@@ -47,16 +47,16 @@ range.  INPUT2 can be omitted if clock hasn't finished yet.
 
 Return the clock line as a string."
   (let* ((beg (org-test-clock-create-timestamp input1 t t))
-	 (end (and input2 (org-test-clock-create-timestamp input2 t t)))
-	 (sec-diff (and input2 (floor (- (org-time-string-to-seconds end)
-					 (org-time-string-to-seconds beg))))))
+         (end (and input2 (org-test-clock-create-timestamp input2 t t)))
+         (sec-diff (and input2 (floor (- (org-time-string-to-seconds end)
+                                         (org-time-string-to-seconds beg))))))
     (concat org-clock-string " " beg
-	    (when end
-	      (concat "--" end " => "
-		      (format "%2d:%02d"
-			      (/ sec-diff 3600)
-			      (/ (mod sec-diff 3600) 60))))
-	    "\n")))
+            (when end
+              (concat "--" end " => "
+                      (format "%2d:%02d"
+                              (/ sec-diff 3600)
+                              (/ (mod sec-diff 3600) 60))))
+            "\n")))
 
 (defun test-org-clock-clocktable-contents-at-point (options)
   "Return contents of a clocktable at point.
@@ -86,119 +86,119 @@ contents.  The clocktable doesn't appear in the buffer."
   (should-not
    (org-test-with-temp-text "* H"
      (let ((org-clock-into-drawer nil)
-	   (org-log-into-drawer nil))
+           (org-log-into-drawer nil))
        (org-clock-into-drawer))))
   (should-not
    (org-test-with-temp-text "* H"
      (let ((org-clock-into-drawer nil)
-	   (org-log-into-drawer t))
+           (org-log-into-drawer t))
        (org-clock-into-drawer))))
   (should-not
    (org-test-with-temp-text "* H"
      (let ((org-clock-into-drawer nil)
-	   (org-log-into-drawer "BAR"))
+           (org-log-into-drawer "BAR"))
        (org-clock-into-drawer))))
   ;; When `org-clock-into-drawer' is a string, use it
   ;; unconditionally.
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer "FOO")
-		  (org-log-into-drawer nil))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer "FOO")
+                  (org-log-into-drawer nil))
+              (org-clock-into-drawer)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer "FOO")
-		  (org-log-into-drawer t))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer "FOO")
+                  (org-log-into-drawer t))
+              (org-clock-into-drawer)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer "FOO")
-		  (org-log-into-drawer "BAR"))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer "FOO")
+                  (org-log-into-drawer "BAR"))
+              (org-clock-into-drawer)))))
   ;; When `org-clock-into-drawer' is an integer, return it.
   (should
    (= 1
       (org-test-with-temp-text "* H"
-	(let ((org-clock-into-drawer 1)
-	      (org-log-into-drawer nil))
-	  (org-clock-into-drawer)))))
+        (let ((org-clock-into-drawer 1)
+              (org-log-into-drawer nil))
+          (org-clock-into-drawer)))))
   (should
    (= 1
       (org-test-with-temp-text "* H"
-	(let ((org-clock-into-drawer 1)
-	      (org-log-into-drawer t))
-	  (org-clock-into-drawer)))))
+        (let ((org-clock-into-drawer 1)
+              (org-log-into-drawer t))
+          (org-clock-into-drawer)))))
   (should
    (= 1
       (org-test-with-temp-text "* H"
-	(let ((org-clock-into-drawer 1)
-	      (org-log-into-drawer "BAR"))
-	  (org-clock-into-drawer)))))
+        (let ((org-clock-into-drawer 1)
+              (org-log-into-drawer "BAR"))
+          (org-clock-into-drawer)))))
   ;; Otherwise, any non-nil value defaults to `org-log-into-drawer' or
   ;; "LOGBOOK" if it is nil.
   (should
    (equal "LOGBOOK"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer t)
-		  (org-log-into-drawer nil))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer t)
+                  (org-log-into-drawer nil))
+              (org-clock-into-drawer)))))
   (should
    (equal "LOGBOOK"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer t)
-		  (org-log-into-drawer t))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer t)
+                  (org-log-into-drawer t))
+              (org-clock-into-drawer)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer t)
-		  (org-log-into-drawer "FOO"))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer t)
+                  (org-log-into-drawer "FOO"))
+              (org-clock-into-drawer)))))
   ;; A non-nil "CLOCK_INTO_DRAWER" property overrides
   ;; `org-clock-into-drawer' value.
   (should
    (equal "LOGBOOK"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: t\n:END:"
-	    (let ((org-clock-into-drawer nil)
-		  (org-log-into-drawer nil))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text
+              "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: t\n:END:"
+            (let ((org-clock-into-drawer nil)
+                  (org-log-into-drawer nil))
+              (org-clock-into-drawer)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: FOO\n:END:"
-	    (let ((org-clock-into-drawer nil)
-		  (org-log-into-drawer nil))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text
+              "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: FOO\n:END:"
+            (let ((org-clock-into-drawer nil)
+                  (org-log-into-drawer nil))
+              (org-clock-into-drawer)))))
   (should-not
    (org-test-with-temp-text
        "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: nil\n:END:"
      (let ((org-clock-into-drawer t)
-	   (org-log-into-drawer nil))
+           (org-log-into-drawer nil))
        (org-clock-into-drawer))))
   ;; "CLOCK_INTO_DRAWER" can be inherited.
   (should
    (equal "LOGBOOK"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: t\n:END:\n** H2<point>"
-	    (let ((org-clock-into-drawer nil)
-		  (org-log-into-drawer nil))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text
+              "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: t\n:END:\n** H2<point>"
+            (let ((org-clock-into-drawer nil)
+                  (org-log-into-drawer nil))
+              (org-clock-into-drawer)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: FOO\n:END:\n** H2<point>"
-	    (let ((org-clock-into-drawer nil)
-		  (org-log-into-drawer nil))
-	      (org-clock-into-drawer)))))
+          (org-test-with-temp-text
+              "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: FOO\n:END:\n** H2<point>"
+            (let ((org-clock-into-drawer nil)
+                  (org-log-into-drawer nil))
+              (org-clock-into-drawer)))))
   (should-not
    (org-test-with-temp-text
        "* H\n:PROPERTIES:\n:CLOCK_INTO_DRAWER: nil\n:END:\n** H2<point>"
      (let ((org-clock-into-drawer t)
-	   (org-log-into-drawer nil))
+           (org-log-into-drawer nil))
        (org-clock-into-drawer)))))
 
 (ert-deftest test-org-clock/drawer-name ()
@@ -208,64 +208,64 @@ contents.  The clocktable doesn't appear in the buffer."
   (should-not
    (org-test-with-temp-text "* H"
      (let ((org-clock-into-drawer nil)
-	   (org-log-into-drawer nil))
+           (org-log-into-drawer nil))
        (org-clock-drawer-name))))
   (should-not
    (org-test-with-temp-text "* H"
      (let ((org-clock-into-drawer nil)
-	   (org-log-into-drawer t))
+           (org-log-into-drawer t))
        (org-clock-drawer-name))))
   (should-not
    (org-test-with-temp-text "* H"
      (let ((org-clock-into-drawer nil)
-	   (org-log-into-drawer "FOO"))
+           (org-log-into-drawer "FOO"))
        (org-clock-drawer-name))))
   ;; A string value for `org-clock-into-drawer' means to use it
   ;; unconditionally.
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer "FOO")
-		  (org-log-into-drawer nil))
-	      (org-clock-drawer-name)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer "FOO")
+                  (org-log-into-drawer nil))
+              (org-clock-drawer-name)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer "FOO")
-		  (org-log-into-drawer t))
-	      (org-clock-drawer-name)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer "FOO")
+                  (org-log-into-drawer t))
+              (org-clock-drawer-name)))))
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer "FOO")
-		  (org-log-into-drawer "BAR"))
-	      (org-clock-drawer-name)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer "FOO")
+                  (org-log-into-drawer "BAR"))
+              (org-clock-drawer-name)))))
   ;; When the value in `org-clock-into-drawer' is a number, re-use
   ;; `org-log-into-drawer' or use default "LOGBOOK" value.
   (should
    (equal "FOO"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer 1)
-		  (org-log-into-drawer "FOO"))
-	      (org-clock-drawer-name)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer 1)
+                  (org-log-into-drawer "FOO"))
+              (org-clock-drawer-name)))))
   (should
    (equal "LOGBOOK"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer 1)
-		  (org-log-into-drawer t))
-	      (org-clock-drawer-name)))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer 1)
+                  (org-log-into-drawer t))
+              (org-clock-drawer-name)))))
   (should
    (equal "LOGBOOK"
-	  (org-test-with-temp-text "* H"
-	    (let ((org-clock-into-drawer 1)
-		  (org-log-into-drawer nil))
-	      (org-clock-drawer-name))))))
+          (org-test-with-temp-text "* H"
+            (let ((org-clock-into-drawer 1)
+                  (org-log-into-drawer nil))
+              (org-clock-drawer-name))))))
 
 
 ;;; Clocktable
 
-(ert-deftest test-org-clock/clocktable ()
-  "Test clocktable specifications."
+(ert-deftest test-org-clock/clocktable/ranges ()
+  "Test ranges in Clock table."
   ;; Relative time: Previous two days.
   (should
    (equal
@@ -277,7 +277,7 @@ contents.  The clocktable doesn't appear in the buffer."
 | Foo                          |        | 8:00 |
 "
     (org-test-with-temp-text
-	"* Relative times in clocktable\n** Foo\n<point>"
+        "* Relative times in clocktable\n** Foo\n<point>"
       (insert (org-test-clock-create-clock "-3d 8:00" "-3d 12:00"))
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
       (insert (org-test-clock-create-clock "-1d 8:00" "-1d 13:00"))
@@ -294,7 +294,7 @@ contents.  The clocktable doesn't appear in the buffer."
 | Foo                          |        | 6:00 |
 "
     (org-test-with-temp-text
-	"* Relative times in clocktable\n** Foo\n<point>"
+        "* Relative times in clocktable\n** Foo\n<point>"
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
       (insert (org-test-clock-create-clock "-1d 8:00" "-1d 13:00"))
       (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
@@ -311,11 +311,14 @@ contents.  The clocktable doesn't appear in the buffer."
 | Foo                          |        | 6:00 |
 "
     (org-test-with-temp-text
-	"* Relative times in clocktable\n** Foo\n<point>"
+        "* Relative times in clocktable\n** Foo\n<point>"
       (insert (org-test-clock-create-clock "-10y 15:00" "-10y 18:00"))
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
       (test-org-clock-clocktable-contents-at-point
-       ":block untilnow :indent nil"))))
+       ":block untilnow :indent nil")))))
+
+(ert-deftest test-org-clock/clocktable/tags ()
+  "Test \":tags\" parameter in Clock table."
   ;; Test tag filtering.
   (should
    (equal
@@ -331,7 +334,10 @@ contents.  The clocktable doesn't appear in the buffer."
       (insert (org-test-clock-create-clock ". 2:00" ". 4:00"))
       (goto-line 2)
       (test-org-clock-clocktable-contents-at-point
-       ":tags \"tag\" :indent nil"))))
+       ":tags \"tag\" :indent nil")))))
+
+(ert-deftest test-org-clock/clocktable/scope ()
+  "Test \":scope\" parameter in Clock table."
   ;; Test `file-with-archives' scope.  In particular, preserve "TBLFM"
   ;; line, and ignore "file" column.
   (should
@@ -343,7 +349,7 @@ contents.  The clocktable doesn't appear in the buffer."
 | Test         | 704d 9:01   | foo |
 "
     (org-test-with-temp-text-in-file
-	"* Test
+        "* Test
 CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 
 #+BEGIN: clocktable :scope file-with-archives
@@ -356,7 +362,103 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
       (forward-line 2)
       (buffer-substring-no-properties
        (point) (progn (goto-char (point-max))
-		      (line-beginning-position -1))))))
+                      (line-beginning-position -1)))))))
+
+(ert-deftest test-org-clock/clocktable/maxlevel ()
+  "Test \":maxlevel\" parameter in Clock table."
+  (should
+   (equal "| Headline     | Time   |      |   |
+|--------------+--------+------+---|
+| *Total time* | *6:00* |      |   |
+|--------------+--------+------+---|
+| Foo          | 6:00   |      |   |
+| \\_  Bar      |        | 2:00 |   |
+"
+          (org-test-with-temp-text
+              "
+* Foo
+CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
+** Bar
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 3
+#+END:"
+            (org-update-dblock)
+            (buffer-substring-no-properties
+	     (line-beginning-position 3)
+	     (progn (goto-char (point-max))
+		    (line-beginning-position))))))
+  (should
+   (equal "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *6:00* |      |
+|--------------+--------+------|
+| Foo          | 6:00   |      |
+| \\_  Bar      |        | 2:00 |
+"
+          (org-test-with-temp-text
+              "
+* Foo
+CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
+** Bar
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 2
+#+END:"
+            (org-update-dblock)
+            (buffer-substring-no-properties
+	     (line-beginning-position 3)
+	     (progn (goto-char (point-max))
+		    (line-beginning-position))))))
+  (should
+   (equal "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *6:00* |
+|--------------+--------|
+| Foo          | 6:00   |
+"
+          (org-test-with-temp-text
+              "
+* Foo
+CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
+** Bar
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1
+#+END:"
+            (org-update-dblock)
+	    (buffer-substring-no-properties
+	     (line-beginning-position 3)
+	     (progn (goto-char (point-max))
+		    (line-beginning-position))))))
+  ;; Special ":maxlevel 0" case: only report total file time.
+  (should
+   (equal "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *6:00* |
+|--------------+--------|
+"
+          (org-test-with-temp-text
+              "
+* Foo
+CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
+** Bar
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 0
+#+END:"
+            (org-update-dblock)
+            (buffer-substring-no-properties
+	     (line-beginning-position 3)
+	     (progn (goto-char (point-max))
+		    (line-beginning-position)))))))
+
+(ert-deftest test-org-clock/clocktable/formula ()
+  "Test \":formula\" parameter in Clock table."
   ;; Test ":formula %".  Handle various duration formats.
   (should
    (equal
@@ -368,7 +470,7 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 | Bar          |   2:00 |  33.3 |
 "
     (org-test-with-temp-text
-	"* Foo
+        "* Foo
   CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
 * Bar
   CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
@@ -379,7 +481,7 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 "
       (org-update-dblock)
       (buffer-substring-no-properties (line-beginning-position 3)
-				      (line-beginning-position 9)))))
+                                      (line-beginning-position 9)))))
   (should
    (equal
     "| Headline     | Time      |     % |
@@ -390,7 +492,7 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 | Bar          | 2:00      |   7.1 |
 "
     (org-test-with-temp-text
-	"
+        "
 * Foo
   CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 * Bar
@@ -400,7 +502,7 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 #+END:"
       (org-update-dblock)
       (buffer-substring-no-properties (line-beginning-position 3)
-				      (line-beginning-position 9))))))
+                                      (line-beginning-position 9))))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here

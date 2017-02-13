@@ -2454,34 +2454,30 @@ from the dynamic block definition."
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))
 	 (sort (plist-get params :sort))
-	 (header (plist-get  params :header))
-	 (narrow (plist-get params :narrow))
+	 (header (plist-get params :header))
 	 (ws (or (plist-get params :wstart) 1))
 	 (ms (or (plist-get params :mstart) 1))
 	 (link (plist-get params :link))
 	 (maxlevel (or (plist-get params :maxlevel) 3))
 	 (emph (plist-get params :emphasize))
-	 (level-p (plist-get params :level))
+	 (compact? (plist-get params :compact))
+	 (narrow (or (plist-get params :narrow) (and compact? '40!)))
+	 (level? (and (not compact?) (plist-get params :level)))
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
-	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
-	 (indent (plist-get params :indent))
+	 (ntcol (if compact? 1
+		  (max 1 (or (plist-get params :tcolumns) 100))))
+	 (indent (or compact? (plist-get params :indent)))
 	 (formula (plist-get params :formula))
 	 (case-fold-search t)
-	 range-text total-time tbl level hlc
-	 file-time entries entry headline
-	 recalc narrow-cut-p)
+	 range-text total-time recalc narrow-cut-p)
 
-    ;; Implement abbreviations
-    (when (plist-get params :compact)
-      (setq level nil indent t narrow (or narrow '40!) ntcol 1))
-
-    ;; Some consistency test for parameters
+    ;; Some consistency test for parameters.
     (unless (integerp ntcol)
       (setq params (plist-put params :tcolumns (setq ntcol 100))))
 
     (when (and narrow (integerp narrow) link)
-      ;; We cannot have both integer narrow and link
+      ;; We cannot have both integer narrow and link.
       (message
        "Using hard narrowing in clocktable to allow for links")
       (setq narrow (intern (format "%d!" narrow))))
@@ -2499,19 +2495,19 @@ from the dynamic block definition."
 	       narrow))))
 
     (when block
-      ;; Get the range text for the header
+      ;; Get the range text for the header.
       (setq range-text (nth 2 (org-clock-special-range block nil t ws ms))))
 
-    ;; Compute the total time
-    (setq total-time (apply '+ (mapcar 'cadr tables)))
+    ;; Compute the total time.
+    (setq total-time (apply #'+ (mapcar #'cadr tables)))
 
-    ;; Now we need to output this tsuff
+    ;; Now we need to output this tsuff.
     (goto-char ipos)
 
-    ;; Insert the text *before* the actual table
+    ;; Insert the text *before* the actual table.
     (insert-before-markers
      (or header
-	 ;; Format the standard header
+	 ;; Format the standard header.
 	 (concat
 	  "#+CAPTION: "
 	  (nth 9 lwords) " ["
@@ -2525,104 +2521,109 @@ from the dynamic block definition."
     ;; Insert the narrowing line
     (when (and narrow (integerp narrow) (not narrow-cut-p))
       (insert-before-markers
-       "|"                            ; table line starter
-       (if multifile "|" "")          ; file column, maybe
-       (if level-p   "|" "")          ; level column, maybe
-       (if timestamp "|" "")          ; timestamp column, maybe
-       (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
-       (format "<%d>| |\n" narrow)))  ; headline and time columns
+       "|"				;table line starter
+       (if multifile "|" "")		;file column, maybe
+       (if level? "|" "")		;level column, maybe
+       (if timestamp "|" "")		;timestamp column, maybe
+       (if properties (make-string (length properties) ?|) "") ;properties columns, maybe
+       (format "<%d>| |\n" narrow)))	; headline and time columns
 
     ;; Insert the table header line
     (insert-before-markers
-     "|"                              ; table line starter
-     (if multifile (concat (nth 1 lwords) "|") "")  ; file column, maybe
-     (if level-p   (concat (nth 2 lwords) "|") "")  ; level column, maybe
-     (if timestamp (concat (nth 3 lwords) "|") "")  ; timestamp column, maybe
-     (if properties (concat (mapconcat 'identity properties "|") "|") "") ;properties columns, maybe
+     "|"					   ;table line starter
+     (if multifile (concat (nth 1 lwords) "|") "") ;file column, maybe
+     (if level? (concat (nth 2 lwords) "|") "") ;level column, maybe
+     (if timestamp (concat (nth 3 lwords) "|") "") ;timestamp column, maybe
+     (if properties			;properties columns, maybe
+	 (concat (mapconcat #'identity properties "|") "|")
+       "")
      (nth 4 lwords) "|"			;headline
      (nth 5 lwords) "|"			;time column
-     (make-string (1- (min maxlevel (or ntcol 100))) ?|)
+     (make-string (max 0 (1- (min maxlevel (or ntcol 100))))
+		  ?|)			;other time columns
      (if (eq formula '%) "%|\n" "\n"))
 
     ;; Insert the total time in the table
     (insert-before-markers
-     "|-\n"                            ; a hline
-     "|"                               ; table line starter
+     "|-\n"				;a hline
+     "|"				;table line starter
      (if multifile (concat "| " (nth 6 lwords) " ") "")
-					; file column, maybe
-     (if level-p   "|"      "")        ; level column, maybe
-     (if timestamp "|"      "")        ; timestamp column, maybe
-     (make-string (length properties) ?|)  ; properties columns, maybe
-     (concat (format org-clock-total-time-cell-format (nth 7 lwords))  "| ") ; instead of a headline
+					;file column, maybe
+     (if level?   "|"      "")		;level column, maybe
+     (if timestamp "|"      "")		;timestamp column, maybe
+     (make-string (length properties) ?|) ;properties columns, maybe
+     (concat (format org-clock-total-time-cell-format (nth 7 lwords))
+	     "| ")
      (format org-clock-total-time-cell-format
 	     (org-duration-from-minutes (or total-time 0))) ;time
      "|"
-     (make-string (1- (min maxlevel (or ntcol 100))) ?|)
+     (make-string (max 0 (1- (min maxlevel (or ntcol 100)))) ?|)
      (cond ((not (eq formula '%)) "")
 	   ((or (not total-time) (= total-time 0)) "0.0|")
 	   (t  "100.0|"))
      "\n")
 
-    ;; Now iterate over the tables and insert the data
-    ;; but only if any time has been collected
+    ;; Now iterate over the tables and insert the data but only if any
+    ;; time has been collected.
     (when (and total-time (> total-time 0))
-
-      (while (setq tbl (pop tables))
-	;; now tbl is the table resulting from one file.
-	(setq file-time (nth 1 tbl))
+      (pcase-dolist (`(,file-name ,file-time ,entries) tables)
 	(when (or (and file-time (> file-time 0))
 		  (not (plist-get params :fileskip0)))
-	  (insert-before-markers "|-\n")  ; a hline because a new file starts
-	  ;; First the file time, if we have multiple files
+	  (insert-before-markers "|-\n") ;hline at new file
+	  ;; First the file time, if we have multiple files.
 	  (when multifile
-	    ;; Summarize the time collected from this file
+	    ;; Summarize the time collected from this file.
 	    (insert-before-markers
 	     (format (concat "| %s %s | %s%s"
-			     (format org-clock-file-time-cell-format (nth 8 lwords))
+			     (format org-clock-file-time-cell-format
+				     (nth 8 lwords))
 			     " | *%s*|\n")
-		     (file-name-nondirectory (car tbl))
-		     (if level-p   "| " "") ; level column, maybe
-		     (if timestamp "| " "") ; timestamp column, maybe
-		     (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
-		     (org-duration-from-minutes (nth 1 tbl))))) ; the time
+		     (file-name-nondirectory file-name)
+		     (if level?   "| " "")  ;level column, maybe
+		     (if timestamp "| " "") ;timestamp column, maybe
+		     (if properties	    ;properties columns, maybe
+			 (make-string (length properties) ?|)
+		       "")
+		     (org-duration-from-minutes file-time)))) ;time
 
 	  ;; Get the list of node entries and iterate over it
-	  (setq entries (nth 2 tbl))
-	  (while (setq entry (pop entries))
-	    (setq level (car entry)
-		  headline (nth 1 entry)
-		  hlc (if emph (or (cdr (assoc level hlchars)) "") ""))
-	    (when narrow-cut-p
-	      (if (and (string-match (concat "\\`" org-bracket-link-regexp
-					     "\\'")
-				     headline)
-		       (match-end 3))
-		  (setq headline
-			(format "[[%s][%s]]"
-				(match-string 1 headline)
-				(org-shorten-string (match-string 3 headline)
-						    narrow)))
-		(setq headline (org-shorten-string headline narrow))))
-	    (insert-before-markers
-	     "|"                      ; start the table line
-	     (if multifile "|" "")    ; free space for file name column?
-	     (if level-p (format "%d|" (car entry)) "")   ; level, maybe
-	     (if timestamp (concat (nth 2 entry) "|") "") ; timestamp, maybe
-	     (if properties
-		 (concat
-		  (mapconcat
-		   (lambda (p) (or (cdr (assoc p (nth 4 entry))) ""))
-		   properties "|") "|") "")  ;properties columns, maybe
-	     (if indent (org-clocktable-indent-string level) "") ; indentation
-	     hlc headline hlc "|"                                ; headline
-	     (make-string (1- (min ntcol level)) ?|) ; empty fields for higher levels
-	     hlc (org-duration-from-minutes (nth 3 entry)) hlc ; time
-	     (make-string (1+ (- maxlevel level)) ?|)
-	     (if (eq formula '%)
-		 (format "%.1f |" (* 100 (/ (nth 3 entry) (float total-time))))
-	       "")
-	     "\n"			; close line
-	     )))))
+	  (when (> maxlevel 0)
+	    (pcase-dolist (`(,level ,headline ,ts ,time . ,props) entries)
+	      (when narrow-cut-p
+		(setq headline
+		      (if (and (string-match
+				(format "\\`%s\\'" org-bracket-link-regexp)
+				headline)
+			       (match-end 3))
+			  (format "[[%s][%s]]"
+				  (match-string 1 headline)
+				  (org-shorten-string (match-string 3 headline)
+						      narrow))
+			(org-shorten-string headline narrow))))
+	      (let ((hlc (if emph (or (cdr (assoc level hlchars)) "") "")))
+		(insert-before-markers
+		 "|"		       ;start the table line
+		 (if multifile "|" "") ;free space for file name column?
+		 (if level? (format "%d|" level) "") ;level, maybe
+		 (if timestamp (concat ts "|") "")   ;timestamp, maybe
+		 (if properties		;properties columns, maybe
+		     (concat (mapconcat (lambda (p)
+					  (or (cdr (assoc p props)) ""))
+					properties
+					"|")
+			     "|")
+		   "")
+		 (if indent		;indentation
+		     (org-clocktable-indent-string level)
+		   "")
+		 hlc headline hlc "|"			 ;headline
+		 (make-string (1- (min ntcol level)) ?|) ;empty fields for higher levels
+		 hlc (org-duration-from-minutes time) hlc ; time
+		 (make-string (1+ (- maxlevel level)) ?|)
+		 (if (eq formula '%)
+		     (format "%.1f |" (* 100 (/ time (float total-time))))
+		   "")
+		 "\n")))))))
     (delete-char -1)
     (cond
      ;; Possibly rescue old formula?
@@ -2638,12 +2639,12 @@ from the dynamic block definition."
       (setq recalc t))
      (t
       (user-error "Invalid :formula parameter in clocktable")))
-    ;; Back to beginning, align the table, recalculate if necessary
+    ;; Back to beginning, align the table, recalculate if necessary.
     (goto-char ipos)
     (skip-chars-forward "^|")
     (org-table-align)
     (when org-hide-emphasis-markers
-      ;; we need to align a second time
+      ;; We need to align a second time.
       (org-table-align))
     (when sort
       (save-excursion
