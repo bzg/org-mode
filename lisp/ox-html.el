@@ -2557,21 +2557,22 @@ holding contextual information."
 	     (cdr ids) "")))
       (if (org-export-low-level-p headline info)
           ;; This is a deep sub-tree: export it as a list item.
-          (let* ((type (if numberedp 'ordered 'unordered))
-                 (itemized-body
-                  (org-html-format-list-item
-                   contents type nil info nil
+          (let* ((html-type (if numberedp "ol" "ul")))
+	    (concat
+	     (and (org-export-first-sibling-p headline info)
+		  (apply 'format "<%s class=\"org-%s\">"
+			 (make-list 2 html-type)))
+	     (org-html-format-list-item
+                   contents (if numberedp 'ordered 'unordered)
+		   nil info nil
                    (concat (org-html--anchor preferred-id nil nil info)
                            extra-ids
-                           full-text))))
-            (concat (and (org-export-first-sibling-p headline info)
-                         (org-html-begin-plain-list type))
-                    itemized-body
-                    (and (org-export-last-sibling-p headline info)
-                         (org-html-end-plain-list type))))
+                           full-text))
+	     (and (org-export-last-sibling-p headline info)
+		  (format "</%s>" html-type))))
+	;; Standard headline.  Export it as a section.
         (let ((extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
               (first-content (car (org-element-contents headline))))
-          ;; Standard headline.  Export it as a section.
           (format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
                   (org-html--container headline info)
                   (concat "outline-container-"
@@ -3138,34 +3139,26 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
-;; FIXME Maybe arg1 is not needed because <li value="20"> already sets
-;; the correct value for the item counter
-(defun org-html-begin-plain-list (type &optional arg1)
-  "Insert the beginning of the HTML list depending on TYPE.
-When ARG1 is a string, use it as the start parameter for ordered
-lists."
-  (pcase type
-    (`ordered
-     (format "<ol class=\"org-ol\"%s>"
-	     (if arg1 (format " start=\"%d\"" arg1) "")))
-    (`unordered "<ul class=\"org-ul\">")
-    (`descriptive "<dl class=\"org-dl\">")))
-
-(defun org-html-end-plain-list (type)
-  "Insert the end of the HTML list depending on TYPE."
-  (pcase type
-    (`ordered "</ol>")
-    (`unordered "</ul>")
-    (`descriptive "</dl>")))
-
-(defun org-html-plain-list (plain-list contents _info)
+(defun org-html-plain-list (plain-list contents info)
   "Transcode a PLAIN-LIST element from Org to HTML.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let ((type (org-element-property :type plain-list)))
-    (format "%s\n%s%s"
-	    (org-html-begin-plain-list type)
-	    contents (org-html-end-plain-list type))))
+  (let* ((type (org-element-property :type plain-list))
+	 (html-type (plist-get '(ordered "ol" unordered "ul" descriptive "dl")
+			       type))
+	 (html-class (format "org-%s" html-type))
+	 (attributes (org-export-read-attribute :attr_html plain-list)))
+    (concat
+     (format "<%s %s>\n"
+	     html-type
+	     (org-html--make-attribute-string
+	      (plist-put attributes :class
+			 (org-trim
+			  (mapconcat #'identity
+				     (list html-class (plist-get attributes :class))
+				     " ")))))
+     contents
+     (format "</%s>" html-type))))
 
 ;;;; Plain Text
 
