@@ -43,17 +43,19 @@
 (ert-deftest test-org-pcomplete/keyword ()
   "Test keyword and block completion."
   (should
-   (equal
+   (string-prefix-p
     "#+startup: "
     (org-test-with-temp-text "#+start<point>"
       (pcomplete)
-      (buffer-string))))
+      (buffer-string))
+    t))
   (should
-   (equal
+   (string-prefix-p
     "#+begin_center"
     (org-test-with-temp-text "#+begin_ce<point>"
       (pcomplete)
-      (buffer-string)))))
+      (buffer-string))
+    t)))
 
 (provide 'test-org-pcomplete)
 ;;; test-org-pcomplete.el ends here

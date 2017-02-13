@@ -3232,8 +3232,9 @@ Another text. (ref:text)
   "Test `org-export-file-uri' specifications."
   ;; Preserve relative filenames.
   (should (equal "relative.org" (org-export-file-uri "relative.org")))
-  ;; Local files start with "file:///"
-  (should (equal "file:///local.org" (org-export-file-uri "/local.org")))
+  ;; Local files start with "file://"
+  (should (equal (concat "file://" (expand-file-name "/local.org"))
+		 (org-export-file-uri "/local.org")))
   ;; Remote files start with "file://"
   (should (equal "file://myself@some.where:papers/last.pdf"
 		 (org-export-file-uri "/myself@some.where:papers/last.pdf")))
