@@ -88,7 +88,7 @@ is meaningful if you work an average of 8 hours per day, 5 days
 a week, 4 weeks a month and 10 months a year.
 
 When setting this variable outside the Customize interface, make
-to call the following command:
+sure to call the following command:
 
   \\[org-duration-set-regexps]"
   :group 'org-agenda
