@@ -198,12 +198,14 @@ than a day uses \"h\" unit instead."
 
 ;;; Internal variables and functions
 
-(defvar org-duration--h:mm-re "\\`[0-9]+\\(?::[0-9]\\{2\\}\\)\\{1,2\\}\\'"
+(defconst org-duration--h:mm-re
+  "\\`[ \t]*[0-9]+\\(?::[0-9]\\{2\\}\\)\\{1,2\\}[ \t]*\\'"
   "Regexp matching a duration expressed with H:MM or H:MM:SS format.
 See `org-duration--h:mm:ss-re' to only match the latter.  Hours
 can use any number of digits.")
 
-(defvar org-duration--h:mm:ss-re "\\`[0-9]+\\(?::[0-9]\\{2\\}\\)\\{2\\}\\'"
+(defconst org-duration--h:mm:ss-re
+  "\\`[ \t]*[0-9]+\\(?::[0-9]\\{2\\}\\)\\{2\\}[ \t]*\\'"
   "Regexp matching a duration expressed H:MM:SS format.
 See `org-duration--h:mm-re' to also support H:MM format.  Hours
 can use any number of digits.")
@@ -249,12 +251,12 @@ When optional argument CANONICAL is non-nil, refer to
 						  org-duration-units))
 			    t)))
   (setq org-duration--full-re
-	(format "\\`%s\\(?:[ \t]+%s\\)*\\'"
+	(format "\\`[ \t]*%s\\(?:[ \t]+%s\\)*[ \t]*\\'"
 		org-duration--unit-re
 		org-duration--unit-re))
   (setq org-duration--mixed-re
-	(format "\\`\\(?1:%s\\(?:[ \t]+%s\\)*\\)[ \t]+\
-\\(?2:[0-9]+\\(?::[0-9][0-9]\\)\\{1,2\\}\\)\\'"
+	(format "\\`[ \t]*\\(?1:%s\\(?:[ \t]+%s\\)*\\)[ \t]+\
+\\(?2:[0-9]+\\(?::[0-9][0-9]\\)\\{1,2\\}\\)[ \t]*\\'"
 		org-duration--unit-re
 		org-duration--unit-re)))
 
