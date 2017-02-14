@@ -3142,26 +3142,26 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
-(defun org-html-plain-list (plain-list contents info)
+(defun org-html-plain-list (plain-list contents _info)
   "Transcode a PLAIN-LIST element from Org to HTML.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let* ((type (org-element-property :type plain-list))
-	 (html-type (plist-get '(ordered "ol" unordered "ul" descriptive "dl")
-			       type))
-	 (html-class (format "org-%s" html-type))
+  (let* ((type (pcase (org-element-property :type plain-list)
+		 ('ordered "ol")
+		 ('unordered "ul")
+		 ('descriptive "dl")
+		 (_ (error "Unknown HTML list type: %s" type))))
+	 (class (format "org-%s" type))
 	 (attributes (org-export-read-attribute :attr_html plain-list)))
-    (concat
-     (format "<%s %s>\n"
-	     html-type
-	     (org-html--make-attribute-string
-	      (plist-put attributes :class
-			 (org-trim
-			  (mapconcat #'identity
-				     (list html-class (plist-get attributes :class))
-				     " ")))))
-     contents
-     (format "</%s>" html-type))))
+    (format "<%s %s>\n%s</%s>"
+	    type
+	    (org-html--make-attribute-string
+	     (plist-put attributes :class
+			(org-trim
+			 (mapconcat #'identity
+				    (list class (plist-get attributes :class))
+				    " "))))
+	    type)))
 
 ;;;; Plain Text
 
