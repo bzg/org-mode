@@ -3150,7 +3150,7 @@ contextual information."
 		 ('ordered "ol")
 		 ('unordered "ul")
 		 ('descriptive "dl")
-		 (_ (error "Unknown HTML list type: %s" type))))
+		 (type (error "Unknown HTML list type: %s" type))))
 	 (class (format "org-%s" type))
 	 (attributes (org-export-read-attribute :attr_html plain-list)))
     (format "<%s %s>\n%s</%s>"
@@ -3161,6 +3161,7 @@ contextual information."
 			 (mapconcat #'identity
 				    (list class (plist-get attributes :class))
 				    " "))))
+	    contents
 	    type)))
 
 ;;;; Plain Text
