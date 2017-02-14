@@ -2560,16 +2560,16 @@ holding contextual information."
           (let* ((html-type (if numberedp "ol" "ul")))
 	    (concat
 	     (and (org-export-first-sibling-p headline info)
-		  (apply 'format "<%s class=\"org-%s\">"
+		  (apply #'format "<%s class=\"org-%s\">\n"
 			 (make-list 2 html-type)))
 	     (org-html-format-list-item
                    contents (if numberedp 'ordered 'unordered)
 		   nil info nil
                    (concat (org-html--anchor preferred-id nil nil info)
                            extra-ids
-                           full-text))
+                           full-text)) "\n"
 	     (and (org-export-last-sibling-p headline info)
-		  (format "</%s>" html-type))))
+		  (format "</%s>\n" html-type))))
 	;; Standard headline.  Export it as a section.
         (let ((extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
               (first-content (car (org-element-contents headline))))
@@ -2696,7 +2696,8 @@ INFO is a plist holding contextual information.  See
 			   (symbol-name checkbox)) ""))
 	(checkbox (concat (org-html-checkbox checkbox info)
 			  (and checkbox " ")))
-	(br (org-html-close-tag "br" nil info)))
+	(br (org-html-close-tag "br" nil info))
+	(extra-newline (if (and (org-string-nw-p contents) headline) "\n" "")))
     (concat
      (pcase type
        (`ordered
@@ -2719,7 +2720,9 @@ INFO is a plist holding contextual information.  See
 			  class (concat checkbox term))
 		  "<dd>"))))
      (unless (eq type 'descriptive) checkbox)
-     (and contents (org-trim contents))
+     extra-newline
+     (and (org-string-nw-p contents) (org-trim contents))
+     extra-newline
      (pcase type
        (`ordered "</li>")
        (`unordered "</li>")
@@ -3266,7 +3269,7 @@ holding contextual information."
 		    #'number-to-string
 		    (org-export-get-headline-number parent info) "-"))))
         ;; Build return value.
-	(format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>"
+	(format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>\n"
 		class-num
 		(or (org-element-property :CUSTOM_ID parent)
 		    section-number
