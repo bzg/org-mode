@@ -3147,10 +3147,10 @@ the plist used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (pcase (org-element-property :type plain-list)
-		 ('ordered "ol")
-		 ('unordered "ul")
-		 ('descriptive "dl")
-		 (type (error "Unknown HTML list type: %s" type))))
+		 (`ordered "ol")
+		 (`unordered "ul")
+		 (`descriptive "dl")
+		 (other (error "Unknown HTML list type: %s" other))))
 	 (class (format "org-%s" type))
 	 (attributes (org-export-read-attribute :attr_html plain-list)))
     (format "<%s %s>\n%s</%s>"
