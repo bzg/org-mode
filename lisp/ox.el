@@ -4323,11 +4323,13 @@ has type \"radio\"."
 
 (defun org-export-file-uri (filename)
   "Return file URI associated to FILENAME."
-  (cond ((string-match-p "\\`//" filename) (concat "file:" filename))
+  (cond ((string-prefix-p "//" filename) (concat "file:" filename))
 	((not (file-name-absolute-p filename)) filename)
 	((org-file-remote-p filename) (concat "file:/" filename))
-	(t (concat "file://" (expand-file-name filename)))))
-
+	(t
+	 (let ((fullname (expand-file-name filename)))
+	   (concat (if (string-prefix-p "/" fullname) "file://" "file:///")
+		   fullname)))))
 
 ;;;; For References
 ;;

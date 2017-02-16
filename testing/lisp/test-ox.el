@@ -3233,7 +3233,7 @@ Another text. (ref:text)
   ;; Preserve relative filenames.
   (should (equal "relative.org" (org-export-file-uri "relative.org")))
   ;; Local files start with "file://"
-  (should (equal (concat "file://" (expand-file-name "/local.org"))
+  (should (equal (concat (if (memq system-type '(windows-nt cygwin)) "file:///" "file://") (expand-file-name "/local.org"))
 		 (org-export-file-uri "/local.org")))
   ;; Remote files start with "file://"
   (should (equal "file://myself@some.where:papers/last.pdf"
@@ -3242,7 +3242,7 @@ Another text. (ref:text)
 		 (org-export-file-uri "//localhost/etc/fstab")))
   ;; Expand filename starting with "~".
   (should (equal (org-export-file-uri "~/file.org")
-		 (concat "file://" (expand-file-name "~/file.org")))))
+		 (concat (if (memq system-type '(windows-nt cygwin)) "file:///" "file://") (expand-file-name "~/file.org")))))
 
 (ert-deftest test-org-export/get-reference ()
   "Test `org-export-get-reference' specifications."
