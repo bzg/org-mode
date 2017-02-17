@@ -520,6 +520,16 @@ of a different task.")
 (define-key org-clock-mode-line-map [mode-line mouse-2] 'org-clock-goto)
 (define-key org-clock-mode-line-map [mode-line mouse-1] 'org-clock-menu)
 
+(defun org-clock--translate (s language)
+  "Translate string S into using string LANGUAGE.
+Assume S in the English term to translate.  Return S as-is if it
+cannot be translated."
+  (or (nth (pcase s
+	     ("File" 1) ("L" 2) ("Timestamp" 3) ("Headline" 4) ("Time" 5)
+	     ("ALL" 6) ("Total time" 7) ("File time" 8) ("Clock summary at" 9))
+	   (assoc-string language org-clock-clocktable-language-setup t))
+      s))
+
 (defun org-clock-menu ()
   (interactive)
   (popup-menu
@@ -2447,10 +2457,7 @@ from the dynamic block definition."
   ;; much easier because there can be a fixed format with a
   ;; well-defined number of columns...
   (let* ((hlchars '((1 . "*") (2 . "/")))
-	 (lwords (assoc (or (plist-get params :lang)
-			    (bound-and-true-p org-export-default-language)
-			    "en")
-			org-clock-clocktable-language-setup))
+	 (lang (or (plist-get params :lang) "en"))
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))
 	 (sort (plist-get params :sort))
@@ -2508,15 +2515,10 @@ from the dynamic block definition."
     (insert-before-markers
      (or header
 	 ;; Format the standard header.
-	 (concat
-	  "#+CAPTION: "
-	  (nth 9 lwords) " ["
-	  (substring
-	   (format-time-string (cdr org-time-stamp-formats))
-	   1 -1)
-	  "]"
-	  (if block (concat ", for " range-text ".") "")
-	  "\n")))
+	 (format "#+CAPTION: %s %s%s\n"
+		 (org-clock--translate "Clock summary at" lang)
+		 (format-time-string (org-time-stamp-format t t))
+		 (if block (concat ", for " range-text ".") ""))))
 
     ;; Insert the narrowing line
     (when (and narrow (integerp narrow) (not narrow-cut-p))
@@ -2526,19 +2528,25 @@ from the dynamic block definition."
        (if level? "|" "")		;level column, maybe
        (if timestamp "|" "")		;timestamp column, maybe
        (if properties (make-string (length properties) ?|) "") ;properties columns, maybe
-       (format "<%d>| |\n" narrow)))	; headline and time columns
+       (format "<%d>| |\n" narrow)))	;headline and time columns
 
     ;; Insert the table header line
     (insert-before-markers
-     "|"					   ;table line starter
-     (if multifile (concat (nth 1 lwords) "|") "") ;file column, maybe
-     (if level? (concat (nth 2 lwords) "|") "") ;level column, maybe
-     (if timestamp (concat (nth 3 lwords) "|") "") ;timestamp column, maybe
+     "|"				;table line starter
+     (if multifile			;file column, maybe
+	 (concat (org-clock--translate "File" lang) "|")
+       "")
+     (if level?				;level column, maybe
+	 (concat (org-clock--translate "L" lang) "|")
+       "")
+     (if timestamp			;timestamp column, maybe
+	 (concat (org-clock--translate "Timestamp" lang) "|")
+       "")
      (if properties			;properties columns, maybe
 	 (concat (mapconcat #'identity properties "|") "|")
        "")
-     (concat (nth 4 lwords) "|")	;headline
-     (concat (nth 5 lwords) "|")	;time column
+     (concat (org-clock--translate "Headline" lang)"|")
+     (concat (org-clock--translate "Time" lang) "|")
      (make-string (max 0 (1- (min maxlevel (or ntcol 100))))
 		  ?|)			;other time columns
      (if (eq formula '%) "%|\n" "\n"))
@@ -2547,12 +2555,13 @@ from the dynamic block definition."
     (insert-before-markers
      "|-\n"				;a hline
      "|"				;table line starter
-     (if multifile (concat "| " (nth 6 lwords) " ") "")
+     (if multifile (format "| %s " (org-clock--translate "ALL" lang)) "")
 					;file column, maybe
-     (if level?   "|"      "")		;level column, maybe
-     (if timestamp "|"      "")		;timestamp column, maybe
+     (if level? "|" "")			;level column, maybe
+     (if timestamp "|" "")		;timestamp column, maybe
      (make-string (length properties) ?|) ;properties columns, maybe
-     (concat (format org-clock-total-time-cell-format (nth 7 lwords))
+     (concat (format org-clock-total-time-cell-format
+		     (org-clock--translate "Total time" lang))
 	     "| ")
      (format org-clock-total-time-cell-format
 	     (org-duration-from-minutes (or total-time 0))) ;time
@@ -2576,7 +2585,7 @@ from the dynamic block definition."
 	    (insert-before-markers
 	     (format (concat "| %s %s | %s%s"
 			     (format org-clock-file-time-cell-format
-				     (nth 8 lwords))
+				     (org-clock--translate "File time" lang))
 			     " | *%s*|\n")
 		     (file-name-nondirectory file-name)
 		     (if level?   "| " "")  ;level column, maybe

@@ -67,13 +67,13 @@ contents.  The clocktable doesn't appear in the buffer."
     (insert "#+END:\n"))
   (unwind-protect
       (save-excursion
-	(let ((org-duration-format 'h:mm)) (org-update-dblock))
-	(forward-line)
-	;; Skip caption.
-	(when (looking-at "#\\+CAPTION:") (forward-line))
-	(buffer-substring (point)
-			  (progn (search-forward "#+END:")
-				 (match-beginning 0))))
+        (let ((org-duration-format 'h:mm)) (org-update-dblock))
+        (forward-line)
+        ;; Skip caption.
+        (when (looking-at "#\\+CAPTION:") (forward-line))
+        (buffer-substring (point)
+                          (progn (search-forward "#+END:")
+                                 (match-beginning 0))))
     ;; Remove clocktable.
     (delete-region (point) (search-forward "#+END:\n"))))
 
@@ -386,9 +386,9 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
 #+END:"
             (org-update-dblock)
             (buffer-substring-no-properties
-	     (line-beginning-position 3)
-	     (progn (goto-char (point-max))
-		    (line-beginning-position))))))
+             (line-beginning-position 3)
+             (progn (goto-char (point-max))
+                    (line-beginning-position))))))
   (should
    (equal "| Headline     | Time   |      |
 |--------------+--------+------|
@@ -409,9 +409,9 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
 #+END:"
             (org-update-dblock)
             (buffer-substring-no-properties
-	     (line-beginning-position 3)
-	     (progn (goto-char (point-max))
-		    (line-beginning-position))))))
+             (line-beginning-position 3)
+             (progn (goto-char (point-max))
+                    (line-beginning-position))))))
   (should
    (equal "| Headline     | Time   |
 |--------------+--------|
@@ -430,10 +430,10 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
 <point>#+BEGIN: clocktable :maxlevel 1
 #+END:"
             (org-update-dblock)
-	    (buffer-substring-no-properties
-	     (line-beginning-position 3)
-	     (progn (goto-char (point-max))
-		    (line-beginning-position))))))
+            (buffer-substring-no-properties
+             (line-beginning-position 3)
+             (progn (goto-char (point-max))
+                    (line-beginning-position))))))
   ;; Special ":maxlevel 0" case: only report total file time.
   (should
    (equal "| Headline     | Time   |
@@ -453,9 +453,9 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
 #+END:"
             (org-update-dblock)
             (buffer-substring-no-properties
-	     (line-beginning-position 3)
-	     (progn (goto-char (point-max))
-		    (line-beginning-position)))))))
+             (line-beginning-position 3)
+             (progn (goto-char (point-max))
+                    (line-beginning-position)))))))
 
 (ert-deftest test-org-clock/clocktable/formula ()
   "Test \":formula\" parameter in Clock table."
@@ -503,6 +503,89 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
       (org-update-dblock)
       (buffer-substring-no-properties (line-beginning-position 3)
                                       (line-beginning-position 9))))))
+
+(ert-deftest test-org-clock/clocktable/lang ()
+  "Test \":lang\" parameter in Clock table."
+  ;; Test foreign translation
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *1d 2:00* |
+|--------------+-----------|
+| Foo          | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1 :lang en
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 8)))))
+  (should
+   (equal
+    "| En-tête        | Durée     |
+|----------------+-----------|
+| *Durée totale* | *1d 2:00* |
+|----------------+-----------|
+| Foo            | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1 :lang fr
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 8)))))
+  ;; No :lang parameter is equivalent to "en".
+  (should
+   (equal
+    (org-test-with-temp-text
+        "* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1 :lang en
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 8)))
+    (org-test-with-temp-text
+        "* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1
+#+END:"
+      (let ((org-export-default-language nil)) (org-update-dblock))
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 8)))))
+  ;; Unknown translation fall backs to "en".
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *1d 2:00* |
+|--------------+-----------|
+| Foo          | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :maxlevel 1 :lang foo
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 8))))))
+
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
