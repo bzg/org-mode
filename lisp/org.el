@@ -22463,7 +22463,7 @@ it for output."
 			       (?O . ,(shell-quote-argument output))))))
 	   (dolist (command process)
 	     (shell-command (format-spec command spec) log-buf))
-	   (when log-buf (with-current-buffer log-buf (special-mode)))))
+	   (when log-buf (with-current-buffer log-buf (compilation-mode)))))
 	(_ (error "No valid command to process %S%s" source err-msg))))
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
