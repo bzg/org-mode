@@ -97,6 +97,7 @@
 ;;   - indented diary-sexps
 ;;   - obsolete QUOTE section
 ;;   - obsolete "file+application" link
+;;   - blank headlines with tags
 
 
 ;;; Code:
@@ -278,7 +279,12 @@
    (make-org-lint-checker
     :name 'file-application
     :description "Report obsolete \"file+application\" link"
-    :categories '(link obsolete)))
+    :categories '(link obsolete))
+   (make-org-lint-checker
+    :name 'empty-headline-with-tags
+    :description "Report ambiguous empty headlines with tags"
+    :categories '(headline)
+    :trust 'low))
   "List of all available checkers.")
 
 (defun org-lint--collect-duplicates
@@ -1013,6 +1019,15 @@ Use \"export %s\" instead"
 				    (car header)))
 			   reports))))))))))))
     reports))
+
+(defun org-lint-empty-headline-with-tags (ast)
+  (org-element-map ast '(headline inlinetask)
+    (lambda (h)
+      (let ((title (org-element-property :raw-value h)))
+	(and (string-match-p "\\`:[[:alnum:]_@#%:]+:\\'" title)
+	     (list (org-element-property :begin h)
+		   (format "Headline containing only tags is ambiguous: %S"
+			   title)))))))
 
 
 ;;; Reports UI
