@@ -1332,6 +1332,16 @@
    (equal "* \n* \n"
 	  (org-test-with-temp-text "* <point>"
 	    (org-insert-heading)
+	    (buffer-string))))
+  (should
+   (org-test-with-temp-text "* <point>\n"
+     (org-insert-heading)
+     (looking-at-p "\n\\'")))
+  ;; Do not insert spurious headlines when inserting a new headline.
+  (should
+   (equal "* H1\n* H2\n* \n"
+	  (org-test-with-temp-text "* H1\n* H2<point>\n"
+	    (org-insert-heading)
 	    (buffer-string)))))
 
 (ert-deftest test-org/insert-todo-heading-respect-content ()

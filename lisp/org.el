@@ -7855,13 +7855,12 @@ unconditionally."
 	       (when blank? (insert "\n"))
 	       (insert "\n" stars " ")
 	       (when (org-string-nw-p split) (insert split))
-	       (insert "\n")
-	       (forward-char -1)))
+	       (when (eobp) (save-excursion (insert "\n")))))
 	    (t
 	     (end-of-line)
 	     (when blank? (insert "\n"))
-	     (insert "\n" stars " \n")
-	     (forward-char -1))))
+	     (insert "\n" stars " ")
+	     (when (eobp) (save-excursion (insert "\n"))))))
      ;; On regular text, turn line into a headline or split, if
      ;; appropriate.
      ((bolp)
