@@ -646,7 +646,8 @@ See also `org-src-mode-hook'."
 	  (setq buffer-offer-save t)
 	  (setq buffer-file-name
 		(concat (buffer-file-name (marker-buffer org-src--beg-marker))
-			"[" (buffer-name) "]")))
+			"[" (buffer-name) "]"))
+	  (setq-local write-contents-functions '(org-edit-src-save)))
       (setq buffer-read-only t))))
 
 (add-hook 'org-src-mode-hook #'org-src-mode-configure-edit-buffer)
@@ -1054,7 +1055,10 @@ Throw an error if there is no such buffer."
 	(insert edited-code)
 	(when (and expecting-bol (not (bolp))) (insert "\n")))
       (save-buffer)
-      (move-overlay overlay beg (point)))))
+      (move-overlay overlay beg (point))))
+  ;; `write-contents-functions' require the function to return
+  ;; a non-nil value so that other functions are not called.
+  t)
 
 (defun org-edit-src-exit ()
   "Kill current sub-editing buffer and return to source buffer."
