@@ -2537,8 +2537,8 @@ from the dynamic block definition."
      (if properties			;properties columns, maybe
 	 (concat (mapconcat #'identity properties "|") "|")
        "")
-     (nth 4 lwords) "|"			;headline
-     (nth 5 lwords) "|"			;time column
+     (concat (nth 4 lwords) "|")	;headline
+     (concat (nth 5 lwords) "|")	;time column
      (make-string (max 0 (1- (min maxlevel (or ntcol 100))))
 		  ?|)			;other time columns
      (if (eq formula '%) "%|\n" "\n"))
