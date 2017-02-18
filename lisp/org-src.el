@@ -1056,7 +1056,7 @@ Throw an error if there is no such buffer."
 	(when (and expecting-bol (not (bolp))) (insert "\n")))
       (save-buffer)
       (move-overlay overlay beg (point))))
-  ;; `write-contents-functions' require the function to return
+  ;; `write-contents-functions' requires the function to return
   ;; a non-nil value so that other functions are not called.
   t)
 
