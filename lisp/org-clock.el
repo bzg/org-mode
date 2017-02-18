@@ -2471,16 +2471,12 @@ from the dynamic block definition."
 	 (level? (and (not compact?) (plist-get params :level)))
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
-	 (ntcol (if compact? 1
-		  (max 1 (or (plist-get params :tcolumns) 100))))
+	 (time-columns (if compact? 1
+			 (min maxlevel (or (plist-get params :tcolumns) 100))))
 	 (indent (or compact? (plist-get params :indent)))
 	 (formula (plist-get params :formula))
 	 (case-fold-search t)
 	 range-text total-time recalc narrow-cut-p)
-
-    ;; Some consistency test for parameters.
-    (unless (integerp ntcol)
-      (setq params (plist-put params :tcolumns (setq ntcol 100))))
 
     (when (and narrow (integerp narrow) link)
       ;; We cannot have both integer narrow and link.
@@ -2543,10 +2539,9 @@ from the dynamic block definition."
      (if properties			;properties columns, maybe
 	 (concat (mapconcat #'identity properties "|") "|")
        "")
-     (concat (nth 4 lwords) "|")	;headline
-     (concat (nth 5 lwords) "|")	;time column
-     (make-string (max 0 (1- (min maxlevel (or ntcol 100))))
-		  ?|)			;other time columns
+     (concat (nth 4 lwords) "|")		;headline
+     (concat (nth 5 lwords) "|")		;time column
+     (make-string (max 0 (1- time-columns)) ?|)	;other time columns
      (if (eq formula '%) "%|\n" "\n"))
 
     ;; Insert the total time in the table
@@ -2563,7 +2558,7 @@ from the dynamic block definition."
      (format org-clock-total-time-cell-format
 	     (org-minutes-to-clocksum-string (or total-time 0))) ;time
      "|"
-     (make-string (max 0 (1- (min maxlevel (or ntcol 100)))) ?|)
+     (make-string (max 0 (1- time-columns)) ?|)
      (cond ((not (eq formula '%)) "")
 	   ((or (not total-time) (= total-time 0)) "0.0|")
 	   (t  "100.0|"))
@@ -2622,10 +2617,10 @@ from the dynamic block definition."
 		 (if indent		;indentation
 		     (org-clocktable-indent-string level)
 		   "")
-		 hlc headline hlc "|"			 ;headline
-		 (make-string (1- (min ntcol level)) ?|) ;empty fields for higher levels
-		 hlc (org-minutes-to-clocksum-string time) hlc ; time
-		 (make-string (1+ (- maxlevel level)) ?|)
+		 hlc headline hlc "|"	;headline
+		 ;; Empty fields for higher levels.
+		 (make-string (max 0 (1- (min time-columns level))) ?|)
+		 hlc (org-minutes-to-clocksum-string time) hlc "|" ; time
 		 (if (eq formula '%)
 		     (format "%.1f |" (* 100 (/ time (float total-time))))
 		   "")
