@@ -695,6 +695,61 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
       (buffer-substring-no-properties (line-beginning-position 3)
                                       (line-beginning-position 9))))))
 
+(ert-deftest test-org-clock/clocktable/properties ()
+  "Test \":properties\" parameter in Clock table."
+  ;; Include a new column with list properties.
+  (should
+   (equal
+    "| A | Headline     | Time    |   |
+|---+--------------+---------+---|
+|   | *Total time* | *26:00* |   |
+|---+--------------+---------+---|
+| 1 | Foo          | 26:00   |   |
+"
+    (org-test-with-temp-text
+        "* Foo
+:PROPERTIES:
+:A: 1
+:END:
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+"
+      (test-org-clock-clocktable-contents-at-point ":properties (\"A\")"))))
+  (should
+   (equal
+    "| A | Headline     | Time    |       |
+|---+--------------+---------+-------|
+|   | *Total time* | *52:00* |       |
+|---+--------------+---------+-------|
+|   | Foo          | 52:00   |       |
+| 1 | \\_  Bar      |         | 26:00 |
+"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+:PROPERTIES:
+:A: 1
+:END:
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+"
+      (test-org-clock-clocktable-contents-at-point ":properties (\"A\")"))))
+  ;; Handle missing properties.
+  (should
+   (equal
+    "| A | Headline     | Time    |   |
+|---+--------------+---------+---|
+|   | *Total time* | *26:00* |   |
+|---+--------------+---------+---|
+| 1 | Foo          | 26:00   |   |
+"
+    (org-test-with-temp-text
+        "* Foo
+:PROPERTIES:
+:A: 1
+:END:
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+"
+      (test-org-clock-clocktable-contents-at-point ":properties (\"A\")")))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here

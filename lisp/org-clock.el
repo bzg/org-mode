@@ -2587,7 +2587,7 @@ from the dynamic block definition."
 
 	  ;; Get the list of node entries and iterate over it
 	  (when (> maxlevel 0)
-	    (pcase-dolist (`(,level ,headline ,ts ,time . ,props) entries)
+	    (pcase-dolist (`(,level ,headline ,ts ,time ,props) entries)
 	      (when narrow-cut-p
 		(setq headline
 		      (if (and (string-match
@@ -2599,12 +2599,11 @@ from the dynamic block definition."
 				  (org-shorten-string (match-string 3 headline)
 						      narrow))
 			(org-shorten-string headline narrow))))
-	      (cl-flet ((format-field
-			 (let ((marker (pcase level
-					 ((guard (not emph)) "")
-					 (1 "*") (2 "/") (_ ""))))
-			   (lambda (field)
-			     (format "%s%s%s |" marker field marker)))))
+	      (cl-flet ((format-field (f) (format (cond ((not emph) "%s |")
+							((= level 1) "*%s* |")
+							((= level 2) "/%s/ |")
+							(t "%s |"))
+						  f)))
 		(insert-before-markers
 		 "|"		       ;start the table line
 		 (if multifile "|" "") ;free space for file name column?
