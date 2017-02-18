@@ -2456,14 +2456,11 @@ from the dynamic block definition."
   ;; someone wants to write their own special formatter, this maybe
   ;; much easier because there can be a fixed format with a
   ;; well-defined number of columns...
-  (let* ((hlchars '((1 . "*") (2 . "/")))
-	 (lang (or (plist-get params :lang) "en"))
+  (let* ((lang (or (plist-get params :lang) "en"))
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))
 	 (sort (plist-get params :sort))
 	 (header (plist-get params :header))
-	 (ws (or (plist-get params :wstart) 1))
-	 (ms (or (plist-get params :mstart) 1))
 	 (link (plist-get params :link))
 	 (maxlevel (or (plist-get params :maxlevel) 3))
 	 (emph (plist-get params :emphasize))
@@ -2472,43 +2469,28 @@ from the dynamic block definition."
 	 (level? (and (not compact?) (plist-get params :level)))
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
-	 (ntcol (if compact? 1
-		  (max 1 (or (plist-get params :tcolumns) 100))))
+	 (time-columns (if compact? 1
+			 (min maxlevel (or (plist-get params :tcolumns) 100))))
 	 (indent (or compact? (plist-get params :indent)))
 	 (formula (plist-get params :formula))
 	 (case-fold-search t)
-	 range-text total-time recalc narrow-cut-p)
-
-    ;; Some consistency test for parameters.
-    (unless (integerp ntcol)
-      (setq params (plist-put params :tcolumns (setq ntcol 100))))
+	 (total-time (apply #'+ (mapcar #'cadr tables)))
+	 recalc narrow-cut-p)
 
     (when (and narrow (integerp narrow) link)
       ;; We cannot have both integer narrow and link.
-      (message
-       "Using hard narrowing in clocktable to allow for links")
+      (message "Using hard narrowing in clocktable to allow for links")
       (setq narrow (intern (format "%d!" narrow))))
 
-    (when narrow
-      (cond
-       ((integerp narrow))
-       ((and (symbolp narrow)
-	     (string-match "\\`[0-9]+!\\'" (symbol-name narrow)))
-	(setq narrow-cut-p t
-	      narrow (string-to-number (substring (symbol-name narrow)
-						  0 -1))))
-       (t
-	(error "Invalid value %s of :narrow property in clock table"
-	       narrow))))
+    (pcase narrow
+      ((or `nil (pred integerp)) nil)	;nothing to do
+      ((and (pred symbolp)
+	    (guard (string-match-p "\\`[0-9]+!\\'" (symbol-name narrow))))
+       (setq narrow-cut-p t)
+       (setq narrow (string-to-number (symbol-name narrow))))
+      (_ (error "Invalid value %s of :narrow property in clock table" narrow)))
 
-    (when block
-      ;; Get the range text for the header.
-      (setq range-text (nth 2 (org-clock-special-range block nil t ws ms))))
-
-    ;; Compute the total time.
-    (setq total-time (apply #'+ (mapcar #'cadr tables)))
-
-    ;; Now we need to output this tsuff.
+    ;; Now we need to output this table stuff.
     (goto-char ipos)
 
     ;; Insert the text *before* the actual table.
@@ -2518,7 +2500,14 @@ from the dynamic block definition."
 	 (format "#+CAPTION: %s %s%s\n"
 		 (org-clock--translate "Clock summary at" lang)
 		 (format-time-string (org-time-stamp-format t t))
-		 (if block (concat ", for " range-text ".") ""))))
+		 (if block
+		     (let ((range-text
+			    (nth 2 (org-clock-special-range
+				    block nil t
+				    (plist-get params :wstart)
+				    (plist-get params :mstart)))))
+		       (format ", for %s." range-text))
+		   ""))))
 
     ;; Insert the narrowing line
     (when (and narrow (integerp narrow) (not narrow-cut-p))
@@ -2527,7 +2516,9 @@ from the dynamic block definition."
        (if multifile "|" "")		;file column, maybe
        (if level? "|" "")		;level column, maybe
        (if timestamp "|" "")		;timestamp column, maybe
-       (if properties (make-string (length properties) ?|) "") ;properties columns, maybe
+       (if properties			;properties columns, maybe
+	   (make-string (length properties) ?|)
+	 "")
        (format "<%d>| |\n" narrow)))	;headline and time columns
 
     ;; Insert the table header line
@@ -2547,8 +2538,7 @@ from the dynamic block definition."
        "")
      (concat (org-clock--translate "Headline" lang)"|")
      (concat (org-clock--translate "Time" lang) "|")
-     (make-string (max 0 (1- (min maxlevel (or ntcol 100))))
-		  ?|)			;other time columns
+     (make-string (max 0 (1- time-columns)) ?|) ;other time columns
      (if (eq formula '%) "%|\n" "\n"))
 
     ;; Insert the total time in the table
@@ -2566,7 +2556,7 @@ from the dynamic block definition."
      (format org-clock-total-time-cell-format
 	     (org-duration-from-minutes (or total-time 0))) ;time
      "|"
-     (make-string (max 0 (1- (min maxlevel (or ntcol 100)))) ?|)
+     (make-string (max 0 (1- time-columns)) ?|)
      (cond ((not (eq formula '%)) "")
 	   ((or (not total-time) (= total-time 0)) "0.0|")
 	   (t  "100.0|"))
@@ -2609,15 +2599,19 @@ from the dynamic block definition."
 				  (org-shorten-string (match-string 3 headline)
 						      narrow))
 			(org-shorten-string headline narrow))))
-	      (let ((hlc (if emph (or (cdr (assoc level hlchars)) "") "")))
+	      (cl-flet ((format-field
+			 (let ((marker (pcase level
+					 ((guard (not emph)) "")
+					 (1 "*") (2 "/") (_ ""))))
+			   (lambda (field)
+			     (format "%s%s%s |" marker field marker)))))
 		(insert-before-markers
 		 "|"		       ;start the table line
 		 (if multifile "|" "") ;free space for file name column?
 		 (if level? (format "%d|" level) "") ;level, maybe
 		 (if timestamp (concat ts "|") "")   ;timestamp, maybe
 		 (if properties		;properties columns, maybe
-		     (concat (mapconcat (lambda (p)
-					  (or (cdr (assoc p props)) ""))
+		     (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
 					properties
 					"|")
 			     "|")
@@ -2625,10 +2619,10 @@ from the dynamic block definition."
 		 (if indent		;indentation
 		     (org-clocktable-indent-string level)
 		   "")
-		 hlc headline hlc "|"			 ;headline
-		 (make-string (1- (min ntcol level)) ?|) ;empty fields for higher levels
-		 hlc (org-duration-from-minutes time) hlc ; time
-		 (make-string (1+ (- maxlevel level)) ?|)
+		 (format-field headline)
+		 ;; Empty fields for higher levels.
+		 (make-string (max 0 (1- (min time-columns level))) ?|)
+		 (format-field (org-duration-from-minutes time))
 		 (if (eq formula '%)
 		     (format "%.1f |" (* 100 (/ time (float total-time))))
 		   "")

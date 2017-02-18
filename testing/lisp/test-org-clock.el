@@ -586,6 +586,115 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
       (buffer-substring-no-properties (line-beginning-position 3)
                                       (line-beginning-position 8))))))
 
+(ert-deftest test-org-clock/clocktable/compact ()
+  "Test \":compact\" parameter in Clock table."
+  ;; With :compact, all headlines are in the same column.
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *1d 2:00* |
+|--------------+-----------|
+| Foo          | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :compact t
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 8)))))
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *2d 4:00* |
+|--------------+-----------|
+| Foo          | 2d 4:00   |
+| \\_  Bar      | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :compact t
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 9)))))
+  ;; :maxlevel does not affect :compact parameter.
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *2d 4:00* |
+|--------------+-----------|
+| Foo          | 2d 4:00   |
+| \\_  Bar      | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :compact t :maxlevel 2
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 9)))))
+  ;; :compact implies a non-nil :indent parameter.
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *2d 4:00* |
+|--------------+-----------|
+| Foo          | 2d 4:00   |
+| \\_  Bar      | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :compact t :indent nil
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 9)))))
+  ;; :compact implies a nil :level parameter.
+  (should
+   (equal
+    "| Headline     | Time      |
+|--------------+-----------|
+| *Total time* | *2d 4:00* |
+|--------------+-----------|
+| Foo          | 2d 4:00   |
+| \\_  Bar      | 1d 2:00   |
+"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+
+* Report
+<point>#+BEGIN: clocktable :compact t :level t
+#+END:"
+      (org-update-dblock)
+      (buffer-substring-no-properties (line-beginning-position 3)
+                                      (line-beginning-position 9))))))
+
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
