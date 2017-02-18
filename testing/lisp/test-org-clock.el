@@ -58,12 +58,21 @@ Return the clock line as a string."
                               (/ (mod sec-diff 3600) 60))))
             "\n")))
 
-(defun test-org-clock-clocktable-contents-at-point (options)
-  "Return contents of a clocktable at point.
-OPTIONS is a string of clocktable options.  Caption is ignored in
-contents.  The clocktable doesn't appear in the buffer."
+(defun test-org-clock-clocktable-contents (options &optional initial)
+  "Return contents of a Clock table for current buffer
+
+OPTIONS is a string of Clock table options.  Optional argument
+INITIAL is a string specifying initial contents within the Clock
+table.
+
+Caption is ignored in contents.  The clocktable doesn't appear in
+the buffer."
+  (declare (indent 2))
+  (goto-char (point-min))
   (save-excursion
     (insert "#+BEGIN: clocktable " options "\n")
+    (when initial (insert initial))
+    (unless (string-suffix-p "\n" initial) (insert "\n"))
     (insert "#+END:\n"))
   (unwind-protect
       (save-excursion
@@ -71,9 +80,8 @@ contents.  The clocktable doesn't appear in the buffer."
         (forward-line)
         ;; Skip caption.
         (when (looking-at "#\\+CAPTION:") (forward-line))
-        (buffer-substring (point)
-                          (progn (search-forward "#+END:")
-                                 (match-beginning 0))))
+        (buffer-substring-no-properties
+	 (point) (progn (search-forward "#+END:") (line-end-position 0))))
     ;; Remove clocktable.
     (delete-region (point) (search-forward "#+END:\n"))))
 
@@ -274,14 +282,13 @@ contents.  The clocktable doesn't appear in the buffer."
 | *Total time*                 | *8:00* |      |
 |------------------------------+--------+------|
 | Relative times in clocktable | 8:00   |      |
-| Foo                          |        | 8:00 |
-"
+| Foo                          |        | 8:00 |"
     (org-test-with-temp-text
         "* Relative times in clocktable\n** Foo\n<point>"
       (insert (org-test-clock-create-clock "-3d 8:00" "-3d 12:00"))
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
       (insert (org-test-clock-create-clock "-1d 8:00" "-1d 13:00"))
-      (test-org-clock-clocktable-contents-at-point
+      (test-org-clock-clocktable-contents
        ":tstart \"<-2d>\" :tend \"<today>\" :indent nil"))))
   ;; Relative time: Yesterday until now.
   (should
@@ -291,14 +298,13 @@ contents.  The clocktable doesn't appear in the buffer."
 | *Total time*                 | *6:00* |      |
 |------------------------------+--------+------|
 | Relative times in clocktable | 6:00   |      |
-| Foo                          |        | 6:00 |
-"
+| Foo                          |        | 6:00 |"
     (org-test-with-temp-text
         "* Relative times in clocktable\n** Foo\n<point>"
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
       (insert (org-test-clock-create-clock "-1d 8:00" "-1d 13:00"))
       (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
-      (test-org-clock-clocktable-contents-at-point
+      (test-org-clock-clocktable-contents
        ":tstart \"<yesterday>\" :tend \"<tomorrow>\" :indent nil"))))
   ;; Test `untilnow' block.
   (should
@@ -308,14 +314,12 @@ contents.  The clocktable doesn't appear in the buffer."
 | *Total time*                 | *6:00* |      |
 |------------------------------+--------+------|
 | Relative times in clocktable | 6:00   |      |
-| Foo                          |        | 6:00 |
-"
+| Foo                          |        | 6:00 |"
     (org-test-with-temp-text
         "* Relative times in clocktable\n** Foo\n<point>"
       (insert (org-test-clock-create-clock "-10y 15:00" "-10y 18:00"))
       (insert (org-test-clock-create-clock "-2d 15:00" "-2d 18:00"))
-      (test-org-clock-clocktable-contents-at-point
-       ":block untilnow :indent nil")))))
+      (test-org-clock-clocktable-contents ":block untilnow :indent nil")))))
 
 (ert-deftest test-org-clock/clocktable/tags ()
   "Test \":tags\" parameter in Clock table."
@@ -326,15 +330,12 @@ contents.  The clocktable doesn't appear in the buffer."
 |--------------+--------+------|
 | *Total time* | *2:00* |      |
 |--------------+--------+------|
-| H1           |        | 2:00 |
-"
+| H1           |        | 2:00 |"
     (org-test-with-temp-text "** H1\n\n*** H2 :tag:\n\n*** H3\n<point>"
       (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
       (goto-line 4)
       (insert (org-test-clock-create-clock ". 2:00" ". 4:00"))
-      (goto-line 2)
-      (test-org-clock-clocktable-contents-at-point
-       ":tags \"tag\" :indent nil")))))
+      (test-org-clock-clocktable-contents ":tags \"tag\" :indent nil")))))
 
 (ert-deftest test-org-clock/clocktable/scope ()
   "Test \":scope\" parameter in Clock table."
@@ -342,27 +343,17 @@ contents.  The clocktable doesn't appear in the buffer."
   ;; line, and ignore "file" column.
   (should
    (equal
-    "| Headline     | Time        |     |
-|--------------+-------------+-----|
-| *Total time* | *704d 9:01* | foo |
-|--------------+-------------+-----|
-| Test         | 704d 9:01   | foo |
-"
+    "| Headline     | Time       |     |
+|--------------+------------+-----|
+| *Total time* | *16905:01* | foo |
+|--------------+------------+-----|
+| Test         | 16905:01   | foo |
+#+TBLFM: $3=string(\"foo\")"
     (org-test-with-temp-text-in-file
         "* Test
-CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
-
-#+BEGIN: clocktable :scope file-with-archives
-#+TBLFM: $3=string(\"foo\")
-#+END:
-"
-      (search-forward "#+begin:")
-      (beginning-of-line)
-      (org-update-dblock)
-      (forward-line 2)
-      (buffer-substring-no-properties
-       (point) (progn (goto-char (point-max))
-                      (line-beginning-position -1)))))))
+CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01"
+      (test-org-clock-clocktable-contents ":scope file-with-archives"
+	  "#+TBLFM: $3=string(\"foo\")")))))
 
 (ert-deftest test-org-clock/clocktable/maxlevel ()
   "Test \":maxlevel\" parameter in Clock table."
@@ -372,90 +363,50 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 | *Total time* | *6:00* |      |   |
 |--------------+--------+------+---|
 | Foo          | 6:00   |      |   |
-| \\_  Bar      |        | 2:00 |   |
-"
+| \\_  Bar      |        | 2:00 |   |"
           (org-test-with-temp-text
-              "
-* Foo
+              "* Foo
 CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
 ** Bar
-CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 3
-#+END:"
-            (org-update-dblock)
-            (buffer-substring-no-properties
-             (line-beginning-position 3)
-             (progn (goto-char (point-max))
-                    (line-beginning-position))))))
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
+            (test-org-clock-clocktable-contents ":maxlevel 3"))))
   (should
    (equal "| Headline     | Time   |      |
 |--------------+--------+------|
 | *Total time* | *6:00* |      |
 |--------------+--------+------|
 | Foo          | 6:00   |      |
-| \\_  Bar      |        | 2:00 |
-"
+| \\_  Bar      |        | 2:00 |"
           (org-test-with-temp-text
-              "
-* Foo
+              "* Foo
 CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
 ** Bar
-CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 2
-#+END:"
-            (org-update-dblock)
-            (buffer-substring-no-properties
-             (line-beginning-position 3)
-             (progn (goto-char (point-max))
-                    (line-beginning-position))))))
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
+	    (test-org-clock-clocktable-contents ":maxlevel 2"))))
   (should
    (equal "| Headline     | Time   |
 |--------------+--------|
 | *Total time* | *6:00* |
 |--------------+--------|
-| Foo          | 6:00   |
-"
+| Foo          | 6:00   |"
           (org-test-with-temp-text
-              "
-* Foo
+              "* Foo
 CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
 ** Bar
-CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1
-#+END:"
-            (org-update-dblock)
-            (buffer-substring-no-properties
-             (line-beginning-position 3)
-             (progn (goto-char (point-max))
-                    (line-beginning-position))))))
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
+	    (test-org-clock-clocktable-contents ":maxlevel 1"))))
   ;; Special ":maxlevel 0" case: only report total file time.
   (should
    (equal "| Headline     | Time   |
 |--------------+--------|
 | *Total time* | *6:00* |
-|--------------+--------|
-"
+|--------------+--------|"
           (org-test-with-temp-text
-              "
-* Foo
+              "* Foo
 CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
 ** Bar
-CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 0
-#+END:"
-            (org-update-dblock)
-            (buffer-substring-no-properties
-             (line-beginning-position 3)
-             (progn (goto-char (point-max))
-                    (line-beginning-position)))))))
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
+	    (test-org-clock-clocktable-contents ":maxlevel 0")))))
 
 (ert-deftest test-org-clock/clocktable/formula ()
   "Test \":formula\" parameter in Clock table."
@@ -467,233 +418,150 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
 | *Total time* | *6:00* | 100.0 |
 |--------------+--------+-------|
 | Foo          |   4:00 |  66.7 |
-| Bar          |   2:00 |  33.3 |
-"
+| Bar          |   2:00 |  33.3 |"
     (org-test-with-temp-text
         "* Foo
   CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
 * Bar
-  CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1 :formula %
-#+END:
-"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 9)))))
+  CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1 :formula %"))))
   (should
    (equal
-    "| Headline     | Time      |     % |
-|--------------+-----------+-------|
-| *Total time* | *1d 4:00* | 100.0 |
-|--------------+-----------+-------|
-| Foo          | 1d 2:00   |  92.9 |
-| Bar          | 2:00      |   7.1 |
-"
+    "| Headline     |    Time |     % |
+|--------------+---------+-------|
+| *Total time* | *28:00* | 100.0 |
+|--------------+---------+-------|
+| Foo          |   26:00 |  92.9 |
+| Bar          |    2:00 |   7.1 |"
     (org-test-with-temp-text
-        "
-* Foo
+        "* Foo
   CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 * Bar
-  CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1 :formula %
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 9))))))
+  CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1 :formula %")))))
 
 (ert-deftest test-org-clock/clocktable/lang ()
   "Test \":lang\" parameter in Clock table."
   ;; Test foreign translation
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *1d 2:00* |
-|--------------+-----------|
-| Foo          | 1d 2:00   |
-"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| Foo          | 26:00   |"
     (org-test-with-temp-text
         "* Foo
-  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1 :lang en
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 8)))))
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1 :lang en"))))
   (should
    (equal
-    "| En-tête        | Durée     |
-|----------------+-----------|
-| *Durée totale* | *1d 2:00* |
-|----------------+-----------|
-| Foo            | 1d 2:00   |
-"
+    "| En-tête        | Durée   |
+|----------------+---------|
+| *Durée totale* | *26:00* |
+|----------------+---------|
+| Foo            | 26:00   |"
     (org-test-with-temp-text
         "* Foo
-  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1 :lang fr
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 8)))))
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1 :lang fr"))))
   ;; No :lang parameter is equivalent to "en".
   (should
    (equal
     (org-test-with-temp-text
         "* Foo
-  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1 :lang en
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 8)))
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1 :lang en"))
     (org-test-with-temp-text
         "* Foo
-  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1
-#+END:"
-      (let ((org-export-default-language nil)) (org-update-dblock))
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 8)))))
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1"))))
   ;; Unknown translation fall backs to "en".
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *1d 2:00* |
-|--------------+-----------|
-| Foo          | 1d 2:00   |
-"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| Foo          | 26:00   |"
     (org-test-with-temp-text
         "* Foo
-  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :maxlevel 1 :lang foo
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 8))))))
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":maxlevel 1 :lang foo")))))
 
 (ert-deftest test-org-clock/clocktable/compact ()
   "Test \":compact\" parameter in Clock table."
   ;; With :compact, all headlines are in the same column.
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *1d 2:00* |
-|--------------+-----------|
-| Foo          | 1d 2:00   |
-"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| Foo          | 26:00   |"
     (org-test-with-temp-text
         "* Foo
-  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :compact t
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 8)))))
+  CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":compact t"))))
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *2d 4:00* |
-|--------------+-----------|
-| Foo          | 2d 4:00   |
-| \\_  Bar      | 1d 2:00   |
-"
+    "| Headline     |    Time |
+|--------------+---------|
+| *Total time* | *52:00* |
+|--------------+---------|
+| Foo          |   52:00 |
+| \\_  Bar      |   26:00 |"
     (org-test-with-temp-text
         "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 ** Bar
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :compact t
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 9)))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":compact t"))))
   ;; :maxlevel does not affect :compact parameter.
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *2d 4:00* |
-|--------------+-----------|
-| Foo          | 2d 4:00   |
-| \\_  Bar      | 1d 2:00   |
-"
+    "| Headline     |    Time |
+|--------------+---------|
+| *Total time* | *52:00* |
+|--------------+---------|
+| Foo          |   52:00 |
+| \\_  Bar      |   26:00 |"
     (org-test-with-temp-text
         "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 ** Bar
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :compact t :maxlevel 2
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 9)))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":compact t :maxlevel 2"))))
   ;; :compact implies a non-nil :indent parameter.
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *2d 4:00* |
-|--------------+-----------|
-| Foo          | 2d 4:00   |
-| \\_  Bar      | 1d 2:00   |
-"
+    "| Headline     |    Time |
+|--------------+---------|
+| *Total time* | *52:00* |
+|--------------+---------|
+| Foo          |   52:00 |
+| \\_  Bar      |   26:00 |"
     (org-test-with-temp-text
         "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 ** Bar
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :compact t :indent nil
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 9)))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":compact t :indent nil"))))
   ;; :compact implies a nil :level parameter.
   (should
    (equal
-    "| Headline     | Time      |
-|--------------+-----------|
-| *Total time* | *2d 4:00* |
-|--------------+-----------|
-| Foo          | 2d 4:00   |
-| \\_  Bar      | 1d 2:00   |
-"
+    "| Headline     |    Time |
+|--------------+---------|
+| *Total time* | *52:00* |
+|--------------+---------|
+| Foo          |   52:00 |
+| \\_  Bar      |   26:00 |"
     (org-test-with-temp-text
         "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 ** Bar
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-
-* Report
-<point>#+BEGIN: clocktable :compact t :level t
-#+END:"
-      (org-update-dblock)
-      (buffer-substring-no-properties (line-beginning-position 3)
-                                      (line-beginning-position 9))))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":compact t :level t")))))
 
 (ert-deftest test-org-clock/clocktable/properties ()
   "Test \":properties\" parameter in Clock table."
@@ -704,16 +572,14 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 |---+--------------+---------+---|
 |   | *Total time* | *26:00* |   |
 |---+--------------+---------+---|
-| 1 | Foo          | 26:00   |   |
-"
+| 1 | Foo          | 26:00   |   |"
     (org-test-with-temp-text
         "* Foo
 :PROPERTIES:
 :A: 1
 :END:
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-"
-      (test-org-clock-clocktable-contents-at-point ":properties (\"A\")"))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":properties (\"A\")"))))
   (should
    (equal
     "| A | Headline     | Time    |       |
@@ -721,8 +587,7 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 |   | *Total time* | *52:00* |       |
 |---+--------------+---------+-------|
 |   | Foo          | 52:00   |       |
-| 1 | \\_  Bar      |         | 26:00 |
-"
+| 1 | \\_  Bar      |         | 26:00 |"
     (org-test-with-temp-text
         "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
@@ -730,9 +595,8 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 :PROPERTIES:
 :A: 1
 :END:
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-"
-      (test-org-clock-clocktable-contents-at-point ":properties (\"A\")"))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":properties (\"A\")"))))
   ;; Handle missing properties.
   (should
    (equal
@@ -740,16 +604,14 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 |---+--------------+---------+---|
 |   | *Total time* | *26:00* |   |
 |---+--------------+---------+---|
-| 1 | Foo          | 26:00   |   |
-"
+| 1 | Foo          | 26:00   |   |"
     (org-test-with-temp-text
         "* Foo
 :PROPERTIES:
 :A: 1
 :END:
-CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
-"
-      (test-org-clock-clocktable-contents-at-point ":properties (\"A\")")))))
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":properties (\"A\")")))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
