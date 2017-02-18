@@ -2592,7 +2592,7 @@ from the dynamic block definition."
 
 	  ;; Get the list of node entries and iterate over it
 	  (when (> maxlevel 0)
-	    (pcase-dolist (`(,level ,headline ,ts ,time . ,props) entries)
+	    (pcase-dolist (`(,level ,headline ,ts ,time ,props) entries)
 	      (when narrow-cut-p
 		(setq headline
 		      (if (and (string-match
