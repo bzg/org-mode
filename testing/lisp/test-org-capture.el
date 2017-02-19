@@ -87,14 +87,34 @@
   ;; %(sexp) placeholder with an input containing the traps %, " and )
   ;; all at once which is complicated to parse.
   (should
-   (equal
-    "5 % Less (See Item \"3)\" Somewhere)\n"
-    (let ((org-store-link-plist nil))
-      (org-capture-fill-template
-       "%(capitalize \"%i\")"
-       "5 % less (see item \"3)\" somewhere)")))))
+   (equal "5 % Less (See Item \"3)\" Somewhere)\n"
+	  (let ((org-store-link-plist nil))
+	    (org-capture-fill-template
+	     "%(capitalize \"%i\")"
+	     "5 % less (see item \"3)\" somewhere)")))))
 
-
+(ert-deftest test-org-capture/refile ()
+  "Test `org-capture-refile' specifications."
+  ;; When refiling, make sure the headline being refiled is the one
+  ;; being captured.  In particular, empty lines after the entry may
+  ;; be removed, and we don't want to shift onto the next heading.
+  (should
+   (string-prefix-p
+    "** H1"
+    (org-test-with-temp-text-in-file "* A\n* B\n"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Todo" entry (file+headline ,file "A") "** H1 %?"))))
+	(org-capture nil "t")
+	(insert "\n")
+	(cl-letf (((symbol-function 'org-refile)
+		   (lambda ()
+		     (interactive)
+		     (throw :return
+			    (buffer-substring-no-properties
+			     (line-beginning-position)
+			     (line-end-position))))))
+	  (catch :return (org-capture-refile))))))))
 
 
 (provide 'test-org-capture)

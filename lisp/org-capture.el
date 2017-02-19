@@ -820,20 +820,28 @@ Refiling is done from the base buffer, because the indirect buffer is then
 already gone.  Any prefix argument will be passed to the refile command."
   (interactive)
   (unless (eq (org-capture-get :type 'local) 'entry)
-    (error
-     "Refiling from a capture buffer makes only sense for `entry'-type templates"))
-  (let ((pos (point))
-	(base (buffer-base-buffer (current-buffer)))
-	(org-capture-is-refiling t)
-	(kill-buffer (org-capture-get :kill-buffer 'local)))
+    (user-error "Refiling from a capture buffer makes only sense \
+for `entry'-type templates"))
+  (let* ((base (or (buffer-base-buffer) (current-buffer)))
+	 (pos (make-marker))
+	 (org-capture-is-refiling t)
+	 (kill-buffer (org-capture-get :kill-buffer 'local)))
+    ;; Since `org-capture-finalize' may alter buffer contents (e.g.,
+    ;; empty lines) around entry, use a marker to refer to the
+    ;; headline to be refiled.  Place the marker in the base buffer,
+    ;; as the current indirect one is going to be killed.
+    (set-marker pos (save-excursion (org-back-to-heading t)) base)
     (org-capture-put :kill-buffer nil)
-    (org-capture-finalize)
-    (save-window-excursion
-      (with-current-buffer (or base (current-buffer))
-	(org-with-wide-buffer
-	 (goto-char pos)
-	 (call-interactively 'org-refile))))
-    (when kill-buffer (kill-buffer base))))
+    (unwind-protect
+	(progn
+	  (org-capture-finalize)
+	  (save-window-excursion
+	    (with-current-buffer base
+	      (org-with-wide-buffer
+	       (goto-char pos)
+	       (call-interactively 'org-refile))))
+	  (when kill-buffer (kill-buffer base)))
+      (set-marker pos nil))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
