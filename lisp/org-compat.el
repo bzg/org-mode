@@ -350,17 +350,17 @@ use of this function is for the stuck project list."
 (define-obsolete-function-alias 'org-duration-string-to-minutes
   'org-duration-to-minutes "Org 9.1")
 
-(define-obsolete-variable-alias 'org-time-clocksum-format
-  'org-duration-format "Org 9.1")
+(make-obsolete-variable 'org-time-clocksum-format
+  "set `org-duration-format' instead." "Org 9.1")
 
-(define-obsolete-variable-alias 'org-time-clocksum-use-fractional
-  'org-duration-format "Org 9.1")
+(make-obsolete-variable 'org-time-clocksum-use-fractional
+  "set `org-duration-format' instead." "Org 9.1")
 
-(define-obsolete-variable-alias 'org-time-clocksum-fractional-format
-  'org-duration-format "Org 9.1")
+(make-obsolete-variable 'org-time-clocksum-fractional-format
+  "set `org-duration-format' instead." "Org 9.1")
 
-(define-obsolete-variable-alias 'org-time-clocksum-use-effort-durations
-  'org-duration-units "Org 9.1")
+(make-obsolete-variable 'org-time-clocksum-use-effort-durations
+  "set `org-duration-units' instead." "Org 9.1")
 
 
 ;;;; Obsolete link types
