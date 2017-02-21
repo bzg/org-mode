@@ -1263,11 +1263,16 @@ When set to the symbol `next' only the first future repeat is shown."
 (defcustom org-agenda-prefer-last-repeat nil
   "Non-nil sets date for repeated entries to their last repeat.
 
+When nil, display SCHEDULED and DEADLINE dates at their base
+date, and in today's agenda, as a reminder.  Display plain
+time-stamps, on the other hand, at every repeat date in the past
+in addition to the base date.
+
 When non-nil, show a repeated entry at its latest repeat date,
-possibly being today, instead of its base date, even if it wasn't
-marked as done.  This setting is useful if you do not always mark
-repeated entries as done and, yet, consider that reaching repeat
-date starts the task anew.
+possibly being today even if it wasn't marked as done.  This
+setting is useful if you do not always mark repeated entries as
+done and, yet, consider that reaching repeat date starts the task
+anew.
 
 When set to a list of strings, prefer last repeats only for
 entries with these TODO keywords."
@@ -5468,16 +5473,28 @@ displayed in agenda view."
 	  ;; S-exp entry doesn't match current day: skip it.
 	  (when (and sexp-entry (not (org-diary-sexp-entry sexp-entry "" date)))
 	    (throw :skip nil))
-	  ;; A repeating time stamp is shown at its base date, and at
-	  ;; every repeated date in the future.
 	  (when repeat
 	    (let* ((past
-		    (if (or (eq org-agenda-prefer-last-repeat t)
-			    (member todo-state org-agenda-prefer-last-repeat))
-			(org-agenda--timestamp-to-absolute
-			 repeat today 'past (current-buffer) pos)
-		      (org-agenda--timestamp-to-absolute repeat)))
+		    ;; A repeating time stamp is shown at its base
+		    ;; date and every repeated date up to TODAY.  If
+		    ;; `org-agenda-prefer-last-repeat' is non-nil,
+		    ;; however, only the last repeat before today
+		    ;; (inclusive) is shown.
+		    (org-agenda--timestamp-to-absolute
+		     repeat
+		     (if (or (> current today)
+			     (eq org-agenda-prefer-last-repeat t)
+			     (member todo-state org-agenda-prefer-last-repeat))
+			 today
+		       current)
+		     'past (current-buffer) pos))
 		   (future
+		    ;;  Display every repeated date past TODAY
+		    ;;  (exclusive) unless
+		    ;;  `org-agenda-show-future-repeats' is nil.  If
+		    ;;  this variable is set to `next', only display
+		    ;;  the first repeated date after TODAY
+		    ;;  (exclusive).
 		    (cond
 		     ((<= current today) past)
 		     ((not org-agenda-show-future-repeats) past)
