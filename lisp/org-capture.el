@@ -831,7 +831,9 @@ for `entry'-type templates"))
     ;; empty lines) around entry, use a marker to refer to the
     ;; headline to be refiled.  Place the marker in the base buffer,
     ;; as the current indirect one is going to be killed.
-    (set-marker pos (save-excursion (org-back-to-heading t)) base)
+    (set-marker pos (save-excursion
+		      (and (org-back-to-heading t) (point)))
+		base)
     (org-capture-put :kill-buffer nil)
     (unwind-protect
 	(progn
