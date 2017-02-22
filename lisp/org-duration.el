@@ -123,23 +123,22 @@ A non-nil REQUIRED? value for these keys indicates that the
 corresponding time component should always be included, even if
 its value is 0.
 
-Eventually, the list can contain an entry indicating special
-formatting needs.  It can follow one of the three following
-patterns:
+Eventually, the list can contain one of the following special
+entries:
 
   (special . h:mm)
   (special . h:mm:ss)
+
+    Units shorter than an hour are ignored.  The hours and
+    minutes part of the duration is expressed unconditionally
+    with H:MM, or H:MM:SS, pattern.
+
   (special . PRECISION)
 
-When any of the first two is present, a duration is expressed in
-mixed mode, where the hours and minutes of the duration are
-expressed as a \"H:MM:SS\" or \"H:MM\" string while still using
-other units defined.
-
-With the last pattern, a duration is expressed with a single
-unit, PRECISION being the number of decimal places to show.  The
-unit chosen is the first one required or with a non-zero integer
-part.  If there is no such unit, the smallest one is used.
+    A duration is expressed with a single unit, PRECISION being
+    the number of decimal places to show.  The unit chosen is the
+    first one required or with a non-zero integer part.  If there
+    is no such unit, the smallest one is used.
 
 For example,
 
