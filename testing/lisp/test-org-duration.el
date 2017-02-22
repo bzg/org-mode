@@ -30,7 +30,7 @@
   (should (= (org-duration-to-minutes "1:20:30") 80.5))
   (should (= (org-duration-to-minutes "2h 10min") 130))
   (should (= (org-duration-to-minutes "1d 1:02") 1502))
-  (should (= (org-duration-to-minutes "2.5h") 450))
+  (should (= (org-duration-to-minutes "2.5h") 150))
   ;; Special case: a bare number is treated as minutes.
   (should (= (org-duration-to-minutes "2") 2))
   (should (= (org-duration-to-minutes "2.5") 2.5))
