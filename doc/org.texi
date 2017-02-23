@@ -16152,9 +16152,7 @@ blocks by matching the reference name to either the block name or the
 
 For simple concatenation, set this @code{:noweb-ref} header argument at the
 sub-tree or file level.  In the example Org file shown next, the body of the
-source code in each block is extracted for concatenation to a pure code
-file@footnote{(For the example to work, turn on the property inheritance for
-@code{noweb-ref}, @pxref{Property inheritance}).}.
+source code in each block is extracted for concatenation to a pure code file.
 
 @example
  #+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
@@ -16162,7 +16160,7 @@ file@footnote{(For the example to work, turn on the property inheritance for
  #+END_SRC
  * the mount point of the fullest disk
    :PROPERTIES:
-   :noweb-ref: fullest-disk
+   :header-args: :noweb-ref fullest-disk
    :END:
 
  ** query all mounted disks
