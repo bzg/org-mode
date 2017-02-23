@@ -34,6 +34,7 @@
   ;; Special case: a bare number is treated as minutes.
   (should (= (org-duration-to-minutes "2") 2))
   (should (= (org-duration-to-minutes "2.5") 2.5))
+  (should (= (org-duration-to-minutes 1) 1))
   ;; Support custom units.
   (should (= 4
 	     (let ((org-duration-units '(("longmin" . 2)))

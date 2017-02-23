@@ -279,6 +279,7 @@ As a special case, a bare number represents minutes.
 Return value as a float.  Raise an error if duration format is
 not recognized."
   (cond
+   ((numberp duration) (float duration))
    ((string-match-p org-duration--h:mm-re duration)
     (pcase-let ((`(,hours ,minutes ,seconds)
 		 (mapcar #'string-to-number (split-string duration ":"))))
