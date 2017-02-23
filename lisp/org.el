@@ -6094,9 +6094,11 @@ by a #."
 							 '(org-block))))))) ; end of source block
 	     ((not org-fontify-quote-and-verse-blocks))
 	     ((string= block-type "quote")
-	      (add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-quote)))
+	      (add-face-text-property
+	       beg1 (min (point-max) (1+ end1)) 'org-quote t))
 	     ((string= block-type "verse")
-	      (add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-verse))))
+	      (add-face-text-property
+	       beg1 (min (point-max) (1+ end1)) 'org-verse t)))
 	    (add-text-properties beg beg1 '(face org-block-begin-line))
 	    (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
 				 '(face org-block-end-line))
