@@ -96,6 +96,7 @@ directories in published site-maps.
 
 *** Babel
 
+**** Support for hledger accounting reports added
 **** Clojure: new setting ~org-babel-clojure-sync-nrepl-timeout~
 
 Creation of a new setting to specify the Cider timeout.  By setting

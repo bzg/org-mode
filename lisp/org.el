@@ -268,6 +268,7 @@ requirements) is loaded."
 		 (const :tag "Fortran" fortran)
 		 (const :tag "Gnuplot" gnuplot)
 		 (const :tag "Haskell" haskell)
+		 (const :tag "hledger" hledger)
 		 (const :tag "IO" io)
 		 (const :tag "J" J)
 		 (const :tag "Java" java)
