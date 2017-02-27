@@ -2358,7 +2358,7 @@ The following commands are available:
      ["Fortnight View" org-agenda-fortnight-view
       :active (org-agenda-check-type nil 'agenda)
       :style radio :selected (eq org-agenda-current-span 'fortnight)
-      :keys "v f"]
+      :keys "v t"]
      ["Month View" org-agenda-month-view
       :active (org-agenda-check-type nil 'agenda)
       :style radio :selected (eq org-agenda-current-span 'month)
