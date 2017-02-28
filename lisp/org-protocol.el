@@ -651,11 +651,13 @@ The visited file needs to be part of a publishing project in
 `org-publish-project-alist' for this to work.  The function
 delegates most of the work to `org-protocol-create'."
   (interactive)
-  (require 'org-publish)
+  (require 'ox-publish)
   (let ((all (or (org-publish-get-project-from-filename buffer-file-name))))
     (if all (org-protocol-create (cdr all))
-      (message "Not in an org-project.  Did you mean `%s'?"
-               (substitute-command-keys "`\\[org-protocol-create]'")))))
+      (message "%s"
+	       (substitute-command-keys
+		"Not in an Org project.  \
+Did you mean `\\[org-protocol-create]'?")))))
 
 (defun org-protocol-create (&optional project-plist)
   "Create a new org-protocol project interactively.
