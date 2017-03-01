@@ -2463,7 +2463,9 @@ file's directory then expand relative links."
 				     (funcall maybe-cap "#+begin_example")
 				     results-switches)
 			   (funcall maybe-cap "#+begin_example\n")))
-		 (if (markerp end) (goto-char end) (forward-char (- end beg)))
+		 (let ((p (point)))
+		   (if (markerp end) (goto-char end) (forward-char (- end beg)))
+		   (org-escape-code-in-region p (point)))
 		 (insert (funcall maybe-cap "#+end_example\n")))))))))
 
 (defun org-babel-update-block-body (new-body)
