@@ -757,8 +757,8 @@ x
 	     ": 2"
 	     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
 
-(ert-deftest test-ob/org-babel-insert-result--improper-lists ()
-  "Test `org-babel-insert-result' with improper lists."
+(ert-deftest test-ob/org-babel-insert-result ()
+  "Test `org-babel-insert-result' specifications."
   ;; Do not error when output is an improper list.
   (should
    (org-test-with-temp-text
@@ -767,7 +767,65 @@ x
 '((1 . nil) (2 . 3))
 #+END_SRC
 "
-     (org-babel-execute-maybe) t)))
+     (org-babel-execute-maybe) t))
+  ;; Escape headlines when producing an example block.
+  (should
+   (string-match-p
+    ",\\* Not an headline"
+    (org-test-with-temp-text
+	"
+<point>#+BEGIN_SRC emacs-lisp
+\"* Not an headline\n\n\n\n\n\n\n\n\n\n\"
+#+END_SRC
+"
+      (org-babel-execute-maybe)
+      (buffer-string))))
+  ;; Escape special syntax in example blocks.
+  (should
+   (string-match-p
+    ",#\\+END_SRC"
+    (org-test-with-temp-text
+	"
+<point>#+BEGIN_SRC emacs-lisp
+\"#+END_SRC\n\n\n\n\n\n\n\n\n\n\"
+#+END_SRC
+"
+      (org-babel-execute-maybe)
+      (buffer-string))))
+  ;; No escaping is done with other blocks or raw type.
+  (should
+   (string-match-p
+    ",\\* Not an headline"
+    (org-test-with-temp-text
+	"
+<point>#+BEGIN_SRC emacs-lisp
+\"* Not an headline\"
+#+END_SRC
+"
+      (org-babel-execute-maybe)
+      (buffer-string))))
+  (should
+   (string-match-p
+    ",\\* Not an headline"
+    (org-test-with-temp-text
+	"
+<point>#+BEGIN_SRC emacs-lisp :results raw
+\"* Not an headline\"
+#+END_SRC
+"
+      (org-babel-execute-maybe)
+      (buffer-string))))
+  (should-not
+   (string-match-p
+    ",\\* Not an headline"
+    (org-test-with-temp-text
+	"
+<point>#+BEGIN_SRC emacs-lisp :results drawer
+\"* Not an headline\"
+#+END_SRC
+"
+      (org-babel-execute-maybe)
+      (buffer-string)))))
 
 (ert-deftest test-ob/remove-inline-result ()
   "Test `org-babel-remove-inline-result' honors whitespace."
