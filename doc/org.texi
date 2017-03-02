@@ -1833,9 +1833,11 @@ this:
 You can interactively insert drawers at point by calling
 @code{org-insert-drawer}, which is bound to @key{C-c C-x d}.  With an active
 region, this command will put the region inside the drawer.  With a prefix
-argument, this command calls @code{org-insert-property-drawer} and add a
-property drawer right below the current headline.  Completion over drawer
-keywords is also possible using @key{M-TAB}.
+argument, this command calls @code{org-insert-property-drawer} and add
+a property drawer right below the current headline.  Completion over drawer
+keywords is also possible using @kbd{M-@key{TAB}}@footnote{Many desktops
+intercept @kbd{M-@key{TAB}} to switch windows.  Use @kbd{C-M-i} or
+@kbd{@key{ESC} @key{TAB}} instead for completion (@pxref{Completion}).}.
 
 Visibility cycling (@pxref{Visibility cycling}) on the headline will hide and
 show the entry, but keep the drawer collapsed to a single line.  In order to
@@ -2132,7 +2134,7 @@ Re-align the table and don't move to another field.
 @orgcmd{C-c SPC,org-table-blank-field}
 Blank the field at point.
 @c
-@orgcmd{<TAB>,org-table-next-field}
+@orgcmd{TAB,org-table-next-field}
 Re-align the table, move to the next field.  Creates a new row if
 necessary.
 @c
@@ -3001,7 +3003,9 @@ a Lisp formula, format the formula according to Emacs Lisp rules.
 Another @key{TAB} collapses the formula back again.  In the open
 formula, @key{TAB} re-indents just like in Emacs Lisp mode.
 @orgcmd{M-@key{TAB},lisp-complete-symbol}
-Complete Lisp symbols, just like in Emacs Lisp mode.
+Complete Lisp symbols, just like in Emacs Lisp mode.@footnote{Many desktops
+intercept @kbd{M-@key{TAB}} to switch windows.  Use @kbd{C-M-i} or
+@kbd{@key{ESC} @key{TAB}} instead for completion (@pxref{Completion}).}
 @kindex S-@key{up}
 @kindex S-@key{down}
 @kindex S-@key{left}
@@ -10388,7 +10392,9 @@ Option keyword sets tailored to a particular back-end can be inserted from
 the export dispatcher (@pxref{The export dispatcher}) using the @code{Insert
 template} command by pressing @key{#}.  To insert keywords individually,
 a good way to make sure the keyword is correct is to type @code{#+} and then
-to use @kbd{M-<TAB>} for completion.
+to use @kbd{M-@key{TAB}}@footnote{Many desktops intercept @kbd{M-TAB} to
+switch windows.  Use @kbd{C-M-i} or @kbd{@key{ESC} @key{TAB}} instead.} for
+completion.
 
 The export keywords available for every back-end, and their equivalent global
 variables, include:
@@ -16886,6 +16892,10 @@ After @samp{#+STARTUP: }, complete startup keywords.
 @item
 When the point is anywhere else, complete dictionary words using Ispell.
 @end itemize
+@kindex C-M-i
+If your desktop intercepts the combo @kbd{M-@key{TAB}} to switch windows, use
+@kbd{C-M-i} or @kbd{@key{ESC} @key{TAB}} as an alternative or customize your
+environment.
 @end table
 
 @node Easy templates
