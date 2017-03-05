@@ -58,6 +58,7 @@
 		     (table-cell . org-confluence-table-cell)
 		     (table-row . org-confluence-table-row)
 		     (template . org-confluence-template)
+		     (timestamp . org-confluence-timestamp)
 		     (underline . org-confluence-underline)
 		     (verbatim . org-confluence-verbatim)))
 
@@ -106,14 +107,19 @@
   (format "\{\{%s\}\}" (org-element-property :value code)))
 
 (defun org-confluence-headline (headline contents info)
-  (let ((low-level-rank (org-export-low-level-p headline info))
-        (text (org-export-data (org-element-property :title headline)
-                               info))
-        (level (org-export-get-relative-level headline info)))
+  (let* ((low-level-rank (org-export-low-level-p headline info))
+	 (text (org-export-data (org-element-property :title headline)
+				info))
+	 (todo (org-export-data (org-element-property :todo-keyword headline)
+				info))
+	 (level (org-export-get-relative-level headline info))
+	 (todo-text (if (or (not (plist-get info :with-todo-keywords))
+			    (string= todo ""))
+			""
+		      (format "*{{%s}}* " todo))))
     ;; Else: Standard headline.
-    (format "h%s. %s\n%s" level text
-            (if (org-string-nw-p contents) contents
-              ""))))
+    (format "h%s. %s%s\n%s" level todo-text text
+            (if (org-string-nw-p contents) contents ""))))
 
 (defun org-confluence-link (link desc info)
   (let ((raw-link (org-element-property :raw-link link)))
@@ -165,13 +171,20 @@ a communication channel."
 (defun org-confluence-table-cell  (table-cell contents info)
   (let ((table-row (org-export-get-parent table-cell)))
     (concat
-     (when (org-export-table-row-starts-header-p table-row info)
-       "|")
-     contents "|")))
+     (and (org-export-table-row-starts-header-p table-row info) "|")
+     " " contents "|")))
 
 (defun org-confluence-template (contents info)
   (let ((depth (plist-get info :with-toc)))
     (concat (when depth "\{toc\}\n\n") contents)))
+
+(defun org-confluence-timestamp (timestamp _contents _info)
+  "Transcode a TIMESTAMP object from Org to Confluence.
+CONTENTS and INFO are ignored."
+  (let ((translated (org-timestamp-translate timestamp)))
+    (if (string-prefix-p "[" translated)
+        (concat "(" (substring translated 1 -1) ")")
+      translated)))
 
 (defun org-confluence-underline (underline contents info)
   (format "+%s+" contents))
