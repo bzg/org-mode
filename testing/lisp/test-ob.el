@@ -775,10 +775,10 @@ x
     (org-test-with-temp-text
 	"
 <point>#+BEGIN_SRC emacs-lisp
-\"* Not an headline\n\n\n\n\n\n\n\n\n\n\"
+\"* Not an headline\"
 #+END_SRC
 "
-      (org-babel-execute-maybe)
+      (let ((org-babel-min-lines-for-block-output 1)) (org-babel-execute-maybe))
       (buffer-string))))
   ;; Escape special syntax in example blocks.
   (should
@@ -787,13 +787,13 @@ x
     (org-test-with-temp-text
 	"
 <point>#+BEGIN_SRC emacs-lisp
-\"#+END_SRC\n\n\n\n\n\n\n\n\n\n\"
+\"#+END_SRC\"
 #+END_SRC
 "
-      (org-babel-execute-maybe)
+      (let ((org-babel-min-lines-for-block-output 1)) (org-babel-execute-maybe))
       (buffer-string))))
   ;; No escaping is done with other blocks or raw type.
-  (should
+  (should-not
    (string-match-p
     ",\\* Not an headline"
     (org-test-with-temp-text
@@ -802,9 +802,10 @@ x
 \"* Not an headline\"
 #+END_SRC
 "
-      (org-babel-execute-maybe)
+      (let ((org-babel-min-lines-for-block-output 10))
+	(org-babel-execute-maybe))
       (buffer-string))))
-  (should
+  (should-not
    (string-match-p
     ",\\* Not an headline"
     (org-test-with-temp-text
