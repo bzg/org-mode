@@ -159,6 +159,9 @@ Select * From Users
 Where clue > 0
 ,#+END_SRC
 #+end_example
+*** New ~function~ scope argument for the Clock Table
+Added a nullary function that returns a list of files as a possible
+argument for the scope of the clock table.
 *** Export
 **** Add Slovanian translations
 **** Implement ~org-export-insert-image-links~

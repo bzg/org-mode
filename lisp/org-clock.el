@@ -2378,6 +2378,7 @@ the currently selected interval size."
 		    (`file-with-archives
 		     (and buffer-file-name
 			  (org-add-archive-files (list buffer-file-name))))
+		    ((pred functionp) (funcall scope))
 		    ((pred consp) scope)
 		    (_ (or (buffer-file-name) (current-buffer)))))
 	   (block (plist-get params :block))

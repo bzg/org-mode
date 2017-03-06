@@ -6635,6 +6635,7 @@ be selected:
              tree       @r{the surrounding level 1 tree}
              agenda     @r{all agenda files}
              ("file"..) @r{scan these files}
+             function   @r{the list of files returned by a function of no argument}
              file-with-archives    @r{current file and its archives}
              agenda-with-archives  @r{all agenda files, including archives}
 :block       @r{The time block to consider.  This block is specified either}

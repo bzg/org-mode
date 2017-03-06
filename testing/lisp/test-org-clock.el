@@ -351,9 +351,20 @@ the buffer."
 #+TBLFM: $3=string(\"foo\")"
     (org-test-with-temp-text-in-file
         "* Test
-CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01"
+CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 01:41] => 16905:01"
       (test-org-clock-clocktable-contents ":scope file-with-archives"
-	  "#+TBLFM: $3=string(\"foo\")")))))
+	  "#+TBLFM: $3=string(\"foo\")"))))
+  ;; Test "function" scope.
+  (should
+   (string-match-p
+    (regexp-quote "| ALL *Total time* | *1:00* |")
+    (org-test-with-temp-text-in-file
+	"* Test
+CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
+      (let ((the-file (buffer-file-name)))
+	(org-test-with-temp-text-in-file ""
+	  (test-org-clock-clocktable-contents
+	      (format ":scope (lambda () (list %S))" the-file))))))))
 
 (ert-deftest test-org-clock/clocktable/maxlevel ()
   "Test \":maxlevel\" parameter in Clock table."
