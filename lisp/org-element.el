@@ -352,9 +352,8 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
       (italic ,@standard-set)
       (item ,@standard-set-no-line-break)
       (keyword ,@(remq 'footnote-reference standard-set))
-      ;; Ignore all links excepted plain links and angular links in
-      ;; a link description.  Also ignore radio-targets and line
-      ;; breaks.
+      ;; Ignore all links in a link description.  Also ignore
+      ;; radio-targets and line breaks.
       (link bold code entity export-snippet inline-babel-call inline-src-block
 	    italic latex-fragment macro statistics-cookie strike-through
 	    subscript superscript underline verbatim)
