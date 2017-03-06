@@ -351,7 +351,7 @@ the buffer."
 #+TBLFM: $3=string(\"foo\")"
     (org-test-with-temp-text-in-file
         "* Test
-CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 01:41] => 16905:01"
+CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01"
       (test-org-clock-clocktable-contents ":scope file-with-archives"
 	  "#+TBLFM: $3=string(\"foo\")"))))
   ;; Test "function" scope.
