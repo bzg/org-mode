@@ -3600,8 +3600,8 @@ contextual information."
 	   ;; remove any trailing "br" close-tag so as to avoid
 	   ;; duplicates.
 	   (let* ((br (org-html-close-tag "br" nil info))
-		  (re (format "\\(%s\\)[ \t]*$" (regexp-quote br))))
-	     (replace-regexp-in-string re br contents)))))
+		  (re (format "\\(?:%s\\)?[ \t]*\n" (regexp-quote br))))
+	     (replace-regexp-in-string re (concat br "\n") contents)))))
 
 
 ;;; Filter Functions
