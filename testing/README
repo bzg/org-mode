@@ -36,15 +36,32 @@ The options in the above command are explained below.
 | --eval  | reloads Org-mode and allows evaluation of code blocks by the tests           |
 | -f      | actually runs the tests using the `org-test-run-batch-tests' function        |
 
-* Trigger testing with 'make test'
+* Trigger the tests with 'make'
 
-Target ~test~ can be used to trigger a test run.
+** Recompile all
 
-#+BEGIN_SRC sh :dir (expand-file-name "..")
+Target ~test~ can be used to trigger a test run.  The tests start
+after cleaning up and recompilation.
+
+#+BEGIN_SRC sh :dir (expand-file-name "..") :results silent
 make test
 #+END_SRC
 
 See ../mk/default.mk for details.
+
+** Test dirty
+
+The 'dirty' targets are for recompiling without cleaning and
+rebuilding everything.  This usually speeds up the recompilation
+considerably.
+
+The 'dirty' target is called test-dirty.
+
+#+BEGIN_SRC sh :dir (expand-file-name "..") :results silent
+make test-dirty
+#+END_SRC
+
+Note that the outcome may /not/ be in perfect shape.
 
 * Interactive testing from within Emacs
 
