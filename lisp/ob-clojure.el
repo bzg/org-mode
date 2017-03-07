@@ -43,7 +43,7 @@
 (require 'ob)
 
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
-(declare-function cider-current-session "ext:cider-client" ())
+(declare-function cider-current-ns "ext:cider-client" ())
 (declare-function nrepl--merge "ext:nrepl-client" (dict1 dict2))
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
 (declare-function nrepl-dict-put "ext:nrepl-client" (dict key value))
@@ -118,7 +118,7 @@ using the :show-process parameter."
 			    org-babel-clojure-sync-nrepl-timeout))
 		       (nrepl-sync-request:eval expanded
 						(cider-current-connection)
-						(cider-current-session))))
+						(cider-current-ns))))
 	       (setq result
 		     (concat
 		      (nrepl-dict-get response
@@ -153,7 +153,7 @@ using the :show-process parameter."
 		;; Update the status of the nREPL output session.
 		(setq status (nrepl-dict-get response "status")))
 	      (cider-current-connection)
-	      (cider-current-session))
+	      (cider-current-ns))
 
 	     ;; Wait until the nREPL code finished to be processed.
 	     (while (not (member "done" status))
