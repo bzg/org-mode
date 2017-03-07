@@ -528,8 +528,10 @@
     (search-forward "sub-body 1")
     (should (org-invisible-p2))
     (search-backward "sub-body 2")
-    (should (org-invisible-p2)))
-  ;; Preserve contents visibility.
+    (should (org-invisible-p2))))
+
+(ert-deftest test-org-list/move-item-down-contents-visibility ()
+  "Preserve contents visibility."
   (org-test-with-temp-text "
 - item 1
   #+BEGIN_CENTER
@@ -540,12 +542,21 @@
   Text2
   #+END_CENTER"
     (org-hide-block-all)
-    (search-forward "- item 1")
-    (org-move-item-down)
-    (search-forward "Text1")
-    (should (org-invisible-p2))
-    (search-backward "Text2")
-    (should (org-invisible-p2))))
+    (let ((invisible-property-1
+	   (progn
+	     (search-forward "Text1")
+	     (get-char-property (point) 'invisible)))
+	  (invisible-property-2
+	   (progn
+	     (search-forward "Text2")
+	     (get-char-property (point) 'invisible))))
+      (goto-char (point-min))
+      (search-forward "- item 1")
+      (org-move-item-down)
+      (search-forward "Text1")
+      (should (eq invisible-property-1 (get-char-property (point) 'invisible)))
+      (search-backward "Text2")
+      (should (eq invisible-property-2 (get-char-property (point) 'invisible))))))
 
 (ert-deftest test-org-list/move-item-up ()
   "Test `org-move-item-up' specifications."
@@ -613,8 +624,9 @@
     (search-forward "sub-body 2")
     (should (org-invisible-p2))
     (search-forward "sub-body 1")
-    (should (org-invisible-p2)))
-  ;; Preserve contents visibility.
+    (should (org-invisible-p2))))
+
+(ert-deftest test-org-list/move-item-up-contents-visibility ()
   (org-test-with-temp-text "
 - item 1
   #+BEGIN_CENTER
@@ -625,12 +637,21 @@
   Text2
   #+END_CENTER"
     (org-hide-block-all)
-    (search-forward "- item 2")
-    (org-move-item-up)
-    (search-forward "Text2")
-    (should (org-invisible-p2))
-    (search-forward "Text1")
-    (should (org-invisible-p2))))
+    (let ((invisible-property-1
+	   (progn
+	     (search-forward "Text1")
+	     (get-char-property (point) 'invisible)))
+          (invisible-property-2
+	   (progn
+	     (search-forward "Text2")
+	     (get-char-property (point) 'invisible))))
+      (goto-char (point-min))
+      (search-forward "- item 2")
+      (org-move-item-up)
+      (search-forward "Text2")
+      (should (eq invisible-property-2 (get-char-property (point) 'invisible)))
+      (search-forward "Text1")
+      (should (eq invisible-property-1 (get-char-property (point) 'invisible))))))
 
 (ert-deftest test-org-list/insert-item ()
   "Test item insertion."
