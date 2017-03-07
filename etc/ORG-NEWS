@@ -86,6 +86,8 @@ docstrings.
 *** Agenda
 **** New variable : ~org-agenda-show-future-repeats~
 **** New variable : ~org-agenda-prefer-last-repeat~
+**** New variable : ~org-deadline-past-days~
+See docstring for details.
 **** Binding C-c C-x < for ~org-agenda-set-restriction-lock-from-agenda~
 *** New value for ~org-publish-sitemap-sort-folders~
 

@@ -1292,7 +1292,19 @@ When an item is scheduled on a date, it shows up in the agenda on
 this day and will be listed until it is marked done or for the
 number of days given here."
   :group 'org-agenda-daily/weekly
-  :type 'integer)
+  :type 'integer
+  :safe 'integerp)
+
+(defcustom org-deadline-past-days 10000
+  "Number of days to warn about missed deadlines.
+When an item has deadline on a date, it shows up in the agenda on
+this day and will appear as a reminder until it is marked DONE or
+for the number of days given here."
+  :group 'org-agenda-daily/weekly
+  :type 'integer
+  :version "26.1"
+  :package-version '(Org . "9.1")
+  :safe 'integerp)
 
 (defcustom org-agenda-log-mode-items '(closed clock)
   "List of items that should be shown in agenda log mode.
@@ -5954,17 +5966,17 @@ specification like [h]h:mm."
 			  (let ((org-deadline-warning-days suppress-prewarning))
 			    (org-get-wdays s))
 			(org-get-wdays s))))
-	  ;; Display deadlines items at base date (DEADLINE), today,
-	  ;; if deadline is overdue or if the expiration of the
-	  ;; upcoming deadline is within WDAYS warning time.  Also,
-	  ;; show any repeat past today.
-	  (when (or (and (/= current deadline)
-			 (/= current today)
-			 (/= current repeat))
-		    (and today?
-			 (> deadline current)
-			 (> diff wdays)))
-	    (throw :skip nil))
+	  (cond
+	   ;; Only display deadlines at their base date, at future
+	   ;; repeat occurrences or in today agenda.
+	   ((= current deadline) nil)
+	   ((= current repeat) nil)
+	   ((not today?) (throw :skip nil))
+	   ;; Upcoming deadline: display within warning period WDAYS.
+	   ((> deadline current) (when (> diff wdays) (throw :skip nil)))
+	   ;; Overdue deadline: warn about it for
+	   ;; `org-deadline-past-days' duration.
+	   (t (when (< org-deadline-past-days (- diff)) (throw :skip nil))))
 	  ;; Possibly skip done tasks.
 	  (when (and done?
 		     (or org-agenda-skip-deadline-if-done
