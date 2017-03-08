@@ -1790,9 +1790,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a SUBSCRIPT object from Org to ASCII.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (if (org-element-property :use-brackets-p subscript)
-      (format "_{%s}" contents)
-    (format "_%s" contents)))
+  (format (if (string-match-p "[ \t]" contents) "_{%s}" "_%s") contents))
 
 
 ;;;; Superscript
@@ -1801,9 +1799,7 @@ contextual information."
   "Transcode a SUPERSCRIPT object from Org to ASCII.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (if (org-element-property :use-brackets-p superscript)
-      (format "^{%s}" contents)
-    (format "^%s" contents)))
+  (format (if (string-match-p "[ \t]" contents) "^{%s}" "^%s") contents))
 
 
 ;;;; Strike-through
