@@ -217,11 +217,6 @@ a communication channel."
 	    (and (plist-get info :with-priority)
 		 (let ((char (org-element-property :priority headline)))
 		   (and char (format "[#%c] " char)))))
-	   (anchor
-	    (and (plist-get info :with-toc)
-		 (format "<a id=\"%s\"></a>"
-			 (or (org-element-property :CUSTOM_ID headline)
-			     (org-export-get-reference headline info)))))
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title))
 	   (style (plist-get info :md-headline-style)))
@@ -239,10 +234,29 @@ a communication channel."
 			 "."))))
 	  (concat bullet (make-string (- 4 (length bullet)) ?\s) heading tags "\n\n"
 		  (and contents (replace-regexp-in-string "^" "    " contents)))))
-       (t (concat (org-md--headline-title style level title anchor tags) contents))))))
+       (t
+	(let ((anchor
+	       (and (org-md--headline-referred-p headline info)
+		    (format "<a id=\"%s\"></a>"
+			    (or (org-element-property :CUSTOM_ID headline)
+				(org-export-get-reference headline info))))))
+	  (concat (org-md--headline-title style level title anchor tags)
+		  contents)))))))
 
 
-;; Headline Title
+(defun org-md--headline-referred-p (headline info)
+  "Non-nil when HEADLINE is being referred to.
+INFO is a plist used as a communication channel.  Links and table
+of contents can refer to headlines."
+  (or (plist-get info :with-toc)
+      (org-element-map (plist-get info :parse-tree) 'link
+	(lambda (link)
+	  (eq headline
+	      (pcase (org-element-property :type link)
+		((or "custom-id" "id") (org-export-resolve-id-link link info))
+		("fuzzy" (org-export-resolve-fuzzy-link link info))
+		(_ nil))))
+	info t)))
 
 (defun org-md--headline-title (style level title &optional anchor tags)
   "Generate a headline title in the preferred Markdown headline style.
