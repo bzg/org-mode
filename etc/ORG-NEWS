@@ -197,6 +197,11 @@ changed by configuring ~org-src-lang-modes~.
 *** New variable : ~org-bibtex-headline-format-function~
 This allow to use a different title than entry title.
 
+*** ~org-attach~ supports attaching files from URLs
+
+Using ~C-c C-a u~ prompts for a URL pointing to a file to be attached
+to the document.
+
 ** Removed functions
 
 *** Org Timeline
