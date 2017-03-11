@@ -173,6 +173,7 @@ Shows a list of commands and prompts for another key to execute a command."
 
 a       Select a file and attach it to the task, using `org-attach-method'.
 c/m/l/y Attach a file using copy/move/link/symbolic-link method.
+u       Attach a file from URL (downloading it).
 n       Create a new attachment, as an Emacs buffer.
 z       Synchronize the current task with its attachment
         directory, in case you added attachments yourself.
@@ -202,6 +203,8 @@ i       Make children of the current entry inherit its attachment directory.")))
 	(let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
        ((memq c '(?y ?\C-y))
 	(let ((org-attach-method 'lns)) (call-interactively 'org-attach-attach)))
+       ((memq c '(?u ?\C-u))
+        (let ((org-attach-method 'url)) (call-interactively 'org-attach-url)))
        ((memq c '(?n ?\C-n)) (call-interactively 'org-attach-new))
        ((memq c '(?z ?\C-z)) (call-interactively 'org-attach-sync))
        ((memq c '(?o ?\C-o)) (call-interactively 'org-attach-open))
@@ -363,10 +366,14 @@ Only do this when `org-attach-store-link-p' is non-nil."
 		    (file-name-nondirectory file))
 	      org-stored-links)))
 
+(defun org-attach-url (url)
+  (interactive "MURL of the file to attach: \n")
+  (org-attach-attach url))
+
 (defun org-attach-attach (file &optional visit-dir method)
   "Move/copy/link FILE into the attachment directory of the current task.
 If VISIT-DIR is non-nil, visit the directory with dired.
-METHOD may be `cp', `mv', `ln', or `lns' default taken from
+METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
 `org-attach-method'."
   (interactive "fFile to keep as an attachment: \nP")
   (setq method (or method org-attach-method))
@@ -380,7 +387,8 @@ METHOD may be `cp', `mv', `ln', or `lns' default taken from
        ((eq method 'mv)	(rename-file file fname))
        ((eq method 'cp)	(copy-file file fname))
        ((eq method 'ln) (add-name-to-file file fname))
-       ((eq method 'lns) (make-symbolic-link file fname)))
+       ((eq method 'lns) (make-symbolic-link file fname))
+       ((eq method 'url) (url-copy-file file fname)))
       (when org-attach-commit
 	(org-attach-commit))
       (org-attach-tag)

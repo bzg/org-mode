@@ -7411,6 +7411,9 @@ Note that hard links are not supported on all systems.
 Attach a file using the copy/move/link method.
 Note that hard links are not supported on all systems.
 
+@orgcmdtkc{u,C-c C-a u,org-attach-url}
+Attach a file from URL
+
 @orgcmdtkc{n,C-c C-a n,org-attach-new}
 Create a new attachment as an Emacs buffer.
 
