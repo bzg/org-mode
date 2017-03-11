@@ -165,6 +165,10 @@ Where clue > 0
 Added a nullary function that returns a list of files as a possible
 argument for the scope of the clock table.
 *** Export
+**** Implement vernacular table of contents in Markdown exporter
+Global table of contents are generated using vanilla Markdown syntax
+instead of HTML.  Also #+TOC keyword, including local table of
+contents, are now supported.
 **** Add Slovanian translations
 **** Implement ~org-export-insert-image-links~
 This new function is meant to be used in back-ends supporting images
