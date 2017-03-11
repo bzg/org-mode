@@ -7305,14 +7305,15 @@ With a prefix argument, exclude the lines of that category.
        (t (error "No category at point"))))))
 
 (defun org-find-top-headline (&optional pos)
-  "Find the topmost parent headline and return it."
+  "Find the topmost parent headline and return it.
+POS when non-nil is the marker or buffer position to start the
+search from."
   (save-excursion
-    (with-current-buffer (if pos (marker-buffer pos) (current-buffer))
-      (if pos (goto-char pos))
-      ;; Skip up to the topmost parent
-      (while (ignore-errors (outline-up-heading 1) t))
-      (ignore-errors
-	(nth 4 (org-heading-components))))))
+    (with-current-buffer (if (markerp pos) (marker-buffer pos) (current-buffer))
+      (when pos (goto-char pos))
+      ;; Skip up to the topmost parent.
+      (while (org-up-heading-safe))
+      (ignore-errors (nth 4 (org-heading-components))))))
 
 (defvar org-agenda-filtered-by-top-headline nil)
 (defun org-agenda-filter-by-top-headline (strip)
