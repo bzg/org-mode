@@ -221,6 +221,15 @@ This is not a node property
 :END:"
      (org-lint '(obsolete-properties-drawer)))))
 
+(ert-deftest test-org-lint/invalid-effort-property ()
+  "Test `org-lint-invalid-effort-property' checker."
+  (should
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:EFFORT: something\n:END:"
+     (org-lint '(invalid-effort-property))))
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:EFFORT: 1:23\n:END:"
+     (org-lint '(invalid-effort-property)))))
+
 (ert-deftest test-org-lint/link-to-local-file ()
   "Test `org-lint-link-to-local-file' checker."
   (should

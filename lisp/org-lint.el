@@ -87,6 +87,7 @@
 ;;   - spurious macro arguments or invalid macro templates
 ;;   - special properties in properties drawer
 ;;   - obsolete syntax for PROPERTIES drawers
+;;   - Invalid EFFORT property value
 ;;   - missing definition for footnote references
 ;;   - missing reference for footnote definitions
 ;;   - non-footnote definitions in footnote section
@@ -239,6 +240,10 @@
     :name 'obsolete-properties-drawer
     :description "Report obsolete syntax for properties drawers"
     :categories '(obsolete properties))
+   (make-org-lint-checker
+    :name 'invalid-effort-property
+    :description "Report invalid duration in EFFORT property"
+    :categories '(properties))
    (make-org-lint-checker
     :name 'undefined-footnote-reference
     :description "Report missing definition for footnote references"
@@ -539,6 +544,16 @@ Use :header-args: instead"
 			(or (org-at-heading-p) (org-at-planning-p)))
 		      "Incorrect contents for PROPERTIES drawer"
 		    "Incorrect location for PROPERTIES drawer"))))))))
+
+(defun org-lint-invalid-effort-property (ast)
+  (org-element-map ast 'node-property
+    (lambda (p)
+      (when (equal "EFFORT" (org-element-property :key p))
+	(let ((value (org-element-property :value p)))
+	  (and (org-string-nw-p value)
+	       (not (org-duration-p value))
+	       (list (org-element-property :begin p)
+		     (format "Invalid effort duration format: %S" value))))))))
 
 (defun org-lint-link-to-local-file (ast)
   (org-element-map ast 'link
