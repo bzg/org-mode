@@ -1654,34 +1654,41 @@ The template may still contain \"%?\" for cursor positioning."
 		(delete-region pos end)
 		(set-marker pos nil)
 		(set-marker end nil)
-		(let ((replacement
-		       (pcase (string-to-char value)
-			 (?< (format-time-string time-string))
-			 (?:
-			  (or (plist-get org-store-link-plist (intern value))
-			      ""))
-			 (?i (let ((lead (buffer-substring-no-properties
+		(let* ((inside-sexp? (org-capture-inside-embedded-elisp-p))
+		       (replacement
+			(pcase (string-to-char value)
+			  (?< (format-time-string time-string))
+			  (?:
+			   (or (plist-get org-store-link-plist (intern value))
+			       ""))
+			  (?i
+			   (if inside-sexp? v-i
+			     ;; Outside embedded Lisp, repeat leading
+			     ;; characters before initial place holder
+			     ;; every line.
+			     (let ((lead (buffer-substring-no-properties
 					  (line-beginning-position) (point))))
-			       (mapconcat #'identity
-					  (split-string v-i "\n")
-					  (concat "\n" lead))))
-			 (?a v-a)
-			 (?A v-A)
-			 (?c v-c)
-			 (?f v-f)
-			 (?F v-F)
-			 (?k v-k)
-			 (?K v-K)
-			 (?l v-l)
-			 (?n v-n)
-			 (?t v-t)
-			 (?T v-T)
-			 (?u v-u)
-			 (?U v-U)
-			 (?x v-x))))
+			       (replace-regexp-in-string "\n\\(.\\)"
+							 (concat lead "\\1")
+							 v-i nil nil 1))))
+			  (?a v-a)
+			  (?A v-A)
+			  (?c v-c)
+			  (?f v-f)
+			  (?F v-F)
+			  (?k v-k)
+			  (?K v-K)
+			  (?l v-l)
+			  (?n v-n)
+			  (?t v-t)
+			  (?T v-T)
+			  (?u v-u)
+			  (?U v-U)
+			  (?x v-x))))
 		  (insert
-		   (if (org-capture-inside-embedded-elisp-p)
-		       (replace-regexp-in-string "\"" "\\\\\"" replacement)
+		   (if inside-sexp?
+		       ;; Escape sensitive characters.
+		       (replace-regexp-in-string "[\\\"]" "\\\\\\&" replacement)
 		     replacement))))))))
 
       ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.
