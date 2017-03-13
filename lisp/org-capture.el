@@ -1060,7 +1060,7 @@ case, raise an error."
   (let ((location (cond ((equal file "") org-default-notes-file)
 			((stringp file) (expand-file-name file org-directory))
 			((functionp file) (funcall file))
-			((and (symbolp file) (bound-and-true-p file)))
+			((and (symbolp file) (boundp file)) (symbol-value file))
 			(t nil))))
     (or (org-string-nw-p location)
 	(error "Invalid file location: %S" location))))
