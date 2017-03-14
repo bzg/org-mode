@@ -35,6 +35,13 @@
   (should
    (equal "success!\n"
 	  (org-capture-fill-template "%(concat \"success\" \"!\")")))
+  ;; It is possible to include other place holders in %(sexp).  In
+  ;; that case properly escape \ and " characters.
+  (should
+   (equal "Nested string \"\\\"\\\"\"\n"
+	  (let ((org-store-link-plist nil))
+	    (org-capture-fill-template "%(concat \"%i\")"
+				       "Nested string \"\\\"\\\"\""))))
   ;; %<...> placeholder.
   (should
    (equal (concat (format-time-string "%Y") "\n")
@@ -66,6 +73,12 @@
 	  (let ((org-store-link-plist nil))
 	    (org-capture-fill-template
 	     "%i" "%(concat \"no \" \"evaluation\")"))))
+  ;; When %i contents span over multiple line, repeat initial leading
+  ;; characters over each line.
+  (should
+   (equal "> line 1\n> line 2\n"
+	  (let ((org-store-link-plist nil))
+	    (org-capture-fill-template "> %i" "line 1\nline 2"))))
   ;; Test %-escaping with \ character.
   (should
    (equal "%i\n"
