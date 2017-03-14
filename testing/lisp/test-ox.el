@@ -839,7 +839,7 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 			     (paragraph . (lambda (p c i) c))
 			     (section . (lambda (s c i) c))))
 	     nil nil nil '(:with-sub-superscript nil)))))
-  ;; Also handle uninterpreted objects in title.
+  ;; Handle uninterpreted objects in parsed keywords.
   (should
    (equal "a_b"
 	  (org-test-with-temp-text "#+TITLE: a_b"
@@ -848,9 +848,21 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 	      :transcoders
 	      '((subscript . (lambda (s c i) "dummy"))
 		(template . (lambda (c i) (org-export-data
-					   (plist-get i :title) i)))
+				      (plist-get i :title) i)))
 		(section . (lambda (s c i) c))))
 	     nil nil nil '(:with-sub-superscript nil)))))
+  ;; Objects in parsed keywords are "uninterpreted" before filters are
+  ;; applied.
+  (should
+   (org-test-with-temp-text "#+TITLE: a_b"
+     (org-export-as
+      (org-export-create-backend
+       :filters
+       '((:filter-options
+	  (lambda (i _)
+	    (org-element-map (plist-get i :title) 'subscript
+	      (lambda (_) (error "There should be no subscript here")))))))
+      nil nil nil '(:with-sub-superscript nil))))
   ;; Handle uninterpreted objects in captions.
   (should
    (equal "adummy\n"
