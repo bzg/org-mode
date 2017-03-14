@@ -2901,83 +2901,67 @@ containing their first reference."
 
 (defun org-export--remove-uninterpreted-data (data info)
   "Change uninterpreted elements back into Org syntax.
-DATA is the parse tree.  INFO is a plist containing export
-options.  Each uninterpreted element or object is changed back
-into a string.  Contents, if any, are not modified.  The parse
-tree is modified by side effect."
-  (org-export--remove-uninterpreted-data-1 data info)
-  (dolist (entry org-export-options-alist)
-    (when (eq (nth 4 entry) 'parse)
-      (let ((p (car entry)))
-	(plist-put info
-		   p
-		   (org-export--remove-uninterpreted-data-1
-		    (plist-get info p)
-		    info))))))
-
-(defun org-export--remove-uninterpreted-data-1 (data info)
-  "Change uninterpreted elements back into Org syntax.
 DATA is a parse tree or a secondary string.  INFO is a plist
 containing export options.  It is modified by side effect and
 returned by the function."
   (org-element-map data
       '(entity bold italic latex-environment latex-fragment strike-through
 	       subscript superscript underline)
-    (lambda (blob)
+    (lambda (datum)
       (let ((new
-	     (cl-case (org-element-type blob)
+	     (cl-case (org-element-type datum)
 	       ;; ... entities...
 	       (entity
 		(and (not (plist-get info :with-entities))
 		     (list (concat
-			    (org-export-expand blob nil)
+			    (org-export-expand datum nil)
 			    (make-string
-			     (or (org-element-property :post-blank blob) 0)
+			     (or (org-element-property :post-blank datum) 0)
 			     ?\s)))))
 	       ;; ... emphasis...
 	       ((bold italic strike-through underline)
 		(and (not (plist-get info :with-emphasize))
-		     (let ((marker (cl-case (org-element-type blob)
+		     (let ((marker (cl-case (org-element-type datum)
 				     (bold "*")
 				     (italic "/")
 				     (strike-through "+")
 				     (underline "_"))))
 		       (append
 			(list marker)
-			(org-element-contents blob)
+			(org-element-contents datum)
 			(list (concat
 			       marker
 			       (make-string
-				(or (org-element-property :post-blank blob)
+				(or (org-element-property :post-blank datum)
 				    0)
 				?\s)))))))
 	       ;; ... LaTeX environments and fragments...
 	       ((latex-environment latex-fragment)
 		(and (eq (plist-get info :with-latex) 'verbatim)
-		     (list (org-export-expand blob nil))))
+		     (list (org-export-expand datum nil))))
 	       ;; ... sub/superscripts...
 	       ((subscript superscript)
 		(let ((sub/super-p (plist-get info :with-sub-superscript))
-		      (bracketp (org-element-property :use-brackets-p blob)))
+		      (bracketp (org-element-property :use-brackets-p datum)))
 		  (and (or (not sub/super-p)
 			   (and (eq sub/super-p '{}) (not bracketp)))
 		       (append
 			(list (concat
-			       (if (eq (org-element-type blob) 'subscript)
+			       (if (eq (org-element-type datum) 'subscript)
 				   "_"
 				 "^")
 			       (and bracketp "{")))
-			(org-element-contents blob)
+			(org-element-contents datum)
 			(list (concat
 			       (and bracketp "}")
-			       (and (org-element-property :post-blank blob)
+			       (and (org-element-property :post-blank datum)
 				    (make-string
-				     (org-element-property :post-blank blob)
+				     (org-element-property :post-blank datum)
 				     ?\s)))))))))))
 	(when new
-	  ;; Splice NEW at BLOB location in parse tree.
-	  (dolist (e new (org-element-extract-element blob))
-	    (unless (equal e "") (org-element-insert-before e blob))))))
+	  ;; Splice NEW at DATUM location in parse tree.
+	  (dolist (e new (org-element-extract-element datum))
+	    (unless (equal e "") (org-element-insert-before e datum))))))
     info nil nil t)
   ;; Return modified parse tree.
   data)
@@ -3070,12 +3054,21 @@ Return code as a string."
 			       (org-export-backend-name backend)))
 	 (org-set-regexps-and-options)
 	 (org-update-radio-target-regexp)
-	 ;; Update communication channel with environment.  Also
-	 ;; install user's and developer's filters.
+	 ;; Update communication channel with environment.
 	 (setq info
-	       (org-export-install-filters
-		(org-combine-plists
-		 info (org-export-get-environment backend subtreep ext-plist))))
+	       (org-combine-plists
+		info (org-export-get-environment backend subtreep ext-plist)))
+	 ;; De-activate uninterpreted data from parsed keywords.
+	 (dolist (entry org-export-options-alist)
+	   (pcase entry
+	     (`(,p ,_ ,_ ,_ parse)
+	      (let ((value (plist-get info p)))
+		(plist-put info
+			   p
+			   (org-export--remove-uninterpreted-data value info))))
+	     (_ nil)))
+	 ;; Install user's and developer's filters.
+	 (setq info (org-export-install-filters info))
 	 ;; Call options filters and update export options.  We do not
 	 ;; use `org-export-filter-apply-functions' here since the
 	 ;; arity of such filters is different.
