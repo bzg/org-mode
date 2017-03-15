@@ -107,7 +107,27 @@ setting of `org-html-htmlize-output-type' is `css'."
 	(?v "As Org file and open"
 	    (lambda (a s v b)
 	      (if a (org-org-export-to-org t s v b)
-		(org-open-file (org-org-export-to-org nil s v b))))))))
+		(org-open-file (org-org-export-to-org nil s v b)))))))
+  :filters-alist '((:filter-parse-tree . org-org--add-missing-sections)))
+
+(defun org-org--add-missing-sections (tree _backend _info)
+  "Ensure each headline has an associated section.
+
+TREE is the parse tree being exported.
+
+Footnotes relative to the headline are inserted in the section,
+using `org-org-section'.  However, this function is not called if
+the headline doesn't contain any section in the first place, so
+we make sure it is always called."
+  (org-element-map tree 'headline
+    (lambda (h)
+      (let ((first-child (car (org-element-contents h)))
+	    (new-section (org-element-create 'section)))
+	(pcase (org-element-type first-child)
+	  (`section nil)
+	  (`nil (org-element-adopt-elements h new-section))
+	  (_ (org-element-insert-before new-section first-child))))))
+  tree)
 
 (defun org-org-export-block (export-block _contents _info)
   "Transcode a EXPORT-BLOCK element from Org to LaTeX.
@@ -196,24 +216,21 @@ a communication channel."
    ;; section, or in the relative headline title.  Indeed, some of
    ;; them may not be available to narrowing so we make sure all of
    ;; them are included in the result.
-   (let ((footnotes-alist
-	  (org-element-map (list (org-element-property :parent section) section)
+   (let ((footnotes
+	  (org-element-map
+	      (list (org-export-get-parent-headline section) section)
 	      'footnote-reference
 	    (lambda (fn)
 	      (and (eq (org-element-property :type fn) 'standard)
 		   (org-export-footnote-first-reference-p fn info)
-		   (cons (org-element-property :label fn)
-			 (org-export-get-footnote-definition fn info))))
+		   (org-element-normalize-string
+		    (format "[fn:%s] %s"
+			    (org-element-property :label fn)
+			    (org-export-data
+			     (org-export-get-footnote-definition fn info)
+			     info)))))
 	    info nil 'headline t)))
-     (and footnotes-alist
-	  (concat "\n"
-		  (mapconcat
-		   (lambda (d)
-		     (org-element-normalize-string
-		      (concat (format "[fn:%s] "(car d))
-			      (org-export-data (cdr d) info))))
-		   footnotes-alist "\n"))))
-   (make-string (or (org-element-property :post-blank section) 0) ?\n)))
+     (and footnotes (concat "\n" (mapconcat #'identity footnotes "\n"))))))
 
 ;;;###autoload
 (defun org-org-export-as-org
