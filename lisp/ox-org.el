@@ -193,16 +193,18 @@ a communication channel."
   (concat
    (org-element-normalize-string contents)
    ;; Insert footnote definitions appearing for the first time in this
-   ;; section.  Indeed, some of them may not be available to narrowing
-   ;; so we make sure all of them are included in the result.
+   ;; section, or in the relative headline title.  Indeed, some of
+   ;; them may not be available to narrowing so we make sure all of
+   ;; them are included in the result.
    (let ((footnotes-alist
-	  (org-element-map section 'footnote-reference
+	  (org-element-map (list (org-element-property :parent section) section)
+	      'footnote-reference
 	    (lambda (fn)
 	      (and (eq (org-element-property :type fn) 'standard)
 		   (org-export-footnote-first-reference-p fn info)
 		   (cons (org-element-property :label fn)
 			 (org-export-get-footnote-definition fn info))))
-	    info)))
+	    info nil 'headline t)))
      (and footnotes-alist
 	  (concat "\n"
 		  (mapconcat
