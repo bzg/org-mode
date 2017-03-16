@@ -7881,15 +7881,14 @@ unconditionally."
 (defun org-N-empty-lines-before-current (n)
   "Make the number of empty lines before current exactly N.
 So this will delete or add empty lines."
-  (let ((column (current-column))
-	(empty-lines (make-string n ?\n)))
+  (save-excursion
     (beginning-of-line)
-    (let ((p (point)))
-      (skip-chars-backward " \r\t\n")
-      (unless (bolp) (forward-line))
-      (delete-region (point) p))
-    (insert empty-lines)
-    (move-to-column column)))
+    (unless (bobp)
+      (let ((start (save-excursion
+		     (skip-chars-backward " \r\t\n")
+		     (line-end-position))))
+	(delete-region start (line-end-position 0))))
+    (insert (make-string n ?\n))))
 
 (defun org-get-heading (&optional no-tags no-todo no-priority no-comment)
   "Return the heading of the current entry, without the stars.

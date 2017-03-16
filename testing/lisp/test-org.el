@@ -1342,7 +1342,16 @@
    (equal "* H1\n* H2\n* \n"
 	  (org-test-with-temp-text "* H1\n* H2<point>\n"
 	    (org-insert-heading)
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Preserve visibility at beginning of line.  In particular, when
+  ;; removing spurious blank lines, do not visually merge heading with
+  ;; the line visible above.
+  (should-not
+   (org-test-with-temp-text "* H1<point>\nContents\n\n* H2\n"
+     (org-overview)
+     (let ((org-blank-before-new-entry '((heading . nil))))
+       (org-insert-heading '(4)))
+     (invisible-p (line-end-position 0)))))
 
 (ert-deftest test-org/insert-todo-heading-respect-content ()
   "Test `org-insert-todo-heading-respect-content' specifications."
