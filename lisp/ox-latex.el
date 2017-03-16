@@ -1312,14 +1312,19 @@ For non-floats, see `org-latex--wrap-label'."
      (t
       (format (if nonfloat "\\captionof{%s}%s{%s%s}\n"
 		"\\caption%s%s{%s%s}\n")
-	      (if nonfloat
-		  (cl-case type
-		    (paragraph "figure")
-		    (src-block (if (plist-get info :latex-listings)
-				   "listing"
-				 "figure"))
-		    (t (symbol-name type)))
-		"")
+	      (let ((type* (if (eq type 'latex-environment)
+			       (org-latex--environment-type element)
+			     type)))
+		(if nonfloat
+		    (cl-case type*
+		      (paragraph "figure")
+		      (image "figure")
+		      (special-block "figure")
+		      (src-block (if (plist-get info :latex-listings)
+				     "listing"
+				   "figure"))
+		      (t (symbol-name type*)))
+		  ""))
 	      (if short (format "[%s]" (org-export-data short info)) "")
 	      label
 	      (org-export-data main info))))))
@@ -2250,23 +2255,61 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Environment
 
+(defun org-latex--environment-type (latex-environment)
+  "Return the TYPE of LATEX-ENVIRONMENT.
+
+The TYPE is determined from the actual latex environment, and
+could be a member of `org-latex-caption-above' or `math'."
+  (let* ((latex-begin-re "\\\\begin{\\([A-Za-z0-9*]+\\)}")
+	 (value (org-remove-indentation
+		 (org-element-property :value latex-environment)))
+	 (env (or (and (string-match latex-begin-re value)
+		       (match-string 1 value))
+		  "")))
+    (cond
+     ((string-match-p org-latex-math-environments-re value) 'math)
+     ((string-match-p
+       (eval-when-compile
+	 (regexp-opt '("table" "longtable" "tabular" "tabu" "longtabu")))
+       env)
+      'table)
+     ((string-match-p "figure" env) 'image)
+     ((string-match-p
+       (eval-when-compile
+	 (regexp-opt '("lstlisting" "listing" "verbatim" "minted")))
+       env)
+      'src-block)
+     (t 'special-block))))
+
 (defun org-latex-latex-environment (latex-environment _contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (plist-get info :with-latex)
-    (let ((value (org-remove-indentation
-		  (org-element-property :value latex-environment))))
-      (if (not (org-element-property :name latex-environment)) value
+    (let* ((value (org-remove-indentation
+		   (org-element-property :value latex-environment)))
+	   (type (org-latex--environment-type latex-environment))
+	   (caption (if (eq type 'math)
+			(org-latex--label latex-environment info nil t)
+		      (org-latex--caption/label-string latex-environment info)))
+	   (caption-above-p
+	    (memq type (append (plist-get info :latex-caption-above) '(math)))))
+      (if (not (or (org-element-property :name latex-environment)
+		   (org-element-property :caption latex-environment)))
+	  value
 	;; Environment is labeled: label must be within the environment
 	;; (otherwise, a reference pointing to that element will count
-	;; the section instead).
+	;; the section instead).  Also insert caption if `latex-environment'
+	;; is not a math environment.
 	(with-temp-buffer
 	  (insert value)
-	  (goto-char (point-min))
-	  (forward-line)
-	  (insert (org-latex--label latex-environment info nil t))
+	  (if caption-above-p
+	      (progn
+		(goto-char (point-min))
+		(forward-line))
+	    (goto-char (point-max))
+	    (forward-line -1))
+	  (insert caption)
 	  (buffer-string))))))
-
 
 ;;;; Latex Fragment
 

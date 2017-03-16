@@ -183,7 +183,7 @@ user to specify the name of the output file upon exporting the
 document.  This also has an effect on publishing.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
 **** Use ~compilation-mode~ for compilation output
-
+**** ~latex-environment~ elements support ~caption~ keywords for LaTeX export
 *** ~org-edit-special~ can edit LaTeX environments
 
 Using ~C-c '~ on a LaTeX environment opens a sub-editing buffer.  By
