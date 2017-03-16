@@ -17816,7 +17816,7 @@ Org.
 Org has a large number of hook variables for adding functionality.  This
 appendix illustrates using a few.  A complete list of hooks with
 documentation is maintained by the Worg project at
-@uref{http://orgmode.org/worg/org-configs/org-hooks.php}.
+@uref{http://orgmode.org/worg/doc.html#hooks}.
 
 @node Add-on packages
 @section Add-on packages
