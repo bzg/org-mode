@@ -105,9 +105,9 @@ sure to call the following command:
 (defcustom org-duration-format '(("d" . nil) (special . h:mm))
   "Format definition for a duration.
 
-The value can be set to, respectively, `h:mm:ss' or `h:mm', which
-means a duration is expressed as, respectively, a \"H:MM:SS\" or
-\"H:MM\" string.
+The value can be set to, respectively, the symbols `h:mm:ss' or
+`h:mm', which means a duration is expressed as, respectively,
+a \"H:MM:SS\" or \"H:MM\" string.
 
 Alternatively, the value can be a list of entries following the
 pattern:
