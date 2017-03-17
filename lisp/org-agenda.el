@@ -6372,7 +6372,7 @@ scheduled items with an hour specification like [h]h:mm."
 			((= schedule current) first)
 			;; Subsequent reminders.  Count from base
 			;; schedule.
-			(t (format next (1+ diff)))))
+			(t (format next diff))))
 		     head level category tags time nil habitp))
 		   (face (cond ((and (not habitp) pastschedp)
 				'org-scheduled-previously)
