@@ -6214,7 +6214,7 @@ scheduled items with an hour specification like [h]h:mm."
 		     (pcase-let ((`(,first ,past) org-agenda-scheduled-leaders))
 		       ;; Show a reminder of a past scheduled today.
 		       (if (and todayp pastschedp)
-			   (format past (1+ diff))
+			   (format past diff)
 			 first))
 		     head level category tags time nil habitp))
 		   (face (cond ((and (not habitp) pastschedp)
