@@ -413,16 +413,17 @@ project base directory."
 
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects in PROJECTS-ALIST.
-This splices all the components into the list."
-  (let ((rest projects-alist) rtn p components)
-    (while (setq p (pop rest))
-      (if (setq components (plist-get (cdr p) :components))
-	  (setq rest (append
-		      (mapcar (lambda (x) (assoc x org-publish-project-alist))
-			      components)
-		      rest))
-	(push p rtn)))
-    (nreverse (delete-dups (delq nil rtn)))))
+This splices all the components into a list."
+  (delete-dups
+   (cl-mapcan (lambda (project)
+		(pcase-let ((`(,name . ,properties) project))
+		  (cl-mapcan (lambda (component)
+			       (or
+				(assoc component org-publish-project-alist)
+				(user-error "Unknown component %S in project %S"
+					    component name)))
+			     (plist-get properties :components))))
+	      projects-alist)))
 
 (defun org-publish-get-base-files (project)
   "Return a list of all files in PROJECT."
