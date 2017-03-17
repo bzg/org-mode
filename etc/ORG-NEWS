@@ -264,6 +264,18 @@ Call ~org-agenda-set-restriction-lock~ from the agenda.
 
 ** Miscellaneous
 
+*** More specific anniversary descriptions
+
+Anniversary descriptions (used in the agenda view, for instance)
+include the point in time, when the anniversary appears.  This is,
+in its most general form, just the date of the anniversary.  Or
+more specific terms, like "today", "tomorrow" or "in n days" are
+used to describe the time span.
+
+This feature allows to automatically change the description of an
+anniversary, depending on if it occurs in the next few days or
+far away in the future.
+
 *** Computed dates in tables appear as inactive time stamps
 
 *** Save point before opening a file with an unknown search option
