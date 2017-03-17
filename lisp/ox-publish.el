@@ -418,8 +418,12 @@ This splices all the components into the list."
     (while (setq p (pop rest))
       (if (setq components (plist-get (cdr p) :components))
 	  (setq rest (append
-		      (mapcar (lambda (x) (assoc x org-publish-project-alist))
-			      components)
+		      (mapcar
+		       (lambda (x)
+			 (or (assoc x org-publish-project-alist)
+			     (user-error "Unknown component %S in project %S"
+					 x (car p))))
+		       components)
 		      rest))
 	(push p rtn)))
     (nreverse (delete-dups (delq nil rtn)))))
