@@ -4082,7 +4082,7 @@ items if they have an hour specification like [h]h:mm."
 			(org-keys
 			 (format "*Org Agenda(%s)*" org-keys))
 			(t "*Org Agenda(a)*")))
-	      org-agenda-buffer-name))
+	      "*Org Agenda*"))
     (org-agenda-prepare "Day/Week")
     (setq start-day (or start-day org-agenda-start-day))
     (if (stringp start-day)
