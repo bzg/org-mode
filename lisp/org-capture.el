@@ -963,7 +963,7 @@ Store them in the capture property list."
 		      (org-find-olp (cons (org-capture-expand-file path)
 					  outline-path))
 		    (set-buffer (org-capture-target-buffer path))
-		    (move-marker (make-marker) (point)))))		    
+		    (point-marker))))
 	   (set-buffer (marker-buffer m))
 	   (org-capture-put-target-region-and-position)
 	   (widen)
