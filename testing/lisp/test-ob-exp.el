@@ -584,6 +584,18 @@ src_emacs-lisp{(+ 1 1)}"
 	(org-babel-exp-process-buffer))
       (buffer-string)))))
 
+(ert-deftest ob-exp/src-block-with-affiliated-keyword ()
+  "Test exporting a code block with affiliated keywords."
+  ;; Pathological case: affiliated keyword matches inline src block
+  ;; syntax.
+  (should
+   (equal "#+name: call_foo\n#+BEGIN_SRC emacs-lisp\n42\n#+END_SRC"
+	  (org-test-with-temp-text
+	      "#+name: call_foo\n#+BEGIN_SRC emacs-lisp\n42\n#+END_SRC"
+	    (let ((org-export-use-babel t))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string)))))
+
 
 (provide 'test-ob-exp)
 
