@@ -449,7 +449,39 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
   CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
 * Bar
   CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
-      (test-org-clock-clocktable-contents ":maxlevel 1 :formula %")))))
+      (test-org-clock-clocktable-contents ":maxlevel 1 :formula %"))))
+  ;; Properly align column with different depths.
+  (should
+   (equal "| Headline      | Time   |      |      |     % |
+|---------------+--------+------+------+-------|
+| *Total time*  | *1:00* |      |      | 100.0 |
+|---------------+--------+------+------+-------|
+| foo           | 1:00   |      |      | 100.0 |
+| \\_  sub       |        | 0:15 |      |  25.0 |
+| \\_  sub2      |        | 0:15 |      |  25.0 |
+| \\_  sub3      |        | 0:30 |      |  50.0 |
+| \\_    subsub1 |        |      | 0:15 |  25.0 |
+| \\_    subsub1 |        |      | 0:15 |  25.0 |"
+	  (org-test-with-temp-text
+	      "* foo
+** sub
+   :LOGBOOK:
+   CLOCK: [2017-03-18 Sat 15:00]--[2017-03-18 Sat 15:15] =>  0:15
+   :END:
+** sub2
+   :LOGBOOK:
+   CLOCK: [2017-03-18 Sat 15:15]--[2017-03-18 Sat 15:30] =>  0:15
+   :END:
+** sub3
+*** subsub1
+    :LOGBOOK:
+    CLOCK: [2017-03-18 Sat 13:00]--[2017-03-18 Sat 13:15] =>  0:15
+    :END:
+*** subsub1
+    :LOGBOOK:
+    CLOCK: [2017-03-18 Sat 14:00]--[2017-03-18 Sat 14:15] =>  0:15
+    :END:"
+	    (test-org-clock-clocktable-contents ":maxlevel 3 :formula %")))))
 
 (ert-deftest test-org-clock/clocktable/lang ()
   "Test \":lang\" parameter in Clock table."
