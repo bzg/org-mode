@@ -15924,7 +15924,7 @@ To evaluate the @samp{src} code block on a remote machine, supply a remote s
 directory name using @samp{Tramp} syntax.  For example:
 
 @example
-#+BEGIN_SRC R :file plot.png :dir /dand@@yakuba.princeton.edu:
+#+BEGIN_SRC R :file plot.png :dir /scp:dand@@yakuba.princeton.edu:
 plot(1:10, main=system("hostname", intern=TRUE))
 #+END_SRC
 @end example
