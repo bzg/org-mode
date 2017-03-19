@@ -525,19 +525,19 @@ as `org-src-fontify-natively' is non-nil."
 	  (let ((inhibit-modification-hooks nil))
 	    (erase-buffer)
 	    ;; Add string and a final space to ensure property change.
-	    (insert string " ")
-	    (unless (eq major-mode lang-mode) (funcall lang-mode))
-	    (org-font-lock-ensure)
-	    (let ((pos (point-min)) next)
-	      (while (setq next (next-property-change pos))
-		;; Handle additional properties from font-lock, so as to
-		;; preserve, e.g., composition.
-		(dolist (prop (cons 'face font-lock-extra-managed-props))
-		  (let ((new-prop (get-text-property pos prop)))
-		    (put-text-property
-		     (+ start (1- pos)) (1- (+ start next)) prop new-prop
-		     org-buffer)))
-		(setq pos next)))))
+	    (insert string " "))
+	  (unless (eq major-mode lang-mode) (funcall lang-mode))
+	  (org-font-lock-ensure)
+	  (let ((pos (point-min)) next)
+	    (while (setq next (next-property-change pos))
+	      ;; Handle additional properties from font-lock, so as to
+	      ;; preserve, e.g., composition.
+	      (dolist (prop (cons 'face font-lock-extra-managed-props))
+		(let ((new-prop (get-text-property pos prop)))
+		  (put-text-property
+		   (+ start (1- pos)) (1- (+ start next)) prop new-prop
+		   org-buffer)))
+	      (setq pos next))))
 	;; Add Org faces.
 	(let ((src-face (nth 1 (assoc-string lang org-src-block-faces t))))
           (when (or (facep src-face) (listp src-face))
