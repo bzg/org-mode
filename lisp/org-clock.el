@@ -2622,6 +2622,7 @@ from the dynamic block definition."
 		 ;; Empty fields for higher levels.
 		 (make-string (max 0 (1- (min time-columns level))) ?|)
 		 hlc (org-minutes-to-clocksum-string time) hlc "|" ; time
+		 (make-string (max 0 (- time-columns level)) ?|)
 		 (if (eq formula '%)
 		     (format "%.1f |" (* 100 (/ time (float total-time))))
 		   "")
