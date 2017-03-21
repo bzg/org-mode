@@ -4076,6 +4076,7 @@ items if they have an hour specification like [h]h:mm."
   (catch 'exit
     (setq org-agenda-buffer-name
 	  (or org-agenda-buffer-tmp-name
+	      (and org-agenda-doing-sticky-redo org-agenda-buffer-name)
 	      (if org-agenda-sticky
 		  (cond ((and org-keys (stringp org-match))
 			 (format "*Org Agenda(%s:%s)*" org-keys org-match))
