@@ -15535,7 +15535,6 @@ See `org-property-re' for match data, if applicable."
 (defun org-property-action ()
   "Do an action on properties."
   (interactive)
-  (unless (org-at-property-p) (user-error "Not at a property"))
   (message "Property Action:  [s]et  [d]elete  [D]elete globally  [c]ompute")
   (let ((c (read-char-exclusive)))
     (cl-case c
