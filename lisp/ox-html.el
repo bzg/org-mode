@@ -171,6 +171,11 @@
     (:html-table-row-open-tag nil nil org-html-table-row-open-tag)
     (:html-table-row-close-tag nil nil org-html-table-row-close-tag)
     (:html-xml-declaration nil nil org-html-xml-declaration)
+    (:html-klipsify-src nil nil org-html-klipsify-src)
+    (:html-klipse-css nil nil org-html-klipse-css)
+    (:html-klipse-js nil nil org-html-klipse-js)
+    (:html-klipse-keep-old-src nil nil org-html-keep-old-src)
+    (:html-klipse-selection-script nil nil org-html-klipse-selection-script)
     (:infojs-opt "INFOJS_OPT" nil nil)
     ;; Redefine regular options.
     (:creator "CREATOR" nil org-html-creator-string)
@@ -1539,6 +1544,46 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Mobile/Viewport_meta_tag"
 				     (const "true")
 				     (const "false"))))))
 
+;; Handle source code blocks with Klipse
+
+(defcustom org-html-klipsify-src nil
+  "When non-nil, source code blocks are editable in exported presentation."
+  :group 'org-export-html
+  :package-version '(Org . "9.1")
+  :type 'boolean)
+
+(defcustom org-html-klipse-css
+  "https://storage.googleapis.com/app.klipse.tech/css/codemirror.css"
+  "Location of the codemirror CSS file for use with klipse."
+  :group 'org-export-html
+  :package-version '(Org . "9.1")
+  :type 'string)
+
+(defcustom org-html-klipse-js
+  "https://storage.googleapis.com/app.klipse.tech/plugin_prod/js/klipse_plugin.min.js"
+  "Location of the klipse javascript file."
+  :group 'org-export-html
+  :type 'string)
+
+(defcustom org-html-klipse-selection-script
+  "window.klipse_settings = {selector_eval_html: '.src-html',
+                             selector_eval_js: '.src-js',
+                             selector_eval_python_client: '.src-python',
+                             selector_eval_scheme: '.src-scheme',
+                             selector: '.src-clojure',
+                             selector_eval_ruby: '.src-ruby'};"
+  "Javascript snippet to activate klipse."
+  :group 'org-export-html
+  :package-version '(Org . "9.1")
+  :type 'string)
+
+(defcustom org-html-keep-old-src nil
+  "When non-nil, use <pre class=\"\"> instead of <pre><code class=\"\">."
+  :group 'org-export-html
+  :package-version '(Org . "9.1")
+  :type 'boolean)
+
+
 ;;;; Todos
 
 (defcustom org-html-todo-kwd-class-prefix ""
@@ -1550,7 +1595,7 @@ CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
 
-
+
 ;;; Internal Functions
 
 (defun org-html-xhtml-p (info)
@@ -2048,6 +2093,13 @@ holding export options."
    (format "</%s>\n" (nth 1 (assq 'content (plist-get info :html-divs))))
    ;; Postamble.
    (org-html--build-pre/postamble 'postamble info)
+   ;; Possibly use the Klipse library live code blocks.
+   (if (plist-get info :html-klipsify-src)
+       (concat "<script>" (plist-get info :html-klipse-selection-script)
+	       "</script><script src=\""
+	       org-html-klipse-js
+	       "\"></script><link rel=\"stylesheet\" type=\"text/css\" href=\""
+	       org-html-klipse-css "\"/>"))
    ;; Closing document.
    "</body>\n</html>"))
 
@@ -3321,11 +3373,14 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (if (org-export-read-attribute :attr_html src-block :textarea)
       (org-html--textarea-block src-block)
-    (let ((lang (org-element-property :language src-block))
+    (let* ((lang (org-element-property :language src-block))
 	  (code (org-html-format-code src-block info))
 	  (label (let ((lbl (and (org-element-property :name src-block)
 				 (org-export-get-reference src-block info))))
-		   (if lbl (format " id=\"%s\"" lbl) ""))))
+		   (if lbl (format " id=\"%s\"" lbl) "")))
+	  (klipsify  (and  (plist-get info :html-klipsify-src)
+                           (member lang '("javascript" "js"
+					  "ruby" "scheme" "clojure" "php" "html")))))
       (if (not lang) (format "<pre class=\"example\"%s>\n%s</pre>" label code)
 	(format "<div class=\"org-src-container\">\n%s%s\n</div>"
 		;; Build caption.
@@ -3342,8 +3397,12 @@ contextual information."
 			      listing-number
 			      (org-trim (org-export-data caption info))))))
 		;; Contents.
-		(format "<pre class=\"src src-%s\"%s>%s</pre>"
-			lang label code))))))
+		(let ((open (if org-html-keep-old-src "<pre" "<pre><code"))
+		      (close (if org-html-keep-old-src "</pre>" "</code></pre>")))
+		  (format "%s class=\"src src-%s\"%s%s>%s%s"
+			  open lang label (if (and klipsify (string= lang "html"))
+					      " data-editor-type=\"html\"" "")
+			  code close)))))))
 
 ;;;; Statistics Cookie
 
