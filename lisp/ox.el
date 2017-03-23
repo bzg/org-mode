@@ -3036,7 +3036,8 @@ Return code as a string."
 	       (org-combine-plists
 		info (org-export-get-environment backend subtreep ext-plist)))
 	 ;; De-activate uninterpreted data from parsed keywords.
-	 (dolist (entry org-export-options-alist)
+	 (dolist (entry (append (org-export-get-all-options backend)
+				org-export-options-alist))
 	   (pcase entry
 	     (`(,p ,_ ,_ ,_ parse)
 	      (let ((value (plist-get info p)))
