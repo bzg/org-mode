@@ -1092,7 +1092,9 @@ BACKEND is an export back-end, as return by, e.g,,
 for the shape of the return value.
 
 Unlike to `org-export-backend-options', this function also
-returns options inherited from parent back-ends, if any."
+returns options inherited from parent back-ends, if any.
+
+Return nil if BACKEND is unknown."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (when backend
     (let ((options (org-export-backend-options backend))
@@ -1396,7 +1398,7 @@ specific items to read, if any."
 		   alist))
 	   alist))
 	;; Priority is given to back-end specific options.
-	(all (append (and backend (org-export-get-all-options backend))
+	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist))
 	(plist))
     (when line
@@ -1433,7 +1435,7 @@ for export.  Return options as a plist."
 			     (match-string-no-properties 4))))))
 	 ;; Look for both general keywords and back-end specific
 	 ;; options, with priority given to the latter.
-	 (options (append (and backend (org-export-get-all-options backend))
+	 (options (append (org-export-get-all-options backend)
 			  org-export-options-alist)))
      ;; Handle other keywords.  Then return PLIST.
      (dolist (option options plist)
@@ -1469,7 +1471,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
   (let* ((case-fold-search t)
 	 (options (append
 		   ;; Priority is given to back-end specific options.
-		   (and backend (org-export-get-all-options backend))
+		   (org-export-get-all-options backend)
 		   org-export-options-alist))
 	 (regexp (format "^[ \t]*#\\+%s:"
 			 (regexp-opt (nconc (delq nil (mapcar #'cadr options))
@@ -1606,7 +1608,7 @@ which back-end specific export options should also be read in the
 process."
   (let (plist
 	;; Priority is given to back-end specific options.
-	(all (append (and backend (org-export-get-all-options backend))
+	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist)))
     (dolist (cell all plist)
       (let ((prop (car cell)))
@@ -3059,7 +3061,8 @@ Return code as a string."
 	       (org-combine-plists
 		info (org-export-get-environment backend subtreep ext-plist)))
 	 ;; De-activate uninterpreted data from parsed keywords.
-	 (dolist (entry org-export-options-alist)
+	 (dolist (entry (append (org-export-get-all-options backend)
+				org-export-options-alist))
 	   (pcase entry
 	     (`(,p ,_ ,_ ,_ parse)
 	      (let ((value (plist-get info p)))
