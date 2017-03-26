@@ -590,7 +590,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-man-line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object from Org to Man.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  ".br\n")
+  "\n.br\n")
 
 
 ;;; Link
