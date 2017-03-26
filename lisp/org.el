@@ -15164,6 +15164,9 @@ When JUST-ALIGN is non-nil, only align tags."
 			 org-tags-sort-function)
 		   ":")))
 
+	  (if (or (string= ":" tags)
+		  (string= "::" tags))
+	      (setq tags ""))
 	  (if (not (org-string-nw-p tags)) (setq tags "")
 	    (unless (string-suffix-p ":" tags) (setq tags (concat tags ":")))
 	    (unless (string-prefix-p ":" tags) (setq tags (concat ":" tags))))
