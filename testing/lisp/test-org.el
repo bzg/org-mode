@@ -2282,7 +2282,17 @@ Foo Bar
   (should
    (org-test-with-temp-text "* [1]\n[[*%5B1%5D<point>]]"
      (org-open-at-point)
-     (bobp))))
+     (bobp)))
+  ;; Match search strings containing newline characters.
+  (should
+   (org-test-with-temp-text-in-file "Paragraph\n\nline1\nline2\n\n"
+     (let ((file (buffer-file-name)))
+       (goto-char (point-max))
+       (insert (format "[[file:%s::line1 line2]]" file))
+       (beginning-of-line)
+       (let ((org-link-search-must-match-exact-headline nil))
+	 (org-open-at-point))
+       (looking-at-p "line1")))))
 
 ;;;; Link Escaping
 
