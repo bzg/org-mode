@@ -10549,7 +10549,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     ;; option If yes, simplify the link by using only the search
     ;; option.
     (when (and buffer-file-name
-	       (string-match "^file:\\(.+?\\)::\\(.+\\)" link))
+	       (string-match "^file:\\(.+?\\)::\\(\\(.\\|\n\\)+\\)" link))
       (let* ((path (match-string 1 link))
 	     (case-fold-search nil)
 	     (search (match-string 2 link)))
@@ -10559,7 +10559,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	    (setq link search)))))
 
     ;; Check if we can/should use a relative path.  If yes, simplify the link
-    (when (string-match "^\\(file:\\|docview:\\)\\(.*\\)" link)
+    (when (string-match "^\\(file:\\|docview:\\)\\(\\(.\\|\n\\)*\\)" link)
       (let* ((type (match-string 1 link))
 	     (path (match-string 2 link))
 	     (origpath path)
