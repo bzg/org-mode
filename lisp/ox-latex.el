@@ -3103,10 +3103,12 @@ contextual information."
 		  ;; table, insert their definition just after it.
 		  (org-latex--delayed-footnotes-definitions table info)))))))
 
-(defun org-latex--align-string (table info)
+(defun org-latex--align-string (table info &optional math?)
   "Return an appropriate LaTeX alignment string.
 TABLE is the considered table.  INFO is a plist used as
-a communication channel."
+a communication channel.  When optional argument MATH? is
+non-nil, TABLE is meant to be a matrix, where all cells are
+centered."
   (or (org-export-read-attribute :attr_latex table :align)
       (let (align)
 	;; Extract column groups and alignment from first (non-rule)
@@ -3122,11 +3124,12 @@ a communication channel."
 	      ;; Check left border for the first cell only.
 	      (when (and (memq 'left borders) (not align))
 		(push "|" align))
-	      (push (cl-case (org-export-table-cell-alignment cell info)
-		      (left "l")
-		      (right "r")
-		      (center "c"))
-		    align)
+	      (push (if math? "c"	;center cells in matrices
+		      (cl-case (org-export-table-cell-alignment cell info)
+			(left "l")
+			(right "r")
+			(center "c"))
+		      align))
 	      (when (memq 'right borders) (push "|" align))))
 	  info)
 	(apply 'concat (nreverse align)))))
@@ -3311,11 +3314,8 @@ This function assumes TABLE has `org' as its `:type' property and
      (plist-get attr :math-prefix)
      ;; Environment.  Also treat special cases.
      (cond ((member env '("array" "tabular"))
-	    ;; Make sure cells are always centered while preserving
-	    ;; vertical separators.
-	    (let ((align (replace-regexp-in-string
-			  "[lr]" "c" (org-latex--align-string table info))))
-	      (format "\\begin{%s}{%s}\n%s\\end{%s}" env align contents env)))
+	    (format "\\begin{%s}{%s}\n%s\\end{%s}"
+		    env (org-latex--align-string table info t) contents env))
 	   ((assoc env org-latex-table-matrix-macros)
 	    (format "\\%s%s{\n%s}"
 		    env
