@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.2.3
+;; Version: 5.3.0
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -85,6 +85,10 @@
 
 ;;; Change Log:
 
+;;   [2017-03-26 Su] Version 5.3.0
+;;   - Focused can now be on a list of nodes (instead of a single one)
+;;   - Cleaned up undeclared dependencies
+;;
 ;;   [2017-02-18 Sa] Version 5.2.3
 ;;   - New command 'focus'
 ;;   - Speeded up org-index--parse-table with the stored property "max-ref"
@@ -175,11 +179,12 @@
 ;;; Code:
 
 (require 'org-table)
+(require 'org-id)
 (require 'cl-lib)
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.2.3" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.3.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -224,14 +229,14 @@ mixed  First, show all index entries, which have been
   :type 'key-sequence)
 
 (defcustom org-index-idle-delay 68
-  "Delay in seconds after which buffer will sorted or fontified when emacs is idle."
+  "Delay in seconds after which buffer will sorted or fontified when Emacs is idle."
   :group 'org-index
   :type 'integer)
 
 (defcustom org-index-prepare-when-idle nil
-  "Optionally fontify and sort index-table when idle, so that first interactive call is faster.
-You only need this if your index has grown so large, that first invocation of org-index needs
-a noticable amount of time."
+  "Fontify and sort index-table when idle to make first call faster.
+You only need this if your index has grown so large, that first
+invocation of `org-index' needs a noticable amount of time."
   :group 'org-index
   :initialize 'custom-initialize-set
   :set (lambda (var val)
@@ -303,7 +308,8 @@ those pieces."
 (defvar org-index--saved-positions nil "Saved positions within current buffer and index buffer; filled by ‘org-index--save-positions’.")
 (defvar org-index--headings nil "Headlines of index-table as a string.")
 (defvar org-index--headings-visible nil "Visible part of headlines of index-table as a string.")
-(defvar org-index--id-focused-node nil "Id of focused node (if any).")
+(defvar org-index--ids-focused-nodes nil "Ids of focused node (if any).")
+(defvar org-index--id-last-goto-focus nil "Id of last node, that has been jumped to.")
 
 ;; Variables to hold context and state
 (defvar org-index--last-fingerprint nil "Fingerprint of last line created.")
@@ -367,31 +373,31 @@ if VALUE cannot be found."
 (defun org-index (&optional command search-ref arg)
   "Fast search-index for selected org nodes and things outside of org.
 
-org-index creates and updates an index table with keywords; each line
-either points to a heading in org, references something outside or
-carries a snippet of text to yank.  The index table is searched for
-keywords through an incremental occur; results are sorted by usage
-count and date, so that frequently used entries appear first among
-the results.
+This function creates and updates an index table with keywords;
+each line either points to a heading in org, references something
+outside or carries a snippet of text to yank.  The index table is
+searched for keywords by means of an incremental occur; results
+are sorted by usage count and date, so that frequently used
+entries appear first.
 
 References are decorated numbers (e.g. 'R237' or '--455--'); they are
 well suited to be used outside of org, e.g. in folder names, ticket
 systems or on printed documents.
 
-On first invocation org-index will help to create a dedicated node
+On first invocation this function will help to create a dedicated node
 for its index table.
 
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.2.3 of org-index.el.
+This is version 5.3.0 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
 package and its main entry point; it will present you with a list
 of subcommands to choose from:
 
-\(Note the one-letter shortcuts, e.g. [o]; used like 'C-c i o'.)
+\(Note the one-letter shortcuts, e.g. [o]; used like `\\[org-index-dispatch] o'.)
 
   occur: [o] Incrementally show matching lines from index.
     Result is updated after every keystroke.  You may enter a
@@ -400,7 +406,7 @@ of subcommands to choose from:
 
   add: [a] Add the current node to index.
     So that (e.g.) it can be found through the subcommand
-    'occur'. Update index, if node is already present.
+    'occur'.  Update index, if node is already present.
 
   kill: [k] Kill (delete) the current node from index.
     Can be invoked from index, from occur or from a headline.
@@ -428,16 +434,20 @@ of subcommands to choose from:
   edit: [e] Present current line in edit buffer.
     Can be invoked from index, from occur or from a headline.
 
-  help: Show complete help text of org-index.
+  help: Show complete help text of `org-index'.
 
-  focus: [f] Return to focus-node; need to set-focus before.
-    The focused node is a single and special node, the location
-    of which is remembered and which can be found with a single
-    key-sequence; it need not be part of the index though.  This
-    can be useful, if you mostly work in a single node, but make
-    frequent excursions to others.
+  focus: [f] Return to first focused node; repeat to see them all.
+    With prefix: reverse order.  You Need to set-focus before.
+    The focused nodes are kept in a short list and can be found
+    by hitting a single key; they need not be part of the index
+    though.  This can be useful, if you work in one or few nodes,
+    but make frequent excursions to others, which are part of the
+    index.
 
-  set-focus: [F] Set focus-node for command focus.
+  set-focus: [F] Set focus to current node, with prefix: append.
+    To truncate the list of focused nodes, just focus on a single
+    node; to remove current node from focus list supply a double
+    prefix.
 
   short-help: [?] Show one-line description of each subcommand.
     I.e. show this list but only first sentence each.
@@ -450,7 +460,7 @@ of subcommands to choose from:
     by count, reference or last access.
 
   find-ref: Search for given reference in all org-buffers.
-    A wrapper to employ emacs standard `multi-occur' function;
+    A wrapper to employ Emacs standard `multi-occur' function;
     asks for reference.
 
   highlight: Highlight or unhighlight all references.
@@ -463,18 +473,18 @@ of subcommands to choose from:
 If you invoke `org-index' for the first time, an assistant will be
 invoked, that helps you to create your own index.
 
-Invoke `org-customize' to tweak the behaviour of org-index.
+Invoke `org-customize' to tweak the behaviour of `org-index'.
 
-Optionally bind `org-index-dispatch' to a key, e.g. 'C-c i' in
-the global keymap to invoke the most important subcommands with
-a single key.
+This includes the global key `org-index-dispatch-key' to invoke
+the most important subcommands with one additional key.
 
 A numeric prefix argument is used as a reference number for
-commands, that need one (e.g. 'head').
+commands, that need one (e.g. 'head') or to modify their
+behaviour (e.g. 'focus').
 
 Use from elisp: Optional argument COMMAND is a symbol naming the
-command to execute. SEARCH-REF specifies a reference to search
-for, if needed. ARG allows passing in a prefix argument as in
+command to execute.  SEARCH-REF specifies a reference to search
+for, if needed.  ARG allows passing in a prefix argument as in
 interactive calls."
 
   (interactive "i\ni\nP")
@@ -557,9 +567,9 @@ interactive calls."
         (unless search-ref
           (if (eq command 'index)
               (let ((r (org-index--read-search-for-index)))
-                (setq search-ref (first r))
-                (setq search-id (second r))
-                (setq search-fingerprint (third r)))
+                (setq search-ref (cl-first r))
+                (setq search-id (cl-second r))
+                (setq search-fingerprint (cl-third r)))
             (unless (and (eq command 'head)
                          org-index--within-index-node
                          (org-at-table-p))
@@ -710,7 +720,7 @@ interactive calls."
 
        ((eq command 'ping)
 
-        (let ((moved-up 0) id info reached-top)
+        (let ((moved-up 0) id info reached-top done)
 
           (unless (string= major-mode "org-mode") (error "No node at point"))
           ;; take id from current node or reference
@@ -721,17 +731,16 @@ interactive calls."
           ;; move up until we find a node in index
           (save-excursion
             (outline-back-to-heading)
-            (while (not (or info
-                            reached-top))
+            (while (not done)
               (if id
                   (setq info (org-index--on 'id id
                                (mapcar (lambda (x) (org-index--get-or-set-field x))
-                                       (list 'ref 'count 'created 'last-accessed 'category 'keywords 'ref)))))
+                                       (list 'keywords 'count 'created 'last-accessed 'category 'ref)))))
 
               (setq reached-top (= (org-outline-level) 1))
 
-              (unless (or info
-                          reached-top)
+              (if (or info reached-top)
+                  (setq done t)
                 (outline-up-heading 1 t)
                 (cl-incf moved-up))
 
@@ -741,9 +750,9 @@ interactive calls."
               (progn
                 (setq message-text
                       (apply 'format
-                             (append (list "'%s'%shas been accessed %s times between %s and %s; category is '%s', keywords are '%s'"
+                             (append (list "'%s'%s has been accessed %s times between %s and %s; category is '%s', reference is '%s'"
                                            (pop info)
-                                           (if (> moved-up 0) (format " (parent node, %d level up) " moved-up) " "))
+                                           (if (> moved-up 0) (format " (parent node, %d level up)" moved-up) ""))
                                      info)))
                 (setq kill-new-text (car (last info))))
             (setq message-text "Neither this node nor any of its parents is part of index"))))
@@ -835,9 +844,9 @@ interactive calls."
                    (symbol-name sort)
                    org-index-sort-by
                    org-index-idle-delay
-                   (second groups-and-counts)
+                   (cl-second groups-and-counts)
                    (symbol-name sort)
-                   (third groups-and-counts))))
+                   (cl-third groups-and-counts))))
 
            ((memq sort-what '(region buffer))
             (org-index--do-sort-lines sort-what)
@@ -863,25 +872,11 @@ interactive calls."
 
 
        ((eq command 'focus)
-
-        (if org-index--id-focused-node
-            (let (marker)
-              (setq marker (org-id-find org-index--id-focused-node 'marker))
-              (unless marker (error "Could not find focus-node"))
-              (pop-to-buffer-same-window (marker-buffer marker))
-              (goto-char (marker-position marker))
-              (org-index--unfold-buffer)
-              (move-marker marker nil)
-              (setq message-text "Jumped to focus-node"))
-          (setq message-text "No focus-node, use set-focus")))
+        (setq message-text (org-index--goto-focus arg)))
 
        
        ((eq command 'set-focus)
-        (let ((focus-id (org-id-get-create)))
-          (with-current-buffer org-index--buffer
-            (org-entry-put org-index--point "id-focused-node" focus-id)
-            (setq org-index--id-focused-node focus-id)
-            (setq message-text "Focus has been set on current node"))))
+        (setq message-text (org-index--set-focus arg)))
 
        
        ((eq command 'maintain)
@@ -1033,7 +1028,7 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
       (with-temp-buffer
         (insert (documentation 'org-index))
         (goto-char (point-min))
-        (search-forward (concat "  " (symbol-name (first org-index--commands)) ": "))
+        (search-forward (concat "  " (symbol-name (cl-first org-index--commands)) ": "))
         (forward-line 0)
         (kill-region (point-min) (point))
         (search-forward (concat "  " (symbol-name (car (last org-index--commands))) ": "))
@@ -1061,7 +1056,7 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
         (insert (org-index--get-short-help-text))
         (goto-char (point-min))
         (while (< (point) (point-max))
-          (when (looking-at "^  \\([-a-z]+\\) +: +\\[\\([a-z?]\\)\\] ")
+          (when (looking-at "^  \\([-a-z]+\\)[ \t]+: +\\[\\([a-z?]\\)\\] ")
             (setq org-index--shortcut-chars
                   (cons (cons (match-string 2) (intern (match-string 1)))
                         org-index--shortcut-chars)))
@@ -1069,6 +1064,71 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
         (unless (> (length org-index--shortcut-chars) 0)
           (error "Internal error, did not find shortcut chars"))
         org-index--shortcut-chars)))
+
+
+(defun org-index--goto-focus (arg)
+  "Goto focus node, one after the other; with ARG: reverse."
+  (if org-index--ids-focused-nodes
+      (let ((maybe-reverse (lambda (&rest x) (if (equal arg '(4)) (reverse x) x)))
+            last-id next-ids marker)
+        (setq last-id (or org-index--id-last-goto-focus
+                          (last org-index--ids-focused-nodes)))
+        (setq next-id
+              (car (or (cdr-safe (member last-id
+                                         (apply maybe-reverse
+                                                (append org-index--ids-focused-nodes
+                                                        org-index--ids-focused-nodes))))
+                       (apply maybe-reverse org-index--ids-focused-nodes))))
+        (or (setq marker (org-id-find next-id 'marker))
+            (error "Could not find focus-node with id %s" next-id))
+        (setq org-index--id-last-goto-focus next-id)
+        (pop-to-buffer-same-window (marker-buffer marker))
+        (goto-char (marker-position marker))
+        (org-index--unfold-buffer)
+        (move-marker marker nil)
+        (if (cdr org-index--ids-focused-nodes) 
+            (format "Jumped to %s focus-node (out of %d)"
+                    (if (equal arg '(4)) "previous" "next")
+                    (length org-index--ids-focused-nodes))
+          "Jumped to single focus-node"))
+      "No nodes in focus, use set-focus"))
+
+
+(defun org-index--set-focus (arg)
+  "Set focus node, with prefix ARG, append to list, with double prefix: delete."
+  (let (id text)
+
+    (setq text
+          (cond
+
+           ((not arg)
+            (setq id (org-id-get-create))
+            (setq org-index--ids-focused-nodes (list id))
+            "Focus has been set on current node (1 node in focus)")
+
+           ((equal arg '(4))
+            (setq id (org-id-get-create))
+            (unless (member id org-index--ids-focused-nodes)
+              (setq org-index--ids-focused-nodes (cons id org-index--ids-focused-nodes)))
+            (setq org-index--id-last-goto-focus id)
+            "Current node has been appended to list of focused nodes (%d node%s in focus)")
+
+           ((equal arg '(16))
+            (setq id (org-id-get))
+            (if (and id  (member id org-index--ids-focused-nodes))
+                (progn
+                  (setq org-index--id-last-goto-focus
+                        (or (car-safe (cdr-safe (member id (reverse (append org-index--ids-focused-nodes
+                                                                            org-index--ids-focused-nodes)))))
+                            org-index--id-last-goto-focus))
+                  (setq org-index--ids-focused-nodes (delete id org-index--ids-focused-nodes))
+                  "Current node has been removed from list of focused nodes (%d node%s in focus)")
+              "Current node has not been in list of focused nodes (%d node%s in focus)"))))
+    
+    (with-current-buffer org-index--buffer
+      (org-entry-put org-index--point "ids-focused-nodes" (string-join org-index--ids-focused-nodes " ")))
+    
+    (format text (length org-index--ids-focused-nodes) (if (cdr org-index--ids-focused-nodes) "s" ""))))
 
 
 (defun org-index--do-edit ()
@@ -1107,13 +1167,13 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
     ;; we need two different keymaps
     (setq buffer-keymap (make-sparse-keymap))
     (set-keymap-parent buffer-keymap widget-keymap)
-    (define-key buffer-keymap (kbd "C-c C-c") 'org-index--edit-c-c-c-c)
-    (define-key buffer-keymap (kbd "C-c C-k") 'org-index--edit-c-c-c-k)
+    (define-key buffer-keymap (kbd "C-c C-c") 'org-index--edit-accept)
+    (define-key buffer-keymap (kbd "C-c C-k") 'org-index--edit-abort)
       
     (setq field-keymap (make-sparse-keymap))
     (set-keymap-parent field-keymap widget-field-keymap)
-    (define-key field-keymap (kbd "C-c C-c") 'org-index--edit-c-c-c-c)
-    (define-key field-keymap (kbd "C-c C-k") 'org-index--edit-c-c-c-k)
+    (define-key field-keymap (kbd "C-c C-c") 'org-index--edit-accept)
+    (define-key field-keymap (kbd "C-c C-k") 'org-index--edit-abort)
 
     ;; prepare buffer
     (setq org-index--context-index (cons (point) (org-index--line-in-canonical-form)))
@@ -1141,8 +1201,8 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
     "Editing a single line from index"))
   
 
-(defun org-index--edit-c-c-c-c ()
-  "Function to invoke on C-c C-c in Edit buffer."
+(defun org-index--edit-accept ()
+  "Function to accept editing in Edit buffer."
   (interactive)
 
   (let ((obuf (get-buffer org-index--occur-buffer-name))
@@ -1204,8 +1264,8 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
     (message "Index line has been edited.")))
 
 
-(defun org-index--edit-c-c-c-k ()
-  "Function invoked on C-c C-k in Edit buffer."
+(defun org-index--edit-abort ()
+  "Function to abort editing in Edit buffer."
   (interactive)
   (kill-buffer org-index--edit-buffer-name)
   (setq org-index--context-index nil)
@@ -1472,8 +1532,9 @@ Optional argument CHECK-SORT-MIXED triggers resorting if mixed and stale."
       (unless org-index--head (org-index--get-decoration-from-ref-field ref-field))
       (setq org-index--maxrefnum (org-index--extract-refnum ref-field))
     
-      ;; Get id of focused node (if any)
-      (setq org-index--id-focused-node (org-entry-get nil "id-focused-node"))
+      ;; Get ids of focused node (if any)
+      (setq org-index--ids-focused-nodes (split-string (or (org-entry-get nil "ids-focused-nodes") "")))
+      (org-entry-delete (point) "id-focused-node") ; migrate (kind of) from previous versions
 
       ;; save position below hline
       (org-index--go-below-hline)
@@ -2972,7 +3033,7 @@ If OTHER in separate window."
                   (setq yank (replace-regexp-in-string (regexp-quote "\\vert") "|" yank nil 'literal))
                   (kill-new yank)
                   (org-mark-ring-goto)
-                  (if (s-starts-with-p "http" yank)
+                  (if (string= (substring yank 0 3) "http")
                       (progn
                         (browse-url yank)
                         (format "Opened '%s' in browser (and copied it too)" yank))
