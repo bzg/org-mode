@@ -3365,6 +3365,7 @@ the agenda to write."
        (save-window-excursion
 	 (let ((bs (copy-sequence (buffer-string)))
 	       (extension (file-name-extension file))
+	       (default-directory (file-name-directory file))
 	       beg content)
 	   (with-temp-buffer
 	     (rename-buffer org-agenda-write-buffer-name t)
