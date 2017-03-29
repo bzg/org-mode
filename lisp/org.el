@@ -10549,43 +10549,43 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     ;; option If yes, simplify the link by using only the search
     ;; option.
     (when (and buffer-file-name
-	       (string-match "^file:\\(.+?\\)::\\(\\(.\\|\n\\)+\\)" link))
-      (let* ((path (match-string 1 link))
-	     (case-fold-search nil)
-	     (search (match-string 2 link)))
+	       (let ((case-fold-search nil))
+		 (string-match "\\`file:\\(.+?\\)::" link)))
+      (let ((path (match-string-no-properties 1 link))
+	    (search (substring-no-properties link (match-end 0))))
 	(save-match-data
 	  (when (equal (file-truename buffer-file-name) (file-truename path))
 	    ;; We are linking to this same file, with a search option
 	    (setq link search)))))
 
     ;; Check if we can/should use a relative path.  If yes, simplify the link
-    (when (string-match "^\\(file:\\|docview:\\)\\(\\(.\\|\n\\)*\\)" link)
-      (let* ((type (match-string 1 link))
-	     (path (match-string 2 link))
-	     (origpath path)
-	     (case-fold-search nil))
-	(cond
-	 ((or (eq org-link-file-path-type 'absolute)
-	      (equal complete-file '(16)))
-	  (setq path (abbreviate-file-name (expand-file-name path))))
-	 ((eq org-link-file-path-type 'noabbrev)
-	  (setq path (expand-file-name path)))
-	 ((eq org-link-file-path-type 'relative)
-	  (setq path (file-relative-name path)))
-	 (t
-	  (save-match-data
-	    (if (string-match (concat "^" (regexp-quote
-					   (expand-file-name
-					    (file-name-as-directory
-					     default-directory))))
-			      (expand-file-name path))
-		;; We are linking a file with relative path name.
-		(setq path (substring (expand-file-name path)
-				      (match-end 0)))
-	      (setq path (abbreviate-file-name (expand-file-name path)))))))
-	(setq link (concat type path))
-	(when (equal desc origpath)
-	  (setq desc path))))
+    (let ((case-fold-search nil))
+      (when (string-match "\\`\\(file:\\|docview\\):" link)
+	(let ((type (match-string-no-properties 0 link))
+	      (path (substring-no-properties link (match-end 0)))
+	      (origpath path))
+	  (cond
+	   ((or (eq org-link-file-path-type 'absolute)
+		(equal complete-file '(16)))
+	    (setq path (abbreviate-file-name (expand-file-name path))))
+	   ((eq org-link-file-path-type 'noabbrev)
+	    (setq path (expand-file-name path)))
+	   ((eq org-link-file-path-type 'relative)
+	    (setq path (file-relative-name path)))
+	   (t
+	    (save-match-data
+	      (if (string-match (concat "^" (regexp-quote
+					     (expand-file-name
+					      (file-name-as-directory
+					       default-directory))))
+				(expand-file-name path))
+		  ;; We are linking a file with relative path name.
+		  (setq path (substring (expand-file-name path)
+					(match-end 0)))
+		(setq path (abbreviate-file-name (expand-file-name path)))))))
+	  (setq link (concat type path))
+	  (when (equal desc origpath)
+	    (setq desc path)))))
 
     (if org-make-link-description-function
 	(setq desc
