@@ -11172,8 +11172,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	 (normalized (replace-regexp-in-string "\n[ \t]*" " " s))
 	 (starred (eq (string-to-char normalized) ?*))
 	 (words (split-string (if starred (substring s 1) s)))
-	 (s-multi-re
-	  (mapconcat #'regexp-quote words "\\([ \t]*\n[ \t]*\\|[ \t]+\\)"))
+	 (s-multi-re (mapconcat #'regexp-quote words "\\(?:[ \t\n]+\\)"))
 	 (s-single-re (mapconcat #'regexp-quote words "[ \t]+"))
 	 type)
     (cond
