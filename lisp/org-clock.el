@@ -2416,26 +2416,27 @@ the currently selected interval size."
 				 (org-clock-get-table-data file params)))))
 			 files)
 	       ;; Get the right restriction for the scope.
-	       (cond
-		((not scope))	     ;use the restriction as it is now
-		((eq scope 'file) (widen))
-		((eq scope 'subtree) (org-narrow-to-subtree))
-		((eq scope 'tree)
-		 (while (org-up-heading-safe))
-		 (org-narrow-to-subtree))
-		((and (symbolp scope)
-		      (string-match "\\`tree\\([0-9]+\\)\\'"
-				    (symbol-name scope)))
-		 (let ((level (string-to-number
-			       (match-string 1 (symbol-name scope)))))
-		   (catch 'exit
-		     (while (org-up-heading-safe)
-		       (looking-at org-outline-regexp)
-		       (when (<= (org-reduced-level (funcall outline-level))
-				 level)
-			 (throw 'exit nil))))
-		   (org-narrow-to-subtree))))
-	       (list (org-clock-get-table-data nil params))))
+	       (save-restriction
+		 (cond
+		  ((not scope))	     ;use the restriction as it is now
+		  ((eq scope 'file) (widen))
+		  ((eq scope 'subtree) (org-narrow-to-subtree))
+		  ((eq scope 'tree)
+		   (while (org-up-heading-safe))
+		   (org-narrow-to-subtree))
+		  ((and (symbolp scope)
+			(string-match "\\`tree\\([0-9]+\\)\\'"
+				      (symbol-name scope)))
+		   (let ((level (string-to-number
+				 (match-string 1 (symbol-name scope)))))
+		     (catch 'exit
+		       (while (org-up-heading-safe)
+			 (looking-at org-outline-regexp)
+			 (when (<= (org-reduced-level (funcall outline-level))
+				   level)
+			   (throw 'exit nil))))
+		     (org-narrow-to-subtree))))
+		 (list (org-clock-get-table-data nil params)))))
 	    (multifile
 	     ;; Even though `file-with-archives' can consist of
 	     ;; multiple files, we consider this is one extended file
