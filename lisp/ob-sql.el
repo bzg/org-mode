@@ -56,6 +56,7 @@
 ;; - sqsh
 ;; - postgresql
 ;; - oracle
+;; - vertica
 ;;
 ;; TODO:
 ;;
@@ -136,6 +137,16 @@ SQL Server on Windows and Linux platform."
                           (when database (format "-D \"%s\"" database))))
              " "))
 
+(defun org-babel-sql-dbstring-vertica (host port user password database)
+  "Make Vertica command line args for database connection. Pass nil to omit that arg."
+  (mapconcat #'identity
+	      (delq nil
+		    (list (when host     (format "-h %s" host))
+			  (when port     (format "-p %d" port))
+			  (when user     (format "-U %s" user))
+			  (when password (format "-w %s" (shell-quote-argument password) ))
+			  (when database (format "-d %s" database))))
+	      " "))
 
 (defun org-babel-sql-convert-standard-filename (file)
   "Convert the file name to OS standard.
@@ -208,6 +219,12 @@ footer=off -F \"\t\"  %s -f %s -o %s %s"
 				    (org-babel-process-file-name in-file))
 				   (org-babel-sql-convert-standard-filename
 				    (org-babel-process-file-name out-file))))
+		    (`vertica (format "vsql %s -f %s -o %s %s"
+				    (org-babel-sql-dbstring-vertica
+				     dbhost dbport dbuser dbpassword database)
+				    (org-babel-process-file-name in-file)
+				    (org-babel-process-file-name out-file)
+				    (or cmdline "")))
                     (`oracle (format
 			      "sqlplus -s %s < %s > %s"
 			      (org-babel-sql-dbstring-oracle
@@ -235,6 +252,7 @@ SET COLSEP '|'
 	 ((or `mssql `sqsh) "SET NOCOUNT ON
 
 ")
+	 (`vertica "\\a\n")
 	 (_ ""))
        (org-babel-expand-body:sql body params)
        ;; "sqsh" requires "go" inserted at EOF.
@@ -245,7 +263,7 @@ SET COLSEP '|'
 	(progn (insert-file-contents-literally out-file) (buffer-string)))
       (with-temp-buffer
 	(cond
-	 ((memq (intern engine) '(dbi mysql postgresql sqsh))
+	 ((memq (intern engine) '(dbi mysql postgresql sqsh vertica))
 	  ;; Add header row delimiter after column-names header in first line
 	  (cond
 	   (colnames-p

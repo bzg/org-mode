@@ -162,6 +162,22 @@ Select * From Users
 Where clue > 0
 ,#+END_SRC
 #+end_example
+
+**** SQL: new engine added =vertica=
+
+A new engine was added to support vsql command line utility for use
+against HP Vertica.
+
+More information on =vsql= can be found here: [[https://my.vertica.com/docs/7.2.x/HTML/index.htm#Authoring/ConnectingToHPVertica/vsql/UsingVsql.htm][my.vertica.com]]
+
+To use =vertica= in an sql =SRC_BLK= set the =:engine= like this:
+
+#+BEGIN_EXAMPLE
+  ,#+BEGIN_SRC sql :engine vertica :dbhost my_host :dbuser dbadmin :dbpassword pw :database vmart
+  SELECT * FROM nodes;
+  ,#+END_SRC
+#+END_EXAMPLE
+
 *** New ~function~ scope argument for the Clock Table
 Added a nullary function that returns a list of files as a possible
 argument for the scope of the clock table.
