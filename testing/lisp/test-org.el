@@ -2292,7 +2292,7 @@ Foo Bar
        (insert (format "[[file:%s::line1 line2]]" file))
        (beginning-of-line)
        (let ((org-link-search-must-match-exact-headline nil))
-	 (org-open-at-point))
+	 (org-open-at-point 0))
        (looking-at-p "line1"))))
   (should
    (org-test-with-temp-text-in-file "Paragraph\n\nline1\n\nline2\n\n"
@@ -2301,7 +2301,7 @@ Foo Bar
        (insert (format "[[file:%s::line1 line2]]" file))
        (beginning-of-line)
        (let ((org-link-search-must-match-exact-headline nil))
-	 (org-open-at-point))
+	 (org-open-at-point 0))
        (looking-at-p "line1")))))
 
 ;;;; Link Escaping
