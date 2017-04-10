@@ -648,7 +648,7 @@ The table of checksums is written to the file mobile-checksums."
   (org-with-point-at pom
     (concat "olp:"
 	    (org-mobile-escape-olp (file-name-nondirectory buffer-file-name))
-	    "/"
+	    ":"
 	    (mapconcat 'org-mobile-escape-olp
 		       (org-get-outline-path)
 		       "/")
