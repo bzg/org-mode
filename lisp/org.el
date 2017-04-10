@@ -10560,10 +10560,10 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
     ;; Check if we can/should use a relative path.  If yes, simplify the link
     (let ((case-fold-search nil))
-      (when (string-match "\\`\\(file:\\|docview\\):" link)
-	(let ((type (match-string-no-properties 0 link))
-	      (path (substring-no-properties link (match-end 0)))
-	      (origpath path))
+      (when (string-match "\\`\\(file\\|docview\\):" link)
+	(let* ((type (match-string-no-properties 0 link))
+	       (path (substring-no-properties link (match-end 0)))
+	       (origpath path))
 	  (cond
 	   ((or (eq org-link-file-path-type 'absolute)
 		(equal complete-file '(16)))
