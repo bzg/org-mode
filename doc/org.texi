@@ -11660,10 +11660,8 @@ You could use @code{http} addresses just as well.
 @LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
 different ways on HTML pages.  The default is to use
 @uref{http://www.mathjax.org, MathJax} which should work out of the box with
-Org@footnote{By default Org loads MathJax from
-@uref{http://docs.mathjax.org/en/latest/start.html#using-the-mathjax-content-delivery-network-cdn,
-MathJax.org}.  A link to the terms of service of the MathJax CDN can be found
-in the docstring of @code{org-html-mathjax-options}.}.  Some MathJax display
+Org@footnote{By default Org loads MathJax from @uref{https://cdnjs.com, cdnjs.com} as
+recommended by @uref{http://www.mathjax.org, MathJax}.}.  Some MathJax display
 options can be configured via @code{org-html-mathjax-options}, or in the
 buffer.  For example, with the following settings,
 @smallexample
