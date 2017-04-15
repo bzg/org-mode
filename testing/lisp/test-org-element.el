@@ -1618,6 +1618,17 @@ e^{i\\pi}+1=0
    (org-test-with-temp-text "* <<<a>>>\n<point>a-bug"
      (org-update-radio-target-regexp)
      (org-element-parse-buffer)))
+  ;; Pathological case: radio target in an emphasis environment.
+  (should
+   (eq 'bold
+       (org-test-with-temp-text "* <<<radio>>>\n<point>*radio*"
+	 (org-update-radio-target-regexp)
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'link
+       (org-test-with-temp-text "* <<<radio>>>\n*<point>radio*"
+	 (org-update-radio-target-regexp)
+	 (org-element-type (org-element-context)))))
   ;; Standard link.
   ;;
   ;; ... with description.
