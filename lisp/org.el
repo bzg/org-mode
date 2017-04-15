@@ -24059,32 +24059,27 @@ Stop at the first and last subheadings of a superior heading.
 Normally this only looks at visible headings, but when INVISIBLE-OK is
 non-nil it will also look at invisible ones."
   (interactive "p")
-  (if (not (ignore-errors (org-back-to-heading invisible-ok)))
-      (if (and arg (< arg 0))
-          (goto-char (point-min))
-        (outline-next-heading))
-    (org-at-heading-p)
-    (let ((level (- (match-end 0) (match-beginning 0) 1))
-          (f (if (and arg (< arg 0))
-                 're-search-backward
-               're-search-forward))
-          (count (if arg (abs arg) 1))
-          (result (point)))
-      (while (and (prog1 (> count 0)
-		    (forward-char (if (and arg (< arg 0)) -1 1)))
-                  (funcall f org-outline-regexp-bol nil 'move))
-        (let ((l (- (match-end 0) (match-beginning 0) 1)))
-          (cond ((< l level) (setq count 0))
-                ((and (= l level)
-                      (or invisible-ok
-                          (progn
-                            (goto-char (line-beginning-position))
-                            (not (outline-invisible-p)))))
-                 (setq count (1- count))
-                 (when (eq l level)
-                   (setq result (point)))))))
-      (goto-char result))
-    (beginning-of-line 1)))
+  (let ((backward? (and arg (< arg 0))))
+    (if (org-before-first-heading-p)
+	(if backward? (goto-char (point-min)) (outline-next-heading))
+      (org-back-to-heading invisible-ok)
+      (unless backward? (end-of-line))	;do not match current headline
+      (let ((level (- (match-end 0) (match-beginning 0) 1))
+	    (f (if backward? #'re-search-backward #'re-search-forward))
+	    (count (if arg (abs arg) 1))
+	    (result (point)))
+	(while (and (> count 0)
+		    (funcall f org-outline-regexp-bol nil 'move))
+	  (let ((l (- (match-end 0) (match-beginning 0) 1)))
+	    (cond ((< l level) (setq count 0))
+		  ((and (= l level)
+			(or invisible-ok
+			    (not (outline-invisible-p
+				  (line-beginning-position)))))
+		   (cl-decf count)
+		   (when (= l level) (setq result (point)))))))
+	(goto-char result))
+      (beginning-of-line))))
 
 (defun org-backward-heading-same-level (arg &optional invisible-ok)
   "Move backward to the ARG'th subheading at same level as this one.
