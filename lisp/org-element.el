@@ -4365,6 +4365,10 @@ to an appropriate container (e.g., a paragraph)."
   (if (memq 'table-cell restriction) (org-element-table-cell-parser)
     (let* ((start (point))
 	   (limit
+	    ;; Object regexp sometimes needs to have a peek at
+	    ;; a character ahead.  Therefore, when there is a hard
+	    ;; limit, make it one more than the true beginning of the
+	    ;; radio target.
 	    (save-excursion
 	      (cond ((not org-target-link-regexp) nil)
 		    ((not (memq 'link restriction)) nil)
@@ -4380,8 +4384,8 @@ to an appropriate container (e.g., a paragraph)."
 		    ((and (= start (1+ (line-beginning-position)))
 			  (= start (match-end 1)))
 		     (and (re-search-forward org-target-link-regexp nil t)
-			  (match-beginning 1)))
-		    (t (match-beginning 1)))))
+			  (1+ (match-beginning 1))))
+		    (t (1+ (match-beginning 1))))))
 	   found)
       (save-excursion
 	(while (and (not found)
@@ -4453,7 +4457,8 @@ to an appropriate container (e.g., a paragraph)."
 			      (org-element-link-parser)))))))
 	    (or (eobp) (forward-char))))
 	(cond (found)
-	      (limit (org-element-link-parser))	;radio link
+	      (limit (forward-char -1)
+		     (org-element-link-parser)) ;radio link
 	      (t nil))))))
 
 (defun org-element--parse-objects (beg end acc restriction &optional parent)
