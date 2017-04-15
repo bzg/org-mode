@@ -2533,6 +2533,64 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 
 ;;; Navigation
 
+(ert-deftest test-org/forward-heading-same-level ()
+  "Test `org-forward-heading-same-level' specifications."
+  ;; Test navigation at top level, forward and backward.
+  (should
+   (equal "* H2"
+	  (org-test-with-temp-text "* H1\n* H2"
+	    (org-forward-heading-same-level 1)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "* H1"
+	  (org-test-with-temp-text "* H1\n<point>* H2"
+	    (org-forward-heading-same-level -1)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Test navigation in a sub-tree, forward and backward.
+  (should
+   (equal "* H2"
+	  (org-test-with-temp-text "* H1\n** H11\n** H12\n* H2"
+	    (org-forward-heading-same-level 1)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "* H1"
+	  (org-test-with-temp-text "* H1\n** H11\n** H12\n<point>* H2"
+	    (org-forward-heading-same-level -1)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Stop at first or last sub-heading.
+  (should-not
+   (equal "* H2"
+	  (org-test-with-temp-text "* H1\n** H11\n<point>** H12\n* H2"
+	    (org-forward-heading-same-level 1)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should-not
+   (equal "* H2"
+	  (org-test-with-temp-text "* H1\n<point>** H11\n** H12\n* H2"
+	    (org-forward-heading-same-level -1)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Allow multiple moves.
+  (should
+   (equal "* H3"
+	  (org-test-with-temp-text "* H1\n* H2\n* H3"
+	    (org-forward-heading-same-level 2)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "* H1"
+	  (org-test-with-temp-text "* H1\n* H2\n<point>* H3"
+	    (org-forward-heading-same-level -2)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Ignore spurious moves when first (or last) sibling is reached.
+  (should
+   (equal "** H3"
+	  (org-test-with-temp-text "* First\n<point>** H1\n** H2\n** H3\n* Last"
+	    (org-forward-heading-same-level 100)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "** H1"
+	  (org-test-with-temp-text "* First\n** H1\n** H2\n<point>** H3\n* Last"
+	    (org-forward-heading-same-level -100)
+	    (buffer-substring-no-properties (point) (line-end-position))))))
+
 (ert-deftest test-org/end-of-meta-data ()
   "Test `org-end-of-meta-data' specifications."
   ;; Skip planning line.
