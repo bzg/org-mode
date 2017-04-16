@@ -2059,8 +2059,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
        "\n")
      (org-latex--wrap-label
       horizontal-rule
-      (format "\\rule{%s}{%s}"
-	      (or (plist-get attr :width) "\\linewidth")
+      (format "\\noindent\\rule{%s}{%s}"
+	      (or (plist-get attr :width) "\\textwidth")
 	      (or (plist-get attr :thickness) "0.5pt"))
       info))))
 
