@@ -149,14 +149,14 @@ SQL Server on Windows and Linux platform."
 	      " "))
 
 (defun org-babel-sql-convert-standard-filename (file)
-  "Convert the file name to OS standard.
+  "Convert FILE to OS standard file name.
 If in Cygwin environment, uses Cygwin specific function to
-convert the file name. Otherwise, uses Emacs' standard conversion
-function."
-  (format "\"%s\""
-	  (if (fboundp 'cygwin-convert-file-name-to-windows)
-	      (cygwin-convert-file-name-to-windows file)
-	    (convert-standard-filename file))))
+convert the file name.  In a Windows-NT environment, do nothing.
+Otherwise, use Emacs' standard conversion function."
+  (cond ((fboundp 'cygwin-convert-file-name-to-windows)
+	 (format "%S" (cygwin-convert-file-name-to-windows file)))
+	((string= "windows-nt" system-type) file)
+	(t (format "%S" (convert-standard-filename file)))))
 
 (defun org-babel-execute:sql (body params)
   "Execute a block of Sql code with Babel.
