@@ -354,7 +354,7 @@ If DELETE is non-nil, delete other windows when in the Org buffer."
 (defun org-toc-quit ()
   "Quit the current Org TOC buffer."
   (interactive)
-  (kill-this-buffer)
+  (kill-buffer)
   (other-window 1)
   (delete-other-windows))
 
