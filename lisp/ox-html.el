@@ -1160,7 +1160,7 @@ See `format-time-string' for more information on its components."
 ;;;; Template :: Mathjax
 
 (defcustom org-html-mathjax-options
-  '((path "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" )
+  '((path "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML" )
     (scale "100")
     (align "center")
     (font "TeX")
@@ -1198,12 +1198,7 @@ You can also customize this for each buffer, using something like
 
 For further information about MathJax options, see the MathJax documentation:
 
-    http://docs.mathjax.org/
-
-Please note that by using the default CDN one must agree with
-MathJax CDN Terms of Service.
-
-    http://www.mathjax.org/mathjax-cdn-terms-of-service.html"
+  http://docs.mathjax.org/"
   :group 'org-export-html
   :package-version '(Org . "8.3")
   :type '(list :greedy t
