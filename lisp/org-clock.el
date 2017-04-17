@@ -2734,19 +2734,22 @@ file time (in minutes) as 1st and 2nd elements.  The third element
 of this list will be a list of headline entries.  Each entry has the
 following structure:
 
-  (LEVEL HEADLINE TIMESTAMP TIME)
+  (LEVEL HEADLINE TIMESTAMP TIME PROPERTIES)
 
-LEVEL:     The level of the headline, as an integer.  This will be
-           the reduced level, so 1,2,3,... even if only odd levels
-           are being used.
-HEADLINE:  The text of the headline.  Depending on PARAMS, this may
-           already be formatted like a link.
-TIMESTAMP: If PARAMS require it, this will be a time stamp found in the
-           entry, any of SCHEDULED, DEADLINE, NORMAL, or first inactive,
-           in this sequence.
-TIME:      The sum of all time spend in this tree, in minutes.  This time
-           will of cause be restricted to the time block and tags match
-           specified in PARAMS."
+LEVEL:      The level of the headline, as an integer.  This will be
+            the reduced level, so 1,2,3,... even if only odd levels
+            are being used.
+HEADLINE:   The text of the headline.  Depending on PARAMS, this may
+            already be formatted like a link.
+TIMESTAMP:  If PARAMS require it, this will be a time stamp found in the
+            entry, any of SCHEDULED, DEADLINE, NORMAL, or first inactive,
+            in this sequence.
+TIME:       The sum of all time spend in this tree, in minutes.  This time
+            will of cause be restricted to the time block and tags match
+            specified in PARAMS.
+PROPERTIES: The list properties specified in the `:properties' parameter
+            along with their value, as an alist following the pattern
+            (NAME . VALUE)."
   (let* ((maxlevel (or (plist-get params :maxlevel) 3))
 	 (timestamp (plist-get params :timestamp))
 	 (ts (plist-get params :tstart))
@@ -2759,7 +2762,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	 (properties (plist-get params :properties))
 	 (inherit-property-p (plist-get params :inherit-props))
 	 (matcher (and tags (cdr (org-make-tags-matcher tags))))
-	 cc st p time level hdl props tsp tbl)
+	 cc st p time level tbl)
 
     (setq org-clock-file-total-minutes nil)
     (when block
@@ -2791,42 +2794,44 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 		 (setq p (next-single-property-change
 			  (point) :org-clock-minutes)))
 	(goto-char p)
-	(when (setq time (get-text-property p :org-clock-minutes))
-	  (save-excursion
-	    (beginning-of-line 1)
-	    (when (and (looking-at "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@#%:]+:\\)?[ \t]*$")
-		       (setq level (org-reduced-level
-				    (- (match-end 1) (match-beginning 1))))
-		       (<= level maxlevel))
-	      (setq hdl (if (not link)
-			    (match-string 2)
-			  (org-make-link-string
-			   (format "file:%s::%s"
-				   (buffer-file-name)
-				   (save-match-data
-				     (match-string 2)))
-			   (org-make-org-heading-search-string
-			    (replace-regexp-in-string
-			     org-bracket-link-regexp
-			     (lambda (m) (or (match-string 3 m)
-					(match-string 1 m)))
-			     (match-string 2)))))
-		    tsp (when timestamp
-			  (setq props (org-entry-properties (point)))
-			  (or (cdr (assoc "SCHEDULED" props))
-			      (cdr (assoc "DEADLINE" props))
-			      (cdr (assoc "TIMESTAMP" props))
-			      (cdr (assoc "TIMESTAMP_IA" props))))
-		    props (when properties
-			    (remove nil
-				    (mapcar
-				     (lambda (p)
-				       (when (org-entry-get (point) p inherit-property-p)
-					 (cons p (org-entry-get (point) p inherit-property-p))))
-				     properties))))
-	      (when (> time 0) (push (list level hdl tsp time props) tbl))))))
-      (setq tbl (nreverse tbl))
-      (list file org-clock-file-total-minutes tbl))))
+	(let ((time (get-text-property p :org-clock-minutes)))
+	  (when (and time (> time 0) (org-at-heading-p))
+	    (let ((level (org-reduced-level (org-current-level))))
+	      (when (<= level maxlevel)
+		(let* ((headline (org-get-heading t t t t))
+		       (hdl
+			(if (not link) headline
+			  (let ((search
+				 (org-make-org-heading-search-string headline)))
+			    (org-make-link-string
+			     (if (not (buffer-file-name)) search
+			       (format "file:%s::%s" (buffer-file-name) search))
+			     ;; Prune statistics cookies.  Replace
+			     ;; links with their description, or
+			     ;; a plain link if there is none.
+			     (org-trim
+			      (org-link-display-format
+			       (replace-regexp-in-string
+				"\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+				headline)))))))
+		       (tsp
+			(and timestamp
+			     (let ((p (org-entry-properties (point) 'special)))
+			       (or (cdr (assoc "SCHEDULED" p))
+				   (cdr (assoc "DEADLINE" p))
+				   (cdr (assoc "TIMESTAMP" p))
+				   (cdr (assoc "TIMESTAMP_IA" p))))))
+		       (props
+			(and properties
+			     (delq nil
+				   (mapcar
+				    (lambda (p)
+				      (let ((v (org-entry-get
+						(point) p inherit-property-p)))
+					(and v (cons p v))))
+				    properties)))))
+		  (push (list level hdl tsp time props) tbl)))))))
+      (list file org-clock-file-total-minutes (nreverse tbl)))))
 
 ;; Saving and loading the clock
 
