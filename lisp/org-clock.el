@@ -2762,7 +2762,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 	 (properties (plist-get params :properties))
 	 (inherit-property-p (plist-get params :inherit-props))
 	 (matcher (and tags (cdr (org-make-tags-matcher tags))))
-	 cc st p time level tbl)
+	 cc st p tbl)
 
     (setq org-clock-file-total-minutes nil)
     (when block
