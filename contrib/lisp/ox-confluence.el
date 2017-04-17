@@ -170,9 +170,9 @@ a communication channel."
 
 (defun org-confluence-table-cell  (table-cell contents info)
   (let ((table-row (org-export-get-parent table-cell)))
-    (concat
-     (and (org-export-table-row-starts-header-p table-row info) "|")
-     " " contents "|")))
+    (concat (and (org-export-table-row-starts-header-p table-row info) "|")
+	    (if (= (length contents) 0) " " contents)
+	    "|")))
 
 (defun org-confluence-template (contents info)
   (let ((depth (plist-get info :with-toc)))
