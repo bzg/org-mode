@@ -1779,10 +1779,9 @@ The template may still contain \"%?\" for cursor positioning."
 				(org-set-tags nil 'align))))))
 		    ((or "C" "L")
 		     (let ((insert-fun (if (equal key "C") #'insert
-					 (lambda (s) (org-insert-link 0 s))))
-			   (first-value (car org-capture--clipboards)))
-		       (pcase (length org-capture--clipboards)
-			 (nil nil)
+					 (lambda (s) (org-insert-link 0 s)))))
+		       (pcase org-capture--clipboards
+			 (`nil nil)
 			 (`(,value) (funcall insert-fun value))
 			 (`(,first-value . ,_)
 			  (funcall insert-fun
