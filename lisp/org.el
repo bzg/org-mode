@@ -12368,7 +12368,8 @@ nil or a string to be used for the todo mark." )
 				     bound1 t))
 	(replace-match "0" t nil nil 1)))))
 
-(defvar org-state) ;; dynamically scoped into this function
+(defvar org-state)
+(defvar org-blocked-by-checkboxes)
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 
@@ -12458,12 +12459,12 @@ When called through ELisp, arg is also interpreted in the following way:
 				       (and (not arg) org-use-fast-todo-selection
 					    (not (eq org-use-fast-todo-selection
 						     'prefix)))))
-			      ;; Use fast selection
+			      ;; Use fast selection.
 			      (org-fast-todo-selection))
 			     ((and (equal arg '(4))
 				   (or (not org-use-fast-todo-selection)
 				       (not org-todo-key-trigger)))
-			      ;; Read a state with completion
+			      ;; Read a state with completion.
 			      (completing-read
 			       "State: " (mapcar #'list org-todo-keywords-1)
 			       nil t))
@@ -12479,9 +12480,9 @@ When called through ELisp, arg is also interpreted in the following way:
 					 org-todo-keywords-1)
 				  (org-last org-todo-keywords-1))))
 			     ((and (eq org-use-fast-todo-selection t) (equal arg '(4))
-				   (setq arg nil))) ; hack to fall back to cycling
+				   (setq arg nil))) ;hack to fall back to cycling
 			     (arg
-			      ;; user or caller requests a specific state
+			      ;; User or caller requests a specific state.
 			      (cond
 			       ((equal arg "") nil)
 			       ((eq arg 'none) nil)
@@ -12499,8 +12500,8 @@ When called through ELisp, arg is also interpreted in the following way:
 			       ((nth (1- (prefix-numeric-value arg))
 				     org-todo-keywords-1))))
 			     ((null member) (or head (car org-todo-keywords-1)))
-			     ((equal this final-done-word) nil) ;; -> make empty
-			     ((null tail) nil) ;; -> first entry
+			     ((equal this final-done-word) nil) ;-> make empty
+			     ((null tail) nil) ;-> first entry
 			     ((memq interpret '(type priority))
 			      (if (eq this-command last-command)
 				  (car tail)
@@ -12518,20 +12519,24 @@ When called through ELisp, arg is also interpreted in the following way:
 				     :position startpos))
 		 dolog now-done-p)
 	    (when org-blocker-hook
-	      (setq org-last-todo-state-is-todo
-		    (not (member this org-done-keywords)))
-	      (unless (save-excursion
-			(save-match-data
-			  (org-with-wide-buffer
-			   (run-hook-with-args-until-failure
-			    'org-blocker-hook change-plist))))
-		(if (called-interactively-p 'interactive)
-		    (user-error "TODO state change from %s to %s blocked (by \"%s\")"
-				this org-state org-block-entry-blocking)
-		  ;; fail silently
-		  (message "TODO state change from %s to %s blocked (by \"%s\")"
-			   this org-state org-block-entry-blocking)
-		  (throw 'exit nil))))
+	      (let (org-blocked-by-checkboxes block-reason)
+		(setq org-last-todo-state-is-todo
+		      (not (member this org-done-keywords)))
+		(unless (save-excursion
+			  (save-match-data
+			    (org-with-wide-buffer
+			     (run-hook-with-args-until-failure
+			      'org-blocker-hook change-plist))))
+		  (setq block-reason (if org-blocked-by-checkboxes
+					 "contained checkboxes"
+				       (format "\"%s\"" org-block-entry-blocking)))
+		  (if (called-interactively-p 'interactive)
+		      (user-error "TODO state change from %s to %s blocked (by %s)"
+				  this org-state block-reason)
+		    ;; Fail silently.
+		    (message "TODO state change from %s to %s blocked (by %s)"
+			     this org-state block-reason)
+		    (throw 'exit nil)))))
 	    (store-match-data match-data)
 	    (replace-match next t t)
 	    (cond ((equal this org-state)
@@ -12558,7 +12563,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	    (when (and (or org-todo-log-states org-log-done)
 		       (not (eq org-inhibit-logging t))
 		       (not (memq arg '(nextset previousset))))
-	      ;; we need to look at recording a time and note
+	      ;; We need to look at recording a time and note.
 	      (setq dolog (or (nth 1 (assoc org-state org-todo-log-states))
 			      (nth 2 (assoc this org-todo-log-states))))
 	      (when (and (eq dolog 'note) (eq org-inhibit-logging 'note))
@@ -12571,14 +12576,14 @@ When called through ELisp, arg is also interpreted in the following way:
 		;; If there was a CLOSED time stamp, get rid of it.
 		(org-add-planning-info nil nil 'closed))
 	      (when (and now-done-p org-log-done)
-		;; It is now done, and it was not done before
+		;; It is now done, and it was not done before.
 		(org-add-planning-info 'closed (org-current-effective-time))
 		(when (and (not dolog) (eq 'note org-log-done))
 		  (org-add-log-setup 'done org-state this 'note)))
 	      (when (and org-state dolog)
-		;; This is a non-nil state, and we need to log it
+		;; This is a non-nil state, and we need to log it.
 		(org-add-log-setup 'state org-state this dolog)))
-	    ;; Fixup tag positioning
+	    ;; Fixup tag positioning.
 	    (org-todo-trigger-tag-changes org-state)
 	    (and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
 	    (when org-provide-todo-statistics
@@ -12595,7 +12600,7 @@ When called through ELisp, arg is also interpreted in the following way:
 		  (setq org-agenda-headline-snapshot-before-repeat
 			(org-get-heading))))
 	      (org-auto-repeat-maybe org-state))
-	    ;; Fixup cursor location if close to the keyword
+	    ;; Fixup cursor location if close to the keyword.
 	    (when (and (outline-on-heading-p)
 		       (not (bolp))
 		       (save-excursion (beginning-of-line 1)
@@ -12714,7 +12719,6 @@ See variable `org-track-ordered-property-with-tag'."
 	(and tag (org-toggle-tag tag 'on))
 	(message "Subtasks must be completed in sequence")))))
 
-(defvar org-blocked-by-checkboxes) ; dynamically scoped
 (defun org-block-todo-from-checkboxes (change-plist)
   "Block turning an entry into a TODO, using checkboxes.
 This checks whether the current task should be blocked from state
