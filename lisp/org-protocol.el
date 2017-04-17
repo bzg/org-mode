@@ -596,11 +596,14 @@ CLIENT is ignored."
   (let ((sub-protocols (append org-protocol-protocol-alist
 			       org-protocol-protocol-alist-default)))
     (catch 'fname
-      (let ((the-protocol (concat (regexp-quote org-protocol-the-protocol) ":/+")))
+      (let ((the-protocol (concat (regexp-quote org-protocol-the-protocol)
+				  ":/+")))
         (when (string-match the-protocol fname)
           (dolist (prolist sub-protocols)
-            (let ((proto (concat the-protocol
-				 (regexp-quote (plist-get (cdr prolist) :protocol)) "\\(:/+\\|\\?\\)")))
+            (let ((proto
+		   (concat the-protocol
+			   (regexp-quote (plist-get (cdr prolist) :protocol))
+			   "\\(:/+\\|\\?\\)")))
               (when (string-match proto fname)
                 (let* ((func (plist-get (cdr prolist) :function))
                        (greedy (plist-get (cdr prolist) :greedy))
@@ -613,12 +616,14 @@ CLIENT is ignored."
                   (when (fboundp func)
                     (unless greedy
                       (throw 'fname
-			     (condition-case nil
-				 (funcall func (org-protocol-parse-parameters result new-style))
-			       (error
-				(warn "Please update your org protocol handler to deal with new-style links.")
-				(funcall func result)))))
-		    ;; Greedy protocol handlers are responsible for parsing their own filenames
+			     (if new-style
+				 (funcall func (org-protocol-parse-parameters
+						result new-style))
+			       (warn "Please update your Org Protocol handler \
+to deal with new-style links.")
+			       (funcall func result))))
+		    ;; Greedy protocol handlers are responsible for
+		    ;; parsing their own filenames.
 		    (funcall func result)
                     (throw 'fname t))))))))
       fname)))
