@@ -498,7 +498,6 @@ Now template ?b will be used."
 	 (org-capture-link-is-already-stored t)) ;; avoid call to org-store-link
     (setq org-stored-links
 	  (cons (list url title) org-stored-links))
-    (kill-new orglink)
     (org-store-link-props :type type
 			  :link url
 			  :description title
