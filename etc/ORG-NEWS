@@ -313,6 +313,7 @@ you use "/!" markup when filtering TODO keywords.
 This variable is a ~defcustom~ and replaces the variable
 ~org-babel-capitalize-example-region-markers~, which is a ~defvar~ and
 is now obselete.
+*** =INCLUDE= keywords in commented trees are now ignored.
 
 * Version 9.0
 

@@ -1055,6 +1055,11 @@ Text"
   (should-error
    (org-test-with-temp-text "#+INCLUDE: dummy.org"
      (org-export-expand-include-keyword)))
+  ;; Refuse to expand keywords in commented headings.
+  (should
+   (org-test-with-temp-text "* COMMENT H1\n#+INCLUDE: dummy.org"
+     (org-export-expand-include-keyword)
+     t))
   ;; Full insertion with recursive inclusion.
   (should
    (equal
@@ -1262,15 +1267,15 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
   ;; Adjacent INCLUDE-keywords should have the same :minlevel if unspecified.
   (should
    (cl-every (lambda (level) (zerop (1- level)))
-	      (org-test-with-temp-text
-		  (concat
-		   (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n"
-			   org-test-dir)
-		   (format "#+INCLUDE: \"%s/examples/include.org::*Heading\""
-			   org-test-dir))
-		(org-export-expand-include-keyword)
-		(org-element-map (org-element-parse-buffer) 'headline
-		  (lambda (head) (org-element-property :level head))))))
+	     (org-test-with-temp-text
+		 (concat
+		  (format "#+INCLUDE: \"%s/examples/include.org::#ah\"\n"
+			  org-test-dir)
+		  (format "#+INCLUDE: \"%s/examples/include.org::*Heading\""
+			  org-test-dir))
+	       (org-export-expand-include-keyword)
+	       (org-element-map (org-element-parse-buffer) 'headline
+		 (lambda (head) (org-element-property :level head))))))
   ;; INCLUDE does not insert induced :minlevel for src-blocks.
   (should-not
    (equal
