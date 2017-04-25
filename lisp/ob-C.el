@@ -125,7 +125,8 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 			(pcase org-babel-c-variant
 			  (`c ".c") (`cpp ".cpp") (`d ".d"))))
 	 (tmp-bin-file			;not used for D
-	  (org-babel-temp-file "C-bin-" org-babel-exeext))
+	  (org-babel-process-file-name
+	   (org-babel-temp-file "C-bin-" org-babel-exeext)))
 	 (cmdline (cdr (assq :cmdline params)))
 	 (cmdline (if cmdline (concat " " cmdline) ""))
 	 (flags (cdr (assq :flags params)))
@@ -151,7 +152,7 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 		(pcase org-babel-c-variant
 		  (`c org-babel-C-compiler)
 		  (`cpp org-babel-C++-compiler))
-		(org-babel-process-file-name tmp-bin-file)
+		tmp-bin-file
 		flags
 		(org-babel-process-file-name tmp-src-file)
 		libs)
