@@ -1505,8 +1505,7 @@ PARAMS is a property list of parameters:
       (goto-char (point-min))
       (let (cache)
 	(while (not (eobp))
-	  (let ((m (or (org-get-at-bol 'org-hd-marker)
-		       (org-get-at-bol 'org-marker))))
+	  (let ((m (org-get-at-bol 'org-hd-marker)))
 	    (when m
 	      (push (cons (line-beginning-position)
 			  ;; `org-columns-current-fmt-compiled' is
