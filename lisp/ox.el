@@ -4503,7 +4503,7 @@ ELEMENT doesn't allow line numbering."
 	     (let ((linum (org-element-property :number-lines el)))
 	       (when linum
 		 (let ((lines (org-count-lines
-			       (org-trim (org-element-property :value el)))))
+			       (org-element-property :value el))))
 		   ;; Accumulate locs or reset them.
 		   (pcase linum
 		     (`(new . ,n) (setq loc (+ n lines)))
@@ -4522,30 +4522,28 @@ an alist between relative line number (integer) and name of code
 reference on that line (string)."
   (let* ((line 0) refs
 	 (value (org-element-property :value element))
-	 ;; Get code and clean it.  Remove blank lines at its
-	 ;; beginning and end.
+	 ;; Remove global indentation from code, if necessary.  Also
+	 ;; remove final newline character, since it doesn't belongs
+	 ;; to the code proper.
 	 (code (replace-regexp-in-string
-		"\\`\\([ \t]*\n\\)+" ""
-		(replace-regexp-in-string
-		 "\\([ \t]*\n\\)*[ \t]*\\'" "\n"
-		 (if (or org-src-preserve-indentation
-			 (org-element-property :preserve-indent element))
-		     value
-		   (org-remove-indentation value)))))
+		"\n\\'" ""
+		(if (or org-src-preserve-indentation
+			(org-element-property :preserve-indent element))
+		    value
+		  (org-remove-indentation value))))
 	 ;; Build a regexp matching a loc with a reference.
 	 (ref-re (org-src-coderef-regexp (org-src-coderef-format element))))
     ;; Return value.
     (cons
      ;; Code with references removed.
-     (org-element-normalize-string
-      (mapconcat
-       (lambda (loc)
-	 (cl-incf line)
-	 (if (not (string-match ref-re loc)) loc
-	   ;; Ref line: remove ref, and signal its position in REFS.
-	   (push (cons line (match-string 3 loc)) refs)
-	   (replace-match "" nil nil loc 1)))
-       (org-split-string code "\n") "\n"))
+     (mapconcat
+      (lambda (loc)
+	(cl-incf line)
+	(if (not (string-match ref-re loc)) loc
+	  ;; Ref line: remove ref, and add its position in REFS.
+	  (push (cons line (match-string 3 loc)) refs)
+	  (replace-match "" nil nil loc 1)))
+      (split-string code "\n") "\n")
      ;; Reference alist.
      refs)))
 
@@ -4568,15 +4566,16 @@ number (i.e. ignoring NUM-LINES) and the name of the code
 reference on it.  If it is nil, FUN's third argument will always
 be nil.  It can be obtained through the use of
 `org-export-unravel-code' function."
-  (let ((--locs (org-split-string code "\n"))
+  (let ((--locs (split-string code "\n"))
 	(--line 0))
-    (org-element-normalize-string
+    (concat
      (mapconcat
       (lambda (--loc)
 	(cl-incf --line)
 	(let ((--ref (cdr (assq --line ref-alist))))
 	  (funcall fun --loc (and num-lines (+ num-lines --line)) --ref)))
-      --locs "\n"))))
+      --locs "\n")
+     "\n")))
 
 (defun org-export-format-code-default (element info)
   "Return source code from ELEMENT, formatted in a standard way.
@@ -4593,7 +4592,7 @@ code."
   ;; Extract code and references.
   (let* ((code-info (org-export-unravel-code element))
          (code (car code-info))
-	 (code-lines (org-split-string code "\n")))
+	 (code-lines (split-string code "\n")))
     (if (null code-lines) ""
       (let* ((refs (and (org-element-property :retain-labels element)
 			(cdr code-info)))
@@ -4618,9 +4617,9 @@ code."
 	      number-str
 	      loc
 	      (and ref
-		   (concat (make-string
-			    (- (+ 6 max-width)
-			       (+ (length loc) (length number-str))) ? )
+		   (concat (make-string (- (+ 6 max-width)
+					   (+ (length loc) (length number-str)))
+					?\s)
 			   (format "(%s)" ref))))))
 	 num-start refs)))))
 
