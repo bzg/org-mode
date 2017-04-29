@@ -152,7 +152,26 @@ parent."
                 (org-element-contents object)))
         (org-element-extract-element object)))
     info nil)
+  (org-extra--merge-sections data backend info)
   data)
+
+(defun org-extra--merge-sections (data _backend info)
+  (org-element-map data 'headline
+    (lambda (hl)
+      (let ((sections
+             (cl-loop
+              for el in (org-element-map (org-element-contents hl)
+                            '(headline section) #'identity info)
+              until (eq (org-element-type el) 'headline)
+              collect el)))
+        (when (and sections
+                   (> (length sections) 1))
+          (apply #'org-element-adopt-elements
+                 (car sections)
+                 (cl-mapcan (lambda (s) (org-element-contents s))
+                            (cdr sections)))
+          (mapc #'org-element-extract-element (cdr sections)))))
+    info))
 
 (defconst ox-extras
   '((latex-header-blocks org-latex-header-blocks-filter org-export-before-parsing-hook)
