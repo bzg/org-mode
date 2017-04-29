@@ -2800,9 +2800,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 	  (when (and time (> time 0) (org-at-heading-p))
 	    (let ((level (org-reduced-level (org-current-level))))
 	      (when (<= level maxlevel)
-		(let* ((headline (replace-regexp-in-string
-				  (format "\\`%s[ \t]+" org-comment-string) ""
-				  (nth 4 (org-heading-components))))
+		(let* ((headline (org-get-heading t t t t))
 		       (hdl
 			(if (not link) headline
 			  (let ((search
@@ -2820,11 +2818,9 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 				headline)))))))
 		       (tsp
 			(and timestamp
-			     (let ((p (org-entry-properties (point) 'special)))
-			       (or (cdr (assoc "SCHEDULED" p))
-				   (cdr (assoc "DEADLINE" p))
-				   (cdr (assoc "TIMESTAMP" p))
-				   (cdr (assoc "TIMESTAMP_IA" p))))))
+			     (cl-some (lambda (p) (org-entry-get (point) p))
+				      '("SCHEDULED" "DEADLINE" "TIMESTAMP"
+					"TIMESTAMP_IA"))))
 		       (props
 			(and properties
 			     (delq nil
