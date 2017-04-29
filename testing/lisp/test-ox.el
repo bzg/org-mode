@@ -3446,12 +3446,12 @@ Another text. (ref:text)
   "Test `org-export-unravel-code' function."
   ;; Code without reference.
   (should
-   (equal '("(+ 1 1)\n")
+   (equal '("(+ 1 1)")
 	  (org-test-with-temp-text "#+BEGIN_EXAMPLE\n(+ 1 1)\n#+END_EXAMPLE"
 	    (org-export-unravel-code (org-element-at-point)))))
   ;; Code with reference.
   (should
-   (equal '("(+ 1 1)\n" (1 . "test"))
+   (equal '("(+ 1 1)" (1 . "test"))
 	  (org-test-with-temp-text
 	      "#+BEGIN_EXAMPLE\n(+ 1 1) (ref:test)\n#+END_EXAMPLE"
 	    (let  ((org-coderef-label-format "(ref:%s)"))
@@ -3459,14 +3459,14 @@ Another text. (ref:text)
   ;; Code with user-defined reference.
   (should
    (equal
-    '("(+ 1 1)\n" (1 . "test"))
+    '("(+ 1 1)" (1 . "test"))
     (org-test-with-temp-text
 	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\n(+ 1 1) [ref:test]\n#+END_EXAMPLE"
       (let ((org-coderef-label-format "(ref:%s)"))
 	(org-export-unravel-code (org-element-at-point))))))
   ;; Code references keys are relative to the current block.
   (should
-   (equal '("(+ 2 2)\n(+ 3 3)\n" (2 . "one"))
+   (equal '("(+ 2 2)\n(+ 3 3)" (2 . "one"))
 	  (org-test-with-temp-text "
 #+BEGIN_EXAMPLE -n
 \(+ 1 1)
@@ -3477,23 +3477,43 @@ Another text. (ref:text)
 #+END_EXAMPLE"
 	    (goto-line 5)
 	    (let ((org-coderef-label-format "(ref:%s)"))
-	      (org-export-unravel-code (org-element-at-point)))))))
+	      (org-export-unravel-code (org-element-at-point)))))))
 
 (ert-deftest test-org-export/format-code-default ()
   "Test `org-export-format-code-default' specifications."
-  ;; Return the empty string when code is empty.
+  ;; Preserve blank lines, even when code is empty.
   (should
-   (equal ""
+   (equal "\n\n"
 	  (org-test-with-parsed-data "#+BEGIN_SRC emacs-lisp\n\n\n#+END_SRC"
 	    (org-export-format-code-default
-	     (org-element-map tree 'src-block 'identity info t) info))))
+	     (org-element-map tree 'src-block #'identity info t) info))))
+  ;; Likewise, preserve leading and trailing blank lines in the code.
+  (should
+   (equal "\n(+ 1 1)\n"
+	  (org-test-with-parsed-data
+	      "#+BEGIN_SRC emacs-lisp\n\n(+ 1 1)\n#+END_SRC"
+	    (org-export-format-code-default
+	     (org-element-map tree 'src-block #'identity info t) info))))
+  (should
+   (equal "(+ 1 1)\n\n"
+	  (org-test-with-parsed-data
+	      "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n\n#+END_SRC"
+	    (org-export-format-code-default
+	     (org-element-map tree 'src-block #'identity info t) info))))
   ;; Number lines, two whitespace characters before the actual loc.
   (should
    (equal "1  a\n2  b\n"
 	  (org-test-with-parsed-data
 	      "#+BEGIN_SRC emacs-lisp +n\na\nb\n#+END_SRC"
 	    (org-export-format-code-default
-	     (org-element-map tree 'src-block 'identity info t) info))))
+	     (org-element-map tree 'src-block #'identity info t) info))))
+  ;; Numbering includes blank lines.
+  (should
+   (equal "1  \n2  a\n3  \n4  b\n5  \n"
+	  (org-test-with-parsed-data
+	      "#+BEGIN_SRC emacs-lisp +n\n\na\n\nb\n\n#+END_SRC"
+	    (org-export-format-code-default
+	     (org-element-map tree 'src-block #'identity info t) info))))
   ;; Put references 6 whitespace characters after the widest line,
   ;; wrapped within parenthesis.
   (should
@@ -3502,7 +3522,7 @@ Another text. (ref:text)
 	    (org-test-with-parsed-data
 		"#+BEGIN_SRC emacs-lisp\n123 (ref:a)\n1 (ref:b)\n#+END_SRC"
 	      (org-export-format-code-default
-	       (org-element-map tree 'src-block 'identity info t) info))))))
+	       (org-element-map tree 'src-block #'identity info t) info))))))
 
 
 
