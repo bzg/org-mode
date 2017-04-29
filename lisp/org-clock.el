@@ -2800,7 +2800,9 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 	  (when (and time (> time 0) (org-at-heading-p))
 	    (let ((level (org-reduced-level (org-current-level))))
 	      (when (<= level maxlevel)
-		(let* ((headline (org-get-heading t t t t))
+		(let* ((headline (replace-regexp-in-string
+				  (format "\\`%s[ \t]+" org-comment-string) ""
+				  (nth 4 (org-heading-components))))
 		       (hdl
 			(if (not link) headline
 			  (let ((search
