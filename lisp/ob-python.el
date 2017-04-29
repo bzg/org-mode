@@ -73,15 +73,16 @@ This will typically be either `python' or `python-mode'."
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((session (org-babel-python-initiate-session
+  (let* ((org-babel-python-command
+	  (or (cdr (assq :python params))
+	      org-babel-python-command))
+	 (session (org-babel-python-initiate-session
 		   (cdr (assq :session params))))
          (result-params (cdr (assq :result-params params)))
          (result-type (cdr (assq :result-type params)))
 	 (return-val (when (and (eq result-type 'value) (not session))
 		       (cdr (assq :return params))))
 	 (preamble (cdr (assq :preamble params)))
-	 (org-babel-python-command
-	  (or (cdr (assq :python params)) org-babel-python-command))
          (full-body
 	  (org-babel-expand-body:generic
 	   (concat body (if return-val (format "\nreturn %s" return-val) ""))
