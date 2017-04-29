@@ -116,12 +116,10 @@ pattern:
 
 UNIT is a unit string, as defined in `org-duration-units'.  The
 time duration is formatted using only the time components that
-are specified here.  If a time unit in missing, it falls back to
-the next smallest unit.
+are specified here.
 
-A non-nil REQUIRED? value for these keys indicates that the
-corresponding time component should always be included, even if
-its value is 0.
+Units with a zero value are skipped, unless REQUIRED? is non-nil.
+In that case, the unit is always used.
 
 Eventually, the list can contain one of the following special
 entries:
