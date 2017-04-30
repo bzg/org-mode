@@ -1810,7 +1810,7 @@ When non-nil, this must be the number of minutes, e.g. 60 for one hour."
 (defcustom org-agenda-show-inherited-tags t
   "Non-nil means show inherited tags in each agenda line.
 
-When this option is set to `always', it take precedences over
+When this option is set to `always', it takes precedence over
 `org-agenda-use-tag-inheritance' and inherited tags are shown
 in every agenda.
 
