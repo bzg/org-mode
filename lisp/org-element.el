@@ -450,7 +450,7 @@ past the brackets."
 ;; There is `org-element-put-property', `org-element-set-contents'.
 ;; These low-level functions are useful to build a parse tree.
 ;;
-;; `org-element-adopt-element', `org-element-set-element',
+;; `org-element-adopt-elements', `org-element-set-element',
 ;; `org-element-extract-element' and `org-element-insert-before' are
 ;; high-level functions useful to modify a parse tree.
 ;;
@@ -4030,7 +4030,7 @@ Optional argument GRANULARITY determines the depth of the
 recursion.  It can be set to the following symbols:
 
 `headline'          Only parse headlines.
-`greater-element'   Don't recurse into greater elements excepted
+`greater-element'   Don't recurse into greater elements except
 		    headlines and sections.  Thus, elements
 		    parsed are the top-level ones.
 `element'           Parse everything but objects and plain text.
@@ -4039,7 +4039,7 @@ recursion.  It can be set to the following symbols:
 When VISIBLE-ONLY is non-nil, don't parse contents of hidden
 elements.
 
-An element or an objects is represented as a list with the
+An element or object is represented as a list with the
 pattern (TYPE PROPERTIES CONTENTS), where :
 
   TYPE is a symbol describing the element or object.  See
