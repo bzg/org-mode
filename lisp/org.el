@@ -22876,16 +22876,16 @@ ELEMENT."
 	   (org--get-expected-indentation element t))
 	  ;; POS is after contents in a greater element.  Indent like
 	  ;; the beginning of the element.
-	  ;;
-	  ;; As a special case, if point is at the end of a footnote
-	  ;; definition or an item, indent like the very last element
-	  ;; within.  If that last element is an item, indent like its
-	  ;; contents.
-	  ((and (not (eq type 'paragraph))
+	  ((and (memq type org-element-greater-elements)
 		(let ((cend (org-element-property :contents-end element)))
 		  (and cend (<= cend pos))))
+	   ;; As a special case, if point is at the end of a footnote
+	   ;; definition or an item, indent like the very last element
+	   ;; within.  If that last element is an item, indent like
+	   ;; its contents.
 	   (if (memq type '(footnote-definition item plain-list))
 	       (let ((last (org-element-at-point)))
+		 (goto-char pos)
 		 (org--get-expected-indentation
 		  last (eq (org-element-type last) 'item)))
 	     (goto-char start)
