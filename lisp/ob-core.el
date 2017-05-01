@@ -1432,36 +1432,79 @@ specified in the properties of the current outline entry."
 
 (defun org-babel-balanced-split (string alts)
   "Split STRING on instances of ALTS.
-ALTS is a cons of two character options where each option may be
-either the numeric code of a single character or a list of
-character alternatives.  For example to split on balanced
-instances of \"[ \t]:\" set ALTS to ((32 9) . 58)."
-  (let* ((matches (lambda (ch spec) (if (listp spec) (member ch spec) (equal spec ch))))
-	 (matched (lambda (ch last)
-		    (if (consp alts)
-			(and (funcall matches ch (cdr alts))
-			     (funcall matches last (car alts)))
-		      (funcall matches ch alts))))
-	 (balance 0) (last 0)
-	 quote partial lst)
-    (mapc (lambda (ch)  ; split on [], (), "" balanced instances of [ \t]:
-	    (setq balance (+ balance
-			     (cond ((or (equal 91 ch) (equal 40 ch)) 1)
-				   ((or (equal 93 ch) (equal 41 ch)) -1)
-				   (t 0))))
-	    (when (and (equal 34 ch) (not (equal 92 last)))
-	      (setq quote (not quote)))
-	    (setq partial (cons ch partial))
-	    (when (and (= balance 0) (not quote) (funcall matched ch last))
-	      (setq lst (cons (apply #'string (nreverse
-					       (if (consp alts)
-						   (cddr partial)
-						 (cdr partial))))
-			      lst))
-	      (setq partial nil))
-	    (setq last ch))
-	  (string-to-list string))
-    (nreverse (cons (apply #'string (nreverse partial)) lst))))
+ALTS is a character, or cons of two character options where each
+option may be either the numeric code of a single character or
+a list of character alternatives.  For example, to split on
+balanced instances of \"[ \t]:\", set ALTS to ((32 9) . 58)."
+  (with-temp-buffer
+    (insert string)
+    (goto-char (point-min))
+    (let ((splitp (lambda (past next)
+		    ;; Non-nil when there should be a split after NEXT
+		    ;; character. PAST is the character before NEXT.
+		    (pcase alts
+		      (`(,(and first (pred consp)) . ,(and second (pred consp)))
+		       (and (memq past first) (memq next second)))
+		      (`(,first . ,(and second (pred consp)))
+		       (and (eq past first) (memq next second)))
+		      (`(,(and first (pred consp)) . ,second)
+		       (and (memq past first) (eq next second)))
+		      (`(,first . ,second)
+		       (and (eq past first) (eq next second)))
+		      ((pred (eq next)) t)
+		      (_ nil))))
+	  (partial nil)
+	  (result nil))
+      (while (not (eobp))
+        (cond
+	 ((funcall splitp (char-before) (char-after))
+	  ;; There is a split after point.  If ALTS is two-folds,
+	  ;; remove last parsed character as it belongs to ALTS.
+	  (when (consp alts) (pop partial))
+	  ;; Include elements parsed so far in RESULTS and flush
+	  ;; partial parsing.
+	  (when partial
+	    (push (apply #'string (nreverse partial)) result)
+	    (setq partial nil))
+	  (forward-char))
+	 ((memq (char-after) '(?\( ?\[))
+	  ;; Include everything between balanced brackets.
+	  (let* ((origin (point))
+		 (after (char-after))
+		 (openings (list after)))
+	    (forward-char)
+	    (while (and openings (re-search-forward "[]()]" nil t))
+	      (pcase (char-before)
+		((and match (or ?\[ ?\()) (push match openings))
+		(?\] (when (eq ?\[ (car openings)) (pop openings)))
+		(_ (when (eq ?\( (car openings)) (pop openings)))))
+	    (if (null openings)
+		(setq partial
+		      (nconc (nreverse (string-to-list
+					(buffer-substring origin (point))))
+			     partial))
+	      ;; Un-balanced bracket.  Backtrack.
+	      (push after partial)
+	      (goto-char (1+ origin)))))
+	 ((and (eq ?\" (char-after)) (not (eq ?\\ (char-before))))
+	  ;; Include everything between non-escaped double quotes.
+	  (push ?\" partial)
+	  (let ((origin (point)))
+	    (condition-case nil
+		;; Use `read' since it is fast and takes care of
+		;; escaped quotes already.
+		(setq partial
+		      (nconc (cons ?\"
+				   (nreverse (string-to-list
+					      (read (current-buffer)))))
+			     partial))
+	      ;; No closing double quote found.  Backtrack.
+	      (end-of-file (goto-char (1+ origin))))))
+	 (t (push (char-after) partial)
+	    (forward-char))))
+      ;; Add pending parsing and return result.
+      (when partial (push (apply #'string (nreverse partial)) result))
+      (nreverse result))))
 
 (defun org-babel-join-splits-near-ch (ch list)
   "Join splits where \"=\" is on either end of the split."
