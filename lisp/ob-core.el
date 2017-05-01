@@ -2849,24 +2849,20 @@ Otherwise if CELL looks like lisp (meaning it starts with a
 lisp, otherwise return it unmodified as a string.  Optional
 argument INHIBIT-LISP-EVAL inhibits lisp evaluation for
 situations in which is it not appropriate."
-  (if (and (stringp cell) (not (equal cell "")))
-      (or (org-babel--string-to-number cell)
-          (if (and (not inhibit-lisp-eval)
-		   (or (member (substring cell 0 1) '("(" "'" "`" "["))
-		       (string= cell "*this*")))
-              (eval (read cell) t)
-            (if (string= (substring cell 0 1) "\"")
-		(read cell)
-	      (progn (set-text-properties 0 (length cell) nil cell) cell))))
-    cell))
+  (cond ((not (org-string-nw-p cell)) cell)
+	((org-babel--string-to-number cell))
+	((and (not inhibit-lisp-eval)
+	      (or (memq (string-to-char cell) '(?\( ?' ?` ?\[))
+		  (string= cell "*this*")))
+	 (eval (read cell) t))
+	((eq (string-to-char cell) ?\") (read cell))
+	(t (org-no-properties cell))))
 
 (defun org-babel--string-to-number (string)
   "If STRING represents a number return its value.
-
 Otherwise return nil."
-  (when (string-match "\\`-?[0-9]*\\.?[0-9]*\\'" string)
-    (string-to-number string)))
-(define-obsolete-function-alias 'org-babel-number-p 'org-babel--string-to-number "Org 9.0")
+  (and (string-match-p "\\`-?[0-9]*\\.?[0-9]*\\'" string)
+       (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name &optional separator)
   "Read the results located at FILE-NAME into an elisp table.

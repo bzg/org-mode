@@ -286,6 +286,11 @@ See `org-link-parameters' for documentation on the other parameters."
   (org-unbracket-string "\"" "\"" s))
 (make-obsolete 'org-remove-double-quotes 'org-unbracket-string "Org 9.0")
 
+(define-obsolete-function-alias 'org-babel-number-p
+  'org-babel--string-to-number "Org 9.0")
+
+
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org
