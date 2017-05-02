@@ -701,11 +701,23 @@ x
     (should (= 2 (length (org-babel-ref-split-args
 			  "a=\"this, no work\", b=1"))))))
 
-(ert-deftest test-ob/org-babel-balanced-split ()
+(ert-deftest test-ob/balanced-split ()
+  "Test `org-babel-balanced-split' specifications."
   (should (equal
 	   '(":a 1" "b [2 3]" "c (4 :d (5 6))")
 	   (org-babel-balanced-split ":a 1 :b [2 3] :c (4 :d (5 6))"
-				     '((32 9) . 58)))))
+				     '((32 9) . 58))))
+  ;; Handle un-balanced parens.
+  (should
+   (equal '(":foo ((6)" "bar 1")
+	  (org-babel-balanced-split ":foo ((6) :bar 1" '((32 9) . 58))))
+  (should
+   (equal '(":foo \"(foo\"" "bar 2")
+	  (org-babel-balanced-split ":foo \"(foo\" :bar 2" '((32 9) . 58))))
+  ;; Handle un-balanced quotes.
+  (should
+   (equal '(":foo \"1" "bar 3")
+	  (org-babel-balanced-split ":foo \"1 :bar 3" '((32 9) . 58)))))
 
 (ert-deftest test-ob/commented-last-block-line-no-var ()
   (org-test-with-temp-text-in-file "

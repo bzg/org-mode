@@ -362,6 +362,9 @@ use of this function is for the stuck project list."
 (make-obsolete-variable 'org-time-clocksum-use-effort-durations
   "set `org-duration-units' instead." "Org 9.1")
 
+(define-obsolete-function-alias 'org-babel-number-p
+  'org-babel--string-to-number "Org 9.0")
+
 
 ;;;; Obsolete link types
 
