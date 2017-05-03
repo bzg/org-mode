@@ -545,14 +545,14 @@ publishing FILENAME."
 	   (lambda (p)
 	     ;; Ignore meta-projects.
 	     (unless (org-publish-property :components p)
-	       (let ((base (expand-file-name
+	       (let ((base (file-truename
 			    (org-publish-property :base-directory p))))
 		 (cond
 		  ;; Check if FILENAME is explicitly included in one
 		  ;; project.
-		  ((member filename
-			   (mapcar (lambda (f) (expand-file-name f base))
-				   (org-publish-property :include p)))
+		  ((cl-some (lambda (f) (file-equal-p f filename))
+			    (mapcar (lambda (f) (expand-file-name f base))
+				    (org-publish-property :include p)))
 		   p)
 		  ;; Exclude file names matching :exclude property.
 		  ((let ((exclude-re (org-publish-property :exclude p)))
@@ -571,8 +571,8 @@ publishing FILENAME."
 		  ;; directory, or some of its sub-directories
 		  ;; if :recursive in non-nil.
 		  ((org-publish-property :recursive p)
-		   (and (string-prefix-p base filename) p))
-		  ((equal base (file-name-directory filename)) p)
+		   (and (file-in-directory-p filename base) p))
+		  ((file-equal-p base (file-name-directory filename)) p)
 		  (t nil)))))
 	   org-publish-project-alist)))
     (cond
@@ -647,9 +647,9 @@ Return output file name."
   (unless (file-directory-p pub-dir)
     (make-directory pub-dir t))
   (let ((output (expand-file-name (file-name-nondirectory filename) pub-dir)))
-    (or (equal (expand-file-name (file-name-directory filename))
-	       (file-name-as-directory (expand-file-name pub-dir)))
-	(copy-file filename output t))
+    (unless (file-equal-p (expand-file-name (file-name-directory filename))
+			  (file-name-as-directory (expand-file-name pub-dir)))
+      (copy-file filename output t))
     ;; Return file name.
     output))
 
@@ -742,7 +742,8 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 			       (plist-get project-plist :base-directory)))
 	    (exclude-regexp (plist-get project-plist :exclude)))
 	(dolist (file (org-publish-get-base-files project exclude-regexp))
-	  (unless (equal file theindex) (org-publish-file file project t)))
+	  (unless (file-equal-p file theindex)
+	    (org-publish-file file project t)))
 	;; Populate "theindex.inc", if needed, and publish
 	;; "theindex.org".
 	(when (plist-get project-plist :makeindex)
@@ -787,8 +788,7 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
 	  (when sitemap-sans-extension
 	    (setq link (file-name-sans-extension link)))
 	  ;; sitemap shouldn't list itself
-	  (unless (equal (file-truename sitemap-filename)
-			 (file-truename file))
+	  (unless (file-equal-p sitemap-filename file)
 	    (if (eq sitemap-style 'list)
 		(message "Generating list-style sitemap for %s" sitemap-title)
 	      (message "Generating tree-style sitemap for %s" sitemap-title)
