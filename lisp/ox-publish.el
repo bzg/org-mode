@@ -664,13 +664,13 @@ If NO-CACHE is not nil, do not initialize `org-publish-cache'.
 This is needed, since this function is used to publish single
 files, when entire projects are published (see
 `org-publish-projects')."
-  (let* ((project
+  (let* ((filename (file-truename filename)) ;normalize name
+	 (project
 	  (or project
 	      (org-publish-get-project-from-filename filename)
 	      (user-error "File %S is not part of any known project"
 			  (abbreviate-file-name filename))))
 	 (project-plist (cdr project))
-	 (ftname (expand-file-name filename))
 	 (publishing-function
 	  (pcase (plist-get project-plist :publishing-function)
 	    (`nil (user-error "No publishing function chosen"))
@@ -678,7 +678,7 @@ files, when entire projects are published (see
 	    (f (list f))))
 	 (base-dir
 	  (file-name-as-directory
-	   (expand-file-name
+	   (file-truename
 	    (or (plist-get project-plist :base-directory)
 		(user-error "Project %S does not have :base-directory defined"
 			    (car project))))))
@@ -691,7 +691,7 @@ files, when entire projects are published (see
 		 (car project))))))
 	 (pub-dir
 	  (file-name-directory
-	   (expand-file-name (file-relative-name ftname base-dir)
+	   (expand-file-name (file-relative-name filename base-dir)
 			     pub-base-dir))))
 
     (unless no-cache (org-publish-initialize-cache (car project)))
