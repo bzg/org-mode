@@ -468,20 +468,20 @@ This splices all the components into the list."
   "Return a project that FILENAME belongs to.
 When UP is non-nil, return a meta-project (i.e., with a :components part)
 publishing FILENAME."
-  (let* ((filename (expand-file-name filename))
+  (let* ((filename (file-truename filename))
 	 (project
 	  (cl-some
 	   (lambda (p)
 	     ;; Ignore meta-projects.
 	     (unless (org-publish-property :components p)
-	       (let ((base (expand-file-name
+	       (let ((base (file-truename
 			    (org-publish-property :base-directory p))))
 		 (cond
 		  ;; Check if FILENAME is explicitly included in one
 		  ;; project.
-		  ((member filename
-			   (mapcar (lambda (f) (expand-file-name f base))
-				   (org-publish-property :include p)))
+		  ((cl-some (lambda (f) (file-equal-p f filename))
+			    (mapcar (lambda (f) (expand-file-name f base))
+				    (org-publish-property :include p)))
 		   p)
 		  ;; Exclude file names matching :exclude property.
 		  ((let ((exclude-re (org-publish-property :exclude p)))
@@ -500,7 +500,7 @@ publishing FILENAME."
 		  ;; directory, or some of its sub-directories
 		  ;; if :recursive in non-nil.
 		  ((org-publish-property :recursive p)
-		   (and (string-prefix-p base filename) p))
+		   (and (file-in-directory-p filename base) p))
 		  ((equal base (file-name-directory filename)) p)
 		  (t nil)))))
 	   org-publish-project-alist)))
@@ -576,9 +576,9 @@ Return output file name."
   (unless (file-directory-p pub-dir)
     (make-directory pub-dir t))
   (let ((output (expand-file-name (file-name-nondirectory filename) pub-dir)))
-    (or (equal (expand-file-name (file-name-directory filename))
-	       (file-name-as-directory (expand-file-name pub-dir)))
-	(copy-file filename output t))
+    (unless (file-equal-p (expand-file-name (file-name-directory filename))
+			  (file-name-as-directory (expand-file-name pub-dir)))
+      (copy-file filename output t))
     ;; Return file name.
     output))
 
@@ -592,44 +592,43 @@ If NO-CACHE is not nil, do not initialize `org-publish-cache'.
 This is needed, since this function is used to publish single
 files, when entire projects are published (see
 `org-publish-projects')."
-  (let* ((project
+  (let* ((filename (file-truename filename)) ;normalize name
+	 (project
 	  (or project
-	      (or (org-publish-get-project-from-filename filename)
-		  (error "File %s not part of any known project"
-			 (abbreviate-file-name filename)))))
-	 (plist (cdr project))
-	 (ftname (expand-file-name filename))
+	      (org-publish-get-project-from-filename filename)
+	      (user-error "File %S is not part of any known project"
+			  (abbreviate-file-name filename))))
+	 (project-plist (cdr project))
 	 (publishing-function
-	  (let ((fun (org-publish-property :publishing-function project)))
-	    (cond ((null fun) (error "No publishing function chosen"))
-		  ((listp fun) fun)
-		  (t (list fun)))))
+	  (pcase (org-publish-property :publishing-function project)
+	    (`nil (user-error "No publishing function chosen"))
+	    ((and f (pred listp)) f)
+	    (f (list f))))
 	 (base-dir
 	  (file-name-as-directory
-	   (expand-file-name
+	   (file-truename
 	    (or (org-publish-property :base-directory project)
-		(error "Project %s does not have :base-directory defined"
-		       (car project))))))
-	 (pub-dir
+		(user-error "Project %S does not have :base-directory defined"
+			    (car project))))))
+	 (pub-base-dir
 	  (file-name-as-directory
 	   (file-truename
 	    (or (org-publish-property :publishing-directory project)
-		(error "Project %s does not have :publishing-directory defined"
-		       (car project))))))
-	 tmp-pub-dir)
+		(user-error
+		 "Project %S does not have :publishing-directory defined"
+		 (car project))))))
+	 (pub-dir
+	  (file-name-directory
+	   (expand-file-name (file-relative-name filename base-dir)
+			     pub-base-dir))))
 
     (unless no-cache (org-publish-initialize-cache (car project)))
 
-    (setq tmp-pub-dir
-	  (file-name-directory
-	   (concat pub-dir
-		   (and (string-match (regexp-quote base-dir) ftname)
-			(substring ftname (match-end 0))))))
     ;; Allow chain of publishing functions.
     (dolist (f publishing-function)
-      (when (org-publish-needed-p filename pub-dir f tmp-pub-dir base-dir)
-	(let ((output (funcall f plist filename tmp-pub-dir)))
-	  (org-publish-update-timestamp filename pub-dir f base-dir)
+      (when (org-publish-needed-p filename pub-base-dir f pub-dir base-dir)
+	(let ((output (funcall f project-plist filename pub-dir)))
+	  (org-publish-update-timestamp filename pub-base-dir f base-dir)
 	  (run-hook-with-args 'org-publish-after-publishing-hook
 			      filename
 			      output))))
@@ -657,11 +656,12 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
       ;; Publish all files from PROJECT except "theindex.org".  Its
       ;; publishing will be deferred until "theindex.inc" is
       ;; populated.
-      (let ((theindex (expand-file-name
-		       "theindex.org"
-		       (org-publish-property :base-directory project))))
+      (let ((theindex
+	     (expand-file-name "theindex.org"
+			       (org-publish-property :base-directory project))))
 	(dolist (file (org-publish-get-base-files project))
-	  (unless (equal file theindex) (org-publish-file file project t)))
+	  (unless (file-equal-p file theindex)
+	    (org-publish-file file project t)))
 	;; Populate "theindex.inc", if needed, and publish
 	;; "theindex.org".
 	(when (org-publish-property :makeindex project)
@@ -1289,23 +1289,19 @@ will be created.  Return VALUE."
        filename property value nil project-name))))
 
 (defun org-publish-cache-get-file-property
-  (filename property &optional default no-create project-name)
+    (filename property &optional default no-create project-name)
   "Return the value for a PROPERTY of file FILENAME in publishing cache.
 Use cache file of PROJECT-NAME.  Return the value of that PROPERTY,
 or DEFAULT, if the value does not yet exist.  Create the entry,
 if necessary, unless NO-CREATE is non-nil."
-  ;; Evtl. load the requested cache file:
-  (if project-name (org-publish-initialize-cache project-name))
-  (let ((pl (org-publish-cache-get filename)) retval)
-    (if pl
-	(if (plist-member pl property)
-	    (setq retval (plist-get pl property))
-	  (setq retval default))
-      ;; no pl yet:
-      (unless no-create
-	(org-publish-cache-set filename (list property default)))
-      (setq retval default))
-    retval))
+  (when project-name (org-publish-initialize-cache project-name))
+  (let ((properties (org-publish-cache-get filename)))
+    (cond ((null properties)
+	   (unless no-create
+	     (org-publish-cache-set filename (list property default)))
+	   default)
+	  ((plist-member properties property) (plist-get properties property))
+	  (t default))))
 
 (defun org-publish-cache-get (key)
   "Return the value stored in `org-publish-cache' for key KEY.
