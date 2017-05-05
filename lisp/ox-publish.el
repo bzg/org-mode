@@ -501,7 +501,7 @@ publishing FILENAME."
 		  ;; if :recursive in non-nil.
 		  ((org-publish-property :recursive p)
 		   (and (file-in-directory-p filename base) p))
-		  ((equal base (file-name-directory filename)) p)
+		  ((file-equal-p base (file-name-directory filename)) p)
 		  (t nil)))))
 	   org-publish-project-alist)))
     (cond
