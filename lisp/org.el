@@ -2553,13 +2553,16 @@ When the value is `file', also include the file name (without directory)
 into the path.  In this case, you can also stop the completion after
 the file name, to get entries inserted as top level in the file.
 
-When `full-file-path', include the full file path."
+When `full-file-path', include the full file path.
+
+When `buffer-name', use the buffer name."
   :group 'org-refile
   :type '(choice
 	  (const :tag "Not" nil)
 	  (const :tag "Yes" t)
 	  (const :tag "Start with file name" file)
-	  (const :tag "Start with full file path" full-file-path)))
+	  (const :tag "Start with full file path" full-file-path)
+	  (const :tag "Start with buffer name" buffer-name)))
 
 (defcustom org-outline-path-complete-in-steps t
   "Non-nil means complete the outline path in hierarchical steps.
@@ -11557,6 +11560,8 @@ order.")
 	       (setq f (and f (expand-file-name f)))
 	       (when (eq org-refile-use-outline-path 'file)
 		 (push (list (file-name-nondirectory f) f nil nil) tgs))
+	       (when (eq org-refile-use-outline-path 'buffer-name)
+		 (push (list (buffer-name (buffer-base-buffer)) f nil nil) tgs))
 	       (org-with-wide-buffer
 		(goto-char (point-min))
 		(setq org-outline-path-cache nil)
@@ -11584,6 +11589,9 @@ order.")
 						  (buffer-base-buffer)))))
 				   (`full-file-path
 				    (list (buffer-file-name
+					   (buffer-base-buffer))))
+				   (`buffer-name
+				    (list (buffer-name
 					   (buffer-base-buffer))))
 				   (_ nil))
 				 (mapcar #'org-protect-slash
