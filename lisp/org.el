@@ -11576,7 +11576,7 @@ order.")
 			    (target
 			     (if (not org-refile-use-outline-path) heading
 			       (mapconcat
-				#'org-protect-slash
+				#'identity
 				(append
 				 (pcase org-refile-use-outline-path
 				   (`file (list (file-name-nondirectory
@@ -11586,7 +11586,8 @@ order.")
 				    (list (buffer-file-name
 					   (buffer-base-buffer))))
 				   (_ nil))
-				 (org-get-outline-path t t))
+				 (mapcar #'org-protect-slash
+					 (org-get-outline-path t t)))
 				"/"))))
 			(push (list target f re (org-refile-marker (point)))
 			      tgs)))
