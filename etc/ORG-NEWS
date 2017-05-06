@@ -219,6 +219,12 @@ This allow to use a different title than entry title.
 Using ~C-c C-a u~ prompts for a URL pointing to a file to be attached
 to the document.
 
+*** New option for ~org-refile-use-outline-path~
+~org-refile-use-outline-path~ now supports the setting ~buffer-name~,
+which causes refile targets to be prefixed with the buffer’s
+name. This is particularly useful when used in conjunction with
+~uniquify.el~.
+
 ** Removed functions
 
 *** Org Timeline
