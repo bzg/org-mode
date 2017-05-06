@@ -131,7 +131,7 @@ the variable."
 	  ;; if ref is indexed grab the indices -- beware nested indices
 	  (when (and (string-match "\\[\\([^\\[]+\\)\\]$" ref)
 		     (let ((str (substring ref 0 (match-beginning 0))))
-		       (= (cl-count ?( str) (cl-count ?) str))))
+		       (= (cl-count ?\( str) (cl-count ?\) str))))
 	    (setq index (match-string 1 ref))
 	    (setq ref (substring ref 0 (match-beginning 0))))
 	  ;; assign any arguments to pass to source block
