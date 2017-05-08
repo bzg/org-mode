@@ -1487,19 +1487,17 @@ balanced instances of \"[ \t]:\", set ALTS to ((32 9) . 58)."
 	      (push after partial)
 	      (goto-char (1+ origin)))))
 	 ((and (eq ?\" (char-after)) (not (eq ?\\ (char-before))))
-	  ;; Include everything between non-escaped double quotes.
-	  (push ?\" partial)
+	  ;; Include everything from current double quote to next
+	  ;; non-escaped double quote.
 	  (let ((origin (point)))
-	    (condition-case nil
-		;; Use `read' since it is fast and takes care of
-		;; escaped quotes already.
+	    (if (re-search-forward "[^\\]\"" nil t)
 		(setq partial
-		      (nconc (cons ?\"
-				   (nreverse (string-to-list
-					      (read (current-buffer)))))
+		      (nconc (nreverse (string-to-list
+					(buffer-substring origin (point))))
 			     partial))
-	      ;; No closing double quote found.  Backtrack.
-	      (end-of-file (goto-char (1+ origin))))))
+	      ;; No closing double quote.  Backtrack.
+	      (push ?\" partial)
+	      (forward-char))))
 	 (t (push (char-after) partial)
 	    (forward-char))))
       ;; Add pending parsing and return result.

@@ -717,7 +717,15 @@ x
   ;; Handle un-balanced quotes.
   (should
    (equal '(":foo \"1" "bar 3")
-	  (org-babel-balanced-split ":foo \"1 :bar 3" '((32 9) . 58)))))
+	  (org-babel-balanced-split ":foo \"1 :bar 3" '((32 9) . 58))))
+  ;; Handle empty string.
+  (should
+   (equal '(":foo \"\"")
+	  (org-babel-balanced-split ":foo \"\"" '((32 9) . 58))))
+  ;; Handle control characters within double quotes.
+  (should
+   (equal '(":foo \"\\n\"")
+	  (org-babel-balanced-split ":foo \"\\n\"" '((32 9) . 58)))))
 
 (ert-deftest test-ob/commented-last-block-line-no-var ()
   (org-test-with-temp-text-in-file "
