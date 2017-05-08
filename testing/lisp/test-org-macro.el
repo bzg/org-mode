@@ -75,9 +75,22 @@
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
       (buffer-string))))
-  ;; Test special "property" macro.  With only one argument, retrieve
-  ;; property from current headline.  Otherwise, the second argument
-  ;; is a search option to get the property from another headline.
+  ;; Macro expansion ignores narrowing.
+  (should
+   (string-match
+    "expansion"
+    (org-test-with-temp-text
+	"#+MACRO: macro expansion\n{{{macro}}}\n<point>Contents"
+      (narrow-to-region (point) (point-max))
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (org-with-wide-buffer (buffer-string))))))
+
+(ert-deftest test-org-macro/property ()
+  "Test {{{property}}} macro."
+  ;; With only one argument, retrieve property from current headline.
+  ;; Otherwise, the second argument is a search option to get the
+  ;; property from another headline.
   (should
    (equal "1"
 	  (org-test-with-temp-text
@@ -107,17 +120,80 @@
    (org-test-with-temp-text
        "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n{{{property(A,*???)}}}<point>"
      (org-macro-initialize-templates)
-     (org-macro-replace-all org-macro-templates)))
-  ;; Macro expansion ignores narrowing.
+     (org-macro-replace-all org-macro-templates))))
+
+(ert-deftest test-org-macro/n ()
+  "Test {{{n}}} macro."
+  ;; Standard test with default counter.
   (should
-   (string-match
-    "expansion"
-    (org-test-with-temp-text
-	"#+MACRO: macro expansion\n{{{macro}}}\n<point>Contents"
-      (narrow-to-region (point) (point-max))
-      (org-macro-initialize-templates)
-      (org-macro-replace-all org-macro-templates)
-      (org-with-wide-buffer (buffer-string))))))
+   (equal "1 2"
+	  (org-test-with-temp-text "{{{n}}} {{{n}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  (should
+   (equal "1 2"
+	  (org-test-with-temp-text "{{{n()}}} {{{n}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  ;; Test alternative counters.
+  (should
+   (equal "1 1 1 2"
+	  (org-test-with-temp-text "{{{n}}} {{{n(c1)}}} {{{n(c2)}}} {{{n(c1)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  ;; Second argument set a counter to a given value.  A non-numeric
+  ;; value resets the counter to 1.
+  (should
+   (equal "9 10"
+	  (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  (should
+   (equal "9 1"
+	  (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c,reset)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  ;; Tolerate spaces in second argument.
+  (should
+   (equal "9 10"
+	  (org-test-with-temp-text "{{{n(c, 9)}}} {{{n(c)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  (should
+   (equal "9 1"
+	  (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c, reset)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  ;; Second argument also applies to default counter.
+  (should
+   (equal "9 10 1"
+	  (org-test-with-temp-text "{{{n(,9)}}} {{{n}}} {{{n(,reset)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position)))))
+  ;; An empty second argument is equivalent to no argument.
+  (should
+   (equal "2 3"
+	  (org-test-with-temp-text "{{{n(c,2)}}} {{{n(c,)}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (line-end-position))))))
 
 (ert-deftest test-org-macro/escape-arguments ()
   "Test `org-macro-escape-arguments' specifications."

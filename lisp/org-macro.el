@@ -36,8 +36,11 @@
 
 ;; Along with macros defined through #+MACRO: keyword, default
 ;; templates include the following hard-coded macros:
-;; {{{time(format-string)}}}, {{{property(node-property)}}},
-;; {{{input-file}}} and {{{modification-time(format-string)}}}.
+;;   {{{time(format-string)}}},
+;;   {{{property(node-property)}}},
+;;   {{{input-file}}},
+;;   {{{modification-time(format-string)}}},
+;;   {{{n(counter,reset}}}.
 
 ;; Upon exporting, "ox.el" will also provide {{{author}}}, {{{date}}},
 ;; {{{email}}} and {{{title}}} macros.
@@ -129,7 +132,7 @@ function installs the following ones: \"property\",
 	    (let ((old-template (assoc (car cell) templates)))
 	      (if old-template (setcdr old-template (cdr cell))
 		(push cell templates))))))
-    ;; Install hard-coded macros.
+    ;; Install "property", "time" macros.
     (mapc update-templates
 	  (list (cons "property"
 		      "(eval (save-excursion
@@ -143,6 +146,7 @@ function installs the following ones: \"property\",
                       l)))))
         (org-entry-get nil \"$1\" 'selective)))")
 		(cons "time" "(eval (format-time-string \"$1\"))")))
+    ;; Install "input-file", "modification-time" macros.
     (let ((visited-file (buffer-file-name (buffer-base-buffer))))
       (when (and visited-file (file-exists-p visited-file))
 	(mapc update-templates
@@ -152,6 +156,10 @@ function installs the following ones: \"property\",
 				  (prin1-to-string visited-file)
 				  (prin1-to-string
 				   (nth 5 (file-attributes visited-file)))))))))
+    ;; Initialize and install "n" macro.
+    (org-macro--counter-initialize)
+    (funcall update-templates
+	     (cons "n" "(eval (org-macro--counter-increment \"$1\" \"$2\"))"))
     (setq org-macro-templates templates)))
 
 (defun org-macro-expand (macro templates)
@@ -280,6 +288,9 @@ Return a list of arguments, as strings.  This is the opposite of
     s nil t)
    "\000"))
 
+
+;;; Helper functions and variables for internal macros
+
 (defun org-macro--vc-modified-time (file)
   (save-window-excursion
     (when (vc-backend file)
@@ -303,6 +314,27 @@ Return a list of arguments, as strings.  This is the opposite of
 		(while (and proc (accept-process-output proc .5 nil t)))))
 	  (kill-buffer buf))
 	date))))
+
+(defvar org-macro--counter-table nil
+  "Hash table containing counter value per name.")
+
+(defun org-macro--counter-initialize ()
+  "Initialize `org-macro--counter-table'."
+  (setq org-macro--counter-table (make-hash-table :test #'equal)))
+
+(defun org-macro--counter-increment (name &optional reset)
+  "Increment counter NAME.
+NAME is a string identifying the counter.  If optional argument
+RESET is a non-empty string, reset the counter instead."
+  (if (org-string-nw-p reset)
+      (let ((new-value (if (string-match-p "\\`[ \t]*[0-9]+[ \t]*\\'" reset)
+			   (string-to-number reset)
+			 1)))
+	(puthash name new-value org-macro--counter-table))
+    (let ((value (gethash name org-macro--counter-table)))
+      (puthash name
+	       (if (null value) 1 (1+ value))
+	       org-macro--counter-table))))
 
 
 (provide 'org-macro)

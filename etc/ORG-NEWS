@@ -197,6 +197,9 @@ contents, are now supported.
 This new function is meant to be used in back-ends supporting images
 as descriptions of links, a.k.a. image links.  See its docstring for
 details.
+**** New macro : ~{{{n}}}~
+This macro creates and increment multiple counters in a document.  See
+manual for details.
 **** Add global macros through ~org-export-global-macros~
 With this variable, one can define macros available for all documents.
 **** New keyword ~#+EXPORT_FILE_NAME~
