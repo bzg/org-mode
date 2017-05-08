@@ -407,9 +407,11 @@ definition."
 (defun org-publish--expand-file-name (file project)
   "Return full file name for FILE in PROJECT.
 When FILE is a relative file name, it is expanded according to
-project base directory."
-  (if (file-name-absolute-p file) file
-    (expand-file-name file (org-publish-property :base-directory project))))
+project base directory.  Always return the true name of the file,
+ignoring symlinks."
+  (file-truename
+   (if (file-name-absolute-p file) file
+     (expand-file-name file (org-publish-property :base-directory project)))))
 
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects in PROJECTS-ALIST.
