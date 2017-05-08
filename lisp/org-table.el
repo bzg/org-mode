@@ -1639,7 +1639,7 @@ In particular, this does handle wide and invisible characters."
 			      dline -1 dline))))
 
 ;;;###autoload
-(defun org-table-sort-lines (with-case &optional sorting-type getkey-func compare-func)
+(defun org-table-sort-lines (&optional with-case sorting-type getkey-func compare-func)
   "Sort table lines according to the column at point.
 
 The position of point indicates the column to be used for
