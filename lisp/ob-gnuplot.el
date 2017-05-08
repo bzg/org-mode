@@ -187,7 +187,7 @@ This function is called by `org-babel-execute-src-block'."
 		     script-file
 		     (if (member system-type '(cygwin windows-nt ms-dos))
 			 t nil)))))
-            (message output))
+            (message "%s" output))
         (with-temp-buffer
           (insert (concat body "\n"))
           (gnuplot-mode)
