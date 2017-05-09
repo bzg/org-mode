@@ -42,6 +42,8 @@
 (require 'org-id)
 (require 'vc-git)
 
+(declare-function dired-dwim-target-directory "dired-aux")
+
 (defgroup org-attach nil
   "Options concerning entry attachments in Org mode."
   :tag "Org Attach"
@@ -406,7 +408,7 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
              (org-attach-store-link file)))
       (if visit-dir
           (dired attach-dir)
-        (message "File \"%s\" is now a task attachment." basename)))))
+        (message "File %S is now a task attachment." basename)))))
 
 (defun org-attach-attach-cp ()
   "Attach a file by copying it."
