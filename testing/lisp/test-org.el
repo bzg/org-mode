@@ -2533,6 +2533,202 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
    (org-test-with-temp-text "xx abc<point> xx"
      (org-in-regexp "abc" nil t))))
 
+(ert-deftest test-org/sort-entries ()
+  "Test `org-sort-entries'."
+  ;; Sort alphabetically.
+  (should
+   (equal "\n* abc\n* def\n* xyz\n"
+	  (org-test-with-temp-text "\n* def\n* xyz\n* abc\n"
+	    (org-sort-entries nil ?a)
+	    (buffer-string))))
+  (should
+   (equal "\n* xyz\n* def\n* abc\n"
+	  (org-test-with-temp-text "\n* def\n* xyz\n* abc\n"
+	    (org-sort-entries nil ?A)
+	    (buffer-string))))
+  ;; Sort numerically.
+  (should
+   (equal "\n* 1\n* 2\n* 10\n"
+	  (org-test-with-temp-text "\n* 10\n* 1\n* 2\n"
+	    (org-sort-entries nil ?n)
+	    (buffer-string))))
+  (should
+   (equal "\n* 10\n* 2\n* 1\n"
+	  (org-test-with-temp-text "\n* 10\n* 1\n* 2\n"
+	    (org-sort-entries nil ?N)
+	    (buffer-string))))
+  ;; Sort by custom function.
+  (should
+   (equal "\n* b\n* aa\n* ccc\n"
+	  (org-test-with-temp-text "\n* ccc\n* b\n* aa\n"
+	    (org-sort-entries nil ?f
+			      (lambda ()
+				(length (buffer-substring (point-at-bol)
+							  (point-at-eol))))
+			      #'<)
+	    (buffer-string))))
+  (should
+   (equal "\n* ccc\n* aa\n* b\n"
+	  (org-test-with-temp-text "\n* ccc\n* b\n* aa\n"
+	    (org-sort-entries nil ?F
+			      (lambda ()
+				(length (buffer-substring (point-at-bol)
+							  (point-at-eol))))
+			      #'<)
+	    (buffer-string))))
+  ;; Sort by TODO keyword.
+  (should
+   (equal "\n* TODO h1\n* TODO h3\n* DONE h2\n"
+	  (org-test-with-temp-text
+	      "\n* TODO h1\n* DONE h2\n* TODO h3\n"
+	    (org-sort-entries nil ?o)
+	    (buffer-string))))
+  (should
+   (equal "\n* DONE h2\n* TODO h1\n* TODO h3\n"
+	  (org-test-with-temp-text
+	      "\n* TODO h1\n* DONE h2\n* TODO h3\n"
+	    (org-sort-entries nil ?O)
+	    (buffer-string))))
+  ;; Sort by priority.
+  (should
+   (equal "\n* [#A] h2\n* [#B] h3\n* [#C] h1\n"
+	  (org-test-with-temp-text
+	      "\n* [#C] h1\n* [#A] h2\n* [#B] h3\n"
+	    (org-sort-entries nil ?p)
+	    (buffer-string))))
+  (should
+   (equal "\n* [#C] h1\n* [#B] h3\n* [#A] h2\n"
+	  (org-test-with-temp-text
+	      "\n* [#C] h1\n* [#A] h2\n* [#B] h3\n"
+	    (org-sort-entries nil ?P)
+	    (buffer-string))))
+  ;; Sort by creation time.
+  (should
+   (equal "
+* h3
+  [2017-05-08 Mon]
+* h2
+  [2017-05-09 Tue]
+* h1
+  [2018-05-09 Wed]
+"
+	  (org-test-with-temp-text
+	      "
+* h1
+  [2018-05-09 Wed]
+* h2
+  [2017-05-09 Tue]
+* h3
+  [2017-05-08 Mon]
+"
+	    (org-sort-entries nil ?c)
+	    (buffer-string))))
+
+  ;; Sort by scheduled date.
+  (should
+   (equal "
+* TODO h4
+SCHEDULED: <2017-05-06 Sat>
+* TODO h3
+SCHEDULED: <2017-05-08 Mon>
+* TODO h2
+DEADLINE: <2017-05-09 Tue>
+* TODO h1
+DEADLINE: <2017-05-07 Sun>
+"
+	  (org-test-with-temp-text
+	      "
+* TODO h2
+DEADLINE: <2017-05-09 Tue>
+* TODO h1
+DEADLINE: <2017-05-07 Sun>
+* TODO h3
+SCHEDULED: <2017-05-08 Mon>
+* TODO h4
+SCHEDULED: <2017-05-06 Sat>
+"
+	    (org-sort-entries nil ?s)
+	    (buffer-string))))
+  ;; Sort by deadline date.
+  (should
+   (equal "
+* TODO h1
+DEADLINE: <2017-05-07 Sun>
+* TODO h2
+DEADLINE: <2017-05-09 Tue>
+* TODO h3
+SCHEDULED: <2017-05-08 Mon>
+* TODO h4
+SCHEDULED: <2017-05-06 Sat>
+"
+	  (org-test-with-temp-text
+	      "
+* TODO h2
+DEADLINE: <2017-05-09 Tue>
+* TODO h1
+DEADLINE: <2017-05-07 Sun>
+* TODO h3
+SCHEDULED: <2017-05-08 Mon>
+* TODO h4
+SCHEDULED: <2017-05-06 Sat>
+"
+	    (org-sort-entries nil ?d)
+	    (buffer-string))))
+  ;; Sort by any date/time
+  (should
+   (equal "
+* TODO h4
+SCHEDULED: <2017-05-06 Sat>
+* TODO h1
+DEADLINE: <2017-05-07 Sun>
+* TODO h3
+SCHEDULED: <2017-05-08 Mon>
+* TODO h2
+DEADLINE: <2017-05-09 Tue>
+"
+	  (org-test-with-temp-text
+	      "
+* TODO h2
+DEADLINE: <2017-05-09 Tue>
+* TODO h1
+DEADLINE: <2017-05-07 Sun>
+* TODO h3
+SCHEDULED: <2017-05-08 Mon>
+* TODO h4
+SCHEDULED: <2017-05-06 Sat>
+"
+	    (org-sort-entries nil ?t)
+	    (buffer-string))))
+  ;; Sort by clocking time.
+  (should
+   (equal "
+* clocked h2
+  :LOGBOOK:
+  CLOCK: [2017-05-09 Tue 00:15]--[2017-05-09 Tue 00:22] =>  0:07
+  CLOCK: [2017-05-09 Tue 00:00]--[2017-05-09 Tue 00:10] =>  0:10
+  :END:
+* clocked h1
+  :LOGBOOK:
+  CLOCK: [2017-05-09 Tue 00:15]--[2017-05-09 Tue 00:22] =>  0:07
+  CLOCK: [2017-05-09 Tue 00:00]--[2017-05-09 Tue 00:12] =>  0:12
+  :END:
+"
+	  (org-test-with-temp-text
+	      "
+* clocked h1
+  :LOGBOOK:
+  CLOCK: [2017-05-09 Tue 00:15]--[2017-05-09 Tue 00:22] =>  0:07
+  CLOCK: [2017-05-09 Tue 00:00]--[2017-05-09 Tue 00:12] =>  0:12
+  :END:
+* clocked h2
+  :LOGBOOK:
+  CLOCK: [2017-05-09 Tue 00:15]--[2017-05-09 Tue 00:22] =>  0:07
+  CLOCK: [2017-05-09 Tue 00:00]--[2017-05-09 Tue 00:10] =>  0:10
+  :END:
+"
+	    (org-sort-entries nil ?k)
+	    (buffer-string)))))
+
 
 ;;; Navigation
 
