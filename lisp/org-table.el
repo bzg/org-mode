@@ -1647,7 +1647,8 @@ In particular, this does handle wide and invisible characters."
 			      dline -1 dline))))
 
 ;;;###autoload
-(defun org-table-sort-lines (with-case &optional sorting-type getkey-func compare-func)
+(defun org-table-sort-lines
+    (&optional with-case sorting-type getkey-func compare-func interactive?)
   "Sort table lines according to the column at point.
 
 The position of point indicates the column to be used for
@@ -1671,12 +1672,13 @@ any of (?a ?A ?n ?N ?t ?T ?f ?F) where the capital letters indicate that
 sorting should be done in reverse order.
 
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
-a function to be called to extract the key.  It must return either
-a string or a number that should serve as the sorting key for that
-row.  It will then use COMPARE-FUNC to compare entries.  If GETKEY-FUNC
-is specified interactively, the comparison will be either a string or
-numeric compare based on the type of the first key in the table."
-  (interactive "P")
+a function to be called to extract the key.  It must return a value
+that is compatible with COMPARE-FUNC, the function used to compare
+entries.
+
+A non-nil value for INTERACTIVE? is used to signal that this
+function is being called interactively."
+  (interactive (list current-prefix-arg nil nil nil t))
   (when (org-region-active-p) (goto-char (region-beginning)))
   ;; Point must be either within a field or before a data line.
   (save-excursion
@@ -1686,7 +1688,7 @@ numeric compare based on the type of the first key in the table."
   ;; Set appropriate case sensitivity and column used for sorting.
   (let ((column (let ((c (org-table-current-column)))
 		  (cond ((> c 0) c)
-			((called-interactively-p 'any)
+			(interactive?
 			 (read-number "Use column N for sorting: "))
 			(t 1))))
 	(sorting-type
@@ -1734,17 +1736,21 @@ numeric compare based on the type of the first key in the table."
 			 (t 0))))
 		((?f ?F)
 		 (or getkey-func
-		     (and (called-interactively-p 'any)
-			  (intern
-			   (completing-read "Sort using function: "
-					    obarray #'fboundp t)))
+		     (and interactive?
+			  (org-read-function "Function for extracting keys: "))
 		     (error "Missing key extractor to sort rows")))
 		(t (user-error "Invalid sorting type `%c'" sorting-type))))
 	     (predicate
 	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
 		((?a ?A) #'string<)
-		((?f ?F) compare-func))))
+		((?f ?F)
+		 (or compare-func
+		     (and interactive?
+			  (org-read-function
+			   (concat "Fuction for comparing keys "
+				   "(empty for default `sort-subr' predicate): ")
+			   'allow-empty)))))))
 	(goto-char (point-min))
 	(sort-subr (memq sorting-type '(?A ?N ?T ?F))
 		   (lambda ()

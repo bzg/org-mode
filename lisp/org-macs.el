@@ -294,6 +294,16 @@ removed."
       (substring string (length pre) (- (length post)))
     string))
 
+(defun org-read-function (prompt &optional allow-empty?)
+  "Prompt for a function.
+If ALLOW-EMPTY? is non-nil, return nil rather than raising an
+error when the user input is empty."
+  (let ((func (completing-read prompt obarray #'fboundp t)))
+    (cond ((not (string= func ""))
+	   (intern func))
+	  (allow-empty? nil)
+	  (t (user-error "Empty input is not valid")))))
+
 (provide 'org-macs)
 
 ;;; org-macs.el ends here
