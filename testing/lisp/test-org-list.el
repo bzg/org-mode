@@ -1012,6 +1012,74 @@
 	    (org-toggle-item t)
 	    (buffer-string)))))
 
+(ert-deftest test-org-list/sort ()
+  "Test `org-sort-list'."
+  ;; Sort alphabetically.
+  (should
+   (equal "- abc\n- def\n- xyz\n"
+	  (org-test-with-temp-text "- def\n- xyz\n- abc\n"
+	    (org-sort-list nil ?a)
+	    (buffer-string))))
+  (should
+   (equal "- xyz\n- def\n- abc\n"
+	  (org-test-with-temp-text "- def\n- xyz\n- abc\n"
+	    (org-sort-list nil ?A)
+	    (buffer-string))))
+  ;; Sort numerically.
+  (should
+   (equal "- 1\n- 2\n- 10\n"
+	  (org-test-with-temp-text "- 10\n- 1\n- 2\n"
+	    (org-sort-list nil ?n)
+	    (buffer-string))))
+  (should
+   (equal "- 10\n- 2\n- 1\n"
+	  (org-test-with-temp-text "- 10\n- 1\n- 2\n"
+	    (org-sort-list nil ?N)
+	    (buffer-string))))
+  ;; Sort by checked status.
+  (should
+   (equal "- [ ] xyz\n- [ ] def\n- [X] abc\n"
+	  (org-test-with-temp-text "- [X] abc\n- [ ] xyz\n- [ ] def\n"
+	    (org-sort-list nil ?x)
+	    (buffer-string))))
+  (should
+   (equal "- [X] abc\n- [ ] xyz\n- [ ] def\n"
+	  (org-test-with-temp-text "- [X] abc\n- [ ] xyz\n- [ ] def\n"
+	    (org-sort-list nil ?X)
+	    (buffer-string))))
+  ;; Sort by time stamp.
+  (should
+   (equal "- <2017-05-08 Mon>\n- <2017-05-09 Tue>\n- <2018-05-09 Wed>\n"
+	  (org-test-with-temp-text
+	      "- <2018-05-09 Wed>\n- <2017-05-09 Tue>\n- <2017-05-08 Mon>\n"
+	    (org-sort-list nil ?t)
+	    (buffer-string))))
+  (should
+   (equal "- <2018-05-09 Wed>\n- <2017-05-09 Tue>\n- <2017-05-08 Mon>\n"
+	  (org-test-with-temp-text
+	      "- <2018-05-09 Wed>\n- <2017-05-09 Tue>\n- <2017-05-08 Mon>\n"
+	    (org-sort-list nil ?T)
+	    (buffer-string))))
+  ;; Sort by custom function.
+  (should
+   (equal "- b\n- aa\n- ccc\n"
+	  (org-test-with-temp-text "- ccc\n- b\n- aa\n"
+	    (org-sort-list nil ?f
+			   (lambda ()
+			     (length (buffer-substring (point-at-bol)
+						       (point-at-eol))))
+			   #'<)
+	    (buffer-string))))
+  (should
+   (equal "- ccc\n- aa\n- b\n"
+	  (org-test-with-temp-text "- ccc\n- b\n- aa\n"
+	    (org-sort-list nil ?F
+			   (lambda ()
+			     (length (buffer-substring (point-at-bol)
+						       (point-at-eol))))
+			   #'<)
+	    (buffer-string)))))
+
 
 ;;; Radio Lists
 
