@@ -8849,10 +8849,11 @@ with the original repeater."
   "Call `org-sort-entries', `org-table-sort-lines' or `org-sort-list'.
 Optional argument WITH-CASE means sort case-sensitively."
   (interactive "P")
-  (funcall (cond ((org-at-table-p) #'org-table-sort-lines)
-		 ((org-at-item-p) #'org-sort-list)
-		 (t #'org-sort-entries))
-	   with-case))
+  (org-call-with-arg
+   (cond ((org-at-table-p) #'org-table-sort-lines)
+	 ((org-at-item-p) #'org-sort-list)
+	 (t #'org-sort-entries))
+   with-case))
 
 (defun org-sort-remove-invisible (s)
   "Remove invisible part of links and emphasis markers from string S."
