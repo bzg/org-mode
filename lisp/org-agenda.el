@@ -9969,11 +9969,13 @@ The prefix arg is passed through to the command if possible."
 		 (c1 (if (eq action ?s) 'org-agenda-schedule
 		       'org-agenda-deadline)))
 	    ;; Make sure to not prompt for a note when bulk
-	    ;; rescheduling as Org cannot cope with simultaneous Org.
-	    ;; Besides, it could be annoying depending on the number
-	    ;; of items re-scheduled.
+	    ;; rescheduling as Org cannot cope with simultaneous
+	    ;; notes.  Besides, it could be annoying depending on the
+	    ;; number of items re-scheduled.
 	    (setq cmd `(eval '(let ((org-log-reschedule
-				     (and org-log-reschedule 'time)))
+				     (and org-log-reschedule 'time))
+				    (org-log-redeadline
+				     (and org-log-redeadline 'time)))
 				(,c1 arg ,time))))))
 
 	 ((equal action ?S)
