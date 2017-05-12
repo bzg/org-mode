@@ -1354,7 +1354,15 @@
      (org-overview)
      (let ((org-blank-before-new-entry '((heading . nil))))
        (org-insert-heading '(4)))
-     (invisible-p (line-end-position 0)))))
+     (invisible-p (line-end-position 0))))
+  ;; Properly handle empty lines when forcing a headline below current
+  ;; one.
+  (should
+   (equal "* H1\n\n* H\n\n* \n"
+	  (org-test-with-temp-text "* H1\n\n* H<point>"
+	    (let ((org-blank-before-new-entry '((heading . t))))
+	      (org-insert-heading '(4))
+	      (buffer-string))))))
 
 (ert-deftest test-org/insert-todo-heading-respect-content ()
   "Test `org-insert-todo-heading-respect-content' specifications."
