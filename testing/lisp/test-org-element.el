@@ -1558,6 +1558,10 @@ e^{i\\pi}+1=0
    (eq 'latex-fragment
        (org-test-with-temp-text "$a$ "
 	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$'"
+	 (org-element-type (org-element-context)))))
   (should-not
    (eq 'latex-fragment
        (org-test-with-temp-text "$a$a"

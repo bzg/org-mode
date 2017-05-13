@@ -3040,7 +3040,8 @@ Assume point is at the beginning of the LaTeX fragment."
 			 (search-forward "$" nil t 2)
 			 (not (memq (char-before (match-beginning 0))
 				    '(?\s ?\t ?\n ?, ?.)))
-			 (looking-at "\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|$\\)")
+			 (looking-at-p
+			  "\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|'\\|$\\)")
 			 (point)))
 		(pcase (char-after (1+ (point)))
 		  (?\( (search-forward "\\)" nil t))
