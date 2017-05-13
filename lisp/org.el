@@ -23260,7 +23260,7 @@ region only contains such lines."
 
 ;; Org comments syntax is quite complex.  It requires the entire line
 ;; to be just a comment.  Also, even with the right syntax at the
-;; beginning of line, some some elements (i.e. verse-block or
+;; beginning of line, some elements (e.g., verse-block or
 ;; example-block) don't accept comments.  Usual Emacs comment commands
 ;; cannot cope with those requirements.  Therefore, Org replaces them.
 
