@@ -3417,15 +3417,6 @@ Text
    (eq 'table-cell
        (org-test-with-temp-text "| a | b<point> {{{macro}}} |"
 	 (org-element-type (org-element-context)))))
-  ;; Find objects in planning lines.
-  (should
-   (eq 'timestamp
-       (org-test-with-temp-text "* H\n  SCHEDULED: <2012<point>-03-29 thu.>"
-	 (org-element-type (org-element-context)))))
-  (should-not
-   (eq 'timestamp
-       (org-test-with-temp-text "* H\n  SCHEDULED<point>: <2012-03-29 thu.>"
-	 (org-element-type (org-element-context)))))
   ;; Find objects in item tags.
   (should
    (eq 'bold

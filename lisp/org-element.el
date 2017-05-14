@@ -5867,17 +5867,6 @@ Providing it allows for quicker computation."
 		    (or (< pos cend) (and (= pos cend) (eobp))))
 	       (narrow-to-region cbeg cend)
 	     (throw 'objects-forbidden element))))
-	;; At a planning line, if point is at a timestamp, return it,
-	;; otherwise, return element.
-	((eq type 'planning)
-	 (dolist (p '(:closed :deadline :scheduled))
-	   (let ((timestamp (org-element-property p element)))
-	     (when (and timestamp
-			(<= (org-element-property :begin timestamp) pos)
-			(> (org-element-property :end timestamp) pos))
-	       (throw 'objects-forbidden timestamp))))
-	 ;; All other locations cannot contain objects: bail out.
-	 (throw 'objects-forbidden element))
 	(t (throw 'objects-forbidden element)))
        (goto-char (point-min))
        (let ((restriction (org-element-restriction type))
