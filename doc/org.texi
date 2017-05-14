@@ -556,8 +556,8 @@ Embedded @LaTeX{}
 
 Exporting
 
-* The export dispatcher::       The main exporter interface
-* Export settings::             Generic export settings
+* The export dispatcher::       The main interface
+* Export settings::             Common export settings
 * Table of contents::           The if and where of the table of contents
 * Include files::               Include additional files into a document
 * Macro replacement::           Use macros to create templates
@@ -577,85 +577,85 @@ Exporting
 
 Beamer export
 
-* Beamer export commands::      How to export Beamer documents.
-* Beamer specific export settings::  Export settings for Beamer export.
-* Sectioning Frames and Blocks in Beamer::  Blocks and sections in Beamer.
-* Beamer specific syntax::      Syntax specific to Beamer.
-* Editing support::             Helper functions for Org Beamer export.
-* A Beamer Example::            An complete Beamer example.
+* Beamer export commands::      For creating Beamer documents.
+* Beamer specific export settings::  For customizing Beamer export.
+* Sectioning Frames and Blocks in Beamer::  For composing Beamer slides.
+* Beamer specific syntax::      For using in Org documents.
+* Editing support::             For using helper functions.
+* A Beamer example::            A complete presentation.
 
 HTML export
 
-* HTML Export commands::        How to invoke HTML export
-* HTML Specific export settings::  Export settings for HTML export
-* HTML doctypes::               Org can export to various (X)HTML flavors
-* HTML preamble and postamble::  How to insert a preamble and a postamble
-* Quoting HTML tags::           Using direct HTML in Org mode
-* Links in HTML export::        How links will be interpreted and formatted
-* Tables in HTML export::       How to modify the formatting of tables
-* Images in HTML export::       How to insert figures into HTML output
-* Math formatting in HTML export::  Beautiful math also on the web
-* Text areas in HTML export::   An alternative way to show an example
-* CSS support::                 Changing the appearance of the output
-* JavaScript support::          Info and Folding in a web browser
+* HTML Export commands::        Invoking HTML export
+* HTML Specific export settings::  Settings for HTML export
+* HTML doctypes::               Exporting various (X)HTML flavors
+* HTML preamble and postamble::  Inserting preamble and postamble
+* Quoting HTML tags::           Using direct HTML in Org files
+* Links in HTML export::        Interpreting and formatting links
+* Tables in HTML export::       Formatting and modifying tables
+* Images in HTML export::       Inserting figures with HTML output
+* Math formatting in HTML export::  Handling math equations
+* Text areas in HTML export::   Showing an alternate approach, an example
+* CSS support::                 Styling HTML output
+* JavaScript support::          Folding scripting in the web browser
 
 @LaTeX{} export
 
-* @LaTeX{} export commands::    How to export to @LaTeX{} and PDF
-* @LaTeX{} specific export settings::  Export settings for @LaTeX{}
-* @LaTeX{} header and sectioning::  Setting up the export file structure
-* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::   Specific attributes for tables
-* Images in @LaTeX{} export::   Specific attributes for images
-* Plain lists in @LaTeX{} export::  Specific attributes for plain lists
-* Source blocks in @LaTeX{} export::  Specific attributes for source blocks
-* Example blocks in @LaTeX{} export::  Specific attributes for example blocks
-* Special blocks in @LaTeX{} export::  Specific attributes for special blocks
-* Horizontal rules in @LaTeX{} export::  Specific attributes for horizontal rules
+* @LaTeX{} export commands::    For producing @LaTeX{} and PDF documents.
+* @LaTeX{} specific export settings::  Unique to this @LaTeX{} back-end.
+* @LaTeX{} header and sectioning::  For file structure.
+* Quoting @LaTeX{} code::       Directly in the Org document.
+* Tables in @LaTeX{} export::   Attributes specific to tables.
+* Images in @LaTeX{} export::   Attributes specific to images.
+* Plain lists in @LaTeX{} export::  Attributes specific to lists.
+* Source blocks in @LaTeX{} export::  Attributes specific to source code blocks.
+* Example blocks in @LaTeX{} export::  Attributes specific to example blocks.
+* Special blocks in @LaTeX{} export::  Attributes specific to special blocks.
+* Horizontal rules in @LaTeX{} export::  Attributes specific to horizontal rules.
 
 OpenDocument Text export
 
-* Pre-requisites for ODT export::  What packages ODT exporter relies on
-* ODT export commands::         How to invoke ODT export
-* ODT specific export settings::  Export settings for ODT
-* Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
-* Applying custom styles::      How to apply custom styles to the output
-* Links in ODT export::         How links will be interpreted and formatted
-* Tables in ODT export::        How Tables are exported
-* Images in ODT export::        How to insert images
-* Math formatting in ODT export::  How @LaTeX{} fragments are formatted
-* Labels and captions in ODT export::  How captions are rendered
-* Literal examples in ODT export::  How source and example blocks are formatted
-* Advanced topics in ODT export::  Read this if you are a power user
+* Pre-requisites for ODT export::  Required packages.
+* ODT export commands::         Invoking export.
+* ODT specific export settings::  Configuration options.
+* Extending ODT export::        Producing @file{.doc}, @file{.pdf} files.
+* Applying custom styles::      Styling the output.
+* Links in ODT export::         Handling and formatting links.
+* Tables in ODT export::        Org table conversions.
+* Images in ODT export::        Inserting images.
+* Math formatting in ODT export::  Formatting @LaTeX{} fragments.
+* Labels and captions in ODT export::  Rendering objects.
+* Literal examples in ODT export::  For source code and example blocks.
+* Advanced topics in ODT export::  For power users.
 
 Math formatting in ODT export
 
-* Working with @LaTeX{} math snippets::  How to embed @LaTeX{} math fragments
-* Working with MathML or OpenDocument formula files::  How to embed equations in native format
+* Working with @LaTeX{} math snippets::  Embedding in @LaTeX{} format.
+* Working with MathML or OpenDocument formula files::  Embedding in native format.
 
 Advanced topics in ODT export
 
-* Configuring a document converter::  How to register a document converter
-* Working with OpenDocument style files::  Explore the internals
-* Creating one-off styles::     How to produce custom highlighting etc
-* Customizing tables in ODT export::  How to define and use Table templates
-* Validating OpenDocument XML::  How to debug corrupt OpenDocument files
+* Configuring a document converter::  Registering a document converter.
+* Working with OpenDocument style files::  Exploring internals.
+* Creating one-off styles::     Customizing styles, highlighting.
+* Customizing tables in ODT export::  Defining table templates.
+* Validating OpenDocument XML::  Debugging corrupted OpenDocument files.
 
 Texinfo export
 
-* Texinfo export commands::     How to invoke Texinfo export
-* Texinfo specific export settings::  Export settings for Texinfo
-* Texinfo file header::         Generating the begining of a Texinfo file
-* Texinfo title and copyright page::  Creating title and copyright pages
-* Texinfo @samp{Top} node::     Installing a manual in Info Top node
-* Headings and sectioning structure::  Building document structure
-* Indices::                     Creating indices
-* Quoting Texinfo code::        Incorporating literal Texinfo code
-* Plain lists in Texinfo export::  Specific attributes for plain lists
-* Tables in Texinfo export::    Specific attributes for tables
-* Images in Texinfo export::    Specific attributes for images
-* Special blocks in Texinfo export::  Specific attributes for special blocks
-* A Texinfo example::           Illustrating Org to Texinfo process
+* Texinfo export commands::     Invoking commands.
+* Texinfo specific export settings::  Setting the environment.
+* Texinfo file header::         Generating the header.
+* Texinfo title and copyright page::  Creating preamble pages.
+* Texinfo @samp{Top} node::     Installing a manual in Info Top node.
+* Headings and sectioning structure::  Building document structure.
+* Indices::                     Creating indices.
+* Quoting Texinfo code::        Incorporating literal Texinfo code.
+* Plain lists in Texinfo export::  List attributes.
+* Tables in Texinfo export::    Table attributes.
+* Images in Texinfo export::    Image attributes.
+* Special blocks in Texinfo export::  Special block attributes.
+* A Texinfo example::           Processing Org to Texinfo.
 
 Publishing
 
@@ -11026,7 +11026,7 @@ popular display formats.
 * Sectioning Frames and Blocks in Beamer::  For composing Beamer slides.
 * Beamer specific syntax::      For using in Org documents.
 * Editing support::             For using helper functions.
-* Beamer Example::              A complete presentation.
+* A Beamer example::            A complete presentation.
 @end menu
 
 @node Beamer export commands
@@ -11254,7 +11254,7 @@ The @code{org-beamer-mode} provides this key for quicker selections in Beamer
 normal environments, and for selecting the @code{BEAMER_COL} property.
 @end table
 
-@node A Beamer Example
+@node A Beamer example
 @subsection A Beamer example
 
 Here is an example of an Org document ready for Beamer export.
@@ -11924,17 +11924,17 @@ blank lines in the Org document.  That's because @LaTeX{} itself depends on
 blank lines to tell apart syntactical elements, such as paragraphs.
 
 @menu
-* @LaTeX{} export commands::    For producing @LaTeX{} and PDF documents
-* @LaTeX{} specific export settings::  Unique to this @LaTeX{} back-end
-* @LaTeX{} header and sectioning::  For file structure
-* Quoting @LaTeX{} code::       Directly in the Org document
-* Tables in @LaTeX{} export::   Attributes specific to tables
-* Images in @LaTeX{} export::   Attributes specific to images
-* Plain lists in @LaTeX{} export::  Attributes specific to lists
-* Source blocks in @LaTeX{} export::  Attributes specific to source code blocks
-* Example blocks in @LaTeX{} export::  Attributes specific to example blocks
-* Special blocks in @LaTeX{} export::  Attributes specific to special blocks
-* Horizontal rules in @LaTeX{} export::  Attributes specific to  horizontal rules
+* @LaTeX{} export commands::    For producing @LaTeX{} and PDF documents.
+* @LaTeX{} specific export settings::  Unique to this @LaTeX{} back-end.
+* @LaTeX{} header and sectioning::  For file structure.
+* Quoting @LaTeX{} code::       Directly in the Org document.
+* Tables in @LaTeX{} export::   Attributes specific to tables.
+* Images in @LaTeX{} export::   Attributes specific to images.
+* Plain lists in @LaTeX{} export::  Attributes specific to lists.
+* Source blocks in @LaTeX{} export::  Attributes specific to source code blocks.
+* Example blocks in @LaTeX{} export::  Attributes specific to example blocks.
+* Special blocks in @LaTeX{} export::  Attributes specific to special blocks.
+* Horizontal rules in @LaTeX{} export::  Attributes specific to horizontal rules.
 @end menu
 
 @node @LaTeX{} export commands
@@ -12521,18 +12521,18 @@ Open Document Format for Office Applications (OpenDocument) Version 1.2}} and
 is compatible with LibreOffice 3.4.
 
 @menu
-* Pre-requisites for ODT export     :: required packages
-* ODT export commands               :: invoking export
-* ODT specific export settings      :: configuration options
-* Extending ODT export              :: producing @samp{doc}, @samp{pdf} files
-* Applying custom styles            :: to the output
-* Links in ODT export               :: handling and formatting links
-* Tables in ODT export              :: Org table conversions
-* Images in ODT export              :: inserting images
-* Math formatting in ODT export     :: formatting @LaTeX{} fragments
-* Labels and captions in ODT export :: rendering objects
-* Literal examples in ODT export    :: for source code and example blocks
-* Advanced topics in ODT export     :: for power users
+* Pre-requisites for ODT export::  Required packages.
+* ODT export commands::         Invoking export.
+* ODT specific export settings::  Configuration options.
+* Extending ODT export::        Producing @file{.doc}, @file{.pdf} files.
+* Applying custom styles::      Styling the output.
+* Links in ODT export::         Handling and formatting links.
+* Tables in ODT export::        Org table conversions.
+* Images in ODT export::        Inserting images.
+* Math formatting in ODT export::  Formatting @LaTeX{} fragments.
+* Labels and captions in ODT export::  Rendering objects.
+* Literal examples in ODT export::  For source code and example blocks.
+* Advanced topics in ODT export::  For power users.
 @end menu
 
 @node Pre-requisites for ODT export
@@ -12856,7 +12856,7 @@ height:width ratio, do the following
 
 @cindex #+ATTR_ODT
 The ODT export back-end can anchor images to @samp{"as-char"},
-@samp{"paragraph"}, or @samp{"page"}.  Set the preferred anchor using the 
+@samp{"paragraph"}, or @samp{"page"}.  Set the preferred anchor using the
 @code{:anchor} property of the @code{#+ATTR_ODT} line.
 
 To create an image that is anchored to a page:
@@ -12871,8 +12871,8 @@ To create an image that is anchored to a page:
 The ODT export back-end has special support built-in for handling math.
 
 @menu
-* Working with @LaTeX{} math snippets::  embedding in @LaTeX{} format
-* Working with MathML or OpenDocument formula files::  embedding in native format
+* Working with @LaTeX{} math snippets::  Embedding in @LaTeX{} format.
+* Working with MathML or OpenDocument formula files::  Embedding in native format.
 @end menu
 
 @node Working with @LaTeX{} math snippets
@@ -13039,11 +13039,11 @@ The ODT export back-end has extensive features useful for power users and
 frequent uses of ODT formats.
 
 @menu
-* Configuring a document converter::  registering a document converter
-* Working with OpenDocument style files::  exploring internals
-* Creating one-off styles::     customizing styles, highlighting
-* Customizing tables in ODT export::  defining table templates
-* Validating OpenDocument XML::  debugging corrupted OpenDocument files
+* Configuring a document converter::  Registering a document converter.
+* Working with OpenDocument style files::  Exploring internals.
+* Creating one-off styles::     Customizing styles, highlighting.
+* Customizing tables in ODT export::  Defining table templates.
+* Validating OpenDocument XML::  Debugging corrupted OpenDocument files.
 @end menu
 
 @node Configuring a document converter
@@ -13458,19 +13458,19 @@ The @samp{texinfo} export back-end generates documents with Texinfo code that
 can compile to Info format.
 
 @menu
-* Texinfo export commands::     invoking commands
-* Texinfo specific export settings::  setting the environment
-* Texinfo file header::         generating the header
-* Texinfo title and copyright page::  creating preamble pages
-* Texinfo @samp{Top} node::     installing a manual in Info Top node
-* Headings and sectioning structure::  building document structure
-* Indices::                     creating indices
-* Quoting Texinfo code::        incorporating literal Texinfo code
-* Plain lists in Texinfo export::  list attributes
-* Tables in Texinfo export::    table attributes
-* Images in Texinfo export::    image attributes
-* Special blocks in Texinfo export::  special block attributes
-* A Texinfo example::           processing Org to Texinfo
+* Texinfo export commands::     Invoking commands.
+* Texinfo specific export settings::  Setting the environment.
+* Texinfo file header::         Generating the header.
+* Texinfo title and copyright page::  Creating preamble pages.
+* Texinfo @samp{Top} node::     Installing a manual in Info Top node.
+* Headings and sectioning structure::  Building document structure.
+* Indices::                     Creating indices.
+* Quoting Texinfo code::        Incorporating literal Texinfo code.
+* Plain lists in Texinfo export::  List attributes.
+* Tables in Texinfo export::    Table attributes.
+* Images in Texinfo export::    Image attributes.
+* Special blocks in Texinfo export::  Special block attributes.
+* A Texinfo example::           Processing Org to Texinfo.
 @end menu
 
 @node Texinfo export commands
