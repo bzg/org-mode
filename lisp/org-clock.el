@@ -1681,7 +1681,7 @@ UPDOWN tells whether to change `up' or `down'.
 Optional argument N tells to change by that many units."
   (let ((tschange (if (eq updown 'up) 'org-timestamp-up
 		    'org-timestamp-down))
-	(timestamp? (org-at-timestamp-p t))
+	(timestamp? (org-at-timestamp-p 'lax))
 	ts1 begts1 ts2 begts2 updatets1 tdiff)
     (when timestamp?
       (save-excursion

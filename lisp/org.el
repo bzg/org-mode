@@ -11194,7 +11194,7 @@ or to another Org file, automatically push the old position onto the ring."
 	     (format "*Org Agenda(a:%s)"
 		     (concat (substring t1 0 10) "--" (substring t2 0 10)))))
 	(org-agenda-list nil tt1 (1+ (- tt2 tt1))))))
-   ((org-at-timestamp-p t)
+   ((org-at-timestamp-p 'lax)
     (let ((org-agenda-buffer-tmp-name
 	   (format "*Org Agenda(a:%s)" (substring (match-string 1) 0 10))))
       (org-agenda-list nil (time-to-days (org-time-string-to-time
@@ -13099,7 +13099,7 @@ repeater from there instead."
 	     (let ((end (org-entry-end-position)))
 	       (catch :repeat
 		 (while (re-search-forward org-repeat-re end t)
-		   (when (save-match-data (org-at-timestamp-p))
+		   (when (save-match-data (org-at-timestamp-p 'agenda))
 		     (throw :repeat (match-string-no-properties 1)))))))))))
 
 (defvar org-last-changed-timestamp)
@@ -13170,7 +13170,7 @@ This function is run automatically after each state change to a DONE state."
 			       (match-string 0)))))
 		(cond
 		 ;; Ignore fake time-stamps (e.g., within comments).
-		 ((not (org-at-timestamp-p t)))
+		 ((not (org-at-timestamp-p 'agenda)))
 		 ;; Time-stamps without a repeater are usually
 		 ;; skipped.  However, a SCHEDULED time-stamp without
 		 ;; one is removed, as they are no longer relevant.
@@ -16620,7 +16620,7 @@ non-nil."
   (let* ((ts (cond
 	      ((org-at-date-range-p t)
 	       (match-string (if (< (point) (- (match-beginning 2) 2)) 1 2)))
-	      ((org-at-timestamp-p t) (match-string 0))))
+	      ((org-at-timestamp-p 'lax) (match-string 0))))
 	 ;; Default time is either the timestamp at point or today.
 	 ;; When entering a range, only the range start is considered.
          (default-time (if (not ts) (current-time)
@@ -16648,9 +16648,9 @@ non-nil."
      (ts
       ;; Make sure we're on a timestamp.  When in the middle of a date
       ;; range, move arbitrarily to range end.
-      (unless (org-at-timestamp-p t)
+      (unless (org-at-timestamp-p 'lax)
 	(skip-chars-forward "-")
-	(org-at-timestamp-p t))
+	(org-at-timestamp-p 'lax))
       (replace-match "")
       (setq org-last-changed-timestamp
 	    (org-insert-time-stamp
@@ -17867,7 +17867,7 @@ With prefix ARG, change by that many units."
   "Increase the date in the time stamp by one day.
 With prefix ARG, change that many days."
   (interactive "p")
-  (if (and (not (org-at-timestamp-p t))
+  (if (and (not (org-at-timestamp-p 'lax))
 	   (org-at-heading-p))
       (org-todo 'up)
     (org-timestamp-change (prefix-numeric-value arg) 'day 'updown)))
@@ -17876,52 +17876,68 @@ With prefix ARG, change that many days."
   "Decrease the date in the time stamp by one day.
 With prefix ARG, change that many days."
   (interactive "p")
-  (if (and (not (org-at-timestamp-p t))
+  (if (and (not (org-at-timestamp-p 'lax))
 	   (org-at-heading-p))
       (org-todo 'down)
     (org-timestamp-change (- (prefix-numeric-value arg)) 'day) 'updown))
 
-(defun org-at-timestamp-p (&optional inactive-ok)
+(defun org-at-timestamp-p (&optional extended)
   "Non-nil if point is inside a timestamp.
 
-When optional argument INACTIVE-OK is non-nil, also consider
-inactive timestamps.
+By default, the function only consider syntactically valid active
+timestamps.  However, the caller may have a broader definition
+for timestamps.  As a consequence, optional argument EXTENDED can
+be set to the following values
 
-When this function returns a non-nil value, match data is set
-according to `org-ts-regexp3' or `org-ts-regexp2', depending on
-INACTIVE-OK.
+  `inactive'
 
-Return the position of the point as a symbol among `bracket',
-`after', `year', `month', `hour', `minute', `day' or a number of
-character from the last know part of the time stamp.
+    Include also syntactically valid inactive timestamps.
 
-This function checks context and only return non-nil for valid
-time stamps.  If you need to match anything looking like a time
-stamp, or if you are sure about the context, consider using
-`org-in-regexp', e.g.,
+  `agenda'
 
-  (org-in-regexp org-ts-regexp)
+    Include timestamps allowed in Agenda, i.e., those in
+    properties drawers, planning lines and clock lines.
 
-Unlike to `org-element-context', the function recognizes time
-stamps in properties drawers, planning lines and clocks."
-  (interactive)
-  (let* ((tsr (if inactive-ok org-ts-regexp3 org-ts-regexp2))
+  `lax'
+
+    Ignore context.  The function matches any part of the
+    document looking like a timestamp.  This includes comments,
+    example blocks...
+
+For backward-compatibility with Org 9.0, every other non-nil
+value is equivalent to `inactive'.
+
+When at a timestamp, return the position of the point as a symbol
+among `bracket', `after', `year', `month', `hour', `minute',
+`day' or a number of character from the last know part of the
+time stamp.
+
+When matching, the match groups are the following:
+  group 1: year
+  group 2: month
+  group 3: day number
+  group 4: day name
+  group 5: hours, if any
+  group 6: minutes, if any"
+  (let* ((regexp (if extended org-ts-regexp3 org-ts-regexp2))
 	 (pos (point))
-	 (match
-	  (let ((boundaries (org-in-regexp tsr)))
+	 (match?
+	  (let ((boundaries (org-in-regexp regexp)))
 	    (save-match-data
 	      (cond ((null boundaries) nil)
-		    ((org-at-planning-p))
-		    ((org-at-property-p))
-		    ;; CLOCK lines only contain inactive time-stamps.
-		    ((and inactive-ok (org-at-clock-log-p)))
+		    ((eq extended 'lax) t)
 		    (t
-		     (eq 'timestamp
-			 (save-excursion
-			   (when (= pos (cdr boundaries)) (forward-char -1))
-			   (org-element-type (org-element-context))))))))))
+		     (or (and (eq extended 'agenda)
+			      (or (org-at-planning-p)
+				  (org-at-property-p)
+				  (and org-agenda-include-inactive-timestamps
+				       (org-at-clock-log-p))))
+			 (eq 'timestamp
+			     (save-excursion
+			       (when (= pos (cdr boundaries)) (forward-char -1))
+			       (org-element-type (org-element-context)))))))))))
     (cond
-     ((not match) nil)
+     ((not match?)                        nil)
      ((= pos (match-beginning 0))         'bracket)
      ;; Distinguish location right before the closing bracket from
      ;; right after it.
@@ -17936,12 +17952,12 @@ stamps in properties drawers, planning lines and clocks."
      ((and (> pos (or (match-end 8) (match-end 5)))
 	   (< pos (match-end 0)))
       (- pos (or (match-end 8) (match-end 5))))
-     (t 'day))))
+     (t                                   'day))))
 
 (defun org-toggle-timestamp-type ()
   "Toggle the type (<active> or [inactive]) of a time stamp."
   (interactive)
-  (when (org-at-timestamp-p t)
+  (when (org-at-timestamp-p 'lax)
     (let ((beg (match-beginning 0)) (end (match-end 0))
 	  (map '((?\[ . "<") (?\] . ">") (?< . "[") (?> . "]"))))
       (save-excursion
@@ -17966,7 +17982,7 @@ The date will be changed by N times WHAT.  WHAT can be `day', `month',
 in the timestamp determines what will be changed.
 When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
   (let ((origin (point))
-	(timestamp? (org-at-timestamp-p t))
+	(timestamp? (org-at-timestamp-p 'lax))
 	origin-cat
 	with-hm inactive
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
@@ -18150,14 +18166,12 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 If there is a time stamp in the current line, go to that date.
 A prefix ARG can be used to force the current date."
   (interactive "P")
-  (let ((tsr org-ts-regexp) diff
-	(calendar-move-hook nil)
+  (let ((calendar-move-hook nil)
 	(calendar-view-holidays-initially-flag nil)
-	(calendar-view-diary-initially-flag nil))
-    (when (or (org-at-timestamp-p)
-	      (save-excursion
-		(beginning-of-line 1)
-		(looking-at (concat ".*" tsr))))
+	(calendar-view-diary-initially-flag nil)
+	diff)
+    (when (or (org-at-timestamp-p 'lax)
+	      (org-match-line (concat ".*" org-ts-regexp)))
       (let ((d1 (time-to-days (current-time)))
 	    (d2 (time-to-days
 		 (org-time-string-to-time (match-string 1)))))
@@ -18176,7 +18190,7 @@ A prefix ARG can be used to force the current date."
   "Insert time stamp corresponding to cursor date in *Calendar* buffer.
 If there is already a time stamp at the cursor position, update it."
   (interactive)
-  (if (org-at-timestamp-p t)
+  (if (org-at-timestamp-p 'lax)
       (org-timestamp-change 0 'calendar)
     (let ((cal-date (org-get-date-from-calendar)))
       (org-insert-time-stamp
@@ -20476,7 +20490,7 @@ depending on context.  See the individual commands for more information."
    ((run-hook-with-args-until-success 'org-shiftup-hook))
    ((and org-support-shift-select (org-region-active-p))
     (org-call-for-shift-select 'previous-line))
-   ((org-at-timestamp-p t)
+   ((org-at-timestamp-p 'lax)
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-down 'org-timestamp-up)))
    ((and (not (eq org-support-shift-select 'always))
@@ -20500,7 +20514,7 @@ depending on context.  See the individual commands for more information."
    ((run-hook-with-args-until-success 'org-shiftdown-hook))
    ((and org-support-shift-select (org-region-active-p))
     (org-call-for-shift-select 'next-line))
-   ((org-at-timestamp-p t)
+   ((org-at-timestamp-p 'lax)
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-up 'org-timestamp-down)))
    ((and (not (eq org-support-shift-select 'always))
@@ -20529,7 +20543,7 @@ Depending on context, this does one of the following:
    ((run-hook-with-args-until-success 'org-shiftright-hook))
    ((and org-support-shift-select (org-region-active-p))
     (org-call-for-shift-select 'forward-char))
-   ((org-at-timestamp-p t) (call-interactively 'org-timestamp-up-day))
+   ((org-at-timestamp-p 'lax) (call-interactively 'org-timestamp-up-day))
    ((and (not (eq org-support-shift-select 'always))
 	 (org-at-heading-p))
     (let ((org-inhibit-logging
@@ -20565,7 +20579,7 @@ Depending on context, this does one of the following:
    ((run-hook-with-args-until-success 'org-shiftleft-hook))
    ((and org-support-shift-select (org-region-active-p))
     (org-call-for-shift-select 'backward-char))
-   ((org-at-timestamp-p t) (call-interactively 'org-timestamp-down-day))
+   ((org-at-timestamp-p 'lax) (call-interactively 'org-timestamp-down-day))
    ((and (not (eq org-support-shift-select 'always))
 	 (org-at-heading-p))
     (let ((org-inhibit-logging
@@ -20617,7 +20631,7 @@ Depending on context, this does one of the following:
   "Change timestamps synchronously up in CLOCK log lines.
 Optional argument N tells to change by that many units."
   (interactive "P")
-  (if (and (org-at-clock-log-p) (org-in-regexp org-ts-regexp-inactive))
+  (if (and (org-at-clock-log-p) (org-at-timestamp-p 'lax))
       (let (org-support-shift-select)
 	(org-clock-timestamps-up n))
     (user-error "Not at a clock log")))
@@ -20626,7 +20640,7 @@ Optional argument N tells to change by that many units."
   "Change timestamps synchronously down in CLOCK log lines.
 Optional argument N tells to change by that many units."
   (interactive "P")
-  (if (and (org-at-clock-log-p) (org-in-regexp org-ts-regexp-inactive))
+  (if (and (org-at-clock-log-p) (org-at-timestamp-p 'lax))
       (let (org-support-shift-select)
 	(org-clock-timestamps-down n))
     (user-error "Not at a clock log")))
@@ -21463,10 +21477,10 @@ an argument, unconditionally call `org-insert-heading'."
      ["Timestamp" org-time-stamp (not (org-before-first-heading-p))]
      ["Timestamp (inactive)" org-time-stamp-inactive (not (org-before-first-heading-p))]
      ("Change Date"
-      ["1 Day Later" org-shiftright (org-at-timestamp-p)]
-      ["1 Day Earlier" org-shiftleft (org-at-timestamp-p)]
-      ["1 ... Later" org-shiftup (org-at-timestamp-p)]
-      ["1 ... Earlier" org-shiftdown (org-at-timestamp-p)])
+      ["1 Day Later" org-shiftright (org-at-timestamp-p 'lax)]
+      ["1 Day Earlier" org-shiftleft (org-at-timestamp-p 'lax)]
+      ["1 ... Later" org-shiftup (org-at-timestamp-p 'lax)]
+      ["1 ... Earlier" org-shiftdown (org-at-timestamp-p 'lax)])
      ["Compute Time Range" org-evaluate-time-range t]
      ["Schedule Item" org-schedule (not (org-before-first-heading-p))]
      ["Deadline" org-deadline (not (org-before-first-heading-p))]
@@ -22898,7 +22912,7 @@ assumed to be significant there."
 
 (defun org-fill-paragraph-with-timestamp-nobreak-p ()
   "Non-nil when a new line at point would split a timestamp."
-  (and (org-at-timestamp-p t)
+  (and (org-at-timestamp-p 'lax)
        (not (looking-at org-ts-regexp-both))))
 
 (declare-function message-in-body-p "message" ())

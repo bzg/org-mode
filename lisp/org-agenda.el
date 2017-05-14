@@ -9097,8 +9097,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(if (not (org-at-timestamp-p))
-	    (error "Cannot find time stamp"))
+	(unless (org-at-timestamp-p 'lax) (error "Cannot find time stamp"))
 	(when (and org-agenda-move-date-from-past-immediately-to-today
 		   (equal arg 1)
 		   (or (not what) (eq what 'day))
@@ -9180,8 +9179,7 @@ be used to request time specification in the time stamp."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(if (not (org-at-timestamp-p t))
-	    (error "Cannot find time stamp"))
+	(unless (org-at-timestamp-p 'lax) (error "Cannot find time stamp"))
 	(org-time-stamp arg (equal (char-after (match-beginning 0)) ?\[)))
       (org-agenda-show-new-time marker org-last-changed-timestamp))
     (message "Time stamp changed to %s" org-last-changed-timestamp)))

@@ -1122,28 +1122,28 @@ to a number.  In the case of a timestamp, increment by days."
 	 txt txt-up inc)
     (org-table-check-inside-data-field)
     (if (not non-empty)
-      (save-excursion
-	(setq txt
-	      (catch 'exit
-		(while (progn (beginning-of-line 1)
-			      (re-search-backward org-table-dataline-regexp
-						  beg t))
-		  (org-table-goto-column colpos t)
-		  (if (and (looking-at
-			    "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
-			   (<= (setq n (1- n)) 0))
-		      (throw 'exit (match-string 1))))))
-	(setq field-up
-	      (catch 'exit
-		(while (progn (beginning-of-line 1)
-			      (re-search-backward org-table-dataline-regexp
-						  beg t))
-		  (org-table-goto-column colpos t)
-		  (if (and (looking-at
-			    "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
-			   (<= (setq n (1- n)) 0))
-		      (throw 'exit (match-string 1))))))
-	(setq non-empty-up (and field-up (string-match "[^ \t]" field-up))))
+	(save-excursion
+	  (setq txt
+		(catch 'exit
+		  (while (progn (beginning-of-line 1)
+				(re-search-backward org-table-dataline-regexp
+						    beg t))
+		    (org-table-goto-column colpos t)
+		    (if (and (looking-at
+			      "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
+			     (<= (setq n (1- n)) 0))
+			(throw 'exit (match-string 1))))))
+	  (setq field-up
+		(catch 'exit
+		  (while (progn (beginning-of-line 1)
+				(re-search-backward org-table-dataline-regexp
+						    beg t))
+		    (org-table-goto-column colpos t)
+		    (if (and (looking-at
+			      "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
+			     (<= (setq n (1- n)) 0))
+			(throw 'exit (match-string 1))))))
+	  (setq non-empty-up (and field-up (string-match "[^ \t]" field-up))))
       ;; Above field was not empty, go down to the next row
       (setq txt (org-trim field))
       (org-table-next-row)
@@ -1170,7 +1170,7 @@ to a number.  In the case of a timestamp, increment by days."
 	  (setq txt (calc-eval (concat txt "+" (number-to-string inc)))))
       (insert txt)
       (org-move-to-column col)
-      (if (and org-table-copy-increment (org-at-timestamp-p t))
+      (if (and org-table-copy-increment (org-at-timestamp-p))
 	  (org-timestamp-up-day inc)
 	(org-table-maybe-recalculate-line))
       (org-table-align)

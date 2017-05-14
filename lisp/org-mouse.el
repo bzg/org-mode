@@ -391,8 +391,8 @@ DEFAULT is returned if no priority is given in the headline."
 (defun org-mouse-delete-timestamp ()
   "Deletes the current timestamp as well as the preceding keyword.
 SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
-  (when (or (org-at-date-range-p) (org-at-timestamp-p))
-    (replace-match "")			; delete the timestamp
+  (when (or (org-at-date-range-p) (org-at-timestamp-p 'lax))
+    (replace-match "")			;delete the timestamp
     (skip-chars-backward " :A-Z")
     (when (looking-at " *[A-Z][A-Z]+:")
       (replace-match ""))))
@@ -714,7 +714,7 @@ This means, between the beginning of line and the point."
 	  (org-tags-sparse-tree nil ,(match-string 1))]
 	 "--"
 	 ,@(org-mouse-tag-menu))))
-     ((org-at-timestamp-p)
+     ((org-at-timestamp-p 'lax)
       (popup-menu
        '(nil
 	 ["Show Day" org-open-at-point t]

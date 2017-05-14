@@ -21,6 +21,12 @@ them, consider modifying ~org-duration-format~ instead.
 Variable ~org-time-clocksum-use-effort-durations~ is also obsolete.
 Consider setting ~org-duration-units~ instead.
 
+*** ~org-at-timestamp-p~ optional argument accepts different values
+
+See docustrings for the allowed values.  For backward compatibility,
+~(org-at-timestamp-p t)~ is still supported, but should be updated
+accordingly.
+
 *** ~org-capture-templates~ no longer accepts S-expressions as file names
 
 Since functions are allowed there, a straightforward way to migrate

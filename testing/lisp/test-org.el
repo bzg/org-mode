@@ -5781,25 +5781,67 @@ Paragraph<point>"
    (eq 'after
        (org-test-with-temp-text "<2012-03-29 Thu><point>»"
 	 (org-at-timestamp-p))))
-  ;; Test optional argument.
+  ;; Test `inactive' optional argument.
   (should
    (org-test-with-temp-text "[2012-03-29 Thu]"
-     (org-at-timestamp-p t)))
+     (org-at-timestamp-p 'inactive)))
   (should-not
    (org-test-with-temp-text "[2012-03-29 Thu]"
      (org-at-timestamp-p)))
-  ;; Unlike `org-element-context', recognize time-stamps in planning
-  ;; info line, property drawers and clocks.
+  ;; When optional argument is `agenda', recognize time-stamps in
+  ;; planning info line, property drawers and clocks.
   (should
+   (org-test-with-temp-text "* H\nSCHEDULED: <point><2012-03-29 Thu>"
+     (org-at-timestamp-p 'agenda)))
+  (should-not
    (org-test-with-temp-text "* H\nSCHEDULED: <point><2012-03-29 Thu>"
      (org-at-timestamp-p)))
   (should
    (org-test-with-temp-text
        "* H\n:PROPERTIES:\n:PROP: <point><2012-03-29 Thu>\n:END:"
+     (org-at-timestamp-p 'agenda)))
+  (should-not
+   (org-test-with-temp-text
+       "* H\n:PROPERTIES:\n:PROP: <point><2012-03-29 Thu>\n:END:"
      (org-at-timestamp-p)))
   (should
    (org-test-with-temp-text "CLOCK: <point>[2012-03-29 Thu]"
-     (org-at-timestamp-p t))))
+     (let ((org-agenda-include-inactive-timestamps t))
+       (org-at-timestamp-p 'agenda))))
+  (should-not
+   (org-test-with-temp-text "CLOCK: <point>[2012-03-29 Thu]"
+     (let ((org-agenda-include-inactive-timestamps t))
+       (org-at-timestamp-p))))
+  (should-not
+   (org-test-with-temp-text "CLOCK: <point>[2012-03-29 Thu]"
+     (let ((org-agenda-include-inactive-timestamps t))
+       (org-at-timestamp-p 'inactive))))
+  ;; When optional argument is `lax', match any part of the document
+  ;; with Org timestamp syntax.
+  (should
+   (org-test-with-temp-text "# <2012-03-29 Thu><point>"
+     (org-at-timestamp-p 'lax)))
+  (should-not
+   (org-test-with-temp-text "# <2012-03-29 Thu><point>"
+     (org-at-timestamp-p)))
+  (should
+   (org-test-with-temp-text ": <2012-03-29 Thu><point>"
+     (org-at-timestamp-p 'lax)))
+  (should-not
+   (org-test-with-temp-text ": <2012-03-29 Thu><point>"
+     (org-at-timestamp-p)))
+  (should
+   (org-test-with-temp-text
+       "#+BEGIN_EXAMPLE\n<2012-03-29 Thu><point>\n#+END_EXAMPLE"
+     (org-at-timestamp-p 'lax)))
+  (should-not
+   (org-test-with-temp-text
+       "#+BEGIN_EXAMPLE\n<2012-03-29 Thu><point>\n#+END_EXAMPLE"
+     (org-at-timestamp-p)))
+  ;; Optional argument `lax' also matches inactive timestamps.
+  (should
+   (org-test-with-temp-text "# [2012-03-29 Thu]<point>"
+     (org-at-timestamp-p 'lax))))
 
 (ert-deftest test-org/time-stamp ()
   "Test `org-time-stamp' specifications."
