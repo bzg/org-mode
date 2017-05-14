@@ -1967,7 +1967,8 @@ will be easy to remove."
 			 (make-string
 			  (max 0 (- (- 60 (current-column))
 				    (- (match-end 4) (match-beginning 4))
-				    (length (org-get-at-bol 'line-prefix)))) ?·)
+				    (length (org-get-at-bol 'line-prefix))))
+			  ?\·)
 			 '(face shadow))
 		     (org-add-props
 			 (format " %9s " (org-duration-from-minutes time))
