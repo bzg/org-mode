@@ -2624,12 +2624,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an INLINE-SRC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((lang (org-element-property :language inline-src-block))
-	(code (org-element-property :value inline-src-block))
-	(label
-	 (let ((lbl (and (org-element-property :name inline-src-block)
-			 (org-export-get-reference inline-src-block info))))
-	   (if (not lbl) "" (format " id=\"%s\"" lbl)))))
+  (let* ((lang (org-element-property :language inline-src-block))
+	 (code (org-html-fontify-code
+		(org-element-property :value inline-src-block)
+		lang))
+	 (label
+	  (let ((lbl (and (org-element-property :name inline-src-block)
+			  (org-export-get-reference inline-src-block info))))
+	    (if (not lbl) "" (format " id=\"%s\"" lbl)))))
     (format "<code class=\"src src-%s\"%s>%s</code>" lang label code)))
 
 ;;;; Inlinetask
