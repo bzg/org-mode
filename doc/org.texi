@@ -11368,7 +11368,7 @@ The URL for the up link of exported HTML pages (@code{org-html-link-up}).
 @vindex org-html-mathjax-options
 Options for MathJax (@code{org-html-mathjax-options}).  MathJax is used to
 typeset @LaTeX{} math in HTML documents.  @xref{Math formatting in HTML
-export} for an example.
+export}, for an example.
 
 @item HTML_HEAD
 @cindex #+HTML_HEAD
