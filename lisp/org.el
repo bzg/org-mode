@@ -11563,6 +11563,8 @@ order.")
 		 (push (list (file-name-nondirectory f) f nil nil) tgs))
 	       (when (eq org-refile-use-outline-path 'buffer-name)
 		 (push (list (buffer-name (buffer-base-buffer)) f nil nil) tgs))
+	       (when (eq org-refile-use-outline-path 'full-file-path)
+		 (push (list (file-truename (buffer-file-name (buffer-base-buffer))) f nil nil) tgs))
 	       (org-with-wide-buffer
 		(goto-char (point-min))
 		(setq org-outline-path-cache nil)
