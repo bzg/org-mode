@@ -12198,7 +12198,7 @@ environments.  @code{:spread} has no effect if @code{:width} is not set.
 @vindex org-latex-tables-booktabs
 @vindex org-latex-tables-centered
 All three commands are toggles.  @code{:booktabs} brings in modern
-typesetting enhancements to regular tables.  The @code {booktabs} package has
+typesetting enhancements to regular tables.  The @code{booktabs} package has
 to be loaded through @code{org-latex-packages-alist}.  @code{:center} is for
 centering the table.  @code{:rmlines} removes all but the very first
 horizontal line made of ASCII characters from "table.el" tables only.
