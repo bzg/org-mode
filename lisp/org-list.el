@@ -2838,7 +2838,8 @@ Return t at each successful move."
 	   (t (user-error "Cannot move item"))))
 	t))))
 
-(defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
+(defun org-sort-list
+    (&optional with-case sorting-type getkey-func compare-func interactive?)
   "Sort list items.
 The cursor may be at any item of the list that should be sorted.
 Sublists are not sorted.  Checkboxes, if any, are ignored.
@@ -2864,13 +2865,15 @@ Capital letters will reverse the sort order.
 
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
 a function to be called with point at the beginning of the
-record.  It must return either a string or a number that should
-serve as the sorting key for that record.  It will then use
-COMPARE-FUNC to compare entries.
+record.  It must return a value that is compatible with COMPARE-FUNC,
+the function used to compare entries.
 
 Sorting is done against the visible part of the headlines, it
-ignores hidden links."
-  (interactive "P")
+ignores hidden links.
+
+A non-nil value for INTERACTIVE? is used to signal that this
+function is being called interactively."
+  (interactive (list current-prefix-arg nil nil nil t))
   (let* ((case-func (if with-case 'identity 'downcase))
          (struct (org-list-struct))
          (prevs (org-list-prevs-alist struct))
@@ -2882,23 +2885,31 @@ ignores hidden links."
 		(message
 		 "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc  [x]checked  A/N/T/F/X means reversed:")
 		(read-char-exclusive))))
+	 (dcst (downcase sorting-type))
 	 (getkey-func
-	  (or getkey-func
-	      (and (= (downcase sorting-type) ?f)
-		   (intern (completing-read "Sort using function: "
-					    obarray 'fboundp t nil nil))))))
+	  (and (= dcst ?f)
+	       (or getkey-func
+		   (and interactive?
+			(org-read-function "Function for extracting keys: "))
+		   (error "Missing key extractor"))))
+	 (sort-func
+	  (cond
+	   ((= dcst ?a) #'string<)
+	   ((= dcst ?f)
+	    (or compare-func
+		(and interactive?
+		     (org-read-function
+		      (concat "Function for comparing keys"
+			      "(empty for default `sort-subr' predicate): ")
+		      'allow-empty))))
+	   ((= dcst ?t) #'<)
+	   ((= dcst ?x) #'string<))))
     (message "Sorting items...")
     (save-restriction
       (narrow-to-region start end)
       (goto-char (point-min))
-      (let* ((dcst (downcase sorting-type))
-	     (case-fold-search nil)
+      (let* ((case-fold-search nil)
 	     (now (current-time))
-	     (sort-func (cond
-			 ((= dcst ?a) 'string<)
-			 ((= dcst ?f) compare-func)
-			 ((= dcst ?t) '<)
-			 ((= dcst ?x) 'string<)))
 	     (next-record (lambda ()
 			    (skip-chars-forward " \r\t\n")
 			    (or (eobp) (beginning-of-line))))
