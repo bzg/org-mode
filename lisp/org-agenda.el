@@ -7444,8 +7444,9 @@ also press `-' or `+' to switch between filtering and excluding."
     (unless char
       (while (not (memq char valid-char-list))
 	(message
-	 "%s by tag [%s ], [TAB], %s[/]:off, [+/-]:filter/exclude%s, [q]:quit"
-	 (if exclude "Exclude" "Filter") tag-chars
+	 "%s by tag [%s ]:tag-char, [TAB]:tag, %s[/]:off, [+/-]:filter/exclude%s, [q]:quit"
+	 (if exclude "Exclude" "Filter")
+	 tag-chars
 	 (if org-agenda-auto-exclude-function "[RET], " "")
 	 (if expand "" ", no grouptag expand"))
 	(setq char (read-char-exclusive))
