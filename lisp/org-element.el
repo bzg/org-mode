@@ -848,7 +848,7 @@ CONTENTS is the contents of the element."
   (format "#+BEGIN: %s%s\n%s#+END:"
 	  (org-element-property :block-name dynamic-block)
 	  (let ((args (org-element-property :arguments dynamic-block)))
-	    (and args (concat " " args)))
+	    (if args (concat " " args) ""))
 	  contents))
 
 
