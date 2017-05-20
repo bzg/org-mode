@@ -9610,22 +9610,19 @@ sub-tree if optional argument INHERIT is non-nil."
 
 (defun org-refresh-stats-properties ()
   "Refresh stats text properties in the buffer."
-  (let (stats)
-    (org-with-silent-modifications
-     (org-with-wide-buffer
-      (goto-char (point-min))
-      (while (re-search-forward
-	      (concat org-outline-regexp-bol ".*"
-		      "\\(?:\\[\\([0-9]+\\)%\\|\\([0-9]+\\)/\\([0-9]+\\)\\]\\)")
-	      nil t)
-	(setq stats (cond ((equal (match-string 3) "0") 0)
-			  ((match-string 2)
-			   (/ (* (string-to-number (match-string 2)) 100)
-			      (string-to-number (match-string 3))))
-			  (t (string-to-number (match-string 1)))))
-	(org-back-to-heading t)
-	(put-text-property (point) (progn (org-end-of-subtree t t) (point))
-			   'org-stats stats))))))
+  (org-with-silent-modifications
+   (org-with-point-at 1
+     (let ((regexp (concat org-outline-regexp-bol
+			   ".*\\[\\([0-9]*\\)\\(?:%\\|/\\([0-9]*\\)\\)\\]")))
+       (while (re-search-forward regexp nil t)
+	 (let* ((numerator (string-to-number (match-string 1)))
+		(denominator (and (match-end 2)
+				  (string-to-number (match-string 2))))
+		(stats (cond ((not denominator) numerator) ;percent
+			     ((= denominator 0) 0)
+			     (t (/ (* numerator 100) denominator)))))
+	   (put-text-property (point) (progn (org-end-of-subtree t t) (point))
+			      'org-stats stats)))))))
 
 (defun org-refresh-effort-properties ()
   "Refresh effort properties"
