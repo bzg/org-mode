@@ -1273,7 +1273,7 @@ When PRINTF is non-nil, use it to format the result."
    (/ (apply #'+ (mapcar #'org-columns--age-to-minutes ages))
       (float (length ages)))))
 
-(defun org-columns--summary-estimate (estimates printf)
+(defun org-columns--summary-estimate (estimates _)
   "Combine a list of estimates, using mean and variance.
 The mean and variance of the result will be the sum of the means
 and variances (respectively) of the individual estimates."
@@ -1288,8 +1288,8 @@ and variances (respectively) of the individual estimates."
 	(`(,value) (cl-incf mean value))))
     (let ((sd (sqrt var)))
       (format "%s-%s"
-	      (format (or printf "%.0f") (- mean sd))
-	      (format (or printf "%.0f") (+ mean sd))))))
+	      (format "%.0f" (- mean sd))
+	      (format "%.0f" (+ mean sd))))))
 
 
 
