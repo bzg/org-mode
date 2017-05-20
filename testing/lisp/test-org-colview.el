@@ -212,6 +212,27 @@
 :END:"
       (let ((org-columns-default-format "%A{$}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified))))
+  ;; Obey to format string even in leaf values.
+  (should
+   (equal
+    "1.0"
+    (org-test-with-temp-text
+	"* H
+:PROPERTIES:
+:A: 1
+:END:"
+      (let ((org-columns-default-format "%A{+;%.1f}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; Raise an error when format strings are applied to non-numbers.
+  (should-error
+   (org-test-with-temp-text
+       "* H
+** S1
+:PROPERTIES:
+:A: foo
+:END:"
+     (let ((org-columns-default-format "%A{+;%.2f}")) (org-columns))
+     (get-char-property (point) 'org-columns-value-modified)))
   ;; {:} sums times.  Plain numbers are hours.
   (should
    (equal

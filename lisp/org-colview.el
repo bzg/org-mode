@@ -223,21 +223,32 @@ See `org-columns-summary-types' for details.")
 
 (defun org-columns--displayed-value (spec value)
   "Return displayed value for specification SPEC in current entry.
-
 SPEC is a column format specification as stored in
 `org-columns-current-fmt-compiled'.  VALUE is the real value to
 display, as a string."
-  (cond
-   ((and (functionp org-columns-modify-value-for-display-function)
-	 (funcall org-columns-modify-value-for-display-function
-		  (nth 1 spec)
-		  value)))
-   ((equal (car spec) "ITEM")
-    (concat (make-string (1- (org-current-level))
-			 (if org-hide-leading-stars ?\s ?*))
-	    "* "
-	    (org-columns-compact-links value)))
-   (value)))
+  (or (and (functionp org-columns-modify-value-for-display-function)
+	   (funcall org-columns-modify-value-for-display-function
+		    (nth 1 spec)	;column name
+		    value))
+      (pcase spec
+	(`("ITEM" . ,_)
+	 (concat (make-string (1- (org-current-level))
+			      (if org-hide-leading-stars ?\s ?*))
+		 "* "
+		 (org-columns-compact-links value)))
+	(`(,_ ,_ ,_ ,_ nil) value)
+	;; If PRINTF is set, and we are displaying a number, obey to
+	;; it.  Otherwise, raise an error.
+	(`(,_ ,name ,_ ,_ ,printf)
+	 (when (or (not (string-match-p "[0-9]" value))
+		   (and (string-match-p "[1-9]" value)
+			(= 0 (string-to-number value))))
+	   (user-error "Invalid value: %S.  \
+Format string in operator implies column %S only contains numbers"
+		       value
+		       name))
+	 (format printf (string-to-number value)))
+	(_ (error "Invalid column specification format: %S" spec)))))
 
 (defun org-columns--collect-values (&optional compiled-fmt)
   "Collect values for columns on the current line.
