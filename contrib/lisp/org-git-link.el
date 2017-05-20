@@ -73,8 +73,8 @@
 
 (defun org-gitbare-open (str)
   (let* ((strlist (org-git-split-string str))
-         (gitdir (first strlist))
-         (object (second strlist)))
+         (gitdir (nth 0 strlist))
+         (object (nth 1 strlist)))
     (org-git-open-file-internal gitdir object)))
 
 
@@ -96,14 +96,18 @@
 
 (defun org-git-open (str)
   (let* ((strlist (org-git-split-string str))
-         (filepath (first strlist))
-         (commit (second strlist))
-         (line (third strlist))
+         (filepath (nth 0 strlist))
+         (commit (nth 1 strlist))
+         (line (nth 2 strlist))
          (dirlist (org-git-find-gitdir (file-truename filepath)))
-         (gitdir (first dirlist))
-         (relpath (second dirlist)))
+         (gitdir (nth 0 dirlist))
+         (relpath (nth 1 dirlist)))
     (org-git-open-file-internal gitdir (concat commit ":" relpath))
-    (when line (goto-line (string-to-int line)))))
+    (when line
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(forward-line (1- (string-to-number line)))))))
 
 
 ;; Utility functions (file names etc)
@@ -127,10 +131,10 @@
     (catch 'toplevel
       (while (not (file-exists-p (expand-file-name ".git" dir)))
         (let ((dirlist (org-git-split-dirpath dir)))
-          (when (string= (second dirlist) "") ; at top level
+          (when (string= (nth 1 dirlist) "") ; at top level
             (throw 'toplevel nil))
-          (setq dir (first dirlist)
-                relpath (concat (file-name-as-directory (second dirlist)) relpath))))
+          (setq dir (nth 0 dirlist)
+                relpath (concat (file-name-as-directory (nth 1 dirlist)) relpath))))
       (list (expand-file-name ".git" dir) relpath))))
 
 
@@ -174,7 +178,7 @@ than two double colons, str2 and/or str3 may be set the empty string."
 (defun org-git-create-git-link (file &optional line)
   "Create git link part to file at specific time"
   (interactive "FFile: ")
-  (let* ((gitdir (first (org-git-find-gitdir (file-truename file))))
+  (let* ((gitdir (nth 0 (org-git-find-gitdir (file-truename file))))
          (branchname (org-git-get-current-branch gitdir))
          (timestring (format-time-string "%Y-%m-%d" (current-time))))
     (concat "git:" file "::" (org-git-create-searchstring branchname timestring)
