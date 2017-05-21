@@ -2399,7 +2399,82 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
      (org-test-with-temp-text-in-file "#+NAME: foo\nParagraph"
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::foo][foo]]" file)
-		(org-store-link nil)))))))
+		(org-store-link nil))))))
+  ;; Store link to Org buffer, with context.
+  (should
+   (let ((org-stored-links nil)
+	 (org-id-link-to-org-use-id nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "* h1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*h1][h1]]" file)
+		(org-store-link nil))))))
+  ;; Store link to Org buffer, without context.
+  (should
+   (let ((org-stored-links nil)
+	 (org-id-link-to-org-use-id nil)
+	 (org-context-in-file-links nil))
+     (org-test-with-temp-text-in-file "* h1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s][file:%s]]" file file)
+		(org-store-link nil))))))
+  ;; C-u prefix reverses `org-context-in-file-links' in Org buffer.
+  (should
+   (let ((org-stored-links nil)
+	 (org-id-link-to-org-use-id nil)
+	 (org-context-in-file-links nil))
+     (org-test-with-temp-text-in-file "* h1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*h1][h1]]" file)
+		(org-store-link '(4)))))))
+  ;; A C-u C-u does *not* reverse `org-context-in-file-links' in Org
+  ;; buffer.
+  (should
+   (let ((org-stored-links nil)
+	 (org-id-link-to-org-use-id nil)
+	 (org-context-in-file-links nil))
+     (org-test-with-temp-text-in-file "* h1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s][file:%s]]" file file)
+		(org-store-link '(16)))))))
+  ;; Store file link to non-Org buffer, with context.
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "one\n<point>two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::one]]" file)
+		(org-store-link nil))))))
+  ;; Store file link to non-Org buffer, without context.
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links nil))
+     (org-test-with-temp-text-in-file "one\n<point>two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s][file:%s]]" file file)
+	 	(org-store-link nil))))))
+  ;; C-u prefix reverses `org-context-in-file-links' in non-Org
+  ;; buffer.
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links nil))
+     (org-test-with-temp-text-in-file "one\n<point>two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::one]]" file)
+		(org-store-link '(4)))))))
+  ;; A C-u C-u does *not* reverse `org-context-in-file-links' in
+  ;; non-Org buffer.
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links nil))
+     (org-test-with-temp-text-in-file "one\n<point>two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s][file:%s]]" file file)
+	 	(org-store-link '(16))))))))
 
 
 ;;; Node Properties
