@@ -340,6 +340,88 @@
 :END:"
       (let ((org-columns-default-format "%A{X%}")) (org-columns))
       (get-char-property (point) 'org-columns-value-modified))))
+  ;; {X/} handles recursive summaries.
+  (should
+   (equal
+    "[1/2]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:
+** S2
+*** S21
+:PROPERTIES:
+:A: [X]
+:END:
+*** S22
+:PROPERTIES:
+:A: [X]
+:END:"
+      (let ((org-columns-default-format "%A{X/}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "[1/2]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [X]
+:END:
+** S2
+*** S21
+:PROPERTIES:
+:A: [ ]
+:END:
+*** S22
+:PROPERTIES:
+:A: [ ]
+:END:"
+      (let ((org-columns-default-format "%A{X/}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  ;; {X%} handles recursive summaries.
+  (should
+   (equal
+    "[50%]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [ ]
+:END:
+** S2
+*** S21
+:PROPERTIES:
+:A: [X]
+:END:
+*** S22
+:PROPERTIES:
+:A: [X]
+:END:"
+      (let ((org-columns-default-format "%A{X%}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
+  (should
+   (equal
+    "[50%]"
+    (org-test-with-temp-text
+	"* H
+** S1
+:PROPERTIES:
+:A: [X]
+:END:
+** S2
+*** S21
+:PROPERTIES:
+:A: [ ]
+:END:
+*** S22
+:PROPERTIES:
+:A: [ ]
+:END:"
+      (let ((org-columns-default-format "%A{X%}")) (org-columns))
+      (get-char-property (point) 'org-columns-value-modified))))
   ;; {min} is the smallest number in column, {max} the largest one.
   ;; {mean} is the arithmetic mean of numbers in column.
   (should

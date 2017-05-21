@@ -1234,14 +1234,17 @@ When PRINTF is non-nil, use it to format the result."
 (defun org-columns--summary-checkbox-count (check-boxes _)
   "Summarize CHECK-BOXES with a check-box cookie."
   (format "[%d/%d]"
-	  (cl-count "[X]" check-boxes :test #'equal)
+	  (cl-count-if (lambda (b) (or (equal b "[X]")
+				  (string-match-p "\\[\\([1-9]\\)/\\1\\]" b)))
+		       check-boxes)
 	  (length check-boxes)))
 
 (defun org-columns--summary-checkbox-percent (check-boxes _)
   "Summarize CHECK-BOXES with a check-box percent."
   (format "[%d%%]"
-	  (round (* 100.0 (cl-count "[X]" check-boxes :test #'equal))
-		 (float (length check-boxes)))))
+	  (round (* 100.0 (cl-count-if (lambda (b) (member b '("[X]" "[100%]")))
+				       check-boxes))
+		 (length check-boxes))))
 
 (defun org-columns--summary-min (values printf)
   "Compute the minimum of VALUES.
