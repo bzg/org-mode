@@ -11609,7 +11609,8 @@ order.")
 				    (list (buffer-name
 					   (buffer-base-buffer))))
 				   (_ nil))
-				 (mapcar #'org-protect-slash
+				 (mapcar (lambda (s) (replace-regexp-in-string
+						 "/" "\\/" s nil t))
 					 (org-get-outline-path t t)))
 				"/"))))
 			(push (list target f re (org-refile-marker (point)))
@@ -11622,9 +11623,6 @@ order.")
 	    (setq targets (append tgs targets))))))
     (message "Getting targets...done")
     (delete-dups (nreverse targets))))
-
-(defun org-protect-slash (s)
-  (replace-regexp-in-string "/" "\\/" s nil t))
 
 (defun org--get-outline-path-1 (&optional use-cache)
   "Return outline path to current headline.
