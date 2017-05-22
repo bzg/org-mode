@@ -565,16 +565,45 @@
 	      (org-fill-element)
 	      (buffer-string)))))
   ;; Do nothing at affiliated keywords.
-  (org-test-with-temp-text "#+NAME: para\nSome\ntext."
-    (let ((fill-column 20))
-      (org-fill-element)
-      (should (equal (buffer-string) "#+NAME: para\nSome\ntext."))))
+  (should
+   (equal "#+NAME: para\nSome\ntext."
+	  (org-test-with-temp-text "#+NAME: para\nSome\ntext."
+	    (let ((fill-column 20))
+	      (org-fill-element)
+	      (buffer-string)))))
   ;; Do not move point after table when filling a table.
   (should-not
    (org-test-with-temp-text "| a | b |\n| c | d |\n"
      (forward-char)
      (org-fill-element)
-     (eobp))))
+     (eobp)))
+  ;; Do not fill "n" macro, with or without arguments, followed by
+  ;; a dot or a closing parenthesis since it could be confused with
+  ;; a numbered bullet.
+  (should-not
+   (equal "123456789\n{{{n}}}."
+	  (org-test-with-temp-text "123456789 {{{n}}}."
+	    (let ((fill-column 10))
+	      (org-fill-element)
+	      (buffer-string)))))
+  (should-not
+   (equal "123456789\n{{{n}}}\)"
+	  (org-test-with-temp-text "123456789 {{{n}}}\)"
+	    (let ((fill-column 10))
+	      (org-fill-element)
+	      (buffer-string)))))
+  (should-not
+   (equal "123456789\n{{{n()}}}."
+	  (org-test-with-temp-text "123456789 {{{n()}}}."
+	    (let ((fill-column 10))
+	      (org-fill-element)
+	      (buffer-string)))))
+  (should-not
+   (equal "123456789\n{{{n(counter)}}}."
+	  (org-test-with-temp-text "123456789 {{{n(counter)}}}."
+	    (let ((fill-column 10))
+	      (org-fill-element)
+	      (buffer-string))))))
 
 (ert-deftest test-org/auto-fill-function ()
   "Test auto-filling features."

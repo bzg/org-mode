@@ -22905,6 +22905,7 @@ assumed to be significant there."
      (org-uniquify
       (append fill-nobreak-predicate
 	      '(org-fill-line-break-nobreak-p
+		org-fill-n-macro-as-item-nobreak-p
 		org-fill-paragraph-with-timestamp-nobreak-p)))))
   (let ((paragraph-ending (substring org-element-paragraph-separate 1)))
     (setq-local paragraph-start paragraph-ending)
@@ -22926,6 +22927,12 @@ assumed to be significant there."
   "Non-nil when a new line at point would split a timestamp."
   (and (org-at-timestamp-p 'lax)
        (not (looking-at org-ts-regexp-both))))
+
+(defun org-fill-n-macro-as-item-nobreak-p ()
+  "Non-nil when a new line at point would create a new list."
+  ;; During export, a "n" macro followed by a dot or a closing
+  ;; parenthesis can end up being parsed as a new list item.
+  (looking-at-p "[ \t]*{{{n\\(?:([^\n)]*)\\)?}}}[.)]\\(?:$\\| \\)"))
 
 (declare-function message-in-body-p "message" ())
 (defvar orgtbl-line-start-regexp) ; From org-table.el
