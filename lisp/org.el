@@ -11825,7 +11825,7 @@ order.")
 	      (org-refile-cache-put tgs (buffer-file-name) descre))
 	    (setq targets (append tgs targets))))))
     (message "Getting targets...done")
-    (nreverse (delete-dups targets))))
+    (delete-dups (nreverse targets))))
 
 (defun org-protect-slash (s)
   (replace-regexp-in-string "/" "\\/" s nil t))
