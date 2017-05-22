@@ -5404,7 +5404,7 @@ Paragraph<point>"
 					(nil :todo . "TODO"))))
 	      (mapcar #'car (org-refile-get-targets))))))
   (should
-   (equal '("F3" "H1" "F2")
+   (equal '("F2" "F3" "H1")
 	  (org-test-with-temp-text "* TODO H1\n** TODO F2\n*** F3"
 	    (let ((org-refile-use-outline-path nil)
 		  (org-refile-targets `((nil :regexp . "F")
