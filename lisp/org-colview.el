@@ -1176,8 +1176,13 @@ properties drawers."
 	       ;; When PROPERTY exists in current node, even if empty,
 	       ;; but its value doesn't match the one computed, use
 	       ;; the latter instead.
-	       (when (and update value (not (equal value summary)))
-		 (org-entry-put (point) property summary)))
+	       ;;
+	       ;; Ignore leading or trailing white spaces that might
+	       ;; have been introduced in summary, since those are not
+	       ;; significant in properties value.
+	       (let ((new-value (org-trim summary)))
+		 (when (and update value (not (equal value new-value)))
+		   (org-entry-put (point) property new-value))))
 	     ;; Add current to current level accumulator.
 	     (when (or summary value-set)
 	       (push (or summary value) (aref lvals level)))
