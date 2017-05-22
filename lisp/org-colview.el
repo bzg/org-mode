@@ -237,17 +237,9 @@ display, as a string."
 		 "* "
 		 (org-columns-compact-links value)))
 	(`(,_ ,_ ,_ ,_ nil) value)
-	;; If PRINTF is set, and we are displaying a number, obey to
-	;; it.  Otherwise, raise an error.
-	(`(,_ ,name ,_ ,_ ,printf)
-	 (when (or (not (string-match-p "[0-9]" value))
-		   (and (string-match-p "[1-9]" value)
-			(= 0 (string-to-number value))))
-	   (user-error "Invalid value: %S.  \
-Format string in operator implies column %S only contains numbers"
-		       value
-		       name))
-	 (format printf (string-to-number value)))
+	;; If PRINTF is set, assume we are displaying a number and
+	;; obey to the format string.
+	(`(,_ ,name ,_ ,_ ,printf) (format printf (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
 (defun org-columns--collect-values (&optional compiled-fmt)
