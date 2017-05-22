@@ -298,6 +298,7 @@ When a Dired buffer is opened next to the Org document being edited,
 the prompt for file to attach can start in the Dired buffer's
 directory if `dired-dwim-target' in non-nil.
 
+*** ~org-fill-paragraph~ can now fill a whole region
 *** More specific anniversary descriptions
 
 Anniversary descriptions (used in the agenda view, for instance)

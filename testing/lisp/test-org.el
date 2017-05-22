@@ -456,23 +456,23 @@
 
 ;;; Filling
 
-(ert-deftest test-org/fill-paragraph ()
-  "Test `org-fill-paragraph' specifications."
+(ert-deftest test-org/fill-element ()
+  "Test `org-fill-element' specifications."
   ;; At an Org table, align it.
   (should
    (equal "| a |\n"
 	  (org-test-with-temp-text "|a|"
-	    (org-fill-paragraph)
+	    (org-fill-element)
 	    (buffer-string))))
   (should
    (equal "#+name: table\n| a |\n"
 	  (org-test-with-temp-text "#+name: table\n| a |\n"
-	    (org-fill-paragraph)
+	    (org-fill-element)
 	    (buffer-string))))
   ;; At a paragraph, preserve line breaks.
   (org-test-with-temp-text "some \\\\\nlong\ntext"
     (let ((fill-column 20))
-      (org-fill-paragraph)
+      (org-fill-element)
       (should (equal (buffer-string) "some \\\\\nlong text"))))
   ;; Correctly fill a paragraph when point is at its very end.
   (should
@@ -480,7 +480,7 @@
 	  (org-test-with-temp-text "A\nB"
 	    (let ((fill-column 20))
 	      (goto-char (point-max))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Correctly fill the last paragraph of a greater element.
   (should
@@ -489,7 +489,7 @@
 	    (let ((fill-column 8))
 	      (forward-line)
 	      (end-of-line)
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Correctly fill an element in a narrowed buffer.
   (should
@@ -497,7 +497,7 @@
 	  (org-test-with-temp-text "01234 6789"
 	    (let ((fill-column 5))
 	      (narrow-to-region 1 8)
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Handle `adaptive-fill-regexp' in paragraphs.
   (should
@@ -505,7 +505,7 @@
 	  (org-test-with-temp-text "> a\n> b"
 	    (let ((fill-column 5)
 		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Special case: Fill first paragraph when point is at an item or
   ;; a plain-list or a footnote reference.
@@ -513,17 +513,17 @@
    (equal "- A B"
 	  (org-test-with-temp-text "- A\n  B"
 	    (let ((fill-column 20))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   (should
    (equal "[fn:1] A B"
 	  (org-test-with-temp-text "[fn:1] A\nB"
 	    (let ((fill-column 20))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
     (let ((fill-column 20))
-      (org-fill-paragraph)
+      (org-fill-element)
       (should (equal (buffer-string)
 		     "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"))))
   ;; Fill contents of `comment-block' elements.
@@ -532,7 +532,7 @@
     (org-test-with-temp-text "#+BEGIN_COMMENT\nSome\ntext\n#+END_COMMENT"
       (let ((fill-column 20))
 	(forward-line)
-	(org-fill-paragraph)
+	(org-fill-element)
 	(buffer-string)))
     "#+BEGIN_COMMENT\nSome text\n#+END_COMMENT"))
   ;; Fill `comment' elements.
@@ -540,21 +540,21 @@
    (equal "  # A B"
 	  (org-test-with-temp-text "  # A\n  # B"
 	    (let ((fill-column 20))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Do not mix consecutive comments when filling one of them.
   (should
    (equal "# A B\n\n# C"
 	  (org-test-with-temp-text "# A\n# B\n\n# C"
 	    (let ((fill-column 20))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Use commented empty lines as separators when filling comments.
   (should
    (equal "# A B\n#\n# C"
 	  (org-test-with-temp-text "# A\n# B\n#\n# C"
 	    (let ((fill-column 20))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Handle `adaptive-fill-regexp' in comments.
   (should
@@ -562,18 +562,18 @@
 	  (org-test-with-temp-text "# > a\n# > b"
 	    (let ((fill-column 20)
 		  (adaptive-fill-regexp "[ \t]*>+[ \t]*"))
-	      (org-fill-paragraph)
+	      (org-fill-element)
 	      (buffer-string)))))
   ;; Do nothing at affiliated keywords.
   (org-test-with-temp-text "#+NAME: para\nSome\ntext."
     (let ((fill-column 20))
-      (org-fill-paragraph)
+      (org-fill-element)
       (should (equal (buffer-string) "#+NAME: para\nSome\ntext."))))
   ;; Do not move point after table when filling a table.
   (should-not
    (org-test-with-temp-text "| a | b |\n| c | d |\n"
      (forward-char)
-     (org-fill-paragraph)
+     (org-fill-element)
      (eobp))))
 
 (ert-deftest test-org/auto-fill-function ()

@@ -22999,7 +22999,8 @@ matches in paragraphs or comments, use it."
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
-(defun org-fill-paragraph (&optional justify)
+
+(defun org-fill-element (&optional justify)
   "Fill element at point, when applicable.
 
 This function only applies to comment blocks, comments, example
@@ -23014,126 +23015,160 @@ width for filling.
 
 For convenience, when point is at a plain list, an item or
 a footnote definition, try to fill the first paragraph within."
-  (interactive)
-  (if (and (derived-mode-p 'message-mode)
-	   (or (not (message-in-body-p))
-	       (save-excursion (move-beginning-of-line 1)
-			       (looking-at message-cite-prefix-regexp))))
-      ;; First ensure filling is correct in message-mode.
-      (let ((fill-paragraph-function
-	     (cl-cadadr (assq 'fill-paragraph-function org-fb-vars)))
-	    (fill-prefix (cl-cadadr (assq 'fill-prefix org-fb-vars)))
-	    (paragraph-start (cl-cadadr (assq 'paragraph-start org-fb-vars)))
-	    (paragraph-separate
-	     (cl-cadadr (assq 'paragraph-separate org-fb-vars))))
-	(fill-paragraph nil))
-    (with-syntax-table org-mode-transpose-word-syntax-table
-      ;; Move to end of line in order to get the first paragraph
-      ;; within a plain list or a footnote definition.
-      (let ((element (save-excursion
-		       (end-of-line)
-		       (or (ignore-errors (org-element-at-point))
-			   (user-error "An element cannot be parsed line %d"
-				       (line-number-at-pos (point)))))))
-	;; First check if point is in a blank line at the beginning of
-	;; the buffer.  In that case, ignore filling.
-	(cl-case (org-element-type element)
-	  ;; Use major mode filling function is src blocks.
-	  (src-block (org-babel-do-key-sequence-in-edit-buffer (kbd "M-q")))
-	  ;; Align Org tables, leave table.el tables as-is.
-	  (table-row (org-table-align) t)
-	  (table
-	   (when (eq (org-element-property :type element) 'org)
+  (with-syntax-table org-mode-transpose-word-syntax-table
+    ;; Move to end of line in order to get the first paragraph within
+    ;; a plain list or a footnote definition.
+    (let ((element (save-excursion (end-of-line) (org-element-at-point))))
+      ;; First check if point is in a blank line at the beginning of
+      ;; the buffer.  In that case, ignore filling.
+      (cl-case (org-element-type element)
+	;; Use major mode filling function is src blocks.
+	(src-block (org-babel-do-key-sequence-in-edit-buffer (kbd "M-q")))
+	;; Align Org tables, leave table.el tables as-is.
+	(table-row (org-table-align) t)
+	(table
+	 (when (eq (org-element-property :type element) 'org)
+	   (save-excursion
+	     (goto-char (org-element-property :post-affiliated element))
+	     (org-table-align)))
+	 t)
+	(paragraph
+	 ;; Paragraphs may contain `line-break' type objects.
+	 (let ((beg (max (point-min)
+			 (org-element-property :contents-begin element)))
+	       (end (min (point-max)
+			 (org-element-property :contents-end element))))
+	   ;; Do nothing if point is at an affiliated keyword.
+	   (if (< (line-end-position) beg) t
+	     (when (derived-mode-p 'message-mode)
+	       ;; In `message-mode', do not fill following citation
+	       ;; in current paragraph nor text before message body.
+	       (let ((body-start (save-excursion (message-goto-body))))
+		 (when body-start (setq beg (max body-start beg))))
+	       (when (save-excursion
+		       (re-search-forward
+			(concat "^" message-cite-prefix-regexp) end t))
+		 (setq end (match-beginning 0))))
+	     ;; Fill paragraph, taking line breaks into account.
 	     (save-excursion
-	       (goto-char (org-element-property :post-affiliated element))
-	       (org-table-align)))
-	   t)
-	  (paragraph
-	   ;; Paragraphs may contain `line-break' type objects.
-	   (let ((beg (max (point-min)
-			   (org-element-property :contents-begin element)))
-		 (end (min (point-max)
-			   (org-element-property :contents-end element))))
-	     ;; Do nothing if point is at an affiliated keyword.
-	     (if (< (line-end-position) beg) t
-	       (when (derived-mode-p 'message-mode)
-		 ;; In `message-mode', do not fill following citation
-		 ;; in current paragraph nor text before message body.
-		 (let ((body-start (save-excursion (message-goto-body))))
-		   (when body-start (setq beg (max body-start beg))))
-		 (when (save-excursion
-			 (re-search-forward
-			  (concat "^" message-cite-prefix-regexp) end t))
-		   (setq end (match-beginning 0))))
-	       ;; Fill paragraph, taking line breaks into account.
-	       (save-excursion
-		 (goto-char beg)
-		 (let ((cuts (list beg)))
-		   (while (re-search-forward "\\\\\\\\[ \t]*\n" end t)
-		     (when (eq 'line-break
-			       (org-element-type
-				(save-excursion (backward-char)
-						(org-element-context))))
-		       (push (point) cuts)))
-		   (dolist (c (delq end cuts))
-		     (fill-region-as-paragraph c end justify)
-		     (setq end c))))
-	       t)))
-	  ;; Contents of `comment-block' type elements should be
-	  ;; filled as plain text, but only if point is within block
-	  ;; markers.
-	  (comment-block
-	   (let* ((case-fold-search t)
-		  (beg (save-excursion
-			 (goto-char (org-element-property :begin element))
-			 (re-search-forward "^[ \t]*#\\+begin_comment" nil t)
-			 (forward-line)
-			 (point)))
-		  (end (save-excursion
-			 (goto-char (org-element-property :end element))
-			 (re-search-backward "^[ \t]*#\\+end_comment" nil t)
-			 (line-beginning-position))))
-	     (if (or (< (point) beg) (> (point) end)) t
-	       (fill-region-as-paragraph
-		(save-excursion (end-of-line)
-				(re-search-backward "^[ \t]*$" beg 'move)
-				(line-beginning-position))
-		(save-excursion (beginning-of-line)
-				(re-search-forward "^[ \t]*$" end 'move)
-				(line-beginning-position))
-		justify))))
-	  ;; Fill comments.
-	  (comment
-	   (let ((begin (org-element-property :post-affiliated element))
-		 (end (org-element-property :end element)))
-	     (when (and (>= (point) begin) (<= (point) end))
-	       (let ((begin (save-excursion
-			      (end-of-line)
-			      (if (re-search-backward "^[ \t]*#[ \t]*$" begin t)
-				  (progn (forward-line) (point))
-				begin)))
-		     (end (save-excursion
+	       (goto-char beg)
+	       (let ((cuts (list beg)))
+		 (while (re-search-forward "\\\\\\\\[ \t]*\n" end t)
+		   (when (eq 'line-break
+			     (org-element-type
+			      (save-excursion (backward-char)
+					      (org-element-context))))
+		     (push (point) cuts)))
+		 (dolist (c (delq end cuts))
+		   (fill-region-as-paragraph c end justify)
+		   (setq end c))))
+	     t)))
+	;; Contents of `comment-block' type elements should be
+	;; filled as plain text, but only if point is within block
+	;; markers.
+	(comment-block
+	 (let* ((case-fold-search t)
+		(beg (save-excursion
+		       (goto-char (org-element-property :begin element))
+		       (re-search-forward "^[ \t]*#\\+begin_comment" nil t)
+		       (forward-line)
+		       (point)))
+		(end (save-excursion
+		       (goto-char (org-element-property :end element))
+		       (re-search-backward "^[ \t]*#\\+end_comment" nil t)
+		       (line-beginning-position))))
+	   (if (or (< (point) beg) (> (point) end)) t
+	     (fill-region-as-paragraph
+	      (save-excursion (end-of-line)
+			      (re-search-backward "^[ \t]*$" beg 'move)
+			      (line-beginning-position))
+	      (save-excursion (beginning-of-line)
+			      (re-search-forward "^[ \t]*$" end 'move)
+			      (line-beginning-position))
+	      justify))))
+	;; Fill comments.
+	(comment
+	 (let ((begin (org-element-property :post-affiliated element))
+	       (end (org-element-property :end element)))
+	   (when (and (>= (point) begin) (<= (point) end))
+	     (let ((begin (save-excursion
 			    (end-of-line)
-			    (if (re-search-forward "^[ \t]*#[ \t]*$" end 'move)
-				(1- (line-beginning-position))
-			      (skip-chars-backward " \r\t\n")
-			      (line-end-position)))))
-		 ;; Do not fill comments when at a blank line.
-		 (when (> end begin)
-		   (let ((fill-prefix
-			  (save-excursion
-			    (beginning-of-line)
-			    (looking-at "[ \t]*#")
-			    (let ((comment-prefix (match-string 0)))
-			      (goto-char (match-end 0))
-			      (if (looking-at adaptive-fill-regexp)
-				  (concat comment-prefix (match-string 0))
-				(concat comment-prefix " "))))))
-		     (save-excursion
-		       (fill-region-as-paragraph begin end justify))))))
-	     t))
-	  ;; Ignore every other element.
-	  (otherwise t))))))
+			    (if (re-search-backward "^[ \t]*#[ \t]*$" begin t)
+				(progn (forward-line) (point))
+			      begin)))
+		   (end (save-excursion
+			  (end-of-line)
+			  (if (re-search-forward "^[ \t]*#[ \t]*$" end 'move)
+			      (1- (line-beginning-position))
+			    (skip-chars-backward " \r\t\n")
+			    (line-end-position)))))
+	       ;; Do not fill comments when at a blank line.
+	       (when (> end begin)
+		 (let ((fill-prefix
+			(save-excursion
+			  (beginning-of-line)
+			  (looking-at "[ \t]*#")
+			  (let ((comment-prefix (match-string 0)))
+			    (goto-char (match-end 0))
+			    (if (looking-at adaptive-fill-regexp)
+				(concat comment-prefix (match-string 0))
+			      (concat comment-prefix " "))))))
+		   (save-excursion
+		     (fill-region-as-paragraph begin end justify))))))
+	   t))
+	;; Ignore every other element.
+	(otherwise t)))))
+
+(defun org-fill-paragraph (&optional justify region)
+  "Fill element at point, when applicable.
+
+This function only applies to comment blocks, comments, example
+blocks and paragraphs.  Also, as a special case, re-align table
+when point is at one.
+
+For convenience, when point is at a plain list, an item or
+a footnote definition, try to fill the first paragraph within.
+
+If JUSTIFY is non-nil (interactively, with prefix argument),
+justify as well.  If `sentence-end-double-space' is non-nil, then
+period followed by one space does not end a sentence, so don't
+break a line there.  The variable `fill-column' controls the
+width for filling.
+
+The REGION argument is non-nil if called interactively; in that
+case, if Transient Mark mode is enabled and the mark is active,
+fill each of the elements in the active region, instead of just
+filling the current element."
+  (interactive (progn
+		 (barf-if-buffer-read-only)
+		 (list (if current-prefix-arg 'full) t)))
+  (cond
+   ((and (derived-mode-p 'message-mode)
+	 (or (not (message-in-body-p))
+	     (save-excursion (move-beginning-of-line 1)
+			     (looking-at message-cite-prefix-regexp))))
+    ;; First ensure filling is correct in message-mode.
+    (let ((fill-paragraph-function
+	   (cl-cadadr (assq 'fill-paragraph-function org-fb-vars)))
+	  (fill-prefix (cl-cadadr (assq 'fill-prefix org-fb-vars)))
+	  (paragraph-start (cl-cadadr (assq 'paragraph-start org-fb-vars)))
+	  (paragraph-separate
+	   (cl-cadadr (assq 'paragraph-separate org-fb-vars))))
+      (fill-paragraph nil)))
+   ((and region transient-mark-mode mark-active
+	 (not (eq (region-beginning) (region-end))))
+    (let ((origin (point-marker))
+	  (start (region-beginning)))
+      (unwind-protect
+	  (progn
+	    (goto-char (region-end))
+	    (while (> (point) start)
+	      (org-backward-paragraph)
+	      (org-fill-element justify)))
+	(goto-char origin)
+	(set-marker origin nil))))
+   (t (org-fill-element justify))))
+(org-remap org-mode-map 'fill-paragraph 'org-fill-paragraph)
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
