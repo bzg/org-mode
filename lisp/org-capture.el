@@ -723,16 +723,6 @@ captured item after finalizing."
 		(kill-region m1 m2))
 	    (setq abort-note 'dirty)))
 
-      ;; Make sure that the empty lines after are correct
-      (when (and (> (point-max) end) ; indeed, the buffer was still narrowed
-		 (member (org-capture-get :type 'local)
-			 '(entry item checkitem plain)))
-	(save-excursion
-	  (goto-char end)
-	  (or (bolp) (newline))
-	  (org-capture-empty-lines-after
-	   (or (org-capture-get :empty-lines-after 'local)
-	       (org-capture-get :empty-lines 'local) 0))))
       ;; Postprocessing:  Update Statistics cookies, do the sorting
       (when (derived-mode-p 'org-mode)
 	(save-excursion
@@ -1101,7 +1091,7 @@ may have been stored before."
     (setq beg (point))
     (org-capture-verify-tree txt)
     (org-paste-subtree level txt 'for-yank)
-    (org-capture-empty-lines-after 1)
+    (org-capture-empty-lines-after)
     (org-capture-position-for-last-stored beg)
     (outline-next-heading)
     (setq end (point))
@@ -1161,7 +1151,7 @@ may have been stored before."
 		      "\n"))
     ;; Insert item.
     (insert txt)
-    (org-capture-empty-lines-after 1)
+    (org-capture-empty-lines-after)
     (org-capture-position-for-last-stored beg)
     (forward-char 1)
     (setq end (point))
@@ -1282,7 +1272,7 @@ Of course, if exact position has been required, just put it there."
     (org-capture-empty-lines-before)
     (setq beg (point))
     (insert txt)
-    (org-capture-empty-lines-after 1)
+    (org-capture-empty-lines-after)
     (org-capture-position-for-last-stored beg)
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
@@ -1366,7 +1356,7 @@ Point will remain at the first line after the inserted text."
   (let* ((template (org-capture-get :template))
 	 (type  (org-capture-get :type))
 	 beg end pp)
-    (or (bolp) (newline))
+    (unless (bolp) (insert "\n"))
     (setq beg (point))
     (cond
      ((and (eq type 'entry) (derived-mode-p 'org-mode))
@@ -1388,13 +1378,16 @@ Point will remain at the first line after the inserted text."
       (org-capture-empty-lines-after)
       (goto-char beg)
       (org-list-repair)
-      (org-end-of-item)
-      (setq end (point)))
-     (t (insert template)))
+      (org-end-of-item))
+     (t
+      (insert template)
+      (org-capture-empty-lines-after)
+      (skip-chars-forward " \t\n")
+      (unless (eobp) (beginning-of-line))))
     (setq end (point))
     (goto-char beg)
-    (if (re-search-forward "%\\?" end t)
-	(replace-match ""))))
+    (when (re-search-forward "%\\?" end t)
+      (replace-match ""))))
 
 (defun org-capture-set-plist (entry)
   "Initialize the property list from the template definition."
