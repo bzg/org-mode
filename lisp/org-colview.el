@@ -239,7 +239,7 @@ display, as a string."
 	(`(,_ ,_ ,_ ,_ nil) value)
 	;; If PRINTF is set, assume we are displaying a number and
 	;; obey to the format string.
-	(`(,_ ,name ,_ ,_ ,printf) (format printf (string-to-number value)))
+	(`(,_ ,_ ,_ ,_ ,printf) (format printf (string-to-number value)))
 	(_ (error "Invalid column specification format: %S" spec)))))
 
 (defun org-columns--collect-values (&optional compiled-fmt)
