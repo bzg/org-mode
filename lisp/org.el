@@ -129,6 +129,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-update-time-maybe "org-clock" ())
 (declare-function org-clocktable-shift "org-clock" (dir n))
+(declare-function
+ org-duration-from-minutes "org-duration" (minutes &optional fmt canonical))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-cache-refresh "org-element" (pos))
 (declare-function org-element-cache-reset "org-element" (&optional all))
@@ -167,6 +169,9 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-next-row "org-table" ())
 (declare-function org-table-paste-rectangle "org-table" ())
 (declare-function org-table-recalculate "org-table" (&optional all noalign))
+(declare-function
+ org-table-sort-lines "org-table"
+ (&optional with-case sorting-type getkey-func compare-func interactive?))
 (declare-function org-table-wrap-region "org-table" (arg))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function orgtbl-ascii-plot "org-table" (&optional ask))
@@ -525,11 +530,12 @@ but the stars and the body are.")
 An archived subtree does not open during visibility cycling, and does
 not contribute to the agenda listings.")
 
-(defconst org-comment-string "COMMENT"
-  "Entries starting with this keyword will never be exported.
+(eval-and-compile
+  (defconst org-comment-string "COMMENT"
+    "Entries starting with this keyword will never be exported.
 \\<org-mode-map>
 An entry can be toggled between COMMENT and normal with
-`\\[org-toggle-comment]'.")
+`\\[org-toggle-comment]'."))
 
 
 ;;;; LaTeX Environments and Fragments
@@ -17853,7 +17859,8 @@ When matching, the match groups are the following:
 		     (or (and (eq extended 'agenda)
 			      (or (org-at-planning-p)
 				  (org-at-property-p)
-				  (and org-agenda-include-inactive-timestamps
+				  (and (bound-and-true-p
+					org-agenda-include-inactive-timestamps)
 				       (org-at-clock-log-p))))
 			 (eq 'timestamp
 			     (save-excursion
