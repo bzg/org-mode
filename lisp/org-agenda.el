@@ -3492,7 +3492,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 	     (insert txt)
 	     (when org-agenda-add-entry-text-descriptive-links
 	       (goto-char (point-min))
-	       (while (org-activate-bracket-links (point-max))
+	       (while (org-activate-links (point-max))
 		 (add-text-properties (match-beginning 0) (match-end 0)
 				      '(face org-link))))
 	     (goto-char (point-min))
@@ -3734,11 +3734,7 @@ FILTER-ALIST is an alist of filters we need to apply when
       (let ((inhibit-read-only t))
 	(goto-char (point-min))
 	(save-excursion
-	  (while (org-activate-bracket-links (point-max))
-	    (add-text-properties (match-beginning 0) (match-end 0)
-				 '(face org-link))))
-	(save-excursion
-	  (while (org-activate-plain-links (point-max))
+	  (while (org-activate-links (point-max))
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 '(face org-link))))
 	(unless (eq org-agenda-remove-tags t)
