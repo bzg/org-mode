@@ -2473,8 +2473,20 @@ from the dynamic block definition."
 	 (level? (and (not compact?) (plist-get params :level)))
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
-	 (time-columns (if compact? 1
-			 (min maxlevel (or (plist-get params :tcolumns) 100))))
+	 (time-columns
+	  (if (or compact? (< maxlevel 2)) 1
+	    ;; Deepest headline level is a hard limit for the number
+	    ;; of time columns.
+	    (let ((levels
+		   (cl-mapcan
+		    (lambda (table)
+		      (pcase table
+			(`(,_ ,(and (pred wholenump) (pred (/= 0))) ,entries)
+			 (mapcar #'car entries))))
+		    tables)))
+	      (min maxlevel
+		   (or (plist-get params :tcolumns) 100)
+		   (if (null levels) 1 (apply #'max levels))))))
 	 (indent (or compact? (plist-get params :indent)))
 	 (formula (plist-get params :formula))
 	 (case-fold-search t)
