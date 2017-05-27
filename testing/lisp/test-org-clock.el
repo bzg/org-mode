@@ -369,12 +369,12 @@ CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
 (ert-deftest test-org-clock/clocktable/maxlevel ()
   "Test \":maxlevel\" parameter in Clock table."
   (should
-   (equal "| Headline     | Time   |      |   |
-|--------------+--------+------+---|
-| *Total time* | *6:00* |      |   |
-|--------------+--------+------+---|
-| Foo          | 6:00   |      |   |
-| \\_  Bar      |        | 2:00 |   |"
+   (equal "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *6:00* |      |
+|--------------+--------+------|
+| Foo          | 6:00   |      |
+| \\_  Bar      |        | 2:00 |"
           (org-test-with-temp-text
               "* Foo
 CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 15:09] =>  4:00
@@ -538,11 +538,11 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
   ;; the headline.
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
@@ -550,11 +550,11 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; Otherwise, link to the headline in the current file.
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[file:filename::Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[file:filename::Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text-in-file
 	"* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
@@ -566,44 +566,44 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; headline.
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* TODO Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* [#A] Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* COMMENT Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* Foo :tag:
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
@@ -611,22 +611,22 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; Remove statistics cookie from headline description.
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* Foo [50%]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo][Foo]]          | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo][Foo]]          | 26:00   |"
     (org-test-with-temp-text
 	"* Foo [1/2]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
@@ -635,22 +635,22 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; links if there is no description.
   (should
    (equal
-    "| Headline     | Time    |   |
-|--------------+---------+---|
-| *Total time* | *26:00* |   |
-|--------------+---------+---|
-| [[Foo%20%5B%5Bhttp://orgmode.org%5D%5BOrg%20mode%5D%5D][Foo Org mode]] | 26:00   |   |"
+    "| Headline     | Time    |
+|--------------+---------|
+| *Total time* | *26:00* |
+|--------------+---------|
+| [[Foo%20%5B%5Bhttp://orgmode.org%5D%5BOrg%20mode%5D%5D][Foo Org mode]] | 26:00   |"
     (org-test-with-temp-text
 	"* Foo [[http://orgmode.org][Org mode]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (equal
-    "| Headline               | Time    |   |
-|------------------------+---------+---|
-| *Total time*           | *26:00* |   |
-|------------------------+---------+---|
-| [[Foo%20%5B%5Bhttp://orgmode.org%5D%5D][Foo http://orgmode.org]] | 26:00   |   |"
+    "| Headline               | Time    |
+|------------------------+---------|
+| *Total time*           | *26:00* |
+|------------------------+---------|
+| [[Foo%20%5B%5Bhttp://orgmode.org%5D%5D][Foo http://orgmode.org]] | 26:00   |"
     (org-test-with-temp-text
 	"* Foo [[http://orgmode.org]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
@@ -735,11 +735,11 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; Include a new column with list properties.
   (should
    (equal
-    "| A | Headline     | Time    |   |
-|---+--------------+---------+---|
-|   | *Total time* | *26:00* |   |
-|---+--------------+---------+---|
-| 1 | Foo          | 26:00   |   |"
+    "| A | Headline     | Time    |
+|---+--------------+---------|
+|   | *Total time* | *26:00* |
+|---+--------------+---------|
+| 1 | Foo          | 26:00   |"
     (org-test-with-temp-text
         "* Foo
 :PROPERTIES:
@@ -767,11 +767,11 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; Handle missing properties.
   (should
    (equal
-    "| A | Headline     | Time    |   |
-|---+--------------+---------+---|
-|   | *Total time* | *26:00* |   |
-|---+--------------+---------+---|
-| 1 | Foo          | 26:00   |   |"
+    "| A | Headline     | Time    |
+|---+--------------+---------|
+|   | *Total time* | *26:00* |
+|---+--------------+---------|
+| 1 | Foo          | 26:00   |"
     (org-test-with-temp-text
         "* Foo
 :PROPERTIES:
@@ -779,6 +779,53 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
 :END:
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":properties (\"A\")")))))
+
+(ert-deftest test-org-clock/clocktable/tcolumns ()
+  "Test \":tcolumns\" parameter in Clock table."
+  ;; When :tcolumns is smaller than the deepest headline level, lump
+  ;; lower levels in the last column.
+  (should
+   (equal
+    "| Headline     |    Time |
+|--------------+---------|
+| *Total time* | *52:00* |
+|--------------+---------|
+| Foo          |   52:00 |
+| \\_  Bar      |   26:00 |"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":tcolumns 1"))))
+  ;; :tcolumns cannot create more columns than the deepest headline
+  ;; level.
+  (should
+   (equal
+    "| Headline     | Time    |       |
+|--------------+---------+-------|
+| *Total time* | *52:00* |       |
+|--------------+---------+-------|
+| Foo          | 52:00   |       |
+| \\_  Bar      |         | 26:00 |"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00
+** Bar
+CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
+      (test-org-clock-clocktable-contents ":tcolumns 3"))))
+  ;; Pathological case: when no headline contributes to the total
+  ;; time, there is only one time column.
+  (should
+   (equal "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |"
+          (org-test-with-temp-text
+              "* Foo
+CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 11:09] =>  0:00
+** Bar
+CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 13:09] =>  0:00"
+            (test-org-clock-clocktable-contents ":tcolumns 2")))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
