@@ -370,12 +370,12 @@ CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
 (ert-deftest test-org-clock/clocktable/maxlevel ()
   "Test \":maxlevel\" parameter in Clock table."
   (should
-   (equal "| Headline     | Time   |      |   |
-|--------------+--------+------+---|
-| *Total time* | *6:00* |      |   |
-|--------------+--------+------+---|
-| Foo          | 6:00   |      |   |
-| \\_  Bar      |        | 2:00 |   |
+   (equal "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *6:00* |      |
+|--------------+--------+------|
+| Foo          | 6:00   |      |
+| \\_  Bar      |        | 2:00 |
 "
           (org-test-with-temp-text
               "
