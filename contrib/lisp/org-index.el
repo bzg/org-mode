@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.4.0
+;; Version: 5.4.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -85,11 +85,12 @@
 
 ;;; Change Log:
 
-;;   [2017-05-20 Sa] Version 5.4.0
+;;   [2017-05-27 Sa] Version 5.4.1
 ;;   - Dedicated submenu for focus operations
 ;;   - Occur accepts a numeric argument as a day span
 ;;   - New customization `org-index-clock-into-focus'
 ;;   - Fixed delay after choosing an index line
+;;   - Bugfixes
 ;;
 ;;   [2017-03-26 Su] Version 5.3.0
 ;;   - Focused can now be on a list of nodes (instead of a single one)
@@ -190,7 +191,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.4.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.4.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -350,6 +351,7 @@ those pieces."
 (defvar org-index--minibuffer-saved-key nil "Temporarily save entry of minibuffer keymap.")
 (defvar org-index--after-focus-timer nil "Timer to clock in or update focused node after a delay.")
 (defvar org-index--after-focus-context nil "Context for after focus action.")
+(defvar org-index--set-focus-time nil "Last time-value, when focus has been set.")
 
 ;; static information for this program package
 (defconst org-index--commands '(occur add kill head ping index ref yank column edit help short-help focus example sort find-ref highlight maintain) "List of commands available.")
@@ -358,7 +360,7 @@ those pieces."
 (defconst org-index--edit-buffer-name "*org-index-edit*" "Name of edit buffer.")
 (defvar org-index--short-help-text nil "Cache for result of `org-index--get-short-help-text.")
 (defvar org-index--shortcut-chars nil "Cache for result of `org-index--get-shortcut-chars.")
-(defvar org-index--after-focus-delay 6 "Number of seconds to wait before invoking after-focus action.")
+(defvar org-index--after-focus-delay 10 "Number of seconds to wait before invoking after-focus action.")
 
 
 (defmacro org-index--on (column value &rest body)
@@ -405,7 +407,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.4.0 of org-index.el.
+This is version 5.4.1 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -452,12 +454,13 @@ of subcommands to choose from:
     Can be invoked from index, from occur or from a headline.
 
   focus: [f] Return to first focused node; repeat to see them all.
-    The focused nodes are kept in a short list and can be found
-    by hitting a single key; they need not be part of the index
-    though.  This can be useful, if you work in one or few nodes,
-    but make frequent excursions to others, which are part of the
-    index. With a prefix argument offer more options, e.g. to set
-    focus.
+    The focused nodes are kept in a short list; they need not be
+    part of the index though.  This command visits one focus node
+    after the other, as long as you invoke it in quick succession
+    and without moving to other nodes; otherwise it returns to
+    the focus node, where you left off. Finally, with a prefix
+    argument, this command offers more options, e.g. to set focus
+    in the first place.
 
   help: Show complete help text of `org-index'.
     I.e. this text.
@@ -1098,26 +1101,32 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
 (defun org-index--goto-focus ()
   "Goto focus node, one after the other."
   (if org-index--ids-focused-nodes
-      (let (last-id next-id this-id marker)
+      (let (last-id next-id here-id recent marker)
+        (setq recent (or (not org-index--set-focus-time)
+                         (< (- (float-time (current-time))
+                               (float-time org-index--set-focus-time))
+                            org-index--after-focus-delay)))
         (setq last-id (or org-index--id-last-goto-focus
-                          (last org-index--ids-focused-nodes)))
-        (setq this-id (org-id-get))
+                          (car (last org-index--ids-focused-nodes))))
+        (setq here-id (org-id-get))
         (setq next-id
-              (if (and this-id
-                       (string= this-id last-id))
+              (if (and recent
+                       here-id
+                       (string= here-id last-id))
                   (car (or (cdr-safe (member last-id
                                              (append org-index--ids-focused-nodes
                                                      org-index--ids-focused-nodes)))
                            org-index--ids-focused-nodes))
-                (or last-id
-                    (car org-index--ids-focused-nodes))))
-        (or (setq marker (org-id-find next-id 'marker))
-            (error "Could not find focus-node with id %s" next-id))
+                last-id))
+        (unless (setq marker (org-id-find next-id 'marker))
+          (setq org-index--id-last-goto-focus nil)
+          (error "Could not find focus-node with id %s" next-id))
 
         (pop-to-buffer-same-window (marker-buffer marker))
         (goto-char (marker-position marker))
         (org-index--unfold-buffer)
         (move-marker marker nil)
+        (setq org-index--set-focus-time (current-time))
         (when org-index-clock-into-focus
           (if org-index--after-focus-timer (cancel-timer org-index--after-focus-timer))
           (setq org-index--after-focus-context
@@ -1135,7 +1144,8 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
                                (setq org-index--after-focus-context nil)))))
         (setq org-index--id-last-goto-focus next-id)
         (if (cdr org-index--ids-focused-nodes)
-            (format "Jumped to next focus-node (out of %d)"
+            (format "Jumped %s focus-node (out of %d)"
+                    (if recent "to next" "back to current")
                     (length org-index--ids-focused-nodes))
           "Jumped to single focus-node"))
       "No nodes in focus, use set-focus"))
@@ -1155,7 +1165,7 @@ Optional argument WITH-SHORT-HELP displays help screen upfront."
            ((eq char ?s)
             (setq id (org-id-get-create))
             (setq org-index--ids-focused-nodes (list id))
-	    (setq org-index--id-last-goto-focus id)
+            (setq org-index--id-last-goto-focus id)
             (if org-index-clock-into-focus (org-clock-in))
             "Focus has been set on current node (1 node in focus)")
 
@@ -2099,41 +2109,44 @@ Optional argument NO-ERROR suppresses error."
 
 (defun org-index--align-and-fontify-current-line (&optional num)
   "Make current line (or NUM lines) blend well among others."
-  (let (lines)
+  (let (lines lines-fontified)
     ;; get current content
     (unless num (setq num 1))
     (setq lines (delete-and-extract-region (line-beginning-position) (line-end-position num)))
     ;; create minimum table with fixed-width columns to align and fontify new line
-    (insert (with-temp-buffer
-              (org-set-font-lock-defaults)
-              (insert org-index--headings-visible)
-              ;; fill columns, so that aligning cannot shrink them
-              (goto-char (point-min))
-              (search-forward "|")
-              (while (search-forward " " (line-end-position) t)
-                (replace-match "." nil t))
-              (goto-char (point-min))
-              (while (search-forward ".|." (line-end-position) t)
-                (replace-match " | " nil t))
-              (goto-char (point-min))
-              (while (search-forward "|." (line-end-position) t)
-                (replace-match "| " nil t))
-              (goto-char (point-max))
-              (insert lines)
-              (forward-line 0)
-              (let ((start (point)))
-                (while (re-search-forward "^\s +|-" nil t)
-                  (replace-match "| -"))
-                (goto-char start))
-              (org-mode)
-              (org-table-align)
-              (font-lock-fontify-region (point-min) (point-max))
-              (goto-char (point-max))
-              (if (eq -1 (skip-chars-backward "\n"))
-                  (delete-char 1))
-              (forward-line (- 1 num))
-              (buffer-substring (line-beginning-position) (line-end-position num))))
-    lines))
+    (insert
+     (setq
+      lines-fontified
+      (with-temp-buffer
+        (org-set-font-lock-defaults)
+        (insert org-index--headings-visible)
+        ;; fill columns, so that aligning cannot shrink them
+        (goto-char (point-min))
+        (search-forward "|")
+        (while (search-forward " " (line-end-position) t)
+          (replace-match "." nil t))
+        (goto-char (point-min))
+        (while (search-forward ".|." (line-end-position) t)
+          (replace-match " | " nil t))
+        (goto-char (point-min))
+        (while (search-forward "|." (line-end-position) t)
+          (replace-match "| " nil t))
+        (goto-char (point-max))
+        (insert lines)
+        (forward-line 0)
+        (let ((start (point)))
+          (while (re-search-forward "^\s +|-" nil t)
+            (replace-match "| -"))
+          (goto-char start))
+        (org-mode)
+        (org-table-align)
+        (font-lock-fontify-region (point-min) (point-max))
+        (goto-char (point-max))
+        (if (eq -1 (skip-chars-backward "\n"))
+            (delete-char 1))
+        (forward-line (- 1 num))
+        (buffer-substring (line-beginning-position) (line-end-position num)))))
+    lines-fontified))
 
 
 (defun org-index--promote-current-line ()
