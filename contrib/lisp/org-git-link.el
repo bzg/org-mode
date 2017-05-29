@@ -126,7 +126,7 @@
   the path. Example: (org-git-find-gitdir
   \"~/gitrepos/foo/bar.txt\") returns
   '(\"/home/user/gitrepos/.git\" \"foo/bar.txt\"). When not in a git repository, return nil."
-  (let ((dir (file-name-directory path))
+  (let ((dir (expand-file-name (file-name-directory path)))
         (relpath (file-name-nondirectory path)))
     (catch 'toplevel
       (while (not (file-exists-p (expand-file-name ".git" dir)))
