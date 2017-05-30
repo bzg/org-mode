@@ -4819,6 +4819,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
   (let* ((org-tags-match-list-sublevels
 	  org-tags-match-list-sublevels)
 	 (completion-ignore-case t)
+	 (org--matcher-tags-todo-only todo-only)
 	 rtn rtnall files file pos matcher
 	 buffer)
     (when (and (stringp match) (not (string-match "\\S-" match)))
@@ -4833,8 +4834,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
       ;; Prepare agendas (and `org-tag-alist-for-agenda') before
       ;; expanding tags within `org-make-tags-matcher'
       (org-agenda-prepare (concat "TAGS " match))
-      (setq org--matcher-tags-todo-only todo-only
-	    matcher (org-make-tags-matcher match)
+      (setq matcher (org-make-tags-matcher match)
 	    match (car matcher)
 	    matcher (cdr matcher))
       (org-compile-prefix-format 'tags)
