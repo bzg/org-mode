@@ -104,9 +104,10 @@
        (lambda () (get-char-property (point) 'org-columns-value))))))
   (should
    (equal
-    '("H1" "H2" "H3" "H4")
-    (org-test-with-temp-text "Top\n* H1\n** <point>H2\n*** H3\n* H4"
-      (let ((org-columns-default-format "%ITEM")) (org-columns t))
+    '("1" "1")
+    (org-test-with-temp-text
+	"Top\n* H1\n** <point>H2\n:PROPERTIES:\n:A: 1\n:END:"
+      (let ((org-columns-default-format "%A{+}")) (org-columns t))
       (org-map-entries
        (lambda () (get-char-property (point) 'org-columns-value)))))))
 
