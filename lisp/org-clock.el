@@ -321,7 +321,8 @@ For more information, see `org-clocktable-write-default'."
     ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Tiempo" "TODO" "Tiempo total" "Tiempo archivo" "Clock summary at")
     ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier" "Horodatage sommaire à")
     ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd" "Clock summary at")
-    ("de" "Datei"    "N"  "Timestamp" "Tätigkeit" "Dauer" "ALLES" "Gesamtdauer"  "Datei Zeit" "Erstellt am"))
+    ("de" "Datei"    "E"  "Zeitstempel" "Kopfzeile" "Dauer" "GESAMT"
+     "Gesamtdauer"  "Dateizeit" "Erstellt am"))
   "Terms used in clocktable, translated to different languages."
   :group 'org-clocktable
   :version "24.1"
