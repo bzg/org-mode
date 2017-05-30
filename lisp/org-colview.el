@@ -781,6 +781,7 @@ view for the whole buffer unconditionally.
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive "P")
   (org-columns-remove-overlays)
+  (when global (goto-char (point-min)))
   (move-marker org-columns-begin-marker (point))
   (org-columns-goto-top-level)
   ;; Initialize `org-columns-current-fmt' and
