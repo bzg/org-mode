@@ -2131,13 +2131,12 @@ The following commands are available:
 	 ;; while letting `kill-all-local-variables' kill the rest
 	 (let ((save (buffer-local-variables)))
 	   (kill-all-local-variables)
-	   (mapc 'make-local-variable org-agenda-local-vars)
+	   (mapc #'make-local-variable org-agenda-local-vars)
 	   (dolist (elem save)
-	     (let ((var (car elem))
-		   (val (cdr elem)))
-	       (when (and val
-			  (member var org-agenda-local-vars))
-		 (set var val)))))
+	     (pcase elem
+	       (`(,var ,val)		;ignore unbound variables
+		(when (and val (memq var org-agenda-local-vars))
+		  (set var val))))))
 	 (setq-local org-agenda-this-buffer-is-sticky t))
 	(org-agenda-sticky
 	 ;; Creating a sticky Agenda buffer for the first time
