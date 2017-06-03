@@ -9410,11 +9410,11 @@ auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
   "Clone local variables from FROM-BUFFER.
 Optional argument REGEXP selects variables to clone."
   (dolist (pair (buffer-local-variables from-buffer))
-    (let ((name (car pair)))
-      (when (and (symbolp name)
-		 (not (memq name org-unique-local-variables))
-		 (or (null regexp) (string-match regexp (symbol-name name))))
-	(set (make-local-variable name) (cdr pair))))))
+    (pcase pair
+      (`(,name ,_)			;ignore unbound variables
+       (when (and (not (memq name org-unique-local-variables))
+		  (or (null regexp) (string-match-p regexp (symbol-name name))))
+	 (set (make-local-variable name) (cdr pair)))))))
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
