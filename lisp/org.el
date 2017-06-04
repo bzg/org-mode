@@ -9620,10 +9620,10 @@ auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
 Optional argument REGEXP selects variables to clone."
   (dolist (pair (buffer-local-variables from-buffer))
     (pcase pair
-      (`(,name ,_)			;ignore unbound variables
+      (`(,name . ,value)		;ignore unbound variables
        (when (and (not (memq name org-unique-local-variables))
 		  (or (null regexp) (string-match-p regexp (symbol-name name))))
-	 (set (make-local-variable name) (cdr pair)))))))
+	 (set (make-local-variable name) value))))))
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
