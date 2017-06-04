@@ -2160,7 +2160,7 @@ The following commands are available:
 	   (mapc #'make-local-variable org-agenda-local-vars)
 	   (dolist (elem save)
 	     (pcase elem
-	       (`(,var ,val)		;ignore unbound variables
+	       (`(,var . ,val)		;ignore unbound variables
 		(when (and val (memq var org-agenda-local-vars))
 		  (set var val))))))
 	 (setq-local org-agenda-this-buffer-is-sticky t))
@@ -2189,9 +2189,9 @@ The following commands are available:
   (add-hook 'pre-command-hook 'org-unhighlight nil 'local)
   ;; Make sure properties are removed when copying text
   (add-hook 'filter-buffer-substring-functions
-		(lambda (fun start end delete)
-		  (substring-no-properties (funcall fun start end delete)))
-		nil t)
+	    (lambda (fun start end delete)
+	      (substring-no-properties (funcall fun start end delete)))
+	    nil t)
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode))
