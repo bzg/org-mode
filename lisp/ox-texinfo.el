@@ -974,16 +974,12 @@ INFO is a plist holding contextual information.  See
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
 	     (format "@uref{file://%s}" destination)))
 	  (`headline
-	   (format "@ref{%s,%s}"
-		   (org-texinfo--get-node destination info)
-		   (cond
-		    (desc)
-		    ((org-export-numbered-headline-p destination info)
-		     (mapconcat
-		      #'number-to-string
-		      (org-export-get-headline-number destination info) "."))
-		    (t (org-export-data
-			(org-element-property :title destination) info)))))
+	   (let ((node-name (org-texinfo--get-node destination info)))
+	     (if desc
+		 (format "@ref{%s, , %s}"
+			 node-name
+			 (org-texinfo--sanitize-node desc))
+	       (format "@ref{%s}" node-name))))
 	  (_
 	   (format "@ref{%s,,%s}"
 		   (org-texinfo--get-node destination info)
