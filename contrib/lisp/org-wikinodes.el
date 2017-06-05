@@ -305,11 +305,11 @@ with working links."
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-wikinodes-clear-cache-when-on-target)
 
 ;; Make Wiki haeding create additional link names for headlines
-(add-hook 'org-export-define-heading-targets-headline-hook
+(add-hook 'org-export-before-parsing-hook
 	  'org-wikinodes-set-wiki-targets-during-export)
 
 ;; Turn Wiki links into links the exporter will treat correctly
-(add-hook 'org-export-preprocess-after-radio-targets-hook
+(add-hook 'org-export-before-parsing-hook
 	  'org-wikinodes-process-links-for-export)
 
 ;; Activate CamelCase words as part of Org mode font lock
