@@ -265,6 +265,11 @@ Use ~org-duration-to-minutes~ instead.
 
 Use ~org-duration-to-minutes~ instead.
 
+*** ~org-gnus-nnimap-cached-article-number~ is removed.
+
+This function relied on ~nnimap-group-overview-filename~, which was
+removed from Gnus circa September 2010.
+
 ** Removed options
 
 *** ~org-agenda-repeating-timestamp-show-all~ is removed.
@@ -272,6 +277,15 @@ Use ~org-duration-to-minutes~ instead.
 For an equivalent to a ~nil~ value, set
 ~org-agenda-show-future-repeats~ to nil and
 ~org-agenda-prefer-last-repeat~ to ~t~.
+
+*** ~org-gnus-nnimap-query-article-no-from-file~ is removed.
+
+This variable has no effect, as it was relying on a function that was
+removed from Gnus circa September 2010.
+
+*** ~org-usenet-links-prefer-google~ is obsolete.
+
+Use ~org-gnus-prefer-web-links~ instead.
 
 *** ~org-publish-sitemap-file-entry-format~ is deprecated
 
