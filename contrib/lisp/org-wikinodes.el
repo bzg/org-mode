@@ -252,7 +252,7 @@ If there is no such wiki target, return nil."
 (defvar target-alist)
 (defvar last-section-target)
 (defvar org-export-target-aliases)
-(defun org-wikinodes-set-wiki-targets-during-export ()
+(defun org-wikinodes-set-wiki-targets-during-export (_)
   (let ((line (buffer-substring (point-at-bol) (point-at-eol)))
 	(case-fold-search nil)
 	wtarget a)
@@ -268,9 +268,8 @@ If there is no such wiki target, return nil."
 		    (car org-export-target-aliases))))
       (push (caar target-alist) (cdr a)))))
 
-(defun org-wikinodes-process-links-for-export ()
+(defun org-wikinodes-process-links-for-export (_)
   "Process Wiki links in the export preprocess buffer.
-
 Try to find target matches in the wiki scope and replace CamelCase words
 with working links."
   (let ((re org-wikinodes-camel-regexp)
@@ -289,7 +288,7 @@ with working links."
 	  (cond
 	   ((org-find-exact-headline-in-buffer link (current-buffer))
 	    ;; Found in current buffer
-	    (insert (format "[[#%s][%s]]" link link)))
+	    (insert (format "[[*%s][%s]]" link link)))
 	   ((eq org-wikinodes-scope 'file)
 	    ;; No match in file, and other files are not allowed
 	    (insert (format "%s" link)))
