@@ -201,15 +201,10 @@ If `org-store-link' was called with a prefix arg the meaning of
 
 (defun org-gnus-open (path)
   "Follow the Gnus message or folder link specified by PATH."
-  (let (group article)
-    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	(error "Error in Gnus link"))
-    (setq group (match-string 1 path)
-	  article (match-string 3 path))
-    (when group
-      (setq group (org-no-properties group)))
-    (when article
-      (setq article (org-no-properties article)))
+  (unless (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path)
+    (error "Error in Gnus link %S" path))
+  (let ((group (match-string-no-properties 1 path))
+	(article (match-string-no-properties 3 path)))
     (org-gnus-follow-link group article)))
 
 (defun org-gnus-follow-link (&optional group article)
@@ -248,7 +243,9 @@ If `org-store-link' was called with a prefix arg the meaning of
 
 (defun org-gnus-no-new-news ()
   "Like `\\[gnus]' but doesn't check for new news."
-  (if (not (gnus-alive-p)) (if org-gnus-no-server (gnus-no-server) (gnus))))
+  (cond ((gnus-alive-p) nil)
+	(org-gnus-no-server (gnus-no-server))
+	(t (gnus))))
 
 (provide 'org-gnus)
 
