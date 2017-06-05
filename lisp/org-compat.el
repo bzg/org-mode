@@ -365,6 +365,9 @@ use of this function is for the stuck project list."
 (define-obsolete-function-alias 'org-babel-number-p
   'org-babel--string-to-number "Org 9.0")
 
+(define-obsolete-variable-alias 'org-usenet-links-prefer-google
+  'org-gnus-prefer-web-links "Org 9.1")
+
 
 ;;;; Obsolete link types
 
