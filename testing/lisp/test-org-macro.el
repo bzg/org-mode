@@ -77,8 +77,8 @@
       (buffer-string))))
   ;; Macro expansion ignores narrowing.
   (should
-   (string-match
-    "expansion"
+   (string-match-p
+    "{{{macro}}}"
     (org-test-with-temp-text
 	"#+MACRO: macro expansion\n{{{macro}}}\n<point>Contents"
       (narrow-to-region (point) (point-max))
