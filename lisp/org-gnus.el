@@ -33,16 +33,15 @@
 
 (require 'org)
 (require 'gnus-util)
-(eval-when-compile (require 'gnus-sum))
 
-;; Declare external functions and variables
+
+;;; Declare external functions and variables
 
 (declare-function message-fetch-field "message" (header &optional not-all))
-(declare-function message-narrow-to-head-1 "message" nil)
-(declare-function gnus-summary-last-subject "gnus-sum" nil)
 (declare-function nnvirtual-map-article "nnvirtual" (article))
 
-;; Customization variables
+
+;;; Customization variables
 
 (defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links)
 
@@ -61,10 +60,14 @@ negates this setting for the duration of the command."
   :package-version '(Org . "8.0")
   :type 'boolean)
 
-;; Install the link type
-(org-link-set-parameters "gnus" :follow #'org-gnus-open :store #'org-gnus-store-link)
+
+;;; Install the link type
 
-;; Implementation
+(org-link-set-parameters "gnus"
+			 :follow #'org-gnus-open
+			 :store #'org-gnus-store-link)
+
+;;; Implementation
 
 (defun org-gnus-group-link (group)
   "Create a link to the Gnus group GROUP.
