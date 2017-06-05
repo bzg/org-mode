@@ -139,6 +139,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-copy "org-element" (datum))
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-lineage "org-element" (blob &optional types with-self))
+(declare-function org-element-link-parser "org-element" ())
 (declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
@@ -5823,14 +5824,11 @@ This includes angle, plain, and bracket links."
 					  (max (1- start) (point-min)) 'face)))
 			       (if (consp face) (memq 'org-tag face)
 				 (eq 'org-tag face))))))
-	  (let* ((link (pcase type	;extract URL part
-			 (`plain (match-string-no-properties 0))
-			 (`angle (buffer-substring-no-properties
-				  (1+ start) (1- end)))
-			 (_ (match-string-no-properties 2))))
-		 (path (save-match-data
-			 (and (string-match ":" link) ;remove type
-			      (substring link (match-end 0)))))
+	  (let* ((link-object (save-excursion
+				(goto-char start)
+				(save-match-data (org-element-link-parser))))
+		 (link (org-element-property :raw-link link-object))
+		 (path (org-element-property :path link-object))
 		 (properties		;for link's visible part
 		  (list
 		   'face (pcase (org-link-get-parameter type :face)
@@ -5845,10 +5843,7 @@ This includes angle, plain, and bracket links."
 		   'help-echo (pcase (org-link-get-parameter type :help-echo)
 				((and (pred stringp) echo) echo)
 				((and (pred functionp) echo) echo)
-				(_ (concat "LINK: "
-					   (save-match-data
-					     (org-link-unescape
-					      (org-link-expand-abbrev link))))))
+				(_ (concat "LINK: " link)))
 		   'htmlize-link (pcase (org-link-get-parameter type
 								:htmlize-link)
 				   ((and (pred functionp) f) (funcall f))
