@@ -54,18 +54,6 @@ negates this setting for the duration of the command."
   :group 'org-link-store
   :type 'boolean)
 
-(defcustom org-gnus-nnimap-query-article-no-from-file nil
-  "If non-nil, `org-gnus-follow-link' will try to translate
-Message-Ids to article numbers by querying the .overview file.
-Normally, this translation is done by querying the IMAP server,
-which is usually very fast.  Unfortunately, some (maybe badly
-configured) IMAP servers don't support this operation quickly.
-So if following a link to a Gnus article takes ages, try setting
-this variable to t."
-  :group 'org-link-store
-  :version "24.1"
-  :type 'boolean)
-
 (defcustom org-gnus-no-server nil
   "Should Gnus be started using `gnus-no-server'?"
   :group 'org-gnus
@@ -77,26 +65,6 @@ this variable to t."
 (org-link-set-parameters "gnus" :follow #'org-gnus-open :store #'org-gnus-store-link)
 
 ;; Implementation
-
-(defun org-gnus-nnimap-cached-article-number (group server message-id)
-  "Return cached article number (uid) of message in GROUP on SERVER.
-MESSAGE-ID is the message-id header field that identifies the
-message.  If the uid is not cached, return nil."
-  (with-temp-buffer
-    (let ((nov (and (fboundp 'nnimap-group-overview-filename)
-		    ;; nnimap-group-overview-filename was removed from
-		    ;; Gnus in September 2010, and therefore should
-		    ;; only be present in Emacs 23.1.
-		    (nnimap-group-overview-filename group server))))
-      (when (and nov (file-exists-p nov))
-	(mm-insert-file-contents nov)
-	(set-buffer-modified-p nil)
-	(goto-char (point-min))
-	(catch 'found
-	  (while (search-forward message-id nil t)
-	    (let ((hdr (split-string (thing-at-point 'line) "\t")))
-	      (if (string= (nth 4 hdr) message-id)
-		  (throw 'found (nth 0 hdr))))))))))
 
 (defun org-gnus-group-link (group)
   "Create a link to the Gnus group GROUP.
@@ -245,45 +213,35 @@ If `org-store-link' was called with a prefix arg the meaning of
   "Follow a Gnus link to GROUP and ARTICLE."
   (require 'gnus)
   (funcall (cdr (assq 'gnus org-link-frame-setup)))
-  (if gnus-other-frame-object (select-frame gnus-other-frame-object))
-  (setq group (org-no-properties group))
-  (setq article (org-no-properties article))
-  (cond ((and group article)
-	 (gnus-activate-group group)
-	 (condition-case nil
-	     (let* ((method (gnus-find-method-for-group group))
-		    (backend (car method))
-		    (server (cadr method)))
-	       (cond
-		((eq backend 'nndoc)
-		 (if (gnus-group-read-group t nil group)
+  (when gnus-other-frame-object (select-frame gnus-other-frame-object))
+  (let ((group (org-no-properties group))
+	(article (org-no-properties article)))
+    (cond
+     ((and group article)
+      (gnus-activate-group group)
+      (condition-case nil
+	  (let ((msg "Couldn't follow Gnus link.  Summary couldn't be opened."))
+	    (pcase (gnus-find-method-for-group group)
+	      (`(nndoc . ,_)
+	       (if (gnus-group-read-group t nil group)
+		   (gnus-summary-goto-article article nil t)
+		 (message msg)))
+	      (_
+	       (let ((articles 1)
+		     group-opened)
+		 (while (and (not group-opened)
+			     ;; Stop on integer overflows.
+			     (> articles 0))
+		   (setq group-opened (gnus-group-read-group articles t group))
+		   (setq articles (if (< articles 16)
+				      (1+ articles)
+				    (* articles 2))))
+		 (if group-opened
 		     (gnus-summary-goto-article article nil t)
-		   (message "Couldn't follow gnus link.  %s"
-			    "The summary couldn't be opened.")))
-		(t
-		 (let ((articles 1)
-		       group-opened)
-		   (when (and (eq backend 'nnimap)
-			      org-gnus-nnimap-query-article-no-from-file)
-		     (setq article
-			   (or (org-gnus-nnimap-cached-article-number
-				(nth 1 (split-string group ":"))
-				server (concat "<" article ">")) article)))
-		   (while (and (not group-opened)
-			       ;; stop on integer overflows
-			       (> articles 0))
-		     (setq group-opened (gnus-group-read-group
-					 articles t group)
-			   articles (if (< articles 16)
-					(1+ articles)
-				      (* articles 2))))
-		   (if group-opened
-		       (gnus-summary-goto-article article nil t)
-		     (message "Couldn't follow gnus link.  %s"
-			      "The summary couldn't be opened."))))))
-	   (quit (message "Couldn't follow gnus link.  %s"
-			  "The linked group is empty."))))
-	(group (gnus-group-jump-to-group group))))
+		   (message msg))))))
+	(quit
+	 (message "Couldn't follow Gnus link.  The linked group is empty."))))
+     (group (gnus-group-jump-to-group group)))))
 
 (defun org-gnus-no-new-news ()
   "Like `\\[gnus]' but doesn't check for new news."
