@@ -110,84 +110,75 @@ If `org-store-link' was called with a prefix arg the meaning of
 
 (defun org-gnus-store-link ()
   "Store a link to a Gnus folder or message."
-  (cond
-   ((eq major-mode 'gnus-group-mode)
-    (let* ((group (cond ((fboundp 'gnus-group-group-name) ; depending on Gnus
-			 (gnus-group-group-name))         ; version
-			((fboundp 'gnus-group-name)
-			 (gnus-group-name))
-			(t "???")))
-	   desc link)
-      (when group
-	(org-store-link-props :type "gnus" :group group)
-	(setq desc (org-gnus-group-link group)
-	      link desc)
-	(org-add-link-props :link link :description desc)
-	link)))
-
-   ((memq major-mode '(gnus-summary-mode gnus-article-mode))
-    (let* ((group gnus-newsgroup-name)
-	   (header (with-current-buffer gnus-summary-buffer
-		     (gnus-summary-article-header)))
-	   (from (mail-header-from header))
-	   (message-id (org-unbracket-string "<" ">" (mail-header-id header)))
-	   (date (org-trim (mail-header-date header)))
-	   (subject (copy-sequence (mail-header-subject header)))
-	   (to (cdr (assq 'To (mail-header-extra header))))
-	   newsgroups x-no-archive desc link)
-      (cl-case  (car (gnus-find-method-for-group gnus-newsgroup-name))
-	(nnvirtual
-	 (setq group (car (nnvirtual-map-article
-			   (gnus-summary-article-number)))))
-	(nnir
-	 (setq group (nnir-article-group (gnus-summary-article-number)))))
-      ;; Remove text properties of subject string to avoid Emacs bug
-      ;; #3506
-      (set-text-properties 0 (length subject) nil subject)
-
-      ;; Fetching an article is an expensive operation; newsgroup and
-      ;; x-no-archive are only needed for web links.
-      (when (org-xor current-prefix-arg org-gnus-prefer-web-links)
-	;; Make sure the original article buffer is up-to-date
-	(save-window-excursion (gnus-summary-select-article))
-	(setq to (or to (gnus-fetch-original-field "To"))
-	      newsgroups (gnus-fetch-original-field "Newsgroups")
-	      x-no-archive (gnus-fetch-original-field "x-no-archive")))
-      (org-store-link-props :type "gnus" :from from :date date :subject subject
-			    :message-id message-id :group group :to to)
-      (setq desc (org-email-link-description)
-	    link (org-gnus-article-link
-		  group	newsgroups message-id x-no-archive))
-      (org-add-link-props :link link :description desc)
-      link))
-   ((eq major-mode 'message-mode)
-    (setq org-store-link-plist nil)  ; reset
-    (save-excursion
-      (save-restriction
-        (message-narrow-to-headers)
-        (and (not (message-fetch-field "Message-ID"))
-             (message-generate-headers '(Message-ID)))
-        (goto-char (point-min))
-        (re-search-forward "^Message-ID: *.*$" nil t)
-        (put-text-property (match-beginning 0) (match-end 0) 'message-deletable nil)
-        (let ((gcc (car (last
-                         (message-unquote-tokens
-                          (message-tokenize-header (mail-fetch-field "gcc" nil t) " ,")))))
-              (id (org-unbracket-string "<" ">" (mail-fetch-field "Message-ID")))
-              (to (mail-fetch-field "To"))
-              (from (mail-fetch-field "From"))
-              (subject (mail-fetch-field "Subject"))
-              desc link
-              newsgroup xarchive)       ; those are always nil for gcc
-          (and (not gcc)
-               (error "Can not create link: No Gcc header found"))
-          (org-store-link-props :type "gnus" :from from :subject subject
-                                :message-id id :group gcc :to to)
-          (setq desc (org-email-link-description)
-                link (org-gnus-article-link
-                      gcc newsgroup id xarchive))
-          (org-add-link-props :link link :description desc)
-          link))))))
+  (pcase major-mode
+    (`gnus-group-mode
+     (let ((group (gnus-group-group-name)))
+       (when group
+	 (org-store-link-props :type "gnus" :group group)
+	 (let ((description (org-gnus-group-link group)))
+	   (org-add-link-props :link description :description description)
+	   description))))
+    ((or `gnus-summary-mode `gnus-article-mode)
+     (let* ((group
+	     (pcase (gnus-find-method-for-group gnus-newsgroup-name)
+	       (`(nnvirtual . ,_)
+		(car (nnvirtual-map-article (gnus-summary-article-number))))
+	       (`(nnir . ,_)
+		(nnir-article-group (gnus-summary-article-number)))
+	       (_ gnus-newsgroup-name)))
+	    (header (with-current-buffer gnus-summary-buffer
+		      (gnus-summary-article-header)))
+	    (from (mail-header-from header))
+	    (message-id (org-unbracket-string "<" ">" (mail-header-id header)))
+	    (date (org-trim (mail-header-date header)))
+	    ;; Remove text properties of subject string to avoid Emacs
+	    ;; bug #3506.
+	    (subject (org-no-properties
+		      (copy-sequence (mail-header-subject header))))
+	    (to (cdr (assq 'To (mail-header-extra header))))
+	    newsgroups x-no-archive)
+       ;; Fetching an article is an expensive operation; newsgroup and
+       ;; x-no-archive are only needed for web links.
+       (when (org-xor current-prefix-arg org-gnus-prefer-web-links)
+	 ;; Make sure the original article buffer is up-to-date.
+	 (save-window-excursion (gnus-summary-select-article))
+	 (setq to (or to (gnus-fetch-original-field "To")))
+	 (setq newsgroups (gnus-fetch-original-field "Newsgroups"))
+	 (setq x-no-archive (gnus-fetch-original-field "x-no-archive")))
+       (org-store-link-props :type "gnus" :from from :date date :subject subject
+			     :message-id message-id :group group :to to)
+       (let ((link (org-gnus-article-link
+		    group newsgroups message-id x-no-archive))
+	     (description (org-email-link-description)))
+	 (org-add-link-props :link link :description description)
+	 link)))
+    (`message-mode
+     (setq org-store-link-plist nil)	;reset
+     (save-excursion
+       (save-restriction
+	 (message-narrow-to-headers)
+	 (unless (message-fetch-field "Message-ID")
+	   (message-generate-headers '(Message-ID)))
+	 (goto-char (point-min))
+	 (re-search-forward "^Message-ID:" nil t)
+	 (put-text-property (line-beginning-position) (line-end-position)
+			    'message-deletable nil)
+	 (let ((gcc (org-last (message-unquote-tokens
+			       (message-tokenize-header
+				(mail-fetch-field "gcc" nil t) " ,"))))
+	       (id (org-unbracket-string "<" ">"
+					 (mail-fetch-field "Message-ID")))
+	       (to (mail-fetch-field "To"))
+	       (from (mail-fetch-field "From"))
+	       (subject (mail-fetch-field "Subject"))
+	       newsgroup xarchive)	;those are always nil for gcc
+	   (unless gcc (error "Can not create link: No Gcc header found"))
+	   (org-store-link-props :type "gnus" :from from :subject subject
+				 :message-id id :group gcc :to to)
+	   (let ((link (org-gnus-article-link gcc newsgroup id xarchive))
+		 (description (org-email-link-description)))
+	     (org-add-link-props :link link :description description)
+	     link)))))))
 
 (defun org-gnus-open-nntp (path)
   "Follow the nntp: link specified by PATH."
