@@ -288,22 +288,24 @@ When nil, no transformation is made."
 (defcustom org-texinfo-text-markup-alist '((bold . "@strong{%s}")
 					   (code . code)
 					   (italic . "@emph{%s}")
-					   (verbatim . verb))
+					   (verbatim . samp))
   "Alist of Texinfo expressions to convert text markup.
 
 The key must be a symbol among `bold', `code', `italic',
 `strike-through', `underscore' and `verbatim'.  The value is
 a formatting string to wrap fontified text with.
 
-Value can also be set to the following symbols: `verb' and
-`code'.  For the former, Org will use \"@verb\" to create
-a format string and select a delimiter character that isn't in
-the string.  For the latter, Org will use \"@code\" to typeset
-and try to protect special characters.
+Value can also be set to the following symbols: `verb', `samp'
+and `code'.  With the first one, Org uses \"@verb\" to create
+a format string and selects a delimiter character that isn't in
+the string.  For the other two, Org uses \"@samp\" or \"@code\"
+to typeset and protects special characters.
 
-If no association can be found for a given markup, text will be
-returned as-is."
+When no association is found for a given markup, text is returned
+as-is."
   :group 'org-export-texinfo
+  :version "26.1"
+  :package-version '(Org . "9.1")
   :type 'alist
   :options '(bold code italic strike-through underscore verbatim))
 
@@ -438,13 +440,12 @@ This is used to choose a separator for constructs like \\verb."
 INFO is a plist used as a communication channel.  See
 `org-texinfo-text-markup-alist' for details."
   (pcase (cdr (assq markup org-texinfo-text-markup-alist))
-    ;; No format string: Return raw text.
-    (`nil text)
+    (`nil text)				;no markup: return raw text
+    (`code (format "@code{%s}" (org-texinfo--sanitize-content text)))
+    (`samp (format "@samp{%s}" (org-texinfo--sanitize-content text)))
     (`verb
      (let ((separator (org-texinfo--find-verb-separator text)))
-       (concat "@verb{" separator text separator "}")))
-    (`code
-     (format "@code{%s}" (replace-regexp-in-string "[@{}]" "@\\&" text)))
+       (format "@verb{%s%s%s}" separator text separator)))
     ;; Else use format string.
     (fmt (format fmt text))))
 
