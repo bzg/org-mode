@@ -459,26 +459,42 @@ anchor name is unique."
 	       (basename
 		(org-texinfo--sanitize-node
 		 (if (eq (org-element-type datum) 'headline)
-		     (org-export-data (org-export-get-alt-title datum info)
-				      info)
+		     (org-texinfo--sanitize-title
+		      (org-export-get-alt-title datum info) info)
 		   (org-export-get-reference datum info))))
 	       (name basename))
 	  ;; Ensure NAME is unique and not reserved node name "Top".
 	  (while (or (equal name "Top") (rassoc name cache))
-	    (setq name (concat basename (number-to-string (cl-incf salt)))))
+	    (setq name (concat basename (format " %d" (cl-incf salt)))))
 	  (plist-put info :texinfo-node-cache (cons (cons datum name) cache))
 	  name))))
 
 (defun org-texinfo--sanitize-node (title)
   "Bend string TITLE to node line requirements.
 Trim string and collapse multiple whitespace characters as they
-are not significant.  Also remove the following characters: @
-{ } ( ) : . ,"
-  (replace-regexp-in-string
-   "[:,.]" ""
+are not significant.  Replace leading left parenthesis, when
+followed by a right parenthesis, with a square bracket.  Remove
+periods, commas and colons."
+  (org-trim
    (replace-regexp-in-string
-    "\\`(\\(.*)\\)" "[\\1"
-    (org-trim (replace-regexp-in-string "[ \t]\\{2,\\}" " " title)))))
+    "[ \t]+" " "
+    (replace-regexp-in-string
+     "[:,.]" ""
+     (replace-regexp-in-string "\\`(\\(.*?)\\)" "[\\1" title)))))
+
+(defun org-texinfo--sanitize-title (title info)
+  "Make TITLE suitable as a section name.
+TITLE is a string or a secondary string.  INFO is the current
+export state, as a plist."
+  (org-export-data-with-backend
+   title
+   (org-export-create-backend
+    :parent 'texinfo
+    :transcoders '((footnote-reference . ignore)
+		   (link . (lambda (object c i) c))
+		   (radio-target . (lambda (object c i) c))
+		   (target . ignore)))
+   info))
 
 (defun org-texinfo--sanitize-content (text)
   "Escape special characters in string TEXT.
@@ -804,7 +820,8 @@ holding contextual information."
 		    (org-export-get-tags headline info)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 (text (org-export-data (org-element-property :title headline) info))
+	 (text (org-texinfo--sanitize-title
+		(org-element-property :title headline) info))
 	 (full-text (funcall (plist-get info :texinfo-format-headline-function)
 			     todo todo-type priority text tags))
 	 (contents (if (org-string-nw-p contents) (concat "\n" contents) "")))
@@ -943,7 +960,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Return @ref command for element or object DATUM.
 DESCRIPTION is the name of the section to print, as a string."
   (let ((node-name (org-texinfo--get-node datum info))
-	(title (org-texinfo--sanitize-node description)))
+	;; Sanitize DESCRIPTION for cross-reference use.  In
+	;; particular, remove colons as they seem to cause (even
+	;; within @asis{...} to the Texinfo reader.
+	(title (replace-regexp-in-string
+		"[ \t]*:+" ""
+		(replace-regexp-in-string "," "@comma{}" description))))
     (if (equal title node-name)
 	(format "@ref{%s}" node-name)
       (format "@ref{%s, , %s}" node-name title))))
@@ -983,13 +1005,20 @@ INFO is a plist holding contextual information.  See
 	  (`plain-text
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
 	     (format "@uref{file://%s}" destination)))
-	  (`headline
-	   (org-texinfo--@ref
-	    destination
-	    (or desc
-		(org-export-data
-		 (org-element-property :title destination) info))
-	    info))
+	  ((or `headline
+	       ;; Targets within headlines cannot be turned into
+	       ;; @anchor{}, so we refer to the headline parent
+	       ;; directly.
+	       (and `target
+		    (guard (eq 'headline
+			       (org-element-type
+				(org-element-property :parent destination))))))
+	   (let ((headline (org-element-lineage destination '(headline) t)))
+	     (org-texinfo--@ref
+	      headline
+	      (or desc (org-texinfo--sanitize-title
+			(org-element-property :title headline) info))
+	      info)))
 	  (_
 	   (org-texinfo--@ref
 	    destination
@@ -1100,8 +1129,13 @@ a plist containing contextual information."
   (org-element-normalize-string
    (mapconcat
     (lambda (h)
-      (let* ((title (org-export-data
-		     (org-export-get-alt-title h info) info))
+      (let* ((title
+	      ;; Colons are used as a separator between title and node
+	      ;; name.  Remove them.
+	      (replace-regexp-in-string
+	       "[ \t]+:+" ""
+	       (org-texinfo--sanitize-title
+		(org-export-get-alt-title h info) info)))
 	     (node (org-texinfo--get-node h info))
 	     (entry (concat "* " title ":"
 			    (if (string= title node) ":"
