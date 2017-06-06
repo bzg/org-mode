@@ -873,9 +873,9 @@ See `org-texinfo-format-headline-function' for details."
   "Transcode an INLINE-SRC-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((code (org-element-property :value inline-src-block))
-	 (separator (org-texinfo--find-verb-separator code)))
-    (concat "@verb{" separator code separator "}")))
+  (format "@code{%s}"
+	  (org-texinfo--sanitize-content
+	   (org-element-property :value inline-src-block))))
 
 ;;;; Inlinetask
 
