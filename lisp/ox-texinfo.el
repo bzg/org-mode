@@ -455,14 +455,17 @@ a communication channel.  The function guarantees the node or
 anchor name is unique."
   (let ((cache (plist-get info :texinfo-node-cache)))
     (or (cdr (assq datum cache))
-	(let ((name
-	       (org-texinfo--sanitize-node
-		(if (eq (org-element-type datum) 'headline)
-		    (org-export-data (org-export-get-alt-title datum info) info)
-		  (org-export-get-reference datum info)))))
+	(let* ((salt 0)
+	       (basename
+		(org-texinfo--sanitize-node
+		 (if (eq (org-element-type datum) 'headline)
+		     (org-export-data (org-export-get-alt-title datum info)
+				      info)
+		   (org-export-get-reference datum info))))
+	       (name basename))
 	  ;; Ensure NAME is unique and not reserved node name "Top".
 	  (while (or (equal name "Top") (rassoc name cache))
-	    (setq name (concat name "x")))
+	    (setq name (concat basename (number-to-string (cl-incf salt)))))
 	  (plist-put info :texinfo-node-cache (cons (cons datum name) cache))
 	  name))))
 
