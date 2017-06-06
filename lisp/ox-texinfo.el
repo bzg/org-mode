@@ -448,21 +448,22 @@ INFO is a plist used as a communication channel.  See
     ;; Else use format string.
     (fmt (format fmt text))))
 
-(defun org-texinfo--get-node (blob info)
-  "Return node or anchor associated to BLOB.
-BLOB is an element or object.  INFO is a plist used as
+(defun org-texinfo--get-node (datum info)
+  "Return node or anchor associated to DATUM.
+DATUM is an element or object.  INFO is a plist used as
 a communication channel.  The function guarantees the node or
 anchor name is unique."
   (let ((cache (plist-get info :texinfo-node-cache)))
-    (or (cdr (assq blob cache))
+    (or (cdr (assq datum cache))
 	(let ((name
 	       (org-texinfo--sanitize-node
-		(if (eq (org-element-type blob) 'headline)
-		    (org-export-data (org-export-get-alt-title blob info) info)
-		  (org-export-get-reference blob info)))))
-	  ;; Ensure NAME is unique.
-	  (while (rassoc name cache) (setq name (concat name "x")))
-	  (plist-put info :texinfo-node-cache (cons (cons blob name) cache))
+		(if (eq (org-element-type datum) 'headline)
+		    (org-export-data (org-export-get-alt-title datum info) info)
+		  (org-export-get-reference datum info)))))
+	  ;; Ensure NAME is unique and not reserved node name "Top".
+	  (while (or (equal name "Top") (rassoc name cache))
+	    (setq name (concat name "x")))
+	  (plist-put info :texinfo-node-cache (cons (cons datum name) cache))
 	  name))))
 
 (defun org-texinfo--sanitize-node (title)
@@ -1266,7 +1267,7 @@ holding contextual information."
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (format "@anchor{%s}%s"
-	  (org-export-get-reference radio-target info)
+	  (org-texinfo--get-node radio-target info)
 	  text))
 
 ;;;; Section
@@ -1314,7 +1315,7 @@ contextual information."
       (org-texinfo--wrap-float value
 			       info
 			       (org-export-translate "Listing" :utf-8 info)
-			       (org-export-get-reference src-block info)
+			       (org-texinfo--get-node src-block info)
 			       caption
 			       shortcaption))))
 
@@ -1373,7 +1374,7 @@ contextual information."
 	(org-texinfo--wrap-float table-str
 				 info
 				 (org-export-translate "Table" :utf-8 info)
-				 (org-export-get-reference table info)
+				 (org-texinfo--get-node table info)
 				 caption
 				 shortcaption)))))
 
@@ -1441,7 +1442,7 @@ a communication channel."
   "Transcode a TARGET object from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "@anchor{%s}" (org-export-get-reference target info)))
+  (format "@anchor{%s}" (org-texinfo--get-node target info)))
 
 ;;;; Timestamp
 
