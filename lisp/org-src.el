@@ -810,45 +810,46 @@ A coderef format regexp can only match at the end of a line."
 			(org-footnote-goto-definition label)
 			(backward-char)
 			(org-element-context)))
-	   (inline (eq (org-element-type definition) 'footnote-reference))
+	   (inline? (eq 'footnote-reference (org-element-type definition)))
 	   (contents
-	    (let ((c (org-with-wide-buffer
-		      (org-trim (buffer-substring-no-properties
-				 (org-element-property :begin definition)
-				 (org-element-property :end definition))))))
-	      (add-text-properties
-	       0
-	       (progn (string-match (if inline "\\`\\[fn:.*?:" "\\`.*?\\]") c)
-		      (match-end 0))
-	       '(read-only "Cannot edit footnote label" front-sticky t
-			   rear-nonsticky t)
-	       c)
-	      (when inline
-		(let ((l (length c)))
-		  (add-text-properties
-		   (1- l) l
-		   '(read-only "Cannot edit past footnote reference"
-			       front-sticky nil rear-nonsticky nil)
-		   c)))
-	      c)))
+	    (org-with-wide-buffer
+	     (buffer-substring-no-properties
+	      (or (org-element-property :post-affiliated definition)
+		  (org-element-property :begin definition))
+	      (cond
+	       (inline? (1+ (org-element-property :contents-end definition)))
+	       ((org-element-property :contents-end definition))
+	       (t (goto-char (org-element-property :post-affiliated definition))
+		  (line-end-position)))))))
+      (add-text-properties
+       0
+       (progn (string-match (if inline? "\\`\\[fn:.*?:" "\\`.*?\\]") contents)
+	      (match-end 0))
+       '(read-only "Cannot edit footnote label" front-sticky t rear-nonsticky t)
+       contents)
+      (when inline?
+	(let ((l (length contents)))
+	  (add-text-properties
+	   (1- l) l
+	   '(read-only "Cannot edit past footnote reference"
+		       front-sticky nil rear-nonsticky nil)
+	   contents)))
       (org-src--edit-element
        definition
        (format "*Edit footnote [%s]*" label)
        #'org-mode
-       `(lambda ()
-	  (if ,(not inline) (delete-region (point) (search-forward "]"))
-	    (delete-region (point) (search-forward ":" nil t 2))
-	    (delete-region (1- (point-max)) (point-max))
-	    (when (re-search-forward "\n[ \t]*\n" nil t)
-	      (user-error "Inline definitions cannot contain blank lines"))
-	    ;; If footnote reference belongs to a table, make sure to
-	    ;; remove any newline characters in order to preserve
-	    ;; table's structure.
-	    (when ,(org-element-lineage definition '(table-cell))
-	      (while (search-forward "\n" nil t) (delete-char -1)))))
-       (concat contents
-	       (and (not (org-element-property :contents-begin definition))
-		    " "))
+       (lambda ()
+	 (if (not inline?) (delete-region (point) (search-forward "]"))
+	   (delete-region (point) (search-forward ":" nil t 2))
+	   (delete-region (1- (point-max)) (point-max))
+	   (when (re-search-forward "\n[ \t]*\n" nil t)
+	     (user-error "Inline definitions cannot contain blank lines"))
+	   ;; If footnote reference belongs to a table, make sure to
+	   ;; remove any newline characters in order to preserve
+	   ;; table's structure.
+	   (when (org-element-lineage definition '(table-cell))
+	     (while (search-forward "\n" nil t) (replace-match "")))))
+       contents
        'remote))
     ;; Report success.
     t))
