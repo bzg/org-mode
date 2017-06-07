@@ -878,14 +878,14 @@ Assume point is at the beginning of the footnote definition."
 			 (match-string-no-properties 1)))
 	   (begin (car affiliated))
 	   (post-affiliated (point))
-	   (ending
+	   (end
 	    (save-excursion
 	      (end-of-line)
 	      (cond
 	       ((not
 		 (re-search-forward org-element--footnote-separator limit t))
 		limit)
-	       ((eq (char-after (match-beginning 0)) ?\[)
+	       ((eq ?\[ (char-after (match-beginning 0)))
 		;; At a new footnote definition, make sure we end
 		;; before any affiliated keyword above.
 		(forward-line -1)
@@ -893,26 +893,27 @@ Assume point is at the beginning of the footnote definition."
 			    (looking-at-p org-element--affiliated-re))
 		  (forward-line -1))
 		(line-beginning-position 2))
-	       (t (match-beginning 0)))))
+	       ((eq ?* (char-after (match-beginning 0))) (match-beginning 0))
+	       (t (skip-chars-forward " \r\t\n" limit)
+		  (if (= limit (point)) limit (line-beginning-position))))))
 	   (contents-begin
-	    (progn
-	      (search-forward "]")
-	      (skip-chars-forward " \r\t\n" ending)
-	      (cond ((= (point) ending) nil)
-		    ((= (line-beginning-position) post-affiliated) (point))
-		    (t (line-beginning-position)))))
-	   (contents-end (and contents-begin ending))
-	   (end (progn (goto-char ending)
-		       (skip-chars-forward " \r\t\n" limit)
-		       (if (eobp) (point) (line-beginning-position)))))
+	    (progn (search-forward "]")
+		   (skip-chars-forward " \r\t\n" end)
+		   (cond ((= (point) end) nil)
+			 ((= (line-beginning-position) post-affiliated) (point))
+			 (t (line-beginning-position)))))
+	   (contents-end
+	    (progn (goto-char end)
+		   (skip-chars-backward " \r\t\n")
+		   (line-beginning-position 2))))
       (list 'footnote-definition
 	    (nconc
 	     (list :label label
 		   :begin begin
 		   :end end
 		   :contents-begin contents-begin
-		   :contents-end contents-end
-		   :post-blank (count-lines ending end)
+		   :contents-end (and contents-begin contents-end)
+		   :post-blank (count-lines contents-end end)
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
