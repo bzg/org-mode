@@ -17018,8 +17018,6 @@ More templates can added by customizing the variable
 @node Speed keys
 @section Speed keys
 @cindex speed keys
-@vindex org-use-speed-commands
-@vindex org-speed-commands-user
 
 Single keystrokes can execute custom commands in an Org file when the cursor
 is on a headline.  Without the extra burden of a meta or modifier key, Speed
@@ -17028,14 +17026,19 @@ navigation, Speed Keys may come in handy on small mobile devices that do not
 have full keyboards.  Speed Keys may also work on TTY devices known for their
 problems when entering Emacs keychords.
 
-By default, Org has Speed Keys disabled.  To activate Speed Keys, configure
-the variable @code{org-use-speed-commands}.  To trigger a Speed Key, the
-cursor must be at the beginning of an Org headline, before any of the stars.
+@vindex org-use-speed-commands
+By default, Org has Speed Keys disabled.  To activate Speed Keys, set the
+variable @code{org-use-speed-commands} to a non-@code{nil} value.  To trigger
+a Speed Key, the cursor must be at the beginning of an Org headline, before
+any of the stars.
 
-Org comes with a pre-defined list of Speed Keys; @kbd{?} shows currently
-active Speed Keys.  To add or modify Speed Keys, customize the variable,
-@code{org-speed-commands-user}.  For more details, see the variable's
-docstring.
+@vindex org-speed-commands-user
+@findex org-speed-command-help
+Org comes with a pre-defined list of Speed Keys.  To add or modify Speed
+Keys, customize the variable, @code{org-speed-commands-user}.  For more
+details, see the variable's docstring.  With Speed Keys activated, @kbd{M-x
+org-speed-command-help}, or @kbd{?} when cursor is at the beginning of an Org
+headline, shows currently active Speed Keys, including the user-defined ones.
 
 
 @node Code evaluation security
