@@ -1065,8 +1065,10 @@ Throw an error if there is no such buffer."
 	 (code (and write-back (org-src--contents-for-write-back))))
     (set-buffer-modified-p nil)
     ;; Switch to source buffer.  Kill sub-editing buffer.
-    (let ((edit-buffer (current-buffer)))
-      (org-src-switch-to-buffer (marker-buffer beg) 'exit)
+    (let ((edit-buffer (current-buffer))
+	  (source-buffer (marker-buffer beg)))
+      (unless source-buffer (error "Source buffer disappeared.  Aborting"))
+      (org-src-switch-to-buffer source-buffer 'exit)
       (kill-buffer edit-buffer))
     ;; Insert modified code.  Ensure it ends with a newline character.
     (org-with-wide-buffer
@@ -1085,7 +1087,7 @@ Throw an error if there is no such buffer."
       (cond
        ;; Block is hidden; move at start of block.
        ((cl-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
-		  (overlays-at (point)))
+		 (overlays-at (point)))
 	(beginning-of-line 0))
        (write-back (org-src--goto-coordinates coordinates beg end))))
     ;; Clean up left-over markers and restore window configuration.
