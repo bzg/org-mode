@@ -269,6 +269,7 @@ be placed after the end of the title."
 
 (defcustom org-texinfo-table-scientific-notation "%s\\,(%s)"
   "Format string to display numbers in scientific notation.
+
 The format should have \"%s\" twice, for mantissa and exponent
 \(i.e. \"%s\\\\times10^{%s}\").
 
@@ -279,7 +280,12 @@ When nil, no transformation is made."
 	  (const :tag "No formatting" nil)))
 
 (defcustom org-texinfo-def-table-markup "@samp"
-  "Default setting for @table environments."
+  "Default markup for first column in two-column tables.
+
+This should an indicating command, e.g., \"@code\", \"@kbd\" or
+\"@asis\".
+
+It can be overridden locally using the \":indic\" attribute."
   :group 'org-export-texinfo
   :type 'string)
 
@@ -1208,8 +1214,10 @@ the plist used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((attr (org-export-read-attribute :attr_texinfo plain-list))
-	 (indic (or (plist-get attr :indic)
-		    (plist-get info :texinfo-def-table-markup)))
+	 (indic (let ((i (or (plist-get attr :indic)
+			     (plist-get info :texinfo-def-table-markup))))
+		  ;; Allow indicating commands with missing @ sign.
+		  (if (string-prefix-p "@" i) i (concat "@" i))))
 	 (table-type (plist-get attr :table-type))
 	 (type (org-element-property :type plain-list))
 	 (list-type (cond
