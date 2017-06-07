@@ -365,5 +365,76 @@ This is a tab:\t.
 	(org-edit-src-exit)
 	(buffer-string))))))
 
+(ert-deftest test-org-src/footnote-references ()
+  "Test editing footnote references."
+  ;; Error when there is no definition to edit.
+  (should-error
+   (org-test-with-temp-text "A footnote<point>[fn:1]"
+     (org-edit-special)))
+  ;; Error when trying to edit an anonymous footnote.
+  (should-error
+   (org-test-with-temp-text "A footnote[fn::<point>edit me!]"
+     (org-edit-special)))
+  ;; Edit a regular definition.
+  (should
+   (equal "[fn:1] Definition"
+	  (org-test-with-temp-text "A footnote<point>[fn:1]\n[fn:1] Definition"
+	    (org-edit-special)
+	    (prog1 (buffer-string) (org-edit-src-exit)))))
+  ;; Label should be protected against editing.
+  (should
+   (org-test-with-temp-text "A footnote<point>[fn:1]\n[fn:1] Definition"
+     (org-edit-special)
+     (prog1 (get-text-property 0 'read-only (buffer-string))
+       (org-edit-src-exit))))
+  (should
+   (org-test-with-temp-text "A footnote<point>[fn:1]\n[fn:1] Definition"
+     (org-edit-special)
+     (prog1 (get-text-property 5 'read-only (buffer-string))
+       (org-edit-src-exit))))
+  ;; Edit a regular definition.
+  (should
+   (equal
+    "A footnote[fn:1][fn:2]\n[fn:1] D1\n\n[fn:2] D2"
+    (org-test-with-temp-text
+	"A footnote<point>[fn:1][fn:2]\n[fn:1] D1\n\n[fn:2] D2"
+      (org-edit-special)
+      (org-edit-src-exit)
+      (buffer-string))))
+  ;; Edit an inline definition.
+  (should
+   (equal
+    "[fn:1:definition]"
+    (org-test-with-temp-text
+	"An inline<point>[fn:1] footnote[fn:1:definition]"
+      (org-edit-special)
+      (prog1 (buffer-string) (org-edit-src-exit)))))
+  ;; Label and closing square bracket should be protected against
+  ;; editing.
+  (should
+   (org-test-with-temp-text "An inline<point>[fn:1] footnote[fn:1:definition]"
+     (org-edit-special)
+     (prog1 (get-text-property 0 'read-only (buffer-string))
+       (org-edit-src-exit))))
+  (should
+   (org-test-with-temp-text "An inline<point>[fn:1] footnote[fn:1:definition]"
+     (org-edit-special)
+     (prog1 (get-text-property 5 'read-only (buffer-string))
+       (org-edit-src-exit))))
+  (should
+   (org-test-with-temp-text "An inline<point>[fn:1] footnote[fn:1:definition]"
+     (org-edit-special)
+     (prog1 (get-text-property 16 'read-only (buffer-string))
+       (org-edit-src-exit))))
+  ;; Do not include trailing white spaces when displaying the inline
+  ;; footnote definition.
+  (should
+   (equal
+    "[fn:1:definition]"
+    (org-test-with-temp-text
+	"An inline<point>[fn:1] footnote[fn:1:definition]    and some text"
+      (org-edit-special)
+      (prog1 (buffer-string) (org-edit-src-exit))))))
+
 (provide 'test-org-src)
 ;;; test-org-src.el ends here
