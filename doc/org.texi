@@ -13699,21 +13699,45 @@ This paragraph is preceded by...
 @node Plain lists in Texinfo export
 @subsection Plain lists in Texinfo export
 @cindex #+ATTR_TEXINFO, in plain lists
+@cindex Two-column tables, in Texinfo export
+
+@cindex :table-type attribute, in Texinfo export
 The Texinfo export back-end by default converts description lists in the Org
 file using the default command @code{@@table}, which results in a table with
 two columns.  To change this behavior, specify @code{:table-type} with
-@code{@@ftable} or @code{@@vtable} attributes.  For more information,
+@code{ftable} or @code{vtable} attributes.  For more information,
 @inforef{Two-column Tables,,texinfo}.
 
 @vindex org-texinfo-def-table-markup
+@cindex :indic attribute, in Texinfo export
 The Texinfo export back-end by default also applies a text highlight based on
 the defaults stored in @code{org-texinfo-def-table-markup}.  To override the
 default highlight command, specify another one with the @code{:indic}
-attribute as shown in this example:
+attribute.
+
+@cindex Multiple entries in two-column tables, in Texinfo export
+@cindex :separator attribute, in Texinfo export
+Org syntax is limited to one entry per list item.  Nevertheless, the Texinfo
+export back-end can split that entry according to any text provided through
+the @code{:sep} attribute.  Each part then becomes a new entry in the first
+column of the table.
+
+The following example illustrates all the attributes above:
 
 @example
-#+ATTR_TEXINFO: :indic @@asis
-- foo :: This is the text for /foo/, with no highlighting.
+#+ATTR_TEXINFO: :table-type vtable :sep , :indic asis
+- foo, bar :: This is the common text for variables foo and bar.
+@end example
+
+@noindent
+becomes
+
+@example
+@@vtable @@asis
+@@item foo
+@@itemx bar
+This is the common text for variables foo and bar.
+@@end table
 @end example
 
 @node Tables in Texinfo export

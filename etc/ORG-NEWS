@@ -208,6 +208,12 @@ user to specify the name of the output file upon exporting the
 document.  This also has an effect on publishing.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
 **** Use ~compilation-mode~ for compilation output
+**** Plain lists accept a new ~:separator~ attribute in Texinfo
+
+The new ~:separator~ attribute splits a tag from a description list
+item into multiple parts.  This allows to have two-column tables with
+multiple entries in the first column.  See manual for more details.
+
 **** ~latex-environment~ elements support ~caption~ keywords for LaTeX export
 *** ~org-edit-special~ can edit LaTeX environments
 

@@ -920,10 +920,25 @@ contextual information."
   "Transcode an ITEM element from Org to Texinfo.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (format "@item%s\n%s"
-	  (let ((tag (org-element-property :tag item)))
-	    (if tag (concat " " (org-export-data tag info)) ""))
-	  (or contents "")))
+  (let* ((tag (org-element-property :tag item))
+	 (split (org-string-nw-p
+		 (org-export-read-attribute :attr_texinfo
+					    (org-element-property :parent item)
+					    :sep)))
+	 (items (and tag
+		     (let ((tag (org-export-data tag info)))
+		       (if split (split-string tag split t "[ \t\n]+")
+			 (list tag))))))
+    (format "%s\n%s"
+	    (pcase items
+	      (`nil "@item")
+	      (`(,item) (concat "@item " item))
+	      (`(,item . ,items)
+	       (concat "@item " item "\n"
+		       (mapconcat (lambda (i) (concat "@itemx " i))
+				  items
+				  "\n"))))
+	    (or contents ""))))
 
 ;;;; Keyword
 
