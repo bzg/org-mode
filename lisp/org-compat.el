@@ -61,7 +61,7 @@
   (defalias 'gui-get-selection 'x-get-selection))
 
 
-;;; Obsolete aliases (remove them once the next major release is released).
+;;; Obsolete aliases (remove them after the next major release).
 
 ;;;; XEmacs compatibility, now removed.
 (define-obsolete-function-alias 'org-activate-mark 'activate-mark)
@@ -191,6 +191,10 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
 (define-obsolete-function-alias 'org-insert-columns-dblock
   'org-columns-insert-dblock "Org 9.0")
+(define-obsolete-function-alias 'org-activate-bracket-links
+  'org-activate-links "Org 9.0")
+(define-obsolete-function-alias 'org-activate-plain-links 'ignore "Org 9.0")
+(define-obsolete-function-alias 'org-activate-angle-links 'ignore "Org 9.0")
 
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
