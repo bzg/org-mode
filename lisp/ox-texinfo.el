@@ -734,7 +734,43 @@ holding contextual information."
 
 (defun org-texinfo-entity (entity _contents _info)
   "Transcode an ENTITY object from Org to Texinfo."
-  (org-element-property :utf-8 entity))
+  ;; Since there is not specific Texinfo entry in entities, use
+  ;; Texinfo-specific commands whenever possible, and fallback to
+  ;; UTF-8 otherwise.
+  (pcase (org-element-property :name entity)
+    ("AElig"                       "@AE{}")
+    ("aelig"                       "@ae{}")
+    ((or "bull" "bullet")          "@bullet{}")
+    ("copy"                        "@copyright{}")
+    ((or "dots" "hellip")          "@dots{}")
+    ("equiv"                       "@equiv{}")
+    ((or "euro" "EUR")             "@euro{}")
+    ((or "ge" "geq")               "@geq{}")
+    ("laquo"                       "@guillemetleft{}")
+    ("iexcl"                       "@exclamdown{}")
+    ("imath"                       "@dotless{i}")
+    ("iquest"                      "@questiondown{}")
+    ("jmath"                       "@dotless{j}")
+    ((or "le" "leq")               "@leq{}")
+    ("lsaquo"                      "@guilsinglleft{}")
+    ("mdash"                       "---")
+    ("minus"                       "@minus{}")
+    ("nbsp"                        "@tie{}")
+    ("ndash"                       "--")
+    ("OElig"                       "@OE{}")
+    ("oelig"                       "@oe{}")
+    ("ordf"                        "@ordf{}")
+    ("ordm"                        "@ordm{}")
+    ("pound"                       "@pound{}")
+    ("raquo"                       "@guillemetright{}")
+    ((or "rArr" "Rightarrow")      "@result{}")
+    ((or "rightarrow" "to" "rarr") "@arrow{}")
+    ("rsaquo"                      "@guilsinglright{}")
+    ("thorn"                       "@th{}")
+    ("THORN"                       "@TH{}")
+    ((and (pred (string-prefix-p "_")) name) ;spacing entities.
+     (format "@w{%s}" (substring name 1)))
+    (_ (org-element-property :utf-8 entity))))
 
 ;;;; Example Block
 
