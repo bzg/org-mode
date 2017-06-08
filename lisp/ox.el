@@ -2844,7 +2844,8 @@ containing their first reference."
      (org-element-create 'headline
 			 (list :footnote-section-p t
 			       :level 1
-			       :title org-footnote-section)
+			       :title org-footnote-section
+			       :raw-value org-footnote-section)
 			 (apply #'org-element-create
 				'section
 				nil
