@@ -1234,16 +1234,14 @@ contextual information."
       (setq output
 	    (org-export-activate-smart-quotes output :texinfo info text)))
     ;; LaTeX into @LaTeX{} and TeX into @TeX{}
-    (let ((case-fold-search nil)
-	  (start 0))
-      (while (string-match "\\(\\(?:La\\)?TeX\\)" output start)
-	(setq output (replace-match
-		      (format "@%s{}" (match-string 1 output)) nil t output)
-	      start (match-end 0))))
+    (let ((case-fold-search nil))
+      (setq output (replace-regexp-in-string "\\(?:La\\)?TeX" "@\\&{}" output)))
     ;; Convert special strings.
     (when (plist-get info :with-special-strings)
-      (while (string-match (regexp-quote "...") output)
-	(setq output (replace-match "@dots{}" nil t output))))
+      (setq output
+	    (replace-regexp-in-string
+	     "\\.\\.\\." "@dots{}"
+	     (replace-regexp-in-string "\\\\-" "@-" output))))
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
