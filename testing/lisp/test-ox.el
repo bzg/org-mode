@@ -1399,15 +1399,6 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
   ;; Throw an error when a macro definition is missing.
   (should-error
    (org-test-with-temp-text "{{{missing}}}"
-     (org-export-as (org-test-default-backend))))
-  ;; Macros defined in commented subtrees are ignored.
-  (should-error
-   (org-test-with-temp-text
-       "* COMMENT H\n#+MACRO: macro1\n* H2\nvalue\n{{{macro1}}}"
-     (org-export-as (org-test-default-backend))))
-  (should-error
-   (org-test-with-temp-text
-       "* COMMENT H\n** H2\n#+MACRO: macro1\n* H3\nvalue\n{{{macro1}}}"
      (org-export-as (org-test-default-backend)))))
 
 (ert-deftest test-org-export/before-processing-hook ()

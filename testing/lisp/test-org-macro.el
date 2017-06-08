@@ -30,33 +30,33 @@
     "#+MACRO: A B\n1 B 3"
     (org-test-with-temp-text "#+MACRO: A B\n1 {{{A}}} 3"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
+             (org-macro-replace-all org-macro-templates)
+             (buffer-string)))))
   ;; Macro with arguments.
   (should
    (equal
     "#+MACRO: macro $1 $2\nsome text"
     (org-test-with-temp-text "#+MACRO: macro $1 $2\n{{{macro(some,text)}}}"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
+             (org-macro-replace-all org-macro-templates)
+             (buffer-string)))))
   ;; Macro with "eval".
   (should
    (equal
     "#+MACRO: add (eval (+ $1 $2))\n3"
     (org-test-with-temp-text "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
+             (org-macro-replace-all org-macro-templates)
+             (buffer-string)))))
   ;; Nested macros.
   (should
    (equal
     "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\ninner outer"
     (org-test-with-temp-text
-	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
+        "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
+             (org-macro-replace-all org-macro-templates)
+             (buffer-string)))))
   ;; Error out when macro expansion is circular.
   (should-error
    (org-test-with-temp-text
@@ -68,10 +68,10 @@
    (string-match
     "success success\\'"
     (org-test-with-temp-text
-	(format "#+MACRO: other-macro success
+        (format "#+MACRO: other-macro success
 #+SETUPFILE: \"%sexamples/macro-templates.org\"
 {{{included-macro}}} {{{other-macro}}}"
-		org-test-dir)
+                org-test-dir)
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
       (buffer-string))))
@@ -80,8 +80,25 @@
    (string-match-p
     "{{{macro}}}"
     (org-test-with-temp-text
-	"#+MACRO: macro expansion\n{{{macro}}}\n<point>Contents"
+        "#+MACRO: macro expansion\n{{{macro}}}\n<point>Contents"
       (narrow-to-region (point) (point-max))
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (org-with-wide-buffer (buffer-string)))))
+  ;; Macros in a commented tree are not expanded.
+  (should
+   (string-match-p
+    "{{{macro}}}"
+    (org-test-with-temp-text
+        "#+MACRO: macro expansion\n* COMMENT H\n<point>{{{macro}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (org-with-wide-buffer (buffer-string)))))
+  (should
+   (string-match-p
+    "{{{macro}}}"
+    (org-test-with-temp-text
+        "#+MACRO: macro expansion\n* COMMENT H1\n** H2\n<point>{{{macro}}}"
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
       (org-with-wide-buffer (buffer-string))))))
@@ -93,25 +110,25 @@
   ;; property from another headline.
   (should
    (equal "1"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:A: 1\n:END:\n{{{property(A)}}}<point>"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text
+              "* H\n:PROPERTIES:\n:A: 1\n:END:\n{{{property(A)}}}<point>"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   (should
    (equal "1"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:A: 1\n:END:\n{{{property(A,)}}}<point>"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text
+              "* H\n:PROPERTIES:\n:A: 1\n:END:\n{{{property(A,)}}}<point>"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   (should
    (equal
     "1"
     (org-test-with-temp-text
-	"* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n{{{property(A,*H1)}}}<point>"
+        "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n{{{property(A,*H1)}}}<point>"
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
       (buffer-substring-no-properties
@@ -127,73 +144,73 @@
   ;; Standard test with default counter.
   (should
    (equal "1 2"
-	  (org-test-with-temp-text "{{{n}}} {{{n}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n}}} {{{n}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   (should
    (equal "1 2"
-	  (org-test-with-temp-text "{{{n()}}} {{{n}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n()}}} {{{n}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   ;; Test alternative counters.
   (should
    (equal "1 1 1 2"
-	  (org-test-with-temp-text "{{{n}}} {{{n(c1)}}} {{{n(c2)}}} {{{n(c1)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n}}} {{{n(c1)}}} {{{n(c2)}}} {{{n(c1)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   ;; Second argument set a counter to a given value.  A non-numeric
   ;; value resets the counter to 1.
   (should
    (equal "9 10"
-	  (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   (should
    (equal "9 1"
-	  (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c,reset)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c,reset)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   ;; Tolerate spaces in second argument.
   (should
    (equal "9 10"
-	  (org-test-with-temp-text "{{{n(c, 9)}}} {{{n(c)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n(c, 9)}}} {{{n(c)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   (should
    (equal "9 1"
-	  (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c, reset)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c, reset)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   ;; Second argument also applies to default counter.
   (should
    (equal "9 10 1"
-	  (org-test-with-temp-text "{{{n(,9)}}} {{{n}}} {{{n(,reset)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
+          (org-test-with-temp-text "{{{n(,9)}}} {{{n}}} {{{n(,reset)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
   ;; An empty second argument is equivalent to no argument.
   (should
    (equal "2 3"
-	  (org-test-with-temp-text "{{{n(c,2)}}} {{{n(c,)}}}"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position))))))
+          (org-test-with-temp-text "{{{n(c,2)}}} {{{n(c,)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position))))))
 
 (ert-deftest test-org-macro/escape-arguments ()
   "Test `org-macro-escape-arguments' specifications."
