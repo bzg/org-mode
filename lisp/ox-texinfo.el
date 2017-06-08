@@ -733,11 +733,8 @@ holding contextual information."
 ;;;; Entity
 
 (defun org-texinfo-entity (entity _contents _info)
-  "Transcode an ENTITY object from Org to Texinfo.
-CONTENTS are the definition itself.  INFO is a plist holding
-contextual information."
-  (let ((ent (org-element-property :latex entity)))
-    (if (org-element-property :latex-math-p entity) (format "@math{%s}" ent) ent)))
+  "Transcode an ENTITY object from Org to Texinfo."
+  (org-element-property :utf-8 entity))
 
 ;;;; Example Block
 
