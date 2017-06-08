@@ -933,7 +933,8 @@ contextual information."
 					    :sep)))
 	 (items (and tag
 		     (let ((tag (org-export-data tag info)))
-		       (if split (split-string tag split t "[ \t\n]+")
+		       (if split
+			   (split-string tag (regexp-quote split) t "[ \t\n]+")
 			 (list tag))))))
     (format "%s\n%s"
 	    (pcase items
