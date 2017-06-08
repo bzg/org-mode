@@ -117,6 +117,23 @@
       (narrow-to-region (point) (point-max))
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
+      (org-with-wide-buffer (buffer-string)))))
+  ;; Macros in a commented tree are not expanded.
+  (should
+   (string-match-p
+    "{{{macro}}}"
+    (org-test-with-temp-text
+	"#+MACRO: macro expansion\n* COMMENT H\n<point>{{{macro}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (org-with-wide-buffer (buffer-string)))))
+  (should
+   (string-match-p
+    "{{{macro}}}"
+    (org-test-with-temp-text
+	"#+MACRO: macro expansion\n* COMMENT H1\n** H2\n<point>{{{macro}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
       (org-with-wide-buffer (buffer-string))))))
 
 (ert-deftest test-org-macro/escape-arguments ()
