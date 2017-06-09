@@ -778,8 +778,9 @@ holding contextual information."
   "Transcode an EXAMPLE-BLOCK element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (format "@verbatim\n%s@end verbatim"
-	  (org-export-format-code-default example-block info)))
+  (format "@example\n%s@end example"
+	  (org-texinfo--sanitize-content
+	   (org-export-format-code-default example-block info))))
 
 ;;; Export Block
 

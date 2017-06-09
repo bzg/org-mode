@@ -360,10 +360,8 @@ is now obselete.
 
 Now ~=...=~ markup uses ~@samp{}~ instead of ~@verb{}~.  You can use
 ~@verb{}~ again by customizing the variable.
+*** Texinfo exports example blocks as ~@example~
 *** Texinfo exports inline src blocks as ~@code{}~
-
-It is possible to write an inline src block filter to use ~@verb{}~
-again.
 
 * Version 9.0
 
