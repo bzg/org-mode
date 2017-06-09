@@ -86,6 +86,20 @@ ob-comint.el, which was not previously tested."
     (org-babel-next-src-block 2)
     (should (equal "20 cm" (org-babel-execute-src-block)))))
 
+(ert-deftest ob-shell/simple-list ()
+  "Test list variables in shell."
+  ;; With bash, a list is turned into an array.
+  (should
+   (= 2
+      (org-test-with-temp-text
+	  "#+BEGIN_SRC bash :var l='(1 2)\necho ${l[1]}\n#+END_SRC"
+	(org-babel-execute-src-block))))
+  ;; On sh, it is a string containing all values.
+  (should
+   (equal "1 2"
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC sh :var l='(1 2)\necho ${l}\n#+END_SRC"
+	    (org-babel-execute-src-block)))))
 
 (provide 'test-ob-shell)
 
