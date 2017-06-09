@@ -3531,44 +3531,44 @@ string followed by a colon.  There can be no space after the colon.  The
 following list shows examples for each link type.
 
 @example
-http://www.astro.uva.nl/~dominik          @r{on the web}
-doi:10.1000/182                           @r{DOI for an electronic resource}
-file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
-/home/dominik/images/jupiter.jpg          @r{same as above}
-file:papers/last.pdf                      @r{file, relative path}
-./papers/last.pdf                         @r{same as above}
-file:/myself@@some.where:papers/last.pdf   @r{file, path on remote machine}
-/myself@@some.where:papers/last.pdf        @r{same as above}
-file:sometextfile::NNN                    @r{file, jump to line number}
-file:projects.org                         @r{another Org file}
-file:projects.org::some words             @r{text search in Org file}@footnote{
+http://www.astro.uva.nl/~dominik             @r{on the web}
+doi:10.1000/182                              @r{DOI for an electronic resource}
+file:/home/dominik/images/jupiter.jpg        @r{file, absolute path}
+/home/dominik/images/jupiter.jpg             @r{same as above}
+file:papers/last.pdf                         @r{file, relative path}
+./papers/last.pdf                            @r{same as above}
+file:/ssh:myself@@some.where:papers/last.pdf  @r{file, path on remote machine}
+/ssh:myself@@some.where:papers/last.pdf       @r{same as above}
+file:sometextfile::NNN                       @r{file, jump to line number}
+file:projects.org                            @r{another Org file}
+file:projects.org::some words                @r{text search in Org file}@footnote{
 The actual behavior of the search will depend on the value of
 the option @code{org-link-search-must-match-exact-headline}.  If its value
-is @code{nil}, then a fuzzy text search will be done.  If it is t, then only the
-exact headline will be matched, ignoring spaces and cookies.  If the value is
-@code{query-to-create}, then an exact headline will be searched; if it is not
-found, then the user will be queried to create it.}
-file:projects.org::*task title @r{heading search in Org
-file}@footnote{Headline searches always match the exact headline, ignoring
+is @code{nil}, then a fuzzy text search will be done.  If it is t, then only
+the exact headline will be matched, ignoring spaces and cookies.  If the
+value is @code{query-to-create}, then an exact headline will be searched; if
+it is not found, then the user will be queried to create it.}
+file:projects.org::*task title               @r{heading search in Org file}@footnote{
+Headline searches always match the exact headline, ignoring
 spaces and cookies.  If the headline is not found and the value of the option
 @code{org-link-search-must-match-exact-headline} is @code{query-to-create},
 then the user will be queried to create it.}
-docview:papers/last.pdf::NNN              @r{open in doc-view mode at page}
-id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
-news:comp.emacs                           @r{Usenet link}
-mailto:adent@@galaxy.net                   @r{Mail link}
-mhe:folder                                @r{MH-E folder link}
-mhe:folder#id                             @r{MH-E message link}
-rmail:folder                              @r{RMAIL folder link}
-rmail:folder#id                           @r{RMAIL message link}
-gnus:group                                @r{Gnus group link}
-gnus:group#id                             @r{Gnus article link}
-bbdb:R.*Stallman                          @r{BBDB link (with regexp)}
-irc:/irc.com/#emacs/bob                   @r{IRC link}
-info:org#External links                   @r{Info node or index link}
-shell:ls *.org                            @r{A shell command}
-elisp:org-agenda                          @r{Interactive Elisp command}
-elisp:(find-file-other-frame "Elisp.org") @r{Elisp form to evaluate}
+docview:papers/last.pdf::NNN                 @r{open in doc-view mode at page}
+id:B7423F4D-2E8A-471B-8810-C40F074717E9      @r{Link to heading by ID}
+news:comp.emacs                              @r{Usenet link}
+mailto:adent@@galaxy.net                      @r{Mail link}
+mhe:folder                                   @r{MH-E folder link}
+mhe:folder#id                                @r{MH-E message link}
+rmail:folder                                 @r{RMAIL folder link}
+rmail:folder#id                              @r{RMAIL message link}
+gnus:group                                   @r{Gnus group link}
+gnus:group#id                                @r{Gnus article link}
+bbdb:R.*Stallman                             @r{BBDB link (with regexp)}
+irc:/irc.com/#emacs/bob                      @r{IRC link}
+info:org#External links                      @r{Info node or index link}
+shell:ls *.org                               @r{A shell command}
+elisp:org-agenda                             @r{Interactive Elisp command}
+elisp:(find-file-other-frame "Elisp.org")    @r{Elisp form to evaluate}
 @end example
 
 @cindex VM links
@@ -3579,13 +3579,13 @@ to VM or Wanderlust messages are available when you load the corresponding
 libraries from the @code{contrib/} directory:
 
 @example
-vm:folder                                 @r{VM folder link}
-vm:folder#id                              @r{VM message link}
-vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
-vm-imap:account:folder                    @r{VM IMAP folder link}
-vm-imap:account:folder#id                 @r{VM IMAP message link}
-wl:folder                                 @r{WANDERLUST folder link}
-wl:folder#id                              @r{WANDERLUST message link}
+vm:folder                                    @r{VM folder link}
+vm:folder#id                                 @r{VM message link}
+vm://myself@@some.where.org/folder#id         @r{VM on remote machine}
+vm-imap:account:folder                       @r{VM IMAP folder link}
+vm-imap:account:folder#id                    @r{VM IMAP message link}
+wl:folder                                    @r{WANDERLUST folder link}
+wl:folder#id                                 @r{WANDERLUST message link}
 @end example
 
 For customizing Org to add new link types @ref{Adding hyperlink types}.
