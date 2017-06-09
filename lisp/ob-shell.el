@@ -140,11 +140,13 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel--variable-assignments:bash (varname values &optional sep hline)
   "Represents the parameters as useful Bash shell variables."
-  (if (listp values)
-      (if (and (listp (car values)) (= 1 (length (car values))))
-	  (org-babel--variable-assignments:bash_array varname values sep hline)
-	(org-babel--variable-assignments:bash_assoc varname values sep hline))
-    (org-babel--variable-assignments:sh-generic varname values sep hline)))
+  (pcase values
+    (`((,_ ,_ . ,_) . ,_)		;two-dimensional array
+     (org-babel--variable-assignments:bash_assoc varname values sep hline))
+    (`(,_ . ,_)				;simple list
+     (org-babel--variable-assignments:bash_array varname values sep hline))
+    (_					;scalar value
+     (org-babel--variable-assignments:sh-generic varname values sep hline))))
 
 (defun org-babel-variable-assignments:shell (params)
   "Return list of shell statements assigning the block's variables."
