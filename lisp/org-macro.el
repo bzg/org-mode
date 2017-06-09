@@ -321,17 +321,17 @@ Return a list of arguments, as strings.  This is the opposite of
 
 (defun org-macro--counter-increment (name &optional reset)
   "Increment counter NAME.
-NAME is a string identifying the counter.  If optional argument
-RESET is a non-empty string, reset the counter instead."
-  (if (org-string-nw-p reset)
-      (let ((new-value (if (string-match-p "\\`[ \t]*[0-9]+[ \t]*\\'" reset)
-			   (string-to-number reset)
-			 1)))
-	(puthash name new-value org-macro--counter-table))
-    (let ((value (gethash name org-macro--counter-table)))
-      (puthash name
-	       (if (null value) 1 (1+ value))
-	       org-macro--counter-table))))
+NAME is a string identifying the counter.  When non-nil, optional
+argument RESET is a string.  If it represents an integer, set the
+counter to this number.  Any other non-empty string resets the
+counter to 1."
+  (puthash name
+	   (cond ((not (org-string-nw-p reset))
+		  (1+ (gethash name org-macro--counter-table 0)))
+		 ((string-match-p "\\`[ \t]*[0-9]+[ \t]*\\'" reset)
+		  (string-to-number reset))
+		 (t 1))
+	   org-macro--counter-table))
 
 
 (provide 'org-macro)
