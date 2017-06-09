@@ -712,14 +712,18 @@ Return the number of footnotes removed."
     (let ((def-re (format "^\\[fn:%s\\]" (regexp-quote label)))
 	  (ndef 0))
       (while (re-search-forward def-re nil t)
-	(let ((full-def (org-footnote-at-definition-p)))
-	  (when full-def
-	    ;; Remove the footnote, and all blank lines before it.
-	    (goto-char (nth 1 full-def))
-	    (skip-chars-backward " \r\t\n")
-	    (unless (bolp) (forward-line))
-	    (delete-region (point) (nth 2 full-def))
-	    (cl-incf ndef))))
+	(pcase (org-footnote-at-definition-p)
+	  (`(,_ ,start ,end ,_)
+	   ;; Remove the footnote, and all blank lines before it.
+	   (delete-region (progn
+			    (goto-char start)
+			    (skip-chars-backward " \r\t\n")
+			    (if (bobp) (point) (line-beginning-position 2)))
+			  (progn
+			    (goto-char end)
+			    (skip-chars-backward " \r\t\n")
+			    (if (bobp) (point) (line-beginning-position 2))))
+	   (cl-incf ndef))))
       ndef)))
 
 (defun org-footnote-delete (&optional label)
