@@ -166,7 +166,16 @@
 	    (org-test-with-temp-text
 		"Para[fn:1]\n\n[fn:1] para1\n\npara2\n\n\nOutside footnote."
 	      (org-footnote-delete "1")
-	      (org-trim (buffer-string)))))))
+	      (org-trim (buffer-string))))))
+  ;; Remove blank lines above the footnote but preserve those after
+  ;; it.
+  (should
+   (equal "Text\n\n\nOther text."
+	  (let ((org-footnote-section nil))
+	    (org-test-with-temp-text
+		"Text[fn:1]\n\n[fn:1] Definition.\n\n\nOther text."
+	      (org-footnote-delete "1")
+	      (buffer-string))))))
 
 (ert-deftest test-org-footnote/goto-definition ()
   "Test `org-footnote-goto-definition' specifications."
