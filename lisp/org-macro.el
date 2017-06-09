@@ -56,6 +56,7 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-file-contents "org" (file &optional noerror))
+(declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-mode "org" ())
 (declare-function vc-backend "vc-hooks" (f))
 (declare-function vc-call "vc-hooks" (fun file &rest args) t)
