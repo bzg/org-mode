@@ -2664,7 +2664,7 @@ calculation precision is greater.
 Degree and radian angle modes of Calc.
 @item @code{F}, @code{S}
 Fraction and symbolic modes of Calc.
-@item @code{T}, @code{t}
+@item @code{T}, @code{t}, @code{U}
 Duration computations in Calc or Lisp, @pxref{Durations and time values}.
 @item @code{E}
 If and how to consider empty fields.  Without @samp{E} empty fields in range
@@ -2781,26 +2781,31 @@ Compute the sum of columns 1 to 4, like Calc's @code{vsum($1..$4)}.
 @cindex Time, computing
 @vindex org-table-duration-custom-format
 
-If you want to compute time values use the @code{T} flag, either in Calc
-formulas or Elisp formulas:
+If you want to compute time values use the @code{T}, @code{t}, or @code{U}
+flag, either in Calc formulas or Elisp formulas:
 
 @example
 @group
   |  Task 1 |   Task 2 |    Total |
   |---------+----------+----------|
   |    2:12 |     1:47 | 03:59:00 |
+  |    2:12 |     1:47 |    03:59 |
   | 3:02:20 | -2:07:00 |     0.92 |
-  #+TBLFM: @@2$3=$1+$2;T::@@3$3=$1+$2;t
+  #+TBLFM: @@2$3=$1+$2;T::@@3$3=$1+$2;U::@@4$3=$1+$2;t
 @end group
 @end example
 
 Input duration values must be of the form @code{HH:MM[:SS]}, where seconds
 are optional.  With the @code{T} flag, computed durations will be displayed
-as @code{HH:MM:SS} (see the first formula above).  With the @code{t} flag,
-computed durations will be displayed according to the value of the option
-@code{org-table-duration-custom-format}, which defaults to @code{'hours} and
-will display the result as a fraction of hours (see the second formula in the
-example above).
+as @code{HH:MM:SS} (see the first formula above).  With the @code{U} flag,
+seconds will be omitted so that the result will be only @code{HH:MM} (see
+second formula above).  Zero-padding of the hours field will depend upon the
+value of the variable @code{org-table-duration-hour-zero-padding}.
+
+With the @code{t} flag, computed durations will be displayed according to the
+value of the option @code{org-table-duration-custom-format}, which defaults
+to @code{'hours} and will display the result as a fraction of hours (see the
+third formula in the example above).
 
 Negative duration values can be manipulated as well, and integers will be
 considered as seconds in addition and subtraction.

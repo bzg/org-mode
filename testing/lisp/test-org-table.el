@@ -1810,6 +1810,13 @@ is t, then new columns should be added as needed"
 		   (org-table-calc-current-TBLFM)
 		   (buffer-string))))
   (should
+   (string-match "| 2:12 | 1:47 | 03:59 |"
+		 (org-test-with-temp-text "
+       | 2:12 | 1:47 | |
+       <point>#+TBLFM: @1$3=$1+$2;U"
+		   (org-table-calc-current-TBLFM)
+		   (buffer-string))))
+  (should
    (string-match "| 3:02:20 | -2:07:00 | 0.92 |"
 		 (org-test-with-temp-text "
        | 3:02:20 | -2:07:00 | |

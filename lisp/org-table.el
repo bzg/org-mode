@@ -294,13 +294,23 @@ relies on the variables to be present in the list."
 The default value is `hours', and will output the results as a
 number of hours.  Other allowed values are `seconds', `minutes' and
 `days', and the output will be a fraction of seconds, minutes or
-days."
+days. `hh:mm' selects to use hours and minutes, ignoring seconds.
+The `U' flag in a table formula will select this specific format for
+a single formula."
   :group 'org-table-calculation
   :version "24.1"
   :type '(choice (symbol :tag "Seconds" 'seconds)
 		 (symbol :tag "Minutes" 'minutes)
 		 (symbol :tag "Hours  " 'hours)
-		 (symbol :tag "Days   " 'days)))
+		 (symbol :tag "Days   " 'days)
+		 (symbol :tag "HH:MM  " 'hh:mm)))
+
+(defcustom org-table-duration-hour-zero-padding t
+  "Non-nil means, hours in table duration computations should be zero-padded.
+So this is about 08:32:34 versus 8:33:34."
+  :group 'org-table-calculation
+  :version "24.1"
+  :type 'boolean)
 
 (defcustom org-table-formula-field-format "%s"
   "Format for fields which contain the result of a formula.
@@ -2723,15 +2733,14 @@ location of point."
 					     (?s . sci) (?e . eng))))
 			     n))))
 	      (setq fmt (replace-match "" t t fmt)))
-	    (if (string-match "T" fmt)
-		(setq duration t numbers t
-		      duration-output-format nil
-		      fmt (replace-match "" t t fmt)))
-	    (if (string-match "t" fmt)
-		(setq duration t
-		      duration-output-format org-table-duration-custom-format
-		      numbers t
-		      fmt (replace-match "" t t fmt)))
+	    (if (string-match "[tTU]" fmt)
+		(let ((ff (match-string 0 fmt)))
+		  (setq duration t numbers t
+			duration-output-format
+			(cond ((equal ff "T") nil)
+			      ((equal ff "t") org-table-duration-custom-format)
+			      ((equal ff "U") 'hh:mm))
+			fmt (replace-match "" t t fmt))))
 	    (if (string-match "N" fmt)
 		(setq numbers t
 		      fmt (replace-match "" t t fmt)))
@@ -3759,7 +3768,17 @@ minutes or seconds."
 		 (format "%.1f" (/ (float secs0) 60)))
 		((eq output-format 'seconds)
 		 (format "%d" secs0))
-		(t (format-seconds "%.2h:%.2m:%.2s" secs0)))))
+		((eq output-format 'hh:mm)
+		 ;; Ignore seconds
+		 (substring (format-seconds
+			     (if org-table-duration-hour-zero-padding
+				 "%.2h:%.2m:%.2s" "%h:%.2m:%.2s")
+			     secs0)
+			    0 -3))
+		(t (format-seconds
+		    (if org-table-duration-hour-zero-padding
+			"%.2h:%.2m:%.2s" "%h:%.2m:%.2s")
+		    secs0)))))
     (if (< secs 0) (concat "-" res) res)))
 
 (defun org-table-fedit-convert-buffer (function)
