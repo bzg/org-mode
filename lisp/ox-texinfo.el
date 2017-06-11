@@ -1380,7 +1380,7 @@ as a communication channel."
 	(type (org-element-property :type special-block)))
     (format "@%s%s\n%s@end %s"
 	    type
-	    (if opt (concat " " opt) opt)
+	    (if opt (concat " " opt) "")
 	    (or contents "")
 	    type)))
 
