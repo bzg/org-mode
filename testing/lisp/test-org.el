@@ -6498,6 +6498,81 @@ Paragraph<point>"
      (org-show-set-visibility 'minimal)
      (org-invisible-p2))))
 
+(ert-deftest test-org/org-file-contents-file ()
+  "Test `org-file-contents' with a file as input."
+  (should
+   (string= "#+BIND: variable value
+#+DESCRIPTION: l2
+#+LANGUAGE: en
+#+SELECT_TAGS: b
+#+TITLE: b
+#+PROPERTY: a 1
+" (org-file-contents (expand-file-name "setupfile3.org"
+				       (concat org-test-dir "examples/")))))
+  
+  (let ((invalid-file "this-file-must-not-exist"))
+    ;; Throw error when trying to access an invalid file.
+    (should-error
+     (org-file-contents invalid-file))
+    ;; Try to access an invalid file, but do not throw an error.
+    (should
+     (string-match-p "\\`Opening input file: No such file or directory"
+		     (org-file-contents invalid-file :noerror)))))
+
+(ert-deftest test-org/org-file-contents-url ()
+  "Test `org-file-contents' with a URL as input."
+  (should
+   (string= "foo"
+	    (let ((buffer (generate-new-buffer "url-retrieve-output")))
+	      (unwind-protect
+		  ;; Simulate successful retrieval of a URL.
+		  (cl-letf (((symbol-function 'url-retrieve-synchronously)
+			     (lambda (&rest_)
+			       (with-current-buffer buffer
+				 (insert "HTTP/1.1 200 OK\n\nfoo"))
+			       buffer)))
+		    (org-file-contents "http://some-valid-url"))
+		(kill-buffer buffer)))))
+
+  (let ((invalid-url "http://this-url-must-not-exist"))
+    ;; Throw error when trying to access an invalid URL.
+    (should-error
+     (let ((buffer (generate-new-buffer "url-retrieve-output")))
+       (unwind-protect
+	   ;; Simulate unsuccessful retrieval of a URL.
+	   (cl-letf (((symbol-function 'url-retrieve-synchronously)
+		      (lambda (&rest_)
+			(with-current-buffer buffer
+			  (insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
+			buffer)))
+	     (org-file-contents invalid-url))
+	 (kill-buffer buffer))))
+    ;; Try to access an invalid URL, but do not throw an error.
+    (should-error
+     (let ((buffer (generate-new-buffer "url-retrieve-output")))
+       (unwind-protect
+	   ;; Simulate unsuccessful retrieval of a URL.
+	   (cl-letf (((symbol-function 'url-retrieve-synchronously)
+		      (lambda (&rest_)
+			(with-current-buffer buffer
+			  (insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
+			buffer)))
+	     (org-file-contents invalid-url))
+	 (kill-buffer buffer))))
+    (should
+     (string=
+      (format "Unable to fetch file from \"%s\"" invalid-url)
+      (let ((buffer (generate-new-buffer "url-retrieve-output")))
+	(unwind-protect
+	    ;; Simulate unsuccessful retrieval of a URL.
+	    (cl-letf (((symbol-function 'url-retrieve-synchronously)
+		       (lambda (&rest_)
+			 (with-current-buffer buffer
+			   (insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
+			 buffer)))
+	      (org-file-contents invalid-url :noerror))
+	  (kill-buffer buffer)))))))
+
 
 (provide 'test-org)
 
