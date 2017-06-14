@@ -203,7 +203,7 @@ manual for details.
 **** Add global macros through ~org-export-global-macros~
 With this variable, one can define macros available for all documents.
 **** New keyword ~#+EXPORT_FILE_NAME~
-Simiralry to ~:EXPORT_FILE_NAME:~ property, this keyword allows the
+Similarly to ~:EXPORT_FILE_NAME:~ property, this keyword allows the
 user to specify the name of the output file upon exporting the
 document.  This also has an effect on publishing.
 **** Horizontal rules are no longer ignored in LaTeX table math mode
@@ -239,6 +239,16 @@ to the document.
 which causes refile targets to be prefixed with the buffer’s
 name. This is particularly useful when used in conjunction with
 ~uniquify.el~.
+
+*** ~org-file-contents~ now allows the FILE argument to be a URL.
+This allows ~#+SETUPFILE:~ to accept a URL instead of a local file
+path.  The URL contents are auto-downloaded and saved to a temporary
+cache ~org--file-cache~.  A new optional argument ~NOCACHE~ is added
+to ~org-file-contents~.
+
+*** ~org-mode-restart~ now resets the newly added ~org--file-cache~.
+Using ~C-c C-c~ on any keyword (like ~#+SETUPFILE~) will reset the
+that file cache.
 
 ** Removed functions
 

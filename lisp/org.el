@@ -181,6 +181,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
 (declare-function org-latex-make-preamble "ox-latex" (info &optional template snippet?))
 
+(defvar ffap-url-regexp)		;Silence byte-compiler
+
 (defsubst org-uniquify (list)
   "Non-destructively remove duplicate elements from LIST."
   (let ((res (copy-sequence list))) (delete-dups res)))
@@ -5280,17 +5282,62 @@ a string, summarizing TAGS, as a list of strings."
 	   (setq current-group (list tag))))
 	(_ nil)))))
 
-(defun org-file-contents (file &optional noerror)
-  "Return the contents of FILE, as a string."
-  (if (and file (file-readable-p file))
+(defvar org--file-cache (make-hash-table :test #'equal)
+  "Hash table to store contents of files referenced via a URL.
+This is the cache of file URLs read using `org-file-contents'.")
+
+(defun org-reset-file-cache ()
+  "Reset the cache of files downloaded by `org-file-contents'."
+  (clrhash org--file-cache))
+
+(defun org-file-url-p (file)
+  "Non-nil if FILE is a URL."
+  (require 'ffap)
+  (string-match-p ffap-url-regexp file))
+
+(defun org-file-contents (file &optional noerror nocache)
+  "Return the contents of FILE, as a string.
+
+FILE can be a file name or URL.
+
+If FILE is a URL, download the contents.  If the URL contents are
+already cached in the `org--file-cache' hash table, the download step
+is skipped.
+
+If NOERROR is non-nil, ignore the error when unable to read the FILE
+from file or URL.
+
+If NOCACHE is non-nil, do a fresh fetch of FILE even if cached version
+is available.  This option applies only if FILE is a URL."
+  (let* ((is-url (org-file-url-p file))
+         (cache (and is-url
+                     (not nocache)
+                     (gethash file org--file-cache))))
+    (cond
+     (cache)
+     (is-url
+      (with-current-buffer (url-retrieve-synchronously file)
+	(goto-char (point-min))
+	;; Move point to after the url-retrieve header.
+	(search-forward "\n\n" nil :move)
+	;; Search for the success code only in the url-retrieve header.
+	(if (save-excursion (re-search-backward "HTTP.*\\s-+200\\s-OK" nil :noerror))
+	    ;; Update the cache `org--file-cache' and return contents.
+	    (puthash file
+		     (buffer-substring-no-properties (point) (point-max))
+		     org--file-cache)
+	  (funcall (if noerror #'message #'user-error)
+		   "Unable to fetch file from %S"
+		   file))))
+     (t
       (with-temp-buffer
-	(insert-file-contents file)
-	(buffer-string))
-    (funcall (if noerror 'message 'error)
-	     "Cannot read file \"%s\"%s"
-	     file
-	     (let ((from (buffer-file-name (buffer-base-buffer))))
-	       (if from (concat " (referenced in file \"" from "\")") "")))))
+        (condition-case err
+	    (progn
+	      (insert-file-contents file)
+	      (buffer-string))
+	  (file-error
+           (funcall (if noerror #'message #'user-error)
+		    (error-message-string err)))))))))
 
 (defun org-extract-log-state-settings (x)
   "Extract the log state setting from a TODO keyword string.
@@ -20687,7 +20734,9 @@ Otherwise, return a user error."
 	    (format "[[%s]]"
 		    (expand-file-name
 		     (let ((value (org-element-property :value element)))
-		       (cond ((not (org-string-nw-p value))
+		       (cond ((org-file-url-p value)
+			      (user-error "The file is specified as a URL, cannot be edited"))
+			     ((not (org-string-nw-p value))
 			      (user-error "No file to edit"))
 			     ((string-match "\\`\"\\(.*?\\)\"" value)
 			      (match-string 1 value))
@@ -20951,7 +21000,8 @@ Use `\\[org-edit-special]' to edit table.el tables"))
     (funcall major-mode)
     (hack-local-variables)
     (when (and indent-status (not (bound-and-true-p org-indent-mode)))
-      (org-indent-mode -1)))
+      (org-indent-mode -1))
+    (org-reset-file-cache))
   (message "%s restarted" major-mode))
 
 (defun org-kill-note-or-show-branches ()

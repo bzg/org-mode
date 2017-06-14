@@ -1499,17 +1499,20 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			 (cond
 			  ;; Options in `org-export-special-keywords'.
 			  ((equal key "SETUPFILE")
-			   (let ((file
-				  (expand-file-name
-				   (org-unbracket-string "\"" "\"" (org-trim val)))))
+			   (let* ((uri (org-unbracket-string "\"" "\"" (org-trim val)))
+				  (uri-is-url (org-file-url-p uri))
+				  (uri (if uri-is-url
+					   uri
+					 (expand-file-name uri))))
 			     ;; Avoid circular dependencies.
-			     (unless (member file files)
+			     (unless (member uri files)
 			       (with-temp-buffer
-				 (setq default-directory
-				   (file-name-directory file))
-				 (insert (org-file-contents file 'noerror))
+				 (unless uri-is-url
+				   (setq default-directory
+					 (file-name-directory uri)))
+				 (insert (org-file-contents uri 'noerror))
 				 (let ((org-inhibit-startup t)) (org-mode))
-				 (funcall get-options (cons file files))))))
+				 (funcall get-options (cons uri files))))))
 			  ((equal key "OPTIONS")
 			   (setq plist
 				 (org-combine-plists
@@ -1647,17 +1650,22 @@ an alist where associations are (VARIABLE-NAME VALUE)."
 				      "BIND")
 			       (push (read (format "(%s)" val)) alist)
 			     ;; Enter setup file.
-			     (let ((file (expand-file-name
-					  (org-unbracket-string "\"" "\"" val))))
-			       (unless (member file files)
+			     (let* ((uri (org-unbracket-string "\"" "\"" val))
+				    (uri-is-url (org-file-url-p uri))
+				    (uri (if uri-is-url
+					     uri
+					   (expand-file-name uri))))
+			       ;; Avoid circular dependencies.
+			       (unless (member uri files)
 				 (with-temp-buffer
-				   (setq default-directory
-					 (file-name-directory file))
+				   (unless uri-is-url
+				     (setq default-directory
+					   (file-name-directory uri)))
 				   (let ((org-inhibit-startup t)) (org-mode))
-				   (insert (org-file-contents file 'noerror))
+				   (insert (org-file-contents uri 'noerror))
 				   (setq alist
 					 (funcall collect-bind
-						  (cons file files)
+						  (cons uri files)
 						  alist))))))))))
 		   alist)))))
       ;; Return value in appropriate order of appearance.

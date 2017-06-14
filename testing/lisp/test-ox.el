@@ -232,6 +232,38 @@ num:2 <:active")))
 		org-test-dir)
       (org-export--get-inbuffer-options))
     '(:language "fr" :select-tags ("a" "b" "c") :title ("a b c"))))
+  ;; Options set through SETUPFILE specified using a URL.
+  (let ((buffer (generate-new-buffer "url-retrieve-output")))
+    (unwind-protect
+	;; Simulate successful retrieval of a setupfile from URL.
+	(cl-letf (((symbol-function 'url-retrieve-synchronously)
+		   (lambda (&rest_)
+		     (with-current-buffer buffer
+		       (insert "HTTP/1.1 200 OK
+
+# Contents of http://link-to-my-setupfile.org
+#+BIND: variable value
+#+DESCRIPTION: l2
+#+LANGUAGE: en
+#+SELECT_TAGS: b
+#+TITLE: b
+#+PROPERTY: a 1
+"))
+		     buffer)))
+	  (should
+	   (equal
+	    (org-test-with-temp-text
+		"#+DESCRIPTION: l1
+#+LANGUAGE: es
+#+SELECT_TAGS: a
+#+TITLE: a
+#+SETUPFILE: \"http://link-to-my-setupfile.org\"
+#+LANGUAGE: fr
+#+SELECT_TAGS: c
+#+TITLE: c"
+	      (org-export--get-inbuffer-options))
+	    '(:language "fr" :select-tags ("a" "b" "c") :title ("a b c")))))
+      (kill-buffer buffer)))
   ;; More than one property can refer to the same buffer keyword.
   (should
    (equal '(:k2 "value" :k1 "value")

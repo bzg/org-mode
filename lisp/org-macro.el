@@ -55,7 +55,8 @@
 (declare-function org-element-macro-parser "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-(declare-function org-file-contents "org" (file &optional noerror))
+(declare-function org-file-contents "org" (file &optional noerror nocache))
+(declare-function org-file-url-p "org" (file))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-mode "org" ())
 (declare-function vc-backend "vc-hooks" (f))
@@ -102,16 +103,21 @@ Return an alist containing all macro templates found."
 				 (if old-cell (setcdr old-cell template)
 				   (push (cons name template) templates))))
 			   ;; Enter setup file.
-			   (let ((file (expand-file-name
-					(org-unbracket-string "\"" "\"" val))))
-			     (unless (member file files)
+			   (let* ((uri (org-unbracket-string "\"" "\"" (org-trim val)))
+				  (uri-is-url (org-file-url-p uri))
+				  (uri (if uri-is-url
+					   uri
+					 (expand-file-name uri))))
+			     ;; Avoid circular dependencies.
+			     (unless (member uri files)
 			       (with-temp-buffer
-				 (setq default-directory
-				       (file-name-directory file))
+				 (unless uri-is-url
+				   (setq default-directory
+					 (file-name-directory uri)))
 				 (org-mode)
-				 (insert (org-file-contents file 'noerror))
+				 (insert (org-file-contents uri 'noerror))
 				 (setq templates
-				       (funcall collect-macros (cons file files)
+				       (funcall collect-macros (cons uri files)
 						templates)))))))))))
 		templates))))
     (funcall collect-macros nil nil)))
