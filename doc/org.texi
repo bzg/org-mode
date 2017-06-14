@@ -14558,7 +14558,7 @@ however, override everything.
 @item @code{:texinfo-active-timestamp-format}    @tab @code{org-texinfo-active-timestamp-format}
 @item @code{:texinfo-classes}                    @tab @code{org-texinfo-classes}
 @item @code{:texinfo-class}                      @tab @code{org-texinfo-default-class}
-@item @code{:texinfo-def-table-markup}           @tab @code{org-texinfo-def-table-markup}
+@item @code{:texinfo-table-default-markup}       @tab @code{org-texinfo-table-default-markup}
 @item @code{:texinfo-diary-timestamp-format}     @tab @code{org-texinfo-diary-timestamp-format}
 @item @code{:texinfo-filename}                   @tab @code{org-texinfo-filename}
 @item @code{:texinfo-format-drawer-function}     @tab @code{org-texinfo-format-drawer-function}

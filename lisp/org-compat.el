@@ -372,6 +372,9 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-usenet-links-prefer-google
   'org-gnus-prefer-web-links "Org 9.1")
 
+(define-obsolete-variable-alias 'org-texinfo-def-table-markup
+  'org-texinfo-table-default-markup "Org 9.1")
+
 
 ;;;; Obsolete link types
 

@@ -113,7 +113,7 @@
     (:texinfo-link-with-unknown-path-format nil nil org-texinfo-link-with-unknown-path-format)
     (:texinfo-tables-verbatim nil nil org-texinfo-tables-verbatim)
     (:texinfo-table-scientific-notation nil nil org-texinfo-table-scientific-notation)
-    (:texinfo-def-table-markup nil nil org-texinfo-def-table-markup)
+    (:texinfo-table-default-markup nil nil org-texinfo-table-default-markup)
     (:texinfo-text-markup-alist nil nil org-texinfo-text-markup-alist)
     (:texinfo-format-drawer-function nil nil org-texinfo-format-drawer-function)
     (:texinfo-format-inlinetask-function nil nil org-texinfo-format-inlinetask-function)))
@@ -279,15 +279,18 @@ When nil, no transformation is made."
 	  (string :tag "Format string")
 	  (const :tag "No formatting" nil)))
 
-(defcustom org-texinfo-def-table-markup "@samp"
+(defcustom org-texinfo-table-default-markup "@asis"
   "Default markup for first column in two-column tables.
 
 This should an indicating command, e.g., \"@code\", \"@kbd\" or
-\"@asis\".
+\"@samp\".
 
 It can be overridden locally using the \":indic\" attribute."
   :group 'org-export-texinfo
-  :type 'string)
+  :type 'string
+  :version "26.1"
+  :package-version '(Org . "9.1")
+  :safe #'stringp)
 
 ;;;; Text markup
 
@@ -1250,7 +1253,7 @@ CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((attr (org-export-read-attribute :attr_texinfo plain-list))
 	 (indic (let ((i (or (plist-get attr :indic)
-			     (plist-get info :texinfo-def-table-markup))))
+			     (plist-get info :texinfo-table-default-markup))))
 		  ;; Allow indicating commands with missing @ sign.
 		  (if (string-prefix-p "@" i) i (concat "@" i))))
 	 (table-type (plist-get attr :table-type))
