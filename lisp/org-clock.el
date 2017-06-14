@@ -2964,7 +2964,7 @@ The details of what will be saved are regulated by the variable
 	     (let ((org-clock-in-resume 'auto-restart)
 		   (org-clock-auto-clock-resolution nil))
 	       (org-clock-in)
-	       (when (outline-invisible-p) (org-show-context))))))
+	       (when (org-invisible-p) (org-show-context))))))
 	(_ nil)))))
 
 ;; Suggested bindings

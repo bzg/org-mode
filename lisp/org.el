@@ -6983,6 +6983,11 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 (defvar org-called-with-limited-levels nil
   "Non-nil when `org-with-limited-levels' is currently active.")
 
+(defun org-invisible-p (&optional pos)
+  "Non-nil if the character after POS is invisible.
+If POS is nil, use `point' instead."
+  (get-char-property (or pos (point)) 'invisible))
+
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
   (let ((goal-column 0) eoh eol eos has-children children-skipped struct)
@@ -7026,7 +7031,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
       (save-excursion
 	(goto-char eos)
 	(outline-next-heading)
-	(when (outline-invisible-p) (org-flag-heading nil))))
+	(when (org-invisible-p) (org-flag-heading nil))))
      ((and (or (>= eol eos)
 	       (not (string-match "\\S-" (buffer-substring eol eos))))
 	   (or has-children
@@ -7060,7 +7065,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
       (save-excursion
 	(goto-char eos)
 	(outline-next-heading)
-	(when (outline-invisible-p) (org-flag-heading nil)))
+	(when (org-invisible-p) (org-flag-heading nil)))
       (setq org-cycle-subtree-status 'children)
       (unless (org-before-first-heading-p)
 	(run-hook-with-args 'org-cycle-hook 'children)))
@@ -7234,9 +7239,9 @@ This function is the default value of the hook `org-cycle-hook'."
 	  ;; Properly fold already folded siblings
 	  (goto-char (point-min))
 	  (while (re-search-forward re nil t)
-	    (when (and (not (outline-invisible-p))
+	    (when (and (not (org-invisible-p))
 		       (save-excursion
-			 (goto-char (point-at-eol)) (outline-invisible-p)))
+			 (goto-char (point-at-eol)) (org-invisible-p)))
 	      (outline-hide-entry))))
 	(org-cycle-show-empty-lines 'overview)
 	(org-cycle-hide-drawers 'overview)))))
@@ -7589,7 +7594,7 @@ With a prefix argument, use the alternative interface: e.g., if
 	(progn
 	  (org-mark-ring-push org-goto-start-pos)
 	  (goto-char selected-point)
-	  (when (or (outline-invisible-p) (org-invisible-p2))
+	  (when (or (org-invisible-p) (org-invisible-p2))
 	    (org-show-context 'org-goto)))
       (message "Quit"))))
 
@@ -7630,7 +7635,7 @@ or nil."
 	 (if (and (boundp 'org-goto-start-pos)
 		  (integer-or-marker-p org-goto-start-pos))
 	     (progn (goto-char org-goto-start-pos)
-		    (when (outline-invisible-p)
+		    (when (org-invisible-p)
 		      (org-show-set-visibility 'lineage)))
 	   (goto-char (point-min)))
 	 (let (org-special-ctrl-a/e) (org-beginning-of-line))
@@ -8542,7 +8547,7 @@ case."
       (setq beg (point)))
     (save-match-data
       (save-excursion (outline-end-of-heading)
-		      (setq folded (outline-invisible-p)))
+		      (setq folded (org-invisible-p)))
       (progn (org-end-of-subtree nil t)
 	     (unless (eobp) (backward-char))))
     (outline-next-heading)
@@ -8638,7 +8643,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
       (if nosubtrees
 	  (outline-next-heading)
 	(save-excursion (outline-end-of-heading)
-			(setq folded (outline-invisible-p)))
+			(setq folded (org-invisible-p)))
 	(ignore-errors (org-forward-heading-same-level (1- n) t))
 	(org-end-of-subtree t t)))
     ;; Include the end of an inlinetask
@@ -8691,7 +8696,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 		(substitute-command-keys
 		 "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
   (org-with-limited-levels
-   (let* ((visp (not (outline-invisible-p)))
+   (let* ((visp (not (org-invisible-p)))
 	  (txt tree)
 	  (^re_ "\\(\\*+\\)[  \t]*")
 	  (old-level (if (string-match org-outline-regexp-bol txt)
@@ -8748,7 +8753,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
      (goto-char beg)
      (skip-chars-forward " \t\n\r")
      (setq beg (point))
-     (when (and (outline-invisible-p) visp)
+     (when (and (org-invisible-p) visp)
        (save-excursion (outline-show-heading)))
      ;; Shift if necessary
      (unless (= shift 0)
@@ -10600,7 +10605,7 @@ If the link is in hidden text, expose it."
     (if (funcall srch-fun org-any-link-re nil t)
 	(progn
 	  (goto-char (match-beginning 0))
-	  (when (outline-invisible-p) (org-show-context)))
+	  (when (org-invisible-p) (org-show-context)))
       (goto-char pos)
       (setq org-link-search-failed t)
       (message "No further link found"))))
@@ -11307,7 +11312,7 @@ or to another Org file, automatically push the old position onto the ring."
     (setq m (car p))
     (pop-to-buffer-same-window (marker-buffer m))
     (goto-char m)
-    (when (or (outline-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
+    (when (or (org-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
 
 (defun org-add-angle-brackets (s)
   (unless (equal (substring s 0 1) "<") (setq s (concat "<" s)))
@@ -12546,7 +12551,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	(org-map-entries
 	 `(org-todo ,arg)
 	 org-loop-over-headlines-in-active-region
-	 cl (when (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (when (org-invisible-p) (org-end-of-subtree nil t))))
     (when (equal arg '(16)) (setq arg 'nextset))
     (when (equal arg -1) (org-cancel-repeater) (setq arg nil))
     (let ((org-blocker-hook org-blocker-hook)
@@ -13457,7 +13462,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
        (if (eq org-loop-over-headlines-in-active-region 'start-level)
 	   'region-start-level
 	 'region)
-       (lambda () (when (outline-invisible-p) (org-end-of-subtree nil t))))
+       (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))
     (org--deadline-or-schedule arg 'deadline time)))
 
 (defun org-schedule (arg &optional time)
@@ -13474,7 +13479,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
        (if (eq org-loop-over-headlines-in-active-region 'start-level)
 	   'region-start-level
 	 'region)
-       (lambda () (when (outline-invisible-p) (org-end-of-subtree nil t))))
+       (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))
     (org--deadline-or-schedule arg 'scheduled time)))
 
 (defun org-get-scheduled-time (pom &optional inherit)
@@ -15021,7 +15026,7 @@ When JUST-ALIGN is non-nil, only align tags."
          #'org-set-tags
          org-loop-over-headlines-in-active-region
          cl
-	 '(when (outline-invisible-p) (org-end-of-subtree nil t))))
+	 '(when (org-invisible-p) (org-end-of-subtree nil t))))
     (let ((org-setting-tags t))
       (if arg
           (save-excursion
@@ -24032,16 +24037,18 @@ interactive command with similar behavior."
   "Check if point is at a character currently not visible.
 This version does not only check the character property, but also
 `visible-mode'."
-  ;; Early versions of noutline don't have `outline-invisible-p'.
   (unless (bound-and-true-p visible-mode)
-    (outline-invisible-p)))
+    (org-invisible-p)))
 
 (defun org-invisible-p2 ()
-  "Check if point is at a character currently not visible."
+  "Check if point is at a character currently not visible.
+
+If the point is at EOL (and not at the beginning of a buffer too),
+move it back by one char before doing this check."
   (save-excursion
-    (when (and (eolp) (not (bobp))) (backward-char 1))
-    ;; Early versions of noutline don't have `outline-invisible-p'.
-    (outline-invisible-p)))
+    (when (and (eolp) (not (bobp)))
+      (backward-char 1))
+    (org-invisible-p)))
 
 (defun org-back-to-heading (&optional invisible-ok)
   "Call `outline-back-to-heading', but provide a better error message."
@@ -24311,7 +24318,7 @@ non-nil it will also look at invisible ones."
 	    (cond ((< l level) (setq count 0))
 		  ((and (= l level)
 			(or invisible-ok
-			    (not (outline-invisible-p
+			    (not (org-invisible-p
 				  (line-beginning-position)))))
 		   (cl-decf count)
 		   (when (= l level) (setq result (point)))))))
@@ -24447,7 +24454,7 @@ item, etc.  It also provides some special moves for convenience:
           ;; With no contents, just skip element.
           ((not contents-begin) (goto-char end))
           ;; If contents are invisible, skip the element altogether.
-          ((outline-invisible-p (line-end-position))
+          ((org-invisible-p (line-end-position))
            (cl-case type
              (headline
               (org-with-limited-levels (outline-next-visible-heading 1)))
@@ -24534,7 +24541,7 @@ convenience:
       (org-backward-paragraph))
      (t (goto-char (or post-affiliated begin))))
     ;; Ensure we never leave point invisible.
-    (when (outline-invisible-p (point)) (beginning-of-visual-line))))
+    (when (org-invisible-p (point)) (beginning-of-visual-line))))
 
 (defun org-forward-element ()
   "Move forward by one element.
@@ -24611,7 +24618,7 @@ Move to the previous element at the same level, when possible."
       (forward-char))
      ((memq (org-element-type element) org-element-greater-elements)
       ;; If contents are hidden, first disclose them.
-      (when (outline-invisible-p (line-end-position)) (org-cycle))
+      (when (org-invisible-p (line-end-position)) (org-cycle))
       (goto-char (or (org-element-property :contents-begin element)
 		     (user-error "No content for this element"))))
      (t (user-error "No inner element")))))
@@ -25092,15 +25099,15 @@ ELEMENT is the element at point."
 (defun org-bookmark-jump-unhide ()
   "Unhide the current position, to show the bookmark location."
   (and (derived-mode-p 'org-mode)
-       (or (outline-invisible-p)
+       (or (org-invisible-p)
 	   (save-excursion (goto-char (max (point-min) (1- (point))))
-			   (outline-invisible-p)))
+			   (org-invisible-p)))
        (org-show-context 'bookmark-jump)))
 
 (defun org-mark-jump-unhide ()
   "Make the point visible with `org-show-context' after jumping to the mark."
   (when (and (derived-mode-p 'org-mode)
-	     (outline-invisible-p))
+	     (org-invisible-p))
     (org-show-context 'mark-goto)))
 
 (eval-after-load "simple"

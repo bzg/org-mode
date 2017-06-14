@@ -1455,7 +1455,7 @@ How well did you do? %s"
 ;;     (save-excursion
 ;;       (org-map-entries
 ;;        (lambda ()
-;;          (when (and (not (outline-invisible-p))
+;;          (when (and (not (org-invisible-p))
 ;;                     (> (org-current-level) drill-entry-level))
 ;;            (setq drill-heading (org-get-heading t))
 ;;            (unless (and (= (org-current-level) (1+ drill-entry-level))
@@ -1480,7 +1480,7 @@ the current topic."
     (save-excursion
       (org-map-entries
        (lambda ()
-         (when (and (not (outline-invisible-p))
+         (when (and (not (org-invisible-p))
                     (> (org-current-level) drill-entry-level))
            (when (or (/= (org-current-level) (1+ drill-entry-level))
                         (funcall test))
