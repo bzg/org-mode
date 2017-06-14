@@ -314,6 +314,10 @@ Use ~org-gnus-prefer-web-links~ instead.
 One can provide new ~:sitemap-format-entry~ property for a function
 equivalent to the removed format string.
 
+*** ~org-texinfo-def-table-markup~ is obsolete
+
+Use ~org-texinfo-table-default-markup~ instead.
+
 ** New functions
 
 *** ~org-publish-find-property~
