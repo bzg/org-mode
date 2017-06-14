@@ -513,7 +513,7 @@
     (cl-letf (((symbol-function 'current-time)
 	       (lambda ()
 		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>")))))
+			(org-parse-time-string "<2014-03-04 Tue>" nil t)))))
       (org-test-with-temp-text
 	  "* H
 ** S1
@@ -528,11 +528,11 @@
 	(get-char-property (point) 'org-columns-value-modified)))))
   (should
    (equal
-    "705d 1h"
+    "705d"
     (cl-letf (((symbol-function 'current-time)
 	       (lambda ()
 		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>")))))
+			(org-parse-time-string "<2014-03-04 Tue>" nil t)))))
       (org-test-with-temp-text
 	  "* H
 ** S1
@@ -547,11 +547,11 @@
 	(get-char-property (point) 'org-columns-value-modified)))))
   (should
    (equal
-    "352d 12h 30min"
+    "352d 12h"
     (cl-letf (((symbol-function 'current-time)
 	       (lambda ()
 		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>")))))
+			(org-parse-time-string "<2014-03-04 Tue>" nil t)))))
       (org-test-with-temp-text
 	  "* H
 ** S1

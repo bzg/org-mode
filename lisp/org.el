@@ -17799,11 +17799,17 @@ day number."
 	   (list (nth 4 d) (nth 3 d) (nth 5 d))))
 	((listp d) (list (nth 4 d) (nth 3 d) (nth 5 d)))))
 
-(defun org-parse-time-string (s &optional nodefault)
+(defun org-parse-time-string (s &optional nodefault zone)
   "Parse the standard Org time string.
+
 This should be a lot faster than the normal `parse-time-string'.
-If time is not given, defaults to 0:00.  However, with optional NODEFAULT,
-hour and minute fields will be nil if not given."
+
+If time is not given, defaults to 0:00.  However, with optional
+NODEFAULT, hour and minute fields will be nil if not given.
+
+The optional ZONE is omitted or nil for Emacs local time, t for
+Universal Time, ‘wall’ for system wall clock time, or a string as
+in the TZ environment variable."
   (cond ((string-match org-ts-regexp0 s)
 	 (list 0
 	       (when (or (match-beginning 8) (not nodefault))
@@ -17813,9 +17819,9 @@ hour and minute fields will be nil if not given."
 	       (string-to-number (match-string 4 s))
 	       (string-to-number (match-string 3 s))
 	       (string-to-number (match-string 2 s))
-	       nil nil nil))
+	       nil nil zone))
 	((string-match "^<[^>]+>$" s)
-	 (decode-time (seconds-to-time (org-matcher-time s))))
+	 (decode-time (seconds-to-time (org-matcher-time s)) zone))
 	(t (error "Not a standard Org time string: %s" s))))
 
 (defun org-timestamp-up (&optional arg)
