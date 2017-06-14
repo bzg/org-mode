@@ -306,11 +306,13 @@ a single formula."
 		 (symbol :tag "HH:MM  " 'hh:mm)))
 
 (defcustom org-table-duration-hour-zero-padding t
-  "Non-nil means, hours in table duration computations should be zero-padded.
+  "Non-nil means hours in table duration computations should be zero-padded.
 So this is about 08:32:34 versus 8:33:34."
   :group 'org-table-calculation
-  :version "24.1"
-  :type 'boolean)
+  :version "26.1"
+  :package-version '(Org . "9.1")
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-table-formula-field-format "%s"
   "Format for fields which contain the result of a formula.

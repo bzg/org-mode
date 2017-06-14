@@ -250,6 +250,12 @@ to ~org-file-contents~.
 Using ~C-c C-c~ on any keyword (like ~#+SETUPFILE~) will reset the
 that file cache.
 
+*** New option : ~org-table-duration-hour-zero-padding~
+This variable allow computed durations in tables to be zero-padded.
+
+*** New mode switch for table formulas : =U=
+This mode omits seconds in durations.
+
 ** Removed functions
 
 *** Org Timeline
