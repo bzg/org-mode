@@ -378,6 +378,8 @@ Now ~=...=~ markup uses ~@samp{}~ instead of ~@verb{}~.  You can use
 ~@verb{}~ again by customizing the variable.
 *** Texinfo exports example blocks as ~@example~
 *** Texinfo exports inline src blocks as ~@code{}~
+*** ~org-parse-time-string~ accepts a new optional argument
+=ZONE= specifies the current time zone.
 
 * Version 9.0
 
