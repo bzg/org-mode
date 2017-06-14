@@ -10864,6 +10864,18 @@ This macro refers to the filename of the exported file.
 This macro returns the value of property @var{PROPERTY-NAME} in the current
 entry.  If @var{SEARCH-OPTION} (@pxref{Search options}) refers to a remote
 entry, that will be used instead.
+
+@item @{@{@{n@}@}@}
+@itemx @{@{@{n(@var{NAME})@}@}@}
+@itemx @{@{@{n(@var{NAME},@var{RESET})@}@}@}
+@cindex n, macro
+@cindex counter, macro
+This macro implements custom counters by returning the number of times the
+macro has been expanded so far while exporting the buffer.  You can create
+more than one counter using different @var{NAME} values.  If @var{RESET} is
+non-empty, the specified counter is reset to the value specified if it is
+a number, or 1 otherwise.  You may leave @var{NAME} empty to reset the
+default counter.
 @end table
 
 The surrounding brackets can be made invisible by setting
