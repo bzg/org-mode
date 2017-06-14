@@ -969,7 +969,8 @@ contextual information."
   "Transcode a KEYWORD element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((key (org-element-property :key keyword))
-	(value (org-element-property :value keyword)))
+	(value (org-texinfo--sanitize-content
+		(org-element-property :value keyword))))
     (cond
      ((string= key "TEXINFO") value)
      ((string= key "CINDEX") (format "@cindex %s" value))
