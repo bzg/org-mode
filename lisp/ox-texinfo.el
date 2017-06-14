@@ -989,24 +989,23 @@ contextual information."
 (defun org-texinfo-keyword (keyword _contents info)
   "Transcode a KEYWORD element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((key (org-element-property :key keyword))
-	(value (org-texinfo--sanitize-content
-		(org-element-property :value keyword))))
-    (cond
-     ((string= key "TEXINFO") value)
-     ((string= key "CINDEX") (format "@cindex %s" value))
-     ((string= key "FINDEX") (format "@findex %s" value))
-     ((string= key "KINDEX") (format "@kindex %s" value))
-     ((string= key "PINDEX") (format "@pindex %s" value))
-     ((string= key "TINDEX") (format "@tindex %s" value))
-     ((string= key "VINDEX") (format "@vindex %s" value))
-     ((string= key "TOC")
-      (cond ((string-match-p "\\<tables\\>" value)
-	     (concat "@listoffloats "
-		     (org-export-translate "Table" :utf-8 info)))
-	    ((string-match-p "\\<listings\\>" value)
-	     (concat "@listoffloats "
-		     (org-export-translate "Listing" :utf-8 info))))))))
+  (let* ((raw-value (org-element-property :value keyword))
+	 (value (org-texinfo--sanitize-content raw-value)))
+    (pcase (org-element-property :key keyword)
+      ("TEXINFO" raw-value)
+      ("CINDEX" (format "@cindex %s" value))
+      ("FINDEX" (format "@findex %s" value))
+      ("KINDEX" (format "@kindex %s" value))
+      ("PINDEX" (format "@pindex %s" value))
+      ("TINDEX" (format "@tindex %s" value))
+      ("VINDEX" (format "@vindex %s" value))
+      ("TOC"
+       (cond ((string-match-p "\\<tables\\>" value)
+	      (concat "@listoffloats "
+		      (org-export-translate "Table" :utf-8 info)))
+	     ((string-match-p "\\<listings\\>" value)
+	      (concat "@listoffloats "
+		      (org-export-translate "Listing" :utf-8 info))))))))
 
 ;;;; Line Break
 
