@@ -316,10 +316,11 @@ Raise an error if expected format is unknown."
      (let ((minutes (floor minutes)))
        (format "%d:%02d" (/ minutes 60) (mod minutes 60))))
     (`h:mm:ss
-     (let ((seconds (floor (* 60 minutes)) ))
+     (let* ((whole-minutes (floor minutes))
+	    (seconds (floor (* 60 (- minutes whole-minutes)))))
        (format "%s:%02d"
-	       (org-duration-from-minutes (/ seconds 60) 'h:mm)
-	       (mod seconds 60))))
+	       (org-duration-from-minutes whole-minutes 'h:mm)
+	       seconds)))
     ((pred atom) (error "Invalid duration format specification: %S" fmt))
     ;; Mixed format.  Call recursively the function on both parts.
     ((and duration-format
@@ -349,7 +350,7 @@ Raise an error if expected format is unknown."
 	   (org-duration-from-minutes minutes mode canonical)
 	 ;; Represent minutes above hour using provided units and H:MM
 	 ;; or H:MM:SS below.
-	 (let* ((units-part (* min-modifier (floor (/ minutes min-modifier))))
+	 (let* ((units-part (* min-modifier (/ (floor minutes) min-modifier)))
 		(minutes-part (- minutes units-part)))
 	   (concat
 	    (org-duration-from-minutes units-part truncated-format canonical)
@@ -397,7 +398,9 @@ Raise an error if expected format is unknown."
 	      (pcase-let* ((`(,unit . ,required?) units)
 			   (modifier (org-duration--modifier unit canonical)))
 		(cond ((<= modifier minutes)
-		       (let ((value (floor (/ minutes modifier))))
+		       (let ((value (if (integerp modifier)
+					(/ (floor minutes) modifier)
+				      (floor (/ minutes modifier)))))
 			 (cl-decf minutes (* value modifier))
 			 (format " %d%s" value unit)))
 		      (required? (concat " 0" unit))
@@ -408,11 +411,7 @@ Raise an error if expected format is unknown."
 	;; one anyway.
 	(t
 	 (pcase-let ((`((,unit . ,_)) (last selected-units)))
-	   (concat
-	    (if (not fractional) "0"
-	      (let ((modifier (org-duration--modifier unit canonical)))
-		(format fractional (/ (float minutes) modifier))))
-	    unit))))))))
+	   (concat "0" unit))))))))
 
 ;;;###autoload
 (defun org-duration-h:mm-only-p (times)
