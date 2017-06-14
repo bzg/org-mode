@@ -1085,7 +1085,7 @@ as days/hours/minutes/seconds."
    ((string-match-p org-ts-regexp s)
     (floor
      (- org-columns--time
-	(float-time (apply #'encode-time (org-parse-time-string s))))))
+	(float-time (apply #'encode-time (org-parse-time-string s nil t))))))
    ;; Match own output for computations in upper levels.
    ((string-match "\\([0-9]+\\)d \\([0-9]+\\)h \\([0-9]+\\)m \\([0-9]+\\)s" s)
     (+ (* 86400 (string-to-number (match-string 1 s)))
