@@ -154,8 +154,8 @@
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function org-uniquify "org" (list))
+(declare-function org-invisible-p "org" (&optional pos))
 (declare-function outline-flag-region "outline" (from to flag))
-(declare-function outline-invisible-p "outline" (&optional pos))
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-previous-heading "outline" ())
 
@@ -2257,7 +2257,7 @@ item is invisible."
     (unless (or (not itemp)
 		(save-excursion
 		  (goto-char itemp)
-		  (outline-invisible-p)))
+		  (org-invisible-p)))
       (if (save-excursion
 	    (goto-char itemp)
 	    (org-at-item-timer-p))

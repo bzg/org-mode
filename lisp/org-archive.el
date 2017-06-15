@@ -204,17 +204,19 @@ if LOCATION is not given, the value of `org-archive-location' is used."
 ;;;###autoload
 (defun org-archive-subtree (&optional find-done)
   "Move the current subtree to the archive.
-The archive can be a certain top-level heading in the current file, or in
-a different file.  The tree will be moved to that location, the subtree
-heading be marked DONE, and the current time will be added.
+The archive can be a certain top-level heading in the current
+file, or in a different file.  The tree will be moved to that
+location, the subtree heading be marked DONE, and the current
+time will be added.
 
-When called with a single prefix argument FIND-DONE, find whole trees without any
-open TODO items and archive them (after getting confirmation from the user).
-When called with a double prefix argument, find whole trees with timestamps before
-today and archive them (after getting confirmation from the user).
-If the cursor is not at a headline when these commands are called, try all level
-1 trees.  If the cursor is on a headline, only try the direct children of
-this heading."
+When called with a single prefix argument FIND-DONE, find whole
+trees without any open TODO items and archive them (after getting
+confirmation from the user).  When called with a double prefix
+argument, find whole trees with timestamps before today and
+archive them (after getting confirmation from the user).  If the
+cursor is not at a headline when these commands are called, try
+all level 1 trees.  If the cursor is on a headline, only try the
+direct children of this heading."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
@@ -224,7 +226,7 @@ this heading."
 	 `(progn (setq org-map-continue-from (progn (org-back-to-heading) (point)))
 		 (org-archive-subtree ,find-done))
 	 org-loop-over-headlines-in-active-region
-	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (org-invisible-p) (org-end-of-subtree nil t))))
     (cond
      ((equal find-done '(4))  (org-archive-all-done))
      ((equal find-done '(16)) (org-archive-all-old))
@@ -422,7 +424,7 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 		 (when (org-at-heading-p)
 		   (org-archive-to-archive-sibling)))
 	 org-loop-over-headlines-in-active-region
-	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (org-invisible-p) (org-end-of-subtree nil t))))
     (save-restriction
       (widen)
       (let (b e pos leader level)
@@ -570,7 +572,7 @@ the children that do not contain any open TODO items."
 	(org-map-entries
 	 `(org-toggle-archive-tag ,find-done)
 	 org-loop-over-headlines-in-active-region
-	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (org-invisible-p) (org-end-of-subtree nil t))))
     (if find-done
 	(org-archive-all-done 'tag)
       (let (set)
@@ -591,7 +593,7 @@ the children that do not contain any open TODO items."
 	(org-map-entries
 	 'org-archive-set-tag
 	 org-loop-over-headlines-in-active-region
-	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (org-invisible-p) (org-end-of-subtree nil t))))
     (org-toggle-tag org-archive-tag 'on)))
 
 ;;;###autoload
