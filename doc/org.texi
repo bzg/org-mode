@@ -10752,7 +10752,7 @@ file, you could use:
 @noindent
 The first parameter is the file name to include.  The optional second
 parameter specifies the block type: @samp{example}, @samp{export} or
-p@samp{src}).  The option third parameter specifies the source code language
+@samp{src}.  The optional third parameter specifies the source code language
 to use for formatting the contents.  This is relevant to both @samp{export}
 and @samp{src} block types.
 
@@ -13771,7 +13771,7 @@ name.  It also adds any @code{:options} attributes to the end of the command,
 as shown in this example:
 
 @example
-#+attr_texinfo: :options org-org-export-to-org ...
+#+ATTR_TEXINFO: :options org-org-export-to-org ...
 #+begin_defun
 A somewhat obsessive function.
 #+end_defun
@@ -18228,7 +18228,7 @@ no special formatting is applied.
 @cindex translator function
 
 Orgtbl mode has built-in translator functions: @code{orgtbl-to-csv}
-(comma-separated values), @code{orgtbl-to-tsv} (TAB-separated values)
+(comma-separated values), @code{orgtbl-to-tsv} (TAB-separated values),
 @code{orgtbl-to-latex}, @code{orgtbl-to-html}, @code{orgtbl-to-texinfo},
 @code{orgtbl-to-unicode} and @code{orgtbl-to-orgtbl}.  They use the generic
 translator, @code{orgtbl-to-generic}, which delegates translations to various
