@@ -17826,7 +17826,11 @@ in the TZ environment variable."
 	       (string-to-number (match-string 2 s))
 	       nil nil zone))
 	((string-match "^<[^>]+>$" s)
-	 (decode-time (seconds-to-time (org-matcher-time s)) zone))
+	 ;; FIXME: `decode-time' needs to be called with ZONE as its
+	 ;; second argument.  However, this requires at least Emacs
+	 ;; 25.1.  We can do it when we switch to this version as our
+	 ;; minimal requirement.
+	 (decode-time (seconds-to-time (org-matcher-time s))))
 	(t (error "Not a standard Org time string: %s" s))))
 
 (defun org-timestamp-up (&optional arg)
