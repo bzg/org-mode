@@ -741,6 +741,7 @@ holding contextual information."
     ("aelig"                       "@ae{}")
     ((or "bull" "bullet")          "@bullet{}")
     ("copy"                        "@copyright{}")
+    ("deg"                         "@textdegree{}")
     ((or "dots" "hellip")          "@dots{}")
     ("equiv"                       "@equiv{}")
     ((or "euro" "EUR")             "@euro{}")
@@ -763,11 +764,12 @@ holding contextual information."
     ("pound"                       "@pound{}")
     ("raquo"                       "@guillemetright{}")
     ((or "rArr" "Rightarrow")      "@result{}")
+    ("reg"                         "@registeredsymbol{}")
     ((or "rightarrow" "to" "rarr") "@arrow{}")
     ("rsaquo"                      "@guilsinglright{}")
     ("thorn"                       "@th{}")
     ("THORN"                       "@TH{}")
-    ((and (pred (string-prefix-p "_")) name) ;spacing entities.
+    ((and (pred (string-prefix-p "_")) name) ;spacing entities
      (format "@w{%s}" (substring name 1)))
     (_ (org-element-property :utf-8 entity))))
 
