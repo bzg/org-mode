@@ -1,7 +1,7 @@
-;;; ob-sclang.el --- SCLang support for Org-mode Babel -*- lexical-binding: t; -*-
+;;; ob-sclang.el --- SCLang support for Org-mode Babel
 ;;; -*- coding: utf-8 -*-
 
-;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2017 Free Software Foundation, Inc.
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Version: 0.1
@@ -72,24 +72,14 @@
   (unless (or (equal (buffer-name) sclang-post-buffer)
               (sclang-get-process))
     (sclang-start))
-  
-  ;; (let* ((db (or (cdr (assoc :db params))
-  ;;                ob-mongo:default-db))
-  ;;        (cmd (mapconcat 'identity (list "mongo" "--quiet" db) " ")))
-  ;;   (org-babel-eval cmd body))
-  
-  (sclang-eval-string body t)
-
-  ;; (let ((cmd "sclang -r -s -D"))
-  ;;   (org-babel-eval cmd body))
-  )
+  (sclang-eval-string body t))
 
 (defvar org-babel-default-header-args:sclang nil)
 
 (setq org-babel-default-header-args:sclang
       '((:session . "*SCLang:Workspace*")
-        (:output . "none")) ; TODO: temporary can't find way to let sclang output to stdout for org-babel.
-      )
+	;; TODO: temporary can't find way to let sclang output to stdout for org-babel.
+        (:output . "none")))
 
 ;;;###autoload
 (with-eval-after-load "org"
