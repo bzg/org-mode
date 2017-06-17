@@ -459,7 +459,8 @@ The attachment is created as an Emacs buffer."
     (unless (file-exists-p file)
       (error "No such attachment: %s" file))
     (delete-file file)
-    (org-attach-commit)))
+    (when org-attach-commit
+      (org-attach-commit))))
 
 (defun org-attach-delete-all (&optional force)
   "Delete all attachments from the current task.
@@ -475,14 +476,16 @@ A safer way is to open the directory in dired and delete from there."
 		 (y-or-n-p "Are you sure you want to remove all attachments of this entry? ")))
       (shell-command (format "rm -fr %s" attach-dir))
       (message "Attachment directory removed")
-      (org-attach-commit)
+      (when org-attach-commit
+        (org-attach-commit))
       (org-attach-untag))))
 
 (defun org-attach-sync ()
   "Synchronize the current tasks with its attachments.
 This can be used after files have been added externally."
   (interactive)
-  (org-attach-commit)
+  (when org-attach-commit
+    (org-attach-commit))
   (when (and org-attach-file-list-property (not org-attach-inherited))
     (org-entry-delete (point) org-attach-file-list-property))
   (let ((attach-dir (org-attach-dir)))
