@@ -991,10 +991,9 @@ contextual information."
 (defun org-texinfo-keyword (keyword _contents info)
   "Transcode a KEYWORD element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((raw-value (org-element-property :value keyword))
-	 (value (org-texinfo--sanitize-content raw-value)))
+  (let ((value (org-element-property :value keyword)))
     (pcase (org-element-property :key keyword)
-      ("TEXINFO" raw-value)
+      ("TEXINFO" value)
       ("CINDEX" (format "@cindex %s" value))
       ("FINDEX" (format "@findex %s" value))
       ("KINDEX" (format "@kindex %s" value))

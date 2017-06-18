@@ -13665,16 +13665,28 @@ entry:
 @subsection Indices
 
 @cindex #+CINDEX
+@cindex concept index, in Texinfo export
+@cindex Texinfo export, index, concept
 @cindex #+FINDEX
+@cindex function index, in Texinfo export
+@cindex Texinfo export, index, function
 @cindex #+KINDEX
+@cindex keystroke index, in Texinfo export
+@cindex Texinfo export, keystroke index
 @cindex #+PINDEX
+@cindex program index, in Texinfo export
+@cindex Texinfo export, program index
 @cindex #+TINDEX
+@cindex data type index, in Texinfo export
+@cindex Texinfo export, data type index
 @cindex #+VINDEX
+@cindex variable index, in Texinfo export
+@cindex Texinfo export, variable index
 The Texinfo export back-end recognizes these indexing keywords if used in the
 Org file: @code{#+CINDEX}, @code{#+FINDEX}, @code{#+KINDEX}, @code{#+PINDEX},
-@code{#+TINDEX}, and @code{#+VINDEX}.  The back-end also recognizes custom
-index definitions that use raw Texinfo code in the Org file (@pxref{Quoting
-Texinfo code}).
+@code{#+TINDEX}, and @code{#+VINDEX}.  Write their value as verbatim Texinfo
+code; in particular, @samp{@{}, @samp{@}} and @samp{@@} characters need to be
+escaped with @samp{@@} if they not belong to a Texinfo command.
 
 @example
 #+CINDEX: Defining indexing entries
@@ -13817,14 +13829,16 @@ Here is a more detailed example Org file.  @inforef{GNU Sample
 Texts,,texinfo} for an equivalent example using Texinfo code.
 
 @example
-#+MACRO: version 2.0
-#+MACRO: updated last updated 4 March 2014
-
-#+OPTIONS: ':t toc:t author:t email:t
 #+TITLE: GNU Sample @{@{@{version@}@}@}
+#+SUBTITLE: for version @{@{@{version@}@}@}, @{@{@{updated@}@}@}
 #+AUTHOR: A.U. Thor
 #+EMAIL: bug-sample@@gnu.org
+
+#+OPTIONS: ':t toc:t author:t email:t
 #+LANGUAGE: en
+
+#+MACRO: version 2.0
+#+MACRO: updated last updated 4 March 2014
 
 #+TEXINFO_FILENAME: sample.info
 #+TEXINFO_HEADER: @@syncodeindex pg cp
@@ -13834,7 +13848,6 @@ Texts,,texinfo} for an equivalent example using Texinfo code.
 #+TEXINFO_DIR_DESC: Invoking sample
 
 #+TEXINFO_PRINTED_TITLE: GNU Sample
-#+SUBTITLE: for version @{@{@{version@}@}@}, @{@{@{updated@}@}@}
 
 * Copying
   :PROPERTIES:
@@ -13844,8 +13857,7 @@ Texts,,texinfo} for an equivalent example using Texinfo code.
   This manual is for GNU Sample (version @{@{@{version@}@}@},
   @{@{@{updated@}@}@}), which is an example in the Texinfo documentation.
 
-  Copyright @@@@texinfo:@@copyright@{@}@@@@ 2013 Free Software Foundation,
-  Inc.
+  Copyright \copy 2016 Free Software Foundation, Inc.
 
   #+BEGIN_QUOTE
   Permission is granted to copy, distribute and/or modify this
