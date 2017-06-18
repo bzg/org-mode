@@ -13738,15 +13738,15 @@ two columns.  To change this behavior, specify @code{:table-type} with
 @code{ftable} or @code{vtable} attributes.  For more information,
 @inforef{Two-column Tables,,texinfo}.
 
-@vindex org-texinfo-def-table-markup
+@vindex org-texinfo-table-default-markup
 @cindex :indic attribute, in Texinfo export
 The Texinfo export back-end by default also applies a text highlight based on
-the defaults stored in @code{org-texinfo-def-table-markup}.  To override the
-default highlight command, specify another one with the @code{:indic}
+the defaults stored in @code{org-texinfo-table-default-markup}.  To override
+the default highlight command, specify another one with the @code{:indic}
 attribute.
 
 @cindex Multiple entries in two-column tables, in Texinfo export
-@cindex :separator attribute, in Texinfo export
+@cindex :sep attribute, in Texinfo export
 Org syntax is limited to one entry per list item.  Nevertheless, the Texinfo
 export back-end can split that entry according to any text provided through
 the @code{:sep} attribute.  Each part then becomes a new entry in the first
