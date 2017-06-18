@@ -40,7 +40,7 @@
 ;;   {{{property(node-property)}}},
 ;;   {{{input-file}}},
 ;;   {{{modification-time(format-string)}}},
-;;   {{{n(counter,reset}}}.
+;;   {{{n(counter,action}}}.
 
 ;; Upon exporting, "ox.el" will also provide {{{author}}}, {{{date}}},
 ;; {{{email}}} and {{{title}}} macros.
@@ -327,19 +327,30 @@ Return a list of arguments, as strings.  This is the opposite of
   "Initialize `org-macro--counter-table'."
   (setq org-macro--counter-table (make-hash-table :test #'equal)))
 
-(defun org-macro--counter-increment (name &optional reset)
+(defun org-macro--counter-increment (name &optional action)
   "Increment counter NAME.
-NAME is a string identifying the counter.  When non-nil, optional
-argument RESET is a string.  If it represents an integer, set the
-counter to this number.  Any other non-empty string resets the
-counter to 1."
-  (puthash name
-	   (cond ((not (org-string-nw-p reset))
-		  (1+ (gethash name org-macro--counter-table 0)))
-		 ((string-match-p "\\`[ \t]*[0-9]+[ \t]*\\'" reset)
-		  (string-to-number reset))
-		 (t 1))
-	   org-macro--counter-table))
+NAME is a string identifying the counter.
+
+When non-nil, optional argument ACTION is a string.
+
+If the string is \"-\", keep the NAME counter at its current
+value, i.e. do not increment.
+
+If the string represents an integer, set the counter to this number.
+
+Any other non-empty string resets the counter to 1."
+  (let ((name-trimmed (org-trim name))
+        (action-trimmed (when (org-string-nw-p action)
+                          (org-trim action))))
+    (puthash name-trimmed
+             (cond ((not (org-string-nw-p action-trimmed))
+                    (1+ (gethash name-trimmed org-macro--counter-table 0)))
+                   ((string= "-" action-trimmed)
+                    (gethash name-trimmed org-macro--counter-table 1))
+                   ((string-match-p "\\`[0-9]+\\'" action-trimmed)
+                    (string-to-number action-trimmed))
+                   (t 1))
+             org-macro--counter-table)))
 
 
 (provide 'org-macro)

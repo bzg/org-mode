@@ -180,17 +180,51 @@
             (org-macro-replace-all org-macro-templates)
             (buffer-substring-no-properties
              (line-beginning-position) (line-end-position)))))
-  ;; Tolerate spaces in second argument.
+  ;; Check that reset happens when the second argument is neither "-"
+  ;; nor a number.
   (should
-   (equal "9 10"
-          (org-test-with-temp-text "{{{n(c, 9)}}} {{{n(c)}}}"
+   (equal "9 1 1 1"
+          (org-test-with-temp-text
+	      (concat "{{{n(c,9)}}} {{{n(c,reiniciar)}}}"
+		      " {{{n(c,réinitialiser)}}} {{{n(c,zurückstellen)}}}")
             (org-macro-initialize-templates)
             (org-macro-replace-all org-macro-templates)
             (buffer-substring-no-properties
              (line-beginning-position) (line-end-position)))))
+  ;; Tolerate spaces in first argument.
   (should
-   (equal "9 1"
-          (org-test-with-temp-text "{{{n(c,9)}}} {{{n(c, reset)}}}"
+   (equal "1 2 3 4"
+          (org-test-with-temp-text "{{{n(c)}}} {{{n(c )}}} {{{n( c)}}} {{{n( c )}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Tolerate spaces when second argument is an integer.
+  (should
+   (equal "2 3 5 7"
+          (org-test-with-temp-text
+	      (concat "{{{n(c,2)}}} {{{n(c, 3)}}}"
+		      " {{{n(c,5 )}}} {{{n(c, 7 )}}}")
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Tolerate spaces when second argument is the hold argument.
+  (should
+   (equal "7 7 8 8 9 9"
+          (org-test-with-temp-text
+	      (concat "{{{n(,7)}}} {{{n(, -)}}}"
+		      " {{{n}}} {{{n(,- )}}} {{{n}}} {{{n(, - )}}}")
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Tolerate spaces when second argument is used to reset the counter.
+  (should
+   (equal "9 1 1 1 1"
+          (org-test-with-temp-text
+	      (concat "{{{n(c,9)}}} {{{n(c,reset)}}} {{{n(c, reset)}}}"
+		      " {{{n(c,reset )}}} {{{n(c, reset )}}}")
             (org-macro-initialize-templates)
             (org-macro-replace-all org-macro-templates)
             (buffer-substring-no-properties
@@ -207,6 +241,49 @@
   (should
    (equal "2 3"
           (org-test-with-temp-text "{{{n(c,2)}}} {{{n(c,)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Hold value at reset value of 1 if the counter hasn't yet started.
+  (should
+   (equal "1"
+          (org-test-with-temp-text "{{{n(,-)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Increment counter following a hold.
+  (should
+   (equal "1 1 2"
+          (org-test-with-temp-text "{{{n}}} {{{n(,-)}}} {{{n}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Hold counter value following a counter value set.
+  (should
+   (equal "1 10 10"
+          (org-test-with-temp-text "{{{n}}} {{{n(,10)}}} {{{n(,-)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Hold counter value in a multiple-counter situation.
+  (should
+   (equal "1.1 1.2 1.3"
+          (org-test-with-temp-text
+	      "{{{n}}}.{{{n(c)}}} {{{n(,-)}}}.{{{n(c)}}} {{{n(,-)}}}.{{{n(c)}}}"
+            (org-macro-initialize-templates)
+            (org-macro-replace-all org-macro-templates)
+            (buffer-substring-no-properties
+             (line-beginning-position) (line-end-position)))))
+  ;; Hold counter values on one or multiple counters at the same time.
+  (should
+   (equal "1.1 1.2 2.2 2.2"
+          (org-test-with-temp-text
+	      (concat "{{{n}}}.{{{n(c)}}} {{{n(,-)}}}.{{{n(c)}}}"
+		      " {{{n}}}.{{{n(c,-)}}} {{{n(,-)}}}.{{{n(c,-)}}}")
             (org-macro-initialize-templates)
             (org-macro-replace-all org-macro-templates)
             (buffer-substring-no-properties
