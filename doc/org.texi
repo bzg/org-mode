@@ -13805,14 +13805,16 @@ Here is a more detailed example Org file.  @inforef{GNU Sample
 Texts,,texinfo} for an equivalent example using Texinfo code.
 
 @example
-#+MACRO: version 2.0
-#+MACRO: updated last updated 4 March 2014
-
-#+OPTIONS: ':t toc:t author:t email:t
 #+TITLE: GNU Sample @{@{@{version@}@}@}
+#+SUBTITLE: for version @{@{@{version@}@}@}, @{@{@{updated@}@}@}
 #+AUTHOR: A.U. Thor
 #+EMAIL: bug-sample@@gnu.org
+
+#+OPTIONS: ':t toc:t author:t email:t
 #+LANGUAGE: en
+
+#+MACRO: version 2.0
+#+MACRO: updated last updated 4 March 2014
 
 #+TEXINFO_FILENAME: sample.info
 #+TEXINFO_HEADER: @@syncodeindex pg cp
@@ -13822,7 +13824,6 @@ Texts,,texinfo} for an equivalent example using Texinfo code.
 #+TEXINFO_DIR_DESC: Invoking sample
 
 #+TEXINFO_PRINTED_TITLE: GNU Sample
-#+SUBTITLE: for version @{@{@{version@}@}@}, @{@{@{updated@}@}@}
 
 * Copying
   :PROPERTIES:
@@ -13832,8 +13833,7 @@ Texts,,texinfo} for an equivalent example using Texinfo code.
   This manual is for GNU Sample (version @{@{@{version@}@}@},
   @{@{@{updated@}@}@}), which is an example in the Texinfo documentation.
 
-  Copyright @@@@texinfo:@@copyright@{@}@@@@ 2013 Free Software Foundation,
-  Inc.
+  Copyright \copy 2016 Free Software Foundation, Inc.
 
   #+BEGIN_QUOTE
   Permission is granted to copy, distribute and/or modify this
