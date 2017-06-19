@@ -110,6 +110,51 @@ The default is to make it look like whitespace.  But you may find it
 useful to make it ever so slightly different."
   :group 'org-faces)
 
+(defvar org-indent--text-line-prefixes nil
+  "Vector containing line prefixes strings for regular text.")
+
+(defvar org-indent--heading-line-prefixes nil
+  "Vector containing line prefix strings for headlines.")
+
+(defvar org-indent--inlinetask-line-prefixes nil
+  "Vector containing line prefix strings for inline tasks.")
+
+(defconst org-indent--deepest-level 50
+  "Maximum theoretical headline depth.")
+
+(defun org-indent--compute-prefixes ()
+  "Compute prefix strings for regular text and headlines."
+  (setq org-indent--heading-line-prefixes
+	(make-vector org-indent--deepest-level nil))
+  (setq org-indent--inlinetask-line-prefixes
+	(make-vector org-indent--deepest-level nil))
+  (setq org-indent--text-line-prefixes
+	(make-vector org-indent--deepest-level nil))
+  (dotimes (n org-indent--deepest-level)
+    (let ((indentation (if (<= n 1) 0
+			 (* (1- org-indent-indentation-per-level)
+			    (1- n)))))
+      ;; Headlines line prefixes.
+      (let ((heading-prefix (make-string indentation ?*)))
+	(aset org-indent--heading-line-prefixes
+	      n
+	      (org-add-props heading-prefix nil 'face 'org-indent))
+	;; Inline tasks line prefixes
+	(aset org-indent--inlinetask-line-prefixes
+	      n
+	      (org-add-props (if (bound-and-true-p org-inlinetask-show-first-star)
+				 (concat org-indent-inlinetask-first-star
+					 (substring heading-prefix 1))
+			       heading-prefix)
+		  nil 'face 'org-indent)))
+      ;; Text line prefixes.
+      (aset org-indent--text-line-prefixes
+	    n
+	    (concat (org-add-props (make-string (+ n indentation) ?\s)
+			nil 'face 'org-indent)
+		    (and (> n 0)
+			 (char-to-string org-indent-boundary-char)))))))
+
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
   (org-with-silent-modifications
@@ -137,14 +182,15 @@ during idle time."
       (setq-local org-hide-leading-stars-before-indent-mode
 		  org-hide-leading-stars)
       (setq-local org-hide-leading-stars t))
+    (org-indent--compute-prefixes)
     (add-hook 'filter-buffer-substring-functions
-		  (lambda (fun start end delete)
-		    (org-indent-remove-properties-from-string
-		     (funcall fun start end delete)))
-		  nil t)
+	      (lambda (fun start end delete)
+		(org-indent-remove-properties-from-string
+		 (funcall fun start end delete)))
+	      nil t)
     (add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
     (add-hook 'before-change-functions
-		  'org-indent-notify-modified-headline nil 'local)
+	      'org-indent-notify-modified-headline nil 'local)
     (and font-lock-mode (org-restart-font-lock))
     (org-indent-remove-properties (point-min) (point-max))
     ;; Submit current buffer to initialize agent.  If it's the first
@@ -247,25 +293,15 @@ expected indentation when wrapping line.
 When optional argument HEADING is non-nil, assume line is at
 a heading.  Moreover, if is is `inlinetask', the first star will
 have `org-warning' face."
-  (let* ((stars (if (<= level 1) ""
-		  (make-string (* (1- org-indent-indentation-per-level)
-				  (1- level))
-			       ?*)))
-	 (line
-	  (cond
-	   ((and (bound-and-true-p org-inlinetask-show-first-star)
-		 (eq heading 'inlinetask))
-	    (concat org-indent-inlinetask-first-star
-		    (org-add-props (substring stars 1) nil 'face 'org-hide)))
-	   (heading (org-add-props stars nil 'face 'org-hide))
-	   (t (concat (org-add-props (concat stars (make-string level ?*))
-			  nil 'face 'org-indent)
-		      (and (> level 0)
-			   (char-to-string org-indent-boundary-char))))))
+  (let* ((line (aref (pcase heading
+		       (`nil org-indent--text-line-prefixes)
+		       (`inlinetask org-indent--inlinetask-line-prefixes)
+		       (_ org-indent--heading-line-prefixes))
+		     level))
 	 (wrap
 	  (org-add-props
-	      (concat stars
-		      (make-string level ?*)
+	      (concat line
+		      (make-string level (if heading ?* ?\s))
 		      (if heading " "
 			(make-string (+ indentation (min level 1)) ?\s)))
 	      nil 'face 'org-indent)))
