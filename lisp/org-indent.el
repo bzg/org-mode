@@ -301,9 +301,8 @@ have `org-warning' face."
 	 (wrap
 	  (org-add-props
 	      (concat line
-		      (make-string level (if heading ?* ?\s))
-		      (if heading " "
-			(make-string (+ indentation (min level 1)) ?\s)))
+		      (if heading (concat (make-string level ?*) " ")
+			(make-string indentation ?\s)))
 	      nil 'face 'org-indent)))
     ;; Add properties down to the next line to indent empty lines.
     (add-text-properties (line-beginning-position) (line-beginning-position 2)
