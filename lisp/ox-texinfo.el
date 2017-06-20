@@ -662,7 +662,6 @@ holding export options."
 	    (top-contents
 	     (org-export-data (org-element-contents first-section) info)))
        (and (org-string-nw-p top-contents) (concat "\n" top-contents)))
-     (and copying "@insertcopying\n")
      "@end ifnottex\n\n"
      ;; Menu.
      (org-texinfo-make-menu (plist-get info :parse-tree) info 'master)
