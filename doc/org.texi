@@ -647,7 +647,7 @@ Texinfo export
 * Texinfo specific export settings::  Setting the environment.
 * Texinfo file header::         Generating the header.
 * Texinfo title and copyright page::  Creating preamble pages.
-* Texinfo @samp{Top} node::     Installing a manual in Info Top node.
+* Info directory file::     Installing a manual in Info file hierarchy.
 * Headings and sectioning structure::  Building document structure.
 * Indices::                     Creating indices.
 * Quoting Texinfo code::        Incorporating literal Texinfo code.
@@ -13462,7 +13462,7 @@ can compile to Info format.
 * Texinfo specific export settings::  Setting the environment.
 * Texinfo file header::         Generating the header.
 * Texinfo title and copyright page::  Creating preamble pages.
-* Texinfo @samp{Top} node::     Installing a manual in Info Top node.
+* Info directory file::     Installing a manual in Info file hierarchy.
 * Headings and sectioning structure::  Building document structure.
 * Indices::                     Creating indices.
 * Quoting Texinfo code::        Incorporating literal Texinfo code.
