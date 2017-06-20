@@ -628,7 +628,8 @@ holding export options."
      "@titlepage\n"
      (when (plist-get info :with-title)
        (concat
-	(format "@title %s\n" (or (plist-get info :texinfo-printed-title) title ""))
+	(format "@title %s\n"
+		(or (plist-get info :texinfo-printed-title) title ""))
 	(let ((subtitle (plist-get info :subtitle)))
 	  (when subtitle
 	    (format "@subtitle %s\n"
@@ -654,10 +655,17 @@ holding export options."
      "@end titlepage\n\n"
      ;; Table of contents.
      (and (plist-get info :with-toc) "@contents\n\n")
-     ;; Configure Top Node when not for Tex
+     ;; Configure Top Node when not for TeX.  Also include contents
+     ;; from the first section of the document.
      "@ifnottex\n"
      "@node Top\n"
      (format "@top %s\n" title)
+     (let* ((first-section
+	     (org-element-map (plist-get info :parse-tree) 'section
+	       #'identity info t '(headline)))
+	    (top-contents
+	     (org-export-data (org-element-contents first-section) info)))
+       (and (org-string-nw-p top-contents) (concat "\n" top-contents)))
      (and copying "@insertcopying\n")
      "@end ifnottex\n\n"
      ;; Menu.
@@ -1368,11 +1376,10 @@ contextual information."
   "Transcode a SECTION element from Org to Texinfo.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
-  (org-trim
-   (concat contents
-	   "\n"
-	   (let ((parent (org-export-get-parent-headline section)))
-	     (and parent (org-texinfo-make-menu parent info))))))
+  (let ((parent (org-export-get-parent-headline section)))
+    (when parent			;ignore very first section
+      (org-trim
+       (concat contents "\n" (org-texinfo-make-menu parent info))))))
 
 ;;;; Special Block
 
