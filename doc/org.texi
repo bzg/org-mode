@@ -13600,8 +13600,14 @@ Copyright information is printed on the back of the title page.
   Copyright \copy 2016 Free Software Foundation, Inc.
 @end example
 
-@node Texinfo @samp{Top} node
-@subsection Texinfo @samp{Top} node
+@node Info directory file
+@subsection Info directory file
+@cindex @samp{dir} file, in Texinfo export
+@cindex Texinfo export, @samp{dir} file
+@cindex Info directory file, in Texinfo export
+@cindex Texinfo export, Info directory file
+@cindex @code{install-info} parameters, in Texinfo export
+@cindex Texinfo export, @code{install-info} parameters
 
 @cindex #+TEXINFO_DIR_CATEGORY
 @cindex #+TEXINFO_DIR_TITLE
@@ -13612,7 +13618,7 @@ This Info file's metadata has variables for category, title, and description:
 @code{#+TEXINFO_DIR_DESC} that establish where in the Info hierarchy the file
 fits.
 
-Here's an example that writes to the @samp{Top} node:
+Here is an example that writes to the Info directory file:
 
 @example
 #+TEXINFO_DIR_CATEGORY: Emacs
@@ -13660,6 +13666,13 @@ entry:
   :DESCRIPTION: Controlling Screen Display
   :END:
 @end example
+
+@cindex The Top node, in Texinfo export
+@cindex Texinfo export, Top node
+The text before the first headline belongs to the @samp{Top} node, i.e., the
+node in which a reader enters an Info manual.  As such, it is expected not to
+appear in printed output generated from the @file{.texi} file.  @inforef{The
+Top Node,,texinfo}, for more information.
 
 @node Indices
 @subsection Indices
@@ -13824,6 +13837,9 @@ Texts,,texinfo} for an equivalent example using Texinfo code.
 #+TEXINFO_DIR_DESC: Invoking sample
 
 #+TEXINFO_PRINTED_TITLE: GNU Sample
+
+This manual is for GNU Sample (version @{@{@{version@}@}@},
+@{@{@{updated@}@}@}).
 
 * Copying
   :PROPERTIES:
