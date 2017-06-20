@@ -1637,30 +1637,37 @@ containing `:call', `:inside-header', `:arguments',
   (save-excursion
     (let* ((begin (car affiliated))
 	   (post-affiliated (point))
-	   (value (progn (search-forward ":" nil t)
+	   (before-blank (line-beginning-position 2))
+	   (value (progn (search-forward ":" before-blank t)
+			 (skip-chars-forward " \t")
 			 (org-trim
 			  (buffer-substring-no-properties
 			   (point) (line-end-position)))))
-	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (if (eobp) (point) (line-beginning-position))))
-	   (valid-value
-	    (string-match
-	     "\\([^()\n]+?\\)\\(?:\\[\\(.*?\\)\\]\\)?(\\(.*\\))[ \t]*\\(.*\\)"
-	     value)))
+	   (call
+	    (or (org-string-nw-p
+		 (buffer-substring-no-properties
+		  (point) (progn (skip-chars-forward "^[]()" before-blank)
+				 (point))))))
+	   (inside-header (org-element--parse-paired-brackets ?\[))
+	   (arguments (org-string-nw-p
+		       (org-element--parse-paired-brackets ?\()))
+	   (end-header
+	    (org-string-nw-p
+	     (org-trim
+	      (buffer-substring-no-properties (point) (line-end-position)))))
+	   (end (progn (forward-line)
+		       (skip-chars-forward " \r\t\n" limit)
+		       (if (eobp) (point) (line-beginning-position)))))
       (list 'babel-call
 	    (nconc
-	     (list :call (and valid-value (match-string 1 value))
-		   :inside-header (and valid-value
-				       (org-string-nw-p (match-string 2 value)))
-		   :arguments (and valid-value
-				   (org-string-nw-p (match-string 3 value)))
-		   :end-header (and valid-value
-				    (org-string-nw-p (match-string 4 value)))
+	     (list :call call
+		   :inside-header inside-header
+		   :arguments arguments
+		   :end-header end-header
 		   :begin begin
 		   :end end
 		   :value value
-		   :post-blank (count-lines pos-before-blank end)
+		   :post-blank (count-lines before-blank end)
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
 
