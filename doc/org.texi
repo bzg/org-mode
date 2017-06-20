@@ -12183,11 +12183,11 @@ also have additional layout @code{:placement} attributes.  These are the
 usual @code{[h t b p ! H]} permissions specified in square brackets.  Note
 that for @code{:float sideways} tables, the @LaTeX{} export back-end ignores
 @code{:placement} attributes.
-@item :align    
+@item :align
 @itemx :font
 @itemx :width
 The @LaTeX{} export back-end uses these attributes for regular tables to set
-their alignments, fonts, and widths. 
+their alignments, fonts, and widths.
 @item :spread
 When @code{:spread} is non-@code{nil}, the @LaTeX{} export back-end spreads
 or shrinks the table by the @code{:width} for @code{tabu} and @code{longtabu}
@@ -12777,7 +12777,7 @@ ODT export}.
 The ODT export back-end processes image links in Org files that do not have
 descriptions, such as these links @samp{[[file:img.jpg]]} or
 @samp{[[./img.jpg]]}, as direct image insertions in the final output.  Either
-of these examples works: 
+of these examples works:
 
 @example
 [[file:img.png]]
@@ -13998,7 +13998,7 @@ The Org export process relies on filters to process specific parts of
 conversion process.  Filters are just lists of functions to be applied to
 certain parts for a given back-end.  The output from the first function in
 the filter is passed on to the next function in the filter.  The final output
-is the output from the final function in the filter. 
+is the output from the final function in the filter.
 
 The Org export process has many filter sets applicable to different types of
 objects, plain text, parse trees, export options, and final output formats.
