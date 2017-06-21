@@ -1593,9 +1593,9 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (insert "--")
 	  (setq te (org-insert-time-stamp (or at-time now) 'with-hm 'inactive))
 	  (setq s (- (float-time
-		      (apply #'encode-time (org-parse-time-string te)))
+		      (apply #'encode-time (org-parse-time-string te nil t)))
 		     (float-time
-		      (apply #'encode-time (org-parse-time-string ts))))
+		      (apply #'encode-time (org-parse-time-string ts nil t))))
 		h (floor (/ s 3600))
 		s (- s (* 3600 h))
 		m (floor (/ s 60))
@@ -1829,9 +1829,9 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 	   (setq ts (match-string 2)
 		 te (match-string 3)
 		 ts (float-time
-		     (apply #'encode-time (org-parse-time-string ts)))
+		     (apply #'encode-time (org-parse-time-string ts nil t)))
 		 te (float-time
-		     (apply #'encode-time (org-parse-time-string te)))
+		     (apply #'encode-time (org-parse-time-string te nil t)))
 		 ts (if tstart (max ts tstart) ts)
 		 te (if tend (min te tend) te)
 		 dt (- te ts)
@@ -2703,14 +2703,16 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
       (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute ts)))
 	(setq ts (float-time (encode-time 0 0 0 day month year)))))
      (ts
-      (setq ts (float-time (apply #'encode-time (org-parse-time-string ts))))))
+      (setq ts (float-time
+		(apply #'encode-time (org-parse-time-string ts nil t))))))
     (cond
      ((numberp te)
       ;; Likewise for te.
       (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute te)))
 	(setq te (float-time (encode-time 0 0 0 day month year)))))
      (te
-      (setq te (float-time (apply #'encode-time (org-parse-time-string te))))))
+      (setq te (float-time
+		(apply #'encode-time (org-parse-time-string te nil t))))))
     (setq tsb
 	  (if (eq step0 'week)
 	      (- ts (* 86400 (- (nth 6 (decode-time (seconds-to-time ts))) ws)))
@@ -2883,9 +2885,9 @@ Otherwise, return nil."
 	  (setq ts (match-string 1)
 		te (match-string 3))
 	  (setq s (- (float-time
-		      (apply #'encode-time (org-parse-time-string te)))
+		      (apply #'encode-time (org-parse-time-string te nil t)))
 		     (float-time
-		      (apply #'encode-time (org-parse-time-string ts))))
+		      (apply #'encode-time (org-parse-time-string ts nil t))))
 		neg (< s 0)
 		s (abs s)
 		h (floor (/ s 3600))
