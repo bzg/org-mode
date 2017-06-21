@@ -5861,12 +5861,12 @@ This includes angle, plain, and bracket links."
     (while (re-search-forward org-any-link-re limit t)
       (let* ((start (match-beginning 0))
 	     (end (match-end 0))
-	     (type (cond ((eq ?< (char-after start)) 'angle)
-			 ((eq ?\[ (char-after (1+ start))) 'bracket)
-			 (t 'plain))))
-	(when (and (memq type org-highlight-links)
+	     (style (cond ((eq ?< (char-after start)) 'angle)
+			  ((eq ?\[ (char-after (1+ start))) 'bracket)
+			  (t 'plain))))
+	(when (and (memq style org-highlight-links)
 		   ;; Do not confuse plain links with tags.
-		   (not (and (eq type 'plain)
+		   (not (and (eq style 'plain)
 			     (let ((face (get-text-property
 					  (max (1- start) (point-min)) 'face)))
 			       (if (consp face) (memq 'org-tag face)
@@ -5875,6 +5875,7 @@ This includes angle, plain, and bracket links."
 				(goto-char start)
 				(save-match-data (org-element-link-parser))))
 		 (link (org-element-property :raw-link link-object))
+		 (type (org-element-property :type link-object))
 		 (path (org-element-property :path link-object))
 		 (properties		;for link's visible part
 		  (list
@@ -5898,7 +5899,7 @@ This includes angle, plain, and bracket links."
 		   'font-lock-multiline t)))
 	    (org-remove-flyspell-overlays-in start end)
 	    (org-rear-nonsticky-at end)
-	    (if (not (eq 'bracket type))
+	    (if (not (eq 'bracket style))
 		(add-text-properties start end properties)
 	      ;; Handle invisible parts in bracket links.
 	      (remove-text-properties start end '(invisible nil))
@@ -5916,7 +5917,7 @@ This includes angle, plain, and bracket links."
 		(org-rear-nonsticky-at visible-end)))
 	    (let ((f (org-link-get-parameter type :activate-func)))
 	      (when (functionp f)
-		(funcall f start end path (eq type 'bracket))))
+		(funcall f start end path (eq style 'bracket))))
 	    (throw :exit t)))))		;signal success
     nil))
 
