@@ -3544,7 +3544,7 @@ file:projects.org                            @r{another Org file}
 file:projects.org::some words                @r{text search in Org file}@footnote{
 The actual behavior of the search will depend on the value of
 the option @code{org-link-search-must-match-exact-headline}.  If its value
-is @code{nil}, then a fuzzy text search will be done.  If it is t, then only
+is @code{nil}, then a fuzzy text search will be done.  If it is @code{t}, then only
 the exact headline will be matched, ignoring spaces and cookies.  If the
 value is @code{query-to-create}, then an exact headline will be searched; if
 it is not found, then the user will be queried to create it.}
