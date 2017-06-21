@@ -347,13 +347,13 @@ contents.  The clocktable doesn't appear in the buffer."
    (equal
     "| Headline     | Time        |     |
 |--------------+-------------+-----|
-| *Total time* | *704d 9:01* | foo |
+| *Total time* | *704d 8:01* | foo |
 |--------------+-------------+-----|
-| Test         | 704d 9:01   | foo |
+| Test         | 704d 8:01   | foo |
 "
     (org-test-with-temp-text-in-file
         "* Test
-CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16905:01
+CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16904:01
 
 #+BEGIN: clocktable :scope file-with-archives
 #+TBLFM: $3=string(\"foo\")
