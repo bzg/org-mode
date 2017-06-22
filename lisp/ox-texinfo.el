@@ -1214,13 +1214,10 @@ holding contextual information."
 	 (cached-entries (gethash scope cache 'no-cache)))
     (if (not (eq cached-entries 'no-cache)) cached-entries
       (puthash scope
-	       (org-element-map (org-element-contents scope) 'headline
-		 (lambda (h)
-		   (and (not (org-not-nil (org-element-property :COPYING h)))
-			(not (org-element-property :footnote-section-p h))
-			(not (org-export-low-level-p h info))
-			h))
-		 info nil 'headline)
+	       (cl-remove-if
+		(lambda (h)
+		  (org-not-nil (org-export-get-node-property :COPYING h t)))
+		(org-export-collect-headlines info nil scope))
 	       cache))))
 
 ;;;; Node Property
