@@ -15142,8 +15142,8 @@ customization options for extracting source code.
 When Org tangles @samp{src} code blocks, it expands, merges, and transforms
 them.  Then Org recomposes them into one or more separate files, as
 configured through the options.  During this @emph{tangling} process, Org
-expands variables in the source code, and resolves any ``noweb'' style
-references (@pxref{Noweb reference syntax}).
+expands variables in the source code, and resolves any Noweb style references
+(@pxref{Noweb reference syntax}).
 
 @subsubheading Header arguments
 
@@ -16148,12 +16148,11 @@ Do not insert newlines to pad the tangled @samp{src} code blocks.
 By default Org expands @samp{src} code blocks during tangling.  The
 @code{:no-expand} header argument turns off such expansions.  Note that one
 side-effect of expansion by @code{org-babel-expand-src-block} also assigns
-values to @code{:var} (@pxref{var}) variables.  Expansions also replace
-``noweb'' references with their targets (@pxref{Noweb reference syntax}).
-Some of these expansions may cause premature assignment, hence this option.
-This option makes a difference only for tangling.  It has no effect when
-exporting since @samp{src} code blocks for execution have to be expanded
-anyway.
+values to @code{:var} (@pxref{var}) variables.  Expansions also replace Noweb
+references with their targets (@pxref{Noweb reference syntax}).  Some of
+these expansions may cause premature assignment, hence this option.  This
+option makes a difference only for tangling.  It has no effect when exporting
+since @samp{src} code blocks for execution have to be expanded anyway.
 
 @node session
 @subsubsection @code{:session}
@@ -16182,42 +16181,56 @@ subsequent source code language blocks change session names.
 @subsubsection @code{:noweb}
 @cindex @code{:noweb}, src header argument
 
-The @code{:noweb} header argument controls expansion of ``noweb'' syntax
+The @code{:noweb} header argument controls expansion of Noweb syntax
 references (@pxref{Noweb reference syntax}).  Expansions occur when source
 code blocks are evaluated, tangled, or exported.
 
 @itemize @bullet
 @item @code{no}
-Default.  No expansion of ``Noweb'' syntax references in the body of the code
+Default.  No expansion of Noweb syntax references in the body of the code
 when evaluating, tangling, or exporting.
 @item @code{yes}
-Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
-block when evaluating, tangling, or exporting.
+Expansion of Noweb syntax references in the body of the @samp{src} code block
+when evaluating, tangling, or exporting.
 @item @code{tangle}
-Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
-block when tangling.  No expansion when evaluating or exporting.
+Expansion of Noweb syntax references in the body of the @samp{src} code block
+when tangling.  No expansion when evaluating or exporting.
 @item @code{no-export}
-Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
-block when evaluating or tangling.  No expansion when exporting.
+Expansion of Noweb syntax references in the body of the @samp{src} code block
+when evaluating or tangling.  No expansion when exporting.
 @item @code{strip-export}
-Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
-block when expanding prior to evaluating or tangling.  Removes ``noweb''
-syntax references when exporting.
+Expansion of Noweb syntax references in the body of the @samp{src} code block
+when expanding prior to evaluating or tangling.  Removes Noweb syntax
+references when exporting.
 @item @code{eval}
-Expansion of ``Noweb'' syntax references in the body of the @samp{src} code
-block only before evaluating.
+Expansion of Noweb syntax references in the body of the @samp{src} code block
+only before evaluating.
 @end itemize
 
 @subsubheading Noweb prefix lines
-Noweb insertions now honor prefix characters that appear before
-@code{<<reference>>}.  This behavior is illustrated in the following example.
-Because the @code{<<example>>} noweb reference appears behind the SQL comment
-syntax, each line of the expanded noweb reference will be commented.
+Noweb insertions now honor prefix characters that appear before the Noweb
+syntax reference.
 
-This @samp{src} code block:
+This behavior is illustrated in the following example.  Because the
+@code{<<example>>} noweb reference appears behind the SQL comment syntax,
+each line of the expanded noweb reference will be commented.
+
+With:
 
 @example
+#+NAME: example
+#+BEGIN_SRC text
+this is the
+multi-line body of example
+#+END_SRC
+@end example
+
+this @samp{src} code block:
+
+@example
+#+BEGIN_SRC sql :noweb yes
 -- <<example>>
+#+END_SRC
 @end example
 
 expands to:
@@ -16230,17 +16243,60 @@ expands to:
 Since this change will not affect noweb replacement text without newlines in
 them, inline noweb references are acceptable.
 
+This feature can also be used for management of indentation in exported code snippets.
+
+With:
+
+@example
+#+NAME: if-true
+#+BEGIN_SRC python :exports none
+print('Do things when True')
+#+END_SRC
+
+#+NAME: if-false
+#+BEGIN_SRC python :exports none
+print('Do things when False')
+#+END_SRC
+@end example
+
+this @samp{src} code block:
+
+@example
+#+BEGIN_SRC python :noweb yes :results output
+if True:
+    <<if-true>>
+else:
+    <<if-false>>
+#+END_SRC
+@end example
+
+expands to:
+
+@example
+if True:
+    print('Do things when True')
+else:
+    print('Do things when False')
+@end example
+
+and evaluates to:
+
+@example
+Do things when True
+@end example
+
 @node noweb-ref
 @subsubsection @code{:noweb-ref}
 @cindex @code{:noweb-ref}, src header argument
 
-When expanding ``noweb'' style references, Org concatenates @samp{src} code
-blocks by matching the reference name to either the block name or the
+When expanding Noweb style references, Org concatenates @samp{src} code
+blocks by matching the reference name to either the code block name or the
 @code{:noweb-ref} header argument.
 
 For simple concatenation, set this @code{:noweb-ref} header argument at the
 sub-tree or file level.  In the example Org file shown next, the body of the
-source code in each block is extracted for concatenation to a pure code file.
+source code in each block is extracted for concatenation to a pure code file
+when tangled.
 
 @example
  #+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
@@ -16300,8 +16356,8 @@ A note of warning: when @code{:cache} is used for a @code{:session}, caching
 may cause unexpected results.
 
 When the caching mechanism tests for any source code changes, it will not
-expand ``noweb'' style references (@pxref{Noweb reference syntax}).  For
-reasons why, see @uref{http://thread.gmane.org/gmane.emacs.orgmode/79046}.
+expand Noweb style references (@pxref{Noweb reference syntax}).  For reasons
+why, see @uref{http://thread.gmane.org/gmane.emacs.orgmode/79046}.
 
 The @code{:cache} header argument can have one of two values: @code{yes} or
 @code{no}.
@@ -16743,38 +16799,80 @@ prints ``2''.  Results show that.
 @cindex syntax, noweb
 @cindex source code, noweb reference
 
-Org supports named blocks in ``noweb'' style syntax.  For ``noweb'' literate
+Org supports named blocks in Noweb style syntax.  For Noweb literate
 programming details, see @uref{http://www.cs.tufts.edu/~nr/noweb/}).
 
 @example
 <<code-block-name>>
 @end example
 
-For the header argument @code{:noweb yes}, Org expands ``noweb'' style
+For the header argument @code{:noweb yes}, Org expands Noweb style references
+in the @samp{src} code block before evaluation.
+
+For the header argument @code{:noweb no}, Org does not expand Noweb style
 references in the @samp{src} code block before evaluation.
 
-For the header argument @code{:noweb no}, Org does not expand ``noweb'' style
-references in the @samp{src} code block before evaluation.
+The default is @code{:noweb no}.  Org defaults to @code{:noweb no} so as not
+to cause errors in languages where Noweb syntax is ambiguous.  Change Org's
+default to @code{:noweb yes} for languages where there is no risk of
+confusion.
 
-The default is @code{:noweb no}.
-
-Org offers a more flexible way to resolve ``noweb'' style references
+Org offers a more flexible way to resolve Noweb style references
 (@pxref{noweb-ref}).
 
-Org can handle naming of @emph{results} block, rather than the body of the
-@samp{src} code block, using ``noweb'' style references.
-
-For ``noweb'' style reference, append parenthesis to the code block name for
-arguments, as shown in this example:
+Org can include the @emph{results} of a code block rather than its body.  To
+that effect, append parentheses, possibly including arguments, to the code
+block name, as show below.
 
 @example
 <<code-block-name(optional arguments)>>
 @end example
 
-Note: Org defaults to @code{:noweb no} so as not to cause errors in languages
-such as @samp{Ruby} where ``noweb'' syntax is equally valid characters.  For
-example, @code{<<arg>>}.  Change Org's default to @code{:noweb yes} for
-languages where there is no risk of confusion.
+Note that when using the above approach to a code block's results, the code
+block name set by @code{#+NAME} keyword is required; the reference set by
+@code{:noweb-ref} will not work.
+
+Here is an example that demonstrates how the exported content changes when
+Noweb style references are used with parentheses versus without.
+
+With:
+
+@example
+#+NAME: some-code
+#+BEGIN_SRC python :var num=0 :results output :exports none
+print(num*10)
+#+END_SRC
+@end example
+
+this code block:
+
+@example
+#+BEGIN_SRC text :noweb yes
+<<some-code>>
+#+END_SRC
+@end example
+
+expands to:
+
+@example
+print(num*10)
+@end example
+
+Below, a similar Noweb style reference is used, but with parentheses, while
+setting a variable @code{num} to 10:
+
+@example
+#+BEGIN_SRC text :noweb yes
+<<some-code(num=10)>>
+#+END_SRC
+@end example
+
+Note that now the expansion contains the @emph{results} of the code block
+@code{some-code}, not the code block itself:
+
+@example
+100
+@end example
 
 For faster tangling of large Org mode files, set
 @code{org-babel-use-quick-and-dirty-noweb-expansion} variable to @code{t}.
