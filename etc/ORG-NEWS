@@ -49,6 +49,10 @@ You can now find them here :
 - https://github.com/sabof/org-bullets
 - https://github.com/org-mime/org-mime
 
+*** Change ~org-texinfo-classes~ value
+The value cannot support functions to create sectionning commands
+anymore.  Also, the sectionning commands should include commands for
+appendices.  See the docstring for more information.
 *** Removal of ~:sitemap-sans-extension~
 
 The publishing property is no longer recognized, as a consequence of

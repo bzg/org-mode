@@ -146,17 +146,19 @@ If nil it will default to `buffer-file-coding-system'."
 (defcustom org-texinfo-classes
   '(("info"
      "@documentencoding AUTO\n@documentlanguage AUTO"
-     ("@chapter %s" . "@unnumbered %s")
-     ("@section %s" . "@unnumberedsec %s")
-     ("@subsection %s" . "@unnumberedsubsec %s")
-     ("@subsubsection %s" . "@unnumberedsubsubsec %s")))
+     ("@chapter %s" "@unnumbered %s" "@appendix %s")
+     ("@section %s" "@unnumberedsec %s" "@appendixsec %s")
+     ("@subsection %s" "@unnumberedsubsec %s" "@appendixsubsec %s")
+     ("@subsubsection %s" "@unnumberedsubsubsec %s" "@appendixsubsubsec %s")))
   "Alist of Texinfo classes and associated header and structure.
 If #+TEXINFO_CLASS is set in the buffer, use its value and the
-associated information.  Here is the structure of each cell:
+associated information.  Here is the structure of a class
+definition:
 
   (class-name
     header-string
-    (numbered-section . unnumbered-section)
+    (numbered-1 unnumbered-1 appendix-1)
+    (numbered-2 unnumbered-2 appendix-2)
     ...)
 
 
@@ -188,25 +190,19 @@ The sectioning structure
 The sectioning structure of the class is given by the elements
 following the header string.  For each sectioning level, a number
 of strings is specified.  A %s formatter is mandatory in each
-section string and will be replaced by the title of the section.
-
-Instead of a list of sectioning commands, you can also specify
-a function name.  That function will be called with two
-parameters, the reduced) level of the headline, and a predicate
-non-nil when the headline should be numbered.  It must return
-a format string in which the section title will be added."
+section string and will be replaced by the title of the section."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.2")
+  :version "26.1"
+  :package-version '(Org . "9.1")
   :type '(repeat
 	  (list (string :tag "Texinfo class")
 		(string :tag "Texinfo header")
 		(repeat :tag "Levels" :inline t
 			(choice
-			 (cons :tag "Heading"
+			 (list :tag "Heading"
 			       (string :tag "  numbered")
-			       (string :tag "unnumbered"))
-			 (function :tag "Hook computing sectioning"))))))
+			       (string :tag "unnumbered")
+			       (string :tag "  appendix")))))))
 
 ;;;; Headline
 
@@ -833,82 +829,74 @@ plist holding contextual information."
 
 ;;;; Headline
 
+(defun org-texinfo--structuring-command (headline info)
+  "Return Texinfo structuring command string for HEADLINE element.
+Return nil if HEADLINE is to be ignored, `plain-list' if it
+should be exported as a plain-list item.  INFO is a plist holding
+contextual information."
+  (cond
+   ((org-element-property :footnote-section-p headline) nil)
+   ((org-not-nil (org-export-get-node-property :COPYING headline t)) nil)
+   ((org-export-low-level-p headline info) 'plain-list)
+   (t
+    (let ((class (plist-get info :texinfo-class)))
+      (pcase (assoc class (plist-get info :texinfo-classes))
+	(`(,_ ,_ . ,sections)
+	 (pcase (nth (1- (org-export-get-relative-level headline info))
+		     sections)
+	   (`(,numbered ,unnumbered ,appendix)
+	    (cond
+	     ((org-not-nil (org-export-get-node-property :APPENDIX headline t))
+	      appendix)
+	     ((org-not-nil (org-export-get-node-property :INDEX headline t))
+	      unnumbered)
+	     ((org-export-numbered-headline-p headline info) numbered)
+	     (t unnumbered)))
+	   (`nil 'plain-list)
+	   (_ (user-error "Invalid Texinfo class specification: %S" class))))
+	(_ (user-error "Invalid Texinfo class specification: %S" class)))))))
+
 (defun org-texinfo-headline (headline contents info)
   "Transcode a HEADLINE element from Org to Texinfo.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((class (plist-get info :texinfo-class))
-	 (level (org-export-get-relative-level headline info))
-	 (numberedp (org-export-numbered-headline-p headline info))
-	 (class-sectioning (assoc class (plist-get info :texinfo-classes)))
-	 ;; Find the index type, if any.
-	 (index (org-element-property :INDEX headline))
-	 ;; Create node info, to insert it before section formatting.
-	 ;; Use custom menu title if present.
-	 (node (format "@node %s\n" (org-texinfo--get-node headline info)))
-	 ;; Section formatting will set two placeholders: one for the
-	 ;; title and the other for the contents.
-	 (section-fmt
-	  (if (org-not-nil (org-element-property :APPENDIX headline))
-	      "@appendix %s\n%s"
-	    (let ((sec (if (and (symbolp (nth 2 class-sectioning))
-				(fboundp (nth 2 class-sectioning)))
-			   (funcall (nth 2 class-sectioning) level numberedp)
-			 (nth (1+ level) class-sectioning))))
-	      (cond
-	       ;; No section available for that LEVEL.
-	       ((not sec) nil)
-	       ;; Section format directly returned by a function.
-	       ((stringp sec) sec)
-	       ;; (numbered-section . unnumbered-section)
-	       ((not (consp (cdr sec)))
-		(concat (if (or index (not numberedp)) (cdr sec) (car sec))
-			"\n%s"))))))
-	 (todo
-	  (and (plist-get info :with-todo-keywords)
-	       (let ((todo (org-element-property :todo-keyword headline)))
-		 (and todo (org-export-data todo info)))))
-	 (todo-type (and todo (org-element-property :todo-type headline)))
-	 (tags (and (plist-get info :with-tags)
-		    (org-export-get-tags headline info)))
-	 (priority (and (plist-get info :with-priority)
-			(org-element-property :priority headline)))
-	 (text (org-texinfo--sanitize-title
-		(org-element-property :title headline) info))
-	 (full-text (funcall (plist-get info :texinfo-format-headline-function)
-			     todo todo-type priority text tags))
-	 (contents (if (org-string-nw-p contents) (concat "\n" contents) "")))
-    (cond
-     ;; Case 1: This is a footnote section: ignore it.
-     ((org-element-property :footnote-section-p headline) nil)
-     ;; Case 2: This is the `copying' section: ignore it
-     ;;         This is used elsewhere.
-     ((org-not-nil (org-element-property :COPYING headline)) nil)
-     ;; Case 3: An index.  If it matches one of the known indexes,
-     ;;         print it as such following the contents, otherwise
-     ;;         print the contents and leave the index up to the user.
-     (index
-      (concat node
-	      (format
-	       section-fmt
-	       full-text
-	       (concat contents
-		       (and (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
-			    (concat "\n@printindex " index))))))
-     ;; Case 4: This is a deep sub-tree: export it as a list item.
-     ;;         Also export as items headlines for which no section
-     ;;         format has been found.
-     ((or (not section-fmt) (org-export-low-level-p headline info))
-      ;; Build the real contents of the sub-tree.
-      (concat (and (org-export-first-sibling-p headline info)
-		   (format "@%s\n" (if numberedp 'enumerate 'itemize)))
-	      "@item\n" full-text "\n"
-	      contents
-	      (if (org-export-last-sibling-p headline info)
-		  (format "@end %s" (if numberedp 'enumerate 'itemize))
-		"\n")))
-     ;; Case 5: Standard headline.  Export it as a section.
-     (t (concat node (format section-fmt full-text contents))))))
+  (let ((section-fmt (org-texinfo--structuring-command headline info)))
+    (when section-fmt
+      (let* ((todo
+	      (and (plist-get info :with-todo-keywords)
+		   (let ((todo (org-element-property :todo-keyword headline)))
+		     (and todo (org-export-data todo info)))))
+	     (todo-type (and todo (org-element-property :todo-type headline)))
+	     (tags (and (plist-get info :with-tags)
+			(org-export-get-tags headline info)))
+	     (priority (and (plist-get info :with-priority)
+			    (org-element-property :priority headline)))
+	     (text (org-texinfo--sanitize-title
+		    (org-element-property :title headline) info))
+	     (full-text
+	      (funcall (plist-get info :texinfo-format-headline-function)
+		       todo todo-type priority text tags))
+	     (contents
+	      (concat (if (org-string-nw-p contents)
+			  (concat "\n" contents)
+			"")
+		      (let ((index (org-element-property :INDEX headline)))
+			(and (member index '("cp" "fn" "ky" "pg" "tp" "vr"))
+			     (format "\n@printindex %s\n" index))))))
+	(cond
+	 ((eq section-fmt 'plain-list)
+	  (let ((numbered? (org-export-numbered-headline-p headline info)))
+	    (concat (and (org-export-first-sibling-p headline info)
+			 (format "@%s\n" (if numbered? 'enumerate 'itemize)))
+		    "@item\n" full-text "\n"
+		    contents
+		    (if (org-export-last-sibling-p headline info)
+			(format "@end %s" (if numbered? 'enumerate 'itemize))
+		      "\n"))))
+	 (t
+	  (concat (format "@node %s\n" (org-texinfo--get-node headline info))
+		  (format section-fmt full-text)
+		  contents)))))))
 
 (defun org-texinfo-format-headline-default-function
   (todo _todo-type priority text tags)
