@@ -896,7 +896,8 @@ holding contextual information."
 	 (t
 	  (concat (format "@node %s\n" (org-texinfo--get-node headline info))
 		  (format section-fmt full-text)
-		  contents)))))))
+		  contents "\n"
+		  (org-texinfo-make-menu headline info))))))))
 
 (defun org-texinfo-format-headline-default-function
   (todo _todo-type priority text tags)
@@ -1359,14 +1360,11 @@ contextual information."
 
 ;;;; Section
 
-(defun org-texinfo-section (section contents info)
+(defun org-texinfo-section (section contents _info)
   "Transcode a SECTION element from Org to Texinfo.
-CONTENTS holds the contents of the section.  INFO is a plist
-holding contextual information."
-  (let ((parent (org-export-get-parent-headline section)))
-    (when parent			;ignore very first section
-      (org-trim
-       (concat contents "\n" (org-texinfo-make-menu parent info))))))
+CONTENTS holds the contents of the section."
+  (and (org-export-get-parent-headline section) ;ignore first section
+       contents))
 
 ;;;; Special Block
 
