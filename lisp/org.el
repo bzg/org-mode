@@ -10618,9 +10618,10 @@ When optional argument REFERENCE-BUFFER is non-nil, it should
 specify a buffer from where the link search should happen.  This
 is used internally by `org-open-link-from-string'.
 
-On top of syntactically correct links, this function will open
-the link at point in comments or comment blocks and the first
-link in a property drawer line."
+On top of syntactically correct links, this function will also
+try to open links and time-stamps in comments, example
+blocks... i.e., whenever point is on something looking like
+a timestamp or a link."
   (interactive "P")
   ;; On a code block, open block's results.
   (unless (call-interactively 'org-babel-open-src-block-result)
@@ -10633,28 +10634,20 @@ link in a property drawer line."
 	      ;; the closest one.
 	      (org-element-lineage
 	       (org-element-context)
-	       '(clock comment comment-block footnote-definition
-		       footnote-reference headline inlinetask keyword link
-		       node-property timestamp)
+	       '(clock footnote-definition footnote-reference headline
+		       inlinetask link timestamp)
 	       t))
 	     (type (org-element-type context))
 	     (value (org-element-property :value context)))
 	(cond
-	 ((not context) (user-error "No link found"))
-	 ;; Exception: open timestamps and links in properties
-	 ;; drawers, keywords and comments.
-	 ((memq type '(comment comment-block keyword node-property))
-	  (call-interactively #'org-open-at-point-global))
 	 ;; On a headline or an inlinetask, but not on a timestamp,
 	 ;; a link, a footnote reference or on tags.
 	 ((and (memq type '(headline inlinetask))
 	       ;; Not on tags.
 	       (let ((case-fold-search nil))
-		 (save-excursion
-		   (beginning-of-line)
-		   (looking-at org-complex-heading-regexp))
-		 (or (not (match-beginning 5))
-		     (< (point) (match-beginning 5)))))
+		 (and (org-match-line org-complex-heading-regexp)
+		      (or (not (match-beginning 5))
+			  (< (point) (match-beginning 5))))))
 	  (let* ((data (org-offer-links-in-entry (current-buffer) (point) arg))
 		 (links (car data))
 		 (links-end (cdr data)))
@@ -10665,6 +10658,26 @@ link in a property drawer line."
 		  (org-open-at-point))
 	      (require 'org-attach)
 	      (org-attach-reveal 'if-exists))))
+	 ;; On a footnote reference or at definition's label.
+	 ((or (eq type 'footnote-reference)
+	      (and (eq type 'footnote-definition)
+		   (save-excursion
+		     ;; Do not validate action when point is on the
+		     ;; spaces right after the footnote label, in
+		     ;; order to be on par with behaviour on links.
+		     (skip-chars-forward " \t")
+		     (let ((begin
+			    (org-element-property :contents-begin context)))
+		       (if begin (< (point) begin)
+			 (= (org-element-property :post-affiliated context)
+			    (line-beginning-position)))))))
+	  (org-footnote-action))
+	 ;; No valid context.  Ignore catch-all types like `headline'.
+	 ;; If point is on something looking like a link or
+	 ;; a time-stamp, try opening it.  It may be useful in
+	 ;; comments, example blocks...
+	 ((memq type '(footnote-definition headline inlinetask nil))
+	  (call-interactively #'org-open-at-point-global))
 	 ;; On a clock line, make sure point is on the timestamp
 	 ;; before opening it.
 	 ((and (eq type 'clock)
@@ -10752,20 +10765,6 @@ link in a property drawer line."
 		      (widen))
 		    (goto-char destination))))
 	       (t (browse-url-at-point))))))
-	 ;; On a footnote reference or at a footnote definition's label.
-	 ((or (eq type 'footnote-reference)
-	      (and (eq type 'footnote-definition)
-		   (save-excursion
-		     ;; Do not validate action when point is on the
-		     ;; spaces right after the footnote label, in
-		     ;; order to be on par with behaviour on links.
-		     (skip-chars-forward " \t")
-		     (let ((begin
-			    (org-element-property :contents-begin context)))
-		       (if begin (< (point) begin)
-			 (= (org-element-property :post-affiliated context)
-			    (line-beginning-position)))))))
-	  (org-footnote-action))
 	 (t (user-error "No link found")))))
     (run-hook-with-args 'org-follow-link-hook)))
 

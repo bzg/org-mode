@@ -2421,14 +2421,18 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 
 ;;;; Open at point
 
-(ert-deftest test-org/open-at-point-in-keyword ()
+(ert-deftest test-org/open-at-point/keyword ()
   "Does `org-open-at-point' open link in a keyword line?"
   (should
    (org-test-with-temp-text
        "<<top>>\n#+KEYWORD: <point>[[top]]"
+     (org-open-at-point) t))
+  (should
+   (org-test-with-temp-text
+       "* H\n<<top>>\n#+KEYWORD: <point>[[top]]"
      (org-open-at-point) t)))
 
-(ert-deftest test-org/open-at-point-in-property ()
+(ert-deftest test-org/open-at-point/property ()
   "Does `org-open-at-point' open link in property drawer?"
   (should
    (org-test-with-temp-text
@@ -2438,11 +2442,15 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 :END:"
      (org-open-at-point) t)))
 
-(ert-deftest test-org/open-at-point-in-comment ()
+(ert-deftest test-org/open-at-point/comment ()
   "Does `org-open-at-point' open link in a commented line?"
   (should
    (org-test-with-temp-text
     "<<top>>\n# <point>[[top]]"
+    (org-open-at-point) t))
+  (should
+   (org-test-with-temp-text
+    "* H\n<<top>>\n# <point>[[top]]"
     (org-open-at-point) t)))
 
 (ert-deftest test-org/open-at-point/inline-image ()
