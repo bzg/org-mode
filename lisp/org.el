@@ -12681,7 +12681,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	    (replace-match next t t)
 	    (cond ((equal this org-state)
 		   (message "TODO state was already %s" (org-trim next)))
-		  ((pos-visible-in-window-p hl-pos)
+		  ((not (pos-visible-in-window-p hl-pos))
 		   (message "TODO state changed to %s" (org-trim next))))
 	    (unless head
 	      (setq head (org-get-todo-sequence-head org-state)
