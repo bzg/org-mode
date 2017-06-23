@@ -20,6 +20,7 @@ else
   ORGVERSION ?= N/A
 endif
 DATE          = $(shell date +%Y-%m-%d)
+YEAR          = $(shell date +%Y)
 ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION:.dirty=).dirty
 endif

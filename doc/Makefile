@@ -33,13 +33,20 @@ org-version.inc:	org.texi
 	@echo "@set VERSION $(ORGVERSION) ($(GITVERSION))" >> org-version.inc
 	@echo "@set DATE $(DATE)" >> org-version.inc
 
+org-version.tex:	orgcard.tex
+	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
+	@echo "% automatically generated, do not edit"  > org-version.tex
+	@echo "\def\orgversionnumber{$(ORGVERSION)}" >> org-version.tex
+	@echo "\def\versionyear{$(YEAR)}" >> org-version.tex
+	@echo "\def\year{$(YEAR)}" >> org-version.tex
+
 install:	org
 	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
 	$(CP) org $(DESTDIR)$(infodir)
 	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) org
 
 clean:
-	$(RM) org *.pdf *.html *_letter.tex org-version.inc \
+	$(RM) org *.pdf *.html *_letter.tex org-version.inc org-version.tex \
 	      *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs \
 	      *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
 cleanall:	clean
@@ -59,7 +66,7 @@ clean-install:
 %.pdf:		LANG=C
 %.pdf:		%.texi org-version.inc
 	$(TEXI2PDF) $<
-%.pdf:		%.tex
+%.pdf:		%.tex org-version.tex
 	PDFLATEX=$(PDFTEX) $(TEXI2PDF) $<
 
 %.html:		%.texi org-version.inc
