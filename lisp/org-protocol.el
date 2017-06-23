@@ -520,7 +520,9 @@ The location for a browser's bookmark should look like this:
   ;; As we enter this function for a match on our protocol, the return value
   ;; defaults to nil.
   (let ((result nil)
-        (f (plist-get (org-protocol-parse-parameters fname nil '(:url)) :url)))
+	(f (org-protocol-sanitize-uri
+	    (plist-get (org-protocol-parse-parameters fname nil '(:url))
+		       :url))))
     (catch 'result
       (dolist (prolist org-protocol-project-alist)
         (let* ((base-url (plist-get (cdr prolist) :base-url))
