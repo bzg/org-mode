@@ -556,7 +556,7 @@ The location for a browser's bookmark should look like this:
 		      ;; Try to match a rewritten URL and map it to
 		      ;; a real file.  Compare redirects without
 		      ;; suffix.
-		      (when (string-match-p (car rewrite) f2)
+		      (when (string-match-p (car rewrite) f1)
 			(throw 'result (concat wdir (cdr rewrite))))))))
 	      ;; -- end of redirects --
 
