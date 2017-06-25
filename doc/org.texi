@@ -11443,8 +11443,8 @@ The default is ``xhtml-strict''.
 Org's HTML exporter does not by default enable new block elements introduced
 with the HTML5 standard.  To enable them, set @code{org-html-html5-fancy} to
 non-@code{nil}.  Or use an @code{OPTIONS} line in the file to set
-@code{html5-fancy}.  HTML5 documents can now have arbitrary #+BEGIN and #+END
-blocks.  For example:
+@code{html5-fancy}.  HTML5 documents can now have arbitrary @code{#+BEGIN}
+and @code{#+END} blocks.  For example:
 
 @example
 #+BEGIN_aside
