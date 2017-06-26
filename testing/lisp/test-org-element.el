@@ -1551,9 +1551,15 @@ e^{i\\pi}+1=0
 
 (ert-deftest test-org-element/latex-fragment-parser ()
   "Test `latex-fragment' parser."
+  ;; Basic $...$ test.
   (should
    (eq 'latex-fragment
        (org-test-with-temp-text "$a$"
+	 (org-element-type (org-element-context)))))
+  ;; Test valid characters after $...$ construct.
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a$a"
 	 (org-element-type (org-element-context)))))
   (should
    (eq 'latex-fragment
@@ -1579,18 +1585,46 @@ e^{i\\pi}+1=0
    (eq 'latex-fragment
        (org-test-with-temp-text "$a$'"
 	 (org-element-type (org-element-context)))))
+  ;; Test forbidden characters inside $...$.
   (should-not
    (eq 'latex-fragment
-       (org-test-with-temp-text "$a$a"
+       (org-test-with-temp-text "$.a$"
 	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$,a$"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$;a$"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$ a$"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a.$"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a,$"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'latex-fragment
+       (org-test-with-temp-text "$a $"
+	 (org-element-type (org-element-context)))))
+  ;; Test $$...$$.
   (should
    (eq 'latex-fragment
        (org-test-with-temp-text "$$a$$"
 	 (org-element-type (org-element-context)))))
+  ;; Test \(...\).
   (should
    (eq 'latex-fragment
        (org-test-with-temp-text "\\(a\\)"
 	 (org-element-type (org-element-context)))))
+  ;; Test \[...\].
   (should
    (eq 'latex-fragment
        (org-test-with-temp-text "\\[a\\]"
