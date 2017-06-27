@@ -2232,6 +2232,224 @@ is t, then new columns should be added as needed"
 
 
 
+;;; Shrunk columns
+
+(ert-deftest test-org-table/toggle-column-width ()
+  "Test `org-table-toggle-columns-width' specifications."
+  ;; Error when not at a column.
+  (should-error
+   (org-test-with-temp-text "<point>a"
+     (org-table-toggle-column-width)))
+  (should-error
+   (org-test-with-temp-text "| a |"
+     (org-table-toggle-column-width)))
+  (should-error
+   (org-test-with-temp-text "| a |<point>"
+     (org-table-toggle-column-width)))
+  ;; A shrunk columns is overlaid with
+  ;; `org-table-shrunk-column-indicator'.
+  (should
+   (equal org-table-shrunk-column-indicator
+	  (org-test-with-temp-text "| <point>a |"
+	    (org-table-toggle-column-width)
+	    (overlay-get (car (overlays-at (point))) 'display))))
+  (should
+   (equal org-table-shrunk-column-indicator
+	  (org-test-with-temp-text "| a |\n|-<point>--|"
+	    (org-table-toggle-column-width)
+	    (overlay-get (car (overlays-at (point))) 'display))))
+  ;; Shrink every field in the same column.
+  (should
+   (equal org-table-shrunk-column-indicator
+	  (org-test-with-temp-text "| a |\n|-<point>--|"
+	    (org-table-toggle-column-width)
+	    (overlay-get (car (overlays-at (1+ (line-beginning-position 0))))
+			 'display))))
+  ;; When column is already shrunk, expand it, i.e., remove overlays.
+  (should-not
+   (equal org-table-shrunk-column-indicator
+	  (org-test-with-temp-text "| <point>a |"
+	    (org-table-toggle-column-width)
+	    (org-table-toggle-column-width)
+	    (overlays-in (point-min) (point-max)))))
+  (should-not
+   (equal org-table-shrunk-column-indicator
+	  (org-test-with-temp-text "| a |\n| <point>b |"
+	    (org-table-toggle-column-width)
+	    (org-table-toggle-column-width)
+	    (overlays-in (point-min) (point-max)))))
+  ;; With a column width cookie, limit overlay to the specified number
+  ;; of characters.
+  (should
+   (equal (concat " abc" org-table-shrunk-column-indicator)
+	  (org-test-with-temp-text "| <3> |\n| <point>abcd |"
+	    (org-table-toggle-column-width)
+	    (overlay-get (car (overlays-at (point))) 'display))))
+  (should
+   (equal (concat " a  " org-table-shrunk-column-indicator)
+	  (org-test-with-temp-text "| <3> |\n| <point>a |"
+	    (org-table-toggle-column-width)
+	    (overlay-get (car (overlays-at (point))) 'display))))
+  ;; Only overlay visible characters of the field.
+  (should
+   (equal (concat " htt" org-table-shrunk-column-indicator)
+	  (org-test-with-temp-text "| <3> |\n| <point>[[http://orgmode.org]] |"
+	    (org-table-toggle-column-width)
+	    (overlay-get (car (overlays-at (point))) 'display))))
+  ;; With optional argument ARG, toggle specified columns.
+  (should
+   (equal org-table-shrunk-column-indicator
+	  (org-test-with-temp-text "| <point>a | b |"
+	    (org-table-toggle-column-width "2")
+	    (overlay-get (car (overlays-at (- (point-max) 2))) 'display))))
+  (should
+   (equal '("b" "c")
+	  (org-test-with-temp-text "| a | b | c | d |"
+	    (org-table-toggle-column-width "2-3")
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  (should
+   (equal '("b" "c" "d")
+	  (org-test-with-temp-text "| a | b | c | d |"
+	    (org-table-toggle-column-width "2-")
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  (should
+   (equal '("a" "b")
+	  (org-test-with-temp-text "| a | b | c | d |"
+	    (org-table-toggle-column-width "-2")
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  (should
+   (equal '("a" "b" "c" "d")
+	  (org-test-with-temp-text "| a | b | c | d |"
+	    (org-table-toggle-column-width "-")
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  (should
+   (equal '("a" "d")
+	  (org-test-with-temp-text "| a | b | c | d |"
+	    (org-table-toggle-column-width "1-3")
+	    (org-table-toggle-column-width "2-4")
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  ;; When ARG is (16), remove any column overlay.
+  (should-not
+   (org-test-with-temp-text "| <point>a |"
+     (org-table-toggle-column-width)
+     (org-table-toggle-column-width '(16))
+     (overlays-in (point-min) (point-max))))
+  (should-not
+   (org-test-with-temp-text "| a | b | c | d |"
+     (org-table-toggle-column-width "-")
+     (org-table-toggle-column-width '(16))
+     (overlays-in (point-min) (point-max)))))
+
+(ert-deftest test-org-table/shrunk-columns ()
+  "Test behaviour of shrunk column."
+  ;; Edition automatically expands a shrunk column.
+  (should-not
+   (org-test-with-temp-text "| <point>a |"
+     (org-table-toggle-column-width)
+     (insert "a")
+     (overlays-in (point-min) (point-max))))
+  ;; Other columns are not changed.
+  (should
+   (org-test-with-temp-text "| <point>a | b |"
+     (org-table-toggle-column-width "-")
+     (insert "a")
+     (overlays-in (point-min) (point-max))))
+  ;; Moving a shrunk column doesn't alter its state.
+  (should
+   (equal "a"
+	  (org-test-with-temp-text "| <point>a | b |"
+	    (org-table-toggle-column-width)
+	    (org-table-move-column-right)
+	    (overlay-get (car (overlays-at (point))) 'help-echo))))
+  (should
+   (equal "a"
+	  (org-test-with-temp-text "| <point>a |\n| b |"
+	    (org-table-toggle-column-width)
+	    (org-table-move-row-down)
+	    (overlay-get (car (overlays-at (point))) 'help-echo))))
+  ;; State is preserved upon inserting a column.
+  (should
+   (equal '("a")
+	  (org-test-with-temp-text "| <point>a |"
+	    (org-table-toggle-column-width)
+	    (org-table-insert-column)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  ;; State is preserved upon deleting a column.
+  (should
+   (equal '("a" "c")
+	  (org-test-with-temp-text "| a | <point>b | c |"
+	    (org-table-toggle-column-width "-")
+	    (org-table-delete-column)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  ;; State is preserved upon deleting a row.
+  (should
+   (equal '("b1" "b2")
+	  (org-test-with-temp-text "| a1 | a2 |\n| b1 | b2 |"
+	    (org-table-toggle-column-width "-")
+	    (org-table-kill-row)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  (should
+   (equal '("a1" "a2")
+	  (org-test-with-temp-text "| a1 | a2 |\n| <point>b1 | b2 |"
+	    (org-table-toggle-column-width "-")
+	    (org-table-kill-row)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  ;; State is preserved upon inserting a row or hline.
+  (should
+   (equal '("" "a1" "b1")
+	  (org-test-with-temp-text "| a1 | a2 |\n| <point>b1 | b2 |"
+	    (org-table-toggle-column-width)
+	    (org-table-insert-row)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  (should
+   (equal '("a1" "b1")
+	  (org-test-with-temp-text "| a1 | a2 |\n| <point>b1 | b2 |"
+	    (org-table-toggle-column-width)
+	    (org-table-insert-hline)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  ;; State is preserved upon sorting a column for all the columns but
+  ;; the one being sorted.
+  (should
+   (equal '("a2" "b2")
+	  (org-test-with-temp-text "| <point>a1 | a2 |\n| <point>b1 | b2 |"
+	    (org-table-toggle-column-width "-")
+	    (org-table-sort-lines nil ?A)
+	    (sort (mapcar (lambda (o) (overlay-get o 'help-echo))
+			  (overlays-in (point-min) (point-max)))
+		  #'string-lessp))))
+  ;; State is preserved upon replacing a field non-interactively.
+  (should
+   (equal '("a")
+	  (org-test-with-temp-text "| <point>a |"
+	    (org-table-toggle-column-width)
+	    (org-table-get-field nil "b")
+	    (mapcar (lambda (o) (overlay-get o 'help-echo))
+		    (overlays-in (point-min) (point-max)))))))
+
+
+
 ;;; Miscellaneous
 
 (ert-deftest test-org-table/get-field ()

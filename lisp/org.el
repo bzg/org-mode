@@ -19629,6 +19629,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map "\C-j"     'org-return-indent)
 (org-defkey org-mode-map "\C-c?"    'org-table-field-info)
 (org-defkey org-mode-map "\C-c "    'org-table-blank-field)
+(org-defkey org-mode-map (kbd "C-c TAB") #'org-table-toggle-column-width)
 (org-defkey org-mode-map "\C-c+"    'org-table-sum)
 (org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
 (org-defkey org-mode-map "\C-c'"    'org-edit-special)
@@ -21237,7 +21238,8 @@ an argument, unconditionally call `org-insert-heading'."
      ["Move Column Left" org-metaleft (org-at-table-p)]
      ["Move Column Right" org-metaright (org-at-table-p)]
      ["Delete Column" org-shiftmetaleft (org-at-table-p)]
-     ["Insert Column" org-shiftmetaright (org-at-table-p)])
+     ["Insert Column" org-shiftmetaright (org-at-table-p)]
+     ["Shrink Column" org-table-toggle-column-width (org-at-table-p)])
     ("Row"
      ["Move Row Up" org-metaup (org-at-table-p)]
      ["Move Row Down" org-metadown (org-at-table-p)]
