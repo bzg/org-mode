@@ -137,7 +137,12 @@
 	     :base-url "http://another.example.com/"
 	     :online-suffix ".js"
 	     :working-directory ,(file-name-directory temp-file-name2))
-	    ))
+	    (test3
+	     :base-url "https://blog-example.com/"
+	     :working-directory ,(file-name-directory temp-file-name2)
+	     :online-suffix ".html"
+	     :working-suffix ".md"
+	     :rewrites (("\\(https://blog-example.com/[0-9]+/[0-9]+/[0-9]+/\\)" . ".md")))))
 	 (test-cases
 	  (list
 	   ;; Old-style URLs
