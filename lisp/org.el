@@ -19961,10 +19961,16 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	     (or (not (boundp 'visible-mode)) (not visible-mode))
 	     (or (get-char-property (point) 'invisible)
 		 (get-char-property (max (point-min) (1- (point))) 'invisible)))
-    ;; OK, we need to take a closer look
-    (let* ((invisible-at-point (get-char-property (point) 'invisible))
-	   (invisible-before-point (unless (bobp) (get-char-property
-						   (1- (point)) 'invisible)))
+    ;; OK, we need to take a closer look.  Do not consider
+    ;; invisibility obtained through text properties (e.g., link
+    ;; fontification), as it cannot be toggled.
+    (let* ((invisible-at-point
+	    (pcase (get-char-property-and-overlay (point) 'invisible)
+	      (`(,value . ,(pred overlayp)) value)))
+	   (invisible-before-point
+	    (and (not (bobp))
+		 (pcase (get-char-property-and-overlay (1- (point)) 'invisible)
+		   (`(,value . ,(pred overlayp)) value))))
 	   (border-and-ok-direction
 	    (or
 	     ;; Check if we are acting predictably before invisible text
@@ -19986,9 +19992,14 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	  ;; Make the area visible
 	  (save-excursion
 	    (when invisible-before-point
-	      (goto-char (previous-single-char-property-change
-			  (point) 'invisible)))
-	    (outline-show-subtree))
+	      (goto-char
+	       (previous-single-char-property-change (point) 'invisible)))
+	    ;; Remove whatever overlay is currently making yet-to-be
+	    ;; edited text invisible.
+	    (remove-overlays (point)
+			     (org-end-of-subtree t t)
+			     'invisible
+			     (or invisible-at-point invisible-before-point)))
 	  (cond
 	   ((eq org-catch-invisible-edits 'show)
 	    ;; That's it, we do the edit after showing
