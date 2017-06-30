@@ -34,11 +34,11 @@ org-version.inc:	org.texi
 	@echo "@set DATE $(DATE)" >> org-version.inc
 
 org-version.tex:	orgcard.tex
-	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
-	@echo "% automatically generated, do not edit"  > org-version.tex
-	@echo "\def\orgversionnumber{$(ORGVERSION)}" >> org-version.tex
-	@echo "\def\versionyear{$(YEAR)}" >> org-version.tex
-	@echo "\def\year{$(YEAR)}" >> org-version.tex
+	@printf "org-version: $(ORGVERSION) ($(GITVERSION))\n"
+	@printf "%% automatically generated, do not edit\n" > org-version.tex
+	@printf "\def\orgversionnumber{$(ORGVERSION)}\n" >> org-version.tex
+	@printf "\def\\\\versionyear{$(YEAR)}\n" >> org-version.tex
+	@printf "\def\year{$(YEAR)}\n" >> org-version.tex
 
 install:	org
 	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
