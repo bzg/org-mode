@@ -1126,6 +1126,7 @@ may have been stored before."
 			(mapconcat 'identity (split-string txt "\n")
 				   "\n  "))))
     ;; Prepare surrounding empty lines.
+    (unless (bolp) (insert "\n"))
     (org-capture-empty-lines-before)
     (setq beg (point))
     (unless (eolp) (save-excursion (insert "\n")))
