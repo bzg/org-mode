@@ -1335,7 +1335,7 @@ Only data lines count for this."
     (org-table-check-inside-data-field))
   (save-excursion
     (let ((c 0)
-	  (pos (point)))
+	  (pos (line-beginning-position)))
       (goto-char (org-table-begin))
       (while (<= (point) pos)
 	(when (looking-at org-table-dataline-regexp) (cl-incf c))
