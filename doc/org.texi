@@ -830,7 +830,7 @@ different formats such as HTML, @LaTeX{}, Open Document, and Markdown.  New
 export backends can be derived from existing ones, or defined from scratch.
 
 Org files can include source code blocks, which makes Org uniquely suited for
-authoring technical documents with code examples. Org source code blocks are
+authoring technical documents with code examples.  Org source code blocks are
 fully functional; they can be evaluated in place and their results can be
 captured in the file.  This makes it possible to create a single file
 reproducible research compendium.
@@ -8081,7 +8081,7 @@ you can use the following instead:
 @end example
 
 That will give you three days' warning: on the anniversary date itself and the
-two days prior. The argument is optional: if omitted, it defaults to 7.
+two days prior.  The argument is optional: if omitted, it defaults to 7.
 
 @subsubheading Appointment reminders
 @cindex @file{appt.el}
