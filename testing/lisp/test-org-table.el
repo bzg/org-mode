@@ -2093,6 +2093,92 @@ is t, then new columns should be added as needed"
       (let ((org-table-tab-jumps-over-hlines nil)) (org-table-next-field))
       (buffer-string)))))
 
+
+
+;;; Moving rows, moving columns
+
+(ert-deftest test-org-table/move-row-down ()
+  "Test `org-table-move-row-down' specifications."
+  ;; Error out when row cannot be moved, e.g., it is the last row in
+  ;; the table.
+  (should-error
+   (org-test-with-temp-text "| a |"
+     (org-table-move-row-down)))
+  (should-error
+   (org-test-with-temp-text "| a |\n"
+     (org-table-move-row-down)))
+  (should-error
+   (org-test-with-temp-text "| a |\n| <point>b |"
+     (org-table-move-row-down)))
+  ;; Move data lines.
+  (should
+   (equal "| b |\n| a |\n"
+	  (org-test-with-temp-text "| a |\n| b |\n"
+	    (org-table-move-row-down)
+	    (buffer-string))))
+  (should
+   (equal "|---|\n| a |\n"
+	  (org-test-with-temp-text "| a |\n|---|\n"
+	    (org-table-move-row-down)
+	    (buffer-string))))
+  ;; Move hlines.
+  (should
+   (equal "| b |\n|---|\n"
+	  (org-test-with-temp-text "|---|\n| b |\n"
+	    (org-table-move-row-down)
+	    (buffer-string))))
+  (should
+   (equal "|---|\n|---|\n"
+	  (org-test-with-temp-text "|---|\n|---|\n"
+	    (org-table-move-row-down)
+	    (buffer-string))))
+  ;; Move rows even without a final newline.
+  (should
+   (equal "| b |\n| a |\n"
+	  (org-test-with-temp-text "| a |\n| b |"
+	    (org-table-move-row-down)
+	    (buffer-string)))))
+
+(ert-deftest test-org-table/move-row-up ()
+  "Test `org-table-move-row-up' specifications."
+  ;; Error out when row cannot be moved, e.g., it is the first row in
+  ;; the table.
+  (should-error
+   (org-test-with-temp-text "| a |"
+     (org-table-move-row-up)))
+  (should-error
+   (org-test-with-temp-text "| a |\n"
+     (org-table-move-row-up)))
+  ;; Move data lines.
+  (should
+   (equal "| b |\n| a |\n"
+	  (org-test-with-temp-text "| a |\n| <point>b |\n"
+	    (org-table-move-row-up)
+	    (buffer-string))))
+  (should
+   (equal "| b |\n|---|\n"
+	  (org-test-with-temp-text "|---|\n| <point>b |\n"
+	    (org-table-move-row-up)
+	    (buffer-string))))
+  ;; Move hlines.
+  (should
+   (equal "|---|\n| a |\n"
+	  (org-test-with-temp-text "| a |\n|<point>---|\n"
+	    (org-table-move-row-up)
+	    (buffer-string))))
+  (should
+   (equal "|---|\n|---|\n"
+	  (org-test-with-temp-text "|---|\n|<point>---|\n"
+	    (org-table-move-row-up)
+	    (buffer-string))))
+  ;; Move rows even without a final newline.
+  (should
+   (equal "| b |\n| a |\n"
+	  (org-test-with-temp-text "| a |\n| <point>b |"
+	    (org-table-move-row-up)
+	    (buffer-string)))))
+
+
 
 ;;; Miscellaneous
 
