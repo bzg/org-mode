@@ -19966,15 +19966,19 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
     ;; fontification), as it cannot be toggled.
     (let* ((invisible-at-point
 	    (pcase (get-char-property-and-overlay (point) 'invisible)
-	      (`(,value . ,(pred overlayp)) value)))
+	      (`(,_ . ,(and (pred overlayp) o)) o)))
+	   ;; Assume that point cannot land in the middle of an
+	   ;; overlay, or between two overlays.
 	   (invisible-before-point
-	    (and (not (bobp))
+	    (and (not invisible-at-point)
+		 (not (bobp))
 		 (pcase (get-char-property-and-overlay (1- (point)) 'invisible)
-		   (`(,value . ,(pred overlayp)) value))))
+		   (`(,_ . ,(and (pred overlayp) o)) o))))
 	   (border-and-ok-direction
 	    (or
-	     ;; Check if we are acting predictably before invisible text
-	     (and invisible-at-point (not invisible-before-point)
+	     ;; Check if we are acting predictably before invisible
+	     ;; text.
+	     (and invisible-at-point
 		  (memq kind '(insert delete-backward)))
 	     ;; Check if we are acting predictably after invisible text
 	     ;; This works not well, and I have turned it off.  It seems
@@ -19982,8 +19986,7 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	     ;; (and (not invisible-at-point) invisible-before-point
 	     ;;  (memq kind '(insert delete)))
 	     )))
-      (when (or (memq invisible-at-point '(outline org-hide-block t))
-		(memq invisible-before-point '(outline org-hide-block t)))
+      (when (or invisible-at-point invisible-before-point)
 	(when (eq org-catch-invisible-edits 'error)
 	  (user-error "Editing in invisible areas is prohibited, make them visible first"))
 	(if (and org-custom-properties-overlays
@@ -19995,11 +19998,14 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	      (goto-char
 	       (previous-single-char-property-change (point) 'invisible)))
 	    ;; Remove whatever overlay is currently making yet-to-be
-	    ;; edited text invisible.
-	    (remove-overlays (point)
-			     (org-end-of-subtree t t)
-			     'invisible
-			     (or invisible-at-point invisible-before-point)))
+	    ;; edited text invisible.  Also remove nested invisibility
+	    ;; related overlays.
+	    (delete-overlay (or invisible-at-point invisible-before-point))
+	    (let ((origin (if invisible-at-point (point) (1- (point)))))
+	      (while (pcase (get-char-property-and-overlay origin 'invisible)
+		       (`(,_ . ,(and (pred overlayp) o))
+			(delete-overlay o)
+			t)))))
 	  (cond
 	   ((eq org-catch-invisible-edits 'show)
 	    ;; That's it, we do the edit after showing
