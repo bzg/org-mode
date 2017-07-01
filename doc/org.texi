@@ -13590,7 +13590,7 @@ itself does not appear in the structure of the document.
 Copyright information is printed on the back of the title page.
 
 @example
-* Copying
+* Legalese
   :PROPERTIES:
   :COPYING: t
   :END:
