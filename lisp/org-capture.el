@@ -1923,9 +1923,7 @@ Assume sexps have been marked with
 		       (if jump-to-captured '(:jump-to-captured t)))))
 
 	   org-remember-templates))))
-;;; The function was made obsolete by commit 65399674d5 of
-;;; 2013-02-22.  This make-obsolete call was added 2016-09-01.
-(make-obsolete 'org-capture-import-remember-templates "use the `org-capture-templates' variable instead." "Org 9.0")
+
 
 (provide 'org-capture)
 
