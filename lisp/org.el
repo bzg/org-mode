@@ -13738,7 +13738,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
   (if (memq org-log-note-how '(time state))
-      (let (current-prefix-arg) (org-store-log-note))
+      (org-store-log-note)
     (let ((org-inhibit-startup t)) (org-mode))
     (insert (format "# Insert note for %s.
 # Finish with C-c C-c, or cancel with C-c C-k.\n\n"
@@ -13815,7 +13815,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 				     org-log-note-previous-state)))))))
       (when lines (setq note (concat note " \\\\")))
       (push note lines))
-    (when (and lines (not (or current-prefix-arg org-note-abort)))
+    (when (and lines (not org-note-abort))
       (with-current-buffer (marker-buffer org-log-note-marker)
 	(org-with-wide-buffer
 	 ;; Find location for the new note.
