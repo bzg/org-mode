@@ -14671,7 +14671,7 @@ it as a time string and apply `float-time' to it.  If S is nil, just return 0."
    ((numberp s) s)
    ((stringp s)
     (condition-case nil
-	(float-time (apply 'encode-time (org-parse-time-string s)))
+	(float-time (apply #'encode-time (org-parse-time-string s nil t)))
       (error 0.)))
    (t 0.)))
 
