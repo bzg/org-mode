@@ -38,10 +38,10 @@
 (defvar eldo-keymaps nil)
 
 (defvar eldo-git-raw-file
-  "http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=lisp/%s;hb=HEAD")
+  "http://orgmode.org/cgit.cgi/org-mode.git/plain/lisp/%s")
 
 (defvar eldo-git-search-string
-  "http://orgmode.org/w/?p=org-mode.git&a=search&h=HEAD&st=commit&s=%s&sr=1")
+  "http://orgmode.org/cgit.cgi/org-mode.git/log/?qt=grep&q=%s")
 
 (defvar eldo-file nil)
 
