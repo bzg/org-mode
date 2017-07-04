@@ -499,6 +499,12 @@ Capture templates
 * Template expansion::          Filling in information about time and context
 * Templates in contexts::       Only show a template in a specific context
 
+Protocols for external access
+
+* @code{store-link} protocol::  Store a link, push URL to kill-ring
+* @code{capture} protocol::     Fill a buffer with external information
+* @code{open-source} protocol::  Edit published contents
+
 Archiving
 
 * Moving subtrees::             Moving a tree to an archive file
@@ -7505,16 +7511,202 @@ For more information, including how to read atom feeds, see
 @node Protocols
 @section Protocols for external access
 @cindex protocols, for external access
-@cindex emacsserver
 
-You can set up Org for handling protocol calls from outside applications that
-are passed to Emacs through the @file{emacsserver}.  For example, you can
+Org protocol is a mean to trigger custom actions in Emacs from external
+applications.  Any application that supports calling external programs with
+an URL as argument may be used with this functionality.  For example, you can
 configure bookmarks in your web browser to send a link to the current page to
-Org and create a note from it using capture (@pxref{Capture}).  Or you
-could create a bookmark that will tell Emacs to open the local source file of
-a remote website you are looking at with the browser.  See
-@uref{http://orgmode.org/worg/org-contrib/org-protocol.php} for detailed
-documentation and setup instructions.
+Org and create a note from it using capture (@pxref{Capture}).  You can also
+create a bookmark that tells Emacs to open the local source file of a remote
+website you are browsing.
+
+@cindex Org protocol, set-up
+@cindex Installing Org protocol
+In order to use Org protocol from an application, you need to register
+@samp{org-protocol://} as a valid scheme-handler.  External calls are passed
+to Emacs through the @code{emacsclient} command, so you also need to ensure
+an Emacs server is running.  More precisely, when the application calls
+
+@example
+emacsclient org-protocol://PROTOCOL?key1=val1&key2=val2
+@end example
+
+@noindent
+Emacs calls the handler associated to @samp{PROTOCOL} with argument
+@samp{(:key1 val1 :key2 val2)}.
+
+@cindex protocol, new protocol
+@cindex defining new protocols
+Org protocol comes with three predefined protocols, detailed in the following
+sections.  Configure @code{org-protocol-protocol-alist} to define your own.
+
+@menu
+* @code{store-link} protocol::  Store a link, push URL to kill-ring.
+* @code{capture} protocol::     Fill a buffer with external information.
+* @code{open-source} protocol::  Edit published contents.
+@end menu
+
+@node @code{store-link} protocol
+@subsection @code{store-link} protocol
+@cindex store-link protocol
+@cindex protocol, store-link
+
+Using @code{store-link} handler, you can copy links, insertable through
+@kbd{M-x org-insert-link} or yanking thereafter.  More precisely, the command
+
+@example
+emacsclient org-protocol://store-link?url=URL&title=TITLE
+@end example
+
+@noindent
+stores the following link:
+
+@example
+[[URL][TITLE]]
+@end example
+
+In addition, @samp{URL} is pushed on the kill-ring for yanking.  You need to
+encode @samp{URL} and @samp{TITLE} if they contain slashes, and probably
+quote those for the shell.
+
+To use this feature from a browser, add a bookmark with an arbitrary name,
+e.g., @samp{Org: store-link} and enter this as @emph{Location}:
+
+@example
+javascript:location.href='org-protocol://store-link?url='+
+      encodeURIComponent(location.href);
+@end example
+
+@node @code{capture} protocol
+@subsection @code{capture} protocol
+@cindex capture protocol
+@cindex protocol, capture
+
+@cindex capture, %:url placeholder
+@cindex %:url template expansion in capture
+@cindex capture, %:title placeholder
+@cindex %:title template expansion in capture
+Activating @code{capture} handler pops up a @samp{Capture} buffer and fills
+the capture template associated to the @samp{X} key with them.  The template
+refers to the data through @code{%:url} and @code{%:title} placeholders.
+Moreover, any selected text in the browser is appended to the body of the
+entry.
+
+@example
+emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
+@end example
+
+To use this feature, add a bookmark with an arbitrary name, e.g.
+@samp{Org: capture} and enter this as @samp{Location}:
+
+@example
+javascript:location.href='org-protocol://template=x'+
+      '&url='+encodeURIComponent(window.location.href)+
+      '&title='+encodeURIComponent(document.title)+
+      '&body='+encodeURIComponent(window.getSelection());
+@end example
+
+@vindex org-protocol-default-template-key
+The result depends on the capture template used, which is set in the bookmark
+itself, as in the example above, or in
+@code{org-protocol-default-template-key}.
+
+@node @code{open-source} protocol
+@subsection @code{open-source} protocol
+@cindex open-source protocol
+@cindex protocol, open-source
+
+The @code{open-source} handler is designed to help with editing local sources
+when reading a document.  To that effect, you can use a bookmark with the
+following location:
+
+@example
+javascript:location.href='org-protocol://open-source?&url='+
+      encodeURIComponent(location.href)
+@end example
+
+@cindex protocol, open-source, :base-url property
+@cindex :base-url property in open-source protocol
+@cindex protocol, open-source, :working-directory property
+@cindex :working-directory property in open-source protocol
+@cindex protocol, open-source, :online-suffix property
+@cindex :online-suffix property in open-source protocol
+@cindex protocol, open-source, :working-suffix property
+@cindex :working-suffix property in open-source protocol
+@vindex org-protocol-project-alist
+The variable @code{org-protocol-project-alist} maps URLs to local file names,
+by stripping URL parameters from the end and replacing the @code{:base-url}
+with @code{:working-diretory} and @code{:online-suffix} with
+@code{:working-suffix}.  For example, assuming you own a local copy of
+@url{http://orgmode.org/worg/} contents at @file{/home/user/worg}, you can
+set @code{org-protocol-project-alist} to the following
+
+@lisp
+(setq org-protocol-project-alist
+      '(("Worg"
+	 :base-url "http://orgmode.org/worg/"
+	 :working-directory "/home/user/worg/"
+	 :online-suffix ".html"
+	 :working-suffix ".org")))
+@end lisp
+
+@noindent
+If you are now browsing
+@url{http://orgmode.org/worg/org-contrib/org-protocol.html} and find a typo
+or have an idea about how to enhance the documentation, simply click the
+bookmark and start editing.
+
+@cindex handle rewritten URL in open-source protocol
+@cindex protocol, open-source rewritten URL
+However, such mapping may not yield the desired results.  Suppose you
+maintain an online store located at @url{http://example.com/}.  The local
+sources reside in @file{/home/user/example/}.  It is common practice to serve
+all products in such a store through one file and rewrite URLs that do not
+match an existing file on the server.  That way, a request to
+@url{http://example.com/print/posters.html} might be rewritten on the server
+to something like
+@url{http://example.com/shop/products.php/posters.html.php}.  The
+@code{open-source} handler probably cannot find a file named
+@file{/home/user/example/print/posters.html.php} and fails.
+
+@cindex protocol, open-source, :rewrites property
+@cindex :rewrites property in open-source protocol
+Such an entry in @code{org-protocol-project-alist} may hold an additional
+property @code{:rewrites}.  This property is a list of cons cells, each of
+which maps a regular expression to a path relative to the
+@code{:working-directory}.
+
+Now map the URL to the path @file{/home/user/example/products.php} by adding
+@code{:rewrites} rules like this:
+
+@lisp
+(setq org-protocol-project-alist
+      '(("example.com"
+         :base-url "http://example.com/"
+         :working-directory "/home/user/example/"
+         :online-suffix ".php"
+         :working-suffix ".php"
+         :rewrites (("example.com/print/" . "products.php")
+                    ("example.com/$" . "index.php")))))
+@end lisp
+
+@noindent
+Since @samp{example.com/$} is used as a regular expression, it maps
+@url{http://example.com/}, @url{https://example.com},
+@url{http://www.example.com/} and similar to
+@file{/home/user/example/index.php}.
+
+The @code{:rewrites} rules are searched as a last resort if and only if no
+existing file name is matched.
+
+@cindex protocol, open-source, set-up mapping
+@cindex set-up mappings in open-source protocol
+@findex org-protocol-create
+@findex org-protocol-create-for-org
+Two functions can help you filling @code{org-protocol-project-alist} with
+valid contents: @code{org-protocol-create} and
+@code{org-protocol-create-for-org}.  The latter is of use if you're editing
+an Org file that is part of a publishing project.
 
 @node Refile and copy
 @section Refile and copy
