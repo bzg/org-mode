@@ -279,5 +279,21 @@ Also, mute output from `message'."
      (org-timer-start))
    :type (list 'error 'user-error)))
 
+(ert-deftest test-org-timer/set-timer-from-effort-prop ()
+  "Test timer setting from effort property."
+  (should
+   (< (* 60 9) 				; 9m
+      (test-org-timer/with-temp-text
+       "* foo
+:PROPERTIES:
+:Effort:   10
+:END:"
+       (org-mode)
+       (org-timer-set-timer)
+       (org-timer-hms-to-secs (org-timer nil t)))
+      (1+ (* 60 10))			; 10m 1s
+      )))
+
+
 (provide 'test-org-timer)
 ;;; test-org-timer.el end here
