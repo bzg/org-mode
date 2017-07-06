@@ -6105,9 +6105,10 @@ by a #."
 			       'keymap org-mouse-map))
     (org-rear-nonsticky-at (match-end 0))
     (when org-display-custom-times
-      (if (match-end 3)
-	  (org-display-custom-time (match-beginning 3) (match-end 3))
-	(org-display-custom-time (match-beginning 1) (match-end 1))))
+      ;; If it's a date range, activate custom time for second date.
+      (when (match-end 3)
+	(org-display-custom-time (match-beginning 3) (match-end 3)))
+      (org-display-custom-time (match-beginning 1) (match-end 1)))
     t))
 
 (defvar-local org-target-link-regexp nil
