@@ -19228,7 +19228,7 @@ a HTML file."
 	(insert latex-header)
 	(insert "\n\\begin{document}\n" string "\n\\end{document}\n")))
 
-    (let* ((err-msg (format "Please adjust '%s' part of \
+    (let* ((err-msg (format "Please adjust `%s' part of \
 `org-preview-latex-process-alist'."
 			    processing-type))
 	   (image-input-file
