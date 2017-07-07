@@ -6264,8 +6264,26 @@ scheduled items with an hour specification like [h]h:mm."
 	      (end-time (match-string 2)))
 	  (setq s1 (match-string 1)
 		s2 (match-string 2)
-		d1 (time-to-days (org-time-string-to-time s1 (current-buffer) pos))
-		d2 (time-to-days (org-time-string-to-time s2 (current-buffer) pos)))
+		d1 (time-to-days
+		    (condition-case err
+			(org-time-string-to-time s1)
+		      (error
+		       (error
+			"Bad timestamp %S at %d in buffer %S\nError was: %s"
+			s1
+			pos
+			(current-buffer)
+			(error-message-string err)))))
+		d2 (time-to-days
+		    (condition-case err
+			(org-time-string-to-time s2)
+		      (error
+		       (error
+			"Bad timestamp %S at %d in buffer %S\nError was: %s"
+			s2
+			pos
+			(current-buffer)
+			(error-message-string err))))))
 	  (if (and (> (- d0 d1) -1) (> (- d2 d0) -1))
 	      ;; Only allow days between the limits, because the normal
 	      ;; date stamps will catch the limits.

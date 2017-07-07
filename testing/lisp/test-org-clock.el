@@ -48,8 +48,9 @@ range.  INPUT2 can be omitted if clock hasn't finished yet.
 Return the clock line as a string."
   (let* ((beg (org-test-clock-create-timestamp input1 t t))
          (end (and input2 (org-test-clock-create-timestamp input2 t t)))
-         (sec-diff (and input2 (floor (- (org-time-string-to-seconds end)
-                                         (org-time-string-to-seconds beg))))))
+         (sec-diff (and input2
+			(floor (- (org-time-string-to-seconds end t)
+				  (org-time-string-to-seconds beg t))))))
     (concat org-clock-string " " beg
             (when end
               (concat "--" end " => "

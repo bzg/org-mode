@@ -1701,8 +1701,8 @@ Optional argument N tells to change by that many units."
 	      (begts (if updatets1 begts1 begts2)))
 	  (setq tdiff
 		(time-subtract
-		 (org-time-string-to-time org-last-changed-timestamp)
-		 (org-time-string-to-time ts)))
+		 (org-time-string-to-time org-last-changed-timestamp t)
+		 (org-time-string-to-time ts t)))
 	  (save-excursion
 	    (goto-char begts)
 	    (org-timestamp-change

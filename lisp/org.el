@@ -17439,8 +17439,8 @@ both scheduled and deadline timestamps."
 			   'timestamp)
 		     (org-at-planning-p))
 		   (time-less-p
-		    (org-time-string-to-time match)
-		    (org-time-string-to-time d)))))))
+		    (org-time-string-to-time match t)
+		    (org-time-string-to-time d t)))))))
     (message "%d entries before %s"
 	     (org-occur regexp nil callback)
 	     d)))
@@ -17461,8 +17461,8 @@ both scheduled and deadline timestamps."
 			   'timestamp)
 		     (org-at-planning-p))
 		   (not (time-less-p
-			 (org-time-string-to-time match)
-			 (org-time-string-to-time d))))))))
+			 (org-time-string-to-time match t)
+			 (org-time-string-to-time d t))))))))
     (message "%d entries after %s"
 	     (org-occur regexp nil callback)
 	     d)))
@@ -17485,11 +17485,11 @@ both scheduled and deadline timestamps."
 			'timestamp)
 		  (org-at-planning-p))
 		(not (time-less-p
-		      (org-time-string-to-time match)
-		      (org-time-string-to-time start-date)))
+		      (org-time-string-to-time match t)
+		      (org-time-string-to-time start-date t)))
 		(time-less-p
-		 (org-time-string-to-time match)
-		 (org-time-string-to-time end-date))))))))
+		 (org-time-string-to-time match t)
+		 (org-time-string-to-time end-date t))))))))
     (message "%d entries between %s and %s"
 	     (org-occur regexp nil callback) start-date end-date)))
 
@@ -17574,19 +17574,19 @@ days in order to avoid rounding problems."
       (push m l))
     (apply 'format fmt (nreverse l))))
 
-(defun org-time-string-to-time (s &optional buffer pos)
-  "Convert a timestamp string into internal time."
-  (condition-case errdata
-      (apply 'encode-time (org-parse-time-string s))
-    (error (error "Bad timestamp `%s'%s\nError was: %s"
-		  s (if (not (and buffer pos))
-			""
-		      (format-message " at %d in buffer `%s'" pos buffer))
-		  (cdr errdata)))))
+(defun org-time-string-to-time (s &optional zone)
+  "Convert timestamp string S into internal time.
+The optional ZONE is omitted or nil for Emacs local time, t for
+Universal Time, ‘wall’ for system wall clock time, or a string as
+in the TZ environment variable."
+  (apply #'encode-time (org-parse-time-string s nil zone)))
 
-(defun org-time-string-to-seconds (s)
-  "Convert a timestamp string to a number of seconds."
-  (float-time (org-time-string-to-time s)))
+(defun org-time-string-to-seconds (s &optional zone)
+  "Convert a timestamp string S into a number of seconds.
+The optional ZONE is omitted or nil for Emacs local time, t for
+Universal Time, ‘wall’ for system wall clock time, or a string as
+in the TZ environment variable."
+  (float-time (org-time-string-to-time s zone)))
 
 (org-define-error 'org-diary-sexp-no-match "Unable to match diary sexp")
 
@@ -18159,8 +18159,7 @@ A prefix ARG can be used to force the current date."
     (when (or (org-at-timestamp-p 'lax)
 	      (org-match-line (concat ".*" org-ts-regexp)))
       (let ((d1 (time-to-days (current-time)))
-	    (d2 (time-to-days
-		 (org-time-string-to-time (match-string 1)))))
+	    (d2 (time-to-days (org-time-string-to-time (match-string 1)))))
 	(setq diff (- d2 d1))))
     (calendar)
     (calendar-goto-today)
