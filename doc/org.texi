@@ -17138,12 +17138,9 @@ structural elements, such as @code{#+BEGIN_SRC} and @code{#+END_SRC}.  Easy
 templates use an expansion mechanism, which is native to Org, in a process
 similar to @file{yasnippet} and other Emacs template expansion packages.
 
-@kbd{@key{<}} @kbd{@key{s}} @kbd{@key{TAB}} completes the @samp{src} code
-block.
+@kbd{<} @kbd{s} @kbd{@key{TAB}} expands to a @samp{src} code block.
 
-@kbd{<} @kbd{l} @kbd{@key{TAB}}
-
-expands to:
+@kbd{<} @kbd{l} @kbd{@key{TAB}} expands to:
 
 #+BEGIN_EXPORT latex
 
