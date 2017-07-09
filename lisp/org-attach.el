@@ -189,7 +189,7 @@ d       Delete one attachment, you will be prompted for a file name.
 D       Delete all of a task's attachments.  A safer way is
         to open the directory in dired and delete from there.
 
-s       Set a specific attachment directory for this entry.
+s       Set a specific attachment directory for this entry or reset to default.
 i       Make children of the current entry inherit its attachment directory.")))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
 	  (message "Select command: [acmlzoOfFdD]")
@@ -275,14 +275,30 @@ Throw an error if we cannot root the directory."
       (buffer-file-name (buffer-base-buffer))
       (error "Need absolute `org-attach-directory' to attach in buffers without filename")))
 
-(defun org-attach-set-directory ()
-  "Set the ATTACH_DIR property of the current entry.
+(defun org-attach-set-directory (&optional arg)
+  "Set the ATTACH_DIR node property and ask to move files there.
 The property defines the directory that is used for attachments
-of the entry."
-  (interactive)
-  (let ((dir (org-entry-get nil "ATTACH_DIR")))
-    (setq dir (read-directory-name "Attachment directory: " dir))
-    (org-entry-put nil "ATTACH_DIR" dir)))
+of the entry.  When called with `\\[universal-argument]', reset \
+the directory to
+the default ID based one."
+  (interactive "P")
+  (let ((old (org-attach-dir))
+        (new
+         (progn
+           (if arg (org-entry-delete nil "ATTACH_DIR")
+             (let ((dir (read-directory-name
+                         "Attachment directory: "
+                         (org-entry-get nil
+                                        "ATTACH_DIR"
+                                        (and org-attach-allow-inheritance t)))))
+               (org-entry-put nil "ATTACH_DIR" dir)))
+           (org-attach-dir t))))
+    (unless (or (string= old new)
+                (not old))
+      (when (yes-or-no-p "Copy over attachments from old directory? ")
+        (copy-directory old new t nil t))
+      (when (yes-or-no-p (concat "Delete " old))
+        (delete-directory old t)))))
 
 (defun org-attach-set-inherit ()
   "Set the ATTACH_DIR_INHERIT property of the current entry.

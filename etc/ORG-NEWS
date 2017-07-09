@@ -88,6 +88,11 @@ See docstring for details.
 *** Change signature for ~org-time-string-to-time~
 See docstring for changes.
 ** New features
+*** ~org-attach~ can move directory contents
+When setting a new directory for an entry, org-attach offers to move
+files over from the old directory.  Using a prefix arg will reset the
+directory to old, ID based one.
+
 *** New Org duration library
 This new library implements tools to read and print time durations in
 various formats (e.g., "H:MM", or "1d 2h 3min"...).
