@@ -1,6 +1,6 @@
 ;;; ob-lua.el --- Org Babel functions for Lua evaluation -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2014, 2016, 2017 Free Software Foundation, Inc.
+;; Copyright (C) 2014, 2016-2017 Free Software Foundation, Inc.
 
 ;; Authors: Dieter Schoen
 ;; Keywords: literate programming, reproducible research
@@ -25,7 +25,7 @@
 ;; for session support, lua-mode is needed.
 ;; lua-mode is not part of GNU Emacs/orgmode, but can be obtained
 ;; from marmalade or melpa.
-;; The source respository is here:
+;; The source repository is here:
 ;; https://github.com/immerrr/lua-mode
 
 ;; However, sessions are not yet working.
