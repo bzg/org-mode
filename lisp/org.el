@@ -5439,7 +5439,6 @@ The following commands are available:
   (org-load-modules-maybe)
   (org-install-agenda-files-menu)
   (when org-descriptive-links (add-to-invisibility-spec '(org-link)))
-  (add-to-invisibility-spec '(org-cwidth))
   (add-to-invisibility-spec '(org-hide-block . t))
   (setq-local outline-regexp org-outline-regexp)
   (setq-local outline-level 'org-outline-level)
@@ -6163,16 +6162,6 @@ Also refresh fontification if needed."
       (when (memq 'radio org-highlight-links)
 	(org-restart-font-lock)))))
 
-(defun org-hide-wide-columns (limit)
-  (let (s e)
-    (setq s (text-property-any (point) (or limit (point-max))
-			       'org-cwidth t))
-    (when s
-      (setq e (next-single-property-change s 'org-cwidth))
-      (add-text-properties s e '(invisible org-cwidth))
-      (goto-char e)
-      t)))
-
 (defvar org-latex-and-related-regexp nil
   "Regular expression for highlighting LaTeX, entities and sub/superscript.")
 
@@ -6347,7 +6336,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   ;; Macro
 	   '(org-fontify-macros)
-	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO keyword
 	   (list (format org-heading-keyword-regexp-format
 			 org-todo-regexp)

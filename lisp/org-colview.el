@@ -1372,7 +1372,6 @@ PARAMS is a property list of parameters:
 :maxlevel When set to a number, don't capture headlines below this level.
 :skip-empty-rows
 	  When t, skip rows where all specifiers other than ITEM are empty.
-:width    apply widths specified in columns format using <N> specifiers.
 :format   When non-nil, specify the column view format to use."
   (let ((table
 	 (let ((id (plist-get params :id))
@@ -1428,14 +1427,6 @@ PARAMS is a property list of parameters:
 			  (concat "\\_" (make-string (* 2 (1- level)) ?\s) item)
 			item))))
 	    (push (cdr row) new-table))))
-      (when (plist-get params :width)
-	(setq table
-	      (append table
-		      (list
-		       (mapcar (lambda (spec)
-				 (let ((w (nth 2 spec)))
-				   (if w (format "<%d>" (max 3 w)) "")))
-			       org-columns-current-fmt-compiled)))))
       (when (plist-get params :vlines)
 	(setq table
 	      (let ((size (length org-columns-current-fmt-compiled)))

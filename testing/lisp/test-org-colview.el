@@ -1435,19 +1435,6 @@
         "* H\n<point>#+BEGIN: columnview :format \"%ITEM(Name)\"\n#+END:"
       (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
       (buffer-substring-no-properties (point) (point-max)))))
-  ;; Test `:width' parameter
-  (should
-   (equal
-    "#+BEGIN: columnview :width t
-| ITEM       | A |
-|------------+---|
-| H          |   |
-| <10>       |   |
-#+END:"
-    (org-test-with-temp-text
-        "* H\n<point>#+BEGIN: columnview :width t\n#+END:"
-      (let ((org-columns-default-format "%10ITEM %A")) (org-update-dblock))
-      (buffer-substring-no-properties (point) (point-max)))))
   ;; When inserting ITEM values, make sure to clean sensitive
   ;; contents, like unique targets or forbidden inline src-blocks.
   (should

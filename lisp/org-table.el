@@ -771,9 +771,6 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
   "Overlay coordinates after each align of a table.")
 
 (defvar org-last-recalc-line nil)
-(defvar org-table-do-narrow t)   ; for dynamic scoping
-(defconst org-narrow-column-arrow "=>"
-  "Used as display property in narrowed table columns.")
 
 ;;;###autoload
 (defun org-table-align ()
@@ -790,17 +787,19 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
      (goto-char beg)
      (org-table-with-shrunk-columns
       (let* ((indent (progn (looking-at "[ \t]*") (match-string 0)))
-	     ;; Table's rows.  Separators are replaced by nil.  Trailing
-	     ;; spaces are also removed.
-	     (lines (mapcar (lambda (l)
-			      (and (not (string-match-p "\\`[ \t]*|-" l))
-				   (let ((l (org-trim l)))
-				     (remove-text-properties
-				      0 (length l) '(display t org-cwidth t) l)
-				     l)))
-			    (org-split-string (buffer-substring beg end) "\n")))
-	     ;; Get the data fields by splitting the lines.
-	     (fields (mapcar (lambda (l) (org-split-string l " *| *"))
+	     (align-cookie?
+	      (save-excursion
+		(re-search-forward "|[ \t]*<[lrc][0-9]*>[ \t]*\\(?:|\\|$\\)"
+				   end t)))
+	     ;; Table's rows.  Rules are replaced by nil.  Trailing
+	     ;; spaces are removed.
+	     (lines (mapcar
+		     (lambda (l)
+		       (and (not (string-match-p org-table-hline-regexp l))
+			    l))
+		     (split-string (buffer-substring beg end) "\n" t "[ \t]")))
+	     ;; List of lists of data fields.
+	     (fields (mapcar (lambda (l) (org-split-string l "[ \t]*|[ \t]*"))
 			     (remq nil lines)))
 	     ;; Compute number of fields in the longest line.  If the
 	     ;; table contains no field, create a default table.
@@ -811,58 +810,23 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	     ;; A list of empty strings to fill any short rows on output.
 	     (emptycells (make-list maxfields ""))
 	     lengths typenums)
-	;; Check for special formatting.
+	;; Compute alignment and width for each column.
 	(dotimes (i maxfields)
-	  (let ((column (mapcar (lambda (x) (or (nth i x) "")) fields))
-		fmax falign)
-	    ;; Look for an explicit width or alignment.
-	    (when (save-excursion
-		    (or (re-search-forward "| *<[lrc][0-9]*> *\\(|\\|$\\)" end t)
-			(and org-table-do-narrow
-			     (re-search-forward
-			      "| *<[lrc]?[0-9]+> *\\(|\\|$\\)" end t))))
-	      (catch :exit
-		(dolist (cell column)
-		  (when (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'" cell)
-		    (when (match-end 1) (setq falign (match-string 1 cell)))
-		    (when (and org-table-do-narrow (match-end 2))
-		      (setq fmax (string-to-number (match-string 2 cell))))
-		    (when (or falign fmax) (throw :exit nil)))))
-	      ;; Find fields that are wider than FMAX, and shorten them.
-	      (when fmax
-		(dolist (x column)
-		  (when (> (org-string-width x) fmax)
-		    (org-add-props x nil
-		      'help-echo
-		      (concat
-		       "Clipped table field, use `\\[org-table-edit-field]' to \
-edit.  Full value is:\n"
-		       (substring-no-properties x)))
-		    (let ((l (length x))
-			  (f1 (min fmax
-				   (or (string-match org-bracket-link-regexp x)
-				       fmax)))
-			  (f2 1))
-		      (unless (> f1 1)
-			(user-error
-			 "Cannot narrow field starting with wide link \"%s\""
-			 (match-string 0 x)))
-		      (if (= (org-string-width x) l) (setq f2 f1)
-			(setq f2 1)
-			(while (< (org-string-width (substring x 0 f2)) f1)
-			  (cl-incf f2)))
-		      (add-text-properties f2 l (list 'org-cwidth t) x)
-		      (add-text-properties
-		       (if (>= (string-width (substring x (1- f2) f2)) 2) (1- f2)
-			 (- f2 2))
-		       f2
-		       (list 'display org-narrow-column-arrow)
-		       x))))))
-	    ;; Get the maximum width for each column
-	    (push (apply #'max (or fmax 1) 1 (mapcar #'org-string-width column))
+	  (let* ((column (mapcar (lambda (x) (or (nth i x) ""))
+				 fields))
+		 (falign
+		  (and align-cookie?
+		       (cl-some (lambda (cell)
+				  (and (string-match "\\`<\\([lrc]\\)[0-9]*>\\'"
+						     cell)
+				       (match-string 1 cell)))
+				column))))
+	    ;; Get the maximum width for each column.
+	    (push (apply #'max 1 (mapcar #'org-string-width column))
 		  lengths)
-	    ;; Get the fraction of numbers among non-empty cells to
-	    ;; decide about alignment of the column.
+	    ;; If there is no alignment cookie, get the fraction of
+	    ;; numbers among non-empty cells to decide about alignment
+	    ;; of the column.
 	    (if falign (push (equal (downcase falign) "r") typenums)
 	      (let ((cnt 0)
 		    (frac 0.0))
@@ -911,29 +875,16 @@ edit.  Full value is:\n"
 	    (let ((ty (if (pop typenums) "" "-"))) ; Flush numbers right.
 	      (setq rfmt (concat rfmt (format rfmt1 ty l)))
 	      (setq hfmt (concat hfmt (format hfmt1 (make-string l ?-))))))
-	  ;; Replace modified lines only.  Check not only contents, but
-	  ;; also columns' width.
+	  ;; Replace modified lines only.
 	  (dolist (l lines)
 	    (let ((line
 		   (if l (apply #'format rfmt (append (pop fields) emptycells))
 		     hfmt))
 		  (previous (buffer-substring (point) (line-end-position))))
-	      (if (and (equal previous line)
-		       (let ((a 0)
-			     (b 0))
-			 (while (and (progn
-				       (setq a (next-single-property-change
-						a 'org-cwidth previous))
-				       (setq b (next-single-property-change
-						b 'org-cwidth line)))
-				     (eq a b)))
-			 (eq a b)))
+	      (if (equal previous line)
 		  (forward-line)
 		(insert line "\n")
 		(delete-region (point) (line-beginning-position 2))))))
-	(when (and orgtbl-mode (not (derived-mode-p 'org-mode)))
-	  (goto-char org-table-aligned-begin-marker)
-	  (while (org-hide-wide-columns org-table-aligned-end-marker)))
 	(set-marker end nil)
 	(when org-table-overlay-coordinates (org-table-overlay-coordinates))
 	(setq org-table-may-need-update nil))))))
@@ -2093,8 +2044,7 @@ toggle `org-table-follow-field-mode'."
    (arg
     (let ((b (save-excursion (skip-chars-backward "^|") (point)))
 	  (e (save-excursion (skip-chars-forward "^|\r\n") (point))))
-      (remove-text-properties b e '(org-cwidth t invisible t
-					       display t intangible t))
+      (remove-text-properties b e '(invisible t intangible t))
       (if (and (boundp 'font-lock-mode) font-lock-mode)
 	  (font-lock-fontify-block))))
    (t
@@ -2121,9 +2071,7 @@ toggle `org-table-follow-field-mode'."
       (setq word-wrap t)
       (goto-char (setq p (point-max)))
       (insert (org-trim field))
-      (remove-text-properties p (point-max)
-			      '(invisible t org-cwidth t display t
-					  intangible t))
+      (remove-text-properties p (point-max) '(invisible t intangible t))
       (goto-char p)
       (setq-local org-finish-function 'org-table-finish-edit-field)
       (setq-local org-window-configuration cw)
@@ -4667,34 +4615,18 @@ FACE, when non-nil, for the highlight."
 		    (concat orgtbl-line-start-regexp "\\|"
 			    auto-fill-inhibit-regexp)
 		  orgtbl-line-start-regexp))
-    (add-to-invisibility-spec '(org-cwidth))
     (when (fboundp 'font-lock-add-keywords)
       (font-lock-add-keywords nil orgtbl-extra-font-lock-keywords)
       (org-restart-font-lock))
     (easy-menu-add orgtbl-mode-menu))
    (t
     (setq auto-fill-inhibit-regexp org-old-auto-fill-inhibit-regexp)
-    (org-table-cleanup-narrow-column-properties)
-    (org-remove-from-invisibility-spec '(org-cwidth))
     (remove-hook 'before-change-functions 'org-before-change-function t)
     (when (fboundp 'font-lock-remove-keywords)
       (font-lock-remove-keywords nil orgtbl-extra-font-lock-keywords)
       (org-restart-font-lock))
     (easy-menu-remove orgtbl-mode-menu)
     (force-mode-line-update 'all))))
-
-(defun org-table-cleanup-narrow-column-properties ()
-  "Remove all properties related to narrow-column invisibility."
-  (let ((s (point-min)))
-    (while (setq s (text-property-any s (point-max)
-				      'display org-narrow-column-arrow))
-      (remove-text-properties s (1+ s) '(display t)))
-    (setq s (point-min))
-    (while (setq s (text-property-any s (point-max) 'org-cwidth 1))
-      (remove-text-properties s (1+ s) '(org-cwidth t)))
-    (setq s (point-min))
-    (while (setq s (text-property-any s (point-max) 'invisible 'org-cwidth))
-      (remove-text-properties s (1+ s) '(invisible t)))))
 
 (defun orgtbl-make-binding (fun n &rest keys)
   "Create a function for binding in the table minor mode.
