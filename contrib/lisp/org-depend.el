@@ -388,9 +388,8 @@ this ID property, that entry is also checked."
 		  (save-excursion
 		    (goto-char pos)
 		    ;; find the older sibling, exit if no more siblings
-		    (condition-case nil
-			(outline-backward-same-level 1)
-		      (error (throw 'ignore t)))
+		    (unless (org-get-last-sibling)
+		      (throw 'ignore t))
 		    ;; Check if this entry is not yet done and block
 		    (unless (org-entry-is-done-p)
 		      ;; return nil, to indicate that we block the change!
