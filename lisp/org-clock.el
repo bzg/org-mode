@@ -2701,8 +2701,7 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
       (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute ts)))
 	(setq ts (float-time (encode-time 0 0 0 day month year)))))
      (ts
-      (setq ts (float-time
-		(apply #'encode-time (org-parse-time-string ts nil t))))))
+      (setq ts (float-time (apply #'encode-time (org-parse-time-string ts))))))
     (cond
      ((numberp te)
       ;; Likewise for te.
