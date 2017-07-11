@@ -3886,34 +3886,52 @@ dimming them."
     (when (eq (overlay-get o 'org-type) 'org-blocked-todo)
       (delete-overlay o)))
   (save-excursion
-    (let ((inhibit-read-only t)
-	  (org-depend-tag-blocked nil)
-	  org-blocked-by-checkboxes)
+    (let ((inhibit-read-only t))
       (goto-char (point-min))
       (while (let ((pos (text-property-not-all
-			 (point) (point-max) 'todo-state nil)))
+			 (point) (point-max) 'org-todo-blocked nil)))
 	       (when pos (goto-char pos)))
-	(setq org-blocked-by-checkboxes nil)
-	(let ((marker (org-get-at-bol 'org-hd-marker)))
-	  (when (and (markerp marker)
-		     (with-current-buffer (marker-buffer marker)
-		       (save-excursion (goto-char marker)
-				       (org-entry-blocked-p))))
-	    ;; Entries blocked by checkboxes cannot be made invisible.
-	    ;; See `org-agenda-dim-blocked-tasks' for details.
-	    (let* ((really-invisible
-		    (and (not org-blocked-by-checkboxes)
-			 (or invisible (eq org-agenda-dim-blocked-tasks
-					   'invisible))))
-		   (ov (make-overlay (if really-invisible (line-end-position 0)
-				       (line-beginning-position))
-				     (line-end-position))))
-	      (if really-invisible (overlay-put ov 'invisible t)
-		(overlay-put ov 'face 'org-agenda-dimmed-todo-face))
-	      (overlay-put ov 'org-type 'org-blocked-todo))))
+	(let* ((invisible (eq (org-get-at-bol 'org-todo-blocked) 'invisible))
+	       (ov (make-overlay (if invisible
+				     (line-end-position 0)
+				   (line-beginning-position))
+				 (line-end-position))))
+	  (if invisible
+	      (overlay-put ov 'invisible t)
+	    (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
+	  (overlay-put ov 'org-type 'org-blocked-todo))
 	(forward-line))))
   (when (called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks...done")))
+
+(defun org-agenda--mark-blocked-entry (entry)
+  "For ENTRY a string with the text property `org-hd-marker', if
+the header at `org-hd-marker' is blocked according to
+`org-entry-blocked-p', then if `org-agenda-dim-blocked-tasks' is
+'invisible and the header is not blocked by checkboxes, set the
+text property `org-todo-blocked' to 'invisible, otherwise set it
+to t."
+  (when (get-text-property 0 'todo-state entry)
+    (let ((entry-marker (get-text-property 0 'org-hd-marker entry))
+          (org-blocked-by-checkboxes nil)
+	  ;; Necessary so that `org-entry-blocked-p' does not change
+	  ;; the buffer.
+          (org-depend-tag-blocked nil))
+      (when entry-marker
+	(let ((blocked
+	       (with-current-buffer (marker-buffer entry-marker)
+		 (save-excursion
+		   (goto-char entry-marker)
+		   (org-entry-blocked-p)))))
+	  (when blocked
+	    (let ((really-invisible
+		   (and (not org-blocked-by-checkboxes)
+			(eq org-agenda-dim-blocked-tasks 'invisible))))
+	      (put-text-property
+	       0 (length entry) 'org-todo-blocked
+	       (if really-invisible 'invisible t)
+	       entry))))))
+    entry))
 
 (defvar org-agenda-skip-function nil
   "Function to be called at each match during agenda construction.
@@ -6781,6 +6799,8 @@ The optional argument TYPE tells the agenda type."
       (setq list (org-agenda-limit-entries list 'tags max-tags)))
     (when max-entries
       (setq list (org-agenda-limit-entries list 'org-hd-marker max-entries)))
+    (when (and org-agenda-dim-blocked-tasks org-blocker-hook)
+      (setq list (mapcar #'org-agenda--mark-blocked-entry list)))
     (mapconcat 'identity list "\n")))
 
 (defun org-agenda-limit-entries (list prop limit &optional fn)
