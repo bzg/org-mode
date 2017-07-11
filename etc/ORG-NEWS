@@ -87,6 +87,12 @@ See docstring for details.
 
 *** Change signature for ~org-time-string-to-time~
 See docstring for changes.
+
+*** Change order of items in ~org-agenda-time-grid~
+~org-agenda-time-grid~ gained an extra item to allow users to customize
+the string displayed after times in the agenda. See docstring for
+details.
+
 ** New features
 *** ~org-attach~ can move directory contents
 When setting a new directory for an entry, org-attach offers to move

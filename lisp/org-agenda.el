@@ -1479,11 +1479,12 @@ the variable `org-agenda-time-grid'."
 
 (defcustom org-agenda-time-grid
   '((daily today require-timed)
-    "----------------"
-    (800 1000 1200 1400 1600 1800 2000))
+    (800 1000 1200 1400 1600 1800 2000)
+    "......"
+    "----------------")
 
   "The settings for time grid for agenda display.
-This is a list of three items.  The first item is again a list.  It contains
+This is a list of four items.  The first item is again a list.  It contains
 symbols specifying conditions when the grid should be displayed:
 
  daily         if the agenda shows a single day
@@ -1492,10 +1493,14 @@ symbols specifying conditions when the grid should be displayed:
  require-timed show grid only if at least one item has a time specification
  remove-match  skip grid times already present in an entry
 
-The second item is a string which will be placed behind the grid time.
+The second item is a list of integers, indicating the times that
+should have a grid line.
 
-The third item is a list of integers, indicating the times that should have
-a grid line."
+The third item is a string which will be placed right after the
+times that have a grid line.
+
+The fourth item is a string placed after the grid times.  This
+will align with agenda items"
   :group 'org-agenda-time-grid
   :type
   '(list
@@ -1507,8 +1512,9 @@ a grid line."
 		require-timed)
 	 (const :tag "Skip grid times already present in an entry"
 		remove-match))
-    (string :tag "Grid String")
-    (repeat :tag "Grid Times" (integer :tag "Time"))))
+    (repeat :tag "Grid Times" (integer :tag "Time"))
+    (string :tag "Grid String (after agenda times)")
+    (string :tag "Grid String (aligns with agenda items)")))
 
 (defcustom org-agenda-show-current-time-in-grid t
   "Non-nil means show the current time in the time grid."
@@ -6418,6 +6424,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			  (get-text-property 1 'effort txt)))
 	     ;; time, tag, effort are needed for the eval of the prefix format
 	     (tag (if tags (nth (1- (length tags)) tags) ""))
+	     (time-grid-trailing-characters (nth 2 org-agenda-time-grid))
 	     time
 	     (ts (if dotime (concat
 			     (if (stringp dotime) dotime "")
@@ -6496,8 +6503,8 @@ Any match of REMOVE-RE will be removed from TXT."
 			 (s1 (concat
 			      (org-agenda-time-of-day-to-ampm-maybe s1)
 			      (if org-agenda-timegrid-use-ampm
-				  "........ "
-				"......")))
+                                  (concat time-grid-trailing-characters " ")
+                                time-grid-trailing-characters)))
 			 (t ""))
 	      extra (or (and (not habitp) extra) "")
 	      category (if (symbolp category) (symbol-name category) category)
@@ -6590,8 +6597,8 @@ TODAYP is t when the current agenda view is on today."
     (let* ((have (delq nil (mapcar
 			    (lambda (x) (get-text-property 1 'time-of-day x))
 			    list)))
-	   (string (nth 1 org-agenda-time-grid))
-	   (gridtimes (nth 2 org-agenda-time-grid))
+	   (string (nth 3 org-agenda-time-grid))
+	   (gridtimes (nth 1 org-agenda-time-grid))
 	   (req (car org-agenda-time-grid))
 	   (remove (member 'remove-match req))
 	   new time)
