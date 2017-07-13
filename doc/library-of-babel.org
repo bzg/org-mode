@@ -73,7 +73,7 @@ Read local or remote file in [[http://www.json.org/][json]] format into emacs-li
   (require 'json)
   (cond
    (file
-    (with-temp-filebuffer file
+    (org-babel-with-temp-filebuffer file
       (goto-char (point-min))
       (json-read)))
    (url
