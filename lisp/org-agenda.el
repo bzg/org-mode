@@ -7597,7 +7597,7 @@ also press `-' or `+' to switch between filtering and excluding."
 		    (org-global-tags-completion-table)))
       (let ((completion-ignore-case t))
 	(setq tag (completing-read
-		   "Tag: " org-global-tags-completion-table))))
+		   "Tag: " org-global-tags-completion-table nil t))))
     (cond
      ((eq char ?\r)
       (org-agenda-filter-show-all-tag)
