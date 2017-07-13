@@ -1606,12 +1606,15 @@ The template may still contain \"%?\" for cursor positioning."
 		  (replace-match "\\1" nil nil v-a)
 		v-a))
 	 (v-n user-full-name)
-	 (v-k (and (marker-buffer org-clock-marker)
-		   (org-no-properties org-clock-heading)))
+	 (v-k (if (marker-buffer org-clock-marker)
+		  (org-no-properties org-clock-heading)
+		""))
 	 (v-K (if (marker-buffer org-clock-marker)
 		  (org-make-link-string
-		   (buffer-file-name (marker-buffer org-clock-marker))
-		   org-clock-heading)))
+		   (format "%s::%s"
+			   (buffer-file-name (marker-buffer org-clock-marker))
+			   (org-no-properties org-clock-heading)))
+		""))
 	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
 	 (v-F (or (org-capture-get :original-file) ""))
 	 (org-capture--clipboards
