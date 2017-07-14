@@ -1611,9 +1611,10 @@ The template may still contain \"%?\" for cursor positioning."
 		""))
 	 (v-K (if (marker-buffer org-clock-marker)
 		  (org-make-link-string
-		   (format "%s::%s"
+		   (format "%s::*%s"
 			   (buffer-file-name (marker-buffer org-clock-marker))
-			   (org-no-properties org-clock-heading)))
+			   v-k)
+		   v-k)
 		""))
 	 (v-f (or (org-capture-get :original-file-nondirectory) ""))
 	 (v-F (or (org-capture-get :original-file) ""))
