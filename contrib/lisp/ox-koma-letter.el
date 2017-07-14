@@ -39,6 +39,7 @@
 ;;   - LCO: see `org-koma-letter-class-option-file',
 ;;   - OPENING: see `org-koma-letter-opening',
 ;;   - PHONE_NUMBER: see `org-koma-letter-phone-number',
+;;   - URL: see `org-koma-letter-url',
 ;;   - SIGNATURE: see `org-koma-letter-signature',
 ;;   - PLACE: see `org-koma-letter-place',
 ;;   - LOCATION: see `org-koma-letter-location',
@@ -57,6 +58,7 @@
 ;;   - backaddress (see `org-koma-letter-use-backaddress')
 ;;   - foldmarks (see `org-koma-letter-use-foldmarks')
 ;;   - phone (see `org-koma-letter-use-phone')
+;;   - url (see `org-koma-letter-use-url')
 ;;   - email (see `org-koma-letter-use-email')
 ;;   - place (see `org-koma-letter-use-place')
 ;;   - location (see `org-koma-letter-use-location')
@@ -183,6 +185,13 @@ keywords."
 This option can also be set with the PHONE_NUMBER keyword."
   :group 'org-export-koma-letter
   :type 'string)
+
+(defcustom org-koma-letter-url ""
+  "Sender's URL, e. g., the URL of her homepage.
+This option can also be set with the URL keyword."
+  :group 'org-export-koma-letter
+  :type 'string
+  :safe #'stringp)
 
 (defcustom org-koma-letter-place ""
   "Place from which the letter is sent, as a string.
@@ -362,6 +371,14 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :group 'org-export-koma-letter
   :type 'boolean)
 
+(defcustom org-koma-letter-use-url nil
+  "Non-nil prints sender's URL.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"url:t\"."
+  :group 'org-export-koma-letter
+  :type 'boolean
+  :safe #'booleanp)
+
 (defcustom org-koma-letter-use-email nil
   "Non-nil prints sender's email address.
 This option can also be set with the OPTIONS keyword, e.g.:
@@ -426,6 +443,7 @@ e.g. \"title-subject:t\"."
     (:author-changed-in-buffer-p "AUTHOR" nil nil t)
     (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
+    (:url "URL" nil org-koma-letter-url)
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
@@ -445,6 +463,7 @@ e.g. \"title-subject:t\"."
     (:with-email nil "email" org-koma-letter-use-email)
     (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
     (:with-phone nil "phone" org-koma-letter-use-phone)
+    (:with-url nil "url" org-koma-letter-use-url)
     (:with-place nil "place" org-koma-letter-use-place)
     (:with-subject nil "subject" org-koma-letter-subject-format)
     (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
@@ -456,6 +475,7 @@ e.g. \"title-subject:t\"."
     (:inbuffer-from "FROM" nil 'koma-letter:empty)
     (:inbuffer-email "EMAIL" nil 'koma-letter:empty)
     (:inbuffer-phone-number "PHONE_NUMBER" nil 'koma-letter:empty)
+    (:inbuffer-url "URL" nil 'koma-letter:empty)
     (:inbuffer-place "PLACE" nil 'koma-letter:empty)
     (:inbuffer-location "LOCATION" nil 'koma-letter:empty)
     (:inbuffer-signature "SIGNATURE" nil 'koma-letter:empty)
@@ -463,6 +483,7 @@ e.g. \"title-subject:t\"."
     (:inbuffer-with-email nil "email" 'koma-letter:empty)
     (:inbuffer-with-foldmarks nil "foldmarks" 'koma-letter:empty)
     (:inbuffer-with-phone nil "phone" 'koma-letter:empty)
+    (:inbuffer-with-url nil "url" 'koma-letter:empty)
     (:inbuffer-with-place nil "place" 'koma-letter:empty))
   :translate-alist '((export-block . org-koma-letter-export-block)
 			(export-snippet . org-koma-letter-export-snippet)
@@ -757,6 +778,14 @@ a communication channel."
      (and (funcall check-scope 'with-phone)
           (format "\\KOMAoption{fromphone}{%s}\n"
                   (if (plist-get info :with-phone) "true" "false")))
+     ;; URL
+     (let ((url (plist-get info :url)))
+       (and (org-string-nw-p url)
+            (funcall check-scope 'url)
+            (format "\\setkomavar{fromurl}{%s}\n" url)))
+     (and (funcall check-scope 'with-url)
+          (format "\\KOMAoption{fromurl}{%s}\n"
+                  (if (plist-get info :with-url) "true" "false")))
      ;; Signature.
      (let* ((heading-val
 	     (and (plist-get info :with-headline-opening)
