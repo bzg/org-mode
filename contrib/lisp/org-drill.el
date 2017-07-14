@@ -622,7 +622,7 @@ regardless of whether the test was successful.")
 
 
 (defmacro pop-random (place)
-  (let ((idx (gensym)))
+  (let ((idx (cl-gensym)))
     `(if (null ,place)
          nil
        (let ((,idx (random* (length ,place))))
