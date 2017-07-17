@@ -218,6 +218,20 @@ To use =vertica= in an sql =SRC_BLK= set the =:engine= like this:
   SELECT * FROM nodes;
   ,#+END_SRC
 #+END_EXAMPLE
+**** C++: New header ~:namespaces~
+
+The new ~:namespaces~ export option can be used to specify namespaces
+to be used within a C++ org source block.  Its usage is similar to
+~:includes~, in that it can accept multiple, space-separated
+namespaces to use.  This header is equivalent to adding ~using
+namespace <name>;~ in the source block. Here is a "Hello World" in C++
+using ~:namespaces~:
+
+#+begin_example
+  ,#+BEGIN_SRC C++ :results output :namespaces std :includes <iostream>
+    cout << "Hello World" << endl;
+  ,#+END_SRC
+#+end_example
 
 *** New ~function~ scope argument for the Clock Table
 Added a nullary function that returns a list of files as a possible
