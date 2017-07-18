@@ -4700,7 +4700,9 @@ Otherwise, these types are allowed:
   :group 'org-sparse-trees)
 
 (defun org-cycle-hide-archived-subtrees (state)
-  "Re-hide all archived subtrees after a visibility state change."
+  "Re-hide all archived subtrees after a visibility state change.
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'."
   (when (and (not org-cycle-open-archived-trees)
              (not (memq state '(overview folded))))
     (save-excursion
@@ -7214,12 +7216,13 @@ open and agenda-wise Org files."
 
 (defun org-cycle-hide-drawers (state &optional exceptions)
   "Re-hide all drawers after a visibility state change.
-When non-nil, optional argument EXCEPTIONS is a list of strings
-specifying which drawers should not be hidden."
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'.  When non-nil, optional argument EXCEPTIONS is
+a list of strings specifying which drawers should not be hidden."
   (when (and (derived-mode-p 'org-mode)
 	     (not (memq state '(overview folded contents))))
     (save-excursion
-      (let* ((globalp (memq state '(contents all)))
+      (let* ((globalp (eq state 'all))
              (beg (if globalp (point-min) (point)))
              (end (if globalp (point-max)
 		    (if (eq state 'children)
