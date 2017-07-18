@@ -7322,7 +7322,7 @@ specifying which drawers should not be hidden."
   (when (and (derived-mode-p 'org-mode)
 	     (not (memq state '(overview folded contents))))
     (save-excursion
-      (let* ((globalp (memq state '(contents all)))
+      (let* ((globalp (eq state 'all))
              (beg (if globalp (point-min) (point)))
              (end (if globalp (point-max)
 		    (if (eq state 'children)
