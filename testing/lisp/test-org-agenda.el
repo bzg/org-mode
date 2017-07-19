@@ -96,6 +96,17 @@ Use this function if you are too lazy to invent a function name."
     (should (= 3 (count-lines (point-min) (point-max)))))
   (---kill-all-agendas))
 
+(ert-deftest org-agenda-91d525871b9003e779df915566bfc0cbf91a24a4 ()
+  "One informative line in the agenda from scheduled non-todo-keyword-item."
+  (cl-assert (not org-agenda-sticky) nil "precondition violation")
+  (cl-assert (not (---agenda-buffers)) nil "precondition violation")
+  (let ((org-agenda-span 'day)
+	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org" org-test-dir))))
+    (org-agenda-list nil  "<2017-07-19 Wed>")
+    (set-buffer org-agenda-buffer-name)
+    (should (progn (goto-line 3) (looking-at " *agenda-file:Scheduled: *test agenda"))))
+  (---kill-all-agendas))
+
 (ert-deftest org-agenda-8e6c85e9ff1ea9fed0ae0fa04ff9a3dace6c9d17 ()
   "Agenda buffer name after having created one sticky agenda buffer."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
@@ -105,7 +116,7 @@ Use this function if you are too lazy to invent a function name."
         org-agenda-files)
     (when buf (kill-buffer buf))
     (org-test-with-temp-text "<2017-03-17 Fri>"
-			     (org-follow-timestamp-link) 	; creates a sticky agenda.
+			     (org-follow-timestamp-link) ; creates a sticky agenda.
 			     )
     (---kill-all-agendas)
     (org-agenda-list)
