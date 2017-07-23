@@ -1556,6 +1556,30 @@ you, configure the option ~org-table-auto-blank-field~.
      #+findex: org-table-kill-row
      Kill the current row or horizontal line.
 
+- {{{kbd(S-UP)}}} (~org-table-move-cell-up~) ::
+
+     #+kindex: S-UP
+     #+findex: org-table-move-cell-up
+     Move cell up by swapping with adjacent cell.
+
+- {{{kbd(S-DOWN)}}} (~org-table-move-cell-down~) ::
+
+     #+kindex: S-DOWN
+     #+findex: org-table-move-cell-down
+     Move cell down by swapping with adjacent cell.
+
+- {{{kbd(S-LEFT)}}} (~org-table-move-cell-left~) ::
+
+     #+kindex: S-LEFT
+     #+findex: org-table-move-cell-left
+     Move cell left by swapping with adjacent cell.
+
+- {{{kbd(S-RIGHT)}}} (~org-table-move-cell-right~) ::
+
+     #+kindex: S-RIGHT
+     #+findex: org-table-move-cell-right
+     Move cell right by swapping with adjacent cell.
+
 - {{{kbd(M-S-DOWN)}}} (~org-table-insert-row~) ::
 
      #+kindex: M-S-DOWN
