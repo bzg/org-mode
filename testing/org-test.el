@@ -104,7 +104,7 @@ org-test searches this directory up the directory tree.")
 This can be used at the top of code-block-language specific test
 files to avoid loading the file on systems without the
 executable."
-  (unless (reduce
+  (unless (cl-reduce
 	   (lambda (acc dir)
 	     (or acc (file-exists-p (expand-file-name exe dir))))
 	   exec-path :initial-value nil)
@@ -200,7 +200,7 @@ otherwise place the point at the beginning of the inserted text."
 (defmacro org-test-with-temp-text-in-file (text &rest body)
   "Run body in a temporary file buffer with Org mode as the active mode."
   (declare (indent 1))
-  (let ((results (gensym)))
+  (let ((results (cl-gensym)))
     `(let ((file (make-temp-file "org-test"))
 	   (kill-buffer-query-functions nil)
 	   (inside-text (if (stringp ,text) ,text (eval ,text)))
