@@ -51,14 +51,24 @@
                   (start end &optional and-go raw nomsg))
 (declare-function geiser-repl-exit "ext:geiser-repl" (&optional arg))
 
+(defcustom org-babel-scheme-null-to 'hline
+  "Replace `null' and empty lists in scheme tables with this before returning."
+  :group 'org-babel
+  :version "26.1"
+  :package-version '(Org . "9.1")
+  :type 'symbol)
+
 (defvar org-babel-default-header-args:scheme '()
   "Default header arguments for scheme code blocks.")
 
 (defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let ((vars (org-babel--get-vars params)))
+  (let ((vars (org-babel--get-vars params))
+	(prepends (cl-remove-if-not (lambda (x) (eq (car x) :prologue)) params)))
     (if (> (length vars) 0)
-        (concat "(let ("
+        (concat (mapconcat (lambda (p) (format "%s" (cdr p)))
+			   prepends "\n     ")
+	        "(let ("
                 (mapconcat
                  (lambda (var) (format "%S" (print `(,(car var) ',(cdr var)))))
                  vars "\n      ")
@@ -176,6 +186,19 @@ is true; otherwise returns the last value."
 		       result))))
     result))
 
+(defun org-babel-scheme--table-or-string (results)
+  "Convert RESULTS into an appropriate elisp value.
+If the results look like a list or tuple, then convert them into an
+Emacs-lisp table, otherwise return the results as a string."
+  (let ((res (org-babel-script-escape results)))
+    (cond ((listp res)
+           (mapcar (lambda (el)
+		     (if (or (null el) (eq el 'null))
+			 org-babel-scheme-null-to
+		       el))
+                   res))
+	  (t res))))
+
 (defun org-babel-execute:scheme (body params)
   "Execute a block of Scheme code with org-babel.
 This function is called by `org-babel-execute-src-block'"
@@ -184,24 +207,28 @@ This function is called by `org-babel-execute-src-block'"
 			      "^ ?\\*\\([^*]+\\)\\*" "\\1"
 			      (buffer-name source-buffer))))
     (save-excursion
-      (org-babel-reassemble-table
-       (let* ((result-type (cdr (assq :result-type params)))
-	      (impl (or (when (cdr (assq :scheme params))
-			  (intern (cdr (assq :scheme params))))
-			geiser-default-implementation
-			(car geiser-active-implementations)))
-	      (session (org-babel-scheme-make-session-name
-			source-buffer-name (cdr (assq :session params)) impl))
-	      (full-body (org-babel-expand-body:scheme body params)))
-	 (org-babel-scheme-execute-with-geiser
-	  full-body			 ; code
-	  (string= result-type "output") ; output?
-	  impl				 ; implementation
-	  (and (not (string= session "none")) session))) ; session
-       (org-babel-pick-name (cdr (assq :colname-names params))
-			    (cdr (assq :colnames params)))
-       (org-babel-pick-name (cdr (assq :rowname-names params))
-			    (cdr (assq :rownames params)))))))
+      (let* ((result-type (cdr (assq :result-type params)))
+	     (impl (or (when (cdr (assq :scheme params))
+			 (intern (cdr (assq :scheme params))))
+		       geiser-default-implementation
+		       (car geiser-active-implementations)))
+	     (session (org-babel-scheme-make-session-name
+		       source-buffer-name (cdr (assq :session params)) impl))
+	     (full-body (org-babel-expand-body:scheme body params))
+	     (result
+	      (org-babel-scheme-execute-with-geiser
+	       full-body		       ; code
+	       (string= result-type "output")  ; output?
+	       impl			       ; implementation
+	       (and (not (string= session "none")) session)))) ; session
+	(let ((table
+	       (org-babel-reassemble-table
+		result
+		(org-babel-pick-name (cdr (assq :colname-names params))
+				     (cdr (assq :colnames params)))
+		(org-babel-pick-name (cdr (assq :rowname-names params))
+				     (cdr (assq :rownames params))))))
+	  (org-babel-scheme--table-or-string table))))))
 
 (provide 'ob-scheme)
 

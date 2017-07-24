@@ -119,6 +119,24 @@ directories in published site-maps.
 
 *** Babel
 
+**** Scheme: support for tables
+**** Scheme: new variable: ~org-babel-scheme-null-to~
+
+This new custom option allows to use a empty list or null symbol to
+format the table output, initially assigned to ~hlines~.
+
+**** Scheme: new header ~:prologue~
+
+A new block code header has been created for Org Babel that enables
+developers to prepend code to the scheme block being processed.
+
+Multiple ~:prologue~ headers can be added each of them using a string
+with the content to be added.
+
+The scheme blocks are prepared by surronding the code in the block
+with a let form. The content of the ~:prologue~ headers are prepended
+before this let form.
+
 **** Support for hledger accounting reports added
 **** Clojure: new setting ~org-babel-clojure-sync-nrepl-timeout~
 
