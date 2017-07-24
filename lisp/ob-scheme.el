@@ -64,16 +64,16 @@
 (defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (org-babel--get-vars params))
-	(prepends (cl-remove-if-not (lambda (x) (eq (car x) :prologue)) params)))
-    (if (> (length vars) 0)
-        (concat (mapconcat (lambda (p) (format "%s" (cdr p)))
-			   prepends "\n     ")
-	        "(let ("
-                (mapconcat
-                 (lambda (var) (format "%S" (print `(,(car var) ',(cdr var)))))
-                 vars "\n      ")
-                ")\n" body ")")
-      body)))
+	(prepends (cdr (assq :prologue params))))
+    (concat (and prepends (concat prepends "\n"))
+	    (if (null vars) body
+	      (format "(let (%s)\n%s\n)"
+		      (mapconcat
+		       (lambda (var)
+			 (format "%S" (print `(,(car var) ',(cdr var)))))
+		       vars
+		       "\n      ")
+		      body)))))
 
 
 (defvar org-babel-scheme-repl-map (make-hash-table :test 'equal)
