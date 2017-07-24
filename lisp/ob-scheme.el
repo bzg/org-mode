@@ -76,15 +76,13 @@
 		      body)))))
 
 
-(defvar org-babel-scheme-repl-map (make-hash-table :test 'equal)
+(defvar org-babel-scheme-repl-map (make-hash-table :test #'equal)
   "Map of scheme sessions to session names.")
 
 (defun org-babel-scheme-cleanse-repl-map ()
   "Remove dead buffers from the REPL map."
   (maphash
-   (lambda (x y)
-     (when (not (buffer-name y))
-       (remhash x org-babel-scheme-repl-map)))
+   (lambda (x y) (unless (buffer-name y) (remhash x org-babel-scheme-repl-map)))
    org-babel-scheme-repl-map))
 
 (defun org-babel-scheme-get-session-buffer (session-name)
@@ -122,12 +120,9 @@ If the session is unnamed (nil), generate a name.
 
 If the session is `none', use nil for the session name, and
 org-babel-scheme-execute-with-geiser will use a temporary session."
-  (let ((result
-	 (cond ((not name)
-		(concat buffer " " (symbol-name impl) " REPL"))
-	       ((string= name "none") nil)
-	       (name))))
-    result))
+  (cond ((not name) (concat buffer " " (symbol-name impl) " REPL"))
+	((string= name "none") nil)
+	(name)))
 
 (defmacro org-babel-scheme-capture-current-message (&rest body)
   "Capture current message in both interactive and noninteractive mode"
