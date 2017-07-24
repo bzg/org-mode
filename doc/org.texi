@@ -501,9 +501,9 @@ Capture templates
 
 Protocols for external access
 
-* @code{store-link} protocol::  Store a link, push URL to kill-ring
-* @code{capture} protocol::     Fill a buffer with external information
-* @code{open-source} protocol::  Edit published contents
+* @code{store-link} protocol::  Store a link, push URL to kill-ring.
+* @code{capture} protocol::     Fill a buffer with external information.
+* @code{open-source} protocol::  Edit published contents.
 
 Archiving
 
