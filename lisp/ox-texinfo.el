@@ -1216,7 +1216,7 @@ holding contextual information."
 	       (cl-remove-if
 		(lambda (h)
 		  (org-not-nil (org-export-get-node-property :COPYING h t)))
-		(org-export-collect-headlines info nil scope))
+		(org-export-collect-headlines info 1 scope))
 	       cache))))
 
 ;;;; Node Property
