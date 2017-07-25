@@ -370,6 +370,10 @@ Call ~org-agenda-set-restriction-lock~ from the agenda.
 
 ** Miscellaneous
 
+*** Allow multiple columns view
+
+Columns view is not limited to a single buffer anymore.
+
 *** Org Attach obeys ~dired-dwim-target~
 
 When a Dired buffer is opened next to the Org document being edited,
