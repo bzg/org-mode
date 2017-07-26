@@ -1028,14 +1028,23 @@ the following lines anywhere in the buffer:
 
 (defcustom org-startup-align-all-tables nil
   "Non-nil means align all tables when visiting a file.
-This is useful when the column width in tables is forced with <N> cookies
-in table fields.  Such tables will look correct only after the first re-align.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
    #+STARTUP: align
    #+STARTUP: noalign"
   :group 'org-startup
   :type 'boolean)
+
+(defcustom org-startup-shrink-all-tables nil
+  "Non-nil means shrink all table columns with a width cookie.
+This can also be configured on a per-file basis by adding one of
+the following lines anywhere in the buffer:
+   #+STARTUP: shrink"
+  :group 'org-startup
+  :type 'boolean
+  :version "26.1"
+  :package-version '(Org . "9.1")
+  :safe #'booleanp)
 
 (defcustom org-startup-with-inline-images nil
   "Non-nil means show inline images when loading a new Org file.
@@ -4826,6 +4835,7 @@ After a match, the following groups carry important information:
     ("oddeven" org-odd-levels-only nil)
     ("align" org-startup-align-all-tables t)
     ("noalign" org-startup-align-all-tables nil)
+    ("shrink" org-startup-shrink-all-tables t)
     ("inlineimages" org-startup-with-inline-images t)
     ("noinlineimages" org-startup-with-inline-images nil)
     ("latexpreview" org-startup-with-latex-preview t)
@@ -5536,8 +5546,14 @@ The following commands are available:
   (unless org-inhibit-startup
     (org-unmodified
      (when org-startup-with-beamer-mode (org-beamer-mode))
-     (when org-startup-align-all-tables
-       (org-table-map-tables #'org-table-align t))
+     (when (or org-startup-align-all-tables org-startup-shrink-all-tables)
+       (org-table-map-tables
+	(cond ((and org-startup-align-all-tables
+		    org-startup-shrink-all-tables)
+	       (lambda () (org-table-align) (org-table-shrink)))
+	      (org-startup-align-all-tables #'org-table-align)
+	      (t #'org-table-shrink))
+	t))
      (when org-startup-with-inline-images (org-display-inline-images))
      (when org-startup-with-latex-preview (org-toggle-latex-fragment '(16)))
      (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))

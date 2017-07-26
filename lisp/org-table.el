@@ -781,7 +781,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (org-table-save-field
      ;; Make sure invisible characters in the table are at the right
      ;; place since column widths take them into account.
-     (font-lock-fontify-region beg end)
+     (org-font-lock-ensure beg end)
      (move-marker org-table-aligned-begin-marker beg)
      (move-marker org-table-aligned-end-marker end)
      (goto-char beg)
@@ -4060,6 +4060,27 @@ prefix, expand all columns."
       ;; Move before overlay if point is under it.
       (let ((o (org-table--shrunk-field)))
 	(when o (goto-char (overlay-start o)))))))
+
+;;;###autoload
+(defun org-table-shrink ()
+  "Shrink all columns with a width cookie in the table at point.
+Columns without a width cookie are expanded."
+  (interactive)
+  (unless (org-at-table-p) (user-error "Not at a table"))
+  (org-with-wide-buffer
+   (let ((begin (org-table-begin))
+	 (end (org-table-end))
+	 (regexp "|[ \t]*<[lrc]?[0-9]+>[ \t]*\\(|\\|$\\)")
+	 (columns))
+     (goto-char begin)
+     (while (re-search-forward regexp end t)
+       (goto-char (match-beginning 1))
+       (cl-pushnew (org-table-current-column) columns))
+     (org-table--expand-all-columns begin end)
+     ;; Make sure invisible characters in the table are at the right
+     ;; place since column widths take them into account.
+     (org-font-lock-ensure begin end)
+     (org-table--shrink-columns (sort columns #'<) begin end))))
 
 
 
