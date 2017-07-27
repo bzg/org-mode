@@ -60,6 +60,27 @@ and end of string are ignored."
       (setq string (replace-match "" nil nil string)))
     (split-string string separators)))
 
+(defun org-string-width (s)
+  "Compute width of string S, ignoring invisible characters."
+  (let ((invisiblep (lambda (v)
+		      ;; Non-nil if a V `invisible' property means
+		      ;; that that text is meant to be invisible.
+		      (or (eq t buffer-invisibility-spec)
+			  (assoc-string v buffer-invisibility-spec))))
+	(len (length s)))
+    (let ((invisible-parts nil))
+      (let ((cursor 0))
+	(while (setq cursor (text-property-not-all cursor len 'invisible nil s))
+	  (let ((end (or (next-single-property-change cursor 'invisible s len))))
+	    (when (funcall invisiblep (get-text-property cursor 'invisible s))
+	      (push (cons cursor end) invisible-parts))
+	    (setq cursor end))))
+      (let ((new-string s))
+	(pcase-dolist (`(,begin . ,end) invisible-parts)
+	  (setq new-string (concat (substring new-string 0 begin)
+				   (substring new-string end))))
+	(string-width new-string)))))
+
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
 Otherwise return nil."
