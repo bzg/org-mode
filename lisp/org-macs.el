@@ -45,6 +45,21 @@ Otherwise, return nil."
        (string-match-p "[^ \r\t\n]" s)
        s))
 
+(defun org-split-string (string &optional separators)
+  "Splits STRING into substrings at SEPARATORS.
+
+SEPARATORS is a regular expression.  When nil, it defaults to
+\"[ \f\t\n\r\v]+\".
+
+Unlike to `split-string', matching SEPARATORS at the beginning
+and end of string are ignored."
+  (let ((separators (or separators "[ \f\t\n\r\v]+")))
+    (when (string-match (concat "\\`" separators) string)
+      (setq string (replace-match "" nil nil string)))
+    (when (string-match (concat separators "\\'") string)
+      (setq string (replace-match "" nil nil string)))
+    (split-string string separators)))
+
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
 Otherwise return nil."
