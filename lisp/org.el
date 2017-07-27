@@ -21823,28 +21823,25 @@ If DELETE is non-nil, delete all those overlays."
   (self-insert-command N))
 
 (defun org-string-width (s)
-  "Compute width of string, ignoring invisible characters.
-This ignores character with invisibility property `org-link', and also
-characters with property `org-cwidth', because these will become invisible
-upon the next fontification round."
-  (let (b l)
-    (when (or (eq t buffer-invisibility-spec)
-	      (assq 'org-link buffer-invisibility-spec))
-      (while (setq b (text-property-any 0 (length s)
-					'invisible 'org-link s))
-	(setq s (concat (substring s 0 b)
-			(substring s (or (next-single-property-change
-					  b 'invisible s)
-                                         (length s)))))))
-    (while (setq b (text-property-any 0 (length s) 'org-cwidth t s))
-      (setq s (concat (substring s 0 b)
-		      (substring s (or (next-single-property-change
-					b 'org-cwidth s)
-                                       (length s))))))
-    (setq l (string-width s) b -1)
-    (while (setq b (text-property-any (1+ b) (length s) 'org-dwidth t s))
-      (setq l (- l (get-text-property b 'org-dwidth-n s))))
-    l))
+  "Compute width of string S, ignoring invisible characters."
+  (let ((invisiblep (lambda (v)
+		      ;; Non-nil if a V `invisible' property means
+		      ;; that that text is meant to be invisible.
+		      (or (eq t buffer-invisibility-spec)
+			  (assoc-string v buffer-invisibility-spec))))
+	(len (length s)))
+    (let ((invisible-parts nil))
+      (let ((cursor 0))
+	(while (setq cursor (text-property-not-all cursor len 'invisible nil s))
+	  (let ((end (or (next-single-property-change cursor 'invisible s len))))
+	    (when (funcall invisiblep (get-text-property cursor 'invisible s))
+	      (push (cons cursor end) invisible-parts))
+	    (setq cursor end))))
+      (let ((new-string s))
+	(pcase-dolist (`(,begin . ,end) invisible-parts)
+	  (setq new-string (concat (substring new-string 0 begin)
+				   (substring new-string end))))
+	(string-width new-string)))))
 
 (defun org-shorten-string (s maxlength)
   "Shorten string S so that it is no longer than MAXLENGTH characters.
