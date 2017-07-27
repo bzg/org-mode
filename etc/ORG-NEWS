@@ -424,6 +424,7 @@ Now ~=...=~ markup uses ~@samp{}~ instead of ~@verb{}~.  You can use
 *** Texinfo default table markup is ~@asis~
 It used to be ~@samp~ but ~@asis~ is neutral and, therefore, more
 suitable as a default value.
+*** Texinfo default process includes ~--no-split~ option
 *** New entities : ~\dollar~ and ~\USD~
 *** ~org-parse-time-string~ accepts a new optional argument
 =ZONE= specifies the current time zone.
