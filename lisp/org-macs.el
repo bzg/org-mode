@@ -60,26 +60,74 @@ and end of string are ignored."
       (setq string (replace-match "" nil nil string)))
     (split-string string separators)))
 
-(defun org-string-width (s)
-  "Compute width of string S, ignoring invisible characters."
-  (let ((invisiblep (lambda (v)
-		      ;; Non-nil if a V `invisible' property means
-		      ;; that that text is meant to be invisible.
-		      (or (eq t buffer-invisibility-spec)
-			  (assoc-string v buffer-invisibility-spec))))
-	(len (length s)))
-    (let ((invisible-parts nil))
-      (let ((cursor 0))
-	(while (setq cursor (text-property-not-all cursor len 'invisible nil s))
-	  (let ((end (or (next-single-property-change cursor 'invisible s len))))
-	    (when (funcall invisiblep (get-text-property cursor 'invisible s))
-	      (push (cons cursor end) invisible-parts))
-	    (setq cursor end))))
-      (let ((new-string s))
-	(pcase-dolist (`(,begin . ,end) invisible-parts)
-	  (setq new-string (concat (substring new-string 0 begin)
-				   (substring new-string end))))
-	(string-width new-string)))))
+(defun org-string-display (string)
+  "Return STRING as it is displayed in the current buffer.
+This function takes into consideration `invisible' and `display'
+text properties."
+  (let* ((build-from-parts
+	  (lambda (s property filter)
+	    ;; Build a new string out of string S.  On every group of
+	    ;; contiguous characters with the same PROPERTY value,
+	    ;; call FILTER on the properties list at the beginning of
+	    ;; the group.  If it returns a string, replace the
+	    ;; characters in the group with it.  Otherwise, preserve
+	    ;; those characters.
+	    (let ((len (length s))
+		  (new "")
+		  (i 0)
+		  (cursor 0))
+	      (while (setq i (text-property-not-all i len property nil s))
+		(let ((end (next-single-property-change i property s len))
+		      (value (funcall filter (text-properties-at i s))))
+		  (when value
+		    (setq new (concat new (substring s cursor i) value))
+		    (setq cursor end))
+		  (setq i end)))
+	      (concat new (substring s cursor)))))
+	 (prune-invisible
+	  (lambda (s)
+	    (funcall build-from-parts s 'invisible
+		     (lambda (props)
+		       ;; If `invisible' property in PROPS means text
+		       ;; is to be invisible, return the empty string.
+		       ;; Otherwise return nil so that the part is
+		       ;; skipped.
+		       (and (or (eq t buffer-invisibility-spec)
+				(assoc-string (plist-get props 'invisible)
+					      buffer-invisibility-spec))
+			    "")))))
+	 (replace-display
+	  (lambda (s)
+	    (funcall build-from-parts s 'display
+		     (lambda (props)
+		       ;; If there is any string specification in
+		       ;; `display' property return it.  Also attach
+		       ;; other text properties on the part to that
+		       ;; string (face...).
+		       (let* ((display (plist-get props 'display))
+			      (value (if (stringp display) display
+				       (cl-some #'stringp display))))
+			 (when value
+			   (apply
+			    #'propertize
+			    ;; Displayed string could contain
+			    ;; invisible parts, but no nested display.
+			    (funcall prune-invisible value)
+			    (plist-put props
+				       'display
+				       (and (not (stringp display))
+					    (cl-remove-if #'stringp
+							  display)))))))))))
+    ;; `display' property overrides `invisible' one.  So we first
+    ;; replace characters with `display' property.  Then we remove
+    ;; invisible characters.
+    (funcall prune-invisible (funcall replace-display string))))
+
+(defun org-string-width (string)
+  "Return width of STRING when displayed in the current buffer.
+Unlike to `string-width', this function takes into consideration
+`invisible' and `display' text properties."
+  (string-width (org-string-display string)))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
