@@ -1626,8 +1626,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (when org-clock-out-switch-to-state
 	    (save-excursion
 	      (org-back-to-heading t)
-	      (let ((org-inhibit-logging t)
-		    (org-clock-out-when-done nil))
+	      (let ((org-clock-out-when-done nil))
 		(cond
 		 ((functionp org-clock-out-switch-to-state)
 		  (let ((case-fold-search nil))
