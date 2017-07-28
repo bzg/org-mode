@@ -3259,11 +3259,12 @@ SCHEDULED: <2017-05-06 Sat>
 
 (ert-deftest test-org/forward-paragraph ()
   "Test `org-forward-paragraph' specifications."
-  ;; At end of buffer, return an error.
-  (should-error
+  ;; At end of buffer, do not return an error.
+  (should
    (org-test-with-temp-text "Paragraph"
      (goto-char (point-max))
-     (org-forward-paragraph)))
+     (org-forward-paragraph)
+     t))
   ;; Standard test.
   (should
    (org-test-with-temp-text "P1\n\nP2\n\nP3"
@@ -3328,10 +3329,11 @@ SCHEDULED: <2017-05-06 Sat>
 
 (ert-deftest test-org/backward-paragraph ()
   "Test `org-backward-paragraph' specifications."
-  ;; Error at beginning of buffer.
-  (should-error
+  ;; Do not error at beginning of buffer.
+  (should
    (org-test-with-temp-text "Paragraph"
-     (org-backward-paragraph)))
+     (org-backward-paragraph)
+     t))
   ;; Regular test.
   (should
    (org-test-with-temp-text "P1\n\nP2\n\nP3"
