@@ -19842,9 +19842,10 @@ commands for more information."
    (t (org-drag-element-forward))))
 
 (defun org-shiftup (&optional arg)
-  "Increase item in timestamp or increase priority of current headline.
-Calls `org-timestamp-up' or `org-priority-up', or `org-previous-item',
-depending on context.  See the individual commands for more information."
+  "Act on current element according to context.
+Call `org-timestamp-up' or `org-priority-up', or
+`org-previous-item', or `org-table-move-cell-up'.  See the
+individual commands for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftup-hook))
@@ -19860,15 +19861,17 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-previous-item))
    ((org-clocktable-try-shift 'up arg))
+   ((org-at-table-p) (org-table-move-cell-up))
    ((run-hook-with-args-until-success 'org-shiftup-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'previous-line))
    (t (org-shiftselect-error))))
 
 (defun org-shiftdown (&optional arg)
-  "Decrease item in timestamp or decrease priority of current headline.
-Calls `org-timestamp-down' or `org-priority-down', or `org-next-item'
-depending on context.  See the individual commands for more information."
+  "Act on current element according to context.
+Call `org-timestamp-down' or `org-priority-down', or
+`org-next-item', or `org-table-move-cell-down'.  See the
+individual commands for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftdown-hook))
@@ -19884,20 +19887,22 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-next-item))
    ((org-clocktable-try-shift 'down arg))
+   ((org-at-table-p) (org-table-move-cell-down))
    ((run-hook-with-args-until-success 'org-shiftdown-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'next-line))
    (t (org-shiftselect-error))))
 
 (defun org-shiftright (&optional arg)
-  "Cycle the thing at point or in the current line, depending on context.
-Depending on context, this does one of the following:
+  "Act on the current element according to context.
+This does one of the following:
 
 - switch a timestamp at point one day into the future
 - on a headline, switch to the next TODO keyword.
 - on an item, switch entire list to the next bullet type
 - on a property line, switch to the next allowed value
-- on a clocktable definition line, move time block into the future"
+- on a clocktable definition line, move time block into the future
+- in a table, move a single cell right"
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftright-hook))
@@ -19920,20 +19925,22 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
+   ((org-at-table-p) (org-table-move-cell-right))
    ((run-hook-with-args-until-success 'org-shiftright-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'forward-char))
    (t (org-shiftselect-error))))
 
 (defun org-shiftleft (&optional arg)
-  "Cycle the thing at point or in the current line, depending on context.
-Depending on context, this does one of the following:
+  "Act on current element according to context.
+This does one of the following:
 
 - switch a timestamp at point one day into the past
 - on a headline, switch to the previous TODO keyword.
 - on an item, switch entire list to the previous bullet type
 - on a property line, switch to the previous allowed value
-- on a clocktable definition line, move time block into the past"
+- on a clocktable definition line, move time block into the past
+- in a table, move a single cell left"
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftleft-hook))
@@ -19956,6 +19963,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
+   ((org-at-table-p) (org-table-move-cell-left))
    ((run-hook-with-args-until-success 'org-shiftleft-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'backward-char))
