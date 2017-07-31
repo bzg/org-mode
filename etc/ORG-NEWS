@@ -233,6 +233,19 @@ using ~:namespaces~:
   ,#+END_SRC
 #+end_example
 
+**** Support for Vala language
+
+[[https://wiki.gnome.org/Projects/Vala][Vala]] language blocks support two special header arguments:
+
+- ~:flags~ passes arguments to the compiler
+- ~:cmdline~ passes commandline arguments to the generated executable
+
+Support for [[http://orgmode.org/manual/var.html#var][~:var~]] does not exist yet, also there is no [[http://orgmode.org/manual/session.html#session][~:session~]]
+support because Vala is a compiled language.
+
+The Vala compiler binary can be changed via the ~defcustom~
+~org-babel-vala-compiler~.
+
 *** New ~function~ scope argument for the Clock Table
 Added a nullary function that returns a list of files as a possible
 argument for the scope of the clock table.

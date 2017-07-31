@@ -15535,6 +15535,7 @@ Org supports the following languages for the @samp{src} code blocks:
 @item Scheme @tab scheme @tab GNU Screen @tab screen
 @item Sed @tab sed @tab shell @tab sh
 @item SQL @tab sql @tab SQLite @tab sqlite
+@item Vala @tab vala
 @end multitable
 
 Additional documentation for some languages are at
