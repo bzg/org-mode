@@ -19,6 +19,24 @@
 
 ;;; Code:
 
+
+(ert-deftest test-org/split-string ()
+  "Test `org-split-string' specifications."
+  ;; Regular test.
+  (should (equal '("a" "b") (org-split-string "a b" " ")))
+  ;; Empty parts are not removed.
+  (should (equal '("a" "" "b") (org-split-string "a||b" "|")))
+  ;; However, empty parts at beginning or end of string are removed.
+  (should (equal '("a" "b") (org-split-string "|a|b|" "|")))
+  ;; Pathological case: call on an empty string.  Since empty parts
+  ;; are not removed, it shouldn't return nil.
+  (should (equal '("") (org-split-string "")))
+  ;; SEPARATORS, when non-nil, is a regexp.  In particular, do not
+  ;; match more than specified.
+  (should-not (equal '("a" "b") (org-split-string "a    b" " ")))
+  ;; When nil, SEPARATORS matches any number of blank characters.
+  (should (equal '("a" "b") (org-split-string "a \t\nb"))))
+
 (ert-deftest test-org/string-display ()
   "Test `org-string-display' specifications."
   (should (equal "a" (org-string-display "a")))
