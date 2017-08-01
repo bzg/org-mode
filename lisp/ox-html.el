@@ -2068,7 +2068,8 @@ holding export options."
      (format "<%s id=\"%s\">\n" (nth 1 div) (nth 2 div)))
    ;; Document title.
    (when (plist-get info :with-title)
-     (let ((title (plist-get info :title))
+     (let ((title (and (plist-get info :with-title)
+		       (plist-get info :title)))
 	   (subtitle (plist-get info :subtitle))
 	   (html5-fancy (org-html--html5-fancy-p info)))
        (when title
