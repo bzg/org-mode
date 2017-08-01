@@ -13640,7 +13640,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
       (setq txt (replace-match "" t t txt)))
     (when (string-match "\\s-+\\'" txt)
       (setq txt (replace-match "" t t txt)))
-    (setq lines (org-split-string txt "\n"))
+    (setq lines (and (not (equal "" txt)) (org-split-string txt "\n")))
     (when (org-string-nw-p note)
       (setq note
 	    (org-replace-escapes
