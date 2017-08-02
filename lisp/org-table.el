@@ -1031,20 +1031,23 @@ Before doing so, re-align the table if necessary."
   (interactive)
   (org-table-justify-field-maybe)
   (org-table-maybe-recalculate-line)
-  (if (and org-table-automatic-realign
-	   org-table-may-need-update)
-      (org-table-align))
-  (if (org-at-table-hline-p)
-      (end-of-line 1))
-  (condition-case nil
-      (progn
-	(re-search-backward "|" (org-table-begin))
-	(re-search-backward "|" (org-table-begin)))
-    (error (user-error "Cannot move to previous table field")))
-  (while (looking-at "|\\(-\\|[ \t]*$\\)")
-    (re-search-backward "|" (org-table-begin)))
-  (if (looking-at "| ?")
-      (goto-char (match-end 0))))
+  (when (and org-table-automatic-realign
+	     org-table-may-need-update)
+    (org-table-align))
+  (when (org-at-table-hline-p)
+    (end-of-line))
+  (let ((start (org-table-begin))
+	(origin (point)))
+    (condition-case nil
+	(progn
+	  (search-backward "|" start nil 2)
+	  (while (looking-at-p "|\\(?:-\\|[ \t]*$\\)")
+	    (search-backward "|" start)))
+      (error
+       (goto-char origin)
+       (user-error "Cannot move to previous table field"))))
+  (when (looking-at "| ?")
+    (goto-char (match-end 0))))
 
 (defun org-table-beginning-of-field (&optional n)
   "Move to the beginning of the current table field.

@@ -2100,6 +2100,45 @@ is t, then new columns should be added as needed"
       (let ((org-table-tab-jumps-over-hlines nil)) (org-table-next-field))
       (buffer-string)))))
 
+(ert-deftest test-org-table/previous-field ()
+  "Test `org-table-previous-field' specifications."
+  ;; Regular tests.
+  (should
+   (eq ?a
+       (org-test-with-temp-text "| a | <point>b |"
+	 (org-table-previous-field)
+	 (char-after))))
+  (should
+   (eq ?a
+       (org-test-with-temp-text "| a |\n| <point>b |"
+	 (org-table-previous-field)
+	 (char-after))))
+  ;; Find previous field across horizontal rules.
+  (should
+   (eq ?a
+       (org-test-with-temp-text "| a |\n|---|\n| <point>b |"
+	 (org-table-previous-field)
+	 (char-after))))
+  ;; When called on a horizontal rule, find previous data field.
+  (should
+   (eq ?b
+       (org-test-with-temp-text "| a | b |\n|---+-<point>--|"
+	 (org-table-previous-field)
+	 (char-after))))
+  ;; Error when at first field.  Make sure to preserve original
+  ;; position.
+  (should-error
+   (org-test-with-temp-text "| <point> a|"
+     (org-table-previous-field)))
+  (should-error
+   (org-test-with-temp-text "|---|\n| <point>a |"
+     (org-table-previous-field)))
+  (should
+   (eq ?a
+       (org-test-with-temp-text "|---|\n| <point>a |"
+	 (ignore-errors (org-table-previous-field))
+	 (char-after)))))
+
 
 
 ;;; Moving rows, moving columns
