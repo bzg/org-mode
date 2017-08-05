@@ -888,7 +888,7 @@ This function assumes major mode for current buffer is
 		     (seen nil))	;prevent duplicates
 		 (while (setq p (next-single-property-change p 'org-hd-marker))
 		   (let ((m (get-text-property p 'org-hd-marker)))
-		     (when (and m (not (memq m seen)))
+		     (when (and m (not (member m seen)))
 		       (push m seen)
 		       (with-current-buffer (marker-buffer m)
 			 (org-with-wide-buffer
