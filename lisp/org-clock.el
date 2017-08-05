@@ -1803,14 +1803,15 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 		      "[ \t]*\\(?:\\(\\[.*?\\]\\)-+\\(\\[.*?\\]\\)\\|=>[ \t]+\\([0-9]+\\):\\([0-9]+\\)\\)"))
 	  (lmax 30)
 	  (ltimes (make-vector lmax 0))
-	  (t1 0)
 	  (level 0)
-	  ts te dt
+	  (tstart (cond ((stringp tstart) (org-time-string-to-seconds tstart t))
+			((consp tstart) (float-time tstart))
+			(t tstart)))
+	  (tend (cond ((stringp tend) (org-time-string-to-seconds tend t))
+		      ((consp tend) (float-time tend))
+		      (t tend)))
+	  (t1 0)
 	  time)
-     (if (stringp tstart) (setq tstart (org-time-string-to-seconds tstart)))
-     (if (stringp tend) (setq tend (org-time-string-to-seconds tend)))
-     (if (consp tstart) (setq tstart (float-time tstart)))
-     (if (consp tend) (setq tend (float-time tend)))
      (remove-text-properties (point-min) (point-max)
 			     `(,(or propname :org-clock-minutes) t
 			       :org-clock-force-headline-inclusion t))
@@ -1819,26 +1820,27 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
        (while (re-search-backward re nil t)
 	 (cond
 	  ((match-end 2)
-	   ;; Two time stamps
-	   (setq ts (match-string 2)
-		 te (match-string 3)
-		 ts (float-time
-		     (apply #'encode-time (org-parse-time-string ts nil t)))
-		 te (float-time
-		     (apply #'encode-time (org-parse-time-string te nil t)))
-		 ts (if tstart (max ts tstart) ts)
-		 te (if tend (min te tend) te)
-		 dt (- te ts)
-		 t1 (if (> dt 0) (+ t1 (floor (/ dt 60))) t1)))
+	   ;; Two time stamps.
+	   (let* ((ts (float-time
+		       (apply #'encode-time
+			      (save-match-data
+				(org-parse-time-string
+				 (match-string 2) nil t)))))
+		  (te (float-time
+		       (apply #'encode-time
+			      (org-parse-time-string (match-string 3) nil t))))
+		  (dt (- (if tend (min te tend) te)
+			 (if tstart (max ts tstart) ts))))
+	     (when (> dt 0) (cl-incf t1 (floor (/ dt 60))))))
 	  ((match-end 4)
-	   ;; A naked time
+	   ;; A naked time.
 	   (setq t1 (+ t1 (string-to-number (match-string 5))
 		       (* 60 (string-to-number (match-string 4))))))
-	  (t ;; A headline
-	   ;; Add the currently clocking item time to the total
+	  (t	 ;A headline
+	   ;; Add the currently clocking item time to the total.
 	   (when (and org-clock-report-include-clocking-task
-		      (equal (org-clocking-buffer) (current-buffer))
-		      (equal (marker-position org-clock-hd-marker) (point))
+		      (eq (org-clocking-buffer) (current-buffer))
+		      (eq (marker-position org-clock-hd-marker) (point))
 		      tstart
 		      tend
 		      (>= (float-time org-clock-start-time) tstart)
