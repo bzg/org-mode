@@ -395,8 +395,9 @@ a communication channel."
 		       (org-export-get-reference destination info))))))))
      ((org-export-inline-image-p link org-html-inline-image-rules)
       (let ((path (let ((raw-path (org-element-property :path link)))
-		    (if (not (file-name-absolute-p raw-path)) raw-path
-		      (expand-file-name raw-path))))
+		    (cond ((not (equal "file" type)) (concat type raw-path))
+			  ((not (file-name-absolute-p raw-path)) raw-path)
+			  (t (expand-file-name raw-path)))))
 	    (caption (org-export-data
 		      (org-export-get-caption
 		       (org-export-get-parent-element link)) info)))
