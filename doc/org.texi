@@ -17376,7 +17376,7 @@ Org evaluates code in the following circumstances:
 Org evaluates @samp{src} code blocks in an Org file during export.  Org also
 evaluates a @samp{src} code block with the @kbd{C-c C-c} key chord.  Users
 exporting or running code blocks must load files only from trusted sources.
-Be weary of customizing variables that remove or alter default security
+Be wary of customizing variables that remove or alter default security
 measures.
 
 @defopt org-confirm-babel-evaluate
