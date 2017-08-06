@@ -434,7 +434,14 @@ This is a tab:\t.
     (org-test-with-temp-text
 	"An inline<point>[fn:1] footnote[fn:1:definition]    and some text"
       (org-edit-special)
-      (prog1 (buffer-string) (org-edit-src-exit))))))
+      (prog1 (buffer-string) (org-edit-src-exit)))))
+  ;; Preserve local variables when editing a footnote definition.
+  (should
+   (eq 'bar
+       (org-test-with-temp-text "A footnote<point>[fn:1]\n[fn:1] Definition"
+	 (setq-local foo 'bar)
+	 (org-edit-special)
+	 (prog1 foo (org-edit-src-exit))))))
 
 (provide 'test-org-src)
 ;;; test-org-src.el ends here

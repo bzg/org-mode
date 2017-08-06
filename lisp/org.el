@@ -9464,7 +9464,7 @@ Optional argument REGEXP selects variables to clone."
       (`(,name . ,value)		;ignore unbound variables
        (when (and (not (memq name org-unique-local-variables))
 		  (or (null regexp) (string-match-p regexp (symbol-name name))))
-	 (set (make-local-variable name) value))))))
+	 (ignore-errors (set (make-local-variable name) value)))))))
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)

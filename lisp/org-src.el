@@ -850,7 +850,8 @@ A coderef format regexp can only match at the end of a line."
 	   (when (org-element-lineage definition '(table-cell))
 	     (while (search-forward "\n" nil t) (replace-match "")))))
        contents
-       'remote))
+       'remote)
+      (org-clone-local-variables (org-src--source-buffer)))
     ;; Report success.
     t))
 
