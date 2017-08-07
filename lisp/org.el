@@ -271,6 +271,7 @@ requirements) is loaded."
 		 (const :tag "CSS" css)
 		 (const :tag "Ditaa" ditaa)
 		 (const :tag "Dot" dot)
+		 (const :tag "Ebnf2ps" ebnf2ps)
 		 (const :tag "Emacs Lisp" emacs-lisp)
 		 (const :tag "Forth" forth)
 		 (const :tag "Fortran" fortran)
@@ -306,7 +307,7 @@ requirements) is loaded."
 		 (const :tag "Sql" sql)
 		 (const :tag "Sqlite" sqlite)
 		 (const :tag "Stan" stan)
-		 (const :tag "ebnf2ps" ebnf2ps))
+		 (const :tag "Vala" vala))
 		:value-type (boolean :tag "Activate" :value t)))
 
 ;;;; Customization variables
