@@ -3930,8 +3930,8 @@ to t."
 	      (put-text-property
 	       0 (length entry) 'org-todo-blocked
 	       (if really-invisible 'invisible t)
-	       entry))))))
-    entry))
+	       entry)))))))
+  entry)
 
 (defvar org-agenda-skip-function nil
   "Function to be called at each match during agenda construction.
