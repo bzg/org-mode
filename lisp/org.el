@@ -9133,15 +9133,15 @@ function is being called interactively."
     (save-restriction
       (narrow-to-region start end)
       (let ((restore-clock?
-	     ;; The clock marker is lost when using `sort-subr'; let's
-	     ;; mark the clock with a temporary
-	     ;; `org-clock-marker-backup' text property.
+	     ;; The clock marker is lost when using `sort-subr'; mark
+	     ;; the clock with temporary `:org-clock-marker-backup'
+	     ;; text property.
 	     (when (and (eq (org-clocking-buffer) (current-buffer))
 			(<= start (marker-position org-clock-marker))
 			(>= end (marker-position org-clock-marker)))
 	       (org-with-silent-modifications
 		(put-text-property (1- org-clock-marker) org-clock-marker
-				   'org-clock-marker-backup t))
+				   :org-clock-marker-backup t))
 	       t))
 	    (dcst (downcase sorting-type))
 	    (case-fold-search nil)
@@ -9231,9 +9231,9 @@ function is being called interactively."
 	(when restore-clock?
 	  (move-marker org-clock-marker
 		       (1+ (next-single-property-change
-			    start 'org-clock-marker-backup)))
+			    start :org-clock-marker-backup)))
 	  (remove-text-properties (1- org-clock-marker) org-clock-marker
-				  '(org-clock-marker-backup t)))))
+				  '(:org-clock-marker-backup t)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
     (message "Sorting entries...done")))
 
