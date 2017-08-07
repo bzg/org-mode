@@ -128,6 +128,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-clock-timestamps-down "org-clock" (&optional n))
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-update-time-maybe "org-clock" ())
+(declare-function org-clocking-buffer "org-clock" ())
 (declare-function org-clocktable-shift "org-clock" (dir n))
 (declare-function
  org-duration-from-minutes "org-duration" (minutes &optional fmt canonical))
