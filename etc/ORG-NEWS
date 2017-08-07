@@ -112,6 +112,12 @@ docstrings.
 **** New variable : ~org-deadline-past-days~
 See docstring for details.
 **** Binding C-c C-x < for ~org-agenda-set-restriction-lock-from-agenda~
+**** New auto-align default setting for =org-agenda-tags-column=
+
+=org-agenda-tags-column= can now be set to =auto=, which will
+automatically align tags to the right edge of the window.  This is now
+the default setting.
+
 *** New value for ~org-publish-sitemap-sort-folders~
 
 The new ~ignore~ value effectively allows toggling inclusion of

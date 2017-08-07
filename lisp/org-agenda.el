@@ -1886,13 +1886,21 @@ When this is the symbol `prefix', only remove tags when
 (defvaralias 'org-agenda-remove-tags-when-in-prefix
   'org-agenda-remove-tags)
 
-(defcustom org-agenda-tags-column -80
+(defcustom org-agenda-tags-column 'auto
   "Shift tags in agenda items to this column.
-If this number is positive, it specifies the column.  If it is negative,
-it means that the tags should be flushright to that column.  For example,
--80 works well for a normal 80 character screen."
+If set to `auto', tags will be automatically aligned to the right
+edge of the window.
+
+If set to a positive number, tags will be left-aligned to that
+column.  If set to a negative number, tags will be right-aligned
+to that column.  For example, -80 works well for a normal 80
+character screen."
   :group 'org-agenda-line-format
-  :type 'integer)
+  :type '(choice
+	  (const :tag "Automatically align to right edge of window" auto)
+	  (integer :tag "Specific column" -80))
+  :package-version '(Org . "9.1")
+  :version "26.1")
 
 (defvaralias 'org-agenda-align-tags-to-column 'org-agenda-tags-column)
 
@@ -8959,7 +8967,11 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 
 (defun org-agenda-align-tags (&optional line)
   "Align all tags in agenda items to `org-agenda-tags-column'."
-  (let ((inhibit-read-only t) l c)
+  (let ((inhibit-read-only t)
+	(org-agenda-tags-column (if (eq 'auto org-agenda-tags-column)
+				    (- (window-text-width))
+				  org-agenda-tags-column))
+	l c)
     (save-excursion
       (goto-char (if line (point-at-bol) (point-min)))
       (while (re-search-forward "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
