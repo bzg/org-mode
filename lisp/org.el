@@ -14759,8 +14759,8 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	    (insert " :" (mapconcat #'identity (nreverse current) ":") ":")
 	    (org-set-tags nil t))
 	(delete-horizontal-space))
-      (run-hooks 'org-after-tags-change-hook))
-    res))
+      (run-hooks 'org-after-tags-change-hook)
+      res)))
 
 (defun org--align-tags-here (to-col)
   "Align tags on the current headline to TO-COL.
