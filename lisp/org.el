@@ -9051,14 +9051,6 @@ A non-nil value for INTERACTIVE? is used to signal that this
 function is being called interactively."
   (interactive (list current-prefix-arg nil nil nil nil t))
   (let ((case-func (if with-case 'identity 'downcase))
-	(cmstr
-	 ;; The clock marker is lost when using `sort-subr', let's
-	 ;; store the clocking string.
-	 (when (equal (marker-buffer org-clock-marker) (current-buffer))
-	   (save-excursion
-	     (goto-char org-clock-marker)
-             (buffer-substring-no-properties (line-beginning-position)
-                                             (point)))))
         start beg end stars re re2
         txt what tmp)
     ;; Find beginning and end of region to sort
@@ -9140,9 +9132,20 @@ function is being called interactively."
 
     (save-restriction
       (narrow-to-region start end)
-      (let ((dcst (downcase sorting-type))
+      (let ((restore-clock?
+	     ;; The clock marker is lost when using `sort-subr'; let's
+	     ;; mark the clock with a temporary
+	     ;; `org-clock-marker-backup' text property.
+	     (when (and (eq (org-clocking-buffer) (current-buffer))
+			(<= start (marker-position org-clock-marker))
+			(>= end (marker-position org-clock-marker)))
+	       (org-with-silent-modifications
+		(put-text-property (1- org-clock-marker) org-clock-marker
+				   'org-clock-marker-backup t))
+	       t))
+	    (dcst (downcase sorting-type))
 	    (case-fold-search nil)
-            (now (current-time)))
+	    (now (current-time)))
         (sort-subr
          (/= dcst sorting-type)
          ;; This function moves to the beginning character of the "record" to
@@ -9224,14 +9227,14 @@ function is being called interactively."
 		     (concat "Function for comparing keys "
 			     "(empty for default `sort-subr' predicate): ")
 		     'allow-empty))))
-          ((member dcst '(?p ?t ?s ?d ?c ?k)) '<)))))
+          ((member dcst '(?p ?t ?s ?d ?c ?k)) '<)))
+	(when restore-clock?
+	  (move-marker org-clock-marker
+		       (1+ (next-single-property-change
+			    start 'org-clock-marker-backup)))
+	  (remove-text-properties (1- org-clock-marker) org-clock-marker
+				  '(org-clock-marker-backup t)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
-    ;; Reset the clock marker if needed
-    (when cmstr
-      (save-excursion
-	(goto-char start)
-	(search-forward cmstr nil t)
-	(move-marker org-clock-marker (point))))
     (message "Sorting entries...done")))
 
 ;;; The orgstruct minor mode
