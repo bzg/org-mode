@@ -3458,8 +3458,10 @@ See also `org-tag-persistent-alist' to sidestep this behavior."
   :group 'org-tags
   :type '(repeat
 	  (choice
-	   (cons   (string    :tag "Tag name")
-		   (character :tag "Access char"))
+	   (cons :tag "Tag with key"
+		 (string    :tag "Tag name")
+		 (character :tag "Access char"))
+	   (list :tag "Tag" (string :tag "Tag name"))
 	   (const :tag "Start radio group" (:startgroup))
 	   (const :tag "Start tag group, non distinct" (:startgrouptag))
 	   (const :tag "Group tags delimiter" (:grouptags))
@@ -3491,8 +3493,10 @@ on a per-file basis, insert anywhere in the file:
   :group 'org-tags
   :type '(repeat
 	  (choice
-	   (cons (string    :tag "Tag name")
+	   (cons :tag "Tag with key"
+		 (string    :tag "Tag name")
 		 (character :tag "Access char"))
+	   (list :tag "Tag" (string :tag "Tag name"))
 	   (const :tag "Start radio group" (:startgroup))
 	   (const :tag "Start tag group, non distinct" (:startgrouptag))
 	   (const :tag "Group tags delimiter" (:grouptags))
