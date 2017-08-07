@@ -14746,9 +14746,9 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
     (org-back-to-heading t)
     (let ((current
 	   (when (re-search-forward "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t]*$"
-				    (point-at-eol) t)
-	     (replace-match "")
-	     (nreverse (org-split-string (match-string 1) ":"))))
+				    (line-end-position) t)
+	     (prog1 (nreverse (org-split-string (match-string 1) ":"))
+	       (replace-match ""))))
 	  res)
       (pcase onoff
 	(`off (setq current (delete tag current)))
