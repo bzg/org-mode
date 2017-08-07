@@ -14739,30 +14739,24 @@ ignore inherited ones."
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
 If ONOFF is `on' or `off', don't toggle but set to this state."
-  (let (res current)
-    (save-excursion
-      (org-back-to-heading t)
-      (if (re-search-forward "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t]*$"
-			     (point-at-eol) t)
-	  (progn
-	    (setq current (match-string 1))
-	    (replace-match ""))
-	(setq current ""))
-      (setq current (nreverse (org-split-string current ":")))
-      (cond
-       ((eq onoff 'on)
-	(setq res t)
-	(or (member tag current) (push tag current)))
-       ((eq onoff 'off)
-	(or (not (member tag current)) (setq current (delete tag current))))
-       (t (if (member tag current)
-	      (setq current (delete tag current))
-	    (setq res t)
-	    (push tag current))))
-      (end-of-line 1)
+  (save-excursion
+    (org-back-to-heading t)
+    (let ((current
+	   (when (re-search-forward "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t]*$"
+				    (point-at-eol) t)
+	     (replace-match "")
+	     (nreverse (org-split-string (match-string 1) ":"))))
+	  res)
+      (pcase onoff
+	(`off (setq current (delete tag current)))
+	((or `on (guard (not (member tag current))))
+	 (setq res t)
+	 (cl-pushnew tag current :test #'equal))
+	(_ (setq current (delete tag current))))
+      (end-of-line)
       (if current
 	  (progn
-	    (insert " :" (mapconcat 'identity (nreverse current) ":") ":")
+	    (insert " :" (mapconcat #'identity (nreverse current) ":") ":")
 	    (org-set-tags nil t))
 	(delete-horizontal-space))
       (run-hooks 'org-after-tags-change-hook))
