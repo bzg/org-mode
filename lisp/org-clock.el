@@ -1439,7 +1439,7 @@ The time is always returned as UTC."
 	     (day (nth 3 dt)))
 	(if (< hour org-extend-today-until) (setf (nth 3 dt) (1- day)))
 	(setf (nth 2 dt) org-extend-today-until)
-	(setq dt (append (list 0 0) (nthcdr 2 dt) '(nil t)))
+	(setq dt (append (list 0 0) (nthcdr 2 dt) '(t)))
 	(apply #'encode-time dt)))
      ((or (equal cmt "all")
 	  (and (or (not cmt) (equal cmt "auto"))
