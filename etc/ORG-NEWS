@@ -466,6 +466,8 @@ suitable as a default value.
     URLs like =https://cool-blog.com/2017/05/20/cool-post/= are
     covered by rewrite rules.
 
+*** Add (C) =COMMENT= support to ~org-structure-template-alist~
+
 * Version 9.0
 
 ** Incompatible changes

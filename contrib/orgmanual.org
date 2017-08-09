@@ -15922,6 +15922,7 @@ The following template selectors are currently supported:
 | {{{kbd(a)}}} | ~#+BEGIN_ASCII~ ...~ #+END_ASCII~     |
 | {{{kbd(A)}}} | ~#+ASCII:~                            |
 | {{{kbd(c)}}} | ~#+BEGIN_CENTER~ ... ~#+END_CENTER~   |
+| {{{kbd(C)}}} | ~#+BEGIN_COMMENT~ ... ~#+END_COMMENT~ |
 | {{{kbd(e)}}} | ~#+BEGIN_EXAMPLE~ ... ~#+END_EXAMPLE~ |
 | {{{kbd(h)}}} | ~#+BEGIN_HTML~ ... ~#+END_HTML~       |
 | {{{kbd(H)}}} | ~#+HTML:~                             |

@@ -17347,6 +17347,7 @@ Org comes with these pre-defined easy templates:
 @item @kbd{q} @tab @code{#+BEGIN_QUOTE ... #+END_QUOTE}
 @item @kbd{v} @tab @code{#+BEGIN_VERSE ... #+END_VERSE}
 @item @kbd{c} @tab @code{#+BEGIN_CENTER ... #+END_CENTER}
+@item @kbd{C} @tab @code{#+BEGIN_COMMENT ... #+END_COMMENT}
 @item @kbd{l} @tab @code{#+BEGIN_EXPORT latex ... #+END_EXPORT}
 @item @kbd{L} @tab @code{#+LATEX:}
 @item @kbd{h} @tab @code{#+BEGIN_EXPORT html ... #+END_EXPORT}
