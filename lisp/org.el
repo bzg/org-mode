@@ -10777,23 +10777,24 @@ a timestamp or a link."
 	     (value (org-element-property :value context)))
 	(cond
 	 ;; On a headline or an inlinetask, but not on a timestamp,
-	 ;; a link, a footnote reference or on tags.
-	 ((and (memq type '(headline inlinetask))
-	       ;; Not on tags.
-	       (let ((case-fold-search nil))
-		 (and (org-match-line org-complex-heading-regexp)
-		      (or (not (match-beginning 5))
-			  (< (point) (match-beginning 5))))))
-	  (let* ((data (org-offer-links-in-entry (current-buffer) (point) arg))
-		 (links (car data))
-		 (links-end (cdr data)))
-	    (if links
-		(dolist (link (if (stringp links) (list links) links))
-		  (search-forward link nil links-end)
-		  (goto-char (match-beginning 0))
-		  (org-open-at-point))
-	      (require 'org-attach)
-	      (org-attach-reveal 'if-exists))))
+	 ;; a link, a footnote reference.
+	 ((memq type '(headline inlinetask))
+	  (org-match-line org-complex-heading-regexp)
+	  (if (and (match-beginning 5)
+		   (>= (point) (match-beginning 5))
+		   (< (point) (match-end 5)))
+	      ;; On tags.
+	      (org-tags-view arg (substring (match-string 5) 0 -1))
+	    ;; Not on tags.
+	    (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
+	      (`(nil . ,_)
+	       (require 'org-attach)
+	       (org-attach-reveal 'if-exists))
+	      (`(,links . ,links-end)
+	       (dolist (link (if (stringp links) (list links) links))
+		 (search-forward link nil links-end)
+		 (goto-char (match-beginning 0))
+		 (org-open-at-point))))))
 	 ;; On a footnote reference or at definition's label.
 	 ((or (eq type 'footnote-reference)
 	      (and (eq type 'footnote-definition)
@@ -10829,14 +10830,6 @@ a timestamp or a link."
 		(point)))
 	  (user-error "No link found"))
 	 ((eq type 'timestamp) (org-follow-timestamp-link))
-	 ;; On tags within a headline or an inlinetask.
-	 ((and (memq type '(headline inlinetask))
-	       (let ((case-fold-search nil))
-		 (save-excursion (beginning-of-line)
-				 (looking-at org-complex-heading-regexp))
-		 (and (match-beginning 5)
-		      (>= (point) (match-beginning 5)))))
-	  (org-tags-view arg (substring (match-string 5) 0 -1)))
 	 ((eq type 'link)
 	  ;; When link is located within the description of another
 	  ;; link (e.g., an inline image), always open the parent
