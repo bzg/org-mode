@@ -5497,7 +5497,7 @@ Paragraph<point>"
   ;; full file name.
   (should
    (org-test-with-temp-text-in-file "* H1"
-     (let* ((filename (buffer-file-name))
+     (let* ((filename (file-truename (buffer-file-name)))
 	    (org-refile-use-outline-path 'full-file-path)
 	    (org-refile-targets `(((,filename) :level . 1))))
        (member filename (mapcar #'car (org-refile-get-targets))))))
