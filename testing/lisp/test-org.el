@@ -375,7 +375,9 @@
   "Test `org-deadline-close-p' specifications."
   ;; Pretend that the current time is 2016-06-03 Fri 01:43
   (cl-letf (((symbol-function 'current-time)
-	     (lambda () '(22353 6425 905205 644000))))
+	     (lambda ()
+	       (apply #'encode-time
+		      (org-parse-time-string "2016-06-03 Fri 01:43")))))
     ;; Timestamps are close if they are within `ndays' of lead time.
     (org-test-with-temp-text "* Heading"
       (should (org-deadline-close-p "2016-06-03 Fri" 0))
