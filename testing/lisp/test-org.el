@@ -2468,6 +2468,23 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
      (org-open-at-point)
      (eq (org-element-type (org-element-context)) 'radio-target))))
 
+(ert-deftest test-org/open-at-point/tag ()
+  "Test `org-open-at-point' on tags."
+  (should
+   (org-test-with-temp-text "* H :<point>tag:"
+     (catch :result
+       (cl-letf (((symbol-function 'org-tags-view)
+		  (lambda (&rest args) (throw :result t))))
+	 (org-open-at-point)
+	 nil))))
+  (should-not
+   (org-test-with-temp-text-in-file "* H<point> :tag:"
+     (catch :result
+       (cl-letf (((symbol-function 'org-tags-view)
+		  (lambda (&rest args) (throw :result t))))
+	 (org-open-at-point)
+	 nil)))))
+
 ;;;; Stored links
 
 (ert-deftest test-org/store-link ()
