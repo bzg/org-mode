@@ -423,33 +423,35 @@ used as a communication channel."
 	    ;; Options, if any.
 	    (let* ((beamer-opt (org-element-property :BEAMER_OPT headline))
 		   (options
-		    ;; Collect options from default value and headline's
-		    ;; properties.  Also add a label for links.
-		    (append
-		     (org-split-string
-		      (plist-get info :beamer-frame-default-options) ",")
-		     (and beamer-opt
-			  (org-split-string
-			   ;; Remove square brackets if user provided
-			   ;; them.
-			   (and (string-match "^\\[?\\(.*\\)\\]?$" beamer-opt)
-				(match-string 1 beamer-opt))
-			   ","))
-		     ;; Provide an automatic label for the frame
-		     ;; unless the user specified one.  Also refrain
-		     ;; from labeling `allowframebreaks' frames; this
-		     ;; is not allowed by beamer.
-		     (unless (and beamer-opt
-				  (or (string-match "\\(^\\|,\\)label=" beamer-opt)
-				      (string-match "allowframebreaks" beamer-opt)))
-		       (list
-			(let ((label (org-beamer--get-label headline info)))
-			  ;; Labels containing colons need to be
-			  ;; wrapped within braces.
-			  (format (if (string-match-p ":" label)
-				      "label={%s}"
-				    "label=%s")
-				  label)))))))
+		    ;; Collect nonempty options from default value and
+		    ;; headline's properties.  Also add a label for
+		    ;; links.
+		    (cl-remove-if-not 'org-string-nw-p
+		     (append
+		      (org-split-string
+		       (plist-get info :beamer-frame-default-options) ",")
+		      (and beamer-opt
+			   (org-split-string
+			    ;; Remove square brackets if user provided
+			    ;; them.
+			    (and (string-match "^\\[?\\(.*\\)\\]?$" beamer-opt)
+				 (match-string 1 beamer-opt))
+			    ","))
+		      ;; Provide an automatic label for the frame
+		      ;; unless the user specified one.  Also refrain
+		      ;; from labeling `allowframebreaks' frames; this
+		      ;; is not allowed by beamer.
+		      (unless (and beamer-opt
+				   (or (string-match "\\(^\\|,\\)label=" beamer-opt)
+				       (string-match "allowframebreaks" beamer-opt)))
+			(list
+			 (let ((label (org-beamer--get-label headline info)))
+			   ;; Labels containing colons need to be
+			   ;; wrapped within braces.
+			   (format (if (string-match-p ":" label)
+				       "label={%s}"
+				     "label=%s")
+				   label))))))))
 	      ;; Change options list into a string.
 	      (org-beamer--normalize-argument
 	       (mapconcat
