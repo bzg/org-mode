@@ -540,6 +540,10 @@ inlinetask within the section."
 		   (org-export-get-node-property
 		    :LOCATION entry
 		    (org-property-inherit-p "LOCATION"))))
+	     (class (org-icalendar-cleanup-string
+		     (org-export-get-node-property
+		      :CLASS entry
+		      (org-property-inherit-p "CLASS"))))
 	     ;; Build description of the entry from associated section
 	     ;; (headline) or contents (inlinetask).
 	     (desc
@@ -568,14 +572,14 @@ inlinetask within the section."
 		       org-icalendar-use-deadline)
 		 (org-icalendar--vevent
 		  entry deadline (concat "DL-" uid)
-		  (concat "DL: " summary) loc desc cat tz)))
+		  (concat "DL: " summary) loc desc cat tz class)))
 	  (let ((scheduled (org-element-property :scheduled entry)))
 	    (and scheduled
 		 (memq (if todo-type 'event-if-todo 'event-if-not-todo)
 		       org-icalendar-use-scheduled)
 		 (org-icalendar--vevent
 		  entry scheduled (concat "SC-" uid)
-		  (concat "S: " summary) loc desc cat tz)))
+		  (concat "S: " summary) loc desc cat tz class)))
 	  ;; When collecting plain timestamps from a headline and its
 	  ;; title, skip inlinetasks since collection will happen once
 	  ;; ENTRY is one of them.
@@ -593,7 +597,7 @@ inlinetask within the section."
 			   ((t) t)))
 		   (let ((uid (format "TS%d-%s" (cl-incf counter) uid)))
 		     (org-icalendar--vevent
-		      entry ts uid summary loc desc cat tz))))
+		      entry ts uid summary loc desc cat tz class))))
 	       info nil (and (eq type 'headline) 'inlinetask))
 	     ""))
 	  ;; Task: First check if it is appropriate to export it.  If
@@ -607,7 +611,7 @@ inlinetask within the section."
 			     (not (org-icalendar-blocked-headline-p
 				   entry info))))
 		       ((t) (eq todo-type 'todo))))
-	    (org-icalendar--vtodo entry uid summary loc desc cat tz))
+	    (org-icalendar--vtodo entry uid summary loc desc cat tz class))
 	  ;; Diary-sexp: Collect every diary-sexp element within ENTRY
 	  ;; and its title, and transcode them.  If ENTRY is
 	  ;; a headline, skip inlinetasks: they will be handled
@@ -638,7 +642,7 @@ inlinetask within the section."
        contents))))
 
 (defun org-icalendar--vevent
-    (entry timestamp uid summary location description categories timezone)
+    (entry timestamp uid summary location description categories timezone class)
   "Create a VEVENT component.
 
 ENTRY is either a headline or an inlinetask element.  TIMESTAMP
@@ -648,7 +652,9 @@ summary or subject for the event.  LOCATION defines the intended
 venue for the event.  DESCRIPTION provides the complete
 description of the event.  CATEGORIES defines the categories the
 event belongs to.  TIMEZONE specifies a time zone for this event
-only.
+only.  CLASS contains the visibility attribute.  Three of them
+(\"PUBLIC\", \"CONFIDENTIAL\", and \"PRIVATE\") are predefined, others
+should be treated as \"PRIVATE\" if they are unknown to the iCalendar server.
 
 Return VEVENT component as a string."
   (org-icalendar-fold-string
@@ -669,6 +675,7 @@ Return VEVENT component as a string."
 		       (org-element-property :repeater-value timestamp)))
 	     "SUMMARY:" summary "\n"
 	     (and (org-string-nw-p location) (format "LOCATION:%s\n" location))
+	     (and (org-string-nw-p class) (format "CLASS:%s\n" class))
 	     (and (org-string-nw-p description)
 		  (format "DESCRIPTION:%s\n" description))
 	     "CATEGORIES:" categories "\n"
@@ -677,7 +684,7 @@ Return VEVENT component as a string."
 	     "END:VEVENT"))))
 
 (defun org-icalendar--vtodo
-  (entry uid summary location description categories timezone)
+  (entry uid summary location description categories timezone class)
   "Create a VTODO component.
 
 ENTRY is either a headline or an inlinetask element.  UID is the
@@ -712,6 +719,7 @@ Return VTODO component as a string."
 			  "\n"))
 	     "SUMMARY:" summary "\n"
 	     (and (org-string-nw-p location) (format "LOCATION:%s\n" location))
+	     (and (org-string-nw-p class) (format "CLASS:%s\n" class))
 	     (and (org-string-nw-p description)
 		  (format "DESCRIPTION:%s\n" description))
 	     "CATEGORIES:" categories "\n"
