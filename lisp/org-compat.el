@@ -61,6 +61,12 @@
   (defalias 'format-message 'format)
   (defalias 'gui-get-selection 'x-get-selection))
 
+(defun org-decode-time (&optional time zone)
+  "Backward-compatible function for `decode-time'."
+  (if (< emacs-major-version 25)
+      (decode-time time)
+    (decode-time time zone)))
+
 (unless (fboundp 'directory-name-p)
   (defun directory-name-p (name)
     "Return non-nil if NAME ends with a directory separator character."

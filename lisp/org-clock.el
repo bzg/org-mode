@@ -1440,7 +1440,7 @@ The time is always returned as UTC."
       (current-time))
      ((equal cmt "today")
       (setq org--msg-extra "showing today's task time.")
-      (let* ((dt (decode-time nil t))
+      (let* ((dt (org-decode-time nil t))
 	     (hour (nth 2 dt))
 	     (day (nth 3 dt)))
 	(if (< hour org-extend-today-until) (setf (nth 3 dt) (1- day)))
