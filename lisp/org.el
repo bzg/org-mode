@@ -14747,8 +14747,12 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
     (let ((current
 	   (when (re-search-forward "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t]*$"
 				    (line-end-position) t)
-	     (prog1 (nreverse (org-split-string (match-string 1) ":"))
-	       (replace-match ""))))
+	     (let ((tags (match-string 1)))
+	       ;; Clear current tags.
+	       (replace-match "")
+	       ;; Reverse the tags list so any new tag is appended to
+	       ;; the current list of tags.
+	       (nreverse (org-split-string tags ":")))))
 	  res)
       (pcase onoff
 	(`off (setq current (delete tag current)))
