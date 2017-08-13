@@ -1759,16 +1759,20 @@ NAME, or nil if no such block exists.  Set match data according
 to `org-babel-named-src-block-regexp'."
   (save-excursion
     (goto-char (point-min))
-    (ignore-errors
-      (org-next-block 1 nil (org-babel-named-src-block-regexp-for-name name)))))
+    (let ((regexp (org-babel-named-src-block-regexp-for-name name)))
+      (or (and (looking-at regexp)
+	       (progn (goto-char (match-beginning 1))
+		      (line-beginning-position)))
+	  (ignore-errors (org-next-block 1 nil))))))
 
 (defun org-babel-src-block-names (&optional file)
   "Returns the names of source blocks in FILE or the current buffer."
   (when file (find-file file))
   (save-excursion
     (goto-char (point-min))
-    (let ((re (org-babel-named-src-block-regexp-for-name))
-	  names)
+    (let* ((re (org-babel-named-src-block-regexp-for-name))
+	   (names (and (looking-at re)
+		       (list (match-string-no-properties 9)))))
       (while (ignore-errors (org-next-block 1 nil re))
 	(push (match-string-no-properties 9) names))
       names)))
