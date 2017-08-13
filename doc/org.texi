@@ -15541,6 +15541,7 @@ Org supports the following languages for the @samp{src} code blocks:
 Additional documentation for some languages are at
 @uref{http://orgmode.org/worg/org-contrib/babel/languages.html}.
 
+@vindex org-babel-load-languages
 By default, only @code{emacs-lisp} is enabled for evaluation.  To enable or
 disable other languages, customize the @code{org-babel-load-languages}
 variable either through the Emacs customization interface, or by adding code
