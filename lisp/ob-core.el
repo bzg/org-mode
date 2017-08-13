@@ -2269,21 +2269,22 @@ INFO may provide the values of these header arguments (in the
 		 ((member "prepend" result-params))) ; already there
 		(setq results-switches
 		      (if results-switches (concat " " results-switches) ""))
-		(let ((wrap (lambda (start finish &optional no-escape no-newlines
-				      inline-start inline-finish)
-			      (when inline
-				(setq start inline-start)
-				(setq finish inline-finish)
-				(setq no-newlines t))
-			      (goto-char end)
-			      (insert (concat finish (unless no-newlines "\n")))
-			      (goto-char beg)
-			      (insert (concat start (unless no-newlines "\n")))
-			      (unless no-escape
-				(org-escape-code-in-region (min (point) end) end))
-			      (goto-char end)
-			      (unless no-newlines (goto-char (point-at-eol)))
-			      (setq end (point-marker))))
+		(let ((wrap
+		       (lambda (start finish &optional no-escape no-newlines
+				 inline-start inline-finish)
+			 (when inline
+			   (setq start inline-start)
+			   (setq finish inline-finish)
+			   (setq no-newlines t))
+			 (let ((before-finish (marker-position end)))
+			   (goto-char end)
+			   (insert (concat finish (unless no-newlines "\n")))
+			   (goto-char beg)
+			   (insert (concat start (unless no-newlines "\n")))
+			   (unless no-escape
+			     (org-escape-code-in-region
+			      (min (point) before-finish) before-finish))
+			   (goto-char end))))
 		      (tabulablep
 		       (lambda (r)
 			 ;; Non-nil when result R can be turned into
@@ -2337,7 +2338,7 @@ INFO may provide the values of these header arguments (in the
 		    (insert (org-macro-escape-arguments
 			     (org-babel-chomp result "\n"))))
 		   (t (goto-char beg) (insert result)))
-		  (setq end (point-marker))
+		  (setq end (copy-marker (point) t))
 		  ;; possibly wrap result
 		  (cond
 		   ((assq :wrap (nth 2 info))
@@ -2374,11 +2375,12 @@ INFO may provide the values of these header arguments (in the
 		   ((and (not (funcall tabulablep result))
 			 (not (member "file" result-params)))
 		    (let ((org-babel-inline-result-wrap
-			   ;; Hard code {{{results(...)}}} on top of customization.
+			   ;; Hard code {{{results(...)}}} on top of
+			   ;; customization.
 			   (format "{{{results(%s)}}}"
 				   org-babel-inline-result-wrap)))
-		      (org-babel-examplify-region beg end results-switches inline)
-		      (setq end (point))))))
+		      (org-babel-examplify-region
+		       beg end results-switches inline)))))
 		;; Possibly indent results in par with #+results line.
 		(when (and (not inline) (numberp indent) (> indent 0)
 			   ;; In this case `table-align' does the work
@@ -2391,6 +2393,7 @@ INFO may provide the values of these header arguments (in the
 			(message "Code block returned no value.")
 		      (message "Code block produced no output."))
 		  (message "Code block evaluation complete.")))
+	    (set-marker end nil)
 	    (when outside-scope (narrow-to-region visible-beg visible-end))
 	    (set-marker visible-beg nil)
 	    (set-marker visible-end nil)))))))
