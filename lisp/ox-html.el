@@ -1812,27 +1812,30 @@ INFO is a plist used as a communication channel."
 (defun org-html--build-meta-info (info)
   "Return meta tags for exported document.
 INFO is a plist used as a communication channel."
-  (let ((protect-string
-	 (lambda (str)
-	   (replace-regexp-in-string
-	    "\"" "&quot;" (org-html-encode-plain-text str))))
-	(title (org-export-data (plist-get info :title) info))
-	(author (and (plist-get info :with-author)
-		     (let ((auth (plist-get info :author)))
-		       (and auth
-			    ;; Return raw Org syntax, skipping non
-			    ;; exportable objects.
-			    (org-element-interpret-data
-			     (org-element-map auth
-				 (cons 'plain-text org-element-all-objects)
-			       'identity info))))))
-	(description (plist-get info :description))
-	(keywords (plist-get info :keywords))
-	(charset (or (and org-html-coding-system
-			  (fboundp 'coding-system-get)
-			  (coding-system-get org-html-coding-system
-					     'mime-charset))
-		     "iso-8859-1")))
+  (let* ((protect-string
+          (lambda (str)
+            (replace-regexp-in-string
+             "\"" "&quot;" (org-html-encode-plain-text str))))
+         (title (org-export-data (plist-get info :title) info))
+         ;; Set title to an invisible character instead of leaving it
+         ;; empty, which is invalid.
+         (title (if (org-string-nw-p title) title "&lrm;"))
+         (author (and (plist-get info :with-author)
+                      (let ((auth (plist-get info :author)))
+                        (and auth
+                             ;; Return raw Org syntax, skipping non
+                             ;; exportable objects.
+                             (org-element-interpret-data
+                              (org-element-map auth
+                                  (cons 'plain-text org-element-all-objects)
+                                'identity info))))))
+         (description (plist-get info :description))
+         (keywords (plist-get info :keywords))
+         (charset (or (and org-html-coding-system
+                           (fboundp 'coding-system-get)
+                           (coding-system-get org-html-coding-system
+                                              'mime-charset))
+                      "iso-8859-1")))
     (concat
      (when (plist-get info :time-stamp-file)
        (format-time-string
