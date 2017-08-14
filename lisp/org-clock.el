@@ -591,8 +591,9 @@ cannot be translated."
   "Hook called in task selection just before prompting the user.")
 
 (defun org-clock-select-task (&optional prompt)
-  "Select a task that was recently associated with clocking."
-  (interactive)
+  "Select a task that was recently associated with clocking.
+Return marker position of the selected task.  Raise an error if
+there is no recent clock to choose from."
   (let (och chl sel-list rpl (i 0) s)
     ;; Remove successive dups from the clock history to consider
     (dolist (c org-clock-history)
