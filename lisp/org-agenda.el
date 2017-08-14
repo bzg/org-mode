@@ -9895,9 +9895,9 @@ The prefix arg is passed through to the command if possible."
 
 	(?s
 	 (let ((time
-		(or arg
-		    (org-read-date nil nil nil "(Re)Schedule to"
-				   org-overriding-default-time))))
+		(and (not arg)
+		     (org-read-date nil nil nil "(Re)Schedule to"
+				    org-overriding-default-time))))
 	   ;; Make sure to not prompt for a note when bulk
 	   ;; rescheduling as Org cannot cope with simultaneous notes.
 	   ;; Besides, it could be annoying depending on the number of
@@ -9908,9 +9908,9 @@ The prefix arg is passed through to the command if possible."
 		      (org-agenda-schedule arg ,time))))))
 	(?d
 	 (let ((time
-		(or arg
-		    (org-read-date nil nil nil "(Re)Set Deadline to"
-				   org-overriding-default-time))))
+		(and (not arg)
+		     (org-read-date nil nil nil "(Re)Set Deadline to"
+				    org-overriding-default-time))))
 	   ;; Make sure to not prompt for a note when bulk
 	   ;; rescheduling as Org cannot cope with simultaneous
 	   ;; notes.  Besides, it could be annoying depending on the
