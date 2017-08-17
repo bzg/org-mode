@@ -19881,6 +19881,8 @@ overwritten, and the table is not marked as requiring realignment."
 	  (call-interactively 'org-self-insert-command)))))
    ((and
      (org-at-table-p)
+     (eq N 1)
+     (not (org-region-active-p))
      (progn
        ;; Check if we blank the field, and if that triggers align.
        (and (featurep 'org-table) org-table-auto-blank-field
@@ -19894,7 +19896,6 @@ overwritten, and the table is not marked as requiring realignment."
 	      ;; width.
 	      (org-table-blank-field)))
        t)
-     (eq N 1)
      (looking-at "[^|\n]* \\( \\)|"))
     ;; There is room for insertion without re-aligning the table.
     (delete-region (match-beginning 1) (match-end 1))
