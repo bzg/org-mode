@@ -439,9 +439,6 @@ document with ~org-mark-ring-goto~ (default binding =C-c &=).
 
 See docstring for details.
 
-*** ~tags-todo~ custom searches now include DONE keywords
-~tags-todo~ is now equivalent to ~C-c a m~ instead of ~C-c a M~ unless
-you use "/!" markup when filtering TODO keywords.
 *** New option ~org-babel-uppercase-example-markers~
 
 This variable is a ~defcustom~ and replaces the variable
