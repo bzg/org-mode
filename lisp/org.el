@@ -19354,16 +19354,24 @@ boundaries."
     (org-with-wide-buffer
      (goto-char (or beg (point-min)))
      (let ((case-fold-search t)
-	   (file-extension-re (image-file-name-regexp)))
-       (while (re-search-forward "[][]\\[\\(?:file\\|[./~]\\)" end t)
+	   (file-extension-re (image-file-name-regexp))
+	   (link-abbrevs (append org-link-abbrev-alist-local
+				 org-link-abbrev-alist))
+	   ;; Check absolute, relative file names and explicit "file:"
+	   ;; links.  Also check link abbreviations since some might
+	   ;; expand to "file" links.
+	   (file-types-re (format "[][]\\[\\(?:file\\|[./~]%s\\)"
+				  (and link-abbrevs
+				       (format "\\|\\(?:%s:\\)"
+					       (regexp-opt link-abbrevs))))))
+       (while (re-search-forward file-types-re end t)
 	 (let ((link (save-match-data (org-element-context))))
-	   ;; Check if we're at an inline image.
-	   (when (and (equal (org-element-property :type link) "file")
+	   ;; Check if we're at an inline image, i.e., an image file
+	   ;; link without a description (unless INCLUDE-LINKED is
+	   ;; non-nil).
+	   (when (and (equal "file" (org-element-property :type link))
 		      (or include-linked
-			  (not (org-element-property :contents-begin link)))
-		      (let ((parent (org-element-property :parent link)))
-			(or (not (eq (org-element-type parent) 'link))
-			    (not (cdr (org-element-contents parent)))))
+			  (null (org-element-contents link)))
 		      (string-match-p file-extension-re
 				      (org-element-property :path link)))
 	     (let ((file (expand-file-name
