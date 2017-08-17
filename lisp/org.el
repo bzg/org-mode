@@ -19353,17 +19353,18 @@ boundaries."
       (when (fboundp 'clear-image-cache) (clear-image-cache)))
     (org-with-wide-buffer
      (goto-char (or beg (point-min)))
-     (let ((case-fold-search t)
-	   (file-extension-re (image-file-name-regexp))
-	   (link-abbrevs (append org-link-abbrev-alist-local
-				 org-link-abbrev-alist))
-	   ;; Check absolute, relative file names and explicit "file:"
-	   ;; links.  Also check link abbreviations since some might
-	   ;; expand to "file" links.
-	   (file-types-re (format "[][]\\[\\(?:file\\|[./~]%s\\)"
-				  (and link-abbrevs
-				       (format "\\|\\(?:%s:\\)"
-					       (regexp-opt link-abbrevs))))))
+     (let* ((case-fold-search t)
+	    (file-extension-re (image-file-name-regexp))
+	    (link-abbrevs (mapcar #'car
+				  (append org-link-abbrev-alist-local
+					  org-link-abbrev-alist)))
+	    ;; Check absolute, relative file names and explicit
+	    ;; "file:" links.  Also check link abbreviations since
+	    ;; some might expand to "file" links.
+	    (file-types-re (format "[][]\\[\\(?:file\\|[./~]%s\\)"
+				   (and link-abbrevs
+					(format "\\|\\(?:%s:\\)"
+						(regexp-opt link-abbrevs))))))
        (while (re-search-forward file-types-re end t)
 	 (let ((link (save-match-data (org-element-context))))
 	   ;; Check if we're at an inline image, i.e., an image file
@@ -19419,23 +19420,13 @@ boundaries."
 						nil
 						:width width)))
 		       (when image
-			 (let* ((link
-				 ;; If inline image is the description
-				 ;; of another link, be sure to
-				 ;; consider the latter as the one to
-				 ;; apply the overlay on.
-				 (let ((parent
-					(org-element-property :parent link)))
-				   (if (eq (org-element-type parent) 'link)
-				       parent
-				     link)))
-				(ov (make-overlay
-				     (org-element-property :begin link)
-				     (progn
-				       (goto-char
-					(org-element-property :end link))
-				       (skip-chars-backward " \t")
-				       (point)))))
+			 (let ((ov (make-overlay
+				    (org-element-property :begin link)
+				    (progn
+				      (goto-char
+				       (org-element-property :end link))
+				      (skip-chars-backward " \t")
+				      (point)))))
 			   (overlay-put ov 'display image)
 			   (overlay-put ov 'face 'default)
 			   (overlay-put ov 'org-image-overlay t)
