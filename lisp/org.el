@@ -14100,8 +14100,8 @@ for inclusion.  See `org-make-tags-matcher' for more information.
 As a special case, it can also be set to t (respectively nil) in
 order to match all (respectively none) headline.
 
-When TODO-ONLY is non-nil, only lines with a not-done TODO
-keyword are included in the output.
+When TODO-ONLY is non-nil, only lines with a TODO keyword are
+included in the output.
 
 START-LEVEL can be a string with asterisks, reducing the scope to
 headlines matching this string."
@@ -14186,7 +14186,7 @@ headlines matching this string."
 	  (when (and
 
 		 ;; eval matcher only when the todo condition is OK
-		 (and (or (not todo-only) (member todo org-not-done-keywords))
+		 (and (or (not todo-only) (member todo org-todo-keywords-1))
 		      (if (functionp matcher)
 			  (let ((case-fold-search t) (org-trust-scanner-tags t))
 			    (funcall matcher todo tags-list level))
@@ -14200,7 +14200,7 @@ headlines matching this string."
 
 		 ;; Check if timestamps are deselecting this entry
 		 (or (not todo-only)
-		     (and (member todo org-not-done-keywords)
+		     (and (member todo org-todo-keywords-1)
 			  (or (not org-agenda-tags-todo-honor-ignore-options)
 			      (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item))))))
 

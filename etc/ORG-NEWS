@@ -93,6 +93,11 @@ See docstring for changes.
 the string displayed after times in the agenda. See docstring for
 details.
 
+*** ~tags-todo~ custom searches now include DONE keywords
+
+Use "/!" markup when filtering TODO keywords to get only not-done TODO
+keywords.
+
 ** New features
 *** ~org-attach~ can move directory contents
 When setting a new directory for an entry, org-attach offers to move
