@@ -1743,7 +1743,8 @@ If you then set `org-html-htmlize-output-type' to `css', calls
 to the function `org-html-htmlize-region-for-paste' will
 produce code that uses these same face definitions."
   (interactive)
-  (require 'htmlize)
+  (or (require 'htmlize nil t)
+      (error "Please install htmlize from https://github.com/hniksic/emacs-htmlize"))
   (and (get-buffer "*html*") (kill-buffer "*html*"))
   (with-temp-buffer
     (let ((fl (face-list))
@@ -2165,7 +2166,9 @@ is the language used for CODE, as a string, or nil."
       ;; Simple transcoding.
       (org-html-encode-plain-text code))
      ;; Case 2: No htmlize or an inferior version of htmlize
-     ((not (and (require 'htmlize nil t) (fboundp 'htmlize-region-for-paste)))
+     ((not (and (or (require 'htmlize nil t)
+		    (error "Please install htmlize from https://github.com/hniksic/emacs-htmlize"))
+		(fboundp 'htmlize-region-for-paste)))
       ;; Emit a warning.
       (message "Cannot fontify src block (htmlize.el >= 1.34 required)")
       ;; Simple transcoding.
