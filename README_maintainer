@@ -89,26 +89,33 @@ Org and contributed libraries.
 org-latest* snapshots are built from the *master* branch.
 
 * Synchronization Org and upstream Emacs
+
 Below it is described how Org is kept in sync with the upstream Emacs.
+
 ** Backporting changes from upstream Emacs
+
 Sometimes Emacs maintainers make changes to Org files.  The process of
 propagating the changes back to the Org repository is called
 /backporting/ for historical reasons.
 
 To find changes that need to be backported from the Emacs repository,
 the following =git= command, courtesy of [[http://permalink.gmane.org/gmane.emacs.devel/215861][Kyle Meyer]], can be used:
+
 #+begin_src shell
   git log $rev..origin/emacs-25 -- lisp/org doc/misc/org.texi \
     etc/refcards/orgcard.tex etc/ORG-NEWS etc/org \
     etc/schema/od-manifest-schema-v1.2-os.rnc \
     etc/schema/od-schema-v1.2-os.rnc
 #+end_src
+
 here, =$rev= is the last commit from the =emacs-25= branch that was
 backported.  The should also be done for the =master= branch.
 
 There is also a [[http://git.savannah.gnu.org/cgit/emacs.git/atom/lisp/org/][feed]] to keep track of new changes in the =lisp/org=
 folder in the Emacs repository.
+
 ** Updating the Org version in upstream Emacs
+
 New releases of Org should be added to the [[https://git.savannah.gnu.org/cgit/emacs.git][Emacs repository]].
 
 Typically, Org can be synchronized by copying over files from the
@@ -124,55 +131,69 @@ has been tested.
 
 Please see [[http://git.savannah.gnu.org/cgit/emacs.git/tree/CONTRIBUTE][CONTRIBUTE]] in the Emacs repository for guidelines on
 contributing to the Emacs repository.
+
 *** Where to files go
+
 The following list shows where files in Org repository are copied to in
 the Emacs repository, folder by folder.
+
 **** =org-mode/doc=
+
 - =org.texi= :: Copy to =emacs/doc/misc=.  It may be necessary to replace,
-                ~@include org-version.inc~ with ~@set VERSION 9.0.9~ or
-                similar.
+     ~@include org-version.inc~ with ~@set VERSION 9.0.9~ or similar.
+
 - =orgcard.tex= :: Copy to =emacs/doc/refcards=.  Make sure that
-                   ~\def\orgversionnumber~ and ~\def\versionyear~ are up
-                   to date.
+     ~\def\orgversionnumber~ and ~\def\versionyear~ are up to date.
+
 - =library-of-babel.org= :: Copy to =emacs/etc/org=.
+
 ****  =org-mode/etc=
+
 - =styles/*= :: Copy to =emacs/etc/org=.
+
 - =schema/*.rnc= :: Copy to =emacs/etc/schema=.
+
 - =schema/schemas.xml= :: Any new entries in this file should be added
      to =emacs/etc/schema/schemas.xml=.
+
 - =ORG-NEWS= :: Copy to =emacs/etc=
+
 **** =org-mode/lisp=
-- Copy =*.el= files to  =emacs/lisp/org=, except =org-loaddefs.el=!
+
+- Copy =*.el= files to =emacs/lisp/org=, except =org-loaddefs.el=!
+
 - You should create =org-version.el= in =emacs/lisp/org=.  The file is
   created when you =make= Org.
+
 **** TODO =org-mode/testing=
+
 * Updating the list of hooks/commands/options on Worg
 
-  Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=.
+Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=.
 
-  This will produce an org file with the documentation.
+This will produce an org file with the documentation.
 
-  Import this file into =worg/doc.org=, leaving the header untouched
-  (except for the release number).
+Import this file into =worg/doc.org=, leaving the header untouched
+(except for the release number).
 
-  Then commit and push the change on the =worg.git= repository.
+Then commit and push the change on the =worg.git= repository.
 
 * Copyright assignments
 
-  The maintainer needs to keep track of copyright assignments.
-  Even better, find a volunteer to do this.
+The maintainer needs to keep track of copyright assignments.  Even
+better, find a volunteer to do this.
 
-  The assignment form is included in the repository as a file that
-  you can send to contributors: =request-assign-future.txt=
+The assignment form is included in the repository as a file that you
+can send to contributors: =request-assign-future.txt=
 
-  The list of all contributors from who we have the papers is kept on
-  Worg at http://orgmode.org/worg/org-contribute.html, so that
-  committers can check if a patch can go into the core.
+The list of all contributors from who we have the papers is kept on
+Worg at http://orgmode.org/worg/org-contribute.html, so that
+committers can check if a patch can go into the core.
 
-  The assignment process does not allways go smoothly, and it has
-  happened several times that it gets stuck or forgotten at the FSF.
-  The contact at the FSF for this is: mailto:copyright-clerk@fsf.org
+The assignment process does not allways go smoothly, and it has
+happened several times that it gets stuck or forgotten at the FSF.
+The contact at the FSF for this is: mailto:copyright-clerk@fsf.org
 
-  Emails from the paper submitter have been ignored in the past, but
-  an email from me (Carsten) as the maintainer of Org mode has usually
-  fixed such cases within a few days.
+Emails from the paper submitter have been ignored in the past, but an
+email from me (Carsten) as the maintainer of Org mode has usually
+fixed such cases within a few days.
