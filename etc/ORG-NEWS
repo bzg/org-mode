@@ -408,10 +408,17 @@ Call ~org-agenda-set-restriction-lock~ from the agenda.
 
 ** Miscellaneous
 
+*** The Library of Babel now on Worg
+
+The library-of-babel.org used to be accessible from the =doc/=
+directory, distributed with Org’s core.  It is now accessible
+from the Worg community-driven documentation [[http://orgmode.org/worg/library-of-babel.html][here]].
+
+If you want to contribute to it, please see [[http://orgmode.org/worg/org-contribute.html][how to contribute]].
+
 *** Allow multiple columns view
 
 Columns view is not limited to a single buffer anymore.
-
 *** Org Attach obeys ~dired-dwim-target~
 
 When a Dired buffer is opened next to the Org document being edited,

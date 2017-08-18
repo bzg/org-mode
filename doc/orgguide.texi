@@ -2554,8 +2554,9 @@ manual for details.
 @subheading Library of Babel
 Use @kbd{C-c C-v l} to load the code blocks from an Org-mode files into the
 ``Library of Babel'', these blocks can then be evaluated from any Org-mode
-buffer.  A collection of generally useful code blocks is distributed with
-Org-mode in @code{contrib/library-of-babel.org}.
+buffer.  A collection of generally useful code blocks is accessible through
+Org-mode’s community-driven documentation on
+@uref{http://orgmode.org/worg/libary-of-babel.html,Worg}.
 
 @subheading Header Arguments
 Many aspects of the evaluation and export of code blocks are controlled
