@@ -98,6 +98,13 @@ details.
 Use "/!" markup when filtering TODO keywords to get only not-done TODO
 keywords.
 
+*** Removal of =ob-scala.el=
+
+See [[https://github.com/ensime/emacs-scala-mode/issues/114][this github issue]].
+
+You can use =ob-scala.el= as packaged in scala-mode, available from the
+MELPA repository.
+
 ** New features
 *** ~org-attach~ can move directory contents
 When setting a new directory for an entry, org-attach offers to move
