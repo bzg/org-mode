@@ -2240,12 +2240,6 @@ is t, then new columns should be added as needed"
   (should-error
    (org-test-with-temp-text "<point>a"
      (org-table-toggle-column-width)))
-  (should-error
-   (org-test-with-temp-text "| a |"
-     (org-table-toggle-column-width)))
-  (should-error
-   (org-test-with-temp-text "| a |<point>"
-     (org-table-toggle-column-width)))
   ;; A shrunk columns is overlaid with
   ;; `org-table-shrunk-column-indicator'.
   (should
@@ -2296,7 +2290,23 @@ is t, then new columns should be added as needed"
 	  (org-test-with-temp-text "| <3> |\n| <point>[[http://orgmode.org]] |"
 	    (org-table-toggle-column-width)
 	    (overlay-get (car (overlays-at (point))) 'display))))
-  ;; With optional argument ARG, toggle specified columns.
+  ;; Before the first column or after the last one, ask for columns
+  ;; ranges.
+  (should
+   (catch :exit
+     (org-test-with-temp-text "| a |"
+       (cl-letf (((symbol-function 'read-string)
+		  (lambda (&rest_) (throw :exit t))))
+	 (org-table-toggle-column-width)
+	 nil))))
+  (should
+   (catch :exit
+     (org-test-with-temp-text "| a |<point>"
+       (cl-letf (((symbol-function 'read-string)
+		  (lambda (&rest_) (throw :exit t))))
+	 (org-table-toggle-column-width)
+	 nil))))
+  ;; When optional argument ARG is a string, toggle specified columns.
   (should
    (equal org-table-shrunk-column-indicator
 	  (org-test-with-temp-text "| <point>a | b |"

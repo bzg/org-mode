@@ -4006,9 +4006,9 @@ If a width cookie specifies a width W for the column, the first
 W visible characters are displayed.  Otherwise, the column is
 shrunk to a single character.
 
-When optional argument ARG is a string, use it as white space
-separated list of column ranges.  A column range can be one of
-the following patterns:
+When point is before the first column or after the last one, ask
+for the columns to shrink or expand, as a list of ranges.
+A column range can be one of the following patterns:
 
   N    column N only
   N-M  every column between N and M (both inclusive)
@@ -4016,19 +4016,17 @@ the following patterns:
   -M   every column between the first one and M (inclusive)
   -    every column
 
-When called with `\\[universal-argument]' prefix, ask for the \
-range specification.
+When optional argument ARG is a string, use it as white space
+separated list of column ranges.
+
+When called with `\\[universal-argument]' prefix, call \
+`org-table-shrink', i.e.,
+shrink columns with a width cookie and expand the others.
 
 When called with `\\[universal-argument] \\[universal-argument]' \
 prefix, expand all columns."
   (interactive "P")
-  (cond ((not (org-at-table-p)) (user-error "Not in a table"))
-	((and (not arg)
-	      (save-excursion
-		(skip-chars-backward "^|" (line-beginning-position))
-		(or (bolp) (looking-at-p "[ \t]*$"))))
-	 ;; Point is either before first column or past last one.
-	 (user-error "Not in a valid column")))
+  (unless (org-at-table-p) (user-error "Not in a table"))
   (let* ((pos (point))
 	 (begin (org-table-begin))
 	 (end (org-table-end))
@@ -4036,40 +4034,51 @@ prefix, expand all columns."
 	 ;; Nonexistent columns are ignored anyway.
 	 (max-columns (/ (- (line-end-position) (line-beginning-position)) 2))
 	 (shrunk (org-table--list-shrunk-columns))
-	 (columns (pcase arg
-		    (`nil
-		     ;; Find current column, even when on a hline.
-		     (let ((separator (if (org-at-table-hline-p) "+" "|"))
-			   (c 1))
-		       (save-excursion
-			 (beginning-of-line)
-			 (search-forward "|" pos t)
-			 (while (search-forward separator pos t) (cl-incf c)))
-		       (list c)))
-		    ((pred stringp)
-		     (org-table--read-column-selection arg max-columns))
-		    (`(4)
-		     (org-table--read-column-selection
-		      (read-string "Column ranges (e.g. 2-4 6-): ")
-		      max-columns))
-		    (`(16) nil)
-		    (_ (user-error "Invalid argument: %S" arg)))))
-    (org-table--expand-all-columns begin end)
-    (unless (equal arg '(16))
-      (org-table--shrink-columns (cl-set-exclusive-or columns shrunk) begin end)
-      ;; Move before overlay if point is under it.
-      (let ((o (org-table--shrunk-field)))
-	(when o (goto-char (overlay-start o)))))))
+	 (columns
+	  (pcase arg
+	    (`nil
+	     (if (save-excursion
+		   (skip-chars-backward "^|" (line-beginning-position))
+		   (or (bolp) (looking-at-p "[ \t]*$")))
+		 ;; Point is either before first column or past last
+		 ;; one.  Ask for columns to operate on.
+		 (org-table--read-column-selection
+		  (read-string "Column ranges (e.g. 2-4 6-): ")
+		  max-columns)
+	       ;; Find current column, even when on a hline.
+	       (let ((separator (if (org-at-table-hline-p) "+" "|"))
+		     (c 1))
+		 (save-excursion
+		   (beginning-of-line)
+		   (search-forward "|" pos t)
+		   (while (search-forward separator pos t) (cl-incf c)))
+		 (list c))))
+	    ((pred stringp) (org-table--read-column-selection arg max-columns))
+	    ((or `(4) `(16)) nil)
+	    (_ (user-error "Invalid argument: %S" arg)))))
+    (pcase arg
+      (`(4) (org-table-shrink begin end))
+      (`(16) (org-table--expand-all-columns begin end))
+      (_
+       (org-table--expand-all-columns begin end)
+       (org-table--shrink-columns (cl-set-exclusive-or columns shrunk) begin end)
+       ;; Move before overlay if point is under it.
+       (let ((o (org-table--shrunk-field)))
+	 (when o (goto-char (overlay-start o))))))))
 
 ;;;###autoload
-(defun org-table-shrink ()
+(defun org-table-shrink (&optional begin end)
   "Shrink all columns with a width cookie in the table at point.
-Columns without a width cookie are expanded."
+
+Columns without a width cookie are expanded.
+
+Optional arguments BEGIN and END, when non-nil, specify the
+beginning and end position of the current table."
   (interactive)
-  (unless (org-at-table-p) (user-error "Not at a table"))
+  (unless (or begin (org-at-table-p)) (user-error "Not at a table"))
   (org-with-wide-buffer
-   (let ((begin (org-table-begin))
-	 (end (org-table-end))
+   (let ((begin (or begin (org-table-begin)))
+	 (end (or end (org-table-end)))
 	 (regexp "|[ \t]*<[lrc]?[0-9]+>[ \t]*\\(|\\|$\\)")
 	 (columns))
      (goto-char begin)
