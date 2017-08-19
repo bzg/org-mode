@@ -524,7 +524,7 @@ Field is restored even in case of abnormal exit."
     `(let ((,begin (copy-marker (org-table-begin)))
 	   (,end (copy-marker (org-table-end) t))
 	   (,shrunk-columns (org-table--list-shrunk-columns)))
-       (org-with-point-at ,begin (org-table--expand-all-columns ,begin ,end))
+       (org-with-point-at ,begin (org-table-expand ,begin ,end))
        (unwind-protect
 	   (progn ,@body)
 	 (org-table--shrink-columns ,shrunk-columns ,begin ,end)
@@ -1366,7 +1366,7 @@ However, when FORCE is non-nil, create new columns if necessary."
 	(beg (org-table-begin))
 	(end (copy-marker (org-table-end)))
 	(shrunk-columns (org-table--list-shrunk-columns)))
-    (org-table--expand-all-columns beg end)
+    (org-table-expand beg end)
     (org-table-save-field
      (goto-char beg)
      (while (< (point) end)
@@ -1379,7 +1379,7 @@ However, when FORCE is non-nil, create new columns if necessary."
     ;; columns again.
     (org-table--shrink-columns (mapcar (lambda (c) (if (< c col) c (1+ c)))
 				       shrunk-columns)
-			     beg end)
+			       beg end)
     (set-marker end nil)
     ;; Fix TBLFM formulas, if desirable.
     (when (or (not org-table-fix-formulas-confirm)
@@ -1440,7 +1440,7 @@ non-nil, the one above is used."
 	 (beg (org-table-begin))
 	 (end (copy-marker (org-table-end)))
 	 (shrunk-columns (remq col (org-table--list-shrunk-columns))))
-    (org-table--expand-all-columns beg end)
+    (org-table-expand beg end)
     (org-table-save-field
      (goto-char beg)
      (while (< (point) end)
@@ -1495,7 +1495,7 @@ non-nil, the one above is used."
     (when (and (not left) (looking-at "[^|\n]*|[^|\n]*$"))
       (user-error "Cannot move column further right"))
     (let ((shrunk-columns (org-table--list-shrunk-columns)))
-      (org-table--expand-all-columns beg end)
+      (org-table-expand beg end)
       (org-table-save-field
        (goto-char beg)
        (while (< (point) end)
@@ -3992,12 +3992,6 @@ table."
 	     (push new (cdr chain))
 	     (overlay-put new 'org-table-column-overlays chain))))))))
 
-(defun org-table--expand-all-columns (beg end)
-  "Expand all columns in an Org table.
-BEG and END are, respectively, the beginning position and the end
-position of the table."
-  (remove-overlays beg end 'org-overlay-type 'table-column-hide))
-
 ;;;###autoload
 (defun org-table-toggle-column-width (&optional arg)
   "Shrink or expand current column in an Org table.
@@ -4058,9 +4052,9 @@ prefix, expand all columns."
 	    (_ (user-error "Invalid argument: %S" arg)))))
     (pcase arg
       (`(4) (org-table-shrink begin end))
-      (`(16) (org-table--expand-all-columns begin end))
+      (`(16) (org-table-expand begin end))
       (_
-       (org-table--expand-all-columns begin end)
+       (org-table-expand begin end)
        (org-table--shrink-columns (cl-set-exclusive-or columns shrunk) begin end)
        ;; Move before overlay if point is under it.
        (let ((o (org-table--shrunk-field)))
@@ -4085,11 +4079,23 @@ beginning and end position of the current table."
      (while (re-search-forward regexp end t)
        (goto-char (match-beginning 1))
        (cl-pushnew (org-table-current-column) columns))
-     (org-table--expand-all-columns begin end)
+     (org-table-expand begin end)
      ;; Make sure invisible characters in the table are at the right
      ;; place since column widths take them into account.
      (org-font-lock-ensure begin end)
      (org-table--shrink-columns (sort columns #'<) begin end))))
+
+;;;###autoload
+(defun org-table-expand (&optional begin end)
+  "Expand all columns in the table at point.
+Optional arguments BEGIN and END, when non-nil, specify the
+beginning and end position of the current table."
+  (interactive)
+  (unless (or begin (org-at-table-p)) (user-error "Not at a table"))
+  (org-with-wide-buffer
+   (let ((begin (or begin (org-table-begin)))
+	 (end (or end (org-table-end))))
+     (remove-overlays begin end 'org-overlay-type 'table-column-hide))))
 
 
 
