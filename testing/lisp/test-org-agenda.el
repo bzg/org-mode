@@ -29,120 +29,98 @@
 
 ;; General auxilliaries
 
-;; (possibly better move to some location in the source.)
+(defun org-test-agenda--agenda-buffers ()
+  "Return agenda buffers in a list."
+  (cl-remove-if-not (lambda (x)
+		      (with-current-buffer x
+			(eq major-mode 'org-agenda-mode)))
+		    (buffer-list)))
 
-;; Prefixing with '---' on this page.
-
-;; Evaluate the following function for no brainer function naming.
-(defun ---sha1-as-defun-name-39e8857766df959d8b52f9c38739f5a77c392ec0 ()
-  "Insert the sha1 of the function text in front of arglist.
-The function text starts at the argument list and ends at the
-last paren (exclusive).
-Use this function if you are too lazy to invent a function name."
-  (interactive)
-  (let* ((start (progn
-		  (beginning-of-defun)
-		  (search-forward-regexp "\(" nil nil 2)
-		  (backward-char)
-		  (point)))
-	 (end (progn
-		(end-of-defun)
-		(backward-char)
-		(point)))
-	 (sha1 (sha1 (current-buffer) start end)))
-    (goto-char start)
-    (insert sha1 " ")
-    (backward-word)))
-
-(defun ---kill-all-agendas ()
+(defun org-test-agenda--kill-all-agendas ()
   "Kill all agenda buffers."
   (mapc #'kill-buffer
-        (cl-remove-if-not
-         (lambda (x)
-           (set-buffer x)
-           (eq major-mode 'org-agenda-mode))
-         (buffer-list))))
-
-(defun ---agenda-buffers ()
-    "Return agenda buffers in a list."
-    (cl-remove-if-not
-     (lambda (x)
-       (set-buffer x)
-       (eq major-mode 'org-agenda-mode))
-     (buffer-list)))
+	(org-test-agenda--agenda-buffers)))
 
 
 ;; Test the Agenda
 
-(ert-deftest org-agenda-90c5dce0435b74ba7e9682a4a9a393aeea741739 ()
+(ert-deftest test-org-agenda/empty ()
   "Empty agenda."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
-  (cl-assert (not (---agenda-buffers)) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
   (let ((org-agenda-span 'day)
         org-agenda-files)
     (org-agenda-list)
     (set-buffer org-agenda-buffer-name)
     (should (= 2 (count-lines (point-min) (point-max)))))
-  (---kill-all-agendas))
+  (org-test-agenda--kill-all-agendas))
 
-(ert-deftest org-agenda-668f0e69003051b79eb421146f7626ac9438c105 ()
+(ert-deftest test-org-agenda/one-line ()
   "One informative line in the agenda."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
-  (cl-assert (not (---agenda-buffers)) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
   (let ((org-agenda-span 'day)
-	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org" org-test-dir))))
+	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
+					       org-test-dir))))
     (org-agenda-list nil  "<2017-03-10 Fri>")
     (set-buffer org-agenda-buffer-name)
     (should (= 3 (count-lines (point-min) (point-max)))))
-  (---kill-all-agendas))
+  (org-test-agenda--kill-all-agendas))
 
-(ert-deftest org-agenda-91d525871b9003e779df915566bfc0cbf91a24a4 ()
+(ert-deftest test-org-agenda/scheduled-non-todo ()
   "One informative line in the agenda from scheduled non-todo-keyword-item."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
-  (cl-assert (not (---agenda-buffers)) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
   (let ((org-agenda-span 'day)
-	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org" org-test-dir))))
-    (org-agenda-list nil  "<2017-07-19 Wed>")
+	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
+					       org-test-dir))))
+    (org-agenda-list nil "<2017-07-19 Wed>")
     (set-buffer org-agenda-buffer-name)
-    (should (progn (goto-line 3) (looking-at " *agenda-file:Scheduled: *test agenda"))))
-  (---kill-all-agendas))
+    (should
+     (progn (goto-line 3)
+	    (looking-at " *agenda-file:Scheduled: *test agenda"))))
+  (org-test-agenda--kill-all-agendas))
 
-(ert-deftest org-agenda-8e6c85e9ff1ea9fed0ae0fa04ff9a3dace6c9d17 ()
+(ert-deftest test-org-agenda/sticky-agenda-name ()
   "Agenda buffer name after having created one sticky agenda buffer."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
-  (cl-assert (not (---agenda-buffers)) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
   (let ((org-agenda-span 'day)
 	(buf (get-buffer org-agenda-buffer-name))
         org-agenda-files)
     (when buf (kill-buffer buf))
     (org-test-with-temp-text "<2017-03-17 Fri>"
-			     (org-follow-timestamp-link) ; creates a sticky agenda.
-			     )
-    (---kill-all-agendas)
+      (org-follow-timestamp-link))	;creates a sticky agenda
+    (org-test-agenda--kill-all-agendas)
     (org-agenda-list)
-    (should (= 1 (length (---agenda-buffers))))
+    (should (= 1 (length (org-test-agenda--agenda-buffers))))
     (should (string= "*Org Agenda*"
-		     (buffer-name (car (---agenda-buffers))))))
-  (---kill-all-agendas))
+		     (buffer-name (car (org-test-agenda--agenda-buffers))))))
+  (org-test-agenda--kill-all-agendas))
 
-(ert-deftest org-agenda-9fa27658bf61d8fe2c5b6f9177e9e8ce07f11f7b ()
+(ert-deftest test-org-agenda/sticky-agenda-name-after-reload ()
   "Agenda buffer name of sticky agenda after reload."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
-  (cl-assert (not (---agenda-buffers)) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
   (org-toggle-sticky-agenda)
   (let (org-agenda-files)
     (org-agenda-list)
     (let* ((agenda-buffer-name
 	    (progn
-	      (assert (= 1 (length (---agenda-buffers))))
-	      (buffer-name (car (---agenda-buffers))))))
+	      (assert (= 1 (length (org-test-agenda--agenda-buffers))))
+	      (buffer-name (car (org-test-agenda--agenda-buffers))))))
       (set-buffer agenda-buffer-name)
       (org-agenda-redo)
-      (should (= 1 (length (---agenda-buffers))))
+      (should (= 1 (length (org-test-agenda--agenda-buffers))))
       (should (string= agenda-buffer-name
-                       (buffer-name (car (---agenda-buffers)))))))
+                       (buffer-name (car (org-test-agenda--agenda-buffers)))))))
   (org-toggle-sticky-agenda)
-  (---kill-all-agendas))
+  (org-test-agenda--kill-all-agendas))
 
 
 (provide 'test-org-agenda)
