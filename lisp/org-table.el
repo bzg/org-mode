@@ -81,17 +81,17 @@ are not run.")
 
 (defvar org-table-TBLFM-begin-regexp "^[ \t]*|.*\n[ \t]*#\\+TBLFM: ")
 
-(defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
+(defcustom orgtbl-optimized t
   "Non-nil means use the optimized table editor version for `orgtbl-mode'.
+
 In the optimized version, the table editor takes over all simple keys that
 normally just insert a character.  In tables, the characters are inserted
 in a way to minimize disturbing the table structure (i.e. in overwrite mode
 for empty fields).  Outside tables, the correct binding of the keys is
 restored.
 
-The default for this option is t if the optimized version is also used in
-Org mode.  See the variable `org-enable-table-editor' for details.  Changing
-this variable requires a restart of Emacs to become effective."
+Changing this variable requires a restart of Emacs to become
+effective."
   :group 'org-table
   :type 'boolean)
 
@@ -208,8 +208,7 @@ removal/insertion."
 (defcustom org-table-auto-blank-field t
   "Non-nil means automatically blank table field when starting to type into it.
 This only happens when typing immediately after a field motion
-command (TAB, S-TAB or RET).
-Only relevant when `org-enable-table-editor' is equal to `optimized'."
+command (TAB, S-TAB or RET)."
   :group 'org-table-editing
   :type 'boolean)
 

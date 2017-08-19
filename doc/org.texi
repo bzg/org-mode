@@ -2106,16 +2106,14 @@ create the above table, you would only type
 fields.  Even faster would be to type @code{|Name|Phone|Age} followed by
 @kbd{C-c @key{RET}}.
 
-@vindex org-enable-table-editor
 @vindex org-table-auto-blank-field
-When typing text into a field, Org treats @key{DEL},
-@key{Backspace}, and all character keys in a special way, so that
-inserting and deleting avoids shifting other fields.  Also, when
-typing @emph{immediately after the cursor was moved into a new field
-with @kbd{@key{TAB}}, @kbd{S-@key{TAB}} or @kbd{@key{RET}}}, the
-field is automatically made blank.  If this behavior is too
-unpredictable for you, configure the options
-@code{org-enable-table-editor} and @code{org-table-auto-blank-field}.
+When typing text into a field, Org treats @key{DEL}, @key{Backspace}, and all
+character keys in a special way, so that inserting and deleting avoids
+shifting other fields.  Also, when typing @emph{immediately after the cursor
+was moved into a new field with @kbd{@key{TAB}}, @kbd{S-@key{TAB}} or
+@kbd{@key{RET}}}, the field is automatically made blank.  If this behavior is
+too unpredictable for you, configure the option
+@code{org-table-auto-blank-field}.
 
 @table @kbd
 @tsubheading{Creation and conversion}

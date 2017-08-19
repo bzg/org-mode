@@ -1734,37 +1734,6 @@ This also applied for speedbar access."
   :tag "Org Table"
   :group 'org)
 
-(defcustom org-enable-table-editor 'optimized
-  "Non-nil means lines starting with \"|\" are handled by the table editor.
-When nil, such lines will be treated like ordinary lines.
-
-When equal to the symbol `optimized', the table editor will be optimized to
-do the following:
-- Automatic overwrite mode in front of whitespace in table fields.
-  This makes the structure of the table stay in tact as long as the edited
-  field does not exceed the column width.
-- Minimize the number of realigns.  Normally, the table is aligned each time
-  TAB or RET are pressed to move to another field.  With optimization this
-  happens only if changes to a field might have changed the column width.
-Optimization requires replacing the functions `self-insert-command',
-`delete-char', and `backward-delete-char' in Org buffers, with a
-slight (in fact: unnoticeable) speed impact for normal typing.  Org is very
-good at guessing when a re-align will be necessary, but you can always
-force one with `\\[org-ctrl-c-ctrl-c]'.
-
-If you would like to use the optimized version in Org mode, but the
-un-optimized version in OrgTbl-mode, see the variable `orgtbl-optimized'.
-
-This variable can be used to turn on and off the table editor during a session,
-but in order to toggle optimization, a restart is required.
-
-See also the variable `org-table-auto-blank-field'."
-  :group 'org-table
-  :type '(choice
-	  (const :tag "off" nil)
-	  (const :tag "on" t)
-	  (const :tag "on, optimized" optimized)))
-
 (defcustom org-self-insert-cluster-for-undo nil
   "Non-nil means cluster self-insert commands for undo when possible.
 If this is set, then, like in the Emacs command loop, 20 consecutive
@@ -19442,6 +19411,14 @@ boundaries."
 
 ;;;; Key bindings
 
+(defun org-remap (map &rest commands)
+  "In MAP, remap the functions given in COMMANDS.
+COMMANDS is a list of alternating OLDDEF NEWDEF command names."
+  (let (new old)
+    (while commands
+      (setq old (pop commands) new (pop commands))
+      (org-defkey map (vector 'remap old) new))))
+
 ;; Outline functions from `outline-mode-prefix-map'
 ;; that can be remapped in Org:
 (define-key org-mode-map [remap outline-mark-subtree] 'org-mark-subtree)
@@ -19494,6 +19471,7 @@ boundaries."
 (org-defkey org-mode-map [(tab)]      'org-cycle)
 (org-defkey org-mode-map [(control tab)] 'org-force-cycle-archived)
 (org-defkey org-mode-map "\M-\t" #'pcomplete)
+
 ;; The following line is necessary under Suse GNU/Linux
 (org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab)
 (org-defkey org-mode-map [(shift tab)]    'org-shifttab)
@@ -19566,8 +19544,13 @@ boundaries."
   (org-defkey org-mode-map [?\e (shift down)]   'org-shiftmetadown))
 
 ;; All the other keys
+(org-remap org-mode-map
+	   'self-insert-command 'org-self-insert-command
+	   'delete-char 'org-delete-char
+	   'delete-backward-char 'org-delete-backward-char)
+(org-defkey org-mode-map "|" 'org-force-self-insert)
 
-(org-defkey org-mode-map "\C-c\C-a" 'outline-show-all)  ; in case allout messed up.
+(org-defkey org-mode-map "\C-c\C-a" 'outline-show-all) ; in case allout messed up.
 (org-defkey org-mode-map "\C-c\C-r" 'org-reveal)
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "s" 'org-narrow-to-subtree)
@@ -20060,14 +20043,6 @@ because, in this case the deletion might narrow the column."
 (put 'org-self-insert-command 'pabbrev-expand-after-command t)
 (put 'orgtbl-self-insert-command 'pabbrev-expand-after-command t)
 
-(defun org-remap (map &rest commands)
-  "In MAP, remap the functions given in COMMANDS.
-COMMANDS is a list of alternating OLDDEF NEWDEF command names."
-  (let (new old)
-    (while commands
-      (setq old (pop commands) new (pop commands))
-      (org-defkey map (vector 'remap old) new))))
-
 (defun org-transpose-words ()
   "Transpose words for Org.
 This uses the `org-mode-transpose-word-syntax-table' syntax
@@ -20077,15 +20052,6 @@ word constituents."
   (with-syntax-table org-mode-transpose-word-syntax-table
     (call-interactively 'transpose-words)))
 (org-remap org-mode-map 'transpose-words 'org-transpose-words)
-
-(when (eq org-enable-table-editor 'optimized)
-  ;; If the user wants maximum table support, we need to hijack
-  ;; some standard editing functions
-  (org-remap org-mode-map
-	     'self-insert-command 'org-self-insert-command
-	     'delete-char 'org-delete-char
-	     'delete-backward-char 'org-delete-backward-char)
-  (org-defkey org-mode-map "|" 'org-force-self-insert))
 
 (defvar org-ctrl-c-ctrl-c-hook nil
   "Hook for functions attaching themselves to `C-c C-c'.
