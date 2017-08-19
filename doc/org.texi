@@ -7323,7 +7323,11 @@ dynamic insertion of content.  The templates are expanded in the order given her
             @r{%^@{prompt|default|completion2|completion3...@}.}
             @r{The arrow keys access a prompt-specific history.}
 %\1 @dots{} %\N @r{Insert the text entered at the Nth %^@{@var{prompt}@}, where @code{N} is}
-            @r{a number, starting from 1.}
+            @r{a number, starting from 1.@footnote{As required in Emacs
+               Lisp, it is necessary to escape any backslash character in
+               a string with another backslash.  So, in order to use
+               @samp{%\1} placeholder, you need to write @samp{%\\1} in
+               the template.}}
 %?          @r{After completing the template, position cursor here.}
 @end smallexample
 
