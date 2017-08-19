@@ -1614,6 +1614,85 @@ See also `test-org-table/copy-field'."
      (search-forward "| a |" nil t 3))))
 
 
+;;; Align
+
+(ert-deftest test-org-table/align ()
+  "Test `org-table-align' specifications."
+  ;; Regular test.
+  (should
+   (equal "| a |\n"
+	  (org-test-with-temp-text "|   a |"
+	    (org-table-align)
+	    (buffer-string))))
+  ;; Preserve alignment.
+  (should
+   (equal "  | a |\n"
+	  (org-test-with-temp-text "  |   a |"
+	    (org-table-align)
+	    (buffer-string))))
+  ;; Handle horizontal lines.
+  (should
+   (equal "| 123 |\n|-----|\n"
+	  (org-test-with-temp-text "| 123 |\n|-|"
+	    (org-table-align)
+	    (buffer-string))))
+  (should
+   (equal "| a | b |\n|---+---|\n"
+	  (org-test-with-temp-text "| a | b |\n|-+-|"
+	    (org-table-align)
+	    (buffer-string))))
+  ;; Handle empty fields.
+  (should
+   (equal "| a   | bc |\n| bcd |    |\n"
+	  (org-test-with-temp-text "| a | bc |\n| bcd |  |"
+	    (org-table-align)
+	    (buffer-string))))
+  (should
+   (equal "| abc | bc  |\n|     | bcd |\n"
+	  (org-test-with-temp-text "| abc | bc |\n| | bcd |"
+	    (org-table-align)
+	    (buffer-string))))
+  ;; Handle missing fields.
+  (should
+   (equal "| a | b |\n| c |   |\n"
+	  (org-test-with-temp-text "| a | b |\n| c |"
+	    (org-table-align)
+	    (buffer-string))))
+  (should
+   (equal "| a | b |\n|---+---|\n"
+	  (org-test-with-temp-text "| a | b |\n|---|"
+	    (org-table-align)
+	    (buffer-string))))
+  ;; Alignment is done to the right when the ratio of numbers in the
+  ;; column is superior to `org-table-number-fraction'.
+  (should
+   (equal "|   1 |\n|  12 |\n| abc |"
+	  (org-test-with-temp-text "| 1 |\n| 12 |\n| abc |"
+	    (let ((org-table-number-fraction 0.5)) (org-table-align))
+	    (buffer-string))))
+  (should
+   (equal "| 1   |\n| ab  |\n| abc |"
+	  (org-test-with-temp-text "| 1 |\n| ab |\n| abc |"
+	    (let ((org-table-number-fraction 0.5)) (org-table-align))
+	    (buffer-string))))
+  ;; Obey to alignment cookies.
+  (should
+   (equal "| <r> |\n|  ab |\n| abc |"
+	  (org-test-with-temp-text "| <r> |\n| ab |\n| abc |"
+	    (let ((org-table-number-fraction 0.5)) (org-table-align))
+	    (buffer-string))))
+  (should
+   (equal "| <l> |\n| 12  |\n| 123 |"
+	  (org-test-with-temp-text "| <l> |\n| 12 |\n| 123 |"
+	    (let ((org-table-number-fraction 0.5)) (org-table-align))
+	    (buffer-string))))
+  (should
+   (equal "| <c> |\n|  1  |\n| 123 |"
+	  (org-test-with-temp-text "| <c> |\n| 1 |\n| 123 |"
+	    (let ((org-table-number-fraction 0.5)) (org-table-align))
+	    (buffer-string)))))
+
+
 ;;; Sorting
 
 (ert-deftest test-org-table/sort-lines ()

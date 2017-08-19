@@ -2375,9 +2375,8 @@ set this option on a per-file basis with:
 
 If you would like to overrule the automatic alignment of number-rich columns
 to the right and of string-rich columns to the left, you can use @samp{<r>},
-@samp{<c>}@footnote{Centering does not work inside Emacs, but it does have an
-effect when exporting to HTML.} or @samp{<l>} in a similar fashion.  You may
-also combine alignment and field width like this: @samp{<r10>}.
+@samp{<c>} or @samp{<l>} in a similar fashion.  You may also combine
+alignment and field width like this: @samp{<r10>}.
 
 Lines which only contain these formatting cookies are removed automatically
 upon exporting the document.

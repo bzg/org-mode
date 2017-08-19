@@ -772,6 +772,18 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 
 (defvar org-last-recalc-line nil)
 
+(defun org-table--align-field (field width align)
+  "Format FIELD according to column WIDTH and alignement ALIGN.
+FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
+\"l\" or\"r\"."
+  (let* ((spaces (- width (org-string-width field)))
+	 (prefix (pcase align
+		   ("l" "")
+		   ("r" (make-string spaces ?\s))
+		   ("c" (make-string (/ spaces 2) ?\s))))
+	 (suffix (make-string (- spaces (length prefix)) ?\s)))
+    (concat " " prefix field suffix " ")))
+
 ;;;###autoload
 (defun org-table-align ()
   "Align the table at point by aligning all vertical bars."
@@ -791,100 +803,83 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	      (save-excursion
 		(re-search-forward "|[ \t]*<[lrc][0-9]*>[ \t]*\\(?:|\\|$\\)"
 				   end t)))
-	     ;; Table's rows.  Rules are replaced by nil.  Trailing
-	     ;; spaces are removed.
-	     (lines (mapcar
-		     (lambda (l)
-		       (and (not (string-match-p org-table-hline-regexp l))
-			    l))
-		     (split-string (buffer-substring beg end) "\n" t "[ \t]")))
-	     ;; List of lists of data fields.
-	     (fields (mapcar (lambda (l) (org-split-string l "[ \t]*|[ \t]*"))
-			     (remq nil lines)))
-	     ;; Compute number of fields in the longest line.  If the
-	     ;; table contains no field, create a default table.
-	     (maxfields (if fields (apply #'max (mapcar #'length fields))
-			  (kill-region beg end)
-			  (org-table-create org-table-default-size)
-			  (user-error "Empty table - created default table")))
-	     ;; A list of empty strings to fill any short rows on output.
-	     (emptycells (make-list maxfields ""))
-	     lengths typenums)
+	     ;; Table's rows as lists of fields.  Rules are replaced
+	     ;; by nil.  Trailing spaces are removed.
+	     (fields (mapcar
+		      (lambda (l)
+			(and (not (string-match-p org-table-hline-regexp l))
+			     (org-split-string l "[ \t]*|[ \t]*")))
+		      (split-string (buffer-substring beg end) "\n" t "[ \t]")))
+	     ;; Compute number of columns.  If the table contains no
+	     ;; field, create a default table and bail out.
+	     (columns-number
+	      (if fields (apply #'max (mapcar #'length fields))
+		(kill-region beg end)
+		(org-table-create org-table-default-size)
+		(user-error "Empty table - created default table")))
+	     (widths nil)
+	     (alignments nil))
 	;; Compute alignment and width for each column.
-	(dotimes (i maxfields)
+	(dotimes (i columns-number)
 	  (let* ((column (mapcar (lambda (x) (or (nth i x) ""))
 				 fields))
-		 (falign
-		  (and align-cookie?
-		       (cl-some (lambda (cell)
-				  (and (string-match "\\`<\\([lrc]\\)[0-9]*>\\'"
-						     cell)
-				       (match-string 1 cell)))
-				column))))
-	    ;; Get the maximum width for each column.
-	    (push (apply #'max 1 (mapcar #'org-string-width column))
-		  lengths)
-	    ;; If there is no alignment cookie, get the fraction of
+		 (width (apply #'max 1 (mapcar #'org-string-width column))))
+	    ;; Store the maximum width for the column.
+	    (push width widths)
+	    ;; If there is no alignment cookie get the fraction of
 	    ;; numbers among non-empty cells to decide about alignment
 	    ;; of the column.
-	    (if falign (push (equal (downcase falign) "r") typenums)
-	      (let ((cnt 0)
-		    (frac 0.0))
-		(dolist (x column)
-		  (unless (equal x "")
-		    (setq frac
-			  (/ (+ (* frac cnt)
-				(if (string-match-p org-table-number-regexp x)
-				    1
-				  0))
-			     (cl-incf cnt)))))
-		(push (>= frac org-table-number-fraction) typenums)))))
-	(setq lengths (nreverse lengths))
-	(setq typenums (nreverse typenums))
+	    (push (cond
+		   ((= width 1) "r")	;doesn't matter
+		   ((and align-cookie?
+			 (cl-some
+			  (lambda (f)
+			    (and (string-match "\\`<\\([lrc]\\)[0-9]*>\\'" f)
+				 (match-string-no-properties 1 f)))
+			  column)))
+		   ((let ((numbers 0)
+			  (non-empty 0))
+		      (dolist (field column)
+			(unless (equal "" field)
+			  (cl-incf non-empty)
+			  (when (string-match-p org-table-number-regexp field)
+			    (cl-incf numbers))))
+		      (>= numbers (* org-table-number-fraction non-empty)))
+		    "r")
+		   (t "l"))
+		  alignments)))
+	(setq widths (nreverse widths))
+	(setq alignments (nreverse alignments))
 	;; Store alignment of this table, for later editing of single
 	;; fields.
-	(setq org-table-last-alignment typenums)
-	(setq org-table-last-column-widths lengths)
-	;; With invisible characters, `format' does not get the field
-	;; width right So we need to make these fields wide by hand.
-	;; Invisible characters may be introduced by fontified links,
-	;; emphasis, macros or sub/superscripts.
-	(when (or (text-property-any beg end 'invisible 'org-link)
-		  (text-property-any beg end 'invisible t))
-	  (dotimes (i maxfields)
-	    (let ((len (nth i lengths)))
-	      (dotimes (j (length fields))
-		(let* ((c (nthcdr i (nth j fields)))
-		       (cell (car c)))
-		  (when (and
-			 (stringp cell)
-			 (let ((l (length cell)))
-			   (or (text-property-any 0 l 'invisible 'org-link cell)
-			       (text-property-any beg end 'invisible t)))
-			 (< (org-string-width cell) len))
-		    (let ((s (make-string (- len (org-string-width cell)) ?\s)))
-		      (setcar c (if (nth i typenums) (concat s cell)
-				  (concat cell s))))))))))
-
-	;; Compute the formats needed for output of the table.
-	(let ((hfmt (concat indent "|"))
-	      (rfmt (concat indent "|"))
-	      (rfmt1 " %%%s%ds |")
-	      (hfmt1 "-%s-+"))
-	  (dolist (l lengths (setq hfmt (concat (substring hfmt 0 -1) "|")))
-	    (let ((ty (if (pop typenums) "" "-"))) ; Flush numbers right.
-	      (setq rfmt (concat rfmt (format rfmt1 ty l)))
-	      (setq hfmt (concat hfmt (format hfmt1 (make-string l ?-))))))
-	  ;; Replace modified lines only.
-	  (dolist (l lines)
-	    (let ((line
-		   (if l (apply #'format rfmt (append (pop fields) emptycells))
-		     hfmt))
-		  (previous (buffer-substring (point) (line-end-position))))
-	      (if (equal previous line)
-		  (forward-line)
-		(insert line "\n")
-		(delete-region (point) (line-beginning-position 2))))))
+	(setq org-table-last-alignment alignments)
+	(setq org-table-last-column-widths widths)
+	;; Build new table rows.  Only replace rows that actually
+	;; changed.
+	(dolist (row fields)
+	  (let ((previous (buffer-substring (point) (line-end-position)))
+		(new
+		 (format "%s|%s|"
+			 indent
+			 (if (null row)	;horizontal rule
+			     (mapconcat (lambda (w) (make-string (+ 2 w) ?-))
+					widths
+					"+")
+			   (let ((cells	;add missing fields
+				  (append row
+					  (make-list (- columns-number
+							(length row))
+						     ""))))
+			     (mapconcat #'identity
+					(cl-mapcar #'org-table--align-field
+						   cells
+						   widths
+						   alignments)
+					"|"))))))
+	    (if (equal new previous)
+		(forward-line)
+	      (insert new "\n")
+	      (delete-region (point) (line-beginning-position 2)))))
 	(set-marker end nil)
 	(when org-table-overlay-coordinates (org-table-overlay-coordinates))
 	(setq org-table-may-need-update nil))))))
@@ -946,22 +941,27 @@ Optional argument NEW may specify text to replace the current field content."
 	(skip-chars-backward "^|")
 	(if (not (looking-at " *\\([^|\n]*?\\) *\\(|\\|$\\)"))
 	    (setq org-table-may-need-update t)
-	  (let* ((numbers? (nth (1- col) org-table-last-alignment))
+	  (let* ((align (nth (1- col) org-table-last-alignment))
+		 (width (nth (1- col) org-table-last-column-widths))
 		 (cell (match-string 0))
 		 (field (match-string 1))
-		 (len (max 1 (- (org-string-width cell) 3)))
 		 (properly-closed? (/= (match-beginning 2) (match-end 2)))
-		 (fmt (format (if numbers? " %%%ds %s" " %%-%ds %s")
-			      len
-			      (if properly-closed? "|"
-				(setq org-table-may-need-update t)
-				"")))
 		 (new-cell
-		  (cond ((not new) (format fmt field))
-			((<= (org-string-width new) len) (format fmt new))
-			(t
-			 (setq org-table-may-need-update t)
-			 (format " %s |" new)))))
+		  (save-match-data
+		    (cond (org-table-may-need-update
+			   (format " %s |" (or new field)))
+			  ((not properly-closed?)
+			   (setq org-table-may-need-update t)
+			   (format " %s |" (or new field)))
+			  ((not new)
+			   (concat (org-table--align-field field width align)
+				   "|"))
+			  ((<= (org-string-width new) width)
+			   (concat (org-table--align-field new width align)
+				   "|"))
+			  (t
+			   (setq org-table-may-need-update t)
+			   (format " %s |" new))))))
 	    (unless (equal new-cell cell)
 	      (let (org-table-may-need-update)
 		(replace-match new-cell t t)))
@@ -5756,9 +5756,9 @@ list of the fields in the rectangle."
 	  org-table-current-line-types
 	  org-table-current-begin-pos org-table-dlines
 	  org-table-current-ncol
-	  org-table-hlines org-table-last-alignment
-	  org-table-last-column-widths org-table-last-alignment
+	  org-table-hlines
 	  org-table-last-column-widths
+	  org-table-last-alignment
 	  buffer loc)
       (setq form (org-table-convert-refs-to-rc form))
       (org-with-wide-buffer
