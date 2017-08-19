@@ -809,7 +809,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
              ;; Find fields that are wider than FMAX, and shorten them.
              (when fmax
                (dolist (x column)
-                 (when (> (org-string-width x) fmax)
+                 (when (> (string-width x) fmax)
                    (org-add-props x nil
                      'help-echo
                      (concat
@@ -837,7 +837,7 @@ edit.  Full value is:\n"
                       (list 'display org-narrow-column-arrow)
                       x))))))
            ;; Get the maximum width for each column
-           (push (apply #'max (or fmax 1) 1 (mapcar #'org-string-width column))
+           (push (or fmax (apply #'max 1 (mapcar #'org-string-width column)))
                  lengths)
            ;; Get the fraction of numbers among non-empty cells to
            ;; decide about alignment of the column.
