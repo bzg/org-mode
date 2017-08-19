@@ -40,26 +40,26 @@ Current buffer is a copy of the original buffer."
 
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers ()
   "Testing export without any headlines in the Org mode file."
-  (require 'ox-html)
-  (let ((html-file (concat (file-name-sans-extension org-test-no-heading-file)
-			   ".html")))
-    (when (file-exists-p html-file) (delete-file html-file))
+  (require 'ox-ascii)
+  (let ((text-file (concat (file-name-sans-extension org-test-no-heading-file)
+			   ".txt")))
+    (when (file-exists-p text-file) (delete-file text-file))
     (org-test-in-example-file org-test-no-heading-file
       ;; Export the file to HTML.
-      (org-export-to-file 'html html-file))
-    ;; should create a .html file
-    (should (file-exists-p html-file))
+      (org-export-to-file 'ascii text-file))
+    ;; should create a ".txt" file
+    (should (file-exists-p text-file))
     ;; should not create a file with "::" appended to its name
     (should-not (file-exists-p (concat org-test-no-heading-file "::")))
-    (when (file-exists-p html-file) (delete-file html-file))))
+    (when (file-exists-p text-file) (delete-file text-file))))
 
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-file ()
   "Testing export from buffers which are not visiting any file."
-  (require 'ox-html)
-  (let ((name (generate-new-buffer-name "*Org HTML Export*")))
+  (require 'ox-ascii)
+  (let ((name (generate-new-buffer-name "*Org ASCII Export*")))
     (org-test-in-example-file nil
-      (org-export-to-buffer 'html name nil nil nil t))
-    ;; Should create a HTML buffer.
+      (org-export-to-buffer 'ascii name nil nil nil t))
+    ;; Should create a new buffer.
     (should (buffer-live-p (get-buffer name)))
     ;; Should contain the content of the buffer.
     (with-current-buffer (get-buffer name)
