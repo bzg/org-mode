@@ -4496,32 +4496,24 @@ This is needed for font-lock setup.")
 
 (defun org-at-table-p (&optional table-type)
   "Non-nil if the cursor is inside an Org table.
-If TABLE-TYPE is non-nil, also check for table.el-type tables.
-If `org-enable-table-editor' is nil, return nil unconditionally."
-  (and
-   org-enable-table-editor
-   (save-excursion
-     (beginning-of-line)
-     (looking-at-p (if table-type "[ \t]*[|+]" "[ \t]*|")))
-   (or (not (derived-mode-p 'org-mode))
-       (let ((e (org-element-lineage (org-element-at-point) '(table) t)))
-	 (and e (or table-type (eq (org-element-property :type e) 'org)))))))
+If TABLE-TYPE is non-nil, also check for table.el-type tables."
+  (and (org-match-line (if table-type "[ \t]*[|+]" "[ \t]*|"))
+       (or (not (derived-mode-p 'org-mode))
+	   (let ((e (org-element-lineage (org-element-at-point) '(table) t)))
+	     (and e (or table-type
+			(eq 'org (org-element-property :type e))))))))
 
 (defun org-at-table.el-p ()
   "Non-nil when point is at a table.el table."
-  (and (save-excursion (beginning-of-line) (looking-at "[ \t]*[|+]"))
+  (and (org-match-line "[ \t]*[|+]")
        (let ((element (org-element-at-point)))
 	 (and (eq (org-element-type element) 'table)
 	      (eq (org-element-property :type element) 'table.el)))))
 
 (defun org-at-table-hline-p ()
   "Non-nil when point is inside a hline in a table.
-Assume point is already in a table.  If `org-enable-table-editor'
-is nil, return nil unconditionally."
-  (and org-enable-table-editor
-       (save-excursion
-	 (beginning-of-line)
-	 (looking-at org-table-hline-regexp))))
+Assume point is already in a table."
+  (org-match-line org-table-hline-regexp))
 
 (defun org-table-map-tables (function &optional quietly)
   "Apply FUNCTION to the start of all tables in the buffer."
@@ -20959,22 +20951,21 @@ This command does many different things, depending on context:
 	 (if (eq (org-element-property :type context) 'table.el)
 	     (message "%s" (substitute-command-keys "\\<org-mode-map>\
 Use `\\[org-edit-special]' to edit table.el tables"))
-	   (let ((org-enable-table-editor t))
-	     (if (or (eq type 'table)
-		     ;; Check if point is at a TBLFM line.
-		     (and (eq type 'table-row)
-			  (= (point) (org-element-property :end context))))
-		 (save-excursion
-		   (if (org-at-TBLFM-p)
-		       (progn (require 'org-table)
-			      (org-table-calc-current-TBLFM))
-		     (goto-char (org-element-property :contents-begin context))
-		     (org-call-with-arg 'org-table-recalculate (or arg t))
-		     (orgtbl-send-table 'maybe)))
-	       (org-table-maybe-eval-formula)
-	       (cond (arg (call-interactively #'org-table-recalculate))
-		     ((org-table-maybe-recalculate-line))
-		     (t (org-table-align)))))))
+	   (if (or (eq type 'table)
+		   ;; Check if point is at a TBLFM line.
+		   (and (eq type 'table-row)
+			(= (point) (org-element-property :end context))))
+	       (save-excursion
+		 (if (org-at-TBLFM-p)
+		     (progn (require 'org-table)
+			    (org-table-calc-current-TBLFM))
+		   (goto-char (org-element-property :contents-begin context))
+		   (org-call-with-arg 'org-table-recalculate (or arg t))
+		   (orgtbl-send-table 'maybe)))
+	     (org-table-maybe-eval-formula)
+	     (cond (arg (call-interactively #'org-table-recalculate))
+		   ((org-table-maybe-recalculate-line))
+		   (t (org-table-align))))))
 	(`timestamp (org-timestamp-change 0 'day))
 	((and `nil (guard (org-at-heading-p)))
 	 ;; When point is on an unsupported object type, we can miss
@@ -21318,8 +21309,7 @@ an argument, unconditionally call `org-insert-heading'."
      :style toggle
      :selected (bound-and-true-p org-table-overlay-coordinates)]
     "--"
-    ["Create" org-table-create (and (not (org-at-table-p))
-				    org-enable-table-editor)]
+    ["Create" org-table-create (not (org-at-table-p))]
     ["Convert Region" org-table-convert-region (not (org-at-table-p 'any))]
     ["Import from File" org-table-import (not (org-at-table-p))]
     ["Export to File" org-table-export (org-at-table-p)]

@@ -1834,7 +1834,6 @@ lines."
     (user-error "First cut/copy a region to paste!"))
   (org-table-check-inside-data-field)
   (let* ((column (org-table-current-column))
-	 (org-enable-table-editor t)
 	 (org-table-automatic-realign nil))
     (org-table-save-field
      (dolist (row org-table-clip)
