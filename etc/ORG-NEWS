@@ -1,5 +1,7 @@
 ORG NEWS -- history of user-visible changes.   -*- mode: org; coding: utf-8 -*-
 
+#+STARTUP: overview
+
 #+LINK: doc http://orgmode.org/worg/doc.html#%s
 #+LINK: git http://orgmode.org/cgit.cgi/org-mode.git/commit/?id=%s
 
@@ -9,6 +11,20 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.2
+** Incompatible changes
+*** =align= STARTUP value no longer narrow table columns
+
+Columns narrowing (or shrinking) is now dynamic. See [[*Dynamically
+narrow table columns]] for details. In particular, it is decoupled from
+aligning.
+
+If you need to automatically shrink columns upon opening an Org
+document, use =shrink= value instead, or in addition to align:
+
+#+BEGIN_EXAMPLE
+,#+STARTUP: align shrink
+#+END_EXAMPLE
+
 ** New features
 *** ~org-archive~ functions update status cookies
 
@@ -27,6 +43,20 @@ Will update the status cookie in the top level header.
 
 The ~org-agenda-overriding-header~ inserted into agenda views can now
 be disabled by setting it to an empty string.
+
+*** Dynamically narrow table columns
+
+With ~C-c TAB~, it is now possible to narrow a column to the width
+specified by a width cookie in the column, or to 1 character if there
+is no such cookie.  The same keybinding expands a narrowed column to
+its previous state.
+
+Editing the column automatically expands the whole column to its full
+size.
+
+#+BEGIN_EXAMPLE
+  ,#+STARTUP: shrink
+#+END_EXAMPLE
 
 * Version 9.1
 

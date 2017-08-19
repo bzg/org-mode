@@ -2296,50 +2296,81 @@ it off with
 @cindex narrow columns in tables
 @cindex alignment in tables
 
-The width of columns is automatically determined by the table editor.  And
-also the alignment of a column is determined automatically from the fraction
-of number-like versus non-number fields in the column.
+The width of columns is automatically determined by the table editor.  The
+alignment of a column is determined automatically from the fraction of
+number-like versus non-number fields in the column.
 
-Sometimes a single field or a few fields need to carry more text, leading to
-inconveniently wide columns.  Or maybe you want to make a table with several
-columns having a fixed width, regardless of content.  To set the width of
-a column, one field anywhere in the column may contain just the string
-@samp{<N>} where @samp{N} is an integer specifying the width of the column in
-characters.  The next re-align will then set the width of this column to this
-value.
+@vindex org-table-automatic-realign
+Editing a field may modify alignment of the table.  Moving a contiguous row
+or column---i.e., using @kbd{TAB} or @kbd{RET}---automatically re-aligns it.
+If you want to disable this behavior, set @code{org-table-automatic-realign}
+to @code{nil}.  In any case, you can always align manually a table:
 
-@example
-@group
-|---+------------------------------|               |---+--------|
-|   |                              |               |   | <6>    |
-| 1 | one                          |               | 1 | one    |
-| 2 | two                          |     ----\     | 2 | two    |
-| 3 | This is a long chunk of text |     ----/     | 3 | This=> |
-| 4 | four                         |               | 4 | four   |
-|---+------------------------------|               |---+--------|
-@end group
-@end example
-
-@noindent
-Fields that are wider become clipped and end in the string @samp{=>}.
-Note that the full text is still in the buffer but is hidden.
-To see the full text, hold the mouse over the field---a tool-tip window
-will show the full content.  To edit such a field, use the command
-@kbd{C-c `} (that is @kbd{C-c} followed by the grave accent).  This will
-open a new window with the full field.  Edit it and finish with @kbd{C-c
-C-c}.
+@table @asis
+@orgcmd{C-c C-c,org-table-align}
+Align the current table.
+@end table
 
 @vindex org-startup-align-all-tables
-When visiting a file containing a table with narrowed columns, the
-necessary character hiding has not yet happened, and the table needs to
-be aligned before it looks nice.  Setting the option
-@code{org-startup-align-all-tables} will realign all tables in a file
-upon visiting, but also slow down startup.  You can also set this option
-on a per-file basis with:
+@noindent
+Setting the option @code{org-startup-align-all-tables} re-aligns all tables
+in a file upon visiting it.  You can also set this option on a per-file basis
+with:
 
 @example
 #+STARTUP: align
 #+STARTUP: noalign
+@end example
+
+Sometimes a single field or a few fields need to carry more text, leading to
+inconveniently wide columns.  Maybe you want to hide away several columns or
+display them with a fixed width, regardless of content, as shown in the
+following example.
+
+@example
+@group
+|---+---------------------+--------|           |---+-------@dots{}|@dots{}|
+|   | <6>                 |        |           |   | <6>   @dots{}|@dots{}|
+| 1 | one                 | some   |   ----\   | 1 | one   @dots{}|@dots{}|
+| 2 | two                 | boring |   ----/   | 2 | two   @dots{}|@dots{}|
+| 3 | This is a long text | column |           | 3 | This i@dots{}|@dots{}|
+|---+---------------------+--------|           |---+-------@dots{}|@dots{}|
+@end group
+@end example
+
+To set the width of a column, one field anywhere in the column may contain
+just the string @samp{<N>} where @samp{N} specifies the width as a number of
+characters.  You control displayed width of columns with the following tools:
+
+@table @asis
+@orgcmd{C-c @key{TAB},org-table-toggle-column-width}
+Shrink or expand current column.
+
+If a width cookie specifies a width W for the column, shrinking it displays
+the first W visible characters only.  Otherwise, the column is shrunk to
+a single character.
+
+When called before the first column or after the last one, ask for a list of
+column ranges to operate on.
+
+@orgcmd{C-u C-c @key{TAB},org-table-shrink}
+Shrink all columns with a column width.  Expand the others.
+
+@orgcmd{C-u C-u C-c @key{TAB},org-table-expand}
+Expand all columns.
+@end table
+
+To see the full text of a shrunk field, hold the mouse over it---a tool-tip
+window then shows the full content.  For convenience, any change to a shrunk
+column expands it.
+
+@vindex org-startup-shrink-all-tables
+Setting the option @code{org-startup-shrink-all-tables} shrinks all columns
+containing a width cookie in a file the moment it is visited.  You can also
+set this option on a per-file basis with:
+
+@example
+#+STARTUP: shrink
 @end example
 
 If you would like to overrule the automatic alignment of number-rich columns
@@ -2348,8 +2379,8 @@ to the right and of string-rich columns to the left, you can use @samp{<r>},
 effect when exporting to HTML.} or @samp{<l>} in a similar fashion.  You may
 also combine alignment and field width like this: @samp{<r10>}.
 
-Lines which only contain these formatting cookies will be removed
-automatically when exporting the document.
+Lines which only contain these formatting cookies are removed automatically
+upon exporting the document.
 
 @node Column groups
 @section Column groups
