@@ -537,7 +537,9 @@ inlinetask within the section."
 			   (org-export-data
 			    (org-element-property :title entry) info))))
 	     (loc (org-icalendar-cleanup-string
-		   (org-element-property :LOCATION entry)))
+		   (org-export-get-node-property
+		    :LOCATION entry
+		    (org-property-inherit-p "LOCATION"))))
 	     ;; Build description of the entry from associated section
 	     ;; (headline) or contents (inlinetask).
 	     (desc
@@ -553,7 +555,9 @@ inlinetask within the section."
 					  org-icalendar-include-body))))
 		      (org-icalendar-include-body (org-trim contents)))))))
 	     (cat (org-icalendar-get-categories entry info))
-	     (tz (org-element-property :TIMEZONE entry)))
+	     (tz (org-export-get-node-property
+		  :TIMEZONE entry
+		  (org-property-inherit-p "TIMEZONE"))))
 	 (concat
 	  ;; Events: Delegate to `org-icalendar--vevent' to generate
 	  ;; "VEVENT" component from scheduled, deadline, or any

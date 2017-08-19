@@ -14165,7 +14165,7 @@ and write it to @code{org-icalendar-combined-agenda-file} file name.
 @cindex property, TIMEZONE
 The iCalendar export back-end includes SUMMARY, DESCRIPTION, LOCATION and
 TIMEZONE properties from the Org entries when exporting.  To force the
-back-end to inherit the LOCATION property, configure the
+back-end to inherit the LOCATION and TIMEZONE properties, configure the
 @code{org-use-property-inheritance} variable.
 
 When Org entries do not have SUMMARY, DESCRIPTION and LOCATION properties,

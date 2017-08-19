@@ -106,6 +106,9 @@ You can use =ob-scala.el= as packaged in scala-mode, available from the
 MELPA repository.
 
 ** New features
+*** iCalendar export uses inheritance for TIMEZONE and LOCATION properties
+Both these properties can be inherited during iCalendar export,
+depending on the value of ~org-use-property-inheritance~.
 *** iCalendar export respects a TIMEZONE property
 Set the TIMEZONE property on an entry to specify a time zone for that
 entry only during iCalendar export.  The property value should be
