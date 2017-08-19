@@ -106,11 +106,14 @@ You can use =ob-scala.el= as packaged in scala-mode, available from the
 MELPA repository.
 
 ** New features
+*** iCalendar export respects a TIMEZONE property
+Set the TIMEZONE property on an entry to specify a time zone for that
+entry only during iCalendar export.  The property value should be
+specified as in "Europe/London".
 *** ~org-attach~ can move directory contents
 When setting a new directory for an entry, org-attach offers to move
 files over from the old directory.  Using a prefix arg will reset the
 directory to old, ID based one.
-
 *** New Org duration library
 This new library implements tools to read and print time durations in
 various formats (e.g., "H:MM", or "1d 2h 3min"...).
