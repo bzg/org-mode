@@ -24,7 +24,7 @@ development.
      git clone git://repo.or.cz/org-mode.git
 
 3. People who are interested to participate in the Org-mode
-   development can to so by sending patches to this address:
+   development can do so by sending patches to this address:
 
      [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]]
 
