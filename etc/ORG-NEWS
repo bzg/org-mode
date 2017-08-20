@@ -135,6 +135,10 @@ See docstring for details.
 =org-agenda-tags-column= can now be set to =auto=, which will
 automatically align tags to the right edge of the window.  This is now
 the default setting.
+**** Disable =org-agenda-overriding-header= by setting to empty string
+
+The =org-agenda-overriding-header= inserted into agenda views can now be
+disabled by setting it to an empty string.
 
 *** New value for ~org-publish-sitemap-sort-folders~
 
