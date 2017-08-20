@@ -44,12 +44,18 @@
 (defvar geiser-impl--implementation)   ; Defined in geiser-impl.el
 (defvar geiser-default-implementation) ; Defined in geiser-impl.el
 (defvar geiser-active-implementations) ; Defined in geiser-impl.el
+(defvar geiser-debug-show-debug-p)     ; Defined in geiser-debug.el
+(defvar geiser-debug-jump-to-debug-p)  ; Defined in geiser-debug.el
+(defvar geiser-repl-use-other-window)  ; Defined in geiser-repl.el
+(defvar geiser-repl-window-allow-split)	; Defined in geiser-repl.el
 
 (declare-function run-geiser "ext:geiser-repl" (impl))
 (declare-function geiser-mode "ext:geiser-mode" ())
 (declare-function geiser-eval-region "ext:geiser-mode"
                   (start end &optional and-go raw nomsg))
 (declare-function geiser-repl-exit "ext:geiser-repl" (&optional arg))
+(declare-function geiser-eval--retort-output "ext:geiser-eval" (ret))
+(declare-function geiser-eval--retort-result-str "ext:geiser-eval" (ret prefix))
 
 (defcustom org-babel-scheme-null-to 'hline
   "Replace `null' and empty lists in scheme tables with this before returning."
@@ -150,35 +156,35 @@ is true; otherwise returns the last value."
     (with-temp-buffer
       (insert (format ";; -*- geiser-scheme-implementation: %s -*-" impl))
       (newline)
-      (insert (if output
-		  (format "(with-output-to-string (lambda () %s))" code)
-		code))
+      (insert code)
       (geiser-mode)
-      (let ((repl-buffer (save-current-buffer
-			   (org-babel-scheme-get-repl impl repl))))
-	(when (not (eq impl (org-babel-scheme-get-buffer-impl
-			     (current-buffer))))
-	  (message "Implementation mismatch: %s (%s) %s (%s)" impl (symbolp impl)
-		   (org-babel-scheme-get-buffer-impl (current-buffer))
-		   (symbolp (org-babel-scheme-get-buffer-impl
-			     (current-buffer)))))
-	(setq geiser-repl--repl repl-buffer)
-	(setq geiser-impl--implementation nil)
-	(setq result (org-babel-scheme-capture-current-message
-		      (geiser-eval-region (point-min) (point-max))))
-	(setq result
-	      (if (and (stringp result) (equal (substring result 0 3) "=> "))
-		  (replace-regexp-in-string "^=> " "" result)
-		"\"An error occurred.\""))
-	(when (not repl)
-	  (save-current-buffer (set-buffer repl-buffer)
-			       (geiser-repl-exit))
-	  (set-process-query-on-exit-flag (get-buffer-process repl-buffer) nil)
-	  (kill-buffer repl-buffer))
-	(setq result (if (or (string= result "#<void>")
-			     (string= result "#<unspecified>"))
-			 nil
-		       result))))
+      (let ((geiser-repl-window-allow-split nil)
+	    (geiser-repl-use-other-window nil))
+	(let ((repl-buffer (save-current-buffer
+			     (org-babel-scheme-get-repl impl repl))))
+	  (when (not (eq impl (org-babel-scheme-get-buffer-impl
+			       (current-buffer))))
+	    (message "Implementation mismatch: %s (%s) %s (%s)" impl (symbolp impl)
+		     (org-babel-scheme-get-buffer-impl (current-buffer))
+		     (symbolp (org-babel-scheme-get-buffer-impl
+			       (current-buffer)))))
+	  (setq geiser-repl--repl repl-buffer)
+	  (setq geiser-impl--implementation nil)
+	  (let ((geiser-debug-jump-to-debug-p nil)
+		(geiser-debug-show-debug-p nil))
+	    (let ((ret (geiser-eval-region (point-min) (point-max))))
+	      (setq result (if output
+			       (geiser-eval--retort-output ret)
+			     (geiser-eval--retort-result-str ret "")))))
+	  (when (not repl)
+	    (save-current-buffer (set-buffer repl-buffer)
+				 (geiser-repl-exit))
+	    (set-process-query-on-exit-flag (get-buffer-process repl-buffer) nil)
+	    (kill-buffer repl-buffer))
+	  (setq result (if (or (string= result "#<void>")
+			       (string= result "#<unspecified>"))
+			   nil
+			 result)))))
     result))
 
 (defun org-babel-scheme--table-or-string (results)
