@@ -108,10 +108,10 @@
        "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n{{{property(A,*???)}}}<point>"
      (org-macro-initialize-templates)
      (org-macro-replace-all org-macro-templates)))
-  ;; Macro expansion preserves narrowing.
+  ;; Macro expansion ignores narrowing.
   (should
-   (string-match-p
-    "{{{macro}}}"
+   (string-match
+    "expansion"
     (org-test-with-temp-text
 	"#+MACRO: macro expansion\n{{{macro}}}\n<point>Contents"
       (narrow-to-region (point) (point-max))
