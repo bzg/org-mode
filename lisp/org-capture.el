@@ -1751,24 +1751,31 @@ The template may still contain \"%?\" for cursor positioning."
 			 (_ (error "Invalid `org-capture--clipboards' value: %S"
 				   org-capture--clipboards)))))
 		    ("p" (org-set-property prompt nil))
-		    ((guard key)
+		    ((or "t" "T" "u" "U")
 		     ;; These are the date/time related ones.
 		     (let* ((upcase? (equal (upcase key) key))
 			    (org-time-was-given upcase?)
 			    (org-end-time-was-given)
-			    (time (org-read-date upcase? t nil prompt)))
+			    (time
+			     (org-read-date
+			      upcase? t nil prompt nil
+			      (pcase key
+				("t" v-t) ("T" v-T) ("u" v-u) ("U" v-U)))))
 		       (org-insert-time-stamp
 			time org-time-was-given
 			(member key '("u" "U"))
 			nil nil (list org-end-time-was-given))))
-		    (_
+		    (`nil
 		     (push (org-completing-read
 			    (concat (or prompt "Enter string")
 				    (and default (format " [%s]" default))
 				    ": ")
 			    completions nil nil nil nil default)
 			   strings)
-		     (insert (car strings)))))))))
+		     (insert (car strings)))
+		    (_
+		     (error "Unknown template placeholder: \"%%^%s\""
+			    key))))))))
 
 	;; Replace %n escapes with nth %^{...} string.
 	(setq strings (nreverse strings))
