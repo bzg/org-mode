@@ -2073,10 +2073,9 @@ evaluate to a string."
   `(pcase org-agenda-overriding-header
      ("" nil)  ; Don't insert a header if set to empty string
      ;; Insert user-specified string
-     ((pred stringp) (insert
-		      (org-add-props (copy-sequence org-agenda-overriding-header)
-			  nil 'face 'org-agenda-structure)
-		      "\n"))
+     ((pred stringp) (insert (propertize org-agenda-overriding-header
+					 'face 'org-agenda-structure)
+			     "\n"))
      ;; When nil, make string automatically and insert it
      ((pred null) (insert ,default))))
 
@@ -4174,11 +4173,9 @@ items if they have an hour specification like [h]h:mm."
 	  (org-agenda--insert-overriding-header
 	    (concat (org-agenda-span-name span)
 		    "-agenda"
-		    (if (< (- d2 d1) 350)
-			(if (= w1 w2)
-			    (format " (W%02d)" w1)
-			  (format " (W%02d-W%02d)" w1 w2))
-		      "")
+		    (cond ((<= 350 (- d2 d1)) "")
+                          ((= w1 w2) (format " (W%02d)" w1))
+                          (t (format " (W%02d-W%02d)" w1 w2)))
 		    ":\n")))
 	(add-text-properties s (1- (point)) (list 'face 'org-agenda-structure
 						  'org-date-line t))
@@ -4701,13 +4698,12 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	  (unless org-agenda-multi
 	    (insert (substitute-command-keys "Available with \
 `N \\[org-agenda-redo]': (0)[ALL]"))
-	    (let ((n 0) s)
-	      (mapc (lambda (x)
-		      (setq s (format "(%d)%s" (setq n (1+ n)) x))
-		      (if (> (+ (current-column) (string-width s) 1) (frame-width))
-			  (insert "\n                     "))
-		      (insert " " s))
-		    kwds))
+	    (let ((n 0))
+              (dolist (k kwds)
+                (let ((s (format "(%d)%s" (cl-incf n) k)))
+                  (when (> (+ (current-column) (string-width s) 1) (window-width))
+                    (insert "\n                     "))
+                  (insert " " s))))
 	    (insert "\n"))
 	  (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure))
 	  (buffer-string)))
