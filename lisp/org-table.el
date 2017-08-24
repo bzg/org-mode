@@ -1740,7 +1740,8 @@ function is being called interactively."
 		   (cond ((string-match org-ts-regexp-both f)
 			  (float-time
 			   (org-time-string-to-time (match-string 0 f))))
-			 ((string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" f)
+			 ((org-duration-p f) (org-duration-to-minutes f))
+			 ((string-match "\\<[0-9]+:[0-9]\\{2\\}\\>" f)
 			  (org-duration-to-minutes (match-string 0 f)))
 			 (t 0))))
 		((?f ?F)

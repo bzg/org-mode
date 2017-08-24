@@ -1668,14 +1668,20 @@ See also `test-org-table/copy-field'."
       (buffer-string))))
   ;; Sort by time (HH:MM values)
   (should
-   (equal "| 1:00 |\n| 14:00 |\n| 17:00 |\n"
-	  (org-test-with-temp-text "| 14:00 |\n| 17:00 |\n| 1:00 |\n"
+   (equal "| 1:00 |\n| 17:00 |\n| 114:00 |\n"
+	  (org-test-with-temp-text "| 114:00 |\n| 17:00 |\n| 1:00 |\n"
 	    (org-table-sort-lines nil ?t)
 	    (buffer-string))))
   (should
-   (equal "| 17:00 |\n| 14:00 |\n| 1:00 |\n"
-	  (org-test-with-temp-text "| 14:00 |\n| 17:00 |\n| 1:00 |\n"
+   (equal "| 114:00 |\n| 17:00 |\n| 1:00 |\n"
+	  (org-test-with-temp-text "| 114:00 |\n| 17:00 |\n| 1:00 |\n"
 	    (org-table-sort-lines nil ?T)
+	    (buffer-string))))
+  ;; Sort by time (durations)
+  (should
+   (equal "| 1d 3:00 |\n| 28:00 |\n"
+	  (org-test-with-temp-text "| 28:00 |\n| 1d 3:00 |\n"
+	    (org-table-sort-lines nil ?t)
 	    (buffer-string))))
   ;; Sort with custom functions.
   (should
