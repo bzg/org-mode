@@ -1756,7 +1756,7 @@ to `org-babel-named-src-block-regexp'."
       (or (and (looking-at regexp)
 	       (progn (goto-char (match-beginning 1))
 		      (line-beginning-position)))
-	  (ignore-errors (org-next-block 1 nil))))))
+	  (ignore-errors (org-next-block 1 nil regexp))))))
 
 (defun org-babel-src-block-names (&optional file)
   "Returns the names of source blocks in FILE or the current buffer."
