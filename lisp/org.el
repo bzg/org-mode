@@ -20898,16 +20898,14 @@ this numeric value."
 (defun org-copy-visible (beg end)
   "Copy the visible parts of the region."
   (interactive "r")
-  (let (snippets s)
-    (save-excursion
-      (save-restriction
-	(narrow-to-region beg end)
-	(setq s (goto-char (point-min)))
-	(while (not (= (point) (point-max)))
-	  (goto-char (org-find-invisible))
-	  (push (buffer-substring s (point)) snippets)
-	  (setq s (goto-char (org-find-visible))))))
-    (kill-new (apply 'concat (nreverse snippets)))))
+  (let ((result ""))
+    (while (/= beg end)
+      (when (get-char-property beg 'invisible)
+	(setq beg (next-single-char-property-change beg 'invisible nil end)))
+      (let ((next (next-single-char-property-change beg 'invisible nil end)))
+	(setq result (concat result (buffer-substring beg next)))
+	(setq beg next)))
+    (kill-new result)))
 
 (defun org-copy-special ()
   "Copy region in table or copy current subtree.
