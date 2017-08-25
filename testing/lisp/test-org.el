@@ -2933,6 +2933,73 @@ SCHEDULED: <2017-05-06 Sat>
 	    (org-sort-entries nil ?k)
 	    (buffer-string)))))
 
+(ert-deftest test-org/file-contents ()
+  "Test `org-file-contents' specifications."
+  ;; Open files.
+  (should
+   (string= "#+BIND: variable value
+#+DESCRIPTION: l2
+#+LANGUAGE: en
+#+SELECT_TAGS: b
+#+TITLE: b
+#+PROPERTY: a 1
+" (org-file-contents (expand-file-name "setupfile3.org"
+				       (concat org-test-dir "examples/")))))
+  ;; Throw error when trying to access an invalid file.
+  (should-error (org-file-contents "this-file-must-not-exist"))
+  ;; Try to access an invalid file, but do not throw an error.
+  (should
+   (progn (org-file-contents "this-file-must-not-exist" :noerror) t))
+  ;; Open URL.
+  (should
+   (string= "foo"
+	    (let ((buffer (generate-new-buffer "url-retrieve-output")))
+	      (unwind-protect
+		  ;; Simulate successful retrieval of a URL.
+		  (cl-letf (((symbol-function 'url-retrieve-synchronously)
+			     (lambda (&rest_)
+			       (with-current-buffer buffer
+				 (insert "HTTP/1.1 200 OK\n\nfoo"))
+			       buffer)))
+		    (org-file-contents "http://some-valid-url"))
+		(kill-buffer buffer)))))
+  ;; Throw error when trying to access an invalid URL.
+  (should-error
+   (let ((buffer (generate-new-buffer "url-retrieve-output")))
+     (unwind-protect
+	 ;; Simulate unsuccessful retrieval of a URL.
+	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
+		    (lambda (&rest_)
+		      (with-current-buffer buffer
+			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
+		      buffer)))
+	   (org-file-contents "http://this-url-must-not-exist"))
+       (kill-buffer buffer))))
+  ;; Try to access an invalid URL, but do not throw an error.
+  (should-error
+   (let ((buffer (generate-new-buffer "url-retrieve-output")))
+     (unwind-protect
+	 ;; Simulate unsuccessful retrieval of a URL.
+	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
+		    (lambda (&rest_)
+		      (with-current-buffer buffer
+			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
+		      buffer)))
+	   (org-file-contents "http://this-url-must-not-exist"))
+       (kill-buffer buffer))))
+  (should
+   (let ((buffer (generate-new-buffer "url-retrieve-output")))
+     (unwind-protect
+	 ;; Simulate unsuccessful retrieval of a URL.
+	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
+		    (lambda (&rest_)
+		      (with-current-buffer buffer
+			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
+		      buffer)))
+	   (org-file-contents "http://this-url-must-not-exist" :noerror))
+       (kill-buffer buffer))
+     t)))
+
 
 ;;; Navigation
 
@@ -6527,72 +6594,52 @@ Paragraph<point>"
      (org-show-set-visibility 'minimal)
      (org-invisible-p2))))
 
-(ert-deftest test-org/file-contents ()
-  "Test `org-file-contents' specifications."
-  ;; Open files.
+(defun test-org/copy-visible ()
+  "Test `org-copy-visible' specifications."
   (should
-   (string= "#+BIND: variable value
-#+DESCRIPTION: l2
-#+LANGUAGE: en
-#+SELECT_TAGS: b
-#+TITLE: b
-#+PROPERTY: a 1
-" (org-file-contents (expand-file-name "setupfile3.org"
-				       (concat org-test-dir "examples/")))))
-  ;; Throw error when trying to access an invalid file.
-  (should-error (org-file-contents "this-file-must-not-exist"))
-  ;; Try to access an invalid file, but do not throw an error.
+   (equal "Foo"
+	  (org-test-with-temp-text "Foo"
+	    (let ((kill-ring nil))
+	      (org-copy-visible (point-min) (point-max))
+	      (current-kill 0 t)))))
+  ;; Skip invisible characters by text property.
   (should
-   (progn (org-file-contents "this-file-must-not-exist" :noerror) t))
-  ;; Open URL.
+   (equal "Foo"
+	  (org-test-with-temp-text #("F<hidden>oo" 1 7 (invisible t))
+	    (let ((kill-ring nil))
+	      (org-copy-visible (point-min) (point-max))
+	      (current-kill 0 t)))))
+  ;; Skip invisible characters by overlay.
   (should
-   (string= "foo"
-	    (let ((buffer (generate-new-buffer "url-retrieve-output")))
-	      (unwind-protect
-		  ;; Simulate successful retrieval of a URL.
-		  (cl-letf (((symbol-function 'url-retrieve-synchronously)
-			     (lambda (&rest_)
-			       (with-current-buffer buffer
-				 (insert "HTTP/1.1 200 OK\n\nfoo"))
-			       buffer)))
-		    (org-file-contents "http://some-valid-url"))
-		(kill-buffer buffer)))))
-  ;; Throw error when trying to access an invalid URL.
-  (should-error
-   (let ((buffer (generate-new-buffer "url-retrieve-output")))
-     (unwind-protect
-	 ;; Simulate unsuccessful retrieval of a URL.
-	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
-		    (lambda (&rest_)
-		      (with-current-buffer buffer
-			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
-		      buffer)))
-	   (org-file-contents "http://this-url-must-not-exist"))
-       (kill-buffer buffer))))
-  ;; Try to access an invalid URL, but do not throw an error.
-  (should-error
-   (let ((buffer (generate-new-buffer "url-retrieve-output")))
-     (unwind-protect
-	 ;; Simulate unsuccessful retrieval of a URL.
-	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
-		    (lambda (&rest_)
-		      (with-current-buffer buffer
-			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
-		      buffer)))
-	   (org-file-contents "http://this-url-must-not-exist"))
-       (kill-buffer buffer))))
+   (equal "Foo"
+	  (org-test-with-temp-text "F<hidden>oo"
+	    (let ((o (make-overlay 2 10)))
+	      (overlay-put o 'invisible t))
+	    (let ((kill-ring nil))
+	      (org-copy-visible (point-min) (point-max))
+	      (current-kill 0 t)))))
+  ;; Handle invisible characters at the beginning and the end of the
+  ;; buffer.
   (should
-   (let ((buffer (generate-new-buffer "url-retrieve-output")))
-     (unwind-protect
-	 ;; Simulate unsuccessful retrieval of a URL.
-	 (cl-letf (((symbol-function 'url-retrieve-synchronously)
-		    (lambda (&rest_)
-		      (with-current-buffer buffer
-			(insert "HTTP/1.1 404 Not found\n\ndoes not matter"))
-		      buffer)))
-	   (org-file-contents "http://this-url-must-not-exist" :noerror))
-       (kill-buffer buffer))
-     t)))
+   (equal "Foo"
+	  (org-test-with-temp-text #("<hidden>Foo" 0 8 (invisible t))
+	    (let ((kill-ring nil))
+	      (org-copy-visible (point-min) (point-max))
+	      (current-kill 0 t)))))
+  (should
+   (equal "Foo"
+	  (org-test-with-temp-text #("Foo<hidden>" 3 11 (invisible t))
+	    (let ((kill-ring nil))
+	      (org-copy-visible (point-min) (point-max))
+	      (current-kill 0 t)))))
+  ;; Handle multiple visible parts.
+  (should
+   (equal "abc"
+	  (org-test-with-temp-text
+	      #("aXbXc" 1 2 (invisible t) 3 4 (invisible t))
+	    (let ((kill-ring nil))
+	      (org-copy-visible (point-min) (point-max))
+	      (current-kill 0 t))))))
 
 
 (provide 'test-org)
