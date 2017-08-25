@@ -304,6 +304,12 @@ This is not a node property
      (org-lint '(undefined-footnote-reference))))
   (should-not
    (org-test-with-temp-text "Text[fn:1]\n[fn:1] Definition"
+     (org-lint '(undefined-footnote-reference))))
+  (should-not
+   (org-test-with-temp-text "Text[fn:1:inline reference]"
+     (org-lint '(undefined-footnote-reference))))
+  (should-not
+   (org-test-with-temp-text "Text[fn::anonymous reference]"
      (org-lint '(undefined-footnote-reference)))))
 
 (ert-deftest test-org-lint/unreferenced-footnote-definition ()
