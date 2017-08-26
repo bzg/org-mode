@@ -405,6 +405,10 @@ equivalent to the removed format string.
 Setting it to a ~nil~ value broke some other features (e.g., speed
 keys).
 
+*** ~org-export-use-babel~ cannot be set to ~inline-only~
+
+The variable is now a boolean.
+
 *** ~org-texinfo-def-table-markup~ is obsolete
 
 Use ~org-texinfo-table-default-markup~ instead.

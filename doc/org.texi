@@ -15346,12 +15346,6 @@ during export, to allow evaluation of just the header arguments but not any
 code evaluation in the source block, set @code{:eval never-export}
 (@pxref{eval}).
 
-To evaluate just the inline code blocks, set @code{org-export-babel-evaluate}
-to @code{inline-only}.  Isolating the option to allow inline evaluations
-separate from @samp{src} code block evaluations during exports is not for
-security but for avoiding any delays due to recalculations, such as calls to
-a remote database.
-
 Org never evaluates code blocks in commented sub-trees when exporting
 (@pxref{Comment lines}).  On the other hand, Org does evaluate code blocks in
 sub-trees excluded from export (@pxref{Export settings}).

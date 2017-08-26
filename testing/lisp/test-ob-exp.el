@@ -546,23 +546,6 @@ src_emacs-lisp{(+ 1 1)}"
     (org-test-with-temp-text
 	"src_emacs-lisp{(+ 1 1)}"
       (let ((org-export-use-babel t)) (org-babel-exp-process-buffer))
-      (buffer-string))))
-  ;; When set to `inline-only' limit evaluation to inline code.
-  (should-not
-   (string-match-p
-    "2"
-    (org-test-with-temp-text
-	"#+BEGIN_SRC emacs-lisp :exports results\n(+ 1 1)\n#+END_SRC"
-      (let ((org-export-use-babel 'inline-only))
-	(org-babel-exp-process-buffer))
-      (buffer-string))))
-  (should
-   (string-match-p
-    "2"
-    (org-test-with-temp-text
-	"src_emacs-lisp{(+ 1 1)}"
-      (let ((org-export-use-babel 'inline-only))
-	(org-babel-exp-process-buffer))
       (buffer-string)))))
 
 (ert-deftest ob-export/body-with-coderef ()
