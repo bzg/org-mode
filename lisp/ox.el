@@ -437,11 +437,7 @@ e.g. \"d:nil\"."
 		(repeat :tag "Specify names of drawers to ignore during export"
 			:inline t
 			(string :tag "Drawer name"))))
-  :safe (lambda (x) (or (booleanp x)
-			(and (listp x)
-			     (or (cl-every #'stringp x)
-				 (and (eq (nth 0 x) 'not)
-				      (cl-every #'stringp (cdr x))))))))
+  :safe (lambda (x) (or (booleanp x) (consp x))))
 
 (defcustom org-export-with-email nil
   "Non-nil means insert author email into the exported file.
