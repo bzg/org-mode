@@ -17230,12 +17230,9 @@ The sample script shows batch processing of multiple files using
 emacs -Q --batch --eval "
     (progn
       (require 'ob-tangle)
-      (mapc (lambda (file)
-	      (save-current-buffer
-		(find-file file)
-		(org-babel-tangle)
-		(kill-buffer)))
-	    command-line-args-left))
+      (dolist (file command-line-args-left)
+        (with-current-buffer (find-file-noselect file)
+          (org-babel-tangle))))
   " "$@@"
 @end example
 
