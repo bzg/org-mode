@@ -20243,6 +20243,7 @@ because, in this case the deletion might narrow the column."
     (org-check-before-invisible-edit 'delete-backward)
     (if (and (org-at-table-p)
 	     (eq N 1)
+	     (not (org-region-active-p))
 	     (string-match "|" (buffer-substring (point-at-bol) (point)))
 	     (looking-at ".*?|"))
 	(let ((pos (point))
