@@ -145,8 +145,6 @@ the Emacs repository, folder by folder.
 - =orgcard.tex= :: Copy to =emacs/doc/refcards=.  Make sure that
      ~\def\orgversionnumber~ and ~\def\versionyear~ are up to date.
 
-- =library-of-babel.org= :: Copy to =emacs/etc/org=.
-
 ****  =org-mode/etc=
 
 - =styles/*= :: Copy to =emacs/etc/org=.
