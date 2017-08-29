@@ -142,7 +142,7 @@ the Emacs repository, folder by folder.
 - =org.texi= :: Copy to =emacs/doc/misc=.  It may be necessary to replace,
      ~@include org-version.inc~ with ~@set VERSION 9.0.9~ or similar.
 
-- =orgcard.tex= :: Copy to =emacs/doc/refcards=.  Make sure that
+- =orgcard.tex= :: Copy to =emacs/etc/refcards=.  Make sure that
      ~\def\orgversionnumber~ and ~\def\versionyear~ are up to date.
 
 ****  =org-mode/etc=
