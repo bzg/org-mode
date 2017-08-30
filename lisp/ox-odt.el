@@ -1870,7 +1870,7 @@ See `org-odt-format-headline-function' for details."
      (let ((style (if (eq todo-type 'done) "OrgDone" "OrgTodo")))
        (format "<text:span text:style-name=\"%s\">%s</text:span> " style todo)))
    (when priority
-     (let* ((style (format "OrgPriority-%s" priority))
+     (let* ((style (format "OrgPriority-%c" priority))
 	    (priority (format "[#%c]" priority)))
        (format "<text:span text:style-name=\"%s\">%s</text:span> "
 	       style priority)))
