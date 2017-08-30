@@ -277,10 +277,7 @@ list are are
 
   :deadline    List deadline due on that date.  When the date is today,
                also list any deadlines past due, or due within
-	       `org-deadline-warning-days'.  `:deadline' must appear before
-               `:scheduled' if the setting of
-               `org-agenda-skip-scheduled-if-deadline-is-shown' is to have
-               any effect.
+	       `org-deadline-warning-days'.
 
   :deadline*   Same as above, but only include the deadline if it has an
                hour specification as [h]h:mm.
