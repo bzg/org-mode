@@ -8941,7 +8941,7 @@ function is being called interactively."
 	     ;; The clock marker is lost when using `sort-subr'; mark
 	     ;; the clock with temporary `:org-clock-marker-backup'
 	     ;; text property.
-	     (when (and (eq (org-clocking-buffer) (current-buffer))
+	     (when (and (eq (org-clock-is-active) (current-buffer))
 			(<= start (marker-position org-clock-marker))
 			(>= end (marker-position org-clock-marker)))
 	       (org-with-silent-modifications
