@@ -10187,9 +10187,7 @@ to override `appt-message-warning-time'."
                             "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)\\'" tod)
                        (concat (match-string 1 tod) ":"
                                (match-string 2 tod))))
-           (when (if (version< emacs-version "23.3")
-                     (appt-add tod evt)
-                   (appt-add tod evt wrn))
+           (when (appt-add tod evt wrn)
              (setq cnt (1+ cnt))))))
      entries)
     (org-release-buffers org-agenda-new-buffers)
