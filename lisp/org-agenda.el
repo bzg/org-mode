@@ -1069,7 +1069,7 @@ have been removed when this is called, as will any matches for regular
 expressions listed in `org-agenda-entry-text-exclude-regexps'.")
 
 (defvar org-agenda-include-inactive-timestamps nil
-  "Non-nil means include inactive time stamps in agenda and timeline.
+  "Non-nil means include inactive time stamps in agenda.
 Dynamically scoped.")
 
 (defgroup org-agenda-windows nil
@@ -1143,17 +1143,17 @@ When nil, only the days which actually have entries are shown."
 
 (defcustom org-agenda-format-date 'org-agenda-format-date-aligned
   "Format string for displaying dates in the agenda.
-Used by the daily/weekly agenda and by the timeline.  This should be
-a format string understood by `format-time-string', or a function returning
-the formatted date as a string.  The function must take a single argument,
-a calendar-style date list like (month day year)."
+Used by the daily/weekly agenda.  This should be a format string
+understood by `format-time-string', or a function returning the
+formatted date as a string.  The function must take a single
+argument, a calendar-style date list like (month day year)."
   :group 'org-agenda-daily/weekly
   :type '(choice
 	  (string :tag "Format string")
 	  (function :tag "Function")))
 
 (defun org-agenda-format-date-aligned (date)
-  "Format a DATE string for display in the daily/weekly agenda, or timeline.
+  "Format a DATE string for display in the daily/weekly agenda.
 This function makes sure that dates are aligned for easy reading."
   (require 'cal-iso)
   (let* ((dayname (calendar-day-name date))
@@ -1213,8 +1213,7 @@ For example, 9:30am would become 09:30 rather than  9:30."
 
 (defcustom org-agenda-weekend-days '(6 0)
   "Which days are weekend?
-These days get the special face `org-agenda-date-weekend' in the agenda
-and timeline buffers."
+These days get the special face `org-agenda-date-weekend' in the agenda."
   :group 'org-agenda-daily/weekly
   :type '(set :greedy t
 	      (const :tag "Monday" 1)
@@ -1642,13 +1641,12 @@ When nil, such items are sorted as 0 minutes effort."
 
 (defcustom org-agenda-prefix-format
   '((agenda  . " %i %-12:c%?-12t% s")
-    (timeline  . "  % s")
     (todo  . " %i %-12:c")
     (tags  . " %i %-12:c")
     (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
 An alist with five entries, each for the different agenda types.  The
-keys of the sublists are `agenda', `timeline', `todo', `search' and `tags'.
+keys of the sublists are `agenda', `todo', `search' and `tags'.
 The values are format strings.
 
 This format works similar to a printf format, with the following meaning:
@@ -1701,11 +1699,12 @@ Custom commands can set this variable in the options section."
 	  (string :tag "General format")
 	  (list :greedy t :tag "View dependent"
 		(cons  (const agenda) (string :tag "Format"))
-		(cons  (const timeline) (string :tag "Format"))
 		(cons  (const todo) (string :tag "Format"))
 		(cons  (const tags) (string :tag "Format"))
 		(cons  (const search) (string :tag "Format"))))
-  :group 'org-agenda-line-format)
+  :group 'org-agenda-line-format
+  :version "26.1"
+  :package-version '(Org . "9.1"))
 
 (defvar org-prefix-format-compiled nil
   "The compiled prefix format and associated variables.
@@ -1827,7 +1826,7 @@ given agenda type.
 
 This can be set to a list of agenda types in which the agenda
 must display the inherited tags.  Available types are `todo',
-`agenda', `search' and `timeline'.
+`agenda' and `search'.
 
 When set to nil, never show inherited tags in agenda lines."
   :group 'org-agenda-line-format
@@ -1839,7 +1838,7 @@ When set to nil, never show inherited tags in agenda lines."
 	  (repeat :tag "Show inherited tags only in selected agenda types"
 		  (symbol :tag "Agenda type"))))
 
-(defcustom org-agenda-use-tag-inheritance '(todo search timeline agenda)
+(defcustom org-agenda-use-tag-inheritance '(todo search agenda)
   "List of agenda view types where to use tag inheritance.
 
 In tags/tags-todo/tags-tree agenda views, tag inheritance is
@@ -1848,7 +1847,7 @@ controlled by `org-use-tag-inheritance'.  In other agenda types,
 agenda entries.  Still, you may want the agenda to be aware of
 the inherited tags anyway, e.g. for later tag filtering.
 
-Allowed value are `todo', `search', `timeline' and `agenda'.
+Allowed value are `todo', `search' and `agenda'.
 
 This variable has no effect if `org-agenda-show-inherited-tags'
 is set to `always'.  In that case, the agenda is aware of those
@@ -1857,7 +1856,8 @@ tags.
 The default value sets tags in every agenda type.  Setting this
 option to nil will speed up non-tags agenda view a lot."
   :group 'org-agenda
-  :version "24.3"
+  :version "26.1"
+  :package-version '(Org . "9.1")
   :type '(choice
 	  (const :tag "Use tag inheritance in all agenda types" t)
 	  (repeat :tag "Use tag inheritance in selected agenda types"
@@ -2382,7 +2382,7 @@ The following commands are available:
     ("Agenda Files")
     "--"
     ("Agenda Dates"
-     ["Goto Today" org-agenda-goto-today (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Goto Today" org-agenda-goto-today (org-agenda-check-type nil 'agenda)]
      ["Next Dates" org-agenda-later (org-agenda-check-type nil 'agenda)]
      ["Previous Dates" org-agenda-earlier (org-agenda-check-type nil 'agenda)]
      ["Jump to date" org-agenda-goto-date (org-agenda-check-type nil 'agenda)])
@@ -2428,7 +2428,7 @@ The following commands are available:
      "--"
      ["Show Logbook entries" org-agenda-log-mode
       :style toggle :selected org-agenda-show-log
-      :active (org-agenda-check-type nil 'agenda 'timeline)
+      :active (org-agenda-check-type nil 'agenda)
       :keys "v l (or just l)"]
      ["Include archived trees" org-agenda-archives-mode
       :style toggle :selected org-agenda-archives-mode :active t
@@ -2485,13 +2485,13 @@ The following commands are available:
      ["Schedule" org-agenda-schedule t]
      ["Set Deadline" org-agenda-deadline t]
      "--"
-     ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Change Time +1 hour" org-agenda-do-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-right"]
-     ["Change Time -1 hour" org-agenda-do-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-left"]
-     ["Change Time +  min" org-agenda-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-right"]
-     ["Change Time -  min" org-agenda-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-left"]
-     ["Change Date to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda 'timeline)])
+     ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda)]
+     ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda)]
+     ["Change Time +1 hour" org-agenda-do-date-later :active (org-agenda-check-type nil 'agenda) :keys "C-u S-right"]
+     ["Change Time -1 hour" org-agenda-do-date-earlier :active (org-agenda-check-type nil 'agenda) :keys "C-u S-left"]
+     ["Change Time +  min" org-agenda-date-later :active (org-agenda-check-type nil 'agenda) :keys "C-u C-u S-right"]
+     ["Change Time -  min" org-agenda-date-earlier :active (org-agenda-check-type nil 'agenda) :keys "C-u C-u S-left"]
+     ["Change Date to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda)])
     ("Clock and Effort"
      ["Clock in" org-agenda-clock-in t]
      ["Clock out" org-agenda-clock-out t]
@@ -2507,12 +2507,12 @@ The following commands are available:
      ["Decrease Priority" org-agenda-priority-down t]
      ["Show Priority" org-show-priority t])
     ("Calendar/Diary"
-     ["New Diary Entry" org-agenda-diary-entry (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Goto Calendar" org-agenda-goto-calendar (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Phases of the Moon" org-agenda-phases-of-moon (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Sunrise/Sunset" org-agenda-sunrise-sunset (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Holidays" org-agenda-holidays (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Convert" org-agenda-convert-date (org-agenda-check-type nil 'agenda 'timeline)]
+     ["New Diary Entry" org-agenda-diary-entry (org-agenda-check-type nil 'agenda)]
+     ["Goto Calendar" org-agenda-goto-calendar (org-agenda-check-type nil 'agenda)]
+     ["Phases of the Moon" org-agenda-phases-of-moon (org-agenda-check-type nil 'agenda)]
+     ["Sunrise/Sunset" org-agenda-sunrise-sunset (org-agenda-check-type nil 'agenda)]
+     ["Holidays" org-agenda-holidays (org-agenda-check-type nil 'agenda)]
+     ["Convert" org-agenda-convert-date (org-agenda-check-type nil 'agenda)]
      "--"
      ["Create iCalendar File" org-icalendar-combine-agenda-files t])
     "--"
@@ -2648,8 +2648,7 @@ type."
 				(const agenda)
 				(const todo)
 				(const tags)
-				(const search)
-				(const timeline))
+				(const search))
 			(integer :tag "Max number of entries")))))
 
 (defcustom org-agenda-max-todos nil
@@ -2667,8 +2666,7 @@ type."
 				(const agenda)
 				(const todo)
 				(const tags)
-				(const search)
-				(const timeline))
+				(const search))
 			(integer :tag "Max number of TODOs")))))
 
 (defcustom org-agenda-max-tags nil
@@ -2686,8 +2684,7 @@ type."
 				(const agenda)
 				(const todo)
 				(const tags)
-				(const search)
-				(const timeline))
+				(const search))
 			(integer :tag "Max number of tagged entries")))))
 
 (defcustom org-agenda-max-effort nil
@@ -2705,8 +2702,7 @@ to limit entries to in this type."
 				(const agenda)
 				(const todo)
 				(const tags)
-				(const search)
-				(const timeline))
+				(const search))
 			(integer :tag "Max number of minutes")))))
 
 (defvar org-agenda-keep-restricted-file-list nil)
@@ -7177,14 +7173,13 @@ in the file.  Otherwise, restriction will be to the current subtree."
 (defun org-agenda-check-type (error &rest types)
   "Check if agenda buffer is of allowed type.
 If ERROR is non-nil, throw an error, otherwise just return nil.
-Allowed types are `agenda' `timeline' `todo' `tags' `search'."
-  (if (not org-agenda-type)
-      (error "No Org agenda currently displayed")
-    (if (memq org-agenda-type types)
-	t
-      (if error
-	  (error "Not allowed in %s-type agenda buffers" org-agenda-type)
-	nil))))
+Allowed types are `agenda' `todo' `tags' `search'."
+  (cond ((not org-agenda-type)
+	 (error "No Org agenda currently displayed"))
+	((memq org-agenda-type types) t)
+	(error
+	 (error "Not allowed in %s-type agenda buffers" org-agenda-type))
+	(t nil)))
 
 (defun org-agenda-Quit ()
   "Exit the agenda, killing the agenda buffer.
@@ -7782,7 +7777,7 @@ Negative selection means regexp must not match for selection of an entry."
   (org-agenda-manipulate-query ?\}))
 (defun org-agenda-manipulate-query (char)
   (cond
-   ((memq org-agenda-type '(timeline agenda))
+   ((eq org-agenda-type 'agenda)
     (let ((org-agenda-include-inactive-timestamps t))
       (org-agenda-redo))
     (message "Display now includes inactive timestamps as well"))
@@ -7845,7 +7840,7 @@ Negative selection means regexp must not match for selection of an entry."
 (defun org-agenda-goto-today ()
   "Go to today."
   (interactive)
-  (org-agenda-check-type t 'timeline 'agenda)
+  (org-agenda-check-type t 'agenda)
   (let* ((args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
 	 (curspan (nth 2 args))
 	 (tdpos (text-property-any (point-min) (point-max) 'org-today t)))
@@ -7972,7 +7967,7 @@ With prefix ARG, go backward that many times the current span."
     (?D (call-interactively 'org-agenda-toggle-diary))
     (?\! (call-interactively 'org-agenda-toggle-deadlines))
     (?\[ (let ((org-agenda-include-inactive-timestamps t))
-	   (org-agenda-check-type t 'timeline 'agenda)
+	   (org-agenda-check-type t 'agenda)
 	   (org-agenda-redo))
 	 (message "Display now includes inactive timestamps as well"))
     (?q (message "Abort"))
@@ -8099,7 +8094,7 @@ so that the date SD will be in that range."
 (defun org-agenda-next-date-line (&optional arg)
   "Jump to the next line indicating a date in agenda buffer."
   (interactive "p")
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (beginning-of-line 1)
   ;; This does not work if user makes date format that starts with a blank
   (if (looking-at "^\\S-") (forward-char 1))
@@ -8112,7 +8107,7 @@ so that the date SD will be in that range."
 (defun org-agenda-previous-date-line (&optional arg)
   "Jump to the previous line indicating a date in agenda buffer."
   (interactive "p")
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (beginning-of-line 1)
   (if (not (re-search-backward "^\\S-" nil t arg))
       (error "No previous date before this line in this buffer")))
@@ -8191,7 +8186,7 @@ configured in `org-agenda-log-mode-items'.
 With a `\\[universal-argument] \\[universal-argument]' prefix, show *only* \
 log items, nothing else."
   (interactive "P")
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (setq org-agenda-show-log
 	(cond
 	 ((equal special '(16)) 'only)
@@ -9157,7 +9152,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 (defun org-agenda-date-later (arg &optional what)
   "Change the date of this item to ARG day(s) later."
   (interactive "p")
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
@@ -9240,7 +9235,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 The prefix ARG is passed to the `org-time-stamp' command and can therefore
 be used to request time specification in the time stamp."
   (interactive "P")
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
@@ -9259,7 +9254,7 @@ be used to request time specification in the time stamp."
   "Schedule the item at point.
 ARG is passed through to `org-schedule'."
   (interactive "P")
-  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
+  (org-agenda-check-type t 'agenda 'todo 'tags 'search)
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
@@ -9280,7 +9275,7 @@ ARG is passed through to `org-schedule'."
   "Schedule the item at point.
 ARG is passed through to `org-deadline'."
   (interactive "P")
-  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
+  (org-agenda-check-type t 'agenda 'todo 'tags 'search)
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
@@ -9589,7 +9584,7 @@ entries in that Org file."
 
 (defun org-agenda-execute-calendar-command (cmd)
   "Execute a calendar command from the agenda with date from cursor."
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (require 'diary-lib)
   (unless (get-text-property (min (1- (point-max)) (point)) 'day)
     (user-error "Don't know which date to use for the calendar command"))
@@ -9639,7 +9634,7 @@ argument, latitude and longitude will be prompted for."
 (defun org-agenda-goto-calendar ()
   "Open the Emacs calendar with the date at the cursor."
   (interactive)
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (let* ((day (or (get-text-property (min (1- (point-max)) (point)) 'day)
 		  (user-error "Don't know which date to open in calendar")))
 	 (date (calendar-gregorian-from-absolute day))
@@ -9664,7 +9659,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 
 (defun org-agenda-convert-date ()
   (interactive)
-  (org-agenda-check-type t 'agenda 'timeline)
+  (org-agenda-check-type t 'agenda)
   (let ((day (get-text-property (min (1- (point-max)) (point)) 'day))
 	date s)
     (unless day
@@ -9922,7 +9917,7 @@ The prefix arg is passed through to the command if possible."
 		      (org-agenda-deadline arg ,time))))))
 
 	(?S
-	 (unless (org-agenda-check-type nil 'agenda 'timeline 'todo)
+	 (unless (org-agenda-check-type nil 'agenda 'todo)
 	   (user-error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type))
 	 (let ((days (read-number
 		      (format "Scatter tasks across how many %sdays: "

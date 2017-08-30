@@ -185,7 +185,6 @@ The built-in agenda views
 * Weekly/daily agenda::		The calendar page with current tasks
 * Global TODO list::		All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
-* Timeline::			Time-sorted view for single file
 * Search view::			Find entries by searching for text
 
 Markup for rich export
@@ -880,8 +879,8 @@ Rotate the TODO state of the current item among
 (unmarked) -> TODO -> DONE -> (unmarked)
 @end smallexample
 
-The same rotation can also be done ``remotely'' from the timeline and
-agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
+The same rotation can also be done ``remotely'' from the agenda buffers with
+the @kbd{t} command key (@pxref{Agenda commands}).
 
 @item S-@key{right}@r{/}@key{left}
 Select the following/preceding TODO state, similar to cycling.
@@ -1535,9 +1534,8 @@ Update dynamic block at point.  The cursor needs to be in the
 @code{#+BEGIN} line of the dynamic block.
 @end table
 
-The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
-the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
-worked on or closed during a day.
+The @kbd{l} key may be used in the agenda (@pxref{Weekly/daily agenda}) to
+show which tasks have been worked on or closed during a day.
 
 @seealso{
 @uref{http://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times,
@@ -1763,8 +1761,6 @@ A list of all TODO items (@pxref{Global TODO list}).
 @item m @r{/} M
 A list of headlines matching a TAGS expression (@pxref{Matching
 tags and properties}).
-@item L
-The timeline view for the current buffer (@pxref{Timeline}).
 @item s
 A list of entries selected by a boolean expression of keywords
 and/or regular expressions that must or must not occur in the entry.
@@ -1777,7 +1773,6 @@ and/or regular expressions that must or must not occur in the entry.
 * Weekly/daily agenda::		The calendar page with current tasks
 * Global TODO list::		All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
-* Timeline::			Time-sorted view for single file
 * Search view::			Find entries by searching for text
 @end menu
 
@@ -1826,7 +1821,7 @@ agenda files (@pxref{Agenda Views}) into a single buffer.
 Like the above, but allows selection of a specific TODO keyword. 
 @end table
 
-@node Matching tags and properties, Timeline, Global TODO list, Built-in agenda views
+@node Matching tags and properties, Search view, Global TODO list, Built-in agenda views
 @subsection Matching tags and properties
 
 If headlines in the agenda files are marked with @emph{tags} (@pxref{Tags}),
@@ -1872,21 +1867,7 @@ Like before, but require the @samp{:laptop:} lines to be tagged also
 You may also test for properties at the same
 time as matching tags, see the manual for more information.
 
-@node Timeline, Search view, Matching tags and properties, Built-in agenda views
-@subsection Timeline for a single file
-
-The timeline summarizes all time-stamped items from a single Org mode
-file in a @emph{time-sorted view}.  The main purpose of this command is
-to give an overview over events in a project.
-
-@table @kbd
-@item C-c a L
-Show a time-sorted view of the Org file, with all time-stamped items.
-When called with a @kbd{C-u} prefix, all unfinished TODO entries
-(scheduled or not) are also listed under the current date.
-@end table
-
-@node Search view,  , Timeline, Built-in agenda views
+@node Search view,  , Matching tags and properties, Built-in agenda views
 @subsection Search view
 
 This agenda view is a general text search facility for Org mode entries.

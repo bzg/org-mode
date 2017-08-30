@@ -1043,21 +1043,21 @@ This means, between the beginning of line and the point."
 		     org-agenda-undo-list)]
 	 ["Rebuild Buffer" org-agenda-redo t]
 	 ["New Diary Entry"
-	  org-agenda-diary-entry (org-agenda-check-type nil 'agenda 'timeline) t]
+	  org-agenda-diary-entry (org-agenda-check-type nil 'agenda) t]
 	 "--"
 	 ["Goto Today" org-agenda-goto-today
-	  (org-agenda-check-type nil 'agenda 'timeline) t]
+	  (org-agenda-check-type nil 'agenda) t]
 	 ["Display Calendar" org-agenda-goto-calendar
-	  (org-agenda-check-type nil 'agenda 'timeline) t]
+	  (org-agenda-check-type nil 'agenda) t]
 	 ("Calendar Commands"
 	  ["Phases of the Moon" org-agenda-phases-of-moon
-	   (org-agenda-check-type nil 'agenda 'timeline)]
+	   (org-agenda-check-type nil 'agenda)]
 	  ["Sunrise/Sunset" org-agenda-sunrise-sunset
-	   (org-agenda-check-type nil 'agenda 'timeline)]
+	   (org-agenda-check-type nil 'agenda)]
 	  ["Holidays" org-agenda-holidays
-	   (org-agenda-check-type nil 'agenda 'timeline)]
+	   (org-agenda-check-type nil 'agenda)]
 	  ["Convert" org-agenda-convert-date
-	   (org-agenda-check-type nil 'agenda 'timeline)]
+	   (org-agenda-check-type nil 'agenda)]
 	  "--"
 	  ["Create iCalendar file" org-icalendar-combine-agenda-files t])
 	 "--"
@@ -1070,7 +1070,7 @@ This means, between the beginning of line and the point."
 	 "--"
 	 ["Show Logbook entries" org-agenda-log-mode
 	  :style toggle :selected org-agenda-show-log
-	  :active (org-agenda-check-type nil 'agenda 'timeline)]
+	  :active (org-agenda-check-type nil 'agenda)]
 	 ["Include Diary" org-agenda-toggle-diary
 	  :style toggle :selected org-agenda-include-diary
 	  :active (org-agenda-check-type nil 'agenda)]
