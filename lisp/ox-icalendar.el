@@ -928,43 +928,46 @@ This function assumes major mode for current buffer is
 (defun org-icalendar--combine-files (&rest files)
   "Combine entries from multiple files into an iCalendar file.
 FILES is a list of files to build the calendar from."
-  (org-agenda-prepare-buffers files)
-  (unwind-protect
-      (progn
-	(with-temp-file org-icalendar-combined-agenda-file
-	  (insert
-	   (org-icalendar--vcalendar
-	    ;; Name.
-	    org-icalendar-combined-name
-	    ;; Owner.
-	    user-full-name
-	    ;; Timezone.
-	    (or (org-string-nw-p org-icalendar-timezone)
-		(cadr (current-time-zone)))
-	    ;; Description.
-	    org-icalendar-combined-description
-	    ;; Contents.
-	    (concat
-	     ;; Agenda contents.
-	     (mapconcat
-	      (lambda (file)
-		(catch 'nextfile
-		  (org-check-agenda-file file)
-		  (with-current-buffer (org-get-agenda-file-buffer file)
-		    ;; Create ID if necessary.
-		    (when org-icalendar-store-UID
-		      (org-icalendar-create-uid file t))
-		    (org-export-as
-		     'icalendar nil nil t
-		     '(:ascii-charset utf-8 :ascii-links-to-notes nil)))))
-	      files "")
-	     ;; BBDB anniversaries.
-	     (when (and org-icalendar-include-bbdb-anniversaries
-			(require 'org-bbdb nil t))
-	       (with-output-to-string (org-bbdb-anniv-export-ical)))))))
-	(run-hook-with-args 'org-icalendar-after-save-hook
-			    org-icalendar-combined-agenda-file))
-    (org-release-buffers org-agenda-new-buffers)))
+  ;; At the end of the process, all buffers related to FILES are going
+  ;; to be killed.  Make sure to only kill the ones opened in the
+  ;; process.
+  (let ((org-agenda-new-buffers nil))
+    (unwind-protect
+	(progn
+	  (with-temp-file org-icalendar-combined-agenda-file
+	    (insert
+	     (org-icalendar--vcalendar
+	      ;; Name.
+	      org-icalendar-combined-name
+	      ;; Owner.
+	      user-full-name
+	      ;; Timezone.
+	      (or (org-string-nw-p org-icalendar-timezone)
+		  (cadr (current-time-zone)))
+	      ;; Description.
+	      org-icalendar-combined-description
+	      ;; Contents.
+	      (concat
+	       ;; Agenda contents.
+	       (mapconcat
+		(lambda (file)
+		  (catch 'nextfile
+		    (org-check-agenda-file file)
+		    (with-current-buffer (org-get-agenda-file-buffer file)
+		      ;; Create ID if necessary.
+		      (when org-icalendar-store-UID
+			(org-icalendar-create-uid file t))
+		      (org-export-as
+		       'icalendar nil nil t
+		       '(:ascii-charset utf-8 :ascii-links-to-notes nil)))))
+		files "")
+	       ;; BBDB anniversaries.
+	       (when (and org-icalendar-include-bbdb-anniversaries
+			  (require 'org-bbdb nil t))
+		 (with-output-to-string (org-bbdb-anniv-export-ical)))))))
+	  (run-hook-with-args 'org-icalendar-after-save-hook
+			      org-icalendar-combined-agenda-file))
+      (org-release-buffers org-agenda-new-buffers))))
 
 
 (provide 'ox-icalendar)
