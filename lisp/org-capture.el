@@ -847,13 +847,17 @@ for `entry'-type templates"))
   (let* ((base (or (buffer-base-buffer) (current-buffer)))
 	 (pos (make-marker))
 	 (org-capture-is-refiling t)
-	 (kill-buffer (org-capture-get :kill-buffer 'local)))
+	 (kill-buffer (org-capture-get :kill-buffer 'local))
+	 (jump-to-captured (org-capture-get :jump-to-captured 'local)))
     ;; Since `org-capture-finalize' may alter buffer contents (e.g.,
     ;; empty lines) around entry, use a marker to refer to the
     ;; headline to be refiled.  Place the marker in the base buffer,
     ;; as the current indirect one is going to be killed.
     (set-marker pos (save-excursion (org-back-to-heading t) (point)) base)
-    (org-capture-put :kill-buffer nil)
+    ;; `org-capture-finalize' calls `org-capture-goto-last-stored' too
+    ;; early.  We want to wait for the refiling to be over, so we
+    ;; control when the latter function is called.
+    (org-capture-put :kill-buffer nil :jump-to-captured nil)
     (unwind-protect
 	(progn
 	  (org-capture-finalize)
@@ -862,7 +866,8 @@ for `entry'-type templates"))
 	      (org-with-wide-buffer
 	       (goto-char pos)
 	       (call-interactively 'org-refile))))
-	  (when kill-buffer (kill-buffer base)))
+	  (when kill-buffer (kill-buffer base))
+	  (when jump-to-captured (org-capture-goto-last-stored)))
       (set-marker pos nil))))
 
 (defun org-capture-kill ()
