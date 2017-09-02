@@ -1305,12 +1305,12 @@ Expose all direct children of the subtree.  With a numeric prefix argument N,
 expose all children down to level N@.
 @orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
 Show the current subtree in an indirect buffer@footnote{The indirect buffer
-(@pxref{Indirect Buffers,https://www.gnu.org/software/emacs/manual/html_node/emacs/Indirect-Buffers.html,,emacs,GNU Emacs Manual}) will contain the entire
-buffer, but will be narrowed to the current tree.  Editing the indirect
-buffer will also change the original buffer, but without affecting visibility
-in that buffer.}.  With a numeric prefix argument N, go up to level N and
-then take that tree.  If N is negative then go up that many levels.  With a
-@kbd{C-u} prefix, do not remove the previously used indirect buffer.
+(@pxref{Indirect Buffers,,emacs}) will contain the entire buffer, but will be
+narrowed to the current tree.  Editing the indirect buffer will also change
+the original buffer, but without affecting visibility in that buffer.}.  With
+a numeric prefix argument N, go up to level N and then take that tree.  If
+N is negative then go up that many levels.  With a @kbd{C-u} prefix, do not
+remove the previously used indirect buffer.
 @orgcmd{C-c C-x v,org-copy-visible}
 Copy the @i{visible} text in the region into the kill ring.
 @end table
@@ -14033,8 +14033,8 @@ A somewhat obsessive function.
 @node A Texinfo example
 @subsection A Texinfo example
 
-Here is a more detailed example Org file.  @inforef{GNU Sample
-Texts,,texinfo} for an equivalent example using Texinfo code.
+Here is a more detailed example Org file.  @xref{GNU Sample Texts,,texinfo}
+for an equivalent example using Texinfo code.
 
 @example
 #+TITLE: GNU Sample @{@{@{version@}@}@}
