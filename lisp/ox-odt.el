@@ -3755,6 +3755,7 @@ contextual information."
 				      nil display-msg nil
 				      processing-type)
 		    (goto-char (point-min))
+		    (skip-chars-forward " \t\n")
 		    (org-element-link-parser))))
 	    (if (not (eq 'link (org-element-type link)))
 		(message "LaTeX Conversion failed.")
