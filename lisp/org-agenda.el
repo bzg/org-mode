@@ -2065,19 +2065,21 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
       (push entry org-agenda-custom-commands))))
 
 (defmacro org-agenda--insert-overriding-header (default)
-  "Insert header into agenda view depending on value of `org-agenda-overriding-header'.
+  "Insert header into agenda view.
+The inserted header depends on `org-agenda-overriding-header'.
 If the empty string, don't insert a header.  If any other string,
 insert it as a header.  If nil, insert DEFAULT, which should
 evaluate to a string."
   (declare (debug (form)) (indent defun))
-  `(pcase org-agenda-overriding-header
-     ("" nil)  ; Don't insert a header if set to empty string
-     ;; Insert user-specified string
-     ((pred stringp) (insert (propertize org-agenda-overriding-header
-					 'face 'org-agenda-structure)
-			     "\n"))
-     ;; When nil, make string automatically and insert it
-     ((pred null) (insert ,default))))
+  `(cond
+    ((not org-agenda-overriding-header) (insert ,default))
+    ((equal org-agenda-overriding-header "") nil)
+    ((stringp org-agenda-overriding-header)
+     (insert (propertize org-agenda-overriding-header
+			 'face 'org-agenda-structure)
+	     "\n"))
+    (t (user-error "Invalid value for `org-agenda-overriding-header': %S"
+		   org-agenda-overriding-header))))
 
 ;;; Define the org-agenda-mode
 
