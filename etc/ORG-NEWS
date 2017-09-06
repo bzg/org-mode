@@ -10,9 +10,22 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.2
 ** New features
+*** ~org-archive~ functions update status cookies
+
+Archiving headers through ~org-archive-subtree~ and
+~org-archive-to-archive-sibling~ such as the ones listed below:
+
+#+BEGIN_SRC org
+  ,* Top [1/2]
+  ,** DONE Completed
+  ,** TODO Working
+#+END_SRC
+
+Will update the status cookie in the top level header.
+
 *** Disable =org-agenda-overriding-header= by setting to empty string
 
-The =org-agenda-overriding-header= inserted into agenda views can now
+The ~org-agenda-overriding-header~ inserted into agenda views can now
 be disabled by setting it to an empty string.
 
 * Version 9.1

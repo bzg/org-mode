@@ -393,6 +393,12 @@ direct children of this heading."
 	(when (featurep 'org-inlinetask)
 	  (org-inlinetask-remove-END-maybe))
 	(setq org-markers-to-move nil)
+	(when org-provide-todo-statistics
+	  (save-excursion
+	    ;; Go to parent, even if no children exist.
+	    (org-up-heading-safe)
+	    ;; Update cookie of parent.
+	    (org-update-statistics-cookies nil)))
 	(message "Subtree archived %s"
 		 (if (eq this-buffer buffer)
 		     (concat "under heading: " heading)
@@ -419,7 +425,7 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 	 '(progn (setq org-map-continue-from
 		       (progn (org-back-to-heading)
 			      (if (looking-at (concat "^.*:" org-archive-tag ":.*$"))
-			      	  (org-end-of-subtree t)
+				  (org-end-of-subtree t)
 				(point))))
 		 (when (org-at-heading-p)
 		   (org-archive-to-archive-sibling)))
@@ -469,6 +475,9 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 	(outline-up-heading 1 t)
 	(outline-hide-subtree)
 	(org-cycle-show-empty-lines 'folded)
+	(when org-provide-todo-statistics
+	  ;; Update TODO statistics of parent.
+	  (org-update-parent-todo-statistics))
 	(goto-char pos)))
     (org-reveal)
     (if (looking-at "^[ \t]*$")
