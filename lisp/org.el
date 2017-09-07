@@ -174,6 +174,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function
  org-table-sort-lines "org-table"
  (&optional with-case sorting-type getkey-func compare-func interactive?))
+(declare-function org-table-shrink "org-table" (&optional begin end))
+(declare-function org-table-toggle-column-width "org-table" (&optional arg))
 (declare-function org-table-wrap-region "org-table" (arg))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function orgtbl-ascii-plot "org-table" (&optional ask))
