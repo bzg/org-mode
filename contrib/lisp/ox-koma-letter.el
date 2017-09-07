@@ -659,8 +659,8 @@ holding export options."
    ;; variables, then we insert LCO files, and, eventually, we insert
    ;; settings coming from buffer keywords.
    (org-koma-letter--build-settings 'global info)
-   (mapconcat #'(lambda (file) (format "\\LoadLetterOption{%s}\n" file))
-	      (org-split-string (or (plist-get info :lco) "") " ")
+   (mapconcat (lambda (file) (format "\\LoadLetterOption{%s}\n" file))
+	      (split-string (or (plist-get info :lco) ""))
 	      "")
    (org-koma-letter--build-settings 'buffer info)
    ;; Date.
@@ -717,7 +717,7 @@ holding export options."
    (format "\\closing{%s}\n"
 	   (org-koma-letter--keyword-or-headline
 	    :closing (lambda (h i) (eq (org-koma-letter--special-tag h i)
-				'closing))
+				       'closing))
 	    info))
    (org-koma-letter--special-contents-inline
     (plist-get info :special-tags-after-closing) info)
