@@ -5085,7 +5085,7 @@ Return value contains the following keys: `archive', `category',
 	      ((equal key "CONSTANTS")
 	       (let* ((constants (assq 'constants alist))
 		      (store (cdr constants)))
-		 (dolist (pair (org-split-string value))
+		 (dolist (pair (split-string value))
 		   (when (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)"
 				       pair)
 		     (let* ((name (match-string 1 pair))
@@ -5100,7 +5100,7 @@ Return value contains the following keys: `archive', `category',
 		 (let ((old (assq 'filetags alist))
 		       (new (apply #'nconc
 				   (mapcar (lambda (x) (org-split-string x ":"))
-					   (org-split-string value)))))
+					   (split-string value)))))
 		   (if old (setcdr old (append new (cdr old)))
 		     (push (cons 'filetags new) alist)))))
 	      ((equal key "LINK")
@@ -5116,7 +5116,7 @@ Return value contains the following keys: `archive', `category',
 		 (push (cons 'scripts (read (match-string 1 value))) alist)))
 	      ((equal key "PRIORITIES")
 	       (push (cons 'priorities
-			   (let ((prio (org-split-string value)))
+			   (let ((prio (split-string value)))
 			     (if (< (length prio) 3) '(?A ?C ?B)
 			       (mapcar #'string-to-char prio))))
 		     alist))
@@ -5133,8 +5133,8 @@ Return value contains the following keys: `archive', `category',
 	       (let ((startup (assq 'startup alist)))
 		 (if startup
 		     (setcdr startup
-			     (append (cdr startup) (org-split-string value)))
-		   (push (cons 'startup (org-split-string value)) alist))))
+			     (append (cdr startup) (split-string value)))
+		   (push (cons 'startup (split-string value)) alist))))
 	      ((equal key "TAGS")
 	       (let ((tag-cell (assq 'tags alist)))
 		 (if tag-cell
@@ -5143,7 +5143,7 @@ Return value contains the following keys: `archive', `category',
 	      ((member key '("TODO" "SEQ_TODO" "TYP_TODO"))
 	       (let ((todo (assq 'todo alist))
 		     (value (cons (if (equal key "TYP_TODO") 'type 'sequence)
-				  (org-split-string value))))
+				  (split-string value))))
 		 (if todo (push value (cdr todo))
 		   (push (list 'todo value) alist))))
 	      ((equal key "SETUPFILE")
@@ -9913,7 +9913,7 @@ according to FMT (default from `org-email-link-description-format')."
 		      (org-back-to-heading t)
 		      (org-element-property :raw-value (org-element-at-point))))))
 	(lines org-context-in-file-links))
-    (or string (setq s (concat "*" s)))  ; Add * for headlines
+    (unless string (setq s (concat "*" s))) ;Add * for headlines
     (setq s (replace-regexp-in-string "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" "" s))
     (when (and string (integerp lines) (> lines 0))
       (let ((slines (org-split-string s "\n")))
@@ -9922,7 +9922,7 @@ according to FMT (default from `org-email-link-description-format')."
 		   'identity
 		   (reverse (nthcdr (- (length slines) lines)
 				    (reverse slines))) "\n")))))
-    (mapconcat 'identity (org-split-string s "[ \t]+") " ")))
+    (mapconcat #'identity (split-string s) " ")))
 
 (defun org-make-link-string (link &optional description)
   "Make a link with brackets, consisting of LINK and DESCRIPTION."
@@ -10814,7 +10814,7 @@ the window configuration before `org-open-at-point' was called using:
 White spaces are not significant."
   (let ((re (format "<<<%s>>>"
 		    (mapconcat #'regexp-quote
-			       (org-split-string target "[ \t\n]+")
+			       (split-string target)
 			       "[ \t]+\\(?:\n[ \t]*\\)?")))
 	(origin (point)))
     (goto-char (point-min))
@@ -12856,7 +12856,7 @@ This hook runs even if there is no statistics cookie present, in which case
   (setq org-log-done nil
         org-log-repeat nil
         org-todo-log-states nil)
-  (dolist (w (org-split-string value))
+  (dolist (w (split-string value))
     (let (a)
       (cond
        ((setq a (assoc w org-startup-options))
@@ -15828,44 +15828,41 @@ non-nil when a property was removed."
 (defun org-entry-add-to-multivalued-property (pom property value)
   "Add VALUE to the words in the PROPERTY in entry at point-or-marker POM."
   (let* ((old (org-entry-get pom property))
-	 (values (and old (org-split-string old "[ \t]"))))
+	 (values (and old (split-string old))))
     (setq value (org-entry-protect-space value))
     (unless (member value values)
       (setq values (append values (list value)))
-      (org-entry-put pom property
-		     (mapconcat 'identity values " ")))))
+      (org-entry-put pom property (mapconcat #'identity values " ")))))
 
 (defun org-entry-remove-from-multivalued-property (pom property value)
   "Remove VALUE from words in the PROPERTY in entry at point-or-marker POM."
   (let* ((old (org-entry-get pom property))
-	 (values (and old (org-split-string old "[ \t]"))))
+	 (values (and old (split-string old))))
     (setq value (org-entry-protect-space value))
     (when (member value values)
       (setq values (delete value values))
-      (org-entry-put pom property
-		     (mapconcat 'identity values " ")))))
+      (org-entry-put pom property (mapconcat #'identity values " ")))))
 
 (defun org-entry-member-in-multivalued-property (pom property value)
   "Is VALUE one of the words in the PROPERTY in entry at point-or-marker POM?"
   (let* ((old (org-entry-get pom property))
-	 (values (and old (org-split-string old "[ \t]"))))
+	 (values (and old (split-string old))))
     (setq value (org-entry-protect-space value))
     (member value values)))
 
 (defun org-entry-get-multivalued-property (pom property)
   "Return a list of values in a multivalued property."
   (let* ((value (org-entry-get pom property))
-	 (values (and value (org-split-string value "[ \t]"))))
-    (mapcar 'org-entry-restore-space values)))
+	 (values (and value (split-string value))))
+    (mapcar #'org-entry-restore-space values)))
 
 (defun org-entry-put-multivalued-property (pom property &rest values)
   "Set multivalued PROPERTY at point-or-marker POM to VALUES.
 VALUES should be a list of strings.  Spaces will be protected."
-  (org-entry-put pom property
-		 (mapconcat 'org-entry-protect-space values " "))
+  (org-entry-put pom property (mapconcat #'org-entry-protect-space values " "))
   (let* ((value (org-entry-get pom property))
-	 (values (and value (org-split-string value "[ \t]"))))
-    (mapcar 'org-entry-restore-space values)))
+	 (values (and value (split-string value))))
+    (mapcar #'org-entry-restore-space values)))
 
 (defun org-entry-protect-space (s)
   "Protect spaces and newline in string S."
@@ -21864,7 +21861,7 @@ wrapped to the length of that word.
 IF WIDTH is nil and LINES is non-nil, the string is forced into at most that
 many lines, whatever width that takes.
 The return value is a list of lines, without newlines at the end."
-  (let* ((words (org-split-string string "[ \t\n]+"))
+  (let* ((words (split-string string))
 	 (maxword (apply 'max (mapcar 'org-string-width words)))
 	 w ll)
     (cond (width

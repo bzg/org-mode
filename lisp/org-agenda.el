@@ -4425,7 +4425,7 @@ in `org-agenda-text-search-extra-files'."
       (if (or org-agenda-search-view-always-boolean
 	      (member (string-to-char words) '(?- ?+ ?\{)))
 	  (setq boolean t))
-      (setq words (org-split-string words))
+      (setq words (split-string words))
       (let (www w)
 	(while (setq w (pop words))
 	  (while (and (string-match "\\\\\\'" w) words)

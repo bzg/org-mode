@@ -520,7 +520,7 @@ headline or finally add more underscore characters (\"_\")."
   (let ((id (org-string-nw-p (org-element-property :TASK_ID item))))
     ;; If an id is specified, use it, as long as it's unique.
     (if (and id (not (member id unique-ids))) id
-      (let* ((parts (org-split-string (org-element-property :raw-value item)))
+      (let* ((parts (split-string (org-element-property :raw-value item)))
 	     (id (org-taskjuggler--clean-id (downcase (pop parts)))))
 	;; Try to add more parts of the headline to make it unique.
 	(while (and (car parts) (member id unique-ids))
@@ -554,8 +554,8 @@ channel."
          (let ((deps (concat (org-element-property :BLOCKER task)
                              (org-element-property :DEPENDS task))))
            (and deps
-                (org-split-string (replace-regexp-in-string "{.*?}" "" deps)
-                                  "[ ,]* +"))))
+                (split-string (replace-regexp-in-string "{.*?}" "" deps)
+			      "[ ,]* +"))))
         depends)
     (when deps-ids
       ;; Find tasks with :task_id: property matching id in DEPS-IDS.

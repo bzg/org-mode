@@ -124,7 +124,7 @@ contains a list of strings to be passed as options to
     (and value
          (string-match "\\(\\S-+\\)[ \t]+\\(\\S-+\\)\\(.*\\)" value)
          (let (options limit)
-           (dolist (arg (org-split-string (match-string 3 value))
+           (dolist (arg (split-string (match-string 3 value))
                         ;; Return value.
                         (list :options (nreverse options) :limit limit))
              (let* ((s (split-string arg ":"))
