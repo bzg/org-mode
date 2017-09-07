@@ -355,7 +355,6 @@ Document structure
 * Drawers::                     Tucking stuff away
 * Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
-* Orgstruct mode::              Structure editing outside Org
 * Org syntax::                  Formal description of Org's syntax
 
 Visibility cycling
@@ -1160,7 +1159,6 @@ edit the structure of the document.
 * Drawers::                     Tucking stuff away
 * Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
-* Orgstruct mode::              Structure editing outside Org
 * Org syntax::                  Formal description of Org's syntax
 @end menu
 
@@ -1989,41 +1987,6 @@ Edit the footnote definition corresponding to the reference at point in
 a separate window.  The window can be closed by pressing @kbd{C-c '}.
 
 @end table
-
-@node Orgstruct mode
-@section The Orgstruct minor mode
-@cindex Orgstruct mode
-@cindex minor mode for structure editing
-
-If you like the intuitive way the Org mode structure editing and list
-formatting works, you might want to use these commands in other modes like
-Text mode or Mail mode as well.  The minor mode @code{orgstruct-mode} makes
-this possible.   Toggle the mode with @kbd{M-x orgstruct-mode RET}, or
-turn it on by default, for example in Message mode, with one of:
-
-@lisp
-(add-hook 'message-mode-hook 'turn-on-orgstruct)
-(add-hook 'message-mode-hook 'turn-on-orgstruct++)
-@end lisp
-
-When this mode is active and the cursor is on a line that looks to Org like a
-headline or the first line of a list item, most structure editing commands
-will work, even if the same keys normally have different functionality in the
-major mode you are using.  If the cursor is not in one of those special
-lines, Orgstruct mode lurks silently in the shadows.
-
-When you use @code{orgstruct++-mode}, Org will also export indentation and
-autofill settings into that mode, and detect item context after the first
-line of an item.
-
-@vindex orgstruct-heading-prefix-regexp
-You can also use Org structure editing to fold and unfold headlines in
-@emph{any} file, provided you defined @code{orgstruct-heading-prefix-regexp}:
-the regular expression must match the local prefix to use before Org's
-headlines.  For example, if you set this variable to @code{";; "} in Emacs
-Lisp files, you will be able to fold and unfold headlines in Emacs Lisp
-commented lines.  Some commands like @code{org-demote} are disabled when the
-prefix is set, but folding/unfolding will work correctly.
 
 @node Org syntax
 @section Org syntax

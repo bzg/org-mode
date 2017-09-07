@@ -93,11 +93,6 @@
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
-;;
-;; In Org buffers, the value of `outline-regexp' is that of
-;; `org-outline-regexp'.  The only function still directly relying on
-;; `outline-regexp' is `org-overview' so that `org-cycle' can do its
-;; job when `orgstruct-mode' is active.
 (defvar org-outline-regexp "\\*+ "
   "Regexp to match Org headlines.")
 
@@ -6977,9 +6972,6 @@ With a numeric prefix, show all headlines up to that level."
      (org-cycle-hide-drawers 'all)
      (org-cycle-show-empty-lines 'all))))
 
-;; This function uses outline-regexp instead of the more fundamental
-;; org-outline-regexp so that org-cycle-global works outside of Org
-;; buffers, where outline-regexp is needed.
 (defun org-overview ()
   "Switch to overview mode, showing only top-level headlines.
 This shows all headlines with a level equal or greater than the level
@@ -6991,7 +6983,7 @@ results."
     (let ((level
 	   (save-excursion
 	     (goto-char (point-min))
-	     (when (re-search-forward (concat "^" outline-regexp) nil t)
+	     (when (re-search-forward org-outline-regexp-bol nil t)
 	       (goto-char (match-beginning 0))
 	       (funcall outline-level)))))
       (and level (outline-hide-sublevels level)))))
@@ -7599,8 +7591,6 @@ When NO-COMMENT is non-nil, don't include COMMENT string."
 		   (delq nil (list todo priority headline tags))
 		   " ")))))
 
-(defvar orgstruct-mode)   ; defined below
-
 (defun org-heading-components ()
   "Return the components of the current heading.
 This is a list with the following elements:
@@ -7612,24 +7602,13 @@ This is a list with the following elements:
 - the tags string, or nil."
   (save-excursion
     (org-back-to-heading t)
-    (when (let (case-fold-search)
-	    (looking-at
-	     (if orgstruct-mode
-		 org-heading-regexp
-	       org-complex-heading-regexp)))
-      (if orgstruct-mode
-	  (list (length (match-string 1))
-		(org-reduced-level (length (match-string 1)))
-		nil
-		nil
-		(match-string 2)
-		nil)
-	(list (length (match-string 1))
-	      (org-reduced-level (length (match-string 1)))
-	      (match-string-no-properties 2)
-	      (and (match-end 3) (aref (match-string 3) 2))
-	      (match-string-no-properties 4)
-	      (match-string-no-properties 5))))))
+    (when (let (case-fold-search) (looking-at org-complex-heading-regexp))
+      (list (length (match-string 1))
+	    (org-reduced-level (length (match-string 1)))
+	    (match-string-no-properties 2)
+	    (and (match-end 3) (aref (match-string 3) 2))
+	    (match-string-no-properties 4)
+	    (match-string-no-properties 5)))))
 
 (defun org-get-entry ()
   "Get the entry text, after heading, entire subtree."
@@ -8792,272 +8771,6 @@ function is being called interactively."
     (run-hooks 'org-after-sorting-entries-or-items-hook)
     (message "Sorting entries...done")))
 
-;;; The orgstruct minor mode
-
-;; Define a minor mode which can be used in other modes in order to
-;; integrate the Org mode structure editing commands.
-
-;; This is really a hack, because the Org mode structure commands use
-;; keys which normally belong to the major mode.  Here is how it
-;; works: The minor mode defines all the keys necessary to operate the
-;; structure commands, but wraps the commands into a function which
-;; tests if the cursor is currently at a headline or a plain list
-;; item.  If that is the case, the structure command is used,
-;; temporarily setting many Org mode variables like regular
-;; expressions for filling etc.  However, when any of those keys is
-;; used at a different location, function uses `key-binding' to look
-;; up if the key has an associated command in another currently active
-;; keymap (minor modes, major mode, global), and executes that
-;; command.  There might be problems if any of the keys is otherwise
-;; used as a prefix key.
-
-(defcustom orgstruct-heading-prefix-regexp ""
-  "Regexp that matches the custom prefix of Org headlines in
-orgstruct(++)-mode."
-  :group 'org
-  :version "26.1"
-  :package-version '(Org . "8.3")
-  :type 'regexp)
-;;;###autoload(put 'orgstruct-heading-prefix-regexp 'safe-local-variable 'stringp)
-
-(defcustom orgstruct-setup-hook nil
-  "Hook run after orgstruct-mode-map is filled."
-  :group 'org
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'hook)
-
-(defvar orgstruct-initialized nil)
-
-(defvar org-local-vars nil
-  "List of local variables, for use by `orgstruct-mode'.")
-
-;;;###autoload
-(define-minor-mode orgstruct-mode
-  "Toggle the minor mode `orgstruct-mode'.
-This mode is for using Org mode structure commands in other
-modes.  The following keys behave as if Org mode were active, if
-the cursor is on a headline, or on a plain list item (both as
-defined by Org mode)."
-  nil " OrgStruct" (make-sparse-keymap)
-  (funcall (if orgstruct-mode
-	       'add-to-invisibility-spec
-	     'remove-from-invisibility-spec)
-	   '(outline . t))
-  (when orgstruct-mode
-    (org-load-modules-maybe)
-    (unless orgstruct-initialized
-      (orgstruct-setup)
-      (setq orgstruct-initialized t))))
-
-;;;###autoload
-(defun turn-on-orgstruct ()
-  "Unconditionally turn on `orgstruct-mode'."
-  (orgstruct-mode 1))
-
-(defvar-local orgstruct-is-++ nil
-  "Is `orgstruct-mode' in ++ version in the current-buffer?")
-(defvar-local org-fb-vars nil)
-(defun orgstruct++-mode (&optional arg)
-  "Toggle `orgstruct-mode', the enhanced version of it.
-In addition to setting orgstruct-mode, this also exports all
-indentation and autofilling variables from Org mode into the
-buffer.  It will also recognize item context in multiline items."
-  (interactive "P")
-  (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
-  (if (< arg 1)
-      (progn (orgstruct-mode -1)
-	     (dolist (v org-fb-vars)
-	       (set (make-local-variable (car v))
-		    (if (eq (car-safe (cadr v)) 'quote)
-			(cl-cadadr v)
-		      (nth 1 v)))))
-    (orgstruct-mode 1)
-    (setq org-fb-vars nil)
-    (unless org-local-vars
-      (setq org-local-vars (org-get-local-variables)))
-    (let (var val)
-      (dolist (x org-local-vars)
-	(when (string-match
-	       "^\\(paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\
-\\|fill-prefix\\|indent-\\)"
-	       (symbol-name (car x)))
-	  (setq var (car x) val (nth 1 x))
-	  (push (list var `(quote ,(eval var))) org-fb-vars)
-	  (set (make-local-variable var)
-	       (if (eq (car-safe val) 'quote) (nth 1 val) val))))
-      (setq-local orgstruct-is-++ t))))
-
-;;;###autoload
-(defun turn-on-orgstruct++ ()
-  "Unconditionally turn on `orgstruct++-mode'."
-  (orgstruct++-mode 1))
-
-(defun orgstruct-error ()
-  "Error when there is no default binding for a structure key."
-  (interactive)
-  (funcall (if (fboundp 'user-error)
-	       'user-error
-	     'error)
-	   "This key has no function outside structure elements"))
-
-(defun orgstruct-setup ()
-  "Setup orgstruct keymap."
-  (dolist (cell '((org-demote . t)
-		  (org-metaleft . t)
-		  (org-metaright . t)
-		  (org-promote . t)
-		  (org-shiftmetaleft . t)
-		  (org-shiftmetaright . t)
-		  org-backward-element
-		  org-backward-heading-same-level
-		  org-ctrl-c-ret
-		  org-ctrl-c-minus
-		  org-ctrl-c-star
-		  org-cycle
-		  org-force-cycle-archived
-		  org-forward-heading-same-level
-		  org-insert-heading
-		  org-insert-heading-respect-content
-		  org-kill-note-or-show-branches
-		  org-mark-subtree
-		  org-meta-return
-		  org-metadown
-		  org-metaup
-		  org-narrow-to-subtree
-		  org-promote-subtree
-		  org-reveal
-		  org-shiftdown
-		  org-shiftleft
-		  org-shiftmetadown
-		  org-shiftmetaup
-		  org-shiftright
-		  org-shifttab
-		  org-shifttab
-		  org-shiftup
-		  org-show-children
-		  org-show-subtree
-		  org-sort
-		  org-up-element
-		  outline-demote
-		  outline-next-visible-heading
-		  outline-previous-visible-heading
-		  outline-promote
-		  outline-up-heading))
-    (let ((f (or (car-safe cell) cell))
-	  (disable-when-heading-prefix (cdr-safe cell)))
-      (when (fboundp f)
-	(let ((new-bindings))
-	  (dolist (binding (nconc (where-is-internal f org-mode-map)
-				  (where-is-internal f outline-mode-map)))
-	    (push binding new-bindings)
-	    ;; TODO use local-function-key-map
-	    (dolist (rep '(("<tab>" . "TAB")
-			   ("<return>" . "RET")
-			   ("<escape>" . "ESC")
-			   ("<delete>" . "DEL")))
-	      (setq binding (read-kbd-macro
-			     (let ((case-fold-search))
-			       (replace-regexp-in-string
-				(regexp-quote (cdr rep))
-				(car rep)
-				(key-description binding)))))
-	      (cl-pushnew binding new-bindings :test 'equal)))
-	  (dolist (binding new-bindings)
-	    (let ((key (lookup-key orgstruct-mode-map binding)))
-	      (when (or (not key) (numberp key))
-		(ignore-errors
-		  (org-defkey orgstruct-mode-map
-			      binding
-			      (orgstruct-make-binding
-			       f binding disable-when-heading-prefix))))))))))
-  (run-hooks 'orgstruct-setup-hook))
-
-(defun orgstruct-make-binding (fun key disable-when-heading-prefix)
-  "Create a function for binding in the structure minor mode.
-FUN is the command to call inside a table.  KEY is the key that
-should be checked in for a command to execute outside of tables.
-Non-nil `disable-when-heading-prefix' means to disable the command
-if `orgstruct-heading-prefix-regexp' is not empty."
-  (let ((name (concat "orgstruct-hijacker-" (symbol-name fun))))
-    (let ((nname name)
-	  (i 0))
-      (while (fboundp (intern nname))
-	(setq nname (format "%s-%d" name (setq i (1+ i)))))
-      (setq name (intern nname)))
-    (eval
-     (let ((bindings '((org-heading-regexp
-			(concat "^"
-				orgstruct-heading-prefix-regexp
-				"\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[		]*$"))
-		       (org-outline-regexp
-			(concat orgstruct-heading-prefix-regexp "\\*+ "))
-		       (org-outline-regexp-bol
-			(concat "^" org-outline-regexp))
-		       (outline-regexp org-outline-regexp)
-		       (outline-heading-end-regexp "\n")
-		       (outline-level 'org-outline-level)
-		       (outline-heading-alist))))
-       `(defun ,name (arg)
-	  ,(concat "In Structure, run `" (symbol-name fun) "'.\n"
-		   "Outside of structure, run the binding of `"
-		   (key-description key) "'."
-		   (when disable-when-heading-prefix
-		     (concat
-		      "\nIf `orgstruct-heading-prefix-regexp' is not empty, this command will always fall\n"
-		      "back to the default binding due to limitations of Org's implementation of\n"
-		      "`" (symbol-name fun) "'.")))
-	  (interactive "p")
-	  (let* ((disable
-		  ,(and disable-when-heading-prefix
-			'(not (string= orgstruct-heading-prefix-regexp ""))))
-		 (fallback
-		  (or disable
-		      (not
-		       (let* ,bindings
-			 (org-context-p 'headline 'item
-					,(when (memq fun
-						     '(org-insert-heading
-						       org-insert-heading-respect-content
-						       org-meta-return))
-					   '(when orgstruct-is-++
-					      'item-body))))))))
-	    (if fallback
-		(let* ((orgstruct-mode)
-		       (binding
-			(let ((key ,key))
-			  (catch 'exit
-			    (dolist
-				(rep
-				 '(nil
-				   ("<\\([^>]*\\)tab>" . "\\1TAB")
-				   ("<\\([^>]*\\)return>" . "\\1RET")
-				   ("<\\([^>]*\\)escape>" . "\\1ESC")
-				   ("<\\([^>]*\\)delete>" . "\\1DEL"))
-				 nil)
-			      (when rep
-				(setq key (read-kbd-macro
-					   (let ((case-fold-search))
-					     (replace-regexp-in-string
-					      (car rep)
-					      (cdr rep)
-					      (key-description key))))))
-			      (when (key-binding key)
-				(throw 'exit (key-binding key))))))))
-		  (if (keymapp binding)
-		      (org-set-transient-map binding)
-		    (let ((func (or binding
-				    (unless disable
-				      'orgstruct-error))))
-		      (when func
-			(call-interactively func)))))
-	      (org-run-like-in-org-mode
-	       (lambda ()
-		 (interactive)
-		 (let* ,bindings
-		   (call-interactively ',fun)))))))))
-    name))
-
 (defun org-contextualize-keys (alist contexts)
   "Return valid elements in ALIST depending on CONTEXTS.
 
@@ -9157,10 +8870,8 @@ This will temporarily bind local variables that are typically bound in
 Org mode to the values they have in Org mode, and then interactively
 call CMD."
   (org-load-modules-maybe)
-  (unless org-local-vars
-    (setq org-local-vars (org-get-local-variables)))
   (let (binds)
-    (dolist (var org-local-vars)
+    (dolist (var (org-get-local-variables))
       (when (or (not (boundp (car var)))
 		(eq (symbol-value (car var))
 		    (default-value (car var))))
@@ -22080,10 +21791,6 @@ list structure.  Instead, use \\<org-mode-map>`\\[org-shiftmetaleft]' or \
 Also align node properties according to `org-property-format'."
   (interactive)
   (cond
-   (orgstruct-is-++
-    (let ((indent-line-function
-	   (cl-cadadr (assq 'indent-line-function org-fb-vars))))
-      (indent-according-to-mode)))
    ((org-at-heading-p) 'noindent)
    (t
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
@@ -22549,18 +22256,6 @@ filling the current element."
 		 (barf-if-buffer-read-only)
 		 (list (if current-prefix-arg 'full) t)))
   (cond
-   ((and (derived-mode-p 'message-mode)
-	 (or (not (message-in-body-p))
-	     (save-excursion (move-beginning-of-line 1)
-			     (looking-at message-cite-prefix-regexp))))
-    ;; First ensure filling is correct in message-mode.
-    (let ((fill-paragraph-function
-	   (cl-cadadr (assq 'fill-paragraph-function org-fb-vars)))
-	  (fill-prefix (cl-cadadr (assq 'fill-prefix org-fb-vars)))
-	  (paragraph-start (cl-cadadr (assq 'paragraph-start org-fb-vars)))
-	  (paragraph-separate
-	   (cl-cadadr (assq 'paragraph-separate org-fb-vars))))
-      (fill-paragraph nil)))
    ((and region transient-mark-mode mark-active
 	 (not (eq (region-beginning) (region-end))))
     (let ((origin (point-marker))
@@ -24021,39 +23716,36 @@ Prefix arg LEVEL is how many levels below the current level
 should be shown.  Default is enough to cause the following
 heading to appear."
   (interactive "p")
-  ;; If `orgstruct-mode' is active, use the slower version.
-  (if orgstruct-mode (call-interactively #'outline-show-children)
-    (save-excursion
-      (org-back-to-heading t)
-      (let* ((current-level (funcall outline-level))
-	     (max-level (org-get-valid-level
-			 current-level
-			 (if level (prefix-numeric-value level) 1)))
-	     (end (save-excursion (org-end-of-subtree t t)))
-	     (regexp-fmt "^\\*\\{%d,%s\\}\\(?: \\|$\\)")
-	     (past-first-child nil)
-	     ;; Make sure to skip inlinetasks.
-	     (re (format regexp-fmt
-			 current-level
-			 (cond
-			  ((not (featurep 'org-inlinetask)) "")
-			  (org-odd-levels-only (- (* 2 org-inlinetask-min-level)
-						  3))
-			  (t (1- org-inlinetask-min-level))))))
-	;; Display parent heading.
-	(outline-flag-region (line-end-position 0) (line-end-position) nil)
-	(forward-line)
-	;; Display children.  First child may be deeper than expected
-	;; MAX-LEVEL.  Since we want to display it anyway, adjust
-	;; MAX-LEVEL accordingly.
-	(while (re-search-forward re end t)
-	  (unless past-first-child
-	    (setq re (format regexp-fmt
-			     current-level
-			     (max (funcall outline-level) max-level)))
-	    (setq past-first-child t))
-	  (outline-flag-region
-	   (line-end-position 0) (line-end-position) nil))))))
+  (save-excursion
+    (org-back-to-heading t)
+    (let* ((current-level (funcall outline-level))
+	   (max-level (org-get-valid-level
+		       current-level
+		       (if level (prefix-numeric-value level) 1)))
+	   (end (save-excursion (org-end-of-subtree t t)))
+	   (regexp-fmt "^\\*\\{%d,%s\\}\\(?: \\|$\\)")
+	   (past-first-child nil)
+	   ;; Make sure to skip inlinetasks.
+	   (re (format regexp-fmt
+		       current-level
+		       (cond
+			((not (featurep 'org-inlinetask)) "")
+			(org-odd-levels-only (- (* 2 org-inlinetask-min-level)
+						3))
+			(t (1- org-inlinetask-min-level))))))
+      ;; Display parent heading.
+      (outline-flag-region (line-end-position 0) (line-end-position) nil)
+      (forward-line)
+      ;; Display children.  First child may be deeper than expected
+      ;; MAX-LEVEL.  Since we want to display it anyway, adjust
+      ;; MAX-LEVEL accordingly.
+      (while (re-search-forward re end t)
+	(unless past-first-child
+	  (setq re (format regexp-fmt
+			   current-level
+			   (max (funcall outline-level) max-level)))
+	  (setq past-first-child t))
+	(outline-flag-region (line-end-position 0) (line-end-position) nil)))))
 
 (defun org-show-subtree ()
   "Show everything after this heading at deeper levels."

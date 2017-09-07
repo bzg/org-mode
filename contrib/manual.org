@@ -1374,46 +1374,6 @@ The following command handles footnotes:
      reference, and you can use the usual commands to follow these
      links.
 
-** The Orgstruct minor mode
-:PROPERTIES:
-:DESCRIPTION: Structure editing outside Org.
-:ALT_TITLE: Orgstruct mode
-:END:
-#+cindex: Orgstruct mode
-#+cindex: minor mode for structure editing
-
-If you like the intuitive way the Org mode structure editing and list
-formatting works, you might want to use these commands in other modes
-like Text mode or Mail mode as well.  The minor mode ~orgstruct-mode~
-makes this possible.  Toggle the mode with {{{kbd(M-x
-orgstruct-mode)}}}, or turn it on by default, for example in Message
-mode, with one of:
-
-#+begin_src emacs-lisp
-  (add-hook 'message-mode-hook 'turn-on-orgstruct)
-  (add-hook 'message-mode-hook 'turn-on-orgstruct++)
-#+end_src
-
-When this mode is active and the cursor is on a line that looks to Org
-like a headline or the first line of a list item, most structure
-editing commands will work, even if the same keys normally have
-different functionality in the major mode you are using.  If the
-cursor is not in one of those special lines, Orgstruct mode lurks
-silently in the shadows.
-
-When you use ~orgstruct++-mode~, Org will also export indentation and
-Auto Fill settings into that mode, and detect item context after the
-first line of an item.
-
-#+vindex: orgstruct-heading-prefix-regexp
-You can also use Org structure editing to fold and unfold headlines in
-/any/ file, provided you defined ~orgstruct-heading-prefix-regexp~:
-the regular expression must match the local prefix to use before Org's
-headlines.  For example, if you set this variable to ~";; "~ in Emacs
-Lisp files, you will be able to fold and unfold headlines in Emacs
-Lisp commented lines.  Some commands like ~org-demote~ are disabled
-when the prefix is set, but folding/unfolding will work correctly.
-
 ** Org syntax
 :PROPERTIES:
 :DESCRIPTION: Formal description of Org's syntax.
@@ -19301,12 +19261,6 @@ function.  To add more alien table formats, we just add more translate
 functions.  Also the burden of developing custom translate functions
 for new table formats is in the hands of those who know those formats
 best.
-
-For an example of how this strategy works, see Orgstruct mode.  In
-that mode, Bastien added the ability to use Org's facilities to edit
-and re-structure lists.  He did this by turning Orgstruct mode on, and
-then exporting the list locally to another format, such as HTML, LaTeX
-or Texinfo.
 
 *** Radio tables
 :PROPERTIES:
