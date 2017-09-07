@@ -1445,7 +1445,7 @@ E.g. when this is set to 1, the search view will only
 show headlines of level 1.  When set to 0, the default
 value, don't limit agenda view by outline level."
   :group 'org-agenda-search-view
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'integer)
 
