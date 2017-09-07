@@ -2361,8 +2361,9 @@ Expand all columns.
 @end table
 
 To see the full text of a shrunk field, hold the mouse over it---a tool-tip
-window then shows the full content.  For convenience, any change to a shrunk
-column expands it.
+window then shows the full content.  Alternatively ‘C-h .’
+(‘display-local-help’) reveals the full content.  For convenience, any change
+to a shrunk column expands it.
 
 @vindex org-startup-shrink-all-tables
 Setting the option @code{org-startup-shrink-all-tables} shrinks all columns
