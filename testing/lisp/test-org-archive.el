@@ -27,7 +27,8 @@
    (equal
     "Top [0%]"
     (org-test-with-temp-text-in-file
-	"* Top [%]\n<point>** DONE One\n** TODO Two"
+	"* Top [%]\n** DONE One\n** TODO Two"
+      (forward-line)
       (org-archive-subtree)
       (forward-line -1)
       (org-element-property :title (org-element-at-point)))))
@@ -35,7 +36,8 @@
   (should
    (equal
     "Top [100%]"
-    (org-test-with-temp-text-in-file "* Top [%]\n<point>** TODO Two"
+    (org-test-with-temp-text-in-file "* Top [%]\n** TODO Two"
+      (forward-line)
       (org-archive-subtree)
       (forward-line -1)
       (org-element-property :title (org-element-at-point)))))
