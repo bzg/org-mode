@@ -594,7 +594,7 @@ properties to export, as strings.
 This option can also be set with the OPTIONS keyword,
 e.g. \"prop:t\"."
   :group 'org-export-general
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "All properties" t)

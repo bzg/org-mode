@@ -2053,7 +2053,7 @@ In tables, the special behavior of RET has precedence."
 A longer mouse click will still set point.  Needs to be set
 before org.el is loaded."
   :group 'org-link-follow
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
 	  (const :tag "A double click follows the link" double)
@@ -5903,7 +5903,7 @@ This includes angle, plain, and bracket links."
   "When non-nil, fontify code in code blocks.
 See also the `org-block' face."
   :type 'boolean
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :group 'org-appearance
   :group 'org-babel)
@@ -9065,7 +9065,7 @@ function is being called interactively."
   "Regexp that matches the custom prefix of Org headlines in
 orgstruct(++)-mode."
   :group 'org
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'regexp)
 ;;;###autoload(put 'orgstruct-heading-prefix-regexp 'safe-local-variable 'stringp)

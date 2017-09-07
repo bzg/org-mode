@@ -865,7 +865,7 @@ The function should return the string to be exported.
 
 The default function simply returns the value of CONTENTS."
   :group 'org-export-latex
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type 'function)
 
@@ -956,7 +956,7 @@ parameter for the listings package.  If the mode name and the
 listings name are the same, the language does not need an entry
 in this list - but it does not hurt if it is present."
   :group 'org-export-latex
-  :version "24.4"
+  :version "26.1"
   :package-version '(Org . "8.3")
   :type '(repeat
 	  (list

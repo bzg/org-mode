@@ -144,7 +144,7 @@ When set to `query', ask the user instead."
   "Confirmation preference for automatically getting annex files.
 If \\='ask, prompt using `y-or-n-p'.  If t, always get.  If nil, never get."
   :group 'org-attach
-  :package-version '(Org . "9")
+  :package-version '(Org . "9.0")
   :version "26.1"
   :type '(choice
 	  (const :tag "confirm with `y-or-n-p'" ask)
