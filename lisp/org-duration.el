@@ -272,11 +272,13 @@ When optional argument CANONICAL is non-nil, refer to
 When optional argument CANONICAL is non-nil, ignore
 `org-duration-units' and use standard time units value.
 
-As a special case, a bare number represents minutes.
+A bare number is translated into minutes.  The empty string is
+translated into 0.0.
 
 Return value as a float.  Raise an error if duration format is
 not recognized."
   (cond
+   ((equal duration "") 0.0)
    ((numberp duration) (float duration))
    ((string-match-p org-duration--h:mm-re duration)
     (pcase-let ((`(,hours ,minutes ,seconds)
