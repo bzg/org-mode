@@ -98,6 +98,8 @@ details.
 Use "/!" markup when filtering TODO keywords to get only not-done TODO
 keywords.
 
+*** ~org-split-string~ returns ~("")~ when called on an empty string
+It used to return nil.
 *** Removal of =ob-scala.el=
 
 See [[https://github.com/ensime/emacs-scala-mode/issues/114][this github issue]].
