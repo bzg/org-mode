@@ -5552,10 +5552,13 @@ The following commands are available:
 
 ;; Update `customize-package-emacs-version-alist'
 (add-to-list 'customize-package-emacs-version-alist
-	     '(Org ("6.21b" . "23.1")  ("6.33x" . "23.2")
-		   ("7.8.11" . "24.1") ("7.9.4" . "24.3")
-		   ("8.2.6" . "24.4") ("8.2.10" . "24.5")
-		   ("9.0" . "26.1")))
+	     '(Org ("8.0" . "24.4")
+		   ("8.1" . "24.4")
+		   ("8.2" . "24.4")
+		   ("8.2.7" . "24.4")
+		   ("8.3" . "26.1")
+		   ("9.0" . "26.1")
+		   ("9.1" . "26.1")))
 
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table text-mode-syntax-table)))
