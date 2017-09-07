@@ -920,7 +920,10 @@ Throw an error when not at an export block."
     (unless (and (eq (org-element-type element) 'export-block)
 		 (org-src--on-datum-p element))
       (user-error "Not in an export block"))
-    (let* ((type (downcase (org-element-property :type element)))
+    (let* ((type (downcase (or (org-element-property :type element)
+			       ;; Missing export-block type.  Fallback
+			       ;; to default mode.
+			       "fundamental")))
 	   (mode (org-src--get-lang-mode type)))
       (unless (functionp mode) (error "No such language mode: %s" mode))
       (org-src--edit-element
