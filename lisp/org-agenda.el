@@ -4368,8 +4368,9 @@ as a whole, to include whitespace.
   with a colon, this will mean that the (non-regexp) snippets of the
   Boolean search must match as full words.
 
-This command searches the agenda files, and in addition the files listed
-in `org-agenda-text-search-extra-files'."
+This command searches the agenda files, and in addition the files
+listed in `org-agenda-text-search-extra-files' unless a restriction lock
+is active."
   (interactive "P")
   (if org-agenda-overriding-arguments
       (setq todo-only (car org-agenda-overriding-arguments)
@@ -4479,9 +4480,12 @@ in `org-agenda-text-search-extra-files'."
 	(if hdl-only (setq regexp (concat org-outline-regexp-bol ".*?"
 					  regexp))))
       (setq files (org-agenda-files nil 'ifmode))
-      (when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
-	(pop org-agenda-text-search-extra-files)
-	(setq files (org-add-archive-files files)))
+      ;; Add `org-agenda-text-search-extra-files' unless there is some
+      ;; restriction.
+      (unless (get 'org-agenda-files 'org-restrict)
+	(when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
+	  (pop org-agenda-text-search-extra-files)
+	  (setq files (org-add-archive-files files))))
       (setq files (append files org-agenda-text-search-extra-files)
 	    rtnall nil)
       (while (setq file (pop files))
