@@ -35,6 +35,8 @@
   (should (= (org-duration-to-minutes "2") 2))
   (should (= (org-duration-to-minutes "2.5") 2.5))
   (should (= (org-duration-to-minutes 1) 1))
+  ;; Special case: the empty string is 0.0.
+  (should (= (org-duration-to-minutes "") 0.0))
   ;; Support custom units.
   (should (= 4
 	     (let ((org-duration-units '(("longmin" . 2)))
