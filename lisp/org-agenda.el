@@ -4381,8 +4381,9 @@ as a whole, to include whitespace.
   with a colon, this will mean that the (non-regexp) snippets of the
   Boolean search must match as full words.
 
-This command searches the agenda files, and in addition the files listed
-in `org-agenda-text-search-extra-files'."
+This command searches the agenda files, and in addition the files
+listed in `org-agenda-text-search-extra-files' unless a restriction lock
+is active."
   (interactive "P")
   (if org-agenda-overriding-arguments
       (setq todo-only (car org-agenda-overriding-arguments)
@@ -4492,10 +4493,20 @@ in `org-agenda-text-search-extra-files'."
 	(if hdl-only (setq regexp (concat org-outline-regexp-bol ".*?"
 					  regexp))))
       (setq files (org-agenda-files nil 'ifmode))
-      (when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
-	(pop org-agenda-text-search-extra-files)
-	(setq files (org-add-archive-files files)))
-      (setq files (append files org-agenda-text-search-extra-files)
+      ;; Add `org-agenda-text-search-extra-files' unless there is some
+      ;; restriction.
+      (unless (get 'org-agenda-files 'org-restrict)
+	(when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
+	  (pop org-agenda-text-search-extra-files)
+	  (setq files (org-add-archive-files files))))
+      ;; Uniquify files.  However, let `org-check-agenda-file' handle
+      ;; non-existent ones.
+      (setq files (cl-remove-duplicates
+		   (append files org-agenda-text-search-extra-files)
+		   (lambda (a b)
+		     (and (file-exists-p a)
+			  (file-exists-p b)
+			  (file-equal-p a b))))
 	    rtnall nil)
       (while (setq file (pop files))
 	(setq ee nil)
@@ -4550,12 +4561,12 @@ in `org-agenda-text-search-extra-files'."
 				   (point-at-bol)
 				   (if hdl-only (point-at-eol) end)))
 			(mapc (lambda (wr) (when (string-match wr str)
-					     (goto-char (1- end))
-					     (throw :skip t)))
+					(goto-char (1- end))
+					(throw :skip t)))
 			      regexps-)
 			(mapc (lambda (wr) (unless (string-match wr str)
-					     (goto-char (1- end))
-					     (throw :skip t)))
+					(goto-char (1- end))
+					(throw :skip t)))
 			      (if todo-only
 				  (cons (concat "^\\*+[ \t]+"
                                                 org-not-done-regexp)
