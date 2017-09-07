@@ -3955,7 +3955,7 @@ COLUMNS is a sorted list of column numbers.  BEG and END are,
 respectively, the beginning position and the end position of the
 table."
   (org-with-wide-buffer
-   (font-lock-ensure beg end)
+   (org-font-lock-ensure beg end)
    (dolist (c columns)
      (goto-char beg)
      (let ((width nil)
