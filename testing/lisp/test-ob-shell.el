@@ -62,29 +62,30 @@ ob-comint.el, which was not previously tested."
 
 (ert-deftest ob-shell/generic-uses-no-assoc-arrays ()
   "No associative arrays for generic"
-  (org-test-at-id "bec1a5b0-4619-4450-a8c0-2a746b44bf8d"
-    (org-babel-next-src-block)
-    (should (equal "first one second two third three"
-                   (org-babel-execute-src-block)))))
+  (should
+   (equal "first one second two third three"
+	  (org-test-at-id "bec1a5b0-4619-4450-a8c0-2a746b44bf8d"
+	    (org-babel-next-src-block)
+	    (org-babel-execute-src-block))))
+  (should
+   (equal "bread 2 kg spaghetti 20 cm milk 50 dl"
+	  (org-test-at-id "82320a48-3409-49d7-85c9-5de1c6d3ff87"
+	    (org-babel-next-src-block)
+	    (org-babel-execute-src-block)))))
 
 (ert-deftest ob-shell/bash-uses-assoc-arrays ()
   "Bash associative arrays"
-  (org-test-at-id "bec1a5b0-4619-4450-a8c0-2a746b44bf8d"
-    (org-babel-next-src-block 2)
-    (should (equal "two" (org-babel-execute-src-block)))))
-
-(ert-deftest ob-shell/generic-uses-no-assoc-arrays ()
-  "No associative arrays for generic"
-  (org-test-at-id "82320a48-3409-49d7-85c9-5de1c6d3ff87"
-    (org-babel-next-src-block)
-    (should (equal "bread 2 kg spaghetti 20 cm milk 50 dl"
-                   (org-babel-execute-src-block)))))
-
-(ert-deftest ob-shell/bash-uses-assoc-arrays ()
-  "Bash associative arrays as strings for the row"
-  (org-test-at-id "82320a48-3409-49d7-85c9-5de1c6d3ff87"
-    (org-babel-next-src-block 2)
-    (should (equal "20 cm" (org-babel-execute-src-block)))))
+  (should
+   (equal "two"
+	  (org-test-at-id "bec1a5b0-4619-4450-a8c0-2a746b44bf8d"
+	    (org-babel-next-src-block 2)
+	    (org-babel-execute-src-block))))
+  ;; Bash associative arrays as strings for the row.
+  (should
+   (equal "20 cm"
+	  (org-test-at-id "82320a48-3409-49d7-85c9-5de1c6d3ff87"
+	    (org-babel-next-src-block 2)
+	    (org-babel-execute-src-block)))))
 
 (ert-deftest ob-shell/simple-list ()
   "Test list variables in shell."

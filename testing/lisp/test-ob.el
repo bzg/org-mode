@@ -923,21 +923,6 @@ replacement happens correctly."
 * next heading")))
 	  '("sh" "emacs-lisp")))
 
-(ert-deftest test-ob/org-babel-remove-result--results-list ()
-  "Test `org-babel-remove-result' with :results list."
-  (test-ob-verify-result-and-removed-result
-   "- 1
-- 2
-- 3
-- (quote (4 5))"
-
-   "* org-babel-remove-result
-#+begin_src emacs-lisp :results list
-'(1 2 3 '(4 5))
-#+end_src
-
-* next heading"))
-
 (ert-deftest test-ob/org-babel-results-indented-wrap ()
   "Ensure that wrapped results are inserted correction when indented.
 If not inserted correctly then the second evaluation will fail
@@ -966,18 +951,6 @@ trying to find the :END: marker."
     (goto-char (point-min))
     (should (search-forward "[[file:foo][bar]]" nil t))
     (should (search-forward "[[file:foo][foo]]" nil t))))
-
-(ert-deftest test-ob/org-babel-remove-result--results-pp ()
-  "Test `org-babel-remove-result' with :results pp."
-  (test-ob-verify-result-and-removed-result
-   ": \"I /am/ working!\""
-
-   "* org-babel-remove-result
-#+begin_src emacs-lisp :results pp
-\"I /am/ working!\")
-#+end_src
-
-* next heading"))
 
 (ert-deftest test-ob/inline-src_blk-preceded-punct-preceded-by-point ()
   (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }")
@@ -1033,19 +1006,6 @@ replacement happens correctly."
     (should (string= buffer-text
 		     (buffer-substring-no-properties
 		      (point-min) (point-max))))))
-
-(ert-deftest test-ob/org-babel-remove-result--results-default ()
-  "Test `org-babel-remove-result' with default :results."
-  (mapcar (lambda (language)
-	    (test-ob-verify-result-and-removed-result
-	     "\n"
-	     (concat
-	      "* org-babel-remove-result
-#+begin_src " language "
-#+end_src
-
-* next heading")))
-	  '("sh" "emacs-lisp")))
 
 (ert-deftest test-ob/org-babel-remove-result--results-list ()
   "Test `org-babel-remove-result' with :results list."
