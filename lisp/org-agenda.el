@@ -4490,10 +4490,10 @@ is active."
       ;; non-existent ones.
       (setq files (cl-remove-duplicates
 		   (append files org-agenda-text-search-extra-files)
-		   (lambda (a b)
-		     (and (file-exists-p a)
-			  (file-exists-p b)
-			  (file-equal-p a b))))
+		   :test (lambda (a b)
+			   (and (file-exists-p a)
+				(file-exists-p b)
+				(file-equal-p a b))))
 	    rtnall nil)
       (while (setq file (pop files))
 	(setq ee nil)
