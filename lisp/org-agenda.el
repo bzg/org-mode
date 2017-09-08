@@ -5728,7 +5728,8 @@ then those holidays will be skipped."
 		(list
 		 (if (memq 'closed items) (concat "\\<" org-closed-string))
 		 (if (memq 'clock items) (concat "\\<" org-clock-string))
-		 (if (memq 'state items) "- State \"\\([a-zA-Z0-9]+\\)\".*?"))))
+		 (if (memq 'state items)
+		     (format "- State \"%s\".*?" org-todo-regexp)))))
 	 (parts-re (if parts (mapconcat 'identity parts "\\|")
 		     (error "`org-agenda-log-mode-items' is empty")))
 	 (regexp (concat
