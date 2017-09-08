@@ -154,40 +154,6 @@
    ;; Lisp formula
    "#+TBLFM: @>$1 = '(+ @I..@>>); N :: $2 = '(* 2 $1); N"))
 
-(ert-deftest test-org-table/align ()
-  "Align columns within Org buffer, depends on `org-table-number-regexp'."
-  (org-test-table-target-expect "
-| 0  |  0 |    0 |       0 |       0 |           0 |       0 |    0 |
-| ab | 12 | 12.2 | 2.4e-08 | 2x10^12 | 4.034+-0.02 | 2.7(10) | >3.5 |
-| ab | ab |   ab |      ab |      ab |          ab |      ab |   ab |
-")
-  (org-test-table-target-expect "
-|          0 |           0 |   0 |    0 |    0 |   0 |
-| <-0x0ab.cf | >-36#0vw.yz | nan | uinf | -inf | inf |
-|         ab |          ab |  ab |   ab |   ab |  ab |
-"))
-
-(ert-deftest test-org-table/align-buffer-tables ()
-  "Align all tables when updating buffer."
-  (let ((before "
-|  a  b  |
-
-|  c  d  |
-")
-	(after "
-| a  b |
-
-| c  d |
-"))
-    (should (equal (org-test-with-temp-text before
-		     (org-table-recalculate-buffer-tables)
-		     (buffer-string))
-		   after))
-    (should (equal (org-test-with-temp-text before
-		     (org-table-iterate-buffer-tables)
-		     (buffer-string))
-		   after))))
-
 (defconst references/target-normal "
 | 0 | 1 | replace | replace | replace | replace | replace | replace |
 | z | 1 | replace | replace | replace | replace | replace | replace |
@@ -1691,6 +1657,27 @@ See also `test-org-table/copy-field'."
 	  (org-test-with-temp-text "| <c> |\n| 1 |\n| 123 |"
 	    (let ((org-table-number-fraction 0.5)) (org-table-align))
 	    (buffer-string)))))
+
+(ert-deftest test-org-table/align-buffer-tables ()
+  "Align all tables when updating buffer."
+  (let ((before "
+|  a  b  |
+
+|  c  d  |
+")
+	(after "
+| a  b |
+
+| c  d |
+"))
+    (should (equal (org-test-with-temp-text before
+		     (org-table-recalculate-buffer-tables)
+		     (buffer-string))
+		   after))
+    (should (equal (org-test-with-temp-text before
+		     (org-table-iterate-buffer-tables)
+		     (buffer-string))
+		   after))))
 
 
 ;;; Sorting
