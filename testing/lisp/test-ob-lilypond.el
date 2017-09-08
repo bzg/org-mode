@@ -162,7 +162,7 @@
 (ert-deftest ob-lilypond/ly-gen-html ()
   (should (boundp 'org-babel-lilypond-gen-html)))
 
-(ert-deftest ob-lilypond/ly-gen-html ()
+(ert-deftest ob-lilypond/ly-gen-pdf ()
   (should (boundp 'org-babel-lilypond-gen-pdf)))
 
 (ert-deftest ob-lilypond/use-eps ()
