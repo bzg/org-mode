@@ -67,7 +67,8 @@ or nil if the normal value should be used."
 (defcustom org-columns-summary-types nil
   "Alist between operators and summarize functions.
 
-Each association follows the pattern (LABEL . SUMMARIZE) where
+Each association follows the pattern (LABEL . SUMMARIZE),
+or (LABEL SUMMARISE COLLECT) where
 
   LABEL is a string used in #+COLUMNS definition describing the
   summary type.  It can contain any character but \"}\".  It is
@@ -77,6 +78,13 @@ Each association follows the pattern (LABEL . SUMMARIZE) where
   argument is a non-empty list of values, as non-empty strings.
   The second one is a format string or nil.  It has to return
   a string summarizing the list of values.
+
+  COLLECT is a function called with one argument, a property
+  name.  It is called in the context of a headline and must
+  return the collected property, or the empty string.  You can
+  use this to only collect a property if a related conditional
+  properties is set, e.g., to return VACATION_DAYS only if
+  CONFIRMED is true.
 
 Note that the return value can become one value for an higher
 order summary, so the function is expected to handle its own
@@ -301,10 +309,22 @@ integers greater than 0."
 
 (defun org-columns--summarize (operator)
   "Return summary function associated to string OPERATOR."
-  (if (not operator) nil
-    (cdr (or (assoc operator org-columns-summary-types)
-	     (assoc operator org-columns-summary-types-default)
-	     (error "Unknown %S operator" operator)))))
+  (pcase (or (assoc operator org-columns-summary-types)
+	     (assoc operator org-columns-summary-types-default))
+    (`nil (error "Unknown %S operator" operator))
+    (`(,_ . ,(and (pred functionp) summarize)) summarize)
+    (`(,_ ,summarize ,_) summarize)
+    (_ (error "Invalid definition for operator %S" operator))))
+
+(defun org-columns--collect (operator)
+  "Return collect function associated to string OPERATOR.
+Return nil if no collect function is associated to OPERATOR."
+  (pcase (or (assoc operator org-columns-summary-types)
+	     (assoc operator org-columns-summary-types-default))
+    (`nil (error "Unknown %S operator" operator))
+    (`(,_ . ,(pred functionp)) nil)	;default value
+    (`(,_ ,_ ,collect) collect)
+    (_ (error "Invalid definition for operator %S" operator))))
 
 (defun org-columns--overlay-text (value fmt width property original)
   "Return text "
@@ -1110,7 +1130,9 @@ properties drawers."
 	 (last-level lmax)
 	 (property (car spec))
 	 (printf (nth 4 spec))
-	 (summarize (org-columns--summarize (nth 3 spec))))
+	 (operator (nth 3 spec))
+	 (collect (and operator (org-columns--collect operator)))
+	 (summarize (and operator (org-columns--summarize operator))))
     (org-with-wide-buffer
      ;; Find the region to compute.
      (goto-char org-columns-top-level-marker)
@@ -1122,7 +1144,8 @@ properties drawers."
 	 (setq last-level level))
        (setq level (org-reduced-level (org-outline-level)))
        (let* ((pos (match-beginning 0))
-	      (value (org-entry-get nil property))
+              (value (if collect (funcall collect property)
+		       (org-entry-get (point) property)))
 	      (value-set (org-string-nw-p value)))
 	 (cond
 	  ((< level last-level)

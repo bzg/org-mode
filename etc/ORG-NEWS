@@ -54,6 +54,53 @@ its previous state.
 Editing the column automatically expands the whole column to its full
 size.
 
+*** =org-columns-summary-types= entries can take an optional COLLECT function
+
+You can use this to make collection of a property from an entry
+conditional on another entry. E.g. given this configuration:
+
+#+BEGIN_SRC emacs-lisp
+  (defun custom/org-collect-confirmed (property)
+    "Return `PROPERTY' for `CONFIRMED' entries"
+    (let ((prop (org-entry-get nil property))
+	  (confirmed (org-entry-get nil "CONFIRMED")))
+      (if (and prop (string= "[X]" confirmed))
+	  prop
+	"0")))
+
+  (setq org-columns-summary-types
+	'(("X+" org-columns--summary-sum
+	   custom/org-collect-confirmed)))
+#+END_SRC
+
+You can have a file =bananas.org= containing:
+
+#+BEGIN_SRC org
+  ,#+columns: %ITEM %CONFIRMED %Bananas{+} %Bananas(Confirmed Bananas){X+}
+
+  ,* All shipments
+  ,** Shipment 1
+     :PROPERTIES:
+     :CONFIRMED: [X]
+     :Bananas:  4
+     :END:
+
+  ,** Shipment 2
+     :PROPERTIES:
+     :CONFIRMED: [ ]
+     :BANANAS:  7
+     :END:
+#+END_SRC
+
+... and when going to the top of that file and entering column view
+you should expect to see something like:
+
+| ITEM            | CONFIRMED | Bananas | Confirmed Bananas |
+|-----------------+-----------+---------+-------------------|
+| All shipments   |           |      11 |                 4 |
+| Shipment 1      | [X]       |       4 |                 4 |
+| Shipment 2      | [ ]       |       7 |                 7 |
+
 #+BEGIN_EXAMPLE
   ,#+STARTUP: shrink
 #+END_EXAMPLE
