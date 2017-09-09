@@ -1097,7 +1097,7 @@ may have been stored before."
 (defun org-capture-place-entry ()
   "Place the template as a new Org entry."
   (let ((reversed? (org-capture-get :prepend))
-	level)
+	(level 1))
     (when (org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))
     (cond
