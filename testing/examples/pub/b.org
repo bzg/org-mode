@@ -1,3 +1,6 @@
 #+title: b
 #+date: <2012-03-29 Thu>
 
+* Headline1
+
+[[file:a.org::#a1]]

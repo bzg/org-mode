@@ -94,7 +94,6 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 		      (cl-remove-if #'file-directory-p
 				    (directory-files dir))))))))
 
-
 
 ;;; Site-map
 
@@ -326,6 +325,68 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 	      (with-temp-buffer
 		(insert-file-contents (expand-file-name "sitemap.org" dir))
 		(buffer-string)))))))
+
+
+;;; Cross references
+
+(ert-deftest test-org-publish/resolve-external-link ()
+  "Test `org-publish-resolve-external-link' specifications."
+  ;; Function should preserve internal reference when used between
+  ;; published files.
+  (should
+   (apply
+    #'equal
+    (let* ((ids nil)
+	   (backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((headline . (lambda (h c i)
+			     (concat (org-export-get-reference h i) " " c)))
+	       (paragraph . (lambda (p c i) c))
+	       (section . (lambda (s c i) c))
+	       (link . (lambda (l c i)
+			 (let ((option (org-element-property :search-option l))
+			       (path (org-element-property :path l)))
+			   (and option
+				(org-publish-resolve-external-link
+				 option path))))))))
+	   (publish
+	    (lambda (plist filename pub-dir)
+	      (org-publish-org-to backend filename ".test" plist pub-dir))))
+      (org-test-publish
+	  (list :publishing-function (list publish))
+	(lambda (dir)
+	  (cl-subseq
+	   (split-string
+	    (mapconcat (lambda (f) (org-file-contents (expand-file-name f dir)))
+		       (directory-files dir nil "\\.test\\'")
+		       " "))
+	   1 3))))))
+  ;; When optional argument PREFER-CUSTOM is non-nil, use custom ID
+  ;; instead of internal reference, whenever possible.
+  (should
+   (equal
+    "a1"
+    (let* ((ids nil)
+	   (backend
+	    (org-export-create-backend
+	     :transcoders
+	     '((headline . (lambda (h c i) c))
+	       (paragraph . (lambda (p c i) c))
+	       (section . (lambda (s c i) c))
+	       (link . (lambda (l c i)
+			 (let ((option (org-element-property :search-option l))
+			       (path (org-element-property :path l)))
+			   (when option
+			     (throw :exit (org-publish-resolve-external-link
+					   option path t)))))))))
+	   (publish
+	    (lambda (plist filename pub-dir)
+	      (push (catch :exit
+		      (org-publish-org-to backend filename ".test" plist pub-dir))
+		    ids))))
+      (org-test-publish (list :publishing-function (list publish)) #'ignore)
+      (car ids)))))
 
 
 ;;; Tools

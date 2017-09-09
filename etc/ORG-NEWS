@@ -58,6 +58,10 @@ size.
   ,#+STARTUP: shrink
 #+END_EXAMPLE
 
+** Miscellaneous
+
+*** ~org-publish-resolve-external-link~ accepts a new optional argument.
+
 * Version 9.1
 
 ** Incompatible changes
