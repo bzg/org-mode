@@ -871,6 +871,7 @@ holding contextual information."
 	     (todo-type (and todo (org-element-property :todo-type headline)))
 	     (tags (and (plist-get info :with-tags)
 			(org-export-get-tags headline info)))
+	     (numbered? (org-export-numbered-headline-p headline info))
 	     (priority (and (plist-get info :with-priority)
 			    (org-element-property :priority headline)))
 	     (text (org-texinfo--sanitize-title
@@ -888,18 +889,19 @@ holding contextual information."
 			     (format "\n@printindex %s\n" index))))))
 	(cond
 	 ((eq section-fmt 'plain-list)
-	  (let ((numbered? (org-export-numbered-headline-p headline info)))
-	    (concat (and (org-export-first-sibling-p headline info)
-			 (format "@%s\n" (if numbered? 'enumerate 'itemize)))
-		    "@item\n" full-text "\n"
-		    contents
-		    (if (org-export-last-sibling-p headline info)
-			(format "@end %s" (if numbered? 'enumerate 'itemize))
-		      "\n"))))
+	  (concat (and (org-export-first-sibling-p headline info)
+		       (format "@%s\n" (if numbered? 'enumerate 'itemize)))
+		  "@item\n" full-text "\n"
+		  contents
+		  (if (org-export-last-sibling-p headline info)
+		      (format "@end %s" (if numbered? 'enumerate 'itemize))
+		    "\n")))
 	 (t
-	  (concat (format "@node %s\n" (org-texinfo--get-node headline info))
-		  (format section-fmt full-text)
-		  contents)))))))
+	  (concat
+	   (and numbered?
+		(format "@node %s\n" (org-texinfo--get-node headline info)))
+	   (format section-fmt full-text)
+	   contents)))))))
 
 (defun org-texinfo-format-headline-default-function
   (todo _todo-type priority text tags)
