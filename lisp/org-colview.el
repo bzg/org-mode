@@ -96,7 +96,11 @@ in `org-columns-summary-types-default', which see."
   :version "26.1"
   :package-version '(Org . "9.0")
   :type '(alist :key-type (string :tag "       Label")
-		:value-type (function :tag "Summarize")))
+		:value-type
+		(choice (function :tag "Summarize")
+			(list :tag "Collect and summarize"
+			      (function :tag "Summarize")
+			      (function :tag "Collect")))))
 
 
 
