@@ -4893,39 +4893,41 @@ keywords.  Possible classes are: `todo', `done', `any'.
 If any of these conditions is met, this function returns the end point of
 the entity, causing the search to continue from there.  This is a function
 that can be put into `org-agenda-skip-function' for the duration of a command."
-  (let (beg end m)
-    (org-back-to-heading t)
-    (setq beg (point)
-	  end (if subtree
-		  (progn (org-end-of-subtree t) (point))
-		(progn (outline-next-heading) (1- (point)))))
-    (goto-char beg)
+  (org-back-to-heading t)
+  (let* ((beg (point))
+	 (end (if subtree (save-excursion (org-end-of-subtree t) (point))
+		(org-entry-end-position)))
+	 (planning-end (if subtree end (line-end-position 2)))
+	 m)
     (and
-     (or
-      (and (memq 'scheduled conditions)
-	   (re-search-forward org-scheduled-time-regexp end t))
-      (and (memq 'notscheduled conditions)
-	   (not (re-search-forward org-scheduled-time-regexp end t)))
-      (and (memq 'deadline conditions)
-	   (re-search-forward org-deadline-time-regexp end t))
-      (and (memq 'notdeadline conditions)
-	   (not (re-search-forward org-deadline-time-regexp end t)))
-      (and (memq 'timestamp conditions)
-	   (re-search-forward org-ts-regexp end t))
-      (and (memq 'nottimestamp conditions)
-	   (not (re-search-forward org-ts-regexp end t)))
-      (and (setq m (memq 'regexp conditions))
-	   (stringp (nth 1 m))
-	   (re-search-forward (nth 1 m) end t))
-      (and (setq m (memq 'notregexp conditions))
-	   (stringp (nth 1 m))
-	   (not (re-search-forward (nth 1 m) end t)))
-      (and (or
-	    (setq m (memq 'nottodo conditions))
-	    (setq m (memq 'todo-unblocked conditions))
-	    (setq m (memq 'nottodo-unblocked conditions))
-	    (setq m (memq 'todo conditions)))
-	   (org-agenda-skip-if-todo m end)))
+     (or (and (memq 'scheduled conditions)
+	      (re-search-forward org-scheduled-time-regexp planning-end t))
+	 (and (memq 'notscheduled conditions)
+	      (not
+	       (save-excursion
+		 (re-search-forward org-scheduled-time-regexp planning-end t))))
+	 (and (memq 'deadline conditions)
+	      (re-search-forward org-deadline-time-regexp planning-end t))
+	 (and (memq 'notdeadline conditions)
+	      (not
+	       (save-excursion
+		 (re-search-forward org-deadline-time-regexp planning-end t))))
+	 (and (memq 'timestamp conditions)
+	      (re-search-forward org-ts-regexp end t))
+	 (and (memq 'nottimestamp conditions)
+	      (not (save-excursion (re-search-forward org-ts-regexp end t))))
+	 (and (setq m (memq 'regexp conditions))
+	      (stringp (nth 1 m))
+	      (re-search-forward (nth 1 m) end t))
+	 (and (setq m (memq 'notregexp conditions))
+	      (stringp (nth 1 m))
+	      (not (save-excursion (re-search-forward (nth 1 m) end t))))
+	 (and (or
+	       (setq m (memq 'nottodo conditions))
+	       (setq m (memq 'todo-unblocked conditions))
+	       (setq m (memq 'nottodo-unblocked conditions))
+	       (setq m (memq 'todo conditions)))
+	      (org-agenda-skip-if-todo m end)))
      end)))
 
 (defun org-agenda-skip-if-todo (args end)
@@ -4934,43 +4936,36 @@ ARGS is a list with first element either `todo', `nottodo',
 `todo-unblocked' or `nottodo-unblocked'.  The remainder is either
 a list of TODO keywords, or a state symbol `todo' or `done' or
 `any'."
-  (let ((kw (car args))
-	(arg (cadr args))
-	todo-wds todo-re)
-    (setq todo-wds
-	  (org-uniquify
-	   (cond
-	    ((listp arg)   ;; list of keywords
-	     (if (member "*" arg)
-		 (mapcar 'substring-no-properties org-todo-keywords-1)
-	       arg))
-	    ((symbolp arg) ;; keyword class name
-	     (cond
-	      ((eq arg 'todo)
-	       (org-delete-all org-done-keywords
-			       (mapcar 'substring-no-properties
-				       org-todo-keywords-1)))
-	      ((eq arg 'done) org-done-keywords)
-	      ((eq arg 'any)
-	       (mapcar 'substring-no-properties org-todo-keywords-1)))))))
-    (setq todo-re
-	  (concat "^\\*+[ \t]+\\<\\("
-		  (mapconcat 'identity todo-wds  "\\|")
-		  "\\)\\>"))
-    (cond
-     ((eq kw 'todo) (re-search-forward todo-re end t))
-     ((eq kw 'nottodo) (not (re-search-forward todo-re end t)))
-     ((eq kw 'todo-unblocked)
-      (catch 'unblocked
-	(while (re-search-forward todo-re end t)
-	  (or (org-entry-blocked-p) (throw 'unblocked t)))
-	nil))
-     ((eq kw 'nottodo-unblocked)
-      (catch 'unblocked
-	(while (re-search-forward todo-re end t)
-	  (or (org-entry-blocked-p) (throw 'unblocked nil)))
-	t))
-     )))
+  (let ((todo-re
+	 (concat "^\\*+[ \t]+"
+		 (regexp-opt
+		  (pcase args
+		    (`(,_ todo)
+		     (org-delete-all org-done-keywords
+				     (copy-sequence org-todo-keywords-1)))
+		    (`(,_ done) org-done-keywords)
+		    (`(,_ any) org-todo-keywords-1)
+		    (`(,_ ,(pred atom))
+		     (error "Invalid TODO class or type: %S" args))
+		    (`(,_ ,(pred (member "*"))) org-todo-keywords-1)
+		    (`(,_ ,todo-list) todo-list))
+		  'words))))
+    (pcase args
+      (`(todo . ,_)
+       (let (case-fold-search) (re-search-forward todo-re end t)))
+      (`(nottodo . ,_)
+       (not (let (case-fold-search) (re-search-forward todo-re end t))))
+      (`(todo-unblocked . ,_)
+       (catch :unblocked
+	 (while (let (case-fold-search) (re-search-forward todo-re end t))
+	   (when (org-entry-blocked-p) (throw :unblocked t)))
+	 nil))
+      (`(nottodo-unblocked . ,_)
+       (catch :unblocked
+	 (while (let (case-fold-search) (re-search-forward todo-re end t))
+	   (when (org-entry-blocked-p) (throw :unblocked nil)))
+	 t))
+      (`(,type . ,_) (error "Unknown TODO skip type: %S" type)))))
 
 ;;;###autoload
 (defun org-agenda-list-stuck-projects (&rest ignore)
