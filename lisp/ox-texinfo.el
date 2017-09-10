@@ -146,10 +146,10 @@ If nil it will default to `buffer-file-coding-system'."
 (defcustom org-texinfo-classes
   '(("info"
      "@documentencoding AUTO\n@documentlanguage AUTO"
-     ("@chapter %s" "@unnumbered %s" "@appendix %s")
-     ("@section %s" "@unnumberedsec %s" "@appendixsec %s")
-     ("@subsection %s" "@unnumberedsubsec %s" "@appendixsubsec %s")
-     ("@subsubsection %s" "@unnumberedsubsubsec %s" "@appendixsubsubsec %s")))
+     ("@chapter %s"       "@chapheading %s"   "@appendix %s")
+     ("@section %s"       "@heading %s"       "@appendixsec %s")
+     ("@subsection %s"    "@subheading %s"    "@appendixsubsec %s")
+     ("@subsubsection %s" "@subsubheading %s" "@appendixsubsubsec %s")))
   "Alist of Texinfo classes and associated header and structure.
 If #+TEXINFO_CLASS is set in the buffer, use its value and the
 associated information.  Here is the structure of a class
@@ -193,7 +193,7 @@ of strings is specified.  A %s formatter is mandatory in each
 section string and will be replaced by the title of the section."
   :group 'org-export-texinfo
   :version "26.1"
-  :package-version '(Org . "9.1")
+  :package-version '(Org . "9.2")
   :type '(repeat
 	  (list (string :tag "Texinfo class")
 		(string :tag "Texinfo header")

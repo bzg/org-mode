@@ -4286,39 +4286,58 @@ Another text. (ref:text)
   "Test `org-export-collect-headlines' specifications."
   ;; Standard test.
   (should
-   (= 2
-      (length
-       (org-test-with-parsed-data "* H1\n** H2"
-	 (org-export-collect-headlines info)))))
+   (equal '("H1" "H2")
+	  (org-test-with-parsed-data "* H1\n** H2"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info)))))
   ;; Do not collect headlines below optional argument.
   (should
-   (= 1
-      (length
-       (org-test-with-parsed-data "* H1\n** H2"
-	 (org-export-collect-headlines info 1)))))
+   (equal '("H1")
+	  (org-test-with-parsed-data "* H1\n** H2"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info 1)))))
   ;; Never collect headlines below maximum headline level.
   (should
-   (= 1
-      (length
-       (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
-	 (org-export-collect-headlines info)))))
+   (equal '("H1")
+	  (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info)))))
   (should
-   (= 1
-      (length
-       (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
-	 (org-export-collect-headlines info 2)))))
+   (equal '("H1")
+	  (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info 2)))))
+  ;; Do not collect footnote section.
+  (should
+   (equal '("H1")
+	  (let ((org-footnote-section "Footnotes"))
+	    (org-test-with-parsed-data "* H1\n** Footnotes"
+	      (mapcar (lambda (h) (org-element-property :raw-value h))
+		      (org-export-collect-headlines info))))))
+  ;; Do not collect unnumbered headlines.
+  (should-not
+   (org-test-with-parsed-data "#+options: num:nil\n* H1\n** H2"
+     (org-export-collect-headlines info)))
+  (should
+   (equal '("H1")
+	  (org-test-with-parsed-data
+	      "* H1\n** H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info)))))
   ;; Collect headlines locally.
   (should
-   (= 2
-      (org-test-with-parsed-data "* H1\n** H2\n** H3"
-	(let ((scope (org-element-map tree 'headline #'identity info t)))
-	  (length (org-export-collect-headlines info nil scope))))))
+   (equal '("H2" "H3")
+	  (org-test-with-parsed-data "* H1\n** H2\n** H3"
+	    (let ((scope (org-element-map tree 'headline #'identity info t)))
+	      (mapcar (lambda (h) (org-element-property :raw-value h))
+		      (org-export-collect-headlines info nil scope))))))
   ;; When collecting locally, optional level is relative.
   (should
-   (= 1
-      (org-test-with-parsed-data "* H1\n** H2\n*** H3"
-	(let ((scope (org-element-map tree 'headline #'identity info t)))
-	  (length (org-export-collect-headlines info 1 scope)))))))
+   (equal '("H2")
+	  (org-test-with-parsed-data "* H1\n** H2\n*** H3"
+	    (let ((scope (org-element-map tree 'headline #'identity info t)))
+	      (mapcar (lambda (h) (org-element-property :raw-value h))
+		      (org-export-collect-headlines info 1 scope)))))))
 
 
 

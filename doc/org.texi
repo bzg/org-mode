@@ -10899,22 +10899,25 @@ settings that cannot be changed using keywords.
 @cindex list of tables
 @cindex list of listings
 
-@cindex #+TOC
 @vindex org-export-with-toc
-Org normally inserts the table of contents directly before the first headline
-of the file.  Org sets the TOC depth the same as the headline levels in the
-file.  Use a lower number for lower TOC depth.  To turn off TOC entirely, use
-@code{nil}.  This is configured in the @code{org-export-with-toc} variable or
-as keywords in an Org file as:
+The table of contents includes all @emph{numbered} headlines in the document.
+Its depth is therefore the same as the headline levels in the file.  If you
+need to use a different depth, or turn it off entirely, set the
+@code{org-export-with-toc} variable accordingly.  You can achieve the same on
+a per file basis, using the following @samp{toc} item in @samp{#+OPTIONS}
+keyword:
 
 @example
 #+OPTIONS: toc:2          @r{only include two levels in TOC}
 #+OPTIONS: toc:nil        @r{no default TOC at all}
 @end example
 
-To move the table of contents to a different location, first turn off the
-default with @code{org-export-with-toc} variable or with @code{#+OPTIONS:
-toc:nil}.  Then insert @code{#+TOC: headlines N} at the desired location(s).
+@cindex #+TOC
+Org normally inserts the table of contents directly before the first headline
+of the file.  To move the table of contents to a different location, first
+turn off the default with @code{org-export-with-toc} variable or with
+@code{#+OPTIONS: toc:nil}.  Then insert @code{#+TOC: headlines N} at the
+desired location(s).
 
 @example
 #+OPTIONS: toc:nil        @r{no default TOC}
