@@ -17581,9 +17581,8 @@ noindent   @r{start with @code{org-indent-mode} turned off}
 @end example
 
 @vindex org-startup-align-all-tables
-Aligns tables consistently upon visiting a file; useful for restoring
-narrowed table columns.  The corresponding variable is
-@code{org-startup-align-all-tables} with @code{nil} as default value.
+Aligns tables consistently upon visiting a file.  The corresponding variable
+is @code{org-startup-align-all-tables} with @code{nil} as default value.
 
 @cindex @code{align}, STARTUP keyword
 @cindex @code{noalign}, STARTUP keyword
@@ -17591,6 +17590,10 @@ narrowed table columns.  The corresponding variable is
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
+
+@vindex org-startup-shrink-all-tables
+Shrink table columns with a width cookie.  The corresponding variable is
+@code{org-startup-shrink-all-tables} with @code{nil} as default value.
 
 @vindex org-startup-with-inline-images
 Whether Org should automatically display inline images.  The corresponding
