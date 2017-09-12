@@ -3413,6 +3413,18 @@ SCHEDULED: <2017-05-06 Sat>
   (should
    (org-test-with-temp-text "Paragraph 1.<point>\n\nParagraph 2."
      (org-forward-sentence)
+     (eobp)))
+  ;; On a headline, stop at the end of the line, unless point is
+  ;; already there.
+  (should
+   (equal
+    "* Headline"
+    (org-test-with-temp-text "* <point>Headline\nSentence."
+      (org-forward-sentence)
+      (buffer-substring-no-properties (line-beginning-position) (point)))))
+  (should
+   (org-test-with-temp-text "* Headline<point>\nSentence."
+     (org-forward-sentence)
      (eobp))))
 
 (ert-deftest test-org/backward-sentence ()
