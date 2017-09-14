@@ -6047,7 +6047,7 @@ Paragraph<point>"
       (cl-letf (((symbol-function 'org-add-log-setup)
 		 (lambda (&rest args) nil)))
 	(org-test-with-temp-text
-	    "* TODO H\n<2012-03-29 Thu. +2y>\nCLOCK: [2012-03-29 Thu 16:40]"
+	    "* TODO H\n<2012-03-29 Thu +2y>\nCLOCK: [2012-03-29 Thu 16:40]"
 	  (org-todo "DONE")
 	  (buffer-string))))))
   ;; When a SCHEDULED entry has no repeater, remove it upon repeating
@@ -6058,6 +6058,19 @@ Paragraph<point>"
     (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
       (org-test-with-temp-text
 	  "* TODO H\nSCHEDULED: <2014-03-04 Tue>\n<2012-03-29 Thu +2y>"
+	(org-todo "DONE")
+	(buffer-string)))))
+  ;; Properly advance repeater even when a clock entry is specified
+  ;; and `org-log-repeat' is nil.
+  (should
+   (string-match-p
+    "SCHEDULED: <2014-03-29"
+    (let ((org-log-repeat nil)
+	  (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+	  "* TODO H
+SCHEDULED: <2012-03-29 Thu +2y>
+CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 	(org-todo "DONE")
 	(buffer-string))))))
 
