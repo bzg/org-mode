@@ -4362,7 +4362,7 @@ After a match, the match groups contain these elements:
 ;; set this option proved cumbersome.  See this message/thread:
 ;; http://article.gmane.org/gmane.emacs.orgmode/68681
 (defvar org-emphasis-regexp-components
-  '("- \t('\"{" "- \t.,:!?;'\")}\\[" " \t\r\n" "." 1)
+  '("-[:space:]('\"{" "-[:space:].,:!?;'\")}\\[" "[:space:]" "." 1)
   "Components used to build the regular expression for emphasis.
 This is a list with five entries.  Terminology:  In an emphasis string
 like \" *strong word* \", we call the initial space PREMATCH, the final
@@ -4377,7 +4377,7 @@ body-regexp  A regexp like \".\" to match a body character.  Don't use
              non-shy groups here, and don't allow newline here.
 newline      The maximum number of newlines allowed in an emphasis exp.
 
-You need to reload Org or to restart Emacs after customizing this.")
+You need to reload Org or to restart Emacs after setting this.")
 
 (defcustom org-emphasis-alist
   '(("*" bold)
