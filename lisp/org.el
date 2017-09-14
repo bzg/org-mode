@@ -13059,8 +13059,9 @@ This function is run automatically after each state change to a DONE state."
 	  ;; a clock, set LAST_REPEAT property.
 	  (when (or org-log-repeat
 		    (catch :clock
-		      (while (re-search-forward org-clock-line-re end t)
-			(when (org-at-clock-log-p) (throw :clock t)))))
+		      (save-excursion
+			(while (re-search-forward org-clock-line-re end t)
+			  (when (org-at-clock-log-p) (throw :clock t))))))
 	    (org-entry-put nil "LAST_REPEAT" (format-time-string
 					      (org-time-stamp-format t t)
 					      (current-time))))
