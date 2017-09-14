@@ -180,11 +180,7 @@ is true; otherwise returns the last value."
 	    (save-current-buffer (set-buffer repl-buffer)
 				 (geiser-repl-exit))
 	    (set-process-query-on-exit-flag (get-buffer-process repl-buffer) nil)
-	    (kill-buffer repl-buffer))
-	  (setq result (if (or (string= result "#<void>")
-			       (string= result "#<unspecified>"))
-			   nil
-			 result)))))
+	    (kill-buffer repl-buffer)))))
     result))
 
 (defun org-babel-scheme--table-or-string (results)

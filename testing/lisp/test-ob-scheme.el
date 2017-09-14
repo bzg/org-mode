@@ -41,29 +41,50 @@
 
 (ert-deftest test-ob-scheme/prologue ()
   "Test :prologue parameter."
-  (equal "#+begin_src scheme :prologue \"(define x 2)\"
+  (should
+   (equal "#+begin_src scheme :prologue \"(define x 2)\"
 x
 #+end_src
 
 #+RESULTS:
 : 2
 "
-	 (org-test-with-temp-text
-	     "#+begin_src scheme :prologue \"(define x 2)\"\nx\n#+end_src"
-	   (org-babel-execute-maybe)
-	   (buffer-string)))
-  (equal
-   "#+begin_src scheme :prologue \"(define x 2)\" :var y=1
+	  (org-test-with-temp-text
+	      "#+begin_src scheme :prologue \"(define x 2)\"\nx\n#+end_src"
+	    (org-babel-execute-maybe)
+	    (buffer-string))))
+  (should
+   (equal
+    "#+begin_src scheme :prologue \"(define x 2)\" :var y=1
 x
 #+end_src
 
 #+RESULTS:
 : 2
 "
-   (org-test-with-temp-text
-       "#+begin_src scheme :prologue \"(define x 2)\" :var y=1\nx\n#+end_src"
-     (org-babel-execute-maybe)
-     (buffer-string))))
+    (org-test-with-temp-text
+	"#+begin_src scheme :prologue \"(define x 2)\" :var y=1\nx\n#+end_src"
+      (org-babel-execute-maybe)
+      (buffer-string)))))
+
+(ert-deftest test-ob-scheme/unspecified ()
+  "Test <#unspecified> return value."
+  (should
+   (equal "#+begin_src scheme
+\(define (mysquare x)
+  (* x x))
+#+end_src
+
+#+RESULTS:
+: #<unspecified>
+"
+	  (org-test-with-temp-text
+	      "#+begin_src scheme
+(define (mysquare x)
+  (* x x))
+#+end_src"
+	    (org-babel-execute-maybe)
+	    (buffer-string)))))
 
 
 (provide 'test-ob-scheme)
