@@ -1575,6 +1575,7 @@ contextual information."
 
 ;;; Interactive functions
 
+;;;###autoload
 (defun org-texinfo-export-to-texinfo
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Texinfo file.
@@ -1609,6 +1610,7 @@ Return output file's name."
     (org-export-to-file 'texinfo outfile
       async subtreep visible-only body-only ext-plist)))
 
+;;;###autoload
 (defun org-texinfo-export-to-info
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Texinfo then process through to INFO.
