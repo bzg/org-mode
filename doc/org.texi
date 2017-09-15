@@ -15534,10 +15534,10 @@ For more examples of header arguments for @code{#+CALL:} lines,
 @cindex code block, library
 
 The ``Library of Babel'' is a collection of code blocks.  Like a function
-library, these code blocks can be called from other Org files.  This
-collection is in a repository file in Org mode format in the @samp{doc}
-directory of Org mode installation.  For remote code block evaluation syntax,
-@pxref{Evaluating code blocks}.
+library, these code blocks can be called from other Org files.  A collection
+of useful code blocks is available on
+@uref{http://orgmode.org/worg/library-of-babel.html,Worg}.  For remote code
+block evaluation syntax, @pxref{Evaluating code blocks}.
 
 @kindex C-c C-v i
 For any user to add code to the library, first save the code in regular
