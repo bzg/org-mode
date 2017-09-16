@@ -4916,13 +4916,7 @@ Paragraph<point>"
    (equal '("A" "B" "COLUMNS")
 	  (org-test-with-temp-text
 	      "* H\n:PROPERTIES:\n:COLUMNS: %25ITEM %A %20B\n:END:"
-	    (org-buffer-property-keys nil nil t))))
-  ;; With non-nil IGNORE-MALFORMED malformed property drawers are silently ignored.
-  (should
-   (equal '("A")
-	  (org-test-with-temp-text
-	      "* a\n:PROPERTIES:\n:A: 1\n:END:\n* b\n:PROPERTIES:\nsome junk here\n:END:\n"
-	    (org-buffer-property-keys nil nil nil t)))))
+	    (org-buffer-property-keys nil nil t)))))
 
 (ert-deftest test-org/property-values ()
   "Test `org-property-values' specifications."

@@ -16010,8 +16010,7 @@ decreases scheduled or deadline date by one day."
 	  (org-indent-line)))))
     (run-hook-with-args 'org-property-changed-functions property value)))
 
-(defun org-buffer-property-keys
-    (&optional specials defaults columns ignore-malformed)
+(defun org-buffer-property-keys (&optional specials defaults columns)
   "Get all property keys in the current buffer.
 
 When SPECIALS is non-nil, also list the special properties that
@@ -16022,10 +16021,7 @@ special meaning internally: ARCHIVE, CATEGORY, SUMMARY,
 DESCRIPTION, LOCATION, and LOGGING and others.
 
 When COLUMNS in non-nil, also include property names given in
-COLUMN formats in the current buffer.
-
-When IGNORE-MALFORMED is non-nil, malformed drawer repair will not be
-automatically performed, such drawers will be silently ignored."
+COLUMN formats in the current buffer."
   (let ((case-fold-search t)
 	(props (append
 		(and specials org-special-properties)
@@ -16034,15 +16030,9 @@ automatically performed, such drawers will be silently ignored."
     (org-with-wide-buffer
      (goto-char (point-min))
      (while (re-search-forward org-property-start-re nil t)
-       (let ((range (org-get-property-block)))
-	 (catch 'skip
-	   (unless range
-	     (when (and (not ignore-malformed)
-			(not (org-before-first-heading-p))
-			(y-or-n-p (format "Malformed drawer at %d, repair?"
-					  (line-beginning-position))))
-	       (org-get-property-block nil t))
-	     (throw 'skip nil))
+       (catch :skip
+	 (let ((range (org-get-property-block)))
+	   (unless range (throw :skip nil))
 	   (goto-char (car range))
 	   (let ((begin (car range))
 		 (end (cdr range)))
@@ -16060,7 +16050,7 @@ automatically performed, such drawers will be silently ignored."
 	     ;; :PROPERTIES:
 	     ;; #+END_EXAMPLE
 	     ;;
-	     (if (< begin (point)) (throw 'skip nil) (goto-char begin))
+	     (if (< begin (point)) (throw :skip nil) (goto-char begin))
 	     (while (< (point) end)
 	       (let ((p (progn (looking-at org-property-re)
 			       (match-string-no-properties 2))))
