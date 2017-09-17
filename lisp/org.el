@@ -19477,7 +19477,6 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 (org-defkey org-mode-map [(shift return)]   'org-table-copy-down)
 (org-defkey org-mode-map [(meta shift return)] 'org-insert-todo-heading)
-(org-defkey org-mode-map [(meta return)]       'org-meta-return)
 (org-defkey org-mode-map (kbd "M-RET") #'org-meta-return)
 
 ;; Cursor keys with modifiers
