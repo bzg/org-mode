@@ -19614,6 +19614,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
 (org-defkey org-mode-map "\C-c-"    'org-ctrl-c-minus)
 (org-defkey org-mode-map "\C-c*"    'org-ctrl-c-star)
+(org-defkey org-mode-map (kbd "C-c TAB") #'org-ctrl-c-tab)
 (org-defkey org-mode-map "\C-c^"    'org-sort)
 (org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
 (org-defkey org-mode-map "\C-c\C-k" 'org-kill-note-or-show-branches)
@@ -21076,6 +21077,15 @@ Calls `org-table-next-row' or `newline-and-indent', depending on
 context.  See the individual commands for more information."
   (interactive)
   (org-return t))
+
+(defun org-ctrl-c-tab (&optional arg)
+  "Toggle columns width in a table, or show children.
+Call `org-table-toggle-column-width' if point is in a table.
+Otherwise, call `org-show-children'."
+  (interactive "p")
+  (call-interactively
+   (if (org-at-table-p) #'org-table-toggle-column-width
+     #'org-show-children)))
 
 (defun org-ctrl-c-star ()
   "Compute table, or change heading status of lines.
