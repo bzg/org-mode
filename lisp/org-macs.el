@@ -38,6 +38,14 @@
                  symbols)
      ,@body))
 
+(defsubst org-trim (s &optional keep-lead)
+  "Remove whitespace at the beginning and the end of string S.
+When optional argument KEEP-LEAD is non-nil, removing blank lines
+at the beginning of the string does not affect leading indentation."
+  (replace-regexp-in-string
+   (if keep-lead "\\`\\([ \t]*\n\\)+" "\\`[ \t\n\r]+") ""
+   (replace-regexp-in-string "[ \t\n\r]+\\'" "" s)))
+
 (defun org-string-nw-p (s)
   "Return S if S is a string containing a non-blank character.
 Otherwise, return nil."

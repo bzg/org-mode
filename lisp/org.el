@@ -194,14 +194,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
   "Get text property PROPERTY at the beginning of line."
   (get-text-property (point-at-bol) property))
 
-(defsubst org-trim (s &optional keep-lead)
-  "Remove whitespace at the beginning and the end of string S.
-When optional argument KEEP-LEAD is non-nil, removing blank lines
-at the beginning of the string does not affect leading indentation."
-  (replace-regexp-in-string
-   (if keep-lead "\\`\\([ \t]*\n\\)+" "\\`[ \t\n\r]+") ""
-   (replace-regexp-in-string "[ \t\n\r]+\\'" "" s)))
-
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
 
