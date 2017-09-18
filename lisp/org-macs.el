@@ -311,6 +311,10 @@ This is in contrast to merely setting it to 0."
       (setq plist (cddr plist)))
     p))
 
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
+
 
 
 ;;; Regexp matching

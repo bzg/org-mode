@@ -186,10 +186,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar ffap-url-regexp)		;Silence byte-compiler
 
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
-
 (defsubst org-get-at-bol (property)
   "Get text property PROPERTY at the beginning of line."
   (get-text-property (point-at-bol) property))
