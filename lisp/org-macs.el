@@ -372,6 +372,10 @@ the value in cdr."
     (cons (list (car flat) (cadr flat))
 	  (org-make-parameter-alist (cddr flat)))))
 
+(defsubst org-get-at-bol (property)
+  "Get text property PROPERTY at the beginning of line."
+  (get-text-property (point-at-bol) property))
+
 
 
 ;;; Local variables

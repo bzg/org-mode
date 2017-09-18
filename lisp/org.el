@@ -186,10 +186,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar ffap-url-regexp)		;Silence byte-compiler
 
-(defsubst org-get-at-bol (property)
-  "Get text property PROPERTY at the beginning of line."
-  (get-text-property (point-at-bol) property))
-
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
 
