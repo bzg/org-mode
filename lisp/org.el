@@ -21070,7 +21070,7 @@ context.  See the individual commands for more information."
   (interactive)
   (org-return t))
 
-(defun org-ctrl-c-tab (&optional arg)
+(defun org-ctrl-c-tab (&optional _arg)
   "Toggle columns width in a table, or show children.
 Call `org-table-toggle-column-width' if point is in a table.
 Otherwise, call `org-show-children'."
