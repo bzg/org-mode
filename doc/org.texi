@@ -14990,6 +14990,7 @@ directory on the local machine.
       '(("org"
          :base-directory "~/org/"
          :publishing-directory "~/public_html"
+         :publishing-function org-html-publish-to-html
          :section-numbers nil
          :with-toc nil
          :html-head "<link rel=\"stylesheet\"
