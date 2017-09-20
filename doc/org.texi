@@ -1256,13 +1256,8 @@ Org uses just two commands, bound to @key{TAB} and
 @end example
 
 @vindex org-cycle-emulate-tab
-@vindex org-cycle-global-at-bob
 The cursor must be on a headline for this to work@footnote{see, however,
-the option @code{org-cycle-emulate-tab}.}.  When the cursor is at the
-beginning of the buffer and the first line is not a headline, then
-@key{TAB} actually runs global cycling (see below)@footnote{see the
-option @code{org-cycle-global-at-bob}.}.  Also when called with a prefix
-argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
+the option @code{org-cycle-emulate-tab}.}.
 
 @cindex global visibility states
 @cindex global cycling
@@ -1281,6 +1276,11 @@ argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
 When @kbd{S-@key{TAB}} is called with a numeric prefix argument N, the
 CONTENTS view up to headlines of level N will be shown.  Note that inside
 tables, @kbd{S-@key{TAB}} jumps to the previous field.
+
+@vindex org-cycle-global-at-bob
+You can run global cycling using @key{TAB} only if point is at the very
+beginning of the buffer and @code{org-cycle-global-at-bob} is set to
+a non-@code{nil} value.
 
 @cindex set startup visibility, command
 @orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
