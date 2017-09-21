@@ -10899,10 +10899,11 @@ settings that cannot be changed using keywords.
 @cindex list of tables
 @cindex list of listings
 
+@cindex: @samp{toc} in OPTIONS keyword
 @vindex org-export-with-toc
-The table of contents includes all @emph{numbered} headlines in the document.
-Its depth is therefore the same as the headline levels in the file.  If you
-need to use a different depth, or turn it off entirely, set the
+The table of contents includes all headlines in the document.  Its depth is
+therefore the same as the headline levels in the file.  If you need to use
+a different depth, or turn it off entirely, set the
 @code{org-export-with-toc} variable accordingly.  You can achieve the same on
 a per file basis, using the following @samp{toc} item in @samp{#+OPTIONS}
 keyword:

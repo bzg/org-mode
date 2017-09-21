@@ -5214,7 +5214,7 @@ there is no such headline, collect all headlines.  In any case,
 argument N becomes relative to the level of that headline.
 
 Return a list of all exportable headlines as parsed elements.
-Footnote sections and unnumbered headlines are ignored."
+Footnote sections are ignored."
   (let* ((scope (cond ((not scope) (plist-get info :parse-tree))
 		      ((eq (org-element-type scope) 'headline) scope)
 		      ((org-export-get-parent-headline scope))
@@ -5226,8 +5226,7 @@ Footnote sections and unnumbered headlines are ignored."
 		   limit))))
     (org-element-map (org-element-contents scope) 'headline
       (lambda (headline)
-	(unless (or (org-element-property :footnote-section-p headline)
-		    (not (org-export-numbered-headline-p headline info)))
+	(unless (org-element-property :footnote-section-p headline)
 	  (let ((level (org-export-get-relative-level headline info)))
 	    (and (<= level n) headline))))
       info)))

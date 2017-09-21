@@ -12,12 +12,6 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.2
 ** Incompatible changes
-*** Table of contents ignore unnumbered headlines
-
-This allows finer control over the table of contents itself, using,
-e.g., =UNNUMBERED= property.  It is also more consistent with LaTeX
-export.
-
 *** =align= STARTUP value no longer narrow table columns
 
 Columns narrowing (or shrinking) is now dynamic. See [[*Dynamically

@@ -4314,16 +4314,6 @@ Another text. (ref:text)
 	    (org-test-with-parsed-data "* H1\n** Footnotes"
 	      (mapcar (lambda (h) (org-element-property :raw-value h))
 		      (org-export-collect-headlines info))))))
-  ;; Do not collect unnumbered headlines.
-  (should-not
-   (org-test-with-parsed-data "#+options: num:nil\n* H1\n** H2"
-     (org-export-collect-headlines info)))
-  (should
-   (equal '("H1")
-	  (org-test-with-parsed-data
-	      "* H1\n** H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
-	    (mapcar (lambda (h) (org-element-property :raw-value h))
-		    (org-export-collect-headlines info)))))
   ;; Collect headlines locally.
   (should
    (equal '("H2" "H3")
