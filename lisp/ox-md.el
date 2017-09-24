@@ -449,7 +449,7 @@ a communication channel."
      (t (let* ((raw-path (org-element-property :path link))
 	       (path
 		(cond
-		 ((member type '("http" "https" "ftp" "mailto" "irc"))
+		 ((member type '("http" "https" "ftp" "mailto"))
 		  (concat type ":" raw-path))
 		 ((string= type "file")
 		  (org-export-file-uri (funcall link-org-files-as-md raw-path)))
