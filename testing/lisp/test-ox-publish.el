@@ -394,6 +394,14 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 	  (org-publish-project-alist
 	   `(("p" :base-directory ,base :base-extension any))))
      (org-publish-get-project-from-filename file)))
+  ;; Pathological case: Handle both :extension any and :recursive t.
+  (should
+   (let* ((base (expand-file-name "examples/pub/" org-test-dir))
+	  (file (expand-file-name "sub/c.org" base))
+	  (org-publish-project-alist
+	   `(("p" :base-directory ,base :recursive t :base-extension any))))
+     (org-publish-get-base-files (org-publish-get-project-from-filename file))))
+
   ;; Check :exclude property.
   (should-not
    (let* ((base (expand-file-name "examples/pub/" org-test-dir))
