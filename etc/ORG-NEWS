@@ -108,6 +108,12 @@ you should expect to see something like:
 ** Miscellaneous
 
 *** ~org-publish-resolve-external-link~ accepts a new optional argument.
+*** ~org-irc.el~ now supports exporting =irc:= links properly
+
+Previously, irc links were exported by ~ox-md~ and ~ox-html~ as normal
+file links, which lead to them being broken in web browsers. Now both
+of these exporters will properly export to =irc:= links, which will
+open properly in irc clients from web browsers.
 
 * Version 9.1
 
