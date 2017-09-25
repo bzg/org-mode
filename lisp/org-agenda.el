@@ -4610,7 +4610,7 @@ is active."
 	  (add-text-properties pos (1- (point)) (list 'face 'org-warning))
 	  (setq pos (point))
 	  (unless org-agenda-multi
-	    (insert (substitute-command-keys "\
+	    (insert (substitute-command-keys "\\<org-agenda-mode-map>\
 Press `\\[org-agenda-manipulate-query-add]', \
 `\\[org-agenda-manipulate-query-subtract]' to add/sub word, \
 `\\[org-agenda-manipulate-query-add-re]', \
