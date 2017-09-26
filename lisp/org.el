@@ -19612,7 +19612,6 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map "\C-j"     'org-return-indent)
 (org-defkey org-mode-map "\C-c?"    'org-table-field-info)
 (org-defkey org-mode-map "\C-c "    'org-table-blank-field)
-(org-defkey org-mode-map (kbd "C-c TAB") #'org-table-toggle-column-width)
 (org-defkey org-mode-map "\C-c+"    'org-table-sum)
 (org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
 (org-defkey org-mode-map "\C-c'"    'org-edit-special)
