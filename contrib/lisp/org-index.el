@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.5.0
+;; Version: 5.6.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -85,74 +85,37 @@
 
 ;;; Change Log:
 
+;;   [2017-09-25 Mo] Version 5.6.1
+;;   - Quick repeat for goto-focus
+;;   - Bugfixes
+;;
 ;;   [2017-09-03 So] Version 5.5.0
-;;   - In occur: case-sensitive search for upcase letters
+;;   - Standard case-folding in occur
 ;;   - Better handling of nested focus nodes
 ;;   - Bugfixes
 ;;
-;;   [2017-06-06 Tu] Version 5.4.2
-;;   - Dedicated submenu for focus operations
-;;   - Occur accepts a numeric argument as a day span
-;;   - New customization `org-index-clock-into-focus'
-;;   - Fixed delay after choosing an index line
-;;   - (Re)introduced lexical binding
-;;   - Bugfixes
-;;
-;;   [2017-03-26 Su] Version 5.3.0
-;;   - Focused can now be on a list of nodes (instead of a single one)
-;;   - Cleaned up undeclared dependencies
-;;
-;;   [2017-02-18 Sa] Version 5.2.3
-;;   - New command 'focus'
-;;   - Speeded up org-index--parse-table with the stored property "max-ref"
-;;   - Speeded up org-index--on with search
-;;   - Added org-index-prepare-when-idle
-;;   - Fixed compatibility issue with emacs 24 (font-lock-ensure)
-;;   - Added more customizations
-;;   - Bugfixes
-;;
-;;   [2016-10-19 We] Version 5.1.4
-;;   - Bugfixes
-;;
-;;   [2016-08-26 Fr] Version 5.1.3
-;;   - Offering help during query for subcommands
-;;   - Removed org-index-default-keybindings
-;;   - Renamed subcommand multi-occur to find-ref
-;;   - Subcommands add needs no longer be invoked from heading
-;;   - Many Bugfixes
-;;
-;;   [2015-12-29 Tu] Version 5.0.2
+;;   [2015-12-29 Tu] to [2017-06-06 Tu] Version 5.0.2 to 5.4.2
 ;;   - New commands yank, column and edit
+;;   - New command focus
 ;;   - New column tags
 ;;   - All columns are now required
 ;;   - References are now optional
 ;;   - Subcommand enter has been renamed to index
 ;;   - Subcommands kill and edit can be invoked from an occur buffer
-;;   - Many Bugfixes
 ;;   - Added link to screencast
+;;   - Occur accepts a numeric argument as a day span
+;;   - Speed improvements
+;;   - Many Bugfixes
 ;;
-;;   [2015-08-20 Th] Version 4.3.0
+;;   [2015-02-26 Th] to [2015-08-20 Th] Version 4.0.0 to 4.3.0
 ;;   - Configuration is done now via standard customize
 ;;   - New sorting strategy 'mixed'
-;;   - Silenced some compiler warnings
-;;
-;;   [2015-03-18 We] Version 4.2.1
-;;   - No garbage in kill-ring
-;;   - No recentering after add
-;;
-;;   [2015-03-08 Su] Version 4.2.0
-;;   - Reference numbers for subcommands can be passed as a prefix argument
-;;   - New variable org-index-default-keybindings-list with a list of
-;;     default keybindings for org-index-default-keybindings
-;;   - Added new column level
-;;   - removed flags get-category-on-add and get-heading-on-add
-;;
-;;   [2015-02-26 Th] to [2015-03-05 Th] Version 4.0.0 to 4.1.2
 ;;   - Removed command "leave"; rather go back with org-mark-ring-goto
 ;;   - Renamed column "link" to "id"
 ;;   - Added maintainance options to find duplicate rows, to check ids,
 ;;     update index or remove property org-index-ref from nodes
-;;   - Shortened versin history
+;;   - Shortened version history
+;;   - Reference numbers for subcommands can be passed as a prefix argument
 ;;
 ;;   [2014-12-08 Mo] to [2015-01-31 Sa] Version 3.0.0 to 3.2.0:
 ;;   - Complete sorting of index only occurs in idle-timer
@@ -183,11 +146,11 @@
 ;;   - Renamed the package from "org-refer-by-number" to "org-reftable"
 ;;
 ;;   [2011-12-10 Sa] to [2012-09-22 Sa] Version Version 1.2.0 to 1.5.0:
-;;    - New command "sort" to sort a buffer or region by reference number
-;;    - New commands "highlight" and "unhighlight" to mark references
-;;    - New command "head" to find a headline with a reference number
-;;    - New commands occur and multi-occur
-;;    - Started this Change Log
+;;   - New command "sort" to sort a buffer or region by reference number
+;;   - New commands "highlight" and "unhighlight" to mark references
+;;   - New command "head" to find a headline with a reference number
+;;   - New commands occur and multi-occur
+;;   - Started this Change Log
 
 ;;; Code:
 
@@ -197,7 +160,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.5.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.6.0" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -414,7 +377,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.5.0 of org-index.el.
+This is version 5.6.0 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -1107,7 +1070,7 @@ Optional argument KEYS-VALUES specifies content of new line."
 (defun org-index--goto-focus ()
   "Goto focus node, one after the other."
   (if org-index--ids-focused-nodes
-      (let (this-id target-id following-id last-id again explain marker)
+      (let (this-id target-id following-id last-id again explain marker (repeat-clause ""))
         (setq again (and (eq this-command last-command)
                          (eq org-index--this-command org-index--last-command)))
         (setq last-id (or org-index--id-last-goto-focus
@@ -1123,6 +1086,14 @@ Optional argument KEYS-VALUES specifies content of new line."
               (setq explain "Jumped to next"))
           (setq target-id last-id)
           (setq explain "Jumped back to current"))
+
+        (set-transient-map (let ((map (make-sparse-keymap)))
+                             (define-key map (vector ?f)
+                               (lambda () (interactive)
+                                 (setq this-command last-command)
+                                 (message (concat (org-index--goto-focus) "."))))
+                             map) t)
+        (setq repeat-clause ", type 'f' to repeat")
 
         (if (member target-id (org-index--ids-up-to-top))
             (setq explain "Staying below current")
@@ -1141,19 +1112,22 @@ Optional argument KEYS-VALUES specifies content of new line."
           (setq org-index--after-focus-timer
                 (run-at-time org-index--after-focus-delay nil
                              (lambda ()
-                               (if org-index--after-focus-context
-                                   (if org-index-clock-into-focus 
-                                       (save-excursion
-                                         (org-id-goto org-index--after-focus-context)
-                                         (org-clock-in)))
-                                 (org-index--update-line org-index--after-focus-context t)
-                                 (setq org-index--after-focus-context nil))))))
+                               (when org-index--after-focus-context
+                                 (save-window-excursion
+                                   (save-excursion
+                                     (org-id-goto org-index--after-focus-context)
+                                     (org-clock-in)
+                                     (org-index--update-line org-index--after-focus-context t)
+                                     (setq org-index--after-focus-context nil)
+                                     (cancel-timer org-index--after-focus-timer))))))))
         (setq org-index--id-last-goto-focus target-id)
-        (if (cdr org-index--ids-focused-nodes)
-            (format "%s focus node (out of %d)"
-                    explain
-                    (length org-index--ids-focused-nodes))
-          "Jumped to single focus-node"))
+        (concat
+         (if (cdr org-index--ids-focused-nodes)
+             (format "%s focus node (out of %d)"
+                     explain
+                     (length org-index--ids-focused-nodes))
+           "Jumped to single focus-node")
+         repeat-clause))
       "No nodes in focus, use set-focus"))
 
 
@@ -1161,7 +1135,8 @@ Optional argument KEYS-VALUES specifies content of new line."
   "More commands for handling focused nodes."
   (let (id text more-text char prompt ids-up-to-top)
 
-    (setq prompt "Please specify action on the list focused nodes: set, append, delete (s,a,d or ? for short help) - ")
+    (setq prompt (format "Please specify action on the list of %s focused nodes: set, append, delete (s,a,d or ? for short help) - "
+                         (length org-index--ids-focused-nodes)))
     (while (not (memq char (list ?s ?a ?d)))
         (setq char (read-char prompt))
         (setq prompt "Actions on list of focused nodes:  s)et single focus on this node,  a)ppend this node to list,  d)elete this node from list.  Please choose - "))
@@ -1219,7 +1194,7 @@ Optional argument KEYS-VALUES specifies content of new line."
 
 
 (defun org-index--ids-up-to-top ()
-  "Get list of all ids from current node up to top level"
+  "Get list of all ids from current node up to top level."
   (when (string= major-mode "org-mode")
     (let (ancestors id level start-level)
       (save-excursion
@@ -1568,7 +1543,8 @@ Optional argument CHECK-SORT-MIXED triggers resorting if mixed and stale."
 
   (let (initial-point
         end-of-headings
-        start-of-headings)
+        start-of-headings
+        max-ref-field)
 
     (unless num-lines-to-format (setq num-lines-to-format 0))
 
@@ -3031,10 +3007,15 @@ If OTHER in separate window."
 
       ;; highlight words
       (mapc (lambda (w) (unless (or (not w) (string= w ""))
-                     (let ((case-fold-search (not (string= w (downcase w)))))
-                       (highlight-regexp (regexp-quote w) 'isearch))))
+                     (highlight-regexp
+                      (if (string= w (downcase w))
+                          (apply 'concat (mapcar (lambda (c) (if (string-match "[[:alpha:]]" (char-to-string c))
+                                                            (format "[%c%c]" (downcase c) (upcase c))
+                                                          (char-to-string c)))
+                                                 (regexp-quote w)))
+                        (regexp-quote w)) 'isearch)))
             (cons word words))
-
+      
       (setq buffer-read-only t)
 
       ;; install keyboard-shortcuts
@@ -3092,7 +3073,7 @@ If OTHER in separate window."
 
 
 (defun org-index--occur-end-of-visible ()
-  "End of visible stretch during occur"
+  "End of visible stretch during occur."
   (if org-index--occur-stack
       (cdr (assoc :end-of-visible (car org-index--occur-stack)))
     (point-max)))
