@@ -1279,8 +1279,8 @@ tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @vindex org-cycle-global-at-bob
 You can run global cycling using @key{TAB} only if point is at the very
-beginning of the buffer and @code{org-cycle-global-at-bob} is set to
-a non-@code{nil} value.
+beginning of the buffer, but not on a headline, and
+@code{org-cycle-global-at-bob} is set to a non-@code{nil} value.
 
 @cindex set startup visibility, command
 @orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
