@@ -16051,7 +16051,9 @@ COLUMN formats in the current buffer."
 	   (when (memq (org-element-type element) '(keyword node-property))
 	     (let ((value (org-element-property :value element))
 		   (start 0))
-	       (while (string-match "%[0-9]*\\(\\S-+\\)" value start)
+	       (while (string-match "%[0-9]*\\([[:alnum:]_-]+\\)\\(([^)]+)\\)?\
+\\(?:{[^}]+}\\)?"
+				    value start)
 		 (setq start (match-end 0))
 		 (let ((p (match-string-no-properties 1 value)))
 		   (unless (member-ignore-case p org-special-properties)
