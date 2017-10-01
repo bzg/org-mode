@@ -4923,7 +4923,7 @@ Paragraph<point>"
 	  (org-test-with-temp-text
 	      "* a\n:PROPERTIES:\n:A: 1\n:END:\n* b\n:PROPERTIES:\nsome junk here\n:END:\n"
 	    (org-buffer-property-keys nil nil nil t))))
-  ;; In COLUMNS, ignore label title and summary-type.
+  ;; In COLUMNS, ignore title and summary-type.
   (should
    (equal '("A")
 	  (org-test-with-temp-text "#+COLUMNS: %A(Foo)"
