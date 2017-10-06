@@ -1792,11 +1792,10 @@ The template may still contain \"%?\" for cursor positioning."
 		     (let* ((upcase? (equal (upcase key) key))
 			    (org-end-time-was-given nil)
 			    (time (org-read-date upcase? t nil prompt)))
-		       (let ((org-time-was-given upcase?))
-			 (org-insert-time-stamp
-			  time org-time-was-given
-			  (member key '("u" "U"))
-			  nil nil (list org-end-time-was-given)))))
+		       (org-insert-time-stamp
+			time (or org-time-was-given upcase?)
+			(member key '("u" "U"))
+			nil nil (list org-end-time-was-given))))
 		    (`nil
 		     (push (org-completing-read
 			    (concat (or prompt "Enter string")
