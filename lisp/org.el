@@ -24230,10 +24230,11 @@ convenience:
 	(backward-char)
 	(org-backward-paragraph))
        ((<= (point) post-affiliated) (goto-char begin))
+       ;; Special behavior: on a table or a property drawer, move to
+       ;; its beginning.
        ((memq type '(node-property table-row))
 	(goto-char (org-element-property
 		    :post-affiliated (org-element-property :parent element))))
-       ((memq type '(property-drawer table)) (goto-char begin))
        (special?
 	(if (<= (point) contents-begin) (goto-char post-affiliated)
 	  ;; Inside a verse block, see blank lines as paragraph
@@ -24244,8 +24245,7 @@ convenience:
 	      (skip-chars-forward " \r\t\n" origin)
 	      (if (= (point) origin) (goto-char contents-begin)
 		(beginning-of-line))))))
-       ((eq type 'paragraph)
-	(goto-char contents-begin)
+       ((eq type 'paragraph) (goto-char contents-begin)
 	;; When at first paragraph in an item or a footnote definition,
 	;; move directly to beginning of line.
 	(let ((parent-contents
@@ -24253,9 +24253,9 @@ convenience:
 		:contents-begin (org-element-property :parent element))))
 	  (when (and parent-contents (= parent-contents contents-begin))
 	    (beginning-of-line))))
-       ;; At the end of a greater element, move to the beginning of the
-       ;; last element within.
-       ((>= (point) contents-end)
+       ;; At the end of a greater element, move to the beginning of
+       ;; the last element within.
+       ((and contents-end (>= (point) contents-end))
 	(goto-char (1- contents-end))
 	(org-backward-paragraph))
        (t (goto-char (or post-affiliated begin))))
