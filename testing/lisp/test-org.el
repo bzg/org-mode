@@ -3607,6 +3607,11 @@ SCHEDULED: <2017-05-06 Sat>
   (should
    (org-test-with-temp-text "#+BEGIN_<point>EXAMPLE\nL1\n#+END_EXAMPLE"
      (org-backward-paragraph)
+     (bobp)))
+  ;; Pathological case: on an empty heading, move to its beginning.
+  (should
+   (org-test-with-temp-text "* <point>H"
+     (org-backward-paragraph)
      (bobp))))
 
 (ert-deftest test-org/forward-element ()
