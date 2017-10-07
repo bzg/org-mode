@@ -123,7 +123,8 @@ default, or nil of no state should be assigned."
 
 (defun org-inlinetask-insert-task (&optional no-state)
   "Insert an inline task.
-If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'."
+If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'.
+If there is a region wrap it inside the inline task."
   (interactive "P")
   ;; Error when inside an inline task, except if point was at its very
   ;; beginning, in which case the new inline task will be inserted
@@ -135,13 +136,19 @@ If prefix arg NO-STATE is set, ignore `org-inlinetask-default-state'."
   (let* ((indent (if org-odd-levels-only
 		     (1- (* 2 org-inlinetask-min-level))
 		   org-inlinetask-min-level))
-	 (indent-string (concat (make-string indent ?*) " ")))
+	 (indent-string (concat (make-string indent ?*) " "))
+	 (rbeg (if (org-region-active-p) (region-beginning) (point)))
+	 (rend (if (org-region-active-p) (region-end) (point))))
+    (goto-char rend)
+    (insert "\n" indent-string "END\n")
+    (goto-char rbeg)
+    (unless (bolp) (insert "\n"))
     (insert indent-string
 	    (if (or no-state (not org-inlinetask-default-state))
-		"\n"
-	      (concat org-inlinetask-default-state " \n"))
-	    indent-string "END\n"))
-  (end-of-line -1))
+		""
+	      (concat org-inlinetask-default-state " "))
+	    (if (= rend rbeg) "" "\n"))
+    (unless (= rend rbeg) (end-of-line 0))))
 (define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
 
 (defun org-inlinetask-outline-regexp ()
