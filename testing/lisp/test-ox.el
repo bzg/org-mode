@@ -4314,6 +4314,21 @@ Another text. (ref:text)
 	    (org-test-with-parsed-data "* H1\n** Footnotes"
 	      (mapcar (lambda (h) (org-element-property :raw-value h))
 		      (org-export-collect-headlines info))))))
+  ;; Do not collect headlines with UNNUMBERED property set to "notoc".
+  ;; Headlines with another value for the property are still
+  ;; collected.
+  (should
+   (equal '("H1")
+	  (org-test-with-parsed-data
+	      "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: notoc\n:END:"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info)))))
+  (should
+   (equal '("H1" "H2")
+	  (org-test-with-parsed-data
+	      "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
+	    (mapcar (lambda (h) (org-element-property :raw-value h))
+		    (org-export-collect-headlines info)))))
   ;; Collect headlines locally.
   (should
    (equal '("H2" "H3")

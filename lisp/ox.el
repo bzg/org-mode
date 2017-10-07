@@ -5226,12 +5226,16 @@ Footnote sections are ignored."
 	 (n (if (not (wholenump n)) limit
 	      (min (if (eq (org-element-type scope) 'org-data) n
 		     (+ (org-export-get-relative-level scope info) n))
-		   limit))))
+		   limit)))
+	 (skipped nil))
     (org-element-map (org-element-contents scope) 'headline
-      (lambda (headline)
-	(unless (org-element-property :footnote-section-p headline)
-	  (let ((level (org-export-get-relative-level headline info)))
-	    (and (<= level n) headline))))
+      (lambda (h)
+	(if (or (org-element-property :footnote-section-p h)
+		(equal "notoc" (org-element-property :UNNUMBERED h))
+		(memq (org-element-property :parent h) skipped)
+		(< n (org-export-get-relative-level h info)))
+	    (progn (push h skipped) nil)
+	  h))
       info)))
 
 (defun org-export-collect-elements (type info &optional predicate)

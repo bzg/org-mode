@@ -10813,7 +10813,9 @@ Toggle inclusion of inlinetasks (@code{org-export-with-inlinetasks}).
 Toggle section-numbers (@code{org-export-with-section-numbers}).  When set to
 number @samp{n}, Org numbers only those headlines at level @samp{n} or above.
 Set @code{UNNUMBERED} property to non-@code{nil} to disable numbering of
-heading and subheadings entirely.
+heading and subheadings entirely.  Moreover, when the value is @samp{notoc}
+the headline, and all its children, do not appear in the table of contents
+either (@pxref{Table of contents}).
 
 @item p:
 @vindex org-export-with-planning
@@ -10911,6 +10913,22 @@ keyword:
 #+OPTIONS: toc:nil        @r{no default TOC at all}
 @end example
 
+@cindex excluding entries from table of contents
+@cindex table of contents, exclude entries
+Org includes both numbered and unnumbered headlines in the table of
+contents@footnote{At the moment, some export back-ends do not obey this
+specification.  For example, @LaTeX{} export excludes every unnumbered
+headline from the table of contents.}.  If you need to exclude an unnumbered
+headline, along with all its children, set the @samp{UNNUMBERED} property to
+@samp{notoc} value.
+
+@example
+* Subtree not numbered, not in table of contents either
+  :PROPERTIES:
+  :UNNUMBERED: notoc
+  :END:
+@end example
+
 @cindex #+TOC
 Org normally inserts the table of contents directly before the first headline
 of the file.  To move the table of contents to a different location, first
@@ -10935,8 +10953,8 @@ compatibility issues, @code{titletoc} has to be loaded @emph{before}
 variable.
 
 @example
-* Section #+TOC: headlines 1 local @r{insert local TOC, with direct children
-only}
+* Section
+#+TOC: headlines 1 local @r{insert local TOC, with direct children only}
 @end example
 
 Use the @code{TOC} keyword to generate list of tables (resp.@: all listings)

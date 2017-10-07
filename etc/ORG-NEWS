@@ -26,6 +26,9 @@ document, use =shrink= value instead, or in addition to align:
 #+END_EXAMPLE
 
 ** New features
+*** Exclude unnumbered headlines from table of contents
+Set their =UNNUMBERED= property to the special =notoc= value.  See
+manual for details.
 *** ~org-archive~ functions update status cookies
 
 Archiving headers through ~org-archive-subtree~ and
