@@ -1028,8 +1028,8 @@ the following lines anywhere in the buffer:
    #+STARTUP: shrink"
   :group 'org-startup
   :type 'boolean
-  :version "26.1"
-  :package-version '(Org . "9.1")
+  :version "27.1"
+  :package-version '(Org . "9.2")
   :safe #'booleanp)
 
 (defcustom org-startup-with-inline-images nil
@@ -5559,7 +5559,8 @@ The following commands are available:
 		   ("8.2.7" . "24.4")
 		   ("8.3" . "26.1")
 		   ("9.0" . "26.1")
-		   ("9.1" . "26.1")))
+		   ("9.1" . "26.1")
+		   ("9.2" . "27.1")))
 
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table text-mode-syntax-table)))

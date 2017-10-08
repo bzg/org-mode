@@ -426,8 +426,8 @@ prevents it from hanging emacs."
   "String to be displayed in a shrunk column."
   :group 'org-table-editing
   :type 'string
-  :version "26.1"
-  :package-version '(Org . "9.1")
+  :version "27.1"
+  :package-version '(Org . "9.2")
   :safe (lambda (v) (and (stringp v) (not (equal v "")))))
 
 (defconst org-table-auto-recalculate-regexp "^[ \t]*| *# *\\(|\\|$\\)"
