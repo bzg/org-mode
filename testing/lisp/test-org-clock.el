@@ -828,5 +828,110 @@ CLOCK: [2016-12-28 Wed 11:09]--[2016-12-28 Wed 11:09] =>  0:00
 CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 13:09] =>  0:00"
             (test-org-clock-clocktable-contents ":tcolumns 2")))))
 
+(ert-deftest test-org-clock/clocktable/step ()
+  "Test \":step\" parameter in Clock table."
+  ;; Regression test: week crossing month boundary before :wstart
+  ;; day-of-week.
+  (should
+   (equal "
+Weekly report starting on: [2017-09-25 Mon]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *1:00* |
+|--------------+--------|
+| Foo          | 1:00   |"
+    (org-test-with-temp-text
+	"* Foo
+CLOCK: [2017-09-30 Sat 12:00]--[2017-09-30 Sat 13:00] =>  1:00
+CLOCK: [2017-10-01 Sun 11:00]--[2017-10-01 Sun 13:00] =>  2:00
+CLOCK: [2017-10-02 Mon 11:00]--[2017-10-02 Mon 14:00] =>  3:00"
+      (let ((system-time-locale "en_US"))
+	(test-org-clock-clocktable-contents
+	    ":step week :block 2017-09 :stepskip0 t")))))
+  (should
+   (equal "
+Weekly report starting on: [2017-10-01 Sun]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *2:00* |
+|--------------+--------|
+| Foo          | 2:00   |
+
+Weekly report starting on: [2017-10-02 Mon]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *7:00* |
+|--------------+--------|
+| Foo          | 7:00   |
+
+Weekly report starting on: [2017-10-09 Mon]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *5:00* |
+|--------------+--------|
+| Foo          | 5:00   |
+"
+	  (org-test-with-temp-text
+	      "* Foo
+CLOCK: [2017-09-30 Sat 12:00]--[2017-09-30 Sat 13:00] =>  1:00
+CLOCK: [2017-10-01 Sun 11:00]--[2017-10-01 Sun 13:00] =>  2:00
+CLOCK: [2017-10-02 Mon 11:00]--[2017-10-02 Mon 14:00] =>  3:00
+CLOCK: [2017-10-08 Sun 09:00]--[2017-10-08 Sun 13:00] =>  4:00
+CLOCK: [2017-10-09 Mon 09:00]--[2017-10-09 Mon 14:00] =>  5:00"
+	    (let ((system-time-locale "en_US"))
+	      (test-org-clock-clocktable-contents
+		  ":step week :block 2017-10 :stepskip0 t")))))
+  ;; :step day
+  (should
+   (equal "
+Daily report: [2017-10-02 Mon]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *3:00* |
+|--------------+--------|
+| Foo          | 3:00   |
+
+Daily report: [2017-10-03 Tue]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |
+
+Daily report: [2017-10-04 Wed]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |
+
+Daily report: [2017-10-05 Thu]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |
+
+Daily report: [2017-10-06 Fri]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |
+
+Daily report: [2017-10-07 Sat]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *0:00* |
+
+Daily report: [2017-10-08 Sun]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *4:00* |
+|--------------+--------|
+| Foo          | 4:00   |"
+	  (org-test-with-temp-text
+	      "* Foo
+CLOCK: [2017-09-30 Sat 12:00]--[2017-09-30 Sat 13:00] =>  1:00
+CLOCK: [2017-10-01 Sun 11:00]--[2017-10-01 Sun 13:00] =>  2:00
+CLOCK: [2017-10-02 Mon 11:00]--[2017-10-02 Mon 14:00] =>  3:00
+CLOCK: [2017-10-08 Sun 09:00]--[2017-10-08 Sun 13:00] =>  4:00
+CLOCK: [2017-10-09 Mon 09:00]--[2017-10-09 Mon 14:00] =>  5:00"
+	    (let ((system-time-locale "en_US"))
+	      (test-org-clock-clocktable-contents
+		  ":step day :block 2017-W40"))))))
+
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
