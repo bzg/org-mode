@@ -292,7 +292,8 @@ which will make the list into a \"build\"."
              "<%s class='org-%s%s'>" tag tag
              (if (org-export-get-node-property :INCREMENTAL plain-list t)
                  " incremental" ""))
-            contents (org-html-end-plain-list type))))
+            contents
+	    (format "</%s>" tag))))
 
 (defun org-s5-inner-template (contents info)
   "Return body of document string after HTML conversion.
