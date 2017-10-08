@@ -3414,8 +3414,8 @@ SCHEDULED: <2017-05-06 Sat>
    (org-test-with-temp-text "Paragraph 1.<point>\n\nParagraph 2."
      (org-forward-sentence)
      (eobp)))
-  ;; On a headline, stop at the end of the line, unless point is
-  ;; already there.
+  ;; Headlines are considered to be sentences by themselves, even if
+  ;; they do not end with a full stop.
   (should
    (equal
     "* Headline"
@@ -3425,7 +3425,11 @@ SCHEDULED: <2017-05-06 Sat>
   (should
    (org-test-with-temp-text "* Headline<point>\nSentence."
      (org-forward-sentence)
-     (eobp))))
+     (eobp)))
+  (should
+   (org-test-with-temp-text "Sentence.<point>\n\n* Headline\n\nSentence 2."
+     (org-forward-sentence)
+     (and (org-at-heading-p) (eolp)))))
 
 (ert-deftest test-org/backward-sentence ()
   "Test `org-backward-sentence' specifications."

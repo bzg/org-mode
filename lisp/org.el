@@ -23618,7 +23618,9 @@ depending on context."
 					(skip-chars-forward " \r\t\n"))))
 	    (narrow-to-region (org-element-property :contents-begin element)
 			      contents-end))
-	  (call-interactively #'forward-sentence))))))
+	  ;; End of heading is considered as the end of a sentence.
+	  (let ((sentence-end (concat (sentence-end) "\\|^\\*+ .*$")))
+	    (call-interactively #'forward-sentence)))))))
 
 (define-key org-mode-map "\M-a" 'org-backward-sentence)
 (define-key org-mode-map "\M-e" 'org-forward-sentence)
