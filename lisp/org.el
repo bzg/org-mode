@@ -20782,8 +20782,8 @@ This command does many different things, depending on context:
 	     '(babel-call clock dynamic-block footnote-definition
 			  footnote-reference inline-babel-call inline-src-block
 			  inlinetask item keyword node-property paragraph
-			  plain-list property-drawer radio-target src-block
-			  statistics-cookie table table-cell table-row
+			  plain-list planning property-drawer radio-target
+			  src-block statistics-cookie table table-cell table-row
 			  timestamp)
 	     t))
 	   (type (org-element-type context)))
@@ -20935,7 +20935,8 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	     (cond (arg (call-interactively #'org-table-recalculate))
 		   ((org-table-maybe-recalculate-line))
 		   (t (org-table-align))))))
-	(`timestamp (org-timestamp-change 0 'day))
+	((or `timestamp (and `planning (guard (org-at-timestamp-p 'lax))))
+	 (org-timestamp-change 0 'day))
 	((and `nil (guard (org-at-heading-p)))
 	 ;; When point is on an unsupported object type, we can miss
 	 ;; the fact that it also is at a heading.  Handle it here.
