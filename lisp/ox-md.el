@@ -240,7 +240,7 @@ a communication channel."
 		    (format "<a id=\"%s\"></a>"
 			    (or (org-element-property :CUSTOM_ID headline)
 				(org-export-get-reference headline info))))))
-	  (concat (org-md--headline-title style level title anchor tags)
+	  (concat (org-md--headline-title style level heading anchor tags)
 		  contents)))))))
 
 
