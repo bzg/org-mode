@@ -1460,10 +1460,10 @@ Demote current heading by one level.
 Promote the current subtree by one level.
 @orgcmd{M-S-@key{right},org-demote-subtree}
 Demote the current subtree by one level.
-@orgcmd{M-S-@key{up},org-move-subtree-up}
+@orgcmd{M-@key{up},org-move-subtree-up}
 Move subtree up (swap with previous subtree of same
 level).
-@orgcmd{M-S-@key{down},org-move-subtree-down}
+@orgcmd{M-@key{down},org-move-subtree-down}
 Move subtree down (swap with next subtree of same level).
 @orgcmd{M-h,org-mark-element}
 Mark the element at point.  Hitting repeatedly will mark subsequent elements
