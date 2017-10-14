@@ -5301,7 +5301,7 @@ is available.  This option applies only if FILE is a URL."
 		   file))))
      (t
       (with-temp-buffer
-        (condition-case err
+        (condition-case nil
 	    (progn
 	      (insert-file-contents file)
 	      (buffer-string))
