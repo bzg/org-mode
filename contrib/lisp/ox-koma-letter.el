@@ -705,7 +705,7 @@ holding export options."
 	      (or (if (plist-get info :special-headings)
 		      (or heading-val keyword-val)
 		    (or keyword-val heading-val))
-		  "\\\\mbox{}"))))
+		  "\\mbox{}"))))
    ;; Opening.
    (format "\\opening{%s}\n\n"
 	   (org-koma-letter--keyword-or-headline
@@ -717,7 +717,7 @@ holding export options."
    (format "\\closing{%s}\n"
 	   (org-koma-letter--keyword-or-headline
 	    :closing (lambda (h i) (eq (org-koma-letter--special-tag h i)
-				       'closing))
+				  'closing))
 	    info))
    (org-koma-letter--special-contents-inline
     (plist-get info :special-tags-after-closing) info)
