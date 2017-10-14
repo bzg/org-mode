@@ -4320,6 +4320,76 @@ Another text. (ref:text)
 	(let ((scope (org-element-map tree 'headline #'identity info t)))
 	  (length (org-export-collect-headlines info 1 scope)))))))
 
+(ert-deftest test-org-export/toc-entry-backend ()
+  "Test `org-export-toc-entry-backend' specifications."
+  ;; Ignore targets.
+  (should
+   (equal "H \n"
+	  (org-test-with-temp-text "* H <<target>>"
+	    (let (org-export-registered-backends)
+	      (org-export-define-backend 'test
+		'((headline . (lambda (h _c i) (org-export-data-with-backend
+					   (org-element-property :title h)
+					   (org-export-toc-entry-backend 'test)
+					   i)))))
+	      (org-export-as 'test)))))
+  ;; Ignore footnote references.
+  (should
+   (equal "H \n"
+	  (org-test-with-temp-text "[fn:1] Definition\n* H [fn:1]"
+	    (let (org-export-registered-backends)
+	      (org-export-define-backend 'test
+		'((headline . (lambda (h _c i) (org-export-data-with-backend
+					   (org-element-property :title h)
+					   (org-export-toc-entry-backend 'test)
+					   i)))))
+	      (org-export-as 'test)))))
+  ;; Replace plain links with contents, or with path.
+  (should
+   (equal "H Org mode\n"
+	  (org-test-with-temp-text "* H [[http://orgmode.org][Org mode]]"
+	    (let (org-export-registered-backends)
+	      (org-export-define-backend 'test
+		'((headline . (lambda (h _c i) (org-export-data-with-backend
+					   (org-element-property :title h)
+					   (org-export-toc-entry-backend 'test)
+					   i)))))
+	      (org-export-as 'test)))))
+  (should
+   (equal "H http://orgmode.org\n"
+	  (org-test-with-temp-text "* H [[http://orgmode.org]]"
+	    (let (org-export-registered-backends)
+	      (org-export-define-backend 'test
+		'((headline . (lambda (h _c i) (org-export-data-with-backend
+					   (org-element-property :title h)
+					   (org-export-toc-entry-backend 'test)
+					   i)))))
+	      (org-export-as 'test)))))
+  ;; Replace radio targets with contents.
+  (should
+   (equal "H radio\n"
+	  (org-test-with-temp-text "* H <<<radio>>>"
+	    (let (org-export-registered-backends)
+	      (org-export-define-backend 'test
+		'((headline . (lambda (h _c i) (org-export-data-with-backend
+					   (org-element-property :title h)
+					   (org-export-toc-entry-backend 'test)
+					   i)))))
+	      (org-export-as 'test)))))
+  ;; With optional argument TRANSCODERS, specify other
+  ;; transformations.
+  (should
+   (equal "H bold\n"
+	  (org-test-with-temp-text "* H *bold*"
+	    (let (org-export-registered-backends)
+	      (org-export-define-backend 'test
+		'((headline . (lambda (h _c i) (org-export-data-with-backend
+					   (org-element-property :title h)
+					   (org-export-toc-entry-backend 'test
+					     '(bold . (lambda (_b c _i) c)))
+					   i)))))
+	      (org-export-as 'test))))))
+
 
 
 ;;; Templates

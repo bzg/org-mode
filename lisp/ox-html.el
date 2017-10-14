@@ -2328,15 +2328,7 @@ INFO is a plist used as a communication channel."
 			(org-element-property :priority headline)))
 	 (text (org-export-data-with-backend
 		(org-export-get-alt-title headline info)
-		;; Create an anonymous back-end that will ignore any
-		;; footnote-reference, link, radio-target and target
-		;; in table of contents.
-		(org-export-create-backend
-		 :parent 'html
-		 :transcoders '((footnote-reference . ignore)
-				(link . (lambda (object c i) c))
-				(radio-target . (lambda (object c i) c))
-				(target . ignore)))
+		(org-export-toc-entry-backend 'html)
 		info))
 	 (tags (and (eq (plist-get info :with-tags) t)
 		    (org-export-get-tags headline info))))

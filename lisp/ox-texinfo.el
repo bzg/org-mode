@@ -499,8 +499,12 @@ export state, as a plist."
    (org-export-create-backend
     :parent 'texinfo
     :transcoders '((footnote-reference . ignore)
-		   (link . (lambda (object c i) c))
-		   (radio-target . (lambda (object c i) c))
+		   (link . (lambda (l c i)
+			     (or c
+				 (org-export-data
+				  (org-element-property :raw-link l)
+				  i))))
+		   (radio-target . (lambda (_r c _i) c))
 		   (target . ignore)))
    info))
 
@@ -519,18 +523,27 @@ strings (e.g., returned by `org-export-get-caption')."
   (let* ((backend
 	  (org-export-create-backend
 	   :parent 'texinfo
-	   :transcoders '((link . (lambda (object c i) c))
-			  (radio-target . (lambda (object c i) c))
+	   :transcoders '((link . (lambda (l c i)
+				    (or c
+					(org-export-data
+					 (org-element-property :raw-link l)
+					 i))))
+			  (radio-target . (lambda (_r c _i) c))
 			  (target . ignore))))
 	 (short-backend
 	  (org-export-create-backend
 	   :parent 'texinfo
-	   :transcoders '((footnote-reference . ignore)
-			  (inline-src-block . ignore)
-			  (link . (lambda (object c i) c))
-			  (radio-target . (lambda (object c i) c))
-			  (target . ignore)
-			  (verbatim . ignore))))
+	   :transcoders
+	   '((footnote-reference . ignore)
+	     (inline-src-block . ignore)
+	     (link . (lambda (l c i)
+		       (or c
+			   (org-export-data
+			    (org-element-property :raw-link l)
+			    i))))
+	     (radio-target . (lambda (_r c _i) c))
+	     (target . ignore)
+	     (verbatim . ignore))))
 	 (short-str
 	  (if (and short caption)
 	      (format "@shortcaption{%s}\n"
