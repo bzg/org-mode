@@ -5871,24 +5871,24 @@ Providing it allows for quicker computation."
 		    ;; Otherwise, return NEXT.
 		    (t (throw 'exit next)))))))))))))
 
-(defun org-element-lineage (blob &optional types with-self)
+(defun org-element-lineage (datum &optional types with-self)
   "List all ancestors of a given element or object.
 
-BLOB is an object or element.
+DATUM is an object or element.
 
-When optional argument TYPES is a list of symbols, return the
-first element or object in the lineage whose type belongs to that
-list.
+Return ancestors from the closest to the farthest.  When optional
+argument TYPES is a list of symbols, return the first element or
+object in the lineage whose type belongs to that list instead.
 
 When optional argument WITH-SELF is non-nil, lineage includes
-BLOB itself as the first element, and TYPES, if provided, also
+DATUM itself as the first element, and TYPES, if provided, also
 apply to it.
 
-When BLOB is obtained through `org-element-context' or
+When DATUM is obtained through `org-element-context' or
 `org-element-at-point', only ancestors from its section can be
-found.  There is no such limitation when BLOB belongs to a full
+found.  There is no such limitation when DATUM belongs to a full
 parse tree."
-  (let ((up (if with-self blob (org-element-property :parent blob)))
+  (let ((up (if with-self datum (org-element-property :parent datum)))
 	ancestors)
     (while (and up (not (memq (org-element-type up) types)))
       (unless types (push up ancestors))
