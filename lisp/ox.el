@@ -5288,6 +5288,21 @@ INFO is a plist used as a communication channel.
 Return a list of src-block elements with a caption."
   (org-export-collect-elements 'src-block info))
 
+(defun org-export-excluded-from-toc-p (headline info)
+  "Non-nil if HEADLINE should be excluded from tables of contents.
+
+INFO is a plist used as a communication channel.
+
+Note that such headlines are already excluded from
+`org-export-collect-headlines'.  Therefore, this function is not
+necessary if you only need to list headlines in the table of
+contents.  However, it is useful if some additional processing is
+required on headlines excluded from table of contents."
+  (or (org-element-property :footnote-section-p headline)
+      (org-export-low-level-p headline info)
+      (cl-some (lambda (h) (equal "notoc" (org-element-property :UNNUMBERED h)))
+	       (org-element-lineage headline nil t))))
+
 (defun org-export-toc-entry-backend (parent &rest transcoders)
   "Return an export back-end appropriate for table of contents entries.
 

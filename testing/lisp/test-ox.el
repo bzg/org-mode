@@ -4344,6 +4344,23 @@ Another text. (ref:text)
 	      (mapcar (lambda (h) (org-element-property :raw-value h))
 		      (org-export-collect-headlines info 1 scope)))))))
 
+(ert-deftest test-org-export/excluded-from-toc-p ()
+  "Test `org-export-excluded-from-toc-p' specifications."
+  (should-not
+   (org-test-with-parsed-data "* H1"
+     (org-element-map tree 'headline
+       (lambda (h) (org-export-excluded-from-toc-p h info)) info t)))
+  (should
+   (org-test-with-parsed-data "* H1\n:PROPERTIES:\n:UNNUMBERED: notoc\n:END:"
+     (org-element-map tree 'headline
+       (lambda (h) (org-export-excluded-from-toc-p h info)) info t)))
+  (should
+   (equal '(in out)
+	  (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	    (org-element-map tree 'headline
+	      (lambda (h) (if (org-export-excluded-from-toc-p h info) 'out 'in))
+	      info)))))
+
 (ert-deftest test-org-export/toc-entry-backend ()
   "Test `org-export-toc-entry-backend' specifications."
   ;; Ignore targets.

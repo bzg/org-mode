@@ -108,6 +108,12 @@ you should expect to see something like:
   ,#+STARTUP: shrink
 #+END_EXAMPLE
 
+** New functions
+
+*** ~org-export-excluded-from-toc-p~
+
+See docstring for details.
+
 ** Miscellaneous
 
 *** ~org-publish-resolve-external-link~ accepts a new optional argument.
