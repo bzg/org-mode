@@ -7351,6 +7351,7 @@ gnus                             |  %:group, @r{for messages also all email fiel
 eww, w3, w3m                     |  %:url
 info                             |  %:file %:node
 calendar                         |  %:date
+org-protocol                     |  %:link %:description %:annotation
 @end smallexample
 
 @noindent
@@ -7592,22 +7593,15 @@ javascript:location.href='org-protocol://store-link?url='+
 @cindex capture protocol
 @cindex protocol, capture
 
-@cindex capture, %:url placeholder
-@cindex %:url template expansion in capture
-@cindex capture, %:title placeholder
-@cindex %:title template expansion in capture
 Activating @code{capture} handler pops up a @samp{Capture} buffer and fills
-the capture template associated to the @samp{X} key with them.  The template
-refers to the data through @code{%:url} and @code{%:title} placeholders.
-Moreover, any selected text in the browser is appended to the body of the
-entry.
+the capture template associated to the @samp{X} key with them.
 
 @example
 emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
 @end example
 
-To use this feature, add a bookmark with an arbitrary name, e.g.
-@samp{Org: capture} and enter this as @samp{Location}:
+To use this feature, add a bookmark with an arbitrary name, e.g.  @samp{Org:
+capture} and enter this as @samp{Location}:
 
 @example
 javascript:location.href='org-protocol://template=x'+
@@ -7620,6 +7614,21 @@ javascript:location.href='org-protocol://template=x'+
 The result depends on the capture template used, which is set in the bookmark
 itself, as in the example above, or in
 @code{org-protocol-default-template-key}.
+
+@cindex capture, %:link placeholder
+@cindex %:link template expansion in capture
+@cindex capture, %:description placeholder
+@cindex %:description template expansion in capture
+@cindex capture, %:annotation placeholder
+@cindex %:annotation template expansion in capture
+The following template placeholders are available:
+
+@example
+%:link          The URL
+%:description   The webpage title
+%:annotation    Equivalent to [[%:link][%:description]]
+%i              The selected text
+@end example
 
 @node @code{open-source} protocol
 @subsection @code{open-source} protocol

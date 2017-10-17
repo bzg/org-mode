@@ -9847,7 +9847,9 @@ active region."
 	(car org-stored-links)))))
 
 (defun org-store-link-props (&rest plist)
-  "Store link properties, extract names, addresses and dates."
+  "Store link properties.
+The properties are pre-processed by extracting names, addresses
+and dates."
   (let ((x (plist-get plist :from)))
     (when x
       (let ((adr (mail-extract-address-components x)))
