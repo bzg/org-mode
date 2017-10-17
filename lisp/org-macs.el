@@ -168,6 +168,31 @@ point nowhere."
 
 
 
+;;; Input
+
+(defun org-read-function (prompt &optional allow-empty?)
+  "Prompt for a function.
+If ALLOW-EMPTY? is non-nil, return nil rather than raising an
+error when the user input is empty."
+  (let ((func (completing-read prompt obarray #'fboundp t)))
+    (cond ((not (string= func ""))
+	   (intern func))
+	  (allow-empty? nil)
+	  (t (user-error "Empty input is not valid")))))
+
+(defun org-completing-read (&rest args)
+  "Completing-read with SPACE being a normal character."
+  (let ((enable-recursive-minibuffers t)
+	(minibuffer-local-completion-map
+	 (copy-keymap minibuffer-local-completion-map)))
+    (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
+    (org-defkey minibuffer-local-completion-map "?" 'self-insert-command)
+    (org-defkey minibuffer-local-completion-map (kbd "C-c !")
+		'org-time-stamp-inactive)
+    (apply #'completing-read args)))
+
+
+
 ;;; Logic
 
 (defsubst org-xor (a b)
@@ -468,16 +493,6 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 			    (1- (* limit-level 2))
 			  limit-level)))
 	   (format "\\*\\{1,%d\\} " nstars)))))
-
-(defun org-read-function (prompt &optional allow-empty?)
-  "Prompt for a function.
-If ALLOW-EMPTY? is non-nil, return nil rather than raising an
-error when the user input is empty."
-  (let ((func (completing-read prompt obarray #'fboundp t)))
-    (cond ((not (string= func ""))
-	   (intern func))
-	  (allow-empty? nil)
-	  (t (user-error "Empty input is not valid")))))
 
 
 (provide 'org-macs)

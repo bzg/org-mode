@@ -10322,16 +10322,6 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		   (match-string 1 (expand-file-name file))))
 	  (t (concat "file:" file)))))
 
-(defun org-completing-read (&rest args)
-  "Completing-read with SPACE being a normal character."
-  (let ((enable-recursive-minibuffers t)
-	(minibuffer-local-completion-map
-	 (copy-keymap minibuffer-local-completion-map)))
-    (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
-    (org-defkey minibuffer-local-completion-map "?" 'self-insert-command)
-    (org-defkey minibuffer-local-completion-map (kbd "C-c !")
-		'org-time-stamp-inactive)
-    (apply #'completing-read args)))
 
 ;;; Opening/following a link
 
