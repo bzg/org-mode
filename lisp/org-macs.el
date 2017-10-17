@@ -168,6 +168,14 @@ point nowhere."
 
 
 
+;;; Logic
+
+(defsubst org-xor (a b)
+  "Exclusive `or'."
+  (if a (not b) b))
+
+
+
 ;;; String manipulation
 
 (defsubst org-trim (s &optional keep-lead)
