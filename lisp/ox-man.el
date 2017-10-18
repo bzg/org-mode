@@ -350,10 +350,8 @@ holding contextual information."
 ;;; Code
 
 (defun org-man-code (code _contents _info)
-  "Transcode a CODE object from Org to Man.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (format "\\fC%s\\fP" code))
+  "Transcode a CODE object from Org to Man."
+  (format "\\fC%s\\fP" (org-element-property :value code)))
 
 
 ;;; Drawer
@@ -1029,11 +1027,9 @@ holding contextual information."
 
 ;;; Verbatim
 
-(defun org-man-verbatim (_verbatim contents _info)
-  "Transcode a VERBATIM object from Org to Man.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (format ".nf\n%s\n.fi" contents))
+(defun org-man-verbatim (verbatim _contents _info)
+  "Transcode a VERBATIM object from Org to Man."
+  (format ".nf\n%s\n.fi" (org-element-property :value verbatim)))
 
 
 ;;; Verse Block
