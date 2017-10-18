@@ -7947,8 +7947,7 @@ unchecked check box."
     (org-insert-heading (or (and (equal arg '(16)) '(16))
 			    force-heading))
     (save-excursion
-      (org-back-to-heading)
-      (outline-previous-heading)
+      (org-forward-heading-same-level -1)
       (let ((case-fold-search nil)) (looking-at org-todo-line-regexp)))
     (let* ((new-mark-x
 	    (if (or (equal arg '(4))
