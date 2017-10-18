@@ -1416,6 +1416,13 @@
     (org-test-with-temp-text "* H\n- an item\n- another one"
       (search-forward "an ")
       (org-insert-todo-heading-respect-content)
+      (buffer-substring-no-properties (line-beginning-position) (point-max)))))
+  ;; Use the same TODO keyword as current heading.
+  (should
+   (equal
+    "* TODO \n"
+    (org-test-with-temp-text "* TODO\n** WAITING\n"
+      (org-insert-todo-heading-respect-content)
       (buffer-substring-no-properties (line-beginning-position) (point-max))))))
 
 (ert-deftest test-org/clone-with-time-shift ()
