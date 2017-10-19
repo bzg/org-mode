@@ -285,6 +285,10 @@ This function shouldn't be used for floats.  See
         output
       (concat (format "%s\n.br\n" label) output))))
 
+(defun org-man--protect-text (text)
+  "Protect minus and backslash characters in string TEXT."
+  (replace-regexp-in-string "-" "\\-" nil t))
+
 
 
 ;;; Template
@@ -351,7 +355,8 @@ holding contextual information."
 
 (defun org-man-code (code _contents _info)
   "Transcode a CODE object from Org to Man."
-  (format "\\fC%s\\fP" (org-element-property :value code)))
+  (format "\\fC%s\\fP"
+	  (org-man--protect-text (org-element-property :value code))))
 
 
 ;;; Drawer
@@ -1029,7 +1034,8 @@ holding contextual information."
 
 (defun org-man-verbatim (verbatim _contents _info)
   "Transcode a VERBATIM object from Org to Man."
-  (format ".nf\n%s\n.fi" (org-element-property :value verbatim)))
+  (format "\\fI%s\\fP"
+	  (org-man--protect-text (org-element-property :value verbatim))))
 
 
 ;;; Verse Block
