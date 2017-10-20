@@ -287,7 +287,7 @@ This function shouldn't be used for floats.  See
 
 (defun org-man--protect-text (text)
   "Protect minus and backslash characters in string TEXT."
-  (replace-regexp-in-string "-" "\\-" nil t))
+  (replace-regexp-in-string "-" "\\-" text nil t))
 
 
 
