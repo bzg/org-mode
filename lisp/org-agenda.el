@@ -4710,7 +4710,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	  (setq pos (point))
 	  (unless org-agenda-multi
 	    (insert (substitute-command-keys "Available with \
-`N \\[org-agenda-redo]': (0)[ALL]"))
+\\<org-agenda-mode-map>`N \\[org-agenda-redo]': (0)[ALL]"))
 	    (let ((n 0))
               (dolist (k kwds)
                 (let ((s (format "(%d)%s" (cl-incf n) k)))
@@ -4810,7 +4810,8 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	  (setq pos (point))
 	  (unless org-agenda-multi
 	    (insert (substitute-command-keys
-		     "Press `\\[universal-argument] \\[org-agenda-redo]' \
+		     "Press \
+\\<org-agenda-mode-map>`\\[universal-argument] \\[org-agenda-redo]' \
 to search again with new search string\n")))
 	  (add-text-properties pos (1- (point))
 			       (list 'face 'org-agenda-structure))
