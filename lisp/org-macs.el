@@ -31,9 +31,6 @@
 
 ;;; Code:
 
-(defvar org-disputed-keys)
-(defvar org-replace-disputed-keys)
-
 
 ;;; Macros
 
@@ -221,24 +218,6 @@ error when the user input is empty."
 (defsubst org-xor (a b)
   "Exclusive `or'."
   (if a (not b) b))
-
-
-
-;;; Keybinding
-
-(defun org-key (key)
-  "Select key according to `org-replace-disputed-keys' and `org-disputed-keys'.
-Or return the original if not disputed."
-  (when org-replace-disputed-keys
-    (let* ((nkey (key-description key))
-	   (x (cl-find-if (lambda (x) (equal (key-description (car x)) nkey))
-			  org-disputed-keys)))
-      (setq key (if x (cdr x) key))))
-  key)
-
-(defun org-defkey (keymap key def)
-  "Define a key, possibly translated, as returned by `org-key'."
-  (define-key keymap (org-key key) def))
 
 
 

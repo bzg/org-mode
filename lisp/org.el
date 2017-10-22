@@ -1107,6 +1107,20 @@ therefore you'll have to restart Emacs to apply it after changing."
   :group 'org-startup
   :type 'alist)
 
+(defun org-key (key)
+  "Select key according to `org-replace-disputed-keys' and `org-disputed-keys'.
+Or return the original if not disputed."
+  (when org-replace-disputed-keys
+    (let* ((nkey (key-description key))
+	   (x (cl-find-if (lambda (x) (equal (key-description (car x)) nkey))
+			  org-disputed-keys)))
+      (setq key (if x (cdr x) key))))
+  key)
+
+(defun org-defkey (keymap key def)
+  "Define a key, possibly translated, as returned by `org-key'."
+  (define-key keymap (org-key key) def))
+
 (defcustom org-ellipsis nil
   "The ellipsis to use in the Org mode outline.
 
