@@ -6837,11 +6837,6 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 (defvar org-called-with-limited-levels nil
   "Non-nil when `org-with-limited-levels' is currently active.")
 
-(defun org-invisible-p (&optional pos)
-  "Non-nil if the character after POS is invisible.
-If POS is nil, use `point' instead."
-  (get-char-property (or pos (point)) 'invisible))
-
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
   (let ((goal-column 0) eoh eol eos has-children children-skipped struct)
@@ -23503,23 +23498,6 @@ interactive command with similar behavior."
 		     (<= (org-outline-level) level))))))))
 
 (define-key org-mode-map "\C-y" 'org-yank)
-
-(defun org-truely-invisible-p ()
-  "Check if point is at a character currently not visible.
-This version does not only check the character property, but also
-`visible-mode'."
-  (unless (bound-and-true-p visible-mode)
-    (org-invisible-p)))
-
-(defun org-invisible-p2 ()
-  "Check if point is at a character currently not visible.
-
-If the point is at EOL (and not at the beginning of a buffer too),
-move it back by one char before doing this check."
-  (save-excursion
-    (when (and (eolp) (not (bobp)))
-      (backward-char 1))
-    (org-invisible-p)))
 
 (defun org-back-to-heading (&optional invisible-ok)
   "Call `outline-back-to-heading', but provide a better error message."

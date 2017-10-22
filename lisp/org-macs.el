@@ -659,6 +659,27 @@ the value in cdr."
       (get-text-property (or (next-single-property-change 0 prop s) 0)
 			 prop s)))
 
+(defun org-invisible-p (&optional pos)
+  "Non-nil if the character after POS is invisible.
+If POS is nil, use `point' instead."
+  (get-char-property (or pos (point)) 'invisible))
+
+(defun org-truely-invisible-p ()
+  "Check if point is at a character currently not visible.
+This version does not only check the character property, but also
+`visible-mode'."
+  (unless (bound-and-true-p visible-mode)
+    (org-invisible-p)))
+
+(defun org-invisible-p2 ()
+  "Check if point is at a character currently not visible.
+If the point is at EOL (and not at the beginning of a buffer too),
+move it back by one char before doing this check."
+  (save-excursion
+    (when (and (eolp) (not (bobp)))
+      (backward-char 1))
+    (org-invisible-p)))
+
 
 
 ;;; Local variables
