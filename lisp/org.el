@@ -21642,26 +21642,6 @@ If there is no description, use the link target."
 	   (org-restart-font-lock)
 	   (setq org-descriptive-links t))))
 
-(defun org-get-at-eol (property n)
-  "Get text property PROPERTY at the end of line less N characters."
-  (get-text-property (- (point-at-eol) n) property))
-
-(defun org-find-text-property-in-string (prop s)
-  "Return the first non-nil value of property PROP in string S."
-  (or (get-text-property 0 prop s)
-      (get-text-property (or (next-single-property-change 0 prop s) 0)
-			 prop s)))
-
-(defun org-display-warning (message)
-  "Display the given MESSAGE as a warning."
-  (display-warning 'org message :warning))
-
-(defun org-eval (form)
-  "Eval FORM and return result."
-  (condition-case error
-      (eval form)
-    (error (format "%%![Error: %s]" error))))
-
 (defun org-in-clocktable-p ()
   "Check if the cursor is in a clocktable."
   (let ((pos (point)) start)
@@ -21678,27 +21658,6 @@ If there is no description, use the link target."
     (and (org-in-regexp org-verbatim-re 2)
 	 (>= (point) (match-beginning 3))
 	 (<= (point) (match-end 4)))))
-
-(defun org-overlay-display (ovl text &optional face evap)
-  "Make overlay OVL display TEXT with face FACE."
-  (overlay-put ovl 'display text)
-  (if face (overlay-put ovl 'face face))
-  (if evap (overlay-put ovl 'evaporate t)))
-
-(defun org-overlay-before-string (ovl text &optional face evap)
-  "Make overlay OVL display TEXT with face FACE."
-  (if face (org-add-props text nil 'face face))
-  (overlay-put ovl 'before-string text)
-  (if evap (overlay-put ovl 'evaporate t)))
-
-(defun org-find-overlays (prop &optional pos delete)
-  "Find all overlays specifying PROP at POS or point.
-If DELETE is non-nil, delete all those overlays."
-  (let (found)
-    (dolist (ov (overlays-at (or pos (point))) found)
-      (cond ((not (overlay-get ov prop)))
-	    (delete (delete-overlay ov))
-	    (t (push ov found))))))
 
 (defun org-goto-marker-or-bmk (marker &optional bookmark)
   "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
@@ -21725,23 +21684,6 @@ If DELETE is non-nil, delete all those overlays."
   (interactive "p")
   (self-insert-command N))
 
-(defun org-shorten-string (s maxlength)
-  "Shorten string S so that it is no longer than MAXLENGTH characters.
-If the string is shorter or has length MAXLENGTH, just return the
-original string.  If it is longer, the functions finds a space in the
-string, breaks this string off at that locations and adds three dots
-as ellipsis.  Including the ellipsis, the string will not be longer
-than MAXLENGTH.  If finding a good breaking point in the string does
-not work, the string is just chopped off in the middle of a word
-if necessary."
-  (if (<= (length s) maxlength)
-      s
-    (let* ((n (max (- maxlength 4) 1))
-	   (re (concat "\\`\\(.\\{1," (int-to-string n) "\\}[^ ]\\)\\([ ]\\|\\'\\)")))
-      (if (string-match re s)
-	  (concat (match-string 1 s) "...")
-	(concat (substring s 0 (max (- maxlength 3) 0)) "...")))))
-
 (defun org-get-indentation (&optional line)
   "Get the indentation of the current line, interpreting tabs.
 When LINE is given, assume it represents a line and compute its indentation."
@@ -21764,18 +21706,6 @@ When LINE is given, assume it represents a line and compute its indentation."
 	      (t (throw 'exit t)))))
     i))
 
-(defun org-remove-tabs (s &optional width)
-  "Replace tabulators in S with spaces.
-Assumes that s is a single line, starting in column 0."
-  (setq width (or width tab-width))
-  (while (string-match "\t" s)
-    (setq s (replace-match
-	     (make-string
-	      (- (* width (/ (+ (match-beginning 0) width) width))
-		 (match-beginning 0)) ?\ )
-	     t t s)))
-  s)
-
 (defun org-fix-indentation (line ind)
   "Fix indentation in LINE.
 IND is a cons cell with target and minimum indentation.
@@ -21789,41 +21719,6 @@ leave it alone.  If it is larger than ind, set it to the target."
 	(concat (make-string i1 ?\ ) l)
       l)))
 
-(defun org-remove-indentation (code &optional n)
-  "Remove maximum common indentation in string CODE and return it.
-N may optionally be the number of columns to remove.  Return CODE
-as-is if removal failed."
-  (with-temp-buffer
-    (insert code)
-    (if (org-do-remove-indentation n) (buffer-string) code)))
-
-(defun org-do-remove-indentation (&optional n)
-  "Remove the maximum common indentation from the buffer.
-When optional argument N is a positive integer, remove exactly
-that much characters from indentation, if possible.  Return nil
-if it fails."
-  (catch :exit
-    (goto-char (point-min))
-    ;; Find maximum common indentation, if not specified.
-    (let ((n (or n
-		 (let ((min-ind (point-max)))
-		   (save-excursion
-		     (while (re-search-forward "^[ \t]*\\S-" nil t)
-		       (let ((ind (1- (current-column))))
-			 (if (zerop ind) (throw :exit nil)
-			   (setq min-ind (min min-ind ind))))))
-		   min-ind))))
-      (if (zerop n) (throw :exit nil)
-	;; Remove exactly N indentation, but give up if not possible.
-	(while (not (eobp))
-	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
-	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
-		  ((< ind n) (throw :exit nil))
-		  (t (indent-line-to (- ind n))))
-	    (forward-line)))
-	;; Signal success.
-	t))))
-
 (defun org-fill-template (template alist)
   "Find each %key of ALIST in TEMPLATE and replace it."
   (let ((case-fold-search nil))
@@ -21834,48 +21729,6 @@ if it fails."
 	     (concat "%" (regexp-quote (car entry)))
 	     (or (cdr entry) "") template t t)))
     template))
-
-(defun org-base-buffer (buffer)
-  "Return the base buffer of BUFFER, if it has one.  Else return the buffer."
-  (if (not buffer)
-      buffer
-    (or (buffer-base-buffer buffer)
-	buffer)))
-
-(defun org-wrap (string &optional width lines)
-  "Wrap string to either a number of lines, or a width in characters.
-If WIDTH is non-nil, the string is wrapped to that width, however many lines
-that costs.  If there is a word longer than WIDTH, the text is actually
-wrapped to the length of that word.
-IF WIDTH is nil and LINES is non-nil, the string is forced into at most that
-many lines, whatever width that takes.
-The return value is a list of lines, without newlines at the end."
-  (let* ((words (split-string string))
-	 (maxword (apply 'max (mapcar 'org-string-width words)))
-	 w ll)
-    (cond (width
-	   (org-do-wrap words (max maxword width)))
-	  (lines
-	   (setq w maxword)
-	   (setq ll (org-do-wrap words maxword))
-	   (if (<= (length ll) lines)
-	       ll
-	     (setq ll words)
-	     (while (> (length ll) lines)
-	       (setq w (1+ w))
-	       (setq ll (org-do-wrap words w)))
-	     ll))
-	  (t (error "Cannot wrap this")))))
-
-(defun org-do-wrap (words width)
-  "Create lines of maximum width WIDTH (in characters) from word list WORDS."
-  (let (lines line)
-    (while words
-      (setq line (pop words))
-      (while (and words (< (+ (length line) (length (car words))) width))
-	(setq line (concat line " " (pop words))))
-      (setq lines (push line lines)))
-    (nreverse lines)))
 
 (defun org-quote-vert (s)
   "Replace \"|\" with \"\\vert\"."
@@ -22018,28 +21871,6 @@ and :keyword."
     (setq clist (nreverse (delq nil clist)))
     clist))
 
-(defun org-in-regexp (regexp &optional nlines visually)
-  "Check if point is inside a match of REGEXP.
-
-Normally only the current line is checked, but you can include
-NLINES extra lines around point into the search.  If VISUALLY is
-set, require that the cursor is not after the match but really
-on, so that the block visually is on the match.
-
-Return nil or a cons cell (BEG . END) where BEG and END are,
-respectively, the positions at the beginning and the end of the
-match."
-  (catch :exit
-    (let ((pos (point))
-          (eol (line-end-position (if nlines (1+ nlines) 1))))
-      (save-excursion
-	(beginning-of-line (- 1 (or nlines 0)))
-	(while (and (re-search-forward regexp eol t)
-		    (<= (match-beginning 0) pos))
-	  (let ((end (match-end 0)))
-	    (when (or (> end pos) (and (= end pos) (not visually)))
-	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
-
 (defun org-between-regexps-p (start-re end-re &optional lim-up lim-down)
   "Non-nil when point is between matches of START-RE and END-RE.
 
@@ -22131,40 +21962,6 @@ for the search purpose."
 		(error "Unable to create a link to here"))))
     (org-occur-in-agenda-files (regexp-quote link))))
 
-(defun org-reverse-string (string)
-  "Return the reverse of STRING."
-  (apply 'string (reverse (string-to-list string))))
-
-;; defsubst org-uniquify must be defined before first use
-
-(defun org-uniquify-alist (alist)
-  "Merge elements of ALIST with the same key.
-
-For example, in this alist:
-
-\(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
-  => \\='((a 1 3) (b 2))
-
-merge (a 1) and (a 3) into (a 1 3).
-
-The function returns the new ALIST."
-  (let (rtn)
-    (dolist (e alist rtn)
-      (let (n)
-	(if (not (assoc (car e) rtn))
-	    (push e rtn)
-	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
-	  (setq rtn (assq-delete-all (car e) rtn))
-	  (push n rtn))))))
-
-(defun org-delete-all (elts list)
-  "Remove all elements in ELTS from LIST.
-Comparison is done with `equal'.  It is a destructive operation
-that may remove elements by altering the list structure."
-  (while elts
-    (setq list (delete (pop elts) list)))
-  list)
-
 (defun org-back-over-empty-lines ()
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
@@ -22177,41 +21974,12 @@ Returns the number of empty lines passed."
     (goto-char (min (point) pos))
     (count-lines (point) pos)))
 
-(defun org-skip-whitespace ()
-  (skip-chars-forward " \t\n\r"))
-
-(defun org-point-in-group (point group &optional context)
-  "Check if POINT is in match-group GROUP.
-If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
-match.  If the match group does not exist or point is not inside it,
-return nil."
-  (and (match-beginning group)
-       (>= point (match-beginning group))
-       (<= point (match-end group))
-       (if context
-	   (list context (match-beginning group) (match-end group))
-	 t)))
-
 (defun org-switch-to-buffer-other-window (&rest args)
   "Switch to buffer in a second window on the current frame.
 In particular, do not allow pop-up frames.
 Returns the newly created buffer."
   (org-no-popups
    (apply 'switch-to-buffer-other-window args)))
-
-(defun org-combine-plists (&rest plists)
-  "Create a single property list from all plists in PLISTS.
-The process starts by copying the first list, and then setting properties
-from the other lists.  Settings in the last list are the most significant
-ones and overrule settings in the other lists."
-  (let ((rtn (copy-sequence (pop plists)))
-	p v ls)
-    (while plists
-      (setq ls (pop plists))
-      (while ls
-	(setq p (pop ls) v (pop ls))
-	(setq rtn (plist-put rtn p v))))
-    rtn))
 
 (defun org-replace-escapes (string table)
   "Replace %-escapes in STRING with values in TABLE.
@@ -22239,15 +22007,6 @@ so values can contain further %-escapes if they are define later in TABLE."
 	(when (and sref (string-match "SREF" string pchg))
 	  (setq string (replace-match sref t t string)))))
     string))
-
-(defun org-find-base-buffer-visiting (file)
-  "Like `find-buffer-visiting' but always return the base buffer and
-not an indirect buffer."
-  (let ((buf (or (get-file-buffer file)
-		 (find-buffer-visiting file))))
-    (if buf
-	(or (buffer-base-buffer buf) buf)
-      nil)))
 
 ;;; TODO: Only called once, from ox-odt which should probably use
 ;;; org-export-inline-image-p or something.

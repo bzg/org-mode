@@ -449,15 +449,6 @@ use of this function is for the stuck project list."
         ((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
          (w32-get-clipboard-data))))
 
-(defun org-add-props (string plist &rest props)
-  "Add text properties to entire string, from beginning to end.
-PLIST may be a list of properties, PROPS are individual properties and values
-that will be added to PLIST.  Returns the string that was modified."
-  (add-text-properties
-   0 (length string) (if props (append plist props) plist) string)
-  string)
-(put 'org-add-props 'lisp-indent-function 2)
-
 (defun org-fit-window-to-buffer (&optional window max-height min-height
                                            shrink-only)
   "Fit WINDOW to the buffer, but only if it is not a side-by-side window.

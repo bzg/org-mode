@@ -171,6 +171,26 @@ point nowhere."
 
 
 
+;;; Buffer
+
+(defun org-base-buffer (buffer)
+  "Return the base buffer of BUFFER, if it has one.  Else return the buffer."
+  (if (not buffer)
+      buffer
+    (or (buffer-base-buffer buffer)
+	buffer)))
+
+(defun org-find-base-buffer-visiting (file)
+  "Like `find-buffer-visiting' but always return the base buffer and
+not an indirect buffer."
+  (let ((buf (or (get-file-buffer file)
+		 (find-buffer-visiting file))))
+    (if buf
+	(or (buffer-base-buffer buf) buf)
+      nil)))
+
+
+
 ;;; Input
 
 (defun org-read-function (prompt &optional allow-empty?)
@@ -222,6 +242,31 @@ Or return the original if not disputed."
 
 
 
+;;; Overlays
+
+(defun org-overlay-display (ovl text &optional face evap)
+  "Make overlay OVL display TEXT with face FACE."
+  (overlay-put ovl 'display text)
+  (if face (overlay-put ovl 'face face))
+  (if evap (overlay-put ovl 'evaporate t)))
+
+(defun org-overlay-before-string (ovl text &optional face evap)
+  "Make overlay OVL display TEXT with face FACE."
+  (if face (org-add-props text nil 'face face))
+  (overlay-put ovl 'before-string text)
+  (if evap (overlay-put ovl 'evaporate t)))
+
+(defun org-find-overlays (prop &optional pos delete)
+  "Find all overlays specifying PROP at POS or point.
+If DELETE is non-nil, delete all those overlays."
+  (let (found)
+    (dolist (ov (overlays-at (or pos (point))) found)
+      (cond ((not (overlay-get ov prop)))
+	    (delete (delete-overlay ov))
+	    (t (push ov found))))))
+
+
+
 ;;; String manipulation
 
 (defsubst org-trim (s &optional keep-lead)
@@ -238,6 +283,10 @@ Otherwise, return nil."
   (and (stringp s)
        (string-match-p "[^ \r\t\n]" s)
        s))
+
+(defun org-reverse-string (string)
+  "Return the reverse of STRING."
+  (apply #'string (nreverse (string-to-list string))))
 
 (defun org-split-string (string &optional separators)
   "Splits STRING into substrings at SEPARATORS.
@@ -340,6 +389,105 @@ removed."
 (defsubst org-current-line-string (&optional to-here)
   (buffer-substring (point-at-bol) (if to-here (point) (point-at-eol))))
 
+(defun org-shorten-string (s maxlength)
+  "Shorten string S so that it is no longer than MAXLENGTH characters.
+If the string is shorter or has length MAXLENGTH, just return the
+original string.  If it is longer, the functions finds a space in the
+string, breaks this string off at that locations and adds three dots
+as ellipsis.  Including the ellipsis, the string will not be longer
+than MAXLENGTH.  If finding a good breaking point in the string does
+not work, the string is just chopped off in the middle of a word
+if necessary."
+  (if (<= (length s) maxlength)
+      s
+    (let* ((n (max (- maxlength 4) 1))
+	   (re (concat "\\`\\(.\\{1," (int-to-string n) "\\}[^ ]\\)\\([ ]\\|\\'\\)")))
+      (if (string-match re s)
+	  (concat (match-string 1 s) "...")
+	(concat (substring s 0 (max (- maxlength 3) 0)) "...")))))
+
+(defun org-remove-tabs (s &optional width)
+  "Replace tabulators in S with spaces.
+Assumes that s is a single line, starting in column 0."
+  (setq width (or width tab-width))
+  (while (string-match "\t" s)
+    (setq s (replace-match
+	     (make-string
+	      (- (* width (/ (+ (match-beginning 0) width) width))
+		 (match-beginning 0)) ?\ )
+	     t t s)))
+  s)
+
+(defun org-wrap (string &optional width lines)
+  "Wrap string to either a number of lines, or a width in characters.
+If WIDTH is non-nil, the string is wrapped to that width, however many lines
+that costs.  If there is a word longer than WIDTH, the text is actually
+wrapped to the length of that word.
+IF WIDTH is nil and LINES is non-nil, the string is forced into at most that
+many lines, whatever width that takes.
+The return value is a list of lines, without newlines at the end."
+  (let* ((words (split-string string))
+	 (maxword (apply 'max (mapcar 'org-string-width words)))
+	 w ll)
+    (cond (width
+	   (org--do-wrap words (max maxword width)))
+	  (lines
+	   (setq w maxword)
+	   (setq ll (org--do-wrap words maxword))
+	   (if (<= (length ll) lines)
+	       ll
+	     (setq ll words)
+	     (while (> (length ll) lines)
+	       (setq w (1+ w))
+	       (setq ll (org--do-wrap words w)))
+	     ll))
+	  (t (error "Cannot wrap this")))))
+
+(defun org--do-wrap (words width)
+  "Create lines of maximum width WIDTH (in characters) from word list WORDS."
+  (let (lines line)
+    (while words
+      (setq line (pop words))
+      (while (and words (< (+ (length line) (length (car words))) width))
+	(setq line (concat line " " (pop words))))
+      (setq lines (push line lines)))
+    (nreverse lines)))
+
+(defun org-remove-indentation (code &optional n)
+  "Remove maximum common indentation in string CODE and return it.
+N may optionally be the number of columns to remove.  Return CODE
+as-is if removal failed."
+  (with-temp-buffer
+    (insert code)
+    (if (org-do-remove-indentation n) (buffer-string) code)))
+
+(defun org-do-remove-indentation (&optional n)
+  "Remove the maximum common indentation from the buffer.
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible.  Return nil
+if it fails."
+  (catch :exit
+    (goto-char (point-min))
+    ;; Find maximum common indentation, if not specified.
+    (let ((n (or n
+		 (let ((min-ind (point-max)))
+		   (save-excursion
+		     (while (re-search-forward "^[ \t]*\\S-" nil t)
+		       (let ((ind (1- (current-column))))
+			 (if (zerop ind) (throw :exit nil)
+			   (setq min-ind (min min-ind ind))))))
+		   min-ind))))
+      (if (zerop n) (throw :exit nil)
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw :exit nil))
+		  (t (indent-line-to (- ind n))))
+	    (forward-line)))
+	;; Signal success.
+	t))))
+
 
 
 ;;; List manipulation
@@ -355,6 +503,38 @@ removed."
   "Return the last element of LIST."
   (car (last list)))
 
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
+
+(defun org-uniquify-alist (alist)
+  "Merge elements of ALIST with the same key.
+
+For example, in this alist:
+
+\(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
+  => \\='((a 1 3) (b 2))
+
+merge (a 1) and (a 3) into (a 1 3).
+
+The function returns the new ALIST."
+  (let (rtn)
+    (dolist (e alist rtn)
+      (let (n)
+	(if (not (assoc (car e) rtn))
+	    (push e rtn)
+	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
+	  (setq rtn (assq-delete-all (car e) rtn))
+	  (push n rtn))))))
+
+(defun org-delete-all (elts list)
+  "Remove all elements in ELTS from LIST.
+Comparison is done with `equal'.  It is a destructive operation
+that may remove elements by altering the list structure."
+  (while elts
+    (setq list (delete (pop elts) list)))
+  list)
+
 (defun org-plist-delete (plist property)
   "Delete PROPERTY from PLIST.
 This is in contrast to merely setting it to 0."
@@ -365,9 +545,19 @@ This is in contrast to merely setting it to 0."
       (setq plist (cddr plist)))
     p))
 
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
+(defun org-combine-plists (&rest plists)
+  "Create a single property list from all plists in PLISTS.
+The process starts by copying the first list, and then setting properties
+from the other lists.  Settings in the last list are the most significant
+ones and overrule settings in the other lists."
+  (let ((rtn (copy-sequence (pop plists)))
+	p v ls)
+    (while plists
+      (setq ls (pop plists))
+      (while ls
+	(setq p (pop ls) v (pop ls))
+	(setq rtn (plist-put rtn p v))))
+    rtn))
 
 
 
@@ -378,11 +568,49 @@ This is in contrast to merely setting it to 0."
        (<= (match-beginning n) pos)
        (>= (match-end n) pos)))
 
+(defun org-skip-whitespace ()
+  "Skip over space, tabs and newline characters."
+  (skip-chars-forward " \t\n\r"))
+
 (defun org-match-line (regexp)
   "Match REGEXP at the beginning of the current line."
   (save-excursion
     (beginning-of-line)
     (looking-at regexp)))
+
+(defun org-in-regexp (regexp &optional nlines visually)
+  "Check if point is inside a match of REGEXP.
+
+Normally only the current line is checked, but you can include
+NLINES extra lines around point into the search.  If VISUALLY is
+set, require that the cursor is not after the match but really
+on, so that the block visually is on the match.
+
+Return nil or a cons cell (BEG . END) where BEG and END are,
+respectively, the positions at the beginning and the end of the
+match."
+  (catch :exit
+    (let ((pos (point))
+          (eol (line-end-position (if nlines (1+ nlines) 1))))
+      (save-excursion
+	(beginning-of-line (- 1 (or nlines 0)))
+	(while (and (re-search-forward regexp eol t)
+		    (<= (match-beginning 0) pos))
+	  (let ((end (match-end 0)))
+	    (when (or (> end pos) (and (= end pos) (not visually)))
+	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
+
+(defun org-point-in-group (point group &optional context)
+  "Check if POINT is in match-group GROUP.
+If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
+match.  If the match group does not exist or point is not inside it,
+return nil."
+  (and (match-beginning group)
+       (>= point (match-beginning group))
+       (<= point (match-end group))
+       (if context
+	   (list context (match-beginning group) (match-end group))
+	 t)))
 
 
 
@@ -416,6 +644,14 @@ in `org-rm-props'."
   (if restricted (remove-text-properties 0 (length s) org-rm-props s)
     (set-text-properties 0 (length s) nil s))
   s)
+(defun org-add-props (string plist &rest props)
+  "Add text properties to entire string, from beginning to end.
+PLIST may be a list of properties, PROPS are individual properties and values
+that will be added to PLIST.  Returns the string that was modified."
+  (declare (indent 2))
+  (add-text-properties
+   0 (length string) (if props (append plist props) plist) string)
+  string)
 
 (defun org-make-parameter-alist (flat)
   "Return alist based on FLAT.
@@ -429,6 +665,16 @@ the value in cdr."
 (defsubst org-get-at-bol (property)
   "Get text property PROPERTY at the beginning of line."
   (get-text-property (point-at-bol) property))
+
+(defun org-get-at-eol (property n)
+  "Get text property PROPERTY at the end of line less N characters."
+  (get-text-property (- (point-at-eol) n) property))
+
+(defun org-find-text-property-in-string (prop s)
+  "Return the first non-nil value of property PROP in string S."
+  (or (get-text-property 0 prop s)
+      (get-text-property (or (next-single-property-change 0 prop s) 0)
+			 prop s)))
 
 
 
@@ -474,6 +720,10 @@ Optional argument REGEXP selects variables to clone."
 
 ;;; Miscellaneous
 
+(defsubst org-call-with-arg (command arg)
+  "Call COMMAND interactively, but pretend prefix arg was ARG."
+  (let ((current-prefix-arg arg)) (call-interactively command)))
+
 (defsubst org-check-external-command (cmd &optional use no-error)
   "Check if external program CMD for USE exists, error if not.
 When the program does exist, return its path.
@@ -486,6 +736,10 @@ program is needed for, so that the error message can be more informative."
 	(error "Can't find `%s'%s" cmd
 	       (if use (format " (%s)" use) "")))))
 
+(defun org-display-warning (message)
+  "Display the given MESSAGE as a warning."
+  (display-warning 'org message :warning))
+
 (defun org-let (list &rest body)
   (eval (cons 'let (cons list body))))
 (put 'org-let 'lisp-indent-function 1)
@@ -494,9 +748,11 @@ program is needed for, so that the error message can be more informative."
   (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
 (put 'org-let2 'lisp-indent-function 2)
 
-(defsubst org-call-with-arg (command arg)
-  "Call COMMAND interactively, but pretend prefix arg was ARG."
-  (let ((current-prefix-arg arg)) (call-interactively command)))
+(defun org-eval (form)
+  "Eval FORM and return result."
+  (condition-case error
+      (eval form)
+    (error (format "%%![Error: %s]" error))))
 
 (defvar org-outline-regexp) ; defined in org.el
 (defvar org-odd-levels-only) ; defined in org.el
