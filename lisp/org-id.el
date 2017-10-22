@@ -73,6 +73,7 @@
 (require 'org)
 
 (declare-function message-make-fqdn "message" ())
+(declare-function org-goto-location "org-goto" (&optional _buf help))
 
 ;;; Customization
 
@@ -276,9 +277,9 @@ If necessary, the ID is created."
 ;;;###autoload
 (defun org-id-get-with-outline-drilling ()
   "Use an outline-cycling interface to retrieve the ID of an entry.
-This only finds entries in the current buffer, using `org-get-location'.
+This only finds entries in the current buffer, using `org-goto-location'.
 It returns the ID of the entry.  If necessary, the ID is created."
-  (let* ((spos (org-get-location (current-buffer) org-goto-help))
+  (let* ((spos (org-goto-location))
 	 (pom (and spos (move-marker (make-marker) (car spos)))))
     (prog1 (org-id-get pom 'create)
       (move-marker pom nil))))
