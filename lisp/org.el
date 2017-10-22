@@ -5754,18 +5754,23 @@ This should be called after the variable `org-link-parameters' has changed."
 	       (verbatim? (member marker '("~" "="))))
 	  (when (save-excursion
 		  (goto-char (match-beginning 0))
-		  ;; Do not match headline stars.  Do not consider
-		  ;; stars of a headline as closing marker for bold
-		  ;; markup either.  Do not match table hlines.
 		  (and
-		   (not (looking-at-p org-outline-regexp-bol))
+		   ;; Do not match headline stars.  Do not consider
+		   ;; stars of a headline as closing marker for bold
+		   ;; markup either.
+		   (not (and (equal marker "*")
+			     (save-excursion
+			       (forward-char)
+			       (skip-chars-backward "*")
+			       (looking-at-p org-outline-regexp-bol))))
+		   ;; Do not match table hlines.
 		   (not (and (equal marker "+")
 			     (org-match-line
 			      "^[ \t]*\\(|[-+]+|?\\|\\+[-+]+\\+\\)[ \t]*$")))
 		   (looking-at (if verbatim? org-verbatim-re org-emph-re))
-		   (not (string-match-p
-			 (concat org-outline-regexp-bol "\\'")
-			 (match-string 0)))))
+		   ;; At a table row, do not cross cell boundaries.
+		   (not (and (save-match-data (org-match-line "[ \t]*|"))
+			     (string-match-p "|" (match-string 4))))))
 	    (pcase-let ((`(,_ ,face ,_) (assoc marker org-emphasis-alist)))
 	      (font-lock-prepend-text-property
 	       (match-beginning 2) (match-end 2) 'face face)
