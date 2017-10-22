@@ -197,6 +197,31 @@ another block
           (org-babel-tangle-jump-to-org)
           (buffer-string)))))))
 
+(ert-deftest ob-tangle/nested-block ()
+  "Test tangling of org file with nested block."
+  (should
+   (string=
+    "#+begin_src org
+,#+begin_src emacs-lisp
+1
+,#+end_src
+#+end_src
+"
+    (org-test-with-temp-text-in-file
+        "#+header: :tangle \"test-ob-tangle.org\"
+#+begin_src org
+,#+begin_src org
+,,#+begin_src emacs-lisp
+1
+,,#+end_src
+,#+end_src
+#+end_src"
+      (unwind-protect
+          (progn (org-babel-tangle)
+                 (with-temp-buffer (insert-file-contents "test-ob-tangle.org")
+                                   (buffer-string)))
+        (delete-file "test-ob-tangle.org"))))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
