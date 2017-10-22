@@ -31,6 +31,10 @@
 
 ;;; Code:
 
+(declare-function org-key "org" (key))
+(declare-function org-defkey "org" (keymap key def))
+
+
 
 ;;; Macros
 
