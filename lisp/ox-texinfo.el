@@ -1375,8 +1375,12 @@ contextual information."
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
   (let ((parent (org-export-get-parent-headline section)))
-    (when (and parent (not (org-export-excluded-from-toc-p parent info)))
-      (org-trim (concat contents "\n" (org-texinfo-make-menu parent info))))))
+    (when parent   ;first section is handled in `org-texinfo-template'
+      (org-trim
+       (concat contents
+	       "\n"
+	       (and (not (org-export-excluded-from-toc-p parent info))
+		    (org-texinfo-make-menu parent info)))))))
 
 ;;;; Special Block
 
