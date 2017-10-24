@@ -498,18 +498,7 @@ periods, commas and colons."
 TITLE is a string or a secondary string.  INFO is the current
 export state, as a plist."
   (org-export-data-with-backend
-   title
-   (org-export-create-backend
-    :parent 'texinfo
-    :transcoders '((footnote-reference . ignore)
-		   (link . (lambda (l c i)
-			     (or c
-				 (org-export-data
-				  (org-element-property :raw-link l)
-				  i))))
-		   (radio-target . (lambda (_r c _i) c))
-		   (target . ignore)))
-   info))
+   title (org-export-toc-entry-backend 'texinfo) info))
 
 (defun org-texinfo--sanitize-content (text)
   "Escape special characters in string TEXT.
@@ -524,29 +513,13 @@ float, as a string.  CAPTION and SHORT are, respectively, the
 caption and shortcaption used for the float, as secondary
 strings (e.g., returned by `org-export-get-caption')."
   (let* ((backend
-	  (org-export-create-backend
-	   :parent 'texinfo
-	   :transcoders '((link . (lambda (l c i)
-				    (or c
-					(org-export-data
-					 (org-element-property :raw-link l)
-					 i))))
-			  (radio-target . (lambda (_r c _i) c))
-			  (target . ignore))))
+	  (org-export-toc-entry-backend 'texinfo
+	    (cons 'footnote-reference
+		  (lambda (f c i) (org-export-with-backend 'texinfo f c i)))))
 	 (short-backend
-	  (org-export-create-backend
-	   :parent 'texinfo
-	   :transcoders
-	   '((footnote-reference . ignore)
-	     (inline-src-block . ignore)
-	     (link . (lambda (l c i)
-		       (or c
-			   (org-export-data
-			    (org-element-property :raw-link l)
-			    i))))
-	     (radio-target . (lambda (_r c _i) c))
-	     (target . ignore)
-	     (verbatim . ignore))))
+	  (org-export-toc-entry-backend 'texinfo
+	    '(inline-src-block . ignore)
+	    '(verbatim . ignore)))
 	 (short-str
 	  (if (and short caption)
 	      (format "@shortcaption{%s}\n"
