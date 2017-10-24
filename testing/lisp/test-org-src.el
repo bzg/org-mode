@@ -443,5 +443,43 @@ This is a tab:\t.
 	 (org-edit-special)
 	 (prog1 foo (org-edit-src-exit))))))
 
+;;; Code escaping
+
+(ert-deftest test-org-src/escape-code-in-string ()
+  "Test `org-escape-code-in-string' specifications."
+  ;; Escape lines starting with "*" or "#+".
+  (should (equal ",*" (org-escape-code-in-string "*")))
+  (should (equal ",#+" (org-escape-code-in-string "#+")))
+  ;; Escape lines starting with ",*" and ",#+".  Number of leading
+  ;; commas does not matter.
+  (should (equal ",,*" (org-escape-code-in-string ",*")))
+  (should (equal ",,#+" (org-escape-code-in-string ",#+")))
+  (should (equal ",,,*" (org-escape-code-in-string ",,*")))
+  (should (equal ",,,#+" (org-escape-code-in-string ",,#+")))
+  ;; Indentation does not matter.
+  (should (equal " ,*" (org-escape-code-in-string " *")))
+  (should (equal " ,#+" (org-escape-code-in-string " #+")))
+  ;; Do nothing on other cases.
+  (should (equal "a" (org-escape-code-in-string "a")))
+  (should (equal "#" (org-escape-code-in-string "#")))
+  (should (equal "," (org-escape-code-in-string ","))))
+
+(ert-deftest test-org-src/unescape-code-in-string ()
+  "Test `org-unescape-code-in-string' specifications."
+  ;; Unescape lines starting with ",*" or ",#+".  Number of leading
+  ;; commas does not matter.
+  (should (equal "*" (org-unescape-code-in-string ",*")))
+  (should (equal "#+" (org-unescape-code-in-string ",#+")))
+  (should (equal ",*" (org-unescape-code-in-string ",,*")))
+  (should (equal ",#+" (org-unescape-code-in-string ",,#+")))
+  ;; Indentation does not matter.
+  (should (equal " *" (org-unescape-code-in-string " ,*")))
+  (should (equal " #+" (org-unescape-code-in-string " ,#+")))
+  ;; Do nothing on other cases.
+  (should (equal "a" (org-unescape-code-in-string "a")))
+  (should (equal "#" (org-unescape-code-in-string "#")))
+  (should (equal "," (org-unescape-code-in-string ","))))
+
+
 (provide 'test-org-src)
 ;;; test-org-src.el ends here
