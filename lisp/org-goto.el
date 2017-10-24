@@ -227,7 +227,8 @@ position or nil."
   (org-no-popups
    (let ((isearch-mode-map org-goto-local-auto-isearch-map)
 	 (isearch-hide-immediately nil)
-	 (isearch-search-fun-function #'org-goto--local-search-headings)
+	 (isearch-search-fun-function
+	  (lambda () #'org-goto--local-search-headings))
 	 (org-goto-selected-point org-goto-exit-command)
 	 (help (or help org-goto-help)))
      (save-excursion
