@@ -47,14 +47,13 @@
 (defvar org-refile-targets)
 
 (defvar org-goto-exit-command nil)
-(defvar org-goto-local-auto-isearch-map nil)
 (defvar org-goto-map nil)
 (defvar org-goto-marker nil)
 (defvar org-goto-selected-point nil)
 (defvar org-goto-start-pos nil)
 (defvar org-goto-window-configuration nil)
 
-(defvar org-goto-local-auto-isearch-map (make-sparse-keymap))
+(defconst org-goto-local-auto-isearch-map (make-sparse-keymap))
 (set-keymap-parent org-goto-local-auto-isearch-map isearch-mode-map)
 
 (defconst org-goto-help
