@@ -83,7 +83,8 @@
   :filters-alist
   '((:filter-headline . org-texinfo--filter-section-blank-lines)
     (:filter-parse-tree . org-texinfo--normalize-headlines)
-    (:filter-section . org-texinfo--filter-section-blank-lines))
+    (:filter-section . org-texinfo--filter-section-blank-lines)
+    (:filter-final-output . org-texinfo--untabify))
   :menu-entry
   '(?i "Export to Texinfo"
        ((?t "As TEXI file" org-texinfo-export-to-texinfo)
@@ -404,6 +405,10 @@ If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 
 
 ;;; Internal Functions
+
+(defun org-texinfo--untabify (s _backend _info)
+  "Remove TAB characters in string S."
+  (replace-regexp-in-string "\t" (make-string tab-width ?\s) s))
 
 (defun org-texinfo--filter-section-blank-lines (headline _backend _info)
   "Filter controlling number of blank lines after a section."
