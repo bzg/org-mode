@@ -2711,39 +2711,6 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
  
 ;;; Miscellaneous
 
-(ert-deftest test-org/in-regexp ()
-  "Test `org-in-regexp' specifications."
-  ;; Standard tests.
-  (should
-   (org-test-with-temp-text "xx ab<point>c xx"
-     (org-in-regexp "abc")))
-  (should-not
-   (org-test-with-temp-text "xx abc <point>xx"
-     (org-in-regexp "abc")))
-  ;; Return non-nil even with multiple matching regexps in the same
-  ;; line.
-  (should
-   (org-test-with-temp-text "abc xx ab<point>c xx"
-     (org-in-regexp "abc")))
-  ;; With optional argument NLINES, check extra lines around point.
-  (should-not
-   (org-test-with-temp-text "A\nB<point>\nC"
-     (org-in-regexp "A\nB\nC")))
-  (should
-   (org-test-with-temp-text "A\nB<point>\nC"
-     (org-in-regexp "A\nB\nC" 1)))
-  (should-not
-   (org-test-with-temp-text "A\nB\nC<point>"
-     (org-in-regexp "A\nB\nC" 1)))
-  ;; When optional argument VISUALLY is non-nil, return nil if at
-  ;; regexp boundaries.
-  (should
-   (org-test-with-temp-text "xx abc<point> xx"
-     (org-in-regexp "abc")))
-  (should-not
-   (org-test-with-temp-text "xx abc<point> xx"
-     (org-in-regexp "abc" nil t))))
-
 (ert-deftest test-org/sort-entries ()
   "Test `org-sort-entries'."
   ;; Sort alphabetically.
