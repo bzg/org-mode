@@ -9715,8 +9715,21 @@ This is a command that has to be installed in `calendar-mode-map'."
       'org-marked-entry-overlay))
 
 (defun org-agenda-bulk-mark (&optional arg)
-  "Mark the entry at point for future bulk action."
+  "Mark entries for future bulk action.
+
+When ARG is nil or one and region is not active then mark the
+entry at point.
+
+When ARG is nil or one and region is active then mark the entries
+in the region.
+
+When ARG is greater than one mark ARG lines."
   (interactive "p")
+  (when (and (or (not arg) (= arg 1)) (use-region-p))
+    (let ((start (caar (region-bounds)))
+	  (end (cdar (region-bounds))))
+      (setq arg (count-lines start end))
+      (goto-char start)))
   (dotimes (i (or arg 1))
     (unless (org-get-at-bol 'org-agenda-diary-link)
       (let* ((m (org-get-at-bol 'org-hd-marker))

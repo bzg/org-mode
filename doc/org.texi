@@ -9333,7 +9333,8 @@ drag forward by that many lines.
 @vindex org-agenda-bulk-custom-functions
 
 @orgcmd{m,org-agenda-bulk-mark}
-Mark the entry at point for bulk action.  With numeric prefix argument, mark
+Mark the entry at point for bulk action.  If there is an active region in the
+agenda, mark the entries in the region.  With numeric prefix argument, mark
 that many successive entries.
 @c
 @orgcmd{*,org-agenda-bulk-mark-all}
