@@ -9726,10 +9726,9 @@ in the region.
 When ARG is greater than one mark ARG lines."
   (interactive "p")
   (when (and (or (not arg) (= arg 1)) (use-region-p))
-    (let ((start (caar (region-bounds)))
-	  (end (cdar (region-bounds))))
-      (setq arg (count-lines start end))
-      (goto-char start)))
+    (setq arg (count-lines (region-beginning) (region-end)))
+    (goto-char (region-beginning))
+    (deactivate-mark))
   (dotimes (i (or arg 1))
     (unless (org-get-at-bol 'org-agenda-diary-link)
       (let* ((m (org-get-at-bol 'org-hd-marker))
