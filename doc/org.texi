@@ -16580,8 +16580,8 @@ Do things when True
 @cindex @code{:noweb-ref}, src header argument
 
 When expanding Noweb style references, Org concatenates @samp{src} code
-blocks by matching the reference name to either the code block name or the
-@code{:noweb-ref} header argument.
+blocks by matching the reference name to either the code block name or, if
+none is found, to the @code{:noweb-ref} header argument.
 
 For simple concatenation, set this @code{:noweb-ref} header argument at the
 sub-tree or file level.  In the example Org file shown next, the body of the
@@ -17163,11 +17163,6 @@ Note that now the expansion contains the @emph{results} of the code block
 @example
 100
 @end example
-
-For faster tangling of large Org mode files, set
-@code{org-babel-use-quick-and-dirty-noweb-expansion} variable to @code{t}.
-The speedup comes at the expense of not correctly resolving inherited values
-of the @code{:noweb-ref} header argument.
 
 
 @node Key bindings and useful functions

@@ -684,8 +684,7 @@ x
   <<foo>>
 #+end_src
 
-#+name: foo
-#+begin_src sh :noweb-sep \"\"
+#+begin_src sh :noweb-ref foo :noweb-sep \"\"
   bar
 #+end_src
 

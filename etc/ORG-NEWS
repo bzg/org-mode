@@ -12,6 +12,46 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.2
 ** Incompatible changes
+*** Change to Noweb expansion
+
+Expansion check =:noweb-ref= only if no matching named block is found
+in the buffer.  As a consequence, any =:noweb-ref= value matching the
+name of a source block in the buffer is ignored. A simple fix is to
+give every concerned source-block, including the named one, a new,
+unique, Noweb reference.
+
+#+BEGIN_SRC org
+  ,#+NAME: foo
+  ,#+BEGIN_SRC emacs-lisp
+    1
+  ,#+END_SRC
+
+  ,#+BEGIN_SRC emacs-lisp :noweb-ref foo
+    2
+  ,#+END_SRC
+
+  ,#+BEGIN_SRC emacs-lisp :noweb yes
+    <<foo>>
+  ,#+END_SRC
+#+END_SRC
+
+should become
+
+#+BEGIN_SRC org
+  ,#+NAME: foo
+  ,#+BEGIN_SRC emacs-lisp :noweb-ref bar
+    1
+  ,#+END_SRC
+
+  ,#+BEGIN_SRC emacs-lisp :noweb-ref bar
+    2
+  ,#+END_SRC
+
+  ,#+BEGIN_SRC emacs-lisp :noweb yes
+    <<bar>>
+  ,#+END_SRC
+#+END_SRC
+
 *** =align= STARTUP value no longer narrow table columns
 
 Columns narrowing (or shrinking) is now dynamic. See [[*Dynamically
@@ -113,6 +153,10 @@ you should expect to see something like:
 *** ~org-export-excluded-from-toc-p~
 
 See docstring for details.
+
+** Removed variables
+
+*** org-babel-use-quick-and-dirty-noweb-expansion
 
 ** Miscellaneous
 

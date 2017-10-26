@@ -90,10 +90,8 @@ Current buffer is a copy of the original buffer."
   (should
    (equal
     '("(message \"expanded1\")" "(message \"expanded2\")" ";; noweb-1-yes-start
-  (message \"expanded1\")
   (message \"expanded1\")" ";; noweb-no-start
   <<noweb-example1>>" ";; noweb-2-yes-start
-  (message \"expanded2\")
   (message \"expanded2\")"
   ";; noweb-tangle-start
 <<noweb-example1>>
