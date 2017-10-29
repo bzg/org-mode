@@ -809,7 +809,7 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 		      (lambda (l)
 			(and (not (string-match-p org-table-hline-regexp l))
 			     (org-split-string l "[ \t]*|[ \t]*")))
-		      (split-string (buffer-substring beg end) "\n" t "[ \t]")))
+		      (split-string (buffer-substring beg end) "\n" t)))
 	     ;; Compute number of columns.  If the table contains no
 	     ;; field, create a default table and bail out.
 	     (columns-number
