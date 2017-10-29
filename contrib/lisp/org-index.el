@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.6.2
+;; Version: 5.7.1
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -96,7 +96,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.6.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.7.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -207,7 +207,12 @@ those pieces."
                   (const keywords))))
 
 (defcustom org-index-clock-into-focus nil
-  "Clock into focused node."
+  "Clock into focused node ?"
+  :group 'org-index
+  :type 'boolean)
+
+(defcustom org-index-goto-bottom-after-focus nil
+  "After visiting a focused nodes; position cursor at bottom of node (as opposed to heading) ?"
   :group 'org-index
   :type 'boolean)
 
@@ -225,6 +230,7 @@ those pieces."
 (defvar org-index--headings nil "Headlines of index-table as a string.")
 (defvar org-index--headings-visible nil "Visible part of headlines of index-table as a string.")
 (defvar org-index--ids-focused-nodes nil "Ids of focused node (if any).")
+(defvar org-index--ids-focused-nodes-saved nil "Backup for ‘org-index--ids-focused-nodes’.")
 (defvar org-index--id-last-goto-focus nil "Id of last node, that has been focused to.")
 
 ;; Variables to hold context and state
@@ -314,7 +320,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.6.2 of org-index.el.
+This is version 5.7.1 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -578,10 +584,8 @@ interactive calls."
                            (string-match "\\([0-9]+\\.[0-9]+\\)\\." org-index-version)
                            (match-string 1 org-index-version))))
          (insert "
-  - Quick repeat with delete-option for goto-focus
-  - Moved Changelog to its own file
-  - New command 'news'
-  - Bugfixes
+  - New option org-index-goto-bottom-after-focus for position after jumping to a focused node
+  - New focus-command 'r' to revert last change to list of focused nodes
 ")
          (insert "\nSee https://github.com/marcIhm/org-index/ChangeLog.org for older news.\n")
          (org-mode))
@@ -1027,29 +1031,37 @@ Optional argument KEYS-VALUES specifies content of new line."
 (defun org-index--goto-focus ()
   "Goto focus node, one after the other."
   (if org-index--ids-focused-nodes
-      (let (this-id target-id following-id last-id again explain marker (repeat-clause ""))
+      (let (target-id following-id last-id again explain marker
+                    (repeat-clause "") (bottom-clause "") (heading-is-clause ""))
         (setq again (and (eq this-command last-command)
                          (eq org-index--this-command org-index--last-command)))
         (setq last-id (or org-index--id-last-goto-focus
                           (car (last org-index--ids-focused-nodes))))
-        (setq this-id (org-id-get))
         (setq following-id (car (or (cdr-safe (member last-id
                                                       (append org-index--ids-focused-nodes
                                                               org-index--ids-focused-nodes)))
                                     org-index--ids-focused-nodes)))
-        (if again
-            (progn
-              (setq target-id following-id)
-              (setq explain "Jumped to next"))
-          (setq target-id last-id)
-          (setq explain "Jumped back to current"))
 
+        (setq target-id (if again following-id last-id))
+        
         (set-transient-map (let ((map (make-sparse-keymap)))
                              (define-key map (vector ?f)
                                (lambda () (interactive)
                                  (setq this-command last-command)
                                  (setq org-index--this-command org-index--last-command)
-                                 (message (concat (org-index--goto-focus) "."))))
+                                 (message (concat (org-index--goto-focus) " (again)."))))
+                             (define-key map (vector ?h)
+                               (lambda () (interactive)
+                                 (org-back-to-heading)
+                                 (recenter 1)
+                                 (message "On heading.")))
+                             (define-key map (vector ?b)
+                               (lambda () (interactive)
+                                 (or (and (org-goto-first-child)
+                                          (forward-line -1))
+                                     (org-end-of-subtree))
+                                 (recenter -1)
+                                 (message "At bottom.")))
                              (define-key map (vector ?d)
                                (lambda () (interactive)
                                  (setq this-command last-command)
@@ -1057,7 +1069,7 @@ Optional argument KEYS-VALUES specifies content of new line."
                                  (org-index--persist-focused-nodes)
                                  (message (concat  "Current node has been removed from list of focused nodes, " (org-index--goto-focus) "."))))
                              map) t)
-        (setq repeat-clause "; type 'f' to repeat or 'd' to delete this node from list")
+        (setq repeat-clause "; type 'f' to repeat or 'd' to delete this node from list, 'h' goes to heading, 'b' to bottom of node")
 
         (if (member target-id (org-index--ids-up-to-top))
             (setq explain "Staying below current")
@@ -1067,8 +1079,19 @@ Optional argument KEYS-VALUES specifies content of new line."
 
           (pop-to-buffer-same-window (marker-buffer marker))
           (goto-char (marker-position marker))
-          (org-index--unfold-buffer)
-          (move-marker marker nil))
+          (move-marker marker nil)
+          (when org-index-goto-bottom-after-focus
+            (setq bottom-clause "bottom of ")
+            (setq heading-is-clause (format ", heading is '%s'" (propertize (org-get-heading t t t t) 'face 'org-todo)))
+	    (or (and (org-goto-first-child)
+                     (forward-line -1))
+                (org-end-of-subtree)))
+	  (org-index--unfold-buffer)
+	  (if org-index-goto-bottom-after-focus (recenter -1)))
+
+        (if again
+            (setq explain (format "Jumped to %snext" bottom-clause))
+          (setq explain (format "Jumped back to %scurrent" bottom-clause)))
         
         (when org-index-clock-into-focus
           (if org-index--after-focus-timer (cancel-timer org-index--after-focus-timer))
@@ -1087,10 +1110,11 @@ Optional argument KEYS-VALUES specifies content of new line."
         (setq org-index--id-last-goto-focus target-id)
         (concat
          (if (cdr org-index--ids-focused-nodes)
-             (format "%s focus node (out of %d)"
+             (format "%s focus node (out of %d)%s"
                      explain
-                     (length org-index--ids-focused-nodes))
-           "Jumped to single focus-node")
+                     (length org-index--ids-focused-nodes)
+                     heading-is-clause)
+           (format "Jumped to %ssingle focus-node%s" bottom-clause heading-is-clause))
          repeat-clause))
       "No nodes in focus, use set-focus"))
 
@@ -1099,25 +1123,28 @@ Optional argument KEYS-VALUES specifies content of new line."
   "More commands for handling focused nodes."
   (let (id text more-text char prompt ids-up-to-top)
 
-    (setq prompt (format "Please specify action on the list of %s focused nodes: set, append, delete (s,a,d or ? for short help) - "
+    (setq prompt (format "Please specify action on the list of %s focused nodes: set, append, delete, restore (s,a,d,r or ? for short help) - "
                          (length org-index--ids-focused-nodes)))
-    (while (not (memq char (list ?s ?a ?d)))
+    (while (not (memq char (list ?s ?a ?d ?r)))
         (setq char (read-char prompt))
-        (setq prompt "Actions on list of focused nodes:  s)et single focus on this node,  a)ppend this node to list,  d)elete this node from list.  Please choose - "))
+        (setq prompt "Actions on list of focused nodes:  s)et single focus on this node,  a)ppend this node to list,  d)elete this node from list,  r)estore previous list of focused nodes.  Please choose - "))
     (setq text
           (cond
 
            ((eq char ?s)
             (setq id (org-id-get-create))
+            (setq org-index--ids-focused-nodes-saved org-index--ids-focused-nodes)
             (setq org-index--ids-focused-nodes (list id))
             (setq org-index--id-last-goto-focus id)
+            (org-index--update-line id t)
             (if org-index-clock-into-focus (org-clock-in))
-            "Focus has been set on current node%s (1 node in focus)")
+            "Focus has been set on current node (1 node in focus)")
 
            ((eq char ?a)
             (setq id (org-id-get-create))
             (unless (member id org-index--ids-focused-nodes)
               ;; remove any children, that are already in list of focused nodes
+              (setq org-index--ids-focused-nodes-saved org-index--ids-focused-nodes)
               (setq org-index--ids-focused-nodes
                     (delete nil (mapcar (lambda (x)
                                           (if (member id (org-with-point-at (org-id-find x t)
@@ -1127,6 +1154,7 @@ Optional argument KEYS-VALUES specifies content of new line."
                                                 nil)
                                             x))
                                         org-index--ids-focused-nodes)))
+              (setq org-index--ids-focused-nodes-saved org-index--ids-focused-nodes)
               ;; remove parent, if already in list of focused nodes
               (setq ids-up-to-top (org-index--ids-up-to-top))
               (when (seq-intersection ids-up-to-top org-index--ids-focused-nodes)
@@ -1134,12 +1162,20 @@ Optional argument KEYS-VALUES specifies content of new line."
                 (setq more-text (concat more-text ", replacing its parent")))
               (setq org-index--ids-focused-nodes (cons id org-index--ids-focused-nodes)))
             (setq org-index--id-last-goto-focus id)
-	    (setq org-index--id-last-goto-focus id)
+            (org-index--update-line id t)
             (if org-index-clock-into-focus (org-clock-in))
             "Current node has been appended to list of focused nodes%s (%d node%s in focus)")
 
            ((eq char ?d)
-            (org-index--delete-from-focus))))
+            (org-index--delete-from-focus))
+
+           ((eq char ?r)
+            (if org-index--ids-focused-nodes-saved
+                (let (txt)
+                  (setq txt (format "Discarded current list of focused %d focused node%s and restored previous list; now %%s%%d node%%s in focus" (length org-index--ids-focused-nodes-saved) (if (cdr org-index--ids-focused-nodes-saved) "s" "")))
+                  (setq org-index--ids-focused-nodes org-index--ids-focused-nodes-saved)
+                  txt)
+              "No saved list of focused nodes to restore, nothing to do"))))
 
     (org-index--persist-focused-nodes)
     
@@ -1162,6 +1198,7 @@ Optional argument KEYS-VALUES specifies content of new line."
                 (or (car-safe (cdr-safe (member id (reverse (append org-index--ids-focused-nodes
                                                                     org-index--ids-focused-nodes)))))
                     org-index--id-last-goto-focus))
+          (setq org-index--ids-focused-nodes-saved org-index--ids-focused-nodes)
           (setq org-index--ids-focused-nodes (delete id org-index--ids-focused-nodes))
           (setq org-index--id-last-goto-focus nil)
           "Current node has been removed from list of focused nodes%s (%d node%s in focus)")
@@ -1629,7 +1666,7 @@ Optional argument CHECK-SORT-MIXED triggers resorting if mixed and stale."
   "One-time migration: No property; need to go through whole table once to find max."
   (org-index--go-below-hline)
   (let ((max-ref-num 0)
-        ref-field ref-num ref)
+        ref-field ref-num)
     (message "One-time migration to set index-property maxref...")
     (while (org-at-table-p)
       (setq ref-field (org-index--get-or-set-field 'ref))
@@ -2053,13 +2090,9 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
 (defun org-index--unfold-buffer ()
   "Helper function to unfold buffer."
-  (org-show-context)
+  (org-show-context 'ancestors)
   (org-show-subtree)
-  (recenter 1)
-  (save-excursion
-    (org-back-to-heading)
-    (forward-line) ;; on property drawer
-    (org-cycle)))
+  (recenter 1))
 
 
 (defun org-index--update-line (&optional id-or-pos no-error)
