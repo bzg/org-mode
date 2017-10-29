@@ -21577,7 +21577,9 @@ Your bug report will be posted to the Org mailing list.
 	   ["Cycle through agenda files" org-cycle-agenda-files t]
 	   ["Occur in all agenda files" org-occur-in-agenda-files t]
 	   "--")
-	  (mapcar 'org-file-menu-entry (org-agenda-files t))))))))
+	  (mapcar 'org-file-menu-entry
+		  ;; Prevent initialization from failing.
+		  (ignore-errors (org-agenda-files t)))))))))
 
 ;;;; Documentation
 
