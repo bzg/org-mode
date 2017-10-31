@@ -19038,9 +19038,9 @@ boundaries."
 	    ;; "file:" links.  Also check link abbreviations since
 	    ;; some might expand to "file" links.
 	    (file-types-re (format "[][]\\[\\(?:file\\|[./~]%s\\)"
-				   (and link-abbrevs
-					(format "\\|\\(?:%s:\\)"
-						(regexp-opt link-abbrevs))))))
+				   (if (not link-abbrevs) ""
+				     (format "\\|\\(?:%s:\\)"
+					     (regexp-opt link-abbrevs))))))
        (while (re-search-forward file-types-re end t)
 	 (let ((link (save-match-data (org-element-context))))
 	   ;; Check if we're at an inline image, i.e., an image file
