@@ -22047,68 +22047,58 @@ assumed to be significant there."
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled.  For convenience, if `adaptive-fill-regexp'
 matches in paragraphs or comments, use it."
-  (catch 'exit
-    (when (derived-mode-p 'message-mode)
-      (save-excursion
-	(beginning-of-line)
-	(cond ((not (message-in-body-p)) (throw 'exit nil))
-	      ((looking-at-p org-table-line-regexp) (throw 'exit nil))
-	      ((looking-at message-cite-prefix-regexp)
-	       (throw 'exit (match-string-no-properties 0)))
-	      ((looking-at org-outline-regexp)
-	       (throw 'exit (make-string (length (match-string 0)) ?\s))))))
-    (org-with-wide-buffer
-     (unless (org-at-heading-p)
-       (let* ((p (line-beginning-position))
-	      (element (save-excursion
-			 (beginning-of-line)
-			 (org-element-at-point)))
-	      (type (org-element-type element))
-	      (post-affiliated (org-element-property :post-affiliated element)))
-	 (unless (< p post-affiliated)
-	   (cl-case type
-	     (comment
+  (org-with-wide-buffer
+   (unless (org-at-heading-p)
+     (let* ((p (line-beginning-position))
+	    (element (save-excursion
+		       (beginning-of-line)
+		       (org-element-at-point)))
+	    (type (org-element-type element))
+	    (post-affiliated (org-element-property :post-affiliated element)))
+       (unless (< p post-affiliated)
+	 (cl-case type
+	   (comment
+	    (save-excursion
+	      (beginning-of-line)
+	      (looking-at "[ \t]*")
+	      (concat (match-string 0) "# ")))
+	   (footnote-definition "")
+	   ((item plain-list)
+	    (make-string (org-list-item-body-column post-affiliated) ?\s))
+	   (paragraph
+	    ;; Fill prefix is usually the same as the current line,
+	    ;; unless the paragraph is at the beginning of an item.
+	    (let ((parent (org-element-property :parent element)))
 	      (save-excursion
 		(beginning-of-line)
-		(looking-at "[ \t]*")
-		(concat (match-string 0) "# ")))
-	     (footnote-definition "")
-	     ((item plain-list)
-	      (make-string (org-list-item-body-column post-affiliated) ?\s))
-	     (paragraph
-	      ;; Fill prefix is usually the same as the current line,
-	      ;; unless the paragraph is at the beginning of an item.
-	      (let ((parent (org-element-property :parent element)))
-		(save-excursion
-		  (beginning-of-line)
-		  (cond ((eq (org-element-type parent) 'item)
-			 (make-string (org-list-item-body-column
-				       (org-element-property :begin parent))
-				      ?\s))
-			((and adaptive-fill-regexp
-			      ;; Locally disable
-			      ;; `adaptive-fill-function' to let
-			      ;; `fill-context-prefix' handle
-			      ;; `adaptive-fill-regexp' variable.
-			      (let (adaptive-fill-function)
-				(fill-context-prefix
-				 post-affiliated
-				 (org-element-property :end element)))))
-			((looking-at "[ \t]+") (match-string 0))
-			(t  "")))))
-	     (comment-block
-	      ;; Only fill contents if P is within block boundaries.
-	      (let* ((cbeg (save-excursion (goto-char post-affiliated)
-					   (forward-line)
-					   (point)))
-		     (cend (save-excursion
-			     (goto-char (org-element-property :end element))
-			     (skip-chars-backward " \r\t\n")
-			     (line-beginning-position))))
-		(when (and (>= p cbeg) (< p cend))
-		  (if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
-		      (match-string 0)
-		    "")))))))))))
+		(cond ((eq (org-element-type parent) 'item)
+		       (make-string (org-list-item-body-column
+				     (org-element-property :begin parent))
+				    ?\s))
+		      ((and adaptive-fill-regexp
+			    ;; Locally disable
+			    ;; `adaptive-fill-function' to let
+			    ;; `fill-context-prefix' handle
+			    ;; `adaptive-fill-regexp' variable.
+			    (let (adaptive-fill-function)
+			      (fill-context-prefix
+			       post-affiliated
+			       (org-element-property :end element)))))
+		      ((looking-at "[ \t]+") (match-string 0))
+		      (t  "")))))
+	   (comment-block
+	    ;; Only fill contents if P is within block boundaries.
+	    (let* ((cbeg (save-excursion (goto-char post-affiliated)
+					 (forward-line)
+					 (point)))
+		   (cend (save-excursion
+			   (goto-char (org-element-property :end element))
+			   (skip-chars-backward " \r\t\n")
+			   (line-beginning-position))))
+	      (when (and (>= p cbeg) (< p cend))
+		(if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
+		    (match-string 0)
+		  ""))))))))))
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
@@ -22153,15 +22143,6 @@ a footnote definition, try to fill the first paragraph within."
 			 (org-element-property :contents-end element))))
 	   ;; Do nothing if point is at an affiliated keyword.
 	   (if (< (line-end-position) beg) t
-	     (when (derived-mode-p 'message-mode)
-	       ;; In `message-mode', do not fill following citation
-	       ;; in current paragraph nor text before message body.
-	       (let ((body-start (save-excursion (message-goto-body))))
-		 (when body-start (setq beg (max body-start beg))))
-	       (when (save-excursion
-		       (re-search-forward
-			(concat "^" message-cite-prefix-regexp) end t))
-		 (setq end (match-beginning 0))))
 	     ;; Fill paragraph, taking line breaks into account.
 	     (save-excursion
 	       (goto-char beg)
