@@ -366,27 +366,29 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
   ;; instead of internal reference, whenever possible.
   (should
    (equal
-    "a1"
+    '("a1" "b1")
     (let* ((ids nil)
+	   (link-transcoder
+	    (lambda (l c i)
+	      (let ((option (org-element-property :search-option l))
+		    (path (org-element-property :path l)))
+		(push (org-publish-resolve-external-link option path t)
+		      ids)
+		"")))
 	   (backend
 	    (org-export-create-backend
-	     :transcoders
-	     '((headline . (lambda (h c i) c))
-	       (paragraph . (lambda (p c i) c))
-	       (section . (lambda (s c i) c))
-	       (link . (lambda (l c i)
-			 (let ((option (org-element-property :search-option l))
-			       (path (org-element-property :path l)))
-			   (when option
-			     (throw :exit (org-publish-resolve-external-link
-					   option path t)))))))))
+	     :transcoders `((headline . (lambda (h c i) c))
+			    (paragraph . (lambda (p c i) c))
+			    (section . (lambda (s c i) c))
+			    (link . ,link-transcoder))))
 	   (publish
 	    (lambda (plist filename pub-dir)
-	      (push (catch :exit
-		      (org-publish-org-to backend filename ".test" plist pub-dir))
-		    ids))))
-      (org-test-publish (list :publishing-function (list publish)) #'ignore)
-      (car ids)))))
+	      (org-publish-org-to backend filename ".test" plist pub-dir))))
+      (org-test-publish (list :publishing-function (list publish)
+			      :exclude "."
+			      :include '("a.org" "b.org"))
+	#'ignore)
+      (sort ids #'string<)))))
 
 
 ;;; Tools
