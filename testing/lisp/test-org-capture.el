@@ -146,5 +146,21 @@
 	     (list file1 file2 (buffer-file-name)))))))))
 
 
+(ert-deftest test-org-capture/insert-at-end-abort ()
+  "Test that capture can be aborted after inserting at end of capture buffer."
+  (should
+   (equal
+    "* A\n* B\n"
+    (org-test-with-temp-text-in-file "* A\n* B\n"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Todo" entry (file+headline ,file "A") "** H1 %?"))))
+	(org-capture nil "t")
+	(goto-char (point-max))
+	(insert "Capture text")
+	(org-capture-kill))
+      (buffer-string)))))
+
+
 (provide 'test-org-capture)
 ;;; test-org-capture.el ends here
