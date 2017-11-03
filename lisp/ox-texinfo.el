@@ -481,7 +481,7 @@ anchor name is unique."
 	       (name basename))
 	  ;; Ensure NAME is unique and not reserved node name "Top".
 	  (while (or (equal name "Top") (rassoc name cache))
-	    (setq name (concat basename (format " %d" (cl-incf salt)))))
+	    (setq name (concat basename (format " (%d)" (cl-incf salt)))))
 	  (plist-put info :texinfo-node-cache (cons (cons datum name) cache))
 	  name))))
 
