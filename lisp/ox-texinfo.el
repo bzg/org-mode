@@ -1158,19 +1158,19 @@ is an integer, build the menu recursively, down to this depth."
   (cond
    ((not level)
     (org-texinfo--format-entries (org-texinfo--menu-entries scope info) info))
-   ((zerop level) nil)
+   ((zerop level) "\n")
    (t
-    (org-element-normalize-string
-     (mapconcat
-      (lambda (h)
-	(let ((entries (org-texinfo--menu-entries h info)))
-	  (when entries
-	    (concat
-	     (format "%s\n\n%s\n"
-		     (org-export-data (org-export-get-alt-title h info) info)
-		     (org-texinfo--format-entries entries info))
-	     (org-texinfo--build-menu h info (1- level))))))
-      (org-texinfo--menu-entries scope info) "\n")))))
+    (mapconcat
+     (lambda (h)
+       (let ((entries (org-texinfo--menu-entries h info)))
+	 (when entries
+	   (concat
+	    (format "%s\n\n%s\n"
+		    (org-export-data (org-export-get-alt-title h info) info)
+		    (org-texinfo--format-entries entries info))
+	    (org-texinfo--build-menu h info (1- level))))))
+     (org-texinfo--menu-entries scope info)
+     ""))))
 
 (defun org-texinfo--format-entries (entries info)
   "Format all direct menu entries in SCOPE, as a string.
