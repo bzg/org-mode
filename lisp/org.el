@@ -1284,7 +1284,7 @@ star at the beginning of the headline, you can do this:
 This list will be checked before `org-speed-commands-default'
 when the variable `org-use-speed-commands' is non-nil
 and when the cursor is at the beginning of a headline.
-The car if each entry is a string with a single letter, which must
+The car of each entry is a string with a single letter, which must
 be assigned to `self-insert-command' in the global map.
 The cdr is either a command to be called interactively, a function
 to be called, or a form to be evaluated.
