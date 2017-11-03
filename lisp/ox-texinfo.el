@@ -885,8 +885,10 @@ holding contextual information."
 		      (format "@end %s" (if numbered? 'enumerate 'itemize))
 		    "\n"))
 	(concat
-	 (and (not notoc?)
-	      (format "@node %s\n" (org-texinfo--get-node headline info)))
+	 ;; Even if HEADLINE is using @subheading and al., leave an
+	 ;; anchor so cross-references in the Org document still work.
+	 (format (if notoc? "@anchor{%s}\n" "@node %s\n")
+		 (org-texinfo--get-node headline info))
 	 (format command full-text)
 	 contents))))))
 
