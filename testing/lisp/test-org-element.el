@@ -1444,9 +1444,19 @@ DEADLINE: <2012-03-29 thu.>"
 	      'org-element-contents))))
   ;; Block in an item: ignore indentation within the block.
   (should
-   (org-test-with-temp-text "- item\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
-     (forward-char)
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+   (org-test-with-temp-text
+       "-<point> item\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Last item in a list or sub-list has no `:post-blank' lines, since
+  ;; those belong to the plain-list.
+  (should
+   (= 0
+      (org-test-with-temp-text "- A\n\n- <point>B\n\nEnd list"
+	(org-element-property :post-blank (org-element-at-point)))))
+  (should
+   (= 0
+      (org-test-with-temp-text "- A\n\n  - B\n\n<point>  - C\n\n  End sub-list"
+	(org-element-property :post-blank (org-element-at-point))))))
 
 
 ;;;; Keyword
@@ -1962,7 +1972,17 @@ e^{i\\pi}+1=0
   "Test `plain-list' parser."
   (org-test-with-temp-text "- item"
     (should (org-element-map (org-element-parse-buffer) 'plain-list 'identity)))
-  ;; Blank lines after the list only belong to outer plain list.
+  ;; Blank lines after a list or sub-list belongs to that list.
+  (should
+   (= 1
+      (org-test-with-temp-text "- A\n\n- B\n\nEnd list"
+	(org-element-property :post-blank (org-element-at-point)))))
+  (should
+   (= 1
+      (org-test-with-temp-text "- A\n\n<point>  - B\n\n  - C\n\n  End sub-list"
+	(org-element-property :post-blank (org-element-at-point)))))
+  ;; Blank lines after the list only belong to outer plain list,
+  ;; however.
   (should
    (equal
     '(t t)
