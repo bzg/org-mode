@@ -149,6 +149,10 @@ you should expect to see something like:
 #+END_EXAMPLE
 
 ** New functions
+*** ~org-insert-structure-template~
+
+This function can be used to wrap existing text of Org elements in
+a #+BEGIN_FOO/#+END_FOO block.  Bound to C-c C-x w by default.
 
 *** ~org-export-excluded-from-toc-p~
 

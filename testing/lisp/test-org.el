@@ -4000,6 +4000,51 @@ Text.
        (org-next-block 1 nil "^[ \t]*#\\+BEGIN_QUOTE")
        (looking-at "#\\+begin_quote")))))
 
+(ert-deftest test-org/insert-template ()
+  "Test `org-insert-structure-template'."
+  ;; Test in empty buffer.
+  (should
+   (string= "#+begin_foo\n#+end_foo\n"
+	    (org-test-with-temp-text ""
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Test with multiple lines in buffer.
+  (should
+   (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
+	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
+	      (org-mark-element)
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Test with text in buffer, no region, no final newline.
+  (should
+   (string= "#+begin_foo\nI'm a paragraph.\n#+end_foo\n"
+	    (org-test-with-temp-text "I'm a paragraph."
+	      (org-mark-element)
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Test with text in buffer and region set.
+  (should
+   (string= "#+begin_foo\nI'm a paragraph\n\nI'm a second paragrah\n#+end_foo\n"
+	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragrah"
+	      (set-mark (point))
+	      (goto-char (point-max))
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Test with example escaping.
+  (should
+   (string= "#+begin_example\n,* Heading\n#+end_example\n"
+	    (org-test-with-temp-text "* Heading"
+	      (org-mark-element)
+	      (org-insert-structure-template "example")
+	      (buffer-string))))
+  ;; Test with indentation.
+  (should
+   (string= "  #+begin_foo\n  This is a paragraph\n  #+end_foo\n"
+	    (org-test-with-temp-text "  This is a paragraph"
+	      (org-mark-element)
+	      (org-insert-structure-template "foo")
+	      (buffer-string)))))
+
 (ert-deftest test-org/previous-block ()
   "Test `org-previous-block' specifications."
   ;; Regular test.

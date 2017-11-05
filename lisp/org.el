@@ -6740,8 +6740,6 @@ Use `\\[org-edit-special]' to edit table.el tables"))
        ((run-hook-with-args-until-success
 	 'org-tab-after-check-for-cycling-hook))
 
-       ((org-try-structure-completion))
-
        ((run-hook-with-args-until-success
 	 'org-tab-before-tab-emulation-hook))
 
@@ -11859,76 +11857,71 @@ keywords relative to each registered export back-end."
     "TITLE:" "TODO:" "TYP_TODO:" "SELECT_TAGS:" "EXCLUDE_TAGS:"))
 
 (defcustom org-structure-template-alist
-  '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC")
-    ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE")
-    ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE")
-    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE")
-    ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM")
-    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER")
-    ("C" "#+BEGIN_COMMENT\n?\n#+END_COMMENT")
-    ("l" "#+BEGIN_EXPORT latex\n?\n#+END_EXPORT")
-    ("L" "#+LaTeX: ")
-    ("h" "#+BEGIN_EXPORT html\n?\n#+END_EXPORT")
-    ("H" "#+HTML: ")
-    ("a" "#+BEGIN_EXPORT ascii\n?\n#+END_EXPORT")
-    ("A" "#+ASCII: ")
-    ("i" "#+INDEX: ?")
-    ("I" "#+INCLUDE: %file ?"))
+  '((?a . "export ascii")
+    (?c . "center")
+    (?C . "comment")
+    (?e . "example")
+    (?E . "export")
+    (?h . "export html")
+    (?l . "export latex")
+    (?q . "quote")
+    (?s . "src")
+    (?v . "verse"))
   "Structure completion elements.
-This is a list of abbreviation keys and values.  The value gets inserted
-if you type `<' followed by the key and then press the completion key,
-usually `TAB'.  %file will be replaced by a file name after prompting
-for the file using completion.  The cursor will be placed at the position
-of the `?' in the template.
-There are two templates for each key, the first uses the original Org syntax,
-the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
-the default when the /org-mtags.el/ module has been loaded.  See also the
-variable `org-mtags-prefer-muse-templates'."
+This is an alist of characters and values.  When
+`org-insert-structure-template' is called, an additional key is
+read.  The key is first looked up in this alist, and the
+corresponding structure is inserted, with \"#+BEGIN_\" and
+\"#+END_\" added automatically."
   :group 'org-completion
   :type '(repeat
-	  (list
-	   (string :tag "Key")
-	   (string :tag "Template")))
-  :version "26.1"
-  :package-version '(Org . "8.3"))
+	  (cons (character :tag "Key")
+		(string :tag "Template")))
+  :package-version '(Org . "9.2"))
 
-(defun org-try-structure-completion ()
-  "Try to complete a structure template before point.
-This looks for strings like \"<e\" on an otherwise empty line and
-expands them."
-  (let ((l (buffer-substring (point-at-bol) (point)))
-	a)
-    (when (and (looking-at "[ \t]*$")
-	       (string-match "^[ \t]*<\\([a-zA-Z]+\\)$" l)
-	       (setq a (assoc (match-string 1 l) org-structure-template-alist)))
-      (org-complete-expand-structure-template (+ -1 (point-at-bol)
-						 (match-beginning 1)) a)
-      t)))
-
-(defun org-complete-expand-structure-template (start cell)
-  "Expand a structure template."
-  (let ((rpl (nth 1 cell))
-	(ind ""))
-    (delete-region start (point))
-    (when (string-match "\\`[ \t]*#\\+" rpl)
-      (cond
-       ((bolp))
-       ((not (string-match "\\S-" (buffer-substring (point-at-bol) (point))))
-	(setq ind (buffer-substring (point-at-bol) (point))))
-       (t (newline))))
-    (setq start (point))
-    (when (string-match "%file" rpl)
-      (setq rpl (replace-match
-		 (concat
-		  "\""
-		  (save-match-data
-		    (abbreviate-file-name (read-file-name "Include file: ")))
-		  "\"")
-		 t t rpl)))
-    (setq rpl (mapconcat 'identity (split-string rpl "\n")
-			 (concat "\n" ind)))
-    (insert rpl)
-    (when (re-search-backward "\\?" start t) (delete-char 1))))
+(defun org-insert-structure-template (type)
+  "Insert a block structure of the type #+begin_foo/#+end_foo.
+First read a character, which can be one of the keys in
+`org-structure-template-alist'.  When it is <TAB>, prompt the
+user for a string to use.  With an active region, wrap the region
+in the block.  Otherwise, insert an empty block."
+  (interactive
+   (list
+    (let* ((key (read-key "Key: "))
+	   (struct-string
+	    (or (cdr (assq key org-structure-template-alist))
+		(and (= key ?\t)
+		     (read-string "Structure type: "))
+		(user-error "`%c' has no structure definition" key))))
+      struct-string)))
+  (let* ((region? (use-region-p))
+	 (s (if region? (region-beginning) (point)))
+	 (e (copy-marker (if region? (region-end) (point)) t))
+	 column)
+    (when (string-match-p
+	   (concat "\\`" (regexp-opt '("example" "export" "src")))
+	   type)
+      (org-escape-code-in-region s e))
+    (goto-char s)
+    (setq column (current-indentation))
+    (beginning-of-line)
+    (indent-to column)
+    (insert (format "#+begin_%s\n" type))
+    (goto-char e)
+    (if (bolp)
+	(progn
+	  (skip-chars-backward " \n\t")
+	  (forward-line))
+      (end-of-line)
+      (insert "\n"))
+    (indent-to column)
+    (insert (format "#+end_%s\n"
+		    (car (split-string type))))
+    (when (or (not region?)
+	      (string-match-p "src\\|\\`export\\'" type))
+      (goto-char s)
+      (end-of-line))
+    (set-marker e nil)))
 
 ;;;; TODO, DEADLINE, Comments
 
@@ -19393,6 +19386,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map "\C-c\C-xE"    'org-inc-effort)
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-columns-insert-dblock)
+(org-defkey org-mode-map "\C-c\C-xw"    'org-insert-structure-template)
 (org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
 
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
