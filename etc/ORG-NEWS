@@ -52,6 +52,12 @@ should become
   ,#+END_SRC
 #+END_SRC
 
+*** Change ~org-structure-template-alist~ value
+
+With the new template expansion mechanism (see
+[[*~org-insert-structure-template~]]), the variable changed its data type.
+See docstring for details.
+
 *** =align= STARTUP value no longer narrow table columns
 
 Columns narrowing (or shrinking) is now dynamic. See [[*Dynamically
@@ -157,6 +163,10 @@ a #+BEGIN_FOO/#+END_FOO block.  Bound to C-c C-x w by default.
 *** ~org-export-excluded-from-toc-p~
 
 See docstring for details.
+
+** Removed functions
+
+*** ~org-try-structure-completion~
 
 ** Removed variables
 
