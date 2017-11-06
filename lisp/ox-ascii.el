@@ -1485,9 +1485,18 @@ contextual information."
      ;; already taken care of at the paragraph level so they don't
      ;; interfere with indentation.
      (let ((contents (org-ascii--indent-string contents indentation)))
-       (if (and (eq (org-element-type (car (org-element-contents item)))
-		    'paragraph)
-		(not (eq list-type 'descriptive)))
+       ;; Determine if contents should follow the bullet or start
+       ;; a new line.  Do the former when the first contributing
+       ;; element to contents is a paragraph.  In descriptive lists
+       ;; however, contents always start a new line.
+       (if (and (not (eq list-type 'descriptive))
+		(org-string-nw-p contents)
+		(eq 'paragraph
+		    (org-element-type
+		     (cl-some (lambda (e)
+				(and (org-string-nw-p (org-export-data e info))
+				     e))
+			      (org-element-contents item)))))
 	   (org-trim contents)
 	 (concat "\n" contents))))))
 
