@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2017 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.7.1
+;; Version: 5.7.2
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -92,11 +92,12 @@
 
 (require 'org-table)
 (require 'org-id)
+(require 'org-inlinetask)
 (require 'cl-lib)
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.7.1" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.7.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -320,7 +321,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.7.1 of org-index.el.
+This is version 5.7.2 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -688,7 +689,7 @@ interactive calls."
 
           ;; move up until we find a node in index
           (save-excursion
-            (outline-back-to-heading)
+            (org-with-limited-levels (org-back-to-heading))
             (while (not done)
               (if id
                   (setq info (org-index--on 'id id
@@ -1052,14 +1053,12 @@ Optional argument KEYS-VALUES specifies content of new line."
                                  (message (concat (org-index--goto-focus) " (again)."))))
                              (define-key map (vector ?h)
                                (lambda () (interactive)
-                                 (org-back-to-heading)
+                                 (org-with-limited-levels (org-back-to-heading))
                                  (recenter 1)
                                  (message "On heading.")))
                              (define-key map (vector ?b)
                                (lambda () (interactive)
-                                 (or (and (org-goto-first-child)
-                                          (forward-line -1))
-                                     (org-end-of-subtree))
+                                 (org-index--end-of-focused-node)
                                  (recenter -1)
                                  (message "At bottom.")))
                              (define-key map (vector ?d)
@@ -1083,9 +1082,7 @@ Optional argument KEYS-VALUES specifies content of new line."
           (when org-index-goto-bottom-after-focus
             (setq bottom-clause "bottom of ")
             (setq heading-is-clause (format ", heading is '%s'" (propertize (org-get-heading t t t t) 'face 'org-todo)))
-	    (or (and (org-goto-first-child)
-                     (forward-line -1))
-                (org-end-of-subtree)))
+            (org-index--end-of-focused-node))
 	  (org-index--unfold-buffer)
 	  (if org-index-goto-bottom-after-focus (recenter -1)))
 
@@ -1117,6 +1114,25 @@ Optional argument KEYS-VALUES specifies content of new line."
            (format "Jumped to %ssingle focus-node%s" bottom-clause heading-is-clause))
          repeat-clause))
       "No nodes in focus, use set-focus"))
+
+
+(defun org-index--end-of-focused-node ()
+  "Goto end of focused nodes, ignoring inline-tasks but stopping at first child."
+  (let (level next (pos (point)))
+    (when (ignore-errors (org-with-limited-levels (org-back-to-heading)))
+      (setq level (outline-level))
+      (forward-char 1)
+      (if (and (org-with-limited-levels (re-search-forward org-outline-regexp-bol nil t))
+               (> (outline-level) level))
+          (progn        ; landed on child node
+            (goto-char (match-beginning 0))
+            (forward-line -1))
+        (goto-char pos) ; landed on next sibling or end of buffer
+        (org-with-limited-levels
+         (org-end-of-subtree nil t)
+         (when (org-at-heading-p)
+           (forward-line -1))))
+      (beginning-of-line))))
 
 
 (defun org-index--more-focus-commands ()
@@ -1211,7 +1227,7 @@ Optional argument KEYS-VALUES specifies content of new line."
     (let (ancestors id level start-level)
       (save-excursion
         (ignore-errors
-          (outline-back-to-heading)
+          (org-with-limited-levels (org-back-to-heading))
           (setq id (org-id-get))
           (if id (setq ancestors (cons id ancestors)))
           (setq start-level (org-outline-level))
@@ -2370,7 +2386,7 @@ CREATE-REF and TAG-WITH-REF if given."
     (org-index--save-positions)
     (unless (or org-index--within-index-node
                 org-index--within-occur)
-      (org-back-to-heading))
+      (org-with-limited-levels (org-back-to-heading)))
     
     ;; try to do the same things from within index and from outside
     (if org-index--within-index-node
@@ -2587,7 +2603,7 @@ Optional argument DEFAULTS gives default values."
     (org-index--save-positions)
     (unless (or org-index--within-index-node
                 org-index--within-occur)
-      (org-back-to-heading))
+      (org-with-limited-levels (org-back-to-heading)))
     
     ;; Collect information: What should be deleted ?
     (if (or org-index--within-occur
