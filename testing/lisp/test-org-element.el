@@ -969,7 +969,20 @@ Some other text
    (org-test-with-temp-text "[fn:1]\n\n"
      (let ((footnote (org-element-at-point)))
        (or (org-element-property :contents-begin footnote)
-	   (org-element-property :contents-end footnote))))))
+	   (org-element-property :contents-end footnote)))))
+  ;; Parse `:pre-blank'.
+  (should
+   (= 0
+      (org-test-with-temp-text "[fn:1] A"
+	(org-element-property :pre-blank (org-element-at-point)))))
+  (should
+   (= 1
+      (org-test-with-temp-text "[fn:1]\nA"
+	(org-element-property :pre-blank (org-element-at-point)))))
+  (should
+   (= 2
+      (org-test-with-temp-text "[fn:1]\n\nA"
+	(org-element-property :pre-blank (org-element-at-point))))))
 
 
 ;;;; Footnotes Reference.
@@ -1433,9 +1446,8 @@ DEADLINE: <2012-03-29 thu.>"
 - [-] item 1
   - [X] item 1.1
   - [ ] item 1.2"
-      (org-element-map
-       (org-element-parse-buffer) 'item
-       (lambda (item) (org-element-property :checkbox item))))))
+      (org-element-map (org-element-parse-buffer) 'item
+	(lambda (item) (org-element-property :checkbox item))))))
   ;; Item starting with special syntax.
   (should
    (equal '(("- item"))
@@ -1447,6 +1459,19 @@ DEADLINE: <2012-03-29 thu.>"
    (org-test-with-temp-text
        "-<point> item\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
      (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Parse `:pre-blank'.
+  (should
+   (= 0
+      (org-test-with-temp-text "-<point> A"
+	(org-element-property :pre-blank (org-element-at-point)))))
+  (should
+   (= 1
+      (org-test-with-temp-text "-<point>\n  A"
+	(org-element-property :pre-blank (org-element-at-point)))))
+  (should
+   (= 2
+      (org-test-with-temp-text "-<point>\n\n  A"
+	(org-element-property :pre-blank (org-element-at-point)))))
   ;; Last item in a list or sub-list has no `:post-blank' lines, since
   ;; those belong to the plain-list.
   (should
@@ -2562,7 +2587,14 @@ Outside list"
 
 (ert-deftest test-org-element/footnote-definition-interpreter ()
   "Test footnote definition interpreter."
-  (should (equal (org-test-parse-and-interpret "[fn:1] Test") "[fn:1] Test\n")))
+  (should (equal (org-test-parse-and-interpret "[fn:1] Test") "[fn:1] Test\n"))
+  ;; Handle `:pre-blank' in definitions.
+  (should
+   (equal (org-test-parse-and-interpret "[fn:1]\nparagraph")
+	  "[fn:1]\nparagraph\n"))
+  (should
+   (equal (org-test-parse-and-interpret "[fn:1]\n\nparagraph")
+	  "[fn:1]\n\nparagraph\n")))
 
 (ert-deftest test-org-element/headline-interpreter ()
   "Test headline and section interpreters."
@@ -2683,6 +2715,13 @@ Outside list"
     (should
      (equal (org-test-parse-and-interpret "-\n  | a | b |")
 	    "- \n  | a | b |\n"))
+    ;; Handle `:pre-blank' in items.
+    (should
+     (equal (org-test-parse-and-interpret "-\n  paragraph")
+	    "- \n  paragraph\n"))
+    (should
+     (equal (org-test-parse-and-interpret "-\n\n  paragraph")
+	    "- \n\n  paragraph\n"))
     ;; Special case: correctly handle "*" bullets.
     (should (org-test-parse-and-interpret " * item"))
     ;; Special case: correctly handle empty items.

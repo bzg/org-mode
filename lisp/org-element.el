@@ -812,7 +812,8 @@ their value.
 
 Return a list whose CAR is `footnote-definition' and CDR is
 a plist containing `:label', `:begin' `:end', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+`:contents-end', `:pre-blank',`:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at the beginning of the footnote definition."
   (save-excursion
@@ -838,12 +839,16 @@ Assume point is at the beginning of the footnote definition."
 	       ((eq ?* (char-after (match-beginning 0))) (match-beginning 0))
 	       (t (skip-chars-forward " \r\t\n" limit)
 		  (if (= limit (point)) limit (line-beginning-position))))))
+	   (pre-blank 0)
 	   (contents-begin
 	    (progn (search-forward "]")
 		   (skip-chars-forward " \r\t\n" end)
 		   (cond ((= (point) end) nil)
 			 ((= (line-beginning-position) post-affiliated) (point))
-			 (t (line-beginning-position)))))
+			 (t
+			  (setq pre-blank
+				(count-lines (line-beginning-position) begin))
+			  (line-beginning-position)))))
 	   (contents-end
 	    (progn (goto-char end)
 		   (skip-chars-backward " \r\t\n")
@@ -855,6 +860,7 @@ Assume point is at the beginning of the footnote definition."
 		   :end end
 		   :contents-begin contents-begin
 		   :contents-end (and contents-begin contents-end)
+		   :pre-blank pre-blank
 		   :post-blank (count-lines contents-end end)
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
@@ -862,9 +868,18 @@ Assume point is at the beginning of the footnote definition."
 (defun org-element-footnote-definition-interpreter (footnote-definition contents)
   "Interpret FOOTNOTE-DEFINITION element as Org syntax.
 CONTENTS is the contents of the footnote-definition."
-  (concat (format "[fn:%s]" (org-element-property :label footnote-definition))
-	  " "
-	  contents))
+  (let ((pre-blank
+	 (min (or (org-element-property :pre-blank footnote-definition)
+		  ;; 0 is specific to paragraphs at the beginning of
+		  ;; the footnote definition, so we use 1 as
+		  ;; a fall-back value, which is more universal.
+		  1)
+	      ;; Footnote ends after more than two consecutive empty
+	      ;; lines: limit ourselves to 2 newline characters.
+	      2)))
+    (concat (format "[fn:%s]" (org-element-property :label footnote-definition))
+	    (if (= pre-blank 0) (concat " " (org-trim contents))
+	      (concat (make-string pre-blank ?\n) contents)))))
 
 
 ;;;; Headline
@@ -1195,8 +1210,8 @@ STRUCT is the structure of the plain list.
 
 Return a list whose CAR is `item' and CDR is a plist containing
 `:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag', `:structure', `:post-blank' and
-`:post-affiliated' keywords.
+`:checkbox', `:counter', `:tag', `:structure', `:pre-blank',
+`:post-blank' and `:post-affiliated' keywords.
 
 When optional argument RAW-SECONDARY-P is non-nil, item's tag, if
 any, will not be parsed as a secondary string, but as a plain
@@ -1223,20 +1238,25 @@ Assume point is at the beginning of the item."
 			  (string-to-number (match-string 0 c)))))))
 	   (end (progn (goto-char (nth 6 (assq (point) struct)))
 		       (if (bolp) (point) (line-beginning-position 2))))
+	   (pre-blank 0)
 	   (contents-begin
-	    (progn (goto-char
-		    ;; Ignore tags in un-ordered lists: they are just
-		    ;; a part of item's body.
-		    (if (and (match-beginning 4)
-			     (save-match-data (string-match "[.)]" bullet)))
-			(match-beginning 4)
-		      (match-end 0)))
-		   (skip-chars-forward " \r\t\n" end)
-		   (cond ((= (point) end) nil)
-			 ;; If first line isn't empty, contents really
-			 ;; start at the text after item's meta-data.
-			 ((= (line-beginning-position) begin) (point))
-			 (t (line-beginning-position)))))
+	    (progn
+	      (goto-char
+	       ;; Ignore tags in un-ordered lists: they are just
+	       ;; a part of item's body.
+	       (if (and (match-beginning 4)
+			(save-match-data (string-match "[.)]" bullet)))
+		   (match-beginning 4)
+		 (match-end 0)))
+	      (skip-chars-forward " \r\t\n" end)
+	      (cond ((= (point) end) nil)
+		    ;; If first line isn't empty, contents really
+		    ;; start at the text after item's meta-data.
+		    ((= (line-beginning-position) begin) (point))
+		    (t
+		     (setq pre-blank
+			   (count-lines (line-beginning-position) begin))
+		     (line-beginning-position)))))
 	   (contents-end (and contents-begin
 			      (progn (goto-char end)
 				     (skip-chars-backward " \r\t\n")
@@ -1251,6 +1271,7 @@ Assume point is at the beginning of the item."
 			:checkbox checkbox
 			:counter counter
 			:structure struct
+			:pre-blank pre-blank
 			:post-blank (count-lines (or contents-end begin) end)
 			:post-affiliated begin))))
       (org-element-put-property
@@ -1275,26 +1296,30 @@ CONTENTS is the contents of the element."
 	 (counter (org-element-property :counter item))
 	 (tag (let ((tag (org-element-property :tag item)))
 		(and tag (org-element-interpret-data tag))))
-	 ;; Compute indentation.
-	 (ind (make-string (length bullet) 32))
-	 (item-starts-with-par-p
-	  (eq (org-element-type (car (org-element-contents item)))
-	      'paragraph)))
+	 (pre-blank
+	  (min (or (org-element-property :pre-blank item)
+		   ;; 0 is specific to paragraphs at the beginning of
+		   ;; the item, so we use 1 as a fall-back value,
+		   ;; which is more universal.
+		   1)
+	       ;; Lists ends after more than two consecutive empty
+	       ;; lines: limit ourselves to 2 newline characters.
+	       2))
+	 (ind (make-string (length bullet) ?\s)))
     ;; Indent contents.
-    (concat
-     bullet
-     (and counter (format "[@%d] " counter))
-     (pcase checkbox
-       (`on "[X] ")
-       (`off "[ ] ")
-       (`trans "[-] ")
-       (_ nil))
-     (and tag (format "%s :: " tag))
-     (when contents
-       (let ((contents (replace-regexp-in-string
-			"\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
-	 (if item-starts-with-par-p (org-trim contents)
-	   (concat "\n" contents)))))))
+    (concat bullet
+	    (and counter (format "[@%d] " counter))
+	    (pcase checkbox
+	      (`on "[X] ")
+	      (`off "[ ] ")
+	      (`trans "[-] ")
+	      (_ nil))
+	    (and tag (format "%s :: " tag))
+	    (when contents
+	      (let ((contents (replace-regexp-in-string
+			       "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
+		(if (= pre-blank 0) (org-trim contents)
+		  (concat (make-string pre-blank ?\n) contents)))))))
 
 
 ;;;; Plain List
@@ -4532,8 +4557,9 @@ to interpret.  Return Org syntax as a string."
 			      (and (eq type 'paragraph)
 				   (memq (org-element-type parent)
 					 '(footnote-definition item))
-				   (eq data
-				       (car (org-element-contents parent)))))))
+				   (eq data (car (org-element-contents parent)))
+				   (eq (org-element-property :pre-blank parent)
+				       0)))))
 			  ""))))))
 		(if (memq type '(org-data plain-text nil)) results
 		  ;; Build white spaces.  If no `:post-blank' property
