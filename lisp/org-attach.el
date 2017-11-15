@@ -577,6 +577,86 @@ This function is called by `org-archive-hook'.  The option
 	  org-attach-archive-delete)
     (org-attach-delete-all t)))
 
+
+;; Attach from dired.
+
+;; Suggestion to activate shortcuts for dired.  Add the following
+;; lines to the emacs config file.
+
+;; (add-hook
+;;  'dired-mode-hook
+;;  (lambda ()
+;;    (define-key dired-mode-map (kbd "C-c C-x a") #'org-attach-dired-attach-to-next-best-subtree)
+;;    (define-key dired-mode-map (kbd "C-c C-x c") #'org-attach-dired-attach-to-next-best-subtree-cp)
+;;    (define-key dired-mode-map (kbd "C-c C-x m") #'org-attach-dired-attach-to-next-best-subtree-mv)
+;;    (define-key dired-mode-map (kbd "C-c C-x l") #'org-attach-dired-attach-to-next-best-subtree-ln)
+;;    (define-key dired-mode-map (kbd "C-c C-x s") #'org-attach-dired-attach-to-next-best-subtree-lns)))
+
+(defun org-attach-attach-files (files &optional method)
+  "Move/copy/link FILES into the attachment directory of the current task.
+METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
+`org-attach-method'."
+  (setq method (or method org-attach-method))
+  (mapc (lambda (file) (org-attach-attach file nil method)) files))
+
+(defun org-attach-dired-marked-files-in-dired ()
+  "Return list of marked files in dired."
+  (cl-assert (eq 'dired-mode major-mode))
+  (delq nil
+        (mapcar
+         (lambda (f) (if (file-directory-p f) nil f)) ;; don't attach directories
+	 (nreverse (dired-map-over-marks (dired-get-filename) nil)))))
+
+(defun org-attach-dired-marked-files-or-file-at-cursor-in-dired ()
+  "Return list of marked files in dired or file at cursor as one
+element list.  Else return nil."
+  (cl-assert (eq 'dired-mode major-mode))
+  (or (org-attach-dired-marked-files-in-dired)
+      (list (dired-get-filename 'no-dir t))))
+
+(defun org-attach-dired-attach-to-next-best-subtree (files)
+  "Attach FILES marked or current file in dired to subtree in other window.
+Precondition: Point must be in a dired buffer.
+Idea taken from `gnus-dired-attach'."
+  (interactive
+   (list (org-attach-dired-marked-files-or-file-at-cursor-in-dired)))
+  (unless (eq major-mode 'dired-mode)
+    (user-error "This command must be triggered in a dired buffer."))
+  (let ((start-win (selected-window))
+        (other-win
+         (get-window-with-predicate
+          (lambda (window)
+            (with-current-buffer (window-buffer window)
+              (eq major-mode 'org-mode))))))
+    (unless other-win
+      (user-error
+       "Can't attach to subtree.  There is no window in Org-mode"))
+    (select-window other-win)
+    (org-attach-attach-files files)
+    (select-window start-win)))
+
+(defun org-attach-dired-attach-to-next-best-subtree-cp ()
+  (interactive)
+  (let ((org-attach-method 'cp))
+    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
+
+(defun org-attach-dired-attach-to-next-best-subtree-mv ()
+  (interactive)
+  (let ((org-attach-method 'mv))
+    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
+
+(defun org-attach-dired-attach-to-next-best-subtree-ln ()
+  (interactive)
+  (let ((org-attach-method 'ln))
+    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
+
+(defun org-attach-dired-attach-to-next-best-subtree-lns ()
+  (interactive)
+  (let ((org-attach-method 'lns))
+    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
+
+
+
 (add-hook 'org-archive-hook 'org-attach-archive-delete-maybe)
 
 (provide 'org-attach)
