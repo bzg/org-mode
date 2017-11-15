@@ -68,7 +68,13 @@
    (eq 'foo
        (get-text-property 1 'face
 			  (org-string-display
-			   #("123" 1 2 (display "abc" face foo)))))))
+			   #("123" 1 2 (display "abc" face foo))))))
+  ;; Also preserve `display' property in original string.
+  (should
+   (equal "abc"
+	  (let ((s #("123" 1 2 (display "abc" face foo))))
+	    (org-string-display s)
+	    (get-text-property 1 'display s)))))
 
 
 (provide 'test-org-macs)
