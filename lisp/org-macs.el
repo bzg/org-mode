@@ -334,16 +334,15 @@ text properties."
 			      (value (if (stringp display) display
 				       (cl-some #'stringp display))))
 			 (when value
-			   (apply
-			    #'propertize
-			    ;; Displayed string could contain
-			    ;; invisible parts, but no nested display.
-			    (funcall prune-invisible value)
-			    (plist-put props
-				       'display
-				       (and (not (stringp display))
-					    (cl-remove-if #'stringp
-							  display)))))))))))
+			   (apply #'propertize
+				  ;; Displayed string could contain
+				  ;; invisible parts, but no nested
+				  ;; display.
+				  (funcall prune-invisible value)
+				  'display
+				  (and (not (stringp display))
+				       (cl-remove-if #'stringp display))
+				  props))))))))
     ;; `display' property overrides `invisible' one.  So we first
     ;; replace characters with `display' property.  Then we remove
     ;; invisible characters.
