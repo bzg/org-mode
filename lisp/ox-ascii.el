@@ -632,7 +632,7 @@ Return value is a symbol among `left', `center', `right' and
     (or justification 'left)))
 
 (defun org-ascii--build-title
-  (element info text-width &optional underline notags toc)
+    (element info text-width &optional underline notags toc)
   "Format ELEMENT title and return it.
 
 ELEMENT is either an `headline' or `inlinetask' element.  INFO is
@@ -651,13 +651,12 @@ possible.  It doesn't apply to `inlinetask' elements."
   (let* ((headlinep (eq (org-element-type element) 'headline))
 	 (numbers
 	  ;; Numbering is specific to headlines.
-	  (and headlinep (org-export-numbered-headline-p element info)
-	       ;; All tests passed: build numbering string.
-	       (concat
-		(mapconcat
-		 'number-to-string
-		 (org-export-get-headline-number element info) ".")
-		" ")))
+	  (and headlinep
+	       (org-export-numbered-headline-p element info)
+	       (let ((numbering (org-export-get-headline-number element info)))
+		 (if toc (format "%d. " (org-last numbering))
+		   (concat (mapconcat #'number-to-string numbering ".")
+			   " ")))))
 	 (text
 	  (org-trim
 	   (org-export-data
