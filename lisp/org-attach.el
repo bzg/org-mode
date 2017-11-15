@@ -599,27 +599,12 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
   (setq method (or method org-attach-method))
   (mapc (lambda (file) (org-attach-attach file nil method)) files))
 
-(defun org-attach-dired-marked-files-in-dired ()
-  "Return list of marked files in dired."
-  (cl-assert (eq 'dired-mode major-mode))
-  (delq nil
-        (mapcar
-         (lambda (f) (if (file-directory-p f) nil f)) ;; don't attach directories
-	 (nreverse (dired-map-over-marks (dired-get-filename) nil)))))
-
-(defun org-attach-dired-marked-files-or-file-at-cursor-in-dired ()
-  "Return list of marked files in dired or file at cursor as one
-element list.  Else return nil."
-  (cl-assert (eq 'dired-mode major-mode))
-  (or (org-attach-dired-marked-files-in-dired)
-      (list (dired-get-filename 'no-dir t))))
-
 (defun org-attach-dired-attach-to-next-best-subtree (files)
   "Attach FILES marked or current file in dired to subtree in other window.
 Precondition: Point must be in a dired buffer.
 Idea taken from `gnus-dired-attach'."
   (interactive
-   (list (org-attach-dired-marked-files-or-file-at-cursor-in-dired)))
+   (list (dired-get-marked-files)))
   (unless (eq major-mode 'dired-mode)
     (user-error "This command must be triggered in a dired buffer."))
   (let ((start-win (selected-window))
