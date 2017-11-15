@@ -580,27 +580,17 @@ This function is called by `org-archive-hook'.  The option
 
 ;; Attach from dired.
 
-;; Suggestion to activate shortcuts for dired.  Add the following
-;; lines to the emacs config file.
+;; Add the following lines to the config file to get a binding for
+;; dired-mode.
 
 ;; (add-hook
 ;;  'dired-mode-hook
 ;;  (lambda ()
-;;    (define-key dired-mode-map (kbd "C-c C-x a") #'org-attach-dired-attach-to-next-best-subtree)
-;;    (define-key dired-mode-map (kbd "C-c C-x c") #'org-attach-dired-attach-to-next-best-subtree-cp)
-;;    (define-key dired-mode-map (kbd "C-c C-x m") #'org-attach-dired-attach-to-next-best-subtree-mv)
-;;    (define-key dired-mode-map (kbd "C-c C-x l") #'org-attach-dired-attach-to-next-best-subtree-ln)
-;;    (define-key dired-mode-map (kbd "C-c C-x s") #'org-attach-dired-attach-to-next-best-subtree-lns)))
+;;    (define-key dired-mode-map (kbd "C-c C-x a") #'org-attach-dired-to-subtree))))
 
-(defun org-attach-attach-files (files &optional method)
-  "Move/copy/link FILES into the attachment directory of the current task.
-METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
-`org-attach-method'."
-  (setq method (or method org-attach-method))
-  (mapc (lambda (file) (org-attach-attach file nil method)) files))
-
-(defun org-attach-dired-attach-to-next-best-subtree (files)
+(defun org-attach-dired-to-subtree (files)
   "Attach FILES marked or current file in dired to subtree in other window.
+Takes the method given in `org-attach-method' for the attach action.
 Precondition: Point must be in a dired buffer.
 Idea taken from `gnus-dired-attach'."
   (interactive
@@ -615,30 +605,11 @@ Idea taken from `gnus-dired-attach'."
               (eq major-mode 'org-mode))))))
     (unless other-win
       (user-error
-       "Can't attach to subtree.  There is no window in Org-mode"))
+       "Can't attach to subtree.  No window displaying an Org buffer"))
     (select-window other-win)
-    (org-attach-attach-files files)
+    (dolist (file files)
+      (org-attach-attach file))
     (select-window start-win)))
-
-(defun org-attach-dired-attach-to-next-best-subtree-cp ()
-  (interactive)
-  (let ((org-attach-method 'cp))
-    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
-
-(defun org-attach-dired-attach-to-next-best-subtree-mv ()
-  (interactive)
-  (let ((org-attach-method 'mv))
-    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
-
-(defun org-attach-dired-attach-to-next-best-subtree-ln ()
-  (interactive)
-  (let ((org-attach-method 'ln))
-    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
-
-(defun org-attach-dired-attach-to-next-best-subtree-lns ()
-  (interactive)
-  (let ((org-attach-method 'lns))
-    (call-interactively #'org-attach-dired-attach-to-next-best-subtree)))
 
 
 
