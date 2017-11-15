@@ -1906,6 +1906,27 @@ is t, then new columns should be added as needed"
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
+(ert-deftest test-org-table/formula-priority ()
+  "Test field formula priority over column formula."
+  ;; Field formulas bind stronger than column formulas.
+  (should
+   (equal
+    "| 1 |  3 |\n| 2 | 99 |\n"
+    (org-test-with-temp-text
+	"| 1 |   |\n| 2 |   |\n<point>#+tblfm: $2=3*$1::@2$2=99"
+      (org-table-calc-current-TBLFM)
+      (buffer-substring-no-properties (point-min) (point)))))
+  ;; When field formula is removed, table formulas is applied again.
+  (should
+   (equal
+    "| 1 | 3 |\n| 2 | 6 |\n"
+    (org-test-with-temp-text
+	"| 1 |   |\n| 2 |   |\n#+tblfm: $2=3*$1<point>::@2$2=99"
+      (org-table-calc-current-TBLFM)
+      (delete-region (point) (line-end-position))
+      (org-table-calc-current-TBLFM)
+      (buffer-substring-no-properties (point-min) (line-beginning-position))))))
+
 (ert-deftest test-org-table/tab-indent ()
   "Test named fields with tab indentation."
   (should

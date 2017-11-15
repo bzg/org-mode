@@ -3270,7 +3270,9 @@ existing formula for column %s"
 		 (org-table-goto-field name)
 		 (org-table-put-field-property :org-untouchable t)))))
 	 ;; Evaluate the column formulas, but skip fields covered by
-	 ;; field formulas.
+	 ;; field formulas.  This is done by setting
+	 ;; `:org-untouchable' property on such fields.  The property
+	 ;; is them removed once column formulas have been applied.
 	 (goto-char beg)
 	 (while (re-search-forward line-re end t)
 	   (unless (string-match "\\` *[_^!$/] *\\'" (org-table-get-field 1))
@@ -3292,6 +3294,7 @@ existing formula for column %s"
 	       (unless (get-text-property (point) :org-untouchable)
 		 (org-table-eval-formula
 		  nil (cdr entry) 'noalign 'nocst 'nostore 'noanalysis)))))
+	 (remove-text-properties beg end '(:org-untouchable))
 	 ;; Evaluate the field formulas.
 	 (dolist (eq eqlfield)
 	   (let ((reference (car eq))
