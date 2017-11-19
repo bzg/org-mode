@@ -1367,17 +1367,22 @@ However, when FORCE is non-nil, create new columns if necessary."
 	(end (copy-marker (org-table-end)))
 	(shrunk-columns (org-table--list-shrunk-columns)))
     (org-table-expand beg end)
-    (org-table-save-field
-     (goto-char beg)
-     (while (< (point) end)
-       (unless (org-at-table-hline-p)
-	 (org-table-goto-column col t)
-	 (insert "|   "))
-       (forward-line)))
+    (save-excursion
+      (goto-char beg)
+      (while (< (point) end)
+	(unless (org-at-table-hline-p)
+	  (org-table-goto-column col t)
+	  (unless (search-forward "|" (line-end-position) t 2)
+	    ;; Add missing vertical bar at the end of the row.
+	    (end-of-line)
+	    (insert "|"))
+	  (insert "  |"))
+	(forward-line)))
+    (org-table-goto-column (1+ col))
     (org-table-align)
     ;; Shift appropriately stored shrunk column numbers, then hide the
     ;; columns again.
-    (org-table--shrink-columns (mapcar (lambda (c) (if (< c col) c (1+ c)))
+    (org-table--shrink-columns (mapcar (lambda (c) (if (<= c col) c (1+ c)))
 				       shrunk-columns)
 			       beg end)
     (set-marker end nil)

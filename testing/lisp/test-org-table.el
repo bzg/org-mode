@@ -2232,6 +2232,60 @@ is t, then new columns should be added as needed"
 	 (ignore-errors (org-table-previous-field))
 	 (char-after)))))
 
+
+;;; Inserting rows, inserting columns
+
+(ert-deftest test-org-table/insert-column ()
+  "Test `org-table-insert-column' specifications."
+  ;; Error when outside a table.
+  (should-error
+   (org-test-with-temp-text "Paragraph"
+     (org-table-insert-column)))
+  ;; Insert new column after current one.
+  (should
+   (equal "| a |   |\n"
+	  (org-test-with-temp-text "| a |"
+	    (org-table-insert-column)
+	    (buffer-string))))
+  (should
+   (equal "| a |   | b |\n"
+	  (org-test-with-temp-text "| <point>a | b |"
+	    (org-table-insert-column)
+	    (buffer-string))))
+  ;; Move point into the newly created column.
+  (should
+   (equal "  |"
+	  (org-test-with-temp-text "| <point>a |"
+	    (org-table-insert-column)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  (should
+   (equal "  | b |"
+	  (org-test-with-temp-text "| <point>a | b |"
+	    (org-table-insert-column)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Handle missing vertical bar in the last column.
+  (should
+   (equal "| a |   |\n"
+	  (org-test-with-temp-text "| a"
+	    (org-table-insert-column)
+	    (buffer-string))))
+  (should
+   (equal "  |"
+	  (org-test-with-temp-text "| <point>a"
+	    (org-table-insert-column)
+	    (buffer-substring-no-properties (point) (line-end-position)))))
+  ;; Handle column insertion when point is before first column.
+  (should
+   (equal " | a |   |\n"
+	  (org-test-with-temp-text " | a |"
+	    (org-table-insert-column)
+	    (buffer-string))))
+  (should
+   (equal " | a |   | b |\n"
+	  (org-test-with-temp-text " | a | b |"
+	    (org-table-insert-column)
+	    (buffer-string)))))
+
 
 
 ;;; Moving rows, moving columns
