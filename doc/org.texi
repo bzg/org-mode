@@ -10819,10 +10819,11 @@ Toggle inclusion of inlinetasks (@code{org-export-with-inlinetasks}).
 @cindex property, UNNUMBERED
 Toggle section-numbers (@code{org-export-with-section-numbers}).  When set to
 number @samp{n}, Org numbers only those headlines at level @samp{n} or above.
-Set @code{UNNUMBERED} property to non-@code{nil} to disable numbering of
-heading and subheadings entirely.  Moreover, when the value is @samp{notoc}
-the headline, and all its children, do not appear in the table of contents
-either (@pxref{Table of contents}).
+Setting @code{UNNUMBERED} property to non-@code{nil} disables numbering of
+the heading.  Since subheadings inherit from this property, it affects their
+numbering, too.  Moreover, when the value is @samp{notoc}, the unnumbered
+headline does not appear in the table of contents either (@pxref{Table of
+contents}).
 
 @item p:
 @vindex org-export-with-planning

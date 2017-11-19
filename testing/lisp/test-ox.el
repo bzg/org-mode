@@ -2474,11 +2474,11 @@ Para2"
      (org-export-numbered-headline-p
       (org-element-map tree 'headline #'identity info t)
       info)))
-  ;; UNNUMBERED ignores inheritance.  Any non-nil value among
-  ;; ancestors disables numbering.
+  ;; UNNUMBERED is inherited.
   (should
-   (org-test-with-parsed-data
-       "* H
+   (equal '(unnumbered numbered unnumbered)
+	  (org-test-with-parsed-data
+	      "* H
 :PROPERTIES:
 :UNNUMBERED: t
 :END:
@@ -2486,10 +2486,12 @@ Para2"
 :PROPERTIES:
 :UNNUMBERED: nil
 :END:
-*** H3"
-     (cl-every
-      (lambda (h) (not (org-export-numbered-headline-p h info)))
-      (org-element-map tree 'headline #'identity info)))))
+** H3"
+	    (org-element-map tree 'headline
+	      (lambda (h)
+		(if (org-export-numbered-headline-p h info) 'numbered
+		  'unnumbered))
+	      info)))))
 
 (ert-deftest test-org-export/number-to-roman ()
   "Test `org-export-number-to-roman' specifications."
