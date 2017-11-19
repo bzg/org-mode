@@ -10791,7 +10791,7 @@ Toggle inclusion of inlinetasks (@code{org-export-with-inlinetasks}).
 Toggle section-numbers (@code{org-export-with-section-numbers}).  When set to
 number @samp{n}, Org numbers only those headlines at level @samp{n} or above.
 Setting @code{UNNUMBERED} property to non-@code{nil} disables numbering of
-a heading.  Since subheadings inherit from this property, it affect their
+a heading.  Since subheadings inherit from this property, it affects their
 numbering, too.
 
 @item p:
