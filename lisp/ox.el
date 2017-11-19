@@ -3954,9 +3954,7 @@ INFO is a plist holding contextual information."
 (defun org-export-numbered-headline-p (headline info)
   "Return a non-nil value if HEADLINE element should be numbered.
 INFO is a plist used as a communication channel."
-  (unless (cl-some
-	   (lambda (head) (org-not-nil (org-element-property :UNNUMBERED head)))
-	   (org-element-lineage headline nil t))
+  (unless (org-not-nil (org-export-get-node-property :UNNUMBERED headline t))
     (let ((sec-num (plist-get info :section-numbers))
 	  (level (org-export-get-relative-level headline info)))
       (if (wholenump sec-num) (<= level sec-num) sec-num))))
