@@ -5225,16 +5225,14 @@ Footnote sections are ignored."
 	 (n (if (not (wholenump n)) limit
 	      (min (if (eq (org-element-type scope) 'org-data) n
 		     (+ (org-export-get-relative-level scope info) n))
-		   limit)))
-	 (skipped nil))
+		   limit))))
     (org-element-map (org-element-contents scope) 'headline
       (lambda (h)
-	(if (or (org-element-property :footnote-section-p h)
-		(equal "notoc" (org-element-property :UNNUMBERED h))
-		(memq (org-element-property :parent h) skipped)
-		(< n (org-export-get-relative-level h info)))
-	    (progn (push h skipped) nil)
-	  h))
+	(and (not (org-element-property :footnote-section-p h))
+	     (not (equal "notoc"
+			 (org-export-get-node-property :UNNUMBERED h t)))
+	     (>= n (org-export-get-relative-level h info))
+	     h))
       info)))
 
 (defun org-export-collect-elements (type info &optional predicate)
@@ -5299,8 +5297,7 @@ contents.  However, it is useful if some additional processing is
 required on headlines excluded from table of contents."
   (or (org-element-property :footnote-section-p headline)
       (org-export-low-level-p headline info)
-      (cl-some (lambda (h) (equal "notoc" (org-element-property :UNNUMBERED h)))
-	       (org-element-lineage headline nil t))))
+      (equal "notoc" (org-export-get-node-property :UNNUMBERED headline t))))
 
 (defun org-export-toc-entry-backend (parent &rest transcoders)
   "Return an export back-end appropriate for table of contents entries.

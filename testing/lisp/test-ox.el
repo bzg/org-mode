@@ -4318,13 +4318,18 @@ Another text. (ref:text)
 		      (org-export-collect-headlines info))))))
   ;; Do not collect headlines with UNNUMBERED property set to "notoc".
   ;; Headlines with another value for the property are still
-  ;; collected.
+  ;; collected.  UNNUMBERED property is inherited.
   (should
    (equal '("H1")
 	  (org-test-with-parsed-data
 	      "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: notoc\n:END:"
 	    (mapcar (lambda (h) (org-element-property :raw-value h))
 		    (org-export-collect-headlines info)))))
+  (should-not
+   (org-test-with-parsed-data
+       "* H1\n:PROPERTIES:\n:UNNUMBERED: notoc\n:END:\n** H2"
+     (mapcar (lambda (h) (org-element-property :raw-value h))
+	     (org-export-collect-headlines info))))
   (should
    (equal '("H1" "H2")
 	  (org-test-with-parsed-data
@@ -4348,17 +4353,28 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/excluded-from-toc-p ()
   "Test `org-export-excluded-from-toc-p' specifications."
+  ;; By default, headlines are not excluded.
   (should-not
    (org-test-with-parsed-data "* H1"
      (org-element-map tree 'headline
        (lambda (h) (org-export-excluded-from-toc-p h info)) info t)))
+  ;; Exclude according to a maximum level.
+  (should
+   (equal '(in out)
+	  (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+	    (org-element-map tree 'headline
+	      (lambda (h) (if (org-export-excluded-from-toc-p h info) 'out 'in))
+	      info))))
+  ;; Exclude according to UNNUMBERED property.
   (should
    (org-test-with-parsed-data "* H1\n:PROPERTIES:\n:UNNUMBERED: notoc\n:END:"
      (org-element-map tree 'headline
        (lambda (h) (org-export-excluded-from-toc-p h info)) info t)))
+  ;; UNNUMBERED property is inherited, so is "notoc" value.
   (should
-   (equal '(in out)
-	  (org-test-with-parsed-data "#+OPTIONS: H:1\n* H1\n** H2"
+   (equal '(out out)
+	  (org-test-with-parsed-data
+	      "* H1\n:PROPERTIES:\n:UNNUMBERED: notoc\n:END:\n** H2"
 	    (org-element-map tree 'headline
 	      (lambda (h) (if (org-export-excluded-from-toc-p h info) 'out 'in))
 	      info)))))
@@ -4427,10 +4443,10 @@ Another text. (ref:text)
 	    (let (org-export-registered-backends)
 	      (org-export-define-backend 'test
 		'((headline . (lambda (h _c i) (org-export-data-with-backend
-					   (org-element-property :title h)
-					   (org-export-toc-entry-backend 'test
-					     '(bold . (lambda (_b c _i) c)))
-					   i)))))
+						(org-element-property :title h)
+						(org-export-toc-entry-backend 'test
+						  '(bold . (lambda (_b c _i) c)))
+						i)))))
 	      (org-export-as 'test))))))
 
 
