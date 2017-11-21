@@ -11080,14 +11080,19 @@ options.
 Org comes with following pre-defined macros:
 
 @table @code
-@item @{@{@{title@}@}@}
+@item @{@{@{keyword(@var{NAME})@}@}@}
+@itemx @{@{@{title@}@}@}
 @itemx @{@{@{author@}@}@}
 @itemx @{@{@{email@}@}@}
+@cindex keyword, macro
 @cindex title, macro
 @cindex author, macro
 @cindex email, macro
-Org replaces these macro references with available information at the time of
-export.
+The @samp{keyword} macro collects all values from @var{NAME} keywords
+throughout the buffer, separated with white space.  @samp{title},
+@samp{author} and @samp{email} macros are shortcuts for, respectively,
+@samp{@{@{@{keyword(TITLE)@}@}@}}, @samp{@{@{@{keyword(AUTHOR)@}@}@}} and
+@samp{@{@{@{keyword(EMAIL)@}@}@}}.
 
 @item @{@{@{date@}@}@}
 @itemx @{@{@{date(@var{FORMAT})@}@}@}

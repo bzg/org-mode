@@ -136,7 +136,8 @@ function installs the following ones: \"property\",
 	    (let ((old-template (assoc (car cell) templates)))
 	      (if old-template (setcdr old-template (cdr cell))
 		(push cell templates))))))
-    ;; Install "author, "date, "email", "title" and "results" macros.
+    ;; Install "author, "date, "email", "keyword", "title" and
+    ;; "results" macros.
     (mapc update-templates
 	  (list
 	   (cons "author" (org-macro--find-keyword-value "AUTHOR"))
@@ -153,6 +154,7 @@ function installs the following ones: \"property\",
 			       value)
 		     value)))
 	   (cons "email" (org-macro--find-keyword-value "EMAIL"))
+	   (cons "keyword" "(eval (org-macro--find-keyword-value \"$1\"))")
 	   (cons "results" "$1")
 	   (cons "title" (org-macro--find-keyword-value "TITLE"))))
     ;; Install "property", "time" macros.

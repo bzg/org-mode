@@ -322,6 +322,29 @@
             (buffer-substring-no-properties
              (line-beginning-position) (line-end-position))))))
 
+(ert-deftest test-org-macro/keyword ()
+  "Test {{{keyword}}} macro."
+  ;; Replace macro with keyword's value.
+  (should
+   (equal
+    "value"
+    (org-test-with-temp-text
+	"#+keyword: value\n<point>{{{keyword(KEYWORD)}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (buffer-substring-no-properties
+       (line-beginning-position) (point-max)))))
+  ;; Replace macro with keyword's value.
+  (should
+   (equal
+    "value value2"
+    (org-test-with-temp-text
+	"#+keyword: value\n#+keyword: value2\n<point>{{{keyword(KEYWORD)}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (buffer-substring-no-properties
+       (line-beginning-position) (point-max))))))
+
 (ert-deftest test-org-macro/escape-arguments ()
   "Test `org-macro-escape-arguments' specifications."
   ;; Regular tests.
