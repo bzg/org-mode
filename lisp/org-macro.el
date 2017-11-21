@@ -136,6 +136,25 @@ function installs the following ones: \"property\",
 	    (let ((old-template (assoc (car cell) templates)))
 	      (if old-template (setcdr old-template (cdr cell))
 		(push cell templates))))))
+    ;; Install "author, "date, "email", "title" and "results" macros.
+    (mapc update-templates
+	  (list
+	   (cons "author" (org-macro--find-keyword-value "AUTHOR"))
+	   (cons "date"
+		 (let* ((value (org-macro--find-keyword-value "DATE"))
+			(date (org-element-parse-secondary-string
+			       value (org-element-restriction 'keyword))))
+		   (if (and (consp date)
+			    (not (cdr date))
+			    (eq (org-element-type (car date)) 'timestamp))
+		       (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
+			       (format "(org-timestamp-format '%S \"$1\")"
+				       (org-element-copy (car date)))
+			       value)
+		     value)))
+	   (cons "email" (org-macro--find-keyword-value "EMAIL"))
+	   (cons "results" "$1")
+	   (cons "title" (org-macro--find-keyword-value "TITLE"))))
     ;; Install "property", "time" macros.
     (mapc update-templates
 	  (list (cons "property"
@@ -156,7 +175,11 @@ function installs the following ones: \"property\",
 	(mapc update-templates
 	      (list (cons "input-file" (file-name-nondirectory visited-file))
 		    (cons "modification-time"
-			  (format "(eval (format-time-string \"$1\" (or (and (org-string-nw-p \"$2\") (org-macro--vc-modified-time %s)) '%s)))"
+			  (format "(eval
+\(format-time-string \"$1\"
+                     (or (and (org-string-nw-p \"$2\")
+                              (org-macro--vc-modified-time %s))
+                     '%s)))"
 				  (prin1-to-string visited-file)
 				  (prin1-to-string
 				   (nth 5 (file-attributes visited-file)))))))))
@@ -190,17 +213,17 @@ default value.  Return nil if no template was found."
         ;; Return string.
         (format "%s" (or value ""))))))
 
-(defun org-macro-replace-all (templates &optional finalize keywords)
+(defun org-macro-replace-all (templates &optional keywords)
   "Replace all macros in current buffer by their expansion.
 
 TEMPLATES is an alist of templates used for expansion.  See
 `org-macro-templates' for a buffer-local default value.
 
-If optional arg FINALIZE is non-nil, raise an error if a macro is
-found in the buffer with no definition in TEMPLATES.
-
 Optional argument KEYWORDS, when non-nil is a list of keywords,
-as strings, where macro expansion is allowed."
+as strings, where macro expansion is allowed.
+
+Return an error if a macro in the buffer cannot be associated to
+a definition in TEMPLATES."
   (org-with-wide-buffer
    (goto-char (point-min))
    (let ((properties-regexp (format "\\`EXPORT_%s\\+?\\'"
@@ -246,7 +269,7 @@ as strings, where macro expansion is allowed."
 		      ;; Leave point before replacement in case of
 		      ;; recursive expansions.
 		      (save-excursion (insert value)))
-		     (finalize
+		     (t
 		      (error "Undefined Org macro: %s; aborting"
 			     (org-element-property :key macro))))))))))))
 
@@ -293,6 +316,22 @@ Return a list of arguments, as strings.  This is the opposite of
 
 
 ;;; Helper functions and variables for internal macros
+
+(defun org-macro--find-keyword-value (name)
+  "Find value for keyword NAME in current buffer.
+KEYWORD is a string.  Return value associated to the keywords
+named after NAME, as a string, or nil."
+  (org-with-point-at 1
+    (let ((regexp (format "^[ \t]*#\\+%s:" (regexp-quote name)))
+	  (case-fold-search t)
+	  (result nil))
+      (while (re-search-forward regexp nil t)
+	(let ((element (org-element-at-point)))
+	  (when (eq 'keyword (org-element-type element))
+	    (setq result (concat result
+				 " "
+				 (org-element-property :value element))))))
+      (and result (org-trim result)))))
 
 (defun org-macro--vc-modified-time (file)
   (save-window-excursion

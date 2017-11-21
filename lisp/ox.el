@@ -3038,9 +3038,9 @@ Return code as a string."
 	 (org-export-expand-include-keyword)
 	 (org-export--delete-comment-trees)
 	 (org-macro-initialize-templates)
-	 (org-macro-replace-all
-	  (append org-macro-templates org-export-global-macros)
-	  nil parsed-keywords)
+	 (org-macro-replace-all (append org-macro-templates
+					org-export-global-macros)
+				parsed-keywords)
 	 ;; Refresh buffer properties and radio targets after
 	 ;; potentially invasive previous changes.  Likewise, do it
 	 ;; again after executing Babel code.
@@ -3082,29 +3082,6 @@ Return code as a string."
 	   (dolist (filter (plist-get info :filter-options))
 	     (let ((result (funcall filter info backend-name)))
 	       (when result (setq info result)))))
-	 ;; Expand export-specific set of macros: {{{author}}},
-	 ;; {{{date(FORMAT)}}}, {{{email}}} and {{{title}}}.  It must
-	 ;; be done once regular macros have been expanded, since
-	 ;; parsed keywords may contain one of them.
-	 (org-macro-replace-all
-	  (list
-	   (cons "author" (org-element-interpret-data (plist-get info :author)))
-	   (cons "date"
-		 (let* ((date (plist-get info :date))
-			(value (or (org-element-interpret-data date) "")))
-		   (if (and (consp date)
-			    (not (cdr date))
-			    (eq (org-element-type (car date)) 'timestamp))
-		       (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
-			       (format "(org-timestamp-format '%S \"$1\")"
-				       (org-element-copy (car date)))
-			       value)
-		     value)))
-	   (cons "email" (org-element-interpret-data (plist-get info :email)))
-	   (cons "title" (org-element-interpret-data (plist-get info :title)))
-	   (cons "results" "$1"))
-	  'finalize
-	  parsed-keywords)
 	 ;; Parse buffer.
 	 (setq tree (org-element-parse-buffer nil visible-only))
 	 ;; Prune tree from non-exported elements and transform
