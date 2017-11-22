@@ -52,8 +52,11 @@
 
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-copy "org-element" (datum))
 (declare-function org-element-macro-parser "org-element" ())
+(declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-property "org-element" (property element))
+(declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-file-contents "org" (file &optional noerror nocache))
 (declare-function org-file-url-p "org" (file))
