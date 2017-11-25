@@ -5705,20 +5705,16 @@ This should be called after the variable `org-link-parameters' has changed."
 	  (when (save-excursion
 		  (goto-char (match-beginning 0))
 		  (and
-		   ;; Do not match headline stars.  Do not consider
-		   ;; stars of a headline as closing marker for bold
-		   ;; markup either.
-		   (not (and (equal marker "*")
-			     (save-excursion
-			       (forward-char)
-			       (skip-chars-backward "*")
-			       (looking-at-p org-outline-regexp-bol))))
 		   ;; Do not match table hlines.
 		   (not (and (equal marker "+")
 			     (org-match-line
-			      "^[ \t]*\\(|[-+]+|?\\|\\+[-+]+\\+\\)[ \t]*$")))
+			      "[ \t]*\\(|[-+]+|?\\|\\+[-+]+\\+\\)[ \t]*$")))
+		   ;; Match full emphasis markup regexp.
 		   (looking-at (if verbatim? org-verbatim-re org-emph-re))
-		   ;; At a table row, do not cross cell boundaries.
+		   ;; Do not span over paragraph boundaries.
+		   (not (string-match-p org-element-paragraph-separate
+					(match-string 2)))
+		   ;; Do not span over cells in table rows.
 		   (not (and (save-match-data (org-match-line "[ \t]*|"))
 			     (string-match-p "|" (match-string 4))))))
 	    (pcase-let ((`(,_ ,face ,_) (assoc marker org-emphasis-alist)))
