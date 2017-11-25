@@ -889,27 +889,6 @@ x
 		       (buffer-substring-no-properties
 			(point-at-bol) (point-at-eol)))))))
 
-(defun test-ob-verify-result-and-removed-result (result buffer-text)
-  "Test helper function to test `org-babel-remove-result'.
-A temp buffer is populated with BUFFER-TEXT, the first block is executed,
-and the result of execution is verified against RESULT.
-
-The block is actually executed /twice/ to ensure result
-replacement happens correctly."
-  (org-test-with-temp-text
-      buffer-text
-    (org-babel-next-src-block) (org-babel-execute-maybe) (org-babel-execute-maybe)
-    (should (re-search-forward "\\#\\+results:" nil t))
-    (forward-line)
-    (should (string= result
-		     (buffer-substring-no-properties
-		      (point-at-bol)
-		      (- (point-max) 16))))
-    (org-babel-previous-src-block) (org-babel-remove-result)
-    (should (string= buffer-text
-		     (buffer-substring-no-properties
-		      (point-min) (point-max))))))
-
 (ert-deftest test-ob/org-babel-remove-result--results-default ()
   "Test `org-babel-remove-result' with default :results."
   (mapcar (lambda (language)
@@ -1114,6 +1093,27 @@ Line 3\"
 
 * next heading"))
 
+(ert-deftest test-ob/org-babel-remove-result--no-blank-line ()
+  "Test `org-babel-remove-result' without blank line between code and results."
+  (should
+   (equal "
+#+begin_src emacs-lisp
+  (+ 1 1)
+#+end_src
+#+results:
+: 2
+* next heading"
+	  (org-test-with-temp-text
+	      "
+<point>#+begin_src emacs-lisp
+  (+ 1 1)
+#+end_src
+#+results:
+: 2
+* next heading"
+	    (org-babel-execute-maybe)
+	    (buffer-string)))))
+
 (ert-deftest test-ob/results-do-not-replace-code-blocks ()
   (org-test-with-temp-text "Block two has a space after the name.
 
@@ -1251,9 +1251,10 @@ Line 3\"
 
 #+RESULTS: test
 : 4
-
+<point>
 Paragraph"
-      (narrow-to-region (point) (save-excursion (forward-line 7) (point)))
+      (narrow-to-region (point-min) (point))
+      (goto-char (point-min))
       (let ((org-babel-results-keyword "RESULTS"))
 	(org-babel-execute-src-block))
       (org-trim (buffer-string)))))
