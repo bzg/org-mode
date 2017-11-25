@@ -1167,7 +1167,8 @@ references with `org-export-get-reference'."
     (let* ((filename (file-truename file))
 	   (crossrefs
 	    (org-publish-cache-get-file-property filename :crossrefs nil t))
-	   (cells (org-export-string-to-search-cell search)))
+	   (cells
+	    (org-export-string-to-search-cell (org-link-unescape search))))
       (or
        ;; Look for reference associated to search cells triggered by
        ;; LINK.  It can match when targeted file has been published
