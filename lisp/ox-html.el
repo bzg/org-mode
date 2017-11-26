@@ -2953,10 +2953,7 @@ images, set it to:
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((home (when (plist-get info :html-link-home)
-		 (org-trim (plist-get info :html-link-home))))
-	 (use-abs-url (plist-get info :html-link-use-abs-url))
-	 (link-org-files-as-html-maybe
+  (let* ((link-org-files-as-html-maybe
 	  (lambda (raw-path info)
 	    ;; Treat links to `file.org' as links to `file.html', if
 	    ;; needed.  See `org-html-link-org-files-as-html'.
@@ -2984,8 +2981,13 @@ INFO is a plist holding contextual information.  See
 		   (org-publish-file-relative-name raw-path info)))
 	    ;; Possibly append `:html-link-home' to relative file
 	    ;; name.
-	    (unless (file-name-absolute-p raw-path)
-	      (setq raw-path (concat (file-name-as-directory home) raw-path)))
+	    (let ((home (and (plist-get info :html-link-home)
+			     (org-trim (plist-get info :html-link-home)))))
+	      (when (and home
+			 (plist-get info :html-link-use-abs-url)
+			 (file-name-absolute-p raw-path))
+		(setq raw-path (concat (file-name-as-directory home) raw-path))))
+	    ;; Maybe turn ".org" into ".html".
 	    (setq raw-path (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id, a headline title, a name or
