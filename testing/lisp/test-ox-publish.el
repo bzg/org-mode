@@ -450,6 +450,33 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 		    ("p" :base-directory ,base))))
 	    (car (org-publish-get-project-from-filename file t))))))
 
+(ert-deftest test-org-publish/file-relative-name ()
+  "Test `org-publish-file-relative-name' specifications."
+  ;; Turn absolute file names into relative ones if file belongs to
+  ;; base directory.
+  (should
+   (equal "a.org"
+	  (let* ((base (expand-file-name "examples/pub/" org-test-dir))
+		 (file (expand-file-name "a.org" base)))
+	    (org-publish-file-relative-name file `(:base-directory ,base)))))
+  (should
+   (equal "pub/a.org"
+	  (let* ((base (expand-file-name "examples/" org-test-dir))
+		 (file (expand-file-name "pub/a.org" base)))
+	    (org-publish-file-relative-name file `(:base-directory ,base)))))
+  ;; Absolute file names that do not belong to base directory are
+  ;; unchanged.
+  (should
+   (equal "/name.org"
+	  (let ((base (expand-file-name "examples/pub/" org-test-dir)))
+	    (org-publish-file-relative-name "/name.org"
+					    `(:base-directory ,base)))))
+  ;; Relative file names are unchanged.
+  (should
+   (equal "a.org"
+	  (let ((base (expand-file-name "examples/pub/" org-test-dir)))
+	    (org-publish-file-relative-name "a.org" `(:base-directory ,base))))))
+
 
 (provide 'test-ox-publish)
 ;;; test-ox-publish.el ends here

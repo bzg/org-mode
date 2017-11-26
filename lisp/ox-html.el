@@ -2976,16 +2976,17 @@ INFO is a plist holding contextual information.  See
 	   ((member type '("http" "https" "ftp" "mailto" "news"))
 	    (url-encode-url (org-link-unescape (concat type ":" raw-path))))
 	   ((string= type "file")
-	    ;; Treat links to ".org" files as ".html", if needed.
+	    ;; During publishing, turn absolute file names belonging
+	    ;; to base directory into relative file names.  Otherwise,
+	    ;; append "file" protocol to absolute file name.
 	    (setq raw-path
-		  (funcall link-org-files-as-html-maybe raw-path info))
-	    ;; If file path is absolute, prepend it with protocol
-	    ;; component - "file://".
-	    (cond
-	     ((file-name-absolute-p raw-path)
-	      (setq raw-path (org-export-file-uri raw-path)))
-	     ((and home use-abs-url)
-	      (setq raw-path (concat (file-name-as-directory home) raw-path))))
+		  (org-export-file-uri
+		   (org-publish-file-relative-name raw-path info)))
+	    ;; Possibly append `:html-link-home' to relative file
+	    ;; name.
+	    (unless (file-name-absolute-p raw-path)
+	      (setq raw-path (concat (file-name-as-directory home) raw-path)))
+	    (setq raw-path (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; Add search option, if any.  A search option can be
 	    ;; relative to a custom-id, a headline title, a name or
 	    ;; a target.
