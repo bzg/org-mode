@@ -1150,7 +1150,8 @@ references with `org-export-get-reference'."
 	     (substring search 1)
 	   (with-current-buffer (find-file-noselect file)
 	     (org-with-point-at 1
-	       (org-link-search search nil t)
+	       (let ((org-link-search-must-match-exact-headline t))
+		 (org-link-search (org-link-unescape search) nil t))
 	       (and (org-at-heading-p)
 		    (org-string-nw-p (org-entry-get (point) "CUSTOM_ID"))))))))
    ((not org-publish-cache)
