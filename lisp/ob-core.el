@@ -2460,12 +2460,18 @@ in the buffer."
   (cond ((looking-at-p "^[ \t]*$") (point)) ;no result
 	((looking-at-p (format "^[ \t]*%s[ \t]*$" org-bracket-link-regexp))
 	 (line-beginning-position 2))
-	(t (save-excursion
-	     (goto-char
-	      (min (point-max)		;for narrowed buffers
-		   (org-element-property :end (org-element-at-point))))
-	     (skip-chars-backward " \r\t\n")
-	     (line-beginning-position 2)))))
+	(t
+	 (let ((element (org-element-at-point)))
+	   (if (memq (org-element-type element)
+		     ;; Possible results types.
+		     '(drawer export-block fixed-width item plain-list src-block
+			      table))
+	       (save-excursion
+		 (goto-char (min (point-max) ;for narrowed buffers
+				 (org-element-property :end element)))
+		 (skip-chars-backward " \r\t\n")
+		 (line-beginning-position 2))
+	     (point))))))
 
 (defun org-babel-result-to-file (result &optional description)
   "Convert RESULT into an `org-mode' link with optional DESCRIPTION.
