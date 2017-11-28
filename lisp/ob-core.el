@@ -1765,15 +1765,17 @@ to `org-babel-named-src-block-regexp'."
 
 (defun org-babel-src-block-names (&optional file)
   "Returns the names of source blocks in FILE or the current buffer."
-  (when file (find-file file))
-  (save-excursion
-    (goto-char (point-min))
-    (let* ((re (org-babel-named-src-block-regexp-for-name))
-	   (names (and (looking-at re)
-		       (list (match-string-no-properties 9)))))
-      (while (ignore-errors (org-next-block 1 nil re))
-	(push (match-string-no-properties 9) names))
-      names)))
+  (with-current-buffer (if file (find-file-noselect file) (current-buffer))
+    (org-with-point-at 1
+      (let ((regexp "^[ \t]*#\\+begin_src ")
+	    (case-fold-search t)
+	    (names nil))
+	(while (re-search-forward regexp nil t)
+	  (let ((element (org-element-at-point)))
+	    (when (eq 'src-block (org-element-type element))
+	      (let ((name (org-element-property :name element)))
+		(when name (push name names))))))
+	names))))
 
 ;;;###autoload
 (defun org-babel-goto-named-result (name)
