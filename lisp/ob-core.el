@@ -2464,8 +2464,8 @@ in the buffer."
 	 (let ((element (org-element-at-point)))
 	   (if (memq (org-element-type element)
 		     ;; Possible results types.
-		     '(drawer export-block fixed-width item plain-list src-block
-			      table))
+		     '(drawer example-block export-block fixed-width item
+			      plain-list src-block table))
 	       (save-excursion
 		 (goto-char (min (point-max) ;for narrowed buffers
 				 (org-element-property :end element)))
