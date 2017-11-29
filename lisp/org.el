@@ -22813,11 +22813,15 @@ strictly within a source block, use appropriate comment syntax."
 		(forward-line)))))))))
 
 (defun org-comment-dwim (_arg)
-  "Call `comment-dwim' within a source edit buffer if needed."
+  "Call the comment command you mean.
+Call `org-toggle-comment' if on a heading, otherwise call
+`comment-dwim', within a source edit buffer if needed."
   (interactive "*P")
-  (if (org-in-src-block-p)
-      (org-babel-do-in-edit-buffer (call-interactively 'comment-dwim))
-    (call-interactively 'comment-dwim)))
+  (cond ((org-at-heading-p)
+	 (call-interactively #'org-toggle-comment))
+	((org-in-src-block-p)
+	 (org-babel-do-in-edit-buffer (call-interactively #'comment-dwim)))
+	(t (call-interactively #'comment-dwim))))
 
 
 ;;; Timestamps API

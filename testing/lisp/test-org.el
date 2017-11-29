@@ -148,6 +148,12 @@
 	  (org-test-with-temp-text "#+KEYWORD: value"
 	    (call-interactively #'org-comment-dwim)
 	    (buffer-string))))
+  ;; Comment a heading
+  (should
+   (equal "* COMMENT Test"
+	  (org-test-with-temp-text "* Test"
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
   ;; In a source block, use appropriate syntax.
   (should
    (equal "  ;; "
