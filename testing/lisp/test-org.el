@@ -90,86 +90,81 @@
   (should
    (equal "# \nComment"
 	  (org-test-with-temp-text "Comment"
-	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string)))))
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
   ;; No region selected, no comment on current line and line empty:
   ;; insert comment on this line.
   (should
    (equal "# \nParagraph"
 	  (org-test-with-temp-text "\nParagraph"
-	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string)))))
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
   ;; No region selected, and a comment on this line: indent it.
   (should
    (equal "* Headline\n  # Comment"
-	  (org-test-with-temp-text "* Headline\n# Comment"
-	    (progn (forward-line)
-		   (let ((org-adapt-indentation t))
-		     (call-interactively 'comment-dwim))
-		   (buffer-string)))))
+	  (org-test-with-temp-text "* Headline\n# <point>Comment"
+	    (let ((org-adapt-indentation t))
+	      (call-interactively #'org-comment-dwim))
+	    (buffer-string))))
   ;; Also recognize single # at column 0 as comments.
   (should
    (equal "# Comment"
 	  (org-test-with-temp-text "# Comment"
-	    (progn (forward-line)
-		   (call-interactively 'comment-dwim)
-		   (buffer-string)))))
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
   ;; Region selected and only comments and blank lines within it:
   ;; un-comment all commented lines.
   (should
    (equal "Comment 1\n\nComment 2"
 	  (org-test-with-temp-text "# Comment 1\n\n# Comment 2"
-	    (progn
-	      (transient-mark-mode 1)
-	      (push-mark (point) t t)
-	      (goto-char (point-max))
-	      (call-interactively 'comment-dwim)
-	      (buffer-string)))))
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
   ;; Region selected without comments: comment all lines if
   ;; `comment-empty-lines' is non-nil, only non-blank lines otherwise.
   (should
    (equal "# Comment 1\n\n# Comment 2"
 	  (org-test-with-temp-text "Comment 1\n\nComment 2"
-	    (progn
-	      (transient-mark-mode 1)
-	      (push-mark (point) t t)
-	      (goto-char (point-max))
-	      (let ((comment-empty-lines nil))
-		(call-interactively 'comment-dwim))
-	      (buffer-string)))))
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (let ((comment-empty-lines nil))
+	      (call-interactively #'org-comment-dwim))
+	    (buffer-string))))
   (should
    (equal "# Comment 1\n# \n# Comment 2"
 	  (org-test-with-temp-text "Comment 1\n\nComment 2"
-	    (progn
-	      (transient-mark-mode 1)
-	      (push-mark (point) t t)
-	      (goto-char (point-max))
-	      (let ((comment-empty-lines t))
-		(call-interactively 'comment-dwim))
-	      (buffer-string)))))
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (let ((comment-empty-lines t))
+	      (call-interactively #'org-comment-dwim))
+	    (buffer-string))))
   ;; In front of a keyword without region, insert a new comment.
   (should
    (equal "# \n#+KEYWORD: value"
 	  (org-test-with-temp-text "#+KEYWORD: value"
-	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string)))))
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
   ;; In a source block, use appropriate syntax.
   (should
    (equal "  ;; "
-	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC"
-	    (forward-line)
+	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n<point>\n#+END_SRC"
 	    (let ((org-edit-src-content-indentation 2))
-	      (call-interactively 'comment-dwim))
-	    (buffer-substring-no-properties (line-beginning-position) (point)))))
+	      (call-interactively #'org-comment-dwim))
+	    (buffer-substring-no-properties (line-beginning-position)
+					    (point)))))
   (should
    (equal "#+BEGIN_SRC emacs-lisp\n  ;; a\n  ;; b\n#+END_SRC"
-	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\na\nb\n#+END_SRC"
-	    (forward-line)
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC emacs-lisp\n<point>a\nb\n#+END_SRC"
 	    (transient-mark-mode 1)
 	    (push-mark (point) t t)
 	    (forward-line 2)
 	    (let ((org-edit-src-content-indentation 2))
-	      (call-interactively 'comment-dwim))
+	      (call-interactively #'org-comment-dwim))
 	    (buffer-string)))))
 
 
