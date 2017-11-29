@@ -188,6 +188,7 @@ file links, which lead to them being broken in web browsers. Now both
 of these exporters will properly export to =irc:= links, which will
 open properly in irc clients from web browsers.
 
+*** ~org-comment-dwim~ (bound to =M-;=) now comments headings, if point is on a heading
 * Version 9.1
 
 ** Incompatible changes
