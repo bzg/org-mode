@@ -79,6 +79,12 @@
 (defvar org-capture-is-refiling nil
   "Non-nil when capture process is refiling an entry.")
 
+(defvar org-capture--prompt-history-table (make-hash-table :test #'equal)
+  "Hash table for all history lists per prompt.")
+
+(defvar org-capture--prompt-history nil
+  "History list for prompt placeholders.")
+
 (defgroup org-capture nil
   "Options concerning capturing new entries."
   :tag "Org Capture"
@@ -1797,13 +1803,20 @@ The template may still contain \"%?\" for cursor positioning."
 			(member key '("u" "U"))
 			nil nil (list org-end-time-was-given))))
 		    (`nil
+		     ;; Load history list for current prompt.
+		     (setq org-capture--prompt-history
+			   (gethash prompt org-capture--prompt-history-table))
 		     (push (org-completing-read
 			    (concat (or prompt "Enter string")
 				    (and default (format " [%s]" default))
 				    ": ")
-			    completions nil nil nil nil default)
+			    completions
+			    nil nil nil 'org-capture--prompt-history default)
 			   strings)
-		     (insert (car strings)))
+		     (insert (car strings))
+		     ;; Save updated history list for current prompt.
+		     (puthash prompt org-capture--prompt-history
+			      org-capture--prompt-history-table))
 		    (_
 		     (error "Unknown template placeholder: \"%%^%s\""
 			    key))))))))
