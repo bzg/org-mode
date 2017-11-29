@@ -5848,8 +5848,7 @@ The following commands insert or update the dynamic block:
 Insert a dynamic block capturing a column view.  You will be prompted
 for the scope or ID of the view.
 @orgcmdkkc{C-c C-c,C-c C-x C-u,org-dblock-update}
-Update dynamic block at point.  The cursor needs to be in the
-@code{#+BEGIN} line of the dynamic block.
+Update dynamic block at point.
 @orgcmd{C-u C-c C-x C-u,org-update-all-dblocks}
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks, column-capturing blocks or other dynamic
@@ -6634,8 +6633,7 @@ argument, jump to the first clock report in the current document and
 update it.  The clock table always includes also trees with
 @code{:ARCHIVE:} tag.
 @orgcmdkkc{C-c C-c,C-c C-x C-u,org-dblock-update}
-Update dynamic block at point.  The cursor needs to be in the
-@code{#+BEGIN} line of the dynamic block.
+Update dynamic block at point.
 @orgkey{C-u C-c C-x C-u}
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks in a buffer.

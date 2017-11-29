@@ -123,7 +123,8 @@ If `org-store-link' was called with a prefix arg the meaning of
 		(save-excursion
 		  (car (nnvirtual-map-article (gnus-summary-article-number)))))
 	       (`(nnir . ,_)
-		(nnir-article-group (gnus-summary-article-number)))
+		(save-excursion
+		  (nnir-article-group (gnus-summary-article-number))))
 	       (_ gnus-newsgroup-name)))
 	    (header (with-current-buffer gnus-summary-buffer
 		      (gnus-summary-article-header)))
