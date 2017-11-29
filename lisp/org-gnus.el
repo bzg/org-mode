@@ -120,7 +120,8 @@ If `org-store-link' was called with a prefix arg the meaning of
      (let* ((group
 	     (pcase (gnus-find-method-for-group gnus-newsgroup-name)
 	       (`(nnvirtual . ,_)
-		(car (nnvirtual-map-article (gnus-summary-article-number))))
+		(save-excursion
+		  (car (nnvirtual-map-article (gnus-summary-article-number)))))
 	       (`(nnir . ,_)
 		(nnir-article-group (gnus-summary-article-number)))
 	       (_ gnus-newsgroup-name)))
