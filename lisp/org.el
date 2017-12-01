@@ -9364,28 +9364,37 @@ active region."
 	    (move-beginning-of-line 2)
 	    (set-mark (point)))))
     (setq org-store-link-plist nil)
-    (let (link cpltxt desc description search
-	       txt custom-id agenda-link sfuns sfunsn)
+    (let (link cpltxt desc description search txt custom-id agenda-link)
       (cond
-
-       ;; Store a link using an external link type
+       ;; Store a link using an external link type, if any function is
+       ;; available. If more than one can generate a link from current
+       ;; location, ask which one to use.
        ((and (not (equal arg '(16)))
-	     (setq sfuns
-		   (delq
-		    nil (mapcar (lambda (f)
-				  (let (fs) (if (funcall f) (push f fs))))
-				(org-store-link-functions)))
-		   sfunsn (mapcar (lambda (fu) (symbol-name (car fu))) sfuns))
-	     (or (and (cdr sfuns)
-		      (funcall (intern
-				(completing-read
-				 "Which function for creating the link? "
-				 sfunsn nil t (car sfunsn)))))
-		 (funcall (caar sfuns)))
-	     (setq link (plist-get org-store-link-plist :link)
-		   desc (or (plist-get org-store-link-plist
-				       :description)
-			    link))))
+	     (let ((results-alist nil))
+	       (dolist (f (org-store-link-functions))
+		 (when (funcall f)
+		   ;; XXX: return value is not link's plist, so we
+		   ;; store the new value before it is modified.  It
+		   ;; would be cleaner to ask store link functions to
+		   ;; return the plist instead.
+		   (push (cons f (copy-sequence org-store-link-plist))
+			 results-alist)))
+	       (pcase results-alist
+		 (`nil nil)
+		 (`((,_ . ,_)) t)	;single choice: nothing to do
+		 (`((,name . ,_) . ,_)
+		  ;; Reinstate link plist associated to the chosen
+		  ;; function.
+		  (apply #'org-store-link-props
+			 (cdr (assoc-string
+			       (completing-read
+				"Which function for creating the link? "
+				(mapcar #'car results-alist) nil t name)
+			       results-alist)))
+		  t))))
+	(setq link (plist-get org-store-link-plist :link))
+	(setq desc (or (plist-get org-store-link-plist :description)
+		       link)))
 
        ;; Store a link from a source code buffer.
        ((org-src-edit-buffer-p)
