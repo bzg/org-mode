@@ -5762,7 +5762,7 @@ This should be called after the variable `org-link-parameters' has changed."
 		   (looking-at (if verbatim? org-verbatim-re org-emph-re))
 		   ;; Do not span over paragraph boundaries.
 		   (not (string-match-p org-element-paragraph-separate
-					(match-string 0)))
+					(match-string 2)))
 		   ;; Do not span over cells in table rows.
 		   (not (and (save-match-data (org-match-line "[ \t]*|"))
 			     (string-match-p "|" (match-string 4))))))
