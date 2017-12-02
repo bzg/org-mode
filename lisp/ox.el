@@ -4053,11 +4053,15 @@ used as a communication channel."
   (memq (org-element-type (org-export-get-previous-element blob info))
 	'(nil section)))
 
-(defun org-export-last-sibling-p (blob info)
-  "Non-nil when BLOB is the last sibling in its parent.
-BLOB is an element or an object.  INFO is a plist used as
+(defun org-export-last-sibling-p (datum info)
+  "Non-nil when DATUM is the last sibling in its parent.
+DATUM is an element or an object.  INFO is a plist used as
 a communication channel."
-  (not (org-export-get-next-element blob info)))
+  (let ((next (org-export-get-next-element datum info)))
+    (or (not next)
+	(and (eq 'headline (org-element-type datum))
+	     (> (org-element-property :level datum)
+		(org-element-property :level next))))))
 
 
 ;;;; For Keywords
