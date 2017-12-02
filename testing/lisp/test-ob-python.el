@@ -101,6 +101,23 @@ return x
     (should (equal '(("col") ("a") ("b"))
 		   (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob-python/session-multiline ()
+  ;; FIXME workaround to prevent starting prompt leaking into output
+  (run-python)
+  (sleep-for 0 10)
+  (org-test-with-temp-text "
+#+begin_src python :session :results output
+  foo = 0
+  for _ in range(10):
+      foo += 1
+
+      foo += 1
+
+  print(foo)
+#+end_src"
+   (org-babel-next-src-block)
+   (should (equal "20" (org-babel-execute-src-block)))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here
