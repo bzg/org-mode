@@ -2677,7 +2677,13 @@ Para2"
       (org-test-with-parsed-data "* Headline\n* Headline 2 :ignore:"
 	(org-element-map tree 'headline
 	  (lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no))
-	  info))))))
+	  info)))))
+  ;; Handle gracefully discontinuous headings.
+  (should
+   (equal '(yes yes)
+	  (org-test-with-parsed-data "** S\n* H"
+	    (org-element-map tree 'headline
+	      (lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no)))))))
 
 (ert-deftest test-org-export/handle-inlinetasks ()
   "Test inlinetask export."
