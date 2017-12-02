@@ -1185,6 +1185,18 @@
    (equal "* h\n"
 	  (org-test-with-temp-text "*<point> h"
 	    (org-return)
+	    (buffer-string))))
+  ;; Before first column or after last one in a table, split the
+  ;; table.
+  (should
+   (equal "| a |\n\n| b |"
+	  (org-test-with-temp-text "| a |\n<point>| b |"
+	    (org-return)
+	    (buffer-string))))
+  (should
+   (equal "| a |\n\n| b |"
+	  (org-test-with-temp-text "| a |<point>\n| b |"
+	    (org-return)
 	    (buffer-string)))))
 
 (ert-deftest test-org/meta-return ()

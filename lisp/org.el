@@ -20740,13 +20740,17 @@ object (e.g., within a comment).  In these case, you need to use
   (let ((context (if org-return-follows-link (org-element-context)
 		   (org-element-at-point))))
     (cond
-     ;; In a table, call `org-table-next-row'.
+     ;; In a table, call `org-table-next-row'.  However, before first
+     ;; column or after last one, split the table.
      ((or (and (eq (org-element-type context) 'table)
 	       (>= (point) (org-element-property :contents-begin context))
 	       (< (point) (org-element-property :contents-end context)))
 	  (org-element-lineage context '(table-row table-cell) t))
-      (org-table-justify-field-maybe)
-      (call-interactively #'org-table-next-row))
+      (if (or (looking-at-p "[ \t]*$")
+	      (save-excursion (skip-chars-backward " \t") (bolp)))
+	  (insert "\n")
+	(org-table-justify-field-maybe)
+	(call-interactively #'org-table-next-row)))
      ;; On a link or a timestamp, call `org-open-at-point' if
      ;; `org-return-follows-link' allows it.  Tolerate fuzzy
      ;; locations, e.g., in a comment, as `org-open-at-point'.
