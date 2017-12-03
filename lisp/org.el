@@ -21470,7 +21470,7 @@ an argument, unconditionally call `org-insert-heading'."
     "--"
     ["Export/Publish..." org-export-dispatch t]
     ("LaTeX"
-     ["Org CDLaTeX mode" org-cdlatex-mode :active (featurep 'cdlatex)
+     ["Org CDLaTeX mode" org-cdlatex-mode :active (require 'cdlatex nil t)
       :style toggle :selected org-cdlatex-mode]
      ["Insert Environment" cdlatex-environment (fboundp 'cdlatex-environment)]
      ["Insert math symbol" cdlatex-math-symbol (fboundp 'cdlatex-math-symbol)]
