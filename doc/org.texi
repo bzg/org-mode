@@ -1298,7 +1298,7 @@ level, all sibling headings.  With a double prefix argument, also show the
 entire subtree of the parent.
 @cindex show branches, command
 @orgcmd{C-c C-k,outline-show-branches}
-Expose all the headings of the subtree, CONTENT view for just one subtree.
+Expose all the headings of the subtree, CONTENTS view for just one subtree.
 @cindex show children, command
 @orgcmd{C-c @key{TAB},outline-show-children}
 Expose all direct children of the subtree.  With a numeric prefix argument N,
