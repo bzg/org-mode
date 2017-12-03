@@ -513,7 +513,7 @@
     (cl-letf (((symbol-function 'current-time)
 	       (lambda ()
 		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>" nil t)))))
+			(org-parse-time-string "<2014-03-04 Tue>")))))
       (org-test-with-temp-text
 	  "* H
 ** S1
@@ -528,39 +528,39 @@
 	(get-char-property (point) 'org-columns-value-modified)))))
   (should
    (equal
-    "705d"
+    "2d"
     (cl-letf (((symbol-function 'current-time)
 	       (lambda ()
 		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>" nil t)))))
+			(org-parse-time-string "<2014-03-04 Tue>")))))
       (org-test-with-temp-text
 	  "* H
 ** S1
 :PROPERTIES:
-:A: <2012-03-29 Thu>
+:A: <2014-03-03 Mon>
 :END:
 ** S1
 :PROPERTIES:
-:A: <2014-03-04 Tue>
+:A: <2014-03-02 Sun>
 :END:"
 	(let ((org-columns-default-format "%A{@max}")) (org-columns))
 	(get-char-property (point) 'org-columns-value-modified)))))
   (should
    (equal
-    "352d 12h"
+    "1d 12h"
     (cl-letf (((symbol-function 'current-time)
 	       (lambda ()
 		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>" nil t)))))
+			(org-parse-time-string "<2014-03-04 Tue>")))))
       (org-test-with-temp-text
 	  "* H
 ** S1
 :PROPERTIES:
-:A: <2012-03-29 Thu>
+:A: <2014-03-03 Mon>
 :END:
 ** S1
 :PROPERTIES:
-:A: <2014-03-04 Tue>
+:A: <2014-03-02 Sun>
 :END:"
 	(let ((org-columns-default-format "%A{@mean}")) (org-columns))
 	(get-char-property (point) 'org-columns-value-modified)))))

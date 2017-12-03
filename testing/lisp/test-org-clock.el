@@ -49,8 +49,8 @@ Return the clock line as a string."
   (let* ((beg (org-test-clock-create-timestamp input1 t t))
          (end (and input2 (org-test-clock-create-timestamp input2 t t)))
          (sec-diff (and input2
-			(floor (- (org-time-string-to-seconds end t)
-				  (org-time-string-to-seconds beg t))))))
+			(floor (- (org-time-string-to-seconds end)
+				  (org-time-string-to-seconds beg))))))
     (concat org-clock-string " " beg
             (when end
               (concat "--" end " => "
@@ -344,15 +344,15 @@ the buffer."
   ;; line, and ignore "file" column.
   (should
    (equal
-    "| Headline     | Time       |     |
-|--------------+------------+-----|
-| *Total time* | *16904:01* | foo |
-|--------------+------------+-----|
-| Test         | 16904:01   | foo |
+    "| Headline     | Time   |     |
+|--------------+--------+-----|
+| *Total time* | *8:40* | foo |
+|--------------+--------+-----|
+| Test         | 8:40   | foo |
 #+TBLFM: $3=string(\"foo\")"
     (org-test-with-temp-text-in-file
         "* Test
-CLOCK: [2012-03-29 Thu 16:40]--[2014-03-04 Thu 00:41] => 16904:01"
+CLOCK: [2012-03-29 Thu 8:00]--[2012-03-29 Thu 16:40] => 8:40"
       (test-org-clock-clocktable-contents ":scope file-with-archives"
 	  "#+TBLFM: $3=string(\"foo\")"))))
   ;; Test "function" scope.
