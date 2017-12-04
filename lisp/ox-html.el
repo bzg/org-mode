@@ -2202,7 +2202,7 @@ https://github.com/hniksic/emacs-htmlize"))
 		      (org-html-htmlize-region-for-paste
 		       (point-min) (point-max))))))
 	  ;; Strip any enclosing <pre></pre> tags.
-	  (let* ((beg (and (string-match "\\`<pre[^>]*>\n*" code) (match-end 0)))
+	  (let* ((beg (and (string-match "\\`<pre[^>]*>\n?" code) (match-end 0)))
 		 (end (and beg (string-match "</pre>\\'" code))))
 	    (if (and beg end) (substring code beg end) code)))))))))
 
@@ -2215,7 +2215,7 @@ alist between line numbers and references (as returned by
 `org-export-unravel-code'), a boolean specifying if labels should
 appear in the source code, and the number associated to the first
 line of code."
-  (let* ((code-lines (org-split-string code "\n"))
+  (let* ((code-lines (split-string code "\n"))
 	 (code-length (length code-lines))
 	 (num-fmt
 	  (and num-start
