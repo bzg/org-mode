@@ -54,7 +54,8 @@
 If this is a relative path, it will be interpreted relative to the directory
 where the Org file lives."
   :group 'org-attach
-  :type 'directory)
+  :type 'directory
+  :safe #'stringp)
 
 (defcustom org-attach-commit t
   "If non-nil commit attachments with git.
