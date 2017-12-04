@@ -21099,7 +21099,7 @@ an argument, unconditionally call `org-insert-heading'."
       ["Next keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-at-heading-p))]
       ["Previous keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-at-heading-p))])
      ["Show TODO Tree" org-show-todo-tree :active t :keys "C-c / t"]
-     ["Global TODO list" org-todo-list :active t :keys "C-c a t"]
+     ["Global TODO list" org-todo-list :active t :keys "\\[org-agenda] t"]
      "--"
      ["Enforce dependencies" (customize-variable 'org-enforce-todo-dependencies)
       :selected org-enforce-todo-dependencies :style toggle :active t]
@@ -21189,7 +21189,7 @@ an argument, unconditionally call `org-insert-heading'."
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
      ["Get Captured and Flagged" org-mobile-pull t]
-     ["Find FLAGGED Tasks" (org-agenda nil "?") :active t :keys "C-c a ?"]
+     ["Find FLAGGED Tasks" (org-agenda nil "?") :active t :keys "\\[org-agenda] ?"]
      "--"
      ["Setup" (progn (require 'org-mobile) (customize-group 'org-mobile)) t])
     "--"
