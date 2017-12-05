@@ -706,6 +706,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
 	(const :tag "   protocol:          Intercept calls from emacsclient" org-protocol)
 	(const :tag "   rmail:             Links to RMAIL folders/messages" org-rmail)
+	(const :tag "   tempo:             Fast completion for structures" org-tempo)
 	(const :tag "   w3m:               Special cut/paste from w3m to Org mode." org-w3m)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)

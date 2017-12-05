@@ -11948,9 +11948,13 @@ options can be configured via @code{org-html-mathjax-options}, or in the
 buffer.  For example, with the following settings,
 @smallexample
 #+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
+#+HTML_MATHJAX: cancel.js noErrors.js
 @end smallexample
 equation labels will be displayed on the left margin and equations will be
-five ems from the left margin.
+five ems from the left margin.  In addition, it loads the two MathJax
+extensions @samp{cancel.js} and @samp{noErrors.js}@footnote{See
+@uref{http://docs.mathjax.org/en/latest/tex.html#tex-extensions, TeX and
+LaTeX extensions} in the @uref{http://docs.mathjax.org, MathJax manual} to learn about extensions.}.
 
 @noindent See the docstring of
 @code{org-html-mathjax-options} for all supported variables.  The MathJax
@@ -17395,6 +17399,19 @@ the key is @key{TAB}, the user is prompted to enter a type.
 @vindex org-structure-template-alist
 Available structure types are defined in @code{org-structure-template-alist},
 see the docstring for adding or changing values.
+
+@cindex Tempo
+@cindex Template expansion
+@cindex template insertion
+@cindex insertion, of templates
+@vindex org-tempo-keywords-alist
+@vindex org-structure-template-alist
+Org Tempo expands snippets to structures defined in
+@code{org-structure-template-alist} and @code{org-tempo-keywords-alist}.  For
+example, @code{org-tempo} expands @kbd{< s @key{TAB}} to a code block.
+Enable it by customizing @code{org-modules} or add @code{(require
+'org-tempo)} to your Emacs init file@footnote{For more information, please
+refer to the commentary section in @file{org-tempo.el}.}.
 
 @multitable @columnfractions 0.2 0.8
 @item @kbd{c} @tab @samp{#+BEGIN_CENTER}

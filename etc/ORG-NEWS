@@ -72,6 +72,8 @@ document, use =shrink= value instead, or in addition to align:
 #+END_EXAMPLE
 
 ** New features
+*** ~org-tempo~ may used for snippet expansion of structure template.
+See manual and commentary in ~org-tempo.el~ for details.
 *** Exclude unnumbered headlines from table of contents
 Set their =UNNUMBERED= property to the special =notoc= value.  See
 manual for details.
@@ -167,7 +169,7 @@ See docstring for details.
 ** Removed functions
 
 *** ~org-try-structure-completion~
-
+=org-tempo= may be used as a replacement.
 ** Removed variables
 
 *** org-babel-use-quick-and-dirty-noweb-expansion
