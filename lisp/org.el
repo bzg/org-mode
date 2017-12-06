@@ -7115,11 +7115,12 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
   "Return `org-agenda-files' list, plus all open Org files.
 This is useful for operations that need to scan all of a user's
 open and agenda-wise Org files."
-  (let ((files (mapcar 'expand-file-name (org-agenda-files))))
+  (let ((files (mapcar #'expand-file-name (org-agenda-files))))
     (dolist (buf (buffer-list))
       (with-current-buffer buf
 	(when (and (derived-mode-p 'org-mode) (buffer-file-name))
-	  (cl-pushnew (expand-file-name (buffer-file-name)) files))))
+	  (cl-pushnew (expand-file-name (buffer-file-name)) files
+		      :test #'equal))))
     files))
 
 (defsubst org-entry-beginning-position ()
