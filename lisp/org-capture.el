@@ -1094,7 +1094,7 @@ may have been stored before."
   (org-switch-to-buffer-other-window
    (org-capture-get-indirect-buffer (org-capture-get :buffer) "CAPTURE"))
   (widen)
-  (outline-show-all)
+  (org-show-all)
   (goto-char (org-capture-get :pos))
   (setq-local outline-level 'org-outline-level)
   (pcase (org-capture-get :type)

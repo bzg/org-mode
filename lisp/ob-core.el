@@ -92,7 +92,6 @@
 (declare-function org-uniquify "org" (list))
 (declare-function orgtbl-to-generic "org-table" (table params))
 (declare-function orgtbl-to-orgtbl "org-table" (table params))
-(declare-function outline-show-all "outline" ())
 (declare-function tramp-compat-make-temp-file "tramp-compat" (filename &optional dir-flag))
 
 (defgroup org-babel nil

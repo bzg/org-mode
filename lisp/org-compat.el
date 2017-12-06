@@ -65,7 +65,6 @@
   (defalias 'outline-hide-entry 'hide-entry)
   (defalias 'outline-hide-sublevels 'hide-sublevels)
   (defalias 'outline-hide-subtree 'hide-subtree)
-  (defalias 'outline-show-all 'show-all)
   (defalias 'outline-show-branches 'show-branches)
   (defalias 'outline-show-children 'show-children)
   (defalias 'outline-show-entry 'show-entry)
@@ -394,11 +393,20 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-texinfo-def-table-markup
   'org-texinfo-table-default-markup "Org 9.1")
 
-;;; The function was made obsolete by commit 65399674d5 of 2013-02-22.
-;;; This make-obsolete call was added 2016-09-01.
+;; The function was made obsolete by commit 65399674d5 of 2013-02-22.
+;; This make-obsolete call was added 2016-09-01.
 (make-obsolete 'org-capture-import-remember-templates
 	       "use the `org-capture-templates' variable instead."
 	       "Org 9.0")
+
+(defun org-show-block-all ()
+  "Unfold all blocks in the current buffer."
+  (interactive)
+  (remove-overlays nil nil 'invisible 'org-hide-block))
+
+(make-obsolete 'org-show-block-all
+	       "use `org-show-all' instead."
+	       "Org 9.2")
 
 
 ;;;; Obsolete link types

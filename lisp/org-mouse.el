@@ -498,7 +498,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
    `("Main Menu"
      ["Show Overview" org-mouse-show-overview t]
      ["Show Headlines" org-mouse-show-headlines t]
-     ["Show All" outline-show-all t]
+     ["Show All" org-show-all t]
      ["Remove Highlights" org-remove-occur-highlights
       :visible org-occur-highlights]
      "--"

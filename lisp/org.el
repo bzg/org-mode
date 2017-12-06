@@ -6595,6 +6595,19 @@ and subscripts."
 
 (defvar org-inlinetask-min-level)
 
+(defun org-show-all (&optional types)
+  "Show all contents in the visible part of the buffer.
+By default, the function expands headings, blocks and drawers.
+When optional argument TYPE is a list of symbols among `blocks',
+`drawers' and `headings', to only expand one specific type."
+  (dolist (type (or types '(blocks drawers headings)))
+    (org-flag-region (point-min) (point-max) nil
+		     (pcase type
+		       (`blocks 'org-hide-block)
+		       (`drawers 'org-hide-drawer)
+		       (`headings 'outline)
+		       (_ (error "Invalid type: %S" type))))))
+
 ;;;###autoload
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org mode.
@@ -6685,7 +6698,7 @@ if the variable `org-cycle-global-at-bob' is t."
 	(org-unlogged-message "Startup visibility, plus VISIBILITY properties"))
 
        ((equal arg '(64))
-	(outline-show-all)
+	(org-show-all)
 	(org-unlogged-message "Entire buffer visible, including drawers"))
 
        ((equal arg '(4)) (org-cycle-internal-global))
@@ -6786,7 +6799,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	   (eq org-cycle-global-status 'contents))
       ;; We just showed the table of contents - now show everything
       (run-hook-with-args 'org-pre-cycle-hook 'all)
-      (outline-show-all)
+      (org-show-all '(headings blocks))
       (unless ga (org-unlogged-message "SHOW ALL"))
       (setq org-cycle-global-status 'all)
       (run-hook-with-args 'org-cycle-hook 'all))
@@ -6911,7 +6924,7 @@ With a numeric prefix, show all headlines up to that level."
 	 (if (derived-mode-p 'org-mode) org-cycle-include-plain-lists nil)))
     (cond
      ((integerp arg)
-      (outline-show-all)
+      (org-show-all '(headings blocks))
       (outline-hide-sublevels arg)
       (setq org-cycle-global-status 'contents))
      ((equal arg '(4))
@@ -6929,7 +6942,7 @@ With a numeric prefix, show all headlines up to that level."
     (org-content))
    ((or (eq org-startup-folded 'showeverything)
 	(eq org-startup-folded nil))
-    (outline-show-all)))
+    (org-show-all)))
   (unless (eq org-startup-folded 'showeverything)
     (when org-hide-block-startup (org-hide-block-all))
     (org-set-visibility-according-to-property)
@@ -7205,7 +7218,7 @@ If USE-MARKERS is set, return the positions as markers."
   "Create visibility overlays for all positions in DATA.
 DATA should have been made by `org-outline-overlay-data'."
   (org-with-wide-buffer
-   (outline-show-all)
+   (org-show-all)
    (dolist (c data) (outline-flag-region (car c) (cdr c) t))))
 
 ;;; Folding of blocks
@@ -7242,13 +7255,8 @@ Optional arguments START and END can be used to limit the range."
 (defun org-hide-block-all ()
   "Fold all blocks in the current buffer."
   (interactive)
-  (org-show-block-all)
+  (org-show-all '(blocks))
   (org-block-map 'org-hide-block-toggle-maybe))
-
-(defun org-show-block-all ()
-  "Unfold all blocks in the current buffer."
-  (interactive)
-  (remove-overlays nil nil 'invisible 'org-hide-block))
 
 (defun org-hide-block-toggle-maybe ()
   "Toggle visibility of block at point.
@@ -7298,7 +7306,7 @@ a block.  Return a non-nil value when toggling is successful."
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
 	  (lambda () (add-hook 'change-major-mode-hook
-			       'org-show-block-all 'append 'local)))
+			  'org-show-all 'append 'local)))
 
 ;;; Indirect buffer display of subtrees
 
@@ -7367,7 +7375,7 @@ frame is not changed."
       (pop-to-buffer ibuf))
      (t (error "Invalid value")))
     (narrow-to-region beg end)
-    (outline-show-all)
+    (org-show-all '(headings blocks))
     (goto-char pos)
     (run-hook-with-args 'org-cycle-hook 'all)
     (and (window-live-p cwin) (select-window cwin))))
@@ -8601,7 +8609,7 @@ function is being called interactively."
       (setq end (point-max))
       (setq what "top-level")
       (goto-char start)
-      (outline-show-all)))
+      (org-show-all '(headings blocks))))
 
     (setq beg (point))
     (when (>= beg end) (goto-char start) (user-error "Nothing to sort"))
@@ -18957,7 +18965,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 	   'delete-backward-char 'org-delete-backward-char)
 (org-defkey org-mode-map "|" 'org-force-self-insert)
 
-(org-defkey org-mode-map "\C-c\C-a" 'outline-show-all) ; in case allout messed up.
+(org-defkey org-mode-map "\C-c\C-a" 'org-show-all)
 (org-defkey org-mode-map "\C-c\C-r" 'org-reveal)
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "s" 'org-narrow-to-subtree)
@@ -20714,7 +20722,7 @@ an argument, unconditionally call `org-insert-heading'."
      ["Cycle Global Visibility" org-shifttab :active (not (org-at-table-p))]
      ["Sparse Tree..." org-sparse-tree t]
      ["Reveal Context" org-reveal t]
-     ["Show All" outline-show-all t]
+     ["Show All" org-show-all t]
      "--"
      ["Subtree to indirect buffer" org-tree-to-indirect-buffer t])
     "--"

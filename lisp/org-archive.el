@@ -315,7 +315,7 @@ direct children of this heading."
 		       org-odd-levels-only
 		     tr-org-odd-levels-only)))
 	      (goto-char (point-min))
-	      (outline-show-all)
+	      (org-show-all '(headings blocks))
 	      (if (and heading (not (and datetree-date (not datetree-subheading-p))))
 		  (progn
 		    (if (re-search-forward

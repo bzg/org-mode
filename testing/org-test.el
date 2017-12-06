@@ -134,7 +134,7 @@ currently executed.")
 	     (condition-case nil
 		 (progn
 		   (org-show-subtree)
-		   (org-show-block-all))
+		   (org-show-all '(blocks)))
 	       (error nil))
 	     (save-restriction ,@body)))
        (unless (or visited-p (not to-be-removed))
@@ -158,7 +158,7 @@ currently executed.")
 	     (progn
 	       (outline-next-visible-heading 1)
 	       (org-show-subtree)
-	       (org-show-block-all))
+	       (org-show-all '(blocks)))
 	   (error nil))
 	 (save-restriction ,@body)))
      (unless visited-p
