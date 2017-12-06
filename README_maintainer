@@ -165,6 +165,9 @@ the Emacs repository, folder by folder.
 
 **** TODO =org-mode/testing=
 
+*** Update  =emacs/etc/NEWS=
+Whenever a new (major) version of Org is synchronized to the Emacs
+repository, it should be mentioned in the NEWS file.
 * Updating the list of hooks/commands/options on Worg
 
 Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=.
