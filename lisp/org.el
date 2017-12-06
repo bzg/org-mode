@@ -4652,15 +4652,13 @@ STATE should be one of the symbols listed in the docstring of
 	 (org-flag-subtree t)
 	 (org-end-of-subtree t))))))
 
-(declare-function outline-end-of-heading "outline" ())
-(declare-function outline-flag-region "outline" (from to flag))
 (defun org-flag-subtree (flag)
   (save-excursion
     (org-back-to-heading t)
-    (outline-end-of-heading)
-    (outline-flag-region (point)
-			 (progn (org-end-of-subtree t) (point))
-			 flag)))
+    (org-flag-region (line-end-position)
+		     (progn (org-end-of-subtree t) (point))
+		     flag
+		     'outline)))
 
 (defalias 'org-advertized-archive-subtree 'org-archive-subtree)
 
@@ -6899,7 +6897,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
       ;; now show everything.
       (unless (org-before-first-heading-p)
 	(run-hook-with-args 'org-pre-cycle-hook 'subtree))
-      (outline-flag-region eoh eos nil)
+      (org-flag-region eoh eos nil 'outline)
       (org-unlogged-message
        (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
       (setq org-cycle-subtree-status 'subtree)
@@ -6908,7 +6906,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
      (t
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)
-      (outline-flag-region eoh eos t)
+      (org-flag-region eoh eos t 'outline)
       (org-unlogged-message "FOLDED")
       (setq org-cycle-subtree-status 'folded)
       (unless (org-before-first-heading-p)
@@ -7095,7 +7093,7 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
 			   (goto-char (match-beginning 0))
 			   (skip-chars-backward " \t\n")
 			   (line-end-position)))))
-		(outline-flag-region b e nil))))))))
+		(org-flag-region b e nil 'outline))))))))
   ;; Never hide empty lines at the end of the file.
   (save-excursion
     (goto-char (point-max))
@@ -7103,7 +7101,7 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
     (outline-end-of-heading)
     (when (and (looking-at "[ \t\n]+")
 	       (= (match-end 0) (point-max)))
-      (outline-flag-region (point) (match-end 0) nil))))
+      (org-flag-region (point) (match-end 0) nil 'outline))))
 
 (defun org-show-empty-lines-in-parent ()
   "Move to the parent and re-show empty lines before visible headlines."
@@ -7219,7 +7217,7 @@ If USE-MARKERS is set, return the positions as markers."
 DATA should have been made by `org-outline-overlay-data'."
   (org-with-wide-buffer
    (org-show-all)
-   (dolist (c data) (outline-flag-region (car c) (cdr c) t))))
+   (dolist (c data) (org-flag-region (car c) (cdr c) t 'outline))))
 
 ;;; Folding of blocks
 
@@ -8104,8 +8102,8 @@ case."
      (org-save-markers-in-region beg end)
      (delete-region beg end)
      (org-remove-empty-overlays-at beg)
-     (or (= beg (point-min)) (outline-flag-region (1- beg) beg nil))
-     (or (bobp) (outline-flag-region (1- (point)) (point) nil))
+     (unless (= beg (point-min)) (org-flag-region (1- beg) beg nil 'outline))
+     (unless (bobp) (org-flag-region (1- (point)) (point) nil 'outline))
      (and (not (bolp)) (looking-at "\n") (forward-char 1))
      (let ((bbb (point)))
        (insert-before-markers txt)
@@ -14359,7 +14357,9 @@ When JUST-ALIGN is non-nil, only align tags."
 		  ;; When text is being inserted on an invisible
 		  ;; region boundary, it can be inadvertently sucked
 		  ;; into invisibility.
-		  (outline-flag-region (point) (progn (insert " " tags) (point)) nil)
+		  (org-flag-region (point) (progn (insert " " tags) (point))
+				   nil
+				   'outline)
 		(skip-chars-backward " \t")
 		(delete-region (point) (line-end-position)))))
 	  ;; Align tags, if any.  Fix tags column if `org-indent-mode'
@@ -23110,15 +23110,13 @@ When ENTRY is non-nil, show the entire entry."
   (save-excursion
     (org-back-to-heading t)
     ;; Check if we should show the entire entry
-    (if entry
-	(progn
-	  (org-show-entry)
-	  (save-excursion
-	    (and (outline-next-heading)
-		 (org-flag-heading nil))))
-      (outline-flag-region (max (point-min) (1- (point)))
-			   (save-excursion (outline-end-of-heading) (point))
-			   flag))))
+    (if (not entry)
+	(org-flag-region
+	 (line-end-position 0) (line-end-position) flag 'outline)
+      (org-show-entry)
+      (save-excursion
+	(and (outline-next-heading)
+	     (org-flag-heading nil))))))
 
 (defun org-get-next-sibling ()
   "Move to next heading of the same level, and return point.
@@ -23710,7 +23708,7 @@ heading to appear."
 						3))
 			(t (1- org-inlinetask-min-level))))))
       ;; Display parent heading.
-      (outline-flag-region (line-end-position 0) (line-end-position) nil)
+      (org-flag-heading nil)
       (forward-line)
       ;; Display children.  First child may be deeper than expected
       ;; MAX-LEVEL.  Since we want to display it anyway, adjust
@@ -23721,16 +23719,13 @@ heading to appear."
 			   current-level
 			   (max (funcall outline-level) max-level)))
 	  (setq past-first-child t))
-	(outline-flag-region (line-end-position 0) (line-end-position) nil)))))
+	(org-flag-heading nil)))))
 
 (defun org-show-subtree ()
   "Show everything after this heading at deeper levels."
   (interactive)
-  (outline-flag-region
-   (point)
-   (save-excursion
-     (org-end-of-subtree t t))
-   nil))
+  (org-flag-region
+   (point) (save-excursion (org-end-of-subtree t t)) nil 'outline))
 
 (defun org-show-entry ()
   "Show the body directly following this heading.
@@ -23739,14 +23734,15 @@ Show the heading too, if it is currently invisible."
   (save-excursion
     (ignore-errors
       (org-back-to-heading t)
-      (outline-flag-region
-       (max (point-min) (1- (point)))
+      (org-flag-region
+       (line-end-position 0)
        (save-excursion
 	 (if (re-search-forward
 	      (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
 	     (match-beginning 1)
 	   (point-max)))
-       nil))))
+       nil
+       'outline))))
 
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines.

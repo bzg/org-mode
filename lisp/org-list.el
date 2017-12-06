@@ -106,33 +106,25 @@
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-interpret-data "org-element" (data))
-(declare-function
- org-element-lineage "org-element" (blob &optional types with-self))
+(declare-function org-element-lineage "org-element" (blob &optional types with-self))
 (declare-function org-element-macro-interpreter "org-element" (macro ##))
-(declare-function
- org-element-map "org-element"
- (data types fun &optional info first-match no-recursion with-affiliated))
+(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-normalize-string "org-element" (s))
-(declare-function org-element-parse-buffer "org-element"
-		  (&optional granularity visible-only))
+(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
-(declare-function org-element-put-property "org-element"
-		  (element property value))
+(declare-function org-element-put-property "org-element" (element property value))
 (declare-function org-element-set-element "org-element" (old new))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-update-syntax "org-element" ())
-(declare-function org-entry-get "org"
-		  (pom property &optional inherit literal-nil))
+(declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-export-create-backend "ox" (&rest rest) t)
 (declare-function org-export-data-with-backend "ox" (data backend info))
 (declare-function org-export-get-backend "ox" (name))
-(declare-function org-export-get-environment "ox"
-		  (&optional backend subtreep ext-plist))
-(declare-function org-export-get-next-element "ox"
-		  (blob info &optional n))
-(declare-function org-export-with-backend "ox"
-		  (backend data &optional contents info))
+(declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
+(declare-function org-export-get-next-element "ox" (blob info &optional n))
+(declare-function org-export-with-backend "ox" (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
+(declare-function org-flag-region "org" (from to flag spec))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-get-todo-state "org" ())
 (declare-function org-in-block-p "org" (names))
@@ -155,7 +147,6 @@
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function org-uniquify "org" (list))
 (declare-function org-invisible-p "org" (&optional pos))
-(declare-function outline-flag-region "outline" (from to flag))
 (declare-function outline-next-heading "outline" ())
 (declare-function outline-previous-heading "outline" ())
 
@@ -2050,8 +2041,8 @@ Possible values are: `folded', `children' or `subtree'.  See
    ((eq view 'folded)
     (let ((item-end (org-list-get-item-end-before-blank item struct)))
       ;; Hide from eol
-      (outline-flag-region (save-excursion (goto-char item) (point-at-eol))
-			   item-end t)))
+      (org-flag-region (save-excursion (goto-char item) (line-end-position))
+		       item-end t 'outline)))
    ((eq view 'children)
     ;; First show everything.
     (org-list-set-item-visibility item struct 'subtree)
@@ -2064,7 +2055,7 @@ Possible values are: `folded', `children' or `subtree'.  See
    ((eq view 'subtree)
     ;; Show everything
     (let ((item-end (org-list-get-item-end item struct)))
-      (outline-flag-region item item-end nil)))))
+      (org-flag-region item item-end nil 'outline)))))
 
 (defun org-list-item-body-column (item)
   "Return column at which body of ITEM should start."
