@@ -154,7 +154,11 @@ Goes through `org-structure-template-alist' and
 (add-hook 'org-mode-hook 'org-tempo-setup)
 (add-hook 'org-tab-before-tab-emulation-hook
 	  'tempo-complete-tag)
-(when (eq major-mode 'org-mode) (org-tempo-setup))
+
+;; Enable Org Tempo in all open Org buffers.
+(mapc (lambda (buf) (with-current-buffer buf
+		 (when (eq major-mode 'org-mode) (org-tempo-setup))))
+      (buffer-list))
 
 (eval-after-load 'org
   '(org-tempo-add-templates))
