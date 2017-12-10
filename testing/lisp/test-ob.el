@@ -1003,9 +1003,9 @@ replacement happens correctly."
 (ert-deftest test-ob/org-babel-remove-result--results-wrap ()
   "Test `org-babel-remove-result' with :results wrap."
   (test-ob-verify-result-and-removed-result
-   ":RESULTS:
+   ":results:
 hello there
-:END:"
+:end:"
 
    "* org-babel-remove-result
 
@@ -1018,11 +1018,11 @@ hello there
 (ert-deftest test-ob/org-babel-remove-result--results-org ()
   "Test `org-babel-remove-result' with :results org."
   (test-ob-verify-result-and-removed-result
-   "#+BEGIN_SRC org
+   "#+begin_src org
 ,* heading
 ,** subheading
 content
-#+END_SRC"
+#+end_src"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results org
@@ -1036,9 +1036,9 @@ content\"
 (ert-deftest test-ob/org-babel-remove-result--results-html ()
   "Test `org-babel-remove-result' with :results html."
   (test-ob-verify-result-and-removed-result
-   "#+BEGIN_EXPORT html
+   "#+begin_export html
 <head><body></body></head>
-#+END_EXPORT"
+#+end_export"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results html
@@ -1050,11 +1050,11 @@ content\"
 (ert-deftest test-ob/org-babel-remove-result--results-latex ()
   "Test `org-babel-remove-result' with :results latex."
   (test-ob-verify-result-and-removed-result
-   "#+BEGIN_EXPORT latex
+   "#+begin_export latex
 Line 1
 Line 2
 Line 3
-#+END_EXPORT"
+#+end_export"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results latex
@@ -1069,9 +1069,9 @@ Line 3\"
   "Test `org-babel-remove-result' with :results code."
 
   (test-ob-verify-result-and-removed-result
-   "#+BEGIN_SRC emacs-lisp
+   "#+begin_src emacs-lisp
 \"I am working!\"
-#+END_SRC"
+#+end_src"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results code
