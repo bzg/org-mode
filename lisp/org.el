@@ -12388,7 +12388,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	  (or (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
 	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
 	  (let* ((match-data (match-data))
-		 (startpos (point-at-bol))
+		 (startpos (copy-marker (line-beginning-position)))
 		 (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
 		 (org-log-done org-log-done)
 		 (org-log-repeat org-log-repeat)
