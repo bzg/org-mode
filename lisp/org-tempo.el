@@ -126,12 +126,13 @@ Goes through `org-structure-template-alist' and
 
 (defun org-tempo--include-file ()
   "Ask for file name and take care of quit"
-  (let* ((inhibit-quit t))
+  (let ((inhibit-quit t))
     (unless (with-local-quit
 	      (prog1 t
 		(insert
-		 (format "#+include: \"%s\" " (file-relative-name
-  				    (read-file-name "Include file: "))))))
+		 (format "#+include: %S "
+			 (file-relative-name
+			  (read-file-name "Include file: "))))))
       (insert "<I")
       (setq quit-flag nil))))
 
@@ -156,9 +157,8 @@ Goes through `org-structure-template-alist' and
 	  'tempo-complete-tag)
 
 ;; Enable Org Tempo in all open Org buffers.
-(mapc (lambda (buf) (with-current-buffer buf
-		 (when (eq major-mode 'org-mode) (org-tempo-setup))))
-      (buffer-list))
+(dolist (b (org-buffer-list))
+  (with-current-buffer b (org-tempo-setup)))
 
 (eval-after-load 'org
   '(org-tempo-add-templates))
