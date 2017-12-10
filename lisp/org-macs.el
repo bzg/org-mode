@@ -31,7 +31,6 @@
 
 ;;; Code:
 
-(declare-function org-key "org" (key))
 (declare-function org-defkey "org" (keymap key def))
 
 
@@ -742,6 +741,11 @@ program is needed for, so that the error message can be more informative."
 (defun org-display-warning (message)
   "Display the given MESSAGE as a warning."
   (display-warning 'org message :warning))
+
+(defun org-unlogged-message (&rest args)
+  "Display a message, but avoid logging it in the *Messages* buffer."
+  (let ((message-log-max nil))
+    (apply #'message args)))
 
 (defun org-let (list &rest body)
   (eval (cons 'let (cons list body))))
