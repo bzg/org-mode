@@ -6592,19 +6592,6 @@ and subscripts."
 
 (defvar org-inlinetask-min-level)
 
-(defun org-show-all (&optional types)
-  "Show all contents in the visible part of the buffer.
-By default, the function expands headings, blocks and drawers.
-When optional argument TYPE is a list of symbols among `blocks',
-`drawers' and `headings', to only expand one specific type."
-  (dolist (type (or types '(blocks drawers headings)))
-    (org-flag-region (point-min) (point-max) nil
-		     (pcase type
-		       (`blocks 'org-hide-block)
-		       (`drawers 'org-hide-drawer)
-		       (`headings 'outline)
-		       (_ (error "Invalid type: %S" type))))))
-
 ;;;###autoload
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org mode.
