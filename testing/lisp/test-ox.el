@@ -1431,7 +1431,15 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
   ;; Throw an error when a macro definition is missing.
   (should-error
    (org-test-with-temp-text "{{{missing}}}"
-     (org-export-as (org-test-default-backend)))))
+     (org-export-as (org-test-default-backend))))
+  ;; Inline source blocks generate {{{results}}} macros.  Evaluate
+  ;; those.
+  (should
+   (equal "=2=\n"
+	  (org-test-with-temp-text "src_emacs-lisp{(+ 1 1)}"
+	    (let ((org-export-use-babel t)
+		  (org-babel-inline-result-wrap "=%s="))
+	      (org-export-as (org-test-default-backend)))))))
 
 (ert-deftest test-org-export/before-processing-hook ()
   "Test `org-export-before-processing-hook'."
