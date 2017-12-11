@@ -19,8 +19,7 @@
 
 ;;; Code:
 
-
-(ert-deftest test-org-element/archive-update-status-cookie ()
+(ert-deftest test-org-archive/update-status-cookie ()
   "Test archiving properly updating status cookies."
   ;; Test org-archive-subtree with two children.
   (should
@@ -58,6 +57,84 @@
       (forward-line -1)
       (org-element-property :title (org-element-at-point))))))
 
+(ert-deftest test-org-archive/to-archive-sibling ()
+  "Test `org-archive-to-archive-sibling' specifications."
+  ;; Archive sibling before or after archive heading.
+  (should
+   (equal "* Archive :ARCHIVE:\n** H\n"
+	  (org-test-with-temp-text "* H\n* Archive :ARCHIVE:\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE"))
+	      (org-archive-to-archive-sibling)
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties
+	       (point) (line-beginning-position 3))))))
+  (should
+   (equal "* Archive :ARCHIVE:\n** H\n"
+	  (org-test-with-temp-text "* Archive :ARCHIVE:\n<point>* H\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE"))
+	      (org-archive-to-archive-sibling)
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties
+	       (point) (line-beginning-position 3))))))
+  ;; When there is no sibling archive heading, create it.
+  (should
+   (equal "* Archive :ARCHIVE:\n** H\n"
+	  (org-test-with-temp-text "* H\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE"))
+	      (org-archive-to-archive-sibling)
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties
+	       (point) (line-beginning-position 3))))))
+  ;; Ignore non-sibling archive headings.
+  (should
+   (equal "* Archive :ARCHIVE:\n* Top\n** Archive :ARCHIVE:\n*** H\n"
+	  (org-test-with-temp-text "* Archive :ARCHIVE:\n* Top\n<point>** H\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE"))
+	      (org-archive-to-archive-sibling)
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties
+	       (point) (line-beginning-position 5))))))
+  ;; When archiving a heading, leave point on next heading.
+  (should
+   (equal "* H2"
+	  (org-test-with-temp-text "* H1\n* H2\n* Archive :ARCHIVE:\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE"))
+	      (org-archive-to-archive-sibling)
+	      (buffer-substring-no-properties (point) (line-end-position))))))
+  (should
+   (equal "* H2"
+	  (org-test-with-temp-text "* Archive :ARCHIVE:\n<point>* H1\n* H2\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE"))
+	      (org-archive-to-archive-sibling)
+	      (buffer-substring-no-properties (point) (line-end-position))))))
+  ;; If `org-archive-reversed-order' is nil, archive as the last
+  ;; child.  Otherwise, archive as the first one.
+  (should
+   (equal "* Archive :ARCHIVE:\n** A\n"
+	  (org-test-with-temp-text "* H\n* Archive :ARCHIVE:\n** A\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE")
+		  (org-archive-reversed-order nil))
+	      (org-archive-to-archive-sibling)
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties
+	       (point) (line-beginning-position 3))))))
+  (should
+   (equal "* Archive :ARCHIVE:\n** H\n"
+	  (org-test-with-temp-text "* H\n* Archive :ARCHIVE:\n** A\n"
+	    (let ((org-archive-sibling-heading "Archive")
+		  (org-archive-tag "ARCHIVE")
+		  (org-archive-reversed-order t))
+	      (org-archive-to-archive-sibling)
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties
+	       (point) (line-beginning-position 3)))))))
 
 (provide 'test-org-archive)
 ;;; test-org-archive.el ends here
