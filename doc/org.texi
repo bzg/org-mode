@@ -7505,6 +7505,62 @@ same directory for attachments as the parent does.
 @end table
 @end table
 
+@menu
+* Attach from dired::          Use dired to attach
+@end menu
+
+@node Attach from dired
+@subsection Attach from dired
+@cindex attach from dired
+
+It's possible to attach files to a subtree from a @command{dired} window in
+Emacs.  This might be convenient in some cases.
+
+To use this feature have one window in @command{dired} mode containing the
+file (or files) to be attached and another window with point in the subtree
+that shall get the attachments.
+
+In the @command{dired} window with point on a file @kbd{M-x
+org-attach-dired-to-subtree} attaches the file to the subtree using the
+attachment method set by variable @code{org-attach-method}.  When files are
+marked in the @command{dired} window then all marked files get attached.
+
+Add the following lines to the Emacs config to have binding @kbd{C-c C-x a}
+in @command{dired} windows for attaching.
+
+@smalllisp
+(add-hook
+ 'dired-mode-hook
+ (lambda ()
+   (define-key dired-mode-map (kbd "C-c C-x a") #'org-attach-dired-to-subtree))))
+@end smalllisp
+
+The following code shows how to bind further attachment methods.
+
+@lisp
+(add-hook
+ 'dired-mode-hook
+ (lambda ()
+   (define-key dired-mode-map (kbd "C-c C-x a") #'org-attach-dired-to-subtree)
+   (define-key dired-mode-map (kbd "C-c C-x c")
+     (lambda () (interactive)
+       (let ((org-attach-method 'cp))
+         (call-interactively #'org-attach-dired-to-subtree))))
+   (define-key dired-mode-map (kbd "C-c C-x m")
+     (lambda () (interactive)
+       (let ((org-attach-method 'mv))
+         (call-interactively #'org-attach-dired-to-subtree))))
+   (define-key dired-mode-map (kbd "C-c C-x h")
+     (lambda () (interactive)
+       (let ((org-attach-method 'ln))
+         (call-interactively #'org-attach-dired-to-subtree))))
+   (define-key dired-mode-map (kbd "C-c C-x s")
+     (lambda () (interactive)
+       (let ((org-attach-method 'lns))
+         (call-interactively #'org-attach-dired-to-subtree))))))
+@end lisp
+
+
 @node RSS feeds
 @section RSS feeds
 @cindex RSS feeds
