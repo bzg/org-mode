@@ -11887,7 +11887,7 @@ This is an alist of characters and values.  When
 read.  The key is first looked up in this alist, and the
 corresponding structure is inserted, with \"#+BEGIN_\" and
 \"#+END_\" added automatically."
-  :group 'org-completion
+  :group 'org-edit-structure
   :type '(repeat
 	  (cons (character :tag "Key")
 		(string :tag "Template")))
