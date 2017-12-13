@@ -1710,7 +1710,7 @@ doesn't specify any upper case character."
   :type '(choice
 	  (const :tag "Case-sensitive" nil)
 	  (const :tag "Case-insensitive" t)
-	  (const :tag "Case-insensitive for lower case searches only" 'smart)))
+	  (const :tag "Case-insensitive for lower case searches only" smart)))
 
 (defcustom org-occur-hook '(org-first-headline-recenter)
   "Hook that is run after `org-occur' has constructed a sparse tree.

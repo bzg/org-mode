@@ -99,8 +99,8 @@ sure to call the following command:
   :set (lambda (var val) (set-default var val) (org-duration-set-regexps))
   :initialize 'custom-initialize-changed
   :type '(choice
-	  (const :tag "H:MM" 'h:mm)
-	  (const :tag "H:MM:SS" 'h:mm:ss)
+	  (const :tag "H:MM" h:mm)
+	  (const :tag "H:MM:SS" h:mm:ss)
 	  (alist :key-type (string :tag "Unit")
 		 :value-type (number :tag "Modifier"))))
 

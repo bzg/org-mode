@@ -395,35 +395,35 @@ the daily/weekly agenda, see `org-agenda-skip-function'.")
 				   (choice
 				    :tag "Condition type"
 				    (list :tag "Regexp matches" :inline t
-					  (const :format "" 'regexp)
+					  (const :format "" regexp)
 					  (regexp))
 				    (list :tag "Regexp does not match" :inline t
-					  (const :format "" 'notregexp)
+					  (const :format "" notregexp)
 					  (regexp))
 				    (list :tag "TODO state is" :inline t
-					  (const 'todo)
+					  (const todo)
 					  (choice
-					   (const :tag "Any not-done state" 'todo)
-					   (const :tag "Any done state" 'done)
-					   (const :tag "Any state" 'any)
+					   (const :tag "Any not-done state" todo)
+					   (const :tag "Any done state" done)
+					   (const :tag "Any state" any)
 					   (list :tag "Keyword list"
 						 (const :format "" quote)
 						 (repeat (string :tag "Keyword")))))
 				    (list :tag "TODO state is not" :inline t
-					  (const 'nottodo)
+					  (const nottodo)
 					  (choice
-					   (const :tag "Any not-done state" 'todo)
-					   (const :tag "Any done state" 'done)
-					   (const :tag "Any state" 'any)
+					   (const :tag "Any not-done state" todo)
+					   (const :tag "Any done state" done)
+					   (const :tag "Any state" any)
 					   (list :tag "Keyword list"
 						 (const :format "" quote)
 						 (repeat (string :tag "Keyword")))))
-				    (const :tag "scheduled" 'scheduled)
-				    (const :tag "not scheduled" 'notscheduled)
-				    (const :tag "deadline" 'deadline)
-				    (const :tag "no deadline" 'notdeadline)
-				    (const :tag "timestamp" 'timestamp)
-				    (const :tag "no timestamp" 'nottimestamp))))))
+				    (const :tag "scheduled" scheduled)
+				    (const :tag "not scheduled" notscheduled)
+				    (const :tag "deadline" deadline)
+				    (const :tag "no deadline" notdeadline)
+				    (const :tag "timestamp" timestamp)
+				    (const :tag "no timestamp" nottimestamp))))))
 		   (list :tag "Non-standard skipping condition"
 			 :value (org-agenda-skip-function)
 			 (const org-agenda-skip-function)
