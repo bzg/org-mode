@@ -48,7 +48,7 @@
   :group 'org)
 
 (defvar org-tempo-tags nil
-  "Tempo tags for org-mode")
+  "Tempo tags for Org mode")
 
 (defcustom org-tempo-keywords-alist
   '((?L . "latex")
