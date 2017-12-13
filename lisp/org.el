@@ -12189,7 +12189,7 @@ There are two templates for each key, the first uses the original Org syntax,
 the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
 the default when the /org-mtags.el/ module has been loaded.  See also the
 variable `org-mtags-prefer-muse-templates'."
-  :group 'org-completion
+  :group 'org-edit-structure
   :type '(repeat
 	  (list
 	   (string :tag "Key")
