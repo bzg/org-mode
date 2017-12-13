@@ -4167,7 +4167,10 @@ A string will be inserted as-is in the header of the document."
 	   (list :tag "options/package pair"
 		 (string :tag "options")
 		 (string :tag "package")
-		 (boolean :tag "Snippet"))
+		 (boolean :tag "Snippet")
+		 (choice
+		  (const :tag "For all compilers" nil)
+		  (repeat :tag "Allowed compiler" string)))
 	   (string :tag "A line of LaTeX"))))
 
 (defcustom org-latex-packages-alist nil
