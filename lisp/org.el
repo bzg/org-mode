@@ -9680,14 +9680,12 @@ according to FMT (default from `org-email-link-description-format')."
   (let ((uri (cond ((string-match org-link-types-re link)
 		    (concat (match-string 1 link)
 			    (org-link-escape (substring link (match-end 1)))))
-		   ;; For readability, url-encode internal links only
-		   ;; when absolutely needed (i.e, when they contain
-		   ;; square brackets).  File links however, are
-		   ;; encoded since, e.g., spaces are significant.
 		   ((or (file-name-absolute-p link)
-			(string-match-p "\\`\\.\\.?/\\|[][]" link))
+			(string-match-p "\\`\\.\\.?/" link))
 		    (org-link-escape link))
-		   (t link)))
+		   ;; For readability, do not encode space characters
+		   ;; in fuzzy links.
+		   (t (org-link-escape link (remq ?\s org-link-escape-chars)))))
 	(description
 	 (and (org-string-nw-p description)
 	      ;; Remove brackets from description, as they are fatal.
