@@ -166,6 +166,10 @@ a #+BEGIN_FOO/#+END_FOO block.  Bound to C-c C-x w by default.
 
 See docstring for details.
 
+*** ~org-attach-dired-to-subtree~
+
+See docstring for details.
+
 ** Removed functions
 
 *** ~org-try-structure-completion~
