@@ -168,6 +168,31 @@ for export
       (should
        (eq (org-babel-execute-src-block nil (org-babel-lob-get-info)) 1)))))
 
+(ert-deftest test-ob-lob/assignment-with-newline ()
+  "Test call lines with an argument containing a newline character."
+  (should
+   (equal " foo"
+	  (org-test-with-temp-text "
+#+name: test-newline
+#+begin_src emacs-lisp :var x=\"a\"
+'foo
+#+end_src
+
+call_test-newline[:eval yes :results raw](\"a\nb\")<point>"
+	    (org-babel-execute-src-block nil (org-babel-lob-get-info))
+	    (buffer-substring (point) (point-max)))))
+  (should
+   (equal " bar"
+	  (org-test-with-temp-text "
+#+name: test-newline
+#+begin_src emacs-lisp :var x=\"a\"
+'bar
+#+end_src
+
+call_test-newline[:eval yes :results raw]('(1\n2))<point>"
+	    (org-babel-execute-src-block nil (org-babel-lob-get-info))
+	    (buffer-substring (point) (point-max))))))
+
 (provide 'test-ob-lob)
 
 ;;; test-ob-lob.el ends here
