@@ -34,7 +34,7 @@
 
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-at-heading-p "org" (&optional ignored))
-(declare-function org-at-table.el-p "org" (&optional table-type))
+(declare-function org-at-table.el-p "org" ())
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element" (blob &optional types with-self))
@@ -47,7 +47,7 @@
 (declare-function org-log-into-drawer "org" ())
 (declare-function org-reduced-level "org" (l))
 (declare-function org-show-context "org" (&optional key))
-(declare-function org-table-end (&optional table-type))
+(declare-function org-table-end "org-table" (&optional table-type))
 (declare-function outline-next-heading "outline" ())
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
