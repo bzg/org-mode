@@ -9953,6 +9953,12 @@ according to FMT (default from `org-email-link-description-format')."
 				    (reverse slines))) "\n")))))
     (mapconcat #'identity (split-string s) " ")))
 
+(defconst org-link-escape-chars
+  ;;%20 %5B %5D %25
+  '(?\s ?\[ ?\] ?%)
+  "List of characters that should be escaped in a link when stored to Org.
+This is the list that is used for internal purposes.")
+
 (defun org-make-link-string (link &optional description)
   "Make a link with brackets, consisting of LINK and DESCRIPTION."
   (unless (org-string-nw-p link) (error "Empty link"))
@@ -9974,12 +9980,6 @@ according to FMT (default from `org-email-link-description-format')."
     (format "[[%s]%s]"
 	    uri
 	    (if description (format "[%s]" description) ""))))
-
-(defconst org-link-escape-chars
-  ;;%20 %5B %5D %25
-  '(?\s ?\[ ?\] ?%)
-  "List of characters that should be escaped in a link when stored to Org.
-This is the list that is used for internal purposes.")
 
 (defun org-link-escape (text &optional table merge)
   "Return percent escaped representation of TEXT.
