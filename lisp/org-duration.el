@@ -51,6 +51,7 @@
 
 (require 'cl-lib)
 (require 'org-macs)
+(declare-function org-trim "org" (s &optional keep-lead))
 
 
 ;;; Public variables
