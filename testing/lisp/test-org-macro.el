@@ -29,9 +29,9 @@
    (equal
     "#+MACRO: A B\n1 B 3"
     (org-test-with-temp-text "#+MACRO: A B\n1 {{{A}}} 3"
-      (progn (org-macro-initialize-templates)
-             (org-macro-replace-all org-macro-templates)
-             (buffer-string)))))
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (buffer-string))))
   ;; Macro with arguments.
   (should
    (equal
@@ -43,20 +43,22 @@
   ;; Macro with "eval".
   (should
    (equal
-    "#+MACRO: add (eval (+ $1 $2))\n3"
-    (org-test-with-temp-text "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
-      (progn (org-macro-initialize-templates)
-             (org-macro-replace-all org-macro-templates)
-             (buffer-string)))))
+    "3"
+    (org-test-with-temp-text
+	"#+MACRO: add (eval (+ (string-to-number $1) (string-to-number $2)))
+<point>{{{add(1,2)}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (buffer-substring-no-properties (point) (line-end-position)))))
   ;; Nested macros.
   (should
    (equal
     "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\ninner outer"
     (org-test-with-temp-text
         "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
-      (progn (org-macro-initialize-templates)
-             (org-macro-replace-all org-macro-templates)
-             (buffer-string)))))
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (buffer-string))))
   ;; Error out when macro expansion is circular.
   (should-error
    (org-test-with-temp-text

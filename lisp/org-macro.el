@@ -151,20 +151,20 @@ function installs the following ones: \"property\",
 		   (if (and (consp date)
 			    (not (cdr date))
 			    (eq (org-element-type (car date)) 'timestamp))
-		       (format "(eval (if (org-string-nw-p \"$1\") %s %S))"
-			       (format "(org-timestamp-format '%S \"$1\")"
+		       (format "(eval (if (org-string-nw-p $1) %s %S))"
+			       (format "(org-timestamp-format '%S $1)"
 				       (org-element-copy (car date)))
 			       value)
 		     value)))
 	   (cons "email" (org-macro--find-keyword-value "EMAIL"))
-	   (cons "keyword" "(eval (org-macro--find-keyword-value \"$1\"))")
+	   (cons "keyword" "(eval (org-macro--find-keyword-value $1))")
 	   (cons "results" "$1")
 	   (cons "title" (org-macro--find-keyword-value "TITLE"))))
     ;; Install "property", "time" macros.
     (mapc update-templates
 	  (list (cons "property"
 		      "(eval (save-excursion
-        (let ((l \"$2\"))
+        (let ((l $2))
           (when (org-string-nw-p l)
             (condition-case _
                 (let ((org-link-search-must-match-exact-headline t))
@@ -172,8 +172,8 @@ function installs the following ones: \"property\",
               (error
                (error \"Macro property failed: cannot find location %s\"
                       l)))))
-        (org-entry-get nil \"$1\" 'selective)))")
-		(cons "time" "(eval (format-time-string \"$1\"))")))
+        (org-entry-get nil $1 'selective)))")
+		(cons "time" "(eval (format-time-string $1))")))
     ;; Install "input-file", "modification-time" macros.
     (let ((visited-file (buffer-file-name (buffer-base-buffer))))
       (when (and visited-file (file-exists-p visited-file))
@@ -181,8 +181,8 @@ function installs the following ones: \"property\",
 	      (list (cons "input-file" (file-name-nondirectory visited-file))
 		    (cons "modification-time"
 			  (format "(eval
-\(format-time-string \"$1\"
-                     (or (and (org-string-nw-p \"$2\")
+\(format-time-string $1
+                     (or (and (org-string-nw-p $2)
                               (org-macro--vc-modified-time %s))
                      '%s)))"
 				  (prin1-to-string visited-file)
@@ -191,7 +191,7 @@ function installs the following ones: \"property\",
     ;; Initialize and install "n" macro.
     (org-macro--counter-initialize)
     (funcall update-templates
-	     (cons "n" "(eval (org-macro--counter-increment \"$1\" \"$2\"))"))
+	     (cons "n" "(eval (org-macro--counter-increment $1 $2))"))
     (setq org-macro-templates templates)))
 
 (defun org-macro-expand (macro templates)
@@ -204,18 +204,22 @@ default value.  Return nil if no template was found."
 	 ;; Macro names are case-insensitive.
 	 (cdr (assoc-string (org-element-property :key macro) templates t))))
     (when template
-      (let ((value (replace-regexp-in-string
-                    "\\$[0-9]+"
-                    (lambda (arg)
-                      (or (nth (1- (string-to-number (substring arg 1)))
-                               (org-element-property :args macro))
-                          ;; No argument: remove place-holder.
-                          ""))
-                    template nil 'literal)))
-        ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
-        (when (string-match "\\`(eval\\>" value)
-          (setq value (eval (read value))))
-        ;; Return string.
+      (let* ((eval? (string-match-p "\\`(eval\\>" template))
+	     (value
+	      (replace-regexp-in-string
+	       "\\$[0-9]+"
+	       (lambda (m)
+		 (let ((arg (or (nth (1- (string-to-number (substring m 1)))
+				     (org-element-property :args macro))
+				;; No argument: remove place-holder.
+				"")))
+		   ;; `eval' implies arguments are strings.
+		   (if eval? (format "%S" arg) arg)))
+	       template nil 'literal)))
+        (when eval?
+          (setq value (eval (condition-case nil (read value)
+			      (error (debug))))))
+        ;; Force return value to be a string.
         (format "%s" (or value ""))))))
 
 (defun org-macro-replace-all (templates &optional keywords)

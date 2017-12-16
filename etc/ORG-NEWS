@@ -58,6 +58,29 @@ With the new template expansion mechanism (see
 [[*~org-insert-structure-template~]]), the variable changed its data type.
 See docstring for details.
 
+*** Placeholders in =(eval ...)= macros are always strings
+
+Within =(eval ...)= macros, =$1=-like placeholders are always replaced
+with a string.  As a consequence, they must not be enclosed within
+quotes. As an illustration, consider the following, now valid,
+examples:
+
+#+begin_example
+  ,#+macro: join (eval (concat $1 $2))
+  ,#+macro: sum (eval (+ (string-to-number $1) (string-to-number $2)))
+
+  {{{join(a,b)}}} => ab
+  {{{sum(1,2)}}}  => 3
+#+end_example
+
+However, there is no change in non-eval macros:
+
+#+begin_example
+  ,#+macro: disp argument: $1
+
+  {{{disp(text)}}} => argument: text
+#+end_example
+
 *** =align= STARTUP value no longer narrow table columns
 
 Columns narrowing (or shrinking) is now dynamic. See [[*Dynamically
