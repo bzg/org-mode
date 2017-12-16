@@ -11918,7 +11918,7 @@ in the block.  Otherwise, insert an empty block."
     (setq column (current-indentation))
     (beginning-of-line)
     (indent-to column)
-    (insert (format "#+begin_%s\n" type))
+    (insert (format "#+begin_%s%s\n" type (if (string-equal "src" type) " " "")))
     (goto-char e)
     (if (bolp)
 	(progn
