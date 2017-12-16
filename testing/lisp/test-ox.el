@@ -1771,12 +1771,19 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
    (equal "Success"
 	  (let (org-export-registered-backends)
 	    (org-export-define-backend 'test
-	      '((plain-text . (lambda (text contents info) "Failure"))))
+	      '((verbatim . (lambda (text contents info) "Failure"))))
 	    (org-export-define-backend 'test2
-	      '((plain-text . (lambda (text contents info) "Success"))))
-	    (org-export-with-backend 'test2 "Test"))))
+	      '((verbatim . (lambda (text contents info) "Success"))))
+	    (org-export-with-backend 'test2 '(verbatim (:value "=Test="))))))
+  ;; Corner case: plain-text transcoders have a different arity.
+  (should
+   (equal "Success"
+	  (org-export-with-backend
+	   (org-export-create-backend
+	    :transcoders '((plain-text . (lambda (text info) "Success"))))
+	   "Test")))
   ;; Provide correct back-end if transcoder needs to use recursive
-  ;; calls anyway.
+  ;; calls.
   (should
    (equal "Success\n"
 	  (let ((test-back-end
