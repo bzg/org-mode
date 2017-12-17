@@ -1474,11 +1474,12 @@ stars).  The following issues are influenced by this variable:
   a headline will be indented when this variable is set.
 
 Note that this is all about true indentation, by adding and
-removing space characters.  See also `org-indent.el' which does
+removing space characters.  See also \"org-indent.el\" which does
 level-dependent indentation in a virtual way, i.e. at display
 time in Emacs."
   :group 'org-edit-structure
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-special-ctrl-a/e nil
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.

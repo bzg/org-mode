@@ -128,7 +128,8 @@ editing it with `\\[org-edit-src-code]'.
 
 It has no effect if `org-src-preserve-indentation' is non-nil."
   :group 'org-edit-structure
-  :type 'integer)
+  :type 'integer
+  :safe #'wholenump)
 
 (defcustom org-edit-src-persistent-message t
   "Non-nil means show persistent exit help message while editing src examples.
