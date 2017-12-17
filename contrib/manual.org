@@ -3226,7 +3226,7 @@ the end of the link, enclose them in square or angular brackets.
 
 ** Handling links
 :PROPERTIES:
-:DESCRIPTION: URL-like links to the world.
+:DESCRIPTION: Creating, inserting and following.
 :END:
 #+cindex: links, handling
 
