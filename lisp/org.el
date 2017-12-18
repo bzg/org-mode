@@ -8085,80 +8085,81 @@ case."
   "Move the current subtree down past ARG headlines of the same level."
   (interactive "p")
   (setq arg (prefix-numeric-value arg))
-  (let ((movfunc (if (> arg 0) 'org-get-next-sibling
-		   'org-get-last-sibling))
-	(ins-point (make-marker))
-	(cnt (abs arg))
-	(col (current-column))
-	beg beg0 end txt folded ne-beg ne-end ne-ins ins-end)
-    ;; Select the tree
-    (org-back-to-heading)
-    (setq beg0 (point))
-    (save-excursion
-      (setq ne-beg (org-back-over-empty-lines))
-      (setq beg (point)))
-    (save-match-data
-      (save-excursion (outline-end-of-heading)
-		      (setq folded (org-invisible-p)))
-      (progn (org-end-of-subtree nil t)
-	     (unless (eobp) (backward-char))))
-    (outline-next-heading)
-    (setq ne-end (org-back-over-empty-lines))
-    (setq end (point))
-    (goto-char beg0)
-    (when (and (> arg 0) (org-first-sibling-p) (< ne-end ne-beg))
-      ;; include less whitespace
-      (save-excursion
-	(goto-char beg)
-	(forward-line (- ne-beg ne-end))
-	(setq beg (point))))
-    ;; Find insertion point, with error handling
-    (while (> cnt 0)
-      (or (and (funcall movfunc) (looking-at org-outline-regexp))
-	  (progn (goto-char beg0)
-		 (user-error "Cannot move past superior level or buffer limit")))
-      (setq cnt (1- cnt)))
-    (when (> arg 0)
-      ;; Moving forward - still need to move over subtree
-      (org-end-of-subtree t t)
-      (save-excursion
-	(org-back-over-empty-lines)
-	(or (bolp) (newline))))
-    (setq ne-ins (org-back-over-empty-lines))
-    (move-marker ins-point (point))
-    (setq txt (buffer-substring beg end))
-    (org-save-markers-in-region beg end)
-    (delete-region beg end)
-    (org-remove-empty-overlays-at beg)
-    (or (= beg (point-min)) (outline-flag-region (1- beg) beg nil))
-    (or (bobp) (outline-flag-region (1- (point)) (point) nil))
-    (and (not (bolp)) (looking-at "\n") (forward-char 1))
-    (let ((bbb (point)))
-      (insert-before-markers txt)
-      (org-reinstall-markers-in-region bbb)
-      (move-marker ins-point bbb))
-    (or (bolp) (insert "\n"))
-    (setq ins-end (point))
-    (goto-char ins-point)
-    (org-skip-whitespace)
-    (when (and (< arg 0)
-	       (org-first-sibling-p)
-	       (> ne-ins ne-beg))
-      ;; Move whitespace back to beginning
-      (save-excursion
-	(goto-char ins-end)
-	(let ((kill-whole-line t))
-	  (kill-line (- ne-ins ne-beg)) (point)))
-      (insert (make-string (- ne-ins ne-beg) ?\n)))
-    (move-marker ins-point nil)
-    (if folded
-	(outline-hide-subtree)
-      (org-show-entry)
-      (org-show-children)
-      (org-cycle-hide-drawers 'children))
-    (org-clean-visibility-after-subtree-move)
-    ;; move back to the initial column we were at
-    (move-to-column col)))
+  (org-preserve-local-variables
+   (let ((movfunc (if (> arg 0) 'org-get-next-sibling
+		    'org-get-last-sibling))
+	 (ins-point (make-marker))
+	 (cnt (abs arg))
+	 (col (current-column))
+	 beg beg0 end txt folded ne-beg ne-end ne-ins ins-end)
+     ;; Select the tree
+     (org-back-to-heading)
+     (setq beg0 (point))
+     (save-excursion
+       (setq ne-beg (org-back-over-empty-lines))
+       (setq beg (point)))
+     (save-match-data
+       (save-excursion (outline-end-of-heading)
+		       (setq folded (org-invisible-p)))
+       (progn (org-end-of-subtree nil t)
+	      (unless (eobp) (backward-char))))
+     (outline-next-heading)
+     (setq ne-end (org-back-over-empty-lines))
+     (setq end (point))
+     (goto-char beg0)
+     (when (and (> arg 0) (org-first-sibling-p) (< ne-end ne-beg))
+       ;; include less whitespace
+       (save-excursion
+	 (goto-char beg)
+	 (forward-line (- ne-beg ne-end))
+	 (setq beg (point))))
+     ;; Find insertion point, with error handling
+     (while (> cnt 0)
+       (or (and (funcall movfunc) (looking-at org-outline-regexp))
+	   (progn (goto-char beg0)
+		  (user-error "Cannot move past superior level or buffer limit")))
+       (setq cnt (1- cnt)))
+     (when (> arg 0)
+       ;; Moving forward - still need to move over subtree
+       (org-end-of-subtree t t)
+       (save-excursion
+	 (org-back-over-empty-lines)
+	 (unless (bolp) (insert "\n"))))
+     (setq ne-ins (org-back-over-empty-lines))
+     (move-marker ins-point (point))
+     (setq txt (buffer-substring beg end))
+     (org-save-markers-in-region beg end)
+     (delete-region beg end)
+     (org-remove-empty-overlays-at beg)
+     (or (= beg (point-min)) (outline-flag-region (1- beg) beg nil))
+     (or (bobp) (outline-flag-region (1- (point)) (point) nil))
+     (and (not (bolp)) (looking-at "\n") (forward-char 1))
+     (let ((bbb (point)))
+       (insert-before-markers txt)
+       (org-reinstall-markers-in-region bbb)
+       (move-marker ins-point bbb))
+     (or (bolp) (insert "\n"))
+     (setq ins-end (point))
+     (goto-char ins-point)
+     (org-skip-whitespace)
+     (when (and (< arg 0)
+		(org-first-sibling-p)
+		(> ne-ins ne-beg))
+       ;; Move whitespace back to beginning.
+       (save-excursion
+	 (goto-char ins-end)
+	 (let ((kill-whole-line t))
+	   (kill-line (- ne-ins ne-beg)) (point)))
+       (insert (make-string (- ne-ins ne-beg) ?\n)))
+     (move-marker ins-point nil)
+     (if folded
+	 (outline-hide-subtree)
+       (org-show-entry)
+       (org-show-children)
+       (org-cycle-hide-drawers 'children))
+     (org-clean-visibility-after-subtree-move)
+     ;; Move back to the initial column we were at.
+     (move-to-column col))))
 
 (defvar org-subtree-clip ""
   "Clipboard for cut and paste of subtrees.
@@ -8185,35 +8186,36 @@ If FORCE-STORE-MARKERS is non-nil, store the relative locations
 of some markers in the region, even if CUT is non-nil.  This is
 useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
   (interactive "p")
-  (let (beg end folded (beg0 (point)))
-    (if (called-interactively-p 'any)
-	(org-back-to-heading nil) ; take what looks like a subtree
-      (org-back-to-heading t)) ; take what is really there
-    (setq beg (point))
-    (skip-chars-forward " \t\r\n")
-    (save-match-data
-      (if nosubtrees
-	  (outline-next-heading)
-	(save-excursion (outline-end-of-heading)
-			(setq folded (org-invisible-p)))
-	(ignore-errors (org-forward-heading-same-level (1- n) t))
-	(org-end-of-subtree t t)))
-    ;; Include the end of an inlinetask
-    (when (and (featurep 'org-inlinetask)
-	       (looking-at-p (concat (org-inlinetask-outline-regexp)
-				     "END[ \t]*$")))
-      (end-of-line))
-    (setq end (point))
-    (goto-char beg0)
-    (when (> end beg)
-      (setq org-subtree-clip-folded folded)
-      (when (or cut force-store-markers)
-	(org-save-markers-in-region beg end))
-      (if cut (kill-region beg end) (copy-region-as-kill beg end))
-      (setq org-subtree-clip (current-kill 0))
-      (message "%s: Subtree(s) with %d characters"
-	       (if cut "Cut" "Copied")
-	       (length org-subtree-clip)))))
+  (org-preserve-local-variables
+   (let (beg end folded (beg0 (point)))
+     (if (called-interactively-p 'any)
+	 (org-back-to-heading nil)    ; take what looks like a subtree
+       (org-back-to-heading t))	      ; take what is really there
+     (setq beg (point))
+     (skip-chars-forward " \t\r\n")
+     (save-match-data
+       (if nosubtrees
+	   (outline-next-heading)
+	 (save-excursion (outline-end-of-heading)
+			 (setq folded (org-invisible-p)))
+	 (ignore-errors (org-forward-heading-same-level (1- n) t))
+	 (org-end-of-subtree t t)))
+     ;; Include the end of an inlinetask
+     (when (and (featurep 'org-inlinetask)
+		(looking-at-p (concat (org-inlinetask-outline-regexp)
+				      "END[ \t]*$")))
+       (end-of-line))
+     (setq end (point))
+     (goto-char beg0)
+     (when (> end beg)
+       (setq org-subtree-clip-folded folded)
+       (when (or cut force-store-markers)
+	 (org-save-markers-in-region beg end))
+       (if cut (kill-region beg end) (copy-region-as-kill beg end))
+       (setq org-subtree-clip (current-kill 0))
+       (message "%s: Subtree(s) with %d characters"
+		(if cut "Cut" "Copied")
+		(length org-subtree-clip))))))
 
 (defun org-paste-subtree (&optional level tree for-yank remove)
   "Paste the clipboard as a subtree, with modification of headline level.
@@ -8691,88 +8693,91 @@ function is being called interactively."
 	    (dcst (downcase sorting-type))
 	    (case-fold-search nil)
 	    (now (current-time)))
-        (sort-subr
-         (/= dcst sorting-type)
-         ;; This function moves to the beginning character of the "record" to
-         ;; be sorted.
-	 (lambda nil
-	   (if (re-search-forward re nil t)
-	       (goto-char (match-beginning 0))
-	     (goto-char (point-max))))
-         ;; This function moves to the last character of the "record" being
-         ;; sorted.
-	 (lambda nil
-	   (save-match-data
-	     (condition-case nil
-		 (outline-forward-same-level 1)
-	       (error
-		(goto-char (point-max))))))
-         ;; This function returns the value that gets sorted against.
-	 (lambda nil
-	   (cond
-	    ((= dcst ?n)
-	     (if (looking-at org-complex-heading-regexp)
-		 (string-to-number (org-sort-remove-invisible (match-string 4)))
-	       nil))
-	    ((= dcst ?a)
-	     (if (looking-at org-complex-heading-regexp)
-		 (funcall case-func (org-sort-remove-invisible (match-string 4)))
-	       nil))
-	    ((= dcst ?k)
-	     (or (get-text-property (point) :org-clock-minutes) 0))
-	    ((= dcst ?t)
-	     (let ((end (save-excursion (outline-next-heading) (point))))
-	       (if (or (re-search-forward org-ts-regexp end t)
-		       (re-search-forward org-ts-regexp-both end t))
-		   (org-time-string-to-seconds (match-string 0))
-		 (float-time now))))
-	    ((= dcst ?c)
-	     (let ((end (save-excursion (outline-next-heading) (point))))
-	       (if (re-search-forward
-		    (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
-		    end t)
-		   (org-time-string-to-seconds (match-string 0))
-		 (float-time now))))
-	    ((= dcst ?s)
-	     (let ((end (save-excursion (outline-next-heading) (point))))
-	       (if (re-search-forward org-scheduled-time-regexp end t)
-		   (org-time-string-to-seconds (match-string 1))
-		 (float-time now))))
-	    ((= dcst ?d)
-	     (let ((end (save-excursion (outline-next-heading) (point))))
-	       (if (re-search-forward org-deadline-time-regexp end t)
-		   (org-time-string-to-seconds (match-string 1))
-		 (float-time now))))
-	    ((= dcst ?p)
-	     (if (re-search-forward org-priority-regexp (point-at-eol) t)
-		 (string-to-char (match-string 2))
-	       org-default-priority))
-	    ((= dcst ?r)
-	     (or (org-entry-get nil property) ""))
-	    ((= dcst ?o)
-	     (when (looking-at org-complex-heading-regexp)
-	       (let* ((m (match-string 2))
-		      (s (if (member m org-done-keywords) '- '+)))
-		 (- 99 (funcall s (length (member m org-todo-keywords-1)))))))
-	    ((= dcst ?f)
-	     (if getkey-func
-		 (progn
-		   (setq tmp (funcall getkey-func))
-		   (when (stringp tmp) (setq tmp (funcall case-func tmp)))
-		   tmp)
-	       (error "Invalid key function `%s'" getkey-func)))
-	    (t (error "Invalid sorting type `%c'" sorting-type))))
-         nil
-         (cond
-          ((= dcst ?a) 'string<)
-          ((= dcst ?f)
-	   (or compare-func
-	       (and interactive?
-		    (org-read-function
-		     (concat "Function for comparing keys "
-			     "(empty for default `sort-subr' predicate): ")
-		     'allow-empty))))
-          ((member dcst '(?p ?t ?s ?d ?c ?k)) '<)))
+        (org-preserve-local-variables
+	 (sort-subr
+	  (/= dcst sorting-type)
+	  ;; This function moves to the beginning character of the
+	  ;; "record" to be sorted.
+	  (lambda nil
+	    (if (re-search-forward re nil t)
+		(goto-char (match-beginning 0))
+	      (goto-char (point-max))))
+	  ;; This function moves to the last character of the "record" being
+	  ;; sorted.
+	  (lambda nil
+	    (save-match-data
+	      (condition-case nil
+		  (outline-forward-same-level 1)
+		(error
+		 (goto-char (point-max))))))
+	  ;; This function returns the value that gets sorted against.
+	  (lambda ()
+	    (cond
+	     ((= dcst ?n)
+	      (if (looking-at org-complex-heading-regexp)
+		  (string-to-number
+		   (org-sort-remove-invisible (match-string 4)))
+		nil))
+	     ((= dcst ?a)
+	      (if (looking-at org-complex-heading-regexp)
+		  (funcall case-func
+			   (org-sort-remove-invisible (match-string 4)))
+		nil))
+	     ((= dcst ?k)
+	      (or (get-text-property (point) :org-clock-minutes) 0))
+	     ((= dcst ?t)
+	      (let ((end (save-excursion (outline-next-heading) (point))))
+		(if (or (re-search-forward org-ts-regexp end t)
+			(re-search-forward org-ts-regexp-both end t))
+		    (org-time-string-to-seconds (match-string 0))
+		  (float-time now))))
+	     ((= dcst ?c)
+	      (let ((end (save-excursion (outline-next-heading) (point))))
+		(if (re-search-forward
+		     (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
+		     end t)
+		    (org-time-string-to-seconds (match-string 0))
+		  (float-time now))))
+	     ((= dcst ?s)
+	      (let ((end (save-excursion (outline-next-heading) (point))))
+		(if (re-search-forward org-scheduled-time-regexp end t)
+		    (org-time-string-to-seconds (match-string 1))
+		  (float-time now))))
+	     ((= dcst ?d)
+	      (let ((end (save-excursion (outline-next-heading) (point))))
+		(if (re-search-forward org-deadline-time-regexp end t)
+		    (org-time-string-to-seconds (match-string 1))
+		  (float-time now))))
+	     ((= dcst ?p)
+	      (if (re-search-forward org-priority-regexp (point-at-eol) t)
+		  (string-to-char (match-string 2))
+		org-default-priority))
+	     ((= dcst ?r)
+	      (or (org-entry-get nil property) ""))
+	     ((= dcst ?o)
+	      (when (looking-at org-complex-heading-regexp)
+		(let* ((m (match-string 2))
+		       (s (if (member m org-done-keywords) '- '+)))
+		  (- 99 (funcall s (length (member m org-todo-keywords-1)))))))
+	     ((= dcst ?f)
+	      (if getkey-func
+		  (progn
+		    (setq tmp (funcall getkey-func))
+		    (when (stringp tmp) (setq tmp (funcall case-func tmp)))
+		    tmp)
+		(error "Invalid key function `%s'" getkey-func)))
+	     (t (error "Invalid sorting type `%c'" sorting-type))))
+	  nil
+	  (cond
+	   ((= dcst ?a) 'string<)
+	   ((= dcst ?f)
+	    (or compare-func
+		(and interactive?
+		     (org-read-function
+		      (concat "Function for comparing keys "
+			      "(empty for default `sort-subr' predicate): ")
+		      'allow-empty))))
+	   ((member dcst '(?p ?t ?s ?d ?c ?k)) '<))))
 	(when restore-clock?
 	  (move-marker org-clock-marker
 		       (1+ (next-single-property-change
@@ -11552,9 +11557,10 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	    (unless org-refile-keep
 	      (if regionp
 		  (delete-region (point) (+ (point) (- region-end region-start)))
-		(delete-region
-		 (and (org-back-to-heading t) (point))
-		 (min (1+ (buffer-size)) (org-end-of-subtree t t) (point)))))
+		(org-preserve-local-variables
+		 (delete-region
+		  (and (org-back-to-heading t) (point))
+		  (min (1+ (buffer-size)) (org-end-of-subtree t t) (point))))))
 	    (when (featurep 'org-inlinetask)
 	      (org-inlinetask-remove-END-maybe))
 	    (setq org-markers-to-move nil)

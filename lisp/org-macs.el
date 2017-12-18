@@ -169,6 +169,24 @@ point nowhere."
   "Load FILE with optional arguments NOERROR and MUSTSUFFIX."
   `(load ,file 'noerror nil nil 'mustsuffix))
 
+(defmacro org-preserve-local-variables (&rest body)
+  "Execute BODY while preserving local variables."
+  (declare (debug (body)))
+  `(let ((local-variables
+	  (org-with-wide-buffer
+	   (goto-char (point-max))
+	   (let ((case-fold-search t))
+	     (and (re-search-backward "^[ \t]*# +Local Variables:"
+				      (max (- (point) 3000) 1)
+				      t)
+		  (delete-and-extract-region (point) (point-max)))))))
+     (unwind-protect (progn ,@body)
+       (when local-variables
+	 (org-with-wide-buffer
+	  (goto-char (point-max))
+	  (unless (bolp) (insert "\n"))
+	  (insert local-variables))))))
+
 
 
 ;;; Buffer

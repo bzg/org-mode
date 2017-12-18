@@ -313,23 +313,23 @@ otherwise."
 
 (defun org-footnote--clear-footnote-section ()
   "Remove all footnote sections in buffer and create a new one.
-New section is created at the end of the buffer, before any file
-local variable definition.  Leave point within the new section."
+New section is created at the end of the buffer.  Leave point
+within the new section."
   (when org-footnote-section
     (goto-char (point-min))
-    (let ((regexp
-	   (format "^\\*+ +%s[ \t]*$"
-		   (regexp-quote org-footnote-section))))
+    (let ((regexp (format "^\\*+ +%s[ \t]*$"
+			  (regexp-quote org-footnote-section))))
       (while (re-search-forward regexp nil t)
 	(delete-region
 	 (match-beginning 0)
-	 (progn (org-end-of-subtree t t)
-		(if (not (eobp)) (point)
-		  (org-footnote--goto-local-insertion-point)
-		  (skip-chars-forward " \t\n")
-		  (if (eobp) (point) (line-beginning-position)))))))
+	 (org-end-of-subtree t t))))
     (goto-char (point-max))
-    (org-footnote--goto-local-insertion-point)
+    ;; Clean-up blank lines at the end of the buffer.
+    (skip-chars-backward " \r\t\n")
+    (unless (bobp)
+      (forward-line)
+      (when (eolp) (insert "\n")))
+    (delete-region (point) (point-max))
     (when (and (cdr (assq 'heading org-blank-before-new-entry))
 	       (zerop (save-excursion (org-back-over-empty-lines))))
       (insert "\n"))
@@ -448,14 +448,8 @@ while collecting them."
   "Find insertion point for footnote, just before next outline heading.
 Assume insertion point is within currently accessible part of the buffer."
   (org-with-limited-levels (outline-next-heading))
-  ;; Skip file local variables.  See `modify-file-local-variable'.
-  (when (eobp)
-    (let ((case-fold-search t))
-      (re-search-backward "^[ \t]*# +Local Variables:"
-			  (max (- (point-max) 3000) (point-min))
-			  t)))
   (skip-chars-backward " \t\n")
-  (forward-line)
+  (unless (bobp) (forward-line))
   (unless (bolp) (insert "\n")))
 
 
@@ -676,21 +670,22 @@ Return buffer position at the beginning of the definition.  This
 function doesn't move point."
   (let ((label (org-footnote-normalize-label label))
 	electric-indent-mode)		; Prevent wrong indentation.
-    (org-with-wide-buffer
-     (cond
-      ((not org-footnote-section) (org-footnote--goto-local-insertion-point))
-      ((save-excursion
-	 (goto-char (point-min))
-	 (re-search-forward
-	  (concat "^\\*+[ \t]+" (regexp-quote org-footnote-section) "[ \t]*$")
-	  nil t))
-       (goto-char (match-end 0))
-       (forward-line)
-       (unless (bolp) (insert "\n")))
-      (t (org-footnote--clear-footnote-section)))
-     (when (zerop (org-back-over-empty-lines)) (insert "\n"))
-     (insert "[fn:" label "] \n")
-     (line-beginning-position 0))))
+    (org-preserve-local-variables
+     (org-with-wide-buffer
+      (cond
+       ((not org-footnote-section) (org-footnote--goto-local-insertion-point))
+       ((save-excursion
+	  (goto-char (point-min))
+	  (re-search-forward
+	   (concat "^\\*+[ \t]+" (regexp-quote org-footnote-section) "[ \t]*$")
+	   nil t))
+	(goto-char (match-end 0))
+	(forward-line)
+	(unless (bolp) (insert "\n")))
+       (t (org-footnote--clear-footnote-section)))
+      (when (zerop (org-back-over-empty-lines)) (insert "\n"))
+      (insert "[fn:" label "] \n")
+      (line-beginning-position 0)))))
 
 (defun org-footnote-delete-references (label)
   "Delete every reference to footnote LABEL.
@@ -733,31 +728,32 @@ and all references of a footnote label.
 
 If LABEL is non-nil, delete that footnote instead."
   (catch 'done
-    (let* ((nref 0) (ndef 0) x
-	   ;; 1. Determine LABEL of footnote at point.
-	   (label (cond
-		   ;; LABEL is provided as argument.
-		   (label)
-		   ;; Footnote reference at point.  If the footnote is
-		   ;; anonymous, delete it and exit instead.
-		   ((setq x (org-footnote-at-reference-p))
-		    (or (car x)
-			(progn
-			  (delete-region (nth 1 x) (nth 2 x))
-			  (message "Anonymous footnote removed")
-			  (throw 'done t))))
-		   ;; Footnote definition at point.
-		   ((setq x (org-footnote-at-definition-p))
-		    (car x))
-		   (t (error "Don't know which footnote to remove")))))
-      ;; 2. Now that LABEL is non-nil, find every reference and every
-      ;; definition, and delete them.
-      (setq nref (org-footnote-delete-references label)
-	    ndef (org-footnote-delete-definitions label))
-      ;; 3. Verify consistency of footnotes and notify user.
-      (org-footnote-auto-adjust-maybe)
-      (message "%d definition(s) of and %d reference(s) of footnote %s removed"
-	       ndef nref label))))
+    (org-preserve-local-variables
+     (let* ((nref 0) (ndef 0) x
+	    ;; 1. Determine LABEL of footnote at point.
+	    (label (cond
+		    ;; LABEL is provided as argument.
+		    (label)
+		    ;; Footnote reference at point.  If the footnote is
+		    ;; anonymous, delete it and exit instead.
+		    ((setq x (org-footnote-at-reference-p))
+		     (or (car x)
+			 (progn
+			   (delete-region (nth 1 x) (nth 2 x))
+			   (message "Anonymous footnote removed")
+			   (throw 'done t))))
+		    ;; Footnote definition at point.
+		    ((setq x (org-footnote-at-definition-p))
+		     (car x))
+		    (t (error "Don't know which footnote to remove")))))
+       ;; 2. Now that LABEL is non-nil, find every reference and every
+       ;; definition, and delete them.
+       (setq nref (org-footnote-delete-references label)
+	     ndef (org-footnote-delete-definitions label))
+       ;; 3. Verify consistency of footnotes and notify user.
+       (org-footnote-auto-adjust-maybe)
+       (message "%d definition(s) of and %d reference(s) of footnote %s removed"
+		ndef nref label)))))
 
 
 ;;;; Sorting, Renumbering, Normalizing
@@ -765,28 +761,25 @@ If LABEL is non-nil, delete that footnote instead."
 (defun org-footnote-renumber-fn:N ()
   "Order numbered footnotes into a sequence in the document."
   (interactive)
-  (let ((references (org-footnote--collect-references)))
-    (unwind-protect
-	(let* ((c 0)
-	       (references (cl-remove-if-not
-			    (lambda (r) (string-match-p "\\`[0-9]+\\'" (car r)))
-			    references))
-	       (alist (mapcar (lambda (l) (cons l (number-to-string (cl-incf c))))
-			      (delete-dups (mapcar #'car references)))))
-	  (org-with-wide-buffer
-	   ;; Re-number references.
-	   (dolist (ref references)
-	     (goto-char (nth 1 ref))
-	     (org-footnote--set-label (cdr (assoc (nth 0 ref) alist))))
-	   ;; Re-number definitions.
-	   (goto-char (point-min))
-	   (while (re-search-forward "^\\[fn:\\([0-9]+\\)\\]" nil t)
-	     (replace-match (or (cdr (assoc (match-string 1) alist))
-				;; Un-referenced definitions get
-				;; higher numbers.
-				(number-to-string (cl-incf c)))
-			    nil nil nil 1))))
-      (dolist (r references) (set-marker (nth 1 r) nil)))))
+  (let* ((c 0)
+	 (references (cl-remove-if-not
+		      (lambda (r) (string-match-p "\\`[0-9]+\\'" (car r)))
+		      (org-footnote--collect-references)))
+	 (alist (mapcar (lambda (l) (cons l (number-to-string (cl-incf c))))
+			(delete-dups (mapcar #'car references)))))
+    (org-with-wide-buffer
+     ;; Re-number references.
+     (dolist (ref references)
+       (goto-char (nth 1 ref))
+       (org-footnote--set-label (cdr (assoc (nth 0 ref) alist))))
+     ;; Re-number definitions.
+     (goto-char (point-min))
+     (while (re-search-forward "^\\[fn:\\([0-9]+\\)\\]" nil t)
+       (replace-match (or (cdr (assoc (match-string 1) alist))
+			  ;; Un-referenced definitions get higher
+			  ;; numbers.
+			  (number-to-string (cl-incf c)))
+		      nil nil nil 1)))))
 
 (defun org-footnote-sort ()
   "Rearrange footnote definitions in the current buffer.
@@ -795,129 +788,121 @@ references.  Also relocate definitions at the end of their
 relative section or within a single footnote section, according
 to `org-footnote-section'.  Inline definitions are ignored."
   (let ((references (org-footnote--collect-references)))
-    (unwind-protect
-	(let ((definitions (org-footnote--collect-definitions 'delete)))
-	  (org-with-wide-buffer
-	   (org-footnote--clear-footnote-section)
-	   ;; Insert footnote definitions at the appropriate location,
-	   ;; separated by a blank line.  Each definition is inserted
-	   ;; only once throughout the buffer.
-	   (let (inserted)
-	     (dolist (cell references)
-	       (let ((label (car cell))
-		     (nested (not (nth 2 cell)))
-		     (inline (nth 3 cell)))
-		 (unless (or (member label inserted) inline)
-		   (push label inserted)
-		   (unless (or org-footnote-section nested)
-		     ;; If `org-footnote-section' is non-nil, or
-		     ;; reference is nested, point is already at the
-		     ;; correct position.  Otherwise, move at the
-		     ;; appropriate location within the section
-		     ;; containing the reference.
-		     (goto-char (nth 1 cell))
-		     (org-footnote--goto-local-insertion-point))
-		   (insert "\n"
-			   (or (cdr (assoc label definitions))
-			       (format "[fn:%s] DEFINITION NOT FOUND." label))
-			   "\n"))))
-	     ;; Insert un-referenced footnote definitions at the end.
-	     (let ((unreferenced
-		    (cl-remove-if (lambda (d) (member (car d) inserted))
-				  definitions)))
-	       (dolist (d unreferenced) (insert "\n" (cdr d) "\n"))))))
-      ;; Clear dangling markers in the buffer.
-      (dolist (r references) (set-marker (nth 1 r) nil)))))
+    (org-preserve-local-variables
+     (let ((definitions (org-footnote--collect-definitions 'delete)))
+       (org-with-wide-buffer
+	(org-footnote--clear-footnote-section)
+	;; Insert footnote definitions at the appropriate location,
+	;; separated by a blank line.  Each definition is inserted
+	;; only once throughout the buffer.
+	(let (inserted)
+	  (dolist (cell references)
+	    (let ((label (car cell))
+		  (nested (not (nth 2 cell)))
+		  (inline (nth 3 cell)))
+	      (unless (or (member label inserted) inline)
+		(push label inserted)
+		(unless (or org-footnote-section nested)
+		  ;; If `org-footnote-section' is non-nil, or
+		  ;; reference is nested, point is already at the
+		  ;; correct position.  Otherwise, move at the
+		  ;; appropriate location within the section
+		  ;; containing the reference.
+		  (goto-char (nth 1 cell))
+		  (org-footnote--goto-local-insertion-point))
+		(insert "\n"
+			(or (cdr (assoc label definitions))
+			    (format "[fn:%s] DEFINITION NOT FOUND." label))
+			"\n"))))
+	  ;; Insert un-referenced footnote definitions at the end.
+	  (pcase-dolist (`(,label . ,definition) definitions)
+	    (unless (member label inserted)
+	      (insert "\n" definition "\n")))))))))
 
 (defun org-footnote-normalize ()
   "Turn every footnote in buffer into a numbered one."
   (interactive)
-  (let ((references (org-footnote--collect-references 'anonymous)))
-    (unwind-protect
-	(let ((n 0)
-	      (translations nil)
-	      (definitions nil))
-	  (org-with-wide-buffer
-	   ;; Update label for reference.  We need to do this before
-	   ;; clearing definitions in order to rename nested footnotes
-	   ;; before they are deleted.
-	   (dolist (cell references)
-	     (let* ((label (car cell))
-		    (anonymous (not label))
-		    (new
-		     (cond
-		      ;; In order to differentiate anonymous
-		      ;; references from regular ones, set their
-		      ;; labels to integers, not strings.
-		      (anonymous (setcar cell (cl-incf n)))
-		      ((cdr (assoc label translations)))
-		      (t (let ((l (number-to-string (cl-incf n))))
-			   (push (cons label l) translations)
-			   l)))))
-	       (goto-char (nth 1 cell))	; Move to reference's start.
-	       (org-footnote--set-label
-		(if anonymous (number-to-string new) new))
-	       (let ((size (nth 3 cell)))
-		 ;; Transform inline footnotes into regular references
-		 ;; and retain their definition for later insertion as
-		 ;; a regular footnote definition.
-		 (when size
-		   (let ((def (concat
-			       (format "[fn:%s] " new)
-			       (org-trim
-				(substring
-				 (delete-and-extract-region
-				  (point) (+ (point) size 1))
-				 1)))))
-		     (push (cons (if anonymous new label) def) definitions)
-		     (when org-footnote-fill-after-inline-note-extraction
-		       (org-fill-paragraph)))))))
-	   ;; Collect definitions.  Update labels according to ALIST.
-	   (let ((definitions
-		   (nconc definitions
-			  (org-footnote--collect-definitions 'delete)))
-		 (inserted))
-	     (org-footnote--clear-footnote-section)
-	     (dolist (cell references)
-	       (let* ((label (car cell))
-		      (anonymous (integerp label))
-		      (pos (nth 1 cell)))
-		 ;; Move to appropriate location, if required.  When
-		 ;; there is a footnote section or reference is
-		 ;; nested, point is already at the expected location.
-		 (unless (or org-footnote-section (not (nth 2 cell)))
-		   (goto-char pos)
-		   (org-footnote--goto-local-insertion-point))
-		 ;; Insert new definition once label is updated.
-		 (unless (member label inserted)
-		   (push label inserted)
-		   (let ((stored (cdr (assoc label definitions)))
-			 ;; Anonymous footnotes' label is already
-			 ;; up-to-date.
-			 (new (if anonymous label
-				(cdr (assoc label translations)))))
-		     (insert "\n"
-			     (cond
-			      ((not stored)
-			       (format "[fn:%s] DEFINITION NOT FOUND." new))
-			      (anonymous stored)
-			      (t
-			       (replace-regexp-in-string
-				"\\`\\[fn:\\(.*?\\)\\]" new stored nil nil 1)))
-			     "\n")))))
-	     ;; Insert un-referenced footnote definitions at the end.
-	     (let ((unreferenced
-		    (cl-remove-if (lambda (d) (member (car d) inserted))
-				  definitions)))
-	       (dolist (d unreferenced)
-		 (insert "\n"
-			 (replace-regexp-in-string
-			  org-footnote-definition-re
-			  (format "[fn:%d]" (cl-incf n))
-			  (cdr d))
-			 "\n"))))))
-      ;; Clear dangling markers.
-      (dolist (r references) (set-marker (nth 1 r) nil)))))
+  (org-preserve-local-variables
+   (let ((n 0)
+	 (translations nil)
+	 (definitions nil)
+	 (references (org-footnote--collect-references 'anonymous)))
+     (org-with-wide-buffer
+      ;; Update label for reference.  We need to do this before
+      ;; clearing definitions in order to rename nested footnotes
+      ;; before they are deleted.
+      (dolist (cell references)
+	(let* ((label (car cell))
+	       (anonymous (not label))
+	       (new
+		(cond
+		 ;; In order to differentiate anonymous references
+		 ;; from regular ones, set their labels to integers,
+		 ;; not strings.
+		 (anonymous (setcar cell (cl-incf n)))
+		 ((cdr (assoc label translations)))
+		 (t (let ((l (number-to-string (cl-incf n))))
+		      (push (cons label l) translations)
+		      l)))))
+	  (goto-char (nth 1 cell))	; Move to reference's start.
+	  (org-footnote--set-label
+	   (if anonymous (number-to-string new) new))
+	  (let ((size (nth 3 cell)))
+	    ;; Transform inline footnotes into regular references and
+	    ;; retain their definition for later insertion as
+	    ;; a regular footnote definition.
+	    (when size
+	      (let ((def (concat
+			  (format "[fn:%s] " new)
+			  (org-trim
+			   (substring
+			    (delete-and-extract-region
+			     (point) (+ (point) size 1))
+			    1)))))
+		(push (cons (if anonymous new label) def) definitions)
+		(when org-footnote-fill-after-inline-note-extraction
+		  (org-fill-paragraph)))))))
+      ;; Collect definitions.  Update labels according to ALIST.
+      (let ((definitions
+	      (nconc definitions
+		     (org-footnote--collect-definitions 'delete)))
+	    (inserted))
+	(org-footnote--clear-footnote-section)
+	(dolist (cell references)
+	  (let* ((label (car cell))
+		 (anonymous (integerp label))
+		 (pos (nth 1 cell)))
+	    ;; Move to appropriate location, if required.  When there
+	    ;; is a footnote section or reference is nested, point is
+	    ;; already at the expected location.
+	    (unless (or org-footnote-section (not (nth 2 cell)))
+	      (goto-char pos)
+	      (org-footnote--goto-local-insertion-point))
+	    ;; Insert new definition once label is updated.
+	    (unless (member label inserted)
+	      (push label inserted)
+	      (let ((stored (cdr (assoc label definitions)))
+		    ;; Anonymous footnotes' label is already
+		    ;; up-to-date.
+		    (new (if anonymous label
+			   (cdr (assoc label translations)))))
+		(insert "\n"
+			(cond
+			 ((not stored)
+			  (format "[fn:%s] DEFINITION NOT FOUND." new))
+			 (anonymous stored)
+			 (t
+			  (replace-regexp-in-string
+			   "\\`\\[fn:\\(.*?\\)\\]" new stored nil nil 1)))
+			"\n")))))
+	;; Insert un-referenced footnote definitions at the end.
+	(pcase-dolist (`(,label . ,definition) definitions)
+	  (unless (member label inserted)
+	    (insert "\n"
+		    (replace-regexp-in-string org-footnote-definition-re
+					      (format "[fn:%d]" (cl-incf n))
+					      definition)
+		    "\n"))))))))
 
 (defun org-footnote-auto-adjust-maybe ()
   "Renumber and/or sort footnotes according to user settings."

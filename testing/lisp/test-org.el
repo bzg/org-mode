@@ -2918,6 +2918,13 @@ SCHEDULED: <2017-05-06 Sat>
   :END:
 "
 	    (org-sort-entries nil ?k)
+	    (buffer-string))))
+  ;; Preserve file local variables when sorting.
+  (should
+   (equal "\n* A\n* B\n# Local Variables:\n# foo: t\n# End:\n"
+	  (org-test-with-temp-text
+	      "\n* B\n* A\n# Local Variables:\n# foo: t\n# End:"
+	    (org-sort-entries nil ?a)
 	    (buffer-string)))))
 
 (ert-deftest test-org/file-contents ()

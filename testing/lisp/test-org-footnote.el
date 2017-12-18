@@ -112,7 +112,33 @@
 	(org-footnote-new))
       (buffer-substring-no-properties
        (line-beginning-position -1)
-       (line-beginning-position 4))))))
+       (line-beginning-position 4)))))
+  ;; Do not alter file local variables when inserting new definition
+  ;; label.
+  (should
+   (equal "Paragraph[fn:1]
+
+\[fn:1] 
+# Local Variables:
+# foo: t
+# End:"
+	  (org-test-with-temp-text
+	      "Paragraph<point>\n# Local Variables:\n# foo: t\n# End:"
+	    (let ((org-footnote-section nil)) (org-footnote-new))
+	    (buffer-string))))
+  (should
+   (equal "Paragraph[fn:1]
+
+* Footnotes
+
+\[fn:1] 
+# Local Variables:
+# foo: t
+# End:"
+	  (org-test-with-temp-text
+	      "Paragraph<point>\n# Local Variables:\n# foo: t\n# End:"
+	    (let ((org-footnote-section "Footnotes")) (org-footnote-new))
+	    (buffer-string)))))
 
 (ert-deftest test-org-footnote/delete ()
   "Test `org-footnote-delete' specifications."
@@ -175,7 +201,15 @@
 	    (org-test-with-temp-text
 		"Text[fn:1]\n\n[fn:1] Definition.\n\n\nOther text."
 	      (org-footnote-delete "1")
-	      (buffer-string))))))
+	      (buffer-string)))))
+  ;; Preserve file local variables when deleting a footnote.
+  (should
+   (equal
+    "Paragraph\n# Local Variables:\n# foo: t\n# End:"
+    (org-test-with-temp-text
+	"Paragraph[fn:1]\n[fn:1] Def 1\n# Local Variables:\n# foo: t\n# End:"
+      (let ((org-footnote-section nil)) (org-footnote-delete "1"))
+      (buffer-string)))))
 
 (ert-deftest test-org-footnote/goto-definition ()
   "Test `org-footnote-goto-definition' specifications."
@@ -454,7 +488,32 @@ Text[fn:1][fn:4]
 "
     (org-test-with-temp-text "Text[fn:9]\n\n[fn:1] A\n[fn:9] B"
       (let ((org-footnote-section nil)) (org-footnote-sort))
-      (buffer-string)))))
+      (buffer-string))))
+  ;; When sorting, preserve file local variables.
+  (should
+   (equal "
+Paragraph[fn:1][fn:2]
+
+\[fn:1] Def 1
+
+\[fn:2] Def 2
+
+# Local Variables:
+# foo: t
+# End:"
+	  (org-test-with-temp-text
+	      "
+Paragraph[fn:1][fn:2]
+
+\[fn:2] Def 2
+
+\[fn:1] Def 1
+
+# Local Variables:
+# foo: t
+# End:"
+	    (let ((org-footnote-section nil)) (org-footnote-sort))
+	    (buffer-string)))))
 
 (ert-deftest test-org-footnote/renumber-fn:N ()
   "Test `org-footnote-renumber-fn:N' specifications."
@@ -569,7 +628,32 @@ Text[fn:1][fn:4]
     "Test[fn:1]\nNext\n\n[fn:1] def\n\n[fn:2] A\n"
     (org-test-with-temp-text "Test[fn::def]\nNext\n[fn:unref] A"
       (let ((org-footnote-section nil)) (org-footnote-normalize))
-      (buffer-string)))))
+      (buffer-string))))
+  ;; Preserve file local variables when normalizing.
+  (should
+   (equal "
+Paragraph[fn:1][fn:2]
+
+\[fn:1] Def 1
+
+\[fn:2] Def 2
+
+# Local Variables:
+# foo: t
+# End:"
+	  (org-test-with-temp-text
+	      "
+Paragraph[fn:foo][fn:bar]
+
+\[fn:bar] Def 2
+
+\[fn:foo] Def 1
+
+# Local Variables:
+# foo: t
+# End:"
+	    (let ((org-footnote-section nil)) (org-footnote-normalize))
+	    (buffer-string)))))
 
 
 (provide 'test-org-footnote)
