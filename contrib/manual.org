@@ -15939,13 +15939,17 @@ keywords.
 :END:
 #+cindex: source code, working with
 
-Source code here refers to any code typed in Org documents.  Org can
-manage source code in any Org file once such code is tagged with begin
-and end markers.  Working with source code begins with tagging source
-code blocks.  Tagged blocks are not restricted to the preamble or the
-end of an Org document; they can go anywhere -- with a few exceptions,
-such as not inside comments and fixed width areas.  Here's a sample
-source code block in Emacs Lisp:
+Source code here refers to any plain text collection of computer
+instructions, possibly with comments, written using a human-readable
+programming language.  Org can manage source code in an Org document
+when the source code is identified with begin and end markers.
+Working with source code begins with identifying source code blocks.
+A source code block can be placed almost anywhere in an Org document;
+it is not restricted to the preamble or the end of the document.
+However, Org cannot manage a source code block if it is placed inside
+an Org comment or within a fixed width section.
+
+Here is an example source code block in the Emacs Lisp language:
 
 #+begin_example
   ,#+BEGIN_SRC emacs-lisp
@@ -15955,62 +15959,60 @@ source code block in Emacs Lisp:
   ,#+END_SRC
 #+end_example
 
-Org can take the code in the block delimited by the =#+BEGIN_SRC=
-... =#+END_SRC= markup, and format, compile, execute, and show the
-results.  Org can simplify many housekeeping tasks essential to modern
-code maintenance.  That's why these blocks in Org mode literature are
-sometimes referred to as /live code/ blocks -- as compared to the
-static text and documentation around it.  Users can control how live
-they want each block by tweaking the headers for compiling, execution,
-extraction.
+Org can manage the source code in the block delimited by =#+BEGIN_SRC=
+... =#+END_SRC= in several ways that can simplify housekeeping tasks
+essential to modern source code maintenance.  Org can edit, format,
+extract, export, and publish source code blocks.  Org can also compile
+and execute a source code block, then capture the results.  The Org
+mode literature sometimes refers to source code blocks as /live code/
+blocks because they can alter the content of the Org document or the
+material that it exports.  Users can control how live they want each
+source code block by tweaking the header arguments (see [[*Using
+header arguments]]) for compiling, execution, extraction, and
+exporting.
 
-Org's source code block type is one of many block types, such as
-quote, export, verse, latex, example, and verbatim.  This section
-pertains to blocks between =#+BEGIN_SRC= and =#+END_SRC=.
+Source code blocks are one of many Org block types, which also include
+=quote=, =export=, =verse=, =latex=, =example=, and =verbatim=.  This
+section pertains to blocks between =#+BEGIN_SRC= and =#+END_SRC=.
 
-For editing source code blocks, Org provides native Emacs major-modes.
-That leverages the latest Emacs features for that source code language
-mode.
+For editing and formatting a source code block, Org uses an
+appropriate Emacs major mode that includes features specifically
+designed for source code in that language.
 
-For exporting, Org can then extract source code blocks into compilable
-source files -- in a conversion process known as /tangling/ in
-literate programming terminology.
+Org can extract one or more source code blocks and write them to one
+or more source files---a process known as /tangling/ in literate
+programming terminology.
 
-For publishing, Org's back-ends can handle the code blocks and the
-text for output to a variety of formats with native syntax
-highlighting.
+For exporting and publishing, Org's back-ends can format a source code
+block appropriately, often with native syntax highlighting.
 
-For executing the source code in the code blocks, Org provides
-facilities that glue the tasks of compiling, collecting the results of
-the execution, and inserting them back to the Org file.  Besides text
-output, results may include links to other data types that Emacs can
-handle: audio, video, and graphics.
+For executing and compiling a source code block, the user can
+configure Org to select the appropriate compiler.  Org provides
+facilities to collect the result of the execution or compiler output,
+insert it into the Org document, and/or export it.  In addition to
+text results, Org can insert links to other data types, including
+audio, video, and graphics.  Org can also link a compiler error
+message to the appropriate line in the source code block.
 
-An important feature of Org's execution of the code blocks is passing
-variables, functions, and results between them.  Such interoperability
-uses a common syntax even if these blocks are in different source code
-languages.  The integration extends to linking the debugger's error
-messages to the line in the source code block in the Org file.  That
-should partly explain why this functionality by the original
-contributors, Eric Schulte and Dan Davison, was called /Org Babel/.
-
-In literate programming, the main appeal is code and documentation
-co-existing in one file.  Org mode takes this several steps further.
-First by enabling execution, and then by inserting results of that
-execution back into the Org file.  Along the way, Org provides
-extensive formatting features, including handling tables.  Org handles
-multiple source code languages in one file, and provides a common
-syntax for passing variables, functions, and results between source
-code blocks.
+An important feature of Org's management of source code blocks is the
+ability to pass variables, functions, and results to one another using
+a common syntax for source code blocks in any language.  Although most
+literate programming facilities are restricted to one language or
+another, Org's language-agnostic approach lets the literate programmer
+match each programming task with the appropriate computer language and
+to mix them all together in a single Org document.  This
+interoperability among languages explains why Org's source code
+management facility was named /Org Babel/ by its originators, Eric
+Schulte and Dan Davison.
 
 Org mode fulfills the promise of easy verification and maintenance of
-publishing reproducible research by keeping all these in the same
-file: text, data, code, configuration settings of the execution
-environment, the results of the execution, and associated narratives,
-claims, references, and internal and external links.
+publishing reproducible research by keeping text, data, code,
+configuration settings of the execution environment, the results of
+the execution, and associated narratives, claims, references, and
+internal and external links in a single Org document.
 
-Details of Org's facilities for working with source code are shown
-next.
+Details of Org's facilities for working with source code are described
+in the following sections.
 
 ** Structure of code blocks
 :PROPERTIES:
@@ -16046,7 +16048,7 @@ An inline code block conforms to this structure:
 
 : src_<language>{<body>}
 
-#+teinfo: @noindent
+#+texinfo: @noindent
 or
 
 : src_<language>[<header arguments>]{<body>}
