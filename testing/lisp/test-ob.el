@@ -668,8 +668,12 @@ x
       (check-eval "never-export" nil)
       (check-eval "no-export" nil))))
 
-(ert-deftest test-ob/noweb-expansion-1 ()
-  (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
+(ert-deftest test-ob/noweb-expansion ()
+  ;; Standard test.
+  (should
+   (string=
+    "bar"
+    (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
   <<foo>>
 #+end_src
 
@@ -677,10 +681,12 @@ x
 #+begin_src sh
   bar
 #+end_src"
-    (should (string= (org-babel-expand-noweb-references) "bar"))))
-
-(ert-deftest test-ob/noweb-expansion-2 ()
-  (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
+      (org-babel-expand-noweb-references))))
+  ;; Handle :noweb-sep.
+  (should
+   (string=
+    "barbaz"
+    (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
   <<foo>>
 #+end_src
 
@@ -691,7 +697,31 @@ x
 #+begin_src sh :noweb-ref foo :noweb-sep \"\"
   baz
 #+end_src"
-    (should (string= (org-babel-expand-noweb-references) "barbaz"))))
+      (org-babel-expand-noweb-references))))
+  ;; :noweb-ref is extracted from definition, not point of call.
+  (should
+   (string=
+    "(+ 1 1)"
+    (org-test-with-temp-text
+	"
+* Call
+:PROPERTIES:
+:header-args: :noweb-ref bar
+:END:
+
+<point>#+begin_src emacs-lisp :results output :tangle yes
+  <<foo>>
+#+end_src
+
+* Evaluation
+:PROPERTIES:
+:header-args: :noweb-ref foo
+:END:
+
+#+begin_src sh :noweb-sep \"\"
+  (+ 1 1)
+#+end_src"
+      (org-babel-expand-noweb-references)))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()
   (org-test-with-temp-text ""
