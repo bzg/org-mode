@@ -2662,6 +2662,36 @@ CONTEXT may be one of :tangle, :export or :eval."
     (cl-some (lambda (v) (member v allowed-values))
 	     (split-string (or (cdr (assq :noweb params)) "")))))
 
+(defun org-babel--noweb-reference (element)
+  "Return Noweb reference for ELEMENT.
+ELEMENT is a source block.  Return value from `:noweb-ref',
+possibly inherited from properties, or nil."
+  (let ((language (org-element-property :language element)))
+    (cdr
+     (or (assq :noweb-ref		;from block itself
+	       (org-babel-parse-header-arguments
+		(mapconcat #'identity
+			   (cons (org-element-property :parameters element)
+				 (org-element-property :header element))
+			   " ")))
+	 (assq :noweb-ref		;from properties
+	       (org-babel-parse-header-arguments
+		(org-trim
+		 (concat
+		  (and language
+		       (org-entry-get (point)
+				      (concat "header-args:" language)
+				      'inherit))
+		  " "
+		  (org-entry-get (point) "header-args" 'inherit)))))
+	 (and language
+	      (let ((lang-headers
+		     (intern (concat "org-babel-default-header-args:"
+				     language))))
+		(and (boundp lang-headers)
+		     (assq :noweb-ref (symbol-value lang-headers)))))
+	 (assq :noweb-ref org-babel-default-header-args)))))
+
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
 
@@ -2777,11 +2807,14 @@ block but are passed literally to the \"example-block\"."
 			;; those with a matching Noweb reference.
 			(let ((expansion nil))
 			  (org-babel-map-src-blocks nil
-			    (let ((i (org-babel-get-src-block-info 'light)))
+			    (let ((element (org-element-at-point)))
 			      (when (equal source-name
-					   (cdr (assq :noweb-ref (nth 2 i))))
-				(let ((sep (or (cdr (assq :noweb-sep (nth 2 i)))
-					       "\n")))
+					   (org-babel--noweb-reference element))
+				(let* ((i (org-babel-get-src-block-info
+					   'light element))
+				       (sep
+					(or (cdr (assq :noweb-sep (nth 2 i)))
+					    "\n")))
 				  (setq expansion
 					(cons sep
 					      (cons (funcall expand-body i)
