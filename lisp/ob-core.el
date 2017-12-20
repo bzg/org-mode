@@ -2771,7 +2771,8 @@ block but are passed literally to the \"example-block\"."
                                            body)))
                               (setq expansion (cons sep (cons full expansion)))))
                         (org-babel-map-src-blocks nil
-			  (let ((i (org-babel-get-src-block-info 'light)))
+			  (let ((i (let ((org-babel-current-src-block-location (point)))
+				     (org-babel-get-src-block-info 'light))))
                             (when (equal (or (cdr (assq :noweb-ref (nth 2 i)))
                                              (nth 4 i))
                                          source-name)
