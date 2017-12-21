@@ -577,9 +577,10 @@ the outer-most code block.")
 (defun org-babel-get-src-block-info (&optional light datum)
   "Extract information from a source block or inline source block.
 
-Optional argument LIGHT does not resolve remote variable
-references; a process which could likely result in the execution
-of other code blocks.
+When optional argument LIGHT is non-nil, Babel does not resolve
+remote variable references; a process which could likely result
+in the execution of other code blocks, and do not evaluate Lisp
+values in parameters.
 
 By default, consider the block at point.  However, when optional
 argument DATUM is provided, extract information from that parsed
@@ -610,8 +611,9 @@ a list with the following pattern:
 		       ;; properties applicable to its location within
 		       ;; the document.
 		       (org-with-point-at (org-element-property :begin datum)
-			 (org-babel-params-from-properties lang))
-		       (mapcar #'org-babel-parse-header-arguments
+			 (org-babel-params-from-properties lang light))
+		       (mapcar (lambda (h)
+				 (org-babel-parse-header-arguments h light))
 			       (cons (org-element-property :parameters datum)
 				     (org-element-property :header datum)))))
 	       (or (org-element-property :switches datum) "")
@@ -1415,24 +1417,31 @@ portions of results lines."
 	  (lambda () (add-hook 'change-major-mode-hook
 			  'org-babel-show-result-all 'append 'local)))
 
-(defvar org-file-properties)
-(defun org-babel-params-from-properties (&optional lang)
-  "Retrieve parameters specified as properties.
-Return a list of association lists of source block params
+(defun org-babel-params-from-properties (&optional lang no-eval)
+  "Retrieve source block parameters specified as properties.
+
+LANG is the language of the source block, as a string.  When
+optional argument NO-EVAL is non-nil, do not evaluate Lisp values
+in parameters.
+
+Return a list of association lists of source block parameters
 specified in the properties of the current outline entry."
   (save-match-data
     (list
-     ;; header arguments specified with the header-args property at
+     ;; Header arguments specified with the header-args property at
      ;; point of call.
      (org-babel-parse-header-arguments
       (org-entry-get org-babel-current-src-block-location
 		     "header-args"
-		     'inherit))
-     (and lang	 ; language-specific header arguments at point of call
+		     'inherit)
+      no-eval)
+     ;; Language-specific header arguments at point of call.
+     (and lang
 	  (org-babel-parse-header-arguments
 	   (org-entry-get org-babel-current-src-block-location
 			  (concat "header-args:" lang)
-			  'inherit))))))
+			  'inherit)
+	   no-eval)))))
 
 (defun org-babel-balanced-split (string alts)
   "Split STRING on instances of ALTS.
@@ -1520,9 +1529,11 @@ balanced instances of \"[ \t]:\", set ALTS to ((32 9) . 58)."
 		       (cons el acc))))
 		 list :initial-value nil))))
 
-(defun org-babel-parse-header-arguments (arg-string)
-  "Parse a string of header arguments returning an alist."
-  (when (> (length arg-string) 0)
+(defun org-babel-parse-header-arguments (string &optional no-eval)
+  "Parse header arguments in STRING.
+When optional argument NO-EVAL is non-nil, do not evaluate Lisp
+in parameters.  Return an alist."
+  (when (org-string-nw-p string)
     (org-babel-parse-multiple-vars
      (delq nil
 	   (mapcar
@@ -1531,10 +1542,12 @@ balanced instances of \"[ \t]:\", set ALTS to ((32 9) . 58)."
 		   "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
 		   arg)
 		  (cons (intern (match-string 1 arg))
-			(org-babel-read (org-babel-chomp (match-string 2 arg))))
+			(org-babel-read (org-babel-chomp (match-string 2 arg))
+					no-eval))
 		(cons (intern (org-babel-chomp arg)) nil)))
-	    (let ((raw (org-babel-balanced-split arg-string '((32 9) . 58))))
-              (cons (car raw) (mapcar (lambda (r) (concat ":" r)) (cdr raw)))))))))
+	    (let ((raw (org-babel-balanced-split string '((32 9) . 58))))
+              (cons (car raw)
+		    (mapcar (lambda (r) (concat ":" r)) (cdr raw)))))))))
 
 (defun org-babel-parse-multiple-vars (header-arguments)
   "Expand multiple variable assignments behind a single :var keyword.
