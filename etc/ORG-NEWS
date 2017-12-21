@@ -65,8 +65,8 @@ details.
 *** Change ~org-structure-template-alist~ value
 
 With the new template expansion mechanism (see
-[[*~org-insert-structure-template~]]), the variable changed its data type.
-See docstring for details.
+[[*~org-insert-structure-template~]] and =org-tempo.el=), the variable
+changed its data type.  See docstring for details.
 
 *** Change ~org-set-effort~ signature
 See docstring for details.

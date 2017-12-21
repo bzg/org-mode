@@ -54,10 +54,10 @@
   "Tempo tags for Org mode")
 
 (defcustom org-tempo-keywords-alist
-  '((?L . "latex")
-    (?H . "html")
-    (?A . "ascii")
-    (?i . "index"))
+  '(("L" . "latex")
+    ("H" . "html")
+    ("A" . "ascii")
+    ("i" . "index"))
   "Keyword completion elements.
 
 Like `org-structure-template-alist' this alist of KEY characters
@@ -67,7 +67,7 @@ value.
 For example \"<l\" at the beginning of a line is expanded to
 #+latex:"
   :group 'org-tempo
-  :type '(repeat (cons (character :tag "Key")
+  :type '(repeat (cons (string :tag "Key")
 		       (string :tag "Keyword")))
   :package-version '(Org . "9.2"))
 
@@ -78,7 +78,7 @@ For example \"<l\" at the beginning of a line is expanded to
 (defun org-tempo-setup ()
   (org-tempo-add-templates)
   (tempo-use-tag-list 'org-tempo-tags)
-  (setq-local tempo-match-finder "^ *\\(<[[:word:]]\\)\\="))
+  (setq-local tempo-match-finder "^ *\\(<[[:word:]]+\\)\\="))
 
 (defun org-tempo-add-templates ()
   "Update all Org Tempo templates.
@@ -101,7 +101,7 @@ Goes through `org-structure-template-alist' and
 
 (defun org-tempo-add-block (entry)
   "Add block entry from `org-structure-template-alist'."
-  (let* ((key (format "<%c" (car entry)))
+  (let* ((key (format "<%s" (car entry)))
 	 (name (cdr entry)))
     (tempo-define-template (format "org-%s" (replace-regexp-in-string " " "-" name))
 			   `(,(format "#+begin_%s " name) p '> n n
@@ -113,7 +113,7 @@ Goes through `org-structure-template-alist' and
 
 (defun org-tempo-add-keyword (entry)
   "Add keyword entry from `org-tempo-keywords-alist'."
-  (let* ((key (format "<%c" (car entry)))
+  (let* ((key (format "<%s" (car entry)))
 	 (name (cdr entry)))
     (tempo-define-template (format "org-%s" (replace-regexp-in-string " " "-" name))
 			   `(,(format "#+%s: " name) p '>)

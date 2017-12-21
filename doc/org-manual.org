@@ -18174,9 +18174,10 @@ text in such a block.
 
      Prompt for a type of block structure, and insert the block at
      point.  If the region is active, it is wrapped in the block.
-     First prompts the user for a key, which is used to look up
-     a structure type from the values below.  If the key is
-     {{{kbd(TAB)}}}, the user is prompted to enter a type.
+     First prompts the user for keys, which are used to look up a
+     structure type from the variable below.  If the key is
+     {{{kbd(TAB)}}}, {{{kbd(RET)}}}, or {{{kbd(SPC)}}}, the user is
+     prompted to enter a block type.
 
 #+vindex: org-structure-template-alist
 Available structure types are defined in

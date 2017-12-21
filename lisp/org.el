@@ -11642,43 +11642,125 @@ keywords relative to each registered export back-end."
     "TITLE:" "TODO:" "TYP_TODO:" "SELECT_TAGS:" "EXCLUDE_TAGS:"))
 
 (defcustom org-structure-template-alist
-  '((?a . "export ascii")
-    (?c . "center")
-    (?C . "comment")
-    (?e . "example")
-    (?E . "export")
-    (?h . "export html")
-    (?l . "export latex")
-    (?q . "quote")
-    (?s . "src")
-    (?v . "verse"))
+  '(("a" . "export ascii")
+    ("c" . "center")
+    ("C" . "comment")
+    ("e" . "example")
+    ("E" . "export")
+    ("h" . "export html")
+    ("l" . "export latex")
+    ("q" . "quote")
+    ("s" . "src")
+    ("v" . "verse"))
   "Structure completion elements.
-This is an alist of characters and values.  When
-`org-insert-structure-template' is called, an additional key is
-read.  The key is first looked up in this alist, and the
-corresponding structure is inserted, with \"#+BEGIN_\" and
-\"#+END_\" added automatically."
+This is an alist of keys and block types.  With
+`org-insert-structure-template' a block can be inserted through a
+menu. The block type is inserted, with \"#+BEGIN_\" and
+\"#+END_\" added automatically.  The menukeys are determined
+based on the key elements in the `org-structure-template-alist'.
+If two entries have the keys \"a\" and \"aa\" respectively, the
+former will be inserted by typing \"a TAB/RET/SPC\" and the
+latter will be inserted by typing \"aa\".  If an entry with the
+key \"aab\" is later added it would be inserted by typing \"ab\".
+
+If loaded, Org Tempo also uses `org-structure-template-alist'.  A
+block can be inserted by pressing TAB after the string \"<KEY\".
+"
   :group 'org-edit-structure
   :type '(repeat
-	  (cons (character :tag "Key")
+	  (cons (string :tag "Key")
 		(string :tag "Template")))
   :package-version '(Org . "9.2"))
 
+(defun org--insert-structure-template-mks ()
+  "Present `org-structure-template-alist' with `org-mks'.
+
+Menus are added if keys require more than one keystroke.
+Tabs are added to single key entires when needing more than one stroke.
+Keys longer than two characters are reduced to two characters."
+  (let* (case-fold-search
+	 (templates (append org-structure-template-alist
+			    '(("\t" . "Press TAB, RET or SPC to write block name"))))
+         (keys (mapcar #'car templates))
+         (start-letters (delete-dups (mapcar (lambda (key) (substring key 0 1)) keys)))
+	 ;; Sort each element of `org-structure-template-alist' into
+	 ;; sublists according to the first letter.
+         (superlist (mapcar (lambda (letter)
+                              (list letter
+				    (cl-remove-if-not
+				     (apply-partially #'string-match-p (concat "^" letter))
+				     templates :key #'car)))
+			    start-letters)))
+    (org-mks
+     (apply #'append
+	    ;; Make an `org-mks' table.  If only one element is
+	    ;; present in a sublist, make it part of the top-menu,
+	    ;; otherwise make a submenu according to the starting
+	    ;; letter and populate it.
+	    (mapcar (lambda (sublist)
+		      (if (eq 1 (length (cadr sublist)))
+                          (mapcar (lambda (elm)
+				    (list (substring (car elm) 0 1)
+                                          (cdr elm) ""))
+                                  (cadr sublist))
+			;; Create submenu.
+                        (let* ((topkey (car sublist))
+			       (elms (cadr sublist))
+			       (keys (mapcar #'car elms))
+			       (long (> (length elms) 3)))
+                          (append
+			   (list
+			    ;; Make a description of the submenu.
+			    (list topkey
+				  (concat
+				   (mapconcat #'cdr
+					      (cl-subseq elms 0 (if long 3 (length elms)))
+					      ", ")
+                                   (when long ", ..."))))
+			   ;; List of entries in submenu.
+			   (cl-mapcar #'list
+				      (org--insert-structure-template-unique-keys keys)
+				      (mapcar #'cdr elms)
+				      (make-list (length elms) ""))))))
+		    superlist))
+     "Select a key\n============"
+     "Key: ")))
+
+(defun org--insert-structure-template-unique-keys (keys)
+  "Make list of unique, two character long elements from KEYS.
+
+Elements of length one have a tab appended.  Elements of length
+two are kept as is.  Longer elements are truncated to length two.
+
+If an element cannot be made unique an error is raised."
+  (let ((orderd-keys (cl-sort (copy-sequence keys) #'< :key #'length))
+	menu-keys)
+    (dolist (key orderd-keys)
+      (let ((potential-key
+	     (cl-case (length key)
+	       (1 (concat key "\t"))
+	       (2 key)
+	       (otherwise
+		(cl-find-if-not (lambda (k) (assoc k menu-keys))
+				(mapcar (apply-partially #'concat (substring  key 0 1))
+					(split-string (substring key 1) "" t)))))))
+	(if (or (not potential-key) (assoc potential-key menu-keys))
+	    (user-error "Could not make unique key for %s." key)
+	  (push (cons potential-key key) menu-keys))))
+    (mapcar #'car
+	    (cl-sort menu-keys #'<
+		     :key (lambda (elm) (cl-position (cdr elm) keys))))))
+
 (defun org-insert-structure-template (type)
-  "Insert a block structure of the type #+begin_foo/#+end_foo.
-First read a character, which can be one of the keys in
-`org-structure-template-alist'.  When it is <TAB>, prompt the
-user for a string to use.  With an active region, wrap the region
-in the block.  Otherwise, insert an empty block."
+    "Insert a block structure of the type #+begin_foo/#+end_foo.
+First choose a block based on `org-structure-template-alist'.
+Alternatively, type RET, TAB or SPC to write the block type.
+With an active region, wrap the region in the block.  Otherwise,
+insert an empty block."
   (interactive
-   (list
-    (let* ((key (read-key "Key: "))
-	   (struct-string
-	    (or (cdr (assq key org-structure-template-alist))
-		(and (= key ?\t)
-		     (read-string "Structure type: "))
-		(user-error "`%c' has no structure definition" key))))
-      struct-string)))
+   (list (pcase (org--insert-structure-template-mks)
+	   (`("\t" . ,_) (read-string "Structure type: "))
+	   (`(,_ ,choice . ,_) choice))))
   (let* ((region? (use-region-p))
 	 (s (if region? (region-beginning) (point)))
 	 (e (copy-marker (if region? (region-end) (point)) t))

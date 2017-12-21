@@ -61,13 +61,14 @@
 
 (ert-deftest test-org-tempo/add-new-templates ()
   "Test that new structures and keywords are added correctly."
-  ;; Check that deleted keys are not kept
+  ;; New blocks should be added.
   (should
-   (let ((org-structure-template-alist '((?n . "new_block"))))
+   (let ((org-structure-template-alist '(("n" . "new_block"))))
      (org-tempo-add-templates)
-     (assoc "<n" org-tempo-tags)))
+     (assoc "<l" org-tempo-tags)))
+  ;; New keys should be added.
   (should
-   (let ((org-tempo-keywords-alist '((?N . "new_keyword"))))
+   (let ((org-tempo-keywords-alist '(("N" . "new_keyword"))))
      (org-tempo-add-templates)
      (assoc "<N" org-tempo-tags))))
 
