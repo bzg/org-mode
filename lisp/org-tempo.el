@@ -34,7 +34,7 @@
 ;;
 ;; `tempo' can also be used to define more sophisticated keywords
 ;; completions.  See the section "Additional keywords" below for
-;; additional details.
+;; examples.
 ;;
 ;;; Code:
 
@@ -65,7 +65,9 @@ and KEYWORD.  The tempo snippet \"<KEY\" is expand to the KEYWORD
 value.
 
 For example \"<l\" at the beginning of a line is expanded to
-#+latex:"
+\"#+latex:\".
+
+Note: the tempo function for \"#+include\" is defined elsewhere."
   :group 'org-tempo
   :type '(repeat (cons (string :tag "Key")
 		       (string :tag "Keyword")))
@@ -76,23 +78,35 @@ For example \"<l\" at the beginning of a line is expanded to
 ;;; Org Tempo functions and setup.
 
 (defun org-tempo-setup ()
-  (org-tempo-add-templates)
+  (org-tempo--update-maybe)
   (tempo-use-tag-list 'org-tempo-tags)
   (setq-local tempo-match-finder "^ *\\(<[[:word:]]+\\)\\="))
+
+(defun org-tempo--keys ()
+  "Return a list of all Org Tempo expansion strings, like \"<s\"."
+  (mapcar (lambda (pair) (format "<%s" (car pair)))
+	  (append org-structure-template-alist
+		  org-tempo-keywords-alist)))
+
+(defun org-tempo--update-maybe ()
+  "Check and add new Org Tempo templates if necessary.
+In particular, if new entries were added to
+`org-structure-template-alist' or `org-tempo-keywords-alist', new
+Tempo templates will be added."
+  (unless (cl-every (lambda (key) (assoc key org-tempo-tags))
+		    (org-tempo--keys))
+    (org-tempo-add-templates)))
 
 (defun org-tempo-add-templates ()
   "Update all Org Tempo templates.
 
 Goes through `org-structure-template-alist' and
 `org-tempo-keywords-alist'."
-  (let ((keys (mapcar (lambda (pair) (format "<%c" (car pair)))
-		      (append org-structure-template-alist
-			      org-tempo-keywords-alist))))
+  (let ((keys (org-tempo--keys)))
     ;; Check for duplicated snippet keys and warn if any are found.
     (when (> (length keys) (length (delete-dups keys)))
       (warn
        "Duplicated keys in `org-structure-template-alist' and `org-tempo-keywords-alist'"))
-
     ;; Remove any keys already defined in case they have been updated.
     (setq org-tempo-tags
 	  (cl-remove-if (lambda (tag) (member (car tag) keys)) org-tempo-tags))
@@ -102,9 +116,11 @@ Goes through `org-structure-template-alist' and
 (defun org-tempo-add-block (entry)
   "Add block entry from `org-structure-template-alist'."
   (let* ((key (format "<%s" (car entry)))
-	 (name (cdr entry)))
+	 (name (cdr entry))
+	 (special (member name '("src" "export"))))
     (tempo-define-template (format "org-%s" (replace-regexp-in-string " " "-" name))
-			   `(,(format "#+begin_%s " name) p '> n n
+			   `(,(format "#+begin_%s%s" name (if special " " ""))
+			     ,(when special 'p) '> n '> ,(unless special 'p) n
 			     ,(format "#+end_%s" (car (split-string name " ")))
 			     >)
 			   key
@@ -126,10 +142,12 @@ Goes through `org-structure-template-alist' and
 Unlike to `tempo-complete-tag', do not give a signal if a partial
 completion or no match at all is found.  Return nil if expansion
 didn't succeed."
+  (org-tempo--update-maybe)
   ;; `tempo-complete-tag' returns its SILENT argument when there is no
   ;; completion available at all.
   (not (eq 'fail (tempo-complete-tag 'fail))))
 
+
 ;;; Additional keywords
 
 (defun org-tempo--include-file ()
@@ -159,8 +177,6 @@ didn't succeed."
 
 (add-hook 'org-mode-hook 'org-tempo-setup)
 (add-hook 'org-tab-before-tab-emulation-hook 'org-tempo-complete-tag)
-
-(org-tempo-add-templates)
 
 ;; Enable Org Tempo in all open Org buffers.
 (dolist (b (org-buffer-list 'files))

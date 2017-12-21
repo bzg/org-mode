@@ -41,7 +41,7 @@
 	    (org-tempo-setup)
 	    (call-interactively 'org-cycle)
 	    (buffer-string))
-	  "#+begin_export latex \n\n#+end_export"))
+	  "#+begin_export latex\n\n#+end_export"))
   ;; Tab should work for expansion.
   (should
    (equal (org-test-with-temp-text "<L<point>"
@@ -58,6 +58,45 @@
 	    (call-interactively 'org-cycle)
 	    (buffer-string))
 	 "<k"))
+
+(ert-deftest test-org-tempo/space-first-line ()
+  "Test space on first line after expansion."
+  ;; Normal blocks should have no space at the end of the first line.
+  (should (zerop
+	   (org-test-with-temp-text "<l<point>"
+	     (org-tempo-setup)
+	     (tempo-complete-tag)
+	     (goto-char (point-min))
+	     (end-of-line)
+	     (skip-chars-backward " "))))
+  ;; src blocks, export blocks and keywords should have one space at
+  ;; the end of the first line.
+  (should (cl-every (apply-partially 'eq 1)
+		    (mapcar (lambda (s)
+			      (org-test-with-temp-text (format "<%s<point>" s)
+				(org-tempo-setup)
+				(tempo-complete-tag)
+				(goto-char (point-min))
+				(end-of-line)
+				(abs (skip-chars-backward " "))))
+			    '("s" "E" "L")))))
+
+(ert-deftest test-org-tempo/cursor-placement ()
+  "Test the placement of the cursor after tempo expand"
+  ;; Normal blocks place point "inside" block.
+  (should
+   (eq (org-test-with-temp-text "<l<point>"
+	  (org-tempo-setup)
+	  (tempo-complete-tag)
+	  (point))
+       (length "#\\+begin_export latex\n")))
+  ;; Special block stop at end of #+begin line.
+  (should
+   (eq (org-test-with-temp-text "<s<point>"
+	  (org-tempo-setup)
+	  (tempo-complete-tag)
+	  (point))
+       (length "#\\+begin_src "))))
 
 (ert-deftest test-org-tempo/add-new-templates ()
   "Test that new structures and keywords are added correctly."
