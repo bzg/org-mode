@@ -11762,33 +11762,62 @@ insert an empty block."
 	   (`("\t" . ,_) (read-string "Structure type: "))
 	   (`(,_ ,choice . ,_) choice))))
   (let* ((region? (use-region-p))
-	 (s (if region? (region-beginning) (point)))
-	 (e (copy-marker (if region? (region-end) (point)) t))
-	 column)
-    (when (string-match-p
-	   (concat "\\`" (regexp-opt '("example" "export" "src")))
-	   type)
-      (org-escape-code-in-region s e))
-    (goto-char s)
-    (setq column (current-indentation))
-    (beginning-of-line)
-    (indent-to column)
-    (insert (format "#+begin_%s%s\n" type (if (string-equal "src" type) " " "")))
-    (goto-char e)
-    (if (bolp)
-	(progn
-	  (skip-chars-backward " \n\t")
-	  (forward-line))
-      (end-of-line)
+	 (col (current-indentation))
+	 (indent (make-string col ?\s))
+	 (special? (string-match-p "\\(src\\|export\\)\\'" type))
+	 (region-string (and region?
+			     (buffer-substring (region-beginning)
+					       (region-end))))
+	 (region-end-blank (and region?
+				(save-excursion
+				  (goto-char (region-end))
+				  (when (looking-at "[ \t]*$")
+				    (replace-match "")
+				    t))))
+	 s)
+    (when region? (delete-region (region-beginning) (region-end)))
+    (unless (save-excursion (skip-chars-backward "[ \t]") (bolp))
       (insert "\n"))
-    (indent-to column)
-    (insert (format "#+end_%s\n"
-		    (car (split-string type))))
-    (when (or (not region?)
-	      (string-match-p "src\\|\\`export\\'" type))
-      (goto-char s)
-      (end-of-line))
-    (set-marker e nil)))
+    (beginning-of-line)
+    (save-excursion
+      (insert
+       (with-temp-buffer
+	 (when region?
+	   (insert region-string "\n")
+	   (when (string-match-p
+		  (concat "\\`" (regexp-opt '("example" "export" "src")))
+		  type)
+	     (org-escape-code-in-region (point-min) (point-max))))
+	 (goto-char (point-min))
+	 ;; Delete trailing white-lines.
+	 (when region?
+	   (while (looking-at-p "^[ \t]*$")
+	     (delete-region (line-beginning-position)
+			    (line-beginning-position 2))))
+	 (save-excursion
+	   (while (not (eobp))
+	     (unless (looking-at-p indent)
+	       (insert indent))
+	     (forward-line)))
+	 (insert
+	  indent
+	  (format "#+begin_%s%s\n" type (if special? " " "")))
+	 (unless region? (indent-to col))
+	 (setq s (point))
+	 (goto-char (point-max))
+	 (skip-chars-backward "[ \t\n]" s)
+	 (delete-region (line-end-position) (point-max))
+	 (insert "\n" indent
+		 (format "#+end_%s" (car (split-string type)))
+		 (if region-end-blank "" "\n"))
+	 (buffer-substring (point-min) (point))))
+      (when (and (eobp) (not (bolp))) (insert "\n")))
+    (cond (special?
+	   (end-of-line))
+	  (t
+	   (forward-line)
+	   (skip-chars-forward "[ \t]*")))))
+
 
 ;;;; TODO, DEADLINE, Comments
 

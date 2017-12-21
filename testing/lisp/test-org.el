@@ -4047,15 +4047,33 @@ Text.
   "Test `org-insert-structure-template'."
   ;; Test in empty buffer.
   (should
-   (string= "#+begin_foo\n#+end_foo\n"
+   (string= "#+begin_foo\n\n#+end_foo\n"
 	    (org-test-with-temp-text ""
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
   ;; Test with multiple lines in buffer.
   (should
-   (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
+   (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\nI'm a second paragraph"
 	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
 	      (org-mark-element)
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Mark only the current line.
+  (should
+   (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
+	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
+	      (set-mark (point-min))
+	      (end-of-line)
+	      (activate-mark)
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
+  ;; Middle of paragraph
+  (should
+   (string= "p1\n#+begin_foo\np2\n#+end_foo\np3"
+	    (org-test-with-temp-text "p1\n<point>p2\np3"
+	      (set-mark (line-beginning-position))
+	      (end-of-line)
+	      (activate-mark)
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
   ;; Test with text in buffer, no region, no final newline.
@@ -4086,7 +4104,18 @@ Text.
 	    (org-test-with-temp-text "  This is a paragraph"
 	      (org-mark-element)
 	      (org-insert-structure-template "foo")
-	      (buffer-string)))))
+	      (buffer-string))))
+  ;; Test point location.
+  (should
+   (eq (length "#\\+begin_foo\n")
+       (org-test-with-temp-text ""
+	 (org-insert-structure-template "foo")
+	 (point))))
+  (should
+   (eq (length "#\\+begin_src ")
+       (org-test-with-temp-text ""
+	 (org-insert-structure-template "src")
+	 (point)))))
 
 (ert-deftest test-org/previous-block ()
   "Test `org-previous-block' specifications."
