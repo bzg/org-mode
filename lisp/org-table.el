@@ -496,6 +496,12 @@ variable is initialized with `org-table-analyze'.")
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
   "Match a reference that needs translation, for reference display.")
 
+(defconst org-table-separator-space
+  (propertize " " 'display '(space :width 1))
+  "Space used around fields when aligning the table.
+This space serves as a segment separator for the purposes of the
+bidirectional reordering.")
+
 (defmacro org-table-save-field (&rest body)
   "Save current field; execute BODY; restore field.
 Field is restored even in case of abnormal exit."
@@ -882,7 +888,10 @@ edit.  Full value is:\n"
        ;; Compute the formats needed for output of the table.
        (let ((hfmt (concat indent "|"))
              (rfmt (concat indent "|"))
-             (rfmt1 " %%%s%ds |")
+             (rfmt1 (concat org-table-separator-space
+			    "%%%s%ds"
+			    org-table-separator-space
+			    "|"))
              (hfmt1 "-%s-+"))
          (dolist (l lengths (setq hfmt (concat (substring hfmt 0 -1) "|")))
            (let ((ty (if (pop typenums) "" "-"))) ; Flush numbers right.
