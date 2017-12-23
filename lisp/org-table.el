@@ -504,6 +504,12 @@ variable is initialized with `org-table-analyze'.")
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
   "Match a reference that needs translation, for reference display.")
 
+(defconst org-table-separator-space
+  (propertize " " 'display '(space :width 1))
+  "Space used around fields when aligning the table.
+This space serves as a segment separator for the purposes of the
+bidirectional reordering.")
+
 (defmacro org-table-save-field (&rest body)
   "Save current field; execute BODY; restore field.
 Field is restored even in case of abnormal exit."
@@ -782,7 +788,11 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 		   ("r" (make-string spaces ?\s))
 		   ("c" (make-string (/ spaces 2) ?\s))))
 	 (suffix (make-string (- spaces (length prefix)) ?\s)))
-    (concat " " prefix field suffix " ")))
+    (concat org-table-separator-space
+	    prefix
+	    field
+	    suffix
+	    org-table-separator-space)))
 
 ;;;###autoload
 (defun org-table-align ()
