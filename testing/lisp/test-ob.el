@@ -721,7 +721,43 @@ x
 #+begin_src sh :noweb-sep \"\"
   (+ 1 1)
 #+end_src"
-      (org-babel-expand-noweb-references)))))
+      (org-babel-expand-noweb-references))))
+  ;; Handle recursive expansion.
+  (should
+   (equal "baz"
+	  (org-test-with-temp-text "
+#+begin_src emacs-lisp :noweb yes<point>
+  <<foo>>
+#+end_src
+
+#+name: foo
+#+begin_src emacs-lisp :noweb yes
+  <<bar>>
+#+end_src
+
+#+name: bar
+#+begin_src emacs-lisp
+  baz
+#+end_src"
+	    (org-babel-expand-noweb-references))))
+  ;; During recursive expansion, obey to `:noweb' property.
+  (should
+   (equal "<<bar>>"
+	  (org-test-with-temp-text "
+#+begin_src emacs-lisp :noweb yes<point>
+  <<foo>>
+#+end_src
+
+#+name: foo
+#+begin_src emacs-lisp :noweb no
+  <<bar>>
+#+end_src
+
+#+name: bar
+#+begin_src emacs-lisp
+  baz
+#+end_src"
+	    (org-babel-expand-noweb-references)))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()
   (org-test-with-temp-text ""

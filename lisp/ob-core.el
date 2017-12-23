@@ -2790,7 +2790,9 @@ block but are passed literally to the \"example-block\"."
 			    (lambda (i)
 			      ;; Expand body of code blocked
 			      ;; represented by block info I.
-			      (let ((b (org-babel-expand-noweb-references i)))
+			      (let ((b (if (org-babel-noweb-p (nth 2 i) :eval)
+					   (org-babel-expand-noweb-references i)
+					 (nth 1 i))))
 				(if (not comment) b
 				  (let ((cs (org-babel-tangle-comment-links i)))
 				    (concat (funcall c-wrap (car cs)) "\n"
