@@ -128,9 +128,8 @@ compatible with `org-babel-get-src-block-info', which see."
 			header
 			org-babel-default-lob-header-args
 			(append
-			 (org-with-wide-buffer
-			  (goto-char begin)
-			  (org-babel-params-from-properties language))
+			 (org-with-point-at begin
+			   (org-babel-params-from-properties language))
 			 (list
 			  (org-babel-parse-header-arguments
 			   (org-element-property :inside-header context))

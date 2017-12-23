@@ -1431,16 +1431,12 @@ specified in the properties of the current outline entry."
      ;; Header arguments specified with the header-args property at
      ;; point of call.
      (org-babel-parse-header-arguments
-      (org-entry-get org-babel-current-src-block-location
-		     "header-args"
-		     'inherit)
+      (org-entry-get (point) "header-args" 'inherit)
       no-eval)
      ;; Language-specific header arguments at point of call.
      (and lang
 	  (org-babel-parse-header-arguments
-	   (org-entry-get org-babel-current-src-block-location
-			  (concat "header-args:" lang)
-			  'inherit)
+	   (org-entry-get (point) (concat "header-args:" lang) 'inherit)
 	   no-eval)))))
 
 (defun org-babel-balanced-split (string alts)
@@ -2675,36 +2671,6 @@ CONTEXT may be one of :tangle, :export or :eval."
     (cl-some (lambda (v) (member v allowed-values))
 	     (split-string (or (cdr (assq :noweb params)) "")))))
 
-(defun org-babel--noweb-reference (element)
-  "Return Noweb reference for ELEMENT.
-ELEMENT is a source block.  Return value from `:noweb-ref',
-possibly inherited from properties, or nil."
-  (let ((language (org-element-property :language element)))
-    (cdr
-     (or (assq :noweb-ref		;from block itself
-	       (org-babel-parse-header-arguments
-		(mapconcat #'identity
-			   (cons (org-element-property :parameters element)
-				 (org-element-property :header element))
-			   " ")))
-	 (assq :noweb-ref		;from properties
-	       (org-babel-parse-header-arguments
-		(org-trim
-		 (concat
-		  (and language
-		       (org-entry-get (point)
-				      (concat "header-args:" language)
-				      'inherit))
-		  " "
-		  (org-entry-get (point) "header-args" 'inherit)))))
-	 (and language
-	      (let ((lang-headers
-		     (intern (concat "org-babel-default-header-args:"
-				     language))))
-		(and (boundp lang-headers)
-		     (assq :noweb-ref (symbol-value lang-headers)))))
-	 (assq :noweb-ref org-babel-default-header-args)))))
-
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
 
@@ -2821,22 +2787,18 @@ block but are passed literally to the \"example-block\"."
 			;; those with a matching Noweb reference.
 			(let ((expansion nil))
 			  (org-babel-map-src-blocks nil
-			    (let ((element (org-element-at-point)))
+			    (let* ((info (org-babel-get-src-block-info 'light))
+				   (parameters (nth 2 info)))
 			      (when (equal source-name
-					   (org-babel--noweb-reference element))
-				(let* ((i (org-babel-get-src-block-info
-					   'light element))
-				       (sep
-					(or (cdr (assq :noweb-sep (nth 2 i)))
-					    "\n")))
-				  (setq expansion
-					(cons sep
-					      (cons (funcall expand-body i)
-						    expansion)))))))
-			  (and expansion
-			       (mapconcat #'identity
-					  (nreverse (cdr expansion))
-					  ""))))))
+					   (cdr (assq :noweb-ref parameters)))
+				(push (funcall expand-body info) expansion)
+				(push (or (cdr (assq :noweb-sep parameters))
+					  "\n")
+				      expansion))))
+			  (when expansion
+			    (mapconcat #'identity
+				       (nreverse (cdr expansion))
+				       ""))))))
                   ;; Possibly raise an error if named block doesn't exist.
                   (if (or org-babel-noweb-error-all-langs
 			  (member lang org-babel-noweb-error-langs))
