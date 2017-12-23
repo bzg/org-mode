@@ -2761,9 +2761,8 @@ block but are passed literally to the \"example-block\"."
                    (let ((raw (org-babel-ref-resolve source-name)))
                      (if (stringp raw) raw (format "%S" raw)))
                  (or
-                  ;; Retrieve from the library of babel.
-                  (nth 2 (assoc (intern source-name)
-                                org-babel-library-of-babel))
+                  ;; Retrieve from the Library of Babel.
+                  (nth 2 (assoc-string source-name org-babel-library-of-babel))
                   ;; Return the contents of headlines literally.
                   (save-excursion
                     (when (org-babel-ref-goto-headline-id source-name)
