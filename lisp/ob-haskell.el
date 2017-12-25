@@ -74,7 +74,7 @@
 		     body params
 		     (org-babel-variable-assignments:haskell params)))
          (session (org-babel-haskell-initiate-session session params))
-       	 (comint-preoutput-filter-functions
+	 (comint-preoutput-filter-functions
 	       (cons 'ansi-color-filter-apply comint-preoutput-filter-functions))
          (raw (org-babel-comint-with-output
 		  (session org-babel-haskell-eoe t full-body)
