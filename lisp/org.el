@@ -6859,6 +6859,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	  (org-list-set-item-visibility (point-at-bol) struct 'children)
 	(org-show-entry)
 	(org-with-limited-levels (org-show-children))
+	(org-show-set-visibility 'canonical)
 	;; FIXME: This slows down the func way too much.
 	;; How keep drawers hidden in subtree anyway?
 	;; (when (memq 'org-cycle-hide-drawers org-cycle-hook)
