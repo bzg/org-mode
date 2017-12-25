@@ -11664,7 +11664,28 @@ following syntax:
 : #+MACRO: name   replacement text; $1, $2 are arguments
 
 #+texinfo: @noindent
-which can be referenced using ={{{name(arg1, arg2)}}}=[fn:117].
+which can be referenced using ={{{name(arg1, arg2)}}}=[fn:117].  For
+example
+
+#+begin_example
+  ,#+MACRO: poem The rose is $1, The violet's $2. Life's ordered: Org assists you.
+  {{{poem(red,blue)}}}
+#+end_example
+
+#+texinfo: @noindent
+becomes
+
+: The rose is red, The violet's blue. Life's ordered: Org assists you.
+
+As a special case, Org parses any replacement text starting with
+=(eval= as an Emacs Lisp expression and evaluates it accordingly.
+Within such templates, arguments become strings.  Thus, the following
+macro
+
+: #+MACRO: gnucheck (eval (concat "GNU/" (capitalize $1)))
+
+#+texinfo: @noindent
+turns ={{{gnucheck(linux)}}}= into =GNU/Linux= during export.
 
 Org recognizes macro references in following Org markup areas:
 paragraphs, headlines, verse blocks, tables cells and lists.  Org also
@@ -11675,11 +11696,11 @@ Org comes with following pre-defined macros:
 
 #+attr_texinfo: :sep ;
 - ={{{keyword(NAME)}}}=; ={{{title}}}=; ={{{author}}}=; ={{{email}}}= ::
+
      #+cindex: keyword, macro
      #+cindex: title, macro
      #+cindex: author, macro
      #+cindex: email, macro
-
      The =keyword= macro collects all values from {{{var(NAME)}}}
      keywords throughout the buffer, separated with white space.
      =title=, =author= and =email= macros are shortcuts for,
@@ -11687,17 +11708,17 @@ Org comes with following pre-defined macros:
      ={{{keyword(EMAIL)}}}=.
 
 - ={{{date}}}=; ={{{date(FORMAT)}}}= ::
-     #+cindex: date, macro
 
+     #+cindex: date, macro
      This macro refers to the =DATE= keyword.  {{{var(FORMAT)}}} is an
      optional argument to the =date= macro that is used only if =DATE=
      is a single timestamp.  {{{var(FORMAT)}}} should be a format
      string understood by ~format-time-string~.
 
 - ={{{time(FORMAT)}}}=; ={{{modification-time(FORMAT, VC)}}}= ::
+
      #+cindex: time, macro
      #+cindex: modification time, macro
-
      These macros refer to the document's date and time of export and
      date and time of modification.  {{{var(FORMAT)}}} is a string
      understood by ~format-time-string~.  If the second argument to
@@ -11706,21 +11727,21 @@ Org comes with following pre-defined macros:
      control system.  Otherwise Org reads the file attributes.
 
 - ={{{input-file}}}= ::
-     #+cindex: input file, macro
 
+     #+cindex: input file, macro
      This macro refers to the filename of the exported file.
 
 - ={{{property(PROPERTY-NAME)}}}=; ={{{property(PROPERTY-NAME, SEARCH OPTION)}}}= ::
-     #+cindex: property, macro
 
+     #+cindex: property, macro
      This macro returns the value of property {{{var(PROPERTY-NAME)}}}
      in the current entry.  If {{{var(SEARCH-OPTION)}}} (see [[*Search
      options in file links]]) refers to a remote entry, use it instead.
 
 - ={{{n}}}=; ={{{n(NAME)}}}=; ={{{n(NAME, ACTION)}}}= ::
+
      #+cindex: n, macro
      #+cindex: counter, macro
-
      This macro implements custom counters by returning the number of
      times the macro has been expanded so far while exporting the
      buffer.  You can create more than one counter using different
