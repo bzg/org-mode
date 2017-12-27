@@ -851,8 +851,7 @@ PROPERTY, i.e. \"behavior\" parameter from `org-export-options-alist'."
 		    (org-no-properties
 		     (org-element-interpret-data parsed-title))
 		  (file-name-nondirectory (file-name-sans-extension file)))))
-	  (org-publish-cache-set-file-property file :title title)
-	  title))))
+	  (org-publish-cache-set-file-property file :title title)))))
 
 (defun org-publish-find-date (file project)
   "Find the date of FILE in PROJECT.
@@ -861,18 +860,21 @@ If FILE is an Org file and provides a DATE keyword use it.  In
 any other case use the file system's modification time.  Return
 time in `current-time' format."
   (let ((file (org-publish--expand-file-name file project)))
-    (if (file-directory-p file) (nth 5 (file-attributes file))
-      (let ((date (org-publish-find-property file :date project)))
-	;; DATE is a secondary string.  If it contains a time-stamp,
-	;; convert it to internal format.  Otherwise, use FILE
-	;; modification time.
-	(cond ((let ((ts (and (consp date) (assq 'timestamp date))))
-		 (and ts
-		      (let ((value (org-element-interpret-data ts)))
-			(and (org-string-nw-p value)
-			     (org-time-string-to-time value))))))
-	      ((file-exists-p file) (nth 5 (file-attributes file)))
-	      (t (error "No such file: \"%s\"" file)))))))
+    (or (org-publish-cache-get-file-property file :date nil t)
+	(org-publish-cache-set-file-property
+	 file :date
+	 (if (file-directory-p file) (nth 5 (file-attributes file))
+	   (let ((date (org-publish-find-property file :date project)))
+	     ;; DATE is a secondary string.  If it contains
+	     ;; a time-stamp, convert it to internal format.
+	     ;; Otherwise, use FILE modification time.
+	     (cond ((let ((ts (and (consp date) (assq 'timestamp date))))
+		      (and ts
+			   (let ((value (org-element-interpret-data ts)))
+			     (and (org-string-nw-p value)
+				  (org-time-string-to-time value))))))
+		   ((file-exists-p file) (nth 5 (file-attributes file)))
+		   (t (error "No such file: \"%s\"" file)))))))))
 
 (defun org-publish-sitemap-default-entry (entry style project)
   "Default format for site map ENTRY, as a string.
