@@ -10006,11 +10006,19 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	    ;; We are linking to this same file, with a search option
 	    (setq link search)))))
 
-    ;; Check if we can/should use a relative path.  If yes, simplify the link
+    ;; Check if we can/should use a relative path.  If yes, simplify
+    ;; the link.
     (let ((case-fold-search nil))
       (when (string-match "\\`\\(file\\|docview\\):" link)
 	(let* ((type (match-string-no-properties 0 link))
-	       (path (substring-no-properties link (match-end 0)))
+	       (path-start (match-end 0))
+	       (search (and (string-match "::\\(.*\\)\\'" link)
+			    (match-string 1 link)))
+	       (path
+		(if search
+		    (substring-no-properties
+		     link path-start (match-beginning 0))
+		  (substring-no-properties link (match-end 0))))
 	       (origpath path))
 	  (cond
 	   ((or (eq org-link-file-path-type 'absolute)
@@ -10031,7 +10039,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		  (setq path (substring (expand-file-name path)
 					(match-end 0)))
 		(setq path (abbreviate-file-name (expand-file-name path)))))))
-	  (setq link (concat type path))
+	  (setq link (concat type path (and search (concat "::" search))))
 	  (when (equal desc origpath)
 	    (setq desc path)))))
 
