@@ -334,7 +334,9 @@ This function is meant to be used in `org-cycle-hook'."
 	   (org-inlinetask-goto-end)))))
     (`children
      (save-excursion
-       (while (and (outline-next-heading) (org-inlinetask-at-task-p))
+       (while
+	   (or (org-inlinetask-at-task-p)
+	       (and (outline-next-heading) (org-inlinetask-at-task-p)))
 	 (org-inlinetask-toggle-visibility)
 	 (org-inlinetask-goto-end))))))
 
