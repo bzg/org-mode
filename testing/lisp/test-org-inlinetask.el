@@ -119,7 +119,7 @@ http://lists.gnu.org/archive/html/emacs-orgmode/2017-12/msg00502.html"
      (org-cycle-internal-local)
      (invisible-p (1- (search-forward "- b"))))))
 
-(ert-deftest test-org-inlinetask/folding-directly-consecutive-tasks ()
+(ert-deftest test-org-inlinetask/folding-directly-consecutive-tasks/0 ()
   "Fold directly consecutive inlinetasks."
   (should
    (org-test-with-temp-text
@@ -134,6 +134,28 @@ http://lists.gnu.org/archive/html/emacs-orgmode/2017-12/msg00502.html"
 "
      (org-cycle-internal-local)
      (invisible-p (1- (search-forward "- b"))))))
+
+(ert-deftest test-org-inlinetask/folding-directly-consecutive-tasks/1 ()
+  "Fold directly consecutive inlinetasks."
+  (should
+   (org-test-with-temp-text
+       "<point>* Test
+*************** p1
+p2
+*************** END
+*************** p3
+p4
+*************** END
+
+"
+     (outline-hide-subtree)
+     (org-cycle)
+     (and
+      (not (invisible-p (1- (search-forward "p1"))))
+      (invisible-p (1- (search-forward "p2")))
+      (not (invisible-p (1- (search-forward "p3"))))
+      (invisible-p (1- (search-forward "p4")))))))
+
 
 
 (provide 'test-org-inlinetask)
