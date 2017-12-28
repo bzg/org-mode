@@ -27,41 +27,115 @@
 
 ;;; Test movement
 
-(ert-deftest test-org-inlinetask/goto-end ()
-  "Tests around org-inlinetask."
+(ert-deftest test-org-inlinetask/org-inlinetask-goto-end ()
   ;; Goto end.
   (should
-     (equal "** H\n***** I\n***** END<point>\nfoo"
-  	    (let ((org-inlinetask-min-level 5)
-  		  (org-adapt-indentation t))
-  	      (org-test-with-temp-text
-		  "** H\n<point>***** I\n***** END\nfoo"
-		(org-inlinetask-goto-end)
-		(insert "<point>")
-		(buffer-string)))))
+   (equal
+    (let ((org-inlinetask-min-level 5)
+  	  (org-adapt-indentation t))
+      (org-test-with-temp-text
+	  "** H
+<point>***** I
+***** END
+foo"
+	(org-inlinetask-goto-end)
+	(insert "<point>")
+	(buffer-string)))
+    "** H
+***** I
+***** END
+<point>foo"))
 
   ;; Goto end.  End is buffer end.
   (should
-     (equal "** H\n***** I\n***** END<point>"
-  	    (let ((org-inlinetask-min-level 5)
-  		  (org-adapt-indentation t))
-  	      (org-test-with-temp-text
-		  "** H\n<point>***** I\n***** END"
-		(org-inlinetask-goto-end)
-		(insert "<point>")
-		(buffer-string)))))
+   (equal
+    (let ((org-inlinetask-min-level 5)
+  	  (org-adapt-indentation t))
+      (org-test-with-temp-text
+	  "** H
+<point>***** I
+***** END"
+	(org-inlinetask-goto-end)
+	(insert "<point>")
+	(buffer-string)))
+    "** H
+***** I
+***** END<point>"))
 
   ;; Goto end.  Starting somewhere.
   (should
-     (equal "** H\n***** I\n***** END<point>\n***** I\n***** END"
-  	    (let ((org-inlinetask-min-level 5)
-  		  (org-adapt-indentation t))
-  	      (org-test-with-temp-text
-		  "** H\n****<point>* I\n***** END\n***** I\n***** END"
-		(org-inlinetask-goto-end)
-		(insert "<point>")
-		(buffer-string))))))
+   (equal
+    (let ((org-inlinetask-min-level 5)
+  	  (org-adapt-indentation t))
+      (org-test-with-temp-text
+	  "** H
+****<point>* I
+***** END
+***** I
+***** END"
+	(org-inlinetask-goto-end)
+	(insert "<point>")
+	(buffer-string)))
+    "** H
+***** I
+***** END
+<point>***** I
+***** END"))
 
+  (should
+   (equal
+    (let ((org-inlinetask-min-level 5)
+  	  (org-adapt-indentation t))
+      (org-test-with-temp-text
+	  "** H
+***** I
+<point> inside
+***** END
+***** I
+***** END"
+	(org-inlinetask-goto-end)
+	(insert "<point>")
+	(buffer-string)))
+    "** H
+***** I
+ inside
+***** END
+<point>***** I
+***** END")))
+
+(ert-deftest test-org-inlinetask/inlinetask-within-plain-list ()
+  "Fold inlinetasks in plain-lists.
+Report:
+http://lists.gnu.org/archive/html/emacs-orgmode/2017-12/msg00502.html"
+  (should
+   (org-test-with-temp-text
+       "* Test
+<point>- x
+  - a
+*************** List folding stopped here
+*************** END
+  - b
+"
+     (org-cycle-internal-local)
+     (invisible-p (1- (search-forward "- b"))))))
+
+(ert-deftest test-org-inlinetask/folding-directly-consecutive-tasks ()
+  "Fold directly consecutive inlinetasks."
+  (should
+   (org-test-with-temp-text
+       "* Test
+<point>- x
+  - a
+*************** List folding stopped here
+*************** END
+*************** List folding stopped here
+*************** END
+  - b
+"
+     (org-cycle-internal-local)
+     (invisible-p (1- (search-forward "- b"))))))
+
+
 (provide 'test-org-inlinetask)
 
 ;;; test-org-inlinetask.el ends here
