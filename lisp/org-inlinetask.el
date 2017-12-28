@@ -189,24 +189,28 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 
 (defun org-inlinetask-goto-end ()
   "Go to the end of the inline task at point.
-Return point."
+    Return point."
   (save-match-data
     (beginning-of-line)
     (let* ((case-fold-search t)
-	   (inlinetask-re (org-inlinetask-outline-regexp))
-	   (task-end-re (concat inlinetask-re "END[ \t]*$")))
+           (inlinetask-re (org-inlinetask-outline-regexp))
+           (task-end-re (concat inlinetask-re "END[ \t]*$")))
       (cond
-       ((looking-at task-end-re))
-       ((looking-at inlinetask-re)
-	(forward-line)
-	(cond
-	 ((looking-at task-end-re))
-	 ((looking-at inlinetask-re))
-	 ((org-inlinetask-in-task-p)
-	  (re-search-forward inlinetask-re nil t))))
-       (t (re-search-forward inlinetask-re nil t)))
-      (end-of-line)
-      (point))))
+       ((looking-at-p task-end-re)
+        (forward-line))
+       ((looking-at-p inlinetask-re)
+        (forward-line)
+        (cond
+         ((looking-at-p task-end-re) (forward-line))
+         ((looking-at-p inlinetask-re))
+         ((org-inlinetask-in-task-p)
+          (re-search-forward inlinetask-re nil t)
+          (forward-line))
+         (t nil)))
+       (t
+        (re-search-forward inlinetask-re nil t)
+        (forward-line)))))
+  (point))
 
 (defun org-inlinetask-get-task-level ()
   "Get the level of the inline task around.
