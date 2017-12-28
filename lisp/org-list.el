@@ -357,33 +357,6 @@ clearly distinguish sub-items in a list."
   :version "24.1"
   :type 'integer)
 
-(defcustom org-list-radio-list-templates
-  '((latex-mode "% BEGIN RECEIVE ORGLST %n
-% END RECEIVE ORGLST %n
-\\begin{comment}
-#+ORGLST: SEND %n org-list-to-latex
--
-\\end{comment}\n")
-    (texinfo-mode "@c BEGIN RECEIVE ORGLST %n
-@c END RECEIVE ORGLST %n
-@ignore
-#+ORGLST: SEND %n org-list-to-texinfo
--
-@end ignore\n")
-    (html-mode "<!-- BEGIN RECEIVE ORGLST %n -->
-<!-- END RECEIVE ORGLST %n -->
-<!--
-#+ORGLST: SEND %n org-list-to-html
--
--->\n"))
-  "Templates for radio lists in different major modes.
-All occurrences of %n in a template will be replaced with the name of the
-list, obtained by prompting the user."
-  :group 'org-plain-lists
-  :type '(repeat
-	  (list (symbol :tag "Major mode")
-		(string :tag "Format"))))
-
 (defvar org-list-forbidden-blocks '("example" "verse" "src" "export")
   "Names of blocks where lists are not allowed.
 Names must be in lower case.")
@@ -3207,76 +3180,6 @@ Point is left at list's end."
       (error "Not in a list")
     (let ((list (save-excursion (org-list-to-lisp t))))
       (insert (org-list-to-subtree list)))))
-
-(defun org-list-insert-radio-list ()
-  "Insert a radio list template appropriate for this major mode."
-  (interactive)
-  (let* ((e (cl-assoc-if #'derived-mode-p org-list-radio-list-templates))
-	 (txt (nth 1 e))
-	 name pos)
-    (unless e (error "No radio list setup defined for %s" major-mode))
-    (setq name (read-string "List name: "))
-    (while (string-match "%n" txt)
-      (setq txt (replace-match name t t txt)))
-    (or (bolp) (insert "\n"))
-    (setq pos (point))
-    (insert txt)
-    (goto-char pos)))
-
-(defun org-list-send-list (&optional maybe)
-  "Send a transformed version of this list to the receiver position.
-With argument MAYBE, fail quietly if no transformation is defined
-for this list."
-  (interactive)
-  (catch 'exit
-    (unless (org-at-item-p) (error "Not at a list item"))
-    (save-excursion
-      (let ((case-fold-search t))
-	(re-search-backward "^[ \t]*#\\+ORGLST:" nil t)
-	(unless (looking-at
-		 "[ \t]*#\\+ORGLST:[ \t]+SEND[ \t]+\\(\\S-+\\)[ \t]+\\([^ \t\n]+\\)")
-	  (if maybe (throw 'exit nil)
-	    (error "Don't know how to transform this list")))))
-    (let* ((name (regexp-quote (match-string 1)))
-	   (transform (intern (match-string 2)))
-	   (bottom-point
-	    (save-excursion
-	      (re-search-forward
-	       "\\(\\\\end{comment}\\|@end ignore\\|-->\\)" nil t)
-	      (match-beginning 0)))
-	   (top-point
-	    (progn
-	      (re-search-backward "#\\+ORGLST" nil t)
-	      (re-search-forward (org-item-beginning-re) bottom-point t)
-	      (match-beginning 0)))
-	   (plain-list (save-excursion
-			 (goto-char top-point)
-			 (org-list-to-lisp))))
-      (unless (fboundp transform)
-	(error "No such transformation function %s" transform))
-      (let ((txt (funcall transform plain-list)))
-	;; Find the insertion(s) place(s).
-	(save-excursion
-	  (goto-char (point-min))
-	  (let ((receiver-count 0)
-		(begin-re (format "BEGIN +RECEIVE +ORGLST +%s\\([ \t]\\|$\\)"
-				  name))
-		(end-re (format "END +RECEIVE +ORGLST +%s\\([ \t]\\|$\\)"
-				name)))
-	    (while (re-search-forward begin-re nil t)
-	      (cl-incf receiver-count)
-	      (let ((beg (line-beginning-position 2)))
-		(unless (re-search-forward end-re nil t)
-		  (user-error "Cannot find end of receiver location at %d" beg))
-		(beginning-of-line)
-		(delete-region beg (point))
-		(insert txt "\n")))
-	    (cond
-	     ((> receiver-count 1)
-	      (message "List converted and installed at receiver locations"))
-	     ((= receiver-count 1)
-	      (message "List converted and installed at receiver location"))
-	     (t (user-error "No valid receiver location found")))))))))
 
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-to-lisp' to a custom format.

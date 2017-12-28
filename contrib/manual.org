@@ -15683,10 +15683,10 @@ a map of files for a given project.
      Plug-in function to use for generation of the sitemap.  It is
      called with two arguments: the title of the site-map and
      a representation of the files and directories involved in the
-     project as a radio list (see [[*Radio lists]]).  The latter can
-     further be transformed using ~org-list-to-generic~,
-     ~org-list-to-subtree~ and alike.  Default value generates a plain
-     list of links to all files in the project.
+     project as a nested list, which can further be transformed using
+     ~org-list-to-generic~, ~org-list-to-subtree~ and alike.  Default
+     value generates a plain list of links to all files in the
+     project.
 
 - ~:sitemap-sort-folders~ ::
 
@@ -19485,49 +19485,6 @@ fields or the symbol ~hline~.  The second argument is the property
 list consisting of parameters specified in the =#+ORGTBL: SEND= line.
 Please share your translator functions by posting them to the Org
 users mailing list, at mailto:emacs-orgmode@gnu.org.
-
-*** Radio lists
-:PROPERTIES:
-:DESCRIPTION: Sending and receiving lists.
-:END:
-#+cindex: radio lists
-
-#+findex: org-list-insert-radio-list
-Call the ~org-list-insert-radio-list~ function to insert a radio list
-template in HTML, LaTeX, and Texinfo mode documents.  Sending and
-receiving radio lists works is the same as for radio tables (see
-[[*Radio tables]]) except for these differences:
-
-#+cindex: ORGLST, keyword
-- Orgstruct mode must be active.
-- Use the =ORGLST= keyword instead of =ORGTBL=.
-- {{{kbd(C-c C-c)}}} works only on the first list item.
-
-#+findex: org-list-to-latex
-#+findex: org-list-to-html
-#+findex: org-list-to-texinfo
-#+findex: org-list-to-generic
-Built-in translator functions are: ~org-list-to-latex~,
-~org-list-to-html~ and ~org-list-to-texinfo~.  They use the
-~org-list-to-generic~ translator function.  See its documentation for
-parameters for accurate customizations of lists.  Here is a LaTeX
-example:
-
-#+begin_example
-  % BEGIN RECEIVE ORGLST to-buy
-  % END RECEIVE ORGLST to-buy
-  \begin{comment}
-  ,#+ORGLST: SEND to-buy org-list-to-latex
-  - a new house
-  - a new computer
-    + a new keyboard
-    + a new mouse
-  - a new life
-  \end{comment}
-#+end_example
-
-{{{kbd(C-c C-c)}}} on =a new house= inserts the translated LaTeX list
-in-between the =BEGIN= and =END= marker lines.
 
 ** Dynamic blocks
 :PROPERTIES:
