@@ -9905,7 +9905,8 @@ If the DEFAULT-DESCRIPTION parameter is non-nil, this value will
 be used as the default description.  Otherwise, if
 `org-make-link-description-function' is non-nil, this function
 will be called with the link target, and the result will be the
-default link description."
+default link description.  When called non-interactivily, don't
+allow to edit the default description."
   (interactive "P")
   (let* ((wcf (current-window-configuration))
 	 (origbuf (current-buffer))
@@ -10059,7 +10060,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 			     (symbol-name org-make-link-description-function))
 		    (sit-for 2)
 		    nil))))))
-	(setq desc (read-string "Description: " initial-input))))
+	(setq desc (if (called-interactively-p 'any)
+		       (read-string "Description: " initial-input)
+		     initial-input))))
 
     (unless (string-match "\\S-" desc) (setq desc nil))
     (when remove (apply 'delete-region remove))
