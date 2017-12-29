@@ -1150,7 +1150,7 @@ to a number.  In the case of a timestamp, increment by days."
 			      (- (org-time-string-to-absolute txt)
 				 (org-time-string-to-absolute txt-up)))
 			     ((string-match org-ts-regexp3 txt) 1)
-			     ((string-match "\\([-+]\\)?[0-9]+\\(?:\.[0-9]+\\)?" txt-up)
+			     ((string-match "\\([-+]\\)?\\(?:[0-9]+\\)?\\(?:\.[0-9]+\\)?" txt-up)
 			      (- (string-to-number txt)
 				 (string-to-number (match-string 0 txt-up))))
 			     (t 1)))
