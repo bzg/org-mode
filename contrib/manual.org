@@ -6229,11 +6229,11 @@ Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
 completed once you have done so.  When you mark a =DEADLINE= or
 a =SCHEDULED= with the TODO keyword =DONE=, it no longer produces
-entries in the agenda.  The problem with this is, however, that then
-also the /next/ instance of the repeated entry will not be active.
-Org mode deals with this in the following way: when you try to mark
-such an entry DONE -- using {{{kbd(C-c C-t)}}}, it shifts the base
-date of the repeating timestamp by the repeater interval, and
+entries in the agenda.  The problem with this is, however, is that
+then also the /next/ instance of the repeated entry will not be
+active.  Org mode deals with this in the following way: when you try
+to mark such an entry DONE, using {{{kbd(C-c C-t)}}}, it shifts the
+base date of the repeating timestamp by the repeater interval, and
 immediately sets the entry state back to TODO[fn:68].  In the example
 above, setting the state to DONE would actually switch the date like
 this:
@@ -21007,9 +21007,9 @@ the headline.
 =lognotereschedule=, and =nologreschedule=.
 
 [fn:68] In fact, the target state is taken from, in this sequence, the
-=REPEAT_TO_STATE= property or the variable ~org-todo-repeat-to-state~.
-If neither of these is specified, the target state defaults to the
-first state of the TODO state sequence.
+=REPEAT_TO_STATE= property, the variable ~org-todo-repeat-to-state~ if
+it is a string, the previous TODO state if ~org-todo-repeat-to-state~
+is ~t~, or the first state of the TODO state sequence.
 
 [fn:69] You can change this using the option ~org-log-repeat~, or the
 =STARTUP= options =logrepeat=, =lognoterepeat=, and =nologrepeat=.
