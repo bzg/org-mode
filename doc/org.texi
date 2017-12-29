@@ -6408,16 +6408,16 @@ Deadlines and scheduled items produce entries in the agenda when they are
 over-due, so it is important to be able to mark such an entry as completed
 once you have done so.  When you mark a DEADLINE or a SCHEDULE with the TODO
 keyword DONE, it will no longer produce entries in the agenda.  The problem
-with this is, however, that then also the @emph{next} instance of the
+with this is, however, is that then also the @emph{next} instance of the
 repeated entry will not be active.  Org mode deals with this in the following
-way: When you try to mark such an entry DONE (using @kbd{C-c C-t}), it will
-shift the base date of the repeating timestamp by the repeater interval, and
-immediately set the entry state back to TODO@footnote{In fact, the target
-state is taken from, in this sequence, the @code{REPEAT_TO_STATE} property or
-the variable @code{org-todo-repeat-to-state}.  If neither of these is
-specified, the target state defaults to the first state of the TODO state
-sequence.}.  In the example above, setting the state to DONE would actually
-switch the date like this:
+way: When you try to mark such an entry as DONE (using @kbd{C-c C-t}), it
+will shift the base date of the repeating timestamp by the repeater interval,
+and immediately set the entry state back to TODO@footnote{In fact, the target
+state is taken from, in this sequence, the @code{REPEAT_TO_STATE} property,
+the variable @code{org-todo-repeat-to-state} if it is a string, the previous
+TODO state if @code{org-todo-repeat-to-state} is @code{t} or the first state
+of the TODO state sequence.}.  In the example above, setting the state to
+DONE would actually switch the date like this:
 
 @example
 ** TODO Pay the rent

@@ -3026,13 +3026,17 @@ This option can also be set with on a per-file-basis with
 
 (defcustom org-todo-repeat-to-state nil
   "The TODO state to which a repeater should return the repeating task.
-By default this is the first task in a TODO sequence, or the previous state
-in a TODO_TYP set.  But you can specify another task here.
-alternatively, set the :REPEAT_TO_STATE: property of the entry."
+By default this is the first task of a TODO sequence or the
+previous state of a TYPE_TODO set.  But you can specify to use
+the previous state in a TODO sequence or a string.
+
+Alternatively, you can set the :REPEAT_TO_STATE: property of the
+entry, which has precedence over this option."
   :group 'org-todo
   :version "24.1"
-  :type '(choice (const :tag "Head of sequence" nil)
-		 (string :tag "Specific state")))
+  :type '(choice (const :tag "Use the previous TODO state" t)
+		 (const :tag "Use the head of the TODO sequence" nil)
+		 (string :tag "Use a specific TODO state")))
 
 (defcustom org-log-repeat 'time
   "Non-nil means record moving through the DONE state when triggering repeat.
@@ -12782,7 +12786,9 @@ This function is run automatically after each state change to a DONE state."
 	(when (and repeat (not (zerop (string-to-number (substring repeat 1)))))
 	  (when (eq org-log-repeat t) (setq org-log-repeat 'state))
 	  (let ((to-state (or (org-entry-get nil "REPEAT_TO_STATE" 'selective)
-			      org-todo-repeat-to-state)))
+			      (and (stringp org-todo-repeat-to-state)
+				   org-todo-repeat-to-state)
+			      (and org-todo-repeat-to-state org-last-state))))
 	    (org-todo (cond
 		       ((and to-state (member to-state org-todo-keywords-1))
 			to-state)
