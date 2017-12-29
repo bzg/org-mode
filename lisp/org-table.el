@@ -1170,14 +1170,16 @@ to a number.  In the case of a timestamp, increment by days."
       (org-table-align)
       (org-move-to-column col))))
 
-(defun org-table-check-inside-data-field (&optional noerror)
-  "Is point inside a table data field?
-I.e. not on a hline or before the first or after the last column?
-This actually throws an error, so it aborts the current command."
-  (cond ((and (org-at-table-p)
+(defun org-table-check-inside-data-field (&optional noerror assume-table)
+  "Non-nil when point is inside a table data field.
+Raise an error otherwise, unless NOERROR is non-nil.  In that
+case, return nil if point is not inside a data field.  When
+optional argument ASSUME-TABLE is non-nil, assume point is within
+a table."
+  (cond ((and (or assume-table (org-at-table-p))
 	      (not (save-excursion (skip-chars-backward " \t") (bolp)))
 	      (not (org-at-table-hline-p))
-	      (not (looking-at "[ \t]*$"))))
+	      (not (looking-at-p "[ \t]*$"))))
 	(noerror nil)
 	(t (user-error "Not in table data field"))))
 
@@ -1399,23 +1401,19 @@ However, when FORCE is non-nil, create new columns if necessary."
       (org-table-fix-formulas "$LR" nil (1- col) 1))))
 
 (defun org-table-find-dataline ()
-  "Find a data line in the current table, which is needed for column commands."
-  (if (and (org-at-table-p)
-	   (not (org-at-table-hline-p)))
-      t
-    (let ((col (current-column))
-	  (end (org-table-end)))
-      (org-move-to-column col)
-      (while (and (< (point) end)
-		  (or (not (= (current-column) col))
-		      (org-at-table-hline-p)))
-	(beginning-of-line 2)
-	(org-move-to-column col))
-      (if (and (org-at-table-p)
-	       (not (org-at-table-hline-p)))
-	  t
-	(user-error
-	 "Please position cursor in a data line for column operations")))))
+  "Find a data line in the current table, which is needed for column commands.
+This function assumes point is in a table.  Raise an error when
+there is no data row below."
+  (or (not (org-at-table-hline-p))
+      (let ((col (current-column))
+	    (end (org-table-end)))
+	(forward-line)
+	(while (and (< (point) end) (org-at-table-hline-p))
+	  (forward-line))
+	(when (>= (point) end)
+	  (user-error "Cannot find data row for column operation"))
+	(org-move-to-column col)
+	t)))
 
 (defun org-table-line-to-dline (line &optional above)
   "Turn a buffer line number into a data line number.
@@ -1446,7 +1444,7 @@ non-nil, the one above is used."
   (interactive)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-find-dataline)
-  (org-table-check-inside-data-field)
+  (org-table-check-inside-data-field nil t)
   (let* ((col (org-table-current-column))
 	 (beg (org-table-begin))
 	 (end (copy-marker (org-table-end)))
@@ -1495,7 +1493,7 @@ non-nil, the one above is used."
   (interactive "P")
   (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-find-dataline)
-  (org-table-check-inside-data-field)
+  (org-table-check-inside-data-field nil t)
   (let* ((col (org-table-current-column))
 	 (col1 (if left (1- col) col))
 	 (colpos (if left (1- col) (1+ col)))
@@ -1836,7 +1834,7 @@ with `org-table-paste-rectangle'."
 	(c01 (org-table-current-column))
 	region)
     (goto-char (max beg end))
-    (org-table-check-inside-data-field)
+    (org-table-check-inside-data-field nil t)
     (let* ((end (copy-marker (line-end-position)))
 	   (c02 (org-table-current-column))
 	   (column-start (min c01 c02))
@@ -2731,7 +2729,7 @@ SUPPRESS-ANALYSIS prevents analyzing the table and checking
 location of point."
   (interactive "P")
   (unless suppress-analysis
-    (org-table-check-inside-data-field)
+    (org-table-check-inside-data-field nil t)
     (org-table-analyze))
   (if (equal arg '(16))
       (let ((eq (org-table-current-field-formula)))
@@ -4438,18 +4436,21 @@ When LOCAL is non-nil, show references for the table at point."
       (select-window win))))
 
 (defun org-table-force-dataline ()
-  "Make sure the cursor is in a dataline in a table."
-  (unless (save-excursion
-	    (beginning-of-line 1)
-	    (looking-at org-table-dataline-regexp))
+  "Move point to the closest data line in a table.
+Raise an error if the table contains no data line.  Preserve
+column when moving point."
+  (unless (org-match-line org-table-dataline-regexp)
     (let* ((re org-table-dataline-regexp)
-	   (p1 (save-excursion (re-search-forward re nil 'move)))
-	   (p2 (save-excursion (re-search-backward re nil 'move))))
+	   (column (current-column))
+	   (p1 (save-excursion (re-search-forward re (org-table-end) t)))
+	   (p2 (save-excursion (re-search-backward re (org-table-begin) t))))
       (cond ((and p1 p2)
 	     (goto-char (if (< (abs (- p1 (point))) (abs (- p2 (point))))
-			    p1 p2)))
+			    p1
+			  p2)))
 	    ((or p1 p2) (goto-char (or p1 p2)))
-	    (t (user-error "No table dataline around here"))))))
+	    (t (user-error "No table data line around here")))
+      (org-move-to-column column))))
 
 (defun org-table-fedit-line-up ()
   "Move cursor one line up in the window showing the table."
