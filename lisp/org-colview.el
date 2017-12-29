@@ -1325,7 +1325,7 @@ and variances (respectively) of the individual estimates."
 
 ;;; Dynamic block for Column view
 
-(defun org-columns--capture-view (maxlevel skip-empty format local)
+(defun org-columns--capture-view (maxlevel match skip-empty format local)
   "Get the column view of the current buffer.
 
 MAXLEVEL sets the level limit.  SKIP-EMPTY tells whether to skip
@@ -1360,7 +1360,8 @@ other rows.  Each row is a list of fields, as strings, or
 			  (or (null r) (and has-item (= (length r) 1)))))
 	     (push (cons (org-reduced-level (org-current-level)) (nreverse row))
 		   table)))))
-     (and maxlevel (format "LEVEL<=%d" maxlevel))
+     (or (and maxlevel (format "LEVEL<=%d" maxlevel))
+	 (and match match))
      (and local 'tree)
      'archive 'comment)
     (org-columns-quit)
@@ -1398,6 +1399,7 @@ PARAMS is a property list of parameters:
 :indent   When non-nil, indent each ITEM field according to its level.
 :vlines   When t, make each column a colgroup to enforce vertical lines.
 :maxlevel When set to a number, don't capture headlines below this level.
+:match    When set to a string, use this as a tags/property match filter.
 :skip-empty-rows
 	  When t, skip rows where all specifiers other than ITEM are empty.
 :format   When non-nil, specify the column view format to use."
@@ -1423,6 +1425,7 @@ PARAMS is a property list of parameters:
 	     (org-with-wide-buffer
 	      (when view-pos (goto-char view-pos))
 	      (org-columns--capture-view (plist-get params :maxlevel)
+					 (plist-get params :match)
 					 (plist-get params :skip-empty-rows)
 					 (plist-get params :format)
 					 view-pos))))))
