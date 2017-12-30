@@ -4487,9 +4487,9 @@ is active."
       (setq files (org-agenda-files nil 'ifmode))
       ;; Add `org-agenda-text-search-extra-files' unless there is some
       ;; restriction.
-      (unless (get 'org-agenda-files 'org-restrict)
-	(when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
-	  (pop org-agenda-text-search-extra-files)
+      (when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
+	(pop org-agenda-text-search-extra-files)
+	(unless (get 'org-agenda-files 'org-restrict)
 	  (setq files (org-add-archive-files files))))
       ;; Uniquify files.  However, let `org-check-agenda-file' handle
       ;; non-existent ones.
