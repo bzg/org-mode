@@ -31,7 +31,7 @@
   "Make the file org-version.el in the current directory.
 This function is internally used by the build system and should
 be used by foreign build systems or installers to produce this
-file in the installation directory of org-mode.  Org will not
+file in the installation directory of Org mode.  Org will not
 work correctly if this file is not present (except directly from
 the Git work tree)."
   (with-temp-buffer
@@ -47,7 +47,7 @@ Inserted by installing Org mode or when a release is made.\"
      org-release))
 ;;;\#\#\#autoload
 \(defun org-git-version ()
-  \"The Git version of org-mode.
+  \"The Git version of Org mode.
 Inserted by installing Org or when a release is made.\"
    (let ((org-git-version \"" org-git-version "\"))
      org-git-version))
@@ -65,7 +65,7 @@ Inserted by installing Org or when a release is made.\"
   "Make the file org-loaddefs.el in the current directory.
 This function is internally used by the build system and should
 be used by foreign build systems or installers to produce this
-file in the installation directory of org-mode.  Org will not
+file in the installation directory of Org mode.  Org will not
 work correctly if this file is not up-to-date."
   (with-temp-buffer
     (set-visited-file-name "org-loaddefs.el")

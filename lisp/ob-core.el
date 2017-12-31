@@ -2475,7 +2475,7 @@ in the buffer."
 	     (point))))))
 
 (defun org-babel-result-to-file (result &optional description)
-  "Convert RESULT into an `org-mode' link with optional DESCRIPTION.
+  "Convert RESULT into an Org link with optional DESCRIPTION.
 If the `default-directory' is different from the containing
 file's directory then expand relative links."
   (when (stringp result)

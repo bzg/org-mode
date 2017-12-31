@@ -1,5 +1,5 @@
 # -*- mode:org -*-
-#+TITLE: Org-mode Testing
+#+TITLE: Org mode Testing
 #+PROPERTY: results silent
 
 * Dependencies
@@ -11,9 +11,9 @@ repository]].
 
 * Non-interactive batch testing from the command line
 
-The simplest way to run the Org-mode test suite is from the command
+The simplest way to run the Org mode test suite is from the command
 line with the following invocation.  Note that the paths below are
-relative to the base of the Org-mode directory.
+relative to the base of the Org mode directory.
 
 Also note that many of the current tests uses babel evaluation...
 
@@ -32,8 +32,8 @@ The options in the above command are explained below.
 
 | -Q      | ignores any personal configuration ensuring a vanilla Emacs instance is used |
 | --batch | runs Emacs in "batch" mode with no gui and termination after execution       |
-| -l      | loads Org-mode and the org mode test suite defined in testing/org-test.el    |
-| --eval  | reloads Org-mode and allows evaluation of code blocks by the tests           |
+| -l      | loads Org mode and the Org mode test suite defined in testing/org-test.el    |
+| --eval  | reloads Org mode and allows evaluation of code blocks by the tests           |
 | -f      | actually runs the tests using the `org-test-run-batch-tests' function        |
 
 * Trigger the tests with 'make'
@@ -88,7 +88,7 @@ Ran 2 tests, 2 results as expected (2017-12-28 15:04:45+0100)
 
 * Interactive testing from within Emacs
 
-To run the Org-mode test suite from a current Emacs instance simply
+To run the Org mode test suite from a current Emacs instance simply
 load and run the test suite with the following commands.
 
 1) First load the test suite.

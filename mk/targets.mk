@@ -68,7 +68,7 @@ config-cmd config-all::
 	$(foreach var,$(CONF_CALL),$(info $(var)	= $($(var))$(EOL)))
 config config-test config-exe config-all config-version::
 	$(info ========= Org version)
-	$(info make:  Org-mode version $(ORGVERSION) ($(GITVERSION) => $(lispdir)))
+	$(info make:  Org mode version $(ORGVERSION) ($(GITVERSION) => $(lispdir)))
 	@echo ""
 
 oldorg:	compile info	# what the old makefile did when no target was specified

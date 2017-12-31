@@ -2,7 +2,7 @@
 #+OPTIONS: num:nil ^:nil
 #+STARTUP: hideblocks
 
-This is an example file for use by the Org-mode tests.
+This is an example file for use by the Org mode tests.
 
 * top
 ** code block
