@@ -1081,59 +1081,7 @@
 	    (buffer-string)))))
 
 
-;;; Radio Lists
-
-(ert-deftest test-org-list/send-list ()
-  "Test various checks for `org-list-send-list'."
-  ;; Error when not at a list item.
-  (should-error
-   (org-test-with-temp-text "Not a list item"
-     (org-list-send-list)))
-  ;; Error when ORGLST line is not provided.
-  (should-error
-   (org-test-with-temp-text "- item"
-     (org-list-send-list)))
-  ;; Error when transformation function is unknown.
-  (should-error
-   (org-test-with-temp-text "@ignore
-#+ORGLST: SEND list unknown-function
-- item
-@end ignore"
-     (forward-line 2)
-     (org-list-send-list)))
-  ;; Error when receiving location is not defined.
-  (should-error
-   (org-test-with-temp-text "@ignore
-#+ORGLST: SEND list org-list-to-texinfo
-- item
-@end ignore"
-     (forward-line 2)
-     (org-list-send-list)))
-  ;; Error when insertion region is ill-formed.
-  (should-error
-   (org-test-with-temp-text "@c BEGIN RECEIVE ORGLST list
-@ignore
-#+ORGLST: SEND list org-list-to-texinfo
-- item
-@end ignore"
-     (forward-line 3)
-     (org-list-send-list)))
-  ;; Allow multiple receiver locations.
-  (should
-   (org-test-with-temp-text "
-@c BEGIN RECEIVE ORGLST list
-@c END RECEIVE ORGLST list
-
-@ignore
-#+ORGLST: SEND list org-list-to-texinfo
-<point>- item contents
-@end ignore
-
-@c BEGIN RECEIVE ORGLST list
-@c END RECEIVE ORGLST list"
-     (org-list-send-list)
-     (goto-char (point-min))
-     (search-forward "item contents" nil t 3))))
+;;; List transformations
 
 (ert-deftest test-org-list/to-generic ()
   "Test `org-list-to-generic' specifications."
@@ -1349,71 +1297,22 @@
   "Test `org-list-to-html' specifications."
   (should
    (equal "<ul class=\"org-ul\">\n<li>a</li>\n</ul>"
-	  (let (org-html-indent)
-	    (with-temp-buffer
-	      (insert "<!-- BEGIN RECEIVE ORGLST name -->
-<!-- END RECEIVE ORGLST name -->
-<!--
-#+ORGLST: SEND name org-list-to-html
-- a
--->")
-	      (goto-char (point-min))
-	      (re-search-forward "^- a" nil t)
-	      (beginning-of-line)
-	      (org-list-send-list)
-	      (goto-line 2)
-	      (buffer-substring-no-properties
-	       (point)
-	       (progn (re-search-forward "^<!-- END" nil t)
-		      (beginning-of-line)
-		      (skip-chars-backward " \r\t\n")
-		      (point))))))))
+	  (org-test-with-temp-text "- a"
+	    (org-list-to-html (org-list-to-lisp) nil)))))
 
 (ert-deftest test-org-list/to-latex ()
   "Test `org-list-to-latex' specifications."
   (should
    (equal "\\begin{itemize}\n\\item a\n\\end{itemize}"
-	  (with-temp-buffer
-	    (insert "% BEGIN RECEIVE ORGLST name
-% END RECEIVE ORGLST name
-\\begin{comment}
-#+ORGLST: SEND name org-list-to-latex
-- a
-\\end{comment}")
-	    (goto-char (point-min))
-	    (re-search-forward "^- a" nil t)
-	    (beginning-of-line)
-	    (org-list-send-list)
-	    (goto-line 2)
-	    (buffer-substring-no-properties
-	     (point)
-	     (progn (re-search-forward "^% END" nil t)
-		    (beginning-of-line)
-		    (skip-chars-backward " \r\t\n")
-		    (point)))))))
+	  (org-test-with-temp-text "- a"
+	    (org-list-to-latex (org-list-to-lisp) nil)))))
 
 (ert-deftest test-org-list/to-texinfo ()
   "Test `org-list-to-texinfo' specifications."
   (should
    (equal "@itemize\n@item\na\n@end itemize"
-	  (with-temp-buffer
-	    (insert "@c BEGIN RECEIVE ORGLST name
-@c END RECEIVE ORGLST name
-@ignore
-#+ORGLST: SEND name org-list-to-texinfo
-- a
-@end ignore")
-	    (goto-char (point-min))
-	    (re-search-forward "^- a" nil t)
-	    (beginning-of-line)
-	    (org-list-send-list)
-	    (goto-line 2)
-	    (buffer-substring-no-properties
-	     (point)
-	     (progn (re-search-forward "^@c END" nil t)
-		    (beginning-of-line)
-		    (skip-chars-backward " \r\t\n")
-		    (point)))))))
+	  (org-test-with-temp-text "- a"
+	    (org-list-to-texinfo (org-list-to-lisp) nil)))))
 
 (ert-deftest test-org-list/to-org ()
   "Test `org-list-to-org' specifications."
