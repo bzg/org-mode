@@ -79,7 +79,7 @@ BTEST = $(BATCH) $(BTEST_INIT) \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
 	  --eval '(org-test-run-batch-tests org-test-select-re)'
 
-# Running a plain emacs with no config and this Org-mode loaded.  This
+# Running a plain emacs with no config and this Org mode loaded.  This
 # should be useful for manual testing and verification of problems.
 NOBATCH = $(EMACSQ) $(BTEST_INIT) -l org -f org-version
 

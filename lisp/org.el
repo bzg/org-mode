@@ -731,7 +731,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "C  panel:             Simple routines for us with bad memory" org-panel)
 	(const :tag "C  registry:          A registry for Org links" org-registry)
 	(const :tag "C  screen:            Visit screen sessions through Org links" org-screen)
-	(const :tag "C  secretary:         Team management with org-mode" org-secretary)
+	(const :tag "C  secretary:         Team management with Org" org-secretary)
 	(const :tag "C  sqlinsert:         Convert Org tables to SQL insertions" orgtbl-sqlinsert)
 	(const :tag "C  toc:               Table of contents for Org buffer" org-toc)
 	(const :tag "C  track:             Keep up with Org mode development" org-track)
@@ -4820,7 +4820,7 @@ After a match, the following groups carry important information:
     ("beamer" org-startup-with-beamer-mode t)
     ("entitiespretty" org-pretty-entities t)
     ("entitiesplain" org-pretty-entities nil))
-  "Variable associated with STARTUP options for org-mode.
+  "Variable associated with STARTUP options for Org.
 Each element is a list of three items: the startup options (as written
 in the #+STARTUP line), the corresponding variable, and the value to set
 this variable to if the option is found.  An optional forth element PUSH
@@ -5890,7 +5890,7 @@ by a #."
 (defun org-fontify-meta-lines-and-blocks (limit)
   (condition-case nil
       (org-fontify-meta-lines-and-blocks-1 limit)
-    (error (message "org-mode fontification error in %S at %d"
+    (error (message "Org mode fontification error in %S at %d"
 		    (current-buffer)
 		    (line-number-at-pos)))))
 

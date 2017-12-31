@@ -12,7 +12,7 @@ while (<IN>) {
     print OUT '<link rel="stylesheet" href="http://orgmode.org/org-manual.css" type="text/css" />';
   } elsif (/<div class="contents">/) {
     print OUT;
-    print OUT '<p>This is the official manual for the latest <a href="http://orgmode.org">Org-mode</a> release.</p><div id="table-of-contents">';
+    print OUT '<p>This is the official manual for the latest <a href="http://orgmode.org">Org mode</a> release.</p><div id="table-of-contents">';
   } elsif (/<h2>Table of Contents<\/h2>/) {
     print OUT;
     print OUT '<a href="http://orgmode.org">http://orgmode.org</a><br/><div id="text-table-of-contents">';
