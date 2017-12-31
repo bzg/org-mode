@@ -12,6 +12,11 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.2
 ** Incompatible changes
+*** Removal of OrgStruct mode mode and radio lists
+
+OrgStruct minor mode and radio lists mechanism (~org-list-send-list~
+and ~org-list-radio-lists-templates~) are removed from the code base.
+
 *** Change to Noweb expansion
 
 Expansion check =:noweb-ref= only if no matching named block is found
