@@ -784,7 +784,6 @@ Tables and lists in arbitrary syntax
 * Radio tables::                Sending and receiving radio tables
 * A @LaTeX{} example::          Step by step, almost a tutorial
 * Translator functions::        Copy and modify
-* Radio lists::                 Sending and receiving lists
 
 MobileOrg
 
@@ -14962,10 +14961,10 @@ retrieve additional information about published documents.
 @item @code{:sitemap-function}
 @tab Plug-in function to use for generation of the sitemap.  It is called
 with two arguments: the title of the site-map and a representation of the
-files and directories involved in the project as a radio list (@pxref{Radio
-lists}).  The latter can further be transformed using
-@code{org-list-to-generic}, @code{org-list-to-subtree} and alike.  Default
-value generates a plain list of links to all files in the project.
+files and directories involved in the project as a nested list, which can
+further be transformed using @code{org-list-to-generic},
+@code{org-list-to-subtree} and alike.  Default value generates a plain list
+of links to all files in the project.
 
 @item @code{:sitemap-sort-folders}
 @tab Where folders should appear in the sitemap.  Set this to @code{first}
@@ -18488,7 +18487,6 @@ list locally to another format, such as HTML, @LaTeX{} or Texinfo.
 * Radio tables::                Sending and receiving radio tables
 * A @LaTeX{} example::          Step by step, almost a tutorial
 * Translator functions::        Copy and modify
-* Radio lists::                 Sending and receiving lists
 @end menu
 
 @node Radio tables
@@ -18709,47 +18707,6 @@ first argument is the table whose lines are a list of fields or the symbol
 parameters specified in the @samp{#+ORGTBL: SEND} line.  Please share your
 translator functions by posting them to the Org users mailing list,
 @email{emacs-orgmode@@gnu.org}.
-
-@node Radio lists
-@subsection Radio lists
-@cindex radio lists
-@cindex org-list-insert-radio-list
-
-Call the @code{org-list-insert-radio-list} function to insert a radio list
-template in HTML, @LaTeX{}, and Texinfo mode documents.  Sending and
-receiving radio lists works is the same as for radio tables (@pxref{Radio
-tables}) except for these differences:
-
-@cindex #+ORGLST
-@itemize @minus
-@item
-Orgstruct mode must be active.
-@item
-Use @code{ORGLST} keyword instead of @code{ORGTBL}.
-@item
-@kbd{C-c C-c} works only on the first list item.
-@end itemize
-
-Built-in translators functions are: @code{org-list-to-latex},
-@code{org-list-to-html} and @code{org-list-to-texinfo}.  They use the
-@code{org-list-to-generic} translator function.  See its documentation for
-parameters for accurate customizations of lists.  Here is a @LaTeX{} example:
-
-@example
-% BEGIN RECEIVE ORGLST to-buy
-% END RECEIVE ORGLST to-buy
-\begin@{comment@}
-#+ORGLST: SEND to-buy org-list-to-latex
-- a new house
-- a new computer
-  + a new keyboard
-  + a new mouse
-- a new life
-\end@{comment@}
-@end example
-
-@kbd{C-c C-c} on @samp{a new house} inserts the translated @LaTeX{} list
-in-between the BEGIN and END marker lines.
 
 @node Dynamic blocks
 @section Dynamic blocks
