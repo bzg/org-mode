@@ -4311,14 +4311,14 @@ FACE, when non-nil, for the highlight."
 
 ;;;###autoload
 (define-minor-mode orgtbl-mode
-  "The `org-mode' table editor as a minor mode for use in other modes."
+  "The Org mode table editor as a minor mode for use in other modes."
   :lighter " OrgTbl" :keymap orgtbl-mode-map
   (org-load-modules-maybe)
   (cond
    ((derived-mode-p 'org-mode)
-    ;; Exit without error, in case some hook functions calls this
-    ;; by accident in org-mode.
-    (message "Orgtbl-mode is not useful in org-mode, command ignored"))
+    ;; Exit without error, in case some hook functions calls this by
+    ;; accident in Org mode.
+    (message "Orgtbl mode is not useful in Org mode, command ignored"))
    (orgtbl-mode
     (and (orgtbl-setup) (defun orgtbl-setup () nil)) ;; FIXME: Yuck!?!
     ;; Make sure we are first in minor-mode-map-alist
