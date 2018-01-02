@@ -14939,61 +14939,44 @@ See `org-property-re' for match data, if applicable."
 (defun org-inc-effort ()
   "Increment the value of the effort property in the current entry."
   (interactive)
-  (org-set-effort nil t))
+  (org-set-effort t))
 
 (defvar org-clock-effort)       ; Defined in org-clock.el.
 (defvar org-clock-current-task) ; Defined in org-clock.el.
-(defun org-set-effort (&optional value increment)
+(defun org-set-effort (&optional increment value)
   "Set the effort property of the current entry.
-With numerical prefix arg, use the nth allowed value, 0 stands for the
-10th allowed value.
-
-When INCREMENT is non-nil, set the property to the next allowed value."
+If INCREMENT is non-nil, set the property to the next allowed
+value.  Otherwise, if optional argument VALUE is provided, use
+it.  Eventually, prompt for the new value if none of the previous
+variables is set."
   (interactive "P")
-  (when (equal value 0) (setq value 10))
-  (let* ((completion-ignore-case t)
-	 (prop org-effort-property)
-	 (cur (org-entry-get nil prop))
-	 (allowed (org-property-get-allowed-values nil prop 'table))
-	 (existing (mapcar 'list (org-property-values prop)))
-	 (heading (nth 4 (org-heading-components)))
-	 rpl
-	 (val (cond
-	       ((stringp value) value)
-	       ((and allowed (integerp value))
-		(or (car (nth (1- value) allowed))
-		    (car (org-last allowed))))
-	       ((and allowed increment)
-		(or (cl-caadr (member (list cur) allowed))
-		    (user-error "Allowed effort values are not set")))
-	       (allowed
-		(message "Select 1-9,0, [RET%s]: %s"
-			 (if cur (concat "=" cur) "")
-			 (mapconcat 'car allowed " "))
-		(setq rpl (read-char-exclusive))
-		(if (equal rpl ?\r)
-		    cur
-		  (setq rpl (- rpl ?0))
-		  (when (equal rpl 0) (setq rpl 10))
-		  (if (and (> rpl 0) (<= rpl (length allowed)))
-		      (car (nth (1- rpl) allowed))
-		    (org-completing-read "Effort: " allowed nil))))
-	       (t
-		(org-completing-read
-		 (concat "Effort" (and cur (string-match "\\S-" cur)
-				       (concat " [" cur "]"))
-			 ": ")
-		 existing nil nil "" nil cur)))))
-    (unless (equal (org-entry-get nil prop) val)
-      (org-entry-put nil prop val))
-    (org-refresh-property
-     '((effort . identity)
-       (effort-minutes . org-duration-to-minutes))
-     val)
-    (when (equal heading (bound-and-true-p org-clock-current-task))
-      (setq org-clock-effort (get-text-property (point-at-bol) 'effort))
+  (let* ((allowed (org-property-get-allowed-values nil org-effort-property t))
+	 (current (org-entry-get nil org-effort-property))
+	 (value
+	  (cond
+	   (increment
+	    (unless allowed (user-error "Allowed effort values are not set"))
+	    (or (cl-caadr (member (list current) allowed))
+		(user-error "Unknown value %S among allowed values" current)))
+	   (value
+	    (if (stringp value) value
+	      (error "Invalid effort value: %S" value)))
+	   (t
+	    (let ((must-match
+		   (and allowed
+			(not (get-text-property 0 'org-unrestricted
+						(caar allowed))))))
+	      (completing-read "Effort: " allowed nil must-match))))))
+    (unless (equal current value)
+      (org-entry-put nil org-effort-property value))
+    (org-refresh-property '((effort . identity)
+			    (effort-minutes . org-duration-to-minutes))
+			  value)
+    (when (equal (org-get-heading t t t t)
+		 (bound-and-true-p org-clock-current-task))
+      (setq org-clock-effort (org-get-at-bol 'effort))
       (org-clock-update-mode-line))
-    (message "%s is now %s" prop val)))
+    (message "%s is now %s" org-effort-property value)))
 
 (defun org-entry-properties (&optional pom which)
   "Get all properties of the current entry.

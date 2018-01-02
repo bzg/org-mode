@@ -6823,10 +6823,10 @@ commands:
 
      #+kindex: C-c C-x e
      #+findex: org-set-effort
-     Set the effort estimate for the current entry.  With a numeric
-     prefix argument, set it to the Nth allowed value (see below).
-     This command is also accessible from the agenda with the
-     {{{kbd(e)}}} key.
+     Set the effort estimate for the current entry.  With a prefix
+     argument, set it to the next allowed value---see below.  This
+     command is also accessible from the agenda with the {{{kbd(e)}}}
+     key.
 
 - {{{kbd(C-c C-x C-e)}}} (~org-clock-modify-effort-estimate~) ::
 

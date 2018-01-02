@@ -63,6 +63,8 @@ With the new template expansion mechanism (see
 [[*~org-insert-structure-template~]]), the variable changed its data type.
 See docstring for details.
 
+*** Change ~org-set-effort~ signature
+See docstring for details.
 *** Placeholders in =(eval ...)= macros are always strings
 
 Within =(eval ...)= macros, =$1=-like placeholders are always replaced
