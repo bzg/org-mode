@@ -6704,6 +6704,95 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 	      (org-copy-visible (point-min) (point-max))
 	      (current-kill 0 t))))))
 
+(ert-deftest test-org/set-visibility-according-to-property ()
+  "Test `org-set-visibility-according-to-property' specifications."
+  ;; "folded" state.
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** <point>b"
+     (org-set-visibility-according-to-property)
+     (invisible-p (point))))
+  ;; "children" state.
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+** b
+<point>Contents
+** c"
+     (org-set-visibility-according-to-property)
+     (invisible-p (point))))
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+** b
+Contents
+*** <point>c"
+     (org-set-visibility-according-to-property)
+     (invisible-p (point))))
+  ;; "content" state.
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: content
+:END:
+** b
+<point>Contents
+*** c"
+     (org-set-visibility-according-to-property)
+     (invisible-p (point))))
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: content
+:END:
+** b
+Contents
+*** <point>c"
+     (org-set-visibility-according-to-property)
+     (not (invisible-p (point)))))
+  ;; "showall" state.
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: showall
+:END:
+** b
+<point>Contents
+*** c"
+     (org-set-visibility-according-to-property)
+     (not (invisible-p (point)))))
+  (should
+   (org-test-with-temp-text
+       "
+* a
+:PROPERTIES:
+:VISIBILITY: showall
+:END:
+** b
+Contents
+*** <point>c"
+     (org-set-visibility-according-to-property)
+     (not (invisible-p (point))))))
+
 
 (provide 'test-org)
 
