@@ -1,7 +1,7 @@
 ;;; org.el --- Outline-based notes management and organizer -*- lexical-binding: t; -*-
 
 ;; Carstens outline-mode for keeping track of everything.
-;; Copyright (C) 2004-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2018 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
@@ -6953,20 +6953,22 @@ With a numeric prefix, show all headlines up to that level."
 	 (save-excursion
 	   (org-back-to-heading t)
 	   (outline-hide-subtree)
-	   (org-reveal)
-	   (cond
-	    ((equal state "folded")
-	     (outline-hide-subtree))
-	    ((equal state "children")
-	     (org-show-hidden-entry)
-	     (org-show-children))
-	    ((equal state "content")
-	     (save-excursion
-	       (save-restriction
-		 (org-narrow-to-subtree)
-		 (org-content))))
-	    ((member state '("all" "showall"))
-	     (outline-show-subtree)))))))
+	   (org-reveal))
+	 (cond
+	  ((equal state "folded")
+	   (outline-hide-subtree)
+	   (org-end-of-subtree t t))
+	  ((equal state "children")
+	   (org-show-hidden-entry)
+	   (org-show-children))
+	  ((equal state "content")
+	   (save-excursion
+	     (save-restriction
+	       (org-narrow-to-subtree)
+	       (org-content)))
+	   (org-end-of-subtree t t))
+	  ((member state '("all" "showall"))
+	   (outline-show-subtree))))))
    (unless no-cleanup
      (org-cycle-hide-archived-subtrees 'all)
      (org-cycle-hide-drawers 'all)
