@@ -311,6 +311,11 @@ create all custom agenda views, for upload to the mobile phone."
   (let ((org-agenda-buffer-name "*SUMO*")
 	(org-agenda-tag-filter org-agenda-tag-filter)
 	(org-agenda-redo-command org-agenda-redo-command))
+    ;; Offer to save agenda-related buffers before pushing, preventing
+    ;; "Non-existent agenda file" prompt for lock files (see #19448).
+    (let ((agenda-buffers (org-buffer-list 'agenda)))
+      (save-some-buffers nil
+			 (lambda () (memq (current-buffer) agenda-buffers))))
     (save-excursion
       (save-restriction
 	(save-window-excursion
