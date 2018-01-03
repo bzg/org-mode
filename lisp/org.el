@@ -9064,7 +9064,7 @@ and then used in capture templates."
 (defvar org-id-link-to-org-use-id) ; Defined in org-id.el
 
 ;;;###autoload
-(defun org-store-link (arg)
+(defun org-store-link (arg &optional interactive?)
   "Store an org-link to the current location.
 \\<org-mode-map>
 This link is added to `org-stored-links' and can later be inserted
@@ -9081,8 +9081,11 @@ part of Org core.
 
 A `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
 prefix ARG forces storing a link for each line in the
-active region."
-  (interactive "P")
+active region.
+
+Assume the function is called interactively if INTERACTIVE? is
+non-nil."
+  (interactive "P\np")
   (org-load-modules-maybe)
   (if (and (equal arg '(64)) (org-region-active-p))
       (save-excursion
@@ -9131,11 +9134,9 @@ active region."
        ;; Store a link from a source code buffer.
        ((org-src-edit-buffer-p)
 	(let ((coderef-format (org-src-coderef-format)))
-	  (cond ((save-excursion
-		   (beginning-of-line)
-		   (looking-at (org-src-coderef-regexp coderef-format)))
+	  (cond ((org-match-line (org-src-coderef-regexp coderef-format))
 		 (setq link (format "(%s)" (match-string-no-properties 3))))
-		((called-interactively-p 'any)
+		(interactive?
 		 (let ((label (read-string "Code line label: ")))
 		   (end-of-line)
 		   (setq link (format coderef-format label))
@@ -9154,10 +9155,7 @@ active region."
 		     (get-text-property (point) 'org-marker))))
 	  (when m
 	    (org-with-point-at m
-	      (setq agenda-link
-		    (if (called-interactively-p 'any)
-			(call-interactively 'org-store-link)
-		      (org-store-link nil)))))))
+	      (setq agenda-link (org-store-link nil interactive?))))))
 
        ((eq major-mode 'calendar-mode)
 	(let ((cd (calendar-cursor-to-date)))
@@ -9221,7 +9219,7 @@ active region."
 		 link cpltxt))
 	  ((and (featurep 'org-id)
 		(or (eq org-id-link-to-org-use-id t)
-		    (and (called-interactively-p 'any)
+		    (and interactive?
 			 (or (eq org-id-link-to-org-use-id 'create-if-interactive)
 			     (and (eq org-id-link-to-org-use-id
 				      'create-if-interactive-and-no-custom-id)
@@ -9284,7 +9282,7 @@ active region."
 		  desc "NONE")))
 	(setq link cpltxt))
 
-       ((called-interactively-p 'interactive)
+       (interactive?
 	(user-error "No method for storing a link from this buffer"))
 
        (t (setq link nil)))
@@ -9301,9 +9299,7 @@ active region."
 		      (lambda (m) (or (match-string 5 m) (match-string 3 m)))
 		      desc))))
       ;; Return the link
-      (if (not (and (or (called-interactively-p 'any)
-			executing-kbd-macro)
-		    link))
+      (if (not (and interactive? link))
 	  (or agenda-link (and link (org-make-link-string link desc)))
 	(push (list link desc) org-stored-links)
 	(message "Stored: %s" (or desc link))
