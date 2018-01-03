@@ -1442,7 +1442,7 @@ in particular CLOCK_MODELINE_TOTAL and the corresponding variable
 `org-clock-mode-line-total' and then decides which time to use.
 
 The time is always returned as UTC."
-  (let ((cmt (or (org-entry-get nil "CLOCK_MODELINE_TOTAL")
+  (let ((cmt (or (org-entry-get nil "CLOCK_MODELINE_TOTAL" 'selective)
 		 (symbol-name org-clock-mode-line-total)))
 	(lr (org-entry-get nil "LAST_REPEAT")))
     (cond
