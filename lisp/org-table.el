@@ -672,17 +672,30 @@ nil      When nil, the command tries to be smart and figure out the
       (org-table-align))))
 
 ;;;###autoload
-(defun org-table-import (file arg)
+(defun org-table-import (file separator)
   "Import FILE as a table.
-The file is assumed to be tab-separated.  Such files can be produced by most
-spreadsheet and database applications.  If no tabs (at least one per line)
-are found, lines will be split on whitespace into fields."
+
+The command tries to be smart and figure out the separator in the
+following way:
+
+  - when each line contains a TAB, assume TAB-separated material
+  - when each line contains a comma, assume CSV material
+  - else, assume one or more SPACE characters as separator.
+
+When non-nil, SEPARATOR specifies the field separator in the
+lines.  It can have the following values:
+
+(4)     Use the comma as a field separator
+(16)    Use a TAB as field separator
+(64)    Prompt for a regular expression as field separator
+integer When a number, use that many spaces, or a TAB, as field separator
+regexp  When a regular expression, use it to match the separator."
   (interactive "f\nP")
-  (or (bolp) (newline))
+  (unless (bolp) (insert "\n"))
   (let ((beg (point))
 	(pm (point-max)))
     (insert-file-contents file)
-    (org-table-convert-region beg (+ (point) (- (point-max) pm)) arg)))
+    (org-table-convert-region beg (+ (point) (- (point-max) pm)) separator)))
 
 
 ;;;###autoload
