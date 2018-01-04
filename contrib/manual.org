@@ -101,14 +101,14 @@ Otherwise autoload Org functions will mess up the installation.
 Then, to make sure your Org configuration is taken into account,
 initialize the package system with ~(package-initialize)~ in your
 Emacs init file before setting any Org option.  If you want to use
-Org's package repository, check out the [[http://orgmode.org/elpa.html][Org ELPA page]].
+Org's package repository, check out the [[https://orgmode.org/elpa.html][Org ELPA page]].
 
 *** Downloading Org as an archive
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
 
-You can download Org latest release from [[http://orgmode.org/][Org's website]].  In this case,
+You can download Org latest release from [[https://orgmode.org/][Org's website]].  In this case,
 make sure you set the load-path correctly in your Emacs init file:
 
 #+begin_src emacs-lisp
@@ -135,7 +135,7 @@ You can clone Org's repository and install Org like this:
 
 #+begin_example
   $ cd ~/src/
-  $ git clone git://orgmode.org/org-mode.git
+  $ git clone git@code.orgmode.org:bzg/org-mode.git
   $ make autoloads
 #+end_example
 
@@ -152,7 +152,7 @@ install Org with =make install=.  Please run =make help= to get the
 list of compilation/installation options.
 
 For more detailed explanations on Org's build system, please check the
-Org Build System page on [[http://orgmode.org/worg/dev/org-build-system.html][Worg]].
+Org Build System page on [[https://orgmode.org/worg/dev/org-build-system.html][Worg]].
 
 ** Activation
 :PROPERTIES:
@@ -1380,7 +1380,7 @@ The following command handles footnotes:
 :END:
 
 A reference document providing a formal description of Org's syntax is
-available as [[http://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
+available as [[https://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
 Goaziou.  It defines Org's core internal concepts such as =headlines=,
 =sections=, =affiliated keywords=, =(greater) elements= and =objects=.
 Each part of an Org file falls into one of the categories above.
@@ -2467,7 +2467,7 @@ of {{{var(S-LIST)}}} to the corresponding element of
 
 These three functions can be used to implement associative arrays,
 count matching cells, rank results, group data, etc.  For practical
-examples see [[http://orgmode.org/worg/org-tutorials/org-lookups.html][this tutorial on Worg]].
+examples see [[https://orgmode.org/worg/org-tutorials/org-lookups.html][this tutorial on Worg]].
 
 *** Editing and debugging formulas
 :PROPERTIES:
@@ -2877,7 +2877,7 @@ Notice that Org Plot is smart enough to apply the table's headers as
 labels.  Further control over the labels, type, content, and
 appearance of plots can be exercised through the =PLOT= keyword
 preceding a table.  See below for a complete list of Org Plot options.
-For more information and examples see the [[http://orgmode.org/worg/org-tutorials/org-plot.html][Org Plot tutorial]].
+For more information and examples see the [[https://orgmode.org/worg/org-tutorials/org-plot.html][Org Plot tutorial]].
 
 **** Plot options
 :PROPERTIES:
@@ -17849,7 +17849,7 @@ Note that now the expansion contains the results of the code block
 
 The "Library of Babel" is a collection of code blocks.  Like
 a function library, these code blocks can be called from other Org
-files.  A collection of useful code blocks is available on [[http://orgmode.org/worg/library-of-babel.html][Worg]].  For
+files.  A collection of useful code blocks is available on [[https://orgmode.org/worg/library-of-babel.html][Worg]].  For
 remote code block evaluation syntax, see [[*Evaluating code blocks]].
 
 #+kindex: C-c C-v i
@@ -19237,7 +19237,7 @@ For creating a new back-end from an existing one, set
 ~:translate-alist~ to an alist of export functions.  This alist
 replaces the parent back-end functions.
 
-For complete documentation, see [[http://orgmode.org/worg/dev/org-export-reference.html][the Org Export Reference on Worg]].
+For complete documentation, see [[https://orgmode.org/worg/dev/org-export-reference.html][the Org Export Reference on Worg]].
 
 ** Tables in arbitrary syntax
 :PROPERTIES:
@@ -19710,7 +19710,7 @@ number.  Here are tips to speed up:
 
 These options can be applied to selected agenda views.  For more
 details about generation of agenda views, see the docstrings for the
-relevant variables, and this [[http://orgmode.org/worg/agenda-optimization.html][dedicated Worg page]] for agenda
+relevant variables, and this [[https://orgmode.org/worg/agenda-optimization.html][dedicated Worg page]] for agenda
 optimization.
 
 ** Extracting agenda information
@@ -21206,7 +21206,7 @@ the docstring of that variable.
 
 [fn:144] An alternative is to use a WebDAV server.  MobileOrg
 documentation has details of WebDAV server configuration.  Additional
-help is at this [[http://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
+help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
 [fn:145] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
