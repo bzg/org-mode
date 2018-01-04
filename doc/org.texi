@@ -7,7 +7,7 @@
 @include org-version.inc
 
 @c Version and Contact Info
-@set MAINTAINERSITE @uref{http://orgmode.org,maintainers web page}
+@set MAINTAINERSITE @uref{https://orgmode.org,maintainers web page}
 @set AUTHOR Carsten Dominik
 @set MAINTAINER Carsten Dominik
 @set MAINTAINEREMAIL @email{carsten at orgmode dot org}
@@ -853,7 +853,7 @@ platform.
 There is a website for Org which provides links to the newest
 version of Org, as well as additional information, frequently asked
 questions (FAQ), links to tutorials, etc.  This page is located at
-@uref{http://orgmode.org}.
+@uref{https://orgmode.org}.
 @cindex print edition
 
 An earlier version (7.3) of this manual is available as a
@@ -890,11 +890,11 @@ Otherwise autoload Org functions will mess up the installation.
 Then, to make sure your Org configuration is taken into account, initialize
 the package system with @code{(package-initialize)} in your Emacs init file
 before setting any Org option.  If you want to use Org's package repository,
-check out the @uref{http://orgmode.org/elpa.html, Org ELPA page}.
+check out the @uref{https://orgmode.org/elpa.html, Org ELPA page}.
 
 @subsubheading Downloading Org as an archive
 
-You can download Org latest release from @uref{http://orgmode.org/, Org's
+You can download Org latest release from @uref{https://orgmode.org/, Org's
 website}.  In this case, make sure you set the load-path correctly in your
 Emacs init file:
 
@@ -935,7 +935,7 @@ install Org with @code{make install}.  Please run @code{make help} to get
 the list of compilation/installation options.
 
 For more detailed explanations on Org's build system, please check the Org
-Build System page on @uref{http://orgmode.org/worg/dev/org-build-system.html,
+Build System page on @uref{https://orgmode.org/worg/dev/org-build-system.html,
 Worg}.
 
 @node Activation
@@ -1897,7 +1897,7 @@ marker in square brackets, inside text.  Markers always start with
 @example
 The Org homepage[fn:1] now looks a lot better than it used to.
 ...
-[fn:1] The link is: http://orgmode.org
+[fn:1] The link is: https://orgmode.org
 @end example
 
 Org mode extends the number-based syntax to @emph{named} footnotes and
@@ -1992,7 +1992,7 @@ a separate window.  The window can be closed by pressing @kbd{C-c '}.
 @cindex Org syntax
 
 A reference document providing a formal description of Org's syntax is
-available as @uref{http://orgmode.org/worg/dev/org-syntax.html, a draft on
+available as @uref{https://orgmode.org/worg/dev/org-syntax.html, a draft on
 Worg}, written and maintained by Nicolas Goaziou.  It defines Org's core
 internal concepts such as @code{headlines}, @code{sections}, @code{affiliated
 keywords}, @code{(greater) elements} and @code{objects}.  Each part of an Org
@@ -2941,7 +2941,7 @@ element of @code{R-LIST}.
 
 These three functions can be used to implement associative arrays, count
 matching cells, rank results, group data etc.  For practical examples
-see @uref{http://orgmode.org/worg/org-tutorials/org-lookups.html, this
+see @uref{https://orgmode.org/worg/org-tutorials/org-lookups.html, this
 tutorial on Worg}.
 
 @node Editing and debugging formulas
@@ -3275,7 +3275,7 @@ Further control over the labels, type, content, and appearance of plots can
 be exercised through the @code{#+PLOT:} lines preceding a table.  See below
 for a complete list of Org-plot options.  The @code{#+PLOT:} lines are
 optional.  For more information and examples see the Org-plot tutorial at
-@uref{http://orgmode.org/worg/org-tutorials/org-plot.html}.
+@uref{https://orgmode.org/worg/org-tutorials/org-plot.html}.
 
 @subsubheading Plot Options
 
@@ -5826,7 +5826,7 @@ An alternative way to capture and process property values into a table is
 provided by Eric Schulte's @file{org-collector.el} which is a contributed
 package@footnote{Contributed packages are not part of Emacs, but are
 distributed with the main distribution of Org (visit
-@uref{http://orgmode.org}).}.  It provides a general API to collect
+@uref{https://orgmode.org}).}.  It provides a general API to collect
 properties from entries in a certain scope, and arbitrary Lisp expressions to
 process these values before inserting them into a table or a dynamic block.
 
@@ -7704,13 +7704,13 @@ The variable @code{org-protocol-project-alist} maps URLs to local file names,
 by stripping URL parameters from the end and replacing the @code{:base-url}
 with @code{:working-directory} and @code{:online-suffix} with
 @code{:working-suffix}.  For example, assuming you own a local copy of
-@url{http://orgmode.org/worg/} contents at @file{/home/user/worg}, you can
+@url{https://orgmode.org/worg/} contents at @file{/home/user/worg}, you can
 set @code{org-protocol-project-alist} to the following
 
 @lisp
 (setq org-protocol-project-alist
       '(("Worg"
-	 :base-url "http://orgmode.org/worg/"
+	 :base-url "https://orgmode.org/worg/"
 	 :working-directory "/home/user/worg/"
 	 :online-suffix ".html"
 	 :working-suffix ".org")))
@@ -7718,7 +7718,7 @@ set @code{org-protocol-project-alist} to the following
 
 @noindent
 If you are now browsing
-@url{http://orgmode.org/worg/org-contrib/org-protocol.html} and find a typo
+@url{https://orgmode.org/worg/org-contrib/org-protocol.html} and find a typo
 or have an idea about how to enhance the documentation, simply click the
 bookmark and start editing.
 
@@ -11851,7 +11851,7 @@ to @code{<a>} or @code{<img>} tags.  This example shows changing the link's
 @cindex #+ATTR_HTML
 @example
 #+ATTR_HTML: :title The Org mode homepage :style color:red;
-[[http://orgmode.org]]
+[[https://orgmode.org]]
 @end example
 
 @node Tables in HTML export
@@ -12130,9 +12130,9 @@ program enhances large files in two different ways of viewing.  One is an
 navigation can be done with the @kbd{n} and @kbd{p} keys (and some other keys
 as well, press @kbd{?} for an overview of the available keys).  The second
 one has a @emph{folding} view, much like Org provides inside Emacs.  The
-script is available at @url{http://orgmode.org/org-info.js} and the
-documentation at @url{http://orgmode.org/worg/code/org-info-js/}.  The script
-is hosted on @url{http://orgmode.org}, but for reliability, prefer installing
+script is available at @url{https://orgmode.org/org-info.js} and the
+documentation at @url{https://orgmode.org/worg/code/org-info-js/}.  The script
+is hosted on @url{https://orgmode.org}, but for reliability, prefer installing
 it on your own web server.
 
 To use this program, just add this line to the Org file:
@@ -12149,7 +12149,7 @@ below:
 
 @example
 path:    @r{The path to the script.  The default grabs the script from}
-         @r{@url{http://orgmode.org/org-info.js}, but you might want to have}
+         @r{@url{https://orgmode.org/org-info.js}, but you might want to have}
          @r{a local copy and use a path like @samp{../scripts/org-info.js}.}
 view:    @r{Initial view when the website is first shown.  Possible values are:}
          info      @r{Info-like interface with one section per page.}
@@ -13069,10 +13069,10 @@ of these examples works:
 @subsubheading Embedding clickable images
 For clickable images, provide a link whose description is another link to an
 image file.  For example, to embed a image @file{org-mode-unicorn.png} which
-when clicked jumps to @uref{http://Orgmode.org} website, do the following
+when clicked jumps to @uref{https://orgmode.org} website, do the following
 
 @example
-[[http://orgmode.org][./org-mode-unicorn.png]]
+[[https://orgmode.org][./org-mode-unicorn.png]]
 @end example
 
 @subsubheading Sizing and scaling of embedded images
@@ -15587,7 +15587,7 @@ For more examples of header arguments for @code{#+CALL:} lines,
 The ``Library of Babel'' is a collection of code blocks.  Like a function
 library, these code blocks can be called from other Org files.  A collection
 of useful code blocks is available on
-@uref{http://orgmode.org/worg/library-of-babel.html,Worg}.  For remote code
+@uref{https://orgmode.org/worg/library-of-babel.html,Worg}.  For remote code
 block evaluation syntax, @pxref{Evaluating code blocks}.
 
 @kindex C-c C-v i
@@ -15629,7 +15629,7 @@ Org supports the following languages for the @samp{src} code blocks:
 @end multitable
 
 Additional documentation for some languages are at
-@uref{http://orgmode.org/worg/org-contrib/babel/languages.html}.
+@uref{https://orgmode.org/worg/org-contrib/babel/languages.html}.
 
 @vindex org-babel-load-languages
 By default, only @code{emacs-lisp} is enabled for evaluation.  To enable or
@@ -15717,7 +15717,7 @@ Org expand @code{:noweb} references by default.
 Each language can have separate default header arguments by customizing the
 variable @code{org-babel-default-header-args:<lang>}, where @code{<lang>} is
 the name of the language.  For details, see the language-specific online
-documentation at @uref{http://orgmode.org/worg/org-contrib/babel}.
+documentation at @uref{https://orgmode.org/worg/org-contrib/babel}.
 
 @node Header arguments in Org mode properties
 @subsubheading Header arguments in Org mode properties
@@ -18304,7 +18304,7 @@ Org.
 Org has a large number of hook variables for adding functionality.  This
 appendix illustrates using a few.  A complete list of hooks with
 documentation is maintained by the Worg project at
-@uref{http://orgmode.org/worg/doc.html#hooks}.
+@uref{https://orgmode.org/worg/doc.html#hooks}.
 
 @node Add-on packages
 @section Add-on packages
@@ -18313,10 +18313,10 @@ documentation is maintained by the Worg project at
 Various authors wrote a large number of add-on packages for Org.
 
 These packages are not part of Emacs, but they are distributed as contributed
-packages with the separate release available at @uref{http://orgmode.org}.
+packages with the separate release available at @uref{https://orgmode.org}.
 See the @file{contrib/README} file in the source code directory for a list of
 contributed files.  Worg page with more information is at:
-@uref{http://orgmode.org/worg/org-contrib/}.
+@uref{https://orgmode.org/worg/org-contrib/}.
 
 @node Adding hyperlink types
 @section Adding hyperlink types
@@ -18437,7 +18437,7 @@ to an alist of export functions.  This alist replaces the parent back-end
 functions.
 
 For complete documentation, see
-@url{http://orgmode.org/worg/dev/org-export-reference.html, the Org Export
+@url{https://orgmode.org/worg/dev/org-export-reference.html, the Org Export
 Reference on Worg}.
 
 @node Context-sensitive commands
@@ -18906,7 +18906,7 @@ Disable tag inheritance for agendas:
 
 These options can be applied to selected agenda views.  For more details
 about generation of agenda views, see the docstrings for the relevant
-variables, and this @uref{http://orgmode.org/worg/agenda-optimization.html,
+variables, and this @uref{https://orgmode.org/worg/agenda-optimization.html,
 dedicated Worg page} for agenda optimization.
 
 @node Extracting agenda information
@@ -19250,7 +19250,7 @@ For a server to host files, consider options like
 @uref{http://dropbox.com,Dropbox.com} account@footnote{An alternative is to
 use webdav server.  MobileOrg documentation has details of webdav server
 configuration.  Additional help is at
-@uref{http://orgmode.org/worg/org-faq.html#mobileorg_webdav, FAQ entry}.}.
+@uref{https://orgmode.org/worg/org-faq.html#mobileorg_webdav, FAQ entry}.}.
 On first connection, MobileOrg creates a directory @file{MobileOrg/} on
 Dropbox.  Pass its location to Emacs through an init file variable as
 follows:
