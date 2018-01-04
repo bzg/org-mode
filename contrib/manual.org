@@ -48,9 +48,9 @@ possible to create a single file reproducible research compendium.
 Org keeps simple things simple.  When first fired up, it should feel
 like a straightforward, easy to use outliner.  Complexity is not
 imposed, but a large amount of functionality is available when needed.
-Org is a toolbox.  Many users actually run only a -- very personal --
-fraction of Org's capabilities, and know that there is more whenever
-they need it.
+Org is a toolbox.  Many users actually run only a---very
+personal---fraction of Org's capabilities, and know that there is more
+whenever they need it.
 
 All of this is achieved with strictly plain text files, the most
 portable and future-proof file format.  Org runs in Emacs.  Emacs is
@@ -176,7 +176,7 @@ time to check the list.
 #+findex: org-store-link
 #+findex: org-iswitchb
 The four Org commands ~org-store-link~, ~org-capture~, ~org-agenda~,
-and ~org-iswitchb~ be accessible through global keys -- i.e., anywhere
+and ~org-iswitchb~ be accessible through global keys---i.e., anywhere
 in Emacs, not just in Org buffers.  Here are suggested bindings for
 these keys, please modify the keys to your own liking.
 
@@ -224,7 +224,7 @@ be passed to the list after a moderator has approved it[fn:2].
 #+findex: org-version
 #+findex: org-submit-bug-report
 For bug reports, please first try to reproduce the bug with the latest
-version of Org available -- if you are running an outdated version, it
+version of Org available---if you are running an outdated version, it
 is quite possible that the bug has been fixed already.  If the bug
 persists, prepare a report and provide as much information as
 possible, including the version information of Emacs ({{{kbd(M-x
@@ -267,7 +267,7 @@ shown below.
   (add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp" t))
 #+end_src
 
-If an error occurs, a "backtrace" can be very useful -- see below on
+If an error occurs, a "backtrace" can be very useful---see below on
 how to create one.  Often a small example file helps, along with clear
 information about:
 
@@ -310,8 +310,8 @@ error occurred.  Here is how to produce a useful backtrace:
    document the steps you take.
 
 4. When you hit the error, a =*Backtrace*= buffer appears on the
-   screen.  Save this buffer to a file -- for example using {{{kbd(C-x
-   C-w)}}} -- and attach it to your bug report.
+   screen.  Save this buffer to a file---for example using {{{kbd(C-x
+   C-w)}}}---and attach it to your bug report.
 
 ** Typesetting conventions used in this manual
 :PROPERTIES:
@@ -774,13 +774,13 @@ The following commands jump to other headlines in the buffer.
 
      #+kindex: M-up
      #+findex: org-move-subtree-up
-     Move subtree up -- swap with previous subtree of same level.
+     Move subtree up, i.e., swap with previous subtree of same level.
 
 - {{{kbd(M-down)}}} (~org-move-subtree-down~) ::
 
      #+kindex: M-down
      #+findex: org-move-subtree-down
-     Move subtree down -- swap with next subtree of same level.
+     Move subtree down, i.e., swap with next subtree of same level.
 
 - {{{kbd(C-c @)}}} (~org-mark-subtree~) ::
 
@@ -856,13 +856,13 @@ The following commands jump to other headlines in the buffer.
      Sort same-level entries.  When there is an active region, all
      entries in the region are sorted.  Otherwise the children of the
      current headline are sorted.  The command prompts for the sorting
-     method, which can be alphabetically, numerically, by time --
-     first timestamp with active preferred, creation time, scheduled
-     time, deadline time --, by priority, by TODO keyword -- in the
-     sequence the keywords have been defined in the setup -- or by the
-     value of a property.  Reverse sorting is possible as well.  You
-     can also supply your own function to extract the sorting key.
-     With a {{{kbd(C-u)}}} prefix, sorting is case-sensitive.
+     method, which can be alphabetically, numerically, by time---first
+     timestamp with active preferred, creation time, scheduled time,
+     deadline time---by priority, by TODO keyword---in the sequence
+     the keywords have been defined in the setup---or by the value of
+     a property.  Reverse sorting is possible as well.  You can also
+     supply your own function to extract the sorting key.  With
+     a {{{kbd(C-u)}}} prefix, sorting is case-sensitive.
 
 - {{{kbd(C-x n s)}}} (~org-narrow-to-subtree~) ::
 
@@ -886,7 +886,7 @@ The following commands jump to other headlines in the buffer.
 
      #+kindex: C-c *
      #+findex: org-toggle-heading
-     Turn a normal line or plain list item into a headline -- so that
+     Turn a normal line or plain list item into a headline---so that
      it becomes a subheading at its location.  Also turn a headline
      into a normal line by removing the stars.  If there is an active
      region, turn all lines in the region into headlines.  If the
@@ -897,8 +897,8 @@ The following commands jump to other headlines in the buffer.
 #+cindex: region, active
 #+cindex: active region
 #+cindex: transient mark mode
-When there is an active region -- i.e., when Transient Mark mode is
-active --, promotion and demotion work on all headlines in the region.
+When there is an active region---i.e., when Transient Mark mode is
+active---promotion and demotion work on all headlines in the region.
 To select a region of headlines, it is best to place both point and
 mark at the beginning of a line, mark at the beginning of the first
 headline, and point at the line just after the last headline to
@@ -1017,10 +1017,10 @@ Org knows ordered lists, unordered lists, and description lists.
   #+vindex: org-alphabetical-lists
   /Ordered/ list items start with a numeral followed by either
   a period or a right parenthesis[fn:10], such as =1.= or =1)=[fn:11]
-  If you want a list to start with a different value -- e.g., 20 --
-  start the text of the item with =[@20]=[fn:12].  Those constructs
-  can be used in any item of the list in order to enforce a particular
-  numbering.
+  If you want a list to start with a different value---e.g.,
+  20---start the text of the item with =[@20]=[fn:12].  Those
+  constructs can be used in any item of the list in order to enforce
+  a particular numbering.
 
 - /Description/ list items are unordered list items, and contain the
   separator =::= to distinguish the description /term/ from the
@@ -1062,15 +1062,15 @@ indented to signal that they belong to a particular item.
 
 #+vindex: org-list-demote-modify-bullet
 #+vindex: org-list-indent-offset
-If you find that using a different bullet for a sub-list -- than that
-used for the current list-level -- improves readability, customize the
+If you find that using a different bullet for a sub-list---than that
+used for the current list-level---improves readability, customize the
 variable ~org-list-demote-modify-bullet~.  To get a greater difference
 of indentation between items and theirs sub-items, customize
 ~org-list-indent-offset~.
 
 #+vindex: org-list-automatic-rules
 The following commands act on items when the cursor is in the first
-line of an item -- the line with the bullet or number.  Some of them
+line of an item---the line with the bullet or number.  Some of them
 imply the application of automatic rules to keep list structure
 intact.  If some of these actions get in your way, configure
 ~org-list-automatic-rules~ to disable them individually.
@@ -1128,8 +1128,8 @@ intact.  If some of these actions get in your way, configure
 
        #+kindex: M-up
        #+kindex: M-down
-       Move the item including subitems up/down[fn:15] -- swap with
-       previous/next item of same indentation.  If the list is
+       Move the item including subitems up/down[fn:15], i.e., swap
+       with previous/next item of same indentation.  If the list is
        ordered, renumbering is automatic.
 
   - {{{kbd(M-left)}}}, {{{kbd(M-right)}}} ::
@@ -1182,7 +1182,7 @@ intact.  If some of these actions get in your way, configure
   - {{{kbd(C-c *)}}} ::
 
        #+kindex: C-c *
-       Turn a plain list item into a headline -- so that it becomes
+       Turn a plain list item into a headline---so that it becomes
        a subheading at its location.  See [[*Structure editing]], for
        a detailed explanation.
 
@@ -1190,8 +1190,8 @@ intact.  If some of these actions get in your way, configure
 
        #+kindex: C-c C-*
        Turn the whole plain list into a subtree of the current
-       heading.  Checkboxes (see [[*Checkboxes]]) become TODO --
-       respectively DONE -- keywords when unchecked -- respectively
+       heading.  Checkboxes (see [[*Checkboxes]]) become TODO,
+       respectively DONE, keywords when unchecked, respectively
        checked.
 
   - {{{kbd(S-left)}}}, {{{kbd(S-right)}}} ::
@@ -1332,8 +1332,8 @@ The following command handles footnotes:
 
      #+kindex: C-c C-x f
      When the cursor is on a footnote reference, jump to the
-     definition.  When it is at a definition, jump to the -- first --
-     reference.
+     definition.  When it is at a definition, jump to
+     the---first---reference.
 
      #+vindex: org-footnote-define-inline
      #+vindex: org-footnote-section
@@ -1393,8 +1393,8 @@ a buffer:
 #+texinfo: @noindent
 It outputs a list containing the buffer's content represented as an
 abstract structure.  The export engine relies on the information
-stored in this list.  Most interactive commands -- e.g., for structure
-editing -- also rely on the syntactic meaning of the surrounding
+stored in this list.  Most interactive commands---e.g., for structure
+editing---also rely on the syntactic meaning of the surrounding
 context.
 
 #+cindex: syntax checker
@@ -1433,8 +1433,8 @@ this:
 
 A table is re-aligned automatically each time you press
 {{{kbd(TAB)}}}, {{{kbd(RET)}}} or {{{kbd(C-c C-c)}}} inside the table.
-{{{kbd(TAB)}}} also moves to the next field -- {{{kbd(RET)}}} to the
-next row -- and creates new table rows at the end of the table or
+{{{kbd(TAB)}}} also moves to the next field---{{{kbd(RET)}}} to the
+next row---and creates new table rows at the end of the table or
 before horizontal lines.  The indentation of the table is set by the
 first line.  Any line starting with =|-= is considered as a horizontal
 separator line and will be expanded on the next re-align to span the
@@ -1760,8 +1760,8 @@ fraction of number-like versus non-number fields in the column.
 
 #+vindex: org-table-automatic-realign
 Editing a field may modify alignment of the table.  Moving
-a contiguous row or column -- i.e., using {{{kbd(TAB)}}} or
-{{{kbd(RET)}}} -- automatically re-aligns it.  If you want to disable
+a contiguous row or column---i.e., using {{{kbd(TAB)}}} or
+{{{kbd(RET)}}}---automatically re-aligns it.  If you want to disable
 this behavior, set ~org-table-automatic-realign~ to ~nil~.  In any
 case, you can always align manually a table:
 
@@ -1826,10 +1826,10 @@ with the following tools:
      #+findex: org-table-expand
      Expand all columns.
 
-To see the full text of a shrunk field, hold the mouse over it --
-a tool-tip window then shows the full content.  Alternatively
-{{{kbd(C-h .)}}}  (~display-local-help~) reveals the full content.
-For convenience, any change to a shrunk column expands it.
+To see the full text of a shrunk field, hold the mouse over it---a
+tool-tip window then shows the full content.  Alternatively {{{kbd(C-h
+.)}}}  (~display-local-help~) reveals the full content.  For
+convenience, any change to a shrunk column expands it.
 
 #+vindex: org-startup-shrink-all-tables
 Setting the option ~org-startup-shrink-all-tables~ shrinks all columns
@@ -2072,7 +2072,7 @@ inefficient[fn:21] for large number of rows.
 
 =$name= is interpreted as the name of a column, parameter or constant.
 Constants are defined globally through the variable
-~org-table-formula-constants~, and locally -- for the file -- through
+~org-table-formula-constants~, and locally---for the file---through
 a line like this example:
 
 : #+CONSTANTS: c=299792458. pi=3.14 eps=2.4e-6
@@ -2258,7 +2258,7 @@ With Emacs Lisp forms, you need to be conscious about the way field
 references are interpolated into the form.  By default, a reference is
 interpolated as a Lisp string (in double-quotes) containing the field.
 If you provide the =N= mode switch, all referenced elements are
-numbers -- non-number fields will be zero -- and interpolated as Lisp
+numbers---non-number fields will be zero---and interpolated as Lisp
 numbers, without quotes.  If you provide the =L= flag, all fields are
 interpolated literally, without quotes.  I.e., if you want a reference
 to be interpreted as a string by the Lisp form, enclose the reference
@@ -2266,7 +2266,7 @@ operator itself in double-quotes, like ="$3"=.  Ranges are inserted as
 space-separated fields, so you can embed them in list or vector
 syntax.
 
-Here are a few examples -- note how the =N= mode is used when we do
+Here are a few examples---note how the =N= mode is used when we do
 computations in Lisp:
 
 - ='(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))= ::
@@ -2342,7 +2342,7 @@ avoid this from happening, in particular in range references, anchor
 ranges at the table borders (using =@<=, =@>=, =$<=, =$>=), or at
 hlines using the =@I= notation.  Automatic adaptation of field
 references does of course not happen if you edit the table structure
-with normal editing commands -- then you must fix the equations
+with normal editing commands---then you must fix the equations
 yourself.
 
 Instead of typing an equation into the field, you may also use the
@@ -2619,7 +2619,7 @@ you prefer to only work with the internal format (like =@3$2= or
           Turn the coordinate grid in the table on and off.
 
 Making a table field blank does not remove the formula associated with
-the field, because that is stored in a different line -- the =TBLFM=
+the field, because that is stored in a different line---the =TBLFM=
 keyword line.  During the next recalculation, the field will be filled
 again.  To remove a formula from a field, you have to give an empty
 reply when prompted for the formula, or to edit the =TBLFM= keyword.
@@ -2917,9 +2917,9 @@ For more information and examples see the [[http://orgmode.org/worg/org-tutorial
      parsed by Gnuplot.  Defaults to =%Y-%m-%d-%H:%M:%S=.
 
 - =script= :: If you want total control, you can specify a script
-     file -- place the file name between double-quotes --, which will
-     be used to plot.  Before plotting, every instance of =$datafile=
-     in the specified script will be replaced with the path to the
+     file---place the file name between double-quotes---which will be
+     used to plot.  Before plotting, every instance of =$datafile= in
+     the specified script will be replaced with the path to the
      generated data file.  Note: even if you set this option, you may
      still want to specify the plot type, as that can impact the
      content of the data file.
@@ -3001,12 +3001,12 @@ this can be either the LINK part, if there is no description, or the
 link.
 
 If you place the cursor at the beginning or just behind the end of the
-displayed text and press {{{kbd(BS)}}}, you remove the -- invisible --
-bracket at that location.  This makes the link incomplete and the
-internals are again displayed as plain text.  Inserting the missing
-bracket hides the link internals again.  To show the internal
-structure of all links, use the menu: Org \rarr Hyperlinks \rarr Literal
-links.
+displayed text and press {{{kbd(BS)}}}, you remove
+the---invisible---bracket at that location.  This makes the link
+incomplete and the internals are again displayed as plain text.
+Inserting the missing bracket hides the link internals again.  To show
+the internal structure of all links, use the menu: Org \rarr Hyperlinks \rarr
+Literal links.
 
 ** Internal links
 :PROPERTIES:
@@ -3200,9 +3200,9 @@ it into an Org file, and to follow the link.
      #+findex: org-store-link
      #+cindex: storing links
      Store a link to the current location.  This is a /global/
-     command -- you must create the key binding yourself -- which can
+     command---you must create the key binding yourself---which can
      be used in any buffer to create a link.  The link is stored for
-     later insertion into an Org buffer -- see below.  What kind of
+     later insertion into an Org buffer---see below.  What kind of
      link is created depends on the current buffer:
 
      - /Org mode buffers/ ::
@@ -3296,8 +3296,8 @@ it into an Org file, and to follow the link.
           abbreviations]]).  If you press {{{kbd(RET)}}} after inserting
           only the prefix, Org offers specific completion support for
           some link types[fn:32].  For example, if you type {{{kbd(f
-          i l e RET)}}} -- alternative access: {{{kbd(C-u C-c C-l)}}},
-          see below -- Org offers file name completion, and after
+          i l e RET)}}}---alternative access: {{{kbd(C-u C-c C-l)}}},
+          see below---Org offers file name completion, and after
           {{{kbd(b b d b RET)}}} you can complete contact names.
 
 - {{{kbd(C-u C-c C-l)}}} ::
@@ -3657,8 +3657,8 @@ The most important commands to work with TODO entries are:
      #+vindex: org-todo-keywords
      #+findex: org-show-todo-tree
      View TODO items in a /sparse tree/ (see [[*Sparse trees]]).  Folds
-     the entire buffer, but shows all TODO items -- with not-DONE
-     state -- and the headings hierarchy above them.  With a prefix
+     the entire buffer, but shows all TODO items---with not-DONE
+     state---and the headings hierarchy above them.  With a prefix
      argument, or by using {{{kbd(C-c / T)}}}, search for a specific
      TODO.  You are prompted for the keyword, and you can also give
      a list of keywords like =KWD1|KWD2|...= to list entries that
@@ -3784,7 +3784,7 @@ well when creating the global TODO list: {{{kbd(C-3 C-c a t)}}}.
 Sometimes you may want to use different sets of TODO keywords in
 parallel.  For example, you may want to have the basic TODO/DONE, but
 also a workflow for bug fixing, and a separate state indicating that
-an item has been canceled -- so it is not DONE, but also does not
+an item has been canceled---so it is not DONE, but also does not
 require action.  Your setup would then look like this:
 
 #+begin_src emacs-lisp
@@ -3890,8 +3890,8 @@ To make sure you are using the correct keyword, type =#+= into the
 buffer and then use {{{kbd(M-TAB)}}} completion.
 
 #+cindex: DONE, final TODO keyword
-Remember that the keywords after the vertical bar -- or the last
-keyword if no bar is there -- must always mean that the item is DONE,
+Remember that the keywords after the vertical bar---or the last
+keyword if no bar is there---must always mean that the item is DONE,
 although you may use a different word.  After changing one of these
 lines, use {{{kbd(C-c C-c)}}} with the cursor still in the line to
 make the changes known to Org mode[fn:41].
@@ -3935,7 +3935,7 @@ a background color.
 
 #+vindex: org-enforce-todo-dependencies
 #+cindex: ORDERED, property
-The structure of Org files -- hierarchy and lists -- makes it easy to
+The structure of Org files---hierarchy and lists---makes it easy to
 define TODO dependencies.  Usually, a parent TODO task should not be
 marked DONE until all subtasks, defined as children tasks, are marked
 as DONE.  And sometimes there is a logical sequence to a number of
@@ -4069,7 +4069,7 @@ a timestamp, or a time-stamped note for a change.  These records are
 inserted after the headline as an itemized list, newest first[fn:44].
 When taking a lot of notes, you might want to get the notes out of the
 way into a drawer (see [[*Drawers]]).  Customize the variable
-~org-log-into-drawer~ to get this behavior -- the recommended drawer
+~org-log-into-drawer~ to get this behavior---the recommended drawer
 for this is called =LOGBOOK=[fn:45].  You can also overrule the
 setting of this variable for a subtree by setting a =LOG_INTO_DRAWER=
 property.
@@ -4185,8 +4185,8 @@ actual habit with some history:
      - State "DONE"       from "TODO"       [2009-09-12 Sat]
 #+end_example
 
-What this habit says is: I want to shave at most every 2 days -- given
-by the =SCHEDULED= date and repeat interval -- and at least every
+What this habit says is: I want to shave at most every 2 days---given
+by the =SCHEDULED= date and repeat interval---and at least every
 4 days.  If today is the 15th, then the habit first appears in the
 agenda on Oct 17, after the minimum of 2 days has elapsed, and will
 appear overdue on Oct 19, after four days have elapsed.
@@ -4429,7 +4429,7 @@ The following commands work with checkboxes:
 
      #+kindex: C-c C-c
      #+findex: org-toggle-checkbox
-     Toggle checkbox status or -- with prefix argument -- checkbox
+     Toggle checkbox status or---with prefix argument---checkbox
      presence at point.  With a single prefix argument, add an empty
      checkbox or remove the current one[fn:51].  With a double prefix
      argument, set it to =[-]=, which is considered to be an
@@ -4438,7 +4438,7 @@ The following commands work with checkboxes:
 - {{{kbd(C-c C-x C-b)}}} (~org-toggle-checkbox~) ::
 
      #+kindex: C-c C-x C-b
-     Toggle checkbox status or -- with prefix argument -- checkbox
+     Toggle checkbox status or---with prefix argument---checkbox
      presence at point.  With double prefix argument, set it to =[-]=,
      which is considered to be an intermediate state.
 
@@ -4448,7 +4448,7 @@ The following commands work with checkboxes:
        all items in the region.
 
      - If the cursor is in a headline, toggle checkboxes in the region
-       between this headline and the next -- so /not/ the entire
+       between this headline and the next---so /not/ the entire
        subtree.
 
      - If there is no active region, just toggle the checkbox at
@@ -4545,8 +4545,8 @@ use the variables ~org-use-tag-inheritance~ and
 
 #+vindex: org-tags-match-list-sublevels
 When a headline matches during a tags search while tag inheritance is
-turned on, all the sublevels in the same tree -- for a simple match
-form -- match as well[fn:53].  The list of matches may then become
+turned on, all the sublevels in the same tree---for a simple match
+form---match as well[fn:53].  The list of matches may then become
 very long.  If you only want to see the first tags match in a subtree,
 configure the variable ~org-tags-match-list-sublevels~ (not
 recommended).
@@ -4752,7 +4752,7 @@ be done with {{{kbd(C-c C-c TAB S a r a h RET)}}}.
 If you find that most of the time you need only a single key press to
 modify your list of tags, set the variable
 ~org-fast-tag-selection-single-key~.  Then you no longer have to press
-{{{kbd(RET)}}} to exit fast tag selection -- it exits after the first
+{{{kbd(RET)}}} to exit fast tag selection---it exits after the first
 change.  If you then occasionally need more keys, press {{{kbd(C-c)}}}
 to turn off auto-exit for the current tag selection process (in
 effect: start selection with {{{kbd(C-c C-c C-c)}}} instead of
@@ -4783,7 +4783,7 @@ of the group or any of its subgroups.  This makes tag searches and
 filters even more flexible.
 
 You can set group tags by using brackets and inserting a colon between
-the group tag and its related tags -- beware that all whitespaces are
+the group tag and its related tags---beware that all whitespaces are
 mandatory so that Org can parse this line correctly:
 
 : #+TAGS: [ GTD : Control Persp ]
@@ -4941,7 +4941,7 @@ a single entry or with a tree they need to be inserted into a special
 drawer (see [[*Drawers]]) with the name =PROPERTIES=, which has to be
 located right below a headline, and its planning line (see [[*Deadlines
 and scheduling]]) when applicable.  Each property is specified on
-a single line, with the key -- surrounded by colons -- first, and the
+a single line, with the key---surrounded by colons---first, and the
 value after it.  Keys are case-insensitive.  Here is an example:
 
 #+begin_example
@@ -5247,8 +5247,8 @@ Org mode implements columns by overlaying a tabular structure over the
 headline of each item.  While the headlines have been turned into
 a table row, you can still change the visibility of the outline tree.
 For example, you get a compact table by switching to "contents"
-view -- {{{kbd(S-TAB)}}} {{{kbd(S-TAB)}}}, or simply {{{kbd(c)}}}
-while column view is active -- but you can still open, read, and edit
+view---{{{kbd(S-TAB)}}} {{{kbd(S-TAB)}}}, or simply {{{kbd(c)}}}
+while column view is active---but you can still open, read, and edit
 the entry below each headline.  Or, you can switch to column view
 after executing a sparse tree command and in this way get a table only
 for the selected items.  Column view also works in agenda buffers (see
@@ -5617,7 +5617,7 @@ The following commands insert or update the dynamic block:
      or other dynamic blocks in a buffer.
 
 You can add formulas to the column view table and you may add plotting
-instructions in front of the table -- these survive an update of the
+instructions in front of the table---these survive an update of the
 block.  If there is a =TBLFM= keyword after the table, the table is
 recalculated automatically after an update.
 
@@ -5870,8 +5870,8 @@ various inputs are interpreted, the items filled in by Org mode are in
 | =2012-w04-5=   | \rArr{} Same as above                           |
 
 Furthermore you can specify a relative date by giving, as the /first/
-thing in the input: a plus/minus sign, a number and a letter -- =d=,
-=w=, =m= or =y= -- to indicate change in days, weeks, months, or
+thing in the input: a plus/minus sign, a number and a letter---=d=,
+=w=, =m= or =y=---to indicate change in days, weeks, months, or
 years.  With a single plus or minus, the date is always relative to
 today.  With a double plus or minus, it is relative to the default
 date.  If instead of a single letter, you use the abbreviation of day
@@ -6331,7 +6331,7 @@ prompted about what to do with it.
      task[fn:73].  You can exercise more control over show time with
      the =CLOCK_MODELINE_TOTAL= property.  It may have the values
      =current= to show only the current clocking instance, =today= to
-     show all time clocked on this tasks today -- see also the
+     show all time clocked on this tasks today---see also the
      variable ~org-extend-today-until~, ~all~ to include all time, or
      ~auto~ which is the default[fn:74].  Clicking with
      {{{kbd(mouse-1)}}} onto the mode line entry pops up a menu with
@@ -6707,7 +6707,7 @@ last week would be:
 #+cindex: idle, resolve, dangling
 
 If you clock in on a work item, and then walk away from your
-computer -- perhaps to take a phone call -- you often need to
+computer---perhaps to take a phone call---you often need to
 "resolve" the time you were away by either subtracting it from the
 current clock, or applying it to another one.
 
@@ -6837,7 +6837,7 @@ commands:
 Clearly the best way to work with effort estimates is through column
 view (see [[*Column view]]).  You should start by setting up discrete
 values for effort estimates, and a =COLUMNS= format that displays
-these values together with clock sums -- if you want to clock your
+these values together with clock sums---if you want to clock your
 time.  For a specific buffer you can use:
 
 #+begin_example
@@ -7022,7 +7022,7 @@ defines a global key[fn:80] for capturing new material.
      #+findex: org-capture-refile
      Finalize the capture process by refiling the note to a different
      place (see [[*Refile and copy]]).  Please realize that this is
-     a normal refiling command that will be executed -- so the cursor
+     a normal refiling command that will be executed---so the cursor
      position at the moment you run this command is important.  If you
      have inserted a tree with a parent and children, first move the
      cursor back to the parent.  Any prefix argument given to this
@@ -8049,7 +8049,7 @@ added.
 :DESCRIPTION: Switch off a tree but keep it in the file.
 :END:
 
-If you want to just switch off -- for agenda views -- certain subtrees
+If you want to just switch off---for agenda views---certain subtrees
 without moving them to a different file, you can use the =ARCHIVE=
 tag.
 
@@ -8265,8 +8265,8 @@ the Speedbar frame:
 - {{{kbd(<)}}} (~org-speedbar-set-agenda-restriction~) ::
 
      #+findex: org-speedbar-set-agenda-restriction
-     Permanently restrict the agenda to the item -- either an Org file
-     or a subtree in such a file -- at the cursor in the Speedbar
+     Permanently restrict the agenda to the item---either an Org file
+     or a subtree in such a file---at the cursor in the Speedbar
      frame.  If there is a window displaying an agenda view, the new
      restriction takes effect immediately.
 
@@ -8284,7 +8284,7 @@ the Speedbar frame:
 #+cindex: dispatching agenda commands
 
 The views are created through a dispatcher, which should be bound to
-a global key -- for example {{{kbd(C-c a)}}} (see [[*Activation]]).  In
+a global key---for example {{{kbd(C-c a)}}} (see [[*Activation]]).  In
 the following we will assume that {{{kbd(C-c a)}}} is indeed how the
 dispatcher is accessed and list keyboard access to commands
 accordingly.  After pressing {{{kbd(C-c a)}}}, an additional letter is
@@ -9900,7 +9900,7 @@ the other commands, the cursor needs to be in the desired line.
 
           Change TODO state.  This prompts for a single TODO keyword and
           changes the state of all selected entries, bypassing blocking
-          and suppressing logging notes -- but not timestamps.
+          and suppressing logging notes---but not timestamps.
 
      - {{{kbd(+)}}}  ::
 
@@ -9987,7 +9987,7 @@ the other commands, the cursor needs to be in the desired line.
      to archive appointments from previous months/years.  The tree is
      built under an entry with a =DATE_TREE= property, or else with
      years as top-level entries.  Emacs prompts you for the entry
-     text -- if you specify it, the entry is created in
+     text---if you specify it, the entry is created in
      ~org-agenda-diary-file~ without further interaction.  If you
      directly press {{{kbd(RET)}}} at the prompt without typing text,
      the target file is shown in another window for you to finish the
@@ -10115,7 +10115,7 @@ used for the matching.  The example above will therefore define:
 - {{{kbd(C-c a y)}}} ::
 
      as the same search, but only for entries with an hour
-     specification like =[h]h:mm= -- think of them as appointments.
+     specification like =[h]h:mm=---think of them as appointments.
 
 - {{{kbd(C-c a w)}}} ::
 
@@ -10252,7 +10252,7 @@ this:
 #+end_src
 
 As you see, the values and parentheses setting is a little complex.
-When in doubt, use the customize interface to set this variable -- it
+When in doubt, use the customize interface to set this variable---it
 fully supports its structure.  Just one caveat: when setting options
 in this interface, the /values/ are just Lisp expressions.  So if the
 value is a string, you need to add the double-quotes around the value
@@ -10368,7 +10368,7 @@ set options for the export commands.  For example:
 #+texinfo: @noindent
 #+vindex: org-agenda-exporter-settings
 This command sets two options for the Postscript exporter, to make it
-print in two columns in landscape format -- the resulting page can be
+print in two columns in landscape format---the resulting page can be
 cut in two and then used in a paper agenda.  The remaining settings
 modify the agenda prefix to omit category and scheduling information,
 and instead include a checkbox to check off items.  We also remove the
@@ -10461,7 +10461,7 @@ environment.  This causes the following issues:
    in all other views they cover the entire block.
 
    It is important to realize that the agenda may show the same entry
-   /twice/ -- for example as scheduled and as a deadline -- and it may
+   /twice/---for example as scheduled and as a deadline---and it may
    show two entries from the same hierarchy (for example a /parent/
    and its /child/).  In these cases, the summation in the agenda
    leads to incorrect results because some values count double.
@@ -10471,7 +10471,7 @@ environment.  This causes the following issues:
    the daily/weekly agenda, the clocksum listed in column view may
    originate from times outside the current view.  This has the
    advantage that you can compare these values with a column listing
-   the planned total effort for a task -- one of the major
+   the planned total effort for a task---one of the major
    applications for column view in the agenda.  If you want
    information about clocked time in the displayed period use clock
    table mode (press {{{kbd(R)}}} in the agenda).
@@ -10482,7 +10482,7 @@ environment.  This causes the following issues:
    that is always today's clocked time for this item.  So even in the
    weekly agenda, the clocksum listed in column view only originates
    from today.  This lets you compare the time you spent on a task for
-   today, with the time already spent -- via =CLOCKSUM= -- and with
+   today, with the time already spent---via =CLOCKSUM=---and with
    the planned total effort for it.
 
 * Markup for rich export
@@ -10519,7 +10519,7 @@ can also be used to format poetry.
    Tiny black birds rise and fall
    Snow covers Emacs
 
-       -- AlexSchroeder
+      ---AlexSchroeder
   ,#+END_VERSE
 #+end_example
 
@@ -10532,7 +10532,7 @@ right margin.  You can include quotations in Org documents like this:
 #+begin_example
   ,#+BEGIN_QUOTE
   Everything should be made as simple as possible,
-  but not any simpler -- Albert Einstein
+  but not any simpler ---Albert Einstein
   ,#+END_QUOTE
 #+end_example
 
@@ -10623,9 +10623,9 @@ Such images can be displayed within the buffer.  See [[*Handling links][the disc
 image links]].
 
 Even though images and tables are prominent examples of captioned
-structures, the same caption mechanism can apply to many others --
-e.g., LaTeX equations, source code blocks.  Depending on the export
-back-end, those may or may not be handled.
+structures, the same caption mechanism can apply to many
+others---e.g., LaTeX equations, source code blocks.  Depending on the
+export back-end, those may or may not be handled.
 
 ** Literal examples
 :PROPERTIES:
@@ -10699,7 +10699,7 @@ to determine the starting line number.
 
 In literal examples, Org interprets strings like =(ref:name)= as
 labels, and use them as targets for special hyperlinks like
-=[[(name)]]= -- i.e., the reference name enclosed in single parenthesis.
+=[[(name)]]=---i.e., the reference name enclosed in single parenthesis.
 In HTML, hovering the mouse over such a link remote-highlights the
 corresponding code line, which is kind of cool.
 
@@ -10744,8 +10744,8 @@ a shortcut is provided (see [[*Structure templates]]).
      works by switching to a temporary buffer with the source code.
      You need to exit by pressing {{{kbd(C-c ')}}} again[fn:107].  The
      edited version then replaces the old version in the Org buffer.
-     Fixed-width regions -- where each line starts with a colon
-     followed by a space -- are edited using ~artist-mode~[fn:108] to
+     Fixed-width regions---where each line starts with a colon
+     followed by a space---are edited using ~artist-mode~[fn:108] to
      allow creating ASCII drawings easily.  Using this command in an
      empty line creates a new fixed-width region.
 
@@ -10771,8 +10771,8 @@ a shortcut is provided (see [[*Structure templates]]).
 #+cindex: HTML entities
 #+cindex: @LaTeX{} entities
 
-You can use LaTeX-like syntax to insert special symbols -- named
-entities -- like =\alpha= to indicate the Greek letter, or =\to= to indicate
+You can use LaTeX-like syntax to insert special symbols---named
+entities---like =\alpha= to indicate the Greek letter, or =\to= to indicate
 an arrow.  Completion for these symbols is available, just type =\=
 and maybe a few letters, and press {{{kbd(M-TAB)}}} to see possible
 completions.  If you need such a symbol inside a word, terminate it
@@ -11142,7 +11142,7 @@ further alter what is exported, and how.
 
      Toggle body-only export.  Useful for excluding headers and
      footers in the export.  Affects only those back-end formats that
-     have such sections -- like =<head>...</head>= in HTML.
+     have such sections---like =<head>...</head>= in HTML.
 
 - {{{kbd(C-s}}} ::
      #+kindex: C-c C-e C-s
@@ -11545,8 +11545,8 @@ file requires the inclusion of the titletoc package.  Because of
 compatibility issues, titletoc has to be loaded /before/ hyperref.
 Customize the ~org-latex-default-packages-alist~ variable.
 
-Use the =TOC= keyword to generate list of tables -- respectively, all
-listings -- with captions.
+Use the =TOC= keyword to generate list of tables---respectively, all
+listings---with captions.
 
 #+begin_example
   ,#+TOC: listings
@@ -12059,7 +12059,7 @@ should in principle be exportable as a Beamer presentation.
 :END:
 
 Since Org's Beamer export back-end is an extension of the LaTeX
-back-end, it recognizes other LaTeX specific syntax -- for example,
+back-end, it recognizes other LaTeX specific syntax---for example,
 =#+LATEX:= or =#+ATTR_LATEX:=.  See [[*LaTeX export]], for details.
 
 Beamer export wraps the table of contents generated with =toc:t=
@@ -12661,7 +12661,7 @@ line.
 #+vindex: org-export-html-tag-class-prefix
 You can modify the CSS style definitions for the exported file.  The
 HTML exporter assigns the following special CSS classes[fn:122] to
-appropriate parts of the document -- your style specifications may
+appropriate parts of the document---your style specifications may
 change these, in addition to any of the standard classes like for
 headlines, tables, etc.
 
@@ -14363,8 +14363,8 @@ To verify if such a file is corrupt, validate it against the
 OpenDocument Relax NG Compact (RNC) syntax schema.  But first the
 =.odt= files have to be decompressed using =zip=.  Note that =.odt=
 files are ZIP archives: [[info:emacs::File Archives]].  The contents of
-ODT files are in XML.  For general help with validation -- and
-schema-sensitive editing -- of XML files:
+ODT files are in XML.  For general help with validation---and
+schema-sensitive editing---of XML files:
 [[info:nxml-mode::Introduction]].
 
 #+vindex: org-export-odt-schema-dir
@@ -14906,18 +14906,19 @@ variable.
 
 #+vindex: org-icalendar-store-UID
 #+cindex: ID, property
-The iCalendar format standard requires globally unique identifier --
-or UID -- for each entry.  The iCalendar export back-end creates UIDs
+The iCalendar format standard requires globally unique identifier---or
+UID---for each entry.  The iCalendar export back-end creates UIDs
 during export.  To save a copy of the UID in the Org file set the
 variable ~org-icalendar-store-UID~.  The back-end looks for the =ID=
 property of the entry for re-using the same UID for subsequent
 exports.
 
-Since a single Org entry can result in multiple iCalendar entries --
-timestamp, deadline, scheduled item, or TODO item -- Org adds prefixes
-to the UID, depending on which part of the Org entry triggered the
-creation of the iCalendar entry.  Prefixing ensures UIDs remains
-unique, yet enable synchronization programs trace the connections.
+Since a single Org entry can result in multiple iCalendar
+entries---timestamp, deadline, scheduled item, or TODO item---Org adds
+prefixes to the UID, depending on which part of the Org entry
+triggered the creation of the iCalendar entry.  Prefixing ensures UIDs
+remains unique, yet enable synchronization programs trace the
+connections.
 
 - {{{kbd(C-c C-e c f)}}} (~org-icalendar-export-to-ics~) ::
 
@@ -15301,7 +15302,7 @@ following properties
 
 - ~:base-extension~ ::
 
-     Extension -- without the dot -- of source files.  This actually
+     Extension---without the dot---of source files.  This actually
      is a regular expression.  Set this to the symbol ~any~ if you
      want to get all files in ~:base-directory~, even without
      extension.
@@ -15772,8 +15773,8 @@ heavy usage.
 Specialized synchronization utilities offer several advantages.  In
 addition to timestamp comparison, they also do content and
 permissions/attribute checks.  For this reason you might prefer to
-publish your web to a local directory -- possibly even /in place/ with
-your Org files -- and then use Unison or Rsync to do the
+publish your web to a local directory---possibly even /in place/ with
+your Org files---and then use Unison or Rsync to do the
 synchronization with the remote host.
 
 Since Unison, for example, can be configured as to which files to
@@ -16298,8 +16299,8 @@ the =var= header argument.
 {{{var(NAME)}}} is the name of the variable bound in the code block
 body.  {{{var(ASSIGN)}}} is a literal value, such as a string,
 a number, a reference to a table, a list, a literal example, another
-code block -- with or without arguments --, or the results of
-evaluating a code block.
+code block---with or without arguments---or the results of evaluating
+a code block.
 
 Here are examples of passing values by reference:
 
@@ -16330,7 +16331,7 @@ Here are examples of passing values by reference:
      #+cindex: @samp{colnames}, header argument
      The =colnames= header argument accepts =yes=, =no=, or =nil=
      values.  The default value is =nil=: if an input table has column
-     names -- because the second row is a horizontal rule --, then Org
+     names---because the second row is a horizontal rule---then Org
      removes the column names, processes the table, puts back the
      column names, and then writes the table to the results block.
      Using =yes=, Org does the same to the first row, even if the
@@ -16631,7 +16632,7 @@ surface, =dir= simply sets the value of the Emacs variable
 ~default-directory~.
 
 For example, to save the plot file in the =Work/= folder of the home
-directory -- notice tilde is expanded:
+directory---notice tilde is expanded:
 
 #+begin_example
   ,#+BEGIN_SRC R :file myplot.png :dir ~/Work
@@ -16697,8 +16698,8 @@ to the end of the code block for execution.
 
 A note about security: With code evaluation comes the risk of harm.
 Org safeguards by prompting for user's permission before executing any
-code in the source block.  To customize this safeguard -- or disable
-it --, see [[*Code evaluation and security issues]].
+code in the source block.  To customize this safeguard, or disable it,
+see [[*Code evaluation and security issues]].
 
 *** How to evaluate source code
 :PROPERTIES:
@@ -16823,11 +16824,11 @@ The =cache= header argument is for caching results of evaluating code
 blocks.  Caching results can avoid re-evaluating a code block that
 have not changed since the previous run.  To benefit from the cache
 and avoid redundant evaluations, the source block must have a result
-already present in the buffer, and neither the header arguments --
-including the value of =var= references -- nor the text of the block
-itself has changed since the result was last computed.  This feature
-greatly helps avoid long-running calculations.  For some edge cases,
-however, the cached results may not be reliable.
+already present in the buffer, and neither the header
+arguments---including the value of =var= references---nor the text of
+the block itself has changed since the result was last computed.  This
+feature greatly helps avoid long-running calculations.  For some edge
+cases, however, the cached results may not be reliable.
 
 The caching feature is best for when code blocks are pure functions,
 that is functions that return the same value for the same input
@@ -17399,8 +17400,8 @@ source code in the tangled file.
 
 #+cindex: @samp{shebang}, header argument
 The =shebang= header argument can turn results into executable script
-files.  By setting it to a string value -- for example, =:shebang
-"#!/bin/bash"= --, Org inserts that string as the first line of the
+files.  By setting it to a string value---for example, =:shebang
+"#!/bin/bash"=---Org inserts that string as the first line of the
 tangled file that the code block is extracted to.  Org then turns on
 the tangled file's executable permission.
 
@@ -17458,7 +17459,7 @@ the tangled source file.  To make this extra jump, Org uses
 ~org-babel-tangle-jump-to-org~ function with two additional source
 code block header arguments:
 
-1. Set =padline= to true -- this is the default setting.
+1. Set =padline= to true---this is the default setting.
 2. Set =comments= to =link=, which makes Org insert links to the Org
    file.
 
@@ -17695,7 +17696,7 @@ this code block:
 
 #+begin_example
   ,#+BEGIN_SRC sql :noweb yes
-    -- <<example>>
+   ---<<example>>
   ,#+END_SRC
 #+end_example
 
@@ -17704,8 +17705,8 @@ expands to:
 
 #+begin_example
   ,#+BEGIN_SRC sql :noweb yes
-    -- this is the
-    -- multi-line body of example
+   ---this is the
+   ---multi-line body of example
   ,#+END_SRC
 #+end_example
 
@@ -18052,10 +18053,10 @@ shortcuts.
 
        : [[*find this headline]]
 
-     - After =:= in a headline, complete tags.  The list of tags is
-       taken from the variable ~org-tag-alist~ -- possibly set through
-       the =#+TAGS= in-buffer option, see [[*Setting tags]] --, or it is
-       created dynamically from all tags used in the current buffer.
+     - After =:= in a headline, complete tags.  Org deduces the list
+       of tags from the =TAGS= in-buffer option (see [[*Setting tags]]),
+       the variable ~org-tag-alist~, or from all tags used in the
+       current buffer.
 
      - After =:= and not in a headline, complete property keys.  The
        list of keys is constructed dynamically from all keys used in
@@ -18330,8 +18331,8 @@ changes.
      also parses and loads the document during normal exporting
      process.  Org parses the contents of this document as if it was
      included in the buffer.  It can be another Org file.  To visit
-     the file -- not a URL --, use {{{kbd(C-c ')}}} while the cursor
-     is on the line with the file name.
+     the file---not a URL---use {{{kbd(C-c ')}}} while the cursor is
+     on the line with the file name.
 
 - =#+STARTUP:= ::
 
@@ -18868,7 +18869,7 @@ packages are documented here.
      #+end_src
 
      #+vindex: org-imenu-depth
-     By default the index is two levels deep -- you can modify the
+     By default the index is two levels deep---you can modify the
      depth using the option ~org-imenu-depth~.
 
 - =speedbar.el= by Eric M. Ludlam ::
@@ -18936,7 +18937,7 @@ the cursor moves across a special context.
      CUA mode.  For Org to relinquish these bindings to CUA mode,
      configure the variable ~org-replace-disputed-keys~.  When set,
      Org moves the following key bindings in Org files, and in the
-     agenda buffer -- but not during date selection.
+     agenda buffer---but not during date selection.
 
      | S-UP      \rArr{}  M-p   | S-DOWN     \rArr{}  M-n   |
      | S-LEFT    \rArr{}  M--   | S-RIGHT    \rArr{}  M-+   |
@@ -18956,8 +18957,8 @@ the cursor moves across a special context.
      is enabled in message buffers while entering text in address
      header lines.  If one wants to use ecomplete one should /not/
      follow the advice to automagically turn on Orgtbl mode in message
-     buffers (see [[*The Orgtbl minor mode]]), but instead -- after
-     filling in the message headers -- turn on Orgtbl mode manually
+     buffers (see [[*The Orgtbl minor mode]]), but instead---after
+     filling in the message headers---turn on Orgtbl mode manually
      when needed in the messages body.
 
 - =filladapt.el= by Kyle Jones ::
@@ -19419,13 +19420,14 @@ control output, see [[*Translator functions]]:
 - ~:efmt EFMT~ ::
 
      Format numbers as exponentials.  The spec should have =%s= twice
-     for inserting mantissa and exponent, for example ="%s\\times10^{%s}"=.
-     This may also be a property list with column numbers and formats,
-     for example =:efmt (2 "$%s\\times10^{%s}$" 4 "$%s\\cdot10^{%s}$")=.  After
-     {{{var(EFMT)}}} has been applied to a value, {{{var(FMT)}}} --
-     see above -- is also be applied.  Functions with two arguments
-     can be supplied instead of strings.  By default, no special
-     formatting is applied.
+     for inserting mantissa and exponent, for example
+     ="%s\\times10^{%s}"=.  This may also be a property list with
+     column numbers and formats, for example =:efmt (2
+     "$%s\\times10^{%s}$" 4 "$%s\\cdot10^{%s}$")=.  After
+     {{{var(EFMT)}}} has been applied to a value, {{{var(FMT)}}}---see
+     above---is also be applied.  Functions with two arguments can be
+     supplied instead of strings.  By default, no special formatting
+     is applied.
 
 *** Translator functions
 :PROPERTIES:
@@ -20768,7 +20770,7 @@ the value is ~query-to-create~, then an exact headline is searched; if
 it is not found, then the user is queried to create it.
 
 [fn:28] If the headline contains a timestamp, it is removed from the
-link, which results in a wrong link -- you should avoid putting
+link, which results in a wrong link---you should avoid putting
 a timestamp in the headline.
 
 [fn:29] The Org Id library must first be loaded, either through
@@ -20829,7 +20831,7 @@ lognotedone=.
 [fn:44] See the variable ~org-log-states-order-reversed~.
 
 [fn:45] Note that the =LOGBOOK= drawer is unfolded when pressing
-{{{kbd(SPC)}}} in the agenda to show an entry -- use {{{kbd(C-u
+{{{kbd(SPC)}}} in the agenda to show an entry---use {{{kbd(C-u
 SPC)}}} to keep it folded here.
 
 [fn:46] It is possible that Org mode records two timestamps when you
@@ -20872,7 +20874,7 @@ column is as such, the summary is also an effort duration.
 line; it is wrapped here only because of formatting constraints.
 
 [fn:58] Contributed packages are not part of Emacs, but are
-distributed with the main distribution of Org -- visit
+distributed with the main distribution of Org---visit
 [[http://orgmode.org]].
 
 [fn:59] The Org date format is inspired by the standard ISO 8601
@@ -20947,8 +20949,8 @@ lognoteclock-out=.
 [fn:76] Language terms can be set through the variable
 ~org-clock-clocktable-language-setup~.
 
-[fn:77] Note that all parameters must be specified in a single line --
-the line is broken here only to fit it into the manual.
+[fn:77] Note that all parameters must be specified in a single
+line---the line is broken here only to fit it into the manual.
 
 [fn:78] On computers using Mac OS X, idleness is based on actual user
 idleness, not just Emacs' idle time.  For X11, you can install
@@ -21019,7 +21021,7 @@ to ISO and therefore independent of the value of
 ~org-agenda-tag-filter-preset~ as an option.  This filter is then
 applied to the view and persists as a basic filter through refreshes
 and more secondary filtering.  The filter is a global property of the
-entire agenda view -- in a block agenda, you should only set this in
+entire agenda view---in a block agenda, you should only set this in
 the global options section, not in the section of an individual block.
 
 [fn:95] Only tags filtering is respected here, effort filtering is
@@ -21158,7 +21160,7 @@ do not want to do this.
 to remove code evaluation from the {{{kbd(C-c C-c)}}} key binding.
 
 [fn:132] Actually, the constructs =call_<name>()= and =src_<lang>{}=
-are not evaluated when they appear in a keyword line -- i.e. lines
+are not evaluated when they appear in a keyword line---i.e. lines
 starting with =#+KEYWORD:=, see [[*Summary of in-buffer settings]].
 
 [fn:133] For Noweb literate programming details, see
