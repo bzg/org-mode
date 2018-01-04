@@ -61,7 +61,7 @@ on every major platform.
 There is a website for Org which provides links to the newest version
 of Org, as well as additional information, frequently asked questions
 (FAQ), links to tutorials, etc.  This page is located at
-[[http://orgmode.org]].
+[[https://orgmode.org]].
 
 #+cindex: print edition
 An earlier version (7.3) of this manual is available as a [[http://www.network-theory.co.uk/org/manual/][paperback
@@ -1296,7 +1296,7 @@ text.  Markers always start with =fn:=.  For example:
 #+begin_example
   The Org homepage[fn:1] now looks a lot better than it used to.
   ...
-  [fn:1] The link is: http://orgmode.org
+  [fn:1] The link is: https://orgmode.org
 #+end_example
 
 Org mode extends the number-based syntax to /named/ footnotes and
@@ -7811,13 +7811,13 @@ The variable ~org-protocol-project-alist~ maps URLs to local file
 names, by stripping URL parameters from the end and replacing the
 ~:base-url~ with ~:working-directory~ and ~:online-suffix~ with
 ~:working-suffix~.  For example, assuming you own a local copy of
-=http://orgmode.org/worg/= contents at =/home/user/worg=, you can set
+=https://orgmode.org/worg/= contents at =/home/user/worg=, you can set
 ~org-protocol-project-alist~ to the following
 
 #+begin_src emacs-lisp
   (setq org-protocol-project-alist
         '(("Worg"
-           :base-url "http://orgmode.org/worg/"
+           :base-url "https://orgmode.org/worg/"
            :working-directory "/home/user/worg/"
            :online-suffix ".html"
            :working-suffix ".org")))
@@ -7825,7 +7825,7 @@ names, by stripping URL parameters from the end and replacing the
 
 #+texinfo: @noindent
 If you are now browsing
-=http://orgmode.org/worg/org-contrib/org-protocol.html= and find
+=https://orgmode.org/worg/org-contrib/org-protocol.html= and find
 a typo or have an idea about how to enhance the documentation, simply
 click the bookmark and start editing.
 
@@ -12468,7 +12468,7 @@ changing the link's title and style:
 #+cindex: ATTR_HTML, keyword
 #+begin_example
   ,#+ATTR_HTML: :title The Org mode homepage :style color:red;
-  [[http://orgmode.org]]
+  [[https://orgmode.org]]
 #+end_example
 
 *** Tables in HTML export
@@ -12749,9 +12749,9 @@ and navigation can be done with the {{{kbd(n)}}} and {{{kbd(p)}}}
 keys, and some other keys as well, press {{{kbd(?)}}} for an overview
 of the available keys.  The second one has a /folding/ view, much like
 Org provides inside Emacs.  The script is available at
-http://orgmode.org/org-info.js and the documentation at
-http://orgmode.org/worg/code/org-info-js/.  The script is hosted on
-http://orgmode.org, but for reliability, prefer installing it on your
+https://orgmode.org/org-info.js and the documentation at
+https://orgmode.org/worg/code/org-info-js/.  The script is hosted on
+https://orgmode.org, but for reliability, prefer installing it on your
 own web server.
 
 To use this program, just add this line to the Org file:
@@ -12767,7 +12767,7 @@ options described below:
 - =path:= ::
 
      The path to the script.  The default is to grab the script from
-     [[http://orgmode.org/org-info.js]], but you might want to have
+     [[https://orgmode.org/org-info.js]], but you might want to have
      a local copy and use a path like =../scripts/org-info.js=.
 
 - =view:= ::
@@ -13792,10 +13792,10 @@ examples works:
 
 For clickable images, provide a link whose description is another link
 to an image file.  For example, to embed a image
-=org-mode-unicorn.png= which when clicked jumps to http://orgmode.org
+=org-mode-unicorn.png= which when clicked jumps to https://orgmode.org
 website, do the following
 
-: [[http://orgmode.org][./org-mode-unicorn.png]]
+: [[https://orgmode.org][./org-mode-unicorn.png]]
 
 **** Sizing and scaling of embedded images
 :PROPERTIES:
@@ -16128,7 +16128,7 @@ Each language can have separate default header arguments by
 customizing the variable ~org-babel-default-header-args:<LANG>~, where
 {{{var(<LANG>)}}} is the name of the language.  For details, see the
 language-specific online documentation at
-http://orgmode.org/worg/org-contrib/babel.
+https://orgmode.org/worg/org-contrib/babel.
 
 *** Header arguments in Org mode properties
 :PROPERTIES:
@@ -17498,7 +17498,7 @@ Code blocks in the following languages are supported.
 | Vala       | vala       |                |            |
 
 Additional documentation for some languages is at
-http://orgmode.org/worg/org-contrib/babel/languages.html.
+https://orgmode.org/worg/org-contrib/babel/languages.html.
 
 #+vindex: org-babel-load-languages
 By default, only Emacs Lisp is enabled for evaluation.  To enable or
@@ -19094,7 +19094,7 @@ of Org.
 Org has a large number of hook variables for adding functionality.
 This appendix illustrates using a few.  A complete list of hooks with
 documentation is maintained by the Worg project at
-http://orgmode.org/worg/doc.html#hooks.
+https://orgmode.org/worg/doc.html#hooks.
 
 ** Add-on packages
 :PROPERTIES:
@@ -19106,9 +19106,9 @@ Various authors wrote a large number of add-on packages for Org.
 
 These packages are not part of Emacs, but they are distributed as
 contributed packages with the separate release available at
-http://orgmode.org.  See the =contrib/README= file in the source code
+https://orgmode.org.  See the =contrib/README= file in the source code
 directory for a list of contributed files.  Worg page with more
-information is at: http://orgmode.org/worg/org-contrib/.
+information is at: https://orgmode.org/worg/org-contrib/.
 
 ** Adding hyperlink types
 :PROPERTIES:
@@ -20640,7 +20640,7 @@ modify this GNU manual."
 #+texinfo_header: @set txicodequotebacktick
 
 # Contact Info
-#+texinfo_header: @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
+#+texinfo_header: @set MAINTAINERSITE @uref{https://orgmode.org,maintainers webpage}
 #+texinfo_header: @set MAINTAINER Carsten Dominik
 #+texinfo_header: @set MAINTAINEREMAIL @email{carsten at orgmode dot org}
 #+texinfo_header: @set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
@@ -20875,7 +20875,7 @@ line; it is wrapped here only because of formatting constraints.
 
 [fn:58] Contributed packages are not part of Emacs, but are
 distributed with the main distribution of Org---visit
-[[http://orgmode.org]].
+[[https://orgmode.org]].
 
 [fn:59] The Org date format is inspired by the standard ISO 8601
 date/time format.  To use an alternative format, see [[*Custom time
