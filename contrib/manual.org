@@ -7074,6 +7074,7 @@ is through the customize interface.
 - {{{kbd(C-c c C)}}} ::
 
      #+kindex: C-c c C
+     #+vindex: org-capture-templates
      Customize the variable ~org-capture-templates~.
 
 Before we give the formal description of template definitions, let's
