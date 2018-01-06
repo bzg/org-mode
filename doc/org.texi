@@ -7060,6 +7060,7 @@ through the customize interface.
 
 @table @kbd
 @orgkey{C-c c C}
+@vindex org-capture-templates
 Customize the variable @code{org-capture-templates}.
 @end table
 
