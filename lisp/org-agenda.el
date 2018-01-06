@@ -2092,7 +2092,10 @@ evaluate to a string."
 (defvar org-agenda-follow-mode nil)
 (defvar org-agenda-entry-text-mode nil)
 (defvar org-agenda-clockreport-mode nil)
-(defvar org-agenda-show-log nil)
+(defvar org-agenda-show-log nil
+  "When non-nil, show the log in the agenda.
+Do not set this directly; instead use
+`org-agenda-start-with-log-mode', which see.")
 (defvar org-agenda-redo-command nil)
 (defvar org-agenda-query-string nil)
 (defvar org-agenda-mode-hook nil
