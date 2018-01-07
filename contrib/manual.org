@@ -20716,7 +20716,7 @@ items.
 [fn:11] You can also get =a.=, =A.=, =a)= and =A)= by configuring
 ~org-list-allow-alphabetical~.  To minimize confusion with normal
 text, those are limited to one character only.  Beyond that limit,
-bullets automatically fallback to numbers.
+bullets automatically become numbers.
 
 [fn:12] If there's a checkbox in the item, the cookie must be put
 /before/ the checkbox.  If you have activated alphabetical lists, you
