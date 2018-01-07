@@ -387,16 +387,19 @@ portability of tables."
 	  (const :tag "Error on attempt to cross" error)))
 
 (defcustom org-table-formula-create-columns nil
-  "Non-nil means that evaluation of a field formula can add new
-columns if an out-of-bounds field is being set."
+  "Non-nil means evaluation of formula can add new columns.
+When non-nil, evaluating an out-of-bounds field can insert as
+many columns as needed.  When set to `warn', issue a warning when
+doing so.  When set to `prompt', ask user before creating a new
+column.  Otherwise, throw an error."
   :group 'org-table-calculation
   :version "26.1"
   :package-version '(Org . "8.3")
   :type '(choice
-	  (const :tag "Setting an out-of-bounds field generates an error (default)" nil)
-	  (const :tag "Setting an out-of-bounds field silently adds columns as needed" t)
-	  (const :tag "Setting an out-of-bounds field adds columns as needed, but issues a warning message" warn)
-	  (const :tag "When setting an out-of-bounds field, the user is prompted" prompt)))
+	  (const :tag "Out-of-bounds field generates an error (default)" nil)
+	  (const :tag "Out-of-bounds field silently adds columns as needed" t)
+	  (const :tag "Out-of-bounds field adds columns, but issues a warning" warn)
+	  (const :tag "Prompt user when setting an out-of-bounds field" prompt)))
 
 (defgroup org-table-import-export nil
   "Options concerning table import and export in Org mode."
@@ -3358,7 +3361,9 @@ existing formula for column %s"
 				  t))
 			   (and (eq org-table-formula-create-columns 'prompt)
 				(yes-or-no-p
-				 "Out-of-bounds formula.  Add columns? ")))))))
+				 "Out-of-bounds formula.  Add columns? "))
+			   (user-error
+			    "Missing columns in the table.  Aborting"))))))
 	     (org-table-eval-formula nil formula t t t t))))
 	;; Clean up markers and internal text property.
 	(remove-text-properties (point-min) (point-max) '(org-untouchable t))

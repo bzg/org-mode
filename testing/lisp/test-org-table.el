@@ -1811,59 +1811,50 @@ See also `test-org-table/copy-field'."
 	    (buffer-string)))))
 
 (ert-deftest test-org-table/field-formula-outside-table ()
-  "If `org-table-formula-create-columns' is nil, then a formula
-that references an out-of-bounds column should do nothing. If it
-is t, then new columns should be added as needed"
-
-  (let ((org-table-formula-create-columns nil))
-
-    (should-error
-     (org-test-table-target-expect
-      "
+  "Test `org-table-formula-create-columns' variable."
+  ;; Refuse to create column if variable is nil.
+  (should-error
+   (org-test-with-temp-text "
 | 2 |
 | 4 |
 | 8 |
-"
-      "
-| 2 |
-| 4 |
-| 8 |
-"
-      1
-      "#+TBLFM: @1$2=5")
-     :type (list 'error 'user-error)))
-
-  (let ((org-table-formula-create-columns t))
-
-    ;; make sure field formulas work
-    (org-test-table-target-expect
-     "
-| 2 |
-| 4 |
-| 8 |
-"
-     "
+<point>#+TBLFM: @1$2=5"
+     (let ((org-table-formula-create-columns nil))
+       (org-table-calc-current-TBLFM))
+     (buffer-string))
+   :type (list 'error 'user-error))
+  ;; If the variable is non-nil, field formulas and columns formulas
+  ;; can create tables.
+  (should
+   (equal
+    "
 | 2 | 5 |
 | 4 |   |
 | 8 |   |
-"
-     1
-     "#+TBLFM: @1$2=5")
-
-    ;; and make sure column formulas work too
-    (org-test-table-target-expect
-     "
+#+TBLFM: @1$2=5"
+    (org-test-with-temp-text "
 | 2 |
 | 4 |
 | 8 |
-"
-     "
+<point>#+TBLFM: @1$2=5"
+      (let ((org-table-formula-create-columns t))
+	(org-table-calc-current-TBLFM))
+      (buffer-string))))
+  (should
+   (equal
+    "
 | 2 |   | 15 |
 | 4 |   | 15 |
 | 8 |   | 15 |
-"
-     1
-     "#+TBLFM: $3=15")))
+#+TBLFM: $3=15"
+    (org-test-with-temp-text "
+| 2 |
+| 4 |
+| 8 |
+<point>#+TBLFM: $3=15"
+      (let ((org-table-formula-create-columns t))
+	(org-table-calc-current-TBLFM))
+      (buffer-string)))))
 
 (ert-deftest test-org-table/duration ()
   "Test durations in table formulas."
