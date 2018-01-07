@@ -430,6 +430,19 @@ for the JavaScript code in this tag.
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -2823,26 +2836,73 @@ INFO is a plist containing export properties."
 			"Creating LaTeX Image..." nil processing-type)
       (buffer-string))))
 
+(defun org-html--wrap-latex-environment (contents _ &optional caption label)
+  "Wrap CONTENTS string within appropriate environment for equations.
+When optional arguments CAPTION and LABEL are given, use them for
+caption and \"id\" attribute."
+  (format "\n<div%s class=\"equation-container\">\n%s%s\n</div>"
+          ;; ID.
+          (if (org-string-nw-p label) (format " id=\"%s\"" label) "")
+          ;; Contents.
+          (format "<span class=\"equation\">\n%s\n</span>" contents)
+          ;; Caption.
+          (if (not (org-string-nw-p caption)) ""
+            (format "\n<span class=\"equation-label\">\n%s\n</span>"
+                    caption))))
+
+(defun org-html--math-environment-p (element &optional _)
+  "Non-nil when ELEMENT is a LaTeX math environment.
+Math environments match the regular expression defined in
+`org-latex-math-environments-re'.  This function is meant to be
+used as a predicate for `org-export-get-ordinal' or a value to
+`org-html-standalone-image-predicate'."
+  (string-match-p org-latex-math-environments-re
+                  (org-element-property :value element)))
+
+(defun org-html--unlabel-latex-environment (latex-frag)
+  "Change environment in LATEX-FRAG string to an unnumbered one.
+For instance, change an 'equation' environment to 'equation*'."
+  (replace-regexp-in-string
+   "\\`[ \t]*\\\\begin{\\([^*]+?\\)}"
+   "\\1*"
+   (replace-regexp-in-string "^[ \t]*\\\\end{\\([^*]+?\\)}[ \r\t\n]*\\'"
+			     "\\1*"
+			     latex-frag nil nil 1)
+   nil nil 1))
+
 (defun org-html-latex-environment (latex-environment _contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((processing-type (plist-get info :with-latex))
 	(latex-frag (org-remove-indentation
 		     (org-element-property :value latex-environment)))
-	(attributes (org-export-read-attribute :attr_html latex-environment)))
+        (attributes (org-export-read-attribute :attr_html latex-environment))
+        (label (and (org-element-property :name latex-environment)
+                    (org-export-get-reference latex-environment info)))
+        (caption (number-to-string
+                  (org-export-get-ordinal
+                   latex-environment info nil
+                   #'org-html--math-environment-p))))
     (cond
      ((memq processing-type '(t mathjax))
-      (org-html-format-latex latex-frag 'mathjax info))
+      (org-html-format-latex
+       (if (org-string-nw-p label)
+	   (replace-regexp-in-string "\\`.*"
+				     (format "\\&\n\\\\label{%s}" label)
+				     latex-frag)
+	 latex-frag)
+       'mathjax info))
      ((assq processing-type org-preview-latex-process-alist)
       (let ((formula-link
-	     (org-html-format-latex latex-frag processing-type info)))
-	(when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
-	  ;; Do not provide a caption or a name to be consistent with
-	  ;; `mathjax' handling.
-	  (org-html--wrap-image
-	   (org-html--format-image
-	    (match-string 1 formula-link) attributes info) info))))
-     (t latex-frag))))
+             (org-html-format-latex
+              (org-html--unlabel-latex-environment latex-frag)
+              processing-type info)))
+        (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
+          (org-html--wrap-latex-environment
+           (org-html--format-image
+            (match-string 1 formula-link) attributes info)
+           info caption label))))
+     (t (org-html--wrap-latex-environment latex-frag info caption label)))))
 
 ;;;; Latex Fragment
 
@@ -3062,23 +3122,37 @@ INFO is a plist holding contextual information.  See
 	     (format "<a href=\"#%s\"%s>%s</a>" href attributes desc)))
 	  ;; Fuzzy link points to a target or an element.
 	  (_
-	   (let* ((ref (org-export-get-reference destination info))
-		  (org-html-standalone-image-predicate
-		   #'org-html--has-caption-p)
-		  (number (cond
-			   (desc nil)
-			   ((org-html-standalone-image-p destination info)
-			    (org-export-get-ordinal
-			     (org-element-map destination 'link
-			       #'identity info t)
-			     info 'link 'org-html-standalone-image-p))
-			   (t (org-export-get-ordinal
-			       destination info nil 'org-html--has-caption-p))))
-		  (desc (cond (desc)
-			      ((not number) "No description for this link")
-			      ((numberp number) (number-to-string number))
-			      (t (mapconcat #'number-to-string number ".")))))
-	     (format "<a href=\"#%s\"%s>%s</a>" ref attributes desc))))))
+           (if (and destination
+                    (memq (plist-get info :with-latex) '(mathjax t))
+                    (eq 'latex-environment (org-element-type destination))
+                    (eq 'math (org-latex--environment-type destination)))
+               ;; Caption and labels are introduced within LaTeX
+	       ;; environment.  Use "eqref" macro to refer to those in
+	       ;; the document.
+               (format "\\eqref{%s}"
+                       (org-export-get-reference destination info))
+             (let* ((ref (org-export-get-reference destination info))
+                    (org-html-standalone-image-predicate
+                     #'org-html--has-caption-p)
+                    (counter-predicate
+                     (if (eq 'latex-environment (org-element-type destination))
+                         #'org-html--math-environment-p
+                       #'org-html--has-caption-p))
+                    (number
+		     (cond
+		      (desc nil)
+		      ((org-html-standalone-image-p destination info)
+		       (org-export-get-ordinal
+			(org-element-map destination 'link #'identity info t)
+			info 'link 'org-html-standalone-image-p))
+		      (t (org-export-get-ordinal
+			  destination info nil counter-predicate))))
+                    (desc
+		     (cond (desc)
+			   ((not number) "No description for this link")
+			   ((numberp number) (number-to-string number))
+			   (t (mapconcat #'number-to-string number ".")))))
+               (format "<a href=\"#%s\"%s>%s</a>" ref attributes desc)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
