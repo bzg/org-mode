@@ -1,6 +1,6 @@
 ;;; org-goto.el --- Fast navigation in an Org buffer  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2012-2017 Free Software Foundation, Inc.
+;; Copyright (C) 2012-2018 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
