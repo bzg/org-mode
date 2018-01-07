@@ -1,6 +1,6 @@
 ;;; org-notify.el --- Notifications for Org-mode
 
-;; Copyright (C) 2012-2017  Free Software Foundation, Inc.
+;; Copyright (C) 2012-2018  Free Software Foundation, Inc.
 
 ;; Author: Peter Münster <pmrb@free.fr>
 ;; Keywords: notification, todo-list, alarm, reminder, pop-up

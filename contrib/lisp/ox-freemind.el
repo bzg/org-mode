@@ -1,6 +1,6 @@
 ;;; ox-freemind.el --- Freemind Mindmap Back-End for Org Export Engine
 
-;; Copyright (C) 2013-2017  Free Software Foundation, Inc.
+;; Copyright (C) 2013-2018  Free Software Foundation, Inc.
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
