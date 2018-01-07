@@ -40,7 +40,7 @@
 @end macro
 @copying
 
-Copyright @copyright{} 2010--2017 Free Software Foundation
+Copyright @copyright{} 2010--2018 Free Software Foundation
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
