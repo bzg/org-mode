@@ -6468,7 +6468,7 @@ formatted as one or several Org tables.
      #+kindex: C-c C-x C-u
      #+findex: org-dblock-update
      Update dynamic block at point.  The cursor needs to be in the
-     ~#+BEGIN~ line of the dynamic block.
+     =BEGIN= line of the dynamic block.
 
 - {{{kbd(C-u C-c C-x C-u)}}} ::
 
@@ -6529,8 +6529,8 @@ be selected:
 - :block ::
 
      The time block to consider.  This block is specified either
-     absolute, or relative to the current time and may be any of these
-     formats:
+     absolutely, or relative to the current time and may be any of
+     these formats:
 
      | =2007-12-31=                            | New year eve 2007   |
      | =2007-12=                               | December 2007       |
@@ -6541,17 +6541,27 @@ be selected:
      | ~thisweek~, ~lastweek~, ~thisweek-N~    | a relative week     |
      | ~thismonth~, ~lastmonth~, ~thismonth-N~ | a relative month    |
      | ~thisyear~, ~lastyear~, ~thisyear-N~    | a relative year     |
+     | ~untilnow~                              |                     |
 
-     Use {{{kbd(S-left)}}} or {{{kbd(S-right)}}} to shift the
-     time interval.
+     #+vindex: org-clock-display-default-range
+     When this option is not set, Org falls back to the value in
+     ~org-clock-display-default-range~, which defaults to the current
+     year.
+
+     Use {{{kbd(S-left)}}} or {{{kbd(S-right)}}} to shift the time
+     interval.
 
 - :tstart ::
 
      A time string specifying when to start considering times.
+     Relative times like ="<-2w>"= can also be used.  See [[*Matching
+     tags and properties]] for relative time syntax.
 
 - :tend  ::
 
      A time string specifying when to stop considering times.
+     Relative times like ="<now>"= can also be used.  See [[*Matching
+     tags and properties]] for relative time syntax.
 
 - wstart ::
 
@@ -6580,10 +6590,10 @@ be selected:
      [[*Matching tags and properties]] for the match syntax.
 
 #+findex: org-clocktable-write-default
-Then there are options which determine the formatting of the table.
+Then there are options that determine the formatting of the table.
 There options are interpreted by the function
 ~org-clocktable-write-default~, but you can specify your own function
-using the ~:formatter~ parameter.
+using the =:formatter= parameter.
 
 - :emphasize ::
 
@@ -6610,7 +6620,7 @@ using the ~:formatter~ parameter.
 - :tcolumns ::
 
      Number of columns to be used for times.  If this is smaller than
-     ~:maxlevel~, lower levels are lumped into one column.
+     =:maxlevel=, lower levels are lumped into one column.
 
 - :level ::
 
