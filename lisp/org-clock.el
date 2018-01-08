@@ -1932,8 +1932,7 @@ Use `\\[org-clock-remove-overlays]' to remove the subtree times."
 	 (prop (cond ((not arg) :org-clock-minutes-default)
 		     (todayp :org-clock-minutes-today)
 		     (customp :org-clock-minutes-custom)
-		     (t :org-clock-minutes)))
-	 time h m p)
+		     (t :org-clock-minutes))))
     (cond ((not arg) (org-clock-sum-custom
 		      nil org-clock-display-default-range prop))
 	  (todayp (org-clock-sum-today))
@@ -1942,27 +1941,27 @@ Use `\\[org-clock-remove-overlays]' to remove the subtree times."
     (unless (equal arg '(64))
       (save-excursion
 	(goto-char (point-min))
-	(while (or (and (equal (setq p (point)) (point-min))
-			(get-text-property p prop))
-		   (setq p (next-single-property-change
-			    (point) prop)))
-	  (goto-char p)
-	  (when (setq time (get-text-property p prop))
-	    (org-clock-put-overlay time)))
-	(setq h (/ org-clock-file-total-minutes 60)
-	      m (- org-clock-file-total-minutes (* 60 h)))
+	(let ((p nil))
+	  (while (or (and (equal (setq p (point)) (point-min))
+			  (get-text-property p prop))
+		     (setq p (next-single-property-change (point) prop)))
+	    (goto-char p)
+	    (let ((time (get-text-property p prop)))
+	      (when time (org-clock-put-overlay time)))))
 	;; Arrange to remove the overlays upon next change.
 	(when org-remove-highlights-with-change
 	  (add-hook 'before-change-functions 'org-clock-remove-overlays
-			nil 'local))))
-    (message (concat (format "Total file time%s: "
-			     (cond (todayp " for today")
-				   (customp " (custom)")
-				   (t "")))
-		     (org-duration-from-minutes
-		      org-clock-file-total-minutes)
-		     " (%d hours and %d minutes)")
-	     h m)))
+		    nil 'local))))
+    (let* ((h (/ org-clock-file-total-minutes 60))
+	   (m (- org-clock-file-total-minutes (* 60 h))))
+      (message (concat (format "Total file time%s: "
+			       (cond (todayp " for today")
+				     (customp " (custom)")
+				     (t "")))
+		       (org-duration-from-minutes
+			org-clock-file-total-minutes)
+		       " (%d hours and %d minutes)")
+	       h m))))
 
 (defvar-local org-clock-overlays nil)
 
