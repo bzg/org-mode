@@ -4264,7 +4264,7 @@ A search cell follows the pattern (TYPE . SEARCH) where
     - target's or radio-target's name as a list of strings if
       TYPE is `target'.
 
-    - NAME affiliated keyword is TYPE is `other'.
+    - NAME affiliated keyword if TYPE is `other'.
 
 A search cell is the internal representation of a fuzzy link.  It
 ignores white spaces and statistics cookies, if applicable."
