@@ -6532,16 +6532,16 @@ be selected:
      absolutely, or relative to the current time and may be any of
      these formats:
 
-     | =2007-12-31=                            | New year eve 2007   |
-     | =2007-12=                               | December 2007       |
-     | =2007-W50=                              | ISO-week 50 in 2007 |
-     | =2007-Q2=                               | 2nd quarter in 2007 |
-     | =2007=                                  | the year 2007       |
-     | ~today~, ~yesterday~, ~today-N~         | a relative day      |
-     | ~thisweek~, ~lastweek~, ~thisweek-N~    | a relative week     |
-     | ~thismonth~, ~lastmonth~, ~thismonth-N~ | a relative month    |
-     | ~thisyear~, ~lastyear~, ~thisyear-N~    | a relative year     |
-     | ~untilnow~                              |                     |
+     | =2007-12-31=                            | New year eve 2007     |
+     | =2007-12=                               | December 2007         |
+     | =2007-W50=                              | ISO-week 50 in 2007   |
+     | =2007-Q2=                               | 2nd quarter in 2007   |
+     | =2007=                                  | the year 2007         |
+     | ~today~, ~yesterday~, ~today-N~         | a relative day        |
+     | ~thisweek~, ~lastweek~, ~thisweek-N~    | a relative week       |
+     | ~thismonth~, ~lastmonth~, ~thismonth-N~ | a relative month      |
+     | ~thisyear~, ~lastyear~, ~thisyear-N~    | a relative year       |
+     | ~untilnow~                              | all clocked time ever |
 
      #+vindex: org-clock-display-default-range
      When this option is not set, Org falls back to the value in
