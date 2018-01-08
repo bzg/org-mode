@@ -430,7 +430,9 @@ This applies when using `org-clock-goto'."
   :type 'integer)
 
 (defcustom org-clock-display-default-range 'thisyear
-  "Default range when displaying clocks with `org-clock-display'."
+  "Default range when displaying clocks with `org-clock-display'.
+Valid values are: `today', `yesterday', `thisweek', `lastweek',
+`thismonth', `lastmonth', `thisyear', `lastyear' and `untilnow'."
   :group 'org-clock
   :type '(choice (const today)
 		 (const yesterday)
@@ -441,7 +443,8 @@ This applies when using `org-clock-goto'."
 		 (const thisyear)
 		 (const lastyear)
 		 (const untilnow)
-		 (const :tag "Select range interactively" interactive)))
+		 (const :tag "Select range interactively" interactive))
+  :safe #'symbolp)
 
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
@@ -1936,7 +1939,7 @@ Use `\\[org-clock-remove-overlays]' to remove the subtree times."
 	  (todayp (org-clock-sum-today))
 	  (customp (org-clock-sum-custom nil arg))
 	  (t (org-clock-sum)))
-    (unless (eq arg '(64))
+    (unless (equal arg '(64))
       (save-excursion
 	(goto-char (point-min))
 	(while (or (and (equal (setq p (point)) (point-min))
