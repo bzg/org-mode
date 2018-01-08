@@ -96,7 +96,7 @@ setting of `org-html-htmlize-output-type' is `css'."
     (table-cell . org-org-identity)
     (table-row . org-org-identity)
     (target . org-org-identity)
-    (timestamp . org-org-identity)
+    (timestamp . org-org-timestamp)
     (underline . org-org-identity)
     (verbatim . org-org-identity)
     (verse-block . org-org-identity))
@@ -205,6 +205,10 @@ as a communication channel."
 	(org-string-nw-p (plist-get info :creator))
 	(format "#+CREATOR: %s\n" (plist-get info :creator)))
    contents))
+
+(defun org-org-timestamp (timestamp _contents _info)
+  "Transcode a TIMESTAMP object to custom format or back into Org syntax."
+  (org-timestamp-translate timestamp))
 
 (defun org-org-section (section contents info)
   "Transcode SECTION element back into Org syntax.
