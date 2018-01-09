@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.7.2
+;; Version: 5.7.4
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -97,7 +97,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.7.2" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.7.4" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -321,7 +321,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.7.2 of org-index.el.
+This is version 5.7.4 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -681,7 +681,7 @@ interactive calls."
 
         (let ((moved-up 0) id info reached-top done)
 
-          (unless (string= major-mode "org-mode") (error "No node at point"))
+          (unless (string= major-mode "org-mode") (error "Not in org-mode"))
           ;; take id from current node or reference
           (setq id (if search-ref
                        (org-index--id-from-ref search-ref)
@@ -1032,7 +1032,7 @@ Optional argument KEYS-VALUES specifies content of new line."
 (defun org-index--goto-focus ()
   "Goto focus node, one after the other."
   (if org-index--ids-focused-nodes
-      (let (target-id following-id last-id again explain marker
+      (let (again last-id following-id in-last-id target-id explain marker
                     (repeat-clause "") (bottom-clause "") (heading-is-clause ""))
         (setq again (and (eq this-command last-command)
                          (eq org-index--this-command org-index--last-command)))
@@ -1042,8 +1042,9 @@ Optional argument KEYS-VALUES specifies content of new line."
                                                       (append org-index--ids-focused-nodes
                                                               org-index--ids-focused-nodes)))
                                     org-index--ids-focused-nodes)))
+        (setq in-last-id (string= (ignore-errors (org-id-get)) last-id))
 
-        (setq target-id (if again following-id last-id))
+        (setq target-id (if (or again in-last-id) following-id last-id))
         
         (set-transient-map (let ((map (make-sparse-keymap)))
                              (define-key map (vector ?f)
@@ -1078,15 +1079,16 @@ Optional argument KEYS-VALUES specifies content of new line."
 
           (pop-to-buffer-same-window (marker-buffer marker))
           (goto-char (marker-position marker))
+          (org-index--unfold-buffer)
           (move-marker marker nil)
           (when org-index-goto-bottom-after-focus
             (setq bottom-clause "bottom of ")
             (setq heading-is-clause (format ", heading is '%s'" (propertize (org-get-heading t t t t) 'face 'org-todo)))
-            (org-index--end-of-focused-node))
-	  (org-index--unfold-buffer)
-	  (if org-index-goto-bottom-after-focus (recenter -1)))
+            (org-index--end-of-focused-node)
+            (org-reveal)
+            (recenter -1)))
 
-        (if again
+        (if (or again in-last-id)
             (setq explain (format "Jumped to %snext" bottom-clause))
           (setq explain (format "Jumped back to %scurrent" bottom-clause)))
         
@@ -1096,7 +1098,7 @@ Optional argument KEYS-VALUES specifies content of new line."
           (setq org-index--after-focus-timer
                 (run-at-time org-index--after-focus-delay nil
                              (lambda ()
-                               (when org-index--after-focus-context
+                               (when (string= org-index--after-focus-context (ignore-errors (org-id-get)))
                                  (save-window-excursion
                                    (save-excursion
                                      (org-id-goto org-index--after-focus-context)
@@ -1118,7 +1120,7 @@ Optional argument KEYS-VALUES specifies content of new line."
 
 (defun org-index--end-of-focused-node ()
   "Goto end of focused nodes, ignoring inline-tasks but stopping at first child."
-  (let (level next (pos (point)))
+  (let (level (pos (point)))
     (when (ignore-errors (org-with-limited-levels (org-back-to-heading)))
       (setq level (outline-level))
       (forward-char 1)
@@ -1160,7 +1162,6 @@ Optional argument KEYS-VALUES specifies content of new line."
             (setq id (org-id-get-create))
             (unless (member id org-index--ids-focused-nodes)
               ;; remove any children, that are already in list of focused nodes
-              (setq org-index--ids-focused-nodes-saved org-index--ids-focused-nodes)
               (setq org-index--ids-focused-nodes
                     (delete nil (mapcar (lambda (x)
                                           (if (member id (org-with-point-at (org-id-find x t)
@@ -1183,7 +1184,8 @@ Optional argument KEYS-VALUES specifies content of new line."
             "Current node has been appended to list of focused nodes%s (%d node%s in focus)")
 
            ((eq char ?d)
-            (org-index--delete-from-focus))
+            (org-index--delete-from-focus)
+            (concat "Current node has been removed from list of focused nodes%s (%d node%s in focus), " (org-index--goto-focus) "."))
 
            ((eq char ?r)
             (if org-index--ids-focused-nodes-saved
@@ -1205,10 +1207,10 @@ Optional argument KEYS-VALUES specifies content of new line."
 
 
 (defun org-index--delete-from-focus ()
-  "Delete current node from list of focused nodes"
+  "Delete current node from list of focused nodes."
   (let (id)
     (setq id (org-id-get))
-    (if (and id  (member id org-index--ids-focused-nodes))
+    (if (and id (member id org-index--ids-focused-nodes))
         (progn
           (setq org-index--id-last-goto-focus
                 (or (car-safe (cdr-safe (member id (reverse (append org-index--ids-focused-nodes
@@ -2106,8 +2108,8 @@ specify flag TEMPORARY for th new table temporary, maybe COMPARE it with existin
 
 (defun org-index--unfold-buffer ()
   "Helper function to unfold buffer."
-  (org-show-context 'ancestors)
-  (org-show-subtree)
+  (org-show-context 'tree)
+  (org-reveal '(4))
   (recenter 1))
 
 
