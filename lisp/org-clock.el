@@ -2694,16 +2694,15 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
 
 (defun org-clocktable-steps (params)
   "Step through the range to make a number of clock tables."
-  (let* ((p1 (copy-sequence params))
-	 (ts (plist-get p1 :tstart))
-	 (te (plist-get p1 :tend))
-	 (ws (plist-get p1 :wstart))
-	 (ms (plist-get p1 :mstart))
-	 (step0 (plist-get p1 :step))
-	 (step (cdr (assoc step0 '((day . 86400) (week . 604800)))))
-	 (stepskip0 (plist-get p1 :stepskip0))
-	 (block (plist-get p1 :block))
-	 cc step-time tsb)
+  (let* ((ts (plist-get params :tstart))
+	 (te (plist-get params :tend))
+	 (ws (plist-get params :wstart))
+	 (ms (plist-get params :mstart))
+	 (step0 (plist-get params :step))
+	 (step (cdr (assq step0 '((day . 86400) (week . 604800)))))
+	 (stepskip0 (plist-get params :stepskip0))
+	 (block (plist-get params :block))
+	 cc tsb)
     (when block
       (setq cc (org-clock-special-range block nil t ws ms)
 	    ts (car cc)
@@ -2726,37 +2725,37 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
     (setq tsb
 	  (if (eq step0 'week)
 	      (let ((dow (nth 6 (decode-time (seconds-to-time ts)))))
-		(if (< dow ws) ts
+		(if (<= dow ws) ts
 		  (- ts (* 86400 (- dow ws)))))
 	    ts))
-    (setq p1 (plist-put p1 :header ""))
-    (setq p1 (plist-put p1 :step nil))
-    (setq p1 (plist-put p1 :block nil))
     (while (< tsb te)
-      (or (bolp) (insert "\n"))
-      (setq p1 (plist-put p1 :tstart (format-time-string
-				      (org-time-stamp-format nil t)
-				      (seconds-to-time (max tsb ts)))))
-      (cl-incf tsb (let ((dow (nth 6 (decode-time (seconds-to-time tsb)))))
-		     (if (or (eq step0 'day)
-			     (= dow ws))
-			 step
-		       (* 86400 (- ws dow)))))
-      (setq p1 (plist-put p1 :tend (format-time-string
-				    (org-time-stamp-format nil t)
-				    (seconds-to-time (min te tsb)))))
-      (insert "\n" (if (eq step0 'day) "Daily report: "
-		     "Weekly report starting on: ")
-	      (plist-get p1 :tstart) "\n")
-      (setq step-time (org-dblock-write:clocktable p1))
-      (re-search-forward "^[ \t]*#\\+END:")
-      (when (and (equal step-time 0) stepskip0)
-	;; Remove the empty table
-	(delete-region (point-at-bol)
-		       (save-excursion
-			 (re-search-backward "^\\(Daily\\|Weekly\\) report"
-					     nil t)
-			 (point))))
+      (unless (bolp) (insert "\n"))
+      (let ((start-time (seconds-to-time (max tsb ts))))
+	(cl-incf tsb (let ((dow (nth 6 (decode-time (seconds-to-time tsb)))))
+		       (if (or (eq step0 'day)
+			       (= dow ws))
+			   step
+			 (* 86400 (- ws dow)))))
+	(insert "\n"
+		(if (eq step0 'day) "Daily report: "
+		  "Weekly report starting on: ")
+		(format-time-string (org-time-stamp-format nil t) start-time)
+		"\n")
+	(let ((table-begin (line-beginning-position 0))
+	      (step-time
+	       (org-dblock-write:clocktable
+		(org-combine-plists
+		 params
+		 (list
+		  :header "" :step nil :block nil
+		  :tstart (format-time-string (org-time-stamp-format t t)
+					      start-time)
+		  :tend (format-time-string (org-time-stamp-format t t)
+					    (seconds-to-time (min te tsb))))))))
+	  (re-search-forward "^[ \t]*#\\+END:")
+	  (when (and stepskip0 (equal step-time 0))
+	    ;; Remove the empty table
+	    (delete-region (line-beginning-position) table-begin))))
       (end-of-line 0))))
 
 (defun org-clock-get-table-data (file params)
