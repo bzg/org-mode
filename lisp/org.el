@@ -22532,7 +22532,8 @@ Return nil if S is not a valid timestamp string."
 TIME is an Emacs internal time representation, as returned, e.g.,
 by `current-time'.
 
-When optional argument WITH-TIME is non-nil, return a
+When optional argument WITH-TIME is non-nil, return a timestamp
+object with a time part, i.e., with hours and minutes.
 
 Return an inactive timestamp if INACTIVE is non-nil.  Otherwise,
 return an active timestamp."
