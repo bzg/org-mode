@@ -1235,7 +1235,8 @@ the default behavior."
       (when (equal select '(64))
 	;; Set start-time to `org-clock-out-time'
 	(let ((org-clock-continuously t))
-	  (org-clock-in nil org-clock-out-time)))
+	  (org-clock-in nil org-clock-out-time)
+	  (throw 'abort nil)))
 
       (when (equal select '(4))
 	(setq selected-task (org-clock-select-task "Clock-in on task: "))
