@@ -22546,8 +22546,8 @@ return an active timestamp."
 			      :hour-start (and with-time hour)
 			      :minute-start (and with-time minute)))))
 
-(defun org-timestamp--to-internal-time (timestamp &optional end)
-  "Encode TIMESTAMP object into Emacs internal time.
+(defun org-timestamp-to-time (timestamp &optional end)
+  "Convert TIMESTAMP object into an Emacs internal time value.
 Use end of date range or time range when END is non-nil.
 Otherwise, use its start."
   (apply #'encode-time
@@ -22571,11 +22571,10 @@ FORMAT is a format specifier to be passed to
 When optional argument END is non-nil, use end of date-range or
 time-range, if possible.
 
-When optional argument UTC is non-nil, time will be expressed as
+When optional argument UTC is non-nil, time is be expressed as
 Universal Time."
-  (format-time-string
-   format (org-timestamp--to-internal-time timestamp end)
-   (and utc t)))
+  (format-time-string format (org-timestamp-to-time timestamp end)
+		      (and utc t)))
 
 (defun org-timestamp-split-range (timestamp &optional end)
   "Extract a TIMESTAMP object from a date or time range.

@@ -196,6 +196,7 @@ a #+BEGIN_FOO/#+END_FOO block.  Bound to C-c C-x w by default.
 
 See docstring for details.
 
+*** ~org-timestamp-to-time~
 *** ~org-timestamp-from-string~
 *** ~org-timestamp-from-time~
 *** ~org-attach-dired-to-subtree~

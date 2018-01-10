@@ -6510,6 +6510,61 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 	    (org-element-interpret-data
 	     (org-timestamp-from-time '(20339 35296) nil t))))))
 
+(ert-deftest test-org/timestamp-to-time ()
+  "Test `org-timestamp-to-time' specifications."
+  (should
+   (equal "2014-03-04"
+	  (format-time-string
+	   "%Y-%m-%d"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "<2014-03-04 Tue>")))))
+  (should
+   (equal "2014-03-04"
+	  (format-time-string
+	   "%Y-%m-%d"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "[2014-03-04 Tue]")))))
+  (should
+   (equal "2012-03-29 08:30"
+	  (format-time-string
+	   "%Y-%m-%d %H:%M"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "<2012-03-29 Thu 08:30-16:40>")))))
+  (should
+   (equal "2012-03-29"
+	  (format-time-string
+	   "%Y-%m-%d"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "<2012-03-29 Thu>--<2014-03-04 Tue>")))))
+  (should
+   (equal "2012-03-29"
+	  (format-time-string
+	   "%Y-%m-%d"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "[2012-03-29 Thu]--[2014-03-04 Tue]")))))
+  ;; When optional argument END is non-nil, use end of date range or
+  ;; time range.
+  (should
+   (equal "2012-03-29 16:40"
+	  (format-time-string
+	   "%Y-%m-%d %H:%M"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "<2012-03-29 Thu 08:30-16:40>")
+	    t))))
+  (should
+   (equal "2014-03-04"
+	  (format-time-string
+	   "%Y-%m-%d"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "<2012-03-29 Thu>--<2014-03-04 Tue>")
+	    t))))
+  (should
+   (equal "2014-03-04"
+	  (format-time-string
+	   "%Y-%m-%d"
+	   (org-timestamp-to-time
+	    (org-timestamp-from-string "[2012-03-29 Thu]--[2014-03-04 Tue]")
+	    t)))))
 
 
 ;;; Visibility
