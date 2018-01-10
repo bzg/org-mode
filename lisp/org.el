@@ -22515,12 +22515,40 @@ Call `org-toggle-comment' if on a heading, otherwise call
 
 ;;; Timestamps API
 
-;; This section contains tools to operate on timestamp objects, as
-;; returned by, e.g. `org-element-context'.
+;; This section contains tools to operate on, or create, timestamp
+;; objects, as returned by, e.g. `org-element-context'.
+
+(defun org-timestamp-from-string (s)
+  "Convert Org timestamp S, as a string, into a timestamp object.
+Return nil if S is not a valid timestamp string."
+  (when (org-string-nw-p s)
+    (with-temp-buffer
+      (save-excursion (insert s))
+      (org-element-timestamp-parser))))
+
+(defun org-timestamp-from-time (time &optional with-time inactive)
+  "Convert a time value into a timestamp object.
+
+TIME is an Emacs internal time representation, as returned, e.g.,
+by `current-time'.
+
+When optional argument WITH-TIME is non-nil, return a
+
+Return an inactive timestamp if INACTIVE is non-nil.  Otherwise,
+return an active timestamp."
+  (pcase-let ((`(,_ ,minute ,hour ,day ,month ,year . ,_) (decode-time time)))
+    (org-element-create 'timestamp
+			(list :type (if inactive 'inactive 'active)
+			      :year-start year
+			      :month-start month
+			      :day-start day
+			      :hour-start (and with-time hour)
+			      :minute-start (and with-time minute)))))
 
 (defun org-timestamp--to-internal-time (timestamp &optional end)
   "Encode TIMESTAMP object into Emacs internal time.
-Use end of date range or time range when END is non-nil."
+Use end of date range or time range when END is non-nil.
+Otherwise, use its start."
   (apply #'encode-time
 	 (cons 0
 	       (mapcar

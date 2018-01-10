@@ -6469,6 +6469,47 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context)))))))
 
+(ert-deftest test-org/timestamp-from-string ()
+  "Test `org-timestamp-from-string' specifications."
+  ;; Return nil if argument is not a valid Org timestamp.
+  (should-not (org-timestamp-from-string ""))
+  (should-not (org-timestamp-from-string nil))
+  (should-not (org-timestamp-from-string "<2012-03-29"))
+  ;; Otherwise, return a valid Org timestamp object.
+  (should
+   (equal "<2012-03-29 Thu>"
+	  (let ((system-time-locale "en_US"))
+	       (org-element-interpret-data
+		(org-timestamp-from-string "<2012-03-29 Thu>")))))
+  (should
+   (equal "[2014-03-04 Tue]"
+	  (let ((system-time-locale "en_US"))
+	       (org-element-interpret-data
+		(org-timestamp-from-string "[2014-03-04 Tue]"))))))
+
+(ert-deftest test-org/timestamp-from-time ()
+  "Test `org-timestamp-from-time' specifications."
+  ;; Standard test.
+  (should
+   (equal "<2012-03-29 Thu>"
+	  (let ((system-time-locale "en_US"))
+	    (org-element-interpret-data
+	     (org-timestamp-from-time '(20339 35296))))))
+  ;; When optional argument WITH-TIME is non-nil, provide time
+  ;; information.
+  (should
+   (equal "<2012-03-29 Thu 16:40>"
+	  (let ((system-time-locale "en_US"))
+	    (org-element-interpret-data
+	     (org-timestamp-from-time '(20340 29760) t)))))
+  ;; When optional argument INACTIVE is non-nil, return an inactive
+  ;; timestamp.
+  (should
+   (equal "[2012-03-29 Thu]"
+	  (let ((system-time-locale "en_US"))
+	    (org-element-interpret-data
+	     (org-timestamp-from-time '(20339 35296) nil t))))))
+
 
 
 ;;; Visibility
