@@ -66,6 +66,7 @@
 (defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
 (defvar-local org-table-formula-constants-local nil
   "Local version of `org-table-formula-constants'.")
+(defvar org-inlinetask-min-level)
 
 ;;;; Require other packages
 
@@ -6819,8 +6820,6 @@ show that drawer instead."
 (put 'org-cycle-global-status 'org-state t)
 (defvar-local org-cycle-subtree-status nil)
 (put 'org-cycle-subtree-status 'org-state t)
-
-(defvar org-inlinetask-min-level)
 
 (defun org-show-all (&optional types)
   "Show all contents in the visible part of the buffer.
