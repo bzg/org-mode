@@ -75,7 +75,6 @@
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-next-block "org" (arg &optional backward block-regexp))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
-(declare-function org-outline-overlay-data "org" (&optional use-markers))
 (declare-function org-previous-block "org" (arg &optional block-regexp))
 (declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-reverse-string "org" (string))

@@ -736,6 +736,35 @@ Optional argument REGEXP selects variables to clone."
 		  (or (null regexp) (string-match-p regexp (symbol-name name))))
 	 (ignore-errors (set (make-local-variable name) value)))))))
 
+
+;;; Visibility
+
+(defun org-outline-overlay-data (&optional use-markers)
+  "Return a list of the locations of all outline overlays.
+These are overlays with the `invisible' property value `outline'.
+The return value is a list of cons cells, with start and stop
+positions for each overlay.
+If USE-MARKERS is set, return the positions as markers."
+  (let (beg end)
+    (org-with-wide-buffer
+     (delq nil
+	   (mapcar (lambda (o)
+		     (when (eq (overlay-get o 'invisible) 'outline)
+		       (setq beg (overlay-start o)
+			     end (overlay-end o))
+		       (and beg end (> end beg)
+			    (if use-markers
+				(cons (copy-marker beg)
+				      (copy-marker end t))
+			      (cons beg end)))))
+		   (overlays-in (point-min) (point-max)))))))
+
+(defun org-set-outline-overlay-data (data)
+  "Create visibility overlays for all positions in DATA.
+DATA should have been made by `org-outline-overlay-data'."
+  (org-with-wide-buffer
+   (org-show-all)
+   (dolist (c data) (org-flag-region (car c) (cdr c) t 'outline))))
 
 
 ;;; Miscellaneous
