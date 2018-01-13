@@ -7535,7 +7535,7 @@ also press `-' or `+' to switch between filtering and excluding."
 	 a n tag)
     (unless char
       (while (not (memq char valid-char-list))
-	(message
+	(org-unlogged-message
 	 "%s by tag [%s ]:tag-char, [TAB]:tag, %s[/]:off, [+/-]:filter/exclude%s, [q]:quit"
 	 (if exclude "Exclude" "Filter")
 	 tag-chars
@@ -7976,9 +7976,10 @@ With prefix ARG, go backward that many times the current span."
 (defun org-agenda-view-mode-dispatch ()
   "Call one of the view mode commands."
   (interactive)
-  (message "View: [d]ay  [w]eek  for[t]night  [m]onth  [y]ear  [SPC]reset  [q]uit/abort
-      time[G]rid   [[]inactive  [f]ollow      [l]og    [L]og-all   [c]lockcheck
-      [a]rch-trees [A]rch-files clock[R]eport include[D]iary       [E]ntryText")
+  (org-unlogged-message
+   "View: [d]ay  [w]eek  for[t]night  [m]onth  [y]ear  [SPC]reset  [q]uit/abort
+       time[G]rid   [[]inactive  [f]ollow      [l]og    [L]og-all   [c]lockcheck
+       [a]rch-trees [A]rch-files clock[R]eport include[D]iary       [E]ntryText")
   (pcase (read-char-exclusive)
     (?\ (call-interactively 'org-agenda-reset-view))
     (?d (call-interactively 'org-agenda-day-view))
@@ -9576,9 +9577,9 @@ entries in that Org file."
   (if (not (eq org-agenda-diary-file 'diary-file))
       (org-agenda-diary-entry-in-org-file)
     (require 'diary-lib)
-    (let* ((char (progn
-		   (message "Diary entry: [d]ay [w]eekly [m]onthly [y]early [a]nniversary [b]lock [c]yclic")
-		   (read-char-exclusive)))
+    (let* ((char (read-char-exclusive
+		  "Diary entry: [d]ay [w]eekly [m]onthly [y]early\
+ [a]nniversary [b]lock [c]yclic"))
 	   (cmd (cdr (assoc char
 			    '((?d . diary-insert-entry)
 			      (?w . diary-insert-weekly-entry)
@@ -9861,7 +9862,7 @@ The prefix arg is passed through to the command if possible."
       (user-error "Marker %s for bulk command is invalid" m)))
 
   ;; Prompt for the bulk command.
-  (message
+  (org-unlogged-message
    (concat (if org-agenda-persistent-marks "Bulk (persistent): " "Bulk: ")
 	   "[$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [d]eadline [r]efile "
 	   "[S]catter [f]unction    "
