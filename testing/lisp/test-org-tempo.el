@@ -23,7 +23,7 @@
 
 (require 'org-tempo)
 
-(unless (featurep 'org-temp)
+(unless (featurep 'org-tempo)
   (signal 'missing-test-dependency "org-tempo"))
 
 (ert-deftest test-org-tempo/completion ()
