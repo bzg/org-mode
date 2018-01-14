@@ -373,6 +373,7 @@ org-notify window.  Mostly copied from `appt-select-lowest-window'."
               :title     (plist-get plist :heading)
               :body      (org-notify-body-text plist)
               :timeout   (if duration (* duration 1000))
+              :urgency   (plist-get plist :urgency)
               :actions   org-notify-actions
               :on-action 'org-notify-on-action-notify)))
     (setq org-notify-on-action-map
