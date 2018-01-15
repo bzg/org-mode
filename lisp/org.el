@@ -18957,17 +18957,23 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
   (org-defkey org-mode-map (kbd "C-c C-x <left>") #'org-shiftcontrolleft))
 
 ;;;; Narrow map
-
 (org-defkey narrow-map "s" #'org-narrow-to-subtree)
 (org-defkey narrow-map "b" #'org-narrow-to-block)
-(org-defkey narrow-map "e" 'org-narrow-to-element)
+(org-defkey narrow-map "e" #'org-narrow-to-element)
+
+;;;; Remap usual Emacs bindings
+(org-remap org-mode-map
+	   'self-insert-command  'org-self-insert-command
+	   'delete-char          'org-delete-char
+	   'delete-backward-char 'org-delete-backward-char
+	   'open-line            'org-open-line
+	   'comment-dwim         'org-comment-dwim
+	   'forward-paragraph    'org-forward-paragraph
+	   'backward-paragraph   'org-backward-paragraph
+	   'delete-indentation   'org-delete-indentation)
 
 ;;;; All the other keys
-(org-remap org-mode-map
-	   'self-insert-command 'org-self-insert-command
-	   'delete-char 'org-delete-char
-	   'delete-backward-char 'org-delete-backward-char)
-(org-defkey org-mode-map (kbd "|") 'org-force-self-insert)
+(org-defkey org-mode-map (kbd "|") #'org-force-self-insert)
 (org-defkey org-mode-map (kbd "C-c C-a") #'org-show-all)
 (org-defkey org-mode-map (kbd "C-c C-r") #'org-reveal)
 (org-defkey org-mode-map (kbd "C-M-t") #'org-transpose-element)
@@ -19002,8 +19008,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c RET") #'org-ctrl-c-ret)
 (org-defkey org-mode-map (kbd "C-c C-x c") #'org-clone-subtree-with-time-shift)
 (org-defkey org-mode-map (kbd "C-c C-x v") #'org-copy-visible)
-(org-defkey org-mode-map (kbd "C-RET") #'org-insert-heading-respect-content)
-(org-defkey org-mode-map (kbd "C-S-RET") #'org-insert-todo-heading-respect-content)
+(org-defkey org-mode-map (kbd "C-<return>") #'org-insert-heading-respect-content)
+(org-defkey org-mode-map (kbd "C-S-<return>") #'org-insert-todo-heading-respect-content)
 (org-defkey org-mode-map (kbd "C-c C-x C-n") #'org-next-link)
 (org-defkey org-mode-map (kbd "C-c C-x C-p") #'org-previous-link)
 (org-defkey org-mode-map (kbd "C-c C-l") #'org-insert-link)
@@ -19032,12 +19038,6 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-c") #'org-ctrl-c-ctrl-c)
 (org-defkey org-mode-map (kbd "C-c C-k") #'org-kill-note-or-show-branches)
 (org-defkey org-mode-map (kbd "C-c #") #'org-update-statistics-cookies)
-(org-defkey org-mode-map [remap open-line] 'org-open-line)
-(org-defkey org-mode-map [remap comment-dwim] 'org-comment-dwim)
-(org-defkey org-mode-map [remap forward-paragraph] 'org-forward-paragraph)
-(org-defkey org-mode-map [remap backward-paragraph] 'org-backward-paragraph)
-(org-defkey org-mode-map (kbd "M-^") #'org-delete-indentation)
-(org-defkey org-mode-map (kbd "ESC ^") #'org-delete-indentation)
 (org-defkey org-mode-map (kbd "RET") #'org-return)
 (org-defkey org-mode-map (kbd "C-j") #'org-return-indent)
 (org-defkey org-mode-map (kbd "C-c ?") #'org-table-field-info)
@@ -19106,6 +19106,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 (define-key org-mode-map (kbd "C-c C-x [") #'org-reftex-citation)
 
+
+;;; Speed commands
 
 (defconst org-speed-commands-default
   '(
