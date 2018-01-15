@@ -1452,13 +1452,13 @@ done, timestamp, timestamp-kwd, tag, target.
 For example, a valid value would be:
 
    <style type=\"text/css\">
-    <![CDATA[
-       p { font-weight: normal; color: gray; }
-       h1 { color: black; }
+    /*<![CDATA[*/
+      p { font-weight: normal; color: gray; }
+      h1 { color: black; }
       .title { text-align: center; }
       .todo, .timestamp-kwd { color: red; }
       .done { color: green; }
-    ]]>
+    /*]]>*/
    </style>
 
 If you want to refer to an external style, use something like
