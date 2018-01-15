@@ -1059,13 +1059,13 @@ has been set."
 
 (defcustom org-replace-disputed-keys nil
   "Non-nil means use alternative key bindings for some keys.
+
 Org mode uses S-<cursor> keys for changing timestamps and priorities.
-These keys are also used by other packages like shift-selection-mode'
-\(built into Emacs 23), `CUA-mode' or `windmove.el'.
-If you want to use Org mode together with one of these other modes,
-or more generally if you would like to move some Org mode commands to
-other keys, set this variable and configure the keys with the variable
-`org-disputed-keys'.
+These keys are also used by other packages like Shift Select mode,
+CUA mode or Windmove.  If you want to use Org mode together with
+one of these other modes, or more generally if you would like to
+move some Org mode commands to other keys, set this variable and
+configure the keys with the variable `org-disputed-keys'.
 
 This option is only relevant at load-time of Org mode, and must be set
 *before* org.el is loaded.  Changing it requires a restart of Emacs to
@@ -1088,7 +1088,7 @@ loading Org."
     ([(shift down)]		. [(meta n)])
     ([(shift left)]		. [(meta -)])
     ([(shift right)]		. [(meta +)])
-    ([(control shift right)] 	. [(meta shift +)])
+    ([(control shift right)]    . [(meta shift +)])
     ([(control shift left)]	. [(meta shift -)]))
   "Keys for which Org mode and other modes compete.
 This is an alist, cars are the default keys, second element specifies
@@ -5573,8 +5573,8 @@ the rounding returns a past time."
 (when org-mouse-1-follows-link
   (org-defkey org-mouse-map [follow-link] 'mouse-face))
 (when org-tab-follows-link
-  (org-defkey org-mouse-map [(tab)] 'org-open-at-point)
-  (org-defkey org-mouse-map "\C-i" 'org-open-at-point))
+  (org-defkey org-mouse-map (kbd "<tab>") #'org-open-at-point)
+  (org-defkey org-mouse-map (kbd "TAB") #'org-open-at-point))
 
 (require 'font-lock)
 
@@ -16077,40 +16077,40 @@ So these are more for recording a certain time/date."
     (org-defkey map (kbd "C-.")
                 (lambda () (interactive)
 		  (org-eval-in-calendar '(calendar-goto-today))))
-    (org-defkey map [(meta shift left)]
+    (org-defkey map (kbd "M-S-<left>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
-    (org-defkey map [(meta shift right)]
-                (lambda () (interactive)
-                  (org-eval-in-calendar '(calendar-forward-month 1))))
-    (org-defkey map [(meta shift up)]
-                (lambda () (interactive)
-                  (org-eval-in-calendar '(calendar-backward-year 1))))
-    (org-defkey map [(meta shift down)]
-                (lambda () (interactive)
-                  (org-eval-in-calendar '(calendar-forward-year 1))))
-    (org-defkey map [?\e (shift left)]
+    (org-defkey map (kbd "ESC S-<left>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
-    (org-defkey map [?\e (shift right)]
+    (org-defkey map (kbd "M-S-<right>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-month 1))))
-    (org-defkey map [?\e (shift up)]
+    (org-defkey map (kbd "ESC S-<right>")
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-month 1))))
+    (org-defkey map (kbd "M-S-<up>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-year 1))))
-    (org-defkey map [?\e (shift down)]
+    (org-defkey map (kbd "ESC S-<up>")
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-year 1))))
+    (org-defkey map (kbd "M-S-<down>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-year 1))))
-    (org-defkey map [(shift up)]
+    (org-defkey map (kbd "ESC S-<down>")
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-year 1))))
+    (org-defkey map (kbd "S-<up>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-week 1))))
-    (org-defkey map [(shift down)]
+    (org-defkey map (kbd "S-<down>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-week 1))))
-    (org-defkey map [(shift left)]
+    (org-defkey map (kbd "S-<left>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-day 1))))
-    (org-defkey map [(shift right)]
+    (org-defkey map (kbd "S-<right>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-day 1))))
     (org-defkey map "!"
@@ -18844,7 +18844,8 @@ boundaries."
   (mapc #'delete-overlay org-inline-image-overlays)
   (setq org-inline-image-overlays nil))
 
-;;;; Key bindings
+
+;;; Key bindings
 
 (defun org-remap (map &rest commands)
   "In MAP, remap the functions given in COMMANDS.
@@ -18854,282 +18855,256 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
       (setq old (pop commands) new (pop commands))
       (org-defkey map (vector 'remap old) new))))
 
-;; Outline functions from `outline-mode-prefix-map'
-;; that can be remapped in Org:
-(define-key org-mode-map [remap outline-mark-subtree] 'org-mark-subtree)
-(define-key org-mode-map [remap outline-show-subtree] 'org-show-subtree)
+;;;; Outline functions that can be remapped in Org
+(define-key org-mode-map [remap outline-mark-subtree] #'org-mark-subtree)
+(define-key org-mode-map [remap outline-show-subtree] #'org-show-subtree)
 (define-key org-mode-map [remap outline-forward-same-level]
-  'org-forward-heading-same-level)
+  #'org-forward-heading-same-level)
 (define-key org-mode-map [remap outline-backward-same-level]
-  'org-backward-heading-same-level)
+  #'org-backward-heading-same-level)
 (define-key org-mode-map [remap outline-show-branches]
-  'org-kill-note-or-show-branches)
-(define-key org-mode-map [remap outline-promote] 'org-promote-subtree)
-(define-key org-mode-map [remap outline-demote] 'org-demote-subtree)
-(define-key org-mode-map [remap outline-insert-heading] 'org-ctrl-c-ret)
+  #'org-kill-note-or-show-branches)
+(define-key org-mode-map [remap outline-promote] #'org-promote-subtree)
+(define-key org-mode-map [remap outline-demote] #'org-demote-subtree)
+(define-key org-mode-map [remap outline-insert-heading] #'org-ctrl-c-ret)
 (define-key org-mode-map [remap outline-next-visible-heading]
-  'org-next-visible-heading)
+  #'org-next-visible-heading)
 (define-key org-mode-map [remap outline-previous-visible-heading]
-  'org-previous-visible-heading)
-(define-key org-mode-map [remap show-children] 'org-show-children)
+  #'org-previous-visible-heading)
+(define-key org-mode-map [remap show-children] #'org-show-children)
 
-;; Outline functions from `outline-mode-prefix-map' that can not
-;; be remapped in Org:
+;;;; Make `C-c C-x' a prefix key
+(org-defkey org-mode-map (kbd "C-c C-x") (make-sparse-keymap))
 
-;; - the column "key binding" shows whether the Outline function is still
-;;   available in Org mode on the same key that it has been bound to in
-;;   Outline mode:
-;;   - "overridden": key used for a different functionality in Org mode
-;;   - else: key still bound to the same Outline function in Org mode
+;;;; TAB key with modifiers
+(org-defkey org-mode-map (kbd "C-i") #'org-cycle)
+(org-defkey org-mode-map (kbd "<tab>") #'org-cycle)
+(org-defkey org-mode-map (kbd "C-<tab>") #'org-force-cycle-archived)
+(org-defkey org-mode-map (kbd "M-<tab>") #'pcomplete)
+(org-defkey org-mode-map (kbd "ESC <tab>") #'pcomplete)
 
-;; | Outline function                   | key binding | Org replacement          |
-;; |------------------------------------+-------------+--------------------------|
-;; | `outline-up-heading'               | `C-c C-u'   | still same function      |
-;; | `outline-move-subtree-up'          | overridden  | better: org-shiftup      |
-;; | `outline-move-subtree-down'        | overridden  | better: org-shiftdown    |
-;; | `show-entry'                       | overridden  | no replacement           |
-;; | `show-branches'                    | `C-c C-k'   | still same function      |
-;; | `show-subtree'                     | overridden  | visibility cycling       |
-;; | `show-all'                         | overridden  | no replacement           |
-;; | `hide-subtree'                     | overridden  | visibility cycling       |
-;; | `hide-body'                        | overridden  | no replacement           |
-;; | `hide-entry'                       | overridden  | visibility cycling       |
-;; | `hide-leaves'                      | overridden  | no replacement           |
-;; | `hide-sublevels'                   | overridden  | no replacement           |
-;; | `hide-other'                       | overridden  | no replacement           |
+(org-defkey org-mode-map (kbd "<S-iso-leftab>") #'org-shifttab)
+(org-defkey org-mode-map (kbd "S-<tab>") #'org-shifttab)
+(define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
 
-;; Make `C-c C-x' a prefix key
-(org-defkey org-mode-map "\C-c\C-x" (make-sparse-keymap))
-
-;; TAB key with modifiers
-(org-defkey org-mode-map "\C-i"       'org-cycle)
-(org-defkey org-mode-map [(tab)]      'org-cycle)
-(org-defkey org-mode-map [(control tab)] 'org-force-cycle-archived)
-(org-defkey org-mode-map "\M-\t" #'pcomplete)
-
-;; The following line is necessary under Suse GNU/Linux
-(org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab)
-(org-defkey org-mode-map [(shift tab)]    'org-shifttab)
-(define-key org-mode-map [backtab] 'org-shifttab)
-
-(org-defkey org-mode-map [(shift return)]   'org-table-copy-down)
-(org-defkey org-mode-map [(meta shift return)] 'org-insert-todo-heading)
+;;;; RET key with modifiers
+(org-defkey org-mode-map (kbd "S-RET") #'org-table-copy-down)
+(org-defkey org-mode-map (kbd "M-S-RET") #'org-insert-todo-heading)
+(org-defkey org-mode-map (kbd "ESC S-RET") #'org-insert-todo-heading)
 (org-defkey org-mode-map (kbd "M-RET") #'org-meta-return)
+(org-defkey org-mode-map (kbd "ESC RET") #'org-meta-return)
 
-;; Cursor keys with modifiers
-(org-defkey org-mode-map [(meta left)]  'org-metaleft)
-(org-defkey org-mode-map [(meta right)] 'org-metaright)
-(org-defkey org-mode-map [(meta up)]    'org-metaup)
-(org-defkey org-mode-map [(meta down)]  'org-metadown)
+;;;; Cursor keys with modifiers
+(org-defkey org-mode-map (kbd "M-<left>") #'org-metaleft)
+(org-defkey org-mode-map (kbd "M-<right>") #'org-metaright)
+(org-defkey org-mode-map (kbd "ESC <right>") #'org-metaright)
+(org-defkey org-mode-map (kbd "M-<up>") #'org-metaup)
+(org-defkey org-mode-map (kbd "ESC <up>") #'org-metaup)
+(org-defkey org-mode-map (kbd "M-<down>") #'org-metadown)
+(org-defkey org-mode-map (kbd "ESC <down>") #'org-metadown)
 
-(org-defkey org-mode-map [(control meta shift right)] 'org-increase-number-at-point)
-(org-defkey org-mode-map [(control meta shift left)] 'org-decrease-number-at-point)
-(org-defkey org-mode-map [(meta shift left)]   'org-shiftmetaleft)
-(org-defkey org-mode-map [(meta shift right)]  'org-shiftmetaright)
-(org-defkey org-mode-map [(meta shift up)]     'org-shiftmetaup)
-(org-defkey org-mode-map [(meta shift down)]   'org-shiftmetadown)
+(org-defkey org-mode-map (kbd "C-M-S-<right>") #'org-increase-number-at-point)
+(org-defkey org-mode-map (kbd "C-M-S-<left>") #'org-decrease-number-at-point)
+(org-defkey org-mode-map (kbd "M-S-<left>") #'org-shiftmetaleft)
+(org-defkey org-mode-map (kbd "ESC S-<left>") #'org-shiftmetaleft)
+(org-defkey org-mode-map (kbd "M-S-<right>") #'org-shiftmetaright)
+(org-defkey org-mode-map (kbd "ESC S-<right>") #'org-shiftmetaright)
+(org-defkey org-mode-map (kbd "M-S-<up>") #'org-shiftmetaup)
+(org-defkey org-mode-map (kbd "ESC S-<up>") #'org-shiftmetaup)
+(org-defkey org-mode-map (kbd "M-S-<down>") #'org-shiftmetadown)
+(org-defkey org-mode-map (kbd "ESC S-<down>") #'org-shiftmetadown)
 
-(org-defkey org-mode-map [(shift up)]          'org-shiftup)
-(org-defkey org-mode-map [(shift down)]        'org-shiftdown)
-(org-defkey org-mode-map [(shift left)]        'org-shiftleft)
-(org-defkey org-mode-map [(shift right)]       'org-shiftright)
+(org-defkey org-mode-map (kbd "S-<up>") #'org-shiftup)
+(org-defkey org-mode-map (kbd "S-<down>") #'org-shiftdown)
+(org-defkey org-mode-map (kbd "S-<left>") #'org-shiftleft)
+(org-defkey org-mode-map (kbd "S-<right>") #'org-shiftright)
 
-(org-defkey org-mode-map [(control shift right)] 'org-shiftcontrolright)
-(org-defkey org-mode-map [(control shift left)]  'org-shiftcontrolleft)
-(org-defkey org-mode-map [(control shift up)] 'org-shiftcontrolup)
-(org-defkey org-mode-map [(control shift down)]  'org-shiftcontroldown)
+(org-defkey org-mode-map (kbd "C-S-<right>") #'org-shiftcontrolright)
+(org-defkey org-mode-map (kbd "C-S-<left>") #'org-shiftcontrolleft)
+(org-defkey org-mode-map (kbd "C-S-<up>") #'org-shiftcontrolup)
+(org-defkey org-mode-map (kbd "C-S-<down>") #'org-shiftcontroldown)
 
-;; Babel keys
+;;;; Babel keys
 (define-key org-mode-map org-babel-key-prefix org-babel-map)
-(dolist (pair org-babel-key-bindings)
-  (define-key org-babel-map (car pair) (cdr pair)))
+(pcase-dolist (`(,key . ,def) org-babel-key-bindings)
+  (define-key org-babel-map key def))
 
-;;; Extra keys for tty access.
+;;;; Extra keys for TTY access.
+
 ;;  We only set them when really needed because otherwise the
 ;;  menus don't show the simple keys
 
 (when (or org-use-extra-keys (not window-system))
-  (org-defkey org-mode-map "\C-c\C-xc"    'org-table-copy-down)
-  (org-defkey org-mode-map "\C-c\C-xM"    'org-insert-todo-heading)
-  (org-defkey org-mode-map "\C-c\C-xm"    'org-meta-return)
-  (org-defkey org-mode-map [?\e (return)] 'org-meta-return)
-  (org-defkey org-mode-map [?\e (left)]   'org-metaleft)
-  (org-defkey org-mode-map "\C-c\C-xl"    'org-metaleft)
-  (org-defkey org-mode-map [?\e (right)]  'org-metaright)
-  (org-defkey org-mode-map "\C-c\C-xr"    'org-metaright)
-  (org-defkey org-mode-map [?\e (up)]     'org-metaup)
-  (org-defkey org-mode-map "\C-c\C-xu"    'org-metaup)
-  (org-defkey org-mode-map [?\e (down)]   'org-metadown)
-  (org-defkey org-mode-map "\C-c\C-xd"    'org-metadown)
-  (org-defkey org-mode-map "\C-c\C-xL"    'org-shiftmetaleft)
-  (org-defkey org-mode-map "\C-c\C-xR"    'org-shiftmetaright)
-  (org-defkey org-mode-map "\C-c\C-xU"    'org-shiftmetaup)
-  (org-defkey org-mode-map "\C-c\C-xD"    'org-shiftmetadown)
-  (org-defkey org-mode-map [?\C-c (up)]    'org-shiftup)
-  (org-defkey org-mode-map [?\C-c (down)]  'org-shiftdown)
-  (org-defkey org-mode-map [?\C-c (left)]  'org-shiftleft)
-  (org-defkey org-mode-map [?\C-c (right)] 'org-shiftright)
-  (org-defkey org-mode-map [?\C-c ?\C-x (right)] 'org-shiftcontrolright)
-  (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft)
-  (org-defkey org-mode-map [?\e (tab)] #'pcomplete)
-  (org-defkey org-mode-map [?\e (shift return)] 'org-insert-todo-heading)
-  (org-defkey org-mode-map [?\e (shift left)]   'org-shiftmetaleft)
-  (org-defkey org-mode-map [?\e (shift right)]  'org-shiftmetaright)
-  (org-defkey org-mode-map [?\e (shift up)]     'org-shiftmetaup)
-  (org-defkey org-mode-map [?\e (shift down)]   'org-shiftmetadown))
+  (org-defkey org-mode-map (kbd "C-c C-x c") #'org-table-copy-down)
+  (org-defkey org-mode-map (kbd "C-c C-x M") #'org-insert-todo-heading)
+  (org-defkey org-mode-map (kbd "C-c C-x RET") #'org-meta-return)
+  (org-defkey org-mode-map (kbd "ESC RET") #'org-meta-return)
+  (org-defkey org-mode-map (kbd "ESC <left>") #'org-metaleft)
+  (org-defkey org-mode-map (kbd "C-c C-x l") #'org-metaleft)
+  (org-defkey org-mode-map (kbd "ESC <right>") #'org-metaright)
+  (org-defkey org-mode-map (kbd "C-c C-x r") #'org-metaright)
+  (org-defkey org-mode-map (kbd "C-c C-x u") #'org-metaup)
+  (org-defkey org-mode-map (kbd "C-c C-x d") #'org-metadown)
+  (org-defkey org-mode-map (kbd "C-c C-x L") #'org-shiftmetaleft)
+  (org-defkey org-mode-map (kbd "C-c C-x R") #'org-shiftmetaright)
+  (org-defkey org-mode-map (kbd "C-c C-x U") #'org-shiftmetaup)
+  (org-defkey org-mode-map (kbd "C-c C-x D") #'org-shiftmetadown)
+  (org-defkey org-mode-map (kbd "C-c <up>") #'org-shiftup)
+  (org-defkey org-mode-map (kbd "C-c <down>") #'org-shiftdown)
+  (org-defkey org-mode-map (kbd "C-c <left>") #'org-shiftleft)
+  (org-defkey org-mode-map (kbd "C-c <right>") #'org-shiftright)
+  (org-defkey org-mode-map (kbd "C-c C-x <right>") #'org-shiftcontrolright)
+  (org-defkey org-mode-map (kbd "C-c C-x <left>") #'org-shiftcontrolleft))
 
-;; All the other keys
+;;;; Narrow map
+
+(org-defkey narrow-map "s" #'org-narrow-to-subtree)
+(org-defkey narrow-map "b" #'org-narrow-to-block)
+(org-defkey narrow-map "e" 'org-narrow-to-element)
+
+;;;; All the other keys
 (org-remap org-mode-map
 	   'self-insert-command 'org-self-insert-command
 	   'delete-char 'org-delete-char
 	   'delete-backward-char 'org-delete-backward-char)
-(org-defkey org-mode-map "|" 'org-force-self-insert)
-
-(org-defkey org-mode-map "\C-c\C-a" 'org-show-all)
-(org-defkey org-mode-map "\C-c\C-r" 'org-reveal)
-(if (boundp 'narrow-map)
-    (org-defkey narrow-map "s" 'org-narrow-to-subtree)
-  (org-defkey org-mode-map "\C-xns" 'org-narrow-to-subtree))
-(if (boundp 'narrow-map)
-    (org-defkey narrow-map "b" 'org-narrow-to-block)
-  (org-defkey org-mode-map "\C-xnb" 'org-narrow-to-block))
-(if (boundp 'narrow-map)
-    (org-defkey narrow-map "e" 'org-narrow-to-element)
-  (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
-(org-defkey org-mode-map "\C-\M-t"  'org-transpose-element)
-(org-defkey org-mode-map "\M-}"     'org-forward-element)
-(org-defkey org-mode-map "\M-{"     'org-backward-element)
-(org-defkey org-mode-map "\C-c\C-^" 'org-up-element)
-(org-defkey org-mode-map "\C-c\C-_" 'org-down-element)
-(org-defkey org-mode-map "\C-c\C-f" 'org-forward-heading-same-level)
-(org-defkey org-mode-map "\C-c\C-b" 'org-backward-heading-same-level)
-(org-defkey org-mode-map "\C-c\M-f" 'org-next-block)
-(org-defkey org-mode-map "\C-c\M-b" 'org-previous-block)
-(org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
-(org-defkey org-mode-map "\C-c\C-x\C-s" 'org-archive-subtree)
-(org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
-(org-defkey org-mode-map "\C-c\C-xd" 'org-insert-drawer)
-(org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
-(org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-archive-sibling)
-(org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
-(org-defkey org-mode-map "\C-c\C-xq" 'org-toggle-tags-groups)
-(org-defkey org-mode-map "\C-c\C-j" 'org-goto)
-(org-defkey org-mode-map "\C-c\C-t" 'org-todo)
-(org-defkey org-mode-map "\C-c\C-q" 'org-set-tags-command)
-(org-defkey org-mode-map "\C-c\C-s" 'org-schedule)
-(org-defkey org-mode-map "\C-c\C-d" 'org-deadline)
-(org-defkey org-mode-map "\C-c;"    'org-toggle-comment)
-(org-defkey org-mode-map "\C-c\C-w" 'org-refile)
-(org-defkey org-mode-map "\C-c\M-w" 'org-copy)
-(org-defkey org-mode-map "\C-c/"    'org-sparse-tree)   ; Minor-mode reserved
-(org-defkey org-mode-map "\C-c\\"   'org-match-sparse-tree) ; Minor-mode res.
-(org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
-(org-defkey org-mode-map "\C-c\C-xc" 'org-clone-subtree-with-time-shift)
-(org-defkey org-mode-map "\C-c\C-xv" 'org-copy-visible)
-(org-defkey org-mode-map [(control return)] 'org-insert-heading-respect-content)
-(org-defkey org-mode-map [(shift control return)] 'org-insert-todo-heading-respect-content)
-(org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
-(org-defkey org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
-(org-defkey org-mode-map "\C-c\C-l" 'org-insert-link)
-(org-defkey org-mode-map "\C-c\M-l" 'org-insert-last-stored-link)
-(org-defkey org-mode-map "\C-c\C-\M-l" 'org-insert-all-links)
-(org-defkey org-mode-map "\C-c\C-o" 'org-open-at-point)
-(org-defkey org-mode-map "\C-c%"    'org-mark-ring-push)
-(org-defkey org-mode-map "\C-c&"    'org-mark-ring-goto)
-(org-defkey org-mode-map "\C-c\C-z" 'org-add-note)  ; Alternative binding
-(org-defkey org-mode-map "\C-c."    'org-time-stamp)  ; Minor-mode reserved
-(org-defkey org-mode-map "\C-c!"    'org-time-stamp-inactive) ; Minor-mode r.
-(org-defkey org-mode-map "\C-c,"    'org-priority)    ; Minor-mode reserved
-(org-defkey org-mode-map "\C-c\C-y" 'org-evaluate-time-range)
-(org-defkey org-mode-map "\C-c>"    'org-goto-calendar)
-(org-defkey org-mode-map "\C-c<"    'org-date-from-calendar)
-(org-defkey org-mode-map [(control ?,)]     'org-cycle-agenda-files)
-(org-defkey org-mode-map [(control ?\')]     'org-cycle-agenda-files)
-(org-defkey org-mode-map "\C-c["    'org-agenda-file-to-front)
-(org-defkey org-mode-map "\C-c]"    'org-remove-file)
-(org-defkey org-mode-map "\C-c\C-x<" 'org-agenda-set-restriction-lock)
-(org-defkey org-mode-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
-(org-defkey org-mode-map "\C-c-"    'org-ctrl-c-minus)
-(org-defkey org-mode-map "\C-c*"    'org-ctrl-c-star)
+(org-defkey org-mode-map (kbd "|") 'org-force-self-insert)
+(org-defkey org-mode-map (kbd "C-c C-a") #'org-show-all)
+(org-defkey org-mode-map (kbd "C-c C-r") #'org-reveal)
+(org-defkey org-mode-map (kbd "C-M-t") #'org-transpose-element)
+(org-defkey org-mode-map (kbd "M-}") #'org-forward-element)
+(org-defkey org-mode-map (kbd "ESC }") #'org-forward-element)
+(org-defkey org-mode-map (kbd "M-{") #'org-backward-element)
+(org-defkey org-mode-map (kbd "ESC {") #'org-backward-element)
+(org-defkey org-mode-map (kbd "C-c C-^") #'org-up-element)
+(org-defkey org-mode-map (kbd "C-c C-_") #'org-down-element)
+(org-defkey org-mode-map (kbd "C-c C-f") #'org-forward-heading-same-level)
+(org-defkey org-mode-map (kbd "C-c C-b") #'org-backward-heading-same-level)
+(org-defkey org-mode-map (kbd "C-c M-f") #'org-next-block)
+(org-defkey org-mode-map (kbd "C-c M-b") #'org-previous-block)
+(org-defkey org-mode-map (kbd "C-c $") #'org-archive-subtree)
+(org-defkey org-mode-map (kbd "C-c C-x C-s") #'org-archive-subtree)
+(org-defkey org-mode-map (kbd "C-c C-x C-a") #'org-archive-subtree-default)
+(org-defkey org-mode-map (kbd "C-c C-x d") #'org-insert-drawer)
+(org-defkey org-mode-map (kbd "C-c C-x a") #'org-toggle-archive-tag)
+(org-defkey org-mode-map (kbd "C-c C-x A") #'org-archive-to-archive-sibling)
+(org-defkey org-mode-map (kbd "C-c C-x b") #'org-tree-to-indirect-buffer)
+(org-defkey org-mode-map (kbd "C-c C-x q") #'org-toggle-tags-groups)
+(org-defkey org-mode-map (kbd "C-c C-j") #'org-goto)
+(org-defkey org-mode-map (kbd "C-c C-t") #'org-todo)
+(org-defkey org-mode-map (kbd "C-c C-q") #'org-set-tags-command)
+(org-defkey org-mode-map (kbd "C-c C-s") #'org-schedule)
+(org-defkey org-mode-map (kbd "C-c C-d") #'org-deadline)
+(org-defkey org-mode-map (kbd "C-c ;") #'org-toggle-comment)
+(org-defkey org-mode-map (kbd "C-c C-w") #'org-refile)
+(org-defkey org-mode-map (kbd "C-c M-w") #'org-copy)
+(org-defkey org-mode-map (kbd "C-c /") #'org-sparse-tree) ;minor-mode reserved
+(org-defkey org-mode-map (kbd "C-c \\") #'org-match-sparse-tree) ;minor-mode r.
+(org-defkey org-mode-map (kbd "C-c RET") #'org-ctrl-c-ret)
+(org-defkey org-mode-map (kbd "C-c C-x c") #'org-clone-subtree-with-time-shift)
+(org-defkey org-mode-map (kbd "C-c C-x v") #'org-copy-visible)
+(org-defkey org-mode-map (kbd "C-RET") #'org-insert-heading-respect-content)
+(org-defkey org-mode-map (kbd "C-S-RET") #'org-insert-todo-heading-respect-content)
+(org-defkey org-mode-map (kbd "C-c C-x C-n") #'org-next-link)
+(org-defkey org-mode-map (kbd "C-c C-x C-p") #'org-previous-link)
+(org-defkey org-mode-map (kbd "C-c C-l") #'org-insert-link)
+(org-defkey org-mode-map (kbd "C-c M-l") #'org-insert-last-stored-link)
+(org-defkey org-mode-map (kbd "C-c C-M-l") #'org-insert-all-links)
+(org-defkey org-mode-map (kbd "C-c C-o") #'org-open-at-point)
+(org-defkey org-mode-map (kbd "C-c %") #'org-mark-ring-push)
+(org-defkey org-mode-map (kbd "C-c &") #'org-mark-ring-goto)
+(org-defkey org-mode-map (kbd "C-c C-z") #'org-add-note) ;alternative binding
+(org-defkey org-mode-map (kbd "C-c .") #'org-time-stamp) ;minor-mode reserved
+(org-defkey org-mode-map (kbd "C-c !") #'org-time-stamp-inactive) ;minor-mode r.
+(org-defkey org-mode-map (kbd "C-c ,") #'org-priority) ;minor-mode reserved
+(org-defkey org-mode-map (kbd "C-c C-y") #'org-evaluate-time-range)
+(org-defkey org-mode-map (kbd "C-c >") #'org-goto-calendar)
+(org-defkey org-mode-map (kbd "C-c <") #'org-date-from-calendar)
+(org-defkey org-mode-map (kbd "C-,") #'org-cycle-agenda-files)
+(org-defkey org-mode-map (kbd "C-'") #'org-cycle-agenda-files)
+(org-defkey org-mode-map (kbd "C-c [") #'org-agenda-file-to-front)
+(org-defkey org-mode-map (kbd "C-c ]") #'org-remove-file)
+(org-defkey org-mode-map (kbd "C-c C-x <") #'org-agenda-set-restriction-lock)
+(org-defkey org-mode-map (kbd "C-c C-x >") #'org-agenda-remove-restriction-lock)
+(org-defkey org-mode-map (kbd "C-c -") #'org-ctrl-c-minus)
+(org-defkey org-mode-map (kbd "C-c *") #'org-ctrl-c-star)
 (org-defkey org-mode-map (kbd "C-c TAB") #'org-ctrl-c-tab)
-(org-defkey org-mode-map "\C-c^"    'org-sort)
-(org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
-(org-defkey org-mode-map "\C-c\C-k" 'org-kill-note-or-show-branches)
-(org-defkey org-mode-map "\C-c#"    'org-update-statistics-cookies)
+(org-defkey org-mode-map (kbd "C-c ^") #'org-sort)
+(org-defkey org-mode-map (kbd "C-c C-c") #'org-ctrl-c-ctrl-c)
+(org-defkey org-mode-map (kbd "C-c C-k") #'org-kill-note-or-show-branches)
+(org-defkey org-mode-map (kbd "C-c #") #'org-update-statistics-cookies)
 (org-defkey org-mode-map [remap open-line] 'org-open-line)
 (org-defkey org-mode-map [remap comment-dwim] 'org-comment-dwim)
 (org-defkey org-mode-map [remap forward-paragraph] 'org-forward-paragraph)
 (org-defkey org-mode-map [remap backward-paragraph] 'org-backward-paragraph)
-(org-defkey org-mode-map "\M-^"     'org-delete-indentation)
-(org-defkey org-mode-map "\C-m"     'org-return)
-(org-defkey org-mode-map "\C-j"     'org-return-indent)
-(org-defkey org-mode-map "\C-c?"    'org-table-field-info)
-(org-defkey org-mode-map "\C-c "    'org-table-blank-field)
-(org-defkey org-mode-map "\C-c+"    'org-table-sum)
-(org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
-(org-defkey org-mode-map "\C-c'"    'org-edit-special)
-(org-defkey org-mode-map "\C-c`"    'org-table-edit-field)
-(org-defkey org-mode-map "\C-c\"a"  'orgtbl-ascii-plot)
-(org-defkey org-mode-map "\C-c\"g"  'org-plot/gnuplot)
-(org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
-(org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
-(org-defkey org-mode-map "\C-c~"    'org-table-create-with-table.el)
-(org-defkey org-mode-map "\C-c\C-a" 'org-attach)
-(org-defkey org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
-(org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
-(org-defkey org-mode-map "\C-c\C-e" 'org-export-dispatch)
-(org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width)
-(org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
-(org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
-(org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
-(org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
-(org-defkey org-mode-map "\C-c@" 'org-mark-subtree)
-(org-defkey org-mode-map "\M-h" 'org-mark-element)
-(org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
-;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
+(org-defkey org-mode-map (kbd "M-^") #'org-delete-indentation)
+(org-defkey org-mode-map (kbd "ESC ^") #'org-delete-indentation)
+(org-defkey org-mode-map (kbd "RET") #'org-return)
+(org-defkey org-mode-map (kbd "C-j") #'org-return-indent)
+(org-defkey org-mode-map (kbd "C-c ?") #'org-table-field-info)
+(org-defkey org-mode-map (kbd "C-c SPC") #'org-table-blank-field)
+(org-defkey org-mode-map (kbd "C-c +") #'org-table-sum)
+(org-defkey org-mode-map (kbd "C-c =") #'org-table-eval-formula)
+(org-defkey org-mode-map (kbd "C-c '") #'org-edit-special)
+(org-defkey org-mode-map (kbd "C-c `") #'org-table-edit-field)
+(org-defkey org-mode-map (kbd "C-c \" a") #'orgtbl-ascii-plot)
+(org-defkey org-mode-map (kbd "C-c \" g") #'org-plot/gnuplot)
+(org-defkey org-mode-map (kbd "C-c |") #'org-table-create-or-convert-from-region)
+(org-defkey org-mode-map (kbd "C-#") #'org-table-rotate-recalc-marks)
+(org-defkey org-mode-map (kbd "C-c ~") #'org-table-create-with-table.el)
+(org-defkey org-mode-map (kbd "C-c C-a") #'org-attach)
+(org-defkey org-mode-map (kbd "C-c }") #'org-table-toggle-coordinate-overlays)
+(org-defkey org-mode-map (kbd "C-c {") #'org-table-toggle-formula-debugger)
+(org-defkey org-mode-map (kbd "C-c C-e") #'org-export-dispatch)
+(org-defkey org-mode-map (kbd "C-c :") #'org-toggle-fixed-width)
+(org-defkey org-mode-map (kbd "C-c C-x C-f") #'org-emphasize)
+(org-defkey org-mode-map (kbd "C-c C-x f") #'org-footnote-action)
+(org-defkey org-mode-map (kbd "C-c @") #'org-mark-subtree)
+(org-defkey org-mode-map (kbd "M-h") #'org-mark-element)
+(org-defkey org-mode-map (kbd "ESC h") #'org-mark-element)
+(org-defkey org-mode-map (kbd "C-c C-*") #'org-list-make-subtree)
 
-(org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
-(org-defkey org-mode-map "\C-c\C-x\M-w" 'org-copy-special)
-(org-defkey org-mode-map "\C-c\C-x\C-y" 'org-paste-special)
+(org-defkey org-mode-map (kbd "C-c C-x C-w") #'org-cut-special)
+(org-defkey org-mode-map (kbd "C-c C-x M-w") #'org-copy-special)
+(org-defkey org-mode-map (kbd "C-c C-x C-y") #'org-paste-special)
 
-(org-defkey org-mode-map "\C-c\C-x\C-t" 'org-toggle-time-stamp-overlays)
-(org-defkey org-mode-map "\C-c\C-x\C-i" 'org-clock-in)
-(org-defkey org-mode-map "\C-c\C-x\C-x" 'org-clock-in-last)
-(org-defkey org-mode-map "\C-c\C-x\C-z" 'org-resolve-clocks)
-(org-defkey org-mode-map "\C-c\C-x\C-o" 'org-clock-out)
-(org-defkey org-mode-map "\C-c\C-x\C-j" 'org-clock-goto)
-(org-defkey org-mode-map "\C-c\C-x\C-q" 'org-clock-cancel)
-(org-defkey org-mode-map "\C-c\C-x\C-d" 'org-clock-display)
-(org-defkey org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
-(org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
-(org-defkey org-mode-map "\C-c\C-x\C-l" 'org-toggle-latex-fragment)
-(org-defkey org-mode-map "\C-c\C-x\C-v" 'org-toggle-inline-images)
-(org-defkey org-mode-map "\C-c\C-x\C-\M-v" 'org-redisplay-inline-images)
-(org-defkey org-mode-map "\C-c\C-x\\"   'org-toggle-pretty-entities)
-(org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
-(org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
-(org-defkey org-mode-map "\C-c\C-xP"    'org-set-property-and-value)
-(org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
-(org-defkey org-mode-map "\C-c\C-xE"    'org-inc-effort)
-(org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
-(org-defkey org-mode-map "\C-c\C-xi"    'org-columns-insert-dblock)
-(org-defkey org-mode-map "\C-c\C-xw"    'org-insert-structure-template)
-(org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
+(org-defkey org-mode-map (kbd "C-c C-x C-t") #'org-toggle-time-stamp-overlays)
+(org-defkey org-mode-map (kbd "C-c C-x C-i") #'org-clock-in)
+(org-defkey org-mode-map (kbd "C-c C-x C-x") #'org-clock-in-last)
+(org-defkey org-mode-map (kbd "C-c C-x C-z") #'org-resolve-clocks)
+(org-defkey org-mode-map (kbd "C-c C-x C-o") #'org-clock-out)
+(org-defkey org-mode-map (kbd "C-c C-x C-j") #'org-clock-goto)
+(org-defkey org-mode-map (kbd "C-c C-x C-q") #'org-clock-cancel)
+(org-defkey org-mode-map (kbd "C-c C-x C-d") #'org-clock-display)
+(org-defkey org-mode-map (kbd "C-c C-x C-r") #'org-clock-report)
+(org-defkey org-mode-map (kbd "C-c C-x C-u") #'org-dblock-update)
+(org-defkey org-mode-map (kbd "C-c C-x C-l") #'org-toggle-latex-fragment)
+(org-defkey org-mode-map (kbd "C-c C-x C-v") #'org-toggle-inline-images)
+(org-defkey org-mode-map (kbd "C-c C-x C-M-v") #'org-redisplay-inline-images)
+(org-defkey org-mode-map (kbd "C-c C-x \\") #'org-toggle-pretty-entities)
+(org-defkey org-mode-map (kbd "C-c C-x C-b") #'org-toggle-checkbox)
+(org-defkey org-mode-map (kbd "C-c C-x p") #'org-set-property)
+(org-defkey org-mode-map (kbd "C-c C-x P") #'org-set-property-and-value)
+(org-defkey org-mode-map (kbd "C-c C-x e") #'org-set-effort)
+(org-defkey org-mode-map (kbd "C-c C-x E") #'org-inc-effort)
+(org-defkey org-mode-map (kbd "C-c C-x o") #'org-toggle-ordered-property)
+(org-defkey org-mode-map (kbd "C-c C-x i") #'org-columns-insert-dblock)
+(org-defkey org-mode-map (kbd "C-c C-x w") #'org-insert-structure-template)
 
-(org-defkey org-mode-map "\C-c\C-x."    'org-timer)
-(org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
-(org-defkey org-mode-map "\C-c\C-x0"    'org-timer-start)
-(org-defkey org-mode-map "\C-c\C-x_"    'org-timer-stop)
-(org-defkey org-mode-map "\C-c\C-x,"    'org-timer-pause-or-continue)
+(org-defkey org-mode-map (kbd "C-c C-x .") #'org-timer)
+(org-defkey org-mode-map (kbd "C-c C-x -") #'org-timer-item)
+(org-defkey org-mode-map (kbd "C-c C-x 0") #'org-timer-start)
+(org-defkey org-mode-map (kbd "C-c C-x _") #'org-timer-stop)
+(org-defkey org-mode-map (kbd "C-c C-x ;") #'org-timer-set-timer)
+(org-defkey org-mode-map (kbd "C-c C-x ,") #'org-timer-pause-or-continue)
 
-(define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
+(define-key org-mode-map (kbd "C-c C-x C-c") #'org-columns)
 
-(define-key org-mode-map "\C-c\C-x!" 'org-reload)
+(define-key org-mode-map (kbd "C-c C-x !") #'org-reload)
 
-(define-key org-mode-map "\C-c\C-xg" 'org-feed-update-all)
-(define-key org-mode-map "\C-c\C-xG" 'org-feed-goto-inbox)
+(define-key org-mode-map (kbd "C-c C-x g") #'org-feed-update-all)
+(define-key org-mode-map (kbd "C-c C-x G") #'org-feed-goto-inbox)
 
-(define-key org-mode-map "\C-c\C-x[" 'org-reftex-citation)
+(define-key org-mode-map (kbd "C-c C-x [") #'org-reftex-citation)
 
 
 (defconst org-speed-commands-default
