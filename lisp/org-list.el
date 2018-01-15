@@ -2338,11 +2338,6 @@ subtree, ignoring planning line and any drawer following it."
 	   block-item
 	   lim-up
 	   lim-down
-	   (keyword-re (concat "^[ \t]*\\<\\(" org-scheduled-string
-			       "\\|" org-deadline-string
-			       "\\|" org-closed-string
-			       "\\|" org-clock-string "\\)"
-			       " *[[<]\\([^]>]+\\)[]>]"))
 	   (orderedp (org-entry-get nil "ORDERED"))
 	   (_bounds
 	    ;; In a region, start at first item in region.
