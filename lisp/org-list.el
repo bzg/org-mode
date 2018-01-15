@@ -121,6 +121,7 @@
 (declare-function org-element-set-element "org-element" (old new))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-update-syntax "org-element" ())
+(declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
 (declare-function org-export-create-backend "ox" (&rest rest) t)
@@ -2356,16 +2357,17 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
 
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
-With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.  With
-double prefix, set checkbox to [-].
+
+With prefix argument TOGGLE-PRESENCE, add or remove checkboxes.
+With a double prefix argument, set the checkbox to \"[-]\".
 
 When there is an active region, toggle status or presence of the
 first checkbox there, and make every item inside have the same
 status or presence, respectively.
 
-If the cursor is in a headline, apply this to all checkbox items
-in the text below the heading, taking as reference the first item
-in subtree, ignoring drawers."
+If point is on a headline, apply this to all checkbox items in
+the text below the heading, taking as reference the first item in
+subtree, ignoring planning line and any drawer following it."
   (interactive "P")
   (save-excursion
     (let* (singlep
@@ -2389,15 +2391,10 @@ in subtree, ignoring drawers."
 		  (error "No item in region"))
 		(setq lim-down (copy-marker limit))))
 	     ((org-at-heading-p)
-	      ;; On an heading, start at first item after drawers and
+	      ;; On a heading, start at first item after drawers and
 	      ;; time-stamps (scheduled, etc.).
 	      (let ((limit (save-excursion (outline-next-heading) (point))))
-		(forward-line 1)
-		(while (or (looking-at org-drawer-regexp)
-			   (looking-at keyword-re))
-		  (if (looking-at keyword-re)
-		      (forward-line 1)
-		    (re-search-forward "^[ \t]*:END:" limit nil)))
+		(org-end-of-meta-data t)
 		(if (org-list-search-forward (org-item-beginning-re) limit t)
 		    (setq lim-up (point-at-bol))
 		  (error "No item in subtree"))
