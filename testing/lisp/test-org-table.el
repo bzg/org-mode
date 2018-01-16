@@ -710,7 +710,7 @@ formatter \"%.1f\"."
 
 (ert-deftest test-org-table/org-lookup-all ()
   "Use `org-lookup-all' for several GROUP BY as in SQL and for ranking.
-See also http://orgmode.org/worg/org-tutorials/org-lookups.html ."
+See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
   (let ((data "
 #+NAME: data
 | Purchase | Product | Shop | Rating |
