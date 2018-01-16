@@ -66,7 +66,7 @@
 ;; Eventually, a dispatcher (`org-export-dispatch') is provided in the
 ;; last one.
 ;;
-;; See <http://orgmode.org/worg/dev/org-export-reference.html> for
+;; See <https://orgmode.org/worg/dev/org-export-reference.html> for
 ;; more information.
 
 ;;; Code:

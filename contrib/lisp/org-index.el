@@ -77,7 +77,7 @@
 ;;
 ;;  The latest published version of this file can always be found at:
 ;;
-;;    http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
+;;    https://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
 ;;
 ;;  Development version under:
 ;;

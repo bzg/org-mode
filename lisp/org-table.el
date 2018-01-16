@@ -4,7 +4,7 @@
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -135,7 +135,7 @@ the fixed string \"#+ORGTBL: SEND\", followed by instruction on how to
 convert the table into a data structure useful in the
 language of the buffer.  Check the manual for the section on
 \"Translator functions\", and more generally check out
-http://orgmode.org/manual/Tables-in-arbitrary-syntax.html#Tables-in-arbitrary-syntax
+https://orgmode.org/manual/Tables-in-arbitrary-syntax.html#Tables-in-arbitrary-syntax
 
 All occurrences of %n in a template will be replaced with the name of the
 table, obtained by prompting the user."

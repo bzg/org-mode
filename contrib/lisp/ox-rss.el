@@ -84,7 +84,7 @@
   :version "24.4"
   :package-version '(Org . "8.0"))
 
-(defcustom org-rss-image-url "http://orgmode.org/img/org-mode-unicorn-logo.png"
+(defcustom org-rss-image-url "https://orgmode.org/img/org-mode-unicorn-logo.png"
   "The URL of the an image for the RSS feed."
   :group 'org-export-rss
   :type 'string)

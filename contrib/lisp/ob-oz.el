@@ -4,7 +4,7 @@
 
 ;; Author: Torsten Anders and Eric Schulte
 ;; Keywords: literate programming, reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 ;; Version: 0.02
 
 ;; This file is not part of GNU Emacs.

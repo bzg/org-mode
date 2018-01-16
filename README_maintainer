@@ -185,7 +185,7 @@ The assignment form is included in the repository as a file that you
 can send to contributors: =request-assign-future.txt=
 
 The list of all contributors from who we have the papers is kept on
-Worg at http://orgmode.org/worg/org-contribute.html, so that
+Worg at https://orgmode.org/worg/org-contribute.html, so that
 committers can check if a patch can go into the core.
 
 The assignment process does not allways go smoothly, and it has

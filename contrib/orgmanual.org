@@ -21,7 +21,7 @@
 #+TEXINFO_HEADER: @set txicodequotebacktick
 
 # Contact Info
-#+TEXINFO_HEADER: @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
+#+TEXINFO_HEADER: @set MAINTAINERSITE @uref{https://orgmode.org,maintainers webpage}
 #+TEXINFO_HEADER: @set MAINTAINER Carsten Dominik
 #+TEXINFO_HEADER: @set MAINTAINEREMAIL @email{carsten at orgmode dot org}
 #+TEXINFO_HEADER: @set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
@@ -92,7 +92,7 @@ different ends, for example:
 
 #+cindex: FAQ
 
-There is a [[http://orgmode.org][website for Org]] that provides links to the newest version
+There is a [[https://orgmode.org][website for Org]] that provides links to the newest version
 of Org, as well as additional information, frequently asked questions
 (FAQ), links to tutorials, etc.
 
@@ -114,11 +114,11 @@ Network Theory Ltd.]]
 *Important:* If you have the version of Org that comes with Emacs or
 as a XEmacs package, please skip this section and go directly to
 [[Activation]].  If you downloaded Org as an ELPA package, please read the
-instructions on the [[http://orgmode.org/elpa.html][Org ELPA page]].  To see what version of Org (if any)
+instructions on the [[https://orgmode.org/elpa.html][Org ELPA page]].  To see what version of Org (if any)
 is part of your Emacs distribution, type {{{kbd(M-x org-version)}}}.[fn:2]
 
 Installation of Org mode uses a build system, which is described in more
-detail on [[http://orgmode.org/worg/dev/org-build-system.html][Worg]].
+detail on [[https://orgmode.org/worg/dev/org-build-system.html][Worg]].
 
 If you have downloaded Org from the Web as a distribution {{{file(.zip)}}} or
 {{{file(.tar.gz)}}} archive, take the following steps to install it:
@@ -202,7 +202,7 @@ compiling them, do a similar step for this directory:
 If you want to include those files with the build and install, please
 customize the variable ~ORG_ADD_CONTRIB~ instead in your
 ~local.mk~ file.  For more details please see this
-[[http://orgmode.org/worg/dev/org-build-system.html#sec-4-1-2][description on Worg]].
+[[https://orgmode.org/worg/dev/org-build-system.html#sec-4-1-2][description on Worg]].
 
 Installing Info files is system dependent, because of differences in
 the {{{file(install-info)}}} program.  The Info documentation is
@@ -1296,7 +1296,7 @@ the marker in square brackets, inside text.  For example:
 #+begin_example
    The Org homepage[fn:1] now looks a lot better than it used to.
    ...
-   [fn:1] The link is: http://orgmode.org
+   [fn:1] The link is: https://orgmode.org
 #+end_example
 
 Org mode extends the number-based syntax to /named/ footnotes and
@@ -2401,7 +2401,7 @@ the corresponding element of ~R-LIST~.
 
 These three functions can be used to implement associative arrays,
 count matching cells, rank results, group data, etc.  For practical
-examples see [[http://orgmode.org/worg/org-tutorials/org-lookups.html][this tutorial on Worg]].
+examples see [[https://orgmode.org/worg/org-tutorials/org-lookups.html][this tutorial on Worg]].
 
 *** Editing and debugging formulas
     :PROPERTIES:
@@ -2750,7 +2750,7 @@ Notice that Org Plot is smart enough to apply the table's headers as
 labels.  Further control over the labels, type, content, and appearance
 of plots can be exercised through the ~#+PLOT:~ lines preceding a
 table.  See below for a complete list of Org-plot options.  For more
-information and examples see the [[http://orgmode.org/worg/org-tutorials/org-plot.html][Org-plot tutorial]].
+information and examples see the [[https://orgmode.org/worg/org-tutorials/org-plot.html][Org-plot tutorial]].
 
 Org-Plot recognizes the following options:
 
@@ -6600,7 +6600,7 @@ Wiegley excellent remember package.  Up to version 6.36 Org used a
 special setup for {{{file(remember.el)}}}.  The file {{{file(org-remember.el)}}}
 is still part of Org mode for backward compatibility with existing
 setups.  You can find the documentation for org-remember at
-[[http://orgmode.org/org-remember.pdf]].
+[[https://orgmode.org/org-remember.pdf]].
 
 The new capturing setup described here is preferred and should be used by new
 users.  To convert your ~org-remember-templates~, run the following command:
@@ -7313,7 +7313,7 @@ your web browser to send a link to the current page to Org and create
 a note from it using capture (see [[Capture]]).  Or you could create a
 bookmark that will tell Emacs to open the local source file of a
 remote website you are looking at with the browser.  See
-[[http://orgmode.org/worg/org-contrib/org-protocol.php]] for detailed
+[[https://orgmode.org/worg/org-contrib/org-protocol.php]] for detailed
 documentation and setup instructions.
 
 ** Refile and copy
@@ -11117,7 +11117,7 @@ the ~<a>~ or ~<img>~ tags.  Here is an example that sets ~title~ and
 #+cindex: #+ATTR_HTML
 #+begin_example
    ,#+ATTR_HTML: title="The Org mode homepage" style="color:red;"
-   ,[[http://orgmode.org]]
+   ,[[https://orgmode.org]]
 #+end_example
 
 *** Tables in HTML export
@@ -11187,7 +11187,7 @@ support text viewers and accessibility, and align it to the right.
 LaTeX math snippets (see [[LaTeX fragments]]) can be displayed in two
 different ways on HTML pages.  The default is to use the [[http://www.mathjax.org][MathJax system]]
 which should work out of the box with Org mode installation because
-~http://orgmode.org~ serves {{{file(MathJax)}}} for Org mode users for
+~https://orgmode.org~ serves {{{file(MathJax)}}} for Org mode users for
 small applications and for testing purposes.[fn:121] To configure
 {{{file(MathJax)}}}, use the variable
 ~org-export-html-mathjax-options~ or insert something like the
@@ -11322,8 +11322,8 @@ is an /Info/-like mode where each section is displayed separately and
 navigation can be done with the {{{kbd(n)}}} and {{{kbd(p)}}} keys (and some other keys
 as well, press {{{kbd(?)}}} for an overview of the available keys).  The second
 view type is a /folding/ view much like Org provides inside Emacs.  The
-script is available at [[http://orgmode.org/org-info.js]] and you can find
-the documentation for it at [[http://orgmode.org/worg/code/org-info-js/]].
+script is available at [[https://orgmode.org/org-info.js]] and you can find
+the documentation for it at [[https://orgmode.org/worg/code/org-info-js/]].
 We host the script at our site, but if you use it a lot, you might
 not want to be dependent on ~orgmode.org~ and prefer to install a local
 copy on your own web server.
@@ -11347,7 +11347,7 @@ line above, you can set the following viewing options:
 - path: ::   
 
   The path to the script.  The default is to grab the script from
-  [[http://orgmode.org/org-info.js]], but you might want to have
+  [[https://orgmode.org/org-info.js]], but you might want to have
   a local copy and use a path like {{{samp(../scripts/org-info.js)}}}.
 
 - view: ::   
@@ -12287,10 +12287,10 @@ desired image file with no link description.  For example, to embed
 You can create clickable images by providing a link whose description
 is a link to an image file.  For example, to embed an image
 {{{file(org-mode-unicorn.png)}}}, which when clicked jumps to
-[[http://Orgmode.org]] website, do the following:
+[[https://orgmode.org]] website, do the following:
 
 #+begin_example
-   [[http://orgmode.org][./org-mode-unicorn.png]]
+   [[https://orgmode.org][./org-mode-unicorn.png]]
 #+end_example
 
 #+cindex: #+ATTR_ODT
@@ -13069,7 +13069,7 @@ kind of report one wants to generate (by default, a
 {{{samp(taskreport)}}}).
 
 For more information and examples see the Org-taskjuggler tutorial at
-[[http://orgmode.org/worg/org-tutorials/org-taskjuggler.html]].
+[[https://orgmode.org/worg/org-tutorials/org-taskjuggler.html]].
 
 ** Freemind export
    :PROPERTIES:
@@ -14177,7 +14177,7 @@ Code blocks in the following languages are supported.
 
 Language-specific documentation is available for some languages.  If
 available, it can be found at
-[[http://orgmode.org/worg/org-contrib/babel/languages.html]].
+[[https://orgmode.org/worg/org-contrib/babel/languages.html]].
 
 The variable ~org-babel-load-languages~ controls which languages are
 enabled for evaluation (by default only ~emacs-lisp~ is enabled).  This
@@ -14276,7 +14276,7 @@ source code blocks.
 
 Each language can define its own set of default header arguments.  See
 the language-specific documentation available online at
-[[http://orgmode.org/worg/org-contrib/babel]].
+[[https://orgmode.org/worg/org-contrib/babel]].
 
 **** Buffer-wide header arguments
      :PROPERTIES:
@@ -16880,7 +16880,7 @@ Org has a large number of hook variables that can be used to add
 functionality.  This appendix about hacking is going to illustrate the
 use of some of them.  A complete list of all hooks with documentation is
 maintained by the Worg project and can be found at
-[[http://orgmode.org/worg/org-configs/org-hooks.php]].
+[[https://orgmode.org/worg/org-configs/org-hooks.php]].
 
 ** Add-on packages
    :PROPERTIES:
@@ -16891,10 +16891,10 @@ maintained by the Worg project and can be found at
 A large number of add-on packages have been written by various
 authors.  These packages are not part of Emacs, but they are
 distributed as contributed packages with the separate release
-available at the Org mode home page at [[http://orgmode.org]].  The
+available at the Org mode home page at [[https://orgmode.org]].  The
 list of contributed packages, along with documentation about each
 package, is maintained by the Worg project at
-[[http://orgmode.org/worg/org-contrib/]].
+[[https://orgmode.org/worg/org-contrib/]].
 
 ** Adding hyperlink types
    :PROPERTIES:
@@ -19093,7 +19093,7 @@ line---it is wrapped here only because of formatting constraints.
 
 [fn:59] Contributed packages are not part of Emacs, but are
 distributed with the main distribution of Org (visit
-[[http://orgmode.org]]).
+[[https://orgmode.org]]).
 
 [fn:60] The Org date format is inspired by the standard ISO 8601
 date/time format.  To use an alternative format, see [[Custom time
@@ -19368,7 +19368,7 @@ with ~xetex~ and possibly ~luatex~.  See the variables
 [fn:128] One can also take advantage of this option to pass other,
 unrelated options into the figure or table environment.  For an example
 see the section ``Exporting org files'' in
-[[http://orgmode.org/worg/org-hacks.html]].
+[[https://orgmode.org/worg/org-hacks.html]].
 
 [fn:129] This requires ~transient-mark-mode~ to be turned on.
 
@@ -19498,7 +19498,7 @@ will remain visible.
 [fn:165] If you cannot use Dropbox, or if your version of MobileOrg
 does not support it, you can use a webdav server.  For more
 information, check out the documentation of MobileOrg and also this
-[[http://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
+[[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
 [fn:166] While creating the agendas, Org mode will force ID properties
 on all referenced entries, so that these entries can be uniquely

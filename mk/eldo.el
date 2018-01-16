@@ -4,7 +4,7 @@
 ;;
 ;; Author: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: elisp, documentation, org
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -38,10 +38,10 @@
 (defvar eldo-keymaps nil)
 
 (defvar eldo-git-raw-file
-  "http://orgmode.org/cgit.cgi/org-mode.git/plain/lisp/%s")
+  "https://orgmode.org/cgit.cgi/org-mode.git/plain/lisp/%s")
 
 (defvar eldo-git-search-string
-  "http://orgmode.org/cgit.cgi/org-mode.git/log/?qt=grep&q=%s")
+  "https://orgmode.org/cgit.cgi/org-mode.git/log/?qt=grep&q=%s")
 
 (defvar eldo-file nil)
 

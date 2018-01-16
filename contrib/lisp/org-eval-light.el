@@ -6,7 +6,7 @@
 ;;         Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp, literate programming,
 ;;           reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 ;; Version: 0.04
 
 ;; This file is not yet part of GNU Emacs.
