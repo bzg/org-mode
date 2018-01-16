@@ -640,20 +640,20 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo %5B%5Bhttp://orgmode.org%5D%5BOrg mode%5D%5D][Foo Org mode]] | 26:00   |"
+| [[Foo %5B%5Bhttps://orgmode.org%5D%5BOrg mode%5D%5D][Foo Org mode]] | 26:00   |"
     (org-test-with-temp-text
-	"* Foo [[http://orgmode.org][Org mode]]
+	"* Foo [[https://orgmode.org][Org mode]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t"))))
   (should
    (equal
-    "| Headline               | Time    |
-|------------------------+---------|
-| *Total time*           | *26:00* |
-|------------------------+---------|
-| [[Foo %5B%5Bhttp://orgmode.org%5D%5D][Foo http://orgmode.org]] | 26:00   |"
+    "| Headline                | Time    |
+|-------------------------+---------|
+| *Total time*            | *26:00* |
+|-------------------------+---------|
+| [[Foo %5B%5Bhttps://orgmode.org%5D%5D][Foo https://orgmode.org]] | 26:00   |"
     (org-test-with-temp-text
-	"* Foo [[http://orgmode.org]]
+	"* Foo [[https://orgmode.org]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
       (test-org-clock-clocktable-contents ":link t")))))
 

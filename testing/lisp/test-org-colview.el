@@ -143,7 +143,7 @@
   (should
    (equal
     '("* [123]" . 7)
-    (org-test-with-temp-text "* [[http://orgmode.org][123]]"
+    (org-test-with-temp-text "* [[https://orgmode.org][123]]"
       (let ((org-columns-default-format "%ITEM")) (org-columns))
       (cons (get-char-property (point) 'org-columns-value-modified)
 	    (aref org-columns-current-maxwidths 0)))))

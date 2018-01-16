@@ -1697,14 +1697,14 @@ e^{i\\pi}+1=0
   (should
    (equal
     '("Orgmode.org")
-    (org-test-with-temp-text "[[http://orgmode.org][Orgmode.org]]"
+    (org-test-with-temp-text "[[https://orgmode.org][Orgmode.org]]"
       (org-element-contents
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
   ;; ... without description.
   (should
    (equal
-    "http"
-    (org-test-with-temp-text "[[http://orgmode.org]]"
+    "https"
+    (org-test-with-temp-text "[[https://orgmode.org]]"
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
@@ -1713,7 +1713,7 @@ e^{i\\pi}+1=0
    (equal
     "//orgmode.org/worg"
     (org-test-with-temp-text "[[Org:worg]]"
-      (let ((org-link-abbrev-alist '(("Org" . "http://orgmode.org/"))))
+      (let ((org-link-abbrev-alist '(("Org" . "https://orgmode.org/"))))
 	(org-element-property
 	 :path
 	 (org-element-map (org-element-parse-buffer) 'link 'identity nil t))))))
@@ -1721,7 +1721,7 @@ e^{i\\pi}+1=0
   (should
    (equal
     "127.0.0.1"
-    (org-test-with-temp-text "[[http://orgmode.org]]"
+    (org-test-with-temp-text "[[https://orgmode.org]]"
       (let ((org-link-translation-function
 	     (lambda (type _) (cons type "127.0.0.1"))))
 	(org-element-property
@@ -1794,30 +1794,30 @@ e^{i\\pi}+1=0
 	    (org-element-property :path (org-element-context)))))
   ;; Plain link.
   (should
-   (org-test-with-temp-text "A link: http://orgmode.org"
+   (org-test-with-temp-text "A link: https://orgmode.org"
      (org-element-map (org-element-parse-buffer) 'link 'identity)))
   ;; Angular link.  Follow RFC 3986.
   (should
    (eq 'link
-       (org-test-with-temp-text "A link: <point><http://orgmode.org>"
+       (org-test-with-temp-text "A link: <point><https://orgmode.org>"
 	 (org-element-type (org-element-context)))))
   (should
    (equal "//orgmode.org"
-	  (org-test-with-temp-text "A link: <point><http://orgmode\n.org>"
+	  (org-test-with-temp-text "A link: <point><https://orgmode\n.org>"
 	    (org-element-property :path (org-element-context)))))
   ;; Link abbreviation.
   (should
-   (equal "http"
+   (equal "https"
 	  (org-test-with-temp-text
-	      "#+LINK: orgmode http://www.orgmode.org/\n[[orgmode:#docs]]"
+	      "#+LINK: orgmode https://www.orgmode.org/\n[[orgmode:#docs]]"
 	    (progn (org-mode-restart)
 		   (goto-char (1- (point-max)))
 		   (org-element-property :type (org-element-context))))))
   ;; Link abbreviation in a secondary string.
   (should
-   (equal "http"
+   (equal "https"
 	  (org-test-with-temp-text
-	      "#+LINK: orgmode http://www.orgmode.org/\n* H [[orgmode:#docs]]"
+	      "#+LINK: orgmode https://www.orgmode.org/\n* H [[orgmode:#docs]]"
 	    (progn (org-mode-restart)
 		   (org-element-map (org-element-parse-buffer) 'link
 		     (lambda (link) (org-element-property :type link))
@@ -3100,15 +3100,15 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 		   (org-test-parse-and-interpret "a radio-target"))
 		 "a radio-target\n"))
   ;; Links without description.
-  (should (equal (org-test-parse-and-interpret "[[http://orgmode.org]]")
-		 "[[http://orgmode.org]]\n"))
+  (should (equal (org-test-parse-and-interpret "[[https://orgmode.org]]")
+		 "[[https://orgmode.org]]\n"))
   ;; Links with a description, even one containing a link.
   (should (equal (org-test-parse-and-interpret
-		  "[[http://orgmode.org][Org mode]]")
-		 "[[http://orgmode.org][Org mode]]\n"))
+		  "[[https://orgmode.org][Org mode]]")
+		 "[[https://orgmode.org][Org mode]]\n"))
   (should (equal (org-test-parse-and-interpret
-		  "[[http://orgmode.org][http://orgmode.org]]")
-		 "[[http://orgmode.org][http://orgmode.org]]\n"))
+		  "[[https://orgmode.org][https://orgmode.org]]")
+		 "[[https://orgmode.org][https://orgmode.org]]\n"))
   ;; File links.
   (should
    (equal (org-test-parse-and-interpret "[[file+emacs:todo.org]]")
@@ -3123,11 +3123,11 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
   ;; Code-ref links.
   (should (equal (org-test-parse-and-interpret "[[(ref)]]") "[[(ref)]]\n"))
   ;; Plain links.
-  (should (equal (org-test-parse-and-interpret "http://orgmode.org")
-		 "http://orgmode.org\n"))
+  (should (equal (org-test-parse-and-interpret "https://orgmode.org")
+		 "https://orgmode.org\n"))
   ;; Angular links.
-  (should (equal (org-test-parse-and-interpret "<http://orgmode.org>")
-		 "<http://orgmode.org>\n"))
+  (should (equal (org-test-parse-and-interpret "<https://orgmode.org>")
+		 "<https://orgmode.org>\n"))
   ;; Pathological case: link with a %-sign in description.
   (should (equal (org-test-parse-and-interpret "[[file://path][%s]]")
 		 "[[file://path][%s]]\n")))
@@ -3550,7 +3550,7 @@ Text
   ;; Special case: objects in inline footnotes.
   (should
    (eq 'link
-       (org-test-with-temp-text "[fn::[[<point>http://orgmode.org]]]"
+       (org-test-with-temp-text "[fn::[[<point>https://orgmode.org]]]"
 	 (org-element-type (org-element-context)))))
   ;; Special case: tags looking like a link.
   (should-not

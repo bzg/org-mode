@@ -37,8 +37,8 @@
 	  (org-feed-format-entry nil "%(concat \"success\" \"!\")" nil)))
   ;; %a placeholder.
   (should
-   (equal "[[http://orgmode.org]]\n"
-	  (org-feed-format-entry '(:link "http://orgmode.org") "%a" nil)))
+   (equal "[[https://orgmode.org]]\n"
+	  (org-feed-format-entry '(:link "https://orgmode.org") "%a" nil)))
   ;; %t and %T placeholders.
   (should
    (equal (format-time-string (org-time-stamp-format nil nil))
