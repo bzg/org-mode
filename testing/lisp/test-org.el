@@ -6494,21 +6494,29 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
    (equal "<2012-03-29 Thu>"
 	  (let ((system-time-locale "en_US"))
 	    (org-element-interpret-data
-	     (org-timestamp-from-time '(20339 35296))))))
+	     (org-timestamp-from-time
+	      (apply #'encode-time
+		     (org-parse-time-string "<2012-03-29 Thu 16:40>")))))))
   ;; When optional argument WITH-TIME is non-nil, provide time
   ;; information.
   (should
    (equal "<2012-03-29 Thu 16:40>"
 	  (let ((system-time-locale "en_US"))
 	    (org-element-interpret-data
-	     (org-timestamp-from-time '(20340 29760) t)))))
+	     (org-timestamp-from-time
+	      (apply #'encode-time
+		     (org-parse-time-string "<2012-03-29 Thu 16:40>"))
+	      t)))))
   ;; When optional argument INACTIVE is non-nil, return an inactive
   ;; timestamp.
   (should
    (equal "[2012-03-29 Thu]"
 	  (let ((system-time-locale "en_US"))
 	    (org-element-interpret-data
-	     (org-timestamp-from-time '(20339 35296) nil t))))))
+	     (org-timestamp-from-time
+	      (apply #'encode-time
+		     (org-parse-time-string "<2012-03-29 Thu 16:40>"))
+	      nil t))))))
 
 (ert-deftest test-org/timestamp-to-time ()
   "Test `org-timestamp-to-time' specifications."
