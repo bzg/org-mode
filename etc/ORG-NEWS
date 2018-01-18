@@ -102,6 +102,9 @@ document, use =shrink= value instead, or in addition to align:
 #+END_EXAMPLE
 
 ** New features
+*** Add support for links to LaTeX equations in HTML export
+Use MathJax links when enabled (by ~org-html-with-latex~), otherwise
+add a label to the rendered equation.
 *** Org Tempo may used for snippet expansion of structure template.
 See manual and the commentary section in ~org-tempo.el~ for details.
 *** Exclude unnumbered headlines from table of contents
