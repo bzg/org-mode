@@ -9197,7 +9197,8 @@ non-nil."
 			 (cdr (assoc-string
 			       (completing-read
 				"Which function for creating the link? "
-				(mapcar #'car results-alist) nil t name)
+				(mapcar #'car results-alist)
+				nil t (symbol-name name))
 			       results-alist)))
 		  t))))
 	(setq link (plist-get org-store-link-plist :link))
