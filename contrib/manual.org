@@ -15213,7 +15213,7 @@ covert it to HTML with {{{kbd(M-x org-html-convert-region-to-html)}}}.
 
 Org includes a publishing management system that allows you to
 configure automatic HTML conversion of /projects/ composed of
-interlinked org files.  You can also configure Org to automatically
+interlinked Org files.  You can also configure Org to automatically
 upload your exported HTML pages and related attachments, such as
 images and source code files, to a web server.
 
