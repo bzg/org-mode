@@ -11,7 +11,7 @@
 @set txicodequotebacktick
 
 @c Version and Contact Info
-@set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
+@set MAINTAINERSITE @uref{https://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
 @set MAINTAINER Carsten Dominik
 @set MAINTAINEREMAIL @email{carsten at orgmode dot org}
@@ -241,7 +241,7 @@ authoring and publishing system, and it supports working with source code for
 literal programming and reproducible research.
 
 @i{This document is a much compressed derivative of the
-@uref{http://orgmode.org/index.html#sec-4_1, comprehensive Org-mode manual}.
+@uref{https://orgmode.org/index.html#sec-4_1, comprehensive Org-mode manual}.
 It contains all basic features and commands, along with important hints for
 customization.  It is intended for beginners who would shy back from a 200
 page manual because of sheer size.}
@@ -543,7 +543,7 @@ is simply the marker in square brackets, inside text.  For example:
 @smallexample
 The Org homepage[fn:1] now looks a lot better than it used to.
 ...
-[fn:1] The link is: http://orgmode.org
+[fn:1] The link is: https://orgmode.org
 @end smallexample
 
 @noindent 
@@ -562,7 +562,7 @@ Jump between definition and reference.
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Document-Structure.html#Document-Structure,
+@uref{https://orgmode.org/manual/Document-Structure.html#Document-Structure,
 Chapter 2 of the manual}@*
 @uref{http://sachachua.com/wp/2008/01/outlining-your-notes-with-org/,
 Sacha Chua's tutorial}}
@@ -685,13 +685,13 @@ between the nearest horizontal separator lines, or the entire table.
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Tables.html#Tables, Chapter 3 of the
+@uref{https://orgmode.org/manual/Tables.html#Tables, Chapter 3 of the
 manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/tables.php, Bastien's
+@uref{https://orgmode.org/worg/org-tutorials/tables.php, Bastien's
 table tutorial}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-spreadsheet-intro.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-spreadsheet-intro.php,
 Bastien's spreadsheet tutorial}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-plot.php, Eric's plotting tutorial}}
+@uref{https://orgmode.org/worg/org-tutorials/org-plot.php, Eric's plotting tutorial}}
 
 @node Hyperlinks, TODO Items, Tables, Top
 @chapter Hyperlinks
@@ -834,7 +834,7 @@ link, together with an explanation:
 @end smallexample
 
 @seealso{
-@uref{http://orgmode.org/manual/Hyperlinks.html#Hyperlinks, Chapter 4 of the
+@uref{https://orgmode.org/manual/Hyperlinks.html#Hyperlinks, Chapter 4 of the
 manual}}
 
 @node TODO Items, Tags, Hyperlinks, Top
@@ -1086,8 +1086,8 @@ This works only if the cursor is already in a plain list item
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/TODO-Items.html#TODO-Items, Chapter 5 of the manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/orgtutorial_dto.php, David
+@uref{https://orgmode.org/manual/TODO-Items.html#TODO-Items, Chapter 5 of the manual}@*
+@uref{https://orgmode.org/worg/org-tutorials/orgtutorial_dto.php, David
 O'Toole's introductory tutorial}@*
 @uref{http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html,
 Charles Cave's GTD setup}}
@@ -1249,7 +1249,7 @@ levels and properties.  For a complete description with many examples, see
 @ref{Matching tags and properties}.
 
 @seealso{
-@uref{http://orgmode.org/manual/Tags.html#Tags, Chapter 6 of the manual}@*
+@uref{https://orgmode.org/manual/Tags.html#Tags, Chapter 6 of the manual}@*
 @uref{http://sachachua.com/wp/2008/01/tagging-in-org-plus-bonus-code-for-timeclocks-and-tags/,
 Sacha Chua's article about tagging in Org-mode}}
 
@@ -1309,9 +1309,9 @@ properties}.
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns,
+@uref{https://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns,
 Chapter 7 of the manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-column-view-tutorial.php,Bastien
+@uref{https://orgmode.org/worg/org-tutorials/org-column-view-tutorial.php,Bastien
 Guerry's column view tutorial}}
 
 @node Dates and Times, Capture - Refile - Archive, Properties, Top
@@ -1528,7 +1528,7 @@ at an existing clock table, just update it.
 #+END: clocktable
 @end smallexample
 @noindent
-For details about how to customize this view, see @uref{http://orgmode.org/manual/Clocking-work-time.html#Clocking-work-time,the manual}.
+For details about how to customize this view, see @uref{https://orgmode.org/manual/Clocking-work-time.html#Clocking-work-time,the manual}.
 @item C-c C-c
 Update dynamic block at point.  The cursor needs to be in the
 @code{#+BEGIN} line of the dynamic block.
@@ -1538,7 +1538,7 @@ The @kbd{l} key may be used in the agenda (@pxref{Weekly/daily agenda}) to
 show which tasks have been worked on or closed during a day.
 
 @seealso{
-@uref{http://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times,
+@uref{https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times,
 Chapter 8 of the manual}@*
 @uref{http://members.optusnet.com.au/~charles57/GTD/org_dates/, Charles
 Cave's Date and Time tutorial}@*
@@ -1699,9 +1699,9 @@ setting this variable, for example
 @end smallexample
 
 @seealso{
-@uref{http://orgmode.org/manual/Capture-_002d-Refile-_002d-Archive.html#Capture-_002d-Refile-_002d-Archive,
+@uref{https://orgmode.org/manual/Capture-_002d-Refile-_002d-Archive.html#Capture-_002d-Refile-_002d-Archive,
 Chapter 9 of the manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-protocol-custom-handler.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-protocol-custom-handler.php,
 Sebastian Rose's tutorial for capturing from a web browser}}@uref{}@*
 
 @node Agenda Views, Markup, Capture - Refile - Archive, Top
@@ -2043,9 +2043,9 @@ headlines that are also TODO items
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Agenda-Views.html#Agenda-Views, Chapter 10 of
+@uref{https://orgmode.org/manual/Agenda-Views.html#Agenda-Views, Chapter 10 of
 the manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.php,
 Mat Lundin's tutorial about custom agenda commands}@*
 @uref{http://www.newartisans.com/2007/08/using-org-mode-as-a-day-planner.html,
 John Wiegley's setup}}
@@ -2289,11 +2289,11 @@ x=\sqrt@{b@}
 @end smallexample
 @noindent  
 With
-@uref{http://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments,special
+@uref{https://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments,special
 setup}, @LaTeX{} snippets will be included as images when exporting to HTML.
 
 @seealso{
-@uref{http://orgmode.org/manual/Markup.html#Markup, Chapter 11 of the manual}}
+@uref{https://orgmode.org/manual/Markup.html#Markup, Chapter 11 of the manual}}
 
 @node Exporting, Publishing, Markup, Top
 @chapter Exporting
@@ -2421,12 +2421,12 @@ Create a single large iCalendar file from all files in
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Exporting.html#Exporting, Chapter 12 of the manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/images-and-xhtml-export.php,
+@uref{https://orgmode.org/manual/Exporting.html#Exporting, Chapter 12 of the manual}@*
+@uref{https://orgmode.org/worg/org-tutorials/images-and-xhtml-export.php,
 Sebastian Rose's image handling tutorial}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-latex-export.php, Thomas
+@uref{https://orgmode.org/worg/org-tutorials/org-latex-export.php, Thomas
 Dye's LaTeX export tutorial}
-@uref{http://orgmode.org/worg/org-tutorials/org-beamer/tutorial.php, Eric
+@uref{https://orgmode.org/worg/org-tutorials/org-beamer/tutorial.php, Eric
 Fraga's BEAMER presentation tutorial}}
 
 @node Publishing, Working With Source Code, Exporting, Top
@@ -2469,11 +2469,11 @@ publishing of all files by giving a prefix argument to any of the commands
 above.
 
 @seealso{
-@uref{http://orgmode.org/manual/Publishing.html#Publishing, Chapter 13 of the
+@uref{https://orgmode.org/manual/Publishing.html#Publishing, Chapter 13 of the
 manual}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php,
 Sebastian Rose's publishing tutorial}@*
-@uref{http://orgmode.org/worg/org-tutorials/org-jekyll.php, Ian Barton's
+@uref{https://orgmode.org/worg/org-tutorials/org-jekyll.php, Ian Barton's
 Jekyll/blogging setup}}
 
 @node Working With Source Code, Miscellaneous, Publishing, Top
@@ -2537,7 +2537,7 @@ Use @kbd{C-c C-v l} to load the code blocks from an Org-mode files into the
 ``Library of Babel'', these blocks can then be evaluated from any Org-mode
 buffer.  A collection of generally useful code blocks is accessible through
 Org-mode’s community-driven documentation on
-@uref{http://orgmode.org/worg/library-of-babel.html,Worg}.
+@uref{https://orgmode.org/worg/library-of-babel.html,Worg}.
 
 @subheading Header Arguments
 Many aspects of the evaluation and export of code blocks are controlled
@@ -2588,9 +2588,9 @@ Org-mode buffer.
 @end table
 
 @seealso{
-@uref{http://orgmode.org/manual/Literal-examples.html#Literal-examples,
+@uref{https://orgmode.org/manual/Literal-examples.html#Literal-examples,
 Chapter 11.3 of the manual}@*
-@uref{http://orgmode.org/worg/org-contrib/babel/index.php,
+@uref{https://orgmode.org/worg/org-contrib/babel/index.php,
 The Babel site on Worg}}
 
 @node Miscellaneous, GNU Free Documentation License, Working With Source Code, Top
@@ -2671,11 +2671,11 @@ by Matt Jones.  The two implementations are not identical but offer similar
 features.
 
 @seealso{
-@uref{http://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 15
+@uref{https://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 15
 of the manual}@*
-@uref{http://orgmode.org/manual/MobileOrg.html#MobileOrg, Appendix B of the
+@uref{https://orgmode.org/manual/MobileOrg.html#MobileOrg, Appendix B of the
 manual}@*
-@uref{http://orgmode.org/orgcard.pdf,Key reference card}}
+@uref{https://orgmode.org/orgcard.pdf,Key reference card}}
 
 
 @node GNU Free Documentation License,  , Miscellaneous, Top

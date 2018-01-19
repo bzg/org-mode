@@ -8,7 +8,7 @@
 ;; Author: Georg C. F. Greve <greve at fsfeurope dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp, email, mairix
 ;; Purpose: Integrate mairix email searching into Org mode
-;; See http://orgmode.org and http://www.rpcurnow.force9.co.uk/mairix/
+;; See https://orgmode.org and http://www.rpcurnow.force9.co.uk/mairix/
 ;; Version: 0.5
 ;;
 ;; This file is Free Software; you can redistribute it and/or modify

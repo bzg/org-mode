@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 ;;
-;; See <http://orgmode.org/worg/dev/org-syntax.html> for details about
+;; See <https://orgmode.org/worg/dev/org-syntax.html> for details about
 ;; Org syntax.
 ;;
 ;; Lisp-wise, a syntax object can be represented as a list.

@@ -7,7 +7,7 @@
 ;;  Luis Anaya (Mathomatic)
 
 ;; Keywords: literate programming, reproducible research, mathomatic
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is not part of GNU Emacs.
 

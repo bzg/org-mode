@@ -4,7 +4,7 @@
 
 ;; Author: Matthieu Lemerre <racin@free.fr>
 ;; Keywords: outlines, hypermedia, calendar, wp
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is not part of GNU Emacs.
 

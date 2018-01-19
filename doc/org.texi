@@ -15718,7 +15718,7 @@ Org expand @code{:noweb} references by default.
 Each language can have separate default header arguments by customizing the
 variable @code{org-babel-default-header-args:<lang>}, where @code{<lang>} is
 the name of the language.  For details, see the language-specific online
-documentation at @uref{https://orgmode.org/worg/org-contrib/babel}.
+documentation at @uref{https://orgmode.org/worg/org-contrib/babel/}.
 
 @node Header arguments in Org mode properties
 @subsubheading Header arguments in Org mode properties

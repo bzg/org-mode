@@ -4,7 +4,7 @@
 
 ;; Author: Eric Schulte <eric dot schulte at gmx dot com>
 ;; Keywords: outlines, hypermedia, bibtex, d3
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 ;; Version: 0.01
 
 ;; This file is not yet part of GNU Emacs.

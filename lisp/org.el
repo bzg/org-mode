@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -48,7 +48,7 @@
 ;; ---------------------------
 ;; See the corresponding sections in the manual at
 ;;
-;;   http://orgmode.org/org.html#Installation
+;;   https://orgmode.org/org.html#Installation
 ;;
 ;; Documentation
 ;; -------------
@@ -59,7 +59,7 @@
 ;; in the doc/ directory.
 ;;
 ;; A list of recent changes can be found at
-;; http://orgmode.org/Changes.html
+;; https://orgmode.org/Changes.html
 ;;
 ;;; Code:
 
@@ -1828,7 +1828,7 @@ See the manual for examples."
 
 (defcustom org-descriptive-links t
   "Non-nil means Org will display descriptive links.
-E.g. [[http://orgmode.org][Org website]] will be displayed as
+E.g. [[https://orgmode.org][Org website]] will be displayed as
 \"Org Website\", hiding the link itself and just displaying its
 description.  When set to nil, Org will display the full links
 literally.
@@ -20966,7 +20966,7 @@ such private information before sending the email.")
      "Remember to cover the basics, that is, what you expected to happen and
 what in fact did happen.  You don't know how to make a good report?  See
 
-     http://orgmode.org/manual/Feedback.html#Feedback
+     https://orgmode.org/manual/Feedback.html#Feedback
 
 Your bug report will be posted to the Org mailing list.
 ------------------------------------------------------------------------")

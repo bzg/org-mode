@@ -7,7 +7,7 @@
 ;;   Luis Anaya (tcl)
 ;;
 ;; Keywords: literate programming, reproducible research
-;; Homepage: http://orgmode.org
+;; Homepage: https://orgmode.org
 
 ;; This file is not part of GNU Emacs.
 

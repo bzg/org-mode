@@ -928,7 +928,7 @@ The minted choice has possible repercussions on the preview of
 latex fragments (see `org-preview-latex-fragment').  If you run
 into previewing problems, please consult
 
-  http://orgmode.org/worg/org-tutorials/org-latex-preview.html"
+  https://orgmode.org/worg/org-tutorials/org-latex-preview.html"
   :group 'org-export-latex
   :type '(choice
 	  (const :tag "Use listings" t)
