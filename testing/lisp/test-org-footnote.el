@@ -74,7 +74,7 @@
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
   (should-error
-   (org-test-with-temp-text " [[http://orgmode.org][Org mode<point>]]"
+   (org-test-with-temp-text " [[https://orgmode.org][Org mode<point>]]"
      (org-footnote-new)))
   ;; Allow new footnotes in blank lines after an element or white
   ;; spaces after an object.

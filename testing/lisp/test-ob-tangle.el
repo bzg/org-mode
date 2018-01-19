@@ -82,9 +82,9 @@
   "Test commenting of links at left margin."
   (should
    (string-match
-    (regexp-quote "# [[http://orgmode.org][Org mode]]")
+    (regexp-quote "# [[https://orgmode.org][Org mode]]")
     (org-test-with-temp-text-in-file
-        "[[http://orgmode.org][Org mode]]
+        "[[https://orgmode.org][Org mode]]
 #+header: :comments org :tangle \"test-ob-tangle.sh\"
 #+begin_src sh
 echo 1

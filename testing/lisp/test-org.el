@@ -1801,12 +1801,12 @@
   (should
    (equal '("Org")
 	  (org-test-with-temp-text
-	      "* [[http://orgmode.org][Org]]\n** S<point>"
+	      "* [[https://orgmode.org][Org]]\n** S<point>"
 	    (org-get-outline-path))))
   (should
-   (equal '("http://orgmode.org")
+   (equal '("https://orgmode.org")
 	  (org-test-with-temp-text
-	      "* [[http://orgmode.org]]\n** S<point>"
+	      "* [[https://orgmode.org]]\n** S<point>"
 	    (org-get-outline-path))))
   ;; When WITH-SELF is non-nil, include current heading.
   (should
@@ -3201,12 +3201,12 @@ SCHEDULED: <2017-05-06 Sat>
 	    (progn (org-beginning-of-line) (looking-at-p "Item"))))))
   ;; Leave point before invisible characters at column 0.
   (should
-   (org-test-with-temp-text "[[http://orgmode.org]]<point>"
+   (org-test-with-temp-text "[[https://orgmode.org]]<point>"
      (let ((org-special-ctrl-a/e nil))
        (org-beginning-of-line)
        (bolp))))
   (should
-   (org-test-with-temp-text "[[http://orgmode.org]]<point>"
+   (org-test-with-temp-text "[[https://orgmode.org]]<point>"
      (let ((org-special-ctrl-a/e t))
        (org-beginning-of-line)
        (bolp))))
@@ -3347,7 +3347,7 @@ SCHEDULED: <2017-05-06 Sat>
        (eobp))))
   ;; Get past invisible characters at the end of line.
   (should
-   (org-test-with-temp-text "[[http://orgmode.org]]"
+   (org-test-with-temp-text "[[https://orgmode.org]]"
      (org-end-of-line)
      (eolp))))
 
