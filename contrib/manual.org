@@ -16139,7 +16139,7 @@ Each language can have separate default header arguments by
 customizing the variable ~org-babel-default-header-args:<LANG>~, where
 {{{var(<LANG>)}}} is the name of the language.  For details, see the
 language-specific online documentation at
-https://orgmode.org/worg/org-contrib/babel.
+https://orgmode.org/worg/org-contrib/babel/.
 
 *** Header arguments in Org mode properties
 :PROPERTIES:
