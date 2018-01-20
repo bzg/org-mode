@@ -21978,7 +21978,6 @@ assumed to be significant there."
   ;; parenthesis can end up being parsed as a new list item.
   (looking-at-p "[ \t]*{{{n\\(?:([^\n)]*)\\)?}}}[.)]\\(?:$\\| \\)"))
 
-(declare-function message-in-body-p "message" ())
 (defvar orgtbl-line-start-regexp) ; From org-table.el
 (defun org-adaptive-fill-function ()
   "Compute a fill prefix for the current line.
@@ -22037,9 +22036,6 @@ matches in paragraphs or comments, use it."
 		(if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
 		    (match-string 0)
 		  ""))))))))))
-
-(declare-function message-goto-body "message" ())
-(defvar message-cite-prefix-regexp)	; From message.el
 
 (defun org-fill-element (&optional justify)
   "Fill element at point, when applicable.
