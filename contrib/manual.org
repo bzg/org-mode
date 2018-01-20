@@ -905,10 +905,9 @@ headline, and point at the line just after the last headline to
 change.  Note that when the cursor is inside a table (see [[*Tables]]),
 the Meta-Cursor keys have different functionality.
 
-** Sparse trees
+** Sparse Trees
 :PROPERTIES:
 :DESCRIPTION: Matches embedded in context.
-:ALT_TITLE: Sparse trees
 :END:
 #+cindex: sparse trees
 #+cindex: trees, sparse
@@ -992,10 +991,9 @@ the document.  Or you can use the command {{{kbd(C-c C-e v)}}} to
 export only the visible part of the document and print the resulting
 file.
 
-** Plain lists
+** Plain Lists
 :PROPERTIES:
 :DESCRIPTION: Additional structure within an entry.
-:ALT_TITLE: Plain lists
 :END:
 #+cindex: plain lists
 #+cindex: lists, plain
@@ -1883,10 +1881,10 @@ every vertical line you would like to have:
   | / | <   |     |     | <       |            |
 #+end_example
 
-** The Orgtbl minor mode
+** The Orgtbl Minor Mode
 :PROPERTIES:
 :DESCRIPTION: The table editor as minor mode.
-:ALT_TITLE: Orgtbl mode
+:ALT_TITLE: Orgtbl Mode
 :END:
 #+cindex: Orgtbl mode
 #+cindex: minor mode for tables
@@ -3508,10 +3506,10 @@ completion function like this:
   (org-link-set-parameter "type" :complete #'some-completion-function)
 #+END_SRC
 
-** Search options in file links
+** Search Options in File Links
 :PROPERTIES:
 :DESCRIPTION: Linking to a specific location.
-:ALT_TITLE: Search options
+:ALT_TITLE: Search Options
 :END:
 #+cindex: search option in file links
 #+cindex: file links, searching
@@ -3577,10 +3575,9 @@ variables for more information.  Org actually uses this mechanism for
 BibTeX database files, and you can use the corresponding code as an
 implementation example.  See the file =org-bibtex.el=.
 
-* TODO items
+* TODO Items
 :PROPERTIES:
 :DESCRIPTION: Every tree branch can be a TODO item.
-:ALT_TITLE: TODO Items
 :END:
 #+cindex: TODO items
 
@@ -3596,10 +3593,10 @@ throughout your notes file.  Org mode compensates for this by
 providing methods to give you an overview of all the things that you
 have to do.
 
-** Basic TODO functionality
+** Basic TODO Functionality
 :PROPERTIES:
 :DESCRIPTION: Marking and displaying TODO entries.
-:ALT_TITLE: TODO basics
+:ALT_TITLE: TODO Basics
 :END:
 
 Any headline becomes a TODO item when it starts with the word =TODO=,
@@ -3688,10 +3685,10 @@ The most important commands to work with TODO entries are:
 Changing a TODO state can also trigger tag changes.  See the docstring
 of the option ~org-todo-state-tags-triggers~ for details.
 
-** Extended use of TODO keywords
+** Extended Use of TODO Keywords
 :PROPERTIES:
 :DESCRIPTION: Workflow and assignments.
-:ALT_TITLE: TODO extensions
+:ALT_TITLE: TODO Extensions
 :END:
 #+cindex: extended TODO keywords
 
@@ -4301,10 +4298,10 @@ highest priority is earlier in the alphabet than the lowest priority):
 #+cindex: PRIORITIES, keyword
 : #+PRIORITIES: A C B
 
-** Breaking tasks down tasks into subtasks
+** Breaking Down Tasks into Subtasks
 :PROPERTIES:
 :DESCRIPTION: Splitting a task into manageable pieces.
-:ALT_TITLE: Breaking down tasks
+:ALT_TITLE: Breaking Down Tasks
 :END:
 #+cindex: tasks, breaking down
 #+cindex: statistics, for TODO items
@@ -5628,10 +5625,9 @@ properties from entries in a certain scope, and arbitrary Lisp
 expressions to process these values before inserting them into a table
 or a dynamic block.
 
-* Dates and times
+* Dates and Times
 :PROPERTIES:
 :DESCRIPTION: Making items useful for planning.
-:ALT_TITLE: Dates and Times
 :END:
 #+cindex: dates
 #+cindex: times
@@ -5645,7 +5641,7 @@ a little confusing because timestamp is often used as indicating when
 something was created or last changed.  However, in Org mode this term
 is used in a much wider sense.
 
-** Timestamps, deadlines, and scheduling
+** Timestamps, Deadlines and Scheduling
 :PROPERTIES:
 :DESCRIPTION: Assigning a time to a tree entry.
 :ALT_TITLE: Timestamps
@@ -6884,7 +6880,7 @@ the agenda buffer]]).  If you have these estimates defined consistently,
 two or three key presses narrow down the list to stuff that fits into
 an available time slot.
 
-** Taking notes with a relative timer
+** Taking Notes with a Relative Timer
 :PROPERTIES:
 :DESCRIPTION: Notes with a running timer.
 :ALT_TITLE: Timers
@@ -7699,7 +7695,7 @@ adding the same item several times.
 For more information, including how to read atom feeds, see
 =org-feed.el= and the docstring of ~org-feed-alist~.
 
-** Protocols for external access
+** Protocols for External Access
 :PROPERTIES:
 :DESCRIPTION: External access to Emacs and Org.
 :ALT_TITLE: Protocols
@@ -8134,10 +8130,9 @@ The following commands help manage the =ARCHIVE= tag:
      retains a lot of its original context, including inherited tags
      and approximate position in the outline.
 
-* Agenda views
+* Agenda Views
 :PROPERTIES:
 :DESCRIPTION: Collecting information into views.
-:ALT_TITLE: Agenda Views
 :END:
 #+cindex: agenda views
 
@@ -8286,10 +8281,10 @@ the Speedbar frame:
      #+findex: org-agenda-remove-restriction-lock
      Lift the restriction.
 
-** The agenda dispatcher
+** The Agenda Dispatcher
 :PROPERTIES:
 :DESCRIPTION: Keyboard access to agenda views.
-:ALT_TITLE: Agenda dispatcher
+:ALT_TITLE: Agenda Dispatcher
 :END:
 #+cindex: agenda dispatcher
 #+cindex: dispatching agenda commands
@@ -8381,10 +8376,10 @@ possibility to create extended agenda buffers that contain several
 blocks together, for example the weekly agenda, the global TODO list
 and a number of special tags matches.  See [[*Custom agenda views]].
 
-** The built-in agenda views
+** The Built-in Agenda Views
 :PROPERTIES:
 :DESCRIPTION: What is available out of the box?
-:ALT_TITLE: Built-in agenda views
+:ALT_TITLE: Built-in Agenda Views
 :END:
 
 In this section we describe the built-in views.
@@ -9242,10 +9237,10 @@ rebuilding the agenda:
      #+findex: org-agenda-limit-interactively
      This prompts for the type of limit to apply and its value.
 
-** Commands in the agenda buffer
+** Commands in the Agenda Buffer
 :PROPERTIES:
 :DESCRIPTION: Remote editing of Org trees.
-:ALT_TITLE: Agenda commands
+:ALT_TITLE: Agenda Commands
 :END:
 #+cindex: commands, in agenda buffer
 
@@ -10425,10 +10420,10 @@ You can also extract agenda information in a way that allows further
 processing by other programs.  See [[*Extracting agenda information]], for
 more information.
 
-** Using column view in the agenda
+** Using Column View in the Agenda
 :PROPERTIES:
 :DESCRIPTION: Using column view for collected entries.
-:ALT_TITLE: Agenda column view
+:ALT_TITLE: Agenda Column View
 :END:
 #+cindex: column view, in agenda
 #+cindex: agenda, column view
@@ -10496,7 +10491,7 @@ environment.  This causes the following issues:
    today, with the time already spent---via =CLOCKSUM=---and with
    the planned total effort for it.
 
-* Markup for rich export
+* Markup for Rich Export
 :PROPERTIES:
 :DESCRIPTION: Prepare text for rich export.
 :ALT_TITLE: Markup
@@ -10865,7 +10860,6 @@ change this convention.  For example, when setting this variable to
 ** Embedded LaTeX
 :PROPERTIES:
 :DESCRIPTION: LaTeX can be freely used inside Org documents.
-:ALT_TITLE: Embedded Latex
 :END:
 #+cindex: @TeX{} interpretation
 #+cindex: @LaTeX{} interpretation
@@ -18162,10 +18156,10 @@ activated, {{{kbd(M-x org-speed-command-help)}}}, or {{{kbd(?)}}} when
 cursor is at the beginning of an Org headline, shows currently active
 Speed Keys, including the user-defined ones.
 
-** Code evaluation and security issues
+** Code Evaluation and Security Issues
 :PROPERTIES:
 :DESCRIPTION: Org files evaluate in-line code.
-:ALT_TITLE: Code evaluation security
+:ALT_TITLE: Code Evaluation Security
 :END:
 
 Unlike plain text, running code comes with risk.  Each =src= code
@@ -18249,10 +18243,10 @@ through the Org menu: Org \rarr Customization \rarr Browse Org Group.
 Org also has per-file settings for some variables (see [[*Summary of
 in-buffer settings]]).
 
-** Summary of in-buffer settings
+** Summary of In-Buffer Settings
 :PROPERTIES:
 :DESCRIPTION: Overview of the #+KEYWORDS.
-:ALT_TITLE: In-buffer settings
+:ALT_TITLE: In-buffer Settings
 :END:
 #+cindex: in-buffer settings
 #+cindex: special keywords
@@ -18675,10 +18669,10 @@ manual, but here is a consolidated list for easy reference.
 
 - If the cursor is at a timestamp, fix the day name in the timestamp.
 
-** A cleaner outline view
+** A Cleaner Outline View
 :PROPERTIES:
 :DESCRIPTION: Getting rid of leading stars in the outline.
-:ALT_TITLE: Clean view
+:ALT_TITLE: Clean View
 :END:
 #+cindex: hiding leading stars
 #+cindex: dynamic indentation
@@ -18792,7 +18786,7 @@ headings as shown in examples below.
 ** Using Org on a TTY
 :PROPERTIES:
 :DESCRIPTION: Using Org on a tty.
-:ALT_TITLE: TTY keys
+:ALT_TITLE: TTY Keys
 :END:
 #+cindex: tty key bindings
 
@@ -18825,7 +18819,7 @@ editing timestamp might be better with {{{kbd(C-c .)}}} chord.
 | {{{kbd(C-S-left)}}}  | {{{kbd(C-c C-x left)}}}  |              |                      |
 | {{{kbd(C-S-right)}}} | {{{kbd(C-c C-x right)}}} |              |                      |
 
-** Interaction with other packages
+** Interaction with Other Packages
 :PROPERTIES:
 :DESCRIPTION: With other Emacs packages.
 :ALT_TITLE: Interaction
@@ -20574,31 +20568,27 @@ be complete if the ones above were not mentioned in this manual.
 
 #+TEXINFO: @include ../doc/doclicense.texi
 
-* Concept index
+* Main Index
 :PROPERTIES:
-:ALT_TITLE: Main Index
 :INDEX:    cp
 :DESCRIPTION: An index of Org's concepts and features.
 :END:
 
-* Key index
+* Key Index
 :PROPERTIES:
 :DESCRIPTION: Key bindings and where they are described.
-:ALT_TITLE: Key Index
 :INDEX:    ky
 :END:
 
-* Command and function index
+* Command and Function Index
 :PROPERTIES:
 :DESCRIPTION: Command names and some internal functions.
-:ALT_TITLE: Command and Function Index
 :INDEX:    fn
 :END:
 
-* Variable index
+* Variable Index
 :PROPERTIES:
 :DESCRIPTION: Variables mentioned in the manual.
-:ALT_TITLE: Variable Index
 :INDEX:    vr
 :END:
 
