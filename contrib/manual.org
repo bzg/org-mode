@@ -423,7 +423,7 @@ not use it as a title for your own headings.
 
 Some people find the many stars too noisy and would prefer an outline
 that has whitespace followed by a single star as headline starters.
-See [[*A cleaner outline view]].
+See [[*A Cleaner Outline View]].
 
 #+vindex: org-cycle-separator-lines
 An empty line after the end of a subtree is considered part of it and
@@ -521,8 +521,8 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
      Reveal context around point, showing the current entry, the
      following heading and the hierarchy above.  Useful for working
      near a location that has been exposed by a sparse tree command
-     (see [[*Sparse trees]]) or an agenda command (see [[*Commands in the
-     agenda buffer]]).  With a prefix argument show, on each level, all
+     (see [[*Sparse Trees]]) or an agenda command (see [[*Commands in the
+     Agenda Buffer]]).  With a prefix argument show, on each level, all
      sibling headings.  With a double prefix argument, also show the
      entire subtree of the parent.
 
@@ -581,7 +581,7 @@ buffer:
 #+cindex: VISIBILITY, property
 #+texinfo: @noindent
 Furthermore, any entries with a =VISIBILITY= property (see [[*Properties
-and columns]]) get their visibility adapted accordingly.  Allowed values
+and Columns]]) get their visibility adapted accordingly.  Allowed values
 for this property are =folded=, =children=, =content=, and ~all~.
 
 - {{{kbd(C-u C-u TAB)}}} (~org-set-startup-visibility~) ::
@@ -697,7 +697,7 @@ The following commands jump to other headlines in the buffer.
      Insert a new heading, item or row.
 
      If the command is used at the /beginning/ of a line, and if there
-     is a heading or a plain list item (see [[*Plain lists]]) at point,
+     is a heading or a plain list item (see [[*Plain Lists]]) at point,
      the new heading/item is created /before/ the current line.  When
      used at the beginning of a regular line of text, turn that line
      into a heading.
@@ -847,7 +847,7 @@ The following commands jump to other headlines in the buffer.
      #+kindex: C-c C-w
      #+findex: org-refile
      Refile entry or region to a different location.  See [[Refile and
-     copy]].
+     Copy]].
 
 - {{{kbd(C-c ^)}}} (~org-sort~) ::
 
@@ -967,7 +967,7 @@ commands can be accessed through a dispatcher:
 For frequently used sparse trees of specific search strings, you can
 use the variable ~org-agenda-custom-commands~ to define fast keyboard
 access to specific sparse trees.  These commands will then be
-accessible through the agenda dispatcher (see [[*The agenda dispatcher]]).
+accessible through the agenda dispatcher (see [[*The Agenda Dispatcher]]).
 For example:
 
 #+begin_src emacs-lisp
@@ -1099,7 +1099,7 @@ intact.  If some of these actions get in your way, configure
        #+findex: org-insert-heading
        #+vindex: org-M-RET-may-split-line
        Insert new item at current level.  With a prefix argument,
-       force a new heading (see [[Structure editing]]).  If this command
+       force a new heading (see [[*Structure Editing]]).  If this command
        is used in the middle of an item, that item is /split/ in two,
        and the second part becomes the new item[fn:13].  If this
        command is executed /before item's body/, the new item is
@@ -1181,7 +1181,7 @@ intact.  If some of these actions get in your way, configure
 
        #+kindex: C-c *
        Turn a plain list item into a headline---so that it becomes
-       a subheading at its location.  See [[*Structure editing]], for
+       a subheading at its location.  See [[*Structure Editing]], for
        a detailed explanation.
 
   - {{{kbd(C-c C-*)}}} ::
@@ -1237,18 +1237,18 @@ active region, this command puts the region inside the drawer.  With
 a prefix argument, this command calls ~org-insert-property-drawer~,
 which creates a =PROPERTIES= drawer right below the current headline.
 Org mode uses this special drawer for storing properties (see
-[[*Properties and columns]]).  You cannot use it for anything else.
+[[*Properties and Columns]]).  You cannot use it for anything else.
 
 Completion over drawer keywords is also possible using
 {{{kbd(M-TAB)}}}[fn:16].
 
-Visibility cycling (see [[*Visibility cycling]]) on the headline hides and
+Visibility cycling (see [[*Visibility Cycling]]) on the headline hides and
 shows the entry, but keep the drawer collapsed to a single line.  In
 order to look inside the drawer, you need to move the cursor to the
 drawer line and press {{{kbd(TAB)}}} there.
 
 You can also arrange for state change notes (see [[Tracking TODO state
-changes]]) and clock times (see [[*Clocking work time]]) to be stored in
+changes]]) and clock times (see [[*Clocking Work Time]]) to be stored in
 a =LOGBOOK= drawer.  If you want to store a quick note there, in
 a similar way to state changes, use
 
@@ -1265,8 +1265,8 @@ a similar way to state changes, use
 #+cindex: blocks, folding
 
 Org mode uses =#+BEGIN= ... =#+END= blocks for various purposes from
-including source code examples (see [[*Literal examples]]) to capturing
-time logging information (see [[*Clocking work time]]).  These blocks can
+including source code examples (see [[*Literal Examples]]) to capturing
+time logging information (see [[*Clocking Work Time]]).  These blocks can
 be folded and unfolded by pressing {{{kbd(TAB)}}} in the =#+BEGIN=
 line.  You can also get all blocks folded at startup by configuring
 the variable ~org-hide-block-startup~ or on a per-file basis by using
@@ -1701,8 +1701,8 @@ you, configure the option ~org-table-auto-blank-field~.
      #+kindex: C-c `
      #+findex: org-table-edit-field
      Edit the current field in a separate window.  This is useful for
-     fields that are not fully visible (see [[*Column width and
-     alignment]]).  When called with a {{{kbd(C-u)}}} prefix, just make
+     fields that are not fully visible (see [[*Column Width and
+     Alignment]]).  When called with a {{{kbd(C-u)}}} prefix, just make
      the full field visible, so that it can be edited in place.  When
      called with two {{{kbd(C-u)}}} prefixes, make the editor window
      follow the cursor through the table and always show the current
@@ -1904,7 +1904,7 @@ Furthermore, with some special setup, it is possible to maintain
 tables in arbitrary syntax with Orgtbl mode.  For example, it is
 possible to construct LaTeX tables with the underlying ease and power
 of Orgtbl mode, including spreadsheet capabilities.  For details, see
-[[*Tables in arbitrary syntax]].
+[[*Tables in Arbitrary Syntax]].
 
 ** The spreadsheet
 :PROPERTIES:
@@ -2078,7 +2078,7 @@ a line like this example:
 #+texinfo: @noindent
 #+vindex: constants-unit-system
 #+pindex: constants.el
-Also, properties (see [[*Properties and columns]]) can be used as
+Also, properties (see [[*Properties and Columns]]) can be used as
 constants in table formulas: for a property =Xyz= use the name
 =$PROP_Xyz=, and the property will be searched in the current outline
 entry and in the hierarchy above it.  If you have the =constants.el=
@@ -3025,7 +3025,7 @@ Links such as =[[My Target]]= or =[[My Target][Find my target]]= lead to a text 
 the current file.
 
 The link can be followed with {{{kbd(C-c C-o)}}} when the cursor is on
-the link, or with a mouse click (see [[*Handling links]]).  Links to
+the link, or with a mouse click (see [[*Handling Links]]).  Links to
 custom IDs point to the corresponding headline.  The preferred match
 for a text link is a /dedicated target/: the same string in double
 angular brackets, like =<<My Target>>=.
@@ -3159,18 +3159,18 @@ corresponding libraries from the =contrib/= directory:
 | =wl:folder=                            | Wanderlust folder link  |
 | =wl:folder#id=                         | Wanderlust message link |
 
-For customizing Org to add new link types, see [[*Adding hyperlink
-types]].
+For customizing Org to add new link types, see [[*Adding Hyperlink
+Types]].
 
 A link should be enclosed in double brackets and may contain
 a descriptive text to be displayed instead of the URL (see [[*Link
-format]]), for example:
+Format]]), for example:
 
 : [[http://www.gnu.org/software/emacs/][GNU Emacs]]
 
 #+texinfo: @noindent
 If the description is a file name or URL that points to an image, HTML
-export (see [[*HTML export]]) inlines the image as a clickable button.  If
+export (see [[*HTML Export]]) inlines the image as a clickable button.  If
 there is no description at all and the link points to an image, that
 image is inlined into the exported HTML file.
 
@@ -3250,14 +3250,15 @@ it into an Org file, and to follow the link.
      - /Other files/ ::
 
           For any other files, the link points to the file, with
-          a search string (see [[*Search options in file links][*Search options]]) pointing to the
-          contents of the current line.  If there is an active region,
-          the selected words form the basis of the search string.  If
-          the automatically created link is not working correctly or
-          accurately enough, you can write custom functions to select
-          the search string and to do the search for particular file
-          types (see [[*Custom searches]]).  The key binding {{{kbd(C-c
-          l)}}} is only a suggestion (see [[*Installation]]).
+          a search string (see [[*Search Options in File Links]]) pointing
+          to the contents of the current line.  If there is an active
+          region, the selected words form the basis of the search
+          string.  If the automatically created link is not working
+          correctly or accurately enough, you can write custom
+          functions to select the search string and to do the search
+          for particular file types (see [[*Custom Searches]]).  The key
+          binding {{{kbd(C-c l)}}} is only a suggestion (see
+          [[*Installation]]).
 
      - /Agenda view/ ::
 
@@ -3291,7 +3292,7 @@ it into an Org file, and to follow the link.
           Completion with {{{kbd(TAB)}}} helps you to insert valid
           link prefixes like =http= or =ftp=, including the prefixes
           defined through link abbreviations (see [[*Link
-          abbreviations]]).  If you press {{{kbd(RET)}}} after inserting
+          Abbreviations]]).  If you press {{{kbd(RET)}}} after inserting
           only the prefix, Org offers specific completion support for
           some link types[fn:32].  For example, if you type {{{kbd(f
           i l e RET)}}}---alternative access: {{{kbd(C-u C-c C-l)}}},
@@ -3518,7 +3519,7 @@ File links can contain additional information to make Emacs jump to
 a particular location in the file when following a link.  This can be
 a line number or a search option after a double colon[fn:35].  For
 example, when the command {{{kbd(C-c l)}}} creates a link (see
-[[*Handling links]]) to a file, it encodes the words in the current line
+[[*Handling Links]]) to a file, it encodes the words in the current line
 as a search string that can be used to find this line back later when
 following the link with {{{kbd(C-c C-o)}}}.
 
@@ -3536,7 +3537,7 @@ link, together with an explanation:
 - =255= :: Jump to line 255.
 - =My Target= :: Search for a link target =<<My Target>>=, or do
      a text search for =my target=, similar to the search in internal
-     links, see [[*Internal links]].  In HTML export (see [[*HTML export]]),
+     links, see [[*Internal Links]].  In HTML export (see [[*HTML Export]]),
      such a file link becomes a HTML reference to the corresponding
      named anchor in the linked file.
 - =*My Target= :: In an Org file, restrict search to headlines.
@@ -3625,7 +3626,7 @@ The most important commands to work with TODO entries are:
 
      The same rotation can also be done "remotely" from the timeline
      and agenda buffers with the {{{kbd(t)}}} command key (see
-     [[*Commands in the agenda buffer]]).
+     [[*Commands in the Agenda Buffer]]).
 
 - {{{kbd(C-u C-c C-t)}}} ::
 
@@ -3642,7 +3643,7 @@ The most important commands to work with TODO entries are:
      #+vindex: org-treat-S-cursor-todo-selection-as-state-change
      Select the following/preceding TODO state, similar to cycling.
      Useful mostly if more than two TODO states are possible (see
-     [[*Extended use of TODO keywords]]).  See also [[*Packages that
+     [[*Extended Use of TODO Keywords]]).  See also [[*Packages that
      conflict with Org mode]], for a discussion of the interaction with
      ~shift-selection-mode~.  See also the variable
      ~org-treat-S-cursor-todo-selection-as-state-change~.
@@ -3653,7 +3654,7 @@ The most important commands to work with TODO entries are:
      #+cindex: sparse tree, for TODO
      #+vindex: org-todo-keywords
      #+findex: org-show-todo-tree
-     View TODO items in a /sparse tree/ (see [[*Sparse trees]]).  Folds
+     View TODO items in a /sparse tree/ (see [[*Sparse Trees]]).  Folds
      the entire buffer, but shows all TODO items---with not-DONE
      state---and the headings hierarchy above them.  With a prefix
      argument, or by using {{{kbd(C-c / T)}}}, search for a specific
@@ -3668,10 +3669,10 @@ The most important commands to work with TODO entries are:
 
      #+kindex: C-c a t
      Show the global TODO list.  Collects the TODO items (with
-     not-DONE states) from all agenda files (see [[*Agenda views]]) into
+     not-DONE states) from all agenda files (see [[*Agenda Views]]) into
      a single buffer.  The new buffer is in Org Agenda mode, which
      provides commands to examine and manipulate the TODO entries from
-     the new buffer (see [[*Commands in the agenda buffer]]).  See [[*The
+     the new buffer (see [[*Commands in the Agenda Buffer]]).  See [[*The
      global TODO list]], for more information.
 
 - {{{kbd(S-M-RET)}}} (~org-insert-todo-heading~) ::
@@ -3992,7 +3993,7 @@ property:
 If you set the variable ~org-agenda-dim-blocked-tasks~, TODO entries
 that cannot be closed because of such dependencies are shown in
 a dimmed font or even made invisible in agenda views (see [[*Agenda
-views]]).
+Views]]).
 
 #+cindex: checkboxes and TODO dependencies
 #+vindex: org-enforce-todo-dependencies
@@ -4017,7 +4018,7 @@ you mark a TODO item as DONE, or even each time you change the state
 of a TODO item.  This system is highly configurable, settings can be
 on a per-keyword basis and can be localized to a file or even
 a subtree.  For information on how to clock working time for a task,
-see [[*Clocking work time]].
+see [[*Clocking Work Time]].
 
 *** Closing items
 :PROPERTIES:
@@ -4272,7 +4273,7 @@ TODO items.
      {{{kbd(SPC)}}} instead, the priority cookie is removed from the
      headline.  The priorities can also be changed "remotely" from the
      timeline and agenda buffer with the {{{kbd(\,)}}} command (see
-     [[*Commands in the agenda buffer]]).
+     [[*Commands in the Agenda Buffer]]).
 
 - {{{kbd(S-up)}}} (~org-priority-up~); {{{kbd(S-down)}}} (~org-priority-down~) ::
 
@@ -4283,7 +4284,7 @@ TODO items.
      #+vindex: org-priority-start-cycle-with-default
      Increase/decrease priority of current headline[fn:47].  Note that
      these keys are also used to modify timestamps (see [[*Creating
-     timestamps]]).  See also [[*Packages that conflict with Org mode]], for
+     Timestamps]]).  See also [[*Packages that conflict with Org mode]], for
      a discussion of the interaction with ~shift-selection-mode~.
 
 #+vindex: org-highest-priority
@@ -4365,9 +4366,9 @@ of) a large number of subtasks (see [[*Checkboxes]]).
 #+cindex: checkboxes
 
 #+vindex: org-list-automatic-rules
-Every item in a plain list[fn:49] (see [[*Plain lists]]) can be made into
+Every item in a plain list[fn:49] (see [[*Plain Lists]]) can be made into
 a checkbox by starting it with the string =[ ]=.  This feature is
-similar to TODO items (see [[*TODO items]]), but is more lightweight.
+similar to TODO items (see [[*TODO Items]]), but is more lightweight.
 Checkboxes are not included into the global TODO list, so they are
 often great to split a task into a number of simple steps.  Or you can
 use them in a shopping list.  To toggle a checkbox, use {{{kbd(C-c
@@ -4456,7 +4457,7 @@ The following commands work with checkboxes:
      #+kindex: M-S-RET
      #+findex: org-insert-todo-heading
      Insert a new item with a checkbox.  This works only if the cursor
-     is already in a plain list item (see [[*Plain lists]]).
+     is already in a plain list item (see [[*Plain Lists]]).
 
 - {{{kbd(C-c C-x o)}}} (~org-toggle-ordered-property~) ::
 
@@ -4583,7 +4584,7 @@ also a special command for inserting tags:
      a {{{kbd(C-u)}}} prefix, all tags in the current buffer are
      aligned to that column, just to make things look nice.  Tags are
      automatically realigned after promotion, demotion, and TODO state
-     changes (see [[*Basic TODO functionality]]).
+     changes (see [[*Basic TODO Functionality]]).
 
 - {{{kbd(C-c C-c)}}} (~org-set-tags-command~) ::
 
@@ -4924,7 +4925,7 @@ could be things such as the album, artist, date of release, number of
 tracks, and so on.
 
 Properties can be conveniently edited and viewed in column view (see
-[[*Column view]]).
+[[*Column View]]).
 
 ** Property Syntax
 :PROPERTIES:
@@ -4937,7 +4938,7 @@ Properties are key--value pairs.  When they are associated with
 a single entry or with a tree they need to be inserted into a special
 drawer (see [[*Drawers]]) with the name =PROPERTIES=, which has to be
 located right below a headline, and its planning line (see [[*Deadlines
-and scheduling]]) when applicable.  Each property is specified on
+and Scheduling]]) when applicable.  Each property is specified on
 a single line, with the key---surrounded by colons---first, and the
 value after it.  Keys are case-insensitive.  Here is an example:
 
@@ -4956,7 +4957,7 @@ value after it.  Keys are case-insensitive.  Here is an example:
 
 Depending on the value of ~org-use-property-inheritance~, a property
 set this way is associated either with a single entry, or with the
-sub-tree defined by the entry, see [[*Property inheritance]].
+sub-tree defined by the entry, see [[*Property Inheritance]].
 
 You may define the allowed values for a particular property =Xyz= by
 setting a property =Xyz_ALL=.  This special property is /inherited/,
@@ -5092,7 +5093,7 @@ The following commands help to work with properties:
 Special properties provide an alternative access method to Org mode
 features, like the TODO state or the priority of an entry, discussed
 in the previous chapters.  This interface exists so that you can
-include these states in a column view (see [[*Column view]]), or to use
+include these states in a column view (see [[*Column View]]), or to use
 them in queries.  The following property names are special and should
 not be used as keys in the properties drawer:
 
@@ -5138,7 +5139,7 @@ not be used as keys in the properties drawer:
 
 To create sparse trees and special lists with selection based on
 properties, the same commands are used as for tag searches (see [[*Tag
-searches]]).
+Searches]]).
 
 - {{{kbd(C-c / m)}}} or {{{kbd(C-c \)}}} (~org-match-sparse-tree~) ::
 
@@ -5208,7 +5209,7 @@ least for the special applications for which they are used:
 
      #+cindex: COLUMNS, property
      The =COLUMNS= property defines the format of column view (see
-     [[*Column view]]).  It is inherited in the sense that the level where
+     [[*Column View]]).  It is inherited in the sense that the level where
      a =COLUMNS= property is defined is used as the starting point for
      a column view table, independently of the location in the subtree
      from where columns view is turned on.
@@ -5249,7 +5250,7 @@ while column view is active---but you can still open, read, and edit
 the entry below each headline.  Or, you can switch to column view
 after executing a sparse tree command and in this way get a table only
 for the selected items.  Column view also works in agenda buffers (see
-[[*Agenda views]]) where queries have collected selected items, possibly
+[[*Agenda Views]]) where queries have collected selected items, possibly
 from a number of files.
 
 *** Defining columns
@@ -5312,7 +5313,7 @@ optional.  The individual parts have the following meaning:
 
      The property that should be edited in this column.  Special
      properties representing meta data are allowed here as well (see
-     [[*Special properties]]).
+     [[*Special Properties]]).
 
 - {{{var(TITLE)}}} ::
 
@@ -5525,7 +5526,7 @@ either for all clocks or just for today.
 
 Since column view is just an overlay over a buffer, it cannot be
 exported or printed directly.  If you want to capture a column view,
-use a =columnview= dynamic block (see [[*Dynamic blocks]]).  The frame of
+use a =columnview= dynamic block (see [[*Dynamic Blocks]]).  The frame of
 this block looks like this:
 
 #+cindex: BEGIN columnview
@@ -5609,7 +5610,7 @@ The following commands insert or update the dynamic block:
 - {{{kbd(C-u C-c C-x C-u)}}} (~org-update-all-dblocks~) ::
 
      #+kindex: C-u C-c C-x C-u
-     Update all dynamic blocks (see [[*Dynamic blocks]]).  This is useful
+     Update all dynamic blocks (see [[*Dynamic Blocks]]).  This is useful
      if you have several clock table blocks, column-capturing blocks
      or other dynamic blocks in a buffer.
 
@@ -6255,7 +6256,7 @@ same repeater for both timestamps.
 An alternative to using a repeater is to create a number of copies of
 a task subtree, with dates shifted in each copy.  The command
 {{{kbd(C-c C-x c)}}} was created for this purpose; it is described in
-[[*Structure editing]].
+[[*Structure Editing]].
 
 ** Clocking Work Time
 :PROPERTIES:
@@ -6321,7 +6322,7 @@ prompted about what to do with it.
      in the mode line, along with the title of the task.  The clock
      time shown is all time ever clocked for this task and its
      children.  If the task has an effort estimate (see [[*Effort
-     estimates]]), the mode line displays the current clocking time
+     Estimates]]), the mode line displays the current clocking time
      against it[fn:72].  If the task is a repeating one (see [[*Repeated
      tasks]]), show only the time since the last reset of the
      task[fn:73].  You can exercise more control over show time with
@@ -6451,7 +6452,7 @@ formatted as one or several Org tables.
 
      #+kindex: C-c C-x C-r
      #+findex: org-clock-report
-     Insert a dynamic block (see [[*Dynamic blocks]]) containing a clock
+     Insert a dynamic block (see [[*Dynamic Blocks]]) containing a clock
      report as an Org mode table into the current file.  When the
      cursor is at an existing clock table, just update it.  When
      called with a prefix argument, jump to the first clock report in
@@ -6469,7 +6470,7 @@ formatted as one or several Org tables.
 - {{{kbd(C-u C-c C-x C-u)}}} ::
 
      #+kindex: C-u C-c C-x C-u
-     Update all dynamic blocks (see [[*Dynamic blocks]]).  This is useful
+     Update all dynamic blocks (see [[*Dynamic Blocks]]).  This is useful
      if you have several clock table blocks in a buffer.
 
 - {{{kbd(S-left)}}}, {{{kbd(S-right)}}} (~org-clocktable-try-shift~) ::
@@ -6636,7 +6637,7 @@ using the =:formatter= parameter.
 
      A timestamp for the entry, when available.  Look for SCHEDULED,
      DEADLINE, TIMESTAMP and TIMESTAMP_IA special properties (see
-     [[*Special properties]]), in this order.
+     [[*Special Properties]]), in this order.
 
 - :properties ::
 
@@ -6841,7 +6842,7 @@ commands:
      Modify the effort estimate of the item currently being clocked.
 
 Clearly the best way to work with effort estimates is through column
-view (see [[*Column view]]).  You should start by setting up discrete
+view (see [[*Column View]]).  You should start by setting up discrete
 values for effort estimates, and a =COLUMNS= format that displays
 these values together with clock sums---if you want to clock your
 time.  For a specific buffer you can use:
@@ -6876,7 +6877,7 @@ are then also added to the load estimate of the day.
 
 Effort estimates can be used in secondary agenda filtering that is
 triggered with the {{{kbd(/)}}} key in the agenda (see [[*Commands in
-the agenda buffer]]).  If you have these estimates defined consistently,
+the Agenda Buffer]]).  If you have these estimates defined consistently,
 two or three key presses narrow down the list to stuff that fits into
 an available time slot.
 
@@ -7027,7 +7028,7 @@ defines a global key[fn:80] for capturing new material.
      #+kindex: C-c C-w
      #+findex: org-capture-refile
      Finalize the capture process by refiling the note to a different
-     place (see [[*Refile and copy]]).  Please realize that this is
+     place (see [[*Refile and Copy]]).  Please realize that this is
      a normal refiling command that will be executed---so the cursor
      position at the moment you run this command is important.  If you
      have inserted a tree with a parent and children, first move the
@@ -7569,7 +7570,7 @@ The following commands deal with attachments:
           Open current task's attachment.  If there is more than one,
           prompt for a file name first.  Opening follows the rules set
           by ~org-file-apps~.  For more details, see the information
-          on following hyperlinks (see [[*Handling links]]).
+          on following hyperlinks (see [[*Handling Links]]).
 
      - {{{kbd(O)}}} (~org-attach-open-in-emacs~) ::
 
@@ -8042,7 +8043,7 @@ example:
 #+cindex: ARCHIVE, property
 If you would like to have a special archive location for a single
 entry or a (sub)tree, give the entry an =ARCHIVE= property with the
-location as the value (see [[*Properties and columns]]).
+location as the value (see [[*Properties and Columns]]).
 
 #+vindex: org-archive-save-context-info
 When a subtree is moved, it receives a number of special properties
@@ -8066,20 +8067,20 @@ its location in the outline tree, but behaves in the following way:
 -
   #+vindex: org-cycle-open-archived-trees
   It does not open when you attempt to do so with a visibility cycling
-  command (see [[*Visibility cycling]]).  You can force cycling archived
+  command (see [[*Visibility Cycling]]).  You can force cycling archived
   subtrees with {{{kbd(C-TAB)}}}, or by setting the option
   ~org-cycle-open-archived-trees~.  Also normal outline commands, like
   ~outline-show-all~, open archived subtrees.
 
 -
   #+vindex: org-sparse-tree-open-archived-trees
-  During sparse tree construction (see [[*Sparse trees]]), matches in
+  During sparse tree construction (see [[*Sparse Trees]]), matches in
   archived subtrees are not exposed, unless you configure the option
   ~org-sparse-tree-open-archived-trees~.
 
 -
   #+vindex: org-agenda-skip-archived-trees
-  During agenda view construction (see [[*Agenda views]]), the content of
+  During agenda view construction (see [[*Agenda Views]]), the content of
   archived trees is ignored unless you configure the option
   ~org-agenda-skip-archived-trees~, in which case these trees are
   always included.  In the agenda you can press {{{kbd(v a)}}} to get
@@ -8175,7 +8176,7 @@ these files remotely.
 #+vindex: org-agenda-skip-archived-trees
 #+cindex: commented entries, in agenda views
 #+cindex: archived entries, in agenda views
-By default, the report ignores commented (see [[*Comment lines]]) and
+By default, the report ignores commented (see [[*Comment Lines]]) and
 archived (see [[*Internal archiving]]) entries.  You can override this by
 setting ~org-agenda-skip-comment-trees~ and
 ~org-agenda-skip-archived-trees~ to ~nil~.
@@ -8242,7 +8243,7 @@ If you would like to focus the agenda temporarily on a file not in
 this list, or on just one file in the list, or even on only a subtree
 in a file, then this can be done in different ways.  For a single
 agenda command, you may press {{{kbd(<)}}} once or several times in
-the dispatcher (see [[*The agenda dispatcher]]).  To restrict the agenda
+the dispatcher (see [[*The Agenda Dispatcher]]).  To restrict the agenda
 scope for an extended period, use the following commands:
 
 - {{{kbd(C-c C-x <)}}} (~org-agenda-set-restriction-lock~) ::
@@ -8374,7 +8375,7 @@ You can also define custom commands that are accessible through the
 dispatcher, just like the default commands.  This includes the
 possibility to create extended agenda buffers that contain several
 blocks together, for example the weekly agenda, the global TODO list
-and a number of special tags matches.  See [[*Custom agenda views]].
+and a number of special tags matches.  See [[*Custom Agenda Views]].
 
 ** The Built-in Agenda Views
 :PROPERTIES:
@@ -8419,8 +8420,8 @@ ten days from today in the future.
 
 Remote editing from the agenda buffer means, for example, that you can
 change the dates of deadlines and appointments from the agenda buffer.
-The commands available in the Agenda buffer are listed in [[*Commands
-in the agenda buffer]].
+The commands available in the Agenda buffer are listed in [[*Commands in
+the Agenda Buffer]].
 
 **** Calendar/Diary integration
 :PROPERTIES:
@@ -8572,11 +8573,11 @@ collected into a single place.
      #+kindex: C-c a t
      #+findex: org-todo-list
      Show the global TODO list.  This collects the TODO items from all
-     agenda files (see [[*Agenda views]]) into a single buffer.  By
+     agenda files (see [[*Agenda Views]]) into a single buffer.  By
      default, this lists items with a state the is not a DONE state.
      The buffer is in ~agenda-mode~, so there are commands to examine
      and manipulate the TODO entries directly from that buffer (see
-     [[*Commands in the agenda buffer]]).
+     [[*Commands in the Agenda Buffer]]).
 
 - {{{kbd(C-c a T)}}} (~org-todo-list~) ::
 
@@ -8596,14 +8597,14 @@ collected into a single place.
      can give a prefix argument to this command to change the selected
      TODO keyword, for example {{{kbd(3 r)}}}.  If you often need
      a search for a specific keyword, define a custom command for it
-     (see [[*The agenda dispatcher]]).
+     (see [[*The Agenda Dispatcher]]).
 
      Matching specific TODO keywords can also be done as part of
-     a tags search (see [[*Tag searches]]).
+     a tags search (see [[*Tag Searches]]).
 
 Remote editing of TODO items means that you can change the state of
 a TODO entry with a single key press.  The commands available in the
-TODO list are described in [[*Commands in the agenda buffer]].
+TODO list are described in [[*Commands in the Agenda Buffer]].
 
 #+cindex: sublevels, inclusion into TODO list
 Normally the global TODO list simply shows all headlines with TODO
@@ -8616,7 +8617,7 @@ it more compact:
   #+vindex: org-agenda-todo-ignore-timestamp
   #+vindex: org-agenda-todo-ignore-with-date
   Some people view a TODO item that has been /scheduled/ for execution
-  or have a /deadline/ (see [[*Timestamps, deadlines, and scheduling]]) as
+  or have a /deadline/ (see [[*Timestamps, Deadlines and Scheduling]]) as
   no longer /open/.  Configure the variables
   ~org-agenda-todo-ignore-scheduled~,
   ~org-agenda-todo-ignore-deadlines~,
@@ -8641,7 +8642,7 @@ it more compact:
 #+cindex: match view
 
 If headlines in the agenda files are marked with /tags/ (see [[*Tags]]),
-or have properties (see [[*Properties and columns]]), you can select
+or have properties (see [[*Properties and Columns]]), you can select
 headlines based on this metadata and collect them into an agenda
 buffer.  The match syntax described here also applies when creating
 sparse trees with {{{kbd(C-c / m)}}}.
@@ -8654,7 +8655,7 @@ sparse trees with {{{kbd(C-c / m)}}}.
      The command prompts for a selection criterion, which is a boolean
      logic expression with tags, like =+work+urgent-withboss= or
      =work|home= (see [[*Tags]]).  If you often need a specific search,
-     define a custom command for it (see [[*The agenda dispatcher]]).
+     define a custom command for it (see [[*The Agenda Dispatcher]]).
 
 - {{{kbd(C-c a M)}}} (~org-tags-view~) ::
 
@@ -8668,10 +8669,10 @@ sparse trees with {{{kbd(C-c / m)}}}.
      items, see the variable
      ~org-agenda-tags-todo-honor-ignore-options~.  Matching specific
      TODO keywords together with a tags match is also possible, see
-     [[*Tag searches]].
+     [[*Tag Searches]].
 
-The commands available in the tags list are described in [[*Commands
-in the agenda buffer]].
+The commands available in the tags list are described in [[*Commands in
+the Agenda Buffer]].
 
 #+cindex: boolean logic, for agenda searches
 A search string can use Boolean operators =&= for AND and =|= for OR.
@@ -8704,7 +8705,7 @@ in curly braces.  For example, =work+{^boss.*}= matches headlines that
 contain the tag =:work:= and any tag /starting/ with =boss=.
 
 #+cindex: group tags, as regular expressions
-Group tags (see [[*Tag hierarchy]]) are expanded as regular expressions.
+Group tags (see [[*Tag Hierarchy]]) are expanded as regular expressions.
 E.g., if =work= is a group tag for the group =:work:lab:conf:=, then
 searching for =work= also searches for ={\(?:work\|lab\|conf\)}= and
 searching for =-work= searches for all headlines but those with one of
@@ -8714,10 +8715,10 @@ the tags in the group (i.e., =-{\(?:work\|lab\|conf\)}=).
 #+cindex: level, for tags/property match
 #+cindex: category, for tags/property match
 #+vindex: org-odd-levels-only
-You may also test for properties (see [[*Properties and columns]]) at the
+You may also test for properties (see [[*Properties and Columns]]) at the
 same time as matching tags.  The properties may be real properties, or
 special properties that represent other metadata (see [[*Special
-properties]]).  For example, the property =TODO= represents the TODO
+Properties]]).  For example, the property =TODO= represents the TODO
 keyword of the entry.  Or, the property =LEVEL= represents the level
 of an entry.  So searching =+LEVEL=3+boss-TODO​="DONE"= lists all level
 three headlines that have the tag =boss= and are /not/ marked with the
@@ -8776,7 +8777,7 @@ expression =Sarah|Denny=, and that are scheduled on or after October
 
 You can configure Org mode to use property inheritance during
 a search, but beware that this can slow down searches considerably.
-See [[*Property inheritance]], for details.
+See [[*Property Inheritance]], for details.
 
 For backward compatibility, and also for typing speed, there is also
 a different way to test TODO states in a search.  For this, terminate
@@ -8890,7 +8891,7 @@ projects, and that =NEXT= and =TODO= indicate next actions.  The tag
 NEXT tag.  Finally, if the project contains the special word =IGNORE=
 anywhere, it should not be listed either.  In this case you would
 start by identifying eligible projects with a tags/TODO match (see
-[[*Tag searches]]) =+PROJECT/-MAYBE-DONE=, and then check for =TODO=,
+[[*Tag Searches]]) =+PROJECT/-MAYBE-DONE=, and then check for =TODO=,
 =NEXT=, =@shop=, and =IGNORE= in the subtree to identify projects that
 are not stuck.  The correct customization for this is:
 
@@ -9040,7 +9041,7 @@ done depends on the type of view.
 #+vindex: org-agenda-sorting-strategy
 Sorting can be customized using the variable
 ~org-agenda-sorting-strategy~, and may also include criteria based on
-the estimated effort of an entry (see [[*Effort estimates]]).
+the estimated effort of an entry (see [[*Effort Estimates]]).
 
 *** Filtering/limiting agenda times
 :PROPERTIES:
@@ -9188,7 +9189,7 @@ custom agenda commands.
 #+cindex: limits, in agenda
 
 Here is a list of options that you can set, either globally, or
-locally in your custom agenda views (see [[*Custom agenda views]]).
+locally in your custom agenda views (see [[*Custom Agenda Views]]).
 
 - ~org-agenda-max-entries~ ::
 
@@ -9564,7 +9565,7 @@ the other commands, the cursor needs to be in the desired line.
      #+kindex: C-c C-x C-c
      #+findex: org-agenda-columns
      #+vindex: org-columns-default-format
-     Invoke column view (see [[*Column view]]) in the agenda buffer.  The
+     Invoke column view (see [[*Column View]]) in the agenda buffer.  The
      column view format is taken from the entry at point, or, if there
      is no entry at point, from the first entry in the agenda view.
      So whatever the format for that entry would be in the original
@@ -9577,7 +9578,7 @@ the other commands, the cursor needs to be in the desired line.
      #+kindex: C-c C-x >
      #+findex: org-agenda-remove-restriction-lock
      Remove the restriction lock on the agenda, if it is currently
-     restricted to a file or subtree (see [[*Agenda files]]).
+     restricted to a file or subtree (see [[*Agenda Files]]).
 
 - {{{kbd(M-up)}}} (~org-agenda-drag-line-backward~) ::
 
@@ -10057,7 +10058,7 @@ the other commands, the cursor needs to be in the desired line.
 Custom agenda commands serve two purposes: to store and quickly access
 frequently used TODO and tags searches, and to create special
 composite agenda buffers.  Custom agenda commands are accessible
-through the dispatcher (see [[*The agenda dispatcher]]), just like the
+through the dispatcher (see [[*The Agenda Dispatcher]]), just like the
 default commands.
 
 *** Storing searches
@@ -10417,7 +10418,7 @@ which creates the agenda views restricted to the file
 =~/org/project.org=, without diary entries and with a 30-day extent.
 
 You can also extract agenda information in a way that allows further
-processing by other programs.  See [[*Extracting agenda information]], for
+processing by other programs.  See [[*Extracting Agenda Information]], for
 more information.
 
 ** Using Column View in the Agenda
@@ -10428,7 +10429,7 @@ more information.
 #+cindex: column view, in agenda
 #+cindex: agenda, column view
 
-Column view (see [[*Column view]]) is normally used to view and edit
+Column view (see [[*Column View]]) is normally used to view and edit
 properties embedded in the hierarchical structure of an Org file.  It
 can be quite useful to use column view also from the agenda, where
 entries are collected by certain criteria.
@@ -10597,7 +10598,7 @@ tables, the lines before the first horizontal separator line become
 table header lines.  You can use the following lines somewhere before
 the table to assign a caption and a label for cross references, and in
 the text you can refer to the object with =[[tab:basic-data]]= (see
-[[*Internal links]]):
+[[*Internal Links]]):
 
 #+begin_example
   ,#+CAPTION: This is the caption for the next table (or link)
@@ -10625,7 +10626,7 @@ it with =CAPTION= and =NAME= keywords as follows:
 #+end_example
 
 #+texinfo: @noindent
-Such images can be displayed within the buffer.  See [[*Handling links][the discussion of
+Such images can be displayed within the buffer.  See [[*Handling Links][the discussion of
 image links]].
 
 Even though images and tables are prominent examples of captioned
@@ -10654,7 +10655,7 @@ suited for source code and similar examples.
 
 Note that such blocks may be /indented/ in order to align nicely with
 indented text and in particular with plain list structure (see
-[[*Plain lists]]).  For simplicity when using small examples, you can
+[[*Plain Lists]]).  For simplicity when using small examples, you can
 also start the example lines with a colon followed by a space.  There
 may also be additional whitespace before the colon:
 
@@ -10670,7 +10671,7 @@ other text that can be marked up by Font Lock in Emacs, you can ask
 for the example to look like the fontified Emacs buffer[fn:104].  This
 is done with the code block, where you also need to specify the name
 of the major mode that should be used to fontify the example[fn:105],
-see [[*Structure templates]] for shortcuts to easily insert code blocks.
+see [[*Structure Templates]] for shortcuts to easily insert code blocks.
 
 #+cindex: BEGIN_SRC
 #+cindex: src block
@@ -10725,7 +10726,7 @@ links use the labels with no parentheses.  Here is an example:
 
 #+cindex: indentation, in source blocks
 Finally, you can use =-i= to preserve the indentation of a specific
-code block (see [[*Editing source code]]).
+code block (see [[*Editing Source Code]]).
 
 #+vindex: org-coderef-label-format
 If the syntax for the label format conflicts with the language syntax,
@@ -10740,7 +10741,7 @@ HTML export also allows examples to be published as text areas (see
 [[*Text areas in HTML export]]).
 
 Because the =#+BEGIN= ... =#+END= patterns need to be added so often,
-a shortcut is provided (see [[*Structure templates]]).
+a shortcut is provided (see [[*Structure Templates]]).
 
 - {{{kbd(C-c ')}}} (~org-edit-special~) ::
 
@@ -11050,7 +11051,7 @@ Sometimes, you may want to pretty print your notes, publish them on
 the web or even share them with people not using Org.  In these cases,
 the Org export facilities can be used to convert your documents to
 a variety of other formats, while retaining as much structure (see
-[[*Document structure]]) and markup (see [[*Markup for rich export]]) as
+[[*Document Structure]]) and markup (see [[*Markup for Rich Export]]) as
 possible.
 
 #+cindex: export back-end
@@ -11181,17 +11182,17 @@ further alter what is exported, and how.
 #+cindex: OPTIONS, keyword
 Export options can be set: globally with variables; for an individual
 file by making variables buffer-local with in-buffer settings (see
-[[*Summary of in-buffer settings]]), by setting individual keywords, or by
+[[*Summary of In-Buffer Settings]]), by setting individual keywords, or by
 specifying them in a compact form with the =OPTIONS= keyword; or for
-a tree by setting properties (see [[*Properties and columns]]).  Options
+a tree by setting properties (see [[*Properties and Columns]]).  Options
 set at a specific level override options set at a more general level.
 
 #+cindex: SETUPFILE, keyword
 In-buffer settings may appear anywhere in the file, either directly or
 indirectly through a file included using =#+SETUPFILE: filename or
 URL= syntax.  Option keyword sets tailored to a particular back-end
-can be inserted from the export dispatcher (see [[*The export
-dispatcher]]) using the =Insert template= command by pressing
+can be inserted from the export dispatcher (see [[*The Export
+Dispatcher]]) using the =Insert template= command by pressing
 {{{kbd(#)}}}.  To insert keywords individually, a good way to make
 sure the keyword is correct is to type =#+= and then to use
 {{{kbd(M-TAB)}}}[fn:16] for completion.
@@ -11396,7 +11397,7 @@ following arguments.
      above.  Set =UNNUMBERED= property to non-~nil~ to disable
      numbering of heading and subheadings entirely.  Moreover, when
      the value is =notoc= the headline, and all its children, do not
-     appear in the table of contents either (see [[*Table of contents]]).
+     appear in the table of contents either (see [[*Table of Contents]]).
 
 - ~p~ ::
 
@@ -11701,7 +11702,7 @@ Org comes with following pre-defined macros:
      #+cindex: property, macro
      This macro returns the value of property {{{var(PROPERTY-NAME)}}}
      in the current entry.  If {{{var(SEARCH-OPTION)}}} (see [[*Search
-     options in file links]]) refers to a remote entry, use it instead.
+     Options in File Links]]) refers to a remote entry, use it instead.
 
 - ={{{n}}}=; ={{{n(NAME)}}}=; ={{{n(NAME, ACTION)}}}= ::
 
@@ -11809,7 +11810,7 @@ See the variable ~org-ascii-links-to-notes~ for details.
 
 The ASCII export back-end has one extra keyword for customizing ASCII
 output.  Setting this keyword works similar to the general options
-(see [[*Export settings]]).
+(see [[*Export Settings]]).
 
 - =SUBTITLE= ::
 
@@ -11825,7 +11826,7 @@ output.  Setting this keyword works similar to the general options
 
 Org converts the first three outline levels into headlines for ASCII
 export.  The remaining levels are turned into lists.  To change this
-cut-off point where levels become lists, see [[*Export settings]].
+cut-off point where levels become lists, see [[*Export Settings]].
 
 *** Quoting ASCII text
 :PROPERTIES:
@@ -11929,7 +11930,7 @@ popular display formats.
 
 Beamer export back-end has several additional keywords for customizing
 Beamer output.  These keywords work similar to the general options
-settings (see [[*Export settings]]).
+settings (see [[*Export Settings]]).
 
 - =BEAMER_THEME= ::
 
@@ -12002,7 +12003,7 @@ should in principle be exportable as a Beamer presentation.
   #+vindex: org-beamer-frame-level
   Org headlines become Beamer frames when the heading level in Org is
   equal to ~org-beamer-frame-level~ or =H= value in a =OPTIONS= line
-  (see [[*Export settings]]).
+  (see [[*Export Settings]]).
 
   #+cindex: BEAMER_ENV, property
   Org overrides headlines to frames conversion for the current tree of
@@ -12065,12 +12066,12 @@ should in principle be exportable as a Beamer presentation.
 
 Since Org's Beamer export back-end is an extension of the LaTeX
 back-end, it recognizes other LaTeX specific syntax---for example,
-=#+LATEX:= or =#+ATTR_LATEX:=.  See [[*LaTeX export]], for details.
+=#+LATEX:= or =#+ATTR_LATEX:=.  See [[*LaTeX Export]], for details.
 
 Beamer export wraps the table of contents generated with =toc:t=
 =OPTION= keyword in a =frame= environment.  Beamer export does not
 wrap the table of contents generated with =TOC= keyword (see [[*Table of
-contents]]).  Use square brackets for specifying options.
+Contents]]).  Use square brackets for specifying options.
 
 : #+TOC: headlines [currentsection]
 
@@ -12217,7 +12218,7 @@ compatible with XHTML 1.0 strict standard.
 :END:
 
 HTML export has a number of keywords, similar to the general options
-settings described in [[*Export settings]].
+settings described in [[*Export Settings]].
 
 - =DESCRIPTION= ::
 
@@ -12449,9 +12450,9 @@ For larger raw HTML code blocks, use these HTML export code blocks:
 #+cindex: external links, in HTML export
 
 The HTML export back-end transforms Org's internal links (see
-[[*Internal links]]) to equivalent HTML links in the output.  The back-end
+[[*Internal Links]]) to equivalent HTML links in the output.  The back-end
 similarly handles Org's automatic links created by radio targets (see
-[[*Radio targets]]) similarly.  For Org links to external files, the
+[[*Radio Targets]]) similarly.  For Org links to external files, the
 back-end transforms the links to /relative/ paths.
 
 #+vindex: org-html-link-org-files-as-html
@@ -12496,7 +12497,7 @@ following lines before the table in the Org file:
 #+end_example
 
 The HTML export back-end preserves column groupings in Org tables (see
-[[*Column groups]]) when exporting to HTML.
+[[*Column Groups]]) when exporting to HTML.
 
 Additional options for customizing tables for HTML export.
 
@@ -12914,7 +12915,7 @@ bibliography compiler[fn:123].
 
 The LaTeX export back-end has several additional keywords for
 customizing LaTeX output.  Setting these keywords works similar to the
-general options (see [[*Export settings]]).
+general options (see [[*Export Settings]]).
 
 #+attr_texinfo: :sep ,
 - =DESCRIPTION= ::
@@ -13004,7 +13005,7 @@ The following sections have further details.
 The LaTeX export back-end converts the first three of Org's outline
 levels into LaTeX headlines.  The remaining Org levels are exported as
 lists.  To change this globally for the cut-off point between levels
-and lists, (see [[*Export settings]]).
+and lists, (see [[*Export Settings]]).
 
 By default, the LaTeX export back-end uses the /article/ class.
 
@@ -13092,7 +13093,7 @@ exports any code between begin and end markers:
 
 The LaTeX export back-end can pass several LaTeX attributes for table
 contents and layout.  Besides specifying label and caption (see
-[[*Images and tables]]), the other valid LaTeX attributes include:
+[[*Images and Tables]]), the other valid LaTeX attributes include:
 
 #+attr_texinfo: :sep ,
 - =:mode= ::
@@ -13126,7 +13127,7 @@ contents and layout.  Besides specifying label and caption (see
 - =:caption= ::
 
      Use =CAPTION= keyword to set a simple caption for a table (see
-     [[*Images and tables]]).  For custom captions, use =:caption=
+     [[*Images and Tables]]).  For custom captions, use =:caption=
      attribute, which accepts raw LaTeX code.  =:caption= value
      overrides =CAPTION= value.
 
@@ -13232,7 +13233,7 @@ overrides the default =#+CAPTION= value:
   [[./img/sed-hr4049.pdf]]
 #+end_example
 
-When captions follow the method as described in [[*Images and tables]],
+When captions follow the method as described in [[*Images and Tables]],
 the LaTeX export back-end wraps the picture in a floating =figure=
 environment.  To float an image without specifying a caption, set the
 =:float= attribute to one of the following:
@@ -13378,7 +13379,7 @@ a file, use the ~org-latex-listings-options~ and
 The LaTeX export back-end wraps the contents of example blocks in
 a =verbatim= environment.  To change this behavior to use another
 environment globally, specify an appropriate export filter (see
-[[*Advanced configuration]]).  To change this behavior to use another
+[[*Advanced Configuration]]).  To change this behavior to use another
 environment for each block, use the =:environment= parameter to
 specify a custom environment.
 
@@ -13467,7 +13468,7 @@ format, as defined at http://daringfireball.net/projects/markdown/.
 
 Since "md" is built on top of the HTML back-end, any Org constructs
 not supported by Markdown, such as tables, the underlying "html"
-back-end (see [[*HTML export]]) converts them.
+back-end (see [[*HTML Export]]) converts them.
 
 *** Markdown export commands
 :PROPERTIES:
@@ -13502,7 +13503,7 @@ Based on ~org-md-headline-style~, Markdown export can generate
 headlines of both /atx/ and /setext/ types.  /atx/ limits headline
 levels to two whereas /setext/ limits headline levels to six.  Beyond
 these limits, the export back-end converts headlines to lists.  To set
-a limit to a level before the absolute limit (see [[*Export settings]]).
+a limit to a level before the absolute limit (see [[*Export Settings]]).
 
 ** OpenDocument Text Export
 :PROPERTIES:
@@ -13572,7 +13573,7 @@ executable.  Without it, export cannot finish.
 
 The ODT export back-end has several additional keywords for
 customizing ODT output.  Setting these keywords works similar to the
-general options (see [[*Export settings]]).
+general options (see [[*Export Settings]]).
 
 - =DESCRIPTION= ::
 
@@ -13735,9 +13736,9 @@ exported document.
 
 By default, the ODT export back-end exports a table with top and
 bottom frames and with ruled lines separating row and column groups
-(see [[*Column groups]]).  All tables are typeset to occupy the same
+(see [[*Column Groups]]).  All tables are typeset to occupy the same
 width.  The ODT export back-end honors any table alignments and
-relative widths for columns (see [[*Column width and alignment]]).
+relative widths for columns (see [[*Column Width and Alignment]]).
 
 Note that the ODT export back-end interprets column widths as weighted
 ratios, the default weight being 1.
@@ -14029,7 +14030,7 @@ With the above modification, the previous example changes to:
 :END:
 
 The ODT export back-end supports literal examples (see [[*Literal
-examples]]) with full fontification.  Internally, the ODT export
+Examples]]) with full fontification.  Internally, the ODT export
 back-end relies on =htmlfontify.el= to generate the style definitions
 needed for fancy listings.  The auto-generated styles get =OrgSrc=
 prefix and inherit colors from the faces used by Emacs Font Lock
@@ -14386,7 +14387,7 @@ export back-end takes care of updating the
 #+cindex: Org export
 /org/ export back-end creates a normalized version of the Org document
 in current buffer.  The exporter evaluates Babel code (see [[*Evaluating
-code blocks]]) and removes content specific to other back-ends.
+Code Blocks]]) and removes content specific to other back-ends.
 
 *** Org export commands
 :PROPERTIES:
@@ -14439,7 +14440,7 @@ code blocks]]) and removes content specific to other back-ends.
 
 The Texinfo export back-end has several additional keywords for
 customizing Texinfo output.  Setting these keywords works similar to
-the general options (see [[*Export settings]]).
+the general options (see [[*Export Settings]]).
 
 - =SUBTITLE= ::
 
@@ -14507,7 +14508,7 @@ the =TEXINFO_FILENAME= keyword.
 #+vindex: org-texinfo-coding-system
 #+cindex: TEXINFO_HEADER, keyword
 Along with the output's file name, the Texinfo header also contains
-language details (see [[*Export settings]]) and encoding system as set in
+language details (see [[*Export Settings]]) and encoding system as set in
 the ~org-texinfo-coding-system~ variable.  Insert =TEXINFO_HEADER=
 keywords for each additional command in the header, for example:
 
@@ -14526,7 +14527,7 @@ document by setting the =TEXINFO_CLASS= keyword to that class.
 
 #+cindex: TEXINFO_PRINTED_TITLE, keyword
 The default template for hard copy output has a title page with
-=TITLE= and =AUTHOR= keywords (see [[*Export settings]]).  To replace the
+=TITLE= and =AUTHOR= keywords (see [[*Export Settings]]).  To replace the
 regular title with something different for the printed version, use
 the =TEXINFO_PRINTED_TITLE= and =SUBTITLE= keywords.  Both expect raw
 Texinfo code for setting their values.
@@ -14606,7 +14607,7 @@ the Texinfo export back-end defaults to the
 ~org-texinfo-default-class~.
 
 If an Org headline's level has no associated Texinfo structuring
-command, or is below a certain threshold (see [[*Export settings]]), then
+command, or is below a certain threshold (see [[*Export Settings]]), then
 the Texinfo export back-end makes it into a list item.
 
 #+cindex: APPENDIX, property
@@ -14619,7 +14620,7 @@ Org headline level or the =TEXINFO_CLASS= keyword.
 The Texinfo export back-end creates a menu entry after the Org
 headline for each regular sectioning structure.  To override this with
 a shorter menu entry, use the =ALT_TITLE= property (see [[*Table of
-contents]]).  Texinfo menu entries also have an option for a longer
+Contents]]).  Texinfo menu entries also have an option for a longer
 =DESCRIPTION= property.  Here's an example that uses both to override
 the default menu entry:
 
@@ -14987,8 +14988,8 @@ Other export back-ends included with Org are:
 
 To activate such back-ends, either customize ~org-export-backends~ or
 load directly with ~(require 'ox-man)~.  On successful load, the
-back-end adds new keys in the export dispatcher (see [[*The export
-dispatcher]]).
+back-end adds new keys in the export dispatcher (see [[*The Export
+Dispatcher]]).
 
 Follow the comment section of such files, for example, =ox-man.el=,
 for usage and configuration details.
@@ -15279,7 +15280,7 @@ where to put published files.
      publish to a webserver using a file name syntax appropriate for
      the Emacs tramp package.  Or you can publish to a local directory
      and use external tools to upload your website (see [[*Uploading
-     files]]).
+     Files]]).
 
 - ~:preparation-function~ ::
 
@@ -15337,7 +15338,7 @@ Publishing means that a file is copied to the destination directory
 and possibly transformed in the process.  The default transformation
 is to export Org files as HTML files, and this is done by the function
 ~org-publish-org-to-html~ which calls the HTML exporter (see [[*HTML
-export]]).  But you can also publish your content as PDF files using
+Export]]).  But you can also publish your content as PDF files using
 ~org-publish-org-to-pdf~, or as ASCII, Texinfo, etc., using the
 corresponding functions.
 
@@ -15390,7 +15391,7 @@ the respective variable for details.
 When a property is given a value in ~org-publish-project-alist~, its
 setting overrides the value of the corresponding user variable, if
 any, during publishing.  Options set within a file (see [[*Export
-settings]]), however, override everything.
+Settings]]), however, override everything.
 
 **** Generic properties
 :PROPERTIES:
@@ -15619,7 +15620,7 @@ settings]]), however, override everything.
 #+cindex: links, publishing
 
 To create a link from one Org file to another, you would use something
-like =[[file:foo.org][The foo]]= or simply =[[file:foo.org]]= (see [[*External links]]).  When
+like =[[file:foo.org][The foo]]= or simply =[[file:foo.org]]= (see [[*External Links]]).  When
 published, this link becomes a link to =foo.html=.  You can thus
 interlink the pages of your "Org web" project and the links will work
 as expected when you publish them to HTML.  If you also publish the
@@ -15634,7 +15635,7 @@ See [[*Example: complex publishing configuration]], for an example of this
 usage.
 
 Eventually, links between published documents can contain some search
-options (see [[*Search options in file links]]), which will be resolved to
+options (see [[*Search Options in File Links]]), which will be resolved to
 the appropriate location in the linked file.  For example, once
 published to HTML, the following links all point to a dedicated anchor
 in =foo.html=.
@@ -15955,7 +15956,7 @@ mode literature sometimes refers to source code blocks as /live code/
 blocks because they can alter the content of the Org document or the
 material that it exports.  Users can control how live they want each
 source code block by tweaking the header arguments (see [[*Using
-header arguments]]) for compiling, execution, extraction, and
+Header Arguments]]) for compiling, execution, extraction, and
 exporting.
 
 Source code blocks are one of many Org block types, which also include
@@ -16025,7 +16026,7 @@ A source code block conforms to this structure:
 
 Do not be put-off by having to remember the source block syntax.  Org
 mode offers a command for wrapping existing text in a block (see
-[[*Structure templates]]).  Org also works with other completion systems
+[[*Structure Templates]]).  Org also works with other completion systems
 in Emacs, some of which predate Org and have custom domain-specific
 languages for defining templates.  Regular use of templates reduces
 errors, increases accuracy, and maintains consistency.
@@ -16068,13 +16069,13 @@ or
      #+cindex: switches, in code blocks
      Optional.  Switches provide finer control of the code execution,
      export, and format (see the discussion of switches in [[*Literal
-     examples]]).
+     Examples]]).
 
 - =<header arguments>= ::
 
      #+cindex: header arguments, in code blocks
      Optional.  Heading arguments control many aspects of evaluation,
-     export and tangling of code blocks (see [[*Using header arguments]]).
+     export and tangling of code blocks (see [[*Using Header Arguments]]).
      Using Org's properties feature, header arguments can be
      selectively applied to the entire buffer or specific sub-trees of
      the Org document.
@@ -16141,7 +16142,7 @@ https://orgmode.org/worg/org-contrib/babel/.
 :END:
 
 For header arguments applicable to the buffer, use =PROPERTY= keyword
-anywhere in the Org file (see [[*Property syntax]]).
+anywhere in the Org file (see [[*Property Syntax]]).
 
 The following example makes all the R code blocks execute in the same
 session.  Setting =:results= to =silent= ignores the results of
@@ -16155,7 +16156,7 @@ for any block.
 
 #+vindex: org-use-property-inheritance
 Header arguments set through Org's property drawers (see [[*Property
-syntax]]) apply at the sub-tree level on down.  Since these property
+Syntax]]) apply at the sub-tree level on down.  Since these property
 drawers can appear anywhere in the file hierarchy, Org uses outermost
 call or source block to resolve the values.  Org ignores
 ~org-use-property-inheritance~ setting.
@@ -16264,7 +16265,7 @@ Multi-line header arguments on a named code block:
 Header arguments in function calls are the most specific and override
 all other settings in case of an overlap.  They get the highest
 priority.  Two =#+CALL:= examples are shown below.  For the complete
-syntax of =CALL= keyword, see [[*Evaluating code blocks]].
+syntax of =CALL= keyword, see [[*Evaluating Code Blocks]].
 
 In this example, =:exports results= header argument is applied to the
 evaluation of the =#+CALL:= line.
@@ -16704,7 +16705,7 @@ to the end of the code block for execution.
 A note about security: With code evaluation comes the risk of harm.
 Org safeguards by prompting for user's permission before executing any
 code in the source block.  To customize this safeguard, or disable it,
-see [[*Code evaluation and security issues]].
+see [[*Code Evaluation and Security Issues]].
 
 *** How to evaluate source code
 :PROPERTIES:
@@ -16754,7 +16755,7 @@ variable ~org-babel-inline-result-wrap~, which by default is set to
 - =<name>= ::
 
      This is the name of the code block to be evaluated (see
-     [[*Structure of code blocks]]).
+     [[*Structure of Code Blocks]]).
 
 - =<arguments>= ::
 
@@ -16816,7 +16817,7 @@ evaluating untrusted code blocks by prompting for a confirmation.
 
 If =eval= header argument is not set, then Org determines whether to
 evaluate the source code from the ~org-confirm-babel-evaluate~
-variable (see [[*Code evaluation and security issues]]).
+variable (see [[*Code Evaluation and Security Issues]]).
 
 *** Cache results of evaluation
 :PROPERTIES:
@@ -16837,7 +16838,7 @@ cases, however, the cached results may not be reliable.
 
 The caching feature is best for when code blocks are pure functions,
 that is functions that return the same value for the same input
-arguments (see [[*Environment of a code block]]), and that do not have
+arguments (see [[*Environment of a Code Block]]), and that do not have
 side effects, and do not rely on external variables other than the
 input arguments.  Functions that depend on a timer, file system
 objects, and random number generators are clearly unsuitable for
@@ -16847,7 +16848,7 @@ A note of warning: when =cache= is used in a session, caching may
 cause unexpected results.
 
 When the caching mechanism tests for any source code changes, it does
-not expand Noweb style references (see [[*Noweb reference syntax]]).  For
+not expand Noweb style references (see [[*Noweb Reference Syntax]]).  For
 reasons why, see http://thread.gmane.org/gmane.emacs.orgmode/79046.
 
 The =cache= header argument can have one of two values: =yes= or =no=.
@@ -16938,7 +16939,7 @@ they are mutually exclusive.
      statement in the code block.
 
      When evaluating the code block in a session (see [[*Environment of
-     a code block]]), Org passes the code to an interpreter running as
+     a Code Block]]), Org passes the code to an interpreter running as
      an interactive Emacs inferior process. Org gets the value from
      the source code interpreter's last statement output.  Org has to
      use language-specific methods to obtain the value.  For example,
@@ -17094,7 +17095,7 @@ default behavior is to automatically determine the result type.
 
      #+cindex: @samp{file-desc}, header argument
      The =file-desc= header argument defines the description (see
-     [[*Link format]]) for the link.  If =file-desc= has no value, Org
+     [[*Link Format]]) for the link.  If =file-desc= has no value, Org
      uses the generated file name for both the "link" and
      "description" parts of the link.
 
@@ -17184,7 +17185,7 @@ Handling options after collecting the results.
 The =post= header argument is for post-processing results from block
 evaluation.  When =post= has any value, Org binds the results to
 ~*this*~ variable for easy passing to =var= header argument
-specifications (see [[*Environment of a code block]]).  That makes results
+specifications (see [[*Environment of a Code Block]]).  That makes results
 available to other code blocks, or even for direct Emacs Lisp code
 execution.
 
@@ -17253,7 +17254,7 @@ code block evaluation, /both/ the code and the results of code block
 evaluation, or /none/.  Org defaults to exporting /code/ for most
 languages.  For some languages, such as ditaa, Org defaults to
 /results/.  To export just the body of code blocks, see [[*Literal
-examples]].  To selectively export sub-trees of an Org document, see
+Examples]].  To selectively export sub-trees of an Org document, see
 [[*Exporting]].
 
 #+cindex: @samp{export}, header argument
@@ -17283,7 +17284,7 @@ file is exported to, say, HTML or LaTeX formats.
 
 #+vindex: org-export-use-babel
 To stop Org from evaluating code blocks to speed exports, use the
-header argument =:eval never-export= (see [[*Evaluating code blocks]]).
+header argument =:eval never-export= (see [[*Evaluating Code Blocks]]).
 To stop Org from evaluating code blocks for greater security, set the
 ~org-export-use-babel~ variable to ~nil~, but understand that header
 arguments will have no effect.
@@ -17294,11 +17295,11 @@ untrusted code.  Stopping code block evaluation also stops evaluation
 of all header arguments of the code block.  This may not be desirable
 in some circumstances.  So during export, to allow evaluation of just
 the header arguments but not any code evaluation in the source block,
-set =:eval never-export= (see [[*Evaluating code blocks]]).
+set =:eval never-export= (see [[*Evaluating Code Blocks]]).
 
 Org never evaluates code blocks in commented sub-trees when exporting
-(see [[*Comment lines]]).  On the other hand, Org does evaluate code
-blocks in sub-trees excluded from export (see [[*Export settings]]).
+(see [[*Comment Lines]]).  On the other hand, Org does evaluate code
+blocks in sub-trees excluded from export (see [[*Export Settings]]).
 
 ** Extracting Source Code
 :PROPERTIES:
@@ -17321,7 +17322,7 @@ When Org tangles code blocks, it expands, merges, and transforms them.
 Then Org recomposes them into one or more separate files, as
 configured through the options.  During this tangling process, Org
 expands variables in the source code, and resolves any Noweb style
-references (see [[*Noweb reference syntax]]).
+references (see [[*Noweb Reference Syntax]]).
 
 *** Header arguments
 :PROPERTIES:
@@ -17387,7 +17388,7 @@ already exist in the code block.
 - =noweb= ::
 
      Includes =link= option, expands Noweb references (see [[*Noweb
-     reference syntax]]), and wraps them in link comments inside the
+     Reference Syntax]]), and wraps them in link comments inside the
      body of the code block.
 
 #+cindex: @samp{padline}, header argument
@@ -17414,8 +17415,8 @@ the tangled file's executable permission.
 By default Org expands code blocks during tangling.  The =no-expand=
 header argument turns off such expansions.  Note that one side-effect
 of expansion by ~org-babel-expand-src-block~ also assigns values (see
-[[*Environment of a code block]]) to variables.  Expansions also replace
-Noweb references with their targets (see [[*Noweb reference syntax]]).
+[[*Environment of a Code Block]]) to variables.  Expansions also replace
+Noweb references with their targets (see [[*Noweb Reference Syntax]]).
 Some of these expansions may cause premature assignment, hence this
 option.  This option makes a difference only for tangling.  It has no
 effect when exporting since code blocks for execution have to be
@@ -17855,7 +17856,7 @@ Note that now the expansion contains the results of the code block
 The "Library of Babel" is a collection of code blocks.  Like
 a function library, these code blocks can be called from other Org
 files.  A collection of useful code blocks is available on [[https://orgmode.org/worg/library-of-babel.html][Worg]].  For
-remote code block evaluation syntax, see [[*Evaluating code blocks]].
+remote code block evaluation syntax, see [[*Evaluating Code Blocks]].
 
 #+kindex: C-c C-v i
 #+findex: org-babel-lob-ingest
@@ -18059,7 +18060,7 @@ shortcuts.
        : [[*find this headline]]
 
      - After =:= in a headline, complete tags.  Org deduces the list
-       of tags from the =TAGS= in-buffer option (see [[*Setting tags]]),
+       of tags from the =TAGS= in-buffer option (see [[*Setting Tags]]),
        the variable ~org-tag-alist~, or from all tags used in the
        current buffer.
 
@@ -18068,7 +18069,7 @@ shortcuts.
        the current buffer.
 
      - After =[=, complete link abbreviations (see [[*Link
-       abbreviations]]).
+       Abbreviations]]).
 
      - After =#+=, complete the special keywords like =TYP_TODO= or
        file-specific =OPTIONS=.  After option keyword is complete,
@@ -18208,7 +18209,7 @@ Org evaluates code in the following circumstances:
 - /Following =shell= and =elisp= links/ ::
 
      Org has two link types that can directly evaluate code (see
-     [[*External links]]).  Because such code is not visible, these links
+     [[*External Links]]).  Because such code is not visible, these links
      have a potential risk.  Org therefore prompts the user when it
      encounters such links.  The customization variables are:
 
@@ -18241,7 +18242,7 @@ accessed through the usual {{{kbd(M-x org-customize)}}} command.  Or
 through the Org menu: Org \rarr Customization \rarr Browse Org Group.
 
 Org also has per-file settings for some variables (see [[*Summary of
-in-buffer settings]]).
+In-Buffer Settings]]).
 
 ** Summary of In-Buffer Settings
 :PROPERTIES:
@@ -18303,7 +18304,7 @@ changes.
      #+cindex: LINK, keyword
      #+vindex: org-link-abbrev-alist
      Each line specifies one abbreviation for one link.  Use multiple
-     =LINK= keywords for more, see [[*Link abbreviations]].  The
+     =LINK= keywords for more, see [[*Link Abbreviations]].  The
      corresponding variable is ~org-link-abbrev-alist~.
 
 - =#+PRIORITIES: highest lowest default= ::
@@ -18962,7 +18963,7 @@ the cursor moves across a special context.
      is enabled in message buffers while entering text in address
      header lines.  If one wants to use ecomplete one should /not/
      follow the advice to automagically turn on Orgtbl mode in message
-     buffers (see [[*The Orgtbl minor mode]]), but instead---after
+     buffers (see [[*The Orgtbl Minor Mode]]), but instead---after
      filling in the message headers---turn on Orgtbl mode manually
      when needed in the messages body.
 
@@ -19115,7 +19116,7 @@ https://orgmode.org.  See the =contrib/README= file in the source code
 directory for a list of contributed files.  Worg page with more
 information is at: https://orgmode.org/worg/org-contrib/.
 
-** Adding Hyperlink types
+** Adding Hyperlink Types
 :PROPERTIES:
 :DESCRIPTION: New custom link types.
 :END:
@@ -19503,7 +19504,7 @@ Org supports /dynamic blocks/ in Org documents.  They are inserted
 with begin and end markers like any other code block, but the contents
 are updated automatically by a user function.  For example, {{{kbd(C-c
 C-x C-r)}}} inserts a dynamic table that updates the work time (see
-[[*Clocking work time]]).
+[[*Clocking Work Time]]).
 
 Dynamic blocks can have names and function parameters.  The syntax is
 similar to source code block specifications:
@@ -20021,7 +20022,7 @@ skipping facilities.  Valid arguments are:
 
 The mapping routine can call any arbitrary function, even functions
 that change meta data or query the property API (see [[*Using the
-property API]]).  Here are some handy functions:
+Property API]]).  Here are some handy functions:
 
 #+attr_texinfo: :options org-todo &optional arg
 #+begin_defun
@@ -20099,7 +20100,7 @@ variables ~org-todo-keywords~ and ~org-tag-alist~.  These should cover
 all the important tags and TODO keywords, even if Org files use only
 some of them.  Though MobileOrg has in-buffer settings, it understands
 TODO states /sets/ (see [[*Setting up keywords for individual files]]) and
-/mutually exclusive/ tags (see [[*Setting tags]]) only for those set in
+/mutually exclusive/ tags (see [[*Setting Tags]]) only for those set in
 these variables.
 
 ** Setting Up the Staging Area
@@ -20688,7 +20689,7 @@ more information about indirect buffers, see [[info:emacs:Indirect%20Buffers][GN
 
 [fn:6] When ~org-agenda-inhibit-startup~ is non-~nil~, Org does not
 honor the default visibility state when first opening a file for the
-agenda (see [[*Speeding up your agendas]]).
+agenda (see [[*Speeding Up Your Agendas]]).
 
 [fn:7] See also the variable ~org-show-context-detail~ to decide how
 much context is shown around each match.
@@ -20763,7 +20764,7 @@ the buffer and press {{{kbd(M-TAB)}}}.  All headlines in the current
 buffer are offered as completions.
 
 [fn:26] When targeting a =NAME= keyword, =CAPTION= keyword is
-mandatory in order to get proper numbering (see [[*Images and tables]]).
+mandatory in order to get proper numbering (see [[*Images and Tables]]).
 
 [fn:27] The actual behavior of the search depends on the value of the
 variable ~org-link-search-must-match-exact-headline~.  If its value is
@@ -20817,7 +20818,7 @@ a special meaning here.
 
 [fn:40] Check also the variable ~org-fast-tag-selection-include-todo~,
 it allows you to change the TODO state through the tags interface
-([[*Setting tags]]), in case you like to mingle the two concepts.  Note
+([[*Setting Tags]]), in case you like to mingle the two concepts.  Note
 that this means you need to come up with unique keys across both sets
 of keywords.
 
@@ -20861,7 +20862,7 @@ checkbox adds checkboxes to the rest of the list.
 C-c)}}} activates any changes in the line.
 
 [fn:53] This is only true if the search does not involve more complex
-tests including properties (see [[*Property searches]]).
+tests including properties (see [[*Property Searches]]).
 
 [fn:54] Keys are automatically assigned to tags that have no
 configured keys.
@@ -20964,7 +20965,7 @@ you are running Debian, to get the same general treatment of idleness.
 On other systems, idle time refers to Emacs idle time only.
 
 [fn:79] Please note the pitfalls of summing hierarchical data in
-a flat list ([[*Using column view in the agenda]]).
+a flat list ([[*Using Column View in the Agenda]]).
 
 [fn:80] Please select your own key, {{{kbd(C-c c)}}} is only
 a suggestion.
@@ -20982,8 +20983,8 @@ level.  Tags are allowed in the tree structure.
 [fn:83] If you need one of these sequences literally, escape the =%=
 with a backslash.
 
-[fn:84] If you define your own link types (see [[*Adding hyperlink
-types]]), any property you store with ~org-store-link-props~ can be
+[fn:84] If you define your own link types (see [[*Adding Hyperlink
+Types]]), any property you store with ~org-store-link-props~ can be
 accessed in capture templates in a similar way.
 
 [fn:85] This is always the other, not the user.  See the variable
@@ -21065,7 +21066,7 @@ listings package or the [[https://github.com/gpoore/minted][minted]] package.  R
 ~org-export-latex-listings~ for details.
 
 [fn:105] Source code in code blocks may also be evaluated either
-interactively or on export.  See [[*Working with source code]] for more
+interactively or on export.  See [[*Working with Source Code]] for more
 information on evaluating code blocks.
 
 [fn:106] Adding =-k= to =-n -r= /keeps/ the labels in the source code
@@ -21085,7 +21086,7 @@ editing with {{{kbd(C-c ')}}}, and also before export.
 =entitiespretty=.
 
 [fn:110] This behaviour can be disabled with =-= export setting (see
-[[*Export settings]]).
+[[*Export Settings]]).
 
 [fn:111] LaTeX is a macro system based on Donald\nbsp{}E.\nbsp{}Knuth's TeX
 system.  Many of the features described here as "LaTeX" are really
@@ -21117,7 +21118,7 @@ backslash characters before a comma need escaping with another
 backslash character.
 
 [fn:118] For a less drastic behavior, consider using a select tag (see
-[[*Export settings]]) instead.
+[[*Export Settings]]) instead.
 
 [fn:119] If =BEAMER_ENV= is set, Org export adds =B_environment= tag
 to make it visible.  The tag serves as a visual aid and has no
@@ -21164,7 +21165,7 @@ to remove code evaluation from the {{{kbd(C-c C-c)}}} key binding.
 
 [fn:132] Actually, the constructs =call_<name>()= and =src_<lang>{}=
 are not evaluated when they appear in a keyword line---i.e. lines
-starting with =#+KEYWORD:=, see [[*Summary of in-buffer settings]].
+starting with =#+KEYWORD:=, see [[*Summary of In-Buffer Settings]].
 
 [fn:133] For Noweb literate programming details, see
 http://www.cs.tufts.edu/~nr/noweb/.
