@@ -212,6 +212,10 @@ See docstring for details.
 See docstring for details.
 
 ** Removed functions
+*** ~org-get-string-indentation~
+It was not used throughout the code base.
+*** ~org-fix-indentation~
+It was not used throughout code base.
 *** ~org-try-structure-completion~
 Org Tempo may be used as a replacement.  See details above.
 ** Removed variables
