@@ -313,7 +313,7 @@ error occurred.  Here is how to produce a useful backtrace:
    screen.  Save this buffer to a file---for example using {{{kbd(C-x
    C-w)}}}---and attach it to your bug report.
 
-** Typesetting conventions used in this manual
+** Typesetting Conventions Used in this Manual
 :PROPERTIES:
 :DESCRIPTION: Typesetting conventions used in this manual.
 :ALT_TITLE: Conventions
@@ -366,7 +366,7 @@ document structure, {{{kbd(M-right)}}} will be listed to call
 ~org-do-demote~, while in the chapter on tables, it will be listed to
 call ~org-table-move-column-right~.
 
-* Document structure
+* Document Structure
 :PROPERTIES:
 :DESCRIPTION: A tree works like your brain.
 :END:
@@ -432,7 +432,7 @@ two empty lines, one empty line remains visible after folding the
 subtree, in order to structure the collapsed view.  See the variable
 ~org-cycle-separator-lines~ to modify this behavior.
 
-** Visibility cycling
+** Visibility Cycling
 :PROPERTIES:
 :DESCRIPTION: Show and hide, much simplified.
 :END:
@@ -674,7 +674,7 @@ The following commands jump to other headlines in the buffer.
      #+texinfo: @noindent
      See also the variable ~org-goto-interface~.
 
-** Structure editing
+** Structure Editing
 :PROPERTIES:
 :DESCRIPTION: Changing sequence and level of headlines.
 :END:
@@ -1277,7 +1277,7 @@ the variable ~org-hide-block-startup~ or on a per-file basis by using
   ,#+STARTUP: nohideblocks
 #+end_example
 
-** Creating footnotes
+** Creating Footnotes
 :PROPERTIES:
 :DESCRIPTION: How footnotes are defined in Org's syntax.
 :END:
@@ -1372,7 +1372,7 @@ The following command handles footnotes:
      reference, and you can use the usual commands to follow these
      links.
 
-** Org syntax
+** Org Syntax
 :PROPERTIES:
 :DESCRIPTION: Formal description of Org's syntax.
 :END:
@@ -1411,7 +1411,7 @@ Org comes with a fast and intuitive table editor.  Spreadsheet-like
 calculations are supported using the Emacs Calc package (see
 [[info:calc]]).
 
-** Built-in table editor
+** Built-in Table Editor
 :PROPERTIES:
 :DESCRIPTION: Simple tables.
 :END:
@@ -1745,7 +1745,7 @@ you, configure the option ~org-table-auto-blank-field~.
      Orgtbl radio tables, see [[*Translator functions]], for a detailed
      description.
 
-** Column width and alignment
+** Column Width and Alignment
 :PROPERTIES:
 :DESCRIPTION: Overrule the automatic settings.
 :END:
@@ -1844,7 +1844,7 @@ alignment and field width like this: =<r10>=.
 Lines which only contain these formatting cookies are removed
 automatically upon exporting the document.
 
-** Column groups
+** Column Groups
 :PROPERTIES:
 :DESCRIPTION: Grouping to trigger vertical lines.
 :END:
@@ -2970,7 +2970,7 @@ defaults to =12=.
 Like HTML, Org provides links inside a file, external links to
 other files, Usenet articles, emails, and much more.
 
-** Link format
+** Link Format
 :PROPERTIES:
 :DESCRIPTION: How links in Org are formatted.
 :END:
@@ -3006,7 +3006,7 @@ Inserting the missing bracket hides the link internals again.  To show
 the internal structure of all links, use the menu: Org \rarr Hyperlinks \rarr
 Literal links.
 
-** Internal links
+** Internal Links
 :PROPERTIES:
 :DESCRIPTION: Links to other places in the current file.
 :END:
@@ -3071,7 +3071,7 @@ return to the previous position with {{{kbd(C-c &)}}}.  Using this
 command several times in direct succession goes back to positions
 recorded earlier.
 
-** Radio targets
+** Radio Targets
 :PROPERTIES:
 :DESCRIPTION: Make targets trigger links in plain text.
 :END:
@@ -3089,7 +3089,7 @@ radio targets only when the file is first loaded into Emacs.  To
 update the target list during editing, press {{{kbd(C-c C-c)}}} with
 the cursor on or at a target.
 
-** External links
+** External Links
 :PROPERTIES:
 :DESCRIPTION: URL-like links to the world.
 :END:
@@ -3182,7 +3182,7 @@ links.  If spaces must be part of the link (for example in
 =bbdb:Richard Stallman=), or if you need to remove ambiguities about
 the end of the link, enclose them in square or angular brackets.
 
-** Handling links
+** Handling Links
 :PROPERTIES:
 :DESCRIPTION: Creating, inserting and following.
 :END:
@@ -3421,7 +3421,7 @@ it into an Org file, and to follow the link.
                    (define-key org-mode-map "\C-p" 'org-previous-link)))
      #+end_src
 
-** Using links outside Org
+** Using Links Outside Org
 :PROPERTIES:
 :DESCRIPTION: Linking from my C source code?
 :END:
@@ -3435,7 +3435,7 @@ commands, like this (please select suitable global keys yourself):
   (global-set-key "\C-c o" 'org-open-at-point-global)
 #+end_src
 
-** Link abbreviations
+** Link Abbreviations
 :PROPERTIES:
 :DESCRIPTION: Shortcuts for writing complex links.
 :END:
@@ -3550,7 +3550,7 @@ As a degenerate case, a file link with an empty file name can be used
 to search the current file.  For example, =[[file:::find me]]= does
 a search for =find me= in the current file, just as =[[find me]]= would.
 
-** Custom searches
+** Custom Searches
 :PROPERTIES:
 :DESCRIPTION: When the default search is not enough.
 :END:
@@ -4005,7 +4005,7 @@ If you need more complex dependency structures, for example
 dependencies between entries in different trees or files, check out
 the contributed module =org-depend.el=.
 
-** Progress logging
+** Progress Logging
 :PROPERTIES:
 :DESCRIPTION: Dates and notes for progress.
 :END:
@@ -4505,7 +4505,7 @@ may specify special faces for specific tags using the variable
 ~org-tag-faces~, in much the same way as you can for TODO keywords
 (see [[*Faces for TODO keywords]]).
 
-** Tag inheritance
+** Tag Inheritance
 :PROPERTIES:
 :DESCRIPTION: Tags use the tree structure of an outline.
 :END:
@@ -4558,7 +4558,7 @@ filtering works fine, with inherited tags.  Set
 includes all agenda types, but setting this to ~nil~ can really speed
 up agenda generation.
 
-** Setting tags
+** Setting Tags
 :PROPERTIES:
 :DESCRIPTION: How to assign tags to a headline.
 :END:
@@ -4757,7 +4757,7 @@ effect: start selection with {{{kbd(C-c C-c C-c)}}} instead of
 the special window is not even shown for single-key tag selection, it
 comes up only when you press an extra {{{kbd(C-c)}}}.
 
-** Tag hierarchy
+** Tag Hierarchy
 :PROPERTIES:
 :DESCRIPTION: Create a hierarchy of tags.
 :END:
@@ -4860,7 +4860,7 @@ support with ~org-toggle-tags-groups~, bound to {{{kbd(C-c C-x q)}}}.
 If you want to disable tag groups completely, set ~org-group-tags~ to
 ~nil~.
 
-** Tag searches
+** Tag Searches
 :PROPERTIES:
 :DESCRIPTION: Searching for combinations of tags.
 :END:
@@ -4902,7 +4902,7 @@ the search string is rich and allows also matching against TODO
 keywords, entry levels and properties.  For a complete description
 with many examples, see [[*Matching tags and properties]].
 
-* Properties and columns
+* Properties and Columns
 :PROPERTIES:
 :DESCRIPTION: Storing information about an entry.
 :END:
@@ -4926,7 +4926,7 @@ tracks, and so on.
 Properties can be conveniently edited and viewed in column view (see
 [[*Column view]]).
 
-** Property syntax
+** Property Syntax
 :PROPERTIES:
 :DESCRIPTION: How properties are spelled out.
 :END:
@@ -5083,7 +5083,7 @@ The following commands help to work with properties:
      Compute the property at point, using the operator and scope from
      the nearest column format definition.
 
-** Special properties
+** Special Properties
 :PROPERTIES:
 :DESCRIPTION: Access to other Org mode features.
 :END:
@@ -5129,7 +5129,7 @@ not be used as keys in the properties drawer:
 | =TIMESTAMP_IA= | The first inactive timestamp in the entry.                     |
 | =TODO=         | The TODO keyword of the entry.                                 |
 
-** Property searches
+** Property Searches
 :PROPERTIES:
 :DESCRIPTION: Matching property values.
 :END:
@@ -5180,7 +5180,7 @@ single property:
      braces, it is interpreted as a regular expression and matched
      against the property values.
 
-** Property inheritance
+** Property Inheritance
 :PROPERTIES:
 :DESCRIPTION: Passing values down a tree.
 :END:
@@ -5232,7 +5232,7 @@ least for the special applications for which they are used:
      The =LOGGING= property may define logging settings for an entry
      or a subtree (see [[*Tracking TODO state changes]]).
 
-** Column view
+** Column View
 :PROPERTIES:
 :DESCRIPTION: Tabular viewing and editing.
 :END:
@@ -5727,7 +5727,7 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
          [2006-11-01 Wed]
      #+end_example
 
-** Creating timestamps
+** Creating Timestamps
 :PROPERTIES:
 :DESCRIPTION: Commands to insert timestamps.
 :END:
@@ -5993,7 +5993,7 @@ following consequences:
   are using dates in tables, table alignment will be messed up.  If
   the custom format is shorter, things do work as expected.
 
-** Deadlines and scheduling
+** Deadlines and Scheduling
 :PROPERTIES:
 :DESCRIPTION: Planning your work.
 :END:
@@ -6257,7 +6257,7 @@ a task subtree, with dates shifted in each copy.  The command
 {{{kbd(C-c C-x c)}}} was created for this purpose; it is described in
 [[*Structure editing]].
 
-** Clocking work time
+** Clocking Work Time
 :PROPERTIES:
 :DESCRIPTION: Tracking how long you spend on a task.
 :END:
@@ -6808,7 +6808,7 @@ If you only want this from time to time, use three universal prefix
 arguments with ~org-clock-in~ and two {{{kbd(C-u C-u)}}} with
 ~org-clock-in-last~.
 
-** Effort estimates
+** Effort Estimates
 :PROPERTIES:
 :DESCRIPTION: Planning work effort in advance.
 :END:
@@ -6956,7 +6956,7 @@ same commands.
      continue the old one.  This command also removes the timer from
      the mode line.
 
-* Capture - Refile - Archive
+* Capture, Refile, Archive
 :PROPERTIES:
 :DESCRIPTION: The ins and outs for projects.
 :END:
@@ -7651,7 +7651,7 @@ a specific attachment method.
                     (call-interactively #'org-attach-dired-to-subtree))))))
 #+end_src
 
-** RSS feeds
+** RSS Feeds
 :PROPERTIES:
 :DESCRIPTION: Getting input from RSS feeds.
 :END:
@@ -7886,7 +7886,7 @@ valid contents: ~org-protocol-create~ and
 ~org-protocol-create-for-org~.  The latter is of use if you're editing
 an Org file that is part of a publishing project.
 
-** Refile and copy
+** Refile and Copy
 :PROPERTIES:
 :DESCRIPTION: Moving/copying a tree from one place to another.
 :END:
@@ -8186,7 +8186,7 @@ Two variables control how the agenda buffer is displayed and whether
 the window configuration is restored when the agenda exits:
 ~org-agenda-window-setup~ and ~org-agenda-restore-windows-after-quit~.
 
-** Agenda files
+** Agenda Files
 :PROPERTIES:
 :DESCRIPTION: Files being searched for agenda information.
 :END:
@@ -8903,7 +8903,7 @@ are not stuck.  The correct customization for this is:
 Note that if a project is identified as non-stuck, the subtree of this
 entry is searched for stuck projects.
 
-** Presentation and sorting
+** Presentation and Sorting
 :PROPERTIES:
 :DESCRIPTION: How agenda items are prepared for display.
 :END:
@@ -10047,7 +10047,7 @@ the other commands, the cursor needs to be in the desired line.
      Emacs for the compilation of the agenda.  Buffers created by the
      user to visit Org files are not removed.
 
-** Custom agenda views
+** Custom Agenda Views
 :PROPERTIES:
 :DESCRIPTION: Defining special searches and views.
 :END:
@@ -10288,7 +10288,7 @@ like this:
 
 See the docstring of the variable for more information.
 
-** Exporting agenda views
+** Exporting Agenda Views
 :PROPERTIES:
 :DESCRIPTION: Writing a view to a file.
 :END:
@@ -10553,7 +10553,7 @@ If you would like to center some text, do it like this:
   ,#+END_CENTER
 #+end_example
 
-** Emphasis and monospace
+** Emphasis and Monospace
 :PROPERTIES:
 :DESCRIPTION: Bold, italic, etc.
 :END:
@@ -10574,7 +10574,7 @@ To turn off fontification for marked up text, you can set
 ~org-fontify-emphasized-text~ to ~nil~.  To narrow down the list of
 available markup syntax, you can customize ~org-emphasis-alist~.
 
-** Horizontal rules
+** Horizontal Rules
 :PROPERTIES:
 :DESCRIPTION: Make a line.
 :END:
@@ -10583,7 +10583,7 @@ available markup syntax, you can customize ~org-emphasis-alist~.
 A line consisting of only dashes, and at least 5 of them, is exported
 as a horizontal line.
 
-** Images and tables
+** Images and Tables
 :PROPERTIES:
 :DESCRIPTION: Images, tables and caption mechanism.
 :END:
@@ -10633,7 +10633,7 @@ structures, the same caption mechanism can apply to many
 others---e.g., LaTeX equations, source code blocks.  Depending on the
 export back-end, those may or may not be handled.
 
-** Literal examples
+** Literal Examples
 :PROPERTIES:
 :DESCRIPTION: Source code examples with special formatting.
 :END:
@@ -10766,7 +10766,7 @@ a shortcut is provided (see [[*Structure templates]]).
      end of the current line.  Then the label is stored as a link
      =(label)=, for retrieval with {{{kbd(C-c C-l)}}}.
 
-** Special symbols
+** Special Symbols
 :PROPERTIES:
 :DESCRIPTION: Greek letters and other symbols.
 :END:
@@ -10826,7 +10826,7 @@ a special way[fn:110] the following commonly used character
 combinations: =\-= is treated as a shy hyphen, =--= and =---= are
 converted into dashes, and =...= becomes a compact set of dots.
 
-** Subscripts and superscripts
+** Subscripts and Superscripts
 :PROPERTIES:
 :DESCRIPTION: Simple syntax for raising/lowering text.
 :END:
@@ -11086,7 +11086,7 @@ or, by requiring the library in the Emacs init file like this:
   (require 'ox-md)
 #+end_src
 
-** The export dispatcher
+** The Export Dispatcher
 :PROPERTIES:
 :DESCRIPTION: The main interface.
 :END:
@@ -11171,7 +11171,7 @@ further alter what is exported, and how.
      parts of an Org document by adjusting outline visibility
      settings.
 
-** Export settings
+** Export Settings
 :PROPERTIES:
 :DESCRIPTION: Common export settings.
 :END:
@@ -11486,7 +11486,7 @@ become buffer-local during export by using the =BIND= keyword.  Its
 syntax is =#+BIND: variable value=.  This is particularly useful for
 in-buffer settings that cannot be changed using keywords.
 
-** Table of contents
+** Table of Contents
 :PROPERTIES:
 :DESCRIPTION: The if and where of the table of contents.
 :END:
@@ -11563,7 +11563,7 @@ Normally Org uses the headline for its entry in the table of contents.
 But with =ALT_TITLE= property, a different entry can be specified for
 the table of contents.
 
-** Include files
+** Include Files
 :PROPERTIES:
 :DESCRIPTION: Include additional files into a document.
 :END:
@@ -11614,7 +11614,7 @@ You can visit the file being included with the following command.
 
      Visit the include file at point.
 
-** Macro replacement
+** Macro Replacement
 :PROPERTIES:
 :DESCRIPTION: Use macros to create templates.
 :END:
@@ -11723,7 +11723,7 @@ The surrounding brackets can be made invisible by setting
 
 Org expands macros at the very beginning of the export process.
 
-** Comment lines
+** Comment Lines
 :PROPERTIES:
 :DESCRIPTION: What will not be exported.
 :END:
@@ -11884,7 +11884,7 @@ these two left and right justification blocks:
   ,#+END_JUSTIFYRIGHT
 #+end_example
 
-** Beamer export
+** Beamer Export
 #+cindex: Beamer export
 
 Org uses Beamer export to convert an Org file tree structure into
@@ -12181,7 +12181,7 @@ Here is an example of an Org document ready for Beamer export.
       Please test this stuff!
 #+end_example
 
-** HTML export
+** HTML Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to HTML.
 :END:
@@ -12830,7 +12830,7 @@ You can choose default values for these options by customizing the
 variable ~org-infojs-options~.  If you always want to apply the script
 to your pages, configure the variable ~org-export-html-use-infojs~.
 
-** LaTeX export
+** LaTeX Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to @LaTeX{} and processing to PDF.
 :END:
@@ -13456,7 +13456,7 @@ The LaTeX export back-end converts horizontal rules by the specified
   -----
 #+end_example
 
-** Markdown export
+** Markdown Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to Markdown.
 :END:
@@ -13504,7 +13504,7 @@ levels to two whereas /setext/ limits headline levels to six.  Beyond
 these limits, the export back-end converts headlines to lists.  To set
 a limit to a level before the absolute limit (see [[*Export settings]]).
 
-** OpenDocument Text export
+** OpenDocument Text Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to OpenDocument Text.
 :END:
@@ -14378,7 +14378,7 @@ OpenDocument RNC files and the needed schema-locating rules.  The ODT
 export back-end takes care of updating the
 ~rng-schema-locating-files~.
 
-** Org export
+** Org Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to Org.
 :END:
@@ -14405,7 +14405,7 @@ code blocks]]) and removes content specific to other back-ends.
      #+kindex: C-c C-e O v
      Export to an Org file, then open it.
 
-** Texinfo export
+** Texinfo Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to Texinfo.
 :END:
@@ -14878,7 +14878,7 @@ Texinfo code.
     :END:
 #+end_example
 
-** iCalendar export
+** iCalendar Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to iCalendar.
 :END:
@@ -14976,7 +14976,7 @@ capabilities of the destination application.  Some are more lenient
 than others.  Consult the Org mode FAQ for advice on specific
 applications.
 
-** Other built-in back-ends
+** Other Built-in Back-ends
 :PROPERTIES:
 :DESCRIPTION: Exporting to a man page.
 :END:
@@ -14993,7 +14993,7 @@ dispatcher]]).
 Follow the comment section of such files, for example, =ox-man.el=,
 for usage and configuration details.
 
-** Advanced configuration
+** Advanced Configuration
 :PROPERTIES:
 :DESCRIPTION: Fine-tuning the export output.
 :END:
@@ -15163,7 +15163,7 @@ Further steps to consider would be an interactive function,
 self-installing an item in the export dispatcher menu, and other
 user-friendly improvements.
 
-** Export in foreign buffers
+** Export in Foreign Buffers
 :PROPERTIES:
 :DESCRIPTION: Author tables and lists in Org syntax.
 :END:
@@ -15761,7 +15761,7 @@ contains an exclamation mark creates a sub item.
   ,#+INDEX: Application!CV
 #+end_example
 
-** Uploading files
+** Uploading Files
 :PROPERTIES:
 :DESCRIPTION: How to get files up on the server.
 :END:
@@ -15798,7 +15798,7 @@ example files you might include with =INCLUDE= keyword.  The timestamp
 mechanism in Org is not smart enough to detect if included files have
 been modified.
 
-** Sample configuration
+** Sample Configuration
 :PROPERTIES:
 :DESCRIPTION: Example projects.
 :END:
@@ -15879,7 +15879,7 @@ place on the web server, and publishing images to it.
           ("website" :components ("orgfiles" "images" "other"))))
 #+end_src
 
-** Triggering publication
+** Triggering Publication
 :PROPERTIES:
 :DESCRIPTION: Publication commands.
 :END:
@@ -15920,7 +15920,7 @@ of the commands above, or by customizing the variable
 particular if files include other files via =SETUPFILE= or =INCLUDE=
 keywords.
 
-* Working with source code
+* Working with Source Code
 :PROPERTIES:
 :DESCRIPTION: Export, evaluate, and tangle code blocks.
 :END:
@@ -16001,7 +16001,7 @@ internal and external links in a single Org document.
 Details of Org's facilities for working with source code are described
 in the following sections.
 
-** Structure of code blocks
+** Structure of Code Blocks
 :PROPERTIES:
 :DESCRIPTION: Code block syntax described.
 :END:
@@ -16083,7 +16083,7 @@ or
 
      Source code in the dialect of the specified language identifier.
 
-** Using header arguments
+** Using Header Arguments
 :PROPERTIES:
 :DESCRIPTION: Different ways to set header arguments.
 :END:
@@ -16276,7 +16276,7 @@ evaluation of =factorial= code block.
 
 : #+CALL: factorial[:session special](n=5)
 
-** Environment of a code block
+** Environment of a Code Block
 :PROPERTIES:
 :DESCRIPTION: Arguments, sessions, working directory...
 :END:
@@ -16693,7 +16693,7 @@ block:
 Likewise, the value of the =epilogue= header argument is for appending
 to the end of the code block for execution.
 
-** Evaluating code blocks
+** Evaluating Code Blocks
 :PROPERTIES:
 :DESCRIPTION: Place results of evaluation in the Org buffer.
 :END:
@@ -16888,7 +16888,7 @@ the result from =random= has changed since the last run.
   0.254227238707244
 #+end_example
 
-** Results of evaluation
+** Results of Evaluation
 :PROPERTIES:
 :DESCRIPTION: Choosing a results type, post-processing...
 :END:
@@ -17241,7 +17241,7 @@ to pass data between code blocks.
   | 1.371 |
 #+end_example
 
-** Exporting code blocks
+** Exporting Code Blocks
 :PROPERTIES:
 :DESCRIPTION: Export contents and/or results.
 :END:
@@ -17300,7 +17300,7 @@ Org never evaluates code blocks in commented sub-trees when exporting
 (see [[*Comment lines]]).  On the other hand, Org does evaluate code
 blocks in sub-trees excluded from export (see [[*Export settings]]).
 
-** Extracting source code
+** Extracting Source Code
 :PROPERTIES:
 :DESCRIPTION: Create pure source code files.
 :END:
@@ -17529,7 +17529,7 @@ the following enables execution of Clojure code blocks:
   (require 'ob-clojure)
 #+end_src
 
-** Editing source code
+** Editing Source Code
 :PROPERTIES:
 :DESCRIPTION: Language major-mode editing.
 :END:
@@ -17607,7 +17607,7 @@ for Python and Emacs Lisp languages.
                               ("python" (:background "#E5FFB8"))))
 #+end_src
 
-** Noweb reference syntax
+** Noweb Reference Syntax
 :PROPERTIES:
 :DESCRIPTION: Literate programming in Org mode.
 :END:
@@ -17863,7 +17863,7 @@ For any user to add code to the library, first save the code in
 regular code blocks of an Org file, and then load the Org file with
 ~org-babel-lob-ingest~, which is bound to {{{kbd(C-c C-v i)}}}.
 
-** Key bindings and useful functions
+** Key bindings and Useful Functions
 :PROPERTIES:
 :DESCRIPTION: Work quickly with code blocks.
 :END:
@@ -17984,7 +17984,7 @@ Active key bindings in Org mode buffer:
 | {{{kbd(C-c C-v h)}}} or {{{kbd(C-c C-v C-h)}}} | ~org-babel-describe-bindings~              |
 | {{{kbd(C-c C-v x)}}} or {{{kbd(C-c C-v C-x)}}} | ~org-babel-do-key-sequence-in-edit-buffer~ |
 
-** Batch execution
+** Batch Execution
 :PROPERTIES:
 :DESCRIPTION: Call functions from the command line.
 :END:
@@ -18080,7 +18080,7 @@ shortcuts.
      - When point is anywhere else, complete dictionary words using
        Ispell.
 
-** Structure templates
+** Structure Templates
 :PROPERTIES:
 :DESCRIPTION: Quick insertion of structural elements.
 :END:
@@ -18127,7 +18127,7 @@ init file[fn:134].
 | {{{kbd(s)}}} | =#+BEGIN_SRC= ... =#+END_SRC=             |
 | {{{kbd(v)}}} | =#+BEGIN_VERSE= ... =#+END_VERSE=         |
 
-** Speed keys
+** Speed Keys
 :PROPERTIES:
 :DESCRIPTION: Electric commands at the beginning of a headline.
 :END:
@@ -18617,7 +18617,7 @@ changes.
      These lines set the TODO keywords and their interpretation in the
      current file.  The corresponding variable is ~org-todo-keywords~.
 
-** The very busy {{{kbd(C-c C-c)}}} key
+** The Very Busy {{{kbd(C-c C-c)}}} Key
 :PROPERTIES:
 :DESCRIPTION: When in doubt, press @kbd{C-c C-c}.
 :END:
@@ -19101,7 +19101,7 @@ This appendix illustrates using a few.  A complete list of hooks with
 documentation is maintained by the Worg project at
 https://orgmode.org/worg/doc.html#hooks.
 
-** Add-on packages
+** Add-on Packages
 :PROPERTIES:
 :DESCRIPTION: Available extensions.
 :END:
@@ -19115,7 +19115,7 @@ https://orgmode.org.  See the =contrib/README= file in the source code
 directory for a list of contributed files.  Worg page with more
 information is at: https://orgmode.org/worg/org-contrib/.
 
-** Adding hyperlink types
+** Adding Hyperlink types
 :PROPERTIES:
 :DESCRIPTION: New custom link types.
 :END:
@@ -19214,7 +19214,7 @@ To define new link types, define a function that implements completion
 support with {{{kbd(C-c C-l)}}}.  This function should not accept any
 arguments but return the appropriate prefix and complete link string.
 
-** Adding export back-ends
+** Adding Export Back-ends
 :PROPERTIES:
 :DESCRIPTION: How to write new export back-ends.
 :END:
@@ -19244,7 +19244,7 @@ replaces the parent back-end functions.
 
 For complete documentation, see [[https://orgmode.org/worg/dev/org-export-reference.html][the Org Export Reference on Worg]].
 
-** Tables in arbitrary syntax
+** Tables in Arbitrary Syntax
 :PROPERTIES:
 :DESCRIPTION: Orgtbl for LaTeX and other programs.
 :END:
@@ -19493,7 +19493,7 @@ list consisting of parameters specified in the =#+ORGTBL: SEND= line.
 Please share your translator functions by posting them to the Org
 users mailing list, at mailto:emacs-orgmode@gnu.org.
 
-** Dynamic blocks
+** Dynamic Blocks
 :PROPERTIES:
 :DESCRIPTION: Automatically filled blocks.
 :END:
@@ -19565,7 +19565,7 @@ Org mode.
 Dynamic blocks, like any other block, can be narrowed with
 ~org-narrow-to-block~.
 
-** Special agenda views
+** Special Agenda Views
 :PROPERTIES:
 :DESCRIPTION: Customized views.
 :END:
@@ -19675,7 +19675,7 @@ special function:
       (org-agenda-overriding-header "Projects waiting for something: "))))
 #+end_src
 
-** Speeding up your agendas
+** Speeding Up Your Agendas
 :PROPERTIES:
 :DESCRIPTION: Tips on how to speed up your agendas.
 :END:
@@ -19718,7 +19718,7 @@ details about generation of agenda views, see the docstrings for the
 relevant variables, and this [[https://orgmode.org/worg/agenda-optimization.html][dedicated Worg page]] for agenda
 optimization.
 
-** Extracting agenda information
+** Extracting Agenda Information
 :PROPERTIES:
 :DESCRIPTION: Post-processing agenda information.
 :END:
@@ -19824,7 +19824,7 @@ CSV output from Emacs and prints with a checkbox:
   }
 #+end_src
 
-** Using the property API
+** Using the Property API
 :PROPERTIES:
 :DESCRIPTION: Writing programs that use entry properties.
 :END:
@@ -19927,7 +19927,7 @@ to be entered.  The functions must return ~nil~ if they are not
 responsible for this property.
 #+end_defopt
 
-** Using the mapping API
+** Using the Mapping API
 :PROPERTIES:
 :DESCRIPTION: Mapping over all or selected entries.
 :END:
@@ -20102,7 +20102,7 @@ TODO states /sets/ (see [[*Setting up keywords for individual files]]) and
 /mutually exclusive/ tags (see [[*Setting tags]]) only for those set in
 these variables.
 
-** Setting up the staging area
+** Setting Up the Staging Area
 :PROPERTIES:
 :DESCRIPTION: For the mobile device.
 :END:
@@ -20196,7 +20196,7 @@ flagged entries.  Note that these entries may not be the most recent
 since MobileOrg searches files that were last pulled.  To get an
 updated agenda view with changes since the last pull, pull again.
 
-* History and acknowledgments
+* History and Acknowledgments
 :PROPERTIES:
 :DESCRIPTION: How Org came into being.
 :APPENDIX: t
@@ -20330,7 +20330,7 @@ I received support from so many users that it is clearly impossible to
 be fair when shortlisting a few of them, but Org's history would not
 be complete if the ones above were not mentioned in this manual.
 
-** List of contributions
+** List of Contributions
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
@@ -20617,7 +20617,7 @@ is included in the section entitled "GNU Free Documentation License".
 modify this GNU manual."
 #+end_quote
 
-* Export setup                                                          :noexport:
+* Export Setup                                                          :noexport:
 
 #+subtitle:  Release {{{version}}}
 #+author:    by Carsten Dominik
