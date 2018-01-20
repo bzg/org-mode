@@ -3705,7 +3705,7 @@ This variable is populated from #+PROPERTY lines.")
   :group 'org)
 
 (defvar-local org-category nil
-  "Variable used by org files to set a category for agenda display.
+  "Variable used by Org files to set a category for agenda display.
 Such files should use a file variable to set it, for example
 
 #   -*- mode: org; org-category: \"ELisp\"
@@ -3957,7 +3957,7 @@ Place-holders only used by `:image-converter':
 (defcustom org-preview-latex-image-directory "ltximg/"
   "Path to store latex preview images.
 A relative path here creates many directories relative to the
-processed org files paths.  An absolute path puts all preview
+processed Org files paths.  An absolute path puts all preview
 images at the same place."
   :group 'org-latex
   :version "26.1"
@@ -4155,9 +4155,9 @@ lines to the buffer:
   :type 'boolean)
 
 (defcustom org-hidden-keywords nil
-  "List of symbols corresponding to keywords to be hidden the org buffer.
-For example, a value \\='(title) for this list will make the document's title
-appear in the buffer without the initial #+TITLE: keyword."
+  "List of symbols corresponding to keywords to be hidden in the Org buffer.
+For example, a value \\='(title) for this list makes the document's title
+appear in the buffer without the initial \"#+TITLE:\" part."
   :group 'org-appearance
   :version "24.1"
   :type '(set (const :tag "#+AUTHOR" author)
@@ -13525,7 +13525,7 @@ headlines matching this string."
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'help-echo
-		      (format "mouse-2 or RET jump to org file %s"
+		      (format "mouse-2 or RET jump to Org file %S"
 			      (abbreviate-file-name
 			       (or (buffer-file-name (buffer-base-buffer))
 				   (buffer-name (buffer-base-buffer)))))))
@@ -15886,7 +15886,7 @@ a priority cookie and tags in the standard locations."
 	   (move-marker (make-marker) (match-beginning 0))))))))
 
 (defun org-find-exact-heading-in-directory (heading &optional dir)
-  "Find Org node headline HEADING in all .org files in directory DIR.
+  "Find Org node headline HEADING in all \".org\" files in directory DIR.
 When the target headline is found, return a marker to this location."
   (let ((files (directory-files (or dir default-directory)
 				t "\\`[^.#].*\\.org\\'"))
@@ -17606,7 +17606,7 @@ Prompt for confirmation when there are unsaved changes.
 Be sure you know what you are doing before letting this function
 overwrite your changes.
 
-This function is useful in a setup where one tracks org files
+This function is useful in a setup where one tracks Org files
 with a version control system, to revert on one machine after pulling
 changes from another.  I believe the procedure must be like this:
 
