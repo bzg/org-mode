@@ -25,7 +25,7 @@
 ;;; Commentary:
 
 ;; This file contains code needed for compatibility with older
-;; versions of GNU Emacs.
+;; versions of GNU Emacs and integration with other packages.
 
 ;;; Code:
 
@@ -841,6 +841,53 @@ ELEMENT is the element at point."
      (defadvice bookmark-jump (after org-make-visible activate)
        "Make the position visible."
        (org-bookmark-jump-unhide))))
+
+;;;; Calendar
+
+(defcustom org-calendar-to-agenda-key 'default
+  "Key to be installed in `calendar-mode-map' for switching to the agenda.
+
+The command `org-calendar-goto-agenda' will be bound to this key.
+
+When set to `default', bind the function to `c', but only if it is
+available in the Calendar keymap.  This is the default choice because
+`c' can then be used to switch back and forth between agenda and calendar.
+
+When nil, `org-calendar-goto-agenda' is not bound to any key."
+  :group 'org-agenda
+  :type '(choice
+	  (const :tag "Bind to `c' if available" default)
+	  (key-sequence :tag "Other binding")
+	  (const :tag "No binding" nil))
+  :safe (lambda (v) (or (symbolp v) (stringp v)))
+  :package-version '(Org . "9.2"))
+
+(defcustom org-calendar-insert-diary-entry-key [?i]
+  "The key to be installed in `calendar-mode-map' for adding diary entries.
+This option is irrelevant until `org-agenda-diary-file' has been configured
+to point to an Org file.  When that is the case, the command
+`org-agenda-diary-entry' will be bound to the key given here, by default
+`i'.  In the calendar, `i' normally adds entries to `diary-file'.  So
+if you want to continue doing this, you need to change this to a different
+key."
+  :group 'org-agenda
+  :type 'sexp)
+
+(defun org--setup-calendar-bindings ()
+  "Bind Org functions in Calendar keymap."
+  (pcase org-calendar-to-agenda-key
+    (`nil nil)
+    ((and key (pred stringp))
+     (local-set-key (kbd key) #'org-calendar-goto-agenda))
+    ((guard (not (lookup-key calendar-mode-map "c")))
+     (local-set-key "c" #'org-calendar-goto-agenda))
+    (_ nil))
+  (unless (eq org-agenda-diary-file 'diary-file)
+    (local-set-key org-calendar-insert-diary-entry-key
+		   #'org-agenda-diary-entry)))
+
+(eval-after-load "calendar"
+  '(add-hook 'calendar-mode-hook #'org--setup-calendar-bindings))
 
 ;;;; Saveplace
 

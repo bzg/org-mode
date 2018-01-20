@@ -57,6 +57,11 @@ should become
   ,#+END_SRC
 #+END_SRC
 
+*** Change ~org-calendar-to-agenda-key~ value
+
+Default value and accepted value types changed.  See [[doc:org-calendar-to-agenda-key][docstring]] for
+details.
+
 *** Change ~org-structure-template-alist~ value
 
 With the new template expansion mechanism (see

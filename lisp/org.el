@@ -3771,25 +3771,6 @@ A nil value means to remove them, after a query, from the list."
   :group 'org-agenda
   :type 'boolean)
 
-(defcustom org-calendar-to-agenda-key [?c]
-  "The key to be installed in `calendar-mode-map' for switching to the agenda.
-The command `org-calendar-goto-agenda' will be bound to this key.  The
-default is the character `c' because then `c' can be used to switch back and
-forth between agenda and calendar."
-  :group 'org-agenda
-  :type 'sexp)
-
-(defcustom org-calendar-insert-diary-entry-key [?i]
-  "The key to be installed in `calendar-mode-map' for adding diary entries.
-This option is irrelevant until `org-agenda-diary-file' has been configured
-to point to an Org file.  When that is the case, the command
-`org-agenda-diary-entry' will be bound to the key given here, by default
-`i'.  In the calendar, `i' normally adds entries to `diary-file'.  So
-if you want to continue doing this, you need to change this to a different
-key."
-  :group 'org-agenda
-  :type 'sexp)
-
 (defcustom org-agenda-diary-file 'diary-file
   "File to which to add new entries with the `i' key in agenda and calendar.
 When this is the symbol `diary-file', the functionality in the Emacs
@@ -3799,17 +3780,6 @@ points to a file, `org-agenda-diary-entry' will be used instead."
   :type '(choice
 	  (const :tag "The standard Emacs diary file" diary-file)
 	  (file :tag "Special Org file diary entries")))
-
-(eval-after-load "calendar"
-  '(progn
-     (org-defkey calendar-mode-map org-calendar-to-agenda-key
-		 'org-calendar-goto-agenda)
-     (add-hook 'calendar-mode-hook
-	       (lambda ()
-		 (unless (eq org-agenda-diary-file 'diary-file)
-		   (define-key calendar-mode-map
-		     org-calendar-insert-diary-entry-key
-		     'org-agenda-diary-entry))))))
 
 (defgroup org-latex nil
   "Options for embedding LaTeX code into Org mode."
