@@ -32,6 +32,7 @@
 (require 'cl-lib)
 (require 'org-macs)
 
+(declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-at-table.el-p "org" ())
