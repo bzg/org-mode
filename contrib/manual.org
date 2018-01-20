@@ -20631,6 +20631,8 @@ modify this GNU manual."
 #+property: header-args :eval no
 #+startup: overview nologdone
 
+#+export_file_name: org.texi
+
 #+texinfo_dir_category: Emacs editing modes
 #+texinfo_dir_title: Org Mode: (org)
 #+texinfo_dir_desc: Outline-based notes management and organizer
