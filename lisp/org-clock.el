@@ -468,38 +468,6 @@ to add an effort property.")
 (defvar org-clock-stored-resume-clock nil
   "Clock to resume, saved by `org-clock-load'")
 
-(defconst org-clock--oldest-date
-  (let* ((dichotomy
-	  (lambda (min max pred)
-	    (if (funcall pred min) min
-	      (cl-incf min)
-	      (while (> (- max min) 1)
-		(let ((mean (+ (ash min -1) (ash max -1) (logand min max 1))))
-		  (if (funcall pred mean) (setq max mean) (setq min mean)))))
-	    max))
-	 (high
-	  (funcall dichotomy
-		   most-negative-fixnum
-		   0
-		   (lambda (m)
-                     ;; libc in macOS 10.6 hangs when decoding times
-                     ;; around year -2**31.  Limit `high' not to go
-                     ;; any earlier than that.
-                     (unless (and (eq system-type 'darwin)
-                                  (string-match-p
-                                   "10\\.6\\.[[:digit:]]"
-                                   (shell-command-to-string
-                                    "sw_vers -productVersion"))
-                                  (<= m -1034058203135))
-                       (ignore-errors (decode-time (list m 0)))))))
-	 (low
-	  (funcall dichotomy
-		   most-negative-fixnum
-		   0
-		   (lambda (m) (ignore-errors (decode-time (list high m)))))))
-    (list high low))
-  "Internal time for oldest date representable on the system.")
-
 ;;; The clock for measuring work time.
 
 (defvar org-mode-line-string "")
@@ -2261,7 +2229,9 @@ have priority."
     ;; Format start and end times according to AS-STRINGS.
     (let* ((start (pcase key
 		    (`interactive (org-read-date nil t nil "Range start? "))
-		    (`untilnow org-clock--oldest-date)
+                    ;; In theory, all clocks started after the dawn of
+                    ;; humanity.
+		    (`untilnow (encode-time 0 0 0 0 0 -50000))
 		    (_ (encode-time 0 m h d month y))))
 	   (end (pcase key
 		  (`interactive (org-read-date nil t nil "Range end? "))
