@@ -193,6 +193,61 @@ call_test-newline[:eval yes :results raw]('(1\n2))<point>"
 	    (org-babel-execute-src-block nil (org-babel-lob-get-info))
 	    (buffer-substring (point) (point-max))))))
 
+(ert-deftest test-ob-lob/external-reference-syntax ()
+  "Test external reference syntax for Babel calls."
+  (should
+   (= 2
+      (org-test-with-temp-text-in-file
+	  "#+name: foo\n#+begin_src emacs-lisp\n(+ 1 1)\n#+end_src"
+	(let ((file (buffer-file-name)))
+	  (org-test-with-temp-text (format "#+call: %s:foo()" file)
+	    (org-babel-execute-src-block nil (org-babel-lob-get-info))))))))
+
+(ert-deftest test-ob-lob/call-with-indirection ()
+  "Test calling code with indirection."
+  (should
+   (= 2
+      (org-test-with-temp-text
+	  "
+#+name: foo
+#+begin_src emacs-lisp
+\(+ 1 1)
+#+end_src
+
+#+name: bar
+#+call: foo()
+
+<point>#+call: bar()"
+	(org-babel-execute-src-block nil (org-babel-lob-get-info)))))
+  (should
+   (= 10
+      (org-test-with-temp-text
+	  "
+#+name: foo
+#+begin_src emacs-lisp :var x=1
+\(* 2 x)
+#+end_src
+
+#+name: bar
+#+call: foo(x=3)
+
+<point>#+call: bar(x=5)"
+	(org-babel-execute-src-block nil (org-babel-lob-get-info)))))
+  (should
+   (= 6
+      (org-test-with-temp-text
+	  "
+#+name: foo
+#+begin_src emacs-lisp :var x=1
+\(* 2 x)
+#+end_src
+
+#+name: bar
+#+call: foo(x=3)
+
+<point>#+call: bar()"
+	(org-babel-execute-src-block nil (org-babel-lob-get-info))))))
+
 (provide 'test-ob-lob)
 
 ;;; test-ob-lob.el ends here
