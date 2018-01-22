@@ -2880,45 +2880,67 @@ For more information and examples see the [[https://orgmode.org/worg/org-tutoria
 :UNNUMBERED: notoc
 :END:
 
-- =set= :: Specify any Gnuplot option to be set when graphing.
+- =set= ::
 
-- =title= :: Specify the title of the plot.
+     Specify any Gnuplot option to be set when graphing.
 
-- =ind= :: Specify which column of the table to use as the =x= axis.
+- =title= ::
 
-- =deps= :: Specify the columns to graph as a Lisp style list,
-     surrounded by parentheses and separated by spaces for example
-     =dep:(3 4)= to graph the third and fourth columns (defaults to
-     graphing all other columns aside from the =ind= column).
+     Specify the title of the plot.
 
-- =type= :: Specify whether the plot is =2d=, =3d=, or =grid=.
+- =ind= ::
 
-- =with= :: Specify a =with= option to be inserted for every col being
-     plotted (e.g., =lines=, =points=, =boxes=, =impulses=, etc.).
-     Defaults to =lines=.
+     Specify which column of the table to use as the =x= axis.
 
-- =file= :: If you want to plot to a file, specify
+- =deps= ::
+
+     Specify the columns to graph as a Lisp style list, surrounded by
+     parentheses and separated by spaces for example =dep:(3 4)= to
+     graph the third and fourth columns.  Defaults to graphing all
+     other columns aside from the =ind= column.
+
+- =type= ::
+
+     Specify whether the plot is =2d=, =3d=, or =grid=.
+
+- =with= ::
+
+     Specify a =with= option to be inserted for every column being
+     plotted, e.g., =lines=, =points=, =boxes=, =impulses=.  Defaults
+     to =lines=.
+
+- =file= ::
+
+     If you want to plot to a file, specify
      ="path/to/desired/output-file"=.
 
-- =labels= :: List of labels to be used for the =deps=.  Defaults to
-     the column headers if they exist.
+- =labels= ::
 
-- =line= :: Specify an entire line to be inserted in the Gnuplot
-     script.
+     List of labels to be used for the =deps=.  Defaults to the column
+     headers if they exist.
 
-- =map= :: When plotting =3d= or =grid= types, set this to =t= to
-     graph a flat mapping rather than a =3d= slope.
+- =line= ::
 
-- =timefmt= ::  Specify format of Org mode timestamps as they will be
-     parsed by Gnuplot.  Defaults to =%Y-%m-%d-%H:%M:%S=.
+     Specify an entire line to be inserted in the Gnuplot script.
 
-- =script= :: If you want total control, you can specify a script
-     file---place the file name between double-quotes---which will be
-     used to plot.  Before plotting, every instance of =$datafile= in
-     the specified script will be replaced with the path to the
-     generated data file.  Note: even if you set this option, you may
-     still want to specify the plot type, as that can impact the
-     content of the data file.
+- =map= ::
+
+     When plotting =3d= or =grid= types, set this to =t= to graph
+     a flat mapping rather than a =3d= slope.
+
+- =timefmt= ::
+
+     Specify format of Org mode timestamps as they will be parsed by
+     Gnuplot.  Defaults to =%Y-%m-%d-%H:%M:%S=.
+
+- =script= ::
+
+     If you want total control, you can specify a script file---place
+     the file name between double-quotes---which will be used to plot.
+     Before plotting, every instance of =$datafile= in the specified
+     script will be replaced with the path to the generated data file.
+     Note: even if you set this option, you may still want to specify
+     the plot type, as that can impact the content of the data file.
 
 *** ASCII bar plots
 :PROPERTIES:
@@ -3809,8 +3831,8 @@ commands:
      example, {{{kbd(C-u C-u C-c C-t)}}} or {{{kbd(C-S-right)}}} would
      jump from =TODO= or =DONE= to =REPORT=, and any of the words in
      the second row to =CANCELED=.  Note that the {{{kbd(C-S-)}}} key
-     binding conflict with ~shift-selection-mode~ (see [[*Packages that
-     conflict with Org mode]]).
+     binding conflict with ~shift-selection-mode~ (see [[*Packages
+     that conflict with Org mode]]).
 
 - {{{kbd(S-right)}}}, {{{kbd(S-left)}}} ::
 
