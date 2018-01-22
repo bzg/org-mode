@@ -16849,9 +16849,7 @@ variable ~org-babel-inline-result-wrap~, which by default is set to
      followed by a colon. For example, in order to execute a block
      named =clear-data= in =file.org=, you can write the following:
 
-     #+begin_src org
-       ,#+CALL: file.org:clear-data()
-     #+end_src
+     : #+CALL: file.org:clear-data()
 
 - =<arguments>= ::
 
