@@ -329,19 +329,25 @@ names, keywords, blocks, etc.  In this manual we use the following
 conventions:
 
 #+attr_texinfo: :sep ,
-- =TODO=, =WAITING= :: TODO keywords are written with all capitals,
-     even if they are user-defined.
+- =TODO=, =WAITING= ::
 
-- =boss=, =ARCHIVE= :: User-defined tags are written in lowercase;
-     built-in tags with special meaning are written with all capitals.
+     TODO keywords are written with all capitals, even if they are
+     user-defined.
 
-- =Release=, =PRIORITY= :: User-defined properties are capitalized;
-     built-in properties with special meaning are written with all
-     capitals.
+- =boss=, =ARCHIVE= ::
 
-- =TITLE=, =BEGIN= ... =END= :: Keywords and blocks are written in
-     uppercase to enhance their readability, but you can use lowercase
-     in your Org files.
+     User-defined tags are written in lowercase; built-in tags with
+     special meaning are written with all capitals.
+
+- =Release=, =PRIORITY= ::
+
+     User-defined properties are capitalized; built-in properties with
+     special meaning are written with all capitals.
+
+- =TITLE=, =BEGIN= ... =END= ::
+
+     Keywords and blocks are written in uppercase to enhance their
+     readability, but you can use lowercase in your Org files.
 
 *** Key bindings and commands
 :PROPERTIES:
@@ -1324,7 +1330,9 @@ variable for details.
 #+texinfo: @noindent
 The following command handles footnotes:
 
-- {{{kbd(C-c C-x f)}}} :: The footnote action command.
+- {{{kbd(C-c C-x f)}}} ::
+
+     The footnote action command.
 
      #+kindex: C-c C-x f
      When the cursor is on a footnote reference, jump to the
@@ -2148,29 +2156,51 @@ display format, however, has been changed to ~(float 8)~ to keep
 tables compact.  The default settings can be configured using the
 variable ~org-calc-default-modes~.
 
-- =p20= :: Set the internal Calc calculation precision to 20 digits.
-- =n3=, =s3=, =e2=, =f4= :: Normal, scientific, engineering or fixed
-     format of the result of Calc passed back to Org.  Calc formatting
-     is unlimited in precision as long as the Calc calculation
-     precision is greater.
-- =D=, =R= :: Degree and radian angle modes of Calc.
-- =F=, =S= :: Fraction and symbolic modes of Calc.
-- =T=, =t=, =U= :: Duration computations in Calc or Lisp, [[*Durations
-     and time values]].
-- =E= :: If and how to consider empty fields.  Without =E= empty
-     fields in range references are suppressed so that the Calc vector
-     or Lisp list contains only the non-empty fields.  With =E= the
-     empty fields are kept.  For empty fields in ranges or empty field
+- =p20= ::
+
+     Set the internal Calc calculation precision to 20 digits.
+
+- =n3=, =s3=, =e2=, =f4= ::
+
+     Normal, scientific, engineering or fixed format of the result of
+     Calc passed back to Org.  Calc formatting is unlimited in
+     precision as long as the Calc calculation precision is greater.
+
+- =D=, =R= ::
+
+     Degree and radian angle modes of Calc.
+
+- =F=, =S= ::
+
+     Fraction and symbolic modes of Calc.
+
+- =T=, =t=, =U= ::
+
+     Duration computations in Calc or Lisp, [[*Durations and time
+     values]].
+
+- =E= ::
+
+     If and how to consider empty fields.  Without =E= empty fields in
+     range references are suppressed so that the Calc vector or Lisp
+     list contains only the non-empty fields.  With =E= the empty
+     fields are kept.  For empty fields in ranges or empty field
      references the value =nan= (not a number) is used in Calc
      formulas and the empty string is used for Lisp formulas.  Add =N=
      to use 0 instead for both formula types.  For the value of
      a field the mode =N= has higher precedence than =E=.
-- =N= :: Interpret all fields as numbers, use 0 for non-numbers.  See
-     the next section to see how this is essential for computations
-     with Lisp formulas.  In Calc formulas it is used only
-     occasionally because there number strings are already interpreted
-     as numbers without =N=.
-- =L= :: Literal, for Lisp formulas only.  See the next section.
+
+- =N= ::
+
+     Interpret all fields as numbers, use 0 for non-numbers.  See the
+     next section to see how this is essential for computations with
+     Lisp formulas.  In Calc formulas it is used only occasionally
+     because there number strings are already interpreted as numbers
+     without =N=.
+
+- =L= ::
+
+     Literal, for Lisp formulas only.  See the next section.
 
 #+texinfo: @noindent
 Unless you use large integer numbers or high-precision calculation and
@@ -2358,15 +2388,26 @@ no keyboard shortcut to enter such range formulas.  To add them, use
 the formula editor (see [[*Editing and debugging formulas]]) or edit the
 =TBLFM= keyword directly.
 
-- =$2== :: Column formula, valid for the entire column.  This is so
-     common that Org treats these formulas in a special way, see
-     [[*Column formulas]].
-- ~@3=~ :: Row formula, applies to all fields in the specified row.
-     =@>== means the last row.
-- =@1$2..@4$3== :: Range formula, applies to all fields in the given
-     rectangular range.  This can also be used to assign a formula to
-     some but not all fields in a row.
-- =$NAME== :: Named field, see [[*Advanced features]].
+- =$2== ::
+
+     Column formula, valid for the entire column.  This is so common
+     that Org treats these formulas in a special way, see [[*Column
+     formulas]].
+
+- ~@3=~ ::
+
+     Row formula, applies to all fields in the specified row.  =@>==
+     means the last row.
+
+- =@1$2..@4$3== ::
+
+     Range formula, applies to all fields in the given rectangular
+     range.  This can also be used to assign a formula to some but not
+     all fields in a row.
+
+- =$NAME== ::
+
+     Named field, see [[*Advanced features]].
 
 *** Column formulas
 :PROPERTIES:
@@ -2788,34 +2829,48 @@ field.
 #+cindex: marking characters, tables
 The marking characters have the following meaning:
 
-- =!= :: The fields in this line define names for the columns, so that
-     you may refer to a column as =$Tot= instead of =$6=.
+- =!= ::
 
-- =^= :: This row defines names for the fields /above/ the row.  With
-     such a definition, any formula in the table may use =$m1= to
-     refer to the value =10=.  Also, if you assign a formula to
-     a names field, it is stored as =$name = ...=.
+     The fields in this line define names for the columns, so that you
+     may refer to a column as =$Tot= instead of =$6=.
 
-- =_= :: Similar to =^=, but defines names for the fields in the row
+- =^= ::
+
+     This row defines names for the fields /above/ the row.  With such
+     a definition, any formula in the table may use =$m1= to refer to
+     the value =10=.  Also, if you assign a formula to a names field,
+     it is stored as =$name = ...=.
+
+- =_= ::
+
+     Similar to =^=, but defines names for the fields in the row
      /below/.
 
-- =$= :: Fields in this row can define /parameters/ for formulas.  For
+- =$= ::
+
+     Fields in this row can define /parameters/ for formulas.  For
      example, if a field in a =$= row contains =max=50=, then formulas
      in this table can refer to the value 50 using =$max=.  Parameters
      work exactly like constants, only that they can be defined on
      a per-table basis.
 
-- =#= :: Fields in this row are automatically recalculated when
-     pressing {{{kbd(TAB)}}} or {{{kbd(RET)}}} or {{{kbd(S-TAB)}}} in
-     this row.  Also, this row is selected for a global recalculation
-     with {{{kbd(C-u C-c *)}}}.  Unmarked lines are left alone by this
+- =#= ::
+
+     Fields in this row are automatically recalculated when pressing
+     {{{kbd(TAB)}}} or {{{kbd(RET)}}} or {{{kbd(S-TAB)}}} in this row.
+     Also, this row is selected for a global recalculation with
+     {{{kbd(C-u C-c *)}}}.  Unmarked lines are left alone by this
      command.
 
-- =*= :: Selects this line for global recalculation with {{{kbd(C-u
-     C-c *)}}}, but not for automatic recalculation.  Use this when
+- =*= ::
+
+     Selects this line for global recalculation with {{{kbd(C-u C-c
+     *)}}}, but not for automatic recalculation.  Use this when
      automatic recalculation slows down editing too much.
 
-- =/= :: Do not export this line.  Useful for lines that contain the
+- =/= ::
+
+     Do not export this line.  Useful for lines that contain the
      narrowing =<N>= markers or column group markers.
 
 Finally, just to whet your appetite for what can be done with the
@@ -3554,18 +3609,32 @@ link, together with an explanation:
   [[file:~/xx.org::/regexp/]]
 #+end_example
 
-- =255= :: Jump to line 255.
-- =My Target= :: Search for a link target =<<My Target>>=, or do
-     a text search for =my target=, similar to the search in internal
-     links, see [[*Internal Links]].  In HTML export (see [[*HTML Export]]),
-     such a file link becomes a HTML reference to the corresponding
-     named anchor in the linked file.
-- =*My Target= :: In an Org file, restrict search to headlines.
-- =#my-custom-id= :: Link to a heading with a =CUSTOM_ID= property
-- =/REGEXP/= :: Do a regular expression search for {{{var(REGEXP)}}}.
-     This uses the Emacs command ~occur~ to list all matches in
-     a separate window.  If the target file is in Org mode,
-     ~org-occur~ is used to create a sparse tree with the matches.
+- =255= ::
+
+     Jump to line 255.
+
+- =My Target= ::
+
+     Search for a link target =<<My Target>>=, or do a text search for
+     =my target=, similar to the search in internal links, see
+     [[*Internal Links]].  In HTML export (see [[*HTML Export]]), such a file
+     link becomes a HTML reference to the corresponding named anchor
+     in the linked file.
+
+- =*My Target= ::
+
+     In an Org file, restrict search to headlines.
+
+- =#my-custom-id= ::
+
+     Link to a heading with a =CUSTOM_ID= property
+
+- =/REGEXP/= ::
+
+     Do a regular expression search for {{{var(REGEXP)}}}.  This uses
+     the Emacs command ~occur~ to list all matches in a separate
+     window.  If the target file is in Org mode, ~org-occur~ is used
+     to create a sparse tree with the matches.
 
 As a degenerate case, a file link with an empty file name can be used
 to search the current file.  For example, =[[file:::find me]]= does
