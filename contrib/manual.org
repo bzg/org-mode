@@ -175,10 +175,11 @@ time to check the list.
 #+findex: org-capture
 #+findex: org-store-link
 #+findex: org-iswitchb
-The four Org commands ~org-store-link~, ~org-capture~, ~org-agenda~,
-and ~org-iswitchb~ be accessible through global keys---i.e., anywhere
-in Emacs, not just in Org buffers.  Here are suggested bindings for
-these keys, please modify the keys to your own liking.
+For a better experience, the four Org commands ~org-store-link~,
+~org-capture~, ~org-agenda~, and ~org-iswitchb~ ought to be accessible
+through global keys---i.e., anywhere in Emacs, not just in Org
+buffers.  Here are suggested bindings for these keys, please modify
+the keys to your own liking.
 
 #+begin_src emacs-lisp
   (global-set-key "\C-cl" 'org-store-link)
