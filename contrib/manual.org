@@ -1074,139 +1074,137 @@ intact.  If some of these actions get in your way, configure
 ~org-list-automatic-rules~ to disable them individually.
 
 #+attr_texinfo: :sep ,
-  - {{{kbd(TAB)}}} (~org-cycle~) ::
+- {{{kbd(TAB)}}} (~org-cycle~) ::
 
-       #+cindex: cycling, in plain lists
-       #+kindex: TAB
-       #+findex: org-cycle
-       #+vindex: org-cycle-include-plain-lists
-       Items can be folded just like headline levels.  Normally this
-       works only if the cursor is on a plain list item.  For more
-       details, see the variable ~org-cycle-include-plain-lists~.  If
-       this variable is set to ~integrate~, plain list items are
-       treated like low-level headlines.  The level of an item is then
-       given by the indentation of the bullet/number.  Items are
-       always subordinate to real headlines, however; the hierarchies
-       remain completely separated.  In a new item with no text yet,
-       the first {{{kbd(TAB)}}} demotes the item to become a child of
-       the previous one.  Subsequent {{{kbd(TAB)}}}s move the item to
-       meaningful levels in the list and eventually get it back to its
-       initial position.
+     #+cindex: cycling, in plain lists
+     #+kindex: TAB
+     #+findex: org-cycle
+     #+vindex: org-cycle-include-plain-lists
+     Items can be folded just like headline levels.  Normally this
+     works only if the cursor is on a plain list item.  For more
+     details, see the variable ~org-cycle-include-plain-lists~.  If
+     this variable is set to ~integrate~, plain list items are treated
+     like low-level headlines.  The level of an item is then given by
+     the indentation of the bullet/number.  Items are always
+     subordinate to real headlines, however; the hierarchies remain
+     completely separated.  In a new item with no text yet, the first
+     {{{kbd(TAB)}}} demotes the item to become a child of the previous
+     one.  Subsequent {{{kbd(TAB)}}}s move the item to meaningful
+     levels in the list and eventually get it back to its initial
+     position.
 
-  - {{{kbd(M-RET)}}} (~org-insert-heading~) ::
+- {{{kbd(M-RET)}}} (~org-insert-heading~) ::
 
-       #+kindex: M-RET
-       #+findex: org-insert-heading
-       #+vindex: org-M-RET-may-split-line
-       Insert new item at current level.  With a prefix argument,
-       force a new heading (see [[*Structure Editing]]).  If this command
-       is used in the middle of an item, that item is /split/ in two,
-       and the second part becomes the new item[fn:13].  If this
-       command is executed /before item's body/, the new item is
-       created /before/ the current one.
+     #+kindex: M-RET
+     #+findex: org-insert-heading
+     #+vindex: org-M-RET-may-split-line
+     Insert new item at current level.  With a prefix argument, force
+     a new heading (see [[*Structure Editing]]).  If this command is used
+     in the middle of an item, that item is /split/ in two, and the
+     second part becomes the new item[fn:13].  If this command is
+     executed /before item's body/, the new item is created /before/
+     the current one.
 
-  - {{{kbd(M-S-RET)}}} ::
+- {{{kbd(M-S-RET)}}} ::
 
-       #+kindex: M-S-RET
-       Insert a new item with a checkbox (see [[Checkboxes]]).
+     #+kindex: M-S-RET
+     Insert a new item with a checkbox (see [[Checkboxes]]).
 
-  - {{{kbd(S-up)}}}, {{{kbd(S-down)}}} ::
+- {{{kbd(S-up)}}}, {{{kbd(S-down)}}} ::
 
-       #+kindex: S-up
-       #+kindex: S-down
-       #+cindex: shift-selection-mode
-       #+vindex: org-support-shift-select
-       #+vindex: org-list-use-circular-motion
-       Jump to the previous/next item in the current list, but only if
-       ~org-support-shift-select~ is off[fn:14].  If not, you can
-       still use paragraph jumping commands like {{{kbd(C-up)}}}
-       and {{{kbd(C-down)}}} to quite similar effect.
+     #+kindex: S-up
+     #+kindex: S-down
+     #+cindex: shift-selection-mode
+     #+vindex: org-support-shift-select
+     #+vindex: org-list-use-circular-motion
+     Jump to the previous/next item in the current list, but only if
+     ~org-support-shift-select~ is off[fn:14].  If not, you can
+     still use paragraph jumping commands like {{{kbd(C-up)}}}
+     and {{{kbd(C-down)}}} to quite similar effect.
 
-  - {{{kbd(M-up)}}}, {{{kbd(M-down)}}} ::
+- {{{kbd(M-up)}}}, {{{kbd(M-down)}}} ::
 
-       #+kindex: M-up
-       #+kindex: M-down
-       Move the item including subitems up/down[fn:15], i.e., swap
-       with previous/next item of same indentation.  If the list is
-       ordered, renumbering is automatic.
+     #+kindex: M-up
+     #+kindex: M-down
+     Move the item including subitems up/down[fn:15], i.e., swap with
+     previous/next item of same indentation.  If the list is ordered,
+     renumbering is automatic.
 
-  - {{{kbd(M-left)}}}, {{{kbd(M-right)}}} ::
+- {{{kbd(M-left)}}}, {{{kbd(M-right)}}} ::
 
-       #+kindex: M-left
-       #+kindex: M-right
-       Decrease/increase the indentation of an item, leaving children
-       alone.
+     #+kindex: M-left
+     #+kindex: M-right
+     Decrease/increase the indentation of an item, leaving children
+     alone.
 
-  - {{{kbd(M-S-left)}}}, {{{kbd(M-S-right)}}} ::
+- {{{kbd(M-S-left)}}}, {{{kbd(M-S-right)}}} ::
 
-       #+kindex: M-S-left
-       #+kindex: M-S-right
-       Decrease/increase the indentation of the item, including
-       subitems.  Initially, the item tree is selected based on
-       current indentation.  When these commands are executed several
-       times in direct succession, the initially selected region is
-       used, even if the new indentation would imply a different
-       hierarchy.  To use the new hierarchy, break the command chain
-       with a cursor motion or so.
+     #+kindex: M-S-left
+     #+kindex: M-S-right
+     Decrease/increase the indentation of the item, including
+     subitems.  Initially, the item tree is selected based on current
+     indentation.  When these commands are executed several times in
+     direct succession, the initially selected region is used, even if
+     the new indentation would imply a different hierarchy.  To use
+     the new hierarchy, break the command chain with a cursor motion
+     or so.
 
-       As a special case, using this command on the very first item of
-       a list moves the whole list.  This behavior can be disabled by
-       configuring ~org-list-automatic-rules~.  The global indentation
-       of a list has no influence on the text /after/ the list.
+     As a special case, using this command on the very first item of
+     a list moves the whole list.  This behavior can be disabled by
+     configuring ~org-list-automatic-rules~.  The global indentation
+     of a list has no influence on the text /after/ the list.
 
-  - {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}} ::
 
-       #+kindex: C-c C-c
-       If there is a checkbox (see [[Checkboxes]]) in the item line,
-       toggle the state of the checkbox.  In any case, verify bullets
-       and indentation consistency in the whole list.
+     #+kindex: C-c C-c
+     If there is a checkbox (see [[Checkboxes]]) in the item line, toggle
+     the state of the checkbox.  In any case, verify bullets and
+     indentation consistency in the whole list.
 
-  - {{{kbd(C-c -)}}} ::
+- {{{kbd(C-c -)}}} ::
 
-       #+kindex: C-c -
-       #+vindex: org-plain-list-ordered-item-terminator
-       Cycle the entire list level through the different
-       itemize/enumerate bullets (=-=, =+=, =*=, =1.=, =1)=) or
-       a subset of them, depending on
-       ~org-plain-list-ordered-item-terminator~, the type of list, and
-       its indentation.  With a numeric prefix argument N, select the
-       Nth bullet from this list.  If there is an active region when
-       calling this, selected text is changed into an item.  With
-       a prefix argument, all lines are converted to list items.  If
-       the first line already was a list item, any item marker is
-       removed from the list.  Finally, even without an active region,
-       a normal line is converted into a list item.
+     #+kindex: C-c -
+     #+vindex: org-plain-list-ordered-item-terminator
+     Cycle the entire list level through the different
+     itemize/enumerate bullets (=-=, =+=, =*=, =1.=, =1)=) or a subset
+     of them, depending on ~org-plain-list-ordered-item-terminator~,
+     the type of list, and its indentation.  With a numeric prefix
+     argument N, select the Nth bullet from this list.  If there is an
+     active region when calling this, selected text is changed into an
+     item.  With a prefix argument, all lines are converted to list
+     items.  If the first line already was a list item, any item
+     marker is removed from the list.  Finally, even without an active
+     region, a normal line is converted into a list item.
 
-  - {{{kbd(C-c *)}}} ::
+- {{{kbd(C-c *)}}} ::
 
-       #+kindex: C-c *
-       Turn a plain list item into a headline---so that it becomes
-       a subheading at its location.  See [[*Structure Editing]], for
-       a detailed explanation.
+     #+kindex: C-c *
+     Turn a plain list item into a headline---so that it becomes
+     a subheading at its location.  See [[*Structure Editing]], for
+     a detailed explanation.
 
-  - {{{kbd(C-c C-*)}}} ::
+- {{{kbd(C-c C-*)}}} ::
 
-       #+kindex: C-c C-*
-       Turn the whole plain list into a subtree of the current
-       heading.  Checkboxes (see [[*Checkboxes]]) become TODO,
-       respectively DONE, keywords when unchecked, respectively
-       checked.
+     #+kindex: C-c C-*
+     Turn the whole plain list into a subtree of the current heading.
+     Checkboxes (see [[*Checkboxes]]) become TODO, respectively DONE,
+     keywords when unchecked, respectively checked.
 
-  - {{{kbd(S-left)}}}, {{{kbd(S-right)}}} ::
+- {{{kbd(S-left)}}}, {{{kbd(S-right)}}} ::
 
-       #+vindex: org-support-shift-select
-       #+kindex: S-left
-       #+kindex: S-right
-       This command also cycles bullet styles when the cursor in on
-       the bullet or anywhere in an item line, details depending on
-       ~org-support-shift-select~.
+     #+vindex: org-support-shift-select
+     #+kindex: S-left
+     #+kindex: S-right
+     This command also cycles bullet styles when the cursor in on the
+     bullet or anywhere in an item line, details depending on
+     ~org-support-shift-select~.
 
-  - {{{kbd(C-c ^)}}} ::
+- {{{kbd(C-c ^)}}} ::
 
-       #+kindex: C-c ^
-       #+cindex: sorting, of plain list
-       Sort the plain list.  Prompt for the sorting method:
-       numerically, alphabetically, by time, or by custom function.
+     #+kindex: C-c ^
+     #+cindex: sorting, of plain list
+     Sort the plain list.  Prompt for the sorting method: numerically,
+     alphabetically, by time, or by custom function.
 
 ** Drawers
 :PROPERTIES:
