@@ -16843,8 +16843,15 @@ variable ~org-babel-inline-result-wrap~, which by default is set to
 
 - =<name>= ::
 
-     This is the name of the code block to be evaluated (see
-     [[*Structure of Code Blocks]]).
+     This is the name of the code block (see [[*Structure of Code
+     Blocks]]) to be evaluated in the current document.  If the block is
+     located in another file, start =<name>= with the file name
+     followed by a colon. For example, in order to execute a block
+     named =clear-data= in =file.org=, you can write the following:
+
+     #+begin_src org
+       ,#+CALL: file.org:clear-data()
+     #+end_src
 
 - =<arguments>= ::
 
