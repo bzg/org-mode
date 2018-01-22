@@ -825,10 +825,6 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
      (goto-char beg)
      (org-table-with-shrunk-columns
       (let* ((indent (progn (looking-at "[ \t]*") (match-string 0)))
-	     (align-cookie?
-	      (save-excursion
-		(re-search-forward "|[ \t]*<[lrc][0-9]*>[ \t]*\\(?:|\\|$\\)"
-				   end t)))
 	     ;; Table's rows as lists of fields.  Rules are replaced
 	     ;; by nil.  Trailing spaces are removed.
 	     (fields (mapcar
@@ -847,31 +843,25 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 	     (alignments nil))
 	;; Compute alignment and width for each column.
 	(dotimes (i columns-number)
-	  (let* ((column (mapcar (lambda (x) (or (nth i x) ""))
-				 fields))
-		 (width (apply #'max 1 (mapcar #'org-string-width column))))
-	    ;; Store the maximum width for the column.
-	    (push width widths)
-	    ;; If there is no alignment cookie get the fraction of
-	    ;; numbers among non-empty cells to decide about alignment
-	    ;; of the column.
+	  (let* ((max-width 1)
+		 (fixed-align? nil)
+		 (numbers 0)
+		 (non-empty 0))
+	    (dolist (row fields)
+	      (let ((cell (or (nth i row) "")))
+		(setq max-width (max max-width (org-string-width cell)))
+		(cond (fixed-align? nil)
+		      ((equal cell "") nil)
+		      ((string-match "\\`<\\([lrc]\\)[0-9]*>\\'" cell)
+		       (setq fixed-align? (match-string 1 cell)))
+		      (t
+		       (cl-incf non-empty)
+		       (when (string-match-p org-table-number-regexp cell)
+			 (cl-incf numbers))))))
+	    (push max-width widths)
 	    (push (cond
-		   ((= width 1) "r")	;doesn't matter
-		   ((and align-cookie?
-			 (cl-some
-			  (lambda (f)
-			    (and (string-match "\\`<\\([lrc]\\)[0-9]*>\\'" f)
-				 (match-string-no-properties 1 f)))
-			  column)))
-		   ((let ((numbers 0)
-			  (non-empty 0))
-		      (dolist (field column)
-			(unless (equal "" field)
-			  (cl-incf non-empty)
-			  (when (string-match-p org-table-number-regexp field)
-			    (cl-incf numbers))))
-		      (>= numbers (* org-table-number-fraction non-empty)))
-		    "r")
+		   (fixed-align?)
+		   ((>= numbers (* org-table-number-fraction non-empty)) "r")
 		   (t "l"))
 		  alignments)))
 	(setq widths (nreverse widths))
