@@ -14074,11 +14074,6 @@ epoch to the beginning of today (00:00)."
 			  ("m" . 2678400.0) ("y" . 31557600.0)))))))
      (t (org-2ft s)))))
 
-(defun org-match-any-p (re list)
-  "Does re match any element of list?"
-  (setq list (mapcar (lambda (x) (string-match re x)) list))
-  (delq nil list))
-
 (defvar org-add-colon-after-tag-completion nil)  ;; dynamically scoped param
 (defvar org-tags-overlay (make-overlay 1 1))
 (delete-overlay org-tags-overlay)

@@ -592,6 +592,10 @@ ones and overrule settings in the other lists."
     (beginning-of-line)
     (looking-at regexp)))
 
+(defun org-match-any-p (re list)
+  "Non nil if regexp RE matches an element in LIST."
+  (cl-some (lambda (x) (string-match-p re x)) list))
+
 (defun org-in-regexp (regexp &optional nlines visually)
   "Check if point is inside a match of REGEXP.
 
