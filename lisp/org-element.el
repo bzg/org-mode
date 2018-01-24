@@ -677,7 +677,7 @@ Assume point is at the beginning of the block."
 (defun org-element-center-block-interpreter (_ contents)
   "Interpret a center-block element as Org syntax.
 CONTENTS is the contents of the element."
-  (format "#+BEGIN_CENTER\n%s#+END_CENTER" contents))
+  (format "#+begin_center\n%s#+end_center" contents))
 
 
 ;;;; Drawer
@@ -787,7 +787,7 @@ Assume point is at beginning of dynamic block."
 (defun org-element-dynamic-block-interpreter (dynamic-block contents)
   "Interpret DYNAMIC-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
-  (format "#+BEGIN: %s%s\n%s#+END:"
+  (format "#+begin: %s%s\n%s#+end:"
 	  (org-element-property :block-name dynamic-block)
 	  (let ((args (org-element-property :arguments dynamic-block)))
 	    (if args (concat " " args) ""))
@@ -1187,18 +1187,18 @@ CONTENTS is the contents of inlinetask."
 		(concat
 		 (make-string
 		  (max (- (+ org-tags-column (length task) (length tags))) 1)
-		  ? )
+		  ?\s)
 		 tags))
 	       (t
 		(concat
-		 (make-string (max (- org-tags-column (length task)) 1) ? )
+		 (make-string (max (- org-tags-column (length task)) 1) ?\s)
 		 tags))))
 	    ;; Prefer degenerate inlinetasks when there are no
 	    ;; contents.
 	    (when contents
 	      (concat "\n"
 		      contents
-		      (make-string level ?*) " END")))))
+		      (make-string level ?*) " end")))))
 
 
 ;;;; Item
@@ -1541,7 +1541,7 @@ Assume point is at the beginning of the block."
 (defun org-element-quote-block-interpreter (_ contents)
   "Interpret quote-block element as Org syntax.
 CONTENTS is the contents of the element."
-  (format "#+BEGIN_QUOTE\n%s#+END_QUOTE" contents))
+  (format "#+begin_quote\n%s#+end_quote" contents))
 
 
 ;;;; Section
@@ -1627,7 +1627,7 @@ Assume point is at the beginning of the block."
   "Interpret SPECIAL-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
   (let ((block-type (org-element-property :type special-block)))
-    (format "#+BEGIN_%s\n%s#+END_%s" block-type contents block-type)))
+    (format "#+begin_%s\n%s#+end_%s" block-type contents block-type)))
 
 
 
@@ -1695,7 +1695,7 @@ containing `:call', `:inside-header', `:arguments',
 
 (defun org-element-babel-call-interpreter (babel-call _)
   "Interpret BABEL-CALL element as Org syntax."
-  (concat "#+CALL: "
+  (concat "#+call: "
 	  (org-element-property :call babel-call)
 	  (let ((h (org-element-property :inside-header babel-call)))
 	    (and h (format "[%s]" h)))
@@ -1849,7 +1849,7 @@ Assume point is at comment block beginning."
 
 (defun org-element-comment-block-interpreter (comment-block _)
   "Interpret COMMENT-BLOCK element as Org syntax."
-  (format "#+BEGIN_COMMENT\n%s#+END_COMMENT"
+  (format "#+begin_comment\n%s#+end_comment"
 	  (org-element-normalize-string
 	   (org-remove-indentation
 	    (org-element-property :value comment-block)))))
@@ -1977,14 +1977,14 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
   "Interpret EXAMPLE-BLOCK element as Org syntax."
   (let ((switches (org-element-property :switches example-block))
 	(value (org-element-property :value example-block)))
-    (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
+    (concat "#+begin_example" (and switches (concat " " switches)) "\n"
 	    (org-element-normalize-string
 	     (org-escape-code-in-string
 	      (if (or org-src-preserve-indentation
 		      (org-element-property :preserve-indent example-block))
 		  value
 		(org-remove-indentation value))))
-	    "#+END_EXAMPLE")))
+	    "#+end_example")))
 
 
 ;;;; Export Block
@@ -2037,7 +2037,7 @@ Assume point is at export-block beginning."
 
 (defun org-element-export-block-interpreter (export-block _)
   "Interpret EXPORT-BLOCK element as Org syntax."
-  (format "#+BEGIN_EXPORT %s\n%s#+END_EXPORT"
+  (format "#+begin_export %s\n%s#+end_export"
 	  (org-element-property :type export-block)
 	  (org-element-property :value export-block)))
 
@@ -2164,7 +2164,7 @@ containing `:key', `:value', `:begin', `:end', `:post-blank' and
 (defun org-element-keyword-interpreter (keyword _)
   "Interpret KEYWORD element as Org syntax."
   (format "#+%s: %s"
-	  (org-element-property :key keyword)
+	  (downcase (org-element-property :key keyword))
 	  (org-element-property :value keyword)))
 
 
@@ -2507,12 +2507,12 @@ Assume point is at the beginning of the block."
 	     (let ((ind (make-string org-edit-src-content-indentation ?\s)))
 	       (replace-regexp-in-string
 		"^" ind (org-remove-indentation val))))))))
-    (concat (format "#+BEGIN_SRC%s\n"
+    (concat (format "#+begin_src%s\n"
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
 			    (and params (concat " " params))))
 	    (org-element-normalize-string (org-escape-code-in-string value))
-	    "#+END_SRC")))
+	    "#+end_src")))
 
 
 ;;;; Table
@@ -2660,7 +2660,7 @@ Assume point is at beginning of the block."
 (defun org-element-verse-block-interpreter (_ contents)
   "Interpret verse-block element as Org syntax.
 CONTENTS is verse block contents."
-  (format "#+BEGIN_VERSE\n%s#+END_VERSE" contents))
+  (format "#+begin_verse\n%s#+end_verse" contents))
 
 
 

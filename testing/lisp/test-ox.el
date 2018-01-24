@@ -439,7 +439,7 @@ Paragraph"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:exclude-tags ("noexp")))))))
   (should
-   (equal "#+FILETAGS: noexp\n"
+   (equal "#+filetags: noexp\n"
 	  (let (org-export-filter-body-functions
 		org-export-filter-final-output-functions)
 	    (org-test-with-temp-text "#+FILETAGS: noexp\n* Head1"
@@ -1345,7 +1345,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
   (require 'ox-org)
   ;; Standard macro expansion.
   (should
-   (equal "#+MACRO: macro1 value\nvalue\n"
+   (equal "#+macro: macro1 value\nvalue\n"
 	  (org-test-with-temp-text "#+MACRO: macro1 value\n{{{macro1}}}"
 	    (org-export-as (org-test-default-backend)))))
   ;; Include global macros.  However, local macros override them.
@@ -1365,7 +1365,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (let ((org-export-global-macros '(("M" . "(eval (+ 1 1))"))))
 	      (org-export-as (org-test-default-backend))))))
   (should
-   (equal "#+MACRO: M local\nlocal\n"
+   (equal "#+macro: M local\nlocal\n"
 	  (org-test-with-temp-text "#+macro: M local\n{{{M}}}"
 	    (let ((org-export-global-macros '(("M" . "global"))))
 	      (org-export-as (org-test-default-backend))))))
@@ -1373,7 +1373,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
   ;; Standard macro expansion.
   (should
    (string-match
-    "#\\+K: value"
+    "#\\+k: value"
     (let ((backend (org-export-create-backend
 		    :parent 'org
 		    :options '((:k "K" nil nil parse)))))
@@ -1386,7 +1386,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 		    :parent 'org
 		    :options '((:k "K" nil nil parse)))))
       (org-test-with-temp-text
-	  "#+MACRO: m v\n* H\n:PROPERTIES:\n:EXPORT_K: {{{m}}}\n:END:"
+	  "#+macro: m v\n* H\n:PROPERTIES:\n:EXPORT_K: {{{m}}}\n:END:"
 	(org-export-as backend nil nil nil '(:with-properties t))))))
   ;; Expand specific macros.
   (should
@@ -1445,7 +1445,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
   "Test `org-export-before-processing-hook'."
   (should
    (equal
-    "#+MACRO: mac val\nTest\n"
+    "#+macro: mac val\nTest\n"
     (org-test-with-temp-text "#+MACRO: mac val\n{{{mac}}} Test"
       (let ((org-export-before-processing-hook
 	     '((lambda (backend)
