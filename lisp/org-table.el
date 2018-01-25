@@ -3972,7 +3972,7 @@ outside of the [1;MAX] range."
      #'<)))
 
 (defun org-table--shrink-columns (columns beg end)
-  "Shrink COLUMNS in an Org table.
+  "Shrink COLUMNS in a table.
 COLUMNS is a sorted list of column numbers.  BEG and END are,
 respectively, the beginning position and the end position of the
 table."
