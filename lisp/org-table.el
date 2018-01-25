@@ -1327,13 +1327,16 @@ value."
 		 "")))))
 
 (defun org-table-current-column ()
-  "Find out which column we are in."
+  "Return current column number."
   (interactive)
   (save-excursion
-    (let ((column 0) (pos (point)))
+    (let ((pos (point)))
       (beginning-of-line)
-      (while (search-forward "|" pos t) (cl-incf column))
-      column)))
+      (if (not (search-forward "|" pos t)) 0
+	(let ((column 1)
+	      (separator (if (org-at-table-hline-p) "[+|]" "|")))
+	  (while (re-search-forward separator pos t) (cl-incf column))
+	  column)))))
 
 (defun org-table-current-dline ()
   "Find out what table data line we are in.
@@ -4040,8 +4043,7 @@ When called with `\\[universal-argument] \\[universal-argument]' \
 prefix, expand all columns."
   (interactive "P")
   (unless (org-at-table-p) (user-error "Not in a table"))
-  (let* ((pos (point))
-	 (begin (org-table-begin))
+  (let* ((begin (org-table-begin))
 	 (end (org-table-end))
 	 ;; Compute an upper bound for the number of columns.
 	 ;; Nonexistent columns are ignored anyway.
@@ -4058,14 +4060,7 @@ prefix, expand all columns."
 		 (org-table--read-column-selection
 		  (read-string "Column ranges (e.g. 2-4 6-): ")
 		  max-columns)
-	       ;; Find current column, even when on a hline.
-	       (let ((separator (if (org-at-table-hline-p) "+" "|"))
-		     (c 1))
-		 (save-excursion
-		   (beginning-of-line)
-		   (search-forward "|" pos t)
-		   (while (search-forward separator pos t) (cl-incf c)))
-		 (list c))))
+	       (list (org-table-current-column))))
 	    ((pred stringp) (org-table--read-column-selection arg max-columns))
 	    ((or `(4) `(16)) nil)
 	    (_ (user-error "Invalid argument: %S" arg)))))

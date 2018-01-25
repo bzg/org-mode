@@ -2588,6 +2588,21 @@ See also `test-org-table/copy-field'."
 
 ;;; Miscellaneous
 
+(ert-deftest test-org-table/current-column ()
+  "Test `org-table-current-column' specifications."
+  (should
+   (= 1 (org-test-with-temp-text "| <point>a |"
+	  (org-table-current-column))))
+  (should
+   (= 1 (org-test-with-temp-text "|-<point>--|"
+	  (org-table-current-column))))
+  (should
+   (= 2 (org-test-with-temp-text "| 1 | <point>2 |"
+	  (org-table-current-column))))
+  (should
+   (= 2 (org-test-with-temp-text "|---+-<point>--|"
+	  (org-table-current-column)))))
+
 (ert-deftest test-org-table/get-field ()
   "Test `org-table-get-field' specifications."
   ;; Regular test.
