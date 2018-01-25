@@ -2401,21 +2401,30 @@ See also `test-org-table/copy-field'."
   ;; With a column width cookie, limit overlay to the specified number
   ;; of characters.
   (should
-   (equal (concat " abc" org-table-shrunk-column-indicator)
-	  (org-test-with-temp-text "| <3> |\n| <point>abcd |"
+   (equal "| ab"
+	  (org-test-with-temp-text "| <3>  |\n| <point>abcd |"
 	    (org-table-toggle-column-width)
-	    (overlay-get (car (overlays-at (point))) 'display))))
+	    (buffer-substring (line-beginning-position)
+			      (overlay-start
+			       (car (overlays-in (line-beginning-position)
+						 (line-end-position))))))))
   (should
-   (equal (concat " a  " org-table-shrunk-column-indicator)
-	  (org-test-with-temp-text "| <3> |\n| <point>a |"
+   (equal "| a "
+	  (org-test-with-temp-text "| <3>  |\n| <point>a   |"
 	    (org-table-toggle-column-width)
-	    (overlay-get (car (overlays-at (point))) 'display))))
-  ;; Only overlay visible characters of the field.
+	    (buffer-substring (line-beginning-position)
+			      (overlay-start
+			       (car (overlays-in (line-beginning-position)
+						 (line-end-position))))))))
+  ;; Width only takes into account visible characters.
   (should
-   (equal (concat " htt" org-table-shrunk-column-indicator)
-	  (org-test-with-temp-text "| <3> |\n| <point>[[http://orgmode.org]] |"
+   (equal "| [[htt"
+	  (org-test-with-temp-text "| <4> |\n| <point>[[http://orgmode.org]] |"
 	    (org-table-toggle-column-width)
-	    (overlay-get (car (overlays-at (point))) 'display))))
+	    (buffer-substring (line-beginning-position)
+			      (overlay-start
+			       (car (overlays-in (line-beginning-position)
+						 (line-end-position))))))))
   ;; Before the first column or after the last one, ask for columns
   ;; ranges.
   (should

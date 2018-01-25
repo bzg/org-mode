@@ -19235,12 +19235,13 @@ overwritten, and the table is not marked as requiring realignment."
      (t (let (org-use-speed-commands)
 	  (call-interactively 'org-self-insert-command)))))
    ((and
-     (org-at-table-p)
-     (eq N 1)
+     (= N 1)
      (not (org-region-active-p))
+     (org-at-table-p)
      (progn
        ;; Check if we blank the field, and if that triggers align.
-       (and (featurep 'org-table) org-table-auto-blank-field
+       (and (featurep 'org-table)
+	    org-table-auto-blank-field
 	    (memq last-command
 		  '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c))
 	    (if (or (eq (char-after) ?\s) (looking-at "[^|\n]*  |"))
@@ -19251,10 +19252,16 @@ overwritten, and the table is not marked as requiring realignment."
 	      ;; width.
 	      (org-table-blank-field)))
        t)
-     (looking-at "[^|\n]* \\( \\)|"))
+     (looking-at "[^|\n]*  |"))
     ;; There is room for insertion without re-aligning the table.
-    (delete-region (match-beginning 1) (match-end 1))
-    (self-insert-command N))
+    (self-insert-command N)
+    (org-table-with-shrunk-field
+     (save-excursion
+       (skip-chars-forward "^|")
+       ;; Do not delete last space, which is
+       ;; `org-table-separator-space', but the regular space before
+       ;; it.
+       (delete-region (- (point) 2) (1- (point))))))
    (t
     (setq org-table-may-need-update t)
     (self-insert-command N)
@@ -19355,22 +19362,14 @@ because, in this case the deletion might narrow the column."
   (interactive "p")
   (save-match-data
     (org-check-before-invisible-edit 'delete-backward)
-    (if (and (org-at-table-p)
-	     (eq N 1)
+    (if (and (= N 1)
+	     (not overwrite-mode)
 	     (not (org-region-active-p))
-	     (string-match "|" (buffer-substring (point-at-bol) (point)))
-	     (looking-at ".*?|"))
-	(let ((pos (point))
-	      (noalign (looking-at "[^|\n\r]*  |"))
-	      (c org-table-may-need-update))
-	  (backward-delete-char N)
-	  (unless overwrite-mode
-	    (skip-chars-forward "^|")
-	    (insert " ")
-	    (goto-char (1- pos)))
-	  ;; noalign: if there were two spaces at the end, this field
-	  ;; does not determine the width of the column.
-	  (when noalign (setq org-table-may-need-update c)))
+	     (not (eq (char-before) ?|))
+	     (save-excursion (skip-chars-backward " \t") (not (bolp)))
+	     (looking-at-p ".*?|")
+	     (org-at-table-p))
+	(progn (forward-char -1) (org-delete-char 1))
       (backward-delete-char N)
       (org-fix-tags-on-the-fly))))
 
@@ -19383,23 +19382,28 @@ because, in this case the deletion might narrow the column."
   (interactive "p")
   (save-match-data
     (org-check-before-invisible-edit 'delete)
-    (if (and (org-at-table-p)
-	     (not (bolp))
-	     (not (= (char-after) ?|))
-	     (eq N 1))
-	(if (looking-at ".*?|")
-	    (let ((pos (point))
-		  (noalign (looking-at "[^|\n\r]*  |"))
-		  (c org-table-may-need-update))
-	      (replace-match
-	       (concat (substring (match-string 0) 1 -1) " |") nil t)
-	      (goto-char pos)
-	      ;; noalign: if there were two spaces at the end, this field
-	      ;; does not determine the width of the column.
-	      (when noalign (setq org-table-may-need-update c)))
-	  (delete-char N))
+    (cond
+     ((or (/= N 1)
+	  (eq (char-after) ?|)
+	  (save-excursion (skip-chars-backward " \t") (bolp))
+	  (not (org-at-table-p)))
       (delete-char N)
-      (org-fix-tags-on-the-fly))))
+      (org-fix-tags-on-the-fly))
+     ((looking-at ".\\(.*?\\)|")
+      (let* ((update? org-table-may-need-update)
+	     (noalign (looking-at-p ".*?  |")))
+	(delete-char 1)
+	(org-table-with-shrunk-field
+	 (save-excursion
+	   ;; Last space is `org-table-separator-space', so insert
+	   ;; a regular one before it instead.
+	   (goto-char (- (match-end 0) 2))
+	   (insert " ")))
+	;; If there were two spaces at the end, this field does not
+	;; determine the width of the column.
+	(when noalign (setq org-table-may-need-update update?))))
+     (t
+      (delete-char N)))))
 
 ;; Make `delete-selection-mode' work with Org mode and Orgtbl mode
 (put 'org-self-insert-command 'delete-selection

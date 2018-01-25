@@ -526,6 +526,17 @@ Field is restored even in case of abnormal exit."
 	 (org-table-goto-column ,column)
 	 (set-marker ,line nil)))))
 
+(defmacro org-table-with-shrunk-field (&rest body)
+  "Save field shrunk state, execute BODY and restore state."
+  (declare (debug (body)))
+  (org-with-gensyms (end shrunk size)
+    `(let* ((,shrunk (save-match-data (org-table--shrunk-field)))
+	    (,end (and ,shrunk (copy-marker (overlay-end ,shrunk) t)))
+	    (,size (and ,shrunk (- ,end (overlay-start ,shrunk)))))
+       (when ,shrunk (delete-overlay ,shrunk))
+       (unwind-protect (progn ,@body)
+	 (when ,shrunk (move-overlay ,shrunk (- ,end ,size) ,end))))))
+
 (defmacro org-table-with-shrunk-columns (&rest body)
   "Expand all columns before executing BODY, then shrink them again."
   (declare (debug (body)))
@@ -1265,16 +1276,8 @@ value."
     (let* ((pos (match-beginning 0))
 	   (val (buffer-substring pos (match-end 0))))
       (when replace
-	;; Since we are going to remove any hidden field, do not rely
-	;; on `org-table--hidden-field' as it could be GC'ed before
-	;; second check.
-	(let* ((hide-overlay (org-table--shrunk-field))
-	       (begin (and hide-overlay (overlay-start hide-overlay))))
-	  (when hide-overlay (delete-overlay hide-overlay))
-	  (replace-match (if (equal replace "") " " replace) t t)
-	  (when hide-overlay
-	    (move-overlay hide-overlay
-			  begin (+ begin (min 1 (length replace)))))))
+	(org-table-with-shrunk-field
+	 (replace-match (if (equal replace "") " " replace) t t)))
       (goto-char (min (line-end-position) (1+ pos)))
       val)))
 
@@ -3838,7 +3841,9 @@ When non-nil, return the overlay narrowing the field."
   (cl-some (lambda (o)
 	     (and (eq 'table-column-hide (overlay-get o 'org-overlay-type))
 		  o))
-	   (overlays-in (1- (point)) (1+ (point)))))
+	   (overlays-at (save-excursion
+			  (skip-chars-forward "^|" (line-end-position))
+			  (1- (point))))))
 
 (defun org-table--list-shrunk-columns ()
   "List currently shrunk columns in table at point."
@@ -3898,38 +3903,38 @@ Whenever the text behind or next to the overlay is modified, all
 the overlays in the column are deleted, effectively displaying
 the column again.
 
-Return overlay used to hide the field."
+Return overlay hiding the field."
   (unless (org-table--shrunk-field)
-    (let ((display
-	   (cond
-	    ((= width 0) org-table-shrunk-column-indicator)
-	    ((eq contents 'hline)
-	     (concat (make-string (1+ width) ?-)
-		     org-table-shrunk-column-indicator))
-	    (t
-	     ;; Remove invisible parts from links in CONTENTS.  Since
-	     ;; shrinking could happen before first fontification
-	     ;; (e.g., using a #+STARTUP keyword), this cannot be done
-	     ;; using text properties.
-	     (let* ((contents (org-string-display contents))
-		    (field-width (string-width contents)))
-	       (if (>= width field-width)
-		   ;; Expand field.
-		   (format " %s%s%s"
-			   contents
-			   (make-string (- width field-width) ?\s)
-			   org-table-shrunk-column-indicator)
-		 ;; Truncate field.
-		 (format " %s%s"
-			 (substring contents 0 width)
-			 org-table-shrunk-column-indicator))))))
-	  (show-before-edit
-	   (list (lambda (o &rest _)
-		   ;; Removing one overlay removes all other overlays
-		   ;; in the same column.
-		   (mapc #'delete-overlay
-			 (cdr (overlay-get o 'org-table-column-overlays))))))
-	  (o (make-overlay start end)))
+    (let* ((overlay-start
+	    (cond
+	     ((= 0 width) start)		 ;hide everything
+	     ((<= (- end start) 1) start)	 ;column too short
+	     ((>= width (- end start)) (1- end)) ;enough room
+	     ((eq contents 'hline) (+ start width))
+	     (t
+	      ;; Find cut location so that WIDTH characters are
+	      ;; visible.
+	      (let* ((begin start)
+		     (lower begin)
+		     (upper (1- end)))
+		(catch :exit
+		  (while (> (- upper lower) 1)
+		    (let ((mean (+ (ash lower -1)
+				   (ash upper -1)
+				   (logand lower upper 1))))
+		      (pcase (org-string-width (buffer-substring begin mean))
+			((pred (= width)) (throw :exit mean))
+			((pred (< width)) (setq upper mean))
+			(_ (setq lower mean)))))
+		  upper)))))
+	   (display org-table-shrunk-column-indicator)
+	   (show-before-edit
+	    (list (lambda (o &rest _)
+		    ;; Removing one overlay removes all other overlays
+		    ;; in the same column.
+		    (mapc #'delete-overlay
+			  (cdr (overlay-get o 'org-table-column-overlays))))))
+	   (o (make-overlay overlay-start end)))
       (overlay-put o 'insert-behind-hooks show-before-edit)
       (overlay-put o 'insert-in-front-hooks show-before-edit)
       (overlay-put o 'modification-hooks show-before-edit)
@@ -4069,10 +4074,8 @@ prefix, expand all columns."
       (`(16) (org-table-expand begin end))
       (_
        (org-table-expand begin end)
-       (org-table--shrink-columns (cl-set-exclusive-or columns shrunk) begin end)
-       ;; Move before overlay if point is under it.
-       (let ((o (org-table--shrunk-field)))
-	 (when o (goto-char (overlay-start o))))))))
+       (org-table--shrink-columns
+	(cl-set-exclusive-or columns shrunk) begin end)))))
 
 ;;;###autoload
 (defun org-table-shrink (&optional begin end)
