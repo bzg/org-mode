@@ -2527,32 +2527,32 @@ Outside list"
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:name "para") "Paragraph")))
-    "#+NAME: para\nParagraph\n"))
+    "#+name: para\nParagraph\n"))
   ;; Interpret multiple affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:attr_ascii ("line2" "line1")) "Paragraph")))
-    "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph\n"))
+    "#+attr_ascii: line1\n#+attr_ascii: line2\nParagraph\n"))
   ;; Interpret parsed affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:caption (("caption"))) "Paragraph")))
-    "#+CAPTION: caption\nParagraph\n"))
+    "#+caption: caption\nParagraph\n"))
   ;; Interpret dual affiliated keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph (:caption ((("long") "short"))) "Paragraph")))
-    "#+CAPTION[short]: long\nParagraph\n"))
+    "#+caption[short]: long\nParagraph\n"))
   ;; Interpret multiple parsed dual keywords.
   (should
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph
 		     (:caption ((("l2") "s2") (("l1") "s1"))) "Paragraph")))
-    "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph\n"))
+    "#+caption[s1]: l1\n#+caption[s2]: l2\nParagraph\n"))
   ;; Pseudo objects and elements are transparent.
   (should
    (equal "A B"
