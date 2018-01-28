@@ -3579,9 +3579,9 @@ a link with {{{kbd(C-c C-l)}}}.  Such a function should not accept any
 arguments, and return the full link with prefix.  You can set the link
 completion function like this:
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (org-link-set-parameter "type" :complete #'some-completion-function)
-#+END_SRC
+#+end_src
 
 ** Search Options in File Links
 :PROPERTIES:
@@ -14847,8 +14847,8 @@ fractions of line length, use the =:columns= attribute.  See example
 below.
 
 #+begin_example
-#+ATTR_TEXINFO: :columns .5 .5
-| a cell | another cell |
+  ,#+ATTR_TEXINFO: :columns .5 .5
+  | a cell | another cell |
 #+end_example
 
 *** Images in Texinfo export
@@ -20662,7 +20662,7 @@ be complete if the ones above were not mentioned in this manual.
 :DESCRIPTION: The license for this documentation.
 :END:
 
-#+TEXINFO: @include ../doc/doclicense.texi
+#+texinfo: @include ../doc/doclicense.texi
 
 * Main Index
 :PROPERTIES:
