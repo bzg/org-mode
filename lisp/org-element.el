@@ -4581,7 +4581,7 @@ If there is no affiliated keyword, return the empty string."
 	    (let (dual)
 	      (when (member key org-element-dual-keywords)
 		(setq dual (cdr value) value (car value)))
-	      (concat "#+" key
+	      (concat "#+" (downcase key)
 		      (and dual
 			   (format "[%s]" (org-element-interpret-data dual)))
 		      ": "
