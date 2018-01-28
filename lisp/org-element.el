@@ -1287,39 +1287,43 @@ Assume point is at the beginning of the item."
 (defun org-element-item-interpreter (item contents)
   "Interpret ITEM element as Org syntax.
 CONTENTS is the contents of the element."
-  (let* ((bullet (let ((bullet (org-element-property :bullet item)))
-		   (org-list-bullet-string
-		    (cond ((not (string-match "[0-9a-zA-Z]" bullet)) "- ")
-			  ((eq org-plain-list-ordered-item-terminator ?\)) "1)")
-			  (t "1.")))))
-	 (checkbox (org-element-property :checkbox item))
-	 (counter (org-element-property :counter item))
-	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-element-interpret-data tag))))
-	 (pre-blank
-	  (min (or (org-element-property :pre-blank item)
-		   ;; 0 is specific to paragraphs at the beginning of
-		   ;; the item, so we use 1 as a fall-back value,
-		   ;; which is more universal.
-		   1)
-	       ;; Lists ends after more than two consecutive empty
-	       ;; lines: limit ourselves to 2 newline characters.
-	       2))
-	 (ind (make-string (length bullet) ?\s)))
-    ;; Indent contents.
-    (concat bullet
-	    (and counter (format "[@%d] " counter))
-	    (pcase checkbox
-	      (`on "[X] ")
-	      (`off "[ ] ")
-	      (`trans "[-] ")
-	      (_ nil))
-	    (and tag (format "%s :: " tag))
-	    (when contents
-	      (let ((contents (replace-regexp-in-string
-			       "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
-		(if (= pre-blank 0) (org-trim contents)
-		  (concat (make-string pre-blank ?\n) contents)))))))
+  (let ((tag (pcase (org-element-property :tag item)
+	       (`nil nil)
+	       (tag (format "%s :: " (org-element-interpret-data tag)))))
+	(bullet
+	 (org-list-bullet-string
+	  (cond
+	   ((not (string-match-p "[0-9a-zA-Z]"
+				 (org-element-property :bullet item))) "- ")
+	   ((eq org-plain-list-ordered-item-terminator ?\)) "1)")
+	   (t "1.")))))
+    (concat
+     bullet
+     (pcase (org-element-property :counter item)
+       (`nil nil)
+       (counter (format "[@%d] " counter)))
+     (pcase (org-element-property :checkbox item)
+       (`on "[X] ")
+       (`off "[ ] ")
+       (`trans "[-] ")
+       (_ nil))
+     tag
+     (when contents
+       (let* ((ind (make-string (if tag 5 (length bullet)) ?\s))
+	      (pre-blank
+	       (min (or (org-element-property :pre-blank item)
+			;; 0 is specific to paragraphs at the
+			;; beginning of the item, so we use 1 as
+			;; a fall-back value, which is more universal.
+			1)
+		    ;; Lists ends after more than two consecutive
+		    ;; empty lines: limit ourselves to 2 newline
+		    ;; characters.
+		    2))
+	      (contents (replace-regexp-in-string
+			 "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
+	 (if (= pre-blank 0) (org-trim contents)
+	   (concat (make-string pre-blank ?\n) contents)))))))
 
 
 ;;;; Plain List
