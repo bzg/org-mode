@@ -6051,17 +6051,21 @@ by a #."
 
 (defun org-fontify-macros (limit)
   "Fontify macros."
-  (when (re-search-forward "\\({{{\\).+?\\(}}}\\)" limit t)
-    (add-text-properties
-     (match-beginning 0) (match-end 0)
-     '(font-lock-fontified t face org-macro))
-    (when org-hide-macro-markers
-      (add-text-properties (match-end 2) (match-beginning 2)
-			   '(invisible t))
-      (add-text-properties (match-beginning 1) (match-end 1)
-			   '(invisible t)))
-    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-    t))
+  (when (re-search-forward "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)" limit t)
+    (let ((begin (match-beginning 0))
+	  (opening-end (match-beginning 1)))
+      (when (and (re-search-forward "\n[ \t]*\n\\|\\(}}}\\)" limit t)
+		 (match-string 1))
+	(let ((end (match-end 1))
+	      (closing-start (match-beginning 1)))
+	  (add-text-properties
+	   begin end
+	   '(font-lock-multiline t font-lock-fontified t face org-macro))
+	  (org-remove-flyspell-overlays-in begin end)
+	  (when org-hide-macro-markers
+	    (add-text-properties begin opening-end '(invisible t))
+	    (add-text-properties closing-start end '(invisible t)))
+	  t)))))
 
 (defun org-activate-footnote-links (limit)
   "Add text properties for footnotes."
