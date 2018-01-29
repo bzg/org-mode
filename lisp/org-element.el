@@ -3247,15 +3247,18 @@ a plist with `:key', `:args', `:begin', `:end', `:value' and
 
 Assume point is at the macro."
   (save-excursion
-    (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\(([ \t\n]*\\([^\000]*?\\))\\)?}}}")
+    (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\([^\000]*?\\))\\)?}}}")
       (let ((begin (point))
 	    (key (downcase (match-string-no-properties 1)))
 	    (value (match-string-no-properties 0))
 	    (post-blank (progn (goto-char (match-end 0))
 			       (skip-chars-forward " \t")))
 	    (end (point))
-	    (args (let ((args (match-string-no-properties 3)))
-		    (and args (org-macro-extract-arguments args)))))
+	    (args (pcase (match-string-no-properties 3)
+		    (`nil nil)
+		    (a (org-macro-extract-arguments
+			(replace-regexp-in-string
+			 "[ \t\r\n]+" " " (org-trim a)))))))
 	(list 'macro
 	      (list :key key
 		    :value value
@@ -3266,7 +3269,11 @@ Assume point is at the macro."
 
 (defun org-element-macro-interpreter (macro _)
   "Interpret MACRO object as Org syntax."
-  (org-element-property :value macro))
+  (format "{{{%s%s}}}"
+	  (org-element-property :key macro)
+	  (pcase (org-element-property :args macro)
+	    (`nil "")
+	    (args (format "(%s)" (apply #'org-macro-escape-arguments args))))))
 
 
 ;;;; Radio-target
