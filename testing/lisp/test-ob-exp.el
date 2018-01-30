@@ -199,57 +199,65 @@ Here is one at the end of a line. {{{results(=2=)}}}
 	(org-test-with-expanded-babel-code (buffer-string)))))))
 
 (ert-deftest ob-exp/exports-inline-code ()
-  (let ((org-babel-inline-result-wrap "=%s=")
-	(org-export-use-babel t))
-    (should
-     (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)}$"
+  (should
+   (equal "src_emacs-lisp[]{(+ 1 1)}"
+	  (org-test-with-temp-text "src_emacs-lisp[:exports code]{(+ 1 1)}"
+	    (let ((org-babel-inline-result-wrap "=%s=")
+		  (org-export-use-babel t))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string))))
+  (should
+   (equal "src_emacs-lisp[]{(+ 1 1)}"
+	  (org-test-with-temp-text "src_emacs-lisp[ :exports code ]{(+ 1 1)}"
+	    (let ((org-babel-inline-result-wrap "=%s=")
+		  (org-export-use-babel t))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string))))
+  (should
+   (equal "src_emacs-lisp[]{(+ 1 1)} {{{results(=2=)}}}"
+	  (org-test-with-temp-text "src_emacs-lisp[:exports both]{(+ 1 1)}"
+	    (let ((org-babel-inline-result-wrap "=%s=")
+		  (org-export-use-babel t))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string))))
+  (should
+   (equal "{{{results(=2=)}}}"
+	  (org-test-with-temp-text
+	      "src_emacs-lisp[:exports results :results scalar]{(+ 1 1)}"
+	    (let ((org-babel-inline-result-wrap "=%s=")
+		  (org-export-use-babel t))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string))))
+  (should
+   (equal "foosrc_emacs-lisp[]{(+ 1 1)}"
+	  (org-test-with-temp-text
+	      "foosrc_emacs-lisp[:exports code]{(+ 1 1)}"
+	    (let ((org-babel-inline-result-wrap "=%s=")
+		  (org-export-use-babel t))
+	      (org-babel-exp-process-buffer))
+	    (buffer-string))))
+  (should
+   (let ((text "src_emacs lisp{(+ 1 1)}"))
+     (string-match (regexp-quote text)
 		   (org-test-with-temp-text
-		       "src_emacs-lisp[:exports code]{(+ 1 1)}"
-		     (org-babel-exp-process-buffer)
-		     (buffer-string))))
-    (should
-     (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)}$"
-		   (org-test-with-temp-text
-		       "src_emacs-lisp[ :exports code ]{(+ 1 1)}"
-		     (org-babel-exp-process-buffer)
-		     (buffer-string))))
-    (should
-     (string-match "\\`src_emacs-lisp\\(?:\\[]\\)?{(\\+ 1 1)} {{{results(=2=)}}}$"
-		   (org-test-with-temp-text
-		       "src_emacs-lisp[:exports both]{(+ 1 1)}"
-		     (org-babel-exp-process-buffer)
-		     (buffer-string))))
-    (should
-     (string-match "\\`{{{results(=2=)}}}$"
-		   (org-test-with-temp-text
-		       "src_emacs-lisp[:exports results :results scalar]{(+ 1 1)}"
-		     (org-babel-exp-process-buffer)
-		     (buffer-string))))
-    (should
-     (let ((text "foosrc_emacs-lisp[:exports code]{(+ 1 1)}"))
-       (string-match (regexp-quote text)
-		     (org-test-with-temp-text
-			 text
-		       (org-babel-exp-process-buffer)
-		       (buffer-string)))))
-    (should
-     (let ((text "src_emacs lisp{(+ 1 1)}"))
-       (string-match (regexp-quote text)
-		     (org-test-with-temp-text
-			 text
-		       (org-babel-exp-process-buffer)
-		       (buffer-string)))))
-    (should
-     (string-match
-      (replace-regexp-in-string
-       "\\\\\\[]{" "\\(?:\\[]\\)?{" ;accept both src_sh[]{...} or src_sh{...}
-       (regexp-quote "Here is one in the middle src_sh[]{echo 1} of a line.
+		       text
+		     (let ((org-babel-inline-result-wrap "=%s=")
+			   (org-export-use-babel t))
+		       (org-babel-exp-process-buffer))
+		     (buffer-string)))))
+  (should
+   (string-match
+    (replace-regexp-in-string
+     "\\\\\\[]{" "\\(?:\\[]\\)?{" ;accept both src_sh[]{...} or src_sh{...}
+     (regexp-quote "Here is one in the middle src_sh[]{echo 1} of a line.
 Here is one at the end of a line. src_sh[]{echo 2}
 src_sh[]{echo 3} Here is one at the beginning of a line.
 Here is one that is also evaluated: src_sh[]{echo 4} {{{results(=4=)}}}")
-       nil t)
-      (org-test-at-id "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
-	(org-narrow-to-subtree)
+     nil t)
+    (org-test-at-id "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
+      (org-narrow-to-subtree)
+      (let ((org-babel-inline-result-wrap "=%s=")
+	    (org-export-use-babel t))
 	(org-test-with-expanded-babel-code (buffer-string)))))))
 
 (ert-deftest ob-exp/exports-inline-code-double-eval ()

@@ -1223,6 +1223,10 @@ Some other text
   (should
    (org-test-with-temp-text "src_emacs-lisp{(+ 1 1)}"
      (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
+  ;; With prefix.
+  (should
+   (org-test-with-temp-text "foosrc_emacs-lisp[]{(+ 1 1)}"
+     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
   ;; With switches.
   (should
    (org-test-with-temp-text "src_emacs-lisp[:foo bar]{(+ 1 1)}"
@@ -1235,9 +1239,6 @@ Some other text
    (org-test-with-temp-text "src_emacs-lisp[]{(+ 1 1)}"
      (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
   ;; Invalid syntax.
-  (should-not
-   (org-test-with-temp-text "foosrc_emacs-lisp[]{(+ 1 1)}"
-     (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
   (should-not
    (org-test-with-temp-text "src_emacs-lisp[]foo{(+ 1 1)}"
      (org-element-map (org-element-parse-buffer) 'inline-src-block 'identity)))
