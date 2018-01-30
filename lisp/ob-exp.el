@@ -85,7 +85,7 @@ none ---- do not display either code or results upon export
 Assume point is at block opening line."
   (interactive)
   (save-excursion
-    (let* ((info (org-babel-get-src-block-info 'light))
+    (let* ((info (org-babel-get-src-block-info))
 	   (lang (nth 0 info))
 	   (raw-params (nth 2 info))
 	   hash)
