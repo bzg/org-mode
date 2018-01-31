@@ -108,6 +108,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (declare-function calendar-check-holidays "holidays" (date))
 (declare-function cdlatex-environment "ext:cdlatex" (environment item))
+(declare-function cdlatex-math-symbol "ext:cdlatex")
 (declare-function isearch-no-upper-case-p "isearch" (string regexp-flag))
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-agenda-entry-get-agenda-timestamp "org-agenda" (pom))
@@ -16083,21 +16084,21 @@ So these are more for recording a certain time/date."
     (org-defkey map (kbd "S-<right>")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-day 1))))
-    (org-defkey map "!"
+    (org-defkey map (kbd "!")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(diary-view-entries))
                   (message "")))
-    (org-defkey map ">"
+    (org-defkey map (kbd ">")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-scroll-left 1))))
-    (org-defkey map "<"
+    (org-defkey map (kbd "<")
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-scroll-right 1))))
-    (org-defkey map "\C-v"
+    (org-defkey map (kbd "C-v")
                 (lambda () (interactive)
                   (org-eval-in-calendar
                    '(calendar-scroll-left-three-months 1))))
-    (org-defkey map "\M-v"
+    (org-defkey map (kbd "M-v")
                 (lambda () (interactive)
                   (org-eval-in-calendar
                    '(calendar-scroll-right-three-months 1))))
@@ -17964,11 +17965,11 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 (defvar org-cdlatex-mode-map (make-sparse-keymap)
   "Keymap for the minor `org-cdlatex-mode'.")
 
-(org-defkey org-cdlatex-mode-map "_" 'org-cdlatex-underscore-caret)
-(org-defkey org-cdlatex-mode-map "^" 'org-cdlatex-underscore-caret)
-(org-defkey org-cdlatex-mode-map "`" 'cdlatex-math-symbol)
-(org-defkey org-cdlatex-mode-map "'" 'org-cdlatex-math-modify)
-(org-defkey org-cdlatex-mode-map "\C-c{" 'org-cdlatex-environment-indent)
+(org-defkey org-cdlatex-mode-map (kbd "_") #'org-cdlatex-underscore-caret)
+(org-defkey org-cdlatex-mode-map (kbd "^") #'org-cdlatex-underscore-caret)
+(org-defkey org-cdlatex-mode-map (kbd "`") #'cdlatex-math-symbol)
+(org-defkey org-cdlatex-mode-map (kbd "'") #'org-cdlatex-math-modify)
+(org-defkey org-cdlatex-mode-map (kbd "C-c {") #'org-cdlatex-environment-indent)
 
 (defvar org-cdlatex-texmathp-advice-is-done nil
   "Flag remembering if we have applied the advice to texmathp already.")
@@ -18933,14 +18934,20 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;; Remap usual Emacs bindings
 (org-remap org-mode-map
-	   'self-insert-command  'org-self-insert-command
-	   'delete-char          'org-delete-char
-	   'delete-backward-char 'org-delete-backward-char
-	   'open-line            'org-open-line
-	   'comment-dwim         'org-comment-dwim
-	   'forward-paragraph    'org-forward-paragraph
-	   'backward-paragraph   'org-backward-paragraph
-	   'delete-indentation   'org-delete-indentation)
+	   'self-insert-command    'org-self-insert-command
+	   'delete-char            'org-delete-char
+	   'delete-backward-char   'org-delete-backward-char
+	   'kill-line              'org-kill-line
+	   'open-line              'org-open-line
+	   'yank                   'org-yank
+	   'comment-dwim           'org-comment-dwim
+	   'move-beginning-of-line 'org-beginning-of-line
+	   'move-end-of-line       'org-end-of-line
+	   'forward-paragraph      'org-forward-paragraph
+	   'backward-paragraph     'org-backward-paragraph
+	   'backward-sentence      'org-backward-sentence
+	   'forward-sentence       'org-forward-sentence
+	   'delete-indentation     'org-delete-indentation)
 
 ;;;; All the other keys
 (org-defkey org-mode-map (kbd "|") #'org-force-self-insert)
@@ -22770,9 +22777,6 @@ With argument N not nil or 1, move forward N - 1 lines first."
 	  (end-of-line))))
      (t (end-of-line)))))
 
-(define-key org-mode-map "\C-a" 'org-beginning-of-line)
-(define-key org-mode-map "\C-e" 'org-end-of-line)
-
 (defun org-backward-sentence (&optional _arg)
   "Go to beginning of sentence, or beginning of table field.
 This will call `backward-sentence' or `org-table-beginning-of-field',
@@ -22823,9 +22827,6 @@ depending on context."
 	  (let ((sentence-end (concat (sentence-end) "\\|^\\*+ .*$")))
 	    (call-interactively #'forward-sentence)))))))
 
-(define-key org-mode-map "\M-a" 'org-backward-sentence)
-(define-key org-mode-map "\M-e" 'org-forward-sentence)
-
 (defun org-kill-line (&optional _arg)
   "Kill line, to tags or end of line."
   (interactive)
@@ -22844,8 +22845,6 @@ depending on context."
     (kill-region (point) (match-beginning 1))
     (org-set-tags nil t))
    (t (kill-region (point) (point-at-eol)))))
-
-(define-key org-mode-map "\C-k" 'org-kill-line)
 
 (defun org-yank (&optional arg)
   "Yank.  If the kill is a subtree, treat it specially.
@@ -22948,8 +22947,6 @@ interactive command with similar behavior."
        (not (or (eobp)
 		(and (bolp) (looking-at-p org-outline-regexp)
 		     (<= (org-outline-level) level))))))))
-
-(define-key org-mode-map "\C-y" 'org-yank)
 
 (defun org-back-to-heading (&optional invisible-ok)
   "Call `outline-back-to-heading', but provide a better error message."
