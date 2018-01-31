@@ -714,12 +714,15 @@ frequently in plain text."
 (defcustom org-export-with-toc t
   "Non-nil means create a table of contents in exported files.
 
-The TOC contains headlines with levels up
-to`org-export-headline-levels'.  When an integer, include levels
-up to N in the toc, this may then be different from
-`org-export-headline-levels', but it will not be allowed to be
-larger than the number of headline levels.  When nil, no table of
-contents is made.
+The table of contents contains headlines with levels up to
+`org-export-headline-levels'.
+
+When this variable is set to an integer N, include levels up to
+N in the table of contents.  Although it may then be different
+from `org-export-headline-levels', it is cannot be larger than
+the number of headline levels.
+
+When nil, no table of contents is created.
 
 This option can also be set with the OPTIONS keyword,
 e.g. \"toc:nil\" or \"toc:3\"."
@@ -728,8 +731,9 @@ e.g. \"toc:nil\" or \"toc:3\"."
 	  (const :tag "No Table of Contents" nil)
 	  (const :tag "Full Table of Contents" t)
 	  (integer :tag "TOC to level"))
-  :safe (lambda (x) (or (booleanp x)
-			(integerp x))))
+  :safe (lambda (x)
+	  (or (booleanp x)
+	      (integerp x))))
 
 (defcustom org-export-with-tables t
   "Non-nil means export tables.
