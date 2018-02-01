@@ -1756,6 +1756,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 (defvar-local org-clock-file-total-minutes nil
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
 
+;;;###autoload
 (defun org-clock-sum-today (&optional headline-filter)
   "Sum the times for each subtree for today."
   (let ((range (org-clock-special-range 'today)))
