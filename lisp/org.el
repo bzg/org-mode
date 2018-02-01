@@ -18947,7 +18947,9 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 	   'backward-paragraph     'org-backward-paragraph
 	   'backward-sentence      'org-backward-sentence
 	   'forward-sentence       'org-forward-sentence
-	   'delete-indentation     'org-delete-indentation)
+	   'fill-paragraph         'org-fill-paragraph
+	   'delete-indentation     'org-delete-indentation
+	   'transpose-words        'org-transpose-words)
 
 ;;;; All the other keys
 (org-defkey org-mode-map (kbd "|") #'org-force-self-insert)
@@ -19447,7 +19449,6 @@ word constituents."
   (interactive)
   (with-syntax-table org-mode-transpose-word-syntax-table
     (call-interactively 'transpose-words)))
-(org-remap org-mode-map 'transpose-words 'org-transpose-words)
 
 (defvar org-ctrl-c-ctrl-c-hook nil
   "Hook for functions attaching themselves to `C-c C-c'.
@@ -22159,7 +22160,6 @@ filling the current element."
 	(goto-char origin)
 	(set-marker origin nil))))
    (t (org-fill-element justify))))
-(org-remap org-mode-map 'fill-paragraph 'org-fill-paragraph)
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
