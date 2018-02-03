@@ -229,7 +229,7 @@ Here is one at the end of a line. {{{results(=2=)}}}
 	      (org-babel-exp-process-buffer))
 	    (buffer-string))))
   (should
-   (equal "foosrc_emacs-lisp[]{(+ 1 1)}"
+   (equal "foosrc_emacs-lisp[:exports code]{(+ 1 1)}"
 	  (org-test-with-temp-text
 	      "foosrc_emacs-lisp[:exports code]{(+ 1 1)}"
 	    (let ((org-babel-inline-result-wrap "=%s=")

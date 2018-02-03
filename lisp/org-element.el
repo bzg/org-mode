@@ -2878,7 +2878,7 @@ Assume point is at the beginning of the babel call."
   (save-excursion
     (catch :no-object
       (when (let ((case-fold-search nil))
-	      (looking-at "call_\\([^ \t\n[(]+\\)[([]"))
+	      (looking-at "\\<call_\\([^ \t\n[(]+\\)[([]"))
 	(goto-char (match-end 1))
 	(let* ((begin (match-beginning 0))
 	       (call (match-string-no-properties 1))
@@ -2932,7 +2932,7 @@ Assume point is at the beginning of the inline src block."
   (save-excursion
     (catch :no-object
       (when (let ((case-fold-search nil))
-	      (looking-at "src_\\([^ \t\n[{]+\\)[{[]"))
+	      (looking-at "\\<src_\\([^ \t\n[{]+\\)[{[]"))
 	(goto-char (match-end 1))
 	(let ((begin (match-beginning 0))
 	      (language (match-string-no-properties 1))
