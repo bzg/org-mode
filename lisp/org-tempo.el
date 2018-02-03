@@ -41,6 +41,8 @@
 (require 'tempo)
 (require 'cl-lib)
 
+(defvar org-structure-template-alist)
+
 
 (defgroup org-tempo nil
   "Options for template expansion of Org structures"
