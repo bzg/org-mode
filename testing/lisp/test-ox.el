@@ -445,6 +445,17 @@ Paragraph"
 	    (org-test-with-temp-text "#+FILETAGS: noexp\n* Head1"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:exclude-tags ("noexp")))))))
+  ;; Excluding a tag excludes its whole group.
+  (should
+   (equal ""
+	  (let (org-export-filter-body-functions
+		org-export-filter-final-output-functions)
+	    (org-test-with-temp-text "* Head1 :baz:"
+	      (let ((org-tag-alist '((:startgrouptag)
+				     ("foo") (:grouptags) ("bar") ("baz")
+				     (:endgrouptag))))
+		(org-export-as (org-test-default-backend)
+			       nil nil nil '(:exclude-tags ("foo"))))))))
   ;; Test include tags for headlines and inlinetasks.
   (should
    (equal (org-test-with-temp-text "* H1\n* H2\n** Sub :exp:\n*** Sub Sub\n* H3"
@@ -452,6 +463,18 @@ Paragraph"
 	      (org-export-as (org-test-default-backend)
 			     nil nil nil '(:select-tags ("exp")))))
 	  "* H2\n** Sub :exp:\n*** Sub Sub\n"))
+  ;; Including a tag includes its whole group.
+  (should
+   (string-match-p
+    "\\`\\* H2"
+    (let (org-export-filter-body-functions
+	  org-export-filter-final-output-functions)
+      (org-test-with-temp-text "* H1\n* H2 :bar:"
+	(let ((org-tag-alist '((:startgrouptag)
+			       ("foo") (:grouptags) ("bar") ("baz")
+			       (:endgrouptag))))
+	  (org-export-as (org-test-default-backend)
+			 nil nil nil '(:select-tags ("foo"))))))))
   ;; If there is an include tag, ignore the section before the first
   ;; headline, if any.
   (should
