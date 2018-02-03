@@ -40,6 +40,7 @@
 
 (require 'tempo)
 (require 'cl-lib)
+(declare-function org-buffer-list "org" (&optional predicate exclude-tmp))
 
 (defvar org-structure-template-alist)
 

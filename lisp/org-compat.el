@@ -53,7 +53,9 @@
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
 
+(defvar calendar-mode-map)
 (defvar org-complex-heading-regexp)
+(defvar org-agenda-diary-file)
 (defvar org-table-any-border-regexp)
 (defvar org-table-dataline-regexp)
 (defvar org-table-tab-recognizes-table.el)
