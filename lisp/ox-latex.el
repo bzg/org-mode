@@ -1719,7 +1719,7 @@ holding export options."
      ;; Table of contents.
      (let ((depth (plist-get info :with-toc)))
        (when depth
-	 (concat (when (wholenump depth)
+	 (concat (when (integerp depth)
 		   (format "\\setcounter{tocdepth}{%d}\n" depth))
 		 (plist-get info :latex-toc-command))))
      ;; Document's body.
