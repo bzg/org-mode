@@ -1644,9 +1644,10 @@ When nil, such items are sorted as 0 minutes effort."
     (tags  . " %i %-12:c")
     (search . " %i %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
-An alist with five entries, each for the different agenda types.  The
-keys of the sublists are `agenda', `todo', `search' and `tags'.
-The values are format strings.
+
+An alist with one entry per agenda type.  The keys of the
+sublists are `agenda', `todo', `search' and `tags'.  The values
+are format strings.
 
 This format works similar to a printf format, with the following meaning:
 
