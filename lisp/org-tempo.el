@@ -94,12 +94,8 @@ Goes through `org-structure-template-alist' and
        "Duplicated keys in `org-structure-template-alist' and `org-tempo-keywords-alist'"))
 
     ;; Remove any keys already defined in case they have been updated.
-    (mapc (lambda (key)
-	    (if (assoc-string key org-tempo-tags)
-		(setq org-tempo-tags
-		      (delete (assoc-string key org-tempo-tags)
-			      org-tempo-tags))))
-	  keys)
+    (setq org-tempo-tags
+	  (cl-remove-if (lambda (tag) (member (car tag) keys)) org-tempo-tags))
     (mapc #'org-tempo-add-block org-structure-template-alist)
     (mapc #'org-tempo-add-keyword org-tempo-keywords-alist)))
 
