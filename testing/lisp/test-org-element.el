@@ -2798,25 +2798,40 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
 (ert-deftest test-org-element/example-block-interpreter ()
   "Test example block interpreter."
   ;; Without switches.
-  (should (equal (org-test-parse-and-interpret
-		  "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE")
-		 "#+begin_example\nTest\n#+end_example\n"))
+  (should (equal "#+begin_example\nTest\n#+end_example\n"
+		 (let ((org-src-preserve-indentation t))
+		   (org-test-parse-and-interpret
+		    "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE"))))
   ;; With switches.
   (should
-   (equal (org-test-parse-and-interpret
-	   "#+BEGIN_EXAMPLE -n -k\n(+ 1 1)\n#+END_EXAMPLE")
-	  "#+begin_example -n -k\n(+ 1 1)\n#+end_example\n"))
+   (equal "#+begin_example -n -k\n(+ 1 1)\n#+end_example\n"
+	  (let ((org-src-preserve-indentation t))
+	    (org-test-parse-and-interpret
+	     "#+BEGIN_EXAMPLE -n -k\n(+ 1 1)\n#+END_EXAMPLE"))))
   ;; Preserve code escaping.
   (should
    (equal
-    (org-test-parse-and-interpret
-     "#+BEGIN_EXAMPLE\n,* Headline\n,#+KEYWORD: value\nText\n#+END_EXAMPLE")
+    (let ((org-src-preserve-indentation t))
+      (org-test-parse-and-interpret
+       "#+BEGIN_EXAMPLE\n,* Headline\n,#+KEYWORD: value\nText\n#+END_EXAMPLE"))
     "#+begin_example\n,* Headline\n,#+KEYWORD: value\nText\n#+end_example\n"))
   ;; Accept missing final newline in value.
   (should
    (equal
     "#+begin_example\nTest\n#+end_example\n"
-    (org-element-interpret-data '(example-block (:value "Test"))))))
+    (let ((org-src-preserve-indentation t))
+      (org-element-interpret-data '(example-block (:value "Test"))))))
+  ;; Handle indentation.
+  (should (equal "#+begin_example\n  Test\n#+end_example\n"
+		 (let ((org-src-preserve-indentation nil)
+		       (org-edit-src-content-indentation 2))
+		   (org-test-parse-and-interpret
+		    "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE"))))
+  (should (equal "#+begin_example\n Test\n#+end_example\n"
+		 (let ((org-src-preserve-indentation t)
+		       (org-edit-src-content-indentation 2))
+		   (org-test-parse-and-interpret
+		    "#+BEGIN_EXAMPLE\n Test\n#+END_EXAMPLE")))))
 
 (ert-deftest test-org-element/export-block-interpreter ()
   "Test export block interpreter."

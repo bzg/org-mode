@@ -1980,14 +1980,21 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 (defun org-element-example-block-interpreter (example-block _)
   "Interpret EXAMPLE-BLOCK element as Org syntax."
   (let ((switches (org-element-property :switches example-block))
-	(value (org-element-property :value example-block)))
+	(value
+	 (let ((val (org-element-property :value example-block)))
+	   (cond
+	    ((or org-src-preserve-indentation
+		 (org-element-property :preserve-indent example-block))
+	     val)
+	    ((= 0 org-edit-src-content-indentation)
+	     (org-remove-indentation val))
+	    (t
+	     (let ((ind (make-string org-edit-src-content-indentation ?\s)))
+	       (replace-regexp-in-string "^[ \t]*\\S-"
+					 (concat ind "\\&")
+					 (org-remove-indentation val))))))))
     (concat "#+begin_example" (and switches (concat " " switches)) "\n"
-	    (org-element-normalize-string
-	     (org-escape-code-in-string
-	      (if (or org-src-preserve-indentation
-		      (org-element-property :preserve-indent example-block))
-		  value
-		(org-remove-indentation value))))
+	    (org-element-normalize-string (org-escape-code-in-string value))
 	    "#+end_example")))
 
 
@@ -2509,14 +2516,14 @@ Assume point is at the beginning of the block."
 	     (org-remove-indentation val))
 	    (t
 	     (let ((ind (make-string org-edit-src-content-indentation ?\s)))
-	       (replace-regexp-in-string
-		"^" ind (org-remove-indentation val))))))))
-    (concat (format "#+begin_src%s\n"
-		    (concat (and lang (concat " " lang))
-			    (and switches (concat " " switches))
-			    (and params (concat " " params))))
-	    (org-element-normalize-string (org-escape-code-in-string value))
-	    "#+end_src")))
+	       (replace-regexp-in-string "^[ \t]*\\S-"
+					 (concat ind "\\&")
+					 (org-remove-indentation val))))))))
+    (format "#+begin_src%s\n%s#+end_src"
+	    (concat (and lang (concat " " lang))
+		    (and switches (concat " " switches))
+		    (and params (concat " " params)))
+	    (org-element-normalize-string (org-escape-code-in-string value)))))
 
 
 ;;;; Table
