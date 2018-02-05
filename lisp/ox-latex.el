@@ -920,15 +920,14 @@ using customize, or with
   (add-to-list \\='org-latex-packages-alist \\='(\"newfloat\" \"minted\"))
 
 In addition, it is necessary to install pygments
-\(http://pygments.org), and to configure the variable
+\(URL `http://pygments.org>'), and to configure the variable
 `org-latex-pdf-process' so that the -shell-escape option is
 passed to pdflatex.
 
 The minted choice has possible repercussions on the preview of
 latex fragments (see `org-preview-latex-fragment').  If you run
 into previewing problems, please consult
-
-  https://orgmode.org/worg/org-tutorials/org-latex-preview.html"
+URL `https://orgmode.org/worg/org-tutorials/org-latex-preview.html'."
   :group 'org-export-latex
   :type '(choice
 	  (const :tag "Use listings" t)
