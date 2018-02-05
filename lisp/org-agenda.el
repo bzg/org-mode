@@ -9756,9 +9756,9 @@ When ARG is greater than one mark ARG lines."
 	      (goto-char (next-single-property-change (point) 'org-hd-marker)))
 	    (beginning-of-line 2))
 	(while (and (get-char-property (point) 'invisible) (not (eobp)))
-	  (beginning-of-line 2))
-	(message "%d entries marked for bulk action"
-		 (length org-agenda-bulk-marked-entries))))))
+	  (beginning-of-line 2)))))
+  (message "%d entries marked for bulk action"
+	   (length org-agenda-bulk-marked-entries)))
 
 (defun org-agenda-bulk-mark-all ()
   "Mark all entries for future agenda bulk action."
