@@ -1056,12 +1056,11 @@ replacement happens correctly."
   (test-ob-verify-result-and-removed-result
    "- 1
 - 2
-- 3
-- (quote (4 5))"
+- 3"
 
    "* org-babel-remove-result
 #+begin_src emacs-lisp :results list
-'(1 2 3 '(4 5))
+'(1 2 3)
 #+end_src
 
 * next heading"))
