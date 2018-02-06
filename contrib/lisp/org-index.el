@@ -3,7 +3,7 @@
 ;; Copyright (C) 2011-2018 Free Software Foundation, Inc.
 
 ;; Author: Marc Ihm <org-index@2484.de>
-;; Version: 5.7.4
+;; Version: 5.7.5
 ;; Keywords: outlines index
 
 ;; This file is not part of GNU Emacs.
@@ -73,7 +73,7 @@
 ;; Updates:
 ;;
 ;;  The latest published version of this file can always be found at:
-;;    https://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
+;;    http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=contrib/lisp/org-index.el;hb=HEAD
 ;;  Development version under:
 ;;    https://github.com/marcIhm/org-index
 ;;
@@ -97,7 +97,7 @@
 (require 'widget)
 
 ;; Version of this package
-(defvar org-index-version "5.7.4" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
+(defvar org-index-version "5.7.5" "Version of `org-index', format is major.minor.bugfix, where \"major\" are incompatible changes and \"minor\" are new features.")
 
 ;; customizable options
 (defgroup org-index nil
@@ -258,7 +258,7 @@ those pieces."
 (defvar org-index--context-node nil "Buffer and position for node in edit buffer.")
 (defvar org-index--short-help-buffer-name "*org-index commands*" "Name of buffer to display short help.")
 (defvar org-index--news-buffer-name "*org-index news*" "Name of buffer to display news.")
-(defvar org-index--display-short-help nil "True, if short help should be displayed.")
+(defvar org-index--short-help-wanted nil "True, if short help should be displayed.")
 (defvar org-index--short-help-displayed nil "True, if short help message has been displayed.")
 (defvar org-index--prefix-arg nil "True, if prefix argument has been received during input.")
 (defvar org-index--minibuffer-saved-key nil "Temporarily save entry of minibuffer keymap.")
@@ -321,7 +321,7 @@ for its index table.
 To start building up your index, use subcommands 'add', 'ref' and
 'yank' to create entries and use 'occur' to find them.
 
-This is version 5.7.4 of org-index.el.
+This is version 5.7.5 of org-index.el.
 
 
 The function `org-index' is the only interactive function of this
@@ -400,7 +400,7 @@ of subcommands to choose from:
      Operates on active region or whole buffer.  Call with prefix
      argument (`C-u') to remove highlights.
 
-  maintain: Index maintainance.
+  maintain: [m] Index maintainance.
      Offers some choices to check, update or fix your index.
 
 If you invoke `org-index' for the first time, an assistant will be
@@ -472,10 +472,10 @@ interactive calls."
                    command (mapconcat 'symbol-name org-index--commands ",")))
         
         ;; read command; if requested display help in read-loop
-        (setq org-index--display-short-help (eq command 'short-help))
+        (setq org-index--short-help-wanted (eq command 'short-help))
         (setq command (org-index--read-command))
 	(if org-index--prefix-arg (setq arg (or arg '(4))))
-        (setq org-index--display-short-help nil))
+        (setq org-index--short-help-wanted nil))
 
       (setq org-index--last-command org-index--this-command)
       (setq org-index--this-command command)
@@ -876,7 +876,7 @@ Optional argument ARG is passed on."
   (let (char command (c-u-text (if arg " C-u " "")))
     (while (not char)
       (if (sit-for 1)
-          (message (concat "org-index (? for detailed prompt) -" c-u-text)))
+          (message (concat "org-index (<space> or ? for detailed prompt) -" c-u-text)))
       (setq char (key-description (read-key-sequence nil)))
       (if (string= char "C-g") (keyboard-quit))
       (if (string= char "SPC") (setq char "?"))
@@ -889,9 +889,8 @@ Optional argument ARG is passed on."
         (setq char nil)))
     (setq command (cdr (assoc char (org-index--get-shortcut-chars))))
     (unless command
-      (message "No subcommand for '%s'; switching to detailed prompt" char)
-      (sit-for 1)
-      (setq command 'short-help))
+      (when (yes-or-no-p (format "No subcommand for '%s'; switch to detailed prompt ? " char))
+        (setq command 'short-help)))
     (org-index command nil arg)))
 
 
@@ -935,7 +934,7 @@ Optional argument KEYS-VALUES specifies content of new line."
               (completing-read
                (concat
                 "Please choose"
-                (if org-index--display-short-help "" " (? for short help)")
+                (if org-index--short-help-wanted "" " (<space> or ? for short help)")
                 ": ")
                (append (mapcar 'symbol-name org-index--commands)
                        (mapcar 'upcase-initials (mapcar 'symbol-name org-index--commands)))
@@ -958,7 +957,7 @@ Optional argument KEYS-VALUES specifies content of new line."
   (local-set-key (kbd "C-u") (lambda () (interactive)
 			       (setq org-index--prefix-arg t)
 			       (message "C-u")))
-  (if org-index--display-short-help (org-index--display-short-help)))
+  (if org-index--short-help-wanted (org-index--display-short-help)))
 
 
 (defun org-index--minibuffer-exit-function ()
@@ -968,18 +967,19 @@ Optional argument KEYS-VALUES specifies content of new line."
   (setq org-index--minibuffer-saved-key nil))
 
 
-(defun org-index--display-short-help ()
-  "Helper function to show help in minibuffer."
+(defun org-index--display-short-help (&optional prompt choices)
+  "Helper function to show help for minibuffer."
   (interactive)
 
   (with-temp-buffer-window
    org-index--short-help-buffer-name nil nil
    (setq org-index--short-help-displayed t)
-   (princ "Short help; shortcuts in []; capital letter acts like C-u.\n")
-   (princ (org-index--get-short-help-text)))
+   (princ (or prompt "Short help; shortcuts in []; capital letter acts like C-u.\n"))
+   (princ (or choices (org-index--get-short-help-text))))
   (with-current-buffer org-index--short-help-buffer-name
     (let ((inhibit-read-only t))
-      (shrink-window-if-larger-than-buffer (get-buffer-window))
+      (fit-window-to-buffer (get-buffer-window))
+      (setq window-size-fixed 'height)
       (goto-char (point-min))
       (end-of-line)
       (goto-char (point-min)))))
@@ -1725,14 +1725,27 @@ Optional argument NO-INC skips automatic increment on maxref."
 
 (defun org-index--do-maintain ()
   "Choose among and perform some tasks to maintain index."
-  (let ((check-what) (max-mini-window-height 1.0) message-text)
-    (setq check-what (intern (org-completing-read "These checks and fixes are available:\n  - statistics : compute statistics about index table\n  - check      : check ids by visiting their nodes\n  - duplicates : check index for duplicate rows (ref or id)\n  - clean      : remove obsolete property org-index-id\n  - update     : update content of index lines, with an id \nPlease choose: " (list "statistics" "check" "duplicates" "clean" "update") nil t nil nil "statistics")))
+  (let ((max-mini-window-height 1.0)
+        message-text choices choices-short check-what)
+    
+    (setq choices (list "statistics : compute statistics about index table\n"
+                        "verify     : verify ids by visiting their nodes\n"
+                        "duplicates : check index for duplicate refs or ids\n"
+                        "max        : compute and check maximum ref\n"
+                        "clean      : remove obsolete property org-index-id\n"
+                        "update     : update content of index lines having an id\n"))
+
+    (org-index--display-short-help "These checks and fixes are available:\n" (apply 'concat choices))
+
+    (setq choices-short (mapcar (lambda (x) (first (split-string x))) choices))
+    (setq check-what (intern (org-completing-read "Please choose: " choices-short nil t nil nil (first choices-short))))
+    (quit-windows-on org-index--short-help-buffer-name)
+
     (message nil)
     
     (cond
-     ((eq check-what 'check)
-      (setq message-text (or (org-index--check-ids)
-                             "No problems found")))
+     ((eq check-what 'verify)
+      (setq message-text (org-index--verify-ids)))
 
      ((eq check-what 'statistics)
       (setq message-text (org-index--do-statistics)))
@@ -1753,7 +1766,10 @@ Optional argument NO-INC skips automatic increment on maxref."
      ((eq check-what 'update)
       (if (y-or-n-p "Updating your index will overwrite certain columns with content from the associated heading and category.  If unsure, you may try this for a single, already existing line of your index by invoking `add'.  Are you SURE to proceed for ALL INDEX LINES ? ")
           (setq message-text (org-index--update-all-lines))
-        (setq message-text "Canceled."))))
+        (setq message-text "Canceled")))
+
+     ((eq check-what 'max)
+      (setq message-text (org-index--check-maximum))))
     message-text))
 
 
@@ -2300,19 +2316,25 @@ Optional argument NO-ERROR suppresses error."
     (goto-char org-index--below-hline)
     (if (or ref-duplicates id-duplicates)
         (progn
-          ;; show results
           (pop-to-buffer-same-window
            (get-buffer-create "*org-index-duplicates*"))
-          (when ref-duplicates
-            (insert "These references appear more than once:\n")
-            (mapc (lambda (x) (insert "  " x "\n")) ref-duplicates)
-            (insert "\n\n"))
-          (when id-duplicates
-            (insert "These ids appear more than once:\n")
-            (mapc (lambda (x) (insert "  " x "\n")) id-duplicates))
+          (erase-buffer)
+          (insert "\n")
+          (if ref-duplicates
+              (progn
+                (insert " These references appear more than once:\n")
+                (mapc (lambda (x) (insert "   " x "\n")) ref-duplicates)
+                (insert "\n\n"))
+            (insert " No references appear more than once.\n"))
+          (if id-duplicates
+              (progn
+                (insert " These ids appear more than once:\n")
+                (mapc (lambda (x) (insert "   " x "\n")) id-duplicates))
+            (insert " No ids appear more than once."))
+          (insert "\n")
 
-          "Some references or ids are duplicates")
-      "No duplicate references or ids found")))
+          "Some references or ids are duplicate")
+        "No duplicate references or ids found")))
 
 
 (defun org-index--find-duplicates-helper (column)
@@ -2339,6 +2361,31 @@ Optional argument NO-ERROR suppresses error."
                      (setq duplicates (cons (car x) duplicates)))) counts)
     
     duplicates))
+
+
+(defun org-index--check-maximum ()
+  "Check maximum reference."
+  (let (ref-field ref-num (max 0) (max-prop))
+
+    (goto-char org-index--below-hline)
+    (setq max-prop (org-index--extract-refnum (org-entry-get org-index--point "max-ref")))
+
+    (while (org-at-table-p)
+
+      (setq ref-field (org-index--get-or-set-field 'ref))
+      (setq ref-num (if ref-field (org-index--extract-refnum ref-field) 0))
+
+      (if (> ref-num max) (setq max ref-num))
+
+      (forward-line))
+
+    (goto-char org-index--below-hline)
+    
+    (cond ((< max-prop max)
+           (format "Maximum ref from property max-ref (%d) is smaller than maximum ref from table (%d); you should correct this" max-prop max))
+          ((> max-prop max)
+           (format  "Maximum ref from property max-ref (%d) is larger than maximum ref from table (%d); you may correct this" max-prop max))
+          (t (format "Maximum ref from property max-ref and maximum ref from table are equal (%d); as expected" max-prop)))))
 
 
 (defun org-index--do-statistics ()
@@ -2455,36 +2502,28 @@ CREATE-REF and TAG-WITH-REF if given."
     ret))
 
 
-(defun org-index--check-ids ()
+(defun org-index--verify-ids ()
   "Check, that ids really point to a node."
   
-  (let ((lines 0)
-        id ids marker)
+  (let ((lines 0) (marker t) id)
     
     (goto-char org-index--below-hline)
     
-    (catch 'problem
-      (while (org-at-table-p)
-        
-        (when (setq id (org-index--get-or-set-field 'id))
-          
-          ;; check for double ids
-          (when (member id ids)
-            (org-table-goto-column (org-index--column-num 'id))
-            (throw 'problem "This id appears twice in index; please use command 'maintain' to check for duplicate ids"))
-          (cl-incf lines)
-          (setq ids (cons id ids))
-          
-          ;; check, if id is valid
-          (setq marker (org-id-find id t))
-          (unless marker
-            (org-table-goto-column (org-index--column-num 'id))
-            (throw 'problem "This id cannot be found")))
-        
-        (forward-line))
+    (while (and marker (org-at-table-p))
       
-      (goto-char org-index--below-hline)
-      nil)))
+      (when (setq id (org-index--get-or-set-field 'id))
+        
+        ;; check, if id is valid
+        (setq marker (org-id-find id t)))
+
+      (when marker (forward-line)))
+    
+    (if marker
+        (progn
+          (goto-char org-index--below-hline)
+          "All ids of index are valid")
+      (org-table-goto-column 1)
+      "The id of this row cannot be found; please fix and check again for rest of index")))
 
   
 (defun org-index--update-all-lines ()
@@ -2493,24 +2532,19 @@ CREATE-REF and TAG-WITH-REF if given."
   (let ((lines 0)
         id kvs)
     
-    ;; check for double ids
-    (or
-     (org-index--check-ids)
-
-     (progn
-       (goto-char org-index--below-hline)
-       (while (org-at-table-p)
+    (goto-char org-index--below-hline)
+    (while (org-at-table-p)
          
-         ;; update single line
-         (when (setq id (org-index--get-or-set-field 'id))
-           (setq kvs (org-index--collect-values-for-add-update-remote id))
-           (org-index--write-fields kvs)
-           (cl-incf lines))
-         (forward-line))
+      ;; update single line
+      (when (setq id (org-index--get-or-set-field 'id))
+	(setq kvs (org-index--collect-values-for-add-update-remote id))
+	(org-index--write-fields kvs)
+	(cl-incf lines))
+      (forward-line))
 
-       (goto-char org-index--below-hline)
-       (org-table-align)
-       (format "Updated %d lines" lines)))))
+    (goto-char org-index--below-hline)
+    (org-table-align)
+    (format "Updated %d lines" lines)))
 
 
 (defun org-index--collect-values-for-add-update (id &optional silent category)
