@@ -68,7 +68,7 @@ or nil if the normal value should be used."
   "Alist between operators and summarize functions.
 
 Each association follows the pattern (LABEL . SUMMARIZE),
-or (LABEL SUMMARISE COLLECT) where
+or (LABEL SUMMARIZE COLLECT) where
 
   LABEL is a string used in #+COLUMNS definition describing the
   summary type.  It can contain any character but \"}\".  It is
