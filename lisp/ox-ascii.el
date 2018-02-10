@@ -959,7 +959,7 @@ channel."
 	(t
 	 (concat
 	  (org-ascii--fill-string
-	   (format "[%s] %s" anchor (org-element-property :raw-link link))
+	   (format "[%s] <%s>" anchor (org-element-property :raw-link link))
 	   width info)
 	  "\n\n")))))
    links ""))
@@ -1602,10 +1602,10 @@ INFO is a plist holding contextual information."
 	  (_ "???"))))
      (t
       (let ((raw-link (org-element-property :raw-link link)))
-	(if (not (org-string-nw-p desc)) (format "[%s]" raw-link)
+	(if (not (org-string-nw-p desc)) (format "<%s>" raw-link)
 	  (concat (format "[%s]" desc)
 		  (and (not (plist-get info :ascii-links-to-notes))
-		       (format " (%s)" raw-link)))))))))
+		       (format " (<%s>)" raw-link)))))))))
 
 
 ;;;; Node Properties
