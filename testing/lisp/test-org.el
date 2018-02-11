@@ -1191,6 +1191,14 @@
    (equal "| a |\n\n| b |"
 	  (org-test-with-temp-text "| a |<point>\n| b |"
 	    (org-return)
+	    (buffer-string))))
+  ;; Do not auto-fill on hitting <RET> inside a property drawer.
+  (should
+   (equal "* Heading\n:PROPERTIES:\n:SOME_PROP: This is a very long property value that goes beyond the fill-column. But this is inside a property drawer, so the auto-filling should be disabled.\n\n:END:"
+	  (org-test-with-temp-text "* Heading\n:PROPERTIES:\n:SOME_PROP: This is a very long property value that goes beyond the fill-column. But this is inside a property drawer, so the auto-filling should be disabled.<point>\n:END:"
+	    (setq-local fill-column 10)
+	    (auto-fill-mode 1)
+	    (org-return)
 	    (buffer-string)))))
 
 (ert-deftest test-org/meta-return ()
