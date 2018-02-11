@@ -78,7 +78,6 @@
 (declare-function org-previous-block "org" (arg &optional block-regexp))
 (declare-function org-remove-indentation "org" (code &optional n))
 (declare-function org-reverse-string "org" (string))
-(declare-function org-set-outline-overlay-data "org" (data))
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-src-coderef-format "org-src" (&optional element))
 (declare-function org-src-coderef-regexp "org-src" (fmt &optional label))

@@ -33,7 +33,6 @@
 
 (declare-function org-defkey "org" (keymap key def))
 
-
 
 ;;; Macros
 
@@ -122,21 +121,36 @@
 
 (defmacro org-save-outline-visibility (use-markers &rest body)
   "Save and restore outline visibility around BODY.
-If USE-MARKERS is non-nil, use markers for the positions.
-This means that the buffer may change while running BODY,
-but it also means that the buffer should stay alive
-during the operation, because otherwise all these markers will
-point nowhere."
+If USE-MARKERS is non-nil, use markers for the positions.  This
+means that the buffer may change while running BODY, but it also
+means that the buffer should stay alive during the operation,
+because otherwise all these markers will point to nowhere."
   (declare (debug (form body)) (indent 1))
-  (org-with-gensyms (data)
-    `(let ((,data (org-outline-overlay-data ,use-markers)))
-       (unwind-protect
-	   (prog1 (progn ,@body)
-	     (org-set-outline-overlay-data ,data))
-	 (when ,use-markers
-	   (dolist (c ,data)
-	     (when (markerp (car c)) (move-marker (car c) nil))
-	     (when (markerp (cdr c)) (move-marker (cdr c) nil))))))))
+  (org-with-gensyms (data invisible-types markers?)
+    `(let* ((,invisible-types '(org-hide-block org-hide-drawer outline))
+	    (,markers? ,use-markers)
+	    (,data
+	     (mapcar (lambda (o)
+		       (let ((beg (overlay-start o))
+			     (end (overlay-end o))
+			     (type (overlay-get o 'invisible)))
+			 (and beg end
+			      (> end beg)
+			      (memq type ,invisible-types)
+			      (list (if ,markers? (copy-marker beg) beg)
+				    (if ,markers? (copy-marker end t) end)
+				    type))))
+		     (org-with-wide-buffer
+		      (overlays-in (point-min) (point-max))))))
+       (unwind-protect (progn ,@body)
+	 (org-with-wide-buffer
+	  (dolist (type ,invisible-types)
+	    (remove-overlays (point-min) (point-max) 'invisible type))
+	  (pcase-dolist (`(,beg ,end ,type) (delq nil ,data))
+	    (org-flag-region beg end t type)
+	    (when ,markers?
+	      (set-marker beg nil)
+	      (set-marker end nil))))))))
 
 (defmacro org-with-wide-buffer (&rest body)
   "Execute body while temporarily widening the buffer."
@@ -770,32 +784,6 @@ SPEC is the invisibility spec, as a symbol."
       (overlay-put o 'invisible spec)
       (overlay-put o 'isearch-open-invisible #'delete-overlay))))
 
-(defun org-outline-overlay-data (&optional use-markers)
-  "Return a list of the locations of all outline overlays.
-These are overlays with the `invisible' property value `outline'.
-The return value is a list of cons cells, with start and stop
-positions for each overlay.
-If USE-MARKERS is set, return the positions as markers."
-  (let (beg end)
-    (org-with-wide-buffer
-     (delq nil
-	   (mapcar (lambda (o)
-		     (when (eq (overlay-get o 'invisible) 'outline)
-		       (setq beg (overlay-start o)
-			     end (overlay-end o))
-		       (and beg end (> end beg)
-			    (if use-markers
-				(cons (copy-marker beg)
-				      (copy-marker end t))
-			      (cons beg end)))))
-		   (overlays-in (point-min) (point-max)))))))
-
-(defun org-set-outline-overlay-data (data)
-  "Create visibility overlays for all positions in DATA.
-DATA should have been made by `org-outline-overlay-data'."
-  (org-with-wide-buffer
-   (org-show-all)
-   (dolist (c data) (org-flag-region (car c) (cdr c) t 'outline))))
 
 
 ;;; Miscellaneous

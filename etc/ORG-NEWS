@@ -212,6 +212,10 @@ See docstring for details.
 See docstring for details.
 
 ** Removed functions
+*** ~org-outline-overlay-data~
+Use ~org-save-outline-visibility~ instead.
+*** ~org-set-outline-overlay-data~
+Use ~org-save-outline-visibility~ instead.
 *** ~org-get-string-indentation~
 It was not used throughout the code base.
 *** ~org-fix-indentation~
