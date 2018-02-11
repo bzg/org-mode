@@ -31,8 +31,6 @@
 
 ;;; Code:
 
-(declare-function org-defkey "org" (keymap key def))
-
 
 ;;; Macros
 
@@ -240,10 +238,10 @@ error when the user input is empty."
   (let ((enable-recursive-minibuffers t)
 	(minibuffer-local-completion-map
 	 (copy-keymap minibuffer-local-completion-map)))
-    (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
-    (org-defkey minibuffer-local-completion-map "?" 'self-insert-command)
-    (org-defkey minibuffer-local-completion-map (kbd "C-c !")
-		'org-time-stamp-inactive)
+    (define-key minibuffer-local-completion-map " " 'self-insert-command)
+    (define-key minibuffer-local-completion-map "?" 'self-insert-command)
+    (define-key minibuffer-local-completion-map (kbd "C-c !")
+      'org-time-stamp-inactive)
     (apply #'completing-read args)))
 
 
