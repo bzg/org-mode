@@ -121,6 +121,14 @@ Goes through `org-structure-template-alist' and
 			   (format "Insert a %s keyword" name)
 			   'org-tempo-tags)))
 
+(defun org-tempo-complete-tag (&rest _)
+  "Look for a tag and expand it silently.
+Unlike to `tempo-complete-tag', do not give a signal if a partial
+completion or no match at all is found.  Return nil if expansion
+didn't succeed."
+  (cl-letf (((symbol-function 'ding) #'ignore))
+    (tempo-complete-tag t)))
+
 ;;; Additional keywords
 
 (defun org-tempo--include-file ()
@@ -153,7 +161,7 @@ Goes through `org-structure-template-alist' and
 
 (add-hook 'org-mode-hook 'org-tempo-setup)
 (add-hook 'org-tab-before-tab-emulation-hook
-	  'tempo-complete-tag)
+	  'org-tempo-complete-tag)
 
 ;; Enable Org Tempo in all open Org buffers.
 (dolist (b (org-buffer-list))
