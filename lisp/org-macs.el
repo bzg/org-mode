@@ -277,6 +277,18 @@ If DELETE is non-nil, delete all those overlays."
 	    (delete (delete-overlay ov))
 	    (t (push ov found))))))
 
+(defun org-flag-region (from to flag spec)
+  "Hide or show lines from FROM to TO, according to FLAG.
+SPEC is the invisibility spec, as a symbol."
+  (remove-overlays from to 'invisible spec)
+  ;; Use `front-advance' since text right before to the beginning of
+  ;; the overlay belongs to the visible line than to the contents.
+  (when flag
+    (let ((o (make-overlay from to nil 'front-advance)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'invisible spec)
+      (overlay-put o 'isearch-open-invisible #'delete-overlay))))
+
 
 
 ;;; Indentation
@@ -766,21 +778,6 @@ Optional argument REGEXP selects variables to clone."
        (when (and (not (memq name org-unique-local-variables))
 		  (or (null regexp) (string-match-p regexp (symbol-name name))))
 	 (ignore-errors (set (make-local-variable name) value)))))))
-
-
-;;; Visibility
-
-(defun org-flag-region (from to flag spec)
-  "Hide or show lines from FROM to TO, according to FLAG.
-SPEC is the invisibility spec, as a symbol."
-  (remove-overlays from to 'invisible spec)
-  ;; Use `front-advance' since text right before to the beginning of
-  ;; the overlay belongs to the visible line than to the contents.
-  (when flag
-    (let ((o (make-overlay from to nil 'front-advance)))
-      (overlay-put o 'evaporate t)
-      (overlay-put o 'invisible spec)
-      (overlay-put o 'isearch-open-invisible #'delete-overlay))))
 
 
 
