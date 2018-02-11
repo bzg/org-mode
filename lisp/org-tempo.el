@@ -160,11 +160,10 @@ didn't succeed."
 ;; `org-structure-template-alist' must be loaded.
 
 (add-hook 'org-mode-hook 'org-tempo-setup)
-(add-hook 'org-tab-before-tab-emulation-hook
-	  'org-tempo-complete-tag)
+(add-hook 'org-tab-before-tab-emulation-hook 'org-tempo-complete-tag)
 
 ;; Enable Org Tempo in all open Org buffers.
-(dolist (b (org-buffer-list))
+(dolist (b (org-buffer-list 'files))
   (with-current-buffer b (org-tempo-setup)))
 
 (eval-after-load 'org
