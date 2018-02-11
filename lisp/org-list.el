@@ -125,7 +125,6 @@
 (declare-function org-export-get-next-element "ox" (blob info &optional n))
 (declare-function org-export-with-backend "ox" (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
-(declare-function org-flag-region "org" (from to flag spec))
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-get-todo-state "org" ())
 (declare-function org-in-block-p "org" (names))

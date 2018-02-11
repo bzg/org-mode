@@ -6608,18 +6608,6 @@ open and agenda-wise Org files."
 
 ;;; Visibility (headlines, blocks, drawers)
 
-(defun org-flag-region (from to flag spec)
-  "Hide or show lines from FROM to TO, according to FLAG.
-SPEC is the invisibility spec, as a symbol."
-  (remove-overlays from to 'invisible spec)
-  ;; Use `front-advance' since text right before to the beginning of
-  ;; the overlay belongs to the visible line than to the contents.
-  (when flag
-    (let ((o (make-overlay from to nil 'front-advance)))
-      (overlay-put o 'evaporate t)
-      (overlay-put o 'invisible spec)
-      (overlay-put o 'isearch-open-invisible #'delete-overlay))))
-
 ;;;; Headlines visibility
 
 (defun org-show-entry ()

@@ -758,6 +758,18 @@ Optional argument REGEXP selects variables to clone."
 
 ;;; Visibility
 
+(defun org-flag-region (from to flag spec)
+  "Hide or show lines from FROM to TO, according to FLAG.
+SPEC is the invisibility spec, as a symbol."
+  (remove-overlays from to 'invisible spec)
+  ;; Use `front-advance' since text right before to the beginning of
+  ;; the overlay belongs to the visible line than to the contents.
+  (when flag
+    (let ((o (make-overlay from to nil 'front-advance)))
+      (overlay-put o 'evaporate t)
+      (overlay-put o 'invisible spec)
+      (overlay-put o 'isearch-open-invisible #'delete-overlay))))
+
 (defun org-outline-overlay-data (&optional use-markers)
   "Return a list of the locations of all outline overlays.
 These are overlays with the `invisible' property value `outline'.
