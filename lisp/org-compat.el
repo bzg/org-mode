@@ -118,6 +118,12 @@ output directories whose names match REGEXP."
 	      (push (expand-file-name file dir) files)))))
       (nconc result (nreverse files)))))
 
+;; `string-collate-lessp' is new in Emacs 25.
+(defalias 'org-string-collate-lessp
+  (if (fboundp 'string-collate-lessp)
+      'string-collate-lessp
+    'string-lessp))
+
 
 ;;; Obsolete aliases (remove them after the next major release).
 

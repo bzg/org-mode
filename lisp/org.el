@@ -3558,8 +3558,8 @@ is better to limit inheritance to certain tags using the variables
   :group 'org-tags
   :type '(choice
 	  (const :tag "No sorting" nil)
-	  (const :tag "Alphabetical" string<)
-	  (const :tag "Reverse alphabetical" string>)
+	  (const :tag "Alphabetical" org-string-collate-lessp)
+	  (const :tag "Reverse alphabetical" org-string-collate-greaterp)
 	  (function :tag "Custom function" nil)))
 
 (defvar org-tags-history nil
@@ -8791,7 +8791,7 @@ function is being called interactively."
 	     (t (error "Invalid sorting type `%c'" sorting-type))))
 	  nil
 	  (cond
-	   ((= dcst ?a) 'string<)
+	   ((= dcst ?a) 'org-string-collate-lessp)
 	   ((= dcst ?f)
 	    (or compare-func
 		(and interactive?
@@ -8900,6 +8900,12 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 	       (and (memq 'item-body contexts)
 		    (org-in-item-p)))
       (goto-char pos))))
+
+;; Defined to provide a value for defcustom, since there is no
+;; string-collate-greaterp in Emacs.
+(defun org-string-collate-greaterp (s1 s2)
+  "Return non-nil if S1 is greater than S2 in collation order."
+  (not (org-string-collate-lessp s1 s2)))
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)

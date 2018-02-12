@@ -243,6 +243,11 @@ of these exporters will properly export to =irc:= links, which will
 open properly in irc clients from web browsers.
 
 *** ~org-comment-dwim~ (bound to =M-;=) now comments headings, if point is on a heading
+*** Alphabetic sorting in headings and tags now uses the locale’s sorting rules
+
+When sorting alphabetically, ~org-sort-entries~ and
+~org-tags-sort-function~ now sort according to the locale’s collation
+rules instead of by code-point.
 * Version 9.1
 
 ** Incompatible changes

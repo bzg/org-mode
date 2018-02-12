@@ -2745,6 +2745,23 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	  (org-test-with-temp-text "\n* def\n* xyz\n* abc\n"
 	    (org-sort-entries nil ?A)
 	    (buffer-string))))
+  ;; Sort alphabetically (with non-ASCII input).  Rebinds
+  ;; `string-collate-lessp' to enforce a canonical locale during
+  ;; testing.
+  (let ((original-string-collate-lessp (symbol-function 'string-collate-lessp)))
+    (cl-letf (((symbol-function 'string-collate-lessp)
+	       (lambda (s1 s2)
+		 (funcall original-string-collate-lessp s1 s2 "C"))))
+      (should
+       (equal "\n* ¥\n* §\n"
+	      (org-test-with-temp-text "\n* §\n* ¥"
+	        (org-sort-entries nil ?a)
+	        (buffer-string))))
+      (should
+       (equal "\n* §\n* ¥\n"
+	      (org-test-with-temp-text "\n* §\n* ¥"
+	        (org-sort-entries nil ?A)
+	        (buffer-string))))))
   ;; Sort numerically.
   (should
    (equal "\n* 1\n* 2\n* 10\n"
@@ -2934,6 +2951,11 @@ SCHEDULED: <2017-05-06 Sat>
 	      "\n* B\n* A\n# Local Variables:\n# foo: t\n# End:"
 	    (org-sort-entries nil ?a)
 	    (buffer-string)))))
+
+(ert-deftest test-org/string-collate-greaterp ()
+  "Test `org-string-collate-greaterp' specifications."
+  (should (org-string-collate-greaterp "def" "abc"))
+  (should-not (org-string-collate-greaterp "abc" "def")))
 
 (ert-deftest test-org/file-contents ()
   "Test `org-file-contents' specifications."
