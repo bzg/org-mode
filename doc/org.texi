@@ -2278,17 +2278,6 @@ format used by Orgtbl radio tables, see @ref{Translator functions}, for a
 detailed description.
 @end table
 
-If you don't like the automatic table editor because it gets in your
-way on lines which you would like to start with @samp{|}, you can turn
-it off with
-
-@lisp
-(setq org-enable-table-editor nil)
-@end lisp
-
-@noindent Then the only table command that still works is
-@kbd{C-c C-c} to do a manual re-align.
-
 @node Column width and alignment
 @section Column width and alignment
 @cindex narrow columns in tables
