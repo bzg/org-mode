@@ -87,43 +87,6 @@
 	  (and (memq system-type '(windows-nt ms-dos))
 	       (= lastc ?\\))))))
 
-(unless (fboundp 'directory-files-recursively)
-  (defun directory-files-recursively (dir regexp &optional include-directories)
-    "Return list of all files under DIR that have file names matching REGEXP.
-This function works recursively.  Files are returned in \"depth first\"
-order, and files from each directory are sorted in alphabetical order.
-Each file name appears in the returned list in its absolute form.
-Optional argument INCLUDE-DIRECTORIES non-nil means also include in the
-output directories whose names match REGEXP."
-    (let ((result nil)
-	  (files nil)
-	  ;; When DIR is "/", remote file names like "/method:" could
-	  ;; also be offered.  We shall suppress them.
-	  (tramp-mode (and tramp-mode (file-remote-p (expand-file-name dir)))))
-      (dolist (file (sort (file-name-all-completions "" dir)
-			  'string<))
-	(unless (member file '("./" "../"))
-	  (if (directory-name-p file)
-	      (let* ((leaf (substring file 0 (1- (length file))))
-		     (full-file (expand-file-name leaf dir)))
-		;; Don't follow symlinks to other directories.
-		(unless (file-symlink-p full-file)
-		  (setq result
-			(nconc result (directory-files-recursively
-				       full-file regexp include-directories))))
-		(when (and include-directories
-			   (string-match regexp leaf))
-		  (setq result (nconc result (list full-file)))))
-	    (when (string-match regexp file)
-	      (push (expand-file-name file dir) files)))))
-      (nconc result (nreverse files)))))
-
-;; `string-collate-lessp' is new in Emacs 25.
-(defalias 'org-string-collate-lessp
-  (if (fboundp 'string-collate-lessp)
-      'string-collate-lessp
-    'string-lessp))
-
 
 ;;; Obsolete aliases (remove them after the next major release).
 
