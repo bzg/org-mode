@@ -87,6 +87,12 @@
 	  (and (memq system-type '(windows-nt ms-dos))
 	       (= lastc ?\\))))))
 
+;; `string-collate-lessp' is new in Emacs 25.
+(defalias 'org-string-collate-lessp
+  (if (fboundp 'string-collate-lessp)
+      'string-collate-lessp
+    'string-lessp))
+
 
 ;;; Obsolete aliases (remove them after the next major release).
 
