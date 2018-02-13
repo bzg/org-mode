@@ -352,7 +352,8 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 		 (file (expand-file-name "a.org" base))
 		 (org-publish-project-alist
 		  `(("p1" :base-directory "/other/")
-		    ("p2" :base-directory ,base))))
+		    ("p2" :base-directory ,base)
+		    ("p3" :base-directory ,base))))
 	    (car (org-publish-get-project-from-filename file)))))
   ;; When :recursive in non-nil, allow files in sub-directories.
   (should
@@ -364,6 +365,19 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
   (should-not
    (let* ((base (expand-file-name "examples/pub/" org-test-dir))
 	  (file (expand-file-name "sub/c.org" base))
+	  (org-publish-project-alist
+	   `(("p" :base-directory ,base :recursive nil))))
+     (org-publish-get-project-from-filename file)))
+  ;; Also, when :recursive is non-nil, follow symlinks to directories.
+  (should
+   (let* ((base (expand-file-name "examples/pub/" org-test-dir))
+	  (file (expand-file-name "link/link.org" base))
+	  (org-publish-project-alist
+	   `(("p" :base-directory ,base :recursive t))))
+     (org-publish-get-project-from-filename file)))
+  (should-not
+   (let* ((base (expand-file-name "examples/pub/" org-test-dir))
+	  (file (expand-file-name "link/link.org" base))
 	  (org-publish-project-alist
 	   `(("p" :base-directory ,base :recursive nil))))
      (org-publish-get-project-from-filename file)))
@@ -401,7 +415,6 @@ Unless set otherwise in PROPERTIES, `:base-directory' is set to
 	  (org-publish-project-alist
 	   `(("p" :base-directory ,base :recursive t :base-extension any))))
      (org-publish-get-base-files (org-publish-get-project-from-filename file))))
-
   ;; Check :exclude property.
   (should-not
    (let* ((base (expand-file-name "examples/pub/" org-test-dir))
