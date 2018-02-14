@@ -2591,7 +2591,45 @@ See also `test-org-table/copy-field'."
 	    (org-table-toggle-column-width)
 	    (org-table-get-field nil "b")
 	    (mapcar (lambda (o) (overlay-get o 'help-echo))
-		    (overlays-in (point-min) (point-max)))))))
+		    (overlays-in (point-min) (point-max))))))
+  ;; Moving to next field doesn't change shrunk state.
+  (should
+   (equal "a"
+	  (org-test-with-temp-text "| <point>a | b |"
+	    (org-table-toggle-column-width)
+	    (org-table-next-field)
+	    (overlay-get (car (overlays-at (1+ (line-beginning-position))))
+			 'help-echo))))
+  (should
+   (equal "b"
+	  (org-test-with-temp-text "| a | <point>b |"
+	    (org-table-toggle-column-width)
+	    (goto-char 2)
+	    (org-table-next-field)
+	    (overlay-get (car (overlays-at (point))) 'help-echo))))
+  ;; Aligning table doesn't alter shrunk state.
+  (should
+   (equal "a"
+	  (org-test-with-temp-text "| <point>a | b   |"
+	    (org-table-toggle-column-width)
+	    (org-table-align)
+	    (overlay-get (car (overlays-at (1+ (line-beginning-position))))
+			 'help-echo))))
+  (should
+   (equal "b"
+	  (org-test-with-temp-text "|---+-----|\n| a | <point>b   |"
+	    (org-table-toggle-column-width)
+	    (org-table-align)
+	    (overlay-get (car (overlays-at (point)))
+			 'help-echo))))
+  (should
+   (equal
+    '("b")
+    (org-test-with-temp-text "|---+-----|\n| a | <point>b   |"
+      (org-table-toggle-column-width)
+      (org-table-align)
+      (mapcar (lambda (o) (overlay-get o 'help-echo))
+	      (overlays-in (line-beginning-position) (line-end-position)))))))
 
 
 

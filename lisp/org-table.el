@@ -3842,7 +3842,9 @@ When non-nil, return the overlay narrowing the field."
 	     (and (eq 'table-column-hide (overlay-get o 'org-overlay-type))
 		  o))
 	   (overlays-at (save-excursion
-			  (skip-chars-forward "^|" (line-end-position))
+			  (skip-chars-forward (if (org-at-table-hline-p) "^+|"
+						"^|")
+					      (line-end-position))
 			  (1- (point))))))
 
 (defun org-table--list-shrunk-columns ()
