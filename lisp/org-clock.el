@@ -2023,27 +2023,32 @@ fontified, and then returned."
 
 ;;;###autoload
 (defun org-clock-report (&optional arg)
-  "Create a table containing a report about clocked time.
-If the cursor is inside an existing clocktable block, then the table
-will be updated.  If not, a new clocktable will be inserted.  The scope
-of the new clock will be subtree when called from within a subtree, and
-file elsewhere.
+  "Update or create a table containing a report about clocked time.
 
-When called with a prefix argument, move to the first clock table in the
-buffer and update it."
+If point is inside an existing clocktable block, update it.
+Otherwise, insert a new one.
+
+The new table inherits its properties from the variable
+`org-clock-clocktable-default-properties'.  The scope of the
+clocktable, when not specified in the previous variable, is
+`subtree' when the function is called from within a subtree, and
+`file' elsewhere.
+
+When called with a prefix argument, move to the first clock table
+in the buffer and update it."
   (interactive "P")
   (org-clock-remove-overlays)
   (when arg
     (org-find-dblock "clocktable")
     (org-show-entry))
-  (if (org-in-clocktable-p)
-      (goto-char (org-in-clocktable-p))
-    (let ((props (if (ignore-errors
-		       (save-excursion (org-back-to-heading)))
-		     (list :name "clocktable" :scope 'subtree)
-		   (list :name "clocktable"))))
-      (org-create-dblock
-       (org-combine-plists org-clock-clocktable-default-properties props))))
+  (pcase (org-in-clocktable-p)
+    (`nil
+     (org-create-dblock
+      (org-combine-plists
+       (list :scope (if (org-before-first-heading-p) 'file 'subtree))
+       org-clock-clocktable-default-properties
+       '(:name "clocktable"))))
+    (start (goto-char start)))
   (org-update-dblock))
 
 (defun org-day-of-week (day month year)
