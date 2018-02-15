@@ -1,2 +1,1 @@
-# Time-stamp: <2018-02-13 10:12:03 ngz>
-symlink
+Symlink

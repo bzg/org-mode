@@ -575,7 +575,7 @@ Return output file name."
 	       `(:crossrefs
 		 ,(org-publish-cache-get-file-property
 		   ;; Normalize file names in cache.
-		   (expand-file-name filename) :crossrefs nil t)
+		   (file-truename filename) :crossrefs nil t)
 		 :filter-final-output
 		 (org-publish--store-crossrefs
 		  org-publish-collect-index
@@ -1027,7 +1027,7 @@ PARENT is a reference to the headline, if any, containing the
 original index keyword.  When non-nil, this reference is a cons
 cell.  Its CAR is a symbol among `id', `custom-id' and `name' and
 its CDR is a string."
-  (let ((file (expand-file-name (plist-get info :input-file))))
+  (let ((file (file-truename (plist-get info :input-file))))
     (org-publish-cache-set-file-property
      file :index
      (delete-dups
@@ -1136,7 +1136,7 @@ a plist.
 This function is meant to be used as a final output filter.  See
 `org-publish-org-to'."
   (org-publish-cache-set-file-property
-   (expand-file-name (plist-get info :input-file))
+   (file-truename (plist-get info :input-file))
    :crossrefs
    ;; Update `:crossrefs' so as to remove unused references and search
    ;; cells.  Actually used references are extracted from
@@ -1181,7 +1181,7 @@ references with `org-export-get-reference'."
 	       file)
       "MissingReference"))
    (t
-    (let* ((filename (expand-file-name file))
+    (let* ((filename (file-truename file))
 	   (crossrefs
 	    (org-publish-cache-get-file-property filename :crossrefs nil t))
 	   (cells
