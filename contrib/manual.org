@@ -6546,8 +6546,8 @@ formatted as one or several Org tables.
      report as an Org mode table into the current file.  When the
      cursor is at an existing clock table, just update it.  When
      called with a prefix argument, jump to the first clock report in
-     the current document and update it.  The clock table always
-     includes also trees with =ARCHIVE= tag.
+     the current document and update it.  The clock table includes
+     archived trees.
 
 - {{{kbd(C-c C-c)}}} or {{{kbd(C-c C-x C-u)}}} (~org-dblock-update~) ::
 
@@ -8147,6 +8147,7 @@ added.
 :DESCRIPTION: Switch off a tree but keep it in the file.
 :END:
 
+#+cindex: ARCHIVE, tag
 If you want to just switch off---for agenda views---certain subtrees
 without moving them to a different file, you can use the =ARCHIVE=
 tag.
