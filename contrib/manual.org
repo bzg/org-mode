@@ -19002,7 +19002,7 @@ packages are documented here.
           Edit a =table.el= table.  Works when the cursor is in
           a =table.el= table.
 
-     - {{{kbd(C-c ~ )}}} (~org-table-create-with-table.el~) ::
+     - {{{kbd(C-c ~​)}}} (~org-table-create-with-table.el~) ::
 
           #+kindex: C-c ~
           #+findex: org-table-create-with-table.el
