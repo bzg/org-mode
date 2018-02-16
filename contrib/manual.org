@@ -20344,7 +20344,7 @@ Before I get to this list, a few special mentions are in order:
 
 - Eric Schulte and Dan Davison ::
 
-     Eric and Dan are jointly responsible for the Org-babel system,
+     Eric and Dan are jointly responsible for the Org Babel system,
      which turns Org into a multi-language environment for evaluating
      code and doing literate programming and reproducible research.
      This has become one of Org's killer features that define what Org
