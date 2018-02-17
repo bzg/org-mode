@@ -175,17 +175,17 @@ time to check the list.
 #+findex: org-capture
 #+findex: org-store-link
 #+findex: org-iswitchb
-For a better experience, the four Org commands ~org-store-link~,
-~org-capture~, ~org-agenda~, and ~org-iswitchb~ ought to be accessible
-through global keys---i.e., anywhere in Emacs, not just in Org
-buffers.  Here are suggested bindings for these keys, please modify
-the keys to your own liking.
+For a better experience, the three Org commands ~org-store-link~,
+~org-capture~ and ~org-agenda~ ought to be accessible anywhere in
+Emacs, not just in Org buffers.  To that effect, you need to bind them
+to globally available keys, like the ones reserved for users (see
+[[info:elisp::Key%20Binding%20Conventions]]).  Here are suggested
+bindings, please modify the keys to your own liking.
 
 #+begin_src emacs-lisp
   (global-set-key "\C-cl" 'org-store-link)
   (global-set-key "\C-ca" 'org-agenda)
   (global-set-key "\C-cc" 'org-capture)
-  (global-set-key "\C-cb" 'org-iswitchb)
 #+end_src
 
 #+cindex: Org mode, turning on
@@ -355,16 +355,8 @@ conventions:
 :UNNUMBERED: notoc
 :END:
 
-#+kindex: C-c a
-#+kindex: C-c c
-The manual suggests a few global key bindings, in particular
-{{{kbd(C-c a)}}} for ~org-agenda~ and {{{kbd(C-c c)}}} for
-~org-capture~.  These are only suggestions, but the rest of the manual
-assumes that these key bindings are in place in order to list commands
-by key access.
-
-Also, the manual lists both the keys and the corresponding commands
-for accessing a functionality.  Org mode often uses the same key for
+The manual lists both the keys and the corresponding commands for
+accessing a functionality.  Org mode often uses the same key for
 different functions, depending on context.  The command that is bound
 to such keys has a generic name, like ~org-metaright~.  In the manual
 we will, wherever possible, give the function that is internally
@@ -983,8 +975,8 @@ For example:
 #+end_src
 
 #+texinfo: @noindent
-defines the key {{{kbd(C-c a f)}}} as a shortcut for creating a sparse
-tree matching the string =FIXME=.
+defines the key {{{kbd(f)}}} as a shortcut for creating a sparse tree
+matching the string =FIXME=.
 
 The other sparse tree commands select headings based on TODO keywords,
 tags, or properties and are discussed later in this manual.
@@ -8381,42 +8373,35 @@ the Speedbar frame:
 #+cindex: agenda dispatcher
 #+cindex: dispatching agenda commands
 
-The views are created through a dispatcher, which should be bound to
-a global key---for example {{{kbd(C-c a)}}} (see [[*Activation]]).  In
-the following we will assume that {{{kbd(C-c a)}}} is indeed how the
-dispatcher is accessed and list keyboard access to commands
-accordingly.  After pressing {{{kbd(C-c a)}}}, an additional letter is
-required to execute a command.  The dispatcher offers the following
-default commands:
+The views are created through a dispatcher, accessible with {{{kbd(M-x
+org-agenda)}}}, or, better, bound to a global key (see [[*Activation]]).
+It displays a menu from which an additional letter is required to
+execute a command.  The dispatcher offers the following default
+commands:
 
 - {{{kbd(a)}}} ::
 
-     #+kindex: C-c a a
      Create the calendar-like agenda (see [[*Weekly/daily agenda]]).
 
 - {{{kbd(t)}}} or {{{kbd(T)}}} ::
 
-     #+kindex: C-c a t
-     #+kindex: C-c a T
      Create a list of all TODO items (see [[*The global TODO list]]).
 
 - {{{kbd(m)}}} or {{{kbd(M)}}} ::
 
-     #+kindex: C-c a m
-     #+kindex: C-c a M
      Create a list of headlines matching a given expression (see
      [[*Matching tags and properties]]).
 
 - {{{kbd(s)}}} ::
 
-     #+kindex: C-c a s
+     #+kindex: s @r{(Agenda dispatcher)}
      Create a list of entries selected by a boolean expression of
      keywords and/or regular expressions that must or must not occur
      in the entry.
 
 - {{{kbd(/)}}} ::
 
-     #+kindex: C-c a /
+     #+kindex: / @r{(Agenda dispatcher)}
      #+vindex: org-agenda-text-search-extra-files
      Search for a regular expression in all agenda files and
      additionally in the files listed in
@@ -8427,20 +8412,18 @@ default commands:
 
 - {{{kbd(#)}}} or {{{kbd(!)}}} ::
 
-     #+kindex: C-c a #
-     #+kindex: C-c a !
      Create a list of stuck projects (see [[*Stuck projects]]).
 
 - {{{kbd(<)}}} ::
 
-     #+kindex: C-c a <
+     #+kindex: < @r{(Agenda dispatcher)}
      Restrict an agenda command to the current buffer[fn:90].  After
      pressing {{{kbd(<)}}}, you still need to press the character
      selecting the command.
 
 - {{{kbd(< <)}}} ::
 
-     #+kindex: C-c a < <
+     #+kindex: < < @r{(Agenda dispatcher)}
      If there is an active region, restrict the following agenda
      command to the region.  Otherwise, restrict it to the current
      subtree[fn:91].  After pressing {{{kbd(< <)}}}, you still need to
@@ -8448,7 +8431,7 @@ default commands:
 
 - {{{kbd(*)}}} ::
 
-     #+kindex: C-c a *
+     #+kindex: * @r{(Agenda dispatcher)}
      #+vindex: org-agenda-sticky
      #+findex: org-toggle-sticky-agenda
      Toggle sticky agenda views.  By default, Org maintains only
@@ -8487,15 +8470,15 @@ In this section we describe the built-in views.
 The purpose of the weekly/daily /agenda/ is to act like a page of
 a paper agenda, showing all the tasks for the current week or day.
 
-- {{{kbd(C-c a a)}}} (~org-agenda-list~) ::
+- {{{kbd(M-x org-agenda a)}}} (~org-agenda-list~) ::
 
-     #+kindex: C-c a a
+     #+kindex: a @r{(Agenda dispatcher)}
      #+findex: org-agenda-list
      #+cindex: org-agenda, command
      Compile an agenda for the current week from a list of Org files.
-     The agenda shows the entries for each day.  With a numeric
-     prefix[fn:92] (like {{{kbd(C-u 2 1 C-c a a)}}}) you may set the
-     number of days to be displayed.
+     The agenda shows the entries for each day.  With a numeric prefix
+     argument[fn:92]---like {{{kbd(C-u 2 1 M-x org-agenda a)}}}---you
+     may set the number of days to be displayed.
 
 #+vindex: org-agenda-span
 #+vindex: org-agenda-start-day
@@ -8659,9 +8642,9 @@ for details.
 The global TODO list contains all unfinished TODO items formatted and
 collected into a single place.
 
-- {{{kbd(C-c a t)}}} (~org-todo-list~) ::
+- {{{kbd(M-x org-agenda t)}}} (~org-todo-list~) ::
 
-     #+kindex: C-c a t
+     #+kindex: t @r{(Agenda dispatcher)}
      #+findex: org-todo-list
      Show the global TODO list.  This collects the TODO items from all
      agenda files (see [[*Agenda Views]]) into a single buffer.  By
@@ -8670,16 +8653,16 @@ collected into a single place.
      and manipulate the TODO entries directly from that buffer (see
      [[*Commands in the Agenda Buffer]]).
 
-- {{{kbd(C-c a T)}}} (~org-todo-list~) ::
+- {{{kbd(M-x org-agenda T)}}} (~org-todo-list~) ::
 
-     #+kindex: C-c a T
+     #+kindex: T @r{(Agenda dispatcher)}
      #+findex: org-todo-list
      #+cindex: TODO keyword matching
      #+vindex: org-todo-keywords
      Like the above, but allows selection of a specific TODO keyword.
      You can also do this by specifying a prefix argument to
-     {{{kbd(C-c a t)}}}.  You are prompted for a keyword, and you may
-     also specify several keywords by separating them with =|= as the
+     {{{kbd(t)}}}.  You are prompted for a keyword, and you may also
+     specify several keywords by separating them with =|= as the
      boolean OR operator.  With a numeric prefix, the Nth keyword in
      ~org-todo-keywords~ is selected.
 
@@ -8738,9 +8721,9 @@ headlines based on this metadata and collect them into an agenda
 buffer.  The match syntax described here also applies when creating
 sparse trees with {{{kbd(C-c / m)}}}.
 
-- {{{kbd(C-c a m)}}} (~org-tags-view~) ::
+- {{{kbd(M-x org-agenda m)}}} (~org-tags-view~) ::
 
-     #+kindex: C-c a m
+     #+kindex: m @r{(Agenda dispatcher)}
      #+findex: org-tags-view
      Produce a list of all headlines that match a given set of tags.
      The command prompts for a selection criterion, which is a boolean
@@ -8748,14 +8731,14 @@ sparse trees with {{{kbd(C-c / m)}}}.
      =work|home= (see [[*Tags]]).  If you often need a specific search,
      define a custom command for it (see [[*The Agenda Dispatcher]]).
 
-- {{{kbd(C-c a M)}}} (~org-tags-view~) ::
+- {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
-     #+kindex: C-c a M
+     #+kindex: M @r{(Agenda dispatcher)}
      #+findex: org-tags-view
      #+vindex: org-tags-match-list-sublevels
      #+vindex: org-agenda-tags-todo-honor-ignore-options
-     Like {{{kbd(C-c a m)}}}, but only select headlines that are also
-     TODO items and force checking subitems (see the variable
+     Like {{{kbd(m)}}}, but only select headlines that are also TODO
+     items and force checking subitems (see the variable
      ~org-tags-match-list-sublevels~).  To exclude scheduled/deadline
      items, see the variable
      ~org-agenda-tags-todo-honor-ignore-options~.  Matching specific
@@ -8879,10 +8862,10 @@ for tags, but should be applied with care: for example, a positive
 selection on several TODO keywords cannot meaningfully be combined
 with boolean AND.  However, /negative selection/ combined with AND can
 be meaningful.  To make sure that only lines are checked that actually
-have any TODO keyword (resulting in a speed-up), use {{{kbd(C-c
-a M)}}}, or equivalently start the TODO part after the slash with =!=.
-Using {{{kbd(C-c a M)}}} or =/!= does not match TODO keywords in
-a DONE state.  Examples:
+have any TODO keyword (resulting in a speed-up), use {{{kbd(M-x
+org-agenda M)}}}, or equivalently start the TODO part after the slash
+with =!=.  Using {{{kbd(M-x org-agenda M)}}} or =/!= does not match
+TODO keywords in a DONE state.  Examples:
 
 - =work/WAITING= ::
 
@@ -8909,9 +8892,9 @@ a DONE state.  Examples:
 This agenda view is a general text search facility for Org mode
 entries.  It is particularly useful to find notes.
 
-- {{{kbd(C-c a s)}}} (~org-search-view~) ::
+- {{{kbd(M-x org-agenda s)}}} (~org-search-view~) ::
 
-     #+kindex: C-c a s
+     #+kindex: s @r{(Agenda dispatcher)}
      #+findex: org-search-view
      This is a special search that lets you select entries by matching
      a substring or specific words using a boolean logic.
@@ -8955,15 +8938,15 @@ no defined next actions, so it never shows up in the TODO lists Org
 mode produces.  During the review, you need to identify such projects
 and define next actions for them.
 
-- {{{kbd(C-c a #)}}} (~org-agenda-list-stuck-projects~) ::
+- {{{kbd(M-x org-agenda #)}}} (~org-agenda-list-stuck-projects~) ::
 
-     #+kindex: C-c a #
+     #+kindex: # @r{(Agenda dispatcher)}
      #+findex: org-agenda-list-stuck-projects
      List projects that are stuck.
 
-- {{{kbd(C-c a !)}}} ::
+- {{{kbd(M-x org-agenda !)}}} ::
 
-     #+kindex: C-c a !
+     #+kindex: ! @r{(Agenda dispatcher)}
      #+vindex: org-stuck-projects
      Customize the variable ~org-stuck-projects~ to define what
      a stuck project is and how to find it.
@@ -10162,7 +10145,7 @@ shortcuts for frequently used searches, either creating an agenda
 buffer, or a sparse tree (the latter covering of course only the
 current buffer).
 
-#+kindex: C-c a C
+#+kindex: C @r{(Agenda dispatcher)}
 #+vindex: org-agenda-custom-commands
 #+cindex: agenda views, main example
 #+cindex: agenda, as an agenda views
@@ -10175,9 +10158,10 @@ current buffer).
 #+cindex: tags-tree
 Custom commands are configured in the variable
 ~org-agenda-custom-commands~.  You can customize this variable, for
-example by pressing {{{kbd(C-c a C)}}}.  You can also directly set it
-with Emacs Lisp in the Emacs init file.  The following example
-contains all valid agenda views:
+example by pressing {{{kbd(C)}}} from the agenda dispatcher (see [[*The
+Agenda Dispatcher]]).  You can also directly set it with Emacs Lisp in
+the Emacs init file.  The following example contains all valid agenda
+views:
 
 #+begin_src emacs-lisp
   (setq org-agenda-custom-commands
@@ -10197,55 +10181,55 @@ contains all valid agenda views:
 
 #+texinfo: @noindent
 The initial string in each entry defines the keys you have to press
-after the dispatcher command {{{kbd(C-c a)}}} in order to access the
-command.  Usually this will be just a single character, but if you
-have many similar commands, you can also define two-letter
-combinations where the first character is the same in several
-combinations and serves as a prefix key[fn:98].  The second parameter
-is the search type, followed by the string or regular expression to be
-used for the matching.  The example above will therefore define:
+after the dispatcher command in order to access the command.  Usually
+this will be just a single character, but if you have many similar
+commands, you can also define two-letter combinations where the first
+character is the same in several combinations and serves as a prefix
+key[fn:98].  The second parameter is the search type, followed by the
+string or regular expression to be used for the matching.  The example
+above will therefore define:
 
-- {{{kbd(C-c a x)}}} ::
+- {{{kbd(x)}}} ::
 
      as a global search for agenda entries planned[fn:99] this
      week/day.
 
-- {{{kbd(C-c a y)}}} ::
+- {{{kbd(y)}}} ::
 
      as the same search, but only for entries with an hour
      specification like =[h]h:mm=---think of them as appointments.
 
-- {{{kbd(C-c a w)}}} ::
+- {{{kbd(w)}}} ::
 
      as a global search for TODO entries with =WAITING= as the TODO
      keyword.
 
-- {{{kbd(C-c a W)}}} ::
+- {{{kbd(W)}}} ::
 
      as the same search, but only in the current buffer and displaying
      the results as a sparse tree.
 
-- {{{kbd(C-c a u)}}} ::
+- {{{kbd(u)}}} ::
 
      as a global tags search for headlines tagged =boss= but not
      =urgent=.
 
-- {{{kbd(C-c a v)}}} ::
+- {{{kbd(v)}}} ::
 
      The same search, but limiting it to headlines that are also TODO
      items.
 
-- {{{kbd(C-c a U)}}} ::
+- {{{kbd(U)}}} ::
 
      as the same search, but only in the current buffer and displaying
      the result as a sparse tree.
 
-- {{{kbd(C-c a f)}}} ::
+- {{{kbd(f)}}} ::
 
      to create a sparse tree (again, current buffer only) with all
      entries containing the word =FIXME=.
 
-- {{{kbd(C-c a h)}}} ::
+- {{{kbd(h)}}} ::
 
      as a prefix command for a =HOME= tags search where you have to
      press an additional key ({{{kbd(l)}}}, {{{kbd(p)}}} or
@@ -10254,6 +10238,7 @@ used for the matching.  The example above will therefore define:
 
 Note that ~*-tree~ agenda views need to be called from an Org buffer
 as they operate on the current buffer only.
+
 *** Block agenda
 :PROPERTIES:
 :DESCRIPTION: All the stuff you need in a single buffer.
@@ -10264,10 +10249,10 @@ as they operate on the current buffer only.
 Another possibility is the construction of agenda views that comprise
 the results of /several/ commands, each of which creates a block in
 the agenda buffer.  The available commands include ~agenda~ for the
-daily or weekly agenda (as created with {{{kbd(C-c a a)}}}), ~alltodo~
-for the global TODO list (as constructed with {{{kbd(C-c a t)}}}), and
-the matching commands discussed above: ~todo~, ~tags~, and
-~tags-todo~.  Here are two examples:
+daily or weekly agenda (as created with {{{kbd(a)}}}) , ~alltodo~ for
+the global TODO list (as constructed with {{{kbd(t)}}}), and the
+matching commands discussed above: ~todo~, ~tags~, and ~tags-todo~.
+Here are two examples:
 
 #+begin_src emacs-lisp
   (setq org-agenda-custom-commands
@@ -10282,11 +10267,11 @@ the matching commands discussed above: ~todo~, ~tags~, and
 #+end_src
 
 #+texinfo: @noindent
-This defines {{{kbd(C-c a h)}}} to create a multi-block view for stuff
-you need to attend to at home.  The resulting agenda buffer contains
-your agenda for the current week, all TODO items that carry the tag
-=home=, and also all lines tagged with =garden=.  Finally the command
-{{{kbd(C-c a o)}}} provides a similar view for office tasks.
+This defines {{{kbd(h)}}} to create a multi-block view for stuff you
+need to attend to at home.  The resulting agenda buffer contains your
+agenda for the current week, all TODO items that carry the tag =home=,
+and also all lines tagged with =garden=.  Finally the command
+{{{kbd(o)}}} provides a similar view for office tasks.
 
 *** Setting options for custom commands
 :PROPERTIES:
@@ -10316,13 +10301,13 @@ at the right spot in ~org-agenda-custom-commands~.  For example:
 #+end_src
 
 #+texinfo: @noindent
-Now the {{{kbd(C-c a w)}}} command sorts the collected entries only by
+Now the {{{kbd(w)}}} command sorts the collected entries only by
 priority, and the prefix format is modified to just say =Mixed:=
 instead of giving the category of the entry.  The sparse tags tree of
-{{{kbd(C-c a U)}}} now turns out ultra-compact, because neither the
-headline hierarchy above the match, nor the headline following the
-match are shown.  The command {{{kbd(C-c a N)}}} does a text search
-limited to only a single file.
+{{{kbd(U)}}} now turns out ultra-compact, because neither the headline
+hierarchy above the match, nor the headline following the match are
+shown.  The command {{{kbd(N)}}} does a text search limited to only
+a single file.
 
 For command sets creating a block agenda, ~org-agenda-custom-commands~
 has two separate spots for setting options.  You can add options that
@@ -10330,7 +10315,7 @@ should be valid for just a single command in the set, and options that
 should be valid for all commands in the set.  The former are just
 added to the command entry; the latter must come after the list of
 command entries.  Going back to the block agenda example (see [[*Block
-agenda]]), let's change the sorting strategy for the {{{kbd(C-c a h)}}}
+agenda]]), let's change the sorting strategy for the {{{kbd(h)}}}
 commands to ~priority-down~, but let's sort the results for GARDEN
 tags query in the opposite order, ~priority-up~.  This would look like
 this:
@@ -10441,11 +10426,10 @@ commands interactively because this might use too much overhead.
 Instead, there is a special command to produce /all/ specified
 files in one step:
 
-#+attr_texinfo: :table-type table :indic @asis
-- {{{kbd(C-c a e)}}} (~org-store-agenda-views~) ::
-     #+kindex: C-c a e
-     #+findex: org-store-agenda-views
+- {{{kbd(e)}}} (~org-store-agenda-views~) ::
 
+     #+kindex: e @r{(Agenda dispatcher)}
+     #+findex: org-store-agenda-views
      Export all agenda views that have export file names associated
      with them.
 
@@ -19832,7 +19816,7 @@ processing or printing.
 standard output.  This command takes one string parameter.  When
 string consists of a single character, Org uses it as a key to
 ~org-agenda-custom-commands~.  These are the same ones available
-through {{{kbd(C-c a)}}}.
+through the agenda dispatcher (see [[*The Agenda Dispatcher]]).
 
 This example command line directly prints the TODO list to the printer:
 
@@ -20287,11 +20271,12 @@ Org integrates its data in an inbox file format.
         note from the property drawer; third, it signals that manual
         editing of the flagged entry is now finished.
 
-#+kindex: C-c a ?
-{{{kbd(C-c a ?)}}} returns to the agenda view to finish processing
-flagged entries.  Note that these entries may not be the most recent
-since MobileOrg searches files that were last pulled.  To get an
-updated agenda view with changes since the last pull, pull again.
+#+kindex: ? @r{(Agenda dispatcher)}
+From the agenda dispatcher, {{{kbd(?)}}} returns to the view to finish
+processing flagged entries.  Note that these entries may not be the
+most recent since MobileOrg searches files that were last pulled.  To
+get an updated agenda view with changes since the last pull, pull
+again.
 
 * History and Acknowledgments
 :PROPERTIES:
@@ -21107,7 +21092,7 @@ restrict to the current buffer.
 [fn:91] For backward compatibility, you can also press {{{kbd(0)}}} to
 restrict to the current region/subtree.
 
-[fn:92] For backward compatibility, the universal prefix
+[fn:92] For backward compatibility, the universal prefix argument
 {{{kbd(C-u)}}} causes all TODO entries to be listed before the agenda.
 This feature is deprecated, use the dedicated TODO list, or a block
 agenda instead (see [[*Block agenda]]).
