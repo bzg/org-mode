@@ -102,10 +102,8 @@ visited, i.e., where no Org built-in function have been loaded.
 Otherwise autoload Org functions will mess up the installation.
 #+end_quote
 
-Then, to make sure your Org configuration is taken into account,
-initialize the package system with =(package-initialize)= in your
-Emacs init file before setting any Org option.  If you want to use
-Org's package repository, check out the [[https://orgmode.org/elpa.html][Org ELPA page]].
+If you want to use Org's package repository, check out the [[https://orgmode.org/elpa.html][Org ELPA
+page]].
 
 *** Downloading Org as an archive
 :PROPERTIES:
