@@ -3258,80 +3258,80 @@ the end of the link, enclose them in square or angular brackets.
 Org provides methods to create a link in the correct syntax, to insert
 it into an Org file, and to follow the link.
 
+#+findex: org-store-link
+#+cindex: storing links
+The main function is ~org-store-link~, called with {{{kbd(M-x
+org-store-link)}}}.  Because of its importance, we suggest to bind it
+to a widely available key (see [[*Activation]]).  It stores a link to the
+current location.  The link is stored for later insertion into an Org
+buffer---see below.  What kind of link is created depends on the
+current buffer:
+
+- /Org mode buffers/ ::
+
+     For Org files, if there is a =<<target>>= at the cursor, the link
+     points to the target.  Otherwise it points to the current
+     headline, which is also the description[fn:28].
+
+     #+vindex: org-link-to-org-use-id
+     #+cindex: CUSTOM_ID, property
+     #+cindex: ID, property
+     If the headline has a =CUSTOM_ID= property, store a link to this
+     custom ID.  In addition or alternatively, depending on the value
+     of ~org-link-to-org-use-id~, create and/or use a globally unique
+     ID property for the link[fn:29].  So using this command in Org
+     buffers potentially creates two links: a human-readable link from
+     the custom ID, and one that is globally unique and works even if
+     the entry is moved from file to file.  Later, when inserting the
+     link, you need to decide which one to use.
+
+- /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
+
+     Pretty much all Emacs mail clients are supported.  The link
+     points to the current article, or, in some Gnus buffers, to the
+     group.  The description is constructed from the author and the
+     subject.
+
+- /Web browsers: W3, W3M and EWW/ ::
+
+     Here the link is the current URL, with the page title as
+     description.
+
+- /Contacts: BBDB/ ::
+
+     Links created in a BBDB buffer point to the current entry.
+
+- /Chat: IRC/ ::
+
+     #+vindex: org-irc-links-to-logs
+     For IRC links, if the variable ~org-irc-link-to-logs~ is
+     non-~nil~, create a =file= style link to the relevant point in
+     the logs for the current conversation.  Otherwise store an =irc=
+     style link to the user/channel/server under the point.
+
+- /Other files/ ::
+
+     For any other file, the link points to the file, with a search
+     string (see [[*Search Options in File Links]]) pointing to the
+     contents of the current line.  If there is an active region, the
+     selected words form the basis of the search string.  If the
+     automatically created link is not working correctly or accurately
+     enough, you can write custom functions to select the search
+     string and to do the search for particular file types (see
+     [[*Custom Searches]]).
+
+     You can also define dedicated links to other files.  See [[*Adding
+     Hyperlink Types]].
+
+- /Agenda view/ ::
+
+     When the cursor is in an agenda view, the created link points to
+     the entry referenced by the current line.
+
+From an Org buffer, the following commands create, navigate or, more
+generally, act on links.
+
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c l)}}} (~org-store-link~) ::
-
-     #+kindex: C-c l
-     #+findex: org-store-link
-     #+cindex: storing links
-     Store a link to the current location.  This is a /global/
-     command---you must create the key binding yourself---which can
-     be used in any buffer to create a link.  The link is stored for
-     later insertion into an Org buffer---see below.  What kind of
-     link is created depends on the current buffer:
-
-     - /Org mode buffers/ ::
-
-          For Org files, if there is a =<<target>>= at the cursor, the
-          link points to the target.  Otherwise it points to the
-          current headline, which is also the description[fn:28].
-
-          #+vindex: org-link-to-org-use-id
-          #+cindex: CUSTOM_ID, property
-          #+cindex: ID, property
-          If the headline has a =CUSTOM_ID= property, store a link to
-          this custom ID.  In addition or alternatively, depending on
-          the value of ~org-link-to-org-use-id~, create and/or use
-          a globally unique ID property for the link[fn:29].  So using
-          this command in Org buffers potentially creates two links:
-          a human-readable link from the custom ID, and one that is
-          globally unique and works even if the entry is moved from
-          file to file.  Later, when inserting the link, you need to
-          decide which one to use.
-
-     - /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
-
-          Pretty much all Emacs mail clients are supported.  The link
-          points to the current article, or, in some Gnus buffers, to
-          the group.  The description is constructed from the author
-          and the subject.
-
-     - /Web browsers: W3 and W3M/ ::
-
-          Here the link is the current URL, with the page title as
-          description.
-
-     - /Contacts: BBDB/ ::
-
-          Links created in a BBDB buffer point to the current entry.
-
-     - /Chat: IRC/ ::
-
-          #+vindex: org-irc-links-to-logs
-          For IRC links, if the variable ~org-irc-link-to-logs~ is
-          non-~nil~, create a =file= style link to the relevant point
-          in the logs for the current conversation.  Otherwise store
-          an =irc= style link to the user/channel/server under the
-          point.
-
-     - /Other files/ ::
-
-          For any other files, the link points to the file, with
-          a search string (see [[*Search Options in File Links]]) pointing
-          to the contents of the current line.  If there is an active
-          region, the selected words form the basis of the search
-          string.  If the automatically created link is not working
-          correctly or accurately enough, you can write custom
-          functions to select the search string and to do the search
-          for particular file types (see [[*Custom Searches]]).  The key
-          binding {{{kbd(C-c l)}}} is only a suggestion (see
-          [[*Installation]]).
-
-     - /Agenda view/ ::
-
-          When the cursor is in an agenda view, the created link
-          points to the entry referenced by the current line.
-
 - {{{kbd(C-c C-l)}}} (~org-insert-link~) ::
 
      #+kindex: C-c C-l
@@ -3347,24 +3347,24 @@ it into an Org file, and to follow the link.
      a descriptive text[fn:31].  If some text was selected at this
      time, it becomes the default description.
 
-     - /Inserting stored links/ ::
+  - /Inserting stored links/ ::
 
-          All links stored during the current session are part of the
-          history for this prompt, so you can access them with
-          {{{kbd(up)}}} and {{{kbd(down)}}} (or {{{kbd(M-p)}}},
-          {{{kbd(M-n)}}}).
+       All links stored during the current session are part of the
+       history for this prompt, so you can access them with
+       {{{kbd(up)}}} and {{{kbd(down)}}} (or {{{kbd(M-p)}}},
+       {{{kbd(M-n)}}}).
 
-     - /Completion support/ ::
+  - /Completion support/ ::
 
-          Completion with {{{kbd(TAB)}}} helps you to insert valid
-          link prefixes like =http= or =ftp=, including the prefixes
-          defined through link abbreviations (see [[*Link
-          Abbreviations]]).  If you press {{{kbd(RET)}}} after inserting
-          only the prefix, Org offers specific completion support for
-          some link types[fn:32].  For example, if you type {{{kbd(f
-          i l e RET)}}}---alternative access: {{{kbd(C-u C-c C-l)}}},
-          see below---Org offers file name completion, and after
-          {{{kbd(b b d b RET)}}} you can complete contact names.
+       Completion with {{{kbd(TAB)}}} helps you to insert valid link
+       prefixes like =http= or =ftp=, including the prefixes defined
+       through link abbreviations (see [[*Link Abbreviations]]).  If you
+       press {{{kbd(RET)}}} after inserting only the prefix, Org
+       offers specific completion support for some link types[fn:32].
+       For example, if you type {{{kbd(f i l e RET)}}}---alternative
+       access: {{{kbd(C-u C-c C-l)}}}, see below---Org offers file
+       name completion, and after {{{kbd(b b d b RET)}}} you can
+       complete contact names.
 
 - {{{kbd(C-u C-c C-l)}}} ::
 
@@ -3387,88 +3387,86 @@ it into an Org file, and to follow the link.
      When the cursor is on an existing link, {{{kbd(C-c C-l)}}} allows
      you to edit the link and description parts of the link.
 
-     - {{{kbd(C-c C-o)}}} (~org-open-at-point~) ::
+- {{{kbd(C-c C-o)}}} (~org-open-at-point~) ::
 
-          #+kindex: C-c C-o
-          #+findex: org-open-at-point
-          #+vindex: org-file-apps
-          #+vindex: org-link-frame-setup
-          Open link at point.  This launches a web browser for URL
-          (using ~browse-url-at-point~), run
-          VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for the corresponding
-          links, and execute the command in a shell link.  When the
-          cursor is on an internal link, this command runs the
-          corresponding search.  When the cursor is on a TAG list in
-          a headline, it creates the corresponding TAGS view.  If the
-          cursor is on a timestamp, it compiles the agenda for that
-          date.  Furthermore, it visits text and remote files in
-          =file= links with Emacs and select a suitable application
-          for local non-text files.  Classification of files is based
-          on file extension only.  See option ~org-file-apps~.  If you
-          want to override the default application and visit the file
-          with Emacs, use a {{{kbd(C-u)}}} prefix.  If you want to
-          avoid opening in Emacs, use a {{{kbd(C-u C-u)}}} prefix. \\
-          If the cursor is on a headline, but not on a link, offer all
-          links in the headline and entry text.  If you want to setup
-          the frame configuration for following links, customize
-          ~org-link-frame-setup~.
+     #+kindex: C-c C-o
+     #+findex: org-open-at-point
+     #+vindex: org-file-apps
+     Open link at point.  This launches a web browser for URL (using
+     ~browse-url-at-point~), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB
+     for the corresponding links, and execute the command in a shell
+     link.  When the cursor is on an internal link, this command runs
+     the corresponding search.  When the cursor is on a TAG list in
+     a headline, it creates the corresponding TAGS view.  If the
+     cursor is on a timestamp, it compiles the agenda for that date.
+     Furthermore, it visits text and remote files in =file= links with
+     Emacs and select a suitable application for local non-text files.
+     Classification of files is based on file extension only.  See
+     option ~org-file-apps~.  If you want to override the default
+     application and visit the file with Emacs, use a {{{kbd(C-u)}}}
+     prefix.  If you want to avoid opening in Emacs, use a {{{kbd(C-u
+     C-u)}}} prefix.
 
-     - {{{kbd(RET)}}} ::
+     #+vindex: org-link-frame-setup
+     If the cursor is on a headline, but not on a link, offer all
+     links in the headline and entry text.  If you want to setup the
+     frame configuration for following links, customize
+     ~org-link-frame-setup~.
 
-          #+vindex: org-return-follows-link
-          #+kindex: RET
-          When ~org-return-follows-link~ is set, {{{kbd(RET)}}} also
-          follows the link at point.
+- {{{kbd(RET)}}} ::
 
-     - {{{kbd(mouse-2)}}} or {{{kbd(mouse-1)}}} ::
+     #+vindex: org-return-follows-link
+     #+kindex: RET
+     When ~org-return-follows-link~ is set, {{{kbd(RET)}}} also
+     follows the link at point.
 
-          #+kindex: mouse-2
-          #+kindex: mouse-1
-          On links, {{{kbd(mouse-1)}}} and {{{kbd(mouse-2)}}} opens
-          the link just as {{{kbd(C-c C-o)}}} does.
+- {{{kbd(mouse-2)}}} or {{{kbd(mouse-1)}}} ::
 
-     - {{{kbd(mouse-3)}}} ::
+     #+kindex: mouse-2
+     #+kindex: mouse-1
+     On links, {{{kbd(mouse-1)}}} and {{{kbd(mouse-2)}}} opens the
+     link just as {{{kbd(C-c C-o)}}} does.
 
-          #+vindex: org-display-internal-link-with-indirect-buffer
-          #+kindex: mouse-3
-          Like {{{kbd(mouse-2)}}}, but force file links to be opened
-          with Emacs, and internal links to be displayed in another
-          window[fn:33].
+- {{{kbd(mouse-3)}}} ::
 
-     - {{{kbd(C-c C-x C-v)}}} (~org-toggle-inline-images~) ::
+     #+vindex: org-display-internal-link-with-indirect-buffer
+     #+kindex: mouse-3
+     Like {{{kbd(mouse-2)}}}, but force file links to be opened with
+     Emacs, and internal links to be displayed in another
+     window[fn:33].
 
-          #+cindex: inlining images
-          #+cindex: images, inlining
-          #+vindex: org-startup-with-inline-images
-          #+kindex: C-c C-x C-v
-          #+findex: org-toggle-inline-images
-          Toggle the inline display of linked images.  Normally this
-          only inlines images that have no description part in the
-          link, i.e., images that are inlined during export.  When
-          called with a prefix argument, also display images that do
-          have a link description.  You can ask for inline images to
-          be displayed at startup by configuring the variable
-          ~org-startup-with-inline-images~[fn:34].
+- {{{kbd(C-c C-x C-v)}}} (~org-toggle-inline-images~) ::
 
-     - {{{kbd(C-c %)}}} (~org-mark-ring-push~) ::
+     #+cindex: inlining images
+     #+cindex: images, inlining
+     #+vindex: org-startup-with-inline-images
+     #+kindex: C-c C-x C-v
+     #+findex: org-toggle-inline-images
+     Toggle the inline display of linked images.  Normally this only
+     inlines images that have no description part in the link, i.e.,
+     images that are inlined during export.  When called with a prefix
+     argument, also display images that do have a link description.
+     You can ask for inline images to be displayed at startup by
+     configuring the variable ~org-startup-with-inline-images~[fn:34].
 
-          #+kindex: C-c %
-          #+findex: org-mark-ring-push
-          #+cindex: mark ring
-          Push the current position onto the mark ring, to be able to
-          return easily.  Commands following an internal link do this
-          automatically.
+- {{{kbd(C-c %)}}} (~org-mark-ring-push~) ::
 
-     - {{{kbd(C-c &)}}} (~org-mark-ring-goto~) ::
+     #+kindex: C-c %
+     #+findex: org-mark-ring-push
+     #+cindex: mark ring
+     Push the current position onto the mark ring, to be able to
+     return easily.  Commands following an internal link do this
+     automatically.
 
-          #+kindex: C-c &
-          #+findex: org-mark-ring-goto
-          #+cindex: links, returning to
-          Jump back to a recorded position.  A position is recorded by
-          the commands following internal links, and by {{{kbd(C-c
-          %)}}}.  Using this command several times in direct
-          succession moves through a ring of previously recorded
-          positions.
+- {{{kbd(C-c &)}}} (~org-mark-ring-goto~) ::
+
+     #+kindex: C-c &
+     #+findex: org-mark-ring-goto
+     #+cindex: links, returning to
+     Jump back to a recorded position.  A position is recorded by the
+     commands following internal links, and by {{{kbd(C-c %)}}}.
+     Using this command several times in direct succession moves
+     through a ring of previously recorded positions.
 
 - {{{kbd(C-c C-x C-n)}}} (~org-next-link~), {{{kbd(C-c C-x C-p)}}} (~org-previous-link~) ::
 
@@ -3480,13 +3478,13 @@ it into an Org file, and to follow the link.
      Move forward/backward to the next link in the buffer.  At the
      limit of the buffer, the search fails once, and then wraps
      around.  The key bindings for this are really too long; you might
-     want to bind this also to {{{kbd(C-n)}}} and {{{kbd(C-p)}}}.
+     want to bind this also to {{{kbd(M-n)}}} and {{{kbd(M-p)}}}.
 
      #+begin_src emacs-lisp
        (add-hook 'org-load-hook
                  (lambda ()
-                   (define-key org-mode-map "\C-n" 'org-next-link)
-                   (define-key org-mode-map "\C-p" 'org-previous-link)))
+                   (define-key org-mode-map "\M-n" 'org-next-link)
+                   (define-key org-mode-map "\M-p" 'org-previous-link)))
      #+end_src
 
 ** Using Links Outside Org
@@ -3585,7 +3583,7 @@ completion function like this:
 File links can contain additional information to make Emacs jump to
 a particular location in the file when following a link.  This can be
 a line number or a search option after a double colon[fn:35].  For
-example, when the command {{{kbd(C-c l)}}} creates a link (see
+example, when the command ~org-store-link~ creates a link (see
 [[*Handling Links]]) to a file, it encodes the words in the current line
 as a search string that can be used to find this line back later when
 following the link with {{{kbd(C-c C-o)}}}.
@@ -10828,16 +10826,13 @@ a shortcut is provided (see [[*Structure Templates]]).
      allow creating ASCII drawings easily.  Using this command in an
      empty line creates a new fixed-width region.
 
-- {{{kbd(C-c l)}}} (~org-store-link~) ::
-
-     #+kindex: C-c l
-     #+findex: org-store-link
-     Calling ~org-store-link~ while editing a source code example in
-     a temporary buffer created with {{{kbd(C-c ')}}} prompts for
-     a label.  Make sure that it is unique in the current buffer, and
-     insert it with the proper formatting like =(ref:label)= at the
-     end of the current line.  Then the label is stored as a link
-     =(label)=, for retrieval with {{{kbd(C-c C-l)}}}.
+#+cindex: storing link, in a source code buffer
+Calling ~org-store-link~ (see [[*Handling Links]]) while editing a source
+code example in a temporary buffer created with {{{kbd(C-c ')}}}
+prompts for a label.  Make sure that it is unique in the current
+buffer, and insert it with the proper formatting like =(ref:label)= at
+the end of the current line.  Then the label is stored as a link
+=(label)=, for retrieval with {{{kbd(C-c C-l)}}}.
 
 ** Special Symbols
 :PROPERTIES:
