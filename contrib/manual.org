@@ -3492,14 +3492,14 @@ generally, act on links.
 :DESCRIPTION: Linking from my C source code?
 :END:
 
+#+findex: org-insert-link-global
+#+findex: org-open-at-point-global
 You can insert and follow links that have Org syntax not only in Org,
-but in any Emacs buffer.  For this, you should create two global
-commands, like this (please select suitable global keys yourself):
+but in any Emacs buffer.  For this, Org provides two functions:
+~org-insert-link-global~ and ~org-open-at-point-global~.
 
-#+begin_src emacs-lisp
-  (global-set-key "\C-c L" 'org-insert-link-global)
-  (global-set-key "\C-c o" 'org-open-at-point-global)
-#+end_src
+You might want to bind them to globally available keys.  See
+ [[*Activation]] for some advice.
 
 ** Link Abbreviations
 :PROPERTIES:
