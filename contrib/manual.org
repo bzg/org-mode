@@ -3499,7 +3499,7 @@ but in any Emacs buffer.  For this, Org provides two functions:
 ~org-insert-link-global~ and ~org-open-at-point-global~.
 
 You might want to bind them to globally available keys.  See
- [[*Activation]] for some advice.
+[[*Activation]] for some advice.
 
 ** Link Abbreviations
 :PROPERTIES:
@@ -13864,7 +13864,7 @@ examples works:
 :END:
 
 For clickable images, provide a link whose description is another link
-to an image file.  For example, to embed a image
+to an image file.  For example, to embed an image
 =org-mode-unicorn.png= which when clicked jumps to https://orgmode.org
 website, do the following
 
@@ -21027,7 +21027,7 @@ lognoteclock-out=.
 [fn:77] Note that all parameters must be specified in a single
 line---the line is broken here only to fit it into the manual.
 
-[fn:78] On computers using Mac OS X, idleness is based on actual user
+[fn:78] On computers using macOS, idleness is based on actual user
 idleness, not just Emacs' idle time.  For X11, you can install
 a utility program =x11idle.c=, available in the =contrib/scripts/=
 directory of the Org Git distribution, or install the xprintidle
