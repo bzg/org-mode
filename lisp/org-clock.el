@@ -513,6 +513,13 @@ cannot be translated."
 	   (assoc-string language org-clock-clocktable-language-setup t))
       s))
 
+(defun org-clock--mode-line-heading ()
+  "Return currently clocked heading, formatted for mode line."
+  (cond ((functionp org-clock-heading-function)
+	 (funcall org-clock-heading-function))
+	((org-before-first-heading-p) "???")
+	(t (org-get-heading t t t t))))
+
 (defun org-clock-menu ()
   (interactive)
   (popup-menu
@@ -658,22 +665,22 @@ If an effort estimate was defined for the current item, use
 01:30/01:50 format (clocked/estimated).
 If not, show simply the clocked time like 01:50."
   (let ((clocked-time (org-clock-get-clocked-time)))
-    (if org-clock-effort
-	(let* ((effort-in-minutes (org-duration-to-minutes org-clock-effort))
-	       (work-done-str
-		(propertize
-		 (org-duration-from-minutes clocked-time)
-		 'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
-			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
-	       (effort-str (org-duration-from-minutes effort-in-minutes))
-	       (clockstr (propertize
-			  (concat  " [%s/" effort-str
-				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
-			  'face 'org-mode-line-clock)))
-	  (format clockstr work-done-str))
-      (propertize (concat " [" (org-duration-from-minutes clocked-time)
-			  "]" (format " (%s)" org-clock-heading))
-		  'face 'org-mode-line-clock))))
+    (propertize
+     (if org-clock-effort
+	 (let* ((effort-in-minutes (org-duration-to-minutes org-clock-effort))
+		(work-done-str
+		 (propertize (org-duration-from-minutes clocked-time)
+			     'face
+			     (if (and org-clock-task-overrun
+				      (not org-clock-task-overrun-text))
+				 'org-mode-line-clock-overrun
+			       'org-mode-line-clock)))
+		(effort-str (org-duration-from-minutes effort-in-minutes)))
+	   (format " [%s/%s] (%s)" work-done-str effort-str org-clock-heading))
+       (format " [%s] (%s)"
+	       (org-duration-from-minutes clocked-time)
+	       org-clock-heading))
+     'face 'org-mode-line-clock)))
 
 (defun org-clock-get-last-clock-out-time ()
   "Get the last clock-out time for the current subtree."
@@ -683,10 +690,13 @@ If not, show simply the clocked time like 01:50."
 				       ".*\\]--\\(\\[[^]]+\\]\\)") end t)
 	(org-time-string-to-time (match-string 1))))))
 
-(defun org-clock-update-mode-line ()
+(defun org-clock-update-mode-line (&optional refresh)
+  "Update mode line with clock information.
+When optional argument is non-nil, refresh cached heading."
   (if org-clock-effort
       (org-clock-notify-once-if-expired)
     (setq org-clock-task-overrun nil))
+  (when refresh (setq org-clock-heading (org-clock--mode-line-heading)))
   (setq org-mode-line-string
 	(propertize
 	 (let ((clock-string (org-clock-get-clock-string))
@@ -1270,15 +1280,7 @@ the default behavior."
 					      org-clock-in-switch-to-state
 					      "\\>"))))
 		(org-todo org-clock-in-switch-to-state)))
-	 (setq org-clock-heading
-	       (cond ((and org-clock-heading-function
-			   (functionp org-clock-heading-function))
-		      (funcall org-clock-heading-function))
-		     ((nth 4 (org-heading-components))
-		      (replace-regexp-in-string
-		       "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" "\\1"
-		       (match-string-no-properties 4)))
-		     (t "???")))
+	 (setq org-clock-heading (org-clock--mode-line-heading))
 	 (org-clock-find-position org-clock-in-resume)
 	 (cond
 	  ((and org-clock-in-resume
