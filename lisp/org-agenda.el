@@ -2213,9 +2213,9 @@ The following commands are available:
 	    nil t)
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
-	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode))
-  (setq org-agenda-show-log org-agenda-start-with-log-mode)
-  (setq org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode)
+	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
+	  org-agenda-show-log org-agenda-start-with-log-mode
+	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode))
   (add-to-invisibility-spec '(org-filtered))
   (add-to-invisibility-spec '(org-link))
   (easy-menu-change
@@ -8187,7 +8187,6 @@ so that the date SD will be in that range."
   (interactive)
   (org-agenda-check-type t 'agenda)
   (setq org-agenda-clockreport-mode (not org-agenda-clockreport-mode))
-  (setq org-agenda-start-with-clockreport-mode org-agenda-clockreport-mode)
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Clocktable mode is %s"
@@ -8211,7 +8210,6 @@ log items, nothing else."
 	      nil 'clockcheck))
 	 (special '(closed clock state))
 	 (t (not org-agenda-show-log))))
-  (setq org-agenda-start-with-log-mode org-agenda-show-log)
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Log mode is %s" (if org-agenda-show-log "on" "off")))
