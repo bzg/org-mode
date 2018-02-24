@@ -2129,7 +2129,6 @@ When nil, `q' will kill the single agenda buffer."
 (defvar org-agenda-this-buffer-is-sticky nil)
 (defvar org-agenda-last-indirect-buffer nil
   "Last buffer loaded by `org-agenda-tree-to-indirect-buffer'.")
-(defvar org-agenda-lprops nil)
 
 (defconst org-agenda-local-vars
   '(org-agenda-this-buffer-name
@@ -2158,7 +2157,6 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-filtered-by-category
     org-agenda-filter-form
     org-agenda-cycle-counter
-    org-agenda-lprops
     org-agenda-last-prefix-arg)
   "Variables that must be local in agenda buffers to allow multiple buffers.")
 
@@ -3738,10 +3736,6 @@ FILTER-ALIST is an alist of filters we need to apply when
 	      (org-uniquify org-done-keywords-for-agenda))
 	(setq org-agenda-last-prefix-arg current-prefix-arg)
 	(setq org-agenda-this-buffer-name org-agenda-buffer-name)
-	;; Don't set these until we know we're in the agenda buffer,
-	;; and we know they're valid.
-	(setq org-agenda-lprops (or org-agenda-lprops
-				    (get 'org-agenda-redo-command 'org-lprops)))
 	(and name (not org-agenda-name)
 	     (setq-local org-agenda-name name)))
       (setq buffer-read-only nil))))
@@ -7306,7 +7300,7 @@ in the agenda."
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
-	 (lprops org-agenda-lprops)
+	 (lprops (get 'org-agenda-redo-command 'org-lprops))
 	 (redo-cmd (get-text-property p 'org-redo-cmd))
 	 (last-args (get-text-property p 'org-last-args))
 	 (org-agenda-overriding-cmd (get-text-property p 'org-series-cmd))
