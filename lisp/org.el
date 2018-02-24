@@ -18902,6 +18902,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 (when (or org-use-extra-keys (not window-system))
   (org-defkey org-mode-map (kbd "C-c C-x c") #'org-table-copy-down)
+  (org-defkey org-mode-map (kbd "C-c C-x m") #'org-meta-return)
   (org-defkey org-mode-map (kbd "C-c C-x M") #'org-insert-todo-heading)
   (org-defkey org-mode-map (kbd "C-c C-x RET") #'org-meta-return)
   (org-defkey org-mode-map (kbd "ESC RET") #'org-meta-return)
