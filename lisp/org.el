@@ -8275,7 +8275,6 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
   (org-with-limited-levels
    (let* ((visp (not (org-invisible-p)))
 	  (txt tree)
-	  (^re_ "\\(\\*+\\)[  \t]*")
 	  (old-level (if (string-match org-outline-regexp-bol txt)
 			 (- (match-end 0) (match-beginning 0) 1)
 		       -1))
@@ -8292,7 +8291,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 			    (condition-case nil
 				(progn
 				  (outline-previous-visible-heading 1)
-				  (if (looking-at ^re_)
+				  (if (looking-at org-outline-regexp-bol)
 				      (- (match-end 0) (match-beginning 0) 1)
 				    1))
 			      (error 1))))
@@ -8301,7 +8300,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 			    (progn
 			      (or (looking-at org-outline-regexp)
 				  (outline-next-visible-heading 1))
-			      (if (looking-at ^re_)
+			      (if (looking-at org-outline-regexp-bol)
 				  (- (match-end 0) (match-beginning 0) 1)
 				1))
 			  (error 1))))
