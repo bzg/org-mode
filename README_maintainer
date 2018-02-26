@@ -23,7 +23,7 @@ New features always go on =master=.
 
 ** Major release
 
-The release number for main releases look like this: =7.13=
+The release number for main releases look like this: =9.1=
 
 Main releases are made whenever Org is in a state where the feature
 set is consistent and we feel that the features that are implemented
@@ -38,7 +38,7 @@ branch back into maint to synchronize the two.
 
 ** Minor release
 
-The release number for minor releases look like this:  =7.13.1=
+The release number for minor releases look like this: =9.1.7=
 
 Minor releases are small amends to main releases.  Usually they fix
 critical bugs discovered in a main release.  Minor bugs are usually
@@ -54,7 +54,7 @@ maint then merged in master.
 When doing a major and a minor release, after all necessary merging is
 done, tag the _maint_ branch for the release with:
 
-  git tag -a release_7.9.1 -m "Adding release tag"
+  git tag -a release_9.1.7 -m "Adding release tag"
 
 and push tags with
 
@@ -62,7 +62,7 @@ and push tags with
 
 We also encourage you to sign release tags like this:
 
-  git tag -s release_7.9.1 -m "Adding release tag"
+  git tag -s release_9.1.7 -m "Adding release tag"
 
 ** Uploading the release files from the orgmode.org server
 
@@ -74,19 +74,19 @@ From there do
   make release
   make upload
 
-to create the .tar.gz and .zip files, the documentation, and to
-upload everything at the right place.
+to create the =.tar.gz= and =.zip= files, the documentation, and to upload
+everything at the right place.
 
 * Available Org's builds on the server
 
 There are two cron tasks on the server: one that builds the ELPA
-packages and one that builds org-latest.tar.gz and org-latest.zip.
+packages and one that builds =org-latest.tar.gz= and =org-latest.zip=.
 
 ELPA packages are built from the *maint* branch.  One ELPA package
 contains Org's core, another one called "org-plus-contrib" contains
 Org and contributed libraries.
 
-org-latest* snapshots are built from the *master* branch.
+=org-latest*= snapshots are built from the *master* branch.
 
 * Synchronization Org and upstream Emacs
 
@@ -120,9 +120,10 @@ New releases of Org should be added to the [[https://git.savannah.gnu.org/cgit/e
 
 Typically, Org can be synchronized by copying over files from the
 =emacs-sync= branch of the Org repository to the =master= branch of Emacs
-repository.  The =emacs-sync= branch has a few extra changes compared with
-the =maint= branch.  If the Emacs maintainers are planning a new release
-of Emacs soon, it is possible that another branch should be used.
+repository.  The =emacs-sync= branch has a few extra changes compared
+with the =maint= branch.  If the Emacs maintainers are planning a new
+release of Emacs soon, it is possible that another branch should be
+used.
 
 If the new release of Org contains many changes, it may be useful to
 use a separate branch before merging, e.g. =scratch/org-mode-merge=.
@@ -134,8 +135,8 @@ contributing to the Emacs repository.
 
 *** Where to files go
 
-The following list shows where files in Org repository are copied to in
-the Emacs repository, folder by folder.
+The following list shows where files in Org repository are copied to
+in the Emacs repository, folder by folder.
 
 **** =org-mode/doc=
 
@@ -145,7 +146,7 @@ the Emacs repository, folder by folder.
 - =orgcard.tex= :: Copy to =emacs/etc/refcards=.  Make sure that
      ~\def\orgversionnumber~ and ~\def\versionyear~ are up to date.
 
-****  =org-mode/etc=
+**** =org-mode/etc=
 
 - =styles/*= :: Copy to =emacs/etc/org=.
 
@@ -166,8 +167,10 @@ the Emacs repository, folder by folder.
 **** TODO =org-mode/testing=
 
 *** Update  =emacs/etc/NEWS=
+
 Whenever a new (major) version of Org is synchronized to the Emacs
 repository, it should be mentioned in the NEWS file.
+
 * Updating the list of hooks/commands/options on Worg
 
 Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=.
