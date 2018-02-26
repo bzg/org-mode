@@ -8242,6 +8242,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 
 (defun org-paste-subtree (&optional level tree for-yank remove)
   "Paste the clipboard as a subtree, with modification of headline level.
+
 The entire subtree is promoted or demoted in order to match a new headline
 level.
 
@@ -8269,41 +8270,35 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
   (interactive "P")
   (setq tree (or tree (and kill-ring (current-kill 0))))
   (unless (org-kill-is-subtree-p tree)
-    (user-error "%s"
-		(substitute-command-keys
-		 "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
+    (user-error
+     (substitute-command-keys
+      "The kill is not a (set of) tree(s).  Use `\\[yank]' to yank anyway")))
   (org-with-limited-levels
    (let* ((visp (not (org-invisible-p)))
 	  (txt tree)
 	  (old-level (if (string-match org-outline-regexp-bol txt)
 			 (- (match-end 0) (match-beginning 0) 1)
 		       -1))
-	  (force-level (cond (level (prefix-numeric-value level))
-			     ((and (looking-at "[ \t]*$")
-				   (string-match
-				    "^\\*+$" (buffer-substring
-					      (point-at-bol) (point))))
-			      (- (match-end 0) (match-beginning 0)))
-			     ((and (bolp)
-				   (looking-at org-outline-regexp))
-			      (- (match-end 0) (point) 1))))
-	  (previous-level (save-excursion
-			    (condition-case nil
-				(progn
-				  (outline-previous-visible-heading 1)
-				  (if (looking-at org-outline-regexp-bol)
-				      (- (match-end 0) (match-beginning 0) 1)
-				    1))
-			      (error 1))))
-	  (next-level (save-excursion
-			(condition-case nil
-			    (progn
-			      (or (looking-at org-outline-regexp)
-				  (outline-next-visible-heading 1))
-			      (if (looking-at org-outline-regexp-bol)
-				  (- (match-end 0) (match-beginning 0) 1)
-				1))
-			  (error 1))))
+	  (force-level
+	   (cond
+	    (level (prefix-numeric-value level))
+	    ;; When point is right after the stars in an otherwise
+	    ;; empty headline, use stars as the forced level.
+	    ((and (looking-at-p "[ \t]*$")
+		  (string-match-p "^\\*+ *"
+				  (buffer-substring (line-beginning-position)
+						    (point))))
+	     (org-outline-level))
+	    ((looking-at-p org-outline-regexp-bol) (org-outline-level))))
+	  (previous-level
+	   (save-excursion
+	     (org-previous-visible-heading 1)
+	     (if (org-at-heading-p) (org-outline-level) 1)))
+	  (next-level
+	   (save-excursion
+	     (if (org-at-heading-p) (org-outline-level)
+	       (org-next-visible-heading 1)
+	       (if (org-at-heading-p) (org-outline-level) 1))))
 	  (new-level (or force-level (max previous-level next-level)))
 	  (shift (if (or (= old-level -1)
 			 (= new-level -1)
@@ -8311,16 +8306,19 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 		     0
 		   (- new-level old-level)))
 	  (delta (if (> shift 0) -1 1))
-	  (func (if (> shift 0) 'org-demote 'org-promote))
+	  (func (if (> shift 0) #'org-demote #'org-promote))
 	  (org-odd-levels-only nil)
 	  beg end newend)
-     ;; Remove the forced level indicator
-     (when force-level
-       (delete-region (point-at-bol) (point)))
-     ;; Paste
-     (beginning-of-line (if (bolp) 1 2))
+     ;; Remove the forced level indicator.
+     (when (and force-level (not level))
+       (delete-region (line-beginning-position) (point)))
+     ;; Paste before the next visible heading or at end of buffer,
+     ;; unless point is at the beginning of a headline.
+     (unless (and (bolp) (org-at-heading-p))
+       (org-next-visible-heading 1)
+       (unless (bolp) (insert "\n")))
      (setq beg (point))
-     (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
+     (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
      (insert-before-markers txt)
      (unless (string-suffix-p "\n" txt) (insert "\n"))
      (setq newend (point))
@@ -8331,7 +8329,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
      (setq beg (point))
      (when (and (org-invisible-p) visp)
        (save-excursion (outline-show-heading)))
-     ;; Shift if necessary
+     ;; Shift if necessary.
      (unless (= shift 0)
        (save-restriction
 	 (narrow-to-region beg end)
@@ -8340,16 +8338,16 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 	   (setq shift (+ delta shift)))
 	 (goto-char (point-min))
 	 (setq newend (point-max))))
-     (when (or (called-interactively-p 'interactive) for-yank)
+     (when (or for-yank (called-interactively-p 'interactive))
        (message "Clipboard pasted as level %d subtree" new-level))
      (when (and (not for-yank) ; in this case, org-yank will decide about folding
 		kill-ring
-		(eq org-subtree-clip (current-kill 0))
+		(equal org-subtree-clip (current-kill 0))
 		org-subtree-clip-folded)
        ;; The tree was folded before it was killed/copied
        (outline-hide-subtree))
-     (and for-yank (goto-char newend))
-     (and remove (setq kill-ring (cdr kill-ring))))))
+     (when for-yank (goto-char newend))
+     (when remove (pop kill-ring)))))
 
 (defun org-kill-is-subtree-p (&optional txt)
   "Check if the current kill is an outline subtree, or a set of trees.
