@@ -228,6 +228,12 @@ Org Tempo may be used as a replacement.  See details above.
 
 ** Miscellaneous
 
+*** ~org-paste-subtree~ no longer breaks sections
+
+Unless point is at the beginning of a headline, ~org-paste-subtree~
+now pastes the tree before the next visible headline.  If you need to
+break the section, use ~org-yank~ instead.
+
 *** ~org-table-insert-column~ inserts a column to the right
 
 It used to insert it on the left.  With this change,
