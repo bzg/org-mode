@@ -112,7 +112,7 @@ You can download Org latest release from [[https://orgmode.org/][Org's website]]
 make sure you set the load-path correctly in your Emacs init file:
 
 #+begin_src emacs-lisp
-  (add-to-list 'load-path "~/path/to/orgdir/lisp")
+(add-to-list 'load-path "~/path/to/orgdir/lisp")
 #+end_src
 
 The downloaded archive contains contributed libraries that are not
@@ -120,7 +120,7 @@ included in Emacs.  If you want to use them, add the =contrib/=
 directory to your load-path:
 
 #+begin_src emacs-lisp
-  (add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
+(add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
 #+end_src
 
 Optionally, you can compile the files and/or install them in your
@@ -134,9 +134,9 @@ system.  Run =make help= to list compilation and installation options.
 You can clone Org's repository and install Org like this:
 
 #+begin_example
-  $ cd ~/src/
-  $ git clone git@code.orgmode.org:bzg/org-mode.git
-  $ make autoloads
+$ cd ~/src/
+$ git clone git@code.orgmode.org:bzg/org-mode.git
+$ make autoloads
 #+end_example
 
 Note that in this case, ~make autoloads~ is mandatory: it defines
@@ -182,9 +182,9 @@ to globally available keys, like the ones reserved for users (see
 bindings, please modify the keys to your own liking.
 
 #+begin_src emacs-lisp
-  (global-set-key "\C-cl" 'org-store-link)
-  (global-set-key "\C-ca" 'org-agenda)
-  (global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cc" 'org-capture)
 #+end_src
 
 #+cindex: Org mode, turning on
@@ -255,16 +255,16 @@ as =emacs -Q=.  The =minimal-org.el= setup file can have contents as
 shown below.
 
 #+begin_src emacs-lisp
-  ;;; Minimal setup to load latest `org-mode'.
+;;; Minimal setup to load latest `org-mode'.
 
-  ;; Activate debugging.
-  (setq debug-on-error t
-        debug-on-signal nil
-        debug-on-quit nil)
+;; Activate debugging.
+(setq debug-on-error t
+      debug-on-signal nil
+      debug-on-quit nil)
 
-  ;; Add latest Org mode to load path.
-  (add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
-  (add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp" t))
+;; Add latest Org mode to load path.
+(add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
+(add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp" t))
 #+end_src
 
 If an error occurs, a "backtrace" can be very useful---see below on
@@ -405,13 +405,13 @@ Org start with one or more stars, on the left margin[fn:3].  For
 example:
 
 #+begin_example
-  ,* Top level headline
-  ,** Second level
-  ,*** Third level
-      some text
-  ,*** Third level
-      more text
-  ,* Another top level headline
+,* Top level headline
+,** Second level
+,*** Third level
+    some text
+,*** Third level
+    more text
+,* Another top level headline
 #+end_example
 
 #+vindex: org-footnote-section
@@ -462,8 +462,8 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
      /Subtree cycling/: Rotate current subtree among the states
 
      #+begin_example
-       ,-> FOLDED -> CHILDREN -> SUBTREE --.
-       '-----------------------------------'
+     ,-> FOLDED -> CHILDREN -> SUBTREE --.
+     '-----------------------------------'
      #+end_example
 
      #+vindex: org-cycle-emulate-tab
@@ -482,8 +482,8 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
      /Global cycling/: Rotate the entire buffer among the states
 
      #+begin_example
-       ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
-       '--------------------------------------'
+     ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
+     '--------------------------------------'
      #+end_example
 
      When {{{kbd(S-TAB)}}} is called with a numeric prefix argument N,
@@ -570,10 +570,10 @@ buffer:
 
 #+cindex: STARTUP, keyword
 #+begin_example
-  ,#+STARTUP: overview
-  ,#+STARTUP: content
-  ,#+STARTUP: showall
-  ,#+STARTUP: showeverything
+,#+STARTUP: overview
+,#+STARTUP: content
+,#+STARTUP: showall
+,#+STARTUP: showeverything
 #+end_example
 
 #+cindex: VISIBILITY, property
@@ -969,8 +969,8 @@ accessible through the agenda dispatcher (see [[*The Agenda Dispatcher]]).
 For example:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("f" occur-tree "FIXME")))
+(setq org-agenda-custom-commands
+      '(("f" occur-tree "FIXME")))
 #+end_src
 
 #+texinfo: @noindent
@@ -1034,20 +1034,20 @@ two blank lines.  In that case, all items are closed.  Here is an
 example:
 
 #+begin_example
-  ,* Lord of the Rings
-  My favorite scenes are (in this order)
-  1. The attack of the Rohirrim
-  2. Eowyn's fight with the witch king
-     + this was already my favorite scene in the book
-     + I really like Miranda Otto.
-  3. Peter Jackson being shot by Legolas
-     - on DVD only
-     He makes a really funny face when it happens.
-  But in the end, no individual scenes matter but the film as a whole.
-  Important actors in this film are:
-  - Elijah Wood :: He plays Frodo
-  - Sean Astin :: He plays Sam, Frodo's friend. I still remember him
-       very well from his role as Mikey Walsh in /The Goonies/.
+,* Lord of the Rings
+My favorite scenes are (in this order)
+1. The attack of the Rohirrim
+2. Eowyn's fight with the witch king
+   + this was already my favorite scene in the book
+   + I really like Miranda Otto.
+3. Peter Jackson being shot by Legolas
+   - on DVD only
+   He makes a really funny face when it happens.
+But in the end, no individual scenes matter but the film as a whole.
+Important actors in this film are:
+- Elijah Wood :: He plays Frodo
+- Sean Astin :: He plays Sam, Frodo's friend. I still remember him
+     very well from his role as Mikey Walsh in /The Goonies/.
 #+end_example
 
 Org supports these lists by tuning filling and wrapping commands to
@@ -1217,12 +1217,12 @@ They can contain anything but a headline and another drawer.  Drawers
 look like this:
 
 #+begin_example
-  ,** This is a headline
-  Still outside the drawer
-  :DRAWERNAME:
-  This is inside the drawer.
-  :END:
-  After the drawer.
+,** This is a headline
+Still outside the drawer
+:DRAWERNAME:
+This is inside the drawer.
+:END:
+After the drawer.
 #+end_example
 
 #+kindex: C-c C-x d
@@ -1269,8 +1269,8 @@ the variable ~org-hide-block-startup~ or on a per-file basis by using
 
 #+cindex: STARTUP, keyword
 #+begin_example
-  ,#+STARTUP: hideblocks
-  ,#+STARTUP: nohideblocks
+,#+STARTUP: hideblocks
+,#+STARTUP: nohideblocks
 #+end_example
 
 ** Creating Footnotes
@@ -1288,9 +1288,9 @@ footnote reference is simply the marker in square brackets, inside
 text.  Markers always start with =fn:=.  For example:
 
 #+begin_example
-  The Org homepage[fn:1] now looks a lot better than it used to.
-  ...
-  [fn:1] The link is: https://orgmode.org
+The Org homepage[fn:1] now looks a lot better than it used to.
+...
+[fn:1] The link is: https://orgmode.org
 #+end_example
 
 Org mode extends the number-based syntax to /named/ footnotes and
@@ -1421,10 +1421,10 @@ as the first non-whitespace character is considered part of a table.
 this:
 
 #+begin_example
-  | Name  | Phone | Age |
-  |-------+-------+-----|
-  | Peter |  1234 |  17 |
-  | Anna  |  4321 |  25 |
+| Name  | Phone | Age |
+|-------+-------+-----|
+| Peter |  1234 |  17 |
+| Anna  |  4321 |  25 |
 #+end_example
 
 A table is re-aligned automatically each time you press
@@ -1437,8 +1437,8 @@ separator line and will be expanded on the next re-align to span the
 whole table width.  So, to create the above table, you would only type
 
 #+begin_example
-  |Name|Phone|Age|
-  |-
+|Name|Phone|Age|
+|-
 #+end_example
 
 #+texinfo: @noindent
@@ -1774,8 +1774,8 @@ in a file upon visiting it.  You can also set this option on
 a per-file basis with:
 
 #+begin_example
-  ,#+STARTUP: align
-  ,#+STARTUP: noalign
+,#+STARTUP: align
+,#+STARTUP: noalign
 #+end_example
 
 Sometimes a single field or a few fields need to carry more text,
@@ -1784,12 +1784,12 @@ several columns or display them with a fixed width, regardless of
 content, as shown in the following example.
 
 #+begin_example
-  |---+---------------------+--------|           |---+-------…|…|
-  |   | <6>                 |        |           |   | <6>   …|…|
-  | 1 | one                 | some   |   ----\   | 1 | one   …|…|
-  | 2 | two                 | boring |   ----/   | 2 | two   …|…|
-  | 3 | This is a long text | column |           | 3 | This i…|…|
-  |---+---------------------+--------|           |---+-------…|…|
+|---+---------------------+--------|           |---+-------…|…|
+|   | <6>                 |        |           |   | <6>   …|…|
+| 1 | one                 | some   |   ----\   | 1 | one   …|…|
+| 2 | two                 | boring |   ----/   | 2 | two   …|…|
+| 3 | This is a long text | column |           | 3 | This i…|…|
+|---+---------------------+--------|           |---+-------…|…|
 #+end_example
 
 To set the width of a column, one field anywhere in the column may
@@ -1860,23 +1860,23 @@ a column a group of its own.  Upon export, boundaries between column
 groups are marked with vertical lines.  Here is an example:
 
 #+begin_example
-  | N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
-  |---+-----+-----+-----+---------+------------|
-  | / |  <  |     |  >  |       < |          > |
-  | 1 |  1  |  1  |  1  |       1 |          1 |
-  | 2 |  4  |  8  | 16  |  1.4142 |     1.1892 |
-  | 3 |  9  | 27  | 81  |  1.7321 |     1.3161 |
-  |---+-----+-----+-----+---------+------------|
-  ,#+TBLFM: $2=$1^2::$3=$1^3::$4=$1^4::$5=sqrt($1)::$6=sqrt(sqrt(($1)))
+| N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+|---+-----+-----+-----+---------+------------|
+| / |  <  |     |  >  |       < |          > |
+| 1 |  1  |  1  |  1  |       1 |          1 |
+| 2 |  4  |  8  | 16  |  1.4142 |     1.1892 |
+| 3 |  9  | 27  | 81  |  1.7321 |     1.3161 |
+|---+-----+-----+-----+---------+------------|
+,#+TBLFM: $2=$1^2::$3=$1^3::$4=$1^4::$5=sqrt($1)::$6=sqrt(sqrt(($1)))
 #+end_example
 
 It is also sufficient to just insert the column group starters after
 every vertical line you would like to have:
 
 #+begin_example
-  | N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
-  |---+-----+-----+-----+---------+------------|
-  | / | <   |     |     | <       |            |
+| N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+|---+-----+-----+-----+---------+------------|
+| / | <   |     |     | <       |            |
 #+end_example
 
 ** The Orgtbl Minor Mode
@@ -1895,7 +1895,7 @@ mode with {{{kbd(M-x orgtbl-mode)}}}.  To turn it on by default, for
 example in Message mode, use
 
 #+begin_src emacs-lisp
-  (add-hook 'message-mode-hook 'turn-on-orgtbl)
+(add-hook 'message-mode-hook 'turn-on-orgtbl)
 #+end_src
 
 Furthermore, with some special setup, it is possible to maintain
@@ -2311,12 +2311,12 @@ If you want to compute time values use the =T=, =t=, or =U= flag,
 either in Calc formulas or Elisp formulas:
 
 #+begin_example
-  |  Task 1 |   Task 2 |    Total |
-  |---------+----------+----------|
-  |    2:12 |     1:47 | 03:59:00 |
-  |    2:12 |     1:47 |    03:59 |
-  | 3:02:20 | -2:07:00 |     0.92 |
-  ,#+TBLFM: @2$3=$1+$2;T::@3$3=$1+$2;U::@4$3=$1+$2;t
+|  Task 1 |   Task 2 |    Total |
+|---------+----------+----------|
+|    2:12 |     1:47 | 03:59:00 |
+|    2:12 |     1:47 |    03:59 |
+| 3:02:20 | -2:07:00 |     0.92 |
+,#+TBLFM: @2$3=$1+$2;T::@3$3=$1+$2;U::@4$3=$1+$2;t
 #+end_example
 
 Input duration values must be of the form =HH:MM[:SS]=, where seconds
@@ -2460,7 +2460,7 @@ Org has three predefined Emacs Lisp functions for lookups in tables.
      Searches for the first element {{{var(S)}}} in list
      {{{var(S-LIST)}}} for which
      #+begin_src emacs-lisp
-       (PREDICATE VAL S)
+     (PREDICATE VAL S)
      #+end_src
      is non-~nil~; returns the value from the corresponding position
      in list {{{var(R-LIST)}}}.  The default {{{var(PREDICATE)}}} is
@@ -2673,24 +2673,24 @@ and then press {{{kbd(C-c C-c)}}} on the formula to apply.  Here is an
 example:
 
 #+begin_example
-  | x | y |
-  |---+---|
-  | 1 |   |
-  | 2 |   |
-  ,#+TBLFM: $2=$1*1
-  ,#+TBLFM: $2=$1*2
+| x | y |
+|---+---|
+| 1 |   |
+| 2 |   |
+,#+TBLFM: $2=$1*1
+,#+TBLFM: $2=$1*2
 #+end_example
 
 #+texinfo: @noindent
 Pressing {{{kbd(C-c C-c)}}} in the line of =#+TBLFM: $2=$1*2= yields:
 
 #+begin_example
-  | x | y |
-  |---+---|
-  | 1 | 2 |
-  | 2 | 4 |
-  ,#+TBLFM: $2=$1*1
-  ,#+TBLFM: $2=$1*2
+| x | y |
+|---+---|
+| 1 | 2 |
+| 2 | 4 |
+,#+TBLFM: $2=$1*1
+,#+TBLFM: $2=$1*2
 #+end_example
 
 #+texinfo: @noindent
@@ -2699,12 +2699,12 @@ example, you get the following result of applying only the first
 =TBLFM= keyword.
 
 #+begin_example
-  | x | y |
-  |---+---|
-  | 1 | 1 |
-  | 2 | 2 |
-  ,#+TBLFM: $2=$1*1
-  ,#+TBLFM: $2=$1*2
+| x | y |
+|---+---|
+| 1 | 1 |
+| 2 | 2 |
+,#+TBLFM: $2=$1*1
+,#+TBLFM: $2=$1*2
 #+end_example
 
 **** Debugging formulas
@@ -2794,21 +2794,21 @@ Here is an example of a table that collects exam results of students
 and makes use of these features:
 
 #+begin_example
-  |---+---------+--------+--------+--------+-------+------|
-  |   | Student | Prob 1 | Prob 2 | Prob 3 | Total | Note |
-  |---+---------+--------+--------+--------+-------+------|
-  | ! |         |     P1 |     P2 |     P3 |   Tot |      |
-  | # | Maximum |     10 |     15 |     25 |    50 | 10.0 |
-  | ^ |         |     m1 |     m2 |     m3 |    mt |      |
-  |---+---------+--------+--------+--------+-------+------|
-  | # | Peter   |     10 |      8 |     23 |    41 |  8.2 |
-  | # | Sam     |      2 |      4 |      3 |     9 |  1.8 |
-  |---+---------+--------+--------+--------+-------+------|
-  |   | Average |        |        |        |  25.0 |      |
-  | ^ |         |        |        |        |    at |      |
-  | $ | max=50  |        |        |        |       |      |
-  |---+---------+--------+--------+--------+-------+------|
-  ,#+TBLFM: $6=vsum($P1..$P3)::$7=10*$Tot/$max;%.1f::$at=vmean(@-II..@-I);%.1f
+|---+---------+--------+--------+--------+-------+------|
+|   | Student | Prob 1 | Prob 2 | Prob 3 | Total | Note |
+|---+---------+--------+--------+--------+-------+------|
+| ! |         |     P1 |     P2 |     P3 |   Tot |      |
+| # | Maximum |     10 |     15 |     25 |    50 | 10.0 |
+| ^ |         |     m1 |     m2 |     m3 |    mt |      |
+|---+---------+--------+--------+--------+-------+------|
+| # | Peter   |     10 |      8 |     23 |    41 |  8.2 |
+| # | Sam     |      2 |      4 |      3 |     9 |  1.8 |
+|---+---------+--------+--------+--------+-------+------|
+|   | Average |        |        |        |  25.0 |      |
+| ^ |         |        |        |        |    at |      |
+| $ | max=50  |        |        |        |       |      |
+|---+---------+--------+--------+--------+-------+------|
+,#+TBLFM: $6=vsum($P1..$P3)::$7=10*$Tot/$max;%.1f::$at=vmean(@-II..@-I);%.1f
 #+end_example
 
 #+texinfo: @noindent
@@ -2870,17 +2870,17 @@ fantastic Calc package, here is a table that computes the Taylor
 series of degree n at location x for a couple of functions.
 
 #+begin_example
-  |---+-------------+---+-----+--------------------------------------|
-  |   | Func        | n | x   | Result                               |
-  |---+-------------+---+-----+--------------------------------------|
-  | # | exp(x)      | 1 | x   | 1 + x                                |
-  | # | exp(x)      | 2 | x   | 1 + x + x^2 / 2                      |
-  | # | exp(x)      | 3 | x   | 1 + x + x^2 / 2 + x^3 / 6            |
-  | # | x^2+sqrt(x) | 2 | x=0 | x*(0.5 / 0) + x^2 (2 - 0.25 / 0) / 2 |
-  | # | x^2+sqrt(x) | 2 | x=1 | 2 + 2.5 x - 2.5 + 0.875 (x - 1)^2    |
-  | * | tan(x)      | 3 | x   | 0.0175 x + 1.77e-6 x^3               |
-  |---+-------------+---+-----+--------------------------------------|
-  ,#+TBLFM: $5=taylor($2,$4,$3);n3
+|---+-------------+---+-----+--------------------------------------|
+|   | Func        | n | x   | Result                               |
+|---+-------------+---+-----+--------------------------------------|
+| # | exp(x)      | 1 | x   | 1 + x                                |
+| # | exp(x)      | 2 | x   | 1 + x + x^2 / 2                      |
+| # | exp(x)      | 3 | x   | 1 + x + x^2 / 2 + x^3 / 6            |
+| # | x^2+sqrt(x) | 2 | x=0 | x*(0.5 / 0) + x^2 (2 - 0.25 / 0) / 2 |
+| # | x^2+sqrt(x) | 2 | x=1 | 2 + 2.5 x - 2.5 + 0.875 (x - 1)^2    |
+| * | tan(x)      | 3 | x   | 0.0175 x + 1.77e-6 x^3               |
+|---+-------------+---+-----+--------------------------------------|
+,#+TBLFM: $5=taylor($2,$4,$3);n3
 #+end_example
 
 ** Org Plot
@@ -2906,14 +2906,14 @@ then call {{{kbd(C-c \quot g)}}} or {{{kbd(M-x org-plot/gnuplot)}}} on the
 following table.
 
 #+begin_example
-  ,#+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
-  | Sede      | Max cites | H-index |
-  |-----------+-----------+---------|
-  | Chile     |    257.72 |   21.39 |
-  | Leeds     |    165.77 |   19.68 |
-  | Sao Paolo |     71.00 |   11.50 |
-  | Stockholm |    134.19 |   14.33 |
-  | Morels    |    257.56 |   17.67 |
+,#+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
+| Sede      | Max cites | H-index |
+|-----------+-----------+---------|
+| Chile     |    257.72 |   21.39 |
+| Leeds     |    165.77 |   19.68 |
+| Sao Paolo |     71.00 |   11.50 |
+| Stockholm |    134.19 |   14.33 |
+| Morels    |    257.56 |   17.67 |
 #+end_example
 
 Notice that Org Plot is smart enough to apply the table's headers as
@@ -3001,15 +3001,15 @@ formula.  When the source column changes, the bar plot may be updated
 by refreshing the table, for example typing {{{kbd(C-u C-c *)}}}.
 
 #+begin_example
-  | Sede          | Max cites |              |
-  |---------------+-----------+--------------|
-  | Chile         |    257.72 | WWWWWWWWWWWW |
-  | Leeds         |    165.77 | WWWWWWWh     |
-  | Sao Paolo     |     71.00 | WWW;         |
-  | Stockholm     |    134.19 | WWWWWW:      |
-  | Morelia       |    257.56 | WWWWWWWWWWWH |
-  | Rochefourchat |      0.00 |              |
-  ,#+TBLFM: $3='(orgtbl-ascii-draw $2 0.0 257.72 12)
+| Sede          | Max cites |              |
+|---------------+-----------+--------------|
+| Chile         |    257.72 | WWWWWWWWWWWW |
+| Leeds         |    165.77 | WWWWWWWh     |
+| Sao Paolo     |     71.00 | WWW;         |
+| Stockholm     |    134.19 | WWWWWW:      |
+| Morelia       |    257.56 | WWWWWWWWWWWH |
+| Rochefourchat |      0.00 |              |
+,#+TBLFM: $3='(orgtbl-ascii-draw $2 0.0 257.72 12)
 #+end_example
 
 The formula is an Elisp call.
@@ -3104,10 +3104,10 @@ keyword, which has to be put in the line before the element it refers
 to, as in the following example
 
 #+begin_example
-  ,#+NAME: My Target
-  | a  | table      |
-  |----+------------|
-  | of | four cells |
+,#+NAME: My Target
+| a  | table      |
+|----+------------|
+| of | four cells |
 #+end_example
 
 If none of the above succeeds, Org searches for a headline that is
@@ -3121,9 +3121,9 @@ assigned to the marked object[fn:26].  In the following excerpt from
 an Org buffer
 
 #+begin_example
-  1. one item
-  2. <<target>>another item
-  Here we refer to item [[target]].
+1. one item
+2. <<target>>another item
+Here we refer to item [[target]].
 #+end_example
 
 #+texinfo: @noindent
@@ -3481,10 +3481,10 @@ generally, act on links.
      want to bind this also to {{{kbd(M-n)}}} and {{{kbd(M-p)}}}.
 
      #+begin_src emacs-lisp
-       (add-hook 'org-load-hook
-                 (lambda ()
-                   (define-key org-mode-map "\M-n" 'org-next-link)
-                   (define-key org-mode-map "\M-p" 'org-previous-link)))
+     (add-hook 'org-load-hook
+               (lambda ()
+                 (define-key org-mode-map "\M-n" 'org-next-link)
+                 (define-key org-mode-map "\M-p" 'org-previous-link)))
      #+end_src
 
 ** Using Links Outside Org
@@ -3523,13 +3523,13 @@ variable ~org-link-abbrev-alist~ that relates the linkwords to
 replacement text.  Here is an example:
 
 #+begin_src emacs-lisp
-  (setq org-link-abbrev-alist
-        '(("bugzilla"  . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
-          ("url-to-ja" . "http://translate.google.fr/translate?sl=en&tl=ja&u=%h")
-          ("google"    . "http://www.google.com/search?q=")
-          ("gmap"      . "http://maps.google.com/maps?q=%s")
-          ("omap"      . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
-          ("ads"       . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
+(setq org-link-abbrev-alist
+      '(("bugzilla"  . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
+        ("url-to-ja" . "http://translate.google.fr/translate?sl=en&tl=ja&u=%h")
+        ("google"    . "http://www.google.com/search?q=")
+        ("gmap"      . "http://maps.google.com/maps?q=%s")
+        ("omap"      . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+        ("ads"       . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
 #+end_src
 
 If the replacement text contains the string =%s=, it is replaced with
@@ -3556,8 +3556,8 @@ can define them in the file with
 
 #+cindex: LINK, keyword
 #+begin_example
-  ,#+LINK: bugzilla  http://10.1.2.9/bugzilla/show_bug.cgi?id=
-  ,#+LINK: google    http://www.google.com/search?q=%s
+,#+LINK: bugzilla  http://10.1.2.9/bugzilla/show_bug.cgi?id=
+,#+LINK: google    http://www.google.com/search?q=%s
 #+end_example
 
 #+texinfo: @noindent
@@ -3569,7 +3569,7 @@ arguments, and return the full link with prefix.  You can set the link
 completion function like this:
 
 #+begin_src emacs-lisp
-  (org-link-set-parameter "type" :complete #'some-completion-function)
+(org-link-set-parameter "type" :complete #'some-completion-function)
 #+end_src
 
 ** Search Options in File Links
@@ -3592,11 +3592,11 @@ Here is the syntax of the different ways to attach a search to a file
 link, together with an explanation:
 
 #+begin_example
-  [[file:~/code/main.c::255]]
-  [[file:~/xx.org::My Target]]
-  [[file:~/xx.org::*My Target]]
-  [[file:~/xx.org::#my-custom-id]]
-  [[file:~/xx.org::/regexp/]]
+[[file:~/code/main.c::255]]
+[[file:~/xx.org::My Target]]
+[[file:~/xx.org::*My Target]]
+[[file:~/xx.org::#my-custom-id]]
+[[file:~/xx.org::/regexp/]]
 #+end_example
 
 - =255= ::
@@ -3794,8 +3794,8 @@ You can use TODO keywords to indicate different /sequential/ states in
 the process of working on an item, for example[fn:37]:
 
 #+begin_src emacs-lisp
-  (setq org-todo-keywords
-        '((sequence "TODO" "FEEDBACK" "VERIFY" "|" "DONE" "DELEGATED")))
+(setq org-todo-keywords
+      '((sequence "TODO" "FEEDBACK" "VERIFY" "|" "DONE" "DELEGATED")))
 #+end_src
 
 The vertical bar separates the TODO keywords (states that /need
@@ -3832,7 +3832,7 @@ persons, by using their names as TODO keywords.  This would be set up
 like this:
 
 #+begin_src emacs-lisp
-  (setq org-todo-keywords '((type "Fred" "Sara" "Lucy" "|" "DONE")))
+(setq org-todo-keywords '((type "Fred" "Sara" "Lucy" "|" "DONE")))
 #+end_src
 
 In this case, different keywords do not indicate a sequence, but
@@ -3865,10 +3865,10 @@ an item has been canceled---so it is not DONE, but also does not
 require action.  Your setup would then look like this:
 
 #+begin_src emacs-lisp
-  (setq org-todo-keywords
-        '((sequence "TODO" "|" "DONE")
-          (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED")
-          (sequence "|" "CANCELED")))
+(setq org-todo-keywords
+      '((sequence "TODO" "|" "DONE")
+        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED")
+        (sequence "|" "CANCELED")))
 #+end_src
 
 The keywords should all be different, this helps Org mode to keep
@@ -3915,10 +3915,10 @@ selection character after each keyword, in parentheses[fn:39].  For
 example:
 
 #+begin_src emacs-lisp
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "|" "DONE(d)")
-          (sequence "REPORT(r)" "BUG(b)" "KNOWNCAUSE(k)" "|" "FIXED(f)")
-          (sequence "|" "CANCELED(c)")))
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "|" "DONE(d)")
+        (sequence "REPORT(r)" "BUG(b)" "KNOWNCAUSE(k)" "|" "FIXED(f)")
+        (sequence "|" "CANCELED(c)")))
 #+end_src
 
 #+vindex: org-fast-tag-selection-include-todo
@@ -3955,9 +3955,9 @@ interpretation, but it means the same as =#+TODO=, or
 A setup for using several sets in parallel would be:
 
 #+begin_example
-  ,#+TODO: TODO | DONE
-  ,#+TODO: REPORT BUG KNOWNCAUSE | FIXED
-  ,#+TODO: | CANCELED
+,#+TODO: TODO | DONE
+,#+TODO: REPORT BUG KNOWNCAUSE | FIXED
+,#+TODO: | CANCELED
 #+end_example
 
 #+cindex: completion, of option keywords
@@ -3990,9 +3990,9 @@ special faces for some of them.  This can be done using the variable
 ~org-todo-keyword-faces~.  For example:
 
 #+begin_src emacs-lisp
-  (setq org-todo-keyword-faces
-        '(("TODO" . org-warning) ("STARTED" . "yellow")
-          ("CANCELED" . (:foreground "blue" :weight bold))))
+(setq org-todo-keyword-faces
+      '(("TODO" . org-warning) ("STARTED" . "yellow")
+        ("CANCELED" . (:foreground "blue" :weight bold))))
 #+end_src
 
 #+vindex: org-faces-easy-properties
@@ -4025,17 +4025,17 @@ children is blocked until all earlier siblings are marked DONE.  Here
 is an example:
 
 #+begin_example
-  ,* TODO Blocked until (two) is done
-  ,** DONE one
-  ,** TODO two
+,* TODO Blocked until (two) is done
+,** DONE one
+,** TODO two
 
-  ,* Parent
-  :PROPERTIES:
-  :ORDERED:  t
-  :END:
-  ,** TODO a
-  ,** TODO b, needs to wait for (a)
-  ,** TODO c, needs to wait for (a) and (b)
+,* Parent
+:PROPERTIES:
+:ORDERED:  t
+:END:
+,** TODO a
+,** TODO b, needs to wait for (a)
+,** TODO c, needs to wait for (a) and (b)
 #+end_example
 
 #+cindex: TODO dependencies, NOBLOCKING
@@ -4044,10 +4044,10 @@ You can ensure an entry is never blocked by using the =NOBLOCKING=
 property:
 
 #+begin_example
-  ,* This entry is never blocked
-  :PROPERTIES:
-  :NOBLOCKING: t
-  :END:
+,* This entry is never blocked
+:PROPERTIES:
+:NOBLOCKING: t
+:END:
 #+end_example
 
 - {{{kbd(C-c C-x o)}}} (~org-toggle-ordered-property~) ::
@@ -4108,7 +4108,7 @@ The most basic logging is to keep track of /when/ a certain TODO item
 was finished.  This is achieved with[fn:42]
 
 #+begin_src emacs-lisp
-  (setq org-log-done 'time)
+(setq org-log-done 'time)
 #+end_src
 
 #+vindex: org-closed-keep-when-no-todo
@@ -4123,7 +4123,7 @@ SPC)}}} for example), that line is also removed, unless you set
 a note along with the timestamp, use[fn:43]
 
 #+begin_src emacs-lisp
-  (setq org-log-done 'note)
+(setq org-log-done 'note)
 #+end_src
 
 #+texinfo: @noindent
@@ -4158,8 +4158,8 @@ a note with timestamp) in parentheses after each keyword.  For
 example, with the setting
 
 #+begin_src emacs-lisp
-  (setq org-todo-keywords
-        '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
 #+end_src
 
 To record a timestamp without a note for TODO keywords configured with
@@ -4194,18 +4194,18 @@ keywords like =lognotedone= or =logrepeat=, as well as adding state
 specific settings like =TODO(!)=.  For example:
 
 #+begin_example
-  ,* TODO Log each state with only a time
-    :PROPERTIES:
-    :LOGGING: TODO(!) WAIT(!) DONE(!) CANCELED(!)
-    :END:
-  ,* TODO Only log when switching to WAIT, and when repeating
-    :PROPERTIES:
-    :LOGGING: WAIT(@) logrepeat
-    :END:
-  ,* TODO No logging at all
-    :PROPERTIES:
-    :LOGGING: nil
-    :END:
+,* TODO Log each state with only a time
+  :PROPERTIES:
+  :LOGGING: TODO(!) WAIT(!) DONE(!) CANCELED(!)
+  :END:
+,* TODO Only log when switching to WAIT, and when repeating
+  :PROPERTIES:
+  :LOGGING: WAIT(@) logrepeat
+  :END:
+,* TODO No logging at all
+  :PROPERTIES:
+  :LOGGING: nil
+  :END:
 #+end_example
 
 *** Tracking your habits
@@ -4244,22 +4244,22 @@ To give you an idea of what the above rules look like in action, here's an
 actual habit with some history:
 
 #+begin_example
-  ,** TODO Shave
-     SCHEDULED: <2009-10-17 Sat .+2d/4d>
-     :PROPERTIES:
-     :STYLE:    habit
-     :LAST_REPEAT: [2009-10-19 Mon 00:36]
-     :END:
-     - State "DONE"       from "TODO"       [2009-10-15 Thu]
-     - State "DONE"       from "TODO"       [2009-10-12 Mon]
-     - State "DONE"       from "TODO"       [2009-10-10 Sat]
-     - State "DONE"       from "TODO"       [2009-10-04 Sun]
-     - State "DONE"       from "TODO"       [2009-10-02 Fri]
-     - State "DONE"       from "TODO"       [2009-09-29 Tue]
-     - State "DONE"       from "TODO"       [2009-09-25 Fri]
-     - State "DONE"       from "TODO"       [2009-09-19 Sat]
-     - State "DONE"       from "TODO"       [2009-09-16 Wed]
-     - State "DONE"       from "TODO"       [2009-09-12 Sat]
+,** TODO Shave
+   SCHEDULED: <2009-10-17 Sat .+2d/4d>
+   :PROPERTIES:
+   :STYLE:    habit
+   :LAST_REPEAT: [2009-10-19 Mon 00:36]
+   :END:
+   - State "DONE"       from "TODO"       [2009-10-15 Thu]
+   - State "DONE"       from "TODO"       [2009-10-12 Mon]
+   - State "DONE"       from "TODO"       [2009-10-10 Sat]
+   - State "DONE"       from "TODO"       [2009-10-04 Sun]
+   - State "DONE"       from "TODO"       [2009-10-02 Fri]
+   - State "DONE"       from "TODO"       [2009-09-29 Tue]
+   - State "DONE"       from "TODO"       [2009-09-25 Fri]
+   - State "DONE"       from "TODO"       [2009-09-19 Sat]
+   - State "DONE"       from "TODO"       [2009-09-16 Wed]
+   - State "DONE"       from "TODO"       [2009-09-12 Sat]
 #+end_example
 
 What this habit says is: I want to shave at most every 2 days---given
@@ -4396,12 +4396,12 @@ are updated each time the TODO status of a child changes, or when
 pressing {{{kbd(C-c C-c)}}} on the cookie.  For example:
 
 #+begin_example
-  ,* Organize Party [33%]
-  ,** TODO Call people [1/2]
-  ,*** TODO Peter
-  ,*** DONE Sarah
-  ,** TODO Buy food
-  ,** DONE Talk to neighbor
+,* Organize Party [33%]
+,** TODO Call people [1/2]
+,*** TODO Peter
+,*** DONE Sarah
+,** TODO Buy food
+,** DONE Talk to neighbor
 #+end_example
 
 #+cindex: COOKIE_DATA, property
@@ -4417,22 +4417,22 @@ include the word =recursive= into the value of the =COOKIE_DATA=
 property.
 
 #+begin_example org
-  ,* Parent capturing statistics [2/20]
-    :PROPERTIES:
-    :COOKIE_DATA: todo recursive
-    :END:
+,* Parent capturing statistics [2/20]
+  :PROPERTIES:
+  :COOKIE_DATA: todo recursive
+  :END:
 #+end_example
 
 If you would like a TODO entry to automatically change to DONE when
 all children are done, you can use the following setup:
 
 #+begin_src emacs-lisp
-  (defun org-summary-todo (n-done n-not-done)
-    "Switch entry to DONE when all subentries are done, to TODO otherwise."
-    (let (org-log-done org-log-states)   ; turn off logging
-      (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+(defun org-summary-todo (n-done n-not-done)
+  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  (let (org-log-done org-log-states)   ; turn off logging
+    (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
-  (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+(add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
 #+end_src
 
 Another possibility is the use of checkboxes to identify (a hierarchy
@@ -4457,14 +4457,14 @@ C-c)}}}, or use the mouse (thanks to Piotr Zielinski's
 Here is an example of a checkbox list.
 
 #+begin_example
-  ,* TODO Organize party [2/4]
-    - [-] call people [1/3]
-      - [ ] Peter
-      - [X] Sarah
-      - [ ] Sam
-    - [X] order food
-    - [ ] think about what music to play
-    - [X] talk to the neighbors
+,* TODO Organize party [2/4]
+  - [-] call people [1/3]
+    - [ ] Peter
+    - [X] Sarah
+    - [ ] Sam
+  - [X] order food
+  - [ ] think about what music to play
+  - [X] talk to the neighbors
 #+end_example
 
 Checkboxes work hierarchically, so if a checkbox item has children
@@ -4598,9 +4598,9 @@ a heading has a certain tag, all subheadings inherit the tag as well.
 For example, in the list
 
 #+begin_example
-  ,* Meeting with the French group      :work:
-  ,** Summary by Frank                  :boss:notes:
-  ,*** TODO Prepare slides for him      :action:
+,* Meeting with the French group      :work:
+,** Summary by Frank                  :boss:notes:
+,*** TODO Prepare slides for him      :action:
 #+end_example
 
 #+texinfo: @noindent
@@ -4680,8 +4680,8 @@ for a given file with lines like
 
 #+cindex: TAGS, keyword
 #+begin_example
-  ,#+TAGS: @work @home @tennisclub
-  ,#+TAGS: laptop car pc sailboat
+,#+TAGS: @work @home @tennisclub
+,#+TAGS: laptop car pc sailboat
 #+end_example
 
 If you have globally defined your preferred set of tags using the
@@ -4710,7 +4710,7 @@ the need to tag many items in different files with =@home=.  In this
 case you can set something like:
 
 #+begin_src emacs-lisp
-  (setq org-tag-alist '(("@work" . ?w) ("@home" . ?h) ("laptop" . ?l)))
+(setq org-tag-alist '(("@work" . ?w) ("@home" . ?h) ("laptop" . ?l)))
 #+end_src
 
 #+texinfo: @noindent
@@ -4730,8 +4730,8 @@ the tag list
 or write them in two lines:
 
 #+begin_example
-  ,#+TAGS: @work(w)  @home(h)  @tennisclub(t)
-  ,#+TAGS: laptop(l)  pc(p)
+,#+TAGS: @work(w)  @home(h)  @tennisclub(t)
+,#+TAGS: laptop(l)  pc(p)
 #+end_example
 
 #+texinfo: @noindent
@@ -4756,11 +4756,11 @@ to indicate a line break.  The previous example would be set globally
 by the following configuration:
 
 #+begin_src emacs-lisp
-  (setq org-tag-alist '((:startgroup . nil)
-                        ("@work" . ?w) ("@home" . ?h)
-                        ("@tennisclub" . ?t)
-                        (:endgroup . nil)
-                        ("laptop" . ?l) ("pc" . ?p)))
+(setq org-tag-alist '((:startgroup . nil)
+                      ("@work" . ?w) ("@home" . ?h)
+                      ("@tennisclub" . ?t)
+                      (:endgroup . nil)
+                      ("laptop" . ?l) ("pc" . ?p)))
 #+end_src
 
 If at least one tag has a selection key then pressing {{{kbd(C-c
@@ -4870,8 +4870,8 @@ tags: =Control=, =Persp=.  Defining =Control= and =Persp= as group
 tags creates an hierarchy of tags:
 
 #+begin_example
-  ,#+TAGS: [ Control : Context Task ]
-  ,#+TAGS: [ Persp : Vision Goal AOF Project ]
+,#+TAGS: [ Control : Context Task ]
+,#+TAGS: [ Persp : Vision Goal AOF Project ]
 #+end_example
 
 That can conceptually be seen as a hierarchy of tags:
@@ -4890,18 +4890,18 @@ You can use the ~:startgrouptag~, ~:grouptags~ and ~:endgrouptag~
 keyword directly when setting ~org-tag-alist~ directly:
 
 #+begin_src emacs-lisp
-  (setq org-tag-alist '((:startgrouptag)
-                        ("GTD")
-                        (:grouptags)
-                        ("Control")
-                        ("Persp")
-                        (:endgrouptag)
-                        (:startgrouptag)
-                        ("Control")
-                        (:grouptags)
-                        ("Context")
-                        ("Task")
-                        (:endgrouptag)))
+(setq org-tag-alist '((:startgrouptag)
+                      ("GTD")
+                      (:grouptags)
+                      ("Control")
+                      ("Persp")
+                      (:endgrouptag)
+                      (:startgrouptag)
+                      ("Control")
+                      (:grouptags)
+                      ("Context")
+                      ("Task")
+                      (:endgrouptag)))
 #+end_src
 
 The tags in a group can be mutually exclusive if using the same group
@@ -4920,10 +4920,10 @@ tag structure.  The regular expressions in the group must be specified
 within curly brackets.  Here is an expanded example:
 
 #+begin_example
-  ,#+TAGS: [ Vision : {V@.+} ]
-  ,#+TAGS: [ Goal : {G@.+} ]
-  ,#+TAGS: [ AOF : {AOF@.+} ]
-  ,#+TAGS: [ Project : {P@.+} ]
+,#+TAGS: [ Vision : {V@.+} ]
+,#+TAGS: [ Goal : {G@.+} ]
+,#+TAGS: [ AOF : {AOF@.+} ]
+,#+TAGS: [ Project : {P@.+} ]
 #+end_example
 
 Searching for the tag =Project= now lists all tags also including
@@ -5022,16 +5022,16 @@ a single line, with the key---surrounded by colons---first, and the
 value after it.  Keys are case-insensitive.  Here is an example:
 
 #+begin_example
-  ,* CD collection
-  ,** Classic
-  ,*** Goldberg Variations
-      :PROPERTIES:
-      :Title:     Goldberg Variations
-      :Composer:  J.S. Bach
-      :Artist:    Glen Gould
-      :Publisher: Deutsche Grammophon
-      :NDisks:    1
-      :END:
+,* CD collection
+,** Classic
+,*** Goldberg Variations
+    :PROPERTIES:
+    :Title:     Goldberg Variations
+    :Composer:  J.S. Bach
+    :Artist:    Glen Gould
+    :Publisher: Deutsche Grammophon
+    :NDisks:    1
+    :END:
 #+end_example
 
 Depending on the value of ~org-use-property-inheritance~, a property
@@ -5047,11 +5047,11 @@ with the CD collection, we can pre-define publishers and the number of
 disks in a box like this:
 
 #+begin_example
-  ,* CD collection
-    :PROPERTIES:
-    :NDisks_ALL:  1 2 3 4
-    :Publisher_ALL: "Deutsche Grammophon" Philips EMI
-    :END:
+,* CD collection
+  :PROPERTIES:
+  :NDisks_ALL:  1 2 3 4
+  :Publisher_ALL: "Deutsche Grammophon" Philips EMI
+  :END:
 #+end_example
 
 If you want to set properties that can be inherited by any entry in
@@ -5067,8 +5067,8 @@ to the property name.  The following results in the property =var=
 having the value =foo=1 bar=2=.
 
 #+begin_example
-  ,#+PROPERTY: var  foo=1
-  ,#+PROPERTY: var+ bar=2
+,#+PROPERTY: var  foo=1
+,#+PROPERTY: var+ bar=2
 #+end_example
 
 It is also possible to add to the values of inherited properties.  The
@@ -5076,20 +5076,20 @@ following results in the =Genres= property having the value =Classic
 Baroque= under the =Goldberg Variations= subtree.
 
 #+begin_example
-  ,* CD collection
-  ,** Classic
-      :PROPERTIES:
-      :Genres: Classic
-      :END:
-  ,*** Goldberg Variations
-      :PROPERTIES:
-      :Title:     Goldberg Variations
-      :Composer:  J.S. Bach
-      :Artist:    Glen Gould
-      :Publisher: Deutsche Grammophon
-      :NDisks:    1
-      :Genres+:   Baroque
-      :END:
+,* CD collection
+,** Classic
+    :PROPERTIES:
+    :Genres: Classic
+    :END:
+,*** Goldberg Variations
+    :PROPERTIES:
+    :Title:     Goldberg Variations
+    :Composer:  J.S. Bach
+    :Artist:    Glen Gould
+    :Publisher: Deutsche Grammophon
+    :NDisks:    1
+    :Genres+:   Baroque
+    :END:
 #+end_example
 
 Note that a property can only have one entry per drawer.
@@ -5356,10 +5356,10 @@ To specify a format that only applies to a specific tree, add
 a =COLUMNS= property to the top node of that tree, for example:
 
 #+begin_example
-  ,** Top node for columns view
-     :PROPERTIES:
-     :COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
-     :END:
+,** Top node for columns view
+   :PROPERTIES:
+   :COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
+   :END:
 #+end_example
 
 If a =COLUMNS= property is present in an entry, it defines columns for
@@ -5451,11 +5451,11 @@ Here is an example for a complete columns definition, along with
 allowed values[fn:57].
 
 #+begin_example
-  :COLUMNS:  %25ITEM %9Approved(Approved?){X} %Owner %11Status \
-                     %10Time_Estimate{:} %CLOCKSUM %CLOCKSUM_T
-  :Owner_ALL:    Tammy Mark Karl Lisa Don
-  :Status_ALL:   "In progress" "Not started yet" "Finished" ""
-  :Approved_ALL: "[ ]" "[X]"
+:COLUMNS:  %25ITEM %9Approved(Approved?){X} %Owner %11Status \
+                   %10Time_Estimate{:} %CLOCKSUM %CLOCKSUM_T
+:Owner_ALL:    Tammy Mark Karl Lisa Don
+:Status_ALL:   "In progress" "Not started yet" "Finished" ""
+:Approved_ALL: "[ ]" "[X]"
 #+end_example
 
 #+texinfo: @noindent
@@ -5610,10 +5610,10 @@ this block looks like this:
 
 #+cindex: BEGIN columnview
 #+begin_example
-  ,* The column view
-  ,#+BEGIN: columnview :hlines 1 :id "label"
+,* The column view
+,#+BEGIN: columnview :hlines 1 :id "label"
 
-  ,#+END:
+,#+END:
 #+end_example
 
 #+texinfo: @noindent
@@ -5749,10 +5749,10 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
      associated with a plain timestamp is shown exactly on that date.
 
      #+begin_example
-       ,* Meet Peter at the movies
-         <2006-11-01 Wed 19:15>
-       ,* Discussion on climate change
-         <2006-11-02 Thu 20:00-22:00>
+     ,* Meet Peter at the movies
+       <2006-11-01 Wed 19:15>
+     ,* Discussion on climate change
+       <2006-11-02 Thu 20:00-22:00>
      #+end_example
 
 - Timestamp with repeater interval ::
@@ -5764,8 +5764,8 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
      (y).  The following shows up in the agenda every Wednesday:
 
      #+begin_example
-       ,* Pick up Sam at school
-         <2007-05-16 Wed 12:30 +1w>
+     ,* Pick up Sam at school
+       <2007-05-16 Wed 12:30 +1w>
      #+end_example
 
 - Diary-style sexp entries ::
@@ -5777,8 +5777,8 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
      calendar/diary package[fn:60].  For example, with optional time:
 
      #+begin_example
-       ,* 22:00-23:00 The nerd meeting on every 2nd Thursday of the month
-         <%%(org-float t 4 2)>
+     ,* 22:00-23:00 The nerd meeting on every 2nd Thursday of the month
+       <%%(org-float t 4 2)>
      #+end_example
 
 - Time/Date range ::
@@ -5790,8 +5790,8 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
      that are displayed and fall in the range.  Here is an example:
 
      #+begin_example
-       ,** Meeting in Amsterdam
-          <2004-08-23 Mon>--<2004-08-26 Thu>
+     ,** Meeting in Amsterdam
+        <2004-08-23 Mon>--<2004-08-26 Thu>
      #+end_example
 
 - Inactive timestamp ::
@@ -5803,8 +5803,8 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
      they do /not/ trigger an entry to show up in the agenda.
 
      #+begin_example
-       ,* Gillian comes late for the fifth time
-         [2006-11-01 Wed]
+     ,* Gillian comes late for the fifth time
+       [2006-11-01 Wed]
      #+end_example
 
 ** Creating Timestamps
@@ -6096,9 +6096,9 @@ immediately after the task they refer to.
      until the entry is marked DONE.  An example:
 
      #+begin_example
-       ,*** TODO write article about the Earth for the Guide
-           DEADLINE: <2004-02-29 Sun>
-           The editor in charge is [[bbdb:Ford Prefect]]
+     ,*** TODO write article about the Earth for the Guide
+         DEADLINE: <2004-02-29 Sun>
+         The editor in charge is [[bbdb:Ford Prefect]]
      #+end_example
 
      #+vindex: org-agenda-skip-deadline-prewarning-if-scheduled
@@ -6121,8 +6121,8 @@ immediately after the task they refer to.
      the task is automatically forwarded until completed.
 
      #+begin_example
-       ,*** TODO Call Trillian for a date on New Years Eve.
-           SCHEDULED: <2004-12-25 Sat>
+     ,*** TODO Call Trillian for a date on New Years Eve.
+         SCHEDULED: <2004-12-25 Sat>
      #+end_example
 
      #+vindex: org-scheduled-delay-days
@@ -6247,8 +6247,8 @@ organize such tasks using a so-called repeater in a =DEADLINE=,
 =SCHEDULED=, or plain timestamp.  In the following example:
 
 #+begin_example
-  ,** TODO Pay the rent
-     DEADLINE: <2005-10-01 Sat +1m>
+,** TODO Pay the rent
+   DEADLINE: <2005-10-01 Sat +1m>
 #+end_example
 
 #+texinfo: noindent
@@ -6275,8 +6275,8 @@ above, setting the state to DONE would actually switch the date like
 this:
 
 #+begin_example
-  ,** TODO Pay the rent
-     DEADLINE: <2005-11-01 Tue +1m>
+,** TODO Pay the rent
+   DEADLINE: <2005-11-01 Tue +1m>
 #+end_example
 
 To mark a task with a repeater as DONE, use {{{kbd(C-- 1 C-c C-t)}}},
@@ -6301,24 +6301,24 @@ like changing batteries which should always repeat a certain time
 special repeaters =++= and =.+=.  For example:
 
 #+begin_example
-  ,** TODO Call Father
-     DEADLINE: <2008-02-10 Sun ++1w>
-     Marking this DONE shifts the date by at least one week, but also
-     by as many weeks as it takes to get this date into the future.
-     However, it stays on a Sunday, even if you called and marked it
-     done on Saturday.
+,** TODO Call Father
+   DEADLINE: <2008-02-10 Sun ++1w>
+   Marking this DONE shifts the date by at least one week, but also
+   by as many weeks as it takes to get this date into the future.
+   However, it stays on a Sunday, even if you called and marked it
+   done on Saturday.
 
-  ,** TODO Empty kitchen trash
-     DEADLINE: <2008-02-08 Fri 20:00 ++1d>
-     Marking this DONE shifts the date by at least one day, and also
-     by as many days as it takes to get the timestamp into the future.
-     Since there is a time in the timestamp, the next deadline in the
-     future will be on today's date if you complete the task before
-     20:00.
+,** TODO Empty kitchen trash
+   DEADLINE: <2008-02-08 Fri 20:00 ++1d>
+   Marking this DONE shifts the date by at least one day, and also
+   by as many days as it takes to get the timestamp into the future.
+   Since there is a time in the timestamp, the next deadline in the
+   future will be on today's date if you complete the task before
+   20:00.
 
-  ,** TODO Check the batteries in the smoke detectors
-     DEADLINE: <2005-11-01 Tue .+1m>
-     Marking this DONE will shift the date to one month after today.
+,** TODO Check the batteries in the smoke detectors
+   DEADLINE: <2005-11-01 Tue .+1m>
+   Marking this DONE will shift the date to one month after today.
 #+end_example
 
 #+vindex: org-agenda-skip-scheduled-if-deadline-is-shown
@@ -6356,8 +6356,8 @@ tasks absorbing your time.
 To save the clock history across Emacs sessions, use:
 
 #+begin_src emacs-lisp
-  (setq org-clock-persist 'history)
-  (org-clock-persistence-insinuate)
+(setq org-clock-persist 'history)
+(org-clock-persistence-insinuate)
 #+end_src
 
 #+vindex: org-clock-persist
@@ -6567,8 +6567,8 @@ into the buffer with the {{{kbd(C-c C-x C-r)}}} command:
 
 #+cindex: BEGIN clocktable
 #+begin_example
-  ,#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
-  ,#+END: clocktable
+,#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
+,#+END: clocktable
 #+end_example
 
 #+texinfo: @noindent
@@ -6743,39 +6743,39 @@ To get a clock summary of the current level 1 tree, for the current
 day, you could write:
 
 #+begin_example
-  ,#+BEGIN: clocktable :maxlevel 2 :block today :scope tree1 :link t
-  ,#+END: clocktable
+,#+BEGIN: clocktable :maxlevel 2 :block today :scope tree1 :link t
+,#+END: clocktable
 #+end_example
 
 #+texinfo: @noindent
 To use a specific time range you could write[fn:77]
 
 #+begin_example
-  ,#+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
-                      :tend "<2006-08-10 Thu 12:00>"
-  ,#+END: clocktable
+,#+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
+                    :tend "<2006-08-10 Thu 12:00>"
+,#+END: clocktable
 #+end_example
 
 A range starting a week ago and ending right now could be written as
 
 #+begin_example
-  ,#+BEGIN: clocktable :tstart "<-1w>" :tend "<now>"
-  ,#+END: clocktable
+,#+BEGIN: clocktable :tstart "<-1w>" :tend "<now>"
+,#+END: clocktable
 #+end_example
 
 A summary of the current subtree with % times would be:
 
 #+begin_example
-  ,#+BEGIN: clocktable :scope subtree :link t :formula %
-  ,#+END: clocktable
+,#+BEGIN: clocktable :scope subtree :link t :formula %
+,#+END: clocktable
 #+end_example
 
 A horizontally compact representation of everything clocked during
 last week would be:
 
 #+begin_example
-  ,#+BEGIN: clocktable :scope agenda :block lastweek :compact t
-  ,#+END: clocktable
+,#+BEGIN: clocktable :scope agenda :block lastweek :compact t
+,#+END: clocktable
 #+end_example
 
 *** Resolving idle time and continuous clocking
@@ -6927,8 +6927,8 @@ these values together with clock sums---if you want to clock your
 time.  For a specific buffer you can use:
 
 #+begin_example
-  ,#+PROPERTY: Effort_ALL 0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00
-  ,#+COLUMNS: %40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM
+,#+PROPERTY: Effort_ALL 0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00
+,#+COLUMNS: %40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM
 #+end_example
 
 #+texinfo: noindent
@@ -7069,7 +7069,7 @@ The following customization sets a default target file for notes.
 
 #+vindex: org-default-notes-file
 #+begin_src emacs-lisp
-  (setq org-default-notes-file (concat org-directory "/notes.org"))
+(setq org-default-notes-file (concat org-directory "/notes.org"))
 #+end_src
 
 You may also define a global key for capturing new material (see
@@ -7169,11 +7169,11 @@ the file =journal.org= should capture journal entries.  A possible
 configuration would look like:
 
 #+begin_src emacs-lisp
-  (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-           "* TODO %?\n  %i\n  %a")
-          ("j" "Journal" entry (file+datetree "~/org/journal.org")
-           "* %?\nEntered on %U\n  %i\n  %a")))
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+         "* %?\nEntered on %U\n  %i\n  %a")))
 #+end_src
 
 #+texinfo: @noindent
@@ -7181,8 +7181,8 @@ If you then press {{{kbd(t)}}} from the capture menu, Org will prepare
 the template for you like this:
 
 #+begin_example
-  ,* TODO
-    [[file:LINK TO WHERE YOU INITIATED CAPTURE]]
+,* TODO
+  [[file:LINK TO WHERE YOU INITIATED CAPTURE]]
 #+end_example
 
 #+texinfo: @noindent
@@ -7197,8 +7197,8 @@ going through the interactive template selection, you can create your
 key binding like this:
 
 #+begin_src emacs-lisp
-  (define-key global-map "\C-cx"
-    (lambda () (interactive) (org-capture nil "x")))
+(define-key global-map "\C-cx"
+  (lambda () (interactive) (org-capture nil "x")))
 #+end_src
 
 **** Template elements
@@ -7219,7 +7219,7 @@ Now lets look at the elements of a template definition.  Each entry in
      for example:
 
      #+begin_src emacs-lisp
-       ("b" "Templates for marking stuff to buy")
+     ("b" "Templates for marking stuff to buy")
      #+end_src
 
      #+texinfo: @noindent
@@ -7558,16 +7558,16 @@ have a capture template "p" for storing Gnus emails containing
 patches.  Then you would configure this option like this:
 
 #+begin_src emacs-lisp
-  (setq org-capture-templates-contexts
-        '(("p" (in-mode . "message-mode"))))
+(setq org-capture-templates-contexts
+      '(("p" (in-mode . "message-mode"))))
 #+end_src
 
 You can also tell that the command key {{{kbd(p)}}} should refer to
 another template.  In that case, add this command key like this:
 
 #+begin_src emacs-lisp
-  (setq org-capture-templates-contexts
-        '(("p" "q" (in-mode . "message-mode"))))
+(setq org-capture-templates-contexts
+      '(("p" "q" (in-mode . "message-mode"))))
 #+end_src
 
 See the docstring of the variable for more information.
@@ -7709,24 +7709,24 @@ Add the following lines to the Emacs init file to have {{{kbd(C-c C-x
 a)}}} attach files in Dired buffers.
 
 #+begin_src emacs-lisp
-  (add-hook 'dired-mode-hook
-            (lambda ()
-              (define-key dired-mode-map
-                (kbd "C-c C-x a")
-                #'org-attach-dired-to-subtree))))
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (define-key dired-mode-map
+              (kbd "C-c C-x a")
+              #'org-attach-dired-to-subtree))))
 #+end_src
 
 The following code shows how to bind the previous command with
 a specific attachment method.
 
 #+begin_src emacs-lisp
-  (add-hook 'dired-mode-hook
-            (lambda ()
-              (define-key dired-mode-map (kbd "C-c C-x c")
-                (lambda ()
-                  (interactive)
-                  (let ((org-attach-method 'cp))
-                    (call-interactively #'org-attach-dired-to-subtree))))))
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (define-key dired-mode-map (kbd "C-c C-x c")
+              (lambda ()
+                (interactive)
+                (let ((org-attach-method 'cp))
+                  (call-interactively #'org-attach-dired-to-subtree))))))
 #+end_src
 
 ** RSS Feeds
@@ -7744,10 +7744,10 @@ feeds, configure the variable ~org-feed-alist~.  The docstring of this
 variable has detailed information.  With the following
 
 #+begin_src emacs-lisp
-  (setq org-feed-alist
-        '(("Slashdot"
-           "http://rss.slashdot.org/Slashdot/slashdot"
-           "~/txt/org/feeds.org" "Slashdot Entries")))
+(setq org-feed-alist
+      '(("Slashdot"
+         "http://rss.slashdot.org/Slashdot/slashdot"
+         "~/txt/org/feeds.org" "Slashdot Entries")))
 #+end_src
 
 #+texinfo: @noindent
@@ -7855,10 +7855,10 @@ To use this feature, add a bookmark with an arbitrary name, e.g.
 =Org: capture= and enter this as =Location=:
 
 #+begin_example
-  javascript:location.href='org-protocol://template=x'+
-        '&url='+encodeURIComponent(window.location.href)+
-        '&title='+encodeURIComponent(document.title)+
-        '&body='+encodeURIComponent(window.getSelection());
+javascript:location.href='org-protocol://template=x'+
+      '&url='+encodeURIComponent(window.location.href)+
+      '&title='+encodeURIComponent(document.title)+
+      '&body='+encodeURIComponent(window.getSelection());
 #+end_example
 
 #+vindex: org-protocol-default-template-key
@@ -7869,10 +7869,10 @@ bookmark itself, as in the example above, or in
 The following template placeholders are available:
 
 #+begin_example
-  %:link          The URL
-  %:description   The webpage title
-  %:annotation    Equivalent to [[%:link][%:description]]
-  %i              The selected text
+%:link          The URL
+%:description   The webpage title
+%:annotation    Equivalent to [[%:link][%:description]]
+%i              The selected text
 #+end_example
 
 *** ~open-source~ protocol
@@ -7887,8 +7887,8 @@ sources when reading a document.  To that effect, you can use
 a bookmark with the following location:
 
 #+begin_example
-  javascript:location.href='org-protocol://open-source?&url='+
-        encodeURIComponent(location.href)
+javascript:location.href='org-protocol://open-source?&url='+
+      encodeURIComponent(location.href)
 #+end_example
 
 #+vindex: org-protocol-project-alist
@@ -7900,12 +7900,12 @@ names, by stripping URL parameters from the end and replacing the
 ~org-protocol-project-alist~ to the following
 
 #+begin_src emacs-lisp
-  (setq org-protocol-project-alist
-        '(("Worg"
-           :base-url "https://orgmode.org/worg/"
-           :working-directory "/home/user/worg/"
-           :online-suffix ".html"
-           :working-suffix ".org")))
+(setq org-protocol-project-alist
+      '(("Worg"
+         :base-url "https://orgmode.org/worg/"
+         :working-directory "/home/user/worg/"
+         :online-suffix ".html"
+         :working-suffix ".org")))
 #+end_src
 
 #+texinfo: @noindent
@@ -7936,14 +7936,14 @@ Now map the URL to the path =/home/user/example/products.php= by
 adding ~:rewrites~ rules like this:
 
 #+begin_src emacs-lisp
-  (setq org-protocol-project-alist
-        '(("example.com"
-           :base-url "http://example.com/"
-           :working-directory "/home/user/example/"
-           :online-suffix ".php"
-           :working-suffix ".php"
-           :rewrites (("example.com/print/" . "products.php")
-                      ("example.com/$" . "index.php")))))
+(setq org-protocol-project-alist
+      '(("example.com"
+         :base-url "http://example.com/"
+         :working-directory "/home/user/example/"
+         :online-suffix ".php"
+         :working-suffix ".php"
+         :rewrites (("example.com/print/" . "products.php")
+                    ("example.com/$" . "index.php")))))
 #+end_src
 
 #+texinfo: @noindent
@@ -8510,7 +8510,7 @@ In order to include entries from the Emacs diary into Org mode's
 agenda, you only need to customize the variable
 
 #+begin_src emacs-lisp
-  (setq org-agenda-include-diary t)
+(setq org-agenda-include-diary t)
 #+end_src
 
 #+texinfo: @noindent
@@ -8534,18 +8534,18 @@ the left margin, no whitespace is allowed before them, as seen in the
 following segment of an Org file:[fn:92]
 
 #+begin_example
-  ,* Holidays
-    :PROPERTIES:
-    :CATEGORY: Holiday
-    :END:
-  %%(org-calendar-holiday)   ; special function for holiday names
+,* Holidays
+  :PROPERTIES:
+  :CATEGORY: Holiday
+  :END:
+%%(org-calendar-holiday)   ; special function for holiday names
 
-  ,* Birthdays
-    :PROPERTIES:
-    :CATEGORY: Ann
-    :END:
-  %%(org-anniversary 1956  5 14) Arthur Dent is %d years old
-  %%(org-anniversary 1869 10  2) Mahatma Gandhi would be %d years old
+,* Birthdays
+  :PROPERTIES:
+  :CATEGORY: Ann
+  :END:
+%%(org-anniversary 1956  5 14) Arthur Dent is %d years old
+%%(org-anniversary 1869 10  2) Mahatma Gandhi would be %d years old
 #+end_example
 
 **** Anniversaries from BBDB
@@ -8563,11 +8563,11 @@ BBDB anniversaries as part of the agenda.  All you need to do is to
 add the following to one of your agenda files:
 
 #+begin_example
-  ,* Anniversaries
-    :PROPERTIES:
-    :CATEGORY: Anniv
-    :END:
-  %%(org-bbdb-anniversaries)
+,* Anniversaries
+  :PROPERTIES:
+  :CATEGORY: Anniv
+  :END:
+%%(org-bbdb-anniversaries)
 #+end_example
 
 You can then go ahead and define anniversaries for a BBDB record.
@@ -8579,10 +8579,10 @@ the class, it defaults to =birthday=.  Here are a few examples, the
 header for the file =org-bbdb.el= contains more detailed information.
 
 #+begin_example
-  1973-06-22
-  06-22
-  1955-08-02 wedding
-  2008-04-14 %s released version 6.01 of Org mode, %d years ago
+1973-06-22
+06-22
+1955-08-02 wedding
+2008-04-14 %s released version 6.01 of Org mode, %d years ago
 #+end_example
 
 After a change to BBDB, or for the first agenda display during an
@@ -8596,11 +8596,11 @@ If you would like to see upcoming anniversaries with a bit of
 forewarning, you can use the following instead:
 
 #+begin_example
-  ,* Anniversaries
-    :PROPERTIES:
-    :CATEGORY: Anniv
-    :END:
-  %%(org-bbdb-anniversaries-future 3)
+,* Anniversaries
+  :PROPERTIES:
+  :CATEGORY: Anniv
+  :END:
+%%(org-bbdb-anniversaries-future 3)
 #+end_example
 
 That will give you three days' warning: on the anniversary date itself
@@ -8810,8 +8810,8 @@ When matching properties, a number of different operators can be used
 to test the value of a property.  Here is a complex example:
 
 #+begin_example
-  +work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2
-           +With={Sarah|Denny}+SCHEDULED>="<2008-10-11>"
++work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2
+         +With={Sarah|Denny}+SCHEDULED>="<2008-10-11>"
 #+end_example
 
 #+texinfo: @noindent
@@ -8965,9 +8965,9 @@ start by identifying eligible projects with a tags/TODO match (see
 are not stuck.  The correct customization for this is:
 
 #+begin_src emacs-lisp
-  (setq org-stuck-projects
-        '("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@shop")
-          "\\<IGNORE\\>"))
+(setq org-stuck-projects
+      '("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@shop")
+        "\\<IGNORE\\>"))
 #+end_src
 
 Note that if a project is identified as non-stuck, the subtree of this
@@ -9046,10 +9046,10 @@ a standard 24 hour format as part of the prefix.  The example times in
 the previous paragraphs would end up in the agenda like this:
 
 #+begin_example
-   8:30-13:00 Arthur Dent lies in front of the bulldozer
-  12:45...... Ford Prefect arrives and takes Arthur to the pub
-  19:00...... The Vogon reads his poem
-  20:30-22:15 Marvin escorts the Hitchhikers to the bridge
+ 8:30-13:00 Arthur Dent lies in front of the bulldozer
+12:45...... Ford Prefect arrives and takes Arthur to the pub
+19:00...... The Vogon reads his poem
+20:30-22:15 Marvin escorts the Hitchhikers to the bridge
 #+end_example
 
 #+cindex: time grid
@@ -9057,17 +9057,17 @@ If the agenda is in single-day mode, or for the display of today, the
 timed entries are embedded in a time grid, like
 
 #+begin_example
-   8:00...... ------------------
-   8:30-13:00 Arthur Dent lies in front of the bulldozer
-  10:00...... ------------------
-  12:00...... ------------------
-  12:45...... Ford Prefect arrives and takes Arthur to the pub
-  14:00...... ------------------
-  16:00...... ------------------
-  18:00...... ------------------
-  19:00...... The Vogon reads his poem
-  20:00...... ------------------
-  20:30-22:15 Marvin escorts the Hitchhikers to the bridge
+ 8:00...... ------------------
+ 8:30-13:00 Arthur Dent lies in front of the bulldozer
+10:00...... ------------------
+12:00...... ------------------
+12:45...... Ford Prefect arrives and takes Arthur to the pub
+14:00...... ------------------
+16:00...... ------------------
+18:00...... ------------------
+19:00...... The Vogon reads his poem
+20:00...... ------------------
+20:30-22:15 Marvin escorts the Hitchhikers to the bridge
 #+end_example
 
 #+vindex: org-agenda-use-time-grid
@@ -9171,17 +9171,17 @@ custom agenda commands.
      business hours, with something like this:
 
      #+begin_src emacs-lisp
-       (defun org-my-auto-exclude-function (tag)
-         (and (cond
-               ((string= tag "Net")
-                (/= 0 (call-process "/sbin/ping" nil nil nil
-                                    "-c1" "-q" "-t1" "mail.gnu.org")))
-               ((or (string= tag "Errand") (string= tag "Call"))
-                (let ((hour (nth 2 (decode-time))))
-                  (or (< hour 8) (> hour 21)))))
-              (concat "-" tag)))
+     (defun org-my-auto-exclude-function (tag)
+       (and (cond
+             ((string= tag "Net")
+              (/= 0 (call-process "/sbin/ping" nil nil nil
+                                  "-c1" "-q" "-t1" "mail.gnu.org")))
+             ((or (string= tag "Errand") (string= tag "Call"))
+              (let ((hour (nth 2 (decode-time))))
+                (or (< hour 8) (> hour 21)))))
+            (concat "-" tag)))
 
-       (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-function)
+     (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-function)
      #+end_src
 
 - {{{kbd(<)}}} (~org-agenda-filter-by-category~) ::
@@ -9224,8 +9224,8 @@ custom agenda commands.
      first need to set up allowed efforts globally, for example
 
      #+begin_src emacs-lisp
-       (setq org-global-properties
-             '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
+     (setq org-global-properties
+           '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
      #+end_src
 
      #+vindex: org-sort-agenda-noeffort-is-high
@@ -9290,9 +9290,9 @@ command.  For example, this custom command displays the next five
 entries with a =NEXT= TODO keyword.
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("n" todo "NEXT"
-           ((org-agenda-max-entries 5)))))
+(setq org-agenda-custom-commands
+      '(("n" todo "NEXT"
+         ((org-agenda-max-entries 5)))))
 #+end_src
 
 Once you mark one of these five entry as DONE, rebuilding the agenda
@@ -10016,13 +10016,13 @@ the other commands, the cursor needs to be in the desired line.
           =web=.
 
           #+begin_src emacs-lisp
-            (defun set-category ()
-              (interactive "P")
-              (let ((marker (or (org-get-at-bol 'org-hd-marker)
-                                (org-agenda-error))))
-                (org-with-point-at marker
-                  (org-back-to-heading t)
-                  (org-set-property "CATEGORY" "web"))))
+          (defun set-category ()
+            (interactive "P")
+            (let ((marker (or (org-get-at-bol 'org-hd-marker)
+                              (org-agenda-error))))
+              (org-with-point-at marker
+                (org-back-to-heading t)
+                (org-set-property "CATEGORY" "web"))))
           #+end_src
 
 *** Calendar commands
@@ -10159,19 +10159,19 @@ the Emacs init file.  The following example contains all valid agenda
 views:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("x" agenda)
-          ("y" agenda*)
-          ("w" todo "WAITING")
-          ("W" todo-tree "WAITING")
-          ("u" tags "+boss-urgent")
-          ("v" tags-todo "+boss-urgent")
-          ("U" tags-tree "+boss-urgent")
-          ("f" occur-tree "\\<FIXME\\>")
-          ("h" . "HOME+Name tags searches") ;description for "h" prefix
-          ("hl" tags "+home+Lisa")
-          ("hp" tags "+home+Peter")
-          ("hk" tags "+home+Kim")))
+(setq org-agenda-custom-commands
+      '(("x" agenda)
+        ("y" agenda*)
+        ("w" todo "WAITING")
+        ("W" todo-tree "WAITING")
+        ("u" tags "+boss-urgent")
+        ("v" tags-todo "+boss-urgent")
+        ("U" tags-tree "+boss-urgent")
+        ("f" occur-tree "\\<FIXME\\>")
+        ("h" . "HOME+Name tags searches") ;description for "h" prefix
+        ("hl" tags "+home+Lisa")
+        ("hp" tags "+home+Peter")
+        ("hk" tags "+home+Kim")))
 #+end_src
 
 #+texinfo: @noindent
@@ -10250,15 +10250,15 @@ matching commands discussed above: ~todo~, ~tags~, and ~tags-todo~.
 Here are two examples:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("h" "Agenda and Home-related tasks"
-           ((agenda "")
-            (tags-todo "home")
-            (tags "garden")))
-          ("o" "Agenda and Office-related tasks"
-           ((agenda "")
-            (tags-todo "work")
-            (tags "office")))))
+(setq org-agenda-custom-commands
+      '(("h" "Agenda and Home-related tasks"
+         ((agenda "")
+          (tags-todo "home")
+          (tags "garden")))
+        ("o" "Agenda and Office-related tasks"
+         ((agenda "")
+          (tags-todo "work")
+          (tags "office")))))
 #+end_src
 
 #+texinfo: @noindent
@@ -10284,15 +10284,15 @@ Setting options requires inserting a list of variable names and values
 at the right spot in ~org-agenda-custom-commands~.  For example:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("w" todo "WAITING"
-           ((org-agenda-sorting-strategy '(priority-down))
-            (org-agenda-prefix-format "  Mixed: ")))
-          ("U" tags-tree "+boss-urgent"
-           ((org-show-context-detail 'minimal)))
-          ("N" search ""
-           ((org-agenda-files '("~org/notes.org"))
-            (org-agenda-text-search-extra-files nil)))))
+(setq org-agenda-custom-commands
+      '(("w" todo "WAITING"
+         ((org-agenda-sorting-strategy '(priority-down))
+          (org-agenda-prefix-format "  Mixed: ")))
+        ("U" tags-tree "+boss-urgent"
+         ((org-show-context-detail 'minimal)))
+        ("N" search ""
+         ((org-agenda-files '("~org/notes.org"))
+          (org-agenda-text-search-extra-files nil)))))
 #+end_src
 
 #+texinfo: @noindent
@@ -10316,17 +10316,17 @@ tags query in the opposite order, ~priority-up~.  This would look like
 this:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("h" "Agenda and Home-related tasks"
-           ((agenda)
-            (tags-todo "home")
-            (tags "garden"
-                  ((org-agenda-sorting-strategy '(priority-up)))))
-           ((org-agenda-sorting-strategy '(priority-down))))
-          ("o" "Agenda and Office-related tasks"
-           ((agenda)
-            (tags-todo "work")
-            (tags "office")))))
+(setq org-agenda-custom-commands
+      '(("h" "Agenda and Home-related tasks"
+         ((agenda)
+          (tags-todo "home")
+          (tags "garden"
+                ((org-agenda-sorting-strategy '(priority-up)))))
+         ((org-agenda-sorting-strategy '(priority-down))))
+        ("o" "Agenda and Office-related tasks"
+         ((agenda)
+          (tags-todo "work")
+          (tags "office")))))
 #+end_src
 
 As you see, the values and parentheses setting is a little complex.
@@ -10345,8 +10345,8 @@ need when reading emails.  Then you would configure this option like
 this:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands-contexts
-        '(("o" (in-mode . "message-mode"))))
+(setq org-agenda-custom-commands-contexts
+      '(("o" (in-mode . "message-mode"))))
 #+end_src
 
 You can also tell that the command key {{{kbd(o)}}} should refer to
@@ -10354,8 +10354,8 @@ another command key {{{kbd(r)}}}.  In that case, add this command key
 like this:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands-contexts
-        '(("o" "r" (in-mode . "message-mode"))))
+(setq org-agenda-custom-commands-contexts
+      '(("o" "r" (in-mode . "message-mode"))))
 #+end_src
 
 See the docstring of the variable for more information.
@@ -10390,21 +10390,21 @@ commands and specify file names for them as well.  File names can be
 relative to the current working directory, or absolute.
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("X" agenda "" nil ("agenda.html" "agenda.ps"))
-          ("Y" alltodo "" nil ("todo.html" "todo.txt" "todo.ps"))
-          ("h" "Agenda and Home-related tasks"
-           ((agenda "")
-            (tags-todo "home")
-            (tags "garden"))
-           nil
-           ("~/views/home.html"))
-          ("o" "Agenda and Office-related tasks"
-           ((agenda)
-            (tags-todo "work")
-            (tags "office"))
-           nil
-           ("~/views/office.ps" "~/calendars/office.ics"))))
+(setq org-agenda-custom-commands
+      '(("X" agenda "" nil ("agenda.html" "agenda.ps"))
+        ("Y" alltodo "" nil ("todo.html" "todo.txt" "todo.ps"))
+        ("h" "Agenda and Home-related tasks"
+         ((agenda "")
+          (tags-todo "home")
+          (tags "garden"))
+         nil
+         ("~/views/home.html"))
+        ("o" "Agenda and Office-related tasks"
+         ((agenda)
+          (tags-todo "work")
+          (tags "office"))
+         nil
+         ("~/views/office.ps" "~/calendars/office.ics"))))
 #+end_src
 
 The extension of the file name determines the type of export.  If it
@@ -10432,14 +10432,14 @@ You can use the options section of the custom agenda commands to also
 set options for the export commands.  For example:
 
 #+begin_src emacs-lisp
-  (setq org-agenda-custom-commands
-        '(("X" agenda ""
-           ((ps-number-of-columns 2)
-            (ps-landscape-mode t)
-            (org-agenda-prefix-format " [ ] ")
-            (org-agenda-with-colors nil)
-            (org-agenda-remove-tags t))
-           ("theagenda.ps"))))
+(setq org-agenda-custom-commands
+      '(("X" agenda ""
+         ((ps-number-of-columns 2)
+          (ps-landscape-mode t)
+          (org-agenda-prefix-format " [ ] ")
+          (org-agenda-with-colors nil)
+          (org-agenda-remove-tags t))
+         ("theagenda.ps"))))
 #+end_src
 
 #+texinfo: @noindent
@@ -10454,11 +10454,11 @@ the black-and-white printer.  Settings specified in
 ~org-agenda-exporter-settings~ also apply, e.g.,
 
 #+begin_src emacs-lisp
-  (setq org-agenda-exporter-settings
-        '((ps-number-of-columns 2)
-          (ps-landscape-mode t)
-          (org-agenda-add-entry-text-maxlines 5)
-          (htmlize-output-type 'css)))
+(setq org-agenda-exporter-settings
+      '((ps-number-of-columns 2)
+        (ps-landscape-mode t)
+        (org-agenda-add-entry-text-maxlines 5)
+        (htmlize-output-type 'css)))
 #+end_src
 
 #+texinfo: @noindent
@@ -10468,19 +10468,19 @@ but the settings in ~org-agenda-custom-commands~ take precedence.
 From the command line you may also use:
 
 #+begin_src shell
-  emacs -eval (org-batch-store-agenda-views) -kill
+emacs -eval (org-batch-store-agenda-views) -kill
 #+end_src
 
 #+texinfo: @noindent
 or, if you need to modify some parameters[fn:102]
 
 #+begin_src shell
-  emacs -eval '(org-batch-store-agenda-views                      \
-                org-agenda-span (quote month)                     \
-                org-agenda-start-day "2007-11-01"                 \
-                org-agenda-include-diary nil                      \
-                org-agenda-files (quote ("~/org/project.org")))'  \
-        -kill
+emacs -eval '(org-batch-store-agenda-views                      \
+              org-agenda-span (quote month)                     \
+              org-agenda-start-day "2007-11-01"                 \
+              org-agenda-include-diary nil                      \
+              org-agenda-files (quote ("~/org/project.org")))'  \
+      -kill
 #+end_src
 
 #+texinfo: @noindent
@@ -10591,13 +10591,13 @@ can also be used to format poetry.
 #+cindex: BEGIN_VERSE
 #+cindex: verse blocks
 #+begin_example
-  ,#+BEGIN_VERSE
-   Great clouds overhead
-   Tiny black birds rise and fall
-   Snow covers Emacs
+,#+BEGIN_VERSE
+ Great clouds overhead
+ Tiny black birds rise and fall
+ Snow covers Emacs
 
-      ---AlexSchroeder
-  ,#+END_VERSE
+    ---AlexSchroeder
+,#+END_VERSE
 #+end_example
 
 When quoting a passage from another document, it is customary to
@@ -10607,10 +10607,10 @@ right margin.  You can include quotations in Org documents like this:
 #+cindex: BEGIN_QUOTE
 #+cindex: quote blocks
 #+begin_example
-  ,#+BEGIN_QUOTE
-  Everything should be made as simple as possible,
-  but not any simpler ---Albert Einstein
-  ,#+END_QUOTE
+,#+BEGIN_QUOTE
+Everything should be made as simple as possible,
+but not any simpler ---Albert Einstein
+,#+END_QUOTE
 #+end_example
 
 If you would like to center some text, do it like this:
@@ -10618,10 +10618,10 @@ If you would like to center some text, do it like this:
 #+cindex: BEGIN_CENTER
 #+cindex: center blocks
 #+begin_example
-  ,#+BEGIN_CENTER
-  Everything should be made as simple as possible, \\
-  but not any simpler
-  ,#+END_CENTER
+,#+BEGIN_CENTER
+Everything should be made as simple as possible, \\
+but not any simpler
+,#+END_CENTER
 #+end_example
 
 ** Emphasis and Monospace
@@ -10671,10 +10671,10 @@ the text you can refer to the object with =[[tab:basic-data]]= (see
 [[*Internal Links]]):
 
 #+begin_example
-  ,#+CAPTION: This is the caption for the next table (or link)
-  ,#+NAME:   tab:basic-data
-  | ... | ... |
-  |-----+-----|
+,#+CAPTION: This is the caption for the next table (or link)
+,#+NAME:   tab:basic-data
+| ... | ... |
+|-----+-----|
 #+end_example
 
 Optionally, the caption can take the form:
@@ -10690,9 +10690,9 @@ references, make sure that the link is on a line by itself and precede
 it with =CAPTION= and =NAME= keywords as follows:
 
 #+begin_example
-  ,#+CAPTION: This is the caption for the next figure link (or table)
-  ,#+NAME:   fig:SED-HR4049
-  [[./img/a.jpg]]
+,#+CAPTION: This is the caption for the next figure link (or table)
+,#+NAME:   fig:SED-HR4049
+[[./img/a.jpg]]
 #+end_example
 
 #+texinfo: @noindent
@@ -10718,9 +10718,9 @@ suited for source code and similar examples.
 #+cindex: BEGIN_EXAMPLE
 #+cindex: example block
 #+begin_example
-  ,#+BEGIN_EXAMPLE
-    Some example from a text file.
-  ,#+END_EXAMPLE
+,#+BEGIN_EXAMPLE
+  Some example from a text file.
+,#+END_EXAMPLE
 #+end_example
 
 Note that such blocks may be /indented/ in order to align nicely with
@@ -10730,8 +10730,8 @@ also start the example lines with a colon followed by a space.  There
 may also be additional whitespace before the colon:
 
 #+begin_example
-  Here is an example
-     : Some example from a text file.
+Here is an example
+   : Some example from a text file.
 #+end_example
 
 #+cindex: formatting source code, markup rules
@@ -10746,11 +10746,11 @@ see [[*Structure Templates]] for shortcuts to easily insert code blocks.
 #+cindex: BEGIN_SRC
 #+cindex: src block
 #+begin_example
-  ,#+BEGIN_SRC emacs-lisp
-    (defun org-xor (a b)
-      "Exclusive or."
-      (if a (not b) b))
-   ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp
+  (defun org-xor (a b)
+    "Exclusive or."
+    (if a (not b) b))
+ ,#+END_SRC
 #+end_example
 
 Both in =example= and in =src= snippets, you can add a =-n= switch to
@@ -10763,15 +10763,15 @@ adds the value of the argument to the last line of the previous block
 to determine the starting line number.
 
 #+begin_example
-  ,#+BEGIN_SRC emacs-lisp -n 20
-    ;; This exports with line number 20.
-    (message "This is line 21")
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp -n 20
+  ;; This exports with line number 20.
+  (message "This is line 21")
+,#+END_SRC
 
-  ,#+BEGIN_SRC emacs-lisp +n 10
-    ;; This is listed as line 31.
-    (message "This is line 32")
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp +n 10
+  ;; This is listed as line 31.
+  (message "This is line 32")
+,#+END_SRC
 #+end_example
 
 In literal examples, Org interprets strings like =(ref:name)= as
@@ -10786,12 +10786,12 @@ are labeled by the line numbers from the code listing.  Otherwise
 links use the labels with no parentheses.  Here is an example:
 
 #+begin_example -l "(dumb-reference:%s)"
-  ,#+BEGIN_SRC emacs-lisp -n -r
-    (save-excursion                 (ref:sc)
-       (goto-char (point-min))      (ref:jump)
-  ,#+END_SRC
-  In line [[(sc)]] we remember the current position. [[(jump)][Line (jump)]]
-  jumps to point-min.
+,#+BEGIN_SRC emacs-lisp -n -r
+  (save-excursion                 (ref:sc)
+     (goto-char (point-min))      (ref:jump)
+,#+END_SRC
+In line [[(sc)]] we remember the current position. [[(jump)][Line (jump)]]
+jumps to point-min.
 #+end_example
 
 #+cindex: indentation, in source blocks
@@ -10853,8 +10853,8 @@ completions.  If you need such a symbol inside a word, terminate it
 with a pair of curly brackets.  For example
 
 #+begin_example
-  Pro tip: Given a circle \Gamma of diameter d, the length of its
-  circumference is \pi{}d.
+Pro tip: Given a circle \Gamma of diameter d, the length of its
+circumference is \pi{}d.
 #+end_example
 
 #+findex: org-entities-help
@@ -10907,8 +10907,8 @@ surround multi-character sub- and superscripts with curly braces.  For
 example
 
 #+begin_example
-  The radius of the sun is R_sun = 6.96 x 10^8 m.  On the other hand,
-  the radius of Alpha Centauri is R_{Alpha Centauri} = 1.28 x R_{sun}.
+The radius of the sun is R_sun = 6.96 x 10^8 m.  On the other hand,
+the radius of Alpha Centauri is R_{Alpha Centauri} = 1.28 x R_{sun}.
 #+end_example
 
 #+vindex: org-use-sub-superscripts
@@ -10973,12 +10973,12 @@ snippets are identified as LaTeX source code:
 For example:
 
 #+begin_example
-  \begin{equation}                        % arbitrary environments,
-  x=\sqrt{b}                              % even tables, figures
-  \end{equation}                          % etc
+\begin{equation}                        % arbitrary environments,
+x=\sqrt{b}                              % even tables, figures
+\end{equation}                          % etc
 
-  If $a^2=b$ and \( b=2 \), then the solution must be
-  either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
+If $a^2=b$ and \( b=2 \), then the solution must be
+either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
 #+end_example
 
 #+vindex: org-export-with-latex
@@ -11151,7 +11151,7 @@ two ways: through the ~org-export-backends~ variable configuration;
 or, by requiring the library in the Emacs init file like this:
 
 #+begin_src emacs-lisp
-  (require 'ox-md)
+(require 'ox-md)
 #+end_src
 
 ** The Export Dispatcher
@@ -11572,8 +11572,8 @@ on a per file basis, using the following =toc= item in =OPTIONS=
 keyword:
 
 #+begin_example
-  ,#+OPTIONS: toc:2          (only include two levels in TOC)
-  ,#+OPTIONS: toc:nil        (no default TOC at all)
+,#+OPTIONS: toc:2          (only include two levels in TOC)
+,#+OPTIONS: toc:nil        (no default TOC at all)
 #+end_example
 
 #+cindex: excluding entries from table of contents
@@ -11584,10 +11584,10 @@ along with all its children, set the =UNNUMBERED= property to =notoc=
 value.
 
 #+begin_example
-  ,* Subtree not numbered, not in table of contents either
-    :PROPERTIES:
-    :UNNUMBERED: notoc
-    :END:
+,* Subtree not numbered, not in table of contents either
+  :PROPERTIES:
+  :UNNUMBERED: notoc
+  :END:
 #+end_example
 
 #+cindex: TOC, keyword
@@ -11598,9 +11598,9 @@ variable or with =#+OPTIONS: toc:nil=.  Then insert =#+TOC: headlines
 N= at the desired location(s).
 
 #+begin_example
-  ,#+OPTIONS: toc:nil
-  ...
-  ,#+TOC: headlines 2
+,#+OPTIONS: toc:nil
+...
+,#+TOC: headlines 2
 #+end_example
 
 To adjust the table of contents depth for a specific section of the
@@ -11609,8 +11609,8 @@ becomes a relative depth for the current level.  The following example
 inserts a local table of contents, with direct children only.
 
 #+begin_example
-  ,* Section
-  ,#+TOC: headlines 1 local
+,* Section
+,#+TOC: headlines 1 local
 #+end_example
 
 Note that for this feature to work properly in LaTeX export, the Org
@@ -11622,8 +11622,8 @@ Use the =TOC= keyword to generate list of tables---respectively, all
 listings---with captions.
 
 #+begin_example
-  ,#+TOC: listings
-  ,#+TOC: tables
+,#+TOC: listings
+,#+TOC: tables
 #+end_example
 
 #+cindex: ALT_TITLE, property
@@ -11701,8 +11701,8 @@ which can be referenced using ={{{name(arg1, arg2)}}}=[fn:116].  For
 example
 
 #+begin_example
-  ,#+MACRO: poem The rose is $1, The violet's $2. Life's ordered: Org assists you.
-  {{{poem(red,blue)}}}
+,#+MACRO: poem The rose is $1, The violet's $2. Life's ordered: Org assists you.
+{{{poem(red,blue)}}}
 #+end_example
 
 #+texinfo: @noindent
@@ -11906,13 +11906,13 @@ following constructs, inline, keyword, or export block:
 #+cindex: ASCII, keyword
 #+cindex: BEGIN_EXPORT ascii
 #+begin_example
-  Inline text @@ascii:and additional text@@ within a paragraph.
+Inline text @@ascii:and additional text@@ within a paragraph.
 
-  ,#+ASCII: Some text
+,#+ASCII: Some text
 
-  ,#+BEGIN_EXPORT ascii
-  Org exports text in this block only when using ASCII back-end.
-  ,#+END_EXPORT
+,#+BEGIN_EXPORT ascii
+Org exports text in this block only when using ASCII back-end.
+,#+END_EXPORT
 #+end_example
 
 *** ASCII specific attributes
@@ -11927,8 +11927,8 @@ specifies the width of an horizontal rule in number of characters.
 The keyword and syntax for specifying widths is:
 
 #+begin_example
-  ,#+ATTR_ASCII: :width 10
-  -----
+,#+ATTR_ASCII: :width 10
+-----
 #+end_example
 
 *** ASCII special blocks
@@ -11943,13 +11943,13 @@ Besides =#+BEGIN_CENTER= blocks (see [[*Paragraphs]]), ASCII back-end has
 these two left and right justification blocks:
 
 #+begin_example
-  ,#+BEGIN_JUSTIFYLEFT
-  It's just a jump to the left...
-  ,#+END_JUSTIFYLEFT
+,#+BEGIN_JUSTIFYLEFT
+It's just a jump to the left...
+,#+END_JUSTIFYLEFT
 
-  ,#+BEGIN_JUSTIFYRIGHT
-  ...and then a step to the right.
-  ,#+END_JUSTIFYRIGHT
+,#+BEGIN_JUSTIFYRIGHT
+...and then a step to the right.
+,#+END_JUSTIFYRIGHT
 #+end_example
 
 ** Beamer Export
@@ -12147,13 +12147,13 @@ Insert Beamer-specific code using the following constructs:
 #+cindex: BEAMER, keyword
 #+cindex: BEGIN_EXPORT beamer
 #+begin_example
-  ,#+BEAMER: \pause
+,#+BEAMER: \pause
 
-  ,#+BEGIN_EXPORT beamer
-    Only Beamer export back-end exports this.
-  ,#+END_BEAMER
+,#+BEGIN_EXPORT beamer
+  Only Beamer export back-end exports this.
+,#+END_BEAMER
 
-  Text @@beamer:some code@@ within a paragraph.
+Text @@beamer:some code@@ within a paragraph.
 #+end_example
 
 Inline constructs, such as the last one above, are useful for adding
@@ -12172,22 +12172,22 @@ angular or square brackets, and =:options= for inserting optional
 arguments.
 
 #+begin_example
-  ,#+ATTR_BEAMER: :environment nonindentlist
-  - item 1, not indented
-  - item 2, not indented
-  - item 3, not indented
+,#+ATTR_BEAMER: :environment nonindentlist
+- item 1, not indented
+- item 2, not indented
+- item 3, not indented
 #+end_example
 
 #+begin_example
-  ,#+ATTR_BEAMER: :overlay <+->
-  - item 1
-  - item 2
+,#+ATTR_BEAMER: :overlay <+->
+- item 1
+- item 2
 #+end_example
 
 #+begin_example
-  ,#+ATTR_BEAMER: :options [Lagrange]
-  Let $G$ be a finite group, and let $H$ be
-  a subgroup of $G$.  Then the order of $H$ divides the order of $G$.
+,#+ATTR_BEAMER: :options [Lagrange]
+Let $G$ be a finite group, and let $H$ be
+a subgroup of $G$.  Then the order of $H$ divides the order of $G$.
 #+end_example
 
 *** Editing support
@@ -12216,37 +12216,37 @@ Beamer documents.
 Here is an example of an Org document ready for Beamer export.
 
 #+begin_example
-  ;#+TITLE: Example Presentation
-  ;#+AUTHOR: Carsten Dominik
-  ;#+OPTIONS: H:2 toc:t num:t
-  ;#+LATEX_CLASS: beamer
-  ;#+LATEX_CLASS_OPTIONS: [presentation]
-  ;#+BEAMER_THEME: Madrid
-  ;#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+;#+TITLE: Example Presentation
+;#+AUTHOR: Carsten Dominik
+;#+OPTIONS: H:2 toc:t num:t
+;#+LATEX_CLASS: beamer
+;#+LATEX_CLASS_OPTIONS: [presentation]
+;#+BEAMER_THEME: Madrid
+;#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
 
-  ,* This is the first structural section
+,* This is the first structural section
 
-  ,** Frame 1
-  ,*** Thanks to Eric Fraga                                           :B_block:
-      :PROPERTIES:
-      :BEAMER_COL: 0.48
-      :BEAMER_ENV: block
-      :END:
-      for the first viable Beamer setup in Org
-  ,*** Thanks to everyone else                                        :B_block:
-      :PROPERTIES:
-      :BEAMER_COL: 0.48
-      :BEAMER_ACT: <2->
-      :BEAMER_ENV: block
-      :END:
-      for contributing to the discussion
-  ,**** This will be formatted as a beamer note                       :B_note:
-       :PROPERTIES:
-       :BEAMER_env: note
-       :END:
-  ,** Frame 2 (where we will not use columns)
-  ,*** Request
-      Please test this stuff!
+,** Frame 1
+,*** Thanks to Eric Fraga                                           :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ENV: block
+    :END:
+    for the first viable Beamer setup in Org
+,*** Thanks to everyone else                                        :B_block:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ACT: <2->
+    :BEAMER_ENV: block
+    :END:
+    for contributing to the discussion
+,**** This will be formatted as a beamer note                       :B_note:
+     :PROPERTIES:
+     :BEAMER_env: note
+     :END:
+,** Frame 2 (where we will not use columns)
+,*** Request
+    Please test this stuff!
 #+end_example
 
 ** HTML Export
@@ -12406,41 +12406,41 @@ HTML5 documents can now have arbitrary =#+BEGIN= ... =#+END= blocks.
 For example:
 
 #+begin_example
-  ,#+BEGIN_aside
-    Lorem ipsum
-  ,#+END_aside
+,#+BEGIN_aside
+  Lorem ipsum
+,#+END_aside
 #+end_example
 
 #+texinfo: @noindent
 exports to:
 
 #+begin_src html
-  <aside>
-    <p>Lorem ipsum</p>
-  </aside>
+<aside>
+  <p>Lorem ipsum</p>
+</aside>
 #+end_src
 
 #+texinfo: @noindent
 while this:
 
 #+begin_example
-  ,#+ATTR_HTML: :controls controls :width 350
-  ,#+BEGIN_video
-  ,#+HTML: <source src="movie.mp4" type="video/mp4">
-  ,#+HTML: <source src="movie.ogg" type="video/ogg">
-  Your browser does not support the video tag.
-  ,#+END_video
+,#+ATTR_HTML: :controls controls :width 350
+,#+BEGIN_video
+,#+HTML: <source src="movie.mp4" type="video/mp4">
+,#+HTML: <source src="movie.ogg" type="video/ogg">
+Your browser does not support the video tag.
+,#+END_video
 #+end_example
 
 #+texinfo: @noindent
 exports to:
 
 #+begin_src html
-  <video controls="controls" width="350">
-    <source src="movie.mp4" type="video/mp4">
-      <source src="movie.ogg" type="video/ogg">
-        <p>Your browser does not support the video tag.</p>
-  </video>
+<video controls="controls" width="350">
+  <source src="movie.mp4" type="video/mp4">
+    <source src="movie.ogg" type="video/ogg">
+      <p>Your browser does not support the video tag.</p>
+</video>
 #+end_src
 
 #+vindex: org-html-html5-elements
@@ -12501,11 +12501,11 @@ can insert that HTML code in the output, use this inline syntax:
 For larger raw HTML code blocks, use these HTML export code blocks:
 
 #+begin_example
-  ,#+HTML: Literal HTML code for export
+,#+HTML: Literal HTML code for export
 
-  ,#+BEGIN_EXPORT html
-    All lines between these markers are exported literally
-  ,#+END_EXPORT
+,#+BEGIN_EXPORT html
+  All lines between these markers are exported literally
+,#+END_EXPORT
 #+end_example
 
 *** Links in HTML export
@@ -12540,8 +12540,8 @@ changing the link's title and style:
 
 #+cindex: ATTR_HTML, keyword
 #+begin_example
-  ,#+ATTR_HTML: :title The Org mode homepage :style color:red;
-  [[https://orgmode.org]]
+,#+ATTR_HTML: :title The Org mode homepage :style color:red;
+[[https://orgmode.org]]
 #+end_example
 
 *** Tables in HTML export
@@ -12559,8 +12559,8 @@ following lines before the table in the Org file:
 #+cindex: CAPTION, keyword
 #+cindex: ATTR_HTML, keyword
 #+begin_example
-   ,#+CAPTION: This is a table with lines around and between cells
-   ,#+ATTR_HTML: border="2" rules="all" frame="border"
+,#+CAPTION: This is a table with lines around and between cells
+,#+ATTR_HTML: border="2" rules="all" frame="border"
 #+end_example
 
 The HTML export back-end preserves column groupings in Org tables (see
@@ -12637,9 +12637,9 @@ accessibility standards.
 #+cindex: CAPTION, keyword
 #+cindex: ATTR_HTML, keyword
 #+begin_example
-  ,#+CAPTION: A black cat stalking a spider
-  ,#+ATTR_HTML: :alt cat/spider image :title Action! :align right
-  [[./img/a.jpg]]
+,#+CAPTION: A black cat stalking a spider
+,#+ATTR_HTML: :alt cat/spider image :title Action! :align right
+[[./img/a.jpg]]
 #+end_example
 
 #+texinfo: @noindent
@@ -12663,8 +12663,8 @@ display options can be configured via ~org-html-mathjax-options~, or
 in the buffer.  For example, with the following settings,
 
 #+begin_example
-  ,#+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
-  ,#+HTML_MATHJAX: cancel.js noErrors.js
+,#+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
+,#+HTML_MATHJAX: cancel.js noErrors.js
 #+end_example
 
 #+texinfo: @noindent
@@ -12715,12 +12715,12 @@ defaults with =:width= and =:height= options on the =#+ATTR_HTML=
 line.
 
 #+begin_example
-  ,#+ATTR_HTML: :textarea t :width 40
-  ,#+BEGIN_EXAMPLE
-    (defun org-xor (a b)
-       "Exclusive or."
-       (if a (not b) b))
-  ,#+END_EXAMPLE
+,#+ATTR_HTML: :textarea t :width 40
+,#+BEGIN_EXAMPLE
+  (defun org-xor (a b)
+     "Exclusive or."
+     (if a (not b) b))
+,#+END_EXAMPLE
 #+end_example
 
 *** CSS support
@@ -12782,8 +12782,8 @@ defaults the HTML exporter uses.
 #+cindex: HTML_HEAD, keyword
 #+cindex: HTML_HEAD_EXTRA, keyword
 #+begin_example
-  ,#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style1.css" />
-  ,#+HTML_HEAD_EXTRA: <link rel="alternate stylesheet" type="text/css" href="style2.css" />
+,#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style1.css" />
+,#+HTML_HEAD_EXTRA: <link rel="alternate stylesheet" type="text/css" href="style2.css" />
 #+end_example
 
 #+vindex: org-html-head-include-default-style
@@ -13113,14 +13113,14 @@ when previewing LaTeX snippets (see [[*Previewing LaTeX fragments]]).
 A sample Org file with the above headers:
 
 #+begin_example
-  ,#+LATEX_CLASS: article
-  ,#+LATEX_CLASS_OPTIONS: [a4paper]
-  ,#+LATEX_HEADER: \usepackage{xyz}
+,#+LATEX_CLASS: article
+,#+LATEX_CLASS_OPTIONS: [a4paper]
+,#+LATEX_HEADER: \usepackage{xyz}
 
-  ,* Headline 1
-    some text
-  ,* Headline 2
-    some more text
+,* Headline 1
+  some text
+,* Headline 2
+  some more text
 #+end_example
 
 *** Quoting LaTeX code
@@ -13147,9 +13147,9 @@ Inserting as an export block in the Org file, where the back-end
 exports any code between begin and end markers:
 
 #+begin_example
-  ,#+BEGIN_EXPORT latex
-    any arbitrary LaTeX code
-  ,#+END_EXPORT
+,#+BEGIN_EXPORT latex
+  any arbitrary LaTeX code
+,#+END_EXPORT
 #+end_example
 
 *** Tables in LaTeX export
@@ -13246,25 +13246,25 @@ LaTeX table attributes help formatting tables for a wide range of
 situations, such as matrix product or spanning multiple pages:
 
 #+begin_example
-  ,#+ATTR_LATEX: :environment longtable :align l|lp{3cm}r|l
-  | ... | ... |
-  | ... | ... |
+,#+ATTR_LATEX: :environment longtable :align l|lp{3cm}r|l
+| ... | ... |
+| ... | ... |
 
-  ,#+ATTR_LATEX: :mode math :environment bmatrix :math-suffix \times
-  | a | b |
-  | c | d |
-  ,#+ATTR_LATEX: :mode math :environment bmatrix
-  | 1 | 2 |
-  | 3 | 4 |
+,#+ATTR_LATEX: :mode math :environment bmatrix :math-suffix \times
+| a | b |
+| c | d |
+,#+ATTR_LATEX: :mode math :environment bmatrix
+| 1 | 2 |
+| 3 | 4 |
 #+end_example
 
 Set the caption with the LaTeX command
 =\bicaption{HeadingA}{HeadingB}=:
 
 #+begin_example
-  ,#+ATTR_LATEX: :caption \bicaption{HeadingA}{HeadingB}
-  | ... | ... |
-  | ... | ... |
+,#+ATTR_LATEX: :caption \bicaption{HeadingA}{HeadingB}
+| ... | ... |
+| ... | ... |
 #+end_example
 
 *** Images in LaTeX export
@@ -13288,16 +13288,16 @@ For specifying image =:width=, =:height=, and other =:options=, use
 this syntax:
 
 #+begin_example
-  ,#+ATTR_LATEX: :width 5cm :options angle=90
-  [[./img/sed-hr4049.pdf]]
+,#+ATTR_LATEX: :width 5cm :options angle=90
+[[./img/sed-hr4049.pdf]]
 #+end_example
 
 For custom commands for captions, use the =:caption= attribute.  It
 overrides the default =#+CAPTION= value:
 
 #+begin_example
-  ,#+ATTR_LATEX: :caption \bicaption{HeadingA}{HeadingB}
-  [[./img/sed-hr4049.pdf]]
+,#+ATTR_LATEX: :caption \bicaption{HeadingA}{HeadingB}
+[[./img/sed-hr4049.pdf]]
 #+end_example
 
 When captions follow the method as described in [[*Images and Tables]],
@@ -13335,8 +13335,8 @@ Use the =placement= attribute to modify a floating environment's
 placement.
 
 #+begin_example
-  ,#+ATTR_LATEX: :float wrap :width 0.38\textwidth :placement {r}{0.4\textwidth}
-  [[./img/hst.png]]
+,#+ATTR_LATEX: :float wrap :width 0.38\textwidth :placement {r}{0.4\textwidth}
+[[./img/hst.png]]
 #+end_example
 
 #+vindex: org-latex-images-centered
@@ -13361,13 +13361,13 @@ attributes for plain lists.  Both attributes work together for
 customizing lists, as shown in the examples:
 
 #+begin_example
-  ,#+LATEX_HEADER: \usepackage[inline]{enumitem}
-  Some ways to say "Hello":
-  ,#+ATTR_LATEX: :environment itemize*
-  ,#+ATTR_LATEX: :options [label={}, itemjoin={,}, itemjoin*={, and}]
-  - Hola
-  - Bonjour
-  - Guten Tag.
+,#+LATEX_HEADER: \usepackage[inline]{enumitem}
+Some ways to say "Hello":
+,#+ATTR_LATEX: :environment itemize*
+,#+ATTR_LATEX: :options [label={}, itemjoin={,}, itemjoin*={, and}]
+- Hola
+- Bonjour
+- Guten Tag.
 #+end_example
 
 Since LaTeX supports only four levels of nesting for lists, use an
@@ -13375,14 +13375,14 @@ external package, such as =enumitem= in LaTeX, for levels deeper than
 four:
 
 #+begin_example
-  ,#+LATEX_HEADER: \usepackage{enumitem}
-  ,#+LATEX_HEADER: \renewlist{itemize}{itemize}{9}
-  ,#+LATEX_HEADER: \setlist[itemize]{label=$\circ$}
-  - One
-    - Two
-      - Three
-        - Four
-          - Five
+,#+LATEX_HEADER: \usepackage{enumitem}
+,#+LATEX_HEADER: \renewlist{itemize}{itemize}{9}
+,#+LATEX_HEADER: \setlist[itemize]{label=$\circ$}
+- One
+  - Two
+    - Three
+      - Four
+        - Five
 #+end_example
 
 *** Source blocks in LaTeX export
@@ -13410,10 +13410,10 @@ objects through the attributes =:float= and =:options=.  For =:float=:
      blocks that may not fit on a page.
 
 #+begin_example
-  ,#+ATTR_LATEX: :float nil
-  ,#+BEGIN_SRC emacs-lisp
-    Lisp code that may not fit in a single page.
-  ,#+END_SRC
+,#+ATTR_LATEX: :float nil
+,#+BEGIN_SRC emacs-lisp
+  Lisp code that may not fit in a single page.
+,#+END_SRC
 #+end_example
 
 #+vindex: org-latex-listings-options
@@ -13424,11 +13424,11 @@ example below, the =:options= are set for Minted.  Minted is a source
 code highlighting LaTeX package with many configurable options.
 
 #+begin_example
-  ,#+ATTR_LATEX: :options commentstyle=\bfseries
-  ,#+BEGIN_SRC emacs-lisp
-    (defun Fib (n)
-      (if (< n 2) n (+ (Fib (- n 1)) (Fib (- n 2)))))
-  ,#+END_SRC
+,#+ATTR_LATEX: :options commentstyle=\bfseries
+,#+BEGIN_SRC emacs-lisp
+  (defun Fib (n)
+    (if (< n 2) n (+ (Fib (- n 1)) (Fib (- n 2)))))
+,#+END_SRC
 #+end_example
 
 To apply similar configuration options for all source blocks in
@@ -13451,10 +13451,10 @@ environment for each block, use the =:environment= parameter to
 specify a custom environment.
 
 #+begin_example
-  ,#+ATTR_LATEX: :environment myverbatim
-  ,#+BEGIN_EXAMPLE
-    This sentence is false.
-  ,#+END_EXAMPLE
+,#+ATTR_LATEX: :environment myverbatim
+,#+BEGIN_EXAMPLE
+  This sentence is false.
+,#+END_EXAMPLE
 #+end_example
 
 *** Special blocks in LaTeX export
@@ -13473,29 +13473,29 @@ makes a special environment of the same name.  The back-end also takes
 string.  For example:
 
 #+begin_example
-  ,#+BEGIN_abstract
-    We demonstrate how to solve the Syracuse problem.
-  ,#+END_abstract
+,#+BEGIN_abstract
+  We demonstrate how to solve the Syracuse problem.
+,#+END_abstract
 
-  ,#+ATTR_LATEX: :options [Proof of important theorem]
-  ,#+BEGIN_proof
-    ...
-    Therefore, any even number greater than 2 is the sum of two primes.
-  ,#+END_proof
+,#+ATTR_LATEX: :options [Proof of important theorem]
+,#+BEGIN_proof
+  ...
+  Therefore, any even number greater than 2 is the sum of two primes.
+,#+END_proof
 #+end_example
 
 #+texinfo: @noindent
 exports to
 
 #+begin_example
-  \begin{abstract}
-    We demonstrate how to solve the Syracuse problem.
-  \end{abstract}
+\begin{abstract}
+  We demonstrate how to solve the Syracuse problem.
+\end{abstract}
 
-  \begin{proof}[Proof of important theorem]
-    ...
-    Therefore, any even number greater than 2 is the sum of two primes.
-  \end{proof}
+\begin{proof}[Proof of important theorem]
+  ...
+  Therefore, any even number greater than 2 is the sum of two primes.
+\end{proof}
 #+end_example
 
 If you need to insert a specific caption command, use =:caption=
@@ -13503,10 +13503,10 @@ attribute.  It overrides standard =CAPTION= value, if any.  For
 example:
 
 #+begin_example
-  ,#+ATTR_LATEX: :caption \MyCaption{HeadingA}
-  ,#+BEGIN_proof
-    ...
-  ,#+END_proof
+,#+ATTR_LATEX: :caption \MyCaption{HeadingA}
+,#+BEGIN_proof
+  ...
+,#+END_proof
 #+end_example
 
 *** Horizontal rules in LaTeX export
@@ -13520,8 +13520,8 @@ The LaTeX export back-end converts horizontal rules by the specified
 =:width= and =:thickness= attributes.  For example:
 
 #+begin_example
-  ,#+ATTR_LATEX: :width .6\textwidth :thickness 0.8pt
-  -----
+,#+ATTR_LATEX: :width .6\textwidth :thickness 0.8pt
+-----
 #+end_example
 
 ** Markdown Export
@@ -13815,16 +13815,16 @@ Specifying =:rel-width= property on an =ATTR_ODT= line controls the
 width of the table.  For example:
 
 #+begin_example
-  ,#+ATTR_ODT: :rel-width 50
-  | Area/Month    |   Jan |   Feb |   Mar |   Sum |
-  |---------------+-------+-------+-------+-------|
-  | /             |     < |       |       |     < |
-  | <l13>         |  <r5> |  <r5> |  <r5> |  <r6> |
-  | North America |     1 |    21 |   926 |   948 |
-  | Middle East   |     6 |    75 |   844 |   925 |
-  | Asia Pacific  |     9 |    27 |   790 |   826 |
-  |---------------+-------+-------+-------+-------|
-  | Sum           |    16 |   123 |  2560 |  2699 |
+,#+ATTR_ODT: :rel-width 50
+| Area/Month    |   Jan |   Feb |   Mar |   Sum |
+|---------------+-------+-------+-------+-------|
+| /             |     < |       |       |     < |
+| <l13>         |  <r5> |  <r5> |  <r5> |  <r6> |
+| North America |     1 |    21 |   926 |   948 |
+| Middle East   |     6 |    75 |   844 |   925 |
+| Asia Pacific  |     9 |    27 |   790 |   826 |
+|---------------+-------+-------+-------+-------|
+| Sum           |    16 |   123 |  2560 |  2699 |
 #+end_example
 
 On export, the above table takes 50% of text width area.  The exporter
@@ -13900,8 +13900,8 @@ image scaling operations:
      To embed =img.png= as a 10 cm x 10 cm image, do the following:
 
      #+begin_example
-       ,#+ATTR_ODT: :width 10 :height 10
-       [[./img.png]]
+     ,#+ATTR_ODT: :width 10 :height 10
+     [[./img.png]]
      #+end_example
 
 - Scale the image ::
@@ -13909,8 +13909,8 @@ image scaling operations:
      To embed =img.png= at half its size, do the following:
 
      #+begin_example
-       ,#+ATTR_ODT: :scale 0.5
-       [[./img.png]]
+     ,#+ATTR_ODT: :scale 0.5
+     [[./img.png]]
      #+end_example
 
 - Scale the image to a specific width ::
@@ -13919,8 +13919,8 @@ image scaling operations:
      original height:width ratio, do the following:
 
      #+begin_example
-       ,#+ATTR_ODT: :width 10
-       [[./img.png]]
+     ,#+ATTR_ODT: :width 10
+     [[./img.png]]
      #+end_example
 
 - Scale the image to a specific height ::
@@ -13929,8 +13929,8 @@ image scaling operations:
      original height:width ratio, do the following:
 
      #+begin_example
-       ,#+ATTR_ODT: :height 10
-       [[./img.png]]
+     ,#+ATTR_ODT: :height 10
+     [[./img.png]]
      #+end_example
 
 **** Anchoring of images
@@ -13946,8 +13946,8 @@ The ODT export back-end can anchor images to ="as-char"=,
 To create an image that is anchored to a page:
 
 #+begin_example
-  ,#+ATTR_ODT: :anchor "page"
-  [[./img.png]]
+,#+ATTR_ODT: :anchor "page"
+[[./img.png]]
 #+end_example
 
 *** Math formatting in ODT export
@@ -13988,17 +13988,17 @@ document in one of the following ways:
      configure the above variables as shown below.
 
      #+begin_src emacs-lisp
-       (setq org-latex-to-mathml-convert-command
-             "java -jar %j -unicode -force -df %o %I"
-             org-latex-to-mathml-jar-file
-             "/path/to/mathtoweb.jar")
+     (setq org-latex-to-mathml-convert-command
+           "java -jar %j -unicode -force -df %o %I"
+           org-latex-to-mathml-jar-file
+           "/path/to/mathtoweb.jar")
      #+end_src
 
      To use LaTeX​ML[fn:125] use
 
      #+begin_src emacs-lisp
-       (setq org-latex-to-mathml-convert-command
-             "latexmlmath \"%i\" --presentationmathml=%o")
+     (setq org-latex-to-mathml-convert-command
+           "latexmlmath \"%i\" --presentationmathml=%o")
      #+end_src
 
      To quickly verify the reliability of the LaTeX-to-MathML
@@ -14067,9 +14067,9 @@ file.  Each category has its own sequence.  A caption is just a label
 applied to these objects.
 
 #+begin_example
-  ,#+CAPTION: Bell curve
-  ,#+NAME:   fig:SED-HR4049
-  [[./img/a.png]]
+,#+CAPTION: Bell curve
+,#+NAME:   fig:SED-HR4049
+[[./img/a.png]]
 #+end_example
 
 When rendered, it may show as follows in the exported document:
@@ -14083,8 +14083,8 @@ with the string "Illustration" instead of the default string "Figure",
 use the following setting:
 
 #+begin_src emacs-lisp
-  (setq org-odt-category-map-alist
-        '(("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)))
+(setq org-odt-category-map-alist
+      '(("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)))
 #+end_src
 
 With the above modification, the previous example changes to:
@@ -14249,8 +14249,8 @@ the Org file.  Such direct formatting is useful for one-off instances.
      For example, to highlight a region of text do the following:
 
      #+begin_example
-       @@odt:<text:span text:style-name="Highlight">This is highlighted
-       text</text:span>@@.  But this is regular text.
+     @@odt:<text:span text:style-name="Highlight">This is highlighted
+     text</text:span>@@.  But this is regular text.
      #+end_example
 
      *Hint:* To see the above example in action, edit the =styles.xml=
@@ -14258,9 +14258,9 @@ the Org file.  Such direct formatting is useful for one-off instances.
      below:
 
      #+begin_example
-       <style:style style:name="Highlight" style:family="text">
-         <style:text-properties fo:background-color="#ff0000"/>
-       </style:style>
+     <style:style style:name="Highlight" style:family="text">
+       <style:text-properties fo:background-color="#ff0000"/>
+     </style:style>
      #+end_example
 
 - Embedding a one-line OpenDocument XML ::
@@ -14270,7 +14270,7 @@ the Org file.  Such direct formatting is useful for one-off instances.
      in the Org file.  For example, to force a page break:
 
      #+begin_example
-       ,#+ODT: <text:p text:style-name="PageBreak"/>
+     ,#+ODT: <text:p text:style-name="PageBreak"/>
      #+end_example
 
      *Hint:* To see the above example in action, edit your
@@ -14278,10 +14278,10 @@ the Org file.  Such direct formatting is useful for one-off instances.
      style as shown below.
 
      #+begin_example
-       <style:style style:name="PageBreak" style:family="paragraph"
-                    style:parent-style-name="Text_20_body">
-         <style:paragraph-properties fo:break-before="page"/>
-       </style:style>
+     <style:style style:name="PageBreak" style:family="paragraph"
+                  style:parent-style-name="Text_20_body">
+       <style:paragraph-properties fo:break-before="page"/>
+     </style:style>
      #+end_example
 
 - Embedding a block of OpenDocument XML ::
@@ -14294,11 +14294,11 @@ the Org file.  Such direct formatting is useful for one-off instances.
      do the following:
 
      #+begin_example
-       ,#+BEGIN_EXPORT odt
-         <text:p text:style-name="Text_20_body_20_bold">
-         This paragraph is specially formatted and uses bold text.
-         </text:p>
-       ,#+END_EXPORT
+     ,#+BEGIN_EXPORT odt
+       <text:p text:style-name="Text_20_body_20_bold">
+       This paragraph is specially formatted and uses bold text.
+       </text:p>
+     ,#+END_EXPORT
      #+end_example
 
 **** Customizing tables in ODT export
@@ -14321,21 +14321,21 @@ For quick preview of this feature, install the settings below and export the
 table that follows:
 
 #+begin_src emacs-lisp
-  (setq org-export-odt-table-styles
-        (append org-export-odt-table-styles
-                '(("TableWithHeaderRowAndColumn" "Custom"
-                   ((use-first-row-styles . t)
-                    (use-first-column-styles . t)))
-                  ("TableWithFirstRowandLastRow" "Custom"
-                   ((use-first-row-styles . t)
-                    (use-last-row-styles . t))))))
+(setq org-export-odt-table-styles
+      (append org-export-odt-table-styles
+              '(("TableWithHeaderRowAndColumn" "Custom"
+                 ((use-first-row-styles . t)
+                  (use-first-column-styles . t)))
+                ("TableWithFirstRowandLastRow" "Custom"
+                 ((use-first-row-styles . t)
+                  (use-last-row-styles . t))))))
 #+end_src
 
 #+begin_example
-  ,#+ATTR_ODT: :style TableWithHeaderRowAndColumn
-  | Name  | Phone | Age |
-  | Peter |  1234 |  17 |
-  | Anna  |  4321 |  25 |
+,#+ATTR_ODT: :style TableWithHeaderRowAndColumn
+| Name  | Phone | Age |
+| Peter |  1234 |  17 |
+| Anna  |  4321 |  25 |
 #+end_example
 
 The example above used =Custom= template and installed two table
@@ -14403,14 +14403,14 @@ To use this feature proceed as follows:
    styles in that template.
 
    #+begin_src emacs-lisp
-     (setq org-export-odt-table-styles
-           (append org-export-odt-table-styles
-                   '(("TableWithHeaderRowAndColumn" "Custom"
-                      ((use-first-row-styles . t)
-                       (use-first-column-styles . t)))
-                     ("TableWithFirstRowandLastRow" "Custom"
-                      ((use-first-row-styles . t)
-                       (use-last-row-styles . t))))))
+   (setq org-export-odt-table-styles
+         (append org-export-odt-table-styles
+                 '(("TableWithHeaderRowAndColumn" "Custom"
+                    ((use-first-row-styles . t)
+                     (use-first-column-styles . t)))
+                   ("TableWithFirstRowandLastRow" "Custom"
+                    ((use-first-row-styles . t)
+                     (use-last-row-styles . t))))))
    #+end_src
 
 3. Associate a table with the table style.
@@ -14419,10 +14419,10 @@ To use this feature proceed as follows:
    the =ATTR_ODT= line as shown below.
 
    #+begin_example
-     ,#+ATTR_ODT: :style TableWithHeaderRowAndColumn
-     | Name  | Phone | Age |
-     | Peter |  1234 |  17 |
-     | Anna  |  4321 |  25 |
+   ,#+ATTR_ODT: :style TableWithHeaderRowAndColumn
+   | Name  | Phone | Age |
+   | Peter |  1234 |  17 |
+   | Anna  |  4321 |  25 |
    #+end_example
 
 **** Validating OpenDocument XML
@@ -14604,9 +14604,9 @@ If one =AUTHOR= line is not sufficient, add multiple =SUBAUTHOR=
 keywords.  They have to be set in raw Texinfo code.
 
 #+begin_example
-  ,#+AUTHOR: Jane Smith
-  ,#+SUBAUTHOR: John Doe
-  ,#+TEXINFO_PRINTED_TITLE: This Long Title@@inlinefmt{tex,@*} Is Broken in @TeX{}
+,#+AUTHOR: Jane Smith
+,#+SUBAUTHOR: John Doe
+,#+TEXINFO_PRINTED_TITLE: This Long Title@@inlinefmt{tex,@*} Is Broken in @TeX{}
 #+end_example
 
 #+cindex: COPYING, property
@@ -14618,14 +14618,14 @@ itself does not appear in the structure of the document.
 Copyright information is printed on the back of the title page.
 
 #+begin_example
-  ,* Legalese
-    :PROPERTIES:
-    :COPYING: t
-    :END:
+,* Legalese
+  :PROPERTIES:
+  :COPYING: t
+  :END:
 
-    This is a short example of a complete Texinfo file, version 1.0.
+  This is a short example of a complete Texinfo file, version 1.0.
 
-    Copyright \copy 2016 Free Software Foundation, Inc.
+  Copyright \copy 2016 Free Software Foundation, Inc.
 #+end_example
 
 *** Info directory file
@@ -14649,9 +14649,9 @@ hierarchy the file fits.
 Here is an example that writes to the Info directory file:
 
 #+begin_example
-  ,#+TEXINFO_DIR_CATEGORY: Emacs
-  ,#+TEXINFO_DIR_TITLE: Org Mode: (org)
-  ,#+TEXINFO_DIR_DESC: Outline-based notes management and organizer
+,#+TEXINFO_DIR_CATEGORY: Emacs
+,#+TEXINFO_DIR_TITLE: Org Mode: (org)
+,#+TEXINFO_DIR_DESC: Outline-based notes management and organizer
 #+end_example
 
 *** Headings and sectioning structure
@@ -14739,10 +14739,10 @@ exports the headline as an unnumbered chapter or section command, and
 then inserts the index after its contents.
 
 #+begin_example
-  ,* Concept Index
-    :PROPERTIES:
-    :INDEX: cp
-    :END:
+,* Concept Index
+  :PROPERTIES:
+  :INDEX: cp
+  :END:
 #+end_example
 
 *** Quoting Texinfo code
@@ -14756,15 +14756,15 @@ code:
 #+cindex: TEXINFO, keyword
 #+cindex: BEGIN_EXPORT texinfo
 #+begin_example
-  Richard @@texinfo:@sc{@@Stallman@@texinfo:}@@ commence' GNU.
+Richard @@texinfo:@sc{@@Stallman@@texinfo:}@@ commence' GNU.
 
-  ,#+TEXINFO: @need800
-  This paragraph is preceded by...
+,#+TEXINFO: @need800
+This paragraph is preceded by...
 
-  ,#+BEGIN_EXPORT texinfo
-    @auindex Johnson, Mark
-    @auindex Lakoff, George
-  ,#+END_EXPORT
+,#+BEGIN_EXPORT texinfo
+  @auindex Johnson, Mark
+  @auindex Lakoff, George
+,#+END_EXPORT
 #+end_example
 
 *** Plain lists in Texinfo export
@@ -14797,19 +14797,19 @@ entry in the first column of the table.
 The following example illustrates all the attributes above:
 
 #+begin_example
-  ,#+ATTR_TEXINFO: :table-type vtable :sep , :indic asis
-  - foo, bar :: This is the common text for variables foo and bar.
+,#+ATTR_TEXINFO: :table-type vtable :sep , :indic asis
+- foo, bar :: This is the common text for variables foo and bar.
 #+end_example
 
 #+texinfo: @noindent
 becomes
 
 #+begin_example
-  @vtable @asis
-  @item foo
-  @itemx bar
-  This is the common text for variables foo and bar.
-  @end table
+@vtable @asis
+@item foo
+@itemx bar
+This is the common text for variables foo and bar.
+@end table
 #+end_example
 
 *** Tables in Texinfo export
@@ -14824,8 +14824,8 @@ fractions of line length, use the =:columns= attribute.  See example
 below.
 
 #+begin_example
-  ,#+ATTR_TEXINFO: :columns .5 .5
-  | a cell | another cell |
+,#+ATTR_TEXINFO: :columns .5 .5
+| a cell | another cell |
 #+end_example
 
 *** Images in Texinfo export
@@ -14841,8 +14841,8 @@ use =:width= and =:height= attributes.  For alternate text, use =:alt=
 and specify the text using Texinfo code, as shown in the example:
 
 #+begin_example
-  ,#+ATTR_TEXINFO: :width 1in :alt Alternate @i{text}
-  [[ridt.pdf]]
+,#+ATTR_TEXINFO: :width 1in :alt Alternate @i{text}
+[[ridt.pdf]]
 #+end_example
 
 *** Special blocks in Texinfo export
@@ -14857,19 +14857,19 @@ the same name.  It also adds any =:options= attributes to the end of
 the command, as shown in this example:
 
 #+begin_example
-  ,#+ATTR_TEXINFO: :options org-org-export-to-org ...
-  ,#+BEGIN_defun
-    A somewhat obsessive function name.
-  ,#+END_defun
+,#+ATTR_TEXINFO: :options org-org-export-to-org ...
+,#+BEGIN_defun
+  A somewhat obsessive function name.
+,#+END_defun
 #+end_example
 
 #+texinfo: @noindent
 becomes
 
 #+begin_example
-  @defun org-org-export-to-org ...
-    A somewhat obsessive function name.
-  @end defun
+@defun org-org-export-to-org ...
+  A somewhat obsessive function name.
+@end defun
 #+end_example
 
 *** A Texinfo example
@@ -14882,68 +14882,68 @@ Here is a more detailed example Org file.  See
 Texinfo code.
 
 #+begin_example
-  ,#+TITLE: GNU Sample {{{version}}}
-  ,#+SUBTITLE: for version {{{version}}}, {{{updated}}}
-  ,#+AUTHOR: A.U. Thor
-  ,#+EMAIL: bug-sample@gnu.org
+,#+TITLE: GNU Sample {{{version}}}
+,#+SUBTITLE: for version {{{version}}}, {{{updated}}}
+,#+AUTHOR: A.U. Thor
+,#+EMAIL: bug-sample@gnu.org
 
-  ,#+OPTIONS: ':t toc:t author:t email:t
-  ,#+LANGUAGE: en
+,#+OPTIONS: ':t toc:t author:t email:t
+,#+LANGUAGE: en
 
-  ,#+MACRO: version 2.0
-  ,#+MACRO: updated last updated 4 March 2014
+,#+MACRO: version 2.0
+,#+MACRO: updated last updated 4 March 2014
 
-  ,#+TEXINFO_FILENAME: sample.info
-  ,#+TEXINFO_HEADER: @syncodeindex pg cp
+,#+TEXINFO_FILENAME: sample.info
+,#+TEXINFO_HEADER: @syncodeindex pg cp
 
-  ,#+TEXINFO_DIR_CATEGORY: Texinfo documentation system
-  ,#+TEXINFO_DIR_TITLE: sample: (sample)
-  ,#+TEXINFO_DIR_DESC: Invoking sample
+,#+TEXINFO_DIR_CATEGORY: Texinfo documentation system
+,#+TEXINFO_DIR_TITLE: sample: (sample)
+,#+TEXINFO_DIR_DESC: Invoking sample
 
-  ,#+TEXINFO_PRINTED_TITLE: GNU Sample
+,#+TEXINFO_PRINTED_TITLE: GNU Sample
+
+This manual is for GNU Sample (version {{{version}}},
+{{{updated}}}).
+
+,* Copying
+  :PROPERTIES:
+  :COPYING:  t
+  :END:
 
   This manual is for GNU Sample (version {{{version}}},
-  {{{updated}}}).
+  {{{updated}}}), which is an example in the Texinfo documentation.
 
-  ,* Copying
-    :PROPERTIES:
-    :COPYING:  t
-    :END:
+  Copyright \copy 2016 Free Software Foundation, Inc.
 
-    This manual is for GNU Sample (version {{{version}}},
-    {{{updated}}}), which is an example in the Texinfo documentation.
+  ,#+BEGIN_QUOTE
+  Permission is granted to copy, distribute and/or modify this
+  document under the terms of the GNU Free Documentation License,
+  Version 1.3 or any later version published by the Free Software
+  Foundation; with no Invariant Sections, with no Front-Cover Texts,
+  and with no Back-Cover Texts.  A copy of the license is included in
+  the section entitled "GNU Free Documentation License".
+  ,#+END_QUOTE
 
-    Copyright \copy 2016 Free Software Foundation, Inc.
+,* Invoking sample
 
-    ,#+BEGIN_QUOTE
-    Permission is granted to copy, distribute and/or modify this
-    document under the terms of the GNU Free Documentation License,
-    Version 1.3 or any later version published by the Free Software
-    Foundation; with no Invariant Sections, with no Front-Cover Texts,
-    and with no Back-Cover Texts.  A copy of the license is included in
-    the section entitled "GNU Free Documentation License".
-    ,#+END_QUOTE
+  ,#+PINDEX: sample
+  ,#+CINDEX: invoking @command{sample}
 
-  ,* Invoking sample
+  This is a sample manual.  There is no sample program to invoke, but
+  if there were, you could see its basic usage and command line
+  options here.
 
-    ,#+PINDEX: sample
-    ,#+CINDEX: invoking @command{sample}
+,* GNU Free Documentation License
+  :PROPERTIES:
+  :APPENDIX: t
+  :END:
 
-    This is a sample manual.  There is no sample program to invoke, but
-    if there were, you could see its basic usage and command line
-    options here.
+  ,#+TEXINFO: @include fdl.texi
 
-  ,* GNU Free Documentation License
-    :PROPERTIES:
-    :APPENDIX: t
-    :END:
-
-    ,#+TEXINFO: @include fdl.texi
-
-  ,* Index
-    :PROPERTIES:
-    :INDEX:    cp
-    :END:
+,* Index
+  :PROPERTIES:
+  :INDEX:    cp
+  :END:
 #+end_example
 
 ** iCalendar Export
@@ -15085,13 +15085,13 @@ heavy duty structural modifications of the document.  For example, you
 can remove every headline in the buffer during export like this:
 
 #+begin_src emacs-lisp
-  (defun my-headline-removal (backend)
-    "Remove all headlines in the current buffer.
-  BACKEND is the export back-end being used, as a symbol."
-    (org-map-entries
-     (lambda () (delete-region (point) (line-beginning-position 2)))))
+(defun my-headline-removal (backend)
+  "Remove all headlines in the current buffer.
+BACKEND is the export back-end being used, as a symbol."
+  (org-map-entries
+   (lambda () (delete-region (point) (line-beginning-position 2)))))
 
-  (add-hook 'org-export-before-parsing-hook 'my-headline-removal)
+(add-hook 'org-export-before-parsing-hook 'my-headline-removal)
 #+end_src
 
 *** Filters
@@ -15135,13 +15135,13 @@ Here is an example filter that replaces non-breaking spaces ~ ~ in the
 Org buffer with =~= for the LaTeX back-end.
 
 #+begin_src emacs-lisp
-  (defun my-latex-filter-nobreaks (text backend info)
-    "Ensure \" \" are properly handled in LaTeX export."
-    (when (org-export-derived-backend-p backend 'latex)
-      (replace-regexp-in-string " " "~" text)))
+(defun my-latex-filter-nobreaks (text backend info)
+  "Ensure \" \" are properly handled in LaTeX export."
+  (when (org-export-derived-backend-p backend 'latex)
+    (replace-regexp-in-string " " "~" text)))
 
-  (add-to-list 'org-export-filter-plain-text-functions
-               'my-latex-filter-nobreaks)
+(add-to-list 'org-export-filter-plain-text-functions
+             'my-latex-filter-nobreaks)
 #+end_src
 
 A filter requires three arguments: the code to be transformed, the
@@ -15164,13 +15164,13 @@ a code block in the same Org file, which is a handy location for
 debugging.
 
 #+begin_example
-  ,#+BIND: org-export-filter-timestamp-functions (tmp-f-timestamp)
-  ,#+BIND: org-export-filter-strike-through-functions (tmp-f-strike-through)
-  ,#+BEGIN_SRC emacs-lisp :exports results :results none
-    (defun tmp-f-timestamp (s backend info)
-      (replace-regexp-in-string "&[lg]t;\\|[][]" "" s))
-    (defun tmp-f-strike-through (s backend info) "")
-  ,#+END_SRC
+,#+BIND: org-export-filter-timestamp-functions (tmp-f-timestamp)
+,#+BIND: org-export-filter-strike-through-functions (tmp-f-strike-through)
+,#+BEGIN_SRC emacs-lisp :exports results :results none
+  (defun tmp-f-timestamp (s backend info)
+    (replace-regexp-in-string "&[lg]t;\\|[][]" "" s))
+  (defun tmp-f-strike-through (s backend info) "")
+,#+END_SRC
 #+end_example
 
 *** Extending an existing back-end
@@ -15195,22 +15195,22 @@ is non-~nil~, like the following:
 Then extend /ascii/ back-end with a custom "my-ascii" back-end.
 
 #+begin_src emacs-lisp
-  (defun my-ascii-src-block (src-block contents info)
-    "Transcode a SRC-BLOCK element from Org to ASCII.
-  CONTENTS is nil.  INFO is a plist used as a communication
-  channel."
-    (if (not (org-export-read-attribute :attr_ascii src-block :language))
-        (org-export-with-backend 'ascii src-block contents info)
-      (concat
-       (format ",--[ %s ]--\n%s`----"
-               (org-element-property :language src-block)
-               (replace-regexp-in-string
-                "^" "| "
-                (org-element-normalize-string
-                 (org-export-format-code-default src-block info)))))))
+(defun my-ascii-src-block (src-block contents info)
+  "Transcode a SRC-BLOCK element from Org to ASCII.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (if (not (org-export-read-attribute :attr_ascii src-block :language))
+      (org-export-with-backend 'ascii src-block contents info)
+    (concat
+     (format ",--[ %s ]--\n%s`----"
+             (org-element-property :language src-block)
+             (replace-regexp-in-string
+              "^" "| "
+              (org-element-normalize-string
+               (org-export-format-code-default src-block info)))))))
 
-  (org-export-define-derived-backend 'my-ascii 'ascii
-    :translate-alist '((src-block . my-ascii-src-block)))
+(org-export-define-derived-backend 'my-ascii 'ascii
+  :translate-alist '((src-block . my-ascii-src-block)))
 #+end_src
 
 The ~my-ascii-src-block~ function looks at the attribute above the
@@ -15224,7 +15224,7 @@ To use the newly defined back-end, evaluate the following from an Org
 buffer:
 
 #+begin_src emacs-lisp
-  (org-export-to-buffer 'my-ascii "*Org MY-ASCII Export*")
+(org-export-to-buffer 'my-ascii "*Org MY-ASCII Export*")
 #+end_src
 
 Further steps to consider would be an interactive function,
@@ -15306,7 +15306,7 @@ list configures one project, and may be in one of the two following
 forms:
 
 #+begin_src emacs-lisp
-  ("project-name" :property value :property value ...)
+("project-name" :property value :property value ...)
 #+end_src
 
 #+texinfo: @noindent
@@ -15314,7 +15314,7 @@ i.e., a well-formed property list with alternating keys and values,
 or:
 
 #+begin_src emacs-lisp
-  ("project-name" :components ("project-name" "project-name" ...))
+("project-name" :components ("project-name" "project-name" ...))
 #+end_src
 
 In both cases, projects are configured by specifying property values.
@@ -15708,9 +15708,9 @@ published to HTML, the following links all point to a dedicated anchor
 in =foo.html=.
 
 #+begin_example
-  [[file:foo.org::*heading]]
-  [[file:foo.org::#custom-id]]
-  [[file:foo.org::target]]
+[[file:foo.org::*heading]]
+[[file:foo.org::#custom-id]]
+[[file:foo.org::target]]
 #+end_example
 
 *** Generating a sitemap
@@ -15824,9 +15824,9 @@ Index entries are specified with =INDEX= keyword.  An entry that
 contains an exclamation mark creates a sub item.
 
 #+begin_example
-  ,*** Curriculum Vitae
-  ,#+INDEX: CV
-  ,#+INDEX: Application!CV
+,*** Curriculum Vitae
+,#+INDEX: CV
+,#+INDEX: Application!CV
 #+end_example
 
 ** Uploading Files
@@ -15885,15 +15885,15 @@ This example publishes a set of Org files to the =public_html=
 directory on the local machine.
 
 #+begin_src emacs-lisp
-  (setq org-publish-project-alist
-        '(("org"
-           :base-directory "~/org/"
-           :publishing-directory "~/public_html"
-           :section-numbers nil
-           :table-of-contents nil
-           :style "<link rel=\"stylesheet\"
-                  href=\"../other/mystyle.css\"
-                  type=\"text/css\"/>")))
+(setq org-publish-project-alist
+      '(("org"
+         :base-directory "~/org/"
+         :publishing-directory "~/public_html"
+         :section-numbers nil
+         :table-of-contents nil
+         :style "<link rel=\"stylesheet\"
+                href=\"../other/mystyle.css\"
+                type=\"text/css\"/>")))
 #+end_src
 
 *** Example: complex publishing configuration
@@ -15919,32 +15919,32 @@ You can accomplish this by setting up an =images/= folder in the right
 place on the web server, and publishing images to it.
 
 #+begin_src emacs-lisp
-  (setq org-publish-project-alist
-        '(("orgfiles"
-           :base-directory "~/org/"
-           :base-extension "org"
-           :publishing-directory "/ssh:user@host:~/html/notebook/"
-           :publishing-function org-html-publish-to-html
-           :exclude "PrivatePage.org" ;; regexp
-           :headline-levels 3
-           :section-numbers nil
-           :with-toc nil
-           :html-head "<link rel=\"stylesheet\"
-                    href=\"../other/mystyle.css\" type=\"text/css\"/>"
-           :html-preamble t)
+(setq org-publish-project-alist
+      '(("orgfiles"
+         :base-directory "~/org/"
+         :base-extension "org"
+         :publishing-directory "/ssh:user@host:~/html/notebook/"
+         :publishing-function org-html-publish-to-html
+         :exclude "PrivatePage.org" ;; regexp
+         :headline-levels 3
+         :section-numbers nil
+         :with-toc nil
+         :html-head "<link rel=\"stylesheet\"
+                  href=\"../other/mystyle.css\" type=\"text/css\"/>"
+         :html-preamble t)
 
-          ("images"
-           :base-directory "~/images/"
-           :base-extension "jpg\\|gif\\|png"
-           :publishing-directory "/ssh:user@host:~/html/images/"
-           :publishing-function org-publish-attachment)
+        ("images"
+         :base-directory "~/images/"
+         :base-extension "jpg\\|gif\\|png"
+         :publishing-directory "/ssh:user@host:~/html/images/"
+         :publishing-function org-publish-attachment)
 
-          ("other"
-           :base-directory "~/other/"
-           :base-extension "css\\|el"
-           :publishing-directory "/ssh:user@host:~/html/other/"
-           :publishing-function org-publish-attachment)
-          ("website" :components ("orgfiles" "images" "other"))))
+        ("other"
+         :base-directory "~/other/"
+         :base-extension "css\\|el"
+         :publishing-directory "/ssh:user@host:~/html/other/"
+         :publishing-function org-publish-attachment)
+        ("website" :components ("orgfiles" "images" "other"))))
 #+end_src
 
 ** Triggering Publication
@@ -16007,11 +16007,11 @@ an Org comment or within a fixed width section.
 Here is an example source code block in the Emacs Lisp language:
 
 #+begin_example
-  ,#+BEGIN_SRC emacs-lisp
-    (defun org-xor (a b)
-       "Exclusive or."
-       (if a (not b) b))
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp
+  (defun org-xor (a b)
+     "Exclusive or."
+     (if a (not b) b))
+,#+END_SRC
 #+end_example
 
 Org can manage the source code in the block delimited by =#+BEGIN_SRC=
@@ -16085,10 +16085,10 @@ shown below.
 A source code block conforms to this structure:
 
 #+begin_example
-  ,#+NAME: <name>
-  ,#+BEGIN_SRC <language> <switches> <header arguments>
-    <body>
-  ,#+END_SRC
+,#+NAME: <name>
+,#+BEGIN_SRC <language> <switches> <header arguments>
+  <body>
+,#+END_SRC
 #+end_example
 
 Do not be put-off by having to remember the source block syntax.  Org
@@ -16179,20 +16179,20 @@ the ~org-babel-default-header-args~ variable, which defaults to the
 following values:
 
 #+begin_example
-  :session    => "none"
-  :results    => "replace"
-  :exports    => "code"
-  :cache      => "no"
-  :noweb      => "no"
+:session    => "none"
+:results    => "replace"
+:exports    => "code"
+:cache      => "no"
+:noweb      => "no"
 #+end_example
 
 The example below sets =:noweb= header arguments to =yes=, which makes
 Org expand =:noweb= references by default.
 
 #+begin_src emacs-lisp
-  (setq org-babel-default-header-args
-        (cons '(:noweb . "yes")
-              (assq-delete-all :noweb org-babel-default-header-args)))
+(setq org-babel-default-header-args
+      (cons '(:noweb . "yes")
+            (assq-delete-all :noweb org-babel-default-header-args)))
 #+end_src
 
 #+cindex: language specific default header arguments
@@ -16217,8 +16217,8 @@ executions for all blocks, not just R code blocks; no results inserted
 for any block.
 
 #+begin_example
-  ,#+PROPERTY: header-args:R  :session *R*
-  ,#+PROPERTY: header-args    :results silent
+,#+PROPERTY: header-args:R  :session *R*
+,#+PROPERTY: header-args    :results silent
 #+end_example
 
 #+vindex: org-use-property-inheritance
@@ -16232,10 +16232,10 @@ In this example, =:cache= defaults to =yes= for all code blocks in the
 sub-tree.
 
 #+begin_example
-  ,* sample header
-    :PROPERTIES:
-    :header-args:    :cache yes
-    :END:
+,* sample header
+  :PROPERTIES:
+  :header-args:    :cache yes
+  :END:
 #+end_example
 
 #+kindex: C-c C-x p
@@ -16251,15 +16251,15 @@ Language-specific header arguments are also read from properties
 identifier.  For example,
 
 #+begin_example
-  ,* Heading
-    :PROPERTIES:
-    :header-args:clojure:    :session *clojure-1*
-    :header-args:R:          :session *R*
-    :END:
-  ,** Subheading
-    :PROPERTIES:
-    :header-args:clojure:    :session *clojure-2*
-    :END:
+,* Heading
+  :PROPERTIES:
+  :header-args:clojure:    :session *clojure-1*
+  :header-args:R:          :session *R*
+  :END:
+,** Subheading
+  :PROPERTIES:
+  :header-args:clojure:    :session *clojure-2*
+  :END:
 #+end_example
 
 #+texinfo: @noindent
@@ -16282,11 +16282,11 @@ ignore results of the code execution.  Setting =:exports= to =code=
 exports only the body of the code block to HTML or LaTeX.
 
 #+begin_example
-  ,#+NAME: factorial
-  ,#+BEGIN_SRC haskell :results silent :exports code :var n=0
-    fac 0 = 1
-    fac n = n * fac (n-1)
-  ,#+END_SRC
+,#+NAME: factorial
+,#+BEGIN_SRC haskell :results silent :exports code :var n=0
+  fac 0 = 1
+  fac n = n * fac (n-1)
+,#+END_SRC
 #+end_example
 
 The same header arguments in an inline code block:
@@ -16302,26 +16302,26 @@ be removed at some point.
 Multi-line header arguments on an unnamed code block:
 
 #+begin_example
-  ,#+HEADER: :var data1=1
-  ,#+BEGIN_SRC emacs-lisp :var data2=2
-     (message "data1:%S, data2:%S" data1 data2)
-  ,#+END_SRC
+,#+HEADER: :var data1=1
+,#+BEGIN_SRC emacs-lisp :var data2=2
+   (message "data1:%S, data2:%S" data1 data2)
+,#+END_SRC
 
-  ,#+RESULTS:
-  : data1:1, data2:2
+,#+RESULTS:
+: data1:1, data2:2
 #+end_example
 
 Multi-line header arguments on a named code block:
 
 #+begin_example
-  ,#+NAME: named-block
-  ,#+HEADER: :var data=2
-  ,#+BEGIN_SRC emacs-lisp
-    (message "data:%S" data)
-  ,#+END_SRC
+,#+NAME: named-block
+,#+HEADER: :var data=2
+,#+BEGIN_SRC emacs-lisp
+  (message "data:%S" data)
+,#+END_SRC
 
-  ,#+RESULTS: named-block
-    : data:2
+,#+RESULTS: named-block
+  : data:2
 #+end_example
 
 *** Header arguments in function calls
@@ -16382,19 +16382,19 @@ Here are examples of passing values by reference:
      A table named with a =NAME= keyword.
 
      #+begin_example
-       ,#+NAME: example-table
-       | 1 |
-       | 2 |
-       | 3 |
-       | 4 |
+     ,#+NAME: example-table
+     | 1 |
+     | 2 |
+     | 3 |
+     | 4 |
 
-       ,#+NAME: table-length
-       ,#+BEGIN_SRC emacs-lisp :var table=example-table
-         (length table)
-       ,#+END_SRC
+     ,#+NAME: table-length
+     ,#+BEGIN_SRC emacs-lisp :var table=example-table
+       (length table)
+     ,#+END_SRC
 
-       ,#+RESULTS: table-length
-       : 4
+     ,#+RESULTS: table-length
+     : 4
      #+end_example
 
      When passing a table, you can treat specially the row, or the
@@ -16412,21 +16412,21 @@ Here are examples of passing values by reference:
      =no=, Org does not pre-process column names at all.
 
      #+begin_example
-       ,#+NAME: less-cols
-       | a |
-       |---|
-       | b |
-       | c |
+     ,#+NAME: less-cols
+     | a |
+     |---|
+     | b |
+     | c |
 
-       ,#+BEGIN_SRC python :var tab=less-cols :colnames nil
-         return [[val + '*' for val in row] for row in tab]
-       ,#+END_SRC
+     ,#+BEGIN_SRC python :var tab=less-cols :colnames nil
+       return [[val + '*' for val in row] for row in tab]
+     ,#+END_SRC
 
-       ,#+RESULTS:
-       | a  |
-       |----|
-       | b* |
-       | c* |
+     ,#+RESULTS:
+     | a  |
+     |----|
+     | b* |
+     | c* |
      #+end_example
 
      #+cindex: @samp{rownames}, header argument
@@ -16439,17 +16439,17 @@ Here are examples of passing values by reference:
      of table-handling in Emacs.
 
      #+begin_example
-       ,#+NAME: with-rownames
-       | one | 1 | 2 | 3 | 4 |  5 |
-       | two | 6 | 7 | 8 | 9 | 10 |
+     ,#+NAME: with-rownames
+     | one | 1 | 2 | 3 | 4 |  5 |
+     | two | 6 | 7 | 8 | 9 | 10 |
 
-       ,#+BEGIN_SRC python :var tab=with-rownames :rownames yes
-         return [[val + 10 for val in row] for row in tab]
-       ,#+END_SRC
+     ,#+BEGIN_SRC python :var tab=with-rownames :rownames yes
+       return [[val + 10 for val in row] for row in tab]
+     ,#+END_SRC
 
-       ,#+RESULTS:
-       | one | 11 | 12 | 13 | 14 | 15 |
-       | two | 16 | 17 | 18 | 19 | 20 |
+     ,#+RESULTS:
+     | one | 11 | 12 | 13 | 14 | 15 |
+     | two | 16 | 17 | 18 | 19 | 20 |
      #+end_example
 
 - list ::
@@ -16457,18 +16457,18 @@ Here are examples of passing values by reference:
      A simple named list.
 
      #+begin_example
-       ,#+NAME: example-list
-       - simple
-         - not
-         - nested
-       - list
+     ,#+NAME: example-list
+     - simple
+       - not
+       - nested
+     - list
 
-       ,#+BEGIN_SRC emacs-lisp :var x=example-list
-         (print x)
-       ,#+END_SRC
+     ,#+BEGIN_SRC emacs-lisp :var x=example-list
+       (print x)
+     ,#+END_SRC
 
-       ,#+RESULTS:
-       | simple | list |
+     ,#+RESULTS:
+     | simple | list |
      #+end_example
 
      Note that only the top level list items are passed along.  Nested
@@ -16480,12 +16480,12 @@ Here are examples of passing values by reference:
      above, optionally followed by parentheses.
 
      #+begin_example
-       ,#+BEGIN_SRC emacs-lisp :var length=table-length()
-         (* 2 length)
-       ,#+END_SRC
+     ,#+BEGIN_SRC emacs-lisp :var length=table-length()
+       (* 2 length)
+     ,#+END_SRC
 
-       ,#+RESULTS:
-       : 8
+     ,#+RESULTS:
+     : 8
      #+end_example
 
 - code block with arguments ::
@@ -16494,21 +16494,21 @@ Here are examples of passing values by reference:
      parentheses and optional arguments passed within the parentheses.
 
      #+begin_example
-       ,#+NAME: double
-       ,#+BEGIN_SRC emacs-lisp :var input=8
-         (* 2 input)
-       ,#+END_SRC
+     ,#+NAME: double
+     ,#+BEGIN_SRC emacs-lisp :var input=8
+       (* 2 input)
+     ,#+END_SRC
 
-       ,#+RESULTS: double
-       : 16
+     ,#+RESULTS: double
+     : 16
 
-       ,#+NAME: squared
-       ,#+BEGIN_SRC emacs-lisp :var input=double(input=1)
-         (* input input)
-       ,#+END_SRC
+     ,#+NAME: squared
+     ,#+BEGIN_SRC emacs-lisp :var input=double(input=1)
+       (* input input)
+     ,#+END_SRC
 
-       ,#+RESULTS: squared
-       : 4
+     ,#+RESULTS: squared
+     : 4
      #+end_example
 
 - literal example ::
@@ -16516,20 +16516,20 @@ Here are examples of passing values by reference:
      A literal example block named with a =NAME= keyword.
 
      #+begin_example
-       ,#+NAME: literal-example
-       ,#+BEGIN_EXAMPLE
-         A literal example
-         on two lines
-       ,#+END_EXAMPLE
+     ,#+NAME: literal-example
+     ,#+BEGIN_EXAMPLE
+       A literal example
+       on two lines
+     ,#+END_EXAMPLE
 
-       ,#+NAME: read-literal-example
-       ,#+BEGIN_SRC emacs-lisp :var x=literal-example
-         (concatenate #'string x " for you.")
-       ,#+END_SRC
+     ,#+NAME: read-literal-example
+     ,#+BEGIN_SRC emacs-lisp :var x=literal-example
+       (concatenate #'string x " for you.")
+     ,#+END_SRC
 
-       ,#+RESULTS: read-literal-example
-       : A literal example
-       : on two lines for you.
+     ,#+RESULTS: read-literal-example
+     : A literal example
+     : on two lines for you.
      #+end_example
 
 Indexing variable values enables referencing portions of a variable.
@@ -16542,18 +16542,18 @@ the last cell of the first row the table =example-table= to the
 variable =data=:
 
 #+begin_example
-  ,#+NAME: example-table
-  | 1 | a |
-  | 2 | b |
-  | 3 | c |
-  | 4 | d |
+,#+NAME: example-table
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
 
-  ,#+BEGIN_SRC emacs-lisp :var data=example-table[0,-1]
-    data
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp :var data=example-table[0,-1]
+  data
+,#+END_SRC
 
-  ,#+RESULTS:
-  : a
+,#+RESULTS:
+: a
 #+end_example
 
 Two integers separated by a colon reference a range of variable
@@ -16562,21 +16562,21 @@ example the following assigns the middle three rows of =example-table=
 to =data=.
 
 #+begin_example
-  ,#+NAME: example-table
-  | 1 | a |
-  | 2 | b |
-  | 3 | c |
-  | 4 | d |
-  | 5 | 3 |
+,#+NAME: example-table
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
+| 5 | 3 |
 
-  ,#+BEGIN_SRC emacs-lisp :var data=example-table[1:3]
-    data
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp :var data=example-table[1:3]
+  data
+,#+END_SRC
 
-  ,#+RESULTS:
-  | 2 | b |
-  | 3 | c |
-  | 4 | d |
+,#+RESULTS:
+| 2 | b |
+| 3 | c |
+| 4 | d |
 #+end_example
 
 To pick the entire range, use an empty index, or the single character
@@ -16584,18 +16584,18 @@ To pick the entire range, use an empty index, or the single character
 reference the first column only.
 
 #+begin_example
-  ,#+NAME: example-table
-  | 1 | a |
-  | 2 | b |
-  | 3 | c |
-  | 4 | d |
+,#+NAME: example-table
+| 1 | a |
+| 2 | b |
+| 3 | c |
+| 4 | d |
 
-  ,#+BEGIN_SRC emacs-lisp :var data=example-table[,0]
-    data
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp :var data=example-table[,0]
+  data
+,#+END_SRC
 
-  ,#+RESULTS:
-  | 1 | 2 | 3 | 4 |
+,#+RESULTS:
+| 1 | 2 | 3 | 4 |
 #+end_example
 
 Index referencing can be used for tables and code blocks.  Index
@@ -16603,19 +16603,19 @@ referencing can handle any number of dimensions.  Commas delimit
 multiple dimensions, as shown below.
 
 #+begin_example
-  ,#+NAME: 3D
-  ,#+BEGIN_SRC emacs-lisp
-    '(((1  2  3)  (4  5  6)  (7  8  9))
-      ((10 11 12) (13 14 15) (16 17 18))
-      ((19 20 21) (22 23 24) (25 26 27)))
-  ,#+END_SRC
+,#+NAME: 3D
+,#+BEGIN_SRC emacs-lisp
+  '(((1  2  3)  (4  5  6)  (7  8  9))
+    ((10 11 12) (13 14 15) (16 17 18))
+    ((19 20 21) (22 23 24) (25 26 27)))
+,#+END_SRC
 
-  ,#+BEGIN_SRC emacs-lisp :var data=3D[1,,1]
-    data
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp :var data=3D[1,,1]
+  data
+,#+END_SRC
 
-  ,#+RESULTS:
-  | 11 | 14 | 17 |
+,#+RESULTS:
+| 11 | 14 | 17 |
 #+end_example
 
 Note that row names and column names are not removed prior to variable
@@ -16632,25 +16632,25 @@ reliability here because the file's name could change once the code in
 the block starts executing.
 
 #+begin_example
-  ,#+BEGIN_SRC sh :var filename=(buffer-file-name) :exports both
-    wc -w $filename
-  ,#+END_SRC
+,#+BEGIN_SRC sh :var filename=(buffer-file-name) :exports both
+  wc -w $filename
+,#+END_SRC
 #+end_example
 
 Note that values read from tables and lists are not mistakenly
 evaluated as Emacs Lisp code, as illustrated in the following example.
 
 #+begin_example
-  ,#+NAME: table
-  | (a b c) |
+,#+NAME: table
+| (a b c) |
 
-  ,#+HEADERS: :var data=table[0,0]
-  ,#+BEGIN_SRC perl
-    $data
-  ,#+END_SRC
+,#+HEADERS: :var data=table[0,0]
+,#+BEGIN_SRC perl
+  $data
+,#+END_SRC
 
-  ,#+RESULTS:
-  : (a b c)
+,#+RESULTS:
+: (a b c)
 #+end_example
 
 *** Using sessions
@@ -16708,18 +16708,18 @@ For example, to save the plot file in the =Work/= folder of the home
 directory---notice tilde is expanded:
 
 #+begin_example
-  ,#+BEGIN_SRC R :file myplot.png :dir ~/Work
-    matplot(matrix(rnorm(100), 10), type="l")
-  ,#+END_SRC
+,#+BEGIN_SRC R :file myplot.png :dir ~/Work
+  matplot(matrix(rnorm(100), 10), type="l")
+,#+END_SRC
 #+end_example
 
 To evaluate the code block on a remote machine, supply a remote
 directory name using Tramp syntax.  For example:
 
 #+begin_example
-  ,#+BEGIN_SRC R :file plot.png :dir /scp:dand@yakuba.princeton.edu:
-    plot(1:10, main=system("hostname", intern=TRUE))
-  ,#+END_SRC
+,#+BEGIN_SRC R :file plot.png :dir /scp:dand@yakuba.princeton.edu:
+  plot(1:10, main=system("hostname", intern=TRUE))
+,#+END_SRC
 #+end_example
 
 Org first captures the text results as usual for insertion in the Org
@@ -16752,8 +16752,8 @@ use =:prologue "reset"= in a Gnuplot code block or, for every such
 block:
 
 #+begin_src emacs-lisp
-  (add-to-list 'org-babel-default-header-args:gnuplot
-               '((:prologue . "reset")))
+(add-to-list 'org-babel-default-header-args:gnuplot
+             '((:prologue . "reset")))
 
 #+end_src
 
@@ -16804,15 +16804,15 @@ buffer or from the "Library of Babel" (see [[*Library of Babel]]).
 The syntax for =CALL= keyword is:
 
 #+begin_example
-  ,#+CALL: <name>(<arguments>)
-  ,#+CALL: <name>[<inside header arguments>](<arguments>) <end header arguments>
+,#+CALL: <name>(<arguments>)
+,#+CALL: <name>[<inside header arguments>](<arguments>) <end header arguments>
 #+end_example
 
 The syntax for inline named code blocks is:
 
 #+begin_example
-  ... call_<name>(<arguments>) ...
-  ... call_<name>[<inside header arguments>](<arguments>)[<end header arguments>] ...
+... call_<name>(<arguments>) ...
+... call_<name>[<inside header arguments>](<arguments>)[<end header arguments>] ...
 #+end_example
 
 When inline syntax is used, the result is wrapped based on the
@@ -16944,21 +16944,21 @@ In this example, both functions are cached.  But =caller= runs only if
 the result from =random= has changed since the last run.
 
 #+begin_example
-  ,#+NAME: random
-  ,#+BEGIN_SRC R :cache yes
-    runif(1)
-  ,#+END_SRC
+,#+NAME: random
+,#+BEGIN_SRC R :cache yes
+  runif(1)
+,#+END_SRC
 
-  ,#+RESULTS[a2a72cd647ad44515fab62e144796432793d68e1]: random
-  0.4659510825295
+,#+RESULTS[a2a72cd647ad44515fab62e144796432793d68e1]: random
+0.4659510825295
 
-  ,#+NAME: caller
-  ,#+BEGIN_SRC emacs-lisp :var x=random :cache yes
-    x
-  ,#+END_SRC
+,#+NAME: caller
+,#+BEGIN_SRC emacs-lisp :var x=random :cache yes
+  x
+,#+END_SRC
 
-  ,#+RESULTS[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
-  0.254227238707244
+,#+RESULTS[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
+0.254227238707244
 #+end_example
 
 ** Results of Evaluation
@@ -17034,31 +17034,31 @@ they are mutually exclusive.
      an external process.  Compare for example these two blocks:
 
      #+begin_example
-       ,#+BEGIN_SRC python :results output
-         print "hello"
-         2
-         print "bye"
-       ,#+END_SRC
+     ,#+BEGIN_SRC python :results output
+       print "hello"
+       2
+       print "bye"
+     ,#+END_SRC
 
-       ,#+RESULTS:
-       : hello
-       : bye
+     ,#+RESULTS:
+     : hello
+     : bye
      #+end_example
 
      In the above non-session mode, the "2" is not printed; so it does
      not appear in results.
 
      #+begin_example
-       ,#+BEGIN_SRC python :results output :session
-         print "hello"
-         2
-         print "bye"
-       ,#+END_SRC
+     ,#+BEGIN_SRC python :results output :session
+       print "hello"
+       2
+       print "bye"
+     ,#+END_SRC
 
-       ,#+RESULTS:
-       : hello
-       : 2
-       : bye
+     ,#+RESULTS:
+     : hello
+     : 2
+     : bye
      #+end_example
 
      In the above session, the interactive interpreter receives and
@@ -17090,34 +17090,34 @@ default behavior is to automatically determine the result type.
      example.
 
      #+begin_example
-       ,#+NAME: many-cols
-       | a | b | c |
-       |---+---+---|
-       | d | e | f |
-       |---+---+---|
-       | g | h | i |
+     ,#+NAME: many-cols
+     | a | b | c |
+     |---+---+---|
+     | d | e | f |
+     |---+---+---|
+     | g | h | i |
 
-       ,#+NAME: no-hline
-       ,#+BEGIN_SRC python :var tab=many-cols :hlines no
-         return tab
-       ,#+END_SRC
+     ,#+NAME: no-hline
+     ,#+BEGIN_SRC python :var tab=many-cols :hlines no
+       return tab
+     ,#+END_SRC
 
-       ,#+RESULTS: no-hline
-       | a | b | c |
-       | d | e | f |
-       | g | h | i |
+     ,#+RESULTS: no-hline
+     | a | b | c |
+     | d | e | f |
+     | g | h | i |
 
-       ,#+NAME: hlines
-       ,#+BEGIN_SRC python :var tab=many-cols :hlines yes
-         return tab
-       ,#+END_SRC
+     ,#+NAME: hlines
+     ,#+BEGIN_SRC python :var tab=many-cols :hlines yes
+       return tab
+     ,#+END_SRC
 
-       ,#+RESULTS: hlines
-       | a | b | c |
-       |---+---+---|
-       | d | e | f |
-       |---+---+---|
-       | g | h | i |
+     ,#+RESULTS: hlines
+     | a | b | c |
+     |---+---+---|
+     | d | e | f |
+     |---+---+---|
+     | g | h | i |
      #+end_example
 
 - =list= ::
@@ -17145,10 +17145,10 @@ default behavior is to automatically determine the result type.
      Org assumes it is the current directory.
 
      #+begin_example
-       ,#+BEGIN_SRC asymptote :results value file :file circle.pdf :output-dir img/
-         size(2cm);
-         draw(unitcircle);
-       ,#+END_SRC
+     ,#+BEGIN_SRC asymptote :results value file :file circle.pdf :output-dir img/
+       size(2cm);
+       draw(unitcircle);
+     ,#+END_SRC
      #+end_example
 
      #+cindex: @samp{file-ext}, header argument
@@ -17158,11 +17158,11 @@ default behavior is to automatically determine the result type.
      extension are mandatory.
 
      #+begin_example
-       ,#+name: circle
-       ,#+BEGIN_SRC asymptote :results value file :file-ext pdf
-         size(2cm);
-         draw(unitcircle);
-       ,#+END_SRC
+     ,#+name: circle
+     ,#+BEGIN_SRC asymptote :results value file :file-ext pdf
+       size(2cm);
+       draw(unitcircle);
+     ,#+END_SRC
      #+end_example
 
      #+cindex: @samp{file-desc}, header argument
@@ -17266,52 +17266,52 @@ action.  The first one shows how to attach an =ATTR_LATEX= keyword
 using =post=.
 
 #+begin_example
-  ,#+NAME: attr_wrap
-  ,#+BEGIN_SRC sh :var data="" :var width="\\textwidth" :results output
-    echo "#+ATTR_LATEX: :width $width"
-    echo "$data"
-  ,#+END_SRC
+,#+NAME: attr_wrap
+,#+BEGIN_SRC sh :var data="" :var width="\\textwidth" :results output
+  echo "#+ATTR_LATEX: :width $width"
+  echo "$data"
+,#+END_SRC
 
-  ,#+HEADER: :file /tmp/it.png
-  ,#+BEGIN_SRC dot :post attr_wrap(width="5cm", data=*this*) :results drawer
-    digraph{
-            a -> b;
-            b -> c;
-            c -> a;
-    }
-  ,#+end_src
+,#+HEADER: :file /tmp/it.png
+,#+BEGIN_SRC dot :post attr_wrap(width="5cm", data=*this*) :results drawer
+  digraph{
+          a -> b;
+          b -> c;
+          c -> a;
+  }
+,#+end_src
 
-  ,#+RESULTS:
-  :RESULTS:
-  ,#+ATTR_LATEX :width 5cm
-  [[file:/tmp/it.png]]
-  :END:
+,#+RESULTS:
+:RESULTS:
+,#+ATTR_LATEX :width 5cm
+[[file:/tmp/it.png]]
+:END:
 #+end_example
 
 The second example shows use of =colnames= header argument in =post=
 to pass data between code blocks.
 
 #+begin_example
-  ,#+NAME: round-tbl
-  ,#+BEGIN_SRC emacs-lisp :var tbl="" fmt="%.3f"
-    (mapcar (lambda (row)
-              (mapcar (lambda (cell)
-                        (if (numberp cell)
-                            (format fmt cell)
-                          cell))
-                      row))
-            tbl)
-  ,#+end_src
+,#+NAME: round-tbl
+,#+BEGIN_SRC emacs-lisp :var tbl="" fmt="%.3f"
+  (mapcar (lambda (row)
+            (mapcar (lambda (cell)
+                      (if (numberp cell)
+                          (format fmt cell)
+                        cell))
+                    row))
+          tbl)
+,#+end_src
 
-  ,#+BEGIN_SRC R :colnames yes :post round-tbl[:colnames yes](*this*)
-    set.seed(42)
-    data.frame(foo=rnorm(1))
-  ,#+END_SRC
+,#+BEGIN_SRC R :colnames yes :post round-tbl[:colnames yes](*this*)
+  set.seed(42)
+  data.frame(foo=rnorm(1))
+,#+END_SRC
 
-  ,#+RESULTS:
-  |   foo |
-  |-------|
-  | 1.371 |
+,#+RESULTS:
+|   foo |
+|-------|
+| 1.371 |
 #+end_example
 
 ** Exporting Code Blocks
@@ -17588,10 +17588,10 @@ In this example, evaluation is disabled for Emacs Lisp, and enabled
 for R.
 
 #+begin_src emacs-lisp
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . nil)
-     (R . t)))
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . nil)
+   (R . t)))
 #+end_src
 
 Note that this is not the only way to enable a language.  Org also
@@ -17599,7 +17599,7 @@ enables languages when loaded with ~require~ statement.  For example,
 the following enables execution of Clojure code blocks:
 
 #+begin_src emacs-lisp
-  (require 'ob-clojure)
+(require 'ob-clojure)
 #+end_src
 
 ** Editing Source Code
@@ -17671,13 +17671,13 @@ shades the background of regular blocks, and colors source blocks only
 for Python and Emacs Lisp languages.
 
 #+begin_src emacs-lisp
-  (require 'color)
-  (set-face-attribute 'org-block nil :background
-                      (color-darken-name
-                       (face-attribute 'default :background) 3))
+(require 'color)
+(set-face-attribute 'org-block nil :background
+                    (color-darken-name
+                     (face-attribute 'default :background) 3))
 
-  (setq org-src-block-faces '(("emacs-lisp" (:background "#EEE2FF"))
-                              ("python" (:background "#E5FFB8"))))
+(setq org-src-block-faces '(("emacs-lisp" (:background "#EEE2FF"))
+                            ("python" (:background "#E5FFB8"))))
 #+end_src
 
 ** Noweb Reference Syntax
@@ -17734,25 +17734,25 @@ tangled, or exported.
 In the following example,
 
 #+begin_example
-  ,#+NAME: initialization
-  ,#+BEGIN_SRC emacs-lisp
-    (setq sentence "Never a foot too far, even.")
-  ,#+END_SRC
+,#+NAME: initialization
+,#+BEGIN_SRC emacs-lisp
+  (setq sentence "Never a foot too far, even.")
+,#+END_SRC
 
-  ,#+BEGIN_SRC emacs-lisp :noweb yes
-    <<initialization>>
-    (reverse sentence)
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp :noweb yes
+  <<initialization>>
+  (reverse sentence)
+,#+END_SRC
 #+end_example
 
 #+texinfo: @noindent
 the second code block is expanded as
 
 #+begin_example
-  ,#+BEGIN_SRC emacs-lisp :noweb yes
-    (setq sentence "Never a foot too far, even.")
-    (reverse sentence)
-  ,#+END_SRC
+,#+BEGIN_SRC emacs-lisp :noweb yes
+  (setq sentence "Never a foot too far, even.")
+  (reverse sentence)
+,#+END_SRC
 #+end_example
 
 Noweb insertions honor prefix characters that appear before the Noweb
@@ -17762,30 +17762,30 @@ SQL comment syntax, each line of the expanded Noweb reference is
 commented.  With:
 
 #+begin_example
-  ,#+NAME: example
-  ,#+BEGIN_SRC text
-    this is the
-    multi-line body of example
-  ,#+END_SRC
+,#+NAME: example
+,#+BEGIN_SRC text
+  this is the
+  multi-line body of example
+,#+END_SRC
 #+end_example
 
 #+texinfo: @noindent
 this code block:
 
 #+begin_example
-  ,#+BEGIN_SRC sql :noweb yes
-   ---<<example>>
-  ,#+END_SRC
+,#+BEGIN_SRC sql :noweb yes
+ ---<<example>>
+,#+END_SRC
 #+end_example
 
 #+texinfo: @noindent
 expands to:
 
 #+begin_example
-  ,#+BEGIN_SRC sql :noweb yes
-   ---this is the
-   ---multi-line body of example
-  ,#+END_SRC
+,#+BEGIN_SRC sql :noweb yes
+ ---this is the
+ ---multi-line body of example
+,#+END_SRC
 #+end_example
 
 Since this change does not affect Noweb replacement text without
@@ -17795,37 +17795,37 @@ This feature can also be used for management of indentation in
 exported code snippets.  With:
 
 #+begin_example
-  ,#+NAME: if-true
-  ,#+BEGIN_SRC python :exports none
-    print('do things when true')
-  ,#+end_src
+,#+NAME: if-true
+,#+BEGIN_SRC python :exports none
+  print('do things when true')
+,#+end_src
 
-  ,#+name: if-false
-  ,#+begin_src python :exports none
-    print('do things when false')
-  ,#+end_src
+,#+name: if-false
+,#+begin_src python :exports none
+  print('do things when false')
+,#+end_src
 #+end_example
 
 #+texinfo: @noindent
 this code block:
 
 #+begin_example
-  ,#+begin_src python :noweb yes :results output
-    if true:
-        <<if-true>>
-    else:
-        <<if-false>>
-  ,#+end_src
+,#+begin_src python :noweb yes :results output
+  if true:
+      <<if-true>>
+  else:
+      <<if-false>>
+,#+end_src
 #+end_example
 
 #+texinfo: @noindent
 expands to:
 
 #+begin_example
-  if true:
-      print('do things when true')
-  else:
-      print('do things when false')
+if true:
+    print('do things when true')
+else:
+    print('do things when false')
 #+end_example
 
 #+cindex: @samp{noweb-ref}, header argument
@@ -17839,28 +17839,28 @@ of the source code in each block is extracted for concatenation to
 a pure code file when tangled.
 
 #+begin_example
-  ,#+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
-    <<fullest-disk>>
-  ,#+END_SRC
-  ,* the mount point of the fullest disk
-    :PROPERTIES:
-    :header-args: :noweb-ref fullest-disk
-    :END:
+,#+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
+  <<fullest-disk>>
+,#+END_SRC
+,* the mount point of the fullest disk
+  :PROPERTIES:
+  :header-args: :noweb-ref fullest-disk
+  :END:
 
-  ,** query all mounted disks
-  ,#+BEGIN_SRC sh
-    df \
-  ,#+END_SRC
+,** query all mounted disks
+,#+BEGIN_SRC sh
+  df \
+,#+END_SRC
 
-  ,** strip the header row
-  ,#+BEGIN_SRC sh
-    |sed '1d' \
-  ,#+END_SRC
+,** strip the header row
+,#+BEGIN_SRC sh
+  |sed '1d' \
+,#+END_SRC
 
-  ,** output mount point of fullest disk
-  ,#+BEGIN_SRC sh
-    |awk '{if (u < +$5) {u = +$5; m = $6}} END {print m}'
-  ,#+END_SRC
+,** output mount point of fullest disk
+,#+BEGIN_SRC sh
+  |awk '{if (u < +$5) {u = +$5; m = $6}} END {print m}'
+,#+END_SRC
 #+end_example
 
 #+cindex: @samp{noweb-sep}, header argument
@@ -17882,19 +17882,19 @@ when Noweb style references are used with parentheses versus without.
 With:
 
 #+begin_example
-  ,#+NAME: some-code
-  ,#+BEGIN_SRC python :var num=0 :results output :exports none
-    print(num*10)
-  ,#+END_SRC
+,#+NAME: some-code
+,#+BEGIN_SRC python :var num=0 :results output :exports none
+  print(num*10)
+,#+END_SRC
 #+end_example
 
 #+texinfo: @noindent
 this code block:
 
 #+begin_example
-  ,#+BEGIN_SRC text :noweb yes
-    <<some-code>>
-  ,#+END_SRC
+,#+BEGIN_SRC text :noweb yes
+  <<some-code>>
+,#+END_SRC
 #+end_example
 
 #+texinfo: @noindent
@@ -17906,9 +17906,9 @@ Below, a similar Noweb style reference is used, but with parentheses,
 while setting a variable =num= to 10:
 
 #+begin_example
-  ,#+BEGIN_SRC text :noweb yes
-    <<some-code(num=10)>>
-  ,#+END_SRC
+,#+BEGIN_SRC text :noweb yes
+  <<some-code(num=10)>>
+,#+END_SRC
 #+end_example
 
 #+texinfo: @noindent
@@ -18073,16 +18073,16 @@ The sample script shows batch processing of multiple files using
 ~org-babel-tangle~.
 
 #+begin_example
-  #!/bin/sh
-  # Tangle files with Org mode
-  #
-  emacs -Q --batch --eval "
-      (progn
-        (require 'ob-tangle)
-        (dolist (file command-line-args-left)
-          (with-current-buffer (find-file-noselect file)
-            (org-babel-tangle))))
-    " "$@"
+#!/bin/sh
+# Tangle files with Org mode
+#
+emacs -Q --batch --eval "
+    (progn
+      (require 'ob-tangle)
+      (dolist (file command-line-args-left)
+        (with-current-buffer (find-file-noselect file)
+          (org-babel-tangle))))
+  " "$@"
 #+end_example
 
 * Miscellaneous
@@ -18199,6 +18199,7 @@ init file[fn:133].
 | {{{kbd(q)}}} | =#+BEGIN_QUOTE= ... =#+END_QUOTE=         |
 | {{{kbd(s)}}} | =#+BEGIN_SRC= ... =#+END_SRC=             |
 | {{{kbd(v)}}} | =#+BEGIN_VERSE= ... =#+END_VERSE=         |
+#+TBLFM: 
 
 ** Speed Keys
 :PROPERTIES:
@@ -18273,9 +18274,9 @@ Org evaluates code in the following circumstances:
      prompting:
 
      #+begin_src emacs-lisp
-       (defun my-org-confirm-babel-evaluate (lang body)
-         (not (string= lang "ditaa")))  ;don't ask for ditaa
-       (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
+     (defun my-org-confirm-babel-evaluate (lang body)
+       (not (string= lang "ditaa")))  ;don't ask for ditaa
+     (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
      #+end_src
 
 - /Following =shell= and =elisp= links/ ::
@@ -18759,13 +18760,13 @@ indentation scheme, as shown on the right in the following table.  It
 uses only one star and indents text to line with the heading:
 
 #+begin_example
-  ,* Top level headline             |    * Top level headline
-  ,** Second level                  |      * Second level
-  ,*** Third level                  |        * Third level
-      some text                    |          some text
-  ,*** Third level                  |        * Third level
-      more text                    |          more text
-  ,* Another top level headline     |    * Another top level headline
+,* Top level headline             |    * Top level headline
+,** Second level                  |      * Second level
+,*** Third level                  |        * Third level
+    some text                    |          some text
+,*** Third level                  |        * Third level
+    more text                    |          more text
+,* Another top level headline     |    * Another top level headline
 #+end_example
 
 #+texinfo: @noindent
@@ -18801,8 +18802,8 @@ headings as shown in examples below.
      Indent text to align with the headline.
 
      #+begin_example
-       ,*** Third level
-           more text, now indented
+     ,*** Third level
+         more text, now indented
      #+end_example
 
      #+vindex: org-adapt-indentation
@@ -18818,17 +18819,17 @@ headings as shown in examples below.
      preference, use these file =STARTUP= options:
 
      #+begin_example
-       ,#+STARTUP: hidestars
-       ,#+STARTUP: showstars
+     ,#+STARTUP: hidestars
+     ,#+STARTUP: showstars
      #+end_example
 
      With stars hidden, the tree is shown as:
 
      #+begin_example
-       ,* Top level headline
-        ,* Second level
-         ,* Third level
-         ...
+     ,* Top level headline
+      ,* Second level
+       ,* Third level
+       ...
      #+end_example
 
      #+texinfo: @noindent
@@ -18848,8 +18849,8 @@ headings as shown in examples below.
      set this per-file, use either one of the following lines:
 
      #+begin_example
-       ,#+STARTUP: odd
-       ,#+STARTUP: oddeven
+     ,#+STARTUP: odd
+     ,#+STARTUP: oddeven
      #+end_example
 
      To switch between single and double stars layouts, use {{{kbd(M-x
@@ -18942,8 +18943,8 @@ packages are documented here.
      follows:
 
      #+begin_src emacs-lisp
-       (add-hook 'org-mode-hook
-                 (lambda () (imenu-add-to-menubar "Imenu")))
+     (add-hook 'org-mode-hook
+               (lambda () (imenu-add-to-menubar "Imenu")))
      #+end_src
 
      #+vindex: org-imenu-depth
@@ -19048,7 +19049,7 @@ the cursor moves across a special context.
      to disable filladapt like this:
 
      #+begin_src emacs-lisp
-       (add-hook 'org-mode-hook 'turn-off-filladapt-mode)
+     (add-hook 'org-mode-hook 'turn-off-filladapt-mode)
      #+end_src
 
 - =viper.el= by Michael Kifer ::
@@ -19061,7 +19062,7 @@ the cursor moves across a special context.
      ~viper-vi-global-user-map~ with
 
      #+begin_src emacs-lisp
-       (define-key viper-vi-global-user-map "C-c /" 'org-sparse-tree)
+     (define-key viper-vi-global-user-map "C-c /" 'org-sparse-tree)
      #+end_src
 
 - =windmove.el= by Hovav Shacham ::
@@ -19074,11 +19075,11 @@ the cursor moves across a special context.
      on {{{kbd(S-<cursor>)}}}, add this to your configuration:
 
      #+begin_src emacs-lisp
-       ;; Make windmove work in Org mode:
-       (add-hook 'org-shiftup-final-hook 'windmove-up)
-       (add-hook 'org-shiftleft-final-hook 'windmove-left)
-       (add-hook 'org-shiftdown-final-hook 'windmove-down)
-       (add-hook 'org-shiftright-final-hook 'windmove-right)
+     ;; Make windmove work in Org mode:
+     (add-hook 'org-shiftup-final-hook 'windmove-up)
+     (add-hook 'org-shiftleft-final-hook 'windmove-left)
+     (add-hook 'org-shiftdown-final-hook 'windmove-down)
+     (add-hook 'org-shiftright-final-hook 'windmove-right)
      #+end_src
 
 - =yasnippet.el= ::
@@ -19089,10 +19090,10 @@ the cursor moves across a special context.
      following code fixed this problem:
 
      #+begin_src emacs-lisp
-       (add-hook 'org-mode-hook
-                 (lambda ()
-                   (setq-local yas/trigger-key [tab])
-                   (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)))
+     (add-hook 'org-mode-hook
+               (lambda ()
+                 (setq-local yas/trigger-key [tab])
+                 (define-key yas/keymap [tab] 'yas/next-field-or-maybe-expand)))
      #+end_src
 
      The latest version of YASnippet does not play well with Org mode.
@@ -19100,19 +19101,19 @@ the cursor moves across a special context.
      the following function:
 
      #+begin_src emacs-lisp
-       (defun yas/org-very-safe-expand ()
-         (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+     (defun yas/org-very-safe-expand ()
+       (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
      #+end_src
 
      Then, tell Org mode to use that function:
 
      #+begin_src emacs-lisp
-       (add-hook 'org-mode-hook
-                 (lambda ()
-                   (make-variable-buffer-local 'yas/trigger-key)
-                   (setq yas/trigger-key [tab])
-                   (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-                   (define-key yas/keymap [tab] 'yas/next-field)))
+     (add-hook 'org-mode-hook
+               (lambda ()
+                 (make-variable-buffer-local 'yas/trigger-key)
+                 (setq yas/trigger-key [tab])
+                 (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+                 (define-key yas/keymap [tab] 'yas/next-field)))
      #+end_src
 
 ** Org Crypt
@@ -19132,22 +19133,22 @@ the ~org-crypt-tag-matcher~ setting.
 Here is a suggestion for Org Crypt settings in Emacs init file:
 
 #+begin_src emacs-lisp
-  (require 'org-crypt)
-  (org-crypt-use-before-save-magic)
-  (setq org-tags-exclude-from-inheritance '("crypt"))
+(require 'org-crypt)
+(org-crypt-use-before-save-magic)
+(setq org-tags-exclude-from-inheritance '("crypt"))
 
-  (setq org-crypt-key nil)
-  ;; GPG key to use for encryption
-  ;; Either the Key ID or set to nil to use symmetric encryption.
+(setq org-crypt-key nil)
+;; GPG key to use for encryption
+;; Either the Key ID or set to nil to use symmetric encryption.
 
-  (setq auto-save-default nil)
-  ;; Auto-saving does not cooperate with org-crypt.el: so you need to
-  ;; turn it off if you plan to use org-crypt.el quite often.  Otherwise,
-  ;; you'll get an (annoying) message each time you start Org.
+(setq auto-save-default nil)
+;; Auto-saving does not cooperate with org-crypt.el: so you need to
+;; turn it off if you plan to use org-crypt.el quite often.  Otherwise,
+;; you'll get an (annoying) message each time you start Org.
 
-  ;; To turn it off only locally, you can insert this:
-  ;;
-  ;; # -*- buffer-auto-save-file-name: nil; -*-
+;; To turn it off only locally, you can insert this:
+;;
+;; # -*- buffer-auto-save-file-name: nil; -*-
 #+end_src
 
 Excluding the =crypt= tag from inheritance prevents already encrypted
@@ -19204,51 +19205,51 @@ process of adding Org links to Unix man pages, which look like this
 The following =org-man.el= file implements it
 
 #+begin_src emacs-lisp
-  ;;; org-man.el - Support for links to man pages in Org mode
-  (require 'org)
+;;; org-man.el - Support for links to man pages in Org mode
+(require 'org)
 
-  (org-link-set-parameters "man"
-                           :follow org-man-command
-                           :export #'org-man-export
-                           :store #'org-man-store-link)
+(org-link-set-parameters "man"
+                         :follow org-man-command
+                         :export #'org-man-export
+                         :store #'org-man-store-link)
 
-  (defcustom org-man-command 'man
-    "The Emacs command to be used to display a man page."
-    :group 'org-link
-    :type '(choice (const man) (const woman)))
+(defcustom org-man-command 'man
+  "The Emacs command to be used to display a man page."
+  :group 'org-link
+  :type '(choice (const man) (const woman)))
 
-  (defun org-man-store-link ()
-    "Store a link to a man page."
-    (when (memq major-mode '(Man-mode woman-mode))
-      ;; This is a man page, we do make this link.
-      (let* ((page (org-man-get-page-name))
-             (link (concat "man:" page))
-             (description (format "Man page for %s" page)))
-        (org-store-link-props
-         :type "man"
-         :link link
-         :description description))))
+(defun org-man-store-link ()
+  "Store a link to a man page."
+  (when (memq major-mode '(Man-mode woman-mode))
+    ;; This is a man page, we do make this link.
+    (let* ((page (org-man-get-page-name))
+           (link (concat "man:" page))
+           (description (format "Man page for %s" page)))
+      (org-store-link-props
+       :type "man"
+       :link link
+       :description description))))
 
-  (defun org-man-get-page-name ()
-    "Extract the page name from the buffer name."
-    ;; This works for both `Man-mode' and `woman-mode'.
-    (if (string-match " \\(\\S-+\\)\\*" (buffer-name))
-        (match-string 1 (buffer-name))
-      (error "Cannot create link to this man page")))
+(defun org-man-get-page-name ()
+  "Extract the page name from the buffer name."
+  ;; This works for both `Man-mode' and `woman-mode'.
+  (if (string-match " \\(\\S-+\\)\\*" (buffer-name))
+      (match-string 1 (buffer-name))
+    (error "Cannot create link to this man page")))
 
-  (defun org-man-export (link description format)
-    "Export a man page link from Org files."
-    (let ((path (format "http://man.he.net/?topic=%s&section=all" link))
-          (desc (or description link)))
-      (pcase format
-        (`html (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
-        (`latex (format "\\href{%s}{%s}" path desc))
-        (`texinfo (format "@uref{%s,%s}" path desc))
-        (`ascii (format "%s (%s)" desc path))
-        (t path))))
+(defun org-man-export (link description format)
+  "Export a man page link from Org files."
+  (let ((path (format "http://man.he.net/?topic=%s&section=all" link))
+        (desc (or description link)))
+    (pcase format
+      (`html (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
+      (`latex (format "\\href{%s}{%s}" path desc))
+      (`texinfo (format "@uref{%s,%s}" path desc))
+      (`ascii (format "%s (%s)" desc path))
+      (t path))))
 
-  (provide 'org-man)
-  ;;; org-man.el ends here
+(provide 'org-man)
+;;; org-man.el ends here
 #+end_src
 
 #+texinfo: @noindent
@@ -19256,7 +19257,7 @@ To activate links to man pages in Org, enter this in the Emacs init
 file:
 
 #+begin_src emacs-lisp
-  (require 'org-man)
+(require 'org-man)
 #+end_src
 
 #+texinfo: @noindent
@@ -19354,8 +19355,8 @@ RECEIVE ORGTBL=.  They have to appear as comments in the current mode.
 If the mode is C, then:
 
 #+begin_example
-   /* BEGIN RECEIVE ORGTBL table_name */
-   /* END RECEIVE ORGTBL table_name */
+/* BEGIN RECEIVE ORGTBL table_name */
+/* END RECEIVE ORGTBL table_name */
 #+end_example
 
 #+texinfo: @noindent
@@ -19416,12 +19417,12 @@ orgtbl-insert-radio-table)}}}, which prompts for a table name.  For
 example, if =salesfigures= is the name, the template inserts:
 
 #+begin_example
-  % BEGIN RECEIVE ORGTBL salesfigures
-  % END RECEIVE ORGTBL salesfigures
-  \begin{comment}
-  ,#+ORGTBL: SEND salesfigures orgtbl-to-latex
-  | | |
-  \end{comment}
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\begin{comment}
+,#+ORGTBL: SEND salesfigures orgtbl-to-latex
+| | |
+\end{comment}
 #+end_example
 
 #+vindex: @LaTeX{}-verbatim-environments
@@ -19433,18 +19434,18 @@ the table is ready for data entry.  It can even use spreadsheet
 features[fn:139]:
 
 #+begin_example
-  % BEGIN RECEIVE ORGTBL salesfigures
-  % END RECEIVE ORGTBL salesfigures
-  \begin{comment}
-  ,#+ORGTBL: SEND salesfigures orgtbl-to-latex
-  | Month | Days | Nr sold | per day |
-  |-------+------+---------+---------|
-  | Jan   |   23 |      55 |     2.4 |
-  | Feb   |   21 |      16 |     0.8 |
-  | March |   22 |     278 |    12.6 |
-  ,#+TBLFM: $4=$3/$2;%.1f
-  % $ (optional extra dollar to keep Font Lock happy, see footnote)
-  \end{comment}
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\begin{comment}
+,#+ORGTBL: SEND salesfigures orgtbl-to-latex
+| Month | Days | Nr sold | per day |
+|-------+------+---------+---------|
+| Jan   |   23 |      55 |     2.4 |
+| Feb   |   21 |      16 |     0.8 |
+| March |   22 |     278 |    12.6 |
+,#+TBLFM: $4=$3/$2;%.1f
+% $ (optional extra dollar to keep Font Lock happy, see footnote)
+\end{comment}
 #+end_example
 
 #+texinfo: @noindent
@@ -19456,21 +19457,21 @@ the first two lines of the source table.  Also the command has to
 /splice/ out the target table without the header and footer.
 
 #+begin_example
-  \begin{tabular}{lrrr}
-  Month & \multicolumn{1}{c}{Days} & Nr.\ sold & per day\\
-  % BEGIN RECEIVE ORGTBL salesfigures
-  % END RECEIVE ORGTBL salesfigures
-  \end{tabular}
-  %
-  \begin{comment}
-  ,#+ORGTBL: SEND salesfigures orgtbl-to-latex :splice t :skip 2
-  | Month | Days | Nr sold | per day |
-  |-------+------+---------+---------|
-  | Jan   |   23 |      55 |     2.4 |
-  | Feb   |   21 |      16 |     0.8 |
-  | March |   22 |     278 |    12.6 |
-  ,#+TBLFM: $4=$3/$2;%.1f
-  \end{comment}
+\begin{tabular}{lrrr}
+Month & \multicolumn{1}{c}{Days} & Nr.\ sold & per day\\
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\end{tabular}
+%
+\begin{comment}
+,#+ORGTBL: SEND salesfigures orgtbl-to-latex :splice t :skip 2
+| Month | Days | Nr sold | per day |
+|-------+------+---------+---------|
+| Jan   |   23 |      55 |     2.4 |
+| Feb   |   21 |      16 |     0.8 |
+| March |   22 |     278 |    12.6 |
+,#+TBLFM: $4=$3/$2;%.1f
+\end{comment}
 #+end_example
 
 The LaTeX translator function ~orgtbl-to-latex~ is already part of
@@ -19540,13 +19541,13 @@ a beginning and ending of lines with =!BL!= and =!EL!=; and uses a TAB
 for a field separator:
 
 #+begin_src emacs-lisp
-  (defun orgtbl-to-language (table params)
-    "Convert the orgtbl-mode TABLE to language."
-    (orgtbl-to-generic
-     table
-     (org-combine-plists
-      '(:tstart "!BTBL!" :tend "!ETBL!" :lstart "!BL!" :lend "!EL!" :sep "\t")
-      params)))
+(defun orgtbl-to-language (table params)
+  "Convert the orgtbl-mode TABLE to language."
+  (orgtbl-to-generic
+   table
+   (org-combine-plists
+    '(:tstart "!BTBL!" :tend "!ETBL!" :lstart "!BL!" :lend "!EL!" :sep "\t")
+    params)))
 #+end_src
 
 #+texinfo: @noindent
@@ -19580,9 +19581,9 @@ Dynamic blocks can have names and function parameters.  The syntax is
 similar to source code block specifications:
 
 #+begin_example
-  ,#+BEGIN: myblock :parameter1 value1 :parameter2 value2 ...
-    ...
-  ,#+END:
+,#+BEGIN: myblock :parameter1 value1 :parameter2 value2 ...
+  ...
+,#+END:
 #+end_example
 
 These commands update dynamic blocks:
@@ -19612,19 +19613,19 @@ The following is an example of a dynamic block and a block writer function
 that updates the time when the function was last run:
 
 #+begin_example
-  ,#+BEGIN: block-update-time :format "on %m/%d/%Y at %H:%M"
-    ...
-  ,#+END:
+,#+BEGIN: block-update-time :format "on %m/%d/%Y at %H:%M"
+  ...
+,#+END:
 #+end_example
 
 #+texinfo: @noindent
 The dynamic block's writer function:
 
 #+begin_src emacs-lisp
-  (defun org-dblock-write:block-update-time (params)
-    (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
-      (insert "Last block update at: "
-              (format-time-string fmt))))
+(defun org-dblock-write:block-update-time (params)
+  (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
+    (insert "Last block update at: "
+            (format-time-string fmt))))
 #+end_src
 
 To keep dynamic blocks up-to-date in an Org file, use the function,
@@ -19663,21 +19664,21 @@ returns ~nil~ on match.  Otherwise it gives the location from where
 the search continues.
 
 #+begin_src emacs-lisp
-  (defun my-skip-unless-waiting ()
-    "Skip trees that are not waiting"
-    (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-      (if (re-search-forward ":waiting:" subtree-end t)
-          nil          ; tag found, do not skip
-        subtree-end))) ; tag not found, continue after end of subtree
+(defun my-skip-unless-waiting ()
+  "Skip trees that are not waiting"
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (re-search-forward ":waiting:" subtree-end t)
+        nil          ; tag found, do not skip
+      subtree-end))) ; tag not found, continue after end of subtree
 #+end_src
 
 To use this custom function in a custom agenda command:
 
 #+begin_src emacs-lisp
-  (org-add-agenda-custom-command
-   '("b" todo "PROJECT"
-     ((org-agenda-skip-function 'my-skip-unless-waiting)
-      (org-agenda-overriding-header "Projects waiting for something: "))))
+(org-add-agenda-custom-command
+ '("b" todo "PROJECT"
+   ((org-agenda-skip-function 'my-skip-unless-waiting)
+    (org-agenda-overriding-header "Projects waiting for something: "))))
 #+end_src
 
 #+vindex: org-agenda-overriding-header
@@ -19739,11 +19740,11 @@ The following is an example of a search for =waiting= without the
 special function:
 
 #+begin_src emacs-lisp
-  (org-add-agenda-custom-command
-   '("b" todo "PROJECT"
-     ((org-agenda-skip-function '(org-agenda-skip-subtree-if
-                                  'regexp ":waiting:"))
-      (org-agenda-overriding-header "Projects waiting for something: "))))
+(org-add-agenda-custom-command
+ '("b" todo "PROJECT"
+   ((org-agenda-skip-function '(org-agenda-skip-subtree-if
+                                'regexp ":waiting:"))
+    (org-agenda-overriding-header "Projects waiting for something: "))))
 #+end_src
 
 ** Speeding Up Your Agendas
@@ -19765,7 +19766,7 @@ number.  Here are tips to speed up:
   #+vindex: org-agenda-dim-blocked-tasks
 
   #+begin_src emacs-lisp
-    (setq org-agenda-dim-blocked-tasks nil)
+  (setq org-agenda-dim-blocked-tasks nil)
   #+end_src
 
 - Stop preparing agenda buffers on startup:
@@ -19773,7 +19774,7 @@ number.  Here are tips to speed up:
   #+vindex: org-agenda-inhibit-startup
 
   #+begin_src emacs-lisp
-    (setq org-agenda-inhibit-startup nil)
+  (setq org-agenda-inhibit-startup nil)
   #+end_src
 
 - Disable tag inheritance for agendas:
@@ -19781,7 +19782,7 @@ number.  Here are tips to speed up:
   #+vindex: org-agenda-use-tag-inheritance
 
   #+begin_src emacs-lisp
-    (setq org-agenda-use-tag-inheritance nil)
+  (setq org-agenda-use-tag-inheritance nil)
   #+end_src
 
 These options can be applied to selected agenda views.  For more
@@ -19818,20 +19819,20 @@ line prints items tagged with =shop=, but excludes items tagged with
 =NewYork=:
 
 #+begin_example
-  emacs -batch -l ~/.emacs                                      \
-        -eval '(org-batch-agenda "+shop-NewYork")' | lpr
+emacs -batch -l ~/.emacs                                      \
+      -eval '(org-batch-agenda "+shop-NewYork")' | lpr
 #+end_example
 
 #+texinfo: @noindent
 An example showing on-the-fly parameter modifications:
 
 #+begin_example
-  emacs -batch -l ~/.emacs                                      \
-     -eval '(org-batch-agenda "a"                               \
-             org-agenda-span (quote month)                      \
-             org-agenda-include-diary nil                       \
-             org-agenda-files (quote ("~/org/project.org")))'   \
-     | lpr
+emacs -batch -l ~/.emacs                                      \
+   -eval '(org-batch-agenda "a"                               \
+           org-agenda-span (quote month)                      \
+           org-agenda-include-diary nil                       \
+           org-agenda-files (quote ("~/org/project.org")))'   \
+   | lpr
 #+end_example
 
 #+texinfo: @noindent
@@ -19877,22 +19878,22 @@ Here is an example of a post-processing script in Perl.  It takes the
 CSV output from Emacs and prints with a checkbox:
 
 #+begin_src perl
-  #!/usr/bin/perl
+#!/usr/bin/perl
 
-  # define the Emacs command to run
-  $cmd = "emacs -batch -l ~/.emacs -eval '(org-batch-agenda-csv \"t\")'";
+# define the Emacs command to run
+$cmd = "emacs -batch -l ~/.emacs -eval '(org-batch-agenda-csv \"t\")'";
 
-  # run it and capture the output
-  $agenda = qx{$cmd 2>/dev/null};
+# run it and capture the output
+$agenda = qx{$cmd 2>/dev/null};
 
-  # loop over all lines
-  foreach $line (split(/\n/,$agenda)) {
-      # get the individual values
-      ($category,$head,$type,$todo,$tags,$date,$time,$extra,
-       $priority_l,$priority_n) = split(/,/,$line);
-      # process and print
-      print "[ ] $head\n";
-  }
+# loop over all lines
+foreach $line (split(/\n/,$agenda)) {
+    # get the individual values
+    ($category,$head,$type,$todo,$tags,$date,$time,$extra,
+     $priority_l,$priority_n) = split(/,/,$line);
+    # process and print
+    print "[ ] $head\n";
+}
 #+end_src
 
 ** Using the Property API
@@ -20129,15 +20130,15 @@ entries with keyword =UPCOMING=.  Org ignores entries in comment trees
 and archive trees.
 
 #+begin_src emacs-lisp
-  (org-map-entries '(org-todo "UPCOMING")
-                   "+TOMORROW" 'file 'archive 'comment)
+(org-map-entries '(org-todo "UPCOMING")
+                 "+TOMORROW" 'file 'archive 'comment)
 #+end_src
 
 The following example counts the number of entries with TODO keyword
 =WAITING=, in all agenda files.
 
 #+begin_src emacs-lisp
-  (length (org-map-entries t "/+WAITING" 'agenda))
+(length (org-map-entries t "/+WAITING" 'agenda))
 #+end_src
 
 * MobileOrg
@@ -20194,7 +20195,7 @@ account[fn:143].  On first connection, MobileOrg creates a directory
 initialisation file variable as follows:
 
 #+begin_src emacs-lisp
-  (setq org-mobile-directory "~/Dropbox/MobileOrg")
+(setq org-mobile-directory "~/Dropbox/MobileOrg")
 #+end_src
 
 Org copies files to the above directory for MobileOrg.  Org also uses
