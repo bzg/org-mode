@@ -18093,7 +18093,7 @@ emacs -Q --batch --eval "
 
 ** Completion
 :PROPERTIES:
-:DESCRIPTION: M-TAB guesses completions.
+:DESCRIPTION: M-@key{TAB} guesses completions.
 :END:
 #+cindex: completion, of @TeX{} symbols
 #+cindex: completion, of TODO keywords
@@ -19019,9 +19019,10 @@ the cursor moves across a special context.
      Org moves the following key bindings in Org files, and in the
      agenda buffer---but not during date selection.
 
-     | S-UP      \rArr{}  M-p   | S-DOWN     \rArr{}  M-n   |
-     | S-LEFT    \rArr{}  M--   | S-RIGHT    \rArr{}  M-+   |
-     | C-S-LEFT  \rArr{}  M-S-- | C-S-RIGHT  \rArr{}  M-S-+ |
+     #+attr_texinfo: :columns 0.4 0.4
+     | {{{kbd(S-UP)}}}      \rArr{}  {{{kbd(M-p)}}}   | {{{kbd(S-DOWN)}}}     \rArr{}  {{{kbd(M-n)}}}   |
+     | {{{kbd(S-LEFT)}}}    \rArr{}  {{{kbd(M--)}}}   | {{{kbd(S-RIGHT)}}}    \rArr{}  {{{kbd(M-+)}}}   |
+     | {{{kbd(C-S-LEFT)}}}  \rArr{}  {{{kbd(M-S--)}}} | {{{kbd(C-S-RIGHT)}}}  \rArr{}  {{{kbd(M-S-+)}}} |
 
      #+vindex: org-disputed-keys
      Yes, these are unfortunately more difficult to remember.  If you
