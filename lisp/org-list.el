@@ -338,7 +338,8 @@ with the word \"recursive\" in the value."
 When the indentation would be larger than this, it will become
 5 characters instead."
   :group 'org-plain-lists
-  :type 'integer)
+  :type 'integer
+  :safe #'wholenump)
 
 (defcustom org-list-indent-offset 0
   "Additional indentation for sub-items in a list.

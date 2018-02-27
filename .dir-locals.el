@@ -8,8 +8,9 @@
   (sentence-end-double-space . t))
  (org-mode
   (indent-tabs-mode)
-  (org-edit-src-content-indentation . 2)
-  (org-adapt-indentation)))
+  (org-edit-src-content-indentation . 0)
+  (org-adapt-indentation)
+  (org-list-description-max-indent . 5)))
 
 
 
