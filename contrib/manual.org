@@ -576,7 +576,7 @@ buffer:
 ,#+STARTUP: showeverything
 #+end_example
 
-#+cindex: VISIBILITY, property
+#+cindex: @samp{VISIBILITY}, property
 #+texinfo: @noindent
 Furthermore, any entries with a =VISIBILITY= property (see [[*Properties
 and Columns]]) get their visibility adapted accordingly.  Allowed values
@@ -2063,7 +2063,7 @@ inefficient[fn:21] for large number of rows.
 #+cindex: references, named
 #+cindex: name, of column or field
 #+cindex: constants, in calculations
-#+cindex: CONSTANTS, keyword
+#+cindex: @samp{CONSTANTS}, keyword
 #+vindex: org-table-formula-constants
 
 =$name= is interpreted as the name of a column, parameter or constant.
@@ -2097,7 +2097,7 @@ letters and numbers.
 #+cindex: references, to a different table
 #+cindex: name, of column or field
 #+cindex: constants, in calculations
-#+cindex: NAME, keyword
+#+cindex: @samp{NAME}, keyword
 You may also reference constants, fields and ranges from a different
 table, either in the current file or even in a different file.  The
 syntax is
@@ -2349,7 +2349,7 @@ field, preceded by =:==, for example =vsum(@II..III)=.  When you press
 still in the field, the formula is stored as the formula for this
 field, evaluated, and the current field is replaced with the result.
 
-#+cindex: TBLFM, keyword
+#+cindex: @samp{TBLFM}, keyword
 Formulas are stored in a special =TBLFM= keyword located directly
 below the table.  If you type the equation in the fourth field of the
 third data line in the table, the formula looks like =@3$4=$1+$2=.
@@ -2663,8 +2663,8 @@ recalculation commands in the table.
 :UNNUMBERED: notoc
 :END:
 #+cindex: multiple formula lines
-#+cindex: TBLFM keywords, multiple
-#+cindex: TBLFM, switching
+#+cindex: @samp{TBLFM} keywords, multiple
+#+cindex: @samp{TBLFM}, switching
 
 #+kindex: C-c C-c
 You may apply the formula temporarily.  This is useful when you switch
@@ -2898,7 +2898,7 @@ either graphically or in ASCII art.
 :UNNUMBERED: notoc
 :END:
 
-#+cindex: PLOT, keyword
+#+cindex: @samp{PLOT}, keyword
 Org Plot can produce 2D and 3D graphs of information stored in Org
 tables using [[http://www.gnuplot.info/][Gnuplot]] and [[http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html][Gnuplot mode]].  To see this in action, ensure
 that you have both Gnuplot and Gnuplot mode installed on your system,
@@ -3081,7 +3081,7 @@ Literal links.
 #+cindex: links, internal
 #+cindex: targets, for links
 
-#+cindex: CUSTOM_ID, property
+#+cindex: @samp{CUSTOM_ID}, property
 If the link does not look like a URL, it is considered to be internal
 in the current file.  The most important case is a link like
 =[[#my-custom-id]]= which links to the entry with the =CUSTOM_ID= property
@@ -3097,7 +3097,7 @@ custom IDs point to the corresponding headline.  The preferred match
 for a text link is a /dedicated target/: the same string in double
 angular brackets, like =<<My Target>>=.
 
-#+cindex: NAME, keyword
+#+cindex: @samp{NAME}, keyword
 If no dedicated target exists, the link tries to match the exact name
 of an element within the buffer.  Naming is done with the =NAME=
 keyword, which has to be put in the line before the element it refers
@@ -3274,8 +3274,8 @@ current buffer:
      headline, which is also the description[fn:28].
 
      #+vindex: org-link-to-org-use-id
-     #+cindex: CUSTOM_ID, property
-     #+cindex: ID, property
+     #+cindex: @samp{CUSTOM_ID}, property
+     #+cindex: @samp{ID}, property
      If the headline has a =CUSTOM_ID= property, store a link to this
      custom ID.  In addition or alternatively, depending on the value
      of ~org-link-to-org-use-id~, create and/or use a globally unique
@@ -3554,7 +3554,7 @@ besides Emacs hacking with =[[ads:Dominik,C]]=.
 If you need special abbreviations just for a single Org buffer, you
 can define them in the file with
 
-#+cindex: LINK, keyword
+#+cindex: @samp{LINK}, keyword
 #+begin_example
 ,#+LINK: bugzilla  http://10.1.2.9/bugzilla/show_bug.cgi?id=
 ,#+LINK: google    http://www.google.com/search?q=%s
@@ -3933,9 +3933,9 @@ remove any TODO keyword from an entry[fn:40].
 :END:
 #+cindex: keyword options
 #+cindex: per-file keywords
-#+cindex: TODO, keyword
-#+cindex: TYP_TODO, keyword
-#+cindex: SEQ_TODO, keyword
+#+cindex: @samp{TODO}, keyword
+#+cindex: @samp{TYP_TODO}, keyword
+#+cindex: @samp{SEQ_TODO}, keyword
 
 It can be very useful to use different aspects of the TODO mechanism
 in different files.  For file-local settings, you need to add special
@@ -4011,7 +4011,7 @@ a background color.
 #+cindex: dependencies, of TODO states
 
 #+vindex: org-enforce-todo-dependencies
-#+cindex: ORDERED, property
+#+cindex: @samp{ORDERED}, property
 The structure of Org files---hierarchy and lists---makes it easy to
 define TODO dependencies.  Usually, a parent TODO task should not be
 marked DONE until all subtasks, defined as children tasks, are marked
@@ -4055,7 +4055,7 @@ property:
      #+kindex: C-c C-x o
      #+findex: org-toggle-ordered-property
      #+vindex: org-track-ordered-property-with-tag
-     #+cindex: ORDERED, property
+     #+cindex: @samp{ORDERED}, property
      Toggle the =ORDERED= property of the current entry.  A property
      is used for this behavior because this should be local to the
      current entry, not inherited like a tag.  However, if you would
@@ -4138,7 +4138,7 @@ entry with a =Closing Note= heading.
 
 #+vindex: org-log-states-order-reversed
 #+vindex: org-log-into-drawer
-#+cindex: LOG_INTO_DRAWER, property
+#+cindex: @samp{LOG_INTO_DRAWER}, property
 When TODO keywords are used as workflow states (see [[*TODO keywords as workflow states][*Workflow states]]),
 you might want to keep track of when a state change occurred and maybe
 take a note about this change.  You can either record just
@@ -4185,7 +4185,7 @@ to a buffer:
 
 : #+TODO: TODO(t) WAIT(w@/!) | DONE(d!) CANCELED(c@)
 
-#+cindex: LOGGING, property
+#+cindex: @samp{LOGGING}, property
 In order to define logging settings that are local to a subtree or
 a single item, define a =LOGGING= property in this entry.  Any
 non-empty =LOGGING= property resets all logging settings to ~nil~.
@@ -4375,7 +4375,7 @@ variables ~org-highest-priority~, ~org-lowest-priority~, and
 values (highest, lowest, default) like this (please make sure that the
 highest priority is earlier in the alphabet than the lowest priority):
 
-#+cindex: PRIORITIES, keyword
+#+cindex: @samp{PRIORITIES}, keyword
 : #+PRIORITIES: A C B
 
 ** Breaking Down Tasks into Subtasks
@@ -4404,7 +4404,7 @@ pressing {{{kbd(C-c C-c)}}} on the cookie.  For example:
 ,** DONE Talk to neighbor
 #+end_example
 
-#+cindex: COOKIE_DATA, property
+#+cindex: @samp{COOKIE_DATA}, property
 If a heading has both checkboxes and TODO children below it, the
 meaning of the statistics cookie become ambiguous.  Set the property
 =COOKIE_DATA= to either =checkbox= or =todo= to resolve this issue.
@@ -4474,7 +4474,7 @@ checked.
 
 #+cindex: statistics, for checkboxes
 #+cindex: checkbox statistics
-#+cindex: COOKIE_DATA, property
+#+cindex: @samp{COOKIE_DATA}, property
 #+vindex: org-hierarchical-checkbox-statistics
 The =[2/4]= and =[1/3]= in the first and second line are cookies
 indicating how many checkboxes present in this entry have been checked
@@ -4494,7 +4494,7 @@ either =checkbox= or =todo= to resolve this issue.
 
 #+cindex: blocking, of checkboxes
 #+cindex: checkbox blocking
-#+cindex: ORDERED, property
+#+cindex: @samp{ORDERED}, property
 If the current outline node has an =ORDERED= property, checkboxes must
 be checked off in sequence, and an error is thrown if you try to check
 off a box while there are unchecked boxes above it.
@@ -4610,7 +4610,7 @@ tags.  You can also set tags that all entries in a file should inherit
 just as if these tags were defined in a hypothetical level zero that
 surrounds the entire file.  Use a line like this[fn:52]
 
-#+cindex: FILETAGS, keyword
+#+cindex: @samp{FILETAGS}, keyword
 : #+FILETAGS: :Peter:Boss:Secret:
 
 #+vindex: org-use-tag-inheritance
@@ -4678,7 +4678,7 @@ the buffer.  You may also globally specify a hard list of tags with
 the variable ~org-tag-alist~.  Finally you can set the default tags
 for a given file with lines like
 
-#+cindex: TAGS, keyword
+#+cindex: @samp{TAGS}, keyword
 #+begin_example
 ,#+TAGS: @work @home @tennisclub
 ,#+TAGS: laptop car pc sailboat
@@ -5058,7 +5058,7 @@ If you want to set properties that can be inherited by any entry in
 a file, use a line like:
 
 #+cindex: @samp{_ALL} suffix, in properties
-#+cindex: PROPERTY, keyword
+#+cindex: @samp{PROPERTY}, keyword
 : #+PROPERTY: NDisks_ALL 1 2 3 4
 
 #+cindex: @samp{+} suffix, in properties
@@ -5176,20 +5176,20 @@ include these states in a column view (see [[*Column View]]), or to use
 them in queries.  The following property names are special and should
 not be used as keys in the properties drawer:
 
-#+cindex: ALLTAGS, special property
-#+cindex: BLOCKED, special property
-#+cindex: CLOCKSUM, special property
-#+cindex: CLOCKSUM_T, special property
-#+cindex: CLOSED, special property
-#+cindex: DEADLINE, special property
-#+cindex: FILE, special property
-#+cindex: ITEM, special property
-#+cindex: PRIORITY, special property
-#+cindex: SCHEDULED, special property
-#+cindex: TAGS, special property
-#+cindex: TIMESTAMP, special property
-#+cindex: TIMESTAMP_IA, special property
-#+cindex: TODO, special property
+#+cindex: @samp{ALLTAGS}, special property
+#+cindex: @samp{BLOCKED}, special property
+#+cindex: @samp{CLOCKSUM}, special property
+#+cindex: @samp{CLOCKSUM_T}, special property
+#+cindex: @samp{CLOSED}, special property
+#+cindex: @samp{DEADLINE}, special property
+#+cindex: @samp{FILE}, special property
+#+cindex: @samp{ITEM}, special property
+#+cindex: @samp{PRIORITY}, special property
+#+cindex: @samp{SCHEDULED}, special property
+#+cindex: @samp{TAGS}, special property
+#+cindex: @samp{TIMESTAMP}, special property
+#+cindex: @samp{TIMESTAMP_IA}, special property
+#+cindex: @samp{TODO}, special property
 | =ALLTAGS=      | All tags, including inherited ones.                            |
 | =BLOCKED=      | ~t~ if task is currently blocked by children or siblings.      |
 | =CATEGORY=     | The category of an entry.                                      |
@@ -5286,7 +5286,7 @@ least for the special applications for which they are used:
 
 - ~COLUMNS~ ::
 
-     #+cindex: COLUMNS, property
+     #+cindex: @samp{COLUMNS}, property
      The =COLUMNS= property defines the format of column view (see
      [[*Column View]]).  It is inherited in the sense that the level where
      a =COLUMNS= property is defined is used as the starting point for
@@ -5295,20 +5295,20 @@ least for the special applications for which they are used:
 
 - ~CATEGORY~ ::
 
-     #+cindex: CATEGORY, property
+     #+cindex: @samp{CATEGORY}, property
      For agenda view, a category set through a =CATEGORY= property
      applies to the entire subtree.
 
 - ~ARCHIVE~ ::
 
-     #+cindex: ARCHIVE, property
+     #+cindex: @samp{ARCHIVE}, property
      For archiving, the =ARCHIVE= property may define the archive
      location for the entire subtree (see [[*Moving a tree to an archive
      file]]).
 
 - ~LOGGING~ ::
 
-     #+cindex: LOGGING, property
+     #+cindex: @samp{LOGGING}, property
      The =LOGGING= property may define logging settings for an entry
      or a subtree (see [[*Tracking TODO state changes]]).
 
@@ -5349,7 +5349,7 @@ done by defining a column format line.
 
 To define a column format for an entire file, use a line like:
 
-#+cindex: COLUMNS, keyword
+#+cindex: @samp{COLUMNS}, keyword
 : #+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
 
 To specify a format that only applies to a specific tree, add
@@ -5608,7 +5608,7 @@ exported or printed directly.  If you want to capture a column view,
 use a =columnview= dynamic block (see [[*Dynamic Blocks]]).  The frame of
 this block looks like this:
 
-#+cindex: BEGIN columnview
+#+cindex: @samp{BEGIN columnview}
 #+begin_example
 ,* The column view
 ,#+BEGIN: columnview :hlines 1 :id "label"
@@ -5640,7 +5640,7 @@ This dynamic block has the following parameters:
 
      - =LABEL= ::
 
-          #+cindex: ID, property
+          #+cindex: @samp{ID}, property
           Call column view in the tree that has an =ID= property with
           the value {{{var(LABEL)}}}.  You can use {{{kbd(M-x
           org-id-copy)}}} to create a globally unique ID for the
@@ -6084,7 +6084,7 @@ immediately after the task they refer to.
 
 - =DEADLINE= ::
 
-     #+cindex: DEADLINE
+     #+cindex: @samp{DEADLINE}
      Meaning: the task (most likely a TODO item, though not
      necessarily) is supposed to be finished on that date.
 
@@ -6110,7 +6110,7 @@ immediately after the task they refer to.
 
 - =SCHEDULED= ::
 
-     #+cindex: SCHEDULED
+     #+cindex: @samp{SCHEDULED}
      Meaning: you are planning to start working on that task on the
      given date.
 
@@ -6377,7 +6377,7 @@ prompted about what to do with it.
      #+findex: org-clock-in
      #+vindex: org-clock-into-drawer
      #+vindex: org-clock-continuously
-     #+cindex: LOG_INTO_DRAWER, property
+     #+cindex: @samp{LOG_INTO_DRAWER}, property
      Start the clock on the current item (clock-in).  This inserts the
      CLOCK keyword together with a timestamp.  If this is not the
      first clocking of this item, the multiple CLOCK lines are wrapped
@@ -6393,8 +6393,8 @@ prompted about what to do with it.
      force continuous clocking by starting the clock when the last
      clock stopped.
 
-     #+cindex: CLOCK_MODELINE_TOTAL, property
-     #+cindex: LAST_REPEAT, property
+     #+cindex: @samp{CLOCK_MODELINE_TOTAL}, property
+     #+cindex: @samp{LAST_REPEAT}, property
      #+vindex: org-clock-modeline-total
      #+vindex: org-clock-in-prepare-hook
      While the clock is running, Org shows the current clocking time
@@ -6565,7 +6565,7 @@ formatted as one or several Org tables.
 Here is an example of the frame for a clock table as it is inserted
 into the buffer with the {{{kbd(C-c C-x C-r)}}} command:
 
-#+cindex: BEGIN clocktable
+#+cindex: @samp{BEGIN clocktable}
 #+begin_example
 ,#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
 ,#+END: clocktable
@@ -6893,7 +6893,7 @@ arguments with ~org-clock-in~ and two {{{kbd(C-u C-u)}}} with
 :DESCRIPTION: Planning work effort in advance.
 :END:
 #+cindex: effort estimates
-#+cindex: EFFORT, property
+#+cindex: @samp{EFFORT}, property
 #+vindex: org-effort-property
 
 If you want to plan your work in a very detailed way, or if you need
@@ -7138,7 +7138,7 @@ with prefix commands:
      Visit the last stored capture item in its buffer.
 
 #+vindex: org-capture-bookmark
-#+cindex: org-capture-last-stored
+#+vindex: org-capture-last-stored
 You can also jump to the bookmark ~org-capture-last-stored~, which is
 automatically created unless you set ~org-capture-bookmark~ to ~nil~.
 
@@ -7682,7 +7682,7 @@ The following commands deal with attachments:
      - {{{kbd(s)}}} (~org-attach-set-directory~) ::
 
           #+kindex: C-c C-a s
-          #+cindex: ATTACH_DIR, property
+          #+cindex: @samp{ATTACH_DIR}, property
           Set a specific directory as the entry's attachment
           directory.  This works by putting the directory path into
           the =ATTACH_DIR= property.
@@ -7690,7 +7690,7 @@ The following commands deal with attachments:
      - {{{kbd(i)}}} (~org-attach-set-inherit~) ::
 
           #+kindex: C-c C-a i
-          #+cindex: ATTACH_DIR_INHERIT, property
+          #+cindex: @samp{ATTACH_DIR_INHERIT}, property
           Set the =ATTACH_DIR_INHERIT= property, so that children use
           the same directory for attachments as the parent does.
 
@@ -8113,7 +8113,7 @@ heading, see the documentation string of the variable
 There is also an in-buffer option for setting this variable, for
 example:
 
-#+cindex: ARCHIVE, keyword
+#+cindex: @samp{ARCHIVE}, keyword
 : #+ARCHIVE: %s_done::
 
 #+texinfo: @noindent
@@ -8134,7 +8134,7 @@ added.
 :DESCRIPTION: Switch off a tree but keep it in the file.
 :END:
 
-#+cindex: ARCHIVE, tag
+#+cindex: @samp{ARCHIVE}, tag
 If you want to just switch off---for agenda views---certain subtrees
 without moving them to a different file, you can use the =ARCHIVE=
 tag.
@@ -8995,7 +8995,7 @@ version of the outline headline associated with the item.
 :DESCRIPTION: Not all tasks are equal.
 :END:
 #+cindex: category
-#+cindex: CATEGORY, keyword
+#+cindex: @samp{CATEGORY}, keyword
 
 The category is a broad label assigned to each agenda item.  By
 default, the category is simply derived from the file name, but you
@@ -9005,7 +9005,7 @@ this:
 : #+CATEGORY: Thesis
 
 #+texinfo: @noindent
-#+cindex: CATEGORY, property
+#+cindex: @samp{CATEGORY}, property
 If you would like to have a special category for a single entry or
 a (sub)tree, give the entry a =CATEGORY= property with the special
 category you want to apply as the value.
@@ -10528,7 +10528,7 @@ environment.  This causes the following issues:
    it uses ~org-columns-default-format~.
 
 2.
-   #+cindex: CLOCKSUM, special property
+   #+cindex: @samp{CLOCKSUM}, special property
    If any of the columns has a summary type defined (see [[*Column
    attributes]]), turning on column view in the agenda visits all
    relevant agenda files and make sure that the computations of this
@@ -10554,7 +10554,7 @@ environment.  This causes the following issues:
    table mode (press {{{kbd(R)}}} in the agenda).
 
 4.
-   #+cindex: CLOCKSUM_T, special property
+   #+cindex: @samp{CLOCKSUM_T}, special property
    When the column view in the agenda shows the =CLOCKSUM_T= property,
    that is always today's clocked time for this item.  So even in the
    weekly agenda, the clocksum listed in column view only originates
@@ -10588,7 +10588,7 @@ To preserve the line breaks, indentation and blank lines in a region,
 but otherwise use normal formatting, you can use this construct, which
 can also be used to format poetry.
 
-#+cindex: BEGIN_VERSE
+#+cindex: @samp{BEGIN_VERSE}
 #+cindex: verse blocks
 #+begin_example
 ,#+BEGIN_VERSE
@@ -10604,7 +10604,7 @@ When quoting a passage from another document, it is customary to
 format this as a paragraph that is indented on both the left and the
 right margin.  You can include quotations in Org documents like this:
 
-#+cindex: BEGIN_QUOTE
+#+cindex: @samp{BEGIN_QUOTE}
 #+cindex: quote blocks
 #+begin_example
 ,#+BEGIN_QUOTE
@@ -10615,7 +10615,7 @@ but not any simpler ---Albert Einstein
 
 If you would like to center some text, do it like this:
 
-#+cindex: BEGIN_CENTER
+#+cindex: @samp{BEGIN_CENTER}
 #+cindex: center blocks
 #+begin_example
 ,#+BEGIN_CENTER
@@ -10659,8 +10659,8 @@ as a horizontal line.
 :DESCRIPTION: Images, tables and caption mechanism.
 :END:
 #+cindex: tables, markup rules
-#+cindex: CAPTION, keyword
-#+cindex: NAME, keyword
+#+cindex: @samp{CAPTION}, keyword
+#+cindex: @samp{NAME}, keyword
 
 Both the native Org mode tables (see [[*Tables]]) and tables formatted
 with the =table.el= package are exported properly.  For Org mode
@@ -10715,7 +10715,7 @@ You can include literal examples that should not be subjected to
 markup.  Such examples are typeset in monospace, so this is well
 suited for source code and similar examples.
 
-#+cindex: BEGIN_EXAMPLE
+#+cindex: @samp{BEGIN_EXAMPLE}
 #+cindex: example block
 #+begin_example
 ,#+BEGIN_EXAMPLE
@@ -10743,7 +10743,7 @@ is done with the code block, where you also need to specify the name
 of the major mode that should be used to fontify the example[fn:104],
 see [[*Structure Templates]] for shortcuts to easily insert code blocks.
 
-#+cindex: BEGIN_SRC
+#+cindex: @samp{BEGIN_SRC}
 #+cindex: src block
 #+begin_example
 ,#+BEGIN_SRC emacs-lisp
@@ -11246,7 +11246,7 @@ further alter what is exported, and how.
 #+cindex: options, for export
 #+cindex: Export, settings
 
-#+cindex: OPTIONS, keyword
+#+cindex: @samp{OPTIONS}, keyword
 Export options can be set: globally with variables; for an individual
 file by making variables buffer-local with in-buffer settings (see
 [[*Summary of In-Buffer Settings]]), by setting individual keywords, or by
@@ -11269,32 +11269,32 @@ global variables, include:
 
 - =AUTHOR= ::
 
-     #+cindex: AUTHOR, keyword
+     #+cindex: @samp{AUTHOR}, keyword
      #+vindex: user-full-name
      The document author (~user-full-name~).
 
 - =CREATOR= ::
 
-     #+cindex: CREATOR, keyword
+     #+cindex: @samp{CREATOR}, keyword
      #+vindex: org-expot-creator-string
      Entity responsible for output generation
      (~org-export-creator-string~).
 
 - =DATE= ::
 
-     #+cindex: DATE, keyword
+     #+cindex: @samp{DATE}, keyword
      #+vindex: org-export-date-timestamp-format
      A date or a time-stamp[fn:114].
 
 - =EMAIL= ::
 
-     #+cindex: EMAIL, keyword
+     #+cindex: @samp{EMAIL}, keyword
      #+vindex: user-mail-address
      The email address (~user-mail-address~).
 
 - =LANGUAGE= ::
 
-     #+cindex: LANGUAGE, keyword
+     #+cindex: @samp{LANGUAGE}, keyword
      #+vindex: org-export-default-language
      Language to use for translating certain strings
      (~org-export-default-language~).  With =#+LANGUAGE: fr=, for
@@ -11303,7 +11303,7 @@ global variables, include:
 
 - =SELECT_TAGS= ::
 
-     #+cindex: SELECT_TAGS, keyword
+     #+cindex: @samp{SELECT_TAGS}, keyword
      #+vindex: org-export-select-tags
      The default value is ~("export")~.  When a tree is tagged with
      =export= (~org-export-select-tags~), Org selects that tree and
@@ -11314,7 +11314,7 @@ global variables, include:
 
 - =EXCLUDE_TAGS= ::
 
-     #+cindex: EXCLUDE_TAGS, keyword
+     #+cindex: @samp{EXCLUDE_TAGS}, keyword
      #+vindex: org-export-exclude-tags
      The default value is ~("noexport")~.  When a tree is tagged with
      =noexport= (~org-export-exclude-tags~), Org excludes that tree
@@ -11325,14 +11325,14 @@ global variables, include:
 
 - =TITLE= ::
 
-     #+cindex: TITLE, keyword
+     #+cindex: @samp{TITLE}, keyword
      #+cindex: document title
      Org displays this title.  For long titles, use multiple =#+TITLE=
      lines.
 
 - =EXPORT_FILE_NAME= ::
 
-     #+cindex: EXPORT_FILE_NAME, keyword
+     #+cindex: @samp{EXPORT_FILE_NAME}, keyword
      The name of the output file to be generated.  Otherwise, Org
      generates the file name based on the buffer name and the
      extension based on the back-end format.
@@ -11458,7 +11458,7 @@ following arguments.
 - ~num~ ::
 
      #+vindex: org-export-with-section-numbers
-     #+cindex: UNNUMBERED, property
+     #+cindex: @samp{UNNUMBERED}, property
      Toggle section-numbers (~org-export-with-section-numbers~).  When
      set to number N, Org numbers only those headlines at level N or
      above.  Set =UNNUMBERED= property to non-~nil~ to disable
@@ -11547,7 +11547,7 @@ respectively, =EXPORT_DATE= and =EXPORT_FILE_NAME=.  Except for
 =SETUPFILE=, all other keywords listed above have an =EXPORT_=
 equivalent.
 
-#+cindex: BIND, keyword
+#+cindex: @samp{BIND}, keyword
 #+vindex: org-export-allow-bind-keywords
 If ~org-export-allow-bind-keywords~ is non-~nil~, Emacs variables can
 become buffer-local during export by using the =BIND= keyword.  Its
@@ -11562,7 +11562,7 @@ in-buffer settings that cannot be changed using keywords.
 #+cindex: list of tables
 #+cindex: list of listings
 
-#+cindex: @samp{toc}, in OPTIONS keyword
+#+cindex: @samp{toc}, in @samp{OPTIONS} keyword
 #+vindex: org-export-with-toc
 The table of contents includes all headlines in the document.  Its
 depth is therefore the same as the headline levels in the file.  If
@@ -11590,7 +11590,7 @@ value.
   :END:
 #+end_example
 
-#+cindex: TOC, keyword
+#+cindex: @samp{TOC}, keyword
 Org normally inserts the table of contents directly before the first
 headline of the file.  To move the table of contents to a different
 location, first turn off the default with ~org-export-with-toc~
@@ -11626,7 +11626,7 @@ listings---with captions.
 ,#+TOC: tables
 #+end_example
 
-#+cindex: ALT_TITLE, property
+#+cindex: @samp{ALT_TITLE}, property
 Normally Org uses the headline for its entry in the table of contents.
 But with =ALT_TITLE= property, a different entry can be specified for
 the table of contents.
@@ -11637,7 +11637,7 @@ the table of contents.
 :END:
 #+cindex: include files, during export
 #+cindex: Export, include files
-#+cindex: INCLUDE, keyword
+#+cindex: @samp{INCLUDE}, keyword
 
 During export, you can include the content of another file.  For
 example, to include your =.emacs= file, you could use:
@@ -11687,7 +11687,7 @@ You can visit the file being included with the following command.
 :DESCRIPTION: Use macros to create templates.
 :END:
 #+cindex: macro replacement, during export
-#+cindex: MACRO, keyword
+#+cindex: @samp{MACRO}, keyword
 
 #+vindex: org-export-global-macros
 Macros replace text snippets during export.  Macros are defined
@@ -11730,10 +11730,10 @@ Org comes with following pre-defined macros:
 #+attr_texinfo: :sep ;
 - ={{{keyword(NAME)}}}=; ={{{title}}}=; ={{{author}}}=; ={{{email}}}= ::
 
-     #+cindex: keyword, macro
-     #+cindex: title, macro
-     #+cindex: author, macro
-     #+cindex: email, macro
+     #+cindex: @samp{keyword}, macro
+     #+cindex: @samp{title}, macro
+     #+cindex: @samp{author}, macro
+     #+cindex: @samp{email}, macro
      The =keyword= macro collects all values from {{{var(NAME)}}}
      keywords throughout the buffer, separated with white space.
      =title=, =author= and =email= macros are shortcuts for,
@@ -11742,7 +11742,7 @@ Org comes with following pre-defined macros:
 
 - ={{{date}}}=; ={{{date(FORMAT)}}}= ::
 
-     #+cindex: date, macro
+     #+cindex: @samp{date}, macro
      This macro refers to the =DATE= keyword.  {{{var(FORMAT)}}} is an
      optional argument to the =date= macro that is used only if =DATE=
      is a single timestamp.  {{{var(FORMAT)}}} should be a format
@@ -11750,8 +11750,8 @@ Org comes with following pre-defined macros:
 
 - ={{{time(FORMAT)}}}=; ={{{modification-time(FORMAT, VC)}}}= ::
 
-     #+cindex: time, macro
-     #+cindex: modification time, macro
+     #+cindex: @samp{time}, macro
+     #+cindex: @samp{modification-time}, macro
      These macros refer to the document's date and time of export and
      date and time of modification.  {{{var(FORMAT)}}} is a string
      understood by ~format-time-string~.  If the second argument to
@@ -11761,19 +11761,19 @@ Org comes with following pre-defined macros:
 
 - ={{{input-file}}}= ::
 
-     #+cindex: input file, macro
+     #+cindex: @samp{input-file}, macro
      This macro refers to the filename of the exported file.
 
 - ={{{property(PROPERTY-NAME)}}}=; ={{{property(PROPERTY-NAME, SEARCH OPTION)}}}= ::
 
-     #+cindex: property, macro
+     #+cindex: @samp{property}, macro
      This macro returns the value of property {{{var(PROPERTY-NAME)}}}
      in the current entry.  If {{{var(SEARCH-OPTION)}}} (see [[*Search
      Options in File Links]]) refers to a remote entry, use it instead.
 
 - ={{{n}}}=; ={{{n(NAME)}}}=; ={{{n(NAME, ACTION)}}}= ::
 
-     #+cindex: n, macro
+     #+cindex: @samp{n}, macro
      #+cindex: counter, macro
      This macro implements custom counters by returning the number of
      times the macro has been expanded so far while exporting the
@@ -11802,7 +11802,7 @@ Lines starting with zero or more whitespace characters followed by one
 =#= and a whitespace are treated as comments and, as such, are not
 exported.
 
-#+cindex: BEGIN_COMMENT
+#+cindex: @samp{BEGIN_COMMENT}
 #+cindex: comment block
 Likewise, regions surrounded by =#+BEGIN_COMMENT= ... =#+END_COMMENT=
 are not exported.
@@ -11881,7 +11881,7 @@ output.  Setting this keyword works similar to the general options
 
 - =SUBTITLE= ::
 
-     #+cindex: SUBTITLE, keyword
+     #+cindex: @samp{SUBTITLE}, keyword
      The document subtitle.  For long subtitles, use multiple
      =#+SUBTITLE= lines in the Org file.  Org prints them on one
      continuous line, wrapping into multiple lines if necessary.
@@ -11903,8 +11903,8 @@ cut-off point where levels become lists, see [[*Export Settings]].
 To insert text within the Org file by the ASCII back-end, use one the
 following constructs, inline, keyword, or export block:
 
-#+cindex: ASCII, keyword
-#+cindex: BEGIN_EXPORT ascii
+#+cindex: @samp{ASCII}, keyword
+#+cindex: @samp{BEGIN_EXPORT ascii}
 #+begin_example
 Inline text @@ascii:and additional text@@ within a paragraph.
 
@@ -11919,7 +11919,7 @@ Org exports text in this block only when using ASCII back-end.
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
-#+cindex: ATTR_ASCII, keyword
+#+cindex: @samp{ATTR_ASCII}, keyword
 #+cindex: horizontal rules, in ASCII export
 
 ASCII back-end recognizes only one attribute, ~:width~, which
@@ -11936,8 +11936,8 @@ The keyword and syntax for specifying widths is:
 :UNNUMBERED: notoc
 :END:
 #+cindex: special blocks, in ASCII export
-#+cindex: BEGIN_JUSTIFYLEFT
-#+cindex: BEGIN_JUSTIFYRIGHT
+#+cindex: @samp{BEGIN_JUSTIFYLEFT}
+#+cindex: @samp{BEGIN_JUSTIFYRIGHT}
 
 Besides =#+BEGIN_CENTER= blocks (see [[*Paragraphs]]), ASCII back-end has
 these two left and right justification blocks:
@@ -12001,7 +12001,7 @@ settings (see [[*Export Settings]]).
 
 - =BEAMER_THEME= ::
 
-     #+cindex: BEAMER_THEME, keyword
+     #+cindex: @samp{BEAMER_THEME}, keyword
      #+vindex: org-beamer-theme
      The Beamer layout theme (~org-beamer-theme~).  Use square
      brackets for options.  For example:
@@ -12010,28 +12010,28 @@ settings (see [[*Export Settings]]).
 
 - =BEAMER_FONT_THEME= ::
 
-     #+cindex: BEAMER_FONT_THEME, keyword
+     #+cindex: @samp{BEAMER_FONT_THEME}, keyword
      The Beamer font theme.
 
 - =BEAMER_INNER_THEME= ::
 
-     #+cindex: BEAMER_INNER_THEME, keyword
+     #+cindex: @samp{BEAMER_INNER_THEME}, keyword
      The Beamer inner theme.
 
 - =BEAMER_OUTER_THEME= ::
 
-     #+cindex: BEAMER_OUTER_THEME, keyword
+     #+cindex: @samp{BEAMER_OUTER_THEME}, keyword
      The Beamer outer theme.
 
 - =BEAMER_HEADER= ::
 
-     #+cindex: BEAMER_HEADER, keyword
+     #+cindex: @samp{BEAMER_HEADER}, keyword
      Arbitrary lines inserted in the preamble, just before the
      =hyperref= settings.
 
 - =DESCRIPTION= ::
 
-     #+cindex: DESCRIPTION, keyword
+     #+cindex: @samp{DESCRIPTION}, keyword
      The document description.  For long descriptions, use multiple
      =DESCRIPTION= keywords.  By default, =hyperref= inserts
      =DESCRIPTION= as metadata.  Use ~org-latex-hyperref-template~ to
@@ -12040,7 +12040,7 @@ settings (see [[*Export Settings]]).
 
 - =KEYWORDS= ::
 
-     #+cindex: KEYWORDS, keyword
+     #+cindex: @samp{KEYWORDS}, keyword
      The keywords for defining the contents of the document.  Use
      multiple =KEYWORDS= lines if necessary.  By default, =hyperref=
      inserts =KEYWORDS= as metadata.  Use
@@ -12050,7 +12050,7 @@ settings (see [[*Export Settings]]).
 
 - =SUBTITLE= ::
 
-     #+cindex: SUBTITLE, keyword
+     #+cindex: @samp{SUBTITLE}, keyword
      Document's subtitle.  For typesetting, use
      ~org-beamer-subtitle-format~ string.  Use
      ~org-latex-hyperref-template~ to configure document metadata.
@@ -12072,7 +12072,7 @@ should in principle be exportable as a Beamer presentation.
   equal to ~org-beamer-frame-level~ or =H= value in a =OPTIONS= line
   (see [[*Export Settings]]).
 
-  #+cindex: BEAMER_ENV, property
+  #+cindex: @samp{BEAMER_ENV}, property
   Org overrides headlines to frames conversion for the current tree of
   an Org file if it encounters the =BEAMER_ENV= property set to
   =frame= or =fullframe=.  Org ignores whatever
@@ -12089,7 +12089,7 @@ should in principle be exportable as a Beamer presentation.
   #+vindex: org-beamer-environments-extra
 
 -
-  #+cindex: BEAMER_REF, property
+  #+cindex: @samp{BEAMER_REF}, property
   If =BEAMER_ENV= is set to =appendix=, Org exports the entry as an
   appendix.  When set to =note=, Org exports the entry as a note
   within the frame or between frames, depending on the entry's heading
@@ -12103,8 +12103,8 @@ should in principle be exportable as a Beamer presentation.
   frames.  It is also useful for properly closing a =column=
   environment.  @end itemize
 
-  #+cindex: BEAMER_ACT, property
-  #+cindex: BEAMER_OPT, property
+  #+cindex: @samp{BEAMER_ACT}, property
+  #+cindex: @samp{BEAMER_OPT}, property
   When =BEAMER_ACT= is set for a headline, Org export translates that
   headline as an overlay or action specification.  When enclosed in
   square brackets, Org export makes the overlay specification
@@ -12113,7 +12113,7 @@ should in principle be exportable as a Beamer presentation.
   with appropriate angular or square brackets.  It also adds the
   =fragile= option for any code that may require a verbatim block.
 
-  #+cindex: BEAMER_COL, property
+  #+cindex: @samp{BEAMER_COL}, property
   To create a column on the Beamer slide, use the =BEAMER_COL=
   property for its headline in the Org file.  Set the value of
   =BEAMER_COL= to a decimal number representing the fraction of the
@@ -12144,8 +12144,8 @@ Contents]]).  Use square brackets for specifying options.
 
 Insert Beamer-specific code using the following constructs:
 
-#+cindex: BEAMER, keyword
-#+cindex: BEGIN_EXPORT beamer
+#+cindex: @samp{BEAMER}, keyword
+#+cindex: @samp{BEGIN_EXPORT beamer}
 #+begin_example
 ,#+BEAMER: \pause
 
@@ -12164,7 +12164,7 @@ shown in this example:
 
 :  A *@@beamer:<2->@@useful* feature
 
-#+cindex: ATTR_BEAMER, keyword
+#+cindex: @samp{ATTR_BEAMER}, keyword
 Beamer export recognizes the =ATTR_BEAMER= keyword with the following
 attributes from Beamer configurations: =:environment= for changing
 local Beamer environment, =:overlay= for specifying Beamer overlays in
@@ -12289,7 +12289,7 @@ settings described in [[*Export Settings]].
 
 - =DESCRIPTION= ::
 
-     #+cindex: DESCRIPTION, keyword
+     #+cindex: @samp{DESCRIPTION}, keyword
      This is the document's description, which the HTML exporter
      inserts it as a HTML meta tag in the HTML file.  For long
      descriptions, use multiple =DESCRIPTION= lines.  The exporter
@@ -12297,34 +12297,34 @@ settings described in [[*Export Settings]].
 
 - =HTML_DOCTYPE= ::
 
-     #+cindex: HTML_DOCTYPE, keyword
+     #+cindex: @samp{HTML_DOCTYPE}, keyword
      #+vindex: org-html-doctype
      Specify the document type, for example: HTML5
      (~org-html-doctype~).
 
 - =HTML_CONTAINER= ::
 
-     #+cindex: HTML_CONTAINER, keyword
+     #+cindex: @samp{HTML_CONTAINER}, keyword
      #+vindex: org-html-container-element
      Specify the HTML container, such as =div=, for wrapping sections
      and elements (~org-html-container-element~).
 
 - =HTML_LINK_HOME= ::
 
-     #+cindex: HTML_LINK_HOME, keyword
+     #+cindex: @samp{HTML_LINK_HOME}, keyword
      #+vindex: org-html-link-home
      The URL for home link (~org-html-link-home~).
 
 - =HTML_LINK_UP= ::
 
-     #+cindex: HTML_LINK_UP, keyword
+     #+cindex: @samp{HTML_LINK_UP}, keyword
      #+vindex: org-html-link-up
      The URL for the up link of exported HTML pages
      (~org-html-link-up~).
 
 - =HTML_MATHJAX= ::
 
-     #+cindex: HTML_MATHJAX, keyword
+     #+cindex: @samp{HTML_MATHJAX}, keyword
      #+vindex: org-html-mathjax-options
      Options for MathJax (~org-html-mathjax-options~).  MathJax is
      used to typeset LaTeX math in HTML documents.  See [[*Math
@@ -12332,35 +12332,35 @@ settings described in [[*Export Settings]].
 
 - =HTML_HEAD= ::
 
-     #+cindex: HTML_HEAD, keyword
+     #+cindex: @samp{HTML_HEAD}, keyword
      #+vindex: org-html-head
      Arbitrary lines for appending to the HTML document's head
      (~org-html-head~).
 
 - =HTML_HEAD_EXTRA= ::
 
-     #+cindex: HTML_HEAD_EXTRA, keyword
+     #+cindex: @samp{HTML_HEAD_EXTRA}, keyword
      #+vindex: org-html-head-extra
      More arbitrary lines for appending to the HTML document's head
      (~org-html-head-extra~).
 
 - =KEYWORDS= ::
 
-     #+cindex: KEYWORDS, keyword
+     #+cindex: @samp{KEYWORDS}, keyword
      Keywords to describe the document's content.  HTML exporter
      inserts these keywords as HTML meta tags.  For long keywords, use
      multiple =KEYWORDS= lines.
 
 - =LATEX_HEADER= ::
 
-     #+cindex: LATEX_HEADER, keyword
+     #+cindex: @samp{LATEX_HEADER}, keyword
      Arbitrary lines for appending to the preamble; HTML exporter
      appends when transcoding LaTeX fragments to images (see [[*Math
      formatting in HTML export]]).
 
 - =SUBTITLE= ::
 
-     #+cindex: SUBTITLE, keyword
+     #+cindex: @samp{SUBTITLE}, keyword
      The document's subtitle.  HTML exporter formats subtitle if
      document type is =HTML5= and the CSS has a =subtitle= class.
 
@@ -12396,7 +12396,7 @@ See the variable ~org-html-doctype-alist~ for details.  The default is
 ~"xhtml-strict"~.
 
 #+vindex: org-html-html5-fancy
-#+cindex: HTML5, export new elements
+#+cindex: @samp{HTML5}, export new elements
 Org's HTML exporter does not by default enable new block elements
 introduced with the HTML5 standard.  To enable them, set
 ~org-html-html5-fancy~ to non-~nil~.  Or use an =OPTIONS= line in the
@@ -12496,8 +12496,8 @@ can insert that HTML code in the output, use this inline syntax:
 
 : @@html:<b>@@bold text@@html:</b>@@
 
-#+cindex: HTML, keyword
-#+cindex: BEGIN_EXPORT html
+#+cindex: @samp{HTML}, keyword
+#+cindex: @samp{BEGIN_EXPORT html}
 For larger raw HTML code blocks, use these HTML export code blocks:
 
 #+begin_example
@@ -12538,7 +12538,7 @@ back-end.  For example, by using =#+ATTR_HTML= lines to specify new
 format attributes to ~<a>~ or ~<img>~ tags.  This example shows
 changing the link's title and style:
 
-#+cindex: ATTR_HTML, keyword
+#+cindex: @samp{ATTR_HTML}, keyword
 #+begin_example
 ,#+ATTR_HTML: :title The Org mode homepage :style color:red;
 [[https://orgmode.org]]
@@ -12556,8 +12556,8 @@ exporting Org tables to HTML.  By default, the exporter does not draw
 frames and cell borders.  To change for this for a table, use the
 following lines before the table in the Org file:
 
-#+cindex: CAPTION, keyword
-#+cindex: ATTR_HTML, keyword
+#+cindex: @samp{CAPTION}, keyword
+#+cindex: @samp{ATTR_HTML}, keyword
 #+begin_example
 ,#+CAPTION: This is a table with lines around and between cells
 ,#+ATTR_HTML: border="2" rules="all" frame="border"
@@ -12634,8 +12634,8 @@ the Org file.  This example shows realignment to right, and adds ~alt~
 and ~title~ attributes in support of text viewers and modern web
 accessibility standards.
 
-#+cindex: CAPTION, keyword
-#+cindex: ATTR_HTML, keyword
+#+cindex: @samp{CAPTION}, keyword
+#+cindex: @samp{ATTR_HTML}, keyword
 #+begin_example
 ,#+CAPTION: A black cat stalking a spider
 ,#+ATTR_HTML: :alt cat/spider image :title Action! :align right
@@ -12773,14 +12773,14 @@ headlines, tables, etc.
 #+vindex: org-html-style-default
 #+vindex: org-html-head
 #+vindex: org-html-head-extra
-#+cindex: HTML_INCLUDE_STYLE, keyword
+#+cindex: @samp{HTML_INCLUDE_STYLE}, keyword
 The HTML export back-end includes a compact default style in each
 exported HTML file.  To override the default style with another style,
 use these keywords in the Org file.  They will replace the global
 defaults the HTML exporter uses.
 
-#+cindex: HTML_HEAD, keyword
-#+cindex: HTML_HEAD_EXTRA, keyword
+#+cindex: @samp{HTML_HEAD}, keyword
+#+cindex: @samp{HTML_HEAD_EXTRA}, keyword
 #+begin_example
 ,#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style1.css" />
 ,#+HTML_HEAD_EXTRA: <link rel="alternate stylesheet" type="text/css" href="style2.css" />
@@ -12791,7 +12791,7 @@ To just turn off the default style, customize
 ~org-html-head-include-default-style~ variable, or use this option
 line in the Org file.
 
-#+cindex: html-style, OPTIONS item
+#+cindex: @samp{html-style}, @samp{OPTIONS} item
 : #+OPTIONS: html-style:nil
 
 For longer style definitions, either use several =HTML_HEAD= and
@@ -12799,7 +12799,7 @@ For longer style definitions, either use several =HTML_HEAD= and
 around them.  Both of these approaches can avoid referring to an
 external file.
 
-#+cindex: HTML_CONTAINER_CLASS, property
+#+cindex: @samp{HTML_CONTAINER_CLASS}, property
 In order to add styles to a sub-tree, use the =HTML_CONTAINER_CLASS=
 property to assign a class to the tree.  In order to specify CSS
 styles for a particular headline, you can use the id specified in
@@ -12829,7 +12829,7 @@ own web server.
 
 To use this program, just add this line to the Org file:
 
-#+cindex: INFOJS_OPT, keyword
+#+cindex: @samp{INFOJS_OPT}, keyword
 : #+INFOJS_OPT: view:info toc:nil
 
 #+texinfo: @noindent
@@ -12964,7 +12964,7 @@ on blank lines to tell apart syntactical elements, such as paragraphs.
 #+cindex: pdflatex
 #+cindex: xelatex
 #+cindex: lualatex
-#+cindex: LATEX_COMPILER, keyword
+#+cindex: @samp{LATEX_COMPILER}, keyword
 The LaTeX export back-end can use any of these LaTeX engines:
 =pdflatex=, =xelatex=, and =lualatex=.  These engines compile LaTeX
 files with different compilers, packages, and output options.  The
@@ -12986,7 +12986,7 @@ general options (see [[*Export Settings]]).
 
 #+attr_texinfo: :sep ,
 - =DESCRIPTION= ::
-     #+cindex: DESCRIPTION, keyword
+     #+cindex: @samp{DESCRIPTION}, keyword
      #+vindex: org-latex-hyperref-template
      #+vindex: org-latex-title-command
      The document's description.  The description along with author
@@ -12999,7 +12999,7 @@ general options (see [[*Export Settings]]).
 
 - =LATEX_CLASS= ::
 
-     #+cindex: LATEX_CLASS, keyword
+     #+cindex: @samp{LATEX_CLASS}, keyword
      #+vindex: org-latex-default-class
      #+vindex: org-latex-classes
      This is LaTeX document class, such as /article/, /report/,
@@ -13011,21 +13011,21 @@ general options (see [[*Export Settings]]).
 
 - =LATEX_CLASS_OPTIONS= ::
 
-     #+cindex: LATEX_CLASS_OPTIONS, keyword
+     #+cindex: @samp{LATEX_CLASS_OPTIONS}, keyword
      Options the LaTeX export back-end uses when calling the LaTeX
      document class.
 
 - =LATEX_COMPILER= ::
 
-     #+cindex: LATEX_COMPILER, keyword
+     #+cindex: @samp{LATEX_COMPILER}, keyword
      #+vindex: org-latex-compiler
      The compiler, such as =pdflatex=, =xelatex=, =lualatex=, for
      producing the PDF.  See ~org-latex-compiler~.
 
 - =LATEX_HEADER=, =LATEX_HEADER_EXTRA= ::
 
-     #+cindex: LATEX_HEADER, keyword
-     #+cindex: LATEX_HEADER_EXTRA, keyword
+     #+cindex: @samp{LATEX_HEADER}, keyword
+     #+cindex: @samp{LATEX_HEADER_EXTRA}, keyword
      #+vindex: org-latex-classes
      Arbitrary lines to add to the document's preamble, before the
      hyperref settings.  See ~org-latex-classes~ for adjusting the
@@ -13033,7 +13033,7 @@ general options (see [[*Export Settings]]).
 
 - =KEYWORDS= ::
 
-     #+cindex: KEYWORDS, keyword
+     #+cindex: @samp{KEYWORDS}, keyword
      #+vindex: org-latex-hyperref-template
      #+vindex: org-latex-title-command
      The keywords for the document.  The description along with author
@@ -13046,7 +13046,7 @@ general options (see [[*Export Settings]]).
 
 - =SUBTITLE= ::
 
-     #+cindex: SUBTITLE, keyword
+     #+cindex: @samp{SUBTITLE}, keyword
      #+vindex: org-latex-subtitle-separate
      #+vindex: org-latex-subtitle-format
      The document's subtitle.  It is typeset as per
@@ -13090,10 +13090,10 @@ exporter splices the values of ~org-latex-default-packages-alist~ and
 ~org-latex-packages-alist~.  Use the same three variables to define
 custom sectioning or custom classes.
 
-#+cindex: LATEX_CLASS, keyword
-#+cindex: LATEX_CLASS_OPTIONS, keyword
-#+cindex: EXPORT_LATEX_CLASS, property
-#+cindex: EXPORT_LATEX_CLASS_OPTIONS, property
+#+cindex: @samp{LATEX_CLASS}, keyword
+#+cindex: @samp{LATEX_CLASS_OPTIONS}, keyword
+#+cindex: @samp{EXPORT_LATEX_CLASS}, property
+#+cindex: @samp{EXPORT_LATEX_CLASS_OPTIONS}, property
 The LaTeX export back-end sends the =LATEX_CLASS_OPTIONS= keyword and
 =EXPORT_LATEX_CLASS_OPTIONS= property as options to the LaTeX
 ~\documentclass~ macro.  The options and the syntax for specifying
@@ -13102,8 +13102,8 @@ conventions.
 
 : #+LATEX_CLASS_OPTIONS: [a4paper,11pt,twoside,twocolumn]
 
-#+cindex: LATEX_HEADER, keyword
-#+cindex: LATEX_HEADER_EXTRA, keyword
+#+cindex: @samp{LATEX_HEADER}, keyword
+#+cindex: @samp{LATEX_HEADER_EXTRA}, keyword
 The LaTeX export back-end appends values from =LATEX_HEADER= and
 =LATEX_HEADER_EXTRA= keywords to the LaTeX header.  The docstring for
 ~org-latex-classes~ explains in more detail.  Also note that LaTeX
@@ -13137,12 +13137,12 @@ Inserting in-line quoted with @ symbols:
 
 : Code embedded in-line @@latex:any arbitrary LaTeX code@@ in a paragraph.
 
-#+cindex: LATEX, keyword
+#+cindex: @samp{LATEX}, keyword
 Inserting as one or more keyword lines in the Org file:
 
 : #+LATEX: any arbitrary LaTeX code
 
-#+cindex: BEGIN_EXPORT latex
+#+cindex: @samp{BEGIN_EXPORT latex}
 Inserting as an export block in the Org file, where the back-end
 exports any code between begin and end markers:
 
@@ -13273,7 +13273,7 @@ Set the caption with the LaTeX command
 :END:
 #+cindex: images, inline in LaTeX
 #+cindex: inlining images in LaTeX
-#+cindex: ATTR_LATEX, keyword
+#+cindex: @samp{ATTR_LATEX}, keyword
 
 The LaTeX export back-end processes image links in Org files that do
 not have descriptions, such as these links =[[file:img.jpg]]= or
@@ -13355,7 +13355,7 @@ export back-end to comment out the =\includegraphics= macro.
 :END:
 
 #+cindex: plain lists, in @LaTeX{} export
-#+cindex: ATTR_LATEX, keyword
+#+cindex: @samp{ATTR_LATEX}, keyword
 The LaTeX export back-end accepts the =environment= and =options=
 attributes for plain lists.  Both attributes work together for
 customizing lists, as shown in the examples:
@@ -13390,7 +13390,7 @@ four:
 :DESCRIPTION: Attributes specific to source code blocks.
 :END:
 #+cindex: source blocks, in @LaTeX{} export
-#+cindex: ATTR_LATEX, keyword
+#+cindex: @samp{ATTR_LATEX}, keyword
 
 The LaTeX export back-end can make source code blocks into floating
 objects through the attributes =:float= and =:options=.  For =:float=:
@@ -13441,7 +13441,7 @@ a file, use the ~org-latex-listings-options~ and
 :END:
 #+cindex: example blocks, in @LaTeX{} export
 #+cindex: verbatim blocks, in @LaTeX{} export
-#+cindex: ATTR_LATEX, keyword
+#+cindex: @samp{ATTR_LATEX}, keyword
 
 The LaTeX export back-end wraps the contents of example blocks in
 a =verbatim= environment.  To change this behavior to use another
@@ -13465,7 +13465,7 @@ specify a custom environment.
 #+cindex: special blocks, in @LaTeX{} export
 #+cindex: abstract, in @LaTeX{} export
 #+cindex: proof, in @LaTeX{} export
-#+cindex: ATTR_LATEX, keyword
+#+cindex: @samp{ATTR_LATEX}, keyword
 
 For other special blocks in the Org file, the LaTeX export back-end
 makes a special environment of the same name.  The back-end also takes
@@ -13514,7 +13514,7 @@ example:
 :DESCRIPTION: Attributes specific to horizontal rules.
 :END:
 #+cindex: horizontal rules, in @LaTeX{} export
-#+cindex: ATTR_LATEX, keyword
+#+cindex: @samp{ATTR_LATEX}, keyword
 
 The LaTeX export back-end converts horizontal rules by the specified
 =:width= and =:thickness= attributes.  For example:
@@ -13607,7 +13607,7 @@ executable.  Without it, export cannot finish.
      #+findex: org-export-to-odt
      Export as OpenDocument Text file.
 
-     #+cindex: EXPORT_FILE_NAME, property
+     #+cindex: @samp{EXPORT_FILE_NAME}, property
      #+vindex: org-odt-preferred-output-format
 
      If ~org-odt-preferred-output-format~ is specified, the ODT export
@@ -13644,14 +13644,14 @@ general options (see [[*Export Settings]]).
 
 - =DESCRIPTION= ::
 
-     #+cindex: DESCRIPTION, keyword
+     #+cindex: @samp{DESCRIPTION}, keyword
      This is the document's description, which the ODT export back-end
      inserts as document metadata.  For long descriptions, use
      multiple lines, prefixed with =DESCRIPTION=.
 
 - =KEYWORDS= ::
 
-     #+cindex: KEYWORDS, keyword
+     #+cindex: @samp{KEYWORDS}, keyword
      The keywords for the document.  The ODT export back-end inserts
      the description along with author name, keywords, and related
      file metadata as metadata in the output file.  Use multiple
@@ -13659,14 +13659,14 @@ general options (see [[*Export Settings]]).
 
 - =ODT_STYLES_FILE= ::
 
-     #+cindex: ODT_STYLES_FILE, keyword
+     #+cindex: @samp{ODT_STYLES_FILE}, keyword
      #+vindex: org-odt-styles-file
      The ODT export back-end uses the ~org-odt-styles-file~ by
      default.  See [[*Applying custom styles]] for details.
 
 - =SUBTITLE= ::
 
-     #+cindex: SUBTITLE, keyword
+     #+cindex: @samp{SUBTITLE}, keyword
      The document subtitle.
 
 *** Extending ODT export
@@ -13751,7 +13751,7 @@ The example here shows creating a style using LibreOffice.
    newly created file.  For additional configuration options, see
    [[x-overriding-factory-styles][Overriding factory styles]].
 
-   #+cindex: ODT_STYLES_FILE, keyword
+   #+cindex: @samp{ODT_STYLES_FILE}, keyword
    To apply an ODT style to a particular file, use the
    =ODT_STYLES_FILE= keyword as shown in the example below:
 
@@ -13810,7 +13810,7 @@ relative widths for columns (see [[*Column Width and Alignment]]).
 Note that the ODT export back-end interprets column widths as weighted
 ratios, the default weight being 1.
 
-#+cindex: ATTR_ODT, keyword
+#+cindex: @samp{ATTR_ODT}, keyword
 Specifying =:rel-width= property on an =ATTR_ODT= line controls the
 width of the table.  For example:
 
@@ -13875,7 +13875,7 @@ website, do the following
 :UNNUMBERED: notoc
 :END:
 
-#+cindex: ATTR_ODT, keyword
+#+cindex: @samp{ATTR_ODT}, keyword
 
 Control the size and scale of the embedded images with the =ATTR_ODT=
 attribute.
@@ -13938,7 +13938,7 @@ image scaling operations:
 :UNNUMBERED: notoc
 :END:
 
-#+cindex: ATTR_ODT, keyword
+#+cindex: @samp{ATTR_ODT}, keyword
 The ODT export back-end can anchor images to ="as-char"=,
 ="paragraph"=, or ="page"=.  Set the preferred anchor using the
 =:anchor= property of the =ATTR_ODT= line.
@@ -14265,7 +14265,7 @@ the Org file.  Such direct formatting is useful for one-off instances.
 
 - Embedding a one-line OpenDocument XML ::
 
-     #+cindex: ODT, keyword
+     #+cindex: @samp{ODT}, keyword
      The ODT export back-end can read one-liner options with =#+ODT:=
      in the Org file.  For example, to force a page break:
 
@@ -14307,7 +14307,7 @@ the Org file.  Such direct formatting is useful for one-off instances.
 :UNNUMBERED: notoc
 :END:
 #+cindex: tables, in ODT export
-#+cindex: ATTR_ODT, keyword
+#+cindex: @samp{ATTR_ODT}, keyword
 
 Override the default table format by specifying a custom table style
 with the =#+ATTR_ODT= line.  For a discussion on default formatting of
@@ -14511,54 +14511,54 @@ the general options (see [[*Export Settings]]).
 
 - =SUBTITLE= ::
 
-     #+cindex: SUBTITLE, keyword
+     #+cindex: @samp{SUBTITLE}, keyword
      The document subtitle.
 
 - =SUBAUTHOR= ::
 
-     #+cindex: SUBAUTHOR, keyword
+     #+cindex: @samp{SUBAUTHOR}, keyword
      Additional authors for the document.
 
 - =TEXINFO_FILENAME= ::
 
-     #+cindex: TEXINFO_FILENAME, keyword
+     #+cindex: @samp{TEXINFO_FILENAME}, keyword
      The Texinfo filename.
 
 - =TEXINFO_CLASS= ::
 
-     #+cindex: TEXINFO_CLASS, keyword
+     #+cindex: @samp{TEXINFO_CLASS}, keyword
      #+vindex: org-texinfo-default-class
      The default document class (~org-texinfo-default-class~), which
      must be a member of ~org-texinfo-classes~.
 
 - =TEXINFO_HEADER= ::
 
-     #+cindex: TEXINFO_HEADER, keyword
+     #+cindex: @samp{TEXINFO_HEADER}, keyword
      Arbitrary lines inserted at the end of the header.
 
 - =TEXINFO_POST_HEADER= ::
 
-     #+cindex: TEXINFO_POST_HEADER, keyword
+     #+cindex: @samp{TEXINFO_POST_HEADER}, keyword
      Arbitrary lines inserted after the end of the header.
 
 - =TEXINFO_DIR_CATEGORY= ::
 
-     #+cindex: TEXINFO_DIR_CATEGORY, keyword
+     #+cindex: @samp{TEXINFO_DIR_CATEGORY}, keyword
      The directory category of the document.
 
 - =TEXINFO_DIR_TITLE= ::
 
-     #+cindex: TEXINFO_DIR_TITLE, keyword
+     #+cindex: @samp{TEXINFO_DIR_TITLE}, keyword
      The directory title of the document.
 
 - =TEXINFO_DIR_DESC= ::
 
-     #+cindex: TEXINFO_DIR_DESC, keyword
+     #+cindex: @samp{TEXINFO_DIR_DESC}, keyword
      The directory description of the document.
 
 - =TEXINFO_PRINTED_TITLE= ::
 
-     #+cindex: TEXINFO_PRINTED_TITLE, keyword
+     #+cindex: @samp{TEXINFO_PRINTED_TITLE}, keyword
      The printed title of the document.
 
 *** Texinfo file header
@@ -14566,14 +14566,14 @@ the general options (see [[*Export Settings]]).
 :DESCRIPTION: Generating the header.
 :END:
 
-#+cindex: TEXINFO_FILENAME, keyword
+#+cindex: @samp{TEXINFO_FILENAME}, keyword
 After creating the header for a Texinfo file, the Texinfo back-end
 automatically generates a name and destination path for the Info file.
 To override this default with a more sensible path and name, specify
 the =TEXINFO_FILENAME= keyword.
 
 #+vindex: org-texinfo-coding-system
-#+cindex: TEXINFO_HEADER, keyword
+#+cindex: @samp{TEXINFO_HEADER}, keyword
 Along with the output's file name, the Texinfo header also contains
 language details (see [[*Export Settings]]) and encoding system as set in
 the ~org-texinfo-coding-system~ variable.  Insert =TEXINFO_HEADER=
@@ -14581,7 +14581,7 @@ keywords for each additional command in the header, for example:
 
 : #+TEXINFO_HEADER: @synindex
 
-#+cindex: TEXINFO_CLASS, keyword
+#+cindex: @samp{TEXINFO_CLASS}, keyword
 #+vindex: org-texinfo-classes
 Instead of repeatedly installing the same set of commands, define
 a class in ~org-texinfo-classes~ once, and then activate it in the
@@ -14592,14 +14592,14 @@ document by setting the =TEXINFO_CLASS= keyword to that class.
 :DESCRIPTION: Creating preamble pages.
 :END:
 
-#+cindex: TEXINFO_PRINTED_TITLE, keyword
+#+cindex: @samp{TEXINFO_PRINTED_TITLE}, keyword
 The default template for hard copy output has a title page with
 =TITLE= and =AUTHOR= keywords (see [[*Export Settings]]).  To replace the
 regular title with something different for the printed version, use
 the =TEXINFO_PRINTED_TITLE= and =SUBTITLE= keywords.  Both expect raw
 Texinfo code for setting their values.
 
-#+cindex: SUBAUTHOR, keyword
+#+cindex: @samp{SUBAUTHOR}, keyword
 If one =AUTHOR= line is not sufficient, add multiple =SUBAUTHOR=
 keywords.  They have to be set in raw Texinfo code.
 
@@ -14609,7 +14609,7 @@ keywords.  They have to be set in raw Texinfo code.
 ,#+TEXINFO_PRINTED_TITLE: This Long Title@@inlinefmt{tex,@*} Is Broken in @TeX{}
 #+end_example
 
-#+cindex: COPYING, property
+#+cindex: @samp{COPYING}, property
 Copying material is defined in a dedicated headline with a non-~nil~
 =COPYING= property.  The back-end inserts the contents within
 a =@copying= command at the beginning of the document.  The heading
@@ -14637,9 +14637,9 @@ Copyright information is printed on the back of the title page.
 #+cindex: Info directory file, in Texinfo export
 #+cindex: @code{install-info}, in Texinfo export
 
-#+cindex: TEXINFO_DIR_CATEGORY, keyword
-#+cindex: TEXINFO_DIR_TITLE, keyword
-#+cindex: TEXINFO_DIR_DESC, keyword
+#+cindex: @samp{TEXINFO_DIR_CATEGORY}, keyword
+#+cindex: @samp{TEXINFO_DIR_TITLE}, keyword
+#+cindex: @samp{TEXINFO_DIR_DESC}, keyword
 The end result of the Texinfo export process is the creation of an
 Info file.  This Info file's metadata has variables for category,
 title, and description: =TEXINFO_DIR_CATEGORY=, =TEXINFO_DIR_TITLE=,
@@ -14661,7 +14661,7 @@ Here is an example that writes to the Info directory file:
 
 #+vindex: org-texinfo-classes
 #+vindex: org-texinfo-default-class
-#+cindex: TEXINFO_CLASS, keyword
+#+cindex: @samp{TEXINFO_CLASS}, keyword
 The Texinfo export back-end uses a pre-defined scheme to convert Org
 headlines to equivalent Texinfo structuring commands.  A scheme like
 this maps top-level headlines to numbered chapters tagged as
@@ -14677,13 +14677,13 @@ If an Org headline's level has no associated Texinfo structuring
 command, or is below a certain threshold (see [[*Export Settings]]), then
 the Texinfo export back-end makes it into a list item.
 
-#+cindex: APPENDIX, property
+#+cindex: @samp{APPENDIX}, property
 The Texinfo export back-end makes any headline with a non-~nil~
 =APPENDIX= property into an appendix.  This happens independent of the
 Org headline level or the =TEXINFO_CLASS= keyword.
 
-#+cindex: ALT_TITLE, property
-#+cindex: DESCRIPTION, property
+#+cindex: @samp{ALT_TITLE}, property
+#+cindex: @samp{DESCRIPTION}, property
 The Texinfo export back-end creates a menu entry after the Org
 headline for each regular sectioning structure.  To override this with
 a shorter menu entry, use the =ALT_TITLE= property (see [[*Table of
@@ -14710,17 +14710,17 @@ file.  See [[info:texinfo::The%20Top%20Node]], for more information.
 :DESCRIPTION: Creating indices.
 :END:
 
-#+cindex: CINDEX, keyword
+#+cindex: @samp{CINDEX}, keyword
 #+cindex: concept index, in Texinfo export
-#+cindex: FINDEX, keyword
+#+cindex: @samp{FINDEX}, keyword
 #+cindex: function index, in Texinfo export
-#+cindex: KINDEX, keyword
+#+cindex: @samp{KINDEX}, keyword
 #+cindex: keystroke index, in Texinfo export
-#+cindex: PINDEX, keyword
+#+cindex: @samp{PINDEX}, keyword
 #+cindex: program index, in Texinfo export
-#+cindex: TINDEX, keyword
+#+cindex: @samp{TINDEX}, keyword
 #+cindex: data type index, in Texinfo export
-#+cindex: VINDEX, keyword
+#+cindex: @samp{VINDEX}, keyword
 #+cindex: variable index, in Texinfo export
 The Texinfo export back-end recognizes these indexing keywords if used
 in the Org file: =CINDEX=, =FINDEX=, =KINDEX=, =PINDEX=, =TINDEX= and
@@ -14730,7 +14730,7 @@ belong to a Texinfo command.
 
 : #+CINDEX: Defining indexing entries
 
-#+cindex: INDEX, property
+#+cindex: @samp{INDEX}, property
 For the back-end to generate an index entry for a headline, set the
 =INDEX= property to =cp= or =vr=.  These abbreviations come from
 Texinfo that stand for concept index and variable index.  The Texinfo
@@ -14753,8 +14753,8 @@ then inserts the index after its contents.
 Use any of the following three methods to insert or escape raw Texinfo
 code:
 
-#+cindex: TEXINFO, keyword
-#+cindex: BEGIN_EXPORT texinfo
+#+cindex: @samp{TEXINFO}, keyword
+#+cindex: @samp{BEGIN_EXPORT texinfo}
 #+begin_example
 Richard @@texinfo:@sc{@@Stallman@@texinfo:}@@ commence' GNU.
 
@@ -14772,7 +14772,7 @@ This paragraph is preceded by...
 :DESCRIPTION: List attributes.
 :END:
 
-#+cindex: ATTR_TEXINFO, keyword
+#+cindex: @samp{ATTR_TEXINFO}, keyword
 #+cindex: two-column tables, in Texinfo export
 
 #+cindex: table types, in Texinfo export
@@ -14817,7 +14817,7 @@ This is the common text for variables foo and bar.
 :DESCRIPTION: Table attributes.
 :END:
 
-#+cindex: ATTR_TEXINFO, keyword
+#+cindex: @samp{ATTR_TEXINFO}, keyword
 When exporting tables, the Texinfo export back-end uses the widest
 cell width in each column.  To override this and instead specify as
 fractions of line length, use the =:columns= attribute.  See example
@@ -14833,7 +14833,7 @@ below.
 :DESCRIPTION: Image attributes.
 :END:
 
-#+cindex: ATTR_TEXINFO, keyword
+#+cindex: @samp{ATTR_TEXINFO}, keyword
 Insert a file link to the image in the Org file, and the Texinfo
 export back-end inserts the image.  These links must have the usual
 supported image extensions and no descriptions.  To scale the image,
@@ -14850,7 +14850,7 @@ and specify the text using Texinfo code, as shown in the example:
 :DESCRIPTION: Special block attributes.
 :END:
 
-#+cindex: ATTR_TEXINFO, keyword
+#+cindex: @samp{ATTR_TEXINFO}, keyword
 
 The Texinfo export back-end converts special blocks to commands with
 the same name.  It also adds any =:options= attributes to the end of
@@ -14978,7 +14978,7 @@ clock alarms based on time, configure the ~org-icalendar-alarm-time~
 variable.
 
 #+vindex: org-icalendar-store-UID
-#+cindex: ID, property
+#+cindex: @samp{ID}, property
 The iCalendar format standard requires globally unique identifier---or
 UID---for each entry.  The iCalendar export back-end creates UIDs
 during export.  To save a copy of the UID in the Org file set the
@@ -15016,10 +15016,10 @@ connections.
      ~org-agenda-files~ and write it to
      ~org-icalendar-combined-agenda-file~ file name.
 
-#+cindex: SUMMARY, property
-#+cindex: DESCRIPTION, property
-#+cindex: LOCATION, property
-#+cindex: TIMEZONE, property
+#+cindex: @samp{SUMMARY}, property
+#+cindex: @samp{DESCRIPTION}, property
+#+cindex: @samp{LOCATION}, property
+#+cindex: @samp{TIMEZONE}, property
 The iCalendar export back-end includes =SUMMARY=, =DESCRIPTION=,
 =LOCATION= and =TIMEZONE= properties from the Org entries when
 exporting.  To force the back-end to inherit the =LOCATION= and
@@ -15299,7 +15299,7 @@ destination and many other properties of a project.
 :END:
 #+cindex: projects, for publishing
 
-#+cindex: org-publish-project-alist
+#+vindex: org-publish-project-alist
 Publishing is configured almost entirely through setting the value of
 one variable, called ~org-publish-project-alist~.  Each element of the
 list configures one project, and may be in one of the two following
@@ -15819,7 +15819,7 @@ The file is created when first publishing a project with the
 "theindex.inc"=.  You can then build around this include statement by
 adding a title, style information, etc.
 
-#+cindex: INDEX, keyword
+#+cindex: @samp{INDEX}, keyword
 Index entries are specified with =INDEX= keyword.  An entry that
 contains an exclamation mark creates a sub item.
 
@@ -16075,8 +16075,8 @@ in the following sections.
 :END:
 #+cindex: code block, structure
 #+cindex: source code, block structure
-#+cindex: NAME keyword, in source blocks
-#+cindex: BEGIN_SRC
+#+cindex: @samp{NAME} keyword, in source blocks
+#+cindex: @samp{BEGIN_SRC}
 
 Org offers two ways to structure source code in Org documents: in
 a source code block, and directly inline.  Both specifications are
@@ -16293,7 +16293,7 @@ The same header arguments in an inline code block:
 
 : src_haskell[:exports both]{fac 5}
 
-#+cindex: HEADER, keyword
+#+cindex: @samp{HEADER}, keyword
 Code block header arguments can span multiple lines using =#+HEADER:=
 on each line.  Note that Org currently accepts the plural spelling of
 =#+HEADER:= only as a convenience for backward-compatibility.  It may
@@ -16767,7 +16767,7 @@ to the end of the code block for execution.
 :END:
 #+cindex: code block, evaluating
 #+cindex: source code, evaluating
-#+cindex: RESULTS, keyword
+#+cindex: @samp{RESULTS}, keyword
 
 A note about security: With code evaluation comes the risk of harm.
 Org safeguards by prompting for user's permission before executing any
@@ -16795,7 +16795,7 @@ Org provides many ways to execute code blocks.  {{{kbd(C-c C-c)}}} or
 ~org-babel-execute-src-block~ function, which executes the code in the
 block, collects the results, and inserts them in the buffer.
 
-#+cindex: CALL, keyword
+#+cindex: @samp{CALL}, keyword
 #+vindex: org-babel-inline-result-wrap
 By calling a named code block[fn:131] from an Org mode buffer or
 a table.  Org can call the named code blocks from the current Org mode
@@ -18319,7 +18319,7 @@ In-Buffer Settings]]).
 
 ** Summary of In-Buffer Settings
 :PROPERTIES:
-:DESCRIPTION: Overview of the #+KEYWORDS.
+:DESCRIPTION: Overview of keywords.
 :ALT_TITLE: In-buffer Settings
 :END:
 #+cindex: in-buffer settings
@@ -18338,27 +18338,27 @@ changes.
 #+attr_texinfo: :sep ,
 - =#+ARCHIVE: %s_done= ::
 
-     #+cindex: ARCHIVE, keyword
+     #+cindex: @samp{ARCHIVE}, keyword
      #+vindex: org-archive-location
      Sets the archive location of the agenda file.  The corresponding
      variable is ~org-archive-location~.
 
 - =#+CATEGORY= ::
 
-     #+cindex: CATEGORY, keyword
+     #+cindex: @samp{CATEGORY}, keyword
      Sets the category of the agenda file, which applies to the entire
      document.
 
 - =#+COLUMNS: %25ITEM ...= ::
 
-     #+cindex: COLUMNS, property
+     #+cindex: @samp{COLUMNS}, property
      Set the default format for columns view.  This format applies
      when columns view is invoked in locations where no =COLUMNS=
      property applies.
 
 - =#+CONSTANTS: name1=value1 ...= ::
 
-     #+cindex: CONSTANTS, keyword
+     #+cindex: @samp{CONSTANTS}, keyword
      #+vindex: org-table-formula-constants
      #+vindex: org-table-formula
      Set file-local values for constants that table formulas can use.
@@ -18368,13 +18368,13 @@ changes.
 
 - =#+FILETAGS: :tag1:tag2:tag3:= ::
 
-     #+cindex: FILETAGS, keyword
+     #+cindex: @samp{FILETAGS}, keyword
      Set tags that all entries in the file inherit from, including the
      top-level entries.
 
 - =#+LINK: linkword replace= ::
 
-     #+cindex: LINK, keyword
+     #+cindex: @samp{LINK}, keyword
      #+vindex: org-link-abbrev-alist
      Each line specifies one abbreviation for one link.  Use multiple
      =LINK= keywords for more, see [[*Link Abbreviations]].  The
@@ -18382,7 +18382,7 @@ changes.
 
 - =#+PRIORITIES: highest lowest default= ::
 
-     #+cindex: PRIORITIES, keyword
+     #+cindex: @samp{PRIORITIES}, keyword
      #+vindex: org-highest-priority
      #+vindex: org-lowest-priority
      #+vindex: org-default-priority
@@ -18393,14 +18393,14 @@ changes.
 
 - =#+PROPERTY: Property_Name Value= ::
 
-     #+cindex: PROPERTY, keyword
+     #+cindex: @samp{PROPERTY}, keyword
      This line sets a default inheritance value for entries in the
      current buffer, most useful for specifying the allowed values of
      a property.
 
 - =#+SETUPFILE: file= ::
 
-     #+cindex: SETUPFILE, keyword
+     #+cindex: @samp{SETUPFILE}, keyword
      The setup file or a URL pointing to such file is for additional
      in-buffer settings.  Org loads this file and parses it for any
      settings in it only when Org opens the main file.  If URL is
@@ -18415,7 +18415,7 @@ changes.
 
 - =#+STARTUP:= ::
 
-     #+cindex: STARTUP, keyword
+     #+cindex: @samp{STARTUP}, keyword
      Startup options Org uses when first visiting a file.
 
      #+vindex: org-startup-folded
@@ -18650,7 +18650,7 @@ changes.
 
           Do not renumber and sort automatically.
 
-     #+cindex: org-hide-block-startup
+     #+vindex: org-hide-block-startup
      To hide blocks on startup, use these keywords.  The corresponding
      variable is ~org-hide-block-startup~.
 
@@ -18662,7 +18662,7 @@ changes.
 
           Do not hide blocks on startup.
 
-     #+cindex: org-pretty-entities
+     #+vindex: org-pretty-entities
      The display of entities as UTF-8 characters is governed by the
      variable ~org-pretty-entities~ and the keywords
 
@@ -18676,7 +18676,7 @@ changes.
 
 - =#+TAGS: TAG1(c1) TAG2(c2)= ::
 
-     #+cindex: TAGS, keyword
+     #+cindex: @samp{TAGS}, keyword
      #+vindex: org-tag-alist
      These lines (several such lines are allowed) specify the valid
      tags in this file, and (potentially) the corresponding /fast tag
@@ -18684,9 +18684,9 @@ changes.
 
 - =#+TODO:=, =#+SEQ_TODO:=, =#+TYP_TODO:= ::
 
-     #+cindex: SEQ_TODO, keyword
-     #+cindex: TODO, keyword
-     #+cindex: TYP_TODO, keyword
+     #+cindex: @samp{SEQ_TODO}, keyword
+     #+cindex: @samp{TODO}, keyword
+     #+cindex: @samp{TYP_TODO}, keyword
      #+vindex: org-todo-keywords
      These lines set the TODO keywords and their interpretation in the
      current file.  The corresponding variable is ~org-todo-keywords~.
@@ -18696,7 +18696,7 @@ changes.
 :DESCRIPTION: When in doubt, press @kbd{C-c C-c}.
 :END:
 #+kindex: C-c C-c
-#+cindex: C-c C-c, overview
+#+cindex: @kbd{C-c C-c}, overview
 
 The {{{kbd(C-c C-c)}}} key in Org serves many purposes depending on
 the context.  It is probably the most over-worked, multi-purpose key
@@ -19364,7 +19364,7 @@ At the location of source, Org needs a special line to direct Orgtbl
 to translate and to find the target for inserting the translated
 table.  For example:
 
-#+cindex: ORGTBL, keyword
+#+cindex: @samp{ORGTBL}, keyword
 : #+ORGTBL: SEND table_name translation_function arguments ...
 
 #+texinfo: @noindent
@@ -19425,7 +19425,7 @@ example, if =salesfigures= is the name, the template inserts:
 \end{comment}
 #+end_example
 
-#+vindex: @LaTeX{}-verbatim-environments
+#+vindex: LaTeX-verbatim-environments
 #+texinfo: @noindent
 The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
