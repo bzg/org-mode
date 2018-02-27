@@ -18,17 +18,12 @@ development.
    patches that can easily and consistently be applied to the
    main repository.
 
-2. There is a mirror hosted publicly at repo.or.cz.  Anyone can
-   get a clone of the current repository state using the command
-
-     git clone git://repo.or.cz/org-mode.git
-
-3. People who are interested in participating to the Org mode
+2. People who are interested in participating to the Org mode
    development can do so by sending patches to this address:
 
      [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]]
 
-4. An interested developer can also request push access to the
+3. An interested developer can also request push access to the
    central repository by creating an account on code.orgmode.org
    and by sending her/his user info to the maintainer.
 
