@@ -4055,7 +4055,6 @@ property:
      #+kindex: C-c C-x o
      #+findex: org-toggle-ordered-property
      #+vindex: org-track-ordered-property-with-tag
-     #+cindex: @samp{ORDERED}, property
      Toggle the =ORDERED= property of the current entry.  A property
      is used for this behavior because this should be local to the
      current entry, not inherited like a tag.  However, if you would
