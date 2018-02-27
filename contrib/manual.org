@@ -2084,8 +2084,8 @@ package, it will also be used to resolve constants, including natural
 constants like =$h= for Planck's constant, and units like =$km= for
 kilometers[fn:22].  Column names and parameters can be specified in
 special table lines.  These are described below, see [[*Advanced
-features]].  All names must start with a letter, and further consist of
-letters and numbers.
+features]].  All names must start with a letter, and further consist
+of letters and numbers.
 
 **** Remote references
 :PROPERTIES:
@@ -2096,7 +2096,6 @@ letters and numbers.
 #+cindex: references, remote
 #+cindex: references, to a different table
 #+cindex: name, of column or field
-#+cindex: constants, in calculations
 #+cindex: @samp{NAME}, keyword
 You may also reference constants, fields and ranges from a different
 table, either in the current file or even in a different file.  The
@@ -2126,9 +2125,9 @@ table name or ID.
 #+cindex: formula syntax, Calc
 #+cindex: syntax, of formulas
 
-A formula can be any algebraic expression understood by the Emacs
-=Calc= package. Note that =calc= has the non-standard convention that
-=/= has lower precedence than =*=, so that =a/b*c= is interpreted as
+A formula can be any algebraic expression understood by the Emacs Calc
+package.  Note that Calc has the non-standard convention that =/= has
+lower precedence than =*=, so that =a/b*c= is interpreted as
 =(a/(b*c))=.  Before evaluation by ~calc-eval~ (see [[info:calc#Calling Calc from Your Programs][Calling Calc from
 Your Lisp Programs]]), variable substitution takes place according to
 the rules described above.
