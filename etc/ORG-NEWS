@@ -193,7 +193,6 @@ you should expect to see something like:
 #+BEGIN_EXAMPLE
   ,#+STARTUP: shrink
 #+END_EXAMPLE
-
 ** New functions
 *** ~org-insert-structure-template~
 
@@ -227,6 +226,11 @@ Org Tempo may be used as a replacement.  See details above.
 *** org-babel-use-quick-and-dirty-noweb-expansion
 
 ** Miscellaneous
+
+*** New face: ~org-upcoming-distant-deadline~
+
+It is meant to be used as the face for distant deadlines, see
+~org-agenda-deadline-faces~
 
 *** ~org-paste-subtree~ no longer breaks sections
 
