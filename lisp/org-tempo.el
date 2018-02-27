@@ -126,8 +126,9 @@ Goes through `org-structure-template-alist' and
 Unlike to `tempo-complete-tag', do not give a signal if a partial
 completion or no match at all is found.  Return nil if expansion
 didn't succeed."
-  (cl-letf (((symbol-function 'ding) #'ignore))
-    (tempo-complete-tag t)))
+  ;; `tempo-complete-tag' returns its SILENT argument when there is no
+  ;; completion available at all.
+  (not (eq 'fail (tempo-complete-tag 'fail))))
 
 ;;; Additional keywords
 

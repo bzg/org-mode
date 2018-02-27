@@ -6929,6 +6929,59 @@ Contents
      (org-set-visibility-according-to-property)
      (not (invisible-p (point))))))
 
+
+;;; Yank and Kill
+
+(ert-deftest test-org/paste-subtree ()
+  "Test `org-paste-subtree' specifications."
+  ;; Return an error if text to yank is not a set of subtrees.
+  (should-error (org-paste-subtree nil "Text"))
+  ;; Adjust level according to current one.
+  (should
+   (equal "* H\n* Text\n"
+	  (org-test-with-temp-text "* H\n<point>"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  (should
+   (equal "* H1\n** H2\n** Text\n"
+	  (org-test-with-temp-text "* H1\n** H2\n<point>"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  ;; When not on a heading, move to next heading before yanking.
+  (should
+   (equal "* H1\nParagraph\n* Text\n* H2"
+	  (org-test-with-temp-text "* H1\n<point>Paragraph\n* H2"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  ;; If point is between two headings, use the deepest level.
+  (should
+   (equal "* H1\n\n* Text\n* H2"
+	  (org-test-with-temp-text "* H1\n<point>\n* H2"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  (should
+   (equal "** H1\n\n** Text\n* H2"
+	  (org-test-with-temp-text "** H1\n<point>\n* H2"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  (should
+   (equal "* H1\n\n** Text\n** H2"
+	  (org-test-with-temp-text "* H1\n<point>\n** H2"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  ;; When on an empty heading, after the stars, deduce the new level
+  ;; from the number of stars.
+  (should
+   (equal "*** Text\n"
+	  (org-test-with-temp-text "*** <point>"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
+  ;; Optional argument LEVEL forces a level for the subtree.
+  (should
+   (equal "* H\n*** Text\n"
+	  (org-test-with-temp-text "* H<point>"
+	    (org-paste-subtree 3 "* Text")
+	    (buffer-string)))))
 
 (provide 'test-org)
 

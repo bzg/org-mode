@@ -511,13 +511,18 @@ which days belong to the weekend."
     (((class color) (min-colors 8)  (background light)) (:foreground "red"))
     (((class color) (min-colors 8)  (background dark)) (:foreground "red" :bold t))
     (t (:bold t)))
-  "Face for items scheduled previously, and not yet done."
+  "Face for items scheduled previously, and not yet done.
+See also `org-agenda-deadline-faces'."
   :group 'org-faces)
+
+(defface org-upcoming-distant-deadline '((t :inherit org-default))
+  "Face for items scheduled previously, not done, and have a distant deadline.
+See also `org-agenda-deadline-faces'.")
 
 (defcustom org-agenda-deadline-faces
   '((1.0 . org-warning)
     (0.5 . org-upcoming-deadline)
-    (0.0 . default))
+    (0.0 . org-upcoming-distant-deadline))
   "Faces for showing deadlines in the agenda.
 This is a list of cons cells.  The cdr of each cell is a face to be used,
 and it can also just be like \\='(:foreground \"yellow\").
