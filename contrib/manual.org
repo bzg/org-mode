@@ -360,7 +360,7 @@ different functions, depending on context.  The command that is bound
 to such keys has a generic name, like ~org-metaright~.  In the manual
 we will, wherever possible, give the function that is internally
 called by the generic command.  For example, in the chapter on
-document structure, {{{kbd(M-right)}}} will be listed to call
+document structure, {{{kbd(M-RIGHT)}}} will be listed to call
 ~org-do-demote~, while in the chapter on tables, it will be listed to
 call ~org-table-move-column-right~.
 
@@ -654,7 +654,7 @@ The following commands jump to other headlines in the buffer.
 
      #+attr_texinfo: :columns 0.3 0.7
      | {{{kbd(TAB)}}}                  | Cycle visibility.               |
-     | {{{kbd(down)}}} / {{{kbd(up)}}} | Next/previous visible headline. |
+     | {{{kbd(DOWN)}}} / {{{kbd(UP)}}} | Next/previous visible headline. |
      | {{{kbd(RET)}}}                  | Select this location.           |
      | {{{kbd(/)}}}                    | Do a Sparse-tree search         |
 
@@ -744,39 +744,39 @@ The following commands jump to other headlines in the buffer.
      level.  Yet another {{{kbd(TAB)}}}, and you are back to the
      initial level.
 
-- {{{kbd(M-left)}}} (~org-do-promote~) ::
+- {{{kbd(M-LEFT)}}} (~org-do-promote~) ::
 
-     #+kindex: M-left
+     #+kindex: M-LEFT
      #+findex: org-do-promote
      Promote current heading by one level.
 
-- {{{kbd(M-right)}}} (~org-do-demote~) ::
+- {{{kbd(M-RIGHT)}}} (~org-do-demote~) ::
 
-     #+kindex: M-right
+     #+kindex: M-RIGHT
      #+findex: org-do-demote
      Demote current heading by one level.
 
-- {{{kbd(M-S-left)}}} (~org-promote-subtree~) ::
+- {{{kbd(M-S-LEFT)}}} (~org-promote-subtree~) ::
 
-     #+kindex: M-S-left
+     #+kindex: M-S-LEFT
      #+findex: org-promote-subtree
      Promote the current subtree by one level.
 
-- {{{kbd(M-S-right)}}} (~org-demote-subtree~) ::
+- {{{kbd(M-S-RIGHT)}}} (~org-demote-subtree~) ::
 
-     #+kindex: M-S-right
+     #+kindex: M-S-RIGHT
      #+findex: org-demote-subtree
      Demote the current subtree by one level.
 
-- {{{kbd(M-up)}}} (~org-move-subtree-up~) ::
+- {{{kbd(M-UP)}}} (~org-move-subtree-up~) ::
 
-     #+kindex: M-up
+     #+kindex: M-UP
      #+findex: org-move-subtree-up
      Move subtree up, i.e., swap with previous subtree of same level.
 
-- {{{kbd(M-down)}}} (~org-move-subtree-down~) ::
+- {{{kbd(M-DOWN)}}} (~org-move-subtree-down~) ::
 
-     #+kindex: M-down
+     #+kindex: M-DOWN
      #+findex: org-move-subtree-down
      Move subtree down, i.e., swap with next subtree of same level.
 
@@ -1108,37 +1108,37 @@ intact.  If some of these actions get in your way, configure
      #+kindex: M-S-RET
      Insert a new item with a checkbox (see [[Checkboxes]]).
 
-- {{{kbd(S-up)}}}, {{{kbd(S-down)}}} ::
+- {{{kbd(S-UP)}}}, {{{kbd(S-DOWN)}}} ::
 
-     #+kindex: S-up
-     #+kindex: S-down
+     #+kindex: S-UP
+     #+kindex: S-DOWN
      #+cindex: shift-selection-mode
      #+vindex: org-support-shift-select
      #+vindex: org-list-use-circular-motion
      Jump to the previous/next item in the current list, but only if
      ~org-support-shift-select~ is off[fn:14].  If not, you can
-     still use paragraph jumping commands like {{{kbd(C-up)}}}
-     and {{{kbd(C-down)}}} to quite similar effect.
+     still use paragraph jumping commands like {{{kbd(C-UP)}}}
+     and {{{kbd(C-DOWN)}}} to quite similar effect.
 
-- {{{kbd(M-up)}}}, {{{kbd(M-down)}}} ::
+- {{{kbd(M-UP)}}}, {{{kbd(M-DOWN)}}} ::
 
-     #+kindex: M-up
-     #+kindex: M-down
+     #+kindex: M-UP
+     #+kindex: M-DOWN
      Move the item including subitems up/down[fn:15], i.e., swap with
      previous/next item of same indentation.  If the list is ordered,
      renumbering is automatic.
 
-- {{{kbd(M-left)}}}, {{{kbd(M-right)}}} ::
+- {{{kbd(M-LEFT)}}}, {{{kbd(M-RIGHT)}}} ::
 
-     #+kindex: M-left
-     #+kindex: M-right
+     #+kindex: M-LEFT
+     #+kindex: M-RIGHT
      Decrease/increase the indentation of an item, leaving children
      alone.
 
-- {{{kbd(M-S-left)}}}, {{{kbd(M-S-right)}}} ::
+- {{{kbd(M-S-LEFT)}}}, {{{kbd(M-S-RIGHT)}}} ::
 
-     #+kindex: M-S-left
-     #+kindex: M-S-right
+     #+kindex: M-S-LEFT
+     #+kindex: M-S-RIGHT
      Decrease/increase the indentation of the item, including
      subitems.  Initially, the item tree is selected based on current
      indentation.  When these commands are executed several times in
@@ -1188,11 +1188,11 @@ intact.  If some of these actions get in your way, configure
      Checkboxes (see [[*Checkboxes]]) become TODO, respectively DONE,
      keywords when unchecked, respectively checked.
 
-- {{{kbd(S-left)}}}, {{{kbd(S-right)}}} ::
+- {{{kbd(S-LEFT)}}}, {{{kbd(S-RIGHT)}}} ::
 
      #+vindex: org-support-shift-select
-     #+kindex: S-left
-     #+kindex: S-right
+     #+kindex: S-LEFT
+     #+kindex: S-RIGHT
      This command also cycles bullet styles when the cursor in on the
      bullet or anywhere in an item line, details depending on
      ~org-support-shift-select~.
@@ -1534,51 +1534,51 @@ you, configure the option ~org-table-auto-blank-field~.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(M-left)}}} (~org-table-move-column-left~) ::
+- {{{kbd(M-LEFT)}}} (~org-table-move-column-left~) ::
 
-     #+kindex: M-left
+     #+kindex: M-LEFT
      #+findex: org-table-move-column-left
      Move the current column left.
 
-- {{{kbd(M-right)}}} (~org-table-move-column-right~) ::
+- {{{kbd(M-RIGHT)}}} (~org-table-move-column-right~) ::
 
-     #+kindex: M-right
+     #+kindex: M-RIGHT
      #+findex: org-table-move-column-right
      Move the current column right.
 
-- {{{kbd(M-S-left)}}} (~org-table-delete-column~) ::
+- {{{kbd(M-S-LEFT)}}} (~org-table-delete-column~) ::
 
-     #+kindex: M-S-left
+     #+kindex: M-S-LEFT
      #+findex: org-table-delete-column
      Kill the current column.
 
-- {{{kbd(M-S-right)}}} (~org-table-insert-column~) ::
+- {{{kbd(M-S-RIGHT)}}} (~org-table-insert-column~) ::
 
-     #+kindex: M-S-right
+     #+kindex: M-S-RIGHT
      #+findex: org-table-insert-column
      Insert a new column to the left of the cursor position.
 
-- {{{kbd(M-up)}}} (~org-table-move-row-up~) ::
+- {{{kbd(M-UP)}}} (~org-table-move-row-up~) ::
 
-     #+kindex: M-up
+     #+kindex: M-UP
      #+findex: org-table-move-row-up
      Move the current row up.
 
-- {{{kbd(M-down)}}} (~org-table-move-row-down~) ::
+- {{{kbd(M-DOWN)}}} (~org-table-move-row-down~) ::
 
-     #+kindex: M-down
+     #+kindex: M-DOWN
      #+findex: org-table-move-row-down
      Move the current row down.
 
-- {{{kbd(M-S-up)}}} (~org-table-kill-row~) ::
+- {{{kbd(M-S-UP)}}} (~org-table-kill-row~) ::
 
-     #+kindex: M-S-up
+     #+kindex: M-S-UP
      #+findex: org-table-kill-row
      Kill the current row or horizontal line.
 
-- {{{kbd(M-S-down)}}} (~org-table-insert-row~) ::
+- {{{kbd(M-S-DOWN)}}} (~org-table-insert-row~) ::
 
-     #+kindex: M-S-down
+     #+kindex: M-S-DOWN
      #+findex: org-table-insert-row
      Insert a new row above the current row.  With a prefix argument,
      the line is created below the current one.
@@ -2602,42 +2602,42 @@ you prefer to only work with the internal format (like =@3$2= or
           #+findex: lisp-complete-symbol
           Complete Lisp symbols, just like in Emacs Lisp mode.
 
-     - {{{kbd(S-up)}}}, {{{kbd(S-down)}}}, {{{kbd(S-left)}}}, {{{kbd(S-right)}}} ::
+     - {{{kbd(S-UP)}}}, {{{kbd(S-DOWN)}}}, {{{kbd(S-LEFT)}}}, {{{kbd(S-RIGHT)}}} ::
 
-          #+kindex: S-up
-          #+kindex: S-down
-          #+kindex: S-left
-          #+kindex: S-right
+          #+kindex: S-UP
+          #+kindex: S-DOWN
+          #+kindex: S-LEFT
+          #+kindex: S-RIGHT
           #+findex: org-table-fedit-ref-up
           #+findex: org-table-fedit-ref-down
           #+findex: org-table-fedit-ref-left
           #+findex: org-table-fedit-ref-right
           Shift the reference at point.  For example, if the reference
-          is =B3= and you press {{{kbd(S-right)}}}, it becomes =C3=.
+          is =B3= and you press {{{kbd(S-RIGHT)}}}, it becomes =C3=.
           This also works for relative references and for hline
           references.
 
-     - {{{kbd(M-S-up)}}} (~org-table-fedit-line-up~) ::
+     - {{{kbd(M-S-UP)}}} (~org-table-fedit-line-up~) ::
 
-          #+kindex: M-S-up
+          #+kindex: M-S-UP
           #+findex: org-table-fedit-line-up
           Move the test line for column formulas up in the Org buffer.
 
-     - {{{kbd(M-S-down)}}} (~org-table-fedit-line-down~) ::
+     - {{{kbd(M-S-DOWN)}}} (~org-table-fedit-line-down~) ::
 
-          #+kindex: M-S-down
+          #+kindex: M-S-DOWN
           #+findex: org-table-fedit-line-down
           Move the test line for column formulas down in the Org buffer.
 
-     - {{{kbd(M-up)}}} (~org-table-fedit-scroll-up~) ::
+     - {{{kbd(M-UP)}}} (~org-table-fedit-scroll-up~) ::
 
-          #+kindex: M-up
+          #+kindex: M-UP
           #+findex: org-table-fedit-scroll-up
           Scroll up the window displaying the table.
 
-     - {{{kbd(M-down)}}} (~org-table-fedit-scroll-down~) ::
+     - {{{kbd(M-DOWN)}}} (~org-table-fedit-scroll-down~) ::
 
-          #+kindex: M-down
+          #+kindex: M-DOWN
           #+findex: org-table-fedit-scroll-down
           Scroll down the window displaying the table.
 
@@ -3351,7 +3351,7 @@ generally, act on links.
 
        All links stored during the current session are part of the
        history for this prompt, so you can access them with
-       {{{kbd(up)}}} and {{{kbd(down)}}} (or {{{kbd(M-p)}}},
+       {{{kbd(UP)}}} and {{{kbd(DOWN)}}} (or {{{kbd(M-p)}}},
        {{{kbd(M-n)}}}).
 
   - /Completion support/ ::
@@ -3715,10 +3715,10 @@ The most important commands to work with TODO entries are:
      states with no prompt.  When ~org-use-fast-todo-selection~ is set
      to ~prefix~, use the fast selection interface.
 
-- {{{kbd(S-right)}}} {{{kbd(S-left)}}} ::
+- {{{kbd(S-RIGHT)}}} {{{kbd(S-LEFT)}}} ::
 
-     #+kindex: S-right
-     #+kindex: S-left
+     #+kindex: S-RIGHT
+     #+kindex: S-LEFT
      #+vindex: org-treat-S-cursor-todo-selection-as-state-change
      Select the following/preceding TODO state, similar to cycling.
      Useful mostly if more than two TODO states are possible (see
@@ -3808,7 +3808,7 @@ With this setup, the command {{{kbd(C-c C-t)}}} cycles an entry from
 =TODO= to =FEEDBACK=, then to =VERIFY=, and finally to =DONE= and
 =DELEGATED=.  You may also use a numeric prefix argument to quickly
 select a specific state.  For example {{{kbd(C-3 C-c C-t)}}} changes
-the state immediately to =VERIFY=.  Or you can use {{{kbd(S-left)}}}
+the state immediately to =VERIFY=.  Or you can use {{{kbd(S-LEFT)}}}
 to go backward through the sequence.  If you define many keywords, you
 can use in-buffer completion (see [[*Completion]]) or even a special
 one-key selection scheme (see [[*Fast access to TODO states]]) to insert
@@ -3881,24 +3881,24 @@ a keyword or using completion, you may also apply the following
 commands:
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-u C-u C-c C-t)}}}, {{{kbd(C-S-right)}}}, {{{kbd(C-S-left)}}} ::
+- {{{kbd(C-u C-u C-c C-t)}}}, {{{kbd(C-S-RIGHT)}}}, {{{kbd(C-S-LEFT)}}} ::
 
-     #+kindex: C-S-right
-     #+kindex: C-S-left
+     #+kindex: C-S-RIGHT
+     #+kindex: C-S-LEFT
      #+kindex: C-u C-u C-c C-t
      These keys jump from one TODO subset to the next.  In the above
-     example, {{{kbd(C-u C-u C-c C-t)}}} or {{{kbd(C-S-right)}}} would
+     example, {{{kbd(C-u C-u C-c C-t)}}} or {{{kbd(C-S-RIGHT)}}} would
      jump from =TODO= or =DONE= to =REPORT=, and any of the words in
      the second row to =CANCELED=.  Note that the {{{kbd(C-S-)}}} key
      binding conflict with ~shift-selection-mode~ (see [[*Packages
      that conflict with Org mode]]).
 
-- {{{kbd(S-right)}}}, {{{kbd(S-left)}}} ::
+- {{{kbd(S-RIGHT)}}}, {{{kbd(S-LEFT)}}} ::
 
-     #+kindex: S-right
-     #+kindex: S-left
-     {{{kbd(S-left)}}} and {{{kbd(S-right)}}} walk through /all/
-     keywords from all sets, so for example {{{kbd(S-right)}}} would
+     #+kindex: S-RIGHT
+     #+kindex: S-LEFT
+     {{{kbd(S-LEFT)}}} and {{{kbd(S-RIGHT)}}} walk through /all/
+     keywords from all sets, so for example {{{kbd(S-RIGHT)}}} would
      switch from =DONE= to =REPORT= in the example above.  For
      a discussion of the interaction with ~shift-selection-mode~, see
      [[*Packages that conflict with Org mode]].
@@ -4354,10 +4354,10 @@ TODO items.
      timeline and agenda buffer with the {{{kbd(\,)}}} command (see
      [[*Commands in the Agenda Buffer]]).
 
-- {{{kbd(S-up)}}} (~org-priority-up~); {{{kbd(S-down)}}} (~org-priority-down~) ::
+- {{{kbd(S-UP)}}} (~org-priority-up~); {{{kbd(S-DOWN)}}} (~org-priority-down~) ::
 
-     #+kindex: S-up
-     #+kindex: S-down
+     #+kindex: S-UP
+     #+kindex: S-DOWN
      #+findex: org-priority-up
      #+findex: org-priority-down
      #+vindex: org-priority-start-cycle-with-default
@@ -5138,10 +5138,10 @@ The following commands help to work with properties:
      Set a property in the current entry.  Both the property and the value
      can be inserted using completion.
 
-- {{{kbd(S-right)}}} (~org-property-next-allowed-values~),  {{{kbd(S-left)}}} (~org-property-previous-allowed-value~) ::
+- {{{kbd(S-RIGHT)}}} (~org-property-next-allowed-values~),  {{{kbd(S-LEFT)}}} (~org-property-previous-allowed-value~) ::
 
-     #+kindex: S-right
-     #+kindex: S-left
+     #+kindex: S-RIGHT
+     #+kindex: S-LEFT
      Switch property at point to the next/previous allowed value.
 
 - {{{kbd(C-c C-c d)}}} (~org-delete-property~) ::
@@ -5520,7 +5520,7 @@ either for all clocks or just for today.
 :END:
 
 #+attr_texinfo: :sep and
-- {{{kbd(left)}}}, {{{kbd(right)}}}, {{{kbd(up)}}}, {{{kbd(down)}}} ::
+- {{{kbd(LEFT)}}}, {{{kbd(RIGHT)}}}, {{{kbd(UP)}}}, {{{kbd(DOWN)}}} ::
 
      Move through the column view from field to field.
 
@@ -5530,12 +5530,12 @@ either for all clocks or just for today.
      Directly select the Nth allowed value, {{{kbd(0)}}} selects the
      10th value.
 
-- {{{kbd(n)}}} or {{{kbd(S-right)}}} (~org-columns-next-allowed-value~) and {{{kbd(p)}}} or {{{kbd(S-left)}}} (~org-columns-previous-allowed-value~) ::
+- {{{kbd(n)}}} or {{{kbd(S-RIGHT)}}} (~org-columns-next-allowed-value~) and {{{kbd(p)}}} or {{{kbd(S-LEFT)}}} (~org-columns-previous-allowed-value~) ::
 
      #+kindex: n
-     #+kindex: S-right
+     #+kindex: S-RIGHT
      #+kindex: p
-     #+kindex: S-left
+     #+kindex: S-LEFT
      #+findex: org-columns-next-allowed-value
      #+findex: org-columns-previous-allowed-value
      Switch to the next/previous allowed value of the field.  For
@@ -5586,15 +5586,15 @@ either for all clocks or just for today.
      #+findex: org-columns-widen
      Make the column narrower/wider by one character.
 
-- {{{kbd(S-M-right)}}} (~org-columns-new~) ::
+- {{{kbd(S-M-RIGHT)}}} (~org-columns-new~) ::
 
-     #+kindex: S-M-right
+     #+kindex: S-M-RIGHT
      #+findex: org-columns-new
      Insert a new column, to the left of the current column.
 
-- {{{kbd(S-M-left)}}} (~org-columns-delete~) ::
+- {{{kbd(S-M-LEFT)}}} (~org-columns-delete~) ::
 
-     #+kindex: S-M-left
+     #+kindex: S-M-LEFT
      #+findex: org-columns-delete
      Delete the current column.
 
@@ -5870,19 +5870,20 @@ format.
      Access the agenda for the date given by the timestamp or -range
      at point (see [[*Weekly/daily agenda]]).
 
-- {{{kbd(S-left)}}} (~org-timestamp-down-day~), {{{kbd(S-right)}}} (~org-timestamp-up-day~) ::
+- {{{kbd(S-LEFT)}}} (~org-timestamp-down-day~), {{{kbd(S-RIGHT)}}} (~org-timestamp-up-day~) ::
 
-     #+kindex: S-left
-     #+kindex: S-right
+     #+kindex: S-LEFT
+     #+kindex: S-RIGHT
      #+findex: org-timestamp-down-day
      #+findex: org-timestamp-up-day
      Change date at cursor by one day.  These key bindings conflict
      with shift-selection and related modes (see [[*Packages that
      conflict with Org mode]]).
 
-- {{{kbd(S-up)}}} (~org-timestamp-up~), {{{kbd(S-down)}}} (~org-timestamp-down~) ::
+- {{{kbd(S-UP)}}} (~org-timestamp-up~), {{{kbd(S-DOWN)}}} (~org-timestamp-down~) ::
 
-     #+kindex: S-up
+     #+kindex: S-UP
+     #+kindex: S-DOWN
      Change the item under the cursor in a timestamp.  The cursor can
      be on a year, month, day, hour or minute.  When the timestamp
      contains a time range like =15:30-16:30=, modifying the first
@@ -5996,22 +5997,22 @@ can control the calendar fully from the minibuffer:
 #+kindex: M-v
 #+kindex: C-v
 #+kindex: mouse-1
-#+kindex: S-right
-#+kindex: S-left
-#+kindex: S-down
-#+kindex: S-up
-#+kindex: M-S-right
-#+kindex: M-S-left
+#+kindex: S-RIGHT
+#+kindex: S-LEFT
+#+kindex: S-DOWN
+#+kindex: S-UP
+#+kindex: M-S-RIGHT
+#+kindex: M-S-LEFT
 #+kindex: RET
 #+attr_texinfo: :columns 0.25 0.55
 | {{{kbd(RET)}}}           | Choose date at cursor in calendar.     |
 | {{{kbd(mouse-1)}}}       | Select date by clicking on it.         |
-| {{{kbd(S-right)}}}    | One day forward.                       |
-| {{{kbd(S-left)}}}     | One day backward.                      |
-| {{{kbd(S-down)}}}     | One week forward.                      |
-| {{{kbd(S-up)}}}       | One week backward.                     |
-| {{{kbd(M-S-right)}}}  | One month forward.                     |
-| {{{kbd(M-S-left)}}}   | One month backward.                    |
+| {{{kbd(S-RIGHT)}}}    | One day forward.                       |
+| {{{kbd(S-LEFT)}}}     | One day backward.                      |
+| {{{kbd(S-DOWN)}}}     | One week forward.                      |
+| {{{kbd(S-UP)}}}       | One week backward.                     |
+| {{{kbd(M-S-RIGHT)}}}  | One month forward.                     |
+| {{{kbd(M-S-LEFT)}}}   | One month backward.                    |
 | {{{kbd(>)}}}             | Scroll calendar forward by one month.  |
 | {{{kbd(<)}}}             | Scroll calendar backward by one month. |
 | {{{kbd(M-v)}}}           | Scroll calendar forward by 3 months.   |
@@ -6055,11 +6056,11 @@ following consequences:
 - You cannot place the cursor onto a timestamp anymore, only before or
   after.
 
-- The {{{kbd(S-up)}}} and {{{kbd(S-down)}}} keys can no longer be used
+- The {{{kbd(S-UP)}}} and {{{kbd(S-DOWN)}}} keys can no longer be used
   to adjust each component of a timestamp.  If the cursor is at the
-  beginning of the stamp, {{{kbd(S-up)}}} and {{{kbd(S-down)}}} change
-  the stamp by one day, just like {{{kbd(S-left)}}}
-  {{{kbd(S-right)}}}.  At the end of the stamp, change the time by one
+  beginning of the stamp, {{{kbd(S-UP)}}} and {{{kbd(S-DOWN)}}} change
+  the stamp by one day, just like {{{kbd(S-LEFT)}}}
+  {{{kbd(S-RIGHT)}}}.  At the end of the stamp, change the time by one
   minute.
 
 - If the timestamp contains a range of clock times or a repeater,
@@ -6451,24 +6452,24 @@ prompted about what to do with it.
      you change them with {{{kbd(S-<cursor>)}}} keys, the update is
      automatic.
 
-- {{{kbd(C-S-up)}}} (~org-clock-timestamps-up~), {{{kbd(C-S-down)}}} (~org-clock-timestamps-down~) ::
+- {{{kbd(C-S-UP)}}} (~org-clock-timestamps-up~), {{{kbd(C-S-DOWN)}}} (~org-clock-timestamps-down~) ::
 
-     #+kindex: C-S-up
+     #+kindex: C-S-UP
      #+findex: org-clock-timestamps-up
-     #+kindex: C-S-down
+     #+kindex: C-S-DOWN
      #+findex: org-clock-timestamps-down
      On CLOCK log lines, increase/decrease both timestamps so that the
      clock duration keeps the same value.
 
-- {{{kbd(S-M-up)}}} (~org-timestamp-up~), {{{kbd(S-M-down)}}} (~org-timestamp-down~) ::
+- {{{kbd(S-M-UP)}}} (~org-timestamp-up~), {{{kbd(S-M-DOWN)}}} (~org-timestamp-down~) ::
 
-     #+kindex: S-M-up
+     #+kindex: S-M-UP
      #+findex: org-clock-timestamp-up
-     #+kindex: S-M-down
+     #+kindex: S-M-DOWN
      #+findex: org-clock-timestamp-down
      On =CLOCK= log lines, increase/decrease the timestamp at point
      and the one of the previous, or the next, clock timestamp by the
-     same duration.  For example, if you hit {{{kbd(S-M-up)}}} to
+     same duration.  For example, if you hit {{{kbd(S-M-UP)}}} to
      increase a clocked-out timestamp by five minutes, then the
      clocked-in timestamp of the next clock is increased by five
      minutes.
@@ -6552,10 +6553,10 @@ formatted as one or several Org tables.
      Update all dynamic blocks (see [[*Dynamic Blocks]]).  This is useful
      if you have several clock table blocks in a buffer.
 
-- {{{kbd(S-left)}}}, {{{kbd(S-right)}}} (~org-clocktable-try-shift~) ::
+- {{{kbd(S-LEFT)}}}, {{{kbd(S-RIGHT)}}} (~org-clocktable-try-shift~) ::
 
-     #+kindex: S-left
-     #+kindex: S-right
+     #+kindex: S-LEFT
+     #+kindex: S-RIGHT
      #+findex: org-clocktable-try-shift
      Shift the current =:block= interval and update the table.  The
      cursor needs to be in the =#+BEGIN: clocktable= line for this
@@ -6624,7 +6625,7 @@ be selected:
      ~org-clock-display-default-range~, which defaults to the current
      year.
 
-     Use {{{kbd(S-left)}}} or {{{kbd(S-right)}}} to shift the time
+     Use {{{kbd(S-LEFT)}}} or {{{kbd(S-RIGHT)}}} to shift the time
      interval.
 
 - :tstart ::
@@ -6940,7 +6941,7 @@ the variables ~org-global-properties~ and
 setup also in the agenda, a global setup may be advised.
 
 The way to assign estimates to individual items is then to switch to
-column mode, and to use {{{kbd(S-right)}}} and {{{kbd(S-left)}}} to
+column mode, and to use {{{kbd(S-RIGHT)}}} and {{{kbd(S-LEFT)}}} to
 change the value.  The values you enter are immediately summed up in
 the hierarchy.  In the column next to it, any clocked time is
 displayed.
@@ -9334,13 +9335,13 @@ the other commands, the cursor needs to be in the desired line.
 
      #+kindex: n
      #+findex: org-agenda-next-line
-     Next line (same as {{{kbd(down)}}} and {{{kbd(C-n)}}}).
+     Next line (same as {{{kbd(DOWN)}}} and {{{kbd(C-n)}}}).
 
 - {{{kbd(p)}}} (~org-agenda-previous-line~) ::
 
      #+kindex: p
      #+findex: org-agenda-previous-line
-     Previous line (same as {{{kbd(up)}}} and {{{kbd(C-p)}}}).
+     Previous line (same as {{{kbd(UP)}}} and {{{kbd(C-p)}}}).
 
 *** View/Go to Org file
 :PROPERTIES:
@@ -9617,7 +9618,7 @@ the other commands, the cursor needs to be in the desired line.
      #+findex: org-agenda-redo
      Recreate the agenda buffer, for example to reflect the changes
      after modification of the timestamps of items with
-     {{{kbd(S-left)}}} and {{{kbd(S-right)}}}.  When the
+     {{{kbd(S-LEFT)}}} and {{{kbd(S-RIGHT)}}}.  When the
      buffer is the global TODO list, a prefix argument is interpreted
      to create a selective list for a specific TODO keyword.
 
@@ -9649,9 +9650,9 @@ the other commands, the cursor needs to be in the desired line.
      Remove the restriction lock on the agenda, if it is currently
      restricted to a file or subtree (see [[*Agenda Files]]).
 
-- {{{kbd(M-up)}}} (~org-agenda-drag-line-backward~) ::
+- {{{kbd(M-UP)}}} (~org-agenda-drag-line-backward~) ::
 
-     #+kindex: M-up
+     #+kindex: M-UP
      #+findex: org-agenda-drag-line-backward
      Drag the line at point backward one line.  With a numeric prefix
      argument, drag backward by that many lines.
@@ -9659,9 +9660,9 @@ the other commands, the cursor needs to be in the desired line.
      Moving agenda lines does not persist after an agenda refresh and
      does not modify the contributing Org files.
 
-- {{{kbd(M-down)}}} (~org-agenda-drag-line-forward~) ::
+- {{{kbd(M-DOWN)}}} (~org-agenda-drag-line-forward~) ::
 
-     #+kindex: M-down
+     #+kindex: M-DOWN
      #+findex: org-agenda-drag-line-forward
      Drag the line at point forward one line.  With a numeric prefix
      argument, drag forward by that many lines.
@@ -9692,15 +9693,15 @@ the other commands, the cursor needs to be in the desired line.
      Change the TODO state of the item, both in the agenda and in the
      original Org file.
 
-- {{{kbd(C-S-right)}}} (~org-agenda-todo-nextset~) ::
+- {{{kbd(C-S-RIGHT)}}} (~org-agenda-todo-nextset~) ::
 
-     #+kindex: C-S-right
+     #+kindex: C-S-RIGHT
      #+findex: org-agenda-todo-nextset
      Switch to the next set of TODO keywords.
 
-- {{{kbd(C-S-left)}}}, ~org-agenda-todo-previousset~ ::
+- {{{kbd(C-S-LEFT)}}}, ~org-agenda-todo-previousset~ ::
 
-     #+kindex: C-S-left
+     #+kindex: C-S-LEFT
      Switch to the previous set of TODO keywords.
 
 - {{{kbd(C-k)}}} (~org-agenda-kill~) ::
@@ -9782,20 +9783,20 @@ the other commands, the cursor needs to be in the desired line.
      #+findex: org-agenda-show-priority
      Display weighted priority of current item.
 
-- {{{kbd(+)}}} or {{{kbd(S-up)}}} (~org-agenda-priority-up~) ::
+- {{{kbd(+)}}} or {{{kbd(S-UP)}}} (~org-agenda-priority-up~) ::
 
      #+kindex: +
-     #+kindex: C-up
+     #+kindex: S-UP
      #+findex: org-agenda-priority-up
      Increase the priority of the current item.  The priority is
      changed in the original buffer, but the agenda is not resorted.
      Use the {{{kbd(r)}}} key for this.
 
-- {{{kbd(-)}}} or {{{kbd(S-down)}}} (~org-agenda-priority-down~) ::
+- {{{kbd(-)}}} or {{{kbd(S-DOWN)}}} (~org-agenda-priority-down~) ::
 
      #+kindex: -
-     #+kindex: C-down
-     #+findex: orga-agenda-priority-down
+     #+kindex: S-DOWN
+     #+findex: org-agenda-priority-down
      Decrease the priority of the current item.
 
 - {{{kbd(C-c C-z)}}} or short {{{kbd(z)}}} (~org-agenda-add-note~) ::
@@ -9828,15 +9829,15 @@ the other commands, the cursor needs to be in the desired line.
      Set a deadline for this item.  With a prefix argument, remove the
      deadline.
 
-- {{{kbd(S-right)}}} (~org-agenda-do-date-later~) ::
+- {{{kbd(S-RIGHT)}}} (~org-agenda-do-date-later~) ::
 
-     #+kindex: S-right
+     #+kindex: S-RIGHT
      #+findex: org-agenda-do-date-later
      Change the timestamp associated with the current line by one day
      into the future.  If the date is in the past, the first call to
      this command moves it to today.  With a numeric prefix argument,
      change it by that many days.  For example, {{{kbd(3
-     6 5 S-right)}}} changes it by a year.  With a {{{kbd(C-u)}}}
+     6 5 S-RIGHT)}}} changes it by a year.  With a {{{kbd(C-u)}}}
      prefix, change the time by one hour.  If you immediately repeat
      the command, it will continue to change hours even without the
      prefix argument.  With a double {{{kbd(C-u C-u)}}} prefix, do the
@@ -9844,9 +9845,9 @@ the other commands, the cursor needs to be in the desired line.
      Org file, but the change is not directly reflected in the agenda
      buffer.  Use {{{kbd(r)}}} or {{{kbd(g)}}} to update the buffer.
 
-- {{{kbd(S-left)}}} (~org-agenda-do-date-earlier~) ::
+- {{{kbd(S-LEFT)}}} (~org-agenda-do-date-earlier~) ::
 
-     #+kindex: S-left
+     #+kindex: S-LEFT
      #+findex: org-agenda-do-date-earlier
      Change the timestamp associated with the current line by one day
      into the past.
@@ -17951,17 +17952,17 @@ Active key bindings in code blocks:
 #+findex: org-babel-execute-src-block
 #+kindex: C-c C-o
 #+findex: org-babel-open-src-block-result
-#+kindex: M-up
+#+kindex: M-UP
 #+findex: org-babel-load-in-session
-#+kindex: M-down
+#+kindex: M-DOWN
 #+findex: org-babel-pop-to-session
 #+attr_texinfo: :columns 0.2 0.55
 | Key binding        | Function                          |
 |--------------------+-----------------------------------|
 | {{{kbd(C-c C-c)}}} | ~org-babel-execute-src-block~     |
 | {{{kbd(C-c C-o)}}} | ~org-babel-open-src-block-result~ |
-| {{{kbd(M-up)}}}    | ~org-babel-load-in-session~       |
-| {{{kbd(M-down)}}}  | ~org-babel-pop-to-session~        |
+| {{{kbd(M-UP)}}}    | ~org-babel-load-in-session~       |
+| {{{kbd(M-DOWN)}}}  | ~org-babel-pop-to-session~        |
 
 Active key bindings in Org mode buffer:
 
@@ -18875,23 +18876,23 @@ editing timestamp might be better with {{{kbd(C-c .)}}} chord.
 | Default              | Alternative 1            | Speed key    | Alternative 2        |
 |----------------------+--------------------------+--------------+----------------------|
 | {{{kbd(S-TAB)}}}     | {{{kbd(C-u TAB)}}}       | {{{kbd(C)}}} |                      |
-| {{{kbd(M-left)}}}    | {{{kbd(C-c C-x l)}}}     | {{{kbd(l)}}} | {{{kbd(Esc left)}}}  |
-| {{{kbd(M-S-left)}}}  | {{{kbd(C-c C-x L)}}}     | {{{kbd(L)}}} |                      |
-| {{{kbd(M-right)}}}   | {{{kbd(C-c C-x r)}}}     | {{{kbd(r)}}} | {{{kbd(Esc right)}}} |
-| {{{kbd(M-S-right)}}} | {{{kbd(C-c C-x R)}}}     | {{{kbd(R)}}} |                      |
-| {{{kbd(M-up)}}}      | {{{kbd(C-c C-x u)}}}     |              | {{{kbd(Esc up)}}}    |
-| {{{kbd(M-S-up)}}}    | {{{kbd(C-c C-x U)}}}     | {{{kbd(U)}}} |                      |
-| {{{kbd(M-down)}}}    | {{{kbd(C-c C-x d)}}}     |              | {{{kbd(Esc down)}}}  |
-| {{{kbd(M-S-down)}}}  | {{{kbd(C-c C-x D)}}}     | {{{kbd(D)}}} |                      |
+| {{{kbd(M-LEFT)}}}    | {{{kbd(C-c C-x l)}}}     | {{{kbd(l)}}} | {{{kbd(Esc LEFT)}}}  |
+| {{{kbd(M-S-LEFT)}}}  | {{{kbd(C-c C-x L)}}}     | {{{kbd(L)}}} |                      |
+| {{{kbd(M-RIGHT)}}}   | {{{kbd(C-c C-x r)}}}     | {{{kbd(r)}}} | {{{kbd(Esc RIGHT)}}} |
+| {{{kbd(M-S-RIGHT)}}} | {{{kbd(C-c C-x R)}}}     | {{{kbd(R)}}} |                      |
+| {{{kbd(M-UP)}}}      | {{{kbd(C-c C-x u)}}}     |              | {{{kbd(Esc UP)}}}    |
+| {{{kbd(M-S-UP)}}}    | {{{kbd(C-c C-x U)}}}     | {{{kbd(U)}}} |                      |
+| {{{kbd(M-DOWN)}}}    | {{{kbd(C-c C-x d)}}}     |              | {{{kbd(Esc DOWN)}}}  |
+| {{{kbd(M-S-DOWN)}}}  | {{{kbd(C-c C-x D)}}}     | {{{kbd(D)}}} |                      |
 | {{{kbd(S-RET)}}}     | {{{kbd(C-c C-x c)}}}     |              |                      |
 | {{{kbd(M-RET)}}}     | {{{kbd(C-c C-x m)}}}     |              | {{{kbd(Esc RET)}}}   |
 | {{{kbd(M-S-RET)}}}   | {{{kbd(C-c C-x M)}}}     |              |                      |
-| {{{kbd(S-left)}}}    | {{{kbd(C-c left)}}}      |              |                      |
-| {{{kbd(S-right)}}}   | {{{kbd(C-c right)}}}     |              |                      |
-| {{{kbd(S-up)}}}      | {{{kbd(C-c up)}}}        |              |                      |
-| {{{kbd(S-down)}}}    | {{{kbd(C-c down)}}}      |              |                      |
-| {{{kbd(C-S-left)}}}  | {{{kbd(C-c C-x left)}}}  |              |                      |
-| {{{kbd(C-S-right)}}} | {{{kbd(C-c C-x right)}}} |              |                      |
+| {{{kbd(S-LEFT)}}}    | {{{kbd(C-c LEFT)}}}      |              |                      |
+| {{{kbd(S-RIGHT)}}}   | {{{kbd(C-c RIGHT)}}}     |              |                      |
+| {{{kbd(S-UP)}}}      | {{{kbd(C-c UP)}}}        |              |                      |
+| {{{kbd(S-DOWN)}}}    | {{{kbd(C-c DOWN)}}}      |              |                      |
+| {{{kbd(C-S-LEFT)}}}  | {{{kbd(C-c C-x LEFT)}}}  |              |                      |
+| {{{kbd(C-S-RIGHT)}}} | {{{kbd(C-c C-x RIGHT)}}} |              |                      |
 
 ** Interaction with Other Packages
 :PROPERTIES:
@@ -20736,7 +20737,7 @@ modify this GNU manual."
 
 # The "kbd" macro turns KBD into @kbd{KBD}.  Additionnally, it
 # encloses case-sensitive special keys (SPC, RET...) within @key{...}.
-#+macro: kbd (eval (let ((case-fold-search nil) (regexp (regexp-opt '("SPC" "RET" "LFD" "TAB" "BS" "ESC" "DELETE" "SHIFT" "CTRL" "META" "up" "left" "right" "down") 'words))) (format "@@texinfo:@kbd{@@%s@@texinfo:}@@" (replace-regexp-in-string regexp "@@texinfo:@key{@@\\&@@texinfo:}@@" $1 t))))
+#+macro: kbd (eval (let ((case-fold-search nil) (regexp (regexp-opt '("SPC" "RET" "LFD" "TAB" "BS" "ESC" "DELETE" "SHIFT" "CTRL" "META" "UP" "LEFT" "RIGHT" "DOWN") 'words))) (format "@@texinfo:@kbd{@@%s@@texinfo:}@@" (replace-regexp-in-string regexp "@@texinfo:@key{@@\\&@@texinfo:}@@" $1 t))))
 
 * Footnotes
 
