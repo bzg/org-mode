@@ -18728,6 +18728,9 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
     (org-toggle-inline-images)
     (org-toggle-inline-images)))
 
+;; For without-x builds.
+(declare-function image-refresh "image" (spec &optional frame))
+
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
 
