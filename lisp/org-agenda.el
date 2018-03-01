@@ -9897,32 +9897,33 @@ The prefix arg is passed through to the command if possible."
 		    (org-agenda-set-tags ,tag
 					 ,(if (eq action ?+) ''on ''off))))))
 
-	(?s
-	 (let ((time
-		(and (not arg)
-		     (org-read-date nil nil nil "(Re)Schedule to"
-				    org-overriding-default-time))))
+	((and (or ?s ?d) c)
+	 (let* ((schedule? (eq c ?s))
+		(prompt (if schedule? "(Re)Schedule to" "(Re)Set Deadline to"))
+		(time
+		 (and (not arg)
+		      (let ((new (org-read-date
+				  nil nil nil prompt org-overriding-default-time)))
+			;; A "double plus" answer applies to every
+			;; scheduled time.  Do not turn it into
+			;; a fixed date yet.
+			(if (string-match-p "\\`[ \t]*\\+\\+"
+					    org-read-date-final-answer)
+			    org-read-date-final-answer
+			  new)))))
 	   ;; Make sure to not prompt for a note when bulk
-	   ;; rescheduling as Org cannot cope with simultaneous notes.
-	   ;; Besides, it could be annoying depending on the number of
-	   ;; items re-scheduled.
+	   ;; rescheduling/resetting deadline as Org cannot cope with
+	   ;; simultaneous notes.  Besides, it could be annoying
+	   ;; depending on the number of marked items.
 	   (setq cmd
-		 `(lambda ()
-		    (let ((org-log-reschedule (and org-log-reschedule 'time)))
-		      (org-agenda-schedule arg ,time))))))
-	(?d
-	 (let ((time
-		(and (not arg)
-		     (org-read-date nil nil nil "(Re)Set Deadline to"
-				    org-overriding-default-time))))
-	   ;; Make sure to not prompt for a note when bulk
-	   ;; rescheduling as Org cannot cope with simultaneous
-	   ;; notes.  Besides, it could be annoying depending on the
-	   ;; number of items re-scheduled.
-	   (setq cmd
-		 `(lambda ()
-		    (let ((org-log-redeadline (and org-log-redeadline 'time)))
-		      (org-agenda-deadline arg ,time))))))
+		 (if schedule?
+		     `(lambda ()
+			(let ((org-log-reschedule
+			       (and org-log-reschedule 'time)))
+			  (org-agenda-schedule arg ,time)))
+		   `(lambda ()
+		      (let ((org-log-redeadline (and org-log-redeadline 'time)))
+			(org-agenda-deadline arg ,time)))))))
 
 	(?S
 	 (unless (org-agenda-check-type nil 'agenda 'todo)
