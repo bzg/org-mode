@@ -3257,7 +3257,8 @@ avoid infinite recursion.  Optional argument DIR is the current
 working directory.  It is used to properly resolve relative
 paths.  Optional argument FOOTNOTES is a hash-table used for
 storing and resolving footnotes.  It is created automatically."
-  (let ((case-fold-search t)
+  (let ((includer-file (buffer-file-name (buffer-base-buffer)))
+	(case-fold-search t)
 	(file-prefix (make-hash-table :test #'equal))
 	(current-prefix 0)
 	(footnotes (or footnotes (make-hash-table :test #'equal)))
@@ -3370,10 +3371,12 @@ storing and resolving footnotes.  It is created automatically."
 		       (insert
 			(org-export--prepare-file-contents
 			 file lines ind minlevel
-			 (or
-			  (gethash file file-prefix)
-			  (puthash file (cl-incf current-prefix) file-prefix))
-			 footnotes)))
+			 (or (gethash file file-prefix)
+			     (puthash file
+				      (cl-incf current-prefix)
+				      file-prefix))
+			 footnotes
+			 includer-file)))
 		     (org-export-expand-include-keyword
 		      (cons (list file lines) included)
 		      (file-name-directory file)
@@ -3451,7 +3454,7 @@ Return a string of lines to be included in the format expected by
 		       counter))))))))
 
 (defun org-export--prepare-file-contents
-    (file &optional lines ind minlevel id footnotes)
+    (file &optional lines ind minlevel id footnotes includer)
   "Prepare contents of FILE for inclusion and return it as a string.
 
 When optional argument LINES is a string specifying a range of
@@ -3473,9 +3476,40 @@ This is useful to avoid conflicts when more than one Org file
 with footnotes is included in a document.
 
 Optional argument FOOTNOTES is a hash-table to store footnotes in
-the included document."
+the included document.
+
+Optional argument INCLUDER is the file name where the inclusion
+is to happen."
   (with-temp-buffer
     (insert-file-contents file)
+    ;; Adapt all file links within the included document that contain
+    ;; relative paths in order to make these paths relative to the
+    ;; base document, or absolute.
+    (goto-char (point-min))
+    (while (re-search-forward org-any-link-re nil t)
+      (let ((link (save-excursion
+		    (backward-char)
+		    (org-element-context))))
+	(when (string= "file" (org-element-property :type link))
+	  (let ((old-path (org-element-property :path link)))
+	    (unless (or (org-file-remote-p old-path)
+			(file-name-absolute-p old-path))
+	      (let ((new-path
+		     (let ((full (expand-file-name old-path
+						   (file-name-directory file))))
+		       (if (not includer) full
+			 (file-relative-name full
+					     (file-name-directory includer))))))
+		(insert (let ((new (org-element-copy link)))
+			  (org-element-put-property new :path new-path)
+			  (when (org-element-property :contents-begin link)
+			    (org-element-adopt-elements new
+			      (buffer-substring
+			       (org-element-property :contents-begin link)
+			       (org-element-property :contents-end link))))
+			  (delete-region (org-element-property :begin link)
+					 (org-element-property :end link))
+			  (org-element-interpret-data new)))))))))
     (when lines
       (let* ((lines (split-string lines "-"))
 	     (lbeg (string-to-number (car lines)))
