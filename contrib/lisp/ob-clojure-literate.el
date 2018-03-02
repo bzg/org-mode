@@ -223,6 +223,61 @@ Don't auto jack in by default for not rude."
              (cdr pair)))
    (org-babel--get-vars params)))
 
+;;; Support header arguments  :results graphics :file "image.png" by inject Clojure code.
+(defun ob-clojure-literate-inject-code (args)
+  "Inject Clojure code into `BODY' in `ARGS'.
+It is used to change Clojure currently working directory in a FAKE way.
+And generate inline graphics image file link result.
+Use header argument like this:
+
+:results graphics :file \"incanter-plot.png\"
+
+Then you need to assign image variable to this :file value like:
+(def incanter-plot (histogram (sample-normal 1000)))
+
+*NOTE*: Currently only support Incanter's `save' function.
+"
+  (let* ((body (nth 0 args))
+         (params (nth 1 args))
+	 (dir (cdr (assq :dir params)))
+	 (default-directory (and (buffer-file-name) (file-name-directory (buffer-file-name))))
+         (directory (and dir (file-name-as-directory (expand-file-name dir))))
+	 (result-type (cdr (assq :results params)))
+	 (file (cdr (assq :file params)))
+	 (file-name (file-name-base file))
+	 ;; TODO: future support `:graphics-file' to avoid collision.
+	 (graphics-result (member "graphics" (cdr (assq :result-params params))))
+	 ;; (graphics-file (cdr (assq :graphics-file params)))
+	 ;; (graphics-name (file-name-base graphics-file))
+         (prepend-to-body (lambda (code)
+                            (setq body (concat code "\n" body))))
+	 (append-to-body (lambda (code)
+			   (setq body (concat body "\n" code "\n"))))
+         )
+    (when directory
+      (unless (file-directory-p (expand-file-name directory))
+	(warn (format "Target directory %s does not exist, please create it." dir))))
+    (when file
+      (funcall append-to-body
+      	       (format "(save %s \"%s\")" file-name (concat directory file)))
+      )
+    (list body params) ; return modified argument list
+    ))
+
+(advice-add 'org-babel-expand-body:clojure :filter-args #'ob-clojure-literate-inject-code)
+
+;;; support :results graphics :dir "data/image" :file "incanter-plot.png"
+(defun ob-clojure-literate-support-graphics-result (result)
+  "Support :results graphics :dir \"data/images\" :file \"incanter-plot.png\"
+reset `RESULT' to `nil'."
+  (let* ((params (nth 2 info))
+	 (graphics-result (member "graphics" (cdr (assq :result-params params)))))
+    (if graphics-result
+	(setq result nil))
+    result))
+
+(advice-add 'org-babel-execute:clojure :filter-return #'ob-clojure-literate-support-graphics-result)
+
 
 (defvar ob-clojure-literate-mode-map
   (let ((map (make-sparse-keymap)))
