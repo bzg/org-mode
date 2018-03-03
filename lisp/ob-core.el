@@ -703,15 +703,15 @@ block."
 			  (list (list r))
 			r)))
 	      (let ((file (cdr (assq :file params)))
-		    (result-graphics (member "graphics" (cdr (assq :result-params params)))))
+		    (result-graphics
+		     (member "graphics" (cdr (assq :result-params params)))))
 		;; If non-empty result and :file then write to :file.
-		(when file
-		  ;; handle :results graphics :file case. don't write result to file if result is graphics.
-		  (unless result-graphics
-		    (when result
-		      (with-temp-file file
-			(insert (org-babel-format-result
-				 result (cdr (assq :sep params)))))))
+		;; Handle :results graphics :file case.  Don't write
+		;; result to file if result is graphics.
+		(when (and file result (not result-graphics))
+		  (with-temp-file file
+		    (insert (org-babel-format-result
+			     result (cdr (assq :sep params)))))
 		  (setq result file))
 		;; Possibly perform post process provided its
 		;; appropriate.  Dynamically bind "*this*" to the
