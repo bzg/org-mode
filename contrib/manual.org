@@ -11052,7 +11052,7 @@ current buffer with {{{kbd(M-x org-cdlatex-mode)}}}, or for all Org
 files with
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
 #+end_src
 
 When this mode is enabled, the following features are present (for
@@ -11067,11 +11067,11 @@ more details see the documentation of CDLaTeX mode):
 - {{{kbd(TAB)}}} ::
      #+kindex: TAB
 
-     The {{{kbd(TAB)}}} expands the template if the cursor is inside
-     a LaTeX fragment[fn:113].  For example, {{{kbd(TAB)}}} expands
-     =fr= to =\frac{}{}= and position the cursor correctly inside the
-     first brace.  Another {{{kbd(TAB)}}} gets you into the second
-     brace.
+     The {{{kbd(TAB)}}} key expands the template if the cursor is
+     inside a LaTeX fragment[fn:113].  For example, {{{kbd(TAB)}}}
+     expands =fr= to =\frac{}{}= and position the cursor correctly
+     inside the first brace.  Another {{{kbd(TAB)}}} gets you into the
+     second brace.
 
      Even outside fragments, {{{kbd(TAB)}}} expands environment
      abbreviations at the beginning of a line.  For example, if you
