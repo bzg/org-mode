@@ -5430,9 +5430,9 @@ optional.  The individual parts have the following meaning:
 The =est+= summary type requires further explanation.  It is used for
 combining estimates, expressed as low-high ranges.  For example,
 instead of estimating a particular task will take 5 days, you might
-estimate it as 5-6 days if you're fairly confident you know how much
-work is required, or 1-10 days if you do not really know what needs to
-be done.  Both ranges average at 5.5 days, but the first represents
+estimate it as 5--6 days if you're fairly confident you know how much
+work is required, or 1--10 days if you do not really know what needs
+to be done.  Both ranges average at 5.5 days, but the first represents
 a more predictable delivery.
 
 When combining a set of such estimates, simply adding the lows and
@@ -5442,7 +5442,7 @@ estimate from the sum.  For example, suppose you had ten tasks, each
 of which was estimated at 0.5 to 2 days of work.  Straight addition
 produces an estimate of 5 to 20 days, representing what to expect if
 everything goes either extremely well or extremely poorly.  In
-contrast, =est+= estimates the full job more realistically, at 10-15
+contrast, =est+= estimates the full job more realistically, at 10--15
 days.
 
 Here is an example for a complete columns definition, along with
