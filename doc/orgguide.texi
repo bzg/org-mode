@@ -846,7 +846,7 @@ come up while taking notes!  With Org mode, simply mark any entry in a tree
 as being a TODO item.  In this way, information is not duplicated, and TODO
 items remain in the context from which they emerged.
 
-Org mode providing methods to give you an overview of all the things that you
+Org mode provides methods to give you an overview of all the things that you
 have to do, collected from many files.
 
 @menu
