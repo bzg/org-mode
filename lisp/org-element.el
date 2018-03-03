@@ -491,6 +491,7 @@ objects, or a strings.
 
 The function takes care of setting `:parent' property for CHILD.
 Return parent element."
+  (declare (indent 1))
   (if (not children) parent
     ;; Link every child to PARENT. If PARENT is nil, it is a secondary
     ;; string: parent is the list itself.
