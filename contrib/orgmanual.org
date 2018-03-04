@@ -231,7 +231,7 @@ Do not forget to activate Org as described in the following section.
 #+findex: org-agenda
 #+findex: org-capture
 #+findex: org-store-link
-#+findex: org-iswitchb
+#+findex: org-switchb
 
 Since Emacs 22.2, files with the {{{file(.org)}}} extension use Org mode by
 default.  If you are using an earlier version of Emacs, add this line to your
@@ -251,7 +251,7 @@ packages, please take the time to check the list (see [[Conflicts]]).
 
 The four Org commands {{{command(org-store-link)}}},
 {{{command(org-capture)}}}, {{{command(org-agenda)}}}, and
-{{{command(org-iswitchb)}}} should be accessible through global keys
+{{{command(org-switchb)}}} should be accessible through global keys
 (i.e., anywhere in Emacs, not just in Org buffers).  Here are
 suggested bindings for these keys, please modify the keys to your own
 liking.
@@ -262,7 +262,7 @@ liking.
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-cc" 'org-capture)
 (global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-cb" 'org-switchb)
 #+end_src
 
 #+cindex: Org mode, turning on
@@ -7631,8 +7631,8 @@ the easiest way to maintain it is through the following commands
 
   Cycle through agenda file list, visiting one file after the other.
 
-- {{{kbd(M-x org-iswitchb)}}} ::
-  #+findex: org-iswitchb
+- {{{kbd(M-x org-switchb)}}} ::
+  #+findex: org-switchb
 
   Command to use an ~iswitchb~-like interface to switch to and between
   Org buffers.
