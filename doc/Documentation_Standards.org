@@ -150,7 +150,6 @@ have made them up of course).
 
 # Local variables:
 # mode: org
-# fill-column: 72
 # ispell-local-dictionary: "en_US-w_accents"
 # ispell-local-pdict: "./.aspell.org.pws"
 # End:
