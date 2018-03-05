@@ -8309,7 +8309,7 @@ but the easiest way to maintain it is through the following commands
 - {{{kbd(M-x org-switchb)}}} ::
 
      #+findex: org-switchb
-     Command to use an ~switchb~-like interface to switch to and
+     Command to use an iswitchb-like interface to switch to and
      between Org buffers.
 
 #+texinfo: @noindent
