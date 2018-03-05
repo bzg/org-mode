@@ -8306,10 +8306,10 @@ but the easiest way to maintain it is through the following commands
      #+cindex: cycling, of agenda files
      Cycle through agenda file list, visiting one file after the other.
 
-- {{{kbd(M-x org-iswitchb)}}} ::
+- {{{kbd(M-x org-switchb)}}} ::
 
-     #+findex: org-iswitchb
-     Command to use an ~iswitchb~-like interface to switch to and
+     #+findex: org-switchb
+     Command to use an ~switchb~-like interface to switch to and
      between Org buffers.
 
 #+texinfo: @noindent
