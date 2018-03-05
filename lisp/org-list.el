@@ -1461,8 +1461,8 @@ This function returns, destructively, the new list structure."
 	 (org-M-RET-may-split-line nil)
 	 ;; Store inner overlays (to preserve visibility).
 	 (overlays (cl-remove-if (lambda (o) (or (< (overlay-start o) item)
-					     (> (overlay-end o) item)))
-				  (overlays-in item item-end))))
+						 (> (overlay-end o) item)))
+				 (overlays-in item item-end))))
     (cond
      ((eq dest 'delete) (org-list-delete-item item struct))
      ((eq dest 'kill)
@@ -2991,6 +2991,9 @@ With a prefix argument ARG, change the region in a single item."
 	   (forward-line)))
 	;; Case 2. Start at an heading: convert to items.
 	((org-at-heading-p)
+	 ;; Remove metadata
+	 (let (org-loop-over-headlines-in-active-region)
+	   (org-heading-delete-metadata))
 	 (let* ((bul (org-list-bullet-string "-"))
 		(bul-len (length bul))
 		;; Indentation of the first heading.  It should be
@@ -3011,6 +3014,9 @@ With a prefix argument ARG, change the region in a single item."
 	       ;; one, set it as reference, in order to preserve
 	       ;; subtrees.
 	       (when (< level ref-level) (setq ref-level level))
+	       ;; Remove metadata
+	       (let (org-loop-over-headlines-in-active-region)
+		 (org-heading-delete-metadata))
 	       ;; Remove stars and TODO keyword.
 	       (let ((case-fold-search nil)) (looking-at org-todo-line-regexp))
 	       (delete-region (point) (or (match-beginning 3)

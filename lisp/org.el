@@ -7674,6 +7674,28 @@ Set it to HEADING when provided."
 	   (org-set-tags nil t)
 	   (when (looking-at "[ \t]*$") (replace-match ""))))))))
 
+(defun org-heading-delete-metadata ()
+  "Delete metadata from the heading at point.
+Metadata are tags, planning information and property/log/clock drawers."
+  (org-back-to-heading t)
+  (org-with-wide-buffer
+   (save-match-data
+     (let ((limit (save-excursion (outline-next-heading))))
+       (org-set-tags-to nil)
+       (save-excursion
+	 (when (re-search-forward
+		(concat org-planning-line-re ".*$") limit t)
+	   (replace-match "")))
+       (save-excursion
+	 (when (re-search-forward org-property-drawer-re limit t)
+	   (replace-match "")))
+       (save-excursion
+	 (when (re-search-forward org-log-drawer-re limit t)
+	   (replace-match "")))
+       (save-excursion
+	 (when (re-search-forward org-clock-drawer-re limit t)
+	   (replace-match "")))))))
+
 (defun org-insert-heading-after-current ()
   "Insert a new heading with same level as current, after current subtree."
   (interactive)
@@ -11016,7 +11038,7 @@ order.")
 					   (buffer-base-buffer))))
 				   (_ nil))
 				 (mapcar (lambda (s) (replace-regexp-in-string
-						 "/" "\\/" s nil t))
+						      "/" "\\/" s nil t))
 					 (org-get-outline-path t t)))
 				"/"))))
 			(push (list target f re (org-refile-marker (point)))
@@ -11739,7 +11761,7 @@ in the block.  Otherwise, insert an empty block."
 If the last change removed the TODO tag or switched to DONE, then
 this is nil.")
 
-(defvar org-setting-tags nil) ; dynamically skipped
+(defvar org-setting-tags nil) ; dynamically scoped
 
 (defvar org-todo-setup-filter-hook nil
   "Hook for functions that pre-filter todo specs.
@@ -18660,7 +18682,6 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
   "Return string to be used as color value for an RGB component."
   (format "%g" (/ value 65535.0)))
 
-
 
 ;; Image display
 
@@ -22628,9 +22649,7 @@ it has a `diary' type."
 		    (org-timestamp-format timestamp fmt t))
 	  (org-timestamp-format timestamp fmt (eq boundary 'end)))))))
 
-
-
-;;; Other stuff.
+;;; Other stuff
 
 (defvar reftex-docstruct-symbol)
 (defvar org--rds)
@@ -23646,12 +23665,27 @@ when non-nil, is a regexp matching keywords names."
 	  (and extra (concat (and kwds "\\|") extra))
 	  "\\):[ \t]*\\(.*\\)"))
 
+;;; Log drawer regular expressions
+
+(defvar org-log-drawer-start-re
+  (concat "^[ 	]*:%s:[ 	]*$" (org-log-into-drawer))
+  "Regular expression matching the first line of a clock drawer.")
+
+(defconst org-log-drawer-end-re
+  org-clock-drawer-end-re
+  "Regular expression matching the last line of a log drawer.")
+
+(defconst org-log-drawer-re
+  (concat "\\(" org-log-drawer-start-re "\\)[^\000]*?\\("
+	  org-log-drawer-end-re "\\)\n?")
+  "Matches an entire log drawer.")
+
 
 ;;; Finish up
 
 (add-hook 'org-mode-hook     ;remove overlays when changing major mode
 	  (lambda () (add-hook 'change-major-mode-hook
-			  'org-show-all 'append 'local)))
+			       'org-show-all 'append 'local)))
 
 (provide 'org)
 
