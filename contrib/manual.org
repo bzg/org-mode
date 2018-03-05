@@ -301,7 +301,7 @@ error occurred.  Here is how to produce a useful backtrace:
 
 2. Then, activate the debugger:
 
-   : M-x toggle-debug-or-errror <RET>
+   : M-x toggle-debug-or-error <RET>
 
    #+texinfo: @noindent
    or, from the menu: Options \rarr Enter Debugger on Error.
