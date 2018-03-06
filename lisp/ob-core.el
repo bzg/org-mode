@@ -2500,15 +2500,18 @@ in the buffer."
 If the `default-directory' is different from the containing
 file's directory then expand relative links."
   (when (stringp result)
-    (format "[[file:%s]%s]"
-	    (if (and default-directory
-		     buffer-file-name
-		     (not (string= (expand-file-name default-directory)
-				   (expand-file-name
-				    (file-name-directory buffer-file-name)))))
-		(expand-file-name result default-directory)
-	      result)
-	    (if description (concat "[" description "]") ""))))
+    (let ((same-directory? (not (string= (expand-file-name default-directory)
+					 (expand-file-name
+					  (file-name-directory buffer-file-name))))))
+      (format "[[file:%s]%s]"
+	      (if (and default-directory buffer-file-name same-directory?)
+		  (if (eq org-link-file-path-type 'adaptive)
+		      (file-relative-name
+		       (expand-file-name result default-directory)
+		       (file-name-directory (buffer-file-name)))
+		    (expand-file-name result default-directory))
+		result)
+	      (if description (concat "[" description "]") "")))))
 
 (defun org-babel-examplify-region (beg end &optional results-switches inline)
   "Comment out region using the inline `==' or `: ' org example quote."
