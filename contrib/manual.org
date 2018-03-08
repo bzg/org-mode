@@ -21154,7 +21154,7 @@ editing with {{{kbd(C-c ')}}}, and also before export.
 ~org-pretty-entities~, or on a per-file base with the =STARTUP= option
 =entitiespretty=.
 
-[fn:109] This behaviour can be disabled with =-= export setting (see
+[fn:109] This behavior can be disabled with =-= export setting (see
 [[*Export Settings]]).
 
 [fn:110] LaTeX is a macro system based on Donald\nbsp{}E.\nbsp{}Knuth's TeX
