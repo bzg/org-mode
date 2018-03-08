@@ -111,8 +111,11 @@ Pass nil to omit that arg."
 	       (when database (concat "-d" database))))))
 
 (defun org-babel-sql-dbstring-oracle (host port user password database)
-  "Make Oracle command line args for database connection."
-  (format "%s/%s@%s:%s/%s" user password host port database))
+  "Make Oracle command line arguments for database connection.
+If PORT and DATABASE are nil then don't pass them.  This allows
+you to use names defined in your \"TNSNAMES\" file."
+  (concat (format "%s/%s@%s" user password host)
+	  (and port database (format ":%s/%s" port database))))
 
 (defun org-babel-sql-dbstring-mssql (host user password database)
   "Make sqlcmd command line args for database connection.
@@ -241,6 +244,7 @@ SET NEWPAGE 0
 SET TAB OFF
 SET SPACE 0
 SET LINESIZE 9999
+SET TRIMOUT ON TRIMSPOOL ON
 SET ECHO OFF
 SET FEEDBACK OFF
 SET VERIFY OFF

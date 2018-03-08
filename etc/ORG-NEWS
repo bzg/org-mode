@@ -199,6 +199,24 @@ you should expect to see something like:
 #+BEGIN_EXAMPLE
   ,#+STARTUP: shrink
 #+END_EXAMPLE
+*** Add support for Oracle's database alias in Babel blocks
+=ob-sql= library already support running SQL blocks against an Oracle
+database using ~sqlplus~.  Now it's possible to use alias names
+defined in =TNSNAMES= file instead of specifying full connection
+parameters.  See example bellow.
+
+#+BEGIN_SRC org
+  you can use the previous full connection parameters
+  ,#+BEGIN_SRC sql :engine oracle :dbuser me :dbpassword my_insecure_password :database my_db_name :dbhost my_db_host :dbport 1521
+  select sysdate from dual;
+  ,#+END_SRC
+
+  or the alias defined in your TNSNAMES file
+  ,#+BEGIN_SRC sql :engine oracle :dbuser me :dbpassword my_insecure_password :database my_tns_alias
+  select sysdate from dual;
+  ,#+END_SRC
+#+END_SRC
+
 ** New functions
 *** ~org-insert-structure-template~
 
