@@ -113,6 +113,10 @@ now sort according to the locale’s collation rules instead of by
 code-point.
 
 ** New features
+*** Add ~:session~ support of ob-js for skewer-mode
+#+begin_src js :session "*skewer-repl*"
+console.log("stardiviner")
+#+end_src
 *** Add support for links to LaTeX equations in HTML export
 Use MathJax links when enabled (by ~org-html-with-latex~), otherwise
 add a label to the rendered equation.

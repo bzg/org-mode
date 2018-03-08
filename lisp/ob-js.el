@@ -41,6 +41,8 @@
 (require 'ob)
 
 (declare-function run-mozilla "ext:moz" (arg))
+(declare-function httpd-start "simple-httpd" ())
+(declare-function run-skewer "skewer-mode" ())
 
 (defvar org-babel-default-header-args:js '()
   "Default header arguments for js code blocks.")
@@ -52,7 +54,10 @@
   "Name of command used to evaluate js blocks."
   :group 'org-babel
   :version "24.1"
-  :type 'string)
+  :type '(choice (const "node")
+		 (const "mozrepl")
+		 (const "skewer-mode"))
+  :safe #'stringp)
 
 (defvar org-babel-js-function-wrapper
   "require('sys').print(require('sys').inspect(function(){\n%s\n}()));"
@@ -62,22 +67,13 @@
   "Execute a block of Javascript code with org-babel.
 This function is called by `org-babel-execute-src-block'"
   (let* ((org-babel-js-cmd (or (cdr (assq :cmd params)) org-babel-js-cmd))
+	 (session (cdr (assq :session params)))
          (result-type (cdr (assq :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:js params)))
-	 (result (if (not (string= (cdr (assq :session params)) "none"))
-		     ;; session evaluation
-		     (let ((session (org-babel-prep-session:js
-				     (cdr (assq :session params)) params)))
-		       (nth 1
-			    (org-babel-comint-with-output
-				(session (format "%S" org-babel-js-eoe) t body)
-			      (mapc
-			       (lambda (line)
-				 (insert (org-babel-chomp line))
-				 (comint-send-input nil t))
-			       (list body (format "%S" org-babel-js-eoe))))))
-		   ;; external evaluation
+	 (result (cond
+		  ;; no session specified, external evaluation
+		  ((string= session "none")
 		   (let ((script-file (org-babel-temp-file "js-script-")))
 		     (with-temp-file script-file
 		       (insert
@@ -87,7 +83,17 @@ This function is called by `org-babel-execute-src-block'"
 			  full-body)))
 		     (org-babel-eval
 		      (format "%s %s" org-babel-js-cmd
-			      (org-babel-process-file-name script-file)) "")))))
+			      (org-babel-process-file-name script-file)) "")))
+		  ;; session evaluation
+		  (t
+		   (let ((session (org-babel-prep-session:js
+				   (cdr (assq :session params)) params)))
+		     (nth 1
+			  (org-babel-comint-with-output
+			      (session (format "%S" org-babel-js-eoe) t body)
+			    (dolist (code (list body (format "%S" org-babel-js-eoe)))
+			      (insert (org-babel-chomp code))
+			      (comint-send-input nil t)))))))))
     (org-babel-result-cond (cdr (assq :result-params params))
       result (org-babel-js-read result))))
 
@@ -140,22 +146,33 @@ specifying a variable of the same value."
 (defun org-babel-js-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (unless (string= session "none")
-    (cond
-     ((string= "mozrepl" org-babel-js-cmd)
-      (require 'moz)
-      (let ((session-buffer (save-window-excursion
-			      (run-mozilla nil)
-			      (rename-buffer session)
-			      (current-buffer))))
-	(if (org-babel-comint-buffer-livep session-buffer)
-	    (progn (sit-for .25) session-buffer)
-	  (sit-for .5)
-	  (org-babel-js-initiate-session session))))
-     ((string= "node" org-babel-js-cmd )
-      (error "Session evaluation with node.js is not supported"))
-     (t
-      (error "Sessions are only supported with mozrepl add \":cmd mozrepl\"")))))
+  (cond
+   ((string= session "none")
+    (warn "Session evaluation of ob-js is not supported"))
+   ((string= "*skewer-repl*" session)
+    (require 'skewer-repl)
+    (let ((session-buffer (get-buffer "*skewer-repl*")))
+      (if (and (org-babel-comint-buffer-livep (get-buffer session-buffer))
+	       (comint-check-proc session-buffer))
+	  session-buffer
+	;; start skewer REPL.
+	(httpd-start)
+	(run-skewer)
+	session-buffer)))
+   ((string= "mozrepl" org-babel-js-cmd)
+    (require 'moz)
+    (let ((session-buffer (save-window-excursion
+			    (run-mozilla nil)
+			    (rename-buffer session)
+			    (current-buffer))))
+      (if (org-babel-comint-buffer-livep session-buffer)
+	  (progn (sit-for .25) session-buffer)
+	(sit-for .5)
+	(org-babel-js-initiate-session session))))
+   ((string= "node" org-babel-js-cmd )
+    (error "Session evaluation with node.js is not supported"))
+   (t
+    (error "Sessions are only supported with mozrepl add \":cmd mozrepl\""))))
 
 (provide 'ob-js)
 
