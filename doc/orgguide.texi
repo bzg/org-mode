@@ -562,7 +562,7 @@ Jump between definition and reference.
 @end table
 
 @seealso{
-@uref{https://orgmode.org/manual/Document-Structure.html#Document-Structure,
+@uref{https://orgmode.org/manual/Document-structure.html#Document-structure,
 Chapter 2 of the manual}@*
 @uref{http://sachachua.com/wp/2008/01/outlining-your-notes-with-org/,
 Sacha Chua's tutorial}}
@@ -1538,7 +1538,7 @@ The @kbd{l} key may be used in the agenda (@pxref{Weekly/daily agenda}) to
 show which tasks have been worked on or closed during a day.
 
 @seealso{
-@uref{https://orgmode.org/manual/Dates-and-Times.html#Dates-and-Times,
+@uref{https://orgmode.org/manual/Dates-and-times.html#Dates-and-times,
 Chapter 8 of the manual}@*
 @uref{http://members.optusnet.com.au/~charles57/GTD/org_dates/, Charles
 Cave's Date and Time tutorial}@*
@@ -2043,7 +2043,7 @@ headlines that are also TODO items
 @end table
 
 @seealso{
-@uref{https://orgmode.org/manual/Agenda-Views.html#Agenda-Views, Chapter 10 of
+@uref{https://orgmode.org/manual/Agenda-views.html#Agenda-views, Chapter 10 of
 the manual}@*
 @uref{https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html,
 Mat Lundin's tutorial about custom agenda commands}@*
@@ -2589,7 +2589,7 @@ Org-mode buffer.
 
 @seealso{
 @uref{https://orgmode.org/manual/Literal-examples.html#Literal-examples,
-Chapter 11.3 of the manual}@*
+Chapter 11 and section 5 of the manual}@*
 @uref{https://orgmode.org/worg/org-contrib/babel/,
 The Babel site on Worg}}
 
