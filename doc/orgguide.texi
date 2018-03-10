@@ -687,11 +687,11 @@ between the nearest horizontal separator lines, or the entire table.
 @seealso{
 @uref{https://orgmode.org/manual/Tables.html#Tables, Chapter 3 of the
 manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/tables.php, Bastien's
+@uref{https://orgmode.org/worg/org-tutorials/tables.html, Bastien's
 table tutorial}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-spreadsheet-intro.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-spreadsheet-intro.html,
 Bastien's spreadsheet tutorial}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-plot.php, Eric's plotting tutorial}}
+@uref{https://orgmode.org/worg/org-tutorials/org-plot.html, Eric's plotting tutorial}}
 
 @node Hyperlinks, TODO Items, Tables, Top
 @chapter Hyperlinks
@@ -1086,8 +1086,8 @@ This works only if the cursor is already in a plain list item
 @end table
 
 @seealso{
-@uref{https://orgmode.org/manual/TODO-Items.html#TODO-Items, Chapter 5 of the manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/orgtutorial_dto.php, David
+@uref{https://orgmode.org/manual/TODO-items.html#TODO-items, Chapter 5 of the manual}@*
+@uref{https://orgmode.org/worg/org-tutorials/orgtutorial_dto.html, David
 O'Toole's introductory tutorial}@*
 @uref{http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html,
 Charles Cave's GTD setup}}
@@ -1309,10 +1309,10 @@ properties}.
 @end table
 
 @seealso{
-@uref{https://orgmode.org/manual/Properties-and-Columns.html#Properties-and-Columns,
-Chapter 7 of the manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-column-view-tutorial.php,Bastien
-Guerry's column view tutorial}}
+@uref{https://orgmode.org/manual/Properties-and-columns.html#Properties-and-columns,Chapter
+7 of the manual}@*
+@uref{https://orgmode.org/worg/org-tutorials/org-column-view-tutorial.html,Bastien's
+column view tutorial}}
 
 @node Dates and Times, Capture - Refile - Archive, Properties, Top
 @chapter Dates and Times
@@ -1701,7 +1701,7 @@ setting this variable, for example
 @seealso{
 @uref{https://orgmode.org/manual/Capture-_002d-Refile-_002d-Archive.html#Capture-_002d-Refile-_002d-Archive,
 Chapter 9 of the manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-protocol-custom-handler.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-protocol-custom-handler.html,
 Sebastian Rose's tutorial for capturing from a web browser}}@uref{}@*
 
 @node Agenda Views, Markup, Capture - Refile - Archive, Top
@@ -2045,7 +2045,7 @@ headlines that are also TODO items
 @seealso{
 @uref{https://orgmode.org/manual/Agenda-Views.html#Agenda-Views, Chapter 10 of
 the manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-custom-agenda-commands.html,
 Mat Lundin's tutorial about custom agenda commands}@*
 @uref{http://www.newartisans.com/2007/08/using-org-mode-as-a-day-planner.html,
 John Wiegley's setup}}
@@ -2422,11 +2422,11 @@ Create a single large iCalendar file from all files in
 
 @seealso{
 @uref{https://orgmode.org/manual/Exporting.html#Exporting, Chapter 12 of the manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/images-and-xhtml-export.php,
+@uref{https://orgmode.org/worg/org-tutorials/images-and-xhtml-export.html,
 Sebastian Rose's image handling tutorial}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-latex-export.php, Thomas
+@uref{https://orgmode.org/worg/org-tutorials/org-latex-export.html, Thomas
 Dye's LaTeX export tutorial}
-@uref{https://orgmode.org/worg/org-tutorials/org-beamer/tutorial.php, Eric
+@uref{https://orgmode.org/worg/exporters/beamer/tutorial.html, Eric
 Fraga's BEAMER presentation tutorial}}
 
 @node Publishing, Working With Source Code, Exporting, Top
@@ -2471,9 +2471,9 @@ above.
 @seealso{
 @uref{https://orgmode.org/manual/Publishing.html#Publishing, Chapter 13 of the
 manual}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php,
+@uref{https://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html,
 Sebastian Rose's publishing tutorial}@*
-@uref{https://orgmode.org/worg/org-tutorials/org-jekyll.php, Ian Barton's
+@uref{https://orgmode.org/worg/org-tutorials/org-jekyll.html, Ian Barton's
 Jekyll/blogging setup}}
 
 @node Working With Source Code, Miscellaneous, Publishing, Top
@@ -2590,7 +2590,7 @@ Org-mode buffer.
 @seealso{
 @uref{https://orgmode.org/manual/Literal-examples.html#Literal-examples,
 Chapter 11.3 of the manual}@*
-@uref{https://orgmode.org/worg/org-contrib/babel/index.php,
+@uref{https://orgmode.org/worg/org-contrib/babel/,
 The Babel site on Worg}}
 
 @node Miscellaneous, GNU Free Documentation License, Working With Source Code, Top
