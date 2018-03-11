@@ -1794,7 +1794,7 @@ function is being called interactively."
 	     (predicate
 	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
-		((?a ?A) #'string<)
+		((?a ?A) #'org-string-collate-lessp)
 		((?f ?F)
 		 (or compare-func
 		     (and interactive?

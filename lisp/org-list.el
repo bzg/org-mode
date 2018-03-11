@@ -2804,7 +2804,8 @@ Sorting can be alphabetically, numerically, by date/time as given
 by a time stamp, by a property or by priority.
 
 Comparing entries ignores case by default.  However, with an
-optional argument WITH-CASE, the sorting considers case as well.
+optional argument WITH-CASE, the sorting considers case as well,
+if the current locale allows for it.
 
 The command prompts for the sorting type unless it has been given
 to the function through the SORTING-TYPE argument, which needs to
@@ -2850,7 +2851,7 @@ function is being called interactively."
 		   (error "Missing key extractor"))))
 	 (sort-func
 	  (cond
-	   ((= dcst ?a) #'string<)
+	   ((= dcst ?a) #'org-string-collate-lessp)
 	   ((= dcst ?f)
 	    (or compare-func
 		(and interactive?

@@ -106,6 +106,12 @@ document, use =shrink= value instead, or in addition to align:
 ,#+STARTUP: align shrink
 #+END_EXAMPLE
 
+*** Alphabetic sorting in tables and lists
+
+When sorting alphabetically, ~org-table-sort-lines~ and ~org-sort-list~
+now sort according to the locale’s collation rules instead of by
+code-point.
+
 ** New features
 *** Add support for links to LaTeX equations in HTML export
 Use MathJax links when enabled (by ~org-html-with-latex~), otherwise
