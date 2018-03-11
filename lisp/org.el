@@ -14045,7 +14045,7 @@ When DOWNCASE is non-nil, expand downcased TAGS."
   "Turn an operator into the appropriate function."
   (setq op
 	(cond
-	 ((equal  op   "<"       ) '(<     string<      org-time<))
+	 ((equal  op   "<"       ) '(<     org-string<  org-time<))
 	 ((equal  op   ">"       ) '(>     org-string>  org-time>))
 	 ((member op '("<=" "=<")) '(<=    org-string<= org-time<=))
 	 ((member op '(">=" "=>")) '(>=    org-string>= org-time>=))
@@ -14054,9 +14054,10 @@ When DOWNCASE is non-nil, expand downcased TAGS."
   (nth (if (eq stringp 'time) 2 (if stringp 1 0)) op))
 
 (defun org<> (a b) (not (= a b)))
-(defun org-string<= (a b) (or (string= a b) (string< a b)))
-(defun org-string>= (a b) (not (string< a b)))
-(defun org-string>  (a b) (and (not (string= a b)) (not (string< a b))))
+(defun org-string<  (a b) (org-string-collate-lessp a b))
+(defun org-string<= (a b) (or (string= a b) (org-string-collate-lessp a b)))
+(defun org-string>= (a b) (not (org-string-collate-lessp a b)))
+(defun org-string>  (a b) (and (not (string= a b)) (not (org-string-collate-lessp a b))))
 (defun org-string<> (a b) (not (string= a b)))
 (defun org-time=  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (=     a b)))
 (defun org-time<  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (<     a b)))
