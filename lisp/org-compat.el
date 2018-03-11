@@ -88,10 +88,16 @@
 	       (= lastc ?\\))))))
 
 ;; `string-collate-lessp' is new in Emacs 25.
-(defalias 'org-string-collate-lessp
-  (if (fboundp 'string-collate-lessp)
-      'string-collate-lessp
-    'string-lessp))
+(if (fboundp 'string-collate-lessp)
+    (defalias 'org-string-collate-lessp
+      'string-collate-lessp)
+  (defun org-string-collate-lessp (s1 s2 &optional locale ignore-case)
+    "Return non-nil if STRING1 is less than STRING2 in lexicographic order.
+
+Case is significant.
+
+LOCALE and IGNORE-CASE are ignored."
+    (string< s1 s2)))
 
 
 ;;; Obsolete aliases (remove them after the next major release).
