@@ -1691,13 +1691,13 @@ See also `test-org-table/copy-field'."
 	    (buffer-string))))
   ;; Sort alphabetically.
   (should
-   (equal "| a | x |\n| b | 4 |\n| c | 3 |\n"
-	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| b | 4 |\n"
+   (equal "| a | x |\n| B | 4 |\n| c | 3 |\n"
+	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
 	    (org-table-sort-lines nil ?a)
 	    (buffer-string))))
   (should
-   (equal "| c | 3 |\n| b | 4 |\n| a | x |\n"
-	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| b | 4 |\n"
+   (equal "| c | 3 |\n| B | 4 |\n| a | x |\n"
+	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
 	    (org-table-sort-lines nil ?A)
 	    (buffer-string))))
   ;; Sort alphabetically with case.
@@ -1707,7 +1707,7 @@ See also `test-org-table/copy-field'."
 	    (org-table-sort-lines t ?a)
 	    (buffer-string))))
   (should
-   (equal "| b |\n| a |\n| C |\n"
+   (equal "| C |\n| b |\n| a |\n"
 	  (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
 	    (org-table-sort-lines nil ?A)
 	    (buffer-string))))
