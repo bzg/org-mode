@@ -1689,28 +1689,33 @@ See also `test-org-table/copy-field'."
 	  (org-test-with-temp-text "| <point>1 | 2 |\n| 5 | 3 |\n| 2 | 4 |\n"
 	    (org-table-sort-lines nil ?N)
 	    (buffer-string))))
-  ;; Sort alphabetically.
-  (should
-   (equal "| a | x |\n| B | 4 |\n| c | 3 |\n"
-	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
-	    (org-table-sort-lines nil ?a)
-	    (buffer-string))))
-  (should
-   (equal "| c | 3 |\n| B | 4 |\n| a | x |\n"
-	  (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
-	    (org-table-sort-lines nil ?A)
-	    (buffer-string))))
-  ;; Sort alphabetically with case.
-  (should
-   (equal "| C |\n| a |\n| b |\n"
-	  (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
-	    (org-table-sort-lines t ?a)
-	    (buffer-string))))
-  (should
-   (equal "| C |\n| b |\n| a |\n"
-	  (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
-	    (org-table-sort-lines nil ?A)
-	    (buffer-string))))
+  ;; Sort alphabetically.  Enforce the C locale for consistent results.
+  (let ((original-string-collate-lessp (symbol-function 'string-collate-lessp)))
+    (cl-letf (((symbol-function 'string-collate-lessp)
+	       (lambda (s1 s2 &optional locale ignore-case)
+		 (funcall original-string-collate-lessp
+			  s1 s2 "C" ignore-case))))
+      (should
+       (equal "| a | x |\n| B | 4 |\n| c | 3 |\n"
+	      (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
+				       (org-table-sort-lines nil ?a)
+				       (buffer-string))))
+      (should
+       (equal "| c | 3 |\n| B | 4 |\n| a | x |\n"
+	      (org-test-with-temp-text "| <point>a | x |\n| c | 3 |\n| B | 4 |\n"
+				       (org-table-sort-lines nil ?A)
+				       (buffer-string))))
+      ;; Sort alphabetically with case.
+      (should
+       (equal "| C |\n| a |\n| b |\n"
+	      (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
+				       (org-table-sort-lines t ?a)
+				       (buffer-string))))
+      (should
+       (equal "| C |\n| b |\n| a |\n"
+	      (org-test-with-temp-text "| <point>a |\n| C |\n| b |\n"
+				       (org-table-sort-lines nil ?A)
+				       (buffer-string))))))
   ;; Sort by time (timestamps)
   (should
    (equal

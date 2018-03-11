@@ -1714,7 +1714,8 @@ alphabetically, numerically, or by time (as given in a time stamp
 in the field, or as a HH:MM value).  Sorting in reverse order is
 also possible.
 
-With prefix argument WITH-CASE, alphabetic sorting will be case-sensitive.
+With prefix argument WITH-CASE, alphabetic sorting will be case-sensitive
+if the locale allows for it.
 
 If SORTING-TYPE is specified when this function is called from a Lisp
 program, no prompting will take place.  SORTING-TYPE must be a character,
@@ -1766,8 +1767,7 @@ function is being called interactively."
       ;; Determine arguments for `sort-subr'.  Also record original
       ;; position.  `org-table-save-field' cannot help here since
       ;; sorting is too much destructive.
-      (let* ((sort-fold-case (not with-case))
-	     (coordinates
+      (let* ((coordinates
 	      (cons (count-lines (point-min) (line-beginning-position))
 		    (current-column)))
 	     (extract-key-from-field
@@ -1794,7 +1794,8 @@ function is being called interactively."
 	     (predicate
 	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
-		((?a ?A) #'org-string-collate-lessp)
+		((?a ?A) (if with-case #'org-string-collate-lessp
+			   (lambda (s1 s2) (org-string-collate-lessp s1 s2 nil t))))
 		((?f ?F)
 		 (or compare-func
 		     (and interactive?
