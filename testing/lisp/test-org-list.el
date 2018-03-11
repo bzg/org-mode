@@ -1015,16 +1015,32 @@
 (ert-deftest test-org-list/sort ()
   "Test `org-sort-list'."
   ;; Sort alphabetically.
-  (should
-   (equal "- abc\n- def\n- xyz\n"
-	  (org-test-with-temp-text "- def\n- xyz\n- abc\n"
-	    (org-sort-list nil ?a)
-	    (buffer-string))))
-  (should
-   (equal "- xyz\n- def\n- abc\n"
-	  (org-test-with-temp-text "- def\n- xyz\n- abc\n"
-	    (org-sort-list nil ?A)
-	    (buffer-string))))
+  (let ((original-string-collate-lessp (symbol-function 'string-collate-lessp)))
+    (cl-letf (((symbol-function 'string-collate-lessp)
+	       (lambda (s1 s2 &optional locale ignore-case)
+		 (funcall original-string-collate-lessp
+			  s1 s2 "C" ignore-case))))
+      (should
+       (equal "- abc\n- def\n- XYZ\n"
+	      (org-test-with-temp-text "- def\n- XYZ\n- abc\n"
+		(org-sort-list nil ?a)
+		(buffer-string))))
+      (should
+       (equal "- XYZ\n- def\n- abc\n"
+	      (org-test-with-temp-text "- def\n- XYZ\n- abc\n"
+		(org-sort-list nil ?A)
+		(buffer-string))))
+      ;; Sort alphabetically (with case).
+      (should
+       (equal "- C\n- a\n- b\n"
+	      (org-test-with-temp-text "- b\n- C\n- a\n"
+		(org-sort-list t ?a)
+		(buffer-string))))
+      (should
+       (equal "- b\n- a\n- C\n"
+	      (org-test-with-temp-text "- b\n- C\n- a\n"
+		(org-sort-list t ?A)
+		(buffer-string))))))
   ;; Sort numerically.
   (should
    (equal "- 1\n- 2\n- 10\n"
