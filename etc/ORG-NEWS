@@ -277,6 +277,10 @@ of these exporters will properly export to =irc:= links, which will
 open properly in irc clients from web browsers.
 
 *** ~org-comment-dwim~ (bound to =M-;=) now comments headings, if point is on a heading
+*** Add support for open source block in window below
+
+Set option ~org-src-window-setup~ to ~split-window-below~.
+
 *** Alphabetic sorting in headings and tags now uses the locale’s sorting rules
 
 When sorting alphabetically, ~org-sort-entries~ and

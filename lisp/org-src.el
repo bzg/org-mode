@@ -153,17 +153,20 @@ the existing edit buffer."
   "How the source code edit buffer should be displayed.
 Possible values for this option are:
 
-current-window    Show edit buffer in the current window, keeping all other
-                  windows.
-other-window      Use `switch-to-buffer-other-window' to display edit buffer.
-reorganize-frame  Show only two windows on the current frame, the current
-                  window and the edit buffer.  When exiting the edit buffer,
-                  return to one window.
-other-frame       Use `switch-to-buffer-other-frame' to display edit buffer.
-                  Also, when exiting the edit buffer, kill that frame."
+current-window     Show edit buffer in the current window, keeping all other
+                   windows.
+split-window-below Show edit buffer below the current window, keeping all
+                   other windows.
+other-window       Use `switch-to-buffer-other-window' to display edit buffer.
+reorganize-frame   Show only two windows on the current frame, the current
+                   window and the edit buffer.  When exiting the edit buffer,
+                   return to one window.
+other-frame        Use `switch-to-buffer-other-frame' to display edit buffer.
+                   Also, when exiting the edit buffer, kill that frame."
   :group 'org-edit-structure
   :type '(choice
 	  (const current-window)
+	  (const split-window-below)
 	  (const other-frame)
 	  (const other-window)
 	  (const reorganize-frame)))
@@ -746,6 +749,9 @@ If BUFFER is non-nil, test it instead."
     (`current-window (pop-to-buffer-same-window buffer))
     (`other-window
      (switch-to-buffer-other-window buffer))
+    (`split-window-below
+     (select-window (split-window-vertically))
+     (pop-to-buffer-same-window buffer))
     (`other-frame
      (pcase context
        (`exit
