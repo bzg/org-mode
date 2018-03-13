@@ -91,12 +91,9 @@
 (if (fboundp 'string-collate-lessp)
     (defalias 'org-string-collate-lessp
       'string-collate-lessp)
-  (defun org-string-collate-lessp (s1 s2 &optional locale ignore-case)
+  (defun org-string-collate-lessp (s1 s2 &rest _)
     "Return non-nil if STRING1 is less than STRING2 in lexicographic order.
-
-Case is significant.
-
-LOCALE and IGNORE-CASE are ignored."
+Case is significant."
     (string< s1 s2)))
 
 
