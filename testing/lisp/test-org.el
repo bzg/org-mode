@@ -2745,6 +2745,11 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	  (org-test-with-temp-text "\n* def\n* xyz\n* abc\n"
 	    (org-sort-entries nil ?A)
 	    (buffer-string))))
+  (should
+   (equal "\n* \n* klm\n* xyz\n"
+	  (org-test-with-temp-text "\n* xyz\n* \n* klm\n"
+	    (org-sort-entries nil ?a)
+	    (buffer-string))))
   ;; Sort numerically.
   (should
    (equal "\n* 1\n* 2\n* 10\n"
@@ -2755,6 +2760,11 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
    (equal "\n* 10\n* 2\n* 1\n"
 	  (org-test-with-temp-text "\n* 10\n* 1\n* 2\n"
 	    (org-sort-entries nil ?N)
+	    (buffer-string))))
+  (should
+   (equal "\n* \n* 1\n* 2\n"
+	  (org-test-with-temp-text "\n* 1\n* \n* 2\n"
+	    (org-sort-entries nil ?n)
 	    (buffer-string))))
   ;; Sort by custom function.
   (should
