@@ -8734,15 +8734,11 @@ function is being called interactively."
 	  (lambda ()
 	    (cond
 	     ((= dcst ?n)
-	      (if (looking-at org-complex-heading-regexp)
-		  (string-to-number
-		   (org-sort-remove-invisible (match-string 4)))
-		nil))
+	      (string-to-number
+	       (org-sort-remove-invisible (org-get-heading t t t t))))
 	     ((= dcst ?a)
-	      (if (looking-at org-complex-heading-regexp)
-		  (funcall case-func
-			   (org-sort-remove-invisible (match-string 4)))
-		nil))
+	      (funcall case-func
+		       (org-sort-remove-invisible (org-get-heading t t t t))))
 	     ((= dcst ?k)
 	      (or (get-text-property (point) :org-clock-minutes) 0))
 	     ((= dcst ?t)
