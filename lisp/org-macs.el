@@ -335,6 +335,22 @@ if it fails."
 
 ;;; String manipulation
 
+(defun org-string< (a b)
+  (org-string-collate-lessp a b))
+
+(defun org-string<= (a b)
+  (or (string= a b) (org-string-collate-lessp a b)))
+
+(defun org-string>= (a b)
+  (not (org-string-collate-lessp a b)))
+
+(defun org-string> (a b)
+  (and (not (string= a b))
+       (not (org-string-collate-lessp a b))))
+
+(defun org-string<> (a b)
+  (not (string= a b)))
+
 (defsubst org-trim (s &optional keep-lead)
   "Remove whitespace at the beginning and the end of string S.
 When optional argument KEEP-LEAD is non-nil, removing blank lines
