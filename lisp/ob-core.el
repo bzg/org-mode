@@ -35,6 +35,7 @@
 
 (defvar org-babel-library-of-babel)
 (defvar org-edit-src-content-indentation)
+(defvar org-link-file-path-type)
 (defvar org-src-lang-modes)
 (defvar org-src-preserve-indentation)
 
