@@ -264,8 +264,6 @@ Then you need to assign image variable to this :file value like:
     (list body params) ; return modified argument list
     ))
 
-(advice-add 'org-babel-expand-body:clojure :filter-args #'ob-clojure-literate-inject-code)
-
 ;;; support :results graphics :dir "data/image" :file "incanter-plot.png"
 (defun ob-clojure-literate-support-graphics-result (result)
   "Support :results graphics :dir \"data/images\" :file \"incanter-plot.png\"
@@ -275,8 +273,6 @@ reset `RESULT' to `nil'."
     (if graphics-result
 	(setq result nil))
     result))
-
-(advice-add 'org-babel-execute:clojure :filter-return #'ob-clojure-literate-support-graphics-result)
 
 
 (defvar ob-clojure-literate-mode-map
@@ -297,12 +293,16 @@ reset `RESULT' to `nil'."
     (ob-clojure-literate-set-local-cider-connections ob-clojure-literate-mode)
     (ob-clojure-literate-set-local-session ob-clojure-literate-mode)
     (advice-add 'org-babel-execute:clojure :before #'ob-clojure-literate-cider-do-not-find-ns)
+    (advice-add 'org-babel-expand-body:clojure :filter-args #'ob-clojure-literate-inject-code)
+    (advice-add 'org-babel-execute:clojure :filter-return #'ob-clojure-literate-support-graphics-result)
     (message "ob-clojure-literate minor mode enabled.")))
 
 ;;;###autoload
 (defun ob-clojure-literate-disable ()
   "Disable Org-mode buffer locally for `ob-clojure-literate'."
   (advice-remove 'org-babel-execute:clojure #'ob-clojure-literate-cider-do-not-find-ns)
+  (advice-remove 'org-babel-expand-body:clojure #'ob-clojure-literate-inject-code)
+  (advice-remove 'org-babel-execute:clojure #'ob-clojure-literate-support-graphics-result)
   (setq-local cider-buffer-ns ob-clojure-literate-original-ns)
   (ob-clojure-literate-set-local-cider-connections ob-clojure-literate-mode)
   (ob-clojure-literate-set-local-session ob-clojure-literate-mode)
