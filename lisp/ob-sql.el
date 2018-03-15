@@ -112,10 +112,23 @@ Pass nil to omit that arg."
 
 (defun org-babel-sql-dbstring-oracle (host port user password database)
   "Make Oracle command line arguments for database connection.
-If PORT and DATABASE are nil then don't pass them.  This allows
-you to use names defined in your \"TNSNAMES\" file."
-  (concat (format "%s/%s@%s" user password host)
-	  (and port database (format ":%s/%s" port database))))
+
+If HOST and PORT are nil then don't pass them.  This allows you
+to use names defined in your \"TNSNAMES\" file.  So you can
+connect with
+
+  <user>/<password>@<host>:<port>/<database>
+
+or
+
+  <user>/<password>@<database>
+
+using its alias."
+  (cond ((and user password database host port)
+	 (format "%s/%s@%s:%s/%s" user password host port database))
+	((and user password database)
+	 (format "%s/%s@%s" user password database))
+	(t (user-error "Missing information to connect to database"))))
 
 (defun org-babel-sql-dbstring-mssql (host user password database)
   "Make sqlcmd command line args for database connection.
