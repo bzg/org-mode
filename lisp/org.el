@@ -7674,28 +7674,6 @@ Set it to HEADING when provided."
 	   (org-set-tags nil t)
 	   (when (looking-at "[ \t]*$") (replace-match ""))))))))
 
-(defun org-heading-delete-metadata ()
-  "Delete metadata from the heading at point.
-Metadata are tags, planning information and property/log/clock drawers."
-  (org-back-to-heading t)
-  (org-with-wide-buffer
-   (save-match-data
-     (let ((limit (save-excursion (outline-next-heading))))
-       (org-set-tags-to nil)
-       (save-excursion
-	 (when (re-search-forward
-		(concat org-planning-line-re ".*$") limit t)
-	   (replace-match "")))
-       (save-excursion
-	 (when (re-search-forward org-property-drawer-re limit t)
-	   (replace-match "")))
-       (save-excursion
-	 (when (re-search-forward org-log-drawer-re limit t)
-	   (replace-match "")))
-       (save-excursion
-	 (when (re-search-forward org-clock-drawer-re limit t)
-	   (replace-match "")))))))
-
 (defun org-insert-heading-after-current ()
   "Insert a new heading with same level as current, after current subtree."
   (interactive)

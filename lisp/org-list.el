@@ -825,6 +825,17 @@ This function modifies STRUCT."
 		       (t (cons pos (cdar ind-to-ori))))))
 		  (cdr struct)))))
 
+(defun org-list--delete-metadata ()
+  "Delete metadata from the heading at point.
+Metadata are tags, planning information and properties drawers."
+  (save-match-data
+    (org-with-wide-buffer
+     (org-set-tags-to nil)
+     (delete-region (line-beginning-position 2)
+		    (save-excursion
+		      (org-end-of-meta-data)
+		      (org-skip-whitespace)
+		      (if (eobp) (point) (line-beginning-position)))))))
 
 
 ;;; Accessors
@@ -2994,7 +3005,7 @@ With a prefix argument ARG, change the region in a single item."
 	((org-at-heading-p)
 	 ;; Remove metadata
 	 (let (org-loop-over-headlines-in-active-region)
-	   (org-heading-delete-metadata))
+	   (org-list--delete-metadata))
 	 (let* ((bul (org-list-bullet-string "-"))
 		(bul-len (length bul))
 		;; Indentation of the first heading.  It should be
@@ -3017,7 +3028,7 @@ With a prefix argument ARG, change the region in a single item."
 	       (when (< level ref-level) (setq ref-level level))
 	       ;; Remove metadata
 	       (let (org-loop-over-headlines-in-active-region)
-		 (org-heading-delete-metadata))
+		 (org-list--delete-metadata))
 	       ;; Remove stars and TODO keyword.
 	       (let ((case-fold-search nil)) (looking-at org-todo-line-regexp))
 	       (delete-region (point) (or (match-beginning 3)

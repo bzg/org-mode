@@ -1,6 +1,6 @@
 ;;; test-org-list.el --- Tests for org-list.el
 
-;; Copyright (C) 2012, 2013, 2014  Nicolas Goaziou
+;; Copyright (C) 2012, 2013, 2014, 2018  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 
@@ -935,6 +935,24 @@
   (should
    (equal "- [ ] line"
 	  (org-test-with-temp-text "* TODO line"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  ;; When turning headlines into items, make sure planning info line
+  ;; and properties drawers are removed.  This also includes empty
+  ;; lines following them.
+  (should
+   (equal "- H\n"
+	  (org-test-with-temp-text "* H\nSCHEDULED: <2012-03-29 Thu>"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  (should
+   (equal "- H\n"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:"
+	    (org-toggle-item nil)
+	    (buffer-string))))
+  (should
+   (equal "- H\nText"
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n\n\nText"
 	    (org-toggle-item nil)
 	    (buffer-string))))
   ;; When a region is marked and first line is a headline, all
