@@ -14806,36 +14806,28 @@ Assume point is on a headline."
       (org-set-tags arg just-align))))
 
 (defun org-set-tags-to (data)
-  "Set the tags of the current entry to DATA, replacing the current tags.
-DATA may be a tags string like :aa:bb:cc:, or a list of tags.
-If DATA is nil or the empty string, any tags will be removed."
+  "Set the tags of the current entry to DATA, replacing current tags.
+DATA may be a tags string like \":aa:bb:cc:\", or a list of tags.
+If DATA is nil or the empty string, all tags are removed."
   (interactive "sTags: ")
-  (setq data
-	(cond
-	 ((eq data nil) "")
-	 ((equal data "") "")
-	 ((stringp data)
-	  (concat ":" (mapconcat 'identity (org-split-string data ":+") ":")
-		  ":"))
-	 ((listp data)
-	  (concat ":" (mapconcat 'identity data ":") ":"))))
-  (when data
-    (save-excursion
-      (org-back-to-heading t)
-      (when (let ((case-fold-search nil))
-	      (looking-at org-complex-heading-regexp))
-	(if (match-end 5)
-	    (progn
-	      (goto-char (match-beginning 5))
-	      (insert data)
-	      (delete-region (point) (point-at-eol))
-	      (org-set-tags nil 'align))
-	  (goto-char (point-at-eol))
-	  (insert " " data)
-	  (org-set-tags nil 'align)))
-      (beginning-of-line 1)
-      (when (looking-at ".*?\\([ \t]+\\)$")
-	(delete-region (match-beginning 1) (match-end 1))))))
+  (let ((data
+	 (pcase (if (stringp data) (org-trim data) data)
+	   ((or `nil "") nil)
+	   ((pred listp) (format ":%s:" (mapconcat #'identity data ":")))
+	   ((pred stringp)
+	    (format ":%s:"
+		    (mapconcat #'identity (org-split-string data ":+") ":")))
+	   (_ (error "Invalid tag specification: %S" data)))))
+    (org-with-wide-buffer
+     (org-back-to-heading t)
+     (let ((case-fold-search nil)) (looking-at org-complex-heading-regexp))
+     (when (or (match-end 5) data)
+       (goto-char (or (match-beginning 5) (line-end-position)))
+       (skip-chars-backward " \t")
+       (delete-region (point) (line-end-position))
+       (when data
+	 (insert " " data)
+	 (org-set-tags nil 'align))))))
 
 (defun org-align-all-tags ()
   "Align the tags in all headings."
