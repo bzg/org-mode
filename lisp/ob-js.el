@@ -43,6 +43,8 @@
 (declare-function run-mozilla "ext:moz" (arg))
 (declare-function httpd-start "simple-httpd" ())
 (declare-function run-skewer "skewer-mode" ())
+(declare-function indium-run-node "indium-nodejs" (command))
+(declare-function indium-eval "indium-interaction" (string &optional callback))
 
 (defvar org-babel-default-header-args:js '()
   "Default header arguments for js code blocks.")
@@ -56,7 +58,8 @@
   :version "24.1"
   :type '(choice (const "node")
 		 (const "mozrepl")
-		 (const "skewer-mode"))
+		 (const "skewer-mode")
+		 (const "indium"))
   :safe #'stringp)
 
 (defvar org-babel-js-function-wrapper
@@ -84,6 +87,13 @@ This function is called by `org-babel-execute-src-block'"
 		     (org-babel-eval
 		      (format "%s %s" org-babel-js-cmd
 			      (org-babel-process-file-name script-file)) "")))
+		  ;; Indium Node REPL
+		  ;; separate case because Indium REPL is not inherited from comint-mode
+		  ((string= session "*JS REPL*")
+		   (require 'indium-repl)
+		   (unless (get-buffer session)
+		     (indium-run-node))
+		   (indium-eval full-body))
 		  ;; session evaluation
 		  (t
 		   (let ((session (org-babel-prep-session:js
