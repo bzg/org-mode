@@ -113,6 +113,10 @@ now sort according to the locale’s collation rules instead of by
 code-point.
 
 ** New features
+*** Add ~:session~ support of ob-js for js-comint
+#+begin_src js :session "*Javascript REPL*"
+console.log("stardiviner")
+#+end_src
 *** Add ~:session~ support of ob-js for Indium
 #+begin_src js :session "*JS REPL*"
 console.log("stardiviner")

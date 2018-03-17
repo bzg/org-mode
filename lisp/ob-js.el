@@ -59,7 +59,8 @@
   :type '(choice (const "node")
 		 (const "mozrepl")
 		 (const "skewer-mode")
-		 (const "indium"))
+		 (const "indium")
+		 (const "js-comint"))
   :safe #'stringp)
 
 (defvar org-babel-js-function-wrapper
@@ -168,6 +169,15 @@ then create.  Return the initialized session."
 	;; start skewer REPL.
 	(httpd-start)
 	(run-skewer)
+	session-buffer)))
+   ((string= "*Javascript REPL*" session)
+    (require 'js-comint)
+    (let ((session-buffer "*Javascript REPL*"))
+      (if (and (org-babel-comint-buffer-livep (get-buffer session-buffer))
+	       (comint-check-proc session-buffer))
+	  session-buffer
+	(call-interactively 'run-js)
+	(sit-for .5)
 	session-buffer)))
    ((string= "mozrepl" org-babel-js-cmd)
     (require 'moz)
