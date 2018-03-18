@@ -5825,41 +5825,45 @@ format.
      When this command is used twice in succession, a time range is
      inserted.
 
+     #+kindex: C-u C-c .
+     #+vindex: org-time-stamp-rounding-minutes
+     When called with a prefix argument, use the alternative format
+     which contains date and time.  The default time can be rounded to
+     multiples of 5 minutes.  See the option
+     ~org-time-stamp-rounding-minutes~.
+
+     #+kindex: C-u C-u C-c .
+     With two prefix arguments, insert an active timestamp with the
+     current time without prompting.
+
 - {{{kbd(C-c !)}}} (~org-time-stamp-inactive~) ::
 
      #+kindex: C-c !
+     #+kindex: C-u C-c !
+     #+kindex: C-u C-u C-c !
      #+findex: org-time-stamp-inactive
      Like {{{kbd(C-c .)}}}, but insert an inactive timestamp that does
      not cause an agenda entry.
 
-- {{{kbd(C-u C-c .)}}}, {{{kbd(C-u C-c !)}}} ::
-
-     #+kindex: C-u C-c .
-     #+kindex: C-u C-c .
-     #+kindex: C-u C-c !
-     #+vindex: org-time-stamp-rounding-minutes
-     Like {{{kbd(C-c .)}}} and {{{kbd(C-c !)}}}, but use the
-     alternative format which contains date and time.  The default
-     time can be rounded to multiples of 5 minutes, see the option
-     ~org-time-stamp-rounding-minutes~.
-
 - {{{kbd(C-c C-c)}}} ::
 
      #+kindex: C-c C-c
-     Normalize timestamp, insert/fix day name if missing or wrong.
+     Normalize timestamp, insert or fix day name if missing or wrong.
 
 - {{{kbd(C-c <)}}} (~org-date-from-calendar~) ::
 
      #+kindex: C-c <
      #+findex: org-date-from-calendar
-     Insert a timestamp corresponding to the cursor date in the Calendar.
+     Insert a timestamp corresponding to the cursor date in the
+     calendar.
 
 - {{{kbd(C-c >)}}} (~org-goto-calendar~) ::
 
      #+kindex: C-c >
      #+findex: org-goto-calendar
-     Access the Emacs calendar for the current date.  If there is a
-     timestamp in the current line, go to the corresponding date instead.
+     Access the Emacs calendar for the current date.  If there is
+     a timestamp in the current line, go to the corresponding date
+     instead.
 
 - {{{kbd(C-c C-o)}}} (~org-open-at-point~) ::
 
