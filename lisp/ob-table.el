@@ -112,7 +112,7 @@ as shown in the example below.
 				      (prog1 nil (setq quote t))
 				    (prog1
 					(cond
-					 (quote (format "\"%s\"" el))
+					 (quote (format "%S" el))
 					 ((stringp el) (org-no-properties el))
 					 (t el))
 				      (setq quote nil))))
