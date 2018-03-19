@@ -1474,7 +1474,27 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (with-current-buffer buffer (set-buffer-modified-p nil))
 	    (kill-buffer buffer))
 	  (when (file-exists-p subdir) (delete-directory subdir t))
-	  (when (file-exists-p includer) (delete-file includer))))))))
+	  (when (file-exists-p includer) (delete-file includer)))))))
+  ;; Pathological case: Do not error when fixing a path in a headline.
+  (should
+   (let* ((subdir (make-temp-file "org-includee-" t))
+	  (includee (expand-file-name "includee.org" subdir))
+	  (includer (make-temp-file "org-includer-")))
+     (write-region "* [[file:foo.org]]" nil includee)
+     (write-region (format "#+INCLUDE: %S"
+			   (file-relative-name includee
+					       temporary-file-directory))
+		   nil includer)
+     (let ((buffer (find-file-noselect includer t)))
+       (unwind-protect
+	   (with-current-buffer buffer
+	     (org-export-expand-include-keyword)
+	     (org-trim (buffer-string)))
+	 (when (buffer-live-p buffer)
+	   (with-current-buffer buffer (set-buffer-modified-p nil))
+	   (kill-buffer buffer))
+	 (when (file-exists-p subdir) (delete-directory subdir t))
+	 (when (file-exists-p includer) (delete-file includer)))))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test macro expansion in an Org buffer."

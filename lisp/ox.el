@@ -3482,34 +3482,6 @@ Optional argument INCLUDER is the file name where the inclusion
 is to happen."
   (with-temp-buffer
     (insert-file-contents file)
-    ;; Adapt all file links within the included document that contain
-    ;; relative paths in order to make these paths relative to the
-    ;; base document, or absolute.
-    (goto-char (point-min))
-    (while (re-search-forward org-any-link-re nil t)
-      (let ((link (save-excursion
-		    (backward-char)
-		    (org-element-context))))
-	(when (string= "file" (org-element-property :type link))
-	  (let ((old-path (org-element-property :path link)))
-	    (unless (or (org-file-remote-p old-path)
-			(file-name-absolute-p old-path))
-	      (let ((new-path
-		     (let ((full (expand-file-name old-path
-						   (file-name-directory file))))
-		       (if (not includer) full
-			 (file-relative-name full
-					     (file-name-directory includer))))))
-		(insert (let ((new (org-element-copy link)))
-			  (org-element-put-property new :path new-path)
-			  (when (org-element-property :contents-begin link)
-			    (org-element-adopt-elements new
-			      (buffer-substring
-			       (org-element-property :contents-begin link)
-			       (org-element-property :contents-end link))))
-			  (delete-region (org-element-property :begin link)
-					 (org-element-property :end link))
-			  (org-element-interpret-data new)))))))))
     (when lines
       (let* ((lines (split-string lines "-"))
 	     (lbeg (string-to-number (car lines)))
@@ -3523,6 +3495,37 @@ is to happen."
 		    (forward-line (1- lend))
 		    (point))))
 	(narrow-to-region beg end)))
+    ;; Adapt all file links within the included document that contain
+    ;; relative paths in order to make these paths relative to the
+    ;; base document, or absolute.
+    (when includer
+      (let ((file-dir (file-name-directory file))
+	    (includer-dir (file-name-directory includer)))
+	(unless (file-equal-p file-dir includer-dir)
+	  (goto-char (point-min))
+	  (unless (eq major-mode 'org-mode)
+	    (let ((org-inhibit-startup t)) (org-mode)))	;set regexps
+	  (while (re-search-forward org-any-link-re nil t)
+	    (let ((link (save-excursion (backward-char) (org-element-context))))
+	      (when (and (eq 'link (org-element-type link))
+			 (string= "file" (org-element-property :type link)))
+		(let ((old-path (org-element-property :path link)))
+		  (unless (or (org-file-remote-p old-path)
+			      (file-name-absolute-p old-path))
+		    (let ((new-path (file-relative-name
+				     (expand-file-name old-path file-dir)
+				     includer-dir)))
+		      (insert
+		       (let ((new (org-element-copy link)))
+			 (org-element-put-property new :path new-path)
+			 (when (org-element-property :contents-begin link)
+			   (org-element-adopt-elements new
+			     (buffer-substring
+			      (org-element-property :contents-begin link)
+			      (org-element-property :contents-end link))))
+			 (delete-region (org-element-property :begin link)
+					(org-element-property :end link))
+			 (org-element-interpret-data new))))))))))))
     ;; Remove blank lines at beginning and end of contents.  The logic
     ;; behind that removal is that blank lines around include keyword
     ;; override blank lines in included file.
