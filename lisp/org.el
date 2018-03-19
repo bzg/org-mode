@@ -14331,10 +14331,11 @@ instead of the agenda files."
 		  (mapcar
 		   (lambda (file)
 		     (set-buffer (find-file-noselect file))
-		     (mapcar (lambda (x)
-			       (and (stringp (car-safe x))
-				    (list (car-safe x))))
-			     (or org-current-tag-alist (org-get-buffer-tags))))
+		     (append (org-get-buffer-tags)
+			     (mapcar (lambda (x)
+				       (and (stringp (car-safe x))
+					    (list (car-safe x))))
+				     org-current-tag-alist)))
 		   (if (car-safe files) files
 		     (org-agenda-files))))))))
 
