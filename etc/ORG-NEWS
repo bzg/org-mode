@@ -243,6 +243,8 @@ Use ~org-save-outline-visibility~ instead.
 It was not used throughout the code base.
 *** ~org-fix-indentation~
 It was not used throughout code base.
+*** ~org-context-p~
+Use ~org-element-at-point~ instead.
 *** ~org-try-structure-completion~
 Org Tempo may be used as a replacement.  See details above.
 ** Removed variables

@@ -8880,21 +8880,6 @@ definitions."
 	  (push r res))))
     (delete-dups (delq nil res))))
 
-(defun org-context-p (&rest contexts)
-  "Check if local context is any of CONTEXTS.
-Possible values in the list of contexts are `table', `headline', and `item'."
-  (let ((pos (point)))
-    (goto-char (point-at-bol))
-    (prog1 (or (and (memq 'table contexts)
-		    (looking-at "[ \t]*|"))
-	       (and (memq 'headline contexts)
-		    (looking-at org-outline-regexp))
-	       (and (memq 'item contexts)
-		    (looking-at "[ \t]*\\([-+*] \\|[0-9]+[.)] \\)"))
-	       (and (memq 'item-body contexts)
-		    (org-in-item-p)))
-      (goto-char pos))))
-
 ;; Defined to provide a value for defcustom, since there is no
 ;; string-collate-greaterp in Emacs.
 (defun org-string-collate-greaterp (s1 s2)
