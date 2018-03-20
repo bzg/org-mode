@@ -9973,7 +9973,7 @@ To turn off fontification for marked up text, you can set
 available markup syntax, you can customize @code{org-emphasis-alist}.  To fine
 tune what characters are allowed before and after the markup characters, you
 can tweak @code{org-emphasis-regexp-components}.  Beware that changing one of
-the above variables will no take effect until you reload Org, for which you
+the above variables will not take effect until you reload Org, for which you
 may need to restart Emacs.
 
 @node Horizontal rules
