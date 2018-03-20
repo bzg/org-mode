@@ -5165,7 +5165,7 @@ a string, summarizing TAGS, as a list of strings."
 	(`(,(or :endgroup :endgrouptag))
 	 (when (eq group-status 'append)
 	   (push (nreverse current-group) groups))
-	 (setq group-status nil))
+	 (setq group-status nil current-group nil))
 	(`(:grouptags) (setq group-status 'append))
 	((and `(,tag . ,_) (guard group-status))
 	 (if (eq group-status 'append) (push tag current-group)
