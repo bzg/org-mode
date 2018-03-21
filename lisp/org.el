@@ -23625,21 +23625,6 @@ when non-nil, is a regexp matching keywords names."
 	  (and extra (concat (and kwds "\\|") extra))
 	  "\\):[ \t]*\\(.*\\)"))
 
-;;; Log drawer regular expressions
-
-(defvar org-log-drawer-start-re
-  (concat "^[ 	]*:%s:[ 	]*$" (org-log-into-drawer))
-  "Regular expression matching the first line of a clock drawer.")
-
-(defconst org-log-drawer-end-re
-  org-clock-drawer-end-re
-  "Regular expression matching the last line of a log drawer.")
-
-(defconst org-log-drawer-re
-  (concat "\\(" org-log-drawer-start-re "\\)[^\000]*?\\("
-	  org-log-drawer-end-re "\\)\n?")
-  "Matches an entire log drawer.")
-
 
 ;;; Finish up
 
