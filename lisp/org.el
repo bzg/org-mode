@@ -4905,9 +4905,15 @@ Support for group tags is controlled by the option
 
 (defun org-tag-add-to-alist (alist1 alist2)
   "Append ALIST1 elements to ALIST2 if they are not there yet."
-  (let (to-add)
-    (dolist (i alist1) (unless (member i alist2) (push i to-add)))
-    (append to-add alist2)))
+  (cond
+   ((null alist2) alist1)
+   ((null alist1) alist2)
+   (t (let ((alist2-cars (mapcar (lambda (x) (car-safe x)) alist2))
+  	    to-add)
+	(dolist (i alist1)
+	  (unless (member (car-safe i) alist2-cars)
+  	    (push i to-add)))
+	(append to-add alist2)))))
 
 (defun org-set-regexps-and-options (&optional tags-only)
   "Precompute regular expressions used in the current buffer.
@@ -14331,11 +14337,12 @@ instead of the agenda files."
 		  (mapcar
 		   (lambda (file)
 		     (set-buffer (find-file-noselect file))
-		     (append (org-get-buffer-tags)
-			     (mapcar (lambda (x)
-				       (and (stringp (car-safe x))
-					    (list (car-safe x))))
-				     org-current-tag-alist)))
+		     (org-tag-add-to-alist
+		      (org-get-buffer-tags)
+		      (mapcar (lambda (x)
+		     		(and (stringp (car-safe x))
+		     		     (list (car-safe x))))
+		     	      org-current-tag-alist)))
 		   (if (car-safe files) files
 		     (org-agenda-files))))))))
 
@@ -14362,9 +14369,9 @@ See also `org-scan-tags'."
     ;; Get a new match request, with completion against the global
     ;; tags table and the local tags in current buffer.
     (let ((org-last-tags-completion-table
-	   (org-uniquify
-	    (delq nil (append (org-get-buffer-tags)
-			      (org-global-tags-completion-table))))))
+	   (org-tag-add-to-alist
+	    (org-get-buffer-tags)
+	    (org-global-tags-completion-table))))
       (setq match
 	    (completing-read
 	     "Match: "
@@ -14882,23 +14889,13 @@ When JUST-ALIGN is non-nil, only align tags."
 			   (table
 			    (setq
 			     org-last-tags-completion-table
-			     ;; Uniquify tags in alists, yet preserve
-			     ;; structure (i.e., keywords).
-			     (delq nil
-				   (mapcar
-				    (lambda (pair)
-				      (let ((head (car pair)))
-					(cond ((symbolp head) pair)
-					      ((member head seen) nil)
-					      (t (push head seen)
-						 pair))))
-				    (append
-				     (or org-current-tag-alist
-					 (org-get-buffer-tags))
-				     (and
-				      org-complete-tags-always-offer-all-agenda-tags
-				      (org-global-tags-completion-table
-				       (org-agenda-files))))))))
+			     (org-tag-add-to-alist
+			      (and
+			       org-complete-tags-always-offer-all-agenda-tags
+			       (org-global-tags-completion-table
+				(org-agenda-files)))
+			      (or org-current-tag-alist
+				  (org-get-buffer-tags)))))
 			   (current-tags (org-split-string current ":"))
 			   (inherited-tags
 			    (nreverse (nthcdr (length current-tags)
@@ -14977,9 +14974,9 @@ This works in the agenda, and also in an Org buffer."
    (list (region-beginning) (region-end)
 	 (let ((org-last-tags-completion-table
 		(if (derived-mode-p 'org-mode)
-		    (org-uniquify
-		     (delq nil (append (org-get-buffer-tags)
-				       (org-global-tags-completion-table))))
+		    (org-tag-add-to-alist
+		     (org-get-buffer-tags)
+		     (org-global-tags-completion-table))
 		  (org-global-tags-completion-table))))
 	   (completing-read
 	    "Tag: " 'org-tags-completion-function nil nil nil
@@ -18564,9 +18561,9 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (setq org-todo-keyword-alist-for-agenda
 		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
 	    (setq org-tag-alist-for-agenda
-		  (org-uniquify
-		   (append org-tag-alist-for-agenda
-			   org-current-tag-alist)))
+		  (org-tag-add-to-alist
+		   org-tag-alist-for-agenda
+		   org-current-tag-alist))
 	    ;; Merge current file's tag groups into global
 	    ;; `org-tag-groups-alist-for-agenda'.
 	    (when org-group-tags
