@@ -14257,8 +14257,7 @@ When JUST-ALIGN is non-nil, only align tags."
 		(if just-align current
 		  ;; Get a new set of tags from the user.
 		  (save-excursion
-		    (let* ((seen)
-			   (table
+		    (let* ((table
 			    (setq
 			     org-last-tags-completion-table
 			     (org-tag-add-to-alist
