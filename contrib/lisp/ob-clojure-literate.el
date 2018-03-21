@@ -35,8 +35,10 @@ Don't auto jack in by default for not rude."
   :type 'boolean
   :group 'ob-clojure-literate)
 
-(defcustom ob-clojure-literate-project-location (concat user-emacs-directory "Org-mode/")
-  "The location for `ob-clojure-literate' scaffold project."
+(defcustom ob-clojure-literate-project-location nil
+  "The location for `ob-clojure-literate' scaffold project.
+If it is nil, then `cider-jack-in' will jack-in outside of Clojure project.
+If it is a directory, `ob-clojure-literate' will try to create Clojure project automatically."
   :type 'string
   :group 'ob-clojure-literate)
 
@@ -45,7 +47,7 @@ Don't auto jack in by default for not rude."
 (defvar ob-clojure-literate-session-ns nil)
 (defvar ob-clojure-literate-cider-connections nil)
 
-(defcustom ob-clojure-literate-default-session "*cider-repl ob-clojure*"
+(defcustom ob-clojure-literate-default-session "*cider-repl localhost*"
   "The default session name for `ob-clojure-literate'."
   :type 'string
   :group 'ob-clojure-literate)
@@ -104,23 +106,31 @@ Don't auto jack in by default for not rude."
 (defun ob-clojure-literate-auto-jackin ()
   "Auto setup ob-clojure-literate scaffold and jack-in Clojure project."
   (interactive)
-  (unless (file-directory-p (expand-file-name ob-clojure-literate-project-location))
-    (make-directory ob-clojure-literate-project-location t)
-    (let ((default-directory ob-clojure-literate-project-location))
-      (shell-command "lein new ob-clojure")))
-  (unless (or
-           (and (cider-connected-p)
-                (if (not (null ob-clojure-literate-session))
-                    (seq-contains cider-connections (get-buffer ob-clojure-literate-session))))
-           cider-connections
-           (not (null ob-clojure-literate-session)))
-    ;; return back to original file.
-    (if (not (and (= (length (ob-clojure-literate-get-session-list)) 1)
-                  (-contains-p (ob-clojure-literate-get-session-list) ob-clojure-literate-default-session)))
-        (save-window-excursion
-          (find-file (expand-file-name (concat ob-clojure-literate-project-location "ob-clojure/src/ob_clojure/core.clj")))
-          (with-current-buffer "core.clj"
-            (cider-jack-in))))))
+  (cond
+   ;; jack-in outside of Clojure project.
+   ((null ob-clojure-literate-project-location)
+    (if (member (get-buffer "*cider-repl localhost*") cider-connections)
+	(message "CIDER default session already launched.")
+      (cider-jack-in nil)))
+   ((not (null ob-clojure-literate-project-location))
+    (unless (file-directory-p (expand-file-name ob-clojure-literate-project-location))
+      (make-directory ob-clojure-literate-project-location t)
+      (let ((default-directory ob-clojure-literate-project-location))
+	(shell-command "lein new ob-clojure")))
+    (unless (or
+             (and (cider-connected-p)
+                  (if (not (null ob-clojure-literate-session))
+		      (seq-contains cider-connections (get-buffer ob-clojure-literate-session))))
+             cider-connections
+             (not (null ob-clojure-literate-session)))
+      ;; return back to original file.
+      (if (not (and (= (length (ob-clojure-literate-get-session-list)) 1)
+                    (-contains-p (ob-clojure-literate-get-session-list) ob-clojure-literate-default-session)))
+          (save-window-excursion
+            (find-file (expand-file-name (concat ob-clojure-literate-project-location "ob-clojure/src/ob_clojure/core.clj")))
+            (with-current-buffer "core.clj"
+	      (cider-jack-in))))))
+   ))
 
 (defun ob-clojure-literate-set-local-cider-connections (toggle?)
   "Set buffer local `cider-connections' for `ob-clojure-literate-mode' `TOGGLE?'."
