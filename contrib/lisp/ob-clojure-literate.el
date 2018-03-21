@@ -151,14 +151,15 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
     ;; (setq-local cider-connections '())
     ))
 
-(defun ob-clojure-literate-cider-do-not-find-ns (body params)
+(defun ob-clojure-literate-set-ns (body params)
   "Fix the issue that `cider-current-ns' try to invoke `clojure-find-ns' to extract ns from buffer."
   ;; TODO: Is it possible to find ns in `body'?
   (when (ob-clojure-literate-any-connection-p)
     (setq ob-clojure-literate-original-ns (cider-current-ns))
     (with-current-buffer ob-clojure-literate-session
       (setq ob-clojure-literate-session-ns cider-buffer-ns))
-    (setq-local cider-buffer-ns ob-clojure-literate-session-ns))
+    (setq-local cider-buffer-ns (or (cdr (assq :ns params))
+				    ob-clojure-literate-session-ns)))
   (message (format "ob-clojure-literate: current CIDER ns is [%s]." cider-buffer-ns)))
 
 (defun ob-clojure-literate-set-local-session (toggle?)
@@ -302,7 +303,7 @@ reset `RESULT' to `nil'."
              (equal major-mode 'org-mode)) ; `ob-clojure-literate-mode' only works in `org-mode'.
     (ob-clojure-literate-set-local-cider-connections ob-clojure-literate-mode)
     (ob-clojure-literate-set-local-session ob-clojure-literate-mode)
-    (advice-add 'org-babel-execute:clojure :before #'ob-clojure-literate-cider-do-not-find-ns)
+    (advice-add 'org-babel-execute:clojure :before #'ob-clojure-literate-set-ns)
     (advice-add 'org-babel-expand-body:clojure :filter-args #'ob-clojure-literate-inject-code)
     (advice-add 'org-babel-execute:clojure :filter-return #'ob-clojure-literate-support-graphics-result)
     (message "ob-clojure-literate minor mode enabled.")))
@@ -310,7 +311,7 @@ reset `RESULT' to `nil'."
 ;;;###autoload
 (defun ob-clojure-literate-disable ()
   "Disable Org-mode buffer locally for `ob-clojure-literate'."
-  (advice-remove 'org-babel-execute:clojure #'ob-clojure-literate-cider-do-not-find-ns)
+  (advice-remove 'org-babel-execute:clojure #'ob-clojure-literate-set-ns)
   (advice-remove 'org-babel-expand-body:clojure #'ob-clojure-literate-inject-code)
   (advice-remove 'org-babel-execute:clojure #'ob-clojure-literate-support-graphics-result)
   (setq-local cider-buffer-ns ob-clojure-literate-original-ns)
