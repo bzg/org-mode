@@ -2648,8 +2648,8 @@ Return t if successful."
 		 (= top (point-at-bol))
 		 (cdr (assq 'indent org-list-automatic-rules))
 		 (if no-subtree
-		     (error
-		      "First item of list cannot move without its subtree")
+		     (user-error
+		      "At first item: use S-M-<left/right> to move the whole list")
 		   t))))
       ;; Determine begin and end points of zone to indent.  If moving
       ;; more than one item, save them for subsequent moves.
