@@ -5731,6 +5731,15 @@ Paragraph<point>"
      (org-match-sparse-tree nil "Lev_1")
      (search-forward "H4")
      (org-invisible-p2)))
+  (should-not
+   (org-test-with-temp-text
+       "#+TAGS: [ Lev_1 : Lev_2 ]\n
+#+TAGS: [ Lev_2 : Lev_3 ]\n
+#+TAGS: { Lev_3 : Lev_4 }\n
+* H\n** H1 :Lev_1:\n** H2 :Lev_2:\n** H3 :Lev_3:\n** H4 :Lev_4:"
+     (org-match-sparse-tree nil "Lev_1+Lev_3")
+     (search-forward "H4")
+     (org-invisible-p2)))
   ;; Match regular expressions in tags
   (should-not
    (org-test-with-temp-text
