@@ -77,39 +77,6 @@
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
       (buffer-string))))
-  ;; Test special "property" macro.  With only one argument, retrieve
-  ;; property from current headline.  Otherwise, the second argument
-  ;; is a search option to get the property from another headline.
-  (should
-   (equal "1"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:A: 1\n:END:\n{{{property(A)}}}<point>"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
-  (should
-   (equal "1"
-	  (org-test-with-temp-text
-	      "* H\n:PROPERTIES:\n:A: 1\n:END:\n{{{property(A,)}}}<point>"
-	    (org-macro-initialize-templates)
-	    (org-macro-replace-all org-macro-templates)
-	    (buffer-substring-no-properties
-	     (line-beginning-position) (line-end-position)))))
-  (should
-   (equal
-    "1"
-    (org-test-with-temp-text
-	"* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n{{{property(A,*H1)}}}<point>"
-      (org-macro-initialize-templates)
-      (org-macro-replace-all org-macro-templates)
-      (buffer-substring-no-properties
-       (line-beginning-position) (line-end-position)))))
-  (should-error
-   (org-test-with-temp-text
-       "* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2\n{{{property(A,*???)}}}<point>"
-     (org-macro-initialize-templates)
-     (org-macro-replace-all org-macro-templates)))
   ;; Macro expansion ignores narrowing.
   (should
    (string-match
@@ -136,7 +103,18 @@
         "#+MACRO: macro expansion\n* COMMENT H1\n** H2\n<point>{{{macro}}}"
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
-      (org-with-wide-buffer (buffer-string))))))
+      (org-with-wide-buffer (buffer-string)))))
+  ;; User-defined macros take precedence over built-in macros.
+  (should
+   (equal
+    "foo"
+    (org-test-with-temp-text
+        "#+MACRO: title foo\n#+TITLE: bar\n<point>{{{title}}}"
+      (org-macro-initialize-templates)
+      (org-macro-replace-all org-macro-templates)
+      (goto-char (point-max))
+      (buffer-substring-no-properties (line-beginning-position)
+				      (line-end-position))))))
 
 (ert-deftest test-org-macro/property ()
   "Test {{{property}}} macro."

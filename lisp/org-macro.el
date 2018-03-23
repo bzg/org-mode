@@ -133,66 +133,57 @@ Templates are stored in buffer-local variable
 function installs the following ones: \"property\",
 \"time\". and, if the buffer is associated to a file,
 \"input-file\" and \"modification-time\"."
-  (let* ((templates nil)
-	 (update-templates
-	  (lambda (cell)
-	    (let ((old-template (assoc (car cell) templates)))
-	      (if old-template (setcdr old-template (cdr cell))
-		(push cell templates))))))
-    ;; Install "author, "date, "email", "keyword", "title" and
-    ;; "results" macros.
-    (mapc update-templates
-	  (list
-	   (cons "author" (org-macro--find-keyword-value "AUTHOR"))
-	   (cons "date"
-		 (let* ((value (org-macro--find-keyword-value "DATE"))
-			(date (org-element-parse-secondary-string
-			       value (org-element-restriction 'keyword))))
-		   (if (and (consp date)
-			    (not (cdr date))
-			    (eq (org-element-type (car date)) 'timestamp))
-		       (format "(eval (if (org-string-nw-p $1) %s %S))"
-			       (format "(org-timestamp-format '%S $1)"
-				       (org-element-copy (car date)))
-			       value)
-		     value)))
-	   (cons "email" (org-macro--find-keyword-value "EMAIL"))
-	   (cons "keyword" "(eval (org-macro--find-keyword-value $1))")
-	   (cons "results" "$1")
-	   (cons "title" (org-macro--find-keyword-value "TITLE"))))
-    ;; Install "property", "time" macros.
-    (mapc update-templates
-	  (list (cons "property"
-		      "(eval (save-excursion
-        (let ((l $2))
-          (when (org-string-nw-p l)
-            (condition-case _
-                (let ((org-link-search-must-match-exact-headline t))
-                  (org-link-search l nil t))
-              (error
-               (error \"Macro property failed: cannot find location %s\"
-                      l)))))
-        (org-entry-get nil $1 'selective)))")
-		(cons "time" "(eval (format-time-string $1))")))
-    ;; Install "input-file", "modification-time" macros.
-    (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-      (when (and visited-file (file-exists-p visited-file))
-	(mapc update-templates
-	      (list (cons "input-file" (file-name-nondirectory visited-file))
-		    (cons "modification-time"
-			  (format "(eval
+  (org-macro--counter-initialize)	;for "n" macro
+  (setq org-macro-templates
+	(nconc
+	 ;; Install user-defined macros.
+	 (org-macro--collect-macros)
+	 ;; Install file-specific macros.
+	 (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+	   (and visited-file
+		(file-exists-p visited-file)
+		(list
+		 `("input-file" . ,(file-name-nondirectory visited-file))
+		 `("modification-time" .
+		   ,(format "(eval
 \(format-time-string $1
                      (or (and (org-string-nw-p $2)
                               (org-macro--vc-modified-time %s))
                      '%s)))"
-				  (prin1-to-string visited-file)
-				  (prin1-to-string
-				   (nth 5 (file-attributes visited-file)))))))))
-    ;; Initialize and install "n" macro.
-    (org-macro--counter-initialize)
-    (funcall update-templates
-	     (cons "n" "(eval (org-macro--counter-increment $1 $2))"))
-    (setq org-macro-templates (nconc (org-macro--collect-macros) templates))))
+			    (prin1-to-string visited-file)
+			    (prin1-to-string
+			     (nth 5 (file-attributes visited-file))))))))
+	 ;; Install built-in macros.
+	 (list
+	  '("n" . "(eval (org-macro--counter-increment $1 $2))")
+	  `("author" . ,(org-macro--find-keyword-value "AUTHOR"))
+	  `("email" . ,(org-macro--find-keyword-value "EMAIL"))
+	  '("keyword" . "(eval (org-macro--find-keyword-value $1))")
+	  '("results" . "$1")
+	  '("time" . "(eval (format-time-string $1))")
+	  `("title" . ,(org-macro--find-keyword-value "TITLE"))
+	  '("property" . "(eval
+ (save-excursion
+   (let ((l $2))
+     (when (org-string-nw-p l)
+       (condition-case _
+           (let ((org-link-search-must-match-exact-headline t))
+             (org-link-search l nil t))
+         (error
+          (error \"Macro property failed: cannot find location %s\" l)))))
+   (org-entry-get nil $1 'selective)))")
+	  `("date" .
+	    ,(let* ((value (org-macro--find-keyword-value "DATE"))
+		    (date (org-element-parse-secondary-string
+			   value (org-element-restriction 'keyword))))
+	       (if (and (consp date)
+			(not (cdr date))
+			(eq 'timestamp (org-element-type (car date))))
+		   (format "(eval (if (org-string-nw-p $1) %s %S))"
+			   (format "(org-timestamp-format '%S $1)"
+				   (org-element-copy (car date)))
+			   value)
+		 value)))))))
 
 (defun org-macro-expand (macro templates)
   "Return expanded MACRO, as a string.
