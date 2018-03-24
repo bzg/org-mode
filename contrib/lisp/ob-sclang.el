@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; `ob-sclang' requires `sclang-interp' from SuperCollider.
+;; `ob-sclang' requires `sclang' from SuperCollider.
 ;; Usually SuperCollider dependencies for Emacs are at /usr/share/emacs/site-lisp/SuperCollider/
 ;; You can install SuperCollider following this article:
 ;; https://github.com/supercollider/supercollider#building-the-source-code
@@ -60,7 +60,7 @@
 (require 'org)
 (require 'ob)
 
-(require 'sclang-interp)
+(require 'sclang)
 
 (defgroup ob-sclang nil
   "org-mode blocks for SuperCollider SCLang."
