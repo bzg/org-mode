@@ -30,28 +30,6 @@
 ;;   (org-test-at-id "6d2ff4ce-4489-4e2a-9c65-e3f71f77d975"
 ;;     (should (= 2 (sbe take-sqrt (n "4"))))))
 
-(ert-deftest test-ob-table/sbe-quote ()
-  "Test that `org-sbe' can correctly handle cell values containing quotes."
-  (org-test-table-target-expect
-   "
-#+name: identity
-#+begin_src emacs-lisp :eval yes
-  x
-#+end_src
-
-| a\"b\"c | replace |
-"
-   "
-#+name: identity
-#+begin_src emacs-lisp :eval yes
-  x
-#+end_src
-
-| a\"b\"c | a\"b\"c |
-"
-   1
-   "#+TBLFM: $2 = '(org-sbe identity (x $$1))"))
-
 (provide 'test-ob-table)
 
 ;;; test-ob-table.el ends here
