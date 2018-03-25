@@ -132,17 +132,12 @@ as shown in the example below.
                                  "("
                                  (mapconcat
                                   (lambda (var-spec)
-                                    (cond
-				     ((> (length (cdr var-spec)) 1)
-				      (format "%S='%S"
-					      (car var-spec)
-					      (mapcar #'read (cdr var-spec))))
-				     ((stringp (cadr var-spec))
-				      (format "%S=%s"
-                                              (car var-spec) (cadr var-spec)))
-				     (t
-				      (format "%S=%S"
-                                              (car var-spec) (cadr var-spec)))))
+                                    (if (> (length (cdr var-spec)) 1)
+                                        (format "%S='%S"
+                                                (car var-spec)
+                                                (mapcar #'read (cdr var-spec)))
+                                      (format "%S=%s"
+                                              (car var-spec) (cadr var-spec))))
                                   ',variables ", ")
                                  ")")))))
                    (org-babel-execute-src-block
