@@ -89,8 +89,6 @@ NOTE: By default, string variable names are interpreted as
 references to source-code blocks, to force interpretation of a
 cell's value as a string, prefix the identifier a \"$\" (e.g.,
 \"$$2\" instead of \"$2\" or \"$@2$2\" instead of \"@2$2\").
-This will not work with a range; instead, pass it as a list,
-e.g. (org-sbe fun (r (list $1..$2))).
 
 NOTE: It is also possible to pass header arguments to the code
 block.  In this case a table cell should hold the string value of
@@ -114,7 +112,7 @@ as shown in the example below.
 				      (prog1 nil (setq quote t))
 				    (prog1
 					(cond
-					 (quote (format "%S" el))
+					 (quote (format "\"%s\"" el))
 					 ((stringp el) (org-no-properties el))
 					 (t el))
 				      (setq quote nil))))
@@ -134,17 +132,12 @@ as shown in the example below.
                                  "("
                                  (mapconcat
                                   (lambda (var-spec)
-                                    (cond
-				     ((> (length (cdr var-spec)) 1)
-				      (format "%S='%S"
-					      (car var-spec)
-					      (mapcar #'read (cdr var-spec))))
-				     ((stringp (cadr var-spec))
-				      (format "%S=%s"
-                                              (car var-spec) (cadr var-spec)))
-				     (t
-				      (format "%S=%S"
-                                              (car var-spec) (cadr var-spec)))))
+                                    (if (> (length (cdr var-spec)) 1)
+                                        (format "%S='%S"
+                                                (car var-spec)
+                                                (mapcar #'read (cdr var-spec)))
+                                      (format "%S=%s"
+                                              (car var-spec) (cadr var-spec))))
                                   ',variables ", ")
                                  ")")))))
                    (org-babel-execute-src-block
