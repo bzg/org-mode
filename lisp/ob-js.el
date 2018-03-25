@@ -140,11 +140,13 @@ specifying a variable of the same value."
 	 (var-lines (org-babel-variable-assignments:js params)))
     (when session
       (org-babel-comint-in-buffer session
-	(sit-for .5) (goto-char (point-max))
-	(mapc (lambda (var)
-		(insert var) (comint-send-input nil t)
-		(org-babel-comint-wait-for-output session)
-		(sit-for .1) (goto-char (point-max))) var-lines)))
+	(goto-char (point-max))
+	(dolist (var var-lines)
+	  (insert var)
+	  (comint-send-input nil t)
+	  (org-babel-comint-wait-for-output session)
+	  (sit-for .1)
+	  (goto-char (point-max)))))
     session))
 
 (defun org-babel-variable-assignments:js (params)
