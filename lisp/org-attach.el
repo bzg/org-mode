@@ -319,7 +319,8 @@ the ATTACH_DIR property) their own attachment directory."
 (defun org-attach-annex-get-maybe (path)
   "Call git annex get PATH (via shell) if using git annex.
 Signals an error if the file content is not available and it was not retrieved."
-  (let ((path-relative (file-relative-name path)))
+  (let* ((default-directory (expand-file-name org-attach-directory))
+	 (path-relative (file-relative-name path)))
     (when (and (org-attach-use-annex)
 	       (not
 		(string-equal
