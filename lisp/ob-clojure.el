@@ -47,14 +47,13 @@
 (declare-function nrepl--merge "ext:nrepl-client" (dict1 dict2))
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
 (declare-function nrepl-dict-put "ext:nrepl-client" (dict key value))
-(declare-function nrepl-request:eval "ext:nrepl-client"
-		  (input callback connection &optional session ns line column additional-params))
-(declare-function nrepl-sync-request:eval "ext:nrepl-client"
-		  (input connection session &optional ns))
+(declare-function nrepl-request:eval "ext:nrepl-client" (input callback connection &optional ns line column additional-params tooling))
+(declare-function nrepl-sync-request:eval "ext:nrepl-client" (input connection &optional ns tooling))
 (declare-function org-trim "org" (s &optional keep-lead))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar nrepl-sync-request-timeout)
+(defvar cider-buffer-ns)
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
@@ -80,19 +79,40 @@ If the value is nil, timeout is disabled."
 	  (const :tag "cider" cider)
 	  (const :tag "SLIME" slime)))
 
+(defcustom org-babel-clojure-default-ns "user"
+  "Default Clojure namespace for src block when all find ns ways failed."
+  :type 'string
+  :group 'org-babel)
+
+(defun org-babel-clojure-cider-current-ns ()
+  "Like `cider-current-ns' except `cider-find-ns'."
+  (or cider-buffer-ns
+      (let ((repl-buf (cider-current-connection)))
+	(and repl-buf (buffer-local-value 'cider-buffer-ns repl-buf)))
+      org-babel-clojure-default-ns))
+
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
+	 (ns (or (cdr (assq :ns params))
+		 (org-babel-clojure-cider-current-ns)))
 	 (result-params (cdr (assq :result-params params)))
-	 (print-level nil) (print-length nil)
-	 (body (org-trim
-		(if (null vars) (org-trim body)
-		  (concat "(let ["
-			  (mapconcat
-			   (lambda (var)
-			     (format "%S (quote %S)" (car var) (cdr var)))
-			   vars "\n      ")
-			  "]\n" body ")")))))
+	 (print-level nil)
+	 (print-length nil)
+	 (body
+	  (org-trim
+	   (format "(ns %s)\n%s"
+		   ;; Source block specified namespace :ns.
+		   ns
+		   ;; Variables binding.
+		   (if (null vars) (org-trim body)
+		     (format "(let [%s]\n%s)"
+			     (mapconcat
+			      (lambda (var)
+				(format "%S (quote %S)" (car var) (cdr var)))
+			      vars
+			      "\n      ")
+			     body))))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format "(clojure.pprint/pprint (do %s))" body)
@@ -102,9 +122,9 @@ If the value is nil, timeout is disabled."
   "Execute a block of Clojure code with Babel.
 The underlying process performed by the code block can be output
 using the :show-process parameter."
-  (let ((expanded (org-babel-expand-body:clojure body params))
-	(response (list 'dict))
-        result)
+  (let* ((expanded (org-babel-expand-body:clojure body params))
+	 (response (list 'dict))
+         result)
     (cl-case org-babel-clojure-backend
       (cider
        (require 'cider)
@@ -117,8 +137,7 @@ using the :show-process parameter."
 		     (let ((nrepl-sync-request-timeout
 			    org-babel-clojure-sync-nrepl-timeout))
 		       (nrepl-sync-request:eval expanded
-						(cider-current-connection)
-						(cider-current-ns))))
+						(cider-current-connection))))
 	       (setq result
 		     (concat
 		      (nrepl-dict-get response
@@ -152,8 +171,7 @@ using the :show-process parameter."
 		(nrepl--merge response resp)
 		;; Update the status of the nREPL output session.
 		(setq status (nrepl-dict-get response "status")))
-	      (cider-current-connection)
-	      (cider-current-ns))
+	      (cider-current-connection))
 
 	     ;; Wait until the nREPL code finished to be processed.
 	     (while (not (member "done" status))
