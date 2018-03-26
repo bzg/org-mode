@@ -221,7 +221,14 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
 
 (defun org-babel-clojure-var-to-clojure (var)
   "Convert src block's `VAR' to Clojure variable."
-  ;; TODO: reference `org-babel-python-var-to-python'
+  (if (listp var)
+      (replace-regexp-in-string "(" "'(" var)
+    (cond
+     ((stringp var)
+      ;; wrap org-babel passed in header argument value with quote in Clojure.
+      (format "\"%s\"" var))
+     (t
+      (format "%s" var))))
   )
 
 (defun org-babel-variable-assignments:clojure (params)
@@ -230,8 +237,7 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
    (lambda (pair)
      (format "(def %s %s)"
              (car pair)
-             ;; (org-babel-clojure-var-to-clojure (cdr pair))
-             (cdr pair)))
+             (org-babel-clojure-var-to-clojure (cdr pair))))
    (org-babel--get-vars params)))
 
 ;;; Support header arguments  :results graphics :file "image.png" by inject Clojure code.
