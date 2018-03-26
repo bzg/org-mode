@@ -7,7 +7,7 @@
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
-;; Version: 9.1.8
+;; Version: 9.1.9
 ;;
 ;; This file is part of GNU Emacs.
 ;;
