@@ -6176,7 +6176,7 @@ scheduled items with an hour specification like [h]h:mm."
 		 ;; Nullify delay when a repeater triggered already
 		 ;; and the delay is of the form --Xd.
 		 ((and (string-match-p "--[0-9]+[hdwmy]" s)
-		       (> current schedule))
+		       (> schedule (org-agenda--timestamp-to-absolute s)))
 		  0)
 		 (suppress-delay
 		  (let ((org-scheduled-delay-days suppress-delay))
