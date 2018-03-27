@@ -20637,13 +20637,15 @@ be complete if the ones above were not mentioned in this manual.
 - Piotr Zielinski wrote =org-mouse.el=, proposed agenda
   blocks and contributed various ideas and code snippets.
 
+- Marco Wahl wrote =org-eww.el=.
+
 * GNU Free Documentation License
 :PROPERTIES:
 :APPENDIX: t
 :DESCRIPTION: The license for this documentation.
 :END:
 
-#+texinfo: @include ../doc/doclicense.texi
+#+texinfo: @include doclicense.texi
 
 * Main Index
 :PROPERTIES:
