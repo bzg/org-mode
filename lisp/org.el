@@ -4909,10 +4909,10 @@ Support for group tags is controlled by the option
    ((null alist2) alist1)
    ((null alist1) alist2)
    (t (let ((alist2-cars (mapcar (lambda (x) (car-safe x)) alist2))
-  	    to-add)
+	    to-add)
 	(dolist (i alist1)
 	  (unless (member (car-safe i) alist2-cars)
-  	    (push i to-add)))
+	    (push i to-add)))
 	(append to-add alist2)))))
 
 (defun org-set-regexps-and-options (&optional tags-only)
@@ -14340,9 +14340,9 @@ instead of the agenda files."
 		     (org-tag-add-to-alist
 		      (org-get-buffer-tags)
 		      (mapcar (lambda (x)
-		     		(and (stringp (car-safe x))
-		     		     (list (car-safe x))))
-		     	      org-current-tag-alist)))
+				(and (stringp (car-safe x))
+				     (list (car-safe x))))
+			      org-current-tag-alist)))
 		   (if (car-safe files) files
 		     (org-agenda-files))))))))
 
