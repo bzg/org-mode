@@ -7593,7 +7593,7 @@ To use this feature, add a bookmark with an arbitrary name, e.g.  @samp{Org:
 capture} and enter this as @samp{Location}:
 
 @example
-javascript:location.href='org-protocol://template=x'+
+javascript:location.href='org-protocol://capture?template=x'+
       '&url='+encodeURIComponent(window.location.href)+
       '&title='+encodeURIComponent(document.title)+
       '&body='+encodeURIComponent(window.getSelection());
