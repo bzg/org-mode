@@ -18874,7 +18874,7 @@ necessary.  Users should look into customizing these further based on
 their usage needs.  For example, the normal {{{kbd(S-cursor)}}} for
 editing timestamp might be better with {{{kbd(C-c .)}}} chord.
 
-#+attr_texinfo: :columns 0.2 0.25 0.1 0.25
+#+attr_texinfo: :columns 0.2 0.28 0.15 0.21
 | Default              | Alternative 1            | Speed key    | Alternative 2        |
 |----------------------+--------------------------+--------------+----------------------|
 | {{{kbd(S-TAB)}}}     | {{{kbd(C-u TAB)}}}       | {{{kbd(C)}}} |                      |
