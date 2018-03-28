@@ -20702,7 +20702,6 @@ modify this GNU manual."
 #+author:    by Carsten Dominik
 #+subauthor: with contributions by Bastien Guerry, Nicolas Goaziou, Eric Schulte, Jambunathan K, Dan Davison, Thomas Dye, David O'Toole, and Philip Rooke.
 #+date:      {{{modification-time}}}
-#+email:     tsd@tsdye.com
 #+language:  en
 
 # XXX: We cannot use TODO keyword as a node starts with "TODO".
