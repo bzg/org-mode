@@ -6692,7 +6692,7 @@ using the =:formatter= parameter.
      table.  If you write it like =50!=, then the headline is also
      shortened in export.
 
-- :indent  ::
+- :indent ::
 
      Indent each headline field according to its level.
 
@@ -6731,7 +6731,7 @@ using the =:formatter= parameter.
      When this flag is non-~nil~, the values for =:properties= are
      inherited.
 
-- :formula  ::
+- :formula ::
 
      Content of a =TBLFM= keyword to be added and evaluated.  As
      a special case, =:formula %= adds a column with % time.  If you
@@ -7485,24 +7485,24 @@ here:
 
      Specific information for certain link types, see below.
 
-- ~%^g~  ::
+- ~%^g~ ::
 
      Prompt for tags, with completion on tags in target file.
 
-- ~%^G~  ::
+- ~%^G~ ::
 
      Prompt for tags, with completion all tags in all agenda files.
 
-- ~%^t~  ::
+- ~%^t~ ::
 
      Like ~%t~, but prompt for date.  Similarly ~%^T~, ~%^u~, ~%^U~.  You may
      define a prompt like ~%^{Birthday}t~.
 
-- ~%^C~  ::
+- ~%^C~ ::
 
      Interactive selection of which kill or clip to use.
 
-- ~%^L~  ::
+- ~%^L~ ::
 
      Like ~%^C~, but insert as link.
 
@@ -9981,37 +9981,37 @@ the other commands, the cursor needs to be in the desired line.
           changes the state of all selected entries, bypassing blocking
           and suppressing logging notes---but not timestamps.
 
-     - {{{kbd(+)}}}  ::
+     - {{{kbd(+)}}} ::
 
           Add a tag to all selected entries.
 
-     - {{{kbd(-)}}}  ::
+     - {{{kbd(-)}}} ::
 
           Remove a tag from all selected entries.
 
-     - {{{kbd(s)}}}  ::
+     - {{{kbd(s)}}} ::
 
           Schedule all items to a new date.  To shift existing schedule
           dates by a fixed number of days, use something starting with
           double plus at the prompt, for example =++8d= or =++2w=.
 
-     - {{{kbd(d)}}}  ::
+     - {{{kbd(d)}}} ::
 
           Set deadline to a specific date.
 
-     - {{{kbd(r)}}}  ::
+     - {{{kbd(r)}}} ::
 
           Prompt for a single refile target and move all entries.  The
           entries are no longer in the agenda; refresh ({{{kbd(g)}}}) to
           bring them back.
 
-     - {{{kbd(S)}}}  ::
+     - {{{kbd(S)}}} ::
 
           Reschedule randomly into the coming N days.  N is prompted for.
           With a prefix argument ({{{kbd(C-u B S)}}}), scatter only
           across weekdays.
 
-     - {{{kbd(f)}}}  ::
+     - {{{kbd(f)}}} ::
 
           #+vindex: org-agenda-bulk-custom-functions
           Apply a function[fn:95] to marked entries.  For example, the
