@@ -2912,7 +2912,7 @@ following table.
 | Leeds     |    165.77 |   19.68 |
 | Sao Paolo |     71.00 |   11.50 |
 | Stockholm |    134.19 |   14.33 |
-| Morels    |    257.56 |   17.67 |
+| Morelia   |    257.56 |   17.67 |
 #+end_example
 
 Notice that Org Plot is smart enough to apply the table's headers as
