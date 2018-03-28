@@ -16647,7 +16647,7 @@ evaluated as Emacs Lisp code, as illustrated in the following example.
 ,#+NAME: table
 | (a b c) |
 
-,#+HEADERS: :var data=table[0,0]
+,#+HEADER: :var data=table[0,0]
 ,#+BEGIN_SRC perl
   $data
 ,#+END_SRC
