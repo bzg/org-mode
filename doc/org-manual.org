@@ -1406,8 +1406,8 @@ You can check syntax in your documents using ~org-lint~ command.
 #+cindex: editing tables
 
 Org comes with a fast and intuitive table editor.  Spreadsheet-like
-calculations are supported using the Emacs Calc package (see
-[[info:calc]]).
+calculations are supported using the Emacs Calc package (see [[info:calc][GNU Emacs
+Calculator Manual]]).
 
 ** Built-in Table Editor
 :PROPERTIES:
