@@ -15195,7 +15195,7 @@ is non-~nil~, like the following:
 
 : #+ATTR_ASCII: :language t
 
-Then extend /ascii/ back-end with a custom "my-ascii" back-end.
+Then extend ASCII back-end with a custom "my-ascii" back-end.
 
 #+begin_src emacs-lisp
 (defun my-ascii-src-block (src-block contents info)
