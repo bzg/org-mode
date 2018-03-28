@@ -18871,7 +18871,7 @@ Org provides alternative key bindings for TTY and modern mobile
 devices that cannot handle cursor keys and complex modifier key
 chords.  Some of these workarounds may be more cumbersome than
 necessary.  Users should look into customizing these further based on
-their usage needs.  For example, the normal {{{kbd(S-cursor)}}} for
+their usage needs.  For example, the normal {{{kbd(S-<cursor>)}}} for
 editing timestamp might be better with {{{kbd(C-c .)}}} chord.
 
 #+attr_texinfo: :columns 0.2 0.28 0.15 0.21
@@ -19015,7 +19015,7 @@ the cursor moves across a special context.
 
      #+cindex: @file{cua.el}
      #+vindex: org-replace-disputed-keys
-     Org key bindings conflict with {{{kbd(S-cursor)}}} keys used by
+     Org key bindings conflict with {{{kbd(S-<cursor>)}}} keys used by
      CUA mode.  For Org to relinquish these bindings to CUA mode,
      configure the variable ~org-replace-disputed-keys~.  When set,
      Org moves the following key bindings in Org files, and in the
