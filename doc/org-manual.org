@@ -4160,12 +4160,13 @@ example, with the setting
       '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
 #+end_src
 
-To record a timestamp without a note for TODO keywords configured with
+#+texinfo: @noindent
+to record a timestamp without a note for TODO keywords configured with
 =@=, just type {{{kbd(C-c C-c)}}} to enter a blank note when prompted.
 
 #+vindex: org-log-done
-#+texinfo: noindent
-you not only define global TODO keywords and fast access keys, but
+#+texinfo: @noindent
+You not only define global TODO keywords and fast access keys, but
 also request that a time is recorded when the entry is set to =DONE=,
 and that a note is recorded when switching to =WAIT= or
 =CANCELED=[fn:46].  The setting for =WAIT= is even more special: the

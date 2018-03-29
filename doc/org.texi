@@ -4679,12 +4679,13 @@ example, with the setting
       '((sequence "TODO(t)" "WAIT(w@@/!)" "|" "DONE(d!)" "CANCELED(c@@)")))
 @end lisp
 
-To record a timestamp without a note for TODO keywords configured with
+@noindent
+to record a timestamp without a note for TODO keywords configured with
 @samp{@@}, just type @kbd{C-c C-c} to enter a blank note when prompted.
 
 @vindex org-log-done
-noindent
-you not only define global TODO keywords and fast access keys, but
+@noindent
+You not only define global TODO keywords and fast access keys, but
 also request that a time is recorded when the entry is set to @samp{DONE},
 and that a note is recorded when switching to @samp{WAIT} or
 @samp{CANCELED}@footnote{It is possible that Org mode records two timestamps when you
