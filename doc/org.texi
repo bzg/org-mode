@@ -7065,7 +7065,7 @@ clock stopped.
 
 @cindex @samp{CLOCK_MODELINE_TOTAL}, property
 @cindex @samp{LAST_REPEAT}, property
-@vindex org-clock-modeline-total
+@vindex org-clock-mode-line-total
 @vindex org-clock-in-prepare-hook
 While the clock is running, Org shows the current clocking time
 in the mode line, along with the title of the task.  The clock
@@ -7079,7 +7079,7 @@ the @samp{CLOCK_MODELINE_TOTAL} property.  It may have the values
 @samp{current} to show only the current clocking instance, @samp{today} to
 show all time clocked on this tasks today---see also the
 variable @code{org-extend-today-until}, @code{all} to include all time, or
-@code{auto} which is the default@footnote{See also the variable @code{org-clock-modeline-total}.}.  Clicking with
+@code{auto} which is the default@footnote{See also the variable @code{org-clock-mode-line-total}.}.  Clicking with
 @kbd{mouse-1} onto the mode line entry pops up a menu with
 clocking options.
 

@@ -6399,7 +6399,7 @@ prompted about what to do with it.
 
      #+cindex: @samp{CLOCK_MODELINE_TOTAL}, property
      #+cindex: @samp{LAST_REPEAT}, property
-     #+vindex: org-clock-modeline-total
+     #+vindex: org-clock-mode-line-total
      #+vindex: org-clock-in-prepare-hook
      While the clock is running, Org shows the current clocking time
      in the mode line, along with the title of the task.  The clock
@@ -21023,7 +21023,7 @@ this to ~org-clock-in-prepare-hook~.
 [fn:73] The last reset of the task is recorded by the =LAST_REPEAT=
 property.
 
-[fn:74] See also the variable ~org-clock-modeline-total~.
+[fn:74] See also the variable ~org-clock-mode-line-total~.
 
 [fn:75] The corresponding in-buffer setting is: =#+STARTUP:
 lognoteclock-out=.
