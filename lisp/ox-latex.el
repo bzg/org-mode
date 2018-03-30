@@ -810,8 +810,9 @@ attributes."
   :type 'boolean
   :safe #'booleanp)
 
-(defcustom org-latex-table-scientific-notation "%s\\,(%s)"
+(defcustom org-latex-table-scientific-notation nil
   "Format string to display numbers in scientific notation.
+
 The format should have \"%s\" twice, for mantissa and exponent
 \(i.e., \"%s\\\\times10^{%s}\").
 

@@ -267,7 +267,7 @@ be placed after the end of the title."
   :group 'org-export-texinfo
   :type 'boolean)
 
-(defcustom org-texinfo-table-scientific-notation "%s\\,(%s)"
+(defcustom org-texinfo-table-scientific-notation nil
   "Format string to display numbers in scientific notation.
 
 The format should have \"%s\" twice, for mantissa and exponent

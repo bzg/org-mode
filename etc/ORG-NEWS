@@ -265,6 +265,16 @@ Org Tempo may be used as a replacement.  See details above.
 
 ** Miscellaneous
 
+*** New default value for ~org-texinfo-table-scientific-notation~
+
+It is now nil, which means numbers in scientific notation are not
+handled specially by default.
+
+*** New default value for ~org-latex-table-scientific-notation~
+
+It is now nil, which means numbers in scientific notation are not
+handled specially by default.
+
 *** New face: ~org-upcoming-distant-deadline~
 
 It is meant to be used as the face for distant deadlines, see
