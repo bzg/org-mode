@@ -1823,10 +1823,11 @@ with the following tools:
      #+findex: org-table-expand
      Expand all columns.
 
-To see the full text of a shrunk field, hold the mouse over it---a
-tool-tip window then shows the full content.  Alternatively {{{kbd(C-h
-.)}}}  (~display-local-help~) reveals the full content.  For
-convenience, any change to a shrunk column expands it.
+To see the full text of a shrunk field, hold the mouse over it:
+a tool-tip window then shows the full contents of the field.
+Alternatively, {{{kbd(C-h .)}}} (~display-local-help~) reveals them,
+too.  For convenience, any change near the shrunk part of a column
+expands it.
 
 #+vindex: org-startup-shrink-all-tables
 Setting the option ~org-startup-shrink-all-tables~ shrinks all columns
