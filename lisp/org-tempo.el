@@ -40,7 +40,7 @@
 
 (require 'tempo)
 (require 'cl-lib)
-(declare-function org-buffer-list "org" (&optional predicate exclude-tmp))
+(require 'org)
 
 (defvar org-structure-template-alist)
 
@@ -156,19 +156,15 @@ didn't succeed."
 ;;
 ;; Org Tempo is set up with each new Org buffer and potentially in the
 ;; current Org buffer.
-;;
-;; Tempo templates can only be added after Org is loaded as
-;; `org-structure-template-alist' must be loaded.
 
 (add-hook 'org-mode-hook 'org-tempo-setup)
 (add-hook 'org-tab-before-tab-emulation-hook 'org-tempo-complete-tag)
 
+(org-tempo-add-templates)
+
 ;; Enable Org Tempo in all open Org buffers.
 (dolist (b (org-buffer-list 'files))
   (with-current-buffer b (org-tempo-setup)))
-
-(eval-after-load 'org
-  '(org-tempo-add-templates))
 
 (provide 'org-tempo)
 
