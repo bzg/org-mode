@@ -308,8 +308,20 @@ last statement in BODY, as elisp."
 	       (list (format "open('%s', 'w').write(str(_))"
 			     (org-babel-process-file-name tmp-file
                                                           'noquote)))))))
+	 (last-indent 0)
 	 (input-body (lambda (body)
-		       (mapc (lambda (line) (insert line) (funcall send-wait))
+		       (mapc (lambda (line)
+			       ;; Insert a blank line to end an indent block.
+			       (let ((curr-indent (string-match "[^\s]" line)))
+				 (if curr-indent
+				     (progn
+				       (when (< curr-indent last-indent)
+					 (insert "")
+					 (funcall send-wait))
+				       (setq last-indent curr-indent))
+				   (setq last-indent 0)))
+			       (insert line)
+			       (funcall send-wait))
 			     (split-string body "[\r\n]"))
 		       (funcall send-wait)))
          (results
