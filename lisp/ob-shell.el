@@ -60,7 +60,7 @@ variables."
 		      name)))))
 
 (defcustom org-babel-shell-names
-  '("sh" "bash" "csh" "ash" "dash" "ksh" "mksh" "posh")
+  '("sh" "bash" "zsh" "fish" "csh" "ash" "dash" "ksh" "mksh" "posh")
   "List of names of shell supported by babel shell code blocks.
 Call `org-babel-shell-initialize' when modifying this variable
 outside the Customize interface."
