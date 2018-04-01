@@ -43,6 +43,7 @@
 (declare-function run-mozilla "ext:moz" (arg))
 (declare-function httpd-start "simple-httpd" ())
 (declare-function run-skewer "skewer-mode" ())
+(declare-function skewer-repl "skewer-repl" ())
 (declare-function indium-run-node "indium-nodejs" (command))
 (declare-function indium-eval "indium-interaction" (string &optional callback))
 
@@ -156,8 +157,8 @@ specifying a variable of the same value."
 			  (car pair) (org-babel-js-var-to-js (cdr pair))))
    (org-babel--get-vars params)))
 
-(defun org-babel-js-initiate-session (&optional session)
-  "If there is not a current inferior-process-buffer in SESSION
+(defun org-babel-js-initiate-session (&optional session _params)
+  "If there is not a current inferior-process-buffer in `SESSION'
 then create.  Return the initialized session."
   (cond
    ((string= session "none")
@@ -165,12 +166,14 @@ then create.  Return the initialized session."
    ((string= "*skewer-repl*" session)
     (require 'skewer-repl)
     (let ((session-buffer (get-buffer "*skewer-repl*")))
-      (if (and (org-babel-comint-buffer-livep (get-buffer session-buffer))
+      (if (and session-buffer
+	       (org-babel-comint-buffer-livep (get-buffer session-buffer))
 	       (comint-check-proc session-buffer))
 	  session-buffer
 	;; start skewer REPL.
 	(httpd-start)
 	(run-skewer)
+	(skewer-repl)
 	session-buffer)))
    ((string= "*Javascript REPL*" session)
     (require 'js-comint)
