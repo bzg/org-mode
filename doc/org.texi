@@ -621,6 +621,7 @@ You can clone Org's repository and install Org like this:
 @example
 $ cd ~/src/
 $ git clone git@@code.orgmode.org:bzg/org-mode.git
+$ cd org-mode/
 $ make autoloads
 @end example
 
