@@ -265,7 +265,7 @@ Then you need to assign image variable to this :file value like:
          (directory (and dir (file-name-as-directory (expand-file-name dir))))
 	 (result-type (cdr (assq :results params)))
 	 (file (cdr (assq :file params)))
-	 (file-name (file-name-base file))
+	 (file-name (and file (file-name-base file)))
 	 ;; TODO: future support `:graphics-file' to avoid collision.
 	 (graphics-result (member "graphics" (cdr (assq :result-params params))))
 	 ;; (graphics-file (cdr (assq :graphics-file params)))
