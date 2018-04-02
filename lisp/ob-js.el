@@ -89,12 +89,12 @@ This function is called by `org-babel-execute-src-block'"
 		     (org-babel-eval
 		      (format "%s %s" org-babel-js-cmd
 			      (org-babel-process-file-name script-file)) "")))
-		  ;; Indium Node REPL
-		  ;; separate case because Indium REPL is not inherited from comint-mode
+		  ;; Indium Node REPL.  Separate case because Indium
+		  ;; REPL is not inherited from Comint mode.
 		  ((string= session "*JS REPL*")
 		   (require 'indium-repl)
 		   (unless (get-buffer session)
-		     (indium-run-node))
+		     (indium-run-node org-babel-js-cmd))
 		   (indium-eval full-body))
 		  ;; session evaluation
 		  (t
