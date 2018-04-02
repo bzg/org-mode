@@ -63,7 +63,11 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
 
 (defun ob-clojure-literate-get-session-list ()
   "Return a list of available started CIDER REPL sessions list."
-  (-map 'buffer-name cider-connections))
+  (-map 'buffer-name
+	;; for multiple connections case.
+	;; get global value instead of buffer local.
+	(default-value 'cider-connections)
+	))
 
 (defun ob-clojure-literate-set-session ()
   "Set session name for buffer local."
@@ -82,7 +86,7 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
     ))
 
 ;;;###autoload
-(defun ob-clojure-literate-specify-session-header-argument ()
+(defun ob-clojure-literate-specify-session ()
   "Specify ob-clojure header argument :session with value selected from a list of available sessions."
   (interactive)
   (let ((lang (nth 0 (org-babel-get-src-block-info))))
@@ -297,7 +301,7 @@ reset `RESULT' to `nil'."
     map)
   "Keymap for `ob-clojure-literate-mode'.")
 
-(define-key org-babel-map (kbd "M-s") 'ob-clojure-literate-specify-session-header-argument)
+(define-key org-babel-map (kbd "M-s") 'ob-clojure-literate-specify-session)
 (define-key org-babel-map (kbd "M-j") 'ob-clojure-literate-auto-jackin)
 ;; (define-key org-babel-map (kbd "M-e") 'cider-eval-last-sexp)
 ;; (define-key org-babel-map (kbd "M-d") 'cider-doc)
