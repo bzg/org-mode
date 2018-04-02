@@ -2406,7 +2406,7 @@ See also `test-org-table/copy-field'."
   ;; With a column width cookie, limit overlay to the specified number
   ;; of characters.
   (should
-   (equal "| ab"
+   (equal "| abc"
 	  (org-test-with-temp-text "| <3>  |\n| <point>abcd |"
 	    (org-table-toggle-column-width)
 	    (buffer-substring (line-beginning-position)
@@ -2414,7 +2414,7 @@ See also `test-org-table/copy-field'."
 			       (car (overlays-in (line-beginning-position)
 						 (line-end-position))))))))
   (should
-   (equal "| a "
+   (equal "| a  "
 	  (org-test-with-temp-text "| <3>  |\n| <point>a   |"
 	    (org-table-toggle-column-width)
 	    (buffer-substring (line-beginning-position)
@@ -2423,7 +2423,7 @@ See also `test-org-table/copy-field'."
 						 (line-end-position))))))))
   ;; Width only takes into account visible characters.
   (should
-   (equal "| [[htt"
+   (equal "| [[http"
 	  (org-test-with-temp-text "| <4> |\n| <point>[[http://orgmode.org]] |"
 	    (org-table-toggle-column-width)
 	    (buffer-substring (line-beginning-position)

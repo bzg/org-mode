@@ -3879,6 +3879,33 @@ When non-nil, return the overlay narrowing the field."
 	(when (org-table--shrunk-field) (push column shrunk)))
       (nreverse shrunk))))
 
+(defun org-table--make-shrinking-overlay (start end display field &optional pre)
+  "Create an overlay to shrink text between START and END.
+
+Use string DISPLAY instead of the real text between the two
+buffer positions.  FIELD is the real contents of the field, as
+a string, or nil.  It is meant to be displayed upon moving the
+mouse onto the overlay.
+
+Return the overlay."
+  (let ((show-before-edit
+	 (lambda (o &rest _)
+	   ;; Removing one overlay removes all other overlays in the
+	   ;; same column.
+	   (mapc #'delete-overlay
+		 (cdr (overlay-get o 'org-table-column-overlays)))))
+	(o (make-overlay start end)))
+    (overlay-put o 'insert-behind-hooks (and (not pre) (list show-before-edit)))
+    (overlay-put o 'insert-in-front-hooks (list show-before-edit))
+    (overlay-put o 'modification-hooks (list show-before-edit))
+    (overlay-put o 'org-overlay-type 'table-column-hide)
+    (when (stringp field) (overlay-put o 'help-echo field))
+    ;; Make sure overlays stays on top of table coordinates overlays.
+    ;; See `org-table-overlay-coordinates'.
+    (overlay-put o 'priority 1)
+    (org-overlay-display o display 'org-table t)
+    o))
+
 (defun org-table--shrink-field (width start end contents)
   "Shrink a table field to a specified width.
 
@@ -3888,13 +3915,13 @@ and END are, respectively, the beginning and ending positions of
 the field.  CONTENTS is its trimmed contents, as a string, or
 `hline' for table rules.
 
-Real field is hidden under an overlay.  The latter has the
+Real field is hidden under one or two overlays.  They have the
 following properties:
 
   `org-overlay-type'
 
     Set to `table-column-hide'.  Used to identify overlays
-    responsible for the task.
+    responsible for shrinking columns in a table.
 
   `org-table-column-overlays'
 
@@ -3906,48 +3933,58 @@ Whenever the text behind or next to the overlay is modified, all
 the overlays in the column are deleted, effectively displaying
 the column again.
 
-Return overlay hiding the field."
-  (unless (org-table--shrunk-field)
-    (let* ((overlay-start
-	    (cond
-	     ((= 0 width) start)		 ;hide everything
-	     ((<= (- end start) 1) start)	 ;column too short
-	     ((>= width (- end start)) (1- end)) ;enough room
-	     ((eq contents 'hline) (+ start width))
-	     (t
-	      ;; Find cut location so that WIDTH characters are
-	      ;; visible.
-	      (let* ((begin start)
-		     (lower begin)
-		     (upper (1- end)))
-		(catch :exit
-		  (while (> (- upper lower) 1)
-		    (let ((mean (+ (ash lower -1)
-				   (ash upper -1)
-				   (logand lower upper 1))))
-		      (pcase (org-string-width (buffer-substring begin mean))
-			((pred (= width)) (throw :exit mean))
-			((pred (< width)) (setq upper mean))
-			(_ (setq lower mean)))))
-		  upper)))))
-	   (display org-table-shrunk-column-indicator)
-	   (show-before-edit
-	    (list (lambda (o &rest _)
-		    ;; Removing one overlay removes all other overlays
-		    ;; in the same column.
-		    (mapc #'delete-overlay
-			  (cdr (overlay-get o 'org-table-column-overlays))))))
-	   (o (make-overlay overlay-start end)))
-      (overlay-put o 'insert-behind-hooks show-before-edit)
-      (overlay-put o 'insert-in-front-hooks show-before-edit)
-      (overlay-put o 'modification-hooks show-before-edit)
-      (overlay-put o 'org-overlay-type 'table-column-hide)
-      (when (stringp contents) (overlay-put o 'help-echo contents))
-      ;; Make sure overlays stays on top of table coordinates
-      ;; overlays.  See `org-table-overlay-coordinates'.
-      (overlay-put o 'priority 1)
-      (org-overlay-display o display 'org-table t)
-      o)))
+Return a list of overlays hiding the field, or nil if field is
+already hidden."
+  (cond
+   ((org-table--shrunk-field) nil)	;already shrunk: bail out
+   ((eq contents 'hline)		;no contents to hide
+    (list (org-table--make-shrinking-overlay
+	   (+ start width 1) end org-table-shrunk-column-indicator contents)))
+   ((or (= 0 width)			;shrink to one character
+	(>= 1 (org-string-width (buffer-substring start end))))
+    (list (org-table--make-shrinking-overlay
+	   start end org-table-shrunk-column-indicator contents)))
+   (t
+    ;; If the field is not empty, consider using two overlays: one for
+    ;; the blanks at the beginning of the field, and another one at
+    ;; the end of the field.  The former ensures a shrunk field is
+    ;; always displayed with a single white space character in front
+    ;; of it -- e.g., so that even right-aligned fields appear to the
+    ;; left -- and the latter cuts the field at WIDTH visible
+    ;; characters.
+    (let* ((pre-overlay
+	    (and (not (equal contents ""))
+		 (org-with-point-at start (looking-at "\\( [ \t]+\\)\\S-"))
+		 (org-table--make-shrinking-overlay
+		  start (match-end 1) org-table-separator-space nil 'pre)))
+	   (post-overlay
+	    (let* ((start (if pre-overlay (overlay-end pre-overlay)
+			    (1+ start)))
+		   (w (org-string-width (buffer-substring start (1- end)))))
+	      (if (>= width w)
+		  ;; Field is too short.  Extend its size by adding
+		  ;; white space characters to the right overlay.
+		  (org-table--make-shrinking-overlay
+		   (1- end) end (concat (make-string (- width w) ?\s)
+					org-table-shrunk-column-indicator)
+		   contents)
+		;; Find cut location so that WIDTH characters are visible.
+		(org-table--make-shrinking-overlay
+		 (let* ((begin start)
+			(lower begin)
+			(upper (1- end)))
+		   (catch :exit
+		     (while (> (- upper lower) 1)
+		       (let ((mean (+ (ash lower -1)
+				      (ash upper -1)
+				      (logand lower upper 1))))
+			 (pcase (org-string-width (buffer-substring begin mean))
+			   ((pred (= width)) (throw :exit mean))
+			   ((pred (< width)) (setq upper mean))
+			   (_ (setq lower mean)))))
+		     upper))
+		 end org-table-shrunk-column-indicator contents)))))
+      (delq nil (list pre-overlay post-overlay))))))
 
 (defun org-table--read-column-selection (select max)
   "Read column selection select as a list of numbers.
@@ -4015,10 +4052,11 @@ table."
 			  (string-match "\\`<[lrc]?\\([0-9]+\\)>\\'" contents))
 		 (setq width (string-to-number (match-string 1 contents)))))))
 	 (forward-line))
-       ;; Link overlay to the other overlays in the same column.
+       ;; Link overlays for current field to the other overlays in the
+       ;; same column.
        (let ((chain (list 'siblings)))
 	 (dolist (field fields)
-	   (let ((new (apply #'org-table--shrink-field (or width 0) field)))
+	   (dolist (new (apply #'org-table--shrink-field (or width 0) field))
 	     (push new (cdr chain))
 	     (overlay-put new 'org-table-column-overlays chain))))))))
 
