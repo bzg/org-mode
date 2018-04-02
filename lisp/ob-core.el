@@ -2501,9 +2501,11 @@ in the buffer."
 If the `default-directory' is different from the containing
 file's directory then expand relative links."
   (when (stringp result)
-    (let ((same-directory? (not (string= (expand-file-name default-directory)
-					 (expand-file-name
-					  (file-name-directory buffer-file-name))))))
+    (let ((same-directory?
+	   (and buffer-file-name
+		(not (string= (expand-file-name default-directory)
+			      (expand-file-name
+			       (file-name-directory buffer-file-name)))))))
       (format "[[file:%s]%s]"
 	      (if (and default-directory buffer-file-name same-directory?)
 		  (if (eq org-link-file-path-type 'adaptive)
