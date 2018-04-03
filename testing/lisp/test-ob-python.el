@@ -118,6 +118,22 @@ return x
    (org-babel-next-src-block)
    (should (equal "20" (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob-python/insert-necessary-blank-line-when-sending-code-to-interpreter ()
+  (org-test-with-temp-text "#+begin_src python :session :results value
+if True:
+    1
+2
+#+end_src"
+    ;; Previously, while adding `:session' to a normal code block, also need to add extra blank lines
+    ;; to end indent block or indicate logical sections. Now, the `org-babel-python-evaluate-session'
+    ;; can do it automatically:
+    ;; >>> if True:
+    ;; >>>     1
+    ;; >>> <insert_blank_line_here>
+    ;; >>> 2
+    (org-babel-execute-maybe)
+    (should (equal 2 (org-babel-execute-src-block)))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here
