@@ -22645,9 +22645,13 @@ package ox-bibtex by Taru Karttunen."
 (defun org-beginning-of-line (&optional n)
   "Go to the beginning of the current visible line.
 
-If this is a headline, and `org-special-ctrl-a/e' is set, ignore
-tags on the first attempt, and only move to after the tags when
-the cursor is already beyond the end of the headline.
+If this is a headline, and `org-special-ctrl-a/e' is not nil or
+symbol `reversed', on the first attempt move to where the
+headline text starts, and only move to beginning of line when the
+cursor is already before the start of the text of the headline.
+
+If `org-special-ctrl-a/e' is symbol `reversed' then go to the
+start of the text on the second attempt.
 
 With argument N not nil or 1, move forward N - 1 lines first."
   (interactive "^p")
@@ -22704,9 +22708,13 @@ With argument N not nil or 1, move forward N - 1 lines first."
 (defun org-end-of-line (&optional n)
   "Go to the end of the line, but before ellipsis, if any.
 
-If this is a headline, and `org-special-ctrl-a/e' is set, ignore
-tags on the first attempt, and only move to after the tags when
-the cursor is already beyond the end of the headline.
+If this is a headline, and `org-special-ctrl-a/e' is not nil or
+symbol `reversed', ignore tags on the first attempt, and only
+move to after the tags when the cursor is already beyond the end
+of the headline.
+
+If `org-special-ctrl-a/e' is symbol `reversed' then ignore tags
+on the second attempt.
 
 With argument N not nil or 1, move forward N - 1 lines first."
   (interactive "^p")
