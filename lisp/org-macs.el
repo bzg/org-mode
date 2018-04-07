@@ -244,6 +244,93 @@ error when the user input is empty."
       'org-time-stamp-inactive)
     (apply #'completing-read args)))
 
+(defun org-mks (table title &optional prompt specials)
+  "Select a member of an alist with multiple keys.
+
+TABLE is the alist which should contain entries where the car is a string.
+There should be two types of entries.
+
+1. prefix descriptions like (\"a\" \"Description\")
+   This indicates that `a' is a prefix key for multi-letter selection, and
+   that there are entries following with keys like \"ab\", \"ax\"...
+
+2. Select-able members must have more than two elements, with the first
+   being the string of keys that lead to selecting it, and the second a
+   short description string of the item.
+
+The command will then make a temporary buffer listing all entries
+that can be selected with a single key, and all the single key
+prefixes.  When you press the key for a single-letter entry, it is selected.
+When you press a prefix key, the commands (and maybe further prefixes)
+under this key will be shown and offered for selection.
+
+TITLE will be placed over the selection in the temporary buffer,
+PROMPT will be used when prompting for a key.  SPECIAL is an
+alist with (\"key\" \"description\") entries.  When one of these
+is selected, only the bare key is returned."
+  (save-window-excursion
+    (let ((inhibit-quit t)
+	  (buffer (org-switch-to-buffer-other-window "*Org Select*"))
+	  (prompt (or prompt "Select: "))
+	  current)
+      (unwind-protect
+	  (catch 'exit
+	    (while t
+	      (erase-buffer)
+	      (insert title "\n\n")
+	      (let ((des-keys nil)
+		    (allowed-keys '("\C-g"))
+		    (cursor-type nil))
+		;; Populate allowed keys and descriptions keys
+		;; available with CURRENT selector.
+		(let ((re (format "\\`%s\\(.\\)\\'"
+				  (if current (regexp-quote current) "")))
+		      (prefix (if current (concat current " ") "")))
+		  (dolist (entry table)
+		    (pcase entry
+		      ;; Description.
+		      (`(,(and key (pred (string-match re))) ,desc)
+		       (let ((k (match-string 1 key)))
+			 (push k des-keys)
+			 (push k allowed-keys)
+			 (insert prefix "[" k "]" "..." "  " desc "..." "\n")))
+		      ;; Usable entry.
+		      (`(,(and key (pred (string-match re))) ,desc . ,_)
+		       (let ((k (match-string 1 key)))
+			 (insert prefix "[" k "]" "     " desc "\n")
+			 (push k allowed-keys)))
+		      (_ nil))))
+		;; Insert special entries, if any.
+		(when specials
+		  (insert "----------------------------------------------------\
+---------------------------\n")
+		  (pcase-dolist (`(,key ,description) specials)
+		    (insert (format "[%s]     %s\n" key description))
+		    (push key allowed-keys)))
+		;; Display UI and let user select an entry or
+		;; a sub-level prefix.
+		(goto-char (point-min))
+		(unless (pos-visible-in-window-p (point-max))
+		  (org-fit-window-to-buffer))
+		(message prompt)
+		(let ((pressed (char-to-string (read-char-exclusive))))
+		  (while (not (member pressed allowed-keys))
+		    (message "Invalid key `%s'" pressed) (sit-for 1)
+		    (message prompt)
+		    (setq pressed (char-to-string (read-char-exclusive))))
+		  (setq current (concat current pressed))
+		  (cond
+		   ((equal pressed "\C-g") (user-error "Abort"))
+		   ;; Selection is a prefix: open a new menu.
+		   ((member pressed des-keys))
+		   ;; Selection matches an association: return it.
+		   ((let ((entry (assoc current table)))
+		      (and entry (throw 'exit entry))))
+		   ;; Selection matches a special entry: return the
+		   ;; selection prefix.
+		   ((assoc current specials) (throw 'exit current))
+		   (t (error "No entry available")))))))
+	(when buffer (kill-buffer buffer))))))
 
 
 ;;; Logic
