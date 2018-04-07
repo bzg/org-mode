@@ -19157,8 +19157,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-x E") #'org-inc-effort)
 (org-defkey org-mode-map (kbd "C-c C-x o") #'org-toggle-ordered-property)
 (org-defkey org-mode-map (kbd "C-c C-x i") #'org-columns-insert-dblock)
-(org-defkey org-mode-map (kbd "C-c C-x w") #'org-insert-structure-template)
-
+(org-defkey org-mode-map (kbd "C-c C-,") #'org-insert-structure-template)
 (org-defkey org-mode-map (kbd "C-c C-x .") #'org-timer)
 (org-defkey org-mode-map (kbd "C-c C-x -") #'org-timer-item)
 (org-defkey org-mode-map (kbd "C-c C-x 0") #'org-timer-start)
