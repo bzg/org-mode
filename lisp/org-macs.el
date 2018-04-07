@@ -244,6 +244,19 @@ error when the user input is empty."
       'org-time-stamp-inactive)
     (apply #'completing-read args)))
 
+(defun org--mks-read-key (allowed-keys prompt)
+  "Read a key and ensure it is a member of ALLOWED-KEYS.
+TAB, SPC and RET are treated equivalently."
+  (let* ((key (char-to-string
+	       (pcase (read-char-exclusive prompt)
+		 ((or ?\s ?\t ?\r) ?\t)
+		 (char char)))))
+    (if (member key allowed-keys)
+        key
+      (message "Invalid key: `%s'" key)
+      (sit-for 1)
+      (org--mks-read-key allowed-keys prompt))))
+
 (defun org-mks (table title &optional prompt specials)
   "Select a member of an alist with multiple keys.
 
@@ -280,6 +293,7 @@ is selected, only the bare key is returned."
 	      (insert title "\n\n")
 	      (let ((des-keys nil)
 		    (allowed-keys '("\C-g"))
+		    (tab-alternatives '("\s" "\t" "\r"))
 		    (cursor-type nil))
 		;; Populate allowed keys and descriptions keys
 		;; available with CURRENT selector.
@@ -292,7 +306,10 @@ is selected, only the bare key is returned."
 		      (`(,(and key (pred (string-match re))) ,desc)
 		       (let ((k (match-string 1 key)))
 			 (push k des-keys)
-			 (push k allowed-keys)
+			 ;; Keys ending in tab, space or RET are equivalent.
+			 (if (member k tab-alternatives)
+			     (push "\t" allowed-keys)
+			   (push k allowed-keys))
 			 (insert prefix "[" k "]" "..." "  " desc "..." "\n")))
 		      ;; Usable entry.
 		      (`(,(and key (pred (string-match re))) ,desc . ,_)
@@ -312,12 +329,7 @@ is selected, only the bare key is returned."
 		(goto-char (point-min))
 		(unless (pos-visible-in-window-p (point-max))
 		  (org-fit-window-to-buffer))
-		(message prompt)
-		(let ((pressed (char-to-string (read-char-exclusive))))
-		  (while (not (member pressed allowed-keys))
-		    (message "Invalid key `%s'" pressed) (sit-for 1)
-		    (message prompt)
-		    (setq pressed (char-to-string (read-char-exclusive))))
+		(let ((pressed (org--mks-read-key allowed-keys prompt)))
 		  (setq current (concat current pressed))
 		  (cond
 		   ((equal pressed "\C-g") (user-error "Abort"))
