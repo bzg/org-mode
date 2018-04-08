@@ -414,7 +414,7 @@ then run `org-babel-switch-to-session'."
     (post       . :any)
     (prologue   . :any)
     (results	. ((file list vector table scalar verbatim)
-		   (raw html latex org code pp drawer)
+		   (raw html latex org code pp drawer link)
 		   (replace silent none append prepend)
 		   (output value)))
     (rownames	. ((no yes)))
@@ -706,14 +706,16 @@ block."
 	      (let ((file (cdr (assq :file params))))
 		;; If non-empty result and :file then write to :file.
 		(when file
-		  (let ((graphics?
-			 (member "graphics" (cdr (assq :result-params params)))))
-		    ;; Handle :results graphics :file case.  Don't
-		    ;; write result to file if result is graphics.
-		    (when (and result (not graphics?))
-		      (with-temp-file file
-			(insert (org-babel-format-result
-				 result (cdr (assq :sep params)))))))
+		  ;; If `:results' are special types like `link' or
+		  ;; `graphics', don't write result to `:file'.  Only
+		  ;; insert a link to `:file'.
+		  (when (and result
+			     (not (or (member "link" result-params)
+				      (member "graphics" result-params))))
+		    (with-temp-file file
+		      (insert (org-babel-format-result
+			       result
+			       (cdr (assq :sep params))))))
 		  (setq result file))
 		;; Possibly perform post process provided its
 		;; appropriate.  Dynamically bind "*this*" to the

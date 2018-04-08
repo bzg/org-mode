@@ -996,6 +996,21 @@ trying to find the :END: marker."
     (should (search-forward "[[file:foo][bar]]" nil t))
     (should (search-forward "[[file:foo][foo]]" nil t))))
 
+(ert-deftest test-ob/result-file-link-type-header-argument ()
+  "Ensure that the result is a link to a file.
+The file is just a link to `:file' value.  Inhibit non-empty
+result write to `:file' value."
+  (org-test-with-temp-text "
+<point>#+begin_src shell :results value link :file \"/tmp/test.txt\"
+echo \"hello\" > /tmp/test.txt
+echo \"test\"
+#+end_src"
+   (org-babel-execute-src-block)
+   (should (search-forward "[[file:/tmp/test.txt]]" nil nil))
+   (should (with-temp-buffer
+	     (insert-file-contents "/tmp/test.txt")
+	     (string= "hello\n" (buffer-string))))))
+
 (ert-deftest test-ob/inline-src_blk-preceded-punct-preceded-by-point ()
   (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }")
 	(org-babel-inline-result-wrap "=%s="))

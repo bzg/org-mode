@@ -17224,6 +17224,19 @@ follows from the type specified above.
      =raw= or =org= results for later scripting and automated
      processing.  Usage example: =:results value drawer=.
 
+- =link= ::
+
+     Result is a link to the file specified in =:file= header
+     argument.  However, unlike plain =:file=, nothing is written to
+     the disk.  The block is used for its side-effects only, as in the
+     following example:
+
+     #+begin_example
+     ,#+begin_src shell :results link :file "download.tar.gz"
+     wget -c "http://example.com/download.tar.gz"
+     ,#+end_src
+     #+end_example
+
 *** Handling
 :PROPERTIES:
 :UNNUMBERED: notoc

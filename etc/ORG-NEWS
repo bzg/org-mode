@@ -113,6 +113,20 @@ now sort according to the locale’s collation rules instead of by
 code-point.
 
 ** New features
+*** Add ~:results link~ support for Babel
+
+With this output format, create a link to the file specified in
+~:file~ header argument, without actually writing any result to it:
+
+#+begin_example
+,#+begin_src shell :dir "data/tmp" :results link :file "crackzor_1.0.c.gz"
+wget -c "http://ben.akrin.com/crackzor/crackzor_1.0.c.gz"
+,#+end_src
+
+,#+results:
+[[file:data/tmp/crackzor_1.0.c.gz]]
+#+end_example
+
 *** Add ~:session~ support of ob-js for js-comint
 #+begin_src js :session "*Javascript REPL*"
 console.log("stardiviner")
@@ -202,11 +216,11 @@ You can have a file =bananas.org= containing:
 ... and when going to the top of that file and entering column view
 you should expect to see something like:
 
-| ITEM            | CONFIRMED | Bananas | Confirmed Bananas |
-|-----------------+-----------+---------+-------------------|
-| All shipments   |           |      11 |                 4 |
-| Shipment 1      | [X]       |       4 |                 4 |
-| Shipment 2      | [ ]       |       7 |                 7 |
+| ITEM          | CONFIRMED | Bananas | Confirmed Bananas |
+|---------------+-----------+---------+-------------------|
+| All shipments |           |      11 |                 4 |
+| Shipment 1    | [X]       |       4 |                 4 |
+| Shipment 2    | [ ]       |       7 |                 7 |
 
 #+BEGIN_EXAMPLE
   ,#+STARTUP: shrink
@@ -3219,7 +3233,7 @@ See https://orgmode.org/elpa/
    | =C-c C-x E=     | =E=    | [[doc::org-inc-effort][org-inc-effort]]              |
    |                 | =#=    | [[doc::org-toggle-comment][org-toggle-comment]]          |
    |                 | =:=    | [[doc::org-columns][org-columns]]                 |
-   |                 | =W=    | Set =APPT_WARNTIME=          |
+   |                 | =W=    | Set =APPT_WARNTIME=         |
    | =k=             |        | [[doc::org-agenda-capture][org-agenda-capture]]          |
    | C-c ,           | ,      | [[doc::org-priority][org-priority]]                |
 
