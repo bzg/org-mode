@@ -1121,6 +1121,21 @@
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
      (looking-at-p "<<target>>")))
+  ;; `org-return-follows-link' handle multi-line lines.
+  (should
+   (org-test-with-temp-text
+       "[[target][This is a very\n long description<point>]]\n <<target>>"
+     (let ((org-return-follows-link t)
+	   (org-link-search-must-match-exact-headline nil))
+       (org-return))
+     (looking-at-p "<<target>>")))
+  (should-not
+   (org-test-with-temp-text
+       "[[target][This is a very\n long description]]<point>\n <<target>>"
+     (let ((org-return-follows-link t)
+	   (org-link-search-must-match-exact-headline nil))
+       (org-return))
+     (looking-at-p "<<target>>")))
   ;; However, do not open link when point is in a table.
   (should
    (org-test-with-temp-text "| [[target<point>]] |\n| between |\n| <<target>> |"
