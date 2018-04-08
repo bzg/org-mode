@@ -20525,7 +20525,14 @@ object (e.g., within a comment).  In these case, you need to use
      ;; `org-return-follows-link' allows it.  Tolerate fuzzy
      ;; locations, e.g., in a comment, as `org-open-at-point'.
      ((and org-return-follows-link
-	   (or (org-in-regexp org-ts-regexp-both nil t)
+	   (or (and (eq 'link (org-element-type context))
+		    ;; Ensure point is not on the white spaces after
+		    ;; the link.
+		    (let ((origin (point)))
+		      (org-with-point-at (org-element-property :end context)
+			(skip-chars-backward " \t")
+			(> (point) origin))))
+	       (org-in-regexp org-ts-regexp-both nil t)
 	       (org-in-regexp org-tsr-regexp-both nil  t)
 	       (org-in-regexp org-any-link-re nil t)))
       (call-interactively #'org-open-at-point))
