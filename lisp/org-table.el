@@ -824,7 +824,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
              ;; Find fields that are wider than FMAX, and shorten them.
              (when fmax
                (dolist (x column)
-                 (when (> (string-width x) fmax)
+                 (when (> (org-string-width x) fmax)
                    (org-add-props x nil
                      'help-echo
                      (concat
