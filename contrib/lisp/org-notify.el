@@ -137,15 +137,16 @@ simple timestamp string."
   "Create the todo-list for one org-agenda file."
   (let* ((files (org-agenda-files 'unrestricted))
          (max (1- (length files))))
-    (setq org-notify-parse-file
-          (if (or (not org-notify-parse-file) (>= org-notify-parse-file max))
-              0
-            (1+ org-notify-parse-file)))
-    (save-excursion
-      (with-current-buffer (find-file-noselect
-                            (nth org-notify-parse-file files))
-        (org-element-map (org-element-parse-buffer 'headline)
-                         'headline 'org-notify-make-todo)))))
+    (when files
+      (setq org-notify-parse-file
+	    (if (or (not org-notify-parse-file) (>= org-notify-parse-file max))
+		0
+	      (1+ org-notify-parse-file)))
+      (save-excursion
+	(with-current-buffer (find-file-noselect
+			      (nth org-notify-parse-file files))
+	  (org-element-map (org-element-parse-buffer 'headline)
+	      'headline 'org-notify-make-todo))))))
 
 (defun org-notify-maybe-too-late (diff period heading)
   "Print warning message, when notified significantly later than defined by
