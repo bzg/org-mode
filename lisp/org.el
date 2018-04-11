@@ -8164,32 +8164,22 @@ case."
 	 (ins-point (make-marker))
 	 (cnt (abs arg))
 	 (col (current-column))
-	 beg beg0 end txt folded ne-beg ne-end ne-ins ins-end)
+	 beg end txt folded)
      ;; Select the tree
      (org-back-to-heading)
-     (setq beg0 (point))
-     (save-excursion
-       (setq ne-beg (org-back-over-empty-lines))
-       (setq beg (point)))
+     (setq beg (point))
      (save-match-data
        (save-excursion (outline-end-of-heading)
 		       (setq folded (org-invisible-p)))
        (progn (org-end-of-subtree nil t)
 	      (unless (eobp) (backward-char))))
      (outline-next-heading)
-     (setq ne-end (org-back-over-empty-lines))
      (setq end (point))
-     (goto-char beg0)
-     (when (and (> arg 0) (org-first-sibling-p) (< ne-end ne-beg))
-       ;; include less whitespace
-       (save-excursion
-	 (goto-char beg)
-	 (forward-line (- ne-beg ne-end))
-	 (setq beg (point))))
+     (goto-char beg)
      ;; Find insertion point, with error handling
      (while (> cnt 0)
        (unless (and (funcall movfunc) (looking-at org-outline-regexp))
-	 (goto-char beg0)
+	 (goto-char beg)
 	 (user-error "Cannot move past superior level or buffer limit"))
        (setq cnt (1- cnt)))
      (when (> arg 0)
@@ -8198,7 +8188,6 @@ case."
        (save-excursion
 	 (org-back-over-empty-lines)
 	 (or (bolp) (newline))))
-     (setq ne-ins (org-back-over-empty-lines))
      (move-marker ins-point (point))
      (setq txt (buffer-substring beg end))
      (org-save-markers-in-region beg end)
@@ -8212,18 +8201,8 @@ case."
        (org-reinstall-markers-in-region bbb)
        (move-marker ins-point bbb))
      (or (bolp) (insert "\n"))
-     (setq ins-end (point))
      (goto-char ins-point)
      (org-skip-whitespace)
-     (when (and (< arg 0)
-		(org-first-sibling-p)
-		(> ne-ins ne-beg))
-       ;; Move whitespace back to beginning
-       (save-excursion
-	 (goto-char ins-end)
-	 (let ((kill-whole-line t))
-	   (kill-line (- ne-ins ne-beg)) (point)))
-       (insert (make-string (- ne-ins ne-beg) ?\n)))
      (move-marker ins-point nil)
      (if folded
 	 (outline-hide-subtree)

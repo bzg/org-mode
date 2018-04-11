@@ -3965,7 +3965,7 @@ Text.
   ;; Pathological case: handle call with point in blank lines right
   ;; after a headline.
   (should
-   (equal "* H2\n* H1\nText\n\n"
+   (equal "* H2\n\n* H1\nText\n"
 	  (org-test-with-temp-text "* H1\nText\n* H2\n\n<point>"
 	    (org-drag-element-backward)
 	    (buffer-string)))))
