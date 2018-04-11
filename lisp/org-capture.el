@@ -1010,7 +1010,7 @@ Store them in the capture property list."
 			 ;; Use 00:00 when no time is given for another
 			 ;; date than today?
 			 (apply #'encode-time
-				(append '(0 0 0)
+				(append `(0 0 ,org-extend-today-until)
 					(cl-cdddr (decode-time prompt-time)))))
 			((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)"
 				       org-read-date-final-answer)
