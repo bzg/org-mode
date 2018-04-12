@@ -17187,16 +17187,16 @@ Choose one of the options; they are mutually exclusive.  The default
 follows from the type specified above.
 
 #+attr_texinfo: :sep ,
-- =raw= ::
+- =code= ::
 
-     Interpreted as raw Org mode.  Inserted directly into the buffer.
-     Aligned if it is a table.  Usage example: =:results value raw=.
+     Result enclosed in a code block.  Useful for parsing.  Usage
+     example: =:results value code=.
 
-- =org= ::
+- =drawer= ::
 
-     Results enclosed in a =BEGIN_SRC org= block.  For comma-escape,
-     either {{{kbd(TAB)}}} in the block, or export the file.  Usage
-     example: =:results value org=.
+     Result wrapped in a =RESULTS= drawer.  Useful for containing
+     =raw= or =org= results for later scripting and automated
+     processing.  Usage example: =:results value drawer=.
 
 - =html= ::
 
@@ -17207,23 +17207,6 @@ follows from the type specified above.
 
      Results enclosed in a =BEGIN_EXPORT latex= block.  Usage example:
      =:results value latex=.
-
-- =code= ::
-
-     Result enclosed in a code block.  Useful for parsing.  Usage
-     example: =:results value code=.
-
-- =pp= ::
-
-     Result converted to pretty-print source code.  Enclosed in a code
-     block.  Languages supported: Emacs Lisp, Python, and Ruby.  Usage
-     example: =:results value pp=.
-
-- =drawer= ::
-
-     Result wrapped in a =RESULTS= drawer.  Useful for containing
-     =raw= or =org= results for later scripting and automated
-     processing.  Usage example: =:results value drawer=.
 
 - =link=, =graphics= ::
 
@@ -17237,6 +17220,23 @@ follows from the type specified above.
      wget -c "http://example.com/download.tar.gz"
      ,#+end_src
      #+end_example
+
+- =org= ::
+
+     Results enclosed in a =BEGIN_SRC org= block.  For comma-escape,
+     either {{{kbd(TAB)}}} in the block, or export the file.  Usage
+     example: =:results value org=.
+
+- =pp= ::
+
+     Result converted to pretty-print source code.  Enclosed in a code
+     block.  Languages supported: Emacs Lisp, Python, and Ruby.  Usage
+     example: =:results value pp=.
+
+- =raw= ::
+
+     Interpreted as raw Org mode.  Inserted directly into the buffer.
+     Aligned if it is a table.  Usage example: =:results value raw=.
 
 *** Handling
 :PROPERTIES:
