@@ -17186,6 +17186,7 @@ Format pertains to the type of the result returned by the code block.
 Choose one of the options; they are mutually exclusive.  The default
 follows from the type specified above.
 
+#+attr_texinfo: :sep ,
 - =raw= ::
 
      Interpreted as raw Org mode.  Inserted directly into the buffer.
@@ -17224,7 +17225,7 @@ follows from the type specified above.
      =raw= or =org= results for later scripting and automated
      processing.  Usage example: =:results value drawer=.
 
-- =link= ::
+- =link=, =graphics= ::
 
      Result is a link to the file specified in =:file= header
      argument.  However, unlike plain =:file=, nothing is written to

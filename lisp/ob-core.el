@@ -414,7 +414,7 @@ then run `org-babel-switch-to-session'."
     (post       . :any)
     (prologue   . :any)
     (results	. ((file list vector table scalar verbatim)
-		   (raw html latex org code pp drawer link)
+		   (raw html latex org code pp drawer link graphics)
 		   (replace silent none append prepend)
 		   (output value)))
     (rownames	. ((no yes)))
