@@ -2300,9 +2300,11 @@ Shrink all columns with a column width.  Expand the others.
 Expand all columns.
 @end table
 
-To see the full text of a shrunk field, hold the mouse over it---a
-tool-tip window then shows the full content.  Alternatively @kbd{C-h .}  (@code{display-local-help}) reveals the full content.  For
-convenience, any change to a shrunk column expands it.
+To see the full text of a shrunk field, hold the mouse over it:
+a tool-tip window then shows the full contents of the field.
+Alternatively, @kbd{C-h .} (@code{display-local-help}) reveals them,
+too.  For convenience, any change near the shrunk part of a column
+expands it.
 
 @vindex org-startup-shrink-all-tables
 Setting the option @code{org-startup-shrink-all-tables} shrinks all columns
@@ -18062,14 +18064,14 @@ Choose one of the options; they are mutually exclusive.  The default
 follows from the type specified above.
 
 @table @asis
-@item @samp{raw}
-Interpreted as raw Org mode.  Inserted directly into the buffer.
-Aligned if it is a table.  Usage example: @samp{:results value raw}.
+@item @samp{code}
+Result enclosed in a code block.  Useful for parsing.  Usage
+example: @samp{:results value code}.
 
-@item @samp{org}
-Results enclosed in a @samp{BEGIN_SRC org} block.  For comma-escape,
-either @kbd{@key{TAB}} in the block, or export the file.  Usage
-example: @samp{:results value org}.
+@item @samp{drawer}
+Result wrapped in a @samp{RESULTS} drawer.  Useful for containing
+@samp{raw} or @samp{org} results for later scripting and automated
+processing.  Usage example: @samp{:results value drawer}.
 
 @item @samp{html}
 Results enclosed in a @samp{BEGIN_EXPORT html} block.  Usage example:
@@ -18079,19 +18081,32 @@ Results enclosed in a @samp{BEGIN_EXPORT html} block.  Usage example:
 Results enclosed in a @samp{BEGIN_EXPORT latex} block.  Usage example:
 @samp{:results value latex}.
 
-@item @samp{code}
-Result enclosed in a code block.  Useful for parsing.  Usage
-example: @samp{:results value code}.
+@item @samp{link}
+@itemx @samp{graphics}
+Result is a link to the file specified in @samp{:file} header
+argument.  However, unlike plain @samp{:file}, nothing is written to
+the disk.  The block is used for its side-effects only, as in the
+following example:
+
+@example
+#+begin_src shell :results link :file "download.tar.gz"
+wget -c "http://example.com/download.tar.gz"
+#+end_src
+@end example
+
+@item @samp{org}
+Results enclosed in a @samp{BEGIN_SRC org} block.  For comma-escape,
+either @kbd{@key{TAB}} in the block, or export the file.  Usage
+example: @samp{:results value org}.
 
 @item @samp{pp}
 Result converted to pretty-print source code.  Enclosed in a code
 block.  Languages supported: Emacs Lisp, Python, and Ruby.  Usage
 example: @samp{:results value pp}.
 
-@item @samp{drawer}
-Result wrapped in a @samp{RESULTS} drawer.  Useful for containing
-@samp{raw} or @samp{org} results for later scripting and automated
-processing.  Usage example: @samp{:results value drawer}.
+@item @samp{raw}
+Interpreted as raw Org mode.  Inserted directly into the buffer.
+Aligned if it is a table.  Usage example: @samp{:results value raw}.
 @end table
 
 @anchor{Handling}
@@ -19137,12 +19152,15 @@ blocks, such as @samp{#+BEGIN_SRC} @dots{} @samp{#+END_SRC}, or to wrap existing
 text in such a block.
 
 @table @asis
-@item @kbd{C-c C-x w} (@code{org-insert-structure-template})
+@item @kbd{C-c C-,} (@code{org-insert-structure-template})
+@findex org-insert-structure-template
+@kindex C-c C-,
 Prompt for a type of block structure, and insert the block at
 point.  If the region is active, it is wrapped in the block.
-First prompts the user for a key, which is used to look up
-a structure type from the values below.  If the key is
-@kbd{@key{TAB}}, the user is prompted to enter a type.
+First prompts the user for keys, which are used to look up
+a structure type from the variable below.  If the key is
+@kbd{@key{TAB}}, @kbd{@key{RET}}, or @kbd{@key{SPC}}, the user is
+prompted to enter a block type.
 @end table
 
 @vindex org-structure-template-alist
@@ -19154,7 +19172,6 @@ changing values.
 @cindex template expansion
 @cindex insertion, of templates
 @vindex org-tempo-keywords-alist
-@vindex org-structure-template-alist
 Org Tempo expands snippets to structures defined in
 @code{org-structure-template-alist} and @code{org-tempo-keywords-alist}.  For
 example, @kbd{< s @key{TAB}} creates a code block.  Enable it by
