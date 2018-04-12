@@ -18184,12 +18184,14 @@ With just a few keystrokes, it is possible to insert empty structural
 blocks, such as =#+BEGIN_SRC= ... =#+END_SRC=, or to wrap existing
 text in such a block.
 
-- {{{kbd(C-c C-,)}}} (~org-insert-structure-template~) ::
+- {{{kbd(C-c C-\,)}}} (~org-insert-structure-template~) ::
 
+     #+findex: org-insert-structure-template
+     #+kindex: C-c C-,
      Prompt for a type of block structure, and insert the block at
      point.  If the region is active, it is wrapped in the block.
-     First prompts the user for keys, which are used to look up a
-     structure type from the variable below.  If the key is
+     First prompts the user for keys, which are used to look up
+     a structure type from the variable below.  If the key is
      {{{kbd(TAB)}}}, {{{kbd(RET)}}}, or {{{kbd(SPC)}}}, the user is
      prompted to enter a block type.
 
@@ -18202,7 +18204,6 @@ changing values.
 #+cindex: template expansion
 #+cindex: insertion, of templates
 #+vindex: org-tempo-keywords-alist
-#+vindex: org-structure-template-alist
 Org Tempo expands snippets to structures defined in
 ~org-structure-template-alist~ and ~org-tempo-keywords-alist~.  For
 example, {{{kbd(< s TAB)}}} creates a code block.  Enable it by
