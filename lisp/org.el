@@ -2294,7 +2294,7 @@ Possible values for the file identifier are:
                  In a custom function, you can access the group matches with
                  (match-string n link).
 
-                 Example: (\"\\\\.pdf::\\\\(\\\\d+\\\\)\\\\\\='\" . \
+                 Example: (\"\\\\.pdf::\\\\([0-9]+\\\\)\\\\\\='\" . \
 \"evince -p %1 %s\")
                      to open [[file:document.pdf::5]] with evince at page 5.
 
