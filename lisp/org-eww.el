@@ -140,13 +140,13 @@ the structure of the Org file."
               ;; concat `org-mode' style url to `return-content'.
 	      (setq return-content
 		    (concat return-content
-			    (if (stringp link-location)
-				;; hint: link-location is different for form-elements.
+			    (if (org-string-nw-p link-location)
+				;; Hint: link-location is different
+				;; for form-elements.
 				(org-make-link-string link-location link-title)
 			      link-title))))
 	  (goto-char temp-position) ; reset point before jump next anchor
-	  (setq out-bound t)	    ; for break out `while' loop
-	  ))
+	  (setq out-bound t)))	    ; for break out `while' loop
       ;; Add the rest until end of the region to be copied.
       (when (< (point) transform-end)
 	(setq return-content
