@@ -76,13 +76,13 @@ so that it can be yanked into an Org  buffer with links working correctly."
     (message "Transforming links...")
     (save-excursion
       (goto-char transform-start)
-      (while (and (not out-bound)                 ; still inside region to copy
+      (while (and (not out-bound)	; still inside region to copy
                   (not (org-w3m-no-next-link-p))) ; no next link current buffer
         ;; store current point before jump next anchor
         (setq temp-position (point))
         ;; move to next anchor when current point is not at anchor
         (or (get-text-property (point) 'w3m-href-anchor) (org-w3m-get-next-link-start))
-        (if (<= (point) transform-end)  ; if point is inside transform bound
+        (if (<= (point) transform-end) ; if point is inside transform bound
             (progn
               ;; get content between two links.
               (if (> (point) temp-position)
@@ -95,12 +95,13 @@ so that it can be yanked into an Org  buffer with links working correctly."
               (setq link-title (buffer-substring (point)
                                                  (org-w3m-get-anchor-end)))
               ;; concat Org style url to `return-content'.
-              (setq return-content (concat return-content
-                                           (org-make-link-string
-                                            link-location link-title))))
-          (goto-char temp-position)     ; reset point before jump next anchor
-          (setq out-bound t)            ; for break out `while' loop
-          ))
+              (setq return-content
+		    (concat return-content
+			    (if (org-string-nw-p link-location)
+				(org-make-link-string link-location link-title)
+			      link-title))))
+          (goto-char temp-position) ; reset point before jump next anchor
+          (setq out-bound t)))	    ; for break out `while' loop
       ;; add the rest until end of the region to be copied
       (if (< (point) transform-end)
           (setq return-content
