@@ -21,7 +21,6 @@
 
 (require 'ob-clojure)
 (require 'cider)
-(require 'dash)
 
 (defgroup ob-clojure-literate nil
   "Clojure's Org-mode Literate Programming."
@@ -63,17 +62,16 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
 
 (defun ob-clojure-literate-get-session-list ()
   "Return a list of available started CIDER REPL sessions list."
-  (-map 'buffer-name
-	;; for multiple connections case.
-	;; get global value instead of buffer local.
-	(default-value 'cider-connections)
-	))
+  (mapcar #'buffer-name
+	  ;; for multiple connections case.
+	  ;; get global value instead of buffer local.
+	  (default-value 'cider-connections)))
 
 (defun ob-clojure-literate-set-session ()
   "Set session name for buffer local."
   ;; if default session is the only one in connections list.
   (if (and (= (length (ob-clojure-literate-get-session-list)) 1)
-           (-contains-p (ob-clojure-literate-get-session-list) ob-clojure-literate-default-session))
+           (member ob-clojure-literate-default-session (ob-clojure-literate-get-session-list)))
       (setq-local ob-clojure-literate-session ob-clojure-literate-default-session)
     ;; if have any connections, choose one from them.
     (if (ob-clojure-literate-any-connection-p)
@@ -129,7 +127,7 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
              (not (null ob-clojure-literate-session)))
       ;; return back to original file.
       (if (not (and (= (length (ob-clojure-literate-get-session-list)) 1)
-                    (-contains-p (ob-clojure-literate-get-session-list) ob-clojure-literate-default-session)))
+                    (member ob-clojure-literate-default-session (ob-clojure-literate-get-session-list))))
           (save-window-excursion
             (find-file (expand-file-name (concat ob-clojure-literate-project-location "ob-clojure/src/ob_clojure/core.clj")))
             (with-current-buffer "core.clj"
@@ -149,7 +147,7 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
     ;; Empty all CIDER connections to avoid `cider-current-connection' return any connection.
     ;; FIXME: when try to enable, `cider-connections' is local and nil.
     ;; (if (and (= (length (ob-clojure-literate-get-session-list)) 1)
-    ;;          (-contains-p (ob-clojure-literate-get-session-list) ob-clojure-literate-default-session)))
+    ;;          (member ob-clojure-literate-default-session (ob-clojure-literate-get-session-list))))
     ;; (unless (local-variable-if-set-p 'cider-connections)
     ;;   (make-local-variable 'cider-connections))
     ;; (setq-local cider-connections '())
