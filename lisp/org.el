@@ -14162,6 +14162,9 @@ headlines matching this string."
 	       (re-search-forward re nil t))
 	(setq org-map-continue-from nil)
 	(catch :skip
+	  ;; Ignore closing parts of inline tasks.
+	  (when (and (fboundp 'org-inlinetask-end-p) (org-inlinetask-end-p))
+	    (throw :skip t))
 	  (setq todo
 		;; TODO: is the 1-2 difference a bug?
 		(when (match-end 1) (match-string-no-properties 2))

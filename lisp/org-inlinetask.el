@@ -152,24 +152,24 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 		  org-inlinetask-min-level)))
     (format "^\\(\\*\\{%d,\\}\\)[ \t]+" nstars)))
 
+(defun org-inlinetask-end-p ()
+  "Return a non-nil value if point is on inline task's END part."
+  (let ((case-fold-search t))
+    (org-match-line (concat (org-inlinetask-outline-regexp) "END[ \t]*$"))))
+
 (defun org-inlinetask-at-task-p ()
-  "Return true if point is at beginning of an inline task."
-  (save-excursion
-    (beginning-of-line)
-    (and (looking-at (concat (org-inlinetask-outline-regexp)  "\\(.*\\)"))
-	 (not (string-match "^end[ \t]*$" (downcase (match-string 2)))))))
+  "Return non-nil if point is at beginning of an inline task."
+  (and (org-match-line (concat (org-inlinetask-outline-regexp)  "\\(.*\\)"))
+       (not (org-inlinetask-end-p))))
 
 (defun org-inlinetask-in-task-p ()
   "Return true if point is inside an inline task."
   (save-excursion
     (beginning-of-line)
-    (let* ((case-fold-search t)
-	   (stars-re (org-inlinetask-outline-regexp))
-	   (task-beg-re (concat stars-re "\\(?:.*\\)"))
-	   (task-end-re (concat stars-re "END[ \t]*$")))
-      (or (looking-at-p task-beg-re)
+    (let ((case-fold-search t))
+      (or (looking-at-p (concat (org-inlinetask-outline-regexp) "\\(?:.*\\)"))
 	  (and (re-search-forward "^\\*+[ \t]+" nil t)
-	       (progn (beginning-of-line) (looking-at-p task-end-re)))))))
+	       (org-inlinetask-end-p))))))
 
 (defun org-inlinetask-goto-beginning ()
   "Go to the beginning of the inline task at point."
@@ -177,7 +177,7 @@ The number of levels is controlled by `org-inlinetask-min-level'."
   (let ((case-fold-search t)
 	(inlinetask-re (org-inlinetask-outline-regexp)))
     (re-search-backward inlinetask-re nil t)
-    (when (looking-at-p (concat inlinetask-re "END[ \t]*$"))
+    (when (org-inlinetask-end-p)
       (re-search-backward inlinetask-re nil t))))
 
 (defun org-inlinetask-goto-end ()
@@ -185,16 +185,15 @@ The number of levels is controlled by `org-inlinetask-min-level'."
     Return point."
   (save-match-data
     (beginning-of-line)
-    (let* ((case-fold-search t)
-           (inlinetask-re (org-inlinetask-outline-regexp))
-           (task-end-re (concat inlinetask-re "END[ \t]*$")))
+    (let ((case-fold-search t)
+	  (inlinetask-re (org-inlinetask-outline-regexp)))
       (cond
-       ((looking-at-p task-end-re)
+       ((org-inlinetask-end-p)
         (forward-line))
        ((looking-at-p inlinetask-re)
         (forward-line)
         (cond
-         ((looking-at-p task-end-re) (forward-line))
+         ((org-inlinetask-end-p) (forward-line))
          ((looking-at-p inlinetask-re))
          ((org-inlinetask-in-task-p)
           (re-search-forward inlinetask-re nil t)
