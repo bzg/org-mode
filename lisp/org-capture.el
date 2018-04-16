@@ -791,7 +791,6 @@ captured item after finalizing."
 	(org-encrypt-entry)))
 
     ;; Kill the indirect buffer
-    (save-buffer)
     (let ((return-wconf (org-capture-get :return-to-wconf 'local))
 	  (new-buffer (org-capture-get :new-buffer 'local))
 	  (kill-buffer (org-capture-get :kill-buffer 'local))
