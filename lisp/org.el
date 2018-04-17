@@ -14141,47 +14141,7 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	 ((member op '("<>" "!=")) '(org<> org-string<> org-time<>))))
   (nth (if (eq stringp 'time) 2 (if stringp 1 0)) op))
 
-(defun org<> (a b) (not (= a b)))
-(defun org-time=  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (=     a b)))
-(defun org-time<  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (<     a b)))
-(defun org-time<= (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (<=    a b)))
-(defun org-time>  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (>     a b)))
-(defun org-time>= (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (>=    a b)))
-(defun org-time<> (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (org<> a b)))
-(defun org-2ft (s)
-  "Convert S to a floating point time.
-If S is already a number, just return it.  If it is a string, parse
-it as a time string and apply `float-time' to it.  If S is nil, just return 0."
-  (cond
-   ((numberp s) s)
-   ((stringp s)
-    (condition-case nil
-	(float-time (apply #'encode-time (org-parse-time-string s)))
-      (error 0.)))
-   (t 0.)))
-
-(defun org-time-today ()
-  "Time in seconds today at 0:00.
-Returns the float number of seconds since the beginning of the
-epoch to the beginning of today (00:00)."
-  (float-time (apply 'encode-time
-		     (append '(0 0 0) (nthcdr 3 (decode-time))))))
-
-(defun org-matcher-time (s)
-  "Interpret a time comparison value."
-  (save-match-data
-    (cond
-     ((string= s "<now>") (float-time))
-     ((string= s "<today>") (org-time-today))
-     ((string= s "<tomorrow>")   (+ 86400.0 (org-time-today)))
-     ((string= s "<yesterday>")  (- (org-time-today) 86400.0))
-     ((string-match "^<\\([-+][0-9]+\\)\\([hdwmy]\\)>$" s)
-      (+ (org-time-today)
-	 (* (string-to-number (match-string 1 s))
-	    (cdr (assoc (match-string 2 s)
-			'(("d" . 86400.0)   ("w" . 604800.0)
-			  ("m" . 2678400.0) ("y" . 31557600.0)))))))
-     (t (org-2ft s)))))
+(defun org<> (a b) (/= a b))
 
 (defvar org-add-colon-after-tag-completion nil)  ;; dynamically scoped param
 (defvar org-tags-overlay (make-overlay 1 1))

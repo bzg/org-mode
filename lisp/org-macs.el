@@ -858,6 +858,71 @@ return nil."
 
 
 
+;;; Time
+
+(defun org-2ft (s)
+  "Convert S to a floating point time.
+If S is already a number, just return it.  If it is a string,
+parse it as a time string and apply `float-time' to it.  If S is
+nil, just return 0."
+  (cond
+   ((numberp s) s)
+   ((stringp s)
+    (condition-case nil
+	(float-time (apply #'encode-time (org-parse-time-string s)))
+      (error 0.)))
+   (t 0.)))
+
+(defun org-time= (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (= a b))))
+
+(defun org-time< (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (< a b))))
+
+(defun org-time<= (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (<= a b))))
+
+(defun org-time> (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (> a b))))
+
+(defun org-time>= (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (>= a b))))
+
+(defun org-time<> (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (\= a b))))
+
+(defun org-matcher-time (s)
+  "Interpret a time comparison value S."
+  (let ((today (float-time (apply #'encode-time
+				  (append '(0 0 0) (nthcdr 3 (decode-time)))))))
+    (save-match-data
+      (cond
+       ((string= s "<now>") (float-time))
+       ((string= s "<today>") today)
+       ((string= s "<tomorrow>") (+ 86400.0 today))
+       ((string= s "<yesterday>") (- today 86400.0))
+       ((string-match "\\`<\\([-+][0-9]+\\)\\([hdwmy]\\)>\\'" s)
+	(+ today
+	   (* (string-to-number (match-string 1 s))
+	      (cdr (assoc (match-string 2 s)
+			  '(("d" . 86400.0)   ("w" . 604800.0)
+			    ("m" . 2678400.0) ("y" . 31557600.0)))))))
+       (t (org-2ft s))))))
+
+
+
 ;;; Text properties
 
 (defconst org-rm-props '(invisible t face t keymap t intangible t mouse-face t
