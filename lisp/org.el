@@ -13942,7 +13942,7 @@ See also `org-scan-tags'."
 						     (if timep 'time strp))))
 			(setq pv (if (or regexp strp) (substring pv 1 -1) pv))
 			(when timep (setq pv (org-matcher-time pv)))
-			(cond ((and regexp (eq po 'org<>))
+			(cond ((and regexp (eq po '/=))
 			       `(not (string-match ,pv (or ,gv ""))))
 			      (regexp `(string-match ,pv (or ,gv "")))
 			      (strp `(,po (or ,gv "") ,pv))
@@ -14138,10 +14138,8 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	 ((member op '("<=" "=<")) '(<=    org-string<= org-time<=))
 	 ((member op '(">=" "=>")) '(>=    org-string>= org-time>=))
 	 ((member op '("="  "==")) '(=     string=      org-time=))
-	 ((member op '("<>" "!=")) '(org<> org-string<> org-time<>))))
+	 ((member op '("<>" "!=")) '(/=    org-string<> org-time<>))))
   (nth (if (eq stringp 'time) 2 (if stringp 1 0)) op))
-
-(defun org<> (a b) (/= a b))
 
 (defvar org-add-colon-after-tag-completion nil)  ;; dynamically scoped param
 (defvar org-tags-overlay (make-overlay 1 1))
