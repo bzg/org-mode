@@ -6187,8 +6187,7 @@ done, nil otherwise."
     (font-lock-mode 1)))
 
 (defun org-activate-tags (limit)
-  (when (re-search-forward
-	 "^\\*+.*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$" limit t)
+  (when (re-search-forward org-tag-line-re limit t)
     (org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
     (add-text-properties (match-beginning 1) (match-end 1)
 			 (list 'mouse-face 'highlight
@@ -14161,14 +14160,9 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   (save-excursion
     (org-back-to-heading t)
     (let ((current
-	   (when (re-search-forward "[ \t]:\\([[:alnum:]_@#%:]+\\):[ \t]*$"
-				    (line-end-position) t)
-	     (let ((tags (match-string 1)))
-	       ;; Clear current tags.
-	       (replace-match "")
-	       ;; Reverse the tags list so any new tag is appended to
-	       ;; the current list of tags.
-	       (nreverse (org-split-string tags ":")))))
+	   ;; Reverse the tags list so any new tag is appended to the
+	   ;; current list of tags.
+	   (nreverse (org-get-tags)))
 	  res)
       (pcase onoff
 	(`off (setq current (delete tag current)))
@@ -14176,33 +14170,27 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	 (setq res t)
 	 (cl-pushnew tag current :test #'equal))
 	(_ (setq current (delete tag current))))
-      (end-of-line)
-      (if current
-	  (progn
-	    (insert " :" (mapconcat #'identity (nreverse current) ":") ":")
-	    (org-set-tags nil t))
-	(delete-horizontal-space))
+      (org-set-tags-to (nreverse current))
       (run-hooks 'org-after-tags-change-hook)
       res)))
 
 (defun org--align-tags-here (to-col)
   "Align tags on the current headline to TO-COL.
 Assume point is on a headline."
-  (let ((pos (point)))
-    (beginning-of-line)
-    (if	(or (not (looking-at ".*?\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"))
-	    (>= pos (match-beginning 2)))
-	;; No tags or point within tags: do not align.
-	(goto-char pos)
+  (when (and (org-match-line org-tag-line-re)
+	     (< (point) (match-beginning 1)))
+    (let ((pos (point))
+	  (shift (if (>= to-col 0) to-col
+		   (- (abs to-col) (string-width (match-string 1))))))
+      ;; Delete all blanks before tags.
       (goto-char (match-beginning 1))
-      (let ((shift (max (- (if (>= to-col 0) to-col
-			     (- (abs to-col) (string-width (match-string 2))))
-			   (current-column))
-			1)))
-	(replace-match (make-string shift ?\s) nil nil nil 1)
-	;; Preserve initial position, if possible.  In any case, stop
-	;; before tags.
-	(when (< pos (point)) (goto-char pos))))))
+      (skip-chars-backward " \t")
+      (delete-region (point) (match-beginning 1))
+      ;; Insert new blanks.
+      (insert (make-string (max 1 (- shift (current-column))) ?\s))
+      ;; Preserve initial position, if possible.  In any case, stop
+      ;; before tags.
+      (when (< pos (point)) (goto-char pos)))))
 
 (defun org-set-tags-command (&optional arg just-align)
   "Call the set-tags command for the current entry."
@@ -14479,8 +14467,8 @@ Returns the new tags string, or nil to not change the current settings."
 	 (done-keywords org-done-keywords)
 	 groups ingroup intaggroup)
     (save-excursion
-      (beginning-of-line 1)
-      (if (looking-at ".*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
+      (beginning-of-line)
+      (if (looking-at org-tag-line-re)
 	  (setq ov-start (match-beginning 1)
 		ov-end (match-end 1)
 		ov-prefix "")
@@ -22814,7 +22802,7 @@ depending on context."
    ((or (not org-special-ctrl-k)
 	(bolp)
 	(not (org-at-heading-p)))
-    (when (and (get-char-property (min (point-max) (point-at-eol)) 'invisible)
+    (when (and (get-char-property (line-end-position) 'invisible)
 	       org-ctrl-k-protect-subtree
 	       (or (eq org-ctrl-k-protect-subtree 'error)
 		   (not (y-or-n-p "Kill hidden subtree along with headline? "))))
@@ -22823,10 +22811,15 @@ depending on context."
 	"`\\[org-kill-line]' aborted as it would kill a hidden subtree")))
     (call-interactively
      (if (bound-and-true-p visual-line-mode) 'kill-visual-line 'kill-line)))
-   ((looking-at ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")
-    (kill-region (point) (match-beginning 1))
+   ((looking-at org-tag-line-re)
+    (let ((end (save-excursion
+		 (goto-char (match-beginning 1))
+		 (skip-chars-backward " \t"))))
+      (if (<= end (point))		;on tags part
+	  (kill-region (point) (line-end-position))
+	(kill-region (point) end)))
     (org-set-tags nil t))
-   (t (kill-region (point) (point-at-eol)))))
+   (t (kill-region (point) (line-end-position)))))
 
 (defun org-yank (&optional arg)
   "Yank.  If the kill is a subtree, treat it specially.

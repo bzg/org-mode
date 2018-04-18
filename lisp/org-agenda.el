@@ -8993,23 +8993,23 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 				  org-agenda-tags-column))
 	l c)
     (save-excursion
-      (goto-char (if line (point-at-bol) (point-min)))
-      (while (re-search-forward "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
-				(if line (point-at-eol) nil) t)
+      (goto-char (if line (line-beginning-position) (point-min)))
+      (while (re-search-forward org-tag-line-re (and line (line-end-position)) t)
 	(add-text-properties
-	 (match-beginning 2) (match-end 2)
+	 (match-beginning 1) (match-end 1)
 	 (list 'face (delq nil (let ((prop (get-text-property
-					    (match-beginning 2) 'face)))
+					    (match-beginning 1) 'face)))
 				 (or (listp prop) (setq prop (list prop)))
 				 (if (memq 'org-tag prop)
 				     prop
 				   (cons 'org-tag prop))))))
-	(setq l (- (match-end 2) (match-beginning 2))
+	(setq l (- (match-end 1) (match-beginning 1))
 	      c (if (< org-agenda-tags-column 0)
 		    (- (abs org-agenda-tags-column) l)
 		  org-agenda-tags-column))
-	(delete-region (match-beginning 1) (match-end 1))
 	(goto-char (match-beginning 1))
+	(delete-region (save-excursion (skip-chars-backward " \t") (point))
+		       (point))
 	(insert (org-add-props
 		    (make-string (max 1 (- c (current-column))) ?\ )
 		    (plist-put (copy-sequence (text-properties-at (point)))
