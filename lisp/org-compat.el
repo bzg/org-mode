@@ -385,6 +385,15 @@ use of this function is for the stuck project list."
 
 (define-obsolete-function-alias 'org-get-tags-at 'org-get-tags "Org 9.2")
 
+(defun org-get-local-tags ()
+  "Get a list of tags defined in the current headline."
+  (declare (obsolete "use `org-get-tags' instead." "Org 9.2"))
+  (org-get-tags nil 'local))
+
+(defun org-get-local-tags-at (&optional pos)
+  "Get a list of tags defined in the current headline."
+  (declare (obsolete "use `org-get-tags' instead." "Org 9.2"))
+  (org-get-tags pos 'local))
 
 ;;;; Obsolete link types
 

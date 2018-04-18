@@ -761,7 +761,7 @@ situation use `org-part-of-drill-entry-p'."
   (save-excursion
     (when marker
       (org-drill-goto-entry marker))
-    (member org-drill-question-tag (org-get-local-tags))))
+    (member org-drill-question-tag (org-get-tags nil t))))
 
 
 (defun org-drill-goto-entry (marker)
@@ -793,7 +793,7 @@ drill entry."
 (defun org-drill-entry-leech-p ()
   "Is the current entry a 'leech item'?"
   (and (org-drill-entry-p)
-       (member "leech" (org-get-local-tags))))
+       (member "leech" (org-get-tags nil t))))
 
 
 ;; (defun org-drill-entry-due-p ()

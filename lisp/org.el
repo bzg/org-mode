@@ -14151,14 +14151,6 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 (defvar org-tags-overlay (make-overlay 1 1))
 (delete-overlay org-tags-overlay)
 
-(defun org-get-local-tags-at (&optional pos)
-  "Get a list of tags defined in the current headline."
-  (org-get-tags pos 'local))
-
-(defun org-get-local-tags ()
-  "Get a list of tags defined in the current headline."
-  (org-get-tags nil 'local))
-
 (defun org-add-prop-inherited (s)
   (add-text-properties 0 (length s) '(inherited t) s)
   s)

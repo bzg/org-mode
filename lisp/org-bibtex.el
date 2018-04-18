@@ -354,9 +354,8 @@ and `org-exclude-tags-from-inheritance'."
 					    (append org-bibtex-tags
 						    org-bibtex-no-export-tags))
 			      tag))
-			  (if org-bibtex-inherit-tags
-			      (org-get-tags)
-			    (org-get-local-tags-at)))))))
+			  (if org-bibtex-inherit-tags (org-get-tags)
+			    (org-get-tags nil t)))))))
     (when type
       (let ((entry (format
 		    "@%s{%s,\n%s\n}\n" type id
