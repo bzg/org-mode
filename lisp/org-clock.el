@@ -2795,7 +2795,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
       (org-clock-sum ts te
 		     (when matcher
 		       `(lambda ()
-			  (let* ((tags-list (org-get-tags-at))
+			  (let* ((tags-list (org-get-tags))
 				 (org-scanner-tags tags-list)
 				 (org-trust-scanner-tags t))
 			    (funcall ,matcher nil tags-list nil)))))

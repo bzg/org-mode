@@ -3805,9 +3805,9 @@ FILTER-ALIST is an alist of filters we need to apply when
 	      (while (equal (forward-line) 0)
 		(when (setq mrk (get-text-property (point) 'org-hd-marker))
 		  (put-text-property (point-at-bol) (point-at-eol)
-				     'tags (org-with-point-at mrk
-					     (delete-dups
-					      (mapcar 'downcase (org-get-tags-at))))))))))
+				     'tags
+				     (org-with-point-at mrk
+				       (mapcar #'downcase (org-get-tags)))))))))
 	(run-hooks 'org-agenda-finalize-hook)
 	(when org-agenda-top-headline-filter
 	  (org-agenda-filter-top-headline-apply
@@ -4588,7 +4588,7 @@ is active."
 				  (and (eq org-agenda-show-inherited-tags t)
 				       (or (eq org-agenda-use-tag-inheritance t)
 					   (memq 'todo org-agenda-use-tag-inheritance))))
-			      tags (org-get-tags-at nil (not inherited-tags))
+			      tags (org-get-tags nil (not inherited-tags))
 			      txt (org-agenda-format-item
 				   ""
 				   (buffer-substring-no-properties
@@ -5380,7 +5380,7 @@ and the timestamp type relevant for the sorting strategy in
 		  (and (eq org-agenda-show-inherited-tags t)
 		       (or (eq org-agenda-use-tag-inheritance t)
 			   (memq 'todo org-agenda-use-tag-inheritance))))
-	      tags (org-get-tags-at nil (not inherited-tags))
+	      tags (org-get-tags nil (not inherited-tags))
 	      level (make-string (org-reduced-level (org-outline-level)) ? )
 	      txt (org-agenda-format-item "" txt level category tags t)
 	      priority (1+ (org-get-priority txt)))
@@ -5590,7 +5590,7 @@ displayed in agenda view."
 			     (or (eq org-agenda-use-tag-inheritance t)
 				 (memq 'agenda
 				       org-agenda-use-tag-inheritance)))))
-		   (tags (org-get-tags-at nil (not inherited-tags)))
+		   (tags (org-get-tags nil (not inherited-tags)))
 		   (level (make-string (org-reduced-level (org-outline-level))
 				       ?\s))
 		   (head (and (looking-at "\\*+[ \t]+\\(.*\\)")
@@ -5654,7 +5654,7 @@ displayed in agenda view."
 		    (and (eq org-agenda-show-inherited-tags t)
 			 (or (eq org-agenda-use-tag-inheritance t)
 			     (memq 'agenda org-agenda-use-tag-inheritance))))
-		tags (org-get-tags-at nil (not inherited-tags))
+		tags (org-get-tags nil (not inherited-tags))
 		todo-state (org-get-todo-state)
 		warntime (get-text-property (point) 'org-appt-warntime)
 		extra nil)
@@ -5804,7 +5804,7 @@ then those holidays will be skipped."
 		      (and (eq org-agenda-show-inherited-tags t)
 			   (or (eq org-agenda-use-tag-inheritance t)
 			       (memq 'todo org-agenda-use-tag-inheritance))))
-		  tags (org-get-tags-at nil (not inherited-tags))
+		  tags (org-get-tags nil (not inherited-tags))
 		  level (make-string (org-reduced-level (org-outline-level)) ? ))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq txt (match-string 1))
@@ -6055,7 +6055,7 @@ specification like [h]h:mm."
 			     (or (eq org-agenda-use-tag-inheritance t)
 				 (memq 'agenda
 				       org-agenda-use-tag-inheritance)))))
-		   (tags (org-get-tags-at nil (not inherited-tags)))
+		   (tags (org-get-tags nil (not inherited-tags)))
 		   (time
 		    (cond
 		     ;; No time of day designation if it is only
@@ -6255,7 +6255,7 @@ scheduled items with an hour specification like [h]h:mm."
 			     (or (eq org-agenda-use-tag-inheritance t)
 				 (memq 'agenda
 				       org-agenda-use-tag-inheritance)))))
-		   (tags (org-get-tags-at nil (not inherited-tags)))
+		   (tags (org-get-tags nil (not inherited-tags)))
 		   (level (make-string (org-reduced-level (org-outline-level))
 				       ?\s))
 		   (head (buffer-substring (point) (line-end-position)))
@@ -6362,7 +6362,7 @@ scheduled items with an hour specification like [h]h:mm."
 				 (or (eq org-agenda-use-tag-inheritance t)
 				     (memq 'agenda org-agenda-use-tag-inheritance))))
 
-			tags (org-get-tags-at nil (not inherited-tags)))
+			tags (org-get-tags nil (not inherited-tags)))
 		  (setq level (make-string (org-reduced-level (org-outline-level)) ? ))
 		  (looking-at "\\*+[ \t]+\\(.*\\)")
 		  (setq head (match-string 1))
@@ -8930,9 +8930,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 	 (line (org-current-line))
 	 (org-agenda-buffer (current-buffer))
 	 (thetags (with-current-buffer (marker-buffer hdmarker)
-		    (org-with-wide-buffer
-		     (goto-char hdmarker)
-		     (org-get-tags-at))))
+		    (org-get-tags hdmarker)))
 	 props m pl undone-face done-face finish new dotime level cat tags)
     (save-excursion
       (goto-char (point-max))

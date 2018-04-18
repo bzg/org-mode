@@ -383,6 +383,8 @@ use of this function is for the stuck project list."
 	       "use `org-show-all' instead."
 	       "Org 9.2")
 
+(define-obsolete-function-alias 'org-get-tags-at 'org-get-tags "Org 9.2")
+
 
 ;;;; Obsolete link types
 

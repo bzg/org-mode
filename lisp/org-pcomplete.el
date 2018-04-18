@@ -33,7 +33,7 @@
 
 (declare-function org-make-org-heading-search-string "org" (&optional string))
 (declare-function org-get-buffer-tags "org" ())
-(declare-function org-get-tags "org" ())
+(declare-function org-get-tags "org" (&optional pos local))
 (declare-function org-buffer-property-keys "org" (&optional specials defaults columns))
 (declare-function org-entry-properties "org" (&optional pom which))
 (declare-function org-tag-alist-to-string "org" (alist &optional skip-key))

@@ -13591,9 +13591,9 @@ Can be set by the action argument to `org-scan-tags' and `org-map-entries'.")
   "The current tag list while the tags scanner is running.")
 
 (defvar org-trust-scanner-tags nil
-  "Should `org-get-tags-at' use the tags for the scanner.
+  "Should `org-get-tags' use the tags for the scanner.
 This is for internal dynamical scoping only.
-When this is non-nil, the function `org-get-tags-at' will return the value
+When this is non-nil, the function `org-get-tags' will return the value
 of `org-scanner-tags' instead of building the list by itself.  This
 can lead to large speed-ups when the tags scanner is used in a file with
 many entries, and when the list of tags is retrieved, for example to
@@ -14153,58 +14153,11 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 
 (defun org-get-local-tags-at (&optional pos)
   "Get a list of tags defined in the current headline."
-  (org-get-tags-at pos 'local))
+  (org-get-tags pos 'local))
 
 (defun org-get-local-tags ()
   "Get a list of tags defined in the current headline."
-  (org-get-tags-at nil 'local))
-
-(defun org-get-tags-at (&optional pos local)
-  "Get a list of all headline tags applicable at POS.
-POS defaults to point.  If tags are inherited, the list contains
-the targets in the same sequence as the headlines appear, i.e.
-the tags of the current headline come last.
-When LOCAL is non-nil, only return tags from the current headline,
-ignore inherited ones."
-  (interactive)
-  (if (and org-trust-scanner-tags
-	   (or (not pos) (equal pos (point)))
-	   (not local))
-      org-scanner-tags
-    (let (tags ltags lastpos parent)
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (or pos (point)))
-	  (save-match-data
-	    (catch 'done
-	      (condition-case nil
-		  (progn
-		    (org-back-to-heading t)
-		    (while (not (equal lastpos (point)))
-		      (setq lastpos (point))
-		      (when (looking-at ".+?:\\([[:alnum:]_@#%:]+\\):[ \t]*$")
-			(setq ltags (org-split-string
-				     (match-string-no-properties 1) ":"))
-			(when parent
-			  (setq ltags (mapcar 'org-add-prop-inherited ltags)))
-			(setq tags (append
-				    (if parent
-					(org-remove-uninherited-tags ltags)
-				      ltags)
-				    tags)))
-		      (or org-use-tag-inheritance (throw 'done t))
-		      (when local (throw 'done t))
-		      (or (org-up-heading-safe) (error nil))
-		      (setq parent t)))
-		(error nil)))))
-	(if local
-	    tags
-	  (reverse (delete-dups
-		    (reverse (append
-			      (org-remove-uninherited-tags
-			       org-file-tags)
-                              tags)))))))))
+  (org-get-tags nil 'local))
 
 (defun org-add-prop-inherited (s)
   (add-text-properties 0 (length s) '(inherited t) s)
@@ -14348,7 +14301,7 @@ When JUST-ALIGN is non-nil, only align tags."
 			   (current-tags (org-split-string current ":"))
 			   (inherited-tags
 			    (nreverse (nthcdr (length current-tags)
-					      (nreverse (org-get-tags-at))))))
+					      (nreverse (org-get-tags))))))
 		      (replace-regexp-in-string
 		       "\\([-+&]+\\|,\\)"
 		       ":"
@@ -14821,7 +14774,7 @@ the scanner.  The following items can be given here:
 If your function needs to retrieve the tags including inherited tags
 at the *current* entry, you can use the value of the variable
 `org-scanner-tags' which will be much faster than getting the value
-with `org-get-tags-at'.  If your function gets properties with
+with `org-get-tags'.  If your function gets properties with
 `org-entry-properties' at the *current* entry, bind `org-trust-scanner-tags'
 to t around the call to `org-entry-properties' to get the same speedup.
 Note that if your function moves around to retrieve tags and properties at
@@ -15102,7 +15055,7 @@ strings."
 		(when value (push (cons "TAGS" value) props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "ALLTAGS"))
-	      (let ((value (org-get-tags-at)))
+	      (let ((value (org-get-tags)))
 		(when value
 		  (push (cons "ALLTAGS"
 			      (format ":%s:" (mapconcat #'identity value ":")))

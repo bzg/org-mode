@@ -774,7 +774,7 @@ situation use `org-part-of-drill-entry-p'."
 or a subheading within a drill item?"
   (or (org-drill-entry-p)
       ;; Does this heading INHERIT the drill tag
-      (member org-drill-question-tag (org-get-tags-at))))
+      (member org-drill-question-tag (org-get-tags))))
 
 
 (defun org-drill-goto-drill-entry-heading ()
