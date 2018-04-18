@@ -914,7 +914,7 @@ value."
       (org-back-to-heading t)
       ;; Filter out Beamer-related tags and install environment tag.
       (let ((tags (cl-remove-if (lambda (x) (string-match "^B_" x))
-				 (org-get-tags)))
+				(org-get-tags nil t)))
 	    (env-tag (and (org-string-nw-p value) (concat "B_" value))))
 	(org-set-tags-to (if env-tag (cons env-tag tags) tags))
 	(when env-tag (org-toggle-tag env-tag 'on)))))

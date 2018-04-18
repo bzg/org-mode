@@ -327,7 +327,7 @@ This needs more work, to handle headings with lots of spaces in them."
 				   (mapcar (lambda (x) (org-string-nw-p (car x)))
 					   org-current-tag-alist))
 				  (mapcar #'car (org-get-buffer-tags))))))
-		    (dolist (tag (org-get-tags))
+		    (dolist (tag (org-get-tags nil t))
 		      (setq lst (delete tag lst)))
 		    lst))
 	  (and (string-match ".*:" pcomplete-stub)

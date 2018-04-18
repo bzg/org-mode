@@ -874,7 +874,7 @@ If BEG and END are given, only do this in that region."
 		(funcall cmd data old new)
 		(unless (member data '("delete" "archive" "archive-sibling"
 				       "addheading"))
-		  (when (member "FLAGGED" (org-get-tags))
+		  (when (member "FLAGGED" (org-get-tags nil t))
 		    (add-to-list 'org-mobile-last-flagged-files
 				 (buffer-file-name)))))
 	    (error (setq org-mobile-error msg)))
@@ -999,7 +999,7 @@ be returned that indicates what went wrong."
 		 old current))))
 
      ((eq what 'tags)
-      (setq current (org-get-tags)
+      (setq current (org-get-tags nil t)
 	    new1 (and new (org-split-string new ":+"))
 	    old1 (and old (org-split-string old ":+")))
       (cond

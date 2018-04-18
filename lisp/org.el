@@ -520,6 +520,12 @@ but the stars and the body are.")
 An archived subtree does not open during visibility cycling, and does
 not contribute to the agenda listings.")
 
+(defconst org-tag-line-re
+  "^\\*+ \\(?:.*[ \t]\\)?\\(:\\([[:alnum:]_@#%:]+\\):\\)[ \t]*$"
+  "Regexp matching tags in a headline.
+Tags are stored in match group 1.  Match group 2 stores the tags
+without the enclosing colons.")
+
 (eval-and-compile
   (defconst org-comment-string "COMMENT"
     "Entries starting with this keyword will never be exported.
@@ -4621,7 +4627,7 @@ STATE should be one of the symbols listed in the docstring of
      ;; Include headline point is currently on.
      (beginning-of-line)
      (while (and (< (point) end) (re-search-forward re end t))
-       (when (member org-archive-tag (org-get-tags))
+       (when (member org-archive-tag (org-get-tags nil t))
 	 (org-flag-subtree t)
 	 (org-end-of-subtree t))))))
 
@@ -14713,21 +14719,48 @@ Returns the new tags string, or nil to not change the current settings."
 	(match-string-no-properties 1)
       "")))
 
-(defun org-get-tags ()
-  "Get the list of tags specified in the current headline."
-  (org-split-string (org-get-tags-string) ":"))
+(defun org--get-local-tags ()
+  "Return list of tags for the current headline.
+Assume point is at the beginning of the headline."
+  (and (looking-at org-tag-line-re)
+       (split-string (match-string-no-properties 2) ":" t)))
+
+(defun org-get-tags (&optional pos local)
+  "Get the list of tags specified in the current headline.
+
+When argument POS is non-nil, retrieve tags for headline at POS.
+
+Accoring to `org-use-tags-inheritance', tags may be inherited
+from parent headlines, and from the whole document, through
+`org-file-tags'.  However, when optional argument LOCAL is
+non-nil, only return tags really specified in the considered
+headline.
+
+Inherited tags have the `inherited' text property."
+  (if (and org-trust-scanner-tags
+	   (or (not pos) (eq pos (point)))
+	   (not local))
+      org-scanner-tags
+    (org-with-point-at (or pos (point))
+      (unless (org-before-first-heading-p)
+	(org-back-to-heading t)
+	(let ((tags (org--get-local-tags)))
+	  (if (or local (not org-use-tag-inheritance)) tags
+	    (while (org-up-heading-safe)
+	      (setq tags (append (mapcar #'org-add-prop-inherited
+					 (org--get-local-tags))
+				 tags)))
+	    (org-remove-uninherited-tags
+	     (delete-dups (append org-file-tags tags)))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (let ((tag-re (concat org-outline-regexp-bol
-			 "\\(?:.*?[ \t]\\)?:\\([[:alnum:]_@#%:]+\\):[ \t]*$"))
-	 tags)
-     (while (re-search-forward tag-re nil t)
-       (dolist (tag (org-split-string (match-string-no-properties 1) ":"))
-	 (push tag tags)))
-     (mapcar #'list (append org-file-tags (org-uniquify tags))))))
+  (org-with-point-at 1
+    (let (tags)
+      (while (re-search-forward org-tag-line-re nil t)
+	(setq tags (nconc (split-string (match-string-no-properties 2) ":")
+			  tags)))
+      (mapcar #'list (delete-dups (append org-file-tags tags))))))
 
 ;;;; The mapping API
 

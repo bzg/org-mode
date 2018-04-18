@@ -422,7 +422,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 (defun org-mouse-tag-menu ()		;todo
   "Create the tags menu."
   (append
-   (let ((tags (org-get-tags)))
+   (let ((tags (org-get-tags nil t)))
      (org-mouse-keyword-menu
       (sort (mapcar 'car (org-get-buffer-tags)) 'string-lessp)
       `(lambda (tag)

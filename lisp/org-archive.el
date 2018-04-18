@@ -271,9 +271,15 @@ direct children of this heading."
 	  (org-back-to-heading t)
 	  ;; Get context information that will be lost by moving the
 	  ;; tree.  See `org-archive-save-context-info'.
-	  (let* ((all-tags (org-get-tags-at))
-		 (local-tags (org-get-tags))
-		 (inherited-tags (org-delete-all local-tags all-tags))
+	  (let* ((all-tags (org-get-tags))
+		 (local-tags
+		  (cl-remove-if (lambda (tag)
+				  (get-text-property 0 'inherited tag))
+				all-tags))
+		 (inherited-tags
+		  (cl-remove-if-not (lambda (tag)
+				      (get-text-property 0 'inherited tag))
+				    all-tags))
 		 (context
 		  `((category . ,(org-get-category nil 'force-refresh))
 		    (file . ,file)

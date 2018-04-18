@@ -6033,12 +6033,81 @@ Paragraph<point>"
 	      (insert "x")
 	      (buffer-string))))))
 
-(ert-deftest test-org/tags-at ()
+(ert-deftest test-org/get-tags ()
+  "Test `org-get-tags' specifications."
+  ;; Standard test.
+  (should
+   (equal '("foo")
+	  (org-test-with-temp-text "* Test :foo:" (org-get-tags))))
   (should
    (equal '("foo" "bar")
-	  (org-test-with-temp-text
-	   "* T<point>est :foo:bar:"
-	   (org-get-tags-at)))))
+	  (org-test-with-temp-text "* Test :foo:bar:" (org-get-tags))))
+  ;; Return nil when there is no tag.
+  (should-not
+   (org-test-with-temp-text "* Test" (org-get-tags)))
+  ;; Tags are inherited from parent headlines.
+  (should
+   (equal '("tag")
+	  (let ((org-use-tag-inheritance t))
+	    (org-test-with-temp-text "* H0 :foo:\n* H1 :tag:\n<point>** H2"
+	      (org-get-tags)))))
+  ;; Tags are inherited from `org-file-tags'.
+  (should
+   (equal '("tag")
+	  (org-test-with-temp-text "* H1"
+	    (let ((org-file-tags '("tag"))
+		  (org-use-tag-inheritance t))
+	      (org-get-tags)))))
+  ;; Only inherited tags have the `inherited' text property.
+  (should
+   (get-text-property 0 'inherited
+		      (org-test-with-temp-text "* H1 :foo:\n** <point>H2 :bar:"
+			(let ((org-use-tag-inheritance t))
+			  (assoc-string "foo" (org-get-tags))))))
+  (should-not
+   (get-text-property 0 'inherited
+		      (org-test-with-temp-text "* H1 :foo:\n** <point>H2 :bar:"
+			(let ((org-use-tag-inheritance t))
+			  (assoc-string "bar" (org-get-tags))))))
+  ;; Obey to `org-use-tag-inheritance'.
+  (should-not
+   (org-test-with-temp-text "* H1 :foo:\n** <point>H2 :bar:"
+     (let ((org-use-tag-inheritance nil))
+       (assoc-string "foo" (org-get-tags)))))
+  (should-not
+   (org-test-with-temp-text "* H1 :foo:\n** <point>H2 :bar:"
+     (let ((org-use-tag-inheritance nil)
+	   (org-file-tags '("foo")))
+       (assoc-string "foo" (org-get-tags)))))
+  (should-not
+   (org-test-with-temp-text "* H1 :foo:bar:\n** <point>H2 :baz:"
+     (let ((org-use-tag-inheritance '("bar")))
+       (assoc-string "foo" (org-get-tags)))))
+  (should
+   (org-test-with-temp-text "* H1 :foo:bar:\n** <point>H2 :baz:"
+     (let ((org-use-tag-inheritance '("bar")))
+       (assoc-string "bar" (org-get-tags)))))
+  (should-not
+   (org-test-with-temp-text "* H1 :foo:bar:\n** <point>H2 :baz:"
+     (let ((org-use-tag-inheritance "b.*"))
+       (assoc-string "foo" (org-get-tags)))))
+  (should
+   (org-test-with-temp-text "* H1 :foo:bar:\n** <point>H2 :baz:"
+     (let ((org-use-tag-inheritance "b.*"))
+       (assoc-string "bar" (org-get-tags)))))
+  ;; When optional argument LOCAL is non-nil, ignore tag inheritance.
+  (should
+   (equal '("baz")
+	  (org-test-with-temp-text "* H1 :foo:bar:\n** <point>H2 :baz:"
+	    (let ((org-use-tag-inheritance t))
+	      (org-get-tags nil t)))))
+  ;; When optional argument POS is non-nil, get tags there instead.
+  (should
+   (equal '("foo")
+	  (org-test-with-temp-text "* H1 :foo:\n* <point>H2 :bar:"
+	    (org-get-tags 1))))
+  ;; Pathological case: tagged headline with an empty body.
+  (should (org-test-with-temp-text "* :tag:" (org-get-tags))))
 
 (ert-deftest test-org/set-tags ()
   "Test `org-set-tags' specifications."

@@ -106,6 +106,14 @@ document, use =shrink= value instead, or in addition to align:
 ,#+STARTUP: align shrink
 #+END_EXAMPLE
 
+*** ~org-get-tags~ meaning change
+
+Function ~org-get-tags~ used to return local tags to the current
+headline.  It now returns the all the inherited tags in addition to
+the local tags.  In order to get the old behaviour back, you can use:
+
+: (org-get-tags nil t)
+
 *** Alphabetic sorting in tables and lists
 
 When sorting alphabetically, ~org-table-sort-lines~ and ~org-sort-list~
