@@ -448,7 +448,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
     ;; set new tags if any
     (when tags
       (end-of-line)
-      (insert " :" (mapconcat 'identity tags ":") ":")
+      (insert " " (org-make-tag-string tags))
       (org-set-tags nil t))))
 
 (defun org-mouse-insert-checkbox ()

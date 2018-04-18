@@ -14211,10 +14211,9 @@ If DATA is nil or the empty string, all tags are removed."
   (let ((data
 	 (pcase (if (stringp data) (org-trim data) data)
 	   ((or `nil "") nil)
-	   ((pred listp) (format ":%s:" (mapconcat #'identity data ":")))
+	   ((pred listp) (org-make-tag-string data))
 	   ((pred stringp)
-	    (format ":%s:"
-		    (mapconcat #'identity (org-split-string data ":+") ":")))
+	    (org-make-tag-string (org-split-string data ":+")))
 	   (_ (error "Invalid tag specification: %S" data)))))
     (org-with-wide-buffer
      (org-back-to-heading t)
@@ -14263,7 +14262,7 @@ When JUST-ALIGN is non-nil, only align tags."
 	      (org-set-tags nil t)
 	      (end-of-line))
             (message "All tags realigned to column %d" org-tags-column))
-	(let* ((current (org-get-tags-string))
+	(let* ((current (org-make-tag-string (org-get-tags nil t)))
 	       (tags
 		(if just-align current
 		  ;; Get a new set of tags from the user.
@@ -14436,7 +14435,7 @@ Also insert END."
 
 (defun org-set-current-tags-overlay (current prefix)
   "Add an overlay to CURRENT tag with PREFIX."
-  (let ((s (concat ":" (mapconcat 'identity current ":") ":")))
+  (let ((s (org-make-tag-string current)))
     (put-text-property 0 (length s) 'face '(secondary-selection org-tag) s)
     (org-overlay-display org-tags-overlay (concat prefix s))))
 
@@ -14642,15 +14641,11 @@ Returns the new tags string, or nil to not change the current settings."
 	  (mapconcat 'identity current ":")
 	nil))))
 
-(defun org-get-tags-string ()
-  "Get the TAGS string in the current headline."
-  (unless (org-at-heading-p t)
-    (user-error "Not on a heading"))
-  (save-excursion
-    (beginning-of-line 1)
-    (if (looking-at ".*[ \t]\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
-	(match-string-no-properties 1)
-      "")))
+(defun org-make-tag-string (tags)
+  "Return string associated to TAGS.
+TAGS is a list of strings."
+  (if (null tags) ""
+    (format ":%s:" (mapconcat #'identity tags ":"))))
 
 (defun org--get-local-tags ()
   "Return list of tags for the current headline.
@@ -15031,14 +15026,15 @@ strings."
 		    props)
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "TAGS"))
-	      (let ((value (org-string-nw-p (org-get-tags-string))))
-		(when value (push (cons "TAGS" value) props)))
+	      (let ((tags (org-get-tags nil t)))
+		(when tags
+		  (push (cons "TAGS" (org-make-tag-string tags))
+			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "ALLTAGS"))
-	      (let ((value (org-get-tags)))
-		(when value
-		  (push (cons "ALLTAGS"
-			      (format ":%s:" (mapconcat #'identity value ":")))
+	      (let ((tags (org-get-tags)))
+		(when tags
+		  (push (cons "ALLTAGS" (org-make-tag-string tags))
 			props)))
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "BLOCKED"))
@@ -17915,7 +17911,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(pall '(:org-archived t :org-comment t))
 	(inhibit-read-only t)
 	(org-inhibit-startup org-agenda-inhibit-startup)
-	(rea (concat ":" org-archive-tag ":"))
+	(rea (org-make-tag-string (list org-archive-tag)))
 	re pos)
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)

@@ -671,8 +671,7 @@ possible.  It doesn't apply to `inlinetask' elements."
 		    (plist-get info :with-tags)
 		    (let ((tag-list (org-export-get-tags element info)))
 		      (and tag-list
-			   (format ":%s:"
-				   (mapconcat 'identity tag-list ":"))))))
+			   (org-make-tag-string tag-list)))))
 	 (priority
 	  (and (plist-get info :with-priority)
 	       (let ((char (org-element-property :priority element)))

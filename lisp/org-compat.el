@@ -395,6 +395,11 @@ use of this function is for the stuck project list."
   (declare (obsolete "use `org-get-tags' instead." "Org 9.2"))
   (org-get-tags pos 'local))
 
+(defun org-get-tags-string ()
+  "Get the TAGS string in the current headline."
+  (declare (obsolete "use `org-make-tag-string' instead." "Org 9.2"))
+  (org-make-tag-string (org-get-tags nil t)))
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org

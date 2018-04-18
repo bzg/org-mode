@@ -211,8 +211,7 @@ a communication channel."
 	   (tags (and (plist-get info :with-tags)
 		      (let ((tag-list (org-export-get-tags headline info)))
 			(and tag-list
-			     (format "     :%s:"
-				     (mapconcat 'identity tag-list ":"))))))
+			     (concat "     " (org-make-tag-string tag-list))))))
 	   (priority
 	    (and (plist-get info :with-priority)
 		 (let ((char (org-element-property :priority headline)))
@@ -589,10 +588,8 @@ contents according to the current headline."
 			  (org-export-get-reference headline info))))
 	     (tags (and (plist-get info :with-tags)
 			(not (eq 'not-in-toc (plist-get info :with-tags)))
-			(let ((tags (org-export-get-tags headline info)))
-			  (and tags
-			       (format ":%s:"
-				       (mapconcat #'identity tags ":")))))))
+			(org-make-tag-string
+			 (org-export-get-tags headline info)))))
 	(concat indentation bullet title tags)))
     (org-export-collect-headlines info n (and local keyword)) "\n")
    "\n"))

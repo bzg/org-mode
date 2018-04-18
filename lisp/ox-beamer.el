@@ -1076,11 +1076,11 @@ aid, but the tag does not have any semantic meaning."
 	 (org-use-fast-tag-selection t)
 	 (org-fast-tag-selection-single-key t))
     (org-set-tags)
-    (let ((tags (or (ignore-errors (org-get-tags-string)) "")))
+    (let ((tags (org-get-tags nil t)))
       (cond
        ;; For a column, automatically ask for its width.
        ((eq org-last-tag-selection-key ?|)
-	(if (string-match ":BMCOL:" tags)
+	(if (member "BMCOL" tags)
 	    (org-set-property "BEAMER_col" (read-string "Column width: "))
 	  (org-delete-property "BEAMER_col")))
        ;; For an "againframe" section, automatically ask for reference
@@ -1096,7 +1096,8 @@ aid, but the tag does not have any semantic meaning."
 	   (read-string "Frame reference (*Title, #custom-id, id:...): "))
 	  (org-set-property "BEAMER_act"
 			    (read-string "Overlay specification: "))))
-       ((string-match (concat ":B_\\(" (mapconcat 'car envs "\\|") "\\):") tags)
+       ((let ((tags-re (concat "B_" (regexp-opt (mapcar #'car envs) t))))
+	  (cl-some (lambda (tag) (string-match tags-re tag)) tags))
 	(org-entry-put nil "BEAMER_env" (match-string 1 tags)))
        (t (org-entry-delete nil "BEAMER_env"))))))
 

@@ -914,10 +914,10 @@ holding contextual information."
   (todo _todo-type priority text tags)
   "Default format function for a headline.
 See `org-texinfo-format-headline-function' for details."
-  (concat (when todo (format "@strong{%s} " todo))
-	  (when priority (format "@emph{#%s} " priority))
+  (concat (and todo (format "@strong{%s} " todo))
+	  (and priority (format "@emph{#%s} " priority))
 	  text
-	  (when tags (format " :%s:" (mapconcat 'identity tags ":")))))
+	  (and tags (concat " " (org-make-tag-string tags)))))
 
 ;;;; Inline Src Block
 
@@ -955,7 +955,7 @@ See `org-texinfo-format-inlinetask-function' for details."
 	 (concat (when todo (format "@strong{%s} " todo))
 		 (when priority (format "#%c " priority))
 		 title
-		 (when tags (format ":%s:" (mapconcat #'identity tags ":"))))))
+		 (when tags (org-make-tag-string tags)))))
     (format "@center %s\n\n%s\n" full-title contents)))
 
 ;;;; Italic

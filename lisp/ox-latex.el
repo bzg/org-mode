@@ -2132,8 +2132,9 @@ See `org-latex-format-inlinetask-function' for details."
 		 (when priority (format "\\framebox{\\#%c} " priority))
 		 title
 		 (when tags
-		   (format "\\hfill{}\\textsc{:%s:}"
-			   (mapconcat #'org-latex--protect-text tags ":"))))))
+		   (format "\\hfill{}\\textsc{%s}"
+			   (org-make-tag-string
+			    (mapcar #'org-latex--protect-text tags)))))))
     (concat "\\begin{center}\n"
 	    "\\fbox{\n"
 	    "\\begin{minipage}[c]{.6\\textwidth}\n"
