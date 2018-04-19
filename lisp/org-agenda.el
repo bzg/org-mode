@@ -4995,14 +4995,14 @@ of what a project is and how to check if it stuck, customize the variable
 		       (format "^\\*+[ \t]+\\(%s\\)\\>"
 			       (mapconcat #'identity todo-wds "\\|"))))
 	 (tags-re (cond ((null tags) nil)
-			((member "*" tags)
-			 (eval-when-compile
+			((member "*" tags) org-tag-line-re)
+			(tags
+			 (let ((other-tags (format "\\(?:%s:\\)*" org-tag-re)))
 			   (concat org-outline-regexp-bol
-				   ".*:[[:alnum:]_@#%]+:[ \t]*$")))
-			(tags (concat org-outline-regexp-bol
-				      ".*:\\("
-				      (mapconcat #'identity tags "\\|")
-				      "\\):[[:alnum:]_@#%:]*[ \t]*$"))
+				   ".*?[ \t]:"
+				   other-tags
+				   (regexp-opt tags t)
+				   ":" other-tags "[ \t]*$")))
 			(t nil)))
 	 (re-list (delq nil (list todo-re tags-re gen-re)))
 	 (skip-re
@@ -6522,7 +6522,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	    (setq duration (- (org-duration-to-minutes s2)
 			      (org-duration-to-minutes s1)))))
 
-	(when (string-match "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$" txt)
+	(when (string-match org-tag-group-re txt)
 	  ;; Tags are in the string
 	  (if (or (eq org-agenda-remove-tags t)
 		  (and org-agenda-remove-tags
@@ -6597,7 +6597,7 @@ Any match of REMOVE-RE will be removed from TXT."
 The modified list may contain inherited tags, and tags matched by
 `org-agenda-hide-tags-regexp' will be removed."
   (when (or add-inherited hide-re)
-    (if (string-match "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$" txt)
+    (if (string-match org-tag-group-re txt)
 	(setq txt (substring txt 0 (match-beginning 0))))
     (setq tags
 	  (delq nil

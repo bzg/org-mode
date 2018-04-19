@@ -520,6 +520,14 @@ but the stars and the body are.")
 An archived subtree does not open during visibility cycling, and does
 not contribute to the agenda listings.")
 
+(defconst org-tag-re "[[:alnum:]_@#%]+"
+  "Regexp matching a single tag.")
+
+(defconst org-tag-group-re "[ \t]+\\(:\\([[:alnum:]_@#%:]+\\):\\)[ \t]*$"
+  "Regexp matching the tag group at the end of a line, with leading spaces.
+Tags are stored in match group 1.  Match group 2 stores the tags
+without the enclosing colons.")
+
 (defconst org-tag-line-re
   "^\\*+ \\(?:.*[ \t]\\)?\\(:\\([[:alnum:]_@#%:]+\\):\\)[ \t]*$"
   "Regexp matching tags in a headline.
@@ -5109,8 +5117,7 @@ S is a value for TAGS keyword or produced with
 `org-tag-alist-to-string'.  Return value is an alist suitable for
 `org-tag-alist' or `org-tag-persistent-alist'."
   (let ((lines (mapcar #'split-string (split-string s "\n" t)))
-	(tag-re (concat "\\`\\([[:alnum:]_@#%]+"
-			"\\|{.+?}\\)"	; regular expression
+	(tag-re (concat "\\`\\(" org-tag-re "\\|{.+?}\\)" ; regular expression
 			"\\(?:(\\(.\\))\\)?\\'"))
 	alist group-flag)
     (dolist (tokens lines (cdr (nreverse alist)))
@@ -13627,9 +13634,8 @@ headlines matching this string."
 			 ;; Get the correct level to match
 			 (concat "\\*\\{" (number-to-string start-level) "\\} ")
 		       org-outline-regexp)
-		     " *\\(\\<\\("
-		     (mapconcat #'regexp-quote org-todo-keywords-1 "\\|")
-		     "\\)\\>\\)? *\\(.*?\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*$"))
+		     " *\\(" (regexp-opt org-todo-keywords-1 'words) "\\)?"
+		     " *\\(.*?\\)\\([ \t]:\\(?:" org-tag-re ":\\)+\\)?[ \t]*$"))
 	 (props (list 'face 'default
 		      'done-face 'org-agenda-done
 		      'undone-face 'default
@@ -13878,7 +13884,12 @@ See also `org-scan-tags'."
 	     'org-tags-completion-function nil nil nil 'org-tags-history))))
 
   (let ((match0 match)
-	(re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@#%]+\\)")
+	(re (concat
+	     "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)"
+	     "\\([0-9]+\\)\\|\\(\\(?:[[:alnum:]_]+\\(?:\\\\-\\)*\\)+\\)"
+	     "\\([<>=]\\{1,2\\}\\)"
+	     "\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)"
+	     "\\|" org-tag-re "\\)"))
 	(start 0)
 	tagsmatch todomatch tagsmatcher todomatcher)
 
@@ -14626,15 +14637,17 @@ Returns the new tags string, or nil to not change the current settings."
 		(delete-region (point) (point-at-eol))
 		(org-fast-tag-insert "Current" current c-face)
 		(org-set-current-tags-overlay current ov-prefix)
-		(while (re-search-forward "\\[.\\] \\([[:alnum:]_@#%]+\\)" nil t)
-		  (setq tg (match-string 1))
-		  (add-text-properties
-		   (match-beginning 1) (match-end 1)
-		   (list 'face
-			 (cond
-			  ((member tg current) c-face)
-			  ((member tg inherited) i-face)
-			  (t (get-text-property (match-beginning 1) 'face))))))
+		(let ((tag-re (concat "\\[.\\] \\(" org-tag-re "\\)")))
+		  (while (re-search-forward tag-re nil t)
+		    (let ((tag (match-string 1)))
+		      (add-text-properties
+		       (match-beginning 1) (match-end 1)
+		       (list 'face
+			     (cond
+			      ((member tag current) c-face)
+			      ((member tag inherited) i-face)
+			      (t (get-text-property (match-beginning 1) '
+						    face))))))))
 		(goto-char (point-min)))))
       (delete-overlay org-tags-overlay)
       (if rtn
