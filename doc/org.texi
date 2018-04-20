@@ -14231,12 +14231,12 @@ The @LaTeX{} export back-end converts horizontal rules by the specified
 
 @cindex Markdown export
 
-The Markdown export back-end, ``md'', converts an Org file to a Markdown
+The Markdown export back-end, ``md'', converts an Org file to Markdown
 format, as defined at @uref{http://daringfireball.net/projects/markdown/}.
 
-Since ``md'' is built on top of the HTML back-end, any Org constructs
-not supported by Markdown, such as tables, the underlying ``html''
-back-end (see @ref{HTML Export}) converts them.
+Since it is built on top of the HTML back-end (see @ref{HTML Export}), it
+converts every Org construct not defined in Markdown syntax, such as
+tables, to HTML.
 
 @anchor{Markdown export commands}
 @subheading Markdown export commands
