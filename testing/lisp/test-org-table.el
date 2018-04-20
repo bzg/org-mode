@@ -2371,7 +2371,7 @@ See also `test-org-table/copy-field'."
   (should-error
    (org-test-with-temp-text "<point>a"
      (org-table-toggle-column-width)))
-  ;; A shrunk columns is overlaid with
+  ;; A shrunk column is overlaid with
   ;; `org-table-shrunk-column-indicator'.
   (should
    (equal org-table-shrunk-column-indicator
@@ -2392,17 +2392,15 @@ See also `test-org-table/copy-field'."
 			 'display))))
   ;; When column is already shrunk, expand it, i.e., remove overlays.
   (should-not
-   (equal org-table-shrunk-column-indicator
-	  (org-test-with-temp-text "| <point>a |"
-	    (org-table-toggle-column-width)
-	    (org-table-toggle-column-width)
-	    (overlays-in (point-min) (point-max)))))
+   (org-test-with-temp-text "| <point>a |"
+     (org-table-toggle-column-width)
+     (org-table-toggle-column-width)
+     (overlays-in (point-min) (point-max))))
   (should-not
-   (equal org-table-shrunk-column-indicator
-	  (org-test-with-temp-text "| a |\n| <point>b |"
-	    (org-table-toggle-column-width)
-	    (org-table-toggle-column-width)
-	    (overlays-in (point-min) (point-max)))))
+   (org-test-with-temp-text "| a |\n| <point>b |"
+     (org-table-toggle-column-width)
+     (org-table-toggle-column-width)
+     (overlays-in (point-min) (point-max))))
   ;; With a column width cookie, limit overlay to the specified number
   ;; of characters.
   (should
@@ -2421,6 +2419,14 @@ See also `test-org-table/copy-field'."
 			      (overlay-start
 			       (car (overlays-in (line-beginning-position)
 						 (line-end-position))))))))
+  (should
+   (equal (concat "----" org-table-shrunk-column-indicator)
+	  (org-test-with-temp-text "| <3>  |\n|--<point>----|"
+	    (org-table-toggle-column-width)
+	    (overlay-get
+	     (car (overlays-in (line-beginning-position)
+			       (line-end-position)))
+	     'display))))
   ;; Width only takes into account visible characters.
   (should
    (equal "| [[http"

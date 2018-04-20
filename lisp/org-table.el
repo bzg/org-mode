@@ -3937,13 +3937,17 @@ Return a list of overlays hiding the field, or nil if field is
 already hidden."
   (cond
    ((org-table--shrunk-field) nil)	;already shrunk: bail out
-   ((eq contents 'hline)		;no contents to hide
-    (list (org-table--make-shrinking-overlay
-	   (+ start width 1) end org-table-shrunk-column-indicator contents)))
    ((or (= 0 width)			;shrink to one character
 	(>= 1 (org-string-width (buffer-substring start end))))
     (list (org-table--make-shrinking-overlay
-	   start end org-table-shrunk-column-indicator contents)))
+	   start end org-table-shrunk-column-indicator
+	   (if (eq 'hline contents) "" contents))))
+   ((eq contents 'hline)		;no contents to hide
+    (list (org-table--make-shrinking-overlay
+	   start end
+	   (concat (make-string (max 0 (1+ width)) ?-)
+		   org-table-shrunk-column-indicator)
+	   "")))
    (t
     ;; If the field is not empty, consider using two overlays: one for
     ;; the blanks at the beginning of the field, and another one at
