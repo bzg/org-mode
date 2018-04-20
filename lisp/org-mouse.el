@@ -434,22 +434,12 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
       `(lambda (tag) (member tag (quote ,tags)))
       ))
    '("--"
-     ["Align Tags Here" (org-set-tags nil t) t]
-     ["Align Tags in Buffer" (org-set-tags t t) t]
-     ["Set Tags ..." (org-set-tags) t])))
+     ["Align Tags Here" (org-align-tags) t]
+     ["Align Tags in Buffer" (org-align-tags t) t]
+     ["Set Tags ..." (org-set-tags-command) t])))
 
 (defun org-mouse-set-tags (tags)
-  (save-excursion
-    ;; remove existing tags first
-    (beginning-of-line)
-    (when (org-mouse-re-search-line ":\\(\\([A-Za-z_]+:\\)+\\)")
-      (replace-match ""))
-
-    ;; set new tags if any
-    (when tags
-      (end-of-line)
-      (insert " " (org-make-tag-string tags))
-      (org-set-tags nil t))))
+  (org-set-tags tags))
 
 (defun org-mouse-insert-checkbox ()
   (interactive)

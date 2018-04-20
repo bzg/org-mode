@@ -366,7 +366,7 @@ direct children of this heading."
 		   (or (and (eq org-archive-subtree-add-inherited-tags 'infile)
 			    infile-p)
 		       (eq org-archive-subtree-add-inherited-tags t))
-		   (org-set-tags-to all-tags))
+		   (org-set-tags all-tags))
 	      ;; Mark the entry as done
 	      (when (and org-archive-mark-done
 			 (let ((case-fold-search nil))

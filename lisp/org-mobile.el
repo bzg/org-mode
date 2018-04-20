@@ -1007,7 +1007,7 @@ be returned that indicates what went wrong."
        ((or (org-mobile-tags-same-p current old1)
 	    (eq org-mobile-force-mobile-change t)
 	    (memq 'tags org-mobile-force-mobile-change))
-	(org-set-tags-to new1) t)
+	(org-set-tags new1) t)
        (t (error "Tags before change were expected as \"%s\", but are \"%s\""
 		 (or old "") (or current "")))))
 
@@ -1036,7 +1036,7 @@ be returned that indicates what went wrong."
 	      (goto-char (match-beginning 4))
 	      (insert new)
 	      (delete-region (point) (+ (point) (length current)))
-	      (org-set-tags nil 'align))
+	      (org-align-tags))
 	     (t (error "Heading changed in MobileOrg and on the computer")))))))
 
      ((eq what 'addheading)

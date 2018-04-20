@@ -184,6 +184,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar ffap-url-regexp)
 (defvar org-element-paragraph-separate)
+(defvar org-indent-indentation-per-level)
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -7573,7 +7574,7 @@ unconditionally."
 	       (org-end-of-subtree t t))
 	      (t
 	       (org-end-of-subtree t t))))
-      (unless (bolp) (insert "\n"))   ;ensure final newline
+      (unless (bolp) (insert "\n"))	;ensure final newline
       (unless (and blank? (org-previous-line-empty-p))
 	(org-N-empty-lines-before-current (if blank? 1 0)))
       (insert stars " \n")
@@ -7593,7 +7594,7 @@ unconditionally."
 	     ;; Preserve tags.
 	     (let ((split (delete-and-extract-region (point) (match-end 4))))
 	       (if (looking-at "[ \t]*$") (replace-match "")
-		 (org-set-tags nil t))
+		 (org-align-tags))
 	       (end-of-line)
 	       (when blank? (insert "\n"))
 	       (insert "\n" stars " ")
@@ -7696,7 +7697,7 @@ Set it to HEADING when provided."
 	   (if old (replace-match new t t nil 4)
 	     (goto-char (or (match-end 3) (match-end 2) (match-end 1)))
 	     (insert " " new))
-	   (org-set-tags nil t)
+	   (org-align-tags)
 	   (when (looking-at "[ \t]*$") (replace-match ""))))))))
 
 (defun org-insert-heading-after-current ()
@@ -7892,7 +7893,7 @@ odd number.  Returns values greater than 0."
        (user-error "Cannot promote to level 0.  UNDO to recover if necessary"))
       (t (replace-match up-head nil t)))
      (unless (= level 1)
-       (when org-auto-align-tags (org-set-tags nil 'ignore-column))
+       (when org-auto-align-tags (org-align-tags))
        (when org-adapt-indentation (org-fixup-indentation (- diff))))
      (run-hooks 'org-after-promote-entry-hook))))
 
@@ -7906,7 +7907,7 @@ odd number.  Returns values greater than 0."
 	  (down-head (concat (make-string (org-get-valid-level level 1) ?*) " "))
 	  (diff (abs (- level (length down-head) -1))))
      (replace-match down-head nil t)
-     (when org-auto-align-tags (org-set-tags nil 'ignore-column))
+     (when org-auto-align-tags (org-align-tags))
      (when org-adapt-indentation (org-fixup-indentation diff))
      (run-hooks 'org-after-demote-entry-hook))))
 
@@ -11315,7 +11316,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		   (save-excursion (org-add-log-note))))
 	       (and org-auto-align-tags
 		    (let ((org-loop-over-headlines-in-active-region nil))
-		      (org-set-tags nil t)))
+		      (org-align-tags)))
 	       (let ((bookmark-name (plist-get org-bookmark-names-plist
 					       :last-refile)))
 		 (when bookmark-name
@@ -11856,8 +11857,6 @@ insert an empty block."
 If the last change removed the TODO tag or switched to DONE, then
 this is nil.")
 
-(defvar org-setting-tags nil) ; dynamically scoped
-
 (defvar org-todo-setup-filter-hook nil
   "Hook for functions that pre-filter todo specs.
 Each function takes a todo spec and returns either nil or the spec
@@ -12129,7 +12128,7 @@ When called through ELisp, arg is also interpreted in the following way:
 		(org-add-log-setup 'state org-state this dolog)))
 	    ;; Fixup tag positioning.
 	    (org-todo-trigger-tag-changes org-state)
-	    (and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
+	    (when org-auto-align-tags (org-align-tags))
 	    (when org-provide-todo-statistics
 	      (org-update-parent-todo-statistics))
 	    (run-hooks 'org-after-todo-state-change-hook)
@@ -13557,7 +13556,7 @@ ACTION can be `set', `up', `down', or a character."
 		  (insert " [#" news "]"))
 	      (goto-char (match-beginning 3))
 	      (insert "[#" news "] "))))
-	(org-set-tags nil 'align))
+	(org-align-tags))
       (if remove
 	  (message "Priority removed")
 	(message "Priority of current item set to %s" news)))))
@@ -14181,8 +14180,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	 (setq res t)
 	 (cl-pushnew tag current :test #'equal))
 	(_ (setq current (delete tag current))))
-      (org-set-tags-to (nreverse current))
-      (run-hooks 'org-after-tags-change-hook)
+      (org-set-tags (nreverse current))
       res)))
 
 (defun org--align-tags-here (to-col)
@@ -14203,163 +14201,114 @@ Assume point is on a headline."
       ;; before tags.
       (when (< pos (point)) (goto-char pos)))))
 
-(defun org-set-tags-command (&optional arg just-align)
-  "Call the set-tags command for the current entry."
-  (interactive "P")
-  (if (or (org-at-heading-p) (and arg (org-before-first-heading-p)))
-      (org-set-tags arg just-align)
-    (save-excursion
-      (unless (and (org-region-active-p)
-		   org-loop-over-headlines-in-active-region)
-	(org-back-to-heading t))
-      (org-set-tags arg just-align))))
+(defun org-set-tags-command (&optional arg)
+  "Set the tags for the current visible entry.
 
-(defun org-set-tags-to (data)
-  "Set the tags of the current entry to DATA, replacing current tags.
-DATA may be a tags string like \":aa:bb:cc:\", or a list of tags.
-If DATA is nil or the empty string, all tags are removed."
-  (interactive "sTags: ")
-  (let ((data
-	 (pcase (if (stringp data) (org-trim data) data)
-	   ((or `nil "") nil)
-	   ((pred listp) (org-make-tag-string data))
-	   ((pred stringp)
-	    (org-make-tag-string (org-split-string data ":+")))
-	   (_ (error "Invalid tag specification: %S" data)))))
+When called with `\\[universal-argument]' prefix argument ARG,
+realign all tags in headings in the current buffer.  If a region
+is active, set tags for all headlines in the region.
+
+This function is for interactive use only;
+in Lisp code use `org-set-tags' instead."
+  (interactive "P")
+  (cond
+   (arg (org-align-tags t))
+   ((and (org-region-active-p) org-loop-over-headlines-in-active-region)
+    ;; Disable `org-loop-over-headlines-in-active-region' for
+    ;; successive calls.
+    (let (org-loop-over-headlines-in-active-region)
+      (org-map-entries
+       #'org-set-tags-command
+       nil
+       (if (eq org-loop-over-headlines-in-active-region 'start-level)
+	   'region-start-level
+	 'region)
+       (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
+   (t
+    (org-back-to-heading)
+    (let* ((all-tags (org-get-tags))
+	   (table (setq org-last-tags-completion-table
+			(org-tag-add-to-alist
+			 (and org-complete-tags-always-offer-all-agenda-tags
+			      (org-global-tags-completion-table
+			       (org-agenda-files)))
+			 (or org-current-tag-alist (org-get-buffer-tags)))))
+	   (current-tags
+	    (cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
+			  all-tags))
+	   (inherited-tags
+	    (cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
+			      all-tags))
+	   (tags
+	    (replace-regexp-in-string
+	     ;; Ignore all forbidden characters in tags.
+	     "[^[:alnum:]_@#%]+" ":"
+	     (if (or (eq t org-use-fast-tag-selection)
+		     (and org-use-fast-tag-selection
+			  (delq nil (mapcar #'cdr table))))
+		 (org-fast-tag-selection
+		  current-tags
+		  inherited-tags
+		  table
+		  (and org-fast-tag-selection-include-todo org-todo-key-alist))
+	       (let ((org-add-colon-after-tag-completion (< 1 (length table))))
+		 (org-trim (completing-read
+			    "Tags: "
+			    #'org-tags-completion-function
+			    nil nil current-tags 'org-tags-history)))))))
+      (org-set-tags tags)))))
+
+(defun org-align-tags (&optional all)
+  "Align tags in current entry.
+When optional argument ALL is non-nil, align all tags in the
+visible part of the buffer."
+  (save-excursion
+    (if all (goto-char (point-min)) (org-back-to-heading t))
+    (catch :single
+      (while (re-search-forward org-tag-line-re nil t)
+	(let* ((offset (if (bound-and-true-p org-indent-mode)
+			   (* (1- org-indent-indentation-per-level)
+			      (1- (org-current-level)))
+			 0))
+	       (tags-column (+ org-tags-column
+			       (if (> org-tags-column 0) (- offset) offset))))
+	  (beginning-of-line)
+	  (org--align-tags-here tags-column)
+	  (if all (forward-line) (throw :single nil)))))))
+
+(defun org-set-tags (tags)
+  "Set the tags of the current entry to TAGS, replacing current tags.
+
+TAGS may be a tags string like \":aa:bb:cc:\", or a list of tags.
+If TAGS is nil or the empty string, all tags are removed.
+
+This function assumes point is on a headline."
+  (let ((tags (pcase tags
+		((pred listp) tags)
+		((pred stringp) (split-string (org-trim tags) ":" t))
+		(_ (error "Invalid tag specification: %S" tags))))
+	(change-flag nil))
+    (when (functionp org-tags-sort-function)
+      (setq tags (sort tags org-tags-sort-function)))
     (org-with-wide-buffer
-     (org-back-to-heading t)
-     (let ((case-fold-search nil)) (looking-at org-complex-heading-regexp))
-     (when (or (match-end 5) data)
-       (goto-char (or (match-beginning 5) (line-end-position)))
+     (unless (equal tags (org-get-tags nil t))
+       (setq change-flag t)
+       ;; Delete previous tags and any trailing white space.
+       (goto-char (if (looking-at org-tag-line-re) (match-beginning 1)
+		    (line-end-position)))
        (skip-chars-backward " \t")
        (delete-region (point) (line-end-position))
-       (when data
-	 (insert " " data)
-	 (org-set-tags nil 'align))))))
-
-(defun org-align-all-tags ()
-  "Align the tags in all headings."
-  (interactive)
-  (save-excursion
-    (or (ignore-errors (org-back-to-heading t))
-	(outline-next-heading))
-    (if (org-at-heading-p)
-	(org-set-tags t)
-      (message "No headings"))))
-
-(defvar org-indent-indentation-per-level)
-(defun org-set-tags (&optional arg just-align)
-  "Set the tags for the current headline.
-With prefix ARG, realign all tags in headings in the current buffer.
-When JUST-ALIGN is non-nil, only align tags."
-  (interactive "P")
-  (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
-      (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
-                    'region-start-level
-		  'region))
-            org-loop-over-headlines-in-active-region)
-        (org-map-entries
-         ;; We don't use ARG and JUST-ALIGN here because these args
-         ;; are not useful when looping over headlines.
-         #'org-set-tags
-         org-loop-over-headlines-in-active-region
-         cl
-	 '(when (org-invisible-p) (org-end-of-subtree nil t))))
-    (let ((org-setting-tags t))
-      (if arg
-          (save-excursion
-            (goto-char (point-min))
-            (while (re-search-forward org-outline-regexp-bol nil t)
-	      (org-set-tags nil t)
-	      (end-of-line))
-            (message "All tags realigned to column %d" org-tags-column))
-	(let* ((current (org-make-tag-string (org-get-tags nil t)))
-	       (tags
-		(if just-align current
-		  ;; Get a new set of tags from the user.
-		  (save-excursion
-		    (let* ((table
-			    (setq
-			     org-last-tags-completion-table
-			     (org-tag-add-to-alist
-			      (and
-			       org-complete-tags-always-offer-all-agenda-tags
-			       (org-global-tags-completion-table
-				(org-agenda-files)))
-			      (or org-current-tag-alist
-				  (org-get-buffer-tags)))))
-			   (current-tags (org-split-string current ":"))
-			   (inherited-tags
-			    (nreverse (nthcdr (length current-tags)
-					      (nreverse (org-get-tags))))))
-		      (replace-regexp-in-string
-		       "\\([-+&]+\\|,\\)"
-		       ":"
-		       (if (or (eq t org-use-fast-tag-selection)
-			       (and org-use-fast-tag-selection
-				    (delq nil (mapcar #'cdr table))))
-			   (org-fast-tag-selection
-			    current-tags inherited-tags table
-			    (and org-fast-tag-selection-include-todo
-				 org-todo-key-alist))
-			 (let ((org-add-colon-after-tag-completion
-				(< 1 (length table))))
-			   (org-trim
-			    (completing-read
-			     "Tags: "
-			     #'org-tags-completion-function
-			     nil nil current 'org-tags-history))))))))))
-
-	  (when org-tags-sort-function
-	    (setq tags
-		  (mapconcat
-		   #'identity
-		   (sort (org-split-string tags "[^[:alnum:]_@#%]+")
-			 org-tags-sort-function)
-		   ":")))
-
-	  (if (or (string= ":" tags)
-		  (string= "::" tags))
-	      (setq tags ""))
-	  (if (not (org-string-nw-p tags)) (setq tags "")
-	    (unless (string-suffix-p ":" tags) (setq tags (concat tags ":")))
-	    (unless (string-prefix-p ":" tags) (setq tags (concat ":" tags))))
-
-	  ;; Insert new tags at the correct column.
-	  (unless (equal current tags)
-	    (save-excursion
-	      (beginning-of-line)
-	      (let ((case-fold-search nil))
-		(looking-at org-complex-heading-regexp))
-	      ;; Remove current tags, if any.
-	      (when (match-end 5) (replace-match "" nil nil nil 5))
-	      ;; Insert new tags, if any.  Otherwise, remove trailing
-	      ;; white spaces.
-	      (end-of-line)
-	      (if (not (equal tags ""))
-		  ;; When text is being inserted on an invisible
-		  ;; region boundary, it can be inadvertently sucked
-		  ;; into invisibility.
-		  (org-flag-region (point) (progn (insert " " tags) (point))
-				   nil
-				   'outline)
-		(skip-chars-backward " \t")
-		(delete-region (point) (line-end-position)))))
-	  ;; Align tags, if any.  Fix tags column if `org-indent-mode'
-	  ;; is on.
-	  (unless (equal tags "")
-	    (let* ((level (save-excursion
-			    (beginning-of-line)
-			    (skip-chars-forward "\\*")))
-		   (offset (if (bound-and-true-p org-indent-mode)
-			       (* (1- org-indent-indentation-per-level)
-				  (1- level))
-			     0))
-		   (tags-column
-		    (+ org-tags-column
-		       (if (> org-tags-column 0) (- offset) offset))))
-	      (org--align-tags-here tags-column))))
-        (unless just-align (run-hooks 'org-after-tags-change-hook))))))
+       (when tags
+	 (save-excursion (insert " " (org-make-tag-string tags)))
+	 ;; When text is being inserted on an invisible region
+	 ;; boundary, it can be inadvertently sucked into
+	 ;; invisibility.
+	 (unless (org-invisible-p (line-beginning-position))
+	   (org-flag-region (point) (line-end-position) nil 'outline))))
+     ;; Align tags, if any.  Fix tags column if `org-indent-mode' is
+     ;; on.
+     (when tags (org-align-tags))
+     (when change-flag (run-hooks 'org-after-tags-change-hook)))))
 
 (defun org-change-tag-in-region (beg end tag off)
   "Add or remove TAG for each entry in the region.
@@ -15398,10 +15347,10 @@ decreases scheduled or deadline date by one day."
 	      ((not (member value org-todo-keywords-1))
 	       (user-error "\"%s\" is not a valid TODO state" value)))
 	(org-todo value)
-	(org-set-tags nil 'align))
+	(org-align-tags))
        ((equal property "PRIORITY")
 	(org-priority (if (org-string-nw-p value) (string-to-char value) ?\s))
-	(org-set-tags nil 'align))
+	(org-align-tags))
        ((equal property "SCHEDULED")
 	(forward-line)
 	(if (and (looking-at-p org-planning-line-re)
@@ -19384,12 +19333,11 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 
 (defun org-fix-tags-on-the-fly ()
   "Align tags in headline at point.
-Unlike to `org-set-tags', it ignores region and sorting."
+Unlike to `org-align-tags', this function does nothing if point
+is not currently on a headline."
   (when (and (eq (char-after (line-beginning-position)) ?*) ;short-circuit
 	     (org-at-heading-p))
-    (let ((org-ignore-region t)
-	  (org-tags-sort-function nil))
-      (org-set-tags nil t))))
+    (org-align-tags)))
 
 (defun org-delete-backward-char (N)
   "Like `delete-backward-char', insert whitespace at field end in tables.
@@ -20243,7 +20191,7 @@ This command does many different things, depending on context:
 	(`footnote-reference (call-interactively #'org-footnote-action))
 	((or `headline `inlinetask)
 	 (save-excursion (goto-char (org-element-property :begin context))
-			 (call-interactively #'org-set-tags)))
+			 (call-interactively #'org-set-tags-command)))
 	(`item
 	 ;; At an item: `C-u C-u' sets checkbox to "[-]"
 	 ;; unconditionally, whereas `C-u' will toggle its presence.
@@ -20355,7 +20303,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	((and `nil (guard (org-at-heading-p)))
 	 ;; When point is on an unsupported object type, we can miss
 	 ;; the fact that it also is at a heading.  Handle it here.
-	 (call-interactively #'org-set-tags))
+	 (call-interactively #'org-set-tags-command))
 	((guard
 	  (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)))
 	(_
@@ -20415,7 +20363,7 @@ With a non-nil optional argument, join it to the following one."
 	;; Adjust alignment of tags.
 	(cond
 	 ((not tags-column))		;no tags
-	 (org-auto-align-tags (org-set-tags nil t))
+	 (org-auto-align-tags (org-align-tags))
 	 (t (org--align-tags-here tags-column)))) ;preserve tags column
     (delete-indentation arg)))
 
@@ -20489,7 +20437,7 @@ object (e.g., within a comment).  In these case, you need to use
 	;; Adjust tag alignment.
 	(cond
 	 ((not (and tags-column string)))
-	 (org-auto-align-tags (org-set-tags nil t))
+	 (org-auto-align-tags (org-align-tags))
 	 (t (org--align-tags-here tags-column))) ;preserve tags column
 	(end-of-line)
 	(org-show-entry)
@@ -22827,7 +22775,7 @@ depending on context."
       (if (<= end (point))		;on tags part
 	  (kill-region (point) (line-end-position))
 	(kill-region (point) end)))
-    (org-set-tags nil t))
+    (org-align-tags))
    (t (kill-region (point) (line-end-position)))))
 
 (defun org-yank (&optional arg)

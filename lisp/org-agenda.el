@@ -9077,7 +9077,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	  (org-show-context 'agenda)
 	  (if tag
 	      (org-toggle-tag tag onoff)
-	    (call-interactively 'org-set-tags))
+	    (call-interactively #'org-set-tags-command))
 	  (end-of-line 1)
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)

@@ -585,7 +585,7 @@ Where possible, use the standard interface for changing this line."
 			(if (eq org-fast-tag-selection-single-key 'expert)
 			    t
 			  org-fast-tag-selection-single-key)))
-		   (call-interactively #'org-set-tags)))))
+		   (call-interactively #'org-set-tags-command)))))
 	    ("DEADLINE"
 	     (lambda ()
 	       (org-with-point-at pom (call-interactively #'org-deadline))))

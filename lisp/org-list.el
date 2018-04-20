@@ -830,7 +830,7 @@ This function modifies STRUCT."
 Metadata are tags, planning information and properties drawers."
   (save-match-data
     (org-with-wide-buffer
-     (org-set-tags-to nil)
+     (org-set-tags nil)
      (delete-region (line-beginning-position 2)
 		    (save-excursion
 		      (org-end-of-meta-data)

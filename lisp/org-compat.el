@@ -400,6 +400,13 @@ use of this function is for the stuck project list."
   (declare (obsolete "use `org-make-tag-string' instead." "Org 9.2"))
   (org-make-tag-string (org-get-tags nil t)))
 
+(define-obsolete-function-alias 'org-set-tags-to 'org-set-tags "Org 9.2")
+
+(defun org-align-all-tags ()
+  "Align the tags in all headings."
+  (declare (obsolete "use `org-align-tags' instead." "Org 9.2"))
+  (org-align-tags t))
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org

@@ -6111,85 +6111,175 @@ Paragraph<point>"
 
 (ert-deftest test-org/set-tags ()
   "Test `org-set-tags' specifications."
-  ;; Tags set via fast-tag-selection should be visible afterwards
-  (should
-   (let ((org-tag-alist '(("NEXT" . ?n)))
-	 (org-fast-tag-selection-single-key t))
-     (cl-letf (((symbol-function 'read-char-exclusive) (lambda () ?n))
-	       ((symbol-function 'window-width) (lambda (&rest args) 100)))
-       (org-test-with-temp-text "<point>* Headline\nAnd its content\n* And another headline\n\nWith some content"
-	 ;; Show only headlines
-	 (org-content)
-	 ;; Set NEXT tag on current entry
-	 (org-set-tags nil nil)
-	 ;; Move point to that NEXT tag
-	 (search-forward "NEXT") (backward-word)
-	 ;; And it should be visible (i.e. no overlays)
-	 (not (overlays-at (point))))))))
-
-(ert-deftest test-org/set-tags-to ()
-  "Test `org-set-tags-to' specifications."
   ;; Throw an error on invalid data.
   (should-error
    (org-test-with-temp-text "* H"
-     (org-set-tags-to 'foo)))
+     (org-set-tags 'foo)))
   ;; `nil', an empty, and a blank string remove all tags.
   (should
    (equal "* H"
 	  (org-test-with-temp-text "* H :tag1:tag2:"
-	    (org-set-tags-to nil)
+	    (org-set-tags nil)
 	    (buffer-string))))
   (should
    (equal "* H"
 	  (org-test-with-temp-text "* H :tag1:tag2:"
-	    (org-set-tags-to "")
+	    (org-set-tags "")
 	    (buffer-string))))
   (should
    (equal "* H"
 	  (org-test-with-temp-text "* H :tag1:tag2:"
-	    (org-set-tags-to " ")
+	    (org-set-tags " ")
 	    (buffer-string))))
   ;; If there's nothing to remove, just bail out.
   (should
    (equal "* H"
 	  (org-test-with-temp-text "* H"
-	    (org-set-tags-to nil)
+	    (org-set-tags nil)
 	    (buffer-string))))
   (should
    (equal "* "
 	  (org-test-with-temp-text "* "
-	    (org-set-tags-to nil)
+	    (org-set-tags nil)
 	    (buffer-string))))
   ;; If DATA is a tag string, set current tags to it, even if it means
   ;; replacing old tags.
   (should
    (equal "* H :tag0:"
 	  (org-test-with-temp-text "* H :tag1:tag2:"
-	    (org-set-tags-to ":tag0:")
+	    (let ((org-tags-column 1)) (org-set-tags ":tag0:"))
 	    (buffer-string))))
   (should
    (equal "* H :tag0:"
 	  (org-test-with-temp-text "* H"
-	    (org-set-tags-to ":tag0:")
+	    (let ((org-tags-column 1)) (org-set-tags ":tag0:"))
 	    (buffer-string))))
   ;; If DATA is a list, set tags to this list, even if it means
   ;; replacing old tags.
   (should
    (equal "* H :tag0:"
 	  (org-test-with-temp-text "* H :tag1:tag2:"
-	    (org-set-tags-to '("tag0"))
+	    (let ((org-tags-column 1)) (org-set-tags '("tag0")))
 	    (buffer-string))))
   (should
    (equal "* H :tag0:"
 	  (org-test-with-temp-text "* H"
-	    (org-set-tags-to '("tag0"))
+	    (let ((org-tags-column 1)) (org-set-tags '("tag0")))
 	    (buffer-string))))
+  ;; When set, apply `org-tags-sort-function'.
+  (should
+   (equal "* H :a:b:"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-tags-column 1)
+		  (org-tags-sort-function #'string<))
+	      (org-set-tags '("b" "a"))
+	      (buffer-string)))))
+  ;; When new tags are identical to the previous ones, still align.
+  (should
+   (equal "* H :foo:"
+	  (org-test-with-temp-text "* H     :foo:"
+	    (let ((org-tags-column 1))
+	      (org-set-tags '("foo"))
+	      (buffer-string)))))
+  ;; When tags have been changed, run `org-after-tags-change-hook'.
+  (should
+   (catch :return
+     (org-test-with-temp-text "* H :foo:"
+       (let ((org-after-tags-change-hook (lambda () (throw :return t))))
+	 (org-set-tags '("bar"))
+	 nil))))
+  (should-not
+   (catch :return
+     (org-test-with-temp-text "* H      :foo:"
+       (let ((org-after-tags-change-hook (lambda () (throw :return t))))
+	 (org-set-tags '("foo"))
+	 nil))))
   ;; Special case: handle empty headlines.
   (should
    (equal "* :tag0:"
 	  (org-test-with-temp-text "* "
-	    (org-set-tags-to '("tag0"))
+	    (let ((org-tags-column 1)) (org-set-tags '("tag0")))
+	    (buffer-string))))
+  ;; Pathological case: when setting tags of a folded headline, do not
+  ;; let new tags being sucked into invisibility.
+  (should-not
+   (org-test-with-temp-text "* H1\nContent\n* H2\n\n Other Content"
+     ;; Show only headlines
+     (org-content)
+     ;; Set NEXT tag on current entry
+     (org-set-tags ":NEXT:")
+     ;; Move point to that NEXT tag
+     (search-forward "NEXT") (backward-word)
+     ;; And it should be visible (i.e. no overlays)
+     (overlays-at (point)))))
+
+(ert-deftest test-org/set-tags-command ()
+  "Test `org-set-tags-command' specifications"
+  ;; Set tags at current headline.
+  (should
+   (equal "* H1 :foo:"
+	  (org-test-with-temp-text "* H1"
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest args) ":foo:")))
+	      (let ((org-use-fast-tag-selection nil)
+		    (org-tags-column 1))
+		(org-set-tags-command)))
+	    (buffer-string))))
+  (should
+   (equal "* H1 :foo:\nContents"
+	  (org-test-with-temp-text "* H1\n<point>Contents"
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest args) ":foo:")))
+	      (let ((org-use-fast-tag-selection nil)
+		    (org-tags-column 1))
+		(org-set-tags-command)))
+	    (buffer-string))))
+  ;; Strip all forbidden characters from user-entered tags.
+  (should
+   (equal "* H1 :foo:"
+	  (org-test-with-temp-text "* H1"
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest args) ": foo *:")))
+	      (let ((org-use-fast-tag-selection nil)
+		    (org-tags-column 1))
+		(org-set-tags-command)))
+	    (buffer-string))))
+  ;; When a region is active and
+  ;; `org-loop-over-headlines-in-active-region' is non-nil, insert the
+  ;; same value in all headlines in region.
+  (should
+   (equal "* H1 :foo:\nContents\n* H2 :foo:"
+	  (org-test-with-temp-text "* H1\nContents\n* H2"
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest args) ":foo:")))
+	      (let ((org-use-fast-tag-selection nil)
+		    (org-loop-over-headlines-in-active-region t)
+		    (org-tags-column 1))
+		(transient-mark-mode 1)
+		(push-mark (point) t t)
+		(goto-char (point-max))
+		(org-set-tags-command)))
+	    (buffer-string))))
+  (should
+   (equal "* H1\nContents\n* H2 :foo:"
+	  (org-test-with-temp-text "* H1\nContents\n* H2"
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest args) ":foo:")))
+	      (let ((org-use-fast-tag-selection nil)
+		    (org-loop-over-headlines-in-active-region nil)
+		    (org-tags-column 1))
+		(transient-mark-mode 1)
+		(push-mark (point) t t)
+		(goto-char (point-max))
+		(org-set-tags-command)))
+	    (buffer-string))))
+  ;; With a non-nil prefix argument, align all tags in the buffer.
+  (should
+   (equal "* H1 :foo:\n* H2 :bar:"
+	  (org-test-with-temp-text "* H1    :foo:\n* H2    :bar:"
+	    (let ((org-tags-column 1)) (org-set-tags-command t))
 	    (buffer-string)))))
+
 
 
 ;;; TODO keywords

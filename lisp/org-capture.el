@@ -1695,9 +1695,7 @@ The template may still contain \"%?\" for cursor positioning."
 			 (unless (eq (char-before) ?:) (insert ":"))
 			 (insert ins)
 			 (unless (eq (char-after) ?:) (insert ":"))
-			 (and (org-at-heading-p)
-			      (let ((org-ignore-region t))
-				(org-set-tags nil 'align))))))
+			 (when (org-at-heading-p) (org-align-tags)))))
 		    ((or "C" "L")
 		     (let ((insert-fun (if (equal key "C") #'insert
 					 (lambda (s) (org-insert-link 0 s)))))

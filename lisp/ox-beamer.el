@@ -916,7 +916,7 @@ value."
       (let ((tags (cl-remove-if (lambda (x) (string-match "^B_" x))
 				(org-get-tags nil t)))
 	    (env-tag (and (org-string-nw-p value) (concat "B_" value))))
-	(org-set-tags-to (if env-tag (cons env-tag tags) tags))
+	(org-set-tags (if env-tag (cons env-tag tags) tags))
 	(when env-tag (org-toggle-tag env-tag 'on)))))
    ((equal property "BEAMER_col")
     (org-toggle-tag "BMCOL" (if (org-string-nw-p value) 'on 'off)))))
@@ -1075,7 +1075,7 @@ aid, but the tag does not have any semantic meaning."
 	 (org-tag-persistent-alist nil)
 	 (org-use-fast-tag-selection t)
 	 (org-fast-tag-selection-single-key t))
-    (org-set-tags)
+    (org-set-tags-command)
     (let ((tags (org-get-tags nil t)))
       (cond
        ;; For a column, automatically ask for its width.
