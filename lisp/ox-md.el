@@ -575,9 +575,9 @@ contents according to the current headline."
 	      (make-string
 	       (* 4 (1- (org-export-get-relative-level headline info)))
 	       ?\s))
-	     (number (format "%d."
-			     (org-last
-			      (org-export-get-headline-number headline info))))
+	     (heading-number (org-last
+			      (org-export-get-headline-number headline info)))
+	     (number (if heading-number (format "%s." heading-number) "- "))
 	     (bullet (concat number (make-string (- 4 (length number)) ?\s)))
 	     (title
 	      (format "[%s](#%s)"
