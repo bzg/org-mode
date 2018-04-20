@@ -1119,6 +1119,8 @@ has been set."
   :group 'org-startup
   :type 'boolean)
 
+(defvaralias 'org-CUA-compatible 'org-replace-disputed-keys)
+
 (defcustom org-replace-disputed-keys nil
   "Non-nil means use alternative key bindings for some keys.
 
@@ -1142,8 +1144,6 @@ variable lets you do the same manually.  You must set it before
 loading Org."
   :group 'org-startup
   :type 'boolean)
-
-(defvaralias 'org-CUA-compatible 'org-replace-disputed-keys)
 
 (defcustom org-disputed-keys
   '(([(shift up)]		. [(meta p)])
@@ -3361,6 +3361,9 @@ This display will be in an overlay, in the minibuffer."
   :group 'org-time
   :type 'boolean)
 
+(defvaralias 'org-popup-calendar-for-date-prompt
+  'org-read-date-popup-calendar)
+
 (defcustom org-read-date-popup-calendar t
   "Non-nil means pop up a calendar when prompting for a date.
 In the calendar, the date can be selected with mouse-1.  However, the
@@ -3368,8 +3371,6 @@ minibuffer will also be active, and you can simply enter the date as well.
 When nil, only the minibuffer will be available."
   :group 'org-time
   :type 'boolean)
-(defvaralias 'org-popup-calendar-for-date-prompt
-  'org-read-date-popup-calendar)
 
 (defcustom org-extend-today-until 0
   "The hour when your day really ends.  Must be an integer.
