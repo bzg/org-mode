@@ -12670,12 +12670,12 @@ The @LaTeX{} export back-end converts horizontal rules by the specified
 @section Markdown export
 @cindex Markdown export
 
-The Markdown export back-end, @code{md}, converts an Org file to a Markdown
+The Markdown export back-end, @code{md}, converts an Org file to Markdown
 format, as defined at @url{http://daringfireball.net/projects/markdown/}.
 
-Since @code{md} is built on top of the HTML back-end, any Org constructs not
-supported by Markdown, such as tables, the underlying @code{html} back-end
-(@pxref{HTML export}) converts them.
+The @code{md} back-end is built on top of the HTML back-end (@pxref{HTML
+export}).  As a consequence, it converts every Org construct not supported by
+Markdown syntax, such as tables, to HTML.
 
 @subheading Markdown export commands
 
