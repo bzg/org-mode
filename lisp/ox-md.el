@@ -574,10 +574,13 @@ contents according to the current headline."
 	      (make-string
 	       (* 4 (1- (org-export-get-relative-level headline info)))
 	       ?\s))
-	     (number (format "%d."
-			     (org-last
-			      (org-export-get-headline-number headline info))))
-	     (bullet (concat number (make-string (- 4 (length number)) ?\s)))
+	     (bullet
+	      (if (not (org-export-numbered-headline-p headline info)) "-   "
+		(let ((prefix
+		       (format "%d." (org-last (org-export-get-headline-number
+						headline info)))))
+		  (concat prefix (make-string (max 1 (- 4 (length prefix)))
+					      ?\s)))))
 	     (title
 	      (format "[%s](#%s)"
 		      (org-export-data-with-backend
