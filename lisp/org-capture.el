@@ -1518,7 +1518,8 @@ The template may still contain \"%?\" for cursor positioning."
 	 (v-c (and kill-ring (current-kill 0)))
 	 (v-x (or (org-get-x-clipboard 'PRIMARY)
 		  (org-get-x-clipboard 'CLIPBOARD)
-		  (org-get-x-clipboard 'SECONDARY)))
+		  (org-get-x-clipboard 'SECONDARY)
+		  ""))			;ensure it is a string
 	 ;; `initial' and `annotation' might have been passed.  But if
 	 ;; the property list has them, we prefer those values.
 	 (v-i (or (plist-get org-store-link-plist :initial)
