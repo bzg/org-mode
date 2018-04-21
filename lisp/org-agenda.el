@@ -6530,7 +6530,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	      (setq txt (replace-match "" t t txt))
 	    (setq txt (replace-match
 		       (concat (make-string (max (- 50 (length txt)) 1) ?\ )
-			       (match-string 2 txt))
+			       (match-string 1 txt))
 		       t t txt))))
 
 	(when remove-re
