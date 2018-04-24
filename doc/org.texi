@@ -9708,10 +9708,13 @@ Time ranges can be specified with two timestamps:
 <2005-05-10 Tue 20:30>--<2005-05-10 Tue 22:15>
 @end example
 
-In the headline of the entry itself, a time(range) may also appear as
-plain text (like @samp{12:45} or a @samp{8:30-1pm}).  If the agenda integrates
-the Emacs diary (see @ref{Weekly/daily agenda}), time specifications in
-diary entries are recognized as well.
+@vindex org-agenda-search-headline-for-time
+In the headline of the entry itself, a time(range)---like @samp{12:45} or
+a @samp{8:30-1pm}---may also appear as plain text@footnote{You can, however, disable this by setting
+@code{org-agenda-search-headline-for-time} variable to a @code{nil} value.}.
+
+If the agenda integrates the Emacs diary (see @ref{Weekly/daily agenda}),
+time specifications in diary entries are recognized as well.
 
 For agenda display, Org mode extracts the time and displays it in
 a standard 24 hour format as part of the prefix.  The example times in
