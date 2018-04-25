@@ -18424,93 +18424,93 @@ file.
 
 Code blocks in the following languages are supported.
 
-@multitable {aaaaaaaaaa} {aaaaaaaaaa} {aaaaaaaaaaaaaa} {aaaaaaaaaa}
+@multitable {aaaaaaaaaa} {aaaaaaaaaaaa} {aaaaaaaaaaaaaa} {aaaaaaaaaaaa}
 @headitem Language
 @tab Identifier
 @tab Language
 @tab Identifier
 @item Asymptote
-@tab asymptote
-@tab Awk
-@tab awk
-@item C
-@tab C
-@tab C++
-@tab C++
-@item Clojure
-@tab clojure
-@tab CSS
-@tab css
-@item D
-@tab d
-@tab ditaa
-@tab ditaa
-@item Graphviz
-@tab dot
-@tab Emacs Calc
-@tab calc
-@item Emacs Lisp
-@tab emacs-lisp
-@tab Fortran
-@tab fortran
-@item Gnuplot
-@tab gnuplot
-@tab Haskell
-@tab haskell
-@item Java
-@tab java
-@tab Javascript
-@tab js
-@item @LaTeX{}
-@tab latex
-@tab Ledger
-@tab ledger
-@item Lisp
-@tab lisp
-@tab Lilypond
-@tab lilypond
-@item Lua
-@tab lua
+@tab @samp{asymptote}
+@tab Lua
+@tab @samp{lua}
+@item Awk
+@tab @samp{awk}
 @tab MATLAB
-@tab matlab
-@item Mscgen
-@tab mscgen
+@tab @samp{matlab}
+@item C
+@tab @samp{C}
+@tab Mscgen
+@tab @samp{mscgen}
+@item C++
+@tab @samp{C++}
 @tab Objective Caml
-@tab ocaml
-@item Octave
-@tab octave
+@tab @samp{ocaml}
+@item Clojure
+@tab @samp{clojure}
+@tab Octave
+@tab @samp{octave}
+@item CSS
+@tab @samp{css}
 @tab Org mode
-@tab org
-@item Oz
-@tab oz
+@tab @samp{org}
+@item D
+@tab @samp{d}
+@tab Oz
+@tab @samp{oz}
+@item ditaa
+@tab @samp{ditaa}
 @tab Perl
-@tab perl
-@item Plantuml
-@tab plantuml
+@tab @samp{perl}
+@item Emacs Calc
+@tab @samp{calc}
+@tab Plantuml
+@tab @samp{plantuml}
+@item Emacs Lisp
+@tab @samp{emacs-lisp}
 @tab Processing.js
-@tab processing
-@item Python
-@tab python
+@tab @samp{processing}
+@item Fortran
+@tab @samp{fortran}
+@tab Python
+@tab @samp{python}
+@item Gnuplot
+@tab @samp{gnuplot}
 @tab R
-@tab R
-@item Ruby
-@tab ruby
+@tab @samp{R}
+@item GNU Screen
+@tab @samp{screen}
+@tab Ruby
+@tab @samp{ruby}
+@item Graphviz
+@tab @samp{dot}
 @tab Sass
-@tab sass
-@item Scheme
-@tab scheme
-@tab GNU Screen
-@tab screen
-@item Sed
-@tab sed
+@tab @samp{sass}
+@item Haskell
+@tab @samp{haskell}
+@tab Scheme
+@tab @samp{scheme}
+@item Java
+@tab @samp{java}
+@tab Sed
+@tab @samp{sed}
+@item Javascript
+@tab @samp{js}
 @tab shell
-@tab sh
-@item SQL
-@tab sql
+@tab @samp{sh}
+@item @LaTeX{}
+@tab @samp{latex}
+@tab SQL
+@tab @samp{sql}
+@item Ledger
+@tab @samp{ledger}
 @tab SQLite
-@tab sqlite
-@item Vala
-@tab vala
+@tab @samp{sqlite}
+@item Lilypond
+@tab @samp{lilypond}
+@tab Vala
+@tab @samp{vala}
+@item Lisp
+@tab @samp{lisp}
 @tab 
 @tab 
 @end multitable
