@@ -40,9 +40,9 @@
 ;; parent into children.
 ;;
 ;; Special fontification of inline tasks, so that they can be
-;; immediately recognized.  From the stars of the headline, only the
-;; first and the last two will be visible, the others will be hidden
-;; using the `org-hide' face.
+;; immediately recognized.  From the stars of the headline, only last
+;; two will be visible, the others will be hidden using the `org-hide'
+;; face.
 ;;
 ;; An inline task is identified solely by a minimum outline level,
 ;; given by the variable `org-inlinetask-min-level', default 15.
@@ -54,14 +54,14 @@
 ;;
 ;; As an example, here are two valid inline tasks:
 ;;
-;;    **************** TODO a small task
+;;    **************** TODO A small task
 ;;
 ;; and
 ;;
-;;    **************** TODO another small task
+;;    **************** TODO Another small task
 ;;                     DEADLINE: <2009-03-30 Mon>
 ;;                     :PROPERTIES:
-;;                       :SOMETHING: or other
+;;                     :SOMETHING: another thing
 ;;                     :END:
 ;;                     And here is some extra text
 ;;    **************** END
