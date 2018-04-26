@@ -5432,7 +5432,6 @@ The following commands are available:
   ;; Calc embedded
   (setq-local calc-embedded-open-mode "# ")
   ;; Modify a few syntax entries
-  (modify-syntax-entry ?@ "w")
   (modify-syntax-entry ?\" "\"")
   (modify-syntax-entry ?\\ "_")
   (modify-syntax-entry ?~ "_")
