@@ -217,8 +217,8 @@ pressing {{{kbd(C-SPC)}}} twice before moving the cursor.
 #+cindex: author
 
 If you find problems with Org, or if you have questions, remarks, or
-ideas about it, please mail to the Org mailing list
-[[mailto:emacs-orgmode@gnu.org]].  You can subscribe to the list [[https://lists.gnu.org/mailman/listinfo/emacs-orgmode][on this
+ideas about it, please send an email to the Org mailing list
+[[mailto:emacs-orgmode@gnu.org]].  You can subscribe to the list [[https://lists.gnu.org/mailman/listinfo/emacs-orgmode][from this
 web page]].  If you are not a member of the mailing list, your mail will
 be passed to the list after a moderator has approved it[fn:2].
 
