@@ -186,7 +186,8 @@ variables and values specified in props"
 	 (header-props
 	  (mapcar (lambda (props)
 		    (mapcar (lambda (pair)
-			      (cons (car pair) (org-babel-read (cdr pair))))
+			      (let ((inhibit-lisp-eval (string= (car pair) "ITEM")))
+				(cons (car pair) (org-babel-read (cdr pair) inhibit-lisp-eval))))
 			    props))
 		  header-props))
 	 ;; collect all property names

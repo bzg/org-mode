@@ -9982,7 +9982,7 @@ Raise a user error when there is nothing to follow."
     (with-temp-buffer
       (let ((org-inhibit-startup (not reference-buffer)))
 	(org-mode)
-	(insert s)
+	(insert (org-link-escape s))
 	(goto-char (point-min))
 	(when reference-buffer
 	  (setq org-link-abbrev-alist-local
