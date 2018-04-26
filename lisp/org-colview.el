@@ -448,6 +448,7 @@ for the duration of the command.")
   "Overlay the newline before the current line with the table title."
   (interactive)
   (let ((title "")
+	(linum-offset (line-number-display-width 'columns))
 	(i 0))
     (dolist (column org-columns-current-fmt-compiled)
       (pcase column
@@ -459,7 +460,7 @@ for the duration of the command.")
     (setq-local org-previous-header-line-format header-line-format)
     (setq org-columns-full-header-line-format
 	  (concat
-	   (org-add-props " " nil 'display '(space :align-to 0))
+	   (org-add-props " " nil 'display `(space :align-to ,linum-offset))
 	   (org-add-props (substring title 0 -1) nil 'face 'org-column-title)))
     (setq org-columns-previous-hscroll -1)
     (add-hook 'post-command-hook 'org-columns-hscroll-title nil 'local)))
