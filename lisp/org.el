@@ -9976,18 +9976,24 @@ This is saved in case the need arises to restore it.")
 
 ;;;###autoload
 (defun org-open-at-point-global ()
-  "Follow a link or time-stamp like Org mode does.
-This command can be called in any mode to follow an external link
-or a time-stamp that has Org mode syntax.  Its behavior is
-undefined when called on internal links (e.g., fuzzy links).
-Raise an error when there is nothing to follow.  "
+  "Follow a link or a time-stamp like Org mode does.
+Also follow links and emails as seen by `thing-at-point'.
+This command can be called in any mode to follow an external
+link or a time-stamp that has Org mode syntax.  Its behavior
+is undefined when called on internal links like fuzzy links.
+Raise a user error when there is nothing to follow."
   (interactive)
-  (cond ((org-in-regexp org-any-link-re)
-	 (org-open-link-from-string (match-string-no-properties 0)))
-	((or (org-in-regexp org-ts-regexp-both nil t)
-	     (org-in-regexp org-tsr-regexp-both nil t))
-	 (org-follow-timestamp-link))
-	(t (user-error "No link found"))))
+  (let ((tap-url (thing-at-point 'url))
+	(tap-email (thing-at-point 'email)))
+    (cond ((org-in-regexp org-any-link-re)
+	   (org-open-link-from-string (match-string-no-properties 0)))
+	  ((or (org-in-regexp org-ts-regexp-both nil t)
+	       (org-in-regexp org-tsr-regexp-both nil t))
+	   (org-follow-timestamp-link))
+	  (tap-url (org-open-link-from-string tap-url))
+	  (tap-email (org-open-link-from-string
+		      (concat "mailto:" tap-email)))
+	  (t (user-error "No link found")))))
 
 ;;;###autoload
 (defun org-open-link-from-string (s &optional arg reference-buffer)
