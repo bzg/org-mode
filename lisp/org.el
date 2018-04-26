@@ -14212,9 +14212,10 @@ Assume point is on a headline."
 (defun org-set-tags-command (&optional arg)
   "Set the tags for the current visible entry.
 
-When called with `\\[universal-argument]' prefix argument ARG,
-realign all tags in headings in the current buffer.  If a region
-is active, set tags for all headlines in the region.
+When called with `\\[universal-argument]' prefix argument ARG, \
+realign all tags
+in the current buffer.  If a region is active, set tags for
+all headlines in the region.
 
 This function is for interactive use only;
 in Lisp code use `org-set-tags' instead."
@@ -14418,10 +14419,12 @@ TODO keywords, should these have keys assigned to them.
 If the keys are nil, a-z are automatically assigned.
 Returns the new tags string, or nil to not change the current settings."
   (let* ((fulltable (append table todo-table))
-	 (maxlen (apply 'max (mapcar
-			      (lambda (x)
-				(if (stringp (car x)) (string-width (car x)) 0))
-			      fulltable)))
+	 (maxlen (if (null fulltable) 0
+		   (apply #'max
+			  (mapcar (lambda (x)
+				    (if (stringp (car x)) (string-width (car x))
+				      0))
+				  fulltable))))
 	 (buf (current-buffer))
 	 (expert (eq org-fast-tag-selection-single-key 'expert))
 	 (buffer-tags nil)
