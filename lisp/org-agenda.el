@@ -9844,8 +9844,9 @@ bulk action."
   "Execute an remote-editing action on all marked entries.
 The prefix arg is passed through to the command if possible."
   (interactive "P")
-  ;; Make sure we have markers, and only valid ones.
-  (unless org-agenda-bulk-marked-entries (user-error "No entries are marked"))
+  ;; When there is no mark, act on the agenda entry at point.
+  (if (not org-agenda-bulk-marked-entries)
+      (save-excursion (org-agenda-bulk-mark)))
   (dolist (m org-agenda-bulk-marked-entries)
     (unless (and (markerp m)
 		 (marker-buffer m)
