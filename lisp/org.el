@@ -682,7 +682,7 @@ After a match, group 1 contains the repeat expression.")
     (org-load-modules-maybe 'force)
     (org-element-cache-reset 'all)))
 
-(defcustom org-modules '(org-w3m org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail)
+(defcustom org-modules '(org-w3m org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail org-tempo)
   "Modules that should always be loaded together with org.el.
 
 If a description starts with <C>, the file is not part of Emacs
@@ -699,8 +699,8 @@ to add the symbol `xyz', and the package must have a call to:
 For export specific modules, see also `org-export-backends'."
   :group 'org
   :set 'org-set-modules
-  :version "24.4"
-  :package-version '(Org . "8.0")
+  :version "26.1"
+  :package-version '(Org . "9.2")
   :type
   '(set :greedy t
 	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
