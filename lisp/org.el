@@ -4834,17 +4834,39 @@ Support for group tags is controlled by the option
   (message "Groups tags support has been turned %s"
 	   (if org-group-tags "on" "off")))
 
-(defun org-tag-add-to-alist (alist1 alist2)
-  "Append ALIST1 elements to ALIST2 if they are not there yet."
+(defun org--tag-add-to-alist (alist1 alist2)
+  "Merge tags from ALIST1 into ALIST2.
+
+Duplicates tags outside a group are removed.  Keywords and order
+are preserved.
+
+The function assumes ALIST1 and ALIST2 are proper tag alists.
+See `org-tag-alist' for their structure."
   (cond
    ((null alist2) alist1)
    ((null alist1) alist2)
-   (t (let ((alist2-cars (mapcar (lambda (x) (car-safe x)) alist2))
-	    to-add)
-	(dolist (i alist1)
-	  (unless (member (car-safe i) alist2-cars)
-	    (push i to-add)))
-	(append to-add alist2)))))
+   (t
+    (let ((to-add nil)
+	  (group-flag nil))
+      (dolist (tag-pair alist1)
+	(pcase tag-pair
+	  (`(,(or :startgrouptag :startgroup))
+	   (setq group-flag t)
+	   (push tag-pair to-add))
+	  (`(,(or :endgrouptag :endgroup))
+	   (setq group-flag nil)
+	   (push tag-pair to-add))
+	  (`(,(or :grouptags :newline))
+	   (push tag-pair to-add))
+	  (`(,tag . ,_)
+	   ;; Remove duplicates from ALIST1, unless they are in
+	   ;; a group.  Indeed, it makes sense to have a tag appear in
+	   ;; multiple groups.
+	   (when (or group-flag (not (assoc tag alist2)))
+	     (push tag-pair to-add)))
+	  (_ (error "Invalid association in tag alist: %S" tag-pair))))
+      ;; Preserve order of ALIST1.
+      (append (nreverse to-add) alist2)))))
 
 (defun org-set-regexps-and-options (&optional tags-only)
   "Precompute regular expressions used in the current buffer.
@@ -4874,7 +4896,7 @@ related expressions."
 		  (mapcar #'org-add-prop-inherited
 			  (cdr (assq 'filetags alist))))
       (setq org-current-tag-alist
-	    (org-tag-add-to-alist
+	    (org--tag-add-to-alist
 	     org-tag-persistent-alist
 	     (let ((tags (cdr (assq 'tags alist))))
 	       (if tags (org-tag-string-to-alist tags)
@@ -13842,7 +13864,7 @@ instead of the agenda files."
 		  (mapcar
 		   (lambda (file)
 		     (set-buffer (find-file-noselect file))
-		     (org-tag-add-to-alist
+		     (org--tag-add-to-alist
 		      (org-get-buffer-tags)
 		      (mapcar (lambda (x)
 				(and (stringp (car-safe x))
@@ -13874,7 +13896,7 @@ See also `org-scan-tags'."
     ;; Get a new match request, with completion against the global
     ;; tags table and the local tags in current buffer.
     (let ((org-last-tags-completion-table
-	   (org-tag-add-to-alist
+	   (org--tag-add-to-alist
 	    (org-get-buffer-tags)
 	    (org-global-tags-completion-table))))
       (setq match
@@ -14228,7 +14250,7 @@ in Lisp code use `org-set-tags' instead."
     (org-back-to-heading)
     (let* ((all-tags (org-get-tags))
 	   (table (setq org-last-tags-completion-table
-			(org-tag-add-to-alist
+			(org--tag-add-to-alist
 			 (and org-complete-tags-always-offer-all-agenda-tags
 			      (org-global-tags-completion-table
 			       (org-agenda-files)))
@@ -14255,7 +14277,8 @@ in Lisp code use `org-set-tags' instead."
 		 (org-trim (completing-read
 			    "Tags: "
 			    #'org-tags-completion-function
-			    nil nil current-tags 'org-tags-history)))))))
+			    nil nil (org-make-tag-string current-tags)
+			    'org-tags-history)))))))
       (org-set-tags tags)))))
 
 (defun org-align-tags (&optional all)
@@ -14317,7 +14340,7 @@ This works in the agenda, and also in an Org buffer."
    (list (region-beginning) (region-end)
 	 (let ((org-last-tags-completion-table
 		(if (derived-mode-p 'org-mode)
-		    (org-tag-add-to-alist
+		    (org--tag-add-to-alist
 		     (org-get-buffer-tags)
 		     (org-global-tags-completion-table))
 		  (org-global-tags-completion-table))))
@@ -17905,7 +17928,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (setq org-todo-keyword-alist-for-agenda
 		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
 	    (setq org-tag-alist-for-agenda
-		  (org-tag-add-to-alist
+		  (org--tag-add-to-alist
 		   org-tag-alist-for-agenda
 		   org-current-tag-alist))
 	    ;; Merge current file's tag groups into global
