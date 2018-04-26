@@ -5889,16 +5889,16 @@ format.
 
      #+kindex: S-UP
      #+kindex: S-DOWN
-     Change the item under the cursor in a timestamp.  The cursor can
-     be on a year, month, day, hour or minute.  When the timestamp
-     contains a time range like =15:30-16:30=, modifying the first
-     time also shifts the second, shifting the time block with
+     On the beginning or enclosing bracket of a timestamp, change its
+     type.  Within a timestamp, change the item under the cursor.  The
+     cursor can be on a year, month, day, hour or minute.  When the
+     timestamp contains a time range like =15:30-16:30=, modifying the
+     first time also shifts the second, shifting the time block with
      constant length.  To change the length, modify the second time.
      Note that if the cursor is in a headline and not at a timestamp,
-     these same keys modify the priority of an item.  (see
-     [[*Priorities]]).  The key bindings also conflict with
-     shift-selection and related modes (see [[*Packages that conflict
-     with Org mode]]).
+     these same keys modify the priority of an item (see [[*Priorities]]).
+     The key bindings also conflict with shift-selection and related
+     modes (see [[*Packages that conflict with Org mode]]).
 
 - {{{kbd(C-c C-y)}}} (~org-evaluate-time-range~) ::
 
