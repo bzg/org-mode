@@ -233,6 +233,11 @@ you should expect to see something like:
 #+BEGIN_EXAMPLE
   ,#+STARTUP: shrink
 #+END_EXAMPLE
+*** Allow to filter by tags/property when capturing colview
+
+You can now use =:match= to filter entries using a todo/tags/properties
+matcher.
+
 *** Add support for Oracle's database alias in Babel blocks
 =ob-sql= library already support running SQL blocks against an Oracle
 database using ~sqlplus~.  Now it's possible to use alias names
