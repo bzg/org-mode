@@ -4015,15 +4015,15 @@ a background color.
 #+cindex: @samp{ORDERED}, property
 The structure of Org files---hierarchy and lists---makes it easy to
 define TODO dependencies.  Usually, a parent TODO task should not be
-marked DONE until all subtasks, defined as children tasks, are marked
-as DONE.  And sometimes there is a logical sequence to a number of
-(sub)tasks, so that one task cannot be acted upon before all siblings
-above it are done.  If you customize the variable
-~org-enforce-todo-dependencies~, Org blocks entries from changing
-state to DONE while they have children that are not DONE.
-Furthermore, if an entry has a property =ORDERED=, each of its
-children is blocked until all earlier siblings are marked DONE.  Here
-is an example:
+marked DONE until all TODO subtasks, defined as children tasks, are
+marked as DONE.  And sometimes there is a logical sequence to a number
+of TODO (sub)tasks, so that one task cannot be acted upon before all
+siblings above it are done.  If you customize the variable
+~org-enforce-todo-dependencies~, Org blocks entries from changing state
+to DONE while they have TODO children that are not DONE.  Furthermore,
+if an entry has a property =ORDERED=, each of its TODO children is
+blocked until all earlier siblings are marked DONE.  Here is an
+example:
 
 #+begin_example
 ,* TODO Blocked until (two) is done
