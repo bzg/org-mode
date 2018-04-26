@@ -4056,11 +4056,11 @@ property:
      #+kindex: C-c C-x o
      #+findex: org-toggle-ordered-property
      #+vindex: org-track-ordered-property-with-tag
-     Toggle the =ORDERED= property of the current entry.  A property
-     is used for this behavior because this should be local to the
-     current entry, not inherited like a tag.  However, if you would
-     like to /track/ the value of this property with a tag for better
-     visibility, customize the variable
+     Toggle the =ORDERED= property of the current entry.  A property is
+     used for this behavior because this should be local to the
+     current entry, not inherited from entries above like a tag.
+     However, if you would like to /track/ the value of this property
+     with a tag for better visibility, customize the variable
      ~org-track-ordered-property-with-tag~.
 
 - {{{kbd(C-u C-u C-u C-c C-t)}}} ::
