@@ -14226,9 +14226,10 @@ Assume point is on a headline."
 (defun org-set-tags-command (&optional arg)
   "Set the tags for the current visible entry.
 
-When called with `\\[universal-argument]' prefix argument ARG,
-realign all tags in headings in the current buffer.  If a region
-is active, set tags for all headlines in the region.
+When called with `\\[universal-argument]' prefix argument ARG, \
+realign all tags
+in the current buffer.  If a region is active, set tags for
+all headlines in the region.
 
 This function is for interactive use only;
 in Lisp code use `org-set-tags' instead."
