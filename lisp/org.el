@@ -5435,6 +5435,8 @@ The following commands are available:
   (modify-syntax-entry ?\" "\"")
   (modify-syntax-entry ?\\ "_")
   (modify-syntax-entry ?~ "_")
+  (modify-syntax-entry ?< "(>")
+  (modify-syntax-entry ?> ")<")
   (setq-local font-lock-unfontify-region-function 'org-unfontify-region)
   ;; Activate before-change-function
   (setq-local org-table-may-need-update t)
