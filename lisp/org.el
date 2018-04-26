@@ -682,7 +682,7 @@ After a match, group 1 contains the repeat expression.")
     (org-load-modules-maybe 'force)
     (org-element-cache-reset 'all)))
 
-(defcustom org-modules '(org-w3m org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail org-tempo)
+(defcustom org-modules '(org-w3m org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-rmail org-tempo org-eww)
   "Modules that should always be loaded together with org.el.
 
 If a description starts with <C>, the file is not part of Emacs
