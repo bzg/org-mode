@@ -6666,7 +6666,7 @@ be selected:
 
      Do not show table sections from files which did not contribute.
 
-- :tags ::
+- :match ::
 
      A tags match to select entries that should contribute.  See
      [[*Matching tags and properties]] for the match syntax.
@@ -6723,6 +6723,10 @@ using the =:formatter= parameter.
      A timestamp for the entry, when available.  Look for SCHEDULED,
      DEADLINE, TIMESTAMP and TIMESTAMP_IA special properties (see
      [[*Special Properties]]), in this order.
+
+- :tags ::
+
+     When this flag is non-~nil~, show the headline's tags.
 
 - :properties ::
 

@@ -120,6 +120,17 @@ When sorting alphabetically, ~org-table-sort-lines~ and ~org-sort-list~
 now sort according to the locale’s collation rules instead of by
 code-point.
 
+*** Change the name of the :tags clocktable option to :match
+
+The =:match= (renamed from =:tags=) option allows to limit clock entries
+to those matching a todo-tags matcher.
+
+The old =:tags= option can be set to =t= to display a headline's tags in
+a dedicated column.
+
+This is consistent with the naming of =org-dblock-write:columnview=
+options, where =:match= is also used as a headlines filter.
+
 ** New features
 *** Add ~:results link~ support for Babel
 

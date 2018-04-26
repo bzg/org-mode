@@ -294,6 +294,7 @@ string as argument."
    :stepskip0 nil
    :fileskip0 nil
    :tags nil
+   :match nil
    :emphasize nil
    :link nil
    :narrow '40!
@@ -2464,6 +2465,7 @@ from the dynamic block definition."
 	 (narrow (or (plist-get params :narrow) (and compact? '40!)))
 	 (level? (and (not compact?) (plist-get params :level)))
 	 (timestamp (plist-get params :timestamp))
+	 (tags (plist-get params :tags))
 	 (properties (plist-get params :properties))
 	 (time-columns
 	  (if (or compact? (< maxlevel 2)) 1
@@ -2524,6 +2526,7 @@ from the dynamic block definition."
        (if multifile "|" "")		;file column, maybe
        (if level? "|" "")		;level column, maybe
        (if timestamp "|" "")		;timestamp column, maybe
+       (if tags "|" "")                 ;tags columns, maybe
        (if properties			;properties columns, maybe
 	   (make-string (length properties) ?|)
 	 "")
@@ -2541,6 +2544,8 @@ from the dynamic block definition."
      (if timestamp			;timestamp column, maybe
 	 (concat (org-clock--translate "Timestamp" lang) "|")
        "")
+     (if tags "Tags |" "")              ;tags columns, maybe
+
      (if properties			;properties columns, maybe
 	 (concat (mapconcat #'identity properties "|") "|")
        "")
@@ -2555,8 +2560,9 @@ from the dynamic block definition."
      "|"				;table line starter
      (if multifile (format "| %s " (org-clock--translate "ALL" lang)) "")
 					;file column, maybe
-     (if level? "|" "")			;level column, maybe
+     (if level?    "|" "")		;level column, maybe
      (if timestamp "|" "")		;timestamp column, maybe
+     (if tags      "|" "")		;timestamp column, maybe
      (make-string (length properties) ?|) ;properties columns, maybe
      (concat (format org-clock-total-time-cell-format
 		     (org-clock--translate "Total time" lang))
@@ -2586,8 +2592,9 @@ from the dynamic block definition."
 				     (org-clock--translate "File time" lang))
 			     " | *%s*|\n")
 		     (file-name-nondirectory file-name)
-		     (if level?   "| " "")  ;level column, maybe
+		     (if level?    "| " "") ;level column, maybe
 		     (if timestamp "| " "") ;timestamp column, maybe
+		     (if tags      "| " "") ;tags column, maybe
 		     (if properties	    ;properties columns, maybe
 			 (make-string (length properties) ?|)
 		       "")
@@ -2595,7 +2602,7 @@ from the dynamic block definition."
 
 	  ;; Get the list of node entries and iterate over it
 	  (when (> maxlevel 0)
-	    (pcase-dolist (`(,level ,headline ,ts ,time ,props) entries)
+	    (pcase-dolist (`(,level ,headline ,tgs ,ts ,time ,props) entries)
 	      (when narrow-cut-p
 		(setq headline
 		      (if (and (string-match
@@ -2617,6 +2624,7 @@ from the dynamic block definition."
 		 (if multifile "|" "") ;free space for file name column?
 		 (if level? (format "%d|" level) "") ;level, maybe
 		 (if timestamp (concat ts "|") "")   ;timestamp, maybe
+		 (if tags (concat (mapconcat #'identity tgs ", ") "|") "")   ;tags, maybe
 		 (if properties		;properties columns, maybe
 		     (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
 					properties
@@ -2747,13 +2755,14 @@ file time (in minutes) as 1st and 2nd elements.  The third element
 of this list will be a list of headline entries.  Each entry has the
 following structure:
 
-  (LEVEL HEADLINE TIMESTAMP TIME PROPERTIES)
+  (LEVEL HEADLINE TAGS TIMESTAMP TIME PROPERTIES)
 
 LEVEL:      The level of the headline, as an integer.  This will be
             the reduced level, so 1,2,3,... even if only odd levels
             are being used.
 HEADLINE:   The text of the headline.  Depending on PARAMS, this may
             already be formatted like a link.
+TAGS:       The list of tags of the headline.
 TIMESTAMP:  If PARAMS require it, this will be a time stamp found in the
             entry, any of SCHEDULED, DEADLINE, NORMAL, or first inactive,
             in this sequence.
@@ -2772,9 +2781,10 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 	 (block (plist-get params :block))
 	 (link (plist-get params :link))
 	 (tags (plist-get params :tags))
+	 (match (plist-get params :match))
 	 (properties (plist-get params :properties))
 	 (inherit-property-p (plist-get params :inherit-props))
-	 (matcher (and tags (cdr (org-make-tags-matcher tags))))
+	 (matcher (and match (cdr (org-make-tags-matcher match))))
 	 cc st p tbl)
 
     (setq org-clock-file-total-minutes nil)
@@ -2795,10 +2805,11 @@ PROPERTIES: The list properties specified in the `:properties' parameter
       (org-clock-sum ts te
 		     (when matcher
 		       `(lambda ()
-			  (let* ((tags-list (org-get-tags))
+			  (let* ((todo (org-get-todo-state))
+				 (tags-list (org-get-tags))
 				 (org-scanner-tags tags-list)
 				 (org-trust-scanner-tags t))
-			    (funcall ,matcher nil tags-list nil)))))
+			    (funcall ,matcher todo tags-list nil)))))
       (goto-char (point-min))
       (setq st t)
       (while (or (and (bobp) (prog1 st (setq st nil))
@@ -2827,6 +2838,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 			       (replace-regexp-in-string
 				"\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
 				headline)))))))
+		       (tgs (and tags (org-get-tags)))
 		       (tsp
 			(and timestamp
 			     (cl-some (lambda (p) (org-entry-get (point) p))
@@ -2841,7 +2853,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 						(point) p inherit-property-p)))
 					(and v (cons p v))))
 				    properties)))))
-		  (push (list level hdl tsp time props) tbl)))))))
+		  (push (list level hdl tgs tsp time props) tbl)))))))
       (list file org-clock-file-total-minutes (nreverse tbl)))))
 
 ;; Saving and loading the clock
