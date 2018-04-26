@@ -667,14 +667,12 @@ See also `org-src-mode-hook'."
 		   (setq org-src--auto-save-timer nil)))))))))
 
 (defun org-src-mode-configure-edit-buffer ()
+  "Configure the src edit buffer."
   (when (bound-and-true-p org-src--from-org-mode)
     (add-hook 'kill-buffer-hook #'org-src--remove-overlay nil 'local)
     (if (bound-and-true-p org-src--allow-write-back)
 	(progn
 	  (setq buffer-offer-save t)
-	  (setq buffer-file-name
-		(concat (buffer-file-name (marker-buffer org-src--beg-marker))
-			"[" (buffer-name) "]"))
 	  (setq-local write-contents-functions '(org-edit-src-save)))
       (setq buffer-read-only t))))
 
