@@ -14255,7 +14255,8 @@ in Lisp code use `org-set-tags' instead."
 		 (org-trim (completing-read
 			    "Tags: "
 			    #'org-tags-completion-function
-			    nil nil current-tags 'org-tags-history)))))))
+			    nil nil (org-make-tag-string current-tags)
+			    'org-tags-history)))))))
       (org-set-tags tags)))))
 
 (defun org-align-tags (&optional all)
