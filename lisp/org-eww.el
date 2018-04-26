@@ -93,11 +93,12 @@ Otherwise point is not moved.  Return point."
 (defun org-eww-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.
 This will encode `link-title' and `link-location' with
-`org-make-link-string', and insert the transformed test into the kill ring,
-so that it can be yanked into an Org mode buffer with links working correctly.
+`org-make-link-string' and insert the transformed text into the
+kill ring, so that it can be yanked into an Org mode buffer with
+links working correctly.
 
-Further lines starting with a star get quoted with a comma to keep
-the structure of the Org file."
+Further lines starting with a star get quoted with a comma to
+keep the structure of the Org file."
   (interactive)
   (let* ((regionp (org-region-active-p))
          (transform-start (point-min))
