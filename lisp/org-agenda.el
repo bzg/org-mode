@@ -6004,10 +6004,7 @@ specification like [h]h:mm."
 			 org-deadline-warning-days))
 		   ;; Set pre-warning to deadline.
 		   (t 0))))
-	       (wdays (if suppress-prewarning
-			  (let ((org-deadline-warning-days suppress-prewarning))
-			    (org-get-wdays s))
-			(org-get-wdays s))))
+	       (wdays (or suppress-prewarning (org-get-wdays s))))
 	  (cond
 	   ;; Only display deadlines at their base date, at future
 	   ;; repeat occurrences or in today agenda.
