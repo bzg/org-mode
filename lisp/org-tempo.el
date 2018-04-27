@@ -46,12 +46,12 @@
 
 
 (defgroup org-tempo nil
-  "Options for template expansion of Org structures"
+  "Template expansion of Org structures."
   :tag "Org structure"
   :group 'org)
 
 (defvar org-tempo-tags nil
-  "Tempo tags for Org mode")
+  "Tempo tags for Org mode.")
 
 (defcustom org-tempo-keywords-alist
   '(("L" . "latex")
@@ -60,14 +60,13 @@
     ("i" . "index"))
   "Keyword completion elements.
 
-Like `org-structure-template-alist' this alist of KEY characters
-and KEYWORD.  The tempo snippet \"<KEY\" is expand to the KEYWORD
-value.
+This is an alist of KEY characters and corresponding KEYWORDS,
+just like `org-structure-template-alist'.  The tempo snippet
+\"<KEY\" will be expanded using the KEYWORD value.  For example
+\"<l\" at the beginning of a line is expanded to \"#+latex:\".
 
-For example \"<l\" at the beginning of a line is expanded to
-\"#+latex:\".
-
-Note: the tempo function for \"#+include\" is defined elsewhere."
+Do not use \"I\" as a KEY, as it it reserved for expanding
+\"#+include\"."
   :group 'org-tempo
   :type '(repeat (cons (string :tag "Key")
 		       (string :tag "Keyword")))
@@ -78,6 +77,7 @@ Note: the tempo function for \"#+include\" is defined elsewhere."
 ;;; Org Tempo functions and setup.
 
 (defun org-tempo-setup ()
+  "Setup tempo tags and match finder for the current buffer."
   (org-tempo--update-maybe)
   (tempo-use-tag-list 'org-tempo-tags)
   (setq-local tempo-match-finder "^ *\\(<[[:word:]]+\\)\\="))
@@ -100,8 +100,8 @@ Tempo templates will be added."
 (defun org-tempo-add-templates ()
   "Update all Org Tempo templates.
 
-Goes through `org-structure-template-alist' and
-`org-tempo-keywords-alist'."
+Go through `org-structure-template-alist' and
+`org-tempo-keywords-alist' and update tempo templates."
   (let ((keys (org-tempo--keys)))
     ;; Check for duplicated snippet keys and warn if any are found.
     (when (> (length keys) (length (delete-dups keys)))
@@ -151,7 +151,7 @@ didn't succeed."
 ;;; Additional keywords
 
 (defun org-tempo--include-file ()
-  "Ask for file name and take care of quit"
+  "Add #+include: and a file name."
   (let ((inhibit-quit t))
     (unless (with-local-quit
 	      (prog1 t
@@ -168,7 +168,6 @@ didn't succeed."
 		       "<I"
 		       "Include keyword"
 		       'org-tempo-tags)
-
 
 ;;; Setup of Org Tempo
 ;;
