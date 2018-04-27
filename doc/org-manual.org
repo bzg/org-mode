@@ -19180,6 +19180,16 @@ Here is a suggestion for Org Crypt settings in Emacs init file:
 ;; # -*- buffer-auto-save-file-name: nil; -*-
 #+end_src
 
+It's possible to use different keys for different headings by
+specifying the respective key as property =CRYPTKEY=, e.g.:
+
+#+begin_example
+,* Totally secret :crypt:
+  :PROPERTIES:
+  :CRYPTKEY: 0x0123456789012345678901234567890123456789
+  :END:
+#+end_example
+
 Excluding the =crypt= tag from inheritance prevents already encrypted
 text from being encrypted again.
 
