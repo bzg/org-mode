@@ -62,19 +62,39 @@ should become
   ,#+END_SRC
 #+END_SRC
 
-*** Change ~org-calendar-to-agenda-key~ value
+*** Accepted values of ~org-structure-template-alist~ 
 
-Default value and accepted value types changed.  See [[doc:org-calendar-to-agenda-key][docstring]] for
-details.
+Org 9.2 comes with a new template expansion mechanism, combining
+`org-insert-structure-template' and org-tempo.el
 
-*** Change ~org-structure-template-alist~ value
+The data types allowed for the ~org-structure-template-alist~ option
+changed, see its docstring for details.
 
-With the new template expansion mechanism (see
-[[*~org-insert-structure-template~]] and =org-tempo.el=), the variable
-changed its data type.  See docstring for details.
+*** Default/accepted values of ~org-calendar-to-agenda-key~
 
-*** Change ~org-set-effort~ signature
-See docstring for details.
+The default value and accepted value of  ~org-calendar-to-agenda-key~
+changed.  This is an excerpt of the new docstring:
+
+: When set to ‘default’, bind the function to ‘c’, but only if it is
+: available in the Calendar keymap.  This is the default choice because
+: ‘c’ can then be used to switch back and forth between agenda and calendar.
+: 
+: When nil, ‘org-calendar-goto-agenda’ is not bound to any key.
+
+Check the full docstring for more.
+
+*** Change the signature of the ~org-set-effort~ function
+
+Here is the new docstring:
+
+: (org-set-effort &optional INCREMENT VALUE)
+: 
+: Set the effort property of the current entry.
+: If INCREMENT is non-nil, set the property to the next allowed
+: value.  Otherwise, if optional argument VALUE is provided, use
+: it.  Eventually, prompt for the new value if none of the previous
+: variables is set.
+
 *** Placeholders in =(eval ...)= macros are always strings
 
 Within =(eval ...)= macros, =$1=-like placeholders are always replaced
@@ -114,8 +134,8 @@ document, use =shrink= value instead, or in addition to align:
 *** ~org-get-tags~ meaning change
 
 Function ~org-get-tags~ used to return local tags to the current
-headline.  It now returns the all the inherited tags in addition to
-the local tags.  In order to get the old behaviour back, you can use:
+headline.  It now returns all the inherited tags in addition to the
+local tags.  In order to get the old behaviour back, you can use:
 
 : (org-get-tags nil t)
 
@@ -130,8 +150,8 @@ code-point.
 The =:match= (renamed from =:tags=) option allows to limit clock entries
 to those matching a todo-tags matcher.
 
-The old =:tags= option can be set to =t= to display a headline's tags in
-a dedicated column.
+The old =:tags= option can be set to =t= to display a headline's tags in a
+dedicated column.
 
 This is consistent with the naming of =org-dblock-write:columnview=
 options, where =:match= is also used as a headlines filter.
@@ -273,6 +293,7 @@ parameters.  See example bellow.
 #+END_SRC
 
 ** New functions
+
 *** ~org-insert-structure-template~
 
 This function can be used to wrap existing text of Org elements in
