@@ -14,8 +14,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
 
-OrgStruct minor mode and radio lists mechanism (~org-list-send-list~
-and ~org-list-radio-lists-templates~) are removed from the code base.
+OrgStruct minor mode and radio lists mechanism (~org-list-send-list~ and
+~org-list-radio-lists-templates~) are removed from the code base.
+
+Note that only radio /lists/ have been removed, not radio tables.
+
+If you want to manipulate lists like in Org in other modes, we suggest
+to use orgalist.el, which you can install from GNU ELPA.
 
 *** Change to Noweb expansion
 
