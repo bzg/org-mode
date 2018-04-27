@@ -5985,24 +5985,29 @@ specification like [h]h:mm."
 		    (org-agenda--timestamp-to-absolute
 		     s base 'future (current-buffer) pos)))))
 	       (diff (- deadline current))
-	       (wdays
-		(cond
-		 ;; The current item has a scheduled date, so
-		 ;; evaluate its prewarning lead time.
-		 ((integerp org-agenda-skip-deadline-prewarning-if-scheduled)
-		  ;; Use global prewarning-restart lead time.
-		  org-agenda-skip-deadline-prewarning-if-scheduled)
-		 ((eq org-agenda-skip-deadline-prewarning-if-scheduled
-		      'pre-scheduled)
-		  ;; Set pre-warning to no earlier than SCHEDULED.
-		  (min (- deadline
-			  (org-agenda--timestamp-to-absolute
-			   (org-entry-get nil "SCHEDULED")))
-		       org-deadline-warning-days))
-		 ;; Set pre-warning to 0
-		 (org-agenda-skip-deadline-prewarning-if-scheduled 0)
-		 ;; Set pre-warning to deadline.
-		 (t (org-get-wdays s)))))
+	       (suppress-prewarning
+		(let ((scheduled
+		       (and org-agenda-skip-deadline-prewarning-if-scheduled
+			    (org-entry-get nil "SCHEDULED"))))
+		  (cond
+		   ((not scheduled) nil)
+		   ;; The current item has a scheduled date, so
+		   ;; evaluate its prewarning lead time.
+		   ((integerp org-agenda-skip-deadline-prewarning-if-scheduled)
+		    ;; Use global prewarning-restart lead time.
+		    org-agenda-skip-deadline-prewarning-if-scheduled)
+		   ((eq org-agenda-skip-deadline-prewarning-if-scheduled
+			'pre-scheduled)
+		    ;; Set pre-warning to no earlier than SCHEDULED.
+		    (min (- deadline
+			    (org-agenda--timestamp-to-absolute scheduled))
+			 org-deadline-warning-days))
+		   ;; Set pre-warning to deadline.
+		   (t 0))))
+	       (wdays (if suppress-prewarning
+			  (let ((org-deadline-warning-days suppress-prewarning))
+			    (org-get-wdays s))
+			(org-get-wdays s))))
 	  (cond
 	   ;; Only display deadlines at their base date, at future
 	   ;; repeat occurrences or in today agenda.
