@@ -34,6 +34,7 @@
 
 (declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())
+(declare-function org-agenda-remove-restriction-lock "org-agenda" (&optional noupdate))
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-element-at-point "org-element" ())
@@ -56,6 +57,8 @@
 (defvar calendar-mode-map)
 (defvar org-complex-heading-regexp)
 (defvar org-agenda-diary-file)
+(defvar org-agenda-overriding-restriction)
+(defvar org-agenda-restriction-lock-overlay)
 (defvar org-table-any-border-regexp)
 (defvar org-table-dataline-regexp)
 (defvar org-table-tab-recognizes-table.el)
