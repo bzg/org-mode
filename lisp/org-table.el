@@ -1865,7 +1865,8 @@ with `org-table-paste-rectangle'."
 	(forward-line))
       (set-marker end nil))
     (when cut (org-table-align))
-    (setq org-table-clip (nreverse region))))
+    (setq org-table-clip (nreverse region))
+    (message (substitute-command-keys "Cells in the region copied, use \\[org-table-paste-rectangle] to paste them in a table."))))
 
 ;;;###autoload
 (defun org-table-paste-rectangle ()

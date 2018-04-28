@@ -20008,7 +20008,8 @@ this numeric value."
       (let ((next (next-single-char-property-change beg 'invisible nil end)))
 	(setq result (concat result (buffer-substring beg next)))
 	(setq beg next)))
-    (kill-new result)))
+    (kill-new result)
+    (message "Visible strings have been copied to the kill ring.")))
 
 (defun org-copy-special ()
   "Copy region in table or copy current subtree.
