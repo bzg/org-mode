@@ -387,6 +387,7 @@ Set option ~org-src-window-setup~ to ~split-window-below~.
 When sorting alphabetically, ~org-sort-entries~ and
 ~org-tags-sort-function~ now sort according to the locale’s collation
 rules instead of by code-point.
+*** New speed command "k" to kill (cut) the subtree at point
 * Version 9.1
 
 ** Incompatible changes

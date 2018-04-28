@@ -19095,6 +19095,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
     ("C" . org-shifttab)
     (" " . org-display-outline-path)
     ("s" . org-narrow-to-subtree)
+    ("k" . org-cut-subtree)
     ("=" . org-columns)
     ("Outline Structure Editing")
     ("U" . org-metaup)
