@@ -7171,18 +7171,20 @@ subtree."
   (org-agenda-maybe-redo))
 
 (defun org-agenda-remove-restriction-lock (&optional noupdate)
-  "Remove the agenda restriction lock."
+  "Remove agenda restriction lock."
   (interactive "P")
-  (delete-overlay org-agenda-restriction-lock-overlay)
-  (delete-overlay org-speedbar-restriction-lock-overlay)
-  (setq org-agenda-overriding-restriction nil)
-  (setq org-agenda-restrict nil)
-  (put 'org-agenda-files 'org-restrict nil)
-  (move-marker org-agenda-restrict-begin nil)
-  (move-marker org-agenda-restrict-end nil)
-  (setq current-prefix-arg nil)
-  (message "Agenda restriction lock removed")
-  (or noupdate (org-agenda-maybe-redo)))
+  (if (not org-agenda-restrict)
+      (message "No agenda restriction to remove.")
+    (delete-overlay org-agenda-restriction-lock-overlay)
+    (delete-overlay org-speedbar-restriction-lock-overlay)
+    (setq org-agenda-overriding-restriction nil)
+    (setq org-agenda-restrict nil)
+    (put 'org-agenda-files 'org-restrict nil)
+    (move-marker org-agenda-restrict-begin nil)
+    (move-marker org-agenda-restrict-end nil)
+    (setq current-prefix-arg nil)
+    (message "Agenda restriction lock removed")
+    (or noupdate (org-agenda-maybe-redo))))
 
 (defun org-agenda-maybe-redo ()
   "If there is any window showing the agenda view, update it."
