@@ -305,7 +305,7 @@ beginning of a headline when using Org speed commands.  Now, if there
 is already a restriction at point, hitting =<= again (or =C-x C-x <=) will
 remove it.
 
-** New functions
+** New commands and functions
 
 *** ~org-insert-structure-template~
 
@@ -323,7 +323,15 @@ See docstring for details.
 
 See docstring for details.
 
-** Removed functions
+*** ~org-toggle-narrow-to-subtree~
+
+Toggle the narrowing state of the buffer: when in a narrowed state,
+widen, otherwise call ~org-narrow-to-subtree~ to narrow.
+
+This is attached to the "s" speed command, so that hitting "s" twice
+will go back to the widen state.
+
+** Removed commands and functions
 *** ~org-outline-overlay-data~
 Use ~org-save-outline-visibility~ instead.
 *** ~org-set-outline-overlay-data~
@@ -336,9 +344,11 @@ It was not used throughout code base.
 Use ~org-element-at-point~ instead.
 *** ~org-try-structure-completion~
 Org Tempo may be used as a replacement.  See details above.
-** Removed variables
+** Removed options
 
 *** org-babel-use-quick-and-dirty-noweb-expansion
+
+See [[*Change to Noweb expansion][Change to Noweb expansion]] for explanations.
 
 ** Miscellaneous
 

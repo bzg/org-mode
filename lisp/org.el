@@ -8447,6 +8447,13 @@ If yes, remember the marker and the distance to BEG."
 	       (when (and (org-at-heading-p) (not (eobp))) (backward-char 1))
 	       (point)))))))
 
+(defun org-toggle-narrow-to-subtree ()
+  "Narrow to the subtree at point or widen a narrowed buffer."
+  (interactive)
+  (if (buffer-narrowed-p)
+      (widen)
+    (org-narrow-to-subtree)))
+
 (defun org-narrow-to-block ()
   "Narrow buffer to the current block."
   (interactive)
@@ -19097,7 +19104,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
     ("c" . org-cycle)
     ("C" . org-shifttab)
     (" " . org-display-outline-path)
-    ("s" . org-narrow-to-subtree)
+    ("s" . org-toggle-narrow-to-subtree)
     ("k" . org-cut-subtree)
     ("=" . org-columns)
     ("Outline Structure Editing")
