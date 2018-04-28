@@ -11673,20 +11673,19 @@ keywords relative to each registered export back-end."
     ("q" . "quote")
     ("s" . "src")
     ("v" . "verse"))
-  "Structure completion elements.
-This is an alist of keys and block types.  With
-`org-insert-structure-template' a block can be inserted through a
-menu. The block type is inserted, with \"#+BEGIN_\" and
-\"#+END_\" added automatically.  The menukeys are determined
-based on the key elements in the `org-structure-template-alist'.
+  "An alist of keys and block types.
+`org-insert-structure-template' will display a menu with this
+list of templates to choose from.  The block type is inserted,
+with \"#+BEGIN_\" and \"#+END_\" added automatically.
+
+The menu keys are defined by the car of each entry in this alist.
 If two entries have the keys \"a\" and \"aa\" respectively, the
 former will be inserted by typing \"a TAB/RET/SPC\" and the
 latter will be inserted by typing \"aa\".  If an entry with the
-key \"aab\" is later added it would be inserted by typing \"ab\".
+key \"aab\" is later added, it can be inserted by typing \"ab\".
 
 If loaded, Org Tempo also uses `org-structure-template-alist'.  A
-block can be inserted by pressing TAB after the string \"<KEY\".
-"
+block can be inserted by pressing TAB after the string \"<KEY\"."
   :group 'org-edit-structure
   :type '(repeat
 	  (cons (string :tag "Key")
@@ -11696,22 +11695,25 @@ block can be inserted by pressing TAB after the string \"<KEY\".
 (defun org--insert-structure-template-mks ()
   "Present `org-structure-template-alist' with `org-mks'.
 
-Menus are added if keys require more than one keystroke.
-Tabs are added to single key entires when needing more than one stroke.
-Keys longer than two characters are reduced to two characters."
+Menus are added if keys require more than one keystroke.  Tabs
+are added to single key entries when more than one stroke is
+needed.  Keys longer than two characters are reduced to two
+characters."
   (let* (case-fold-search
 	 (templates (append org-structure-template-alist
 			    '(("\t" . "Press TAB, RET or SPC to write block name"))))
          (keys (mapcar #'car templates))
-         (start-letters (delete-dups (mapcar (lambda (key) (substring key 0 1)) keys)))
+         (start-letters
+	  (delete-dups (mapcar (lambda (key) (substring key 0 1)) keys)))
 	 ;; Sort each element of `org-structure-template-alist' into
 	 ;; sublists according to the first letter.
-         (superlist (mapcar (lambda (letter)
-                              (list letter
-				    (cl-remove-if-not
-				     (apply-partially #'string-match-p (concat "^" letter))
-				     templates :key #'car)))
-			    start-letters)))
+         (superlist
+	  (mapcar (lambda (letter)
+                    (list letter
+			  (cl-remove-if-not
+			   (apply-partially #'string-match-p (concat "^" letter))
+			   templates :key #'car)))
+		  start-letters)))
     (org-mks
      (apply #'append
 	    ;; Make an `org-mks' table.  If only one element is
@@ -11748,12 +11750,12 @@ Keys longer than two characters are reduced to two characters."
      "Key: ")))
 
 (defun org--insert-structure-template-unique-keys (keys)
-  "Make list of unique, two character long elements from KEYS.
+  "Make a list of unique, two characters long elements from KEYS.
 
 Elements of length one have a tab appended.  Elements of length
 two are kept as is.  Longer elements are truncated to length two.
 
-If an element cannot be made unique an error is raised."
+If an element cannot be made unique, an error is raised."
   (let ((orderd-keys (cl-sort (copy-sequence keys) #'< :key #'length))
 	menu-keys)
     (dolist (key orderd-keys)
@@ -11774,10 +11776,10 @@ If an element cannot be made unique an error is raised."
 
 (defun org-insert-structure-template (type)
     "Insert a block structure of the type #+begin_foo/#+end_foo.
-First choose a block based on `org-structure-template-alist'.
-Alternatively, type RET, TAB or SPC to write the block type.
-With an active region, wrap the region in the block.  Otherwise,
-insert an empty block."
+Select a block from `org-structure-template-alist' then type
+either RET, TAB or SPC to write the block type.  With an active
+region, wrap the region in the block.  Otherwise, insert an empty
+block."
   (interactive
    (list (pcase (org--insert-structure-template-mks)
 	   (`("\t" . ,_) (read-string "Structure type: "))
