@@ -1835,8 +1835,9 @@ If there is no active region, use just the field at point."
 ;;;###autoload
 (defun org-table-copy-region (beg end &optional cut)
   "Copy rectangular region in table to clipboard.
-A special clipboard is used which can only be accessed
-with `org-table-paste-rectangle'."
+A special clipboard is used which can only be accessed with
+`org-table-paste-rectangle'.  Return the region copied, as a list
+of lists of fields."
   (interactive (list
 		(if (org-region-active-p) (region-beginning) (point))
 		(if (org-region-active-p) (region-end) (point))
@@ -1865,8 +1866,9 @@ with `org-table-paste-rectangle'."
 	(forward-line))
       (set-marker end nil))
     (when cut (org-table-align))
-    (setq org-table-clip (nreverse region))
-    (message (substitute-command-keys "Cells in the region copied, use \\[org-table-paste-rectangle] to paste them in a table."))))
+    (message (substitute-command-keys "Cells in the region copied, use \
+\\[org-table-paste-rectangle] to paste them in a table."))
+    (setq org-table-clip (nreverse region))))
 
 ;;;###autoload
 (defun org-table-paste-rectangle ()
