@@ -845,7 +845,7 @@ The following commands jump to other headlines in the buffer.
 
      #+kindex: C-c C-w
      #+findex: org-refile
-     Refile entry or region to a different location.  See [[Refile and
+     Refile entry or region to a different location.  See [[*Refile and
      Copy]].
 
 - {{{kbd(C-c ^)}}} (~org-sort~) ::
@@ -1053,7 +1053,7 @@ Important actors in this film are:
 
 Org supports these lists by tuning filling and wrapping commands to
 deal with them correctly, and by exporting them properly (see
-[[Exporting]]).  Since indentation is what governs the structure of these
+[[*Exporting]]).  Since indentation is what governs the structure of these
 lists, many structural constructs like =#+BEGIN_= blocks can be
 indented to signal that they belong to a particular item.
 
@@ -1107,7 +1107,7 @@ intact.  If some of these actions get in your way, configure
 - {{{kbd(M-S-RET)}}} ::
 
      #+kindex: M-S-RET
-     Insert a new item with a checkbox (see [[Checkboxes]]).
+     Insert a new item with a checkbox (see [[*Checkboxes]]).
 
 - {{{kbd(S-UP)}}}, {{{kbd(S-DOWN)}}} ::
 
@@ -1156,7 +1156,7 @@ intact.  If some of these actions get in your way, configure
 - {{{kbd(C-c C-c)}}} ::
 
      #+kindex: C-c C-c
-     If there is a checkbox (see [[Checkboxes]]) in the item line, toggle
+     If there is a checkbox (see [[*Checkboxes]]) in the item line, toggle
      the state of the checkbox.  In any case, verify bullets and
      indentation consistency in the whole list.
 
