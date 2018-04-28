@@ -395,8 +395,7 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
 
 (defface org-block '((t :inherit shadow))
   "Face text in #+begin ... #+end blocks.
-For source-blocks `org-src-block-faces' takes precedence.
-See also `org-fontify-quote-and-verse-blocks'."
+For source-blocks `org-src-block-faces' takes precedence."
   :group 'org-faces
   :version "26.1")
 
@@ -414,11 +413,13 @@ See also `org-fontify-quote-and-verse-blocks'."
   :version "22.1")
 
 (defface org-quote '((t (:inherit org-block)))
-  "Face for #+BEGIN_QUOTE ... #+END_QUOTE blocks."
+  "Face for #+BEGIN_QUOTE ... #+END_QUOTE blocks.
+Active when `org-fontify-quote-and-verse-blocks' is set."
   :group 'org-faces)
 
 (defface org-verse '((t (:inherit org-block)))
-  "Face for #+BEGIN_VERSE ... #+END_VERSE blocks."
+  "Face for #+BEGIN_VERSE ... #+END_VERSE blocks.
+Active when `org-fontify-quote-and-verse-blocks' is set."
   :group 'org-faces)
 
 (defcustom org-fontify-quote-and-verse-blocks nil
