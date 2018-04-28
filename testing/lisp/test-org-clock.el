@@ -327,11 +327,11 @@ the buffer."
   ;; Test match filtering.
   (should
    (equal
-    "| Headline   | Time |      |
-|------------+------+------|
+    "| Headline     | Time   |      |
+|--------------+--------+------|
 | *Total time* | *2:00* |      |
-|------------+------+------|
-| H1         |      | 2:00 |"
+|--------------+--------+------|
+| H1           |        | 2:00 |"
     (org-test-with-temp-text "** H1\n\n*** H2 :tag:\n\n*** H3\n<point>"
       (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
       (goto-line 4)
@@ -343,11 +343,11 @@ the buffer."
   ;; Test tags column.
   (should
    (equal
-    "| Tags | Headline   | Time |      |
-|------+------------+------+------|
+    "| Tags | Headline     | Time   |      |
+|------+--------------+--------+------|
 |      | *Total time* | *1:00* |      |
-|------+------------+------+------|
-| tag  | H1         |      | 1:00 |"
+|------+--------------+--------+------|
+| tag  | H1           |        | 1:00 |"
     (org-test-with-temp-text "** H1 :tag:\n\n*** H2 \n<point>"
       (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
       (goto-line 4)

@@ -62,6 +62,13 @@
 (defvar org-table1-hline-regexp)
 
 
+;;; Emacs < 26.1 compatibility
+
+(if (fboundp 'line-number-display-width)
+    (defalias 'org-line-number-display-width 'line-number-display-width)
+  (defun org-line-number-display-width (&rest _) 0))
+
+
 ;;; Emacs < 25.1 compatibility
 
 (when (< emacs-major-version 25)

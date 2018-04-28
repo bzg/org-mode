@@ -448,7 +448,7 @@ for the duration of the command.")
   "Overlay the newline before the current line with the table title."
   (interactive)
   (let ((title "")
-	(linum-offset (line-number-display-width 'columns))
+	(linum-offset (org-line-number-display-width 'columns))
 	(i 0))
     (dolist (column org-columns-current-fmt-compiled)
       (pcase column
