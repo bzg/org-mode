@@ -7124,43 +7124,50 @@ Argument ARG is the prefix argument."
 
 ;;;###autoload
 (defun org-agenda-set-restriction-lock (&optional type)
-  "Set restriction lock for agenda, to current subtree or file.
-Restriction will be the file if TYPE is `file', or if type is the
-universal prefix \\='(4), or if the cursor is before the first headline
-in the file.  Otherwise, restriction will be to the current subtree."
+  "Set restriction lock for agenda to current subtree or file.
+When in a restricted subtree, remove it.
+
+The restriction will span over the entire file if TYPE is `file',
+or if type is '(4), or if the cursor is before the first headline
+in the file. Otherwise, only apply the restriction to the current
+subtree."
   (interactive "P")
-  (org-agenda-remove-restriction-lock 'noupdate)
-  (and (equal type '(4)) (setq type 'file))
-  (setq type (cond
-	      (type type)
-	      ((org-at-heading-p) 'subtree)
-	      ((condition-case nil (org-back-to-heading t) (error nil))
-	       'subtree)
-	      (t 'file)))
-  (if (eq type 'subtree)
-      (progn
-	(setq org-agenda-restrict (current-buffer))
-	(setq org-agenda-overriding-restriction 'subtree)
-	(put 'org-agenda-files 'org-restrict
-	     (list (buffer-file-name (buffer-base-buffer))))
-	(org-back-to-heading t)
-	(move-overlay org-agenda-restriction-lock-overlay
-		      (point)
-		      (if org-agenda-restriction-lock-highlight-subtree
-			  (save-excursion (org-end-of-subtree t t) (point))
-			(point-at-eol)))
-	(move-marker org-agenda-restrict-begin (point))
-	(move-marker org-agenda-restrict-end
-		     (save-excursion (org-end-of-subtree t t)))
-	(message "Locking agenda restriction to subtree"))
-    (put 'org-agenda-files 'org-restrict
-	 (list (buffer-file-name (buffer-base-buffer))))
-    (setq org-agenda-restrict nil)
-    (setq org-agenda-overriding-restriction 'file)
-    (move-marker org-agenda-restrict-begin nil)
-    (move-marker org-agenda-restrict-end nil)
-    (message "Locking agenda restriction to file"))
-  (setq current-prefix-arg nil)
+  (if (and org-agenda-overriding-restriction
+	   (member org-agenda-restriction-lock-overlay
+		   (overlays-at (point))))
+      (org-agenda-remove-restriction-lock 'noupdate)
+    (org-agenda-remove-restriction-lock 'noupdate)
+    (and (equal type '(4)) (setq type 'file))
+    (setq type (cond
+		(type type)
+		((org-at-heading-p) 'subtree)
+		((condition-case nil (org-back-to-heading t) (error nil))
+		 'subtree)
+		(t 'file)))
+    (if (eq type 'subtree)
+	(progn
+	  (setq org-agenda-restrict (current-buffer))
+	  (setq org-agenda-overriding-restriction 'subtree)
+	  (put 'org-agenda-files 'org-restrict
+	       (list (buffer-file-name (buffer-base-buffer))))
+	  (org-back-to-heading t)
+	  (move-overlay org-agenda-restriction-lock-overlay
+			(point)
+			(if org-agenda-restriction-lock-highlight-subtree
+			    (save-excursion (org-end-of-subtree t t) (point))
+			  (point-at-eol)))
+	  (move-marker org-agenda-restrict-begin (point))
+	  (move-marker org-agenda-restrict-end
+		       (save-excursion (org-end-of-subtree t t)))
+	  (message "Locking agenda restriction to subtree"))
+      (put 'org-agenda-files 'org-restrict
+	   (list (buffer-file-name (buffer-base-buffer))))
+      (setq org-agenda-restrict nil)
+      (setq org-agenda-overriding-restriction 'file)
+      (move-marker org-agenda-restrict-begin nil)
+      (move-marker org-agenda-restrict-end nil)
+      (message "Locking agenda restriction to file"))
+    (setq current-prefix-arg nil))
   (org-agenda-maybe-redo))
 
 (defun org-agenda-remove-restriction-lock (&optional noupdate)

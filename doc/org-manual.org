@@ -8338,20 +8338,20 @@ scope for an extended period, use the following commands:
 
      #+kindex: C-c C-x <
      #+findex: org-agenda-set-restriction-lock
-     Permanently restrict the agenda to the current subtree.  When
-     called with a prefix argument, or with the cursor before the
-     first headline in a file, set the agenda scope to the entire
-     file.  This restriction remains in effect until removed with
-     {{{kbd(C-c C-x >)}}}, or by typing either {{{kbd(<)}}} or
-     {{{kbd(>)}}} in the agenda dispatcher.  If there is a window
-     displaying an agenda view, the new restriction takes effect
-     immediately.
+     Restrict the agenda to the current subtree.  If there already is
+     a restriction at point, remove it.  When called with a universal
+     prefix argument or with the cursor before the first headline in a
+     file, set the agenda scope to the entire file.  This restriction
+     remains in effect until removed with {{{kbd(C-c C-x >)}}}, or by typing
+     either {{{kbd(<)}}} or {{{kbd(>)}}} in the agenda dispatcher.  If there is a
+     window displaying an agenda view, the new restriction takes
+     effect immediately.
 
 - {{{kbd(C-c C-x >)}}} (~org-agenda-remove-restriction-lock~) ::
 
      #+kindex: C-c C-x >
      #+findex: org-agenda-remove-restriction-lock
-     Remove the permanent restriction created by {{{kbd(C-c C-x <)}}}.
+     Remove the restriction created by {{{kbd(C-c C-x <)}}}.
 
 #+texinfo: @noindent
 When working with =speedbar.el=, you can use the following commands in
@@ -8360,15 +8360,16 @@ the Speedbar frame:
 - {{{kbd(<)}}} (~org-speedbar-set-agenda-restriction~) ::
 
      #+findex: org-speedbar-set-agenda-restriction
-     Permanently restrict the agenda to the item---either an Org file
-     or a subtree in such a file---at the cursor in the Speedbar
-     frame.  If there is a window displaying an agenda view, the new
-     restriction takes effect immediately.
+     Restrict the agenda to the item---either an Org file or a subtree
+     in such a file---at the cursor in the Speedbar frame.  If agenda
+     is already restricted there, remove the restriction.  If there is
+     a window displaying an agenda view, the new restriction takes
+     effect immediately.
 
 - {{{kbd(>)}}} (~org-agenda-remove-restriction-lock~) ::
 
      #+findex: org-agenda-remove-restriction-lock
-     Lift the restriction.
+     Remove the restriction.
 
 ** The Agenda Dispatcher
 :PROPERTIES:

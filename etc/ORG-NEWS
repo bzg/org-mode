@@ -298,6 +298,13 @@ parameters.  See example bellow.
   ,#+END_SRC
 #+END_SRC
 
+*** ~org-agenda-set-restriction-lock~ toggle agenda restriction at point
+
+You can set an agenda restriction lock with =C-x C-x <= or with =<= at the
+beginning of a headline when using Org speed commands.  Now, if there
+is already a restriction at point, hitting =<= again (or =C-x C-x <=) will
+remove it.
+
 ** New functions
 
 *** ~org-insert-structure-template~

@@ -688,6 +688,8 @@ This also applied for speedbar access."
 
 (defun org-speedbar-set-agenda-restriction ()
   "Restrict future agenda commands to the location at point in speedbar.
+If there is already a restriction lock at the location, remove it.
+
 To get rid of the restriction, use `\\[org-agenda-remove-restriction-lock]'."
   (interactive)
   (require 'org-agenda)
@@ -698,7 +700,11 @@ To get rid of the restriction, use `\\[org-agenda-remove-restriction-lock]'."
       (setq m (get-text-property p 'org-imenu-marker))
       (with-current-buffer (marker-buffer m)
 	(goto-char m)
-	(org-agenda-set-restriction-lock 'subtree)))
+	(if (and org-agenda-overriding-restriction
+		 (member org-agenda-restriction-lock-overlay
+			 (overlays-at (point))))
+	    (org-agenda-remove-restriction-lock 'noupdate)
+	  (org-agenda-set-restriction-lock 'subtree))))
      ((setq p (text-property-any (point-at-bol) (point-at-eol)
 				 'speedbar-function 'speedbar-find-file))
       (setq tp (previous-single-property-change
