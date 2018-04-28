@@ -9222,8 +9222,9 @@ custom agenda commands.
      Filter the agenda view by a regular expression: only show agenda
      entries matching the regular expression the user entered.  When
      called with a prefix argument, it filters /out/ entries matching
-     the regexp.  With two universal prefix arguments, it removes all
-     the regexp filters, which can be accumulated.
+     the regexp.  Called in a regexp-filtered agenda view, remove the
+     filter, unless there are two universal prefix arguments, in which
+     case filters are cumulated.
 
      #+vindex: org-agenda-regexp-filter-preset
      You can add a filter preset in custom agenda commands through the

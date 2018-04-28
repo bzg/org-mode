@@ -7433,22 +7433,23 @@ The top headline is that of the current line."
 
 (defvar org-agenda-regexp-filter nil)
 (defun org-agenda-filter-by-regexp (strip)
-  "Filter agenda entries by a regular expression.
-Regexp filters are cumulative.
-With no prefix argument, keep entries matching the regexp.
+  "Filter agenda entries by regular expressions.
+
 With one prefix argument, filter out entries matching the regexp.
-With two prefix arguments, remove the regexp filters."
+If there is already a regexp filter, remove it unless called with
+two prefix arguments."
   (interactive "P")
-  (if (not (equal strip '(16)))
-      (let ((flt (concat (if (equal strip '(4)) "-" "+")
+  (cond
+   ((and org-agenda-regexp-filter (not (equal strip '(16))))
+    (org-agenda-filter-show-all-re)
+    (message "Regexp filter removed"))
+   (t (let ((flt (concat (if (equal strip '(4)) "-" "+")
 			 (read-from-minibuffer
 			  (if (equal strip '(4))
 			      "Filter out entries matching regexp: "
 			    "Narrow to entries matching regexp: ")))))
 	(push flt org-agenda-regexp-filter)
-	(org-agenda-filter-apply org-agenda-regexp-filter 'regexp))
-    (org-agenda-filter-show-all-re)
-    (message "Regexp filter removed")))
+	(org-agenda-filter-apply org-agenda-regexp-filter 'regexp)))))
 
 (defvar org-agenda-effort-filter nil)
 (defun org-agenda-filter-by-effort (strip)
