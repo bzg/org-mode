@@ -19360,10 +19360,10 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 
 (defun org-fix-tags-on-the-fly ()
   "Align tags in headline at point.
-Unlike to `org-align-tags', this function does nothing if point
-is not currently on a headline."
-  (when (and (eq (char-after (line-beginning-position)) ?*) ;short-circuit
-	     (org-at-heading-p))
+Unlike `org-align-tags', this function does nothing if point is
+either not currently on a tagged headline or on a tag."
+  (when (and (org-match-line org-tag-line-re)
+	     (< (point) (match-beginning 1)))
     (org-align-tags)))
 
 (defun org-delete-backward-char (N)
