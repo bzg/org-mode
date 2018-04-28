@@ -40,6 +40,7 @@
 ;;   - OPENING: see `org-koma-letter-opening',
 ;;   - PHONE_NUMBER: see `org-koma-letter-phone-number',
 ;;   - URL: see `org-koma-letter-url',
+;;   - FROM_LOGO: see `org-koma-letter-from-logo',
 ;;   - SIGNATURE: see `org-koma-letter-signature',
 ;;   - PLACE: see `org-koma-letter-place',
 ;;   - LOCATION: see `org-koma-letter-location',
@@ -59,6 +60,7 @@
 ;;   - foldmarks (see `org-koma-letter-use-foldmarks')
 ;;   - phone (see `org-koma-letter-use-phone')
 ;;   - url (see `org-koma-letter-use-url')
+;;   - from-logo (see `org-koma-letter-use-from-logo')
 ;;   - email (see `org-koma-letter-use-email')
 ;;   - place (see `org-koma-letter-use-place')
 ;;   - location (see `org-koma-letter-use-location')
@@ -189,6 +191,13 @@ This option can also be set with the PHONE_NUMBER keyword."
 (defcustom org-koma-letter-url ""
   "Sender's URL, e. g., the URL of her homepage.
 This option can also be set with the URL keyword."
+  :group 'org-export-koma-letter
+  :type 'string
+  :safe #'stringp)
+
+(defcustom org-koma-letter-from-logo ""
+  "Commands for inserting the sender's logo, e. g., \\includegraphics{logo}.
+This option can also be set with the FROM_LOGO keyword."
   :group 'org-export-koma-letter
   :type 'string
   :safe #'stringp)
@@ -379,6 +388,14 @@ This option can also be set with the OPTIONS keyword, e.g.:
   :type 'boolean
   :safe #'booleanp)
 
+(defcustom org-koma-letter-use-from-logo nil
+  "Non-nil prints sender's FROM_LOGO.
+This option can also be set with the OPTIONS keyword, e.g.:
+\"from-logo:t\"."
+  :group 'org-export-koma-letter
+  :type 'boolean
+  :safe #'booleanp)
+
 (defcustom org-koma-letter-use-email nil
   "Non-nil prints sender's email address.
 This option can also be set with the OPTIONS keyword, e.g.:
@@ -444,6 +461,7 @@ e.g. \"title-subject:t\"."
     (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
     (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
     (:url "URL" nil org-koma-letter-url)
+    (:from-logo "FROM_LOGO" nil org-koma-letter-from-logo)
     (:email "EMAIL" nil (org-koma-letter--get-value org-koma-letter-email) t)
     (:to-address "TO_ADDRESS" nil nil newline)
     (:place "PLACE" nil org-koma-letter-place)
@@ -464,6 +482,7 @@ e.g. \"title-subject:t\"."
     (:with-foldmarks nil "foldmarks" org-koma-letter-use-foldmarks)
     (:with-phone nil "phone" org-koma-letter-use-phone)
     (:with-url nil "url" org-koma-letter-use-url)
+    (:with-from-logo nil "from-logo" org-koma-letter-use-from-logo)
     (:with-place nil "place" org-koma-letter-use-place)
     (:with-subject nil "subject" org-koma-letter-subject-format)
     (:with-title-as-subject nil "title-subject" org-koma-letter-prefer-subject)
@@ -476,6 +495,7 @@ e.g. \"title-subject:t\"."
     (:inbuffer-email "EMAIL" nil 'koma-letter:empty)
     (:inbuffer-phone-number "PHONE_NUMBER" nil 'koma-letter:empty)
     (:inbuffer-url "URL" nil 'koma-letter:empty)
+    (:inbuffer-from-logo "FROM_LOGO" nil 'koma-letter:empty)
     (:inbuffer-place "PLACE" nil 'koma-letter:empty)
     (:inbuffer-location "LOCATION" nil 'koma-letter:empty)
     (:inbuffer-signature "SIGNATURE" nil 'koma-letter:empty)
@@ -484,6 +504,7 @@ e.g. \"title-subject:t\"."
     (:inbuffer-with-foldmarks nil "foldmarks" 'koma-letter:empty)
     (:inbuffer-with-phone nil "phone" 'koma-letter:empty)
     (:inbuffer-with-url nil "url" 'koma-letter:empty)
+    (:inbuffer-with-from-logo nil "from-logo" 'koma-letter:empty)
     (:inbuffer-with-place nil "place" 'koma-letter:empty))
   :translate-alist '((export-block . org-koma-letter-export-block)
 			(export-snippet . org-koma-letter-export-snippet)
@@ -786,6 +807,14 @@ a communication channel."
      (and (funcall check-scope 'with-url)
           (format "\\KOMAoption{fromurl}{%s}\n"
                   (if (plist-get info :with-url) "true" "false")))
+     ;; From Logo
+     (let ((from-logo (plist-get info :from-logo)))
+       (and (org-string-nw-p from-logo)
+            (funcall check-scope 'from-logo)
+            (format "\\setkomavar{fromlogo}{%s}\n" from-logo)))
+     (and (funcall check-scope 'with-from-logo)
+          (format "\\KOMAoption{fromlogo}{%s}\n"
+                  (if (plist-get info :with-from-logo) "true" "false")))
      ;; Signature.
      (let* ((heading-val
 	     (and (plist-get info :with-headline-opening)
