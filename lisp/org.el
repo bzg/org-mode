@@ -14205,21 +14205,28 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 
 (defun org--align-tags-here (to-col)
   "Align tags on the current headline to TO-COL.
-Assume point is on a headline."
-  (when (and (org-match-line org-tag-line-re)
-	     (< (point) (match-beginning 1)))
-    (let ((pos (point))
-	  (shift (if (>= to-col 0) to-col
-		   (- (abs to-col) (string-width (match-string 1))))))
-      ;; Delete all blanks before tags.
-      (goto-char (match-beginning 1))
-      (skip-chars-backward " \t")
-      (delete-region (point) (match-beginning 1))
-      ;; Insert new blanks.
-      (insert (make-string (max 1 (- shift (current-column))) ?\s))
-      ;; Preserve initial position, if possible.  In any case, stop
-      ;; before tags.
-      (when (< pos (point)) (goto-char pos)))))
+Assume point is on a headline.  Preserve point when aligning
+tags."
+  (when (org-match-line org-tag-line-re)
+    (let* ((shift (if (>= to-col 0) to-col
+		    (- (abs to-col) (string-width (match-string 1)))))
+	   (origin (point-marker))
+	   (column (current-column))
+	   (tags-start (match-beginning 1))
+	   (blank-start (save-excursion
+			  (goto-char tags-start)
+			  (skip-chars-backward " \t")
+			  (point)))
+	   (in-blank? (and (> origin blank-start)
+			   (<= origin tags-start))))
+      (delete-region blank-start tags-start)
+      (goto-char blank-start)
+      (let ((indent-tabs-mode nil)) (indent-to shift 1))
+      ;; Try to move back to original position.  If point was in the
+      ;; blanks before the tags, ORIGIN marker is of no use because it
+      ;; now points to BLANK-START.  Use COLUMN instead.
+      (if in-blank? (org-move-to-column column)
+	(goto-char origin)))))
 
 (defun org-set-tags-command (&optional arg)
   "Set the tags for the current visible entry.
@@ -14246,57 +14253,61 @@ in Lisp code use `org-set-tags' instead."
 	 'region)
        (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
    (t
-    (org-back-to-heading)
-    (let* ((all-tags (org-get-tags))
-	   (table (setq org-last-tags-completion-table
-			(org--tag-add-to-alist
-			 (and org-complete-tags-always-offer-all-agenda-tags
-			      (org-global-tags-completion-table
-			       (org-agenda-files)))
-			 (or org-current-tag-alist (org-get-buffer-tags)))))
-	   (current-tags
-	    (cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
-			  all-tags))
-	   (inherited-tags
-	    (cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
-			      all-tags))
-	   (tags
-	    (replace-regexp-in-string
-	     ;; Ignore all forbidden characters in tags.
-	     "[^[:alnum:]_@#%]+" ":"
-	     (if (or (eq t org-use-fast-tag-selection)
-		     (and org-use-fast-tag-selection
-			  (delq nil (mapcar #'cdr table))))
-		 (org-fast-tag-selection
-		  current-tags
-		  inherited-tags
-		  table
-		  (and org-fast-tag-selection-include-todo org-todo-key-alist))
-	       (let ((org-add-colon-after-tag-completion (< 1 (length table))))
-		 (org-trim (completing-read
-			    "Tags: "
-			    #'org-tags-completion-function
-			    nil nil (org-make-tag-string current-tags)
-			    'org-tags-history)))))))
-      (org-set-tags tags)))))
+    (save-excursion
+      (org-back-to-heading)
+      (let* ((all-tags (org-get-tags))
+	     (table (setq org-last-tags-completion-table
+			  (org--tag-add-to-alist
+			   (and org-complete-tags-always-offer-all-agenda-tags
+				(org-global-tags-completion-table
+				 (org-agenda-files)))
+			   (or org-current-tag-alist (org-get-buffer-tags)))))
+	     (current-tags
+	      (cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
+			    all-tags))
+	     (inherited-tags
+	      (cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
+				all-tags))
+	     (tags
+	      (replace-regexp-in-string
+	       ;; Ignore all forbidden characters in tags.
+	       "[^[:alnum:]_@#%]+" ":"
+	       (if (or (eq t org-use-fast-tag-selection)
+		       (and org-use-fast-tag-selection
+			    (delq nil (mapcar #'cdr table))))
+		   (org-fast-tag-selection
+		    current-tags
+		    inherited-tags
+		    table
+		    (and org-fast-tag-selection-include-todo org-todo-key-alist))
+		 (let ((org-add-colon-after-tag-completion (< 1 (length table))))
+		   (org-trim (completing-read
+			      "Tags: "
+			      #'org-tags-completion-function
+			      nil nil (org-make-tag-string current-tags)
+			      'org-tags-history)))))))
+	(org-set-tags tags))))))
 
 (defun org-align-tags (&optional all)
   "Align tags in current entry.
 When optional argument ALL is non-nil, align all tags in the
 visible part of the buffer."
-  (save-excursion
-    (if all (goto-char (point-min)) (org-back-to-heading t))
-    (catch :single
-      (while (re-search-forward org-tag-line-re nil t)
-	(let* ((offset (if (bound-and-true-p org-indent-mode)
-			   (* (1- org-indent-indentation-per-level)
-			      (1- (org-current-level)))
-			 0))
-	       (tags-column (+ org-tags-column
-			       (if (> org-tags-column 0) (- offset) offset))))
-	  (beginning-of-line)
-	  (org--align-tags-here tags-column)
-	  (if all (forward-line) (throw :single nil)))))))
+  (let ((get-indent-column
+	 (lambda ()
+	   (let ((offset (if (bound-and-true-p org-indent-mode)
+			     (* (1- org-indent-indentation-per-level)
+				(1- (org-current-level)))
+			   0)))
+	     (+ org-tags-column
+		(if (> org-tags-column 0) (- offset) offset))))))
+    (if (and (not all) (org-at-heading-p))
+	(org--align-tags-here (funcall get-indent-column))
+      (save-excursion
+	(if all
+	    (while (re-search-forward org-tag-line-re nil t)
+	      (org--align-tags-here (funcall get-indent-column)))
+	  (org-back-to-heading t)
+	  (org--align-tags-here (funcall get-indent-column)))))))
 
 (defun org-set-tags (tags)
   "Set the tags of the current entry to TAGS, replacing current tags.

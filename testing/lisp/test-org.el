@@ -6225,6 +6225,7 @@ Paragraph<point>"
 		    (org-tags-column 1))
 		(org-set-tags-command)))
 	    (buffer-string))))
+  ;; Preserve position when called from the section below.
   (should
    (equal "* H1 :foo:\nContents"
 	  (org-test-with-temp-text "* H1\n<point>Contents"
@@ -6234,6 +6235,15 @@ Paragraph<point>"
 		    (org-tags-column 1))
 		(org-set-tags-command)))
 	    (buffer-string))))
+  (should-not
+   (equal "* H1 :foo:\nContents2"
+	  (org-test-with-temp-text "* H1\n<point>Contents2"
+	    (cl-letf (((symbol-function 'completing-read)
+		       (lambda (&rest args) ":foo:")))
+	      (let ((org-use-fast-tag-selection nil)
+		    (org-tags-column 1))
+		(org-set-tags-command)))
+	    (org-at-heading-p))))
   ;; Strip all forbidden characters from user-entered tags.
   (should
    (equal "* H1 :foo:"
