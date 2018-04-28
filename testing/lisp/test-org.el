@@ -6280,6 +6280,76 @@ Paragraph<point>"
 	    (let ((org-tags-column 1)) (org-set-tags-command t))
 	    (buffer-string)))))
 
+(ert-deftest test-org/toggle-tag ()
+  "Test `org-toggle-tag' specifications."
+  ;; Insert missing tag.
+  (should
+   (equal "* H :tag:"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-tags-column 1)) (org-toggle-tag "tag"))
+	    (buffer-string))))
+  (should
+   (equal "* H :tag1:tag2:"
+	  (org-test-with-temp-text "* H :tag1:"
+	    (let ((org-tags-column 1)) (org-toggle-tag "tag2"))
+	    (buffer-string))))
+  ;; Remove existing tag.
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H :tag:"
+	    (org-toggle-tag "tag")
+	    (buffer-string))))
+  (should
+   (equal "* H :tag1:"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (let ((org-tags-column 1)) (org-toggle-tag "tag2"))
+	    (buffer-string))))
+  (should
+   (equal "* H :tag2:"
+	  (org-test-with-temp-text "* H :tag1:tag2:"
+	    (let ((org-tags-column 1)) (org-toggle-tag "tag1"))
+	    (buffer-string))))
+  ;; With optional argument ONOFF set to `on', try to insert the tag,
+  ;; even if its already there.
+  (should
+   (equal "* H :tag:"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-tags-column 1)) (org-toggle-tag "tag" 'on))
+	    (buffer-string))))
+  (should
+   (equal "* H :tag:"
+	  (org-test-with-temp-text "* H :tag:"
+	    (let ((org-tags-column 1)) (org-toggle-tag "tag" 'on))
+	    (buffer-string))))
+  ;; With optional argument ONOFF set to `off', try to remove the tag,
+  ;; even if its not there.
+  (should
+   (equal "* H"
+	  (org-test-with-temp-text "* H :tag:"
+	    (org-toggle-tag "tag" 'off)
+	    (buffer-string))))
+  (should
+   (equal "* H :tag:"
+	  (org-test-with-temp-text "* H :tag:"
+	    (let ((org-tags-column 1)) (org-toggle-tag "foo" 'off))
+	    (buffer-string))))
+  ;; Special case: Handle properly tag inheritance.  In particular, do
+  ;; not set inherited tags.
+  (should
+   (equal "* H1 :tag:\n** H2 :tag2:tag:"
+	  (org-test-with-temp-text "* H1 :tag:\n** <point>H2 :tag2:"
+	    (let ((org-use-tag-inheritance t)
+		  (org-tags-column 1))
+	      (org-toggle-tag "tag"))
+	    (buffer-string))))
+  (should
+   (equal "* H1 :tag1:tag2:\n** H2 :foo:"
+	  (org-test-with-temp-text "* H1 :tag1:tag2:\n** <point>H2"
+	    (let ((org-use-tag-inheritance t)
+		  (org-tags-column 1))
+	      (org-toggle-tag "foo"))
+	    (buffer-string)))))
+
 
 
 ;;; TODO keywords

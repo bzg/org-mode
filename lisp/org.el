@@ -14180,7 +14180,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
     (let ((current
 	   ;; Reverse the tags list so any new tag is appended to the
 	   ;; current list of tags.
-	   (nreverse (org-get-tags)))
+	   (nreverse (org-get-tags nil t)))
 	  res)
       (pcase onoff
 	(`off (setq current (delete tag current)))
