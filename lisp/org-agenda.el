@@ -7134,7 +7134,9 @@ subtree."
   (interactive "P")
   (if (and org-agenda-overriding-restriction
 	   (member org-agenda-restriction-lock-overlay
-		   (overlays-at (point))))
+		   (overlays-at (point)))
+	   (equal (overlay-start org-agenda-restriction-lock-overlay)
+		  (point)))
       (org-agenda-remove-restriction-lock 'noupdate)
     (org-agenda-remove-restriction-lock 'noupdate)
     (and (equal type '(4)) (setq type 'file))
