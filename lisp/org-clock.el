@@ -949,12 +949,12 @@ If necessary, clock-out of the currently active clock."
 					     resolve-to))))))))
 
 (defun org-clock-jump-to-current-clock (&optional effective-clock)
-  (interactive)
+  "When an Org clock is running, jump to it."
   (let ((drawer (org-clock-into-drawer))
 	(clock (or effective-clock (cons org-clock-marker
 					 org-clock-start-time))))
     (unless (marker-buffer (car clock))
-      (error "No clock is currently running"))
+      (user-error "No Org clock is currently running"))
     (org-with-clock clock (org-clock-goto))
     (with-current-buffer (marker-buffer (car clock))
       (goto-char (car clock))
