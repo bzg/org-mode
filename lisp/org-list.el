@@ -2012,7 +2012,9 @@ doesn't correspond anymore to the real list in buffer."
       ;; 5. Eventually fix checkboxes.
       (org-list-struct-fix-box struct parents prevs))
     ;; 6. Apply structure modifications to buffer.
-    (org-list-struct-apply-struct struct old-struct)))
+    (org-list-struct-apply-struct struct old-struct))
+  ;; 7. Return the updated structure
+  struct)
 
 
 

@@ -20282,8 +20282,11 @@ This command does many different things, depending on context:
 	     ;; item of the list and no argument is provided, simply
 	     ;; toggle checkbox of that item, if any.
 	     (org-list-set-checkbox begin struct new-box)))
-	   (org-list-write-struct
-	    struct (org-list-parents-alist struct) old-struct)
+	   (when (equal
+		  (org-list-write-struct
+		   struct (org-list-parents-alist struct) old-struct)
+		  old-struct)
+	     (message "Cannot update this checkbox"))
 	   (org-update-checkbox-count-maybe)))
 	((or `property-drawer `node-property)
 	 (call-interactively #'org-property-action))
