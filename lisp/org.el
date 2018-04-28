@@ -14316,30 +14316,32 @@ TAGS may be a tags string like \":aa:bb:cc:\", or a list of tags.
 If TAGS is nil or the empty string, all tags are removed.
 
 This function assumes point is on a headline."
-  (let ((tags (pcase tags
-		((pred listp) tags)
-		((pred stringp) (split-string (org-trim tags) ":" t))
-		(_ (error "Invalid tag specification: %S" tags))))
-	(change-flag nil))
-    (when (functionp org-tags-sort-function)
-      (setq tags (sort tags org-tags-sort-function)))
-    (org-with-wide-buffer
-     (unless (equal tags (org-get-tags nil t))
-       (setq change-flag t)
-       ;; Delete previous tags and any trailing white space.
-       (goto-char (if (looking-at org-tag-line-re) (match-beginning 1)
-		    (line-end-position)))
-       (skip-chars-backward " \t")
-       (delete-region (point) (line-end-position))
-       (when tags
-	 (save-excursion (insert " " (org-make-tag-string tags)))
-	 ;; When text is being inserted on an invisible region
-	 ;; boundary, it can be inadvertently sucked into
-	 ;; invisibility.
-	 (unless (org-invisible-p (line-beginning-position))
-	   (org-flag-region (point) (line-end-position) nil 'outline))))
-     ;; Align tags, if any.  Fix tags column if `org-indent-mode' is
-     ;; on.
+  (org-with-wide-buffer
+   (let ((tags (pcase tags
+		 ((pred listp) tags)
+		 ((pred stringp) (split-string (org-trim tags) ":" t))
+		 (_ (error "Invalid tag specification: %S" tags))))
+	 (old-tags (org-get-tags nil t))
+	 (change-flag nil))
+     (when (functionp org-tags-sort-function)
+       (setq tags (sort tags org-tags-sort-function)))
+     (unless (equal tags old-tags) (setq change-flag t))
+     ;; Delete previous tags and any trailing white space.
+     (goto-char (if (org-match-line org-tag-line-re) (match-beginning 1)
+		  (line-end-position)))
+     (skip-chars-backward " \t")
+     (delete-region (point) (line-end-position))
+     ;; Deleting white spaces may break an otherwise empty headline.
+     ;; Re-introduce one space in this case.
+     (unless (org-at-heading-p) (insert " "))
+     (when tags
+       (save-excursion (insert " " (org-make-tag-string tags)))
+       ;; When text is being inserted on an invisible region
+       ;; boundary, it can be inadvertently sucked into
+       ;; invisibility.
+       (unless (org-invisible-p (line-beginning-position))
+	 (org-flag-region (point) (line-end-position) nil 'outline)))
+     ;; Align tags, if any.
      (when tags (org-align-tags))
      (when change-flag (run-hooks 'org-after-tags-change-hook)))))
 
