@@ -4232,7 +4232,8 @@ following symbols:
 (defcustom org-hide-emphasis-markers nil
   "Non-nil mean font-lock should hide the emphasis marker characters."
   :group 'org-appearance
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-hide-macro-markers nil
   "Non-nil mean font-lock should hide the brackets marking macro calls."
