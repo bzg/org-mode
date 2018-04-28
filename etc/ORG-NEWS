@@ -25,16 +25,20 @@ to use orgalist.el, which you can install from GNU ELPA.
 *** Change in the structure template expansion
 
 Org 9.2 comes with a new template expansion mechanism, combining
-~org-insert-structure-template~ and org-tempo.el, which is loaded by
-default.
+~org-insert-structure-template~ bound to ~C-c C-'~.
 
 If you customized the ~org-structure-template-alist~ option manually,
 you probably need to udpate it, see the docstring for accepted values.
 
-If you need complex templates, look at the ~tempo-define-template~
-function or at solutions like yasnippet.
+If you prefer using previous patterns, e.g. =<s=, you can activate
+them again by requiring Org Tempo library:
 
-If you don't need org-tempo.el, remove it from ~org-modules~.
+: (require 'org-tempo)
+
+or add it to ~org-modules~.
+
+If you need complex templates, look at the ~tempo-define-template~
+function or at solutions like Yasnippet.
 
 *** Change to Noweb expansion
 
