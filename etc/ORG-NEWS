@@ -22,6 +22,20 @@ Note that only radio /lists/ have been removed, not radio tables.
 If you want to manipulate lists like in Org in other modes, we suggest
 to use orgalist.el, which you can install from GNU ELPA.
 
+*** Change in the structure template expansion
+
+Org 9.2 comes with a new template expansion mechanism, combining
+~org-insert-structure-template~ and org-tempo.el, which is loaded by
+default.
+
+If you customized the ~org-structure-template-alist~ option manually,
+you probably need to udpate it, see the docstring for accepted values.
+
+If you need complex templates, look at the ~tempo-define-template~
+function or at solutions like yasnippet.
+
+If you don't need org-tempo.el, remove it from ~org-modules~.
+
 *** Change to Noweb expansion
 
 Expansion check =:noweb-ref= only if no matching named block is found
@@ -61,14 +75,6 @@ should become
     <<bar>>
   ,#+END_SRC
 #+END_SRC
-
-*** Accepted values of ~org-structure-template-alist~ 
-
-Org 9.2 comes with a new template expansion mechanism, combining
-`org-insert-structure-template' and org-tempo.el
-
-The data types allowed for the ~org-structure-template-alist~ option
-changed, see its docstring for details.
 
 *** Default/accepted values of ~org-calendar-to-agenda-key~
 
