@@ -346,6 +346,8 @@ It was not used throughout the code base.
 It was not used throughout code base.
 *** ~org-context-p~
 Use ~org-element-at-point~ instead.
+*** ~org-preserve-lc~
+It is no longer used in the code base.
 *** ~org-try-structure-completion~
 Org Tempo may be used as a replacement.  See details above.
 ** Removed options

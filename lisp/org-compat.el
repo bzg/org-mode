@@ -262,6 +262,7 @@ See `org-link-parameters' for documentation on the other parameters."
 
 (make-obsolete 'org-add-link-type "use `org-link-set-parameters' instead." "Org 9.0")
 
+;;;; Functions unused in Org core.
 (defun org-table-recognize-table.el ()
   "If there is a table.el table nearby, recognize it and move into it."
   (when (and org-table-tab-recognizes-table.el (org-at-table.el-p))
@@ -280,10 +281,22 @@ See `org-link-parameters' for documentation on the other parameters."
             (message "recognizing table.el table...done")))
       (error "This should not happen"))))
 
-;; Not used by Org core since commit 6d1e3082, Feb 2010.
+;; Not used since commit 6d1e3082, Feb 2010.
 (make-obsolete 'org-table-recognize-table.el
-               "please notify the org mailing list if you use this function."
+               "please notify the Org mailing list if you use this function."
                "Org 9.0")
+
+(defmacro org-preserve-lc (&rest body)
+  (declare (debug (body))
+	   (obsolete "please notify the Org mailing list if you use this function."
+		     "Org 9.0"))
+  (org-with-gensyms (line col)
+    `(let ((,line (org-current-line))
+	   (,col (current-column)))
+       (unwind-protect
+	   (progn ,@body)
+	 (org-goto-line ,line)
+	 (org-move-to-column ,col)))))
 
 (defun org-remove-angle-brackets (s)
   (org-unbracket-string "<" ">" s))

@@ -41,16 +41,6 @@
                  symbols)
      ,@body))
 
-(defmacro org-preserve-lc (&rest body)
-  (declare (debug (body)))
-  (org-with-gensyms (line col)
-    `(let ((,line (org-current-line))
-	   (,col (current-column)))
-       (unwind-protect
-	   (progn ,@body)
-	 (org-goto-line ,line)
-	 (org-move-to-column ,col)))))
-
 ;; Use `org-with-silent-modifications' to ignore cosmetic changes and
 ;; `org-unmodified' to ignore real text modifications
 (defmacro org-unmodified (&rest body)
