@@ -12829,12 +12829,15 @@ TYPE is either `deadline' or `scheduled'.  See `org-deadline' or
 			    (match-string 1 old-date)))))
     (pcase arg
       (`(4)
-       (when (and old-date log)
-	 (org-add-log-setup (if deadline? 'deldeadline 'delschedule)
-			    nil old-date log))
-       (org-remove-timestamp-with-keyword keyword)
-       (message (if deadline? "Item no longer has a deadline."
-		  "Item is no longer scheduled.")))
+       (if (not old-date)
+	   (message (if deadline? "Entry had no deadline to remove"
+		      "Entry was not scheduled"))
+	 (when (and old-date log)
+	   (org-add-log-setup (if deadline? 'deldeadline 'delschedule)
+			      nil old-date log))
+	 (org-remove-timestamp-with-keyword keyword)
+	 (message (if deadline? "Entry no longer has a deadline."
+		    "Entry is no longer scheduled."))))
       (`(16)
        (save-excursion
 	 (org-back-to-heading t)
