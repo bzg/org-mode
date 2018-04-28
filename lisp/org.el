@@ -14207,7 +14207,9 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   "Align tags on the current headline to TO-COL.
 Assume point is on a headline.  Preserve point when aligning
 tags."
-  (when (org-match-line org-tag-line-re)
+  (when (and (org-match-line org-tag-line-re)
+	     (/= to-col (save-excursion	;nothing to do?
+			  (goto-char (match-beginning 1)) (current-column))))
     (let* ((shift (if (>= to-col 0) to-col
 		    (- (abs to-col) (string-width (match-string 1)))))
 	   (origin (point-marker))
