@@ -8995,15 +8995,18 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 	(beginning-of-line 0)))))
 
 (defun org-agenda-align-tags (&optional line)
-  "Align all tags in agenda items to `org-agenda-tags-column'."
+  "Align all tags in agenda items to `org-agenda-tags-column'.
+When optional argument LINE is non-nil, align tags only on the
+current line."
   (let ((inhibit-read-only t)
 	(org-agenda-tags-column (if (eq 'auto org-agenda-tags-column)
 				    (- (window-text-width))
 				  org-agenda-tags-column))
+	(end (if line (line-end-position) (point-max)))
 	l c)
     (save-excursion
       (goto-char (if line (line-beginning-position) (point-min)))
-      (while (re-search-forward org-tag-line-re (and line (line-end-position)) t)
+      (while (re-search-forward org-tag-group-re end t)
 	(add-text-properties
 	 (match-beginning 1) (match-end 1)
 	 (list 'face (delq nil (let ((prop (get-text-property
