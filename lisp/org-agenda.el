@@ -9002,7 +9002,7 @@ current line."
 	(org-agenda-tags-column (if (eq 'auto org-agenda-tags-column)
 				    (- (window-text-width))
 				  org-agenda-tags-column))
-	(end (if line (line-end-position) (point-max)))
+	(end (and line (line-end-position)))
 	l c)
     (save-excursion
       (goto-char (if line (line-beginning-position) (point-min)))
@@ -9023,7 +9023,7 @@ current line."
 	(delete-region (save-excursion (skip-chars-backward " \t") (point))
 		       (point))
 	(insert (org-add-props
-		    (make-string (max 1 (- c (current-column))) ?\ )
+		    (make-string (max 1 (- c (current-column))) ?\s)
 		    (plist-put (copy-sequence (text-properties-at (point)))
 			       'face nil))))
       (goto-char (point-min))
