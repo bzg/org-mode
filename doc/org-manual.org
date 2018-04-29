@@ -11799,6 +11799,11 @@ Org comes with following pre-defined macros:
      specified counter is reset to 1.  You may leave {{{var(NAME)}}}
      empty to reset the default counter.
 
+#+cindex: @samp{results}, macro
+Moreover, inline source blocks (see [[*Structure of Code Blocks]]) use the
+special =results= macro to mark their output.  As such, you are
+advised against re-defining it, unless you know what you are doing.
+
 #+vindex: org-hide-macro-markers
 The surrounding brackets can be made invisible by setting
 ~org-hide-macro-markers~ non-~nil~.
