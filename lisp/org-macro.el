@@ -62,7 +62,6 @@
 (declare-function org-file-url-p "org" (file))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-mode "org" ())
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function vc-backend "vc-hooks" (f))
 (declare-function vc-call "vc-hooks" (fun file &rest args) t)
 (declare-function vc-exec-after "vc-dispatcher" (code))

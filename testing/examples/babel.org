@@ -112,21 +112,17 @@
 
 #+name: pascals-triangle
 #+begin_src emacs-lisp :var n=5 :exports both
-  (require 'cl)
-  (defalias 'my-map (if (org-version-check "24.2.50" "cl" :predicate)
-                        'cl-map
-                      'map))
-  (defun pascals-triangle (n)
-    (if (= n 0)
-        (list (list 1))
-      (let* ((prev-triangle (pascals-triangle (- n 1)))
-             (prev-row (car (reverse prev-triangle))))
-        (append prev-triangle
-                (list (my-map 'list #'+
-                              (append prev-row '(0))
-                              (append '(0) prev-row)))))))
-  
-  (pascals-triangle n)
+(defun pascals-triangle (n)
+  (if (= n 0)
+      (list (list 1))
+    (let* ((prev-triangle (pascals-triangle (- n 1)))
+           (prev-row (car (reverse prev-triangle))))
+      (append prev-triangle
+              (list (cl-map 'list #'+
+                            (append prev-row '(0))
+                            (append '(0) prev-row)))))))
+
+(pascals-triangle n)
 #+end_src
 
 * calling code blocks from inside table

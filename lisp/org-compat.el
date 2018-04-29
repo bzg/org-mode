@@ -35,6 +35,7 @@
 (declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-agenda-remove-restriction-lock "org-agenda" (&optional noupdate))
+(declare-function org-align-tags "org" (&optional all))
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-element-at-point "org-element" ())
@@ -43,10 +44,12 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
+(declare-function org-get-tags "org" (&optional pos local))
 (declare-function org-invisible-p "org" (&optional pos))
 (declare-function org-link-display-format "org" (s))
 (declare-function org-link-set-parameters "org" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
+(declare-function org-make-tag-string "org" (tags))
 (declare-function org-reduced-level "org" (l))
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-table-end "org-table" (&optional table-type))
@@ -110,7 +113,7 @@ Case is significant."
 ;;; Obsolete aliases (remove them after the next major release).
 
 ;;;; XEmacs compatibility, now removed.
-(define-obsolete-function-alias 'org-activate-mark 'activate-mark)
+(define-obsolete-function-alias 'org-activate-mark 'activate-mark "Org 9.0")
 (define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
 (define-obsolete-function-alias 'org-bound-and-true-p 'bound-and-true-p "Org 9.0")
 (define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
@@ -283,13 +286,13 @@ See `org-link-parameters' for documentation on the other parameters."
 
 ;; Not used since commit 6d1e3082, Feb 2010.
 (make-obsolete 'org-table-recognize-table.el
-               "please notify the Org mailing list if you use this function."
+               "please notify Org mailing list if you use this function."
                "Org 9.0")
 
 (defmacro org-preserve-lc (&rest body)
   (declare (debug (body))
-	   (obsolete "please notify the Org mailing list if you use this function."
-		     "Org 9.0"))
+	   (obsolete "please notify Org mailing list if you use this function."
+		     "Org 9.2"))
   (org-with-gensyms (line col)
     `(let ((,line (org-current-line))
 	   (,col (current-column)))
@@ -297,6 +300,12 @@ See `org-link-parameters' for documentation on the other parameters."
 	   (progn ,@body)
 	 (org-goto-line ,line)
 	 (org-move-to-column ,col)))))
+
+(defun org-version-check (version &rest _)
+  "Non-nil if VERSION is lower (older) than `emacs-version'."
+  (declare (obsolete "use `version<' or `fboundp' instead."
+		     "Org 9.2"))
+  (version< version emacs-version))
 
 (defun org-remove-angle-brackets (s)
   (org-unbracket-string "<" ">" s))
@@ -430,6 +439,11 @@ use of this function is for the stuck project list."
   (declare (obsolete "use `org-align-tags' instead." "Org 9.2"))
   (org-align-tags t))
 
+(defmacro org-with-silent-modifications (&rest body)
+  (declare (obsolete "use `with-silent-modifications' instead." "9.2")
+	   (debug (body)))
+  `(with-silent-modifications ,@body))
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org
@@ -440,30 +454,6 @@ use of this function is for the stuck project list."
 
 
 ;;; Miscellaneous functions
-
-(defun org-version-check (version feature level)
-  (let* ((v1 (mapcar 'string-to-number (split-string version "[.]")))
-         (v2 (mapcar 'string-to-number (split-string emacs-version "[.]")))
-         (rmaj (or (nth 0 v1) 99))
-         (rmin (or (nth 1 v1) 99))
-         (rbld (or (nth 2 v1) 99))
-         (maj (or (nth 0 v2) 0))
-         (min (or (nth 1 v2) 0))
-         (bld (or (nth 2 v2) 0)))
-    (if (or (< maj rmaj)
-            (and (= maj rmaj)
-                 (< min rmin))
-            (and (= maj rmaj)
-                 (= min rmin)
-                 (< bld rbld)))
-        (if (eq level :predicate)
-            ;; just return if we have the version
-            nil
-          (let ((msg (format "Emacs %s or greater is recommended for %s"
-                             version feature)))
-            (display-warning 'org msg level)
-            t))
-      t)))
 
 (defun org-get-x-clipboard (value)
   "Get the value of the X or Windows clipboard."
@@ -477,23 +467,6 @@ use of this function is for the stuck project list."
                 (gui-get-selection value 'TEXT)))))
         ((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
          (w32-get-clipboard-data))))
-
-(defun org-fit-window-to-buffer (&optional window max-height min-height
-                                           shrink-only)
-  "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
-WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
-passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
-`shrink-window-if-larger-than-buffer' instead, the height limit is
-ignored in this case."
-  (cond ((if (fboundp 'window-full-width-p)
-             (not (window-full-width-p window))
-           ;; do nothing if another window would suffer
-           (> (frame-width) (window-width window))))
-        ((and (fboundp 'fit-window-to-buffer) (not shrink-only))
-         (fit-window-to-buffer window max-height min-height))
-        ((fboundp 'shrink-window-if-larger-than-buffer)
-         (shrink-window-if-larger-than-buffer window)))
-  (or window (selected-window)))
 
 ;; `set-transient-map' is only in Emacs >= 24.4
 (defalias 'org-set-transient-map
@@ -576,14 +549,9 @@ Pass COLUMN and FORCE to `move-to-column'."
       (or (file-remote-p file 'localname) file))))
 
 (defmacro org-no-popups (&rest body)
-  "Suppress popup windows.
-Let-bind some variables to nil around BODY to achieve the desired
-effect, which variables to use depends on the Emacs version."
-  (if (org-version-check "24.2.50" "" :predicate)
-      `(let (pop-up-frames display-buffer-alist)
-         ,@body)
-    `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
-       ,@body)))
+  "Suppress popup windows and evaluate BODY."
+  `(let (pop-up-frames display-buffer-alist)
+     ,@body))
 
 ;;;###autoload
 (defmacro org-check-version ()
@@ -603,11 +571,6 @@ effect, which variables to use depends on the Emacs version."
            (defun org-release () "N/A")
            (defun org-git-version () "N/A !!check installation!!"))))))
 
-(defmacro org-with-silent-modifications (&rest body)
-  (if (fboundp 'with-silent-modifications)
-      `(with-silent-modifications ,@body)
-    `(org-unmodified ,@body)))
-(def-edebug-spec org-with-silent-modifications (body))
 
 
 ;;; Functions for Emacs < 24.4 compatibility

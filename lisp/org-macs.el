@@ -31,6 +31,9 @@
 
 ;;; Code:
 
+(declare-function format-spec "format-spec" (format specification))
+(declare-function org-string-collate-less-p "org-compat" (s1 s2 &rest _))
+
 
 ;;; Macros
 
@@ -41,8 +44,8 @@
                  symbols)
      ,@body))
 
-;; Use `org-with-silent-modifications' to ignore cosmetic changes and
-;; `org-unmodified' to ignore real text modifications
+;; Use `with-silent-modifications' to ignore cosmetic changes and
+;; `org-unmodified' to ignore real text modifications.
 (defmacro org-unmodified (&rest body)
   "Run BODY while preserving the buffer's `buffer-modified-p' state."
   (declare (debug (body)))
@@ -191,7 +194,7 @@ because otherwise all these markers will point to nowhere."
 
 
 
-;;; Buffer
+;;; Buffer and windows
 
 (defun org-base-buffer (buffer)
   "Return the base buffer of BUFFER, if it has one.  Else return the buffer."
@@ -208,6 +211,29 @@ not an indirect buffer."
     (if buf
 	(or (buffer-base-buffer buf) buf)
       nil)))
+
+(defun org-switch-to-buffer-other-window (&rest args)
+  "Switch to buffer in a second window on the current frame.
+In particular, do not allow pop-up frames.
+Returns the newly created buffer."
+  (org-no-popups (apply #'switch-to-buffer-other-window args)))
+
+(defun org-fit-window-to-buffer (&optional window max-height min-height
+                                           shrink-only)
+  "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
+WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
+passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
+`shrink-window-if-larger-than-buffer' instead, the height limit is
+ignored in this case."
+  (cond ((if (fboundp 'window-full-width-p)
+             (not (window-full-width-p window))
+           ;; Do nothing if another window would suffer.
+           (> (frame-width) (window-width window))))
+        ((and (fboundp 'fit-window-to-buffer) (not shrink-only))
+         (fit-window-to-buffer window max-height min-height))
+        ((fboundp 'shrink-window-if-larger-than-buffer)
+         (shrink-window-if-larger-than-buffer window)))
+  (or window (selected-window)))
 
 
 
@@ -279,6 +305,48 @@ it for output."
     (unless (org-file-newer-than-p output time)
       (error (format "File %S wasn't produced%s" output err-msg)))
     output))
+
+
+
+;;; Indentation
+
+(defun org-get-indentation (&optional line)
+  "Get the indentation of the current line, interpreting tabs.
+When LINE is given, assume it represents a line and compute its indentation."
+  (if line
+      (when (string-match "^ *" (org-remove-tabs line))
+	(match-end 0))
+    (save-excursion
+      (beginning-of-line 1)
+      (skip-chars-forward " \t")
+      (current-column))))
+
+(defun org-do-remove-indentation (&optional n)
+  "Remove the maximum common indentation from the buffer.
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible.  Return nil
+if it fails."
+  (catch :exit
+    (goto-char (point-min))
+    ;; Find maximum common indentation, if not specified.
+    (let ((n (or n
+		 (let ((min-ind (point-max)))
+		   (save-excursion
+		     (while (re-search-forward "^[ \t]*\\S-" nil t)
+		       (let ((ind (1- (current-column))))
+			 (if (zerop ind) (throw :exit nil)
+			   (setq min-ind (min min-ind ind))))))
+		   min-ind))))
+      (if (zerop n) (throw :exit nil)
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw :exit nil))
+		  (t (indent-line-to (- ind n))))
+	    (forward-line)))
+	;; Signal success.
+	t))))
 
 
 
@@ -406,11 +474,199 @@ is selected, only the bare key is returned."
 	(when buffer (kill-buffer buffer))))))
 
 
+;;; List manipulation
+
+(defsubst org-get-alist-option (option key)
+  (cond ((eq key t) t)
+	((eq option t) t)
+	((assoc key option) (cdr (assoc key option)))
+	(t (let ((r (cdr (assq 'default option))))
+	     (if (listp r) (delq nil r) r)))))
+
+(defsubst org-last (list)
+  "Return the last element of LIST."
+  (car (last list)))
+
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
+
+(defun org-uniquify-alist (alist)
+  "Merge elements of ALIST with the same key.
+
+For example, in this alist:
+
+\(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
+  => \\='((a 1 3) (b 2))
+
+merge (a 1) and (a 3) into (a 1 3).
+
+The function returns the new ALIST."
+  (let (rtn)
+    (dolist (e alist rtn)
+      (let (n)
+	(if (not (assoc (car e) rtn))
+	    (push e rtn)
+	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
+	  (setq rtn (assq-delete-all (car e) rtn))
+	  (push n rtn))))))
+
+(defun org-delete-all (elts list)
+  "Remove all elements in ELTS from LIST.
+Comparison is done with `equal'.  It is a destructive operation
+that may remove elements by altering the list structure."
+  (while elts
+    (setq list (delete (pop elts) list)))
+  list)
+
+(defun org-plist-delete (plist property)
+  "Delete PROPERTY from PLIST.
+This is in contrast to merely setting it to 0."
+  (let (p)
+    (while plist
+      (if (not (eq property (car plist)))
+	  (setq p (plist-put p (car plist) (nth 1 plist))))
+      (setq plist (cddr plist)))
+    p))
+
+(defun org-combine-plists (&rest plists)
+  "Create a single property list from all plists in PLISTS.
+The process starts by copying the first list, and then setting properties
+from the other lists.  Settings in the last list are the most significant
+ones and overrule settings in the other lists."
+  (let ((rtn (copy-sequence (pop plists)))
+	p v ls)
+    (while plists
+      (setq ls (pop plists))
+      (while ls
+	(setq p (pop ls) v (pop ls))
+	(setq rtn (plist-put rtn p v))))
+    rtn))
+
+
+
+;;; Local variables
+
+(defconst org-unique-local-variables
+  '(org-element--cache
+    org-element--cache-objects
+    org-element--cache-sync-keys
+    org-element--cache-sync-requests
+    org-element--cache-sync-timer)
+  "List of local variables that cannot be transferred to another buffer.")
+
+(defun org-get-local-variables ()
+  "Return a list of all local variables in an Org mode buffer."
+  (delq nil
+	(mapcar
+	 (lambda (x)
+	   (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
+		  (name (car binding)))
+	     (and (not (get name 'org-state))
+		  (not (memq name org-unique-local-variables))
+		  (string-match-p
+		   "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|\
+auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
+		   (symbol-name name))
+		  binding)))
+	 (with-temp-buffer
+	   (org-mode)
+	   (buffer-local-variables)))))
+
+(defun org-clone-local-variables (from-buffer &optional regexp)
+  "Clone local variables from FROM-BUFFER.
+Optional argument REGEXP selects variables to clone."
+  (dolist (pair (buffer-local-variables from-buffer))
+    (pcase pair
+      (`(,name . ,value)		;ignore unbound variables
+       (when (and (not (memq name org-unique-local-variables))
+		  (or (null regexp) (string-match-p regexp (symbol-name name))))
+	 (ignore-errors (set (make-local-variable name) value)))))))
+
+
+
 ;;; Logic
 
 (defsubst org-xor (a b)
   "Exclusive `or'."
   (if a (not b) b))
+
+
+
+;;; Miscellaneous
+
+(defsubst org-call-with-arg (command arg)
+  "Call COMMAND interactively, but pretend prefix arg was ARG."
+  (let ((current-prefix-arg arg)) (call-interactively command)))
+
+(defsubst org-check-external-command (cmd &optional use no-error)
+  "Check if external program CMD for USE exists, error if not.
+When the program does exist, return its path.
+When it does not exist and NO-ERROR is set, return nil.
+Otherwise, throw an error.  The optional argument USE can describe what this
+program is needed for, so that the error message can be more informative."
+  (or (executable-find cmd)
+      (if no-error
+	  nil
+	(error "Can't find `%s'%s" cmd
+	       (if use (format " (%s)" use) "")))))
+
+(defun org-display-warning (message)
+  "Display the given MESSAGE as a warning."
+  (display-warning 'org message :warning))
+
+(defun org-unlogged-message (&rest args)
+  "Display a message, but avoid logging it in the *Messages* buffer."
+  (let ((message-log-max nil))
+    (apply #'message args)))
+
+(defun org-let (list &rest body)
+  (eval (cons 'let (cons list body))))
+(put 'org-let 'lisp-indent-function 1)
+
+(defun org-let2 (list1 list2 &rest body)
+  (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
+(put 'org-let2 'lisp-indent-function 2)
+
+(defun org-eval (form)
+  "Eval FORM and return result."
+  (condition-case error
+      (eval form)
+    (error (format "%%![Error: %s]" error))))
+
+(defvar org-outline-regexp) ; defined in org.el
+(defvar org-odd-levels-only) ; defined in org.el
+(defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
+(defun org-get-limited-outline-regexp ()
+  "Return outline-regexp with limited number of levels.
+The number of levels is controlled by `org-inlinetask-min-level'"
+  (cond ((not (derived-mode-p 'org-mode))
+	 outline-regexp)
+	((not (featurep 'org-inlinetask))
+	 org-outline-regexp)
+	(t
+	 (let* ((limit-level (1- org-inlinetask-min-level))
+		(nstars (if org-odd-levels-only
+			    (1- (* limit-level 2))
+			  limit-level)))
+	   (format "\\*\\{1,%d\\} " nstars)))))
+
+
+(provide 'org-macs)
+
+;;; Motion
+
+(defsubst org-goto-line (N)
+  (save-restriction
+    (widen)
+    (goto-char (point-min))
+    (forward-line (1- N))))
+
+(defsubst org-current-line (&optional pos)
+  (save-excursion
+    (and pos (goto-char pos))
+    ;; works also in narrowed buffer, because we start at 1, not point-min
+    (+ (if (bolp) 1 0) (count-lines 1 (point)))))
 
 
 
@@ -451,45 +707,60 @@ SPEC is the invisibility spec, as a symbol."
 
 
 
-;;; Indentation
+;;; Regexp matching
 
-(defun org-get-indentation (&optional line)
-  "Get the indentation of the current line, interpreting tabs.
-When LINE is given, assume it represents a line and compute its indentation."
-  (if line
-      (when (string-match "^ *" (org-remove-tabs line))
-	(match-end 0))
-    (save-excursion
-      (beginning-of-line 1)
-      (skip-chars-forward " \t")
-      (current-column))))
+(defsubst org-pos-in-match-range (pos n)
+  (and (match-beginning n)
+       (<= (match-beginning n) pos)
+       (>= (match-end n) pos)))
 
-(defun org-do-remove-indentation (&optional n)
-  "Remove the maximum common indentation from the buffer.
-When optional argument N is a positive integer, remove exactly
-that much characters from indentation, if possible.  Return nil
-if it fails."
+(defun org-skip-whitespace ()
+  "Skip over space, tabs and newline characters."
+  (skip-chars-forward " \t\n\r"))
+
+(defun org-match-line (regexp)
+  "Match REGEXP at the beginning of the current line."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at regexp)))
+
+(defun org-match-any-p (re list)
+  "Non-nil if regexp RE matches an element in LIST."
+  (cl-some (lambda (x) (string-match-p re x)) list))
+
+(defun org-in-regexp (regexp &optional nlines visually)
+  "Check if point is inside a match of REGEXP.
+
+Normally only the current line is checked, but you can include
+NLINES extra lines around point into the search.  If VISUALLY is
+set, require that the cursor is not after the match but really
+on, so that the block visually is on the match.
+
+Return nil or a cons cell (BEG . END) where BEG and END are,
+respectively, the positions at the beginning and the end of the
+match."
   (catch :exit
-    (goto-char (point-min))
-    ;; Find maximum common indentation, if not specified.
-    (let ((n (or n
-		 (let ((min-ind (point-max)))
-		   (save-excursion
-		     (while (re-search-forward "^[ \t]*\\S-" nil t)
-		       (let ((ind (1- (current-column))))
-			 (if (zerop ind) (throw :exit nil)
-			   (setq min-ind (min min-ind ind))))))
-		   min-ind))))
-      (if (zerop n) (throw :exit nil)
-	;; Remove exactly N indentation, but give up if not possible.
-	(while (not (eobp))
-	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
-	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
-		  ((< ind n) (throw :exit nil))
-		  (t (indent-line-to (- ind n))))
-	    (forward-line)))
-	;; Signal success.
-	t))))
+    (let ((pos (point))
+          (eol (line-end-position (if nlines (1+ nlines) 1))))
+      (save-excursion
+	(beginning-of-line (- 1 (or nlines 0)))
+	(while (and (re-search-forward regexp eol t)
+		    (<= (match-beginning 0) pos))
+	  (let ((end (match-end 0)))
+	    (when (or (> end pos) (and (= end pos) (not visually)))
+	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
+
+(defun org-point-in-group (point group &optional context)
+  "Check if POINT is in match-group GROUP.
+If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
+match.  If the match group does not exist or point is not inside it,
+return nil."
+  (and (match-beginning group)
+       (>= point (match-beginning group))
+       (<= point (match-end group))
+       (if context
+	   (list context (match-beginning group) (match-end group))
+	 t)))
 
 
 
@@ -704,215 +975,6 @@ as-is if removal failed."
 
 
 
-;;; List manipulation
-
-(defsubst org-get-alist-option (option key)
-  (cond ((eq key t) t)
-	((eq option t) t)
-	((assoc key option) (cdr (assoc key option)))
-	(t (let ((r (cdr (assq 'default option))))
-	     (if (listp r) (delq nil r) r)))))
-
-(defsubst org-last (list)
-  "Return the last element of LIST."
-  (car (last list)))
-
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
-
-(defun org-uniquify-alist (alist)
-  "Merge elements of ALIST with the same key.
-
-For example, in this alist:
-
-\(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
-  => \\='((a 1 3) (b 2))
-
-merge (a 1) and (a 3) into (a 1 3).
-
-The function returns the new ALIST."
-  (let (rtn)
-    (dolist (e alist rtn)
-      (let (n)
-	(if (not (assoc (car e) rtn))
-	    (push e rtn)
-	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
-	  (setq rtn (assq-delete-all (car e) rtn))
-	  (push n rtn))))))
-
-(defun org-delete-all (elts list)
-  "Remove all elements in ELTS from LIST.
-Comparison is done with `equal'.  It is a destructive operation
-that may remove elements by altering the list structure."
-  (while elts
-    (setq list (delete (pop elts) list)))
-  list)
-
-(defun org-plist-delete (plist property)
-  "Delete PROPERTY from PLIST.
-This is in contrast to merely setting it to 0."
-  (let (p)
-    (while plist
-      (if (not (eq property (car plist)))
-	  (setq p (plist-put p (car plist) (nth 1 plist))))
-      (setq plist (cddr plist)))
-    p))
-
-(defun org-combine-plists (&rest plists)
-  "Create a single property list from all plists in PLISTS.
-The process starts by copying the first list, and then setting properties
-from the other lists.  Settings in the last list are the most significant
-ones and overrule settings in the other lists."
-  (let ((rtn (copy-sequence (pop plists)))
-	p v ls)
-    (while plists
-      (setq ls (pop plists))
-      (while ls
-	(setq p (pop ls) v (pop ls))
-	(setq rtn (plist-put rtn p v))))
-    rtn))
-
-
-
-;;; Regexp matching
-
-(defsubst org-pos-in-match-range (pos n)
-  (and (match-beginning n)
-       (<= (match-beginning n) pos)
-       (>= (match-end n) pos)))
-
-(defun org-skip-whitespace ()
-  "Skip over space, tabs and newline characters."
-  (skip-chars-forward " \t\n\r"))
-
-(defun org-match-line (regexp)
-  "Match REGEXP at the beginning of the current line."
-  (save-excursion
-    (beginning-of-line)
-    (looking-at regexp)))
-
-(defun org-match-any-p (re list)
-  "Non-nil if regexp RE matches an element in LIST."
-  (cl-some (lambda (x) (string-match-p re x)) list))
-
-(defun org-in-regexp (regexp &optional nlines visually)
-  "Check if point is inside a match of REGEXP.
-
-Normally only the current line is checked, but you can include
-NLINES extra lines around point into the search.  If VISUALLY is
-set, require that the cursor is not after the match but really
-on, so that the block visually is on the match.
-
-Return nil or a cons cell (BEG . END) where BEG and END are,
-respectively, the positions at the beginning and the end of the
-match."
-  (catch :exit
-    (let ((pos (point))
-          (eol (line-end-position (if nlines (1+ nlines) 1))))
-      (save-excursion
-	(beginning-of-line (- 1 (or nlines 0)))
-	(while (and (re-search-forward regexp eol t)
-		    (<= (match-beginning 0) pos))
-	  (let ((end (match-end 0)))
-	    (when (or (> end pos) (and (= end pos) (not visually)))
-	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
-
-(defun org-point-in-group (point group &optional context)
-  "Check if POINT is in match-group GROUP.
-If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
-match.  If the match group does not exist or point is not inside it,
-return nil."
-  (and (match-beginning group)
-       (>= point (match-beginning group))
-       (<= point (match-end group))
-       (if context
-	   (list context (match-beginning group) (match-end group))
-	 t)))
-
-
-
-;;; Motion
-
-(defsubst org-goto-line (N)
-  (save-restriction
-    (widen)
-    (goto-char (point-min))
-    (forward-line (1- N))))
-
-(defsubst org-current-line (&optional pos)
-  (save-excursion
-    (and pos (goto-char pos))
-    ;; works also in narrowed buffer, because we start at 1, not point-min
-    (+ (if (bolp) 1 0) (count-lines 1 (point)))))
-
-
-
-;;; Time
-
-(defun org-2ft (s)
-  "Convert S to a floating point time.
-If S is already a number, just return it.  If it is a string,
-parse it as a time string and apply `float-time' to it.  If S is
-nil, just return 0."
-  (cond
-   ((numberp s) s)
-   ((stringp s)
-    (condition-case nil
-	(float-time (apply #'encode-time (org-parse-time-string s)))
-      (error 0.)))
-   (t 0.)))
-
-(defun org-time= (a b)
-  (let ((a (org-2ft a))
-	(b (org-2ft b)))
-    (and (> a 0) (> b 0) (= a b))))
-
-(defun org-time< (a b)
-  (let ((a (org-2ft a))
-	(b (org-2ft b)))
-    (and (> a 0) (> b 0) (< a b))))
-
-(defun org-time<= (a b)
-  (let ((a (org-2ft a))
-	(b (org-2ft b)))
-    (and (> a 0) (> b 0) (<= a b))))
-
-(defun org-time> (a b)
-  (let ((a (org-2ft a))
-	(b (org-2ft b)))
-    (and (> a 0) (> b 0) (> a b))))
-
-(defun org-time>= (a b)
-  (let ((a (org-2ft a))
-	(b (org-2ft b)))
-    (and (> a 0) (> b 0) (>= a b))))
-
-(defun org-time<> (a b)
-  (let ((a (org-2ft a))
-	(b (org-2ft b)))
-    (and (> a 0) (> b 0) (\= a b))))
-
-(defun org-matcher-time (s)
-  "Interpret a time comparison value S."
-  (let ((today (float-time (apply #'encode-time
-				  (append '(0 0 0) (nthcdr 3 (decode-time)))))))
-    (save-match-data
-      (cond
-       ((string= s "<now>") (float-time))
-       ((string= s "<today>") today)
-       ((string= s "<tomorrow>") (+ 86400.0 today))
-       ((string= s "<yesterday>") (- today 86400.0))
-       ((string-match "\\`<\\([-+][0-9]+\\)\\([hdwmy]\\)>\\'" s)
-	(+ today
-	   (* (string-to-number (match-string 1 s))
-	      (cdr (assoc (match-string 2 s)
-			  '(("d" . 86400.0)   ("w" . 604800.0)
-			    ("m" . 2678400.0) ("y" . 31557600.0)))))))
-       (t (org-2ft s))))))
-
-
-
 ;;; Text properties
 
 (defconst org-rm-props '(invisible t face t keymap t intangible t mouse-face t
@@ -982,105 +1044,92 @@ move it back by one char before doing this check."
 
 
 
-;;; Local variables
+;;; Time
 
-(defconst org-unique-local-variables
-  '(org-element--cache
-    org-element--cache-objects
-    org-element--cache-sync-keys
-    org-element--cache-sync-requests
-    org-element--cache-sync-timer)
-  "List of local variables that cannot be transferred to another buffer.")
+(defun org-2ft (s)
+  "Convert S to a floating point time.
+If S is already a number, just return it.  If it is a string,
+parse it as a time string and apply `float-time' to it.  If S is
+nil, just return 0."
+  (cond
+   ((numberp s) s)
+   ((stringp s)
+    (condition-case nil
+	(float-time (apply #'encode-time (org-parse-time-string s)))
+      (error 0.)))
+   (t 0.)))
 
-(defun org-get-local-variables ()
-  "Return a list of all local variables in an Org mode buffer."
-  (delq nil
-	(mapcar
-	 (lambda (x)
-	   (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
-		  (name (car binding)))
-	     (and (not (get name 'org-state))
-		  (not (memq name org-unique-local-variables))
-		  (string-match-p
-		   "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|\
-auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
-		   (symbol-name name))
-		  binding)))
-	 (with-temp-buffer
-	   (org-mode)
-	   (buffer-local-variables)))))
+(defun org-time= (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (= a b))))
 
-(defun org-clone-local-variables (from-buffer &optional regexp)
-  "Clone local variables from FROM-BUFFER.
-Optional argument REGEXP selects variables to clone."
-  (dolist (pair (buffer-local-variables from-buffer))
-    (pcase pair
-      (`(,name . ,value)		;ignore unbound variables
-       (when (and (not (memq name org-unique-local-variables))
-		  (or (null regexp) (string-match-p regexp (symbol-name name))))
-	 (ignore-errors (set (make-local-variable name) value)))))))
+(defun org-time< (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (< a b))))
+
+(defun org-time<= (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (<= a b))))
+
+(defun org-time> (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (> a b))))
+
+(defun org-time>= (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (>= a b))))
+
+(defun org-time<> (a b)
+  (let ((a (org-2ft a))
+	(b (org-2ft b)))
+    (and (> a 0) (> b 0) (\= a b))))
+
+(defun org-parse-time-string (s &optional nodefault)
+  "Parse Org time string S.
+
+If time is not given, defaults to 0:00.  However, with optional
+NODEFAULT, hour and minute fields are nil if not given.
+
+Throw an error if S in not a valid Org time string.
+
+This should be a lot faster than the `parse-time-string'."
+  (cond ((string-match org-ts-regexp0 s)
+	 (list 0
+	       (when (or (match-beginning 8) (not nodefault))
+		 (string-to-number (or (match-string 8 s) "0")))
+	       (when (or (match-beginning 7) (not nodefault))
+		 (string-to-number (or (match-string 7 s) "0")))
+	       (string-to-number (match-string 4 s))
+	       (string-to-number (match-string 3 s))
+	       (string-to-number (match-string 2 s))
+	       nil nil nil))
+	((string-match "\\`<[^>]+>\\'" s)
+	 (decode-time (seconds-to-time (org-matcher-time s))))
+	(t (error "Not an Org time string: %s" s))))
+
+(defun org-matcher-time (s)
+  "Interpret a time comparison value S."
+  (let ((today (float-time (apply #'encode-time
+				  (append '(0 0 0) (nthcdr 3 (decode-time)))))))
+    (save-match-data
+      (cond
+       ((string= s "<now>") (float-time))
+       ((string= s "<today>") today)
+       ((string= s "<tomorrow>") (+ 86400.0 today))
+       ((string= s "<yesterday>") (- today 86400.0))
+       ((string-match "\\`<\\([-+][0-9]+\\)\\([hdwmy]\\)>\\'" s)
+	(+ today
+	   (* (string-to-number (match-string 1 s))
+	      (cdr (assoc (match-string 2 s)
+			  '(("d" . 86400.0)   ("w" . 604800.0)
+			    ("m" . 2678400.0) ("y" . 31557600.0)))))))
+       (t (org-2ft s))))))
 
 
 
-;;; Miscellaneous
-
-(defsubst org-call-with-arg (command arg)
-  "Call COMMAND interactively, but pretend prefix arg was ARG."
-  (let ((current-prefix-arg arg)) (call-interactively command)))
-
-(defsubst org-check-external-command (cmd &optional use no-error)
-  "Check if external program CMD for USE exists, error if not.
-When the program does exist, return its path.
-When it does not exist and NO-ERROR is set, return nil.
-Otherwise, throw an error.  The optional argument USE can describe what this
-program is needed for, so that the error message can be more informative."
-  (or (executable-find cmd)
-      (if no-error
-	  nil
-	(error "Can't find `%s'%s" cmd
-	       (if use (format " (%s)" use) "")))))
-
-(defun org-display-warning (message)
-  "Display the given MESSAGE as a warning."
-  (display-warning 'org message :warning))
-
-(defun org-unlogged-message (&rest args)
-  "Display a message, but avoid logging it in the *Messages* buffer."
-  (let ((message-log-max nil))
-    (apply #'message args)))
-
-(defun org-let (list &rest body)
-  (eval (cons 'let (cons list body))))
-(put 'org-let 'lisp-indent-function 1)
-
-(defun org-let2 (list1 list2 &rest body)
-  (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
-(put 'org-let2 'lisp-indent-function 2)
-
-(defun org-eval (form)
-  "Eval FORM and return result."
-  (condition-case error
-      (eval form)
-    (error (format "%%![Error: %s]" error))))
-
-(defvar org-outline-regexp) ; defined in org.el
-(defvar org-odd-levels-only) ; defined in org.el
-(defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
-(defun org-get-limited-outline-regexp ()
-  "Return outline-regexp with limited number of levels.
-The number of levels is controlled by `org-inlinetask-min-level'"
-  (cond ((not (derived-mode-p 'org-mode))
-	 outline-regexp)
-	((not (featurep 'org-inlinetask))
-	 org-outline-regexp)
-	(t
-	 (let* ((limit-level (1- org-inlinetask-min-level))
-		(nstars (if org-odd-levels-only
-			    (1- (* limit-level 2))
-			  limit-level)))
-	   (format "\\*\\{1,%d\\} " nstars)))))
-
-
-(provide 'org-macs)
-
 ;;; org-macs.el ends here
