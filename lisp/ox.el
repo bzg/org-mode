@@ -3510,7 +3510,7 @@ is to happen."
 	      (when (and (eq 'link (org-element-type link))
 			 (string= "file" (org-element-property :type link)))
 		(let ((old-path (org-element-property :path link)))
-		  (unless (or (org-file-remote-p old-path)
+		  (unless (or (file-remote-p old-path)
 			      (file-name-absolute-p old-path))
 		    (let ((new-path (file-relative-name
 				     (expand-file-name old-path file-dir)
@@ -4425,7 +4425,7 @@ has type \"radio\"."
   "Return file URI associated to FILENAME."
   (cond ((string-prefix-p "//" filename) (concat "file:" filename))
 	((not (file-name-absolute-p filename)) filename)
-	((org-file-remote-p filename) (concat "file:/" filename))
+	((file-remote-p filename) (concat "file:/" filename))
 	(t
 	 (let ((fullname (expand-file-name filename)))
 	   (concat (if (string-prefix-p "/" fullname) "file://" "file:///")
