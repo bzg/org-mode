@@ -478,23 +478,6 @@ use of this function is for the stuck project list."
         ((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
          (w32-get-clipboard-data))))
 
-(defun org-fit-window-to-buffer (&optional window max-height min-height
-                                           shrink-only)
-  "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
-WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
-passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
-`shrink-window-if-larger-than-buffer' instead, the height limit is
-ignored in this case."
-  (cond ((if (fboundp 'window-full-width-p)
-             (not (window-full-width-p window))
-           ;; do nothing if another window would suffer
-           (> (frame-width) (window-width window))))
-        ((and (fboundp 'fit-window-to-buffer) (not shrink-only))
-         (fit-window-to-buffer window max-height min-height))
-        ((fboundp 'shrink-window-if-larger-than-buffer)
-         (shrink-window-if-larger-than-buffer window)))
-  (or window (selected-window)))
-
 ;; `set-transient-map' is only in Emacs >= 24.4
 (defalias 'org-set-transient-map
   (if (fboundp 'set-transient-map)

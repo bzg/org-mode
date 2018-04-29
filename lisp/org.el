@@ -21397,13 +21397,6 @@ Returns the number of empty lines passed."
     (goto-char (min (point) pos))
     (count-lines (point) pos)))
 
-(defun org-switch-to-buffer-other-window (&rest args)
-  "Switch to buffer in a second window on the current frame.
-In particular, do not allow pop-up frames.
-Returns the newly created buffer."
-  (org-no-popups
-   (apply 'switch-to-buffer-other-window args)))
-
 (defun org-replace-escapes (string table)
   "Replace %-escapes in STRING with values in TABLE.
 TABLE is an association list with keys like \"%a\" and string values.

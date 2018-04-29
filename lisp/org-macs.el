@@ -191,7 +191,7 @@ because otherwise all these markers will point to nowhere."
 
 
 
-;;; Buffer
+;;; Buffer and windows
 
 (defun org-base-buffer (buffer)
   "Return the base buffer of BUFFER, if it has one.  Else return the buffer."
@@ -208,6 +208,29 @@ not an indirect buffer."
     (if buf
 	(or (buffer-base-buffer buf) buf)
       nil)))
+
+(defun org-switch-to-buffer-other-window (&rest args)
+  "Switch to buffer in a second window on the current frame.
+In particular, do not allow pop-up frames.
+Returns the newly created buffer."
+  (org-no-popups (apply #'switch-to-buffer-other-window args)))
+
+(defun org-fit-window-to-buffer (&optional window max-height min-height
+                                           shrink-only)
+  "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
+WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
+passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
+`shrink-window-if-larger-than-buffer' instead, the height limit is
+ignored in this case."
+  (cond ((if (fboundp 'window-full-width-p)
+             (not (window-full-width-p window))
+           ;; Do nothing if another window would suffer.
+           (> (frame-width) (window-width window))))
+        ((and (fboundp 'fit-window-to-buffer) (not shrink-only))
+         (fit-window-to-buffer window max-height min-height))
+        ((fboundp 'shrink-window-if-larger-than-buffer)
+         (shrink-window-if-larger-than-buffer window)))
+  (or window (selected-window)))
 
 
 
