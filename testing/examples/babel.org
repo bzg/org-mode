@@ -112,7 +112,6 @@
 
 #+name: pascals-triangle
 #+begin_src emacs-lisp :var n=5 :exports both
-(require 'cl)
 (defun pascals-triangle (n)
   (if (= n 0)
       (list (list 1))
