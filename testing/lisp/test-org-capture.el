@@ -145,7 +145,6 @@
 	     (org-capture-refile)
 	     (list file1 file2 (buffer-file-name)))))))))
 
-
 (ert-deftest test-org-capture/insert-at-end-abort ()
   "Test that capture can be aborted after inserting at end of capture buffer."
   (should
@@ -160,6 +159,122 @@
 	(insert "Capture text")
 	(org-capture-kill))
       (buffer-string)))))
+
+(ert-deftest test-org-capture/table-line ()
+  "Test `table-line' type in capture template."
+  ;; When a only file is specified, use the first table available.
+  (should
+   (equal "Text
+
+| a |
+| x |
+
+| b |"
+	  (org-test-with-temp-text-in-file "Text\n\n| a |\n\n| b |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file) "| x |"
+		       :immediate-finish t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  ;; When an entry is specified, find the first table in the
+  ;; corresponding section.
+  (should
+   (equal "* Foo
+| a |
+* Inbox
+| b |
+| x |
+"
+	  (org-test-with-temp-text-in-file "* Foo\n| a |\n* Inbox\n| b |\n"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file+headline ,file "Inbox")
+		       "| x |" :immediate-finish t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  (should
+   (equal "* Inbox
+| a |
+| x |
+
+| b |
+"
+	  (org-test-with-temp-text-in-file "* Inbox\n| a |\n\n| b |\n"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file+headline ,file "Inbox")
+		       "| x |" :immediate-finish t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  ;; Create a new table with an empty header when none can be found.
+  (should
+   (equal "|   |   |\n|---+---|\n| a | b |\n"
+	  (org-test-with-temp-text-in-file ""
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file) "| a | b |"
+		       :immediate-finish t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  ;; When `:prepend' is nil, add the row at the end of the table.
+  (should
+   (equal "| a |\n| x |\n"
+	  (org-test-with-temp-text-in-file "| a |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file)
+		       "| x |" :immediate-finish t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  ;; When `:prepend' is non-nil, add it as the first row after the
+  ;; header, if there is one, or the first row otherwise.
+  (should
+   (equal "| a |\n|---|\n| x |\n| b |"
+	  (org-test-with-temp-text-in-file "| a |\n|---|\n| b |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file)
+		       "| x |" :immediate-finish t :prepend t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  (should
+   (equal "| x |\n| a |"
+	  (org-test-with-temp-text-in-file "| a |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file)
+		       "| x |" :immediate-finish t :prepend t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  ;; When `:table-line-pos' is set and is meaningful, obey it.
+  (should
+   (equal "| a |\n|---|\n| b |\n| x |\n|---|\n| c |"
+	  (org-test-with-temp-text-in-file "| a |\n|---|\n| b |\n|---|\n| c |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file)
+		       "| x |" :immediate-finish t :table-line-pos "II-1"))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  (should
+   (equal "| a |\n|---|\n| x |\n| b |\n|---|\n| c |"
+	  (org-test-with-temp-text-in-file "| a |\n|---|\n| b |\n|---|\n| c |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file)
+		       "| x |" :immediate-finish t :table-line-pos "I+1"))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
+  ;; Throw an error on invalid `:table-line-pos' specifications.
+  (should-error
+   (org-test-with-temp-text-in-file "| a |"
+     (let* ((file (buffer-file-name))
+	    (org-capture-templates
+	     `(("t" "Table" table-line (file ,file)
+		"| x |" :immediate-finish t :table-line-pos "II+99"))))
+       (org-capture nil "t")
+       t))))
 
 
 (provide 'test-org-capture)

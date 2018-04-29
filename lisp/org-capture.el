@@ -59,12 +59,13 @@
 (declare-function org-table-current-dline "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
 
+(defvar dired-buffers)
 (defvar org-end-time-was-given)
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
-(defvar org-table-hlines)
+(defvar org-table-border-regexp)
 (defvar org-table-current-begin-pos)
-(defvar dired-buffers)
+(defvar org-table-hlines)
 
 (defvar org-capture-clock-was-started nil
   "Internal flag, noting if the clock was started.")
@@ -1199,85 +1200,77 @@ may have been stored before."
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
   (require 'org-table)
-  (let* ((txt (org-capture-get :template))
-	 (target-entry-p (org-capture-get :target-entry-p))
-	 (table-line-pos (org-capture-get :table-line-pos))
-	 beg end)
+  (let ((text
+	 (pcase (org-trim (org-capture-get :template))
+	   ((pred (string-match-p org-table-border-regexp))
+	    "| %?Bad template |")
+	   (text (concat text "\n"))))
+	(table-line-pos (org-capture-get :table-line-pos))
+	beg end)
     (cond
      ((org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))
-     ((not target-entry-p)
-      ;; Table is not necessarily under a heading
+     ((not (org-capture-get :target-entry-p))
+      ;; Table is not necessarily under a heading.  Find first table
+      ;; in the buffer.
       (setq beg (point-min) end (point-max)))
      (t
-      ;; WE are at a heading, limit search to the body
-      (setq beg (1+ (point-at-eol))
-	    end (save-excursion (outline-next-heading) (point)))))
-    (if (re-search-forward org-table-dataline-regexp end t)
-	(let ((b (org-table-begin)) (e (org-table-end)) (case-fold-search t))
-	  (goto-char e)
-	  (if (looking-at "[ \t]*#\\+tblfm:")
-	      (forward-line 1))
-	  (narrow-to-region b (point)))
+      ;; We are at a heading, limit search to the body.
+      (setq beg (line-beginning-position 2))
+      (setq end (save-excursion (outline-next-heading) (point)))))
+    (goto-char beg)
+    ;; Narrow to the table, possibly creating one if necessary.
+    (catch :found
+      (while (re-search-forward org-table-dataline-regexp end t)
+	(pcase (org-element-lineage (org-element-at-point) '(table) t)
+	  (`nil nil)
+	  (table
+	   (goto-char (org-element-property :end table))
+	   (skip-chars-backward " \r\t\n")
+	   (forward-line)
+	   (narrow-to-region (org-element-property :post-affiliated table)
+			     (point))
+	   (throw :found t))))
+      ;; No table found.  Create it with an empty header.
       (goto-char end)
-      (insert "\n|   |\n|----|\n|    |\n")
-      (narrow-to-region (1+ end) (point)))
-    ;; We are narrowed to the table, or to an empty line if there was no table
-
-    ;; Check if the template is good
-    (if (not (string-match org-table-dataline-regexp txt))
-	(setq txt "| %?Bad template |\n"))
-    (if (functionp table-line-pos)
-	(setq table-line-pos (funcall table-line-pos))
-      (setq table-line-pos (eval table-line-pos)))
+      (unless (bolp) (insert "\n"))
+      (let ((origin (point)))
+	(insert "|   |\n|----|\n")
+	(narrow-to-region origin (point))))
+    ;; In the current table, find the appropriate location for TEXT.
     (cond
      ((and table-line-pos
-	   (string-match "\\(I+\\)\\([-+][0-9]\\)" table-line-pos))
+	   (string-match "\\(I+\\)\\([-+][0-9]+\\)" table-line-pos))
       (goto-char (point-min))
-      ;; we have a complex line specification
-      (let ((ll (ignore-errors
-		  (save-match-data (org-table-analyze))
-		  (aref org-table-hlines
-			(- (match-end 1) (match-beginning 1)))))
+      (let ((line
+	     (condition-case _
+		 (progn
+		   (save-match-data (org-table-analyze))
+		   (aref org-table-hlines
+			 (- (match-end 1) (match-beginning 1))))
+	       (error
+		(error "Invalid table line specification %S" table-line-pos))))
 	    (delta (string-to-number (match-string 2 table-line-pos))))
-	;; The user wants a special position in the table
-	(unless ll
-	  (error "Invalid table line specification \"%s\"" table-line-pos))
-	(goto-char org-table-current-begin-pos)
-	(forward-line (+ ll delta (if (< delta 0) 0 -1)))
-	(org-table-insert-row 'below)
-	(beginning-of-line 1)
-	(delete-region (point) (1+ (point-at-eol)))
-	(setq beg (point))
-	(insert txt)
-	(setq end (point))))
+	(forward-line (+ line delta (if (< delta 0) 0 -1)))
+	(forward-line)))		;insert below
      ((org-capture-get :prepend)
       (goto-char (point-min))
-      (re-search-forward org-table-hline-regexp nil t)
-      (beginning-of-line 1)
-      (re-search-forward org-table-dataline-regexp nil t)
-      (beginning-of-line 1)
-      (setq beg (point))
-      (org-table-insert-row)
-      (beginning-of-line 1)
-      (delete-region (point) (1+ (point-at-eol)))
-      (insert txt)
-      (setq end (point)))
+      (cond
+       ((not (re-search-forward org-table-hline-regexp nil t)))
+       ((re-search-forward org-table-dataline-regexp nil t) (beginning-of-line))
+       (t (goto-char (org-table-end)))))
      (t
-      (goto-char (point-max))
-      (re-search-backward org-table-dataline-regexp nil t)
-      (beginning-of-line 1)
-      (org-table-insert-row 'below)
-      (beginning-of-line 1)
-      (delete-region (point) (1+ (point-at-eol)))
-      (setq beg (point))
-      (insert txt)
-      (setq end (point))))
-    (goto-char beg)
-    (org-capture-position-for-last-stored 'table-line)
-    (if (or (re-search-backward "%\\?" beg t)
-	    (re-search-forward "%\\?" end t))
-	(replace-match ""))
+      (goto-char (org-table-end))))
+    ;; Insert text and position point according to template.
+    (unless (bolp) (insert "\n"))
+    (let ((beg (point))
+	  (end (save-excursion
+		 (insert text)
+		 (point))))
+      (org-capture-position-for-last-stored 'table-line)
+      (when (or (re-search-backward "%\\?" beg t)
+		(re-search-forward "%\\?" end t))
+	(replace-match "")))
     (org-table-align)))
 
 (defun org-capture-place-plain-text ()
