@@ -411,14 +411,14 @@ DATELINE is non-nil when the face used should be
 			      (line-beginning-position 2))))
 	(overlay-put ov 'keymap org-columns-map)
 	(push ov org-columns-overlays))
-      (org-with-silent-modifications
-       (let ((inhibit-read-only t))
-	 (put-text-property
-	  (line-end-position 0)
-	  (line-beginning-position 2)
-	  'read-only
-	  (substitute-command-keys
-	   "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
+      (with-silent-modifications
+	(let ((inhibit-read-only t))
+	  (put-text-property
+	   (line-end-position 0)
+	   (line-beginning-position 2)
+	   'read-only
+	   (substitute-command-keys
+	    "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
 to edit property")))))))
 
 (defun org-columns-add-ellipses (string width)
@@ -491,11 +491,11 @@ for the duration of the command.")
     (set-marker org-columns-begin-marker nil)
     (when (markerp org-columns-top-level-marker)
       (set-marker org-columns-top-level-marker nil))
-    (org-with-silent-modifications
-     (mapc #'delete-overlay org-columns-overlays)
-     (setq org-columns-overlays nil)
-     (let ((inhibit-read-only t))
-       (remove-text-properties (point-min) (point-max) '(read-only t))))
+    (with-silent-modifications
+      (mapc #'delete-overlay org-columns-overlays)
+      (setq org-columns-overlays nil)
+      (let ((inhibit-read-only t))
+	(remove-text-properties (point-min) (point-max) '(read-only t))))
     (when org-columns-flyspell-was-active
       (flyspell-mode 1))
     (when (local-variable-p 'org-colview-initial-truncate-line-value)
@@ -520,10 +520,10 @@ for the duration of the command.")
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
   (interactive)
-  (org-with-silent-modifications
-   (org-columns-remove-overlays)
-   (let ((inhibit-read-only t))
-     (remove-text-properties (point-min) (point-max) '(read-only t))))
+  (with-silent-modifications
+    (org-columns-remove-overlays)
+    (let ((inhibit-read-only t))
+      (remove-text-properties (point-min) (point-max) '(read-only t))))
   (if (not (eq major-mode 'org-agenda-mode))
       (setq org-columns-current-fmt nil)
     (setq org-agenda-columns-active nil)
@@ -622,8 +622,8 @@ Where possible, use the standard interface for changing this line."
 	(org-agenda-columns)))
      (t
       (let ((inhibit-read-only t))
-	(org-with-silent-modifications
-	 (remove-text-properties (max (point-min) (1- bol)) eol '(read-only t)))
+	(with-silent-modifications
+	  (remove-text-properties (max (point-min) (1- bol)) eol '(read-only t)))
 	(org-columns--call action))
       ;; Some properties can modify headline (e.g., "TODO"), and
       ;; possible shuffle overlays.  Make sure they are still all at
@@ -1170,9 +1170,9 @@ properties drawers."
 		      (old (assoc spec summaries-alist)))
 		 (if old (setcdr old summary)
 		   (push (cons spec summary) summaries-alist)
-		   (org-with-silent-modifications
-		    (add-text-properties
-		     pos (1+ pos) (list 'org-summaries summaries-alist)))))
+		   (with-silent-modifications
+		     (add-text-properties
+		      pos (1+ pos) (list 'org-summaries summaries-alist)))))
 	       ;; When PROPERTY exists in current node, even if empty,
 	       ;; but its value doesn't match the one computed, use
 	       ;; the latter instead.
@@ -1208,8 +1208,8 @@ column specification."
 
 (defun org-columns-compute-all ()
   "Compute all columns that have operators defined."
-  (org-with-silent-modifications
-   (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+  (with-silent-modifications
+    (remove-text-properties (point-min) (point-max) '(org-summaries t)))
   (let ((org-columns--time (float-time (current-time)))
 	seen)
     (dolist (spec org-columns-current-fmt-compiled)
@@ -1638,8 +1638,8 @@ This will add overlays to the date lines, to show the summary for each day."
     (let ((b (find-buffer-visiting file)))
       (with-current-buffer (or (buffer-base-buffer b) b)
 	(org-with-wide-buffer
-	 (org-with-silent-modifications
-	  (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+	 (with-silent-modifications
+	   (remove-text-properties (point-min) (point-max) '(org-summaries t)))
 	 (goto-char (point-min))
 	 (org-columns-get-format-and-top-level)
 	 (dolist (spec fmt)

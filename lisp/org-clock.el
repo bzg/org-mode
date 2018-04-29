@@ -1788,87 +1788,87 @@ HEADLINE-FILTER is a zero-arg function that, if specified, is called for
 each headline in the time range with point at the headline.  Headlines for
 which HEADLINE-FILTER returns nil are excluded from the clock summation.
 PROPNAME lets you set a custom text property instead of :org-clock-minutes."
-  (org-with-silent-modifications
-   (let* ((re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
-		      org-clock-string
-		      "[ \t]*\\(?:\\(\\[.*?\\]\\)-+\\(\\[.*?\\]\\)\\|=>[ \t]+\\([0-9]+\\):\\([0-9]+\\)\\)"))
-	  (lmax 30)
-	  (ltimes (make-vector lmax 0))
-	  (level 0)
-	  (tstart (cond ((stringp tstart) (org-time-string-to-seconds tstart))
-			((consp tstart) (float-time tstart))
-			(t tstart)))
-	  (tend (cond ((stringp tend) (org-time-string-to-seconds tend))
-		      ((consp tend) (float-time tend))
-		      (t tend)))
-	  (t1 0)
-	  time)
-     (remove-text-properties (point-min) (point-max)
-			     `(,(or propname :org-clock-minutes) t
-			       :org-clock-force-headline-inclusion t))
-     (save-excursion
-       (goto-char (point-max))
-       (while (re-search-backward re nil t)
-	 (cond
-	  ((match-end 2)
-	   ;; Two time stamps.
-	   (let* ((ts (float-time
-		       (apply #'encode-time
-			      (save-match-data
-				(org-parse-time-string (match-string 2))))))
-		  (te (float-time
-		       (apply #'encode-time
-			      (org-parse-time-string (match-string 3)))))
-		  (dt (- (if tend (min te tend) te)
-			 (if tstart (max ts tstart) ts))))
-	     (when (> dt 0) (cl-incf t1 (floor (/ dt 60))))))
-	  ((match-end 4)
-	   ;; A naked time.
-	   (setq t1 (+ t1 (string-to-number (match-string 5))
-		       (* 60 (string-to-number (match-string 4))))))
-	  (t	 ;A headline
-	   ;; Add the currently clocking item time to the total.
-	   (when (and org-clock-report-include-clocking-task
-		      (eq (org-clocking-buffer) (current-buffer))
-		      (eq (marker-position org-clock-hd-marker) (point))
-		      tstart
-		      tend
-		      (>= (float-time org-clock-start-time) tstart)
-		      (<= (float-time org-clock-start-time) tend))
-	     (let ((time (floor (- (float-time)
-				   (float-time org-clock-start-time))
-				60)))
-	       (setq t1 (+ t1 time))))
-	   (let* ((headline-forced
-		   (get-text-property (point)
-				      :org-clock-force-headline-inclusion))
-		  (headline-included
-		   (or (null headline-filter)
-		       (save-excursion
-			 (save-match-data (funcall headline-filter))))))
-	     (setq level (- (match-end 1) (match-beginning 1)))
-	     (when (>= level lmax)
-	       (setq ltimes (vconcat ltimes (make-vector lmax 0)) lmax (* 2 lmax)))
-	     (when (or (> t1 0) (> (aref ltimes level) 0))
-	       (when (or headline-included headline-forced)
-		 (if headline-included
-		     (cl-loop for l from 0 to level do
-			      (aset ltimes l (+ (aref ltimes l) t1))))
-		 (setq time (aref ltimes level))
-		 (goto-char (match-beginning 0))
-		 (put-text-property (point) (point-at-eol)
-				    (or propname :org-clock-minutes) time)
-		 (when headline-filter
-		   (save-excursion
-		     (save-match-data
-		       (while (org-up-heading-safe)
-			 (put-text-property
-			  (point) (line-end-position)
-			  :org-clock-force-headline-inclusion t))))))
-	       (setq t1 0)
-	       (cl-loop for l from level to (1- lmax) do
-			(aset ltimes l 0)))))))
-       (setq org-clock-file-total-minutes (aref ltimes 0))))))
+  (with-silent-modifications
+    (let* ((re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
+		       org-clock-string
+		       "[ \t]*\\(?:\\(\\[.*?\\]\\)-+\\(\\[.*?\\]\\)\\|=>[ \t]+\\([0-9]+\\):\\([0-9]+\\)\\)"))
+	   (lmax 30)
+	   (ltimes (make-vector lmax 0))
+	   (level 0)
+	   (tstart (cond ((stringp tstart) (org-time-string-to-seconds tstart))
+			 ((consp tstart) (float-time tstart))
+			 (t tstart)))
+	   (tend (cond ((stringp tend) (org-time-string-to-seconds tend))
+		       ((consp tend) (float-time tend))
+		       (t tend)))
+	   (t1 0)
+	   time)
+      (remove-text-properties (point-min) (point-max)
+			      `(,(or propname :org-clock-minutes) t
+				:org-clock-force-headline-inclusion t))
+      (save-excursion
+	(goto-char (point-max))
+	(while (re-search-backward re nil t)
+	  (cond
+	   ((match-end 2)
+	    ;; Two time stamps.
+	    (let* ((ts (float-time
+			(apply #'encode-time
+			       (save-match-data
+				 (org-parse-time-string (match-string 2))))))
+		   (te (float-time
+			(apply #'encode-time
+			       (org-parse-time-string (match-string 3)))))
+		   (dt (- (if tend (min te tend) te)
+			  (if tstart (max ts tstart) ts))))
+	      (when (> dt 0) (cl-incf t1 (floor (/ dt 60))))))
+	   ((match-end 4)
+	    ;; A naked time.
+	    (setq t1 (+ t1 (string-to-number (match-string 5))
+			(* 60 (string-to-number (match-string 4))))))
+	   (t	 ;A headline
+	    ;; Add the currently clocking item time to the total.
+	    (when (and org-clock-report-include-clocking-task
+		       (eq (org-clocking-buffer) (current-buffer))
+		       (eq (marker-position org-clock-hd-marker) (point))
+		       tstart
+		       tend
+		       (>= (float-time org-clock-start-time) tstart)
+		       (<= (float-time org-clock-start-time) tend))
+	      (let ((time (floor (- (float-time)
+				    (float-time org-clock-start-time))
+				 60)))
+		(setq t1 (+ t1 time))))
+	    (let* ((headline-forced
+		    (get-text-property (point)
+				       :org-clock-force-headline-inclusion))
+		   (headline-included
+		    (or (null headline-filter)
+			(save-excursion
+			  (save-match-data (funcall headline-filter))))))
+	      (setq level (- (match-end 1) (match-beginning 1)))
+	      (when (>= level lmax)
+		(setq ltimes (vconcat ltimes (make-vector lmax 0)) lmax (* 2 lmax)))
+	      (when (or (> t1 0) (> (aref ltimes level) 0))
+		(when (or headline-included headline-forced)
+		  (if headline-included
+		      (cl-loop for l from 0 to level do
+			       (aset ltimes l (+ (aref ltimes l) t1))))
+		  (setq time (aref ltimes level))
+		  (goto-char (match-beginning 0))
+		  (put-text-property (point) (point-at-eol)
+				     (or propname :org-clock-minutes) time)
+		  (when headline-filter
+		    (save-excursion
+		      (save-match-data
+			(while (org-up-heading-safe)
+			  (put-text-property
+			   (point) (line-end-position)
+			   :org-clock-force-headline-inclusion t))))))
+		(setq t1 0)
+		(cl-loop for l from level to (1- lmax) do
+			 (aset ltimes l 0)))))))
+	(setq org-clock-file-total-minutes (aref ltimes 0))))))
 
 (defun org-clock-sum-current-item (&optional tstart)
   "Return time, clocked on current item in total."

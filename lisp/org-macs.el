@@ -41,8 +41,8 @@
                  symbols)
      ,@body))
 
-;; Use `org-with-silent-modifications' to ignore cosmetic changes and
-;; `org-unmodified' to ignore real text modifications
+;; Use `with-silent-modifications' to ignore cosmetic changes and
+;; `org-unmodified' to ignore real text modifications.
 (defmacro org-unmodified (&rest body)
   "Run BODY while preserving the buffer's `buffer-modified-p' state."
   (declare (debug (body)))

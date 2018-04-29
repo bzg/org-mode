@@ -8742,9 +8742,9 @@ function is being called interactively."
 	     (when (and (eq (org-clock-is-active) (current-buffer))
 			(<= start (marker-position org-clock-marker))
 			(>= end (marker-position org-clock-marker)))
-	       (org-with-silent-modifications
-		(put-text-property (1- org-clock-marker) org-clock-marker
-				   :org-clock-marker-backup t))
+	       (with-silent-modifications
+		 (put-text-property (1- org-clock-marker) org-clock-marker
+				    :org-clock-marker-backup t))
 	       t))
 	    (dcst (downcase sorting-type))
 	    (case-fold-search nil)
@@ -8960,16 +8960,16 @@ the value of the drawer property."
 	 (inherit? (org-property-inherit-p dprop))
 	 (property-re (org-re-property (concat (regexp-quote dprop) "\\+?") t))
 	 (global (and inherit? (org--property-global-value dprop nil))))
-    (org-with-silent-modifications
-     (org-with-point-at 1
-       ;; Set global values (e.g., values defined through
-       ;; "#+PROPERTY:" keywords) to the whole buffer.
-       (when global (put-text-property (point-min) (point-max) tprop global))
-       ;; Set local values.
-       (while (re-search-forward property-re nil t)
-	 (when (org-at-property-p)
-	   (org-refresh-property tprop (org-entry-get (point) dprop) inherit?))
-	 (outline-next-heading))))))
+    (with-silent-modifications
+      (org-with-point-at 1
+	;; Set global values (e.g., values defined through
+	;; "#+PROPERTY:" keywords) to the whole buffer.
+	(when global (put-text-property (point-min) (point-max) tprop global))
+	;; Set local values.
+	(while (re-search-forward property-re nil t)
+	  (when (org-at-property-p)
+	    (org-refresh-property tprop (org-entry-get (point) dprop) inherit?))
+	  (outline-next-heading))))))
 
 (defun org-refresh-property (tprop p &optional inherit)
   "Refresh the buffer text property TPROP from the drawer property P.
@@ -9001,49 +9001,49 @@ sub-tree if optional argument INHERIT is non-nil."
 		   "???"))
 		((symbolp org-category) (symbol-name org-category))
 		(t org-category))))
-    (org-with-silent-modifications
-     (org-with-wide-buffer
-      ;; Set buffer-wide category.  Search last #+CATEGORY keyword.
-      ;; This is the default category for the buffer.  If none is
-      ;; found, fall-back to `org-category' or buffer file name.
-      (put-text-property
-       (point-min) (point-max)
-       'org-category
-       (catch 'buffer-category
-	 (goto-char (point-max))
-	 (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
-	   (let ((element (org-element-at-point)))
-	     (when (eq (org-element-type element) 'keyword)
-	       (throw 'buffer-category
-		      (org-element-property :value element)))))
-	 default-category))
-      ;; Set sub-tree specific categories.
-      (goto-char (point-min))
-      (let ((regexp (org-re-property "CATEGORY")))
-	(while (re-search-forward regexp nil t)
-	  (let ((value (match-string-no-properties 3)))
-	    (when (org-at-property-p)
-	      (put-text-property
-	       (save-excursion (org-back-to-heading t) (point))
-	       (save-excursion (org-end-of-subtree t t) (point))
-	       'org-category
-	       value)))))))))
+    (with-silent-modifications
+      (org-with-wide-buffer
+       ;; Set buffer-wide category.  Search last #+CATEGORY keyword.
+       ;; This is the default category for the buffer.  If none is
+       ;; found, fall-back to `org-category' or buffer file name.
+       (put-text-property
+	(point-min) (point-max)
+	'org-category
+	(catch 'buffer-category
+	  (goto-char (point-max))
+	  (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
+	    (let ((element (org-element-at-point)))
+	      (when (eq (org-element-type element) 'keyword)
+		(throw 'buffer-category
+		       (org-element-property :value element)))))
+	  default-category))
+       ;; Set sub-tree specific categories.
+       (goto-char (point-min))
+       (let ((regexp (org-re-property "CATEGORY")))
+	 (while (re-search-forward regexp nil t)
+	   (let ((value (match-string-no-properties 3)))
+	     (when (org-at-property-p)
+	       (put-text-property
+		(save-excursion (org-back-to-heading t) (point))
+		(save-excursion (org-end-of-subtree t t) (point))
+		'org-category
+		value)))))))))
 
 (defun org-refresh-stats-properties ()
   "Refresh stats text properties in the buffer."
-  (org-with-silent-modifications
-   (org-with-point-at 1
-     (let ((regexp (concat org-outline-regexp-bol
-			   ".*\\[\\([0-9]*\\)\\(?:%\\|/\\([0-9]*\\)\\)\\]")))
-       (while (re-search-forward regexp nil t)
-	 (let* ((numerator (string-to-number (match-string 1)))
-		(denominator (and (match-end 2)
-				  (string-to-number (match-string 2))))
-		(stats (cond ((not denominator) numerator) ;percent
-			     ((= denominator 0) 0)
-			     (t (/ (* numerator 100) denominator)))))
-	   (put-text-property (point) (progn (org-end-of-subtree t t) (point))
-			      'org-stats stats)))))))
+  (with-silent-modifications
+    (org-with-point-at 1
+      (let ((regexp (concat org-outline-regexp-bol
+			    ".*\\[\\([0-9]*\\)\\(?:%\\|/\\([0-9]*\\)\\)\\]")))
+	(while (re-search-forward regexp nil t)
+	  (let* ((numerator (string-to-number (match-string 1)))
+		 (denominator (and (match-end 2)
+				   (string-to-number (match-string 2))))
+		 (stats (cond ((not denominator) numerator) ;percent
+			      ((= denominator 0) 0)
+			      (t (/ (* numerator 100) denominator)))))
+	    (put-text-property (point) (progn (org-end-of-subtree t t) (point))
+			       'org-stats stats)))))))
 
 (defun org-refresh-effort-properties ()
   "Refresh effort properties"
@@ -17931,20 +17931,20 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (if old
 		      (setcdr old (org-uniquify (append (cdr old) (cdr alist))))
 		    (push alist org-tag-groups-alist-for-agenda)))))
-	    (org-with-silent-modifications
-	     (save-excursion
-	       (remove-text-properties (point-min) (point-max) pall)
-	       (when org-agenda-skip-archived-trees
-		 (goto-char (point-min))
-		 (while (re-search-forward rea nil t)
-		   (when (org-at-heading-p t)
-		     (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
-	       (goto-char (point-min))
-	       (setq re (format "^\\*+ .*\\<%s\\>" org-comment-string))
-	       (while (re-search-forward re nil t)
-		 (when (save-match-data (org-in-commented-heading-p t))
-		   (add-text-properties
-		    (match-beginning 0) (org-end-of-subtree t) pc)))))
+	    (with-silent-modifications
+	      (save-excursion
+		(remove-text-properties (point-min) (point-max) pall)
+		(when org-agenda-skip-archived-trees
+		  (goto-char (point-min))
+		  (while (re-search-forward rea nil t)
+		    (when (org-at-heading-p t)
+		      (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
+		(goto-char (point-min))
+		(setq re (format "^\\*+ .*\\<%s\\>" org-comment-string))
+		(while (re-search-forward re nil t)
+		  (when (save-match-data (org-in-commented-heading-p t))
+		    (add-text-properties
+		     (match-beginning 0) (org-end-of-subtree t) pc)))))
 	    (goto-char pos)))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))

@@ -436,6 +436,11 @@ use of this function is for the stuck project list."
   (declare (obsolete "use `org-align-tags' instead." "Org 9.2"))
   (org-align-tags t))
 
+(defmacro org-with-silent-modifications (&rest body)
+  (declare (obsolete "use `with-silent-modifications' instead." "9.2")
+	   (debug (body)))
+  `(with-silent-modifications ,@body))
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org
@@ -563,11 +568,6 @@ Pass COLUMN and FORCE to `move-to-column'."
            (defun org-release () "N/A")
            (defun org-git-version () "N/A !!check installation!!"))))))
 
-(defmacro org-with-silent-modifications (&rest body)
-  (if (fboundp 'with-silent-modifications)
-      `(with-silent-modifications ,@body)
-    `(org-unmodified ,@body)))
-(def-edebug-spec org-with-silent-modifications (body))
 
 
 ;;; Functions for Emacs < 24.4 compatibility
