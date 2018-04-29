@@ -17154,31 +17154,6 @@ day number."
 	   (list (nth 4 d) (nth 3 d) (nth 5 d))))
 	((listp d) (list (nth 4 d) (nth 3 d) (nth 5 d)))))
 
-(defun org-parse-time-string (s &optional nodefault)
-  "Parse the standard Org time string.
-
-This should be a lot faster than the normal `parse-time-string'.
-
-If time is not given, defaults to 0:00.  However, with optional
-NODEFAULT, hour and minute fields will be nil if not given."
-  (cond ((string-match org-ts-regexp0 s)
-	 (list 0
-	       (when (or (match-beginning 8) (not nodefault))
-		 (string-to-number (or (match-string 8 s) "0")))
-	       (when (or (match-beginning 7) (not nodefault))
-		 (string-to-number (or (match-string 7 s) "0")))
-	       (string-to-number (match-string 4 s))
-	       (string-to-number (match-string 3 s))
-	       (string-to-number (match-string 2 s))
-	       nil nil nil))
-	((string-match "^<[^>]+>$" s)
-	 ;; FIXME: `decode-time' needs to be called with ZONE as its
-	 ;; second argument.  However, this requires at least Emacs
-	 ;; 25.1.  We can do it when we switch to this version as our
-	 ;; minimal requirement.
-	 (decode-time (seconds-to-time (org-matcher-time s))))
-	(t (error "Not a standard Org time string: %s" s))))
-
 (defun org-timestamp-up (&optional arg)
   "Increase the date item at the cursor by one.
 If the cursor is on the year, change the year.  If it is on the month,
