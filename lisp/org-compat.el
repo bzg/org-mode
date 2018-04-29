@@ -128,6 +128,7 @@ Case is significant."
 (define-obsolete-function-alias 'org-match-string-no-properties 'match-string-no-properties "Org 9.0")
 (define-obsolete-function-alias 'org-propertize 'propertize "Org 9.0")
 (define-obsolete-function-alias 'org-select-frame-set-input-focus 'select-frame-set-input-focus "Org 9.0")
+(define-obsolete-function-alias 'org-file-remote-p 'file-remote-p "Org 9.2")
 
 (defmacro org-re (s)
   "Replace posix classes in regular expression S."
@@ -440,7 +441,7 @@ use of this function is for the stuck project list."
   (org-align-tags t))
 
 (defmacro org-with-silent-modifications (&rest body)
-  (declare (obsolete "use `with-silent-modifications' instead." "9.2")
+  (declare (obsolete "use `with-silent-modifications' instead." "Org 9.2")
 	   (debug (body)))
   `(with-silent-modifications ,@body))
 

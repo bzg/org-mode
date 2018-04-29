@@ -10684,7 +10684,7 @@ If the file does not exist, an error is thrown."
 		'org-file-apps-entry-match-against-dlink-p file-apps))
 	 (apps-dlink (cl-remove-if-not
 		      'org-file-apps-entry-match-against-dlink-p file-apps))
-	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
+	 (remp (and (assq 'remote apps) (file-remote-p file)))
 	 (dirp (unless remp (file-directory-p file)))
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
 		   (concat (file-name-as-directory file) "index.org")
@@ -10855,21 +10855,6 @@ be opened in Emacs."
 		 list))
    (when add-auto-mode
      (mapcar (lambda (x) (cons (car x) 'emacs)) auto-mode-alist))))
-
-(defvar ange-ftp-name-format)
-(defun org-file-remote-p (file)
-  "Test whether FILE specifies a location on a remote system.
-Return non-nil if the location is indeed remote.
-
-For example, the filename \"/user@host:/foo\" specifies a location
-on the system \"/user@host:\"."
-  (cond ((fboundp 'file-remote-p)
-         (file-remote-p file))
-        ((fboundp 'tramp-handle-file-remote-p)
-         (tramp-handle-file-remote-p file))
-        ((and (boundp 'ange-ftp-name-format)
-              (string-match (car ange-ftp-name-format) file))
-         t)))
 
 
 ;;;; Refiling
