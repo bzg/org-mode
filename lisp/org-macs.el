@@ -308,6 +308,48 @@ it for output."
 
 
 
+;;; Indentation
+
+(defun org-get-indentation (&optional line)
+  "Get the indentation of the current line, interpreting tabs.
+When LINE is given, assume it represents a line and compute its indentation."
+  (if line
+      (when (string-match "^ *" (org-remove-tabs line))
+	(match-end 0))
+    (save-excursion
+      (beginning-of-line 1)
+      (skip-chars-forward " \t")
+      (current-column))))
+
+(defun org-do-remove-indentation (&optional n)
+  "Remove the maximum common indentation from the buffer.
+When optional argument N is a positive integer, remove exactly
+that much characters from indentation, if possible.  Return nil
+if it fails."
+  (catch :exit
+    (goto-char (point-min))
+    ;; Find maximum common indentation, if not specified.
+    (let ((n (or n
+		 (let ((min-ind (point-max)))
+		   (save-excursion
+		     (while (re-search-forward "^[ \t]*\\S-" nil t)
+		       (let ((ind (1- (current-column))))
+			 (if (zerop ind) (throw :exit nil)
+			   (setq min-ind (min min-ind ind))))))
+		   min-ind))))
+      (if (zerop n) (throw :exit nil)
+	;; Remove exactly N indentation, but give up if not possible.
+	(while (not (eobp))
+	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
+	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
+		  ((< ind n) (throw :exit nil))
+		  (t (indent-line-to (- ind n))))
+	    (forward-line)))
+	;; Signal success.
+	t))))
+
+
+
 ;;; Input
 
 (defun org-read-function (prompt &optional allow-empty?)
@@ -432,11 +474,199 @@ is selected, only the bare key is returned."
 	(when buffer (kill-buffer buffer))))))
 
 
+;;; List manipulation
+
+(defsubst org-get-alist-option (option key)
+  (cond ((eq key t) t)
+	((eq option t) t)
+	((assoc key option) (cdr (assoc key option)))
+	(t (let ((r (cdr (assq 'default option))))
+	     (if (listp r) (delq nil r) r)))))
+
+(defsubst org-last (list)
+  "Return the last element of LIST."
+  (car (last list)))
+
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-sequence list))) (delete-dups res)))
+
+(defun org-uniquify-alist (alist)
+  "Merge elements of ALIST with the same key.
+
+For example, in this alist:
+
+\(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
+  => \\='((a 1 3) (b 2))
+
+merge (a 1) and (a 3) into (a 1 3).
+
+The function returns the new ALIST."
+  (let (rtn)
+    (dolist (e alist rtn)
+      (let (n)
+	(if (not (assoc (car e) rtn))
+	    (push e rtn)
+	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
+	  (setq rtn (assq-delete-all (car e) rtn))
+	  (push n rtn))))))
+
+(defun org-delete-all (elts list)
+  "Remove all elements in ELTS from LIST.
+Comparison is done with `equal'.  It is a destructive operation
+that may remove elements by altering the list structure."
+  (while elts
+    (setq list (delete (pop elts) list)))
+  list)
+
+(defun org-plist-delete (plist property)
+  "Delete PROPERTY from PLIST.
+This is in contrast to merely setting it to 0."
+  (let (p)
+    (while plist
+      (if (not (eq property (car plist)))
+	  (setq p (plist-put p (car plist) (nth 1 plist))))
+      (setq plist (cddr plist)))
+    p))
+
+(defun org-combine-plists (&rest plists)
+  "Create a single property list from all plists in PLISTS.
+The process starts by copying the first list, and then setting properties
+from the other lists.  Settings in the last list are the most significant
+ones and overrule settings in the other lists."
+  (let ((rtn (copy-sequence (pop plists)))
+	p v ls)
+    (while plists
+      (setq ls (pop plists))
+      (while ls
+	(setq p (pop ls) v (pop ls))
+	(setq rtn (plist-put rtn p v))))
+    rtn))
+
+
+
+;;; Local variables
+
+(defconst org-unique-local-variables
+  '(org-element--cache
+    org-element--cache-objects
+    org-element--cache-sync-keys
+    org-element--cache-sync-requests
+    org-element--cache-sync-timer)
+  "List of local variables that cannot be transferred to another buffer.")
+
+(defun org-get-local-variables ()
+  "Return a list of all local variables in an Org mode buffer."
+  (delq nil
+	(mapcar
+	 (lambda (x)
+	   (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
+		  (name (car binding)))
+	     (and (not (get name 'org-state))
+		  (not (memq name org-unique-local-variables))
+		  (string-match-p
+		   "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|\
+auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
+		   (symbol-name name))
+		  binding)))
+	 (with-temp-buffer
+	   (org-mode)
+	   (buffer-local-variables)))))
+
+(defun org-clone-local-variables (from-buffer &optional regexp)
+  "Clone local variables from FROM-BUFFER.
+Optional argument REGEXP selects variables to clone."
+  (dolist (pair (buffer-local-variables from-buffer))
+    (pcase pair
+      (`(,name . ,value)		;ignore unbound variables
+       (when (and (not (memq name org-unique-local-variables))
+		  (or (null regexp) (string-match-p regexp (symbol-name name))))
+	 (ignore-errors (set (make-local-variable name) value)))))))
+
+
+
 ;;; Logic
 
 (defsubst org-xor (a b)
   "Exclusive `or'."
   (if a (not b) b))
+
+
+
+;;; Miscellaneous
+
+(defsubst org-call-with-arg (command arg)
+  "Call COMMAND interactively, but pretend prefix arg was ARG."
+  (let ((current-prefix-arg arg)) (call-interactively command)))
+
+(defsubst org-check-external-command (cmd &optional use no-error)
+  "Check if external program CMD for USE exists, error if not.
+When the program does exist, return its path.
+When it does not exist and NO-ERROR is set, return nil.
+Otherwise, throw an error.  The optional argument USE can describe what this
+program is needed for, so that the error message can be more informative."
+  (or (executable-find cmd)
+      (if no-error
+	  nil
+	(error "Can't find `%s'%s" cmd
+	       (if use (format " (%s)" use) "")))))
+
+(defun org-display-warning (message)
+  "Display the given MESSAGE as a warning."
+  (display-warning 'org message :warning))
+
+(defun org-unlogged-message (&rest args)
+  "Display a message, but avoid logging it in the *Messages* buffer."
+  (let ((message-log-max nil))
+    (apply #'message args)))
+
+(defun org-let (list &rest body)
+  (eval (cons 'let (cons list body))))
+(put 'org-let 'lisp-indent-function 1)
+
+(defun org-let2 (list1 list2 &rest body)
+  (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
+(put 'org-let2 'lisp-indent-function 2)
+
+(defun org-eval (form)
+  "Eval FORM and return result."
+  (condition-case error
+      (eval form)
+    (error (format "%%![Error: %s]" error))))
+
+(defvar org-outline-regexp) ; defined in org.el
+(defvar org-odd-levels-only) ; defined in org.el
+(defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
+(defun org-get-limited-outline-regexp ()
+  "Return outline-regexp with limited number of levels.
+The number of levels is controlled by `org-inlinetask-min-level'"
+  (cond ((not (derived-mode-p 'org-mode))
+	 outline-regexp)
+	((not (featurep 'org-inlinetask))
+	 org-outline-regexp)
+	(t
+	 (let* ((limit-level (1- org-inlinetask-min-level))
+		(nstars (if org-odd-levels-only
+			    (1- (* limit-level 2))
+			  limit-level)))
+	   (format "\\*\\{1,%d\\} " nstars)))))
+
+
+(provide 'org-macs)
+
+;;; Motion
+
+(defsubst org-goto-line (N)
+  (save-restriction
+    (widen)
+    (goto-char (point-min))
+    (forward-line (1- N))))
+
+(defsubst org-current-line (&optional pos)
+  (save-excursion
+    (and pos (goto-char pos))
+    ;; works also in narrowed buffer, because we start at 1, not point-min
+    (+ (if (bolp) 1 0) (count-lines 1 (point)))))
 
 
 
@@ -477,45 +707,60 @@ SPEC is the invisibility spec, as a symbol."
 
 
 
-;;; Indentation
+;;; Regexp matching
 
-(defun org-get-indentation (&optional line)
-  "Get the indentation of the current line, interpreting tabs.
-When LINE is given, assume it represents a line and compute its indentation."
-  (if line
-      (when (string-match "^ *" (org-remove-tabs line))
-	(match-end 0))
-    (save-excursion
-      (beginning-of-line 1)
-      (skip-chars-forward " \t")
-      (current-column))))
+(defsubst org-pos-in-match-range (pos n)
+  (and (match-beginning n)
+       (<= (match-beginning n) pos)
+       (>= (match-end n) pos)))
 
-(defun org-do-remove-indentation (&optional n)
-  "Remove the maximum common indentation from the buffer.
-When optional argument N is a positive integer, remove exactly
-that much characters from indentation, if possible.  Return nil
-if it fails."
+(defun org-skip-whitespace ()
+  "Skip over space, tabs and newline characters."
+  (skip-chars-forward " \t\n\r"))
+
+(defun org-match-line (regexp)
+  "Match REGEXP at the beginning of the current line."
+  (save-excursion
+    (beginning-of-line)
+    (looking-at regexp)))
+
+(defun org-match-any-p (re list)
+  "Non-nil if regexp RE matches an element in LIST."
+  (cl-some (lambda (x) (string-match-p re x)) list))
+
+(defun org-in-regexp (regexp &optional nlines visually)
+  "Check if point is inside a match of REGEXP.
+
+Normally only the current line is checked, but you can include
+NLINES extra lines around point into the search.  If VISUALLY is
+set, require that the cursor is not after the match but really
+on, so that the block visually is on the match.
+
+Return nil or a cons cell (BEG . END) where BEG and END are,
+respectively, the positions at the beginning and the end of the
+match."
   (catch :exit
-    (goto-char (point-min))
-    ;; Find maximum common indentation, if not specified.
-    (let ((n (or n
-		 (let ((min-ind (point-max)))
-		   (save-excursion
-		     (while (re-search-forward "^[ \t]*\\S-" nil t)
-		       (let ((ind (1- (current-column))))
-			 (if (zerop ind) (throw :exit nil)
-			   (setq min-ind (min min-ind ind))))))
-		   min-ind))))
-      (if (zerop n) (throw :exit nil)
-	;; Remove exactly N indentation, but give up if not possible.
-	(while (not (eobp))
-	  (let ((ind (progn (skip-chars-forward " \t") (current-column))))
-	    (cond ((eolp) (delete-region (line-beginning-position) (point)))
-		  ((< ind n) (throw :exit nil))
-		  (t (indent-line-to (- ind n))))
-	    (forward-line)))
-	;; Signal success.
-	t))))
+    (let ((pos (point))
+          (eol (line-end-position (if nlines (1+ nlines) 1))))
+      (save-excursion
+	(beginning-of-line (- 1 (or nlines 0)))
+	(while (and (re-search-forward regexp eol t)
+		    (<= (match-beginning 0) pos))
+	  (let ((end (match-end 0)))
+	    (when (or (> end pos) (and (= end pos) (not visually)))
+	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
+
+(defun org-point-in-group (point group &optional context)
+  "Check if POINT is in match-group GROUP.
+If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
+match.  If the match group does not exist or point is not inside it,
+return nil."
+  (and (match-beginning group)
+       (>= point (match-beginning group))
+       (<= point (match-end group))
+       (if context
+	   (list context (match-beginning group) (match-end group))
+	 t)))
 
 
 
@@ -730,147 +975,72 @@ as-is if removal failed."
 
 
 
-;;; List manipulation
+;;; Text properties
 
-(defsubst org-get-alist-option (option key)
-  (cond ((eq key t) t)
-	((eq option t) t)
-	((assoc key option) (cdr (assoc key option)))
-	(t (let ((r (cdr (assq 'default option))))
-	     (if (listp r) (delq nil r) r)))))
+(defconst org-rm-props '(invisible t face t keymap t intangible t mouse-face t
+				   rear-nonsticky t mouse-map t fontified t
+				   org-emphasis t)
+  "Properties to remove when a string without properties is wanted.")
 
-(defsubst org-last (list)
-  "Return the last element of LIST."
-  (car (last list)))
+(defsubst org-no-properties (s &optional restricted)
+  "Remove all text properties from string S.
+When RESTRICTED is non-nil, only remove the properties listed
+in `org-rm-props'."
+  (if restricted (remove-text-properties 0 (length s) org-rm-props s)
+    (set-text-properties 0 (length s) nil s))
+  s)
+(defun org-add-props (string plist &rest props)
+  "Add text properties to entire string, from beginning to end.
+PLIST may be a list of properties, PROPS are individual properties and values
+that will be added to PLIST.  Returns the string that was modified."
+  (declare (indent 2))
+  (add-text-properties
+   0 (length string) (if props (append plist props) plist) string)
+  string)
 
-(defsubst org-uniquify (list)
-  "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-sequence list))) (delete-dups res)))
+(defun org-make-parameter-alist (flat)
+  "Return alist based on FLAT.
+FLAT is a list with alternating symbol names and values.  The
+returned alist is a list of lists with the symbol name in car and
+the value in cdr."
+  (when flat
+    (cons (list (car flat) (cadr flat))
+	  (org-make-parameter-alist (cddr flat)))))
 
-(defun org-uniquify-alist (alist)
-  "Merge elements of ALIST with the same key.
+(defsubst org-get-at-bol (property)
+  "Get text property PROPERTY at the beginning of line."
+  (get-text-property (point-at-bol) property))
 
-For example, in this alist:
+(defun org-get-at-eol (property n)
+  "Get text property PROPERTY at the end of line less N characters."
+  (get-text-property (- (point-at-eol) n) property))
 
-\(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
-  => \\='((a 1 3) (b 2))
+(defun org-find-text-property-in-string (prop s)
+  "Return the first non-nil value of property PROP in string S."
+  (or (get-text-property 0 prop s)
+      (get-text-property (or (next-single-property-change 0 prop s) 0)
+			 prop s)))
 
-merge (a 1) and (a 3) into (a 1 3).
+(defun org-invisible-p (&optional pos)
+  "Non-nil if the character after POS is invisible.
+If POS is nil, use `point' instead."
+  (get-char-property (or pos (point)) 'invisible))
 
-The function returns the new ALIST."
-  (let (rtn)
-    (dolist (e alist rtn)
-      (let (n)
-	(if (not (assoc (car e) rtn))
-	    (push e rtn)
-	  (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
-	  (setq rtn (assq-delete-all (car e) rtn))
-	  (push n rtn))))))
+(defun org-truely-invisible-p ()
+  "Check if point is at a character currently not visible.
+This version does not only check the character property, but also
+`visible-mode'."
+  (unless (bound-and-true-p visible-mode)
+    (org-invisible-p)))
 
-(defun org-delete-all (elts list)
-  "Remove all elements in ELTS from LIST.
-Comparison is done with `equal'.  It is a destructive operation
-that may remove elements by altering the list structure."
-  (while elts
-    (setq list (delete (pop elts) list)))
-  list)
-
-(defun org-plist-delete (plist property)
-  "Delete PROPERTY from PLIST.
-This is in contrast to merely setting it to 0."
-  (let (p)
-    (while plist
-      (if (not (eq property (car plist)))
-	  (setq p (plist-put p (car plist) (nth 1 plist))))
-      (setq plist (cddr plist)))
-    p))
-
-(defun org-combine-plists (&rest plists)
-  "Create a single property list from all plists in PLISTS.
-The process starts by copying the first list, and then setting properties
-from the other lists.  Settings in the last list are the most significant
-ones and overrule settings in the other lists."
-  (let ((rtn (copy-sequence (pop plists)))
-	p v ls)
-    (while plists
-      (setq ls (pop plists))
-      (while ls
-	(setq p (pop ls) v (pop ls))
-	(setq rtn (plist-put rtn p v))))
-    rtn))
-
-
-
-;;; Regexp matching
-
-(defsubst org-pos-in-match-range (pos n)
-  (and (match-beginning n)
-       (<= (match-beginning n) pos)
-       (>= (match-end n) pos)))
-
-(defun org-skip-whitespace ()
-  "Skip over space, tabs and newline characters."
-  (skip-chars-forward " \t\n\r"))
-
-(defun org-match-line (regexp)
-  "Match REGEXP at the beginning of the current line."
+(defun org-invisible-p2 ()
+  "Check if point is at a character currently not visible.
+If the point is at EOL (and not at the beginning of a buffer too),
+move it back by one char before doing this check."
   (save-excursion
-    (beginning-of-line)
-    (looking-at regexp)))
-
-(defun org-match-any-p (re list)
-  "Non-nil if regexp RE matches an element in LIST."
-  (cl-some (lambda (x) (string-match-p re x)) list))
-
-(defun org-in-regexp (regexp &optional nlines visually)
-  "Check if point is inside a match of REGEXP.
-
-Normally only the current line is checked, but you can include
-NLINES extra lines around point into the search.  If VISUALLY is
-set, require that the cursor is not after the match but really
-on, so that the block visually is on the match.
-
-Return nil or a cons cell (BEG . END) where BEG and END are,
-respectively, the positions at the beginning and the end of the
-match."
-  (catch :exit
-    (let ((pos (point))
-          (eol (line-end-position (if nlines (1+ nlines) 1))))
-      (save-excursion
-	(beginning-of-line (- 1 (or nlines 0)))
-	(while (and (re-search-forward regexp eol t)
-		    (<= (match-beginning 0) pos))
-	  (let ((end (match-end 0)))
-	    (when (or (> end pos) (and (= end pos) (not visually)))
-	      (throw :exit (cons (match-beginning 0) (match-end 0))))))))))
-
-(defun org-point-in-group (point group &optional context)
-  "Check if POINT is in match-group GROUP.
-If CONTEXT is non-nil, return a list with CONTEXT and the boundaries of the
-match.  If the match group does not exist or point is not inside it,
-return nil."
-  (and (match-beginning group)
-       (>= point (match-beginning group))
-       (<= point (match-end group))
-       (if context
-	   (list context (match-beginning group) (match-end group))
-	 t)))
-
-
-
-;;; Motion
-
-(defsubst org-goto-line (N)
-  (save-restriction
-    (widen)
-    (goto-char (point-min))
-    (forward-line (1- N))))
-
-(defsubst org-current-line (&optional pos)
-  (save-excursion
-    (and pos (goto-char pos))
-    ;; works also in narrowed buffer, because we start at 1, not point-min
-    (+ (if (bolp) 1 0) (count-lines 1 (point)))))
+    (when (and (eolp) (not (bobp)))
+      (backward-char 1))
+    (org-invisible-p)))
 
 
 
@@ -962,174 +1132,4 @@ This should be a lot faster than the `parse-time-string'."
 
 
 
-;;; Text properties
-
-(defconst org-rm-props '(invisible t face t keymap t intangible t mouse-face t
-				   rear-nonsticky t mouse-map t fontified t
-				   org-emphasis t)
-  "Properties to remove when a string without properties is wanted.")
-
-(defsubst org-no-properties (s &optional restricted)
-  "Remove all text properties from string S.
-When RESTRICTED is non-nil, only remove the properties listed
-in `org-rm-props'."
-  (if restricted (remove-text-properties 0 (length s) org-rm-props s)
-    (set-text-properties 0 (length s) nil s))
-  s)
-(defun org-add-props (string plist &rest props)
-  "Add text properties to entire string, from beginning to end.
-PLIST may be a list of properties, PROPS are individual properties and values
-that will be added to PLIST.  Returns the string that was modified."
-  (declare (indent 2))
-  (add-text-properties
-   0 (length string) (if props (append plist props) plist) string)
-  string)
-
-(defun org-make-parameter-alist (flat)
-  "Return alist based on FLAT.
-FLAT is a list with alternating symbol names and values.  The
-returned alist is a list of lists with the symbol name in car and
-the value in cdr."
-  (when flat
-    (cons (list (car flat) (cadr flat))
-	  (org-make-parameter-alist (cddr flat)))))
-
-(defsubst org-get-at-bol (property)
-  "Get text property PROPERTY at the beginning of line."
-  (get-text-property (point-at-bol) property))
-
-(defun org-get-at-eol (property n)
-  "Get text property PROPERTY at the end of line less N characters."
-  (get-text-property (- (point-at-eol) n) property))
-
-(defun org-find-text-property-in-string (prop s)
-  "Return the first non-nil value of property PROP in string S."
-  (or (get-text-property 0 prop s)
-      (get-text-property (or (next-single-property-change 0 prop s) 0)
-			 prop s)))
-
-(defun org-invisible-p (&optional pos)
-  "Non-nil if the character after POS is invisible.
-If POS is nil, use `point' instead."
-  (get-char-property (or pos (point)) 'invisible))
-
-(defun org-truely-invisible-p ()
-  "Check if point is at a character currently not visible.
-This version does not only check the character property, but also
-`visible-mode'."
-  (unless (bound-and-true-p visible-mode)
-    (org-invisible-p)))
-
-(defun org-invisible-p2 ()
-  "Check if point is at a character currently not visible.
-If the point is at EOL (and not at the beginning of a buffer too),
-move it back by one char before doing this check."
-  (save-excursion
-    (when (and (eolp) (not (bobp)))
-      (backward-char 1))
-    (org-invisible-p)))
-
-
-
-;;; Local variables
-
-(defconst org-unique-local-variables
-  '(org-element--cache
-    org-element--cache-objects
-    org-element--cache-sync-keys
-    org-element--cache-sync-requests
-    org-element--cache-sync-timer)
-  "List of local variables that cannot be transferred to another buffer.")
-
-(defun org-get-local-variables ()
-  "Return a list of all local variables in an Org mode buffer."
-  (delq nil
-	(mapcar
-	 (lambda (x)
-	   (let* ((binding (if (symbolp x) (list x) (list (car x) (cdr x))))
-		  (name (car binding)))
-	     (and (not (get name 'org-state))
-		  (not (memq name org-unique-local-variables))
-		  (string-match-p
-		   "\\`\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|\
-auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
-		   (symbol-name name))
-		  binding)))
-	 (with-temp-buffer
-	   (org-mode)
-	   (buffer-local-variables)))))
-
-(defun org-clone-local-variables (from-buffer &optional regexp)
-  "Clone local variables from FROM-BUFFER.
-Optional argument REGEXP selects variables to clone."
-  (dolist (pair (buffer-local-variables from-buffer))
-    (pcase pair
-      (`(,name . ,value)		;ignore unbound variables
-       (when (and (not (memq name org-unique-local-variables))
-		  (or (null regexp) (string-match-p regexp (symbol-name name))))
-	 (ignore-errors (set (make-local-variable name) value)))))))
-
-
-
-;;; Miscellaneous
-
-(defsubst org-call-with-arg (command arg)
-  "Call COMMAND interactively, but pretend prefix arg was ARG."
-  (let ((current-prefix-arg arg)) (call-interactively command)))
-
-(defsubst org-check-external-command (cmd &optional use no-error)
-  "Check if external program CMD for USE exists, error if not.
-When the program does exist, return its path.
-When it does not exist and NO-ERROR is set, return nil.
-Otherwise, throw an error.  The optional argument USE can describe what this
-program is needed for, so that the error message can be more informative."
-  (or (executable-find cmd)
-      (if no-error
-	  nil
-	(error "Can't find `%s'%s" cmd
-	       (if use (format " (%s)" use) "")))))
-
-(defun org-display-warning (message)
-  "Display the given MESSAGE as a warning."
-  (display-warning 'org message :warning))
-
-(defun org-unlogged-message (&rest args)
-  "Display a message, but avoid logging it in the *Messages* buffer."
-  (let ((message-log-max nil))
-    (apply #'message args)))
-
-(defun org-let (list &rest body)
-  (eval (cons 'let (cons list body))))
-(put 'org-let 'lisp-indent-function 1)
-
-(defun org-let2 (list1 list2 &rest body)
-  (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
-(put 'org-let2 'lisp-indent-function 2)
-
-(defun org-eval (form)
-  "Eval FORM and return result."
-  (condition-case error
-      (eval form)
-    (error (format "%%![Error: %s]" error))))
-
-(defvar org-outline-regexp) ; defined in org.el
-(defvar org-odd-levels-only) ; defined in org.el
-(defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
-(defun org-get-limited-outline-regexp ()
-  "Return outline-regexp with limited number of levels.
-The number of levels is controlled by `org-inlinetask-min-level'"
-  (cond ((not (derived-mode-p 'org-mode))
-	 outline-regexp)
-	((not (featurep 'org-inlinetask))
-	 org-outline-regexp)
-	(t
-	 (let* ((limit-level (1- org-inlinetask-min-level))
-		(nstars (if org-odd-levels-only
-			    (1- (* limit-level 2))
-			  limit-level)))
-	   (format "\\*\\{1,%d\\} " nstars)))))
-
-
-(provide 'org-macs)
-
 ;;; org-macs.el ends here
