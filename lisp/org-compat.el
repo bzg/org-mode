@@ -283,13 +283,13 @@ See `org-link-parameters' for documentation on the other parameters."
 
 ;; Not used since commit 6d1e3082, Feb 2010.
 (make-obsolete 'org-table-recognize-table.el
-               "please notify the Org mailing list if you use this function."
+               "please notify Org mailing list if you use this function."
                "Org 9.0")
 
 (defmacro org-preserve-lc (&rest body)
   (declare (debug (body))
-	   (obsolete "please notify the Org mailing list if you use this function."
-		     "Org 9.0"))
+	   (obsolete "please notify Org mailing list if you use this function."
+		     "Org 9.2"))
   (org-with-gensyms (line col)
     `(let ((,line (org-current-line))
 	   (,col (current-column)))
@@ -297,6 +297,12 @@ See `org-link-parameters' for documentation on the other parameters."
 	   (progn ,@body)
 	 (org-goto-line ,line)
 	 (org-move-to-column ,col)))))
+
+(defun org-version-check (version &rest _)
+  "Non-nil if VERSION is lower (older) than `emacs-version'."
+  (declare (obsolete "use `version<' or `fboundp' instead."
+		     "Org 9.2"))
+  (version< version emacs-version))
 
 (defun org-remove-angle-brackets (s)
   (org-unbracket-string "<" ">" s))
@@ -441,30 +447,6 @@ use of this function is for the stuck project list."
 
 ;;; Miscellaneous functions
 
-(defun org-version-check (version feature level)
-  (let* ((v1 (mapcar 'string-to-number (split-string version "[.]")))
-         (v2 (mapcar 'string-to-number (split-string emacs-version "[.]")))
-         (rmaj (or (nth 0 v1) 99))
-         (rmin (or (nth 1 v1) 99))
-         (rbld (or (nth 2 v1) 99))
-         (maj (or (nth 0 v2) 0))
-         (min (or (nth 1 v2) 0))
-         (bld (or (nth 2 v2) 0)))
-    (if (or (< maj rmaj)
-            (and (= maj rmaj)
-                 (< min rmin))
-            (and (= maj rmaj)
-                 (= min rmin)
-                 (< bld rbld)))
-        (if (eq level :predicate)
-            ;; just return if we have the version
-            nil
-          (let ((msg (format "Emacs %s or greater is recommended for %s"
-                             version feature)))
-            (display-warning 'org msg level)
-            t))
-      t)))
-
 (defun org-get-x-clipboard (value)
   "Get the value of the X or Windows clipboard."
   (cond ((and (eq window-system 'x)
@@ -559,14 +541,9 @@ Pass COLUMN and FORCE to `move-to-column'."
       (or (file-remote-p file 'localname) file))))
 
 (defmacro org-no-popups (&rest body)
-  "Suppress popup windows.
-Let-bind some variables to nil around BODY to achieve the desired
-effect, which variables to use depends on the Emacs version."
-  (if (org-version-check "24.2.50" "" :predicate)
-      `(let (pop-up-frames display-buffer-alist)
-         ,@body)
-    `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
-       ,@body)))
+  "Suppress popup windows and evaluate BODY."
+  `(let (pop-up-frames display-buffer-alist)
+     ,@body))
 
 ;;;###autoload
 (defmacro org-check-version ()
