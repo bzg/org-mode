@@ -234,15 +234,19 @@ file to byte-code before it is loaded."
 
 (defcustom org-babel-load-languages '((emacs-lisp . t))
   "Languages which can be evaluated in Org buffers.
+\\<org-mode-map>
 This list can be used to load support for any of the languages
-below, note that each language will depend on a different set of
-system executables and/or Emacs modes.  When a language is
-\"loaded\", then code blocks in that language can be evaluated
-with `org-babel-execute-src-block' bound by default to C-c
-C-c (note the `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can
-be set to remove code block evaluation from the C-c C-c
-keybinding.  By default only Emacs Lisp (which has no
-requirements) is loaded."
+below.  Each language will depend on a different set of system
+executables and/or Emacs modes.
+
+When a language is \"loaded\", code blocks in that language can
+be evaluated with `org-babel-execute-src-block', which is bound
+by default to \\[org-ctrl-c-ctrl-c].
+
+The `org-babel-no-eval-on-ctrl-c-ctrl-c' option can be set to
+remove code block evaluation from \\[org-ctrl-c-ctrl-c].  By
+default, only Emacs Lisp is loaded, since it has no specific
+requirement."
   :group 'org-babel
   :set 'org-babel-do-load-languages
   :version "24.1"
