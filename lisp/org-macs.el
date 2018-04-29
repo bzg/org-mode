@@ -31,6 +31,9 @@
 
 ;;; Code:
 
+(declare-function format-spec "format-spec" (format specification))
+(declare-function org-string-collate-less-p "org-compat" (s1 s2 &rest _))
+
 
 ;;; Macros
 

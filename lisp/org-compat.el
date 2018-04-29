@@ -35,6 +35,7 @@
 (declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-agenda-remove-restriction-lock "org-agenda" (&optional noupdate))
+(declare-function org-align-tags "org" (&optional all))
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-element-at-point "org-element" ())
@@ -43,10 +44,12 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
+(declare-function org-get-tags "org" (&optional pos local))
 (declare-function org-invisible-p "org" (&optional pos))
 (declare-function org-link-display-format "org" (s))
 (declare-function org-link-set-parameters "org" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
+(declare-function org-make-tag-string "org" (tags))
 (declare-function org-reduced-level "org" (l))
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-table-end "org-table" (&optional table-type))
@@ -110,7 +113,7 @@ Case is significant."
 ;;; Obsolete aliases (remove them after the next major release).
 
 ;;;; XEmacs compatibility, now removed.
-(define-obsolete-function-alias 'org-activate-mark 'activate-mark)
+(define-obsolete-function-alias 'org-activate-mark 'activate-mark "Org 9.0")
 (define-obsolete-function-alias 'org-add-hook 'add-hook "Org 9.0")
 (define-obsolete-function-alias 'org-bound-and-true-p 'bound-and-true-p "Org 9.0")
 (define-obsolete-function-alias 'org-decompose-region 'decompose-region "Org 9.0")
