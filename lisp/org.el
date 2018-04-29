@@ -20875,7 +20875,8 @@ an argument, unconditionally call `org-insert-heading'."
     "--"
     ("Documentation"
      ["Show Version" org-version t]
-     ["Info Documentation" org-info t])
+     ["Info Documentation" org-info t]
+     ["Browse Org News" org-browse-news t])
     ("Customize"
      ["Browse Org Group" org-customize t]
      "--"
@@ -20886,14 +20887,18 @@ an argument, unconditionally call `org-insert-heading'."
     ("Refresh/Reload"
      ["Refresh setup current buffer" org-mode-restart t]
      ["Reload Org (after update)" org-reload t]
-     ["Reload Org uncompiled" (org-reload t) :active t :keys "C-u C-c C-x !"])
-    ))
+     ["Reload Org uncompiled" (org-reload t) :active t :keys "C-u C-c C-x !"])))
 
 (defun org-info (&optional node)
   "Read documentation for Org in the info system.
 With optional NODE, go directly to that node."
   (interactive)
   (info (format "(org)%s" (or node ""))))
+
+(defun org-browse-news ()
+  "Browse the news for the latest major release."
+  (interactive)
+  (browse-url "https://orgmode.org/Changes.html"))
 
 ;;;###autoload
 (defun org-submit-bug-report ()
