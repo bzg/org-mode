@@ -338,6 +338,13 @@ widen, otherwise call ~org-narrow-to-subtree~ to narrow.
 This is attached to the "s" speed command, so that hitting "s" twice
 will go back to the widen state.
 
+*** ~org-browse-news~
+
+Browse https://orgmode.org/Changes.html to let users read informations
+about the last major release.
+
+There is a new menu entry for this in the "Documentation" menu item.
+
 ** Removed commands and functions
 *** ~org-outline-overlay-data~
 Use ~org-save-outline-visibility~ instead.
