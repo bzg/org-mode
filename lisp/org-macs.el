@@ -34,6 +34,8 @@
 (declare-function format-spec "format-spec" (format specification))
 (declare-function org-string-collate-lessp "org-compat" (s1 s2 &rest _))
 
+(defvar org-ts-regexp0)
+
 
 ;;; Macros
 
