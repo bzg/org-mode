@@ -549,11 +549,6 @@ Pass COLUMN and FORCE to `move-to-column'."
       "Return the local name component of FILE."
       (or (file-remote-p file 'localname) file))))
 
-(defmacro org-no-popups (&rest body)
-  "Suppress popup windows and evaluate BODY."
-  `(let (pop-up-frames display-buffer-alist)
-     ,@body))
-
 ;;;###autoload
 (defmacro org-check-version ()
   "Try very hard to provide sensible version strings."

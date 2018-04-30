@@ -32,7 +32,7 @@
 ;;; Code:
 
 (declare-function format-spec "format-spec" (format specification))
-(declare-function org-string-collate-less-p "org-compat" (s1 s2 &rest _))
+(declare-function org-string-collate-lessp "org-compat" (s1 s2 &rest _))
 
 
 ;;; Macros
@@ -191,6 +191,11 @@ because otherwise all these markers will point to nowhere."
 	  (goto-char (point-max))
 	  (unless (bolp) (insert "\n"))
 	  (insert local-variables))))))
+
+(defmacro org-no-popups (&rest body)
+  "Suppress popup windows and evaluate BODY."
+  `(let (pop-up-frames display-buffer-alist)
+     ,@body))
 
 
 
