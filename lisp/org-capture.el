@@ -1269,6 +1269,7 @@ may have been stored before."
 		 (point))))
       (org-capture-position-for-last-stored 'table-line)
       (org-capture-mark-kill-region beg end)
+      (org-capture-narrow beg end)
       (when (or (re-search-backward "%\\?" beg t)
 		(re-search-forward "%\\?" end t))
 	(replace-match "")))
