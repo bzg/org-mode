@@ -11806,7 +11806,7 @@ advised against re-defining it, unless you know what you are doing.
 
 #+vindex: org-hide-macro-markers
 The surrounding brackets can be made invisible by setting
-~org-hide-macro-markers~ non-~nil~.
+~org-hide-macro-markers~ to a non-~nil~ value.
 
 Org expands macros at the very beginning of the export process.
 
