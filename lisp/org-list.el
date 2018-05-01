@@ -1625,8 +1625,8 @@ bullets between START and END."
 		  (funcall change-bullet-maybe item)
 		  (cond
 		   ;; First item indented but not parent: error
-		   ((and (not prev) (< parent start))
-		    (error "Cannot indent the first item of a list"))
+		   ((and (not prev) (or (not parent) (< parent start)))
+		    (user-error "Cannot indent the first item of a list"))
 		   ;; First item and parent indented: keep same
 		   ;; parent.
 		   ((not prev) (funcall set-assoc cell))
