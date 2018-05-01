@@ -220,69 +220,73 @@
 
 (ert-deftest test-org-list/indent-item ()
   "Test `org-indent-item' specifications."
-  ;; 1. Error when not at an item.
+  ;; Error when not at an item.
   (org-test-with-temp-text "Paragraph."
     (should-error (org-indent-item)))
-  ;; 2. Error when trying to move first item of a list.
-  (org-test-with-temp-text "
+  ;; Error when trying to move first item of a list.
+  (should-error
+   (org-test-with-temp-text "
 - Item 1
 - Item 2"
-    (forward-line)
-    (should-error (org-indent-item)))
-  ;; 3. Indent a single item, not its children.
-  (org-test-with-temp-text "
+     (forward-line)
+     (org-indent-item)))
+  (should-error
+   (org-test-with-temp-text "
 - Item 1
-- Item 2
-  - Item 2.1"
-    (search-forward "- Item 2")
-    (let (org-list-demote-modify-bullet) (org-indent-item))
-    (should (equal (buffer-string)
-		   "
+- Item 2"
+     (forward-line)
+     (let ((org-list-automatic-rules nil)) (org-indent-item))))
+  ;; Indent a single item, not its children.
+  (should
+   (equal "
 - Item 1
   - Item 2
-  - Item 2.1")))
-  ;; 4. Follow `org-list-demote-modify-bullet' specifications.
-  ;;
-  ;; 4.1. With unordered lists.
-  (org-test-with-temp-text "
+  - Item 2.1"
+	  (org-test-with-temp-text "
 - Item 1
-- Item 2"
-    (search-forward "- Item 2")
-    (let ((org-list-demote-modify-bullet '(("-" . "+")))) (org-indent-item))
-    (should (equal (buffer-string)
-		   "
+- Item 2<point>
+  - Item 2.1"
+	    (let (org-list-demote-modify-bullet) (org-indent-item))
+	    (buffer-string))))
+  ;; Follow `org-list-demote-modify-bullet' specifications.
+  (should
+   (equal "
 - Item 1
-  + Item 2")))
-  ;; 4.2. and ordered lists.
-  (org-test-with-temp-text "
+  + Item 2"
+	  (org-test-with-temp-text "
+- Item 1
+- Item 2<point>"
+	    (let ((org-list-demote-modify-bullet '(("-" . "+"))))
+	      (org-indent-item))
+	    (buffer-string))))
+  (should
+   (equal "
 1. Item 1
-2. Item 2"
-    (search-forward "2. Item 2")
-    (let ((org-plain-list-ordered-item-terminator t)
-	  (org-list-demote-modify-bullet '(("1." . "+"))))
-      (org-indent-item))
-    (should (equal (buffer-string)
-		   "
+   + Item 2"
+	  (org-test-with-temp-text "
 1. Item 1
-   + Item 2")))
-  ;; 5. When a region is selected, indent every item within.
-  (org-test-with-temp-text "
-- Item 1
-- Item 2
-- Item 3
-"
-    (search-forward "- Item 2")
-    (beginning-of-line)
-    (transient-mark-mode 1)
-    (push-mark (point) t t)
-    (goto-char (point-max))
-    (let (org-list-demote-modify-bullet) (org-indent-item))
-    (should (equal (buffer-string)
-		   "
+2. Item 2<point>"
+	    (let ((org-plain-list-ordered-item-terminator t)
+		  (org-list-demote-modify-bullet '(("1." . "+"))))
+	      (org-indent-item))
+	    (buffer-string))))
+  ;; When a region is selected, indent every item within.
+  (should
+   (equal "
 - Item 1
   - Item 2
   - Item 3
-"))))
+"
+	  (org-test-with-temp-text "
+- Item 1
+<point>- Item 2
+- Item 3
+"
+	    (transient-mark-mode 1)
+	    (push-mark (point) t t)
+	    (goto-char (point-max))
+	    (let (org-list-demote-modify-bullet) (org-indent-item))
+	    (buffer-string)))))
 
 (ert-deftest test-org-list/indent-item-tree ()
   "Test `org-indent-item-tree' specifications."
