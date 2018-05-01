@@ -1096,9 +1096,12 @@ aid, but the tag does not have any semantic meaning."
 	   (read-string "Frame reference (*Title, #custom-id, id:...): "))
 	  (org-set-property "BEAMER_act"
 			    (read-string "Overlay specification: "))))
-       ((let ((tags-re (concat "B_" (regexp-opt (mapcar #'car envs) t))))
-	  (cl-some (lambda (tag) (string-match tags-re tag)) tags))
-	(org-entry-put nil "BEAMER_env" (match-string 1 tags)))
+       ((let* ((tags-re (concat "B_" (regexp-opt (mapcar #'car envs) t)))
+	       (env (cl-some (lambda (tag)
+			       (and (string-match tags-re tag)
+				    (match-string 1 tag)))
+			     tags)))
+	  (and env (progn (org-entry-put nil "BEAMER_env" env) t))))
        (t (org-entry-delete nil "BEAMER_env"))))))
 
 ;;;###autoload
