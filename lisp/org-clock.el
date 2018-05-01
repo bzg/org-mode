@@ -2200,13 +2200,17 @@ have priority."
 	(`lastq     (setq key 'quarter shift -1))))
     ;; Prepare start and end times depending on KEY's type.
     (pcase key
-      ((or `day `today) (setq m 0 h 0 h1 24 d (+ d shift)))
+      ((or `day `today) (setq m 0
+                              h org-extend-today-until
+                              h1 (+ 24 org-extend-today-until)
+                              d (+ d shift)))
       ((or `week `thisweek)
        (let* ((ws (or wstart 1))
 	      (diff (+ (* -7 shift) (if (= dow 0) (- 7 ws) (- dow ws)))))
-	 (setq m 0 h 0 d (- d diff) d1 (+ 7 d))))
+	 (setq m 0 h org-extend-today-until d (- d diff) d1 (+ 7 d))))
       ((or `month `thismonth)
-       (setq h 0 m 0 d (or mstart 1) month (+ month shift) month1 (1+ month)))
+       (setq h org-extend-today-until m 0 d (or mstart 1)
+             month (+ month shift) month1 (1+ month)))
       ((or `quarter `thisq)
        ;; Compute if this shift remains in this year.  If not, compute
        ;; how many years and quarters we have to shift (via floor*) and
@@ -2224,14 +2228,16 @@ have priority."
 	     (setq shiftedy (- y (+ 1 (nth 0 tmp)))
 		   shiftedm (- 13 (* 3 (nth 1 tmp)))
 		   shiftedq (- 5 (nth 1 tmp)))))
-	 (setq m 0 h 0 d 1 month shiftedm month1 (+ 3 shiftedm) y shiftedy))
+	 (setq m 0 h org-extend-today-until d 1
+               month shiftedm month1 (+ 3 shiftedm) y shiftedy))
 	((> (+ q shift) 0)		; Shift is within this year.
 	 (setq shiftedq (+ q shift))
 	 (setq shiftedy y)
 	 (let ((qshift (* 3 (1- (+ q shift)))))
-	   (setq m 0 h 0 d 1 month (+ 1 qshift) month1 (+ 4 qshift))))))
+	   (setq m 0 h org-extend-today-until d 1
+                 month (+ 1 qshift) month1 (+ 4 qshift))))))
       ((or `year `thisyear)
-       (setq m 0 h 0 d 1 month 1 y (+ y shift) y1 (1+ y)))
+       (setq m 0 h org-extend-today-until d 1 month 1 y (+ y shift) y1 (1+ y)))
       ((or `interactive `untilnow))	; Special cases, ignore them.
       (_ (user-error "No such time block %s" key)))
     ;; Format start and end times according to AS-STRINGS.
