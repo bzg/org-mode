@@ -183,17 +183,29 @@ or similar things which you want to have when editing a source code file,
 but which mess up the display of a snippet in Org exported files.")
 
 (defcustom org-src-lang-modes
-  '(("ocaml" . tuareg) ("elisp" . emacs-lisp) ("ditaa" . artist)
-    ("asymptote" . asy) ("dot" . fundamental) ("sqlite" . sql)
-    ("calc" . fundamental) ("C" . c) ("cpp" . c++) ("C++" . c++)
-    ("screen" . shell-script) ("shell" . sh) ("bash" . sh))
+  '(("C" . c)
+    ("C++" . c++)
+    ("asymptote" . asy)
+    ("bash" . sh)
+    ("beamer" . latex)
+    ("calc" . fundamental)
+    ("cpp" . c++)
+    ("ditaa" . artist)
+    ("dot" . fundamental)
+    ("elisp" . emacs-lisp)
+    ("ocaml" . tuareg)
+    ("screen" . shell-script)
+    ("shell" . sh)
+    ("sqlite" . sql))
   "Alist mapping languages to their major mode.
-The key is the language name, the value is the string that should
-be inserted as the name of the major mode.  For many languages this is
-simple, but for language where this is not the case, this variable
-provides a way to simplify things on the user side.
-For example, there is no ocaml-mode in Emacs, but the mode to use is
-`tuareg-mode'."
+
+The key is the language name.  The value is the mode name, as
+a string or a symbol, without the \"-mode\" suffix.
+
+For many languages this is simple, but for language where this is
+not the case, this variable provides a way to simplify things on
+the user side.  For example, there is no `ocaml-mode' in Emacs,
+but the mode to use is `tuareg-mode'."
   :group 'org-edit-structure
   :type '(repeat
 	  (cons
