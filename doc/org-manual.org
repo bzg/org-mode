@@ -17534,6 +17534,16 @@ files.  By setting it to a string value---for example, =:shebang
 tangled file that the code block is extracted to.  Org then turns on
 the tangled file's executable permission.
 
+#+cindex: @samp{tangle-mode}, header argument
+The =tangle-mode= header argument specifies what permissions to set
+for tangled files by ~set-file-modes~.  For example, to make
+a read-only tangled file, use =:tangle-mode (identity #o444)=.  To
+make it executable, use =:tangle-mode (identity #o755)=.  It also
+overrides executable permission granted by =shebang=.  When multiple
+source code blocks tangle to a single file with different and
+conflicting =tangle-mode= header arguments, Org's behavior is
+undefined.
+
 #+cindex: @samp{no-expand}, header argument
 By default Org expands code blocks during tangling.  The =no-expand=
 header argument turns off such expansions.  Note that one side-effect
