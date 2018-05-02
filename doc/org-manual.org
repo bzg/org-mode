@@ -17362,7 +17362,7 @@ languages.  For some languages, such as ditaa, Org defaults to
 Examples]].  To selectively export sub-trees of an Org document, see
 [[*Exporting]].
 
-#+cindex: @samp{export}, header argument
+#+cindex: @samp{exports}, header argument
 The =exports= header argument is to specify if that part of the Org
 file is exported to, say, HTML or LaTeX formats.
 
