@@ -17251,6 +17251,24 @@ follows from the type specified above.
      Interpreted as raw Org mode.  Inserted directly into the buffer.
      Aligned if it is a table.  Usage example: =:results value raw=.
 
+#+cindex: @samp{wrap}, header argument
+The =wrap= header argument unconditionnally marks the results block by
+appending strings to =#+BEGIN_= and =#+END_=.  If no string is
+specified, Org wraps the results in a =#+BEGIN_results=
+... =#+END_results= block.  It takes precedent over the =results=
+value listed above.  E.g.,
+
+#+begin_example
+,#+BEGIN_SRC emacs-lisp :results html :wrap EXPORT markdown
+"<blink>Welcome back to the 90's</blink>"
+,#+END_SRC
+
+,#+RESULTS:
+,#+BEGIN_EXPORT markdown
+<blink>Welcome back to the 90's</blink>
+,#+END_EXPORT
+#+end_example
+
 *** Handling
 :PROPERTIES:
 :UNNUMBERED: notoc
