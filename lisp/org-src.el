@@ -421,8 +421,8 @@ Assume point is in the corresponding edit buffer."
 	(write-back org-src--allow-write-back))
     (with-temp-buffer
       ;; Reproduce indentation parameters from source buffer.
-      (setq-local indent-tabs-mode use-tabs?)
-      (when (> source-tab-width 0) (setq-local tab-width source-tab-width))
+      (setq indent-tabs-mode use-tabs?)
+      (when (> source-tab-width 0) (setq tab-width source-tab-width))
       ;; Apply WRITE-BACK function on edit buffer contents.
       (insert (org-no-properties contents))
       (goto-char (point-min))
@@ -647,13 +647,12 @@ This minor mode is turned on in two situations:
 See also `org-src-mode-hook'."
   nil " OrgSrc" nil
   (when org-edit-src-persistent-message
-    (setq-local
-     header-line-format
-     (substitute-command-keys
-      (if org-src--allow-write-back
-	  "Edit, then exit with `\\[org-edit-src-exit]' or abort with \
+    (setq header-line-format
+	  (substitute-command-keys
+	   (if org-src--allow-write-back
+	       "Edit, then exit with `\\[org-edit-src-exit]' or abort with \
 `\\[org-edit-src-abort]'"
-	"Exit with `\\[org-edit-src-exit]' or abort with \
+	     "Exit with `\\[org-edit-src-exit]' or abort with \
 `\\[org-edit-src-abort]'"))))
   ;; Possibly activate various auto-save features (for the edit buffer
   ;; or the source buffer).
@@ -685,7 +684,7 @@ See also `org-src-mode-hook'."
     (if (bound-and-true-p org-src--allow-write-back)
 	(progn
 	  (setq buffer-offer-save t)
-	  (setq-local write-contents-functions '(org-edit-src-save)))
+	  (setq write-contents-functions '(org-edit-src-save)))
       (setq buffer-read-only t))))
 
 (add-hook 'org-src-mode-hook #'org-src-mode-configure-edit-buffer)
