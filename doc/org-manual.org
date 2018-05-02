@@ -15,9 +15,9 @@
 #+cindex: summary
 
 Org is a mode for keeping notes, maintaining TODO lists, and project
-planning with a fast and effective plain-text system.  It also is an
-authoring system with unique support for literate programming and
-reproducible research.
+planning with a fast and effective plain-text markup language.  It
+also is an authoring system with unique support for literate
+programming and reproducible research.
 
 Org is implemented on top of Outline mode, which makes it possible to
 keep the content of large files well structured.  Visibility cycling
