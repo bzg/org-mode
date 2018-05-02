@@ -229,23 +229,48 @@ issued in the language major mode buffer."
 
 ;;; Internal functions and variables
 
-(defvar org-src--allow-write-back t)
-(defvar org-src--auto-save-timer nil)
-(defvar org-src--babel-info nil)
-(defvar org-src--beg-marker nil)
-(defvar org-src--block-indentation nil)
-(defvar org-src--end-marker nil)
-(defvar org-src--from-org-mode nil)
-(defvar org-src--overlay nil)
-(defvar org-src--preserve-indentation nil)
-(defvar org-src--remote nil)
-(defvar org-src--saved-temp-window-config nil)
-(defvar org-src--source-type nil
+(defvar-local org-src--allow-write-back t)
+(put 'org-src--allow-write-back 'permanent-local t)
+
+(defvar-local org-src--auto-save-timer nil)
+(put 'org-src--auto-save-timer 'permanent-local t)
+
+(defvar-local org-src--babel-info nil)
+(put 'org-src--babel-info 'permanent-local t)
+
+(defvar-local org-src--beg-marker nil)
+(put 'org-src--beg-marker 'permanent-local t)
+
+(defvar-local org-src--block-indentation nil)
+(put 'org-src--block-indentation 'permanent-local t)
+
+(defvar-local org-src--end-marker nil)
+(put 'org-src--end-marker 'permanent-local t)
+
+(defvar-local org-src--from-org-mode nil)
+(put 'org-src--from-org-mode 'permanent-local t)
+
+(defvar-local org-src--overlay nil)
+(put 'org-src--overlay 'permanent-local t)
+
+(defvar-local org-src--preserve-indentation nil)
+(put 'org-src--preserve-indentation 'permanent-local t)
+
+(defvar-local org-src--remote nil)
+(put 'org-src--remote 'permanent-local t)
+
+(defvar-local org-src--saved-temp-window-config nil)
+(put 'org-src--saved-temp-window-config 'permanent-local t)
+
+(defvar-local org-src--source-type nil
   "Type of element being edited, as a symbol.")
-(defvar org-src--tab-width nil
+(put 'org-src--source-type 'permanent-local t)
+
+(defvar-local org-src--tab-width nil
   "Contains `tab-width' value from Org source buffer.
 However, if `indent-tabs-mode' is nil in that buffer, its value
 is 0.")
+(put 'org-src--tab-width 'permanent-local t)
 
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
@@ -498,16 +523,16 @@ Leave point in edit buffer."
 	;; Transmit buffer-local variables for exit function.  It must
 	;; be done after initializing major mode, as this operation
 	;; may reset them otherwise.
-	(setq-local org-src--tab-width source-tab-width)
-	(setq-local org-src--from-org-mode org-mode-p)
-	(setq-local org-src--beg-marker beg)
-	(setq-local org-src--end-marker end)
-	(setq-local org-src--remote remote)
-	(setq-local org-src--source-type type)
-	(setq-local org-src--block-indentation ind)
-	(setq-local org-src--preserve-indentation preserve-ind)
-	(setq-local org-src--overlay overlay)
-	(setq-local org-src--allow-write-back write-back)
+	(setq org-src--tab-width source-tab-width)
+	(setq org-src--from-org-mode org-mode-p)
+	(setq org-src--beg-marker beg)
+	(setq org-src--end-marker end)
+	(setq org-src--remote remote)
+	(setq org-src--source-type type)
+	(setq org-src--block-indentation ind)
+	(setq org-src--preserve-indentation preserve-ind)
+	(setq org-src--overlay overlay)
+	(setq org-src--allow-write-back write-back)
 	;; Start minor mode.
 	(org-src-mode)
 	;; Move mark and point in edit buffer to the corresponding
@@ -977,7 +1002,7 @@ name of the sub-editing buffer."
 		  (or (org-element-property :label-fmt element)
 		      org-coderef-label-format))
       (when (eq type 'src-block)
-	(setq-local org-src--babel-info babel-info)
+	(setq org-src--babel-info babel-info)
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
 	  (when (fboundp edit-prep-func)
 	    (funcall edit-prep-func babel-info))))
@@ -1010,8 +1035,8 @@ name of the sub-editing buffer."
 	 (skip-chars-backward " \t")
 	 (delete-region (point) (point-max))))
       ;; Finalize buffer.
-      (setq-local org-src--babel-info babel-info)
-      (setq-local org-src--preserve-indentation t)
+      (setq org-src--babel-info babel-info)
+      (setq org-src--preserve-indentation t)
       (let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
 	(when (fboundp edit-prep-func) (funcall edit-prep-func babel-info)))
       ;; Return success.
