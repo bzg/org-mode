@@ -1981,19 +1981,15 @@ communication channel."
 		      (format "<p class=\"creator\">%s</p>\n" creator))
 		    (format "<p class=\"validation\">%s</p>\n"
 			    validation-link))))
-		(t (format-spec
-		    (or (cadr (assoc-string
-			       (plist-get info :language)
-			       (eval (intern
-				      (format "org-html-%s-format" type)))
-			       t))
-			(cadr
-			 (assoc-string
-			  "en"
-			  (eval
-			   (intern (format "org-html-%s-format" type)))
-			  t)))
-		    spec))))))
+		(t
+		 (let ((formats (plist-get info (if (eq type 'preamble)
+						    :html-preamble-format
+						  :html-postamble-format)))
+		       (language (plist-get info :language)))
+		   (format-spec
+		    (cadr (or (assoc-string language formats t)
+			      (assoc-string "en" formats t)))
+		    spec)))))))
 	(let ((div (assq type (plist-get info :html-divs))))
 	  (when (org-string-nw-p section-contents)
 	    (concat
