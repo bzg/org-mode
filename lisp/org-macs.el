@@ -414,7 +414,7 @@ When you press a prefix key, the commands (and maybe further prefixes)
 under this key will be shown and offered for selection.
 
 TITLE will be placed over the selection in the temporary buffer,
-PROMPT will be used when prompting for a key.  SPECIAL is an
+PROMPT will be used when prompting for a key.  SPECIALS is an
 alist with (\"key\" \"description\") entries.  When one of these
 is selected, only the bare key is returned."
   (save-window-excursion
