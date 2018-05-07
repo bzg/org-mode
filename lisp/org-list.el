@@ -1258,10 +1258,18 @@ function ends.
 
 This function modifies STRUCT."
   (let ((case-fold-search t))
-    ;; 1. Get information about list: position of point with regards
-    ;;    to item start (BEFOREP), blank lines number separating items
-    ;;    (BLANK-NB), if we're allowed to (SPLIT-LINE-P).
-    (let* ((item (progn (goto-char pos) (goto-char (org-list-get-item-begin))))
+    ;; 1. Get information about list: ITEM containing POS, position of
+    ;;    point with regards to item start (BEFOREP), blank lines
+    ;;    number separating items (BLANK-NB), if we're allowed to
+    ;;    (SPLIT-LINE-P).
+    (let* ((item (goto-char (catch :exit
+			      (let ((inner-item 0))
+				(pcase-dolist (`(,i . ,_) struct)
+				  (cond
+				   ((= i pos) (throw :exit i))
+				   ((< i pos) (setq inner-item i))
+				   (t (throw :exit inner-item))))
+				inner-item))))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
 	   (beforep
