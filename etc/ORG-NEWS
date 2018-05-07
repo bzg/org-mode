@@ -28,7 +28,7 @@ look at the outshine package in the MELPA repository.
 *** Change in the structure template expansion
 
 Org 9.2 comes with a new template expansion mechanism, combining
-~org-insert-structure-template~ bound to ~C-c C-'~.
+~org-insert-structure-template~ bound to ~C-c C-,~.
 
 If you customized the ~org-structure-template-alist~ option manually,
 you probably need to udpate it, see the docstring for accepted values.
