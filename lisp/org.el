@@ -8126,7 +8126,7 @@ Assume point is at a heading or an inlinetask beginning."
 	  ((looking-at-p org-outline-regexp) (forward-line))
 	  ((looking-at-p "[ \t]*$") (forward-line))
 	  (t
-	   (indent-line-to (+ (org-get-indentation) diff))
+	   (indent-line-to (+ (current-indentation) diff))
 	   (beginning-of-line)
 	   (or (and (looking-at-p "[ \t]*#\\+BEGIN_\\(EXAMPLE\\|SRC\\)")
 		    (let ((e (org-element-at-point)))
@@ -18095,7 +18095,7 @@ environment remains unintended."
       (let ((ind (if (bolp) 0
 		   (save-excursion
 		     (org-return-indent)
-		     (prog1 (org-get-indentation)
+		     (prog1 (current-indentation)
 		       (when (progn (skip-chars-forward " \t") (eolp))
 			 (delete-region beg (point)))))))
 	    (bol (progn (skip-chars-backward " \t") (bolp))))
@@ -21523,7 +21523,7 @@ ELEMENT."
 	 ((item plain-list) (org-list-item-body-column post-affiliated))
 	 (t
 	  (goto-char start)
-	  (org-get-indentation))))
+	  (current-indentation))))
       ((memq type '(headline inlinetask nil))
        (if (org-match-line "[ \t]*$")
 	   (org--get-expected-indentation element t)
@@ -21556,7 +21556,7 @@ ELEMENT."
 		 (setq start (org-element-property :begin previous)))
 		(t (goto-char (org-element-property :begin previous))
 		   (throw 'exit
-			  (if (bolp) (org-get-indentation)
+			  (if (bolp) (current-indentation)
 			    ;; At first paragraph in an item or
 			    ;; a footnote definition.
 			    (org--get-expected-indentation
@@ -21575,7 +21575,7 @@ ELEMENT."
 	  ((and (memq type '(footnote-definition plain-list))
 		(> (count-lines (point) pos) 2))
 	   (goto-char start)
-	   (org-get-indentation))
+	   (current-indentation))
 	  ;; Line above is the first one of a paragraph at the
 	  ;; beginning of an item or a footnote definition.  Indent
 	  ;; like parent.
@@ -21602,9 +21602,9 @@ ELEMENT."
 		 (org--get-expected-indentation
 		  last (eq (org-element-type last) 'item)))
 	     (goto-char start)
-	     (org-get-indentation)))
+	     (current-indentation)))
 	  ;; In any other case, indent like the current line.
-	  (t (org-get-indentation)))))))))
+	  (t (current-indentation)))))))))
 
 (defun org--align-node-property ()
   "Align node property at point.
@@ -21740,7 +21740,7 @@ assumed to be significant there."
 		       (not
 			(or org-src-preserve-indentation
 			    (org-element-property :preserve-indent element)))))
-	      (let ((offset (- ind (org-get-indentation))))
+	      (let ((offset (- ind (current-indentation))))
 		(unless (zerop offset)
 		  (indent-rigidly (org-element-property :begin element)
 				  (org-element-property :end element)
@@ -21796,7 +21796,7 @@ assumed to be significant there."
 		;; might break the list as a whole.  On the other
 		;; hand, when at a plain list, indent it as a whole.
 		(cond ((eq type 'plain-list)
-		       (let ((offset (- ind (org-get-indentation))))
+		       (let ((offset (- ind (current-indentation))))
 			 (unless (zerop offset)
 			   (indent-rigidly (org-element-property :begin element)
 					   (org-element-property :end element)
@@ -22233,7 +22233,7 @@ region only contains such lines."
               (catch 'zerop
                 (while (< (point) end)
                   (unless (looking-at-p "[ \t]*$")
-                    (let ((ind (org-get-indentation)))
+                    (let ((ind (current-indentation)))
                       (setq min-ind (min min-ind ind))
                       (when (zerop ind) (throw 'zerop t))))
                   (forward-line)))))

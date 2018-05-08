@@ -566,7 +566,7 @@ If that property is already present, nothing changes."
 			      (if (looking-at
 				   (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
 				  (org-feed-make-indented-block
-				   v (org-get-indentation))
+				   v (current-indentation))
 				v))))))))
 		(when replacement
 		  (insert

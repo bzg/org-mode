@@ -126,7 +126,6 @@
 (declare-function org-export-get-next-element "ox" (blob info &optional n))
 (declare-function org-export-with-backend "ox" (backend data &optional contents info))
 (declare-function org-fix-tags-on-the-fly "org" ())
-(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-get-todo-state "org" ())
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
@@ -428,7 +427,7 @@ group 4: description tag")
 	   (ind-ref (if (or (looking-at "^[ \t]*$")
 			    (and inlinetask-re (looking-at inlinetask-re)))
 			10000
-		      (org-get-indentation))))
+		      (current-indentation))))
       (cond
        ((eq (nth 2 context) 'invalid) nil)
        ((looking-at item-re) (point))
@@ -450,7 +449,7 @@ group 4: description tag")
 	;; Look for an item, less indented that reference line.
 	(catch 'exit
 	  (while t
-	    (let ((ind (org-get-indentation)))
+	    (let ((ind (current-indentation)))
 	      (cond
 	       ;; This is exactly what we want.
 	       ((and (looking-at item-re) (< ind ind-ref))
@@ -620,7 +619,7 @@ Assume point is at an item."
 	   (item-re (org-item-re))
 	   (inlinetask-re (and (featurep 'org-inlinetask)
 			       (org-inlinetask-outline-regexp)))
-	   (beg-cell (cons (point) (org-get-indentation)))
+	   (beg-cell (cons (point) (current-indentation)))
            itm-lst itm-lst-2 end-lst end-lst-2 struct
 	   (assoc-at-point
 	    (function
@@ -648,7 +647,7 @@ Assume point is at an item."
       (save-excursion
 	(catch 'exit
 	  (while t
-	    (let ((ind (org-get-indentation)))
+	    (let ((ind (current-indentation)))
 	      (cond
 	       ((<= (point) lim-up)
 		;; At upward limit: if we ended at an item, store it,
@@ -708,7 +707,7 @@ Assume point is at an item."
       ;;    position of items in END-LST-2.
       (catch 'exit
 	(while t
-	  (let ((ind (org-get-indentation)))
+	  (let ((ind (current-indentation)))
 	    (cond
 	     ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
@@ -1884,7 +1883,7 @@ Initial position of cursor is restored after the changes."
 		 (org-inlinetask-goto-beginning))
 		;; Shift only non-empty lines.
 		((looking-at-p "^[ \t]*\\S-")
-		 (indent-line-to (+ (org-get-indentation) delta))))
+		 (indent-line-to (+ (current-indentation) delta))))
 	       (forward-line -1)))))
          (modify-item
           (function
@@ -1893,7 +1892,7 @@ Initial position of cursor is restored after the changes."
 	   (lambda (item)
 	     (goto-char item)
 	     (let* ((new-ind (org-list-get-ind item struct))
-		    (old-ind (org-get-indentation))
+		    (old-ind (current-indentation))
 		    (new-bul (org-list-bullet-string
 			      (org-list-get-bullet item struct)))
 		    (old-bul (org-list-get-bullet item old-struct))
@@ -1968,7 +1967,7 @@ Initial position of cursor is restored after the changes."
 			;; Ignore empty lines.  Also ignore blocks and
 			;; drawers contents.
 			(unless (looking-at-p "[ \t]*$")
-			  (setq min-ind (min (org-get-indentation) min-ind))
+			  (setq min-ind (min (current-indentation) min-ind))
 			  (cond
 			   ((and (looking-at "#\\+BEGIN\\(:\\|_\\S-+\\)")
 				 (re-search-forward
@@ -2092,7 +2091,7 @@ Possible values are: `folded', `children' or `subtree'.  See
 	;; Descriptive list item.  Body starts after item's tag, if
 	;; possible.
 	(let ((start (1+ (- (match-beginning 1) (line-beginning-position))))
-	      (ind (org-get-indentation)))
+	      (ind (current-indentation)))
 	  (if (> start (+ ind org-list-description-max-indent))
 	      (+ ind 5)
 	    start))
@@ -2965,7 +2964,7 @@ With a prefix argument ARG, change the region in a single item."
 	     (save-excursion
 	       (catch 'exit
 		 (while (< (point) end)
-		   (let ((i (org-get-indentation)))
+		   (let ((i (current-indentation)))
 		     (cond
 		      ;; Skip blank lines and inline tasks.
 		      ((looking-at "^[ \t]*$"))
@@ -2981,7 +2980,7 @@ With a prefix argument ARG, change the region in a single item."
 	       (while (< (point) end)
 		 (unless (or (looking-at "^[ \t]*$")
 			     (looking-at org-outline-regexp-bol))
-		   (indent-line-to (+ (org-get-indentation) delta)))
+		   (indent-line-to (+ (current-indentation) delta)))
 		 (forward-line))))))
 	(skip-blanks
 	 (lambda (pos)
@@ -3073,7 +3072,7 @@ With a prefix argument ARG, change the region in a single item."
 	;;         set them as item's body.
 	(arg (let* ((bul (org-list-bullet-string "-"))
 		    (bul-len (length bul))
-		    (ref-ind (org-get-indentation)))
+		    (ref-ind (current-indentation)))
 	       (skip-chars-forward " \t")
 	       (insert bul)
 	       (forward-line)

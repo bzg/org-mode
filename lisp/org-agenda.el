@@ -3555,10 +3555,10 @@ removed from the entry content.  Currently only `planning' is allowed here."
 	     ;; find and remove min common indentation
 	     (goto-char (point-min))
 	     (untabify (point-min) (point-max))
-	     (setq ind (org-get-indentation))
+	     (setq ind (current-indentation))
 	     (while (not (eobp))
 	       (unless (looking-at "[ \t]*$")
-		 (setq ind (min ind (org-get-indentation))))
+		 (setq ind (min ind (current-indentation))))
 	       (beginning-of-line 2))
 	     (goto-char (point-min))
 	     (while (not (eobp))

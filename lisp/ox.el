@@ -3281,7 +3281,7 @@ storing and resolving footnotes.  It is created automatically."
 	    (beginning-of-line)
 	    ;; Extract arguments from keyword's value.
 	    (let* ((value (org-element-property :value element))
-		   (ind (org-get-indentation))
+		   (ind (current-indentation))
 		   location
 		   (file
 		    (and (string-match

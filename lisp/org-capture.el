@@ -1158,10 +1158,10 @@ may have been stored before."
 	    (goto-char beg)
 	    (when (org-list-search-forward (org-item-beginning-re) end t)
 	      (goto-char (match-beginning 0))
-	      (setq ind (org-get-indentation))))
+	      (setq ind (current-indentation))))
 	(goto-char end)
 	(when (org-list-search-backward (org-item-beginning-re) beg t)
-	  (setq ind (org-get-indentation))
+	  (setq ind (current-indentation))
 	  (org-end-of-item)))
       (unless ind (goto-char end)))
     ;; Remove common indentation
@@ -1178,7 +1178,7 @@ may have been stored before."
     (unless (eolp) (save-excursion (insert "\n")))
     (unless ind
       (org-indent-line)
-      (setq ind (org-get-indentation))
+      (setq ind (current-indentation))
       (delete-region beg (point)))
     ;; Set the correct indentation, depending on context
     (setq ind (make-string ind ?\ ))

@@ -48,7 +48,6 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-footnote-goto-definition "org-footnote"
 		  (label &optional location))
-(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
 (declare-function org-trim "org" (s &optional keep-lead))
 
@@ -502,7 +501,7 @@ Leave point in edit buffer."
 	     (type (org-element-type datum))
 	     (ind (org-with-wide-buffer
 		   (goto-char (org-element-property :begin datum))
-		   (org-get-indentation)))
+		   (current-indentation)))
 	     (preserve-ind
 	      (and (memq type '(example-block src-block))
 		   (or (org-element-property :preserve-indent datum)

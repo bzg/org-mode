@@ -357,7 +357,7 @@ stopped."
 	      level (org-list-item-body-column (point))))
 	    ;; Regular line.
 	    (t
-	     (org-indent-set-line-properties level (org-get-indentation))))))))))
+	     (org-indent-set-line-properties level (current-indentation))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
   "Set `org-indent-modified-headline-flag' depending on context.

@@ -5967,7 +5967,7 @@ end of ELEM-A."
     ;; give it ELEM-B's (which will in, in turn, have no indentation).
     (let* ((ind-B (when specialp
 		    (goto-char (org-element-property :begin elem-B))
-		    (org-get-indentation)))
+		    (current-indentation)))
 	   (beg-A (org-element-property :begin elem-A))
 	   (end-A (save-excursion
 		    (goto-char (org-element-property :end elem-A))

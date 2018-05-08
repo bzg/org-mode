@@ -215,6 +215,8 @@ Counting starts at 1."
   'org-activate-links "Org 9.0")
 (define-obsolete-function-alias 'org-activate-plain-links 'ignore "Org 9.0")
 (define-obsolete-function-alias 'org-activate-angle-links 'ignore "Org 9.0")
+(define-obsolete-function-alias 'org-get-indentation
+  'current-indentation "Org 9.2")
 
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."

@@ -33,7 +33,6 @@
 (declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-export-copy-buffer "ox" ())
 (declare-function org-fill-template "org" (template alist))
-(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 
 (defvar org-src-preserve-indentation)
@@ -244,7 +243,7 @@ this template."
 			   (insert rep))))
 		      (`src-block
 		       (let ((match-start (copy-marker (match-beginning 0)))
-			     (ind (org-get-indentation)))
+			     (ind (current-indentation)))
 			 ;; Take care of matched block: compute
 			 ;; replacement string.  In particular, a nil
 			 ;; REPLACEMENT means the block is left as-is

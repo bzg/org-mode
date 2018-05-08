@@ -61,8 +61,6 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-escape-code-in-region "org-src" (beg end))
-(declare-function org-get-indentation "org" (&optional line))
-(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-in-regexp "org" (regexp &optional nlines visually))
 (declare-function org-indent-line "org" ())
 (declare-function org-list-get-list-end "org-list" (item struct prevs))
@@ -1889,7 +1887,7 @@ region is not active then the point is demarcated."
            (save-excursion
              (goto-char place)
              (let ((lang (nth 0 info))
-                   (indent (make-string (org-get-indentation) ?\s)))
+                   (indent (make-string (current-indentation) ?\s)))
 	       (when (string-match "^[[:space:]]*$"
 				   (buffer-substring (point-at-bol)
 						     (point-at-eol)))
@@ -2286,7 +2284,7 @@ INFO may provide the values of these header arguments (in the
 		  (goto-char (org-element-property :end inline))
 		  (skip-chars-backward " \t"))
 		(unless inline
-		  (setq indent (org-get-indentation))
+		  (setq indent (current-indentation))
 		  (forward-line 1))
 		(setq beg (point))
 		(cond
@@ -2554,7 +2552,7 @@ file's directory then expand relative links."
     (unless (eq (org-element-type element) 'src-block)
       (error "Not in a source block"))
     (goto-char (org-babel-where-is-src-block-head element))
-    (let* ((ind (org-get-indentation))
+    (let* ((ind (current-indentation))
 	   (body-start (line-beginning-position 2))
 	   (body (org-element-normalize-string
 		  (if (or org-src-preserve-indentation

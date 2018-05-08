@@ -317,17 +317,6 @@ it for output."
 
 ;;; Indentation
 
-(defun org-get-indentation (&optional line)
-  "Get the indentation of the current line, interpreting tabs.
-When LINE is given, assume it represents a line and compute its indentation."
-  (if line
-      (when (string-match "^ *" (org-remove-tabs line))
-	(match-end 0))
-    (save-excursion
-      (beginning-of-line 1)
-      (skip-chars-forward " \t")
-      (current-column))))
-
 (defun org-do-remove-indentation (&optional n)
   "Remove the maximum common indentation from the buffer.
 When optional argument N is a positive integer, remove exactly
