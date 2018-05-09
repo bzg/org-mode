@@ -27,7 +27,7 @@ guide::		orgguide.texi org-version.inc
 	../mk/guidesplit.pl $@/*
 endif
 
-org.texi:
+org.texi:	org-manual.org
 	$(BATCH) \
 	  --eval '(add-to-list '"'"'load-path "../lisp")' \
 	  --eval '(load "../mk/org-fixup.el")' \
