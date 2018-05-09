@@ -5779,7 +5779,7 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
 
      #+begin_example
      ,* 22:00-23:00 The nerd meeting on every 2nd Thursday of the month
-       <%%(org-float t 4 2)>
+       <%%(diary-float t 4 2)>
      #+end_example
 
 - Time/Date range ::
@@ -6158,7 +6158,7 @@ entries.  Org mode issues early and late warnings based on the
 assumption that the timestamp represents the /nearest instance/ of the
 repeater.  However, the use of diary S-exp entries like
 
-: <%%(org-float t 42)>
+: <%%(diary-float t 42)>
 
 #+texinfo: @noindent
 in scheduling and deadline timestamps is limited.  Org mode does not

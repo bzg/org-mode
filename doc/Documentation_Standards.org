@@ -94,10 +94,10 @@ I have made them up of course).
 - Entries in the concept index are normally all lower case unless some
   other rule dictates otherwise.
 
-* orgmanual.org specific conventions
+* org-manual.org specific conventions
 
 Org git repository comes with an .org version of the manual in the
-=contrib/= directory.  Here are indications that are specific to this
+=doc/= directory.  Here are indications that are specific to this
 version of the manual.
 
 - Five of the standard Texinfo indexes are used in the Org manual:
