@@ -27,6 +27,13 @@
 (require 'autoload)
 (require 'org-compat "org-compat.el")
 
+(defun org-make-manuals ()
+  "Generate the Texinfo files out of Org manuals."
+  (require 'ox-texinfo)
+  (dolist (manual '("../doc/org-manual.org"))
+    (find-file manual)
+    (org-texinfo-export-to-texinfo)))
+
 (defun org-make-org-version (org-release org-git-version odt-dir)
   "Make the file org-version.el in the current directory.
 This function is internally used by the build system and should

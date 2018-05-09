@@ -27,6 +27,12 @@ guide::		orgguide.texi org-version.inc
 	../mk/guidesplit.pl $@/*
 endif
 
+org.texi:
+	$(BATCH) \
+	  --eval '(add-to-list '"'"'load-path "../lisp")' \
+	  --eval '(load "../mk/org-fixup.el")' \
+	  --eval '(org-make-manuals)'
+
 org-version.inc:	org.texi
 	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
 	@echo "@c automatically generated, do not edit"  > org-version.inc
