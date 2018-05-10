@@ -31,8 +31,9 @@
 
 ;;; Code:
 
-(declare-function format-spec "format-spec" (format specification))
-(declare-function org-string-collate-lessp "org-compat" (s1 s2 &rest _))
+(require 'format-spec)
+
+(declare-function org-string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
 
 (defvar org-ts-regexp0)
 

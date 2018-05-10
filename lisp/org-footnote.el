@@ -47,13 +47,11 @@
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
 (declare-function org-fill-paragraph "org" (&optional justify region))
 (declare-function org-in-block-p "org" (names))
-(declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-inside-LaTeX-fragment-p "org" ())
 (declare-function org-inside-latex-macro-p "org" ())
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function org-show-context "org" (&optional key))
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function outline-next-heading "outline")
 
 (defvar electric-indent-mode)

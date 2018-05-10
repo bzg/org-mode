@@ -23,14 +23,12 @@
 ;;; Code:
 
 (require 'org-macs)
+(require 'org-compat)
 
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-beginning-of-line "org" (&optional n))
 (declare-function org-defkey "org" (keymap key def))
-(declare-function org-fit-window-to-buffer "org" (&optional window max-height min-height shrink-only))
-(declare-function org-invisible-p "org" (&optional pos))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
-(declare-function org-no-popups "org" (&rest body))
 (declare-function org-overview "org" ())
 (declare-function org-refile-check-position "org" (refile-pointer))
 (declare-function org-refile-get-location "org" (&optional prompt default-buffer new-nodes))

@@ -40,10 +40,9 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-macs)
 (require 'comint)
 
-(declare-function org-remove-indentation "org" (code &optional n))
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function haskell-mode "ext:haskell-mode" ())
 (declare-function run-haskell "ext:inf-haskell" (&optional arg))
 (declare-function inferior-haskell-load-file

@@ -28,9 +28,8 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-macs)
 
-(declare-function org-remove-indentation "org" )
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function py-shell "ext:python-mode" (&optional argprompt))
 (declare-function py-toggle-shells "ext:python-mode" (arg))
 (declare-function run-python "ext:python" (&optional cmd dedicated show))

@@ -34,10 +34,9 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-macs)
 (require 'cl-lib)
 
-(declare-function org-remove-indentation "org" (code &optional n))
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function lua-shell "ext:lua-mode" (&optional argprompt))
 (declare-function lua-toggle-shells "ext:lua-mode" (arg))
 (declare-function run-lua "ext:lua" (cmd &optional dedicated show))

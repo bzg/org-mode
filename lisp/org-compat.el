@@ -45,7 +45,6 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-get-tags "org" (&optional pos local))
-(declare-function org-invisible-p "org" (&optional pos))
 (declare-function org-link-display-format "org" (s))
 (declare-function org-link-set-parameters "org" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())

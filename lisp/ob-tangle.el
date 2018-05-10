@@ -40,14 +40,12 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-heading-components "org" ())
+(declare-function org-id-find "org-id" (id &optional markerp))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-link-escape "org" (text &optional table merge))
 (declare-function org-open-link-from-string "org" (s &optional arg reference-buffer))
-(declare-function org-remove-indentation "org" (code &optional n))
-(declare-function org-store-link "org" (arg))
-(declare-function org-trim "org" (s &optional keep-lead))
+(declare-function org-store-link "org" (arg &optional interactive?))
 (declare-function outline-previous-heading "outline" ())
-(declare-function org-id-find "org-id" (id &optional markerp))
 
 (defvar org-link-types-re)
 

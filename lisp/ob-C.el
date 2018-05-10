@@ -34,11 +34,9 @@
 
 (require 'cc-mode)
 (require 'ob)
-
+(require 'org-macs)
 
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
-(declare-function org-remove-indentation "org" (code &optional n))
-(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("C++" . "cpp"))

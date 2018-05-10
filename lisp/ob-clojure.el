@@ -41,6 +41,7 @@
 ;;; Code:
 (require 'cl-lib)
 (require 'ob)
+(require 'org-macs)
 
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
 (declare-function cider-current-ns "ext:cider-client" ())
@@ -49,7 +50,6 @@
 (declare-function nrepl-dict-put "ext:nrepl-client" (dict key value))
 (declare-function nrepl-request:eval "ext:nrepl-client" (input callback connection &optional ns line column additional-params tooling))
 (declare-function nrepl-sync-request:eval "ext:nrepl-client" (input connection &optional ns tooling))
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
 
 (defvar nrepl-sync-request-timeout)

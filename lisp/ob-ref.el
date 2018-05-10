@@ -50,6 +50,7 @@
 
 ;;; Code:
 (require 'ob-core)
+(require 'org-macs)
 (require 'cl-lib)
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
@@ -63,7 +64,6 @@
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-show-context "org" (&optional key))
-(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-update-intermediate nil
   "Update the in-buffer results of code blocks executed to resolve references.")

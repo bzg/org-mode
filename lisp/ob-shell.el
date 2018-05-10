@@ -27,6 +27,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-macs)
 (require 'shell)
 (require 'cl-lib)
 
@@ -36,7 +37,6 @@
 (declare-function org-babel-comint-buffer-livep "ob-comint" (buffer))
 (declare-function org-babel-comint-with-output "ob-comint" (meta &rest body)
 		  t)
-(declare-function org-trim "org" (s &optional keep-lead))
 (declare-function orgtbl-to-generic "org-table" (table params))
 
 (defvar org-babel-default-header-args:shell '())

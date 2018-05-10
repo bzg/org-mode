@@ -30,10 +30,10 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-macs)
 
 (declare-function matlab-shell "ext:matlab-mode")
 (declare-function matlab-shell-run-region "ext:matlab-mode")
-(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-babel-default-header-args:matlab '())
 (defvar org-babel-default-header-args:octave '())

@@ -37,8 +37,6 @@
 (require 'ob-keys)
 (require 'ob-comint)
 
-(declare-function org-base-buffer "org" (buffer))
-(declare-function org-do-remove-indentation "org" (&optional n))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
@@ -48,8 +46,6 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-footnote-goto-definition "org-footnote"
 		  (label &optional location))
-(declare-function org-switch-to-buffer-other-window "org" (&rest args))
-(declare-function org-trim "org" (s &optional keep-lead))
 
 (defvar org-inhibit-startup)
 
