@@ -67,6 +67,13 @@
 (defvar org-table1-hline-regexp)
 
 
+;;; Emacs < 27.1 compatibility
+
+(unless (fboundp 'pcomplete-uniquify-list)
+  ;; The misspelled variant was made obsolete in Emacs 27.1
+  (defalias 'pcomplete-uniquify-list 'pcomplete-uniqify-list))
+
+
 ;;; Emacs < 26.1 compatibility
 
 (if (fboundp 'line-number-display-width)
@@ -216,6 +223,9 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org-activate-angle-links 'ignore "Org 9.0")
 (define-obsolete-function-alias 'org-get-indentation
   'current-indentation "Org 9.2")
+(define-obsolete-function-alias 'org-capture-member 'org-capture-get "Org 9.2")
+(define-obsolete-function-alias 'org-remove-from-invisibility-spec
+  'remove-from-invisibility-spec "Org 9.2")
 
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
@@ -495,9 +505,6 @@ Unlike to `use-region-p', this function also checks
 
 
 ;;; Invisibility compatibility
-
-(define-obsolete-function-alias 'org-remove-from-invisibility-spec 'remove-from-invisibility-spec
-  "Org 9.2")
 
 (defun org-in-invisibility-spec-p (arg)
   "Is ARG a member of `buffer-invisibility-spec'?"
