@@ -474,38 +474,34 @@ When LOCAL is set, use the local variable `org-capture-current-plist',
 this is necessary after initialization of the capture process,
 to avoid conflicts with other active capture processes."
   (plist-get (if local org-capture-current-plist org-capture-plist) prop))
-
-(defun org-capture-member (prop &optional local)
-  "Is PROP a property in `org-capture-plist'.
-When LOCAL is set, use the local variable `org-capture-current-plist',
-this is necessary after initialization of the capture process,
-to avoid conflicts with other active capture processes."
-  (plist-get (if local org-capture-current-plist org-capture-plist) prop))
+(define-obsolete-function-alias 'org-capture-member 'org-capture-get "Org 9.2")
 
 ;;; The minor mode
 
-(defvar org-capture-mode-map (make-sparse-keymap)
+(defvar org-capture-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "\C-c\C-c" #'org-capture-finalize)
+    (define-key map "\C-c\C-k" #'org-capture-kill)
+    (define-key map "\C-c\C-w" #'org-capture-refile)
+    map)
   "Keymap for `org-capture-mode', a minor mode.
 Use this map to set additional keybindings for when Org mode is used
 for a capture buffer.")
 
 (defvar org-capture-mode-hook nil
-  "Hook for the minor `org-capture-mode'.")
+  "Hook for the `org-capture-mode' minor mode.")
 
 (define-minor-mode org-capture-mode
   "Minor mode for special key bindings in a capture buffer.
 
 Turning on this mode runs the normal hook `org-capture-mode-hook'."
-  nil " Rem" org-capture-mode-map
+  nil " Cap" org-capture-mode-map
   (setq-local
    header-line-format
    (substitute-command-keys
     "\\<org-capture-mode-map>Capture buffer.  Finish \
 `\\[org-capture-finalize]', refile `\\[org-capture-refile]', \
 abort `\\[org-capture-kill]'.")))
-(define-key org-capture-mode-map "\C-c\C-c" 'org-capture-finalize)
-(define-key org-capture-mode-map "\C-c\C-k" 'org-capture-kill)
-(define-key org-capture-mode-map "\C-c\C-w" 'org-capture-refile)
 
 ;;; The main commands
 
@@ -1021,7 +1017,7 @@ Store them in the capture property list."
 	       (org-today))))
 	    ;; the following is the keep-restriction argument for
 	    ;; org-datetree-find-date-create
-	    (if outline-path 'subtree-at-point))))
+	    (when outline-path 'subtree-at-point))))
 	(`(file+function ,path ,function)
 	 (set-buffer (org-capture-target-buffer path))
 	 (org-capture-put-target-region-and-position)
@@ -1193,9 +1189,9 @@ may have been stored before."
     (setq end (point))
     (org-capture-mark-kill-region beg end)
     (org-capture-narrow beg end)
-    (if (or (re-search-backward "%\\?" beg t)
-	    (re-search-forward "%\\?" end t))
-	(replace-match ""))))
+    (when (or (re-search-backward "%\\?" beg t)
+	      (re-search-forward "%\\?" end t))
+      (replace-match ""))))
 
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
@@ -1307,9 +1303,9 @@ Of course, if exact position has been required, just put it there."
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
-    (if (or (re-search-backward "%\\?" beg t)
-	    (re-search-forward "%\\?" end t))
-	(replace-match ""))))
+    (when (or (re-search-backward "%\\?" beg t)
+	      (re-search-forward "%\\?" end t))
+      (replace-match ""))))
 
 (defun org-capture-mark-kill-region (beg end)
   "Mark the region that will have to be killed when aborting capture."
@@ -1366,7 +1362,7 @@ Point will be after the empty lines, so insertion can directly be done."
   (let ((pos (point)))
     (org-back-over-empty-lines)
     (delete-region (point) pos)
-    (if (> n 0) (newline n))))
+    (when (> n 0) (newline n))))
 
 (defun org-capture-empty-lines-after (&optional n)
   "Set the correct number of empty lines after the inserted string.
@@ -1376,7 +1372,7 @@ Point will remain at the first line after the inserted text."
   (org-back-over-empty-lines)
   (while (looking-at "[ \t]*\n") (replace-match ""))
   (let ((pos (point)))
-    (if (> n 0) (newline n))
+    (when (> n 0) (newline n))
     (goto-char pos)))
 
 (defvar org-clock-marker) ; Defined in org.el
@@ -1852,9 +1848,9 @@ Assume sexps have been marked with
 		 (setq jump-to-captured t))
 
 	       (append (list key desc type target template)
-		       (if prepend '(:prepend t))
-		       (if immediate '(:immediate-finish t))
-		       (if jump-to-captured '(:jump-to-captured t)))))
+		       (and prepend '(:prepend t))
+		       (and immediate '(:immediate-finish t))
+		       (and jump-to-captured '(:jump-to-captured t)))))
 
 	   org-remember-templates))))
 

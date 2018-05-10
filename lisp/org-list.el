@@ -2260,7 +2260,7 @@ item is invisible."
 				(string-match "[.)]" (match-string 1))))
 			 (match-beginning 4)
 		       (match-end 0)))
-	  (if desc (backward-char 1))
+	  (when desc (backward-char 1))
 	  t)))))
 
 (defun org-list-repair ()

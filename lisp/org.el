@@ -235,10 +235,10 @@ Stars are put in group 1 and the trimmed body in group 2.")
     (let ((active (cdr pair)) (lang (symbol-name (car pair))))
       (if active
 	  (require (intern (concat "ob-" lang)))
-	(funcall 'fmakunbound
-		 (intern (concat "org-babel-execute:" lang)))
-	(funcall 'fmakunbound
-		 (intern (concat "org-babel-expand-body:" lang)))))))
+	(fmakunbound
+	 (intern (concat "org-babel-execute:" lang)))
+	(fmakunbound
+	 (intern (concat "org-babel-expand-body:" lang)))))))
 
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 ;;;###autoload
@@ -9955,7 +9955,7 @@ If the link is in hidden text, expose it."
   "Move backward to the previous link.
 If the link is in hidden text, expose it."
   (interactive)
-  (funcall 'org-next-link t))
+  (org-next-link t))
 
 (defun org-translate-link (s)
   "Translate a link string if a translation function has been defined."
@@ -11209,7 +11209,7 @@ the *old* location.")
   "Like `org-refile', but copy."
   (interactive)
   (let ((org-refile-keep t))
-    (funcall 'org-refile nil nil nil "Copy")))
+    (org-refile nil nil nil "Copy")))
 
 (defun org-refile (&optional arg default-buffer rfloc msg)
   "Move the entry or entries at point to another heading.
@@ -13217,25 +13217,19 @@ EXTRA is additional text that will be inserted into the notes buffer."
     (let ((org-inhibit-startup t)) (org-mode))
     (insert (format "# Insert note for %s.
 # Finish with C-c C-c, or cancel with C-c C-k.\n\n"
-		    (cond
-		     ((eq org-log-note-purpose 'clock-out) "stopped clock")
-		     ((eq org-log-note-purpose 'done)  "closed todo item")
-		     ((eq org-log-note-purpose 'state)
+		    (cl-case org-log-note-purpose
+		     (clock-out "stopped clock")
+		     (done  "closed todo item")
+		     (reschedule "rescheduling")
+		     (delschedule "no longer scheduled")
+		     (redeadline "changing deadline")
+		     (deldeadline "removing deadline")
+		     (refile "refiling")
+		     (note "this entry")
+		     (state
 		      (format "state change from \"%s\" to \"%s\""
 			      (or org-log-note-previous-state "")
 			      (or org-log-note-state "")))
-		     ((eq org-log-note-purpose 'reschedule)
-		      "rescheduling")
-		     ((eq org-log-note-purpose 'delschedule)
-		      "no longer scheduled")
-		     ((eq org-log-note-purpose 'redeadline)
-		      "changing deadline")
-		     ((eq org-log-note-purpose 'deldeadline)
-		      "removing deadline")
-		     ((eq org-log-note-purpose 'refile)
-		      "refiling")
-		     ((eq org-log-note-purpose 'note)
-		      "this entry")
 		     (t (error "This should not happen")))))
     (when org-log-note-extra (insert org-log-note-extra))
     (setq-local org-finish-function 'org-store-log-note)
@@ -13526,10 +13520,19 @@ from the `before-change-functions' in the current buffer."
   (interactive)
   (org-priority 'down))
 
-(defun org-priority (&optional action _show)
+(defun org-priority (&optional action show)
   "Change the priority of an item.
-ACTION can be `set', `up', `down', or a character."
+
+When called interactively with a `\\[universal-argument]' prefix,
+show the priority in the minibuffer instead of changing it.
+
+When called programatically, ACTION can be `set', `up', `down',
+or a character."
   (interactive "P")
+  (when show
+    ;; Deprecation warning inserted for Org 9.2; once enough time has
+    ;; passed the SHOW argument should be removed.
+    (warn "`org-priority' called with deprecated SHOW argument"))
   (if (equal action '(4))
       (org-show-priority)
     (unless org-enable-priority-commands
@@ -13555,7 +13558,7 @@ ACTION can be `set', `up', `down', or a character."
 	  (when (and (= (upcase org-highest-priority) org-highest-priority)
 		     (= (upcase org-lowest-priority) org-lowest-priority))
 	    (setq new (upcase new)))
-	  (cond ((equal new ?\ ) (setq remove t))
+	  (cond ((equal new ?\s) (setq remove t))
 		((or (< (upcase new) org-highest-priority) (> (upcase new) org-lowest-priority))
 		 (user-error "Priority must be between `%c' and `%c'"
 			     org-highest-priority org-lowest-priority))))
@@ -14442,7 +14445,7 @@ This works in the agenda, and also in an Org buffer."
       (assoc s2 ctable)))))
 
 (defun org-fast-tag-insert (kwd tags face &optional end)
-  "Insert KDW, and the TAGS, the latter with face FACE.
+  "Insert KWD, and the TAGS, the latter with face FACE.
 Also insert END."
   (insert (format "%-12s" (concat kwd ":"))
 	  (org-add-props (mapconcat 'identity tags " ") nil 'face face)
@@ -21125,12 +21128,10 @@ If there is no description, use the link target."
   "Toggle the literal or descriptive display of links."
   (interactive)
   (if org-descriptive-links
-      (progn (org-remove-from-invisibility-spec '(org-link))
-	     (org-restart-font-lock)
-	     (setq org-descriptive-links nil))
-    (progn (add-to-invisibility-spec '(org-link))
-	   (org-restart-font-lock)
-	   (setq org-descriptive-links t))))
+      (remove-from-invisibility-spec '(org-link))
+    (add-to-invisibility-spec '(org-link)))
+  (org-restart-font-lock)
+  (setq org-descriptive-links (not org-descriptive-links)))
 
 (defun org-in-clocktable-p ()
   "Check if the cursor is in a clocktable."
@@ -22111,7 +22112,7 @@ fill each of the elements in the active region, instead of just
 filling the current element."
   (interactive (progn
 		 (barf-if-buffer-read-only)
-		 (list (if current-prefix-arg 'full) t)))
+		 (list (when current-prefix-arg 'full) t)))
   (cond
    ((and region transient-mark-mode mark-active
 	 (not (eq (region-beginning) (region-end))))
@@ -22995,8 +22996,6 @@ empty."
 (defun org-at-target-p ()
   (or (org-in-regexp org-radio-target-regexp)
       (org-in-regexp org-target-regexp)))
-;; Compatibility alias with Org versions < 7.8.03
-(defalias 'org-on-target-p 'org-at-target-p)
 
 (defun org-up-heading-all (arg)
   "Move to the heading line of which the present line is a subheading.

@@ -468,19 +468,20 @@ You may specify the template with a template= query parameter, like this:
   javascript:location.href = \\='org-protocol://capture?template=b\\='+ ...
 
 Now template ?b will be used."
-  (if (and (boundp 'org-stored-links)
-	   (org-protocol-do-capture info))
-      (message "Item captured."))
+  (when (and (boundp 'org-stored-links)
+	     (org-protocol-do-capture info))
+    (message "Item captured."))
   nil)
 
 (defun org-protocol-convert-query-to-plist (query)
   "Convert QUERY key=value pairs in the URL to a property list."
-  (if query
-      (apply 'append (mapcar (lambda (x)
-			       (let ((c (split-string x "=")))
-				 (list (intern (concat ":" (car c))) (cadr c))))
-			     (split-string query "&")))))
+  (when query
+    (apply 'append (mapcar (lambda (x)
+			     (let ((c (split-string x "=")))
+			       (list (intern (concat ":" (car c))) (cadr c))))
+			   (split-string query "&")))))
 
+(defvar org-capture-templates)
 (defun org-protocol-do-capture (info)
   "Perform the actual capture based on INFO."
   (let* ((temp-parts (org-protocol-parse-parameters info))
@@ -494,8 +495,7 @@ Now template ?b will be used."
 	 (template (or (plist-get parts :template)
 		       org-protocol-default-template-key))
 	 (url (and (plist-get parts :url) (org-protocol-sanitize-uri (plist-get parts :url))))
-	 (type (and url (if (string-match "^\\([a-z]+\\):" url)
-			    (match-string 1 url))))
+	 (type (and url (string-match "^\\([a-z]+\\):" url) (match-string 1 url)))
 	 (title (or (plist-get parts :title) ""))
 	 (region (or (plist-get parts :body) ""))
 	 (orglink (if url

@@ -569,7 +569,7 @@ Where possible, use the standard interface for changing this line."
 	 (action
 	  (pcase key
 	    ("CLOCKSUM"
-	     (error "This special column cannot be edited"))
+	     (user-error "This special column cannot be edited"))
 	    ("ITEM"
 	     (lambda () (org-with-point-at pom (org-edit-headline))))
 	    ("TODO"
@@ -1036,8 +1036,8 @@ the current buffer."
 
 (defun org-columns-uncompile-format (compiled)
   "Turn the compiled columns format back into a string representation.
-COMPILED is an alist, as returned by
-`org-columns-compile-format', which see."
+
+COMPILED is an alist, as returned by `org-columns-compile-format'."
   (mapconcat
    (lambda (spec)
      (pcase spec

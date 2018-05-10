@@ -496,18 +496,13 @@ Unlike to `use-region-p', this function also checks
 
 ;;; Invisibility compatibility
 
-(defun org-remove-from-invisibility-spec (arg)
-  "Remove elements from `buffer-invisibility-spec'."
-  (if (fboundp 'remove-from-invisibility-spec)
-      (remove-from-invisibility-spec arg)
-    (if (consp buffer-invisibility-spec)
-        (setq buffer-invisibility-spec
-              (delete arg buffer-invisibility-spec)))))
+(define-obsolete-function-alias 'org-remove-from-invisibility-spec 'remove-from-invisibility-spec
+  "Org 9.2")
 
 (defun org-in-invisibility-spec-p (arg)
   "Is ARG a member of `buffer-invisibility-spec'?"
-  (if (consp buffer-invisibility-spec)
-      (member arg buffer-invisibility-spec)))
+  (when (consp buffer-invisibility-spec)
+    (member arg buffer-invisibility-spec)))
 
 (defun org-move-to-column (column &optional force _buffer)
   "Move to column COLUMN.
@@ -526,8 +521,8 @@ Pass COLUMN and FORCE to `move-to-column'."
   (let ((start 0) (n 1))
     (while (string-match "\n" s start)
       (setq start (match-end 0) n (1+ n)))
-    (if (and (> (length s) 0) (= (aref s (1- (length s))) ?\n))
-        (setq n (1- n)))
+    (when (and (> (length s) 0) (= (aref s (1- (length s))) ?\n))
+      (setq n (1- n)))
     n))
 
 (defun org-kill-new (string &rest args)

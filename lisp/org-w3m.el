@@ -72,7 +72,7 @@ so that it can be yanked into an Org  buffer with links working correctly."
       (setq transform-start (region-beginning))
       (setq transform-end (region-end))
       ;; Deactivate mark if current mark is activate.
-      (if (fboundp 'deactivate-mark) (deactivate-mark)))
+      (when (fboundp 'deactivate-mark) (deactivate-mark)))
     (message "Transforming links...")
     (save-excursion
       (goto-char transform-start)
@@ -85,10 +85,10 @@ so that it can be yanked into an Org  buffer with links working correctly."
         (if (<= (point) transform-end) ; if point is inside transform bound
             (progn
               ;; get content between two links.
-              (if (> (point) temp-position)
-                  (setq return-content (concat return-content
-                                               (buffer-substring
-                                                temp-position (point)))))
+              (when (> (point) temp-position)
+                (setq return-content (concat return-content
+                                             (buffer-substring
+                                              temp-position (point)))))
               ;; get link location at current point.
               (setq link-location (get-text-property (point) 'w3m-href-anchor))
               ;; get link title at current point.
@@ -103,10 +103,10 @@ so that it can be yanked into an Org  buffer with links working correctly."
           (goto-char temp-position) ; reset point before jump next anchor
           (setq out-bound t)))	    ; for break out `while' loop
       ;; add the rest until end of the region to be copied
-      (if (< (point) transform-end)
-          (setq return-content
-                (concat return-content
-                        (buffer-substring (point) transform-end))))
+      (when (< (point) transform-end)
+        (setq return-content
+              (concat return-content
+                      (buffer-substring (point) transform-end))))
       (org-kill-new return-content)
       (message "Transforming links...done, use C-y to insert text into Org file")
       (message "Copy with link transformation complete."))))

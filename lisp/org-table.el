@@ -551,13 +551,13 @@ and table.el tables."
   (interactive)
   (require 'table)
   (cond
-   ((org-at-table.el-p)
-    (if (y-or-n-p "Convert table to Org table? ")
-	(org-table-convert)))
-   ((org-at-table-p)
-    (when (y-or-n-p "Convert table to table.el table? ")
-      (org-table-align)
-      (org-table-convert)))
+   ((and (org-at-table.el-p)
+	 (y-or-n-p "Convert table to Org table? "))
+    (org-table-convert))
+   ((and (org-at-table-p)
+	 (y-or-n-p "Convert table to table.el table? "))
+    (org-table-align)
+    (org-table-convert))
    (t (call-interactively 'table-insert))))
 
 ;;;###autoload
@@ -598,12 +598,11 @@ SIZE is a string Columns x Rows like for example \"3x2\"."
     ;; (mapcar (lambda (x) (insert line)) (make-list rows t))
     (dotimes (_ rows) (insert line))
     (goto-char pos)
-    (if (> rows 1)
-	;; Insert a hline after the first row.
-	(progn
-	  (end-of-line 1)
-	  (insert "\n|-")
-	  (goto-char pos)))
+    (when (> rows 1)
+      ;; Insert a hline after the first row.
+      (end-of-line 1)
+      (insert "\n|-")
+      (goto-char pos))
     (org-table-align)))
 
 ;;;###autoload
@@ -633,8 +632,8 @@ nil      When nil, the command tries to be smart and figure out the
     (if (> (count-lines beg end) org-table-convert-region-max-lines)
 	(user-error "Region is longer than `org-table-convert-region-max-lines' (%s) lines; not converting"
 		    org-table-convert-region-max-lines)
-      (if (equal separator '(64))
-	  (setq separator (read-regexp "Regexp for field separator")))
+      (when (equal separator '(64))
+	(setq separator (read-regexp "Regexp for field separator")))
       (goto-char beg)
       (beginning-of-line 1)
       (setq beg (point-marker))
@@ -993,9 +992,9 @@ Before doing so, re-align the table if necessary."
   (interactive)
   (org-table-maybe-eval-formula)
   (org-table-maybe-recalculate-line)
-  (if (and org-table-automatic-realign
-	   org-table-may-need-update)
-      (org-table-align))
+  (when (and org-table-automatic-realign
+	     org-table-may-need-update)
+    (org-table-align))
   (let ((end (org-table-end)))
     (if (org-at-table-hline-p)
 	(end-of-line 1))
@@ -1055,7 +1054,7 @@ With numeric argument N, move N-1 fields backward first."
 	(user-error "No more table fields before the current")
       (goto-char (match-end 0))
       (and (looking-at " ") (forward-char 1)))
-    (if (>= (point) pos) (org-table-beginning-of-field 2))))
+    (when (>= (point) pos) (org-table-beginning-of-field 2))))
 
 (defun org-table-end-of-field (&optional n)
   "Move to the end of the current table field.
@@ -1069,9 +1068,9 @@ With numeric argument N, move N-1 fields forward first."
     (when (re-search-forward "|" (point-at-eol 1) t)
       (backward-char 1)
       (skip-chars-backward " ")
-      (if (and (equal (char-before (point)) ?|) (looking-at " "))
-	  (forward-char 1)))
-    (if (<= (point) pos) (org-table-end-of-field 2))))
+      (when (and (equal (char-before (point)) ?|) (equal (char-after (point)) ?\s))
+	(forward-char 1)))
+    (when (<= (point) pos) (org-table-end-of-field 2))))
 
 ;;;###autoload
 (defun org-table-next-row ()

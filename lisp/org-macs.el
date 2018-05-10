@@ -78,7 +78,7 @@
   (org-with-gensyms (mpom)
     `(let ((,mpom ,pom))
        (save-excursion
-	 (if (markerp ,mpom) (set-buffer (marker-buffer ,mpom)))
+	 (when (markerp ,mpom) (set-buffer (marker-buffer ,mpom)))
 	 (org-with-wide-buffer
 	  (goto-char (or ,mpom (point)))
 	  ,@body)))))
@@ -206,8 +206,7 @@ because otherwise all these markers will point to nowhere."
 
 (defun org-base-buffer (buffer)
   "Return the base buffer of BUFFER, if it has one.  Else return the buffer."
-  (if (not buffer)
-      buffer
+  (when buffer
     (or (buffer-base-buffer buffer)
 	buffer)))
 
@@ -216,9 +215,7 @@ because otherwise all these markers will point to nowhere."
 not an indirect buffer."
   (let ((buf (or (get-file-buffer file)
 		 (find-buffer-visiting file))))
-    (if buf
-	(or (buffer-base-buffer buf) buf)
-      nil)))
+    (org-base-buffer buf)))
 
 (defun org-switch-to-buffer-other-window (&rest args)
   "Switch to buffer in a second window on the current frame.
@@ -672,14 +669,14 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 (defun org-overlay-display (ovl text &optional face evap)
   "Make overlay OVL display TEXT with face FACE."
   (overlay-put ovl 'display text)
-  (if face (overlay-put ovl 'face face))
-  (if evap (overlay-put ovl 'evaporate t)))
+  (when face (overlay-put ovl 'face face))
+  (when evap (overlay-put ovl 'evaporate t)))
 
 (defun org-overlay-before-string (ovl text &optional face evap)
   "Make overlay OVL display TEXT with face FACE."
-  (if face (org-add-props text nil 'face face))
+  (when face (org-add-props text nil 'face face))
   (overlay-put ovl 'before-string text)
-  (if evap (overlay-put ovl 'evaporate t)))
+  (when evap (overlay-put ovl 'evaporate t)))
 
 (defun org-find-overlays (prop &optional pos delete)
   "Find all overlays specifying PROP at POS or point.

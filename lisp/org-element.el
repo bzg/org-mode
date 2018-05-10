@@ -5958,11 +5958,11 @@ end of ELEM-A."
     ;; ELEM-A position in such a situation.  Note that the case of
     ;; a footnote definition is impossible: it cannot contain two
     ;; paragraphs in a row because it cannot contain a blank line.
-    (if (and specialp
-	     (or (not (eq (org-element-type elem-B) 'paragraph))
-		 (/= (org-element-property :begin elem-B)
-		     (org-element-property :contents-begin elem-B))))
-	(error "Cannot swap elements"))
+    (when (and specialp
+	       (or (not (eq (org-element-type elem-B) 'paragraph))
+		   (/= (org-element-property :begin elem-B)
+		       (org-element-property :contents-begin elem-B))))
+      (error "Cannot swap elements"))
     ;; In a special situation, ELEM-A will have no indentation.  We'll
     ;; give it ELEM-B's (which will in, in turn, have no indentation).
     (let* ((ind-B (when specialp

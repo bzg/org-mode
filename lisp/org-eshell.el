@@ -32,7 +32,7 @@
 			 :store #'org-eshell-store-link)
 
 (defun org-eshell-open (link)
-  "Switch to am eshell buffer and execute a command line.
+  "Switch to an eshell buffer and execute a command line.
    The link can be just a command line (executed in the default
    eshell buffer) or a command line prefixed by a buffer name
    followed by a colon."
