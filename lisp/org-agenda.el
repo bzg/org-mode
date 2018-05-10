@@ -5101,19 +5101,6 @@ each date.  It also removes lines that contain only whitespace."
     (replace-match ""))
   (run-hooks 'org-agenda-cleanup-fancy-diary-hook))
 
-;; Make sure entries from the diary have the right text properties.
-(eval-after-load "diary-lib"
-  '(if (boundp 'diary-modify-entry-list-string-function)
-       ;; We can rely on the hook, nothing to do
-       nil
-     ;; Hook not available, must use advice to make this work
-     (defadvice add-to-diary-list (before org-mark-diary-entry activate)
-       "Make the position visible."
-       (if (and org-disable-agenda-to-diary  ;; called from org-agenda
-		(stringp string)
-		buffer-file-name)
-	   (setq string (org-modify-diary-entry-string string))))))
-
 (defun org-modify-diary-entry-string (string)
   "Add text properties to string, allowing Org to act on it."
   (org-add-props string nil
@@ -8843,7 +8830,7 @@ the dedicated frame."
     (with-current-buffer buffer
       (save-excursion
 	(goto-char pos)
-	(funcall 'org-tree-to-indirect-buffer arg)))))
+	(org-tree-to-indirect-buffer arg)))))
 
 (defvar org-last-heading-marker (make-marker)
   "Marker pointing to the headline that last changed its TODO state
@@ -9057,7 +9044,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	  (widen)
 	  (goto-char pos)
 	  (org-show-context 'agenda)
-	  (funcall 'org-priority force-direction)
+	  (org-priority force-direction)
 	  (end-of-line 1)
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)
@@ -9463,8 +9450,8 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
      (find-file-noselect org-agenda-diary-file))
     (widen)
     (goto-char (point-min))
-    (cond
-     ((eq type 'anniversary)
+    (cl-case type
+     (anniversary
       (or (re-search-forward "^*[ \t]+Anniversaries" nil t)
 	  (progn
 	    (or (org-at-heading-p t)
@@ -9478,7 +9465,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (insert "\n")
       (insert (format "%%%%(org-anniversary %d %2d %2d) %s"
 		      (nth 2 d1) (car d1) (nth 1 d1) text)))
-     ((eq type 'day)
+     (day
       (let ((org-prefix-has-time t)
 	    (org-agenda-time-leading-zero t)
 	    fmt time time2)
@@ -9504,10 +9491,12 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 				(calendar-absolute-from-gregorian d1))
 			       nil nil nil nil time2))
       (end-of-line 0))
-     ((eq type 'block)
-      (if (> (calendar-absolute-from-gregorian d1)
-	     (calendar-absolute-from-gregorian d2))
-	  (setq d1 (prog1 d2 (setq d2 d1))))
+     ((block) ;; Wrap this in (strictly unnecessary) parens because
+              ;; otherwise the indentation gets confused by the
+              ;; special meaning of 'block
+      (when (> (calendar-absolute-from-gregorian d1)
+	       (calendar-absolute-from-gregorian d2))
+	(setq d1 (prog1 d2 (setq d2 d1))))
       (if (eq org-agenda-insert-diary-strategy 'top-level)
 	  (org-agenda-insert-diary-as-top-level text)
 	(require 'org-datetree)
