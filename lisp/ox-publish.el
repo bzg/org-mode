@@ -1321,7 +1321,7 @@ the file including them will be republished as well."
 Use cache file of PROJECT-NAME.  If the entry does not exist, it
 will be created.  Return VALUE."
   ;; Evtl. load the requested cache file:
-  (if project-name (org-publish-initialize-cache project-name))
+  (when project-name (org-publish-initialize-cache project-name))
   (let ((pl (org-publish-cache-get filename)))
     (if pl (progn (plist-put pl property value) value)
       (org-publish-cache-get-file-property

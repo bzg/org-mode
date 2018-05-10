@@ -1342,8 +1342,8 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let* ((title (org-element-property :name quote-block))
 	 (start-quote (concat "@quotation"
-			      (if title
-				  (format " %s" title)))))
+			      (when title
+				(format " %s" title)))))
     (format "%s\n%s@end quotation" start-quote contents)))
 
 ;;;; Radio Target

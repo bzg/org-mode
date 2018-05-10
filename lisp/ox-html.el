@@ -1764,12 +1764,12 @@ produce code that uses these same face definitions."
       (htmlize-region (point-min) (point-max))))
   (pop-to-buffer-same-window "*html*")
   (goto-char (point-min))
-  (if (re-search-forward "<style" nil t)
-      (delete-region (point-min) (match-beginning 0)))
-  (if (re-search-forward "</style>" nil t)
-      (delete-region (1+ (match-end 0)) (point-max)))
+  (when (re-search-forward "<style" nil t)
+    (delete-region (point-min) (match-beginning 0)))
+  (when (re-search-forward "</style>" nil t)
+    (delete-region (1+ (match-end 0)) (point-max)))
   (beginning-of-line 1)
-  (if (looking-at " +") (replace-match ""))
+  (when (looking-at " +") (replace-match ""))
   (goto-char (point-min)))
 
 (defun org-html--make-string (n string)
@@ -2097,12 +2097,12 @@ holding export options."
    ;; Postamble.
    (org-html--build-pre/postamble 'postamble info)
    ;; Possibly use the Klipse library live code blocks.
-   (if (plist-get info :html-klipsify-src)
-       (concat "<script>" (plist-get info :html-klipse-selection-script)
-	       "</script><script src=\""
-	       org-html-klipse-js
-	       "\"></script><link rel=\"stylesheet\" type=\"text/css\" href=\""
-	       org-html-klipse-css "\"/>"))
+   (when (plist-get info :html-klipsify-src)
+     (concat "<script>" (plist-get info :html-klipse-selection-script)
+	     "</script><script src=\""
+	     org-html-klipse-js
+	     "\"></script><link rel=\"stylesheet\" type=\"text/css\" href=\""
+	     org-html-klipse-css "\"/>"))
    ;; Closing document.
    "</body>\n</html>"))
 
@@ -3716,8 +3716,8 @@ contextual information."
   (with-temp-buffer
     (insert contents)
     (set-auto-mode t)
-    (if (plist-get info :html-indent)
-	(indent-region (point-min) (point-max)))
+    (when (plist-get info :html-indent)
+      (indent-region (point-min) (point-max)))
     (buffer-substring-no-properties (point-min) (point-max))))
 
 
