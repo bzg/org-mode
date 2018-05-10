@@ -1,6 +1,6 @@
 # -*- mode:org -*-
 #+TITLE: Org mode Testing
-#+PROPERTY: results silent
+#+PROPERTY: header-args:emacs-lisp :results silent
 
 * Dependencies
 
