@@ -26,6 +26,7 @@
 
 (require 'org-test)
 (require 'org-attach)
+(eval-and-compile (require 'cl-lib))
 
 (ert-deftest test-org-attach/dired-attach-to-next-best-subtree/1 ()
   "Attach file at point in dired to subtree."
@@ -36,22 +37,22 @@
 	  "* foo   :foo:"
 	  (split-window)
 	  (dired temporary-file-directory)
-	  (assert (eq 'dired-mode major-mode))
+	  (cl-assert (eq 'dired-mode major-mode))
 	  (revert-buffer)
 	  (dired-goto-file a-filename)
 					; action
 	  (call-interactively #'org-attach-dired-to-subtree)
 					; check
 	  (delete-window)
-	  (assert (eq 'org-mode major-mode))
+	  (cl-assert (eq 'org-mode major-mode))
 	  (beginning-of-buffer)
 	  (search-forward "* foo")
 					; expectation.  tag ATTACH has been appended.
-	  (reduce (lambda (x y) (or x y))
-		  (mapcar (lambda (x) (string-equal "ATTACH" x))
-			  (plist-get
-			   (plist-get
-			    (org-element-at-point) 'headline) :tags))))
+	  (cl-reduce (lambda (x y) (or x y))
+		     (mapcar (lambda (x) (string-equal "ATTACH" x))
+			     (plist-get
+			      (plist-get
+			       (org-element-at-point) 'headline) :tags))))
        (delete-file a-filename)))))
 
 (ert-deftest test-org-attach/dired-attach-to-next-best-subtree/2 ()
@@ -64,7 +65,7 @@
 	  "* foo"
 	  (split-window)
 	  (dired temporary-file-directory)
-	  (assert (eq 'dired-mode major-mode))
+	  (cl-assert (eq 'dired-mode major-mode))
 	  (revert-buffer)
 	  (dired-goto-file a-filename)
 	  (dired-mark 1)
@@ -74,7 +75,7 @@
 	  (call-interactively #'org-attach-dired-to-subtree)
 					; check
 	  (delete-window)
-	  (assert (eq 'org-mode major-mode))
+	  (cl-assert (eq 'org-mode major-mode))
 	  (beginning-of-buffer)
 	  (search-forward "* foo")
 	  (and (file-exists-p (concat (org-attach-dir) "/"

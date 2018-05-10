@@ -25,6 +25,7 @@
 
 (require 'org-test)
 (require 'org-agenda)
+(eval-and-compile (require 'cl-lib))
 
 
 ;; General auxilliaries
@@ -112,7 +113,7 @@
     (org-agenda-list)
     (let* ((agenda-buffer-name
 	    (progn
-	      (assert (= 1 (length (org-test-agenda--agenda-buffers))))
+	      (cl-assert (= 1 (length (org-test-agenda--agenda-buffers))))
 	      (buffer-name (car (org-test-agenda--agenda-buffers))))))
       (set-buffer agenda-buffer-name)
       (org-agenda-redo)

@@ -22,6 +22,8 @@
 
 ;;; Code:
 
+(eval-and-compile (require 'cl-lib))
+
 
 ;;; Comments
 
@@ -7117,7 +7119,7 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 	     (let (result (line 0))
 	       (while (not (eobp))
 		 (unless (org-invisible-p2) (push line result))
-		 (incf line)
+		 (cl-incf line)
 		 (forward-line))
 	       (nreverse result))))))
     (should (equal '(0 7) (funcall list-visible-lines 'minimal t)))

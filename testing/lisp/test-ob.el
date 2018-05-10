@@ -20,6 +20,8 @@
 
 ;;; Code:
 
+(eval-and-compile (require 'cl-lib))
+
 (ert-deftest test-ob/indented-cached-org-bracket-link ()
   "When the result of a source block is a cached indented link it
 should still return the link."
@@ -553,7 +555,7 @@ on two lines
 
 #+NAME: read-literal-example
 #+BEGIN_SRC emacs-lisp :var x=literal-example
-  (concatenate 'string x \" for me.\")
+  (cl-concatenate 'string x \" for me.\")
 #+END_SRC"
     (org-babel-next-src-block 1)
     (should (string= (org-babel-execute-src-block)

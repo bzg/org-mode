@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(eval-and-compile (require 'cl-lib))
+
 (unless (featurep 'org-element)
   (signal 'missing-test-dependency "org-element"))
 
@@ -46,7 +48,7 @@ Some other text
 	(let ((count 0))
 	  (org-element-map
 	   (org-element-parse-buffer) 'plain-text
-	   (lambda (s) (when (string-match "text" s) (incf count))))
+	   (lambda (s) (when (string-match "text" s) (cl-incf count))))
 	  count))))
   ;; Applies to secondary strings
   (should
