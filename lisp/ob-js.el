@@ -41,11 +41,11 @@
 (require 'ob)
 
 (declare-function run-mozilla "ext:moz" (arg))
-(declare-function httpd-start "simple-httpd" ())
-(declare-function run-skewer "skewer-mode" ())
-(declare-function skewer-repl "skewer-repl" ())
-(declare-function indium-run-node "indium-nodejs" (command))
-(declare-function indium-eval "indium-interaction" (string &optional callback))
+(declare-function httpd-start "ext:simple-httpd" ())
+(declare-function run-skewer "ext:skewer-mode" ())
+(declare-function skewer-repl "ext:skewer-repl" ())
+(declare-function indium-run-node "ext:indium-nodejs" (command))
+(declare-function indium-eval "ext:indium-interaction" (string &optional callback))
 
 (defvar org-babel-default-header-args:js '()
   "Default header arguments for js code blocks.")
