@@ -265,13 +265,13 @@ last statement in BODY, as elisp."
   (let ((raw
          (pcase result-type
            (`output (org-babel-eval org-babel-python-command
-				    (concat (if preamble (concat preamble "\n"))
+				    (concat preamble (and preamble "\n")
 					    body)))
            (`value (let ((tmp-file (org-babel-temp-file "python-")))
 		     (org-babel-eval
 		      org-babel-python-command
 		      (concat
-		       (if preamble (concat preamble "\n") "")
+		       preamble (and preamble "\n")
 		       (format
 			(if (member "pp" result-params)
 			    org-babel-python-pp-wrapper-method

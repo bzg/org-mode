@@ -112,10 +112,9 @@
     (or buffer
 	(progn
 	  (run-geiser impl)
-	  (if name
-	      (progn
-		(rename-buffer name t)
-		(org-babel-scheme-set-session-buffer name (current-buffer))))
+	  (when name
+	    (rename-buffer name t)
+	    (org-babel-scheme-set-session-buffer name (current-buffer)))
 	  (current-buffer)))))
 
 (defun org-babel-scheme-make-session-name (buffer name impl)

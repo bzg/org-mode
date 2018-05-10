@@ -254,9 +254,9 @@ This removes initial blank and comment lines and then calls
     (with-temp-file temp-file
       (insert-file-contents file-name)
       (re-search-forward "^[ \t]*[^# \t]" nil t)
-      (if (< (setq beg (point-min))
-	     (setq end (point-at-bol)))
-	  (delete-region beg end)))
+      (when (< (setq beg (point-min))
+	       (setq end (point-at-bol)))
+	(delete-region beg end)))
     (org-babel-import-elisp-from-file temp-file '(16))))
 
 (provide 'ob-octave)

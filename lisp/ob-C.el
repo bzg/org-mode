@@ -373,8 +373,8 @@ FORMAT can be either a format string or a function which is called with VAL."
 	      (pcase (org-babel-C-val-to-base-type v)
 		(`stringp (setq type 'stringp))
 		(`floatp
-		 (if (or (not type) (eq type 'integerp))
-		     (setq type 'floatp)))
+		 (when (or (not type) (eq type 'integerp))
+		   (setq type 'floatp)))
 		(`integerp
 		 (unless type (setq type 'integerp)))))
 	    val)
