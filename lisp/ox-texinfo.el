@@ -1289,8 +1289,13 @@ contextual information."
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
 		    "\\(\\\\\\\\\\)?[ \t]*\n" " @*\n" output)))
-    ;; Return value.
-    output))
+    ;; Reverse sentence ending.  A sentence can end with a capital
+    ;; letter.  Use non-breaking space if it shouldn't.
+    (let ((case-fold-search nil))
+      (replace-regexp-in-string
+       "[A-Z]\\([.?!]\\)\\(?:[])]\\|'\\{1,2\\}\\)?\\(?: \\|$\\)"
+       "@\\1"
+       output nil nil 1))))
 
 ;;;; Planning
 
