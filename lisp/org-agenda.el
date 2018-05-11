@@ -4751,13 +4751,13 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
       (setq match nil))
     (catch 'exit
       ;; TODO: this code is repeated a lot...
-      (if org-agenda-sticky
-	  (setq org-agenda-buffer-name
-		(if (stringp match)
-		    (format "*Org Agenda(%s:%s)*"
-			    (or org-keys (or (and todo-only "M") "m")) match)
-		  (format "*Org Agenda(%s)*" (or (and todo-only "M") "m"))))
-	(setq matcher (org-make-tags-matcher match)))
+      (when org-agenda-sticky
+	(setq org-agenda-buffer-name
+	      (if (stringp match)
+		  (format "*Org Agenda(%s:%s)*"
+			  (or org-keys (or (and todo-only "M") "m")) match)
+		(format "*Org Agenda(%s)*" (or (and todo-only "M") "m")))))
+      (setq matcher (org-make-tags-matcher match))
       ;; Prepare agendas (and `org-tag-alist-for-agenda') before
       ;; expanding tags within `org-make-tags-matcher'
       (org-agenda-prepare (concat "TAGS " match))
