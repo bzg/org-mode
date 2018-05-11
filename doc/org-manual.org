@@ -11231,7 +11231,7 @@ further alter what is exported, and how.
      footers in the export.  Affects only those back-end formats that
      have such sections---like =<head>...</head>= in HTML.
 
-- {{{kbd(C-s}}} ::
+- {{{kbd(C-s)}}} ::
      #+kindex: C-c C-e C-s
 
      Toggle sub-tree export.  When turned on, Org exports only the
