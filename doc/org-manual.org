@@ -18267,7 +18267,7 @@ init file[fn:134].
 | {{{kbd(q)}}} | =#+BEGIN_QUOTE= ... =#+END_QUOTE=         |
 | {{{kbd(s)}}} | =#+BEGIN_SRC= ... =#+END_SRC=             |
 | {{{kbd(v)}}} | =#+BEGIN_VERSE= ... =#+END_VERSE=         |
-#+TBLFM: 
+#+TBLFM:
 
 ** Speed Keys
 :PROPERTIES:
