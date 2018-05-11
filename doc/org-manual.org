@@ -8510,7 +8510,7 @@ the Agenda Buffer]].
 #+cindex: calendar integration
 #+cindex: diary integration
 
-Emacs contains the calendar and diary by Edward M. Reingold.  The
+Emacs contains the calendar and diary by Edward\nbsp{}M.\nbsp{}Reingold.  The
 calendar displays a three-month calendar with holidays from different
 countries and cultures.  The diary allows you to keep track of
 anniversaries, lunar phases, sunrise/set, recurrent appointments
@@ -19019,7 +19019,7 @@ packages are documented here.
      By default the index is two levels deep---you can modify the
      depth using the option ~org-imenu-depth~.
 
-- =speedbar.el= by Eric M. Ludlam ::
+- =speedbar.el= by Eric\nbsp{}M.\nbsp{}Ludlam ::
      #+cindex: @file{speedbar.el}
 
      Speedbar package creates a special Emacs frame for displaying
@@ -19076,7 +19076,7 @@ making it available outside of the special contexts where special
 commands apply, and (ii) extending an existing active region even if
 the cursor moves across a special context.
 
-- =cua.el= by Kim. F. Storm ::
+- =cua.el= by Kim\nbsp{}F.\nbsp{}Storm ::
 
      #+cindex: @file{cua.el}
      #+vindex: org-replace-disputed-keys
@@ -20526,7 +20526,7 @@ be complete if the ones above were not mentioned in this manual.
   inspired some of the early development, including HTML export.  He
   also asked for a way to narrow wide table columns.
 
-- Thomas S. Dye contributed documentation on Worg and helped
+- Thomas\nbsp{}S.\nbsp{}Dye contributed documentation on Worg and helped
   integrating the Org Babel documentation into the manual.
 
 - Christian Egli converted the documentation into Texinfo format,
@@ -20538,7 +20538,7 @@ be complete if the ones above were not mentioned in this manual.
 
 - Nic Ferrier contributed mailcap and XOXO support.
 
-- Miguel A.  Figueroa-Villanueva implemented hierarchical checkboxes.
+- Miguel\nbsp{}A.\nbsp{}Figueroa-Villanueva implemented hierarchical checkboxes.
 
 - John Foerch figured out how to make incremental search show context
   around a match in a hidden outline tree.
@@ -20592,7 +20592,7 @@ be complete if the ones above were not mentioned in this manual.
   and is a prolific contributor on the mailing list with competent
   replies, small fixes and patches.
 
-- Jason F. McBrayer suggested agenda export to CSV format.
+- Jason\nbsp{}F.\nbsp{}McBrayer suggested agenda export to CSV format.
 
 - Max Mikhanosha came up with the idea of refiling.
 
@@ -20631,7 +20631,7 @@ be complete if the ones above were not mentioned in this manual.
 - Martin Pohlack provided the code snippet to bundle character
   insertion into bundles of 20 for undo.
 
-- T.V. Raman reported bugs and suggested improvements.
+- T.\nbsp{}V.\nbsp{}Raman reported bugs and suggested improvements.
 
 - Matthias Rempe (Oelde) provided ideas, Windows support, and quality
   control.
@@ -20684,7 +20684,7 @@ be complete if the ones above were not mentioned in this manual.
 - David O'Toole wrote =org-publish.el= and drafted the
   manual chapter about publishing.
 
-- Jambunathan K. contributed the ODT exporter.
+- Jambunathan\nbsp{}K.\nbsp{}contributed the ODT exporter.
 
 - Sebastien Vauban reported many issues with LaTeX and Beamer export
   and enabled source code highlighting in Gnus.
