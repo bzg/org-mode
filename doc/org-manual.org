@@ -18304,7 +18304,7 @@ Speed Keys, including the user-defined ones.
 :ALT_TITLE: Code Evaluation Security
 :END:
 
-Unlike plain text, running code comes with risk.  Each =src= code
+Unlike plain text, running code comes with risk.  Each source code
 block, in terms of risk, is equivalent to an executable file.  Org
 therefore puts a few confirmation prompts by default.  This is to
 alert the casual user from accidentally running untrusted code.
@@ -18319,10 +18319,10 @@ Org evaluates code in the following circumstances:
 
 - /Source code blocks/ ::
 
-     Org evaluates =src= code blocks in an Org file during export.
-     Org also evaluates a =src= code block with the {{{kbd(C-c C-c)}}}
-     key chord.  Users exporting or running code blocks must load
-     files only from trusted sources.  Be wary of customizing
+     Org evaluates source code blocks in an Org file during export.
+     Org also evaluates a source code block with the {{{kbd(C-c
+     C-c)}}} key chord.  Users exporting or running code blocks must
+     load files only from trusted sources.  Be wary of customizing
      variables that remove or alter default security measures.
 
      #+attr_texinfo: :options org-confirm-babel-evaluate
