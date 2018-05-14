@@ -3421,7 +3421,7 @@ The value of this variable is an alist.  Associations either:
 where TAG is a tag as a string, SELECT is character, used to
 select that tag through the fast tag selection interface, and
 SPECIAL is one of the following keywords: `:startgroup',
-`:startgrouptag', `:grouptags', `:engroup', `:endgrouptag' or
+`:startgrouptag', `:grouptags', `:endgroup', `:endgrouptag' or
 `:newline'.  These keywords are used to define a hierarchy of
 tags.  See manual for details.
 
