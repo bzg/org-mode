@@ -100,6 +100,7 @@
 ;;   - indented diary-sexps
 ;;   - obsolete QUOTE section
 ;;   - obsolete "file+application" link
+;;   - spurious colons in tags
 
 
 ;;; Code:
@@ -285,7 +286,10 @@
    (make-org-lint-checker
     :name 'file-application
     :description "Report obsolete \"file+application\" link"
-    :categories '(link obsolete)))
+    :categories '(link obsolete))
+   (make-org-lint-checker
+    :name 'spurious-colons
+    :description "Report spurious colons in tags"))
   "List of all available checkers.")
 
 (defun org-lint--collect-duplicates
@@ -1030,6 +1034,13 @@ Use \"export %s\" instead"
 				    (car header)))
 			   reports))))))))))))
     reports))
+
+(defun org-lint-spurious-colons (ast)
+  (org-element-map ast '(headline inlinetask)
+    (lambda (h)
+      (when (member "" (org-element-property :tags h))
+	(list (org-element-property :begin h)
+	      "Tags contain a spurious colon")))))
 
 
 

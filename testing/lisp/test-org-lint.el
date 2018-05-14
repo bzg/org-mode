@@ -487,6 +487,18 @@ SCHEDULED: <2012-03-29 thu.>"
 #+end_src"
      (org-lint '(wrong-header-value)))))
 
+(ert-deftest test-org/spurious-colons ()
+  "Test `org-list-spurious-colons' checker."
+  (should-not
+   (org-test-with-temp-text "* H :tag:tag2:"
+     (org-lint '(spurious-colons))))
+  (should
+   (org-test-with-temp-text "* H :tag::tag2:"
+     (org-lint '(spurious-colons))))
+  (should
+   (org-test-with-temp-text "* H :tag::"
+     (org-lint '(spurious-colons)))))
+
 
 (provide 'test-org-lint)
 ;;; test-org-lint.el ends here
