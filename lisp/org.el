@@ -9164,7 +9164,7 @@ and then used in capture templates."
 
 ;;;###autoload
 (defun org-store-link (arg &optional interactive?)
-  "Store an org-link to the current location.
+  "Store a link to the current location.
 \\<org-mode-map>
 This link is added to `org-stored-links' and can later be inserted
 into an Org buffer with `org-insert-link' (`\\[org-insert-link]').
