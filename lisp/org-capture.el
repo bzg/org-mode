@@ -1204,7 +1204,8 @@ may have been stored before."
 	beg end)
     (cond
      ((org-capture-get :exact-position)
-      (goto-char (org-capture-get :exact-position)))
+      (setq beg (org-capture-get :exact-position))
+      (setq end (save-excursion (outline-next-heading) (point))))
      ((not (org-capture-get :target-entry-p))
       ;; Table is not necessarily under a heading.  Find first table
       ;; in the buffer.

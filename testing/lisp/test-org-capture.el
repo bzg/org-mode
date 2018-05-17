@@ -207,6 +207,22 @@
 		       "| x |" :immediate-finish t))))
 	      (org-capture nil "t"))
 	    (buffer-string))))
+  ;; When a precise location is specified, find the first table after
+  ;; point, down to the end of the section.
+  (should
+   (equal "| a |
+
+
+| b |
+| x |
+"
+	  (org-test-with-temp-text-in-file "| a |\n\n\n| b |\n"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file+function ,file forward-line)
+		       "| x |" :immediate-finish t))))
+	      (org-capture nil "t"))
+	    (buffer-string))))
   ;; Create a new table with an empty header when none can be found.
   (should
    (equal "|   |   |\n|---+---|\n| a | b |\n"
