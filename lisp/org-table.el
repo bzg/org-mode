@@ -2275,34 +2275,31 @@ When NAMED is non-nil, look for a named equation."
 	 (eq (cond
 	      ((and stored equation (string-match-p "^ *=? *$" equation))
 	       stored)
-	      ((stringp equation)
-	       equation)
-	      (t (org-table-formula-from-user
-		  (read-string
-		   (org-table-formula-to-user
-		    (format "%s formula %s="
-			    (if named "Field" "Column")
-			    scol))
-		   (if stored (org-table-formula-to-user stored) "")
-		   'org-table-formula-history
-		   )))))
+	      ((stringp equation) equation)
+	      (t
+	       (org-table-formula-from-user
+		(read-string
+		 (org-table-formula-to-user
+		  (format "%s formula %s=" (if named "Field" "Column") scol))
+		 (if stored (org-table-formula-to-user stored) "")
+		 'org-table-formula-history)))))
 	 mustsave)
-    (when (not (string-match "\\S-" eq))
-      ;; remove formula
+    (unless (org-string-nw-p eq)
+      ;; Remove formula.
       (setq stored-list (delq (assoc scol stored-list) stored-list))
       (org-table-store-formulas stored-list)
       (user-error "Formula removed"))
-    (if (string-match "^ *=?" eq) (setq eq (replace-match "" t t eq)))
-    (if (string-match " *$" eq) (setq eq (replace-match "" t t eq)))
-    (if (and name (not named))
-	;; We set the column equation, delete the named one.
-	(setq stored-list (delq (assoc name stored-list) stored-list)
-	      mustsave t))
+    (when (string-match "^ *=?" eq) (setq eq (replace-match "" t t eq)))
+    (when (string-match " *$" eq) (setq eq (replace-match "" t t eq)))
+    (when (and name (not named))
+      ;; We set the column equation, delete the named one.
+      (setq stored-list (delq (assoc name stored-list) stored-list)
+	    mustsave t))
     (if stored
 	(setcdr (assoc scol stored-list) eq)
       (setq stored-list (cons (cons scol eq) stored-list)))
-    (if (or mustsave (not (equal stored eq)))
-	(org-table-store-formulas stored-list))
+    (when (or mustsave (not (equal stored eq)))
+      (org-table-store-formulas stored-list))
     eq))
 
 (defun org-table-store-formulas (alist &optional location)
@@ -2370,7 +2367,7 @@ LOCATION is a buffer position, consider the formulas there."
 	      eq-alist seen)
 	  (dolist (string strings (nreverse eq-alist))
 	    (when (string-match "\\`\\(@[-+I<>0-9.$@]+\\|\\$\\([_a-zA-Z0-9]+\\|\
-[<>]+\\)\\) *= *\\(.*[^ \t]\\)"
+\[<>]+\\)\\) *= *\\(.*[^ \t]\\)"
 				string)
 	      (let ((lhs
 		     (let ((m (match-string 1 string)))
