@@ -2156,11 +2156,11 @@ but not any simpler
 @node Emphasis and monospace, Comment lines, Paragraphs, Structural markup elements
 @subheading Emphasis and monospace
 
-You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
-and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
-in the code and verbatim string is not processed for Org-mode specific
-syntax, it is exported verbatim.  To insert a horizontal rules, use a line 
-consisting of only dashes, and at least 5 of them.
+You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=verbatim=}
+and @code{~code~}, and, if you must, @samp{+strike-through+}.  Text in the
+code and verbatim string is not processed for Org-mode specific syntax, it is
+exported verbatim.  To insert a horizontal rules, use a line consisting of
+only dashes, and at least 5 of them.
 
 @node Comment lines,  , Emphasis and monospace, Structural markup elements
 @subheading Comment lines
