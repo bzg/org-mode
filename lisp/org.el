@@ -13718,10 +13718,8 @@ headlines matching this string."
 	  ;; Ignore closing parts of inline tasks.
 	  (when (and (fboundp 'org-inlinetask-end-p) (org-inlinetask-end-p))
 	    (throw :skip t))
-	  (setq todo
-		;; TODO: is the 1-2 difference a bug?
-		(when (match-end 1) (match-string-no-properties 2))
-		tags (when (match-end 4) (match-string-no-properties 4)))
+	  (setq todo (and (match-end 1) (match-string-no-properties 1)))
+	  (setq tags (and (match-end 4) (org-trim (match-string-no-properties 4))))
 	  (goto-char (setq lspos (match-beginning 0)))
 	  (setq level (org-reduced-level (org-outline-level))
 		category (org-get-category))
