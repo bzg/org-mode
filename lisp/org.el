@@ -764,7 +764,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "   tempo:             Fast completion for structures" org-tempo)
 	(const :tag "   w3m:               Special cut/paste from w3m to Org mode." org-w3m)
 	(const :tag "   eshell:            Support for links to working directories in eshell" org-eshell)
-	
+
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  checklist:         Extra functions for checklists in repeated tasks" org-checklist)
