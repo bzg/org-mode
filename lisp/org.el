@@ -5700,13 +5700,21 @@ stacked delimiters is N.  Escaping delimiters is not possible."
    "\\(?:" (org-create-multibrace-regexp "(" ")" org-match-sexp-depth) "\\)"
    "\\|"
    "\\(?:\\*\\|[+-]?[[:alnum:].,\\]*[[:alnum:]]\\)\\)")
-  "The regular expression matching a sub- or superscript.")
+  "The regular expression matching a sub- or superscript.
+
+Match groups:
+1: The preceding character (non-whitespace)
+2: The underscore or caret
+3: Entire sub/superscript
+4: (if present) the portion inside the braces/parens")
 
 (defconst org-match-substring-with-braces-regexp
   (concat
    "\\(\\S-\\)\\([_^]\\)"
    "\\(" (org-create-multibrace-regexp "{" "}" org-match-sexp-depth) "\\)")
-  "The regular expression matching a sub- or superscript, forcing braces.")
+  "The regular expression matching a sub- or superscript, forcing braces.
+
+Match groups: see `org-match-substring-regexp'.")
 
 (defun org-make-link-regexps ()
   "Update the link regular expressions.
@@ -6604,17 +6612,45 @@ If TAG is a number, get the corresponding match group."
 				((raise 0.5)))
   "Display properties for showing superscripts and subscripts.")
 
-(defun org-remove-font-lock-display-properties (beg end)
-  "Remove specific display properties that have been added by font lock.
-The will remove the raise properties that are used to show superscripts
-and subscripts."
-  (let (next prop)
+(defun org--remove-sub-superscipt-font-lock-properties (outer-beg end)
+  "Remove the raise and invisible properties that are used to
+show superscripts and subscripts."
+  (let ((beg outer-beg) next prop)
     (while (< beg end)
       (setq next (next-single-property-change beg 'display nil end)
 	    prop (get-text-property beg 'display))
       (when (member prop org-script-display)
 	(put-text-property beg next 'display nil))
+      (setq beg next))
+    (setq beg outer-beg)
+    (while (< beg end)
+      (setq next (next-single-property-change beg 'invisible nil end)
+	    prop (get-text-property beg 'invisible))
+      (when (eq prop 'org-script)
+	(put-text-property beg next 'invisible nil))
       (setq beg next))))
+
+(defvar-local org-raise-scripts--current-script-bounds nil)
+
+(cl-pushnew '(org-script . t) text-property-default-nonsticky)
+
+(defun org-raise-scripts--post-command-hook ()
+  "Modeled after `prettify-symbols--post-command-hook'."
+  (when (and org-raise-scripts--current-script-bounds
+	     (or (< (point) (nth 0 org-raise-scripts--current-script-bounds))
+		 (> (point) (nth 1 org-raise-scripts--current-script-bounds))))
+    (apply #'font-lock-flush org-raise-scripts--current-script-bounds)
+    (setq org-raise-scripts--current-script-bounds nil))
+  (let ((bounds (get-text-property (point) 'org-script)))
+    (when bounds
+      (let ((start (nth 0 bounds))
+	    (end (nth 1 bounds)))
+	(setq org-raise-scripts--current-script-bounds bounds)
+	(with-silent-modifications
+	  (org-remove-font-lock-display-properties start end))))))
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (add-hook 'post-command-hook #'org-raise-scripts--post-command-hook nil 'local)))
 
 (defun org-raise-scripts (limit)
   "Add raise properties to sub/superscripts."
@@ -6624,32 +6660,37 @@ and subscripts."
 		  org-match-substring-regexp
 		org-match-substring-with-braces-regexp)
 	      limit t))
-    (let* ((pos (point)) table-p comment-p
-	   (mpos (match-beginning 3))
-	   (emph-p (get-text-property mpos 'org-emphasis))
-	   (link-p (get-text-property mpos 'mouse-face))
-	   (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
-      (goto-char (point-at-bol))
-      (setq table-p (looking-at-p org-table-dataline-regexp)
-	    comment-p (looking-at-p "^[ \t]*#[ +]"))
-      (goto-char pos)
-      ;; Handle a_b^c
-      (when (member (char-after) '(?_ ?^)) (goto-char (1- pos)))
-      (unless (or comment-p emph-p link-p keyw-p)
-	(put-text-property (match-beginning 3) (match-end 0)
-			   'display
-			   (if (equal (char-after (match-beginning 2)) ?^)
-			       (nth (if table-p 3 1) org-script-display)
-			     (nth (if table-p 2 0) org-script-display)))
-	(add-text-properties (match-beginning 2) (match-end 2)
-			     (list 'invisible t))
-	(when (and (eq (char-after (match-beginning 3)) ?{)
-		   (eq (char-before (match-end 3)) ?}))
-	  (add-text-properties (match-beginning 3) (1+ (match-beginning 3))
-			       (list 'invisible t))
-	  (add-text-properties (1- (match-end 3)) (match-end 3)
-			       (list 'invisible t))))
-      t)))
+    (unless (and org-raise-scripts--current-script-bounds
+		 (> (point) (nth 0 org-raise-scripts--current-script-bounds))
+		 (<= (point) (nth 1 org-raise-scripts--current-script-bounds)))
+      (let* ((pos (point)) table-p comment-p
+	     (mpos (match-beginning 3))
+	     (emph-p (get-text-property mpos 'org-emphasis))
+	     (link-p (get-text-property mpos 'mouse-face))
+	     (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
+	(goto-char (point-at-bol))
+	(setq table-p (looking-at-p org-table-dataline-regexp)
+	      comment-p (looking-at-p "^[ \t]*#[ +]"))
+	(goto-char pos)
+	;; Handle a_b^c
+	(when (member (char-after) '(?_ ?^)) (goto-char (1- pos)))
+	(unless (or comment-p emph-p link-p keyw-p)
+	  (put-text-property (match-beginning 2) (match-end 0)
+			     'org-script (list (match-beginning 2) (match-end 0)))
+	  (put-text-property (match-beginning 3) (match-end 0)
+			     'display
+			     (if (equal (char-after (match-beginning 2)) ?^)
+				 (nth (if table-p 3 1) org-script-display)
+			       (nth (if table-p 2 0) org-script-display)))
+	  (add-text-properties (match-beginning 2) (match-end 2)
+			       '(invisible org-script))
+	  (when (and (eq (char-after (match-beginning 3)) ?{)
+		     (eq (char-before (match-end 3)) ?}))
+	    (add-text-properties (match-beginning 3) (1+ (match-beginning 3))
+				 '(invisible org-script))
+	    (add-text-properties (1- (match-end 3)) (match-end 3)
+				 '(invisible org-script))))
+	t))))
 
 (defun org-remove-empty-overlays-at (pos)
   "Remove outline overlays that do not contain non-white stuff."
