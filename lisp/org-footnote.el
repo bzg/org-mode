@@ -115,9 +115,7 @@ you will need to run the following command after the change:
   :type '(choice
 	  (string :tag "Collect footnotes under heading")
 	  (const :tag "Define footnotes locally" nil))
-  :safe (lambda (x)
-	  (or (eq x nil)
-	      (stringp x))))
+  :safe #'string-or-null-p)
 
 (defcustom org-footnote-define-inline nil
   "Non-nil means define footnotes inline, at reference location.
