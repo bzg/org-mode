@@ -14459,29 +14459,30 @@ This works in the agenda, and also in an Org buffer."
     (message "Tag :%s: %s in %d headings" tag (if off "removed" "set") cnt)))
 
 (defun org-tags-completion-function (string _predicate &optional flag)
-  (let (s1 s2 rtn (ctable org-last-tags-completion-table)
-	   (confirm (lambda (x) (stringp (car x)))))
-    (if (string-match "^\\(.*[-+:&,|]\\)\\([^-+:&,|]*\\)$" string)
-        (setq s1 (match-string 1 string)
-              s2 (match-string 2 string))
-      (setq s1 "" s2 string))
-    (cond
-     ((eq flag nil)
-      ;; try completion
-      (setq rtn (try-completion s2 ctable confirm))
-      (when (stringp rtn)
-	(setq rtn
-	      (concat s1 s2 (substring rtn (length s2))
-		      (if (and org-add-colon-after-tag-completion
-			       (assoc rtn ctable))
-			  ":" ""))))
-      rtn)
-     ((eq flag t)
-      ;; all-completions
-      (all-completions s2 ctable confirm))
-     ((eq flag 'lambda)
-      ;; exact match?
-      (assoc s2 ctable)))))
+  "Complete tag STRING.
+FLAG specifies the type of completion operation to perform.  This
+function is passed as a collection function to `completing-read',
+which see."
+  (let ((completion-ignore-case nil)	;tags are case-sensitive
+	(confirm (lambda (x) (stringp (car x))))
+	(prefix ""))
+    (when (string-match "^\\(.*[-+:&,|]\\)\\([^-+:&,|]*\\)$" string)
+      (setq prefix (match-string 1 string))
+      (setq string (match-string 2 string)))
+    (pcase flag
+      (`t (all-completions string org-last-tags-completion-table confirm))
+      (`lambda (assoc string org-last-tags-completion-table)) ;exact match?
+      (`nil
+       (pcase (try-completion string org-last-tags-completion-table confirm)
+	 ((and completion (pred stringp))
+	  (concat prefix
+		  completion
+		  (if (and org-add-colon-after-tag-completion
+			   (assoc completion org-last-tags-completion-table))
+		      ":"
+		    "")))
+	 (completion completion)))
+      (_ nil))))
 
 (defun org-fast-tag-insert (kwd tags face &optional end)
   "Insert KWD, and the TAGS, the latter with face FACE.
