@@ -11727,6 +11727,35 @@ block can be inserted by pressing TAB after the string \"<KEY\"."
 		(string :tag "Template")))
   :package-version '(Org . "9.2"))
 
+(defun org--check-org-structure-template-alist (&optional checklist)
+  "Check whether `org-structure-template-alist' is set up correctly.
+In particular, check if the Org 9.2 format is used as opposed to
+previous format.
+"
+  (let ((elm (cl-remove-if-not (lambda (x) (listp (cdr x)))
+			       (or (eval checklist)
+				   org-structure-template-alist))))
+    (when elm
+      (org-display-warning
+       (format "
+Please update the entries of `%s'.
+
+In Org 9.2 the format was changed from something like
+
+    (\"s\" \"#+BEGIN_SRC ?\\n#+END_SRC\")
+
+to something like
+
+    (\"s\" . \"src\")
+
+Please refer to the documentation of `org-structure-template-alist'.
+
+The following entries must be updated:
+
+%s"
+	       (or checklist 'org-structure-template-alist)
+	       (pp-to-string elm))))))
+
 (defun org--insert-structure-template-mks ()
   "Present `org-structure-template-alist' with `org-mks'.
 
@@ -11734,6 +11763,7 @@ Menus are added if keys require more than one keystroke.  Tabs
 are added to single key entries when more than one stroke is
 needed.  Keys longer than two characters are reduced to two
 characters."
+  (org--check-org-structure-template-alist)
   (let* (case-fold-search
 	 (templates (append org-structure-template-alist
 			    '(("\t" . "Press TAB, RET or SPC to write block name"))))

@@ -102,6 +102,8 @@ Tempo templates will be added."
 
 Go through `org-structure-template-alist' and
 `org-tempo-keywords-alist' and update tempo templates."
+  (mapc 'org--check-org-structure-template-alist '(org-structure-template-alist
+						   org-tempo-keywords-alist))
   (let ((keys (org-tempo--keys)))
     ;; Check for duplicated snippet keys and warn if any are found.
     (when (> (length keys) (length (delete-dups keys)))
