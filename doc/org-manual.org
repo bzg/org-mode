@@ -21383,3 +21383,10 @@ on outline paths, assuming they are unique.
 =checksums.dat=.
 
 [fn:149] The file will be empty after this operation.
+* Local variables                                                  :noexport:
+
+# Local Variables:
+# org-footnote-section: "Footnotes"
+# org-footnote-define-inline: nil
+# org-footnote-auto-label: t
+# End:
