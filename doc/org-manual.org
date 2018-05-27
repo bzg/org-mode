@@ -17175,7 +17175,7 @@ default behavior is to automatically determine the result type.
      If =file= is missing, Org generates the base name of the output
      file from the name of the code block, and its extension from the
      =file-ext= header argument.  In that case, both the name and the
-     extension are mandatory.
+     extension are mandatory.[fn:150]
 
      #+begin_example
      ,#+name: circle
@@ -21383,6 +21383,15 @@ on outline paths, assuming they are unique.
 =checksums.dat=.
 
 [fn:149] The file will be empty after this operation.
+
+[fn:150] Due to the way this header arg is implemented, it implies
+“:results file”.  Therefore if it is set for multiple blocks at once
+(by a subtree or buffer property for example), all blocks will be forced
+to produce file results.  This is seldom desired behavior, so it is
+recommended to set this header only on a per-block basis.  It is possible
+that this aspect of the implementation might change in the future.
+
+
 * Local variables                                                  :noexport:
 
 # Local Variables:
