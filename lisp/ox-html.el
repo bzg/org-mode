@@ -215,7 +215,7 @@
 (defconst org-html-html5-elements
   '("article" "aside" "audio" "canvas" "details" "figcaption"
     "figure" "footer" "header" "menu" "meter" "nav" "output"
-    "progress" "section" "video")
+    "progress" "section" "summary" "video")
   "New elements in html5.
 
 For blocks that should contain headlines, use the HTML_CONTAINER
