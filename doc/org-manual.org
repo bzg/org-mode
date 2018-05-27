@@ -1906,7 +1906,7 @@ possible to construct LaTeX tables with the underlying ease and power
 of Orgtbl mode, including spreadsheet capabilities.  For details, see
 [[*Tables in Arbitrary Syntax]].
 
-** The spreadsheet
+** The Spreadsheet
 :PROPERTIES:
 :DESCRIPTION: The table editor has spreadsheet capabilities.
 :END:
