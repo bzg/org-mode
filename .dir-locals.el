@@ -8,10 +8,13 @@
   (sentence-end-double-space . t))
  (org-mode
   (indent-tabs-mode)
-  (org-edit-src-content-indentation . 0)
   (org-adapt-indentation)
-  (org-list-description-max-indent . 5)
-  (org-hide-emphasis-markers . nil)))
+  (org-edit-src-content-indentation . 0)
+  (org-footnote-auto-label . t)
+  (org-footnote-define-inline . nil)
+  (org-footnote-section . "Footnotes")
+  (org-hide-emphasis-markers . nil)
+  (org-list-description-max-indent . 5)))
 
 
 

@@ -21391,12 +21391,3 @@ forced to produce file results.  This is seldom desired behavior, so
 it is recommended to set this header only on a per-block basis.  It is
 possible that this aspect of the implementation might change in the
 future.
-
-
-* Local variables                                                  :noexport:
-
-# Local Variables:
-# org-footnote-section: "Footnotes"
-# org-footnote-define-inline: nil
-# org-footnote-auto-label: t
-# End:
