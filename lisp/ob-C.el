@@ -463,5 +463,7 @@ specifying a variable with the name of the table."
 	 table table table))))))
 
 (provide 'ob-C)
+(provide 'ob-C++)
+(provide 'ob-D)
 
 ;;; ob-C.el ends here
