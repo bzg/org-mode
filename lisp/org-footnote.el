@@ -114,7 +114,10 @@ you will need to run the following command after the change:
 	   (org-element-cache-reset 'all)))
   :type '(choice
 	  (string :tag "Collect footnotes under heading")
-	  (const :tag "Define footnotes locally" nil)))
+	  (const :tag "Define footnotes locally" nil))
+  :safe (lambda (x)
+	  (or (eq x nil)
+	      (stringp x))))
 
 (defcustom org-footnote-define-inline nil
   "Non-nil means define footnotes inline, at reference location.
@@ -122,7 +125,8 @@ When nil, footnotes will be defined in a special section near
 the end of the document.  When t, the [fn:label:definition] notation
 will be used to define the footnote at the reference position."
   :group 'org-footnote
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 (defcustom org-footnote-auto-label t
   "Non-nil means define automatically new labels for footnotes.
@@ -139,7 +143,9 @@ random	   Automatically generate a unique, random label."
 	  (const :tag "Prompt for label" nil)
 	  (const :tag "Create automatic [fn:N]" t)
 	  (const :tag "Offer automatic [fn:N] for editing" confirm)
-	  (const :tag "Create a random label" random)))
+	  (const :tag "Create a random label" random))
+  :safe (lambda (x)
+	  (memq x '(nil t confirm random))))
 
 (defcustom org-footnote-auto-adjust nil
   "Non-nil means automatically adjust footnotes after insert/delete.
@@ -157,7 +163,9 @@ The main values of this variable can be set with in-buffer options:
 	  (const :tag "No adjustment" nil)
 	  (const :tag "Renumber" renumber)
 	  (const :tag "Sort" sort)
-	  (const :tag "Renumber and Sort" t)))
+	  (const :tag "Renumber and Sort" t))
+  :safe (lambda (x)
+	  (memq x '(nil renumber sort t))))
 
 (defcustom org-footnote-fill-after-inline-note-extraction nil
   "Non-nil means fill paragraphs after extracting footnotes.
@@ -165,7 +173,8 @@ When extracting inline footnotes, the lengths of lines can change a lot.
 When this option is set, paragraphs from which an inline footnote has been
 extracted will be filled again."
   :group 'org-footnote
-  :type 'boolean)
+  :type 'boolean
+  :safe #'booleanp)
 
 
 ;;;; Predicates
