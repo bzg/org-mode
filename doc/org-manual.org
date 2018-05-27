@@ -18511,7 +18511,7 @@ changes.
 
      #+vindex: org-startup-indented
      Dynamic virtual indentation is controlled by the variable
-     ~org-startup-indented~.[fn:137]
+     ~org-startup-indented~[fn:137].
 
      - =indent= ::
 
