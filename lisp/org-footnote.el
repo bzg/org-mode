@@ -142,8 +142,7 @@ random	   Automatically generate a unique, random label."
 	  (const :tag "Create automatic [fn:N]" t)
 	  (const :tag "Offer automatic [fn:N] for editing" confirm)
 	  (const :tag "Create a random label" random))
-  :safe (lambda (x)
-	  (memq x '(nil t confirm random))))
+  :safe #'symbolp)
 
 (defcustom org-footnote-auto-adjust nil
   "Non-nil means automatically adjust footnotes after insert/delete.
@@ -162,8 +161,7 @@ The main values of this variable can be set with in-buffer options:
 	  (const :tag "Renumber" renumber)
 	  (const :tag "Sort" sort)
 	  (const :tag "Renumber and Sort" t))
-  :safe (lambda (x)
-	  (memq x '(nil renumber sort t))))
+  :safe #'symbolp)
 
 (defcustom org-footnote-fill-after-inline-note-extraction nil
   "Non-nil means fill paragraphs after extracting footnotes.
