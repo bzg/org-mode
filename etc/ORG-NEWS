@@ -10,6 +10,12 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
+* Version 9.3
+
+** Babel
+
+*** Add LaTeX output support in PlantUML
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
