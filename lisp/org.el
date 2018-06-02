@@ -11840,7 +11840,7 @@ If an element cannot be made unique, an error is raised."
 		     :key (lambda (elm) (cl-position (cdr elm) keys))))))
 
 (defun org-insert-structure-template (type)
-    "Insert a block structure of the type #+begin_foo/#+end_foo.
+  "Insert a block structure of the type #+begin_foo/#+end_foo.
 Select a block from `org-structure-template-alist' then type
 either RET, TAB or SPC to write the block type.  With an active
 region, wrap the region in the block.  Otherwise, insert an empty
@@ -11849,62 +11849,36 @@ block."
    (list (pcase (org--insert-structure-template-mks)
 	   (`("\t" . ,_) (read-string "Structure type: "))
 	   (`(,_ ,choice . ,_) choice))))
-  (let* ((region? (use-region-p))
-	 (col (current-indentation))
-	 (indent (make-string col ?\s))
-	 (special? (string-match-p "\\(src\\|export\\)\\'" type))
-	 (region-string (and region?
-			     (buffer-substring (region-beginning)
-					       (region-end))))
-	 (region-end-blank (and region?
-				(save-excursion
-				  (goto-char (region-end))
-				  (when (looking-at "[ \t]*$")
-				    (replace-match "")
-				    t))))
-	 s)
-    (when region? (delete-region (region-beginning) (region-end)))
-    (unless (save-excursion (skip-chars-backward "[ \t]") (bolp))
+  (let* ((column (current-indentation))
+	 (region? (use-region-p))
+	 (region-start (and region? (region-beginning)))
+	 (region-end (and region? (copy-marker (region-end))))
+	 (special? (string-match-p "\\`\\(src\\|export\\)\\'" type)))
+    (when region? (goto-char region-start))
+    (if (save-excursion (skip-chars-backward " \t") (bolp))
+	(beginning-of-line)
       (insert "\n"))
-    (beginning-of-line)
     (save-excursion
-      (insert
-       (with-temp-buffer
-	 (when region?
-	   (insert region-string "\n")
-	   (when (string-match-p
-		  (concat "\\`" (regexp-opt '("example" "export" "src")))
-		  type)
-	     (org-escape-code-in-region (point-min) (point-max))))
-	 (goto-char (point-min))
-	 ;; Delete trailing white-lines.
-	 (when region?
-	   (while (looking-at-p "^[ \t]*$")
-	     (delete-region (line-beginning-position)
-			    (line-beginning-position 2))))
-	 (save-excursion
-	   (while (not (eobp))
-	     (unless (looking-at-p indent)
-	       (insert indent))
-	     (forward-line)))
-	 (insert
-	  indent
-	  (format "#+begin_%s%s\n" type (if special? " " "")))
-	 (unless region? (indent-to col))
-	 (setq s (point))
-	 (goto-char (point-max))
-	 (skip-chars-backward "[ \t\n]" s)
-	 (delete-region (line-end-position) (point-max))
-	 (insert "\n" indent
-		 (format "#+end_%s" (car (split-string type)))
-		 (if region-end-blank "" "\n"))
-	 (buffer-substring (point-min) (point))))
+      (indent-to column)
+      (insert (format "#+begin_%s%s\n" type (if special? " " "")))
+      (when region?
+	(when (string-match-p (concat "\\`"
+				      (regexp-opt '("example" "export" "src")))
+			      type)
+	  (org-escape-code-in-region (point) region-end))
+	(goto-char region-end)
+	;; Ignore empty lines at the end of the region.
+	(skip-chars-backward " \r\t\n")
+	(end-of-line))
+      (unless (bolp) (insert "\n"))
+      (indent-to column)
+      (insert (format "#+end_%s" (car (split-string type))))
+      (if (looking-at "[ \t]*$") (replace-match "")
+	(insert "\n"))
       (when (and (eobp) (not (bolp))) (insert "\n")))
-    (cond (special?
-	   (end-of-line))
-	  (t
-	   (forward-line)
-	   (skip-chars-forward "[ \t]*")))))
+    (if special? (end-of-line)
+      (forward-line)
+      (skip-chars-forward " \t"))))
 
 
 ;;;; TODO, DEADLINE, Comments

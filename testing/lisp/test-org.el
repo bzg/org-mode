@@ -4060,18 +4060,19 @@ Text.
        (org-next-block 1 nil "^[ \t]*#\\+BEGIN_QUOTE")
        (looking-at "#\\+begin_quote")))))
 
-(ert-deftest test-org/insert-template ()
+(ert-deftest test-org/insert-structure-template ()
   "Test `org-insert-structure-template'."
   ;; Test in empty buffer.
   (should
-   (string= "#+begin_foo\n\n#+end_foo\n"
+   (string= "#+begin_foo\n#+end_foo\n"
 	    (org-test-with-temp-text ""
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
   ;; Test with multiple lines in buffer.
   (should
-   (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\nI'm a second paragraph"
+   (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
 	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
+	      (transient-mark-mode 1)
 	      (org-mark-element)
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
@@ -4079,12 +4080,12 @@ Text.
   (should
    (string= "#+begin_foo\nI'm a paragraph\n#+end_foo\n\nI'm a second paragraph"
 	    (org-test-with-temp-text "I'm a paragraph\n\nI'm a second paragraph"
+	      (transient-mark-mode 1)
 	      (set-mark (point-min))
 	      (end-of-line)
-	      (activate-mark)
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
-  ;; Middle of paragraph
+  ;; Middle of paragraph.
   (should
    (string= "p1\n#+begin_foo\np2\n#+end_foo\np3"
 	    (org-test-with-temp-text "p1\n<point>p2\np3"
@@ -4124,15 +4125,15 @@ Text.
 	      (buffer-string))))
   ;; Test point location.
   (should
-   (eq (length "#\\+begin_foo\n")
-       (org-test-with-temp-text ""
-	 (org-insert-structure-template "foo")
-	 (point))))
+   (string= "#+begin_foo\n"
+	    (org-test-with-temp-text ""
+	      (org-insert-structure-template "foo")
+	      (buffer-substring (point-min) (point)))))
   (should
-   (eq (length "#\\+begin_src ")
-       (org-test-with-temp-text ""
-	 (org-insert-structure-template "src")
-	 (point)))))
+   (string= "#+begin_src "
+	    (org-test-with-temp-text ""
+	      (org-insert-structure-template "src")
+	      (buffer-substring (point-min) (point))))))
 
 (ert-deftest test-org/previous-block ()
   "Test `org-previous-block' specifications."
