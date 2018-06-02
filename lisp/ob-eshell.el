@@ -73,8 +73,8 @@ The PARAMS are variables assignments."
   "Non-nil if Eshell SESSION exists."
   (get-buffer session))
 
-(defun org-babel-eshell-initiate-session (&optional session params)
-  "Initiate a session named SESSION according to PARAMS."
+(defun org-babel-eshell-initiate-session (&optional session _params)
+  "Initiate a session named SESSION."
   (when (and session (not (string= session "none")))
     (save-window-excursion
       (or (ob-eshell-session-live-p session)
