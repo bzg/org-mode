@@ -57,7 +57,8 @@ is modified outside the Customize interface."
 	     'org-babel-variable-assignments:shell
 	     ,(format "Return list of %s statements assigning to the block's \
 variables."
-		      name)))))
+		      name)))
+    (eval `(defvar ,(intern (concat "org-babel-default-header-args:" name)) '()))))
 
 (defcustom org-babel-shell-names
   '("sh" "bash" "zsh" "fish" "csh" "ash" "dash" "ksh" "mksh" "posh")
