@@ -581,10 +581,12 @@ which enable the original code blocks to be found."
 		  (t (org-babel-next-src-block (1- n)))))
         (org-babel-goto-named-src-block block-name))
       (goto-char (org-babel-where-is-src-block-head))
-      ;; Preserve location of point within the source code in tangled
-      ;; code file.
       (forward-line 1)
-      (forward-char (- mid body-start))
+      ;; Try to preserve location of point within the source code in
+      ;; tangled code file.
+      (let ((offset (- mid body-start)))
+	(when (> end (+ offset (point)))
+	  (forward-char offset)))
       (setq target-char (point)))
     (org-src-switch-to-buffer target-buffer t)
     (goto-char target-char)
