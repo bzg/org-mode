@@ -931,10 +931,10 @@ Assume point is at beginning of the headline."
 	   (level (prog1 (org-reduced-level (skip-chars-forward "*"))
 		    (skip-chars-forward " \t")))
 	   (todo (and org-todo-regexp
-		      (let (case-fold-search) (looking-at org-todo-regexp))
+		      (let (case-fold-search) (looking-at (concat org-todo-regexp " ")))
 		      (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")
-			     (match-string 0))))
+			     (match-string 1))))
 	   (todo-type
 	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
 	   (priority (and (looking-at "\\[#.\\][ \t]*")

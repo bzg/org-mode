@@ -1014,6 +1014,17 @@ Some other text
 
 ;;;; Headline
 
+(ert-deftest test-org-element/headline-todo-keyword ()
+  "Test todo keyword recognition."
+  ;; Reference test.
+  (org-test-with-temp-text "* TODO Headline"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should (org-element-property :todo-keyword (org-element-at-point)))))
+  ;; Todo keyword is prefix of headlines first word.
+  (org-test-with-temp-text "* TODOHeadline"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should-not (org-element-property :todo-keyword (org-element-at-point))))))
+
 (ert-deftest test-org-element/headline-comment-keyword ()
   "Test COMMENT keyword recognition."
   ;; Reference test.
