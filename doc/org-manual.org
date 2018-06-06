@@ -4869,7 +4869,7 @@ mandatory so that Org can parse this line correctly:
 
 In this example, =GTD= is the group tag and it is related to two other
 tags: =Control=, =Persp=.  Defining =Control= and =Persp= as group
-tags creates an hierarchy of tags:
+tags creates a hierarchy of tags:
 
 #+begin_example
 ,#+TAGS: [ Control : Context Task ]
@@ -11943,7 +11943,7 @@ Org exports text in this block only when using ASCII back-end.
 #+cindex: horizontal rules, in ASCII export
 
 ASCII back-end recognizes only one attribute, ~:width~, which
-specifies the width of an horizontal rule in number of characters.
+specifies the width of a horizontal rule in number of characters.
 The keyword and syntax for specifying widths is:
 
 #+begin_example
