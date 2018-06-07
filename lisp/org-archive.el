@@ -350,8 +350,7 @@ direct children of this heading."
 		(if org-archive-reversed-order
 		    (progn
 		      (goto-char (point-min))
-		      (unless (org-at-heading-p) (outline-next-heading))
-		      (insert "\n") (backward-char 1))
+		      (unless (org-at-heading-p) (outline-next-heading)))
 		  (goto-char (point-max))
 		  ;; Subtree narrowing can let the buffer end on
 		  ;; a headline.  `org-paste-subtree' then deletes it.
