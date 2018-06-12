@@ -613,46 +613,42 @@ This also applied for speedbar access."
 (defvar-local org-imenu-markers nil
   "All markers currently used by Imenu.")
 
-(defun org-imenu-new-marker (&optional pos)
-  "Return a new marker for use by Imenu, and remember the marker."
-  (let ((m (make-marker)))
-    (move-marker m (or pos (point)))
-    (push m org-imenu-markers)
-    m))
-
 (defun org-imenu-get-tree ()
   "Produce the index for Imenu."
   (dolist (x org-imenu-markers) (move-marker x nil))
   (setq org-imenu-markers nil)
-  (let* ((case-fold-search nil)
-	 (n org-imenu-depth)
-	 (re (concat "^" (org-get-limited-outline-regexp)))
-	 (subs (make-vector (1+ n) nil))
-	 (last-level 0)
-	 m level head0 head)
-    (org-with-wide-buffer
-     (goto-char (point-max))
+  (org-with-wide-buffer
+   (goto-char (point-max))
+   (let* ((re (concat "^" (org-get-limited-outline-regexp)))
+	  (subs (make-vector (1+ org-imenu-depth) nil))
+	  (last-level 0))
      (while (re-search-backward re nil t)
-       (setq level (org-reduced-level (funcall outline-level)))
-       (when (and (<= level n)
-		  (looking-at org-complex-heading-regexp)
-		  (setq head0 (match-string-no-properties 4)))
-	 (setq head (org-link-display-format head0)
-	       m (org-imenu-new-marker))
-	 (org-add-props head nil 'org-imenu-marker m 'org-imenu t)
-	 (if (>= level last-level)
-	     (push (cons head m) (aref subs level))
-	   (push (cons head (aref subs (1+ level))) (aref subs level))
-	   (cl-loop for i from (1+ level) to n do (aset subs i nil)))
-	 (setq last-level level))))
-    (aref subs 1)))
+       (let ((level (org-reduced-level (funcall outline-level)))
+	     (headline (org-no-properties
+			(org-link-display-format (org-get-heading t t t t)))))
+	 (when (and (<= level org-imenu-depth) (org-string-nw-p headline))
+	   (let* ((m (point-marker))
+		  (item (propertize headline 'org-imenu-marker m 'org-imenu t)))
+	     (push m org-imenu-markers)
+	     (if (>= level last-level)
+		 (push (cons item m) (aref subs level))
+	       (push (cons item
+			   (cl-mapcan #'identity (cl-subseq subs (1+ level))))
+		     (aref subs level))
+	       (cl-loop for i from (1+ level) to org-imenu-depth
+			do (aset subs i nil)))
+	     (setq last-level level)))))
+     (aref subs 1))))
 
 (eval-after-load "imenu"
   '(progn
      (add-hook 'imenu-after-jump-hook
 	       (lambda ()
 		 (when (derived-mode-p 'org-mode)
-		   (org-show-context 'org-goto))))))
+		   (org-show-context 'org-goto))))
+     (add-hook 'org-mode-hook
+	       (lambda ()
+		 (setq imenu-create-index-function 'org-imenu-get-tree)))))
 
 ;;;; Speedbar
 

@@ -5529,9 +5529,6 @@ The following commands are available:
       (regexp . "^[ \t]*#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
       (modes . '(org-mode)))))
 
-  ;; Imenu
-  (setq-local imenu-create-index-function 'org-imenu-get-tree)
-
   ;; Make isearch reveal context
   (setq-local outline-isearch-open-invisible-function
 	      (lambda (&rest _) (org-show-context 'isearch)))
