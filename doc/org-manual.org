@@ -11942,9 +11942,9 @@ Org exports text in this block only when using ASCII back-end.
 #+cindex: @samp{ATTR_ASCII}, keyword
 #+cindex: horizontal rules, in ASCII export
 
-ASCII back-end recognizes only one attribute, ~:width~, which
-specifies the width of a horizontal rule in number of characters.
-The keyword and syntax for specifying widths is:
+ASCII back-end recognizes only one attribute, =:width=, which
+specifies the width of a horizontal rule in number of characters.  The
+keyword and syntax for specifying widths is:
 
 #+begin_example
 ,#+ATTR_ASCII: :width 10
