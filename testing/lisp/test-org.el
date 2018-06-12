@@ -4123,6 +4123,12 @@ Text.
 	      (org-mark-element)
 	      (org-insert-structure-template "foo")
 	      (buffer-string))))
+  (should
+   (string= " #+begin_foo\n Line 1\n  Line2\n #+end_foo\n"
+	    (org-test-with-temp-text " Line 1\n  Line2"
+	      (org-mark-element)
+	      (org-insert-structure-template "foo")
+	      (buffer-string))))
   ;; Test point location.
   (should
    (string= "#+begin_foo\n"

@@ -11849,36 +11849,36 @@ block."
    (list (pcase (org--insert-structure-template-mks)
 	   (`("\t" . ,_) (read-string "Structure type: "))
 	   (`(,_ ,choice . ,_) choice))))
-  (let* ((column (current-indentation))
-	 (region? (use-region-p))
+  (let* ((region? (use-region-p))
 	 (region-start (and region? (region-beginning)))
 	 (region-end (and region? (copy-marker (region-end))))
-	 (special? (string-match-p "\\`\\(src\\|export\\)\\'" type)))
+	 (extended? (string-match-p "\\`\\(src\\|export\\)\\'" type))
+	 (verbatim? (string-match-p
+		     (concat "\\`" (regexp-opt '("example" "export" "src")))
+		     type)))
     (when region? (goto-char region-start))
-    (if (save-excursion (skip-chars-backward " \t") (bolp))
-	(beginning-of-line)
-      (insert "\n"))
-    (save-excursion
-      (indent-to column)
-      (insert (format "#+begin_%s%s\n" type (if special? " " "")))
-      (when region?
-	(when (string-match-p (concat "\\`"
-				      (regexp-opt '("example" "export" "src")))
-			      type)
-	  (org-escape-code-in-region (point) region-end))
-	(goto-char region-end)
-	;; Ignore empty lines at the end of the region.
-	(skip-chars-backward " \r\t\n")
-	(end-of-line))
-      (unless (bolp) (insert "\n"))
-      (indent-to column)
-      (insert (format "#+end_%s" (car (split-string type))))
-      (if (looking-at "[ \t]*$") (replace-match "")
+    (let ((column (current-indentation)))
+      (if (save-excursion (skip-chars-backward " \t") (bolp))
+	  (beginning-of-line)
 	(insert "\n"))
-      (when (and (eobp) (not (bolp))) (insert "\n")))
-    (if special? (end-of-line)
-      (forward-line)
-      (skip-chars-forward " \t"))))
+      (save-excursion
+	(indent-to column)
+	(insert (format "#+begin_%s%s\n" type (if extended? " " "")))
+	(when region?
+	  (when verbatim? (org-escape-code-in-region (point) region-end))
+	  (goto-char region-end)
+	  ;; Ignore empty lines at the end of the region.
+	  (skip-chars-backward " \r\t\n")
+	  (end-of-line))
+	(unless (bolp) (insert "\n"))
+	(indent-to column)
+	(insert (format "#+end_%s" (car (split-string type))))
+	(if (looking-at "[ \t]*$") (replace-match "")
+	  (insert "\n"))
+	(when (and (eobp) (not (bolp))) (insert "\n")))
+      (if extended? (end-of-line)
+	(forward-line)
+	(skip-chars-forward " \t")))))
 
 
 ;;;; TODO, DEADLINE, Comments
