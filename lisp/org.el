@@ -22941,9 +22941,10 @@ interactive command with similar behavior."
 
 (defun org-before-first-heading-p ()
   "Before first heading?"
-  (save-excursion
-    (end-of-line)
-    (null (re-search-backward org-outline-regexp-bol nil t))))
+  (org-with-limited-levels
+   (save-excursion
+     (end-of-line)
+     (null (re-search-backward org-outline-regexp-bol nil t)))))
 
 (defun org-at-heading-p (&optional ignored)
   (outline-on-heading-p t))
