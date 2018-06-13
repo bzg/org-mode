@@ -21122,7 +21122,7 @@ you are running Debian, to get the same general treatment of idleness.
 On other systems, idle time refers to Emacs idle time only.
 
 [fn:80] Please note the pitfalls of summing hierarchical data in
-a flat list ([[*Using Column View in the Agenda]]).
+a flat list (see [[*Using Column View in the Agenda]]).
 
 [fn:81] Org used to offer four different targets for date/week tree
 capture.  Now, Org automatically translates these to use
