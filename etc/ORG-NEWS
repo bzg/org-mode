@@ -15,6 +15,14 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
+*** New parameter for =INCLUDE= keyword
+Add =:coding CODING-SYSTEM= to include files using a different coding
+system than the main Org document.  For example:
+
+#+begin_example
+,#+INCLUDE: "myfile.cmd" src cmd :coding cp850-dos
+#+end_example
+
 *** New cell movement functions in tables
 ~S-<UP>~, ~S-<DOWN>~, ~S-<RIGHT>~, and ~S-<LEFT>~ now move cells in
 the corresponding direction by swapping with the adjacent cell.
