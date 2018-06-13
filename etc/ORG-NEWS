@@ -12,10 +12,18 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.3
 
-** Babel
+** New features
+*** Babel
+**** Add LaTeX output support in PlantUML
+*** New cell movement functions in tables
+~S-<UP>~, ~S-<DOWN>~, ~S-<RIGHT>~, and ~S-<LEFT>~ now move cells in
+the corresponding direction by swapping with the adjacent cell.
 
-*** Add LaTeX output support in PlantUML
-
+** New functions
+*** ~org-table-cell-up~
+*** ~org-table-cell-down~
+*** ~org-table-cell-left~
+*** ~org-table-cell-right~
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
