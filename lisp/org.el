@@ -7700,25 +7700,27 @@ So this will delete or add empty lines."
 When NO-TAGS is non-nil, don't include tags.
 When NO-TODO is non-nil, don't include TODO keywords.
 When NO-PRIORITY is non-nil, don't include priority cookie.
-When NO-COMMENT is non-nil, don't include COMMENT string."
-  (save-excursion
-    (org-back-to-heading t)
-    (let ((case-fold-search nil))
-      (looking-at org-complex-heading-regexp)
-      (let ((todo (and (not no-todo) (match-string 2)))
-	    (priority (and (not no-priority) (match-string 3)))
-	    (headline (pcase (match-string 4)
-			(`nil "")
-			((and (guard no-comment) h)
-			 (replace-regexp-in-string
-			  (eval-when-compile
-			    (format "\\`%s[ \t]+" org-comment-string))
-			  "" h))
-			(h h)))
-	    (tags (and (not no-tags) (match-string 5))))
-	(mapconcat #'identity
-		   (delq nil (list todo priority headline tags))
-		   " ")))))
+When NO-COMMENT is non-nil, don't include COMMENT string.
+Return nil before first heading."
+  (unless (org-before-first-heading-p)
+    (save-excursion
+      (org-back-to-heading t)
+      (let ((case-fold-search nil))
+	(looking-at org-complex-heading-regexp)
+	(let ((todo (and (not no-todo) (match-string 2)))
+	      (priority (and (not no-priority) (match-string 3)))
+	      (headline (pcase (match-string 4)
+			  (`nil "")
+			  ((and (guard no-comment) h)
+			   (replace-regexp-in-string
+			    (eval-when-compile
+			      (format "\\`%s[ \t]+" org-comment-string))
+			    "" h))
+			  (h h)))
+	      (tags (and (not no-tags) (match-string 5))))
+	  (mapconcat #'identity
+		     (delq nil (list todo priority headline tags))
+		     " "))))))
 
 (defun org-heading-components ()
   "Return the components of the current heading.
