@@ -5509,6 +5509,8 @@ The following commands are available:
 		  (forward-char -1))))
   ;; Next error for sparse trees
   (setq-local next-error-function 'org-occur-next-match)
+  ;; Make commit log messages from Org documents easier.
+  (setq-local add-log-current-defun-function #'org-add-log-current-headline)
   ;; Make sure dependence stuff works reliably, even for users who set it
   ;; too late :-(
   (if org-enforce-todo-dependencies
