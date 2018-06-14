@@ -20969,8 +20969,8 @@ and agenda buffers.
 a special meaning here.
 
 [fn:40] Check also the variable ~org-fast-tag-selection-include-todo~,
-it allows you to change the TODO state through the tags interface
-([[*Setting Tags]]), in case you like to mingle the two concepts.  Note
+it allows you to change the TODO state through the tags interface (see
+[[*Setting Tags]]), in case you like to mingle the two concepts.  Note
 that this means you need to come up with unique keys across both sets
 of keywords.
 
