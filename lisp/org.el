@@ -22154,20 +22154,27 @@ filling the current element."
   (interactive (progn
 		 (barf-if-buffer-read-only)
 		 (list (when current-prefix-arg 'full) t)))
-  (cond
-   ((and region transient-mark-mode mark-active
-	 (not (eq (region-beginning) (region-end))))
-    (let ((origin (point-marker))
-	  (start (region-beginning)))
-      (unwind-protect
-	  (progn
-	    (goto-char (region-end))
-	    (while (> (point) start)
-	      (org-backward-paragraph)
-	      (org-fill-element justify)))
-	(goto-char origin)
-	(set-marker origin nil))))
-   (t (org-fill-element justify))))
+  (let ((hash (and (not (buffer-modified-p))
+		   (org-buffer-hash))))
+    (cond
+     ((and region transient-mark-mode mark-active
+	   (not (eq (region-beginning) (region-end))))
+      (let ((origin (point-marker))
+	    (start (region-beginning)))
+	(unwind-protect
+	    (progn
+	      (goto-char (region-end))
+	      (while (> (point) start)
+		(org-backward-paragraph)
+		(org-fill-element justify)))
+	  (goto-char origin)
+	  (set-marker origin nil))))
+     (t (org-fill-element justify)))
+    ;; If we didn't change anything in the buffer (and the buffer was
+    ;; previously unmodified), then flip the modification status back
+    ;; to "unchanged".
+    (when (and hash (equal hash (org-buffer-hash)))
+      (set-buffer-modified-p nil))))
 
 (defun org-auto-fill-function ()
   "Auto-fill function."

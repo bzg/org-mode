@@ -81,6 +81,10 @@
     (defalias 'org-line-number-display-width 'line-number-display-width)
   (defun org-line-number-display-width (&rest _) 0))
 
+(if (fboundp 'buffer-hash)
+    (defalias 'org-buffer-hash 'buffer-hash)
+  (defun org-buffer-hash () (md5 (current-buffer))))
+
 
 ;;; Emacs < 25.1 compatibility
 
