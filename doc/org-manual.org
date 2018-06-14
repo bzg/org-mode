@@ -16047,8 +16047,9 @@ Header Arguments]]) for compiling, execution, extraction, and
 exporting.
 
 Source code blocks are one of many Org block types, which also include
-=quote=, =export=, =verse=, =latex=, =example=, and =verbatim=.  This
-section pertains to blocks between =#+BEGIN_SRC= and =#+END_SRC=.
+"center", "comment", "dynamic", "example", "export", "quote",
+"special", and "verse".  This section pertains to blocks between
+=#+BEGIN_SRC= and =#+END_SRC=.
 
 For editing and formatting a source code block, Org uses an
 appropriate Emacs major mode that includes features specifically
