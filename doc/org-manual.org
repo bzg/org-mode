@@ -17619,29 +17619,30 @@ code block header arguments:
 
 Code blocks in the following languages are supported.
 
-| Language   | Identifier    | Language       | Identifier   |
-|------------+---------------+----------------+--------------|
-| Asymptote  | =asymptote=   | Lua            | =lua=        |
-| Awk        | =awk=         | MATLAB         | =matlab=     |
-| C          | =C=           | Mscgen         | =mscgen=     |
-| C++        | =C++=[fn:135] | Objective Caml | =ocaml=      |
-| Clojure    | =clojure=     | Octave         | =octave=     |
-| CSS        | =css=         | Org mode       | =org=        |
-| D          | =D=[fn:136]   | Oz             | =oz=         |
-| ditaa      | =ditaa=       | Perl           | =perl=       |
-| Emacs Calc | =calc=        | Plantuml       | =plantuml=   |
-| Emacs Lisp | =emacs-lisp=  | Processing.js  | =processing= |
-| Fortran    | =fortran=     | Python         | =python=     |
-| Gnuplot    | =gnuplot=     | R              | =R=          |
-| GNU Screen | =screen=      | Ruby           | =ruby=       |
-| Graphviz   | =dot=         | Sass           | =sass=       |
-| Haskell    | =haskell=     | Scheme         | =scheme=     |
-| Java       | =java=        | Sed            | =sed=        |
-| Javascript | =js=          | shell          | =sh=         |
-| LaTeX      | =latex=       | SQL            | =sql=        |
-| Ledger     | =ledger=      | SQLite         | =sqlite=     |
-| Lilypond   | =lilypond=    | Vala           | =vala=       |
-| Lisp       | =lisp=        |                |              |
+#+attr_texinfo: :columns 0.20 0.35 0.20 0.20
+| Language   | Identifier    | Language      | Identifier   |
+|------------+---------------+---------------+--------------|
+| Asymptote  | =asymptote=   | Lua           | =lua=        |
+| Awk        | =awk=         | MATLAB        | =matlab=     |
+| C          | =C=           | Mscgen        | =mscgen=     |
+| C++        | =C++=[fn:135] | OCaml         | =ocaml=      |
+| Clojure    | =clojure=     | Octave        | =octave=     |
+| CSS        | =css=         | Org mode      | =org=        |
+| D          | =D=[fn:136]   | Oz            | =oz=         |
+| ditaa      | =ditaa=       | Perl          | =perl=       |
+| Emacs Calc | =calc=        | Plantuml      | =plantuml=   |
+| Emacs Lisp | =emacs-lisp=  | Processing.js | =processing= |
+| Fortran    | =fortran=     | Python        | =python=     |
+| Gnuplot    | =gnuplot=     | R             | =R=          |
+| GNU Screen | =screen=      | Ruby          | =ruby=       |
+| Graphviz   | =dot=         | Sass          | =sass=       |
+| Haskell    | =haskell=     | Scheme        | =scheme=     |
+| Java       | =java=        | Sed           | =sed=        |
+| Javascript | =js=          | shell         | =sh=         |
+| LaTeX      | =latex=       | SQL           | =sql=        |
+| Ledger     | =ledger=      | SQLite        | =sqlite=     |
+| Lilypond   | =lilypond=    | Vala          | =vala=       |
+| Lisp       | =lisp=        |               |              |
 
 Additional documentation for some languages is at
 https://orgmode.org/worg/org-contrib/babel/languages.html.
