@@ -18257,18 +18257,17 @@ example, {{{kbd(< s TAB)}}} creates a code block.  Enable it by
 customizing ~org-modules~ or add ~(require 'org-tempo)~ to your Emacs
 init file[fn:138].
 
-
 #+attr_texinfo: :columns 0.1 0.9
 | {{{kbd(a)}}} | =#+BEGIN_EXPORT ascii= ... =#+END_EXPORT= |
 | {{{kbd(c)}}} | =#+BEGIN_CENTER= ... =#+END_CENTER=       |
 | {{{kbd(C)}}} | =#+BEGIN_COMMENT= ... =#+END_COMMENT=     |
 | {{{kbd(e)}}} | =#+BEGIN_EXAMPLE= ... =#+END_EXAMPLE=     |
+| {{{kbd(E)}}} | =#+BEGIN_EXPORT= ... =#+END_EXPORT= |
 | {{{kbd(h)}}} | =#+BEGIN_EXPORT html= ... =#+END_EXPORT=  |
 | {{{kbd(l)}}} | =#+BEGIN_EXPORT latex= ... =#+END_EXPORT= |
 | {{{kbd(q)}}} | =#+BEGIN_QUOTE= ... =#+END_QUOTE=         |
 | {{{kbd(s)}}} | =#+BEGIN_SRC= ... =#+END_SRC=             |
 | {{{kbd(v)}}} | =#+BEGIN_VERSE= ... =#+END_VERSE=         |
-#+TBLFM:
 
 ** Speed Keys
 :PROPERTIES:
