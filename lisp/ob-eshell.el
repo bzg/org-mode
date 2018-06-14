@@ -77,11 +77,8 @@ The PARAMS are variables assignments."
   "Initiate a session named SESSION."
   (when (and session (not (string= session "none")))
     (save-window-excursion
-      (or (ob-eshell-session-live-p session)
-	  (progn
-	    (let ((eshell-buffer-name session))
-	      (eshell))
-	    (get-buffer (current-buffer)))))
+      (unless (ob-eshell-session-live-p session)
+	(let ((eshell-buffer-name session)) (eshell))))
     session))
 
 (defun org-babel-variable-assignments:eshell (params)
