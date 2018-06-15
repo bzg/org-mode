@@ -2900,7 +2900,7 @@ property to one or more of these keywords."
   (setq org-log-done 'note)))
 
 (defcustom org-log-reschedule nil
-  "Information to record when the scheduling date of a tasks is modified.
+  "Information to record when the scheduling date of a task is modified.
 
 Possible values are:
 
@@ -2912,16 +2912,22 @@ This option can also be set with on a per-file-basis with
 
    #+STARTUP: nologreschedule
    #+STARTUP: logreschedule
-   #+STARTUP: lognotereschedule"
+   #+STARTUP: lognotereschedule
+
+You can have local logging settings for a subtree by setting the LOGGING
+property to one or more of these keywords.
+
+This variable has an effect when calling `org-schedule' or
+`org-agenda-schedule' only."
   :group 'org-todo
   :group 'org-progress
   :type '(choice
 	  (const :tag "No logging" nil)
 	  (const :tag "Record timestamp" time)
-	  (const :tag "Record timestamp with note." note)))
+	  (const :tag "Record timestamp with note" note)))
 
 (defcustom org-log-redeadline nil
-  "Information to record when the deadline date of a tasks is modified.
+  "Information to record when the deadline date of a task is modified.
 
 Possible values are:
 
@@ -2936,7 +2942,10 @@ This option can also be set with on a per-file-basis with
    #+STARTUP: lognoteredeadline
 
 You can have local logging settings for a subtree by setting the LOGGING
-property to one or more of these keywords."
+property to one or more of these keywords.
+
+This variable has an effect when calling `org-deadline' or
+`org-agenda-deadline' only."
   :group 'org-todo
   :group 'org-progress
   :type '(choice
