@@ -19791,12 +19791,20 @@ for more information."
   (cond
    ((run-hook-with-args-until-success 'org-metaup-hook))
    ((org-region-active-p)
-    (let* ((a (min (region-beginning) (region-end)))
-	   (b (1- (max (region-beginning) (region-end))))
-	   (c (save-excursion (goto-char a)
-			      (move-beginning-of-line 0)))
-	   (d (save-excursion (goto-char a)
-			      (move-end-of-line 0) (point))))
+    (let* ((a (save-excursion
+		(goto-char (min (region-beginning) (region-end)))
+		(line-beginning-position)))
+	   (b (save-excursion
+		(goto-char (max (region-beginning) (region-end)))
+		(if (bolp) (1- (point)) (line-end-position))))
+	   (c (save-excursion
+		(goto-char a)
+		(move-beginning-of-line 0)
+		(point)))
+	   (d (save-excursion
+		(goto-char a)
+		(move-end-of-line 0)
+		(point))))
       (transpose-regions a b c d)
       (goto-char c)))
    ((org-at-table-p) (org-call-with-arg 'org-table-move-row 'up))
@@ -19813,12 +19821,20 @@ commands for more information."
   (cond
    ((run-hook-with-args-until-success 'org-metadown-hook))
    ((org-region-active-p)
-    (let* ((a (min (region-beginning) (region-end)))
-	   (b (max (region-beginning) (region-end)))
-	   (c (save-excursion (goto-char b)
-			      (move-beginning-of-line 1)))
-	   (d (save-excursion (goto-char b)
-			      (move-end-of-line 1) (1+ (point)))))
+    (let* ((a (save-excursion
+		(goto-char (min (region-beginning) (region-end)))
+		(line-beginning-position)))
+	   (b (save-excursion
+		(goto-char (max (region-beginning) (region-end)))
+		(if (bolp) (1- (point)) (line-end-position))))
+	   (c (save-excursion
+		(goto-char b)
+		(move-beginning-of-line (if (bolp) 1 2))
+		(point)))
+	   (d (save-excursion
+		(goto-char b)
+		(move-end-of-line (if (bolp) 1 2))
+		(point))))
       (transpose-regions a b c d)
       (goto-char d)))
    ((org-at-table-p) (call-interactively 'org-table-move-row))
