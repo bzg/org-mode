@@ -1696,18 +1696,35 @@ The template may still contain \"%?\" for cursor positioning."
 			 (_ (error "Invalid `org-capture--clipboards' value: %S"
 				   org-capture--clipboards)))))
 		    ("p"
-		     (let ((value (org-read-property-value
-				   prompt
-				   (set-marker (make-marker)
-					       (org-capture-get :pos)
-					       (org-capture-get :buffer)))))
-		       (org-entry-put
-			nil prompt
-			(pcase (assoc-string prompt
-					     org-properties-postprocess-alist
-					     t)
-			  (`(,_ . ,f) (funcall f value))
-			  (_ value)))))
+		     ;; We remove file properties inherited from
+		     ;; target buffer so `org-read-property-value' has
+		     ;; a chance to find allowed values in sub-trees
+		     ;; from the target buffer.
+		     (setq-local org-file-properties nil)
+		     (let* ((origin (set-marker (make-marker)
+						(org-capture-get :pos)
+						(org-capture-get :buffer)))
+			    ;; Find location from where to get allowed
+			    ;; values.  If `:target-entry-p' is
+			    ;; non-nil, the current headline in the
+			    ;; target buffer is going to be a parent
+			    ;; headline, so location is fine.
+			    ;; Otherwise, find the parent headline in
+			    ;; the target buffer.
+			    (pom (if (org-capture-get :target-entry-p) origin
+				   (let ((level (progn
+						  (while (org-up-heading-safe))
+						  (org-current-level))))
+				     (org-with-point-at origin
+				       (let ((l (if (org-at-heading-p)
+						    (org-current-level)
+						  most-positive-fixnum)))
+					 (while (and l (>= l level))
+					   (setq l (org-up-heading-safe)))
+					 (if l (point-marker)
+					   (point-min-marker)))))))
+			    (value (org-read-property-value prompt pom)))
+		       (org-set-property prompt value)))
 		    ((or "t" "T" "u" "U")
 		     ;; These are the date/time related ones.
 		     (let* ((upcase? (equal (upcase key) key))
