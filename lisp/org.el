@@ -15636,23 +15636,33 @@ This is computed according to `org-property-set-functions-alist'."
   (or (cdr (assoc property org-property-set-functions-alist))
       'org-completing-read))
 
-(defun org-read-property-value (property)
-  "Read PROPERTY value from user."
+(defun org-read-property-value (property &optional pom)
+  "Read value for PROPERTY, as a string.
+When optional argument POM is non-nil, completion uses additional
+information, i.e., allowed or existing values at point or marker
+POM."
   (let* ((completion-ignore-case t)
-	 (allowed (org-property-get-allowed-values nil property 'table))
-	 (cur (org-entry-get nil property))
-	 (prompt (concat property " value"
-			 (if (and cur (string-match "\\S-" cur))
-			     (concat " [" cur "]") "") ": "))
-	 (set-function (org-set-property-function property))
-	 (val (if allowed
-		  (funcall set-function prompt allowed nil
-			   (not (get-text-property 0 'org-unrestricted
-						   (caar allowed))))
-		(funcall set-function prompt
-			 (mapcar 'list (org-property-values property))
-			 nil nil "" nil cur))))
-    (org-trim val)))
+	 (allowed
+	  (or (org-property-get-allowed-values nil property 'table)
+	      (and pom (org-property-get-allowed-values pom property 'table))))
+	 (current (org-entry-get nil property))
+	 (prompt (format "%s value%s: "
+			 property
+			 (if (org-string-nw-p current)
+			     (format " [%s]" current)
+			   "")))
+	 (set-function (org-set-property-function property)))
+    (org-trim
+     (if allowed
+	 (funcall set-function
+		  prompt allowed nil
+		  (not (get-text-property 0 'org-unrestricted (caar allowed))))
+       (let ((all (mapcar #'list
+			  (append (org-property-values property)
+				  (and pom
+				       (org-with-point-at pom
+					 (org-property-values property)))))))
+	 (funcall set-function prompt all nil nil "" nil current))))))
 
 (defvar org-last-set-property nil)
 (defvar org-last-set-property-value nil)

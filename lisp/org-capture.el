@@ -1695,7 +1695,19 @@ The template may still contain \"%?\" for cursor positioning."
 						first-value)))
 			 (_ (error "Invalid `org-capture--clipboards' value: %S"
 				   org-capture--clipboards)))))
-		    ("p" (org-set-property prompt nil))
+		    ("p"
+		     (let ((value (org-read-property-value
+				   prompt
+				   (set-marker (make-marker)
+					       (org-capture-get :pos)
+					       (org-capture-get :buffer)))))
+		       (org-entry-put
+			nil prompt
+			(pcase (assoc-string prompt
+					     org-properties-postprocess-alist
+					     t)
+			  (`(,_ . ,f) (funcall f value))
+			  (_ value)))))
 		    ((or "t" "T" "u" "U")
 		     ;; These are the date/time related ones.
 		     (let* ((upcase? (equal (upcase key) key))
