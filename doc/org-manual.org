@@ -6224,14 +6224,14 @@ schedule an item:[fn:66]
      a numeric prefix, check that many days.  For example, {{{kbd(C-1
      C-c / d)}}} shows all deadlines due tomorrow.
 
-- {{{kbd(C-c / b)}}}, ~org-check-before-date~ ::
+- {{{kbd(C-c / b)}}} (~org-check-before-date~) ::
 
      #+kindex: C-c / b
      #+findex: org-check-before-date
      Sparse tree for deadlines and scheduled items before a given
      date.
 
-- {{{kbd(C-c / a)}}}, ~org-check-after-date~ ::
+- {{{kbd(C-c / a)}}} (~org-check-after-date~) ::
 
      #+kindex: C-c / a
      #+findex: org-check-after-date
