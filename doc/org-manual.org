@@ -569,7 +569,7 @@ can be configured through the variable ~org-startup-folded~, or on
 a per-file basis by adding one of the following lines anywhere in the
 buffer:
 
-#+cindex: STARTUP, keyword
+#+cindex: @samp{STARTUP}, keyword
 #+begin_example
 ,#+STARTUP: overview
 ,#+STARTUP: content
@@ -2304,8 +2304,8 @@ computations in Lisp:
 :PROPERTIES:
 :DESCRIPTION: How to compute durations and time values.
 :END:
-#+cindex: Duration, computing
-#+cindex: Time, computing
+#+cindex: duration, computing
+#+cindex: time, computing
 #+vindex: org-table-duration-custom-format
 
 If you want to compute time values use the =T=, =t=, or =U= flag,
@@ -4039,8 +4039,8 @@ example:
 ,** TODO c, needs to wait for (a) and (b)
 #+end_example
 
-#+cindex: TODO dependencies, NOBLOCKING
-#+cindex: NOBLOCKING, property
+#+cindex: TODO dependencies, @samp{NOBLOCKING}
+#+cindex: @samp{NOBLOCKING}, property
 You can ensure an entry is never blocked by using the =NOBLOCKING=
 property:
 
@@ -4214,7 +4214,7 @@ specific settings like =TODO(!)=.  For example:
 :DESCRIPTION: How consistent have you been?
 :END:
 #+cindex: habits
-#+cindex: STYLE, property
+#+cindex: @samp{STYLE}, property
 
 Org has the ability to track the consistency of a special category of
 TODO, called "habits."  A habit has the following properties:
@@ -6091,7 +6091,7 @@ immediately after the task they refer to.
 
 - =DEADLINE= ::
 
-     #+cindex: @samp{DEADLINE}
+     #+cindex: @samp{DEADLINE} marker
      Meaning: the task (most likely a TODO item, though not
      necessarily) is supposed to be finished on that date.
 
@@ -6117,7 +6117,7 @@ immediately after the task they refer to.
 
 - =SCHEDULED= ::
 
-     #+cindex: @samp{SCHEDULED}
+     #+cindex: @samp{SCHEDULED} marker
      Meaning: you are planning to start working on that task on the
      given date.
 
@@ -10759,7 +10759,7 @@ of the major mode that should be used to fontify the example[fn:106],
 see [[*Structure Templates]] for shortcuts to easily insert code blocks.
 
 #+cindex: @samp{BEGIN_SRC}
-#+cindex: src block
+#+cindex: source block
 #+begin_example
 ,#+BEGIN_SRC emacs-lisp
   (defun org-xor (a b)
@@ -10933,7 +10933,7 @@ get in your way.  Configure the variable ~org-use-sub-superscripts~ to
 change this convention.  For example, when setting this variable to
 ~{}~, =a_b= is not interpreted as a subscript, but =a_{b}= is.
 
-- {{{kbd(C-c C-x \)}}} (~org-toggle-pretty-entities~~) ::
+- {{{kbd(C-c C-x \)}}} (~org-toggle-pretty-entities~) ::
      #+kindex: C-c C-x \
      #+findex: org-toggle-pretty-entities
 
@@ -11174,7 +11174,7 @@ or, by requiring the library in the Emacs init file like this:
 :DESCRIPTION: The main interface.
 :END:
 #+cindex: dispatcher, for export commands
-#+cindex: Export, dispatcher
+#+cindex: export, dispatcher
 
 The export dispatcher is the main interface for Org's exports.
 A hierarchical menu presents the currently configured export formats.
@@ -11269,7 +11269,7 @@ specifying them in a compact form with the =OPTIONS= keyword; or for
 a tree by setting properties (see [[*Properties and Columns]]).  Options
 set at a specific level override options set at a more general level.
 
-#+cindex: SETUPFILE, keyword
+#+cindex: @samp{SETUPFILE}, keyword
 In-buffer settings may appear anywhere in the file, either directly or
 indirectly through a file included using =#+SETUPFILE: filename or
 URL= syntax.  Option keyword sets tailored to a particular back-end
@@ -11651,7 +11651,7 @@ the table of contents.
 :DESCRIPTION: Include additional files into a document.
 :END:
 #+cindex: include files, during export
-#+cindex: Export, include files
+#+cindex: export, include files
 #+cindex: @samp{INCLUDE}, keyword
 
 During export, you can include the content of another file.  For
