@@ -66,7 +66,7 @@
 
 (defun org-info-follow-link (name)
   "Follow an Info file and node link specified by NAME."
-  (if (or (string-match "\\(.*\\)[#:]:?\\(.*\\)" name)
+  (if (or (string-match "\\(.*\\)\\(:?#\\|::\\)\\(.*\\)" name)
           (string-match "\\(.*\\)" name))
       (let ((filename (match-string 1 name))
 	    (nodename-or-index (or (match-string 2 name) "Top")))
@@ -129,7 +129,7 @@ See `org-info-emacs-documents' and `org-info-other-documents' for details."
 (defun org-info-export (path desc format)
   "Export an info link.
 See `org-link-parameters' for details about PATH, DESC and FORMAT."
-  (let* ((parts (split-string path "[#:]:?"))
+  (let* ((parts (split-string path "#\\|::"))
 	 (manual (car parts))
 	 (node (or (nth 1 parts) "Top")))
     (pcase format
