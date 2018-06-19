@@ -646,8 +646,7 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 	   (format "\\*\\{1,%d\\} " nstars)))))
 
 
-(provide 'org-macs)
-
+
 ;;; Motion
 
 (defsubst org-goto-line (N)
@@ -1141,5 +1140,7 @@ This should be a lot faster than the `parse-time-string'."
        (t (org-2ft s))))))
 
 
-
+
+(provide 'org-macs)
+
 ;;; org-macs.el ends here
