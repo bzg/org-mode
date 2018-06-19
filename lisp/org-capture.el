@@ -1763,13 +1763,13 @@ The template may still contain \"%?\" for cursor positioning."
 	       nil t)))))
 
       ;; Make sure there are no empty lines before the text, and that
-      ;; it ends with a newline character.
+      ;; it ends with a newline character or it is empty.
       (skip-chars-forward " \t\n")
       (delete-region (point-min) (line-beginning-position))
       (goto-char (point-max))
       (skip-chars-backward " \t\n")
       (delete-region (point) (point-max))
-      (insert "\n")
+      (unless (bobp) (insert "\n"))
 
       ;; Return the expanded template and kill the capture buffer.
       (untabify (point-min) (point-max))
