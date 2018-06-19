@@ -1110,16 +1110,7 @@ as a canonical duration, i.e., using units defined in
   "Apply FUN to time values TIMES.
 Return the result as a duration."
   (org-duration-from-minutes
-   (apply fun
-	  (mapcar (lambda (time)
-		    ;; Unlike to `org-duration-to-minutes' standard
-		    ;; behavior, we want to consider plain numbers as
-		    ;; hours.  As a consequence, we treat them
-		    ;; differently.
-		    (if (string-match-p "\\`[0-9]+\\(?:\\.[0-9]*\\)?\\'" time)
-			(* 60 (string-to-number time))
-		      (org-duration-to-minutes time)))
-		  times))
+   (apply fun (mapcar #'org-duration-to-minutes times))
    (org-duration-h:mm-only-p times)))
 
 (defun org-columns--compute-spec (spec &optional update)

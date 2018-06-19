@@ -5404,7 +5404,7 @@ optional.  The individual parts have the following meaning:
      | =X=      | Checkbox status, =[X]= if all children are =[X]=.     |
      | =X/=     | Checkbox status, =[n/m]=.                             |
      | =X%=     | Checkbox status, =[n%]=.                              |
-     | =:=      | Sum times, HH:MM, plain numbers are hours.            |
+     | =:=      | Sum times, HH:MM, plain numbers are minutes.          |
      | =:min=   | Smallest time value in column.                        |
      | =:max=   | Largest time value.                                   |
      | =:mean=  | Arithmetic mean of time values.                       |
