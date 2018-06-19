@@ -12,6 +12,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.3
 
+** Incompatible change
+
+*** Plain numbers are hours in Column View mode
+
+See [[git:3367ac9457]] for details.
+
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
