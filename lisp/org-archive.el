@@ -325,7 +325,8 @@ direct children of this heading."
 	      (if (and heading (not (and datetree-date (not datetree-subheading-p))))
 		  (progn
 		    (if (re-search-forward
-			 (concat "^" (regexp-quote heading) org-tag-group-re)
+			 (concat "^" (regexp-quote heading)
+				 "\\([ \t]+:\\(" org-tag-re ":\\)+\\)?[ \t]*$")
 			 nil t)
 			(goto-char (match-end 0))
 		      ;; Heading not found, just insert it at the end
