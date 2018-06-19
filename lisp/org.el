@@ -14250,28 +14250,33 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   "Align tags on the current headline to TO-COL.
 Assume point is on a headline.  Preserve point when aligning
 tags."
-  (when (and (org-match-line org-tag-line-re)
-	     (/= to-col (save-excursion	;nothing to do?
-			  (goto-char (match-beginning 1)) (current-column))))
-    (let* ((shift (if (>= to-col 0) to-col
-		    (- (abs to-col) (string-width (match-string 1)))))
-	   (origin (point-marker))
-	   (column (current-column))
-	   (tags-start (match-beginning 1))
+  (when (org-match-line org-tag-line-re)
+    (let* ((tags-start (match-beginning 1))
 	   (blank-start (save-excursion
 			  (goto-char tags-start)
 			  (skip-chars-backward " \t")
 			  (point)))
-	   (in-blank? (and (> origin blank-start)
-			   (<= origin tags-start))))
-      (delete-region blank-start tags-start)
-      (goto-char blank-start)
-      (let ((indent-tabs-mode nil)) (indent-to shift 1))
-      ;; Try to move back to original position.  If point was in the
-      ;; blanks before the tags, ORIGIN marker is of no use because it
-      ;; now points to BLANK-START.  Use COLUMN instead.
-      (if in-blank? (org-move-to-column column)
-	(goto-char origin)))))
+	   (new (max (if (>= to-col 0) to-col
+		       (- (abs to-col) (string-width (match-string 1))))
+		     ;; Introduce at least one space after the heading
+		     ;; or the stars.
+		     (save-excursion
+		       (goto-char blank-start)
+		       (1+ (current-column)))))
+	   (current
+	    (save-excursion (goto-char tags-start) (current-column)))
+	   (origin (point-marker))
+	   (column (current-column)))
+      (when (/= new current)
+	(delete-region blank-start tags-start)
+	(goto-char blank-start)
+	(let ((indent-tabs-mode nil)) (indent-to new))
+	;; Try to move back to original position.  If point was in the
+	;; blanks before the tags, ORIGIN marker is of no use because
+	;; it now points to BLANK-START.  Use COLUMN instead.
+	(let ((in-blank? (and (> origin blank-start) (<= origin tags-start))))
+	  (if in-blank? (org-move-to-column column)
+	    (goto-char origin)))))))
 
 (defun org-set-tags-command (&optional arg)
   "Set the tags for the current visible entry.
@@ -14367,28 +14372,29 @@ This function assumes point is on a headline."
 		 ((pred stringp) (split-string (org-trim tags) ":" t))
 		 (_ (error "Invalid tag specification: %S" tags))))
 	 (old-tags (org-get-tags nil t))
-	 (change-flag nil))
+	 (tags-change? nil))
      (when (functionp org-tags-sort-function)
        (setq tags (sort tags org-tags-sort-function)))
-     (unless (equal tags old-tags) (setq change-flag t))
-     ;; Delete previous tags and any trailing white space.
-     (goto-char (if (org-match-line org-tag-line-re) (match-beginning 1)
-		  (line-end-position)))
-     (skip-chars-backward " \t")
-     (delete-region (point) (line-end-position))
-     ;; Deleting white spaces may break an otherwise empty headline.
-     ;; Re-introduce one space in this case.
-     (unless (org-at-heading-p) (insert " "))
-     (when tags
-       (save-excursion (insert " " (org-make-tag-string tags)))
-       ;; When text is being inserted on an invisible region
-       ;; boundary, it can be inadvertently sucked into
-       ;; invisibility.
-       (unless (org-invisible-p (line-beginning-position))
-	 (org-flag-region (point) (line-end-position) nil 'outline)))
+     (setq tags-change? (not (equal tags old-tags)))
+     (when tags-change?
+       ;; Delete previous tags and any trailing white space.
+       (goto-char (if (org-match-line org-tag-line-re) (match-beginning 1)
+		    (line-end-position)))
+       (skip-chars-backward " \t")
+       (delete-region (point) (line-end-position))
+       ;; Deleting white spaces may break an otherwise empty headline.
+       ;; Re-introduce one space in this case.
+       (unless (org-at-heading-p) (insert " "))
+       (when tags
+	 (save-excursion (insert " " (org-make-tag-string tags)))
+	 ;; When text is being inserted on an invisible region
+	 ;; boundary, it can be inadvertently sucked into
+	 ;; invisibility.
+	 (unless (org-invisible-p (line-beginning-position))
+	   (org-flag-region (point) (line-end-position) nil 'outline))))
      ;; Align tags, if any.
      (when tags (org-align-tags))
-     (when change-flag (run-hooks 'org-after-tags-change-hook)))))
+     (when tags-change? (run-hooks 'org-after-tags-change-hook)))))
 
 (defun org-change-tag-in-region (beg end tag off)
   "Add or remove TAG for each entry in the region.

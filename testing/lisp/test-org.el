@@ -6209,6 +6209,23 @@ Paragraph<point>"
 	  (org-test-with-temp-text "* "
 	    (let ((org-tags-column 1)) (org-set-tags '("tag0")))
 	    (buffer-string))))
+  ;; Modify buffer only when a tag change happens or alignment is
+  ;; done.
+  (should-not
+   (org-test-with-temp-text "* H :foo:"
+     (set-buffer-modified-p nil)
+     (let ((org-tags-column 1)) (org-set-tags '("foo")))
+     (buffer-modified-p)))
+  (should
+   (org-test-with-temp-text "* H :foo:"
+     (set-buffer-modified-p nil)
+     (let ((org-tags-column 10)) (org-set-tags '("foo")))
+     (buffer-modified-p)))
+  (should
+   (org-test-with-temp-text "* H :foo:"
+     (set-buffer-modified-p nil)
+     (let ((org-tags-column 10)) (org-set-tags '("bar")))
+     (buffer-modified-p)))
   ;; Pathological case: when setting tags of a folded headline, do not
   ;; let new tags being sucked into invisibility.
   (should-not
