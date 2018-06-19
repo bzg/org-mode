@@ -179,8 +179,8 @@ For a better experience, the three Org commands ~org-store-link~,
 ~org-capture~ and ~org-agenda~ ought to be accessible anywhere in
 Emacs, not just in Org buffers.  To that effect, you need to bind them
 to globally available keys, like the ones reserved for users (see
-[[info:elisp::Key%20Binding%20Conventions]]).  Here are suggested
-bindings, please modify the keys to your own liking.
+[[info:elisp#Key%20Binding%20Conventions][info:elisp#Key Binding Conventions]]).  Here are suggested bindings,
+please modify the keys to your own liking.
 
 #+begin_src emacs-lisp
 (global-set-key "\C-cl" 'org-store-link)
