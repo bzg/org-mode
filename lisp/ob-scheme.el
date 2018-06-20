@@ -212,6 +212,7 @@ This function is called by `org-babel-execute-src-block'"
 	     (session (org-babel-scheme-make-session-name
 		       source-buffer-name (cdr (assq :session params)) impl))
 	     (full-body (org-babel-expand-body:scheme body params))
+	     (result-params (cdr (assq :result-params params)))
 	     (result
 	      (org-babel-scheme-execute-with-geiser
 	       full-body		       ; code
@@ -225,7 +226,9 @@ This function is called by `org-babel-execute-src-block'"
 				     (cdr (assq :colnames params)))
 		(org-babel-pick-name (cdr (assq :rowname-names params))
 				     (cdr (assq :rownames params))))))
-	  (org-babel-scheme--table-or-string table))))))
+	  (org-babel-result-cond result-params
+	    result
+	    (org-babel-scheme--table-or-string table)))))))
 
 (provide 'ob-scheme)
 
