@@ -57,6 +57,7 @@
 (declare-function org-encrypt-entry "org-crypt" ())
 (declare-function org-table-analyze "org-table" ())
 (declare-function org-table-current-dline "org-table" ())
+(declare-function org-table-fix-formulas "org-table" (key replace &optional limit delta remove))
 (declare-function org-table-goto-line "org-table" (N))
 
 (defvar dired-buffers)
@@ -65,6 +66,7 @@
 (defvar org-remember-templates)
 (defvar org-table-border-regexp)
 (defvar org-table-current-begin-pos)
+(defvar org-table-fix-formulas-confirm)
 (defvar org-table-hlines)
 
 (defvar org-capture-clock-was-started nil
@@ -763,9 +765,21 @@ captured item after finalizing."
 	;; If we have added a table line, maybe recompute?
 	(when (and (eq (org-capture-get :type 'local) 'table-line)
 		   (org-at-table-p))
-	  (if (org-table-get-stored-formulas)
-	      (org-table-recalculate 'all) ;; FIXME: Should we iterate???
-	    (org-table-align))))
+	  (if (not (org-table-get-stored-formulas)) (org-table-align)
+	    ;; Adjust formulas, if necessary.  We assume a non-nil
+	    ;; `:immediate-finish' means that no confirmation is
+	    ;; required.  Else, obey `org-table-fix-formulas-confirm'.
+	    ;;
+	    ;; The delta required to fix formulas depends on the
+	    ;; number of rows inserted by the template.
+	    (when (or (org-capture-get :immediate-finish)
+		      (not org-table-fix-formulas-confirm)
+		      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
+	      (org-table-fix-formulas
+	       "@" nil (1- (org-table-current-dline))
+	       (count-lines (org-capture-get :begin-marker 'local)
+			    (org-capture-get :end-marker 'local))))
+	    (org-table-recalculate 'all)))) ;FIXME: should we iterate?
       ;; Store this place as the last one where we stored something
       ;; Do the marking in the base buffer, so that it makes sense after
       ;; the indirect buffer has been killed.

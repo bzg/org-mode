@@ -300,7 +300,39 @@
 	     `(("t" "Table" table-line (file ,file)
 		"| x |" :immediate-finish t :table-line-pos "II+99"))))
        (org-capture nil "t")
-       t))))
+       t)))
+  ;; Update formula when capturing one or more rows.
+  (should
+   (equal
+    '(("@3$1" . "9"))
+    (org-test-with-temp-text-in-file "| 1 |\n|---|\n| 9 |\n#+tblfm: @2$1=9"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Table" table-line (file ,file)
+		 "| 2 |" :immediate-finish t :table-line-pos "I-1"))))
+	(org-capture nil "t")
+	(org-table-get-stored-formulas)))))
+  (should
+   (equal
+    '(("@4$1" . "9"))
+    (org-test-with-temp-text-in-file "| 1 |\n|---|\n| 9 |\n#+tblfm: @2$1=9"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Table" table-line (file ,file)
+		 "| 2 |\n| 3 |" :immediate-finish t :table-line-pos "I-1"))))
+	(org-capture nil "t")
+	(org-table-get-stored-formulas)))))
+  ;; Do not update formula when cell in inserted below affected row.
+  (should-not
+   (equal
+    '(("@3$1" . "9"))
+    (org-test-with-temp-text-in-file "| 1 |\n|---|\n| 9 |\n#+tblfm: @2$1=9"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Table" table-line (file ,file)
+		 "| 2 |" :immediate-finish t))))
+	(org-capture nil "t")
+	(org-table-get-stored-formulas))))))
 
 
 (provide 'test-org-capture)
