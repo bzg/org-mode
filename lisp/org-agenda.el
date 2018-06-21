@@ -8669,9 +8669,8 @@ if it was hidden in the outline."
 
 When called repeatedly, scroll the window that is displaying the buffer.
 
-With a `\\[universal-argument]' prefix, use `org-show-entry' instead of \
-`outline-show-subtree'
-to display the item, so that drawers and logbooks stay folded."
+With a `\\[universal-argument]' prefix argument, display the item, but \
+fold drawers."
   (interactive "P")
   (let ((win (selected-window)))
     (if (and (window-live-p org-agenda-show-window)
@@ -8680,7 +8679,13 @@ to display the item, so that drawers and logbooks stay folded."
 	  (select-window org-agenda-show-window)
 	  (ignore-errors (scroll-up)))
       (org-agenda-goto t)
-      (if arg (org-show-entry) (outline-show-subtree))
+      (org-show-entry)
+      (if arg (org-cycle-hide-drawers 'children)
+	(org-with-wide-buffer
+	 (narrow-to-region (org-entry-beginning-position)
+			   (org-entry-end-position))
+	 (org-show-all '(drawers))))
+      (when arg )
       (setq org-agenda-show-window (selected-window)))
     (select-window win)))
 
