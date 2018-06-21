@@ -1220,10 +1220,11 @@ may have been stored before."
       (while (re-search-forward org-table-dataline-regexp end t)
 	(pcase (org-element-lineage (org-element-at-point) '(table) t)
 	  (`nil nil)
+	  ((and table
+		(guard (eq 'table.el (org-element-property :type table))))
+	   nil)
 	  (table
-	   (goto-char (org-element-property :end table))
-	   (skip-chars-backward " \r\t\n")
-	   (forward-line)
+	   (goto-char (org-element-property :contents-end table))
 	   (narrow-to-region (org-element-property :post-affiliated table)
 			     (point))
 	   (throw :found t))))
