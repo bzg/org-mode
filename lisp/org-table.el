@@ -231,9 +231,6 @@ fields."
 	  (const :tag "with yes-or-no" yes-or-no-p)
 	  (const :tag "with y-or-n" y-or-n-p)
 	  (const :tag "no confirmation" nil)))
-(put 'org-table-fix-formulas-confirm
-     'safe-local-variable
-     #'(lambda (x) (member x '(yes-or-no-p y-or-n-p))))
 
 (defcustom org-table-tab-jumps-over-hlines t
   "Non-nil means tab in the last column of a table with jump over a hline.
