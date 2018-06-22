@@ -14266,7 +14266,8 @@ tags."
 	   (current
 	    (save-excursion (goto-char tags-start) (current-column)))
 	   (origin (point-marker))
-	   (column (current-column)))
+	   (column (current-column))
+	   (in-blank? (and (> origin blank-start) (<= origin tags-start))))
       (when (/= new current)
 	(delete-region blank-start tags-start)
 	(goto-char blank-start)
@@ -14274,9 +14275,7 @@ tags."
 	;; Try to move back to original position.  If point was in the
 	;; blanks before the tags, ORIGIN marker is of no use because
 	;; it now points to BLANK-START.  Use COLUMN instead.
-	(let ((in-blank? (and (> origin blank-start) (<= origin tags-start))))
-	  (if in-blank? (org-move-to-column column)
-	    (goto-char origin)))))))
+	(if in-blank? (org-move-to-column column) (goto-char origin))))))
 
 (defun org-set-tags-command (&optional arg)
   "Set the tags for the current visible entry.

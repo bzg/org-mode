@@ -6040,7 +6040,14 @@ Paragraph<point>"
 	    (let ((org-tags-column 0))
 	      (org-fix-tags-on-the-fly)
 	      (insert "x")
-	      (buffer-string))))))
+	      (buffer-string)))))
+  ;; Aligning tags preserve position.
+  (should
+   (= 6 (org-test-with-temp-text "* 345 <point> :tag:"
+	  (let ((org-tags-column 78)
+		(indent-tabs-mode nil))
+	    (org-fix-tags-on-the-fly))
+	  (current-column)))))
 
 (ert-deftest test-org/get-tags ()
   "Test `org-get-tags' specifications."
