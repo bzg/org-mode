@@ -2184,29 +2184,37 @@ The following commands are available:
 
 \\{org-agenda-mode-map}"
   (interactive)
-  (cond (org-agenda-doing-sticky-redo
-	 ;; Refreshing sticky agenda-buffer
-	 ;;
-	 ;; Preserve the value of `org-agenda-local-vars' variables,
-	 ;; while letting `kill-all-local-variables' kill the rest
-	 (let ((save (buffer-local-variables)))
-	   (kill-all-local-variables)
+  (let ((agenda-local-vars-to-keep
+	 '(text-scale-mode-amount
+	   text-scale-mode
+	   text-scale-mode-lighter
+	   face-remapping-alist))
+	(save (buffer-local-variables)))
+    (kill-all-local-variables)
+    (cond (org-agenda-doing-sticky-redo
+	   ;; Refreshing sticky agenda-buffer
+	   ;;
+	   ;; Preserve the value of `org-agenda-local-vars' variables.
 	   (mapc #'make-local-variable org-agenda-local-vars)
 	   (dolist (elem save)
 	     (pcase elem
 	       (`(,var . ,val)		;ignore unbound variables
 		(when (and val (memq var org-agenda-local-vars))
-		  (set var val))))))
-	 (setq-local org-agenda-this-buffer-is-sticky t))
-	(org-agenda-sticky
-	 ;; Creating a sticky Agenda buffer for the first time
-	 (kill-all-local-variables)
-	 (mapc 'make-local-variable org-agenda-local-vars)
-	 (setq-local org-agenda-this-buffer-is-sticky t))
-	(t
-	 ;; Creating a non-sticky agenda buffer
-	 (kill-all-local-variables)
-	 (setq-local org-agenda-this-buffer-is-sticky nil)))
+		  (set var val)))))
+	   (setq-local org-agenda-this-buffer-is-sticky t))
+	  (org-agenda-sticky
+	   ;; Creating a sticky Agenda buffer for the first time
+	   (mapc 'make-local-variable org-agenda-local-vars)
+	   (setq-local org-agenda-this-buffer-is-sticky t))
+	  (t
+	   ;; Creating a non-sticky agenda buffer
+	   (setq-local org-agenda-this-buffer-is-sticky nil)))
+    (mapc #'make-local-variable agenda-local-vars-to-keep)
+    (dolist (elem save)
+      (pcase elem
+	(`(,var . ,val)		;ignore unbound variables
+	 (when (and val (memq var agenda-local-vars-to-keep))
+	   (set var val))))))
   (setq org-agenda-undo-list nil
 	org-agenda-pending-undo-list nil
 	org-agenda-bulk-marked-entries nil)
