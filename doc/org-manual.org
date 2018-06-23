@@ -20092,12 +20092,12 @@ at the beginning of the headline, call the function without arguments.
 Org returns an alist of return values of calls to the function.
 
 To avoid preserving point, Org wraps the call to {{{var(FUNC)}}} in
-save-excursion form.  After evaluation, Org moves point to the
-end of the line that was just processed.  Search continues from that
-point forward.  This may not always work as expected under some
-conditions, such as if the current sub-tree was removed by a previous
-archiving operation.  In such rare circumstances, Org skips the next
-entry entirely when it should not.  To stop Org from such skips, make
+~save-excursion~ form.  After evaluation, Org moves point to the end
+of the line that was just processed.  Search continues from that point
+forward.  This may not always work as expected under some conditions,
+such as if the current sub-tree was removed by a previous archiving
+operation.  In such rare circumstances, Org skips the next entry
+entirely when it should not.  To stop Org from such skips, make
 {{{var(FUNC)}}} set the variable ~org-map-continue-from~ to a specific
 buffer position.
 
