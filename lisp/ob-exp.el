@@ -107,7 +107,7 @@ Assume point is at block opening line."
 				   (symbol-value lang-headers))
 			      (append (org-babel-params-from-properties lang)
 				      (list raw-params)))))))
-	  (setf hash (org-babel-sha1-hash info)))
+	  (setf hash (org-babel-sha1-hash info :export)))
 	(org-babel-exp-do-export info 'block hash)))))
 
 (defcustom org-babel-exp-call-line-template
@@ -376,7 +376,7 @@ block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
   (unless (and hash (equal hash (org-babel-current-result-hash)))
     (let ((lang (nth 0 info))
-	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
+	  (body (if (org-babel-noweb-p (nth 2 info) :export)
 		    (org-babel-expand-noweb-references
 		     info org-babel-exp-reference-buffer)
 		  (nth 1 info)))

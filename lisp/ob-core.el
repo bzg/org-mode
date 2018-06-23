@@ -645,7 +645,7 @@ block."
       (let* ((params (nth 2 info))
 	     (cache (let ((c (cdr (assq :cache params))))
 		      (and (not arg) c (string= "yes" c))))
-	     (new-hash (and cache (org-babel-sha1-hash info)))
+	     (new-hash (and cache (org-babel-sha1-hash info :eval)))
 	     (old-hash (and cache (org-babel-current-result-hash)))
 	     (current-cache (and new-hash (equal new-hash old-hash))))
 	(cond
@@ -1221,11 +1221,14 @@ the current subtree."
       (widen))))
 
 ;;;###autoload
-(defun org-babel-sha1-hash (&optional info)
-  "Generate an sha1 hash based on the value of info."
+(defun org-babel-sha1-hash (&optional info context)
+  "Generate a sha1 hash based on the value of INFO.
+CONTEXT specifies the context of evaluation.  It can be `:eval',
+`:export', `:tangle'.  A nil value means `:eval'."
   (interactive)
   (let ((print-level nil)
-	(info (or info (org-babel-get-src-block-info))))
+	(info (or info (org-babel-get-src-block-info)))
+	(context (or context :eval)))
     (setf (nth 2 info)
 	  (sort (copy-sequence (nth 2 info))
 		(lambda (a b) (string< (car a) (car b)))))
@@ -1253,8 +1256,9 @@ the current subtree."
 	   ;; expanded body
 	   (lang (nth 0 info))
 	   (params (nth 2 info))
-	   (body (if (org-babel-noweb-p params :eval)
-			   (org-babel-expand-noweb-references info) (nth 1 info)))
+	   (body (if (org-babel-noweb-p params context)
+		     (org-babel-expand-noweb-references info)
+		   (nth 1 info)))
 	   (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
 	   (assignments-cmd (intern (concat "org-babel-variable-assignments:"
 					    lang)))
