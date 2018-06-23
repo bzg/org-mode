@@ -818,11 +818,9 @@ a communication channel."
      ;; Signature.
      (let* ((heading-val
 	     (and (plist-get info :with-headline-opening)
-		  (org-string-nw-p
-		   (org-trim
-		    (org-export-data
-		     (org-koma-letter--get-tagged-contents 'closing)
-		     info)))))
+		  (pcase (org-koma-letter--get-tagged-contents 'closing)
+		    ((and (pred org-string-nw-p) closing) (org-trim closing))
+		    (_ nil))))
 	    (signature (org-string-nw-p (plist-get info :signature)))
 	    (signature-scope (funcall check-scope 'signature)))
        (and (or (and signature signature-scope)
