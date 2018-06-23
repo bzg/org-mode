@@ -3390,17 +3390,17 @@ generally, act on links.
      Open link at point.  This launches a web browser for URL (using
      ~browse-url-at-point~), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB
      for the corresponding links, and execute the command in a shell
-     link.  When point is on an internal link, this command runs
-     the corresponding search.  When point is on a TAG list in
-     a headline, it creates the corresponding TAGS view.  If the
-     cursor is on a timestamp, it compiles the agenda for that date.
-     Furthermore, it visits text and remote files in =file= links with
-     Emacs and select a suitable application for local non-text files.
-     Classification of files is based on file extension only.  See
-     option ~org-file-apps~.  If you want to override the default
-     application and visit the file with Emacs, use a {{{kbd(C-u)}}}
-     prefix.  If you want to avoid opening in Emacs, use a {{{kbd(C-u
-     C-u)}}} prefix.
+     link.  When point is on an internal link, this command runs the
+     corresponding search.  When point is on the tags part of
+     a headline, it creates the corresponding tags view (see [[*Matching
+     tags and properties]]).  If the cursor is on a timestamp, it
+     compiles the agenda for that date.  Furthermore, it visits text
+     and remote files in =file= links with Emacs and select a suitable
+     application for local non-text files.  Classification of files is
+     based on file extension only.  See option ~org-file-apps~.  If
+     you want to override the default application and visit the file
+     with Emacs, use a {{{kbd(C-u)}}} prefix.  If you want to avoid
+     opening in Emacs, use a {{{kbd(C-u C-u)}}} prefix.
 
      #+vindex: org-link-frame-setup
      If point is on a headline, but not on a link, offer all links in
