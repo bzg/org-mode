@@ -1939,29 +1939,28 @@ Use `\\[org-clock-remove-overlays]' to remove the subtree times."
 (defvar-local org-clock-overlays nil)
 
 (defun org-clock-put-overlay (time)
-  "Put an overlays on the current line, displaying TIME.
-This creates a new overlay and stores it in `org-clock-overlays', so that it
-will be easy to remove."
-  (let (ov tx)
-    (beginning-of-line)
-    (let ((case-fold-search nil))
-      (when (looking-at org-complex-heading-regexp)
-	(goto-char (match-beginning 4))))
-    (setq ov (make-overlay (point) (point-at-eol))
-	  tx (concat (buffer-substring-no-properties (point) (match-end 4))
-		     (org-add-props
-			 (make-string
-			  (max 0 (- (- 60 (current-column))
-				    (- (match-end 4) (match-beginning 4))
-				    (length (org-get-at-bol 'line-prefix))))
-			  ?\·)
-			 '(face shadow))
-		     (org-add-props
-			 (format " %9s " (org-duration-from-minutes time))
-			 '(face org-clock-overlay))
-		     ""))
-    (overlay-put ov 'display tx)
-    (push ov org-clock-overlays)))
+  "Put an overlay on the headline at point, displaying TIME.
+Create a new overlay and store it in `org-clock-overlays', so
+that it will be easy to remove.  This function assumes point is
+on a headline."
+  (org-match-line org-complex-heading-regexp)
+  (goto-char (match-beginning 4))
+  (let* ((headline (match-string 4))
+	 (text (concat headline
+		       (org-add-props
+			   (make-string
+			    (max (- (- 60 (current-column))
+				    (org-string-width headline)
+				    (length (org-get-at-bol 'line-prefix)))
+				 0)
+			    ?\·)
+			   '(face shadow))
+		       (org-add-props
+			   (format " %9s " (org-duration-from-minutes time))
+			   '(face org-clock-overlay))))
+	 (o (make-overlay (point) (line-end-position))))
+    (org-overlay-display o text)
+    (push o org-clock-overlays)))
 
 ;;;###autoload
 (defun org-clock-remove-overlays (&optional _beg _end noremove)
