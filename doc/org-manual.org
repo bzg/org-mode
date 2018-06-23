@@ -204,7 +204,7 @@ Many commands in Org work on the region if the region is /active/.  To
 make use of this, you need to have ~transient-mark-mode~ turned on,
 which is the default.  If you do not like ~transient-mark-mode~, you
 can create an active region by using the mouse to select a region, or
-pressing {{{kbd(C-SPC)}}} twice before moving the cursor.
+pressing {{{kbd(C-SPC)}}} twice before moving point.
 
 ** Feedback
 :PROPERTIES:
@@ -468,7 +468,7 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
      #+end_example
 
      #+vindex: org-cycle-emulate-tab
-     The cursor must be on a headline for this to work[fn:4].
+     Point must be on a headline for this to work[fn:4].
 
 - {{{kbd(S-TAB)}}} (~org-global-cycle~), {{{kbd(C-u TAB)}}} ::
 
@@ -901,8 +901,8 @@ active---promotion and demotion work on all headlines in the region.
 To select a region of headlines, it is best to place both point and
 mark at the beginning of a line, mark at the beginning of the first
 headline, and point at the line just after the last headline to
-change.  Note that when the cursor is inside a table (see [[*Tables]]),
-the Meta-Cursor keys have different functionality.
+change.  Note that when point is inside a table (see [[*Tables]]), the
+Meta-Cursor keys have different functionality.
 
 ** Sparse Trees
 :PROPERTIES:
@@ -1066,11 +1066,11 @@ of indentation between items and theirs sub-items, customize
 ~org-list-indent-offset~.
 
 #+vindex: org-list-automatic-rules
-The following commands act on items when the cursor is in the first
-line of an item---the line with the bullet or number.  Some of them
-imply the application of automatic rules to keep list structure
-intact.  If some of these actions get in your way, configure
-~org-list-automatic-rules~ to disable them individually.
+The following commands act on items when point is in the first line of
+an item---the line with the bullet or number.  Some of them imply the
+application of automatic rules to keep list structure intact.  If some
+of these actions get in your way, configure ~org-list-automatic-rules~
+to disable them individually.
 
 #+attr_texinfo: :sep ,
 - {{{kbd(TAB)}}} (~org-cycle~) ::
@@ -1080,13 +1080,13 @@ intact.  If some of these actions get in your way, configure
      #+findex: org-cycle
      #+vindex: org-cycle-include-plain-lists
      Items can be folded just like headline levels.  Normally this
-     works only if the cursor is on a plain list item.  For more
-     details, see the variable ~org-cycle-include-plain-lists~.  If
-     this variable is set to ~integrate~, plain list items are treated
-     like low-level headlines.  The level of an item is then given by
-     the indentation of the bullet/number.  Items are always
-     subordinate to real headlines, however; the hierarchies remain
-     completely separated.  In a new item with no text yet, the first
+     works only if point is on a plain list item.  For more details,
+     see the variable ~org-cycle-include-plain-lists~.  If this
+     variable is set to ~integrate~, plain list items are treated like
+     low-level headlines.  The level of an item is then given by the
+     indentation of the bullet/number.  Items are always subordinate
+     to real headlines, however; the hierarchies remain completely
+     separated.  In a new item with no text yet, the first
      {{{kbd(TAB)}}} demotes the item to become a child of the previous
      one.  Subsequent {{{kbd(TAB)}}}s move the item to meaningful
      levels in the list and eventually get it back to its initial
@@ -1194,7 +1194,7 @@ intact.  If some of these actions get in your way, configure
      #+vindex: org-support-shift-select
      #+kindex: S-LEFT
      #+kindex: S-RIGHT
-     This command also cycles bullet styles when the cursor in on the
+     This command also cycles bullet styles when point in on the
      bullet or anywhere in an item line, details depending on
      ~org-support-shift-select~.
 
@@ -1241,8 +1241,8 @@ Completion over drawer keywords is also possible using
 
 Visibility cycling (see [[*Visibility Cycling]]) on the headline hides and
 shows the entry, but keep the drawer collapsed to a single line.  In
-order to look inside the drawer, you need to move the cursor to the
-drawer line and press {{{kbd(TAB)}}} there.
+order to look inside the drawer, you need to move point to the drawer
+line and press {{{kbd(TAB)}}} there.
 
 You can also arrange for state change notes (see [[Tracking TODO state
 changes]]) and clock times (see [[*Clocking Work Time]]) to be stored in
@@ -1328,7 +1328,7 @@ The following command handles footnotes:
      The footnote action command.
 
      #+kindex: C-c C-x f
-     When the cursor is on a footnote reference, jump to the
+     When point is on a footnote reference, jump to the
      definition.  When it is at a definition, jump to
      the---first---reference.
 
@@ -1357,7 +1357,7 @@ The following command handles footnotes:
 - {{{kbd(C-c C-c)}}} ::
 
      #+kindex: C-c C-c
-     If the cursor is on a footnote reference, jump to the definition.
+     If point is on a footnote reference, jump to the definition.
      If it is at the definition, jump back to the reference.  When
      called at a footnote location with a prefix argument, offer the
      same menu as {{{kbd(C-c C-x f)}}}.
@@ -1450,7 +1450,7 @@ fields.  Even faster would be to type =|Name|Phone|Age= followed by
 When typing text into a field, Org treats {{{kbd(DEL)}}},
 {{{kbd(Backspace)}}}, and all character keys in a special way, so that
 inserting and deleting avoids shifting other fields.  Also, when
-typing /immediately/ after the cursor was moved into a new field with
+typing /immediately/ after point was moved into a new field with
 {{{kbd(TAB)}}}, {{{kbd(S-TAB)}}} or {{{kbd(RET)}}}, the field is
 automatically made blank.  If this behavior is too unpredictable for
 you, configure the option ~org-table-auto-blank-field~.
@@ -1488,7 +1488,7 @@ you, configure the option ~org-table-auto-blank-field~.
 
      #+kindex: C-c C-c
      #+findex: org-table-align
-     Re-align the table without moving the cursor.
+     Re-align the table without moving point.
 
 - {{{kbd(TAB)}}} (~org-table-next-field~) ::
 
@@ -1557,7 +1557,7 @@ you, configure the option ~org-table-auto-blank-field~.
 
      #+kindex: M-S-RIGHT
      #+findex: org-table-insert-column
-     Insert a new column to the left of the cursor position.
+     Insert a new column to the left of point position.
 
 - {{{kbd(M-UP)}}} (~org-table-move-row-up~) ::
 
@@ -1595,7 +1595,7 @@ you, configure the option ~org-table-auto-blank-field~.
 
      #+kindex: C-c RET
      #+findex: org-table-hline-and-move
-     Insert a horizontal line below current row, and move the cursor
+     Insert a horizontal line below current row, and move point
      into the row below that line.
 
 - {{{kbd(C-c ^)}}} (~org-table-sort-lines~) ::
@@ -1651,7 +1651,7 @@ you, configure the option ~org-table-auto-blank-field~.
 
      #+kindex: M-RET
      #+findex: org-table-wrap-region
-     Split the current field at the cursor position and move the rest
+     Split the current field at point position and move the rest
      to the line below.  If there is an active region, and both point
      and mark are in the same column, the text in the column is
      wrapped to minimum width for the given number of lines.
@@ -1704,10 +1704,9 @@ you, configure the option ~org-table-auto-blank-field~.
      Alignment]]).  When called with a {{{kbd(C-u)}}} prefix, just make
      the full field visible, so that it can be edited in place.  When
      called with two {{{kbd(C-u)}}} prefixes, make the editor window
-     follow the cursor through the table and always show the current
-     field.  The follow mode exits automatically when the cursor
-     leaves the table, or when you repeat this command with {{{kbd(C-u
-     C-u C-c `)}}}.
+     follow point through the table and always show the current field.
+     The follow mode exits automatically when point leaves the table,
+     or when you repeat this command with {{{kbd(C-u C-u C-c `)}}}.
 
 - {{{kbd(M-x org-table-import)}}} ::
 
@@ -2279,11 +2278,11 @@ interpolated as a Lisp string (in double-quotes) containing the field.
 If you provide the =N= mode switch, all referenced elements are
 numbers---non-number fields will be zero---and interpolated as Lisp
 numbers, without quotes.  If you provide the =L= flag, all fields are
-interpolated literally, without quotes.  I.e., if you want a reference
-to be interpreted as a string by the Lisp form, enclose the reference
-operator itself in double-quotes, like ="$3"=.  Ranges are inserted as
-space-separated fields, so you can embed them in list or vector
-syntax.
+interpolated literally, without quotes.  For example, if you want a
+reference to be interpreted as a string by the Lisp form, enclose the
+reference operator itself in double-quotes, like ="$3"=.  Ranges are
+inserted as space-separated fields, so you can embed them in list or
+vector syntax.
 
 Here are a few examples---note how the =N= mode is used when we do
 computations in Lisp:
@@ -2346,7 +2345,7 @@ considered as seconds in addition and subtraction.
 
 To assign a formula to a particular field, type it directly into the
 field, preceded by =:==, for example =vsum(@II..III)=.  When you press
-{{{kbd(TAB)}}} or {{{kbd(RET)}}} or {{{kbd(C-c C-c)}}} with the cursor
+{{{kbd(TAB)}}} or {{{kbd(RET)}}} or {{{kbd(C-c C-c)}}} with point
 still in the field, the formula is stored as the formula for this
 field, evaluated, and the current field is replaced with the result.
 
@@ -2360,9 +2359,8 @@ formulas are modified in order to still reference the same field.  To
 avoid this from happening, in particular in range references, anchor
 ranges at the table borders (using =@<=, =@>=, =$<=, =$>=), or at
 hlines using the =@I= notation.  Automatic adaptation of field
-references does of course not happen if you edit the table structure
-with normal editing commands---then you must fix the equations
-yourself.
+references does not happen if you edit the table structure with normal
+editing commands---you must fix the formulas yourself.
 
 Instead of typing an equation into the field, you may also use the
 following command
@@ -2423,7 +2421,7 @@ column formulas very easy to use.
 
 To assign a formula to a column, type it directly into any field in
 the column, preceded by an equal sign, like ==$1+$2=.  When you press
-{{{kbd(TAB)}}} or {{{kbd(RET)}}} or {{{kbd(C-c C-c)}}} with the cursor
+{{{kbd(TAB)}}} or {{{kbd(RET)}}} or {{{kbd(C-c C-c)}}} with point
 still in the field, the formula is stored as the formula for the
 current column, evaluated and the current field replaced with the
 result.  If the field contains only ===, the previously stored formula
@@ -2536,8 +2534,7 @@ you prefer to only work with the internal format (like =@3$2= or
      #+kindex: C-c ?
      #+findex: org-table-field-info
      While editing a formula in a table field, highlight the field(s)
-     referenced by the reference at the cursor position in the
-     formula.
+     referenced by the reference at point position in the formula.
 
 - {{{kbd(C-c })}}} (~org-table-toggle-coordinate-overlays~) ::
 
@@ -2559,10 +2556,10 @@ you prefer to only work with the internal format (like =@3$2= or
      #+findex: org-table-edit-formulas
      Edit all formulas for the current table in a special buffer,
      where the formulas are displayed one per line.  If the current
-     field has an active formula, the cursor in the formula editor
-     marks it.  While inside the special buffer, Org automatically
-     highlights any field or range reference at the cursor position.
-     You may edit, remove and add formulas, and use the following
+     field has an active formula, point in the formula editor marks
+     it.  While inside the special buffer, Org automatically
+     highlights any field or range reference at point position.  You
+     may edit, remove and add formulas, and use the following
      commands:
 
      - {{{kbd(C-c C-c)}}} or {{{kbd(C-x C-s)}}} (~org-table-fedit-finish~) ::
@@ -2668,10 +2665,10 @@ recalculation commands in the table.
 #+cindex: @samp{TBLFM}, switching
 
 #+kindex: C-c C-c
-You may apply the formula temporarily.  This is useful when you switch
-the formula.  Place multiple =TBLFM= keywords right after the table,
-and then press {{{kbd(C-c C-c)}}} on the formula to apply.  Here is an
-example:
+You may apply the formula temporarily.  This is useful when you want
+to switch the formula applied to the table.  Place multiple =TBLFM=
+keywords right after the table, and then press {{{kbd(C-c C-c)}}} on
+the formula to apply.  Here is an example:
 
 #+begin_example
 | x | y |
@@ -2696,7 +2693,7 @@ Pressing {{{kbd(C-c C-c)}}} in the line of =#+TBLFM: $2=$1*2= yields:
 
 #+texinfo: @noindent
 Note: If you recalculate this table, with {{{kbd(C-u C-c *)}}}, for
-example, you get the following result of applying only the first
+example, you get the following result from applying only the first
 =TBLFM= keyword.
 
 #+begin_example
@@ -2995,11 +2992,11 @@ For more information and examples see the [[https://orgmode.org/worg/org-tutoria
 :UNNUMBERED: notoc
 :END:
 
-While the cursor is on a column, typing {{{kbd(C-c " a)}}} or
-{{{kbd(M-x orgtbl-ascii-plot)}}} create a new column containing an
-ASCII-art bars plot.  The plot is implemented through a regular column
-formula.  When the source column changes, the bar plot may be updated
-by refreshing the table, for example typing {{{kbd(C-u C-c *)}}}.
+While point is on a column, typing {{{kbd(C-c " a)}}} or {{{kbd(M-x
+orgtbl-ascii-plot)}}} create a new column containing an ASCII-art bars
+plot.  The plot is implemented through a regular column formula.  When
+the source column changes, the bar plot may be updated by refreshing
+the table, for example typing {{{kbd(C-u C-c *)}}}.
 
 #+begin_example
 | Sede          | Max cites |              |
@@ -3035,8 +3032,8 @@ defaults to =12=.
 :END:
 #+cindex: hyperlinks
 
-Like HTML, Org provides links inside a file, external links to
-other files, Usenet articles, emails, and much more.
+Like HTML, Org provides support for links inside a file, external
+links to other files, Usenet articles, emails, and much more.
 
 ** Link Format
 :PROPERTIES:
@@ -3063,10 +3060,9 @@ highlighted in the face ~org-link~, which by default is an underlined
 face.  You can directly edit the visible part of a link.  Note that
 this can be either the LINK part, if there is no description, or the
 {{{var(DESCRIPTION)}}} part.  To edit also the invisible
-{{{var(LINK)}}} part, use {{{kbd(C-c C-l)}}} with the cursor on the
-link.
+{{{var(LINK)}}} part, use {{{kbd(C-c C-l)}}} with point on the link.
 
-If you place the cursor at the beginning or just behind the end of the
+If you place point at the beginning or just behind the end of the
 displayed text and press {{{kbd(BS)}}}, you remove
 the---invisible---bracket at that location.  This makes the link
 incomplete and the internals are again displayed as plain text.
@@ -3092,7 +3088,7 @@ custom IDs are unique in a file.
 Links such as =[[My Target]]= or =[[My Target][Find my target]]= lead to a text search in
 the current file.
 
-The link can be followed with {{{kbd(C-c C-o)}}} when the cursor is on
+The link can be followed with {{{kbd(C-c C-o)}}} when point is on
 the link, or with a mouse click (see [[*Handling Links]]).  Links to
 custom IDs point to the corresponding headline.  The preferred match
 for a text link is a /dedicated target/: the same string in double
@@ -3155,7 +3151,7 @@ Target>>>= causes each occurrence of =my target= in normal text to
 become activated as a link.  The Org file is scanned automatically for
 radio targets only when the file is first loaded into Emacs.  To
 update the target list during editing, press {{{kbd(C-c C-c)}}} with
-the cursor on or at a target.
+point on or at a target.
 
 ** External Links
 :PROPERTIES:
@@ -3214,10 +3210,10 @@ the colon.  The following list shows examples for each link type.
 
 #+cindex: VM links
 #+cindex: Wanderlust links
-On top of these built-in link types, some are available through the
-=contrib/= directory (see [[*Installation]]).  For example, these links to
-VM or Wanderlust messages are available when you load the
-corresponding libraries from the =contrib/= directory:
+On top of these built-in link types, additional ones are available
+through the =contrib/= directory (see [[*Installation]]).  For example,
+these links to VM or Wanderlust messages are available when you load
+the corresponding libraries from the =contrib/= directory:
 
 | =vm:folder=                            | VM folder link          |
 | =vm:folder#id=                         | VM message link         |
@@ -3227,11 +3223,11 @@ corresponding libraries from the =contrib/= directory:
 | =wl:folder=                            | Wanderlust folder link  |
 | =wl:folder#id=                         | Wanderlust message link |
 
-For customizing Org to add new link types, see [[*Adding Hyperlink
-Types]].
+For information on customizing Org to add new link types, see [[*Adding
+Hyperlink Types]].
 
 A link should be enclosed in double brackets and may contain
-a descriptive text to be displayed instead of the URL (see [[*Link
+descriptive text to be displayed instead of the URL (see [[*Link
 Format]]), for example:
 
 : [[http://www.gnu.org/software/emacs/][GNU Emacs]]
@@ -3248,7 +3244,7 @@ image is inlined into the exported HTML file.
 Org also finds external links in the normal text and activates them as
 links.  If spaces must be part of the link (for example in
 =bbdb:Richard Stallman=), or if you need to remove ambiguities about
-the end of the link, enclose them in square or angular brackets.
+the end of the link, enclose the link in square or angular brackets.
 
 ** Handling Links
 :PROPERTIES:
@@ -3265,12 +3261,12 @@ The main function is ~org-store-link~, called with {{{kbd(M-x
 org-store-link)}}}.  Because of its importance, we suggest to bind it
 to a widely available key (see [[*Activation]]).  It stores a link to the
 current location.  The link is stored for later insertion into an Org
-buffer---see below.  What kind of link is created depends on the
+buffer---see below.  The kind of link that is created depends on the
 current buffer:
 
 - /Org mode buffers/ ::
 
-     For Org files, if there is a =<<target>>= at the cursor, the link
+     For Org files, if there is a =<<target>>= at point, the link
      points to the target.  Otherwise it points to the current
      headline, which is also the description[fn:28].
 
@@ -3295,7 +3291,7 @@ current buffer:
 
 - /Web browsers: W3, W3M and EWW/ ::
 
-     Here the link is the current URL, with the page title as
+     Here the link is the current URL, with the page title as the
      description.
 
 - /Contacts: BBDB/ ::
@@ -3315,18 +3311,16 @@ current buffer:
      For any other file, the link points to the file, with a search
      string (see [[*Search Options in File Links]]) pointing to the
      contents of the current line.  If there is an active region, the
-     selected words form the basis of the search string.  If the
-     automatically created link is not working correctly or accurately
-     enough, you can write custom functions to select the search
-     string and to do the search for particular file types (see
-     [[*Custom Searches]]).
+     selected words form the basis of the search string. You can write
+     custom Lisp functions to select the search string and perform the
+     search for particular file types (see [[*Custom Searches]]).
 
      You can also define dedicated links to other files.  See [[*Adding
      Hyperlink Types]].
 
 - /Agenda view/ ::
 
-     When the cursor is in an agenda view, the created link points to
+     When point is in an agenda view, the created link points to
      the entry referenced by the current line.
 
 From an Org buffer, the following commands create, navigate or, more
@@ -3385,7 +3379,7 @@ generally, act on links.
 - {{{kbd(C-c C-l)}}} (with cursor on existing link) ::
 
      #+cindex: following links
-     When the cursor is on an existing link, {{{kbd(C-c C-l)}}} allows
+     When point is on an existing link, {{{kbd(C-c C-l)}}} allows
      you to edit the link and description parts of the link.
 
 - {{{kbd(C-c C-o)}}} (~org-open-at-point~) ::
@@ -3396,8 +3390,8 @@ generally, act on links.
      Open link at point.  This launches a web browser for URL (using
      ~browse-url-at-point~), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB
      for the corresponding links, and execute the command in a shell
-     link.  When the cursor is on an internal link, this command runs
-     the corresponding search.  When the cursor is on a TAG list in
+     link.  When point is on an internal link, this command runs
+     the corresponding search.  When point is on a TAG list in
      a headline, it creates the corresponding TAGS view.  If the
      cursor is on a timestamp, it compiles the agenda for that date.
      Furthermore, it visits text and remote files in =file= links with
@@ -3409,9 +3403,9 @@ generally, act on links.
      C-u)}}} prefix.
 
      #+vindex: org-link-frame-setup
-     If the cursor is on a headline, but not on a link, offer all
-     links in the headline and entry text.  If you want to setup the
-     frame configuration for following links, customize
+     If point is on a headline, but not on a link, offer all links in
+     the headline and entry text.  If you want to setup the frame
+     configuration for following links, customize
      ~org-link-frame-setup~.
 
 - {{{kbd(RET)}}} ::
@@ -3455,7 +3449,7 @@ generally, act on links.
      #+kindex: C-c %
      #+findex: org-mark-ring-push
      #+cindex: mark ring
-     Push the current position onto the mark ring, to be able to
+     Push the current position onto the Org mark ring, to be able to
      return easily.  Commands following an internal link do this
      automatically.
 
@@ -3536,14 +3530,15 @@ replacement text.  Here is an example:
 If the replacement text contains the string =%s=, it is replaced with
 the tag.  Using =%h= instead of =%s= percent-encodes the tag (see the
 example above, where we need to encode the URL parameter).  Using
-=%(my-function)= passes the tag to a custom function, and replace it
-by the resulting string.
+=%(my-function)= passes the tag to a custom Lisp function, and replace
+it by the resulting string.
 
 If the replacement text do not contain any specifier, it is simply
 appended to the string in order to create the link.
 
-Instead of a string, you may also specify a function that will be
-called with the tag as the only argument to create the link.
+Instead of a string, you may also specify a Lisp function to create
+the link.  Such a function will be called with the tag as the only
+argument.
 
 With the above setting, you could link to a specific bug with
 =[[bugzilla:129]]=, search the web for =OrgMode= with =[[google:OrgMode]]=,
@@ -3563,11 +3558,11 @@ can define them in the file with
 
 #+texinfo: @noindent
 In-buffer completion (see [[*Completion]]) can be used after =[= to
-complete link abbreviations.  You may also define a function that
-implements special (e.g., completion) support for inserting such
-a link with {{{kbd(C-c C-l)}}}.  Such a function should not accept any
-arguments, and return the full link with prefix.  You can set the link
-completion function like this:
+complete link abbreviations.  You may also define a Lisp function that
+implements special (e.g., completion) support for inserting such a
+link with {{{kbd(C-c C-l)}}}.  Such a function should not accept any
+arguments, and should return the full link with a prefix.  You can set
+the link completion function like this:
 
 #+begin_src emacs-lisp
 (org-link-set-parameter "type" :complete #'some-completion-function)
@@ -3590,7 +3585,7 @@ as a search string that can be used to find this line back later when
 following the link with {{{kbd(C-c C-o)}}}.
 
 Here is the syntax of the different ways to attach a search to a file
-link, together with an explanation:
+link, together with explanations for each:
 
 #+begin_example
 [[file:~/code/main.c::255]]
@@ -3971,8 +3966,8 @@ buffer and then use {{{kbd(M-TAB)}}} completion.
 Remember that the keywords after the vertical bar---or the last
 keyword if no bar is there---must always mean that the item is DONE,
 although you may use a different word.  After changing one of these
-lines, use {{{kbd(C-c C-c)}}} with the cursor still in the line to
-make the changes known to Org mode[fn:41].
+lines, use {{{kbd(C-c C-c)}}} with point still in the line to make the
+changes known to Org mode[fn:41].
 
 *** Faces for TODO keywords
 :PROPERTIES:
@@ -4525,7 +4520,7 @@ The following commands work with checkboxes:
        first.  With a prefix argument, add or remove the checkbox for
        all items in the region.
 
-     - If the cursor is in a headline, toggle checkboxes in the region
+     - If point is in a headline, toggle checkboxes in the region
        between this headline and the next---so /not/ the entire
        subtree.
 
@@ -4536,7 +4531,7 @@ The following commands work with checkboxes:
 
      #+kindex: M-S-RET
      #+findex: org-insert-todo-heading
-     Insert a new item with a checkbox.  This works only if the cursor
+     Insert a new item with a checkbox.  This works only if point
      is already in a plain list item (see [[*Plain Lists]]).
 
 - {{{kbd(C-c C-x o)}}} (~org-toggle-ordered-property~) ::
@@ -4669,8 +4664,8 @@ also a special command for inserting tags:
 - {{{kbd(C-c C-c)}}} (~org-set-tags-command~) ::
 
      #+kindex: C-c C-c
-     When the cursor is in a headline, this does the same as
-     {{{kbd(C-c C-q)}}}.
+     When point is in a headline, this does the same as {{{kbd(C-c
+     C-q)}}}.
 
 #+vindex: org-complete-tags-always-offer-all-agenda-tags
 #+vindex: org-tag-alist
@@ -4747,8 +4742,8 @@ you indicate that at most one of =@work=, =@home=, and =@tennisclub=
 should be selected.  Multiple such groups are allowed.
 
 #+texinfo: @noindent
-Do not forget to press {{{kbd(C-c C-c)}}} with the cursor in one of
-these lines to activate any changes.
+Do not forget to press {{{kbd(C-c C-c)}}} with point in one of these
+lines to activate any changes.
 
 #+texinfo: @noindent
 To set these mutually exclusive groups in the variable
@@ -5130,8 +5125,7 @@ The following commands help to work with properties:
 
      #+kindex: C-c C-c
      #+findex: org-property-action
-     With the cursor in a property drawer, this executes property
-     commands.
+     With point in a property drawer, this executes property commands.
 
 - {{{kbd(C-c C-c s)}}} (~org-set-property~) ::
 
@@ -5491,16 +5485,16 @@ either for all clocks or just for today.
      #+kindex: C-c C-x C-c
      #+vindex: org-columns
      #+vindex: org-columns-default-format
-     Turn on column view.  If the cursor is before the first headline
-     in the file, column view is turned on for the entire file, using
-     the =#+COLUMNS= definition.  If the cursor is somewhere inside
-     the outline, this command searches the hierarchy, up from point,
-     for a =COLUMNS= property that defines a format.  When one is
-     found, the column view table is established for the tree starting
-     at the entry that contains the =COLUMNS= property.  If no such
-     property is found, the format is taken from the =#+COLUMNS= line
-     or from the variable ~org-columns-default-format~, and column
-     view is established for the current entry and its subtree.
+     Turn on column view.  If point is before the first headline in
+     the file, column view is turned on for the entire file, using the
+     =#+COLUMNS= definition.  If point is somewhere inside the
+     outline, this command searches the hierarchy, up from point, for
+     a =COLUMNS= property that defines a format.  When one is found,
+     the column view table is established for the tree starting at the
+     entry that contains the =COLUMNS= property.  If no such property
+     is found, the format is taken from the =#+COLUMNS= line or from
+     the variable ~org-columns-default-format~, and column view is
+     established for the current entry and its subtree.
 
 - {{{kbd(r)}}} or {{{kbd(g)}}} (~org-columns-redo~) ::
 
@@ -5685,7 +5679,7 @@ The following commands insert or update the dynamic block:
      #+kindex: C-c C-c
      #+kindex: C-c C-x C-u
      #+findex: org-dblock-update
-     Update dynamic block at point.  The cursor needs to be in the
+     Update dynamic block at point.  point needs to be in the
      =#+BEGIN= line of the dynamic block.
 
 - {{{kbd(C-u C-c C-x C-u)}}} (~org-update-all-dblocks~) ::
@@ -5858,8 +5852,7 @@ format.
 
      #+kindex: C-c <
      #+findex: org-date-from-calendar
-     Insert a timestamp corresponding to the cursor date in the
-     calendar.
+     Insert a timestamp corresponding to point date in the calendar.
 
 - {{{kbd(C-c >)}}} (~org-goto-calendar~) ::
 
@@ -5891,15 +5884,15 @@ format.
      #+kindex: S-UP
      #+kindex: S-DOWN
      On the beginning or enclosing bracket of a timestamp, change its
-     type.  Within a timestamp, change the item under the cursor.  The
+     type.  Within a timestamp, change the item under point.  The
      cursor can be on a year, month, day, hour or minute.  When the
      timestamp contains a time range like =15:30-16:30=, modifying the
      first time also shifts the second, shifting the time block with
      constant length.  To change the length, modify the second time.
-     Note that if the cursor is in a headline and not at a timestamp,
-     these same keys modify the priority of an item (see [[*Priorities]]).
-     The key bindings also conflict with shift-selection and related
-     modes (see [[*Packages that conflict with Org mode]]).
+     Note that if point is in a headline and not at a timestamp, these
+     same keys modify the priority of an item (see [[*Priorities]]).  The
+     key bindings also conflict with shift-selection and related modes
+     (see [[*Packages that conflict with Org mode]]).
 
 - {{{kbd(C-c C-y)}}} (~org-evaluate-time-range~) ::
 
@@ -6059,11 +6052,11 @@ date/time format does not /replace/ the default format.  Instead, it
 is put /over/ the default format using text properties.  This has the
 following consequences:
 
-- You cannot place the cursor onto a timestamp anymore, only before or
+- You cannot place point onto a timestamp anymore, only before or
   after.
 
 - The {{{kbd(S-UP)}}} and {{{kbd(S-DOWN)}}} keys can no longer be used
-  to adjust each component of a timestamp.  If the cursor is at the
+  to adjust each component of a timestamp.  If point is at the
   beginning of the stamp, {{{kbd(S-UP)}}} and {{{kbd(S-DOWN)}}} change
   the stamp by one day, just like {{{kbd(S-LEFT)}}}
   {{{kbd(S-RIGHT)}}}.  At the end of the stamp, change the time by one
@@ -6208,9 +6201,8 @@ schedule an item:[fn:66]
      #+findex: org-mark-entry-for-agenda-action
      Mark the current entry for agenda action.  After you have marked
      the entry like this, you can open the agenda or the calendar to
-     find an appropriate date.  With the cursor on the selected date,
-     press {{{kbd(k s)}}} or {{{kbd(k d)}}} to schedule the marked
-     item.
+     find an appropriate date.  With point on the selected date, press
+     {{{kbd(k s)}}} or {{{kbd(k d)}}} to schedule the marked item.
 
 - {{{kbd(C-c / d)}}} (~org-check-deadlines~) ::
 
@@ -6550,8 +6542,8 @@ formatted as one or several Org tables.
      #+kindex: C-c C-c
      #+kindex: C-c C-x C-u
      #+findex: org-dblock-update
-     Update dynamic block at point.  The cursor needs to be in the
-     =BEGIN= line of the dynamic block.
+     Update dynamic block at point.  Point needs to be in the =BEGIN=
+     line of the dynamic block.
 
 - {{{kbd(C-u C-c C-x C-u)}}} ::
 
@@ -7118,7 +7110,7 @@ You may also define a global key for capturing new material (see
      #+findex: org-capture-refile
      Finalize the capture process by refiling the note to a different
      place (see [[*Refile and Copy]]).  Please realize that this is
-     a normal refiling command that will be executed---so the cursor
+     a normal refiling command that will be executed---so point
      position at the moment you run this command is important.  If you
      have inserted a tree with a parent and children, first move the
      cursor back to the parent.  Any prefix argument given to this
@@ -7306,7 +7298,7 @@ Now lets look at the elements of a template definition.  Each entry in
 
      - =(file+regexp "filename" "regexp to find location")= ::
 
-          Use a regular expression to position the cursor.
+          Use a regular expression to position point.
 
      - =(file+olp+datetree "filename" [ "Level 1 heading" ...])= ::
 
@@ -8093,8 +8085,8 @@ file, the archive file.
      #+kindex: C-c $
      #+findex: org-archive-subtree
      #+vindex: org-archive-location
-     Archive the subtree starting at the cursor position to the
-     location given by ~org-archive-location~.
+     Archive the subtree starting at point position to the location
+     given by ~org-archive-location~.
 
 - {{{kbd(C-u C-c C-x C-s)}}} ::
 
@@ -8102,8 +8094,8 @@ file, the archive file.
      Check if any direct children of the current headline could be
      moved to the archive.  To do this, check each subtree for open
      TODO entries.  If none is found, the command offers to move it to
-     the archive location.  If the cursor is /not/ on a headline when
-     this command is invoked, check level 1 trees.
+     the archive location.  If point is /not/ on a headline when this
+     command is invoked, check level 1 trees.
 
 - {{{kbd(C-u C-u C-c C-x C-s)}}} ::
 
@@ -8202,8 +8194,8 @@ The following commands help manage the =ARCHIVE= tag:
      Check if any direct children of the current headline should be
      archived.  To do this, check each subtree for open TODO entries.
      If none is found, the command offers to set the =ARCHIVE= tag for
-     the child.  If the cursor is /not/ on a headline when this
-     command is invoked, check the level 1 trees.
+     the child.  If point is /not/ on a headline when this command is
+     invoked, check the level 1 trees.
 
 - {{{kbd(C-TAB)}}} (~org-force-cycle-archived~) ::
 
@@ -8341,12 +8333,12 @@ scope for an extended period, use the following commands:
      #+findex: org-agenda-set-restriction-lock
      Restrict the agenda to the current subtree.  If there already is
      a restriction at point, remove it.  When called with a universal
-     prefix argument or with the cursor before the first headline in a
-     file, set the agenda scope to the entire file.  This restriction
-     remains in effect until removed with {{{kbd(C-c C-x >)}}}, or by typing
-     either {{{kbd(<)}}} or {{{kbd(>)}}} in the agenda dispatcher.  If there is a
-     window displaying an agenda view, the new restriction takes
-     effect immediately.
+     prefix argument or with point before the first headline in
+     a file, set the agenda scope to the entire file.  This
+     restriction remains in effect until removed with {{{kbd(C-c C-x
+     >)}}}, or by typing either {{{kbd(<)}}} or {{{kbd(>)}}} in the
+     agenda dispatcher.  If there is a window displaying an agenda
+     view, the new restriction takes effect immediately.
 
 - {{{kbd(C-c C-x >)}}} (~org-agenda-remove-restriction-lock~) ::
 
@@ -8362,8 +8354,8 @@ the Speedbar frame:
 
      #+findex: org-speedbar-set-agenda-restriction
      Restrict the agenda to the item---either an Org file or a subtree
-     in such a file---at the cursor in the Speedbar frame.  If agenda
-     is already restricted there, remove the restriction.  If there is
+     in such a file---at point in the Speedbar frame.  If agenda is
+     already restricted there, remove the restriction.  If there is
      a window displaying an agenda view, the new restriction takes
      effect immediately.
 
@@ -9337,7 +9329,7 @@ agenda buffer.  In this way, all information is stored only once,
 removing the risk that your agenda and note files may diverge.
 
 Some commands can be executed with mouse clicks on agenda lines.  For
-the other commands, the cursor needs to be in the desired line.
+the other commands, point needs to be in the desired line.
 
 *** Motion
 :PROPERTIES:
@@ -9394,8 +9386,8 @@ the other commands, the cursor needs to be in the desired line.
      #+kindex: F
      #+findex: org-agenda-follow-mode
      #+vindex: org-agenda-start-with-follow-mode
-     Toggle Follow mode.  In Follow mode, as you move the cursor
-     through the agenda buffer, the other window always shows the
+     Toggle Follow mode.  In Follow mode, as you move point through
+     the agenda buffer, the other window always shows the
      corresponding location in the Org file.  The initial setting for
      this mode in new agenda buffers can be set with the variable
      ~org-agenda-start-with-follow-mode~.
@@ -10058,18 +10050,18 @@ the other commands, the cursor needs to be in the desired line.
      #+kindex: c
      #+findex: org-calendar-goto-agenda
      When in the calendar, compute and show the Org agenda for the
-     date at the cursor.
+     date at point.
 
 - {{{kbd(i)}}} (~org-agenda-diary-entry~) ::
      #+kindex: i
      #+findex: org-agenda-diary-entry
 
      #+cindex: diary entries, creating from agenda
-     Insert a new entry into the diary, using the date at the cursor
-     and (for block entries) the date at the mark.  This adds to the
-     Emacs diary file[fn:98], in a way similar to the {{{kbd(i)}}}
-     command in the calendar.  The diary file pops up in another
-     window, where you can add the entry.
+     Insert a new entry into the diary, using the date at point and
+     (for block entries) the date at the mark.  This adds to the Emacs
+     diary file[fn:98], in a way similar to the {{{kbd(i)}}} command
+     in the calendar.  The diary file pops up in another window, where
+     you can add the entry.
 
      #+vindex: org-agenda-diary-file
      If you configure ~org-agenda-diary-file~ to point to an Org file,
@@ -10110,7 +10102,7 @@ the other commands, the cursor needs to be in the desired line.
 
      #+kindex: H
      #+findex: org-agenda-holidays
-     Show holidays for three months around the cursor date.
+     Show holidays for three months around point date.
 
 *** Quit and exit
 :PROPERTIES:
@@ -11037,8 +11029,7 @@ images.
      point, process all fragments in the current entry (between two
      headlines).  When called with a prefix argument, process the
      entire subtree.  When called with two prefix arguments, or when
-     the cursor is before the first headline, process the entire
-     buffer.
+     point is before the first headline, process the entire buffer.
 
 #+vindex: org-startup-with-latex-preview
 You can turn on the previewing of all LaTeX fragments in a file with
@@ -11083,11 +11074,10 @@ more details see the documentation of CDLaTeX mode):
 - {{{kbd(TAB)}}} ::
      #+kindex: TAB
 
-     The {{{kbd(TAB)}}} key expands the template if the cursor is
-     inside a LaTeX fragment[fn:115].  For example, {{{kbd(TAB)}}}
-     expands =fr= to =\frac{}{}= and position the cursor correctly
-     inside the first brace.  Another {{{kbd(TAB)}}} gets you into the
-     second brace.
+     The {{{kbd(TAB)}}} key expands the template if point is inside
+     a LaTeX fragment[fn:115].  For example, {{{kbd(TAB)}}} expands
+     =fr= to =\frac{}{}= and position point correctly inside the first
+     brace.  Another {{{kbd(TAB)}}} gets you into the second brace.
 
      Even outside fragments, {{{kbd(TAB)}}} expands environment
      abbreviations at the beginning of a line.  For example, if you
@@ -11236,12 +11226,11 @@ further alter what is exported, and how.
      #+kindex: C-c C-e C-s
 
      Toggle sub-tree export.  When turned on, Org exports only the
-     sub-tree starting from the cursor position at the time the export
+     sub-tree starting from point position at the time the export
      dispatcher was invoked.  Org uses the top heading of this
-     sub-tree as the document's title.  If the cursor is not on
-     a heading, Org uses the nearest enclosing header.  If the cursor
-     is in the document preamble, Org signals an error and aborts
-     export.
+     sub-tree as the document's title.  If point is not on a heading,
+     Org uses the nearest enclosing header.  If point is in the
+     document preamble, Org signals an error and aborts export.
 
      #+vindex: org-export-initial-scope
      To make the sub-tree export the default, customize the variable
@@ -18288,7 +18277,7 @@ key chords.
 #+vindex: org-use-speed-commands
 By default, Org has Speed Keys disabled.  To activate Speed Keys, set
 the variable ~org-use-speed-commands~ to a non-~nil~ value.  To
-trigger a Speed Key, the cursor must be at the beginning of an Org
+trigger a Speed Key, point must be at the beginning of an Org
 headline, before any of the stars.
 
 #+vindex: org-speed-commands-user
@@ -18480,8 +18469,8 @@ changes.
      also parses and loads the document during normal exporting
      process.  Org parses the contents of this document as if it was
      included in the buffer.  It can be another Org file.  To visit
-     the file---not a URL---use {{{kbd(C-c ')}}} while the cursor is
-     on the line with the file name.
+     the file---not a URL---use {{{kbd(C-c ')}}} while point is on the
+     line with the file name.
 
 - =#+STARTUP:= ::
 
@@ -18776,42 +18765,42 @@ manual, but here is a consolidated list for easy reference.
 - If any highlights shown in the buffer from the creation of a sparse
   tree, or from clock display, remove such highlights.
 
-- If the cursor is in one of the special =KEYWORD= lines, scan the
-  buffer for these lines and update the information.  Also reset the
-  Org file cache used to temporary store the contents of URLs used as
-  values for keywords like =SETUPFILE=.
+- If point is in one of the special =KEYWORD= lines, scan the buffer
+  for these lines and update the information.  Also reset the Org file
+  cache used to temporary store the contents of URLs used as values
+  for keywords like =SETUPFILE=.
 
-- If the cursor is inside a table, realign the table.  The table
-  realigns even if automatic table editor is turned off.
+- If point is inside a table, realign the table.  The table realigns
+  even if automatic table editor is turned off.
 
-- If the cursor is on a =TBLFM= keyword, re-apply the formulas to the
+- If point is on a =TBLFM= keyword, re-apply the formulas to the
   entire table.
 
 - If the current buffer is a capture buffer, close the note and file
   it.  With a prefix argument, also jump to the target location after
   saving the note.
 
-- If the cursor is on a =<<<target>>>=, update radio targets and
+- If point is on a =<<<target>>>=, update radio targets and
   corresponding links in this buffer.
 
-- If the cursor is on a property line or at the start or end of
-  a property drawer, offer property commands.
+- If point is on a property line or at the start or end of a property
+  drawer, offer property commands.
 
-- If the cursor is at a footnote reference, go to the corresponding
+- If point is at a footnote reference, go to the corresponding
   definition, and /vice versa/.
 
-- If the cursor is on a statistics cookie, update it.
+- If point is on a statistics cookie, update it.
 
-- If the cursor is in a plain list item with a checkbox, toggle the
-  status of the checkbox.
+- If point is in a plain list item with a checkbox, toggle the status
+  of the checkbox.
 
-- If the cursor is on a numbered item in a plain list, renumber the
-  ordered list.
+- If point is on a numbered item in a plain list, renumber the ordered
+  list.
 
-- If the cursor is on the =#+BEGIN= line of a dynamic block, the block
-  is updated.
+- If point is on the =#+BEGIN= line of a dynamic block, the block is
+  updated.
 
-- If the cursor is at a timestamp, fix the day name in the timestamp.
+- If point is at a timestamp, fix the day name in the timestamp.
 
 ** A Cleaner Outline View
 :PROPERTIES:
@@ -19046,7 +19035,7 @@ packages are documented here.
 
           #+kindex: C-c '
           #+findex: org-edit-special
-          Edit a =table.el= table.  Works when the cursor is in
+          Edit a =table.el= table.  Works when point is in
           a =table.el= table.
 
      - {{{kbd(C-c ~​)}}} (~org-table-create-with-table.el~) ::
@@ -19076,7 +19065,7 @@ not do anything, Org offers the variable ~org-support-shift-select~
 for customization.  Org mode accommodates shift selection by (i)
 making it available outside of the special contexts where special
 commands apply, and (ii) extending an existing active region even if
-the cursor moves across a special context.
+point moves across a special context.
 
 - =cua.el= by Kim\nbsp{}F.\nbsp{}Storm ::
 
@@ -20098,13 +20087,12 @@ entry point for this API is:
 Call {{{(var(FUNC))}}} at each headline selected by {{{var(MATCH)}}}
 in {{{var(SCOPE)}}}.
 
-{{{var(FUNC)}}} is a function or a Lisp form.  With the cursor
-positioned at the beginning of the headline, call the function without
-arguments.  Org returns an alist of return values of calls to the
-function.
+{{{var(FUNC)}}} is a function or a Lisp form.  With point positioned
+at the beginning of the headline, call the function without arguments.
+Org returns an alist of return values of calls to the function.
 
 To avoid preserving point, Org wraps the call to {{{var(FUNC)}}} in
-save-excursion form.  After evaluation, Org moves the cursor to the
+save-excursion form.  After evaluation, Org moves point to the
 end of the line that was just processed.  Search continues from that
 point forward.  This may not always work as expected under some
 conditions, such as if the current sub-tree was removed by a previous
@@ -20329,7 +20317,7 @@ Org integrates its data in an inbox file format.
 
 3. Org generates an agenda view for flagged entries for user
    intervention to clean up.  For notes stored in flagged entries,
-   MobileOrg displays them in the echo area when the cursor is on the
+   MobileOrg displays them in the echo area when point is on the
    corresponding agenda item.
 
    - {{{kbd(?)}}} ::
@@ -20916,7 +20904,7 @@ can be used.  Just type a star followed by a few optional letters into
 the buffer and press {{{kbd(M-TAB)}}}.  All headlines in the current
 buffer are offered as completions.
 
-[fn:26] When targeting a =NAME= keyword, =CAPTION= keyword is
+[fn:26] When targeting a =NAME= keyword, the =CAPTION= keyword is
 mandatory in order to get proper numbering (see [[*Images and Tables]]).
 
 [fn:27] The actual behavior of the search depends on the value of the
@@ -20941,8 +20929,8 @@ automatically enclosed in double brackets, and you will be asked for
 the optional descriptive text.
 
 [fn:31] After insertion of a stored link, the link will be removed
-from the list of stored links.  To keep it in the list later use, use
-a triple {{{kbd(C-u)}}} prefix argument to {{{kbd(C-c C-l)}}}, or
+from the list of stored links.  To keep it in the list for later use,
+use a triple {{{kbd(C-u)}}} prefix argument to {{{kbd(C-c C-l)}}}, or
 configure the option ~org-keep-stored-link-after-insertion~.
 
 [fn:32] This works if a function has been defined in the ~:complete~
@@ -20976,7 +20964,7 @@ that this means you need to come up with unique keys across both sets
 of keywords.
 
 [fn:41] Org mode parses these lines only when Org mode is activated
-after visiting a file.  {{{kbd(C-c C-c)}}} with the cursor in a line
+after visiting a file.  {{{kbd(C-c C-c)}}} with point in a line
 starting with =#+= is simply restarting Org mode for the current
 buffer.
 
@@ -21258,7 +21246,7 @@ used to create images, any LaTeX environment is handled.
 and from the ImageMagick suite.  Choose the converter by setting the
 variable ~org-preview-latex-default-process~ accordingly.
 
-[fn:115] Org mode has a method to test if the cursor is inside such
+[fn:115] Org mode has a method to test if point is inside such
 a fragment, see the documentation of the function
 ~org-inside-LaTeX-fragment-p~.
 
