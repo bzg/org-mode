@@ -3699,9 +3699,9 @@ The most important commands to work with TODO entries are:
      selection interface; this is the default behavior when
      ~org-use-fast-todo-selection~ is non-~nil~.
 
-     The same rotation can also be done "remotely" from the timeline
-     and agenda buffers with the {{{kbd(t)}}} command key (see
-     [[*Commands in the Agenda Buffer]]).
+     The same rotation can also be done "remotely" from the agenda
+     buffer with the {{{kbd(t)}}} command key (see [[*Commands in the
+     Agenda Buffer]]).
 
 - {{{kbd(C-u C-c C-t)}}} ::
 
@@ -4347,8 +4347,8 @@ TODO items.
      for a priority character =A=, =B= or =C=.  When you press
      {{{kbd(SPC)}}} instead, the priority cookie is removed from the
      headline.  The priorities can also be changed "remotely" from the
-     timeline and agenda buffer with the {{{kbd(\,)}}} command (see
-     [[*Commands in the Agenda Buffer]]).
+     agenda buffer with the {{{kbd(\,)}}} command (see [[*Commands in
+     the Agenda Buffer]]).
 
 - {{{kbd(S-UP)}}} (~org-priority-up~); {{{kbd(S-DOWN)}}} (~org-priority-down~) ::
 
@@ -5741,8 +5741,8 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
      #+cindex: appointment
      A simple timestamp just assigns a date/time to an item.  This is
      just like writing down an appointment or event in a paper agenda.
-     In the timeline and agenda displays, the headline of an entry
-     associated with a plain timestamp is shown exactly on that date.
+     In the agenda display, the headline of an entry associated with
+     a plain timestamp is shown exactly on that date.
 
      #+begin_example
      ,* Meet Peter at the movies
@@ -8235,9 +8235,6 @@ a separate buffer.  Seven different view types are provided:
 - a /match view/, showings headlines based on the tags, properties,
   and TODO state associated with them,
 
-- a /timeline view/ that shows all events in a single Org file, in
-  time-sorted view,
-
 - a /text search view/ that shows all entries from multiple files that
   contain specified keywords,
 
@@ -9551,7 +9548,7 @@ the other commands, point needs to be in the desired line.
      #+kindex: [
      #+findex: org-agenda-manipulate-query-add
      Include inactive timestamps into the current view.  Only for
-     weekly/daily agenda and timeline views.
+     weekly/daily agenda.
 
 - {{{kbd(v a)}}} (~org-agenda-archives-mode~) ::
 
@@ -20951,8 +20948,8 @@ lists of TODO items, but this is not required.
 [fn:37] Changing the variable ~org-todo-keywords~ only becomes
 effective after restarting Org mode in a buffer.
 
-[fn:38] This is also true for the {{{kbd(t)}}} command in the timeline
-and agenda buffers.
+[fn:38] This is also true for the {{{kbd(t)}}} command in the agenda
+buffer.
 
 [fn:39] All characters are allowed except =@=, =^= and =!=, which have
 a special meaning here.
