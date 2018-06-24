@@ -124,6 +124,27 @@
   (org-test-agenda--kill-all-agendas))
 
 
+;; agenda redo
+
+(require 'face-remap)
+
+(ert-deftest test-org-agenda/rescale ()
+  "Text scale survives `org-agenda-redo'."
+  (org-test-agenda--kill-all-agendas)
+  (unwind-protect
+      (let ((org-agenda-span 'day)
+         org-agenda-files)
+     (org-agenda-list)
+     (set-buffer org-agenda-buffer-name)
+     (text-scale-mode)
+     (text-scale-set 11)
+     (cl-assert (and (boundp text-scale-mode) text-scale-mode))
+     (org-agenda-redo)
+     (should text-scale-mode)
+     (should (= 11 text-scale-mode-amount)))
+   (org-test-agenda--kill-all-agendas)))
+
+
 (provide 'test-org-agenda)
 
 ;;; test-org-agenda.el ends here
