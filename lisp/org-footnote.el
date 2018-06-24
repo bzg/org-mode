@@ -511,7 +511,7 @@ This function is meant to be used for fontification only."
 		 ;; Footnotes definitions are separated by new
 		 ;; headlines, another footnote definition or 2 blank
 		 ;; lines.
-		 (let ((end (match-beginning 0))
+		 (let ((end (match-end 0))
 		       (lim (save-excursion
 			      (re-search-backward
 			       (concat org-outline-regexp-bol
