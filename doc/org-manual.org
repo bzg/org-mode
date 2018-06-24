@@ -2221,7 +2221,7 @@ Operations]]).  For example
      ="teen"= if age =$1= is less than 20, else the Org table result
      field is set to empty with the empty string.
 
-- =if("$1" == "nan" || "$2" == "nan", string(""), $1 + $2); E f-1= ::
+- =if("$1" =​= "nan" || "$2" =​= "nan", string(""), $1 + $2); E f-1= ::
 
      Sum of the first two columns.  When at least one of the input
      fields is empty the Org table result field is set to empty.  =E=
@@ -2229,7 +2229,7 @@ Operations]]).  For example
      optional Calc format string similar to =%.1f= but leaves empty
      results empty.
 
-- =if(typeof(vmean($1..$7)) == 12, string(""), vmean($1..$7); E= ::
+- =if(typeof(vmean($1..$7)) =​= 12, string(""), vmean($1..$7); E= ::
 
      Mean value of a range unless there is any empty field.  Every
      field in the range that is empty is replaced by =nan= which lets
@@ -2238,7 +2238,7 @@ Operations]]).  For example
      this when the sample set is expected to never have missing
      values.
 
-- =if("$1..$7" == "[]", string(""), vmean($1..$7))= ::
+- =if("$1..$7" =​= "[]", string(""), vmean($1..$7))= ::
 
      Mean value of a range with empty fields skipped.  Every field in
      the range that is empty is skipped.  When all fields in the range
