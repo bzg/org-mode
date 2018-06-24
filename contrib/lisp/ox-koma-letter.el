@@ -77,6 +77,43 @@
 ;;     (See also `org-koma-letter-author'),
 ;;   - EMAIL: Same as AUTHOR. (see also `org-koma-letter-email'),
 ;;
+;; FROM_LOGO uses LaTeX markup.  FROM_LOGO provides the
+;; "includegraphics" command to tell LaTeX where to find the logo.
+;; This command needs to know the logo's directory and file name.  The
+;; directory can either be relative or absolute, just as you would
+;; expect.  LaTeX can use three file types for the logo: PDF, JPEG, or
+;; PNG.  The logo can either include or exclude its extension, which
+;; might surprise you.  When you exclude its extension, LaTeX will
+;; search the directory for the "best" quality graphics format.  For
+;; example if it finds both logo.pdf and logo.png then it will
+;; identify the PDF as "better", and include "logo.pdf".  This can be
+;; useful, for example, when you are mocking up a logo in the PNG
+;; raster format and then switch over to the higher quality PDF vector
+;; format.  When you include the file extension then LaTeX will
+;; include it without searching for higher quality file types.
+;; Whatever file type you choose, it will probably require a few
+;; design iterations to get the best looking logo size for your
+;; letter.  Finally, the directory and file name are specified
+;; *without* quotes.  Here are some examples with commentary, in the
+;; location of your letter, with a logo named "logo", to get you
+;; started:
+;;
+;;   Logo in the same directory: \includegraphics{logo}
+;;       or a sub-directory:     \includegraphics{logos/production/logo}
+;;
+;;   Logos specified using absolute paths on Linux or Windows:
+;;
+;;       \includegraphics{~/correspondence/logo}
+;;       \includegraphics{~/correspondence/logos/production/logo}
+;;       \includegraphics{c:/you/correspondence/logo}
+;;       \includegraphics{c:/you/correspondence/logos/production/logo}
+;;
+;;   Logos in the same directory where the "better" quality PDF will
+;;   be chosen over the JPG:
+;;
+;;       \includegraphics{logo.pdf}
+;;       \includegraphics{logo.png}
+;;
 ;; Headlines are in general ignored.  However, headlines with special
 ;; tags can be used for specified contents like postscript (ps),
 ;; carbon copy (cc), enclosures (encl) and code to be inserted after
