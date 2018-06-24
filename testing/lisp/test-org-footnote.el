@@ -242,6 +242,28 @@
       (org-footnote-goto-definition "label")
       (buffer-substring (point) (point-max))))))
 
+(ert-deftest test-org-footnote/goto-previous-reference ()
+  "Test `org-footnote-goto-previous-reference' specifications."
+  ;; Error on unknown reference.
+  (should-error
+   (org-test-with-temp-text "No footnote reference"
+     (org-footnote-goto-previous-reference "1")))
+  ;; Error when trying to reach a reference outside narrowed part of
+  ;; buffer.
+  (should-error
+   (org-test-with-temp-text "Some text<point>\nReference[fn:1]."
+     (narrow-to-region (point-min) (point))
+     (org-footnote-goto-previous-reference "1")))
+  ;; Otherwise, move to closest reference from point.
+  (should
+   (org-test-with-temp-text "First reference[fn:1]\nReference[fn:1].<point>"
+     (org-footnote-goto-previous-reference "1")
+     (= (line-end-position) (point-max))))
+  (should
+   (org-test-with-temp-text "First reference[fn:1]\nReference[fn:1]."
+     (org-footnote-goto-previous-reference "1")
+     (= (line-beginning-position) (point-min)))))
+
 (ert-deftest test-org-footnote/sort ()
   "Test `org-footnote-sort' specifications."
   ;; Reorder definitions with a nil `org-footnote-section'.  In this

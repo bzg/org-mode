@@ -467,16 +467,27 @@ the buffer position bounding the search.
 
 Return value is a list like those provided by `org-footnote-at-reference-p'.
 If no footnote is found, return nil."
-  (save-excursion
-    (let* ((label-fmt (if label (format "\\[fn:%s[]:]" label) org-footnote-re)))
-      (catch 'exit
-	(while t
-	  (unless (funcall (if backward #'re-search-backward #'re-search-forward)
-			   label-fmt limit t)
-	    (throw 'exit nil))
+  (let ((label-fmt (if label (format "\\[fn:%s[]:]" label) org-footnote-re)))
+    (catch :exit
+      (save-excursion
+	(while (funcall (if backward #'re-search-backward #'re-search-forward)
+			label-fmt limit t)
 	  (unless backward (backward-char))
-	  (let ((ref (org-footnote-at-reference-p)))
-	    (when ref (throw 'exit ref))))))))
+	  (let ((reference (org-element-context)))
+	    (when (eq 'footnote-reference (org-element-type reference))
+	      (throw :exit
+		     (list
+		      (org-element-property :label reference)
+		      (org-element-property :begin reference)
+		      (save-excursion
+			(goto-char (org-element-property :end reference))
+			(skip-chars-backward " \t")
+			(point))
+		      (and (eq 'inline (org-element-property :type reference))
+			   (buffer-substring-no-properties
+			    (org-element-property :contents-begin reference)
+			    (org-element-property :contents-end
+						  reference))))))))))))
 
 (defun org-footnote-next-reference-or-definition (limit)
   "Move point to next footnote reference or definition.
@@ -537,21 +548,23 @@ value if point was successfully moved."
 (defun org-footnote-goto-previous-reference (label)
   "Find the first closest (to point) reference of footnote with label LABEL."
   (interactive "sLabel: ")
-  (org-mark-ring-push)
-  (let ((label (org-footnote-normalize-label label))
-	ref)
-    (save-excursion
-      (setq ref (or (org-footnote-get-next-reference label t)
-		    (org-footnote-get-next-reference label)
-		    (save-restriction
-		      (widen)
-		      (or
-		       (org-footnote-get-next-reference label t)
-		       (org-footnote-get-next-reference label))))))
-    (if (not ref)
-	(error "Cannot find reference of footnote %s" label)
-      (goto-char (nth 1 ref))
-      (org-show-context 'link-search))))
+  (let* ((label (org-footnote-normalize-label label))
+	 (reference
+	  (save-excursion
+	    (or (org-footnote-get-next-reference label t)
+		(org-footnote-get-next-reference label)
+		(and (buffer-narrowed-p)
+		     (org-with-wide-buffer
+		      (or (org-footnote-get-next-reference label t)
+			  (org-footnote-get-next-reference label)))))))
+	 (start (nth 1 reference)))
+    (cond ((not reference)
+	   (user-error "Cannot find reference of footnote %S" label))
+	  ((or (> start (point-max)) (< start (point-min)))
+	   (user-error "Reference is outside narrowed part of buffer")))
+    (org-mark-ring-push)
+    (goto-char start)
+    (org-show-context 'link-search)))
 
 
 ;;;; Getters
