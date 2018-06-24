@@ -16123,7 +16123,7 @@ or
      Optional.  Names the source block so it can be called, like
      a function, from other source blocks or inline code to evaluate
      or to capture the results.  Code from other blocks, other files,
-     and from table formulas (see [[*The spreadsheet]]) can use the name
+     and from table formulas (see [[*The Spreadsheet]]) can use the name
      to reference a source block.  This naming serves the same purpose
      as naming Org tables.  Org mode requires unique names.  For
      duplicate names, Org mode's behavior is undefined.
@@ -18357,7 +18357,7 @@ Org evaluates code in the following circumstances:
 
 - /Formulas in tables/ ::
 
-     Formulas in tables (see [[*The spreadsheet]]) are code that is
+     Formulas in tables (see [[*The Spreadsheet]]) are code that is
      evaluated either by the Calc interpreter, or by the Emacs Lisp
      interpreter.
 
@@ -18972,7 +18972,7 @@ packages are documented here.
      #+cindex: @file{calc.el}
 
      Org uses the Calc package for implementing spreadsheet
-     functionality in its tables (see [[*The spreadsheet]]).  Org also
+     functionality in its tables (see [[*The Spreadsheet]]).  Org also
      uses Calc for embedded calculations.  See [[info:calc::Embedded%20Mode][GNU Emacs Calc Manual]].
 
 - =constants.el= by Carsten Dominik ::
