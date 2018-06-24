@@ -18973,7 +18973,7 @@ packages are documented here.
 
      Org uses the Calc package for implementing spreadsheet
      functionality in its tables (see [[*The spreadsheet]]).  Org also
-     uses Calc for embedded calculations.  See [[info:calc:Embedded%20Mode][GNU Emacs Calc Manual]].
+     uses Calc for embedded calculations.  See [[info:calc::Embedded%20Mode][GNU Emacs Calc Manual]].
 
 - =constants.el= by Carsten Dominik ::
      #+cindex: @file{constants.el}
@@ -20826,7 +20826,7 @@ stars.
 [fn:5] The indirect buffer contains the entire buffer, but is narrowed
 to the current tree.  Editing the indirect buffer also changes the
 original buffer, but without affecting visibility in that buffer.  For
-more information about indirect buffers, see [[info:emacs:Indirect%20Buffers][GNU Emacs Manual]].
+more information about indirect buffers, see [[info:emacs#Indirect%20Buffers][GNU Emacs Manual]].
 
 [fn:6] When ~org-agenda-inhibit-startup~ is non-~nil~, Org does not
 honor the default visibility state when first opening a file for the
