@@ -10318,7 +10318,7 @@ should be valid for all commands in the set.  The former are just
 added to the command entry; the latter must come after the list of
 command entries.  Going back to the block agenda example (see [[*Block
 agenda]]), let's change the sorting strategy for the {{{kbd(h)}}}
-commands to ~priority-down~, but let's sort the results for GARDEN
+commands to ~priority-down~, but let's sort the results for =garden=
 tags query in the opposite order, ~priority-up~.  This would look like
 this:
 
