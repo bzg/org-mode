@@ -6581,12 +6581,12 @@ these options can be configured in the variable
 First there are options that determine which clock entries are to
 be selected:
 
-- :maxlevel ::
+- =:maxlevel= ::
 
      Maximum level depth to which times are listed in the table.
      Clocks at deeper levels are summed into the upper level.
 
-- :scope ::
+- =:scope= ::
 
      The scope to consider.  This can be any of the following:
 
@@ -6601,7 +6601,7 @@ be selected:
      | ~file-with-archives~   | current file and its archives                            |
      | ~agenda-with-archives~ | all agenda files, including archives                     |
 
-- :block ::
+- =:block= ::
 
      The time block to consider.  This block is specified either
      absolutely, or relative to the current time and may be any of
@@ -6626,40 +6626,40 @@ be selected:
      Use {{{kbd(S-LEFT)}}} or {{{kbd(S-RIGHT)}}} to shift the time
      interval.
 
-- :tstart ::
+- =:tstart= ::
 
      A time string specifying when to start considering times.
      Relative times like ="<-2w>"= can also be used.  See [[*Matching
      tags and properties]] for relative time syntax.
 
-- :tend  ::
+- =:tend= ::
 
      A time string specifying when to stop considering times.
      Relative times like ="<now>"= can also be used.  See [[*Matching
      tags and properties]] for relative time syntax.
 
-- wstart ::
+- =:wstart= ::
 
      The starting day of the week.  The default is 1 for Monday.
 
-- mstart ::
+- =:mstart= ::
 
      The starting day of the month.  The default is 1 for the first.
 
-- :step ::
+- =:step= ::
 
      Set to ~week~ or ~day~ to split the table into chunks.  To use
      this, ~:block~ or ~:tstart~, ~:tend~ are needed.
 
-- :stepskip0 ::
+- =:stepskip0= ::
 
      Do not show steps that have zero time.
 
-- :fileskip0 ::
+- =:fileskip0= ::
 
      Do not show table sections from files which did not contribute.
 
-- :match ::
+- =:match= ::
 
      A tags match to select entries that should contribute.  See
      [[*Matching tags and properties]] for the match syntax.
@@ -6670,75 +6670,75 @@ There options are interpreted by the function
 ~org-clocktable-write-default~, but you can specify your own function
 using the =:formatter= parameter.
 
-- :emphasize ::
+- =:emphasize= ::
 
      When ~t~, emphasize level one and level two items.
 
-- :lang ::
+- =:lang= ::
 
      Language[fn:77] to use for descriptive cells like "Task".
 
-- :link ::
+- =:link= ::
 
      Link the item headlines in the table to their origins.
 
-- :narrow ::
+- =:narrow= ::
 
      An integer to limit the width of the headline column in the Org
      table.  If you write it like =50!=, then the headline is also
      shortened in export.
 
-- :indent ::
+- =:indent= ::
 
      Indent each headline field according to its level.
 
-- :tcolumns ::
+- =:tcolumns= ::
 
      Number of columns to be used for times.  If this is smaller than
      =:maxlevel=, lower levels are lumped into one column.
 
-- :level ::
+- =:level= ::
 
      Should a level number column be included?
 
-- :sort ::
+- =:sort= ::
 
      A cons cell containing the column to sort and a sorting type.
      E.g., =:sort (1 . ?a)= sorts the first column alphabetically.
 
-- :compact ::
+- =:compact= ::
 
      Abbreviation for =:level nil :indent t :narrow 40! :tcolumns 1=.
      All are overwritten except if there is an explicit =:narrow=.
 
-- :timestamp ::
+- =:timestamp= ::
 
      A timestamp for the entry, when available.  Look for SCHEDULED,
      DEADLINE, TIMESTAMP and TIMESTAMP_IA special properties (see
      [[*Special Properties]]), in this order.
 
-- :tags ::
+- =:tags= ::
 
      When this flag is non-~nil~, show the headline's tags.
 
-- :properties ::
+- =:properties= ::
 
      List of properties shown in the table.  Each property gets its
      own column.
 
-- :inherit-props ::
+- =:inherit-props= ::
 
      When this flag is non-~nil~, the values for =:properties= are
      inherited.
 
-- :formula ::
+- =:formula= ::
 
      Content of a =TBLFM= keyword to be added and evaluated.  As
      a special case, =:formula %= adds a column with % time.  If you
      do not specify a formula here, any existing formula below the
      clock table survives updates and is evaluated.
 
-- :formatter ::
+- =:formatter= ::
 
      A function to format clock data and insert it into the buffer.
 
@@ -6759,6 +6759,7 @@ To use a specific time range you could write[fn:78]
 ,#+END: clocktable
 #+end_example
 
+#+texinfo: @noindent
 A range starting a week ago and ending right now could be written as
 
 #+begin_example
@@ -6766,15 +6767,17 @@ A range starting a week ago and ending right now could be written as
 ,#+END: clocktable
 #+end_example
 
-A summary of the current subtree with % times would be:
+#+texinfo: @noindent
+A summary of the current subtree with % times would be
 
 #+begin_example
 ,#+BEGIN: clocktable :scope subtree :link t :formula %
 ,#+END: clocktable
 #+end_example
 
+#+texinfo: @noindent
 A horizontally compact representation of everything clocked during
-last week would be:
+last week would be
 
 #+begin_example
 ,#+BEGIN: clocktable :scope agenda :block lastweek :compact t
