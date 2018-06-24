@@ -66,7 +66,7 @@
 
 (defun org-info-follow-link (name)
   "Follow an Info file and node link specified by NAME."
-  (if (or (string-match "\\(.*\\)\\(:?#\\|::\\)\\(.*\\)" name)
+  (if (or (string-match "\\(.*\\)\\(?:#\\|::\\)\\(.*\\)" name)
           (string-match "\\(.*\\)" name))
       (let ((filename (match-string 1 name))
 	    (nodename-or-index (or (match-string 2 name) "Top")))
