@@ -6590,16 +6590,16 @@ be selected:
 
      The scope to consider.  This can be any of the following:
 
-     | ~nil~                  | the current buffer or narrowed region                    |
-     | ~file~                 | the full current buffer                                  |
-     | ~subtree~              | the subtree where the clocktable is located              |
-     | ~treeN~                | the surrounding level N tree, for example =tree3=        |
-     | ~tree~                 | the surrounding level 1 tree                             |
-     | ~agenda~               | all agenda files                                         |
-     | =("file" ...)=         | scan these files                                         |
-     | =FUNCTION=             | scan files returned by calling FUNCTION with no argument |
-     | ~file-with-archives~   | current file and its archives                            |
-     | ~agenda-with-archives~ | all agenda files, including archives                     |
+     | ~nil~                  | the current buffer or narrowed region                               |
+     | ~file~                 | the full current buffer                                             |
+     | ~subtree~              | the subtree where the clocktable is located                         |
+     | ~treeN~                | the surrounding level N tree, for example =tree3=                   |
+     | ~tree~                 | the surrounding level 1 tree                                        |
+     | ~agenda~               | all agenda files                                                    |
+     | =("file" ...)=         | scan these files                                                    |
+     | =FUNCTION=             | scan files returned by calling {{{var(FUNCTION)}}} with no argument |
+     | ~file-with-archives~   | current file and its archives                                       |
+     | ~agenda-with-archives~ | all agenda files, including archives                                |
 
 - =:block= ::
 
