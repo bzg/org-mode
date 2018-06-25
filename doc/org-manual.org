@@ -1145,8 +1145,7 @@ to disable them individually.
      indentation.  When these commands are executed several times in
      direct succession, the initially selected region is used, even if
      the new indentation would imply a different hierarchy.  To use
-     the new hierarchy, break the command chain with a cursor motion
-     or so.
+     the new hierarchy, break the command chain by moving point.
 
      As a special case, using this command on the very first item of
      a list moves the whole list.  This behavior can be disabled by
@@ -1194,7 +1193,7 @@ to disable them individually.
      #+vindex: org-support-shift-select
      #+kindex: S-LEFT
      #+kindex: S-RIGHT
-     This command also cycles bullet styles when point in on the
+     This command also cycles bullet styles when point is in on the
      bullet or anywhere in an item line, details depending on
      ~org-support-shift-select~.
 
@@ -1683,7 +1682,7 @@ you, configure the option ~org-table-auto-blank-field~.
      #+vindex: org-table-copy-increment
      When current field is empty, copy from first non-empty field
      above.  When not empty, copy current field down to next row and
-     move cursor along with it.  Depending on the variable
+     move point along with it.  Depending on the variable
      ~org-table-copy-increment~, integer field values can be
      incremented during copy.  Integers that are too large are not
      incremented, however.  Also, a ~0~ prefix argument temporarily
@@ -1919,10 +1918,10 @@ to derive fields from other fields.  While fully featured, Org's
 implementation is not identical to other spreadsheets.  For example,
 Org knows the concept of a /column formula/ that will be applied to
 all non-header fields in a column without having to copy the formula
-to each relevant field.  There is also a formula debugger, and
-a formula editor with features for highlighting fields in the table
-corresponding to the references at the point in the formula, moving
-these references by arrow keys.
+to each relevant field.  There is also a formula debugger, and a
+formula editor with features for highlighting fields in the table
+corresponding to the references at point in the formula, moving these
+references by arrow keys.
 
 *** References
 :PROPERTIES:
@@ -3376,7 +3375,7 @@ generally, act on links.
      possible with =~/= for your home directory.  You can force an
      absolute path with two {{{kbd(C-u)}}} prefixes.
 
-- {{{kbd(C-c C-l)}}} (with cursor on existing link) ::
+- {{{kbd(C-c C-l)}}} (with point on existing link) ::
 
      #+cindex: following links
      When point is on an existing link, {{{kbd(C-c C-l)}}} allows
@@ -3391,11 +3390,11 @@ generally, act on links.
      ~browse-url-at-point~), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB
      for the corresponding links, and execute the command in a shell
      link.  When point is on an internal link, this command runs the
-     corresponding search.  When point is on the tags part of
-     a headline, it creates the corresponding tags view (see [[*Matching
-     tags and properties]]).  If the cursor is on a timestamp, it
-     compiles the agenda for that date.  Furthermore, it visits text
-     and remote files in =file= links with Emacs and select a suitable
+     corresponding search.  When point is on the tags part of a
+     headline, it creates the corresponding tags view (see [[*Matching
+     tags and properties]]).  If point is on a timestamp, it compiles
+     the agenda for that date.  Furthermore, it visits text and remote
+     files in =file= links with Emacs and select a suitable
      application for local non-text files.  Classification of files is
      based on file extension only.  See option ~org-file-apps~.  If
      you want to override the default application and visit the file
@@ -3867,14 +3866,13 @@ require action.  Your setup would then look like this:
         (sequence "|" "CANCELED")))
 #+end_src
 
-The keywords should all be different, this helps Org mode to keep
-track of which subsequence should be used for a given entry.  In this
-setup, {{{kbd(C-c C-t)}}} only operates within a subsequence, so it
-switches from =DONE= to (nothing) to =TODO=, and from =FIXED= to
-(nothing) to =REPORT=.  Therefore you need a mechanism to initially
-select the correct sequence.  Besides the obvious ways like typing
-a keyword or using completion, you may also apply the following
-commands:
+The keywords should all be different, this helps Org mode keep track
+of which subsequence should be used for a given entry.  In this setup,
+{{{kbd(C-c C-t)}}} only operates within a sub-sequence, so it switches
+from =DONE= to (nothing) to =TODO=, and from =FIXED= to (nothing) to
+=REPORT=.  Therefore you need a mechanism to initially select the
+correct sequence.  In addition to typing a keyword or using completion
+(see [[*Completion]]), you may also apply the following commands:
 
 #+attr_texinfo: :sep ,
 - {{{kbd(C-u C-u C-c C-t)}}}, {{{kbd(C-S-RIGHT)}}}, {{{kbd(C-S-LEFT)}}} ::
@@ -3882,22 +3880,23 @@ commands:
      #+kindex: C-S-RIGHT
      #+kindex: C-S-LEFT
      #+kindex: C-u C-u C-c C-t
-     These keys jump from one TODO subset to the next.  In the above
-     example, {{{kbd(C-u C-u C-c C-t)}}} or {{{kbd(C-S-RIGHT)}}} would
-     jump from =TODO= or =DONE= to =REPORT=, and any of the words in
-     the second row to =CANCELED=.  Note that the {{{kbd(C-S-)}}} key
-     binding conflict with ~shift-selection-mode~ (see [[*Packages
-     that conflict with Org mode]]).
+     These keys jump from one TODO sub-sequence to the next.  In the
+     above example, {{{kbd(C-u C-u C-c C-t)}}} or {{{kbd(C-S-RIGHT)}}}
+     would jump from =TODO= or =DONE= to =REPORT=, and any of the
+     words in the second row to =CANCELED=.  Note that the
+     {{{kbd(C-S-)}}} key binding conflict with ~shift-selection-mode~
+     (see [[*Packages that conflict with Org mode]]).
 
 - {{{kbd(S-RIGHT)}}}, {{{kbd(S-LEFT)}}} ::
 
      #+kindex: S-RIGHT
      #+kindex: S-LEFT
      {{{kbd(S-LEFT)}}} and {{{kbd(S-RIGHT)}}} walk through /all/
-     keywords from all sets, so for example {{{kbd(S-RIGHT)}}} would
-     switch from =DONE= to =REPORT= in the example above.  For
-     a discussion of the interaction with ~shift-selection-mode~, see
-     [[*Packages that conflict with Org mode]].
+     keywords from all sub-sequences, so for example
+     {{{kbd(S-RIGHT)}}} would switch from =DONE= to =REPORT= in the
+     example above.  For a discussion of the interaction with
+     ~shift-selection-mode~, see [[*Packages that conflict with Org
+     mode]].
 
 *** Fast access to TODO states
 :PROPERTIES:
@@ -3943,7 +3942,7 @@ anywhere in the file:
 : #+TODO: TODO FEEDBACK VERIFY | DONE CANCELED
 
 #+texinfo: @noindent
-you may also write =#+SEQ_TODO= to be explicit about the
+You may also write =#+SEQ_TODO= to be explicit about the
 interpretation, but it means the same as =#+TODO=, or
 
 : #+TYP_TODO: Fred Sara Lucy Mike | DONE
@@ -3960,7 +3959,7 @@ A setup for using several sets in parallel would be:
 #+kindex: M-TAB
 #+texinfo: @noindent
 To make sure you are using the correct keyword, type =#+= into the
-buffer and then use {{{kbd(M-TAB)}}} completion.
+buffer and then use {{{kbd(M-TAB)}}} to complete it (see [[*Completion]]).
 
 #+cindex: DONE, final TODO keyword
 Remember that the keywords after the vertical bar---or the last
@@ -4010,15 +4009,15 @@ a background color.
 #+cindex: @samp{ORDERED}, property
 The structure of Org files---hierarchy and lists---makes it easy to
 define TODO dependencies.  Usually, a parent TODO task should not be
-marked DONE until all TODO subtasks, defined as children tasks, are
-marked as DONE.  And sometimes there is a logical sequence to a number
-of TODO (sub)tasks, so that one task cannot be acted upon before all
-siblings above it are done.  If you customize the variable
-~org-enforce-todo-dependencies~, Org blocks entries from changing state
-to DONE while they have TODO children that are not DONE.  Furthermore,
-if an entry has a property =ORDERED=, each of its TODO children is
-blocked until all earlier siblings are marked DONE.  Here is an
-example:
+marked DONE until all TODO subtasks, or children tasks, are marked as
+DONE.  Sometimes there is a logical sequence to (sub)tasks, so that
+one subtask cannot be acted upon before all siblings above it have
+been marked DONE.  If you customize the variable
+~org-enforce-todo-dependencies~, Org blocks entries from changing
+state to DONE while they have TODO children that are not DONE.
+Furthermore, if an entry has a property =ORDERED=, each of its TODO
+children is blocked until all earlier siblings are marked DONE.  Here
+is an example:
 
 #+begin_example
 ,* TODO Blocked until (two) is done
@@ -4037,7 +4036,7 @@ example:
 #+cindex: TODO dependencies, @samp{NOBLOCKING}
 #+cindex: @samp{NOBLOCKING}, property
 You can ensure an entry is never blocked by using the =NOBLOCKING=
-property:
+property (see [[*Properties and Columns]]):
 
 #+begin_example
 ,* This entry is never blocked
@@ -4051,28 +4050,28 @@ property:
      #+kindex: C-c C-x o
      #+findex: org-toggle-ordered-property
      #+vindex: org-track-ordered-property-with-tag
-     Toggle the =ORDERED= property of the current entry.  A property is
-     used for this behavior because this should be local to the
-     current entry, not inherited from entries above like a tag.
-     However, if you would like to /track/ the value of this property
-     with a tag for better visibility, customize the variable
+     Toggle the =ORDERED= property of the current entry.  A property
+     is used for this behavior because this should be local to the
+     current entry, not inherited from entries above like a tag (see
+     [[*Tags]]).  However, if you would like to /track/ the value of this
+     property with a tag for better visibility, customize the variable
      ~org-track-ordered-property-with-tag~.
 
 - {{{kbd(C-u C-u C-u C-c C-t)}}} ::
 
      #+kindex: C-u C-u C-u C-c C-t
-     Change TODO state, circumventing any state blocking.
+     Change TODO state, regardless of any state blocking.
 
 #+vindex: org-agenda-dim-blocked-tasks
 If you set the variable ~org-agenda-dim-blocked-tasks~, TODO entries
-that cannot be closed because of such dependencies are shown in
-a dimmed font or even made invisible in agenda views (see [[*Agenda
+that cannot be marked DONE because of unmarked children are shown in a
+dimmed font or even made invisible in agenda views (see [[*Agenda
 Views]]).
 
 #+cindex: checkboxes and TODO dependencies
 #+vindex: org-enforce-todo-dependencies
-You can also block changes of TODO states by looking at checkboxes
-(see [[*Checkboxes]]).  If you set the variable
+You can also block changes of TODO states by using checkboxes (see
+[[*Checkboxes]]).  If you set the variable
 ~org-enforce-todo-checkbox-dependencies~, an entry that has unchecked
 checkboxes is blocked from switching to DONE.
 
@@ -4087,12 +4086,12 @@ the contributed module =org-depend.el=.
 #+cindex: progress logging
 #+cindex: logging, of progress
 
-Org mode can automatically record a timestamp and possibly a note when
-you mark a TODO item as DONE, or even each time you change the state
-of a TODO item.  This system is highly configurable, settings can be
-on a per-keyword basis and can be localized to a file or even
-a subtree.  For information on how to clock working time for a task,
-see [[*Clocking Work Time]].
+Org mode can automatically record a timestamp and optionally a note
+when you mark a TODO item as DONE, or even each time you change the
+state of a TODO item.  This system is highly configurable, settings
+can be on a per-keyword basis and can be localized to a file or even a
+subtree.  For information on how to clock working time for a task, see
+[[*Clocking Work Time]].
 
 *** Closing items
 :PROPERTIES:
@@ -4100,7 +4099,7 @@ see [[*Clocking Work Time]].
 :END:
 
 The most basic logging is to keep track of /when/ a certain TODO item
-was finished.  This is achieved with[fn:42]
+was marked DONE.  This can be achieved with[fn:42]
 
 #+begin_src emacs-lisp
 (setq org-log-done 'time)
@@ -4136,15 +4135,14 @@ entry with a =Closing Note= heading.
 #+cindex: @samp{LOG_INTO_DRAWER}, property
 When TODO keywords are used as workflow states (see [[*TODO keywords as workflow states][*Workflow states]]),
 you might want to keep track of when a state change occurred and maybe
-take a note about this change.  You can either record just
-a timestamp, or a time-stamped note for a change.  These records are
-inserted after the headline as an itemized list, newest first[fn:44].
-When taking a lot of notes, you might want to get the notes out of the
-way into a drawer (see [[*Drawers]]).  Customize the variable
-~org-log-into-drawer~ to get this behavior---the recommended drawer
-for this is called =LOGBOOK=[fn:45].  You can also overrule the
-setting of this variable for a subtree by setting a =LOG_INTO_DRAWER=
-property.
+take a note about this change.  You can either record just a
+timestamp, or a time-stamped note.  These records are inserted after
+the headline as an itemized list, newest first[fn:44].  When taking a
+lot of notes, you might want to get the notes out of the way into a
+drawer (see [[*Drawers]]).  Customize the variable ~org-log-into-drawer~
+to get this behavior---the recommended drawer for this is called
+=LOGBOOK=[fn:45].  You can also overrule the setting of this variable
+for a subtree by setting a =LOG_INTO_DRAWER= property.
 
 Since it is normally too much to record a note for every state, Org
 mode expects configuration on a per-keyword basis for this.  This is
@@ -4212,29 +4210,30 @@ specific settings like =TODO(!)=.  For example:
 #+cindex: @samp{STYLE}, property
 
 Org has the ability to track the consistency of a special category of
-TODO, called "habits."  A habit has the following properties:
+TODO, called "habits."  To use habits, you have to enable the ~habits~
+module by customizing the variable ~org-modules~.
 
-1. You have enabled the ~habits~ module by customizing the variable
-   ~org-modules~.
+A habit has the following properties:
 
-2. The habit is a TODO item, with a TODO keyword representing an open
+1. The habit is a TODO item, with a TODO keyword representing an open
    state.
 
-3. The property =STYLE= is set to the value =habit=.
+2. The property =STYLE= is set to the value =habit= (see [[*Properties
+   and Columns]]).
 
-4. The TODO has a scheduled date, usually with a =.+= style repeat
+3. The TODO has a scheduled date, usually with a =.+= style repeat
    interval.  A =++= style may be appropriate for habits with time
    constraints, e.g., must be done on weekends, or a =+= style for an
    unusual habit that can have a backlog, e.g., weekly reports.
 
-5. The TODO may also have minimum and maximum ranges specified by
+4. The TODO may also have minimum and maximum ranges specified by
    using the syntax =.+2d/3d=, which says that you want to do the task
    at least every three days, but at most every two days.
 
-6. You must also have state logging for the DONE state enabled (see
-   [[*Tracking TODO state changes]]), in order for historical data to be
-   represented in the consistency graph.  If it is not enabled it is
-   not an error, but the consistency graphs are largely meaningless.
+5. State logging for the DONE state is enabled (see [[*Tracking TODO
+   state changes]]), in order for historical data to be represented in
+   the consistency graph.  If it is not enabled it is not an error,
+   but the consistency graphs are largely meaningless.
 
 To give you an idea of what the above rules look like in action, here's an
 actual habit with some history:
@@ -4261,8 +4260,9 @@ actual habit with some history:
 What this habit says is: I want to shave at most every 2 days---given
 by the =SCHEDULED= date and repeat interval---and at least every
 4 days.  If today is the 15th, then the habit first appears in the
-agenda on Oct 17, after the minimum of 2 days has elapsed, and will
-appear overdue on Oct 19, after four days have elapsed.
+agenda (see [[*Agenda Views]]) on Oct 17, after the minimum of 2 days has
+elapsed, and will appear overdue on Oct 19, after four days have
+elapsed.
 
 What's really useful about habits is that they are displayed along
 with a consistency graph, to show how consistent you've been at
@@ -4303,8 +4303,8 @@ the way habits are displayed in the agenda.
 - ~org-habit-show-habits-only-for-today~ ::
 
      #+vindex: org-habit-show-habits-only-for-today
-     If non-~nil~, only show habits in today's agenda view.  This is
-     set to true by default.
+     If non-~nil~, only show habits in today's agenda view.  The
+     default value is ~t~.
 
 Lastly, pressing {{{kbd(K)}}} in the agenda buffer causes habits to
 temporarily be disabled and do not appear at all.  Press {{{kbd(K)}}}
@@ -4329,11 +4329,12 @@ like this
 #+vindex: org-priority-faces
 #+texinfo: @noindent
 By default, Org mode supports three priorities: =A=, =B=, and =C=.
-=A= is the highest priority.  An entry without a cookie is treated
-just like priority =B=.  Priorities make a difference only for sorting
-in the agenda (see [[*Weekly/daily agenda]]); outside the agenda, they
-have no inherent meaning to Org mode.  The cookies can be highlighted
-with special faces by customizing the variable ~org-priority-faces~.
+=A= is the highest priority.  An entry without a cookie is treated as
+equivalent if it had priority =B=.  Priorities make a difference only
+for sorting in the agenda (see [[*Weekly/daily agenda]]); outside the
+agenda, they have no inherent meaning to Org mode.  The cookies are
+displayed with the face defined by the variable ~org-priority-faces~,
+which can be customized.
 
 Priorities can be attached to any outline node; they do not need to be
 TODO items.
@@ -4345,10 +4346,10 @@ TODO items.
      #+findex: org-priority
      Set the priority of the current headline.  The command prompts
      for a priority character =A=, =B= or =C=.  When you press
-     {{{kbd(SPC)}}} instead, the priority cookie is removed from the
-     headline.  The priorities can also be changed "remotely" from the
-     agenda buffer with the {{{kbd(\,)}}} command (see [[*Commands in
-     the Agenda Buffer]]).
+     {{{kbd(SPC)}}} instead, the priority cookie, if one is set, is
+     removed from the headline.  The priorities can also be changed
+     "remotely" from the agenda buffer with the {{{kbd(\,)}}} command
+     (see [[*Commands in the Agenda Buffer]]).
 
 - {{{kbd(S-UP)}}} (~org-priority-up~); {{{kbd(S-DOWN)}}} (~org-priority-down~) ::
 
@@ -4357,10 +4358,11 @@ TODO items.
      #+findex: org-priority-up
      #+findex: org-priority-down
      #+vindex: org-priority-start-cycle-with-default
-     Increase/decrease priority of current headline[fn:47].  Note that
-     these keys are also used to modify timestamps (see [[*Creating
-     Timestamps]]).  See also [[*Packages that conflict with Org mode]], for
-     a discussion of the interaction with ~shift-selection-mode~.
+     Increase/decrease the priority of the current headline[fn:47].
+     Note that these keys are also used to modify timestamps (see
+     [[*Creating Timestamps]]).  See also [[*Packages that conflict with Org
+     mode]], for a discussion of the interaction with
+     ~shift-selection-mode~.
 
 #+vindex: org-highest-priority
 #+vindex: org-lowest-priority
@@ -4386,10 +4388,10 @@ highest priority is earlier in the alphabet than the lowest priority):
 It is often advisable to break down large tasks into smaller,
 manageable subtasks.  You can do this by creating an outline tree
 below a TODO item, with detailed subtasks on the tree[fn:48].  To keep
-the overview over the fraction of subtasks that are already completed,
-insert either =[/]= or =[%]= anywhere in the headline.  These cookies
-are updated each time the TODO status of a child changes, or when
-pressing {{{kbd(C-c C-c)}}} on the cookie.  For example:
+an overview of the fraction of subtasks that have already been marked
+DONE, insert either =[/]= or =[%]= anywhere in the headline.  These
+cookies are updated each time the TODO status of a child changes, or
+when pressing {{{kbd(C-c C-c)}}} on the cookie.  For example:
 
 #+begin_example
 ,* Organize Party [33%]
@@ -5435,7 +5437,7 @@ a more predictable delivery.
 
 When combining a set of such estimates, simply adding the lows and
 highs produces an unrealistically wide result.  Instead, =est+= adds
-the statistical mean and variance of the sub-tasks, generating a final
+the statistical mean and variance of the subtasks, generating a final
 estimate from the sum.  For example, suppose you had ten tasks, each
 of which was estimated at 0.5 to 2 days of work.  Straight addition
 produces an estimate of 5 to 20 days, representing what to expect if
@@ -5817,8 +5819,8 @@ format.
 
      #+kindex: C-c .
      #+findex: org-time-stamp
-     Prompt for a date and insert a corresponding timestamp.  When the
-     cursor is at an existing timestamp in the buffer, the command is
+     Prompt for a date and insert a corresponding timestamp.  When
+     point is at an existing timestamp in the buffer, the command is
      used to modify this timestamp instead of inserting a new one.
      When this command is used twice in succession, a time range is
      inserted.
@@ -5875,7 +5877,7 @@ format.
      #+kindex: S-RIGHT
      #+findex: org-timestamp-down-day
      #+findex: org-timestamp-up-day
-     Change date at cursor by one day.  These key bindings conflict
+     Change date at point by one day.  These key bindings conflict
      with shift-selection and related modes (see [[*Packages that
      conflict with Org mode]]).
 
@@ -5884,10 +5886,10 @@ format.
      #+kindex: S-UP
      #+kindex: S-DOWN
      On the beginning or enclosing bracket of a timestamp, change its
-     type.  Within a timestamp, change the item under point.  The
-     cursor can be on a year, month, day, hour or minute.  When the
-     timestamp contains a time range like =15:30-16:30=, modifying the
-     first time also shifts the second, shifting the time block with
+     type.  Within a timestamp, change the item under point.  Point
+     can be on a year, month, day, hour or minute.  When the timestamp
+     contains a time range like =15:30-16:30=, modifying the first
+     time also shifts the second, shifting the time block with
      constant length.  To change the length, modify the second time.
      Note that if point is in a headline and not at a timestamp, these
      same keys modify the priority of an item (see [[*Priorities]]).  The
@@ -6004,18 +6006,18 @@ can control the calendar fully from the minibuffer:
 #+kindex: M-S-LEFT
 #+kindex: RET
 #+attr_texinfo: :columns 0.25 0.55
-| {{{kbd(RET)}}}           | Choose date at cursor in calendar.     |
-| {{{kbd(mouse-1)}}}       | Select date by clicking on it.         |
-| {{{kbd(S-RIGHT)}}}    | One day forward.                       |
-| {{{kbd(S-LEFT)}}}     | One day backward.                      |
-| {{{kbd(S-DOWN)}}}     | One week forward.                      |
-| {{{kbd(S-UP)}}}       | One week backward.                     |
-| {{{kbd(M-S-RIGHT)}}}  | One month forward.                     |
-| {{{kbd(M-S-LEFT)}}}   | One month backward.                    |
-| {{{kbd(>)}}}             | Scroll calendar forward by one month.  |
-| {{{kbd(<)}}}             | Scroll calendar backward by one month. |
-| {{{kbd(M-v)}}}           | Scroll calendar forward by 3 months.   |
-| {{{kbd(C-v)}}}           | Scroll calendar backward by 3 months.  |
+| {{{kbd(RET)}}}       | Choose date at point in calendar.      |
+| {{{kbd(mouse-1)}}}   | Select date by clicking on it.         |
+| {{{kbd(S-RIGHT)}}}   | One day forward.                       |
+| {{{kbd(S-LEFT)}}}    | One day backward.                      |
+| {{{kbd(S-DOWN)}}}    | One week forward.                      |
+| {{{kbd(S-UP)}}}      | One week backward.                     |
+| {{{kbd(M-S-RIGHT)}}} | One month forward.                     |
+| {{{kbd(M-S-LEFT)}}}  | One month backward.                    |
+| {{{kbd(>)}}}         | Scroll calendar forward by one month.  |
+| {{{kbd(<)}}}         | Scroll calendar backward by one month. |
+| {{{kbd(M-v)}}}       | Scroll calendar forward by 3 months.   |
+| {{{kbd(C-v)}}}       | Scroll calendar backward by 3 months.  |
 
 #+vindex: org-read-date-display-live
 The actions of the date/time prompt may seem complex, but I assure you
@@ -6262,8 +6264,8 @@ the repeater should come first and the warning period last: =DEADLINE:
 #+vindex: org-todo-repeat-to-state
 Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
-completed once you have done so.  When you mark a =DEADLINE= or
-a =SCHEDULED= with the TODO keyword =DONE=, it no longer produces
+DONE once you have done so.  When you mark a =DEADLINE= or a
+=SCHEDULED= with the TODO keyword =DONE=, it no longer produces
 entries in the agenda.  The problem with this is, however, is that
 then also the /next/ instance of the repeated entry will not be
 active.  Org mode deals with this in the following way: when you try
@@ -6531,11 +6533,10 @@ formatted as one or several Org tables.
      #+kindex: C-c C-x C-r
      #+findex: org-clock-report
      Insert a dynamic block (see [[*Dynamic Blocks]]) containing a clock
-     report as an Org mode table into the current file.  When the
-     cursor is at an existing clock table, just update it.  When
-     called with a prefix argument, jump to the first clock report in
-     the current document and update it.  The clock table includes
-     archived trees.
+     report as an Org mode table into the current file.  When point is
+     at an existing clock table, just update it.  When called with a
+     prefix argument, jump to the first clock report in the current
+     document and update it.  The clock table includes archived trees.
 
 - {{{kbd(C-c C-c)}}} or {{{kbd(C-c C-x C-u)}}} (~org-dblock-update~) ::
 
@@ -6556,10 +6557,9 @@ formatted as one or several Org tables.
      #+kindex: S-LEFT
      #+kindex: S-RIGHT
      #+findex: org-clocktable-try-shift
-     Shift the current =:block= interval and update the table.  The
-     cursor needs to be in the =#+BEGIN: clocktable= line for this
-     command.  If =:block= is =today=, it is shifted to =today-1=,
-     etc.
+     Shift the current =:block= interval and update the table.  Point
+     needs to be in the =#+BEGIN: clocktable= line for this command.
+     If =:block= is =today=, it is shifted to =today-1=, etc.
 
 Here is an example of the frame for a clock table as it is inserted
 into the buffer with the {{{kbd(C-c C-x C-r)}}} command:
@@ -7112,12 +7112,12 @@ You may also define a global key for capturing new material (see
      #+kindex: C-c C-w @r{(Capture buffer)}
      #+findex: org-capture-refile
      Finalize the capture process by refiling the note to a different
-     place (see [[*Refile and Copy]]).  Please realize that this is
-     a normal refiling command that will be executed---so point
-     position at the moment you run this command is important.  If you
-     have inserted a tree with a parent and children, first move the
-     cursor back to the parent.  Any prefix argument given to this
-     command is passed on to the ~org-refile~ command.
+     place (see [[*Refile and Copy]]).  Please realize that this is a
+     normal refiling command that will be executed---so point position
+     at the moment you run this command is important.  If you have
+     inserted a tree with a parent and children, first move point back
+     to the parent.  Any prefix argument given to this command is
+     passed on to the ~org-refile~ command.
 
 - {{{kbd(C-c C-k)}}} (~org-capture-kill~) ::
 
@@ -7129,7 +7129,7 @@ You may also define a global key for capturing new material (see
 You can also call ~org-capture~ in a special way from the agenda,
 using the {{{kbd(k c)}}} key combination.  With this access, any
 timestamps inserted by the selected capture template defaults to the
-cursor date in the agenda, rather than to the current date.
+date at point in the agenda, rather than to the current date.
 
 To find the locations of the last stored capture, use ~org-capture~
 with prefix commands:
@@ -7527,7 +7527,7 @@ here:
 
 - ~%?~ ::
 
-     After completing the template, position cursor here.
+     After completing the template, position point here.
 
 #+texinfo: @noindent
 #+vindex: org-store-link-props
@@ -8575,12 +8575,12 @@ add the following to one of your agenda files:
 #+end_example
 
 You can then go ahead and define anniversaries for a BBDB record.
-Basically, you need to press {{{kbd(C-o anniversary RET)}}} with the
-cursor in a BBDB record and then add the date in the format
-=YYYY-MM-DD= or =MM-DD=, followed by a space and the class of the
-anniversary (=birthday=, =wedding=, or a format string).  If you omit
-the class, it defaults to =birthday=.  Here are a few examples, the
-header for the file =org-bbdb.el= contains more detailed information.
+Basically, you need to press {{{kbd(C-o anniversary RET)}}} with point
+in a BBDB record and then add the date in the format =YYYY-MM-DD= or
+=MM-DD=, followed by a space and the class of the anniversary
+(=birthday=, =wedding=, or a format string).  If you omit the class,
+it defaults to =birthday=.  Here are a few examples, the header for
+the file =org-bbdb.el= contains more detailed information.
 
 #+begin_example
 1973-06-22
@@ -10042,8 +10042,8 @@ the other commands, point needs to be in the desired line.
 
      #+kindex: c
      #+findex: org-agenda-goto-calendar
-     Open the Emacs calendar and move to the date at the agenda
-     cursor.
+     Open the Emacs calendar and go to the date at point in the
+     agenda.
 
 - {{{kbd(c)}}} (~org-calendar-goto-agenda~) ::
 
@@ -10095,7 +10095,7 @@ the other commands, point needs to be in the desired line.
 
      #+kindex: C
      #+findex: org-agenda-convert-date
-     Convert the date at cursor into many other cultural and historic
+     Convert the date at point into many other cultural and historic
      calendars.
 
 - {{{kbd(H)}}} (~org-agenda-holidays~) ::
@@ -18266,8 +18266,8 @@ init file[fn:138].
 :END:
 #+cindex: speed keys
 
-Single keystrokes can execute custom commands in an Org file when the
-cursor is on a headline.  Without the extra burden of a meta or
+Single keystrokes can execute custom commands in an Org file when
+point is on a headline.  Without the extra burden of a meta or
 modifier key, Speed Keys can speed navigation or execute custom
 commands.  Besides faster navigation, Speed Keys may come in handy on
 small mobile devices that do not have full keyboards.  Speed Keys may
@@ -18286,7 +18286,7 @@ Org comes with a pre-defined list of Speed Keys.  To add or modify
 Speed Keys, customize the variable, ~org-speed-commands-user~.  For
 more details, see the variable's docstring.  With Speed Keys
 activated, {{{kbd(M-x org-speed-command-help)}}}, or {{{kbd(?)}}} when
-cursor is at the beginning of an Org headline, shows currently active
+point is at the beginning of an Org headline, shows currently active
 Speed Keys, including the user-defined ones.
 
 ** Code Evaluation and Security Issues
@@ -18924,11 +18924,12 @@ headings as shown in examples below.
 #+cindex: tty key bindings
 
 Org provides alternative key bindings for TTY and modern mobile
-devices that cannot handle cursor keys and complex modifier key
-chords.  Some of these workarounds may be more cumbersome than
-necessary.  Users should look into customizing these further based on
-their usage needs.  For example, the normal {{{kbd(S-<cursor>)}}} for
-editing timestamp might be better with {{{kbd(C-c .)}}} chord.
+devices that cannot perform movement commands on point and key
+bindings with modifier keys.  Some of these workarounds may be more
+cumbersome than necessary.  Users should look into customizing these
+further based on their usage needs.  For example, the normal
+{{{kbd(S-<cursor>)}}} for editing timestamp might be better with
+{{{kbd(C-c .)}}} chord.
 
 #+attr_texinfo: :columns 0.2 0.28 0.15 0.21
 | Default              | Alternative 1            | Speed key    | Alternative 2        |
@@ -19056,7 +19057,7 @@ packages are documented here.
 
 #+cindex: shift-selection-mode
 #+vindex: org-support-shift-select
-In Emacs, ~shift-selection-mode~ combines cursor motions with shift
+In Emacs, ~shift-selection-mode~ combines motions of point with shift
 key to enlarge regions.  Emacs sets this mode by default.  This
 conflicts with Org's use of {{{kbd(S-<cursor>)}}} commands to change
 timestamps, TODO keywords, priorities, and item bullet types, etc.
@@ -20986,7 +20987,7 @@ change recording note takes precedence and cancel the closing note.
 
 [fn:47] See also the option ~org-priority-start-cycle-with-default~.
 
-[fn:48] To keep subtasks out of the global TODO list, see the
+[fn:48] To keep subtasks out of the global TODO list, see the option
 ~org-agenda-todo-list-sublevels~.
 
 [fn:49] With the exception of description lists.  But you can allow it
