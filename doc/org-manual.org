@@ -6713,9 +6713,9 @@ using the =:formatter= parameter.
 
 - =:timestamp= ::
 
-     A timestamp for the entry, when available.  Look for SCHEDULED,
-     DEADLINE, TIMESTAMP and TIMESTAMP_IA special properties (see
-     [[*Special Properties]]), in this order.
+     A timestamp for the entry, when available.  Look for =SCHEDULED=,
+     =DEADLINE=, =TIMESTAMP= and =TIMESTAMP_IA= special properties
+     (see [[*Special Properties]]), in this order.
 
 - =:tags= ::
 
