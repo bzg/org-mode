@@ -5573,8 +5573,7 @@ The following commands are available:
      (when org-startup-with-latex-preview (org-toggle-latex-fragment '(16)))
      (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))
      (when org-startup-truncated (setq truncate-lines t))
-     (when org-startup-indented (require 'org-indent) (org-indent-mode 1))
-     (org-refresh-effort-properties)))
+     (when org-startup-indented (require 'org-indent) (org-indent-mode 1))))
   ;; Try to set `org-hide' face correctly.
   (let ((foreground (org-find-invisible-foreground)))
     (when foreground
@@ -15007,7 +15006,7 @@ variables is set."
 			  value)
     (when (equal (org-get-heading t t t t)
 		 (bound-and-true-p org-clock-current-task))
-      (setq org-clock-effort (org-get-at-bol 'effort))
+      (setq org-clock-effort value)
       (org-clock-update-mode-line))
     (message "%s is now %s" org-effort-property value)))
 

@@ -438,7 +438,9 @@ using three `C-u' prefix arguments."
 	   (if (numberp org-timer-default-timer)
 	       (number-to-string org-timer-default-timer)
 	     org-timer-default-timer))
-	 (effort-minutes (ignore-errors (floor (org-get-at-eol 'effort-minutes 1))))
+	 (effort-minutes (let ((effort (org-entry-get nil org-effort-property)))
+			   (when (org-string-nw-p effort)
+			     (floor (org-duration-to-minutes effort)))))
 	 (minutes (or (and (numberp opt) (number-to-string opt))
 		      (and (not (equal opt '(64)))
 			   effort-minutes
