@@ -21016,9 +21016,9 @@ configured keys.
 [fn:56] If more than one summary type applies to the same property,
 the parent values are computed according to the first of them.
 
-[fn:57] An age is defined as a duration, using effort modifiers
-defined in ~org-effort-durations~, e.g., =3d 1h=.  If any value in the
-column is as such, the summary is also an effort duration.
+[fn:57] An age can be defined as a duration, using units defined in
+~org-duration-units~, e.g., =3d 1h=.  If any value in the column is as
+such, the summary is also expressed as a duration.
 
 [fn:58] Please note that the =COLUMNS= definition must be on a single
 line; it is wrapped here only because of formatting constraints.

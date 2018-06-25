@@ -228,6 +228,9 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org-remove-from-invisibility-spec
   'remove-from-invisibility-spec "Org 9.2")
 
+(define-obsolete-variable-alias 'org-effort-durations 'org-duration-units
+  "Org 9.2")
+
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
   (save-match-data
