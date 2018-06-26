@@ -15048,24 +15048,36 @@ connections.
 #+cindex: @samp{DESCRIPTION}, property
 #+cindex: @samp{LOCATION}, property
 #+cindex: @samp{TIMEZONE}, property
+#+cindex: @samp{CLASS}, property
 The iCalendar export back-end includes =SUMMARY=, =DESCRIPTION=,
-=LOCATION= and =TIMEZONE= properties from the Org entries when
-exporting.  To force the back-end to inherit the =LOCATION= and
-=TIMEZONE= properties, configure the ~org-use-property-inheritance~
-variable.
+=LOCATION=, =TIMEZONE= and =CLASS= properties from the Org entries
+when exporting.  To force the back-end to inherit the =LOCATION=,
+=TIMEZONE= and =CLASS= properties, configure the
+~org-use-property-inheritance~ variable.
 
 #+vindex: org-icalendar-include-body
-When Org entries do not have =SUMMARY=, =DESCRIPTION= and =LOCATION=
-properties, the iCalendar export back-end derives the summary from the
-headline, and derives the description from the body of the Org item.
-The ~org-icalendar-include-body~ variable limits the maximum number of
-characters of the content are turned into its description.
+When Org entries do not have =SUMMARY=, =DESCRIPTION=, =LOCATION= and
+=CLASS= properties, the iCalendar export back-end derives the summary
+from the headline, and derives the description from the body of the
+Org item.  The ~org-icalendar-include-body~ variable limits the
+maximum number of characters of the content are turned into its
+description.
 
 The =TIMEZONE= property can be used to specify a per-entry time zone,
 and is applied to any entry with timestamp information.  Time zones
 should be specified as per the IANA time zone database format, e.g.,
 =Asia/Almaty=.  Alternately, the property value can be =UTC=, to force
 UTC time for this entry only.
+
+The =CLASS= property can be used to specify a per-entry visibility
+class or access restrictions, and is applied to any entry with class
+information.  The iCalendar standard defines three visibility classes:
+- =PUBLIC= :: The entry is publicly visible (this is the default).
+- =CONFIDENTIAL= :: Only a limited group of clients get access to the
+     event.
+- =PRIVATE= :: The entry can be retrieved only by its owner.
+The server should treat unknown class properties the same as
+=PRIVATE=.
 
 Exporting to iCalendar format depends in large part on the
 capabilities of the destination application.  Some are more lenient
