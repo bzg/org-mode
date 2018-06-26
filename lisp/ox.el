@@ -5824,6 +5824,7 @@ them."
      ("es" :default "Figura")
      ("et" :default "Joonis")
      ("is" :default "Mynd")
+     ("it" :default "Figura")
      ("ja" :default "図" :html "&#22259;")
      ("no" :default "Illustrasjon")
      ("nb" :default "Illustrasjon")
