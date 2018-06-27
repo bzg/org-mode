@@ -979,5 +979,55 @@ CLOCK: [2017-12-27 Wed 08:00]--[2017-12-27 Wed 16:00] =>  8:00"
 		  (concat ":step day :tstart \"<2017-12-25 Mon>\" "
 			  ":tend \"<2017-12-27 Wed 23:59>\" :stepskip0 t")))))))
 
+(ert-deftest test-org-clock/clocktable/extend-today-until ()
+  "Test assignment of clock time to days in presence of \"org-extend-today-until\"."
+  ;; Basic test of :block with org-extend-today-until - the report for
+  ;; 2017-09-30 should include the time clocked on 2017-10-01 before
+  ;; 04:00.
+  (should
+   (equal "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *2:00* |
+|--------------+--------|
+| Foo          | 2:00   |"
+	  (org-test-with-temp-text
+	   "* Foo
+CLOCK: [2017-09-30 Sat 12:00]--[2017-09-30 Sat 13:00] =>  1:00
+CLOCK: [2017-10-01 Sun 02:00]--[2017-10-01 Sun 03:00] =>  1:00
+CLOCK: [2017-10-01 Sun 11:00]--[2017-10-01 Sun 13:00] =>  2:00"
+	   (setq-local org-extend-today-until 4)
+	   (let ((system-time-locale "en_US"))
+	     (test-org-clock-clocktable-contents
+	      ":block 2017-09-30")))))
+
+  ;; Week-length block - time on Monday before 04:00 should be
+  ;; assigned to previous week.
+  (should
+   (equal "
+Weekly report starting on: [2017-10-01 Sun]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *2:00* |
+|--------------+--------|
+| Foo          | 2:00   |
+
+Weekly report starting on: [2017-10-02 Mon]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *2:00* |
+|--------------+--------|
+| Foo          | 2:00   |
+"
+	  (org-test-with-temp-text
+	   "* Foo
+CLOCK: [2017-10-01 Sun 12:00]--[2017-10-01 Sun 13:00] =>  1:00
+CLOCK: [2017-10-02 Mon 02:00]--[2017-10-02 Mon 03:00] =>  1:00
+CLOCK: [2017-10-02 Mon 11:00]--[2017-10-02 Mon 13:00] =>  2:00"
+	   (setq-local org-extend-today-until 4)
+	   (let ((system-time-locale "en_US"))
+	     (test-org-clock-clocktable-contents
+	      ":step week :block 2017-10 :stepskip0 t"))))))
+
+
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
