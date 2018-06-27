@@ -21,6 +21,18 @@ See [[git:3367ac9457]] for details.
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
+*** iCalendar export respects a =CLASS= property
+
+Set the =CLASS= property on an entry to specify a visibility class for
+that entry only during iCalendar export. The property can be set to
+anything the calendar server supports. The iCalendar standard defines
+the values =PUBLIC=, =CONFIDENTIAL=, =PRIVATE=, which can be
+interpreted as publicly visable, accessible to a specific group, and
+private respectively.
+
+This property can be inherited during iCalendar export, depending on
+the value of ~org-use-property-inheritance~.
+
 *** New parameter for =INCLUDE= keyword
 Add =:coding CODING-SYSTEM= to include files using a different coding
 system than the main Org document.  For example:
