@@ -5571,7 +5571,7 @@ either for all clocks or just for today.
      If no list is found, the new value is stored in the first entry
      that is part of the current column view.
 
-**** Modifying column view on-the-fly:
+**** Modifying column view on-the-fly
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
