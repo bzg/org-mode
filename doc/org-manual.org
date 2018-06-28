@@ -5028,7 +5028,7 @@ value after it.  Keys are case-insensitive.  Here is an example:
     :PROPERTIES:
     :Title:     Goldberg Variations
     :Composer:  J.S. Bach
-    :Artist:    Glen Gould
+    :Artist:    Glenn Gould
     :Publisher: Deutsche Grammophon
     :NDisks:    1
     :END:
@@ -5085,7 +5085,7 @@ Baroque= under the =Goldberg Variations= subtree.
     :PROPERTIES:
     :Title:     Goldberg Variations
     :Composer:  J.S. Bach
-    :Artist:    Glen Gould
+    :Artist:    Glenn Gould
     :Publisher: Deutsche Grammophon
     :NDisks:    1
     :Genres+:   Baroque
