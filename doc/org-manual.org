@@ -20799,10 +20799,11 @@ modify this GNU manual."
 #+macro: cite @@texinfo:@cite{@@$1@@texinfo:}@@
 #+macro: var @@texinfo:@var{@@$1@@texinfo:}@@
 
-# The "version" macro returns major.minor version number.  This is
-# sufficient since bugfix releases are not expected to add features
-# and therefore imply manual modifications.
-#+macro: version (eval (mapconcat #'identity (cl-subseq (split-string (org-version) "\\.") 0 -1) "."))
+# The "version" macro extracts "Version" keyword from "org.el".  It
+# returns major.minor version number.  This is sufficient since bugfix
+# releases are not expected to add features and therefore imply manual
+# modifications.
+#+macro: version (eval (with-current-buffer (find-file-noselect "../lisp/org.el") (org-with-point-at 1 (if (re-search-forward "Version: +\\([0-9.]+\\)" nil t) (mapconcat #'identity (cl-subseq (split-string (match-string-no-properties 1) "\\.") 0 2) ".") (error "Missing \"Version\" keyword in \"org.el\"")))))
 
 # The "kbd" macro turns KBD into @kbd{KBD}.  Additionnally, it
 # encloses case-sensitive special keys (SPC, RET...) within @key{...}.
