@@ -1122,7 +1122,13 @@ This should be a lot faster than the `parse-time-string'."
 	(t (error "Not an Org time string: %s" s))))
 
 (defun org-matcher-time (s)
-  "Interpret a time comparison value S."
+  "Interpret a time comparison value S as a floating point time.
+
+S can be an Org time stamp, a modifier, e.g., \"<+2d>\", or the
+following special strings: \"<now>\", \"<today>\",
+\"<tomorrow>\", and \"<yesterday>\".
+
+Return 0. if S is not recognized as a valid value."
   (let ((today (float-time (apply #'encode-time
 				  (append '(0 0 0) (nthcdr 3 (decode-time)))))))
     (save-match-data
@@ -1137,7 +1143,8 @@ This should be a lot faster than the `parse-time-string'."
 	      (cdr (assoc (match-string 2 s)
 			  '(("d" . 86400.0)   ("w" . 604800.0)
 			    ("m" . 2678400.0) ("y" . 31557600.0)))))))
-       (t (org-2ft s))))))
+       ((string-match org-ts-regexp0 s) (org-2ft s))
+       (t 0.)))))
 
 
 
