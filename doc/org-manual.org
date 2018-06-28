@@ -3176,36 +3176,36 @@ External links are URL-like locators.  They start with a short
 identifying string followed by a colon.  There can be no space after
 the colon.  The following list shows examples for each link type.
 
-| =http://www.astro.uva.nl/=dominik=          | on the web                     |
-| =doi:10.1000/182=                           | DOI for an electronic resource |
-| =file:/home/dominik/images/jupiter.jpg=     | file, absolute path            |
-| =/home/dominik/images/jupiter.jpg=          | same as above                  |
-| =file:papers/last.pdf=                      | file, relative path            |
-| =./papers/last.pdf=                         | same as above                  |
-| =file:/ssh:me@some.where:papers/last.pdf=   | file, path on remote machine   |
-| =/ssh:me@some.where:papers/last.pdf=        | same as above                  |
-| =file:sometextfile::NNN=                    | file, jump to line number      |
-| =file:projects.org=                         | another Org file               |
-| =file:projects.org::some words=             | text search in Org file[fn:27] |
-| =file:projects.org::*task title=            | heading search in Org file     |
-| =file+sys:/path/to/file=                    | open via OS, like double-click |
-| =file+emacs:/path/to/file=                  | force opening by Emacs         |
-| =docview:papers/last.pdf::NNN=              | open in doc-view mode at page  |
-| =id:B7423F4D-2E8A-471B-8810-C40F074717E9=   | Link to heading by ID          |
-| =news:comp.emacs=                           | Usenet link                    |
-| =mailto:adent@galaxy.net=                   | Mail link                      |
-| =mhe:folder=                                | MH-E folder link               |
-| =mhe:folder#id=                             | MH-E message link              |
-| =rmail:folder=                              | Rmail folder link              |
-| =rmail:folder#id=                           | Rmail message link             |
-| =gnus:group=                                | Gnus group link                |
-| =gnus:group#id=                             | Gnus article link              |
-| =bbdb:R.*Stallman=                          | BBDB link (with regexp)        |
-| =irc:/irc.com/#emacs/bob=                   | IRC link                       |
-| =info:org#External links=                   | Info node link                 |
-| =shell:ls *.org=                            | A shell command                |
-| =elisp:org-agenda=                          | Interactive Elisp command      |
-| =elisp:(find-file-other-frame "Elisp.org")= | Elisp form to evaluate         |
+| =http://www.astro.uva.nl/=dominik=        | on the web                     |
+| =doi:10.1000/182=                         | DOI for an electronic resource |
+| =file:/home/dominik/images/jupiter.jpg=   | file, absolute path            |
+| =/home/dominik/images/jupiter.jpg=        | same as above                  |
+| =file:papers/last.pdf=                    | file, relative path            |
+| =./papers/last.pdf=                       | same as above                  |
+| =file:/ssh:me@some.where:papers/last.pdf= | file, path on remote machine   |
+| =/ssh:me@some.where:papers/last.pdf=      | same as above                  |
+| =file:sometextfile::NNN=                  | file, jump to line number      |
+| =file:projects.org=                       | another Org file               |
+| =file:projects.org::some words=           | text search in Org file[fn:27] |
+| =file:projects.org::*task title=          | heading search in Org file     |
+| =file+sys:/path/to/file=                  | open via OS, like double-click |
+| =file+emacs:/path/to/file=                | force opening by Emacs         |
+| =docview:papers/last.pdf::NNN=            | open in doc-view mode at page  |
+| =id:B7423F4D-2E8A-471B-8810-C40F074717E9= | link to heading by ID          |
+| =news:comp.emacs=                         | Usenet link                    |
+| =mailto:adent@galaxy.net=                 | mail link                      |
+| =mhe:folder=                              | MH-E folder link               |
+| =mhe:folder#id=                           | MH-E message link              |
+| =rmail:folder=                            | Rmail folder link              |
+| =rmail:folder#id=                         | Rmail message link             |
+| =gnus:group=                              | Gnus group link                |
+| =gnus:group#id=                           | Gnus article link              |
+| =bbdb:R.*Stallman=                        | BBDB link (with regexp)        |
+| =irc:/irc.com/#emacs/bob=                 | IRC link                       |
+| =info:org#External links=                 | Info node link                 |
+| =shell:ls *.org=                          | shell command                  |
+| =elisp:org-agenda=                        | interactive Elisp command      |
+| =elisp:(find-file "Elisp.org")=           | Elisp form to evaluate         |
 
 #+cindex: VM links
 #+cindex: Wanderlust links
