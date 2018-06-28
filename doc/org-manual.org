@@ -3739,9 +3739,9 @@ The most important commands to work with TODO entries are:
      ~org-todo-keywords~.  With two prefix arguments, find all TODO
      states, both un-done and done.
 
-- {{{kbd(C-c a t)}}} (~org-todo-list~) ::
+- {{{kbd(M-x org-agenda t)}}} (~org-todo-list~) ::
 
-     #+kindex: C-c a t
+     #+kindex: t @r{(Agenda dispatcher)}
      Show the global TODO list.  Collects the TODO items (with
      not-DONE states) from all agenda files (see [[*Agenda Views]]) into
      a single buffer.  The new buffer is in Org Agenda mode, which
@@ -3844,7 +3844,8 @@ type in a sparse tree by using a numeric prefix to {{{kbd(C-c / t)}}}.
 For example, to see all things Lucy has to do, you would use
 {{{kbd(C-3 C-c / t)}}}.  To collect Lucy's items from all agenda files
 into a single buffer, you would use the numeric prefix argument as
-well when creating the global TODO list: {{{kbd(C-3 C-c a t)}}}.
+well when creating the global TODO list: {{{kbd(C-3 M-x org-agenda
+t)}}}.
 
 *** Multiple keyword sets in one file
 :PROPERTIES:
@@ -4958,16 +4959,16 @@ related information into special lists.
      With a {{{kbd(C-u)}}} prefix argument, ignore headlines that are
      not a TODO line.
 
-- {{{kbd(C-c a m)}}} (~org-tags-view~) ::
+- {{{kbd(M-x org-agenda m)}}} (~org-tags-view~) ::
 
-     #+kindex: C-c a m
+     #+kindex: m @r{(Agenda dispatcher)}
      #+findex: org-tags-view
      Create a global list of tag matches from all agenda files.  See
      [[*Matching tags and properties]].
 
-- {{{kbd(C-c a M)}}} (~org-tags-view~) ::
+- {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
-     #+kindex: C-c a M
+     #+kindex: M @r{(Agenda dispatcher)}
      #+vindex: org-tags-match-list-sublevels
      Create a global list of tag matches from all agenda files, but
      check only TODO items and force checking subitems (see the option
@@ -5227,16 +5228,16 @@ Searches]]).
      a {{{kbd(C-u)}}} prefix argument, ignore headlines that are not
      a TODO line.
 
-- {{{kbd(C-c a m)}}}, ~org-tags-view~ ::
+- {{{kbd(M-x org-agenda m)}}}, ~org-tags-view~ ::
 
-     #+kindex: C-c a m
+     #+kindex: m @r{(Agenda dispatcher)}
+     #+findex: org-tags-view
      Create a global list of tag/property matches from all agenda
      files.
 
-- {{{kbd(C-c a M)}}} (~org-tags-view~) ::
+- {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
-     #+kindex: C-c a M
-     #+findex: org-tags-view
+     #+kindex: M @r{(Agenda dispatcher)}
      #+vindex: org-tags-match-list-sublevels
      Create a global list of tag matches from all agenda files, but
      check only TODO items and force checking of subitems (see the
