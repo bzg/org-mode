@@ -900,29 +900,32 @@ Some other text
   "Test fixed-width area parsing."
   ;; Preserve indentation.
   (should
-   (org-test-with-temp-text ": no blank\n:  one blank"
-     (org-element-map (org-element-parse-buffer) 'fixed-width 'identity)))
+   (equal "no blank\n one blank"
+	  (org-test-with-temp-text ": no blank\n:  one blank"
+	    (org-element-property :value (org-element-at-point)))))
   ;; Fixed-width with empty lines.
   (should
-   (org-test-with-temp-text ": first part\n:\n: \n: second part"
-     (org-element-map (org-element-parse-buffer) 'fixed-width 'identity)))
+   (equal "first part\n\n\nsecond part"
+	  (org-test-with-temp-text ": first part\n:\n: \n: second part"
+	    (org-element-property :value (org-element-at-point)))))
   ;; Parse indented fixed-width markers.
   (should
-   (org-test-with-temp-text "Text\n  : no blank\n  :  one blank"
-     (org-element-map (org-element-parse-buffer) 'fixed-width 'identity)))
+   (eq 'fixed-width
+       (org-test-with-temp-text "Text\n<point>  : no blank\n  :  one blank"
+	 (org-element-type (org-element-at-point)))))
   ;; Distinguish fixed-width areas within a list and outside of it.
   (should
-   (= 2
-      (length
-       (org-test-with-temp-text "
+   (org-test-with-temp-text "
 - Item
-  : fixed-width inside
+  : fixed-width inside<point>
 : fixed-width outside"
-	 (org-element-map (org-element-parse-buffer) 'fixed-width 'identity)))))
+     (= (org-element-property :end (org-element-at-point))
+	(line-beginning-position 2))))
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text ": A\n "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point))
+	(point-max)))))
 
 
 ;;;; Footnote Definition
@@ -2859,15 +2862,6 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
   ;; Preserve indentation.
   (should (equal (org-test-parse-and-interpret ":  2 blanks\n: 1 blank")
 		 ":  2 blanks\n: 1 blank\n"))
-  ;; Remove last newline character
-  (should
-   (equal (org-element-fixed-width-interpreter
-	   '(fixed-width (:value "Test\n")) nil)
-	  ": Test"))
-  (should
-   (equal (org-element-fixed-width-interpreter
-	   '(fixed-width (:value "Test")) nil)
-	  ": Test"))
   ;; Handle empty string.
   (should
    (equal (org-element-fixed-width-interpreter

@@ -1852,7 +1852,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-latex--wrap-label
    fixed-width
-   (format "\\begin{verbatim}\n%s\\end{verbatim}"
+   (format "\\begin{verbatim}\n%s\n\\end{verbatim}"
 	   (org-remove-indentation
 	    (org-element-property :value fixed-width)))
    info))

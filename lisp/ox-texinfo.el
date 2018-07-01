@@ -825,7 +825,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-texinfo-fixed-width (fixed-width _contents _info)
   "Transcode a FIXED-WIDTH element from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (format "@example\n%s@end example"
+  (format "@example\n%s\n@end example"
 	  (org-remove-indentation
 	   (org-texinfo--sanitize-content
 	    (org-element-property :value fixed-width)))))

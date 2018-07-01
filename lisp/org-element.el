@@ -2072,26 +2072,22 @@ Assume point is at the beginning of the fixed-width area."
   (save-excursion
     (let* ((begin (car affiliated))
 	   (post-affiliated (point))
-	   value
 	   (end-area
 	    (progn
 	      (while (and (< (point) limit)
 			  (looking-at "[ \t]*:\\( \\|$\\)"))
-		;; Accumulate text without starting colons.
-		(setq value
-		      (concat value
-			      (buffer-substring-no-properties
-			       (match-end 0) (point-at-eol))
-			      "\n"))
 		(forward-line))
-	      (point)))
+	      (if (bolp) (line-end-position 0) (point))))
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (line-beginning-position)))))
       (list 'fixed-width
 	    (nconc
 	     (list :begin begin
 		   :end end
-		   :value value
+		   :value (replace-regexp-in-string
+			   "^[ \t]*: ?" ""
+			   (buffer-substring-no-properties post-affiliated
+							   end-area))
 		   :post-blank (count-lines end-area end)
 		   :post-affiliated post-affiliated)
 	     (cdr affiliated))))))
@@ -2099,10 +2095,7 @@ Assume point is at the beginning of the fixed-width area."
 (defun org-element-fixed-width-interpreter (fixed-width _)
   "Interpret FIXED-WIDTH element as Org syntax."
   (let ((value (org-element-property :value fixed-width)))
-    (and value
-	 (replace-regexp-in-string
-	  "^" ": "
-	  (if (string-match "\n\\'" value) (substring value 0 -1) value)))))
+    (and value (replace-regexp-in-string "^" ": " value))))
 
 
 ;;;; Horizontal Rule
