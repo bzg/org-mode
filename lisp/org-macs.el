@@ -1107,19 +1107,19 @@ NODEFAULT, hour and minute fields are nil if not given.
 Throw an error if S in not a valid Org time string.
 
 This should be a lot faster than the `parse-time-string'."
-  (cond ((string-match org-ts-regexp0 s)
-	 (list 0
-	       (when (or (match-beginning 8) (not nodefault))
-		 (string-to-number (or (match-string 8 s) "0")))
-	       (when (or (match-beginning 7) (not nodefault))
-		 (string-to-number (or (match-string 7 s) "0")))
-	       (string-to-number (match-string 4 s))
-	       (string-to-number (match-string 3 s))
-	       (string-to-number (match-string 2 s))
-	       nil nil nil))
-	((string-match "\\`<[^>]+>\\'" s)
-	 (decode-time (seconds-to-time (org-matcher-time s))))
-	(t (error "Not an Org time string: %s" s))))
+  (unless (string-match org-ts-regexp0 s)
+    (error "Not an Org time string: %s" s))
+  (list 0
+	(cond ((match-beginning 8) (string-to-number (match-string 8)))
+	      (nodefault nil)
+	      (t 0))
+	(cond ((match-beginning 7) (string-to-number (match-string 7)))
+	      (nodefault nil)
+	      (t 0))
+	(string-to-number (match-string 4 s))
+	(string-to-number (match-string 3 s))
+	(string-to-number (match-string 2 s))
+	nil nil nil))
 
 (defun org-matcher-time (s)
   "Interpret a time comparison value S as a floating point time.
