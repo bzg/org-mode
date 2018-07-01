@@ -2402,7 +2402,7 @@ Outside list"
 
 ;;;; Timestamp
 
-(ert-deftest test-org-element/timestamp ()
+(ert-deftest test-org-element/timestamp-parser ()
   "Test `timestamp' parser."
   ;; Active timestamp.
   (should

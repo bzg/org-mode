@@ -1110,10 +1110,10 @@ This should be a lot faster than the `parse-time-string'."
   (unless (string-match org-ts-regexp0 s)
     (error "Not an Org time string: %s" s))
   (list 0
-	(cond ((match-beginning 8) (string-to-number (match-string 8)))
+	(cond ((match-beginning 8) (string-to-number (match-string 8 s)))
 	      (nodefault nil)
 	      (t 0))
-	(cond ((match-beginning 7) (string-to-number (match-string 7)))
+	(cond ((match-beginning 7) (string-to-number (match-string 7 s)))
 	      (nodefault nil)
 	      (t 0))
 	(string-to-number (match-string 4 s))
