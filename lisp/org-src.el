@@ -240,11 +240,11 @@ issued in the language major mode buffer."
 
 ;;; Internal functions and variables
 
+(defvar org-src--auto-save-timer nil
+  "Idle Timer auto-saving remote editing buffers.")
+
 (defvar-local org-src--allow-write-back t)
 (put 'org-src--allow-write-back 'permanent-local t)
-
-(defvar-local org-src--auto-save-timer nil)
-(put 'org-src--auto-save-timer 'permanent-local t)
 
 (defvar-local org-src--babel-info nil)
 (put 'org-src--babel-info 'permanent-local t)
@@ -681,7 +681,8 @@ See also `org-src-mode-hook'."
 	  (concat (make-temp-name "org-src-")
 		  (format-time-string "-%Y-%d-%m")
 		  ".txt")))
-  (unless (or org-src--auto-save-timer (zerop org-edit-src-auto-save-idle-delay))
+  (unless (or org-src--auto-save-timer
+	      (= 0 org-edit-src-auto-save-idle-delay))
     (setq org-src--auto-save-timer
 	  (run-with-idle-timer
 	   org-edit-src-auto-save-idle-delay t
