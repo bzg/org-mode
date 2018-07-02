@@ -32,10 +32,10 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'ob-comint)
 (require 'org-macs)
 (require 'org-compat)
-(require 'ob-keys)
-(require 'ob-comint)
+(require 'org-keys)
 
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-class "org-element" (datum &optional parent))
