@@ -1473,6 +1473,26 @@
 :END:"
       (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
       (buffer-substring-no-properties (point) (outline-next-heading)))))
+  ;; Test `:exclude-tags' parameter.
+  (should
+   (equal
+    "#+BEGIN: columnview :exclude-tags (\"excludeme\")
+| ITEM | A |
+|------+---|
+| H1   |   |
+#+END:
+"
+    (org-test-with-temp-text
+        "
+* H1
+<point>#+BEGIN: columnview :exclude-tags (\"excludeme\")
+#+END:
+** H1.1 :excludeme:
+:PROPERTIES:
+:A: 1
+:END:"
+      (let ((org-columns-default-format "%ITEM %A")) (org-update-dblock))
+      (buffer-substring-no-properties (point) (outline-next-heading)))))
   ;; Test `:format' parameter.
   (should
    (equal

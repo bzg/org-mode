@@ -5653,6 +5653,11 @@ This dynamic block has the following parameters:
      When non-~nil~, skip rows where the only non-empty specifier of
      the column view is =ITEM=.
 
+- =:exclude-tags= ::
+
+     List of tags to exclude from column view table: entries with
+     these tags will be excluded from the column view.
+
 - =:indent= ::
 
      When non-~nil~, indent each =ITEM= field according to its level.
