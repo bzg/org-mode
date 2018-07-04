@@ -19379,7 +19379,7 @@ again.
 * Hacking
 :PROPERTIES:
 :DESCRIPTION: How to hack your way around.
-:APPENDIX: Appendix
+:APPENDIX: t
 :END:
 #+cindex: hacking
 
