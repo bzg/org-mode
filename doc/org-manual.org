@@ -13459,9 +13459,9 @@ a file, use the ~org-latex-listings-options~ and
 The LaTeX export back-end wraps the contents of example blocks in
 a =verbatim= environment.  To change this behavior to use another
 environment globally, specify an appropriate export filter (see
-[[*Advanced Configuration]]).  To change this behavior to use another
-environment for each block, use the =:environment= parameter to
-specify a custom environment.
+[[*Advanced Export Configuration]]).  To change this behavior to use
+another environment for each block, use the =:environment= parameter
+to specify a custom environment.
 
 #+begin_example
 ,#+ATTR_LATEX: :environment myverbatim
@@ -15074,7 +15074,7 @@ Dispatcher]]).
 Follow the comment section of such files, for example, =ox-man.el=,
 for usage and configuration details.
 
-** Advanced Configuration
+** Advanced Export Configuration
 :PROPERTIES:
 :DESCRIPTION: Fine-tuning the export output.
 :END:
