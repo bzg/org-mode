@@ -10683,10 +10683,6 @@ the exporter back-end.  Strings like =\alpha= are exported as =&alpha;= in
 the HTML output, and as =\(\alpha\)= in the LaTeX output.  Similarly, =\nbsp=
 becomes =&nbsp;= in HTML and =~= in LaTeX.
 
-#+cindex: escaping characters
-Entities may also be used as a way to escape markup in an Org
-document, e.g., =\under{}not underlined\under= exports as =_not underlined_=.
-
 #+cindex: special symbols, in-buffer display
 If you would like to see entities displayed as UTF-8 characters, use
 the following command[fn:111]:
