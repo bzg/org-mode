@@ -18234,6 +18234,24 @@ init file[fn:140].
 | {{{kbd(s)}}} | =#+BEGIN_SRC= ... =#+END_SRC=             |
 | {{{kbd(v)}}} | =#+BEGIN_VERSE= ... =#+END_VERSE=         |
 
+** Escape Character
+
+#+cindex: escape character
+#+cindex: zero width space
+You may sometimes want to write text that looks like Org syntax, but
+should really read as plain text.  Org may use a specific escape
+character in some situations, e.g., a backslash in macros (see [[*Macro
+Replacement]]).  In the general case, however, we suggest to use the
+zero width space.  You can get it with one of the following:
+
+: C-x 8 <RET> zero width space <RET>
+: C-x 8 <RET> 200B <RET>
+
+For example, in order to write =[[1,2]]= as-is in your document, you can
+write this, where =X= denotes the zero width space character:
+
+: [[X1,2]]
+
 ** Speed Keys
 :PROPERTIES:
 :DESCRIPTION: Electric commands at the beginning of a headline.
