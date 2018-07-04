@@ -10578,12 +10578,13 @@ section summarizes the markup rules used in an Org mode buffer.
 :PROPERTIES:
 :DESCRIPTION: The basic unit of text.
 :END:
-#+cindex: paragraphs, markup rules
 
+#+cindex: paragraphs, markup rules
 Paragraphs are separated by at least one empty line.  If you need to
-enforce a line break within a paragraph, use ~\\~ at the end of
+enforce a line break within a paragraph, use =\\= at the end of
 a line.
 
+#+cindex: line breaks, markup rules
 To preserve the line breaks, indentation and blank lines in a region,
 but otherwise use normal formatting, you can use this construct, which
 can also be used to format poetry.
@@ -10917,8 +10918,8 @@ more details see the documentation of CDLaTeX mode):
 :PROPERTIES:
 :DESCRIPTION: Source code examples with special formatting.
 :END:
-#+cindex: literal examples, markup
-#+cindex: code line references, markup
+#+cindex: literal examples, markup rules
+#+cindex: code line references, markup rules
 
 You can include literal examples that should not be subjected to
 markup.  Such examples are typeset in monospace, so this is well
@@ -11085,7 +11086,7 @@ command:
 :PROPERTIES:
 :DESCRIPTION: Describe tables, images...
 :END:
-#+cindex: caption, markup rules
+#+cindex: captions, markup rules
 #+cindex: @samp{CAPTION}, keyword
 
 You can assign a caption to a specific part of a document by inserting
@@ -11110,8 +11111,8 @@ export back-end, those may or may not be handled.
 :PROPERTIES:
 :DESCRIPTION: Make a line.
 :END:
-#+cindex: horizontal rules, markup rules
 
+#+cindex: horizontal rules, markup rules
 A line consisting of only dashes, and at least 5 of them, is exported
 as a horizontal line.
 
