@@ -10681,10 +10681,7 @@ change this convention.  For example, when setting this variable to
 :END:
 #+cindex: math symbols
 #+cindex: special symbols
-#+cindex: @TeX{} macros
-#+cindex: @LaTeX{} fragments, markup rules
-#+cindex: HTML entities
-#+cindex: @LaTeX{} entities
+#+cindex: entities
 
 You can use LaTeX-like syntax to insert special symbols---named
 entities---like =\alpha= to indicate the Greek letter, or =\to= to indicate
