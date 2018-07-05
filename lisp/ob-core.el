@@ -1291,19 +1291,6 @@ CONTEXT specifies the context of evaluation.  It can be `:eval',
        (looking-at org-babel-result-regexp)
        (match-string-no-properties 1)))))
 
-(defun org-babel-set-current-result-hash (hash info)
-  "Set the current in-buffer hash to HASH."
-  (org-with-wide-buffer
-   (goto-char (org-babel-where-is-src-block-result nil info))
-   (looking-at org-babel-result-regexp)
-   (goto-char (match-beginning 1))
-   (mapc #'delete-overlay (overlays-at (point)))
-   (forward-char org-babel-hash-show)
-   (mapc #'delete-overlay (overlays-at (point)))
-   (replace-match hash nil nil nil 1)
-   (beginning-of-line)
-   (org-babel-hide-hash)))
-
 (defun org-babel-hide-hash ()
   "Hide the hash in the current results line.
 Only the initial `org-babel-hash-show' characters of the hash

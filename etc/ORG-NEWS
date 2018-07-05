@@ -50,6 +50,11 @@ the corresponding direction by swapping with the adjacent cell.
 *** ~org-table-cell-down~
 *** ~org-table-cell-left~
 *** ~org-table-cell-right~
+** Removed functions
+*** ~org-babel-set-current-result-hash~
+
+It was unused throughout the code base.
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
