@@ -1018,30 +1018,32 @@ evaluation mechanisms."
 
 ;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
-  "If `point' is on a src block then open the results of the
-source code block, otherwise return nil.  With optional prefix
-argument RE-RUN the source-code block is evaluated even if
-results already exist."
+  "Open results of source block at point.
+
+If `point' is on a source block then open the results of the source
+code block, otherwise return nil.  With optional prefix argument
+RE-RUN the source-code block is evaluated even if results already
+exist."
   (interactive "P")
-  (let ((info (org-babel-get-src-block-info 'light)))
-    (when info
-      (save-excursion
-	;; go to the results, if there aren't any then run the block
-	(goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
-		       (progn (org-babel-execute-src-block)
-			      (org-babel-where-is-src-block-result))))
-	(end-of-line 1)
-	(while (looking-at "[\n\r\t\f ]") (forward-char 1))
-	;; open the results
-	(if (looking-at org-bracket-link-regexp)
-	    ;; file results
-	    (org-open-at-point)
-	  (let ((r (org-babel-format-result
-		    (org-babel-read-result) (cdr (assq :sep (nth 2 info))))))
-	    (pop-to-buffer (get-buffer-create "*Org-Babel Results*"))
-	    (delete-region (point-min) (point-max))
-	    (insert r)))
-	t))))
+  (pcase (org-babel-get-src-block-info 'light)
+    (`(,_ ,_ ,arguments ,_ ,_ ,start ,_)
+     (save-excursion
+       ;; Go to the results, if there aren't any then run the block.
+       (goto-char start)
+       (goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
+		      (progn (org-babel-execute-src-block)
+			     (org-babel-where-is-src-block-result))))
+       (end-of-line)
+       (skip-chars-forward " \r\t\n")
+       ;; Open the results.
+       (if (looking-at org-bracket-link-regexp) (org-open-at-point)
+	 (let ((r (org-babel-format-result (org-babel-read-result)
+					   (cdr (assq :sep arguments)))))
+	   (pop-to-buffer (get-buffer-create "*Org Babel Results*"))
+	   (erase-buffer)
+	   (insert r)))
+       t))
+    (_ nil)))
 
 ;;;###autoload
 (defmacro org-babel-map-src-blocks (file &rest body)
