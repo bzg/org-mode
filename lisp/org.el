@@ -10136,10 +10136,10 @@ When optional argument REFERENCE-BUFFER is non-nil, it should
 specify a buffer from where the link search should happen.  This
 is used internally by `org-open-link-from-string'.
 
-On top of syntactically correct links, this function will also
-try to open links and time-stamps in comments, example
-blocks... i.e., whenever point is on something looking like
-a timestamp or a link."
+On top of syntactically correct links, this function also tries
+to open links and time-stamps in comments, node properties, and
+keywords if point is on something looking like a timestamp or
+a link."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-window-config-before-follow-link (current-window-configuration))
@@ -10150,12 +10150,18 @@ a timestamp or a link."
 	    ;; closest one.
 	    (org-element-lineage
 	     (org-element-context)
-	     '(clock footnote-definition footnote-reference headline
-		     inline-src-block inlinetask link src-block timestamp)
+	     '(clock comment comment-block footnote-definition
+		     footnote-reference headline inline-src-block inlinetask
+		     keyword link node-property src-block timestamp)
 	     t))
 	   (type (org-element-type context))
 	   (value (org-element-property :value context)))
       (cond
+       ((not type) (user-error "No link found"))
+       ;; No valid link at point.  For convenience, look if something
+       ;; looks like a link under point in some specific places.
+       ((memq type '(comment comment-block node-property keyword))
+	(call-interactively #'org-open-at-point-global))
        ;; On a headline or an inlinetask, but not on a timestamp,
        ;; a link, a footnote reference.
        ((memq type '(headline inlinetask))
@@ -10189,12 +10195,6 @@ a timestamp or a link."
 		       (= (org-element-property :post-affiliated context)
 			  (line-beginning-position)))))))
 	(org-footnote-action))
-       ;; No valid context.  Ignore catch-all types like `headline'.
-       ;; If point is on something looking like a link or
-       ;; a time-stamp, try opening it.  It may be useful in comments,
-       ;; example blocks...
-       ((memq type '(footnote-definition headline inlinetask nil))
-	(call-interactively #'org-open-at-point-global))
        ;; On a clock line, make sure point is on the timestamp
        ;; before opening it.
        ((and (eq type 'clock)
