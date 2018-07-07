@@ -5599,7 +5599,7 @@ This dynamic block has the following parameters:
 
      - =file:FILENAME= ::
 
-          Run column view at the top of the {{{var(FILENAME)}}} file
+          Run column view at the top of the {{{var(FILENAME)}}} file.
 
      - =LABEL= ::
 
