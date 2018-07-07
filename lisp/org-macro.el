@@ -127,11 +127,14 @@ Return an alist containing all macro templates found."
 
 (defun org-macro-initialize-templates ()
   "Collect macro templates defined in current buffer.
+
 Templates are stored in buffer-local variable
-`org-macro-templates'.  In addition to buffer-defined macros, the
-function installs the following ones: \"property\",
-\"time\". and, if the buffer is associated to a file,
-\"input-file\" and \"modification-time\"."
+`org-macro-templates'.
+
+In addition to buffer-defined macros, the function installs the
+following ones: \"n\", \"author\", \"email\", \"keyword\",
+\"results\", \"time\", \"property\", and, if the buffer is
+associated to a file, \"input-file\" and \"modification-time\"."
   (org-macro--counter-initialize)	;for "n" macro
   (setq org-macro-templates
 	(nconc
