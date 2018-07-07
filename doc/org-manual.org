@@ -5662,7 +5662,7 @@ block.  If there is a =TBLFM= keyword after the table, the table is
 recalculated automatically after an update.
 
 An alternative way to capture and process property values into a table
-is provided by Eric Schulte's =org-collector.el= which is
+is provided by Eric Schulte's =org-collector.el=, which is
 a contributed package[fn:59].  It provides a general API to collect
 properties from entries in a certain scope, and arbitrary Lisp
 expressions to process these values before inserting them into a table
