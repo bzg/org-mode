@@ -164,16 +164,7 @@ associated to a file, \"input-file\" and \"modification-time\"."
 	  '("results" . "$1")
 	  '("time" . "(eval (format-time-string $1))")
 	  `("title" . ,(org-macro--find-keyword-value "TITLE"))
-	  '("property" . "(eval
- (save-excursion
-   (let ((l $2))
-     (when (org-string-nw-p l)
-       (condition-case _
-           (let ((org-link-search-must-match-exact-headline t))
-             (org-link-search l nil t))
-         (error
-          (error \"Macro property failed: cannot find location %s\" l)))))
-   (org-entry-get nil $1 'selective)))")
+	  '("property" . "(eval (org-macro--get-property $1 $2))")
 	  `("date" .
 	    ,(let* ((value (org-macro--find-keyword-value "DATE"))
 		    (date (org-element-parse-secondary-string
@@ -318,6 +309,19 @@ Return a list of arguments, as strings.  This is the opposite of
 
 
 ;;; Helper functions and variables for internal macros
+
+(defun org-macro--get-property (property location)
+  "Find PROPERTY's value at LOCATION.
+PROPERTY is a string.  LOCATION is a search string, as expected
+by `org-link-search', or the empty string."
+  (save-excursion
+    (when (org-string-nw-p location)
+      (condition-case _
+	  (let ((org-link-search-must-match-exact-headline t))
+	    (org-link-search location nil t))
+        (error
+	 (error "Macro property failed: cannot find location %s" location))))
+    (org-entry-get nil property 'selective)))
 
 (defun org-macro--find-keyword-value (name)
   "Find value for keyword NAME in current buffer.
