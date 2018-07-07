@@ -1595,7 +1595,16 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	  (org-test-with-temp-text "src_emacs-lisp{(+ 1 1)}"
 	    (let ((org-export-use-babel t)
 		  (org-babel-inline-result-wrap "=%s="))
-	      (org-export-as (org-test-default-backend)))))))
+	      (org-export-as (org-test-default-backend))))))
+  ;; If inline source block is already associated to a "results"
+  ;; macro, do not duplicate it.
+  (should
+   (equal "src_emacs-lisp{(+ 1 1)} {{{results(=2=)}}}"
+	  (org-test-with-temp-text "src_emacs-lisp{(+ 1 1)} {{{results(=2=)}}}"
+	    (let ((org-export-use-babel t)
+		  (org-babel-inline-result-wrap "=%s="))
+	      (org-export-as (org-test-default-backend)))
+	    (buffer-string)))))
 
 (ert-deftest test-org-export/before-processing-hook ()
   "Test `org-export-before-processing-hook'."

@@ -133,8 +133,8 @@ Templates are stored in buffer-local variable
 
 In addition to buffer-defined macros, the function installs the
 following ones: \"n\", \"author\", \"email\", \"keyword\",
-\"results\", \"time\", \"property\", and, if the buffer is
-associated to a file, \"input-file\" and \"modification-time\"."
+\"time\", \"property\", and, if the buffer is associated to
+a file, \"input-file\" and \"modification-time\"."
   (org-macro--counter-initialize)	;for "n" macro
   (setq org-macro-templates
 	(nconc
@@ -161,7 +161,6 @@ associated to a file, \"input-file\" and \"modification-time\"."
 	  `("author" . ,(org-macro--find-keyword-value "AUTHOR"))
 	  `("email" . ,(org-macro--find-keyword-value "EMAIL"))
 	  '("keyword" . "(eval (org-macro--find-keyword-value $1))")
-	  '("results" . "$1")
 	  '("time" . "(eval (format-time-string $1))")
 	  `("title" . ,(org-macro--find-keyword-value "TITLE"))
 	  '("property" . "(eval (org-macro--get-property $1 $2))")
@@ -240,7 +239,8 @@ a definition in TEMPLATES."
 		     (goto-char (match-beginning 0))
 		     (org-element-macro-parser))))))
 	   (when macro
-	     (let* ((value (org-macro-expand macro templates))
+	     (let* ((key (org-element-property :key macro))
+		    (value (org-macro-expand macro templates))
 		    (begin (org-element-property :begin macro))
 		    (signature (list begin
 				     macro
@@ -249,8 +249,7 @@ a definition in TEMPLATES."
 	       ;; macro with the same arguments is expanded at the
 	       ;; same position twice.
 	       (cond ((member signature record)
-		      (error "Circular macro expansion: %s"
-			     (org-element-property :key macro)))
+		      (error "Circular macro expansion: %s" key))
 		     (value
 		      (push signature record)
 		      (delete-region
@@ -262,6 +261,10 @@ a definition in TEMPLATES."
 		      ;; Leave point before replacement in case of
 		      ;; recursive expansions.
 		      (save-excursion (insert value)))
+		     ;; Special "results" macro: if it is not defined,
+		     ;; simply leave it as-is.  It will be expanded in
+		     ;; a second phase.
+		     ((equal key "results"))
 		     (t
 		      (error "Undefined Org macro: %s; aborting"
 			     (org-element-property :key macro))))))))))))

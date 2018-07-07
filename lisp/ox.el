@@ -3043,15 +3043,14 @@ Return code as a string."
 	 ;; Run first hook with current back-end's name as argument.
 	 (run-hook-with-args 'org-export-before-processing-hook
 			     (org-export-backend-name backend))
-	 ;; Include files, delete comments and expand macros.  Refresh
-	 ;; buffer properties and radio targets after these
-	 ;; potentially invasive changes.
 	 (org-export-expand-include-keyword)
 	 (org-export--delete-comment-trees)
 	 (org-macro-initialize-templates)
 	 (org-macro-replace-all (append org-macro-templates
 					org-export-global-macros)
 				parsed-keywords)
+	 ;; Refresh buffer properties and radio targets after previous
+	 ;; potentially invasive changes.
 	 (org-set-regexps-and-options)
 	 (org-update-radio-target-regexp)
 	 ;;  Possibly execute Babel code.  Re-run a macro expansion
