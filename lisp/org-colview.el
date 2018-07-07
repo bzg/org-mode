@@ -808,17 +808,17 @@ view for the whole buffer unconditionally.
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive "P")
   (org-columns-remove-overlays)
-  (when global (goto-char (point-min)))
-  (if (markerp org-columns-begin-marker)
-      (move-marker org-columns-begin-marker (point))
-    (setq org-columns-begin-marker (point-marker)))
-  (org-columns-goto-top-level)
-  ;; Initialize `org-columns-current-fmt' and
-  ;; `org-columns-current-fmt-compiled'.
-  (let ((org-columns--time (float-time (current-time))))
-    (org-columns-get-format columns-fmt-string)
-    (unless org-columns-inhibit-recalculation (org-columns-compute-all))
-    (save-excursion
+  (save-excursion
+    (when global (goto-char (point-min)))
+    (if (markerp org-columns-begin-marker)
+	(move-marker org-columns-begin-marker (point))
+      (setq org-columns-begin-marker (point-marker)))
+    (org-columns-goto-top-level)
+    ;; Initialize `org-columns-current-fmt' and
+    ;; `org-columns-current-fmt-compiled'.
+    (let ((org-columns--time (float-time (current-time))))
+      (org-columns-get-format columns-fmt-string)
+      (unless org-columns-inhibit-recalculation (org-columns-compute-all))
       (save-restriction
 	(when (and (not global) (org-at-heading-p))
 	  (narrow-to-region (point) (org-end-of-subtree t t)))
