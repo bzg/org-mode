@@ -19262,10 +19262,10 @@ can operate on the reports with the following keys:
 | {{{kbd(i)}}}                   | Also remove them from all subsequent checks |
 | {{{kbd(S)}}}                   | Sort reports by the column at point         |
 
-** MobileOrg
+* MobileOrg
 :PROPERTIES:
 :DESCRIPTION: Viewing and capture on a mobile device.
-:APPENDIX: Appendix
+:APPENDIX: t
 :END:
 #+cindex: iPhone
 #+cindex: smartphone
@@ -19295,7 +19295,7 @@ TODO states /sets/ (see [[*Setting up keywords for individual files]]) and
 /mutually exclusive/ tags (see [[*Setting Tags]]) only for those set in
 these variables.
 
-*** Setting Up the Staging Area
+** Setting Up the Staging Area
 :PROPERTIES:
 :DESCRIPTION: For the mobile device.
 :END:
@@ -19322,7 +19322,7 @@ initialisation file variable as follows:
 Org copies files to the above directory for MobileOrg.  Org also uses
 the same directory for sharing notes between Org and MobileOrg.
 
-*** Pushing to MobileOrg
+** Pushing to MobileOrg
 :PROPERTIES:
 :DESCRIPTION: Uploading Org files and agendas.
 :END:
@@ -19343,7 +19343,7 @@ files.  MobileOrg reads this file first from the server to determine
 what other files to download for agendas.  For faster downloads,
 MobileOrg only reads files whose checksums[fn:149] have changed.
 
-*** Pulling from MobileOrg
+** Pulling from MobileOrg
 :PROPERTIES:
 :DESCRIPTION: Integrating captured and flagged items.
 :END:
