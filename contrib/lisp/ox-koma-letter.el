@@ -693,7 +693,7 @@ PLIST-KEY."
                                    'headline
                                  (lambda (h)
                                    (and (funcall pred h info)
-					(org-element-property :title head)))
+					(org-element-property :title h)))
                                  info t))))
     (org-export-data (or headline-candidate keyword-candidate "") info)))
 
