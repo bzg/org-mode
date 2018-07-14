@@ -767,17 +767,21 @@ holding export options."
    ;; Opening.
    (format "\\opening{%s}\n\n"
            (org-koma-letter--keyword-or-headline
-            :opening (lambda (h i) (not (org-koma-letter--special-tag h i)))
+            :opening
+	    (lambda (h i)
+	      (not (org-koma-letter--special-tag h i)))
             info))
    ;; Letter body.
    contents
    ;; Closing.
    (format "\\closing{%s}\n"
-           (org-koma-letter--keyword-or-headline
-            :closing
+	   (org-koma-letter--keyword-or-headline
+	    :closing
 	    (lambda (h i)
-	      (eq (org-koma-letter--special-tag h i) 'closing))
-            info))
+	      (let ((special-tag (org-koma-letter--special-tag h i)))
+		(and special-tag
+		     (string= "closing" special-tag))))
+	    info))
    (org-koma-letter--special-contents-inline
     (plist-get info :special-tags-after-closing) info)
    ;; Letter end.
