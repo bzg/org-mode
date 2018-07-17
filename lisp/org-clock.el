@@ -1219,33 +1219,27 @@ the default behavior."
 	  (throw 'abort nil)))
 
       (when (equal select '(4))
-	(setq selected-task (org-clock-select-task "Clock-in on task: "))
-	(if selected-task
-	    (setq selected-task (copy-marker selected-task))
-	  (error "Abort")))
+	(pcase (org-clock-select-task "Clock-in on task: ")
+	  (`nil (error "Abort"))
+	  (task (setq selected-task (copy-marker task)))))
 
       (when (equal select '(16))
 	;; Mark as default clocking task
 	(org-clock-mark-default-task))
 
       (when interrupting
-	;; We are interrupting the clocking of a different task.
-	;; Save a marker to this task, so that we can go back.
-	;; First check if we are trying to clock into the same task!
-	(when (save-excursion
-		(unless selected-task
-		  (org-back-to-heading t))
-		(and (equal (marker-buffer org-clock-hd-marker)
-			    (if selected-task
-				(marker-buffer selected-task)
-			      (current-buffer)))
-		     (= (marker-position org-clock-hd-marker)
-			(if selected-task
-			    (marker-position selected-task)
-			  (point)))
-		     (equal org-clock-current-task (nth 4 (org-heading-components)))))
-	  (message "Clock continues in \"%s\"" org-clock-heading)
-	  (throw 'abort nil))
+	;; We are interrupting the clocking of a different task.  Save
+	;; a marker to this task, so that we can go back.  First check
+	;; if we are trying to clock into the same task!
+	(when (or selected-task (derived-mode-p 'org-mode))
+	  (org-with-point-at selected-task
+	    (unless selected-task (org-back-to-heading t))
+	    (when (and (eq (marker-buffer org-clock-hd-marker)
+			   (buffer-base-buffer))
+		       (= (point) (marker-position org-clock-hd-marker))
+		       (equal org-clock-current-task (org-get-heading t t t t)))
+	      (message "Clock continues in %S" org-clock-heading)
+	      (throw 'abort nil))))
 	(move-marker org-clock-interrupted-task
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
@@ -1270,7 +1264,7 @@ the default behavior."
 	 (or interrupting (move-marker org-clock-interrupted-task nil))
 	 (run-hooks 'org-clock-in-prepare-hook)
 	 (org-clock-history-push)
-	 (setq org-clock-current-task (nth 4 (org-heading-components)))
+	 (setq org-clock-current-task (org-get-heading t t t t))
 	 (cond ((functionp org-clock-in-switch-to-state)
 		(let ((case-fold-search nil))
 		  (looking-at org-complex-heading-regexp))
