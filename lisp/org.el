@@ -22837,10 +22837,11 @@ depending on context."
 	"`\\[org-kill-line]' aborted as it would kill a hidden subtree")))
     (call-interactively
      (if (bound-and-true-p visual-line-mode) 'kill-visual-line 'kill-line)))
-   ((looking-at org-tag-line-re)
+   ((org-match-line org-tag-line-re)
     (let ((end (save-excursion
 		 (goto-char (match-beginning 1))
-		 (skip-chars-backward " \t"))))
+		 (skip-chars-backward " \t")
+		 (point))))
       (if (<= end (point))		;on tags part
 	  (kill-region (point) (line-end-position))
 	(kill-region (point) end)))

@@ -1639,6 +1639,74 @@
 	    (org-toggle-fixed-width)
 	    (buffer-string)))))
 
+(ert-deftest test-org/kill-line ()
+  "Test `org-kill-line' specifications."
+  ;; At the beginning of a line, kill whole line.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "abc"
+	    (org-kill-line)
+	    (buffer-string))))
+  ;; In the middle of a line, kill line until its end.
+  (should
+   (equal "a"
+	  (org-test-with-temp-text "a<point>bc"
+	    (org-kill-line)
+	    (buffer-string))))
+  ;; Do not kill newline character.
+  (should
+   (equal "\n123"
+	  (org-test-with-temp-text "abc\n123"
+	    (org-kill-line)
+	    (buffer-string))))
+  (should
+   (equal "a\n123"
+	  (org-test-with-temp-text "a<point>bc\n123"
+	    (org-kill-line)
+	    (buffer-string))))
+  ;; When `org-special-ctrl-k' is non-nil and point is at a headline,
+  ;; kill until tags.
+  (should
+   (equal "* A :tag:"
+	  (org-test-with-temp-text "* A<point>B :tag:"
+	    (let ((org-special-ctrl-k t)
+		  (org-tags-column 0))
+	      (org-kill-line))
+	    (buffer-string))))
+  ;; If point is on tags, only kill part left until the end of line.
+  (should
+   (equal "* A :tag:"
+	  (org-test-with-temp-text "* A :tag:<point>tag2:"
+	    (let ((org-special-ctrl-k t)
+		  (org-tags-column 0))
+	      (org-kill-line))
+	    (buffer-string))))
+  ;; However, if point is at the beginning of the line, kill whole
+  ;; headline.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "* AB :tag:"
+	    (let ((org-special-ctrl-k t)
+		  (org-tags-column 0))
+	      (org-kill-line))
+	    (buffer-string))))
+  ;; When `org-ctrl-k-protect-subtree' is non-nil, and point is in
+  ;; invisible text, ask before removing it.  When set to `error',
+  ;; throw an error.
+  (should-error
+   (org-test-with-temp-text "* H\n** <point>H2\nContents\n* H3"
+     (org-overview)
+     (let ((org-special-ctrl-k nil)
+	   (org-ctrl-k-protect-subtree t))
+       (cl-letf (((symbol-function 'y-or-n-p) 'ignore))
+	 (org-kill-line)))))
+  (should-error
+   (org-test-with-temp-text "* H\n** <point>H2\nContents\n* H3"
+     (org-overview)
+     (let ((org-special-ctrl-k nil)
+	   (org-ctrl-k-protect-subtree 'error))
+       (org-kill-line)))))
+
 
 
 ;;; Headline
