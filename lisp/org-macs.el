@@ -200,6 +200,16 @@ because otherwise all these markers will point to nowhere."
   `(let (pop-up-frames display-buffer-alist)
      ,@body))
 
+(defmacro org-table-with-shrunk-field (&rest body)
+  "Save field shrunk state, execute BODY and restore state."
+  (declare (debug (body)))
+  (org-with-gensyms (end shrunk size)
+    `(let* ((,shrunk (save-match-data (org-table--shrunk-field)))
+	    (,end (and ,shrunk (copy-marker (overlay-end ,shrunk) t)))
+	    (,size (and ,shrunk (- ,end (overlay-start ,shrunk)))))
+       (when ,shrunk (delete-overlay ,shrunk))
+       (unwind-protect (progn ,@body)
+	 (when ,shrunk (move-overlay ,shrunk (- ,end ,size) ,end))))))
 
 
 ;;; Buffer and windows
@@ -1034,23 +1044,6 @@ move it back by one char before doing this check."
     (when (and (eolp) (not (bobp)))
       (backward-char 1))
     (org-invisible-p)))
-
-
-;;; Tables
-
-;; This macro is placed here because it is used in org.el.
-;; org-table.el requires org.el.  So, if we put this macro in its
-;; natural place (org-table), a require loop would result.
-(defmacro org-table-with-shrunk-field (&rest body)
-  "Save field shrunk state, execute BODY and restore state."
-  (declare (debug (body)))
-  (org-with-gensyms (end shrunk size)
-    `(let* ((,shrunk (save-match-data (org-table--shrunk-field)))
-	    (,end (and ,shrunk (copy-marker (overlay-end ,shrunk) t)))
-	    (,size (and ,shrunk (- ,end (overlay-start ,shrunk)))))
-       (when ,shrunk (delete-overlay ,shrunk))
-       (unwind-protect (progn ,@body)
-	 (when ,shrunk (move-overlay ,shrunk (- ,end ,size) ,end))))))
 
 
 ;;; Time
