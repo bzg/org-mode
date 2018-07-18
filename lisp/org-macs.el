@@ -813,11 +813,18 @@ SEPARATORS is a regular expression.  When nil, it defaults to
 Unlike `split-string', matching SEPARATORS at the beginning and
 end of string are ignored."
   (let ((separators (or separators "[ \f\t\n\r\v]+")))
-    (when (string-match (concat "\\`" separators) string)
-      (setq string (replace-match "" nil nil string)))
-    (when (string-match (concat separators "\\'") string)
-      (setq string (replace-match "" nil nil string)))
-    (split-string string separators)))
+    (if (not (string-match separators string)) (list string)
+      (let ((i (match-end 0))
+	    (results
+	     (and (/= 0 (match-beginning 0)) ;skip leading separator
+		  (list (substring string 0 (match-beginning 0))))))
+	(while (string-match separators string i)
+	  (push (substring string i (match-beginning 0))
+		results)
+	  (setq i (match-end 0)))
+	(nreverse (if (= i (length string))
+		      results		;skip trailing separator
+		    (cons (substring string i) results)))))))
 
 (defun org-string-display (string)
   "Return STRING as it is displayed in the current buffer.
