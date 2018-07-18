@@ -39,44 +39,31 @@
   ;; When nil, SEPARATORS matches any number of blank characters.
   (should (equal '("a" "b") (org-split-string "a \t\nb"))))
 
-(ert-deftest test-org/string-display ()
-  "Test `org-string-display' specifications."
-  (should (equal "a" (org-string-display "a")))
-  (should (equal "" (org-string-display "")))
+(ert-deftest test-org/string-width ()
+  "Test `org-string-width' specifications."
+  (should (= 1 (org-string-width "a")))
+  (should (= 0 (org-string-width "")))
   ;; Ignore invisible characters.
-  (should (equal "" (org-string-display #("a" 0 1 (invisible t)))))
-  (should (equal "b" (org-string-display #("ab" 0 1 (invisible t)))))
-  (should (equal "a" (org-string-display #("ab" 1 2 (invisible t)))))
-  (should (equal "ace" (org-string-display
-                        #("abcde" 1 2 (invisible t) 3 4 (invisible t)))))
+  (should (= 0 (org-string-width #("a" 0 1 (invisible t)))))
+  (should (= 1 (org-string-width #("ab" 0 1 (invisible t)))))
+  (should (= 1 (org-string-width #("ab" 1 2 (invisible t)))))
+  (should (= 3 (org-string-width
+		#("abcde" 1 2 (invisible t) 3 4 (invisible t)))))
   ;; Check if `invisible' value really means invisibility.
-  (should (equal "" (let ((buffer-invisibility-spec t))
-                      (org-string-display #("a" 0 1 (invisible foo))))))
-  (should (equal "" (let ((buffer-invisibility-spec '(foo)))
-                      (org-string-display #("a" 0 1 (invisible foo))))))
-  (should (equal "" (let ((buffer-invisibility-spec '((foo . t))))
-                      (org-string-display #("a" 0 1 (invisible foo))))))
-  (should (equal "a" (let ((buffer-invisibility-spec '(bar)))
-                       (org-string-display #("a" 0 1 (invisible foo))))))
+  (should (= 0 (let ((buffer-invisibility-spec t))
+                 (org-string-width #("a" 0 1 (invisible foo))))))
+  (should (= 0 (let ((buffer-invisibility-spec '(foo)))
+                 (org-string-width #("a" 0 1 (invisible foo))))))
+  (should (= 0 (let ((buffer-invisibility-spec '((foo . t))))
+                 (org-string-width #("a" 0 1 (invisible foo))))))
+  (should (= 1 (let ((buffer-invisibility-spec '(bar)))
+                 (org-string-width #("a" 0 1 (invisible foo))))))
   ;; Check `display' property.
-  (should (equal "abc" (org-string-display #("a" 0 1 (display "abc")))))
-  (should (equal "1abc3" (org-string-display #("1a3" 1 2 (display "abc")))))
+  (should (= 3 (org-string-width #("a" 0 1 (display "abc")))))
+  (should (= 5 (org-string-width #("1a3" 1 2 (display "abc")))))
   ;; `display' string can also contain invisible characters.
-  (should (equal "1ac3" (org-string-display
-			 #("123" 1 2 (display #("abc" 1 2 (invisible t)))))))
-  ;; Preserve other text properties when replacing with a display
-  ;; string.
-  (should
-   (eq 'foo
-       (get-text-property 1 'face
-			  (org-string-display
-			   #("123" 1 2 (display "abc" face foo))))))
-  ;; Also preserve `display' property in original string.
-  (should
-   (equal "abc"
-	  (let ((s #("123" 1 2 (display "abc" face foo))))
-	    (org-string-display s)
-	    (get-text-property 1 'display s)))))
+  (should (= 4 (org-string-width
+		#("123" 1 2 (display #("abc" 1 2 (invisible t))))))))
 
 
 ;;; Regexp

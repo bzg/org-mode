@@ -826,73 +826,47 @@ end of string are ignored."
 		      results		;skip trailing separator
 		    (cons (substring string i) results)))))))
 
-(defun org-string-display (string)
-  "Return STRING as it is displayed in the current buffer.
-This function takes into consideration `invisible' and `display'
-text properties."
-  (let* ((build-from-parts
-	  (lambda (s property filter)
-	    ;; Build a new string out of string S.  On every group of
-	    ;; contiguous characters with the same PROPERTY value,
-	    ;; call FILTER on the properties list at the beginning of
-	    ;; the group.  If it returns a string, replace the
-	    ;; characters in the group with it.  Otherwise, preserve
-	    ;; those characters.
-	    (let ((len (length s))
-		  (new "")
-		  (i 0)
-		  (cursor 0))
-	      (while (setq i (text-property-not-all i len property nil s))
-		(let ((end (next-single-property-change i property s len))
-		      (value (funcall filter (text-properties-at i s))))
-		  (when value
-		    (setq new (concat new (substring s cursor i) value))
-		    (setq cursor end))
-		  (setq i end)))
-	      (concat new (substring s cursor)))))
-	 (prune-invisible
-	  (lambda (s)
-	    (funcall build-from-parts s 'invisible
-		     (lambda (props)
-		       ;; If `invisible' property in PROPS means text
-		       ;; is to be invisible, return the empty string.
-		       ;; Otherwise return nil so that the part is
-		       ;; skipped.
-		       (and (or (eq t buffer-invisibility-spec)
-				(assoc-string (plist-get props 'invisible)
-					      buffer-invisibility-spec))
-			    "")))))
-	 (replace-display
-	  (lambda (s)
-	    (funcall build-from-parts s 'display
-		     (lambda (props)
-		       ;; If there is any string specification in
-		       ;; `display' property return it.  Also attach
-		       ;; other text properties on the part to that
-		       ;; string (face...).
-		       (let* ((display (plist-get props 'display))
-			      (value (if (stringp display) display
-				       (cl-some #'stringp display))))
-			 (when value
-			   (apply #'propertize
-				  ;; Displayed string could contain
-				  ;; invisible parts, but no nested
-				  ;; display.
-				  (funcall prune-invisible value)
-				  'display
-				  (and (not (stringp display))
-				       (cl-remove-if #'stringp display))
-				  props))))))))
-    ;; `display' property overrides `invisible' one.  So we first
-    ;; replace characters with `display' property.  Then we remove
-    ;; invisible characters.
-    (funcall prune-invisible (funcall replace-display string))))
+(defun org--string-from-props (s property)
+  "Return visible string according to text properties in string S.
+PROPERTY is either `invisible' or `display'."
+  (let ((len (length s))
+	(new nil)
+	(i 0)
+	(cursor 0))
+    (while (setq i (text-property-not-all i len property nil s))
+      (let* ((end (next-single-property-change i property s len))
+	     (props (text-properties-at i s))
+	     (value
+	      (if (eq property 'invisible)
+		  ;; If `invisible' property in PROPS means text is to
+		  ;; be invisible, return the empty string.  Otherwise
+		  ;; return nil so that the part is skipped.
+		  (and (or (eq t buffer-invisibility-spec)
+			   (assoc-string (plist-get props 'invisible)
+					 buffer-invisibility-spec))
+		       "")
+		(let ((display (plist-get props 'display)))
+		  (pcase (if (stringp display) display
+			   (cl-some #'stringp display))
+		    (`nil nil)
+		    ;; Displayed string could contain invisible parts,
+		    ;; but no nested display.
+		    (s (org--string-from-props s 'invisible)))))))
+	(when value
+	  (setq new (concat new (substring s cursor i) value))
+	  (setq cursor end))
+	(setq i end)))
+    (if new (concat new (substring s cursor))
+      ;; If PROPERTY was not found, return S as-is.
+      s)))
 
 (defun org-string-width (string)
   "Return width of STRING when displayed in the current buffer.
 Unlike `string-width', this function takes into consideration
 `invisible' and `display' text properties."
-  (string-width (org-string-display string)))
+  (string-width
+   (org--string-from-props (org--string-from-props string 'display)
+			   'invisible)))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
