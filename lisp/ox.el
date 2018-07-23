@@ -5751,6 +5751,7 @@ them."
      ("ja" :default "前ページからの続き")
      ("nl" :default "Vervolg van vorige pagina")
      ("pt" :default "Continuação da página anterior")
+     ("pt_BR" :html "Continua&ccedil;&atilde;o da p&aacute;gina anterior" :ascii "Continuacao da pagina anterior" :default "Continuação da página anterior")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077;)"
       :utf-8 "(Продолжение)")
      ("sl" :default "Nadaljevanje s prejšnje strani"))
@@ -5764,11 +5765,13 @@ them."
      ("ja" :default "次ページに続く")
      ("nl" :default "Vervolg op volgende pagina")
      ("pt" :default "Continua na página seguinte")
+     ("pt_BR" :html "Continua na pr&oacute;xima p&aacute;gina" :ascii "Continua na proxima pagina" :default "Continua na próxima página")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077; &#1089;&#1083;&#1077;&#1076;&#1091;&#1077;&#1090;)"
       :utf-8 "(Продолжение следует)")
      ("sl" :default "Nadaljevanje na naslednji strani"))
     ("Created"
      ("cs" :default "Vytvořeno")
+     ("pt_BR" :default "Criado em")
      ("sl" :default "Ustvarjeno"))
     ("Date"
      ("ar" :default "بتاريخ")
@@ -5889,6 +5892,7 @@ them."
      ("ja" :default "ソースコード目次")
      ("no" :default "Dataprogrammer")
      ("nb" :default "Dataprogrammer")
+     ("pt_BR" :html "&Iacute;ndice de Listagens" :default "Índice de Listagens" :ascii "Indice de Listagens")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1088;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1086;&#1082;"
       :utf-8 "Список распечаток")
      ("sl" :default "Seznam programskih izpisov")
@@ -5906,7 +5910,7 @@ them."
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
      ("nn" :default "Tabeller")
-     ("pt_BR" :default "Índice de Tabelas" :ascii "Indice de Tabelas")
+     ("pt_BR" :html "&Iacute;ndice de Tabelas" :default "Índice de Tabelas" :ascii "Indice de Tabelas")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1090;&#1072;&#1073;&#1083;&#1080;&#1094;"
       :utf-8 "Список таблиц")
      ("sl" :default "Seznam tabel")
@@ -5939,7 +5943,7 @@ them."
      ("ja" :default "ソースコード%d:")
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
-     ("pt_BR" :default "Listagem %d")
+     ("pt_BR" :default "Listagem %d:")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
       :utf-8 "Распечатка %d.:")
      ("sl" :default "Izpis programa %d")
@@ -5950,16 +5954,19 @@ them."
      ("fr" :ascii "References" :default "Références")
      ("de" :default "Quellen")
      ("es" :default "Referencias")
+     ("pt_BR" :html "Refer&ecirc;ncias" :default "Referências" :ascii "Referencias")
      ("sl" :default "Reference"))
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
+     ("pt_BR" :default "Veja a figura %s")
      ("sl" :default "Glej sliko %s"))
     ("See listing %s"
      ("cs" :default "Viz program %s")
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
+     ("pt_BR" :default "Veja a listagem %s")
      ("sl" :default "Glej izpis programa %s"))
     ("See section %s"
      ("ar" :default "انظر قسم %s")
@@ -5980,6 +5987,7 @@ them."
      ("cs" :default "Viz tabulka %s")
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
+     ("pt_BR" :default "Veja a tabela %s")
      ("sl" :default "Glej tabelo %s"))
     ("Table"
      ("ar" :default "جدول")
@@ -6007,7 +6015,7 @@ them."
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
-     ("pt_BR" :default "Tabela %d")
+     ("pt_BR" :default "Tabela %d:")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
       :utf-8 "Таблица %d.:")
      ("sl" :default "Tabela %d")
@@ -6049,8 +6057,7 @@ them."
      ("et" :default "Tundmatu viide")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
      ("ja" :default "不明な参照先")
-     ("pt_BR" :default "Referência desconhecida"
-      :ascii "Referencia desconhecida")
+     ("pt_BR" :html "Refer&ecirc;ncia desconhecida" :default "Referência desconhecida" :ascii "Referencia desconhecida")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
       :utf-8 "Неизвестная ссылка")
      ("sl" :default "Neznana referenca")
