@@ -6190,6 +6190,13 @@ Paragraph<point>"
    (equal '("foo")
 	  (org-test-with-temp-text "* H1 :foo:\n* <point>H2 :bar:"
 	    (org-get-tags 1))))
+  ;; Make sure tags excluded from inheritance are returned if local
+  (should
+   (equal '("foo")
+	  (org-test-with-temp-text "* Test :foo:"
+            (let ((org-use-tag-inheritance t)
+                  (org-tags-exclude-from-inheritance '("foo")))
+	      (org-get-tags)))))
   ;; Pathological case: tagged headline with an empty body.
   (should (org-test-with-temp-text "* :tag:" (org-get-tags))))
 

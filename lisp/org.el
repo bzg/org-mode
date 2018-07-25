@@ -14722,14 +14722,15 @@ Inherited tags have the `inherited' text property."
     (org-with-point-at (or pos (point))
       (unless (org-before-first-heading-p)
 	(org-back-to-heading t)
-	(let ((tags (org--get-local-tags)))
-	  (if (or local (not org-use-tag-inheritance)) tags
+	(let ((ltags (org--get-local-tags)) itags)
+	  (if (or local (not org-use-tag-inheritance)) ltags
+	    (setq itags org-file-tags)
 	    (while (org-up-heading-safe)
-	      (setq tags (append (mapcar #'org-add-prop-inherited
-					 (org--get-local-tags))
-				 tags)))
-	    (org-remove-uninherited-tags
-	     (delete-dups (append org-file-tags tags)))))))))
+	      (setq itags (append (mapcar #'org-add-prop-inherited
+					  (org--get-local-tags))
+				  itags)))
+	    (delete-dups
+	     (append (org-remove-uninherited-tags itags) ltags))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
