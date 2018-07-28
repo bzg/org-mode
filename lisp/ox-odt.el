@@ -1359,11 +1359,10 @@ original parsed data.  INFO is a plist holding export options."
   ;; Write styles file.
   (let* ((styles-file (plist-get info :odt-styles-file))
 	 (styles-file (and (org-string-nw-p styles-file)
-			   (read (org-trim styles-file))))
+			   (org-trim styles-file)))
 	 ;; Non-availability of styles.xml is not a critical
 	 ;; error. For now, throw an error.
 	 (styles-file (or styles-file
-			  (plist-get info :odt-styles-file)
 			  (expand-file-name "OrgOdtStyles.xml"
 					    org-odt-styles-dir)
 			  (error "org-odt: Missing styles file?"))))
