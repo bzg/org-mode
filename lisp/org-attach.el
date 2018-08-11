@@ -574,10 +574,8 @@ prefix."
   "Maybe delete subtree attachments when archiving.
 This function is called by `org-archive-hook'.  The option
 `org-attach-archive-delete' controls its behavior."
-  (when (if (eq org-attach-archive-delete 'query)
-	    (yes-or-no-p "Delete all attachments? ")
-	  org-attach-archive-delete)
-    (org-attach-delete-all t)))
+  (when org-attach-archive-delete
+    (org-attach-delete-all (not (eq org-attach-archive-delete 'query)))))
 
 
 ;; Attach from dired.
