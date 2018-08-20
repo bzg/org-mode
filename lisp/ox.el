@@ -5844,6 +5844,7 @@ them."
      ("et" :default "Joonis %d:")
      ("fr" :default "Figure %d :" :html "Figure&nbsp;%d&nbsp;:")
      ("is" :default "Mynd %d")
+     ("it" :default "Figura %d:")
      ("ja" :default "図%d: " :html "&#22259;%d: ")
      ("no" :default "Illustrasjon %d")
      ("nb" :default "Illustrasjon %d")
@@ -5906,6 +5907,7 @@ them."
      ("et" :default "Tabelite nimekiri")
      ("fr" :default "Liste des tableaux")
      ("is" :default "Töfluskrá" :html "T&ouml;fluskr&aacute;")
+     ("it" :default "Indice delle tabelle")
      ("ja" :default "表目次")
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
@@ -5924,6 +5926,7 @@ them."
      ("es" :default "Listado de programa")
      ("et" :default "Loend")
      ("fr" :default "Programme" :html "Programme")
+     ("it" :default "Listato")
      ("ja" :default "ソースコード")
      ("no" :default "Dataprogram")
      ("nb" :default "Dataprogram")
@@ -5940,6 +5943,7 @@ them."
      ("es" :default "Listado de programa %d")
      ("et" :default "Loend %d")
      ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:")
+     ("it" :default "Listato %d :")
      ("ja" :default "ソースコード%d:")
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
@@ -5951,15 +5955,17 @@ them."
     ("References"
      ("ar" :default "المراجع")
      ("cs" :default "Reference")
-     ("fr" :ascii "References" :default "Références")
      ("de" :default "Quellen")
      ("es" :default "Referencias")
+     ("fr" :ascii "References" :default "Références")
+     ("it" :default "Riferimenti")
      ("pt_BR" :html "Refer&ecirc;ncias" :default "Referências" :ascii "Referencias")
      ("sl" :default "Reference"))
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
+     ("it" :default "Vedi figura %s")
      ("pt_BR" :default "Veja a figura %s")
      ("sl" :default "Glej sliko %s"))
     ("See listing %s"
@@ -5976,6 +5982,7 @@ them."
      ("es" :ascii "Vea seccion %s" :html "Vea secci&oacute;n %s" :default "Vea sección %s")
      ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
      ("fr" :default "cf. section %s")
+     ("it" :default "Vedi sezione %s")
      ("ja" :default "セクション %s を参照")
      ("pt_BR" :html "Veja a se&ccedil;&atilde;o %s" :default "Veja a seção %s"
       :ascii "Veja a secao %s")
@@ -5987,6 +5994,7 @@ them."
      ("cs" :default "Viz tabulka %s")
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
+     ("it" :default "Vedi tabella %s")
      ("pt_BR" :default "Veja a tabela %s")
      ("sl" :default "Glej tabelo %s"))
     ("Table"
@@ -5997,6 +6005,7 @@ them."
      ("et" :default "Tabel")
      ("fr" :default "Tableau")
      ("is" :default "Tafla")
+     ("it" :default "Tabella")
      ("ja" :default "表" :html "&#34920;")
      ("pt_BR" :default "Tabela")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;"
@@ -6056,6 +6065,7 @@ them."
      ("es" :default "Referencia desconocida")
      ("et" :default "Tundmatu viide")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
+     ("it" :default "Riferimento sconosciuto")
      ("ja" :default "不明な参照先")
      ("pt_BR" :html "Refer&ecirc;ncia desconhecida" :default "Referência desconhecida" :ascii "Referencia desconhecida")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
