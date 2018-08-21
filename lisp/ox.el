@@ -6020,6 +6020,7 @@ them."
      ("et" :default "Tabel %d")
      ("fr" :default "Tableau %d :")
      ("is" :default "Tafla %d")
+     ("it" :default "Tabella %d:")
      ("ja" :default "表%d:" :html "&#34920;%d:")
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
