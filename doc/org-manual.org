@@ -11092,16 +11092,16 @@ as a horizontal line.
 :END:
 #+cindex: exporting
 
-Sometimes, you may want to pretty print your notes, publish them on
-the web or even share them with people not using Org.  In these cases,
-the Org export facilities can be used to convert your documents to
-a variety of other formats, while retaining as much structure (see
-[[*Document Structure]]) and markup (see [[*Markup for Rich Contents]]) as
-possible.
+At some point you might want to print your notes, publish them on the
+web, or share them with people not using Org.  Org can convert and
+export documents to a variety of other formats while retaining as much
+structure (see [[*Document Structure]]) and markup (see [[*Markup for Rich
+Contents]]) as possible.
 
 #+cindex: export back-end
-Libraries responsible for such translation are called back-ends.  Org
-ships with the following ones
+The libraries responsible for translating Org files to other formats
+are called /back-ends/.  Org ships with support for the following
+back-ends:
 
 - /ascii/ (ASCII format)
 - /beamer/ (LaTeX Beamer format)
@@ -11115,18 +11115,18 @@ ships with the following ones
 - /man/ (Man page format)
 
 #+texinfo: @noindent
-Org also uses additional libraries located in =contrib/= directory
-(see [[*Installation]]).  Users can install additional export libraries
-for additional formats from the Emacs packaging system.  For easy
-discovery, these packages have a common naming scheme: ~ox-NAME~,
-where {{{var(NAME)}}} is one of the formats.  For example,
-~ox-koma-letter~ /koma-letter/ back-end.
+Users can install libraries for additional formats from the Emacs
+packaging system. For easy discovery, these packages have a common
+naming scheme: ~ox-NAME~, where {{{var(NAME)}}} is a format.  For
+example, ~ox-koma-letter~ for /koma-letter/ back-end.  More libraries
+can be found in the =contrib/= directory (see [[*Installation]]).
 
 #+vindex: org-export-backends
-Org loads back-ends for the following formats by default: ASCII, HTML,
-iCalendar, LaTeX and ODT.  Org can load additional back-ends either of
-two ways: through the ~org-export-backends~ variable configuration;
-or, by requiring the library in the Emacs init file like this:
+Org only loads back-ends for the following formats by default: ASCII,
+HTML, iCalendar, LaTeX, and ODT.  Additional back-ends can be loaded
+in either of two ways: by configuring the ~org-export-backends~
+variable, or by requiring libraries in the Emacs init file.  For
+example, to load the markdown back-end, add this to your Emacs config:
 
 #+begin_src emacs-lisp
 (require 'ox-md)
@@ -11169,31 +11169,28 @@ further alter what is exported, and how.
 
      Toggle asynchronous export.  Asynchronous export uses an external
      Emacs process with a specially configured initialization file to
-     complete the exporting process in the background thereby
-     releasing the current interface.  This is particularly useful
-     when exporting long documents.
+     complete the exporting process in the background, without tying-up
+     Emacs.  This is particularly useful when exporting long documents.
 
-     Output from an asynchronous export is saved on the "the export
-     stack".  To view this stack, call the export dispatcher with
+     Output from an asynchronous export is saved on the /export
+     stack/.  To view this stack, call the export dispatcher with
      a double {{{kbd(C-u)}}} prefix argument.  If already in the
      export dispatcher menu, {{{kbd(&)}}} displays the stack.
-
-     #+vindex: org-export-async-init-file
-     To make the background export process the default, customize the
-     variable, ~org-export-in-background~.  Additionally, you can set
-     the initialization file used by the background process with
-     ~org-export-async-init-file~.
 
      #+vindex: org-export-in-background
      You can make asynchronous export the default by setting
      ~org-export-in-background~.
+
+     #+vindex: org-export-async-init-file
+     You can set the initialization file used by the background process
+     by setting ~org-export-async-init-file~.
 
 - {{{kbd(C-b)}}} ::
      #+kindex: C-c C-e C-b
 
      Toggle body-only export.  Useful for excluding headers and
      footers in the export.  Affects only those back-end formats that
-     have such sections---like =<head>...</head>= in HTML.
+     have sections like =<head>...</head>= in HTML.
 
 - {{{kbd(C-s)}}} ::
      #+kindex: C-c C-e C-s
@@ -11206,15 +11203,15 @@ further alter what is exported, and how.
      document preamble, Org signals an error and aborts export.
 
      #+vindex: org-export-initial-scope
-     To make the sub-tree export the default, customize the variable
+     To make sub-tree export the default, customize the variable
      ~org-export-initial-scope~.
 
 - {{{kbd(C-v)}}} ::
      #+kindex: C-c C-e C-v
 
-     Toggle visible-only export.  Useful for exporting only visible
-     parts of an Org document by adjusting outline visibility
-     settings.
+     Toggle visible-only export.  This is useful for exporting only certain
+     parts of an Org document by adjusting the visibility
+     of particular headings.
 
 ** Export Settings
 :PROPERTIES:
@@ -11226,8 +11223,8 @@ further alter what is exported, and how.
 #+cindex: @samp{OPTIONS}, keyword
 Export options can be set: globally with variables; for an individual
 file by making variables buffer-local with in-buffer settings (see
-[[*Summary of In-Buffer Settings]]), by setting individual keywords, or by
-specifying them in a compact form with the =OPTIONS= keyword; or for
+[[*Summary of In-Buffer Settings]]); by setting individual keywords or
+specifying them in compact form with the =OPTIONS= keyword; or for
 a tree by setting properties (see [[*Properties and Columns]]).  Options
 set at a specific level override options set at a more general level.
 
@@ -11517,12 +11514,11 @@ following arguments.
      #+vindex: org-export-with-tables
      Toggle inclusion of tables (~org-export-with-tables~).
 
-When exporting sub-trees, special node properties in them can override
-the above keywords.  They are special because they have an =EXPORT_=
-prefix.  For example, =DATE= and =EXPORT_FILE_NAME= keywords become,
-respectively, =EXPORT_DATE= and =EXPORT_FILE_NAME=.  Except for
-=SETUPFILE=, all other keywords listed above have an =EXPORT_=
-equivalent.
+When exporting sub-trees, special node properties can override the
+above keywords.  These properties have an =EXPORT_= prefix.  For
+example, =DATE= becomes, =EXPORT_DATE= when used for a specific
+sub-tree.  Except for =SETUPFILE=, all other keywords listed above
+have an =EXPORT_= equivalent.
 
 #+cindex: @samp{BIND}, keyword
 #+vindex: org-export-allow-bind-keywords
