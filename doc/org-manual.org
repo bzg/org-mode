@@ -10539,14 +10539,14 @@ environment.  This causes the following issues:
 :DESCRIPTION: Compose beautiful documents.
 :END:
 
-As you could tell so far, Org is primarily about organizing and
-searching through your notes.  However, it also provides a lightweight
-markup language that allows a rich formatting for those.  You may want
-to center, or emphasize, text.  You may need to insert a formula or
-a picture within your writings.  There is some syntax for all of this.
-Used in conjuction with the export framework (see [[*Exporting]]), you can
-author appealing documents, like the fine manual you are currently
-reading!
+Org is primarily about organizing and searching through your
+plain-text notes.  However, it also provides a lightweight yet robust
+markup language for rich text formatting and more.  For instance, you
+may want to center or emphasize text.  Or you may need to insert
+a formula or image in your writing.  Org offers syntax for all of this
+and more.  Used in conjunction with the export framework (see
+[[*Exporting]]), you can author beautiful documents in Org---like the fine
+manual you are currently reading.
 
 ** Paragraphs
 :PROPERTIES:
