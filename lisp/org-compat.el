@@ -598,6 +598,15 @@ attention to case differences."
            (eq t (compare-strings suffix nil nil
                                   string start-pos nil ignore-case))))))
 
+(unless (fboundp 'proper-list-p)
+  ;; `proper-list-p' was added in Emacs 27.1.  The function below is
+  ;; taken from Emacs subr.el 200195e824b^.
+  (defun proper-list-p (object)
+    "Return OBJECT's length if it is a proper list, nil otherwise.
+A proper list is neither circular nor dotted (i.e., its last cdr
+is nil)."
+    (and (listp object) (ignore-errors (length object)))))
+
 
 ;;; Integration with and fixes for other packages
 
