@@ -16399,7 +16399,7 @@ user."
   ;; overridden in tests.
   (let ((org-def def)
 	(org-defdecode defdecode)
-	(nowdecode (decode-time))
+	(nowdecode (decode-time (current-time)))
 	delta deltan deltaw deltadef year month day
 	hour minute second wday pm h2 m2 tl wday1
 	iso-year iso-weekday iso-week iso-date futurep kill-year)
@@ -16579,7 +16579,7 @@ user."
 	;; Pass `current-time' result to `decode-time' (instead of
 	;; calling without arguments) so that only `current-time' has
 	;; to be overridden in tests.
-	(let ((now (decode-time)))
+	(let ((now (decode-time (current-time))))
 	  (setq day (nth 3 now) month (nth 4 now) year (nth 5 now))))
       (cond ((member deltaw '("d" "")) (setq day (+ day deltan)))
 	    ((equal deltaw "w") (setq day (+ day (* 7 deltan))))

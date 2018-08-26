@@ -1224,7 +1224,10 @@ column specification."
   "Compute all columns that have operators defined."
   (with-silent-modifications
     (remove-text-properties (point-min) (point-max) '(org-summaries t)))
-  (let ((org-columns--time (float-time))
+  ;; Pass `current-time' result to `float-time' (instead of calling
+  ;; without arguments) so that only `current-time' has to be
+  ;; overridden in tests.
+  (let ((org-columns--time (float-time (current-time)))
 	seen)
     (dolist (spec org-columns-current-fmt-compiled)
       (let ((property (car spec)))

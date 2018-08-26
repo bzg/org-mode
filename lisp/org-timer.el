@@ -144,7 +144,7 @@ the region 0:00:00."
 	       ;; Pass `current-time' result to `float-time' (instead
 	       ;; of calling without arguments) so that only
 	       ;; `current-time' has to be overridden in tests.
-	       (- (float-time) delta))))
+	       (- (float-time (current-time)) delta))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
       (message "Timer start time set to %s, current value is %s"
@@ -163,18 +163,18 @@ With prefix arg STOP, stop it entirely."
    (org-timer-pause-time
     (let ((start-secs (float-time org-timer-start-time))
 	  (pause-secs (float-time org-timer-pause-time)))
+      ;; Note: We pass the result of `current-time' to `time-add' and
+      ;; `float-time' below so that we can easily override the value
+      ;; in tests.
       (if org-timer-countdown-timer
 	  (let ((new-secs (- start-secs pause-secs)))
 	    (setq org-timer-countdown-timer
 		  (org-timer--run-countdown-timer
 		   new-secs org-timer-countdown-timer-title))
 	    (setq org-timer-start-time
-		  (time-add nil (seconds-to-time new-secs))))
+		  (time-add (current-time) (seconds-to-time new-secs))))
 	(setq org-timer-start-time
-	      ;; Pass `current-time' result to `float-time' (instead
-	      ;; of calling without arguments) so that only
-	      ;; `current-time' has to be overridden in tests.
-	      (seconds-to-time (- (float-time)
+	      (seconds-to-time (- (float-time (current-time))
 				  (- pause-secs start-secs)))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
@@ -240,8 +240,8 @@ it in the buffer."
   ;; overridden in tests.
   (if org-timer-countdown-timer
       (- (float-time org-timer-start-time)
-	 (float-time org-timer-pause-time))
-    (- (float-time org-timer-pause-time)
+	 (float-time (or org-timer-pause-time (current-time))))
+    (- (float-time (or org-timer-pause-time (current-time)))
        (float-time org-timer-start-time))))
 
 ;;;###autoload
@@ -465,8 +465,10 @@ using three `C-u' prefix arguments."
 		(org-timer--run-countdown-timer
 		 secs org-timer-countdown-timer-title))
 	  (run-hooks 'org-timer-set-hook)
+	  ;; Pass `current-time' result to `add-time' (instead nil) so
+	  ;; that only `current-time' has to be overridden in tests.
 	  (setq org-timer-start-time
-		(time-add nil (seconds-to-time secs)))
+		(time-add (current-time) (seconds-to-time secs)))
 	  (setq org-timer-pause-time nil)
 	  (org-timer-set-mode-line 'on))))))
 
