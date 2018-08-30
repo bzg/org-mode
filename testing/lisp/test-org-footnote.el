@@ -231,7 +231,7 @@
   ;; anonymous footnotes.
   (should
    (equal
-    "Definition."
+    " Definition."
     (org-test-with-temp-text "Some text\n[fn:1] Definition."
       (org-footnote-goto-definition "1")
       (buffer-substring (point) (point-max)))))

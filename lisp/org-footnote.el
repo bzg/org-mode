@@ -544,7 +544,7 @@ value if point was successfully moved."
       (user-error "Definition is outside narrowed part of buffer")))
     (org-mark-ring-push)
     (goto-char def-start)
-    (looking-at (format "\\[fn:%s[]:] ?" (regexp-quote label)))
+    (looking-at (format "\\[fn:%s[]:]" (regexp-quote label)))
     (goto-char (match-end 0))
     (org-show-context 'link-search)
     (when (derived-mode-p 'org-mode)
