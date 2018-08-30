@@ -2946,24 +2946,24 @@ Otherwise return nil."
 (defun org-babel-import-elisp-from-file (file-name &optional separator)
   "Read the results located at FILE-NAME into an elisp table.
 If the table is trivial, then return it as a scalar."
-  (let (result)
-    (save-window-excursion
-      (with-temp-buffer
-	(condition-case err
-	    (progn
-	      (org-table-import file-name separator)
-	      (delete-file file-name)
-	      (setq result (mapcar (lambda (row)
-				     (mapcar #'org-babel-string-read row))
-				   (org-table-to-lisp))))
-	  (error (message "Error reading results: %s" err) nil)))
-      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
-	  (if (consp (car result))
-	      (if (null (cdr (car result)))
-		  (caar result)
-		result)
-	    (car result))
-	result))))
+  (save-window-excursion
+    (let ((result
+	   (with-temp-buffer
+	     (condition-case err
+		 (progn
+		   (org-table-import file-name separator)
+		   (delete-file file-name)
+		   (delq nil
+			 (mapcar (lambda (row)
+				   (and (not (eq row 'hline))
+					(mapcar #'org-babel-string-read row)))
+				 (org-table-to-lisp))))
+	       (error (message "Error reading results: %s" err) nil)))))
+      (pcase result
+	(`((,scalar)) scalar)
+	(`((,_ ,_ . ,_)) result)
+	(`(,scalar) scalar)
+	(_ result)))))
 
 (defun org-babel-string-read (cell)
   "Strip nested \"s from around strings."
