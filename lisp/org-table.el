@@ -1143,9 +1143,10 @@ to a number.  In the case of a timestamp, increment by days."
 			     (<= (setq n (1- n)) 0))
 			(throw 'exit (match-string 1))))))
 	  (setq non-empty-up (and field-up (string-match "[^ \t]" field-up))))
-      ;; Above field was not empty, go down to the next row
+      ;; Above field was not empty, go down to the next row.  Skip
+      ;; alignment since we do it at the end of the process anyway.
       (setq txt (org-trim field))
-      (org-table-next-row)
+      (let ((org-table-may-need-update nil)) (org-table-next-row))
       (org-table-blank-field))
     (if non-empty-up (setq txt-up (org-trim field-up)))
     (setq inc (cond
