@@ -156,7 +156,10 @@ state to switch it to."
 	  (symbol :tag "Function")))
 
 (defcustom org-clock-history-length 5
-  "Number of clock tasks to remember in history."
+  "Number of clock tasks to remember in history.
+Clocking in using history works best if this is at most 35, in
+which case all digits and capital letters are used up by the
+*Clock Task Select* buffer."
   :group 'org-clock
   :type 'integer)
 
@@ -534,7 +537,7 @@ cannot be translated."
 
 (defun org-clock-history-push (&optional pos buffer)
   "Push a marker to the clock history."
-  (setq org-clock-history-length (max 1 (min 35 org-clock-history-length)))
+  (setq org-clock-history-length (max 1 org-clock-history-length))
   (let ((m (move-marker (make-marker)
 			(or pos (point)) (org-base-buffer
 					  (or buffer (current-buffer)))))
