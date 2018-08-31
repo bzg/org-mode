@@ -73,16 +73,18 @@ book from Network Theory Ltd.]].
 :END:
 #+cindex: installation
 
-Org is part of recent distributions of GNU Emacs, so you normally do
-not need to install it.  If, for one reason or another, you want to
-install Org on top of this pre-packaged version, there are three ways
-to do it:
+Org is included in all recent distributions of GNU Emacs, so you
+probably do not need to install it.  Most users will simply activate
+Org and begin exploring its many features.
 
-- By using Emacs package system.
-- By downloading Org as an archive.
-- By using Org's git repository.
+If, for one reason or another, you want to install Org on top of this
+pre-packaged version, there are three ways to do it:
 
-We *strongly recommend* to stick to a single installation method.
+- by using the Emacs package system;
+- by downloading Org as an archive; or
+- by using Org's git repository.
+
+We *strongly recommend* sticking to a single installation method.
 
 *** Using Emacs packaging system
 :PROPERTIES:
