@@ -5747,7 +5747,7 @@ then those holidays will be skipped."
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
 	 (org-agenda-search-headline-for-time nil)
-	 marker hdmarker priority category level tags closedp
+	 marker hdmarker priority category level tags closedp type
 	 statep clockp state ee txt extra timestr rest clocked inherited-tags)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5807,11 +5807,14 @@ then those holidays will be skipped."
 			(statep (concat "State:     (" state ")"))
 			(t (concat "Clocked:   (" clocked  ")")))
 		       txt level category tags timestr)))
+	  (setq type (cond (closedp "closed")
+			   (statep "state")
+			   (t "clock")))
 	  (setq priority 100000)
 	  (org-add-props txt props
 	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-agenda-done
 	    'priority priority 'level level
-	    'type "closed" 'date date
+	    'type type 'date date
 	    'undone-face 'org-warning 'done-face 'org-agenda-done)
 	  (push txt ee))
 	(goto-char (point-at-eol))))
