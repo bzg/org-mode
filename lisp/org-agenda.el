@@ -5733,7 +5733,7 @@ then those holidays will be skipped."
 		 (when (memq 'closed items) (concat "\\<" org-closed-string))
 		 (when (memq 'clock items) (concat "\\<" org-clock-string))
 		 (when (memq 'state items)
-		   (format "- State \"%s\".*?" org-todo-regexp)))))
+		   (format "- +State \"%s\".*?" org-todo-regexp)))))
 	 (parts-re (if parts (mapconcat 'identity parts "\\|")
 		     (error "`org-agenda-log-mode-items' is empty")))
 	 (regexp (concat
