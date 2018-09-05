@@ -93,7 +93,7 @@
   ;; When creating a new footnote, move to its definition.
   (should
    (string=
-    "[fn:1] "
+    "[fn:1]"
     (org-test-with-temp-text "Text<point>"
       (let ((org-footnote-auto-label t)
 	    (org-footnote-auto-adjust nil))
