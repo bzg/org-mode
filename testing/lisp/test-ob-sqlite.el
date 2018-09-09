@@ -19,7 +19,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(org-test-for-executable "sqlite")
+(org-test-for-executable "sqlite3")
+(require 'ob-sqlite)
 (unless (featurep 'ob-sqlite)
   (signal 'missing-test-dependency "Support for sqlite code blocks"))
 
