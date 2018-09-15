@@ -869,17 +869,15 @@ for `entry'-type templates"))
     ;; early.  We want to wait for the refiling to be over, so we
     ;; control when the latter function is called.
     (org-capture-put :kill-buffer nil :jump-to-captured nil)
-    (unwind-protect
-	(progn
-	  (org-capture-finalize)
-	  (save-window-excursion
-	    (with-current-buffer base
-	      (org-with-wide-buffer
-	       (goto-char pos)
-	       (call-interactively 'org-refile))))
-	  (when kill-buffer (kill-buffer base))
-	  (when jump-to-captured (org-capture-goto-last-stored)))
-      (set-marker pos nil))))
+    (org-capture-finalize)
+    (save-window-excursion
+      (with-current-buffer base
+	(org-with-point-at pos
+	  (call-interactively 'org-refile))))
+    (when kill-buffer
+      (with-current-buffer base (save-buffer))
+      (kill-buffer base))
+    (when jump-to-captured (org-capture-goto-last-stored))))
 
 (defun org-capture-kill ()
   "Abort the current capture process."
