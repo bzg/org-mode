@@ -20099,7 +20099,9 @@ When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an export block, call `org-edit-export-block'.
 When in a LaTeX environment, call `org-edit-latex-environment'.
 When at an #+INCLUDE keyword, visit the included file.
-When at a footnote reference, call `org-edit-footnote-reference'
+When at a footnote reference, call `org-edit-footnote-reference'.
+When at an active timestamp, call `org-time-stamp'.
+When at an inactive timestamp, call `org-time-stamp-inactive'.
 On a link, call `ffap' to visit the link at point.
 Otherwise, return a user error."
   (interactive "P")
@@ -20152,6 +20154,9 @@ Otherwise, return a user error."
 	 (pcase (org-element-type context)
 	   (`footnote-reference (org-edit-footnote-reference))
 	   (`inline-src-block (org-edit-inline-src-code))
+	   (`timestamp (if (eq 'inactive (org-element-property :type context))
+			   (call-interactively #'org-time-stamp-inactive)
+			 (call-interactively #'org-time-stamp)))
 	   (`link (call-interactively #'ffap))
 	   (_ (user-error "No special environment to edit here"))))))))
 
