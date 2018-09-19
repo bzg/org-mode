@@ -13920,14 +13920,14 @@ image scaling operations:
 :END:
 
 #+cindex: @samp{ATTR_ODT}, keyword
-The ODT export back-end can anchor images to ="as-char"=,
-="paragraph"=, or ="page"=.  Set the preferred anchor using the
-=:anchor= property of the =ATTR_ODT= line.
+The ODT export back-end can anchor images to =as-char=, =paragraph=,
+or =page=.  Set the preferred anchor using the =:anchor= property of
+the =ATTR_ODT= line.
 
 To create an image that is anchored to a page:
 
 #+begin_example
-,#+ATTR_ODT: :anchor "page"
+,#+ATTR_ODT: :anchor page
 [[./img.png]]
 #+end_example
 
