@@ -21317,7 +21317,7 @@ semantic relevance.
 
 [fn:124] Please note that exported formulas are part of an HTML
 document, and that signs such as =<=, =>=, or =&= have special
-meanings (see [[http://docs.mathjax.org/en/latest/tex.html#tex-and-latex-in-html-documents][MathJax TeX and LaTeX support]]).
+meanings.  See [[http://docs.mathjax.org/en/latest/tex.html#tex-and-latex-in-html-documents][MathJax TeX and LaTeX support]].
 
 [fn:125] See [[http://docs.mathjax.org/en/latest/tex.html#tex-extensions][TeX and LaTeX extensions]] in the [[http://docs.mathjax.org][MathJax manual]] to learn
 about extensions.
