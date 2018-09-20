@@ -1037,7 +1037,7 @@ name of the sub-editing buffer."
        (org-src--construct-edit-buffer-name (buffer-name) lang)
        lang-f
        (lambda ()
-	 ;; Inline src blocks are limited to one line.
+	 ;; Inline source blocks are limited to one line.
 	 (while (re-search-forward "\n[ \t]*" nil t) (replace-match " "))
 	 ;; Trim contents.
 	 (goto-char (point-min))

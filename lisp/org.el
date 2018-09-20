@@ -20241,7 +20241,7 @@ This command does many different things, depending on context:
       ;; Act according to type of element or object at point.
       ;;
       ;; Do nothing on a blank line, except if it is contained in
-      ;; a src block.  Hence, we first check if point is in such
+      ;; a source block.  Hence, we first check if point is in such
       ;; a block and then if it is at a blank line.
       (pcase type
 	((or `inline-src-block `src-block)
@@ -21226,8 +21226,8 @@ If there is no description, use the link target."
 
 (defun org-in-src-block-p (&optional inside)
   "Whether point is in a code source block.
-When INSIDE is non-nil, don't consider we are within a src block
-when point is at #+BEGIN_SRC or #+END_SRC."
+When INSIDE is non-nil, don't consider we are within a source
+block when point is at #+BEGIN_SRC or #+END_SRC."
   (let ((case-fold-search t))
     (or (and (eq (get-char-property (point) 'src-block) t))
 	(and (not inside)
@@ -22030,7 +22030,7 @@ a footnote definition, try to fill the first paragraph within."
       ;; First check if point is in a blank line at the beginning of
       ;; the buffer.  In that case, ignore filling.
       (cl-case (org-element-type element)
-	;; Use major mode filling function is src blocks.
+	;; Use major mode filling function is source blocks.
 	(src-block (org-babel-do-key-sequence-in-edit-buffer (kbd "M-q")))
 	;; Align Org tables, leave table.el tables as-is.
 	(table-row (org-table-align) t)

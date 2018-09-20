@@ -1434,7 +1434,7 @@ echo \"$data\"
 	       (org-babel-execute-src-block))))))
 
 (ert-deftest test-ob/preserve-results-indentation ()
-  "Preserve indentation when executing a src block."
+  "Preserve indentation when executing a source block."
   (should
    (equal
     '(2 2)

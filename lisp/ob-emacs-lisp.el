@@ -34,7 +34,7 @@
 (defvar org-babel-default-header-args:emacs-lisp '((:lexical . "no"))
   "Default arguments for evaluating an emacs-lisp source block.
 
-A value of \"yes\" or t causes src blocks to be eval'd using
+A value of \"yes\" or t causes source blocks to be eval'd using
 lexical scoping.  It can also be an alist mapping symbols to
 their value.  It is used as the optional LEXICAL argument to
 `eval', which see.")

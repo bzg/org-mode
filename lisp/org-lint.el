@@ -69,13 +69,13 @@
 ;;   - duplicate footnote definitions
 ;;   - orphaned affiliated keywords
 ;;   - obsolete affiliated keywords
-;;   - missing language in src blocks
+;;   - missing language in source blocks
 ;;   - missing back-end in export blocks
 ;;   - invalid Babel call blocks
 ;;   - NAME values with a colon
 ;;   - deprecated export block syntax
 ;;   - deprecated Babel header properties
-;;   - wrong header arguments in src blocks
+;;   - wrong header arguments in source blocks
 ;;   - misuse of CATEGORY keyword
 ;;   - "coderef" links with unknown destination
 ;;   - "custom-id" links with unknown destination
@@ -162,7 +162,7 @@
     :trust 'low)
    (make-org-lint-checker
     :name 'missing-language-in-src-block
-    :description "Report missing language in src blocks"
+    :description "Report missing language in source blocks"
     :categories '(babel))
    (make-org-lint-checker
     :name 'missing-backend-in-export-block

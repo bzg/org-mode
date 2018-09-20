@@ -37,8 +37,8 @@
 
 ;; - resource-id :: the id or name of the resource
 
-;; So an example of a simple src block referencing table data in the
-;; same file would be
+;; So an example of a simple source block referencing table data in
+;; the same file would be
 
 ;;  #+NAME: sandbox
 ;;  | 1 |         2 | 3 |

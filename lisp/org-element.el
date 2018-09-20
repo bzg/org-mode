@@ -307,8 +307,9 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
       (strike-through ,@standard-set)
       (subscript ,@standard-set)
       (superscript ,@standard-set)
-      ;; Ignore inline babel call and inline src block as formulas are
-      ;; possible.  Also ignore line breaks and statistics cookies.
+      ;; Ignore inline babel call and inline source block as formulas
+      ;; are possible.  Also ignore line breaks and statistics
+      ;; cookies.
       (table-cell bold code entity export-snippet footnote-reference italic
 		  latex-fragment link macro radio-target strike-through
 		  subscript superscript target timestamp underline verbatim)
@@ -2399,7 +2400,7 @@ containing `:closed', `:deadline', `:scheduled', `:begin',
 ;;;; Src Block
 
 (defun org-element-src-block-parser (limit affiliated)
-  "Parse a src block.
+  "Parse a source block.
 
 LIMIT bounds the search.  AFFILIATED is a list of which CAR is
 the buffer position at the beginning of the first affiliated
@@ -2455,7 +2456,7 @@ Assume point is at the beginning of the block."
 		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
 		       (match-string 1 switches)))
 		 ;; Should labels be retained in (or stripped from)
-		 ;; src blocks?
+		 ;; source blocks?
 		 (retain-labels
 		  (or (not switches)
 		      (not (string-match "-r\\>" switches))
@@ -2929,7 +2930,7 @@ When at an inline source block, return a list whose car is
 `:language', `:value', `:parameters' and `:post-blank' as
 keywords.  Otherwise, return nil.
 
-Assume point is at the beginning of the inline src block."
+Assume point is at the beginning of the inline source block."
   (save-excursion
     (catch :no-object
       (when (let ((case-fold-search nil))

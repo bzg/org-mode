@@ -1027,7 +1027,7 @@ value.  For example,
   (setq org-latex-minted-options
     \\='((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
 
-will result in src blocks being exported with
+will result in source blocks being exported with
 
 \\begin{minted}[bgcolor=bg,frame=lines]{<LANG>}
 
@@ -1048,12 +1048,13 @@ block-specific options, you may use the following syntax:
 (defcustom org-latex-custom-lang-environments nil
   "Alist mapping languages to language-specific LaTeX environments.
 
-It is used during export of src blocks by the listings and minted
-latex packages.  The environment may be a simple string, composed of
-only letters and numbers.  In this case, the string is directly the
-name of the latex environment to use.  The environment may also be
-a format string.  In this case the format string will be directly
-exported.  This format string may contain these elements:
+It is used during export of source blocks by the listings and
+minted latex packages.  The environment may be a simple string,
+composed of only letters and numbers.  In this case, the string
+is directly the name of the latex environment to use.  The
+environment may also be a format string.  In this case the format
+string will be directly exported.  This format string may contain
+these elements:
 
   %s for the formatted source
   %c for the caption
@@ -1075,7 +1076,7 @@ would have the effect that if Org encounters a Python source block
 during LaTeX export it will produce
 
   \\begin{pythoncode}
-  <src block body>
+  <source block body>
   \\end{pythoncode}
 
 and if Org encounters an Ocaml source block during LaTeX export it
@@ -1083,7 +1084,7 @@ will produce
 
   \\begin{listing}
   \\begin{minted}[<attr_latex options>]{ocaml}
-  <src block body>
+  <source block body>
   \\end{minted}
   \\caption{<caption>}
   \\label{<label>}

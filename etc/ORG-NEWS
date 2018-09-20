@@ -609,7 +609,7 @@ value of the code will be displayed in the results section.
 
 **** Maxima: new headers ~:prologue~ and ~:epilogue~
 Babel options ~:prologue~ and ~:epilogue~ have been implemented for
-Maxima src blocks which prepend and append, respectively, the given
+Maxima source blocks which prepend and append, respectively, the given
 code strings.  This can be useful for specifying formatting settings
 which would add clutter to exported code.  For instance, you can use
 this ~:prologue "fpprintprec: 2; linel: 50;"~ for presenting Maxima
@@ -891,7 +891,7 @@ is now obsolete.
 Now ~=...=~ markup uses ~@samp{}~ instead of ~@verb{}~.  You can use
 ~@verb{}~ again by customizing the variable.
 *** Texinfo exports example blocks as ~@example~
-*** Texinfo exports inline src blocks as ~@code{}~
+*** Texinfo exports inline source blocks as ~@code{}~
 *** Texinfo default table markup is ~@asis~
 It used to be ~@samp~ but ~@asis~ is neutral and, therefore, more
 suitable as a default value.
@@ -1708,9 +1708,9 @@ docstring for more information.
 
 ** New features
 
-*** Default lexical evaluation of emacs-lisp src blocks
+*** Default lexical evaluation of emacs-lisp source blocks
 
-Emacs-lisp src blocks in babel are now evaluated using lexical
+Emacs-lisp source blocks in Babel are now evaluated using lexical
 scoping.  There is a new header to control this behavior.
 
 The default results in an eval with lexical scoping.

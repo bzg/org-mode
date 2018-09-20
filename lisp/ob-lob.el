@@ -62,7 +62,7 @@ should not be inherited from a source block.")
 		  (cons (cons source info)
 			(assq-delete-all source org-babel-library-of-babel))))
 	  (cl-incf lob-ingest-count))))
-    (message "%d src block%s added to Library of Babel"
+    (message "%d source block%s added to Library of Babel"
 	     lob-ingest-count (if (> lob-ingest-count 1) "s" ""))
     lob-ingest-count))
 

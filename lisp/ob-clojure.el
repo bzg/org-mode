@@ -80,7 +80,7 @@ If the value is nil, timeout is disabled."
 	  (const :tag "SLIME" slime)))
 
 (defcustom org-babel-clojure-default-ns "user"
-  "Default Clojure namespace for src block when all find ns ways failed."
+  "Default Clojure namespace for source block when finding ns failed."
   :type 'string
   :group 'org-babel)
 

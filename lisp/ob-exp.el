@@ -209,9 +209,9 @@ this template."
 					      (progn (goto-char end)
 						     (skip-chars-forward " \t")
 						     (point)))
-			     ;; Otherwise: remove inline src block but
-			     ;; preserve following white spaces.  Then
-			     ;; insert value.
+			     ;; Otherwise: remove inline source block
+			     ;; but preserve following white spaces.
+			     ;; Then insert value.
 			     (delete-region begin end)
 			     (insert replacement)))))
 		      ((or `babel-call `inline-babel-call)

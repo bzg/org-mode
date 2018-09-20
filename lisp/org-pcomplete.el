@@ -346,8 +346,9 @@ This needs more work, to handle headings with lots of spaces in them."
    (substring pcomplete-stub 1)))
 
 (defun pcomplete/org-mode/block-option/src ()
-  "Complete the arguments of a begin_src block.
-Complete a language in the first field, the header arguments and switches."
+  "Complete the arguments of a source block.
+Complete a language in the first field, the header arguments and
+switches."
   (pcomplete-here
    (mapcar
     (lambda(x) (symbol-name (nth 3 x)))

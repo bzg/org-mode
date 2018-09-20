@@ -575,7 +575,7 @@ src_emacs-lisp{(+ 1 1)}"
 
 (ert-deftest ob-exp/src-block-with-affiliated-keyword ()
   "Test exporting a code block with affiliated keywords."
-  ;; Pathological case: affiliated keyword matches inline src block
+  ;; Pathological case: affiliated keyword matches inline source block
   ;; syntax.
   (should
    (equal "#+name: call_foo\n#+BEGIN_SRC emacs-lisp\n42\n#+END_SRC"
