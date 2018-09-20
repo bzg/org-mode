@@ -1049,9 +1049,9 @@ block-specific options, you may use the following syntax:
   "Alist mapping languages to language-specific LaTeX environments.
 
 It is used during export of source blocks by the listings and
-minted latex packages.  The environment may be a simple string,
+minted LaTeX packages.  The environment may be a simple string,
 composed of only letters and numbers.  In this case, the string
-is directly the name of the latex environment to use.  The
+is directly the name of the LaTeX environment to use.  The
 environment may also be a format string.  In this case the format
 string will be directly exported.  This format string may contain
 these elements:
@@ -1223,7 +1223,7 @@ logfiles to remove, set `org-latex-logfiles-extensions'."
     ("Undefined control sequence" . "[undefined control sequence]"))
   "Alist of regular expressions and associated messages for the user.
 The regular expressions are used to find possible warnings in the
-log of a latex-run.  These warnings will be reported after
+log of a LaTeX-run.  These warnings will be reported after
 calling `org-latex-compile'."
   :group 'org-export-latex
   :version "26.1"
