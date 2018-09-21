@@ -15406,10 +15406,6 @@ non-Org files, you always need to specify the publishing function:
      Function executing the publication of a file.  This may also be
      a list of functions, which are all called in turn.
 
-- ~:plain-source~ ::
-
-     Non-~nil~ means, publish plain source.
-
 - ~:htmlized-source~ ::
 
      Non-~nil~ means, publish htmlized source.
