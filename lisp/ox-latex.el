@@ -1879,9 +1879,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(org-export-get-footnote-definition footnote-reference info)
 		info t)))
       ;; Use \footnotemark if reference is within another footnote
-      ;; reference, footnote definition or table cell.
-      ((org-element-lineage footnote-reference
-			    '(footnote-reference footnote-definition table-cell))
+      ;; reference, footnote definition, table cell or item's tag.
+      ((or (org-element-lineage footnote-reference
+				'(footnote-reference footnote-definition
+						     table-cell))
+	   (and (org-element-lineage footnote-reference '(item))
+		(org-element-secondary-p footnote-reference)))
        "\\footnotemark")
       ;; Otherwise, define it with \footnote command.
       (t
@@ -1892,11 +1895,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		  ;; reference to def.
 		  (cond ((not label) "")
 			((org-element-map (plist-get info :parse-tree) 'footnote-reference
-			    (lambda (f)
-			      (and (not (eq f footnote-reference))
-				   (equal (org-element-property :label f) label)
-				   (org-trim (org-latex--label def info t t))))
-			    info t))
+			   (lambda (f)
+			     (and (not (eq f footnote-reference))
+				  (equal (org-element-property :label f) label)
+				  (org-trim (org-latex--label def info t t))))
+			   info t))
 			(t "")))
 	  ;; Retrieve all footnote references within the footnote and
 	  ;; add their definition after it, since LaTeX doesn't support
@@ -2186,12 +2189,22 @@ contextual information."
 		     (off "$\\square$")
 		     (trans "$\\boxminus$")))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-data tag info)))))
+		(and tag (org-export-data tag info))))
+	 ;; If there are footnotes references in tag, be sure to add
+	 ;; their definition at the end of the item.  This workaround
+	 ;; is necessary since "\footnote{}" command is not supported
+	 ;; in tags.
+	 (tag-footnotes
+	  (or (and tag (org-latex--delayed-footnotes-definitions
+			(org-element-property :tag item) info))
+	      "")))
     (concat counter
 	    "\\item"
 	    (cond
-	     ((and checkbox tag) (format "[{%s %s}] " checkbox tag))
-	     ((or checkbox tag) (format "[{%s}] " (or checkbox tag)))
+	     ((and checkbox tag)
+	      (format "[{%s %s}] %s" checkbox tag tag-footnotes))
+	     ((or checkbox tag)
+	      (format "[{%s}] %s" (or checkbox tag) tag-footnotes))
 	     ;; Without a tag or a check-box, if CONTENTS starts with
 	     ;; an opening square bracket, add "\relax" to "\item",
 	     ;; unless the brackets comes from an initial export
@@ -2206,14 +2219,7 @@ contextual information."
 					  'latex)))))))
 	      "\\relax ")
 	     (t " "))
-	    (and contents (org-trim contents))
-	    ;; If there are footnotes references in tag, be sure to
-	    ;; add their definition at the end of the item.  This
-	    ;; workaround is necessary since "\footnote{}" command is
-	    ;; not supported in tags.
-	    (and tag
-		 (org-latex--delayed-footnotes-definitions
-		  (org-element-property :tag item) info)))))
+	    (and contents (org-trim contents)))))
 
 
 ;;;; Keyword
