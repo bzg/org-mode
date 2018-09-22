@@ -21414,7 +21414,7 @@ on outline paths, assuming they are unique.
 
 [fn:151] The file will be empty after this operation.
 
-[fn:152] https://ctan.org/tex-archive/macros/latex/contrib/comment?lang=en
+[fn:152] https://www.ctan.org/pkg/comment
 
 [fn:153] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
