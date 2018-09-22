@@ -1883,8 +1883,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       ((or (org-element-lineage footnote-reference
 				'(footnote-reference footnote-definition
 						     table-cell))
-	   (and (org-element-lineage footnote-reference '(item))
-		(org-element-secondary-p footnote-reference)))
+	   (eq 'item (org-element-type
+		      (org-export-get-parent-element footnote-reference))))
        "\\footnotemark")
       ;; Otherwise, define it with \footnote command.
       (t
