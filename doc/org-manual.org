@@ -8542,12 +8542,12 @@ add the following to one of your agenda files:
 #+end_example
 
 You can then go ahead and define anniversaries for a BBDB record.
-Basically, you need to press {{{kbd(C-o anniversary RET)}}} with point
-in a BBDB record and then add the date in the format =YYYY-MM-DD= or
-=MM-DD=, followed by a space and the class of the anniversary
-(=birthday=, =wedding=, or a format string).  If you omit the class,
-it defaults to =birthday=.  Here are a few examples, the header for
-the file =org-bbdb.el= contains more detailed information.
+Basically, you need a field named =anniversary= for the BBDB record
+which contains the date in the format =YYYY-MM-DD= or =MM-DD=,
+followed by a space and the class of the anniversary (=birthday=,
+=wedding=, or a format string).  If you omit the class, it defaults to
+=birthday=.  Here are a few examples, the header for the file
+=org-bbdb.el= contains more detailed information.
 
 #+begin_example
 1973-06-22
