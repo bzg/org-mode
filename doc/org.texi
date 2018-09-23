@@ -8243,12 +8243,12 @@ following to one of your agenda files:
 @end example
 
 You can then go ahead and define anniversaries for a BBDB record.  Basically,
-you need to press @kbd{C-o anniversary @key{RET}} with the cursor in a BBDB
-record and then add the date in the format @code{YYYY-MM-DD} or @code{MM-DD},
-followed by a space and the class of the anniversary (@samp{birthday} or
-@samp{wedding}, or a format string).  If you omit the class, it will default to
-@samp{birthday}.  Here are a few examples, the header for the file
-@file{org-bbdb.el} contains more detailed information.
+you need a field named @samp{anniversary} for the BBDB record which contains
+the date in the format @code{YYYY-MM-DD} or @code{MM-DD}, followed by a space
+and the class of the anniversary (@samp{birthday} or @samp{wedding}, or a
+format string).  If you omit the class, it will default to @samp{birthday}.
+Here are a few examples, the header for the file @file{org-bbdb.el} contains
+more detailed information.
 
 @example
 1973-06-22
