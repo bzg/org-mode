@@ -300,7 +300,7 @@ italicized, in all other cases it is left unchanged."
 Argument TIME-STR is the value retrieved from BBDB.  If YYYY- is omitted
 it will be considered unknown."
   (pcase (org-split-string time-str "-")
-    (`(,a ,b nil) (list (string-to-number a) (string-to-number b) nil))
+    (`(,a ,b) (list (string-to-number a) (string-to-number b) nil))
     (`(,a ,b ,c) (list (string-to-number b)
 		       (string-to-number c)
 		       (string-to-number a)))))
