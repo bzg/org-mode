@@ -158,7 +158,8 @@ a file, \"input-file\" and \"modification-time\"."
                      '%s)))"
 			    (prin1-to-string visited-file)
 			    (prin1-to-string
-			     (nth 5 (file-attributes visited-file))))))))
+			     (file-attribute-modification-time
+			      (file-attributes visited-file))))))))
 	 ;; Install built-in macros.
 	 (list
 	  '("n" . "(eval (org-macro--counter-increment $1 $2))")

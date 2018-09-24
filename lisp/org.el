@@ -253,8 +253,9 @@ file to byte-code before it is loaded."
   (let* ((age (lambda (file)
 		(float-time
 		 (time-subtract nil
-				(nth 5 (or (file-attributes (file-truename file))
-					   (file-attributes file)))))))
+				(file-attribute-modification-time
+				 (or (file-attributes (file-truename file))
+				     (file-attributes file)))))))
 	 (base-name (file-name-sans-extension file))
 	 (exported-file (concat base-name ".el")))
     ;; tangle if the Org file is newer than the elisp file

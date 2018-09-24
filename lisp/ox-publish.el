@@ -881,7 +881,8 @@ time in `current-time' format."
     (or (org-publish-cache-get-file-property file :date nil t)
 	(org-publish-cache-set-file-property
 	 file :date
-	 (if (file-directory-p file) (nth 5 (file-attributes file))
+	 (if (file-directory-p file)
+	     (file-attribute-modification-time (file-attributes file))
 	   (let ((date (org-publish-find-property file :date project)))
 	     ;; DATE is a secondary string.  If it contains
 	     ;; a time-stamp, convert it to internal format.
@@ -891,7 +892,8 @@ time in `current-time' format."
 			   (let ((value (org-element-interpret-data ts)))
 			     (and (org-string-nw-p value)
 				  (org-time-string-to-time value))))))
-		   ((file-exists-p file) (nth 5 (file-attributes file)))
+		   ((file-exists-p file)
+		    (file-attribute-modification-time (file-attributes file)))
 		   (t (error "No such file: \"%s\"" file)))))))))
 
 (defun org-publish-sitemap-default-entry (entry style project)
@@ -1364,8 +1366,7 @@ does not exist."
 	       (expand-file-name (or (file-symlink-p file) file)
 				 (file-name-directory file)))))
     (if (not attr) (error "No such file: \"%s\"" file)
-      (+ (ash (car (nth 5 attr)) 16)
-	 (cadr (nth 5 attr))))))
+      (floor (float-time (file-attribute-modification-time attr))))))
 
 
 (provide 'ox-publish)
