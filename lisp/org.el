@@ -13057,7 +13057,6 @@ WHAT entry will also be removed."
 					  (scheduled "SCHEDULED")
 					  (otherwise nil))
 					default-time default-input)))))
-
       (org-with-wide-buffer
        (org-back-to-heading t)
        (forward-line)
