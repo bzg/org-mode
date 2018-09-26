@@ -13051,7 +13051,10 @@ WHAT entry will also be removed."
 			 (org-read-date-analyze
 			  time default-time (decode-time default-time)))
 		;; If necessary, get the time from the user
-		(or time (org-read-date nil 'to-time nil nil
+		(or time (org-read-date nil 'to-time nil
+					(case what
+					  ('deadline "DEADLINE")
+					  ('scheduled "SCHEDULED"))
 					default-time default-input)))))
 
       (org-with-wide-buffer
