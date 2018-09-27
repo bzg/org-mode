@@ -20103,6 +20103,7 @@ When in an export block, call `org-edit-export-block'.
 When in a LaTeX environment, call `org-edit-latex-environment'.
 When at an #+INCLUDE keyword, visit the included file.
 When at a footnote reference, call `org-edit-footnote-reference'.
+When at a planning line call, `org-deadline' and/or `org-schedule'.
 When at an active timestamp, call `org-time-stamp'.
 When at an inactive timestamp, call `org-time-stamp-inactive'.
 On a link, call `ffap' to visit the link at point.
@@ -20150,6 +20151,13 @@ Otherwise, return a user error."
       (`export-block (org-edit-export-block))
       (`fixed-width (org-edit-fixed-width-region))
       (`latex-environment (org-edit-latex-environment))
+      (`planning
+       (let ((proplist (cadr element)))
+         (mapc #'call-interactively
+               (remq nil
+                     (list
+                      (when (plist-get proplist :deadline) #'org-deadline)
+                      (when (plist-get proplist :scheduled) #'org-schedule))))))
       (_
        ;; No notable element at point.  Though, we may be at a link or
        ;; a footnote reference, which are objects.  Thus, scan deeper.
