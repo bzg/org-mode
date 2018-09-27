@@ -9869,7 +9869,7 @@ The prefix arg is passed through to the command if possible."
   (org-unlogged-message
    (concat (if org-agenda-persistent-marks "Bulk (persistent): " "Bulk: ")
 	   "[$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [d]eadline [r]efile "
-	   "[S]catter [f]unction    "
+	   "[S]catter [f]unction [p]ersist-toggle    "
 	   (and org-agenda-bulk-custom-functions
 		(format " Custom: [%s]"
 			(mapconcat (lambda (f) (char-to-string (car f)))
