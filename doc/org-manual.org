@@ -19354,7 +19354,7 @@ data in an inbox file format, through the following steps:
         Pressing {{{kbd(?)}}} displays the entire flagged note in
         another window.  Org also pushes it to the kill ring.  To
         store flagged note as a normal note, use {{{kbd(? z C-y C-c
-        C-c)}}}.  Pressing{{{kbd(?)}}} twice does these things: first
+        C-c)}}}.  Pressing {{{kbd(?)}}} twice does these things: first
         it removes the =FLAGGED= tag; second, it removes the flagged
         note from the property drawer; third, it signals that manual
         editing of the flagged entry is now finished.
