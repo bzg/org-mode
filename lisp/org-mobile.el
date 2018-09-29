@@ -24,12 +24,12 @@
 ;;
 ;;; Commentary:
 ;;
-;; This file contains the code to interact with Richard Moreland's
-;; iPhone application MobileOrg, as well as with the Android version
-;; by Matthew Jones.  This code is documented in Appendix B of the Org
-;; manual.  The code is not specific for the iPhone and Android - any
-;; external viewer/flagging/editing application that uses the same
-;; conventions could be used.
+;; This file contains the code to interact with a mobile application,
+;; such as Richard Moreland's iPhone application MobileOrg, or the
+;; Android version by Matthew Jones.  This code is documented in
+;; Appendix B of the Org manual.  The code is not specific for the
+;; iPhone and Android - any external viewer/flagging/editing
+;; application that uses the same conventions could be used.
 
 (require 'org)
 (require 'org-agenda)
@@ -45,15 +45,17 @@
   :group 'org)
 
 (defcustom org-mobile-files '(org-agenda-files)
-  "Files to be staged for MobileOrg.
+  "Files to be staged for the mobile application.
+
 This is basically a list of files and directories.  Files will be staged
-directly.  Directories will be search for files with the extension `.org'.
+directly.  Directories will be search for files with the extension \".org\".
 In addition to this, the list may also contain the following symbols:
 
-org-agenda-files
+`org-agenda-files'
      This means include the complete, unrestricted list of files given in
      the variable `org-agenda-files'.
-org-agenda-text-search-extra-files
+
+`org-agenda-text-search-extra-files'
      Include the files given in the variable
      `org-agenda-text-search-extra-files'"
   :group 'org-mobile
@@ -84,12 +86,14 @@ org-agenda-text-search-extra-files
 
 (defcustom org-mobile-use-encryption nil
   "Non-nil means keep only encrypted files on the WebDAV server.
+
 Encryption uses AES-256, with a password given in
-`org-mobile-encryption-password'.
-When nil, plain files are kept on the server.
-Turning on encryption requires setting the same password in the MobileOrg
-application.  Before turning this on, check of MobileOrg does already
-support it - at the time of this writing it did not yet."
+`org-mobile-encryption-password'.  When nil, plain files are kept
+on the server.
+
+Turning on encryption requires setting the same password in the
+mobile application.  Before turning this on, check if the mobile
+application does support it."
   :group 'org-mobile
   :version "24.1"
   :type 'boolean)
@@ -104,9 +108,10 @@ You might want to put this file into a directory where only you have access."
 
 (defcustom org-mobile-encryption-password ""
   "Password for encrypting files uploaded to the server.
+
 This is a single password which is used for AES-256 encryption.  The same
-password must also be set in the MobileOrg application.  All Org files,
-including mobileorg.org will be encrypted using this password.
+password must also be set in the mobile application.  All Org files,
+including \"mobileorg.org\" will be encrypted using this password.
 
 SECURITY CONSIDERATIONS:
 
@@ -129,7 +134,7 @@ session."
   (or (org-string-nw-p org-mobile-encryption-password)
       (org-string-nw-p org-mobile-encryption-password-session)
       (setq org-mobile-encryption-password-session
-	    (read-passwd "Password for MobileOrg: " t))))
+	    (read-passwd "Password for mobile application: " t))))
 
 (defcustom org-mobile-inbox-for-pull "~/org/from-mobile.org"
   "The file where captured notes and flags will be appended to.
@@ -142,23 +147,25 @@ been appended to the file given here.  This file should be in
 
 (defconst org-mobile-capture-file "mobileorg.org"
   "The capture file where the mobile stores captured notes and flags.
-This should not be changed, because MobileOrg assumes this name.")
+This must not be changed, because the mobile application assumes this name.")
 
 (defcustom org-mobile-index-file "index.org"
-  "The index file with links to all Org files that should be loaded by MobileOrg.
-Relative to `org-mobile-directory'.  The Address field in the MobileOrg setup
-should point to this file."
+  "Index file with links to all Org files.
+It should be loaded by the mobile application.  The file name is
+relative to `org-mobile-directory'.  The \"Address\" field in the
+mobile application setup should point to this file."
   :group 'org-mobile
   :type 'file)
 
 (defcustom org-mobile-agendas 'all
-  "The agendas that should be pushed to MobileOrg.
+  "The agendas that should be pushed to the mobile application.
+
 Allowed values:
 
-default  the weekly agenda and the global TODO list
-custom   all custom agendas defined by the user
-all      the custom agendas and the default ones
-list     a list of selection key(s) as string."
+`default'  the weekly agenda and the global TODO list
+`custom'   all custom agendas defined by the user
+`all'      the custom agendas and the default ones
+`list'     a list of selection key(s) as string."
   :group 'org-mobile
   :version "24.1"
   :type '(choice
@@ -229,7 +236,9 @@ using `rsync' or `scp'.")
 
 (defconst org-mobile-action-alist '(("edit" . org-mobile-edit))
   "Alist with flags and actions for mobile sync.
-When flagging an entry, MobileOrg will create entries that look like
+
+When flagging an entry, the mobile application creates entries
+that look like
 
   * F(action:data)  [[id:entry-id][entry title]]
 
@@ -1037,7 +1046,9 @@ be returned that indicates what went wrong."
 	      (insert new)
 	      (delete-region (point) (+ (point) (length current)))
 	      (org-align-tags))
-	     (t (error "Heading changed in MobileOrg and on the computer")))))))
+	     (t
+	      (error
+	       "Heading changed in the mobile device and on the computer")))))))
 
      ((eq what 'addheading)
       (if (org-at-heading-p)	; if false we are in top-level of file
@@ -1090,7 +1101,8 @@ be returned that indicates what went wrong."
 					(outline-next-heading)
 					(point))))
 	t)
-       (t (error "Body was changed in MobileOrg and on the computer")))))))
+       (t (error
+	   "Body was changed in the mobile device and on the computer")))))))
 
 (defun org-mobile-tags-same-p (list1 list2)
   "Are the two tag lists the same?"
