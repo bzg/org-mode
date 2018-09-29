@@ -21263,7 +21263,7 @@ a fragment, see the documentation of the function
 [fn:111] This works automatically for the HTML backend (it requires
 version 1.34 of the =htmlize.el= package, which you need to install).
 Fontified code chunks in LaTeX can be achieved using either the
-listings package or the [[https://www.ctan.org/pkg/minted][minted]] package.  Refer to
+[[https://www.ctan.org/pkg/listings][listings]] package or the [[https://www.ctan.org/pkg/minted][minted]] package.  Refer to
 ~org-export-latex-listings~ for details.
 
 [fn:112] Source code in code blocks may also be evaluated either
