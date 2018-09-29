@@ -19234,55 +19234,9 @@ specifying the respective key as property =CRYPTKEY=, e.g.:
 Excluding the =crypt= tag from inheritance prevents already encrypted
 text from being encrypted again.
 
-** Org Syntax
-:PROPERTIES:
-:DESCRIPTION: Formal description of Org's syntax.
-:END:
-
-A reference document providing a formal description of Org's syntax is
-available as [[https://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
-Goaziou.  It defines Org's core internal concepts such as "headlines",
-"sections", "affiliated keywords", "(greater) elements" and "objects".
-Each part of an Org document belongs to one of the previous
-categories.
-
-To explore the abstract structure of an Org buffer, run this in
-a buffer:
-
-: M-: (org-element-parse-buffer) <RET>
-
-#+texinfo: @noindent
-It outputs a list containing the buffer's content represented as an
-abstract structure.  The export engine relies on the information
-stored in this list.  Most interactive commands---e.g., for structure
-editing---also rely on the syntactic meaning of the surrounding
-context.
-
-#+cindex: syntax checker
-#+cindex: linter
-#+findex: org-lint
-You can probe the syntax of your documents with the command
-
-: M-x org-lint <RET>
-
-#+texinfo: @noindent
-It runs a number of checks to find common mistakes.  It then displays
-their location in a dedicated buffer, along with a description and
-a "trust level", since false-positive are possible.  From there, you
-can operate on the reports with the following keys:
-
-#+attr_texinfo: :columns 0.22 0.78
-| {{{kbd(C-j)}}}, {{{kbd(TAB)}}} | Display the offending line                  |
-| {{{kbd(RET)}}}                 | Move point to the offending line            |
-| {{{kbd(g)}}}                   | Check the document again                    |
-| {{{kbd(h)}}}                   | Hide all reports from the same checker      |
-| {{{kbd(i)}}}                   | Also remove them from all subsequent checks |
-| {{{kbd(S)}}}                   | Sort reports by the column at point         |
-
-* Org Mobile
+** Org Mobile
 :PROPERTIES:
 :DESCRIPTION: Viewing and capture on a mobile device.
-:APPENDIX: t
 :END:
 #+cindex: smartphone
 
@@ -19305,7 +19259,7 @@ TODO states /sets/ (see [[*Setting up keywords for individual files]]) and
 /mutually exclusive/ tags (see [[*Setting Tags]]) only for those set in
 these variables.
 
-** Setting Up the Staging Area
+*** Setting up the staging area
 :PROPERTIES:
 :DESCRIPTION: For the mobile device.
 :END:
@@ -19339,7 +19293,7 @@ application encrypts the file contents, the file name remains visible
 on the file systems of the local computer, the server, and the mobile
 device.
 
-** Pushing to the mobile application
+*** Pushing to the mobile application
 :PROPERTIES:
 :DESCRIPTION: Uploading Org files and agendas.
 :END:
@@ -19361,7 +19315,7 @@ to determine what other files to download for agendas.  For faster
 downloads, it is expected to only read files whose checksums[fn:151]
 have changed.
 
-** Pulling from the mobile application
+*** Pulling from the mobile application
 :PROPERTIES:
 :DESCRIPTION: Integrating captured and flagged items.
 :END:
@@ -19411,6 +19365,51 @@ processing flagged entries.  Note that these entries may not be the
 most recent since the mobile application searches files that were last
 pulled.  To get an updated agenda view with changes since the last
 pull, pull again.
+
+** Org Syntax
+:PROPERTIES:
+:DESCRIPTION: Formal description of Org's syntax.
+:END:
+
+A reference document providing a formal description of Org's syntax is
+available as [[https://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
+Goaziou.  It defines Org's core internal concepts such as "headlines",
+"sections", "affiliated keywords", "(greater) elements" and "objects".
+Each part of an Org document belongs to one of the previous
+categories.
+
+To explore the abstract structure of an Org buffer, run this in
+a buffer:
+
+: M-: (org-element-parse-buffer) <RET>
+
+#+texinfo: @noindent
+It outputs a list containing the buffer's content represented as an
+abstract structure.  The export engine relies on the information
+stored in this list.  Most interactive commands---e.g., for structure
+editing---also rely on the syntactic meaning of the surrounding
+context.
+
+#+cindex: syntax checker
+#+cindex: linter
+#+findex: org-lint
+You can probe the syntax of your documents with the command
+
+: M-x org-lint <RET>
+
+#+texinfo: @noindent
+It runs a number of checks to find common mistakes.  It then displays
+their location in a dedicated buffer, along with a description and
+a "trust level", since false-positive are possible.  From there, you
+can operate on the reports with the following keys:
+
+#+attr_texinfo: :columns 0.22 0.78
+| {{{kbd(C-j)}}}, {{{kbd(TAB)}}} | Display the offending line                  |
+| {{{kbd(RET)}}}                 | Move point to the offending line            |
+| {{{kbd(g)}}}                   | Check the document again                    |
+| {{{kbd(h)}}}                   | Hide all reports from the same checker      |
+| {{{kbd(i)}}}                   | Also remove them from all subsequent checks |
+| {{{kbd(S)}}}                   | Sort reports by the column at point         |
 
 * Hacking
 :PROPERTIES:
