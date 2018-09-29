@@ -242,35 +242,25 @@ Stars are put in group 1 and the trimmed body in group 2.")
 	(fmakunbound
 	 (intern (concat "org-babel-expand-body:" lang)))))))
 
-(declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
+
 ;;;###autoload
 (defun org-babel-load-file (file &optional compile)
   "Load Emacs Lisp source code blocks in the Org FILE.
 This function exports the source code using `org-babel-tangle'
-and then loads the resulting file using `load-file'.  With prefix
-arg (noninteractively: 2nd arg) COMPILE the tangled Emacs Lisp
-file to byte-code before it is loaded."
+and then loads the resulting file using `load-file'.  With
+optional prefix argument COMPILE, the tangled Emacs Lisp file is
+byte-compiled before it is loaded."
   (interactive "fFile to load: \nP")
-  (let* ((age (lambda (file)
-		(float-time
-		 (time-subtract (current-time)
-				(nth 5 (or (file-attributes (file-truename file))
-					   (file-attributes file)))))))
-	 (base-name (file-name-sans-extension file))
-	 (exported-file (concat base-name ".el")))
-    ;; tangle if the Org file is newer than the elisp file
-    (unless (and (file-exists-p exported-file)
-		 (> (funcall age file) (funcall age exported-file)))
-      ;; Tangle-file traversal returns reversed list of tangled files
-      ;; and we want to evaluate the first target.
-      (setq exported-file
-	    (car (last (org-babel-tangle-file file exported-file "emacs-lisp")))))
-    (message "%s %s"
-	     (if compile
-		 (progn (byte-compile-file exported-file 'load)
-			"Compiled and loaded")
-	       (progn (load-file exported-file) "Loaded"))
-	     exported-file)))
+  (let* ((tangled-file (concat (file-name-sans-extension file) ".el")))
+    ;; Tangle only if the Org file is newer than the Elisp file.
+    (unless (org-file-newer-than-p tangled-file (nth 5 (file-attributes file)))
+      (org-babel-tangle-file file tangled-file "emacs-lisp"))
+    (if compile
+	(progn
+	  (byte-compile-file tangled-file 'load)
+	  (message "Compiled and loaded %s" tangled-file))
+      (load-file tangled-file)
+      (message "Loaded %s" tangled-file))))
 
 (defcustom org-babel-load-languages '((emacs-lisp . t))
   "Languages which can be evaluated in Org buffers.
