@@ -19279,35 +19279,28 @@ can operate on the reports with the following keys:
 | {{{kbd(i)}}}                   | Also remove them from all subsequent checks |
 | {{{kbd(S)}}}                   | Sort reports by the column at point         |
 
-* MobileOrg
+* Org Mobile
 :PROPERTIES:
 :DESCRIPTION: Viewing and capture on a mobile device.
 :APPENDIX: t
 :END:
-#+cindex: iPhone
 #+cindex: smartphone
-#+cindex: android
-#+cindex: MobileOrg
 
-MobileOrg is a companion mobile app that runs on iOS and Android
-devices.  MobileOrg enables offline-views and capture support for an
-Org mode system that is rooted on a "real" computer.  MobileOrg can
-record changes to existing entries.
-
-The [[https://github.com/MobileOrg/][iOS implementation]] for the /iPhone/iPod Touch/iPad/ series of
-devices, was started by Richard Moreland and is now in the hands of
-Sean Escriva.  Android users should check out [[http://wiki.github.com/matburt/mobileorg-android/][MobileOrg Android]] by
-Matt Jones.  Though the two implementations are not identical, they
-offer similar features.
+Org Mobile is a protocol for synchronizing Org files between Emacs and
+other applications, e.g., on mobile devices.  It enables offline-views
+and capture support for an Org mode system that is rooted on a "real"
+computer.  The external application can also record changes to
+existing entries.
 
 This appendix describes Org's support for agenda view formats
-compatible with MobileOrg.  It also describes synchronizing changes,
-such as to notes, between MobileOrg and the computer.
+compatible with Org Mobile.  It also describes synchronizing changes,
+such as to notes, between the mobile application and the computer.
 
-To change tags and TODO states in MobileOrg, first customize the
-variables ~org-todo-keywords~ and ~org-tag-alist~.  These should cover
-all the important tags and TODO keywords, even if Org files use only
-some of them.  Though MobileOrg has in-buffer settings, it understands
+To change tags and TODO states in the mobile application, first
+customize the variables ~org-todo-keywords~ and ~org-tag-alist~.
+These should cover all the important tags and TODO keywords, even if
+Org files use only some of them.  Though the mobile application is
+expected to support in-buffer settings, it is required to understand
 TODO states /sets/ (see [[*Setting up keywords for individual files]]) and
 /mutually exclusive/ tags (see [[*Setting Tags]]) only for those set in
 these variables.
@@ -19317,80 +19310,92 @@ these variables.
 :DESCRIPTION: For the mobile device.
 :END:
 
-MobileOrg needs access to a file directory on a server to interact
-with Emacs.  With a public server, consider encrypting the files.
-MobileOrg version 1.5 supports encryption for the iPhone.  Org also
-requires =openssl= installed on the local computer.  To turn on
-encryption, set the same password in MobileOrg and in Emacs.  Set the
-password in the variable ~org-mobile-use-encryption~[fn:147].  Note
-that even after MobileOrg encrypts the file contents, the file name
-remains visible on the file systems of the local computer, the server,
-and the mobile device.
-
-For a server to host files, consider options like [[http://dropbox.com][Dropbox.com]]
-account[fn:148].  On first connection, MobileOrg creates a directory
-=MobileOrg= on Dropbox.  Pass its location to Emacs through an
-initialisation file variable as follows:
+#+vindex: org-mobile-directory
+The mobile application needs access to a file directory on
+a server[fn:147] to interact with Emacs.  Pass its location through
+the ~org-mobile-directory~ variable.  If you can mount that directory
+locally just set the variable to point to that directory:
 
 #+begin_src emacs-lisp
-(setq org-mobile-directory "~/Dropbox/MobileOrg")
+(setq org-mobile-directory "~/orgmobile/")
 #+end_src
 
-Org copies files to the above directory for MobileOrg.  Org also uses
-the same directory for sharing notes between Org and MobileOrg.
+#+texinfo: @noindent
+Alternatively, by using TRAMP (see [[info:tramp][TRAMP User Manual]]),
+~org-mobile-directory~ may point to a remote directory accessible
+through, for example, SSH and SCP:
 
-** Pushing to MobileOrg
+#+begin_src emacs-lisp
+(setq org-mobile-directory "/scpc:user@remote.host:org/webdav/")
+#+end_src
+
+#+vindex: org-mobile-encryption
+With a public server, consider encrypting the files.  Org also
+requires OpenSSL installed on the local computer.  To turn on
+encryption, set the same password in the mobile application and in
+Emacs.  Set the password in the variable
+~org-mobile-use-encryption~[fn:148].  Note that even after the mobile
+application encrypts the file contents, the file name remains visible
+on the file systems of the local computer, the server, and the mobile
+device.
+
+** Pushing to the mobile application
 :PROPERTIES:
 :DESCRIPTION: Uploading Org files and agendas.
 :END:
 
+#+findex: org-mobile-push
 #+vindex: org-mobile-files
-#+vindex: org-directory
-Org pushes files listed in ~org-mobile-files~ to
-~org-mobile-directory~.  Files include agenda files (as listed in
-~org-agenda-files~).  Customize ~org-mobile-files~ to add other files.
-File names are staged with paths relative to ~org-directory~, so all
-files should be inside this directory[fn:149].
+The command ~org-mobile-push~ copies files listed in
+~org-mobile-files~ into the staging area.  Files include agenda files
+(as listed in ~org-agenda-files~).  Customize ~org-mobile-files~ to
+add other files.  File names are staged with paths relative to
+~org-directory~, so all files should be inside this directory[fn:149].
 
 Push creates a special Org file =agendas.org= with custom agenda views
 defined by the user[fn:150].
 
 Finally, Org writes the file =index.org=, containing links to other
-files.  MobileOrg reads this file first from the server to determine
-what other files to download for agendas.  For faster downloads,
-MobileOrg only reads files whose checksums[fn:151] have changed.
+files.  The mobile application reads this file first from the server
+to determine what other files to download for agendas.  For faster
+downloads, it is expected to only read files whose checksums[fn:151]
+have changed.
 
-** Pulling from MobileOrg
+** Pulling from the mobile application
 :PROPERTIES:
 :DESCRIPTION: Integrating captured and flagged items.
 :END:
 
-When MobileOrg synchronizes with the server, it pulls the Org files
-for viewing.  It then appends to the file =mobileorg.org= on the
-server the captured entries, pointers to flagged and changed entries.
-Org integrates its data in an inbox file format.
+#+findex: org-mobile-pull
+The command ~org-mobile-pull~ synchronizes changes with the server.
+More specifically, it first pulls the Org files for viewing.  It then
+appends captured entries and pointers to flagged or changed entries to
+the file =mobileorg.org= on the server.  Org ultimately integrates its
+data in an inbox file format, through the following steps:
 
 1.
    #+vindex: org-mobile-inbox-for-pull
    Org moves all entries found in =mobileorg.org=[fn:152] and appends
    them to the file pointed to by the variable
-   ~org-mobile-inbox-for-pull~.  Each captured entry and each editing
-   event is a top-level entry in the inbox file.
+   ~org-mobile-inbox-for-pull~.  It should reside neither in the
+   staging area nor on the server.  Each captured entry and each
+   editing event is a top-level entry in the inbox file.
 
-2. After moving the entries, Org attempts changes to MobileOrg.  Some
-   changes are applied directly and without user interaction.
-   Examples include changes to tags, TODO state, headline and body
-   text.  Entries for further action are tagged as =FLAGGED=.  Org
-   marks entries with problems with an error message in the inbox.
-   They have to be resolved manually.
+2.
+   #+cindex: @samp{FLAGGED}, tag
+   After moving the entries, Org processes changes to the shared
+   files.  Some of them are applied directly and without user
+   interaction.  Examples include changes to tags, TODO state,
+   headline and body text.  Entries requiring further action are
+   tagged as =FLAGGED=.  Org marks entries with problems with an error
+   message in the inbox.  They have to be resolved manually.
 
 3. Org generates an agenda view for flagged entries for user
-   intervention to clean up.  For notes stored in flagged entries,
-   MobileOrg displays them in the echo area when point is on the
-   corresponding agenda item.
+   intervention to clean up.  For notes stored in flagged entries, Org
+   displays them in the echo area when point is on the corresponding
+   agenda item.
 
    - {{{kbd(?)}}} ::
-        #+kindex: ?
 
         Pressing {{{kbd(?)}}} displays the entire flagged note in
         another window.  Org also pushes it to the kill ring.  To
@@ -19403,9 +19408,9 @@ Org integrates its data in an inbox file format.
 #+kindex: ? @r{(Agenda dispatcher)}
 From the agenda dispatcher, {{{kbd(?)}}} returns to the view to finish
 processing flagged entries.  Note that these entries may not be the
-most recent since MobileOrg searches files that were last pulled.  To
-get an updated agenda view with changes since the last pull, pull
-again.
+most recent since the mobile application searches files that were last
+pulled.  To get an updated agenda view with changes since the last
+pull, pull again.
 
 * Hacking
 :PROPERTIES:
@@ -21418,13 +21423,12 @@ through ~word-wrap~.
 [fn:146] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 4 stars, and so
 on.
 
-[fn:147] If Emacs is configured for safe storing of passwords, then
-configure the variable, ~org-mobile-encryption-password~; please read
-the docstring of that variable.
+[fn:147] For a server to host files, consider using a WebDAV server,
+such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
-[fn:148] An alternative is to use a WebDAV server.  MobileOrg
-documentation has details of WebDAV server configuration.  Additional
-help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
+[fn:148] If Emacs is configured for safe storing of passwords, then
+configure the variable ~org-mobile-encryption-password~; please read
+the docstring of that variable.
 
 [fn:149] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
