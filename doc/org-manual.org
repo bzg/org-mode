@@ -21434,7 +21434,7 @@ as their targets.
 
 [fn:150] While creating the agendas, Org mode forces ID properties on
 all referenced entries, so that these entries can be uniquely
-identified if MobileOrg flags them for further action.  To avoid
+identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
 on outline paths, assuming they are unique.
