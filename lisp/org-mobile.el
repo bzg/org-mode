@@ -139,7 +139,7 @@ session."
 (defcustom org-mobile-inbox-for-pull "~/org/from-mobile.org"
   "The file where captured notes and flags will be appended to.
 During the execution of `org-mobile-pull', the file
-`org-mobile-capture-file' will be emptied it's contents have
+`org-mobile-capture-file' is emptied as soon as its contents have
 been appended to the file given here.  This file should be in
 `org-directory', and not in the staging area or on the web server."
   :group 'org-mobile
