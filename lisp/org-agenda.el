@@ -2395,6 +2395,7 @@ The following commands are available:
 (define-key org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
+(org-defkey org-agenda-mode-map "\C-c\C-xI" 'org-info-find-node)
 
 (org-defkey org-agenda-mode-map [mouse-2] 'org-agenda-goto-mouse)
 (org-defkey org-agenda-mode-map [mouse-3] 'org-agenda-show-mouse)

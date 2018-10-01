@@ -18962,6 +18962,22 @@ further based on their usage needs.  For example, the normal
 | {{{kbd(C-S-LEFT)}}}  | {{{kbd(C-c C-x LEFT)}}}  |              |                      |
 | {{{kbd(C-S-RIGHT)}}} | {{{kbd(C-c C-x RIGHT)}}} |              |                      |
 
+** Context Dependent Documentation
+:PROPERTIES:
+:DESCRIPTION: Get Documentation for Context.
+:ALT_TITLE: Documentation
+:END:
+#+cindex: documentation
+#+cindex: Info
+#+findex: org-info-find-node
+
+{{{kbd(C-c C-x C-i)}}} tries to open a suitable section of the Org
+info documentation depending on the Org element at point.  For example
+on a headline the info documentation about the Org document structure
+appears.
+
+{{{kbd(q)}}} closes the info window.
+
 ** Interaction with Other Packages
 :PROPERTIES:
 :DESCRIPTION: With other Emacs packages.

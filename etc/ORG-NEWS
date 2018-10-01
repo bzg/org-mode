@@ -91,7 +91,7 @@ changed.  This is an excerpt of the new docstring:
 : When set to ‘default’, bind the function to ‘c’, but only if it is
 : available in the Calendar keymap.  This is the default choice because
 : ‘c’ can then be used to switch back and forth between agenda and calendar.
-: 
+:
 : When nil, ‘org-calendar-goto-agenda’ is not bound to any key.
 
 Check the full docstring for more.
@@ -101,7 +101,7 @@ Check the full docstring for more.
 Here is the new docstring:
 
 : (org-set-effort &optional INCREMENT VALUE)
-: 
+:
 : Set the effort property of the current entry.
 : If INCREMENT is non-nil, set the property to the next allowed
 : value.  Otherwise, if optional argument VALUE is provided, use
@@ -344,6 +344,13 @@ Browse https://orgmode.org/Changes.html to let users read informations
 about the last major release.
 
 There is a new menu entry for this in the "Documentation" menu item.
+
+*** ~org-info-find-node~
+
+From an Org file or an agenda switch to a suitable info page depending
+on the context.
+
+The function is bound to =C-c C-x I=.
 
 ** Removed commands and functions
 *** ~org-outline-overlay-data~
