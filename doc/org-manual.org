@@ -185,9 +185,9 @@ to globally available keys, like the ones reserved for users (see
 bindings, please modify the keys to your own liking.
 
 #+begin_src emacs-lisp
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cc" 'org-capture)
+(global-set-key (kbd "C-c l") 'org-store-link)
+(global-set-key (kbd "C-c a") 'org-agenda)
+(global-set-key (kbd "C-c c") 'org-capture)
 #+end_src
 
 #+cindex: Org mode, turning on
