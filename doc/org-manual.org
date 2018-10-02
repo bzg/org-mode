@@ -18964,17 +18964,17 @@ further based on their usage needs.  For example, the normal
 
 ** Context Dependent Documentation
 :PROPERTIES:
-:DESCRIPTION: Get Documentation for Context.
-:ALT_TITLE: Documentation
+:DESCRIPTION: Jump to Documentation for Context.
+:ALT_TITLE: Documentation Access
 :END:
 #+cindex: documentation
 #+cindex: Info
 #+findex: org-info-find-node
 
-{{{kbd(C-c C-x C-i)}}} tries to open a suitable section of the Org
-info documentation depending on the Org element at point.  For example
-on a headline the info documentation about the Org document structure
-appears.
+{{{kbd(C-c C-x C-i)}}} in an Org file tries to open a suitable section
+of the Org info documentation depending on the Org element at point.
+For example on a headline the info documentation about the Org
+document structure appears.
 
 {{{kbd(q)}}} closes the info window.
 

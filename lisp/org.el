@@ -18984,7 +18984,6 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;; All the other keys
 (org-defkey org-mode-map (kbd "|") #'org-force-self-insert)
-(org-defkey org-mode-map (kbd "C-c C-a") #'org-show-all)
 (org-defkey org-mode-map (kbd "C-c C-r") #'org-reveal)
 (org-defkey org-mode-map (kbd "C-M-t") #'org-transpose-element)
 (org-defkey org-mode-map (kbd "M-}") #'org-forward-element)
@@ -19072,11 +19071,9 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "M-h") #'org-mark-element)
 (org-defkey org-mode-map (kbd "ESC h") #'org-mark-element)
 (org-defkey org-mode-map (kbd "C-c C-*") #'org-list-make-subtree)
-
 (org-defkey org-mode-map (kbd "C-c C-x C-w") #'org-cut-special)
 (org-defkey org-mode-map (kbd "C-c C-x M-w") #'org-copy-special)
 (org-defkey org-mode-map (kbd "C-c C-x C-y") #'org-paste-special)
-
 (org-defkey org-mode-map (kbd "C-c C-x C-t") #'org-toggle-time-stamp-overlays)
 (org-defkey org-mode-map (kbd "C-c C-x C-i") #'org-clock-in)
 (org-defkey org-mode-map (kbd "C-c C-x C-x") #'org-clock-in-last)
@@ -19105,16 +19102,12 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-x _") #'org-timer-stop)
 (org-defkey org-mode-map (kbd "C-c C-x ;") #'org-timer-set-timer)
 (org-defkey org-mode-map (kbd "C-c C-x ,") #'org-timer-pause-or-continue)
+(org-defkey org-mode-map (kbd "C-c C-x C-c") #'org-columns)
+(org-defkey org-mode-map (kbd "C-c C-x !") #'org-reload)
+(org-defkey org-mode-map (kbd "C-c C-x g") #'org-feed-update-all)
+(org-defkey org-mode-map (kbd "C-c C-x G") #'org-feed-goto-inbox)
+(org-defkey org-mode-map (kbd "C-c C-x [") #'org-reftex-citation)
 (org-defkey org-mode-map (kbd "C-c C-x I") #'org-info-find-node)
-
-(define-key org-mode-map (kbd "C-c C-x C-c") #'org-columns)
-
-(define-key org-mode-map (kbd "C-c C-x !") #'org-reload)
-
-(define-key org-mode-map (kbd "C-c C-x g") #'org-feed-update-all)
-(define-key org-mode-map (kbd "C-c C-x G") #'org-feed-goto-inbox)
-
-(define-key org-mode-map (kbd "C-c C-x [") #'org-reftex-citation)
 
 
 ;;; Speed commands
