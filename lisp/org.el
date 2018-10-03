@@ -23669,8 +23669,7 @@ Started from `gnus-info-find-node'."
           ((eq 'org-mode major-mode)
            (let* ((context (org-element-at-point))
                   (element-info-nodes ; compare to `org-element-all-elements'.
-                   `(
-                     (babel-call . "(org) Evaluating Code Blocks")
+                   `((babel-call . "(org) Evaluating Code Blocks")
                      (center-block . "(org) Paragraphs")
                      (clock . ,default-org-info-node)
                      (comment . "(org) Comment Lines")
@@ -23699,8 +23698,7 @@ Started from `gnus-info-find-node'."
                      (src-block . "(org) Working with Source Code")
                      (table . "(org) Tables")
                      (table-row . "(org) Tables")
-                     (verse-block . "(org) Paragraphs")
-                     )))
+                     (verse-block . "(org) Paragraphs"))))
              (or (cdr (assoc (car context) element-info-nodes))
                  default-org-info-node)))
           (t default-org-info-node))))))
