@@ -1784,33 +1784,38 @@ Replaces invalid characters with \"_\"."
 (defun org-html-footnote-section (info)
   "Format the footnote section.
 INFO is a plist used as a communication channel."
-  (let* ((fn-alist (org-export-collect-footnote-definitions info))
-	 (fn-alist
-	  (cl-loop for (n _type raw) in fn-alist collect
-		   (cons n (if (eq (org-element-type raw) 'org-data)
-			       (org-trim (org-export-data raw info))
-			     (format "<div class=\"footpara\">%s</div>"
-				     (org-trim (org-export-data raw info))))))))
-    (when fn-alist
+  (pcase (org-export-collect-footnote-definitions info)
+    (`nil nil)
+    (definitions
       (format
        (plist-get info :html-footnotes-section)
        (org-html--translate "Footnotes" info)
        (format
 	"\n%s\n"
 	(mapconcat
-	 (lambda (fn)
-	   (let ((n (car fn)) (def (cdr fn)))
-	     (format
-	      "<div class=\"footdef\">%s %s</div>\n"
-	      (format
-	       (plist-get info :html-footnote-format)
-	       (org-html--anchor
-		(format "fn.%d" n)
-		n
-		(format " class=\"footnum\" href=\"#fnr.%d\"" n)
-		info))
-	      def)))
-	 fn-alist
+	 (lambda (definition)
+	   (pcase definition
+	     (`(,n ,_ ,def)
+	      ;; `org-export-collect-footnote-definitions' can return
+	      ;; two kinds of footnote definitions: inline and blocks.
+	      ;; Since this should not make any difference in the HTML
+	      ;; output, we wrap the inline definitions within
+	      ;; a "footpara" class paragraph.
+	      (let ((inline? (not (org-element-map def org-element-all-elements
+				    #'identity nil t)))
+		    (anchor (org-html--anchor
+			     (format "fn.%d" n)
+			     n
+			     (format " class=\"footnum\" href=\"#fnr.%d\"" n)
+			     info))
+		    (contents (org-trim (org-export-data def info))))
+		(format "<div class=\"footdef\">%s %s</div>\n"
+			(format (plist-get info :html-footnote-format) anchor)
+			(format "<div class=\"footpara\">%s</div>"
+				(if (not inline?) contents
+				  (format "<p class=\"footpara\">%s</p>"
+					  contents))))))))
+	 definitions
 	 "\n"))))))
 
 
