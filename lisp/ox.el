@@ -4028,19 +4028,19 @@ inherited from parent headlines and FILETAGS keywords."
        ;; Add FILETAGS keywords and return results.
        (org-uniquify (append (plist-get info :filetags) current-tag-list))))))
 
-(defun org-export-get-node-property (property blob &optional inherited)
-  "Return node PROPERTY value for BLOB.
+(defun org-export-get-node-property (property datum &optional inherited)
+  "Return node PROPERTY value for DATUM.
 
-PROPERTY is an upcase symbol (i.e. `:COOKIE_DATA').  BLOB is an
+PROPERTY is an upcase symbol (e.g., `:COOKIE_DATA').  DATUM is an
 element or object.
 
 If optional argument INHERITED is non-nil, the value can be
 inherited from a parent headline.
 
 Return value is a string or nil."
-  (let ((headline (if (eq (org-element-type blob) 'headline) blob
-		    (org-export-get-parent-headline blob))))
-    (if (not inherited) (org-element-property property blob)
+  (let ((headline (if (eq (org-element-type datum) 'headline) datum
+		    (org-export-get-parent-headline datum))))
+    (if (not inherited) (org-element-property property datum)
       (let ((parent headline))
 	(catch 'found
 	  (while parent
