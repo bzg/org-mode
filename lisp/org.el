@@ -3492,9 +3492,9 @@ on a per-file basis, insert anywhere in the file:
 
 (defcustom org-complete-tags-always-offer-all-agenda-tags nil
   "If non-nil, always offer completion for all tags of all agenda files.
-Instead of customizing this variable directly, you might want to
-set it locally for capture buffers, because there no list of
-tags in that file can be created dynamically (there are none).
+
+Setting this variable locally allows for dynamic generation of tag
+completions in capture buffers.
 
   (add-hook \\='org-capture-mode-hook
             (lambda ()
