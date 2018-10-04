@@ -7457,6 +7457,37 @@ Contents
 	    (org-paste-subtree 3 "* Text")
 	    (buffer-string)))))
 
+(ert-deftest test-org/cut-and-paste-subtree ()
+  "Test `org-cut-subtree' and `org-paste-subtree'."
+  (should
+   (equal
+    "* Two
+two
+* One
+"
+    (org-test-with-temp-text
+     "* One
+<point>* Two
+two
+"
+     (call-interactively #'org-cut-subtree)
+     (goto-char (point-min))
+     (call-interactively #'org-paste-subtree)
+     (buffer-string))))
+  (should
+   (equal
+    "* One
+* Two
+"
+    (org-test-with-temp-text
+     "* One
+<point>* Two
+"
+     (call-interactively #'org-cut-subtree)
+     (backward-char)
+     (call-interactively #'org-paste-subtree)
+     (buffer-string)))))
+
 (provide 'test-org)
 
 ;;; test-org.el ends here
