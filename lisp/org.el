@@ -8209,12 +8209,10 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 	  (force-level
 	   (cond
 	    (level (prefix-numeric-value level))
-	    ;; When point is right after the stars in an otherwise
-	    ;; empty headline, use stars as the forced level.
-	    ((and (looking-at-p "[ \t]*$")
-		  (string-match-p "^\\*+ *"
-				  (buffer-substring (line-beginning-position)
-						    (point))))
+	    ;; When point is after the stars in an otherwise empty
+	    ;; headline, use the number of stars as the forced level.
+	    ((and (org-match-line "^\\*+[ \t]*$")
+		  (not (eq ?* (char-after))))
 	     (org-outline-level))
 	    ((looking-at-p org-outline-regexp-bol) (org-outline-level))))
 	  (previous-level
