@@ -11631,6 +11631,7 @@ neither checks for valid syntax nor changes the contents in any way.
 For example and source blocks, Org code-escapes the contents before
 inclusion.
 
+#+cindex: @samp{minlevel}, include
 If an included file is not specified as having any markup language,
 Org assumes it be in Org format and proceeds as usual with a few
 exceptions.  Org makes the footnote labels (see [[*Creating Footnotes]])
@@ -11645,6 +11646,7 @@ top-level headline:
 
 : #+INCLUDE: "~/my-book/chapter2.org" :minlevel 1
 
+#+cindex: @samp{lines}, include
 Inclusion of only portions of files are specified using ranges
 parameter with =:lines= keyword.  The line at the upper end of the
 range will not be included.  The start and/or the end of the range may
@@ -11664,6 +11666,7 @@ Therefore,
 #+texinfo: @noindent
 includes the first 20 lines of the headline named =conclusion=.
 
+#+cindex: @samp{only-contents}, include
 To extract only the contents of the matched object, set
 =:only-contents= property to non-~nil~.  This omits any planning lines
 or property drawers.  For example, to include the body of the heading
