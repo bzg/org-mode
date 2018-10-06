@@ -882,6 +882,10 @@ removed."
       (substring string (length pre) (- (length post)))
     string))
 
+(defun org-strip-quotes (string)
+  "Strip double quotes from around a string, if applicable."
+  (org-unbracket-string "\"" "\"" string))
+
 (defsubst org-current-line-string (&optional to-here)
   (buffer-substring (point-at-bol) (if to-here (point) (point-at-eol))))
 

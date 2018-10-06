@@ -3135,10 +3135,6 @@ Callers of this function will probably want to add an entry to
       (when (and sym (boundp sym))
 	(defvaralias (intern (concat "org-babel-" var ":" new)) sym)))))
 
-(defun org-babel-strip-quotes (string)
-  "Strip \\\"s from around a string, if applicable."
-  (org-unbracket-string "\"" "\"" string))
-
 (provide 'ob-core)
 
 ;; Local variables:

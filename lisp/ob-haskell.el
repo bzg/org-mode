@@ -74,17 +74,16 @@
 		     (org-babel-variable-assignments:haskell params)))
          (session (org-babel-haskell-initiate-session session params))
 	 (comint-preoutput-filter-functions
-	       (cons 'ansi-color-filter-apply comint-preoutput-filter-functions))
+	  (cons 'ansi-color-filter-apply comint-preoutput-filter-functions))
          (raw (org-babel-comint-with-output
 		  (session org-babel-haskell-eoe t full-body)
                 (insert (org-trim full-body))
                 (comint-send-input nil t)
                 (insert org-babel-haskell-eoe)
                 (comint-send-input nil t)))
-         (results (mapcar
-                   #'org-babel-strip-quotes
-                   (cdr (member org-babel-haskell-eoe
-                                (reverse (mapcar #'org-trim raw)))))))
+         (results (mapcar #'org-strip-quotes
+			  (cdr (member org-babel-haskell-eoe
+                                       (reverse (mapcar #'org-trim raw)))))))
     (org-babel-reassemble-table
      (let ((result
             (pcase result-type
