@@ -4895,8 +4895,8 @@ within curly brackets.  Here is an expanded example:
 Searching for the tag =Project= now lists all tags also including
 regular expression matches for =P@.+=, and similarly for tag searches
 on =Vision=, =Goal= and =AOF=.  For example, this would work well for
-a project tagged with a common project-identifier,
-e.g. =P@2014_OrgTags=.
+a project tagged with a common project-identifier, e.g.,
+=P@2014_OrgTags=.
 
 #+kindex: C-c C-x q
 #+findex: org-toggle-tags-groups
@@ -7824,8 +7824,8 @@ capture template associated to the =X= key with them.
 
 : emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
 
-To use this feature, add a bookmark with an arbitrary name, e.g.
-=Org: capture= and enter this as =Location=:
+To use this feature, add a bookmark with an arbitrary name, e.g.,
+=Org: capture=, and enter this as =Location=:
 
 #+begin_example
 javascript:location.href='org-protocol://capture?template=x'+
