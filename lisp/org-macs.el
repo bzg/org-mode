@@ -887,7 +887,11 @@ removed."
   (org-unbracket-string "\"" "\"" string))
 
 (defsubst org-current-line-string (&optional to-here)
-  (buffer-substring (point-at-bol) (if to-here (point) (point-at-eol))))
+  "Return current line, as a string.
+If optional argument TO-HERE is non-nil, return string from
+beginning of line up to point."
+  (buffer-substring (line-beginning-position)
+		    (if to-here (point) (line-end-position))))
 
 (defun org-shorten-string (s maxlength)
   "Shorten string S so that it is no longer than MAXLENGTH characters.
