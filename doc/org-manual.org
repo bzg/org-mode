@@ -21443,8 +21443,8 @@ do not want to do this.
 to remove code evaluation from the {{{kbd(C-c C-c)}}} key binding.
 
 [fn:137] Actually, the constructs =call_<name>()= and =src_<lang>{}=
-are not evaluated when they appear in a keyword line---i.e. lines
-starting with =#+KEYWORD:=, see [[*Summary of In-Buffer Settings]].
+are not evaluated when they appear in a keyword (see [[*Summary of
+In-Buffer Settings]]).
 
 [fn:138] Due to the way this header argument is implemented, it
 implies ":results file".  Therefore if it is set for multiple blocks
