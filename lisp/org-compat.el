@@ -460,6 +460,9 @@ use of this function is for the stuck project list."
 	   (debug (body)))
   `(with-silent-modifications ,@body))
 
+(define-obsolete-function-alias 'org-babel-strip-quotes
+  'org-strip-quotes "Org 9.2")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org

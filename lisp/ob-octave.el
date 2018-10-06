@@ -237,13 +237,11 @@ value of the last statement in BODY, as elisp."
       (`output
        (setq results
 	     (if matlabp
-		 (cdr (reverse (delq "" (mapcar
-					 #'org-babel-strip-quotes
-					 (mapcar #'org-trim raw)))))
+		 (cdr (reverse (delq "" (mapcar #'org-strip-quotes
+						(mapcar #'org-trim raw)))))
 	       (cdr (member org-babel-octave-eoe-output
-			    (reverse (mapcar
-				      #'org-babel-strip-quotes
-				      (mapcar #'org-trim raw)))))))
+			    (reverse (mapcar #'org-strip-quotes
+					     (mapcar #'org-trim raw)))))))
        (mapconcat #'identity (reverse results) "\n")))))
 
 (defun org-babel-octave-import-elisp-from-file (file-name)
