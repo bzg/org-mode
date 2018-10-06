@@ -14,6 +14,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 ** Incompatible change
 
+*** ~:file~ header argument no longer assume "file" ~:results~
+
+The "file" ~:results~ value is now mandatory for a code block
+returning a link to a file.  The ~:file~ or ~:file-ext~ header
+arguments no longer imply a "file" result is expected.
+
 *** Plain numbers are hours in Column View mode
 
 See [[git:3367ac9457]] for details.

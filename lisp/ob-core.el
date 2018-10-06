@@ -694,7 +694,8 @@ block."
 			       (not (listp r)))
 			  (list (list r))
 			r)))
-	      (let ((file (cdr (assq :file params))))
+	      (let ((file (and (member "file" result-params)
+			       (cdr (assq :file params)))))
 		;; If non-empty result and :file then write to :file.
 		(when file
 		  ;; If `:results' are special types like `link' or
@@ -2624,19 +2625,6 @@ parameters when merging lists."
 				  results
 				  (split-string
 				   (if (stringp value) value (eval value t))))))
-	  (`(,(or :file :file-ext) . ,value)
-	   ;; `:file' and `:file-ext' are regular keywords but they
-	   ;; imply a "file" `:results' and a "results" `:exports'.
-	   (when value
-	     (setq results
-		   (funcall merge results-exclusive-groups results '("file")))
-	     (unless (or (member "both" exports)
-			 (member "none" exports)
-			 (member "code" exports))
-	       (setq exports
-		     (funcall merge
-			      exports-exclusive-groups exports '("results"))))
-	     (push pair params)))
 	  (`(:exports . ,value)
 	   (setq exports (funcall merge
 				  exports-exclusive-groups
