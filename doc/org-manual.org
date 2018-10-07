@@ -2790,12 +2790,13 @@ and makes use of these features:
 ,#+TBLFM: $6=vsum($P1..$P3)::$7=10*$Tot/$max;%.1f::$at=vmean(@-II..@-I);%.1f
 #+end_example
 
-#+texinfo: @noindent
-*Important*: please note that for these special tables, recalculating
-the table with {{{kbd(C-u C-c *)}}} only affects rows that are marked
-=#= or =*=, and fields that have a formula assigned to the field
-itself.  The column formulas are not applied in rows with empty first
-field.
+#+attr_texinfo: :tag Important
+#+begin_quote
+Please note that for these special tables, recalculating the table
+with {{{kbd(C-u C-c *)}}} only affects rows that are marked =#= or
+=*=, and fields that have a formula assigned to the field itself.  The
+column formulas are not applied in rows with empty first field.
+#+end_quote
 
 #+cindex: marking characters, tables
 The marking characters have the following meaning:
@@ -6108,15 +6109,16 @@ immediately after the task they refer to.
      ~org-agenda-skip-scheduled-delay-if-deadline~ for details on how
      to control this globally or per agenda.
 
-     #+texinfo: @noindent
-     *Important:* Scheduling an item in Org mode should /not/ be
-     understood in the same way that we understand /scheduling
-     a meeting/.  Setting a date for a meeting is just a simple
-     appointment, you should mark this entry with a simple plain
-     timestamp, to get this item shown on the date where it applies.
-     This is a frequent misunderstanding by Org users.  In Org mode,
-     /scheduling/ means setting a date when you want to start working
-     on an action item.
+     #+attr_texinfo: :tag Important
+     #+begin_quote
+     Scheduling an item in Org mode should /not/ be understood in the
+     same way that we understand /scheduling a meeting/.  Setting
+     a date for a meeting is just a simple appointment, you should
+     mark this entry with a simple plain timestamp, to get this item
+     shown on the date where it applies.  This is a frequent
+     misunderstanding by Org users.  In Org mode, /scheduling/ means
+     setting a date when you want to start working on an action item.
+     #+end_quote
 
 You may use timestamps with repeaters in scheduling and deadline
 entries.  Org mode issues early and late warnings based on the
