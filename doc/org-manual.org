@@ -6219,7 +6219,7 @@ organize such tasks using a so-called repeater in a =DEADLINE=,
    DEADLINE: <2005-10-01 Sat +1m>
 #+end_example
 
-#+texinfo: noindent
+#+texinfo: @noindent
 the =+1m= is a repeater; the intended interpretation is that the task
 has a deadline on =<2005-10-01>= and repeats itself every (one) month
 starting from that time.  You can use yearly, monthly, weekly, daily
@@ -6904,7 +6904,7 @@ time.  For a specific buffer you can use:
 ,#+COLUMNS: %40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM
 #+end_example
 
-#+texinfo: noindent
+#+texinfo: @noindent
 #+vindex: org-global-properties
 #+vindex: org-columns-default-format
 or, even better, you can set up these values globally by customizing
