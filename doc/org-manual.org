@@ -280,7 +280,6 @@ information about:
 2. What did you expect to happen?
 3. What happened instead?
 
-#+texinfo: @noindent
 Thank you for helping to improve this program.
 
 *** How to create a useful backtrace
@@ -420,9 +419,8 @@ example:
 #+end_example
 
 #+vindex: org-footnote-section
-#+texinfo: @noindent
-Note that the name defined in ~org-footnote-section~ is reserved.  Do
-not use it as a title for your own headings.
+The name defined in ~org-footnote-section~ is reserved.  Do not use it
+as a title for your own headings.
 
 Some people find the many stars too noisy and would prefer an outline
 that has whitespace followed by a single star as headline starters.
@@ -582,7 +580,6 @@ buffer:
 #+end_example
 
 #+cindex: @samp{VISIBILITY}, property
-#+texinfo: @noindent
 Furthermore, any entries with a =VISIBILITY= property (see [[*Properties
 and Columns]]) get their visibility adapted accordingly.  Allowed values
 for this property are =folded=, =children=, =content=, and ~all~.
@@ -966,7 +963,6 @@ commands can be accessed through a dispatcher:
      Jump to the previous sparse tree match in this buffer.
 
 #+vindex: org-agenda-custom-commands
-#+texinfo: @noindent
 For frequently used sparse trees of specific search strings, you can
 use the variable ~org-agenda-custom-commands~ to define fast keyboard
 access to specific sparse trees.  These commands will then be
@@ -1323,7 +1319,6 @@ yourself.  This is handled by the variable ~org-footnote-auto-label~
 and its corresponding =STARTUP= keywords.  See the docstring of that
 variable for details.
 
-#+texinfo: @noindent
 The following command handles footnotes:
 
 - {{{kbd(C-c C-x f)}}} ::
@@ -1748,7 +1743,6 @@ case, you can always align manually a table:
      #+findex: org-table-align
      Align the current table.
 
-#+texinfo: @noindent
 #+vindex: org-startup-align-all-tables
 Setting the option ~org-startup-align-all-tables~ re-aligns all tables
 in a file upon visiting it.  You can also set this option on
@@ -2055,7 +2049,6 @@ a line like this example:
 
 : #+CONSTANTS: c=299792458. pi=3.14 eps=2.4e-6
 
-#+texinfo: @noindent
 #+vindex: constants-unit-system
 #+pindex: constants.el
 Also, properties (see [[*Properties and Columns]]) can be used as
@@ -2175,7 +2168,6 @@ variable ~org-calc-default-modes~.
 
      Literal, for Lisp formulas only.  See the next section.
 
-#+texinfo: @noindent
 Unless you use large integer numbers or high-precision calculation and
 display for floating point numbers you may alternatively provide
 a ~printf~ format specifier to reformat the Calc result after it has
@@ -2673,9 +2665,9 @@ Pressing {{{kbd(C-c C-c)}}} in the line of =#+TBLFM: $2=$1*2= yields:
 #+end_example
 
 #+texinfo: @noindent
-Note: If you recalculate this table, with {{{kbd(C-u C-c *)}}}, for
-example, you get the following result from applying only the first
-=TBLFM= keyword.
+If you recalculate this table, with {{{kbd(C-u C-c *)}}}, for example,
+you get the following result from applying only the first =TBLFM=
+keyword.
 
 #+begin_example
 | x | y |
@@ -3034,7 +3026,6 @@ or alternatively
 
 : [[LINK]]
 
-#+texinfo: @noindent
 Once a link in the buffer is complete (all brackets present), Org
 changes the display so that =DESCRIPTION= is displayed instead of
 =[[LINK][DESCRIPTION]]= and =LINK= is displayed instead of =[[LINK]]=.  Links are be
@@ -3214,7 +3205,6 @@ Format]]), for example:
 
 : [[http://www.gnu.org/software/emacs/][GNU Emacs]]
 
-#+texinfo: @noindent
 If the description is a file name or URL that points to an image, HTML
 export (see [[*HTML Export]]) inlines the image as a clickable button.  If
 there is no description at all and the link points to an image, that
@@ -3524,7 +3514,6 @@ can define them in the file with
 ,#+LINK: google    http://www.google.com/search?q=%s
 #+end_example
 
-#+texinfo: @noindent
 In-buffer completion (see [[*Completion]]) can be used after =[= to
 complete link abbreviations.  You may also define a Lisp function that
 implements special (e.g., completion) support for inserting such a
@@ -3648,7 +3637,6 @@ for example:
 
 : *** TODO Write letter to Sam Fortune
 
-#+texinfo: @noindent
 The most important commands to work with TODO entries are:
 
 - {{{kbd(C-c C-t)}}} (~org-todo~) ::
@@ -3725,7 +3713,6 @@ The most important commands to work with TODO entries are:
      Insert a new TODO entry below the current one.
 
 #+vindex: org-todo-state-tags-triggers
-#+texinfo: @noindent
 Changing a TODO state can also trigger tag changes.  See the docstring
 of the option ~org-todo-state-tags-triggers~ for details.
 
@@ -3911,7 +3898,6 @@ anywhere in the file:
 
 : #+TODO: TODO FEEDBACK VERIFY | DONE CANCELED
 
-#+texinfo: @noindent
 You may also write =#+SEQ_TODO= to be explicit about the
 interpretation, but it means the same as =#+TODO=, or
 
@@ -3927,7 +3913,6 @@ A setup for using several sets in parallel would be:
 
 #+cindex: completion, of option keywords
 #+kindex: M-TAB
-#+texinfo: @noindent
 To make sure you are using the correct keyword, type =#+= into the
 buffer and then use {{{kbd(M-TAB)}}} to complete it (see [[*Completion]]).
 
@@ -4130,7 +4115,6 @@ to record a timestamp without a note for TODO keywords configured with
 =@=, just type {{{kbd(C-c C-c)}}} to enter a blank note when prompted.
 
 #+vindex: org-log-done
-#+texinfo: @noindent
 You not only define global TODO keywords and fast access keys, but
 also request that a time is recorded when the entry is set to =DONE=,
 and that a note is recorded when switching to =WAIT= or
@@ -4297,7 +4281,6 @@ like this
 : *** TODO [#A] Write letter to Sam Fortune
 
 #+vindex: org-priority-faces
-#+texinfo: @noindent
 By default, Org mode supports three priorities: =A=, =B=, and =C=.
 =A= is the highest priority.  An entry without a cookie is treated as
 equivalent if it had priority =B=.  Priorities make a difference only
@@ -4467,7 +4450,6 @@ If the current outline node has an =ORDERED= property, checkboxes must
 be checked off in sequence, and an error is thrown if you try to check
 off a box while there are unchecked boxes above it.
 
-#+texinfo: @noindent
 The following commands work with checkboxes:
 
 - {{{kbd(C-c C-c)}}} (~org-toggle-checkbox~) ::
@@ -4583,7 +4565,6 @@ surrounds the entire file.  Use a line like this[fn:52]
 
 #+vindex: org-use-tag-inheritance
 #+vindex: org-tags-exclude-from-inheritance
-#+texinfo: @noindent
 To limit tag inheritance to specific tags, or to turn it off entirely,
 use the variables ~org-use-tag-inheritance~ and
 ~org-tags-exclude-from-inheritance~.
@@ -4682,13 +4663,11 @@ case you can set something like:
 (setq org-tag-alist '(("@work" . ?w) ("@home" . ?h) ("laptop" . ?l)))
 #+end_src
 
-#+texinfo: @noindent
 If the tag is only relevant to the file you are working on, then you
 can instead set the =TAGS= keyword as:
 
 : #+TAGS: @work(w)  @home(h)  @tennisclub(t)  laptop(l)  pc(p)
 
-#+texinfo: @noindent
 The tags interface shows the available tags in a splash window.  If
 you want to start a new line after a specific tag, insert =\n= into
 the tag list
@@ -4703,7 +4682,6 @@ or write them in two lines:
 ,#+TAGS: laptop(l)  pc(p)
 #+end_example
 
-#+texinfo: @noindent
 You can also group together tags that are mutually exclusive by using
 braces, as in:
 
@@ -4713,11 +4691,9 @@ braces, as in:
 you indicate that at most one of =@work=, =@home=, and =@tennisclub=
 should be selected.  Multiple such groups are allowed.
 
-#+texinfo: @noindent
 Do not forget to press {{{kbd(C-c C-c)}}} with point in one of these
 lines to activate any changes.
 
-#+texinfo: @noindent
 To set these mutually exclusive groups in the variable
 ~org-tags-alist~, you must use the dummy tags ~:startgroup~ and
 ~:endgroup~ instead of the braces.  Similarly, you can use ~:newline~
@@ -4785,7 +4761,6 @@ In this interface, you can also use the following special keys:
      using expert mode, the first {{{kbd(C-c)}}} displays the
      selection window.
 
-#+texinfo: @noindent
 This method lets you assign tags to a headline with very few keys.
 With the above setup, you could clear the current tags and set
 =@home=, =laptop= and =pc= tags with just the following keys:
@@ -5067,7 +5042,6 @@ Note that a property can only have one entry per drawer.
 Property values set with the global variable ~org-global-properties~
 can be inherited by all entries in all Org files.
 
-#+texinfo: @noindent
 The following commands help to work with properties:
 
 #+attr_texinfo: :sep ,
@@ -5392,7 +5366,6 @@ optional.  The individual parts have the following meaning:
      | =@mean=  | Arithmetic mean of ages (in days/hours/mins/seconds). |
      | =est+=   | Add low-high estimates.                               |
 
-     #+texinfo: @noindent
      #+vindex: org-columns-summary-types
      You can also define custom summary types by setting
      ~org-columns-summary-types~.
@@ -5584,7 +5557,6 @@ this block looks like this:
 ,#+END:
 #+end_example
 
-#+texinfo: @noindent
 This dynamic block has the following parameters:
 
 - =:id= ::
@@ -5636,7 +5608,6 @@ This dynamic block has the following parameters:
 
      When non-~nil~, indent each =ITEM= field according to its level.
 
-#+texinfo: @noindent
 The following commands insert or update the dynamic block:
 
 - {{{kbd(C-c C-x i)}}} (~org-insert-columns-dblock~) ::
@@ -6018,7 +5989,6 @@ it by customizing the variables ~org-display-custom-times~ and
      #+findex: org-toggle-time-stamp-overlays
      Toggle the display of custom formats for dates and times.
 
-#+texinfo: @noindent
 Org mode needs the default format for scanning, so the custom
 date/time format does not /replace/ the default format.  Instead, it
 is put /over/ the default format using text properties.  This has the
@@ -6541,14 +6511,12 @@ into the buffer with the {{{kbd(C-c C-x C-r)}}} command:
 ,#+END: clocktable
 #+end_example
 
-#+texinfo: @noindent
 #+vindex: org-clocktable-defaults
 The =#+BEGIN= line and specify a number of options to define the
 scope, structure, and formatting of the report.  Defaults for all
 these options can be configured in the variable
 ~org-clocktable-defaults~.
 
-#+texinfo: @noindent
 First there are options that determine which clock entries are to
 be selected:
 
@@ -6561,16 +6529,16 @@ be selected:
 
      The scope to consider.  This can be any of the following:
 
-     | ~nil~                  | the current buffer or narrowed region                               |
-     | ~file~                 | the full current buffer                                             |
-     | ~subtree~              | the subtree where the clocktable is located                         |
-     | ~treeN~                | the surrounding level N tree, for example =tree3=                   |
-     | ~tree~                 | the surrounding level 1 tree                                        |
-     | ~agenda~               | all agenda files                                                    |
+     | =nil=                  | the current buffer or narrowed region                               |
+     | =file=                 | the full current buffer                                             |
+     | =subtree=              | the subtree where the clocktable is located                         |
+     | =treeN=                | the surrounding level N tree, for example =tree3=                   |
+     | =tree=                 | the surrounding level 1 tree                                        |
+     | =agenda=               | all agenda files                                                    |
      | =("file" ...)=         | scan these files                                                    |
      | =FUNCTION=             | scan files returned by calling {{{var(FUNCTION)}}} with no argument |
-     | ~file-with-archives~   | current file and its archives                                       |
-     | ~agenda-with-archives~ | all agenda files, including archives                                |
+     | =file-with-archives=   | current file and its archives                                       |
+     | =agenda-with-archives= | all agenda files, including archives                                |
 
 - =:block= ::
 
@@ -6583,11 +6551,11 @@ be selected:
      | =2007-W50=                              | ISO-week 50 in 2007   |
      | =2007-Q2=                               | 2nd quarter in 2007   |
      | =2007=                                  | the year 2007         |
-     | ~today~, ~yesterday~, ~today-N~         | a relative day        |
-     | ~thisweek~, ~lastweek~, ~thisweek-N~    | a relative week       |
-     | ~thismonth~, ~lastmonth~, ~thismonth-N~ | a relative month      |
-     | ~thisyear~, ~lastyear~, ~thisyear-N~    | a relative year       |
-     | ~untilnow~                              | all clocked time ever |
+     | =today=, =yesterday=, =today-N=         | a relative day        |
+     | =thisweek=, =lastweek=, =thisweek-N=    | a relative week       |
+     | =thismonth=, =lastmonth=, =thismonth-N= | a relative month      |
+     | =thisyear=, =lastyear=, =thisyear-N=    | a relative year       |
+     | =untilnow=                              | all clocked time ever |
 
      #+vindex: org-clock-display-default-range
      When this option is not set, Org falls back to the value in
@@ -7199,7 +7167,6 @@ Now lets look at the elements of a template definition.  Each entry in
      ("b" "Templates for marking stuff to buy")
      #+end_src
 
-     #+texinfo: @noindent
      If you do not define a template for the {{{kbd(C)}}} key, this
      key opens the Customize buffer for this complex variable.
 
@@ -7500,7 +7467,6 @@ here:
 
      After completing the template, position point here.
 
-#+texinfo: @noindent
 #+vindex: org-store-link-props
 For specific link types, the following keywords are defined[fn:84]:
 
@@ -7574,7 +7540,6 @@ your choice to an entry.  You can also make children inherit the
 attachment directory from a parent, so that an entire subtree uses the
 same attached directory.
 
-#+texinfo: @noindent
 The following commands deal with attachments:
 
 - {{{kbd(C-c C-a)}}} (~org-attach~) ::
@@ -8093,7 +8058,6 @@ example:
 #+cindex: @samp{ARCHIVE}, keyword
 : #+ARCHIVE: %s_done::
 
-#+texinfo: @noindent
 #+cindex: ARCHIVE, property
 If you would like to have a special archive location for a single
 entry or a (sub)tree, give the entry an =ARCHIVE= property with the
@@ -8218,7 +8182,6 @@ a separate buffer.  Seven different view types are provided:
 - /custom views/ that are special searches and combinations of
   different views.
 
-#+texinfo: @noindent
 The extracted information is displayed in a special /agenda buffer/.
 This buffer is read-only, but provides commands to visit the
 corresponding locations in the original Org files, and even to edit
@@ -8317,9 +8280,8 @@ scope for an extended period, use the following commands:
      #+findex: org-agenda-remove-restriction-lock
      Remove the restriction created by {{{kbd(C-c C-x <)}}}.
 
-#+texinfo: @noindent
-When working with =speedbar.el=, you can use the following commands in
-the Speedbar frame:
+When working with Speedbar, you can use the following commands in the
+Speedbar frame:
 
 - {{{kbd(<)}}} (~org-speedbar-set-agenda-restriction~) ::
 
@@ -8979,17 +8941,14 @@ this:
 
 : #+CATEGORY: Thesis
 
-#+texinfo: @noindent
 #+cindex: @samp{CATEGORY}, property
 If you would like to have a special category for a single entry or
 a (sub)tree, give the entry a =CATEGORY= property with the special
 category you want to apply as the value.
 
-#+texinfo: @noindent
 The display in the agenda buffer looks best if the category is not
 longer than 10 characters.
 
-#+texinfo: @noindent
 #+vindex: org-agenda-category-icon-alist
 You can set up icons for category by customizing the
 ~org-agenda-category-icon-alist~ variable.
@@ -10442,7 +10401,6 @@ the black-and-white printer.  Settings specified in
 #+texinfo: @noindent
 but the settings in ~org-agenda-custom-commands~ take precedence.
 
-#+texinfo: @noindent
 From the command line you may also use:
 
 #+begin_src shell
@@ -11120,7 +11078,6 @@ back-ends:
 - /texinfo/ (Texinfo format)
 - /man/ (Man page format)
 
-#+texinfo: @noindent
 Users can install libraries for additional formats from the Emacs
 packaging system. For easy discovery, these packages have a common
 naming scheme: ~ox-NAME~, where {{{var(NAME)}}} is a format.  For
@@ -12652,9 +12609,8 @@ accessibility standards.
 [[./img/a.jpg]]
 #+end_example
 
-#+texinfo: @noindent
-The HTML export back-end copies the =http= links from the Org file as
-is.
+The HTML export back-end copies the =http= links from the Org file
+as-is.
 
 *** Math formatting in HTML export
 :PROPERTIES:
@@ -12901,7 +12857,6 @@ options described below:
      Should view-toggle buttons be everywhere?  When =nil= (the
      default), only one such button is present.
 
-#+texinfo: @noindent
 #+vindex: org-infojs-options
 #+vindex: org-export-html-use-infojs
 You can choose default values for these options by customizing the
@@ -13341,7 +13296,6 @@ attribute to one of the following:
 
      To avoid a =:float= even if using a caption.
 
-#+texinfo: @noindent
 Use the =placement= attribute to modify a floating environment's
 placement.
 
@@ -18872,7 +18826,6 @@ uses only one star and indents text to line with the heading:
 ,* Another top level headline     |    * Another top level headline
 #+end_example
 
-#+texinfo: @noindent
 #+cindex: Indent mode
 #+findex: org-indent-mode
 To turn this mode on, use the minor mode, ~org-indent-mode~.  Text
@@ -18935,7 +18888,6 @@ headings as shown in examples below.
        ...
      #+end_example
 
-     #+texinfo: @noindent
      #+vindex: org-hide, face
      Because Org makes the font color the same as the background color
      to hide to stars, sometimes ~org-hide~ face may need tweaking to
@@ -19325,7 +19277,6 @@ locally just set the variable to point to that directory:
 (setq org-mobile-directory "~/orgmobile/")
 #+end_src
 
-#+texinfo: @noindent
 Alternatively, by using TRAMP (see [[info:tramp][TRAMP User Manual]]),
 ~org-mobile-directory~ may point to a remote directory accessible
 through, for example, SSH and SCP:
@@ -19667,7 +19618,6 @@ If the mode is C, then:
 /* END RECEIVE ORGTBL table_name */
 #+end_example
 
-#+texinfo: @noindent
 At the location of source, Org needs a special line to direct Orgtbl
 to translate and to find the target for inserting the translated
 table.  For example:
@@ -19696,7 +19646,6 @@ called:
      translator function, which then skips columns as specified in
      =skipcols=.
 
-#+texinfo: @noindent
 To keep the source table intact in the buffer without being disturbed
 when the source file is compiled or otherwise being worked on, use one
 of these strategies:
@@ -19756,7 +19705,6 @@ features[fn:154]:
 \end{comment}
 #+end_example
 
-#+texinfo: @noindent
 After editing, {{{kbd(C-c C-c)}}} inserts the translated table at the
 target location, between the two marker lines.
 
@@ -20174,7 +20122,6 @@ with the following fields:
 - priority-l :: The priority letter if any was given
 - priority-n :: The computed numerical priority
 
-#+texinfo: @noindent
 If the selection of the agenda item was based on a timestamp,
 including those items with =DEADLINE= and =SCHEDULED= keywords, then
 Org includes date and time in the output.
@@ -20523,7 +20470,6 @@ Before I get to this list, a few special mentions are in order:
      Org using an Info-like or a folding interface with single-key
      navigation.
 
-#+texinfo: @noindent
 See below for the full list of contributions! Again, please let me
 know what I am missing here!
 
