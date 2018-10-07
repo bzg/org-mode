@@ -14852,6 +14852,35 @@ and specify the text using Texinfo code, as shown in the example:
 [[ridt.pdf]]
 #+end_example
 
+*** Quotations in Texinfo export
+:PROPERTIES:
+:DESCRIPTION: Quote block attributes.
+:END:
+
+#+cindex: @samp{ATTR_TEXINFO}, keyword
+You can write the text of a quotation within a quote block (see
+[[*Paragraphs]]).  You may also emphasize some text at the beginning of
+the quotation with the =:tag= attribute.
+
+#+begin_example
+,#+ATTR_TEXINFO: :tag Warning
+,#+BEGIN_QUOTE
+Striking your thumb with a hammer may cause severe pain and discomfort.
+,#+END_QUOTE
+#+end_example
+
+To specify the author of the quotation, use the =:author= attribute.
+
+#+begin_example
+,#+ATTR_TEXINFO: :author King Arthur
+,#+BEGIN_QUOTE
+The Lady of the Lake, her arm clad in the purest shimmering samite,
+held aloft Excalibur from the bosom of the water, signifying by divine
+providence that I, Arthur, was to carry Excalibur. That is why I am
+your king.
+,#+END_QUOTE
+#+end_example
+
 *** Special blocks in Texinfo export
 :PROPERTIES:
 :DESCRIPTION: Special block attributes.

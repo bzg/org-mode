@@ -1345,11 +1345,12 @@ holding contextual information."
   "Transcode a QUOTE-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((title (org-element-property :name quote-block))
-	 (start-quote (concat "@quotation"
-			      (when title
-				(format " %s" title)))))
-    (format "%s\n%s@end quotation" start-quote contents)))
+  (let ((tag (org-export-read-attribute :attr_texinfo quote-block :tag))
+	(author (org-export-read-attribute :attr_texinfo quote-block :author)))
+    (format "@quotation%s\n%s%s\n@end quotation"
+	    (if tag (concat " " tag) "")
+	    contents
+	    (if author (concat "\n@author " author) ""))))
 
 ;;;; Radio Target
 
