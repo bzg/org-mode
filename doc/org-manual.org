@@ -95,10 +95,12 @@ Recent Emacs distributions include a packaging system which lets you
 install Elisp libraries.  You can install Org with {{{kbd(M-x
 package-install RET org)}}}.
 
-#+texinfo: @noindent
-*Important*: you need to do this in a session where no =.org= file has
-been visited, i.e., where no Org built-in function have been loaded.
+#+attr_texinfo: :tag Important
+#+begin_quote
+You need to do this in a session where no =.org= file has been
+visited, i.e., where no Org built-in function have been loaded.
 Otherwise autoload Org functions will mess up the installation.
+#+end_quote
 
 Then, to make sure your Org configuration is taken into account,
 initialize the package system with ~(package-initialize)~ in your
