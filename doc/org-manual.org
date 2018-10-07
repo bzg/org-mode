@@ -15269,10 +15269,9 @@ functions:
      Convert the selected region into Markdown.
 
 In-place conversions are particularly handy for quick conversion of
-tables and lists in foreign buffers.  For example, turn on the minor
-mode {{{kbd(M-x orgstruct-mode)}}} in an HTML buffer, then use the
-convenient Org keyboard commands to create a list, select it, and
-covert it to HTML with {{{kbd(M-x org-html-convert-region-to-html)}}}.
+tables and lists in foreign buffers.  For example, in an HTML buffer,
+write a list in Org syntax, select it, and convert it to HTML with
+{{{kbd(M-x org-html-convert-region-to-html)}}}.
 
 * Publishing
 :PROPERTIES:
