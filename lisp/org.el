@@ -2822,7 +2822,7 @@ When non-nil, you first need to check off all check boxes before the TODO
 entry can be switched to DONE.
 This variable needs to be set before org.el is loaded, and you need to
 restart Emacs after a change to make the change effective.  The only way
-to change is while Emacs is running is through the customize interface."
+to change it while Emacs is running is through the customize interface."
   :set (lambda (var val)
 	 (set var val)
 	 (if val
