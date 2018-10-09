@@ -1238,7 +1238,7 @@ the default behavior."
 	  (org-with-point-at selected-task
 	    (unless selected-task (org-back-to-heading t))
 	    (when (and (eq (marker-buffer org-clock-hd-marker)
-			   (buffer-base-buffer))
+			   (org-base-buffer (current-buffer)))
 		       (= (point) (marker-position org-clock-hd-marker))
 		       (equal org-clock-current-task (org-get-heading t t t t)))
 	      (message "Clock continues in %S" org-clock-heading)
