@@ -222,6 +222,51 @@ another block
                                    (buffer-string)))
         (delete-file "test-ob-tangle.org"))))))
 
+(ert-deftest ob-tangle/block-order ()
+  "Test order of tangled blocks."
+  ;; Order per language.
+  (should
+   (equal '("1" "2")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		      (format "#+property: header-args :tangle %S
+#+begin_src emacs-lisp
+1
+#+end_src
+
+#+begin_src emacs-lisp
+2
+#+end_src"
+			      file)
+		    (org-babel-tangle))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
+	      (delete-file file)))))
+  ;; Order per source block.
+  (should
+   (equal '("1" "2")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		      (format "#+property: header-args :tangle %S
+#+begin_src foo
+1
+#+end_src
+
+#+begin_src bar
+2
+#+end_src"
+			      file)
+		    (org-babel-tangle))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
+	      (delete-file file))))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
