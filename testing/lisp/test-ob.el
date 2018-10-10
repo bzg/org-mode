@@ -2034,6 +2034,16 @@ abc
 	(let ((org-coderef-label-format "#(ref:%s)"))
 	  (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob/string-to-number ()
+    (should (=  0   (org-babel--string-to-number "0")))
+    (should (=  1   (org-babel--string-to-number "1")))
+    (should (eq nil (org-babel--string-to-number "000")))
+    (should (eq nil (org-babel--string-to-number "001")))
+    (should (eq nil (org-babel--string-to-number "010")))
+    (should (=  100 (org-babel--string-to-number "100")))
+    (should (=  0.1 (org-babel--string-to-number "0.1")))
+    (should (=  1.0 (org-babel--string-to-number "1.0"))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

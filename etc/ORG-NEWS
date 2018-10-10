@@ -62,6 +62,8 @@ the corresponding direction by swapping with the adjacent cell.
 
 It was unused throughout the code base.
 
+** Miscellaneous
+*** Org Table reads numbers starting with 0 as strings
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists

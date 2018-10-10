@@ -2915,7 +2915,7 @@ situations in which is it not appropriate."
 (defun org-babel--string-to-number (string)
   "If STRING represents a number return its value.
 Otherwise return nil."
-  (and (string-match-p "\\`-?[0-9]*\\.?[0-9]*\\'" string)
+  (and (string-match-p "\\`-?\\([0-9]\\|\\([1-9]\\|[0-9]*\\.\\)[0-9]*\\)\\'" string)
        (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name &optional separator)
