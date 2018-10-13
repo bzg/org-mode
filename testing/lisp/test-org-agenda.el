@@ -85,6 +85,23 @@
 	    (looking-at " *agenda-file:Scheduled: *test agenda"))))
   (org-test-agenda--kill-all-agendas))
 
+(ert-deftest test-org-agenda/set-priority ()
+  "One informative line in the agenda. Check that org-agenda-priority updates the agenda."
+  (cl-assert (not org-agenda-sticky) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
+  (let ((org-agenda-span 'day)
+	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
+					       org-test-dir))))
+    (org-agenda-list nil "<2017-07-19 Wed>")
+    (set-buffer org-agenda-buffer-name)
+
+    (should
+     (progn (goto-line 3)
+	    (org-agenda-priority ?B)
+	    (looking-at-p " *agenda-file:Scheduled: *\\[#B\\] test agenda"))))
+  (org-test-agenda--kill-all-agendas))
+
 (ert-deftest test-org-agenda/sticky-agenda-name ()
   "Agenda buffer name after having created one sticky agenda buffer."
   (cl-assert (not org-agenda-sticky) nil "precondition violation")
