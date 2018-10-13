@@ -18995,7 +18995,7 @@ Do not dim blocked tasks:
 @vindex org-agenda-inhibit-startup
 Stop preparing agenda buffers on startup:
 @lisp
-(setq org-agenda-inhibit-startup nil)
+(setq org-agenda-inhibit-startup t)
 @end lisp
 @item
 @vindex org-agenda-show-inherited-tags
