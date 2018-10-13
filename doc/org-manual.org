@@ -20072,7 +20072,7 @@ number.  Here are tips to speed up:
   #+vindex: org-agenda-inhibit-startup
 
   #+begin_src emacs-lisp
-  (setq org-agenda-inhibit-startup nil)
+  (setq org-agenda-inhibit-startup t)
   #+end_src
 
 - Disable tag inheritance for agendas:
