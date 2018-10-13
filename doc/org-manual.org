@@ -6616,8 +6616,9 @@ be selected:
 
 - =:step= ::
 
-     Set to ~week~ or ~day~ to split the table into chunks.  To use
-     this, ~:block~ or ~:tstart~, ~:tend~ are needed.
+     Set to =day=, =week=, =month= or =year= to split the table into
+     chunks.  To use this, either =:block=, or =:tstart= and =:tend=
+     are required.
 
 - =:stepskip0= ::
 
