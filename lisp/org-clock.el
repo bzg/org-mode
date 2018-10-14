@@ -2121,7 +2121,7 @@ time.
 
 The return value is a list containing two internal times, one for
 the beginning of the range and one for its end, like the ones
-returned by `current time' or `encode-time' and a string used to
+returned by `current-time' or `encode-time' and a string used to
 display information.  If AS-STRINGS is non-nil, the returned
 times will be formatted strings.
 

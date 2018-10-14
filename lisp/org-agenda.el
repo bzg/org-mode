@@ -1227,7 +1227,7 @@ These days get the special face `org-agenda-date-weekend' in the agenda."
   "Non-nil means jump to today when moving a past date forward in time.
 When using S-right in the agenda to move a a date forward, and the date
 stamp currently points to the past, the first key press will move it
-to today.  WHen nil, just move one day forward even if the date stays
+to today.  When nil, just move one day forward even if the date stays
 in the past."
   :group 'org-agenda-daily/weekly
   :version "24.1"
