@@ -176,7 +176,8 @@ When nil, you can use these keybindings to navigate the buffer:
   (let ((keys (this-command-keys)))
     (when (eq (lookup-key isearch-mode-map keys) 'isearch-printing-char)
       (isearch-mode t)
-      (isearch-process-search-char (string-to-char keys)))))
+      (isearch-process-search-char (string-to-char keys))
+      (org-font-lock-ensure))))
 
 (defun org-goto-ret (&optional _arg)
   "Finish `org-goto' by going to the new location."
