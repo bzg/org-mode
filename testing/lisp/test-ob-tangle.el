@@ -265,6 +265,35 @@ another block
 		  (with-temp-buffer
 		    (insert-file-contents file)
 		    (org-split-string (buffer-string))))
+	      (delete-file file)))))
+  ;; Preserve order with mixed languages.
+  (should
+   (equal '("1" "3" "2" "4")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		      (format "#+property: header-args :tangle %S
+#+begin_src foo
+1
+#+end_src
+
+#+begin_src bar
+2
+#+end_src
+
+#+begin_src foo
+3
+#+end_src
+
+#+begin_src bar
+4
+#+end_src"
+			      file)
+		    (org-babel-tangle))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
 	      (delete-file file))))))
 
 (provide 'test-ob-tangle)
