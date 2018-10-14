@@ -5808,7 +5808,9 @@ This should be called after the variable `org-link-parameters' has changed."
 	       (match-beginning 2) (match-end 2) 'face face)
 	      (when verbatim?
 		(org-remove-flyspell-overlays-in
-		 (match-beginning 0) (match-end 0)))
+		 (match-beginning 0) (match-end 0))
+		(remove-text-properties (match-beginning 2) (match-end 2)
+					'(display t invisible t intangible t)))
 	      (add-text-properties (match-beginning 2) (match-end 2)
 				   '(font-lock-multiline t org-emphasis t))
 	      (when org-hide-emphasis-markers
