@@ -31,18 +31,44 @@
 (require 'org-compat)
 (require 'pcomplete)
 
-(declare-function org-make-org-heading-search-string "org" (&optional string))
-(declare-function org-get-buffer-tags "org" ())
-(declare-function org-get-tags "org" (&optional pos local))
+(declare-function org-at-heading-p "org" (&optional ignored))
+(declare-function org-before-first-heading-p "org" ())
 (declare-function org-buffer-property-keys "org" (&optional specials defaults columns))
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-property "org-element" property element)
+(declare-function org-element-type "org-element" (element))
+(declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-entry-properties "org" (&optional pom which))
+(declare-function org-export-backend-options "ox" (cl-x) t)
+(declare-function org-get-buffer-tags "org" ())
+(declare-function org-get-export-keywords "org" ())
+(declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
+(declare-function org-get-tags "org" (&optional pos local))
+(declare-function org-make-org-heading-search-string "org" (&optional string))
 (declare-function org-tag-alist-to-string "org" (alist &optional skip-key))
 
-;;;; Customization variables
-
-(defvar org-drawer-regexp)
-(defvar org-property-re)
 (defvar org-current-tag-alist)
+(defvar org-default-priority)
+(defvar org-drawer-regexp)
+(defvar org-element-affiliated-keywords)
+(defvar org-entities)
+(defvar org-export-default-language)
+(defvar org-export-exclude-tags)
+(defvar org-export-select-tags)
+(defvar org-file-tags)
+(defvar org-highest-priority)
+(defvar org-link-abbrev-alist)
+(defvar org-link-abbrev-alist-local)
+(defvar org-lowest-priority)
+(defvar org-options-keywords)
+(defvar org-outline-regexp)
+(defvar org-property-re)
+(defvar org-startup-options)
+(defvar org-time-stamp-formats)
+(defvar org-todo-keywords-1)
+(defvar org-todo-line-regexp)
+
+;;;; Customization variables
 
 (defun org-thing-at-point ()
   "Examine the thing at point and let the caller know what it is.
@@ -150,9 +176,6 @@ When completing for #+STARTUP, for example, this function returns
 		 (car (org-thing-at-point)))
 		pcomplete-default-completion-function))))
 
-(defvar org-options-keywords)		 ; From org.el
-(defvar org-element-affiliated-keywords) ; From org-element.el
-(declare-function org-get-export-keywords "org" ())
 (defun pcomplete/org-mode/file-option ()
   "Complete against all valid file options."
   (require 'org-element)
@@ -184,7 +207,6 @@ When completing for #+STARTUP, for example, this function returns
   "Complete arguments for the #+AUTHOR file option."
   (pcomplete-here (list user-full-name)))
 
-(defvar org-time-stamp-formats)
 (defun pcomplete/org-mode/file-option/date ()
   "Complete arguments for the #+DATE file option."
   (pcomplete-here (list (format-time-string (car org-time-stamp-formats)))))
@@ -193,7 +215,6 @@ When completing for #+STARTUP, for example, this function returns
   "Complete arguments for the #+EMAIL file option."
   (pcomplete-here (list user-mail-address)))
 
-(defvar org-export-exclude-tags)
 (defun pcomplete/org-mode/file-option/exclude_tags ()
   "Complete arguments for the #+EXCLUDE_TAGS file option."
   (require 'ox)
@@ -201,12 +222,10 @@ When completing for #+STARTUP, for example, this function returns
    (and org-export-exclude-tags
 	(list (mapconcat 'identity org-export-exclude-tags " ")))))
 
-(defvar org-file-tags)
 (defun pcomplete/org-mode/file-option/filetags ()
   "Complete arguments for the #+FILETAGS file option."
   (pcomplete-here (and org-file-tags (mapconcat 'identity org-file-tags " "))))
 
-(defvar org-export-default-language)
 (defun pcomplete/org-mode/file-option/language ()
   "Complete arguments for the #+LANGUAGE file option."
   (require 'ox)
@@ -214,9 +233,6 @@ When completing for #+STARTUP, for example, this function returns
    (pcomplete-uniquify-list
     (list org-export-default-language "en"))))
 
-(defvar org-default-priority)
-(defvar org-highest-priority)
-(defvar org-lowest-priority)
 (defun pcomplete/org-mode/file-option/priorities ()
   "Complete arguments for the #+PRIORITIES file option."
   (pcomplete-here (list (format "%c %c %c"
@@ -224,7 +240,6 @@ When completing for #+STARTUP, for example, this function returns
 				org-lowest-priority
 				org-default-priority))))
 
-(defvar org-export-select-tags)
 (defun pcomplete/org-mode/file-option/select_tags ()
   "Complete arguments for the #+SELECT_TAGS file option."
   (require 'ox)
@@ -232,7 +247,6 @@ When completing for #+STARTUP, for example, this function returns
    (and org-export-select-tags
 	(list (mapconcat 'identity org-export-select-tags " ")))))
 
-(defvar org-startup-options)
 (defun pcomplete/org-mode/file-option/startup ()
   "Complete arguments for the #+STARTUP file option."
   (while (pcomplete-here
@@ -261,7 +275,6 @@ When completing for #+STARTUP, for example, this function returns
 	       (buffer-name (buffer-base-buffer)))))))
 
 
-(declare-function org-export-backend-options "ox" (cl-x) t)
 (defun pcomplete/org-mode/file-option/options ()
   "Complete arguments for the #+OPTIONS file option."
   (while (pcomplete-here
@@ -295,8 +308,6 @@ When completing for #+STARTUP, for example, this function returns
      (lambda (a) (when (boundp a) (setq vars (cons (symbol-name a) vars)))))
     (pcomplete-here vars)))
 
-(defvar org-link-abbrev-alist-local)
-(defvar org-link-abbrev-alist)
 (defun pcomplete/org-mode/link ()
   "Complete against defined #+LINK patterns."
   (pcomplete-here
@@ -306,7 +317,6 @@ When completing for #+STARTUP, for example, this function returns
 	     (append org-link-abbrev-alist-local
 		     org-link-abbrev-alist))))))
 
-(defvar org-entities)
 (defun pcomplete/org-mode/tex ()
   "Complete against TeX-style HTML entity names."
   (require 'org-entities)
@@ -314,12 +324,10 @@ When completing for #+STARTUP, for example, this function returns
 	  (pcomplete-uniquify-list (remove nil (mapcar 'car-safe org-entities)))
 	  (substring pcomplete-stub 1))))
 
-(defvar org-todo-keywords-1)
 (defun pcomplete/org-mode/todo ()
   "Complete against known TODO keywords."
   (pcomplete-here (pcomplete-uniquify-list (copy-sequence org-todo-keywords-1))))
 
-(defvar org-todo-line-regexp)
 (defun pcomplete/org-mode/searchhead ()
   "Complete against all headings.
 This needs more work, to handle headings with lots of spaces in them."
