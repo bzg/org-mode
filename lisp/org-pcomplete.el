@@ -47,51 +47,69 @@
 (defun org-thing-at-point ()
   "Examine the thing at point and let the caller know what it is.
 The return value is a string naming the thing at point."
-  (let ((beg1 (save-excursion
-		(skip-chars-backward "[:alnum:]-_@")
-		(point)))
-	(beg (save-excursion
-	       (skip-chars-backward "a-zA-Z0-9-_:$")
-	       (point)))
-	(line-to-here (buffer-substring (point-at-bol) (point))))
+  (let ((line-to-here (org-current-line-string t))
+	(case-fold-search t))
     (cond
-     ((string-match "\\`[ \t]*#\\+begin: clocktable[ \t]+" line-to-here)
+     ;; Parameters on a clock table opening line.
+     ((org-match-line "[ \t]*#\\+BEGIN: clocktable[ \t]")
       (cons "block-option" "clocktable"))
-     ((string-match "\\`[ \t]*#\\+begin_src[ \t]+" line-to-here)
+     ;; Flags and parameters on a source block opening line.
+     ((org-match-line "[ \t]*#\\+BEGIN_SRC[ \t]")
       (cons "block-option" "src"))
-     ((save-excursion
-	(re-search-backward "^[ \t]*#\\+\\([A-Z_]+\\):.*"
-			    (line-beginning-position) t))
+     ;; Value for a known keyword.
+     ((org-match-line "[ \t]*#\\+\\(\\S-+\\):")
       (cons "file-option" (match-string-no-properties 1)))
-     ((string-match "\\`[ \t]*#\\+[a-zA-Z_]*\\'" line-to-here)
+     ;; Keyword name.
+     ((and (org-match-line "[ \t]*#\\+[a-zA-Z_]*$")
+	   (looking-at-p "[ \t]*$"))
       (cons "file-option" nil))
-     ((equal (char-before beg) ?\[)
+     ;; Link abbreviation.
+     ((save-excursion
+	(skip-chars-backward "A-Za-z0-9-_")
+	(and (eq ?\[ (char-before))
+	     (eq ?\[ (char-before (1- (point))))))
       (cons "link" nil))
-     ((equal (char-before beg) ?\\)
+     ;; Entities.  Some of them accept numbers, but only at their end.
+     ;; So, we first skip numbers, then letters.
+     ((eq ?\\ (save-excursion
+		(skip-chars-backward "0-9")
+		(skip-chars-backward "a-zA-Z")
+		(char-before)))
       (cons "tex" nil))
-     ((string-match "\\`\\*+[ \t]+\\'"
-		    (buffer-substring (point-at-bol) beg))
-      (cons "todo" nil))
-     ((equal (char-before beg) ?*)
-      (cons "searchhead" nil))
-     ((and (equal (char-before beg1) ?:)
-	   (equal (char-after (point-at-bol)) ?*))
+     ;; Tags on a headline.
+     ((and (org-at-heading-p)
+	   (eq ?: (save-excursion
+		    (skip-chars-backward "[:alnum:]_@#%")
+		    (char-before))))
       (cons "tag" nil))
-     ((and (equal (char-before beg1) ?:)
-	   (not (equal (char-after (point-at-bol)) ?*))
-	   (save-excursion
-	     (move-beginning-of-line 1)
-	     (skip-chars-backward "[ \t\n]")
-	     ;; org-drawer-regexp matches a whole line but while
-	     ;; looking-back, we just ignore trailing whitespaces
-	     (or (looking-back (substring org-drawer-regexp 0 -1)
-			       (line-beginning-position))
-		 (looking-back org-property-re
-			       (line-beginning-position)))))
-      (cons "prop" nil))
-     ((and (equal (char-before beg1) ?:)
-	   (not (equal (char-after (point-at-bol)) ?*)))
-      (cons "drawer" nil))
+     ;; TODO keywords on an empty headline.
+     ((and (string-match "^\\*+ +\\S-*$" line-to-here)
+	   (looking-at-p "[ \t]*$"))
+      (cons "todo" nil))
+     ;; Heading after a star for search strings or links.
+     ((save-excursion
+	(skip-chars-backward "^*" (line-beginning-position))
+	(and (eq ?* (char-before))
+	     (eq (char-before (1- (point))) '?\[)
+	     (eq (char-before (- (point) 2)) '?\[)))
+      (cons "searchhead" nil))
+     ;; Property or drawer name, depending on point.  If point is at
+     ;; a valid location for a node property, offer completion on all
+     ;; node properties in the buffer. Otherwise, offer completion on
+     ;; all drawer names, including "PROPERTIES".
+     ((and (string-match "^[ \t]*:\\S-*$" line-to-here)
+	   (looking-at-p "[ \t]*$"))
+      (let ((origin (line-beginning-position)))
+	(if (org-before-first-heading-p) (cons "drawer" nil)
+	  (save-excursion
+	    (org-end-of-meta-data)
+	    (if (or (= origin (point))
+		    (not (org-match-line "[ \t]*:PROPERTIES:[ \t]*$")))
+		(cons "drawer" nil)
+	      (while (org-match-line org-property-re)
+		(forward-line))
+	      (if (= origin (point)) (cons "prop" nil)
+		(cons "drawer" nil)))))))
      (t nil))))
 
 (defun org-command-at-point ()
