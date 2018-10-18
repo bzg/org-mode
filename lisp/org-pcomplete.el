@@ -323,18 +323,18 @@ When completing for #+STARTUP, for example, this function returns
 (defun pcomplete/org-mode/searchhead ()
   "Complete against all headings.
 This needs more work, to handle headings with lots of spaces in them."
-  (while
-      (pcomplete-here
-       (save-excursion
-	 (goto-char (point-min))
-	 (let (tbl)
-	   (let ((case-fold-search nil))
-	     (while (re-search-forward org-todo-line-regexp nil t)
-	       (push (org-make-org-heading-search-string
-		      (match-string-no-properties 3))
-		     tbl)))
-	   (pcomplete-uniquify-list tbl)))
-       (substring pcomplete-stub 1))))
+  (while (pcomplete-here
+	  (save-excursion
+	    (goto-char (point-min))
+	    (let (tbl)
+	      (while (re-search-forward org-outline-regexp nil t)
+		(push (org-make-org-heading-search-string
+		       (org-get-heading t t t t))
+		      tbl))
+	      (pcomplete-uniquify-list tbl)))
+	  ;; When completing a bracketed link, i.e., "[[*", argument
+	  ;; starts at the star, so remove this character.
+	  (substring pcomplete-stub 1))))
 
 (defun pcomplete/org-mode/tag ()
   "Complete a tag name.  Omit tags already set."
