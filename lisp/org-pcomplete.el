@@ -68,7 +68,8 @@
 (defvar org-todo-keywords-1)
 (defvar org-todo-line-regexp)
 
-;;;; Customization variables
+
+;;; Internal Functions
 
 (defun org-thing-at-point ()
   "Examine the thing at point and let the caller know what it is.
@@ -138,6 +139,16 @@ The return value is a string naming the thing at point."
 		(cons "drawer" nil)))))))
      (t nil))))
 
+(defun org-pcomplete-case-double (list)
+  "Return list with both upcase and downcase version of all strings in LIST."
+  (let (e res)
+    (while (setq e (pop list))
+      (setq res (cons (downcase e) (cons (upcase e) res))))
+    (nreverse res)))
+
+
+;;; Completion API
+
 (defun org-command-at-point ()
   "Return the qualified name of the Org completion entity at point.
 When completing for #+STARTUP, for example, this function returns
@@ -175,6 +186,9 @@ When completing for #+STARTUP, for example, this function returns
    (funcall (or (pcomplete-find-completion-function
 		 (car (org-thing-at-point)))
 		pcomplete-default-completion-function))))
+
+
+;;; Completion functions
 
 (defun pcomplete/org-mode/file-option ()
   "Complete against all valid file options."
@@ -416,14 +430,8 @@ switches."
 			   ":tcolumns" ":level" ":compact" ":timestamp"
 			   ":formula" ":formatter" ":wstart" ":mstart"))))
 
-(defun org-pcomplete-case-double (list)
-  "Return list with both upcase and downcase version of all strings in LIST."
-  (let (e res)
-    (while (setq e (pop list))
-      (setq res (cons (downcase e) (cons (upcase e) res))))
-    (nreverse res)))
-
-;;;; Finish up
+
+;;; Finish up
 
 (provide 'org-pcomplete)
 
