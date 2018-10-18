@@ -351,6 +351,23 @@ This needs more work, to handle headings with lots of spaces in them."
 	  (and (string-match ".*:" pcomplete-stub)
 	       (substring pcomplete-stub (match-end 0))))))
 
+(defun pcomplete/org-mode/drawer ()
+  "Complete a drawer name, including \"PROPERTIES\"."
+  (pcomplete-here
+   (org-pcomplete-case-double
+    (mapcar (lambda (x) (concat x ":"))
+	    (let ((names (list "PROPERTIES")))
+	      (save-excursion
+		(goto-char (point-min))
+		(while (re-search-forward org-drawer-regexp nil t)
+		  (let ((drawer (org-element-at-point)))
+		    (when (memq (org-element-type drawer)
+				'(drawer property-drawer))
+		      (push (org-element-property :drawer-name drawer) names)
+		      (goto-char (org-element-property :end drawer))))))
+	      (pcomplete-uniquify-list names))))
+   (substring pcomplete-stub 1)))	;remove initial colon
+
 (defun pcomplete/org-mode/prop ()
   "Complete a property name.  Omit properties already set."
   (pcomplete-here
