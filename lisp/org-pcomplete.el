@@ -354,13 +354,14 @@ This needs more work, to handle headings with lots of spaces in them."
 (defun pcomplete/org-mode/prop ()
   "Complete a property name.  Omit properties already set."
   (pcomplete-here
-   (mapcar (lambda (x)
-	     (concat x ": "))
-	   (let ((lst (pcomplete-uniquify-list
-		       (copy-sequence (org-buffer-property-keys nil t t)))))
-	     (dolist (prop (org-entry-properties))
-	       (setq lst (delete (car prop) lst)))
-	     lst))
+   (org-pcomplete-case-double
+    (mapcar (lambda (x)
+	      (concat x ": "))
+	    (let ((lst (pcomplete-uniquify-list
+			(copy-sequence (org-buffer-property-keys nil t t)))))
+	      (dolist (prop (org-entry-properties))
+		(setq lst (delete (car prop) lst)))
+	      lst)))
    (substring pcomplete-stub 1)))
 
 (defun pcomplete/org-mode/block-option/src ()
