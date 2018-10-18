@@ -24,21 +24,39 @@
 
 ;;; Code:
 
-(ert-deftest test-org-pcomplete/prop ()
-  "Test property completion."
-  ;; Drawer where we are currently completing property name is
-  ;; malformed in any case, it'll become valid only after successful
-  ;; completion.  We expect that this completion process will finish
-  ;; successfully, and there will be no interactive drawer repair
-  ;; attempts.
+(ert-deftest test-org-pcomplete/clocktable ()
+  "Test completion of clock table parameters."
   (should
-   (equal
-    "* a\n:PROPERTIES:\n:pname: \n:END:\n* b\n:PROPERTIES:\n:pname: pvalue\n:END:\n"
-    (org-test-with-temp-text "* a\n:PROPERTIES:\n:pna<point>\n:END:\n* b\n:PROPERTIES:\n:pname: pvalue\n:END:\n"
-      (cl-letf (((symbol-function 'y-or-n-p)
-		 (lambda (_) (error "Should not be called"))))
-	(pcomplete))
-      (buffer-string)))))
+   (equal "#+begin: clocktable :scope"
+	  (org-test-with-temp-text "#+begin: clocktable :sco<point>"
+	    (pcomplete)
+	    (buffer-string)))))
+
+(ert-deftest test-org-pcomplete/drawer ()
+  "Test drawer completion."
+  (should
+   (equal "* Foo\n:PROPERTIES:"
+	  (org-test-with-temp-text "* Foo\n:<point>"
+	    (pcomplete)
+	    (buffer-string))))
+  (should
+   (equal ":DRAWER:\nContents\n:END:\n* Foo\n:DRAWER:"
+	  (org-test-with-temp-text ":DRAWER:\nContents\n:END:\n* Foo\n:D<point>"
+	    (pcomplete)
+	    (buffer-string)))))
+
+(ert-deftest test-org-pcomplete/entity ()
+  "Test entity completion."
+  (should
+   (equal "\\alpha"
+	  (org-test-with-temp-text "\\alp<point>"
+	    (pcomplete)
+	    (buffer-string))))
+  (should
+   (equal "\\frac12"
+	  (org-test-with-temp-text "\\frac1<point>"
+	    (pcomplete)
+	    (buffer-string)))))
 
 (ert-deftest test-org-pcomplete/keyword ()
   "Test keyword and block completion."
@@ -56,6 +74,64 @@
       (pcomplete)
       (buffer-string))
     t)))
+
+(ert-deftest test-org-pcomplete/link ()
+  "Test link completion"
+  (should
+   (equal "[[org:"
+	  (org-test-with-temp-text "[[o<point>"
+	    (let ((org-link-abbrev-alist '(("org" . "https://orgmode.org/"))))
+	      (pcomplete))
+	    (buffer-string))))
+  (should-not
+   (equal "[org:"
+	  (org-test-with-temp-text "[[o<point>"
+	    (let ((org-link-abbrev-alist '(("org" . "https://orgmode.org/"))))
+	      (pcomplete))
+	    (buffer-string)))))
+
+(ert-deftest test-org-pcomplete/prop ()
+  "Test property completion."
+  (should
+   (equal
+    "
+* a
+:PROPERTIES:
+:pname:\s
+:END:
+* b
+:PROPERTIES:
+:pname: pvalue
+:END:
+"
+    (org-test-with-temp-text "
+* a
+:PROPERTIES:
+:pna<point>
+:END:
+* b
+:PROPERTIES:
+:pname: pvalue
+:END:
+"
+      (pcomplete)
+      (buffer-string)))))
+
+(ert-deftest test-org-pcomplete/search-heading ()
+  "Test search heading completion."
+  (should
+   (equal "* Foo\n[[*Foo"
+	  (org-test-with-temp-text "* Foo\n[[*<point>"
+	    (pcomplete)
+	    (buffer-string)))))
+
+(ert-deftest test-org-pcomplete/todo ()
+  "Test TODO completion."
+  (should
+   (equal "* TODO"
+	  (org-test-with-temp-text "* T<point>"
+	    (pcomplete)
+	    (buffer-string)))))
 
 (provide 'test-org-pcomplete)
 ;;; test-org-pcomplete.el ends here
