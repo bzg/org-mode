@@ -302,8 +302,9 @@ When completing for #+STARTUP, for example, this function returns
   (pcomplete-here
    (pcomplete-uniquify-list
     (copy-sequence
-     (append (mapcar 'car org-link-abbrev-alist-local)
-	     (mapcar 'car org-link-abbrev-alist))))))
+     (mapcar (lambda (e) (concat (car e) ":"))
+	     (append org-link-abbrev-alist-local
+		     org-link-abbrev-alist))))))
 
 (defvar org-entities)
 (defun pcomplete/org-mode/tex ()
