@@ -48,6 +48,7 @@ system than the main Org document.  For example:
 #+end_example
 
 *** New values in clock tables' step: =month= and =year=
+*** ODT export handles numbers cookies in lists
 *** New cell movement functions in tables
 ~S-<UP>~, ~S-<DOWN>~, ~S-<RIGHT>~, and ~S-<LEFT>~ now move cells in
 the corresponding direction by swapping with the adjacent cell.

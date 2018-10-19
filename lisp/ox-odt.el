@@ -1966,10 +1966,12 @@ contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((plain-list (org-export-get-parent item))
+	 (count (org-element-property :counter item))
 	 (type (org-element-property :type plain-list)))
     (unless (memq type '(ordered unordered descriptive-1 descriptive-2))
       (error "Unknown list type: %S" type))
-    (format "\n<text:list-item>\n%s\n%s"
+    (format "\n<text:list-item%s>\n%s\n%s"
+	    (if count (format " text:start-value=\"%s\"" count) "")
 	    contents
 	    (if (org-element-map item 'table #'identity info 'first-match)
 		"</text:list-header>"
