@@ -424,9 +424,8 @@ used as a communication channel."
 	    (let* ((beamer-opt (org-element-property :BEAMER_OPT headline))
 		   (options
 		    ;; Collect nonempty options from default value and
-		    ;; headline's properties.  Also add a label for
-		    ;; links.
-		    (cl-remove-if-not 'org-string-nw-p
+		    ;; headline's properties.
+		    (cl-remove-if-not #'org-string-nw-p
 		     (append
 		      (org-split-string
 		       (plist-get info :beamer-frame-default-options) ",")
@@ -436,29 +435,31 @@ used as a communication channel."
 			    ;; them.
 			    (and (string-match "^\\[?\\(.*\\)\\]?$" beamer-opt)
 				 (match-string 1 beamer-opt))
-			    ","))
-		      ;; Provide an automatic label for the frame
-		      ;; unless the user specified one.  Also refrain
-		      ;; from labeling `allowframebreaks' frames; this
-		      ;; is not allowed by beamer.
-		      (unless (and beamer-opt
-				   (or (string-match "\\(^\\|,\\)label=" beamer-opt)
-				       (string-match "allowframebreaks" beamer-opt)))
-			(list
-			 (let ((label (org-beamer--get-label headline info)))
-			   ;; Labels containing colons need to be
-			   ;; wrapped within braces.
-			   (format (if (string-match-p ":" label)
-				       "label={%s}"
-				     "label=%s")
-				   label))))))))
+			    ",")))))
+		   (fragile
+		    ;; Add "fragile" option if necessary.
+		    (and fragilep
+			 (not (member "fragile" options))
+			 (list "fragile")))
+		   (label
+		    ;; Provide an automatic label for the frame unless
+		    ;; the user specified one.  Also refrain from
+		    ;; labeling `allowframebreaks' frames; this is not
+		    ;; allowed by Beamer.
+		    (and (not (member "allowframebreaks" options))
+			 (not (cl-some (lambda (s) (string-match-p "^label=" s))
+				       options))
+			 (list
+			  (let ((label (org-beamer--get-label headline info)))
+			    ;; Labels containing colons need to be
+			    ;; wrapped within braces.
+			    (format (if (string-match-p ":" label)
+					"label={%s}"
+				      "label=%s")
+				    label))))))
 	      ;; Change options list into a string.
 	      (org-beamer--normalize-argument
-	       (mapconcat
-		'identity
-		(if (or (not fragilep) (member "fragile" options)) options
-		  (cons "fragile" options))
-		",")
+	       (mapconcat #'identity (append label fragile options) ",")
 	       'option))
 	    ;; Title.
 	    (let ((env (org-element-property :BEAMER_ENV headline)))
