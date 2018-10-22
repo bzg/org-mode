@@ -1271,18 +1271,19 @@ may have been stored before."
      (t
       (goto-char (org-table-end))))
     ;; Insert text and position point according to template.
-    (unless (bolp) (insert "\n"))
-    (let ((beg (point))
-	  (end (save-excursion
-		 (insert text)
-		 (point))))
-      (org-capture-position-for-last-stored 'table-line)
-      (org-capture-mark-kill-region beg end)
-      (org-capture-narrow beg end)
-      (when (or (re-search-backward "%\\?" beg t)
-		(re-search-forward "%\\?" end t))
-	(replace-match "")))
-    (org-table-align)))
+    (let ((origin (point)))
+      (unless (bolp) (insert "\n"))
+      (let ((beg (point))
+	    (end (save-excursion
+		   (insert text)
+		   (point))))
+	(org-capture-position-for-last-stored 'table-line)
+	(org-capture-mark-kill-region origin end)
+	(org-capture-narrow beg end)
+	(when (or (search-backward "%?" beg t)
+		  (search-forward "%?" end t))
+	  (replace-match "")))
+      (org-table-align))))
 
 (defun org-capture-place-plain-text ()
   "Place the template plainly.

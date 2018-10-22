@@ -161,6 +161,15 @@
 	(insert "Capture text")
 	(org-capture-kill))
       (buffer-string))))
+  (should
+   (equal "| a |\n| b |"
+	  (org-test-with-temp-text-in-file "| a |\n| b |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file) "| x |"))))
+	      (org-capture nil "t")
+	      (org-capture-kill))
+	    (buffer-string))))
   ;; Test aborting a capture that split the line.
   (should
    (equal
