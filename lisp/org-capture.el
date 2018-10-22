@@ -1279,7 +1279,9 @@ may have been stored before."
 		   (point))))
 	(org-capture-position-for-last-stored 'table-line)
 	(org-capture-mark-kill-region origin end)
-	(org-capture-narrow beg end)
+	;; TEXT is guaranteed to end with a newline character.  Ignore
+	;; it when narrowing so as to not alter data on the next line.
+	(org-capture-narrow beg (1- end))
 	(when (or (search-backward "%?" beg t)
 		  (search-forward "%?" end t))
 	  (replace-match "")))
