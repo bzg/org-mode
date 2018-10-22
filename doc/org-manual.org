@@ -19279,10 +19279,10 @@ locally just set the variable to point to that directory:
 
 Alternatively, by using TRAMP (see [[info:tramp][TRAMP User Manual]]),
 ~org-mobile-directory~ may point to a remote directory accessible
-through, for example, SSH and SCP:
+through, for example, SSH, SCP, or DAVS:
 
 #+begin_src emacs-lisp
-(setq org-mobile-directory "/scpc:user@remote.host:org/webdav/")
+(setq org-mobile-directory "/davs:user@remote.host:/org/webdav/")
 #+end_src
 
 #+vindex: org-mobile-encryption
