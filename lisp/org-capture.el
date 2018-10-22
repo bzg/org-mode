@@ -1296,14 +1296,12 @@ Of course, if exact position has been required, just put it there."
   (cond
    ((org-capture-get :exact-position)
     (goto-char (org-capture-get :exact-position)))
-   ((and (org-capture-get :target-entry-p)
-	 (bolp)
-	 (looking-at org-outline-regexp))
+   ((org-capture-get :target-entry-p)
     ;; Place the text into this entry.
     (if (org-capture-get :prepend)
 	;; Skip meta data and drawers.
 	(org-end-of-meta-data t)
-      ;; Go to end of the entry text, before the next headline
+      ;; Go to end of the entry text, before the next headline.
       (outline-next-heading)))
    (t
     ;; Beginning or end of file.
