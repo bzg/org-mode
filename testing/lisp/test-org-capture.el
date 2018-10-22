@@ -161,6 +161,15 @@
 	(insert "Capture text")
 	(org-capture-kill))
       (buffer-string))))
+  (should
+   (equal "| a |\n| b |"
+	  (org-test-with-temp-text-in-file "| a |\n| b |"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Table" table-line (file ,file) "| x |"))))
+	      (org-capture nil "t")
+	      (org-capture-kill))
+	    (buffer-string))))
   ;; Test aborting a capture that split the line.
   (should
    (equal
@@ -364,6 +373,71 @@
 	(org-capture nil "t")
 	(org-table-get-stored-formulas))))))
 
+(ert-deftest test-org-capture/plain ()
+  "Test `plain' type in capture template."
+  ;; Insert at end of the file, unless `:prepend' is non-nil.
+  (should
+   (equal "Some text.\nFoo\n"
+	  (org-test-with-temp-text-in-file "Some text."
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file ,file) "Foo"
+		       :immediate-finish t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  (should
+   (equal "Foo\nSome text."
+	  (org-test-with-temp-text-in-file "Some text."
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file ,file) "Foo"
+		       :immediate-finish t :prepend t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  ;; When a headline is specified, add it at the beginning of the
+  ;; entry, past any meta-data, or at its end, depending on
+  ;; `:prepend'.
+  (should
+   (equal "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\nFoo\n* B"
+	  (org-test-with-temp-text-in-file
+	      "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\n* B"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file+headline ,file "A") "Foo"
+		       :immediate-finish t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  (should
+   (equal "* A\nSCHEDULED: <2012-03-29 Thu>\nFoo\nSome text.\n* B"
+	  (org-test-with-temp-text-in-file
+	      "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\n* B"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file+headline ,file "A") "Foo"
+		       :immediate-finish t :prepend t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  ;; At an exact position, in the middle of a line, make sure to
+  ;; insert text on a line on its own.
+  (should
+   (equal "A\nX\nB"
+	  (org-test-with-temp-text-in-file "AB"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file+function ,file forward-char) "X"
+		       :immediate-finish t))))
+	      (org-capture nil "t")
+	      (buffer-string)))))
+  ;; Pathological case: insert an empty template in an empty file.
+  (should
+   (equal ""
+	  (org-test-with-temp-text-in-file ""
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file ,file) ""
+		       :immediate-finish t))))
+	      (org-capture nil "t")
+	      (buffer-string))))))
 
 (provide 'test-org-capture)
 ;;; test-org-capture.el ends here

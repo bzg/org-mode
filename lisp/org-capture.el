@@ -1111,8 +1111,10 @@ may have been stored before."
 
 (defun org-capture-place-entry ()
   "Place the template as a new Org entry."
-  (let ((reversed? (org-capture-get :prepend))
+  (let ((template (org-capture-get :template))
+	(reversed? (org-capture-get :prepend))
 	(level 1))
+    (org-capture-verify-tree template)
     (when (org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))
     (cond
@@ -1131,11 +1133,9 @@ may have been stored before."
     (let ((origin (point)))
       (unless (bolp) (insert "\n"))
       (org-capture-empty-lines-before)
+      (org-capture-position-for-last-stored (point))
       (let ((beg (point)))
-	(org-capture-position-for-last-stored beg)
-	(let ((template (org-capture-get :template)))
-	  (org-capture-verify-tree template)
-	  (org-paste-subtree level template 'for-yank))
+	(org-paste-subtree level template 'for-yank)
 	(let ((end (if (org-at-heading-p) (line-end-position 0) (point))))
 	  (org-capture-empty-lines-after)
 	  (unless (org-at-heading-p) (outline-next-heading))
@@ -1271,18 +1271,21 @@ may have been stored before."
      (t
       (goto-char (org-table-end))))
     ;; Insert text and position point according to template.
-    (unless (bolp) (insert "\n"))
-    (let ((beg (point))
-	  (end (save-excursion
-		 (insert text)
-		 (point))))
-      (org-capture-position-for-last-stored 'table-line)
-      (org-capture-mark-kill-region beg end)
-      (org-capture-narrow beg end)
-      (when (or (re-search-backward "%\\?" beg t)
-		(re-search-forward "%\\?" end t))
-	(replace-match "")))
-    (org-table-align)))
+    (let ((origin (point)))
+      (unless (bolp) (insert "\n"))
+      (let ((beg (point))
+	    (end (save-excursion
+		   (insert text)
+		   (point))))
+	(org-capture-position-for-last-stored 'table-line)
+	(org-capture-mark-kill-region origin end)
+	;; TEXT is guaranteed to end with a newline character.  Ignore
+	;; it when narrowing so as to not alter data on the next line.
+	(org-capture-narrow beg (1- end))
+	(when (or (search-backward "%?" beg t)
+		  (search-forward "%?" end t))
+	  (replace-match "")))
+      (org-table-align))))
 
 (defun org-capture-place-plain-text ()
   "Place the template plainly.
@@ -1290,35 +1293,36 @@ If the target locator points at an Org node, place the template into
 the text of the entry, before the first child.  If not, place the
 template at the beginning or end of the file.
 Of course, if exact position has been required, just put it there."
-  (let* ((txt (org-capture-get :template))
-	 beg end)
-    (cond
-     ((org-capture-get :exact-position)
-      (goto-char (org-capture-get :exact-position)))
-     ((and (org-capture-get :target-entry-p)
-	   (bolp)
-	   (looking-at org-outline-regexp))
-      ;; we should place the text into this entry
-      (if (org-capture-get :prepend)
-	  ;; Skip meta data and drawers
-	  (org-end-of-meta-data t)
-	;; go to ent of the entry text, before the next headline
-	(outline-next-heading)))
-     (t
-      ;; beginning or end of file
-      (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))))
-    (or (bolp) (newline))
+  (cond
+   ((org-capture-get :exact-position)
+    (goto-char (org-capture-get :exact-position)))
+   ((org-capture-get :target-entry-p)
+    ;; Place the text into this entry.
+    (if (org-capture-get :prepend)
+	;; Skip meta data and drawers.
+	(org-end-of-meta-data t)
+      ;; Go to end of the entry text, before the next headline.
+      (outline-next-heading)))
+   (t
+    ;; Beginning or end of file.
+    (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))))
+  (let ((origin (point)))
+    (unless (bolp) (insert "\n"))
     (org-capture-empty-lines-before)
-    (setq beg (point))
-    (insert txt)
-    (org-capture-empty-lines-after)
-    (org-capture-position-for-last-stored beg)
-    (setq end (point))
-    (org-capture-mark-kill-region beg (1- end))
-    (org-capture-narrow beg (1- end))
-    (when (or (re-search-backward "%\\?" beg t)
-	      (re-search-forward "%\\?" end t))
-      (replace-match ""))))
+    (org-capture-position-for-last-stored (point))
+    (let ((beg (point)))
+      (insert (org-capture-get :template))
+      (unless (bolp) (insert "\n"))
+      ;; Ignore the final newline character so as to not alter data
+      ;; after inserted text.  Yet, if the template is empty, make
+      ;; sure END matches BEG instead of pointing before it.
+      (let ((end (max beg (1- (point)))))
+	(org-capture-empty-lines-after)
+	(org-capture-mark-kill-region origin (point))
+	(org-capture-narrow beg end)
+	(when (or (search-backward "%?" beg t)
+		  (search-forward "%?" end t))
+	  (replace-match ""))))))
 
 (defun org-capture-mark-kill-region (beg end)
   "Mark the region that will have to be killed when aborting capture."
