@@ -1111,8 +1111,10 @@ may have been stored before."
 
 (defun org-capture-place-entry ()
   "Place the template as a new Org entry."
-  (let ((reversed? (org-capture-get :prepend))
+  (let ((template (org-capture-get :template))
+	(reversed? (org-capture-get :prepend))
 	(level 1))
+    (org-capture-verify-tree template)
     (when (org-capture-get :exact-position)
       (goto-char (org-capture-get :exact-position)))
     (cond
@@ -1131,11 +1133,9 @@ may have been stored before."
     (let ((origin (point)))
       (unless (bolp) (insert "\n"))
       (org-capture-empty-lines-before)
+      (org-capture-position-for-last-stored (point))
       (let ((beg (point)))
-	(org-capture-position-for-last-stored beg)
-	(let ((template (org-capture-get :template)))
-	  (org-capture-verify-tree template)
-	  (org-paste-subtree level template 'for-yank))
+	(org-paste-subtree level template 'for-yank)
 	(let ((end (if (org-at-heading-p) (line-end-position 0) (point))))
 	  (org-capture-empty-lines-after)
 	  (unless (org-at-heading-p) (outline-next-heading))
