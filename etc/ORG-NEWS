@@ -225,6 +225,17 @@ This is consistent with the naming of =org-dblock-write:columnview=
 options, where =:match= is also used as a headlines filter.
 
 ** New features
+*** Add ~:session~ support of ob-clojure for CIDER
+You can initialize source block session with Babel default keybinding
+=[C-c C-v C-z]= to use =sesman= session manager to link current
+project, directory or buffer with specific Clojure session, or
+=cider-jack-in= a new CIDER REPL if no CIDER REPLs available. In older
+CIDER version which has not =sesman= integrated, only has
+=cider-jack-in= without Clojure project is supported.
+#+begin_src clojure :session
+(dissoc Clojure 'JVM)
+(conj clojurists "stardiviner")
+#+end_src
 *** Add ~:results link~ support for Babel
 
 With this output format, create a link to the file specified in

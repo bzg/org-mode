@@ -46,6 +46,7 @@
 (declare-function cider-jack-in "ext:cider" (&optional prompt-project cljs-too))
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
 (declare-function cider-current-ns "ext:cider-client" ())
+(declare-function cider-repls "ext:cider-connection" (&optional type ensure))
 (declare-function nrepl--merge "ext:nrepl-client" (dict1 dict2))
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
 (declare-function nrepl-dict-put "ext:nrepl-client" (dict key value))
@@ -55,6 +56,8 @@
 
 (defvar nrepl-sync-request-timeout)
 (defvar cider-buffer-ns)
+(defvar sesman-system)
+(defvar cider-version)
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
@@ -221,11 +224,20 @@ using the :show-process parameter."
        ;; CIDER jack-in to the Clojure project directory.
        ((eq org-babel-clojure-backend 'cider)
         (require 'cider)
-        (let ((session-buffer (save-window-excursion
-                                (cider-jack-in t)
-                                (current-buffer))))
-          (if (org-babel-comint-buffer-livep session-buffer)
-              (progn (sit-for .25) session-buffer))))
+        (let ((session-buffer
+	       (save-window-excursion
+		 (if (version< cider-version "0.18.0")
+		     ;; Older CIDER (without sesman) still need to use
+		     ;; old way.
+		     (cider-jack-in nil) ;jack-in without project
+		   ;; New CIDER (with sesman to manage sessions).
+		   (unless (cider-repls)
+		     (let ((sesman-system 'CIDER))
+		       (call-interactively 'sesman-link-with-directory))))
+                 (current-buffer))))
+          (when (org-babel-comint-buffer-livep session-buffer)
+            (sit-for .25)
+	    session-buffer)))
        ((eq org-babel-clojure-backend 'slime)
         (error "Session evaluation with SLIME is not supported"))
        (t
