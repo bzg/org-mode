@@ -1147,63 +1147,109 @@ may have been stored before."
 
 (defun org-capture-place-item ()
   "Place the template as a new plain list item."
-  (let* ((txt (org-capture-get :template))
-	 (target-entry-p (org-capture-get :target-entry-p))
-	 (ind 0)
-	 beg end)
-    (if (org-capture-get :exact-position)
-	(goto-char (org-capture-get :exact-position))
-      (cond
-       ((not target-entry-p)
-	;; Insert as top-level entry, either at beginning or at end of file
-	(setq beg (point-min) end (point-max)))
-       (t
-	(setq beg (1+ (point-at-eol))
-	      end (save-excursion (outline-next-heading) (point)))))
-      (setq ind nil)
-      (if (org-capture-get :prepend)
-	  (progn
-	    (goto-char beg)
-	    (when (org-list-search-forward (org-item-beginning-re) end t)
-	      (goto-char (match-beginning 0))
-	      (setq ind (current-indentation))))
-	(goto-char end)
-	(when (org-list-search-backward (org-item-beginning-re) beg t)
-	  (setq ind (current-indentation))
-	  (org-end-of-item)))
-      (unless ind (goto-char end)))
-    ;; Remove common indentation
-    (setq txt (org-remove-indentation txt))
-    ;; Make sure this is indeed an item
-    (unless (string-match (concat "\\`" (org-item-re)) txt)
-      (setq txt (concat "- "
-			(mapconcat 'identity (split-string txt "\n")
-				   "\n  "))))
-    ;; Prepare surrounding empty lines.
-    (unless (bolp) (insert "\n"))
-    (org-capture-empty-lines-before)
-    (setq beg (point))
-    (unless (eolp) (save-excursion (insert "\n")))
-    (unless ind
-      (org-indent-line)
-      (setq ind (current-indentation))
-      (delete-region beg (point)))
-    ;; Set the correct indentation, depending on context
-    (setq ind (make-string ind ?\ ))
-    (setq txt (concat ind
-		      (mapconcat 'identity (split-string txt "\n")
-				 (concat "\n" ind))
-		      "\n"))
-    ;; Insert item.
-    (insert txt)
-    (org-capture-empty-lines-after)
-    (org-capture-position-for-last-stored beg)
-    (setq end (point))
-    (org-capture-mark-kill-region beg end)
-    (org-capture-narrow beg end)
-    (when (or (re-search-backward "%\\?" beg t)
-	      (re-search-forward "%\\?" end t))
-      (replace-match ""))))
+  (let ((prepend? (org-capture-get :prepend))
+	(template (org-remove-indentation (org-capture-get :template)))
+	item)
+    ;; Make template suitable for insertion.  In particular, add
+    ;; a main bullet if it is missing.
+    (unless (string-match-p (concat "\\`" (org-item-re)) template)
+      (setq template (concat "- " (mapconcat #'identity
+					     (split-string template "\n")
+					     "\n  "))))
+    ;; Delimit the area where we should look for a plain list.
+    (pcase-let ((`(,beg . ,end)
+		 (cond ((org-capture-get :exact-position)
+			;; User gave a specific position.  Start
+			;; looking for lists from here.
+			(cons (save-excursion
+				(goto-char (org-capture-get :exact-position))
+				(line-beginning-position))
+			      (org-entry-end-position)))
+		       ((org-capture-get :target-entry-p)
+			;; At a heading, limit search to its body.
+			(cons (line-beginning-position 2)
+			      (org-entry-end-position)))
+		       (t
+			;; Table is not necessarily under a heading.
+			;; Search whole buffer.
+			(cons (point-min) (point-max))))))
+      ;; Find the first plain list in the delimited area.
+      (goto-char beg)
+      (let ((item-regexp (org-item-beginning-re)))
+	(catch :found
+	  (while (re-search-forward item-regexp end t)
+	    (when (setq item (org-element-lineage
+			      (org-element-at-point) '(plain-list) t))
+	      (goto-char (org-element-property (if prepend? :post-affiliated
+						 :contents-end)
+					       item))
+	      (throw :found t)))
+	  ;; No list found.  Move to the location when to insert
+	  ;; template.
+	  (goto-char (if prepend? beg end)))))
+    ;; Insert template.
+    (let ((origin (point)))
+      (unless (bolp) (insert "\n"))
+      ;; When a new list is created, always obey to `:empty-lines' and
+      ;; friends.
+      ;;
+      ;; When capturing in an existing list, do not change blank lines
+      ;; above or below the list; consider it to be a stable
+      ;; structure.  However, we can control how many blank lines
+      ;; separate items.  So obey to `:empty-lines' between items as
+      ;; long as it does not insert more than one empty line.  In the
+      ;; specific case of empty lines above, it means we only obey the
+      ;; parameter when appending an item.
+      (unless (and item prepend?)
+	(org-capture-empty-lines-before
+	 (and item
+	      (not prepend?)
+	      (min 1 (or (org-capture-get :empty-lines-before)
+			 (org-capture-get :empty-lines)
+			 0)))))
+      (org-capture-position-for-last-stored (point))
+      (let ((beg (line-beginning-position))
+	    (end (progn
+		   (insert (org-trim template) "\n")
+		   (point-marker))))
+	(when item
+	  (let ((i (save-excursion
+		     (goto-char (org-element-property :post-affiliated item))
+		     (current-indentation))))
+	    (save-excursion
+	      (goto-char beg)
+	      (save-excursion
+		(while (< (point) end)
+		  (indent-to i)
+		  (forward-line)))
+	      ;; Pre-pending an item could change the type of the list
+	      ;; if there is a mismatch.  In this situation,
+	      ;; prioritize the existing list.
+	      (when prepend?
+		(let ((ordered? (eq 'ordered (org-element-property :type item))))
+		  (when (org-xor ordered?
+				 (string-match-p "\\`[A-Za-z0-9]\\([.)]\\)"
+						 template))
+		    (org-cycle-list-bullet (if ordered? "1." "-")))))
+	      ;; Eventually repair the list for proper indentation and
+	      ;; bullets.
+	      (org-list-repair))))
+	;; Limit number of empty lines.  See above for details.
+	(unless (and item (not prepend?))
+	  (org-capture-empty-lines-after
+	   (and item
+		prepend?
+		(min 1 (or (org-capture-get :empty-lines-after)
+			   (org-capture-get :empty-lines)
+			   0)))))
+	(org-capture-mark-kill-region origin (point))
+	;; ITEM always end with a newline character.  Make sure we do
+	;; not narrow at the beginning of the next line, possibly
+	;; altering its structure (e.g., when it is a headline).
+	(org-capture-narrow beg (1- end))
+	(when (or (search-backward "%?" beg t)
+		  (search-forward "%?" end t))
+	  (replace-match ""))))))
 
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
