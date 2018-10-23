@@ -162,6 +162,15 @@
 	(org-capture-kill))
       (buffer-string))))
   (should
+   (equal "- A\n  - B"
+	  (org-test-with-temp-text-in-file "- A\n  - B"
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Item" item (file ,file) "- X"))))
+	      (org-capture nil "t")
+	      (org-capture-kill))
+	    (buffer-string))))
+  (should
    (equal "| a |\n| b |"
 	  (org-test-with-temp-text-in-file "| a |\n| b |"
 	    (let* ((file (buffer-file-name))
@@ -196,6 +205,189 @@
 	(org-capture nil "t")
 	(goto-char (point-max))
 	(insert "Capture text")
+	(org-capture-finalize))
+      (buffer-string)))))
+
+(ert-deftest test-org-capture/item ()
+  "Test `item' type in capture template."
+  ;; Insert item in the first plain list found at the target location.
+  (should
+   (equal
+    "* A\n- list 1\n- X\n\n\n1. list 2"
+    (org-test-with-temp-text-in-file "* A\n- list 1\n\n\n1. list 2"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+headline ,file "A") "- X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  (should
+   (equal
+    "Text\n- list 1\n- X\n\n\n1. list 2"
+    (org-test-with-temp-text-in-file "Text\n- list 1\n\n\n1. list 2"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; When targeting a specific location, start looking for plain lists
+  ;; from there.
+  (should
+   (equal
+    "* A\n- skip\n\n\n1. here\n2. X\n"
+    (org-test-with-temp-text-in-file "* A\n- skip\n\n\n1. here"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+regexp ,file "here") "1. X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; If there is no such list, create it.
+  (should
+   (equal
+    "* A\n- X\n"
+    (org-test-with-temp-text-in-file "* A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+headline ,file "A") "- X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; When `:prepend' is non-nil, insert new item as the first item.
+  (should
+   (equal
+    "* A\n- X\n- 1\n- 2"
+    (org-test-with-temp-text-in-file "* A\n- 1\n- 2"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+headline ,file "A") "- X"
+		 :prepend t))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; When `:prepend' is nil, insert new item as the last top-level
+  ;; item.
+  (should
+   (equal
+    "* A\n- 1\n  - 2\n- X\n"
+    (org-test-with-temp-text-in-file "* A\n- 1\n  - 2"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+headline ,file "A") "- X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; When targeting a specific location, one can insert in a sub-list.
+  (should
+   (equal
+    "* A\n- skip\n  - here\n  - X\n- skip"
+    (org-test-with-temp-text-in-file "* A\n- skip\n  - here\n- skip"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+regexp ,file "here") "- X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; Obey `:empty-lines' when creating a new list.
+  (should
+   (equal
+    "\n- X\n\n\n* H"
+    (org-test-with-temp-text-in-file "\n* H"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X"
+		 :empty-lines-before 1 :empty-lines-after 2 :prepend t))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; Obey `:empty-lines' in an existing list only between items, and
+  ;; only if the value doesn't break the list.
+  (should
+   (equal
+    "- A\n\n- X\nText"
+    (org-test-with-temp-text-in-file "- A\nText"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X" :empty-lines 1))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  (should
+   (equal
+    "Text\n- X\n\n- A"
+    (org-test-with-temp-text-in-file "Text\n- A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X"
+		 :prepend t :empty-lines 1))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  (should-not
+   (equal
+    "- A\n\n\n- X"
+    (org-test-with-temp-text-in-file "- A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X" :empty-lines 2))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; Preserve list type when pre-pending.
+  (should
+   (equal
+    "1. X\n2. A"
+    (org-test-with-temp-text-in-file "1. A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X" :prepend t))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; Handle indentation.  Handle multi-lines templates.
+  (should
+   (equal
+    "  - A\n  - X\n"
+    (org-test-with-temp-text-in-file "  - A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  (should
+   (equal
+    "  - A\n  - X\n    Line 2\n"
+    (org-test-with-temp-text-in-file "  - A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X\n  Line 2"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; Handle incomplete templates.
+  (should
+   (equal
+    "- A\n- X\n"
+    (org-test-with-temp-text-in-file "- A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "X"))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  ;; Do not break next headline.
+  (should-not
+   (equal
+    "- A\n- X\nFoo* H"
+    (org-test-with-temp-text-in-file "- A\n* H"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X"))))
+	(org-capture nil "t")
+	(goto-char (point-max))
+	(insert "Foo")
 	(org-capture-finalize))
       (buffer-string)))))
 
