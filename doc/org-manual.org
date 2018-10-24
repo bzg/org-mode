@@ -3026,14 +3026,17 @@ or alternatively
 
 : [[LINK]]
 
-Once a link in the buffer is complete (all brackets present), Org
+Once a link in the buffer is complete---all brackets present---, Org
 changes the display so that =DESCRIPTION= is displayed instead of
-=[[LINK][DESCRIPTION]]= and =LINK= is displayed instead of =[[LINK]]=.  Links are be
-highlighted in the face ~org-link~, which by default is an underlined
-face.  You can directly edit the visible part of a link.  Note that
-this can be either the LINK part, if there is no description, or the
-{{{var(DESCRIPTION)}}} part.  To edit also the invisible
-{{{var(LINK)}}} part, use {{{kbd(C-c C-l)}}} with point on the link.
+=[[LINK][DESCRIPTION]]= and =LINK= is displayed instead of =[[LINK]]=.
+Links are highlighted in the ~org-link~ face, which, by default, is an
+underlined face.
+
+You can directly edit the visible part of a link.  This can be either
+the {{{var(LINK)}}} part, if there is no description, or the
+{{{var(DESCRIPTION)}}} part otherwise.  To also edit the invisible
+{{{var(LINK)}}} part, use {{{kbd(C-c C-l)}}} with point on the link
+(see [[*Handling Links]]).
 
 If you place point at the beginning or just behind the end of the
 displayed text and press {{{kbd(BS)}}}, you remove
