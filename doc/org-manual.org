@@ -11089,7 +11089,7 @@ Org only loads back-ends for the following formats by default: ASCII,
 HTML, iCalendar, LaTeX, and ODT.  Additional back-ends can be loaded
 in either of two ways: by configuring the ~org-export-backends~
 variable, or by requiring libraries in the Emacs init file.  For
-example, to load the markdown back-end, add this to your Emacs config:
+example, to load the Markdown back-end, add this to your Emacs config:
 
 #+begin_src emacs-lisp
 (require 'ox-md)
