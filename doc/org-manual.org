@@ -15238,6 +15238,16 @@ regions.  A convenient feature of this in-place conversion is that the
 exported output replaces the original source.  Here are such
 functions:
 
+- ~org-ascii-convert-region-to-ascii~ ::
+
+     #+findex: org-ascii-convert-region-to-ascii
+     Convert the selected region into ASCII.
+
+- ~org-ascii-convert-region-to-utf8~ ::
+
+     #+findex: org-ascii-convert-region-to-utf8
+     Convert the selected region into UTF-8.
+
 - ~org-html-convert-region-to-html~ ::
 
      #+findex: org-html-convert-region-to-html
