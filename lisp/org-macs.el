@@ -827,8 +827,9 @@ end of string are ignored."
 		    (cons (substring string i) results)))))))
 
 (defun org--string-from-props (s property)
-  "Return visible string according to text properties in string S.
-PROPERTY is either `invisible' or `display'."
+  "Return the visible part of string S.
+Visible part is determined according to text PROPERTY, which is
+either `invisible' or `display'."
   (let ((len (length s))
 	(new nil)
 	(i 0)
@@ -836,22 +837,30 @@ PROPERTY is either `invisible' or `display'."
     (while (setq i (text-property-not-all i len property nil s))
       (let* ((end (next-single-property-change i property s len))
 	     (props (text-properties-at i s))
+	     (spec (plist-get props property))
 	     (value
-	      (if (eq property 'invisible)
-		  ;; If `invisible' property in PROPS means text is to
-		  ;; be invisible, return the empty string.  Otherwise
-		  ;; return nil so that the part is skipped.
-		  (and (or (eq t buffer-invisibility-spec)
-			   (assoc-string (plist-get props 'invisible)
-					 buffer-invisibility-spec))
-		       "")
-		(let ((display (plist-get props 'display)))
-		  (pcase (if (stringp display) display
-			   (cl-some #'stringp display))
-		    (`nil nil)
+	      (pcase property
+		(`invisible
+		 ;; If `invisible' property in PROPS means text is to
+		 ;; be invisible, return the empty string.  Otherwise
+		 ;; return nil so that the part is skipped.
+		 (and (or (eq t buffer-invisibility-spec)
+			  (assoc-string spec buffer-invisibility-spec))
+		      ""))
+		(`display
+		 (pcase spec
+		   (`nil nil)
+		   (`(image . ,_)
+		    ;; Since we are returning a string, create
+		    ;; a place-holder with the same width as the
+		    ;; image.
+		    (make-string (ceiling (car (image-size spec))) ?\s))
+		   ((pred stringp)
 		    ;; Displayed string could contain invisible parts,
 		    ;; but no nested display.
-		    (s (org--string-from-props s 'invisible)))))))
+		    (org--string-from-props spec 'invisible))
+		   (_ (error "Un-handled `display' value: %S" spec))))
+		(_ (error "Unknown property: %S" property)))))
 	(when value
 	  (setq new (concat new (substring s cursor i) value))
 	  (setq cursor end))
@@ -863,7 +872,9 @@ PROPERTY is either `invisible' or `display'."
 (defun org-string-width (string)
   "Return width of STRING when displayed in the current buffer.
 Unlike `string-width', this function takes into consideration
-`invisible' and `display' text properties."
+`invisible' and `display' text properties.  It supports the
+latter in a limited way; it raises an error if it cannot handle
+a given `display' combination."
   (string-width
    (org--string-from-props (org--string-from-props string 'display)
 			   'invisible)))
