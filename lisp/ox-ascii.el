@@ -2065,6 +2065,20 @@ a communication channel."
 ;;; End-user functions
 
 ;;;###autoload
+(defun org-ascii-convert-region-to-ascii ()
+  "Assume region has Org syntax, and convert it to plain ASCII."
+  (interactive)
+  (let ((org-ascii-charset 'ascii))
+    (org-export-replace-region-by 'ascii)))
+
+;;;###autoload
+(defun org-ascii-convert-region-to-utf8 ()
+  "Assume region has Org syntax, and convert it to UTF-8."
+  (interactive)
+  (let ((org-ascii-charset 'utf-8))
+    (org-export-replace-region-by 'ascii)))
+
+;;;###autoload
 (defun org-ascii-export-as-ascii
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a text buffer.
