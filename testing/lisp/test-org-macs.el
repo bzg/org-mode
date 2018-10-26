@@ -63,7 +63,9 @@
   (should (= 5 (org-string-width #("1a3" 1 2 (display "abc")))))
   ;; `display' string can also contain invisible characters.
   (should (= 4 (org-string-width
-		#("123" 1 2 (display #("abc" 1 2 (invisible t))))))))
+		#("123" 1 2 (display #("abc" 1 2 (invisible t)))))))
+  ;; Test `space' property in `display'.
+  (should (= 2 (org-string-width #(" " 0 1 (display (space :width 2)))))))
 
 
 ;;; Regexp

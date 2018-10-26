@@ -826,47 +826,70 @@ end of string are ignored."
 		      results		;skip trailing separator
 		    (cons (substring string i) results)))))))
 
-(defun org--string-from-props (s property)
-  "Return visible string according to text properties in string S.
-PROPERTY is either `invisible' or `display'."
-  (let ((len (length s))
-	(new nil)
-	(i 0)
-	(cursor 0))
-    (while (setq i (text-property-not-all i len property nil s))
-      (let* ((end (next-single-property-change i property s len))
-	     (props (text-properties-at i s))
+(defun org--string-from-props (s property beg end)
+  "Return the visible part of string S.
+Visible part is determined according to text PROPERTY, which is
+either `invisible' or `display'.  BEG and END are 0-indices
+delimiting S."
+  (let ((width 0)
+	(cursor beg))
+    (while (setq beg (text-property-not-all beg end property nil s))
+      (let* ((next (next-single-property-change beg property s end))
+	     (props (text-properties-at beg s))
+	     (spec (plist-get props property))
 	     (value
-	      (if (eq property 'invisible)
-		  ;; If `invisible' property in PROPS means text is to
-		  ;; be invisible, return the empty string.  Otherwise
-		  ;; return nil so that the part is skipped.
-		  (and (or (eq t buffer-invisibility-spec)
-			   (assoc-string (plist-get props 'invisible)
-					 buffer-invisibility-spec))
-		       "")
-		(let ((display (plist-get props 'display)))
-		  (pcase (if (stringp display) display
-			   (cl-some #'stringp display))
-		    (`nil nil)
+	      (pcase property
+		(`invisible
+		 ;; If `invisible' property in PROPS means text is to
+		 ;; be invisible, return 0.  Otherwise return nil so
+		 ;; as to resume search.
+		 (and (or (eq t buffer-invisibility-spec)
+			  (assoc-string spec buffer-invisibility-spec))
+		      0))
+		(`display
+		 (pcase spec
+		   (`nil nil)
+		   (`(space . ,props)
+		    (let ((width (plist-get props :width)))
+		      (and (wholenump width) width)))
+		   (`(image . ,_)
+		    (ceiling (car (image-size spec))))
+		   ((pred stringp)
 		    ;; Displayed string could contain invisible parts,
 		    ;; but no nested display.
-		    (s (org--string-from-props s 'invisible)))))))
+		    (org--string-from-props spec 'invisible 0 (length spec)))
+		   (_
+		    ;; Un-handled `display' value.  Ignore it.
+		    ;; Consider the original string instead.
+		    nil)))
+		(_ (error "Unknown property: %S" property)))))
 	(when value
-	  (setq new (concat new (substring s cursor i) value))
-	  (setq cursor end))
-	(setq i end)))
-    (if new (concat new (substring s cursor))
-      ;; If PROPERTY was not found, return S as-is.
-      s)))
+	  (cl-incf width
+		   ;; When looking for `display' parts, we still need
+		   ;; to look for `invisible' property elsewhere.
+		   (+ (cond ((eq property 'display)
+			     (org--string-from-props s 'invisible cursor beg))
+			    ((= cursor beg) 0)
+			    (t (string-width (substring s cursor beg))))
+		      value))
+	  (setq cursor next))
+	(setq beg next)))
+    (+ width
+       ;; Look for `invisible' property in the last part of the
+       ;; string.  See above.
+       (cond ((eq property 'display)
+	      (org--string-from-props s 'invisible cursor end))
+	     ((= cursor end) 0)
+	     (t (string-width (substring s cursor end)))))))
 
 (defun org-string-width (string)
   "Return width of STRING when displayed in the current buffer.
 Unlike `string-width', this function takes into consideration
-`invisible' and `display' text properties."
-  (string-width
-   (org--string-from-props (org--string-from-props string 'display)
-			   'invisible)))
+`invisible' and `display' text properties.  It supports the
+latter in a limited way, mostly for combinations used in Org.
+Results may be off sometimes if it cannot handle a given
+`display' value."
+  (org--string-from-props string 'display 0 (length string)))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
