@@ -340,8 +340,9 @@ conventions:
 
 - =boss=, =ARCHIVE= ::
 
-     User-defined tags are written in lowercase; built-in tags with
-     special meaning are written with all capitals.
+     Tags are case-sensitive.  User-defined tags are written in
+     lowercase; built-in tags with special meaning are written as they
+     should appear in the document, usually with all capitals.
 
 - =Release=, =PRIORITY= ::
 
@@ -4771,8 +4772,8 @@ With the above setup, you could clear the current tags and set
 =@home=, =laptop= and =pc= tags with just the following keys:
 {{{kbd(C-c C-c SPC h l p RET)}}}.  Switching from =@home= to =@work=
 would be done with {{{kbd(C-c C-c w RET)}}} or alternatively with
-{{{kbd(C-c C-c C-c w)}}}.  Adding the non-predefined tag =Sarah= could
-be done with {{{kbd(C-c C-c TAB S a r a h RET)}}}.
+{{{kbd(C-c C-c C-c w)}}}.  Adding the non-predefined tag =sarah= could
+be done with {{{kbd(C-c C-c TAB s a r a h RET)}}}.
 
 #+vindex: org-fast-tag-selection-single-key
 If you find that most of the time you need only a single key press to
