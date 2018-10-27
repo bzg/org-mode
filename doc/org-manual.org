@@ -3259,10 +3259,12 @@ current buffer:
 
 - /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
 
+     #+vindex: org-email-link-description-format
      Pretty much all Emacs mail clients are supported.  The link
      points to the current article, or, in some Gnus buffers, to the
-     group.  The description is constructed from the author and the
-     subject.
+     group.  The description is constructed according to the variable
+     ~org-email-link-description-format~.  By default, it refers to
+     the addressee and the subject, possibly truncated.
 
 - /Web browsers: W3, W3M and EWW/ ::
 
