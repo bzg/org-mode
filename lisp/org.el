@@ -1867,7 +1867,7 @@ use."
   :version "24.3"
   :group 'org-link-store)
 
-(defcustom org-email-link-description-format "Email %c: %.30s"
+(defcustom org-email-link-description-format "Email %c: %s"
   "Format of the description part of a link to an email or usenet message.
 The following %-escapes will be replaced by corresponding information:
 
@@ -1886,7 +1886,9 @@ This is for example useful to limit the length of the subject.
 
 Examples: \"%f on: %.30s\", \"Email from %f\", \"Email %c\""
   :group 'org-link-store
-  :type 'string)
+  :package-version '(Org . 9.3)
+  :type 'string
+  :safe #'stringp)
 
 (defcustom org-from-is-user-regexp
   (let (r1 r2)

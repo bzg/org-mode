@@ -14,6 +14,17 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 ** Incompatible change
 
+*** Change default value for ~org-email-link-description-format~
+
+When linking from a mail buffer, Org used to truncate the subject of
+the message to 30 characters in order to build the description of the
+link.  This behavior was considered as too surprising.  As
+a consequence, Org no longer truncates subjects.
+
+You can get the old behaviour back with the following:
+
+: (setq org-email-link-description-format "Email %c: %.30s")
+
 *** ~:file~ header argument no longer assume "file" ~:results~
 
 The "file" ~:results~ value is now mandatory for a code block
