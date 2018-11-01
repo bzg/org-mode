@@ -193,7 +193,7 @@ D       Delete all of a task's attachments.  A safer way is
 s       Set a specific attachment directory for this entry or reset to default.
 i       Make children of the current entry inherit its attachment directory.")))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
-	  (message "Select command: [acmlzoOfFdD]")
+	  (message "Select command: [acmlyunzoOfFdD]")
 	  (setq c (read-char-exclusive))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
       (cond
