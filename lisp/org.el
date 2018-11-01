@@ -17274,7 +17274,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
 	      h (string-to-number (match-string 2 s)))
 	(if (org-pos-in-match-range pos 2)
 	    (setq h (+ h n))
-	  (setq n (* dm (with-no-warnings (signum n))))
+	  (setq n (* dm (with-no-warnings (cl-signum n))))
 	  (unless (= 0 (setq rem (% m dm)))
 	    (setq m (+ m (if (> n 0) (- rem) (- dm rem)))))
 	  (setq m (+ m n)))
