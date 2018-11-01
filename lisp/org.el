@@ -22365,7 +22365,8 @@ interactive command with similar behavior."
      (end-of-line)
      (null (re-search-backward org-outline-regexp-bol nil t)))))
 
-(defun org-at-heading-p (&optional ignored)
+(defun org-at-heading-p (&optional _)
+  "Non-nil when on a headline."
   (outline-on-heading-p t))
 
 (defun org-in-commented-heading-p (&optional no-inheritance)
