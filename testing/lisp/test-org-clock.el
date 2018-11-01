@@ -977,7 +977,26 @@ CLOCK: [2017-12-27 Wed 08:00]--[2017-12-27 Wed 16:00] =>  8:00"
 	    (let ((system-time-locale "en_US"))
 	      (test-org-clock-clocktable-contents
 		  (concat ":step day :tstart \"<2017-12-25 Mon>\" "
-			  ":tend \"<2017-12-27 Wed 23:59>\" :stepskip0 t")))))))
+			  ":tend \"<2017-12-27 Wed 23:59>\" :stepskip0 t"))))))
+  ;; Regression test: Respect DST
+  (should
+   (equal "
+Daily report: [2018-10-29 Mon]
+| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *8:00* |
+|--------------+--------|
+| Foo          | 8:00   |
+"
+	  (org-test-with-temp-text
+	      "* Foo
+CLOCK: [2018-10-29 Mon 08:00]--[2018-10-29 Mon 16:00] =>  8:00"
+	    (let ((system-time-locale "en_US"))
+	      (test-org-clock-clocktable-contents
+		  (concat ":step day "
+			  ":stepskip0 t "
+			  ":tstart \"2018-10-01\" "
+			  ":tend \"2018-11-01\"")))))))
 
 (ert-deftest test-org-clock/clocktable/extend-today-until ()
   "Test assignment of clock time to days in presence of \"org-extend-today-until\"."
