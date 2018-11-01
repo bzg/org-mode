@@ -160,20 +160,18 @@ archive file is."
 
 (defun org-all-archive-files ()
   "Get a list of all archive files used in the current buffer."
-  (let ((case-fold-search t)
-	files)
-    (org-with-wide-buffer
-     (goto-char (point-min))
-     (while (re-search-forward
-	     "^[ \t]*\\(#\\+\\|:\\)ARCHIVE:[ \t]+\\(.*\\)"
-	     nil t)
-       (when (save-match-data
-	       (if (eq (match-string 1) ":") (org-at-property-p)
-		 (eq (org-element-type (org-element-at-point)) 'keyword)))
-	 (let ((file (org-extract-archive-file
-		      (match-string-no-properties 2))))
-	   (when (and (org-string-nw-p file) (file-exists-p file))
-	     (push file files))))))
+  (let (files)
+    (org-with-point-at 1
+      (let ((regexp "^[ \t]*\\(#\\+\\|:\\)ARCHIVE:[ \t]+\\(.*\\)")
+	    (case-fold-search t))
+	(while (re-search-forward regexp nil t)
+	  (when (save-match-data
+		  (if (equal ":" (match-string 1)) (org-at-property-p)
+		    (eq 'keyword (org-element-type (org-element-at-point)))))
+	    (let ((file (org-extract-archive-file
+			 (match-string-no-properties 2))))
+	      (when (and (org-string-nw-p file) (file-exists-p file))
+		(push file files)))))))
     (setq files (nreverse files))
     (let ((file (org-extract-archive-file)))
       (when (and (org-string-nw-p file) (file-exists-p file))
