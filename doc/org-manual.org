@@ -7586,91 +7586,97 @@ The following commands deal with attachments:
      After these keys, a list of commands is displayed and you must
      press an additional key to select a command:
 
-     - {{{kbd(a)}}} (~org-attach-attach~) ::
+  - {{{kbd(a)}}} (~org-attach-attach~) ::
 
-          #+kindex: C-c C-a a
-          #+findex: org-attach-attach
-          #+vindex: org-attach-method
-          Select a file and move it into the task's attachment
-          directory.  The file is copied, moved, or linked, depending
-          on ~org-attach-method~.  Note that hard links are not
-          supported on all systems.
+       #+kindex: C-c C-a a
+       #+findex: org-attach-attach
+       #+vindex: org-attach-method
+       Select a file and move it into the task's attachment directory.
+       The file is copied, moved, or linked, depending on
+       ~org-attach-method~.  Note that hard links are not supported on
+       all systems.
 
-     - {{{kbd(c)}}}/{{{kbd(m)}}}/{{{kbd(l)}}} ::
+  - {{{kbd(c)}}}/{{{kbd(m)}}}/{{{kbd(l)}}} ::
 
-          #+kindex: C-c C-a c
-          #+kindex: C-c C-a m
-          #+kindex: C-c C-a l
-          Attach a file using the copy/move/link method.  Note that
-          hard links are not supported on all systems.
+       #+kindex: C-c C-a c
+       #+kindex: C-c C-a m
+       #+kindex: C-c C-a l
+       Attach a file using the copy/move/link method.  Note that hard
+       links are not supported on all systems.
 
-     - {{{kbd(n)}}} (~org-attach-new~) ::
+  - {{{kbd(b)}}} (~org-attach-buffer~) ::
 
-          #+kindex: C-c C-a n
-          #+findex: org-attach-new
-          Create a new attachment as an Emacs buffer.
+       #+kindex: C-c C-a b
+       #+findex: org-attach-buffer
+       Select a buffer and save it as a file in the task's attachment
+       directory.
 
-     - {{{kbd(z)}}} (~org-attach-sync~) ::
+  - {{{kbd(n)}}} (~org-attach-new~) ::
 
-          #+kindex: C-c C-a z
-          #+findex: org-attach-sync
-          Synchronize the current task with its attachment directory, in case
-          you added attachments yourself.
+       #+kindex: C-c C-a n
+       #+findex: org-attach-new
+       Create a new attachment as an Emacs buffer.
 
-     - {{{kbd(o)}}} (~org-attach-open~) ::
+  - {{{kbd(z)}}} (~org-attach-sync~) ::
 
-          #+kindex: C-c C-a o
-          #+findex: org-attach-open
-          #+vindex: org-file-apps
-          Open current task's attachment.  If there is more than one,
-          prompt for a file name first.  Opening follows the rules set
-          by ~org-file-apps~.  For more details, see the information
-          on following hyperlinks (see [[*Handling Links]]).
+       #+kindex: C-c C-a z
+       #+findex: org-attach-sync
+       Synchronize the current task with its attachment directory, in
+       case you added attachments yourself.
 
-     - {{{kbd(O)}}} (~org-attach-open-in-emacs~) ::
+  - {{{kbd(o)}}} (~org-attach-open~) ::
 
-          #+kindex: C-c C-a O
-          #+findex: org-attach-open-in-emacs
-          Also open the attachment, but force opening the file in
-          Emacs.
+       #+kindex: C-c C-a o
+       #+findex: org-attach-open
+       #+vindex: org-file-apps
+       Open current task's attachment.  If there is more than one,
+       prompt for a file name first.  Opening follows the rules set by
+       ~org-file-apps~.  For more details, see the information on
+       following hyperlinks (see [[*Handling Links]]).
 
-     - {{{kbd(f)}}} (~org-attach-reveal~) ::
+  - {{{kbd(O)}}} (~org-attach-open-in-emacs~) ::
 
-          #+kindex: C-c C-a f
-          #+findex: org-attach-reveal
-          Open the current task's attachment directory.
+       #+kindex: C-c C-a O
+       #+findex: org-attach-open-in-emacs
+       Also open the attachment, but force opening the file in Emacs.
 
-     - {{{kbd(F)}}} (~org-attach-reveal-in-emacs~) ::
+  - {{{kbd(f)}}} (~org-attach-reveal~) ::
 
-          #+kindex: C-c C-a F
-          #+findex: org-attach-reveal-in-emacs
-          Also open the directory, but force using Dired in Emacs.
+       #+kindex: C-c C-a f
+       #+findex: org-attach-reveal
+       Open the current task's attachment directory.
 
-     - {{{kbd(d)}}} (~org-attach-delete-one~) ::
+  - {{{kbd(F)}}} (~org-attach-reveal-in-emacs~) ::
 
-          #+kindex: C-c C-a d
-          Select and delete a single attachment.
+       #+kindex: C-c C-a F
+       #+findex: org-attach-reveal-in-emacs
+       Also open the directory, but force using Dired in Emacs.
 
-     - {{{kbd(D)}}} (~org-attach-delete-all~) ::
+  - {{{kbd(d)}}} (~org-attach-delete-one~) ::
 
-          #+kindex: C-c C-a D
-          Delete all of a task's attachments.  A safer way is to open
-          the directory in Dired and delete from there.
+       #+kindex: C-c C-a d
+       Select and delete a single attachment.
 
-     - {{{kbd(s)}}} (~org-attach-set-directory~) ::
+  - {{{kbd(D)}}} (~org-attach-delete-all~) ::
 
-          #+kindex: C-c C-a s
-          #+cindex: @samp{ATTACH_DIR}, property
-          Set a specific directory as the entry's attachment
-          directory.  This works by putting the directory path into
-          the =ATTACH_DIR= property.
+       #+kindex: C-c C-a D
+       Delete all of a task's attachments.  A safer way is to open the
+       directory in Dired and delete from there.
 
-     - {{{kbd(i)}}} (~org-attach-set-inherit~) ::
+  - {{{kbd(s)}}} (~org-attach-set-directory~) ::
 
-          #+kindex: C-c C-a i
-          #+cindex: @samp{ATTACH_DIR_INHERIT}, property
-          Set the =ATTACH_DIR_INHERIT= property, so that children use
-          the same directory for attachments as the parent does.
+       #+kindex: C-c C-a s
+       #+cindex: @samp{ATTACH_DIR}, property
+       Set a specific directory as the entry's attachment directory.
+       This works by putting the directory path into the =ATTACH_DIR=
+       property.
+
+  - {{{kbd(i)}}} (~org-attach-set-inherit~) ::
+
+       #+kindex: C-c C-a i
+       #+cindex: @samp{ATTACH_DIR_INHERIT}, property
+       Set the =ATTACH_DIR_INHERIT= property, so that children use the
+       same directory for attachments as the parent does.
 
 #+cindex: attach from Dired
 #+findex: org-attach-dired-to-subtree

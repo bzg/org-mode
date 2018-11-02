@@ -38,6 +38,10 @@ See [[git:3367ac9457]] for details.
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
+*** Attach buffer contents to headline
+With =<b>= key from attachment dispatcher (=<C-c C-a>=), it is now
+possible to write the contents of a buffer to a file in the headline
+attachement directory.
 *** iCalendar export respects a =CLASS= property
 
 Set the =CLASS= property on an entry to specify a visibility class for
