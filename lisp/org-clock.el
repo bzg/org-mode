@@ -2681,6 +2681,15 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
   (if (= level 1) ""
     (concat "\\_" (make-string (* 2 (1- level)) ?\s))))
 
+(defun org-clocktable-increment-day (ts &optional n)
+  "Increment day in TS by N (defaulting to 1).
+The TS argument has the same type as the return values of
+`float-time' or `current-time'."
+  (let ((tsd (decode-time ts)))
+    (cl-incf (nth 3 tsd) (or n 1))
+    (setf (nth 8 tsd) nil) ; no time zone: increasing day skips one whole day
+    (apply 'encode-time tsd)))
+
 (defun org-clocktable-steps (params)
   "Step through the range to make a number of clock tables."
   (let* ((ts (plist-get params :tstart))
@@ -2688,7 +2697,6 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
 	 (ws (plist-get params :wstart))
 	 (ms (plist-get params :mstart))
 	 (step0 (plist-get params :step))
-	 (step (cdr (assq step0 '((day . 86400) (week . 604800)))))
 	 (stepskip0 (plist-get params :stepskip0))
 	 (block (plist-get params :block))
 	 cc tsb)
@@ -2715,16 +2723,19 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
 	  (if (eq step0 'week)
 	      (let ((dow (nth 6 (decode-time (seconds-to-time ts)))))
 		(if (<= dow ws) ts
-		  (- ts (* 86400 (- dow ws)))))
+		  (org-clocktable-increment-day ts ; decrement
+						(- ws dow))))
 	    ts))
     (while (< tsb te)
       (unless (bolp) (insert "\n"))
-      (let ((start-time (seconds-to-time (max tsb ts))))
-	(cl-incf tsb (let ((dow (nth 6 (decode-time (seconds-to-time tsb)))))
-		       (if (or (eq step0 'day)
-			       (= dow ws))
-			   step
-			 (* 86400 (- ws dow)))))
+      (let* ((start-time (seconds-to-time (max tsb ts)))
+	     (dow (nth 6 (decode-time (seconds-to-time tsb))))
+	     (days-to-skip (cond ((eq step0 'day) 1)
+				 ;; else 'week:
+				 ((= dow ws) 7)
+				 (t (- ws dow)))))
+	(setq tsb (time-to-seconds (org-clocktable-increment-day tsb
+								 days-to-skip)))
 	(insert "\n"
 		(if (eq step0 'day) "Daily report: "
 		  "Weekly report starting on: ")
