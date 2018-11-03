@@ -9090,23 +9090,31 @@ non-nil."
 	(setq desc (or (plist-get org-store-link-plist :description)
 		       link)))
 
-       ;; Store a link from a source code buffer.
+       ;; Store a link from a remote editing buffer.
        ((org-src-edit-buffer-p)
 	(let ((coderef-format (org-src-coderef-format)))
-	  (cond ((org-match-line (org-src-coderef-regexp coderef-format))
-		 (setq link (format "(%s)" (match-string-no-properties 3))))
-		(interactive?
-		 (let ((label (read-string "Code line label: ")))
-		   (end-of-line)
-		   (setq link (format coderef-format label))
-		   (let ((gc (- 79 (length link))))
-		     (if (< (current-column) gc)
-			 (org-move-to-column gc t)
-		       (insert " ")))
-		   (insert link)
-		   (setq link (concat "(" label ")"))
-		   (setq desc nil)))
-		(t (setq link nil)))))
+	  (cond
+	   ;; A code reference exists. Use it.
+	   ((save-excursion
+	      (beginning-of-line)
+	      (re-search-forward (org-src-coderef-regexp coderef-format)
+				 (line-end-position)
+				 t))
+	    (setq link (format "(%s)" (match-string-no-properties 3))))
+	   ;; No code reference.  Create a new one then store the link
+	   ;; to it, but only in the function is called interactively.
+	   (interactive?
+	    (end-of-line)
+	    (let* ((label (read-string "Code line label: "))
+		   (reference (format coderef-format label))
+		   (gc (- 79 (length link))))
+	      (if (< (current-column) gc)
+		  (org-move-to-column gc t)
+		(insert " "))
+	      (insert reference))
+	    (setq link (format "(%s)" label))
+	    (setq desc nil))
+	   (t (setq link nil)))))
 
        ;; We are in the agenda, link to referenced location
        ((equal (bound-and-true-p org-agenda-buffer-name) (buffer-name))
