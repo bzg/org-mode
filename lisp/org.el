@@ -9111,9 +9111,8 @@ non-nil."
 	      (if (< (current-column) gc)
 		  (org-move-to-column gc t)
 		(insert " "))
-	      (insert reference))
-	    (setq link (format "(%s)" label))
-	    (setq desc nil))
+	      (insert reference)
+	      (setq link (format "(%s)" label))))
 	   (t (setq link nil)))))
 
        ;; We are in the agenda, link to referenced location
