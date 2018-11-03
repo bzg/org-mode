@@ -2726,9 +2726,9 @@ The TS argument has the same type as the return values of
 		  (org-clocktable-increment-day ts ; decrement
 						(- ws dow))))
 	    ts))
-    (while (< tsb te)
+    (while (< (float-time tsb) te)
       (unless (bolp) (insert "\n"))
-      (let* ((start-time (seconds-to-time (max tsb ts)))
+      (let* ((start-time (seconds-to-time (max (float-time tsb) ts)))
 	     (dow (nth 6 (decode-time (seconds-to-time tsb))))
 	     (days-to-skip (cond ((eq step0 'day) 1)
 				 ;; else 'week:
