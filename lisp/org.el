@@ -9094,7 +9094,13 @@ non-nil."
        ((org-src-edit-buffer-p)
 	(let ((coderef-format (org-src-coderef-format)))
 	  (cond
-	   ;; A code reference exists. Use it.
+	   ;; Code references do not exist in this type of buffer.
+	   ;; Pretend we're linking from the source buffer directly.
+	   ((not (memq (org-src-source-type) '(example-block src-block)))
+	    (with-current-buffer (org-src-source-buffer)
+	      (org-store-link arg interactive?))
+	    (setq link nil))
+	   ;; A code reference exists.  Use it.
 	   ((save-excursion
 	      (beginning-of-line)
 	      (re-search-forward (org-src-coderef-regexp coderef-format)
@@ -9107,12 +9113,14 @@ non-nil."
 	    (end-of-line)
 	    (let* ((label (read-string "Code line label: "))
 		   (reference (format coderef-format label))
-		   (gc (- 79 (length link))))
+		   (gc (- 79 (length reference))))
 	      (if (< (current-column) gc)
 		  (org-move-to-column gc t)
 		(insert " "))
 	      (insert reference)
 	      (setq link (format "(%s)" label))))
+	   ;; No code reference, and non-interactive call.  Don't know
+	   ;; what to do.  Give up.
 	   (t (setq link nil)))))
 
        ;; We are in the agenda, link to referenced location
@@ -10317,18 +10325,12 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	    (let ((element (org-element-at-point)))
 	      (when (and (memq (org-element-type element)
 			       '(example-block src-block))
-			 ;; Build proper regexp according to current
-			 ;; block's label format.
-			 (let ((label-fmt
-				(regexp-quote
-				 (or (org-element-property :label-fmt element)
-				     org-coderef-label-format))))
-			   (save-excursion
-			     (beginning-of-line)
-			     (looking-at (format ".*?\\(%s\\)[ \t]*$"
-						 (format label-fmt coderef))))))
+			 (org-match-line
+			  (concat ".*?" (org-src-coderef-regexp
+					 (org-src-coderef-format element)
+					 coderef))))
 		(setq type 'dedicated)
-		(goto-char (match-beginning 1))
+		(goto-char (match-beginning 2))
 		(throw :coderef-match nil))))
 	  (goto-char origin)
 	  (error "No match for coderef: %s" coderef))))
