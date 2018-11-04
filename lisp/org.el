@@ -9244,7 +9244,12 @@ non-nil."
 
        ;; Store a link from a remote editing buffer.
        ((org-src-edit-buffer-p)
-	(let ((coderef-format (org-src-coderef-format)))
+	(let ((coderef-format (org-src-coderef-format))
+	      (format-link
+	       (lambda (label)
+		 (if org-src-source-file-name
+		     (format "file:%s::(%s)" org-src-source-file-name label)
+		   (format "(%s)" label)))))
 	  (cond
 	   ;; Code references do not exist in this type of buffer.
 	   ;; Pretend we're linking from the source buffer directly.
@@ -9258,7 +9263,7 @@ non-nil."
 	      (re-search-forward (org-src-coderef-regexp coderef-format)
 				 (line-end-position)
 				 t))
-	    (setq link (format "(%s)" (match-string-no-properties 3))))
+	    (setq link (funcall format-link (match-string-no-properties 3))))
 	   ;; No code reference.  Create a new one then store the link
 	   ;; to it, but only in the function is called interactively.
 	   (interactive?
@@ -9270,7 +9275,7 @@ non-nil."
 		  (org-move-to-column gc t)
 		(insert " "))
 	      (insert reference)
-	      (setq link (format "(%s)" label))))
+	      (setq link (funcall format-link label))))
 	   ;; No code reference, and non-interactive call.  Don't know
 	   ;; what to do.  Give up.
 	   (t (setq link nil)))))

@@ -283,6 +283,10 @@ However, if `indent-tabs-mode' is nil in that buffer, its value
 is 0.")
 (put 'org-src--tab-width 'permanent-local t)
 
+(defvar-local org-src-source-file-name nil
+  "File name associated to Org source buffer, or nil.")
+(put 'org-src-source-file-name 'permanent-local t)
+
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
   (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
@@ -487,6 +491,7 @@ Leave point in edit buffer."
 	(with-current-buffer old-edit-buffer (org-src--remove-overlay))
 	(kill-buffer old-edit-buffer))
       (let* ((org-mode-p (derived-mode-p 'org-mode))
+	     (source-file-name (buffer-file-name (buffer-base-buffer)))
 	     (source-tab-width (if indent-tabs-mode tab-width 0))
 	     (type (org-element-type datum))
 	     (ind (org-with-wide-buffer
@@ -538,6 +543,7 @@ Leave point in edit buffer."
 	(setq org-src--preserve-indentation preserve-ind)
 	(setq org-src--overlay overlay)
 	(setq org-src--allow-write-back write-back)
+	(setq org-src-source-file-name source-file-name)
 	;; Start minor mode.
 	(org-src-mode)
 	;; Move mark and point in edit buffer to the corresponding
