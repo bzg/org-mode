@@ -300,12 +300,6 @@ Return nil if there is no such buffer."
 	     (eq (marker-buffer end) (marker-buffer org-src--end-marker))
 	     (throw 'exit b))))))
 
-(defun org-src--source-buffer ()
-  "Return source buffer edited by current buffer."
-  (unless (org-src-edit-buffer-p) (error "Not in a source buffer"))
-  (or (marker-buffer org-src--beg-marker)
-      (error "No source buffer available for current editing session")))
-
 (defun org-src--get-lang-mode (lang)
   "Return major mode that should be used for LANG.
 LANG is a string, and the returned major mode is a symbol."
@@ -774,6 +768,19 @@ If BUFFER is non-nil, test it instead."
 	 (local-variable-p 'org-src--beg-marker buffer)
 	 (local-variable-p 'org-src--end-marker buffer))))
 
+(defun org-src-source-buffer ()
+  "Return source buffer edited in current buffer.
+Raise an error when current buffer is not a source editing buffer."
+  (unless (org-src-edit-buffer-p) (error "Not in a source buffer"))
+  (or (marker-buffer org-src--beg-marker)
+      (error "No source buffer available for current editing session")))
+
+(defun org-src-source-type ()
+  "Return type of element edited in current buffer.
+Raise an error when current buffer is not a source editing buffer."
+  (unless (org-src-edit-buffer-p) (error "Not in a source buffer"))
+  org-src--source-type)
+
 (defun org-src-switch-to-buffer (buffer context)
   (pcase org-src-window-setup
     (`current-window (pop-to-buffer-same-window buffer))
@@ -1103,7 +1110,7 @@ Throw an error if there is no such buffer."
 	(beg org-src--beg-marker)
 	(end org-src--end-marker)
 	(overlay org-src--overlay))
-    (with-current-buffer (org-src--source-buffer)
+    (with-current-buffer (org-src-source-buffer)
       (undo-boundary)
       (goto-char beg)
       ;; Temporarily disable read-only features of OVERLAY in order to

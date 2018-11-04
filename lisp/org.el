@@ -9246,7 +9246,13 @@ non-nil."
        ((org-src-edit-buffer-p)
 	(let ((coderef-format (org-src-coderef-format)))
 	  (cond
-	   ;; A code reference exists. Use it.
+	   ;; Code references do not exist in this type of buffer.
+	   ;; Pretend we're linking from the source buffer directly.
+	   ((not (memq (org-src-source-type) '(example-block src-block)))
+	    (with-current-buffer (org-src-source-buffer)
+	      (org-store-link arg interactive?))
+	    (setq link nil))
+	   ;; A code reference exists.  Use it.
 	   ((save-excursion
 	      (beginning-of-line)
 	      (re-search-forward (org-src-coderef-regexp coderef-format)
@@ -9259,12 +9265,14 @@ non-nil."
 	    (end-of-line)
 	    (let* ((label (read-string "Code line label: "))
 		   (reference (format coderef-format label))
-		   (gc (- 79 (length link))))
+		   (gc (- 79 (length reference))))
 	      (if (< (current-column) gc)
 		  (org-move-to-column gc t)
 		(insert " "))
 	      (insert reference)
 	      (setq link (format "(%s)" label))))
+	   ;; No code reference, and non-interactive call.  Don't know
+	   ;; what to do.  Give up.
 	   (t (setq link nil)))))
 
        ;; We are in the agenda, link to referenced location
