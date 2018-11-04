@@ -1360,6 +1360,9 @@ original parsed data.  INFO is a plist holding export options."
   (let* ((styles-file (plist-get info :odt-styles-file))
 	 (styles-file (and (org-string-nw-p styles-file)
 			   (org-trim styles-file)))
+	 (styles-file (if (string-match-p "\\`(.*)\\'" styles-file)
+			  (ignore-errors (read styles-file))
+			styles-file))
 	 ;; Non-availability of styles.xml is not a critical
 	 ;; error. For now, throw an error.
 	 (styles-file (or styles-file
