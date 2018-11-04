@@ -10469,18 +10469,12 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	    (let ((element (org-element-at-point)))
 	      (when (and (memq (org-element-type element)
 			       '(example-block src-block))
-			 ;; Build proper regexp according to current
-			 ;; block's label format.
-			 (let ((label-fmt
-				(regexp-quote
-				 (or (org-element-property :label-fmt element)
-				     org-coderef-label-format))))
-			   (save-excursion
-			     (beginning-of-line)
-			     (looking-at (format ".*?\\(%s\\)[ \t]*$"
-						 (format label-fmt coderef))))))
+			 (org-match-line
+			  (concat ".*?" (org-src-coderef-regexp
+					 (org-src-coderef-format element)
+					 coderef))))
 		(setq type 'dedicated)
-		(goto-char (match-beginning 1))
+		(goto-char (match-beginning 2))
 		(throw :coderef-match nil))))
 	  (goto-char origin)
 	  (error "No match for coderef: %s" coderef))))
