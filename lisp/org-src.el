@@ -283,6 +283,10 @@ However, if `indent-tabs-mode' is nil in that buffer, its value
 is 0.")
 (put 'org-src--tab-width 'permanent-local t)
 
+(defvar-local org-src-source-file-name nil
+  "File name associated to Org source buffer, or nil.")
+(put 'org-src-source-file-name 'permanent-local t)
+
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
   (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
@@ -299,12 +303,6 @@ Return nil if there is no such buffer."
 	     (= end org-src--end-marker)
 	     (eq (marker-buffer end) (marker-buffer org-src--end-marker))
 	     (throw 'exit b))))))
-
-(defun org-src--source-buffer ()
-  "Return source buffer edited by current buffer."
-  (unless (org-src-edit-buffer-p) (error "Not in a source buffer"))
-  (or (marker-buffer org-src--beg-marker)
-      (error "No source buffer available for current editing session")))
 
 (defun org-src--get-lang-mode (lang)
   "Return major mode that should be used for LANG.
@@ -493,6 +491,7 @@ Leave point in edit buffer."
 	(with-current-buffer old-edit-buffer (org-src--remove-overlay))
 	(kill-buffer old-edit-buffer))
       (let* ((org-mode-p (derived-mode-p 'org-mode))
+	     (source-file-name (buffer-file-name (buffer-base-buffer)))
 	     (source-tab-width (if indent-tabs-mode tab-width 0))
 	     (type (org-element-type datum))
 	     (ind (org-with-wide-buffer
@@ -544,6 +543,7 @@ Leave point in edit buffer."
 	(setq org-src--preserve-indentation preserve-ind)
 	(setq org-src--overlay overlay)
 	(setq org-src--allow-write-back write-back)
+	(setq org-src-source-file-name source-file-name)
 	;; Start minor mode.
 	(org-src-mode)
 	;; Move mark and point in edit buffer to the corresponding
@@ -773,6 +773,19 @@ If BUFFER is non-nil, test it instead."
     (and (buffer-live-p buffer)
 	 (local-variable-p 'org-src--beg-marker buffer)
 	 (local-variable-p 'org-src--end-marker buffer))))
+
+(defun org-src-source-buffer ()
+  "Return source buffer edited in current buffer.
+Raise an error when current buffer is not a source editing buffer."
+  (unless (org-src-edit-buffer-p) (error "Not in a source buffer"))
+  (or (marker-buffer org-src--beg-marker)
+      (error "No source buffer available for current editing session")))
+
+(defun org-src-source-type ()
+  "Return type of element edited in current buffer.
+Raise an error when current buffer is not a source editing buffer."
+  (unless (org-src-edit-buffer-p) (error "Not in a source buffer"))
+  org-src--source-type)
 
 (defun org-src-switch-to-buffer (buffer context)
   (pcase org-src-window-setup
@@ -1103,7 +1116,7 @@ Throw an error if there is no such buffer."
 	(beg org-src--beg-marker)
 	(end org-src--end-marker)
 	(overlay org-src--overlay))
-    (with-current-buffer (org-src--source-buffer)
+    (with-current-buffer (org-src-source-buffer)
       (undo-boundary)
       (goto-char beg)
       ;; Temporarily disable read-only features of OVERLAY in order to
