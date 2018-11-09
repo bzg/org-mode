@@ -13978,7 +13978,7 @@ When DOWNCASED is non-nil, expand downcased TAGS."
   (let ((tag-groups
 	 (let ((g (or org-tag-groups-alist-for-agenda org-tag-groups-alist)))
 	   (if (not downcased) g
-	     (mapcar (lambda (s) (mapcar #'downcase s)))))))
+	     (mapcar (lambda (s) (mapcar #'downcase s)) g)))))
     (cond
      (single-as-list (org--tags-expand-group (list match) tag-groups nil))
      (org-group-tags
