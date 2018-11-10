@@ -27,8 +27,9 @@
 
 (require 'cl-lib)
 (require 'format-spec)
-(require 'ox)
 (require 'org-compat)
+(require 'org-macs)
+(require 'ox)
 (require 'table nil 'noerror)
 
 ;;; Define Back-End
@@ -1364,7 +1365,7 @@ original parsed data.  INFO is a plist holding export options."
 	     (condition-case nil
 		 (read s)
 	       (error (user-error "Invalid styles file specification: %S" s))))
-	    (filename (org-strip-quote filename)))))
+	    (filename (org-strip-quotes filename)))))
     (cond
      ;; Non-availability of styles.xml is not a critical error.  For
      ;; now, throw an error.
