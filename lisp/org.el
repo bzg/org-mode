@@ -674,7 +674,8 @@ on a string that terminates immediately after the date.")
 The time stamps may be either active or inactive.")
 
 (defconst org-repeat-re
-  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
+  "[[<][0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^]>\n]*?\
+\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
   "Regular expression for specifying repeated events.
 After a match, group 1 contains the repeat expression.")
 
@@ -12730,117 +12731,110 @@ This function is run automatically after each state change to a DONE state."
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
 	 (end (copy-marker (org-entry-end-position))))
-    (unwind-protect
-	(when (and repeat (not (zerop (string-to-number (substring repeat 1)))))
-	  (when (eq org-log-repeat t) (setq org-log-repeat 'state))
-	  (let ((to-state (or (org-entry-get nil "REPEAT_TO_STATE" 'selective)
-			      (and (stringp org-todo-repeat-to-state)
-				   org-todo-repeat-to-state)
-			      (and org-todo-repeat-to-state org-last-state))))
-	    (org-todo (cond
-		       ((and to-state (member to-state org-todo-keywords-1))
-			to-state)
-		       ((eq interpret 'type) org-last-state)
-		       (head)
-		       (t 'none))))
-	  (org-back-to-heading t)
-	  (org-add-planning-info nil nil 'closed)
-	  ;; When `org-log-repeat' is non-nil or entry contains
-	  ;; a clock, set LAST_REPEAT property.
-	  (when (or org-log-repeat
-		    (catch :clock
-		      (save-excursion
-			(while (re-search-forward org-clock-line-re end t)
-			  (when (org-at-clock-log-p) (throw :clock t))))))
-	    (org-entry-put nil "LAST_REPEAT" (format-time-string
-					      (org-time-stamp-format t t)
-					      (current-time))))
-	  (when org-log-repeat
-	    (if (or (memq 'org-add-log-note (default-value 'post-command-hook))
-		    (memq 'org-add-log-note post-command-hook))
-		;; We are already setup for some record.
-		(when (eq org-log-repeat 'note)
-		  ;; Make sure we take a note, not only a time stamp.
-		  (setq org-log-note-how 'note))
-	      ;; Set up for taking a record.
-	      (org-add-log-setup 'state
-				 (or done-word (car org-done-keywords))
-				 org-last-state
-				 org-log-repeat)))
-	  (let ((planning-re (regexp-opt
-			      (list org-scheduled-string org-deadline-string))))
-	    (while (re-search-forward org-ts-regexp end t)
-	      (let* ((ts (match-string 0))
-		     (planning? (org-at-planning-p))
-		     (type (if (not planning?) "Plain:"
-			     (save-excursion
-			       (re-search-backward
-				planning-re (line-beginning-position) t)
-			       (match-string 0)))))
-		(cond
-		 ;; Ignore fake time-stamps (e.g., within comments).
-		 ((not (org-at-timestamp-p 'agenda)))
-		 ;; Time-stamps without a repeater are usually
-		 ;; skipped.  However, a SCHEDULED time-stamp without
-		 ;; one is removed, as they are no longer relevant.
-		 ((not (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
-				     ts))
-		  (when (equal type org-scheduled-string)
-		    (org-remove-timestamp-with-keyword type)))
-		 (t
-		  (let ((n (string-to-number (match-string 2 ts)))
-			(what (match-string 3 ts)))
-		    (when (equal what "w") (setq n (* n 7) what "d"))
-		    (when (and (equal what "h")
-			       (not (string-match-p "[0-9]\\{1,2\\}:[0-9]\\{2\\}"
-						    ts)))
-		      (user-error
-		       "Cannot repeat in Repeat in %d hour(s) because no hour \
-has been set"
-		       n))
-		    ;; Preparation, see if we need to modify the start
-		    ;; date for the change.
-		    (when (match-end 1)
-		      (let ((time (save-match-data
-				    (org-time-string-to-time ts))))
-			(cond
-			 ((equal (match-string 1 ts) ".")
-			  ;; Shift starting date to today
-			  (org-timestamp-change
-			   (- (org-today) (time-to-days time))
-			   'day))
-			 ((equal (match-string 1 ts) "+")
-			  (let ((nshiftmax 10)
-				(nshift 0))
-			    (while (or (= nshift 0)
-				       (not (time-less-p (current-time) time)))
-			      (when (= (cl-incf nshift) nshiftmax)
-				(or (y-or-n-p
-				     (format "%d repeater intervals were not \
+    (when (and repeat (not (= 0 (string-to-number (substring repeat 1)))))
+      (when (eq org-log-repeat t) (setq org-log-repeat 'state))
+      (let ((to-state (or (org-entry-get nil "REPEAT_TO_STATE" 'selective)
+			  (and (stringp org-todo-repeat-to-state)
+			       org-todo-repeat-to-state)
+			  (and org-todo-repeat-to-state org-last-state))))
+	(org-todo (cond ((and to-state (member to-state org-todo-keywords-1))
+			 to-state)
+			((eq interpret 'type) org-last-state)
+			(head)
+			(t 'none))))
+      (org-back-to-heading t)
+      (org-add-planning-info nil nil 'closed)
+      ;; When `org-log-repeat' is non-nil or entry contains
+      ;; a clock, set LAST_REPEAT property.
+      (when (or org-log-repeat
+		(catch :clock
+		  (save-excursion
+		    (while (re-search-forward org-clock-line-re end t)
+		      (when (org-at-clock-log-p) (throw :clock t))))))
+	(org-entry-put nil "LAST_REPEAT" (format-time-string
+					  (org-time-stamp-format t t)
+					  (current-time))))
+      (when org-log-repeat
+	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
+		(memq 'org-add-log-note post-command-hook))
+	    ;; We are already setup for some record.
+	    (when (eq org-log-repeat 'note)
+	      ;; Make sure we take a note, not only a time stamp.
+	      (setq org-log-note-how 'note))
+	  ;; Set up for taking a record.
+	  (org-add-log-setup 'state
+			     (or done-word (car org-done-keywords))
+			     org-last-state
+			     org-log-repeat)))
+      (let ((planning-re (regexp-opt
+			  (list org-scheduled-string org-deadline-string))))
+	(while (re-search-forward org-ts-regexp-both end t)
+	  (let* ((ts (match-string 0))
+		 (planning? (org-at-planning-p))
+		 (type (if (not planning?) "Plain:"
+			 (save-excursion
+			   (re-search-backward
+			    planning-re (line-beginning-position) t)
+			   (match-string 0)))))
+	    (cond
+	     ;; Ignore fake time-stamps (e.g., within comments).
+	     ((not (org-at-timestamp-p 'agenda)))
+	     ((string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts)
+	      (let ((n (string-to-number (match-string 2 ts)))
+		    (what (match-string 3 ts)))
+		(when (equal what "w") (setq n (* n 7) what "d"))
+		(when (and (equal what "h")
+			   (not (string-match-p "[0-9]\\{1,2\\}:[0-9]\\{2\\}"
+						ts)))
+		  (user-error
+		   "Cannot repeat in %d hour(s) because no hour has been set"
+		   n))
+		;; Preparation, see if we need to modify the start
+		;; date for the change.
+		(when (match-end 1)
+		  (let ((time (save-match-data (org-time-string-to-time ts)))
+			(repeater-type (match-string 1 ts)))
+		    (cond
+		     ((equal "." repeater-type)
+		      ;; Shift starting date to today.
+		      (org-timestamp-change (- (org-today) (time-to-days time))
+					    'day))
+		     ((equal "+" repeater-type)
+		      (let ((nshiftmax 10)
+			    (nshift 0))
+			(while (or (= nshift 0)
+				   (not (time-less-p (current-time) time)))
+			  (when (= nshiftmax (cl-incf nshift))
+			    (or (y-or-n-p
+				 (format "%d repeater intervals were not \
 enough to shift date past today.  Continue? "
-					     nshift))
-				    (user-error "Abort")))
-			      (org-timestamp-change n (cdr (assoc what whata)))
-			      (org-in-regexp org-ts-regexp3)
-			      (setq ts (match-string 1))
-			      (setq time
-				    (save-match-data
-				      (org-time-string-to-time ts)))))
-			  (org-timestamp-change (- n) (cdr (assoc what whata)))
-			  ;; Rematch, so that we have everything in place
-			  ;; for the real shift.
+					 nshift))
+				(user-error "Abort")))
+			  (org-timestamp-change n (cdr (assoc what whata)))
 			  (org-in-regexp org-ts-regexp3)
 			  (setq ts (match-string 1))
-			  (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
-					ts)))))
-		    (save-excursion
-		      (org-timestamp-change n (cdr (assoc what whata)) nil t))
-		    (setq msg
-			  (concat
-			   msg type " " org-last-changed-timestamp " "))))))))
-	  (setq org-log-post-message msg)
-	  (message "%s" msg))
-      (set-marker end nil))))
+			  (setq time
+				(save-match-data
+				  (org-time-string-to-time ts)))))
+		      (org-timestamp-change (- n) (cdr (assoc what whata)))
+		      ;; Rematch, so that we have everything in place
+		      ;; for the real shift.
+		      (org-in-regexp org-ts-regexp3)
+		      (setq ts (match-string 1))
+		      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
+				    ts)))))
+		(save-excursion
+		  (org-timestamp-change n (cdr (assoc what whata)) nil t))
+		(setq msg
+		      (concat msg type " " org-last-changed-timestamp " "))))
+	     (t
+	      ;; Time-stamps without a repeater are usually skipped.
+	      ;; However, a SCHEDULED time-stamp without one is
+	      ;; removed, as they are no longer relevant.
+	      (when (equal type org-scheduled-string)
+		(org-remove-timestamp-with-keyword type)))))))
+      (setq org-log-post-message msg)
+      (message "%s" msg))))
 
 (defun org-show-todo-tree (arg)
   "Make a compact tree which shows all headlines marked with TODO.

@@ -6607,6 +6607,15 @@ Paragraph<point>"
      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2h>"
        (org-todo "DONE")
        (buffer-string))))
+  ;; Also repeat inactive time stamps with a repeater.
+  (should
+   (string-match-p
+    "\\[2014-03-29 .* \\+2y\\]"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+	  "* TODO H\n[2012-03-29 Thu. +2y]"
+	(org-todo "DONE")
+	(buffer-string)))))
   ;; Do not repeat commented time stamps.
   (should-not
    (string-prefix-p
