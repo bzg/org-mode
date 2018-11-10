@@ -5173,8 +5173,7 @@ Return value contains the following keys: `archive', `category',
 	      ((equal key "SETUPFILE")
 	       (unless buffer-read-only ; Do not check in Gnus messages.
 		 (let ((f (and (org-string-nw-p value)
-			       (expand-file-name
-				(org-unbracket-string "\"" "\"" value)))))
+			       (expand-file-name (org-strip-quotes value)))))
 		   (when (and f (file-readable-p f) (not (member f files)))
 		     (with-temp-buffer
 		       (setq default-directory (file-name-directory f))
@@ -20084,28 +20083,27 @@ Otherwise, return a user error."
 		(params (nth 2 info))
 		(session (cdr (assq :session params))))
 	   (if (not session) (org-edit-src-code)
-	     ;; At a src-block with a session and function called with
-	     ;; an ARG: switch to the buffer related to the inferior
-	     ;; process.
+	     ;; At a source block with a session and function called
+	     ;; with an ARG: switch to the buffer related to the
+	     ;; inferior process.
 	     (switch-to-buffer
 	      (funcall (intern (concat "org-babel-prep-session:" lang))
 		       session params))))))
       (`keyword
-       (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
-           (org-open-link-from-string
-	    (format "[[%s]]"
-		    (expand-file-name
-		     (let ((value (org-element-property :value element)))
-		       (cond ((org-file-url-p value)
-			      (user-error "The file is specified as a URL, cannot be edited"))
-			     ((not (org-string-nw-p value))
-			      (user-error "No file to edit"))
-			     ((string-match "\\`\"\\(.*?\\)\"" value)
-			      (match-string 1 value))
-			     ((string-match "\\`[^ \t\"]\\S-*" value)
-			      (match-string 0 value))
-			     (t (user-error "No valid file specified")))))))
-         (user-error "No special environment to edit here")))
+       (unless (member (org-element-property :key element)
+		       '("INCLUDE" "SETUPFILE"))
+	 (user-error "No special environment to edit here"))
+       (org-open-link-from-string
+	(format "[[%s]]"
+		(expand-file-name
+		 (let ((value (org-strip-quotes
+			       (org-element-property :value element))))
+		   (cond
+		    ((not (org-string-nw-p value))
+		     (user-error "No file to edit"))
+		    ((org-file-url-p value)
+		     (user-error "Files located with a URL cannot be edited"))
+		    (t value)))))))
       (`table
        (if (eq (org-element-property :type element) 'table.el)
            (org-edit-table.el)
