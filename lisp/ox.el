@@ -1499,7 +1499,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			 (cond
 			  ;; Options in `org-export-special-keywords'.
 			  ((equal key "SETUPFILE")
-			   (let* ((uri (org-unbracket-string "\"" "\"" (org-trim val)))
+			   (let* ((uri (org-strip-quotes (org-trim val)))
 				  (uri-is-url (org-file-url-p uri))
 				  (uri (if uri-is-url
 					   uri
@@ -1650,7 +1650,7 @@ an alist where associations are (VARIABLE-NAME VALUE)."
 				      "BIND")
 			       (push (read (format "(%s)" val)) alist)
 			     ;; Enter setup file.
-			     (let* ((uri (org-unbracket-string "\"" "\"" val))
+			     (let* ((uri (org-strip-quotes val))
 				    (uri-is-url (org-file-url-p uri))
 				    (uri (if uri-is-url
 					     uri
@@ -3288,8 +3288,8 @@ storing and resolving footnotes.  It is created automatically."
 			       (setq value (replace-match "" nil nil value))))
 			coding-system-for-read))
 		   (file
-		    (and (string-match
-			  "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
+		    (and (string-match "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
+				       value)
 			 (prog1
 			     (save-match-data
 			       (let ((matched (match-string 1 value)))
@@ -3298,9 +3298,8 @@ storing and resolving footnotes.  It is created automatically."
 				   (setq location (match-string 2 matched))
 				   (setq matched
 					 (replace-match "" nil nil matched 1)))
-				 (expand-file-name
-				  (org-unbracket-string "\"" "\"" matched)
-				  dir)))
+				 (expand-file-name (org-strip-quotes matched)
+						   dir)))
 			   (setq value (replace-match "" nil nil value)))))
 		   (only-contents
 		    (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?"

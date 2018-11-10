@@ -589,7 +589,7 @@ Use :header-args: instead"
 	       (path
 		(and (string-match "^\\(\".+\"\\|\\S-+\\)[ \t]*" value)
 		     (save-match-data
-		       (org-unbracket-string "\"" "\"" (match-string 1 value))))))
+		       (org-strip-quotes (match-string 1 value))))))
 	  (if (not path)
 	      (list (org-element-property :post-affiliated k)
 		    "Missing location argument in INCLUDE keyword")

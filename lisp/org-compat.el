@@ -226,6 +226,7 @@ Counting starts at 1."
   'org-activate-links "Org 9.0")
 (define-obsolete-function-alias 'org-activate-plain-links 'ignore "Org 9.0")
 (define-obsolete-function-alias 'org-activate-angle-links 'ignore "Org 9.0")
+(define-obsolete-function-alias 'org-remove-double-quotes 'org-strip-quotes "Org 9.0")
 (define-obsolete-function-alias 'org-get-indentation
   'current-indentation "Org 9.2")
 (define-obsolete-function-alias 'org-capture-member 'org-capture-get "Org 9.2")
@@ -330,10 +331,6 @@ See `org-link-parameters' for documentation on the other parameters."
 (defun org-remove-angle-brackets (s)
   (org-unbracket-string "<" ">" s))
 (make-obsolete 'org-remove-angle-brackets 'org-unbracket-string "Org 9.0")
-
-(defun org-remove-double-quotes (s)
-  (org-unbracket-string "\"" "\"" s))
-(make-obsolete 'org-remove-double-quotes 'org-unbracket-string "Org 9.0")
 
 (defcustom org-publish-sitemap-file-entry-format "%t"
   "Format string for site-map file entry.
