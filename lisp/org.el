@@ -14523,11 +14523,10 @@ Assume point is at the beginning of the headline."
 
 When argument POS is non-nil, retrieve tags for headline at POS.
 
-Accoring to `org-use-tags-inheritance', tags may be inherited
+According to `org-use-tags-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
 `org-file-tags'.  However, when optional argument LOCAL is
-non-nil, only return tags really specified in the considered
-headline.
+non-nil, only return tags specified at the headline.
 
 Inherited tags have the `inherited' text property."
   (if (and org-trust-scanner-tags
