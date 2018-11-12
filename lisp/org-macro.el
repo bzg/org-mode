@@ -110,7 +110,7 @@ Return an alist containing all macro templates found."
 				 (if old-cell (setcdr old-cell template)
 				   (push (cons name template) templates))))
 			   ;; Enter setup file.
-			   (let* ((uri (org-unbracket-string "\"" "\"" (org-trim val)))
+			   (let* ((uri (org-strip-quotes (org-trim val)))
 				  (uri-is-url (org-file-url-p uri))
 				  (uri (if uri-is-url
 					   uri

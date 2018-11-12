@@ -576,7 +576,7 @@ holding export options."
     (concat
      "\\input texinfo    @c -*- texinfo -*-\n"
      "@c %**start of header\n"
-     (let ((file (or (plist-get info :texinfo-filename)
+     (let ((file (or (org-strip-quotes (plist-get info :texinfo-filename))
 		     (let ((f (plist-get info :output-file)))
 		       (and f (concat (file-name-sans-extension f) ".info"))))))
        (and file (format "@setfilename %s\n" file)))

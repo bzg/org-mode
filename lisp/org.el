@@ -674,7 +674,8 @@ on a string that terminates immediately after the date.")
 The time stamps may be either active or inactive.")
 
 (defconst org-repeat-re
-  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
+  "[[<][0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^]>\n]*?\
+\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
   "Regular expression for specifying repeated events.
 After a match, group 1 contains the repeat expression.")
 
@@ -5173,8 +5174,7 @@ Return value contains the following keys: `archive', `category',
 	      ((equal key "SETUPFILE")
 	       (unless buffer-read-only ; Do not check in Gnus messages.
 		 (let ((f (and (org-string-nw-p value)
-			       (expand-file-name
-				(org-unbracket-string "\"" "\"" value)))))
+			       (expand-file-name (org-strip-quotes value)))))
 		   (when (and f (file-readable-p f) (not (member f files)))
 		     (with-temp-buffer
 		       (setq default-directory (file-name-directory f))
@@ -12731,117 +12731,110 @@ This function is run automatically after each state change to a DONE state."
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
 	 (end (copy-marker (org-entry-end-position))))
-    (unwind-protect
-	(when (and repeat (not (zerop (string-to-number (substring repeat 1)))))
-	  (when (eq org-log-repeat t) (setq org-log-repeat 'state))
-	  (let ((to-state (or (org-entry-get nil "REPEAT_TO_STATE" 'selective)
-			      (and (stringp org-todo-repeat-to-state)
-				   org-todo-repeat-to-state)
-			      (and org-todo-repeat-to-state org-last-state))))
-	    (org-todo (cond
-		       ((and to-state (member to-state org-todo-keywords-1))
-			to-state)
-		       ((eq interpret 'type) org-last-state)
-		       (head)
-		       (t 'none))))
-	  (org-back-to-heading t)
-	  (org-add-planning-info nil nil 'closed)
-	  ;; When `org-log-repeat' is non-nil or entry contains
-	  ;; a clock, set LAST_REPEAT property.
-	  (when (or org-log-repeat
-		    (catch :clock
-		      (save-excursion
-			(while (re-search-forward org-clock-line-re end t)
-			  (when (org-at-clock-log-p) (throw :clock t))))))
-	    (org-entry-put nil "LAST_REPEAT" (format-time-string
-					      (org-time-stamp-format t t)
-					      (current-time))))
-	  (when org-log-repeat
-	    (if (or (memq 'org-add-log-note (default-value 'post-command-hook))
-		    (memq 'org-add-log-note post-command-hook))
-		;; We are already setup for some record.
-		(when (eq org-log-repeat 'note)
-		  ;; Make sure we take a note, not only a time stamp.
-		  (setq org-log-note-how 'note))
-	      ;; Set up for taking a record.
-	      (org-add-log-setup 'state
-				 (or done-word (car org-done-keywords))
-				 org-last-state
-				 org-log-repeat)))
-	  (let ((planning-re (regexp-opt
-			      (list org-scheduled-string org-deadline-string))))
-	    (while (re-search-forward org-ts-regexp end t)
-	      (let* ((ts (match-string 0))
-		     (planning? (org-at-planning-p))
-		     (type (if (not planning?) "Plain:"
-			     (save-excursion
-			       (re-search-backward
-				planning-re (line-beginning-position) t)
-			       (match-string 0)))))
-		(cond
-		 ;; Ignore fake time-stamps (e.g., within comments).
-		 ((not (org-at-timestamp-p 'agenda)))
-		 ;; Time-stamps without a repeater are usually
-		 ;; skipped.  However, a SCHEDULED time-stamp without
-		 ;; one is removed, as they are no longer relevant.
-		 ((not (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
-				     ts))
-		  (when (equal type org-scheduled-string)
-		    (org-remove-timestamp-with-keyword type)))
-		 (t
-		  (let ((n (string-to-number (match-string 2 ts)))
-			(what (match-string 3 ts)))
-		    (when (equal what "w") (setq n (* n 7) what "d"))
-		    (when (and (equal what "h")
-			       (not (string-match-p "[0-9]\\{1,2\\}:[0-9]\\{2\\}"
-						    ts)))
-		      (user-error
-		       "Cannot repeat in Repeat in %d hour(s) because no hour \
-has been set"
-		       n))
-		    ;; Preparation, see if we need to modify the start
-		    ;; date for the change.
-		    (when (match-end 1)
-		      (let ((time (save-match-data
-				    (org-time-string-to-time ts))))
-			(cond
-			 ((equal (match-string 1 ts) ".")
-			  ;; Shift starting date to today
-			  (org-timestamp-change
-			   (- (org-today) (time-to-days time))
-			   'day))
-			 ((equal (match-string 1 ts) "+")
-			  (let ((nshiftmax 10)
-				(nshift 0))
-			    (while (or (= nshift 0)
-				       (not (time-less-p (current-time) time)))
-			      (when (= (cl-incf nshift) nshiftmax)
-				(or (y-or-n-p
-				     (format "%d repeater intervals were not \
+    (when (and repeat (not (= 0 (string-to-number (substring repeat 1)))))
+      (when (eq org-log-repeat t) (setq org-log-repeat 'state))
+      (let ((to-state (or (org-entry-get nil "REPEAT_TO_STATE" 'selective)
+			  (and (stringp org-todo-repeat-to-state)
+			       org-todo-repeat-to-state)
+			  (and org-todo-repeat-to-state org-last-state))))
+	(org-todo (cond ((and to-state (member to-state org-todo-keywords-1))
+			 to-state)
+			((eq interpret 'type) org-last-state)
+			(head)
+			(t 'none))))
+      (org-back-to-heading t)
+      (org-add-planning-info nil nil 'closed)
+      ;; When `org-log-repeat' is non-nil or entry contains
+      ;; a clock, set LAST_REPEAT property.
+      (when (or org-log-repeat
+		(catch :clock
+		  (save-excursion
+		    (while (re-search-forward org-clock-line-re end t)
+		      (when (org-at-clock-log-p) (throw :clock t))))))
+	(org-entry-put nil "LAST_REPEAT" (format-time-string
+					  (org-time-stamp-format t t)
+					  (current-time))))
+      (when org-log-repeat
+	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
+		(memq 'org-add-log-note post-command-hook))
+	    ;; We are already setup for some record.
+	    (when (eq org-log-repeat 'note)
+	      ;; Make sure we take a note, not only a time stamp.
+	      (setq org-log-note-how 'note))
+	  ;; Set up for taking a record.
+	  (org-add-log-setup 'state
+			     (or done-word (car org-done-keywords))
+			     org-last-state
+			     org-log-repeat)))
+      (let ((planning-re (regexp-opt
+			  (list org-scheduled-string org-deadline-string))))
+	(while (re-search-forward org-ts-regexp-both end t)
+	  (let* ((ts (match-string 0))
+		 (planning? (org-at-planning-p))
+		 (type (if (not planning?) "Plain:"
+			 (save-excursion
+			   (re-search-backward
+			    planning-re (line-beginning-position) t)
+			   (match-string 0)))))
+	    (cond
+	     ;; Ignore fake time-stamps (e.g., within comments).
+	     ((not (org-at-timestamp-p 'agenda)))
+	     ((string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts)
+	      (let ((n (string-to-number (match-string 2 ts)))
+		    (what (match-string 3 ts)))
+		(when (equal what "w") (setq n (* n 7) what "d"))
+		(when (and (equal what "h")
+			   (not (string-match-p "[0-9]\\{1,2\\}:[0-9]\\{2\\}"
+						ts)))
+		  (user-error
+		   "Cannot repeat in %d hour(s) because no hour has been set"
+		   n))
+		;; Preparation, see if we need to modify the start
+		;; date for the change.
+		(when (match-end 1)
+		  (let ((time (save-match-data (org-time-string-to-time ts)))
+			(repeater-type (match-string 1 ts)))
+		    (cond
+		     ((equal "." repeater-type)
+		      ;; Shift starting date to today.
+		      (org-timestamp-change (- (org-today) (time-to-days time))
+					    'day))
+		     ((equal "+" repeater-type)
+		      (let ((nshiftmax 10)
+			    (nshift 0))
+			(while (or (= nshift 0)
+				   (not (time-less-p (current-time) time)))
+			  (when (= nshiftmax (cl-incf nshift))
+			    (or (y-or-n-p
+				 (format "%d repeater intervals were not \
 enough to shift date past today.  Continue? "
-					     nshift))
-				    (user-error "Abort")))
-			      (org-timestamp-change n (cdr (assoc what whata)))
-			      (org-in-regexp org-ts-regexp3)
-			      (setq ts (match-string 1))
-			      (setq time
-				    (save-match-data
-				      (org-time-string-to-time ts)))))
-			  (org-timestamp-change (- n) (cdr (assoc what whata)))
-			  ;; Rematch, so that we have everything in place
-			  ;; for the real shift.
+					 nshift))
+				(user-error "Abort")))
+			  (org-timestamp-change n (cdr (assoc what whata)))
 			  (org-in-regexp org-ts-regexp3)
 			  (setq ts (match-string 1))
-			  (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
-					ts)))))
-		    (save-excursion
-		      (org-timestamp-change n (cdr (assoc what whata)) nil t))
-		    (setq msg
-			  (concat
-			   msg type " " org-last-changed-timestamp " "))))))))
-	  (setq org-log-post-message msg)
-	  (message "%s" msg))
-      (set-marker end nil))))
+			  (setq time
+				(save-match-data
+				  (org-time-string-to-time ts)))))
+		      (org-timestamp-change (- n) (cdr (assoc what whata)))
+		      ;; Rematch, so that we have everything in place
+		      ;; for the real shift.
+		      (org-in-regexp org-ts-regexp3)
+		      (setq ts (match-string 1))
+		      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)"
+				    ts)))))
+		(save-excursion
+		  (org-timestamp-change n (cdr (assoc what whata)) nil t))
+		(setq msg
+		      (concat msg type " " org-last-changed-timestamp " "))))
+	     (t
+	      ;; Time-stamps without a repeater are usually skipped.
+	      ;; However, a SCHEDULED time-stamp without one is
+	      ;; removed, as they are no longer relevant.
+	      (when (equal type org-scheduled-string)
+		(org-remove-timestamp-with-keyword type)))))))
+      (setq org-log-post-message msg)
+      (message "%s" msg))))
 
 (defun org-show-todo-tree (arg)
   "Make a compact tree which shows all headlines marked with TODO.
@@ -14083,7 +14076,20 @@ See also `org-scan-tags'."
 	(setq matcher `(and (member todo org-not-done-keywords) ,matcher)))
       (cons match0 `(lambda (todo tags-list level) ,matcher)))))
 
-(defun org-tags-expand (match &optional single-as-list downcased tags-already-expanded)
+(defun org--tags-expand-group (group tag-groups expanded)
+  "Recursively Expand all tags in GROUP, according to TAG-GROUPS.
+TAG-GROUPS is the list of groups used for expansion.  EXPANDED is
+an accumulator used in recursive calls."
+  (dolist (tag group)
+    (unless (member tag expanded)
+      (let ((group (assoc tag tag-groups)))
+	(push tag expanded)
+	(when group
+	  (setq expanded
+		(org--tags-expand-group (cdr group) tag-groups expanded))))))
+  expanded)
+
+(defun org-tags-expand (match &optional single-as-list downcased)
   "Expand group tags in MATCH.
 
 This replaces every group tag in MATCH with a regexp tag search.
@@ -14100,7 +14106,7 @@ E.g., this expansion
   Work|Home => {\\(?:Work\\|Lab\\|Conf\\}|Home
 
 will match anything tagged with \"Lab\" and \"Home\", or tagged
-with \"Conf\" and \"Home\" or tagged with \"Work\" and \"home\".
+with \"Conf\" and \"Home\" or tagged with \"Work\" and \"Home\".
 
 A group tag in MATCH can contain regular expressions of its own.
 For example, a group tag \"Proj\" defined as { Proj : {P@.+} }
@@ -14112,118 +14118,61 @@ When the optional argument SINGLE-AS-LIST is non-nil, MATCH is
 assumed to be a single group tag, and the function will return
 the list of tags in this group.
 
-When DOWNCASE is non-nil, expand downcased TAGS."
-  (if org-group-tags
+When DOWNCASED is non-nil, expand downcased TAGS."
+  (unless (org-string-nw-p match) (error "Invalid match tag: %S" match))
+  (let ((tag-groups
+	 (let ((g (or org-tag-groups-alist-for-agenda org-tag-groups-alist)))
+	   (if (not downcased) g
+	     (mapcar (lambda (s) (mapcar #'downcase s)) g)))))
+    (cond
+     (single-as-list (org--tags-expand-group (list match) tag-groups nil))
+     (org-group-tags
       (let* ((case-fold-search t)
-	     (stable org-mode-syntax-table)
-	     (taggroups (or org-tag-groups-alist-for-agenda org-tag-groups-alist))
-	     (taggroups (if downcased
-			    (mapcar (lambda (tg) (mapcar #'downcase tg))
-				    taggroups)
-			  taggroups))
-	     (taggroups-keys (mapcar #'car taggroups))
-	     (return-match (if downcased (downcase match) match))
-	     (count 0)
-	     (work-already-expanded tags-already-expanded)
-	     regexps-in-match tags-in-group regexp-in-group regexp-in-group-escaped)
+	     (tag-syntax org-mode-syntax-table)
+	     (group-keys (mapcar #'car tag-groups))
+	     (key-regexp (concat "\\([+-]?\\)" (regexp-opt group-keys 'words)))
+	     (return-match (if downcased (downcase match) match)))
+	;; Mark regexp-expressions in the match-expression so that we
+	;; do not replace them later on.
+	(let ((s 0))
+	  (while (string-match "{.+?}" return-match s)
+	    (setq s (match-end 0))
+	    (add-text-properties
+	     (match-beginning 0) (match-end 0) '(regexp t) return-match)))
 	;; @ and _ are allowed as word-components in tags.
-	(modify-syntax-entry ?@ "w" stable)
-	(modify-syntax-entry ?_ "w" stable)
-	;; Temporarily replace regexp-expressions in the match-expression.
-	(while (string-match "{.+?}" return-match)
-	  (cl-incf count)
-	  (push (match-string 0 return-match) regexps-in-match)
-	  (setq return-match (replace-match (format "<%d>" count) t nil return-match)))
-	(while (and taggroups-keys
-		    (with-syntax-table stable
-		      (string-match
-		       (concat "\\(?1:[+-]?\\)\\(?2:\\<"
-			       (regexp-opt taggroups-keys) "\\>\\)")
-		       return-match)))
-	  (let* ((dir (match-string 1 return-match))
-		 (tag (match-string 2 return-match))
-		 (tag (if downcased (downcase tag) tag)))
-	    (unless (or (get-text-property 0 'grouptag (match-string 2 return-match))
-		        (member tag tags-already-expanded))
-	      (setq tags-in-group (assoc tag taggroups))
-	      (push tag work-already-expanded)
-	      ;; Recursively expand each tag in the group, if the tag hasn't
-	      ;; already been expanded.  Restore the match-data after all recursive calls.
-	      (save-match-data
-		(let (tags-expanded)
-		  (dolist (x (cdr tags-in-group))
-		    (if (and (member x taggroups-keys)
-			     (not (member x work-already-expanded)))
-			(setq tags-expanded
-			      (delete-dups
-			       (append
-				(org-tags-expand x t downcased
-						 work-already-expanded)
-				tags-expanded)))
-		      (setq tags-expanded
-			    (append (list x) tags-expanded)))
-		    (setq work-already-expanded
-			  (delete-dups
-			   (append tags-expanded
-				   work-already-expanded))))
-		  (setq tags-in-group
-			(delete-dups (cons (car tags-in-group)
-					   tags-expanded)))))
-	      ;; Filter tag-regexps from tags.
-	      (setq regexp-in-group-escaped
-		    (delq nil (mapcar (lambda (x)
-					(if (stringp x)
-					    (and (equal "{" (substring x 0 1))
-						 (equal "}" (substring x -1))
-						 x)
-					  x))
-				      tags-in-group))
-		    regexp-in-group
-		    (mapcar (lambda (x)
-			      (substring x 1 -1))
-			    regexp-in-group-escaped)
-		    tags-in-group
-		    (delq nil (mapcar (lambda (x)
-					(if (stringp x)
-					    (and (not (equal "{" (substring x 0 1)))
-						 (not (equal "}" (substring x -1)))
-						 x)
-					  x))
-				      tags-in-group)))
-	      ;; If single-as-list, do no more in the while-loop.
-	      (if (not single-as-list)
-		  (progn
-		    (when regexp-in-group
-		      (setq regexp-in-group
-			    (concat "\\|"
-				    (mapconcat 'identity regexp-in-group
-					       "\\|"))))
-		    (setq tags-in-group
-			  (concat dir
-				  "{\\<"
-				  (regexp-opt tags-in-group)
-				  "\\>"
-				  regexp-in-group
-				  "}"))
-		    (when (stringp tags-in-group)
-		      (org-add-props tags-in-group '(grouptag t)))
-		    (setq return-match
-			  (replace-match tags-in-group t t return-match)))
-		(setq tags-in-group
-		      (append regexp-in-group-escaped tags-in-group))))
-	    (setq taggroups-keys (delete tag taggroups-keys))))
-	;; Add the regular expressions back into the match-expression again.
-	(while regexps-in-match
-	  (setq return-match (replace-regexp-in-string (format "<%d>" count)
-						       (pop regexps-in-match)
-						       return-match t t))
-	  (cl-decf count))
-	(if single-as-list
-	    (if tags-in-group tags-in-group (list return-match))
-	  return-match))
-    (if single-as-list
-	(list (if downcased (downcase match) match))
-      match)))
+	(modify-syntax-entry ?@ "w" tag-syntax)
+	(modify-syntax-entry ?_ "w" tag-syntax)
+	;; For each tag token found in MATCH, compute a regexp and  it
+	(with-syntax-table tag-syntax
+	  (replace-regexp-in-string
+	   key-regexp
+	   (lambda (m)
+	     (if (get-text-property (match-beginning 2) 'regexp m)
+		 m			;regexp tag: ignore
+	       (let* ((operator (match-string 1 m))
+		      (tag-token (let ((tag (match-string 2 m)))
+				   (list (if downcased (downcase tag) tag))))
+		      regexp-tags regular-tags)
+		 ;; Partition tags between regexp and regular tags.
+		 ;; Remove curly bracket syntax from regexp tags.
+		 (dolist (tag (org--tags-expand-group tag-token tag-groups nil))
+		   (save-match-data
+		     (if (string-match "{\\(.+?\\)}" tag)
+			 (push (match-string 1 tag) regexp-tags)
+		       (push tag regular-tags))))
+		 ;; Replace tag token by the appropriate regexp.
+		 ;; Regular tags need to be regexp-quoted, whereas
+		 ;; regexp-tags are inserted as-is.
+		 (let ((regular (regexp-opt regular-tags))
+		       (regexp (mapconcat #'identity regexp-tags "\\|")))
+		   (concat operator
+			   (cond
+			    ((null regular-tags) (format "{%s}" regexp))
+			    ((null regexp-tags) (format "{\\<%s\\>}" regular))
+			    (t (format "{\\<%s\\>\\|%s}" regular regexp))))))))
+	   return-match
+	   t t))))
+     (t match))))
 
 (defun org-op-to-function (op &optional stringp)
   "Turn an operator into the appropriate function."
@@ -14726,11 +14675,10 @@ Assume point is at the beginning of the headline."
 
 When argument POS is non-nil, retrieve tags for headline at POS.
 
-Accoring to `org-use-tags-inheritance', tags may be inherited
+According to `org-use-tags-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
 `org-file-tags'.  However, when optional argument LOCAL is
-non-nil, only return tags really specified in the considered
-headline.
+non-nil, only return tags specified at the headline.
 
 Inherited tags have the `inherited' text property."
   (if (and org-trust-scanner-tags
@@ -20128,28 +20076,27 @@ Otherwise, return a user error."
 		(params (nth 2 info))
 		(session (cdr (assq :session params))))
 	   (if (not session) (org-edit-src-code)
-	     ;; At a src-block with a session and function called with
-	     ;; an ARG: switch to the buffer related to the inferior
-	     ;; process.
+	     ;; At a source block with a session and function called
+	     ;; with an ARG: switch to the buffer related to the
+	     ;; inferior process.
 	     (switch-to-buffer
 	      (funcall (intern (concat "org-babel-prep-session:" lang))
 		       session params))))))
       (`keyword
-       (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
-           (org-open-link-from-string
-	    (format "[[%s]]"
-		    (expand-file-name
-		     (let ((value (org-element-property :value element)))
-		       (cond ((org-file-url-p value)
-			      (user-error "The file is specified as a URL, cannot be edited"))
-			     ((not (org-string-nw-p value))
-			      (user-error "No file to edit"))
-			     ((string-match "\\`\"\\(.*?\\)\"" value)
-			      (match-string 1 value))
-			     ((string-match "\\`[^ \t\"]\\S-*" value)
-			      (match-string 0 value))
-			     (t (user-error "No valid file specified")))))))
-         (user-error "No special environment to edit here")))
+       (unless (member (org-element-property :key element)
+		       '("INCLUDE" "SETUPFILE"))
+	 (user-error "No special environment to edit here"))
+       (org-open-link-from-string
+	(format "[[%s]]"
+		(expand-file-name
+		 (let ((value (org-strip-quotes
+			       (org-element-property :value element))))
+		   (cond
+		    ((not (org-string-nw-p value))
+		     (user-error "No file to edit"))
+		    ((org-file-url-p value)
+		     (user-error "Files located with a URL cannot be edited"))
+		    (t value)))))))
       (`table
        (if (eq (org-element-property :type element) 'table.el)
            (org-edit-table.el)

@@ -6468,6 +6468,54 @@ Paragraph<point>"
 	      (org-toggle-tag "foo"))
 	    (buffer-string)))))
 
+(ert-deftest test-org/tags-expand ()
+  "Test `org-tags-expand' specifications."
+  ;; Expand tag groups as a regexp enclosed withing curly brackets.
+  (should
+   (equal "{\\<[ABC]\\>}"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "A")))))
+  (should
+   (equal "{\\<\\(?:Aa\\|Bb\\|Cc\\)\\>}"
+	  (org-test-with-temp-text "#+TAGS: [ Aa : Bb Cc ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "Aa")))))
+  ;; Preserve operator before the regexp.
+  (should
+   (equal "+{\\<[ABC]\\>}"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "+A")))))
+  (should
+   (equal "-{\\<[ABC]\\>}"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "-A")))))
+  ;; Handle "|" syntax.
+  (should
+   (equal "{\\<[ABC]\\>}|D"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "A|D")))))
+  ;; Handle nested groups.
+  (should
+   (equal "{\\<[A-D]\\>}"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]\n#+TAGS: [ B : D ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "A")))))
+  ;; Expand multiple occurrences of the same group.
+  (should
+   (equal "{\\<[ABC]\\>}|{\\<[ABC]\\>}"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "A|A")))))
+  ;; Preserve regexp matches.
+  (should
+   (equal "{A+}"
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "{A+}"))))))
 
 
 ;;; TODO keywords
@@ -6559,6 +6607,15 @@ Paragraph<point>"
      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2h>"
        (org-todo "DONE")
        (buffer-string))))
+  ;; Also repeat inactive time stamps with a repeater.
+  (should
+   (string-match-p
+    "\\[2014-03-29 .* \\+2y\\]"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+	  "* TODO H\n[2012-03-29 Thu. +2y]"
+	(org-todo "DONE")
+	(buffer-string)))))
   ;; Do not repeat commented time stamps.
   (should-not
    (string-prefix-p

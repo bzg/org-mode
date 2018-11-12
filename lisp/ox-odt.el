@@ -27,8 +27,9 @@
 
 (require 'cl-lib)
 (require 'format-spec)
-(require 'ox)
 (require 'org-compat)
+(require 'org-macs)
+(require 'ox)
 (require 'table nil 'noerror)
 
 ;;; Define Back-End
@@ -1357,19 +1358,18 @@ original parsed data.  INFO is a plist holding export options."
   ;; Update styles file.
   ;; Copy styles.xml.  Also dump htmlfontify styles, if there is any.
   ;; Write styles file.
-  (let* ((styles-file (plist-get info :odt-styles-file))
-	 (styles-file (and (org-string-nw-p styles-file)
-			   (org-trim styles-file)))
-	 (styles-file (if (string-match-p "\\`(.*)\\'" styles-file)
-			  (ignore-errors (read styles-file))
-			styles-file))
-	 ;; Non-availability of styles.xml is not a critical
-	 ;; error. For now, throw an error.
-	 (styles-file (or styles-file
-			  (expand-file-name "OrgOdtStyles.xml"
-					    org-odt-styles-dir)
-			  (error "org-odt: Missing styles file?"))))
+  (let* ((styles-file
+	  (pcase (plist-get info :odt-styles-file)
+	    (`nil (expand-file-name "OrgOdtStyles.xml" org-odt-styles-dir))
+	    ((and s (pred (string-match-p "\\`(.*)\\'")))
+	     (condition-case nil
+		 (read s)
+	       (error (user-error "Invalid styles file specification: %S" s))))
+	    (filename (org-strip-quotes filename)))))
     (cond
+     ;; Non-availability of styles.xml is not a critical error.  For
+     ;; now, throw an error.
+     ((null styles-file) (error "Missing styles file"))
      ((listp styles-file)
       (let ((archive (nth 0 styles-file))
 	    (members (nth 1 styles-file)))
@@ -1379,7 +1379,7 @@ original parsed data.  INFO is a plist holding export options."
 	    (let* ((image-type (file-name-extension member))
 		   (media-type (format "image/%s" image-type)))
 	      (org-odt-create-manifest-file-entry media-type member))))))
-     ((and (stringp styles-file) (file-exists-p styles-file))
+     ((file-exists-p styles-file)
       (let ((styles-file-type (file-name-extension styles-file)))
 	(cond
 	 ((string= styles-file-type "xml")

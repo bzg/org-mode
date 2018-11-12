@@ -899,14 +899,17 @@ Otherwise return nil."
 (defun org-unbracket-string (pre post string)
   "Remove PRE/POST from the beginning/end of STRING.
 Both PRE and POST must be pre-/suffixes of STRING, or neither is
-removed."
-  (if (and (string-prefix-p pre string)
-	   (string-suffix-p post string))
-      (substring string (length pre) (- (length post)))
-    string))
+removed.  Return the new string.  If STRING is nil, return nil."
+  (declare (indent 2))
+  (and string
+       (if (and (string-prefix-p pre string)
+		(string-suffix-p post string))
+	   (substring string (length pre) (- (length post)))
+	 string)))
 
 (defun org-strip-quotes (string)
-  "Strip double quotes from around a string, if applicable."
+  "Strip double quotes from around STRING, if applicable.
+If STRING is nil, return nil."
   (org-unbracket-string "\"" "\"" string))
 
 (defsubst org-current-line-string (&optional to-here)
