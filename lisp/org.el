@@ -12614,20 +12614,25 @@ This function is run automatically after each state change to a DONE state."
 			     (or done-word (car org-done-keywords))
 			     org-last-state
 			     org-log-repeat)))
+      ;; Time-stamps without a repeater are usually skipped.  However,
+      ;; a SCHEDULED time-stamp without one is removed, as they are no
+      ;; longer relevant.
+      (save-excursion
+	(let ((scheduled (org-entry-get (point) "SCHEDULED")))
+	  (when (and scheduled (not (string-match-p org-repeat-re scheduled)))
+	    (org-remove-timestamp-with-keyword org-scheduled-string))))
+      ;; Update every time-stamp with a repeater in the entry.
       (let ((planning-re (regexp-opt
 			  (list org-scheduled-string org-deadline-string))))
-	(while (re-search-forward org-ts-regexp-both end t)
+	(while (re-search-forward org-repeat-re end t)
 	  (let* ((ts (match-string 0))
-		 (planning? (org-at-planning-p))
-		 (type (if (not planning?) "Plain:"
+		 (type (if (not (org-at-planning-p)) "Plain:"
 			 (save-excursion
 			   (re-search-backward
 			    planning-re (line-beginning-position) t)
 			   (match-string 0)))))
-	    (cond
-	     ;; Ignore fake time-stamps (e.g., within comments).
-	     ((not (org-at-timestamp-p 'agenda)))
-	     ((string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts)
+	    (when (and (org-at-timestamp-p 'agenda)
+		       (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))
 	      (let ((n (string-to-number (match-string 2 ts)))
 		    (what (match-string 3 ts)))
 		(when (equal what "w") (setq n (* n 7) what "d"))
@@ -12674,15 +12679,9 @@ enough to shift date past today.  Continue? "
 		(save-excursion
 		  (org-timestamp-change n (cdr (assoc what whata)) nil t))
 		(setq msg
-		      (concat msg type " " org-last-changed-timestamp " "))))
-	     (t
-	      ;; Time-stamps without a repeater are usually skipped.
-	      ;; However, a SCHEDULED time-stamp without one is
-	      ;; removed, as they are no longer relevant.
-	      (when (equal type org-scheduled-string)
-		(org-remove-timestamp-with-keyword type)))))))
+		      (concat msg type " " org-last-changed-timestamp " ")))))))
       (setq org-log-post-message msg)
-      (message "%s" msg))))
+      (message msg))))
 
 (defun org-show-todo-tree (arg)
   "Make a compact tree which shows all headlines marked with TODO.
