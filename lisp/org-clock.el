@@ -2710,15 +2710,13 @@ The TS argument has the same type as the return values of
       ;; org-agenda.
       (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute ts)))
 	(setq ts (float-time (encode-time 0 0 0 day month year)))))
-     (ts
-      (setq ts (float-time (apply #'encode-time (org-parse-time-string ts))))))
+     (ts (setq ts (org-matcher-time ts))))
     (cond
      ((numberp te)
       ;; Likewise for te.
       (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute te)))
 	(setq te (float-time (encode-time 0 0 0 day month year)))))
-     (te
-      (setq te (float-time (apply #'encode-time (org-parse-time-string te))))))
+     (te (setq te (org-matcher-time te))))
     (setq tsb
 	  (if (eq step0 'week)
 	      (let ((dow (nth 6 (decode-time (seconds-to-time ts)))))
