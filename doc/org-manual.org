@@ -5614,6 +5614,11 @@ This dynamic block has the following parameters:
 
      When non-~nil~, indent each =ITEM= field according to its level.
 
+- =:format= ::
+
+     Specify a column attribute (see [[*Column attributes]]) for the
+     dynamic block.
+
 The following commands insert or update the dynamic block:
 
 - {{{kbd(C-c C-x i)}}} (~org-insert-columns-dblock~) ::
