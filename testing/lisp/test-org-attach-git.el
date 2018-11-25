@@ -20,19 +20,19 @@
 
 ;;; Code:
 (org-test-for-executable "git-annex")
-(require 'org-attach)
+(require 'org-attach-git)
 (require 'cl-lib)
 
-(defmacro test-org-attach-annex/with-annex (&rest body)
+(defmacro test-org-attach-git/with-annex (&rest body)
   `(let ((tmpdir (make-temp-file "org-annex-test" t "/")))
      (unwind-protect
 	 (let ((default-directory tmpdir)
-	       (org-attach-directory tmpdir))
+	       (org-attach-id-dir tmpdir))
 	   (shell-command "git init")
 	   (shell-command "git annex init")
 	   ,@body))))
 
-(ert-deftest test-org-attach/use-annex ()
+(ert-deftest test-org-attach-git/use-annex ()
   (test-org-attach-annex/with-annex
    (let ((org-attach-git-annex-cutoff 1))
      (should (org-attach-use-annex)))
@@ -44,12 +44,12 @@
   (let ((tmpdir (make-temp-file "org-annex-test" t "/")))
      (unwind-protect
 	 (let ((default-directory tmpdir)
-	       (org-attach-directory tmpdir))
+	       (org-attach-id-dir tmpdir))
 	   (shell-command "git init")
 	   (should-not (org-attach-use-annex)))
        (delete-directory tmpdir 'recursive))))
 
-(ert-deftest test-org-attach/get-maybe ()
+(ert-deftest test-org-attach-git/get-maybe ()
   (test-org-attach-annex/with-annex
    (let ((path (expand-file-name "test-file"))
 	 (annex-dup (make-temp-file "org-annex-test" t "/")))

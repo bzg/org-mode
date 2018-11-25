@@ -87,6 +87,9 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-no-heading-file
   (expand-file-name "no-heading.org" org-test-example-dir))
 
+(defconst org-test-attachments-file
+  (expand-file-name "attachments.org" org-test-example-dir))
+
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
 

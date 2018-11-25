@@ -111,7 +111,96 @@ every other backend was already using xcolor to set fg and bg, the CLI
 alternative was removed and there is no more a :use-xcolor options
 since now it's implicitly always true.
 
+*** Org-Attach Git commit
+[[*Org-Attach has been refactored and extended][Refactoring of Org-Attach]] affected the Git commit functionality.  Not
+much, but the following changes are required if you still need to
+auto-commit attachments to git:
+
+- Customization of ~org-attach-annex-auto-get~ needs to be renamed to
+  ~org-attach-git-annex-auto-get~.
+
+- Customization of ~org-attach-commit~ is no longer needed.  Instead
+  one need to require the =org-attach-git= module in the startup.
+
 ** New features
+*** Org-Attach has been refactored and extended
+Org attach has been refactored and the functionality extended.  It
+should now be easier to understand how it works.  A few improvements
+and extra options have been added as well.
+
+From the initial comment in org-attach source-code:
+
+- Attachments are managed either by using a custom property DIR or by
+  using property ID from org-id.  When DIR is defined, a location in
+  the filesystem is directly attached to the outline node.  When
+  org-id is used, attachments are stored in a folder named after the
+  ID, in a location defined by ~org-attach-id-dir~.  DIR has
+  precedence over ID when both parameters are defined for the current
+  outline node (also when inherited parameters are taken into
+  account).
+
+From now on inheritance requires no extra property and will adhere to
+~org-attach-use-inheritance~ by default.  Inheritance can be
+customized to always be activated or never be activated in
+~org-attach-use-inheritance~.
+
+The ATTACH_DIR property is deprecated in favour of the shorter
+property DIR.  Links to folders inside the DIR property can now be
+declared as relative links.  This is not enabled by default, but can
+be set in ~org-attach-dir-relative~.
+
+When adding new attachment to the outline node the preferred way of
+doing so can be customized.  Take a look at
+~org-attach-preferred-new-method~.  It defaults to using ID since that
+was the behaviour before this change.
+
+If both DIR and ID properties are set on the same node, DIR has
+precedence and will be used.
+
+One can now also choose to build attachment-directory-paths in a
+customized way.  This is an advanced topic, but in some case it makes
+sense to parse an ID in a different way than the default one.  Create
+your own function and use it is ~org-attach-id-to-path-function~ if
+you want to customize the ID-based folder structure.
+
+If you've used ATTACH_DIR properties to manage attachments, use the
+following code to rename that property to DIR which supports the same
+functionality.  ATTACH_DIR_INHERIT is no longer supported and is
+removed.
+
+#+begin_src emacs-lisp
+  (defun org-update-attach-properties ()
+      "Change properties for Org-Attach."
+      (interactive)
+      (org-with-point-at 1
+	(while (outline-next-heading)
+	  (let ((DIR (org--property-local-values "ATTACH_DIR" nil)))
+	    (when DIR
+	      (org-set-property "DIR" (car DIR))
+	      (org-delete-property "ATTACH_DIR"))))
+	(org-delete-property-globally "ATTACH_DIR_INHERIT")))
+#+end_src
+
+For those who hate breaking changes, even though the changes are made
+to clean things up; fear not.  ATTACH_DIR will still continue to work.
+It's just not documented any longer.  When you get the chance, run the
+code above to clean things up anyways!
+
+**** New hooks
+Two hooks are added to org-attach:
+- org-attach-after-change-hook
+- org-attach-open-hook
+
+They are added mostly for internal restructuring purposes, but can
+ofc. be used for other things as well.
+
+*** New link-type: Attachment
+Attachment-links are now first-class citizens.  They mimick file-links
+in everything they do but use the existing attachment-folder as a base
+when expanding the links. Both =DIR= and =ID= properties are used to
+try to resolve the links, in exactly the same way as Org-Attach uses
+those properties.
+
 *** Handle overlay specification for notes in Beamer export
 
 This aligns Beamer notes with slide overlays.
@@ -243,6 +332,11 @@ dynamic block in ~org-dynamic-block-alist~.
 ** Removed functions
 *** ~org-babel-set-current-result-hash~
 *** ~org-capture-insert-template-here~
+*** ~org-attach-directory~
+
+It has been deprecated in favour of ~org-attach-id-dir~ which is less
+ambigous given the restructured org-attach.
+
 ** Miscellaneous
 *** Change signature for ~org-list-to-subtree~
 The function now accepts the level of the subtree as an optional

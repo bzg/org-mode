@@ -3071,6 +3071,7 @@ point on or at a target.
 #+cindex: irc links
 #+cindex: URL links
 #+cindex: file links
+#+cindex: attachment links
 #+cindex: Rmail links
 #+cindex: MH-E links
 #+cindex: Usenet links
@@ -3082,38 +3083,114 @@ Org supports links to files, websites, Usenet and email messages, BBDB
 database entries and links to both IRC conversations and their logs.
 External links are URL-like locators.  They start with a short
 identifying string followed by a colon.  There can be no space after
-the colon.  The following list shows examples for each link type.
+the colon.
 
-| =https://staff.science.uva.nl/c.dominik/= | on the web                     |
-| =doi:10.1000/182=                         | DOI for an electronic resource |
-| =file:/home/dominik/images/jupiter.jpg=   | file, absolute path            |
-| =/home/dominik/images/jupiter.jpg=        | same as above                  |
-| =file:papers/last.pdf=                    | file, relative path            |
-| =./papers/last.pdf=                       | same as above                  |
-| =file:/ssh:me@some.where:papers/last.pdf= | file, path on remote machine   |
-| =/ssh:me@some.where:papers/last.pdf=      | same as above                  |
-| =file:sometextfile::NNN=                  | file, jump to line number      |
-| =file:projects.org=                       | another Org file               |
-| =file:projects.org::some words=           | text search in Org file[fn:27] |
-| =file:projects.org::*task title=          | heading search in Org file     |
-| =file+sys:/path/to/file=                  | open via OS, like double-click |
-| =file+emacs:/path/to/file=                | force opening by Emacs         |
-| =docview:papers/last.pdf::NNN=            | open in doc-view mode at page  |
-| =id:B7423F4D-2E8A-471B-8810-C40F074717E9= | link to heading by ID          |
-| =news:comp.emacs=                         | Usenet link                    |
-| =mailto:adent@galaxy.net=                 | mail link                      |
-| =mhe:folder=                              | MH-E folder link               |
-| =mhe:folder#id=                           | MH-E message link              |
-| =rmail:folder=                            | Rmail folder link              |
-| =rmail:folder#id=                         | Rmail message link             |
-| =gnus:group=                              | Gnus group link                |
-| =gnus:group#id=                           | Gnus article link              |
-| =bbdb:R.*Stallman=                        | BBDB link (with regexp)        |
-| =irc:/irc.com/#emacs/bob=                 | IRC link                       |
-| =info:org#External links=                 | Info node link                 |
-| =shell:ls *.org=                          | shell command                  |
-| =elisp:org-agenda=                        | interactive Elisp command      |
-| =elisp:(find-file "Elisp.org")=           | Elisp form to evaluate         |
+Here is the full set of built-in link types:
+
+- =file= ::
+
+   File links.  File name may be remote, absolute, or relative.
+
+   Additionally, you can specify a line number, or a text search.
+   In Org files, you may link to a headline name, a custom ID, or a
+   code reference instead.
+
+   As a special case, "file" prefix may be omitted if the file name
+   is complete, e.g., it starts with =./=, or =/=.
+
+- =attachment= ::
+
+  Same as file links but for files and folders attached to the current
+  node (see [[*Attachments]]).  Attachment links are intended to behave
+  exactly as file links but for files relative to the attachment
+  directory.
+
+- =bbdb= ::
+
+  Link to a BBDB record, with possible regexp completion.
+
+- =docview= ::
+
+  Link to a document opened with DocView mode.  You may specify a page
+  number.
+
+- =doi= ::
+
+  Link to an electronic ressource, through its handle.
+
+- =elisp= ::
+
+  Execute an Elisp command upon activation.
+
+- =gnus=, =rmail=, =mhe= ::
+
+  Links to messages or folders from a given Emacs' MUA.
+
+- =http=, =https= ::
+
+  Web links.
+
+- =id= ::
+
+  Link to a specific headline by its ID property, in an Org file.
+
+- =info= ::
+
+  Link to an Info manual, or to a specific node.
+
+- =irc= ::
+
+  Link to an IRC channel.
+
+- =mailto= ::
+
+  Link to message composition.
+
+- =news= ::
+
+  Usenet links.
+
+- =shell= ::
+
+  Execute a shell command upon activation.
+
+The following table illustrates the link types above, along with their
+options:
+
+| Link Type  | Example                                                  |
+|------------+----------------------------------------------------------|
+| http       | =http://staff.science.uva.nl/c.dominik/=                 |
+| https      | =https://orgmode.org/=                                   |
+| doi        | =doi:10.1000/182=                                        |
+| file       | =file:/home/dominik/images/jupiter.jpg=                  |
+|            | =/home/dominik/images/jupiter.jpg= (same as above)       |
+|            | =file:papers/last.pdf=                                   |
+|            | =./papers/last.pdf= (same as above)                      |
+|            | =file:/ssh:me@some.where:papers/last.pdf= (remote)       |
+|            | =/ssh:me@some.where:papers/last.pdf= (same as above)     |
+|            | =file:sometextfile::NNN= (jump to line number)           |
+|            | =file:projects.org=                                      |
+|            | =file:projects.org::some words= (text search) [fn:28]    |
+|            | =file:projects.org::*task title= (headline search)       |
+|            | =file:projects.org::#custom-id= (headline search)        |
+| attachment | =attachment:projects.org=                                |
+|            | =attachment:projects.org::some words= (text search)      |
+| docview    | =docview:papers/last.pdf::NNN=                           |
+| id         | =id:B7423F4D-2E8A-471B-8810-C40F074717E9=                |
+| news       | =news:comp.emacs=                                        |
+| mailto     | =mailto:adent@galaxy.net=                                |
+| mhe        | =mhe:folder= (folder link)                               |
+|            | =mhe:folder#id= (message link)                           |
+| rmail      | =rmail:folder= (folder link)                             |
+|            | =rmail:folder#id= (message link)                         |
+| gnus       | =gnus:group= (group link)                                |
+|            | =gnus:group#id= (article link)                           |
+| bbdb       | =bbdb:R.*Stallman= (record with regexp)                  |
+| irc        | =irc:/irc.com/#emacs/bob=                                |
+| info       | =info:org#External links=                                |
+| shell      | =shell:ls *.org=                                         |
+| elisp      | =elisp:(find-file "Elisp.org")= (Elisp form to evaluate) |
+|            | =elisp:org-agenda= (interactive Elisp command)           |
 
 #+cindex: VM links
 #+cindex: Wanderlust links
@@ -3465,14 +3542,18 @@ the link completion function like this:
 :END:
 #+cindex: search option in file links
 #+cindex: file links, searching
+#+cindex: attachment links, searching
 
-File links can contain additional information to make Emacs jump to
-a particular location in the file when following a link.  This can be
-a line number or a search option after a double colon[fn:34].  For
+File links can contain additional information to make Emacs jump to a
+particular location in the file when following a link.  This can be a
+line number or a search option after a double colon[fn:34].  For
 example, when the command ~org-store-link~ creates a link (see
 [[*Handling Links]]) to a file, it encodes the words in the current line
 as a search string that can be used to find this line back later when
 following the link with {{{kbd(C-c C-o)}}}.
+
+Note that all search options apply for Attachment links in the same
+way that they apply for File links.
 
 Here is the syntax of the different ways to attach a search to a file
 link, together with explanations for each:
@@ -3483,6 +3564,7 @@ link, together with explanations for each:
 [[file:~/xx.org::*My Target]]
 [[file:~/xx.org::#my-custom-id]]
 [[file:~/xx.org::/regexp/]]
+[[attachment:main.c::255]]
 #+end_example
 
 - =255= ::
@@ -6896,19 +6978,276 @@ same commands.
   continue the old one.  This command also removes the timer from the
   mode line.
 
-* Capture, Refile, Archive
+* Refile, Copy and Archiving
 :PROPERTIES:
-:DESCRIPTION: The ins and outs for projects.
+:DESCRIPTION: Moving and copying information with ease.
+:END:
+#+cindex: refiling notes
+#+cindex: copying notes
+#+cindex: archiving
+
+Once information is in the system, it may need to be moved around.
+Org provides Refile, Copy and Archive commands for this.  Refile and
+Copy helps with moving and copying outlines.  Archiving helps to keep
+the system compact and fast.
+
+** Refile and Copy
+:PROPERTIES:
+:DESCRIPTION: Moving/copying a tree from one place to another.
+:END:
+#+cindex: refiling notes
+#+cindex: copying notes
+
+When reviewing the captured data, you may want to refile or to copy
+some of the entries into a different list, for example into a project.
+Cutting, finding the right location, and then pasting the note is
+cumbersome.  To simplify this process, you can use the following
+special command:
+
+- {{{kbd(C-c C-w)}}} (~org-refile~) ::
+
+  #+kindex: C-c C-w
+  #+findex: org-refile
+  #+vindex: org-reverse-note-order
+  #+vindex: org-refile-targets
+  #+vindex: org-refile-use-outline-path
+  #+vindex: org-outline-path-complete-in-steps
+  #+vindex: org-refile-allow-creating-parent-nodes
+  #+vindex: org-log-refile
+  Refile the entry or region at point.  This command offers possible
+  locations for refiling the entry and lets you select one with
+  completion.  The item (or all items in the region) is filed below
+  the target heading as a subitem.  Depending on
+  ~org-reverse-note-order~, it is either the first or last subitem.
+
+  By default, all level 1 headlines in the current buffer are
+  considered to be targets, but you can have more complex definitions
+  across a number of files.  See the variable ~org-refile-targets~ for
+  details.  If you would like to select a location via
+  a file-path-like completion along the outline path, see the
+  variables ~org-refile-use-outline-path~ and
+  ~org-outline-path-complete-in-steps~.  If you would like to be able
+  to create new nodes as new parents for refiling on the fly, check
+  the variable ~org-refile-allow-creating-parent-nodes~.  When the
+  variable ~org-log-refile~[fn:88] is set, a timestamp or a note is
+  recorded whenever an entry is refiled.
+
+- {{{kbd(C-u C-c C-w)}}} ::
+
+  #+kindex: C-u C-c C-w
+  Use the refile interface to jump to a heading.
+
+- {{{kbd(C-u C-u C-c C-w)}}} (~org-refile-goto-last-stored~) ::
+
+  #+kindex: C-u C-u C-c C-w
+  #+findex: org-refile-goto-last-stored
+  Jump to the location where ~org-refile~ last moved a tree to.
+
+- {{{kbd(C-2 C-c C-w)}}} ::
+
+  #+kindex: C-2 C-c C-w
+  Refile as the child of the item currently being clocked.
+
+- {{{kbd(C-3 C-c C-w)}}} ::
+
+  #+kindex: C-3 C-c C-w
+  #+vindex: org-refile-keep
+  Refile and keep the entry in place.  Also see ~org-refile-keep~ to
+  make this the default behavior, and beware that this may result in
+  duplicated =ID= properties.
+
+- {{{kbd(C-0 C-c C-w)}}} or {{{kbd(C-u C-u C-u C-c C-w)}}} (~org-refile-cache-clear~) ::
+
+  #+kindex: C-u C-u C-u C-c C-w
+  #+kindex: C-0 C-c C-w
+  #+findex: org-refile-cache-clear
+  #+vindex: org-refile-use-cache
+  Clear the target cache.  Caching of refile targets can be turned on
+  by setting ~org-refile-use-cache~.  To make the command see new
+  possible targets, you have to clear the cache with this command.
+
+- {{{kbd(C-c M-w)}}} (~org-copy~) ::
+
+  #+kindex: C-c M-w
+  #+findex: org-copy
+  Copying works like refiling, except that the original note is not
+  deleted.
+
+** Archiving
+:PROPERTIES:
+:DESCRIPTION: What to do with finished products.
+:END:
+#+cindex: archiving
+
+When a project represented by a (sub)tree is finished, you may want to
+move the tree out of the way and to stop it from contributing to the
+agenda.  Archiving is important to keep your working files compact and
+global searches like the construction of agenda views fast.
+
+- {{{kbd(C-c C-x C-a)}}} (~org-archive-subtree-default~) ::
+
+  #+kindex: C-c C-x C-a
+  #+findex: org-archive-subtree-default
+  #+vindex: org-archive-default-command
+  Archive the current entry using the command specified in the
+  variable ~org-archive-default-command~.
+
+*** Moving a tree to an archive file
+:PROPERTIES:
+:DESCRIPTION: Moving a tree to an archive file.
+:ALT_TITLE: Moving subtrees
+:END:
+#+cindex: external archiving
+
+The most common archiving action is to move a project tree to another
+file, the archive file.
+
+- {{{kbd(C-c C-x C-s)}}} or short {{{kbd(C-c $)}}} (~org-archive-subtree~) ::
+
+  #+kindex: C-c C-x C-s
+  #+kindex: C-c $
+  #+findex: org-archive-subtree
+  #+vindex: org-archive-location
+  Archive the subtree starting at point position to the location given
+  by ~org-archive-location~.
+
+- {{{kbd(C-u C-c C-x C-s)}}} ::
+
+  #+kindex: C-u C-c C-x C-s
+  Check if any direct children of the current headline could be moved
+  to the archive.  To do this, check each subtree for open TODO
+  entries.  If none is found, the command offers to move it to the
+  archive location.  If point is /not/ on a headline when this command
+  is invoked, check level 1 trees.
+
+- {{{kbd(C-u C-u C-c C-x C-s)}}} ::
+
+  #+kindex: C-u C-u C-c C-x C-s
+  As above, but check subtree for timestamps instead of TODO entries.
+  The command offers to archive the subtree if it /does/ contain
+  a timestamp, and that timestamp is in the past.
+
+#+cindex: archive locations
+The default archive location is a file in the same directory as the
+current file, with the name derived by appending =_archive= to the
+current file name.  You can also choose what heading to file archived
+items under, with the possibility to add them to a datetree in a file.
+For information and examples on how to specify the file and the
+heading, see the documentation string of the variable
+~org-archive-location~.
+
+There is also an in-buffer option for setting this variable, for
+example:
+
+#+cindex: @samp{ARCHIVE}, keyword
+: #+ARCHIVE: %s_done::
+
+#+cindex: ARCHIVE, property
+If you would like to have a special archive location for a single
+entry or a (sub)tree, give the entry an =ARCHIVE= property with the
+location as the value (see [[*Properties and Columns]]).
+
+#+vindex: org-archive-save-context-info
+When a subtree is moved, it receives a number of special properties
+that record context information like the file from where the entry
+came, its outline path the archiving time etc.  Configure the variable
+~org-archive-save-context-info~ to adjust the amount of information
+added.
+
+*** Internal archiving
+:PROPERTIES:
+:DESCRIPTION: Switch off a tree but keep it in the file.
+:END:
+
+#+cindex: @samp{ARCHIVE}, tag
+If you want to just switch off---for agenda views---certain subtrees
+without moving them to a different file, you can use the =ARCHIVE=
+tag.
+
+A headline that is marked with the =ARCHIVE= tag (see [[*Tags]]) stays at
+its location in the outline tree, but behaves in the following way:
+
+-
+  #+vindex: org-cycle-open-archived-trees
+  It does not open when you attempt to do so with a visibility cycling
+  command (see [[*Visibility Cycling]]).  You can force cycling archived
+  subtrees with {{{kbd(C-TAB)}}}, or by setting the option
+  ~org-cycle-open-archived-trees~.  Also normal outline commands, like
+  ~outline-show-all~, open archived subtrees.
+
+-
+  #+vindex: org-sparse-tree-open-archived-trees
+  During sparse tree construction (see [[*Sparse Trees]]), matches in
+  archived subtrees are not exposed, unless you configure the option
+  ~org-sparse-tree-open-archived-trees~.
+
+-
+  #+vindex: org-agenda-skip-archived-trees
+  During agenda view construction (see [[*Agenda Views]]), the content of
+  archived trees is ignored unless you configure the option
+  ~org-agenda-skip-archived-trees~, in which case these trees are
+  always included.  In the agenda you can press {{{kbd(v a)}}} to get
+  archives temporarily included.
+
+-
+  #+vindex: org-export-with-archived-trees
+  Archived trees are not exported (see [[*Exporting]]), only the headline
+  is.  Configure the details using the variable
+  ~org-export-with-archived-trees~.
+
+-
+  #+vindex: org-columns-skip-archived-trees
+  Archived trees are excluded from column view unless the variable
+  ~org-columns-skip-archived-trees~ is configured to ~nil~.
+
+The following commands help manage the =ARCHIVE= tag:
+
+- {{{kbd(C-c C-x a)}}} (~org-toggle-archive-tag~) ::
+
+  #+kindex: C-c C-x a
+  #+findex: org-toggle-archive-tag
+  Toggle the archive tag for the current headline.  When the tag is
+  set, the headline changes to a shadowed face, and the subtree below
+  it is hidden.
+
+- {{{kbd(C-u C-c C-x a)}}} ::
+
+  #+kindex: C-u C-c C-x a
+  Check if any direct children of the current headline should be
+  archived.  To do this, check each subtree for open TODO entries.  If
+  none is found, the command offers to set the =ARCHIVE= tag for the
+  child.  If point is /not/ on a headline when this command is
+  invoked, check the level 1 trees.
+
+- {{{kbd(C-TAB)}}} (~org-force-cycle-archived~) ::
+
+  #+kindex: C-TAB
+  Cycle a tree even if it is tagged with =ARCHIVE=.
+
+- {{{kbd(C-c C-x A)}}} (~org-archive-to-archive-sibling~) ::
+
+  #+kindex: C-c C-x A
+  #+findex: org-archive-to-archive-sibling
+  Move the current entry to the /Archive Sibling/.  This is a sibling
+  of the entry with the heading =Archive= and the archive tag.  The
+  entry becomes a child of that sibling and in this way retains a lot
+  of its original context, including inherited tags and approximate
+  position in the outline.
+
+* Capture, Attachments, RSS Feeds and Protocols
+:PROPERTIES:
+:DESCRIPTION: Dealing with external data.
 :END:
 #+cindex: capture
+#+cindex: attachments
+#+cindex: RSS feeds
+#+cindex: Atom feeds
+#+cindex: protocols, for external access
 
 An important part of any organization system is the ability to quickly
 capture new ideas and tasks, and to associate reference material with
 them.  Org does this using a process called /capture/.  It also can
 store files related to a task (/attachments/) in a special directory.
-Once in the system, tasks and projects need to be moved around.
-Moving completed project trees to an archive file keeps the system
-compact and fast.
 
 ** Capture
 :PROPERTIES:
@@ -7437,28 +7776,30 @@ See the docstring of the variable for more information.
 
 ** Attachments
 :PROPERTIES:
-:DESCRIPTION: Add files to tasks.
+:DESCRIPTION: Attach files to outlines.
 :END:
 #+cindex: attachments
-#+vindex: org-attach-directory
 
 It is often useful to associate reference material with an outline
-node/task.  Small chunks of plain text can simply be stored in the
-subtree of a project.  Hyperlinks (see [[*Hyperlinks]]) can establish
-associations with files that live elsewhere on your computer or in the
-cloud, like emails or source code files belonging to a project.
-Another method is /attachments/, which are files located in
-a directory belonging to an outline node.  Org uses directories named
-by the unique ID of each entry.  These directories are located in the
-=data/= directory which lives in the same directory where your Org
-file lives[fn:87].  If you initialize this directory with =git init=,
-Org automatically commits changes when it sees them.  The attachment
-system has been contributed to Org by John Wiegley.
+node.  Small chunks of plain text can simply be stored in the subtree
+of a project.  Hyperlinks (see [[*Hyperlinks]]) can establish associations
+with files that live elsewhere on your computer or in the cloud, like
+emails or source code files belonging to a project.
 
-In cases where it seems better to do so, you can attach a directory of
-your choice to an entry.  You can also make children inherit the
-attachment directory from a parent, so that an entire subtree uses the
-same attached directory.
+Another method is /attachments/, which are files located in a
+directory belonging to an outline node.  Org uses directories either
+named by a unique ID of each entry, or by a =DIR= property.
+
+*** Attachment defaults and dispatcher
+By default, org-attach will use ID properties when adding attachments
+to outline nodes.  This makes working with attachments fully
+automated.  There is no decision needed for folder-name or location.
+ID-based directories are by default located in the =data/= directory,
+which lives in the same directory where your Org file lives[fn:87].
+For more control over the setup, see [[*Attachment options]].
+
+When attachments are made using ~org-attach~ a default tag =ATTACH= is
+added to the node that gets the attachments.
 
 The following commands deal with attachments:
 
@@ -7550,18 +7891,137 @@ The following commands deal with attachments:
   - {{{kbd(s)}}} (~org-attach-set-directory~) ::
 
     #+kindex: C-c C-a s
-    #+cindex: @samp{ATTACH_DIR}, property
+    #+cindex: @samp{DIR}, property
     Set a specific directory as the entry's attachment directory.
-    This works by putting the directory path into the =ATTACH_DIR=
+    This works by putting the directory path into the =DIR=
     property.
 
-  - {{{kbd(i)}}} (~org-attach-set-inherit~) ::
+  - {{{kbd(S)}}} (~org-attach-unset-directory~) ::
 
-    #+kindex: C-c C-a i
-    #+cindex: @samp{ATTACH_DIR_INHERIT}, property
-    Set the =ATTACH_DIR_INHERIT= property, so that children use the
-    same directory for attachments as the parent does.
+    #+kindex: C-c C-a S
+    #+cindex: @samp{DIR}, property
+    Remove the attachment directory.  This command removes the =DIR=
+    property and asks the user to either move content inside that
+    folder, if an =ID= property is set, delete the content, or to
+    leave the attachment directory as is but no longer attached to the
+    outline node.
 
+*** Attachment options
+There are a couple of options for attachments that are worth
+mentioning.
+
+- ~org-attach-id-dir~ ::
+  #+vindex: org-attach-id-dir
+  The directory where attachments are stored when =ID= is used as
+  method.
+
+- ~org-attach-dir-relative~ ::
+  #+vindex: org-attach-dir-relative
+  When setting the =DIR= property on a node using {{{kbd(C-c C-a s)}}}
+  (~org-attach-set-directory~), absolute links are entered by default.
+  This option changes that to relative links.
+
+- ~org-attach-use-inheritance~ ::
+  #+vindex: org-attach-use-inheritance
+  By default folders attached to an outline node are inherited from
+  parents according to ~org-use-property-inheritance~.  If one instead
+  want to set inheritance specifically for org-attach that can be done
+  using ~org-attach-use-inheritance~.  Inheriting documents through
+  the node hierarchy makes a lot of sense in most cases. Especially
+  since the introduction of [[* Attachment links]].  The following example
+  shows one use case for attachment inheritance:
+
+  #+begin_example
+  ,* Chapter A ...
+    :PROPERTIES:
+    :DIR: Chapter A/
+    :END:
+  ,** Introduction
+  Some text
+
+  #+NAME: Image 1
+  [[Attachment:image 1.jpg]]
+  #+end_example
+
+  Without inheritance one would not be able to resolve the link to
+  image =1.jpg=, since the link is inside a sub-heading to =Chapter
+  A=.
+
+  Inheritance works the same way for both =ID= and =DIR= property.  If
+  both properties are defined on the same headline then =DIR= takes
+  precedance.  This is also true if inheritance is enabled.  If =DIR=
+  is inherited from a parent node in the outline, that property still
+  takes precedence over an =ID= property defined on the node itself.
+
+- ~org-attach-method~ ::
+  #+vindex: org-attach-method
+  When attaching files using the dispatcher {{{kbd(C-c C-a)}}} it
+  defaults to copying files.  The behaviour can be changed by
+  customizing ~org-attach-method~.  Options are Copy, Move/Rename,
+  Hard link or Symbolic link.
+
+- ~org-attach-preferred-new-method~ ::
+  #+vindex: org-attach-preferred-new-method
+  This customization lets you choose the default way to attach to
+  nodes without existing =ID= and =DIR= property.  It defaults to ~id~
+  but can also be set to ~dir~, ~ask~ or ~nil~.
+
+- ~org-attach-archive-delete~ ::
+  #+vindex: org-attach-archive-delete
+  Configure this to determine if attachments should be deleted or not
+  when a subtree that has attachments is archived.
+
+- ~org-attach-auto-tag~ ::
+  #+vindex: org-attach-auto-tag
+  When attaching files to a heading it will be assigned a tag
+  according to what is set here.
+
+- ~org-attach-id-to-path-function~ ::
+  #+vindex: org-attach-id-to-path-function
+  When =ID= is used for attachments, the ID is parsed into a part of a
+  directory-path.  See ~org-attach-id-folder-format~ for the default
+  function.  Define a new one and add it to
+  ~org-attach-id-to-path-function~ if you want the folder structure
+  any other way.  Note that modifying this makes org-attach dependent
+  on your function also for opening attachments, not only setting
+  them!
+
+- ~org-attach-expert~ ::
+  #+vindex: org-attach-expert
+  Do not show the splash buffer with the attach dispatcher when
+  ~org-attach-expert~ is set to non-~nil~.
+
+See customization group =Org Attach= if you want to change the
+default settings.
+
+*** Attachment links
+Attached files and folders can be referenced using attachment links.
+This makes it easy to refer to the material added to an outline node.
+Especially if it was attached using the unique ID of the entry!
+
+#+begin_example
+,* TODO Some task
+  :PROPERTIES:
+  :ID:       95d50008-c12e-479f-a4f2-cc0238205319
+  :END:
+See attached document for more information: [[attachment:info.org]]
+#+end_example
+
+See [[*External Links]] for more information about these links.
+
+*** Automatic version-control with Git
+If the directory attached to an outline node is a Git repository, Org
+can be configured to automatically commit changes to that repository
+when it sees them.
+
+To make Org mode take care of versioning of attachments for you, add
+the following to your Emacs config:
+
+#+begin_src emacs-lisp
+  (require 'org-attach-git)
+#+end_src
+
+*** Attach from Dired
 #+cindex: attach from Dired
 #+findex: org-attach-dired-to-subtree
 It is possible to attach files to a subtree from a Dired buffer.  To
@@ -7831,249 +8291,6 @@ Two functions can help you filling ~org-protocol-project-alist~ with
 valid contents: ~org-protocol-create~ and
 ~org-protocol-create-for-org~.  The latter is of use if you're editing
 an Org file that is part of a publishing project.
-
-** Refile and Copy
-:PROPERTIES:
-:DESCRIPTION: Moving/copying a tree from one place to another.
-:END:
-#+cindex: refiling notes
-#+cindex: copying notes
-
-When reviewing the captured data, you may want to refile or to copy
-some of the entries into a different list, for example into a project.
-Cutting, finding the right location, and then pasting the note is
-cumbersome.  To simplify this process, you can use the following
-special command:
-
-- {{{kbd(C-c C-w)}}} (~org-refile~) ::
-
-  #+kindex: C-c C-w
-  #+findex: org-refile
-  #+vindex: org-reverse-note-order
-  #+vindex: org-refile-targets
-  #+vindex: org-refile-use-outline-path
-  #+vindex: org-outline-path-complete-in-steps
-  #+vindex: org-refile-allow-creating-parent-nodes
-  #+vindex: org-log-refile
-  Refile the entry or region at point.  This command offers possible
-  locations for refiling the entry and lets you select one with
-  completion.  The item (or all items in the region) is filed below
-  the target heading as a subitem.  Depending on
-  ~org-reverse-note-order~, it is either the first or last subitem.
-
-  By default, all level 1 headlines in the current buffer are
-  considered to be targets, but you can have more complex definitions
-  across a number of files.  See the variable ~org-refile-targets~ for
-  details.  If you would like to select a location via
-  a file-path-like completion along the outline path, see the
-  variables ~org-refile-use-outline-path~ and
-  ~org-outline-path-complete-in-steps~.  If you would like to be able
-  to create new nodes as new parents for refiling on the fly, check
-  the variable ~org-refile-allow-creating-parent-nodes~.  When the
-  variable ~org-log-refile~[fn:88] is set, a timestamp or a note is
-  recorded whenever an entry is refiled.
-
-- {{{kbd(C-u C-c C-w)}}} ::
-
-  #+kindex: C-u C-c C-w
-  Use the refile interface to jump to a heading.
-
-- {{{kbd(C-u C-u C-c C-w)}}} (~org-refile-goto-last-stored~) ::
-
-  #+kindex: C-u C-u C-c C-w
-  #+findex: org-refile-goto-last-stored
-  Jump to the location where ~org-refile~ last moved a tree to.
-
-- {{{kbd(C-2 C-c C-w)}}} ::
-
-  #+kindex: C-2 C-c C-w
-  Refile as the child of the item currently being clocked.
-
-- {{{kbd(C-3 C-c C-w)}}} ::
-
-  #+kindex: C-3 C-c C-w
-  #+vindex: org-refile-keep
-  Refile and keep the entry in place.  Also see ~org-refile-keep~ to
-  make this the default behavior, and beware that this may result in
-  duplicated =ID= properties.
-
-- {{{kbd(C-0 C-c C-w)}}} or {{{kbd(C-u C-u C-u C-c C-w)}}} (~org-refile-cache-clear~) ::
-
-  #+kindex: C-u C-u C-u C-c C-w
-  #+kindex: C-0 C-c C-w
-  #+findex: org-refile-cache-clear
-  #+vindex: org-refile-use-cache
-  Clear the target cache.  Caching of refile targets can be turned on
-  by setting ~org-refile-use-cache~.  To make the command see new
-  possible targets, you have to clear the cache with this command.
-
-- {{{kbd(C-c M-w)}}} (~org-copy~) ::
-
-  #+kindex: C-c M-w
-  #+findex: org-copy
-  Copying works like refiling, except that the original note is not
-  deleted.
-
-** Archiving
-:PROPERTIES:
-:DESCRIPTION: What to do with finished products.
-:END:
-#+cindex: archiving
-
-When a project represented by a (sub)tree is finished, you may want to
-move the tree out of the way and to stop it from contributing to the
-agenda.  Archiving is important to keep your working files compact and
-global searches like the construction of agenda views fast.
-
-- {{{kbd(C-c C-x C-a)}}} (~org-archive-subtree-default~) ::
-
-  #+kindex: C-c C-x C-a
-  #+findex: org-archive-subtree-default
-  #+vindex: org-archive-default-command
-  Archive the current entry using the command specified in the
-  variable ~org-archive-default-command~.
-
-*** Moving a tree to an archive file
-:PROPERTIES:
-:DESCRIPTION: Moving a tree to an archive file.
-:ALT_TITLE: Moving subtrees
-:END:
-#+cindex: external archiving
-
-The most common archiving action is to move a project tree to another
-file, the archive file.
-
-- {{{kbd(C-c C-x C-s)}}} or short {{{kbd(C-c $)}}} (~org-archive-subtree~) ::
-
-  #+kindex: C-c C-x C-s
-  #+kindex: C-c $
-  #+findex: org-archive-subtree
-  #+vindex: org-archive-location
-  Archive the subtree starting at point position to the location given
-  by ~org-archive-location~.
-
-- {{{kbd(C-u C-c C-x C-s)}}} ::
-
-  #+kindex: C-u C-c C-x C-s
-  Check if any direct children of the current headline could be moved
-  to the archive.  To do this, check each subtree for open TODO
-  entries.  If none is found, the command offers to move it to the
-  archive location.  If point is /not/ on a headline when this command
-  is invoked, check level 1 trees.
-
-- {{{kbd(C-u C-u C-c C-x C-s)}}} ::
-
-  #+kindex: C-u C-u C-c C-x C-s
-  As above, but check subtree for timestamps instead of TODO entries.
-  The command offers to archive the subtree if it /does/ contain
-  a timestamp, and that timestamp is in the past.
-
-#+cindex: archive locations
-The default archive location is a file in the same directory as the
-current file, with the name derived by appending =_archive= to the
-current file name.  You can also choose what heading to file archived
-items under, with the possibility to add them to a datetree in a file.
-For information and examples on how to specify the file and the
-heading, see the documentation string of the variable
-~org-archive-location~.
-
-There is also an in-buffer option for setting this variable, for
-example:
-
-#+cindex: @samp{ARCHIVE}, keyword
-: #+ARCHIVE: %s_done::
-
-#+cindex: ARCHIVE, property
-If you would like to have a special archive location for a single
-entry or a (sub)tree, give the entry an =ARCHIVE= property with the
-location as the value (see [[*Properties and Columns]]).
-
-#+vindex: org-archive-save-context-info
-When a subtree is moved, it receives a number of special properties
-that record context information like the file from where the entry
-came, its outline path the archiving time etc.  Configure the variable
-~org-archive-save-context-info~ to adjust the amount of information
-added.
-
-*** Internal archiving
-:PROPERTIES:
-:DESCRIPTION: Switch off a tree but keep it in the file.
-:END:
-
-#+cindex: @samp{ARCHIVE}, tag
-If you want to just switch off---for agenda views---certain subtrees
-without moving them to a different file, you can use the =ARCHIVE=
-tag.
-
-A headline that is marked with the =ARCHIVE= tag (see [[*Tags]]) stays at
-its location in the outline tree, but behaves in the following way:
-
--
-  #+vindex: org-cycle-open-archived-trees
-  It does not open when you attempt to do so with a visibility cycling
-  command (see [[*Visibility Cycling]]).  You can force cycling archived
-  subtrees with {{{kbd(C-TAB)}}}, or by setting the option
-  ~org-cycle-open-archived-trees~.  Also normal outline commands, like
-  ~outline-show-all~, open archived subtrees.
-
--
-  #+vindex: org-sparse-tree-open-archived-trees
-  During sparse tree construction (see [[*Sparse Trees]]), matches in
-  archived subtrees are not exposed, unless you configure the option
-  ~org-sparse-tree-open-archived-trees~.
-
--
-  #+vindex: org-agenda-skip-archived-trees
-  During agenda view construction (see [[*Agenda Views]]), the content of
-  archived trees is ignored unless you configure the option
-  ~org-agenda-skip-archived-trees~, in which case these trees are
-  always included.  In the agenda you can press {{{kbd(v a)}}} to get
-  archives temporarily included.
-
--
-  #+vindex: org-export-with-archived-trees
-  Archived trees are not exported (see [[*Exporting]]), only the headline
-  is.  Configure the details using the variable
-  ~org-export-with-archived-trees~.
-
--
-  #+vindex: org-columns-skip-archived-trees
-  Archived trees are excluded from column view unless the variable
-  ~org-columns-skip-archived-trees~ is configured to ~nil~.
-
-The following commands help manage the =ARCHIVE= tag:
-
-- {{{kbd(C-c C-x a)}}} (~org-toggle-archive-tag~) ::
-
-  #+kindex: C-c C-x a
-  #+findex: org-toggle-archive-tag
-  Toggle the archive tag for the current headline.  When the tag is
-  set, the headline changes to a shadowed face, and the subtree below
-  it is hidden.
-
-- {{{kbd(C-u C-c C-x a)}}} ::
-
-  #+kindex: C-u C-c C-x a
-  Check if any direct children of the current headline should be
-  archived.  To do this, check each subtree for open TODO entries.  If
-  none is found, the command offers to set the =ARCHIVE= tag for the
-  child.  If point is /not/ on a headline when this command is
-  invoked, check the level 1 trees.
-
-- {{{kbd(C-TAB)}}} (~org-force-cycle-archived~) ::
-
-  #+kindex: C-TAB
-  Cycle a tree even if it is tagged with =ARCHIVE=.
-
-- {{{kbd(C-c C-x A)}}} (~org-archive-to-archive-sibling~) ::
-
-  #+kindex: C-c C-x A
-  #+findex: org-archive-to-archive-sibling
-  Move the current entry to the /Archive Sibling/.  This is a sibling
-  of the entry with the heading =Archive= and the archive tag.  The
-  entry becomes a child of that sibling and in this way retains a lot
-  of its original context, including inherited tags and approximate
-  position in the outline.
 
 * Agenda Views
 :PROPERTIES:
@@ -21244,7 +21461,7 @@ accessed in capture templates in a similar way.
 ~org-link-from-user-regexp~.
 
 [fn:87] If you move entries or Org files from one directory to
-another, you may want to configure ~org-attach-directory~ to contain
+another, you may want to configure ~org-attach-id-dir~ to contain
 an absolute path.
 
 [fn:88] Note the corresponding =STARTUP= options =logrefile=,

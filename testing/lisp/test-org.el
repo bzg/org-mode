@@ -2514,7 +2514,11 @@ Foo Bar
      (catch :result
        (cl-letf (((symbol-function 'org-tags-view)
 		  (lambda (&rest args) (throw :result t))))
-	 (org-open-at-point)
+	 ;; When point isn't on a tag it's going to try other things,
+	 ;; possibly trying to open attachments which will return an
+	 ;; error if there isn't an attachment. Supress that error.
+	 (ignore-errors
+	     (org-open-at-point))
 	 nil)))))
 
 

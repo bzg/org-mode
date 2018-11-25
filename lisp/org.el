@@ -3847,7 +3847,9 @@ This is needed for font-lock setup.")
 		  (beg end))
 (declare-function org-agenda-set-restriction-lock "org-agenda" (&optional type))
 (declare-function org-agenda-skip "org-agenda" ())
-(declare-function org-attach-reveal "org-attach" (&optional if-exists))
+(declare-function org-attach-expand "org-attach" (file))
+(declare-function org-attach-reveal "org-attach" ())
+(declare-function org-attach-reveal-in-emacs "org-attach" ())
 (declare-function org-gnus-follow-link "org-gnus" (&optional group article))
 (declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
@@ -8645,12 +8647,15 @@ a link."
 	  (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
 	    (`(nil . ,_)
 	     (require 'org-attach)
-	     (org-attach-reveal 'if-exists))
+	     (message "Opening attachment-dir")
+	     (if (equal arg '(4))
+		 (org-attach-reveal-in-emacs)
+	       (org-attach-reveal)))
 	    (`(,links . ,links-end)
 	     (dolist (link (if (stringp links) (list links) links))
 	       (search-forward link nil links-end)
 	       (goto-char (match-beginning 0))
-	       (org-open-at-point))))))
+	       (org-open-at-point arg))))))
        ;; On a footnote reference or at definition's label.
        ((or (eq type 'footnote-reference)
 	    (and (eq type 'footnote-definition)
@@ -16630,13 +16635,14 @@ boundaries."
 	     ;; "file:" links.  Also check link abbreviations since
 	     ;; some might expand to "file" links.
 	     (file-types-re
-	      (format "\\[\\[\\(?:file%s:\\|[./~]\\)\\|\\]\\[\\(<?file:\\)"
+	      (format "\\[\\[\\(?:file%s:\\|attachment:\\|[./~]\\)\\|\\]\\[\\(<?file:\\)"
 		      (if (not link-abbrevs) ""
 			(concat "\\|" (regexp-opt link-abbrevs))))))
 	(while (re-search-forward file-types-re end t)
 	  (let* ((link (org-element-lineage
 			(save-match-data (org-element-context))
 			'(link) t))
+                 (linktype (org-element-property :type link))
 		 (inner-start (match-beginning 1))
 		 (path
 		  (cond
@@ -16650,7 +16656,8 @@ boundaries."
 		   ;; INCLUDE-LINKED is non-nil.
 		   ((or (not (org-element-property :contents-begin link))
 			include-linked)
-		    (and (equal "file" (org-element-property :type link))
+		    (and (or (equal "file" linktype)
+                             (equal "attachment" linktype))
 			 (org-element-property :path link)))
 		   ;; Link with a description.  Check if description
 		   ;; is a filename.  Even if Org doesn't have syntax
@@ -16669,7 +16676,11 @@ boundaries."
 			      (match-end 0))
 			   (match-string 2)))))))
 	    (when (and path (string-match-p file-extension-re path))
-	      (let ((file (expand-file-name path)))
+	      (let ((file (if (equal "attachment" linktype)
+                              (progn
+                                (require 'org-attach)
+                                (org-attach-expand path))
+                            (expand-file-name path))))
 		(when (file-exists-p file)
 		  (let ((width
 			 ;; Apply `org-image-actual-width' specifications.
