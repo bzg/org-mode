@@ -66,6 +66,7 @@
 ;; Vimperator/Firefox.app - Grab the url of the frontmost tab in the frontmost window
 ;; Safari.app - Grab the url of the frontmost tab in the frontmost window
 ;; Google Chrome.app - Grab the url of the frontmost tab in the frontmost window
+;; Brave.app - Grab the url of the frontmost tab in the frontmost window
 ;; Together.app - Grab links to the selected items in the library list
 ;; Skim.app - Grab a link to the selected page in the topmost pdf document
 ;; Microsoft Outlook.app - Grab a link to the selected message in the message list
@@ -164,6 +165,12 @@
   :group 'org-mac-link
   :type 'boolean)
 
+(defcustom org-mac-grab-Brave-app-p t
+  "Add menu option [b]rave to grab links from Brave.app."
+  :tag "Grab Brave.app links"
+  :group 'org-mac-link
+  :type 'boolean)
+
 (defcustom org-mac-grab-Together-app-p nil
   "Add menu option [t]ogether to grab links from Together.app."
   :tag "Grab Together.app links"
@@ -249,6 +256,7 @@ When done, go grab the link, and insert it at point."
 	    ("f" "irefox" org-mac-firefox-insert-frontmost-url ,org-mac-grab-Firefox-app-p)
 	    ("v" "imperator" org-mac-vimperator-insert-frontmost-url ,org-mac-grab-Firefox+Vimperator-p)
 	    ("c" "hrome" org-mac-chrome-insert-frontmost-url ,org-mac-grab-Chrome-app-p)
+	    ("b" "rave" org-mac-brave-insert-frontmost-url ,org-mac-grab-Brave-app-p)
             ("e" "evernote" org-mac-evernote-note-insert-selected ,org-mac-grab-Evernote-app-p)
 	    ("t" "ogether" org-mac-together-insert-selected ,org-mac-grab-Together-app-p)
 	    ("S" "kim" org-mac-skim-insert-page ,org-mac-grab-Skim-app-p)
@@ -423,6 +431,39 @@ The links are of the form <link>::split::<name>."
 (defun org-mac-chrome-insert-frontmost-url ()
   (interactive)
   (insert (org-mac-chrome-get-frontmost-url)))
+
+
+;; Handle links from Brave.app
+;; Grab the frontmost url from Brave. Same limitations as
+;; Firefox/Chrome because Brave doesn't publish an Applescript
+;; dictionary
+
+(defun org-as-mac-brave-get-frontmost-url ()
+  (let ((result
+	 (do-applescript
+	  (concat
+	   "set frontmostApplication to path to frontmost application\n"
+	   "tell application \"Brave\"\n"
+	   "	set theUrl to get URL of active tab of first window\n"
+	   "	set theResult to (get theUrl) & \"::split::\" & (get name of window 1)\n"
+	   "end tell\n"
+	   "activate application (frontmostApplication as text)\n"
+	   "set links to {}\n"
+	   "copy theResult to the end of links\n"
+	   "return links as string\n"))))
+    (replace-regexp-in-string
+     "^\"\\|\"$" "" (car (split-string result "[\r\n]+" t)))))
+
+;;;###autoload
+(defun org-mac-brave-get-frontmost-url ()
+  (interactive)
+  (message "Applescript: Getting Brave url...")
+  (org-mac-paste-applescript-links (org-as-mac-brave-get-frontmost-url)))
+
+;;;###autoload
+(defun org-mac-brave-insert-frontmost-url ()
+  (interactive)
+  (insert (org-mac-brave-get-frontmost-url)))
 
 
 ;; Handle links from Safari.app
