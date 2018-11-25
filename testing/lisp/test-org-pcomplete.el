@@ -125,6 +125,39 @@
 	    (pcomplete)
 	    (buffer-string)))))
 
+(ert-deftest test-org-pcomplete/tag ()
+  "Test tag completion."
+  ;; Complete at end of line, according to `org-current-tag-alist'.
+  (should
+   (equal "* H :foo:"
+	  (org-test-with-temp-text "* H :<point>"
+	    (let ((org-current-tag-alist '(("foo")))) (pcomplete))
+	    (buffer-string))))
+  (should
+   (equal "* H :foo:bar:"
+	  (org-test-with-temp-text "* H :foo:b<point>"
+	    (let ((org-current-tag-alist '(("bar")))) (pcomplete))
+	    (buffer-string))))
+  ;; If `org-current-tag-alist' is non-nil, complete against tags in
+  ;; buffer.
+  (should
+   (equal "* H1 :bar:\n* H2 :bar:"
+	  (org-test-with-temp-text "* H1 :bar:\n* H2 :<point>"
+	    (let ((org-current-tag-alist nil)) (pcomplete))
+	    (buffer-string))))
+  ;; Do not complete in the middle of a line.
+  (should
+   (equal "* H :notag: :real:tags:"
+	  (org-test-with-temp-text "* H :notag:<point> :real:tags:"
+	    (let ((org-current-tag-alist '(("foo")))) (pcomplete))
+	    (buffer-string))))
+  ;; Complete even when there's a match on the line.
+  (should
+   (equal "* foo: :foo:"
+	  (org-test-with-temp-text "* foo: :<point>"
+	    (let ((org-current-tag-alist '(("foo")))) (pcomplete))
+	    (buffer-string)))))
+
 (ert-deftest test-org-pcomplete/todo ()
   "Test TODO completion."
   (should

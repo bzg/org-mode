@@ -104,10 +104,11 @@ The return value is a string naming the thing at point."
 		(char-before)))
       (cons "tex" nil))
      ;; Tags on a headline.
-     ((and (org-at-heading-p)
-	   (eq ?: (save-excursion
-		    (skip-chars-backward "[:alnum:]_@#%")
-		    (char-before))))
+     ((and (org-match-line
+	    (format "\\*+ \\(?:.+? \\)?\\(:\\)\\(\\(?::\\|%s\\)+\\)?[ \t]*$"
+		    org-tag-re))
+	   (or (org-point-in-group (point) 2)
+	       (= (point) (match-end 1))))
       (cons "tag" nil))
      ;; TODO keywords on an empty headline.
      ((and (string-match "^\\*+ +\\S-*$" line-to-here)
@@ -372,7 +373,8 @@ This needs more work, to handle headings with lots of spaces in them."
 		      (setq lst (delete tag lst)))
 		    lst))
 	  (and (string-match ".*:" pcomplete-stub)
-	       (substring pcomplete-stub (match-end 0))))))
+	       (substring pcomplete-stub (match-end 0)))
+	  t)))
 
 (defun pcomplete/org-mode/drawer ()
   "Complete a drawer name, including \"PROPERTIES\"."
