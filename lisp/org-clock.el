@@ -2706,21 +2706,17 @@ a number of clock tables."
          ;; timestamp string.  The `:block' property has precedence
          ;; over `:tstart' and `:tend'.
          (start
-          (apply #'encode-time
-                 (pcase (if range (car range) (plist-get params :tstart))
-                   ((and (pred numberp) n)
-                    (pcase-let
-                        ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
-                      (list 0 0 org-extend-today-until d m y)))
-                   (timestamp (org-matcher-time timestamp)))))
+          (pcase (if range (car range) (plist-get params :tstart))
+            ((and (pred numberp) n)
+             (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
+               (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
+            (timestamp (seconds-to-time (org-matcher-time timestamp)))))
          (end
-          (apply #'encode-time
-                 (pcase (if range (nth 1 range) (plist-get params :tend))
-                   ((and (pred numberp) n)
-                    (pcase-let
-                        ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
-                      (list 0 0 org-extend-today-until d m y)))
-                   (timestamp (org-matcher-time timestamp))))))
+          (pcase (if range (nth 1 range) (plist-get params :tend))
+            ((and (pred numberp) n)
+             (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
+               (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
+            (timestamp (seconds-to-time (org-matcher-time timestamp))))))
     (while (time-less-p start end)
       (unless (bolp) (insert "\n"))
       ;; Insert header before each clock table.
