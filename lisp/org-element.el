@@ -3912,7 +3912,18 @@ element it has to parse."
 	     ((looking-at "%%(")
 	      (org-element-diary-sexp-parser limit affiliated))
 	     ;; Table.
-	     ((looking-at "[ \t]*\\(|\\|\\+\\(-+\\+\\)+[ \t]*$\\)")
+	     ((or (looking-at "[ \t]*|")
+		  ;; There is no strict definition of a table.el
+		  ;; table.  Try to prevent false positive while being
+		  ;; quick.
+		  (let ((rule-regexp "[ \t]*\\+\\(-+\\+\\)+[ \t]*$")
+			(next (line-beginning-position 2)))
+		    (and (looking-at rule-regexp)
+			 (save-excursion
+			   (forward-line)
+			   (re-search-forward "^[ \t]*\\($\\|[^|]\\)" limit t)
+			   (and (> (line-beginning-position) next)
+				(org-match-line rule-regexp))))))
 	      (org-element-table-parser limit affiliated))
 	     ;; List.
 	     ((looking-at (org-item-re))
