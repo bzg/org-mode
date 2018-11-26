@@ -2338,6 +2338,12 @@ SCHEDULED: <2014-03-04 tue.>"
        "* H1\n:PROPERTIES:\n:CUSTOM_ID: custom\n:END:\n* H2\n[[#custom<point>]]"
      (org-open-at-point)
      (looking-at-p "\\* H1")))
+  ;; Handle escape characters.
+  (should
+   (org-test-with-temp-text
+       "* H1\n:PROPERTIES:\n:CUSTOM_ID: [%]\n:END:\n* H2\n[[#%5B%25%5D<point>]]"
+     (org-open-at-point)
+     (looking-at-p "\\* H1")))
   ;; Throw an error on false positives.
   (should-error
    (org-test-with-temp-text

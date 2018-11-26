@@ -10132,9 +10132,10 @@ a link."
 			    (org-search-radio-target
 			     (org-element-property :path context))
 			  (org-link-search
-			   (if (member type '("custom-id" "coderef"))
-			       (org-element-property :raw-link context)
-			     path)
+			   (pcase type
+			     ("custom-id" (concat "#" path))
+			     ("coderef" (format "(%s)" path))
+			     (_ path))
 			   ;; Prevent fuzzy links from matching
 			   ;; themselves.
 			   (and (equal type "fuzzy")
