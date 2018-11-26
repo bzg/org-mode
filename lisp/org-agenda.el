@@ -6165,6 +6165,7 @@ scheduled items with an hour specification like [h]h:mm."
 	       (diff (- current schedule))
 	       (warntime (get-text-property (point) 'org-appt-warntime))
 	       (pastschedp (< schedule today))
+	       (futureschedp (> schedule today))
 	       (habitp (and (fboundp 'org-is-habit-p) (org-is-habit-p)))
 	       (suppress-delay
 		(let ((deadline (and org-agenda-skip-scheduled-delay-if-deadline
@@ -6281,6 +6282,8 @@ scheduled items with an hour specification like [h]h:mm."
 		     head level category tags time nil habitp))
 		   (face (cond ((and (not habitp) pastschedp)
 				'org-scheduled-previously)
+			       ((and habitp futureschedp)
+				'org-agenda-done)
 			       (todayp 'org-scheduled-today)
 			       (t 'org-scheduled)))
 		   (habitp (and habitp (org-habit-parse-todo))))
