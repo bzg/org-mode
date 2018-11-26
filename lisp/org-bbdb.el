@@ -93,7 +93,7 @@
 ;;
 ;;; Code:
 
-(require 'org)
+(require 'ol)
 (require 'cl-lib)
 
 ;; Declare external functions and variables
@@ -230,7 +230,7 @@ date year)."
                         (bbdb-record-getprop rec 'company)
                       (car (bbdb-record-field rec 'organization))))
 	   (link (concat "bbdb:" name)))
-      (org-store-link-props :type "bbdb" :name name :company company
+      (org-link-store-props :type "bbdb" :name name :company company
 			    :link link :description name)
       link)))
 

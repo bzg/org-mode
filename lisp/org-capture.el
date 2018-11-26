@@ -54,7 +54,12 @@
 (declare-function org-clock-update-mode-line "org-clock" (&optional refresh))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-decrypt-entry "org-crypt" ())
+(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-lineage "org-element" (datum &optional types with-self))
+(declare-function org-element-property "org-element" (property element))
 (declare-function org-encrypt-entry "org-crypt" ())
+(declare-function org-insert-link "ol" (&optional complete-file link-location default-description))
+(declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-analyze "org-table" ())
 (declare-function org-table-current-dline "org-table" ())
 (declare-function org-table-fix-formulas "org-table" (key replace &optional limit delta remove))
@@ -64,6 +69,7 @@
 (defvar org-end-time-was-given)
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
+(defvar org-store-link-plist)
 (defvar org-table-border-regexp)
 (defvar org-table-current-begin-pos)
 (defvar org-table-fix-formulas-confirm)
@@ -1593,7 +1599,7 @@ The template may still contain \"%?\" for cursor positioning."
 		  (org-no-properties org-clock-heading)
 		""))
 	 (v-K (if (marker-buffer org-clock-marker)
-		  (org-make-link-string
+		  (org-link-make-string
 		   (format "%s::*%s"
 			   (buffer-file-name (marker-buffer org-clock-marker))
 			   v-k)

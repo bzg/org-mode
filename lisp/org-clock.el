@@ -35,13 +35,16 @@
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-link-display-format "ol" (s))
+(declare-function org-link-heading-search-string "ol" (&optional string))
+(declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-goto-line "org-table" (n))
 (declare-function org-dynamic-block-define "org" (type func))
 
 (defvar org-frame-title-format-backup frame-title-format)
 (defvar org-state)
+(defvar org-link-bracket-re)
 (defvar org-time-stamp-formats)
-
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org mode."
@@ -2616,7 +2619,7 @@ from the dynamic block definition."
 	      (when narrow-cut-p
 		(setq headline
 		      (if (and (string-match
-				(format "\\`%s\\'" org-bracket-link-regexp)
+				(format "\\`%s\\'" org-link-bracket-re)
 				headline)
 			       (match-end 3))
 			  (format "[[%s][%s]]"
@@ -2854,8 +2857,8 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 		       (hdl
 			(if (not link) headline
 			  (let ((search
-				 (org-make-org-heading-search-string headline)))
-			    (org-make-link-string
+				 (org-link-heading-search-string headline)))
+			    (org-link-make-string
 			     (if (not (buffer-file-name)) search
 			       (format "file:%s::%s" (buffer-file-name) search))
 			     ;; Prune statistics cookies.  Replace

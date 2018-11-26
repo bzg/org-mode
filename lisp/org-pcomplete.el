@@ -44,7 +44,7 @@
 (declare-function org-get-export-keywords "org" ())
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
-(declare-function org-make-org-heading-search-string "org" (&optional string))
+(declare-function org-link-heading-search-string "ol" (&optional string))
 (declare-function org-tag-alist-to-string "org" (alist &optional skip-key))
 
 (defvar org-current-tag-alist)
@@ -352,8 +352,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	    (goto-char (point-min))
 	    (let (tbl)
 	      (while (re-search-forward org-outline-regexp nil t)
-		(push (org-make-org-heading-search-string
-		       (org-get-heading t t t t))
+		(push (org-link-heading-search-string (org-get-heading t t t t))
 		      tbl))
 	      (pcomplete-uniquify-list tbl)))
 	  ;; When completing a bracketed link, i.e., "[[*", argument

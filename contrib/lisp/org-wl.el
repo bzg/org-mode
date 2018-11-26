@@ -221,10 +221,10 @@ ENTITY is a message entity."
 	     ((and (eq folder-type 'nntp) org-wl-nntp-prefer-web-links)
 	      (setq link
 		    (format
-		     (if (string-match "gmane\\." folder-name)
+		     (if (string-match-p "gmane\\." folder-name)
 			 "http://mid.gmane.org/%s"
 		       "http://groups.google.com/groups/search?as_umsgid=%s")
-		     (org-fixup-message-id-for-http message-id)))
+		     (url-encode-url message-id)))
 	      (org-store-link-props :type "http" :link link :description subject
 				    :from from :to to :message-id message-id
 				    :message-id-no-brackets message-id-no-brackets
@@ -291,7 +291,7 @@ for namazu index."
 	  (goto-char old-point))
 	(when article
 	  (if (string-match-p "@" article)
-	      (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+	      (wl-summary-jump-to-msg-by-message-id (org-link-add-angle-brackets
 						     article))
 	    (or (wl-summary-jump-to-msg (string-to-number article))
 		(error "No such message: %s" article)))

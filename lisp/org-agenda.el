@@ -46,6 +46,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'ol)
 (require 'org)
 (require 'org-macs)
 
@@ -3537,7 +3538,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 		 (add-text-properties (match-beginning 0) (match-end 0)
 				      '(face org-link))))
 	     (goto-char (point-min))
-	     (while (re-search-forward org-bracket-link-regexp (point-max) t)
+	     (while (re-search-forward org-link-bracket-re (point-max) t)
 	       (set-text-properties (match-beginning 0) (match-end 0)
 				    nil))
 	     (goto-char (point-min))
@@ -5200,7 +5201,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
     (when results
       (setq results
 	    (mapcar (lambda (i) (replace-regexp-in-string
-				 org-bracket-link-regexp "\\3" i)) results))
+				 org-link-bracket-re "\\3" i)) results))
       (concat (org-agenda-finalize-entries results) "\n"))))
 
 ;;; Agenda entry finders
@@ -6568,7 +6569,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	      extra (or (and (not habitp) extra) "")
 	      category (if (symbolp category) (symbol-name category) category)
 	      level (or level ""))
-	(if (string-match org-bracket-link-regexp category)
+	(if (string-match org-link-bracket-re category)
 	    (progn
 	      (setq l (if (match-end 3)
 			  (- (match-end 3) (match-beginning 3))
@@ -8629,9 +8630,9 @@ It also looks at the text of the entry itself."
      ((and buffer lk)
       (mapcar (lambda(l)
 		(with-current-buffer buffer
-		  (setq trg (and (string-match org-bracket-link-regexp l)
+		  (setq trg (and (string-match org-link-bracket-re l)
 				 (match-string 1 l)))
-		  (if (or (not trg) (string-match org-any-link-re trg))
+		  (if (or (not trg) (string-match org-link-any-re trg))
 		      (org-with-wide-buffer
 		       (goto-char marker)
 		       (when (search-forward l nil lkend)
@@ -8645,11 +8646,11 @@ It also looks at the text of the entry itself."
 		      (goto-char (match-beginning 0))
 		      (org-open-at-point)))))
 	      lk))
-     ((or (org-in-regexp (concat "\\(" org-bracket-link-regexp "\\)"))
+     ((or (org-in-regexp (concat "\\(" org-link-bracket-re "\\)"))
 	  (save-excursion
 	    (beginning-of-line 1)
-	    (looking-at (concat ".*?\\(" org-bracket-link-regexp "\\)"))))
-      (org-open-link-from-string (match-string 1)))
+	    (looking-at (concat ".*?\\(" org-link-bracket-re "\\)"))))
+      (org-link-open-from-string (match-string 1)))
      (t (message "No link to open here")))))
 
 (defun org-agenda-copy-local-variable (var)
@@ -8667,8 +8668,8 @@ displayed Org file fills the frame."
   (interactive)
   (if (and org-return-follows-link
 	   (not (org-get-at-bol 'org-marker))
-	   (org-in-regexp org-bracket-link-regexp))
-      (org-open-link-from-string (match-string 0))
+	   (org-in-regexp org-link-bracket-re))
+      (org-link-open-from-string (match-string 0))
     (let* ((marker (or (org-get-at-bol 'org-marker)
 		       (org-agenda-error)))
 	   (buffer (marker-buffer marker))
@@ -10237,7 +10238,7 @@ to override `appt-message-warning-time'."
      (lambda (x)
        (let* ((evt (org-trim
                     (replace-regexp-in-string
-                     org-bracket-link-regexp "\\3"
+                     org-link-bracket-re "\\3"
                      (or (get-text-property 1 'txt x) ""))))
               (cat (get-text-property (1- (length x)) 'org-category x))
               (tod (get-text-property 1 'time-of-day x))

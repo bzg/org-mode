@@ -1023,7 +1023,7 @@ evaluation mechanisms."
    (call-interactively
     (key-binding (or key (read-key-sequence nil))))))
 
-(defvar org-bracket-link-regexp)
+(defvar org-link-bracket-re)
 
 (defun org-babel-active-location-p ()
   (memq (org-element-type (save-match-data (org-element-context)))
@@ -1049,7 +1049,7 @@ exist."
        (end-of-line)
        (skip-chars-forward " \r\t\n")
        ;; Open the results.
-       (if (looking-at org-bracket-link-regexp) (org-open-at-point)
+       (if (looking-at org-link-bracket-re) (org-open-at-point)
 	 (let ((r (org-babel-format-result (org-babel-read-result)
 					   (cdr (assq :sep arguments)))))
 	   (pop-to-buffer (get-buffer-create "*Org Babel Results*"))
@@ -2093,7 +2093,7 @@ Return nil if ELEMENT cannot be read."
      (`paragraph
       ;; Treat paragraphs containing a single link specially.
       (skip-chars-forward " \t")
-      (if (and (looking-at org-bracket-link-regexp)
+      (if (and (looking-at org-link-bracket-re)
 	       (save-excursion
 		 (goto-char (match-end 0))
 		 (skip-chars-forward " \r\t\n")
@@ -2135,7 +2135,7 @@ Return nil if ELEMENT cannot be read."
 If the path of the link is a file path it is expanded using
 `expand-file-name'."
   (let* ((case-fold-search t)
-         (raw (and (looking-at org-bracket-link-regexp)
+         (raw (and (looking-at org-link-bracket-re)
                    (org-no-properties (match-string 1))))
          (type (and (string-match org-link-types-re raw)
                     (match-string 1 raw))))
@@ -2479,7 +2479,7 @@ in the buffer."
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results."
   (cond ((looking-at-p "^[ \t]*$") (point)) ;no result
-	((looking-at-p (format "^[ \t]*%s[ \t]*$" org-bracket-link-regexp))
+	((looking-at-p (format "^[ \t]*%s[ \t]*$" org-link-bracket-re))
 	 (line-beginning-position 2))
 	(t
 	 (let ((element (org-element-at-point)))

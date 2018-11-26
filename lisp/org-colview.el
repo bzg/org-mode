@@ -42,6 +42,8 @@
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-dynamic-block-define "org" (type func))
+(declare-function org-link-display-format "ol" (s))
+(declare-function org-link-open-from-string "ol" (s &optional arg))
 
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
 (defvar org-agenda-columns-compute-summary-properties)
@@ -763,7 +765,7 @@ around it."
 (defun org-columns-open-link (&optional arg)
   (interactive "P")
   (let ((value (get-char-property (point) 'org-columns-value)))
-    (org-open-link-from-string value arg)))
+    (org-link-open-from-string value arg)))
 
 ;;;###autoload
 (defun org-columns-get-format-and-top-level ()

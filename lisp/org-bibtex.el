@@ -107,7 +107,7 @@
 
 ;;; Code:
 
-(require 'org)
+(require 'ol)
 (require 'bibtex)
 (require 'cl-lib)
 (require 'org-compat)
@@ -488,7 +488,7 @@ With optional argument OPTIONAL, also prompt for optional fields."
 		   (save-excursion
 		     (bibtex-beginning-of-entry)
 		     (bibtex-parse-entry)))))
-      (org-store-link-props
+      (org-link-store-props
        :key (cdr (assoc "=key=" entry))
        :author (or (cdr (assoc "author" entry)) "[no author]")
        :editor (or (cdr (assoc "editor" entry)) "[no editor]")

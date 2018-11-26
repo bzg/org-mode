@@ -73,6 +73,7 @@
 
 (require 'cl-lib)
 (require 'ob-exp)
+(require 'ol)
 (require 'org-element)
 (require 'org-macro)
 (require 'tabulated-list)
@@ -3531,8 +3532,8 @@ is to happen."
 	  (goto-char (point-min))
 	  (unless (eq major-mode 'org-mode)
 	    (let ((org-inhibit-startup t)) (org-mode)))	;set regexps
-	  (let ((regexp (concat org-plain-link-re "\\|" org-angle-link-re)))
-	    (while (re-search-forward org-any-link-re nil t)
+	  (let ((regexp (concat org-link-plain-re "\\|" org-link-angle-re)))
+	    (while (re-search-forward org-link-any-re nil t)
 	      (let ((link (save-excursion
 			    (forward-char -1)
 			    (save-match-data (org-element-context)))))
@@ -4257,8 +4258,8 @@ structure of RULES.
 
 Return modified DATA."
   (let ((link-re (format "\\`\\(?:%s\\|%s\\)\\'"
-			 org-plain-link-re
-			 org-angle-link-re))
+			 org-link-plain-re
+			 org-link-angle-re))
 	(case-fold-search t))
     (org-element-map data 'link
       (lambda (l)

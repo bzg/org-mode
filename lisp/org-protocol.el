@@ -116,6 +116,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'ol)
 
 (declare-function org-publish-get-project-from-filename "ox-publish"
 		  (filename &optional up))
@@ -489,12 +490,12 @@ Now template ?b will be used."
 	 (region (or (plist-get parts :body) ""))
 	 (orglink
 	  (if (null url) title
-	    (org-make-link-string url (or (org-string-nw-p title) url))))
+	    (org-link-make-string url (or (org-string-nw-p title) url))))
 	 ;; Avoid call to `org-store-link'.
 	 (org-capture-link-is-already-stored t))
     ;; Only store link if there's a URL to insert later on.
     (when url (push (list url title) org-stored-links))
-    (org-store-link-props :type type
+    (org-link-store-props :type type
 			  :link url
 			  :description title
 			  :annotation orglink

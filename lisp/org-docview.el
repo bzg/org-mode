@@ -43,7 +43,7 @@
 ;;; Code:
 
 
-(require 'org)
+(require 'ol)
 (require 'doc-view)
 
 (declare-function doc-view-goto-page "doc-view" (page))
@@ -84,7 +84,7 @@
     (let* ((path buffer-file-name)
 	   (page (image-mode-window-get 'page))
 	   (link (concat "docview:" path "::" (number-to-string page))))
-      (org-store-link-props
+      (org-link-store-props
        :type "docview"
        :link link
        :description path))))
@@ -93,7 +93,7 @@
   "Use the existing file name completion for file.
 Links to get the file name, then ask the user for the page number
 and append it."
-  (concat (replace-regexp-in-string "^file:" "docview:" (org-file-complete-link))
+  (concat (replace-regexp-in-string "^file:" "docview:" (org-link-complete-file))
 	  "::"
 	  (read-from-minibuffer "Page:" "1")))
 

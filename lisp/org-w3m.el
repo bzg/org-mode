@@ -41,7 +41,7 @@
 
 ;;; Code:
 
-(require 'org)
+(require 'ol)
 
 (defvar w3m-current-url)
 (defvar w3m-current-title)
@@ -50,7 +50,7 @@
 (defun org-w3m-store-link ()
   "Store a link to a w3m buffer."
   (when (eq major-mode 'w3m-mode)
-    (org-store-link-props
+    (org-link-store-props
      :type "w3m"
      :link w3m-current-url
      :url (url-view-url t)
@@ -59,7 +59,7 @@
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with Org style links.
 This will encode `link-title' and `link-location' with
-`org-make-link-string', and insert the transformed test into the kill ring,
+`org-link-make-string', and insert the transformed test into the kill ring,
 so that it can be yanked into an Org  buffer with links working correctly."
   (interactive)
   (let* ((regionp (org-region-active-p))
@@ -98,7 +98,7 @@ so that it can be yanked into an Org  buffer with links working correctly."
               (setq return-content
 		    (concat return-content
 			    (if (org-string-nw-p link-location)
-				(org-make-link-string link-location link-title)
+				(org-link-make-string link-location link-title)
 			      link-title))))
           (goto-char temp-position) ; reset point before jump next anchor
           (setq out-bound t)))	    ; for break out `while' loop

@@ -30,7 +30,7 @@
 
 ;;; Code:
 
-(require 'org)
+(require 'ol)
 
 ;; Declare external functions and variables
 
@@ -54,7 +54,7 @@
 			"#" Info-current-node))
 	  (desc (concat (file-name-nondirectory Info-current-file)
 			"#" Info-current-node)))
-      (org-store-link-props :type "info" :file Info-current-file
+      (org-link-store-props :type "info" :file Info-current-file
 			    :node Info-current-node
 			    :link link :desc desc)
       link)))

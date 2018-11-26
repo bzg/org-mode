@@ -23,9 +23,9 @@
 
 ;;; Code:
 
-(require 'org)
 (require 'eshell)
 (require 'esh-mode)
+(require 'ol)
 
 (org-link-set-parameters "eshell"
 			 :follow #'org-eshell-open
@@ -57,7 +57,7 @@
   (when (eq major-mode 'eshell-mode)
     (let* ((command (concat "cd " dired-directory))
            (link  (concat (buffer-name) ":" command)))
-      (org-store-link-props
+      (org-link-store-props
        :link (concat "eshell:" link)
        :description command))))
 

@@ -62,6 +62,16 @@
 (require 'avl-tree)
 (require 'cl-lib)
 
+(declare-function org-link-expand-abbrev "ol" (link))
+(declare-function org-link-types "ol" ())
+(declare-function org-link-unescape "ol" (str))
+
+(defvar org-link-translation-function)
+(defvar org-link-types-re)
+(defvar org-link-angle-re)
+(defvar org-link-plain-re)
+(defvar org-link-bracket-re)
+
 
 
 ;;; Definitions And Rules
@@ -3097,7 +3107,7 @@ Assume point is at the beginning of the link."
 	(setq contents-begin (match-beginning 1))
 	(setq contents-end (match-end 1)))
        ;; Type 2: Standard link, i.e. [[https://orgmode.org][homepage]]
-       ((looking-at org-bracket-link-regexp)
+       ((looking-at org-link-bracket-re)
 	(setq format 'bracket)
 	(setq contents-begin (match-beginning 3))
 	(setq contents-end (match-end 3))
@@ -3147,7 +3157,7 @@ Assume point is at the beginning of the link."
 	  (setq type "fuzzy")
 	  (setq path raw-link))))
        ;; Type 3: Plain link, e.g., https://orgmode.org
-       ((looking-at org-plain-link-re)
+       ((looking-at org-link-plain-re)
 	(setq format 'plain)
 	(setq raw-link (match-string-no-properties 0))
 	(setq type (match-string-no-properties 1))
@@ -3156,7 +3166,7 @@ Assume point is at the beginning of the link."
        ;; Type 4: Angular link, e.g., <https://orgmode.org>.  Unlike to
        ;; bracket links, follow RFC 3986 and remove any extra
        ;; whitespace in URI.
-       ((looking-at org-angle-link-re)
+       ((looking-at org-link-angle-re)
 	(setq format 'angle)
 	(setq type (match-string-no-properties 1))
 	(setq link-end (match-end 0))

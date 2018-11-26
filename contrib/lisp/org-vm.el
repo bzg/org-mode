@@ -107,7 +107,7 @@
 (defun org-vm-follow-link (&optional folder article readonly)
   "Follow a VM link to FOLDER and ARTICLE."
   (require 'vm)
-  (setq article (org-add-angle-brackets article))
+  (setq article (org-link-add-angle-brackets article))
   (if (string-match "^//\\([a-zA-Z]+@\\)?\\([^:]+\\):\\(.*\\)" folder)
       ;; ange-ftp or efs or tramp access
       (let ((user (or (match-string 1 folder) (user-login-name)))
@@ -124,7 +124,7 @@
   (when folder
     (funcall (cdr (assq 'vm org-link-frame-setup)) folder readonly)
     (when article
-      (org-vm-select-message (org-add-angle-brackets article)))))
+      (org-vm-select-message (org-link-add-angle-brackets article)))))
 
 (defun org-vm-imap-open (path)
   "Follow a VM link to an IMAP folder."
@@ -143,7 +143,7 @@
       (funcall (cdr (assq 'vm-imap org-link-frame-setup))
                mailbox-spec)
       (when message-id
-        (org-vm-select-message (org-add-angle-brackets message-id))))))
+        (org-vm-select-message (org-link-add-angle-brackets message-id))))))
 
 (defun org-vm-select-message (message-id)
   "Go to the message with message-id in the current folder."

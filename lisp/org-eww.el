@@ -44,7 +44,7 @@
 
 
 ;;; Code:
-(require 'org)
+(require 'ol)
 (require 'cl-lib)
 
 (defvar eww-current-title)
@@ -60,7 +60,7 @@
 (defun org-eww-store-link ()
   "Store a link to the url of an EWW buffer."
   (when (eq major-mode 'eww-mode)
-    (org-store-link-props
+    (org-link-store-props
      :type "eww"
      :link (if (< emacs-major-version 25)
 	       eww-current-url
@@ -93,7 +93,7 @@ Otherwise point is not moved.  Return point."
 (defun org-eww-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.
 This will encode `link-title' and `link-location' with
-`org-make-link-string' and insert the transformed text into the
+`org-link-make-string' and insert the transformed text into the
 kill ring, so that it can be yanked into an Org mode buffer with
 links working correctly.
 
@@ -144,7 +144,7 @@ keep the structure of the Org file."
 			    (if (org-string-nw-p link-location)
 				;; Hint: link-location is different
 				;; for form-elements.
-				(org-make-link-string link-location link-title)
+				(org-link-make-string link-location link-title)
 			      link-title))))
 	  (goto-char temp-position) ; reset point before jump next anchor
 	  (setq out-bound t)))	    ; for break out `while' loop

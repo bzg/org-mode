@@ -35,6 +35,9 @@
 (require 'org-agenda)
 (require 'cl-lib)
 
+(declare-function org-link-escape "ol" (text &optional table merge))
+(declare-function org-link-unescape "ol" (str))
+
 (defvar org-agenda-keep-restricted-file-list)
 
 ;;; Code:

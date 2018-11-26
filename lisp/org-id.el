@@ -71,9 +71,11 @@
 ;;; Code:
 
 (require 'org)
+(require 'ol)
 
 (declare-function message-make-fqdn "message" ())
 (declare-function org-goto-location "org-goto" (&optional _buf help))
+(declare-function org-link-set-parameters "ol" (type &rest rest))
 
 ;;; Customization
 
@@ -648,7 +650,7 @@ optional argument MARKERP, return the position as a new marker."
 				(match-string 4)
 			      (match-string 0)))
 		       link))))
-      (org-store-link-props :link link :description desc :type "id")
+      (org-link-store-props :link link :description desc :type "id")
       link)))
 
 (defun org-id-open (id)

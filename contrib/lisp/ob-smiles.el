@@ -25,7 +25,7 @@
 (defun molecule-jump (name)
   "Jump to molecule `NAME' definition."
   (org-mark-ring-push)
-  (org-open-link-from-string (format "[[%s]]" path)))
+  (org-link-open-from-string (format "[[%s]]" path)))
 
 (defun molecule-export (path desc backend)
   "Export molecule to HTML format on `PATH' with `DESC' and `BACKEND'."

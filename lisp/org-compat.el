@@ -47,7 +47,7 @@
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
 (declare-function org-link-display-format "org" (s))
-(declare-function org-link-set-parameters "org" (type &rest rest))
+(declare-function org-link-set-parameters "ol" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
 (declare-function org-make-tag-string "org" (tags))
 (declare-function org-reduced-level "org" (l))
@@ -447,6 +447,87 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-agenda-overriding-columns-format
   'org-overriding-columns-format "Org 9.2.2")
 
+(define-obsolete-variable-alias 'org-doi-server-url
+  'org-link-doi-server-url "Org 9.3")
+
+(define-obsolete-variable-alias 'org-email-link-description-format
+  'org-link-email-description-format "Org 9.3")
+
+(define-obsolete-variable-alias 'org-make-link-description-function
+  'org-link-make-description-function "Org 9.3")
+
+(define-obsolete-variable-alias 'org-from-is-user-regexp
+  'org-link-from-user-regexp "Org 9.3")
+
+(define-obsolete-variable-alias 'org-descriptive-links
+  'org-link-descriptive "Org 9.3")
+
+(define-obsolete-variable-alias 'org-url-hexify-p
+  'org-link-url-hexify "Org 9.3")
+
+(define-obsolete-variable-alias 'org-context-in-file-links
+  'org-link-context-for-files "Org 9.3")
+
+(define-obsolete-variable-alias 'org-keep-stored-link-after-insertion
+  'org-link-keep-stored-after-insertion "Org 9.3")
+
+(define-obsolete-variable-alias 'org-display-internal-link-with-indirect-buffer
+  'org-link-use-indirect-buffer-for-internals "Org 9.3")
+
+(define-obsolete-variable-alias 'org-confirm-shell-link-function
+  'org-link-shell-confirm-function "Org 9.3")
+
+(define-obsolete-variable-alias 'org-confirm-shell-link-not-regexp
+  'org-link-shell-skip-confirm-regexp "Org 9.3")
+
+(define-obsolete-variable-alias 'org-confirm-elisp-link-function
+  'org-link-elisp-confirm-function "Org 9.3")
+
+(define-obsolete-variable-alias 'org-confirm-elisp-link-not-regexp
+  'org-link-elisp-skip-confirm-regexp "Org 9.3")
+
+(define-obsolete-function-alias 'org-file-complete-link
+  'org-link-complete-file "Org 9.3")
+
+(define-obsolete-function-alias 'org-email-link-description
+  'org-link-email-description "Org 9.3")
+
+(define-obsolete-function-alias 'org-make-link-string
+  'org-link-make-string "Org 9.3")
+
+(define-obsolete-function-alias 'org-store-link-props
+  'org-link-store-props "Org 9.3")
+
+(define-obsolete-function-alias 'org-add-link-props
+  'org-link-add-props "Org 9.3")
+
+(define-obsolete-function-alias 'org-make-org-heading-search-string
+  'org-link-heading-search-string "Org 9.3")
+
+(define-obsolete-function-alias 'org-make-link-regexps
+  'org-link-make-regexps "Org 9.3")
+
+(define-obsolete-variable-alias 'org-angle-link-re
+  'org-link-angle-re "Org 9.3")
+
+(define-obsolete-variable-alias 'org-plain-link-re
+  'org-link-plain-re "Org 9.3")
+
+(define-obsolete-variable-alias 'org-bracket-link-regexp
+  'org-link-bracket-re "Org 9.3")
+
+(define-obsolete-variable-alias 'org-bracket-link-analytic-regexp
+  'org-link-analytic-bracket-re "Org 9.3")
+
+(define-obsolete-variable-alias 'org-any-link-re
+  'org-link-any-re "Org 9.3")
+
+(define-obsolete-function-alias 'org-open-link-from-string
+  'org-link-open-from-string "Org 9.3")
+
+(define-obsolete-function-alias 'org-add-angle-brackets
+  'org-link-add-angle-brackets "Org 9.3")
+
 ;; The function was made obsolete by commit 65399674d5 of 2013-02-22.
 ;; This make-obsolete call was added 2016-09-01.
 (make-obsolete 'org-capture-import-remember-templates
@@ -496,7 +577,7 @@ use of this function is for the stuck project list."
 
 ;;;; Obsolete link types
 
-(eval-after-load 'org
+(eval-after-load 'ol
   '(progn
      (org-link-set-parameters "file+emacs") ;since Org 9.0
      (org-link-set-parameters "file+sys"))) ;since Org 9.0

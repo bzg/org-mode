@@ -106,10 +106,11 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'ob)
+(require 'ol)
 (require 'org-element)
 (require 'org-macro)
 (require 'ox)
-(require 'ob)
 
 
 ;;; Checkers
@@ -606,14 +607,13 @@ Use :header-args: instead"
 			"Non-existent file argument in INCLUDE keyword")
 		(let* ((visiting (if file (find-buffer-visiting file)
 				   (current-buffer)))
-		       (buffer (or visiting (find-file-noselect file))))
+		       (buffer (or visiting (find-file-noselect file)))
+		       (org-link-search-must-match-exact-headline t))
 		  (unwind-protect
 		      (with-current-buffer buffer
 			(when (and search
-				   (not
-				    (ignore-errors
-				      (let ((org-link-search-inhibit-query t))
-					(org-link-search search nil t)))))
+				   (not (ignore-errors
+					  (org-link-search search nil t))))
 			  (list (org-element-property :post-affiliated k)
 				(format
 				 "Invalid search part \"%s\" in INCLUDE keyword"
