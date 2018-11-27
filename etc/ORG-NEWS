@@ -12,8 +12,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.3
 
-** Incompatible change
-
+** Incompatible changes
+*** Change in behavior on exit from an Org edit buffer
+Org will no longer attempt to restore the window configuration in the
+frame to which the user returns after editing a source block with
+~org-edit-src-code~.  Instead, the window configuration will remain as
+it is.
 *** Change default value for ~org-email-link-description-format~
 
 When linking from a mail buffer, Org used to truncate the subject of

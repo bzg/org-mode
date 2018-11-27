@@ -270,9 +270,6 @@ issued in the language major mode buffer."
 (defvar-local org-src--remote nil)
 (put 'org-src--remote 'permanent-local t)
 
-(defvar-local org-src--saved-temp-window-config nil)
-(put 'org-src--saved-temp-window-config 'permanent-local t)
-
 (defvar-local org-src--source-type nil
   "Type of element being edited, as a symbol.")
 (put 'org-src--source-type 'permanent-local t)
@@ -475,7 +472,6 @@ When REMOTE is non-nil, do not try to preserve point or mark when
 moving from the edit area to the source.
 
 Leave point in edit buffer."
-  (setq org-src--saved-temp-window-config (current-window-configuration))
   (let* ((area (org-src--contents-area datum))
 	 (beg (copy-marker (nth 0 area)))
 	 (end (copy-marker (nth 1 area) t))
@@ -1172,10 +1168,7 @@ Throw an error if there is no such buffer."
        (write-back (org-src--goto-coordinates coordinates beg end))))
     ;; Clean up left-over markers and restore window configuration.
     (set-marker beg nil)
-    (set-marker end nil)
-    (when org-src--saved-temp-window-config
-      (set-window-configuration org-src--saved-temp-window-config)
-      (setq org-src--saved-temp-window-config nil))))
+    (set-marker end nil)))
 
 
 (provide 'org-src)
