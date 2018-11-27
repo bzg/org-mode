@@ -10284,9 +10284,10 @@ a link."
 			    (org-search-radio-target
 			     (org-element-property :path context))
 			  (org-link-search
-			   (if (member type '("custom-id" "coderef"))
-			       (org-element-property :raw-link context)
-			     path)
+			   (pcase type
+			     ("custom-id" (concat "#" path))
+			     ("coderef" (format "(%s)" path))
+			     (_ path))
 			   ;; Prevent fuzzy links from matching
 			   ;; themselves.
 			   (and (equal type "fuzzy")
@@ -20442,7 +20443,8 @@ object (e.g., within a comment).  In these case, you need to use
     (cond
      ;; In a table, call `org-table-next-row'.  However, before first
      ;; column or after last one, split the table.
-     ((or (and (eq (org-element-type context) 'table)
+     ((or (and (eq 'table (org-element-type context))
+	       (not (eq 'table.el (org-element-property :type context)))
 	       (>= (point) (org-element-property :contents-begin context))
 	       (< (point) (org-element-property :contents-end context)))
 	  (org-element-lineage context '(table-row table-cell) t))
@@ -20468,9 +20470,8 @@ object (e.g., within a comment).  In these case, you need to use
       (call-interactively #'org-open-at-point))
      ;; Insert newline in heading, but preserve tags.
      ((and (not (bolp))
-	   (save-excursion (beginning-of-line)
-			   (let ((case-fold-search nil))
-			     (looking-at org-complex-heading-regexp))))
+	   (let ((case-fold-search nil))
+	     (org-match-line org-complex-heading-regexp)))
       ;; At headline.  Split line.  However, if point is on keyword,
       ;; priority cookie or tags, do not break any of them: add
       ;; a newline after the headline instead.
