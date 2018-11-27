@@ -2673,10 +2673,7 @@ The function assumes BUFFER's major mode is `org-mode'."
 				    (quote ,val))
 			      vars))))))
 	 ;; Whole buffer contents.
-	 (insert
-	  ,(org-with-wide-buffer
-	    (buffer-substring-no-properties
-	     (point-min) (point-max))))
+	 (insert ,(org-with-wide-buffer (buffer-string)))
 	 ;; Narrowing.
 	 ,(if (org-region-active-p)
 	      `(narrow-to-region ,(region-beginning) ,(region-end))
