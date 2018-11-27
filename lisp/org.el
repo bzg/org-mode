@@ -7488,22 +7488,25 @@ unconditionally."
 	  (member arg '((4) (16)))
 	  (and (not invisible-ok)
 	       (invisible-p (max (1- (point)) (point-min)))))
-      ;; Position point at the location of insertion.
-      (if (not level)			;before first headline
-	  (org-with-limited-levels (outline-next-heading))
-	;; Make sure we end up on a visible headline if INVISIBLE-OK
-	;; is nil.
-	(org-with-limited-levels (org-back-to-heading invisible-ok))
-	(cond ((equal arg '(16))
-	       (org-up-heading-safe)
-	       (org-end-of-subtree t t))
-	      (t
-	       (org-end-of-subtree t t))))
-      (unless (bolp) (insert "\n"))	;ensure final newline
+      ;; Position point at the location of insertion.  Make sure we
+      ;; end up on a visible headline if INVISIBLE-OK is nil.
+      (org-with-limited-levels
+       (if (not level) (outline-next-heading) ;before first headline
+	 (org-back-to-heading invisible-ok)
+	 (when (equal arg '(16)) (org-up-heading-safe))
+	 (org-end-of-subtree)))
+      (unless (bolp) (insert "\n"))
       (unless (and blank? (org-previous-line-empty-p))
 	(org-N-empty-lines-before-current (if blank? 1 0)))
-      (insert stars " \n")
-      (forward-char -1))
+      (insert stars " ")
+      (when (eobp) (save-excursion (insert "\n")))
+      ;; When INVISIBLE-OK is non-nil, ensure newly created headline
+      ;; is visible.
+      (unless invisible-ok
+	(pcase (get-char-property-and-overlay (point) 'invisible)
+	  (`(outline . ,o)
+	   (move-overlay o (overlay-start o) (line-end-position 0)))
+	  (_ nil))))
      ;; At a headline...
      ((org-at-heading-p)
       (cond ((bolp)
