@@ -2892,7 +2892,7 @@ contextual information."
 	   (listings (plist-get info :latex-listings)))
       (cond
        ;; Case 1.  No source fontification.
-       ((not listings)
+       ((or (not lang) (not listings))
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
 	       (float-env
 		(cond ((string= "multicolumn" float)
