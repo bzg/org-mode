@@ -4005,10 +4005,12 @@ A cell is of the format
 
 If SNIPPET-FLAG is non-nil, the package also needs to be included
 when compiling LaTeX snippets into images for inclusion into
-non-LaTeX output.  COMPILERS is a list of compilers that should
-include the package, see `org-latex-compiler'.  If the document
-compiler is not in the list, and the list is non-nil, the package
-will not be inserted in the final document.
+non-LaTeX output.
+
+COMPILERS is a list of compilers that should include the package,
+see `org-latex-compiler'.  If the document compiler is not in the
+list, and the list is non-nil, the package will not be inserted
+in the final document.
 
 A string will be inserted as-is in the header of the document."
   :group 'org-latex
@@ -4041,6 +4043,11 @@ A cell is of the format:
 SNIPPET-FLAG, when non-nil, indicates that this package is also
 needed when turning LaTeX snippets into images for inclusion into
 non-LaTeX output.
+
+COMPILERS is a list of compilers that should include the package,
+see `org-latex-compiler'.  If the document compiler is not in the
+list, and the list is non-nil, the package will not be inserted
+in the final document.
 
 A string will be inserted as-is in the header of the document.
 
