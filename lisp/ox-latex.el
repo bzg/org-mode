@@ -1440,26 +1440,21 @@ Return the new header."
 (defun org-latex--remove-packages (pkg-alist info)
   "Remove packages based on the current LaTeX compiler.
 
-If the fourth argument of an element is set in pkg-alist, and it
-is not a member of the LaTeX compiler of the document, the packages
-is removed.  See also `org-latex-compiler'.
+PKG-ALIST is a list of packages, as in `org-latex-packages-alist'
+and `org-latex-default-packages-alist'.  If the fourth argument
+of a package is neither nil nor a member of the LaTeX compiler
+associated to the document, the package is removed.
 
-Return modified pkg-alist."
+Return new list of packages."
   (let ((compiler (or (plist-get info :latex-compiler) "")))
-    (if (member-ignore-case compiler org-latex-compilers)
-	(delq nil
-	      (mapcar
-	       (lambda (pkg)
-		 (unless (and
-			  (listp pkg)
-			  (let ((third (nth 3 pkg)))
-			    (and third
-				 (not (member-ignore-case
-				       compiler
-				       (if (listp third) third (list third)))))))
-		   pkg))
-	       pkg-alist))
-      pkg-alist)))
+    (if (not (member-ignore-case compiler org-latex-compilers)) pkg-alist
+      (cl-remove-if-not
+       (lambda (package)
+	 (pcase package
+	   (`(,_ ,_ ,_ nil) t)
+	   (`(,_ ,_ ,_ ,compilers) (member-ignore-case compiler compilers))
+	   (_ t)))
+       pkg-alist))))
 
 (defun org-latex--find-verb-separator (s)
   "Return a character not used in string S.
@@ -2892,7 +2887,7 @@ contextual information."
 	   (listings (plist-get info :latex-listings)))
       (cond
        ;; Case 1.  No source fontification.
-       ((not listings)
+       ((or (not lang) (not listings))
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
 	       (float-env
 		(cond ((string= "multicolumn" float)
