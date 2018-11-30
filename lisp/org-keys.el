@@ -100,6 +100,7 @@
 (declare-function org-goto-calendar "org" (&optional arg))
 (declare-function org-inc-effort "org" ())
 (declare-function org-increase-number-at-point "org" (&optional inc))
+(declare-function org-info-find-node "org" (&optional nodename))
 (declare-function org-insert-all-links "org" (arg &optional pre post))
 (declare-function org-insert-drawer "org" (&optional arg drawer))
 (declare-function org-insert-heading-respect-content "org" (&optional invisible-ok))
