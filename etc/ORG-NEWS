@@ -42,6 +42,9 @@ See [[git:3367ac9457]] for details.
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
+*** Allow LaTeX attributes and captions for "table.el" tables
+Supported LaTeX attributes are ~:float~, ~:center~, ~:font~ and
+~:caption~.
 *** Attach buffer contents to headline
 With =<b>= key from attachment dispatcher (=<C-c C-a>=), it is now
 possible to write the contents of a buffer to a file in the headline
