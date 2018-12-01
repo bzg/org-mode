@@ -179,7 +179,7 @@
     ("et" . "estonian")
     ("eu" . "basque")
     ("fi" . "finnish")
-    ("fr" . "frenchb")
+    ("fr" . "french")
     ("fr-ca" . "canadien")
     ("gl" . "galician")
     ("hr" . "croatian")

@@ -64,6 +64,7 @@
 (defvar org-outline-regexp)
 (defvar org-property-re)
 (defvar org-startup-options)
+(defvar org-tag-re)
 (defvar org-time-stamp-formats)
 (defvar org-todo-keywords-1)
 (defvar org-todo-line-regexp)
