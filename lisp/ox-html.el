@@ -2607,7 +2607,10 @@ holding contextual information."
 	     (and (org-export-last-sibling-p headline info)
 		  (format "</%s>\n" html-type))))
 	;; Standard headline.  Export it as a section.
-        (let ((extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
+        (let ((extra-class
+	       (org-element-property :HTML_CONTAINER_CLASS headline))
+	      (headline-class
+	       (org-element-property :HTML_HEADLINE_CLASS headline))
               (first-content (car (org-element-contents headline))))
           (format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
                   (org-html--container headline info)
@@ -2616,9 +2619,11 @@ holding contextual information."
                   (concat (format "outline-%d" level)
                           (and extra-class " ")
                           extra-class)
-                  (format "\n<h%d id=\"%s\">%s</h%d>\n"
+                  (format "\n<h%d id=\"%s\"%s>%s</h%d>\n"
                           level
                           id
+			  (if (not headline-class) ""
+			    (format " class=\"%s\"" headline-class))
                           (concat
                            (and numberedp
                                 (format

@@ -42,6 +42,9 @@ See [[git:3367ac9457]] for details.
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
+*** New property =HTML_HEADLINE_CLASS= in HTML export
+The new property =HTML_HEADLINE_CLASS= assigns a class attribute to
+a headline.
 *** Allow LaTeX attributes and captions for "table.el" tables
 Supported LaTeX attributes are ~:float~, ~:center~, ~:font~ and
 ~:caption~.

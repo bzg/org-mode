@@ -12813,10 +12813,12 @@ around them.  Both of these approaches can avoid referring to an
 external file.
 
 #+cindex: @samp{HTML_CONTAINER_CLASS}, property
+#+cindex: @samp{HTML_HEADLINE_CLASS}, property
 In order to add styles to a sub-tree, use the =HTML_CONTAINER_CLASS=
 property to assign a class to the tree.  In order to specify CSS
 styles for a particular headline, you can use the ID specified in
-a =CUSTOM_ID= property.
+a =CUSTOM_ID= property.  You can also assign a specific class to
+a headline with the =HTML_HEADLINE_CLASS= property.
 
 Never change the ~org-html-style-default~ constant.  Instead use other
 simpler ways of customizing as described above.
