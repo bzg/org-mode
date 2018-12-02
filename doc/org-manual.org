@@ -11247,7 +11247,7 @@ global variables, include:
      Language to use for translating certain strings
      (~org-export-default-language~).  With =#+LANGUAGE: fr=, for
      example, Org translates =Table of contents= to the French =Table
-     des matières=.
+     des matières=[fn:119].
 
 - =SELECT_TAGS= ::
 
@@ -11526,7 +11526,7 @@ keyword:
 #+cindex: excluding entries from table of contents
 #+cindex: table of contents, exclude entries
 Org includes both numbered and unnumbered headlines in the table of
-contents[fn:119].  If you need to exclude an unnumbered headline,
+contents[fn:120].  If you need to exclude an unnumbered headline,
 along with all its children, set the =UNNUMBERED= property to =notoc=
 value.
 
@@ -11629,7 +11629,7 @@ be omitted to use the obvious defaults.
 | =#+INCLUDE: "~/.emacs" :lines "10-"=  | Include lines from 10 to EOF       |
 
 Inclusions may specify a file-link to extract an object matched by
-~org-link-search~[fn:120] (see [[*Search Options in File Links]]).  The
+~org-link-search~[fn:121] (see [[*Search Options in File Links]]).  The
 ranges for =:lines= keyword are relative to the requested element.
 Therefore,
 
@@ -11670,7 +11670,7 @@ following syntax:
 : #+MACRO: name   replacement text; $1, $2 are arguments
 
 #+texinfo: @noindent
-which can be referenced using ={{{name(arg1, arg2)}}}=[fn:121].  For
+which can be referenced using ={{{name(arg1, arg2)}}}=[fn:122].  For
 example
 
 #+begin_example
@@ -11789,7 +11789,7 @@ are not exported.
 Finally, a =COMMENT= keyword at the beginning of an entry, but after
 any other keyword or priority cookie, comments out the entire subtree.
 In this case, the subtree is not exported and no code block within it
-is executed either[fn:122].  The command below helps changing the
+is executed either[fn:123].  The command below helps changing the
 comment status of a headline.
 
 - {{{kbd(C-c ;)}}} (~org-toggle-comment~) ::
@@ -12060,7 +12060,7 @@ should in principle be exportable as a Beamer presentation.
 
 - Org exports a Beamer frame's objects as block environments.  Org can
   enforce wrapping in special block types when =BEAMER_ENV= property
-  is set[fn:123].  For valid values see
+  is set[fn:124].  For valid values see
   ~org-beamer-environments-default~.  To add more values, see
   ~org-beamer-environments-extra~.
   #+vindex: org-beamer-environments-default
@@ -12635,7 +12635,7 @@ as-is.
 #+vindex: org-html-mathjax-options~
 LaTeX math snippets (see [[*LaTeX fragments]]) can be displayed in two
 different ways on HTML pages.  The default is to use the [[http://www.mathjax.org][MathJax]],
-which should work out of the box with Org[fn:124][fn:125].  Some MathJax
+which should work out of the box with Org[fn:125][fn:126].  Some MathJax
 display options can be configured via ~org-html-mathjax-options~, or
 in the buffer.  For example, with the following settings,
 
@@ -12647,7 +12647,7 @@ in the buffer.  For example, with the following settings,
 #+texinfo: @noindent
 equation labels are displayed on the left margin and equations are
 five em from the left margin.  In addition, it loads the two MathJax
-extensions =cancel.js= and =noErrors.js=[fn:126].
+extensions =cancel.js= and =noErrors.js=[fn:127].
 
 #+vindex: org-html-mathjax-template
 See the docstring of ~org-html-mathjax-options~ for all supported
@@ -12710,7 +12710,7 @@ line.
 #+vindex: org-export-html-todo-kwd-class-prefix
 #+vindex: org-export-html-tag-class-prefix
 You can modify the CSS style definitions for the exported file.  The
-HTML exporter assigns the following special CSS classes[fn:127] to
+HTML exporter assigns the following special CSS classes[fn:128] to
 appropriate parts of the document---your style specifications may
 change these, in addition to any of the standard classes like for
 headlines, tables, etc.
@@ -12949,7 +12949,7 @@ LaTeX export back-end finds the compiler version to use from
 Org file.  See the docstring for the
 ~org-latex-default-packages-alist~ for loading packages with certain
 compilers.  Also see ~org-latex-bibtex-compiler~ to set the
-bibliography compiler[fn:128].
+bibliography compiler[fn:129].
 
 *** LaTeX specific export settings
 :PROPERTIES:
@@ -12972,6 +12972,22 @@ general options (see [[*Export Settings]]).
      See ~org-latex-title-command~ for typesetting description into
      the document's front matter.  Use multiple =DESCRIPTION= keywords
      for long descriptions.
+
+- =LANGUAGE= ::
+     #+cindex: @samp{LANGUAGE}, keyword
+     #+vindex: org-latex-package-alist
+     In order to be effective, the =babel= or =polyglossia=
+     packages---according to the LaTeX compiler used---must be loaded
+     with the appropriate language as argument.  This can be
+     accomplished by modifying the =org-latex-package-alist= variable,
+     e.g., with the following snippet:
+
+    #+begin_src emacs-lisp
+    (add-to-list org-latex-package-alist
+		 '("AUTO" "babel" t ("pdflatex")))
+    (add-to-list org-latex-package-alist
+		 '("AUTO" "polyglossia" t ("xelatex" "lualatex")))
+    #+end_src
 
 - =LATEX_CLASS= ::
 
@@ -13559,7 +13575,7 @@ a limit to a level before the absolute limit (see [[*Export Settings]]).
 
 The ODT export back-end handles creating of OpenDocument Text (ODT)
 format.  Documents created by this exporter use the
-{{{cite(OpenDocument-v1.2 specification)}}}[fn:129] and are compatible
+{{{cite(OpenDocument-v1.2 specification)}}}[fn:130] and are compatible
 with LibreOffice 3.4.
 
 *** Pre-requisites for ODT export
@@ -13960,7 +13976,7 @@ document in one of the following ways:
      variables ~org-latex-to-mathml-convert-command~ and
      ~org-latex-to-mathml-jar-file~.
 
-     If you prefer to use MathToWeb[fn:130] as your converter, you can
+     If you prefer to use MathToWeb[fn:131] as your converter, you can
      configure the above variables as shown below.
 
      #+begin_src emacs-lisp
@@ -13970,7 +13986,7 @@ document in one of the following ways:
            "/path/to/mathtoweb.jar")
      #+end_src
 
-     To use LaTeX​ML[fn:131] use
+     To use LaTeX​ML[fn:132] use
 
      #+begin_src emacs-lisp
      (setq org-latex-to-mathml-convert-command
@@ -14290,7 +14306,7 @@ with the =#+ATTR_ODT= line.  For a discussion on default formatting of
 tables, see [[*Tables in ODT export]].
 
 This feature closely mimics the way table templates are defined in the
-OpenDocument-v1.2 specification.[fn:132]
+OpenDocument-v1.2 specification.[fn:133]
 
 #+vindex: org-odt-table-styles
 For quick preview of this feature, install the settings below and export the
@@ -14324,7 +14340,7 @@ templates, define new styles there.
 
 To use this feature proceed as follows:
 
-1. Create a table template[fn:133].
+1. Create a table template[fn:134].
 
    A table template is set of =table-cell= and =paragraph= styles for
    each of the following table cell categories:
@@ -14363,7 +14379,7 @@ To use this feature proceed as follows:
    =</office:automatic-styles>= element of the content template file
    (see [[x-orgodtcontenttemplate-xml][Factory styles]]).
 
-2. Define a table style[fn:134].
+2. Define a table style[fn:135].
 
    #+vindex: org-odt-table-styles
    To define a table style, create an entry for the style in the
@@ -15428,7 +15444,7 @@ If you want to publish the Org file as an =.org= file but with
 ~org-publish-org-to-org~.  This produces =file.org= and put it in the
 publishing directory.  If you want a htmlized version of this file,
 set the parameter ~:htmlized-source~ to ~t~.  It produces
-=file.org.html= in the publishing directory[fn:135].
+=file.org.html= in the publishing directory[fn:136].
 
 Other files like images only need to be copied to the publishing
 destination; for this you can use ~org-publish-attachment~.  For
@@ -16802,13 +16818,13 @@ See [[*Languages]] to enable other languages.
 #+kindex: C-c C-v e
 #+findex: org-babel-execute-src-block
 Org provides many ways to execute code blocks.  {{{kbd(C-c C-c)}}} or
-{{{kbd(C-c C-v e)}}} with the point on a code block[fn:136] calls the
+{{{kbd(C-c C-v e)}}} with the point on a code block[fn:137] calls the
 ~org-babel-execute-src-block~ function, which executes the code in the
 block, collects the results, and inserts them in the buffer.
 
 #+cindex: @samp{CALL}, keyword
 #+vindex: org-babel-inline-result-wrap
-By calling a named code block[fn:137] from an Org mode buffer or
+By calling a named code block[fn:138] from an Org mode buffer or
 a table.  Org can call the named code blocks from the current Org mode
 buffer or from the "Library of Babel" (see [[*Library of Babel]]).
 
@@ -17166,7 +17182,7 @@ default behavior is to automatically determine the result type.
      If =file= is missing, Org generates the base name of the output
      file from the name of the code block, and its extension from the
      =file-ext= header argument.  In that case, both the name and the
-     extension are mandatory[fn:138].
+     extension are mandatory[fn:139].
 
      #+begin_example
      ,#+name: circle
@@ -17615,10 +17631,10 @@ Code blocks in the following languages are supported.
 | Asymptote  | =asymptote=   | Lua           | =lua=        |
 | Awk        | =awk=         | MATLAB        | =matlab=     |
 | C          | =C=           | Mscgen        | =mscgen=     |
-| C++        | =C++=[fn:139] | OCaml         | =ocaml=      |
+| C++        | =C++=[fn:140] | OCaml         | =ocaml=      |
 | Clojure    | =clojure=     | Octave        | =octave=     |
 | CSS        | =css=         | Org mode      | =org=        |
-| D          | =D=[fn:140]   | Oz            | =oz=         |
+| D          | =D=[fn:141]   | Oz            | =oz=         |
 | ditaa      | =ditaa=       | Perl          | =perl=       |
 | Emacs Calc | =calc=        | Plantuml      | =plantuml=   |
 | Emacs Lisp | =emacs-lisp=  | Processing.js | =processing= |
@@ -17747,7 +17763,7 @@ for Python and Emacs Lisp languages.
 #+cindex: syntax, Noweb
 #+cindex: source code, Noweb reference
 
-Org supports named blocks in Noweb[fn:141] style syntax:
+Org supports named blocks in Noweb[fn:142] style syntax:
 
 : <<CODE-BLOCK-ID>>
 
@@ -18247,7 +18263,7 @@ Org Tempo expands snippets to structures defined in
 ~org-structure-template-alist~ and ~org-tempo-keywords-alist~.  For
 example, {{{kbd(< s TAB)}}} creates a code block.  Enable it by
 customizing ~org-modules~ or add ~(require 'org-tempo)~ to your Emacs
-init file[fn:142].
+init file[fn:143].
 
 #+attr_texinfo: :columns 0.1 0.9
 | {{{kbd(a)}}} | =#+BEGIN_EXPORT ascii= ... =#+END_EXPORT= |
@@ -18520,7 +18536,7 @@ changes.
 
      #+vindex: org-startup-indented
      Dynamic virtual indentation is controlled by the variable
-     ~org-startup-indented~[fn:143].
+     ~org-startup-indented~[fn:144].
 
      - =indent= ::
 
@@ -18851,7 +18867,7 @@ uses only one star and indents text to line with the heading:
 #+findex: org-indent-mode
 To turn this mode on, use the minor mode, ~org-indent-mode~.  Text
 lines that are not headlines are prefixed with spaces to vertically
-align with the headline text[fn:144].
+align with the headline text[fn:145].
 
 #+vindex: org-indent-indentation-per-level
 To make more horizontal space, the headlines are shifted by two stars.
@@ -18886,7 +18902,7 @@ headings as shown in examples below.
      #+vindex: org-adapt-indentation
      Org supports this with paragraph filling, line wrapping, and
      structure editing, preserving or adapting the indentation as
-     appropriate[fn:145].
+     appropriate[fn:146].
 
 - /Hiding leading stars/ ::
 
@@ -18919,7 +18935,7 @@ headings as shown in examples below.
 
      #+vindex: org-odd-levels-only
      Using stars for only odd levels, 1, 3, 5, ..., can also clean up
-     the clutter.  This removes two stars from each level[fn:146].
+     the clutter.  This removes two stars from each level[fn:147].
      For Org to properly handle this cleaner structure during edits
      and exports, configure the variable ~org-odd-levels-only~.  To
      set this per-file, use either one of the following lines:
@@ -19290,7 +19306,7 @@ these variables.
 
 #+vindex: org-mobile-directory
 The mobile application needs access to a file directory on
-a server[fn:147] to interact with Emacs.  Pass its location through
+a server[fn:148] to interact with Emacs.  Pass its location through
 the ~org-mobile-directory~ variable.  If you can mount that directory
 locally just set the variable to point to that directory:
 
@@ -19311,7 +19327,7 @@ With a public server, consider encrypting the files.  Org also
 requires OpenSSL installed on the local computer.  To turn on
 encryption, set the same password in the mobile application and in
 Emacs.  Set the password in the variable
-~org-mobile-use-encryption~[fn:148].  Note that even after the mobile
+~org-mobile-use-encryption~[fn:149].  Note that even after the mobile
 application encrypts the file contents, the file name remains visible
 on the file systems of the local computer, the server, and the mobile
 device.
@@ -19327,15 +19343,15 @@ The command ~org-mobile-push~ copies files listed in
 ~org-mobile-files~ into the staging area.  Files include agenda files
 (as listed in ~org-agenda-files~).  Customize ~org-mobile-files~ to
 add other files.  File names are staged with paths relative to
-~org-directory~, so all files should be inside this directory[fn:149].
+~org-directory~, so all files should be inside this directory[fn:150].
 
 Push creates a special Org file =agendas.org= with custom agenda views
-defined by the user[fn:150].
+defined by the user[fn:151].
 
 Finally, Org writes the file =index.org=, containing links to other
 files.  The mobile application reads this file first from the server
 to determine what other files to download for agendas.  For faster
-downloads, it is expected to only read files whose checksums[fn:151]
+downloads, it is expected to only read files whose checksums[fn:152]
 have changed.
 
 *** Pulling from the mobile application
@@ -19352,7 +19368,7 @@ data in an inbox file format, through the following steps:
 
 1.
    #+vindex: org-mobile-inbox-for-pull
-   Org moves all entries found in =mobileorg.org=[fn:152] and appends
+   Org moves all entries found in =mobileorg.org=[fn:153] and appends
    them to the file pointed to by the variable
    ~org-mobile-inbox-for-pull~.  It should reside neither in the
    staging area nor on the server.  Each captured entry and each
@@ -19688,9 +19704,9 @@ of these strategies:
 #+cindex: @LaTeX{}, and Orgtbl mode
 
 To wrap a source table in LaTeX, use the =comment= environment
-provided by =comment.sty=[fn:153].  To activate it, put
+provided by =comment.sty=[fn:154].  To activate it, put
 ~\usepackage{comment}~ in the document header.  Orgtbl mode inserts
-a radio table skeleton[fn:146] with the command {{{kbd(M-x
+a radio table skeleton[fn:147] with the command {{{kbd(M-x
 orgtbl-insert-radio-table)}}}, which prompts for a table name.  For
 example, if =salesfigures= is the name, the template inserts:
 
@@ -19709,7 +19725,7 @@ The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
 the table at the target (receive) location named =salesfigures=.  Now
 the table is ready for data entry.  It can even use spreadsheet
-features[fn:154]:
+features[fn:155]:
 
 #+begin_example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -19923,7 +19939,7 @@ Dynamic blocks, like any other block, can be narrowed with
 #+vindex: org-agenda-skip-function
 #+vindex: org-agenda-skip-function-global
 Org provides a special hook to further limit items in agenda views:
-~agenda~, ~agenda*~[fn:155], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
+~agenda~, ~agenda*~[fn:156], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
 ~tags-tree~.  Specify a custom function that tests inclusion of every
 matched item in the view.  This function can also skip as much as is
 needed.
@@ -19966,7 +19982,7 @@ meaningful string suitable for the agenda view.
 #+vindex: org-agenda-skip-function
 Search for entries with a limit set on levels for the custom search.
 This is a general approach to creating custom searches in Org.  To
-include all levels, use =LEVEL>0=[fn:156].  Then to selectively pick
+include all levels, use =LEVEL>0=[fn:157].  Then to selectively pick
 the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
@@ -21337,74 +21353,78 @@ within a buffer with the =STARTUP= options =inlineimages= and
 [fn:118] The variable ~org-export-date-timestamp-format~ defines how
 this timestamp are exported.
 
-[fn:119] At the moment, some export back-ends do not obey this
+[fn:119] For export to LaTeX format---or LaTeX-related formats such as
+Beamer---, the =org-latex-package-alist= variable needs further
+configuration. See [[LaTeX specific export settings]].
+
+[fn:120] At the moment, some export back-ends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
 headline from the table of contents.
 
-[fn:120] Note that ~org-link-search-must-match-exact-headline~ is
+[fn:121] Note that ~org-link-search-must-match-exact-headline~ is
 locally bound to non-~nil~.  Therefore, ~org-link-search~ only matches
 headlines and named elements.
 
-[fn:121] Since commas separate the arguments, commas within arguments
+[fn:122] Since commas separate the arguments, commas within arguments
 have to be escaped with the backslash character.  So only those
 backslash characters before a comma need escaping with another
 backslash character.
 
-[fn:122] For a less drastic behavior, consider using a select tag (see
+[fn:123] For a less drastic behavior, consider using a select tag (see
 [[*Export Settings]]) instead.
 
-[fn:123] If =BEAMER_ENV= is set, Org export adds =B_environment= tag
+[fn:124] If =BEAMER_ENV= is set, Org export adds =B_environment= tag
 to make it visible.  The tag serves as a visual aid and has no
 semantic relevance.
 
-[fn:124] By default Org loads MathJax from [[https://cdnjs.com][cdnjs.com]] as recommended by
+[fn:125] By default Org loads MathJax from [[https://cdnjs.com][cdnjs.com]] as recommended by
 [[http://www.mathjax.org][MathJax]].
 
-[fn:125] Please note that exported formulas are part of an HTML
+[fn:126] Please note that exported formulas are part of an HTML
 document, and that signs such as =<=, =>=, or =&= have special
 meanings.  See [[http://docs.mathjax.org/en/latest/tex.html#tex-and-latex-in-html-documents][MathJax TeX and LaTeX support]].
 
-[fn:126] See [[http://docs.mathjax.org/en/latest/tex.html#tex-extensions][TeX and LaTeX extensions]] in the [[http://docs.mathjax.org][MathJax manual]] to learn
+[fn:127] See [[http://docs.mathjax.org/en/latest/tex.html#tex-extensions][TeX and LaTeX extensions]] in the [[http://docs.mathjax.org][MathJax manual]] to learn
 about extensions.
 
-[fn:127] If the classes on TODO keywords and tags lead to conflicts,
+[fn:128] If the classes on TODO keywords and tags lead to conflicts,
 use the variables ~org-html-todo-kwd-class-prefix~ and
 ~org-html-tag-class-prefix~ to make them unique.
 
-[fn:128] This does not allow setting different bibliography compilers
+[fn:129] This does not allow setting different bibliography compilers
 for different files.  However, "smart" LaTeX compilation systems, such
 as latexmk, can select the correct bibliography compiler.
 
-[fn:129] See [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][Open Document Format for Office Applications
+[fn:130] See [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][Open Document Format for Office Applications
 (OpenDocument) Version 1.2]].
 
-[fn:130] See [[http://www.mathtoweb.com/cgi-bin/mathtoweb_home.pl][MathToWeb]].
+[fn:131] See [[http://www.mathtoweb.com/cgi-bin/mathtoweb_home.pl][MathToWeb]].
 
-[fn:131] See [[http://dlmf.nist.gov/LaTeXML/]].
+[fn:132] See [[http://dlmf.nist.gov/LaTeXML/]].
 
-[fn:132] [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][OpenDocument-v1.2 Specification]]
+[fn:133] [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][OpenDocument-v1.2 Specification]]
 
-[fn:133] See the =<table:table-template>= element of the
+[fn:134] See the =<table:table-template>= element of the
 OpenDocument-v1.2 specification.
 
-[fn:134] See the attributes =table:template-name=,
+[fn:135] See the attributes =table:template-name=,
 =table:use-first-row-styles=, =table:use-last-row-styles=,
 =table:use-first-column-styles=, =table:use-last-column-styles=,
 =table:use-banding-rows-styles=, and =table:use-banding-column-styles=
 of the =<table:table>= element in the OpenDocument-v1.2 specification.
 
-[fn:135] If the publishing directory is the same as the source
+[fn:136] If the publishing directory is the same as the source
 directory, =file.org= is exported as =file.org.org=, so you probably
 do not want to do this.
 
-[fn:136] The option ~org-babel-no-eval-on-ctrl-c-ctrl-c~ can be used
+[fn:137] The option ~org-babel-no-eval-on-ctrl-c-ctrl-c~ can be used
 to remove code evaluation from the {{{kbd(C-c C-c)}}} key binding.
 
-[fn:137] Actually, the constructs =call_<name>()= and =src_<lang>{}=
+[fn:138] Actually, the constructs =call_<name>()= and =src_<lang>{}=
 are not evaluated when they appear in a keyword (see [[*Summary of
 In-Buffer Settings]]).
 
-[fn:138] Due to the way this header argument is implemented, it
+[fn:139] Due to the way this header argument is implemented, it
 implies ":results file".  Therefore if it is set for multiple blocks
 at once (by a subtree or buffer property for example), all blocks are
 forced to produce file results.  This is seldom desired behavior, so
@@ -21412,59 +21432,59 @@ it is recommended to set this header only on a per-block basis.  It is
 possible that this aspect of the implementation might change in the
 future.
 
-[fn:139] C++ language is handled in =ob-C.el=.  Even though the
+[fn:140] C++ language is handled in =ob-C.el=.  Even though the
 identifier for such source blocks is =C++=, you activate it by loading
 the C language.
 
-[fn:140] D language is handled in =ob-C.el=.  Even though the
+[fn:141] D language is handled in =ob-C.el=.  Even though the
 identifier for such source blocks is =D=, you activate it by loading
 the C language.
 
-[fn:141] For Noweb literate programming details, see
+[fn:142] For Noweb literate programming details, see
 http://www.cs.tufts.edu/~nr/noweb/.
 
-[fn:142] For more information, please refer to the commentary section
+[fn:143] For more information, please refer to the commentary section
 in =org-tempo.el=.
 
-[fn:143] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
+[fn:144] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
 property, such that ~visual-line-mode~ (or purely setting ~word-wrap~)
 wraps long lines (including headlines) correctly indented.
 
-[fn:144] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
+[fn:145] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
 for indenting and wrapping long lines of headlines or text.  This
 minor mode handles ~visual-line-mode~ and directly applied settings
 through ~word-wrap~.
 
-[fn:145] Also see the variable ~org-adapt-indentation~.
+[fn:146] Also see the variable ~org-adapt-indentation~.
 
-[fn:146] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 4 stars, and so
+[fn:147] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 4 stars, and so
 on.
 
-[fn:147] For a server to host files, consider using a WebDAV server,
+[fn:148] For a server to host files, consider using a WebDAV server,
 such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
-[fn:148] If Emacs is configured for safe storing of passwords, then
+[fn:149] If Emacs is configured for safe storing of passwords, then
 configure the variable ~org-mobile-encryption-password~; please read
 the docstring of that variable.
 
-[fn:149] Symbolic links in ~org-directory~ need to have the same name
+[fn:150] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
 
-[fn:150] While creating the agendas, Org mode forces ID properties on
+[fn:151] While creating the agendas, Org mode forces ID properties on
 all referenced entries, so that these entries can be uniquely
 identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
 on outline paths, assuming they are unique.
 
-[fn:151] Checksums are stored automatically in the file
+[fn:152] Checksums are stored automatically in the file
 =checksums.dat=.
 
-[fn:152] The file will be empty after this operation.
+[fn:153] The file will be empty after this operation.
 
-[fn:153] https://www.ctan.org/pkg/comment
+[fn:154] https://www.ctan.org/pkg/comment
 
-[fn:154] If the =TBLFM= keyword contains an odd number of dollar
+[fn:155] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
 shown in the example you can fix this by adding an extra line inside
 the =comment= environment that is used to balance the dollar
@@ -21472,9 +21492,9 @@ expressions.  If you are using AUCTeX with the font-latex library,
 a much better solution is to add the =comment= environment to the
 variable ~LaTeX-verbatim-environments~.
 
-[fn:155] The ~agenda*~ view is the same as ~agenda~ except that it
+[fn:156] The ~agenda*~ view is the same as ~agenda~ except that it
 only considers /appointments/, i.e., scheduled and deadline items that
 have a time specification =[h]h:mm= in their time-stamps.
 
-[fn:156] Note that, for ~org-odd-levels-only~, a level number
+[fn:157] Note that, for ~org-odd-levels-only~, a level number
 corresponds to order in the hierarchy, not to the number of stars.
