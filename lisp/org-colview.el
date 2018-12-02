@@ -247,7 +247,7 @@ display, as a string."
 	 (concat (make-string (1- (org-current-level))
 			      (if org-hide-leading-stars ?\s ?*))
 		 "* "
-		 (org-columns-compact-links value)))
+		 (org-link-display-format value)))
 	(`(,_ ,_ ,_ ,_ nil) value)
 	;; If PRINTF is set, assume we are displaying a number and
 	;; obey to the format string.
@@ -500,14 +500,6 @@ for the duration of the command.")
       (flyspell-mode 1))
     (when (local-variable-p 'org-colview-initial-truncate-line-value)
       (setq truncate-lines org-colview-initial-truncate-line-value))))
-
-(defun org-columns-compact-links (s)
-  "Replace [[link][desc]] with [desc] or [link]."
-  (while (string-match org-bracket-link-regexp s)
-    (setq s (replace-match
-	     (concat "[" (match-string (if (match-end 3) 3 1) s) "]")
-	     t t s)))
-  s)
 
 (defun org-columns-show-value ()
   "Show the full value of the property."
