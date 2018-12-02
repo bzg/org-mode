@@ -522,8 +522,7 @@ cannot be translated."
   (cond ((functionp org-clock-heading-function)
 	 (funcall org-clock-heading-function))
 	((org-before-first-heading-p) "???")
-	(t (replace-regexp-in-string
-	    org-bracket-link-analytic-regexp "\\5"
+	(t (org-link-display-format
 	    (org-no-properties (org-get-heading t t t t))))))
 
 (defun org-clock-menu ()
