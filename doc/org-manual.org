@@ -14306,7 +14306,7 @@ with the =#+ATTR_ODT= line.  For a discussion on default formatting of
 tables, see [[*Tables in ODT export]].
 
 This feature closely mimics the way table templates are defined in the
-OpenDocument-v1.2 specification.[fn:133]
+OpenDocument-v1.2 specification[fn:133].
 
 #+vindex: org-odt-table-styles
 For quick preview of this feature, install the settings below and export the
