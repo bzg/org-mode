@@ -13986,7 +13986,8 @@ document in one of the following ways:
            "/path/to/mathtoweb.jar")
      #+end_src
 
-     To use LaTeX​ML[fn:132] use
+     #+texinfo: @noindent
+     or, to use LaTeX​ML[fn:132] instead,
 
      #+begin_src emacs-lisp
      (setq org-latex-to-mathml-convert-command
