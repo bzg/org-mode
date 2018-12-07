@@ -206,7 +206,19 @@
 	(goto-char (point-max))
 	(insert "Capture text")
 	(org-capture-finalize))
-      (buffer-string)))))
+      (buffer-string))))
+  ;; Correctly save position of inserted entry.
+  (should
+   (equal
+    "** H"
+    (org-test-with-temp-text-in-file "* A"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Test" entry (file+headline ,file "A") "** H\nFoo"
+		 :immediate-finish t))))
+	(org-capture nil "t")
+	(org-capture '(16))
+	(buffer-substring (point) (line-end-position)))))))
 
 (ert-deftest test-org-capture/item ()
   "Test `item' type in capture template."

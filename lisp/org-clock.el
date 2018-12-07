@@ -917,39 +917,42 @@ If necessary, clock-out of the currently active clock."
 (defvar org-clock-resolving-clocks nil)
 (defvar org-clock-resolving-clocks-due-to-idleness nil)
 
-(defun org-clock-resolve-clock (clock resolve-to clock-out-time
-				      &optional close-p restart-p fail-quietly)
-  "Resolve `CLOCK' given the time `RESOLVE-TO', and the present.
-`CLOCK' is a cons cell of the form (MARKER START-TIME)."
-  (let ((org-clock-resolving-clocks t))
-    (cond
-     ((null resolve-to)
-      (org-clock-clock-cancel clock)
-      (if (and restart-p (not org-clock-clocking-in))
-	  (org-clock-clock-in clock)))
-
-     ((eq resolve-to 'now)
-      (if restart-p
-	  (error "RESTART-P is not valid here"))
-      (if (or close-p org-clock-clocking-in)
-	  (org-clock-clock-out clock fail-quietly)
-	(unless (org-is-active-clock clock)
-	  (org-clock-clock-in clock t))))
-
-     ((not (time-less-p resolve-to (current-time)))
-      (error "RESOLVE-TO must refer to a time in the past"))
-
-     (t
-      (if restart-p
-	  (error "RESTART-P is not valid here"))
-      (org-clock-clock-out clock fail-quietly (or clock-out-time
-						  resolve-to))
-      (unless org-clock-clocking-in
-	(if close-p
-	    (setq org-clock-leftover-time (and (null clock-out-time)
-					       resolve-to))
-	  (org-clock-clock-in clock nil (and clock-out-time
-					     resolve-to))))))))
+(defun org-clock-resolve-clock
+    (clock resolve-to clock-out-time close restart fail-quietly)
+  "Resolve CLOCK given the time RESOLVE-TO, and the present.
+CLOCK is a cons cell of the form (MARKER START-TIME)."
+  (let ((org-clock-resolving-clocks t)
+	;; If the clocked entry contained only a clock and possibly
+	;; the associated drawer, and we either cancel it or clock it
+	;; out, `org-clock-out-remove-zero-time-clocks' may clear all
+	;; contents, and leave point on the /next/ headline.  We store
+	;; the current entry location to be able to get back here when
+	;; we need to clock in again the previously clocked task.
+	(heading (org-with-point-at (car clock) (org-back-to-heading t))))
+    (pcase resolve-to
+      (`nil
+       (org-clock-clock-cancel clock)
+       (when (and restart (not org-clock-clocking-in))
+	 (org-with-point-at heading (org-clock-in))))
+      (`now
+       (cond
+	(restart (error "RESTART is not valid here"))
+	((or close org-clock-clocking-in)
+	 (org-clock-clock-out clock fail-quietly))
+	((org-is-active-clock clock) nil)
+	(t (org-clock-clock-in clock t))))
+      ((pred (time-less-p (current-time)))
+       (error "RESOLVE-TO must refer to a time in the past"))
+      (_
+       (when restart (error "RESTART is not valid here"))
+       (org-clock-clock-out clock fail-quietly (or clock-out-time resolve-to))
+       (cond
+	(org-clock-clocking-in nil)
+	(close
+	 (setq org-clock-leftover-time (and (null clock-out-time) resolve-to)))
+	(t
+	 (org-with-point-at heading
+	   (org-clock-in nil (and clock-out-time resolve-to)))))))))
 
 (defun org-clock-jump-to-current-clock (&optional effective-clock)
   "When an Org clock is running, jump to it."
