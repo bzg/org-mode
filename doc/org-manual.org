@@ -7390,8 +7390,9 @@ here:
 - =%i= ::
 
      Initial content, the region when capture is called while the
-     region is active.  The entire text will be indented like ~%i~
-     itself.
+     region is active.  If there is text before =%i= on the same line,
+     such as indentation, and =%i= is not inside a =%(exp)= form, that
+     prefix is added before every line in the inserted text.
 
 - =%a= ::
 
