@@ -1670,11 +1670,9 @@ The template may still contain \"%?\" for cursor positioning."
 			     ;; Outside embedded Lisp, repeat leading
 			     ;; characters before initial place holder
 			     ;; every line.
-			     (let ((lead (buffer-substring-no-properties
-					  (line-beginning-position) (point))))
-			       (replace-regexp-in-string "\n\\(.\\)"
-							 (concat lead "\\1")
-							 v-i nil nil 1))))
+			     (let ((lead (concat "\n"
+						 (org-current-line-string t))))
+			       (replace-regexp-in-string "\n" lead v-i nil t))))
 			  (?a v-a)
 			  (?A v-A)
 			  (?c v-c)

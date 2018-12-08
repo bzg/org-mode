@@ -74,11 +74,16 @@
 	    (org-capture-fill-template
 	     "%i" "%(concat \"no \" \"evaluation\")"))))
   ;; When %i contents span over multiple line, repeat initial leading
-  ;; characters over each line.
+  ;; characters over each line.  Also try possibly problematic
+  ;; prefixes such as "\\".
   (should
    (equal "> line 1\n> line 2\n"
 	  (let ((org-store-link-plist nil))
 	    (org-capture-fill-template "> %i" "line 1\nline 2"))))
+  (should
+   (equal "\\ line 1\n\\ line 2\n"
+	  (let ((org-store-link-plist nil))
+	    (org-capture-fill-template "\\ %i" "line 1\nline 2"))))
   ;; Test %-escaping with \ character.
   (should
    (equal "%i\n"
