@@ -7368,7 +7368,11 @@ here:
 - =%(EXP)= ::
 
      Evaluate Elisp expression {{{var(EXP)}}} and replace it with the
-     result.  The {{{var(EXP)}}} form must return a string.
+     result.  The {{{var(EXP)}}} form must return a string.  Only
+     placeholders pre-existing within the template, or introduced with
+     =%[file]=, are expanded this way.  Since this happens after
+     expanding non-interactive "%-escapes", those can be used to fill
+     the expression.
 
 - =%<FORMAT>= ::
 
