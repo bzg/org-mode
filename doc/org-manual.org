@@ -7260,15 +7260,15 @@ Now lets look at the elements of a template definition.  Each entry in
           top level.  Check out the ~:time-prompt~ and ~:tree-type~
           properties below for additional options.
 
-     - ~(file+function "filename" function-finding-location)~ ::
+     - =(file+function "filename" function-finding-location)= ::
 
           A function to find the right location in the file.
 
-     - ~(clock)~ ::
+     - =(clock)= ::
 
           File to the entry that is currently being clocked.
 
-     - ~(function function-finding-location)~ ::
+     - =(function function-finding-location)= ::
 
           Most general way: write your own function which both visits the
           file and moves point to the right location.
@@ -7361,120 +7361,120 @@ In the template itself, special "%-escapes"[fn:83] allow dynamic
 insertion of content.  The templates are expanded in the order given
 here:
 
-- ~%[FILE]~ ::
+- =%[FILE]= ::
 
      Insert the contents of the file given by {{{var(FILE)}}}.
 
-- ~%(SEXP)~ ::
+- =%(EXP)= ::
 
-     Evaluate Elisp SEXP and replace with the result.  The
-     {{{var(SEXP)}}} must return a string.
+     Evaluate Elisp expression {{{var(EXP)}}} and replace it with the
+     result.  The {{{var(EXP)}}} form must return a string.
 
-- ~%<FORMAT>~ ::
+- =%<FORMAT>= ::
 
      The result of format-time-string on the {{{var(FORMAT)}}}
      specification.
 
-- ~%t~ ::
+- =%t= ::
 
      Timestamp, date only.
 
-- ~%T~ ::
+- =%T= ::
 
      Timestamp, with date and time.
 
-- ~%u~, ~%U~ ::
+- =%u=, =%U= ::
 
-     Like ~%t~, ~%T~ above, but inactive timestamps.
+     Like =%t=, =%T= above, but inactive timestamps.
 
-- ~%i~ ::
+- =%i= ::
 
      Initial content, the region when capture is called while the
      region is active.  The entire text will be indented like ~%i~
      itself.
 
-- ~%a~ ::
+- =%a= ::
 
      Annotation, normally the link created with ~org-store-link~.
 
-- ~%A~ ::
+- =%A= ::
 
-     Like ~%a~, but prompt for the description part.
+     Like =%a=, but prompt for the description part.
 
-- ~%l~ ::
+- =%l= ::
 
-     Like ~%a~, but only insert the literal link.
+     Like =%a=, but only insert the literal link.
 
-- ~%c~ ::
+- =%c= ::
 
      Current kill ring head.
 
-- ~%x~ ::
+- =%x= ::
 
      Content of the X clipboard.
 
-- ~%k~ ::
+- =%k= ::
 
      Title of the currently clocked task.
 
-- ~%K~ ::
+- =%K= ::
 
      Link to the currently clocked task.
 
-- ~%n~ ::
+- =%n= ::
 
      User name (taken from ~user-full-name~).
 
-- ~%f~ ::
+- =%f= ::
 
      File visited by current buffer when org-capture was called.
 
-- ~%F~ ::
+- =%F= ::
 
      Full path of the file or directory visited by current buffer.
 
-- ~%:keyword~ ::
+- =%:keyword= ::
 
      Specific information for certain link types, see below.
 
-- ~%^g~ ::
+- =%^g= ::
 
      Prompt for tags, with completion on tags in target file.
 
-- ~%^G~ ::
+- =%^G= ::
 
      Prompt for tags, with completion all tags in all agenda files.
 
-- ~%^t~ ::
+- =%^t= ::
 
-     Like ~%t~, but prompt for date.  Similarly ~%^T~, ~%^u~, ~%^U~.  You may
-     define a prompt like ~%^{Birthday}t~.
+     Like =%t=, but prompt for date.  Similarly =%^T=, =%^u=, =%^U=.  You may
+     define a prompt like =%^{Birthday}t=.
 
-- ~%^C~ ::
+- =%^C= ::
 
      Interactive selection of which kill or clip to use.
 
-- ~%^L~ ::
+- =%^L= ::
 
-     Like ~%^C~, but insert as link.
+     Like =%^C=, but insert as link.
 
-- ~%^{PROP}p~ ::
+- =%^{PROP}p= ::
 
-     Prompt the user for a value for property PROP.
+     Prompt the user for a value for property {{{var(PROP)}}}.
 
-- ~%^{PROMPT}~ ::
+- =%^{PROMPT}= ::
 
      Prompt the user for a string and replace this sequence with it.
      You may specify a default value and a completion table with
-     ~%^{prompt|default|completion2|completion3...}~.  The arrow keys
+     =%^{prompt|default|completion2|completion3...}=.  The arrow keys
      access a prompt-specific history.
 
-- ~%\n~ ::
+- =%\N= ::
 
-     Insert the text entered at the Nth ~%^{PROMPT}~, where N is
-     a number, starting from 1.
+     Insert the text entered at the {{{var(N)}}}th =%^{PROMPT}=, where
+     {{{var(N)}}} is a number, starting from 1.
 
-- ~%?~ ::
+- =%?= ::
 
      After completing the template, position point here.
 
@@ -7484,20 +7484,20 @@ For specific link types, the following keywords are defined[fn:84]:
 #+vindex: org-from-is-user-regexp
 | Link type    | Available keywords                                       |
 |--------------+----------------------------------------------------------|
-| bbdb         | ~%:name~, ~%:company~                                    |
-| irc          | ~%:server~, ~%:port~, ~%:nick~                           |
-| mh, rmail    | ~%:type~, ~%:subject~, ~%:message-id~                    |
-|              | ~%:from~, ~%:fromname~, ~%:fromaddress~                  |
-|              | ~%:to~, ~%:toname~, ~%:toaddress~                        |
-|              | ~%:date~ (message date header field)                     |
-|              | ~%:date-timestamp~ (date as active timestamp)            |
-|              | ~%:date-timestamp-inactive~ (date as inactive timestamp) |
-|              | ~%:fromto~ (either "to NAME" or "from NAME")[fn:85]      |
-| gnus         | ~%:group~, for messages also all email fields            |
-| w3, w3m      | ~%:url~                                                  |
-| info         | ~%:file~, ~%:node~                                       |
-| calendar     | ~%:date~                                                 |
-| org-protocol | ~%:link~, ~%:description~, ~%:annotation~                |
+| bbdb         | =%:name=, =%:company=                                    |
+| irc          | =%:server=, =%:port=, =%:nick=                           |
+| mh, rmail    | =%:type=, =%:subject=, =%:message-id=                    |
+|              | =%:from=, =%:fromname=, =%:fromaddress=                  |
+|              | =%:to=, =%:toname=, =%:toaddress=                        |
+|              | =%:date= (message date header field)                     |
+|              | =%:date-timestamp= (date as active timestamp)            |
+|              | =%:date-timestamp-inactive= (date as inactive timestamp) |
+|              | =%:fromto= (either "to NAME" or "from NAME")[fn:85]      |
+| gnus         | =%:group=, for messages also all email fields            |
+| w3, w3m      | =%:url=                                                  |
+| info         | =%:file=, =%:node=                                       |
+| calendar     | =%:date=                                                 |
+| org-protocol | =%:link=, =%:description=, =%:annotation=                |
 
 **** Templates in contexts
 :PROPERTIES:
@@ -7541,9 +7541,9 @@ cloud, like emails or source code files belonging to a project.
 Another method is /attachments/, which are files located in
 a directory belonging to an outline node.  Org uses directories named
 by the unique ID of each entry.  These directories are located in the
-~data~ directory which lives in the same directory where your Org file
-lives[fn:86].  If you initialize this directory with =git init=, Org
-automatically commits changes when it sees them.  The attachment
+=data/= directory which lives in the same directory where your Org
+file lives[fn:86].  If you initialize this directory with =git init=,
+Org automatically commits changes when it sees them.  The attachment
 system has been contributed to Org by John Wiegley.
 
 In cases where it seems better to do so, you can attach a directory of
