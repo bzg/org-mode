@@ -287,8 +287,10 @@ be replaced with content and expanded:
               with `org-capture-use-agenda-date' set.
   %T          Time stamp as above, with date and time.
   %u, %U      Like the above, but inactive time stamps.
-  %i          Initial content, copied from the active region.  If %i is
-              indented, the entire inserted text will be indented as well.
+  %i          Initial content, copied from the active region.  If
+              there is text before %i on the same line, such as
+              indentation, and %i is not inside a %(sexp), that prefix
+              will be added before every line in the inserted text.
   %a          Annotation, normally the link created with `org-store-link'.
   %A          Like %a, but prompt for the description part.
   %l          Like %a, but only insert the literal link.
