@@ -266,6 +266,8 @@ properties are:
                      capture was invoked, kill the buffer again after capture
                      is finalized.
 
+ :no-save            Do not save the target file after finishing the capture.
+
 The template defines the text to be inserted.  Often this is an
 Org mode entry (so the first line should start with a star) that
 will be filed as a child of the target headline.  It can also be
@@ -795,8 +797,8 @@ captured item after finalizing."
 	(goto-char (org-capture-get :decrypted))
 	(org-encrypt-entry)))
 
-    ;; Kill the indirect buffer
-    (save-buffer)
+    (unless (org-capture-get :no-save) (save-buffer))
+
     (let ((return-wconf (org-capture-get :return-to-wconf 'local))
 	  (new-buffer (org-capture-get :new-buffer 'local))
 	  (kill-buffer (org-capture-get :kill-buffer 'local))
