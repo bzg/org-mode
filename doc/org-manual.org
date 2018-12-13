@@ -7382,6 +7382,10 @@ Now lets look at the elements of a template definition.  Each entry in
           If the target file was not yet visited when capture was invoked, kill
           the buffer again after capture is completed.
 
+     - ~:no-save~ ::
+
+          Do not save the target file after finishing the capture.
+
 **** Template expansion
 :PROPERTIES:
 :DESCRIPTION: Filling in information about time and context.
