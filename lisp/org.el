@@ -6226,24 +6226,31 @@ Also refresh fontification if needed."
 (defun org-compute-latex-and-related-regexp ()
   "Compute regular expression for LaTeX, entities and sub/superscript.
 Result depends on variable `org-highlight-latex-and-related'."
-  (setq-local
-   org-latex-and-related-regexp
-   (let* ((re-sub
-	   (cond ((not (memq 'script org-highlight-latex-and-related)) nil)
-		 ((eq org-use-sub-superscripts '{})
-		  (list org-match-substring-with-braces-regexp))
-		 (org-use-sub-superscripts (list org-match-substring-regexp))))
-	  (re-latex
-	   (when (memq 'latex org-highlight-latex-and-related)
-	     (let ((matchers (plist-get org-format-latex-options :matchers)))
-	       (delq nil
-		     (mapcar (lambda (x)
-			       (and (member (car x) matchers) (nth 1 x)))
-			     org-latex-regexps)))))
-	  (re-entities
-	   (when (memq 'entities org-highlight-latex-and-related)
-	     (list "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)"))))
-     (mapconcat 'identity (append re-latex re-entities re-sub) "\\|"))))
+  (let ((re-sub
+	 (cond ((not (memq 'script org-highlight-latex-and-related)) nil)
+	       ((eq org-use-sub-superscripts '{})
+		(list org-match-substring-with-braces-regexp))
+	       (org-use-sub-superscripts (list org-match-substring-regexp))))
+	(re-latex
+	 (when (memq 'latex org-highlight-latex-and-related)
+	   (let* ((matchers (plist-get org-format-latex-options :matchers))
+		  (regexps (and (member "begin" matchers)
+				'("\\\\end{[a-zA-Z0-9\\*]+}[ \t]*$"))))
+	     (dolist (matcher matchers)
+	       (pcase (assoc matcher org-latex-regexps)
+		 (`("begin" . ,_) (push "^[ \t]*\\\\begin{[a-zA-Z0-9\\*]+}"
+					regexps))
+		 (`(,_ ,regexp . ,_) (push regexp regexps))
+		 (_ nil)))
+	     (nreverse regexps))))
+	(re-entities
+	 (when (memq 'entities org-highlight-latex-and-related)
+	   (list "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\
+\\($\\|{}\\|[^[:alpha:]]\\)"))))
+    (setq-local org-latex-and-related-regexp
+		(mapconcat #'identity
+			   (append re-latex re-entities re-sub)
+			   "\\|"))))
 
 (defun org-do-latex-and-related (limit)
   "Highlight LaTeX snippets and environments, entities and sub/superscript.
@@ -6253,22 +6260,41 @@ done, nil otherwise."
   (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
       (while (re-search-forward org-latex-and-related-regexp limit t)
-	(unless
-	    (cl-some
-	     (lambda (f)
-	       (memq f '(org-code org-verbatim underline org-special-keyword)))
-	     (save-excursion
-	       (goto-char (1+ (match-beginning 0)))
-	       (face-at-point nil t)))
-	  (let ((offset (if (memq (char-after (1+ (match-beginning 0)))
+	(unless (cl-some
+		 (lambda (f) (memq f '(org-code org-verbatim underline
+					   org-special-keyword)))
+		 (save-excursion
+		   (goto-char (1+ (match-beginning 0)))
+		   (face-at-point nil t)))
+	  (let* ((start (if (memq (char-after (1+ (match-beginning 0)))
 				  '(?_ ?^))
-			    1
-			  0)))
+			    (1+ (match-beginning 0))
+			  (match-beginning 0)))
+		 (end
+		  (let* ((b (match-beginning 0))
+			 (e (match-end 0))
+			 (m (buffer-substring-no-properties b e)))
+		    (cond
+		     ((string-match "\\`[ \t]*\\\\begin{\\([a-zA-Z0-9\\*]+\\)}"
+				    m)
+		      (let ((closing
+			     (format "\\\\end{%s}[ \t]*$"
+				     (regexp-quote (match-string 1 m)))))
+			(or (re-search-forward closing nil t) e)))
+		     ((string-match "\\\\end{\\([a-zA-Z0-9\\*]+\\)}[ \t]*\\'" m)
+		      (let ((opening
+			     (format "^[ \t]*\\\\begin{%s}"
+				     (regexp-quote (match-string 1 m)))))
+			(setq start (or (save-excursion
+					  (re-search-backward opening nil t))
+					b))
+			(line-end-position)))
+		     ((string-match "\\\\[a-zA-Z]+\\*?{" m)
+		      (search-forward "}" nil t))
+		     (t e)))))
 	    (font-lock-prepend-text-property
-	     (+ offset (match-beginning 0)) (match-end 0)
-	     'face 'org-latex-and-related)
-	    (add-text-properties (+ offset (match-beginning 0)) (match-end 0)
-				 '(font-lock-multiline t)))
+	     start end 'face 'org-latex-and-related)
+	    (add-text-properties start end '(font-lock-multiline t)))
 	  (throw 'found t)))
       nil)))
 
