@@ -103,7 +103,7 @@ Otherwise autoload Org functions will mess up the installation.
 #+end_quote
 
 Then, to make sure your Org configuration is taken into account,
-initialize the package system with ~(package-initialize)~ in your
+initialize the package system with =(package-initialize)= in your
 Emacs init file before setting any Org option.  If you want to use
 Org's package repository, check out the [[https://orgmode.org/elpa.html][Org ELPA page]].
 
@@ -2143,7 +2143,7 @@ A formula can contain an optional mode string after a semicolon.  This
 string consists of flags to influence Calc and other modes during
 execution.  By default, Org uses the standard Calc modes (precision
 12, angular units degrees, fraction and symbolic modes off).  The
-display format, however, has been changed to ~(float 8)~ to keep
+display format, however, has been changed to =(float 8)= to keep
 tables compact.  The default settings can be configured using the
 variable ~org-calc-default-modes~.
 
@@ -2451,7 +2451,7 @@ following command:
 
 Org has three predefined Emacs Lisp functions for lookups in tables.
 
-- ~(org-lookup-first VAL S-LIST R-LIST &optional PREDICATE)~ ::
+- =(org-lookup-first VAL S-LIST R-LIST &optional PREDICATE)= ::
 
      #+findex: org-lookup-first
      Searches for the first element {{{var(S)}}} in list
@@ -2468,13 +2468,13 @@ Org has three predefined Emacs Lisp functions for lookups in tables.
      {{{var(S-LIST)}}}.  If {{{var(R-LIST)}}} is ~nil~, the matching
      element {{{var(S)}}} of {{{var(S-LIST)}}} is returned.
 
-- ~(org-lookup-last VAL S-LIST R-LIST &optional PREDICATE)~ ::
+- =(org-lookup-last VAL S-LIST R-LIST &optional PREDICATE)= ::
 
      #+findex: org-lookup-last
      Similar to ~org-lookup-first~ above, but searches for the /last/
      element for which {{{var(PREDICATE)}}} is non-~nil~.
 
-- ~(org-lookup-all VAL S-LIST R-LIST &optional PREDICATE)~ ::
+- =(org-lookup-all VAL S-LIST R-LIST &optional PREDICATE)= ::
 
      #+findex: org-lookup-all
      Similar to ~org-lookup-first~, but searches for /all/ elements
@@ -8477,7 +8477,7 @@ days you want to see by default in the agenda, or to a span name, such
 a ~day~, ~week~, ~month~ or ~year~.  For weekly agendas, the default
 is to start on the previous Monday (see
 ~org-agenda-start-on-weekday~).  You can also set the start date using
-a date shift: ~(setq org-agenda-start-day "+10d")~ starts the agenda
+a date shift: =(setq org-agenda-start-day "+10d")= starts the agenda
 ten days from today in the future.
 
 Remote editing from the agenda buffer means, for example, that you can
@@ -9274,7 +9274,7 @@ locally in your custom agenda views (see [[*Custom Agenda Views]]).
      Limit the number of tagged entries.
 
 When set to a positive integer, each option excludes entries from
-other categories: for example, ~(setq org-agenda-max-effort 100)~
+other categories: for example, =(setq org-agenda-max-effort 100)=
 limits the agenda to 100 minutes of effort and exclude any entry that
 has no effort property.  If you want to include entries with no effort
 property, use a negative value for ~org-agenda-max-effort~.  One
@@ -11298,7 +11298,7 @@ global variables, include:
 
      #+cindex: @samp{SELECT_TAGS}, keyword
      #+vindex: org-export-select-tags
-     The default value is ~("export")~.  When a tree is tagged with
+     The default value is =("export")=.  When a tree is tagged with
      =export= (~org-export-select-tags~), Org selects that tree and
      its sub-trees for export.  Org excludes trees with =noexport=
      tags, see below.  When selectively exporting files with =export=
@@ -11309,7 +11309,7 @@ global variables, include:
 
      #+cindex: @samp{EXCLUDE_TAGS}, keyword
      #+vindex: org-export-exclude-tags
-     The default value is ~("noexport")~.  When a tree is tagged with
+     The default value is =("noexport")=.  When a tree is tagged with
      =noexport= (~org-export-exclude-tags~), Org excludes that tree
      and its sub-trees from export.  Entries tagged with =noexport=
      are unconditionally excluded from the export, even if they have
@@ -15135,7 +15135,7 @@ Other export back-ends included with Org are:
 - =ox-man.el=: Export to a man page.
 
 To activate such back-ends, either customize ~org-export-backends~ or
-load directly with ~(require 'ox-man)~.  On successful load, the
+load directly with =(require 'ox-man)=.  On successful load, the
 back-end adds new keys in the export dispatcher (see [[*The Export
 Dispatcher]]).
 
@@ -18322,7 +18322,7 @@ changing values.
 Org Tempo expands snippets to structures defined in
 ~org-structure-template-alist~ and ~org-tempo-keywords-alist~.  For
 example, {{{kbd(< s TAB)}}} creates a code block.  Enable it by
-customizing ~org-modules~ or add ~(require 'org-tempo)~ to your Emacs
+customizing ~org-modules~ or add =(require 'org-tempo)= to your Emacs
 init file[fn:143].
 
 #+attr_texinfo: :columns 0.1 0.9
@@ -19619,7 +19619,7 @@ file:
 #+texinfo: @noindent
 A review of =org-man.el=:
 
-1. First, ~(require 'org)~ ensures =org.el= is loaded.
+1. First, =(require 'org)= ensures =org.el= is loaded.
 
 2.
 
@@ -20366,8 +20366,8 @@ entry point for this API is:
 
 #+attr_texinfo: :options org-map-entries func &optional match scope &rest skip
 #+begin_defun
-Call {{{(var(FUNC))}}} at each headline selected by {{{var(MATCH)}}}
-in {{{var(SCOPE)}}}.
+Call {{{var(FUNC)}}} at each headline selected by {{{var(MATCH)}}} in
+{{{var(SCOPE)}}}.
 
 {{{var(FUNC)}}} is a function or a Lisp form.  With point positioned
 at the beginning of the headline, call the function without arguments.
@@ -20418,7 +20418,7 @@ of:
 
      All agenda files with any archive files associated with them.
 
-- ~(file1 file2 ...)~ ::
+- list of filenames ::
 
      If this is a list, all files in the list are scanned.
 
@@ -20428,7 +20428,7 @@ skipping facilities.  Valid arguments are:
 
 - ~archive~ ::
 
-     Skip trees with the archive tag.
+     Skip trees with the =ARCHIVE= tag.
 
 - ~comment~ ::
 
@@ -20964,7 +20964,7 @@ modify this GNU manual."
 * Footnotes
 
 [fn:1] If you do not use Font Lock globally turn it on in Org buffer
-with ~(add-hook 'org-mode-hook 'turn-on-font-lock)~.
+with =(add-hook 'org-mode-hook 'turn-on-font-lock)=.
 
 [fn:2] Please consider subscribing to the mailing list in order to
 minimize the work the mailing list moderators have to do.
@@ -21077,7 +21077,7 @@ a timestamp in the headline.
 
 [fn:30] The Org Id library must first be loaded, either through
 ~org-customize~, by enabling ~id~ in ~org-modules~, or by adding
-~(require 'org-id)~ in your Emacs init file.
+=(require 'org-id)= in your Emacs init file.
 
 [fn:31] Note that you do not have to use this command to insert
 a link.  Links in Org are plain text, and you can type or paste them
@@ -21235,7 +21235,7 @@ than 30 stars.  This is a hard-coded limitation of ~lmax~ in
 ~org-clock-sum~.
 
 [fn:72] To resume the clock under the assumption that you have worked
-on this task while outside Emacs, use ~(setq org-clock-persist t)~.
+on this task while outside Emacs, use =(setq org-clock-persist t)=.
 
 [fn:73] To add an effort estimate "on the fly", hook a function doing
 this to ~org-clock-in-prepare-hook~.
