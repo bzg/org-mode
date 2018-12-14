@@ -19997,45 +19997,45 @@ the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
 
-- ~(org-agenda-skip-entry-if 'scheduled)~ ::
+- =(org-agenda-skip-entry-if 'scheduled)= ::
 
      Skip current entry if it has been scheduled.
 
-- ~(org-agenda-skip-entry-if 'notscheduled)~ ::
+- =(org-agenda-skip-entry-if 'notscheduled)= ::
 
      Skip current entry if it has not been scheduled.
 
-- ~(org-agenda-skip-entry-if 'deadline)~ ::
+- =(org-agenda-skip-entry-if 'deadline)= ::
 
      Skip current entry if it has a deadline.
 
-- ~(org-agenda-skip-entry-if 'scheduled 'deadline)~ ::
+- =(org-agenda-skip-entry-if 'scheduled 'deadline)= ::
 
      Skip current entry if it has a deadline, or if it is scheduled.
 
-- ~(org-agenda-skip-entry-if 'todo '("TODO" "WAITING"))~ ::
+- =(org-agenda-skip-entry-if 'todo '("TODO" "WAITING"))= ::
 
      Skip current entry if the TODO keyword is TODO or WAITING.
 
-- ~(org-agenda-skip-entry-if 'todo 'done)~ ::
+- =(org-agenda-skip-entry-if 'todo 'done)= ::
 
      Skip current entry if the TODO keyword marks a DONE state.
 
-- ~(org-agenda-skip-entry-if 'timestamp)~ ::
+- =(org-agenda-skip-entry-if 'timestamp)= ::
 
      Skip current entry if it has any timestamp, may also be deadline
      or scheduled.
 
-- ~(org-agenda-skip-entry-if 'regexp "regular expression")~ ::
+- =(org-agenda-skip-entry-if 'regexp "regular expression")= ::
 
      Skip current entry if the regular expression matches in the
      entry.
 
-- ~(org-agenda-skip-entry-if 'notregexp "regular expression")~ ::
+- =(org-agenda-skip-entry-if 'notregexp "regular expression")= ::
 
      Skip current entry unless the regular expression matches.
 
-- ~(org-agenda-skip-subtree-if 'regexp "regular expression")~ ::
+- =(org-agenda-skip-subtree-if 'regexp "regular expression")= ::
 
      Same as above, but check and skip the entire subtree.
 
