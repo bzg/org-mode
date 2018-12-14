@@ -19832,14 +19832,15 @@ Orgtbl mode and uses a =tabular= environment to typeset the table and
 marks horizontal lines with ~\hline~.  For additional parameters to
 control output, see [[*Translator functions]]:
 
-- ~:splice nil/t~ ::
+- =:splice BOOLEAN= ::
 
-     When non-~nil~, return only table body lines; not wrapped in
-     tabular environment.  Default is ~nil~.
+     When {{{var(BOOLEAN}}} is non-~nil~, return only table body
+     lines; i.e., not wrapped in =tabular= environment.  Default is
+     ~nil~.
 
-- ~:fmt FMT~ ::
+- =:fmt FMT= ::
 
-     Format to warp each field.  It should contain =%s= for the
+     Format string to warp each field.  It should contain =%s= for the
      original field value.  For example, to wrap each field value in
      dollar symbol, you could use =:fmt "$%s$"=.  Format can also wrap
      a property list with column numbers and formats, for example
@@ -19847,15 +19848,14 @@ control output, see [[*Translator functions]]:
      of one argument can be used; the function must return a formatted
      string.
 
-- ~:efmt EFMT~ ::
+- =:efmt EFMT= ::
 
      Format numbers as exponentials.  The spec should have =%s= twice
-     for inserting mantissa and exponent, for example
-     ="%s\\times10^{%s}"=.  This may also be a property list with
-     column numbers and formats, for example =:efmt (2
-     "$%s\\times10^{%s}$" 4 "$%s\\cdot10^{%s}$")=.  After
+     for inserting mantissa and exponent, for example ="%s\\times10^{%s}"=.
+     This may also be a property list with column numbers and formats,
+     for example =:efmt (2 "$%s\\times10^{%s}$" 4 "$%s\\cdot10^{%s}$")=.  After
      {{{var(EFMT)}}} has been applied to a value, {{{var(FMT)}}}---see
-     above---is also be applied.  Functions with two arguments can be
+     above---is also applied.  Functions with two arguments can be
      supplied instead of strings.  By default, no special formatting
      is applied.
 
@@ -20047,45 +20047,45 @@ the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
 
-- ~(org-agenda-skip-entry-if 'scheduled)~ ::
+- =(org-agenda-skip-entry-if 'scheduled)= ::
 
      Skip current entry if it has been scheduled.
 
-- ~(org-agenda-skip-entry-if 'notscheduled)~ ::
+- =(org-agenda-skip-entry-if 'notscheduled)= ::
 
      Skip current entry if it has not been scheduled.
 
-- ~(org-agenda-skip-entry-if 'deadline)~ ::
+- =(org-agenda-skip-entry-if 'deadline)= ::
 
      Skip current entry if it has a deadline.
 
-- ~(org-agenda-skip-entry-if 'scheduled 'deadline)~ ::
+- =(org-agenda-skip-entry-if 'scheduled 'deadline)= ::
 
      Skip current entry if it has a deadline, or if it is scheduled.
 
-- ~(org-agenda-skip-entry-if 'todo '("TODO" "WAITING"))~ ::
+- =(org-agenda-skip-entry-if 'todo '("TODO" "WAITING"))= ::
 
      Skip current entry if the TODO keyword is TODO or WAITING.
 
-- ~(org-agenda-skip-entry-if 'todo 'done)~ ::
+- =(org-agenda-skip-entry-if 'todo 'done)= ::
 
      Skip current entry if the TODO keyword marks a DONE state.
 
-- ~(org-agenda-skip-entry-if 'timestamp)~ ::
+- =(org-agenda-skip-entry-if 'timestamp)= ::
 
      Skip current entry if it has any timestamp, may also be deadline
      or scheduled.
 
-- ~(org-agenda-skip-entry-if 'regexp "regular expression")~ ::
+- =(org-agenda-skip-entry-if 'regexp "regular expression")= ::
 
      Skip current entry if the regular expression matches in the
      entry.
 
-- ~(org-agenda-skip-entry-if 'notregexp "regular expression")~ ::
+- =(org-agenda-skip-entry-if 'notregexp "regular expression")= ::
 
      Skip current entry unless the regular expression matches.
 
-- ~(org-agenda-skip-subtree-if 'regexp "regular expression")~ ::
+- =(org-agenda-skip-subtree-if 'regexp "regular expression")= ::
 
      Same as above, but check and skip the entire subtree.
 
