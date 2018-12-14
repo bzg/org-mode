@@ -19782,14 +19782,15 @@ Orgtbl mode and uses a =tabular= environment to typeset the table and
 marks horizontal lines with ~\hline~.  For additional parameters to
 control output, see [[*Translator functions]]:
 
-- ~:splice nil/t~ ::
+- =:splice BOOLEAN= ::
 
-     When non-~nil~, return only table body lines; not wrapped in
-     tabular environment.  Default is ~nil~.
+     When {{{var(BOOLEAN}}} is non-~nil~, return only table body
+     lines; i.e., not wrapped in =tabular= environment.  Default is
+     ~nil~.
 
-- ~:fmt FMT~ ::
+- =:fmt FMT= ::
 
-     Format to warp each field.  It should contain =%s= for the
+     Format string to warp each field.  It should contain =%s= for the
      original field value.  For example, to wrap each field value in
      dollar symbol, you could use =:fmt "$%s$"=.  Format can also wrap
      a property list with column numbers and formats, for example
@@ -19797,15 +19798,14 @@ control output, see [[*Translator functions]]:
      of one argument can be used; the function must return a formatted
      string.
 
-- ~:efmt EFMT~ ::
+- =:efmt EFMT= ::
 
      Format numbers as exponentials.  The spec should have =%s= twice
-     for inserting mantissa and exponent, for example
-     ="%s\\times10^{%s}"=.  This may also be a property list with
-     column numbers and formats, for example =:efmt (2
-     "$%s\\times10^{%s}$" 4 "$%s\\cdot10^{%s}$")=.  After
+     for inserting mantissa and exponent, for example ="%s\\times10^{%s}"=.
+     This may also be a property list with column numbers and formats,
+     for example =:efmt (2 "$%s\\times10^{%s}$" 4 "$%s\\cdot10^{%s}$")=.  After
      {{{var(EFMT)}}} has been applied to a value, {{{var(FMT)}}}---see
-     above---is also be applied.  Functions with two arguments can be
+     above---is also applied.  Functions with two arguments can be
      supplied instead of strings.  By default, no special formatting
      is applied.
 
