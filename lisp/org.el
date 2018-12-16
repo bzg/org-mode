@@ -6112,38 +6112,34 @@ done, nil otherwise."
   (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
       (while (re-search-forward org-latex-and-related-regexp limit t)
-	(unless (cl-some
-		 (lambda (f) (memq f '(org-code org-verbatim underline
-					   org-special-keyword)))
-		 (save-excursion
-		   (goto-char (1+ (match-beginning 0)))
-		   (face-at-point nil t)))
-	  (let* ((start (if (memq (char-after (1+ (match-beginning 0)))
-				  '(?_ ?^))
-			    (1+ (match-beginning 0))
-			  (match-beginning 0)))
-		 (end
-		  (let* ((b (match-beginning 0))
-			 (e (match-end 0))
-			 (m (buffer-substring-no-properties b e)))
-		    (cond
-		     ((string-match "\\`[ \t]*\\\\begin{\\([a-zA-Z0-9\\*]+\\)}"
-				    m)
-		      (let ((closing
-			     (format "\\\\end{%s}[ \t]*$"
-				     (regexp-quote (match-string 1 m)))))
-			(or (re-search-forward closing nil t) e)))
-		     ((string-match "\\\\end{\\([a-zA-Z0-9\\*]+\\)}[ \t]*\\'" m)
-		      (let ((opening
-			     (format "^[ \t]*\\\\begin{%s}"
-				     (regexp-quote (match-string 1 m)))))
-			(setq start (or (save-excursion
-					  (re-search-backward opening nil t))
-					b))
-			(line-end-position)))
-		     ((string-match "\\\\[a-zA-Z]+\\*?{" m)
-		      (search-forward "}" nil t))
-		     (t e)))))
+	(unless (cl-some (lambda (f) (memq f '(org-code org-verbatim underline
+						   org-special-keyword)))
+			 (save-excursion
+			   (goto-char (1+ (match-beginning 0)))
+			   (face-at-point nil t)))
+	  (let ((start (if (memq (char-after (1+ (match-beginning 0)))
+				 '(?_ ?^))
+			   (1+ (match-beginning 0))
+			 (match-beginning 0)))
+		(end
+		 (let* ((b (match-beginning 0))
+			(e (match-end 0))
+			(m (buffer-substring-no-properties b e)))
+		   (cond
+		    ((string-match "\\`[ \t]*\\\\begin{\\([a-zA-Z0-9\\*]+\\)}" m)
+		     (let ((re (format "\\\\end{%s}[ \t]*$"
+				       (regexp-quote (match-string 1 m)))))
+		       (or (re-search-forward re nil t) e)))
+		    ((string-match "\\\\end{\\([a-zA-Z0-9\\*]+\\)}[ \t]*\\'" m)
+		     (let ((re (format "^[ \t]*\\\\begin{%s}"
+				       (regexp-quote (match-string 1 m)))))
+		       (setq start
+			     (or (save-excursion (re-search-backward re nil t))
+				 b))
+		       (line-end-position)))
+		    ((string-match "\\`\\\\[a-zA-Z]+\\*?{\\'" m)
+		     (search-forward "}" nil t))
+		    (t e)))))
 	    (font-lock-prepend-text-property
 	     start end 'face 'org-latex-and-related)
 	    (add-text-properties start end '(font-lock-multiline t)))
