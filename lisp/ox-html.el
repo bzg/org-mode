@@ -152,6 +152,7 @@
     (:html-metadata-timestamp-format nil nil org-html-metadata-timestamp-format)
     (:html-postamble-format nil nil org-html-postamble-format)
     (:html-preamble-format nil nil org-html-preamble-format)
+    (:html-self-link-headlines nil nil org-html-self-link-headlines)
     (:html-table-align-individual-fields
      nil nil org-html-table-align-individual-fields)
     (:html-table-caption-above nil nil org-html-table-caption-above)
@@ -801,6 +802,13 @@ but without \"name\" attribute."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'boolean)
+
+(defcustom org-html-self-link-headlines nil
+  "When non-nil, the headlines contain a hyperlink to themselves."
+  :group 'org-export-html
+  :package-version '(Org . "9.3")
+  :type 'boolean
+  :safe #'booleanp)
 
 ;;;; Inlinetasks
 
@@ -2592,7 +2600,11 @@ holding contextual information."
                                todo todo-type priority text tags info))
            (contents (or contents ""))
 	   (id (or (org-element-property :CUSTOM_ID headline)
-		   (org-export-get-reference headline info))))
+		   (org-export-get-reference headline info)))
+	   (formatted-text
+	    (if (plist-get info :html-self-link-headlines)
+		(format "<a href=\"#%s\">%s</a>" id full-text)
+	      full-text)))
       (if (org-export-low-level-p headline info)
           ;; This is a deep sub-tree: export it as a list item.
           (let* ((html-type (if numberedp "ol" "ul")))
@@ -2603,7 +2615,7 @@ holding contextual information."
 	     (org-html-format-list-item
 	      contents (if numberedp 'ordered 'unordered)
 	      nil info nil
-	      (concat (org-html--anchor id nil nil info) full-text)) "\n"
+	      (concat (org-html--anchor id nil nil info) formatted-text)) "\n"
 	     (and (org-export-last-sibling-p headline info)
 		  (format "</%s>\n" html-type))))
 	;; Standard headline.  Export it as a section.
@@ -2630,7 +2642,7 @@ holding contextual information."
                                  "<span class=\"section-number-%d\">%s</span> "
                                  level
                                  (mapconcat #'number-to-string numbers ".")))
-                           full-text)
+                           formatted-text)
                           level)
                   ;; When there is no section, pretend there is an
                   ;; empty one to get the correct <div

@@ -12531,6 +12531,21 @@ For larger raw HTML code blocks, use these HTML export code blocks:
 ,#+END_EXPORT
 #+end_example
 
+*** Headlines in HTML export
+:PROPERTIES:
+:DESCRIPTION: Formatting headlines.
+:END:
+#+cindex: headlines, in HTML export
+
+Headlines are exported to =<h1>=, =<h2>=, etc.  Each headline gets the
+=id= attribute from =CUSTOM_ID= property, or a unique generated value,
+see [[*Internal Links]].
+
+#+vindex: org-html-self-link-headlines
+When ~org-html-self-link-headlines~ is set to a non-~nil~ value, the
+text of the headlines is also wrapped in =<a>= tags.  These tags have
+a =href= attribute making the headlines link to themselves.
+
 *** Links in HTML export
 :PROPERTIES:
 :DESCRIPTION: Inserting and formatting links.
@@ -15660,6 +15675,7 @@ Settings]]), however, override everything.
 | ~:html-postamble~                              | ~org-html-postamble~                              |
 | ~:html-preamble-format~                        | ~org-html-preamble-format~                        |
 | ~:html-preamble~                               | ~org-html-preamble~                               |
+| ~:html-self-link-headlines~                    | ~org-html-self-link-headlines~                    |
 | ~:html-table-align-individual-field~           | ~de{org-html-table-align-individual-fields~       |
 | ~:html-table-attributes~                       | ~org-html-table-default-attributes~               |
 | ~:html-table-caption-above~                    | ~org-html-table-caption-above~                    |

@@ -403,6 +403,11 @@ beginning of a headline when using Org speed commands.  Now, if there
 is already a restriction at point, hitting =<= again (or =C-x C-x <=) will
 remove it.
 
+*** Headlines can now link to themselves in HTML export
+
+When enabling ~org-html-self-link-headlines~ the headlines exported to
+HTML contain a hyperlink to themselves.
+
 ** New commands and functions
 
 *** ~org-insert-structure-template~
