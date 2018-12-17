@@ -2768,24 +2768,21 @@ channel."
 DATA is a parse tree or a secondary string.  INFO is a plist
 containing export options.  Modify DATA by side-effect and return it."
   (let ((valid-object-p
-	 ;; Non-nil when OBJ can be added to the latex math block B.
-	 (lambda (obj b)
-	   (pcase (org-element-type obj)
-	     (`entity (org-element-property :latex-math-p obj))
+	 ;; Non-nil when OBJECT can be added to a latex math block.
+	 (lambda (object)
+	   (pcase (org-element-type object)
+	     (`entity (org-element-property :latex-math-p object))
 	     (`latex-fragment
-	      (let ((value (org-element-property :value obj)))
+	      (let ((value (org-element-property :value object)))
 		(or (string-prefix-p "\\(" value)
-		    (string-match-p "\\`\\$[^$]" value))))
-	     ((and type (or `subscript `superscript))
-	      (not (memq type (mapcar #'org-element-type
-				      (org-element-contents b)))))))))
-    (org-element-map data '(entity latex-fragment subscript superscript)
+		    (string-match-p "\\`\\$[^$]" value))))))))
+    (org-element-map data '(entity latex-fragment)
       (lambda (object)
 	;; Skip objects already wrapped.
 	(when (and (not (eq (org-element-type
 			     (org-element-property :parent object))
 			    'latex-math-block))
-		   (funcall valid-object-p object nil))
+		   (funcall valid-object-p object))
 	  (let ((math-block (list 'latex-math-block nil))
 		(next-elements (org-export-get-next-element object info t))
 		(last object))
@@ -2797,20 +2794,17 @@ containing export options.  Modify DATA by side-effect and return it."
 	      ;; MATH-BLOCK swallows consecutive math objects.
 	      (catch 'exit
 		(dolist (next next-elements)
-		  (unless (funcall valid-object-p next math-block)
-		    (throw 'exit nil))
+		  (unless (funcall valid-object-p next) (throw 'exit nil))
 		  (org-element-extract-element next)
 		  (org-element-adopt-elements math-block next)
 		  ;; Eschew the case: \beta$x$ -> \(\betax\).
-		  (unless (memq (org-element-type next)
-				'(subscript superscript))
-		    (org-element-put-property last :post-blank 1))
+		  (org-element-put-property last :post-blank 1)
 		  (setq last next)
 		  (when (> (or (org-element-property :post-blank next) 0) 0)
 		    (throw 'exit nil)))))
 	    (org-element-put-property
 	     math-block :post-blank (org-element-property :post-blank last)))))
-      info nil '(subscript superscript latex-math-block) t)
+      info nil '(latex-math-block) t)
     ;; Return updated DATA.
     data))
 
@@ -3065,56 +3059,18 @@ holding contextual information."
 
 ;;;; Subscript
 
-(defun org-latex--script-size (object info)
-  "Transcode a subscript or superscript object.
-OBJECT is an Org object.  INFO is a plist used as a communication
-channel."
-  (let ((output ""))
-    (org-element-map (org-element-contents object)
-	(cons 'plain-text org-element-all-objects)
-      (lambda (obj)
-	(cl-case (org-element-type obj)
-	  ((entity latex-fragment)
-	   (let ((data (org-trim (org-export-data obj info))))
-	     (string-match
-	      "\\`\\(?:\\\\[([]\\|\\$+\\)?\\(.*?\\)\\(?:\\\\[])]\\|\\$+\\)?\\'"
-	      data)
-	     (setq output
-		   (concat output
-			   (match-string 1 data)
-			   (let ((blank (org-element-property :post-blank obj)))
-			     (and blank (> blank 0) "\\ "))))))
-	  (plain-text
-	   (setq output
-		 (format "%s\\text{%s}" output (org-export-data obj info))))
-	  (otherwise
-	   (setq output
-		 (concat output
-			 (org-export-data obj info)
-			 (let ((blank (org-element-property :post-blank obj)))
-			   (and blank (> blank 0) "\\ ")))))))
-      info nil org-element-recursive-objects)
-    ;; Result.  Do not wrap into curly brackets if OUTPUT is a single
-    ;; character.
-    (concat (if (eq (org-element-type object) 'subscript) "_" "^")
-	    (and (> (length output) 1) "{")
-	    output
-	    (and (> (length output) 1) "}"))))
-
-(defun org-latex-subscript (subscript _contents info)
+(defun org-latex-subscript (_subscript contents _info)
   "Transcode a SUBSCRIPT object from Org to LaTeX.
-CONTENTS is the contents of the object.  INFO is a plist holding
-contextual information."
-  (org-latex--script-size subscript info))
+CONTENTS is the contents of the object."
+  (format "\\textsubscript{%s}" contents))
 
 
 ;;;; Superscript
 
-(defun org-latex-superscript (superscript _contents info)
+(defun org-latex-superscript (_superscript contents _info)
   "Transcode a SUPERSCRIPT object from Org to LaTeX.
-CONTENTS is the contents of the object.  INFO is a plist holding
-contextual information."
-  (org-latex--script-size superscript info))
+CONTENTS is the contents of the object."
+  (format "\\textsuperscript{%s}" contents))
 
 
 ;;;; Table
