@@ -167,7 +167,7 @@
 	(org-capture-kill))
       (buffer-string))))
   (should
-   (equal "- A\n  - B"
+   (equal "- A\n  - B\n"
 	  (org-test-with-temp-text-in-file "- A\n  - B"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -176,7 +176,7 @@
 	      (org-capture-kill))
 	    (buffer-string))))
   (should
-   (equal "| a |\n| b |"
+   (equal "| a |\n| b |\n"
 	  (org-test-with-temp-text-in-file "| a |\n| b |"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -230,7 +230,7 @@
   ;; Insert item in the first plain list found at the target location.
   (should
    (equal
-    "* A\n- list 1\n- X\n\n\n1. list 2"
+    "* A\n- list 1\n- X\n\n\n1. list 2\n"
     (org-test-with-temp-text-in-file "* A\n- list 1\n\n\n1. list 2"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -240,7 +240,7 @@
       (buffer-string))))
   (should
    (equal
-    "Text\n- list 1\n- X\n\n\n1. list 2"
+    "Text\n- list 1\n- X\n\n\n1. list 2\n"
     (org-test-with-temp-text-in-file "Text\n- list 1\n\n\n1. list 2"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -274,7 +274,7 @@
   ;; When `:prepend' is non-nil, insert new item as the first item.
   (should
    (equal
-    "* A\n- X\n- 1\n- 2"
+    "* A\n- X\n- 1\n- 2\n"
     (org-test-with-temp-text-in-file "* A\n- 1\n- 2"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -298,7 +298,7 @@
   ;; When targeting a specific location, one can insert in a sub-list.
   (should
    (equal
-    "* A\n- skip\n  - here\n  - X\n- skip"
+    "* A\n- skip\n  - here\n  - X\n- skip\n"
     (org-test-with-temp-text-in-file "* A\n- skip\n  - here\n- skip"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -309,7 +309,7 @@
   ;; Obey `:empty-lines' when creating a new list.
   (should
    (equal
-    "\n- X\n\n\n* H"
+    "\n- X\n\n\n* H\n"
     (org-test-with-temp-text-in-file "\n* H"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -322,7 +322,7 @@
   ;; only if the value doesn't break the list.
   (should
    (equal
-    "- A\n\n- X\nText"
+    "- A\n\n- X\nText\n"
     (org-test-with-temp-text-in-file "- A\nText"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -332,7 +332,7 @@
       (buffer-string))))
   (should
    (equal
-    "Text\n- X\n\n- A"
+    "Text\n- X\n\n- A\n"
     (org-test-with-temp-text-in-file "Text\n- A"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -343,7 +343,7 @@
       (buffer-string))))
   (should-not
    (equal
-    "- A\n\n\n- X"
+    "- A\n\n\n- X\n"
     (org-test-with-temp-text-in-file "- A"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -354,7 +354,7 @@
   ;; Preserve list type when pre-pending.
   (should
    (equal
-    "1. X\n2. A"
+    "1. X\n2. A\n"
     (org-test-with-temp-text-in-file "1. A"
       (let* ((file (buffer-file-name))
 	     (org-capture-templates
@@ -417,7 +417,8 @@
 | a |
 | x |
 
-| b |"
+| b |
+"
 	  (org-test-with-temp-text-in-file "Text\n\n| a |\n\n| b |"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -483,7 +484,7 @@
 	    (buffer-string))))
   ;; Properly insert row with formulas.
   (should
-   (equal "| 1 |\n| 2 |\n#+TBLFM: "
+   (equal "| 1 |\n| 2 |\n#+TBLFM: \n"
 	  (org-test-with-temp-text-in-file "| 1 |\n#+TBLFM: "
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -504,7 +505,7 @@
   ;; When `:prepend' is non-nil, add it as the first row after the
   ;; header, if there is one, or the first row otherwise.
   (should
-   (equal "| a |\n|---|\n| x |\n| b |"
+   (equal "| a |\n|---|\n| x |\n| b |\n"
 	  (org-test-with-temp-text-in-file "| a |\n|---|\n| b |"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -513,7 +514,7 @@
 	      (org-capture nil "t"))
 	    (buffer-string))))
   (should
-   (equal "| x |\n| a |"
+   (equal "| x |\n| a |\n"
 	  (org-test-with-temp-text-in-file "| a |"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -523,7 +524,7 @@
 	    (buffer-string))))
   ;; When `:table-line-pos' is set and is meaningful, obey it.
   (should
-   (equal "| a |\n|---|\n| b |\n| x |\n|---|\n| c |"
+   (equal "| a |\n|---|\n| b |\n| x |\n|---|\n| c |\n"
 	  (org-test-with-temp-text-in-file "| a |\n|---|\n| b |\n|---|\n| c |"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -532,7 +533,7 @@
 	      (org-capture nil "t"))
 	    (buffer-string))))
   (should
-   (equal "| a |\n|---|\n| x |\n| b |\n|---|\n| c |"
+   (equal "| a |\n|---|\n| x |\n| b |\n|---|\n| c |\n"
 	  (org-test-with-temp-text-in-file "| a |\n|---|\n| b |\n|---|\n| c |"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -595,7 +596,7 @@
 	      (org-capture nil "t")
 	      (buffer-string)))))
   (should
-   (equal "Foo\nSome text."
+   (equal "Foo\nSome text.\n"
 	  (org-test-with-temp-text-in-file "Some text."
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
@@ -607,7 +608,7 @@
   ;; entry, past any meta-data, or at its end, depending on
   ;; `:prepend'.
   (should
-   (equal "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\nFoo\n* B"
+   (equal "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\nFoo\n* B\n"
 	  (org-test-with-temp-text-in-file
 	      "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\n* B"
 	    (let* ((file (buffer-file-name))
@@ -617,7 +618,7 @@
 	      (org-capture nil "t")
 	      (buffer-string)))))
   (should
-   (equal "* A\nSCHEDULED: <2012-03-29 Thu>\nFoo\nSome text.\n* B"
+   (equal "* A\nSCHEDULED: <2012-03-29 Thu>\nFoo\nSome text.\n* B\n"
 	  (org-test-with-temp-text-in-file
 	      "* A\nSCHEDULED: <2012-03-29 Thu>\nSome text.\n* B"
 	    (let* ((file (buffer-file-name))
@@ -629,7 +630,7 @@
   ;; At an exact position, in the middle of a line, make sure to
   ;; insert text on a line on its own.
   (should
-   (equal "A\nX\nB"
+   (equal "A\nX\nB\n"
 	  (org-test-with-temp-text-in-file "AB"
 	    (let* ((file (buffer-file-name))
 		   (org-capture-templates
