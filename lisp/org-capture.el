@@ -662,7 +662,7 @@ of the day at point (if any) or the current HH:MM time."
 	    (org-capture-put :template (org-capture-fill-template))
 	  ((error quit)
 	   (if (get-buffer "*Capture*") (kill-buffer "*Capture*"))
-	   (error "Capture abort: %s" error)))
+	   (error "Capture abort: %s" (error-message-string error))))
 
 	(setq org-capture-clock-keep (org-capture-get :clock-keep))
 	(if (equal goto 0)
@@ -672,26 +672,24 @@ of the day at point (if any) or the current HH:MM time."
 	      (org-capture-place-template
 	       (eq (car (org-capture-get :target)) 'function))
 	    ((error quit)
-	     (if (and (buffer-base-buffer (current-buffer))
-		      (string-prefix-p "CAPTURE-" (buffer-name)))
-		 (kill-buffer (current-buffer)))
+	     (when (and (buffer-base-buffer (current-buffer))
+			(string-prefix-p "CAPTURE-" (buffer-name)))
+	       (kill-buffer (current-buffer)))
 	     (set-window-configuration (org-capture-get :return-to-wconf))
 	     (error "Capture template `%s': %s"
 		    (org-capture-get :key)
-		    (nth 1 error))))
-	  (if (and (derived-mode-p 'org-mode)
-		   (org-capture-get :clock-in))
-	      (condition-case nil
-		  (progn
-		    (if (org-clock-is-active)
-			(org-capture-put :interrupted-clock
-					 (copy-marker org-clock-marker)))
-		    (org-clock-in)
-		    (setq-local org-capture-clock-was-started t))
-		(error
-		 "Could not start the clock in this capture buffer")))
-	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize)))))))))
+		    (error-message-string error))))
+	  (when (and (derived-mode-p 'org-mode) (org-capture-get :clock-in))
+	    (condition-case nil
+		(progn
+		  (when (org-clock-is-active)
+		    (org-capture-put :interrupted-clock
+				     (copy-marker org-clock-marker)))
+		  (org-clock-in)
+		  (setq-local org-capture-clock-was-started t))
+	      (error "Could not start the clock in this capture buffer")))
+	  (when (org-capture-get :immediate-finish)
+	    (org-capture-finalize)))))))))
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
