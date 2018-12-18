@@ -3276,7 +3276,7 @@ current buffer:
      If the headline has a =CUSTOM_ID= property, store a link to this
      custom ID.  In addition or alternatively, depending on the value
      of ~org-link-to-org-use-id~, create and/or use a globally unique
-     ID property for the link[fn:30].  So using this command in Org
+     =ID= property for the link[fn:30].  So using this command in Org
      buffers potentially creates two links: a human-readable link from
      the custom ID, and one that is globally unique and works even if
      the entry is moved from file to file.  Later, when inserting the
@@ -7129,7 +7129,7 @@ You can also jump to the bookmark ~org-capture-last-stored~, which is
 automatically created unless you set ~org-capture-bookmark~ to ~nil~.
 
 To insert the capture at point in an Org buffer, call ~org-capture~
-with a ~C-0~ prefix argument.
+with a {{{kbd(C-0)}}} prefix argument.
 
 *** Capture templates
 :PROPERTIES:
@@ -7172,7 +7172,7 @@ the template for you like this:
 #+end_example
 
 #+texinfo: @noindent
-During expansion of the template, ~%a~ has been replaced by a link to
+During expansion of the template, =%a= has been replaced by a link to
 the location from where you called the capture command.  This can be
 extremely useful for deriving tasks from emails, for example.  You
 fill in the task definition, press {{{kbd(C-c C-c)}}} and Org returns
@@ -8032,7 +8032,7 @@ special command:
      #+vindex: org-refile-keep
      Refile and keep the entry in place.  Also see ~org-refile-keep~
      to make this the default behavior, and beware that this may
-     result in duplicated ~ID~ properties.
+     result in duplicated =ID= properties.
 
 - {{{kbd(C-0 C-c C-w)}}} or {{{kbd(C-u C-u C-u C-c C-w)}}} (~org-refile-cache-clear~) ::
 
@@ -21530,8 +21530,8 @@ the docstring of that variable.
 [fn:150] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
 
-[fn:151] While creating the agendas, Org mode forces ID properties on
-all referenced entries, so that these entries can be uniquely
+[fn:151] While creating the agendas, Org mode forces =ID= properties
+on all referenced entries, so that these entries can be uniquely
 identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
