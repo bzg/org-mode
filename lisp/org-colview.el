@@ -233,21 +233,27 @@ See `org-columns-summary-types' for details.")
     "--"
     ["Quit" org-columns-quit t]))
 
-(defun org-columns--displayed-value (spec value)
+(defun org-columns--displayed-value (spec value &optional no-star)
   "Return displayed value for specification SPEC in current entry.
+
 SPEC is a column format specification as stored in
 `org-columns-current-fmt-compiled'.  VALUE is the real value to
-display, as a string."
+display, as a string.
+
+When NO-STAR is non-nil, do not add asterisks before displayed
+value for ITEM property."
   (or (and (functionp org-columns-modify-value-for-display-function)
 	   (funcall org-columns-modify-value-for-display-function
 		    (nth 1 spec)	;column name
 		    value))
       (pcase spec
 	(`("ITEM" . ,_)
-	 (concat (make-string (1- (org-current-level))
-			      (if org-hide-leading-stars ?\s ?*))
-		 "* "
-		 (org-columns-compact-links value)))
+	 (let ((stars
+		(and (not no-star)
+		     (concat (make-string (1- (org-current-level))
+					  (if org-hide-leading-stars ?\s ?*))
+			     "* "))))
+	   (concat stars (org-columns-compact-links value))))
 	(`(,_ ,_ ,_ ,_ nil) value)
 	;; If PRINTF is set, assume we are displaying a number and
 	;; obey to the format string.
@@ -280,7 +286,11 @@ possible to override it with optional argument COMPILED-FMT."
 					  (get-text-property (point) 'duration))
 					 'face 'org-warning))
 			"")))
-	    (list spec v (org-columns--displayed-value spec v))))))
+	    ;; A non-nil COMPILED-FMT means we're calling from Org
+	    ;; Agenda mode, where we do not want leading stars for
+	    ;; ITEM.  Hence the optional argument for
+	    ;; `org-columns--displayed-value'.
+	    (list spec v (org-columns--displayed-value spec v compiled-fmt))))))
      (or compiled-fmt org-columns-current-fmt-compiled))))
 
 (defun org-columns--set-widths (cache)
