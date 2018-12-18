@@ -331,7 +331,11 @@ Return nil if no collect function is associated to OPERATOR."
     (_ (error "Invalid definition for operator %S" operator))))
 
 (defun org-columns--overlay-text (value fmt width property original)
-  "Return text "
+  "Return decorated VALUE string for columns overlay display.
+FMT is a format string.  WIDTH is the width of the column, as an
+integer.  PROPERTY is the property being displayed, as a string.
+ORIGINAL is the real string, i.e., before it is modified by
+`org-columns--displayed-value'."
   (format fmt
           (let ((v (org-columns-add-ellipses value width)))
             (pcase property
@@ -1289,17 +1293,17 @@ When PRINTF is non-nil, use it to format the result."
    times))
 
 (defun org-columns--summary-min-age (ages _)
-  "Compute the minimum time among AGES."
+  "Compute the minimum age among AGES."
   (org-columns--format-age
    (apply #'min (mapcar #'org-columns--age-to-minutes ages))))
 
 (defun org-columns--summary-max-age (ages _)
-  "Compute the maximum time among AGES."
+  "Compute the maximum age among AGES."
   (org-columns--format-age
    (apply #'max (mapcar #'org-columns--age-to-minutes ages))))
 
 (defun org-columns--summary-mean-age (ages _)
-  "Compute the minimum time among AGES."
+  "Compute the mean age among AGES."
   (org-columns--format-age
    (/ (apply #'+ (mapcar #'org-columns--age-to-minutes ages))
       (float (length ages)))))
