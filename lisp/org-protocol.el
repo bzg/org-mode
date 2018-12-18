@@ -122,6 +122,7 @@
 (declare-function server-edit "server" (&optional arg))
 
 (defvar org-capture-link-is-already-stored)
+(defvar org-capture-templates)
 
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
@@ -468,10 +469,42 @@ You may specify the template with a template= query parameter, like this:
   javascript:location.href = \\='org-protocol://capture?template=b\\='+ ...
 
 Now template ?b will be used."
-  (when (and (boundp 'org-stored-links)
-	     (org-protocol-do-capture info))
-    (message "Item captured."))
-  nil)
+  (let* ((parts
+	  (pcase (org-protocol-parse-parameters info)
+	    ;; New style links are parsed as a plist.
+	    ((let `(,(pred keywordp) . ,_) info) info)
+	    ;; Old style links, with or without template key, are
+	    ;; parsed as a list of strings.
+	    (p
+	     (let ((k (if (= 1 (length (car p)))
+			  '(:template :url :title :body)
+			'(:url :title :body))))
+	       (org-protocol-assign-parameters p k)))))
+	 (template (or (plist-get parts :template)
+		       org-protocol-default-template-key))
+	 (url (and (plist-get parts :url)
+		   (org-protocol-sanitize-uri (plist-get parts :url))))
+	 (type (and url
+		    (string-match "^\\([a-z]+\\):" url)
+		    (match-string 1 url)))
+	 (title (or (plist-get parts :title) ""))
+	 (region (or (plist-get parts :body) ""))
+	 (orglink
+	  (if (null url) title
+	    (org-make-link-string url (or (org-string-nw-p title) url))))
+	 ;; Avoid call to `org-store-link'.
+	 (org-capture-link-is-already-stored t))
+    ;; Only store link if there's a URL to insert later on.
+    (when url (push (list url title) org-stored-links))
+    (org-store-link-props :type type
+			  :link url
+			  :description title
+			  :annotation orglink
+			  :initial region
+			  :query parts)
+    (raise-frame)
+    (org-capture nil template))
+  (message "Item captured."))
 
 (defun org-protocol-convert-query-to-plist (query)
   "Convert QUERY key=value pairs in the URL to a property list."
@@ -480,39 +513,6 @@ Now template ?b will be used."
 			     (let ((c (split-string x "=")))
 			       (list (intern (concat ":" (car c))) (cadr c))))
 			   (split-string query "&")))))
-
-(defvar org-capture-templates)
-(defun org-protocol-do-capture (info)
-  "Perform the actual capture based on INFO."
-  (let* ((temp-parts (org-protocol-parse-parameters info))
-	 (parts
-	  (cond
-	   ((and (listp info) (symbolp (car info))) info)
-	   ((= (length (car temp-parts)) 1) ;; First parameter is exactly one character long
-	    (org-protocol-assign-parameters temp-parts '(:template :url :title :body)))
-	   (t
-	    (org-protocol-assign-parameters temp-parts '(:url :title :body)))))
-	 (template (or (plist-get parts :template)
-		       org-protocol-default-template-key))
-	 (url (and (plist-get parts :url) (org-protocol-sanitize-uri (plist-get parts :url))))
-	 (type (and url (string-match "^\\([a-z]+\\):" url) (match-string 1 url)))
-	 (title (or (plist-get parts :title) ""))
-	 (region (or (plist-get parts :body) ""))
-	 (orglink (if url
-		      (org-make-link-string
-		       url (if (string-match "[^[:space:]]" title) title url))
-		    title))
-	 (org-capture-link-is-already-stored t)) ;; avoid call to org-store-link
-    (setq org-stored-links
-	  (cons (list url title) org-stored-links))
-    (org-store-link-props :type type
-			  :link url
-			  :description title
-			  :annotation orglink
-			  :initial region
-			  :query parts)
-    (raise-frame)
-    (funcall 'org-capture nil template)))
 
 (defun org-protocol-open-source (fname)
   "Process an org-protocol://open-source?url= style URL with FNAME.
