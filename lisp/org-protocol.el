@@ -503,8 +503,11 @@ Now template ?b will be used."
 			  :initial region
 			  :query parts)
     (raise-frame)
-    (org-capture nil template))
-  (message "Item captured."))
+    (org-capture nil template)
+    (message "Item captured.")
+    ;; Make sure we do not return a string, as `server-visit-files',
+    ;; through `server-edit', would interpret it as a file name.
+    nil))
 
 (defun org-protocol-convert-query-to-plist (query)
   "Convert QUERY key=value pairs in the URL to a property list."
