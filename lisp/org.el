@@ -9178,10 +9178,11 @@ sub-tree if optional argument INHERIT is non-nil."
 
 (defun org-store-link-functions ()
   "Return a list of functions that are called to create and store a link.
-The functions defined in the :store property of
+
+The functions are defined in the `:store' property of
 `org-link-parameters'.
 
-Each function will be called in turn until one returns a non-nil
+Each function is called in turn until one returns a non-nil
 value.  Each function should check if it is responsible for
 creating this link (for example by looking at the major mode).
 If not, it must exit and return nil.  If yes, it should return

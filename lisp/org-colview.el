@@ -233,21 +233,27 @@ See `org-columns-summary-types' for details.")
     "--"
     ["Quit" org-columns-quit t]))
 
-(defun org-columns--displayed-value (spec value)
+(defun org-columns--displayed-value (spec value &optional no-star)
   "Return displayed value for specification SPEC in current entry.
+
 SPEC is a column format specification as stored in
 `org-columns-current-fmt-compiled'.  VALUE is the real value to
-display, as a string."
+display, as a string.
+
+When NO-STAR is non-nil, do not add asterisks before displayed
+value for ITEM property."
   (or (and (functionp org-columns-modify-value-for-display-function)
 	   (funcall org-columns-modify-value-for-display-function
 		    (nth 1 spec)	;column name
 		    value))
       (pcase spec
 	(`("ITEM" . ,_)
-	 (concat (make-string (1- (org-current-level))
-			      (if org-hide-leading-stars ?\s ?*))
-		 "* "
-		 (org-columns-compact-links value)))
+	 (let ((stars
+		(and (not no-star)
+		     (concat (make-string (1- (org-current-level))
+					  (if org-hide-leading-stars ?\s ?*))
+			     "* "))))
+	   (concat stars (org-columns-compact-links value))))
 	(`(,_ ,_ ,_ ,_ nil) value)
 	;; If PRINTF is set, assume we are displaying a number and
 	;; obey to the format string.
@@ -280,7 +286,11 @@ possible to override it with optional argument COMPILED-FMT."
 					  (get-text-property (point) 'duration))
 					 'face 'org-warning))
 			"")))
-	    (list spec v (org-columns--displayed-value spec v))))))
+	    ;; A non-nil COMPILED-FMT means we're calling from Org
+	    ;; Agenda mode, where we do not want leading stars for
+	    ;; ITEM.  Hence the optional argument for
+	    ;; `org-columns--displayed-value'.
+	    (list spec v (org-columns--displayed-value spec v compiled-fmt))))))
      (or compiled-fmt org-columns-current-fmt-compiled))))
 
 (defun org-columns--set-widths (cache)
@@ -331,7 +341,11 @@ Return nil if no collect function is associated to OPERATOR."
     (_ (error "Invalid definition for operator %S" operator))))
 
 (defun org-columns--overlay-text (value fmt width property original)
-  "Return text "
+  "Return decorated VALUE string for columns overlay display.
+FMT is a format string.  WIDTH is the width of the column, as an
+integer.  PROPERTY is the property being displayed, as a string.
+ORIGINAL is the real string, i.e., before it is modified by
+`org-columns--displayed-value'."
   (format fmt
           (let ((v (org-columns-add-ellipses value width)))
             (pcase property
@@ -1289,17 +1303,17 @@ When PRINTF is non-nil, use it to format the result."
    times))
 
 (defun org-columns--summary-min-age (ages _)
-  "Compute the minimum time among AGES."
+  "Compute the minimum age among AGES."
   (org-columns--format-age
    (apply #'min (mapcar #'org-columns--age-to-minutes ages))))
 
 (defun org-columns--summary-max-age (ages _)
-  "Compute the maximum time among AGES."
+  "Compute the maximum age among AGES."
   (org-columns--format-age
    (apply #'max (mapcar #'org-columns--age-to-minutes ages))))
 
 (defun org-columns--summary-mean-age (ages _)
-  "Compute the minimum time among AGES."
+  "Compute the mean age among AGES."
   (org-columns--format-age
    (/ (apply #'+ (mapcar #'org-columns--age-to-minutes ages))
       (float (length ages)))))
@@ -1386,24 +1400,54 @@ an inline src-block."
 ;;;###autoload
 (defun org-dblock-write:columnview (params)
   "Write the column view table.
+
 PARAMS is a property list of parameters:
 
-:id       the :ID: property of the entry where the columns view
-	  should be built.  When the symbol `local', call locally.
-	  When `global' call column view with the cursor at the beginning
-	  of the buffer (usually this means that the whole buffer switches
-	  to column view).  When \"file:path/to/file.org\", invoke column
-	  view at the start of that file.  Otherwise, the ID is located
-	  using `org-id-find'.
-:hlines   When t, insert a hline before each item.  When a number, insert
-	  a hline before each level <= that number.
-:indent   When non-nil, indent each ITEM field according to its level.
-:vlines   When t, make each column a colgroup to enforce vertical lines.
-:maxlevel When set to a number, don't capture headlines below this level.
-:match    When set to a string, use this as a tags/property match filter.
-:skip-empty-rows
-	  When t, skip rows where all specifiers other than ITEM are empty.
-:format   When non-nil, specify the column view format to use."
+`:id' (mandatory)
+
+    The ID property of the entry where the columns view should be
+    built.  When the symbol `local', call locally.  When `global'
+    call column view with the cursor at the beginning of the
+    buffer (usually this means that the whole buffer switches to
+    column view).  When \"file:path/to/file.org\", invoke column
+    view at the start of that file.  Otherwise, the ID is located
+    using `org-id-find'.
+
+`:exclude-tags'
+
+    List of tags to exclude from column view table.
+
+`:format'
+
+    When non-nil, specify the column view format to use.
+
+`:hlines'
+
+    When non-nil, insert a hline before each item.  When
+    a number, insert a hline before each level inferior or equal
+    to that number.
+
+`:indent'
+
+    When non-nil, indent each ITEM field according to its level.
+
+`:match'
+
+    When set to a string, use this as a tags/property match filter.
+
+`:maxlevel'
+
+    When set to a number, don't capture headlines below this level.
+
+`:skip-empty-rows'
+
+    When non-nil, skip rows where all specifiers other than ITEM
+    are empty.
+
+`:vlines'
+
+    When non-nil, make each column a column group to enforce
+    vertical lines."
   (let ((table
 	 (let ((id (plist-get params :id))
 	       view-file view-pos)
