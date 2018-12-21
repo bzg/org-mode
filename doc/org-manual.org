@@ -583,7 +583,7 @@ buffer:
 #+cindex: @samp{VISIBILITY}, property
 Furthermore, any entries with a =VISIBILITY= property (see [[*Properties
 and Columns]]) get their visibility adapted accordingly.  Allowed values
-for this property are =folded=, =children=, =content=, and ~all~.
+for this property are =folded=, =children=, =content=, and =all=.
 
 - {{{kbd(C-u C-u TAB)}}} (~org-set-startup-visibility~) ::
 
