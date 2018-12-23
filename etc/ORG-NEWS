@@ -40,6 +40,13 @@ arguments no longer imply a "file" result is expected.
 See [[git:3367ac9457]] for details.
 
 ** New features
+*** Add a dispatcher command to insert dynamic blocks
+
+You can add dynamic block into ~org-dynamic-block-alist~ with function
+~org-dynamic-block-define~.  All dynamic blocks in
+~org-dynamic-block-define~ can be used by
+~org-dynamic-block-insert-dblock~ command.
+
 *** Babel
 **** Add LaTeX output support in PlantUML
 *** New minor mode to display headline numbering
@@ -85,6 +92,12 @@ system than the main Org document.  For example:
 the corresponding direction by swapping with the adjacent cell.
 
 ** New functions
+*** ~org-dynamic-block-insert-dblock~
+
+Use default keybinding =<C-c C-x x>= to run command
+~org-dynamic-block-insert-dblock~.  It will prompt user to select
+dynamic block in ~org-dynamic-block-alist~.
+
 *** ~org-table-cell-up~
 *** ~org-table-cell-down~
 *** ~org-table-cell-left~

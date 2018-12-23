@@ -41,6 +41,7 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-dynamic-block-define "org" (type func))
 
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
 (defvar org-agenda-columns-compute-summary-properties)
@@ -1237,7 +1238,7 @@ When PRINTF is non-nil, use it to format the result."
   "Summarize CHECK-BOXES with a check-box cookie."
   (format "[%d/%d]"
 	  (cl-count-if (lambda (b) (or (equal b "[X]")
-				  (string-match-p "\\[\\([1-9]\\)/\\1\\]" b)))
+				   (string-match-p "\\[\\([1-9]\\)/\\1\\]" b)))
 		       check-boxes)
 	  (length check-boxes)))
 
@@ -1537,6 +1538,7 @@ PARAMS is a property list of parameters:
 		     (id)))))
   (org-update-dblock))
 
+(org-dynamic-block-define "columnview" #'org-columns-insert-dblock)
 
 
 ;;; Column view in the agenda

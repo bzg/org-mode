@@ -36,6 +36,7 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-table-goto-line "org-table" (n))
+(declare-function org-dynamic-block-define "org" (type func))
 
 (defvar org-frame-title-format-backup frame-title-format)
 (defvar org-time-stamp-formats)
@@ -2051,6 +2052,8 @@ in the buffer and update it."
        '(:name "clocktable"))))
     (start (goto-char start)))
   (org-update-dblock))
+
+(org-dynamic-block-define "clocktable" #'org-clock-report)
 
 (defun org-day-of-week (day month year)
   "Returns the day of the week as an integer."

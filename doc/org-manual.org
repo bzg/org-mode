@@ -19975,9 +19975,14 @@ users mailing list, at mailto:emacs-orgmode@gnu.org.
 
 Org supports /dynamic blocks/ in Org documents.  They are inserted
 with begin and end markers like any other code block, but the contents
-are updated automatically by a user function.  For example, {{{kbd(C-c
-C-x C-r)}}} inserts a dynamic table that updates the work time (see
-[[*Clocking Work Time]]).
+are updated automatically by a user function.
+
+#+kindex: C-c C-x x
+#+findex: org-dynamic-block-insert-dblock
+You can insert a dynamic block with ~org-dynamic-block-insert-dblock~,
+which is bound to {{{kbd(C-c C-x x)}}} by default.  For example,
+{{{kbd(C-c C-x x c l o c k t a b l e RET)}}} inserts a table that
+updates the work time (see [[*Clocking Work Time]]).
 
 Dynamic blocks can have names and function parameters.  The syntax is
 similar to source code block specifications:

@@ -273,6 +273,30 @@ the buffer."
 
 ;;; Clocktable
 
+(ert-deftest test-org-clock/clocktable/insert ()
+  "Test insert clocktable dynamic block with `org-dynamic-block-insert-dblock'."
+  (should
+   (equal
+    "| Headline     | Time   |      |
+|--------------+--------+------|
+| *Total time* | *1:00* |      |
+|--------------+--------+------|
+| \\_  H2       |        | 1:00 |"
+    (org-test-with-temp-text "** H1\n\n** H2\n<point>"
+      (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
+
+      (goto-line 2)
+      (require 'org-clock)
+      (org-dynamic-block-insert-dblock "clocktable")
+
+      (goto-line 1)
+      (unwind-protect
+	  (save-excursion
+	    (when (search-forward "#+CAPTION:") (forward-line))
+	    (buffer-substring-no-properties
+	     (point) (progn (search-forward "#+END:") (line-end-position 0))))
+	(delete-region (point) (search-forward "#+END:\n")))))))
+
 (ert-deftest test-org-clock/clocktable/ranges ()
   "Test ranges in Clock table."
   ;; Relative time: Previous two days.

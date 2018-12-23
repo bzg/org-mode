@@ -464,6 +464,12 @@ use of this function is for the stuck project list."
 (define-obsolete-function-alias 'org-babel-strip-quotes
   'org-strip-quotes "Org 9.2")
 
+(define-obsolete-function-alias 'org-clock-report
+  'org-dynamic-block-insert-dblock "Org 9.3")
+
+(define-obsolete-function-alias 'org-columns-insert-dblock
+  'org-dynamic-block-insert-dblock "Org 9.3")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'org

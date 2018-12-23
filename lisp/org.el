@@ -11518,6 +11518,41 @@ If COMMAND is not given, use `org-update-dblock'."
 	(unless (re-search-forward org-dblock-end-re nil t)
 	  (error "Dynamic block not terminated"))))))
 
+(defcustom org-dynamic-block-alist nil
+  "Alist defining all the Org dynamic blocks.
+The key is the dynamic block type name, as a string.  The value
+is the function used to insert the dynamic block."
+  :group 'org-block
+  :package-version '(Org . "9.3")
+  :type '(alist :tag "Dynamic block name"
+		:key-type string
+                :value-type function)
+  :safe #'listp)
+
+(defun org-dynamic-block-function (type)
+  "Return function associated to a given dynamic block type.
+TYPE is the dynamic block type, as a string."
+  (cdr (assoc type org-dynamic-block-alist)))
+
+(defun org-dynamic-block-types ()
+  "List all defined dynamic block types."
+  (mapcar #'car org-dynamic-block-alist))
+
+(defun org-dynamic-block-define (type func)
+  "Define dynamic block TYPE with FUNC."
+  (push (cons type func) org-dynamic-block-alist))
+
+(defun org-dynamic-block-insert-dblock (type)
+  "Insert a dynamic block of type TYPE.
+When used interactively, select the dynamic block types among
+defined types, per `org-dynamic-block-define'."
+  (interactive (list (completing-read "Dynamic block: "
+				      (org-dynamic-block-types))))
+  (pcase (org-dynamic-block-function type)
+    (`nil (error "No such dynamic block: %S" type))
+    ((and f (pred functionp)) (funcall f))
+    (_ (error "Invalid function for dynamic block %S" type))))
+
 (defun org-dblock-update (&optional arg)
   "User command for updating dynamic blocks.
 Update the dynamic block at point.  With prefix ARG, update all dynamic
