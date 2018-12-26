@@ -515,14 +515,6 @@ for the duration of the command.")
     (when (local-variable-p 'org-colview-initial-truncate-line-value)
       (setq truncate-lines org-colview-initial-truncate-line-value))))
 
-(defun org-columns-compact-links (s)
-  "Replace [[link][desc]] with [desc] or [link]."
-  (while (string-match org-bracket-link-regexp s)
-    (setq s (replace-match
-	     (concat "[" (match-string (if (match-end 3) 3 1) s) "]")
-	     t t s)))
-  s)
-
 (defun org-columns-show-value ()
   "Show the full value of the property."
   (interactive)
@@ -1124,16 +1116,7 @@ as a canonical duration, i.e., using units defined in
   "Apply FUN to time values TIMES.
 Return the result as a duration."
   (org-duration-from-minutes
-   (apply fun
-	  (mapcar (lambda (time)
-		    ;; Unlike to `org-duration-to-minutes' standard
-		    ;; behavior, we want to consider plain numbers as
-		    ;; hours.  As a consequence, we treat them
-		    ;; differently.
-		    (if (string-match-p "\\`[0-9]+\\(?:\\.[0-9]*\\)?\\'" time)
-			(* 60 (string-to-number time))
-		      (org-duration-to-minutes time)))
-		  times))
+   (apply fun (mapcar #'org-duration-to-minutes times))
    (org-duration-h:mm-only-p times)))
 
 (defun org-columns--compute-spec (spec &optional update)
@@ -1340,14 +1323,15 @@ and variances (respectively) of the individual estimates."
 
 ;;; Dynamic block for Column view
 
-(defun org-columns--capture-view (maxlevel match skip-empty format local)
+(defun org-columns--capture-view (maxlevel match skip-empty exclude-tags format local)
   "Get the column view of the current buffer.
 
 MAXLEVEL sets the level limit.  SKIP-EMPTY tells whether to skip
 empty rows, an empty row being one where all the column view
-specifiers but ITEM are empty.  FORMAT is a format string for
-columns, or nil.  When LOCAL is non-nil, only capture headings in
-current subtree.
+specifiers but ITEM are empty.  EXCLUDE-TAGS is a list of tags
+that will be excluded from the resulting view.  FORMAT is a
+format string for columns, or nil.  When LOCAL is non-nil, only
+capture headings in current subtree.
 
 This function returns a list containing the title row and all
 other rows.  Each row is a list of fields, as strings, or
@@ -1370,9 +1354,13 @@ other rows.  Each row is a list of fields, as strings, or
 					     'org-columns-value
 					   'org-columns-value-modified)))
 		     row)))
-	   (unless (and skip-empty
-			(let ((r (delete-dups (remove "" row))))
-			  (or (null r) (and has-item (= (length r) 1)))))
+	   (unless (or
+		    (and skip-empty
+			 (let ((r (delete-dups (remove "" row))))
+			   (or (null r) (and has-item (= (length r) 1)))))
+		    (and exclude-tags
+			 (cl-some (lambda (tag) (member tag exclude-tags))
+				  (org-get-tags))))
 	     (push (cons (org-reduced-level (org-current-level)) (nreverse row))
 		   table)))))
      (or (and maxlevel (format "LEVEL<=%d" maxlevel))
@@ -1472,6 +1460,7 @@ PARAMS is a property list of parameters:
 	      (org-columns--capture-view (plist-get params :maxlevel)
 					 (plist-get params :match)
 					 (plist-get params :skip-empty-rows)
+					 (plist-get params :exclude-tags)
 					 (plist-get params :format)
 					 view-pos))))))
     (when table

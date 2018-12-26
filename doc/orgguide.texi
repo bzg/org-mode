@@ -646,6 +646,12 @@ Re-align, move to previous field.
 @item @key{RET}
 Re-align the table and move down to next row.  Creates a new row if
 necessary.
+@c
+@item S-@key{up}
+@itemx S-@key{down}
+@itemx S-@key{left}
+@itemx S-@key{right}
+Move a cell up, down, left, and right by swapping with adjacent cell.
 
 @tsubheading{Column and row editing}
 @item M-@key{left}

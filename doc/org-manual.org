@@ -1554,6 +1554,30 @@ you, configure the option ~org-table-auto-blank-field~.
      #+findex: org-table-kill-row
      Kill the current row or horizontal line.
 
+- {{{kbd(S-UP)}}} (~org-table-move-cell-up~) ::
+
+     #+kindex: S-UP
+     #+findex: org-table-move-cell-up
+     Move cell up by swapping with adjacent cell.
+
+- {{{kbd(S-DOWN)}}} (~org-table-move-cell-down~) ::
+
+     #+kindex: S-DOWN
+     #+findex: org-table-move-cell-down
+     Move cell down by swapping with adjacent cell.
+
+- {{{kbd(S-LEFT)}}} (~org-table-move-cell-left~) ::
+
+     #+kindex: S-LEFT
+     #+findex: org-table-move-cell-left
+     Move cell left by swapping with adjacent cell.
+
+- {{{kbd(S-RIGHT)}}} (~org-table-move-cell-right~) ::
+
+     #+kindex: S-RIGHT
+     #+findex: org-table-move-cell-right
+     Move cell right by swapping with adjacent cell.
+
 - {{{kbd(M-S-DOWN)}}} (~org-table-insert-row~) ::
 
      #+kindex: M-S-DOWN
@@ -3265,7 +3289,7 @@ current buffer:
      points to the current article, or, in some Gnus buffers, to the
      group.  The description is constructed according to the variable
      ~org-email-link-description-format~.  By default, it refers to
-     the addressee and the subject, possibly truncated.
+     the addressee and the subject.
 
 - /Web browsers: W3, W3M and EWW/ ::
 
@@ -5363,7 +5387,7 @@ optional.  The individual parts have the following meaning:
      | =X=      | Checkbox status, =[X]= if all children are =[X]=.     |
      | =X/=     | Checkbox status, =[n/m]=.                             |
      | =X%=     | Checkbox status, =[n%]=.                              |
-     | =:=      | Sum times, HH:MM, plain numbers are hours.            |
+     | =:=      | Sum times, HH:MM, plain numbers are minutes.          |
      | =:min=   | Smallest time value in column.                        |
      | =:max=   | Largest time value.                                   |
      | =:mean=  | Arithmetic mean of time values.                       |
@@ -5609,6 +5633,11 @@ This dynamic block has the following parameters:
 
      When non-~nil~, skip rows where the only non-empty specifier of
      the column view is =ITEM=.
+
+- =:exclude-tags= ::
+
+     List of tags to exclude from column view table: entries with
+     these tags will be excluded from the column view.
 
 - =:indent= ::
 
@@ -6598,8 +6627,9 @@ be selected:
 
 - =:step= ::
 
-     Set to ~week~ or ~day~ to split the table into chunks.  To use
-     this, ~:block~ or ~:tstart~, ~:tend~ are needed.
+     Set to =day=, =week=, =month= or =year= to split the table into
+     chunks.  To use this, either =:block=, or =:tstart= and =:tend=
+     are required.
 
 - =:stepskip0= ::
 
@@ -7570,91 +7600,97 @@ The following commands deal with attachments:
      After these keys, a list of commands is displayed and you must
      press an additional key to select a command:
 
-     - {{{kbd(a)}}} (~org-attach-attach~) ::
+  - {{{kbd(a)}}} (~org-attach-attach~) ::
 
-          #+kindex: C-c C-a a
-          #+findex: org-attach-attach
-          #+vindex: org-attach-method
-          Select a file and move it into the task's attachment
-          directory.  The file is copied, moved, or linked, depending
-          on ~org-attach-method~.  Note that hard links are not
-          supported on all systems.
+       #+kindex: C-c C-a a
+       #+findex: org-attach-attach
+       #+vindex: org-attach-method
+       Select a file and move it into the task's attachment directory.
+       The file is copied, moved, or linked, depending on
+       ~org-attach-method~.  Note that hard links are not supported on
+       all systems.
 
-     - {{{kbd(c)}}}/{{{kbd(m)}}}/{{{kbd(l)}}} ::
+  - {{{kbd(c)}}}/{{{kbd(m)}}}/{{{kbd(l)}}} ::
 
-          #+kindex: C-c C-a c
-          #+kindex: C-c C-a m
-          #+kindex: C-c C-a l
-          Attach a file using the copy/move/link method.  Note that
-          hard links are not supported on all systems.
+       #+kindex: C-c C-a c
+       #+kindex: C-c C-a m
+       #+kindex: C-c C-a l
+       Attach a file using the copy/move/link method.  Note that hard
+       links are not supported on all systems.
 
-     - {{{kbd(n)}}} (~org-attach-new~) ::
+  - {{{kbd(b)}}} (~org-attach-buffer~) ::
 
-          #+kindex: C-c C-a n
-          #+findex: org-attach-new
-          Create a new attachment as an Emacs buffer.
+       #+kindex: C-c C-a b
+       #+findex: org-attach-buffer
+       Select a buffer and save it as a file in the task's attachment
+       directory.
 
-     - {{{kbd(z)}}} (~org-attach-sync~) ::
+  - {{{kbd(n)}}} (~org-attach-new~) ::
 
-          #+kindex: C-c C-a z
-          #+findex: org-attach-sync
-          Synchronize the current task with its attachment directory, in case
-          you added attachments yourself.
+       #+kindex: C-c C-a n
+       #+findex: org-attach-new
+       Create a new attachment as an Emacs buffer.
 
-     - {{{kbd(o)}}} (~org-attach-open~) ::
+  - {{{kbd(z)}}} (~org-attach-sync~) ::
 
-          #+kindex: C-c C-a o
-          #+findex: org-attach-open
-          #+vindex: org-file-apps
-          Open current task's attachment.  If there is more than one,
-          prompt for a file name first.  Opening follows the rules set
-          by ~org-file-apps~.  For more details, see the information
-          on following hyperlinks (see [[*Handling Links]]).
+       #+kindex: C-c C-a z
+       #+findex: org-attach-sync
+       Synchronize the current task with its attachment directory, in
+       case you added attachments yourself.
 
-     - {{{kbd(O)}}} (~org-attach-open-in-emacs~) ::
+  - {{{kbd(o)}}} (~org-attach-open~) ::
 
-          #+kindex: C-c C-a O
-          #+findex: org-attach-open-in-emacs
-          Also open the attachment, but force opening the file in
-          Emacs.
+       #+kindex: C-c C-a o
+       #+findex: org-attach-open
+       #+vindex: org-file-apps
+       Open current task's attachment.  If there is more than one,
+       prompt for a file name first.  Opening follows the rules set by
+       ~org-file-apps~.  For more details, see the information on
+       following hyperlinks (see [[*Handling Links]]).
 
-     - {{{kbd(f)}}} (~org-attach-reveal~) ::
+  - {{{kbd(O)}}} (~org-attach-open-in-emacs~) ::
 
-          #+kindex: C-c C-a f
-          #+findex: org-attach-reveal
-          Open the current task's attachment directory.
+       #+kindex: C-c C-a O
+       #+findex: org-attach-open-in-emacs
+       Also open the attachment, but force opening the file in Emacs.
 
-     - {{{kbd(F)}}} (~org-attach-reveal-in-emacs~) ::
+  - {{{kbd(f)}}} (~org-attach-reveal~) ::
 
-          #+kindex: C-c C-a F
-          #+findex: org-attach-reveal-in-emacs
-          Also open the directory, but force using Dired in Emacs.
+       #+kindex: C-c C-a f
+       #+findex: org-attach-reveal
+       Open the current task's attachment directory.
 
-     - {{{kbd(d)}}} (~org-attach-delete-one~) ::
+  - {{{kbd(F)}}} (~org-attach-reveal-in-emacs~) ::
 
-          #+kindex: C-c C-a d
-          Select and delete a single attachment.
+       #+kindex: C-c C-a F
+       #+findex: org-attach-reveal-in-emacs
+       Also open the directory, but force using Dired in Emacs.
 
-     - {{{kbd(D)}}} (~org-attach-delete-all~) ::
+  - {{{kbd(d)}}} (~org-attach-delete-one~) ::
 
-          #+kindex: C-c C-a D
-          Delete all of a task's attachments.  A safer way is to open
-          the directory in Dired and delete from there.
+       #+kindex: C-c C-a d
+       Select and delete a single attachment.
 
-     - {{{kbd(s)}}} (~org-attach-set-directory~) ::
+  - {{{kbd(D)}}} (~org-attach-delete-all~) ::
 
-          #+kindex: C-c C-a s
-          #+cindex: @samp{ATTACH_DIR}, property
-          Set a specific directory as the entry's attachment
-          directory.  This works by putting the directory path into
-          the =ATTACH_DIR= property.
+       #+kindex: C-c C-a D
+       Delete all of a task's attachments.  A safer way is to open the
+       directory in Dired and delete from there.
 
-     - {{{kbd(i)}}} (~org-attach-set-inherit~) ::
+  - {{{kbd(s)}}} (~org-attach-set-directory~) ::
 
-          #+kindex: C-c C-a i
-          #+cindex: @samp{ATTACH_DIR_INHERIT}, property
-          Set the =ATTACH_DIR_INHERIT= property, so that children use
-          the same directory for attachments as the parent does.
+       #+kindex: C-c C-a s
+       #+cindex: @samp{ATTACH_DIR}, property
+       Set a specific directory as the entry's attachment directory.
+       This works by putting the directory path into the =ATTACH_DIR=
+       property.
+
+  - {{{kbd(i)}}} (~org-attach-set-inherit~) ::
+
+       #+kindex: C-c C-a i
+       #+cindex: @samp{ATTACH_DIR_INHERIT}, property
+       Set the =ATTACH_DIR_INHERIT= property, so that children use the
+       same directory for attachments as the parent does.
 
 #+cindex: attach from Dired
 #+findex: org-attach-dired-to-subtree
@@ -12786,10 +12822,12 @@ around them.  Both of these approaches can avoid referring to an
 external file.
 
 #+cindex: @samp{HTML_CONTAINER_CLASS}, property
+#+cindex: @samp{HTML_HEADLINE_CLASS}, property
 In order to add styles to a sub-tree, use the =HTML_CONTAINER_CLASS=
 property to assign a class to the tree.  In order to specify CSS
 styles for a particular headline, you can use the ID specified in
-a =CUSTOM_ID= property.
+a =CUSTOM_ID= property.  You can also assign a specific class to
+a headline with the =HTML_HEADLINE_CLASS= property.
 
 Never change the ~org-html-style-default~ constant.  Instead use other
 simpler ways of customizing as described above.
@@ -15051,24 +15089,36 @@ connections.
 #+cindex: @samp{DESCRIPTION}, property
 #+cindex: @samp{LOCATION}, property
 #+cindex: @samp{TIMEZONE}, property
+#+cindex: @samp{CLASS}, property
 The iCalendar export back-end includes =SUMMARY=, =DESCRIPTION=,
-=LOCATION= and =TIMEZONE= properties from the Org entries when
-exporting.  To force the back-end to inherit the =LOCATION= and
-=TIMEZONE= properties, configure the ~org-use-property-inheritance~
-variable.
+=LOCATION=, =TIMEZONE= and =CLASS= properties from the Org entries
+when exporting.  To force the back-end to inherit the =LOCATION=,
+=TIMEZONE= and =CLASS= properties, configure the
+~org-use-property-inheritance~ variable.
 
 #+vindex: org-icalendar-include-body
-When Org entries do not have =SUMMARY=, =DESCRIPTION= and =LOCATION=
-properties, the iCalendar export back-end derives the summary from the
-headline, and derives the description from the body of the Org item.
-The ~org-icalendar-include-body~ variable limits the maximum number of
-characters of the content are turned into its description.
+When Org entries do not have =SUMMARY=, =DESCRIPTION=, =LOCATION= and
+=CLASS= properties, the iCalendar export back-end derives the summary
+from the headline, and derives the description from the body of the
+Org item.  The ~org-icalendar-include-body~ variable limits the
+maximum number of characters of the content are turned into its
+description.
 
 The =TIMEZONE= property can be used to specify a per-entry time zone,
 and is applied to any entry with timestamp information.  Time zones
 should be specified as per the IANA time zone database format, e.g.,
 =Asia/Almaty=.  Alternately, the property value can be =UTC=, to force
 UTC time for this entry only.
+
+The =CLASS= property can be used to specify a per-entry visibility
+class or access restrictions, and is applied to any entry with class
+information.  The iCalendar standard defines three visibility classes:
+- =PUBLIC= :: The entry is publicly visible (this is the default).
+- =CONFIDENTIAL= :: Only a limited group of clients get access to the
+     event.
+- =PRIVATE= :: The entry can be retrieved only by its owner.
+The server should treat unknown class properties the same as
+=PRIVATE=.
 
 Exporting to iCalendar format depends in large part on the
 capabilities of the destination application.  Some are more lenient
@@ -17636,29 +17686,29 @@ code block header arguments:
 Code blocks in the following languages are supported.
 
 #+attr_texinfo: :columns 0.20 0.35 0.20 0.20
-| Language   | Identifier    | Language      | Identifier   |
-|------------+---------------+---------------+--------------|
-| Asymptote  | =asymptote=   | Lua           | =lua=        |
-| Awk        | =awk=         | MATLAB        | =matlab=     |
-| C          | =C=           | Mscgen        | =mscgen=     |
-| C++        | =C++=[fn:140] | OCaml         | =ocaml=      |
-| Clojure    | =clojure=     | Octave        | =octave=     |
-| CSS        | =css=         | Org mode      | =org=        |
-| D          | =D=[fn:141]   | Oz            | =oz=         |
-| ditaa      | =ditaa=       | Perl          | =perl=       |
-| Emacs Calc | =calc=        | Plantuml      | =plantuml=   |
-| Emacs Lisp | =emacs-lisp=  | Processing.js | =processing= |
-| Fortran    | =fortran=     | Python        | =python=     |
-| Gnuplot    | =gnuplot=     | R             | =R=          |
-| GNU Screen | =screen=      | Ruby          | =ruby=       |
-| Graphviz   | =dot=         | Sass          | =sass=       |
-| Haskell    | =haskell=     | Scheme        | =scheme=     |
-| Java       | =java=        | Sed           | =sed=        |
-| Javascript | =js=          | shell         | =sh=         |
-| LaTeX      | =latex=       | SQL           | =sql=        |
-| Ledger     | =ledger=      | SQLite        | =sqlite=     |
-| Lilypond   | =lilypond=    | Vala          | =vala=       |
-| Lisp       | =lisp=        |               |              |
+| Language   | Identifier    | Language       | Identifier   |
+|------------+---------------+----------------+--------------|
+| Asymptote  | =asymptote=   | Lisp           | =lisp=       |
+| Awk        | =awk=         | Lua            | =lua=        |
+| C          | =C=           | MATLAB         | =matlab=     |
+| C++        | =C++=[fn:140] | Mscgen         | =mscgen=     |
+| Clojure    | =clojure=     | Objective Caml | =ocaml=      |
+| CSS        | =css=         | Octave         | =octave=     |
+| D          | =D=[fn:141]   | Org mode       | =org=        |
+| ditaa      | =ditaa=       | Oz             | =oz=         |
+| Emacs Calc | =calc=        | Perl           | =perl=       |
+| Emacs Lisp | =emacs-lisp=  | Plantuml       | =plantuml=   |
+| Eshell     | =eshell=      | Processing.js  | =processing= |
+| Fortran    | =fortran=     | Python         | =python=     |
+| Gnuplot    | =gnuplot=     | R              | =R=          |
+| GNU Screen | =screen=      | Ruby           | =ruby=       |
+| Graphviz   | =dot=         | Sass           | =sass=       |
+| Haskell    | =haskell=     | Scheme         | =scheme=     |
+| Java       | =java=        | Sed            | =sed=        |
+| Javascript | =js=          | shell          | =sh=         |
+| LaTeX      | =latex=       | SQL            | =sql=        |
+| Ledger     | =ledger=      | SQLite         | =sqlite=     |
+| Lilypond   | =lilypond=    | Vala           | =vala=       |
 
 Additional documentation for some languages is at
 https://orgmode.org/worg/org-contrib/babel/languages.html.

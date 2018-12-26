@@ -30,7 +30,7 @@ should still return the link."
      (org-test-with-temp-text
 	 "
 * Test
-  #+<point>BEGIN_SRC emacs-lisp :file test.txt :cache yes
+  #+<point>BEGIN_SRC emacs-lisp :results file :file test.txt :cache yes
     (message \"test\")
   #+END_SRC"
        ;; Execute twice as the first time creates the cache.
@@ -1003,30 +1003,48 @@ trying to find the :END: marker."
 The file is just a link to `:file' value.  Inhibit non-empty
 result write to `:file' value."
   (org-test-with-temp-text "
+<point>#+begin_src shell :results value file link :file \"/tmp/test.txt\"
+echo \"hello\" > /tmp/test.txt
+echo \"test\"
+#+end_src"
+    (org-babel-execute-src-block)
+    (should (search-forward "[[file:/tmp/test.txt]]" nil t))
+    (should (with-temp-buffer
+	      (insert-file-contents "/tmp/test.txt")
+	      (string= "hello\n" (buffer-string)))))
+  ;; Without "link" output type, the result is not a file.
+  (should-not
+   (org-test-with-temp-text "
 <point>#+begin_src shell :results value link :file \"/tmp/test.txt\"
 echo \"hello\" > /tmp/test.txt
 echo \"test\"
 #+end_src"
-   (org-babel-execute-src-block)
-   (should (search-forward "[[file:/tmp/test.txt]]" nil nil))
-   (should (with-temp-buffer
-	     (insert-file-contents "/tmp/test.txt")
-	     (string= "hello\n" (buffer-string))))))
+     (org-babel-execute-src-block)
+     (search-forward "[[file:/tmp/test.txt]]" nil t))))
 
 (ert-deftest test-ob/result-graphics-link-type-header-argument ()
   "Ensure that the result is a link to a file.
 The file is just a link to `:file' value.  Inhibit non-empty
 result write to `:file' value."
   (org-test-with-temp-text "
+<point>#+begin_src shell :results value file graphics :file \"/tmp/test.txt\"
+echo \"hello\" > /tmp/test.txt
+echo \"test\"
+#+end_src"
+    (org-babel-execute-src-block)
+    (should (search-forward "[[file:/tmp/test.txt]]" nil nil))
+    (should (with-temp-buffer
+	      (insert-file-contents "/tmp/test.txt")
+	      (string= "hello\n" (buffer-string)))))
+  ;; Without "link" output type, the result is not a file.
+  (should-not
+   (org-test-with-temp-text "
 <point>#+begin_src shell :results value graphics :file \"/tmp/test.txt\"
 echo \"hello\" > /tmp/test.txt
 echo \"test\"
 #+end_src"
-   (org-babel-execute-src-block)
-   (should (search-forward "[[file:/tmp/test.txt]]" nil nil))
-   (should (with-temp-buffer
-	     (insert-file-contents "/tmp/test.txt")
-	     (string= "hello\n" (buffer-string))))))
+     (org-babel-execute-src-block)
+     (search-forward "[[file:/tmp/test.txt]]" nil t))))
 
 (ert-deftest test-ob/inline-src_blk-preceded-punct-preceded-by-point ()
   (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }")
@@ -2015,6 +2033,16 @@ abc
 	  "#+begin_src emacs-lisp\n3 #(ref:foo)\n#+end_src"
 	(let ((org-coderef-label-format "#(ref:%s)"))
 	  (org-babel-execute-src-block))))))
+
+(ert-deftest test-ob/string-to-number ()
+    (should (=  0   (org-babel--string-to-number "0")))
+    (should (=  1   (org-babel--string-to-number "1")))
+    (should (eq nil (org-babel--string-to-number "000")))
+    (should (eq nil (org-babel--string-to-number "001")))
+    (should (eq nil (org-babel--string-to-number "010")))
+    (should (=  100 (org-babel--string-to-number "100")))
+    (should (=  0.1 (org-babel--string-to-number "0.1")))
+    (should (=  1.0 (org-babel--string-to-number "1.0"))))
 
 (provide 'test-ob)
 

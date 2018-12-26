@@ -10,6 +10,86 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
+* Version 9.3
+
+** Incompatible changes
+*** Change in behavior on exit from an Org edit buffer
+Org will no longer attempt to restore the window configuration in the
+frame to which the user returns after editing a source block with
+~org-edit-src-code~.  Instead, the window configuration will remain as
+it is.
+*** Change default value for ~org-email-link-description-format~
+
+When linking from a mail buffer, Org used to truncate the subject of
+the message to 30 characters in order to build the description of the
+link.  This behavior was considered as too surprising.  As
+a consequence, Org no longer truncates subjects.
+
+You can get the old behaviour back with the following:
+
+: (setq org-email-link-description-format "Email %c: %.30s")
+
+*** ~:file~ header argument no longer assume "file" ~:results~
+
+The "file" ~:results~ value is now mandatory for a code block
+returning a link to a file.  The ~:file~ or ~:file-ext~ header
+arguments no longer imply a "file" result is expected.
+
+*** Plain numbers are hours in Column View mode
+
+See [[git:3367ac9457]] for details.
+
+** New features
+*** Babel
+**** Add LaTeX output support in PlantUML
+*** New property =HTML_HEADLINE_CLASS= in HTML export
+The new property =HTML_HEADLINE_CLASS= assigns a class attribute to
+a headline.
+*** Allow LaTeX attributes and captions for "table.el" tables
+Supported LaTeX attributes are ~:float~, ~:center~, ~:font~ and
+~:caption~.
+*** Attach buffer contents to headline
+With =<b>= key from attachment dispatcher (=<C-c C-a>=), it is now
+possible to write the contents of a buffer to a file in the headline
+attachement directory.
+*** iCalendar export respects a =CLASS= property
+
+Set the =CLASS= property on an entry to specify a visibility class for
+that entry only during iCalendar export. The property can be set to
+anything the calendar server supports. The iCalendar standard defines
+the values =PUBLIC=, =CONFIDENTIAL=, =PRIVATE=, which can be
+interpreted as publicly visable, accessible to a specific group, and
+private respectively.
+
+This property can be inherited during iCalendar export, depending on
+the value of ~org-use-property-inheritance~.
+
+*** New parameter for =INCLUDE= keyword
+Add =:coding CODING-SYSTEM= to include files using a different coding
+system than the main Org document.  For example:
+
+#+begin_example
+,#+INCLUDE: "myfile.cmd" src cmd :coding cp850-dos
+#+end_example
+
+*** New values in clock tables' step: =month= and =year=
+*** ODT export handles numbers cookies in lists
+*** New cell movement functions in tables
+~S-<UP>~, ~S-<DOWN>~, ~S-<RIGHT>~, and ~S-<LEFT>~ now move cells in
+the corresponding direction by swapping with the adjacent cell.
+
+** New functions
+*** ~org-table-cell-up~
+*** ~org-table-cell-down~
+*** ~org-table-cell-left~
+*** ~org-table-cell-right~
+** Removed functions
+*** ~org-babel-set-current-result-hash~
+
+It was unused throughout the code base.
+
+** Miscellaneous
+*** Org Table reads numbers starting with 0 as strings
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
@@ -170,6 +250,17 @@ This is consistent with the naming of =org-dblock-write:columnview=
 options, where =:match= is also used as a headlines filter.
 
 ** New features
+*** Add ~:session~ support of ob-clojure for CIDER
+You can initialize source block session with Babel default keybinding
+=[C-c C-v C-z]= to use =sesman= session manager to link current
+project, directory or buffer with specific Clojure session, or
+=cider-jack-in= a new CIDER REPL if no CIDER REPLs available. In older
+CIDER version which has not =sesman= integrated, only has
+=cider-jack-in= without Clojure project is supported.
+#+begin_src clojure :session
+(dissoc Clojure 'JVM)
+(conj clojurists "stardiviner")
+#+end_src
 *** Add ~:results link~ support for Babel
 
 With this output format, create a link to the file specified in

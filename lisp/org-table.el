@@ -1442,6 +1442,80 @@ non-nil, the one above is used."
 		     (above min)
 		     (t max)))))))
 
+(defun org-table--swap-cells (row1 col1 row2 col2)
+  "Swap two cells indicated by the coordinates provided.
+ROW1, COL1, ROW2, COL2 are integers indicating the row/column
+position of the two cells that will be swapped in the table."
+  (let ((content1 (org-table-get row1 col1))
+	(content2 (org-table-get row2 col2)))
+    (org-table-put row1 col1 content2)
+    (org-table-put row2 col2 content1)))
+
+(defun org-table--move-cell (direction)
+  "Move the current cell in a cardinal direction.
+DIRECTION is a symbol among `up', `down', `left', and `right'.
+The contents the current cell are swapped with cell in the
+indicated direction.  Raise an error if the move cannot be done."
+  (let ((row-shift (pcase direction (`up -1) (`down 1) (_ 0)))
+	(column-shift (pcase direction (`left -1) (`right 1) (_ 0))))
+    (when (and (= 0 row-shift) (= 0 column-shift))
+      (error "Invalid direction: %S" direction))
+    ;; Initialize `org-table-current-ncol' and `org-table-dlines'.
+    (org-table-analyze)
+    (let* ((row (org-table-current-line))
+	   (column (org-table-current-column))
+	   (target-row (+ row row-shift))
+	   (target-column (+ column column-shift))
+	   (org-table-current-nrow (1- (length org-table-dlines))))
+      (when (or (< target-column 1)
+		(< target-row 1)
+		(> target-column org-table-current-ncol)
+		(> target-row org-table-current-nrow))
+	(user-error "Cannot move cell further"))
+      (org-table--swap-cells row column target-row target-column)
+      (org-table-goto-line target-row)
+      (org-table-goto-column target-column))))
+
+;;;###autoload
+(defun org-table-move-cell-up ()
+  "Move a single cell up in a table.
+Swap with anything in target cell."
+  (interactive)
+  (unless (org-table-check-inside-data-field)
+    (error "No table at point"))
+  (org-table--move-cell 'up)
+  (org-table-align))
+
+;;;###autoload
+(defun org-table-move-cell-down ()
+  "Move a single cell down in a table.
+Swap with anything in target cell."
+  (interactive)
+  (unless (org-table-check-inside-data-field)
+    (error "No table at point"))
+  (org-table--move-cell 'down)
+  (org-table-align))
+
+;;;###autoload
+(defun org-table-move-cell-left ()
+  "Move a single cell left in a table.
+Swap with anything in target cell."
+  (interactive)
+  (unless (org-table-check-inside-data-field)
+    (error "No table at point"))
+  (org-table--move-cell 'left)
+  (org-table-align))
+
+;;;###autoload
+(defun org-table-move-cell-right ()
+  "Move a single cell right in a table.
+Swap with anything in target cell."
+  (interactive)
+  (unless (org-table-check-inside-data-field)
+    (error "No table at point"))
+  (org-table--move-cell 'right)
+  (org-table-align))
+
 ;;;###autoload
 (defun org-table-delete-column ()
   "Delete a column from the table."

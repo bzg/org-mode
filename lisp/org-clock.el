@@ -522,8 +522,7 @@ cannot be translated."
   (cond ((functionp org-clock-heading-function)
 	 (funcall org-clock-heading-function))
 	((org-before-first-heading-p) "???")
-	(t (replace-regexp-in-string
-	    org-bracket-link-analytic-regexp "\\5"
+	(t (org-link-display-format
 	    (org-no-properties (org-get-heading t t t t))))))
 
 (defun org-clock-menu ()
@@ -2684,79 +2683,84 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
   (if (= level 1) ""
     (concat "\\_" (make-string (* 2 (1- level)) ?\s))))
 
-(defun org-clocktable-increment-day (ts &optional n)
-  "Increment day in TS by N (defaulting to 1).
-The TS argument has the same type as the return values of
-`float-time' or `current-time'."
-  (let ((tsd (decode-time ts)))
-    (cl-incf (nth 3 tsd) (or n 1))
-    (setf (nth 8 tsd) nil) ; no time zone: increasing day skips one whole day
-    (apply 'encode-time tsd)))
-
 (defun org-clocktable-steps (params)
-  "Step through the range to make a number of clock tables."
-  (let* ((ts (plist-get params :tstart))
-	 (te (plist-get params :tend))
-	 (ws (plist-get params :wstart))
-	 (ms (plist-get params :mstart))
-	 (step0 (plist-get params :step))
-	 (stepskip0 (plist-get params :stepskip0))
-	 (block (plist-get params :block))
-	 cc tsb)
-    (when block
-      (setq cc (org-clock-special-range block nil t ws ms)
-	    ts (car cc)
-	    te (nth 1 cc)))
-    (cond
-     ((numberp ts)
-      ;; If ts is a number, it's an absolute day number from
-      ;; org-agenda.
-      (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute ts)))
-	(setq ts (float-time (encode-time 0 0 0 day month year)))))
-     (ts (setq ts (org-matcher-time ts))))
-    (cond
-     ((numberp te)
-      ;; Likewise for te.
-      (pcase-let ((`(,month ,day ,year) (calendar-gregorian-from-absolute te)))
-	(setq te (float-time (encode-time 0 0 0 day month year)))))
-     (te (setq te (org-matcher-time te))))
-    (setq tsb
-	  (if (eq step0 'week)
-	      (let ((dow (nth 6 (decode-time (seconds-to-time ts)))))
-		(if (<= dow ws) ts
-		  (org-clocktable-increment-day ts ; decrement
-						(- ws dow))))
-	    ts))
-    (while (< (float-time tsb) te)
+  "Create one ore more clock tables, according to PARAMS.
+Step through the range specifications in plist PARAMS to make
+a number of clock tables."
+  (let* ((ignore-empty-tables (plist-get params :stepskip0))
+         (step (plist-get params :step))
+         (step-header
+          (pcase step
+            (`day "Daily report: ")
+            (`week "Weekly report starting on: ")
+            (`month "Monthly report starting on: ")
+            (`year "Annual report starting on: ")
+            (_ (user-error "Unknown `:step' specification: %S" step))))
+         (week-start (or (plist-get params :wstart) 1))
+         (month-start (or (plist-get params :mstart) 1))
+         (range
+          (pcase (plist-get params :block)
+            (`nil nil)
+            (range
+             (org-clock-special-range range nil t week-start month-start))))
+         ;; For both START and END, any number is an absolute day
+         ;; number from Agenda.  Otherwise, consider value to be an Org
+         ;; timestamp string.  The `:block' property has precedence
+         ;; over `:tstart' and `:tend'.
+         (start
+          (pcase (if range (car range) (plist-get params :tstart))
+            ((and (pred numberp) n)
+             (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
+               (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
+            (timestamp (seconds-to-time (org-matcher-time timestamp)))))
+         (end
+          (pcase (if range (nth 1 range) (plist-get params :tend))
+            ((and (pred numberp) n)
+             (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
+               (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
+            (timestamp (seconds-to-time (org-matcher-time timestamp))))))
+    (while (time-less-p start end)
       (unless (bolp) (insert "\n"))
-      (let* ((start-time (seconds-to-time (max (float-time tsb) ts)))
-	     (dow (nth 6 (decode-time (seconds-to-time tsb))))
-	     (days-to-skip (cond ((eq step0 'day) 1)
-				 ;; else 'week:
-				 ((= dow ws) 7)
-				 (t (- ws dow)))))
-	(setq tsb (time-to-seconds (org-clocktable-increment-day tsb
-								 days-to-skip)))
-	(insert "\n"
-		(if (eq step0 'day) "Daily report: "
-		  "Weekly report starting on: ")
-		(format-time-string (org-time-stamp-format nil t) start-time)
-		"\n")
-	(let ((table-begin (line-beginning-position 0))
-	      (step-time
-	       (org-dblock-write:clocktable
-		(org-combine-plists
-		 params
-		 (list
-		  :header "" :step nil :block nil
-		  :tstart (format-time-string (org-time-stamp-format t t)
-					      start-time)
-		  :tend (format-time-string (org-time-stamp-format t t)
-					    (seconds-to-time (min te tsb))))))))
-	  (re-search-forward "^[ \t]*#\\+END:")
-	  (when (and stepskip0 (equal step-time 0))
-	    ;; Remove the empty table
-	    (delete-region (line-beginning-position) table-begin))))
+      ;; Insert header before each clock table.
+      (insert "\n"
+              step-header
+              (format-time-string (org-time-stamp-format nil t) start)
+	      "\n")
+      ;; Compute NEXT, which is the end of the current clock table,
+      ;; according to step.
+      (let* ((next
+              (apply #'encode-time
+                     (pcase-let
+                         ((`(,_ ,_ ,_ ,d ,m ,y ,dow . ,_) (decode-time start)))
+                       (pcase step
+                         (`day (list 0 0 org-extend-today-until (1+ d) m y))
+                         (`week
+                          (let ((offset (if (= dow week-start) 7
+                                          (mod (- week-start dow) 7))))
+                            (list 0 0 org-extend-today-until (+ d offset) m y)))
+                         (`month (list 0 0 0 month-start (1+ m) y))
+                         (`year (list 0 0 org-extend-today-until 1 1 (1+ y)))))))
+             (table-begin (line-beginning-position 0))
+	     (step-time
+              ;; Write clock table between START and NEXT.
+	      (org-dblock-write:clocktable
+	       (org-combine-plists
+	        params (list :header ""
+                             :step nil
+                             :block nil
+		             :tstart (format-time-string
+                                      (org-time-stamp-format t t)
+                                      start)
+		             :tend (format-time-string
+                                    (org-time-stamp-format t t)
+                                    ;; Never include clocks past END.
+                                    (if (time-less-p end next) end next)))))))
+	(let ((case-fold-search t)) (re-search-forward "^[ \t]*#\\+END:"))
+	;; Remove the table if it is empty and `:stepskip0' is
+	;; non-nil.
+	(when (and ignore-empty-tables (equal step-time 0))
+	  (delete-region (line-beginning-position) table-begin))
+        (setq start next))
       (end-of-line 0))))
 
 (defun org-clock-get-table-data (file params)

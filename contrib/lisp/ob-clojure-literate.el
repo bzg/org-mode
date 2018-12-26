@@ -184,62 +184,6 @@ If it is a directory, `ob-clojure-literate' will try to create Clojure project a
                  (lambda (cons) (if (eq (car cons) :session) t cons))
                  org-babel-default-header-args:clojure)))))
 
-;;; Support `org-babel-initiate-session' / [C-c C-v z] to initialize Clojure session.
-
-(defun org-babel-clojure-initiate-session (&optional session _params)
-  "Initiate a session named SESSION according to PARAMS."
-  (when (and session (not (string= session "none")))
-    (save-window-excursion
-      (unless (org-babel-comint-buffer-livep session)
-        ;; CIDER jack-in to the Clojure project directory.
-        (cond
-         ((eq org-babel-clojure-backend 'cider)
-          (require 'cider)
-          (let ((session-buffer (save-window-excursion
-                                  (cider-jack-in t)
-                                  (current-buffer))))
-            (if (org-babel-comint-buffer-livep session-buffer)
-                (progn (sit-for .25) session-buffer))))
-         ((eq org-babel-clojure-backend 'slime)
-          (error "Session evaluation with SLIME is not supported"))
-         (t
-          (error "Session initiate failed")))
-        )
-      (get-buffer session)
-      )))
-
-(defun org-babel-prep-session:clojure (session params)
-  "Prepare SESSION according to the header arguments specified in PARAMS."
-  (let* ((session (org-babel-clojure-initiate-session session))
-         (var-lines (org-babel-variable-assignments:clojure params)))
-    (when session
-      (org-babel-comint-in-buffer session
-        (mapc (lambda (var)
-                (insert var) (comint-send-input nil t)
-		(org-babel-comint-wait-for-output session)
-		(sit-for .1) (goto-char (point-max))) var-lines)))
-    session))
-
-(defun org-babel-clojure-var-to-clojure (var)
-  "Convert src block's `VAR' to Clojure variable."
-  (if (listp var)
-      (replace-regexp-in-string "(" "'(" var)
-    (cond
-     ((stringp var)
-      ;; wrap org-babel passed in header argument value with quote in Clojure.
-      (format "\"%s\"" var))
-     (t
-      (format "%s" var))))
-  )
-
-(defun org-babel-variable-assignments:clojure (params)
-  "Return a list of Clojure statements assigning the block's variables in `PARAMS'."
-  (mapcar
-   (lambda (pair)
-     (format "(def %s %s)"
-             (car pair)
-             (org-babel-clojure-var-to-clojure (cdr pair))))
-   (org-babel--get-vars params)))
 
 ;;; Support header arguments  :results graphics :file "image.png" by inject Clojure code.
 (defun ob-clojure-literate-inject-code (args)

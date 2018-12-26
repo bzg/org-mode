@@ -3279,6 +3279,11 @@ storing and resolving footnotes.  It is created automatically."
 	    (let* ((value (org-element-property :value element))
 		   (ind (current-indentation))
 		   location
+		   (coding-system-for-read
+		    (or (and (string-match ":coding +\\(\\S-+\\)>" value)
+			     (prog1 (intern (match-string 1 value))
+			       (setq value (replace-match "" nil nil value))))
+			coding-system-for-read))
 		   (file
 		    (and (string-match "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
 				       value)

@@ -43,8 +43,10 @@
 (require 'ob)
 (require 'org-macs)
 
+(declare-function cider-jack-in "ext:cider" (&optional prompt-project cljs-too))
 (declare-function cider-current-connection "ext:cider-client" (&optional type))
 (declare-function cider-current-ns "ext:cider-client" ())
+(declare-function cider-repls "ext:cider-connection" (&optional type ensure))
 (declare-function nrepl--merge "ext:nrepl-client" (dict1 dict2))
 (declare-function nrepl-dict-get "ext:nrepl-client" (dict key))
 (declare-function nrepl-dict-put "ext:nrepl-client" (dict key value))
@@ -54,6 +56,8 @@
 
 (defvar nrepl-sync-request-timeout)
 (defvar cider-buffer-ns)
+(defvar sesman-system)
+(defvar cider-version)
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
@@ -210,6 +214,69 @@ using the :show-process parameter."
       result
       (condition-case nil (org-babel-script-escape result)
 	(error result)))))
+
+(defun org-babel-clojure-initiate-session (&optional session _params)
+  "Initiate a session named SESSION according to PARAMS."
+  (when (and session (not (string= session "none")))
+    (save-window-excursion
+      (cond
+       ((org-babel-comint-buffer-livep session) nil)
+       ;; CIDER jack-in to the Clojure project directory.
+       ((eq org-babel-clojure-backend 'cider)
+        (require 'cider)
+        (let ((session-buffer
+	       (save-window-excursion
+		 (if (version< cider-version "0.18.0")
+		     ;; Older CIDER (without sesman) still need to use
+		     ;; old way.
+		     (cider-jack-in nil) ;jack-in without project
+		   ;; New CIDER (with sesman to manage sessions).
+		   (unless (cider-repls)
+		     (let ((sesman-system 'CIDER))
+		       (call-interactively 'sesman-link-with-directory))))
+                 (current-buffer))))
+          (when (org-babel-comint-buffer-livep session-buffer)
+            (sit-for .25)
+	    session-buffer)))
+       ((eq org-babel-clojure-backend 'slime)
+        (error "Session evaluation with SLIME is not supported"))
+       (t
+        (error "Session initiate failed")))
+      (get-buffer session))))
+
+(defun org-babel-prep-session:clojure (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let ((session (org-babel-clojure-initiate-session session))
+        (var-lines (org-babel-variable-assignments:clojure params)))
+    (when session
+      (org-babel-comint-in-buffer session
+	(dolist (var var-lines)
+	  (insert var)
+	  (comint-send-input nil t)
+	  (org-babel-comint-wait-for-output session)
+	  (sit-for .1)
+	  (goto-char (point-max)))))
+    session))
+
+(defun org-babel-clojure-var-to-clojure (var)
+  "Convert src block's VAR to Clojure variable."
+  (cond
+   ((listp var)
+    (replace-regexp-in-string "(" "'(" var))
+   ((stringp var)
+    ;; Wrap Babel passed-in header argument value with quotes in Clojure.
+    (format "\"%s\"" var))
+   (t
+    (format "%S" var))))
+
+(defun org-babel-variable-assignments:clojure (params)
+  "Return a list of Clojure statements assigning the block's variables in PARAMS."
+  (mapcar
+   (lambda (pair)
+     (format "(def %s %s)"
+             (car pair)
+             (org-babel-clojure-var-to-clojure (cdr pair))))
+   (org-babel--get-vars params)))
 
 (provide 'ob-clojure)
 
