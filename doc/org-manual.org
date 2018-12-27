@@ -18227,7 +18227,7 @@ emacs -Q --batch --eval "
 
 ** Completion
 :PROPERTIES:
-:DESCRIPTION: M-@key{TAB} guesses completions.
+:DESCRIPTION: @kbd{M-@key{TAB}} guesses completions.
 :END:
 #+cindex: completion, of @TeX{} symbols
 #+cindex: completion, of TODO keywords
@@ -19048,19 +19048,19 @@ further based on their usage needs.  For example, the normal
 
 ** Context Dependent Documentation
 :PROPERTIES:
-:DESCRIPTION: Jump to Documentation for Context.
+:DESCRIPTION: Read documentation about current syntax.
 :ALT_TITLE: Documentation Access
 :END:
 #+cindex: documentation
 #+cindex: Info
+
 #+findex: org-info-find-node
-
+#+kindex: C-c C-x C-i
 {{{kbd(C-c C-x C-i)}}} in an Org file tries to open a suitable section
-of the Org info documentation depending on the Org element at point.
-For example on a headline the info documentation about the Org
-document structure appears.
+of the Org manual depending on the syntax at point.  For example,
+using it on a headline displays "Document Structure" section.
 
-{{{kbd(q)}}} closes the info window.
+{{{kbd(q)}}} closes the Info window.
 
 ** Interaction with Other Packages
 :PROPERTIES:
