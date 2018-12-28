@@ -1112,7 +1112,9 @@ nil, just return 0."
 If time is not given, defaults to 0:00.  However, with optional
 NODEFAULT, hour and minute fields are nil if not given.
 
-Throw an error if S in not a valid Org time string.
+Throw an error if S does not contain a valid Org time string.
+Note that the first match for YYYY-MM-DD will be used (e.g.,
+\"-52000-02-03\" will be taken as \"2000-02-03\").
 
 This should be a lot faster than the `parse-time-string'."
   (unless (string-match org-ts-regexp0 s)
