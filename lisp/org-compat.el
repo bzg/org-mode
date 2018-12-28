@@ -81,6 +81,20 @@
     (defalias 'org-line-number-display-width 'line-number-display-width)
   (defun org-line-number-display-width (&rest _) 0))
 
+(unless (fboundp 'file-attribute-modification-time)
+  (defsubst file-attribute-modification-time (attributes)
+    "The modification time in ATTRIBUTES returned by `file-attributes'.
+This is the time of the last change to the file's contents, and
+is a list of integers (HIGH LOW USEC PSEC) in the same style
+as (current-time)."
+    (nth 5 attributes)))
+
+(unless (fboundp 'file-attribute-size)
+  (defsubst file-attribute-size (attributes)
+    "The size (in bytes) in ATTRIBUTES returned by `file-attributes'.
+This is a floating point number if the size is too large for an integer."
+    (nth 7 attributes)))
+
 
 ;;; Emacs < 25.1 compatibility
 
