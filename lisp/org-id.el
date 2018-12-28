@@ -358,7 +358,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
   "Return string with random (version 4) UUID."
   (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
 			  (random)
-			  (encode-time nil 'list)
+			  (org-current-time-as-list)
 			  (user-uid)
 			  (emacs-pid)
 			  (user-full-name)
@@ -417,7 +417,7 @@ The input I may be a character, or a single-letter string."
   "Encode TIME as a 10-digit string.
 This string holds the time to micro-second accuracy, and can be decoded
 using `org-id-decode'."
-  (setq time (encode-time time 'list))
+  (setq time (or time (org-current-time-as-list)))
   (concat (org-id-int-to-b36 (nth 0 time) 4)
 	  (org-id-int-to-b36 (nth 1 time) 4)
 	  (org-id-int-to-b36 (or (nth 2 time) 0) 4)))

@@ -74,6 +74,13 @@
   ;; The misspelled variant was made obsolete in Emacs 27.1
   (defalias 'pcomplete-uniquify-list 'pcomplete-uniqify-list))
 
+(defun org-current-time-as-list ()
+  "Compatibility wrapper for `current-time'.
+As of Emacs 27.1, `current-time' callers should not assume a list
+return value."
+  (or (ignore-errors (encode-time nil 'list))
+      (current-time)))
+
 
 ;;; Emacs < 26.1 compatibility
 
