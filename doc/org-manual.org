@@ -2383,7 +2383,7 @@ the formula editor (see [[*Editing and debugging formulas]]) or edit the
      that Org treats these formulas in a special way, see [[*Column
      formulas]].
 
-- ~@3=~ ::
+- =@3== ::
 
      Row formula, applies to all fields in the specified row.  =@>==
      means the last row.
