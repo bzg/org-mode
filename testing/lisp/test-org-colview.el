@@ -142,7 +142,7 @@
   ;; Special case: width takes into account link narrowing in ITEM.
   (should
    (equal
-    '("* [123]" . 7)
+    '("* 123" . 5)
     (org-test-with-temp-text "* [[https://orgmode.org][123]]"
       (let ((org-columns-default-format "%ITEM")) (org-columns))
       (cons (get-char-property (point) 'org-columns-value-modified)
