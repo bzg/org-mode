@@ -427,6 +427,9 @@ Some people find the many stars too noisy and would prefer an outline
 that has whitespace followed by a single star as headline starters.
 See [[*A Cleaner Outline View]].
 
+Headline are not numbered.  However, you may want to dynamically
+number some, or all, of them.  See [[*Dynamic Headline Numbering]].
+
 #+vindex: org-cycle-separator-lines
 An empty line after the end of a subtree is considered part of it and
 is hidden when the subtree is folded.  However, if you leave at least
@@ -19024,6 +19027,36 @@ headings as shown in examples below.
      To switch between single and double stars layouts, use {{{kbd(M-x
      org-convert-to-odd-levels)}}} and {{{kbd(M-x
      org-convert-to-oddeven-levels)}}}.
+
+** Dynamic Headline Numbering
+:PROPERTIES:
+:DESCRIPTION: Display and update outline numbering.
+:END:
+
+#+cindex: Org Num mode
+#+cindex: number headlines
+The Org Num minor mode, toggled with {{{kbd(M-x org-num-mode)}}},
+displays on top of headlines.  It also updates numbering automatically
+upon changes to the structure of the document.
+
+#+vindex: org-num-max-level
+#+vindex: org-num-skip-tags
+#+vindex: org-num-skip-commented
+#+vindex: org-num-skip-unnumbered
+By default, all headlines are numbered.  You can limit numbering to
+specific headlines according to their level, tags, =COMMENT= keyword,
+or =UNNUMBERED= property.  Set ~org-num-max-level~,
+~org-num-skip-tags~, ~org-num-skip-commented~,
+~org-num-skip-unnumbered~, or ~org-num-skip-footnotes~ accordingly.
+
+#+vindex: org-num-skip-footnotes
+If ~org-num-skip-footnotes~ is non-~nil~, footnotes sections (see
+[[*Creating Footnotes]]) are not numbered either.
+
+#+vindex: org-num-face
+#+vindex: org-num-format-function
+You can control how the numbering is displayed by setting
+~org-num-face~ and ~org-num-format-function~.
 
 ** Using Org on a TTY
 :PROPERTIES:

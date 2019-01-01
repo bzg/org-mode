@@ -42,6 +42,12 @@ See [[git:3367ac9457]] for details.
 ** New features
 *** Babel
 **** Add LaTeX output support in PlantUML
+*** New minor mode to display headline numbering
+
+Use =<M-x org-num-mode>= to get a visual indication of the numbering
+in the outline.  The numbering is also automatically updated upon
+changes in the buffer.
+
 *** New property =HTML_HEADLINE_CLASS= in HTML export
 The new property =HTML_HEADLINE_CLASS= assigns a class attribute to
 a headline.
