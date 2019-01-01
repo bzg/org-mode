@@ -1,6 +1,6 @@
 ;;; test-ob-ruby.el --- tests for ob-ruby.el
 
-;; Copyright (c) 2013-2015 Oleh Krehel
+;; Copyright (c) 2013-2015, 2019 Oleh Krehel
 ;; Authors: Oleh Krehel
 
 ;; This program is free software; you can redistribute it and/or modify

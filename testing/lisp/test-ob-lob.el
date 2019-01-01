@@ -1,6 +1,6 @@
 ;;; test-ob-lob.el --- test for ob-lob.el
 
-;; Copyright (c) 2010-2015 Eric Schulte
+;; Copyright (c) 2010-2015, 2019 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; This file is not part of GNU Emacs.

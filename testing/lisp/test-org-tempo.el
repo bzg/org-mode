@@ -1,6 +1,6 @@
 ;;; test-org-tempo.el --- Tests for test-org-tempo.el     -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Rasmus Pank Roulund
+;; Copyright (C) 2017, 2019 Rasmus Pank Roulund
 
 ;; Author: Rasmus Pank Roulund <emacs at pank dot eu>
 

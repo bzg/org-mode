@@ -1,6 +1,6 @@
 ;;; test-org-capture.el --- Tests for org-capture.el -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015, 2017  Nicolas Goaziou
+;; Copyright (C) 2015, 2017, 2019  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
 

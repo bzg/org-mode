@@ -1,6 +1,6 @@
 ;;; test-org-src.el --- tests for org-src.el
 
-;; Copyright (C) 2012-2015  Le Wang
+;; Copyright (C) 2012-2015, 2019  Le Wang
 
 ;; Author: Le Wang <l26wang at gmail dot com>
 

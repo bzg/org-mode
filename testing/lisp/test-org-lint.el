@@ -1,6 +1,6 @@
 ;;; test-org-lint.el --- Tests for Org Lint          -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016  Nicolas Goaziou
+;; Copyright (C) 2016, 2019  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
 

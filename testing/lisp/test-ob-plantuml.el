@@ -1,6 +1,6 @@
 ;;; test-ob-plantuml.el --- tests for ob-plantuml.el
 
-;; Copyright (c) 2016 Thibault Marin
+;; Copyright (c) 2016, 2019 Thibault Marin
 ;; Authors: Thibault Marin
 
 ;; This file is not part of GNU Emacs.

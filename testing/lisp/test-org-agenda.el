@@ -1,6 +1,6 @@
 ;;; test-org-agenda.el --- Tests for org-agenda.el -*- lexical-binding: t ; -*-
 
-;; Copyright (C) 2017 Marco Wahl
+;; Copyright (C) 2017, 2019 Marco Wahl
 
 ;; Author: Marco Wahl <marcowahlsoft@gmail.com>
 

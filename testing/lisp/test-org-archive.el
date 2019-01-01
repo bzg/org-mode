@@ -1,6 +1,6 @@
 ;;; test-org-archive.el --- Test for Org Archive     -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017  Jay Kamat
+;; Copyright (C) 2017, 2019  Jay Kamat
 
 ;; Author: Jay Kamat <jaygkamat@gmail.com>
 

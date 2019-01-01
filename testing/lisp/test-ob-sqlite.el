@@ -1,6 +1,6 @@
 ;;; test-ob-sqlite.el --- tests for ob-sqlite.el
 
-;; Copyright (C) 2017  Eduardo Bellani
+;; Copyright (C) 2017, 2019  Eduardo Bellani
 
 ;; Author: Eduardo Bellani <ebellani@gmail.com>
 ;; Keywords: lisp
