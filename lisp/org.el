@@ -5954,6 +5954,24 @@ by a #."
 	    (add-text-properties closing-start end '(invisible t)))
 	  t)))))
 
+(defun org-fontify-extend-region (beg end _old-len)
+  (let ((begin-re "\\(\\\\\\[\\|\\(#\\+begin_\\|\\\\begin{\\)\\S-+\\)")
+	(end-re "\\(\\\\\\]\\|\\(#\\+end_\\|\\\\end{\\)\\S-+\\)")
+	(extend (lambda (r1 r2 dir)
+		  (let ((re (replace-regexp-in-string "\\(begin\\|end\\)" r1
+			     (replace-regexp-in-string "[][]" r2
+			      (match-string-no-properties 0)))))
+		    (re-search-forward (regexp-quote re) nil t dir)))))
+    (save-match-data
+      (save-excursion
+	(goto-char beg)
+	(back-to-indentation)
+	(cond ((looking-at end-re)
+	       (cons (or (funcall extend "begin" "[" -1) beg) end))
+	      ((looking-at begin-re)
+	       (cons beg (or (funcall extend "end" "]" 1) end)))
+	      (t (cons beg end)))))))
+
 (defun org-activate-footnote-links (limit)
   "Add text properties for footnotes."
   (let ((fn (org-footnote-next-reference-or-definition limit)))
@@ -6085,16 +6103,11 @@ Result depends on variable `org-highlight-latex-and-related'."
 	       (org-use-sub-superscripts (list org-match-substring-regexp))))
 	(re-latex
 	 (when (memq 'latex org-highlight-latex-and-related)
-	   (let* ((matchers (plist-get org-format-latex-options :matchers))
-		  (regexps (and (member "begin" matchers)
-				'("\\\\end{[a-zA-Z0-9\\*]+}[ \t]*$"))))
-	     (dolist (matcher matchers)
-	       (pcase (assoc matcher org-latex-regexps)
-		 (`("begin" . ,_) (push "^[ \t]*\\\\begin{[a-zA-Z0-9\\*]+}"
-					regexps))
-		 (`(,_ ,regexp . ,_) (push regexp regexps))
-		 (_ nil)))
-	     (nreverse regexps))))
+	   (let ((matchers (plist-get org-format-latex-options :matchers)))
+	     (delq nil
+		   (mapcar (lambda (x)
+			     (and (member (car x) matchers) (nth 1 x)))
+			   org-latex-regexps)))))
 	(re-entities
 	 (when (memq 'entities org-highlight-latex-and-related)
 	   (list "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\
@@ -6111,38 +6124,20 @@ highlighted object, if any.  Return t if some highlighting was
 done, nil otherwise."
   (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
-      (while (re-search-forward org-latex-and-related-regexp limit t)
+      (while (re-search-forward org-latex-and-related-regexp
+				nil t) ;; on purpose, we ignore LIMIT
 	(unless (cl-some (lambda (f) (memq f '(org-code org-verbatim underline
-						   org-special-keyword)))
+					       org-special-keyword)))
 			 (save-excursion
 			   (goto-char (1+ (match-beginning 0)))
 			   (face-at-point nil t)))
-	  (let* ((start (if (memq (char-after (1+ (match-beginning 0)))
+	  (let ((offset (if (memq (char-after (1+ (match-beginning 0)))
 				  '(?_ ?^))
-			    (1+ (match-beginning 0))
-			  (match-beginning 0)))
-		 (end
-		  (let* ((b (match-beginning 0))
-			 (e (match-end 0))
-			 (m (buffer-substring-no-properties b e)))
-		    (cond
-		     ((string-match "\\`[ \t]*\\\\begin{\\([a-zA-Z0-9\\*]+\\)}"
-				    m)
-		      (let ((re (format "\\\\end{%s}[ \t]*$"
-					(regexp-quote (match-string 1 m)))))
-			(or (re-search-forward re nil t) e)))
-		     ((string-match "\\\\end{\\([a-zA-Z0-9\\*]+\\)}[ \t]*\\'" m)
-		      (let ((re (format "^[ \t]*\\\\begin{%s}"
-					(regexp-quote (match-string 1 m)))))
-			(setq start
-			      (or (save-excursion (re-search-backward re nil t))
-				  b))
-			(line-end-position)))
-		     ((string-match "\\`\\\\[a-zA-Z]+\\*?{\\'" m)
-		      (search-forward "}" nil t))
-		     (t e)))))
+			    1
+			  0)))
 	    (font-lock-prepend-text-property
-	     start end 'face 'org-latex-and-related)
+	     (+ offset (match-beginning 0)) (match-end 0)
+	     'face 'org-latex-and-related)
 	    (add-text-properties start end '(font-lock-multiline t)))
 	  (throw 'found t)))
       nil)))
@@ -6332,6 +6327,8 @@ needs to be inserted at a specific position in the font-lock sequence.")
     (setq-local org-font-lock-keywords org-font-lock-extra-keywords)
     (setq-local font-lock-defaults
 		'(org-font-lock-keywords t nil nil backward-paragraph))
+    (setq-local font-lock-extend-after-change-region-function
+		#'org-fontify-extend-region)
     (kill-local-variable 'font-lock-keywords)
     nil))
 
