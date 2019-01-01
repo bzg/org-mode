@@ -1,6 +1,6 @@
 ;;; test-ob-sed.el --- tests for ob-sed.el
 
-;; Copyright (c) 2015 Bjarte Johansen
+;; Copyright (c) 2015, 2019 Bjarte Johansen
 ;; Authors: Bjarte Johansen
 
 ;; This file is not part of GNU Emacs.

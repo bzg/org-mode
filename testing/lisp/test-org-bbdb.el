@@ -1,6 +1,6 @@
 ;;; test-org-bbdb.el --- tests for org-bbdb.el                        -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2018  Marco Wahl
+;; Copyright (C) 2018, 2019  Marco Wahl
 
 ;; Author:  <marcowahlsoft@gmail.com>
 ;; Keywords: calendar

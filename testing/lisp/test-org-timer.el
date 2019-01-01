@@ -1,6 +1,6 @@
 ;;; test-org-timer.el --- Tests for org-timer.el
 
-;; Copyright (C) 2014-2015  Kyle Meyer
+;; Copyright (C) 2014-2015, 2019  Kyle Meyer
 
 ;; Author: Kyle Meyer <kyle@kyleam.com>
 

@@ -1,6 +1,6 @@
 ;;; test-ox.el --- Tests for ox.el                   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2012-2016  Nicolas Goaziou
+;; Copyright (C) 2012-2016, 2019  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 

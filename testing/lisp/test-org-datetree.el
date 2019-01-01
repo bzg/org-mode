@@ -1,6 +1,6 @@
 ;;; test-org-datetree.el --- Tests for Org Datetree  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2015  Nicolas Goaziou
+;; Copyright (C) 2015, 2019  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
 

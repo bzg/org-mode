@@ -1,6 +1,6 @@
 ;;; test-org-macs.el --- Tests for Org Macs library  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017  Nicolas Goaziou
+;; Copyright (C) 2017, 2019  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
 

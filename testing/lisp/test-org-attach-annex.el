@@ -1,6 +1,6 @@
 ;;; test-org-annex-attach.el --- Tests for Org Attach with git-annex
 ;;
-;; Copyright (c) 2016 Erik Hetzner
+;; Copyright (c) 2016, 2019 Erik Hetzner
 ;; Authors: Erik Hetzner
 
 ;; This file is not part of GNU Emacs.

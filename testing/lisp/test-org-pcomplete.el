@@ -1,6 +1,6 @@
 ;;; test-org-pcomplete.el --- test pcomplete integration
 
-;; Copyright (C) 2015-2016  Alexey Lebedeff
+;; Copyright (C) 2015-2016, 2019  Alexey Lebedeff
 ;; Authors: Alexey Lebedeff
 
 ;; This file is not part of GNU Emacs.

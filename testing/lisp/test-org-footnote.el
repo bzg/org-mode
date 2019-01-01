@@ -1,6 +1,6 @@
 ;;; test-org-footnote.el --- Tests for org-footnote.el
 
-;; Copyright (C) 2012-2015  Nicolas Goaziou
+;; Copyright (C) 2012-2015, 2019  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <mail at nicolasgoaziou dot fr>
 

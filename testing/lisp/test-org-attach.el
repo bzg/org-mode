@@ -1,6 +1,6 @@
 ;;; test-org-attach.el --- tests for org-attach.el      -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017
+;; Copyright (C) 2017, 2019
 
 ;; Author: Marco Wahl
 ;; Keywords: internal

@@ -1,6 +1,6 @@
 ;;; test-org-feed.el --- Tests for org-feed.el -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016  Michael Brand
+;; Copyright (C) 2016, 2019  Michael Brand
 
 ;; Author: Michael Brand <michael.ch.brand@gmail.com>
 

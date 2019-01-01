@@ -1,6 +1,6 @@
 ;;; test-ob-lua.el --- tests for ob-lua.el
 
-;; Copyright (c) 2016 Thibault Marin
+;; Copyright (c) 2016, 2019 Thibault Marin
 ;; Authors: Thibault Marin
 
 ;; This file is not part of GNU Emacs.

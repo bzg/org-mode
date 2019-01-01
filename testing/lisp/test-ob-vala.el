@@ -1,6 +1,6 @@
 ;;; test-ob-vala.el --- tests for ob-vala.el
 
-;; Copyright (C) 2017 Christian Garbs
+;; Copyright (C) 2017, 2019 Christian Garbs
 ;; Authors: Christian Garbs
 
 ;; This file is not part of GNU Emacs.
