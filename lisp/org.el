@@ -9938,7 +9938,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		       (read-string "Description: " initial-input)
 		     initial-input))))
 
-    (unless (string-match "\\S-" desc) (setq desc nil))
+    (unless (org-string-nw-p desc) (setq desc nil))
     (when remove (apply 'delete-region remove))
     (insert (org-make-link-string link desc))
     ;; Redisplay so as the new link has proper invisible characters.
