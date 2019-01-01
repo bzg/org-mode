@@ -253,7 +253,7 @@ value for ITEM property."
 		     (concat (make-string (1- (org-current-level))
 					  (if org-hide-leading-stars ?\s ?*))
 			     "* "))))
-	   (concat stars (org-columns-compact-links value))))
+	   (concat stars (org-link-display-format value))))
 	(`(,_ ,_ ,_ ,_ nil) value)
 	;; If PRINTF is set, assume we are displaying a number and
 	;; obey to the format string.
