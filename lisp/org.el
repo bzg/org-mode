@@ -6117,17 +6117,16 @@ Result depends on variable `org-highlight-latex-and-related'."
 			   (append re-latex re-entities re-sub)
 			   "\\|"))))
 
-(defun org-do-latex-and-related (limit)
+(defun org-do-latex-and-related (_limit)
   "Highlight LaTeX snippets and environments, entities and sub/superscript.
-LIMIT bounds the search for syntax to highlight.  Stop at first
-highlighted object, if any.  Return t if some highlighting was
-done, nil otherwise."
+Stop at first highlighted object, if any.  Return t if some
+highlighting was done, nil otherwise."
   (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
       (while (re-search-forward org-latex-and-related-regexp
 				nil t) ;; on purpose, we ignore LIMIT
 	(unless (cl-some (lambda (f) (memq f '(org-code org-verbatim underline
-					       org-special-keyword)))
+						   org-special-keyword)))
 			 (save-excursion
 			   (goto-char (1+ (match-beginning 0)))
 			   (face-at-point nil t)))
@@ -6138,7 +6137,8 @@ done, nil otherwise."
 	    (font-lock-prepend-text-property
 	     (+ offset (match-beginning 0)) (match-end 0)
 	     'face 'org-latex-and-related)
-	    (add-text-properties start end '(font-lock-multiline t)))
+	    (add-text-properties (+ offset (match-beginning 0)) (match-end 0)
+				 '(font-lock-multiline t)))
 	  (throw 'found t)))
       nil)))
 
