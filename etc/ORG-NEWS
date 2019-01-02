@@ -39,6 +39,15 @@ arguments no longer imply a "file" result is expected.
 
 See [[git:3367ac9457]] for details.
 
+*** All LaTeX preview backends use now xcolor
+
+The dvipng backend was previously relying on fg and bg parameters to
+be passed to the CLI. This didn't work when xcolor was directly or
+indirectly used in the document (e.g. tkiz is a user of xcolor). Since
+every other backend was already using xcolor to set fg and bg, the CLI
+alternative was removed and there is no more a :use-xcolor options
+since now it's implicitly always true.
+
 ** New features
 *** Add a dispatcher command to insert dynamic blocks
 

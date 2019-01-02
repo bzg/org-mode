@@ -3813,12 +3813,11 @@ All available processes and theirs documents can be found in
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvipng -fg %F -bg %B -D %D -T tight -o %O %f"))
+     :image-converter ("dvipng -D %D -T tight -o %O %f"))
     (dvisvgm
      :programs ("latex" "dvisvgm")
      :description "dvi > svg"
      :message "you need to install the programs: latex and dvisvgm."
-     :use-xcolor t
      :image-input-type "dvi"
      :image-output-type "svg"
      :image-size-adjust (1.7 . 1.5)
@@ -3828,7 +3827,6 @@ All available processes and theirs documents can be found in
      :programs ("latex" "convert")
      :description "pdf > png"
      :message "you need to install the programs: latex and imagemagick."
-     :use-xcolor t
      :image-input-type "pdf"
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
@@ -3848,11 +3846,6 @@ PROPERTIES accepts the following attributes:
   :message            string, message it when required programs cannot be found.
   :image-input-type   string, input file type of image converter (e.g., \"dvi\").
   :image-output-type  string, output file type of image converter (e.g., \"png\").
-  :use-xcolor         boolean, when non-nil, LaTeX \"xcolor\" macro is used to
-                      deal with background and foreground color of image.
-                      Otherwise, dvipng style background and foreground color
-                      format are generated.  You may then refer to them in
-                      command options with \"%F\" and \"%B\".
   :image-size-adjust  cons of numbers, the car element is used to adjust LaTeX
                       image size showed in buffer and the cdr element is for
                       HTML file.  This option is only useful for process
@@ -3884,8 +3877,6 @@ Place-holders used by `:image-converter' and `:latex-compiler':
 
 Place-holders only used by `:image-converter':
 
-  %F    foreground of image
-  %B    background of image
   %D    dpi, which is used to adjust image size by some processing commands.
   %S    the image size scale ratio, which is used to adjust image size by some
         processing commands."
@@ -18339,7 +18330,6 @@ a HTML file."
 	  (cdr (assq processing-type org-preview-latex-process-alist)))
 	 (programs (plist-get processing-info :programs))
 	 (error-message (or (plist-get processing-info :message) ""))
-	 (use-xcolor (plist-get processing-info :use-xcolor))
 	 (image-input-type (plist-get processing-info :image-input-type))
 	 (image-output-type (plist-get processing-info :image-output-type))
 	 (post-clean (or (plist-get processing-info :post-clean)
@@ -18370,36 +18360,23 @@ a HTML file."
 	 (resize-mini-windows nil)) ;Fix Emacs flicker when creating image.
     (dolist (program programs)
       (org-check-external-command program error-message))
-    (if use-xcolor
-	(progn (if (eq fg 'default)
-		   (setq fg (org-latex-color :foreground))
-		 (setq fg (org-latex-color-format fg)))
-	       (if (eq bg 'default)
-		   (setq bg (org-latex-color :background))
-		 (setq bg (org-latex-color-format
-			   (if (string= bg "Transparent") "white" bg))))
-	       (with-temp-file texfile
-		 (insert latex-header)
-		 (insert "\n\\begin{document}\n"
-			 "\\definecolor{fg}{rgb}{" fg "}\n"
-			 "\\definecolor{bg}{rgb}{" bg "}\n"
-			 "\n\\pagecolor{bg}\n"
-			 "\n{\\color{fg}\n"
-			 string
-			 "\n}\n"
-			 "\n\\end{document}\n")))
-      (if (eq fg 'default)
-	  (setq fg (org-dvipng-color :foreground))
-	(unless (string= fg "Transparent")
-	  (setq fg (org-dvipng-color-format fg))))
-      (if (eq bg 'default)
-	  (setq bg (org-dvipng-color :background))
-	(unless (string= bg "Transparent")
-	  (setq bg (org-dvipng-color-format bg))))
-      (with-temp-file texfile
-	(insert latex-header)
-	(insert "\n\\begin{document}\n" string "\n\\end{document}\n")))
-
+    (if (eq fg 'default)
+	(setq fg (org-latex-color :foreground))
+      (setq fg (org-latex-color-format fg)))
+    (if (eq bg 'default)
+	(setq bg (org-latex-color :background))
+      (setq bg (org-latex-color-format
+		(if (string= bg "Transparent") "white" bg))))
+    (with-temp-file texfile
+      (insert latex-header)
+      (insert "\n\\begin{document}\n"
+	      "\\definecolor{fg}{rgb}{" fg "}\n"
+	      "\\definecolor{bg}{rgb}{" bg "}\n"
+	      "\n\\pagecolor{bg}\n"
+	      "\n{\\color{fg}\n"
+	      string
+	      "\n}\n"
+	      "\n\\end{document}\n"))
     (let* ((err-msg (format "Please adjust `%s' part of \
 `org-preview-latex-process-alist'."
 			    processing-type))
@@ -18409,9 +18386,7 @@ a HTML file."
 	   (image-output-file
 	    (org-compile-file
 	     image-input-file image-converter image-output-type err-msg log-buf
-	     `((?F . ,(shell-quote-argument fg))
-	       (?B . ,(shell-quote-argument bg))
-	       (?D . ,(shell-quote-argument (format "%s" dpi)))
+	     `((?D . ,(shell-quote-argument (format "%s" dpi)))
 	       (?S . ,(shell-quote-argument (format "%s" (/ dpi 140.0))))))))
       (copy-file image-output-file tofile 'replace)
       (dolist (e post-clean)
