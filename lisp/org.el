@@ -4138,6 +4138,7 @@ org-level-* faces."
   "Non-nil means highlight LaTeX related syntax in the buffer.
 When non nil, the value should be a list containing any of the
 following symbols:
+  `native'   Highlight LaTeX snippets and environments natively.
   `latex'    Highlight LaTeX snippets and environments.
   `script'   Highlight subscript and superscript.
   `entities' Highlight entities."
@@ -4147,6 +4148,7 @@ following symbols:
   :type '(choice
 	  (const :tag "No highlighting" nil)
 	  (set :greedy t :tag "Highlight"
+	       (const :tag "LaTeX snippets and environments (native)" native)
 	       (const :tag "LaTeX snippets and environments" latex)
 	       (const :tag "Subscript and superscript" script)
 	       (const :tag "Entities" entities))))
@@ -6093,7 +6095,8 @@ Result depends on variable `org-highlight-latex-and-related'."
 		(list org-match-substring-with-braces-regexp))
 	       (org-use-sub-superscripts (list org-match-substring-regexp))))
 	(re-latex
-	 (when (memq 'latex org-highlight-latex-and-related)
+	 (when (or (memq 'latex org-highlight-latex-and-related)
+		   (memq 'native org-highlight-latex-and-related))
 	   (let ((matchers (plist-get org-format-latex-options :matchers)))
 	     (delq nil
 		   (mapcar (lambda (x)
@@ -6117,17 +6120,20 @@ highlighting was done, nil otherwise."
       (while (re-search-forward org-latex-and-related-regexp
 				nil t) ;; on purpose, we ignore LIMIT
 	(unless (cl-some (lambda (f) (memq f '(org-code org-verbatim underline
-						   org-special-keyword)))
+							org-special-keyword)))
 			 (save-excursion
 			   (goto-char (1+ (match-beginning 0)))
 			   (face-at-point nil t)))
-	  (let ((offset (if (memq (char-after (1+ (match-beginning 0)))
-				  '(?_ ?^))
-			    1
-			  0)))
-	    (font-lock-prepend-text-property
-	     (+ offset (match-beginning 0)) (match-end 0)
-	     'face 'org-latex-and-related)
+	  (let* ((offset (if (memq (char-after (1+ (match-beginning 0)))
+				   '(?_ ?^))
+			     1
+			   0))
+		 (start (+ offset (match-beginning 0)))
+		 (end (match-end 0)))
+	    (if (memq 'native org-highlight-latex-and-related)
+		(org-src-font-lock-fontify-block "latex" start end)
+	      (font-lock-prepend-text-property start end
+					       'face 'org-latex-and-related))
 	    (add-text-properties (+ offset (match-beginning 0)) (match-end 0)
 				 '(font-lock-multiline t)))
 	  (throw 'found t)))

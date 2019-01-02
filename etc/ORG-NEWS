@@ -99,6 +99,11 @@ system than the main Org document.  For example:
 *** New cell movement functions in tables
 ~S-<UP>~, ~S-<DOWN>~, ~S-<RIGHT>~, and ~S-<LEFT>~ now move cells in
 the corresponding direction by swapping with the adjacent cell.
+*** New option to natively fontify LaTeX snippets and environments
+A 'native option was added to org-highlight-latex-and-related. It
+matches the same structures than 'latex but it calls
+org-src-font-lock-fontify-block instead, thus bringing about full
+LaTeX font locking.
 
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
