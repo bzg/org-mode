@@ -6121,7 +6121,21 @@ Paragraph<point>"
 	  (let ((org-tags-column 78)
 		(indent-tabs-mode nil))
 	    (org-fix-tags-on-the-fly))
-	  (current-column)))))
+	  (current-column))))
+  ;; Aligning all tags in visible buffer.
+  (should
+   ;;              12345678901234567890
+   (equal (concat "* Level 1      :abc:\n"
+                  "** Level 2     :def:")
+          (org-test-with-temp-text (concat "* Level 1 :abc:\n"
+                                           "** Level 2 :def:")
+            (let ((org-tags-column -20)
+                  (indent-tabs-mode nil))
+              ;; (org-align-tags :all) must work even when the point
+              ;; is at the end of the buffer.
+              (goto-char (point-max))
+              (org-align-tags :all))
+            (buffer-string)))))
 
 (ert-deftest test-org/get-tags ()
   "Test `org-get-tags' specifications."

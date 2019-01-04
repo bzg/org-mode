@@ -14354,8 +14354,10 @@ visible part of the buffer."
 	(org--align-tags-here (funcall get-indent-column))
       (save-excursion
 	(if all
-	    (while (re-search-forward org-tag-line-re nil t)
-	      (org--align-tags-here (funcall get-indent-column)))
+	    (progn
+	      (goto-char (point-min))
+	      (while (re-search-forward org-tag-line-re nil t)
+		(org--align-tags-here (funcall get-indent-column))))
 	  (org-back-to-heading t)
 	  (org--align-tags-here (funcall get-indent-column)))))))
 
