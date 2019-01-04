@@ -3329,7 +3329,7 @@ Depending on the system Emacs is running on, certain dates cannot
 be represented with the type used internally to represent time.
 Dates between 1970-1-1 and 2038-1-1 can always be represented
 correctly.  Some systems allow for earlier dates, some for later,
-some for both.  One way to find out it to insert any date into an
+some for both.  One way to find out is to insert any date into an
 Org buffer, putting the cursor on the year and hitting S-up and
 S-down to test the range.
 
@@ -3337,7 +3337,7 @@ When this variable is set to t, the date/time prompt will not let
 you specify dates outside the 1970-2037 range, so it is certain that
 these dates will work in whatever version of Emacs you are
 running, and also that you can move a file from one Emacs implementation
-to another.  WHenever Org is forcing the year for you, it will display
+to another.  Whenever Org is forcing the year for you, it will display
 a message and beep.
 
 When this variable is nil, Org will check if the date is
