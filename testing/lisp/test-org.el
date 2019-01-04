@@ -6217,6 +6217,17 @@ Paragraph<point>"
             (let ((org-use-tag-inheritance t)
                   (org-tags-exclude-from-inheritance '("foo")))
 	      (org-get-tags)))))
+  ;; Test the collection of tags from #+filetags and parent tags.
+  (should
+   (equal '("a" "b" "c" "d")
+	  (org-test-with-temp-text (concat "#+filetags: a\n"
+					   "* Level 1 :b:\n"
+					   "** Level 2 :c:\n"
+					   "*** Level 3 :d:\n"
+					   "<point>")
+            (let ((org-use-tag-inheritance t))
+	      (org-mode-restart) ;So that `org-file-tags' get populated from #+filetags
+	      (org-get-tags)))))
   ;; Pathological case: tagged headline with an empty body.
   (should (org-test-with-temp-text "* :tag:" (org-get-tags))))
 
