@@ -959,7 +959,8 @@ matching headlines within the active region.  Such string must be
 a tags/property/todo match as it is used in the agenda tags view.
 
 The list of commands is: `org-schedule', `org-deadline',
-`org-todo', `org-archive-subtree', `org-archive-set-tag' and
+`org-todo', `org-set-tags-command', `org-archive-subtree',
+`org-archive-set-tag', `org-toggle-archive-tag' and
 `org-archive-to-archive-sibling'.  The archiving commands skip
 already archived entries."
   :type '(choice (const :tag "Don't loop" nil)
