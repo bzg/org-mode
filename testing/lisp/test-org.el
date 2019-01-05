@@ -6411,11 +6411,11 @@ Paragraph<point>"
 		(goto-char (point-max))
 		(org-set-tags-command)))
 	    (buffer-string))))
-  ;; With a non-nil prefix argument, align all tags in the buffer.
+  ;; With a C-u prefix argument, align all tags in the buffer.
   (should
    (equal "* H1 :foo:\n* H2 :bar:"
 	  (org-test-with-temp-text "* H1    :foo:\n* H2    :bar:"
-	    (let ((org-tags-column 1)) (org-set-tags-command t))
+	    (let ((org-tags-column 1)) (org-set-tags-command '(4)))
 	    (buffer-string)))))
 
 (ert-deftest test-org/toggle-tag ()
