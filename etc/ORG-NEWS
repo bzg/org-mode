@@ -123,6 +123,12 @@ It was unused throughout the code base.
 
 ** Miscellaneous
 *** Org Table reads numbers starting with 0 as strings
+*** Disable fast tag selection interface via prefix arg
+
+A call of ~org-set-tags-command~ with prefix argument C-u C-u avoids
+the fast tag selection interface and instead offers the plain
+interface.
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists

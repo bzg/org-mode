@@ -14165,60 +14165,66 @@ tags."
 
 When called with `\\[universal-argument]' prefix argument ARG, \
 realign all tags
-in the current buffer.  If a region is active, set tags for
-all headlines in the region.
+in the current buffer.
+
+When called with `\\[universal-argument] \\[universal-argument]' prefix argument, \
+unconditionally do not
+offer the fast tag selection interface.
+
+If a region is active, set tags in the region according to the
+setting of `org-loop-over-headlines-in-active-region'.
 
 This function is for interactive use only;
 in Lisp code use `org-set-tags' instead."
   (interactive "P")
-  (cond
-   (arg (org-align-tags t))
-   ((and (org-region-active-p) org-loop-over-headlines-in-active-region)
-    ;; Disable `org-loop-over-headlines-in-active-region' for
-    ;; successive calls.
-    (let (org-loop-over-headlines-in-active-region)
-      (org-map-entries
-       #'org-set-tags-command
-       nil
-       (if (eq org-loop-over-headlines-in-active-region 'start-level)
-	   'region-start-level
-	 'region)
-       (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
-   (t
-    (save-excursion
-      (org-back-to-heading)
-      (let* ((all-tags (org-get-tags))
-	     (table (setq org-last-tags-completion-table
-			  (org--tag-add-to-alist
-			   (and org-complete-tags-always-offer-all-agenda-tags
-				(org-global-tags-completion-table
-				 (org-agenda-files)))
-			   (or org-current-tag-alist (org-get-buffer-tags)))))
-	     (current-tags
-	      (cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
-			    all-tags))
-	     (inherited-tags
-	      (cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
-				all-tags))
-	     (tags
-	      (replace-regexp-in-string
-	       ;; Ignore all forbidden characters in tags.
-	       "[^[:alnum:]_@#%]+" ":"
-	       (if (or (eq t org-use-fast-tag-selection)
-		       (and org-use-fast-tag-selection
-			    (delq nil (mapcar #'cdr table))))
-		   (org-fast-tag-selection
-		    current-tags
-		    inherited-tags
-		    table
-		    (and org-fast-tag-selection-include-todo org-todo-key-alist))
-		 (let ((org-add-colon-after-tag-completion (< 1 (length table))))
-		   (org-trim (completing-read
-			      "Tags: "
-			      #'org-tags-completion-function
-			      nil nil (org-make-tag-string current-tags)
-			      'org-tags-history)))))))
-	(org-set-tags tags))))))
+  (let ((org-use-fast-tag-selection
+	 (unless (equal '(16) arg) org-use-fast-tag-selection)))
+    (cond
+     ((equal '(4) arg) (org-align-tags t))
+     ((and (org-region-active-p) org-loop-over-headlines-in-active-region)
+      (let (org-loop-over-headlines-in-active-region) ;  hint: infinite recursion.
+	(org-map-entries
+	 #'org-set-tags-command
+	 nil
+	 (if (eq org-loop-over-headlines-in-active-region 'start-level)
+	     'region-start-level
+	   'region)
+	 (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
+     (t
+      (save-excursion
+	(org-back-to-heading)
+	(let* ((all-tags (org-get-tags))
+	       (table (setq org-last-tags-completion-table
+			    (org--tag-add-to-alist
+			     (and org-complete-tags-always-offer-all-agenda-tags
+				  (org-global-tags-completion-table
+				   (org-agenda-files)))
+			     (or org-current-tag-alist (org-get-buffer-tags)))))
+	       (current-tags
+		(cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
+			      all-tags))
+	       (inherited-tags
+		(cl-remove-if-not (lambda (tag) (get-text-property 0 'inherited tag))
+				  all-tags))
+	       (tags
+		(replace-regexp-in-string
+		 ;; Ignore all forbidden characters in tags.
+		 "[^[:alnum:]_@#%]+" ":"
+		 (if (or (eq t org-use-fast-tag-selection)
+			 (and org-use-fast-tag-selection
+			      (delq nil (mapcar #'cdr table))))
+		     (org-fast-tag-selection
+		      current-tags
+		      inherited-tags
+		      table
+		      (and org-fast-tag-selection-include-todo org-todo-key-alist))
+		   (let ((org-add-colon-after-tag-completion (< 1 (length table))))
+		     (org-trim (completing-read
+				"Tags: "
+				#'org-tags-completion-function
+				nil nil (org-make-tag-string current-tags)
+				'org-tags-history)))))))
+	  (org-set-tags tags)))))))
 
 (defun org-align-tags (&optional all)
   "Align tags in current entry.
