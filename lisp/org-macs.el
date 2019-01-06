@@ -31,6 +31,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'format-spec)
 
 (declare-function org-string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
