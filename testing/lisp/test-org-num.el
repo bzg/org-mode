@@ -21,18 +21,18 @@
 
 ;;; Code:
 
-;; FIXME: this test fails in batch mode.
-;;
-;; (ert-deftest test-org-num/face ()
-;;   "Test `org-num-face' parameter."
-;;   (should
-;;    (equal
-;;     '(foo)
-;;     (org-test-with-temp-text "* H1"
-;;       (let ((org-num-face 'foo)) (org-num-mode 1))
-;;       (mapcar (lambda (o)
-;; 		(get-text-property 0 'face (overlay-get o 'after-string)))
-;; 	      (overlays-in (point-min) (point-max)))))))
+(require 'org-num)
+
+(ert-deftest test-org-num/face ()
+  "Test `org-num-face' parameter."
+  (should
+   (equal
+    '(foo)
+    (org-test-with-temp-text "* H1"
+      (let ((org-num-face 'foo)) (org-num-mode 1))
+      (mapcar (lambda (o)
+		(get-text-property 0 'face (overlay-get o 'after-string)))
+	      (overlays-in (point-min) (point-max)))))))
 
 (ert-deftest test-org-num/format-function ()
   "Test `org-num-format-function' parameter."
