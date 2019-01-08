@@ -162,6 +162,24 @@
    (org-test-agenda--kill-all-agendas)))
 
 
+(ert-deftest test-org-agenda/diary-inclusion ()
+  "Diary inclusion happens."
+  (org-test-agenda--kill-all-agendas)
+  (let ((diary-file (expand-file-name "examples/diary-file" org-test-dir))
+	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
+					       org-test-dir)))
+	(diary-date-forms '((month "[-/]" day "[^-/0-9]")
+			    (year "[-/]" month "[-/]" day "[^0-9]")
+			    (monthname " *" day "[^-0-9]")
+			    (year " *" monthname " *" day "[^0-9]")
+			    (dayname "\\W")))
+	(org-agenda-span 'day)
+	(org-agenda-include-diary t))
+    (org-agenda-list nil "<2019-01-08>")
+    (should (search-forward "f0bcf0cd8bad93c1451bb6e1b2aaedef5cce7cbb" nil t))
+    (org-test-agenda--kill-all-agendas)))
+
+
 (provide 'test-org-agenda)
 
 ;;; test-org-agenda.el ends here
