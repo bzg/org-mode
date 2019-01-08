@@ -14601,26 +14601,30 @@ When argument POS is non-nil, retrieve tags for headline at POS.
 
 According to `org-use-tags-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
-`org-file-tags'.  However, when optional argument LOCAL is
-non-nil, only return tags specified at the headline.
+`org-file-tags'.  In this case, the returned list of tags
+contains tags in this order: file tags, tags inherited from
+parent headlines, local tags.
+
+However, when optional argument LOCAL is non-nil, only return
+tags specified at the headline.
 
 Inherited tags have the `inherited' text property."
   (if (and org-trust-scanner-tags
-	   (or (not pos) (eq pos (point)))
-	   (not local))
+           (or (not pos) (eq pos (point)))
+           (not local))
       org-scanner-tags
     (org-with-point-at (or pos (point))
       (unless (org-before-first-heading-p)
-	(org-back-to-heading t)
-	(let ((ltags (org--get-local-tags)) itags)
-	  (if (or local (not org-use-tag-inheritance)) ltags
-	    (setq itags org-file-tags)
-	    (while (org-up-heading-safe)
-	      (setq itags (append (mapcar #'org-add-prop-inherited
-					  (org--get-local-tags))
-				  itags)))
-	    (delete-dups
-	     (append (org-remove-uninherited-tags itags) ltags))))))))
+        (org-back-to-heading t)
+        (let ((ltags (org--get-local-tags)) itags)
+          (if (or local (not org-use-tag-inheritance)) ltags
+            (while (org-up-heading-safe)
+              (setq itags (append (mapcar #'org-add-prop-inherited
+                                          (org--get-local-tags))
+                                  itags)))
+            (setq itags (append org-file-tags itags))
+            (delete-dups
+             (append (org-remove-uninherited-tags itags) ltags))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
