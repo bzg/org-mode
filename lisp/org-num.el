@@ -184,6 +184,11 @@ Update `org-num--invalid-flag' accordingly."
   (overlay-put o 'org-num 'invalid)
   (setq org-num--invalid-flag t))
 
+(defun org-num--clear ()
+  "Remove all numbering overlays in current buffer."
+  (mapc #'delete-overlay org-num--overlays)
+  (setq org-num--overlays nil))
+
 (defun org-num--make-overlay (numbering level skip)
   "Return overlay for numbering headline at point.
 
@@ -444,11 +449,12 @@ NUMBERING is a list of numbers."
       (user-error "Cannot activate headline numbering outside Org mode"))
     (setq org-num--numbering nil)
     (setq org-num--overlays (nreverse (org-num--number-region nil nil)))
-    (add-hook 'after-change-functions #'org-num--verify nil t))
+    (add-hook 'after-change-functions #'org-num--verify nil t)
+    (add-hook 'change-major-mode-hook #'org-num--clear nil t))
    (t
-    (mapc #'delete-overlay org-num--overlays)
-    (setq org-num--overlays nil)
-    (remove-hook 'after-change-functions #'org-num--verify t))))
+    (org-num--clear)
+    (remove-hook 'after-change-functions #'org-num--verify t)
+    (remove-hook 'change-major-mode-hook #'org-num--clear t))))
 
 
 (provide 'org-num)
