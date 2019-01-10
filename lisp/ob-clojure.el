@@ -63,7 +63,8 @@
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
 
 (defvar org-babel-default-header-args:clojure '())
-(defvar org-babel-header-args:clojure '((package . :any)))
+(defvar org-babel-header-args:clojure '((ns . :any)
+					(package . :any)))
 
 (defcustom org-babel-clojure-sync-nrepl-timeout 10
   "Timeout value, in seconds, of a Clojure sync call.
@@ -103,20 +104,19 @@ If the value is nil, timeout is disabled."
 	 (result-params (cdr (assq :result-params params)))
 	 (print-level nil)
 	 (print-length nil)
-	 (body
-	  (org-trim
-	   (format "(ns %s)\n%s"
-		   ;; Source block specified namespace :ns.
-		   ns
-		   ;; Variables binding.
-		   (if (null vars) (org-trim body)
-		     (format "(let [%s]\n%s)"
-			     (mapconcat
-			      (lambda (var)
-				(format "%S (quote %S)" (car var) (cdr var)))
-			      vars
-			      "\n      ")
-			     body))))))
+	 (body (org-trim
+		(concat
+		 ;; Source block specified namespace :ns.
+		 (and (cdr (assq :ns params)) (format "(ns %s)\n" ns))
+		 ;; Variables binding.
+		 (if (null vars) (org-trim body)
+		   (format "(let [%s]\n%s)"
+			   (mapconcat
+			    (lambda (var)
+			      (format "%S (quote %S)" (car var) (cdr var)))
+			    vars
+			    "\n      ")
+			   body))))))
     (if (or (member "code" result-params)
 	    (member "pp" result-params))
 	(format "(clojure.pprint/pprint (do %s))" body)

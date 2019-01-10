@@ -71,6 +71,20 @@
     (should (string=
 	     ": 1"
 	     (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+(ert-deftest ob-clojure/tangle-without-ns ()
+  (org-test-with-temp-text
+   "#+begin_src clojure :tangle /tmp/test.clj
+(print 1)
+#+end_src"
+   (org-babel-next-src-block)
+   (org-babel-tangle)
+   (should
+    (string=
+     "(print 1)
+"
+     (with-temp-buffer
+       (insert-file-contents "/tmp/test.clj")
+       (buffer-substring-no-properties (point-min) (point-max)))))))
 
 (provide 'test-ob-clojure)
 

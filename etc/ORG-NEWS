@@ -13,6 +13,11 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 * Version 9.3
 
 ** Incompatible changes
+*** ob-clojure will not auto prepend ~(ns ..)~ statement now
+When tangling, user usually just want to tangle literally code instead
+of prepend inserting a ~(ns ..)~ statement before source block
+code. Now, when you have no ~:ns~ header argument specified, this
+behavior will not happend automatically.
 *** Change in behavior on exit from an Org edit buffer
 Org will no longer attempt to restore the window configuration in the
 frame to which the user returns after editing a source block with
