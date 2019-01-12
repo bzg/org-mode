@@ -1604,7 +1604,7 @@ With prefix ARG, insert below the current line."
    (let* ((line (buffer-substring (line-beginning-position) (line-end-position)))
 	  (new (org-table-clean-line line)))
      ;; Fix the first field if necessary
-     (when (string-match "^[ \t]*| *[#$] *|" line)
+     (when (string-match "^[ \t]*| *[#*$] *|" line)
        (setq new (replace-match (match-string 0 line) t t new)))
      (beginning-of-line (if arg 2 1))
      ;; Buffer may not end of a newline character, so ensure
