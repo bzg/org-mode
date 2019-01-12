@@ -10054,7 +10054,7 @@ a link."
 	     (org-element-context)
 	     '(clock comment comment-block footnote-definition
 		     footnote-reference headline inline-src-block inlinetask
-		     keyword link node-property src-block timestamp)
+		     keyword link node-property planning src-block timestamp)
 	     t))
 	   (type (org-element-type context))
 	   (value (org-element-property :value context)))
@@ -10097,6 +10097,10 @@ a link."
 		       (= (org-element-property :post-affiliated context)
 			  (line-beginning-position)))))))
 	(org-footnote-action))
+       ;; On a planning line.  Check if we are really on a timestamp.
+       ((and (eq type 'planning)
+	     (org-in-regexp org-ts-regexp-both nil t))
+	(org-follow-timestamp-link))
        ;; On a clock line, make sure point is on the timestamp
        ;; before opening it.
        ((and (eq type 'clock)
