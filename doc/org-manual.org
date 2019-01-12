@@ -6511,17 +6511,13 @@ Org mode can produce quite complex reports based on the time clocking
 information.  Such a report is called a /clock table/, because it is
 formatted as one or several Org tables.
 
+You can insert, or update, a clock table through Org dynamic blocks
+insert command (see [[*Dynamic Blocks]]), by pressing {{{kbd(C-c C-x
+x c l o c k t a b l e RET)}}}.  When called with a prefix argument,
+jump to the first clock table in the current document and update it.
+The clock table includes archived trees.
+
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c C-x C-r)}}} (~org-clock-report~) ::
-
-     #+kindex: C-c C-x C-r
-     #+findex: org-clock-report
-     Insert a dynamic block (see [[*Dynamic Blocks]]) containing a clock
-     report as an Org mode table into the current file.  When point is
-     at an existing clock table, just update it.  When called with a
-     prefix argument, jump to the first clock report in the current
-     document and update it.  The clock table includes archived trees.
-
 - {{{kbd(C-c C-c)}}} or {{{kbd(C-c C-x C-u)}}} (~org-dblock-update~) ::
 
      #+kindex: C-c C-c
