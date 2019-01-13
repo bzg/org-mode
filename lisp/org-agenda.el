@@ -7380,6 +7380,10 @@ With a prefix argument, do so in all agenda buffers."
 (defvar org-agenda-filter-form nil)
 (defvar org-agenda-filtered-by-category nil)
 
+(defsubst org-agenda-get-category ()
+  "Return the category of the agenda line."
+  (org-get-at-bol 'org-category))
+
 (defun org-agenda-filter-by-category (strip)
   "Filter lines in the agenda buffer that have a specific category.
 The category is that of the current line.
@@ -7390,7 +7394,7 @@ With a prefix argument, exclude the lines of that category.
   (if (and org-agenda-filtered-by-category
 	   org-agenda-category-filter)
       (org-agenda-filter-show-all-cat)
-    (let ((cat (org-no-properties (org-get-at-eol 'org-category 1))))
+    (let ((cat (org-no-properties (org-agenda-get-category))))
       (cond
        ((and cat strip)
         (org-agenda-filter-apply
@@ -7725,7 +7729,7 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 	(if (org-get-at-bol 'org-marker)
 	    (progn
 	      (setq tags (org-get-at-bol 'tags)
-		    cat (org-get-at-eol 'org-category 1)
+		    cat (org-agenda-get-category)
 		    txt (org-get-at-bol 'txt))
 	      (unless (eval org-agenda-filter-form)
 		(org-agenda-filter-hide-line type))
@@ -8950,7 +8954,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		   (equal m hdmarker))
 	  (setq props (text-properties-at (point))
 		dotime (org-get-at-bol 'dotime)
-		cat (org-get-at-eol 'org-category 1)
+		cat (org-agenda-get-category)
 		level (org-get-at-bol 'level)
 		tags thetags
 		new
