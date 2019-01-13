@@ -928,7 +928,9 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	;; contents, and leave point on the /next/ headline.  We store
 	;; the current entry location to be able to get back here when
 	;; we need to clock in again the previously clocked task.
-	(heading (org-with-point-at (car clock) (org-back-to-heading t))))
+	(heading (org-with-point-at (car clock)
+		   (org-back-to-heading t)
+		   (point-marker))))
     (pcase resolve-to
       (`nil
        (org-clock-clock-cancel clock)
