@@ -9780,7 +9780,7 @@ If the DEFAULT-DESCRIPTION parameter is non-nil, this value will
 be used as the default description.  Otherwise, if
 `org-make-link-description-function' is non-nil, this function
 will be called with the link target, and the result will be the
-default link description.  When called non-interactivily, don't
+default link description.  When called non-interactively, don't
 allow to edit the default description."
   (interactive "P")
   (let* ((wcf (current-window-configuration))
