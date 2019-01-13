@@ -572,7 +572,7 @@ Where possible, use the standard interface for changing this line."
 	 (eol (line-end-position))
 	 (pom (or (get-text-property bol 'org-hd-marker) (point)))
 	 (key (or key (get-char-property (point) 'org-columns-key)))
-	 (org-columns--time (float-time (current-time)))
+	 (org-columns--time (float-time))
 	 (action
 	  (pcase key
 	    ("CLOCKSUM"
@@ -823,7 +823,7 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
     (org-columns-goto-top-level)
     ;; Initialize `org-columns-current-fmt' and
     ;; `org-columns-current-fmt-compiled'.
-    (let ((org-columns--time (float-time (current-time))))
+    (let ((org-columns--time (float-time)))
       (org-columns-get-format columns-fmt-string)
       (unless org-columns-inhibit-recalculation (org-columns-compute-all))
       (save-restriction
@@ -1208,6 +1208,9 @@ column specification."
   "Compute all columns that have operators defined."
   (with-silent-modifications
     (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+  ;; Pass `current-time' result to `float-time' (instead of calling
+  ;; without arguments) so that only `current-time' has to be
+  ;; overridden in tests.
   (let ((org-columns--time (float-time (current-time)))
 	seen)
     (dolist (spec org-columns-current-fmt-compiled)
@@ -1551,7 +1554,7 @@ PARAMS is a property list of parameters:
   (if (markerp org-columns-begin-marker)
       (move-marker org-columns-begin-marker (point))
     (setq org-columns-begin-marker (point-marker)))
-  (let* ((org-columns--time (float-time (current-time)))
+  (let* ((org-columns--time (float-time))
 	 (fmt
 	  (cond
 	   ((bound-and-true-p org-agenda-overriding-columns-format))

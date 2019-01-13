@@ -74,6 +74,13 @@
   ;; The misspelled variant was made obsolete in Emacs 27.1
   (defalias 'pcomplete-uniquify-list 'pcomplete-uniqify-list))
 
+(defun org-current-time-as-list ()
+  "Compatibility wrapper for `current-time'.
+As of Emacs 27.1, `current-time' callers should not assume a list
+return value."
+  (or (ignore-errors (encode-time nil 'list))
+      (current-time)))
+
 
 ;;; Emacs < 26.1 compatibility
 
@@ -84,6 +91,20 @@
 (if (fboundp 'buffer-hash)
     (defalias 'org-buffer-hash 'buffer-hash)
   (defun org-buffer-hash () (md5 (current-buffer))))
+
+(unless (fboundp 'file-attribute-modification-time)
+  (defsubst file-attribute-modification-time (attributes)
+    "The modification time in ATTRIBUTES returned by `file-attributes'.
+This is the time of the last change to the file's contents, and
+is a list of integers (HIGH LOW USEC PSEC) in the same style
+as (current-time)."
+    (nth 5 attributes)))
+
+(unless (fboundp 'file-attribute-size)
+  (defsubst file-attribute-size (attributes)
+    "The size (in bytes) in ATTRIBUTES returned by `file-attributes'.
+This is a floating point number if the size is too large for an integer."
+    (nth 7 attributes)))
 
 
 ;;; Emacs < 25.1 compatibility
@@ -601,6 +622,15 @@ attention to case differences."
       (and (>= start-pos 0)
            (eq t (compare-strings suffix nil nil
                                   string start-pos nil ignore-case))))))
+
+(unless (fboundp 'proper-list-p)
+  ;; `proper-list-p' was added in Emacs 27.1.  The function below is
+  ;; taken from Emacs subr.el 200195e824b^.
+  (defun proper-list-p (object)
+    "Return OBJECT's length if it is a proper list, nil otherwise.
+A proper list is neither circular nor dotted (i.e., its last cdr
+is nil)."
+    (and (listp object) (ignore-errors (length object)))))
 
 
 ;;; Integration with and fixes for other packages

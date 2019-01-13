@@ -1401,6 +1401,9 @@ current display in the agenda."
   :group 'org-agenda-daily/weekly
   :type 'plist)
 
+(defvaralias 'org-agenda-search-view-search-words-only
+  'org-agenda-search-view-always-boolean)
+
 (defcustom org-agenda-search-view-always-boolean nil
   "Non-nil means the search string is interpreted as individual parts.
 
@@ -1428,9 +1431,6 @@ boolean search."
   :group 'org-agenda-search-view
   :version "24.1"
   :type 'boolean)
-
-(defvaralias 'org-agenda-search-view-search-words-only
-  'org-agenda-search-view-always-boolean)
 
 (defcustom org-agenda-search-view-force-full-words nil
   "Non-nil means, search words must be matches as complete words.
@@ -1873,6 +1873,9 @@ Nil means don't hide any tags."
 	  (const  :tag "Hide none" nil)
 	  (string :tag "Regexp   ")))
 
+(defvaralias 'org-agenda-remove-tags-when-in-prefix
+  'org-agenda-remove-tags)
+
 (defcustom org-agenda-remove-tags nil
   "Non-nil means remove the tags from the headline copy in the agenda.
 When this is the symbol `prefix', only remove tags when
@@ -1883,8 +1886,7 @@ When this is the symbol `prefix', only remove tags when
 	  (const :tag "Never" nil)
 	  (const :tag "When prefix format contains %T" prefix)))
 
-(defvaralias 'org-agenda-remove-tags-when-in-prefix
-  'org-agenda-remove-tags)
+(defvaralias 'org-agenda-align-tags-to-column 'org-agenda-tags-column)
 
 (defcustom org-agenda-tags-column 'auto
   "Shift tags in agenda items to this column.
@@ -1901,8 +1903,6 @@ character screen."
 	  (integer :tag "Specific column" -80))
   :package-version '(Org . "9.1")
   :version "26.1")
-
-(defvaralias 'org-agenda-align-tags-to-column 'org-agenda-tags-column)
 
 (defcustom org-agenda-fontify-priorities 'cookies
   "Non-nil means highlight low and high priorities in agenda.
@@ -2084,9 +2084,9 @@ evaluate to a string."
 
 ;;; Define the org-agenda-mode
 
+(defvaralias 'org-agenda-keymap 'org-agenda-mode-map)
 (defvar org-agenda-mode-map (make-sparse-keymap)
   "Keymap for `org-agenda-mode'.")
-(defvaralias 'org-agenda-keymap 'org-agenda-mode-map)
 
 (defvar org-agenda-menu) ; defined later in this file.
 (defvar org-agenda-restrict nil) ; defined later in this file.
@@ -2229,10 +2229,14 @@ The following commands are available:
   (add-hook 'post-command-hook 'org-agenda-update-agenda-type nil 'local)
   (add-hook 'pre-command-hook 'org-unhighlight nil 'local)
   ;; Make sure properties are removed when copying text
-  (add-hook 'filter-buffer-substring-functions
-	    (lambda (fun start end delete)
-	      (substring-no-properties (funcall fun start end delete)))
-	    nil t)
+  (if (boundp 'filter-buffer-substring-functions)
+      (add-hook 'filter-buffer-substring-functions
+		(lambda (fun start end delete)
+                  (substring-no-properties (funcall fun start end delete)))
+		nil t)
+    ;; Emacs >= 24.4.
+    (add-function :filter-return (local 'filter-buffer-substring-function)
+                  #'substring-no-properties))
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
@@ -7014,15 +7018,15 @@ When TYPE is \"scheduled\", \"deadline\", \"timestamp\" or
 \"timestamp_ia\", compare within each of these type.  When TYPE
 is the empty string, compare all timestamps without respect of
 their type."
-  (let* ((def (if org-sort-agenda-notime-is-late most-positive-fixnum -1))
+  (let* ((def (and (not org-sort-agenda-notime-is-late) -1))
 	 (ta (or (and (string-match type (or (get-text-property 1 'type a) ""))
 		      (get-text-property 1 'ts-date a))
 		 def))
 	 (tb (or (and (string-match type (or (get-text-property 1 'type b) ""))
 		      (get-text-property 1 'ts-date b))
 		 def)))
-    (cond ((< ta tb) -1)
-	  ((< tb ta) +1))))
+    (cond ((if ta (and tb (< ta tb)) tb) -1)
+	  ((if tb (and ta (< tb ta)) ta) +1))))
 
 (defsubst org-cmp-habit-p (a b)
   "Compare the todo states of strings A and B."
@@ -10201,7 +10205,7 @@ to override `appt-message-warning-time'."
          ;; time and without date as argument, so it may pass wrong
          ;; information otherwise
          (today (org-date-to-gregorian
-                 (time-to-days (current-time))))
+                 (time-to-days nil)))
          (org-agenda-restrict nil)
          (files (org-agenda-files 'unrestricted)) entries file
          (org-agenda-buffer nil))

@@ -943,7 +943,7 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	 (org-clock-clock-out clock fail-quietly))
 	((org-is-active-clock clock) nil)
 	(t (org-clock-clock-in clock t))))
-      ((pred (time-less-p (current-time)))
+      ((pred (time-less-p nil))
        (error "RESOLVE-TO must refer to a time in the past"))
       (_
        (when restart (error "RESTART is not valid here"))
@@ -1043,7 +1043,7 @@ to be CLOCKED OUT."))))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
 	   (floor (/ (float-time
-		      (time-subtract (current-time) last-valid)) 60)))
+		      (time-subtract nil last-valid)) 60)))
 	 (keep
 	  (and (memq ch '(?k ?K))
 	       (read-number "Keep how many minutes? " default)))
@@ -1080,8 +1080,7 @@ to be CLOCKED OUT."))))
 	      (keep
 	       (time-add last-valid (seconds-to-time (* 60 keep))))
 	      (gotback
-	       (time-subtract (current-time)
-			      (seconds-to-time (* 60 gotback))))
+	       (time-subtract nil (seconds-to-time (* 60 gotback))))
 	      (t
 	       (error "Unexpected, please report this as a bug")))
        (and gotback last-valid)
@@ -1163,7 +1162,7 @@ so long."
 	     org-clock-marker (marker-buffer org-clock-marker))
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
-	    (time-subtract (current-time)
+	    (time-subtract nil
 			   (seconds-to-time org-clock-user-idle-seconds)))
 	   (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
@@ -1173,8 +1172,7 @@ so long."
 	   (lambda (_)
 	     (format "Clocked in & idle for %.1f mins"
 		     (/ (float-time
-			 (time-subtract (current-time)
-					org-clock-user-idle-start))
+			 (time-subtract nil org-clock-user-idle-start))
 			60.0)))
 	   org-clock-user-idle-start)))))
 
@@ -2130,7 +2128,8 @@ The return value is a list containing two internal times, one for
 the beginning of the range and one for its end, like the ones
 returned by `current-time' or `encode-time' and a string used to
 display information.  If AS-STRINGS is non-nil, the returned
-times will be formatted strings.
+times will be formatted strings.  Note that the first element is
+always nil when KEY is `untilnow'.
 
 If WSTART is non-nil, use this number to specify the starting day
 of a week (monday is 1).  If MSTART is non-nil, use this number
@@ -2247,9 +2246,7 @@ have priority."
     ;; Format start and end times according to AS-STRINGS.
     (let* ((start (pcase key
 		    (`interactive (org-read-date nil t nil "Range start? "))
-                    ;; In theory, all clocks started after the dawn of
-                    ;; humanity.
-		    (`untilnow (encode-time 0 0 0 0 0 -50000))
+		    (`untilnow nil)
 		    (_ (encode-time 0 m h d month y))))
 	   (end (pcase key
 		  (`interactive (org-read-date nil t nil "Range end? "))
@@ -2273,7 +2270,7 @@ have priority."
 	      (`untilnow "now"))))
       (if (not as-strings) (list start end text)
 	(let ((f (cdr org-time-stamp-formats)))
-	  (list (format-time-string f start)
+	  (list (and start (format-time-string f start))
 		(format-time-string f end)
 		text))))))
 
@@ -2717,7 +2714,11 @@ a number of clock tables."
             ((and (pred numberp) n)
              (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
                (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
-            (timestamp (seconds-to-time (org-matcher-time timestamp)))))
+            (timestamp
+	     (seconds-to-time
+	      (org-matcher-time (or timestamp
+				    ;; The year Org was born.
+				    "<2003-01-01 Thu 00:00>"))))))
          (end
           (pcase (if range (nth 1 range) (plist-get params :tend))
             ((and (pred numberp) n)

@@ -258,7 +258,8 @@ byte-compiled before it is loaded."
   (interactive "fFile to load: \nP")
   (let* ((tangled-file (concat (file-name-sans-extension file) ".el")))
     ;; Tangle only if the Org file is newer than the Elisp file.
-    (unless (org-file-newer-than-p tangled-file (nth 5 (file-attributes file)))
+    (unless (org-file-newer-than-p tangled-file
+				   (file-attribute-modification-time file))
       (org-babel-tangle-file file tangled-file "emacs-lisp"))
     (if compile
 	(progn
@@ -1439,6 +1440,8 @@ time in Emacs."
   :type 'boolean
   :safe #'booleanp)
 
+(defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e)
+
 (defcustom org-special-ctrl-a/e nil
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.
 
@@ -1476,7 +1479,6 @@ This may also be a cons cell where the behavior for `C-a' and
 			(const :tag "off" nil)
 			(const :tag "on: before tags first" t)
 			(const :tag "reversed: after tags first" reversed)))))
-(defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e)
 
 (defcustom org-special-ctrl-k nil
   "Non-nil means `C-k' will behave specially in headlines.
@@ -2890,6 +2892,8 @@ because Agenda Log mode depends on the format of these entries."
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
 
+(defvaralias 'org-log-state-notes-into-drawer 'org-log-into-drawer)
+
 (defcustom org-log-into-drawer nil
   "Non-nil means insert state change notes and time stamps into a drawer.
 When nil, state changes notes will be inserted after the headline and
@@ -2920,8 +2924,6 @@ function `org-log-into-drawer' instead."
 	  (const :tag "Not into a drawer" nil)
 	  (const :tag "LOGBOOK" t)
 	  (string :tag "Other")))
-
-(defvaralias 'org-log-state-notes-into-drawer 'org-log-into-drawer)
 
 (defun org-log-into-drawer ()
   "Name of the log drawer, as a string, or nil.
@@ -3231,6 +3233,9 @@ This display will be in an overlay, in the minibuffer."
   :group 'org-time
   :type 'boolean)
 
+(defvaralias 'org-popup-calendar-for-date-prompt
+  'org-read-date-popup-calendar)
+
 (defcustom org-read-date-popup-calendar t
   "Non-nil means pop up a calendar when prompting for a date.
 In the calendar, the date can be selected with mouse-1.  However, the
@@ -3238,8 +3243,6 @@ minibuffer will also be active, and you can simply enter the date as well.
 When nil, only the minibuffer will be available."
   :group 'org-time
   :type 'boolean)
-(defvaralias 'org-popup-calendar-for-date-prompt
-  'org-read-date-popup-calendar)
 
 (defcustom org-extend-today-until 0
   "The hour when your day really ends.  Must be an integer.
@@ -3687,6 +3690,9 @@ regular expression will be included."
   :group 'org-agenda
   :type 'regexp)
 
+(defvaralias 'org-agenda-multi-occur-extra-files
+  'org-agenda-text-search-extra-files)
+
 (defcustom org-agenda-text-search-extra-files nil
   "List of extra files to be searched by text search commands.
 These files will be searched in addition to the agenda files by the
@@ -3703,9 +3709,6 @@ scope."
   :type '(set :greedy t
 	      (const :tag "Agenda Archives" agenda-archives)
 	      (repeat :inline t (file))))
-
-(defvaralias 'org-agenda-multi-occur-extra-files
-  'org-agenda-text-search-extra-files)
 
 (defcustom org-agenda-skip-unavailable-files nil
   "Non-nil means to just skip non-reachable files in `org-agenda-files'.
@@ -5491,15 +5494,14 @@ the rounding returns a past time."
 	    (apply 'encode-time
 		   (append (list 0 (* r (floor (+ .5 (/ (float (nth 1 time)) r)))))
 			   (nthcdr 2 time))))
-      (if (and past (< (float-time (time-subtract (current-time) res)) 0))
+      (if (and past (< (float-time (time-subtract nil res)) 0))
 	  (seconds-to-time (- (float-time res) (* r 60)))
 	res))))
 
 (defun org-today ()
   "Return today date, considering `org-extend-today-until'."
   (time-to-days
-   (time-subtract (current-time)
-		  (list 0 (* 3600 org-extend-today-until) 0))))
+   (time-subtract nil (list 0 (* 3600 org-extend-today-until) 0))))
 
 ;;;; Font-Lock stuff, including the activators
 
@@ -9488,7 +9490,7 @@ Note: this function also decodes single byte encodings like
 		  (cons 6 128))))
 	  (when (>= val 192) (setq eat (car shift-xor)))
 	  (setq val (logxor val (cdr shift-xor)))
-	  (setq sum (+ (lsh sum (car shift-xor)) val))
+	  (setq sum (+ (ash sum (car shift-xor)) val))
 	  (when (> eat 0) (setq eat (- eat 1)))
 	  (cond
 	   ((= 0 eat)			;multi byte
@@ -12673,8 +12675,7 @@ This function is run automatically after each state change to a DONE state."
 		    (while (re-search-forward org-clock-line-re end t)
 		      (when (org-at-clock-log-p) (throw :clock t))))))
 	(org-entry-put nil "LAST_REPEAT" (format-time-string
-					  (org-time-stamp-format t t)
-					  (current-time))))
+					  (org-time-stamp-format t t))))
       (when org-log-repeat
 	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
 		(memq 'org-add-log-note post-command-hook))
@@ -12729,7 +12730,7 @@ This function is run automatically after each state change to a DONE state."
 		      (let ((nshiftmax 10)
 			    (nshift 0))
 			(while (or (= nshift 0)
-				   (not (time-less-p (current-time) time)))
+				   (not (time-less-p nil time)))
 			  (when (= nshiftmax (cl-incf nshift))
 			    (or (y-or-n-p
 				 (format "%d repeater intervals were not \
@@ -16382,7 +16383,7 @@ user."
 					;      (when (and org-read-date-prefer-future
 					;		 (not iso-year)
 					;		 (< (calendar-absolute-from-gregorian iso-date)
-					;		    (time-to-days (current-time))))
+					;		    (time-to-days nil)))
 					;	(setq year (1+ year)
 					;	      iso-date (calendar-gregorian-from-absolute
 					;			(calendar-iso-to-absolute
@@ -16870,7 +16871,7 @@ signaled."
 YEAR is expanded into one of the 30 next years, if possible, or
 into a past one.  Any year larger than 99 is returned unchanged."
   (if (>= year 100) year
-    (let* ((current (string-to-number (format-time-string "%Y" (current-time))))
+    (let* ((current (string-to-number (format-time-string "%Y")))
 	   (century (/ current 100))
 	   (offset (- year (% current 100))))
       (cond ((> offset 30) (+ (* (1- century) 100) year))
@@ -17367,7 +17368,7 @@ A prefix ARG can be used to force the current date."
 	diff)
     (when (or (org-at-timestamp-p 'lax)
 	      (org-match-line (concat ".*" org-ts-regexp)))
-      (let ((d1 (time-to-days (current-time)))
+      (let ((d1 (time-to-days nil))
 	    (d2 (time-to-days (org-time-string-to-time (match-string 1)))))
 	(setq diff (- d2 d1))))
     (calendar)
@@ -18528,6 +18529,9 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
       (org-toggle-inline-images)
     (org-toggle-inline-images)
     (org-toggle-inline-images)))
+
+;; For without-x builds.
+(declare-function image-refresh "image" (spec &optional frame))
 
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
