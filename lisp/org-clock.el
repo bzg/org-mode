@@ -2128,7 +2128,8 @@ The return value is a list containing two internal times, one for
 the beginning of the range and one for its end, like the ones
 returned by `current-time' or `encode-time' and a string used to
 display information.  If AS-STRINGS is non-nil, the returned
-times will be formatted strings.
+times will be formatted strings.  Note that the first element is
+always nil when KEY is `untilnow'.
 
 If WSTART is non-nil, use this number to specify the starting day
 of a week (monday is 1).  If MSTART is non-nil, use this number
@@ -2245,9 +2246,7 @@ have priority."
     ;; Format start and end times according to AS-STRINGS.
     (let* ((start (pcase key
 		    (`interactive (org-read-date nil t nil "Range start? "))
-                    ;; In theory, all clocks started after the dawn of
-                    ;; humanity.
-		    (`untilnow (encode-time 0 0 0 0 0 -50000))
+		    (`untilnow nil)
 		    (_ (encode-time 0 m h d month y))))
 	   (end (pcase key
 		  (`interactive (org-read-date nil t nil "Range end? "))
@@ -2271,7 +2270,7 @@ have priority."
 	      (`untilnow "now"))))
       (if (not as-strings) (list start end text)
 	(let ((f (cdr org-time-stamp-formats)))
-	  (list (format-time-string f start)
+	  (list (and start (format-time-string f start))
 		(format-time-string f end)
 		text))))))
 
@@ -2707,7 +2706,9 @@ The TS argument has the same type as the return values of
 	 cc tsb)
     (when block
       (setq cc (org-clock-special-range block nil t ws ms)
-	    ts (car cc)
+	    ts (or (car cc)
+		   ;; The year Org was born.
+		   "<2003-01-01 Thu 00:00>")
 	    te (nth 1 cc)))
     (cond
      ((numberp ts)
