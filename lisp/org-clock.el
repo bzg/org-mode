@@ -2687,7 +2687,7 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
     (concat "\\_" (make-string (* 2 (1- level)) ?\s))))
 
 (defun org-clocktable-steps (params)
-  "Create one ore more clock tables, according to PARAMS.
+  "Create one or more clock tables, according to PARAMS.
 Step through the range specifications in plist PARAMS to make
 a number of clock tables."
   (let* ((ignore-empty-tables (plist-get params :stepskip0))
