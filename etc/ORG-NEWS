@@ -104,6 +104,11 @@ A 'native option was added to org-highlight-latex-and-related. It
 matches the same structures than 'latex but it calls
 org-src-font-lock-fontify-block instead, thus bringing about full
 LaTeX font locking.
+*** ~org-clone-subtree-with-time-shift~ learnt to shift backward in time
+=<C-c C-x c>= (~org-clone-subtree-with-time-shift~) now takes a
+negative value as a valid repeater to shift time stamps in backward
+in cloned subtrees.  You can give, for example, ‘-3d’ to shift three
+days in the past.
 
 ** New functions
 *** ~org-dynamic-block-insert-dblock~

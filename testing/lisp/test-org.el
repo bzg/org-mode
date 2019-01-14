@@ -1496,6 +1496,18 @@
 	    (replace-regexp-in-string
 	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
 	     nil nil 1))))
+  ;; Clone repeating once in backward.
+  (should
+   (equal "\
+* H1\n<2015-06-21>
+* H1\n<2015-06-19>
+* H1\n<2015-06-17 +1w>
+"
+	  (org-test-with-temp-text "* H1\n<2015-06-21 Sun +1w>"
+	    (org-clone-subtree-with-time-shift 1 "-2d")
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\)\\( \\+[0-9][hdmwy]\\)?>" "" (buffer-string)
+	     nil nil 1))))
   ;; Clone non-repeating zero times.
   (should
    (equal "\
