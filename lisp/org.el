@@ -258,8 +258,9 @@ byte-compiled before it is loaded."
   (interactive "fFile to load: \nP")
   (let* ((tangled-file (concat (file-name-sans-extension file) ".el")))
     ;; Tangle only if the Org file is newer than the Elisp file.
-    (unless (org-file-newer-than-p tangled-file
-				   (file-attribute-modification-time file))
+    (unless (org-file-newer-than-p
+	     tangled-file
+	     (file-attribute-modification-time (file-attributes file)))
       (org-babel-tangle-file file tangled-file "emacs-lisp"))
     (if compile
 	(progn
