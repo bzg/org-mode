@@ -1333,8 +1333,7 @@ may have been stored before."
 	(org-capture-narrow beg (1- end))
 	(when (or (search-backward "%?" beg t)
 		  (search-forward "%?" end t))
-	  (replace-match "")))
-      (org-table-align))))
+	  (replace-match ""))))))
 
 (defun org-capture-place-plain-text ()
   "Place the template plainly.
