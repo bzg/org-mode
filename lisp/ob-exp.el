@@ -376,7 +376,7 @@ block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
   (unless (and hash (equal hash (org-babel-current-result-hash)))
     (let ((lang (nth 0 info))
-	  (body (if (org-babel-noweb-p (nth 2 info) :export)
+	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
 		    (org-babel-expand-noweb-references
 		     info org-babel-exp-reference-buffer)
 		  (nth 1 info)))
