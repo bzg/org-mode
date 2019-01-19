@@ -3153,10 +3153,7 @@ Return new environment, as a string."
 	    (cond ((and (not float) (plist-member attributes :float)) nil)
 		  ((member float '("sidewaystable" "sideways")) "sidewaystable")
 		  ((equal float "multicolumn") "table*")
-		  ((or float
-		       (org-element-property :caption table)
-		       (org-string-nw-p (plist-get attributes :caption)))
-		   "table")
+		  ((or float caption) "table")
 		  (t nil))))
 	 (placement
 	  (or (plist-get attributes :placement)
