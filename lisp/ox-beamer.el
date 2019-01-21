@@ -645,13 +645,22 @@ as a communication channel."
 		contents))
        ;; Case 4: HEADLINE is a note.
        ((member environment '("note" "noteNH"))
-	(format "\\note{%s}"
-		(concat (and (equal environment "note")
-			     (concat
-			      (org-export-data
-			       (org-element-property :title headline) info)
-			      "\n"))
-			(org-trim contents))))
+        (concat "\\note"
+		;; Overlay specification.
+		(let ((overlay (org-element-property :BEAMER_ACT headline)))
+		  (when overlay
+		    (org-beamer--normalize-argument
+		     overlay
+		     (if (string-match "\\`\\[.*\\]\\'" overlay)
+			 'defaction 'action))))
+		(format "{%s}"
+                        (concat (and (equal environment "note")
+                                     (concat
+                                      (org-export-data
+                                       (org-element-property :title headline)
+				       info)
+                                      "\n"))
+				(org-trim contents)))))
        ;; Case 5: HEADLINE is a frame.
        ((= level frame-level)
 	(org-beamer--format-frame headline contents info))

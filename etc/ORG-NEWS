@@ -54,6 +54,10 @@ alternative was removed and there is no more a :use-xcolor options
 since now it's implicitly always true.
 
 ** New features
+*** Handle overlay specification for notes in Beamer export
+
+This aligns Beamer notes with slide overlays.
+
 *** Add a dispatcher command to insert dynamic blocks
 
 You can add dynamic block into ~org-dynamic-block-alist~ with function
