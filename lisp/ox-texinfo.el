@@ -479,12 +479,12 @@ node or anchor name is unique."
 		    (org-texinfo--sanitize-title
 		     (org-export-get-alt-title datum info) info))
 		   (`radio-target
-		    (org-texinfo--sanitize-title
-		     (org-element-contents datum) info))
+		    (org-export-data (org-element-contents datum) info))
 		   (`target
-		    (org-export-data (org-element-property :value datum) info))
-		   (type
-		    (error "Cannot generate node name for type: %S" type)))))
+		    (org-element-property :value datum))
+		   (_
+		    (or (org-element-property :name datum)
+			(org-export-get-reference datum info))))))
 	       (name basename))
 	  ;; Org exports deeper elements before their parents.  If two
 	  ;; node names collide -- e.g., they have the same title --
