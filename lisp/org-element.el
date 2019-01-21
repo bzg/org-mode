@@ -4095,8 +4095,9 @@ If STRING is the empty string or nil, return nil."
 	    (ignore-errors
 	      (if (symbolp v) (makunbound v)
 		(set (make-local-variable (car v)) (cdr v)))))
-	  (insert string)
-	  (restore-buffer-modified-p nil)
+	  ;; Transferring local variables may put the temporary buffer
+	  ;; into a read-only state.  Make sure we can insert STRING.
+	  (let ((inhibit-read-only t)) (insert string))
 	  (org-element--parse-objects
 	   (point-min) (point-max) nil restriction parent))))))
 
