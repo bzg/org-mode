@@ -789,7 +789,9 @@ Raise an error when current buffer is not a source editing buffer."
     (`other-window
      (switch-to-buffer-other-window buffer))
     (`split-window-below
-     (select-window (split-window-vertically))
+     (if (eq context 'exit)
+	 (delete-window)
+       (select-window (split-window-vertically)))
      (pop-to-buffer-same-window buffer))
     (`other-frame
      (pcase context
