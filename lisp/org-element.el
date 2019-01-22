@@ -4098,6 +4098,8 @@ If STRING is the empty string or nil, return nil."
 	  ;; Transferring local variables may put the temporary buffer
 	  ;; into a read-only state.  Make sure we can insert STRING.
 	  (let ((inhibit-read-only t)) (insert string))
+	  ;; Prevent "Buffer *temp* modified; kill anyway?".
+	  (restore-buffer-modified-p nil)
 	  (org-element--parse-objects
 	   (point-min) (point-max) nil restriction parent))))))
 
