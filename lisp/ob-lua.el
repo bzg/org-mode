@@ -148,7 +148,7 @@ specifying a variable of the same value."
     (if (eq var 'hline)
         org-babel-lua-hline-to
       (format
-       (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
+       (if (and (stringp var) (string-match "[\n\r]" var)) "[=[%s]=]" "%S")
        (if (stringp var) (substring-no-properties var) var)))))
 
 (defun org-babel-lua-table-or-string (results)
