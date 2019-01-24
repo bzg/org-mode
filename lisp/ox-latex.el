@@ -3144,8 +3144,9 @@ centered."
   "Decorate TABLE string with caption and float environment.
 
 ATTRIBUTES is the plist containing is LaTeX attributes.  CAPTION
-is its caption.  It is located above the table if ABOVE? is
-non-nil.  INFO is the plist containing current export parameters.
+is its caption, as a string or nil.  It is located above the
+table if ABOVE? is non-nil.  INFO is the plist containing current
+export parameters.
 
 Return new environment, as a string."
   (let* ((float-environment
@@ -3153,7 +3154,7 @@ Return new environment, as a string."
 	    (cond ((and (not float) (plist-member attributes :float)) nil)
 		  ((member float '("sidewaystable" "sideways")) "sidewaystable")
 		  ((equal float "multicolumn") "table*")
-		  ((or float caption) "table")
+		  ((or float (org-string-nw-p caption)) "table")
 		  (t nil))))
 	 (placement
 	  (or (plist-get attributes :placement)
