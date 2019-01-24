@@ -6163,6 +6163,9 @@ by a #."
   "Add text properties for target matches."
   (when org-target-link-regexp
     (let ((case-fold-search t))
+      ;; `org-target-link-regexp' matches one character before the
+      ;; actual target.
+      (unless (bolp) (forward-char -1))
       (when (re-search-forward org-target-link-regexp limit t)
 	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
 	(add-text-properties (match-beginning 1) (match-end 1)
