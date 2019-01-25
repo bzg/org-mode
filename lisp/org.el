@@ -12771,7 +12771,7 @@ of `org-todo-keywords-1'."
   (interactive "P")
   (let ((case-fold-search nil)
 	(kwd-re
-	 (cond ((null arg) org-not-done-regexp)
+	 (cond ((null arg) (concat org-not-done-regexp "\\s-"))
 	       ((equal arg '(4))
 		(let ((kwd
 		       (completing-read "Keyword (or KWD1|KWD2|...): "
