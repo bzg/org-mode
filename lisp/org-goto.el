@@ -238,10 +238,11 @@ position or nil."
 	  (condition-case nil
 	      (make-indirect-buffer (current-buffer) "*org-goto*")
 	    (error (make-indirect-buffer (current-buffer) "*org-goto*"))))
-	 (with-output-to-temp-buffer "*Org Help*"
+	 (let (temp-buffer-show-function temp-buffer-show-hook)
+	   (with-output-to-temp-buffer "*Org Help*"
 	   (princ (format help (if org-goto-auto-isearch
 				   "  Just type for auto-isearch."
-				 "  n/p/f/b/u to navigate, q to quit."))))
+				 "  n/p/f/b/u to navigate, q to quit.")))))
 	 (org-fit-window-to-buffer (get-buffer-window "*Org Help*"))
 	 (setq buffer-read-only nil)
 	 (let ((org-startup-truncated t)
