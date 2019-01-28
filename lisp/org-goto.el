@@ -228,7 +228,6 @@ position or nil."
 	 (isearch-hide-immediately nil)
 	 (isearch-search-fun-function
 	  (lambda () #'org-goto--local-search-headings))
-	 (org-goto-selected-point org-goto-exit-command)
 	 (help (or help org-goto-help)))
      (save-excursion
        (save-window-excursion
