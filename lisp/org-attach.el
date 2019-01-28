@@ -626,7 +626,9 @@ Idea taken from `gnus-dired-attach'."
     (select-window other-win)
     (dolist (file files)
       (org-attach-attach file))
-    (select-window start-win)))
+    (select-window start-win)
+    (when (eq 'mv org-attach-method)
+      (revert-buffer))))
 
 
 
