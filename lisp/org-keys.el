@@ -442,10 +442,13 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "<tab>") #'org-cycle)
 (org-defkey org-mode-map (kbd "C-<tab>") #'org-force-cycle-archived)
 (org-defkey org-mode-map (kbd "M-<tab>") #'pcomplete)
+(org-defkey org-mode-map (kbd "M-TAB") #'pcomplete)
 (org-defkey org-mode-map (kbd "ESC <tab>") #'pcomplete)
+(org-defkey org-mode-map (kbd "ESC TAB") #'pcomplete)
 
 (org-defkey org-mode-map (kbd "<S-iso-leftab>") #'org-shifttab)
 (org-defkey org-mode-map (kbd "S-<tab>") #'org-shifttab)
+(org-defkey org-mode-map (kbd "S-TAB") #'org-shifttab)
 (define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
 
 ;;;; RET/<return> key with modifiers
