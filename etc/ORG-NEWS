@@ -136,6 +136,12 @@ dynamic block in ~org-dynamic-block-alist~.
 It was unused throughout the code base.
 
 ** Miscellaneous
+*** No more special indentation for description items
+
+Descriptions items are indented like regular ones, i.e., text starts
+after the bullet.  Special indentation used to introduce bugs when
+inserting sub-items in a description list.
+
 *** New hook: ~org-todo-repeat-hook~
 This hook was actually introduced in Org 9.2.1, but wasn't advertised.
 *** Org Table reads numbers starting with 0 as strings

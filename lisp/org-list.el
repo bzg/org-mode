@@ -328,14 +328,6 @@ with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
 
-(defcustom org-list-description-max-indent 20
-  "Maximum indentation for the second line of a description list.
-When the indentation would be larger than this, it will become
-5 characters instead."
-  :group 'org-plain-lists
-  :type 'integer
-  :safe #'wholenump)
-
 (defcustom org-list-indent-offset 0
   "Additional indentation for sub-items in a list.
 By setting this to a small number, usually 1 or 2, one can more
@@ -2070,25 +2062,13 @@ Possible values are: `folded', `children' or `subtree'.  See
   "Return column at which body of ITEM should start."
   (save-excursion
     (goto-char item)
-    (if (save-excursion
-	  (end-of-line)
-	  (re-search-backward
-	   "[ \t]::\\([ \t]\\|$\\)" (line-beginning-position) t))
-	;; Descriptive list item.  Body starts after item's tag, if
-	;; possible.
-	(let ((start (1+ (- (match-beginning 1) (line-beginning-position))))
-	      (ind (current-indentation)))
-	  (if (> start (+ ind org-list-description-max-indent))
-	      (+ ind 5)
-	    start))
-      ;; Regular item.  Body starts after bullet.
-      (looking-at "[ \t]*\\(\\S-+\\)")
-      (+ (progn (goto-char (match-end 1)) (current-column))
-	 (if (and org-list-two-spaces-after-bullet-regexp
-		  (string-match-p org-list-two-spaces-after-bullet-regexp
-				  (match-string 1)))
-	     2
-	   1)))))
+    (looking-at "[ \t]*\\(\\S-+\\)")
+    (+ (progn (goto-char (match-end 1)) (current-column))
+       (if (and org-list-two-spaces-after-bullet-regexp
+		(string-match-p org-list-two-spaces-after-bullet-regexp
+				(match-string 1)))
+	   2
+	 1))))
 
 
 

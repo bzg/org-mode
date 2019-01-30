@@ -21100,10 +21100,8 @@ Indentation is done according to the following rules:
        definitions and inline tasks, indent like its first line.
 
     2. If element has a parent, indent like its contents.  More
-       precisely, if parent is an item, indent after the
-       description part, if any, or the bullet (see
-       `org-list-description-max-indent').  Else, indent like
-       parent's first line.
+       precisely, if parent is an item, indent after the bullet.
+       Else, indent like parent's first line.
 
     3. Otherwise, indent relatively to current level, if
        `org-adapt-indentation' is non-nil, or to left margin.
