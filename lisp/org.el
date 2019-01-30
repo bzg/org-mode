@@ -3133,6 +3133,11 @@ property to one or more of these keywords."
 	  (const :tag "Force recording the DONE state" time)
 	  (const :tag "Force recording a note with the DONE state" note)))
 
+(defcustom org-todo-repeat-hook nil
+  "Hook that is run after a task has been repeated."
+  :package-version '(Org . "9.2")
+  :group 'org-todo
+  :type 'hook)
 
 (defgroup org-priorities nil
   "Priorities in Org mode."
@@ -12876,6 +12881,7 @@ enough to shift date past today.  Continue? "
 		  (org-timestamp-change n (cdr (assoc what whata)) nil t))
 		(setq msg
 		      (concat msg type " " org-last-changed-timestamp " ")))))))
+      (run-hooks 'org-todo-repeat-hook)
       (setq org-log-post-message msg)
       (message msg))))
 
