@@ -348,14 +348,6 @@ clearly distinguish sub-items in a list."
   "Names of blocks where lists are not allowed.
 Names must be in lower case.")
 
-(defvar org-list-export-context '(block inlinetask)
-  "Context types where lists will be interpreted during export.
-
-Valid types are `drawer', `inlinetask' and `block'.  More
-specifically, type `block' is determined by the variable
-`org-list-forbidden-blocks'.")
-
-
 
 ;;; Predicates and regexps
 
