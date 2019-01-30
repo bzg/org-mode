@@ -6227,7 +6227,7 @@ any current timestamp.
 
 Some tasks need to be repeated again and again.  Org mode helps to
 organize such tasks using a so-called repeater in a =DEADLINE=,
-=SCHEDULED=, or plain timestamp.  In the following example:
+=SCHEDULED=, or plain timestamps[fn:69].  In the following example:
 
 #+begin_example
 ,** TODO Pay the rent
@@ -6238,10 +6238,12 @@ organize such tasks using a so-called repeater in a =DEADLINE=,
 the =+1m= is a repeater; the intended interpretation is that the task
 has a deadline on =<2005-10-01>= and repeats itself every (one) month
 starting from that time.  You can use yearly, monthly, weekly, daily
-and hourly repeat cookies by using the ~y/w/m/d/h~ letters.  If you
-need both a repeater and a special warning period in a deadline entry,
-the repeater should come first and the warning period last: =DEADLINE:
-<2005-10-01 Sat +1m -3d>=.
+and hourly repeat cookies by using the =y=, =w=, =m=, =d= and =h=
+letters.  If you need both a repeater and a special warning period in
+a deadline entry, the repeater should come first and the warning
+period last
+
+: DEADLINE: <2005-10-01 Sat +1m -3d>
 
 #+vindex: org-todo-repeat-to-state
 Deadlines and scheduled items produce entries in the agenda when they
@@ -6253,7 +6255,7 @@ then also the /next/ instance of the repeated entry will not be
 active.  Org mode deals with this in the following way: when you try
 to mark such an entry DONE, using {{{kbd(C-c C-t)}}}, it shifts the
 base date of the repeating timestamp by the repeater interval, and
-immediately sets the entry state back to TODO[fn:69].  In the example
+immediately sets the entry state back to TODO[fn:70].  In the example
 above, setting the state to DONE would actually switch the date like
 this:
 
@@ -6266,7 +6268,7 @@ To mark a task with a repeater as DONE, use {{{kbd(C-- 1 C-c C-t)}}},
 i.e., ~org-todo~ with a numeric prefix argument of =-1=.
 
 #+vindex: org-log-repeat
-A timestamp[fn:70] is added under the deadline, to keep a record that
+A timestamp[fn:71] is added under the deadline, to keep a record that
 you actually acted on the previous instance of this deadline.
 
 As a consequence of shifting the base date, this entry is no longer
@@ -6332,7 +6334,7 @@ a project.  When you start working on an item, you can start the
 clock.  When you stop working on that task, or when you mark the task
 done, the clock is stopped and the corresponding time interval is
 recorded.  It also computes the total time spent on each
-subtree[fn:71] of a project.  And it remembers a history or tasks
+subtree[fn:72] of a project.  And it remembers a history or tasks
 recently clocked, to that you can jump quickly between a number of
 tasks absorbing your time.
 
@@ -6345,7 +6347,7 @@ To save the clock history across Emacs sessions, use:
 
 #+vindex: org-clock-persist
 When you clock into a new task after resuming Emacs, the incomplete
-clock[fn:72] is retrieved (see [[*Resolving idle time]]) and you are
+clock[fn:73] is retrieved (see [[*Resolving idle time]]) and you are
 prompted about what to do with it.
 
 *** Clocking commands
@@ -6385,14 +6387,14 @@ prompted about what to do with it.
      time shown is all time ever clocked for this task and its
      children.  If the task has an effort estimate (see [[*Effort
      Estimates]]), the mode line displays the current clocking time
-     against it[fn:73].  If the task is a repeating one (see [[*Repeated
+     against it[fn:74].  If the task is a repeating one (see [[*Repeated
      tasks]]), show only the time since the last reset of the
-     task[fn:74].  You can exercise more control over show time with
+     task[fn:75].  You can exercise more control over show time with
      the =CLOCK_MODELINE_TOTAL= property.  It may have the values
      =current= to show only the current clocking instance, =today= to
      show all time clocked on this tasks today---see also the
      variable ~org-extend-today-until~, ~all~ to include all time, or
-     ~auto~ which is the default[fn:75].  Clicking with
+     ~auto~ which is the default[fn:76].  Clicking with
      {{{kbd(mouse-1)}}} onto the mode line entry pops up a menu with
      clocking options.
 
@@ -6406,7 +6408,7 @@ prompted about what to do with it.
      directly computes the resulting time in inserts it after the time
      range as ==>HH:MM=.  See the variable ~org-log-note-clock-out~
      for the possibility to record an additional note together with
-     the clock-out timestamp[fn:76].
+     the clock-out timestamp[fn:77].
 
 - {{{kbd(C-c C-x C-x)}}} (~org-clock-in-last~) ::
 
@@ -6592,7 +6594,7 @@ be selected:
      | =thisweek=, =lastweek=, =thisweek-N=    | a relative week       |
      | =thismonth=, =lastmonth=, =thismonth-N= | a relative month      |
      | =thisyear=, =lastyear=, =thisyear-N=    | a relative year       |
-     | =untilnow=[fn:77]                       | all clocked time ever |
+     | =untilnow=[fn:78]                       | all clocked time ever |
 
      #+vindex: org-clock-display-default-range
      When this option is not set, Org falls back to the value in
@@ -6653,7 +6655,7 @@ using the =:formatter= parameter.
 
 - =:lang= ::
 
-     Language[fn:78] to use for descriptive cells like "Task".
+     Language[fn:79] to use for descriptive cells like "Task".
 
 - =:link= ::
 
@@ -6728,7 +6730,7 @@ day, you could write:
 #+end_example
 
 #+texinfo: @noindent
-To use a specific time range you could write[fn:79]
+To use a specific time range you could write[fn:80]
 
 #+begin_example
 ,#+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
@@ -6784,7 +6786,7 @@ current clock, or applying it to another one.
 #+vindex: org-clock-x11idle-program-name
 By customizing the variable ~org-clock-idle-time~ to some integer,
 such as 10 or 15, Emacs can alert you when you get back to your
-computer after being idle for that many minutes[fn:80], and ask what
+computer after being idle for that many minutes[fn:81], and ask what
 you want to do with the idle time.  There will be a question waiting
 for you when you get back, indicating how much idle time has passed
 constantly updated with the current amount, as well as a set of
@@ -6930,7 +6932,7 @@ displayed.
 
 #+vindex: org-agenda-columns-add-appointments-to-effort-sum
 If you switch to column view in the daily/weekly agenda, the effort
-column summarizes the estimated work effort for each day[fn:81], and
+column summarizes the estimated work effort for each day[fn:82], and
 you can use this to find space in your schedule.  To get an overview
 of the entire part of the day that is committed, you can set the
 option ~org-agenda-columns-add-appointments-to-effort-sum~.  The
@@ -7281,7 +7283,7 @@ Now lets look at the elements of a template definition.  Each entry in
 
      - =(file+olp+datetree "filename" [ "Level 1 heading" ...])= ::
 
-          This target[fn:82] creates a heading in a date tree[fn:83] for
+          This target[fn:83] creates a heading in a date tree[fn:84] for
           today's date.  If the optional outline path is given, the tree
           will be built under the node it is pointing to, instead of at
           top level.  Check out the ~:time-prompt~ and ~:tree-type~
@@ -7388,7 +7390,7 @@ Now lets look at the elements of a template definition.  Each entry in
 :DESCRIPTION: Filling in information about time and context.
 :END:
 
-In the template itself, special "%-escapes"[fn:84] allow dynamic
+In the template itself, special "%-escapes"[fn:85] allow dynamic
 insertion of content.  The templates are expanded in the order given
 here:
 
@@ -7515,7 +7517,7 @@ here:
      After completing the template, position point here.
 
 #+vindex: org-store-link-props
-For specific link types, the following keywords are defined[fn:85]:
+For specific link types, the following keywords are defined[fn:86]:
 
 #+vindex: org-from-is-user-regexp
 | Link type    | Available keywords                                       |
@@ -7528,7 +7530,7 @@ For specific link types, the following keywords are defined[fn:85]:
 |              | =%:date= (message date header field)                     |
 |              | =%:date-timestamp= (date as active timestamp)            |
 |              | =%:date-timestamp-inactive= (date as inactive timestamp) |
-|              | =%:fromto= (either "to NAME" or "from NAME")[fn:86]      |
+|              | =%:fromto= (either "to NAME" or "from NAME")[fn:87]      |
 | gnus         | =%:group=, for messages also all email fields            |
 | w3, w3m      | =%:url=                                                  |
 | info         | =%:file=, =%:node=                                       |
@@ -7578,7 +7580,7 @@ Another method is /attachments/, which are files located in
 a directory belonging to an outline node.  Org uses directories named
 by the unique ID of each entry.  These directories are located in the
 =data/= directory which lives in the same directory where your Org
-file lives[fn:87].  If you initialize this directory with =git init=,
+file lives[fn:88].  If you initialize this directory with =git init=,
 Org automatically commits changes when it sees them.  The attachment
 system has been contributed to Org by John Wiegley.
 
@@ -8004,7 +8006,7 @@ special command:
      ~org-outline-path-complete-in-steps~.  If you would like to be
      able to create new nodes as new parents for refiling on the fly,
      check the variable ~org-refile-allow-creating-parent-nodes~.
-     When the variable ~org-log-refile~[fn:88] is set, a timestamp or
+     When the variable ~org-log-refile~[fn:89] is set, a timestamp or
      a note is recorded whenever an entry is refiled.
 
 - {{{kbd(C-u C-c C-w)}}} ::
@@ -8264,12 +8266,12 @@ the window configuration is restored when the agenda exits:
 
 #+vindex: org-agenda-files
 The information to be shown is normally collected from all /agenda
-files/, the files listed in the variable ~org-agenda-files~[fn:89].
+files/, the files listed in the variable ~org-agenda-files~[fn:90].
 If a directory is part of this list, all files with the extension
 =.org= in this directory are part of the list.
 
 Thus, even if you only work with a single Org file, that file should
-be put into the list[fn:90].  You can customize ~org-agenda-files~,
+be put into the list[fn:91].  You can customize ~org-agenda-files~,
 but the easiest way to maintain it is through the following commands
 
 #+attr_texinfo: :sep and
@@ -8402,7 +8404,7 @@ commands:
 - {{{kbd(<)}}} ::
 
      #+kindex: < @r{(Agenda dispatcher)}
-     Restrict an agenda command to the current buffer[fn:91].  After
+     Restrict an agenda command to the current buffer[fn:92].  After
      pressing {{{kbd(<)}}}, you still need to press the character
      selecting the command.
 
@@ -8411,7 +8413,7 @@ commands:
      #+kindex: < < @r{(Agenda dispatcher)}
      If there is an active region, restrict the following agenda
      command to the region.  Otherwise, restrict it to the current
-     subtree[fn:92].  After pressing {{{kbd(< <)}}}, you still need to
+     subtree[fn:93].  After pressing {{{kbd(< <)}}}, you still need to
      press the character selecting the command.
 
 - {{{kbd(*)}}} ::
@@ -8462,7 +8464,7 @@ a paper agenda, showing all the tasks for the current week or day.
      #+cindex: org-agenda, command
      Compile an agenda for the current week from a list of Org files.
      The agenda shows the entries for each day.  With a numeric prefix
-     argument[fn:93]---like {{{kbd(C-u 2 1 M-x org-agenda a)}}}---you
+     argument[fn:94]---like {{{kbd(C-u 2 1 M-x org-agenda a)}}}---you
      may set the number of days to be displayed.
 
 #+vindex: org-agenda-span
@@ -8521,7 +8523,7 @@ the entries into an Org file.  Org mode evaluates diary-style sexp
 entries, and does it faster because there is no overhead for first
 creating the diary display.  Note that the sexp entries must start at
 the left margin, no whitespace is allowed before them, as seen in the
-following segment of an Org file:[fn:94]
+following segment of an Org file:[fn:95]
 
 #+begin_example
 ,* Holidays
@@ -9025,7 +9027,7 @@ Time ranges can be specified with two timestamps:
 
 #+vindex: org-agenda-search-headline-for-time
 In the headline of the entry itself, a time(range)---like =12:45= or
-a =8:30-1pm=---may also appear as plain text[fn:95].
+a =8:30-1pm=---may also appear as plain text[fn:96].
 
 If the agenda integrates the Emacs diary (see [[*Weekly/daily agenda]]),
 time specifications in diary entries are recognized as well.
@@ -9134,7 +9136,7 @@ custom agenda commands.
      estimates.  The difference between this and a custom agenda
      command is that filtering is very fast, so that you can switch
      quickly between different filters without having to recreate the
-     agenda.[fn:96]
+     agenda.[fn:97]
 
      You are prompted for a tag selection letter; {{{kbd(SPC)}}} means
      any tag at all.  Pressing {{{kbd(TAB)}}} at that prompt offers
@@ -9563,7 +9565,7 @@ the other commands, point needs to be in the desired line.
      with the variable ~org-agenda-start-with-clockreport-mode~.  By
      using a prefix argument when toggling this mode (i.e., {{{kbd(C-u
      R)}}}), the clock table does not show contributions from entries
-     that are hidden by agenda filtering[fn:97].  See also the
+     that are hidden by agenda filtering[fn:98].  See also the
      variable ~org-clock-report-include-clocking-task~.
 
 - {{{kbd(v c)}}} ::
@@ -10001,7 +10003,7 @@ the other commands, point needs to be in the desired line.
      - {{{kbd(f)}}} ::
 
           #+vindex: org-agenda-bulk-custom-functions
-          Apply a function[fn:98] to marked entries.  For example, the
+          Apply a function[fn:99] to marked entries.  For example, the
           function below sets the =CATEGORY= property of the entries to
           =web=.
 
@@ -10042,7 +10044,7 @@ the other commands, point needs to be in the desired line.
      #+cindex: diary entries, creating from agenda
      Insert a new entry into the diary, using the date at point and
      (for block entries) the date at the mark.  This adds to the Emacs
-     diary file[fn:99], in a way similar to the {{{kbd(i)}}} command
+     diary file[fn:100], in a way similar to the {{{kbd(i)}}} command
      in the calendar.  The diary file pops up in another window, where
      you can add the entry.
 
@@ -10170,13 +10172,13 @@ after the dispatcher command in order to access the command.  Usually
 this will be just a single character, but if you have many similar
 commands, you can also define two-letter combinations where the first
 character is the same in several combinations and serves as a prefix
-key[fn:100].  The second parameter is the search type, followed by the
+key[fn:101].  The second parameter is the search type, followed by the
 string or regular expression to be used for the matching.  The example
 above will therefore define:
 
 - {{{kbd(x)}}} ::
 
-     as a global search for agenda entries planned[fn:101] this
+     as a global search for agenda entries planned[fn:102] this
      week/day.
 
 - {{{kbd(y)}}} ::
@@ -10358,8 +10360,8 @@ See the docstring of the variable for more information.
 
 If you are away from your computer, it can be very useful to have
 a printed version of some agenda views to carry around.  Org mode can
-export custom agenda views as plain text, HTML[fn:102], Postscript,
-PDF[fn:103], and iCalendar files.  If you want to do this only
+export custom agenda views as plain text, HTML[fn:103], Postscript,
+PDF[fn:104], and iCalendar files.  If you want to do this only
 occasionally, use the following command:
 
 - {{{kbd(C-x C-w)}}} (~org-agenda-write~) ::
@@ -10373,7 +10375,7 @@ occasionally, use the following command:
 
 If you need to export certain agenda views frequently, you can
 associate any custom agenda command with a list of output file
-names[fn:104].  Here is an example that first defines custom commands
+names[fn:105].  Here is an example that first defines custom commands
 for the agenda and the global TODO list, together with a number of
 files to which to export them.  Then we define two block agenda
 commands and specify file names for them as well.  File names can be
@@ -10461,7 +10463,7 @@ emacs -eval (org-batch-store-agenda-views) -kill
 #+end_src
 
 #+texinfo: @noindent
-or, if you need to modify some parameters[fn:105]
+or, if you need to modify some parameters[fn:106]
 
 #+begin_src shell
 emacs -eval '(org-batch-store-agenda-views                      \
@@ -10702,7 +10704,7 @@ becomes =&nbsp;= in HTML and =~= in LaTeX.
 
 #+cindex: special symbols, in-buffer display
 If you would like to see entities displayed as UTF-8 characters, use
-the following command[fn:106]:
+the following command[fn:107]:
 
 - {{{kbd(C-c C-x \)}}} (~org-toggle-pretty-entities~) ::
      #+kindex: C-c C-x \
@@ -10716,7 +10718,7 @@ the following command[fn:106]:
 #+cindex: dash, special symbol
 #+cindex: ellipsis, special symbol
 In addition to regular entities defined above, Org exports in
-a special way[fn:107] the following commonly used character
+a special way[fn:108] the following commonly used character
 combinations: =\-= is treated as a shy hyphen, =--= and =---= are
 converted into dashes, and =...= becomes a compact set of dots.
 
@@ -10729,7 +10731,7 @@ converted into dashes, and =...= becomes a compact set of dots.
 
 Plain ASCII is normally sufficient for almost all note taking.
 Exceptions include scientific notes, which often require mathematical
-symbols and the occasional formula.  LaTeX[fn:108] is widely used to
+symbols and the occasional formula.  LaTeX[fn:109] is widely used to
 typeset scientific documents.  Org mode supports embedding LaTeX code
 into its files, because many academics are used to writing and reading
 LaTeX source code, and because it can be readily processed to produce
@@ -10751,7 +10753,7 @@ into images (see [[*Previewing LaTeX fragments]]).
 LaTeX fragments do not need any special marking at all.  The following
 snippets are identified as LaTeX source code:
 
-- Environments of any kind[fn:109].  The only requirement is that the
+- Environments of any kind[fn:110].  The only requirement is that the
   =\begin= statement appears on a new line, preceded by only
   whitespace.
 
@@ -10795,7 +10797,7 @@ lines:
 
 #+vindex: org-preview-latex-default-process
 If you have a working LaTeX installation and =dvipng=, =dvisvgm= or
-=convert= installed[fn:110], LaTeX fragments can be processed to
+=convert= installed[fn:111], LaTeX fragments can be processed to
 produce images of the typeset expressions to be used for inclusion
 while exporting to HTML (see [[*LaTeX fragments]]), or for inline
 previewing within Org mode.
@@ -10863,7 +10865,7 @@ more details see the documentation of CDLaTeX mode):
      #+kindex: TAB
 
      The {{{kbd(TAB)}}} key expands the template if point is inside
-     a LaTeX fragment[fn:111].  For example, {{{kbd(TAB)}}} expands
+     a LaTeX fragment[fn:112].  For example, {{{kbd(TAB)}}} expands
      =fr= to =\frac{}{}= and position point correctly inside the first
      brace.  Another {{{kbd(TAB)}}} gets you into the second brace.
 
@@ -10935,9 +10937,9 @@ Here is an example
 #+vindex: org-latex-listings
 If the example is source code from a programming language, or any
 other text that can be marked up by Font Lock in Emacs, you can ask
-for the example to look like the fontified Emacs buffer[fn:112].  This
+for the example to look like the fontified Emacs buffer[fn:113].  This
 is done with the code block, where you also need to specify the name
-of the major mode that should be used to fontify the example[fn:113],
+of the major mode that should be used to fontify the example[fn:114],
 see [[*Structure Templates]] for shortcuts to easily insert code blocks.
 
 #+cindex: @samp{BEGIN_SRC}
@@ -10978,7 +10980,7 @@ In HTML, hovering the mouse over such a link remote-highlights the
 corresponding code line, which is kind of cool.
 
 You can also add a =-r= switch which /removes/ the labels from the
-source code[fn:114].  With the =-n= switch, links to these references
+source code[fn:115].  With the =-n= switch, links to these references
 are labeled by the line numbers from the code listing.  Otherwise
 links use the labels with no parentheses.  Here is an example:
 
@@ -11016,10 +11018,10 @@ a shortcut is provided (see [[*Structure Templates]]).
      #+findex: org-edit-special
      Edit the source code example at point in its native mode.  This
      works by switching to a temporary buffer with the source code.
-     You need to exit by pressing {{{kbd(C-c ')}}} again[fn:115].  The
+     You need to exit by pressing {{{kbd(C-c ')}}} again[fn:116].  The
      edited version then replaces the old version in the Org buffer.
      Fixed-width regions---where each line starts with a colon
-     followed by a space---are edited using ~artist-mode~[fn:116] to
+     followed by a space---are edited using ~artist-mode~[fn:117] to
      allow creating ASCII drawings easily.  Using this command in an
      empty line creates a new fixed-width region.
 
@@ -11038,7 +11040,7 @@ the end of the current line.  Then the label is stored as a link
 
 #+cindex: inlining images
 #+cindex: images, markup rules
-An image is a link to an image file[fn:117] that does not have
+An image is a link to an image file[fn:118] that does not have
 a description part, for example
 
 : ./img/cat.jpg
@@ -11067,7 +11069,7 @@ command:
      a prefix argument, also display images that do have a link
      description.  You can ask for inline images to be displayed at
      startup by configuring the variable
-     ~org-startup-with-inline-images~[fn:118].
+     ~org-startup-with-inline-images~[fn:119].
 
 ** Captions
 :PROPERTIES:
@@ -11274,7 +11276,7 @@ global variables, include:
 
      #+cindex: @samp{DATE}, keyword
      #+vindex: org-export-date-timestamp-format
-     A date or a time-stamp[fn:119].
+     A date or a time-stamp[fn:120].
 
 - =EMAIL= ::
 
@@ -11289,7 +11291,7 @@ global variables, include:
      Language to use for translating certain strings
      (~org-export-default-language~).  With =#+LANGUAGE: fr=, for
      example, Org translates =Table of contents= to the French =Table
-     des matières=[fn:120].
+     des matières=[fn:121].
 
 - =SELECT_TAGS= ::
 
@@ -11568,7 +11570,7 @@ keyword:
 #+cindex: excluding entries from table of contents
 #+cindex: table of contents, exclude entries
 Org includes both numbered and unnumbered headlines in the table of
-contents[fn:121].  If you need to exclude an unnumbered headline,
+contents[fn:122].  If you need to exclude an unnumbered headline,
 along with all its children, set the =UNNUMBERED= property to =notoc=
 value.
 
@@ -11671,7 +11673,7 @@ be omitted to use the obvious defaults.
 | =#+INCLUDE: "~/.emacs" :lines "10-"=  | Include lines from 10 to EOF       |
 
 Inclusions may specify a file-link to extract an object matched by
-~org-link-search~[fn:122] (see [[*Search Options in File Links]]).  The
+~org-link-search~[fn:123] (see [[*Search Options in File Links]]).  The
 ranges for =:lines= keyword are relative to the requested element.
 Therefore,
 
@@ -11712,7 +11714,7 @@ following syntax:
 : #+MACRO: name   replacement text; $1, $2 are arguments
 
 #+texinfo: @noindent
-which can be referenced using ={{{name(arg1, arg2)}}}=[fn:123].  For
+which can be referenced using ={{{name(arg1, arg2)}}}=[fn:124].  For
 example
 
 #+begin_example
@@ -11831,7 +11833,7 @@ are not exported.
 Finally, a =COMMENT= keyword at the beginning of an entry, but after
 any other keyword or priority cookie, comments out the entire subtree.
 In this case, the subtree is not exported and no code block within it
-is executed either[fn:124].  The command below helps changing the
+is executed either[fn:125].  The command below helps changing the
 comment status of a headline.
 
 - {{{kbd(C-c ;)}}} (~org-toggle-comment~) ::
@@ -12102,7 +12104,7 @@ should in principle be exportable as a Beamer presentation.
 
 - Org exports a Beamer frame's objects as block environments.  Org can
   enforce wrapping in special block types when =BEAMER_ENV= property
-  is set[fn:125].  For valid values see
+  is set[fn:126].  For valid values see
   ~org-beamer-environments-default~.  To add more values, see
   ~org-beamer-environments-extra~.
   #+vindex: org-beamer-environments-default
@@ -12692,7 +12694,7 @@ as-is.
 #+vindex: org-html-mathjax-options~
 LaTeX math snippets (see [[*LaTeX fragments]]) can be displayed in two
 different ways on HTML pages.  The default is to use the [[http://www.mathjax.org][MathJax]],
-which should work out of the box with Org[fn:126][fn:127].  Some MathJax
+which should work out of the box with Org[fn:127][fn:128].  Some MathJax
 display options can be configured via ~org-html-mathjax-options~, or
 in the buffer.  For example, with the following settings,
 
@@ -12704,7 +12706,7 @@ in the buffer.  For example, with the following settings,
 #+texinfo: @noindent
 equation labels are displayed on the left margin and equations are
 five em from the left margin.  In addition, it loads the two MathJax
-extensions =cancel.js= and =noErrors.js=[fn:128].
+extensions =cancel.js= and =noErrors.js=[fn:129].
 
 #+vindex: org-html-mathjax-template
 See the docstring of ~org-html-mathjax-options~ for all supported
@@ -12767,7 +12769,7 @@ line.
 #+vindex: org-export-html-todo-kwd-class-prefix
 #+vindex: org-export-html-tag-class-prefix
 You can modify the CSS style definitions for the exported file.  The
-HTML exporter assigns the following special CSS classes[fn:129] to
+HTML exporter assigns the following special CSS classes[fn:130] to
 appropriate parts of the document---your style specifications may
 change these, in addition to any of the standard classes like for
 headlines, tables, etc.
@@ -13008,7 +13010,7 @@ LaTeX export back-end finds the compiler version to use from
 Org file.  See the docstring for the
 ~org-latex-default-packages-alist~ for loading packages with certain
 compilers.  Also see ~org-latex-bibtex-compiler~ to set the
-bibliography compiler[fn:130].
+bibliography compiler[fn:131].
 
 *** LaTeX specific export settings
 :PROPERTIES:
@@ -13634,7 +13636,7 @@ a limit to a level before the absolute limit (see [[*Export Settings]]).
 
 The ODT export back-end handles creating of OpenDocument Text (ODT)
 format.  Documents created by this exporter use the
-{{{cite(OpenDocument-v1.2 specification)}}}[fn:131] and are compatible
+{{{cite(OpenDocument-v1.2 specification)}}}[fn:132] and are compatible
 with LibreOffice 3.4.
 
 *** Pre-requisites for ODT export
@@ -14035,7 +14037,7 @@ document in one of the following ways:
      variables ~org-latex-to-mathml-convert-command~ and
      ~org-latex-to-mathml-jar-file~.
 
-     If you prefer to use MathToWeb[fn:132] as your converter, you can
+     If you prefer to use MathToWeb[fn:133] as your converter, you can
      configure the above variables as shown below.
 
      #+begin_src emacs-lisp
@@ -14046,7 +14048,7 @@ document in one of the following ways:
      #+end_src
 
      #+texinfo: @noindent
-     or, to use LaTeX​ML[fn:133] instead,
+     or, to use LaTeX​ML[fn:134] instead,
 
      #+begin_src emacs-lisp
      (setq org-latex-to-mathml-convert-command
@@ -14366,7 +14368,7 @@ with the =#+ATTR_ODT= line.  For a discussion on default formatting of
 tables, see [[*Tables in ODT export]].
 
 This feature closely mimics the way table templates are defined in the
-OpenDocument-v1.2 specification[fn:134].
+OpenDocument-v1.2 specification[fn:135].
 
 #+vindex: org-odt-table-styles
 For quick preview of this feature, install the settings below and export the
@@ -14400,7 +14402,7 @@ templates, define new styles there.
 
 To use this feature proceed as follows:
 
-1. Create a table template[fn:135].
+1. Create a table template[fn:136].
 
    A table template is set of =table-cell= and =paragraph= styles for
    each of the following table cell categories:
@@ -14439,7 +14441,7 @@ To use this feature proceed as follows:
    =</office:automatic-styles>= element of the content template file
    (see [[x-orgodtcontenttemplate-xml][Factory styles]]).
 
-2. Define a table style[fn:136].
+2. Define a table style[fn:137].
 
    #+vindex: org-odt-table-styles
    To define a table style, create an entry for the style in the
@@ -15516,7 +15518,7 @@ If you want to publish the Org file as an =.org= file but with
 ~org-publish-org-to-org~.  This produces =file.org= and put it in the
 publishing directory.  If you want a htmlized version of this file,
 set the parameter ~:htmlized-source~ to ~t~.  It produces
-=file.org.html= in the publishing directory[fn:137].
+=file.org.html= in the publishing directory[fn:138].
 
 Other files like images only need to be copied to the publishing
 destination; for this you can use ~org-publish-attachment~.  For
@@ -16891,13 +16893,13 @@ See [[*Languages]] to enable other languages.
 #+kindex: C-c C-v e
 #+findex: org-babel-execute-src-block
 Org provides many ways to execute code blocks.  {{{kbd(C-c C-c)}}} or
-{{{kbd(C-c C-v e)}}} with the point on a code block[fn:138] calls the
+{{{kbd(C-c C-v e)}}} with the point on a code block[fn:139] calls the
 ~org-babel-execute-src-block~ function, which executes the code in the
 block, collects the results, and inserts them in the buffer.
 
 #+cindex: @samp{CALL}, keyword
 #+vindex: org-babel-inline-result-wrap
-By calling a named code block[fn:139] from an Org mode buffer or
+By calling a named code block[fn:140] from an Org mode buffer or
 a table.  Org can call the named code blocks from the current Org mode
 buffer or from the "Library of Babel" (see [[*Library of Babel]]).
 
@@ -17255,7 +17257,7 @@ default behavior is to automatically determine the result type.
      If =file= is missing, Org generates the base name of the output
      file from the name of the code block, and its extension from the
      =file-ext= header argument.  In that case, both the name and the
-     extension are mandatory[fn:140].
+     extension are mandatory[fn:141].
 
      #+begin_example
      ,#+name: circle
@@ -17704,10 +17706,10 @@ Code blocks in the following languages are supported.
 | Asymptote  | =asymptote=   | Lisp           | =lisp=       |
 | Awk        | =awk=         | Lua            | =lua=        |
 | C          | =C=           | MATLAB         | =matlab=     |
-| C++        | =C++=[fn:141] | Mscgen         | =mscgen=     |
+| C++        | =C++=[fn:142] | Mscgen         | =mscgen=     |
 | Clojure    | =clojure=     | Objective Caml | =ocaml=      |
 | CSS        | =css=         | Octave         | =octave=     |
-| D          | =D=[fn:142]   | Org mode       | =org=        |
+| D          | =D=[fn:143]   | Org mode       | =org=        |
 | ditaa      | =ditaa=       | Oz             | =oz=         |
 | Emacs Calc | =calc=        | Perl           | =perl=       |
 | Emacs Lisp | =emacs-lisp=  | Plantuml       | =plantuml=   |
@@ -17836,7 +17838,7 @@ for Python and Emacs Lisp languages.
 #+cindex: syntax, Noweb
 #+cindex: source code, Noweb reference
 
-Org supports named blocks in Noweb[fn:143] style syntax:
+Org supports named blocks in Noweb[fn:144] style syntax:
 
 : <<CODE-BLOCK-ID>>
 
@@ -18336,7 +18338,7 @@ Org Tempo expands snippets to structures defined in
 ~org-structure-template-alist~ and ~org-tempo-keywords-alist~.  For
 example, {{{kbd(< s TAB)}}} creates a code block.  Enable it by
 customizing ~org-modules~ or add =(require 'org-tempo)= to your Emacs
-init file[fn:144].
+init file[fn:145].
 
 #+attr_texinfo: :columns 0.1 0.9
 | {{{kbd(a)}}} | =#+BEGIN_EXPORT ascii= ... =#+END_EXPORT= |
@@ -18609,7 +18611,7 @@ changes.
 
      #+vindex: org-startup-indented
      Dynamic virtual indentation is controlled by the variable
-     ~org-startup-indented~[fn:145].
+     ~org-startup-indented~[fn:146].
 
      - =indent= ::
 
@@ -18940,7 +18942,7 @@ uses only one star and indents text to line with the heading:
 #+findex: org-indent-mode
 To turn this mode on, use the minor mode, ~org-indent-mode~.  Text
 lines that are not headlines are prefixed with spaces to vertically
-align with the headline text[fn:146].
+align with the headline text[fn:147].
 
 #+vindex: org-indent-indentation-per-level
 To make more horizontal space, the headlines are shifted by two stars.
@@ -18975,7 +18977,7 @@ headings as shown in examples below.
      #+vindex: org-adapt-indentation
      Org supports this with paragraph filling, line wrapping, and
      structure editing, preserving or adapting the indentation as
-     appropriate[fn:147].
+     appropriate[fn:148].
 
 - /Hiding leading stars/ ::
 
@@ -19008,7 +19010,7 @@ headings as shown in examples below.
 
      #+vindex: org-odd-levels-only
      Using stars for only odd levels, 1, 3, 5, ..., can also clean up
-     the clutter.  This removes two stars from each level[fn:148].
+     the clutter.  This removes two stars from each level[fn:149].
      For Org to properly handle this cleaner structure during edits
      and exports, configure the variable ~org-odd-levels-only~.  To
      set this per-file, use either one of the following lines:
@@ -19409,7 +19411,7 @@ these variables.
 
 #+vindex: org-mobile-directory
 The mobile application needs access to a file directory on
-a server[fn:149] to interact with Emacs.  Pass its location through
+a server[fn:150] to interact with Emacs.  Pass its location through
 the ~org-mobile-directory~ variable.  If you can mount that directory
 locally just set the variable to point to that directory:
 
@@ -19430,7 +19432,7 @@ With a public server, consider encrypting the files.  Org also
 requires OpenSSL installed on the local computer.  To turn on
 encryption, set the same password in the mobile application and in
 Emacs.  Set the password in the variable
-~org-mobile-use-encryption~[fn:150].  Note that even after the mobile
+~org-mobile-use-encryption~[fn:151].  Note that even after the mobile
 application encrypts the file contents, the file name remains visible
 on the file systems of the local computer, the server, and the mobile
 device.
@@ -19446,15 +19448,15 @@ The command ~org-mobile-push~ copies files listed in
 ~org-mobile-files~ into the staging area.  Files include agenda files
 (as listed in ~org-agenda-files~).  Customize ~org-mobile-files~ to
 add other files.  File names are staged with paths relative to
-~org-directory~, so all files should be inside this directory[fn:151].
+~org-directory~, so all files should be inside this directory[fn:152].
 
 Push creates a special Org file =agendas.org= with custom agenda views
-defined by the user[fn:152].
+defined by the user[fn:153].
 
 Finally, Org writes the file =index.org=, containing links to other
 files.  The mobile application reads this file first from the server
 to determine what other files to download for agendas.  For faster
-downloads, it is expected to only read files whose checksums[fn:153]
+downloads, it is expected to only read files whose checksums[fn:154]
 have changed.
 
 *** Pulling from the mobile application
@@ -19471,7 +19473,7 @@ data in an inbox file format, through the following steps:
 
 1.
    #+vindex: org-mobile-inbox-for-pull
-   Org moves all entries found in =mobileorg.org=[fn:154] and appends
+   Org moves all entries found in =mobileorg.org=[fn:155] and appends
    them to the file pointed to by the variable
    ~org-mobile-inbox-for-pull~.  It should reside neither in the
    staging area nor on the server.  Each captured entry and each
@@ -19807,9 +19809,9 @@ of these strategies:
 #+cindex: @LaTeX{}, and Orgtbl mode
 
 To wrap a source table in LaTeX, use the =comment= environment
-provided by =comment.sty=[fn:155].  To activate it, put
+provided by =comment.sty=[fn:156].  To activate it, put
 ~\usepackage{comment}~ in the document header.  Orgtbl mode inserts
-a radio table skeleton[fn:148] with the command {{{kbd(M-x
+a radio table skeleton[fn:149] with the command {{{kbd(M-x
 orgtbl-insert-radio-table)}}}, which prompts for a table name.  For
 example, if =salesfigures= is the name, the template inserts:
 
@@ -19828,7 +19830,7 @@ The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
 the table at the target (receive) location named =salesfigures=.  Now
 the table is ready for data entry.  It can even use spreadsheet
-features[fn:156]:
+features[fn:157]:
 
 #+begin_example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -20047,7 +20049,7 @@ Dynamic blocks, like any other block, can be narrowed with
 #+vindex: org-agenda-skip-function
 #+vindex: org-agenda-skip-function-global
 Org provides a special hook to further limit items in agenda views:
-~agenda~, ~agenda*~[fn:157], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
+~agenda~, ~agenda*~[fn:158], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
 ~tags-tree~.  Specify a custom function that tests inclusion of every
 matched item in the view.  This function can also skip as much as is
 needed.
@@ -20090,7 +20092,7 @@ meaningful string suitable for the agenda view.
 #+vindex: org-agenda-skip-function
 Search for entries with a limit set on levels for the custom search.
 This is a general approach to creating custom searches in Org.  To
-include all levels, use =LEVEL>0=[fn:158].  Then to selectively pick
+include all levels, use =LEVEL>0=[fn:159].  Then to selectively pick
 the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
@@ -21269,43 +21271,46 @@ the headline.
 [fn:68] Note the corresponding =STARTUP= options =logreschedule=,
 =lognotereschedule=, and =nologreschedule=.
 
-[fn:69] In fact, the target state is taken from, in this sequence, the
+[fn:69] Org does not repeat inactive timestamps, however.  See
+[[*Timestamps, Deadlines and Scheduling]].
+
+[fn:70] In fact, the target state is taken from, in this sequence, the
 =REPEAT_TO_STATE= property, the variable ~org-todo-repeat-to-state~ if
 it is a string, the previous TODO state if ~org-todo-repeat-to-state~
 is ~t~, or the first state of the TODO state sequence.
 
-[fn:70] You can change this using the option ~org-log-repeat~, or the
+[fn:71] You can change this using the option ~org-log-repeat~, or the
 =STARTUP= options =logrepeat=, =lognoterepeat=, and =nologrepeat=.
 With =lognoterepeat=, you will also be prompted for a note.
 
-[fn:71] Clocking only works if all headings are indented with less
+[fn:72] Clocking only works if all headings are indented with less
 than 30 stars.  This is a hard-coded limitation of ~lmax~ in
 ~org-clock-sum~.
 
-[fn:72] To resume the clock under the assumption that you have worked
+[fn:73] To resume the clock under the assumption that you have worked
 on this task while outside Emacs, use =(setq org-clock-persist t)=.
 
-[fn:73] To add an effort estimate "on the fly", hook a function doing
+[fn:74] To add an effort estimate "on the fly", hook a function doing
 this to ~org-clock-in-prepare-hook~.
 
-[fn:74] The last reset of the task is recorded by the =LAST_REPEAT=
+[fn:75] The last reset of the task is recorded by the =LAST_REPEAT=
 property.
 
-[fn:75] See also the variable ~org-clock-mode-line-total~.
+[fn:76] See also the variable ~org-clock-mode-line-total~.
 
-[fn:76] The corresponding in-buffer setting is: =#+STARTUP:
+[fn:77] The corresponding in-buffer setting is: =#+STARTUP:
 lognoteclock-out=.
 
-[fn:77] When using ~:step~, ~untilnow~ starts from the beginning of
+[fn:78] When using ~:step~, ~untilnow~ starts from the beginning of
 2003, not the beginning of time.
 
-[fn:78] Language terms can be set through the variable
+[fn:79] Language terms can be set through the variable
 ~org-clock-clocktable-language-setup~.
 
-[fn:79] Note that all parameters must be specified in a single
+[fn:80] Note that all parameters must be specified in a single
 line---the line is broken here only to fit it into the manual.
 
-[fn:80] On computers using macOS, idleness is based on actual user
+[fn:81] On computers using macOS, idleness is based on actual user
 idleness, not just Emacs' idle time.  For X11, you can install
 a utility program =x11idle.c=, available in the =contrib/scripts/=
 directory of the Org Git distribution, or install the xprintidle
@@ -21313,229 +21318,229 @@ package and set it to the variable ~org-clock-x11idle-program-name~ if
 you are running Debian, to get the same general treatment of idleness.
 On other systems, idle time refers to Emacs idle time only.
 
-[fn:81] Please note the pitfalls of summing hierarchical data in
+[fn:82] Please note the pitfalls of summing hierarchical data in
 a flat list (see [[*Using Column View in the Agenda]]).
 
-[fn:82] Org used to offer four different targets for date/week tree
+[fn:83] Org used to offer four different targets for date/week tree
 capture.  Now, Org automatically translates these to use
 ~file+olp+datetree~, applying the ~:time-prompt~ and ~:tree-type~
 properties.  Please rewrite your date/week-tree targets using
 ~file+olp+datetree~ since the older targets are now deprecated.
 
-[fn:83] A date tree is an outline structure with years on the highest
+[fn:84] A date tree is an outline structure with years on the highest
 level, months or ISO weeks as sublevels and then dates on the lowest
 level.  Tags are allowed in the tree structure.
 
-[fn:84] If you need one of these sequences literally, escape the =%=
+[fn:85] If you need one of these sequences literally, escape the =%=
 with a backslash.
 
-[fn:85] If you define your own link types (see [[*Adding Hyperlink
+[fn:86] If you define your own link types (see [[*Adding Hyperlink
 Types]]), any property you store with ~org-store-link-props~ can be
 accessed in capture templates in a similar way.
 
-[fn:86] This is always the other, not the user.  See the variable
+[fn:87] This is always the other, not the user.  See the variable
 ~org-from-is-user-regexp~.
 
-[fn:87] If you move entries or Org files from one directory to
+[fn:88] If you move entries or Org files from one directory to
 another, you may want to configure ~org-attach-directory~ to contain
 an absolute path.
 
-[fn:88] Note the corresponding =STARTUP= options =logrefile=,
+[fn:89] Note the corresponding =STARTUP= options =logrefile=,
 =lognoterefile=, and =nologrefile=.
 
-[fn:89] If the value of that variable is not a list, but a single file
+[fn:90] If the value of that variable is not a list, but a single file
 name, then the list of agenda files in maintained in that external
 file.
 
-[fn:90] When using the dispatcher, pressing {{{kbd(<)}}} before
+[fn:91] When using the dispatcher, pressing {{{kbd(<)}}} before
 selecting a command actually limits the command to the current file,
 and ignores ~org-agenda-files~ until the next dispatcher command.
 
-[fn:91] For backward compatibility, you can also press {{{kbd(1)}}} to
+[fn:92] For backward compatibility, you can also press {{{kbd(1)}}} to
 restrict to the current buffer.
 
-[fn:92] For backward compatibility, you can also press {{{kbd(0)}}} to
+[fn:93] For backward compatibility, you can also press {{{kbd(0)}}} to
 restrict to the current region/subtree.
 
-[fn:93] For backward compatibility, the universal prefix argument
+[fn:94] For backward compatibility, the universal prefix argument
 {{{kbd(C-u)}}} causes all TODO entries to be listed before the agenda.
 This feature is deprecated, use the dedicated TODO list, or a block
 agenda instead (see [[*Block agenda]]).
 
-[fn:94] The variable ~org-anniversary~ used in the example is just
+[fn:95] The variable ~org-anniversary~ used in the example is just
 like ~diary-anniversary~, but the argument order is always according
 to ISO and therefore independent of the value of
 ~calendar-date-style~.
 
-[fn:95] You can, however, disable this by setting
+[fn:96] You can, however, disable this by setting
 ~org-agenda-search-headline-for-time~ variable to a ~nil~ value.
 
-[fn:96] Custom commands can preset a filter by binding the variable
+[fn:97] Custom commands can preset a filter by binding the variable
 ~org-agenda-tag-filter-preset~ as an option.  This filter is then
 applied to the view and persists as a basic filter through refreshes
 and more secondary filtering.  The filter is a global property of the
 entire agenda view---in a block agenda, you should only set this in
 the global options section, not in the section of an individual block.
 
-[fn:97] Only tags filtering is respected here, effort filtering is
+[fn:98] Only tags filtering is respected here, effort filtering is
 ignored.
 
-[fn:98] You can also create persistent custom functions through
+[fn:99] You can also create persistent custom functions through
 ~org-agenda-bulk-custom-functions~.
 
-[fn:99] This file is parsed for the agenda when
+[fn:100] This file is parsed for the agenda when
 ~org-agenda-include-diary~ is set.
 
-[fn:100] You can provide a description for a prefix key by inserting
+[fn:101] You can provide a description for a prefix key by inserting
 a cons cell with the prefix and the description.
 
-[fn:101] /Planned/ means here that these entries have some planning
+[fn:102] /Planned/ means here that these entries have some planning
 information attached to them, like a time-stamp, a scheduled or
 a deadline string.  See ~org-agenda-entry-types~ on how to set what
 planning information is taken into account.
 
-[fn:102] For HTML you need to install Hrvoje Niksic's =htmlize.el=
+[fn:103] For HTML you need to install Hrvoje Niksic's =htmlize.el=
 from [[https://github.com/hniksic/emacs-htmlize][Hrvoje Niksic's repository]].
 
-[fn:103] To create PDF output, the Ghostscript ps2pdf utility must be
+[fn:104] To create PDF output, the Ghostscript ps2pdf utility must be
 installed on the system.  Selecting a PDF file also creates the
 postscript file.
 
-[fn:104] If you want to store standard views like the weekly agenda or
+[fn:105] If you want to store standard views like the weekly agenda or
 the global TODO list as well, you need to define custom commands for
 them in order to be able to specify file names.
 
-[fn:105] Quoting depends on the system you use, please check the FAQ
+[fn:106] Quoting depends on the system you use, please check the FAQ
 for examples.
 
-[fn:106] You can turn this on by default by setting the variable
+[fn:107] You can turn this on by default by setting the variable
 ~org-pretty-entities~, or on a per-file base with the =STARTUP= option
 =entitiespretty=.
 
-[fn:107] This behavior can be disabled with =-= export setting (see
+[fn:108] This behavior can be disabled with =-= export setting (see
 [[*Export Settings]]).
 
-[fn:108] LaTeX is a macro system based on Donald\nbsp{}E.\nbsp{}Knuth's TeX
+[fn:109] LaTeX is a macro system based on Donald\nbsp{}E.\nbsp{}Knuth's TeX
 system.  Many of the features described here as "LaTeX" are really
 from TeX, but for simplicity I am blurring this distinction.
 
-[fn:109] When MathJax is used, only the environments recognized by
+[fn:110] When MathJax is used, only the environments recognized by
 MathJax are processed.  When dvipng, dvisvgm, or ImageMagick suite is
 used to create images, any LaTeX environment is handled.
 
-[fn:110] These are respectively available at
+[fn:111] These are respectively available at
 [[http://sourceforge.net/projects/dvipng/]], [[http://dvisvgm.bplaced.net/]]
 and from the ImageMagick suite.  Choose the converter by setting the
 variable ~org-preview-latex-default-process~ accordingly.
 
-[fn:111] Org mode has a method to test if point is inside such
+[fn:112] Org mode has a method to test if point is inside such
 a fragment, see the documentation of the function
 ~org-inside-LaTeX-fragment-p~.
 
-[fn:112] This works automatically for the HTML backend (it requires
+[fn:113] This works automatically for the HTML backend (it requires
 version 1.34 of the =htmlize.el= package, which you need to install).
 Fontified code chunks in LaTeX can be achieved using either the
 [[https://www.ctan.org/pkg/listings][listings]] package or the [[https://www.ctan.org/pkg/minted][minted]] package.  Refer to
 ~org-export-latex-listings~ for details.
 
-[fn:113] Source code in code blocks may also be evaluated either
+[fn:114] Source code in code blocks may also be evaluated either
 interactively or on export.  See [[*Working with Source Code]] for more
 information on evaluating code blocks.
 
-[fn:114] Adding =-k= to =-n -r= /keeps/ the labels in the source code
+[fn:115] Adding =-k= to =-n -r= /keeps/ the labels in the source code
 while using line numbers for the links, which might be useful to
 explain those in an Org mode example code.
 
-[fn:115] Upon exit, lines starting with =*=, =,*=, =#+= and =,#+= get
+[fn:116] Upon exit, lines starting with =*=, =,*=, =#+= and =,#+= get
 a comma prepended, to keep them from being interpreted by Org as
 outline nodes or special syntax.  These commas are stripped when
 editing with {{{kbd(C-c ')}}}, and also before export.
 
-[fn:116] You may select a different-mode with the variable
+[fn:117] You may select a different-mode with the variable
 ~org-edit-fixed-width-region-mode~.
 
-[fn:117] What Emacs considers to be an image depends on
+[fn:118] What Emacs considers to be an image depends on
 ~image-file-name-extensions~ and ~image-file-name-regexps~.
 
-[fn:118] The variable ~org-startup-with-inline-images~ can be set
+[fn:119] The variable ~org-startup-with-inline-images~ can be set
 within a buffer with the =STARTUP= options =inlineimages= and
 =noinlineimages=.
 
-[fn:119] The variable ~org-export-date-timestamp-format~ defines how
+[fn:120] The variable ~org-export-date-timestamp-format~ defines how
 this timestamp are exported.
 
-[fn:120] For export to LaTeX format---or LaTeX-related formats such as
+[fn:121] For export to LaTeX format---or LaTeX-related formats such as
 Beamer---, the =org-latex-package-alist= variable needs further
 configuration. See [[LaTeX specific export settings]].
 
-[fn:121] At the moment, some export back-ends do not obey this
+[fn:122] At the moment, some export back-ends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
 headline from the table of contents.
 
-[fn:122] Note that ~org-link-search-must-match-exact-headline~ is
+[fn:123] Note that ~org-link-search-must-match-exact-headline~ is
 locally bound to non-~nil~.  Therefore, ~org-link-search~ only matches
 headlines and named elements.
 
-[fn:123] Since commas separate the arguments, commas within arguments
+[fn:124] Since commas separate the arguments, commas within arguments
 have to be escaped with the backslash character.  So only those
 backslash characters before a comma need escaping with another
 backslash character.
 
-[fn:124] For a less drastic behavior, consider using a select tag (see
+[fn:125] For a less drastic behavior, consider using a select tag (see
 [[*Export Settings]]) instead.
 
-[fn:125] If =BEAMER_ENV= is set, Org export adds =B_environment= tag
+[fn:126] If =BEAMER_ENV= is set, Org export adds =B_environment= tag
 to make it visible.  The tag serves as a visual aid and has no
 semantic relevance.
 
-[fn:126] By default Org loads MathJax from [[https://cdnjs.com][cdnjs.com]] as recommended by
+[fn:127] By default Org loads MathJax from [[https://cdnjs.com][cdnjs.com]] as recommended by
 [[http://www.mathjax.org][MathJax]].
 
-[fn:127] Please note that exported formulas are part of an HTML
+[fn:128] Please note that exported formulas are part of an HTML
 document, and that signs such as =<=, =>=, or =&= have special
 meanings.  See [[http://docs.mathjax.org/en/latest/tex.html#tex-and-latex-in-html-documents][MathJax TeX and LaTeX support]].
 
-[fn:128] See [[http://docs.mathjax.org/en/latest/tex.html#tex-extensions][TeX and LaTeX extensions]] in the [[http://docs.mathjax.org][MathJax manual]] to learn
+[fn:129] See [[http://docs.mathjax.org/en/latest/tex.html#tex-extensions][TeX and LaTeX extensions]] in the [[http://docs.mathjax.org][MathJax manual]] to learn
 about extensions.
 
-[fn:129] If the classes on TODO keywords and tags lead to conflicts,
+[fn:130] If the classes on TODO keywords and tags lead to conflicts,
 use the variables ~org-html-todo-kwd-class-prefix~ and
 ~org-html-tag-class-prefix~ to make them unique.
 
-[fn:130] This does not allow setting different bibliography compilers
+[fn:131] This does not allow setting different bibliography compilers
 for different files.  However, "smart" LaTeX compilation systems, such
 as latexmk, can select the correct bibliography compiler.
 
-[fn:131] See [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][Open Document Format for Office Applications
+[fn:132] See [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][Open Document Format for Office Applications
 (OpenDocument) Version 1.2]].
 
-[fn:132] See [[http://www.mathtoweb.com/cgi-bin/mathtoweb_home.pl][MathToWeb]].
+[fn:133] See [[http://www.mathtoweb.com/cgi-bin/mathtoweb_home.pl][MathToWeb]].
 
-[fn:133] See [[http://dlmf.nist.gov/LaTeXML/]].
+[fn:134] See [[http://dlmf.nist.gov/LaTeXML/]].
 
-[fn:134] [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][OpenDocument-v1.2 Specification]]
+[fn:135] [[http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][OpenDocument-v1.2 Specification]]
 
-[fn:135] See the =<table:table-template>= element of the
+[fn:136] See the =<table:table-template>= element of the
 OpenDocument-v1.2 specification.
 
-[fn:136] See the attributes =table:template-name=,
+[fn:137] See the attributes =table:template-name=,
 =table:use-first-row-styles=, =table:use-last-row-styles=,
 =table:use-first-column-styles=, =table:use-last-column-styles=,
 =table:use-banding-rows-styles=, and =table:use-banding-column-styles=
 of the =<table:table>= element in the OpenDocument-v1.2 specification.
 
-[fn:137] If the publishing directory is the same as the source
+[fn:138] If the publishing directory is the same as the source
 directory, =file.org= is exported as =file.org.org=, so you probably
 do not want to do this.
 
-[fn:138] The option ~org-babel-no-eval-on-ctrl-c-ctrl-c~ can be used
+[fn:139] The option ~org-babel-no-eval-on-ctrl-c-ctrl-c~ can be used
 to remove code evaluation from the {{{kbd(C-c C-c)}}} key binding.
 
-[fn:139] Actually, the constructs =call_<name>()= and =src_<lang>{}=
+[fn:140] Actually, the constructs =call_<name>()= and =src_<lang>{}=
 are not evaluated when they appear in a keyword (see [[*Summary of
 In-Buffer Settings]]).
 
-[fn:140] Due to the way this header argument is implemented, it
+[fn:141] Due to the way this header argument is implemented, it
 implies ":results file".  Therefore if it is set for multiple blocks
 at once (by a subtree or buffer property for example), all blocks are
 forced to produce file results.  This is seldom desired behavior, so
@@ -21543,59 +21548,59 @@ it is recommended to set this header only on a per-block basis.  It is
 possible that this aspect of the implementation might change in the
 future.
 
-[fn:141] C++ language is handled in =ob-C.el=.  Even though the
+[fn:142] C++ language is handled in =ob-C.el=.  Even though the
 identifier for such source blocks is =C++=, you activate it by loading
 the C language.
 
-[fn:142] D language is handled in =ob-C.el=.  Even though the
+[fn:143] D language is handled in =ob-C.el=.  Even though the
 identifier for such source blocks is =D=, you activate it by loading
 the C language.
 
-[fn:143] For Noweb literate programming details, see
+[fn:144] For Noweb literate programming details, see
 http://www.cs.tufts.edu/~nr/noweb/.
 
-[fn:144] For more information, please refer to the commentary section
+[fn:145] For more information, please refer to the commentary section
 in =org-tempo.el=.
 
-[fn:145] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
+[fn:146] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
 property, such that ~visual-line-mode~ (or purely setting ~word-wrap~)
 wraps long lines (including headlines) correctly indented.
 
-[fn:146] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
+[fn:147] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
 for indenting and wrapping long lines of headlines or text.  This
 minor mode handles ~visual-line-mode~ and directly applied settings
 through ~word-wrap~.
 
-[fn:147] Also see the variable ~org-adapt-indentation~.
+[fn:148] Also see the variable ~org-adapt-indentation~.
 
-[fn:148] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 4 stars, and so
+[fn:149] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 4 stars, and so
 on.
 
-[fn:149] For a server to host files, consider using a WebDAV server,
+[fn:150] For a server to host files, consider using a WebDAV server,
 such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
-[fn:150] If Emacs is configured for safe storing of passwords, then
+[fn:151] If Emacs is configured for safe storing of passwords, then
 configure the variable ~org-mobile-encryption-password~; please read
 the docstring of that variable.
 
-[fn:151] Symbolic links in ~org-directory~ need to have the same name
+[fn:152] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
 
-[fn:152] While creating the agendas, Org mode forces =ID= properties
+[fn:153] While creating the agendas, Org mode forces =ID= properties
 on all referenced entries, so that these entries can be uniquely
 identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
 on outline paths, assuming they are unique.
 
-[fn:153] Checksums are stored automatically in the file
+[fn:154] Checksums are stored automatically in the file
 =checksums.dat=.
 
-[fn:154] The file will be empty after this operation.
+[fn:155] The file will be empty after this operation.
 
-[fn:155] https://www.ctan.org/pkg/comment
+[fn:156] https://www.ctan.org/pkg/comment
 
-[fn:156] If the =TBLFM= keyword contains an odd number of dollar
+[fn:157] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
 shown in the example you can fix this by adding an extra line inside
 the =comment= environment that is used to balance the dollar
@@ -21603,9 +21608,9 @@ expressions.  If you are using AUCTeX with the font-latex library,
 a much better solution is to add the =comment= environment to the
 variable ~LaTeX-verbatim-environments~.
 
-[fn:157] The ~agenda*~ view is the same as ~agenda~ except that it
+[fn:158] The ~agenda*~ view is the same as ~agenda~ except that it
 only considers /appointments/, i.e., scheduled and deadline items that
 have a time specification =[h]h:mm= in their time-stamps.
 
-[fn:158] Note that, for ~org-odd-levels-only~, a level number
+[fn:159] Note that, for ~org-odd-levels-only~, a level number
 corresponds to order in the hierarchy, not to the number of stars.
