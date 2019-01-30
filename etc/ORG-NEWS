@@ -136,6 +136,8 @@ dynamic block in ~org-dynamic-block-alist~.
 It was unused throughout the code base.
 
 ** Miscellaneous
+*** New hook: ~org-todo-repeat-hook~
+This hook was actually introduced in Org 9.2.1, but wasn't advertised.
 *** Org Table reads numbers starting with 0 as strings
 *** Disable fast tag selection interface via prefix arg
 
