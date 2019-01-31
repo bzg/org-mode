@@ -311,7 +311,7 @@ determines if it is a foreground or a background color."
   (if (not value)
       (setq org-tags-special-faces-re nil)
     (setq org-tags-special-faces-re
-	  (concat ":\\(" (mapconcat 'car value "\\|") "\\):"))))
+	  (concat ":" (regexp-opt (mapcar #'car value) t) ":"))))
 
 (defface org-checkbox '((t :inherit bold))
   "Face for checkboxes."
