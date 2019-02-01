@@ -252,7 +252,7 @@ file to byte-code before it is loaded."
   (interactive "fFile to load: \nP")
   (let* ((age (lambda (file)
 		(float-time
-		 (time-subtract nil
+		 (time-subtract (current-time)
 				(file-attribute-modification-time
 				 (or (file-attributes (file-truename file))
 				     (file-attributes file)))))))
@@ -5645,14 +5645,15 @@ the rounding returns a past time."
 	    (apply 'encode-time
 		   (append (list 0 (* r (floor (+ .5 (/ (float (nth 1 time)) r)))))
 			   (nthcdr 2 time))))
-      (if (and past (< (float-time (time-subtract nil res)) 0))
+      (if (and past (< (float-time (time-subtract (current-time) res)) 0))
 	  (seconds-to-time (- (float-time res) (* r 60)))
 	res))))
 
 (defun org-today ()
   "Return today date, considering `org-extend-today-until'."
   (time-to-days
-   (time-subtract nil (list 0 (* 3600 org-extend-today-until) 0))))
+   (time-subtract (current-time)
+		  (list 0 (* 3600 org-extend-today-until) 0))))
 
 ;;;; Font-Lock stuff, including the activators
 
@@ -12857,7 +12858,7 @@ This function is run automatically after each state change to a DONE state."
 		      (let ((nshiftmax 10)
 			    (nshift 0))
 			(while (or (= nshift 0)
-				   (not (time-less-p nil time)))
+				   (not (time-less-p (current-time) time)))
 			  (when (= nshiftmax (cl-incf nshift))
 			    (or (y-or-n-p
 				 (format "%d repeater intervals were not \
