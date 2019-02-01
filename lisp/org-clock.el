@@ -943,7 +943,9 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	 (org-clock-clock-out clock fail-quietly))
 	((org-is-active-clock clock) nil)
 	(t (org-clock-clock-in clock t))))
-      ((pred (time-less-p nil))
+      ((pred (time-less-p (current-time)))
+       ;; ^ NOTE: Here and in other `time-less-p' calls, we use
+       ;; (current-time) rather than nil for Emacs 24 compatibility.
        (error "RESOLVE-TO must refer to a time in the past"))
       (_
        (when restart (error "RESTART is not valid here"))
@@ -1043,7 +1045,10 @@ to be CLOCKED OUT."))))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
 	   (floor (/ (float-time
-		      (time-subtract nil last-valid)) 60)))
+		      ;; NOTE: Here and in other `time-subtract'
+		      ;; calls, we use (current-time) rather than nil
+		      ;; for Emacs 24 compatibility.
+		      (time-subtract (current-time) last-valid)) 60)))
 	 (keep
 	  (and (memq ch '(?k ?K))
 	       (read-number "Keep how many minutes? " default)))
@@ -1080,7 +1085,8 @@ to be CLOCKED OUT."))))
 	      (keep
 	       (time-add last-valid (seconds-to-time (* 60 keep))))
 	      (gotback
-	       (time-subtract nil (seconds-to-time (* 60 gotback))))
+	       (time-subtract (current-time)
+			      (seconds-to-time (* 60 gotback))))
 	      (t
 	       (error "Unexpected, please report this as a bug")))
        (and gotback last-valid)
@@ -1162,7 +1168,7 @@ so long."
 	     org-clock-marker (marker-buffer org-clock-marker))
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
-	    (time-subtract nil
+	    (time-subtract (current-time)
 			   (seconds-to-time org-clock-user-idle-seconds)))
 	   (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
@@ -1172,7 +1178,8 @@ so long."
 	   (lambda (_)
 	     (format "Clocked in & idle for %.1f mins"
 		     (/ (float-time
-			 (time-subtract nil org-clock-user-idle-start))
+			 (time-subtract (current-time)
+					org-clock-user-idle-start))
 			60.0)))
 	   org-clock-user-idle-start)))))
 

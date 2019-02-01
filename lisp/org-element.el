@@ -5117,7 +5117,7 @@ Assume ELEMENT belongs to cache and that a cache is active."
 TIME-LIMIT is a time value or nil."
   (and time-limit
        (or (input-pending-p)
-	   (time-less-p time-limit nil))))
+	   (time-less-p time-limit (current-time)))))
 
 (defsubst org-element--cache-shift-positions (element offset &optional props)
   "Shift ELEMENT properties relative to buffer positions by OFFSET.
@@ -5171,7 +5171,10 @@ updated before current modification are actually submitted."
 	     (and next (aref next 0))
 	     threshold
 	     (and (not threshold)
-		  (time-add nil
+		  ;; NOTE: Here and in other `time-add' calls, we use
+		  ;; (current-time) rather than nil for Emacs 24
+		  ;; compatibility.
+		  (time-add (current-time)
 			    org-element-cache-sync-duration))
 	     future-change)
 	    ;; Request processed.  Merge current and next offsets and
