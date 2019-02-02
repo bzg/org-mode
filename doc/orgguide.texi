@@ -1653,7 +1653,7 @@ the right location, and then pasting the note is cumbersome.  To simplify
 this process, use the following commands:
 
 @table @kbd
-@item C-c M-x
+@item C-c M-w
 Copy the entry or region at point.  This command behaves like
 @code{org-refile}, except that the original note will not be deleted.
 @item C-c C-w
