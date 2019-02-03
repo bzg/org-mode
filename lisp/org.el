@@ -7133,30 +7133,32 @@ With a numeric prefix, show all headlines up to that level."
     (org-cycle-show-empty-lines t)))
 
 (defun org-set-visibility-according-to-property ()
-  "Switch subtree visibilities according to :VISIBILITY: property."
+  "Switch subtree visibility according to VISIBILITY property."
   (interactive)
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (while (re-search-forward "^[ \t]*:VISIBILITY:" nil t)
-     (if (not (org-at-property-p)) (outline-next-heading)
-       (let ((state (match-string 3)))
-	 (save-excursion
-	   (org-back-to-heading t)
-	   (outline-hide-subtree)
-	   (org-reveal)
-	   (cond
-	    ((equal state "folded")
-	     (outline-hide-subtree))
-	    ((equal state "children")
-	     (org-show-hidden-entry)
-	     (org-show-children))
-	    ((equal state "content")
-	     (save-excursion
-	       (save-restriction
-		 (org-narrow-to-subtree)
-		 (org-content))))
-	    ((member state '("all" "showall"))
-	     (outline-show-subtree)))))))))
+  (let ((regexp (org-re-property "VISIBILITY")))
+    (org-with-point-at 1
+      (while (re-search-forward regexp nil t)
+	(let ((state (match-string 3)))
+	  (if (not (org-at-property-p)) (outline-next-heading)
+	    (save-excursion
+	      (org-back-to-heading t)
+	      (outline-hide-subtree)
+	      (org-reveal)
+	      (pcase state
+		("folded"
+		 (outline-hide-subtree))
+		("children"
+		 (org-show-hidden-entry)
+		 (org-show-children))
+		("content"
+		 (save-excursion
+		   (save-restriction
+		     (org-narrow-to-subtree)
+		     (org-content))))
+		((or "all" "showall")
+		 (outline-show-subtree))
+		(_ nil)))
+	    (org-end-of-subtree)))))))
 
 (defun org-overview ()
   "Switch to overview mode, showing only top-level headlines.
