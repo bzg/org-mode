@@ -90,6 +90,7 @@
 (defvar org-habit-show-habits)
 (defvar org-habit-show-habits-only-for-today)
 (defvar org-habit-show-all-today)
+(defvar org-habit-scheduled-past-days)
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name "*Org Agenda*")
@@ -6201,7 +6202,8 @@ scheduled items with an hour specification like [h]h:mm."
 		       habitp
 		       (bound-and-true-p org-habit-show-all-today))
 	    (when (or (and (> ddays 0) (< diff ddays))
-		      (> diff org-scheduled-past-days)
+		      (> diff (or (and habitp org-habit-scheduled-past-days)
+				  org-scheduled-past-days))
 		      (> schedule current)
 		      (and (/= current schedule)
 			   (/= current today)

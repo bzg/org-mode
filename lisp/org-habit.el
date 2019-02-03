@@ -89,6 +89,21 @@ It will be green even if it was done after the deadline."
   :group 'org-habit
   :type 'boolean)
 
+(defcustom org-habit-scheduled-past-days nil
+"Value to use instead of `org-scheduled-past-days', for habits only.
+
+If nil, `org-scheduled-past-days' is used.
+
+Setting this to say 10000 is a way to make habits always show up
+as a reminder, even if you set `org-scheduled-past-days' to a
+small value because you regard scheduled items as a way of
+\"turning on\" TODO items on a particular date, rather than as a
+means of creating calendar-based reminders."
+  :group 'org-habit
+  :type '(choice integer (const nil))
+  :package-version '(Org . "9.3")
+  :safe (lambda (v) (or (integerp v) (null v))))
+
 (defface org-habit-clear-face
   '((((background light)) (:background "#8270f9"))
     (((background dark)) (:background "blue")))
