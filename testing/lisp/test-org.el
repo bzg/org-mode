@@ -7489,7 +7489,21 @@ Contents
 Contents
 *** <point>c"
      (org-set-visibility-according-to-property)
-     (not (invisible-p (point))))))
+     (not (invisible-p (point)))))
+  ;; When VISIBILITY properties are nested, ignore inner ones.
+  (should
+   (org-test-with-temp-text
+       "
+* A
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** <point>B
+:PROPERTIES:
+:VISIBILITY: folded
+:END:"
+     (org-set-visibility-according-to-property)
+     (invisible-p (point)))))
 
 
 ;;; Yank and Kill
