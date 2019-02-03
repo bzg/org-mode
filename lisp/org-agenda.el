@@ -6257,9 +6257,17 @@ scheduled items with an hour specification like [h]h:mm."
 		   (head (buffer-substring (point) (line-end-position)))
 		   (time
 		    (cond
-		     ;; No time of day designation if it is only
-		     ;; a reminder.
-		     ((and (/= current schedule) (/= current repeat)) nil)
+		     ;; No time of day designation if it is only a
+		     ;; reminder, except for habits, which always show
+		     ;; the time of day.  Habits are an exception
+		     ;; because if there is a time of day, that is
+		     ;; interpreted to mean they should usually happen
+		     ;; then, even if doing the habit was missed.
+		     ((and
+		       (not habitp)
+		       (/= current schedule)
+		       (/= current repeat))
+		      nil)
 		     ((string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
 		      (concat (substring s (match-beginning 1)) " "))
 		     (t 'time)))
