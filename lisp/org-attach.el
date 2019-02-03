@@ -588,6 +588,7 @@ This function is called by `org-archive-hook'.  The option
 ;;  (lambda ()
 ;;    (define-key dired-mode-map (kbd "C-c C-x a") #'org-attach-dired-to-subtree))))
 
+;;;###autoload
 (defun org-attach-dired-to-subtree (files)
   "Attach FILES marked or current file in dired to subtree in other window.
 Takes the method given in `org-attach-method' for the attach action.
