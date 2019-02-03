@@ -7710,7 +7710,7 @@ a)}}} attach files in Dired buffers.
           (lambda ()
             (define-key dired-mode-map
               (kbd "C-c C-x a")
-              #'org-attach-dired-to-subtree))))
+              #'org-attach-dired-to-subtree)))
 #+end_src
 
 The following code shows how to bind the previous command with
