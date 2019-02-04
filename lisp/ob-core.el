@@ -175,9 +175,14 @@ This string must include a \"%s\" which will be replaced by the results."
   :safe #'booleanp)
 
 (defun org-babel-noweb-wrap (&optional regexp)
-  (concat org-babel-noweb-wrap-start
-	  (or regexp "\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
-	  org-babel-noweb-wrap-end))
+  "Return regexp matching a Noweb reference.
+
+Match any reference, or only those matching REGEXP, if non-nil.
+
+When matching, reference is stored in match group 1."
+  (concat (regexp-quote org-babel-noweb-wrap-start)
+	  (or regexp "\\([^ \t\n]\\(?:.*?[^ \t\n]\\)?\\)")
+	  (regexp-quote org-babel-noweb-wrap-end)))
 
 (defvar org-babel-src-name-regexp
   "^[ \t]*#\\+name:[ \t]*"
