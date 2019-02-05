@@ -83,6 +83,7 @@ When nil, use the same face as the headline.  This value is
 ignored if `org-num-format-function' specifies a face for its
 output."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type '(choice (const :tag "Like the headline" nil)
                  (face :tag "Use face"))
   :safe (lambda (val) (or (null val) (facep val))))
@@ -94,6 +95,7 @@ return a string, or nil.  When nil, no numbering is displayed.
 Any `face' text property on the returned string overrides
 `org-num-face'."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type 'function
   :safe nil)
 
@@ -101,6 +103,7 @@ Any `face' text property on the returned string overrides
   "Level below which headlines are not numbered.
 When set to nil, all headlines are numbered."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type '(choice (const :tag "Number everything" nil)
                  (integer :tag "Stop numbering at level"))
   :safe (lambda (val) (or (null val) (wholenump val))))
@@ -108,12 +111,14 @@ When set to nil, all headlines are numbered."
 (defcustom org-num-skip-commented nil
   "Non-nil means commented sub-trees are not numbered."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type 'boolean
   :safe #'booleanp)
 
 (defcustom org-num-skip-footnotes nil
   "Non-nil means footnotes sections are not numbered."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type 'boolean
   :safe #'booleanp)
 
@@ -127,12 +132,14 @@ Tag in this list prevent numbering the whole sub-tree,
 irrespective to `org-use-tags-inheritance', or other means to
 control tag inheritance."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type '(repeat (string :tag "Tag"))
   :safe (lambda (val) (and (listp val) (cl-every #'stringp val))))
 
 (defcustom org-num-skip-unnumbered nil
   "Non-nil means numbering obeys to UNNUMBERED property."
   :group 'org-appearance
+  :package-version '(Org . "9.3")
   :type 'boolean
   :safe #'booleanp)
 
