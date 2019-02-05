@@ -65,9 +65,10 @@
 (defvar org-comment-string)
 (defvar org-complex-heading-regexp)
 (defvar org-cycle-level-faces)
+(defvar org-footnote-section)
+(defvar org-level-faces)
 (defvar org-n-level-faces)
 (defvar org-odd-levels-only)
-(defvar org-level-faces)
 
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
