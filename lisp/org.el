@@ -1895,7 +1895,7 @@ This is for example useful to limit the length of the subject.
 
 Examples: \"%f on: %.30s\", \"Email from %f\", \"Email %c\""
   :group 'org-link-store
-  :package-version '(Org . 9.3)
+  :package-version '(Org . "9.3")
   :type 'string
   :safe #'stringp)
 
