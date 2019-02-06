@@ -19554,17 +19554,15 @@ Otherwise, return a user error."
        (unless (member (org-element-property :key element)
 		       '("INCLUDE" "SETUPFILE"))
 	 (user-error "No special environment to edit here"))
-       (org-open-link-from-string
-	(format "[[%s]]"
-		(expand-file-name
-		 (let ((value (org-strip-quotes
-			       (org-element-property :value element))))
-		   (cond
-		    ((not (org-string-nw-p value))
-		     (user-error "No file to edit"))
-		    ((org-file-url-p value)
-		     (user-error "Files located with a URL cannot be edited"))
-		    (t value)))))))
+       (let ((value (org-element-property :value element)))
+	 (unless (org-string-nw-p value) (user-error "No file to edit"))
+	 (let ((file (and (string-match "\\`\"\\(.*?\\)\"\\|\\S-+" value)
+			  (or (match-string 1 value)
+			      (match-string 0 value)))))
+	   (when (org-file-url-p file)
+	     (user-error "Files located with a URL cannot be edited"))
+	   (org-open-link-from-string
+	    (format "[[%s]]" (expand-file-name file))))))
       (`table
        (if (eq (org-element-property :type element) 'table.el)
            (org-edit-table.el)
