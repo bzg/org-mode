@@ -388,27 +388,22 @@ current time."
 				    (throw :exit s))))))))))
 		 donep)))
 	     markedp face)
-	(if donep
-	    (let ((done-time (time-add
-			      starting
-			      (days-to-time
-			       (- start (time-to-days starting))))))
-
-	      (aset graph index org-habit-completed-glyph)
-	      (setq markedp t)
-	      (while (and done-dates
-			  (= start (car done-dates)))
-		(setq last-done-date (car done-dates)
-		      done-dates (cdr done-dates))))
-	  (if todayp
-	      (aset graph index org-habit-today-glyph)))
+	(cond
+	 (donep
+	  (aset graph index org-habit-completed-glyph)
+	  (setq markedp t)
+	  (while (and done-dates (= start (car done-dates)))
+	    (setq last-done-date (car done-dates))
+	    (setq done-dates (cdr done-dates))))
+	 (todayp
+	  (aset graph index org-habit-today-glyph)))
 	(setq face (if (or in-the-past-p todayp)
 		       (car faces)
 		     (cdr faces)))
-	(if (and in-the-past-p
-		 (not (eq face 'org-habit-overdue-face))
-		 (not markedp))
-	    (setq face (cdr faces)))
+	(when (and in-the-past-p
+		   (not (eq face 'org-habit-overdue-face))
+		   (not markedp))
+	  (setq face (cdr faces)))
 	(put-text-property index (1+ index) 'face face graph)
 	(put-text-property index (1+ index)
 			   'help-echo
@@ -416,7 +411,7 @@ current time."
 				    (org-time-stamp-format)
  				    (time-add starting (days-to-time (- start (time-to-days starting)))))
 				   (if donep " DONE" ""))
-	 graph))
+			   graph))
       (setq start (1+ start)
 	    index (1+ index)))
     graph))
