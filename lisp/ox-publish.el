@@ -1314,8 +1314,9 @@ the file including them will be republished as well."
 	  (unless visiting (kill-buffer buf)))))
     (or (null pstamp)
 	(let ((ctime (org-publish-cache-ctime-of-src filename)))
-	  (or (< pstamp ctime)
-	      (cl-some (lambda (ct) (< ctime ct)) included-files-ctime))))))
+	  (or (time-less-p pstamp ctime)
+	      (cl-some (lambda (ct) (time-less-p ctime ct))
+		       included-files-ctime))))))
 
 (defun org-publish-cache-set-file-property
   (filename property value &optional project-name)
@@ -1365,8 +1366,8 @@ does not exist."
   (let ((attr (file-attributes
 	       (expand-file-name (or (file-symlink-p file) file)
 				 (file-name-directory file)))))
-    (if (not attr) (error "No such file: \"%s\"" file)
-      (floor (float-time (file-attribute-modification-time attr))))))
+    (if attr (file-attribute-modification-time attr)
+      (error "No such file: %S" file))))
 
 
 (provide 'ox-publish)
