@@ -1304,8 +1304,8 @@ the file including them will be republished as well."
 		    (let* ((value (org-element-property :value element))
 			   (filename
 			    (and (string-match "\\`\\(\".+?\"\\|\\S-+\\)" value)
-				 (let ((m (org-unbracket-string
-					   "\"" "\"" (match-string 1 value))))
+				 (let ((m (org-strip-quotes
+					   (match-string 1 value))))
 				   ;; Ignore search suffix.
 				   (if (string-match "::.*?\\'" m)
 				       (substring m 0 (match-beginning 0))
