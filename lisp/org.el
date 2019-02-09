@@ -14729,7 +14729,7 @@ Assume point is at the beginning of the headline."
 
 When argument POS is non-nil, retrieve tags for headline at POS.
 
-According to `org-use-tags-inheritance', tags may be inherited
+According to `org-use-tag-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
 `org-file-tags'.  In this case, the returned list of tags
 contains tags in this order: file tags, tags inherited from
