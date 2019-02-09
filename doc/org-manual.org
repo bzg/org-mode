@@ -9929,7 +9929,7 @@ the other commands, point needs to be in the desired line.
      #+kindex: M-*
      #+findex: org-agenda-bulk-toggle-all
 
-     Mark entries matching a regular expression for bulk action.
+     Toggle mark of every entry for bulk action.
 
 - {{{kbd(%)}}} (~org-agenda-bulk-mark-regexp~) ::
      #+kindex: %
