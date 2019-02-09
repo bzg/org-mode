@@ -115,7 +115,7 @@ MAKE_ORG_INSTALL = $(BATCHL) \
 MAKE_ORG_VERSION = $(BATCHL) \
 	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
-	  --eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)" "'$(datadir)'")'
+	  --eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)")'
 
 # How to byte-compile the whole source directory
 ELCDIR	= $(BATCHL) \

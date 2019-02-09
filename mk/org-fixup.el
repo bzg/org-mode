@@ -34,7 +34,7 @@
     (find-file manual)
     (org-texinfo-export-to-texinfo)))
 
-(defun org-make-org-version (org-release org-git-version odt-dir)
+(defun org-make-org-version (org-release org-git-version)
   "Make the file org-version.el in the current directory.
 This function is internally used by the build system and should
 be used by foreign build systems or installers to produce this
@@ -58,9 +58,6 @@ Inserted by installing Org mode or when a release is made.\"
 Inserted by installing Org or when a release is made.\"
    (let ((org-git-version \"" org-git-version "\"))
      org-git-version))
-;;;\#\#\#autoload
-\(defvar org-odt-data-dir \"" odt-dir "\"
-  \"The location of ODT styles.\")
 \f\n\(provide 'org-version\)
 \f\n;; Local Variables:\n;; version-control: never
 ;; no-byte-compile: t
@@ -93,17 +90,13 @@ Finds the install directory by looking for library \"org\".
 Optionally byte-compile lisp files in the install directory or
 force re-compilation.  This function is provided for easier
 manual install when the build system can't be used."
-  (let* ((origin default-directory)
-	 (dirlisp (org-find-library-dir "org"))
-	 (dirorg (concat dirlisp "../" ))
-	 (dirodt (if (boundp 'org-odt-data-dir)
-		     org-odt-data-dir
-		   (concat dirorg "etc/"))))
+  (let ((origin default-directory)
+	(dirlisp (org-find-library-dir "org")))
     (unwind-protect
 	(progn
 	  (cd dirlisp)
 	  (org-fixup)
-	  (org-make-org-version (org-release) (org-git-version) dirodt)
+	  (org-make-org-version (org-release) (org-git-version))
 	  (org-make-org-loaddefs)
 	  (when compile (byte-recompile-directory dirlisp 0 force)))
       (cd origin))))
