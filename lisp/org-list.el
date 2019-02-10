@@ -3157,7 +3157,7 @@ Point is left at list's end."
   (if (not (ignore-errors (goto-char (org-in-item-p))))
       (error "Not in a list")
     (let ((list (save-excursion (org-list-to-lisp t))))
-      (insert (org-list-to-subtree list)))))
+      (insert (org-list-to-subtree list) "\n"))))
 
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-to-lisp' to a custom format.
