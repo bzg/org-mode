@@ -1285,10 +1285,7 @@ the file including them will be republished as well."
     (error
      "`org-publish-cache-file-needs-publishing' called, but no cache present"))
   (let* ((key (org-publish-timestamp-filename filename pub-dir pub-func))
-	 (pstamp (pcase (org-publish-cache-get key)
-		   ;; Old format, convert it back to a time value.
-		   ((and stamp (pred wholenump)) (seconds-to-time stamp))
-		   (stamp stamp)))
+	 (pstamp (org-publish-cache-get key))
 	 (org-inhibit-startup t)
 	 included-files-ctime)
     (when (equal (file-name-extension filename) "org")
