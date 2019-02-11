@@ -19100,8 +19100,8 @@ further based on their usage needs.  For example, the normal
 #+cindex: Info
 
 #+findex: org-info-find-node
-#+kindex: C-c C-x C-i
-{{{kbd(C-c C-x C-i)}}} in an Org file tries to open a suitable section
+#+kindex: C-c C-x I
+{{{kbd(C-c C-x I)}}} in an Org file tries to open a suitable section
 of the Org manual depending on the syntax at point.  For example,
 using it on a headline displays "Document Structure" section.
 
