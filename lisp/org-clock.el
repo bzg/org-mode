@@ -1301,8 +1301,7 @@ the default behavior."
 	   (setq ts (concat "[" (match-string 1) "]"))
 	   (goto-char (match-end 1))
 	   (setq org-clock-start-time
-		 (apply 'encode-time
-			(org-parse-time-string (match-string 1))))
+		 (org-time-string-to-time (match-string 1)))
 	   (setq org-clock-effort (org-entry-get (point) org-effort-property))
 	   (setq org-clock-total-time (org-clock-sum-current-item
 				       (org-clock-get-sum-start))))
@@ -1439,7 +1438,7 @@ The time is always returned as UTC."
 	     (day (nth 3 dt)))
 	(if (< hour org-extend-today-until) (setf (nth 3 dt) (1- day)))
 	(setf (nth 2 dt) org-extend-today-until)
-	(apply #'encode-time (append (list 0 0) (nthcdr 2 dt)))))
+	(apply #'encode-time 0 0 (nthcdr 2 dt))))
      ((or (equal cmt "all")
 	  (and (or (not cmt) (equal cmt "auto"))
 	       (not lr)))
@@ -1829,7 +1828,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 			       (org-parse-time-string (match-string 3)))))
 		   (dt (- (if tend (min te tend) te)
 			  (if tstart (max ts tstart) ts))))
-	      (when (> dt 0) (cl-incf t1 (floor (/ dt 60))))))
+	      (when (> dt 0) (cl-incf t1 (floor dt 60)))))
 	   ((match-end 4)
 	    ;; A naked time.
 	    (setq t1 (+ t1 (string-to-number (match-string 5))
@@ -2910,8 +2909,7 @@ Otherwise, return nil."
 		     (<= org-clock-marker (point-at-eol)))
 	    ;; The clock is running here
 	    (setq org-clock-start-time
-		  (apply 'encode-time
-			 (org-parse-time-string (match-string 1))))
+		  (org-time-string-to-time (match-string 1)))
 	    (org-clock-update-mode-line)))
 	 (t
 	  (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))

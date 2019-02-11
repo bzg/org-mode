@@ -1011,9 +1011,9 @@ Store them in the capture property list."
 			      (not (= (time-to-days prompt-time) (org-today))))
 			 ;; Use 00:00 when no time is given for another
 			 ;; date than today?
-			 (apply #'encode-time
-				(append `(0 0 ,org-extend-today-until)
-					(cl-cdddr (decode-time prompt-time)))))
+			 (apply #'encode-time 0 0
+				org-extend-today-until
+				(cl-cdddr (decode-time prompt-time))))
 			((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)"
 				       org-read-date-final-answer)
 			 ;; Replace any time range by its start.
