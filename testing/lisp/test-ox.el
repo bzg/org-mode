@@ -1363,7 +1363,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
      (org-export-expand-include-keyword)
      (eq 3 (org-current-level)))))
 
-(ert-deftest test-org/expand-include/links ()
+(ert-deftest test-org-export/expand-include/links ()
   "Test links modifications when including files."
   ;; Preserve relative plain links.
   (should
@@ -3037,7 +3037,93 @@ Para2"
 	     (org-element-map
 		 (org-export-insert-image-links tree info '(("file" . "xxx")))
 		 'link
-	       (lambda (l) (org-element-property :type l)))))))
+	       (lambda (l) (org-element-property :type l))))))
+  ;; If an image link was included from another file, make sure to
+  ;; shift any relative path accordingly.
+  (should
+   (string-prefix-p
+    "file:org-includee-"
+    (let* ((subdir (make-temp-file "org-includee-" t))
+	   (includee (expand-file-name "includee.org" subdir))
+	   (includer (make-temp-file "org-includer-")))
+      (write-region "file:foo.png" nil includee)
+      (write-region (format "#+INCLUDE: %S"
+			    (file-relative-name includee
+						temporary-file-directory))
+		    nil includer)
+      (let ((buffer (find-file-noselect includer t)))
+	(unwind-protect
+	    (with-current-buffer buffer
+	      (org-export-as
+	       (org-export-create-backend
+		:transcoders
+		'((section . (lambda (_s c _i) c))
+		  (paragraph . (lambda (_p c _i) c))
+		  (link . (lambda (l c _i) (org-element-link-interpreter l c))))
+		:filters
+		'((:filter-parse-tree
+		   (lambda (d _b i) (org-export-insert-image-links d i)))))))
+	  (when (buffer-live-p buffer)
+	    (with-current-buffer buffer (set-buffer-modified-p nil))
+	    (kill-buffer buffer))
+	  (when (file-exists-p subdir) (delete-directory subdir t))
+	  (when (file-exists-p includer) (delete-file includer)))))))
+  (should
+   (string-match-p
+    "file:org-includee-.+?foo\\.png"
+    (let* ((subdir (make-temp-file "org-includee-" t))
+	   (includee (expand-file-name "includee.org" subdir))
+	   (includer (make-temp-file "org-includer-")))
+      (write-region "[[https://orgmode.org][file:foo.png]]" nil includee)
+      (write-region (format "#+INCLUDE: %S"
+			    (file-relative-name includee
+						temporary-file-directory))
+		    nil includer)
+      (let ((buffer (find-file-noselect includer t)))
+	(unwind-protect
+	    (with-current-buffer buffer
+	      (org-export-as
+	       (org-export-create-backend
+		:transcoders
+		'((section . (lambda (_s c _i) c))
+		  (paragraph . (lambda (_p c _i) c))
+		  (link . (lambda (l c _i) (org-element-link-interpreter l c))))
+		:filters
+		'((:filter-parse-tree
+		   (lambda (d _b i) (org-export-insert-image-links d i)))))))
+	  (when (buffer-live-p buffer)
+	    (with-current-buffer buffer (set-buffer-modified-p nil))
+	    (kill-buffer buffer))
+	  (when (file-exists-p subdir) (delete-directory subdir t))
+	  (when (file-exists-p includer) (delete-file includer)))))))
+  (should
+   (string-match-p
+    "file:org-includee.+?file:org-includee"
+    (let* ((subdir (make-temp-file "org-includee-" t))
+	   (includee (expand-file-name "includee.org" subdir))
+	   (includer (make-temp-file "org-includer-")))
+      (write-region "[[file:bar.png][file:foo.png]]" nil includee)
+      (write-region (format "#+INCLUDE: %S"
+			    (file-relative-name includee
+						temporary-file-directory))
+		    nil includer)
+      (let ((buffer (find-file-noselect includer t)))
+	(unwind-protect
+	    (with-current-buffer buffer
+	      (org-export-as
+	       (org-export-create-backend
+		:transcoders
+		'((section . (lambda (_s c _i) c))
+		  (paragraph . (lambda (_p c _i) c))
+		  (link . (lambda (l c _i) (org-element-link-interpreter l c))))
+		:filters
+		'((:filter-parse-tree
+		   (lambda (d _b i) (org-export-insert-image-links d i)))))))
+	  (when (buffer-live-p buffer)
+	    (with-current-buffer buffer (set-buffer-modified-p nil))
+	    (kill-buffer buffer))
+	  (when (file-exists-p subdir) (delete-directory subdir t))
+	  (when (file-exists-p includer) (delete-file includer))))))))
 
 (ert-deftest test-org-export/fuzzy-link ()
   "Test fuzzy links specifications."
