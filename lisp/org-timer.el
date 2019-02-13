@@ -141,10 +141,7 @@ the region 0:00:00."
 	  (setq delta (org-timer-hms-to-secs (org-timer-fix-incomplete s)))))
 	(setq org-timer-start-time
 	      (seconds-to-time
-	       ;; Pass `current-time' result to `float-time' (instead
-	       ;; of calling without arguments) so that only
-	       ;; `current-time' has to be overridden in tests.
-	       (- (float-time (current-time)) delta))))
+	       (- (float-time) delta))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
       (message "Timer start time set to %s, current value is %s"
@@ -174,7 +171,7 @@ With prefix arg STOP, stop it entirely."
 	    (setq org-timer-start-time
 		  (time-add (current-time) (seconds-to-time new-secs))))
 	(setq org-timer-start-time
-	      (seconds-to-time (- (float-time (current-time))
+	      (seconds-to-time (- (float-time)
 				  (- pause-secs start-secs)))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
@@ -235,13 +232,10 @@ it in the buffer."
 	   (abs (floor (org-timer-seconds))))))
 
 (defun org-timer-seconds ()
-  ;; Pass `current-time' result to `float-time' (instead of calling
-  ;; without arguments) so that only `current-time' has to be
-  ;; overridden in tests.
   (if org-timer-countdown-timer
       (- (float-time org-timer-start-time)
-	 (float-time (or org-timer-pause-time (current-time))))
-    (- (float-time (or org-timer-pause-time (current-time)))
+	 (float-time org-timer-pause-time))
+    (- (float-time org-timer-pause-time)
        (float-time org-timer-start-time))))
 
 ;;;###autoload
@@ -465,8 +459,8 @@ using three `C-u' prefix arguments."
 		(org-timer--run-countdown-timer
 		 secs org-timer-countdown-timer-title))
 	  (run-hooks 'org-timer-set-hook)
-	  ;; Pass `current-time' result to `add-time' (instead nil) so
-	  ;; that only `current-time' has to be overridden in tests.
+	  ;; Pass `current-time' result to `time-add' (instead of nil)
+	  ;; for for Emacs 24 compatibility.
 	  (setq org-timer-start-time
 		(time-add (current-time) (seconds-to-time secs)))
 	  (setq org-timer-pause-time nil)
