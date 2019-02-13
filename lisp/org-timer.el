@@ -226,15 +226,12 @@ it in the buffer."
       (insert (org-timer-value-string)))))
 
 (defun org-timer-value-string ()
-  "Set the timer string."
+  "Return current timer string."
   (format org-timer-format
 	  (org-timer-secs-to-hms
-	   (abs (floor (org-timer-seconds))))))
-
-(defun org-timer-seconds ()
-  (funcall (if org-timer-countdown-timer #'+ #'-)
-	   (- (float-time org-timer-start-time)
-	      (float-time org-timer-pause-time))))
+	   (let ((time (- (float-time org-timer-pause-time)
+			  (float-time org-timer-start-time))))
+	     (abs (floor (if org-timer-countdown-timer (- time) time)))))))
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)
