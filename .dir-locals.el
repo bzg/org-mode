@@ -14,8 +14,7 @@
   (org-footnote-auto-label . t)
   (org-footnote-define-inline . nil)
   (org-footnote-section . "Footnotes")
-  (org-hide-emphasis-markers . nil)
-  (org-list-description-max-indent . 5)))
+  (org-hide-emphasis-markers . nil)))
 
 
 
