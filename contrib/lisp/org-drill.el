@@ -1874,7 +1874,7 @@ Note: does not actually alter the item."
 
 
 (defun org-drill--show-latex-fragments ()
-  (org-remove-latex-fragment-image-overlays)
+  (org-clear-latex-preview)
   (if (fboundp 'org-toggle-latex-fragment)
       (org-toggle-latex-fragment '(4))
     (org-preview-latex-fragment '(4))))
@@ -2273,7 +2273,7 @@ See `org-drill' for more details."
                     (funcall answer-fn
                              (lambda () (org-drill-reschedule))))))))
 	    (run-hook-with-args 'org-drill-entry-after-hook)
-	    (org-remove-latex-fragment-image-overlays)))))))
+	    (org-clear-latex-preview)))))))
 
 
 (defun org-drill-entries-pending-p ()

@@ -1635,8 +1635,8 @@ changed by an edit command."
 Such highlights are created by `org-occur' and `org-clock-display'.
 When nil, `\\[org-ctrl-c-ctrl-c]' needs to be used \
 to get rid of the highlights.
-The highlights created by `org-toggle-latex-fragment' always need
-`\\[org-toggle-latex-fragment]' to be removed."
+The highlights created by `org-latex-preview' always need
+`\\[org-latex-preview]' to be removed."
   :group 'org-sparse-trees
   :group 'org-time
   :type 'boolean)
@@ -5443,7 +5443,7 @@ The following commands are available:
 	      (t #'org-table-shrink))
 	t))
      (when org-startup-with-inline-images (org-display-inline-images))
-     (when org-startup-with-latex-preview (org-toggle-latex-fragment '(16)))
+     (when org-startup-with-latex-preview (org-latex-preview '(16)))
      (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))
      (when org-startup-truncated (setq truncate-lines t))
      (when org-startup-indented (require 'org-indent) (org-indent-mode 1))))
@@ -18018,7 +18018,7 @@ looks only before point, not after."
     (org-in-regexp
      "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
 
-(defun org--format-latex-make-overlay (beg end image &optional imagetype)
+(defun org--make-preview-overlay (beg end image &optional imagetype)
   "Build an overlay between BEG and END using IMAGE file.
 Argument IMAGETYPE is the extension of the displayed image,
 as a string.  It defaults to \"png\"."
@@ -18034,88 +18034,91 @@ as a string.  It defaults to \"png\"."
 		 'display
 		 (list 'image :type imagetype :file image :ascent 'center))))
 
-(defun org--list-latex-overlays (&optional beg end)
-  "List all Org LaTeX overlays in current buffer.
-Limit to overlays between BEG and END when those are provided."
-  (cl-remove-if-not
-   (lambda (o) (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay))
-   (overlays-in (or beg (point-min)) (or end (point-max)))))
-
-(defun org-remove-latex-fragment-image-overlays (&optional beg end)
+(defun org-clear-latex-preview (&optional beg end)
   "Remove all overlays with LaTeX fragment images in current buffer.
 When optional arguments BEG and END are non-nil, remove all
 overlays between them instead.  Return a non-nil value when some
 overlays were removed, nil otherwise."
-  (let ((overlays (org--list-latex-overlays beg end)))
+  (let ((overlays
+	 (cl-remove-if-not
+	  (lambda (o) (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay))
+	  (overlays-in (or beg (point-min)) (or end (point-max))))))
     (mapc #'delete-overlay overlays)
     overlays))
 
-(defun org-toggle-latex-fragment (&optional arg)
-  "Preview the LaTeX fragment at point, or all locally or globally.
+(defun org--latex-preview-region (beg end)
+  "Preview LaTeX fragments between BEG and END.
+BEG and END are buffer positions."
+  (let ((file (buffer-file-name (buffer-base-buffer))))
+    (save-excursion
+      (org-format-latex
+       (concat org-preview-latex-image-directory "org-ltximg")
+       beg end
+       ;; Emacs cannot overlay images from remote hosts.  Create it in
+       ;; `temporary-file-directory' instead.
+       (if (or (not file) (file-remote-p file))
+    	   temporary-file-directory
+	 default-directory)
+       'overlays nil 'forbuffer org-preview-latex-default-process))))
 
-If the cursor is on a LaTeX fragment, create the image and overlay
-it over the source code, if there is none.  Remove it otherwise.
-If there is no fragment at point, display all fragments in the
-current section.
+(defun org-latex-preview (&optional arg)
+  "Toggle preview of the LaTeX fragment at point.
 
-With prefix ARG, preview or clear image for all fragments in the
-current subtree or in the whole buffer when used before the first
-headline.  With a prefix ARG `\\[universal-argument] \
-\\[universal-argument]' preview or clear images
-for all fragments in the buffer."
+If the cursor is on a LaTeX fragment, create the image and
+overlay it over the source code, if there is none.  Remove it
+otherwise.  If there is no fragment at point, display images for
+all fragments in the current section.
+
+With a `\\[universal-argument]' prefix argument ARG, clear images \
+for all fragments
+in the current section.
+
+With a `\\[universal-argument] \\[universal-argument]' prefix \
+argument ARG, display image for all
+fragments in the buffer.
+
+With a `\\[universal-argument] \\[universal-argument] \
+\\[universal-argument]' prefix argument ARG, clear image for all
+fragments in the buffer."
   (interactive "P")
-  (when (display-graphic-p)
-    (catch 'exit
-      (save-excursion
-	(let (beg end msg)
-	  (cond
-	   ((or (equal arg '(16))
-		(and (equal arg '(4))
-		     (org-with-limited-levels (org-before-first-heading-p))))
-	    (if (org-remove-latex-fragment-image-overlays)
-		(progn (message "LaTeX fragments images removed from buffer")
-		       (throw 'exit nil))
-	      (setq msg "Creating images for buffer...")))
-	   ((equal arg '(4))
-	    (org-with-limited-levels (org-back-to-heading t))
-	    (setq beg (point))
-	    (setq end (progn (org-end-of-subtree t) (point)))
-	    (if (org-remove-latex-fragment-image-overlays beg end)
-		(progn
-		  (message "LaTeX fragment images removed from subtree")
-		  (throw 'exit nil))
-	      (setq msg "Creating images for subtree...")))
-	   ((let ((datum (org-element-context)))
-	      (when (memq (org-element-type datum)
-			  '(latex-environment latex-fragment))
-		(setq beg (org-element-property :begin datum))
-		(setq end (org-element-property :end datum))
-		(if (org-remove-latex-fragment-image-overlays beg end)
-		    (progn (message "LaTeX fragment image removed")
-			   (throw 'exit nil))
-		  (setq msg "Creating image...")))))
-	   (t
-	    (org-with-limited-levels
-	     (setq beg (if (org-at-heading-p) (line-beginning-position)
-			 (outline-previous-heading)
-			 (point)))
-	     (setq end (progn (outline-next-heading) (point)))
-	     (if (org-remove-latex-fragment-image-overlays beg end)
-		 (progn
-		   (message "LaTeX fragment images removed from section")
-		   (throw 'exit nil))
-	       (setq msg "Creating images for section...")))))
-	  (let ((file (buffer-file-name (buffer-base-buffer))))
-	    (org-format-latex
-	     (concat org-preview-latex-image-directory "org-ltximg")
-	     beg end
-	     ;; Emacs cannot overlay images from remote hosts.  Create
-	     ;; it in `temporary-file-directory' instead.
-	     (if (or (not file) (file-remote-p file))
-		 temporary-file-directory
-	       default-directory)
-	     'overlays msg 'forbuffer org-preview-latex-default-process))
-	  (message (concat msg "done")))))))
+  (cond
+   ((not (display-graphic-p)) nil)
+   ;; Clear whole buffer.
+   ((equal arg '(64))
+    (org-clear-latex-preview (point-min) (point-max))
+    (message "LaTeX previews removed from buffer"))
+   ;; Preview whole buffer.
+   ((equal arg '(16))
+    (message "Creating LaTeX previews in buffer...")
+    (org--latex-preview-region (point-min) (point-max))
+    (message "Creating LaTeX previews in buffer... done."))
+   ;; Clear current section.
+   ((equal arg '(4))
+    (org-clear-latex-preview
+     (if (org-before-first-heading-p) (point-min)
+       (save-excursion
+	 (org-with-limited-levels (org-back-to-heading t) (point))))
+     (org-with-limited-levels (org-entry-end-position))))
+   ;; Toggle preview on LaTeX code at point.
+   ((let ((datum (org-element-context)))
+      (and (memq (org-element-type datum) '(latex-environment latex-fragment))
+	   (let ((beg (org-element-property :begin datum))
+		 (end (org-element-property :end datum)))
+	     (if (org-clear-latex-preview beg end)
+		 (message "LaTeX preview removed")
+	       (message "Creating LaTeX preview...")
+	       (org--latex-preview-region beg end)
+	       (message "Creating LaTeX preview... done."))
+	     t))))
+   ;; Preview current section.
+   (t
+    (let ((beg (if (org-before-first-heading-p) (point-min)
+		 (save-excursion
+		   (org-with-limited-levels (org-back-to-heading t) (point)))))
+	  (end (org-with-limited-levels (org-entry-end-position))))
+      (message "Creating LaTeX previews in section...")
+      (org--latex-preview-region beg end)
+      (message "Creating LaTeX previews in section... done.")))))
 
 (defun org-format-latex
     (prefix &optional beg end dir overlays msg forbuffer processing-type)
@@ -18216,7 +18219,7 @@ Some of the options can be changed using the variable
 			    (when (eq (overlay-get o 'org-overlay-type)
 				      'org-latex-overlay)
 			      (delete-overlay o)))
-			  (org--format-latex-make-overlay beg end movefile imagetype)
+			  (org--make-preview-overlay beg end movefile imagetype)
 			  (goto-char end))
 		      (delete-region beg end)
 		      (insert

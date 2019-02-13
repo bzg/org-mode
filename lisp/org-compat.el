@@ -257,6 +257,12 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-effort-durations 'org-duration-units
   "Org 9.2")
 
+(define-obsolete-function-alias 'org-toggle-latex-fragment 'org-latex-preview
+  "Org 9.3")
+
+(define-obsolete-function-alias 'org-remove-latex-fragment-image-overlays
+  'org-clear-latex-preview "Org 9.3")
+
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
   (save-match-data

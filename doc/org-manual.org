@@ -10810,16 +10810,18 @@ In particular, the ~:scale~ (and for HTML export, ~:html-scale~)
 property of the former can be used to adjust the size of the preview
 images.
 
-- {{{kbd(C-c C-x C-l)}}} (~org-toggle-latex-fragment~) ::
-     #+kindex: C-c C-x C-l
-     #+findex: org-toggle-latex-fragment
+- {{{kbd(C-c C-x C-l)}}} (~org-latex-preview~) ::
+  #+kindex: C-c C-x C-l
+  #+findex: org-latex-preview
 
-     Produce a preview image of the LaTeX fragment at point and
-     overlay it over the source code.  If there is no fragment at
-     point, process all fragments in the current entry (between two
-     headlines).  When called with a prefix argument, process the
-     entire subtree.  When called with two prefix arguments, or when
-     point is before the first headline, process the entire buffer.
+  Produce a preview image of the LaTeX fragment at point and overlay
+  it over the source code.  If there is no fragment at point, process
+  all fragments in the current entry -- between two headlines.
+
+  When called with a single prefix argument, clear all images in the
+  current entry.  Two prefix arguments produce a preview image for all
+  fragments in the buffer, while three of them clear all the images in
+  that buffer.
 
 #+vindex: org-startup-with-latex-preview
 You can turn on the previewing of all LaTeX fragments in a file with
