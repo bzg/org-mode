@@ -232,11 +232,9 @@ it in the buffer."
 	   (abs (floor (org-timer-seconds))))))
 
 (defun org-timer-seconds ()
-  (if org-timer-countdown-timer
-      (- (float-time org-timer-start-time)
-	 (float-time org-timer-pause-time))
-    (- (float-time org-timer-pause-time)
-       (float-time org-timer-start-time))))
+  (funcall (if org-timer-countdown-timer #'+ #'-)
+	   (- (float-time org-timer-start-time)
+	      (float-time org-timer-pause-time))))
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)
