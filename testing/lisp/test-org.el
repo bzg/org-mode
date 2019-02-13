@@ -198,18 +198,14 @@
   (should
    (equal
     "2015-03-04"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2014-03-04")))))
+    (org-test-at-time "2014-03-04"
       (org-read-date
        t nil "+1y" nil
        (apply #'encode-time (org-parse-time-string "2012-03-29"))))))
   (should
    (equal
     "2013-03-29"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2014-03-04")))))
+    (org-test-at-time "2014-03-04"
       (org-read-date
        t nil "++1y" nil
        (apply #'encode-time (org-parse-time-string "2012-03-29"))))))
@@ -219,25 +215,19 @@
   (should
    (equal
     "2014-04-01"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2014-03-04")))))
+    (org-test-at-time "2014-03-04"
       (let ((org-read-date-prefer-future t))
 	(org-read-date t nil "1")))))
   (should
    (equal
     "2013-03-04"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2012-03-29")))))
+    (org-test-at-time "2012-03-29"
       (let ((org-read-date-prefer-future t))
 	(org-read-date t nil "3-4")))))
   (should
    (equal
     "2012-03-04"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2012-03-29")))))
+    (org-test-at-time "2012-03-29"
       (let ((org-read-date-prefer-future nil))
 	(org-read-date t nil "3-4")))))
   ;; When set to `org-read-date-prefer-future' is set to `time', read
@@ -247,17 +237,13 @@
   (should
    (equal
     "2012-03-30"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2012-03-29 16:40")))))
+    (org-test-at-time "2012-03-29 16:40"
       (let ((org-read-date-prefer-future 'time))
 	(org-read-date t nil "00:40" nil)))))
   (should-not
    (equal
     "2012-03-30"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2012-03-29 16:40")))))
+    (org-test-at-time "2012-03-29 16:40"
       (let ((org-read-date-prefer-future 'time))
 	(org-read-date t nil "29 00:40" nil)))))
   ;; Caveat: `org-read-date-prefer-future' always refers to current
@@ -265,9 +251,7 @@
   (should
    (equal
     "2014-04-01"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2014-03-04")))))
+    (org-test-at-time "2014-03-04"
       (let ((org-read-date-prefer-future t))
 	(org-read-date
 	 t nil "1" nil
@@ -275,9 +259,7 @@
   (should
    (equal
     "2014-03-25"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time (org-parse-time-string "2014-03-04")))))
+    (org-test-at-time "2014-03-04"
       (let ((org-read-date-prefer-future t))
 	(org-read-date
 	 t nil "25" nil
@@ -376,11 +358,7 @@
 
 (ert-deftest test-org/deadline-close-p ()
   "Test `org-deadline-close-p' specifications."
-  ;; Pretend that the current time is 2016-06-03 Fri 01:43
-  (cl-letf (((symbol-function 'current-time)
-	     (lambda ()
-	       (apply #'encode-time
-		      (org-parse-time-string "2016-06-03 Fri 01:43")))))
+  (org-test-at-time "2016-06-03 Fri 01:43"
     ;; Timestamps are close if they are within `ndays' of lead time.
     (org-test-with-temp-text "* Heading"
       (should (org-deadline-close-p "2016-06-03 Fri" 0))
@@ -4859,10 +4837,7 @@ Paragraph<point>"
   ;; Accept delta time, e.g., "+2d".
   (should
    (equal "* H\nDEADLINE: <2015-03-04>\n"
-	  (cl-letf (((symbol-function 'current-time)
-		     (lambda (&rest args)
-		       (apply #'encode-time
-			      (org-parse-time-string "2014-03-04")))))
+	  (org-test-at-time "2014-03-04"
 	    (org-test-with-temp-text "* H"
 	      (let ((org-adapt-indentation nil)
 		    (org-last-inserted-timestamp nil))
@@ -4976,10 +4951,7 @@ Paragraph<point>"
   ;; Accept delta time, e.g., "+2d".
   (should
    (equal "* H\nSCHEDULED: <2015-03-04>\n"
-	  (cl-letf (((symbol-function 'current-time)
-		     (lambda (&rest args)
-		       (apply #'encode-time
-			      (org-parse-time-string "2014-03-04")))))
+	  (org-test-at-time "2014-03-04"
 	    (org-test-with-temp-text "* H"
 	      (let ((org-adapt-indentation nil)
 		    (org-last-inserted-timestamp nil))
@@ -6871,10 +6843,7 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
    (string-match
     "Te<2014-03-04 .*? 00:41>xt"
     (org-test-with-temp-text "Te<point>xt"
-      (cl-letf (((symbol-function 'current-time)
-		 (lambda ()
-		   (apply #'encode-time
-			  (org-parse-time-string "2014-03-04 00:41")))))
+      (org-test-at-time "2014-03-04 00:41"
 	(org-time-stamp '(16))
 	(buffer-string)))))
   ;; When optional argument is non-nil, insert an inactive timestamp.

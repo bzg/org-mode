@@ -510,10 +510,7 @@
   (should
    (equal
     "0min"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>")))))
+    (org-test-at-time "<2014-03-04 Tue>"
       (org-test-with-temp-text
 	  "* H
 ** S1
@@ -529,10 +526,7 @@
   (should
    (equal
     "2d"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>")))))
+    (org-test-at-time "<2014-03-04 Tue>"
       (org-test-with-temp-text
 	  "* H
 ** S1
@@ -548,10 +542,7 @@
   (should
    (equal
     "1d 12h"
-    (cl-letf (((symbol-function 'current-time)
-	       (lambda ()
-		 (apply #'encode-time
-			(org-parse-time-string "<2014-03-04 Tue>")))))
+    (org-test-at-time "<2014-03-04 Tue>"
       (org-test-with-temp-text
 	  "* H
 ** S1

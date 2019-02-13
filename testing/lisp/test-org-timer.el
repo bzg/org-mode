@@ -40,8 +40,7 @@ Also, mute output from `message'."
 (defmacro test-org-timer/with-current-time (time &rest body)
   "Run BODY, setting `current-time' output to TIME."
   (declare (indent 1))
-  `(cl-letf (((symbol-function 'current-time) (lambda () ,time)))
-     ,@body))
+  `(org-test-at-time ,time ,@body))
 
 
 ;;; Time conversion and formatting
