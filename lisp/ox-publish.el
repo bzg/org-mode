@@ -1366,8 +1366,8 @@ does not exist."
   (let ((attr (file-attributes
 	       (expand-file-name (or (file-symlink-p file) file)
 				 (file-name-directory file)))))
-    (if (not attr) (error "No such file: %S" file)
-      (file-attribute-modification-time attr))))
+    (if attr (file-attribute-modification-time attr)
+      (error "No such file: %S" file))))
 
 
 (provide 'ox-publish)
