@@ -10086,7 +10086,14 @@ a link."
 		 (>= (point) (match-beginning 5))
 		 (< (point) (match-end 5)))
 	    ;; On tags.
-	    (org-tags-view arg (substring (match-string 5) 0 -1))
+	    (org-tags-view
+	     arg
+	     (save-excursion
+	       (let* ((beg (match-beginning 5))
+		      (end (match-end 5))
+		      (beg-tag (or (search-backward ":" beg 'at-limit) (point)))
+		      (end-tag (search-forward ":" end nil 2)))
+		 (buffer-substring (1+ beg-tag) (1- end-tag)))))
 	  ;; Not on tags.
 	  (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
 	    (`(nil . ,_)
