@@ -38,6 +38,7 @@
 (declare-function org-table-goto-line "org-table" (n))
 
 (defvar org-frame-title-format-backup frame-title-format)
+(defvar org-state)
 (defvar org-time-stamp-formats)
 
 
@@ -1982,7 +1983,7 @@ If NOREMOVE is nil, remove this function from the
       (remove-hook 'before-change-functions
 		   'org-clock-remove-overlays 'local))))
 
-(defvar org-state) ;; dynamically scoped into this function
+;;;###autoload
 (defun org-clock-out-if-current ()
   "Clock out if the current entry contains the running clock.
 This is used to stop the clock after a TODO entry is marked DONE,
