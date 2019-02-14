@@ -12148,7 +12148,8 @@ When called through ELisp, arg is also interpreted in the following way:
 	    (when org-auto-align-tags (org-align-tags))
 	    (when org-provide-todo-statistics
 	      (org-update-parent-todo-statistics))
-	    (org-clock-out-if-current)
+	    (when (bound-and-true-p org-clock-out-when-done)
+	      (org-clock-out-if-current))
 	    (run-hooks 'org-after-todo-state-change-hook)
 	    (when (and arg (not (member org-state org-done-keywords)))
 	      (setq head (org-get-todo-sequence-head org-state)))
