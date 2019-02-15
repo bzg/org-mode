@@ -7696,7 +7696,6 @@ unconditionally."
       (unless (and blank? (org-previous-line-empty-p))
 	(org-N-empty-lines-before-current (if blank? 1 0)))
       (insert stars " ")
-      (when (eobp) (save-excursion (insert "\n")))
       ;; When INVISIBLE-OK is non-nil, ensure newly created headline
       ;; is visible.
       (unless invisible-ok
@@ -7723,13 +7722,11 @@ unconditionally."
 	       (end-of-line)
 	       (when blank? (insert "\n"))
 	       (insert "\n" stars " ")
-	       (when (org-string-nw-p split) (insert split))
-	       (when (eobp) (save-excursion (insert "\n")))))
+	       (when (org-string-nw-p split) (insert split))))
 	    (t
 	     (end-of-line)
 	     (when blank? (insert "\n"))
-	     (insert "\n" stars " ")
-	     (when (eobp) (save-excursion (insert "\n"))))))
+	     (insert "\n" stars " "))))
      ;; On regular text, turn line into a headline or split, if
      ;; appropriate.
      ((bolp)
