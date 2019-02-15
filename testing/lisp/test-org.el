@@ -1267,13 +1267,13 @@
 	    (buffer-string))))
   ;; In the middle of a headline, split it if allowed.
   (should
-   (equal "* H\n* 1\n"
+   (equal "* H\n* 1"
 	  (org-test-with-temp-text "* H<point>1"
 	    (let ((org-M-RET-may-split-line '((headline . t))))
 	      (org-insert-heading))
 	    (buffer-string))))
   (should
-   (equal "* H1\n* \n"
+   (equal "* H1\n* "
 	  (org-test-with-temp-text "* H<point>1"
 	    (let ((org-M-RET-may-split-line '((headline . nil))))
 	      (org-insert-heading))
@@ -1281,19 +1281,19 @@
   ;; However, splitting cannot happen on TODO keywords, priorities or
   ;; tags.
   (should
-   (equal "* TODO H1\n* \n"
+   (equal "* TODO H1\n* "
 	  (org-test-with-temp-text "* TO<point>DO H1"
 	    (let ((org-M-RET-may-split-line '((headline . t))))
 	      (org-insert-heading))
 	    (buffer-string))))
   (should
-   (equal "* [#A] H1\n* \n"
+   (equal "* [#A] H1\n* "
 	  (org-test-with-temp-text "* [#<point>A] H1"
 	    (let ((org-M-RET-may-split-line '((headline . t))))
 	      (org-insert-heading))
 	    (buffer-string))))
   (should
-   (equal "* H1 :tag:\n* \n"
+   (equal "* H1 :tag:\n* "
 	  (org-test-with-temp-text "* H1 :ta<point>g:"
 	    (let ((org-M-RET-may-split-line '((headline . t))))
 	      (org-insert-heading))
@@ -1320,14 +1320,14 @@
   ;; point.
   (should
    (equal
-    "* H1\n** H2\n* \n"
+    "* H1\n** H2\n* "
     (org-test-with-temp-text "* H1\n** H2"
       (let ((org-insert-heading-respect-content nil))
 	(org-insert-heading '(4)))
       (buffer-string))))
   (should
    (equal
-    "* H1\n** H2\n* \n"
+    "* H1\n** H2\n* "
     (org-test-with-temp-text "* H<point>1\n** H2"
       (let ((org-insert-heading-respect-content nil))
 	(org-insert-heading '(4)))
@@ -1335,7 +1335,7 @@
   ;; When called with two universal arguments, insert a new headline
   ;; at the end of the grandparent subtree.
   (should
-   (equal "* H1\n** H3\n- item\n** H2\n** \n"
+   (equal "* H1\n** H3\n- item\n** H2\n** "
 	  (org-test-with-temp-text "* H1\n** H3\n- item<point>\n** H2"
 	    (let ((org-insert-heading-respect-content nil))
 	      (org-insert-heading '(16)))
@@ -1343,7 +1343,7 @@
   ;; When optional TOP-LEVEL argument is non-nil, always insert
   ;; a level 1 heading.
   (should
-   (equal "* H1\n** H2\n* \n"
+   (equal "* H1\n** H2\n* "
 	  (org-test-with-temp-text "* H1\n** H2<point>"
 	    (org-insert-heading nil nil t)
 	    (buffer-string))))
@@ -1354,32 +1354,32 @@
 	    (buffer-string))))
   ;; Obey `org-blank-before-new-entry'.
   (should
-   (equal "* H1\n\n* \n"
+   (equal "* H1\n\n* "
 	  (org-test-with-temp-text "* H1<point>"
 	    (let ((org-blank-before-new-entry '((heading . t))))
 	      (org-insert-heading))
 	    (buffer-string))))
   (should
-   (equal "* H1\n* \n"
+   (equal "* H1\n* "
 	  (org-test-with-temp-text "* H1<point>"
 	    (let ((org-blank-before-new-entry '((heading . nil))))
 	      (org-insert-heading))
 	    (buffer-string))))
   (should
-   (equal "* H1\n* H2\n* \n"
+   (equal "* H1\n* H2\n* "
 	  (org-test-with-temp-text "* H1\n* H2<point>"
 	    (let ((org-blank-before-new-entry '((heading . auto))))
 	      (org-insert-heading))
 	    (buffer-string))))
   (should
-   (equal "* H1\n\n* H2\n\n* \n"
+   (equal "* H1\n\n* H2\n\n* "
 	  (org-test-with-temp-text "* H1\n\n* H2<point>"
 	    (let ((org-blank-before-new-entry '((heading . auto))))
 	      (org-insert-heading))
 	    (buffer-string))))
   ;; Corner case: correctly insert a headline after an empty one.
   (should
-   (equal "* \n* \n"
+   (equal "* \n* "
 	  (org-test-with-temp-text "* <point>"
 	    (org-insert-heading)
 	    (buffer-string))))
@@ -1405,7 +1405,7 @@
   ;; Properly handle empty lines when forcing a headline below current
   ;; one.
   (should
-   (equal "* H1\n\n* H\n\n* \n"
+   (equal "* H1\n\n* H\n\n* "
 	  (org-test-with-temp-text "* H1\n\n* H<point>"
 	    (let ((org-blank-before-new-entry '((heading . t))))
 	      (org-insert-heading '(4))
@@ -1421,14 +1421,14 @@
   ;; Add headline at the end of the first subtree
   (should
    (equal
-    "* TODO \n"
+    "* TODO "
     (org-test-with-temp-text "* H1\nH1Body<point>\n** H2\nH2Body"
       (org-insert-todo-heading-respect-content)
       (buffer-substring-no-properties (line-beginning-position) (point-max)))))
   ;; In a list, do not create a new item.
   (should
    (equal
-    "* TODO \n"
+    "* TODO "
     (org-test-with-temp-text "* H\n- an item\n- another one"
       (search-forward "an ")
       (org-insert-todo-heading-respect-content)
