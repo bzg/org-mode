@@ -565,9 +565,18 @@ for the duration of the command.")
       (org-columns-next-allowed-value)
     (org-columns-edit-value "TAGS")))
 
-(defvar org-agenda-overriding-columns-format nil
+(define-obsolete-variable-alias 'org-agenda-overriding-columns-format
+  'org-overriding-columns-format "Org 9.2.2")
+
+(defvar org-overriding-columns-format nil
   "When set, overrides any other format definition for the agenda.
-Don't set this, this is meant for dynamic scoping.")
+Don't set this, this is meant for dynamic scoping.  Set
+`org-local-columns-format' instead.")
+
+(defvar-local org-local-columns-format nil
+  "When set, overrides any other format definition for the agenda.
+This can be set as a buffer local value to avoid interfering with
+dynamic scoping for `org-overriding-columns-format'.")
 
 (defun org-columns-edit-value (&optional key)
   "Edit the value of the property at point in column view.
@@ -628,7 +637,7 @@ Where possible, use the standard interface for changing this line."
       (org-columns--call action)
       ;; The following let preserves the current format, and makes
       ;; sure that in only a single file things need to be updated.
-      (let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
+      (let* ((org-overriding-columns-format org-columns-current-fmt)
 	     (buffer (marker-buffer pom))
 	     (org-agenda-contributing-files
 	      (list (with-current-buffer buffer
@@ -722,7 +731,7 @@ an integer, select that value."
 	(org-columns--call action)
 	;; The following let preserves the current format, and makes
 	;; sure that in only a single file things need to be updated.
-	(let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
+	(let* ((org-overriding-columns-format org-columns-current-fmt)
 	       (buffer (marker-buffer pom))
 	       (org-agenda-contributing-files
 		(list (with-current-buffer buffer
@@ -1563,7 +1572,8 @@ PARAMS is a property list of parameters:
   (let* ((org-columns--time (float-time))
 	 (fmt
 	  (cond
-	   ((bound-and-true-p org-agenda-overriding-columns-format))
+	   ((bound-and-true-p org-overriding-columns-format))
+	   ((bound-and-true-p org-local-columns-format))
 	   ((let ((m (org-get-at-bol 'org-hd-marker)))
 	      (and m
 		   (or (org-entry-get m "COLUMNS" t)

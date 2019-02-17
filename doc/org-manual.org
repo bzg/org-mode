@@ -10477,11 +10477,11 @@ environment.  This causes the following issues:
    the entries in the agenda are collected from different files, and
    different files may have different columns formats, this is
    a non-trivial problem.  Org first checks if the variable
-   ~org-agenda-overriding-columns-format~ is currently set, and if so,
-   takes the format from there.  Otherwise it takes the format
-   associated with the first item in the agenda, or, if that item does
-   not have a specific format (defined in a property, or in its file),
-   it uses ~org-columns-default-format~.
+   ~org-overriding-columns-format~ is currently set, and if so, takes
+   the format from there.  Otherwise it takes the format associated
+   with the first item in the agenda, or, if that item does not have
+   a specific format (defined in a property, or in its file), it uses
+   ~org-columns-default-format~.
 
 2.
    #+cindex: @samp{CLOCKSUM}, special property
