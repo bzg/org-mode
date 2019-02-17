@@ -3953,6 +3953,11 @@ buffer positions.  FIELD is the real contents of the field, as
 a string, or nil.  It is meant to be displayed upon moving the
 mouse onto the overlay.
 
+When optional argument PRE is non-nil, assume the overlay is
+located at the beginning of the field, and prepend
+`org-table-separator-space' to it.  Otherwise, concatenate
+`org-table-shrunk-column-indicator' at its end.
+
 Return the overlay."
   (let ((show-before-edit
 	 (lambda (o &rest _)
@@ -3961,7 +3966,7 @@ Return the overlay."
 	   (mapc #'delete-overlay
 		 (cdr (overlay-get o 'org-table-column-overlays)))))
 	(o (make-overlay start end)))
-    (overlay-put o 'insert-behind-hooks (and (not pre) (list show-before-edit)))
+    (overlay-put o 'insert-behind-hooks (list show-before-edit))
     (overlay-put o 'insert-in-front-hooks (list show-before-edit))
     (overlay-put o 'modification-hooks (list show-before-edit))
     (overlay-put o 'org-overlay-type 'table-column-hide)
@@ -3969,17 +3974,20 @@ Return the overlay."
     ;; Make sure overlays stays on top of table coordinates overlays.
     ;; See `org-table-overlay-coordinates'.
     (overlay-put o 'priority 1)
-    (org-overlay-display o display 'org-table t)
+    (let ((d (if pre (concat org-table-separator-space display)
+	       (concat display org-table-shrunk-column-indicator))))
+      (org-overlay-display o d 'org-table t))
     o))
 
-(defun org-table--shrink-field (width start end contents)
+(defun org-table--shrink-field (width align start end contents)
   "Shrink a table field to a specified width.
 
 WIDTH is an integer representing the number of characters to
-display, in addition to `org-table-shrunk-column-indicator'.  START
-and END are, respectively, the beginning and ending positions of
-the field.  CONTENTS is its trimmed contents, as a string, or
-`hline' for table rules.
+display, in addition to `org-table-shrunk-column-indicator'.
+ALIGN is the alignment of the current column, as either \"l\",
+\"c\" or \"r\".  START and END are, respectively, the beginning
+and ending positions of the field.  CONTENTS is its trimmed
+contents, as a string, or `hline' for table rules.
 
 Real field is hidden under one or two overlays.  They have the
 following properties:
@@ -4006,55 +4014,92 @@ already hidden."
    ((or (= 0 width)			;shrink to one character
 	(>= 1 (org-string-width (buffer-substring start end))))
     (list (org-table--make-shrinking-overlay
-	   start end org-table-shrunk-column-indicator
-	   (if (eq 'hline contents) "" contents))))
+	   start end "" (if (eq 'hline contents) "" contents))))
    ((eq contents 'hline)		;no contents to hide
     (list (org-table--make-shrinking-overlay
-	   start end
-	   (concat (make-string (max 0 (1+ width)) ?-)
-		   org-table-shrunk-column-indicator)
-	   "")))
+	   start end (make-string (max 0 (1+ width)) ?-) "")))
    (t
-    ;; If the field is not empty, consider using two overlays: one for
-    ;; the blanks at the beginning of the field, and another one at
-    ;; the end of the field.  The former ensures a shrunk field is
-    ;; always displayed with a single white space character in front
-    ;; of it -- e.g., so that even right-aligned fields appear to the
-    ;; left -- and the latter cuts the field at WIDTH visible
-    ;; characters.
-    (let* ((pre-overlay
-	    (and (not (equal contents ""))
-		 (org-with-point-at start (looking-at "\\( [ \t]+\\)\\S-"))
-		 (org-table--make-shrinking-overlay
-		  start (match-end 1) org-table-separator-space nil 'pre)))
-	   (post-overlay
-	    (let* ((start (if pre-overlay (overlay-end pre-overlay)
-			    (1+ start)))
-		   (w (org-string-width (buffer-substring start (1- end)))))
-	      (if (>= width w)
-		  ;; Field is too short.  Extend its size by adding
-		  ;; white space characters to the right overlay.
-		  (org-table--make-shrinking-overlay
-		   (1- end) end (concat (make-string (- width w) ?\s)
-					org-table-shrunk-column-indicator)
-		   contents)
-		;; Find cut location so that WIDTH characters are visible.
-		(org-table--make-shrinking-overlay
-		 (let* ((begin start)
-			(lower begin)
-			(upper (1- end)))
-		   (catch :exit
-		     (while (> (- upper lower) 1)
-		       (let ((mean (+ (ash lower -1)
-				      (ash upper -1)
-				      (logand lower upper 1))))
-			 (pcase (org-string-width (buffer-substring begin mean))
-			   ((pred (= width)) (throw :exit mean))
-			   ((pred (< width)) (setq upper mean))
-			   (_ (setq lower mean)))))
-		     upper))
-		 end org-table-shrunk-column-indicator contents)))))
-      (delq nil (list pre-overlay post-overlay))))))
+    ;; If the field is not empty, display exactly WIDTH characters.
+    ;; It can mean to partly hide the field, or extend it with virtual
+    ;; blanks.  To that effect, we use one or two overlays.  The
+    ;; first, optional, one may add or hide white spaces before the
+    ;; contents of the field.  The other, mandatory, one cuts the
+    ;; field or displays white spaces at the end of the field.  It
+    ;; also always displays `org-table-shrunk-column-indicator'.
+    (let* ((lead (org-with-point-at start (skip-chars-forward " ")))
+	   (trail (org-with-point-at end (abs (skip-chars-backward " "))))
+	   (contents-width (org-string-width
+			    (buffer-substring (+ start lead) (- end trail)))))
+      (cond
+       ;; Contents are too large to fit in WIDTH character.  Limit, if
+       ;; possible, blanks at the beginning of the field to a single
+       ;; white space, and cut the field at an appropriate location.
+       ((<= width contents-width)
+	(let ((pre
+	       (and (> lead 0)
+		    (org-table--make-shrinking-overlay
+		     start (+ start lead) "" contents t)))
+	      (post
+	       (org-table--make-shrinking-overlay
+		;; Find cut location so that WIDTH characters are
+		;; visible using dichotomy.
+		(let* ((begin (+ start lead))
+		       (lower begin)
+		       (upper (1- end))
+		       ;; Compensate the absence of leading space,
+		       ;; thus preserving alignment.
+		       (width (if (= lead 0) (1+ width) width)))
+		  (catch :exit
+		    (while (> (- upper lower) 1)
+		      (let ((mean (+ (ash lower -1)
+				     (ash upper -1)
+				     (logand lower upper 1))))
+			(pcase (org-string-width (buffer-substring begin mean))
+			  ((pred (= width)) (throw :exit mean))
+			  ((pred (< width)) (setq upper mean))
+			  (_ (setq lower mean)))))
+		    upper))
+		end "" contents)))
+	  (if pre (list pre post) (list post))))
+       ;; Contents fit it WIDTH characters.  First compute number of
+       ;; white spaces needed on each side of contents, then expand or
+       ;; compact blanks on each side of the field in order to
+       ;; preserve width and obey to alignment constraints.
+       (t
+	(let* ((required (- width contents-width))
+	       (before
+		(pcase align
+		  ;; Compensate the absence of leading space, thus
+		  ;; preserving alignment.
+		  ((guard (= lead 0)) -1)
+		  ("l" 0)
+		  ("r" required)
+		  ("c" (/ required 2))))
+	       (after (- required before))
+	       (pre
+		(pcase (1- lead)
+		  ((or (guard (= lead 0)) (pred (= before))) nil)
+		  ((pred (< before))
+		   (org-table--make-shrinking-overlay
+		    start (+ start (- lead before)) "" contents t))
+		  (_
+		   (org-table--make-shrinking-overlay
+		    start (1+ start)
+		    (make-string (- before (1- lead)) ?\s)
+		    contents t))))
+	       (post
+		(pcase (1- trail)
+		  ((pred (= after))
+		   (org-table--make-shrinking-overlay (1- end) end "" contents))
+		  ((pred (< after))
+		   (org-table--make-shrinking-overlay
+		    (+ after (- end trail)) end "" contents))
+		  (_
+		   (org-table--make-shrinking-overlay
+		    (1- end) end
+		    (make-string (- after (1- trail)) ?\s)
+		    contents)))))
+	  (if pre (list pre post) (list post)))))))))
 
 (defun org-table--read-column-selection (select max)
   "Read column selection select as a list of numbers.
@@ -4095,7 +4140,8 @@ table."
    (org-font-lock-ensure beg end)
    (dolist (c columns)
      (goto-char beg)
-     (let ((width nil)
+     (let ((align nil)
+	   (width nil)
 	   (fields nil))
        (while (< (point) end)
 	 (catch :continue
@@ -4117,16 +4163,19 @@ table."
 		    (contents (if hline? 'hline
 				(org-trim (buffer-substring start end)))))
 	       (push (list start end contents) fields)
-	       (when (and (null width)
-			  (not hline?)
-			  (string-match "\\`<[lrc]?\\([0-9]+\\)>\\'" contents))
-		 (setq width (string-to-number (match-string 1 contents)))))))
+	       (when (and (not hline?)
+			  (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)>\\'"
+					contents))
+		 (unless align (setq align (match-string 1 contents)))
+		 (unless width
+		   (setq width (string-to-number (match-string 2 contents))))))))
 	 (forward-line))
        ;; Link overlays for current field to the other overlays in the
        ;; same column.
        (let ((chain (list 'siblings)))
 	 (dolist (field fields)
-	   (dolist (new (apply #'org-table--shrink-field (or width 0) field))
+	   (dolist (new (apply #'org-table--shrink-field
+			       (or width 0) (or align "l") field))
 	     (push new (cdr chain))
 	     (overlay-put new 'org-table-column-overlays chain))))))))
 
