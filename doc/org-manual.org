@@ -11683,24 +11683,24 @@ which can be referenced using ={{{name(arg1, arg2)}}}=[fn:124].  For
 example
 
 #+begin_example
-,#+MACRO: poem The rose is $1, The violet's $2. Life's ordered: Org assists you.
+,#+MACRO: poem Rose is $1, violet's $2. Life's ordered: Org assists you.
 {{{poem(red,blue)}}}
 #+end_example
 
 #+texinfo: @noindent
 becomes
 
-: The rose is red, The violet's blue. Life's ordered: Org assists you.
+: Rose is red, violet's blue. Life's ordered: Org assists you.
 
 As a special case, Org parses any replacement text starting with
 =(eval= as an Emacs Lisp expression and evaluates it accordingly.
 Within such templates, arguments become strings.  Thus, the following
 macro
 
-: #+MACRO: gnucheck (eval (concat "GNU/" (capitalize $1)))
+: #+MACRO: gnustamp (eval (concat "GNU/" (capitalize $1)))
 
 #+texinfo: @noindent
-turns ={{{gnucheck(linux)}}}= into =GNU/Linux= during export.
+turns ={{{gnustamp(linux)}}}= into =GNU/Linux= during export.
 
 Org recognizes macro references in following Org markup areas:
 paragraphs, headlines, verse blocks, tables cells and lists.  Org also
@@ -12203,13 +12203,13 @@ Beamer documents.
 Here is an example of an Org document ready for Beamer export.
 
 #+begin_example
-;#+TITLE: Example Presentation
-;#+AUTHOR: Carsten Dominik
-;#+OPTIONS: H:2 toc:t num:t
-;#+LATEX_CLASS: beamer
-;#+LATEX_CLASS_OPTIONS: [presentation]
-;#+BEAMER_THEME: Madrid
-;#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+,#+TITLE: Example Presentation
+,#+AUTHOR: Carsten Dominik
+,#+OPTIONS: H:2 toc:t num:t
+,#+LATEX_CLASS: beamer
+,#+LATEX_CLASS_OPTIONS: [presentation]
+,#+BEAMER_THEME: Madrid
+,#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col)
 
 ,* This is the first structural section
 
