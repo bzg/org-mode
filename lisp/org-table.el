@@ -4010,14 +4010,21 @@ the column again.
 Return a list of overlays hiding the field, or nil if field is
 already hidden."
   (cond
-   ((org-table--shrunk-field) nil)	;already shrunk: bail out
-   ((or (= 0 width)			;shrink to one character
-	(>= 1 (org-string-width (buffer-substring start end))))
+   ((= start end) nil)			;no field to narrow
+   ((org-table--shrunk-field) nil)	;already shrunk
+   ((= 0 width)				;shrink to one character
     (list (org-table--make-shrinking-overlay
 	   start end "" (if (eq 'hline contents) "" contents))))
-   ((eq contents 'hline)		;no contents to hide
+   ((eq contents 'hline)
     (list (org-table--make-shrinking-overlay
-	   start end (make-string (max 0 (1+ width)) ?-) "")))
+	   start end (make-string (1+ width) ?-) "")))
+   ((equal contents "")			;no contents to hide
+    (list
+     (let ((w (org-string-width (buffer-substring start end))))
+       (if (> width w)
+	   (org-table--make-shrinking-overlay
+	    (1- end) end (make-string (- (+ width 2) w) ?\s) "")
+	 (org-table--make-shrinking-overlay (- end (- w width 1)) end "" "")))))
    (t
     ;; If the field is not empty, display exactly WIDTH characters.
     ;; It can mean to partly hide the field, or extend it with virtual
