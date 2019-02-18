@@ -6783,6 +6783,7 @@ show that drawer instead."
 By default, the function expands headings, blocks and drawers.
 When optional argument TYPE is a list of symbols among `blocks',
 `drawers' and `headings', to only expand one specific type."
+  (interactive)
   (dolist (type (or types '(blocks drawers headings)))
     (org-flag-region (point-min) (point-max) nil
 		     (pcase type
