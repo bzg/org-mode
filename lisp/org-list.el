@@ -1553,22 +1553,21 @@ bullets between START and END."
   (let* (acc
 	 (set-assoc (lambda (cell) (push cell acc) cell))
 	 (change-bullet-maybe
-	  (function
-	   (lambda (item)
-	     (let ((new-bul-p
-		    (cdr (assoc
-			  ;; Normalize ordered bullets.
-			  (let ((bul (org-trim
-				      (org-list-get-bullet item struct))))
-			    (cond ((string-match "[A-Z]\\." bul) "A.")
-				  ((string-match "[A-Z])" bul) "A)")
-				  ((string-match "[a-z]\\." bul) "a.")
-				  ((string-match "[a-z])" bul) "a)")
-				  ((string-match "[0-9]\\." bul) "1.")
-				  ((string-match "[0-9])" bul) "1)")
-				  (t bul)))
-			  org-list-demote-modify-bullet))))
-	       (when new-bul-p (org-list-set-bullet item struct new-bul-p))))))
+	  (lambda (item)
+	    (let ((new-bul
+		   (cdr (assoc
+			 ;; Normalize ordered bullets.
+			 (let ((bul (org-list-get-bullet item struct))
+			       (case-fold-search nil))
+			   (cond ((string-match "[A-Z]\\." bul) "A.")
+				 ((string-match "[A-Z])" bul) "A)")
+				 ((string-match "[a-z]\\." bul) "a.")
+				 ((string-match "[a-z])" bul) "a)")
+				 ((string-match "[0-9]\\." bul) "1.")
+				 ((string-match "[0-9])" bul) "1)")
+				 (t (org-trim bul))))
+			 org-list-demote-modify-bullet))))
+	      (when new-bul (org-list-set-bullet item struct new-bul)))))
 	 (ind
 	  (lambda (cell)
 	    (let* ((item (car cell))

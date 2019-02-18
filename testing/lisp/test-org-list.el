@@ -270,6 +270,18 @@
 		  (org-list-demote-modify-bullet '(("1." . "+"))))
 	      (org-indent-item))
 	    (buffer-string))))
+  (should
+   (equal "
+a. Item 1
+   - Item 2"
+	  (org-test-with-temp-text "
+a. Item 1
+b. Item 2<point>"
+	    (let ((org-plain-list-ordered-item-terminator t)
+		  (org-list-allow-alphabetical t)
+		  (org-list-demote-modify-bullet '(("A." . "a.") ("a." . "-"))))
+	      (org-indent-item))
+	    (buffer-string))))
   ;; When a region is selected, indent every item within.
   (should
    (equal "
