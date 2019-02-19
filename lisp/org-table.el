@@ -3946,11 +3946,14 @@ already hidden."
 	   start end (make-string (1+ width) ?-) "")))
    ((equal contents "")			;no contents to hide
     (list
-     (let ((w (org-string-width (buffer-substring start end))))
-       (if (> width w)
+     (let ((w (org-string-width (buffer-substring start end)))
+	   ;; We really want WIDTH + 2 whitespace, to include blanks
+	   ;; around fields.
+	   (full (+ 2 width)))
+       (if (<= w full)
 	   (org-table--make-shrinking-overlay
-	    (1- end) end (make-string (- (+ width 2) w) ?\s) "")
-	 (org-table--make-shrinking-overlay (- end (- w width 1)) end "" "")))))
+	    (1- end) end (make-string (- full w) ?\s) "")
+	 (org-table--make-shrinking-overlay (- end (- w full) 1) end "" "")))))
    (t
     ;; If the field is not empty, display exactly WIDTH characters.
     ;; It can mean to partly hide the field, or extend it with virtual
