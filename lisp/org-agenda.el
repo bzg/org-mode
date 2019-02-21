@@ -4672,18 +4672,8 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   (when (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
   (let* ((today (org-today))
 	 (date (calendar-gregorian-from-absolute today))
-	 (kwds org-todo-keywords-for-agenda)
 	 (completion-ignore-case t)
-	 (org-select-this-todo-keyword
-	  (if (stringp arg) arg
-	    (and arg (integerp arg) (> arg 0)
-                 (nth (1- arg) kwds))))
-	 rtn rtnall files file pos)
-    (when (equal arg '(4))
-      (setq org-select-this-todo-keyword
-	    (completing-read "Keyword (or KWD1|K2D2|...): "
-			     (mapcar #'list kwds) nil nil)))
-    (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
+         kwds org-select-this-todo-keyword rtn rtnall files file pos)
     (catch 'exit
       (when org-agenda-sticky
 	(setq org-agenda-buffer-name
@@ -4692,6 +4682,16 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 			  org-select-this-todo-keyword)
 		(format "*Org Agenda(%s)*" (or org-keys "t")))))
       (org-agenda-prepare "TODO")
+      (setq kwds org-todo-keywords-for-agenda
+            org-select-this-todo-keyword (if (stringp arg) arg
+                                           (and (integerp arg)
+						(> arg 0)
+                                                (nth (1- arg) kwds))))
+      (when (equal arg '(4))
+        (setq org-select-this-todo-keyword
+              (completing-read "Keyword (or KWD1|K2D2|...): "
+                               (mapcar #'list kwds) nil nil)))
+      (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
       (org-compile-prefix-format 'todo)
       (org-set-sorting-strategy 'todo)
       (setq org-agenda-redo-command
