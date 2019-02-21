@@ -12684,7 +12684,9 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	    (when (and (= cnt 0) (not ingroup)) (insert "  "))
 	    (insert "[" c "] " tg (make-string
 				   (- fwidth 4 (length tg)) ?\ ))
-	    (when (= (setq cnt (1+ cnt)) ncol)
+	    (when (and (= (setq cnt (1+ cnt)) ncol)
+		       ;; Avoid lines with just a closing delimiter.
+		       (not (equal (car tbl) '(:endgroup))))
 	      (insert "\n")
 	      (when ingroup (insert "  "))
 	      (setq cnt 0)))))
