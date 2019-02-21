@@ -317,7 +317,7 @@ A headline is blocked when either
     done first or is a child of a blocked grandparent entry."
   (or
    ;; Check if any child is not done.
-   (org-element-map headline 'headline
+   (org-element-map (org-element-contents headline) 'headline
      (lambda (hl) (eq (org-element-property :todo-type hl) 'todo))
      info 'first-match)
    ;; Check :ORDERED: node property.
