@@ -3026,19 +3026,18 @@ s   Search for keywords                 M   Like m, but only TODO entries
 					    (symbol-name type)
 					  "Lambda expression"))
 		      (t "???"))))
-	      (if org-agenda-menu-show-matcher
-		  (setq line
-			(concat line ": "
-				(cond
-				 ((stringp match)
-				  (setq match (copy-sequence match))
-				  (org-add-props match nil 'face 'org-warning))
-				 ((listp type)
-				  (format "set of %d commands" (length type))))))
-		(when (org-string-nw-p match)
-		  (add-text-properties
-		   0 (length line) (list 'help-echo
-					 (concat "Matcher: " match)) line)))
+	      (cond
+	       ((not (org-string-nw-p match)) nil)
+	       (org-agenda-menu-show-matcher
+		(setq line
+		      (concat line ": "
+			      (cond
+			       ((stringp match)
+				(propertize match nil 'face 'org-warning))
+			       ((listp type)
+				(format "set of %d commands" (length type)))))))
+	       (t
+		(org-add-props line nil 'help-echo (concat "Matcher: " match))))
 	      (push line lines)))
 	  (setq lines (nreverse lines))
 	  (when prefixes
