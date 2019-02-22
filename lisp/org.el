@@ -18752,7 +18752,8 @@ conventions:
      from `image-file-name-regexp' and it has no contents.
 
   2. Its description consists in a single link of the previous
-     type.
+     type.  In this case, that link must be a well-formed plain
+     or angle link, i.e., it must have an explicit \"file\" type.
 
 When optional argument INCLUDE-LINKED is non-nil, also links with
 a text description part will be inlined.  This can be nice for
@@ -18768,89 +18769,112 @@ boundaries."
     (unless refresh
       (org-remove-inline-images)
       (when (fboundp 'clear-image-cache) (clear-image-cache)))
-    (org-with-wide-buffer
-     (goto-char (or beg (point-min)))
-     (let* ((case-fold-search t)
-	    (file-extension-re (image-file-name-regexp))
-	    (link-abbrevs (mapcar #'car
-				  (append org-link-abbrev-alist-local
-					  org-link-abbrev-alist)))
-	    ;; Check absolute, relative file names and explicit
-	    ;; "file:" links.  Also check link abbreviations since
-	    ;; some might expand to "file" links.
-	    (file-types-re (format "[][]\\[\\(?:file\\|[./~]%s\\)"
-				   (if (not link-abbrevs) ""
-				     (format "\\|\\(?:%s:\\)"
-					     (regexp-opt link-abbrevs))))))
-       (while (re-search-forward file-types-re end t)
-	 (let ((link (save-match-data (org-element-context))))
-	   ;; Check if we're at an inline image, i.e., an image file
-	   ;; link without a description (unless INCLUDE-LINKED is
-	   ;; non-nil).
-	   (when (and (equal "file" (org-element-property :type link))
-		      (or include-linked
-			  (null (org-element-contents link)))
-		      (string-match-p file-extension-re
-				      (org-element-property :path link)))
-	     (let ((file (expand-file-name
-			  (org-link-unescape
-			   (org-element-property :path link)))))
-	       (when (file-exists-p file)
-		 (let ((width
-			;; Apply `org-image-actual-width' specifications.
-			(cond
-			 ((not (image-type-available-p 'imagemagick)) nil)
-			 ((eq org-image-actual-width t) nil)
-			 ((listp org-image-actual-width)
-			  (or
-			   ;; First try to find a width among
-			   ;; attributes associated to the paragraph
-			   ;; containing link.
-			   (let ((paragraph
-				  (let ((e link))
-				    (while (and (setq e (org-element-property
-							 :parent e))
-						(not (eq (org-element-type e)
-							 'paragraph))))
-				    e)))
-			     (when paragraph
-			       (save-excursion
-				 (goto-char (org-element-property :begin paragraph))
-				 (when
-				     (re-search-forward
-				      "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
-				      (org-element-property
-				       :post-affiliated paragraph)
-				      t)
-				   (string-to-number (match-string 1))))))
-			   ;; Otherwise, fall-back to provided number.
-			   (car org-image-actual-width)))
-			 ((numberp org-image-actual-width)
-			  org-image-actual-width)))
-		       (old (get-char-property-and-overlay
-			     (org-element-property :begin link)
-			     'org-image-overlay)))
-		   (if (and (car-safe old) refresh)
-		       (image-refresh (overlay-get (cdr old) 'display))
-		     (let ((image (create-image file
-						(and width 'imagemagick)
-						nil
-						:width width)))
-		       (when image
-			 (let ((ov (make-overlay
-				    (org-element-property :begin link)
-				    (progn
-				      (goto-char
-				       (org-element-property :end link))
-				      (skip-chars-backward " \t")
-				      (point)))))
-			   (overlay-put ov 'display image)
-			   (overlay-put ov 'face 'default)
-			   (overlay-put ov 'org-image-overlay t)
-			   (overlay-put
-			    ov 'modification-hooks
-			    (list 'org-display-inline-remove-overlay))
-			   (push ov org-inline-image-overlays)))))))))))))))
+    (org-with-point-at (or beg 1)
+      (let* ((case-fold-search t)
+	     (file-extension-re (image-file-name-regexp))
+	     (link-abbrevs (mapcar #'car
+				   (append org-link-abbrev-alist-local
+					   org-link-abbrev-alist)))
+	     ;; Check absolute, relative file names and explicit
+	     ;; "file:" links.  Also check link abbreviations since
+	     ;; some might expand to "file" links.
+	     (file-types-re
+	      (format "\\[\\[\\(?:file%s:\\|[./~]\\)\\|\\]\\[\\(<?file:\\)"
+		      (if (not link-abbrevs) ""
+			(concat "\\|" (regexp-opt link-abbrevs))))))
+	(while (re-search-forward file-types-re end t)
+	  (let* ((link (org-element-lineage
+			(save-match-data (org-element-context))
+			'(link) t))
+		 (inner-start (match-beginning 1))
+		 (path
+		  (cond
+		   ;; No link at point; no inline image.
+		   ((not link) nil)
+		   ;; File link without a description.  Also handle
+		   ;; INCLUDE-LINKED here since it should have
+		   ;; precedence over the next case.  I.e., if link
+		   ;; contains filenames in both the path and the
+		   ;; description, prioritize the path only when
+		   ;; INCLUDE-LINKED is non-nil.
+		   ((or (not (org-element-property :contents-begin link))
+			include-linked)
+		    (and (equal "file" (org-element-property :type link))
+			 (org-element-property :path link)))
+		   ;; Link with a description.  Check if description
+		   ;; is a filename.  Even if Org doesn't have syntax
+		   ;; for those -- clickable image -- constructs, fake
+		   ;; them, as in `org-export-insert-image-links'.
+		   ((not inner-start) nil)
+		   (t
+		    (org-with-point-at inner-start
+		      (and (looking-at
+			    (if (char-equal ?< (char-after inner-start))
+				org-angle-link-re
+			      org-plain-link-re))
+			   ;; File name must fill the whole
+			   ;; description.
+			   (= (org-element-property :contents-end link)
+			      (match-end 0))
+			   (match-string 2)))))))
+	    (when (and path (string-match-p file-extension-re path))
+	      (let ((file (expand-file-name (org-link-unescape path))))
+		(when (file-exists-p file)
+		  (let ((width
+			 ;; Apply `org-image-actual-width' specifications.
+			 (cond
+			  ((not (image-type-available-p 'imagemagick)) nil)
+			  ((eq org-image-actual-width t) nil)
+			  ((listp org-image-actual-width)
+			   (or
+			    ;; First try to find a width among
+			    ;; attributes associated to the paragraph
+			    ;; containing link.
+			    (let ((paragraph
+				   (let ((e link))
+				     (while (and (setq e (org-element-property
+							  :parent e))
+						 (not (eq (org-element-type e)
+							  'paragraph))))
+				     e)))
+			      (when paragraph
+				(save-excursion
+				  (goto-char (org-element-property :begin paragraph))
+				  (when
+				      (re-search-forward
+				       "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
+				       (org-element-property
+					:post-affiliated paragraph)
+				       t)
+				    (string-to-number (match-string 1))))))
+			    ;; Otherwise, fall-back to provided number.
+			    (car org-image-actual-width)))
+			  ((numberp org-image-actual-width)
+			   org-image-actual-width)))
+			(old (get-char-property-and-overlay
+			      (org-element-property :begin link)
+			      'org-image-overlay)))
+		    (if (and (car-safe old) refresh)
+			(image-refresh (overlay-get (cdr old) 'display))
+		      (let ((image (create-image file
+						 (and width 'imagemagick)
+						 nil
+						 :width width)))
+			(when image
+			  (let ((ov (make-overlay
+				     (org-element-property :begin link)
+				     (progn
+				       (goto-char
+					(org-element-property :end link))
+				       (skip-chars-backward " \t")
+				       (point)))))
+			    (overlay-put ov 'display image)
+			    (overlay-put ov 'face 'default)
+			    (overlay-put ov 'org-image-overlay t)
+			    (overlay-put
+			     ov 'modification-hooks
+			     (list 'org-display-inline-remove-overlay))
+			    (push ov org-inline-image-overlays)))))))))))))))
 
 (defun org-display-inline-remove-overlay (ov after _beg _end &optional _len)
   "Remove inline-display overlay if a corresponding region is modified."
