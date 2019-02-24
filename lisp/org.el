@@ -6188,8 +6188,11 @@ by a #."
 Also refresh fontification if needed."
   (interactive)
   (let ((old-regexp org-target-link-regexp)
-	(before-re "\\(?:^\\|[^[:alnum:]]\\)\\(")
-	(after-re "\\)\\(?:$\\|[^[:alnum:]]\\)")
+	;; Some languages, e.g., Chinese, do not use spaces to
+	;; separate words.  Also allow to surround radio targets with
+	;; line-breakable characters.
+	(before-re "\\(?:^\\|[^[:alnum:]]\\|\\c|\\)\\(")
+	(after-re "\\)\\(?:$\\|[^[:alnum:]]\\|\\c|\\)")
 	(targets
 	 (org-with-wide-buffer
 	  (goto-char (point-min))
