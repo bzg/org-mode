@@ -3767,7 +3767,8 @@ FILTER-ALIST is an alist of filters we need to apply when
 	     (setq-local org-agenda-name name)))
       (setq buffer-read-only nil))))
 
-(defvar org-agenda-overriding-columns-format)  ; From org-colview.el
+(defvar org-overriding-columns-format)
+(defvar org-local-columns-format)
 (defun org-agenda-finalize ()
   "Finishing touch for the agenda buffer, called just before displaying it."
   (unless org-agenda-multi
@@ -3782,9 +3783,9 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (org-agenda-align-tags))
 	(unless org-agenda-with-colors
 	  (remove-text-properties (point-min) (point-max) '(face nil)))
-	(when (bound-and-true-p org-agenda-overriding-columns-format)
-	  (setq-local org-agenda-overriding-columns-format
-		      org-agenda-overriding-columns-format))
+	(when (bound-and-true-p org-overriding-columns-format)
+	  (setq-local org-local-columns-format
+		      org-overriding-columns-format))
 	(when org-agenda-view-columns-initially
 	  (org-agenda-columns))
 	(when org-agenda-fontify-priorities
