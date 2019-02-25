@@ -565,9 +565,6 @@ for the duration of the command.")
       (org-columns-next-allowed-value)
     (org-columns-edit-value "TAGS")))
 
-(define-obsolete-variable-alias 'org-agenda-overriding-columns-format
-  'org-overriding-columns-format "Org 9.2.2")
-
 (defvar org-overriding-columns-format nil
   "When set, overrides any other format definition for the agenda.
 Don't set this, this is meant for dynamic scoping.  Set

@@ -434,6 +434,9 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-texinfo-def-table-markup
   'org-texinfo-table-default-markup "Org 9.1")
 
+(define-obsolete-variable-alias 'org-agenda-overriding-columns-format
+  'org-overriding-columns-format "Org 9.2.2")
+
 ;; The function was made obsolete by commit 65399674d5 of 2013-02-22.
 ;; This make-obsolete call was added 2016-09-01.
 (make-obsolete 'org-capture-import-remember-templates
