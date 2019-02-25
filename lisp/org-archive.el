@@ -29,6 +29,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'cl-lib)
 
 (declare-function org-element-type "org-element" (element))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
@@ -126,22 +127,6 @@ Hook functions are called with point on the subtree in the
 original file.  At this stage, the subtree has been added to the
 archive location, but not yet deleted from the original file.")
 
-(defun org-get-local-archive-location ()
-  "Get the archive location applicable at point."
-  (let ((re "^[ \t]*#\\+ARCHIVE:[ \t]+\\(\\S-.*\\S-\\)[ \t]*$")
-	prop)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(setq prop (org-entry-get nil "ARCHIVE" 'inherit))
-	(cond
-	 ((and prop (string-match "\\S-" prop))
-	  prop)
-	 ((or (re-search-backward re nil t)
-	      (re-search-forward re nil t))
-	  (match-string 1))
-	 (t org-archive-location))))))
-
 ;;;###autoload
 (defun org-add-archive-files (files)
   "Splice the archive files into the list of files.
@@ -159,45 +144,36 @@ archive file is."
      files))))
 
 (defun org-all-archive-files ()
-  "Get a list of all archive files used in the current buffer."
-  (let (files)
+  "List of all archive files used in the current buffer."
+  (let* ((case-fold-search t)
+	 (files `(,(car (org-archive--compute-location org-archive-location)))))
     (org-with-point-at 1
-      (let ((regexp "^[ \t]*\\(#\\+\\|:\\)ARCHIVE:[ \t]+\\(.*\\)")
-	    (case-fold-search t))
-	(while (re-search-forward regexp nil t)
-	  (when (save-match-data
-		  (if (equal ":" (match-string 1)) (org-at-property-p)
-		    (eq 'keyword (org-element-type (org-element-at-point)))))
-	    (let ((file (org-extract-archive-file
-			 (match-string-no-properties 2))))
-	      (when (and (org-string-nw-p file) (file-exists-p file))
-		(push file files)))))))
-    (setq files (nreverse files))
-    (let ((file (org-extract-archive-file)))
-      (when (and (org-string-nw-p file) (file-exists-p file))
-	(push file files)))
-    files))
+      (while (re-search-forward "^[ \t]*:ARCHIVE:" nil t)
+	(when (org-at-property-p)
+	  (pcase (org-archive--compute-location (match-string 3))
+	    (`(,file . ,_)
+	     (when (org-string-nw-p file)
+	       (cl-pushnew file files :test #'file-equal-p))))))
+      (cl-remove-if-not #'file-exists-p (nreverse files)))))
 
-(defun org-extract-archive-file (&optional location)
-  "Extract and expand the file name from archive LOCATION.
-if LOCATION is not given, the value of `org-archive-location' is used."
-  (setq location (or location org-archive-location))
-  (if (string-match "\\(.*\\)::\\(.*\\)" location)
-      (if (= (match-beginning 1) (match-end 1))
-	  (buffer-file-name (buffer-base-buffer))
-	(expand-file-name
-	 (format (match-string 1 location)
-		 (file-name-nondirectory
-		  (buffer-file-name (buffer-base-buffer))))))))
-
-(defun org-extract-archive-heading (&optional location)
-  "Extract the heading from archive LOCATION.
-if LOCATION is not given, the value of `org-archive-location' is used."
-  (setq location (or location org-archive-location))
-  (if (string-match "\\(.*\\)::\\(.*\\)" location)
-      (format (match-string 2 location)
-	      (file-name-nondirectory
-	       (buffer-file-name (buffer-base-buffer))))))
+(defun org-archive--compute-location (location)
+  "Extract and expand the location from archive LOCATION.
+Return a pair (FILE . HEADING) where FILE is the file name and
+HEADING the heading of the archive location, as strings.  Raise
+an error if LOCATION is not a valid archive location."
+  (unless (string-match "::" location)
+    (error "Invalid archive location: %S" location))
+  (let ((current-file (buffer-file-name (buffer-base-buffer)))
+	(file-fmt (substring location nil (match-beginning 0)))
+	(heading-fmt (substring location (match-end 0))))
+    (cons
+     ;; File part.
+     (if (org-string-nw-p file-fmt)
+	 (expand-file-name
+	  (format file-fmt (file-name-nondirectory current-file)))
+       current-file)
+     ;; Heading part.
+     (format heading-fmt (file-name-nondirectory current-file)))))
 
 ;;;###autoload
 (defun org-archive-subtree (&optional find-done)
@@ -242,10 +218,11 @@ direct children of this heading."
 	     (file (abbreviate-file-name
 		    (or (buffer-file-name (buffer-base-buffer))
 			(error "No file associated to buffer"))))
-	     (location (org-get-local-archive-location))
-	     (afile (or (org-extract-archive-file location)
-			(error "Invalid `org-archive-location'")))
-	     (heading (org-extract-archive-heading location))
+	     (location (org-archive--compute-location
+			(or (org-entry-get nil "ARCHIVE" 'inherit)
+			    org-archive-location)))
+	     (afile (car location))
+	     (heading (cdr location))
 	     (infile-p (equal file (abbreviate-file-name (or afile ""))))
 	     (newfile-p (and (org-string-nw-p afile)
 			     (not (file-exists-p afile))))
