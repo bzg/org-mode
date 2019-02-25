@@ -3034,7 +3034,7 @@ s   Search for keywords                 M   Like m, but only TODO entries
 		      (concat line ": "
 			      (cond
 			       ((stringp match)
-				(propertize match nil 'face 'org-warning))
+				(propertize match 'face 'org-warning))
 			       ((listp type)
 				(format "set of %d commands" (length type)))))))
 	       (t
