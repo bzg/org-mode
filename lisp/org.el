@@ -2447,8 +2447,8 @@ This option can also be set with on a per-file-basis with
 You can have local logging settings for a subtree by setting the LOGGING
 property to one or more of these keywords.
 
-When bulk-refiling from the agenda, the value `note' is forbidden and
-will temporarily be changed to `time'."
+When bulk-refiling, e.g., from the agenda, the value `note' is
+forbidden and will temporarily be changed to `time'."
   :group 'org-refile
   :group 'org-progress
   :version "24.1"
@@ -11342,7 +11342,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
       (setq last-command nil)
       (when regionp
 	(goto-char region-start)
-	(or (bolp) (goto-char (point-at-bol)))
+	(beginning-of-line)
 	(setq region-start (point))
 	(unless (or (org-kill-is-subtree-p
 		     (buffer-substring region-start region-end))
@@ -11430,10 +11430,18 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		   (or (outline-next-heading) (goto-char (point-max)))))
 	       (unless (bolp) (newline))
 	       (org-paste-subtree level nil nil t)
-	       (when org-log-refile
-		 (org-add-log-setup 'refile nil nil org-log-refile)
-		 (unless (eq org-log-refile 'note)
-		   (save-excursion (org-add-log-note))))
+	       ;; Record information, according to `org-log-refile'.
+	       ;; Do not prompt for a note when refiling multiple
+	       ;; headlines, however.  Simply add a time stamp.
+	       (cond
+		((not org-log-refile))
+		(regionp
+		 (org-map-region
+		  (lambda () (org-add-log-setup 'refile nil nil 'time))
+		  (point)
+		  (+ (point) (- region-end region-start))))
+		(t
+		 (org-add-log-setup 'refile nil nil org-log-refile)))
 	       (and org-auto-align-tags
 		    (let ((org-loop-over-headlines-in-active-region nil))
 		      (org-align-tags)))
