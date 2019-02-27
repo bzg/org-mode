@@ -56,11 +56,11 @@
 
 (defun org-docview-export (link description format)
   "Export a docview link from Org files."
-  (let* ((path (if (string-match "\\(.+\\)::.+" link) (match-string 1 link)
-		 link))
-         (desc (or description link)))
+  (let ((path (if (string-match "\\(.+\\)::.+" link) (match-string 1 link)
+		link))
+        (desc (or description link)))
     (when (stringp path)
-      (setq path (org-link-escape (expand-file-name path)))
+      (setq path (expand-file-name path))
       (cond
        ((eq format 'html) (format "<a href=\"%s\">%s</a>" path desc))
        ((eq format 'latex) (format "\\href{%s}{%s}" path desc))

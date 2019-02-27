@@ -558,8 +558,8 @@ Use :header-args: instead"
 (defun org-lint-link-to-local-file (ast)
   (org-element-map ast 'link
     (lambda (l)
-      (when (equal (org-element-property :type l) "file")
-	(let ((file (org-link-unescape (org-element-property :path l))))
+      (when (equal "file" (org-element-property :type l))
+	(let ((file (org-element-property :path l)))
 	  (and (not (file-remote-p file))
 	       (not (file-exists-p file))
 	       (list (org-element-property :begin l)

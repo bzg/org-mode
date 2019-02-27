@@ -105,8 +105,7 @@ Can link to more than one message, if so all matching messages are shown."
 (defun org-notmuch-search-store-link ()
   "Store a link to a notmuch search or message."
   (when (eq major-mode 'notmuch-search-mode)
-    (let ((link (concat "notmuch-search:"
-			(org-link-escape notmuch-search-query-string)))
+    (let ((link (concat "notmuch-search:" notmuch-search-query-string))
 	  (desc (concat "Notmuch search: " notmuch-search-query-string)))
       (org-store-link-props :type "notmuch-search"
 			    :link link
@@ -121,14 +120,14 @@ Can link to more than one message, if so all matching messages are shown."
 (defun org-notmuch-search-follow-link (search)
   "Follow a notmuch link by displaying SEARCH in notmuch-search mode."
   (require 'notmuch)
-  (notmuch-search (org-link-unescape search)))
+  (notmuch-search search))
 
 
 
 (defun org-notmuch-tree-follow-link (search)
   "Follow a notmuch link by displaying SEARCH in notmuch-tree mode."
   (require 'notmuch)
-  (notmuch-tree (org-link-unescape search)))
+  (notmuch-tree search))
 
 (provide 'org-notmuch)
 

@@ -3018,7 +3018,7 @@ INFO is a plist holding contextual information.  See
 	 (path
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto" "news"))
-	    (url-encode-url (org-link-unescape (concat type ":" raw-path))))
+	    (url-encode-url (concat type ":" raw-path)))
 	   ((string= type "file")
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
@@ -3172,18 +3172,18 @@ INFO is a plist holding contextual information.  See
 		(format (org-export-get-coderef-format path desc)
 			(org-export-resolve-coderef path info)))))
      ;; External link with a description part.
-     ((and path desc) (format "<a href=\"%s\"%s>%s</a>"
-			      (org-html-encode-plain-text path)
-			      attributes
-			      desc))
+     ((and path desc)
+      (format "<a href=\"%s\"%s>%s</a>"
+	      (org-html-encode-plain-text path)
+	      attributes
+	      desc))
      ;; External link without a description part.
-     (path (let ((path (org-html-encode-plain-text path)))
-	     (format "<a href=\"%s\"%s>%s</a>"
-		     path
-		     attributes
-		     (org-link-unescape path))))
+     (path
+      (let ((path (org-html-encode-plain-text path)))
+	(format "<a href=\"%s\"%s>%s</a>" path attributes path)))
      ;; No path, only description.  Try to do something useful.
-     (t (format "<i>%s</i>" desc)))))
+     (t
+      (format "<i>%s</i>" desc)))))
 
 ;;;; Node Property
 

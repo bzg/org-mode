@@ -4195,7 +4195,7 @@ The function ignores links with an implicit type (e.g.,
       (let ((protocol (org-link-get-parameter type :export)))
 	(and (functionp protocol)
 	     (funcall protocol
-		      (org-link-unescape (org-element-property :path link))
+		      (org-element-property :path link)
 		      desc
 		      backend))))))
 
@@ -4379,7 +4379,7 @@ Return value can be an object or an element:
 Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
   (let* ((search-cells (org-export-string-to-search-cell
-			(org-link-unescape (org-element-property :path link))))
+			(org-element-property :path link)))
 	 (link-cache (or (plist-get info :resolve-fuzzy-link-cache)
 			 (let ((table (make-hash-table :test #'eq)))
 			   (plist-put info :resolve-fuzzy-link-cache table)
