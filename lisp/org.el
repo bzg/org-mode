@@ -10140,7 +10140,7 @@ a link."
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ((eq type 'link)
 	(let ((type (org-element-property :type context))
-	      (path (org-link-unescape (org-element-property :path context))))
+	      (path (org-element-property :path context)))
 	  ;; Switch back to REFERENCE-BUFFER needed when called in
 	  ;; a temporary buffer through `org-open-link-from-string'.
 	  (with-current-buffer (or reference-buffer (current-buffer))
@@ -10173,8 +10173,7 @@ a link."
 			   (cond ((not option) nil)
 				 ((string-match-p "\\`[0-9]+\\'" option)
 				  (list (string-to-number option)))
-				 (t (list nil
-					  (org-link-unescape option)))))))))
+				 (t (list nil option))))))))
 	     ((functionp (org-link-get-parameter type :follow))
 	      (funcall (org-link-get-parameter type :follow) path))
 	     ((member type '("coderef" "custom-id" "fuzzy" "radio"))
@@ -18638,7 +18637,7 @@ boundaries."
 			      (match-end 0))
 			   (match-string 2)))))))
 	    (when (and path (string-match-p file-extension-re path))
-	      (let ((file (expand-file-name (org-link-unescape path))))
+	      (let ((file (expand-file-name path)))
 		(when (file-exists-p file)
 		  (let ((width
 			 ;; Apply `org-image-actual-width' specifications.

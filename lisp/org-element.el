@@ -3102,8 +3102,8 @@ Assume point is at the beginning of the link."
 	(setq contents-begin (match-beginning 3))
 	(setq contents-end (match-end 3))
 	(setq link-end (match-end 0))
-	;; RAW-LINK is the original link.  Expand any
-	;; abbreviation in it.
+	;; RAW-LINK is the original link.  Decode any encoding.
+	;; Expand any abbreviation in it.
 	;;
 	;; Also treat any newline character and associated
 	;; indentation as a single space character.  This is not
@@ -3114,9 +3114,10 @@ Assume point is at the beginning of the link."
 	;; [[shell:ls *.org]], which defeats Org's focus on
 	;; simplicity.
 	(setq raw-link (org-link-expand-abbrev
-			(replace-regexp-in-string
-			 "[ \t]*\n[ \t]*" " "
-			 (match-string-no-properties 1))))
+			(org-link-unescape
+			 (replace-regexp-in-string
+			  "[ \t]*\n[ \t]*" " "
+			  (match-string-no-properties 1)))))
 	;; Determine TYPE of link and set PATH accordingly.  According
 	;; to RFC 3986, remove whitespaces from URI in external links.
 	;; In internal ones, treat indentation as a single space.

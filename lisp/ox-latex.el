@@ -2344,8 +2344,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
   (let* ((parent (org-export-get-parent-element link))
-	 (path (let ((raw-path (org-link-unescape
-				(org-element-property :path link))))
+	 (path (let ((raw-path (org-element-property :path link)))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
 	 (filetype (file-name-extension path))
@@ -2502,8 +2501,9 @@ INFO is a plist holding contextual information.  See
 		(cond ((member type '("http" "https" "ftp" "mailto" "doi"))
 		       (concat type ":" raw-path))
 		      ((string= type "file")
-		       (org-export-file-uri (org-link-unescape raw-path)))
-		      (t raw-path)))))
+		       (org-export-file-uri raw-path))
+		      (t
+		       raw-path)))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'latex))
@@ -2558,7 +2558,7 @@ INFO is a plist holding contextual information.  See
       (format (org-export-get-coderef-format path desc)
 	      (org-export-resolve-coderef path info)))
      ;; External link with a description part.
-     ((and path desc) (format "\\href{%s}{%s}" (org-link-unescape path) desc))
+     ((and path desc) (format "\\href{%s}{%s}" path desc))
      ;; External link without a description part.
      (path (format "\\url{%s}" path))
      ;; No path, only description.  Try to do something useful.

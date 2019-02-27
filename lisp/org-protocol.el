@@ -298,11 +298,9 @@ SEPARATOR is specified or SEPARATOR is nil, assume \"/+\".  The
 results of that splitting are returned as a list."
   (let* ((sep (or separator "/+\\|\\?"))
          (split-parts (split-string data sep)))
-    (if unhexify
-	(if (fboundp unhexify)
-	    (mapcar unhexify split-parts)
-	  (mapcar 'org-link-unescape split-parts))
-      split-parts)))
+    (cond ((not unhexify) split-parts)
+	  ((fboundp unhexify) (mapcar unhexify split-parts))
+	  (t (mapcar #'org-link-unescape split-parts)))))
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Transform PARAM-LIST into a flat list for greedy handlers.
@@ -382,11 +380,8 @@ If INFO is already a property list, return it unchanged."
 	      result)
 	  (while data
 	    (setq result
-		  (append
-		   result
-		   (list
-		    (pop data)
-		    (org-link-unescape (pop data))))))
+		  (append result
+			  (list (pop data) (pop data)))))
 	  result)
       (let ((data (org-protocol-split-data info t org-protocol-data-separator)))
 	(if default-order
@@ -445,9 +440,9 @@ form URL/TITLE can also be used."
     (when (boundp 'org-stored-links)
       (push (list uri title) org-stored-links))
     (kill-new uri)
-    (message "`%s' to insert new org-link, `%s' to insert `%s'"
-             (substitute-command-keys "`\\[org-insert-link]'")
-             (substitute-command-keys "`\\[yank]'")
+    (message "`%s' to insert new Org link, `%s' to insert %S"
+             (substitute-command-keys "\\[org-insert-link]")
+             (substitute-command-keys "\\[yank]")
              uri))
   nil)
 

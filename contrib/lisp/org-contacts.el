@@ -1013,7 +1013,7 @@ to do our best."
 			(setq phones-list (org-contacts-remove-ignored-property-values ignore-list (org-contacts-split-property tel)))
 			(setq result "")
 			(while phones-list
-			  (setq result (concat result  "TEL:" (org-link-unescape (org-contacts-strip-link (car phones-list))) "\n"))
+			  (setq result (concat result  "TEL:" (org-contacts-strip-link (org-link-unescape (car phones-list))) "\n"))
 			  (setq phones-list (cdr phones-list)))
 			result))
 	    (when bday

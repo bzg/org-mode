@@ -1173,7 +1173,7 @@ references with `org-export-get-reference'."
 	   (with-current-buffer (find-file-noselect file)
 	     (org-with-point-at 1
 	       (let ((org-link-search-must-match-exact-headline t))
-		 (org-link-search (org-link-unescape search) nil t))
+		 (org-link-search search nil t))
 	       (and (org-at-heading-p)
 		    (org-string-nw-p (org-entry-get (point) "CUSTOM_ID"))))))))
    ((not org-publish-cache)
@@ -1186,8 +1186,7 @@ references with `org-export-get-reference'."
     (let* ((filename (file-truename file))
 	   (crossrefs
 	    (org-publish-cache-get-file-property filename :crossrefs nil t))
-	   (cells
-	    (org-export-string-to-search-cell (org-link-unescape search))))
+	   (cells (org-export-string-to-search-cell search)))
       (or
        ;; Look for reference associated to search cells triggered by
        ;; LINK.  It can match when targeted file has been published
