@@ -371,27 +371,17 @@ call ~org-table-move-column-right~.
 :PROPERTIES:
 :DESCRIPTION: A tree works like your brain.
 :END:
+
 #+cindex: document structure
 #+cindex: structure of document
-
-Org is based on Outline mode and provides flexible commands to
-edit the structure of the document.
-
-** Outlines
-:PROPERTIES:
-:DESCRIPTION: Org is based on Outline mode.
-:END:
-#+cindex: outlines
-#+cindex: Outline mode
-
-Org is implemented on top of Outline mode.  Outlines allow a document
-to be organized in a hierarchical structure, which, least for me, is
-the best representation of notes and thoughts.  An overview of this
-structure is achieved by folding, i.e., hiding large parts of the
-document to show only the general document structure and the parts
-currently being worked on.  Org greatly simplifies the use of outlines
-by compressing the entire show and hide functionalities into a single
-command, ~org-cycle~, which is bound to the {{{kbd(TAB)}}} key.
+Org is an outliner.  Outlines allow a document to be organized in
+a hierarchical structure, which, least for me, is the best
+representation of notes and thoughts.  An overview of this structure
+is achieved by folding, i.e., hiding large parts of the document to
+show only the general document structure and the parts currently being
+worked on.  Org greatly simplifies the use of outlines by compressing
+the entire show and hide functionalities into a single command,
+~org-cycle~, which is bound to the {{{kbd(TAB)}}} key.
 
 ** Headlines
 :PROPERTIES:
