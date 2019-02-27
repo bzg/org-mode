@@ -445,9 +445,9 @@ form URL/TITLE can also be used."
     (when (boundp 'org-stored-links)
       (push (list uri title) org-stored-links))
     (kill-new uri)
-    (message "`%s' to insert new org-link, `%s' to insert `%s'"
-             (substitute-command-keys "`\\[org-insert-link]'")
-             (substitute-command-keys "`\\[yank]'")
+    (message "`%s' to insert new Org link, `%s' to insert %S"
+             (substitute-command-keys "\\[org-insert-link]")
+             (substitute-command-keys "\\[yank]")
              uri))
   nil)
 
