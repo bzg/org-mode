@@ -3216,7 +3216,7 @@ locally for the subtree through node properties."
 	    (org-entry-put
 	     node "EXPORT_OPTIONS" (mapconcat 'identity items " "))
 	  (while items
-	    (insert "#+OPTIONS:")
+	    (insert "#+options:")
 	    (let ((width 10))
 	      (while (and items
 			  (< (+ width (length (car items)) 1) fill-column))
@@ -3242,7 +3242,7 @@ locally for the subtree through node properties."
 	(if subtreep (org-entry-put node (concat "EXPORT_" (car key)) val)
 	  (insert
 	   (format "#+%s:%s\n"
-		   (car key)
+		   (downcase (car key))
 		   (if (org-string-nw-p val) (format " %s" val) ""))))))))
 
 (defun org-export-expand-include-keyword (&optional included dir footnotes)
