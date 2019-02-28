@@ -2596,7 +2596,7 @@ from the dynamic block definition."
 	  (when multifile
 	    ;; Summarize the time collected from this file.
 	    (insert-before-markers
-	     (format (concat "| %s %s | %s%s"
+	     (format (concat "| %s %s | %s%s%s"
 			     (format org-clock-file-time-cell-format
 				     (org-clock--translate "File time" lang))
 			     " | *%s*|\n")
