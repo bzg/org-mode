@@ -9035,7 +9035,7 @@ current line."
 				 (if (memq 'org-tag prop)
 				     prop
 				   (cons 'org-tag prop))))))
-	(setq l (- (match-end 1) (match-beginning 1))
+	(setq l (string-width (match-string 1))
 	      c (if (< org-agenda-tags-column 0)
 		    (- (abs org-agenda-tags-column) l)
 		  org-agenda-tags-column))
