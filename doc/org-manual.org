@@ -3268,11 +3268,11 @@ current buffer:
 
 - /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
 
-  #+vindex: org-email-link-description-format
+  #+vindex: org-link-email-description-format
   Pretty much all Emacs mail clients are supported.  The link points
   to the current article, or, in some Gnus buffers, to the group.  The
   description is constructed according to the variable
-  ~org-email-link-description-format~.  By default, it refers to the
+  ~org-link-email-description-format~.  By default, it refers to the
   addressee and the subject.
 
 - /Web browsers: W3, W3M and EWW/ ::
@@ -3320,7 +3320,7 @@ generally, act on links.
   #+cindex: link completion
   #+cindex: completion, of links
   #+cindex: inserting links
-  #+vindex: org-keep-stored-link-after-insertion
+  #+vindex: org-link-keep-stored-after-insertion
   Insert a link[fn:32].  This prompts for a link to be inserted into
   the buffer.  You can just type a link, using text for an internal
   link, or one of the link type prefixes mentioned in the examples
@@ -3408,7 +3408,7 @@ generally, act on links.
 
 - {{{kbd(mouse-3)}}} ::
 
-  #+vindex: org-display-internal-link-with-indirect-buffer
+  #+vindex: org-link-use-indirect-buffer-for-internals
   #+kindex: mouse-3
   Like {{{kbd(mouse-2)}}}, but force file links to be opened with
   Emacs, and internal links to be displayed in another window[fn:35].
@@ -7482,7 +7482,7 @@ here:
 #+vindex: org-store-link-props
 For specific link types, the following keywords are defined[fn:87]:
 
-#+vindex: org-from-is-user-regexp
+#+vindex: org-link-from-user-regexp
 | Link type    | Available keywords                                       |
 |--------------+----------------------------------------------------------|
 | bbdb         | =%:name=, =%:company=                                    |
@@ -18375,12 +18375,12 @@ Org evaluates code in the following circumstances:
   have a potential risk.  Org therefore prompts the user when it
   encounters such links.  The customization variables are:
 
-  #+attr_texinfo: :options org-confirm-shell-link-function
+  #+attr_texinfo: :options org-link-shell-confirm-function
   #+begin_defopt
   Function that prompts the user before executing a shell link.
   #+end_defopt
 
-  #+attr_texinfo: :options org-confirm-elisp-link-function
+  #+attr_texinfo: :options org-link-elisp-confirm-function
   #+begin_defopt
   Function that prompts the user before executing an Emacs Lisp link.
   #+end_defopt
@@ -21054,12 +21054,12 @@ the optional descriptive text.
 [fn:33] After insertion of a stored link, the link will be removed
 from the list of stored links.  To keep it in the list for later use,
 use a triple {{{kbd(C-u)}}} prefix argument to {{{kbd(C-c C-l)}}}, or
-configure the option ~org-keep-stored-link-after-insertion~.
+configure the option ~org-link-keep-stored-after-insertion~.
 
 [fn:34] This works if a function has been defined in the ~:complete~
 property of a link in ~org-link-parameters~.
 
-[fn:35] See the variable ~org-display-internal-link-with-indirect-buffer~.
+[fn:35] See the variable ~org-link-use-indirect-buffer-for-internals~.
 
 [fn:36] For backward compatibility, line numbers can also follow a
 single colon.
@@ -21255,7 +21255,7 @@ Types]]), any property you store with ~org-store-link-props~ can be
 accessed in capture templates in a similar way.
 
 [fn:88] This is always the other, not the user.  See the variable
-~org-from-is-user-regexp~.
+~org-link-from-user-regexp~.
 
 [fn:89] If you move entries or Org files from one directory to
 another, you may want to configure ~org-attach-directory~ to contain
