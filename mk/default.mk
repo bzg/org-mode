@@ -75,7 +75,7 @@ BTEST = $(BATCH) $(BTEST_INIT) \
 		)' \
 	  -l org-loaddefs.el \
 	  -l cl -l testing/org-test.el \
-	  -l ert -l org -l ox \
+	  -l ert -l org -l ox -l ol \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
 	  --eval '(org-test-run-batch-tests org-test-select-re)'
 
