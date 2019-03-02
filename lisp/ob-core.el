@@ -677,8 +677,15 @@ block."
 		      (replace-regexp-in-string
 		       (org-src-coderef-regexp coderef) "" expand nil nil 1))))
 		 (dir (cdr (assq :dir params)))
+		 (mkdirp (cdr (assq :mkdirp params)))
 		 (default-directory
-		   (or (and dir (file-name-as-directory (expand-file-name dir)))
+		   (or (and dir
+			    (not (member mkdirp '("no" "nil" nil)))
+			    (progn
+			      (let ((d (file-name-as-directory
+					(expand-file-name dir))))
+				(make-directory d 'parents)
+				d)))
 		       default-directory))
 		 (cmd (intern (concat "org-babel-execute:" lang)))
 		 result)

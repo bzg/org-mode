@@ -17484,9 +17484,10 @@ to source file(s).
   location.  Example: =:tangle FILENAME=.
 
 #+cindex: @samp{mkdirp}, header argument
-The =mkdirp= header argument creates parent directories for tangled
-files if the directory does not exist.  =yes= enables directory
-creation and =no= inhibits directory creation.
+The =mkdirp= header argument creates parent directories for =dir=
+header argument specified path and tangled files if the directory does
+not exist.  =yes= enables directory creation and =no= inhibits
+directory creation.
 
 #+cindex: @samp{comments}, header argument
 The =comments= header argument controls inserting comments into

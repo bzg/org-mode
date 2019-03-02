@@ -1607,6 +1607,14 @@ echo \"$data\"
 		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
     ))
 
+(ert-deftest test-ob-core/dir-mkdirp ()
+  (org-test-with-temp-text
+   "#+begin_src sh :mkdirp yes :dir \"data/code\"
+pwd
+#+end_src"
+   (org-babel-execute-src-block))
+  (should (file-directory-p "data/code")))
+
 (ert-deftest test-ob/script-escape ()
   ;; Delimited lists of numbers
   (should (equal '(1 2 3)

@@ -157,6 +157,12 @@ A call of ~org-set-tags-command~ with prefix argument C-u C-u avoids
 the fast tag selection interface and instead offers the plain
 interface.
 
+*** ~:mkdirp~ now supports create directory for ~:dir~ path
+
+The ~:mkdirp~ header argument used to only work for ~:tangle~ tangle
+files. Now ~:mkdirp~ works for ~:dir~ too. This is more convenient for
+specify default directory and with ~:file~ header argument.
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
