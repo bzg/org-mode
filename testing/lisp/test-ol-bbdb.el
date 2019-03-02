@@ -24,13 +24,13 @@
 
 ;;; Code:
 
-(require 'org-bbdb)
+(require 'ol-bbdb)
 
 (ert-deftest test-org-bbdb-anniv-extract-date ()
   (should (equal nil (org-bbdb-anniv-extract-date "foo")))
   (should (equal '(9 22 2018) (org-bbdb-anniv-extract-date "2018-09-22")))
   (should (equal '(9 22 nil) (org-bbdb-anniv-extract-date "09-22"))))
 
-(provide 'test-org-bbdb)
+(provide 'test-ol-bbdb)
 
 ;;; test-org-bbdb.el ends here

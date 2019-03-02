@@ -1,4 +1,4 @@
-;;; org-w3m.el --- Support from Copy and Paste From w3m -*- lexical-binding: t; -*-
+;;; ol-w3m.el --- Copy and Paste From W3M            -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2008-2019 Free Software Foundation, Inc.
 
@@ -179,6 +179,6 @@ Return t if there is no previous link; otherwise, return nil."
    (define-key w3m-minor-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
    (define-key w3m-minor-mode-map "\C-c\C-x\C-w" 'org-w3m-copy-for-org-mode)))
 
-(provide 'org-w3m)
+(provide 'ol-w3m)
 
-;;; org-w3m.el ends here
+;;; ol-w3m.el ends here

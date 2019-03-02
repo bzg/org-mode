@@ -1,4 +1,4 @@
-;;; org-bookmark.el - Support for links to bookmark
+;;; ol-bookmark.el - Links to bookmarks
 ;; Copyright (C) 2008-2018 Free Software Foundation, Inc.
 ;;
 ;; Author: Tokuya Kameshima <kames AT fa2.so-net.ne.jp>
@@ -25,6 +25,7 @@
 
 (require 'org)
 (require 'bookmark)
+(require 'ol)
 
 (defgroup org-bookmark nil
   "Options concerning the bookmark link."
@@ -84,6 +85,6 @@ Otherwise prompt the user for the right bookmark to use."
 	(org-store-link-props :link (concat "bookmark:" bookmark)
 			      :description bookmark))))
 
-(provide 'org-bookmark)
+(provide 'ol-bookmark)
 
-;;; org-bookmark.el ends here
+;;; ol-bookmark.el ends here

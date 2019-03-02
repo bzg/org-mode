@@ -1,4 +1,4 @@
-;;; org-vm.el --- Support for links to VM messages from within Org-mode
+;;; ol-vm.el --- Links to VM messages
 
 ;; Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
@@ -33,6 +33,7 @@
 
 ;;; Code:
 
+(require 'ol)
 (require 'org)
 
 ;; Declare external functions and variables
@@ -161,8 +162,6 @@
     (vm-preview-current-message)
     (vm-summarize)))
 
-(provide 'org-vm)
+(provide 'ol-vm)
 
-
-
-;;; org-vm.el ends here
+;;; ol-vm.el ends here

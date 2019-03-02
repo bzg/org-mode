@@ -1,4 +1,4 @@
-;;; org-mew.el --- Support for links to Mew messages from within Org-mode
+;;; ol-mew.el --- Links to Mew messages
 
 ;; Copyright (C) 2008-2018 Free Software Foundation, Inc.
 
@@ -55,6 +55,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'ol)
 
 (defgroup org-mew nil
   "Options concerning the Mew link."
@@ -349,6 +350,6 @@ asks you to select the capture template."
 	      (throw 'found (cdr elem))))
 	(setq alist (cdr alist))))))
 
-(provide 'org-mew)
+(provide 'ol-mew)
 
-;;; org-mew.el ends here
+;;; ol-mew.el ends here

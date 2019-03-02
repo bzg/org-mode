@@ -1,4 +1,4 @@
-;;; org-docview.el --- Support for links to doc-view-mode buffers -*- lexical-binding: t; -*-
+;;; ol-docview.el --- Links to Docview mode buffers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2009-2019 Free Software Foundation, Inc.
 
@@ -43,11 +43,12 @@
 ;;; Code:
 
 
-(require 'ol)
 (require 'doc-view)
+(require 'ol)
 
 (declare-function doc-view-goto-page "doc-view" (page))
 (declare-function image-mode-window-get "image-mode" (prop &optional winprops))
+(declare-function org-open-file "org" (path &optional in-emacs line search))
 
 (org-link-set-parameters "docview"
 			 :follow #'org-docview-open
@@ -98,6 +99,6 @@ and append it."
 	  (read-from-minibuffer "Page:" "1")))
 
 
-(provide 'org-docview)
+(provide 'ol-docview)
 
-;;; org-docview.el ends here
+;;; ol-docview.el ends here

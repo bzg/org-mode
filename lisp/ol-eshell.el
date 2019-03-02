@@ -1,4 +1,4 @@
-;;; org-eshell.el - Support for Links to Working Directories in Eshell -*- lexical-binding: t; -*-
+;;; ol-eshell.el - Links to Working Directories in Eshell -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2019 Free Software Foundation, Inc.
 
@@ -61,6 +61,6 @@
        :link (concat "eshell:" link)
        :description command))))
 
-(provide 'org-eshell)
+(provide 'ol-eshell)
 
-;;; org-eshell.el ends here
+;;; ol-eshell.el ends here

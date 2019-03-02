@@ -1,4 +1,4 @@
-;;; org-wl.el --- Support for links to Wanderlust messages from within Org-mode
+;;; ol-wl.el --- Links to Wanderlust messages
 
 ;; Copyright (C) 2004-2018 Free Software Foundation, Inc.
 
@@ -31,6 +31,7 @@
 
 ;;; Code:
 
+(require 'ol)
 (require 'org)
 
 (defgroup org-wl nil
@@ -297,6 +298,6 @@ for namazu index."
 		(error "No such message: %s" article)))
 	  (wl-summary-redisplay))))))
 
-(provide 'org-wl)
+(provide 'ol-wl)
 
-;;; org-wl.el ends here
+;;; ol-wl.el ends here

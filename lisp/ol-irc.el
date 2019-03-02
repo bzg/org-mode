@@ -1,4 +1,4 @@
-;;; org-irc.el --- Store Links to IRC Sessions -*- lexical-binding: t; -*-
+;;; ol-irc.el --- Links to IRC Sessions              -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2008-2019 Free Software Foundation, Inc.
 ;;
@@ -260,10 +260,10 @@ FORMAT."
       (`md (format "[%s](irc:%s)" desc link))
       (_ nil))))
 
-(provide 'org-irc)
+(provide 'ol-irc)
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
 
-;;; org-irc.el ends here
+;;; ol-irc.el ends here

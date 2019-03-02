@@ -1,4 +1,4 @@
-;;; org-git-link.el --- Provide org links to specific file version
+;;; ol-git-link.el --- Links to specific file version
 
 ;; Copyright (C) 2009-2014  Reimar Finken
 
@@ -62,6 +62,8 @@
 ;;; Code:
 
 (require 'org)
+(require 'ol)
+
 (defcustom org-git-program "git"
   "Name of the git executable used to follow git links."
   :type '(string)
@@ -224,6 +226,6 @@ than two double colons, str2 and/or str3 may be set the empty string."
       (if (looking-at "^refs/heads/")   ; 11 characters
           (buffer-substring 12 (1- (point-max))))))) ; to strip off final newline
 
-(provide 'org-git-link)
+(provide 'ol-git-link)
 
-;;; org-git-link.el ends here
+;;; ol-git-link.el ends here

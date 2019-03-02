@@ -1,4 +1,4 @@
-;;; org-mhe.el --- Support for Links to MH-E Messages -*- lexical-binding: t; -*-
+;;; ol-mhe.el --- Links to MH-E Messages             -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2019 Free Software Foundation, Inc.
 
@@ -214,6 +214,6 @@ folders."
       (kill-buffer)
       (error "Message not found"))))
 
-(provide 'org-mhe)
+(provide 'ol-mhe)
 
-;;; org-mhe.el ends here
+;;; ol-mhe.el ends here

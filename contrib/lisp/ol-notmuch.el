@@ -1,4 +1,4 @@
-;;; org-notmuch.el --- Support for links to notmuch messages from within Org-mode
+;;; org-notmuch.el --- Links to notmuch messages
 
 ;; Copyright (C) 2010-2014  Matthieu Lemerre
 
@@ -39,6 +39,7 @@
 
 ;;; Code:
 
+(require 'ol)
 (require 'org)
 
 ;; customisable notmuch open functions
@@ -129,6 +130,6 @@ Can link to more than one message, if so all matching messages are shown."
   (require 'notmuch)
   (notmuch-tree search))
 
-(provide 'org-notmuch)
+(provide 'ol-notmuch)
 
-;;; org-notmuch.el ends here
+;;; ol-notmuch.el ends here

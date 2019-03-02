@@ -1,4 +1,4 @@
-;;; org-elisp-symbol.el --- Org links to emacs-lisp symbols
+;;; ol-elisp-symbol.el --- Links to Emacs-lisp symbols
 ;;
 ;; Copyright 2007-2018 Free Software Foundation, Inc.
 ;;
@@ -74,8 +74,8 @@
 
 ;;; Code:
 
-(provide 'org-elisp-symbol)
-
+(provide 'ol-elisp-symbol)
+(require 'ol)
 (require 'org)
 
 (org-link-set-parameters "elisp-symbol"
@@ -158,4 +158,4 @@
 ;;;;  User Options, Variables
 ;;;;##########################################################################
 
-;;; org-elisp-symbol.el ends here
+;;; ol-elisp-symbol.el ends here

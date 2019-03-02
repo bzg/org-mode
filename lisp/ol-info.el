@@ -1,4 +1,4 @@
-;;; org-info.el --- Support for Links to Info Nodes -*- lexical-binding: t; -*-
+;;; ol-info.el --- Links to Info Nodes               -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2019 Free Software Foundation, Inc.
 
@@ -143,6 +143,6 @@ See `org-link-parameters' for details about PATH, DESC and FORMAT."
 	 (format "@ref{%s,%s,,%s,}" node title manual)))
       (_ nil))))
 
-(provide 'org-info)
+(provide 'ol-info)
 
-;;; org-info.el ends here
+;;; ol-info.el ends here

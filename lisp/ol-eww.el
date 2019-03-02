@@ -1,4 +1,4 @@
-;;; org-eww.el --- Store url and kill from Eww mode for Org  -*- lexical-binding: t -*-
+;;; ol-eww.el --- Store URL and kill from Eww mode    -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2019 Free Software Foundation, Inc.
 
@@ -55,7 +55,7 @@
 (declare-function eww-current-url "eww")
 
 
-;; Store Org-link in eww-mode buffer
+;; Store Org link in Eww mode buffer
 (org-link-set-parameters "eww" :follow #'eww :store #'org-eww-store-link)
 (defun org-eww-store-link ()
   "Store a link to the url of an EWW buffer."
@@ -72,7 +72,7 @@
 			(eww-current-url))))))
 
 
-;; Some auxiliary functions concerning links in eww buffers
+;; Some auxiliary functions concerning links in Eww buffers
 (defun org-eww-goto-next-url-property-change ()
   "Move to the start of next link if exists.
 Otherwise point is not moved.  Return point."
@@ -171,6 +171,6 @@ keep the structure of the Org file."
 (add-hook 'eww-mode-hook #'org-eww-extend-eww-keymap)
 
 
-(provide 'org-eww)
+(provide 'ol-eww)
 
-;;; org-eww.el ends here
+;;; ol-eww.el ends here

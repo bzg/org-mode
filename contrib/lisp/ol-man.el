@@ -1,4 +1,4 @@
-;;; org-man.el - Support for links to manpages in Org-mode
+;;; ol-man.el - Links to man pages
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -23,6 +23,7 @@
 ;;
 ;;; Commentary:
 
+(require 'ol)
 (require 'org)
 
 (org-link-set-parameters "man"
@@ -70,6 +71,6 @@ PATH should be a topic that can be thrown at the man command."
      ((eq format 'ascii) (format "%s (%s)" desc path))
      (t path))))
 
-(provide 'org-man)
+(provide 'ol-man)
 
-;;; org-man.el ends here
+;;; ol-man.el ends here

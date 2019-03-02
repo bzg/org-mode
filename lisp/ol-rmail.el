@@ -1,4 +1,4 @@
-;;; org-rmail.el --- Support for Links to Rmail Messages -*- lexical-binding: t; -*-
+;;; ol-rmail.el --- Links to Rmail Messages          -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2019 Free Software Foundation, Inc.
 
@@ -110,6 +110,6 @@
 	  message-number)
       (error "Message not found"))))
 
-(provide 'org-rmail)
+(provide 'ol-rmail)
 
-;;; org-rmail.el ends here
+;;; ol-rmail.el ends here

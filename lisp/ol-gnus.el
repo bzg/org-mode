@@ -1,4 +1,4 @@
-;;; org-gnus.el --- Support for Links to Gnus Groups and Messages -*- lexical-binding: t; -*-
+;;; ol-gnus.el --- Links to Gnus Groups and Messages -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2019 Free Software Foundation, Inc.
 
@@ -263,7 +263,6 @@ If `org-store-link' was called with a prefix arg the meaning of
 	(org-gnus-no-server (gnus-no-server))
 	(t (gnus))))
 
-(provide 'org-gnus)
+(provide 'ol-gnus)
 
-
-;;; org-gnus.el ends here
+;;; ol-gnus.el ends here
