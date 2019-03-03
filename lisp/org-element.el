@@ -58,20 +58,52 @@
 
 ;;; Code:
 
-(require 'org)
 (require 'avl-tree)
 (require 'cl-lib)
+(require 'org-macs)
+(require 'ol)
+(require 'org-entities)
+(require 'org-footnote)
+(require 'org-list)
+(require 'org-macro)
+(require 'org-table)
 
-(declare-function org-link-expand-abbrev "ol" (link))
-(declare-function org-link-types "ol" ())
-(declare-function org-link-unescape "ol" (str))
+(declare-function org-at-heading-p "org" (&optional _))
+(declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
+(declare-function org-escape-code-in-string "org-src" (s))
+(declare-function org-find-visible "org" ())
+(declare-function org-reduced-level "org" (l))
+(declare-function org-unescape-code-in-string "org-src" (s))
+(declare-function outline-next-heading "org" ())
+(declare-function outline-previous-heading "org" ())
 
-(defvar org-link-translation-function)
-(defvar org-link-types-re)
-(defvar org-link-angle-re)
-(defvar org-link-plain-re)
-(defvar org-link-bracket-re)
-
+(defvar org-archive-tag)
+(defvar org-clock-line-re)
+(defvar org-closed-string)
+(defvar org-comment-string)
+(defvar org-complex-heading-regexp)
+(defvar org-dblock-start-re)
+(defvar org-deadline-string)
+(defvar org-done-keywords)
+(defvar org-drawer-regexp)
+(defvar org-edit-src-content-indentation)
+(defvar org-emph-re)
+(defvar org-emphasis-regexp-components)
+(defvar org-keyword-time-not-clock-regexp)
+(defvar org-match-substring-regexp)
+(defvar org-odd-levels-only)
+(defvar org-outline-regexp-bol)
+(defvar org-planning-line-re)
+(defvar org-property-drawer-re)
+(defvar org-property-format)
+(defvar org-property-re)
+(defvar org-scheduled-string)
+(defvar org-src-preserve-indentation)
+(defvar org-tags-column)
+(defvar org-time-stamp-formats)
+(defvar org-todo-regexp)
+(defvar org-ts-regexp-both)
+(defvar org-verbatim-re)
 
 
 ;;; Definitions And Rules
@@ -101,7 +133,7 @@ specially in `org-element--object-lex'.")
   (setq org-element-paragraph-separate
 	(concat "^\\(?:"
 		;; Headlines, inlinetasks.
-		org-outline-regexp "\\|"
+		"\\*+ " "\\|"
 		;; Footnote definitions.
 		"\\[fn:[-_[:word:]]+\\]" "\\|"
 		;; Diary sexps.
@@ -127,7 +159,7 @@ specially in `org-element--object-lex'.")
 		;; LaTeX environments.
 		"\\\\begin{\\([A-Za-z0-9*]+\\)}" "\\|"
 		;; Clock lines.
-		(regexp-quote org-clock-string) "\\|"
+		"CLOCK:" "\\|"
 		;; Lists.
 		(let ((term (pcase org-plain-list-ordered-item-terminator
 			      (?\) ")") (?. "\\.") (_ "[.)]")))
@@ -1733,7 +1765,7 @@ Return a list whose CAR is `clock' and CDR is a plist containing
   (save-excursion
     (let* ((case-fold-search nil)
 	   (begin (point))
-	   (value (progn (search-forward org-clock-string (line-end-position) t)
+	   (value (progn (search-forward "CLOCK:" (line-end-position) t)
 			 (skip-chars-forward " \t")
 			 (org-element-timestamp-parser)))
 	   (duration (and (search-forward " => " (line-end-position) t)
@@ -1758,7 +1790,7 @@ Return a list whose CAR is `clock' and CDR is a plist containing
 
 (defun org-element-clock-interpreter (clock _)
   "Interpret CLOCK element as Org syntax."
-  (concat org-clock-string " "
+  (concat "CLOCK: "
 	  (org-element-timestamp-interpreter
 	   (org-element-property :value clock) nil)
 	  (let ((duration (org-element-property :duration clock)))
@@ -5526,7 +5558,7 @@ the process stopped before finding the expected result."
 
 (defconst org-element--cache-sensitive-re
   (concat
-   org-outline-regexp-bol "\\|"
+   "^\\*+ " "\\|"
    "\\\\end{[A-Za-z0-9*]+}[ \t]*$" "\\|"
    "^[ \t]*\\(?:"
    "#\\+\\(?:BEGIN[:_]\\|END\\(?:_\\|:?[ \t]*$\\)\\)" "\\|"
