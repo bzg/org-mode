@@ -46,7 +46,7 @@
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
-(declare-function org-link-display-format "org" (s))
+(declare-function org-link-display-format "ol" (s))
 (declare-function org-link-set-parameters "ol" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
 (declare-function org-make-tag-string "org" (tags))

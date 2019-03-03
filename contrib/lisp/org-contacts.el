@@ -59,6 +59,7 @@
 (require 'mail-utils)
 (require 'org-agenda)
 (require 'org-capture)
+(require 'ol)
 
 (defgroup org-contacts nil
   "Options about contacts management."

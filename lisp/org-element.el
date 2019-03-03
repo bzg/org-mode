@@ -74,8 +74,8 @@
 (declare-function org-find-visible "org" ())
 (declare-function org-reduced-level "org" (l))
 (declare-function org-unescape-code-in-string "org-src" (s))
-(declare-function outline-next-heading "org" ())
-(declare-function outline-previous-heading "org" ())
+(declare-function outline-next-heading "outline" ())
+(declare-function outline-previous-heading "outline" ())
 
 (defvar org-archive-tag)
 (defvar org-clock-line-re)
