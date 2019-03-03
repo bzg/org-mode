@@ -38,7 +38,6 @@
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-type "org-element" (element))
-(declare-function org-fill-template "org" (template alist))
 (declare-function org-heading-components "org" ())
 (declare-function org-id-find "org-id" (id &optional markerp))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))

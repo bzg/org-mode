@@ -18818,17 +18818,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "p")
   (self-insert-command N))
 
-(defun org-fill-template (template alist)
-  "Find each %key of ALIST in TEMPLATE and replace it."
-  (let ((case-fold-search nil))
-    (dolist (entry (sort (copy-sequence alist)
-                         (lambda (a b) (< (length (car a)) (length (car b))))))
-      (setq template
-	    (replace-regexp-in-string
-	     (concat "%" (regexp-quote (car entry)))
-	     (or (cdr entry) "") template t t)))
-    template))
-
 (defun org-quote-vert (s)
   "Replace \"|\" with \"\\vert\"."
   (while (string-match "|" s)
