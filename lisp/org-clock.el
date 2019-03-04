@@ -334,11 +334,12 @@ For more information, see `org-clocktable-write-default'."
   :version "24.1"
   :type 'alist)
 
-(defcustom org-clock-clocktable-default-properties '(:maxlevel 2 :scope file)
+(defcustom org-clock-clocktable-default-properties '(:maxlevel 2)
   "Default properties for new clocktables.
 These will be inserted into the BEGIN line, to make it easy for users to
 play with them."
   :group 'org-clocktable
+  :package-version '(Org . "9.2")
   :type 'plist)
 
 (defcustom org-clock-idle-time nil
