@@ -277,12 +277,12 @@ the buffer."
   "Test insert clocktable dynamic block with `org-dynamic-block-insert-dblock'."
   (should
    (equal
-    "| Headline     | Time   |      |
-|--------------+--------+------|
-| *Total time* | *1:00* |      |
-|--------------+--------+------|
-| \\_  H2       |        | 1:00 |"
-    (org-test-with-temp-text "** H1\n\n** H2\n<point>"
+    "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *1:00* |
+|--------------+--------|
+| H1           | 1:00   |"
+    (org-test-with-temp-text "* H1\n<point>"
       (insert (org-test-clock-create-clock ". 1:00" ". 2:00"))
 
       (goto-line 2)
