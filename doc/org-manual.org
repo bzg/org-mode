@@ -16723,13 +16723,15 @@ for those code blocks running in a session.
 
 #+cindex: working directory, in a code block
 #+cindex: @samp{dir}, header argument
+#+cindex: @samp{mkdirp}, header argument
 The =dir= header argument specifies the default directory during code
 block execution.  If it is absent, then the directory associated with
-the current buffer is used.  In other words, supplying =:dir PATH=
-temporarily has the same effect as changing the current directory with
-{{{kbd(M-x cd PATH)}}}, and then not setting =dir=.  Under the
-surface, =dir= simply sets the value of the Emacs variable
-~default-directory~.
+the current buffer is used.  In other words, supplying =:dir
+DIRECTORY= temporarily has the same effect as changing the current
+directory with {{{kbd(M-x cd RET DIRECTORY)}}}, and then not setting
+=dir=.  Under the surface, =dir= simply sets the value of the Emacs
+variable ~default-directory~.  Setting =mkdirp= header argument to
+a non-~nil~ value creates the directory, if necessary.
 
 For example, to save the plot file in the =Work/= folder of the home
 directory---notice tilde is expanded:
@@ -17484,10 +17486,9 @@ to source file(s).
   location.  Example: =:tangle FILENAME=.
 
 #+cindex: @samp{mkdirp}, header argument
-The =mkdirp= header argument creates parent directories for =dir=
-header argument specified path and tangled files if the directory does
-not exist.  =yes= enables directory creation and =no= inhibits
-directory creation.
+The =mkdirp= header argument creates parent directories for tangled
+files if the directory does not exist.  A =yes= value enables
+directory creation whereas =no= inhibits it.
 
 #+cindex: @samp{comments}, header argument
 The =comments= header argument controls inserting comments into
