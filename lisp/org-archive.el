@@ -164,7 +164,7 @@ an error if LOCATION is not a valid archive location."
   (unless (string-match "::" location)
     (error "Invalid archive location: %S" location))
   (let ((current-file (buffer-file-name (buffer-base-buffer)))
-	(file-fmt (substring location nil (match-beginning 0)))
+	(file-fmt (substring location 0 (match-beginning 0)))
 	(heading-fmt (substring location (match-end 0))))
     (cons
      ;; File part.
