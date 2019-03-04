@@ -1608,12 +1608,32 @@ echo \"$data\"
     ))
 
 (ert-deftest test-ob-core/dir-mkdirp ()
-  (org-test-with-temp-text
-   "#+begin_src sh :mkdirp yes :dir \"data/code\"
-pwd
+  "Test :mkdirp with :dir header combination."
+  (should-not
+   (org-test-with-temp-text-in-file
+       "#+begin_src emacs-lisp :dir \"data/code\"
+t
 #+end_src"
-   (org-babel-execute-src-block))
-  (should (file-directory-p "data/code")))
+     (org-babel-execute-src-block)
+     (message default-directory)
+     (file-directory-p "data/code")))
+  (should-not
+   (org-test-with-temp-text-in-file
+       "#+begin_src emacs-lisp :mkdirp no :dir \"data/code\"
+t
+#+end_src"
+     (org-babel-execute-src-block)
+     (message default-directory)
+     (file-directory-p "data/code")))
+  (should
+   (org-test-with-temp-text-in-file
+       "#+begin_src emacs-lisp :mkdirp yes :dir \"data/code\"
+t
+#+end_src"
+     (org-babel-execute-src-block)
+     (message default-directory)
+     (prog1 (file-directory-p "data/code")
+       (delete-directory "data" t)))))
 
 (ert-deftest test-ob/script-escape ()
   ;; Delimited lists of numbers
