@@ -15944,8 +15944,8 @@ non-nil."
 	      ((org-at-timestamp-p 'lax) (match-string 0))))
 	 ;; Default time is either the timestamp at point or today.
 	 ;; When entering a range, only the range start is considered.
-         (default-time (if (not ts) (current-time)
-			 (apply #'encode-time (org-parse-time-string ts))))
+         (default-time (and ts
+			    (apply #'encode-time (org-parse-time-string ts))))
          (default-input (and ts (org-get-compact-tod ts)))
          (repeater (and ts
 			(string-match "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ts)
@@ -15953,13 +15953,13 @@ non-nil."
 	 org-time-was-given
 	 org-end-time-was-given
 	 (time
-	  (and (if (equal arg '(16)) (current-time)
-		 ;; Preserve `this-command' and `last-command'.
-		 (let ((this-command this-command)
-		       (last-command last-command))
-		   (org-read-date
-		    arg 'totime nil nil default-time default-input
-		    inactive))))))
+	  (if (equal arg '(16)) (current-time)
+	    ;; Preserve `this-command' and `last-command'.
+	    (let ((this-command this-command)
+		  (last-command last-command))
+	      (org-read-date
+	       arg 'totime nil nil default-time default-input
+	       inactive)))))
     (cond
      ((and ts
            (memq last-command '(org-time-stamp org-time-stamp-inactive))
@@ -16257,7 +16257,7 @@ user."
     (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
       (setq ans "+0"))
 
-    (when (setq delta (org-read-date-get-relative ans (current-time) org-def))
+    (when (setq delta (org-read-date-get-relative ans nil org-def))
       (setq ans (replace-match "" t t ans)
 	    deltan (car delta)
 	    deltaw (nth 1 delta)
@@ -16605,7 +16605,7 @@ Don't touch the rest."
 If SECONDS is non-nil, return the difference in seconds."
   (let ((fdiff (if seconds #'float-time #'time-to-days)))
     (- (funcall fdiff (org-time-string-to-time timestamp-string))
-       (funcall fdiff (current-time)))))
+       (funcall fdiff nil))))
 
 (defun org-deadline-close-p (timestamp-string &optional ndays)
   "Is the time in TIMESTAMP-STRING close to the current date?"
@@ -16787,10 +16787,8 @@ days in order to avoid rounding problems."
 	  (match-end (match-end 0))
 	  (time1 (org-time-string-to-time ts1))
 	  (time2 (org-time-string-to-time ts2))
-	  (t1 (float-time time1))
-	  (t2 (float-time time2))
-	  (diff (abs (- t2 t1)))
-	  (negative (< (- t2 t1) 0))
+	  (diff (abs (float-time (time-subtract time2 time1))))
+	  (negative (time-less-p time2 time1))
 	  ;; (ys (floor (* 365 24 60 60)))
 	  (ds (* 24 60 60))
 	  (hs (* 60 60))
@@ -16801,14 +16799,14 @@ days in order to avoid rounding problems."
 	  (fh "%02d:%02d")
 	  y d h m align)
      (if havetime
-	 (setq ; y (floor (/ diff ys))  diff (mod diff ys)
+	 (setq ; y (floor diff ys)  diff (mod diff ys)
 	  y 0
-	  d (floor (/ diff ds))  diff (mod diff ds)
-	  h (floor (/ diff hs))  diff (mod diff hs)
-	  m (floor (/ diff 60)))
-       (setq ; y (floor (/ diff ys))  diff (mod diff ys)
+	  d (floor diff ds)  diff (mod diff ds)
+	  h (floor diff hs)  diff (mod diff hs)
+	  m (floor diff 60))
+       (setq ; y (floor diff ys)  diff (mod diff ys)
 	y 0
-	d (floor (+ (/ diff ds) 0.5))
+	d (round diff ds)
 	h 0 m 0))
      (if (not to-buffer)
 	 (message "%s" (org-make-tdiff-string y d h m))

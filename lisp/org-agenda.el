@@ -5880,12 +5880,12 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 ((> dt (* 60 maxtime))
 	  ;; a very long clocking chunk
 	  (setq issue (format "Clocking interval is very long: %s"
-			      (org-duration-from-minutes (floor (/ dt 60.))))
+			      (org-duration-from-minutes (floor dt 60)))
 		face (or (plist-get pl :long-face) face)))
 	 ((< dt (* 60 mintime))
 	  ;; a very short clocking chunk
 	  (setq issue (format "Clocking interval is very short: %s"
-			      (org-duration-from-minutes (floor (/ dt 60.))))
+			      (org-duration-from-minutes (floor dt 60)))
 		face (or (plist-get pl :short-face) face)))
 	 ((and (> tlend 0) (< ts tlend))
 	  ;; Two clock entries are overlapping

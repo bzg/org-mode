@@ -1082,8 +1082,8 @@ nil, just return 0."
    ((stringp s)
     (condition-case nil
 	(float-time (apply #'encode-time (org-parse-time-string s)))
-      (error 0.)))
-   (t 0.)))
+      (error 0)))
+   (t 0)))
 
 (defun org-time= (a b)
   (let ((a (org-2ft a))

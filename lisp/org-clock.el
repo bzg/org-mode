@@ -1169,8 +1169,7 @@ so long."
 	     org-clock-marker (marker-buffer org-clock-marker))
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
-	    (time-subtract (current-time)
-			   (seconds-to-time org-clock-user-idle-seconds)))
+	    (time-since (seconds-to-time org-clock-user-idle-seconds)))
 	   (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
 	  (org-clock-resolve
@@ -1179,9 +1178,8 @@ so long."
 	   (lambda (_)
 	     (format "Clocked in & idle for %.1f mins"
 		     (/ (float-time
-			 (time-subtract (current-time)
-					org-clock-user-idle-start))
-			60.0)))
+			 (time-since org-clock-user-idle-start))
+			60)))
 	   org-clock-user-idle-start)))))
 
 (defvar org-clock-current-task nil "Task currently clocked in.")
@@ -1600,7 +1598,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  ;; Possibly remove zero time clocks.  However, do not add
 	  ;; a note associated to the CLOCK line in this case.
 	  (cond ((and org-clock-out-remove-zero-time-clocks
-		      (= (+ h m) 0))
+		      (= 0 h m))
 		 (setq remove t)
 		 (delete-region (line-beginning-position)
 				(line-beginning-position 2)))
