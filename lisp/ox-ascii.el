@@ -1472,8 +1472,8 @@ contextual information."
 		   (replace-regexp-in-string
 		    "-" "•"
 		    (replace-regexp-in-string
-		     "+" "⁃"
-		     (replace-regexp-in-string "*" "‣" bul))))))))
+		     "\\+" "⁃"
+		     (replace-regexp-in-string "\\*" "‣" bul))))))))
 	 (indentation (if (eq list-type 'descriptive) org-ascii-quote-margin
 			(string-width bullet))))
     (concat
