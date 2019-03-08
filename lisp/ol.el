@@ -1314,22 +1314,36 @@ PATH is the command to execute, as a string."
 If the link is in hidden text, expose it.  When SEARCH-BACKWARD
 is non-nil, move backward."
   (interactive)
-  (when (and org-link--search-failed (eq this-command last-command))
-    (goto-char (point-min))
-    (message "Link search wrapped back to beginning of buffer"))
-  (setq org-link--search-failed nil)
-  (let* ((pos (point))
-	 (ct (org-context))
-	 (a (assq :link ct))
-	 (srch-fun (if search-backward 're-search-backward 're-search-forward)))
-    (cond (a (goto-char (nth (if search-backward 1 2) a)))
-	  ((looking-at org-link-any-re)
-	   ;; Don't stay stuck at link without an org-link face
-	   (forward-char (if search-backward -1 1))))
-    (if (funcall srch-fun org-link-any-re nil t)
-	(progn
-	  (goto-char (match-beginning 0))
-	  (when (org-invisible-p) (org-show-context)))
+  (let ((pos (point))
+	(search-fun (if search-backward #'re-search-backward
+		      #'re-search-forward)))
+    ;; Tweak initial position.  If last search failed, wrap around.
+    ;; Otherwise, make sure we do not match current link.
+    (cond
+     ((not (and org-link--search-failed (eq this-command last-command)))
+      (cond
+       ((and (not search-backward) (looking-at org-link-any-re))
+	(goto-char (match-end 0)))
+       (search-backward
+	(pcase (org-in-regexp org-link-any-re nil t)
+	  (`(,beg . ,_) (goto-char beg))
+	  (_ nil)))
+       (t nil)))
+     (search-backward
+      (goto-char (point-max))
+      (message "Link search wrapped back to end of buffer"))
+     (t
+      (goto-char (point-min))
+      (message "Link search wrapped back to beginning of buffer")))
+    (setq org-link--search-failed nil)
+    (catch :found
+      (while (funcall search-fun org-link-any-re nil t)
+	(pcase (org-element-lineage (org-element-context) '(link) t)
+	  (`nil nil)
+	  (link
+	   (goto-char (org-element-property :begin link))
+	   (when (org-invisible-p) (org-show-context))
+	   (throw :found t))))
       (goto-char pos)
       (setq org-link--search-failed t)
       (message "No further link found"))))

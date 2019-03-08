@@ -248,6 +248,98 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	 (insert "new")
 	 (org-element-type (org-element-context))))))
 
+
+;;; Navigation
+
+(ert-deftest test-ol/next-link ()
+  "Test `org-next-link' specifications."
+  ;; Move to any type of link.
+  (should
+   (equal "[[link]]"
+	  (org-test-with-temp-text "foo [[link]]"
+	    (org-next-link)
+	    (buffer-substring (point) (line-end-position)))))
+  (should
+   (equal "http://link"
+	  (org-test-with-temp-text "foo http://link"
+	    (org-next-link)
+	    (buffer-substring (point) (line-end-position)))))
+  (should
+   (equal "<http://link>"
+	  (org-test-with-temp-text "foo <http://link>"
+	    (org-next-link)
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Ignore link at point.
+  (should
+   (equal "[[link2]]"
+	  (org-test-with-temp-text "[[link1]] [[link2]]"
+	    (org-next-link)
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Ignore fake links.
+  (should
+   (equal "[[truelink]]"
+	  (org-test-with-temp-text "foo\n: [[link]]\n[[truelink]]"
+	    (org-next-link)
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Do not move point when there is no link.
+  (should
+   (org-test-with-temp-text "foo bar"
+     (org-next-link)
+     (bobp)))
+  ;; Wrap around after a failed search.
+  (should
+   (equal "[[link]]"
+	  (org-test-with-temp-text "[[link]]\n<point>foo"
+	    (org-next-link)
+	    (let* ((this-command 'org-next-link)
+		   (last-command this-command))
+	      (org-next-link))
+	    (buffer-substring (point) (line-end-position))))))
+
+(ert-deftest test-ol/previous-link ()
+  "Test `org-previous-link' specifications."
+  ;; Move to any type of link.
+  (should
+   (equal "[[link]]"
+	  (org-test-with-temp-text "[[link]]\nfoo<point>"
+	    (org-previous-link)
+	    (buffer-substring (point) (line-end-position)))))
+  (should
+   (equal "http://link"
+	  (org-test-with-temp-text "http://link\nfoo<point>"
+	    (org-previous-link)
+	    (buffer-substring (point) (line-end-position)))))
+  (should
+   (equal "<http://link>"
+	  (org-test-with-temp-text "<http://link>\nfoo<point>"
+	    (org-previous-link)
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Ignore link at point.
+  (should
+   (equal "[[link1]]"
+	  (org-test-with-temp-text "[[link1]]\n[[link2<point>]]"
+	    (org-previous-link)
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Ignore fake links.
+  (should
+   (equal "[[truelink]]"
+	  (org-test-with-temp-text "[[truelink]]\n: [[link]]\n<point>"
+	    (org-previous-link)
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Do not move point when there is no link.
+  (should
+   (org-test-with-temp-text "foo bar<point>"
+     (org-previous-link)
+     (eobp)))
+  ;; Wrap around after a failed search.
+  (should
+   (equal "[[link]]"
+	  (org-test-with-temp-text "foo\n[[link]]"
+	    (org-previous-link)
+	    (let* ((this-command 'org-previous-link)
+		   (last-command this-command))
+	      (org-previous-link))
+	    (buffer-substring (point) (line-end-position))))))
 
 (provide 'test-ol)
 ;;; test-ol.el ends here
