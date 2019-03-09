@@ -462,9 +462,6 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-descriptive-links
   'org-link-descriptive "Org 9.3")
 
-(define-obsolete-variable-alias 'org-url-hexify-p
-  'org-link-url-hexify "Org 9.3")
-
 (define-obsolete-variable-alias 'org-context-in-file-links
   'org-link-context-for-files "Org 9.3")
 

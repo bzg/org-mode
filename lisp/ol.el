@@ -375,13 +375,6 @@ single keystroke rather than having to type \"yes\"."
   :tag "Org Store Link"
   :group 'org-link)
 
-(defcustom org-link-url-hexify t
-  "When non-nil, hexify URL when creating a link."
-  :type 'boolean
-  :version "24.3"
-  :group 'org-link-store
-  :safe #'booleanp)
-
 (defcustom org-link-context-for-files t
   "Non-nil means file links from `org-store-link' contain context.
 \\<org-mode-map>
@@ -450,12 +443,6 @@ links more efficient."
   :safe #'booleanp)
 
 ;;; Public variables
-
-(defconst org-link-escape-chars
-  ;;%20 %5B %5D %25
-  '(?\s ?\[ ?\] ?%)
-  "List of characters that should be escaped in a link when stored to Org.
-This is the list that is used for internal purposes.")
 
 (defconst org-target-regexp (let ((border "[^<>\n\r \t]"))
 			      (format "<<\\(%s\\|%s[^<>\n\r]*%s\\)>>"
@@ -597,7 +584,7 @@ either a link description or nil."
     (concat (format "%-45s" (substring desc 0 (min (length desc) 40)))
 	    "<" (car link) ">")))
 
-(defun org-link--unescape-compound (hex)
+(defun org-link--decode-compound (hex)
   "Unhexify Unicode hex-chars HEX.
 E.g. \"%C3%B6\" is the German o-Umlaut.  Note: this function also
 decodes single byte encodings like \"%E1\" (a-acute) if not
@@ -628,14 +615,15 @@ followed by another \"%[A-F0-9]{2}\" group."
 	    (setq ret (concat ret (char-to-string sum)))
 	    (setq sum 0))
 	   ((not bytes)			; single byte(s)
-	    (setq ret (org-link--unescape-single-byte-sequence hex))))))
+	    (setq ret (org-link--decode-single-byte-sequence hex))))))
       ret)))
 
-(defun org-link--unescape-single-byte-sequence (hex)
+(defun org-link--decode-single-byte-sequence (hex)
   "Unhexify hex-encoded single byte character sequence HEX."
   (mapconcat (lambda (byte)
 	       (char-to-string (string-to-number byte 16)))
-	     (cdr (split-string hex "%")) ""))
+	     (cdr (split-string hex "%"))
+	     ""))
 
 (defun org-link--fontify-links-to-this-file ()
   "Fontify links to the current file in `org-stored-links'."
@@ -750,7 +738,18 @@ This should be called after the variable `org-link-parameters' has changed."
 	   "\\([^][ \t\n()<>]+\\(?:([[:word:]0-9_]+)\\|\\([^[:punct:] \t\n]\\|/\\)\\)\\)")
 	  ;;	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
 	  org-link-bracket-re
-	  "\\[\\[\\([^][]+\\)\\]\\(\\[\\([^][]+\\)\\]\\)?\\]"
+	  (rx (seq "[["
+		   ;; URI part: match group 1.
+		   (group
+		    (*? anything)
+		    ;; Allow an even number of backslashes right
+		    ;; before the closing bracket.
+		    (not (any "\\"))
+		    (zero-or-more "\\\\"))
+		   "]"
+		   ;; Description (optional): match group 2.
+		   (opt "[" (group (+? anything)) "]")
+		   "]"))
 	  org-link-any-re
 	  (concat "\\(" org-link-bracket-re "\\)\\|\\("
 		  org-link-angle-re "\\)\\|\\("
@@ -841,55 +840,71 @@ and dates."
       (setq org-store-link-plist
 	    (plist-put org-store-link-plist key value)))))
 
-(defun org-link-escape (text &optional table merge)
-  "Return percent escaped representation of TEXT.
-TEXT is a string with the text to escape.
-Optional argument TABLE is a list with characters that should be
-escaped.  When nil, `org-link-escape-chars' is used.
-If optional argument MERGE is set, merge TABLE into
-`org-link-escape-chars'."
-  (let ((characters-to-encode
-	 (cond ((null table) org-link-escape-chars)
-	       (merge (append org-link-escape-chars table))
-	       (t table))))
-    (mapconcat
-     (lambda (c)
-       (if (or (memq c characters-to-encode)
-	       (and org-link-url-hexify (or (< c 32) (> c 126))))
-	   (mapconcat (lambda (e) (format "%%%.2X" e))
-		      (or (encode-coding-char c 'utf-8)
-			  (error "Unable to percent escape character: %c" c))
-		      "")
-	 (char-to-string c)))
-     text "")))
+(defun org-link-encode (text table)
+  "Return percent escaped representation of string TEXT.
+TEXT is a string with the text to escape. TABLE is a list of
+characters that should be escaped."
+  (mapconcat
+   (lambda (c)
+     (if (memq c table)
+	 (mapconcat (lambda (e) (format "%%%.2X" e))
+		    (or (encode-coding-char c 'utf-8)
+			(error "Unable to percent escape character: %c" c))
+		    "")
+       (char-to-string c)))
+   text ""))
 
-(defun org-link-unescape (str)
-  "Unhex hexified Unicode parts in string STR.
-E.g. \"%C3%B6\" becomes the german o-Umlaut.  This is the
-reciprocal of `org-link-escape', which see."
-  (if (org-string-nw-p str)
-      (replace-regexp-in-string
-       "\\(%[0-9A-Za-z]\\{2\\}\\)+" #'org-link--unescape-compound str t t)
-    str))
+(defun org-link-decode (s)
+  "Decode percent-encoded parts in string S.
+E.g. \"%C3%B6\" becomes the german o-Umlaut."
+  (replace-regexp-in-string "\\(%[0-9A-Za-z]\\{2\\}\\)+"
+			    #'org-link--decode-compound s t t))
+
+(defun org-link-escape (link)
+  "Backslash-escape sensitive characters in string LINK."
+  ;; Escape closing square brackets followed by another square bracket
+  ;; or at the end of the link.  Also escape final backslashes so that
+  ;; we do not escape inadvertently URI's closing bracket.
+  (with-temp-buffer
+    (insert link)
+    (insert (make-string (- (skip-chars-backward "\\\\"))
+			 ?\\))
+    (while (search-backward "\]" nil t)
+      (when (looking-at-p "\\]\\(?:[][]\\|\\'\\)")
+	(insert (make-string (1+ (- (skip-chars-backward "\\\\")))
+			     ?\\))))
+    (buffer-string)))
+
+(defun org-link-unescape (link)
+  "Remove escaping backslash characters from string LINK."
+  (with-temp-buffer
+    (save-excursion (insert link))
+    (while (re-search-forward "\\(\\\\+\\)\\]\\(?:[][]\\|\\'\\)" nil t)
+      (replace-match (make-string (/ (- (match-end 1) (match-beginning 1)) 2)
+				  ?\\)
+		     nil t nil 1))
+    (goto-char (point-max))
+    (delete-char (/ (- (skip-chars-backward "\\\\")) 2))
+    (buffer-string)))
 
 (defun org-link-make-string (link &optional description)
-  "Make a bracket link, consisting of LINK and DESCRIPTION."
+  "Make a bracket link, consisting of LINK and DESCRIPTION.
+LINK is escaped with backslashes for inclusion in buffer."
   (unless (org-string-nw-p link) (error "Empty link"))
-  (let ((uri (cond ((string-match org-link-types-re link)
-		    (concat (match-string 1 link)
-			    (org-link-escape (substring link (match-end 1)))))
-		   ((or (file-name-absolute-p link)
-			(string-match-p "\\`\\.\\.?/" link))
-		    (org-link-escape link))
-		   ;; For readability, do not encode space characters
-		   ;; in fuzzy links.
-		   (t (org-link-escape link (remq ?\s org-link-escape-chars)))))
-	(description
-	 (and (org-string-nw-p description)
-	      ;; Remove brackets from description, as they are fatal.
-	      (replace-regexp-in-string
-	       "[][]" (lambda (m) (if (equal "[" m) "{" "}"))
-	       (org-trim description)))))
+  (let* ((uri (org-link-escape link))
+	 (zero-width-space (string ?\x200B))
+	 (description
+	  (and (org-string-nw-p description)
+	       ;; Description cannot contain two consecutive square
+	       ;; brackets, or end with a square bracket.  To prevent
+	       ;; this, insert a zero width space character between
+	       ;; the brackets, or at the end of the description.
+	       (replace-regexp-in-string
+		"\\(]\\)\\(]\\)"
+		(concat "\\1" zero-width-space "\\2")
+		(replace-regexp-in-string "]\\'"
+					  (concat "\\&" zero-width-space)
+					  (org-trim description))))))
     (format "[[%s]%s]"
 	    uri
 	    (if description (format "[%s]" description) ""))))
@@ -1207,7 +1222,7 @@ If there is no description, use the link target."
   (save-match-data
     (replace-regexp-in-string
      org-link-bracket-re
-     (lambda (m) (or (match-string 3 m) (match-string 1 m)))
+     (lambda (m) (or (match-string 2 m) (match-string 1 m)))
      s nil t)))
 
 (defun org-link-add-angle-brackets (s)
@@ -1662,7 +1677,7 @@ don't allow to edit the default description."
      ((org-in-regexp org-link-bracket-re 1)
       ;; We do have a link at point, and we are going to edit it.
       (setq remove (list (match-beginning 0) (match-end 0)))
-      (setq desc (when (match-end 3) (match-string-no-properties 3)))
+      (setq desc (when (match-end 2) (match-string-no-properties 2)))
       (setq link (read-string "Link: "
 			      (org-link-unescape
 			       (match-string-no-properties 1)))))

@@ -5201,7 +5201,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
     (when results
       (setq results
 	    (mapcar (lambda (i) (replace-regexp-in-string
-				 org-link-bracket-re "\\3" i)) results))
+				 org-link-bracket-re "\\2" i)) results))
       (concat (org-agenda-finalize-entries results) "\n"))))
 
 ;;; Agenda entry finders
@@ -6571,9 +6571,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	      level (or level ""))
 	(if (string-match org-link-bracket-re category)
 	    (progn
-	      (setq l (if (match-end 3)
-			  (- (match-end 3) (match-beginning 3))
-			(- (match-end 1) (match-beginning 1))))
+	      (setq l (string-width (or (match-string 2) (match-string 1))))
 	      (when (< l (or org-prefix-category-length 0))
 		(setq category (copy-sequence category))
 		(org-add-props category nil
@@ -10238,7 +10236,7 @@ to override `appt-message-warning-time'."
      (lambda (x)
        (let* ((evt (org-trim
                     (replace-regexp-in-string
-                     org-link-bracket-re "\\3"
+                     org-link-bracket-re "\\2"
                      (or (get-text-property 1 'txt x) ""))))
               (cat (get-text-property (1- (length x)) 'org-category x))
               (tod (get-text-property 1 'time-of-day x))

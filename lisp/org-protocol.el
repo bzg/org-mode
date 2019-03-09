@@ -301,7 +301,7 @@ results of that splitting are returned as a list."
          (split-parts (split-string data sep)))
     (cond ((not unhexify) split-parts)
 	  ((fboundp unhexify) (mapcar unhexify split-parts))
-	  (t (mapcar #'org-link-unescape split-parts)))))
+	  (t (mapcar #'org-link-decode split-parts)))))
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Transform PARAM-LIST into a flat list for greedy handlers.
@@ -382,7 +382,7 @@ If INFO is already a property list, return it unchanged."
 	  (while data
 	    (setq result
 		  (append result
-			  (list (pop data) (org-link-unescape (pop data))))))
+			  (list (pop data) (org-link-decode (pop data))))))
 	  result)
       (let ((data (org-protocol-split-data info t org-protocol-data-separator)))
 	(if default-order

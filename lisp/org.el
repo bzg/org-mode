@@ -9389,7 +9389,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 			       (setq heading-text
 				     (replace-regexp-in-string
 				      org-link-bracket-re
-				      "\\3"
+				      "\\2"
 				      (or (nth 4 (org-heading-components))
 					  ""))))
 			     (org-refile-get-location

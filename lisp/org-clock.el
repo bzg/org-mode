@@ -2621,10 +2621,10 @@ from the dynamic block definition."
 		      (if (and (string-match
 				(format "\\`%s\\'" org-link-bracket-re)
 				headline)
-			       (match-end 3))
+			       (match-end 2))
 			  (format "[[%s][%s]]"
 				  (match-string 1 headline)
-				  (org-shorten-string (match-string 3 headline)
+				  (org-shorten-string (match-string 2 headline)
 						      narrow))
 			(org-shorten-string headline narrow))))
 	      (cl-flet ((format-field (f) (format (cond ((not emph) "%s |")

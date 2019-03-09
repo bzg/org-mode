@@ -3510,9 +3510,9 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
 	   (org-element-map tree 'link 'identity info t) info)))))
-  ;; Handle url-encoded fuzzy links.
+  ;; Handle escaped fuzzy links.
   (should
-   (org-test-with-parsed-data "* A B\n[[A%20B]]"
+   (org-test-with-parsed-data "* [foo]\n[[[foo\\]]]"
      (org-export-resolve-fuzzy-link
       (org-element-map tree 'link #'identity info t) info))))
 

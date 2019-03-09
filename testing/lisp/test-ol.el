@@ -20,80 +20,106 @@
 ;;; Code:
 
 
-;;; (Un)Escape links
+;;; Decode and Encode Links
 
-(ert-deftest test-ol/escape-ascii-character ()
-  "Escape an ascii character."
-  (should
-   (string=
-    "%5B"
-    (org-link-escape "["))))
+(ert-deftest test-ol/encode ()
+  "Test `org-link-encode' specifications."
+  ;; Regural test.
+  (should (string= "Foo%3A%42ar" (org-link-encode "Foo:Bar" '(?\: ?\B))))
+  ;; Encode an ASCII character.
+  (should (string= "%5B" (org-link-encode "[" '(?\[))))
+  ;; Encode an ASCII control character.
+  (should (string= "%09" (org-link-encode "\t" '(9))))
+  ;; Encode a Unicode multibyte character.
+  (should (string= "%E2%82%AC" (org-link-encode "€" '(?\€)))))
 
-(ert-deftest test-ol/escape-ascii-ctrl-character ()
-  "Escape an ascii control character."
-  (should
-   (string=
-    "%09"
-    (org-link-escape "\t"))))
+(ert-deftest test-ol/decode ()
+  "Test `org-link-decode' specifications."
+  ;; Decode an ASCII character.
+  (should (string= "[" (org-link-decode "%5B")))
+  ;; Decode an ASCII control character.
+  (should (string= "\n" (org-link-decode "%0A")))
+  ;; Decode a Unicode multibyte character.
+  (should (string= "€" (org-link-decode "%E2%82%AC"))))
 
-(ert-deftest test-ol/escape-multibyte-character ()
-  "Escape an unicode multibyte character."
+(ert-deftest test-ol/encode-url-with-escaped-char ()
+  "Encode and decode a URL that includes an encoded char."
   (should
-   (string=
-    "%E2%82%AC"
-    (org-link-escape "€"))))
+   (string= "http://some.host.com/form?&id=blah%2Bblah25"
+	    (org-link-decode
+	     (org-link-encode "http://some.host.com/form?&id=blah%2Bblah25"
+			      '(?\s ?\[ ?\] ?%))))))
 
-(ert-deftest test-ol/escape-custom-table ()
-  "Escape string with custom character table."
-  (should
-   (string=
-    "Foo%3A%42ar%0A"
-    (org-link-escape "Foo:Bar\n" '(?\: ?\B)))))
+
+;;; Escape and Unescape Links
 
-(ert-deftest test-ol/escape-custom-table-merge ()
-  "Escape string with custom table merged with default table."
-  (should
-   (string=
-    "%5BF%6F%6F%3A%42ar%0A%5D"
-    (org-link-escape "[Foo:Bar\n]" '(?\: ?\B ?\o) t))))
+(ert-deftest test-ol/escape ()
+  "Test `org-link-escape' specifications."
+  ;; No-op when there is no backslash or closing square bracket.
+  (should (string= "foo[" (org-link-escape "foo[")))
+  ;; Escape closing square bracket at the end of the link.
+  (should (string= "[foo\\]" (org-link-escape "[foo]")))
+  ;; Escape closing square brackets followed by another square
+  ;; bracket.
+  (should (string= "foo\\][bar" (org-link-escape "foo][bar")))
+  (should (string= "foo\\]]bar" (org-link-escape "foo]]bar")))
+  ;; However, escaping closing square bracket at the end of the link
+  ;; has precedence over the previous rule.
+  (should (string= "foo]\\]" (org-link-escape "foo]]")))
+  ;; Escape backslashes at the end of the link.
+  (should (string= "foo\\\\" (org-link-escape "foo\\")))
+  ;; Escape backslashes that could be confused with escaping
+  ;; characters.
+  (should (string= "foo\\\\\\]" (org-link-escape "foo\\]")))
+  (should (string= "foo\\\\\\][" (org-link-escape "foo\\][")))
+  (should (string= "foo\\\\\\]]bar" (org-link-escape "foo\\]]bar")))
+  ;; Do not escape backslash characters when unnecessary.
+  (should (string= "foo\\bar" (org-link-escape "foo\\bar")))
+  (should (string= "foo\\]bar" (org-link-escape "foo\\]bar")))
+  ;; Pathological cases: consecutive closing square brackets.
+  (should (string= "[[[foo\\]]\\]" (org-link-escape "[[[foo]]]")))
+  (should (string= "[[[foo]\\]] bar" (org-link-escape "[[[foo]]] bar"))))
 
-(ert-deftest test-ol/unescape-ascii-character ()
-  "Unescape an ascii character."
-  (should
-   (string=
-    "["
-    (org-link-unescape "%5B"))))
+(ert-deftest test-ol/unescape ()
+  "Test `org-link-unescape' specifications."
+  ;; No-op if there is no backslash.
+  (should (string= "foo[" (org-link-unescape "foo[")))
+  ;; No-op if backslashes are not escaping backslashes.
+  (should (string= "foo\\bar" (org-link-unescape "foo\\bar")))
+  (should (string= "foo\\]bar" (org-link-unescape "foo\\]bar")))
+  ;;
+  (should (string= "foo\\]" (org-link-unescape "foo\\\\\\]")))
+  (should (string= "foo\\][" (org-link-unescape "foo\\\\\\][")))
+  (should (string= "foo\\]]bar" (org-link-unescape "foo\\\\\\]]bar")))
+  ;; Unescape backslashes at the end of the link.
+  (should (string= "foo\\" (org-link-unescape "foo\\\\")))
+  ;; Unescape closing square bracket at the end of the link.
+  (should (string= "[foo]" (org-link-unescape "[foo\\]")))
+  ;; Pathological cases: consecutive closing square brackets.
+  (should (string= "[[[foo]]]" (org-link-unescape "[[[foo\\]]\\]")))
+  (should (string= "[[[foo]]] bar" (org-link-unescape "[[[foo]\\]] bar"))))
 
-(ert-deftest test-ol/unescape-ascii-ctrl-character ()
-  "Unescpae an ascii control character."
+(ert-deftest test-ol/make-string ()
+  "Test `org-link-make-string' specifications."
+  ;; Throw an error on empty URI.
+  (should-error (org-link-make-string ""))
+  ;; Empty description returns a [[URI]] construct.
+  (should (string= "[[uri]]"(org-link-make-string "uri")))
+  ;; Non-empty description returns a [[URI][DESCRIPTION]] construct.
   (should
-   (string=
-    "\n"
-    (org-link-unescape "%0A"))))
-
-(ert-deftest test-ol/unescape-multibyte-character ()
-  "Unescape unicode multibyte character."
+   (string= "[[uri][description]]"
+	    (org-link-make-string "uri" "description")))
+  ;; Escape "]]" strings in the description with zero-width spaces.
   (should
-   (string=
-    "€"
-    (org-link-unescape "%E2%82%AC"))))
-
-(ert-deftest test-ol/unescape-ascii-extended-char ()
-  "Unescape old style percent escaped character."
+   (let ((zws (string ?\x200B)))
+     (string= (format "[[uri][foo]%s]bar]]" zws)
+	      (org-link-make-string "uri" "foo]]bar"))))
+  ;; Prevent description from ending with a closing square bracket
+  ;; with a zero-width space.
   (should
-   (string=
-    "àâçèéêîôùû"
-        (decode-coding-string
-	 (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
-
-(ert-deftest test-ol/escape-url-with-escaped-char ()
-  "Escape and unescape a URL that includes an escaped char.
-http://article.gmane.org/gmane.emacs.orgmode/21459/"
-  (should
-   (string=
-    "http://some.host.com/form?&id=blah%2Bblah25"
-    (org-link-unescape
-     (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
+   (let ((zws (string ?\x200B)))
+     (string= (format "[[uri][foo]%s]]" zws)
+	      (org-link-make-string "uri" "foo]")))))
 
 
 ;;; Store links

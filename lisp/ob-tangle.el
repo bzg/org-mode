@@ -30,6 +30,7 @@
 (require 'cl-lib)
 (require 'org-src)
 (require 'org-macs)
+(require 'ol)
 
 (declare-function make-directory "files" (dir &optional parents))
 (declare-function org-at-heading-p "org" (&optional ignored))
@@ -40,13 +41,7 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
-(declare-function org-link-escape "org" (text &optional table merge))
-(declare-function org-link-open-from-string "ol" (s &optional arg))
-(declare-function org-link-trim-scheme "ol" (uri))
-(declare-function org-store-link "org" (arg &optional interactive?))
 (declare-function outline-previous-heading "outline" ())
-
-(defvar org-link-types-re)
 
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el")
@@ -330,8 +325,6 @@ references."
     (delete-region (save-excursion (beginning-of-line 1) (point))
                    (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
-(defvar org-stored-links)
-(defvar org-link-bracket-re)
 (defun org-babel-spec-to-string (spec)
   "Insert SPEC into the current file.
 
@@ -506,10 +499,7 @@ non-nil, return the full association list to be used by
 	 `(("start-line" . ,(number-to-string
 			     (org-babel-where-is-src-block-head)))
 	   ("file" . ,(buffer-file-name))
-	   ("link" . ,(org-link-escape
-		       (progn
-			 (call-interactively #'org-store-link)
-			 (org-no-properties (car (pop org-stored-links))))))
+	   ("link" . ,(org-no-properties (org-store-link nil)))
 	   ("source-name" .
 	    ,(nth 4 (or info (org-babel-get-src-block-info 'light)))))))
     (list (org-fill-template org-babel-tangle-comment-format-beg link-data)
@@ -527,7 +517,7 @@ which enable the original code blocks to be found."
     (let ((counter 0) new-body end)
       (while (re-search-forward org-link-bracket-re nil t)
         (when (re-search-forward
-	       (concat " " (regexp-quote (match-string 3)) " ends here"))
+	       (concat " " (regexp-quote (match-string 2)) " ends here"))
           (setq end (match-end 0))
           (forward-line -1)
           (save-excursion
@@ -549,7 +539,7 @@ which enable the original code blocks to be found."
 		     (and (setq start (line-beginning-position))
 			  (setq body-start (line-beginning-position 2))
 			  (setq link (match-string 0))
-			  (setq block-name (match-string 3))
+			  (setq block-name (match-string 2))
 			  (save-excursion
 			    (save-match-data
 			      (re-search-forward

@@ -3141,8 +3141,8 @@ Assume point is at the beginning of the link."
        ;; Type 2: Standard link, i.e. [[https://orgmode.org][homepage]]
        ((looking-at org-link-bracket-re)
 	(setq format 'bracket)
-	(setq contents-begin (match-beginning 3))
-	(setq contents-end (match-end 3))
+	(setq contents-begin (match-beginning 2))
+	(setq contents-end (match-end 2))
 	(setq link-end (match-end 0))
 	;; RAW-LINK is the original link.  Decode any encoding.
 	;; Expand any abbreviation in it.

@@ -95,9 +95,7 @@ The list includes
               (match-end 0)
               (save-match-data
                 (org-link-unescape (match-string-no-properties 1)))
-              (or (and (match-end 3)
-                       (match-string-no-properties 3))
-                  "")))
+              (or (match-string-no-properties 2) "")))
        ((looking-at org-plain-link-re)
         (list (match-beginning 0)
               (match-end 0)

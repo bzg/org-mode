@@ -120,15 +120,15 @@ load and run the test suite with the following commands.
 
    To run one test: Use this as a demo example of a failing test
    #+BEGIN_SRC emacs-lisp
-     (ert-deftest test-org/org-link-escape-ascii-character-demo-of-fail ()
+     (ert-deftest test-org/org-link-encode-ascii-character-demo-of-fail ()
        (should (string= "%5B"  ; Expecting %5B is correct.
-                        (org-link-escape "[")))
+                        (org-link-encode "[")))
        (should (string= "%5C"  ; Expecting %5C is wrong, %5D correct.
-                        (org-link-escape "]"))))
+                        (org-link-encode "]"))))
    #+END_SRC
    or evaluate the ~ert-deftest form~ of the test you want to run.
    Then ~M-x ert RET
-   test-org/org-link-escape-ascii-character-demo-of-fail RET~.  When
+   test-org/org-link-encode-ascii-character-demo-of-fail RET~.  When
    not visible yet switch to the ERT results buffer named ~*ert*~.
    When a test failed the ERT results buffer shows the details of the
    first ~should~ that failed.  See ~(info "(ert)Running Tests
