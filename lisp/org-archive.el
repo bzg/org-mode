@@ -205,7 +205,7 @@ direct children of this heading."
      ((equal find-done '(4))  (org-archive-all-done))
      ((equal find-done '(16)) (org-archive-all-old))
      (t
-      ;; Save all relevant TODO keyword-relatex variables
+      ;; Save all relevant TODO keyword-related variables.
       (let* ((tr-org-todo-keywords-1 org-todo-keywords-1)
 	     (tr-org-todo-kwd-alist org-todo-kwd-alist)
 	     (tr-org-done-keywords org-done-keywords)
