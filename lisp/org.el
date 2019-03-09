@@ -12193,7 +12193,7 @@ When called through ELisp, arg is also interpreted in the following way:
 			     (run-hook-with-args-until-success
 			      'org-todo-get-default-hook org-state org-last-state)
 			     org-state))
-		 (next (if org-state (concat " " org-state " ") " "))
+		 (next (if (org-string-nw-p org-state) (concat " " org-state " ") " "))
 		 (change-plist (list :type 'todo-state-change :from this :to org-state
 				     :position startpos))
 		 dolog now-done-p)
