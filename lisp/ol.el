@@ -489,15 +489,6 @@ This is the list that is used for internal purposes.")
 (defvar org-link-bracket-re nil
   "Matches a link in double brackets.")
 
-(defvar org-link-analytic-bracket-re nil
-  "Regular expression used to analyze links.
-Here is what the match groups contain after a match:
-1: http:
-2: http
-3: path
-4: [desc]
-5: desc")
-
 (defvar org-link-any-re nil
   "Regular expression matching any link.")
 
@@ -760,14 +751,6 @@ This should be called after the variable `org-link-parameters' has changed."
 	  ;;	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
 	  org-link-bracket-re
 	  "\\[\\[\\([^][]+\\)\\]\\(\\[\\([^][]+\\)\\]\\)?\\]"
-	  org-link-analytic-bracket-re
-	  (concat
-	   "\\[\\["
-	   "\\(" types-re ":\\)?"
-	   "\\([^]]+\\)"
-	   "\\]"
-	   "\\(\\[" "\\([^]]+\\)" "\\]\\)?"
-	   "\\]")
 	  org-link-any-re
 	  (concat "\\(" org-link-bracket-re "\\)\\|\\("
 		  org-link-angle-re "\\)\\|\\("
@@ -1223,10 +1206,8 @@ of matched result, which is either `dedicated' or `fuzzy'."
 If there is no description, use the link target."
   (save-match-data
     (replace-regexp-in-string
-     org-link-analytic-bracket-re
-     (lambda (m)
-       (if (match-end 5) (match-string 5 m)
-	 (concat (match-string 1 m) (match-string 3 m))))
+     org-link-bracket-re
+     (lambda (m) (or (match-string 3 m) (match-string 1 m)))
      s nil t)))
 
 (defun org-link-add-angle-brackets (s)
@@ -1613,11 +1594,7 @@ non-nil."
 	    desc (or desc cpltxt))
       (cond ((not desc))
 	    ((equal desc "NONE") (setq desc nil))
-	    (t (setq desc
-		     (replace-regexp-in-string
-		      org-link-analytic-bracket-re
-		      (lambda (m) (or (match-string 5 m) (match-string 3 m)))
-		      desc))))
+	    (t (setq desc (org-link-display-format desc))))
       ;; Return the link
       (if (not (and interactive? link))
 	  (or agenda-link (and link (org-link-make-string link desc)))

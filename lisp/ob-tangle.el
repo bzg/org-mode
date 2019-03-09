@@ -39,10 +39,10 @@
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-type "org-element" (element))
 (declare-function org-heading-components "org" ())
-(declare-function org-id-find "org-id" (id &optional markerp))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-link-escape "org" (text &optional table merge))
 (declare-function org-link-open-from-string "ol" (s &optional arg))
+(declare-function org-link-trim-scheme "ol" (uri))
 (declare-function org-store-link "org" (arg &optional interactive?))
 (declare-function outline-previous-heading "outline" ())
 
@@ -516,7 +516,6 @@ non-nil, return the full association list to be used by
 	  (org-fill-template org-babel-tangle-comment-format-end link-data))))
 
 ;; de-tangling functions
-(defvar org-link-analytic-bracket-re)
 (defun org-babel-detangle (&optional source-code-file)
   "Propagate changes in source file back original to Org file.
 This requires that code blocks were tangled with link comments
@@ -526,9 +525,9 @@ which enable the original code blocks to be found."
     (when source-code-file (find-file source-code-file))
     (goto-char (point-min))
     (let ((counter 0) new-body end)
-      (while (re-search-forward org-link-analytic-bracket-re nil t)
+      (while (re-search-forward org-link-bracket-re nil t)
         (when (re-search-forward
-	       (concat " " (regexp-quote (match-string 5)) " ends here"))
+	       (concat " " (regexp-quote (match-string 3)) " ends here"))
           (setq end (match-end 0))
           (forward-line -1)
           (save-excursion
@@ -542,17 +541,15 @@ which enable the original code blocks to be found."
   "Jump from a tangled code file to the related Org mode file."
   (interactive)
   (let ((mid (point))
-	start body-start end
-        target-buffer target-char link path block-name body)
+	start body-start end target-buffer target-char link block-name body)
     (save-window-excursion
       (save-excursion
-	(while (and (re-search-backward org-link-analytic-bracket-re nil t)
+	(while (and (re-search-backward org-link-bracket-re nil t)
 		    (not ; ever wider searches until matching block comments
 		     (and (setq start (line-beginning-position))
 			  (setq body-start (line-beginning-position 2))
 			  (setq link (match-string 0))
-			  (setq path (match-string 3))
-			  (setq block-name (match-string 5))
+			  (setq block-name (match-string 3))
 			  (save-excursion
 			    (save-match-data
 			      (re-search-forward
@@ -562,12 +559,9 @@ which enable the original code blocks to be found."
 	(unless (and start (< start mid) (< mid end))
 	  (error "Not in tangled code"))
         (setq body (buffer-substring body-start end)))
-      (when (string-match "::" path)
-        (setq path (substring path 0 (match-beginning 0))))
-      (find-file (or (car (org-id-find path)) path))
-      (setq target-buffer (current-buffer))
       ;; Go to the beginning of the relative block in Org file.
       (org-link-open-from-string link)
+      (setq target-buffer (current-buffer))
       (if (string-match "[^ \t\n\r]:\\([[:digit:]]+\\)" block-name)
           (let ((n (string-to-number (match-string 1 block-name))))
 	    (if (org-before-first-heading-p) (goto-char (point-min))

@@ -517,7 +517,7 @@ use of this function is for the stuck project list."
   'org-link-bracket-re "Org 9.3")
 
 (define-obsolete-variable-alias 'org-bracket-link-analytic-regexp
-  'org-link-analytic-bracket-re "Org 9.3")
+  'org-link-bracket-re "Org 9.3")
 
 (define-obsolete-variable-alias 'org-any-link-re
   'org-link-any-re "Org 9.3")
