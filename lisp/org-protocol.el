@@ -381,7 +381,7 @@ If INFO is already a property list, return it unchanged."
 	  (while data
 	    (setq result
 		  (append result
-			  (list (pop data) (pop data)))))
+			  (list (pop data) (org-link-unescape (pop data))))))
 	  result)
       (let ((data (org-protocol-split-data info t org-protocol-data-separator)))
 	(if default-order
