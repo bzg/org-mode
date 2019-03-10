@@ -505,7 +505,7 @@ variable is initialized with `org-table-analyze'.")
   "Match a reference that needs translation, for reference display.")
 
 (defconst org-table-separator-space
-  (propertize " " 'display '(space :width 1))
+  (propertize " " 'display '(space :relative-width 1))
   "Space used around fields when aligning the table.
 This space serves as a segment separator for the purposes of the
 bidirectional reordering.")
