@@ -13,10 +13,35 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 * Version 9.3
 
 ** Incompatible changes
-*** ob-clojure will not auto prepend ~(ns ..)~ statement now
-When tangling, user usually just want to tangle literally code instead
+*** Change bracket link escaping syntax
+
+Org used to percent-encode sensitive characters in the URI part of the
+bracket links.
+
+Now, escaping mechanism uses the usual backslash character, according
+to the following rules, applied in order:
+
+1. All consecutive =\= characters at the end of the link must be
+   escaped;
+2. Any =]= character at the very end of the link must be escaped;
+3. Any =]= character followed by either =[= or =]= must be escaped;
+4. Others =]= and =\= characters need not be escaped.
+
+When in doubt, use the function ~org-link-escape~ in order to turn
+a link string into its properly escaped form.
+
+The old ~org-link-escape~ and ~org-link-unescape~ functions have been
+renamed into ~org-link-encode~ and ~org-link-decode~.
+
+*** Change match group number in ~org-link-bracket-re~
+
+Link description, if any, is located in match group 2 instead of match
+group 3.
+
+*** ob-clojure does not auto prepend ~(ns ..)~ statement anymore
+When tangling, user usually just wants to tangle literally code instead
 of prepend inserting a ~(ns ..)~ statement before source block
-code. Now, when you have no ~:ns~ header argument specified, this
+code.  Now, when you have no ~:ns~ header argument specified, this
 behavior will not happend automatically.
 *** Change in behavior on exit from an Org edit buffer
 Org will no longer attempt to restore the window configuration in the

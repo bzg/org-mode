@@ -3022,18 +3022,23 @@ or alternatively
 
 : [[LINK]]
 
-#+cindex: square brackets in links
 #+cindex: escape syntax, for links
-The {{{var(LINK)}}} part cannot contain =[= and =]= characters.  You
-can replace them with their percent-encoded counterparts, which are,
-respectively, =%5B= and =%5D=.  You also need to encode =%= characters
-as =%25=.  Optionally, it may also come handy to encode consecutive
-spaces as =%20=.
+Some =\= and =]= characters in the {{{var(LINK)}}} part need to be
+"escaped", i.e., preceded by another =\= character.  More
+specifically, the following character categories must be escaped, in
+order:
 
-Org takes for granted that such links are correctly escaped.  Luckily,
-functions inserting links (see [[*Handling Links]]) take care of this.
-You really need to bother about it only when inserting manually a URI
-within square brackets.
+1. all consecutive =\= characters at the end of the link;
+2. any =]= character at the very end of the link;
+3. any =]= character followed by either =[= or =]=;
+
+#+findex: org-link-escape
+Org takes for granted that such links are correctly escaped.
+Functions inserting links (see [[*Handling Links]]) take care of this.
+You only need to bother about those rules when inserting directly, or
+yanking, a URI within square brackets.  When in doubt, use the
+function ~org-link-escape~ in order to turn a link string into its
+properly escaped form.
 
 Once a link in the buffer is complete, with all brackets present, Org
 changes the display so that =DESCRIPTION= is displayed instead of
