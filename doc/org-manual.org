@@ -19725,7 +19725,7 @@ of these strategies:
 To wrap a source table in LaTeX, use the =comment= environment
 provided by =comment.sty=[fn:157].  To activate it, put
 ~\usepackage{comment}~ in the document header.  Orgtbl mode inserts
-a radio table skeleton[fn:150] with the command {{{kbd(M-x
+a radio table skeleton[fn:158] with the command {{{kbd(M-x
 orgtbl-insert-radio-table)}}}, which prompts for a table name.  For
 example, if =salesfigures= is the name, the template inserts:
 
@@ -19744,7 +19744,7 @@ The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
 the table at the target (receive) location named =salesfigures=.  Now
 the table is ready for data entry.  It can even use spreadsheet
-features[fn:158]:
+features[fn:159]:
 
 #+begin_example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -19958,7 +19958,7 @@ Dynamic blocks, like any other block, can be narrowed with
 #+vindex: org-agenda-skip-function
 #+vindex: org-agenda-skip-function-global
 Org provides a special hook to further limit items in agenda views:
-~agenda~, ~agenda*~[fn:159], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
+~agenda~, ~agenda*~[fn:160], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
 ~tags-tree~.  Specify a custom function that tests inclusion of every
 matched item in the view.  This function can also skip as much as is
 needed.
@@ -20001,7 +20001,7 @@ meaningful string suitable for the agenda view.
 #+vindex: org-agenda-skip-function
 Search for entries with a limit set on levels for the custom search.
 This is a general approach to creating custom searches in Org.  To
-include all levels, use =LEVEL>0=[fn:160].  Then to selectively pick
+include all levels, use =LEVEL>0=[fn:161].  Then to selectively pick
 the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
@@ -21514,7 +21514,11 @@ on outline paths, assuming they are unique.
 
 [fn:157] https://www.ctan.org/pkg/comment
 
-[fn:158] If the =TBLFM= keyword contains an odd number of dollar
+[fn:158] By default this works only for LaTeX, HTML, and Texinfo.
+Configure the variable ~orgtbl-radio-table-templates~ to install
+templates for other modes.
+
+[fn:159] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
 shown in the example you can fix this by adding an extra line inside
 the =comment= environment that is used to balance the dollar
@@ -21522,9 +21526,9 @@ expressions.  If you are using AUCTeX with the font-latex library,
 a much better solution is to add the =comment= environment to the
 variable ~LaTeX-verbatim-environments~.
 
-[fn:159] The ~agenda*~ view is the same as ~agenda~ except that it
+[fn:160] The ~agenda*~ view is the same as ~agenda~ except that it
 only considers /appointments/, i.e., scheduled and deadline items that
 have a time specification =[h]h:mm= in their time-stamps.
 
-[fn:160] Note that, for ~org-odd-levels-only~, a level number
+[fn:161] Note that, for ~org-odd-levels-only~, a level number
 corresponds to order in the hierarchy, not to the number of stars.
