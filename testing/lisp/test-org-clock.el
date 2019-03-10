@@ -590,10 +590,10 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
   ;; Otherwise, link to the headline in the current file.
   (should
    (equal
-    "| Headline                      | Time    |
-|-------------------------------+---------|
-| *Total time*                  | *26:00* |
-|-------------------------------+---------|
+    "| Headline                                  | Time    |
+|-------------------------------------------+---------|
+| *Total time*                              | *26:00* |
+|-------------------------------------------+---------|
 | [[file:filename::Foo][Foo]] | 26:00   |"
     (org-test-with-temp-text-in-file
         "* Foo
@@ -614,7 +614,7 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
     (org-test-with-temp-text
         "* TODO Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (equal
     "| Headline     | Time    |
@@ -625,7 +625,7 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
     (org-test-with-temp-text
         "* [#A] Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (equal
     "| Headline     | Time    |
@@ -647,7 +647,7 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
     (org-test-with-temp-text
         "* Foo :tag:
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
   ;; Remove statistics cookie from headline description.
   (should
    (equal
@@ -659,7 +659,7 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
     (org-test-with-temp-text
         "* Foo [50%]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
   (should
    (equal
     "| Headline     | Time    |
@@ -670,7 +670,7 @@ CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
     (org-test-with-temp-text
         "* Foo [1/2]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
+      (test-org-clock-clocktable-contents ":link t :lang en"))))
   ;; Replace links with their description, or turn them into plain
   ;; links if there is no description.
   (should
