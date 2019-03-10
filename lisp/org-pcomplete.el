@@ -429,8 +429,9 @@ switches."
 			   ":tstart" ":tend" ":block" ":step"
 			   ":stepskip0" ":fileskip0"
 			   ":emphasize" ":link" ":narrow" ":indent"
-			   ":tcolumns" ":level" ":compact" ":timestamp"
-			   ":formula" ":formatter" ":wstart" ":mstart"))))
+			   ":hidefiles" ":tcolumns" ":level" ":compact"
+			   ":timestamp" ":formula" ":formatter"
+			   ":wstart" ":mstart"))))
 
 
 ;;; Finish up

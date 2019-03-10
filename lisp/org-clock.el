@@ -307,6 +307,7 @@ string as argument."
    :link nil
    :narrow '40!
    :indent t
+   :hidefiles nil
    :formula nil
    :timestamp nil
    :level nil
@@ -2406,6 +2407,7 @@ the currently selected interval size."
 	   (ws (plist-get params :wstart))
 	   (ms (plist-get params :mstart))
 	   (step (plist-get params :step))
+	   (hide-files (plist-get params :hidefiles))
 	   (formatter (or (plist-get params :formatter)
 			  org-clock-clocktable-formatter
 			  'org-clocktable-write-default))
@@ -2460,7 +2462,9 @@ the currently selected interval size."
 	     ;; Even though `file-with-archives' can consist of
 	     ;; multiple files, we consider this is one extended file
 	     ;; instead.
-	     (and (consp files) (not (eq scope 'file-with-archives)))))
+	     (and (not hide-files)
+		  (consp files)
+		  (not (eq scope 'file-with-archives)))))
 
 	(funcall formatter
 		 origin
