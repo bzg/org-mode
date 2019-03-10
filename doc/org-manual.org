@@ -6611,11 +6611,12 @@ be selected:
 
 - =:stepskip0= ::
 
-     Do not show steps that have zero time.
+     When non-~nil~, do not show steps that have zero time.
 
 - =:fileskip0= ::
 
-     Do not show table sections from files which did not contribute.
+     When non-~nil~, do not show table sections from files which did
+     not contribute.
 
 - =:match= ::
 
@@ -6630,7 +6631,7 @@ using the =:formatter= parameter.
 
 - =:emphasize= ::
 
-     When ~t~, emphasize level one and level two items.
+     When non-~nil~, emphasize level one and level two items.
 
 - =:lang= ::
 
