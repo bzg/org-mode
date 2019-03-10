@@ -415,6 +415,33 @@ SCHEDULED: <2012-03-29 thu.>"
    (org-test-with-temp-text "[[file+emacs:foo.org]]"
      (org-lint '(file-application)))))
 
+(ert-deftest test-org-lint/percenc-encoding-link-escape ()
+  "Test `org-lint-percent-encoding-link-escape' checker."
+  (should
+   (org-test-with-temp-text "[[A%20B]]"
+     (org-lint '(percent-encoding-link-escape))))
+  (should
+   (org-test-with-temp-text "[[%5Bfoo%5D]]"
+     (org-lint '(percent-encoding-link-escape))))
+  (should
+   (org-test-with-temp-text "[[A%2520B]]"
+     (org-lint '(percent-encoding-link-escape))))
+  (should-not
+   (org-test-with-temp-text "[[A B]]"
+     (org-lint '(percent-encoding-link-escape))))
+  (should-not
+   (org-test-with-temp-text "[[A%30B]]"
+     (org-lint '(percent-encoding-link-escape))))
+  (should-not
+   (org-test-with-temp-text "[[A%20%30B]]"
+     (org-lint '(percent-encoding-link-escape))))
+  (should-not
+   (org-test-with-temp-text "<file:A%20B>"
+     (org-lint '(percent-encoding-link-escape))))
+  (should-not
+   (org-test-with-temp-text "[[A B%]]"
+     (org-lint '(percent-encoding-link-escape)))))
+
 (ert-deftest test-org-lint/wrong-header-argument ()
   "Test `org-lint-wrong-header-argument' checker."
   (should

@@ -289,8 +289,14 @@
     :description "Report obsolete \"file+application\" link"
     :categories '(link obsolete))
    (make-org-lint-checker
+    :name 'percent-encoding-link-escape
+    :description "Report obsolete escape syntax in links"
+    :categories '(link obsolete)
+    :trust 'low)
+   (make-org-lint-checker
     :name 'spurious-colons
-    :description "Report spurious colons in tags"))
+    :description "Report spurious colons in tags"
+    :categories '(tags)))
   "List of all available checkers.")
 
 (defun org-lint--collect-duplicates
@@ -883,6 +889,23 @@ Use \"export %s\" instead"
 	(and app
 	     (list (org-element-property :begin l)
 		   (format "Deprecated \"file+%s\" link type" app)))))))
+
+(defun org-lint-percent-encoding-link-escape (ast)
+  (org-element-map ast 'link
+    (lambda (l)
+      (when (eq 'bracket (org-element-property :format l))
+	(let* ((uri (org-element-property :path l))
+	       (start 0)
+	       (obsolete-flag
+		(catch :obsolete
+		  (while (string-match "%\\(..\\)?" uri start)
+		    (setq start (match-end 0))
+		    (unless (member (match-string 1 uri) '("25" "5B" "5D" "20"))
+		      (throw :obsolete nil)))
+		  (string-match-p "%" uri))))
+	  (when obsolete-flag
+	    (list (org-element-property :begin l)
+		  "Link escaped with obsolete percent-encoding syntax")))))))
 
 (defun org-lint-wrong-header-argument (ast)
   (let* ((reports)
