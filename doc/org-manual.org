@@ -1,4 +1,9 @@
 #+title: The Org Manual
+#+subtitle:  Release {{{version}}}
+#+author:    The Org Mode Developers
+#+date:      {{{modification-time}}}
+#+language:  en
+
 
 #+texinfo: @insertcopying
 
@@ -20881,11 +20886,6 @@ modify this GNU manual."
 #+end_quote
 
 * Export Setup                                                          :noexport:
-
-#+subtitle:  Release {{{version}}}
-#+author:    The Org Mode Developers
-#+date:      {{{modification-time}}}
-#+language:  en
 
 # XXX: We cannot use TODO keyword as a node starts with "TODO".
 #+todo: REVIEW FIXME | DONE
