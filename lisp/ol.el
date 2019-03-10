@@ -458,15 +458,6 @@ links more efficient."
 (defvar org-link-types-re nil
   "Matches a link that has a url-like prefix like \"http:\"")
 
-(defvar org-link-re-with-space nil
-  "Matches a link with spaces, optional angular brackets around it.")
-
-(defvar org-link-re-with-space2 nil
-  "Matches a link with spaces, optional angular brackets around it.")
-
-(defvar org-link-re-with-space3 nil
-  "Matches a link with spaces, only for internal part in bracket links.")
-
 (defvar org-link-angle-re nil
   "Matches link with angular brackets, spaces are allowed.")
 
@@ -715,20 +706,6 @@ This should be called after the variable `org-link-parameters' has changed."
   (let ((types-re (regexp-opt (org-link-types) t)))
     (setq org-link-types-re
 	  (concat "\\`" types-re ":")
-	  org-link-re-with-space
-	  (concat "<?" types-re ":"
-		  "\\([^" org-link--forbidden-chars " ]"
-		  "[^" org-link--forbidden-chars "]*"
-		  "[^" org-link--forbidden-chars " ]\\)>?")
-	  org-link-re-with-space2
-	  (concat "<?" types-re ":"
-		  "\\([^" org-link--forbidden-chars " ]"
-		  "[^\t\n\r]*"
-		  "[^" org-link--forbidden-chars " ]\\)>?")
-	  org-link-re-with-space3
-	  (concat "<?" types-re ":"
-		  "\\([^" org-link--forbidden-chars " ]"
-		  "[^\t\n\r]*\\)")
 	  org-link-angle-re
 	  (format "<%s:\\([^>\n]*\\(?:\n[ \t]*[^> \t\n][^>\n]*\\)*\\)>"
 		  types-re)
