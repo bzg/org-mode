@@ -6355,14 +6355,14 @@ prompted about what to do with it.
   the mode line, along with the title of the task.  The clock time
   shown is all time ever clocked for this task and its children.  If
   the task has an effort estimate (see [[*Effort Estimates]]), the mode
-  line displays the current clocking time against it[fn:76].  If the
+  line displays the current clocking time against it[fn:75].  If the
   task is a repeating one (see [[*Repeated tasks]]), show only the time
-  since the last reset of the task[fn:77].  You can exercise more
+  since the last reset of the task[fn:76].  You can exercise more
   control over show time with the =CLOCK_MODELINE_TOTAL= property.  It
   may have the values =current= to show only the current clocking
   instance, =today= to show all time clocked on this tasks today---see
   also the variable ~org-extend-today-until~, ~all~ to include all
-  time, or ~auto~ which is the default[fn:78].  Clicking with
+  time, or ~auto~ which is the default[fn:77].  Clicking with
   {{{kbd(mouse-1)}}} onto the mode line entry pops up a menu with
   clocking options.
 
@@ -6376,7 +6376,7 @@ prompted about what to do with it.
   computes the resulting time in inserts it after the time range as
   ==>HH:MM=.  See the variable ~org-log-note-clock-out~ for the
   possibility to record an additional note together with the clock-out
-  timestamp[fn:79].
+  timestamp[fn:78].
 
 - {{{kbd(C-c C-x C-x)}}} (~org-clock-in-last~) ::
 
