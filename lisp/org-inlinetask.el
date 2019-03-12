@@ -268,17 +268,6 @@ If the task has an end part, also demote it."
 	    (goto-char beg)
 	    (org-fixup-indentation diff)))))))
 
-(defun org-inlinetask-get-current-indentation ()
-  "Get the indentation of the last non-while line above this one."
-  (save-excursion
-    (beginning-of-line 1)
-    (skip-chars-backward " \t\n")
-    (beginning-of-line 1)
-    (or (org-at-item-p)
-	(looking-at "[ \t]*"))
-    (goto-char (match-end 0))
-    (current-column)))
-
 (defvar org-indent-indentation-per-level) ; defined in org-indent.el
 
 (defface org-inlinetask '((t :inherit shadow))
