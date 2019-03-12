@@ -35,42 +35,71 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'org)
+(require 'org-macs)
+(require 'org-compat)
+(require 'org-keys)
 
+(declare-function org-at-TBLFM-p "org" (&optional pos))
+(declare-function org-at-table-hline-p "org" ())
+(declare-function org-at-table-p "org" (&optional table-type))
+(declare-function org-at-table.el-p "org" ())
+(declare-function org-at-timestamp-p "org" (&optional extended))
+(declare-function org-delete-backward-char "org" (N))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-extract-element "org-element" (element))
 (declare-function org-element-interpret-data "org-element" (data))
-(declare-function org-element-lineage "org-element"
-		  (blob &optional types with-self))
-(declare-function org-element-map "org-element"
-		  (data types fun
-			&optional info first-match no-recursion with-affiliated))
-(declare-function org-element-parse-buffer "org-element"
-		  (&optional granularity visible-only))
+(declare-function org-element-lineage "org-element" (blob &optional types with-self))
+(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
+(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-
+(declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-export-create-backend "ox" (&rest rest) t)
 (declare-function org-export-data-with-backend "ox" (data backend info))
-(declare-function org-export-filter-apply-functions "ox"
-		  (filters value info))
+(declare-function org-export-filter-apply-functions "ox" (filters value info))
 (declare-function org-export-first-sibling-p "ox" (blob info))
 (declare-function org-export-get-backend "ox" (name))
-(declare-function org-export-get-environment "ox"
-		  (&optional backend subtreep ext-plist))
+(declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
 (declare-function org-export-install-filters "ox" (info))
 (declare-function org-export-table-has-special-column-p "ox" (table))
 (declare-function org-export-table-row-is-special-p "ox" (table-row info))
+(declare-function org-id-find "org-id" (id &optional markerp))
+(declare-function org-indent-line "org" ())
+(declare-function org-load-modules-maybe "org" (&optional force))
+(declare-function org-restart-font-lock "org" ())
+(declare-function org-sort-remove-invisible "org" (s))
+(declare-function org-table-map-tables "org" (function &optional quietly))
+(declare-function org-time-stamp-format "org" (&optional long inactive))
+(declare-function org-time-string-to-absolute "org" (s &optional daynr prefer buffer pos))
+(declare-function org-time-string-to-time "org" (s))
+(declare-function org-timestamp-up-day "org" (&optional arg))
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
 
 (defvar constants-unit-system)
+(defvar org-M-RET-may-split-line)
 (defvar org-element-use-cache)
 (defvar org-export-filters-alist)
+(defvar org-finish-function)
+(defvar org-inhibit-highlight-removal)
+(defvar org-inhibit-startup)
+(defvar org-selected-window)
+(defvar org-self-insert-cluster-for-undo)
+(defvar org-self-insert-command-undo-counter)
+(defvar org-table-buffer-is-an)
+(defvar org-table-dataline-regexp)
 (defvar org-table-follow-field-mode)
-(defvar orgtbl-mode) ; defined below
-(defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
+(defvar org-table-formula-constants-local)
+(defvar org-table-hline-regexp)
+(defvar org-table-may-need-update)
+(defvar org-ts-regexp)
+(defvar org-ts-regexp-both)
+(defvar org-ts-regexp-inactive)
+(defvar org-ts-regexp3)
+(defvar org-window-configuration)
+(defvar orgtbl-mode)
+(defvar orgtbl-mode-menu)
 (defvar sort-fold-case)
 
 (defvar orgtbl-after-send-table-hook nil
