@@ -62,7 +62,7 @@
 (declare-function org-file-contents "org" (file &optional noerror nocache))
 (declare-function org-file-url-p "org" (file))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
-(declare-function org-link-search "org" (s &optional avoid-pos stealth))
+(declare-function org-link-search "ol" (s &optional avoid-pos stealth))
 (declare-function org-mode "org" ())
 (declare-function vc-backend "vc-hooks" (f))
 (declare-function vc-call "vc-hooks" (fun file &rest args) t)
@@ -139,6 +139,7 @@ In addition to buffer-defined macros, the function installs the
 following ones: \"n\", \"author\", \"email\", \"keyword\",
 \"time\", \"property\", and, if the buffer is associated to
 a file, \"input-file\" and \"modification-time\"."
+  (require 'org-element)
   (org-macro--counter-initialize)	;for "n" macro
   (setq org-macro-templates
 	(nconc
