@@ -3535,7 +3535,7 @@ need to be added to the hook variables
 ~org-execute-file-search-functions~.  See the docstring for these
 variables for more information.  Org actually uses this mechanism for
 BibTeX database files, and you can use the corresponding code as an
-implementation example.  See the file =org-bibtex.el=.
+implementation example.  See the file =ol-bibtex.el=.
 
 * TODO Items
 :PROPERTIES:
@@ -8445,7 +8445,7 @@ which contains the date in the format =YYYY-MM-DD= or =MM-DD=,
 followed by a space and the class of the anniversary (=birthday=,
 =wedding=, or a format string).  If you omit the class, it defaults to
 =birthday=.  Here are a few examples, the header for the file
-=org-bbdb.el= contains more detailed information.
+=ol-bbdb.el= contains more detailed information.
 
 #+begin_example
 1973-06-22
@@ -20603,14 +20603,14 @@ be complete if the ones above were not mentioned in this manual.
 
 - Russel Adams came up with the idea for drawers.
 
-- Thomas Baumann wrote =org-bbdb.el= and =org-mhe.el=.
+- Thomas Baumann wrote =ol-bbdb.el= and =ol-mhe.el=.
 
 - Christophe Bataillon created the great unicorn logo that we use on
   the Org mode website.
 
 - Alex Bochannek provided a patch for rounding timestamps.
 
-- Jan Böcker wrote =org-docview.el=.
+- Jan Böcker wrote =ol-docview.el=.
 
 - Brad Bozarth showed how to pull RSS feed data into Org files.
 
@@ -20687,7 +20687,7 @@ be complete if the ones above were not mentioned in this manual.
 - Manuel Hermenegildo has contributed various ideas, small fixes and
   patches.
 
-- Phil Jackson wrote =org-irc.el=.
+- Phil Jackson wrote =ol-irc.el=.
 
 - Scott Jaderholm proposed footnotes, control over whitespace between
   folded entries, and column view for properties.
@@ -20792,7 +20792,7 @@ be complete if the ones above were not mentioned in this manual.
 - Ulf Stegemann created the table to translate special symbols to
   HTML, LaTeX, UTF-8, Latin-1 and ASCII.
 
-- Andy Stewart contributed code to =org-w3m.el=, to copy
+- Andy Stewart contributed code to =ol-w3m.el=, to copy
   HTML content with links transformation to Org syntax.
 
 - David O'Toole wrote =org-publish.el= and drafted the
@@ -20826,7 +20826,7 @@ be complete if the ones above were not mentioned in this manual.
 - Piotr Zielinski wrote =org-mouse.el=, proposed agenda
   blocks and contributed various ideas and code snippets.
 
-- Marco Wahl wrote =org-eww.el=.
+- Marco Wahl wrote =ol-eww.el=.
 
 * GNU Free Documentation License
 :PROPERTIES:
