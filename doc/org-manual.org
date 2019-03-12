@@ -147,7 +147,7 @@ $ cd org-mode/
 $ make autoloads
 #+end_example
 
-Note that in this case, ~make autoloads~ is mandatory: it defines
+Note that in this case, =make autoloads= is mandatory: it defines
 Org's version in =org-version.el= and Org's autoloads in
 =org-loaddefs.el=.
 
