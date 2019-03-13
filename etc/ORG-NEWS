@@ -83,6 +83,11 @@ since now it's implicitly always true.
 
 This aligns Beamer notes with slide overlays.
 
+*** Add support for lettered lists in Texinfo
+
+Using =:enum A= or =:enum a= Texinfo attribute switches an otherwise
+numbered list to a lettered list.
+
 *** Add a dispatcher command to insert dynamic blocks
 
 You can add dynamic block into ~org-dynamic-block-alist~ with function

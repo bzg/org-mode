@@ -1253,12 +1253,14 @@ contextual information."
 		  (if (string-prefix-p "@" i) i (concat "@" i))))
 	 (table-type (plist-get attr :table-type))
 	 (type (org-element-property :type plain-list))
-	 (initial-counter
-	  (and (eq type 'ordered)
-	       ;; Texinfo only supports initial counters, i.e., it
-	       ;; cannot change the numbering mid-list.
-	       (let ((first-item (car (org-element-contents plain-list))))
-		 (org-element-property :counter first-item))))
+	 (enum
+	  (cond ((not (eq type 'ordered)) nil)
+		((plist-member attr :enum) (plist-get attr :enum))
+		(t
+		 ;; Texinfo only supports initial counters, i.e., it
+		 ;; cannot change the numbering mid-list.
+		 (let ((first-item (car (org-element-contents plain-list))))
+		   (org-element-property :counter first-item)))))
 	 (list-type (cond
 		     ((eq type 'ordered) "enumerate")
 		     ((eq type 'unordered) "itemize")
@@ -1266,7 +1268,7 @@ contextual information."
 		     (t "table"))))
     (format "@%s\n%s@end %s"
 	    (cond ((eq type 'descriptive) (concat list-type " " indic))
-		  (initial-counter (format "%s %d" list-type initial-counter))
+		  (enum (format "%s %s" list-type enum))
 		  (t list-type))
 	    contents
 	    list-type)))

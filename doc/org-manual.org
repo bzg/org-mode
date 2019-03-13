@@ -14773,21 +14773,22 @@ This paragraph is preceded by...
 
 #+cindex: @samp{ATTR_TEXINFO}, keyword
 #+cindex: two-column tables, in Texinfo export
-
-#+cindex: table types, in Texinfo export
+#+cindex: table-type, Texinfo attribute
 The Texinfo export back-end by default converts description lists in
 the Org file using the default command =@table=, which results in
-a table with two columns.  To change this behavior, specify
-=:table-type= with =ftable= or =vtable= attributes.  For more
-information, see [[info:texinfo::Two-column Tables]].
+a table with two columns.  To change this behavior, set =:table-type=
+attribute to either =ftable= or =vtable= value.  For more information,
+see [[info:texinfo::Two-column Tables]].
 
 #+vindex: org-texinfo-table-default-markup
+#+cindex: indic, Texinfo attribute
 The Texinfo export back-end by default also applies a text highlight
 based on the defaults stored in ~org-texinfo-table-default-markup~.
 To override the default highlight command, specify another one with
 the =:indic= attribute.
 
 #+cindex: multiple items in Texinfo lists
+#+cindex: sep, Texinfo attribute
 Org syntax is limited to one entry per list item.  Nevertheless, the
 Texinfo export back-end can split that entry according to any text
 provided through the =:sep= attribute.  Each part then becomes a new
@@ -14809,6 +14810,20 @@ becomes
 @itemx bar
 This is the common text for variables foo and bar.
 @end table
+#+end_example
+
+#+cindex: lettered lists, in Texinfo export
+#+cindex: enum, Texinfo attribute
+Ordered lists are numbered when exported to Texinfo format.  Such
+numbering obeys any counter (see [[*Plain Lists]]) in the first item of
+the list.  The =:enum= attribute also let you start the list at
+a specific number, or switch to a lettered list, as illustrated here
+
+#+begin_example
+#+ATTR_TEXINFO: :enum A
+1. Alpha
+2. Bravo
+3. Charlie
 #+end_example
 
 *** Tables in Texinfo export
