@@ -706,7 +706,7 @@ contextual information."
   "Transcode a CENTER-BLOCK element from Org to Texinfo.
 CONTENTS holds the contents of the block.  INFO is a plist used
 as a communication channel."
-  contents)
+  (replace-regexp-in-string "\\(^\\).*?\\S-" "@center " contents nil nil 1))
 
 ;;;; Clock
 
