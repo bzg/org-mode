@@ -1253,13 +1253,21 @@ contextual information."
 		  (if (string-prefix-p "@" i) i (concat "@" i))))
 	 (table-type (plist-get attr :table-type))
 	 (type (org-element-property :type plain-list))
+	 (initial-counter
+	  (and (eq type 'ordered)
+	       ;; Texinfo only supports initial counters, i.e., it
+	       ;; cannot change the numbering mid-list.
+	       (let ((first-item (car (org-element-contents plain-list))))
+		 (org-element-property :counter first-item))))
 	 (list-type (cond
 		     ((eq type 'ordered) "enumerate")
 		     ((eq type 'unordered) "itemize")
 		     ((member table-type '("ftable" "vtable")) table-type)
 		     (t "table"))))
     (format "@%s\n%s@end %s"
-	    (if (eq type 'descriptive) (concat list-type " " indic) list-type)
+	    (cond ((eq type 'descriptive) (concat list-type " " indic))
+		  (initial-counter (format "%s %d" list-type initial-counter))
+		  (t list-type))
 	    contents
 	    list-type)))
 
