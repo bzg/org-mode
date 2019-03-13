@@ -14981,7 +14981,7 @@ This manual is for GNU Sample (version {{{version}}},
   :APPENDIX: t
   :END:
 
-  ,#+TEXINFO: @include fdl.texi
+  ,#+INCLUDE: fdl.org
 
 ,* Index
   :PROPERTIES:
@@ -20851,7 +20851,7 @@ be complete if the ones above were not mentioned in this manual.
 :DESCRIPTION: The license for this documentation.
 :END:
 
-#+texinfo: @include doclicense.texi
+#+include: fdl.org
 
 * Main Index
 :PROPERTIES:
