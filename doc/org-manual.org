@@ -4329,9 +4329,7 @@ a checkbox by starting it with the string =[ ]=.  This feature is
 similar to TODO items (see [[*TODO Items]]), but is more lightweight.
 Checkboxes are not included into the global TODO list, so they are
 often great to split a task into a number of simple steps.  Or you can
-use them in a shopping list.  To toggle a checkbox, use {{{kbd(C-c
-C-c)}}}, or use the mouse (thanks to Piotr Zielinski's
-=org-mouse.el=).
+use them in a shopping list.
 
 Here is an example of a checkbox list.
 
