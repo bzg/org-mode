@@ -316,7 +316,7 @@ See `org-link-parameters' for documentation on the other parameters."
 ;;;; Functions unused in Org core.
 (defun org-table-recognize-table.el ()
   "If there is a table.el table nearby, recognize it and move into it."
-  (when (and org-table-tab-recognizes-table.el (org-at-table.el-p))
+  (when (org-at-table.el-p)
     (beginning-of-line)
     (unless (or (looking-at org-table-dataline-regexp)
                 (not (looking-at org-table1-hline-regexp)))

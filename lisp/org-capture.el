@@ -51,6 +51,7 @@
 (require 'org)
 
 (declare-function org-at-encrypted-entry-p "org-crypt" ())
+(declare-function org-at-table-p "org-table" (&optional table-type))
 (declare-function org-clock-update-mode-line "org-clock" (&optional refresh))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-decrypt-entry "org-crypt" ())
@@ -72,7 +73,9 @@
 (defvar org-store-link-plist)
 (defvar org-table-border-regexp)
 (defvar org-table-current-begin-pos)
+(defvar org-table-dataline-regexp)
 (defvar org-table-fix-formulas-confirm)
+(defvar org-table-hline-regexp)
 (defvar org-table-hlines)
 
 (defvar org-capture-clock-was-started nil

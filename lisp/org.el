@@ -65,8 +65,6 @@
 ;;; Code:
 
 (defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
-(defvar-local org-table-formula-constants-local nil
-  "Local version of `org-table-formula-constants'.")
 (defvar org-inlinetask-min-level)
 
 ;;;; Require other packages
@@ -94,6 +92,7 @@
 (require 'org-compat)
 (require 'org-keys)
 (require 'ol)
+(require 'org-table)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
@@ -164,12 +163,9 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-type "org-element" (element))
 (declare-function org-export-dispatch "ox" (&optional arg))
 (declare-function org-export-get-backend "ox" (name))
-(declare-function org-export-get-backend "ox" (name))
-(declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
 (declare-function org-export-get-environment "ox" (&optional backend subtreep ext-plist))
 (declare-function org-feed-goto-inbox "org-feed" (feed))
 (declare-function org-feed-update-all "org-feed" ())
-(declare-function org-goto "org-goto" (&optional alternative-interface))
 (declare-function org-goto "org-goto" (&optional alternative-interface))
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-id-get-create "org-id" (&optional force))
@@ -177,43 +173,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
 (declare-function org-latex-make-preamble "ox-latex" (info &optional template snippet?))
-(declare-function org-latex-make-preamble "ox-latex" (info &optional template snippet?))
 (declare-function org-plot/gnuplot "org-plot" (&optional params))
-(declare-function org-table--shrunk-field "org-table" ()) ;; For `org-table-with-shrunk-field'.
-(declare-function org-table-align "org-table" ())
-(declare-function org-table-begin "org-table" (&optional table-type))
-(declare-function org-table-beginning-of-field "org-table" (&optional n))
-(declare-function org-table-blank-field "org-table" ())
-(declare-function org-table-calc-current-TBLFM "org-table" (&optional arg))
-(declare-function org-table-copy-down "org-table" (N))
-(declare-function org-table-copy-region "org-table" (beg end &optional cut))
-(declare-function org-table-create-or-convert-from-region "org-table" (arg))
-(declare-function org-table-create-with-table.el "org-table" ())
-(declare-function org-table-cut-region "org-table" (beg end))
-(declare-function org-table-edit-field "org-table" (arg))
-(declare-function org-table-end "org-table" (&optional table-type))
-(declare-function org-table-end-of-field "org-table" (&optional n))
-(declare-function org-table-eval-formula "org-table" (&optional arg equation suppress-align suppress-const suppress-store suppress-analysis))
-(declare-function org-table-field-info "org-table" (arg))
-(declare-function org-table-insert-row "org-table" (&optional arg))
-(declare-function org-table-justify-field-maybe "org-table" (&optional new))
-(declare-function org-table-maybe-eval-formula "org-table" ())
-(declare-function org-table-maybe-recalculate-line "org-table" ())
-(declare-function org-table-move-cell-up "org-table" ())
-(declare-function org-table-move-cell-down "org-table" ())
-(declare-function org-table-move-cell-right "org-table" ())
-(declare-function org-table-move-cell-left "org-table" ())
-(declare-function org-table-next-row "org-table" ())
-(declare-function org-table-paste-rectangle "org-table" ())
-(declare-function org-table-recalculate "org-table" (&optional all noalign))
-(declare-function org-table-rotate-recalc-marks "org-table" (&optional newchar))
-(declare-function org-table-shrink "org-table" (&optional begin end))
-(declare-function org-table-sort-lines "org-table" (&optional with-case sorting-type getkey-func compare-func interactive?))
-(declare-function org-table-sum "org-table" (&optional beg end nlast))
-(declare-function org-table-toggle-column-width "org-table" (&optional arg))
-(declare-function org-table-toggle-coordinate-overlays "org-table" ())
-(declare-function org-table-toggle-formula-debugger "org-table" ())
-(declare-function org-table-wrap-region "org-table" (arg))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function org-timer "org-timer" (&optional restart no-insert))
 (declare-function org-timer-item "org-timer" (&optional arg))
@@ -225,14 +185,11 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-timer-stop "org-timer" ())
 (declare-function org-toggle-archive-tag "org-archive" (&optional find-done))
 (declare-function org-update-radio-target-regexp "ol" ())
-(declare-function orgtbl-ascii-plot "org-table" (&optional ask))
-(declare-function orgtbl-mode "org-table" (&optional arg))
 
 (defvar ffap-url-regexp)
 (defvar org-element-paragraph-separate)
 (defvar org-indent-indentation-per-level)
 (defvar org-radio-target-regexp)
-(defvar org-table-auto-blank-field)
 (defvar org-target-link-regexp)
 (defvar org-target-regexp)
 
@@ -607,30 +564,6 @@ An entry can be toggled between COMMENT and normal with
 (defconst org-effort-property "Effort"
   "The property that is being used to keep track of effort estimates.
 Effort estimates given in this property need to have the format H:MM.")
-
-;;;; Table
-
-(defconst org-table-any-line-regexp "^[ \t]*\\(|\\|\\+-[-+]\\)"
-  "Detect an org-type or table-type table.")
-
-(defconst org-table-line-regexp "^[ \t]*|"
-  "Detect an org-type table line.")
-
-(defconst org-table-dataline-regexp "^[ \t]*|[^-]"
-  "Detect an org-type table line.")
-
-(defconst org-table-hline-regexp "^[ \t]*|-"
-  "Detect an org-type table hline.")
-
-(defconst org-table1-hline-regexp "^[ \t]*\\+-[-+]"
-  "Detect a table-type table hline.")
-
-(defconst org-table-any-border-regexp "^[ \t]*[^|+ \t]"
-  "Detect the first line outside a table when searching from within it.
-This works for both table types.")
-
-(defconst org-TBLFM-regexp "^[ \t]*#\\+TBLFM: "
-  "Detect a #+TBLFM line.")
 
 ;;;; Timestamp
 
@@ -1817,24 +1750,12 @@ as possible."
   :group 'org-sparse-trees
   :type 'hook)
 
-(defgroup org-table nil
-  "Options concerning tables in Org mode."
-  :tag "Org Table"
-  :group 'org)
-
 (defcustom org-self-insert-cluster-for-undo nil
   "Non-nil means cluster self-insert commands for undo when possible.
 If this is set, then, like in the Emacs command loop, 20 consecutive
 characters will be undone together.
 This is configurable, because there is some impact on typing performance."
   :group 'org-table
-  :type 'boolean)
-
-(defcustom org-table-tab-recognizes-table.el t
-  "Non-nil means TAB will automatically notice a table.el table.
-When it sees such a table, it moves point into it and - if necessary -
-calls `table-recognize-table'."
-  :group 'org-table-editing
   :type 'boolean)
 
 (defvaralias 'org-activate-links 'org-highlight-links)
@@ -3935,7 +3856,6 @@ This is needed for font-lock setup.")
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
-(declare-function orgtbl-send-table "org-table" (&optional maybe))
 (declare-function parse-time-string "parse-time" (string))
 
 (defvar align-mode-rules-list)
@@ -3948,63 +3868,10 @@ This is needed for font-lock setup.")
 (defvar remember-data-file)
 (defvar texmathp-why)
 
-;;;###autoload
-(defun turn-on-orgtbl ()
-  "Unconditionally turn on `orgtbl-mode'."
-  (require 'org-table)
-  (orgtbl-mode 1))
-
-(defun org-at-table-p (&optional table-type)
-  "Non-nil if the cursor is inside an Org table.
-If TABLE-TYPE is non-nil, also check for table.el-type tables."
-  (and (org-match-line (if table-type "[ \t]*[|+]" "[ \t]*|"))
-       (or (not (derived-mode-p 'org-mode))
-	   (let ((e (org-element-lineage (org-element-at-point) '(table) t)))
-	     (and e (or table-type
-			(eq 'org (org-element-property :type e))))))))
-
-(defun org-at-table.el-p ()
-  "Non-nil when point is at a table.el table."
-  (and (org-match-line "[ \t]*[|+]")
-       (let ((element (org-element-at-point)))
-	 (and (eq (org-element-type element) 'table)
-	      (eq (org-element-property :type element) 'table.el)))))
-
-(defun org-at-table-hline-p ()
-  "Non-nil when point is inside a hline in a table.
-Assume point is already in a table."
-  (org-match-line org-table-hline-regexp))
-
-(defun org-table-map-tables (function &optional quietly)
-  "Apply FUNCTION to the start of all tables in the buffer."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (while (re-search-forward org-table-any-line-regexp nil t)
-     (unless quietly
-       (message "Mapping tables: %d%%"
-		(floor (* 100.0 (point)) (buffer-size))))
-     (beginning-of-line 1)
-     (when (and (looking-at org-table-line-regexp)
-		;; Exclude tables in src/example/verbatim/clocktable blocks
-		(not (org-in-block-p '("src" "example" "verbatim" "clocktable"))))
-       (save-excursion (funcall function))
-       (or (looking-at org-table-line-regexp)
-	   (forward-char 1)))
-     (re-search-forward org-table-any-border-regexp nil 1)))
-  (unless quietly (message "Mapping tables: done")))
-
 (declare-function org-clock-save-markers-for-cut-and-paste "org-clock" (beg end))
 (declare-function org-clock-update-mode-line "org-clock" (&optional refresh))
 (declare-function org-resolve-clocks "org-clock"
 		  (&optional also-non-dangling-p prompt last-valid))
-
-(defun org-at-TBLFM-p (&optional pos)
-  "Non-nil when point (or POS) is in #+TBLFM line."
-  (save-excursion
-    (goto-char (or pos (point)))
-    (beginning-of-line)
-    (and (let ((case-fold-search t)) (looking-at org-TBLFM-regexp))
-	 (eq (org-element-type (org-element-at-point)) 'table))))
 
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
@@ -4892,12 +4759,6 @@ This is for getting out of special buffers like capture.")
 
 ;;;; Define the Org mode
 
-;; We use a before-change function to check if a table might need
-;; an update.
-(defvar org-table-may-need-update t
-  "Indicates that a table might need an update.
-This variable is set by `org-before-change-function'.
-`org-table-align' sets it back to nil.")
 (defun org-before-change-function (_beg _end)
   "Every change indicates that a table might need an update."
   (setq org-table-may-need-update t))
@@ -4906,7 +4767,6 @@ This variable is set by `org-before-change-function'.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
 (defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
-(defvar org-table-buffer-is-an nil)
 
 (defvar bidi-paragraph-direction)
 (defvar buffer-face-mode-face)
@@ -17794,7 +17654,6 @@ Otherwise, return a user error."
 	   (`link (call-interactively #'ffap))
 	   (_ (user-error "No special environment to edit here"))))))))
 
-(defvar org-table-coordinate-overlays) ; defined in org-table.el
 (defun org-ctrl-c-ctrl-c (&optional arg)
   "Set tags in headline, or update according to changed information at point.
 
@@ -19515,7 +19374,6 @@ assumed to be significant there."
   ;; parenthesis can end up being parsed as a new list item.
   (looking-at-p "[ \t]*{{{n\\(?:([^\n)]*)\\)?}}}[.)]\\(?:$\\| \\)"))
 
-(defvar orgtbl-line-start-regexp) ; From org-table.el
 (defun org-adaptive-fill-function ()
   "Compute a fill prefix for the current line.
 Return fill prefix, as a string, or nil if current line isn't
