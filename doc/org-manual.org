@@ -2935,21 +2935,23 @@ or alternatively
 : [[LINK]]
 
 #+cindex: escape syntax, for links
+#+cindex: backslashes, in links
 Some =\= and =]= characters in the {{{var(LINK)}}} part need to be
 "escaped", i.e., preceded by another =\= character.  More
-specifically, the following character categories must be escaped, in
-order:
+specifically, the following character categories, and only them, must
+be escaped, in order:
 
-1. all consecutive =\= characters at the end of the link;
-2. any =]= character at the very end of the link;
-3. any =]= character followed by either =[= or =]=;
+1. all consecutive =\= characters at the end of the link,
+2. any =]= character at the very end of the link,
+3. all consecutive =\= characters preceding =][= or =]]= patterns,
+4. any =]= character followed by either =[= or =]=.
 
 #+findex: org-link-escape
 Org takes for granted that such links are correctly escaped.
 Functions inserting links (see [[*Handling Links]]) take care of this.
 You only need to bother about those rules when inserting directly, or
-yanking, a URI within square brackets.  When in doubt, use the
-function ~org-link-escape~ in order to turn a link string into its
+yanking, a URI within square brackets.  When in doubt, you may use the
+function ~org-link-escape~, which turns a link string into its
 properly escaped form.
 
 Once a link in the buffer is complete, with all brackets present, Org
