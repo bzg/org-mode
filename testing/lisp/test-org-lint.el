@@ -240,6 +240,9 @@ This is not a node property
   "Test `org-lint-non-existent-setupfile-parameter' checker."
   (should
    (org-test-with-temp-text "#+setupfile: Idonotexist.org"
+     (org-lint '(non-existent-setupfile-parameter))))
+  (should-not
+   (org-test-with-temp-text "#+setupfile: https://I.do/not.exist.org"
      (org-lint '(non-existent-setupfile-parameter)))))
 
 (ert-deftest test-org-lint/wrong-include-link-parameter ()
