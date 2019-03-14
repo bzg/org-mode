@@ -96,6 +96,10 @@ You can add dynamic block into ~org-dynamic-block-alist~ with function
 ~org-dynamic-block-insert-dblock~ command.
 
 *** Babel
+**** ob-emacs-lisp sets ~lexical-binding~ in Org edit buffers
+When editing an Elisp src block, the editing buffer's
+~lexical-binding~ is set according to the src block's =:lexical=
+parameter.
 **** Add LaTeX output support in PlantUML
 *** New minor mode to display headline numbering
 
