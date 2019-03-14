@@ -76,6 +76,95 @@
 	      (buffer-substring-no-properties (line-beginning-position 2)
 					      (line-end-position 2))))))
 
+(ert-deftest ob-emacs-lisp/dynamic-lexical-execute ()
+  (cl-flet ((execute (text)
+              (org-test-with-temp-text-in-file text
+		(org-babel-next-src-block)
+		(org-babel-execute-maybe)
+		(re-search-forward "results" nil t)
+		(re-search-forward ": " nil t)
+		(buffer-substring-no-properties (point) (point-at-eol)))))
+
+    (should (string= "dynamic" (execute "
+#+begin_src emacs-lisp :lexical no :results verbatim
+(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+#+end_src")))
+
+    (should (string= "lexical" (execute "
+#+begin_src emacs-lisp :lexical yes :results verbatim
+(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+#+end_src")))
+
+    (should (string= "dynamic" (let ((x 'dynamic)) (execute "
+#+begin_src emacs-lisp :lexical no :results verbatim
+x
+#+end_src"))))
+
+    (should (string= "lexical" (let ((x 'dynamic)) (execute "
+#+begin_src emacs-lisp :lexical '((x . lexical)) :results verbatim
+x
+#+end_src"))))
+
+    ;; Src block execution uses `eval'. As of 2019-02-26, `eval' does
+    ;; not dynamically bind `lexical-binding' to the value of its
+    ;; LEXICAL parameter. Hence, (eval 'lexical-binding LEXICAL)
+    ;; evaluates to the same value that just `lexical-binding'
+    ;; evaluates to, even if LEXICAL is different. So tests like the
+    ;; following do not work here:
+    ;;
+    ;; (should (string= "t" (execute "
+    ;; #+begin_src emacs-lisp :lexical yes :results verbatim
+    ;; lexical-binding
+    ;; #+end_src")))
+    ;;
+    ;; However, the corresponding test in
+    ;; `ob-emacs-lisp/dynamic-lexical-edit' does work.
+    ))
+
+(ert-deftest ob-emacs-lisp/dynamic-lexical-edit ()
+  (cl-flet ((execute (text)
+              (org-test-with-temp-text-in-file text
+		(org-babel-next-src-block)
+		(org-edit-src-code)
+		(goto-char (point-max))
+		(prog1 (eval-last-sexp 0)
+		  (org-edit-src-exit)))))
+
+    (should (eq 'dynamic (execute "
+#+begin_src emacs-lisp :lexical no :results verbatim
+(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+#+end_src")))
+
+    (should (eq 'lexical (execute "
+#+begin_src emacs-lisp :lexical yes :results verbatim
+(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+#+end_src")))
+
+    (should (eq 'dynamic (let ((x 'dynamic)) (execute "
+#+begin_src emacs-lisp :lexical no :results verbatim
+x
+#+end_src"))))
+
+    (should (eq 'lexical (let ((x 'dynamic)) (execute "
+#+begin_src emacs-lisp :lexical '((x . lexical)) :results verbatim
+x
+#+end_src"))))
+
+    (should (equal nil (execute "
+#+begin_src emacs-lisp :lexical no :results verbatim
+lexical-binding
+#+end_src")))
+
+    (should (equal t (execute "
+#+begin_src emacs-lisp :lexical yes :results verbatim
+lexical-binding
+#+end_src")))
+
+    (should (equal '((x . 0)) (execute "
+#+begin_src emacs-lisp :lexical '((x . 0)) :results verbatim
+lexical-binding
+#+end_src")))))
+
 (provide 'test-ob-emacs-lisp)
 
  ;;; test-ob-emacs-lisp.el ends here
