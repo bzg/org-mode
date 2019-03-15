@@ -576,125 +576,129 @@ CLOCK: [2016-12-28 Wed 13:09]--[2016-12-28 Wed 15:09] =>  2:00"
   "Test \":link\" parameter in Clock table."
   ;; If there is no file attached to the document, link directly to
   ;; the headline.
-  (should
-   (equal
-    "| Headline     | Time    |
+  (let (org-link-descriptive)
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
-  ;; Otherwise, link to the headline in the current file.
-  (should
-   (equal
-    "| Headline                                  | Time    |
-|-------------------------------------------+---------|
-| *Total time*                              | *26:00* |
-|-------------------------------------------+---------|
+	(test-org-clock-clocktable-contents ":link t"))))
+    ;; Otherwise, link to the headline in the current file.
+    (should
+     (equal
+      "| Headline                    | Time    |
+|-----------------------------+---------|
+| *Total time*                | *26:00* |
+|-----------------------------+---------|
 | [[file:filename::Foo][Foo]] | 26:00   |"
-    (org-test-with-temp-text-in-file
-        "* Foo
+      (org-test-with-temp-text
+	  (org-test-with-temp-text-in-file
+              "* Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (let ((file (buffer-file-name)))
-        (replace-regexp-in-string
-         (regexp-quote file) "filename"
-         (test-org-clock-clocktable-contents ":link t :lang en"))))))
-  ;; Ignore TODO keyword, priority cookie, COMMENT and tags in
-  ;; headline.
-  (should
-   (equal
-    "| Headline     | Time    |
+	    (let ((file (buffer-file-name)))
+              (replace-regexp-in-string
+               (regexp-quote file) "filename"
+               (test-org-clock-clocktable-contents ":link t :lang en"))))
+	(org-table-align)
+	(buffer-substring-no-properties (point-min) (point-max)))))
+    ;; Ignore TODO keyword, priority cookie, COMMENT and tags in
+    ;; headline.
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* TODO Foo
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* TODO Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en"))))
-  (should
-   (equal
-    "| Headline     | Time    |
+	(test-org-clock-clocktable-contents ":link t :lang en"))))
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* [#A] Foo
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* [#A] Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en"))))
-  (should
-   (equal
-    "| Headline     | Time    |
+	(test-org-clock-clocktable-contents ":link t :lang en"))))
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* COMMENT Foo
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* COMMENT Foo
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t"))))
-  (should
-   (equal
-    "| Headline     | Time    |
+	(test-org-clock-clocktable-contents ":link t"))))
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo :tag:
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* Foo :tag:
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en"))))
-  ;; Remove statistics cookie from headline description.
-  (should
-   (equal
-    "| Headline     | Time    |
+	(test-org-clock-clocktable-contents ":link t :lang en"))))
+    ;; Remove statistics cookie from headline description.
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo [50%]
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* Foo [50%]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en"))))
-  (should
-   (equal
-    "| Headline     | Time    |
+	(test-org-clock-clocktable-contents ":link t :lang en"))))
+    (should
+     (equal
+      "| Headline     | Time    |
 |--------------+---------|
 | *Total time* | *26:00* |
 |--------------+---------|
-| [[Foo][Foo]]          | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo [1/2]
+| [[Foo][Foo]] | 26:00   |"
+      (org-test-with-temp-text
+          "* Foo [1/2]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en"))))
-  ;; Replace links with their description, or turn them into plain
-  ;; links if there is no description.
-  (should
-   (equal
-    "| Headline                                | Time    |
-|-----------------------------------------+---------|
-| *Total time*                            | *26:00* |
-|-----------------------------------------+---------|
+	(test-org-clock-clocktable-contents ":link t :lang en"))))
+    ;; Replace links with their description, or turn them into plain
+    ;; links if there is no description.
+    (should
+     (equal
+      "| Headline                                                  | Time    |
+|-----------------------------------------------------------+---------|
+| *Total time*                                              | *26:00* |
+|-----------------------------------------------------------+---------|
 | [[Foo [[https://orgmode.org\\][Org mode]\\]][Foo Org mode]] | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo [[https://orgmode.org][Org mode]]
+      (org-test-with-temp-text
+          "* Foo [[https://orgmode.org][Org mode]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en"))))
-  (should
-   (equal
-    "| Headline                     | Time    |
-|------------------------------+---------|
-| *Total time*                 | *26:00* |
-|------------------------------+---------|
+	(test-org-clock-clocktable-contents ":link t :lang en"))))
+    (should
+     (equal
+      "| Headline                                                  | Time    |
+|-----------------------------------------------------------+---------|
+| *Total time*                                              | *26:00* |
+|-----------------------------------------------------------+---------|
 | [[Foo [[https://orgmode.org]\\]][Foo https://orgmode.org]] | 26:00   |"
-    (org-test-with-temp-text
-        "* Foo [[https://orgmode.org]]
+      (org-test-with-temp-text
+          "* Foo [[https://orgmode.org]]
 CLOCK: [2016-12-27 Wed 13:09]--[2016-12-28 Wed 15:09] => 26:00"
-      (test-org-clock-clocktable-contents ":link t :lang en")))))
+	(test-org-clock-clocktable-contents ":link t :lang en"))))))
 
 (ert-deftest test-org-clock/clocktable/compact ()
   "Test \":compact\" parameter in Clock table."
