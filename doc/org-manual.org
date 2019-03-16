@@ -10494,8 +10494,8 @@ but not any simpler
 
 You can make words =*bold*=, =/italic/=, =_underlined_=, ==verbatim==
 and =~code~=, and, if you must, =+strike-through+=.  Text in the code
-and verbatim string is not processed for Org mode specific syntax; it
-is exported verbatim.
+and verbatim string is not processed for Org specific syntax; it is
+exported verbatim.
 
 #+vindex: org-fontify-emphasized-text
 To turn off fontification for marked up text, you can set
@@ -10921,7 +10921,6 @@ make sure that the link is on a line by itself and precede it with
 [[./img/a.jpg]]
 #+end_example
 
-#+texinfo: @noindent
 Such images can be displayed within the buffer with the following
 command:
 
@@ -11355,7 +11354,7 @@ following arguments.
 - ~c~ ::
 
   #+vindex: org-export-with-clocks
-  Toggle inclusion of CLOCK keywords (~org-export-with-clocks~).
+  Toggle inclusion of =CLOCK= keywords (~org-export-with-clocks~).
 
 - ~creator~ ::
 
@@ -11450,7 +11449,7 @@ following arguments.
 
   #+vindex: org-export-with-tasks
   Toggle inclusion of tasks (TODO items); or ~nil~ to remove all
-  tasks; or ~todo~ to remove DONE tasks; or list the keywords to keep
+  tasks; or ~todo~ to remove done tasks; or list the keywords to keep
   (~org-export-with-tasks~).
 
 - ~tex~ ::
@@ -11645,8 +11644,7 @@ with the custom ID =theory=, you can use
 
 : #+INCLUDE: "./paper.org::#theory" :only-contents t
 
-The following command allows navigating back and forth to the included
-document:
+The following command allows navigating to the included document:
 
 - {{{kbd(C-c ')}}} (~org-edit~special~) ::
   #+kindex: C-c '
@@ -11838,12 +11836,11 @@ See the variable ~org-ascii-links-to-notes~ for details.
   =myfile.txt=, Org exports to =myfile.txt.txt= in order to prevent
   data loss.
 
-#+attr_texinfo: :sep ,
 - {{{kbd(C-c C-e t A)}}} (~org-ascii-export-to-ascii~), {{{kbd(C-c C-e t L)}}}, {{{kbd(C-c C-e t U)}}} ::
   #+kindex: C-c C-e t A
   #+kindex: C-c C-e t L
   #+kindex: C-c C-e t U
-  #+findex: org-ascii-export-to-ascii
+  #+findex: org-ascii-export-as-ascii
 
   Export to a temporary buffer.  Does not create a file.
 
@@ -12462,7 +12459,6 @@ insert a postamble if ~org-html-postamble~ is set to ~nil~.
 :END:
 
 The HTML export back-end transforms =<= and =>= to =&lt;= and =&gt;=.
-
 To include raw HTML code in the Org file so the HTML export back-end
 can insert that HTML code in the output, use this inline syntax:
 =@@html:...@@=.  For example:
@@ -16004,28 +16000,28 @@ place on the web server, and publishing images to it.
 
 Once properly configured, Org can publish with the following commands:
 
-- {{{kbd(C-c C-e X)}}} (~org-publish~) ::
+- {{{kbd(C-c C-e P x)}}} (~org-publish~) ::
 
-  #+kindex: C-c C-e X
+  #+kindex: C-c C-e P x
   #+findex: org-publish
   Prompt for a specific project and publish all files that belong to
   it.
 
-- {{{kbd(C-c C-e P)}}} (~org-publish-current-project~) ::
+- {{{kbd(C-c C-e P p)}}} (~org-publish-current-project~) ::
 
-  #+kindex: C-c C-e P
+  #+kindex: C-c C-e P p
   #+findex: org-publish-current-project
   Publish the project containing the current file.
 
-- {{{kbd(C-c C-e F)}}} (~org-publish-current-file~) ::
+- {{{kbd(C-c C-e P f)}}} (~org-publish-current-file~) ::
 
-  #+kindex: C-c C-e F
+  #+kindex: C-c C-e P f
   #+findex: org-publish-current-file
   Publish only the current file.
 
-- {{{kbd(C-c C-e E)}}} (~org-publish-all~) ::
+- {{{kbd(C-c C-e P a)}}} (~org-publish-all~) ::
 
-  #+kindex: C-c C-e E
+  #+kindex: C-c C-e P a
   #+findex: org-publish-all
   Publish every project.
 
@@ -16452,14 +16448,14 @@ Here are examples of passing values by reference:
   table.
 
   #+cindex: @samp{colnames}, header argument
-  The =colnames= header argument accepts =yes=, =no=, or =nil=
-  values.  The default value is =nil=: if an input table has column
+  The =colnames= header argument accepts =yes=, =no=, or =nil= values.
+  The default value is =nil=: if an input table has column
   names---because the second row is a horizontal rule---then Org
-  removes the column names, processes the table, puts back the
-  column names, and then writes the table to the results block.
-  Using =yes=, Org does the same to the first row, even if the
-  initial table does not contain any horizontal rule.  When set to
-  =no=, Org does not pre-process column names at all.
+  removes the column names, processes the table, puts back the column
+  names, and then writes the table to the results block.  Using =yes=,
+  Org does the same to the first row, even if the initial table does
+  not contain any horizontal rule.  When set to =no=, Org does not
+  pre-process column names at all.
 
   #+begin_example
   ,#+NAME: less-cols
@@ -17706,7 +17702,7 @@ the following enables execution of Clojure code blocks:
 
 #+kindex: C-c '
 Use {{{kbd(C-c ')}}} to edit the current code block.  It opens a new
-major-mode edit buffer containing the body of the source code block,
+major mode edit buffer containing the body of the source code block,
 ready for any edits.  Use {{{kbd(C-c ')}}} again to close the buffer
 and return to the Org buffer.
 
