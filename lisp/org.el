@@ -5142,6 +5142,9 @@ This includes angle, plain, and bracket links."
 			  ((eq ?\[ (char-after (1+ start))) 'bracket)
 			  (t 'plain))))
 	(when (and (memq style org-highlight-links)
+		   ;; Do not span over paragraph boundaries.
+		   (not (string-match-p org-element-paragraph-separate
+					(match-string 0)))
 		   ;; Do not confuse plain links with tags.
 		   (not (and (eq style 'plain)
 			     (let ((face (get-text-property
