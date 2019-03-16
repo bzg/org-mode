@@ -41,12 +41,8 @@
 
 (declare-function calendar-cursor-to-date "calendar" (&optional error event))
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
-(declare-function mailcap-extension-to-mime "mailcap" (extn))
-(declare-function mailcap-mime-info (string &optional request no-decode))
-(declare-function mailcap-parse-mailcaps "mailcap" (&optional path force))
 (declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
-(declare-function org-context "org" ())
 (declare-function org-do-occur "org" (regexp &optional cleanup))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-cache-refresh "org-element" (pos))
