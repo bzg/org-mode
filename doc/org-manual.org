@@ -1176,7 +1176,7 @@ to disable them individually.
 
   #+kindex: C-c C-*
   Turn the whole plain list into a subtree of the current heading.
-  Checkboxes (see [[*Checkboxes]]) become TODO, respectively DONE,
+  Checkboxes (see [[*Checkboxes]]) become =TODO=, respectively =DONE=,
   keywords when unchecked, respectively checked.
 
 - {{{kbd(S-LEFT)}}}, {{{kbd(S-RIGHT)}}} ::
@@ -5591,10 +5591,9 @@ a little confusing because timestamp is often used as indicating when
 something was created or last changed.  However, in Org mode this term
 is used in a much wider sense.
 
-** Timestamps, Deadlines and Scheduling
+** Timestamps
 :PROPERTIES:
 :DESCRIPTION: Assigning a time to a tree entry.
-:ALT_TITLE: Timestamps
 :END:
 #+cindex: timestamps
 #+cindex: ranges, time
@@ -5638,12 +5637,12 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
     <2007-05-16 Wed 12:30 +1w>
   #+end_example
 
-- Diary-style sexp entries ::
+- Diary-style expression entries ::
 
   #+cindex: diary style timestamps
   #+cindex: sexp timestamps
   For more complex date specifications, Org mode supports using the
-  special sexp diary entries implemented in the Emacs calendar/diary
+  special expression diary entries implemented in the Emacs Calendar
   package[fn:60].  For example, with optional time:
 
   #+begin_example
@@ -5957,15 +5956,15 @@ immediately after the task they refer to.
 - =DEADLINE= ::
 
   #+cindex: @samp{DEADLINE} marker
-  Meaning: the task (most likely a TODO item, though not necessarily)
-  is supposed to be finished on that date.
+  Meaning: the task---most likely a TODO item, though not
+  necessarily---is supposed to be finished on that date.
 
   #+vindex: org-deadline-warning-days
   On the deadline date, the task is listed in the agenda.  In
   addition, the agenda for /today/ carries a warning about the
   approaching or missed deadline, starting ~org-deadline-warning-days~
-  before the due date, and continuing until the entry is marked DONE.
-  An example:
+  before the due date, and continuing until the entry is marked as
+  done.  An example:
 
   #+begin_example
   ,*** TODO write article about the Earth for the Guide
@@ -6022,15 +6021,15 @@ immediately after the task they refer to.
 You may use timestamps with repeaters in scheduling and deadline
 entries.  Org mode issues early and late warnings based on the
 assumption that the timestamp represents the /nearest instance/ of the
-repeater.  However, the use of diary S-exp entries like
+repeater.  However, the use of diary expression entries like
 
 : <%%(diary-float t 42)>
 
 #+texinfo: @noindent
 in scheduling and deadline timestamps is limited.  Org mode does not
-know enough about the internals of each S-exp function to issue early
-and late warnings.  However, it shows the item on each day where the
-S-exp entry matches.
+know enough about the internals of each function to issue early and
+late warnings.  However, it shows the item on each day where the
+expression entry matches.
 
 *** Inserting deadlines or schedules
 :PROPERTIES:
@@ -6135,15 +6134,15 @@ period last
 #+vindex: org-todo-repeat-to-state
 Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
-DONE once you have done so.  When you mark a =DEADLINE= or a
-=SCHEDULED= with the TODO keyword =DONE=, it no longer produces
+done once you have done so.  When you mark a =DEADLINE= or
+a =SCHEDULED= with the TODO keyword =DONE=, it no longer produces
 entries in the agenda.  The problem with this is, however, is that
 then also the /next/ instance of the repeated entry will not be
 active.  Org mode deals with this in the following way: when you try
-to mark such an entry DONE, using {{{kbd(C-c C-t)}}}, it shifts the
+to mark such an entry as done, using {{{kbd(C-c C-t)}}}, it shifts the
 base date of the repeating timestamp by the repeater interval, and
 immediately sets the entry state back to TODO[fn:69].  In the example
-above, setting the state to DONE would actually switch the date like
+above, setting the state to =DONE= would actually switch the date like
 this:
 
 #+begin_example
@@ -6251,8 +6250,8 @@ prompted about what to do with it.
   #+vindex: org-clock-continuously
   #+cindex: @samp{LOG_INTO_DRAWER}, property
   Start the clock on the current item (clock-in).  This inserts the
-  CLOCK keyword together with a timestamp.  If this is not the first
-  clocking of this item, the multiple CLOCK lines are wrapped into
+  =CLOCK= keyword together with a timestamp.  If this is not the first
+  clocking of this item, the multiple =CLOCK= lines are wrapped into
   a =LOGBOOK= drawer (see also the variable ~org-clock-into-drawer~).
   You can also overrule the setting of this variable for a subtree by
   setting a =CLOCK_INTO_DRAWER= or =LOG_INTO_DRAWER= property.  When
@@ -7044,7 +7043,6 @@ configuration would look like:
          "* %?\nEntered on %U\n  %i\n  %a")))
 #+end_src
 
-#+texinfo: @noindent
 If you then press {{{kbd(t)}}} from the capture menu, Org will prepare
 the template for you like this:
 
@@ -7854,13 +7852,6 @@ Cutting, finding the right location, and then pasting the note is
 cumbersome.  To simplify this process, you can use the following
 special command:
 
-- {{{kbd(C-c M-w)}}} (~org-copy~) ::
-
-  #+kindex: C-c M-w
-  #+findex: org-copy
-  Copying works like refiling, except that the original note is not
-  deleted.
-
 - {{{kbd(C-c C-w)}}} (~org-refile~) ::
 
   #+kindex: C-c C-w
@@ -7922,6 +7913,13 @@ special command:
   Clear the target cache.  Caching of refile targets can be turned on
   by setting ~org-refile-use-cache~.  To make the command see new
   possible targets, you have to clear the cache with this command.
+
+- {{{kbd(C-c M-w)}}} (~org-copy~) ::
+
+  #+kindex: C-c M-w
+  #+findex: org-copy
+  Copying works like refiling, except that the original note is not
+  deleted.
 
 ** Archiving
 :PROPERTIES:
@@ -8181,7 +8179,7 @@ but the easiest way to maintain it is through the following commands
 - {{{kbd(M-x org-switchb)}}} ::
 
   #+findex: org-switchb
-  Command to use an iswitchb-like interface to switch to and between
+  Command to use an Iswitchb-like interface to switch to and between
   Org buffers.
 
 #+texinfo: @noindent
@@ -8245,15 +8243,16 @@ It displays a menu from which an additional letter is required to
 execute a command.  The dispatcher offers the following default
 commands:
 
+#+attr_texinfo: :sep ,
 - {{{kbd(a)}}} ::
 
   Create the calendar-like agenda (see [[*Weekly/daily agenda]]).
 
-- {{{kbd(t)}}} or {{{kbd(T)}}} ::
+- {{{kbd(t)}}}, {{{kbd(T)}}} ::
 
   Create a list of all TODO items (see [[*The global TODO list]]).
 
-- {{{kbd(m)}}} or {{{kbd(M)}}} ::
+- {{{kbd(m)}}}, {{{kbd(M)}}} ::
 
   Create a list of headlines matching a given expression (see
   [[*Matching tags and properties]]).
@@ -8275,7 +8274,7 @@ commands:
   to specify the number of context lines for each match, default is
   1.
 
-- {{{kbd(#)}}} or {{{kbd(!)}}} ::
+- {{{kbd(#)}}}, {{{kbd(!)}}} ::
 
   Create a list of stuck projects (see [[*Stuck projects]]).
 
@@ -8394,13 +8393,13 @@ buffer, as well as the commands {{{kbd(S)}}}, {{{kbd(M)}}}, and
 convert to other calendars, respectively.  {{{kbd(c)}}} can be used to
 switch back and forth between calendar and agenda.
 
-If you are using the diary only for S-exp entries and holidays, it is
-faster to not use the above setting, but instead to copy or even move
-the entries into an Org file.  Org mode evaluates diary-style sexp
-entries, and does it faster because there is no overhead for first
-creating the diary display.  Note that the sexp entries must start at
-the left margin, no whitespace is allowed before them, as seen in the
-following segment of an Org file:[fn:94]
+If you are using the diary only for expression entries and holidays,
+it is faster to not use the above setting, but instead to copy or even
+move the entries into an Org file.  Org mode evaluates diary-style
+expression entries, and does it faster because there is no overhead
+for first creating the diary display.  Note that the expression
+entries must start at the left margin, no whitespace is allowed before
+them, as seen in the following segment of an Org file:[fn:94]
 
 #+begin_example
 ,* Holidays
@@ -8555,9 +8554,8 @@ it more compact:
   #+vindex: org-agenda-todo-ignore-timestamp
   #+vindex: org-agenda-todo-ignore-with-date
   Some people view a TODO item that has been /scheduled/ for execution
-  or have a /deadline/ (see [[*Timestamps, Deadlines and Scheduling]]) as
-  no longer /open/.  Configure the variables
-  ~org-agenda-todo-ignore-scheduled~,
+  or have a /deadline/ (see [[*Timestamps]]) as no longer /open/.
+  Configure the variables ~org-agenda-todo-ignore-scheduled~,
   ~org-agenda-todo-ignore-deadlines~,
   ~org-agenda-todo-ignore-timestamp~ and/or
   ~org-agenda-todo-ignore-with-date~ to exclude such items from the
@@ -8622,16 +8620,16 @@ syntactic sugar for positive selection.  The AND operator =&= is
 optional when =+= or =-= is present.  Here are some examples, using
 only tags.
 
-- ~+work-boss~ ::
+- =+work-boss= ::
 
   Select headlines tagged =work=, but discard those also tagged
   =boss=.
 
-- ~work|laptop~ ::
+- =work|laptop= ::
 
   Selects lines tagged =work= or =laptop=.
 
-- ~work|laptop+night~ ::
+- =work|laptop+night= ::
 
   Like before, but require the =laptop= lines to be tagged also
   =night=.
@@ -9391,15 +9389,15 @@ the other commands, point needs to be in the desired line.
   #+findex: org-agenda-log-mode
   #+vindex: org-log-done
   #+vindex: org-agenda-log-mode-items
-  Toggle Logbook mode.  In Logbook mode, entries that were marked DONE
-  while logging was on (see the variable ~org-log-done~) are shown in
-  the agenda, as are entries that have been clocked on that day.  You
-  can configure the entry types that should be included in log mode
-  using the variable ~org-agenda-log-mode-items~.  When called with
-  a {{{kbd(C-u)}}} prefix, show all possible logbook entries,
-  including state changes.  When called with two prefix arguments
-  {{{kbd(C-u C-u)}}}, show only logging information, nothing else.
-  {{{kbd(v L)}}} is equivalent to {{{kbd(C-u v l)}}}.
+  Toggle Logbook mode.  In Logbook mode, entries that were marked as
+  done while logging was on (see the variable ~org-log-done~) are
+  shown in the agenda, as are entries that have been clocked on that
+  day.  You can configure the entry types that should be included in
+  log mode using the variable ~org-agenda-log-mode-items~.  When
+  called with a {{{kbd(C-u)}}} prefix argument, show all possible
+  logbook entries, including state changes.  When called with two
+  prefix arguments {{{kbd(C-u C-u)}}}, show only logging information,
+  nothing else.  {{{kbd(v L)}}} is equivalent to {{{kbd(C-u v l)}}}.
 
 - {{{kbd(v [)}}} or short {{{kbd([)}}} (~org-agenda-manipulate-query-add~) ::
 
@@ -10034,10 +10032,9 @@ views:
         ("hk" tags "+home+Kim")))
 #+end_src
 
-#+texinfo: @noindent
 The initial string in each entry defines the keys you have to press
 after the dispatcher command in order to access the command.  Usually
-this will be just a single character, but if you have many similar
+this is just a single character, but if you have many similar
 commands, you can also define two-letter combinations where the first
 character is the same in several combinations and serves as a prefix
 key[fn:100].  The second parameter is the search type, followed by the
@@ -21165,8 +21162,8 @@ format]].  The day name is optional when you type the date yourself.
 However, any date inserted or modified by Org adds that day name, for
 reading convenience.
 
-[fn:60] When working with the standard diary sexp functions, you need
-to be very careful with the order of the arguments.  That order
+[fn:60] When working with the standard diary expression functions, you
+need to be very careful with the order of the arguments.  That order
 depends evilly on the variable ~calendar-date-style~.  For example, to
 specify a date December 12, 2005, the call might look like
 =(diary-date 12 1 2005)= or =(diary-date 1 12 2005)= or =(diary-date
@@ -21188,7 +21185,7 @@ shift the date to tomorrow.
 ~org-read-date-display-live~.
 
 [fn:64] It will still be listed on that date after it has been marked
-DONE.  If you do not like this, set the variable
+as done.  If you do not like this, set the variable
 ~org-agenda-skip-scheduled-if-done~.
 
 [fn:65] The =SCHEDULED= and =DEADLINE= dates are inserted on the line
@@ -21202,7 +21199,7 @@ the headline.
 =lognotereschedule=, and =nologreschedule=.
 
 [fn:68] Org does not repeat inactive timestamps, however.  See
-[[*Timestamps, Deadlines and Scheduling]].
+[[*Timestamps]].
 
 [fn:69] In fact, the target state is taken from, in this sequence, the
 =REPEAT_TO_STATE= property, the variable ~org-todo-repeat-to-state~ if
