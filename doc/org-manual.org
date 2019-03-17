@@ -17020,23 +17020,22 @@ header arguments working together.  The primary determinant, however,
 is the =results= header argument.  It accepts four classes of options.
 Each code block can take only one option per class:
 
-- collection ::
+- Collection ::
 
   For how the results should be collected from the code block;
 
-- type ::
+- Type ::
 
   For which type of result the code block will return; affects how Org
   processes and inserts results in the Org buffer;
 
-- format ::
+- Format ::
 
-  For the result; affects how Org processes and inserts results in the
-  Org buffer;
+  For the result; affects how Org processes results;
 
-- handling ::
+- Handling ::
 
-  For processing results after evaluation of the code block;
+  For inserting results once they are properly formatted.
 
 *** Collection
 :PROPERTIES:
