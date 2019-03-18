@@ -4127,6 +4127,9 @@ items if they have an hour specification like [h]h:mm."
 	  span (nth 2 org-agenda-overriding-arguments)))
   (when (and (integerp arg) (> arg 0))
     (setq span arg arg nil))
+  (when (numberp span)
+    (unless (< 0 span)
+      (user-error "Agenda creation impossible for this span(=%d days)." span)))
   (catch 'exit
     (setq org-agenda-buffer-name
 	  (or org-agenda-buffer-tmp-name
