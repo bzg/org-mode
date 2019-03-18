@@ -221,7 +221,7 @@ into
 
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.
-Valid values are ?. and ?\).  To get both terminators, use t.
+Valid values are ?. and ?\\).  To get both terminators, use t.
 
 This variable needs to be set before org.el is loaded.  If you
 need to make a change while Emacs is running, use the customize
@@ -2629,7 +2629,7 @@ Return t if successful."
 		(error "Cannot outdent beyond margin")
 	      ;; Change bullet if necessary.
 	      (when (and (= (+ top-ind offset) 0)
-			 (string-match "*"
+			 (string-match "\\*"
 				       (org-list-get-bullet beg struct)))
 		(org-list-set-bullet beg struct
 				     (org-list-bullet-string "-")))
