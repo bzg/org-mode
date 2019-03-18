@@ -4187,7 +4187,8 @@ the way habits are displayed in the agenda.
 
   #+vindex: org-habit-show-habits-only-for-today
   If non-~nil~, only show habits in today's agenda view.  The default
-  value is ~t~.
+  value is ~t~.  Pressing {{{kbd(C-u K)}}} in the agenda toggles this
+  variable.
 
 Lastly, pressing {{{kbd(K)}}} in the agenda buffer causes habits to
 temporarily be disabled and do not appear at all.  Press {{{kbd(K)}}}

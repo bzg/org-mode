@@ -152,7 +152,10 @@ LaTeX font locking.
 negative value as a valid repeater to shift time stamps in backward
 in cloned subtrees.  You can give, for example, ‘-3d’ to shift three
 days in the past.
-
+*** Toggle display of all vs. undone scheduled habits conveniently
+=<C-u K>= (~org-habit-toggle-display-in-agenda~) in an agenda toggles
+the display of all habits to those which are undone and scheduled.
+This is a function for convenience.
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
 
@@ -164,6 +167,7 @@ dynamic block in ~org-dynamic-block-alist~.
 *** ~org-table-cell-down~
 *** ~org-table-cell-left~
 *** ~org-table-cell-right~
+*** ~org-habit-toggle-display-in-agenda~
 ** Removed functions
 *** ~org-babel-set-current-result-hash~
 

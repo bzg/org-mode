@@ -449,7 +449,18 @@ current time."
   (message "Habits turned %s"
 	   (if org-habit-show-habits "on" "off")))
 
-(org-defkey org-agenda-mode-map "K" 'org-habit-toggle-habits)
+(defun org-habit-toggle-display-in-agenda (arg)
+  "Toggle display of habits in agenda.
+With ARG toggle display of all vs. undone scheduled habits.
+See `org-habit-show-all-today'."
+  (interactive "P")
+  (if (not arg)
+      (org-habit-toggle-habits)
+    (org-agenda-check-type t 'agenda)
+    (setq org-habit-show-all-today (not org-habit-show-all-today))
+    (when org-habit-show-habits (org-agenda-redo))))
+
+(org-defkey org-agenda-mode-map "K" 'org-habit-toggle-display-in-agenda)
 
 (provide 'org-habit)
 
