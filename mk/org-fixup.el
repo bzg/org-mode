@@ -30,7 +30,7 @@
 (defun org-make-manuals ()
   "Generate the Texinfo files out of Org manuals."
   (require 'ox-texinfo)
-  (dolist (manual '("../doc/org-manual.org"))
+  (dolist (manual '("../doc/org-manual.org" "../doc/org-guide.org"))
     (find-file manual)
     (org-texinfo-export-to-texinfo)))
 

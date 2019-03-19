@@ -7,7 +7,7 @@ endif
 
 all:		$(ORG_MAKE_DOC)
 
-info:		org
+info:		org orgguide
 
 html:		org.html
 
@@ -27,7 +27,7 @@ guide::		orgguide.texi org-version.inc
 	../mk/guidesplit.pl $@/*
 endif
 
-org.texi:	org-manual.org
+org.texi orgguide.texi:	org-manual.org org-guide.org
 	$(BATCH) \
 	  --eval '(add-to-list '"'"'load-path "../lisp")' \
 	  --eval '(load "../mk/org-fixup.el")' \
@@ -46,21 +46,24 @@ org-version.tex:	orgcard.tex
 	@printf "\def\\\\versionyear{$(YEAR)}\n" >> org-version.tex
 	@printf "\def\year{$(YEAR)}\n" >> org-version.tex
 
-install:	org
+install:	org orgguide
 	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
 	$(CP) org $(DESTDIR)$(infodir)
+	$(CP) orgguide $(DESTDIR)$(infodir)
 	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) org
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) orgguide
 
 clean:
-	$(RM) org *.pdf *.html *_letter.tex org-version.inc org-version.tex \
-	      *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs \
-	      *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
+	$(RM) org orgguide *.pdf *.html *_letter.tex org-version.inc \
+	      org-version.tex *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys \
+              *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
 cleanall:	clean
 	$(RMR) guide manual
 
 clean-install:
 	$(RM) $(DESTDIR)$(infodir)/org*
 	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) --remove org
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) --remove orgguide
 
 .SUFFIXES:	.texi .tex .txt _letter.tex
 
