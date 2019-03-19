@@ -186,8 +186,8 @@ For a better experience, the three Org commands ~org-store-link~,
 ~org-capture~ and ~org-agenda~ ought to be accessible anywhere in
 Emacs, not just in Org buffers.  To that effect, you need to bind them
 to globally available keys, like the ones reserved for users (see
-[[info:elisp::Key%20Binding%20Conventions]]).  Here are suggested
-bindings, please modify the keys to your own liking.
+[[info:elisp::Key Binding Conventions]]).  Here are suggested bindings,
+please modify the keys to your own liking.
 
 #+begin_src emacs-lisp
 (global-set-key (kbd "C-c l") 'org-store-link)
@@ -2096,7 +2096,7 @@ formatting[fn:21].  A few examples:
 | =vmean($2..$7);EN= | Same, but treat empty fields as 0                |
 | =taylor($3,x=7,2)= | Taylor series of $3, at x=7, second degree       |
 
-Calc also contains a complete set of logical operations (see [[info:calc#Logical%20Operations][Logical
+Calc also contains a complete set of logical operations (see [[info:calc#Logical Operations][Logical
 Operations]]).  For example
 
 - =if($1 < 20, teen, string(""))= ::
@@ -3144,10 +3144,10 @@ image is inlined into the exported HTML file.
 #+cindex: square brackets, around links
 #+cindex: angular brackets, around links
 #+cindex: plain text external links
-Org also finds external links in the normal text and activates them as
-links.  If spaces must be part of the link (for example in
-=bbdb:Richard Stallman=), or if you need to remove ambiguities about
-the end of the link, enclose the link in square or angular brackets.
+Org also recognizes external links amid normal text and activates them
+as links.  If spaces must be part of the link (for example in
+=bbdb:R.*Stallman=), or if you need to remove ambiguities about the
+end of the link, enclose the link in square or angular brackets.
 
 ** Handling Links
 :PROPERTIES:
@@ -3893,15 +3893,15 @@ a background color.
 #+cindex: @samp{ORDERED}, property
 The structure of Org files---hierarchy and lists---makes it easy to
 define TODO dependencies.  Usually, a parent TODO task should not be
-marked DONE until all TODO subtasks, or children tasks, are marked as
-DONE.  Sometimes there is a logical sequence to (sub)tasks, so that
+marked as done until all TODO subtasks, or children tasks, are marked
+as done.  Sometimes there is a logical sequence to (sub)tasks, so that
 one subtask cannot be acted upon before all siblings above it have
-been marked DONE.  If you customize the variable
+been marked as done.  If you customize the variable
 ~org-enforce-todo-dependencies~, Org blocks entries from changing
 state to DONE while they have TODO children that are not DONE.
 Furthermore, if an entry has a property =ORDERED=, each of its TODO
-children is blocked until all earlier siblings are marked DONE.  Here
-is an example:
+children is blocked until all earlier siblings are marked as done.
+Here is an example:
 
 #+begin_example
 ,* TODO Blocked until (two) is done
@@ -3948,8 +3948,8 @@ property (see [[*Properties and Columns]]):
 
 #+vindex: org-agenda-dim-blocked-tasks
 If you set the variable ~org-agenda-dim-blocked-tasks~, TODO entries
-that cannot be marked DONE because of unmarked children are shown in a
-dimmed font or even made invisible in agenda views (see [[*Agenda
+that cannot be marked as done because of unmarked children are shown
+in a dimmed font or even made invisible in agenda views (see [[*Agenda
 Views]]).
 
 #+cindex: checkboxes and TODO dependencies
@@ -3979,11 +3979,11 @@ subtree.  For information on how to clock working time for a task, see
 
 *** Closing items
 :PROPERTIES:
-:DESCRIPTION: When was this entry marked DONE?
+:DESCRIPTION: When was this entry marked as done?
 :END:
 
 The most basic logging is to keep track of /when/ a certain TODO item
-was marked DONE.  This can be achieved with[fn:41]
+was marked as done.  This can be achieved with[fn:41]
 
 #+begin_src emacs-lisp
 (setq org-log-done 'time)
@@ -4271,7 +4271,7 @@ It is often advisable to break down large tasks into smaller,
 manageable subtasks.  You can do this by creating an outline tree
 below a TODO item, with detailed subtasks on the tree[fn:47].  To keep
 an overview of the fraction of subtasks that have already been marked
-DONE, insert either =[/]= or =[%]= anywhere in the headline.  These
+as done, insert either =[/]= or =[%]= anywhere in the headline.  These
 cookies are updated each time the TODO status of a child changes, or
 when pressing {{{kbd(C-c C-c)}}} on the cookie.  For example:
 
@@ -5989,8 +5989,8 @@ immediately after the task they refer to.
   #+vindex: org-agenda-skip-scheduled-if-done
   The headline is listed under the given date[fn:64].  In addition,
   a reminder that the scheduled date has passed is present in the
-  compilation for /today/, until the entry is marked DONE, i.e., the
-  task is automatically forwarded until completed.
+  compilation for /today/, until the entry is marked as done, i.e.,
+  the task is automatically forwarded until completed.
 
   #+begin_example
   ,*** TODO Call Trillian for a date on New Years Eve.
@@ -8977,7 +8977,7 @@ Sorting can be customized using the variable
 ~org-agenda-sorting-strategy~, and may also include criteria based on
 the estimated effort of an entry (see [[*Effort Estimates]]).
 
-*** Filtering/limiting agenda times
+*** Filtering/limiting agenda items
 :PROPERTIES:
 :DESCRIPTION: Dynamically narrow the agenda.
 :END:
@@ -10972,11 +10972,9 @@ as a horizontal line.
 
 ** Creating Footnotes
 :PROPERTIES:
-:DESCRIPTION: How footnotes are defined in Org's syntax.
+:DESCRIPTION: Edit and read footnotes.
 :END:
 #+cindex: footnotes
-
-Org mode supports the creation of footnotes.
 
 A footnote is started by a footnote marker in square brackets in
 column 0, no indentation allowed.  It ends at the next footnote
@@ -14694,7 +14692,7 @@ the default menu entry:
 The text before the first headline belongs to the /Top/ node, i.e.,
 the node in which a reader enters an Info manual.  As such, it is
 expected not to appear in printed output generated from the =.texi=
-file.  See [[info:texinfo::The%20Top%20Node]], for more information.
+file.  See [[info:texinfo::The Top Node]], for more information.
 
 *** Indices
 :PROPERTIES:
@@ -14913,7 +14911,7 @@ becomes
 :END:
 
 Here is a more detailed example Org file.  See
-[[info:texinfo::GNU%20Sample%20Texts]] for an equivalent example using
+[[info:texinfo::GNU Sample Texts]] for an equivalent example using
 Texinfo code.
 
 #+begin_example
@@ -18598,7 +18596,7 @@ changes.
 
       - =logdone= ::
 
-        Record a timestamp when an item is marked DONE.
+        Record a timestamp when an item is marked as done.
 
       - =lognotedone= ::
 
@@ -18606,7 +18604,7 @@ changes.
 
       - =nologdone= ::
 
-        Do not record when items are marked DONE.
+        Do not record when items are marked as done.
 
       - =logrepeat= ::
 
@@ -19066,7 +19064,7 @@ packages are documented here.
 
   Org uses the Calc package for implementing spreadsheet functionality
   in its tables (see [[*The Spreadsheet]]).  Org also uses Calc for
-  embedded calculations.  See [[info:calc::Embedded%20Mode][GNU Emacs Calc Manual]].
+  embedded calculations.  See [[info:calc::Embedded Mode][GNU Emacs Calc Manual]].
 
 - =constants.el= by Carsten Dominik ::
   #+cindex: @file{constants.el}
@@ -20954,7 +20952,7 @@ stars.
 [fn:5] The indirect buffer contains the entire buffer, but is narrowed
 to the current tree.  Editing the indirect buffer also changes the
 original buffer, but without affecting visibility in that buffer.  For
-more information about indirect buffers, see [[info:emacs#Indirect%20Buffers][GNU Emacs Manual]].
+more information about indirect buffers, see [[info:emacs#Indirect Buffers][GNU Emacs Manual]].
 
 [fn:6] When ~org-agenda-inhibit-startup~ is non-~nil~, Org does not
 honor the default visibility state when first opening a file for the
@@ -21027,7 +21025,7 @@ parenthesis or white spaces, either.  URIs within angle brackets have
 no such limitation.
 
 [fn:24] More accurately, the precise behavior depends on how point
-arrived there---see [[info:elisp#Invisible%20Text][Invisible Text]].
+arrived there---see [[info:elisp#Invisible Text][Invisible Text]].
 
 [fn:25] To insert a link targeting a headline, in-buffer completion
 can be used.  Just type a star followed by a few optional letters into
