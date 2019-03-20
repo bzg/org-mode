@@ -93,7 +93,7 @@ The return value is a string naming the thing at point."
       (cons "file-option" nil))
      ;; Link abbreviation.
      ((save-excursion
-	(skip-chars-backward "A-Za-z0-9-_")
+	(skip-chars-backward "-A-Za-z0-9_")
 	(and (eq ?\[ (char-before))
 	     (eq ?\[ (char-before (1- (point))))))
       (cons "link" nil))
