@@ -24,11 +24,51 @@ to the following rules, applied in order:
 1. All consecutive =\= characters at the end of the link must be
    escaped;
 2. Any =]= character at the very end of the link must be escaped;
-3. Any =]= character followed by either =[= or =]= must be escaped;
-4. Others =]= and =\= characters need not be escaped.
+3. All consecutive =\= characters preceding =][= or =]]= patterns must
+   be escaped;
+4. Any =]= character followed by either =[= or =]= must be escaped;
+5. Others =]= and =\= characters need not be escaped.
 
 When in doubt, use the function ~org-link-escape~ in order to turn
 a link string into its properly escaped form.
+
+The following function will help switching your links to the new
+syntax:
+
+#+begin_src emacs-lisp
+(defun org-update-link-syntax (&optional no-query)
+  "Update syntax for links in current buffer.
+Query before replacing a link, unless optional argument NO-QUERY
+is non-nil."
+  (interactive "P")
+  (org-with-point-at 1
+    (let ((case-fold-search t))
+      (while (re-search-forward "\\[\\[[^]]*?%\\(?:2[05]\\|5[BD]\\)" nil t)
+        (let ((object (save-match-data (org-element-context))))
+          (when (and (eq 'link (org-element-type object))
+                     (= (match-beginning 0)
+                        (org-element-property :begin object)))
+            (goto-char (org-element-property :end object))
+            (let* ((uri-start (+ 2 (match-beginning 0)))
+                   (uri-end (save-excursion
+                              (goto-char uri-start)
+                              (re-search-forward "\\][][]" nil t)
+                              (match-beginning 0)))
+                   (uri (buffer-substring-no-properties uri-start uri-end))
+                   (start 0))
+              (when (catch :obsolete
+                      (while (string-match "%\\(..\\)?" uri start)
+                        (setq start (match-end 0))
+                        (unless (member (match-string 1 uri)
+                                        '("25" "5B" "5D" "20"))
+                          (throw :obsolete nil)))
+                      (or no-query
+                          (y-or-n-p
+                           (format "Possibly obsolete URI syntax: %S.  Update?"
+                                   uri))))
+                (setf (buffer-substring uri-start uri-end)
+                      (org-link-escape (org-link-decode uri)))))))))))
+#+end_src
 
 The old ~org-link-escape~ and ~org-link-unescape~ functions have been
 renamed into ~org-link-encode~ and ~org-link-decode~.
