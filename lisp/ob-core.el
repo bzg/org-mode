@@ -3135,7 +3135,8 @@ after the babel API for OLD-type source blocks is fully defined.
 Callers of this function will probably want to add an entry to
 `org-src-lang-modes' as well."
   (dolist (fn '("execute" "expand-body" "prep-session"
-		"variable-assignments" "load-session"))
+		"variable-assignments" "load-session"
+		"edit-prep"))
     (let ((sym (intern-soft (concat "org-babel-" fn ":" old))))
       (when (and sym (fboundp sym))
 	(defalias (intern (concat "org-babel-" fn ":" new)) sym))))
