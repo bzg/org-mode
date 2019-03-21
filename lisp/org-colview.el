@@ -482,13 +482,15 @@ for the duration of the command.")
 (defun org-columns-hscroll-title ()
   "Set the `header-line-format' so that it scrolls along with the table."
   (sit-for .0001) ; need to force a redisplay to update window-hscroll
-  (when (not (= (window-hscroll) org-columns-previous-hscroll))
-    (setq header-line-format
-	  (concat (substring org-columns-full-header-line-format 0 1)
-		  (substring org-columns-full-header-line-format
-			     (1+ (window-hscroll))))
-	  org-columns-previous-hscroll (window-hscroll))
-    (force-mode-line-update)))
+  (let ((hscroll (window-hscroll)))
+    (when (/= org-columns-previous-hscroll hscroll)
+      (setq header-line-format
+	    (concat (substring org-columns-full-header-line-format 0 1)
+		    (substring org-columns-full-header-line-format
+			       (min (length org-columns-full-header-line-format)
+				    (1+ hscroll))))
+	    org-columns-previous-hscroll hscroll)
+      (force-mode-line-update))))
 
 (defvar org-colview-initial-truncate-line-value nil
   "Remember the value of `truncate-lines' across colview.")
