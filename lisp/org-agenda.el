@@ -8484,7 +8484,7 @@ Point is in the buffer where the item originated.")
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
 	 (type (org-get-at-bol 'type))
-	 dbeg dend (n 0) conf)
+	 dbeg dend (n 0))
     (org-with-remote-undo buffer
       (with-current-buffer buffer
 	(save-excursion
@@ -8496,14 +8496,20 @@ Point is in the buffer where the item originated.")
 		  dend (min (point-max) (1+ (point-at-eol)))))
 	  (goto-char dbeg)
 	  (while (re-search-forward "^[ \t]*\\S-" dend t) (setq n (1+ n)))))
-      (setq conf (or (eq t org-agenda-confirm-kill)
-		     (and (numberp org-agenda-confirm-kill)
-			  (> n org-agenda-confirm-kill))))
-      (and conf
-	   (not (y-or-n-p
-		 (format "Delete entry with %d lines in buffer \"%s\"? "
-			 n (buffer-name buffer))))
-	   (error "Abort"))
+      (when (or (eq t org-agenda-confirm-kill)
+		(and (numberp org-agenda-confirm-kill)
+		     (> n org-agenda-confirm-kill)))
+	(let ((win-conf (current-window-configuration)))
+	  (unwind-protect
+	      (and
+	       (prog2
+		   (org-agenda-tree-to-indirect-buffer nil)
+		   (not (y-or-n-p
+			 (format "Delete entry with %d lines in buffer \"%s\"? "
+				 n (buffer-name buffer))))
+		 (kill-buffer org-last-indirect-buffer))
+	       (error "Abort"))
+	    (set-window-configuration win-conf))))
       (let ((org-agenda-buffer-name bufname-orig))
 	(org-remove-subtree-entries-from-agenda buffer dbeg dend))
       (with-current-buffer buffer (delete-region dbeg dend))
