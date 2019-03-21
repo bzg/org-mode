@@ -241,6 +241,11 @@ The ~:mkdirp~ header argument used to only work for ~:tangle~ tangle
 files. Now ~:mkdirp~ works for ~:dir~ too. This is more convenient for
 specify default directory and with ~:file~ header argument.
 
+*** New variable: ~org-agenda-breadcrumbs-separator~
+If breadcrumbs are showed in org-agenda with the help of "%b" format
+in ~org-agenda-prefix-format~, user can customize breadcrumbs's
+separator using ~org-agenda-breadcrumbs-separator~.
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists

@@ -1708,6 +1708,13 @@ Custom commands can set this variable in the options section."
   :version "26.1"
   :package-version '(Org . "9.1"))
 
+(defcustom org-agenda-breadcrumbs-separator "->"
+  "The separator of breadcrumbs in agenda lines."
+  :group 'org-agenda-line-format
+  :package-version '(Org . "9.3")
+  :type 'string
+  :safe #'stringp)
+
 (defvar org-prefix-format-compiled nil
   "The compiled prefix format and associated variables.
 This is a list where first element is a list of variable bindings, and second
@@ -6556,8 +6563,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	  (setq breadcrumbs (org-with-point-at (org-get-at-bol 'org-marker)
 			      (let ((s (org-format-outline-path (org-get-outline-path)
 								(1- (frame-width))
-								nil "->")))
-				(if (eq "" s) "" (concat s "->"))))))
+								nil org-agenda-breadcrumbs-separator)))
+				(if (eq "" s) "" (concat s org-agenda-breadcrumbs-separator))))))
 	(setq time (cond (s2 (concat
 			      (org-agenda-time-of-day-to-ampm-maybe s1)
 			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
