@@ -130,9 +130,8 @@ numbered list to a lettered list.
 
 *** Add a dispatcher command to insert dynamic blocks
 
-You can add dynamic block into ~org-dynamic-block-alist~ with function
-~org-dynamic-block-define~.  All dynamic blocks in
-~org-dynamic-block-define~ can be used by
+You can add new dynamic blocks with function
+~org-dynamic-block-define~.  All such dynamic blocks can be used by
 ~org-dynamic-block-insert-dblock~ command.
 
 *** Babel

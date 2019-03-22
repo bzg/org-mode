@@ -9575,16 +9575,13 @@ If COMMAND is not given, use `org-update-dblock'."
 	(unless (re-search-forward org-dblock-end-re nil t)
 	  (error "Dynamic block not terminated"))))))
 
-(defcustom org-dynamic-block-alist nil
+(defvar org-dynamic-block-alist nil
   "Alist defining all the Org dynamic blocks.
+
 The key is the dynamic block type name, as a string.  The value
-is the function used to insert the dynamic block."
-  :group 'org-block
-  :package-version '(Org . "9.3")
-  :type '(alist :tag "Dynamic block name"
-		:key-type string
-                :value-type function)
-  :safe #'listp)
+is the function used to insert the dynamic block.
+
+Use `org-dynamic-block-define' to populate it.")
 
 (defun org-dynamic-block-function (type)
   "Return function associated to a given dynamic block type.
