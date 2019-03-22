@@ -9593,8 +9593,12 @@ TYPE is the dynamic block type, as a string."
   (mapcar #'car org-dynamic-block-alist))
 
 (defun org-dynamic-block-define (type func)
-  "Define dynamic block TYPE with FUNC."
-  (push (cons type func) org-dynamic-block-alist))
+  "Define dynamic block TYPE with FUNC.
+TYPE is a string.  FUNC is the function creating the dynamic
+block of such type."
+  (pcase (assoc type org-dynamic-block-alist)
+    (`nil (push (cons type func) org-dynamic-block-alist))
+    (`(,def . ,_) (setcdr def func))))
 
 (defun org-dynamic-block-insert-dblock (type)
   "Insert a dynamic block of type TYPE.
