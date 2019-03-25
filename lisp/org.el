@@ -17512,7 +17512,7 @@ this numeric value."
     (unless inc (setq inc 1))
     (let ((pos (point))
 	  (beg (skip-chars-backward "-+^/*0-9eE."))
-	  (end (skip-chars-forward "-+^/*0-9eE^.")) nap)
+	  (end (skip-chars-forward "-+^/*0-9eE.")) nap)
       (setq nap (buffer-substring-no-properties
 		 (+ pos beg) (+ pos beg end)))
       (delete-region (+ pos beg) (+ pos beg end))
@@ -19364,7 +19364,7 @@ assumed to be significant there."
 (defun org-fill-line-break-nobreak-p ()
   "Non-nil when a new line at point would create an Org line break."
   (save-excursion
-    (skip-chars-backward "[ \t]")
+    (skip-chars-backward " \t")
     (skip-chars-backward "\\\\")
     (looking-at "\\\\\\\\\\($\\|[^\\]\\)")))
 
