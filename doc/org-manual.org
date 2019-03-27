@@ -8192,7 +8192,7 @@ important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
 Org can select items based on various criteria and display them in
-a separate buffer.  Seven different view types are provided:
+a separate buffer.  Six different view types are provided:
 
 - an /agenda/ that is like a calendar and shows information for
   specific dates,
