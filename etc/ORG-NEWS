@@ -54,18 +54,11 @@ is non-nil."
                               (goto-char uri-start)
                               (re-search-forward "\\][][]" nil t)
                               (match-beginning 0)))
-                   (uri (buffer-substring-no-properties uri-start uri-end))
-                   (start 0))
-              (when (catch :obsolete
-                      (while (string-match "%\\(..\\)?" uri start)
-                        (setq start (match-end 0))
-                        (unless (member (match-string 1 uri)
-                                        '("25" "5B" "5D" "20"))
-                          (throw :obsolete nil)))
-                      (or no-query
-                          (y-or-n-p
-                           (format "Possibly obsolete URI syntax: %S.  Update?"
-                                   uri))))
+                   (uri (buffer-substring-no-properties uri-start uri-end)))
+              (when (or no-query
+                        (y-or-n-p
+                         (format "Possibly obsolete URI syntax: %S.  Fix? "
+                                 uri)))
                 (setf (buffer-substring uri-start uri-end)
                       (org-link-escape (org-link-decode uri)))))))))))
 #+end_src
