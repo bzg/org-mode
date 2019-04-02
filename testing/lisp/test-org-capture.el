@@ -223,7 +223,16 @@
 		 :immediate-finish t))))
 	(org-capture nil "t")
 	(org-capture '(16))
-	(buffer-substring (point) (line-end-position)))))))
+	(buffer-substring (point) (line-end-position))))))
+  ;; Do not raise an error on empty entries.
+  (should
+   (org-test-with-temp-text-in-file ""
+     (let* ((file (buffer-file-name))
+	    (org-capture-templates
+	     `(("t" "Test" entry (file+headline ,file "A") "** "
+		:immediate-finish t))))
+       (org-capture nil "t")
+       (buffer-string)))))
 
 (ert-deftest test-org-capture/item ()
   "Test `item' type in capture template."

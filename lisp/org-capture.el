@@ -1608,10 +1608,8 @@ The template may still contain \"%?\" for cursor positioning."
 		      (org-get-x-clipboard 'CLIPBOARD)
 		      (org-get-x-clipboard 'SECONDARY)
 		      v-c))))
-
     (setq org-store-link-plist (plist-put org-store-link-plist :annotation v-a))
     (setq org-store-link-plist (plist-put org-store-link-plist :initial v-i))
-
     (unless template
       (setq template "")
       (message "no template") (ding)
@@ -1623,7 +1621,6 @@ The template may still contain \"%?\" for cursor positioning."
       (setq mark-active nil)
       (insert template)
       (goto-char (point-min))
-
       ;; %[] insert contents of a file.
       (save-excursion
 	(while (re-search-forward "%\\[\\(.+\\)\\]" nil t)
@@ -1640,10 +1637,8 @@ The template may still contain \"%?\" for cursor positioning."
 		 (insert (format "%%![couldn not insert %s: %s]"
 				 filename
 				 error))))))))
-
       ;; Mark %() embedded elisp for later evaluation.
       (org-capture-expand-embedded-elisp 'mark)
-
       ;; Expand non-interactive templates.
       (let ((regexp "%\\(:[-a-za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlntTuUx]\\)"))
 	(save-excursion
@@ -1693,10 +1688,8 @@ The template may still contain \"%?\" for cursor positioning."
 		       ;; Escape sensitive characters.
 		       (replace-regexp-in-string "[\\\"]" "\\\\\\&" replacement)
 		     replacement))))))))
-
       ;; Expand %() embedded Elisp.  Limit to Sexp originally marked.
       (org-capture-expand-embedded-elisp)
-
       ;; Expand interactive templates.  This is the last step so that
       ;; template is mostly expanded when prompting happens.  Turn on
       ;; Org mode and set local variables.  This is to support
@@ -1814,7 +1807,6 @@ The template may still contain \"%?\" for cursor positioning."
 		    (_
 		     (error "Unknown template placeholder: \"%%^%s\""
 			    key))))))))
-
 	;; Replace %n escapes with nth %^{...} string.
 	(setq strings (nreverse strings))
 	(save-excursion
@@ -1823,16 +1815,16 @@ The template may still contain \"%?\" for cursor positioning."
 	      (replace-match
 	       (nth (1- (string-to-number (match-string 1))) strings)
 	       nil t)))))
-
       ;; Make sure there are no empty lines before the text, and that
       ;; it ends with a newline character or it is empty.
       (skip-chars-forward " \t\n")
       (delete-region (point-min) (line-beginning-position))
       (goto-char (point-max))
       (skip-chars-backward " \t\n")
-      (delete-region (point) (point-max))
-      (unless (bobp) (insert "\n"))
-
+      (if (bobp) (delete-region (point) (line-end-position))
+	(end-of-line)
+	(delete-region (point) (point-max))
+	(insert "\n"))
       ;; Return the expanded template and kill the capture buffer.
       (untabify (point-min) (point-max))
       (set-buffer-modified-p nil)
