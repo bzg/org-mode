@@ -72,7 +72,7 @@ Should accept a notmuch search string as the sole argument."
 
 (defun org-notmuch-store-link ()
   "Store a link to a notmuch search or message."
-  (when (eq major-mode 'notmuch-show-mode)
+  (when (memq major-mode '(notmuch-show-mode notmuch-tree-mode))
     (let* ((message-id (notmuch-show-get-message-id t))
 	   (subject (notmuch-show-get-subject))
 	   (to (notmuch-show-get-to))
