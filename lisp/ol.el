@@ -1307,12 +1307,15 @@ is non-nil, move backward."
     (setq org-link--search-failed nil)
     (catch :found
       (while (funcall search-fun org-link-any-re nil t)
-	(pcase (org-element-lineage (org-element-context) '(link) t)
-	  (`nil nil)
-	  (link
-	   (goto-char (org-element-property :begin link))
-	   (when (org-invisible-p) (org-show-context))
-	   (throw :found t))))
+	(let ((context (save-excursion
+			 (forward-char -1)
+			 (org-element-context))))
+	  (pcase (org-element-lineage context '(link) t)
+	    (`nil nil)
+	    (link
+	     (goto-char (org-element-property :begin link))
+	     (when (org-invisible-p) (org-show-context))
+	     (throw :found t)))))
       (goto-char pos)
       (setq org-link--search-failed t)
       (message "No further link found"))))

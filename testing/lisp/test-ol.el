@@ -320,7 +320,13 @@
 	    (let* ((this-command 'org-next-link)
 		   (last-command this-command))
 	      (org-next-link))
-	    (buffer-substring (point) (line-end-position))))))
+	    (buffer-substring (point) (line-end-position)))))
+  ;; Find links with item tags.
+  (should
+   (equal "[[link1]]"
+	  (org-test-with-temp-text "- tag [[link1]] :: description"
+	    (org-next-link)
+	    (buffer-substring (point) (search-forward "]]" nil t))))))
 
 (ert-deftest test-ol/previous-link ()
   "Test `org-previous-link' specifications."
