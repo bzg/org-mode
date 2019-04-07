@@ -110,7 +110,7 @@
 (defun org-eldoc-get-mode-local-documentation-function (lang)
   "Check if LANG-mode sets eldoc-documentation-function and return its value."
   (let ((cached-func (gethash lang org-eldoc-local-functions-cache 'empty))
-        (mode-func (intern-soft (format "%s-mode" lang)))
+        (mode-func (org-src-get-lang-mode lang))
         doc-func)
     (if (eq 'empty cached-func)
         (when (fboundp mode-func)
