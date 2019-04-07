@@ -301,15 +301,6 @@ Return nil if there is no such buffer."
 	     (eq (marker-buffer end) (marker-buffer org-src--end-marker))
 	     (throw 'exit b))))))
 
-(defun org-src--get-lang-mode (lang)
-  "Return major mode that should be used for LANG.
-LANG is a string, and the returned major mode is a symbol."
-  (intern
-   (concat
-    (let ((l (or (cdr (assoc lang org-src-lang-modes)) lang)))
-      (if (symbolp l) (symbol-name l) l))
-    "-mode")))
-
 (defun org-src--coordinates (pos beg end)
   "Return coordinates of POS relatively to BEG and END.
 POS, BEG and END are buffer positions.  Return value is either
@@ -568,7 +559,7 @@ Leave point in edit buffer."
   "Fontify code block.
 This function is called by emacs automatic fontification, as long
 as `org-src-fontify-natively' is non-nil."
-  (let ((lang-mode (org-src--get-lang-mode lang)))
+  (let ((lang-mode (org-src-get-lang-mode lang)))
     (when (fboundp lang-mode)
       (let ((string (buffer-substring-no-properties start end))
 	    (modified (buffer-modified-p))
@@ -762,6 +753,15 @@ Org-babel commands."
     (org-src-do-at-code-block
      (call-interactively (lookup-key org-babel-map key)))))
 
+(defun org-src-get-lang-mode (lang)
+  "Return major mode that should be used for LANG.
+LANG is a string, and the returned major mode is a symbol."
+  (intern
+   (concat
+    (let ((l (or (cdr (assoc lang org-src-lang-modes)) lang)))
+      (if (symbolp l) (symbol-name l) l))
+    "-mode")))
+
 (defun org-src-edit-buffer-p (&optional buffer)
   "Non-nil when current buffer is a source editing buffer.
 If BUFFER is non-nil, test it instead."
@@ -948,7 +948,7 @@ the LaTeX environment in the Org mode buffer."
     (org-src--edit-element
      element
      (org-src--construct-edit-buffer-name (buffer-name) "LaTeX environment")
-     (org-src--get-lang-mode "latex")
+     (org-src-get-lang-mode "latex")
      t)
     t))
 
@@ -973,7 +973,7 @@ Throw an error when not at an export block."
 			       ;; Missing export-block type.  Fallback
 			       ;; to default mode.
 			       "fundamental")))
-	   (mode (org-src--get-lang-mode type)))
+	   (mode (org-src-get-lang-mode type)))
       (unless (functionp mode) (error "No such language mode: %s" mode))
       (org-src--edit-element
        element
@@ -1006,7 +1006,7 @@ name of the sub-editing buffer."
     (let* ((lang
 	    (if (eq type 'src-block) (org-element-property :language element)
 	      "example"))
-	   (lang-f (and (eq type 'src-block) (org-src--get-lang-mode lang)))
+	   (lang-f (and (eq type 'src-block) (org-src-get-lang-mode lang)))
 	   (babel-info (and (eq type 'src-block)
 			    (org-babel-get-src-block-info 'light)))
 	   deactivate-mark)
@@ -1039,7 +1039,7 @@ name of the sub-editing buffer."
 		 (org-src--on-datum-p context))
       (user-error "Not on inline source code"))
     (let* ((lang (org-element-property :language context))
-	   (lang-f (org-src--get-lang-mode lang))
+	   (lang-f (org-src-get-lang-mode lang))
 	   (babel-info (org-babel-get-src-block-info 'light))
 	   deactivate-mark)
       (unless (functionp lang-f) (error "No such language mode: %s" lang-f))
