@@ -241,10 +241,9 @@ the hidden cloze during a test.")
 
 (defun org-drill--compute-cloze-keywords ()
   (list (list (org-drill--compute-cloze-regexp)
-              (copy-list '(1 'org-drill-visible-cloze-face nil))
-              (copy-list '(2 'org-drill-visible-cloze-hint-face t))
-              (copy-list '(3 'org-drill-visible-cloze-face nil))
-              )))
+              (list 1 'org-drill-visible-cloze-face nil)
+              (list 2 'org-drill-visible-cloze-hint-face t)
+              (list 3 'org-drill-visible-cloze-face nil))))
 
 (defvar-local org-drill-cloze-regexp
   (org-drill--compute-cloze-regexp))
@@ -1011,7 +1010,7 @@ in the matrix."
      (learn-str
       (let ((learn-data (or (and learn-str
                                  (read learn-str))
-                            (copy-list initial-repetition-state))))
+                            (copy-sequence initial-repetition-state))))
         (list (nth 0 learn-data)        ; last interval
               (nth 1 learn-data)        ; repetitions
               (org-drill-entry-failure-count)
@@ -1026,7 +1025,7 @@ in the matrix."
             (org-drill-entry-total-repeats)
             (org-drill-entry-average-quality)
             (org-drill-entry-ease)))
-     (t  ; virgin item
+     (t					; virgin item
       (list 0 0 0 0 nil nil)))))
 
 
