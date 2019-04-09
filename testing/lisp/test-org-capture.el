@@ -292,6 +292,41 @@
 	(org-capture nil "t")
 	(org-capture-finalize))
       (buffer-string))))
+  ;; If there is no list and `:prepend' is non-nil, insert list at the
+  ;; beginning of the entry, or the beginning of the buffer.  However,
+  ;; preserve properties drawer and planning info, if any.
+  (should
+   (equal
+    "* A\n- X\nSome text\n"
+    (org-test-with-temp-text-in-file "* A\nSome text"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+headline ,file "A") "- X"
+		 :prepend t))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  (should
+   (equal
+    "- X\nText\n"
+    (org-test-with-temp-text-in-file "Text"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file ,file) "- X" :prepend t))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
+  (should
+   (equal
+    "* A\nSCHEDULED: <2012-03-29 Thu>\n- X\nText\n"
+    (org-test-with-temp-text-in-file "* A\nSCHEDULED: <2012-03-29 Thu>\nText"
+      (let* ((file (buffer-file-name))
+	     (org-capture-templates
+	      `(("t" "Item" item (file+headline ,file "A") "- X"
+		 :prepend t))))
+	(org-capture nil "t")
+	(org-capture-finalize))
+      (buffer-string))))
   ;; When `:prepend' is nil, insert new item as the last top-level
   ;; item.
   (should
