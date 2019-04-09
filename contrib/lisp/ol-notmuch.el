@@ -56,12 +56,13 @@ Should accept a notmuch search string as the sole argument."
 (defcustom org-notmuch-search-open-function
   'org-notmuch-search-follow-link
   "Function used to follow notmuch-search links.
-
 Should accept a notmuch search string as the sole argument."
   :group 'org-notmuch
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'function)
+
+(make-obsolete-variable 'org-notmuch-search-open-function nil "9.3")
 
 
 
@@ -116,7 +117,7 @@ Can link to more than one message, if so all matching messages are shown."
 (defun org-notmuch-search-open (path)
   "Follow a notmuch message link specified by PATH."
   (message "%s" path)
-  (funcall org-notmuch-search-open-function path))
+  (org-notmuch-search-follow-link path))
 
 (defun org-notmuch-search-follow-link (search)
   "Follow a notmuch link by displaying SEARCH in notmuch-search mode."
@@ -124,6 +125,25 @@ Can link to more than one message, if so all matching messages are shown."
   (notmuch-search search))
 
 
+
+(org-link-set-parameters "notmuch-tree"
+			 :follow #'org-notmuch-tree-open
+			 :store #'org-notmuch-tree-store-link)
+
+(defun org-notmuch-tree-store-link ()
+  "Store a link to a notmuch search or message."
+  (when (eq major-mode 'notmuch-tree-mode)
+    (let ((link (concat "notmuch-tree:" (notmuch-tree-get-query)))
+	  (desc (concat "Notmuch tree: " (notmuch-tree-get-query))))
+      (org-store-link-props :type "notmuch-tree"
+			    :link link
+			    :description desc)
+      link)))
+
+(defun org-notmuch-tree-open (path)
+  "Follow a notmuch message link specified by PATH."
+  (message "%s" path)
+  (org-notmuch-tree-follow-link path))
 
 (defun org-notmuch-tree-follow-link (search)
   "Follow a notmuch link by displaying SEARCH in notmuch-tree mode."
