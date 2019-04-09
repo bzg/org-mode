@@ -1187,8 +1187,14 @@ may have been stored before."
 					       item))
 	      (throw :found t)))
 	  ;; No list found.  Move to the location when to insert
-	  ;; template.
-	  (goto-char (if prepend? beg end)))))
+	  ;; template.  Skip planning info and properties drawers, if
+	  ;; any.
+	  (goto-char (cond ((not prepend?) end)
+			   ((org-before-first-heading-p) beg)
+			   (t (max (save-excursion
+				     (org-end-of-meta-data)
+				     (point))
+				   beg)))))))
     ;; Insert template.
     (let ((origin (point)))
       (unless (bolp) (insert "\n"))
