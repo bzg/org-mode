@@ -352,6 +352,11 @@
 	  (org-test-with-temp-text "[[link1]]\n[[link2<point>]]"
 	    (org-previous-link)
 	    (buffer-substring (point) (line-end-position)))))
+  (should
+   (equal "[[link1]]"
+	  (org-test-with-temp-text "line\n[[link1]]\n[[link2<point>]]"
+	    (org-previous-link)
+	    (buffer-substring (point) (line-end-position)))))
   ;; Ignore fake links.
   (should
    (equal "[[truelink]]"

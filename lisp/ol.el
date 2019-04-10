@@ -1308,7 +1308,7 @@ is non-nil, move backward."
     (catch :found
       (while (funcall search-fun org-link-any-re nil t)
 	(let ((context (save-excursion
-			 (forward-char -1)
+			 (unless search-backward (forward-char -1))
 			 (org-element-context))))
 	  (pcase (org-element-lineage context '(link) t)
 	    (`nil nil)
