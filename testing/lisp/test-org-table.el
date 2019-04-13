@@ -2640,7 +2640,14 @@ See also `test-org-table/copy-field'."
       (org-table-toggle-column-width)
       (org-table-align)
       (mapcar (lambda (o) (overlay-get o 'help-echo))
-	      (overlays-in (line-beginning-position) (line-end-position)))))))
+	      (overlays-in (line-beginning-position) (line-end-position))))))
+  ;; Recalculating formulas doesn't change shrunk state.
+  (should
+   (equal "2"
+	  (org-test-with-temp-text "| 1 | <point>0 |\n#+TBLFM: $2=$1+1\n"
+	    (org-table-toggle-column-width)
+	    (org-table-recalculate)
+	    (overlay-get (car (overlays-at (point))) 'help-echo)))))
 
 
 
