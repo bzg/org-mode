@@ -3353,10 +3353,10 @@ existing formula for column %s"
 				 "Out-of-bounds formula.  Add columns? "))
 			   (user-error
 			    "Missing columns in the table.  Aborting"))))))
-	     (org-table-eval-formula nil formula t t t t))))
-	;; Clean up markers and internal text property.
-	(remove-text-properties (point-min) (point-max) '(org-untouchable t))
-	(set-marker end nil)
+	     (org-table-eval-formula nil formula t t t t)))
+	 ;; Clean up markers and internal text property.
+	 (remove-text-properties (point-min) (point-max) '(:org-untouchable t))
+	 (set-marker end nil))
 	(unless noalign
 	  (when org-table-may-need-update (org-table-align))
 	  (when all
