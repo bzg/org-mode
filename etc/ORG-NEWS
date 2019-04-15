@@ -188,6 +188,10 @@ days in the past.
 =<C-u K>= (~org-habit-toggle-display-in-agenda~) in an agenda toggles
 the display of all habits to those which are undone and scheduled.
 This is a function for convenience.
+*** New paramater for SQL Babel blocks: ~:dbconnection~
+The new paramater ~:dbconnection~ allows to specify a connection name
+in a SQL block header: this name is used to look up connection
+parameters in ~sql-connection-alist~.
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
 
