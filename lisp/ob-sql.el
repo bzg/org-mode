@@ -74,6 +74,7 @@
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function cygwin-convert-file-name-to-windows "cygw32.c" (file &optional absolute-p))
 
+(defvar sql-connection-alist)
 (defvar org-babel-default-header-args:sql '())
 
 (defconst org-babel-header-args:sql
