@@ -604,28 +604,28 @@ invisible edits and process them.
 
 The following commands jump to other headlines in the buffer.
 
-- {{{kbd(C-c C-n)}}} (~outline-next-visible-heading~) ::
+- {{{kbd(C-c C-n)}}} (~org-next-visible-heading~) ::
 
      #+kindex: C-c C-n
-     #+findex: outline-next-visible-heading
+     #+findex: org-next-visible-heading
      Next heading.
 
-- {{{kbd(C-c C-p)}}} (~outline-previous-visible-heading~) ::
+- {{{kbd(C-c C-p)}}} (~org-previous-visible-heading~) ::
 
      #+kindex: C-c C-p
-     #+findex: outline-previous-visible-heading
+     #+findex: org-previous-visible-heading
      Previous heading.
 
-- {{{kbd(C-c C-f)}}} (~org-forward-same-level~) ::
+- {{{kbd(C-c C-f)}}} (~org-forward-heading-same-level~) ::
 
      #+kindex: C-c C-f
-     #+findex: org-forward-same-level
+     #+findex: org-forward-heading-same-level
      Next heading same level.
 
-- {{{kbd(C-c C-b)}}} (~org-backward-same-level~) ::
+- {{{kbd(C-c C-b)}}} (~org-backward-heading-same-level~) ::
 
      #+kindex: C-c C-b
-     #+findex: org-backward-same-level
+     #+findex: org-backward-heading-same-level
      Previous heading same level.
 
 - {{{kbd(C-c C-u)}}} (~outline-up-heading~) ::
