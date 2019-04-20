@@ -13277,13 +13277,15 @@ insert the image.  But for TikZ (http://sourceforge.net/projects/pgf/)
 images, the back-end uses an ~\input~ macro wrapped within
 a ~tikzpicture~ environment.
 
-For specifying image =:width=, =:height=, and other =:options=, use
-this syntax:
+For specifying image =:width=, =:height=, =:scale= and other =:options=,
+use this syntax:
 
 #+begin_example
 ,#+ATTR_LATEX: :width 5cm :options angle=90
 [[./img/sed-hr4049.pdf]]
 #+end_example
+
+A =:scale= attribute overrides both =:width= and =:height= attributes.
 
 For custom commands for captions, use the =:caption= attribute.  It
 overrides the default =#+CAPTION= value:

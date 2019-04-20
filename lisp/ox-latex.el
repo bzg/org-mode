@@ -127,6 +127,7 @@
     (:latex-format-headline-function nil nil org-latex-format-headline-function)
     (:latex-format-inlinetask-function nil nil org-latex-format-inlinetask-function)
     (:latex-hyperref-template nil nil org-latex-hyperref-template t)
+    (:latex-image-default-scale nil nil org-latex-image-default-scale)
     (:latex-image-default-height nil nil org-latex-image-default-height)
     (:latex-image-default-option nil nil org-latex-image-default-option)
     (:latex-image-default-width nil nil org-latex-image-default-width)
@@ -707,6 +708,16 @@ This value will not be used if a height is provided."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'string)
+
+(defcustom org-latex-image-default-scale ""
+  "Default scale for images.
+This value will not be used if a width or a scale is provided,
+or if the image is wrapped within a \"wrapfigure\" environment.
+Scale overrides width and height."
+  :group 'org-export-latex
+  :package-version '(Org . "9.3")
+  :type 'string
+  :safe #'stringp)
 
 (defcustom org-latex-image-default-height ""
   "Default height for images.
@@ -2374,13 +2385,18 @@ used as a communication channel."
 	  (if (plist-member attr :center) (plist-get attr :center)
 	    (plist-get info :latex-images-centered)))
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
-	 ;; It is possible to specify width and height in the
-	 ;; ATTR_LATEX line, and also via default variables.
-	 (width (cond ((plist-get attr :width))
+	 ;; It is possible to specify scale or width and height in
+	 ;; the ATTR_LATEX line, and also via default variables.
+	 (scale (cond ((eq float 'wrap) "")
+		      ((plist-get attr :scale))
+		      (t (plist-get info :latex-image-default-scale))))
+	 (width (cond ((org-string-nw-p scale) "")
+		      ((plist-get attr :width))
 		      ((plist-get attr :height) "")
 		      ((eq float 'wrap) "0.48\\textwidth")
 		      (t (plist-get info :latex-image-default-width))))
-	 (height (cond ((plist-get attr :height))
+	 (height (cond ((org-string-nw-p scale) "")
+		       ((plist-get attr :height))
 		       ((or (plist-get attr :width)
 			    (memq float '(figure wrap))) "")
 		       (t (plist-get info :latex-image-default-height))))
@@ -2402,18 +2418,21 @@ used as a communication channel."
 		  (format "\\begin{tikzpicture}[%s]\n%s\n\\end{tikzpicture}"
 			  options
 			  image-code)))
-	  (when (or (org-string-nw-p width) (org-string-nw-p height))
-	    (setq image-code (format "\\resizebox{%s}{%s}{%s}"
-				     (if (org-string-nw-p width) width "!")
-				     (if (org-string-nw-p height) height "!")
-				     image-code))))
+	  (setq image-code
+		(cond ((org-string-nw-p scale)
+		       (format "\\scalebox{%s}{%s}" scale image-code))
+		      ((or (org-string-nw-p width) (org-string-nw-p height))
+		       (format "\\resizebox{%s}{%s}{%s}"
+			       (if (org-string-nw-p width) width "!")
+			       (if (org-string-nw-p height) height "!")
+			       image-code)))))
       ;; For other images:
-      ;; - add width and height to options.
+      ;; - add scale, or width and height to options.
       ;; - include the image with \includegraphics.
-      (when (org-string-nw-p width)
-	(setq options (concat options ",width=" width)))
-      (when (org-string-nw-p height)
-	(setq options (concat options ",height=" height)))
+      (if (org-string-nw-p scale)
+	  (setq options (concat options ",scale=" scale))
+	(when (org-string-nw-p width) (setq options (concat options ",width=" width)))
+	(when (org-string-nw-p height) (setq options (concat options ",height=" height))))
       (let ((search-option (org-element-property :search-option link)))
         (when (and search-option
                    (equal filetype "pdf")
