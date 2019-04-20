@@ -33,7 +33,7 @@
 
 (require 'cl-lib)
 (require 'ox-ascii)
-(declare-function org-bbdb-anniv-export-ical "org-bbdb" nil)
+(declare-function org-bbdb-anniv-export-ical "ol-bbdb" nil)
 
 
 
@@ -971,7 +971,7 @@ FILES is a list of files to build the calendar from."
 		files "")
 	       ;; BBDB anniversaries.
 	       (when (and org-icalendar-include-bbdb-anniversaries
-			  (require 'org-bbdb nil t))
+			  (require 'ol-bbdb nil t))
 		 (with-output-to-string (org-bbdb-anniv-export-ical)))))))
 	  (run-hook-with-args 'org-icalendar-after-save-hook
 			      org-icalendar-combined-agenda-file))

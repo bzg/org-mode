@@ -59,7 +59,7 @@
 ;;	 	      (obe-html-export-citations))))
 
 ;;; Code:
-(require 'org-bibtex)
+(require 'ol-bibtex)
 
 (declare-function org-trim "org" (s &optional keep-lead))
 
