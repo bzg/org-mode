@@ -192,6 +192,26 @@ This is a function for convenience.
 The new paramater ~:dbconnection~ allows to specify a connection name
 in a SQL block header: this name is used to look up connection
 parameters in ~sql-connection-alist~.
+
+*** New =:scale= attribute supported by LaTeX exporters
+
+The builtin "latex" exporters now accept and use a =:scale= attribute,
+which scales an image by a given factor.
+
+This attribute is wrapped adound the =scale= parameter of LaTeX's
+=\includegraphics= (bitmap images) or a TiKZ's =\scalebox=.
+Therefore, its value should be some string palatable to LaTeX as
+a positive float Its default value is an empty string (i.e. disabled).
+
+This attribute overrides the =:width= and =:height= attributes.
+
+#+begin_example
+,#+name: Beastie
+,#+caption: I think I saw this curious horse already, but where ?
+,#+LATEX_ATTR: :scale 2
+[[https://orgmode.org/img/org-mode-unicorn-logo.png]]
+#+end_example
+
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
 
