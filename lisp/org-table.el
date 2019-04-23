@@ -4105,7 +4105,7 @@ beginning and end position of the current table."
 	  (unless quietly
 	    (message "Mapping tables: %d%%"
 		     (floor (* 100.0 (point)) (buffer-size))))
-	  (goto-char (org-element-property :begin table))
+	  (goto-char (org-element-property :post-affiliated table))
 	  (let ((end (copy-marker (org-element-property :end table))))
 	    (unwind-protect
 		(progn (funcall f) (goto-char end))
