@@ -11926,6 +11926,9 @@ It's just a jump to the left...
 #+end_example
 
 ** Beamer Export
+:PROPERTIES:
+:DESCRIPTION: Producing presentations and slides.
+:END:
 #+cindex: Beamer export
 
 Org uses Beamer export to convert an Org file tree structure into
