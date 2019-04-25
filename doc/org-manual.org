@@ -21473,7 +21473,7 @@ through ~word-wrap~.
 
 [fn:149] Also see the variable ~org-adapt-indentation~.
 
-[fn:150] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 4 stars, and so
+[fn:150] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 5 stars, and so
 on.
 
 [fn:151] For a server to host files, consider using a WebDAV server,
