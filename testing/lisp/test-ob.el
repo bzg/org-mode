@@ -1633,7 +1633,14 @@ t
      (org-babel-execute-src-block)
      (message default-directory)
      (prog1 (file-directory-p "data/code")
-       (delete-directory "data" t)))))
+       (delete-directory "data" t))))
+  (should
+   (equal "/tmp/test-dir-no-mkdirp/"
+	  (org-test-with-temp-text-in-file
+	      "#+begin_src emacs-lisp :dir /tmp/test-dir-no-mkdirp
+default-directory
+#+end_src"
+	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/script-escape ()
   ;; Delimited lists of numbers
