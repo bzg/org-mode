@@ -152,6 +152,59 @@ If \\='ask, prompt using `y-or-n-p'.  If t, always get.  If nil, never get."
 	  (const :tag "always get from annex if necessary" t)
 	  (const :tag "never get from annex" nil)))
 
+(defcustom org-attach-commands
+  '(((?a ?\C-a) org-attach-attach
+     "Select a file and attach it to the task, using `org-attach-method'.")
+    ((?c ?\C-c) org-attach-attach-cp
+     "Attach a file using copy method.")
+    ((?m ?\C-m) org-attach-attach-mv
+     "Attach a file using move method.")
+    ((?l ?\C-l) org-attach-attach-ln
+     "Attach a file using link method.")
+    ((?y ?\C-y) org-attach-attach-lns
+     "Attach a file using symbolic-link method.")
+    ((?u ?\C-u) org-attach-url
+     "Attach a file from URL (downloading it).")
+    ((?b) org-attach-buffer
+     "Select a buffer and attach its contents to the task.")
+    ((?n ?\C-n) org-attach-new
+     "Create a new attachment, as an Emacs buffer.")
+    ((?z ?\C-z) org-attach-sync
+     "Synchronize the current task with its attachment\n directory, in case \
+you added attachments yourself.\n")
+    ((?o ?\C-o) org-attach-open
+     "Open current task's attachments.")
+    ((?O) org-attach-open-in-emacs
+     "Like \"o\", but force opening in Emacs.")
+    ((?f ?\C-f) org-attach-reveal
+     "Open current task's attachment directory.")
+    ((?F) org-attach-reveal-in-emacs
+     "Like \"f\", but force using Dired in Emacs.\n")
+    ((?d ?\C-d) org-attach-delete-one
+     "Delete one attachment, you will be prompted for a file name.")
+    ((?D) org-attach-delete-all
+     "Delete all of a task's attachments.  A safer way is\n to open the \
+directory in dired and delete from there.\n")
+    ((?s ?\C-s) org-attach-set-directory
+     "Set a specific attachment directory for this entry or reset to default.")
+    ((?i ?\C-i) org-attach-set-inherit
+     "Make children of the current entry inherit its attachment directory.\n")
+    ((?q) (lambda () (interactive) (message "Abort")) "Abort."))
+  "The list of commands for the attachment dispatcher.
+Each entry in this list is a list of three elements:
+- A list of keys (characters) to select the command (the fist
+  character in the list is shown in the attachment dispatcher's
+  splash buffer and minubuffer prompt).
+- A command that is called interactively when one of these keys
+  is pressed.
+- A docstring for this command in the attachment dispatcher's
+  splash buffer."
+  :group 'org-attach
+  :package-version '(Org . "9.3")
+  :type '(repeat (list (repeat :tag "Keys" character)
+		       (function :tag "Command")
+		       (string :tag "Docstring"))))
+
 ;;;###autoload
 (defun org-attach ()
   "The dispatcher for attachment commands.
@@ -172,59 +225,35 @@ Shows a list of commands and prompts for another key to execute a command."
 	(save-window-excursion
 	  (unless org-attach-expert
 	    (with-output-to-temp-buffer "*Org Attach*"
-	      (princ "Select an Attachment Command:
-
-a       Select a file and attach it to the task, using `org-attach-method'.
-c/m/l/y Attach a file using copy/move/link/symbolic-link method.
-u       Attach a file from URL (downloading it).
-b       Select a buffer and attach its contents to the task.
-n       Create a new attachment, as an Emacs buffer.
-z       Synchronize the current task with its attachment
-        directory, in case you added attachments yourself.
-
-o       Open current task's attachments.
-O       Like \"o\", but force opening in Emacs.
-f       Open current task's attachment directory.
-F       Like \"f\", but force using dired in Emacs.
-
-d       Delete one attachment, you will be prompted for a file name.
-D       Delete all of a task's attachments.  A safer way is
-        to open the directory in dired and delete from there.
-
-s       Set a specific attachment directory for this entry or reset to default.
-i       Make children of the current entry inherit its attachment directory.")))
+	      (princ
+	       (format "Select an Attachment Command:\n\n%s"
+		       (mapconcat
+			(lambda (entry)
+			  (pcase entry
+			    (`((,key . ,_) ,_ ,docstring)
+			     (format "%c       %s"
+				     key
+				     (replace-regexp-in-string "\n\\([\t ]*\\)"
+							       "        "
+							       docstring
+							       nil nil 1)))
+			    (_
+			     (user-error
+			      "Invalid `org-attach-commands' item: %S"
+			      entry))))
+			org-attach-commands
+			"\n")))))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
-	  (message "Select command: [acmlyubnzoOfFdD]")
+	  (message "Select command: [%s]"
+		   (concat (mapcar #'caar org-attach-commands)))
 	  (setq c (read-char-exclusive))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
-      (cond
-       ((memq c '(?a ?\C-a)) (call-interactively 'org-attach-attach))
-       ((memq c '(?c ?\C-c))
-	(let ((org-attach-method 'cp)) (call-interactively 'org-attach-attach)))
-       ((memq c '(?m ?\C-m))
-	(let ((org-attach-method 'mv)) (call-interactively 'org-attach-attach)))
-       ((memq c '(?l ?\C-l))
-	(let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
-       ((memq c '(?y ?\C-y))
-	(let ((org-attach-method 'lns)) (call-interactively 'org-attach-attach)))
-       ((memq c '(?u ?\C-u))
-        (let ((org-attach-method 'url)) (call-interactively 'org-attach-url)))
-       ((eq c ?b) (call-interactively 'org-attach-buffer))
-       ((memq c '(?n ?\C-n)) (call-interactively 'org-attach-new))
-       ((memq c '(?z ?\C-z)) (call-interactively 'org-attach-sync))
-       ((memq c '(?o ?\C-o)) (call-interactively 'org-attach-open))
-       ((eq c ?O)            (call-interactively 'org-attach-open-in-emacs))
-       ((memq c '(?f ?\C-f)) (call-interactively 'org-attach-reveal))
-       ((memq c '(?F))       (call-interactively 'org-attach-reveal-in-emacs))
-       ((memq c '(?d ?\C-d)) (call-interactively
-			      'org-attach-delete-one))
-       ((eq c ?D)            (call-interactively 'org-attach-delete-all))
-       ((eq c ?q)            (message "Abort"))
-       ((memq c '(?s ?\C-s)) (call-interactively
-			      'org-attach-set-directory))
-       ((memq c '(?i ?\C-i)) (call-interactively
-			      'org-attach-set-inherit))
-       (t (error "No such attachment command %c" c))))))
+      (let ((command (cl-some (lambda (entry)
+				(and (memq c (nth 0 entry)) (nth 1 entry)))
+			      org-attach-commands)))
+	(if (commandp command t)
+	    (call-interactively command)
+	  (error "No such attachment command: %c" c))))))
 
 (defun org-attach-dir (&optional create-if-not-exists-p)
   "Return the directory associated with the current entry.
