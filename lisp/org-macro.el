@@ -133,7 +133,7 @@ The two arguments are used in recursive calls."
 			     (cons uri files) templates)))))))))))
     (let ((macros `(("author" . ,(org-macro--find-keyword-value "AUTHOR"))
 		    ("email" . ,(org-macro--find-keyword-value "EMAIL"))
-		    ("title" . ,(org-macro--find-keyword-value "TITLE"))
+		    ("title" . ,(org-macro--find-keyword-value "TITLE" t))
 		    ("date" . ,(org-macro--find-date)))))
       (pcase-dolist (`(,name . ,value) macros)
 	(setq templates (org-macro--set-template name value templates))))
@@ -326,21 +326,24 @@ by `org-link-search', or the empty string."
 	 (error "Macro property failed: cannot find location %s" location))))
     (org-entry-get nil property 'selective)))
 
-(defun org-macro--find-keyword-value (name)
+(defun org-macro--find-keyword-value (name &optional collect)
   "Find value for keyword NAME in current buffer.
-KEYWORD is a string.  Return value associated to the keywords
-named after NAME, as a string, or nil."
+Return value associated to the keywords named after NAME, as
+a string, or nil.  When optional argument COLLECT is non-nil,
+concatenate values, separated with a space, from various keywords
+in the buffer."
   (org-with-point-at 1
     (let ((regexp (format "^[ \t]*#\\+%s:" (regexp-quote name)))
 	  (case-fold-search t)
 	  (result nil))
-      (while (re-search-forward regexp nil t)
-	(let ((element (org-element-at-point)))
-	  (when (eq 'keyword (org-element-type element))
-	    (setq result (concat result
-				 " "
-				 (org-element-property :value element))))))
-      (and result (org-trim result)))))
+      (catch :exit
+	(while (re-search-forward regexp nil t)
+	  (let ((element (org-element-at-point)))
+	    (when (eq 'keyword (org-element-type element))
+	      (let ((value (org-element-property :value element)))
+		(if (not collect) (throw :exit value)
+		  (setq result (concat result " " value)))))))
+	(and result (org-trim result))))))
 
 (defun org-macro--find-date ()
   "Find value for DATE in current buffer.
