@@ -103,18 +103,7 @@
         "#+MACRO: macro expansion\n* COMMENT H1\n** H2\n<point>{{{macro}}}"
       (org-macro-initialize-templates)
       (org-macro-replace-all org-macro-templates)
-      (org-with-wide-buffer (buffer-string)))))
-  ;; User-defined macros take precedence over built-in macros.
-  (should
-   (equal
-    "foo"
-    (org-test-with-temp-text
-        "#+MACRO: title foo\n#+TITLE: bar\n<point>{{{title}}}"
-      (org-macro-initialize-templates)
-      (org-macro-replace-all org-macro-templates)
-      (goto-char (point-max))
-      (buffer-substring-no-properties (line-beginning-position)
-				      (line-end-position))))))
+      (org-with-wide-buffer (buffer-string))))))
 
 (ert-deftest test-org-macro/property ()
   "Test {{{property}}} macro."
