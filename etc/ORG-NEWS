@@ -261,6 +261,10 @@ specify default directory and with ~:file~ header argument.
 If breadcrumbs are showed in org-agenda with the help of "%b" format
 in ~org-agenda-prefix-format~, user can customize breadcrumbs's
 separator using ~org-agenda-breadcrumbs-separator~.
+*** New variable ~org-attach-commands~
+
+This variable makes it possible to customize the list of commands for
+the attachment dispatcher.
 
 * Version 9.2
 ** Incompatible changes
