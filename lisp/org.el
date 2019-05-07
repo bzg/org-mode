@@ -15225,10 +15225,16 @@ When matching, the match groups are the following:
 (defvar org-clock-adjust-closest nil)          ; defined in org-clock.el
 (defun org-timestamp-change (n &optional what updown suppress-tmp-delay)
   "Change the date in the time stamp at point.
-The date will be changed by N times WHAT.  WHAT can be `day', `month',
-`year', `minute', `second'.  If WHAT is not given, the cursor position
-in the timestamp determines what will be changed.
-When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
+
+The date is changed by N times WHAT.  WHAT can be `day', `month',
+`year', `hour', or `minute'.  If WHAT is not given, the cursor
+position in the timestamp determines what is changed.
+
+When optional argument UPDOWN is non-nil, minutes are rounded
+according to `org-time-stamp-rounding-minutes'.
+
+When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
+\"--2d\"."
   (let ((origin (point))
 	(timestamp? (org-at-timestamp-p 'lax))
 	origin-cat
