@@ -3494,7 +3494,7 @@ replacement text.  Here is an example:
         ("google"    . "http://www.google.com/search?q=")
         ("gmap"      . "http://maps.google.com/maps?q=%s")
         ("omap"      . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
-        ("ads"       . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
+        ("ads"       . "https://ui.adsabs.harvard.edu/search/q=%20author%3A\"%s\"")))
 #+end_src
 
 If the replacement text contains the string =%s=, it is replaced with
