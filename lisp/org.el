@@ -6480,11 +6480,11 @@ With a numeric prefix, show all headlines up to that level."
 	  (if (not (org-at-property-p)) (outline-next-heading)
 	    (save-excursion
 	      (org-back-to-heading t)
-	      (outline-hide-subtree)
+	      (org-flag-subtree t)
 	      (org-reveal)
 	      (pcase state
 		("folded"
-		 (outline-hide-subtree))
+		 (org-flag-subtree t))
 		("children"
 		 (org-show-hidden-entry)
 		 (org-show-children))
@@ -7490,7 +7490,7 @@ case."
      (org-skip-whitespace)
      (move-marker ins-point nil)
      (if folded
-	 (outline-hide-subtree)
+	 (org-flag-subtree t)
        (org-show-entry)
        (org-show-children))
      (org-clean-visibility-after-subtree-move)
@@ -7656,7 +7656,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
 		(equal org-subtree-clip (current-kill 0))
 		org-subtree-clip-folded)
        ;; The tree was folded before it was killed/copied
-       (outline-hide-subtree))
+       (org-flag-subtree t))
      (when for-yank (goto-char newend))
      (when remove (pop kill-ring)))))
 
@@ -20365,7 +20365,7 @@ interactive command with similar behavior."
 	     (or (looking-at org-outline-regexp)
 		 (re-search-forward org-outline-regexp-bol end t))
 	     (while (and (< (point) end) (looking-at org-outline-regexp))
-	       (outline-hide-subtree)
+	       (org-flag-subtree t)
 	       (org-cycle-show-empty-lines 'folded)
 	       (condition-case nil
 		   (outline-forward-same-level 1)

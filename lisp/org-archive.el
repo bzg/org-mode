@@ -450,7 +450,7 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 	 (format-time-string
 	  (substring (cdr org-time-stamp-formats) 1 -1)))
 	(outline-up-heading 1 t)
-	(outline-hide-subtree)
+	(org-flag-subtree t)
 	(org-cycle-show-empty-lines 'folded)
 	(when org-provide-todo-statistics
 	  ;; Update TODO statistics of parent.

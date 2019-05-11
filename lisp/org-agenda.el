@@ -8766,7 +8766,7 @@ if it was hidden in the outline."
     (set-window-start (selected-window) (point-at-bol))
     (cond
      ((= more 0)
-      (outline-hide-subtree)
+      (org-flag-subtree t)
       (save-excursion
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'folded))
