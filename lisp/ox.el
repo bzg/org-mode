@@ -4365,7 +4365,7 @@ as returned by `org-export-search-cells'."
   (let ((targets (org-export-search-cells datum)))
     (and targets (cl-some (lambda (cell) (member cell targets)) cells))))
 
-(defun org-export-resolve-fuzzy-link (link info)
+(defun org-export-resolve-fuzzy-link (link info &rest pseudo-types)
   "Return LINK destination.
 
 INFO is a plist holding contextual information.
@@ -4382,6 +4382,10 @@ Return value can be an object or an element:
 
 - Otherwise, throw an error.
 
+PSEUDO-TYPES are pseudo-elements types, i.e., elements defined
+specifically in an export back-end, that could have a name
+affiliated keyword.
+
 Assume LINK type is \"fuzzy\".  White spaces are not
 significant."
   (let* ((search-cells (org-export-string-to-search-cell
@@ -4394,7 +4398,7 @@ significant."
     (if (not (eq cached 'not-found)) cached
       (let ((matches
 	     (org-element-map (plist-get info :parse-tree)
-		 (cons 'target org-element-all-elements)
+		 (append pseudo-types '(target) org-element-all-elements)
 	       (lambda (datum)
 		 (and (org-export-match-search-cell-p datum search-cells)
 		      datum)))))
