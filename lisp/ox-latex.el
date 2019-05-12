@@ -1278,17 +1278,19 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
 	  (and (or user-label force)
 	       (if (and user-label (plist-get info :latex-prefer-user-labels))
 		   user-label
-		 (concat (cl-case type
-			   (headline "sec:")
-			   (table "tab:")
-			   (latex-environment
+		 (concat (pcase type
+			   (`headline "sec:")
+			   (`table "tab:")
+			   (`latex-environment
 			    (and (string-match-p
 				  org-latex-math-environments-re
 				  (org-element-property :value datum))
 				 "eq:"))
-			   (paragraph
+			   (`latex-matrices "eq:")
+			   (`paragraph
 			    (and (org-element-property :caption datum)
-				 "fig:")))
+				 "fig:"))
+			   (_ nil))
 			 (org-export-get-reference datum info))))))
     (cond ((not full) label)
 	  (label (format "\\label{%s}%s"
@@ -2539,9 +2541,10 @@ INFO is a plist holding contextual information.  See
      ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
-      (let ((destination (if (string= type "fuzzy")
-			     (org-export-resolve-fuzzy-link link info)
-			   (org-export-resolve-id-link link info))))
+      (let ((destination
+	     (if (string= type "fuzzy")
+		 (org-export-resolve-fuzzy-link link info 'latex-matrices)
+	       (org-export-resolve-id-link link info))))
 	(cl-case (org-element-type destination)
 	  ;; Id link points to an external file.
 	  (plain-text
@@ -2734,12 +2737,18 @@ it."
 			      'latex-matrices)))
 	    (let* ((caption (and (not (string= mode "inline-math"))
 				 (org-element-property :caption table)))
+		   (name (and (not (string= mode "inline-math"))
+			      (org-element-property :name table)))
 		   (matrices
 		    (list 'latex-matrices
-			  (list :caption caption
+			  ;; Inherit name from the first table.
+			  (list :name name
+				;; FIXME: what syntax for captions?
+				;;
+				;; :caption caption
 				:markup
 				(cond ((string= mode "inline-math") 'inline)
-				      (caption 'equation)
+				      ((or caption name) 'equation)
 				      (t 'math)))))
 		   (previous table)
 		   (next (org-export-get-next-element table info)))
@@ -2754,6 +2763,8 @@ it."
 				    :attr_latex next :mode)
 				   (plist-get info :latex-default-table-mode))
 			       mode))
+		(org-element-put-property table :name nil)
+		(org-element-put-property table :caption nil)
 		(org-element-extract-element previous)
 		(org-element-adopt-elements matrices previous)
 		(setq previous next))
@@ -2763,20 +2774,29 @@ it."
 	      (org-element-put-property
 	       matrices :post-blank (org-element-property :post-blank previous))
 	      (org-element-put-property previous :post-blank 0)
+	      (org-element-put-property table :name nil)
+	      (org-element-put-property table :caption nil)
 	      (org-element-extract-element previous)
 	      (org-element-adopt-elements matrices previous))))))
     info)
   data)
 
-(defun org-latex-matrices (matrices contents _info)
+(defun org-latex-matrices (matrices contents info)
   "Transcode a MATRICES element from Org to LaTeX.
 CONTENTS is a string.  INFO is a plist used as a communication
 channel."
-  (format (cl-case (org-element-property :markup matrices)
-	    (inline "\\(%s\\)")
-	    (equation "\\begin{equation}\n%s\\end{equation}")
-	    (t "\\[\n%s\\]"))
-	  contents))
+  (pcase (org-element-property :markup matrices)
+    (`inline (format "\\(%s\\)" contents))
+    (`equation
+     (let ((caption (org-latex--caption/label-string matrices info))
+	   (caption-above? (org-latex--caption-above-p matrices info)))
+       (concat "\\begin{equation}\n"
+	       (and caption-above? caption)
+	       contents
+	       (and (not caption-above?) caption)
+	       "\\end{equation}")))
+    (_
+     (format "\\[\n%s\\]" contents))))
 
 
 ;;;; Pseudo Object: LaTeX Math Block
