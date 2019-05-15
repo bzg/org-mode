@@ -11551,6 +11551,22 @@ file requires the inclusion of the titletoc package.  Because of
 compatibility issues, titletoc has to be loaded /before/ hyperref.
 Customize the ~org-latex-default-packages-alist~ variable.
 
+The following example inserts a table of contents that links to the
+children of the specified target.
+
+#+begin_example
+,* Target
+  :PROPERTIES:
+  :CUSTOM_ID: TargetSection
+  :END:
+,** Heading A
+,** Heading B
+,* Another section
+,#+TOC: headlines 1 :target #TargetSection
+#+end_example
+
+The =:target= attribute is supported in HTML, Markdown, ODT, and ASCII export.
+
 Use the =TOC= keyword to generate list of tables---respectively, all
 listings---with captions.
 

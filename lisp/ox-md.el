@@ -363,9 +363,14 @@ channel."
 	((string-match-p "\\<headlines\\>" value)
 	 (let ((depth (and (string-match "\\<[0-9]+\\>" value)
 			   (string-to-number (match-string 0 value))))
-	       (local? (string-match-p "\\<local\\>" value)))
+	       (scope
+		(cond
+		 ((string-match ":target +\\(\".+?\"\\|\\S-+\\)" value) ;link
+		  (org-export-resolve-link
+		   (org-strip-quotes (match-string 1 value)) info))
+		 ((string-match-p "\\<local\\>" value) keyword)))) ;local
 	   (org-remove-indentation
-	    (org-md--build-toc info depth keyword local?)))))))
+	    (org-md--build-toc info depth keyword scope)))))))
     (_ (org-export-with-backend 'html keyword contents info))))
 
 
@@ -550,7 +555,7 @@ a communication channel."
 
 ;;;; Template
 
-(defun org-md--build-toc (info &optional n keyword local)
+(defun org-md--build-toc (info &optional n keyword scope)
   "Return a table of contents.
 
 INFO is a plist used as a communication channel.
@@ -561,10 +566,10 @@ depth of the table.
 Optional argument KEYWORD specifies the TOC keyword, if any, from
 which the table of contents generation has been initiated.
 
-When optional argument LOCAL is non-nil, build a table of
-contents according to the current headline."
+When optional argument SCOPE is non-nil, build a table of
+contents according to the specified element."
   (concat
-   (unless local
+   (unless scope
      (let ((style (plist-get info :md-headline-style))
 	   (title (org-html--translate "Table of Contents" info)))
        (org-md--headline-title style 1 title nil)))
@@ -594,7 +599,7 @@ contents according to the current headline."
 			(org-make-tag-string
 			 (org-export-get-tags headline info)))))
 	(concat indentation bullet title tags)))
-    (org-export-collect-headlines info n (and local keyword)) "\n")
+    (org-export-collect-headlines info n scope) "\n")
    "\n"))
 
 (defun org-md--footnote-formatted (footnote info)

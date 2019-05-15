@@ -3197,6 +3197,40 @@ Paragraph[fn:1][fn:2][fn:lbl3:C<<target>>][[test]][[target]]
        (lambda (link) (org-export-resolve-fuzzy-link link info))
        info t))))
 
+(ert-deftest test-org-export/resolve-link ()
+  "Test `org-export-resolve-link' specifications."
+  (should
+   ;; Match ID links
+   (equal
+    "Headline1"
+    (org-test-with-parsed-data "* Headline1
+:PROPERTIES:
+:ID: aaaa
+:END:
+* Headline2"
+      (org-element-property
+       :raw-value (org-export-resolve-link "#aaaa" info)))))
+   ;; Match Custom ID links
+  (should
+   (equal
+    "Headline1"
+    (org-test-with-parsed-data
+	"* Headline1
+:PROPERTIES:
+:CUSTOM_ID: test
+:END:
+* Headline2"
+      (org-element-property
+       :raw-value (org-export-resolve-link "#test" info)))))
+  ;; Match fuzzy links
+  (should
+   (equal
+    "B"
+    (org-test-with-parsed-data
+	"* A\n* B\n* C"
+      (org-element-property
+       :raw-value (org-export-resolve-link "B" info))))))
+
 (defun test-org-gen-loc-list(text type)
   (org-test-with-parsed-data text
     (org-element-map tree type
@@ -4610,6 +4644,56 @@ Another text. (ref:text)
 	    (let ((scope (org-element-map tree 'headline #'identity info t)))
 	      (mapcar (lambda (h) (org-element-property :raw-value h))
 		      (org-export-collect-headlines info nil scope))))))
+  ;; Collect headlines from a scope specified by a fuzzy match
+  (should
+   (equal '("H3" "H4")
+	  (org-test-with-parsed-data "* HA
+** H1
+** H2
+* Target
+  :PROPERTIES:
+  :CUSTOM_ID: TargetSection
+  :END:
+** H3
+** H4
+* HB
+** H5
+"
+	    (mapcar
+	     (lambda (h) (org-element-property :raw-value h))
+	     (org-export-collect-headlines
+	      info
+	      nil
+	      (org-export-resolve-fuzzy-link
+	       (with-temp-buffer
+		 (save-excursion (insert "[[Target]]"))
+		 (org-element-link-parser))
+	       info))))))
+  ;; Collect headlines from a scope specified by CUSTOM_ID
+  (should
+   (equal '("H3" "H4")
+	  (org-test-with-parsed-data "* Not this section
+** H1
+** H2
+* Target
+  :PROPERTIES:
+  :CUSTOM_ID: TargetSection
+  :END:
+** H3
+** H4
+* Another
+** H5
+"
+	    (mapcar
+	     (lambda (h) (org-element-property :raw-value h))
+	     (org-export-collect-headlines
+	      info
+	      nil
+	      (org-export-resolve-id-link
+	       (with-temp-buffer
+		 (save-excursion (insert "[[#TargetSection]]"))
+		 (org-element-link-parser))
+	       info))))))
   ;; When collecting locally, optional level is relative.
   (should
    (equal '("H2")

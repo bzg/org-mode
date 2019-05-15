@@ -4171,6 +4171,9 @@ meant to be translated with `org-export-data' or alike."
 ;; specified id or custom-id in parse tree, the path to the external
 ;; file with the id.
 ;;
+;; `org-export-resolve-link' searches for the destination of a link
+;; within the parsed tree and returns the element.
+;;
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
 ;; when the element isn't numbered.
@@ -4456,6 +4459,31 @@ has type \"radio\"."
 		 t)
 	     radio))
       info 'first-match)))
+
+(defun org-export-resolve-link (link info)
+  "Return LINK destination.
+
+LINK is a string or a link object.
+
+INFO is a plist holding contextual information.
+
+Return value can be an object or an element:
+
+- If LINK path matches an ID or a custom ID, return the headline.
+
+- If LINK path matches a fuzzy link, return its destination.
+
+- Otherwise, throw an error."
+  ;; Convert string links to link objects.
+  (when (stringp link)
+    (setq link (with-temp-buffer
+		 (save-excursion
+		   (insert (org-make-link-string link)))
+		 (org-element-link-parser))))
+  (pcase (org-element-property :type link)
+    ((or "custom-id" "id") (org-export-resolve-id-link link info))
+    ("fuzzy" (org-export-resolve-fuzzy-link link info))
+    (_ (signal 'org-link-broken (list (org-element-property :path link))))))
 
 (defun org-export-file-uri (filename)
   "Return file URI associated to FILENAME."

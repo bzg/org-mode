@@ -212,6 +212,22 @@ This attribute overrides the =:width= and =:height= attributes.
 [[https://orgmode.org/img/org-mode-unicorn-logo.png]]
 #+end_example
 
+*** Allow specifying the target for a table of contents
+
+The =+TOC= keyword now accepts a =:target:= attribute that specifies
+the headline to use for making the table of contents.
+
+#+begin_example
+,* Target
+  :PROPERTIES:
+  :CUSTOM_ID: TargetSection
+  :END:
+,** Heading A
+,** Heading B
+,* Another section
+,#+TOC: headlines 1 :target "#TargetSection"
+#+end_example
+
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
 
