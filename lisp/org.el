@@ -4181,7 +4181,7 @@ Each element is either a cell or a string.
 
 A cell is of the format:
 
-    (\"options\" \"package\" SNIPPET-FLAG)
+    (\"options\" \"package\" SNIPPET-FLAG COMPILERS)
 
 SNIPPET-FLAG, when non-nil, indicates that this package is also
 needed when turning LaTeX snippets into images for inclusion into
