@@ -3173,17 +3173,17 @@ current buffer:
   to the target.  Otherwise it points to the current headline, which
   is also the description[fn:28].
 
-  #+vindex: org-link-to-org-use-id
+  #+vindex: org-id-link-to-org-use-id
   #+cindex: @samp{CUSTOM_ID}, property
   #+cindex: @samp{ID}, property
   If the headline has a =CUSTOM_ID= property, store a link to this
   custom ID.  In addition or alternatively, depending on the value of
-  ~org-link-to-org-use-id~, create and/or use a globally unique =ID=
-  property for the link[fn:29].  So using this command in Org buffers
-  potentially creates two links: a human-readable link from the custom
-  ID, and one that is globally unique and works even if the entry is
-  moved from file to file.  Later, when inserting the link, you need
-  to decide which one to use.
+  ~org-id-link-to-org-use-id~, create and/or use a globally unique
+  =ID= property for the link[fn:29].  So using this command in Org
+  buffers potentially creates two links: a human-readable link from
+  the custom ID, and one that is globally unique and works even if the
+  entry is moved from file to file.  Later, when inserting the link,
+  you need to decide which one to use.
 
 - /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
 
