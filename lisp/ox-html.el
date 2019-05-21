@@ -1998,8 +1998,9 @@ communication channel."
 			(plist-get info :html-metadata-timestamp-format))))
 		    (when (plist-get info :with-creator)
 		      (format "<p class=\"creator\">%s</p>\n" creator))
-		    (format "<p class=\"validation\">%s</p>\n"
-			    validation-link))))
+		    (when (org-string-nw-p validation-link)
+		      (format "<p class=\"validation\">%s</p>\n"
+			      validation-link)))))
 		(t
 		 (let ((formats (plist-get info (if (eq type 'preamble)
 						    :html-preamble-format
