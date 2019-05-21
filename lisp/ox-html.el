@@ -1983,32 +1983,33 @@ communication channel."
 		       (creator (cdr (assq ?c spec)))
 		       (validation-link (cdr (assq ?v spec))))
 		   (concat
-		    (when (and (plist-get info :with-date)
-			       (org-string-nw-p date))
-		      (format "<p class=\"date\">%s: %s</p>\n"
-			      (org-html--translate "Date" info)
-			      date))
-		    (when (and (plist-get info :with-author)
-			       (org-string-nw-p author))
-		      (format "<p class=\"author\">%s: %s</p>\n"
-			      (org-html--translate "Author" info)
-			      author))
-		    (when (and (plist-get info :with-email)
-			       (org-string-nw-p email))
-		      (format "<p class=\"email\">%s: %s</p>\n"
-			      (org-html--translate "Email" info)
-			      email))
-		    (when (plist-get info :time-stamp-file)
-		      (format
-		       "<p class=\"date\">%s: %s</p>\n"
-		       (org-html--translate "Created" info)
-		       (format-time-string
-			(plist-get info :html-metadata-timestamp-format))))
-		    (when (plist-get info :with-creator)
-		      (format "<p class=\"creator\">%s</p>\n" creator))
-		    (when (org-string-nw-p validation-link)
-		      (format "<p class=\"validation\">%s</p>\n"
-			      validation-link)))))
+		    (and (plist-get info :with-date)
+			 (org-string-nw-p date)
+			 (format "<p class=\"date\">%s: %s</p>\n"
+				 (org-html--translate "Date" info)
+				 date))
+		    (and (plist-get info :with-author)
+			 (org-string-nw-p author)
+			 (format "<p class=\"author\">%s: %s</p>\n"
+				 (org-html--translate "Author" info)
+				 author))
+		    (and (plist-get info :with-email)
+			 (org-string-nw-p email)
+			 (format "<p class=\"email\">%s: %s</p>\n"
+				 (org-html--translate "Email" info)
+				 email))
+		    (and (plist-get info :time-stamp-file)
+			 (format
+			  "<p class=\"date\">%s: %s</p>\n"
+			  (org-html--translate "Created" info)
+			  (format-time-string
+			   (plist-get info :html-metadata-timestamp-format))))
+		    (and (plist-get info :with-creator)
+			 (org-string-nw-p creator)
+			 (format "<p class=\"creator\">%s</p>\n" creator))
+		    (and (org-string-nw-p validation-link)
+			 (format "<p class=\"validation\">%s</p>\n"
+				 validation-link)))))
 		(t
 		 (let ((formats (plist-get info (if (eq type 'preamble)
 						    :html-preamble-format
