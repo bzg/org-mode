@@ -3264,8 +3264,8 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 
 (ert-deftest test-org-element/granularity ()
   "Test granularity impact on buffer parsing."
-  (org-test-with-temp-text "
-* Head 1
+  (org-test-with-temp-text
+      "* Head 1
 ** Head 2
 #+BEGIN_CENTER
 Centered paragraph.

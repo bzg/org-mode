@@ -146,7 +146,8 @@ currently executed.")
   (declare (indent 1))
   `(let* ((my-file (or ,file org-test-file))
 	  (visited-p (get-file-buffer my-file))
-	  to-be-removed)
+	  to-be-removed
+	  results)
      (save-window-excursion
        (save-match-data
 	 (find-file my-file)
@@ -160,9 +161,10 @@ currently executed.")
 	       (org-show-subtree)
 	       (org-show-all '(blocks)))
 	   (error nil))
-	 (save-restriction ,@body)))
+	 (setq results (save-restriction ,@body))))
      (unless visited-p
-       (kill-buffer to-be-removed))))
+       (kill-buffer to-be-removed))
+     results))
 (def-edebug-spec org-test-in-example-file (form body))
 
 (defmacro org-test-at-marker (file marker &rest body)
@@ -198,20 +200,30 @@ otherwise place the point at the beginning of the inserted text."
 (def-edebug-spec org-test-with-temp-text (form body))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
-  "Run body in a temporary file buffer with Org mode as the active mode."
+  "Run body in a temporary file buffer with Org mode as the active mode.
+If the string \"<point>\" appears in TEXT then remove it and
+place the point there before running BODY, otherwise place the
+point at the beginning of the buffer."
   (declare (indent 1))
-  (let ((results (cl-gensym)))
-    `(let ((file (make-temp-file "org-test"))
-	   (kill-buffer-query-functions nil)
-	   (inside-text (if (stringp ,text) ,text (eval ,text)))
-	   ,results)
-       (with-temp-file file (insert inside-text))
-       (find-file file)
-       (org-mode)
-       (setq ,results (progn ,@body))
-       (save-buffer) (kill-buffer (current-buffer))
-       (delete-file file)
-       ,results)))
+  `(let ((file (make-temp-file "org-test"))
+	 (inside-text (if (stringp ,text) ,text (eval ,text)))
+	 buffer)
+     (with-temp-file file (insert inside-text))
+     (unwind-protect
+	 (progn
+	   (setq buffer (find-file file))
+	   (when (re-search-forward "<point>" nil t)
+	     (replace-match ""))
+	   (org-mode)
+	   (progn ,@body))
+       (let ((kill-buffer-query-functions nil))
+	 (when buffer
+	   (set-buffer buffer)
+	   ;; Ignore changes, we're deleting the file in the next step
+	   ;; anyways.
+	   (set-buffer-modified-p nil)
+	   (kill-buffer))
+	 (delete-file file)))))
 (def-edebug-spec org-test-with-temp-text-in-file (form body))
 
 (defun org-test-table-target-expect (target &optional expect laps

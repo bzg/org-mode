@@ -1,4 +1,4 @@
-;;; test-ob-R.el --- tests for ob-R.el
+;;; test-property-inheritance.el --- tests for property-inheritance.el
 
 ;; Copyright (c) 2011-2014, 2019 Eric Schulte
 ;; Authors: Eric Schulte
@@ -47,4 +47,4 @@
 
 (provide 'test-ob-R)
 
-;;; test-ob-R.el ends here
+;;; test-property-inheritance.el ends here

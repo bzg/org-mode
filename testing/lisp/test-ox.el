@@ -1352,7 +1352,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	       org-test-dir)
      (narrow-to-region (point) (point-max))
      (org-export-expand-include-keyword)
-     (eq 1 (org-current-level))))
+     (eq 2 (org-current-level))))
   ;; If :minlevel is present do not alter it.
   (should
    (org-test-with-temp-text
@@ -2003,8 +2003,8 @@ In particular, structure of the document mustn't be altered after
 comments removal."
   (should
    (equal "Para1\n\nPara2\n"
-	  (org-test-with-temp-text "
-Para1
+	  (org-test-with-temp-text
+	      "Para1
 # Comment
 
 # Comment
@@ -2012,15 +2012,15 @@ Para2"
 	    (org-export-as (org-test-default-backend)))))
   (should
    (equal "Para1\n\nPara2\n"
-	  (org-test-with-temp-text "
-Para1
+	  (org-test-with-temp-text
+	      "Para1
 # Comment
 Para2"
 	    (org-export-as (org-test-default-backend)))))
   (should
    (equal "[fn:1] Para1\n\n\nPara2\n"
-	  (org-test-with-temp-text "
-\[fn:1] Para1
+	  (org-test-with-temp-text
+	      "[fn:1] Para1
 # Inside definition
 
 
@@ -2029,8 +2029,8 @@ Para2"
 	    (org-export-as (org-test-default-backend)))))
   (should
    (equal "[fn:1] Para1\n\nPara2\n"
-	  (org-test-with-temp-text "
-\[fn:1] Para1
+	  (org-test-with-temp-text
+	      "[fn:1] Para1
 
 # Inside definition
 
@@ -2040,24 +2040,24 @@ Para2"
 	    (org-export-as (org-test-default-backend)))))
   (should
    (equal "[fn:1] Para1\n\nPara2\n"
-	  (org-test-with-temp-text "
-\[fn:1] Para1
+	  (org-test-with-temp-text
+	      "[fn:1] Para1
 # Inside definition
 
 Para2"
 	    (org-export-as (org-test-default-backend)))))
   (should
    (equal "[fn:1] Para1\n\nPara2\n"
-	  (org-test-with-temp-text "
-\[fn:1] Para1
+	  (org-test-with-temp-text
+	      "[fn:1] Para1
 
 # Inside definition
 Para2"
 	    (org-export-as (org-test-default-backend)))))
   (should
    (equal "- item 1\n\n- item 2\n"
-	  (org-test-with-temp-text "
-- item 1
+	  (org-test-with-temp-text
+	      "- item 1
 
   # Comment
 

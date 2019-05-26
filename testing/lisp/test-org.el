@@ -5060,18 +5060,18 @@ Paragraph<point>"
   (should
    (equal
     "1"
-    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
-      (org-entry-get (point) "A" t))))
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** H2"
+      (org-entry-get (point-max) "A" t))))
   (should
    (equal
     "1"
-    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
+    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** H2"
       (let ((org-use-property-inheritance t))
-	(org-entry-get (point) "A" 'selective)))))
+	(org-entry-get (point-max) "A" 'selective)))))
   (should-not
-   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** <point>H2"
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** H2"
      (let ((org-use-property-inheritance nil))
-       (org-entry-get (point) "A" 'selective))))
+       (org-entry-get (point-max) "A" 'selective))))
   (should
    (equal
     "1 2"
