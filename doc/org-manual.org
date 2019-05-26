@@ -21302,8 +21302,8 @@ information attached to them, like a time-stamp, a scheduled or
 a deadline string.  See ~org-agenda-entry-types~ on how to set what
 planning information is taken into account.
 
-[fn:104] For HTML you need to install Hrvoje Niksic's =htmlize.el=
-from [[https://github.com/hniksic/emacs-htmlize][Hrvoje Niksic's repository]].
+[fn:104] For HTML you need to install Hrvoje Nikšić's =htmlize.el=
+from [[https://github.com/hniksic/emacs-htmlize][Hrvoje Nikšić's repository]].
 
 [fn:105] To create PDF output, the Ghostscript ps2pdf utility must be
 installed on the system.  Selecting a PDF file also creates the
