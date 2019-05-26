@@ -348,6 +348,9 @@ FULL is given."
 
 
 ;;; Syntax Constants
+;;;; Keyword
+(defconst org-keyword-regexp "^[ \t]*#\\+\\(\\S-+?\\):[ \t]*\\(.*\\)$"
+  "Regular expression for keyword-lines")
 
 ;;;; Block
 
@@ -3180,8 +3183,13 @@ This list will be combined with the constant `org-global-properties-fixed'.
 The entries in this list are cons cells where the car is a property
 name and cdr is a string with the value.
 
-You can set buffer-local values for the same purpose in the variable
-`org-file-properties' this by adding lines like
+Buffer local properties are added either by a document property drawer
+
+:PROPERTIES:
+:NAME: VALUE
+:END:
+
+or by adding lines like
 
 #+PROPERTY: NAME VALUE"
   :group 'org-properties
@@ -3189,10 +3197,14 @@ You can set buffer-local values for the same purpose in the variable
 	  (cons (string :tag "Property")
 		(string :tag "Value"))))
 
-(defvar-local org-file-properties nil
+(defvar-local org-keyword-properties nil
   "List of property/value pairs that can be inherited by any entry.
-Valid for the current buffer.
-This variable is populated from #+PROPERTY lines.")
+Valid for the current buffer.  This variable is populated from
+#+PROPERTY lines.
+
+Note that properties are defined also in property drawers.
+Properties defined there will take precedence over properties
+defined as keywords.")
 
 (defgroup org-agenda nil
   "Options concerning agenda views in Org mode."
@@ -3201,11 +3213,18 @@ This variable is populated from #+PROPERTY lines.")
 
 (defvar-local org-category nil
   "Variable used by Org files to set a category for agenda display.
-Such files should use a file variable to set it, for example
+There are multiple ways to set the category.  One way is to set
+it in the document property drawer.  For example:
+
+:PROPERTIES:
+:CATEGORY: ELisp
+:END:
+
+Other ways to define it is as an emacs file variable, for example
 
 #   -*- mode: org; org-category: \"ELisp\"
 
-or contain a special line
+or for the file to contain a special line:
 
 #+CATEGORY: ELisp
 
@@ -4338,8 +4357,8 @@ related expressions."
       (setq org-tag-groups-alist
 	    (org-tag-alist-to-groups org-current-tag-alist))
       (unless tags-only
-	;; File properties.
-	(setq-local org-file-properties (cdr (assq 'property alist)))
+	;; Properties.
+	(setq-local org-keyword-properties (cdr (assq 'property alist)))
 	;; Archive location.
 	(let ((archive (cdr (assq 'archive alist))))
 	  (when archive (setq-local org-archive-location archive)))
@@ -4347,9 +4366,9 @@ related expressions."
 	(let ((cat (org-string-nw-p (cdr (assq 'category alist)))))
 	  (when cat
 	    (setq-local org-category (intern cat))
-	    (setq-local org-file-properties
+	    (setq-local org-keyword-properties
 			(org--update-property-plist
-			 "CATEGORY" cat org-file-properties))))
+			 "CATEGORY" cat org-keyword-properties))))
 	;; Columns.
 	(let ((column (cdr (assq 'columns alist))))
 	  (when column (setq-local org-columns-default-format column)))
@@ -8267,13 +8286,14 @@ the value of the drawer property."
 	 (inhibit-read-only t)
 	 (inherit? (org-property-inherit-p dprop))
 	 (property-re (org-re-property (concat (regexp-quote dprop) "\\+?") t))
-	 (global (and inherit? (org--property-global-value dprop nil))))
+	 (global-or-keyword (and inherit?
+				 (org--property-global-or-keyword-value dprop nil))))
     (with-silent-modifications
       (org-with-point-at 1
-	;; Set global values (e.g., values defined through
-	;; "#+PROPERTY:" keywords) to the whole buffer.
-	(when global (put-text-property (point-min) (point-max) tprop global))
-	;; Set local values.
+	;; Set global and keyword based values to the whole buffer.
+	(when global-or-keyword
+	  (put-text-property (point-min) (point-max) tprop global-or-keyword))
+	;; Set values based on property-drawers throughout the document.
 	(while (re-search-forward property-re nil t)
 	  (when (org-at-property-p)
 	    (org-refresh-property tprop (org-entry-get (point) dprop) inherit?))
@@ -8281,21 +8301,29 @@ the value of the drawer property."
 
 (defun org-refresh-property (tprop p &optional inherit)
   "Refresh the buffer text property TPROP from the drawer property P.
-The refresh happens only for the current headline, or the whole
-sub-tree if optional argument INHERIT is non-nil."
-  (unless (org-before-first-heading-p)
-    (save-excursion
-      (org-back-to-heading t)
-      (let ((start (point))
-	    (end (save-excursion
-		   (if inherit (org-end-of-subtree t t)
-		     (or (outline-next-heading) (point-max))))))
-	(if (symbolp tprop)
-	    ;; TPROP is a text property symbol.
-	    (put-text-property start end tprop p)
-	  ;; TPROP is an alist with (property . function) elements.
-	  (pcase-dolist (`(,prop . ,f) tprop)
-	    (put-text-property start end prop (funcall f p))))))))
+The refresh happens only for the current entry, or the whole
+sub-tree if optional argument INHERIT is non-nil.
+
+If point is before first headline, the function applies to the
+part before the first headline.  In that particular case, when
+optional argument INHERIT is non-nil, it refreshes properties for
+the whole buffer."
+  (save-excursion
+    (org-back-to-heading-or-point-min t)
+    (let ((start (point))
+	  (end (save-excursion
+		 (cond ((and inherit (org-before-first-heading-p))
+			(point-max))
+		       (inherit
+			(org-end-of-subtree t t))
+		       ((outline-next-heading))
+		       ((point-max))))))
+      (if (symbolp tprop)
+	  ;; TPROP is a text property symbol.
+	  (put-text-property start end tprop p)
+	;; TPROP is an alist with (property . function) elements.
+	(pcase-dolist (`(,prop . ,f) tprop)
+	  (put-text-property start end prop (funcall f p)))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
@@ -8311,9 +8339,9 @@ sub-tree if optional argument INHERIT is non-nil."
 		(t org-category))))
     (with-silent-modifications
       (org-with-wide-buffer
-       ;; Set buffer-wide category.  Search last #+CATEGORY keyword.
-       ;; This is the default category for the buffer.  If none is
-       ;; found, fall-back to `org-category' or buffer file name.
+       ;; Set buffer-wide property from keyword.  Search last #+CATEGORY
+       ;; keyword.  If none is found, fall-back to `org-category' or
+       ;; buffer file name, or set it by the document property drawer.
        (put-text-property
 	(point-min) (point-max)
 	'org-category
@@ -8325,15 +8353,20 @@ sub-tree if optional argument INHERIT is non-nil."
 		(throw 'buffer-category
 		       (org-element-property :value element)))))
 	  default-category))
-       ;; Set sub-tree specific categories.
+       ;; Set categories from the document property drawer or
+       ;; property drawers in the outline.  If category is found in
+       ;; the property drawer for the whole buffer that value
+       ;; overrides the keyword-based value set above.
        (goto-char (point-min))
        (let ((regexp (org-re-property "CATEGORY")))
 	 (while (re-search-forward regexp nil t)
 	   (let ((value (match-string-no-properties 3)))
 	     (when (org-at-property-p)
 	       (put-text-property
-		(save-excursion (org-back-to-heading t) (point))
-		(save-excursion (org-end-of-subtree t t) (point))
+		(save-excursion (org-back-to-heading-or-point-min t))
+		(save-excursion (if (org-before-first-heading-p)
+				    (point-max)
+				  (org-end-of-subtree t t)))
 		'org-category
 		value)))))))))
 
@@ -12919,30 +12952,45 @@ Modifications are made by side-effect.  Return new alist."
 
 (defun org-get-property-block (&optional beg force)
   "Return the (beg . end) range of the body of the property drawer.
-BEG is the beginning of the current subtree, or of the part
-before the first headline.  If it is not given, it will be found.
-If the drawer does not exist, create it if FORCE is non-nil, or
-return nil."
+BEG is the beginning of the current subtree or the beginning of
+the document if before the first headline.  If it is not given,
+it will be found.  If the drawer does not exist, create it if
+FORCE is non-nil, or return nil."
   (org-with-wide-buffer
-   (when beg (goto-char beg))
-   (unless (org-before-first-heading-p)
-     (let ((beg (cond (beg)
+   (let ((beg (cond (beg (goto-char beg))
 		      ((or (not (featurep 'org-inlinetask))
 			   (org-inlinetask-in-task-p))
-		       (org-back-to-heading t))
-		      (t (org-with-limited-levels (org-back-to-heading t))))))
-       (forward-line)
-       (when (looking-at-p org-planning-line-re) (forward-line))
-       (cond ((looking-at org-property-drawer-re)
-	      (forward-line)
-	      (cons (point) (progn (goto-char (match-end 0))
-				   (line-beginning-position))))
-	     (force
-	      (goto-char beg)
-	      (org-insert-property-drawer)
-	      (let ((pos (save-excursion (search-forward ":END:")
-					 (line-beginning-position))))
-		(cons pos pos))))))))
+		       (org-back-to-heading-or-point-min t) (point))
+		      (t (org-with-limited-levels
+			  (org-back-to-heading-or-point-min t))
+			 (point)))))
+     ;; Move point to its position according to its positional rules.
+     (cond ((org-before-first-heading-p)
+	    (while (and (org-at-comment-p) (bolp)) (forward-line)))
+	   (t (forward-line)
+	      (when (looking-at-p org-planning-line-re) (forward-line))))
+     (cond ((looking-at org-property-drawer-re)
+	    (forward-line)
+	    (cons (point) (progn (goto-char (match-end 0))
+				 (line-beginning-position))))
+	   (force
+	    (goto-char beg)
+	    (org-insert-property-drawer)
+	    (let ((pos (save-excursion (re-search-forward org-property-drawer-re)
+				       (line-beginning-position))))
+	      (cons pos pos)))))))
+
+(defun org-at-property-block-p ()
+  "Return t when point is at the first line of a property drawer.
+The property drawer is validated according to its positional
+rules using `org-get-property-block'."
+  (save-excursion
+    (beginning-of-line)
+    (and (looking-at org-property-start-re)
+	 (forward-line)
+	 (let ((property-drawer (org-get-property-block)))
+	   (and property-drawer
+		(= (point) (car property-drawer)))))))
 
 (defun org-at-property-p ()
   "Non-nil when point is inside a property drawer.
@@ -13027,7 +13075,7 @@ Return value is an alist.  Keys are properties, as upcased
 strings."
   (org-with-point-at pom
     (when (and (derived-mode-p 'org-mode)
-	       (ignore-errors (org-back-to-heading t)))
+	       (org-back-to-heading-or-point-min t))
       (catch 'exit
 	(let* ((beg (point))
 	       (specific (and (stringp which) (upcase which)))
@@ -13236,13 +13284,13 @@ unless LITERAL-NIL is non-nil."
 	;; Return final values.
 	(and (not (equal value '(nil))) (nreverse value))))))
 
-(defun org--property-global-value (property literal-nil)
-  "Return value for PROPERTY in current buffer.
+(defun org--property-global-or-keyword-value (property literal-nil)
+  "Return value for PROPERTY as defined by global properties or by keyword.
 Return value is a string.  Return nil if property is not set
-globally.  Also return nil when PROPERTY is set to \"nil\",
-unless LITERAL-NIL is non-nil."
+globally or by keyword.  Also return nil when PROPERTY is set to
+\"nil\", unless LITERAL-NIL is non-nil."
   (let ((global
-	 (cdr (or (assoc-string property org-file-properties t)
+	 (cdr (or (assoc-string property org-keyword-properties t)
 		  (assoc-string property org-global-properties t)
 		  (assoc-string property org-global-properties-fixed t)))))
     (if literal-nil global (org-not-nil global))))
@@ -13391,12 +13439,12 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 			   value)))
 	   (cond
 	    ((car v)
-	     (org-back-to-heading t)
+	     (org-back-to-heading-or-point-min t)
 	     (move-marker org-entry-property-inherited-from (point))
 	     (throw 'exit nil))
-	    ((org-up-heading-safe))
+	    ((org-up-heading-or-point-min))
 	    (t
-	     (let ((global (org--property-global-value property literal-nil)))
+	     (let ((global (org--property-global-or-keyword-value property literal-nil)))
 	       (cond ((not global))
 		     (value (setq value (concat global " " value)))
 		     (t (setq value global))))
@@ -13428,8 +13476,8 @@ decreases scheduled or deadline date by one day."
 	 (user-error "Invalid property name: \"%s\"" property)))
   (org-with-point-at pom
     (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
-	(org-back-to-heading t)
-      (org-with-limited-levels (org-back-to-heading t)))
+	(org-back-to-heading-or-point-min t)
+      (org-with-limited-levels (org-back-to-heading-or-point-min t)))
     (let ((beg (point)))
       (cond
        ((equal property "TODO")
@@ -13565,19 +13613,26 @@ COLUMN formats in the current buffer."
 Do nothing if the drawer already exists.  The newly created
 drawer is immediately hidden."
   (org-with-wide-buffer
+   ;; Set point to the position where the drawer should be inserted.
    (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
-       (org-back-to-heading t)
-     (org-with-limited-levels (org-back-to-heading t)))
-   (forward-line)
-   (when (looking-at-p org-planning-line-re) (forward-line))
+       (org-back-to-heading-or-point-min t)
+     (org-with-limited-levels (org-back-to-heading-or-point-min t)))
+   (if (org-before-first-heading-p)
+       (while (and (org-at-comment-p) (bolp)) (forward-line))
+     (progn
+       (forward-line)
+       (when (looking-at-p org-planning-line-re) (forward-line))))
    (unless (looking-at-p org-property-drawer-re)
      ;; Make sure we start editing a line from current entry, not from
      ;; next one.  It prevents extending text properties or overlays
      ;; belonging to the latter.
-     (when (bolp) (backward-char))
-     (let ((begin (1+ (point)))
+     (when (and (bolp) (> (point) (point-min))) (backward-char))
+     (let ((begin (if (= (point) (point-min))
+		      (point)
+		    (1+ (point))))
 	   (inhibit-read-only t))
-       (insert "\n:PROPERTIES:\n:END:")
+       (unless (= begin (point-min)) (insert "\n"))
+       (insert ":PROPERTIES:\n:END:")
        (org-flag-drawer t nil (line-end-position 0) (point))
        (when (eobp) (insert "\n"))
        (org-indent-region begin (point))))))
@@ -20482,6 +20537,15 @@ interactive command with similar behavior."
     (error (error "Before first headline at position %d in buffer %s"
 		  (point) (current-buffer)))))
 
+(defun org-back-to-heading-or-point-min (&optional invisible-ok)
+  "Go back to heading or first point in buffer.
+If point is before first heading go to first point in buffer
+instead of back to heading."
+  (condition-case nil
+      (outline-back-to-heading invisible-ok)
+    (error
+     (goto-char (point-min)))))
+
 (defun org-before-first-heading-p ()
   "Before first heading?"
   (org-with-limited-levels
@@ -20514,6 +20578,12 @@ unless optional argument NO-INHERITANCE is non-nil."
     (save-match-data
       (beginning-of-line)
       (looking-at "^[ \t]*# "))))
+
+(defun org-at-keyword-p nil
+  "Return t if cursor is at a keyword-line."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at org-keyword-regexp)))
 
 (defun org-at-drawer-p nil
   "Return t if cursor is at a drawer keyword."
@@ -20561,6 +20631,17 @@ make a significant difference in outlines with very many siblings."
       (and (> level-up 0)
 	   (re-search-backward (format "^\\*\\{1,%d\\} " level-up) nil t)
 	   (funcall outline-level)))))
+
+(defun org-up-heading-or-point-min ()
+  "Move to the heading line of which the present is a subheading, or point-min.
+This version is needed to make point-min behave like a virtual
+heading of level 0 for property-inheritance.  It will return the
+level of the headline found (down to 0) or nil if already at a
+point before the first headline or at point-min."
+  (when (ignore-errors (org-back-to-heading t))
+    (if (< 1 (funcall outline-level))
+	(org-up-heading-safe)
+      (unless (= (point) (point-min)) (goto-char (point-min))))))
 
 (defun org-first-sibling-p ()
   "Is this heading the first child of its parents?"
@@ -20662,28 +20743,31 @@ If there is no such heading, return nil."
 (defun org-end-of-subtree (&optional invisible-ok to-heading)
   "Goto to the end of a subtree."
   ;; This contains an exact copy of the original function, but it uses
-  ;; `org-back-to-heading', to make it work also in invisible
-  ;; trees.  And is uses an invisible-ok argument.
+  ;; `org-back-to-heading-or-point-min', to make it work also in invisible
+  ;; trees and before first headline.  And is uses an invisible-ok argument.
   ;; Under Emacs this is not needed, but the old outline.el needs this fix.
   ;; Furthermore, when used inside Org, finding the end of a large subtree
   ;; with many children and grandchildren etc, this can be much faster
   ;; than the outline version.
-  (org-back-to-heading invisible-ok)
+  (org-back-to-heading-or-point-min invisible-ok)
   (let ((first t)
 	(level (funcall outline-level)))
-    (if (and (derived-mode-p 'org-mode) (< level 1000))
-	;; A true heading (not a plain list item), in Org
-	;; This means we can easily find the end by looking
-	;; only for the right number of stars.  Using a regexp to do
-	;; this is so much faster than using a Lisp loop.
-	(let ((re (concat "^\\*\\{1," (int-to-string level) "\\} ")))
-	  (forward-char 1)
-	  (and (re-search-forward re nil 'move) (beginning-of-line 1)))
-      ;; something else, do it the slow way
-      (while (and (not (eobp))
-		  (or first (> (funcall outline-level) level)))
-	(setq first nil)
-	(outline-next-heading)))
+    (cond ((= level 0)
+	   (goto-char (point-max)))
+	  ((and (derived-mode-p 'org-mode) (< level 1000))
+	   ;; A true heading (not a plain list item), in Org
+	   ;; This means we can easily find the end by looking
+	   ;; only for the right number of stars.  Using a regexp to do
+	   ;; this is so much faster than using a Lisp loop.
+	   (let ((re (concat "^\\*\\{1," (int-to-string level) "\\} ")))
+	     (forward-char 1)
+	     (and (re-search-forward re nil 'move) (beginning-of-line 1))))
+	  (t
+	   ;; something else, do it the slow way
+	   (while (and (not (eobp))
+		       (or first (> (funcall outline-level) level)))
+	     (setq first nil)
+	     (outline-next-heading))))
     (unless to-heading
       (when (memq (preceding-char) '(?\n ?\^M))
 	;; Go to end of line before heading

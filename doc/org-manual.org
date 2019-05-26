@@ -4957,7 +4957,7 @@ with many examples, see [[*Matching tags and properties]].
 
 A property is a key-value pair associated with an entry.  Properties
 can be set so they are associated with a single entry, with every
-entry in a tree, or with every entry in an Org file.
+entry in a tree, or with the whole buffer.
 
 There are two main applications for properties in Org mode.  First,
 properties are like tags, but with a value.  Imagine maintaining
@@ -5021,8 +5021,12 @@ disks in a box like this:
   :END:
 #+end_example
 
-If you want to set properties that can be inherited by any entry in
-a file, use a line like:
+Properties can be inserted on buffer level.  That means they apply
+before the first headline and can be inherited by all entries in a
+file.  Property blocks defined before first headline needs to be
+located at the top of the buffer, allowing only comments above.
+
+Properties can also be defined using lines like:
 
 #+cindex: @samp{_ALL} suffix, in properties
 #+cindex: @samp{PROPERTY}, keyword
@@ -5087,7 +5091,8 @@ The following commands help to work with properties:
   #+findex: org-insert-drawer
   Insert a property drawer into the current entry.  The drawer is
   inserted early in the entry, but after the lines with planning
-  information like deadlines.
+  information like deadlines.  If before first headline the drawer is
+  inserted at the top of the drawer after any potential comments.
 
 - {{{kbd(C-c C-c)}}} (~org-property-action~) ::
 
@@ -5310,11 +5315,6 @@ done by defining a column format line.
 :DESCRIPTION: Where defined, where valid?
 :END:
 
-To define a column format for an entire file, use a line like:
-
-#+cindex: @samp{COLUMNS}, keyword
-: #+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
-
 To specify a format that only applies to a specific tree, add
 a =COLUMNS= property to the top node of that tree, for example:
 
@@ -5324,6 +5324,13 @@ a =COLUMNS= property to the top node of that tree, for example:
    :COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
    :END:
 #+end_example
+
+A =COLUMNS= property within a property drawer before first headline
+will apply to the entire file.  As an addition to property drawers,
+keywords can also be defined for an entire file using a line like:
+
+#+cindex: @samp{COLUMNS}, keyword
+: #+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
 
 If a =COLUMNS= property is present in an entry, it defines columns for
 the entry itself, and for the entire subtree below it.  Since the

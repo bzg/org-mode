@@ -1736,11 +1736,11 @@ The template may still contain \"%?\" for cursor positioning."
 			 (_ (error "Invalid `org-capture--clipboards' value: %S"
 				   org-capture--clipboards)))))
 		    ("p"
-		     ;; We remove file properties inherited from
+		     ;; We remove keyword properties inherited from
 		     ;; target buffer so `org-read-property-value' has
 		     ;; a chance to find allowed values in sub-trees
 		     ;; from the target buffer.
-		     (setq-local org-file-properties nil)
+		     (setq-local org-keyword-properties nil)
 		     (let* ((origin (set-marker (make-marker)
 						(org-capture-get :pos)
 						(org-capture-get :buffer)))

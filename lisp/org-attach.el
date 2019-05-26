@@ -244,7 +244,7 @@ Shows a list of commands and prompts for another key to execute a command."
       (when marker
 	(set-buffer (marker-buffer marker))
 	(goto-char marker))
-      (org-back-to-heading t)
+      (org-back-to-heading-or-point-min t)
       (save-excursion
 	(save-window-excursion
 	  (unless org-attach-expert
