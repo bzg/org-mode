@@ -41,7 +41,7 @@
 (declare-function org-table-goto-line "org-table" (n))
 (declare-function org-dynamic-block-define "org" (type func))
 
-(defvar org-frame-title-format-backup frame-title-format)
+(defvar org-frame-title-format-backup nil)
 (defvar org-state)
 (defvar org-link-bracket-re)
 (defvar org-time-stamp-formats)
@@ -1359,6 +1359,7 @@ the default behavior."
 	 ;; add to frame title
 	 (when (or (eq org-clock-clocked-in-display 'frame-title)
 		   (eq org-clock-clocked-in-display 'both))
+	   (setq org-frame-title-format-backup frame-title-format)
 	   (setq frame-title-format org-clock-frame-title-format))
 	 (org-clock-update-mode-line)
 	 (when org-clock-mode-line-timer
@@ -1549,6 +1550,14 @@ line and position cursor in that line."
 	 (org-log-states-order-reversed (goto-char (car (last positions))))
 	 (t (goto-char (car positions))))))))
 
+(defun org-clock-restore-frame-title-format ()
+  "Restore `frame-title-format' from `org-frame-title-format-backup'.
+`frame-title-format' is restored if `org-frame-title-format-backup' is not nil
+and current `frame-title-format' is equal to `org-clock-frame-title-format'."
+  (when (and org-frame-title-format-backup
+	     (equal frame-title-format org-clock-frame-title-format))
+    (setq frame-title-format org-frame-title-format-backup)))
+
 ;;;###autoload
 (defun org-clock-out (&optional switch-to-state fail-quietly at-time)
   "Stop the currently running clock.
@@ -1560,7 +1569,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
     (when (not (org-clocking-p))
       (setq global-mode-string
 	    (delq 'org-mode-line-string global-mode-string))
-      (setq frame-title-format org-frame-title-format-backup)
+      (org-clock-restore-frame-title-format)
       (force-mode-line-update)
       (if fail-quietly (throw 'exit t) (user-error "No active clock")))
     (let ((org-clock-out-switch-to-state
@@ -1618,7 +1627,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	    (setq org-clock-idle-timer nil))
 	  (setq global-mode-string
 		(delq 'org-mode-line-string global-mode-string))
-	  (setq frame-title-format org-frame-title-format-backup)
+	  (org-clock-restore-frame-title-format)
 	  (when org-clock-out-switch-to-state
 	    (save-excursion
 	      (org-back-to-heading t)
@@ -1718,7 +1727,7 @@ Optional argument N tells to change by that many units."
   (when (not (org-clocking-p))
     (setq global-mode-string
 	  (delq 'org-mode-line-string global-mode-string))
-    (setq frame-title-format org-frame-title-format-backup)
+    (org-clock-restore-frame-title-format)
     (force-mode-line-update)
     (error "No active clock"))
   (save-excursion    ; Do not replace this with `with-current-buffer'.
@@ -1734,7 +1743,7 @@ Optional argument N tells to change by that many units."
   (move-marker org-clock-hd-marker nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
-  (setq frame-title-format org-frame-title-format-backup)
+  (org-clock-restore-frame-title-format)
   (force-mode-line-update)
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))
