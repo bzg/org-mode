@@ -18932,7 +18932,9 @@ Returns the number of empty lines passed."
 This works in the calendar and in the agenda, anywhere else it just
 returns the current time.
 If WITH-TIME is non-nil, returns the time of the event at point (in
-the agenda) or the current time of the day."
+the agenda) or the current time of the day; otherwise returns the
+earliest time on the cursor date that Org treats as that date
+(bearing in mind `org-extend-today-until')."
   (let (date day defd tp hod mod)
     (when with-time
       (setq tp (get-text-property (point) 'time))
@@ -18945,13 +18947,13 @@ the agenda) or the current time of the day."
     (cond
      ((eq major-mode 'calendar-mode)
       (setq date (calendar-cursor-to-date)
-	    defd (encode-time 0 (or mod 0) (or hod 0)
+	    defd (encode-time 0 (or mod 0) (or hod org-extend-today-until)
 			      (nth 1 date) (nth 0 date) (nth 2 date))))
      ((eq major-mode 'org-agenda-mode)
       (setq day (get-text-property (point) 'day))
       (when day
 	(setq date (calendar-gregorian-from-absolute day)
-	      defd (encode-time 0 (or mod 0) (or hod 0)
+	      defd (encode-time 0 (or mod 0) (or hod org-extend-today-until)
 				(nth 1 date) (nth 0 date) (nth 2 date))))))
     (or defd (current-time))))
 
