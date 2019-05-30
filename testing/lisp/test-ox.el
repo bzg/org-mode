@@ -4148,33 +4148,28 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/table-cell-width ()
   "Test `org-export-table-cell-width' specifications."
-  ;; 1. Width is primarily determined by width cookies.  If no cookie
-  ;;    is found, cell's width is nil.
-  (org-test-with-parsed-data "
+  ;; Width is primarily determined by width cookies.  If no cookie is
+  ;; found, cell's width is nil.
+  (should
+   (equal '(nil 6 7)
+	  (org-test-with-parsed-data "
 | / | <l> | <6> | <l7> |
 |   |  a  |  b  |  c   |"
-    (should
-     (equal
-      '(nil 6 7)
-      (mapcar (lambda (cell) (org-export-table-cell-width cell info))
-	      (org-element-map tree 'table-cell 'identity info)))))
-  ;; 2. The last width cookie has precedence.
-  (org-test-with-parsed-data "
-| <6> |
-| <7> |
-|  a  |"
-    (should
-     (equal
-      '(7)
-      (mapcar (lambda (cell) (org-export-table-cell-width cell info))
-	      (org-element-map tree 'table-cell 'identity info)))))
-  ;; 3. Valid width cookies must have a specific row.
-  (org-test-with-parsed-data "| <6> | cell |"
-    (should
-     (equal
-      '(nil nil)
-      (mapcar (lambda (cell) (org-export-table-cell-width cell info))
-	      (org-element-map tree 'table-cell 'identity))))))
+	    (mapcar (lambda (cell) (org-export-table-cell-width cell info))
+		    (org-element-map tree 'table-cell 'identity info)))))
+  ;; Valid width cookies must have a specific row.
+  (should
+   (equal '(nil nil)
+	  (org-test-with-parsed-data "| <6> | cell |"
+	    (mapcar (lambda (cell) (org-export-table-cell-width cell info))
+		    (org-element-map tree 'table-cell 'identity)))))
+  ;; Do not error on malformed tables.
+  (should
+   (org-test-with-parsed-data "
+| a |
+| b | c |"
+     (mapcar (lambda (cell) (org-export-table-cell-width cell info))
+	     (org-element-map tree 'table-cell 'identity info)))))
 
 (ert-deftest test-org-export/table-cell-alignment ()
   "Test `org-export-table-cell-alignment' specifications."
