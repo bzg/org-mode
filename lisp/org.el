@@ -5064,7 +5064,7 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 		   (not (and (save-match-data (org-match-line "[ \t]*|"))
 			     (string-match-p "|" (match-string 4))))))
 	    (pcase-let ((`(,_ ,face ,_) (assoc marker org-emphasis-alist)))
-	      (font-lock-append-text-property
+	      (font-lock-prepend-text-property
 	       (match-beginning 2) (match-end 2) 'face face)
 	      (when verbatim?
 		(org-remove-flyspell-overlays-in
