@@ -2255,7 +2255,7 @@ line of code."
 		(format "<span class=\"linenr\">%s</span>"
 			(format num-fmt line-num)))
 	      ;; Transcoded src line.
-	      loc
+	      (format "<code>%s</code>" loc)
 	      ;; Add label, if needed.
 	      (when (and ref retain-labels) (format " (%s)" ref))))
        ;; Mark transcoded line as an anchor, if needed.
