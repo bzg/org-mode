@@ -2255,7 +2255,11 @@ line of code."
 		(format "<span class=\"linenr\">%s</span>"
 			(format num-fmt line-num)))
 	      ;; Transcoded src line.
-	      (format "<code>%s</code>" loc)
+	      (format "<code%s>%s</code>"
+                      (if num-start
+                          (format " data-ox-html-linenr=\"%s\"" line-num)
+                        "")
+                      loc)
 	      ;; Add label, if needed.
 	      (when (and ref retain-labels) (format " (%s)" ref))))
        ;; Mark transcoded line as an anchor, if needed.
