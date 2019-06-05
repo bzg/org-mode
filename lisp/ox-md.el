@@ -555,16 +555,13 @@ a communication channel."
 
 ;;;; Template
 
-(defun org-md--build-toc (info &optional n keyword scope)
+(defun org-md--build-toc (info &optional n _keyword scope)
   "Return a table of contents.
 
 INFO is a plist used as a communication channel.
 
 Optional argument N, when non-nil, is an integer specifying the
 depth of the table.
-
-Optional argument KEYWORD specifies the TOC keyword, if any, from
-which the table of contents generation has been initiated.
 
 When optional argument SCOPE is non-nil, build a table of
 contents according to the specified element."
