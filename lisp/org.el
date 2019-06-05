@@ -15451,12 +15451,10 @@ If there is already a time stamp at the cursor position, update it."
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
 (defcustom org-image-actual-width t
-  "Should we use the actual width of images when inlining them?
+  "When non-nil, use the actual width of images when inlining them.
 
-When set to t, always use the image width.
-
-When set to a number, use imagemagick (when available) to set
-the image's width to this value.
+When set to a number, use imagemagick (when available) to set the
+image's width to this value.
 
 When set to a number in a list, try to get the width from any
 #+ATTR.* keyword if it matches a width specification like
@@ -15468,7 +15466,9 @@ and fall back on that number if none is found.
 When set to nil, try to get the width from an #+ATTR.* keyword
 and fall back on the original width if none is found.
 
-This requires Emacs >= 24.1, build with imagemagick support."
+When set to any other non-nil value, always use the image width.
+
+This requires Emacs >= 24.1, built with imagemagick support."
   :group 'org-appearance
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -16683,23 +16683,16 @@ boundaries."
 			    ;; First try to find a width among
 			    ;; attributes associated to the paragraph
 			    ;; containing link.
-			    (let ((paragraph
-				   (let ((e link))
-				     (while (and (setq e (org-element-property
-							  :parent e))
-						 (not (eq (org-element-type e)
-							  'paragraph))))
-				     e)))
-			      (when paragraph
-				(save-excursion
-				  (goto-char (org-element-property :begin paragraph))
-				  (when
-				      (re-search-forward
-				       "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"
-				       (org-element-property
-					:post-affiliated paragraph)
-				       t)
-				    (string-to-number (match-string 1))))))
+			    (pcase (org-element-lineage link '(paragraph))
+			      (`nil nil)
+			      (p
+			       (let* ((case-fold-search t)
+				      (end (org-element-property :post-affiliated p))
+				      (re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"))
+				 (when (org-with-point-at
+					   (org-element-property :begin p)
+					 (re-search-forward re end t))
+				   (string-to-number (match-string 1))))))
 			    ;; Otherwise, fall-back to provided number.
 			    (car org-image-actual-width)))
 			  ((numberp org-image-actual-width)
