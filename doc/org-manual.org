@@ -10697,9 +10697,9 @@ a major LaTeX mode like AUCTeX in order to speed-up insertion of
 environments and math templates.  Inside Org mode, you can make use of
 some of the features of CDLaTeX mode.  You need to install
 =cdlatex.el= and =texmathp.el= (the latter comes also with AUCTeX)
-from [[http://www.astro.uva.nl/~dominik/Tools/cdlatex]].  Do not use
-CDLaTeX mode itself under Org mode, but use the light version
-~org-cdlatex-mode~ that comes as part of Org mode.  Turn it on for the
+from [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/]].  Do not use
+CDLaTeX mode itself under Org mode, but use the light version Org
+CDLaTeX minor mode that comes as part of Org.  Turn it on for the
 current buffer with {{{kbd(M-x org-cdlatex-mode)}}}, or for all Org
 files with
 
