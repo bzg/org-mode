@@ -376,12 +376,26 @@ Some other text
      (org-test-with-temp-text
 	 "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph"
        (org-element-at-point)))))
-  ;; Parse "parsed" keywords.
+  ;; Parse "parsed" keywords, unless granularity prevents it.
   (should
    (equal
     '(("caption"))
     (org-test-with-temp-text "#+CAPTION: caption\nParagraph"
       (car (org-element-property :caption (org-element-at-point))))))
+  (should
+   (org-test-with-temp-text "#+CAPTION: *caption*\nParagraph"
+     (org-element-map (org-element-map (org-element-parse-buffer)
+			  'paragraph
+			(lambda (e) (org-element-property :caption e)) nil t)
+	 'bold
+       #'org-element-type nil t)))
+  (should-not
+   (org-test-with-temp-text "#+CAPTION: *caption*\nParagraph"
+     (org-element-map (org-element-map (org-element-parse-buffer 'element)
+			  'paragraph
+			(lambda (e) (org-element-property :caption e)) nil t)
+	 'bold
+       #'org-element-type nil t)))
   ;; Parse dual keywords.
   (should
    (equal

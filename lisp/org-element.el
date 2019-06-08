@@ -3899,7 +3899,8 @@ element it has to parse."
        ((org-at-heading-p)
 	(org-element-inlinetask-parser limit raw-secondary-p))
        ;; From there, elements can have affiliated keywords.
-       (t (let ((affiliated (org-element--collect-affiliated-keywords limit)))
+       (t (let ((affiliated (org-element--collect-affiliated-keywords
+			     limit (memq granularity '(nil object)))))
 	    (cond
 	     ;; Jumping over affiliated keywords put point off-limits.
 	     ;; Parse them as regular keywords.
@@ -3985,7 +3986,7 @@ element it has to parse."
 ;; that element, and, in the meantime, collect information they give
 ;; into appropriate properties.  Hence the following function.
 
-(defun org-element--collect-affiliated-keywords (limit)
+(defun org-element--collect-affiliated-keywords (limit parse)
   "Collect affiliated keywords from point down to LIMIT.
 
 Return a list whose CAR is the position at the first of them and
@@ -3994,13 +3995,16 @@ beginning of the first line after them.
 
 As a special case, if element doesn't start at the beginning of
 the line (e.g., a paragraph starting an item), CAR is current
-position of point and CDR is nil."
+position of point and CDR is nil.
+
+When PARSE is non-nil, values from keywords belonging to
+`org-element-parsed-keywords' are parsed as secondary strings."
   (if (not (bolp)) (list (point))
     (let ((case-fold-search t)
 	  (origin (point))
 	  ;; RESTRICT is the list of objects allowed in parsed
-	  ;; keywords value.
-	  (restrict (org-element-restriction 'keyword))
+	  ;; keywords value.  If PARSE is nil, no object is allowed.
+	  (restrict (and parse (org-element-restriction 'keyword)))
 	  output)
       (while (and (< (point) limit) (looking-at org-element--affiliated-re))
 	(let* ((raw-kwd (upcase (match-string 1)))
@@ -4009,35 +4013,35 @@ position of point and CDR is nil."
 	       (kwd (or (cdr (assoc raw-kwd
 				    org-element-keyword-translation-alist))
 			raw-kwd))
+	       ;; PARSED? is non-nil when keyword should have its
+	       ;; value parsed.
+	       (parsed? (member kwd org-element-parsed-keywords))
 	       ;; Find main value for any keyword.
 	       (value
-		(save-match-data
-		  (org-trim
-		   (buffer-substring-no-properties
-		    (match-end 0) (line-end-position)))))
-	       ;; PARSEDP is non-nil when keyword should have its
-	       ;; value parsed.
-	       (parsedp (member kwd org-element-parsed-keywords))
-	       ;; If KWD is a dual keyword, find its secondary
-	       ;; value.  Maybe parse it.
-	       (dualp (member kwd org-element-dual-keywords))
+		(let ((beg (match-end 0))
+		      (end (save-excursion
+			     (end-of-line)
+			     (skip-chars-backward " \t")
+			     (point))))
+		  (if parsed?
+		      (org-element--parse-objects beg end nil restrict)
+		    (org-trim (buffer-substring-no-properties beg end)))))
+	       ;; If KWD is a dual keyword, find its secondary value.
+	       ;; Maybe parse it.
+	       (dual? (member kwd org-element-dual-keywords))
 	       (dual-value
-		(and dualp
+		(and dual?
 		     (let ((sec (match-string-no-properties 2)))
-		       (if (or (not sec) (not parsedp)) sec
+		       (cond
+			((and sec parsed?)
 			 (save-match-data
 			   (org-element--parse-objects
-			    (match-beginning 2) (match-end 2) nil restrict))))))
+			    (match-beginning 2) (match-end 2) nil restrict)))
+			(sec sec)))))
 	       ;; Attribute a property name to KWD.
 	       (kwd-sym (and kwd (intern (concat ":" (downcase kwd))))))
 	  ;; Now set final shape for VALUE.
-	  (when parsedp
-	    (setq value
-		  (org-element--parse-objects
-		   (match-end 0)
-		   (progn (end-of-line) (skip-chars-backward " \t") (point))
-		   nil restrict)))
-	  (when dualp
+	  (when dual?
 	    (setq value (and (or value dual-value) (cons value dual-value))))
 	  (when (or (member kwd org-element-multiple-keywords)
 		    ;; Attributes can always appear on multiple lines.

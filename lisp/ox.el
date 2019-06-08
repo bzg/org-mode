@@ -3716,18 +3716,24 @@ will become the empty string."
 		(cdr (nreverse (cons (funcall prepare-value s) result))))))))
     (if property (plist-get attributes property) attributes)))
 
-(defun org-export-get-caption (element &optional shortp)
+(defun org-export-get-caption (element &optional short)
   "Return caption from ELEMENT as a secondary string.
 
-When optional argument SHORTP is non-nil, return short caption,
-as a secondary string, instead.
+When optional argument SHORT is non-nil, return short caption, as
+a secondary string, instead.
 
 Caption lines are separated by a white space."
-  (let ((full-caption (org-element-property :caption element)) caption)
-    (dolist (line full-caption (cdr caption))
-      (let ((cap (funcall (if shortp 'cdr 'car) line)))
-	(when cap
-	  (setq caption (nconc (list " ") (copy-sequence cap) caption)))))))
+  (let ((full-caption (org-element-property :caption element))
+	(get (if short #'cdr #'car))
+	caption)
+    (dolist (line full-caption)
+      (pcase (funcall get line)
+	(`nil nil)
+	(c
+	 (setq caption
+	       (nconc (list " ")
+		      (copy-sequence c) caption)))))
+    (cdr caption)))
 
 
 ;;;; For Derived Back-ends
