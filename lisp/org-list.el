@@ -3153,10 +3153,14 @@ Point is left at list's end."
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
   (interactive)
-  (if (not (ignore-errors (goto-char (org-in-item-p))))
-      (error "Not in a list")
-    (let ((list (save-excursion (org-list-to-lisp t))))
-      (insert (org-list-to-subtree list) "\n"))))
+  (let ((item (org-in-item-p)))
+    (unless item (error "Not in a list"))
+    (goto-char item)
+    (let ((level (pcase (org-current-level)
+		   (`nil 1)
+		   (l (1+ (org-reduced-level l)))))
+	  (list (save-excursion (org-list-to-lisp t))))
+      (insert (org-list-to-subtree list level) "\n"))))
 
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-to-lisp' to a custom format.
@@ -3465,21 +3469,22 @@ with overruling parameters for `org-list-to-generic'."
 		 :cbtrans "[-] ")))
     (org-list-to-generic list (org-combine-plists defaults params))))
 
-(defun org-list-to-subtree (list &optional params)
+(defun org-list-to-subtree (list &optional start-level params)
   "Convert LIST into an Org subtree.
-LIST is as returned by `org-list-to-lisp'.  PARAMS is a property
-list with overruling parameters for `org-list-to-generic'."
+LIST is as returned by `org-list-to-lisp'.  Subtree starts at
+START-LEVEL or level 1 if nil.  PARAMS is a property list with
+overruling parameters for `org-list-to-generic'."
   (let* ((blank (pcase (cdr (assq 'heading org-blank-before-new-entry))
 		  (`t t)
 		  (`auto (save-excursion
 			   (org-with-limited-levels (outline-previous-heading))
 			   (org-previous-line-empty-p)))))
-	 (level (org-reduced-level (or (org-current-level) 0)))
+	 (level (or start-level 1))
 	 (make-stars
 	  (lambda (_type depth &optional _count)
 	    ;; Return the string for the heading, depending on DEPTH
 	    ;; of current sub-list.
-	    (let ((oddeven-level (+ level depth)))
+	    (let ((oddeven-level (+ level (1- depth))))
 	      (concat (make-string (if org-odd-levels-only
 				       (1- (* 2 oddeven-level))
 				     oddeven-level)

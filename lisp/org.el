@@ -18154,7 +18154,12 @@ number of stars to add."
 		     (min (org-list-get-bottom-point struct) (1+ end))))
 	       (save-restriction
 		 (narrow-to-region (point) list-end)
-		 (insert (org-list-to-subtree (org-list-to-lisp t)) "\n")))
+		 (insert (org-list-to-subtree
+			  (org-list-to-lisp t)
+			  (pcase (org-current-level)
+			    (`nil 1)
+			    (l (1+ (org-reduced-level l)))))
+			 "\n")))
 	     (setq toggled t))
 	   (forward-line)))
 	;; Case 3. Started at normal text: make every line an heading,
@@ -18163,10 +18168,10 @@ number of stars to add."
 		   (make-string
 		    (if (numberp nstars) nstars (or (org-current-level) 0)) ?*))
 		  (add-stars
-		   (cond (nstars "")                ; stars from prefix only
-			 ((equal stars "") "*")     ; before first heading
+		   (cond (nstars "")	; stars from prefix only
+			 ((equal stars "") "*")	; before first heading
 			 (org-odd-levels-only "**") ; inside heading, odd
-			 (t "*")))                  ; inside heading, oddeven
+			 (t "*")))	; inside heading, oddeven
 		  (rpl (concat stars add-stars " "))
 		  (lend (when (listp nstars) (save-excursion (end-of-line) (point)))))
 	     (while (< (point) (if (equal nstars '(4)) lend end))

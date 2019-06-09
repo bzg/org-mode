@@ -246,6 +246,9 @@ dynamic block in ~org-dynamic-block-alist~.
 It was unused throughout the code base.
 
 ** Miscellaneous
+*** Change signature for ~org-list-to-subtree~
+The function now accepts the level of the subtree as an optional
+argument.  It no longer deduces it from the current level.
 *** LaTeX preview is simplified
 
 Function ~org-latex-preview~, formerly known as
