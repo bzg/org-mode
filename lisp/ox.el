@@ -4917,7 +4917,7 @@ same column as TABLE-CELL, or nil."
 		      table)))
 	 (width-vector (or (gethash table cache)
 			   (puthash table (make-vector columns 'empty) cache))))
-    ;; Table may not have the same number of rows.  Extend
+    ;; Table rows may not have the same number of cells.  Extend
     ;; WIDTH-VECTOR appropriately if we encounter a row larger than
     ;; expected.
     (when (>= column (length width-vector))
@@ -4966,6 +4966,15 @@ Possible values are `left', `right' and `center'."
 		      table)))
 	 (align-vector (or (gethash table cache)
 			   (puthash table (make-vector columns nil) cache))))
+    ;; Table rows may not have the same number of cells.  Extend
+    ;; ALIGN-VECTOR appropriately if we encounter a row larger than
+    ;; expected.
+    (when (>= column (length align-vector))
+      (setq align-vector
+	    (vconcat align-vector
+		     (make-list (- (1+ column) (length align-vector))
+				nil)))
+      (puthash table align-vector cache))
     (or (aref align-vector column)
 	(let ((number-cells 0)
 	      (total-cells 0)
