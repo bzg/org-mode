@@ -4484,7 +4484,7 @@ Return value can be an object or an element:
   (when (stringp link)
     (setq link (with-temp-buffer
 		 (save-excursion
-		   (insert (org-make-link-string link)))
+		   (insert (org-link-make-string link)))
 		 (org-element-link-parser))))
   (pcase (org-element-property :type link)
     ((or "custom-id" "id") (org-export-resolve-id-link link info))
