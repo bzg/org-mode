@@ -1741,6 +1741,7 @@ Optional argument N tells to change by that many units."
       (sit-for 2)))
   (move-marker org-clock-marker nil)
   (move-marker org-clock-hd-marker nil)
+  (setq org-clock-current-task nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
   (org-clock-restore-frame-title-format)
