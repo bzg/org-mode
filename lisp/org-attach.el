@@ -419,7 +419,8 @@ Only do this when `org-attach-store-link-p' is non-nil."
 
 (defun org-attach-url (url)
   (interactive "MURL of the file to attach: \n")
-  (org-attach-attach url))
+  (let ((org-attach-method 'url))
+    (org-attach-attach url)))
 
 (defun org-attach-buffer (buffer-name)
   "Attach BUFFER-NAME's contents to current task.
