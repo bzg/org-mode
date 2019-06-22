@@ -20553,8 +20553,8 @@ Before I get to this list, a few special mentions are in order:
   Without Sebastian, the HTML/XHTML publishing of Org would be the
   pitiful work of an ignorant amateur.  Sebastian has pushed this part
   of Org onto a much higher level.  He also wrote =org-info.js=,
-  a Java script for displaying webpages derived from Org using an
-  Info-like or a folding interface with single-key navigation.
+  a JavaScript program for displaying webpages derived from Org using
+  an Info-like or a folding interface with single-key navigation.
 
 See below for the full list of contributions! Again, please let me
 know what I am missing here!
