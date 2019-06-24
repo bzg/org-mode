@@ -8765,11 +8765,13 @@ it more compact:
   #+vindex: org-agenda-todo-ignore-with-date
   Some people view a TODO item that has been /scheduled/ for execution
   or have a /deadline/ (see [[*Timestamps]]) as no longer /open/.
-  Configure the variables ~org-agenda-todo-ignore-scheduled~,
-  ~org-agenda-todo-ignore-deadlines~,
-  ~org-agenda-todo-ignore-timestamp~ and/or
-  ~org-agenda-todo-ignore-with-date~ to exclude such items from the
-  global TODO list.
+  Configure the variables ~org-agenda-todo-ignore-scheduled~ to
+  exclude some or all scheduled items from the global TODO list,
+  ~org-agenda-todo-ignore-deadlines~ to exclude some or all items with
+  a deadline set, ~org-agenda-todo-ignore-timestamp~ to exclude some
+  or all items with an active timestamp other than a DEADLINE or
+  a SCHEDULED timestamp and/or ~org-agenda-todo-ignore-with-date~ to
+  exclude items with at least one active timestamp.
 
 -
   #+vindex: org-agenda-todo-list-sublevels
