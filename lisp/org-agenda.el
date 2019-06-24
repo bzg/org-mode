@@ -5431,7 +5431,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (and org-agenda-todo-ignore-deadlines
 	       (re-search-forward org-deadline-time-regexp end t)
 	       (cond
-		((memq org-agenda-todo-ignore-deadlines '(t all)) t)
+		((eq org-agenda-todo-ignore-deadlines 'all) t)
 		((eq org-agenda-todo-ignore-deadlines 'far)
 		 (not (org-deadline-close-p (match-string 1))))
 		((eq org-agenda-todo-ignore-deadlines 'future)
