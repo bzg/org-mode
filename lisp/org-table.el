@@ -1081,6 +1081,7 @@ Before doing so, re-align the table if necessary."
       (org-table-align))
   (let ((col (org-table-current-column)))
     (beginning-of-line 2)
+    (unless (bolp) (insert "\n"))	;missing newline at eob
     (when (or (not (org-at-table-p))
 	      (org-at-table-hline-p))
       (beginning-of-line 0)
