@@ -572,8 +572,7 @@ reference (with row).  Mode string N."
     "$8 = '(let ((l '(@0$1..@0$4))) "
     "(if l (/ (apply '+ l) (length l)) \"\")); N :: "
     "$9 = '(/ (+ $1..$4) (length '($1..$4))); EN :: "
-    "$10 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN")
-))
+    "$10 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN")))
 
 (ert-deftest test-org-table/copy-field ()
   "Experiments on how to copy one field into another field.
@@ -625,6 +624,125 @@ See also `test-org-table/remote-reference-access'."
 | [2012-12-31 Mon] | [2012-12-31 Mon] |
 "
      1 "#+TBLFM: $2 = if(\"$1\" == \"nan\", string(\"\"), $1); E")))
+
+(ert-deftest test-org-table/copy-down ()
+  "Test `org-table-copy-down' specifications."
+  ;; Error when there is nothing to copy in the current field or the
+  ;; field above.
+  (should-error
+   (org-test-with-temp-text "|  |\n| <point> |"
+     (org-table-copy-down 1)))
+  ;; Error when there is nothing to copy in the Nth field.
+  (should-error
+   (org-test-with-temp-text "|    |\n| foo |\n| <point> |"
+     (org-table-copy-down 2)))
+  ;; In an empty field, copy field above.
+  (should
+   (equal "| foo |\n| foo |"
+	  (org-test-with-temp-text "| foo |\n| <point> |"
+	    (org-table-copy-down 1)
+	    (buffer-string))))
+  ;; In a non-empty field, copy it below.
+  (should
+   (equal "| foo |\n| foo |"
+	  (org-test-with-temp-text "| <point>foo |"
+	    (org-table-copy-down 1)
+	    (buffer-string))))
+  ;; If field is a number or a timestamp, or is prefixed or suffixed
+  ;; with a number, increment it by one unit.
+  (should
+   (equal "| 1 |\n| 2 |\n"
+	  (org-test-with-temp-text "| <point>1 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (string-match-p "<2012-03-30"
+		   (org-test-with-temp-text "| <point><2012-03-29> |"
+		     (let ((org-table-copy-increment t))
+		       (org-table-copy-down 1))
+		     (buffer-string))))
+  (should
+   (equal "| A1 |\n| A2 |\n"
+	  (org-test-with-temp-text "| <point>A1 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (equal "| 1A |\n| 2A |\n"
+	  (org-test-with-temp-text "| <point>1A |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  ;; When `org-table-copy-increment' is nil, or when argument is 0, do
+  ;; not increment.
+  (should
+   (equal "| 1 |\n| 1 |\n"
+	  (org-test-with-temp-text "| <point>1 |"
+	    (let ((org-table-copy-increment nil)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (equal "| 1 |\n| 1 |\n"
+	  (org-test-with-temp-text "| <point>1 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 0))
+	    (buffer-string))))
+  ;; When there is a field just above field being incremented, try to
+  ;; use it to guess increment step.
+  (should
+   (equal "| 4 |\n| 3 |\n| 2 |\n"
+	  (org-test-with-temp-text "| 4 |\n| <point>3 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (equal "| A0 |\n| A2 |\n| A4 |\n"
+	  (org-test-with-temp-text "| A0 |\n| <point>A2 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  ;; Both fields need to have the same type.  In the special case of
+  ;; number-prefixed or suffixed fields, make sure both fields have
+  ;; the same pattern.
+  (should
+   (equal "| A4 |\n|  3 |\n|  4 |\n"
+	  (org-test-with-temp-text "| A4 |\n| <point>3 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (equal "| 0A |\n| A2 |\n| A3 |\n"
+	  (org-test-with-temp-text "| 0A |\n| <point>A2 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (equal "| A0 |\n| 2A |\n| 3A |\n"
+	  (org-test-with-temp-text "| A0 |\n| <point>2A |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  ;; Do not search field above past blank fields and horizontal
+  ;; separators.
+  (should
+   (equal "| 4 |\n|---|\n| 3 |\n| 4 |\n"
+	  (org-test-with-temp-text "| 4 |\n|---|\n| <point>3 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  (should
+   (equal "| 4 |\n|   |\n| 3 |\n| 4 |\n"
+	  (org-test-with-temp-text "| 4 |\n|   |\n| <point>3 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 1))
+	    (buffer-string))))
+  ;; When `org-table-copy-increment' is a number, use it as the
+  ;; increment step, ignoring any previous field.
+  (should
+   (equal "| 1 |\n| 3 |\n| 6 |\n"
+	  (org-test-with-temp-text "| 1 |\n| <point>3 |"
+	    (let ((org-table-copy-increment 3)) (org-table-copy-down 1))
+	    (buffer-string))))
+  ;; However, if argument is 0, do not increment whatsoever.
+  (should
+   (equal "| 1 |\n| 3 |\n| 3 |\n"
+	  (org-test-with-temp-text "| 1 |\n| <point>3 |"
+	    (let ((org-table-copy-increment t)) (org-table-copy-down 0))
+	    (buffer-string))))
+  (should
+   (equal "| 1 |\n| 3 |\n| 3 |\n"
+	  (org-test-with-temp-text "| 1 |\n| <point>3 |"
+	    (let ((org-table-copy-increment 3)) (org-table-copy-down 0))
+	    (buffer-string)))))
 
 (ert-deftest test-org-table/sub-total ()
   "Grouped rows with sub-total.

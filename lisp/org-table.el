@@ -1680,6 +1680,103 @@ If there is no active region, use just the field at point."
 		(if (org-region-active-p) (region-end) (point))))
   (org-table-copy-region beg end 'cut))
 
+(defun org-table--increment-field (field previous)
+  "Increment string FIELD according to PREVIOUS field.
+
+Increment FIELD only if it is a string representing a number, per
+Emacs Lisp syntax, a timestamp, or is either prefixed or suffixed
+with a number.  In any other case, return FIELD as-is.
+
+If PREVIOUS has the same structure as FIELD, e.g.,
+a number-prefixed string with the same pattern, the increment
+step is the difference between numbers (or timestamps, measured
+in days) in PREVIOUS and FIELD.  Otherwise, it uses
+`org-table-copy-increment', if the variable contains a number, or
+default to 1.
+
+The function assumes `org-table-copy-increment' is non-nil."
+  (let* ((default-step (if (numberp org-table-copy-increment)
+			   org-table-copy-increment
+			 1))
+	 (number-regexp			;Lisp read syntax for numbers
+	  (rx (and string-start
+		   (opt (any "+-"))
+		   (or (and (one-or-more digit) (opt "."))
+		       (and (zero-or-more digit) "." (one-or-more digit)))
+		   (opt (any "eE") (opt (opt (any "+-")) (one-or-more digit)))
+		   string-end)))
+	 (number-prefix-regexp (rx (and string-start (one-or-more digit))))
+	 (number-suffix-regexp (rx (and (one-or-more digit) string-end)))
+	 (analyze
+	  (lambda (field)
+	    ;; Analyse string FIELD and return information related to
+	    ;; increment or nil.  When non-nil, return value has the
+	    ;; following scheme: (TYPE VALUE PATTERN) where
+	    ;; - TYPE is a symbol among `number', `prefix', `suffix'
+	    ;;   and `timestamp',
+	    ;; - VALUE is a timestamp if TYPE is `timestamp', or
+	    ;;   a number otherwise,
+	    ;; - PATTERN is the field without its prefix, or suffix if
+	    ;;   TYPE is either `prefix' or `suffix' , or nil
+	    ;;   otherwise.
+	    (cond ((not (org-string-nw-p field)) nil)
+		  ((string-match-p number-regexp field)
+		   (list 'number
+			 (string-to-number field)
+			 nil))
+		  ((string-match number-prefix-regexp field)
+		   (list 'prefix
+			 (string-to-number (match-string 0 field))
+			 (substring field (match-end 0))))
+		  ((string-match number-suffix-regexp field)
+		   (list 'suffix
+			 (string-to-number (match-string 0 field))
+			 (substring field 0 (match-beginning 0))))
+		  ((string-match-p org-ts-regexp3 field)
+		   (list 'timestamp field nil))
+		  (t nil))))
+	 (next-number-string
+	  (lambda (n1 &optional n2)
+	    ;; Increment number N1 and return it as a string.  If N2
+	    ;; is also a number, deduce increment step from the
+	    ;; difference between N1 and N2.  Otherwise, increment
+	    ;; step is `default-step'.
+	    (number-to-string (if n2 (+ n1 (- n1 n2)) (+ n1 default-step)))))
+	 (shift-timestamp
+	  (lambda (t1 &optional t2)
+	    ;; Increment timestamp T1 and return it.  If T2 is also
+	    ;; a timestamp, deduce increment step from the difference,
+	    ;; in days, between T1 and T2.  Otherwise, increment by
+	    ;; `default-step' days.
+	    (with-temp-buffer
+	      (insert t1)
+	      (org-timestamp-up-day (if (not t2) default-step
+				      (- (org-time-string-to-absolute t1)
+					 (org-time-string-to-absolute t2))))
+	      (buffer-string)))))
+    ;; Check if both PREVIOUS and FIELD have the same type.  Also, if
+    ;; the case of prefixed or suffixed numbers, make sure their
+    ;; pattern, i.e., the part of the string without the prefix or the
+    ;; suffix, is the same.
+    (pcase (cons (funcall analyze field) (funcall analyze previous))
+      (`((number ,n1 ,_) . (number ,n2 ,_))
+       (funcall next-number-string n1 n2))
+      (`((number ,n ,_) . ,_)
+       (funcall next-number-string n))
+      (`((prefix ,n1 ,p1) . (prefix ,n2 ,p2))
+       (concat (funcall next-number-string n1 (and (equal p1 p2) n2)) p1))
+      (`((prefix ,n ,p) . ,_)
+       (concat (funcall next-number-string n) p))
+      (`((suffix ,n1 ,p1) . (suffix ,n2 ,p2))
+       (concat p1 (funcall next-number-string n1 (and (equal p1 p2) n2))))
+      (`((suffix ,n ,p) . ,_)
+       (concat p (funcall next-number-string n)))
+      (`((timestamp ,t1 ,_) . (timestamp ,t2 ,_))
+       (funcall shift-timestamp t1 t2))
+      (`((timestamp ,t1 ,_) . ,_)
+       (funcall shift-timestamp t1))
+      (_ field))))
+
 ;;;###autoload
 (defun org-table-copy-down (n)
   "Copy the value of the current field one row below.
@@ -1693,79 +1790,60 @@ row, and the cursor is moved with it.  Therefore, repeating this
 command causes the column to be filled row-by-row.
 
 If the variable `org-table-copy-increment' is non-nil and the
-field is an integer or a timestamp, it will be incremented while
-copying.  By default, increment by the difference between the
-value in the current field and the one in the field above.  To
-increment using a fixed integer, set `org-table-copy-increment'
-to a number.  In the case of a timestamp, increment by days."
+field is a number, a timestamp, or is either prefixed or suffixed
+with a number, it will be incremented while copying.  By default,
+increment by the difference between the value in the current
+field and the one in the field above, if any.  To increment using
+a fixed integer, set `org-table-copy-increment' to a number.  In
+the case of a timestamp, increment by days.
+
+However, when N is 0, do not increment the field at all."
   (interactive "p")
-  (let* ((colpos (org-table-current-column))
-	 (col (current-column))
-	 (field (save-excursion (org-table-get-field)))
-	 (field-up (or (save-excursion
-			 (org-table-get (1- (org-table-current-line))
-					(org-table-current-column))) ""))
-	 (non-empty (string-match "[^ \t]" field))
-	 (non-empty-up (string-match "[^ \t]" field-up))
-	 (beg (org-table-begin))
-	 (orig-n n)
-	 txt txt-up inc)
-    (org-table-check-inside-data-field)
-    (if (not non-empty)
-	(save-excursion
-	  (setq txt
-		(catch 'exit
-		  (while (progn (beginning-of-line 1)
-				(re-search-backward org-table-dataline-regexp
-						    beg t))
-		    (org-table-goto-column colpos t)
-		    (if (and (looking-at
-			      "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
-			     (<= (setq n (1- n)) 0))
-			(throw 'exit (match-string 1))))))
-	  (setq field-up
-		(catch 'exit
-		  (while (progn (beginning-of-line 1)
-				(re-search-backward org-table-dataline-regexp
-						    beg t))
-		    (org-table-goto-column colpos t)
-		    (if (and (looking-at
-			      "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
-			     (<= (setq n (1- n)) 0))
-			(throw 'exit (match-string 1))))))
-	  (setq non-empty-up (and field-up (string-match "[^ \t]" field-up))))
-      ;; Above field was not empty, go down to the next row.  Skip
-      ;; alignment since we do it at the end of the process anyway.
-      (setq txt (org-trim field))
+  (org-table-check-inside-data-field)
+  (let* ((beg (org-table-begin))
+	 (column (org-table-current-column))
+	 (initial-field (save-excursion
+			  (let ((f (org-string-nw-p (org-table-get-field))))
+			    (and f (org-trim f)))))
+	 field field-above next-field)
+    (save-excursion
+      ;; Get reference field.
+      (if initial-field (setq field initial-field)
+	(beginning-of-line)
+	(setq field
+	      (catch :exit
+		(while (re-search-backward org-table-dataline-regexp beg t)
+		  (let ((f (org-string-nw-p (org-table-get-field column))))
+		    (cond ((and (> n 1) f) (cl-decf n))
+			  (f (throw :exit (org-trim f)))
+			  (t nil))
+		    (beginning-of-line)))
+		(user-error "No non-empty field found"))))
+      ;; Check if increment is appropriate, and how it should be done.
+      (when (and org-table-copy-increment (/= n 0))
+	;; If increment step is not explicit, get non-empty field just
+	;; above the field being incremented to guess it.
+	(unless (numberp org-table-copy-increment)
+	  (setq field-above
+		(let ((f (unless (= beg (line-beginning-position))
+			   (forward-line -1)
+			   (not (org-at-table-hline-p))
+			   (org-table-get-field column))))
+		  (and (org-string-nw-p f)
+		       (org-trim f)))))
+	;; Compute next field.
+	(setq next-field (org-table--increment-field field field-above))))
+    ;; Since initial field in not empty, we modify row below instead.
+    ;; Skip alignment since we do it at the end of the process anyway.
+    (when initial-field
       (let ((org-table-may-need-update nil)) (org-table-next-row))
       (org-table-blank-field))
-    (if non-empty-up (setq txt-up (org-trim field-up)))
-    (setq inc (cond
-	       ((numberp org-table-copy-increment) org-table-copy-increment)
-	       (txt-up (cond ((and (string-match org-ts-regexp3 txt-up)
-				   (string-match org-ts-regexp3 txt))
-			      (- (org-time-string-to-absolute txt)
-				 (org-time-string-to-absolute txt-up)))
-			     ((string-match org-ts-regexp3 txt) 1)
-			     ((string-match "\\([-+]\\)?[0-9]*\\(?:\\.[0-9]+\\)?" txt-up)
-			      (- (string-to-number txt)
-				 (string-to-number (match-string 0 txt-up))))
-			     (t 1)))
-	       (t 1)))
-    (if (not txt)
-	(user-error "No non-empty field found")
-      (if (and org-table-copy-increment
-	       (not (equal orig-n 0))
-	       (string-match-p "^[-+^/*0-9eE.]+$" txt)
-	       (< (string-to-number txt) 100000000))
-	  (setq txt (calc-eval (concat txt "+" (number-to-string inc)))))
-      (insert txt)
-      (org-move-to-column col)
-      (if (and org-table-copy-increment (org-at-timestamp-p 'lax))
-	  (org-timestamp-up-day inc)
-	(org-table-maybe-recalculate-line))
-      (org-table-align)
-      (org-move-to-column col))))
+    ;; Insert the new field.  NEW-FIELD may be nil if
+    ;; `org-table-increment' is nil, or N = 0.  In that case, copy
+    ;; FIELD.
+    (insert (or next-field field))
+    (org-table-maybe-recalculate-line)
+    (org-table-align)))
 
 ;;;###autoload
 (defun org-table-copy-region (beg end &optional cut)

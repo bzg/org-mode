@@ -1574,12 +1574,15 @@ you, configure the option ~org-table-auto-blank-field~.
   #+vindex: org-table-copy-increment
   When current field is empty, copy from first non-empty field above.
   When not empty, copy current field down to next row and move point
-  along with it.  Depending on the variable
-  ~org-table-copy-increment~, integer field values can be incremented
-  during copy.  Integers that are too large are not incremented,
-  however.  Also, a ~0~ prefix argument temporarily disables the
-  increment.  This key is also used by shift-selection and related
-  modes (see [[*Packages that conflict with Org mode]]).
+  along with it.
+
+  Depending on the variable ~org-table-copy-increment~, integer and
+  time stamp field values, and fields prefixed or suffixed with
+  a whole number, can be incremented during copy.  Also, a ~0~ prefix
+  argument temporarily disables the increment.
+
+  This key is also used by shift-selection and related modes (see
+  [[*Packages that conflict with Org mode]]).
 
 *** Miscellaneous
 :PROPERTIES:

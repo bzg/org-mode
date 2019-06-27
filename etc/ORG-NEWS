@@ -255,6 +255,12 @@ Function ~org-latex-preview~, formerly known as
 ~org-toggle-latex-fragment~, has a hopefully simpler and more
 predictable behavior.  See its docstring for details.
 
+*** ~org-table-copy-down~ supports patterns
+
+When ~org-table-copy-increment~ is non-nil, it is now possible to
+increment fields like =A1=, or =0A=, i.e., any string prefixed or
+suffixed with a whole number.
+
 *** No more special indentation for description items
 
 Descriptions items are indented like regular ones, i.e., text starts
