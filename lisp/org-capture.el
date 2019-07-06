@@ -663,10 +663,9 @@ of the day at point (if any) or the current HH:MM time."
 			 :annotation annotation
 			 :initial initial
 			 :return-to-wconf (current-window-configuration)
-			 :default-time
-			 (or org-overriding-default-time
-			     (org-current-time)))
-	(org-capture-set-target-location)
+			 :default-time (or org-overriding-default-time
+					   (org-current-time)))
+	(org-capture-set-target-location (and (equal goto 0) 'here))
 	(condition-case error
 	    (org-capture-put :template (org-capture-fill-template))
 	  ((error quit)
@@ -674,31 +673,28 @@ of the day at point (if any) or the current HH:MM time."
 	   (error "Capture abort: %s" (error-message-string error))))
 
 	(setq org-capture-clock-keep (org-capture-get :clock-keep))
-	(if (equal goto 0)
-	    ;;insert at point
-	    (org-capture-insert-template-here)
-	  (condition-case error
-	      (org-capture-place-template
-	       (eq (car (org-capture-get :target)) 'function))
-	    ((error quit)
-	     (when (and (buffer-base-buffer (current-buffer))
-			(string-prefix-p "CAPTURE-" (buffer-name)))
-	       (kill-buffer (current-buffer)))
-	     (set-window-configuration (org-capture-get :return-to-wconf))
-	     (error "Capture template `%s': %s"
-		    (org-capture-get :key)
-		    (error-message-string error))))
-	  (when (and (derived-mode-p 'org-mode) (org-capture-get :clock-in))
-	    (condition-case nil
-		(progn
-		  (when (org-clock-is-active)
-		    (org-capture-put :interrupted-clock
-				     (copy-marker org-clock-marker)))
-		  (org-clock-in)
-		  (setq-local org-capture-clock-was-started t))
-	      (error "Could not start the clock in this capture buffer")))
-	  (when (org-capture-get :immediate-finish)
-	    (org-capture-finalize)))))))))
+	(condition-case error
+	    (org-capture-place-template
+	     (eq (car (org-capture-get :target)) 'function))
+	  ((error quit)
+	   (when (and (buffer-base-buffer (current-buffer))
+		      (string-prefix-p "CAPTURE-" (buffer-name)))
+	     (kill-buffer (current-buffer)))
+	   (set-window-configuration (org-capture-get :return-to-wconf))
+	   (error "Capture template `%s': %s"
+		  (org-capture-get :key)
+		  (error-message-string error))))
+	(when (and (derived-mode-p 'org-mode) (org-capture-get :clock-in))
+	  (condition-case nil
+	      (progn
+		(when (org-clock-is-active)
+		  (org-capture-put :interrupted-clock
+				   (copy-marker org-clock-marker)))
+		(org-clock-in)
+		(setq-local org-capture-clock-was-started t))
+	    (error "Could not start the clock in this capture buffer")))
+	(when (org-capture-get :immediate-finish)
+	  (org-capture-finalize))))))))
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
@@ -927,6 +923,8 @@ Store them in the capture property list."
   (let ((target-entry-p t))
     (save-excursion
       (pcase (or target (org-capture-get :target))
+	(`here
+	 (org-capture-put :exact-position (point) :insert-here t))
 	(`(file ,path)
 	 (set-buffer (org-capture-target-buffer path))
 	 (org-capture-put-target-region-and-position)
@@ -1124,11 +1122,14 @@ may have been stored before."
   "Place the template as a new Org entry."
   (let ((template (org-capture-get :template))
 	(reversed? (org-capture-get :prepend))
+	(exact-position (org-capture-get :exact-position))
+	(insert-here? (org-capture-get :insert-here))
 	(level 1))
     (org-capture-verify-tree template)
-    (when (org-capture-get :exact-position)
-      (goto-char (org-capture-get :exact-position)))
+    (when exact-position (goto-char exact-position))
     (cond
+     ;; Force insertion at point.
+     ((org-capture-get :insert-here) nil)
      ;; Insert as a child of the current entry.
      ((org-capture-get :target-entry-p)
       (setq level (org-get-valid-level
@@ -1145,7 +1146,9 @@ may have been stored before."
       (unless (bolp) (insert "\n"))
       (org-capture-empty-lines-before)
       (let ((beg (point)))
-	(org-paste-subtree level template 'for-yank)
+	(save-restriction
+	  (when insert-here? (narrow-to-region beg beg))
+	  (org-paste-subtree level template 'for-yank))
 	(org-capture-position-for-last-stored beg)
 	(let ((end (if (org-at-heading-p) (line-end-position 0) (point))))
 	  (org-capture-empty-lines-after)
@@ -1172,10 +1175,11 @@ may have been stored before."
 		 (cond ((org-capture-get :exact-position)
 			;; User gave a specific position.  Start
 			;; looking for lists from here.
-			(cons (save-excursion
-				(goto-char (org-capture-get :exact-position))
-				(line-beginning-position))
-			      (org-entry-end-position)))
+			(org-with-point-at (org-capture-get :exact-position)
+			  (cons (line-beginning-position)
+				(if (org-capture-get :insert-here)
+				    (line-beginning-position)
+				  (org-entry-end-position)))))
 		       ((org-capture-get :target-entry-p)
 			;; At a heading, limit search to its body.
 			(cons (line-beginning-position 2)
@@ -1198,7 +1202,8 @@ may have been stored before."
 	  ;; No list found.  Move to the location when to insert
 	  ;; template.  Skip planning info and properties drawers, if
 	  ;; any.
-	  (goto-char (cond ((not prepend?) end)
+	  (goto-char (cond ((org-capture-get :insert-here) beg)
+			   ((not prepend?) end)
 			   ((org-before-first-heading-p) beg)
 			   (t (max (save-excursion
 				     (org-end-of-meta-data)
@@ -1280,8 +1285,10 @@ may have been stored before."
 	beg end)
     (cond
      ((org-capture-get :exact-position)
-      (setq beg (org-capture-get :exact-position))
-      (setq end (save-excursion (outline-next-heading) (point))))
+      (org-with-point-at (org-capture-get :exact-position)
+	(setq beg (line-beginning-position))
+	(setq end (if (org-capture-get :insert-here) beg
+		    (org-entry-end-position)))))
      ((not (org-capture-get :target-entry-p))
       ;; Table is not necessarily under a heading.  Find first table
       ;; in the buffer.
@@ -1307,10 +1314,11 @@ may have been stored before."
       (goto-char end)
       (unless (bolp) (insert "\n"))
       (let ((origin (point)))
-	(insert "|   |\n|----|\n")
+	(insert "|   |\n|---|\n")
 	(narrow-to-region origin (point))))
     ;; In the current table, find the appropriate location for TEXT.
     (cond
+     ((org-capture-get :insert-here) nil)
      ((and table-line-pos
 	   (string-match "\\(I+\\)\\([-+][0-9]+\\)" table-line-pos))
       (goto-char (point-min))
@@ -1455,44 +1463,6 @@ Point will remain at the first line after the inserted text."
     (goto-char pos)))
 
 (defvar org-clock-marker) ; Defined in org.el
-
-(defun org-capture-insert-template-here ()
-  "Insert the capture template at point."
-  (let* ((template (org-capture-get :template))
-	 (type  (org-capture-get :type))
-	 beg end pp)
-    (unless (bolp) (insert "\n"))
-    (setq beg (point))
-    (cond
-     ((and (eq type 'entry) (derived-mode-p 'org-mode))
-      (org-capture-verify-tree (org-capture-get :template))
-      (org-paste-subtree nil template t))
-     ((and (memq type '(item checkitem))
-	   (derived-mode-p 'org-mode)
-	   (save-excursion (skip-chars-backward " \t\n")
-			   (setq pp (point))
-			   (org-in-item-p)))
-      (goto-char pp)
-      (org-insert-item)
-      (skip-chars-backward " ")
-      (skip-chars-backward "-+*0123456789).")
-      (delete-region (point) (point-at-eol))
-      (setq beg (point))
-      (org-remove-indentation template)
-      (insert template)
-      (org-capture-empty-lines-after)
-      (goto-char beg)
-      (org-list-repair)
-      (org-end-of-item))
-     (t
-      (insert template)
-      (org-capture-empty-lines-after)
-      (skip-chars-forward " \t\n")
-      (unless (eobp) (beginning-of-line))))
-    (setq end (point))
-    (goto-char beg)
-    (when (re-search-forward "%\\?" end t)
-      (replace-match ""))))
 
 (defun org-capture-set-plist (entry)
   "Initialize the property list from the template definition."

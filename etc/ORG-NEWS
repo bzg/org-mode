@@ -242,9 +242,7 @@ dynamic block in ~org-dynamic-block-alist~.
 *** ~org-habit-toggle-display-in-agenda~
 ** Removed functions
 *** ~org-babel-set-current-result-hash~
-
-It was unused throughout the code base.
-
+*** ~org-capture-insert-template-here~
 ** Miscellaneous
 *** Change signature for ~org-list-to-subtree~
 The function now accepts the level of the subtree as an optional
