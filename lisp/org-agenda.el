@@ -4201,9 +4201,12 @@ items if they have an hour specification like [h]h:mm."
                           ((= w1 w2) (format " (W%02d)" w1))
                           (t (format " (W%02d-W%02d)" w1 w2)))
 		    ":\n")))
-	(add-text-properties s (1- (point)) (list 'face 'org-agenda-structure
-						  'org-date-line t))
-	(org-agenda-mark-header-line s))
+	;; Add properties if we actually inserted a header.
+	(when (> (point) s)
+	  (add-text-properties s (1- (point))
+			       (list 'face 'org-agenda-structure
+				     'org-date-line t))
+	  (org-agenda-mark-header-line s)))
       (while (setq d (pop day-numbers))
 	(setq date (calendar-gregorian-from-absolute d)
 	      s (point))
