@@ -1568,22 +1568,6 @@ STRUCT may be modified if `org-list-demote-modify-bullet' matches
 bullets between START and END."
   (let* (acc
 	 (set-assoc (lambda (cell) (push cell acc) cell))
-	 (change-bullet-maybe
-	  (lambda (item)
-	    (let ((new-bul
-		   (cdr (assoc
-			 ;; Normalize ordered bullets.
-			 (let ((bul (org-list-get-bullet item struct))
-			       (case-fold-search nil))
-			   (cond ((string-match "[A-Z]\\." bul) "A.")
-				 ((string-match "[A-Z])" bul) "A)")
-				 ((string-match "[a-z]\\." bul) "a.")
-				 ((string-match "[a-z])" bul) "a)")
-				 ((string-match "[0-9]\\." bul) "1.")
-				 ((string-match "[0-9])" bul) "1)")
-				 (t (org-trim bul))))
-			 org-list-demote-modify-bullet))))
-	      (when new-bul (org-list-set-bullet item struct new-bul)))))
 	 (ind
 	  (lambda (cell)
 	    (let* ((item (car cell))
@@ -1599,7 +1583,20 @@ bullets between START and END."
 		;; Item is in zone...
 		(let ((prev (org-list-get-prev-item item struct prevs)))
 		  ;; Check if bullet needs to be changed.
-		  (funcall change-bullet-maybe item)
+		  (pcase (assoc (let ((b (org-list-get-bullet item struct))
+				      (case-fold-search nil))
+				  (cond ((string-match "[A-Z]\\." b) "A.")
+					((string-match "[A-Z])" b) "A)")
+					((string-match "[a-z]\\." b) "a.")
+					((string-match "[a-z])" b) "a)")
+					((string-match "[0-9]\\." b) "1.")
+					((string-match "[0-9])" b) "1)")
+					(t (org-trim b))))
+				org-list-demote-modify-bullet)
+		    (`(,_ . ,bullet)
+		     (org-list-set-bullet
+		      item struct (org-list-bullet-string bullet)))
+		    (_ nil))
 		  (cond
 		   ;; First item indented but not parent: error
 		   ((and (not prev) (or (not parent) (< parent start)))
@@ -2686,11 +2683,12 @@ Return t if successful."
 	  (error "Cannot outdent an item without its children"))
 	 ;; Normal shifting
 	 (t
-	  (let* ((new-parents
+	  (let* ((old-struct (copy-tree struct))
+		 (new-parents
 		  (if (< arg 0)
 		      (org-list-struct-outdent beg end struct parents)
 		    (org-list-struct-indent beg end struct parents prevs))))
-	    (org-list-write-struct struct new-parents))
+	    (org-list-write-struct struct new-parents old-struct))
 	  (org-update-checkbox-count-maybe))))))
   t)
 
