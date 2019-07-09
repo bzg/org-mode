@@ -847,6 +847,15 @@ Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
 			     (paragraph . (lambda (p c i) c))
 			     (section . (lambda (s c i) c))))
 	     nil nil nil '(:with-latex verbatim)))))
+  (should
+   (equal "$1$ \n"
+	  (org-test-with-temp-text "$1$ "
+	    (org-export-as
+	     (org-export-create-backend
+	      :transcoders '((latex-fragment . (lambda (l c i) "dummy"))
+			     (paragraph . (lambda (p c i) c))
+			     (section . (lambda (s c i) c))))
+	     nil nil nil '(:with-latex verbatim)))))
   ;; Sub/superscript.
   (should
    (equal "adummy\n"
