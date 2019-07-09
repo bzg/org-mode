@@ -644,7 +644,7 @@ See also `test-org-table/remote-reference-access'."
 	    (buffer-string))))
   ;; In a non-empty field, copy it below.
   (should
-   (equal "| foo |\n| foo |"
+   (equal "| foo |\n| foo |\n"
 	  (org-test-with-temp-text "| <point>foo |"
 	    (org-table-copy-down 1)
 	    (buffer-string))))
