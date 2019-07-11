@@ -17908,6 +17908,15 @@ Use `\\[org-edit-special]' to edit table.el tables"))
     (org-reset-file-cache))
   (message "%s restarted" major-mode))
 
+(defun org-flag-above-first-heading (&optional arg)
+  "Hide from bob up to the first heading.
+Move point to the beginning of first heading or end of buffer."
+  (goto-char (point-min))
+  (unless (org-at-heading-p)
+    (outline-next-heading))
+  (unless (bobp)
+    (org-flag-region 1 (1- (point)) (not arg) 'outline)))
+
 (defun org-kill-note-or-show-branches ()
   "Abort storing current note, or call `outline-show-branches'."
   (interactive)
