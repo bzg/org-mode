@@ -22,7 +22,6 @@ org-colview-xemacs.el	 --- Column View in Org-mode, XEmacs-specific version
 org-contacts.el          --- Contacts management
 org-contribdir.el        --- Dummy file to mark the org contrib Lisp directory
 org-depend.el            --- TODO dependencies for Org-mode
-org-drill.el             --- Self-testing with org-learn
 org-effectiveness.el     --- Measuring your personal effectiveness
 org-element.el           --- Parser and applications for Org syntax
 org-eldoc.el             --- Eldoc documentation for SRC blocks

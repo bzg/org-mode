@@ -330,6 +330,10 @@ dynamic block in ~org-dynamic-block-alist~.
 *** ~org-table-cell-right~
 *** ~org-habit-toggle-display-in-agenda~
 ** Removed functions
+*** Removed Org Drill
+
+You can install it back from MELPA.
+
 *** ~org-babel-set-current-result-hash~
 *** ~org-capture-insert-template-here~
 *** ~org-attach-directory~
