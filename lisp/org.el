@@ -18070,14 +18070,20 @@ context.  See the individual commands for more information."
   (interactive)
   (org-return t))
 
-(defun org-ctrl-c-tab (&optional _arg)
+(defun org-ctrl-c-tab (&optional arg)
   "Toggle columns width in a table, or show children.
 Call `org-table-toggle-column-width' if point is in a table.
-Otherwise, call `org-show-children'."
+Otherwise, call `org-show-children'.  ARG is the level to hide."
   (interactive "p")
-  (call-interactively
-   (if (org-at-table-p) #'org-table-toggle-column-width
-     #'org-show-children)))
+  (if (org-at-table-p)
+      (call-interactively #'org-table-toggle-column-width)
+    (if (org-before-first-heading-p)
+        (progn
+          (org-flag-above-first-heading)
+          (outline-hide-sublevels (or arg 1))
+          (goto-char (point-min)))
+      (outline-hide-subtree)
+      (org-show-children arg))))
 
 (defun org-ctrl-c-star ()
   "Compute table, or change heading status of lines.
