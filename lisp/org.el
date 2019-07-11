@@ -17928,17 +17928,15 @@ Move point to the beginning of first heading or end of buffer."
   (goto-char (point-min)))
 
 (defun org-kill-note-or-show-branches ()
-  "Abort storing current note, or call `outline-show-branches'."
+  "Abort storing current note, or show just branches."
   (interactive)
-  (if (not org-finish-function)
-      (save-excursion
-	(save-restriction
-	  (org-narrow-to-subtree)
-	  (org-flag-subtree t)
-	  (call-interactively 'outline-show-branches)
-	  (org-hide-archived-subtrees (point-min) (point-max))))
-    (let ((org-note-abort t))
-      (funcall org-finish-function))))
+  (if org-finish-function
+      (let ((org-note-abort t))
+        (funcall org-finish-function))
+    (if (org-before-first-heading-p)
+        (org-show-branches-buffer)
+      (outline-hide-subtree)
+      (outline-show-branches))))
 
 (defun org-delete-indentation (&optional arg)
   "Join current line to previous and fix whitespace at join.
