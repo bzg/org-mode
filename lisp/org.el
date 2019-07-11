@@ -17917,6 +17917,16 @@ Move point to the beginning of first heading or end of buffer."
   (unless (bobp)
     (org-flag-region 1 (1- (point)) (not arg) 'outline)))
 
+(defun org-show-branches-buffer ()
+  "Show all branches in the buffer."
+  (org-flag-above-first-heading)
+  (outline-hide-sublevels 1)
+  (unless (eobp)
+    (outline-show-branches)
+    (while (outline-get-next-sibling)
+      (outline-show-branches)))
+  (goto-char (point-min)))
+
 (defun org-kill-note-or-show-branches ()
   "Abort storing current note, or call `outline-show-branches'."
   (interactive)
