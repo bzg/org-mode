@@ -152,6 +152,8 @@ current-window     Show edit buffer in the current window, keeping all other
                    windows.
 split-window-below Show edit buffer below the current window, keeping all
                    other windows.
+split-window-right Show edit buffer to the right of the current window,
+                   keeping all other windows.
 other-window       Use `switch-to-buffer-other-window' to display edit buffer.
 reorganize-frame   Show only two windows on the current frame, the current
                    window and the edit buffer.  When exiting the edit buffer,
@@ -162,6 +164,7 @@ other-frame        Use `switch-to-buffer-other-frame' to display edit buffer.
   :type '(choice
 	  (const current-window)
 	  (const split-window-below)
+	  (const split-window-right)
 	  (const other-frame)
 	  (const other-window)
 	  (const reorganize-frame)))
@@ -792,6 +795,11 @@ Raise an error when current buffer is not a source editing buffer."
      (if (eq context 'exit)
 	 (delete-window)
        (select-window (split-window-vertically)))
+     (pop-to-buffer-same-window buffer))
+    (`split-window-right
+     (if (eq context 'exit)
+	 (delete-window)
+       (select-window (split-window-horizontally)))
      (pop-to-buffer-same-window buffer))
     (`other-frame
      (pcase context
