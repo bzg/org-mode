@@ -398,6 +398,8 @@ leave unfolded subtrees unfolded.
 
 I.e. treat the whole file as if it was a subtree.
 
+*** Respect narrowing when agenda command is restricted to buffer
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists

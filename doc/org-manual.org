@@ -8491,8 +8491,9 @@ commands:
 - {{{kbd(<)}}} ::
 
   #+kindex: < @r{(Agenda dispatcher)}
-  Restrict an agenda command to the current buffer[fn:91].  After
-  pressing {{{kbd(<)}}}, you still need to press the character
+  Restrict an agenda command to the current buffer[fn:91].  If
+  narrowing is in effect restrict to the narrowed part of the buffer.
+  After pressing {{{kbd(<)}}}, you still need to press the character
   selecting the command.
 
 - {{{kbd(< <)}}} ::

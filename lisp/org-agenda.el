@@ -2848,7 +2848,13 @@ Pressing `<' twice means to restrict to the current subtree or region
 	    (org-back-to-heading t)
 	    (move-marker org-agenda-restrict-begin (point))
 	    (move-marker org-agenda-restrict-end
-			 (progn (org-end-of-subtree t)))))))
+			 (progn (org-end-of-subtree t)))))
+	 ((and (eq restriction 'buffer)
+	       (or (< 1 (point-min))
+		   (< (point-max) (1+ (buffer-size)))))
+	  (setq org-agenda-restrict (current-buffer))
+	  (move-marker org-agenda-restrict-begin (point-min))
+	  (move-marker org-agenda-restrict-end (point-max)))))
 
       ;; For example the todo list should not need it (but does...)
       (cond
