@@ -2562,7 +2562,7 @@ a headline.
 To quickly insert empty structural blocks, such as =#+BEGIN_SRC=
 ... =#+END_SRC=, or to wrap existing text in such a block, use
 
-- {{{kbd(C-c C-\,)}}} (~org-insert-structure-template~) ::
+- {{{kbd(C-c C-\,)}}} ::
 
   Prompt for a type of block structure, and insert the block at point.
   If the region is active, it is wrapped in the block.
