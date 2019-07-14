@@ -1541,7 +1541,7 @@ commands:
   keywords and/or regular expressions that must or must not occur in
   the entry.
 
-** The Weekly/daily Agenda
+** The Weekly/Daily Agenda
 :PROPERTIES:
 :DESCRIPTION: What is available out of the box?
 :ALT_TITLE: Built-in Agenda Views
@@ -1585,7 +1585,7 @@ add the appointments of your agenda files, use the command
 
 The global TODO list contains all unfinished TODO items formatted and
 collected into a single place.  Remote editing of TODO items lets you
-can change the state of a TODO entry with a single key press.  Forr
+can change the state of a TODO entry with a single key press.  For
 commands available in the TODO list, see [[*Commands in the Agenda
 Buffer]].
 
