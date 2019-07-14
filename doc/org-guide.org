@@ -2553,6 +2553,20 @@ For example, this command will complete TeX symbols after =\=, TODO
 keywords at the beginning of a headline, and tags after =:= in
 a headline.
 
+
+** Structure Templates
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+To quickly insert empty structural blocks, such as =#+BEGIN_SRC=
+... =#+END_SRC=, or to wrap existing text in such a block, use
+
+- {{{kbd(C-c C-\,)}}} (~org-insert-structure-template~) ::
+
+  Prompt for a type of block structure, and insert the block at point.
+  If the region is active, it is wrapped in the block.
+
 ** Clean view
 :PROPERTIES:
 :UNNUMBERED: notoc
