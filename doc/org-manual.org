@@ -8986,7 +8986,8 @@ necessary to turn on boolean search, other =+= characters are
 optional.  For more details, see the docstring of the command
 ~org-search-view~.
 
-You can incrementally adjust a boolean search with the following keys
+You can incrementally and conveniently adjust a boolean search from
+the agenda search view with the following keys
 
 #+attr_texinfo: :columns 0.1 0.6
 | {{{kbd([)}}} | Add a positive search word        |
