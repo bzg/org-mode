@@ -22,8 +22,8 @@
 
 ;;; Commentary:
 
-;; This library implements a RSS 2.0 back-end for Org exporter, based on
-;; the `html' back-end.
+;; This library implements an RSS 2.0 back-end for Org exporter, based
+;; on the `html' back-end.
 ;;
 ;; It requires Emacs 24.1 at least.
 ;;
@@ -85,7 +85,7 @@
   :package-version '(Org . "8.0"))
 
 (defcustom org-rss-image-url "https://orgmode.org/img/org-mode-unicorn-logo.png"
-  "The URL of the an image for the RSS feed."
+  "The URL of the image for the RSS feed."
   :group 'org-export-rss
   :type 'string)
 
@@ -143,7 +143,7 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
 
 ;;;###autoload
 (defun org-rss-export-as-rss (&optional async subtreep visible-only)
-  "Export current buffer to a RSS buffer.
+  "Export current buffer to an RSS buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
@@ -173,7 +173,7 @@ non-nil."
 
 ;;;###autoload
 (defun org-rss-export-to-rss (&optional async subtreep visible-only)
-  "Export current buffer to a RSS file.
+  "Export current buffer to an RSS file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
