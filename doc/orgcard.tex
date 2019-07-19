@@ -287,6 +287,7 @@
 \key{restore property-dependent startup visibility}{C-u C-u TAB}
 \metax{show the whole file, including drawers}{C-u C-u C-u TAB}
 \key{reveal context around point}{C-c C-r}
+\metax{toggle indented view}{M-x org-indent-mode}
 
 \section{Motion}
 
@@ -453,7 +454,7 @@ formula, \kbd{:=} a field formula.
 \key{go to the next code block}{C-c C-v n}
 \key{go to the previous code block}{C-c C-v p}
 \key{demarcate a code block}{C-c C-v d}
-\key{execute the next key sequence in the code edit buffer}{C-c C-v x}
+\key{execute next key sequence in code edit buffer}{C-c C-v x}
 \key{execute all code blocks in current buffer}{C-c C-v b}
 \key{execute all code blocks in current subtree}{C-c C-v s}
 \key{tangle code blocks in current file}{C-c C-v t}
@@ -463,13 +464,14 @@ formula, \kbd{:=} a field formula.
 \key{load the current code block into a session}{C-c C-v l}
 \key{view sha1 hash of the current code block}{C-c C-v a}
 
-\section{Completion}
+\section{Completion and Template Insertion}
 
 In-buffer completion completes TODO keywords at headline start, TeX
 macros after ``{\tt \\}'', option keywords after ``{\tt \#-}'', TAGS
 after  ``{\tt :}'', and dictionary words elsewhere.
 
 \key{complete word at point}{M-TAB}
+\key{structure template (insert or wrap region)}{C-c C-,}
 
 
 \newcolumn
@@ -660,8 +662,6 @@ some other place.
 
 \key{toggle fixed width for entry or region}{C-c :}
 \key{toggle pretty display of scripts, entities}{C-c C-x {\tt\char`\\}}
-
-{\bf Comments: Text not being exported}
 
 Lines starting with \kbd{\#} and subtrees starting with COMMENT are
 never exported.
