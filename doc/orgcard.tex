@@ -266,8 +266,10 @@
 \def\threecol#1#2#3{\hskip\keyindent\relax#1\hfil&\kbd{#2}\hfil\quad
   &\kbd{#3}\hfil\quad\cr}
 
-\def\noteone{{\small \hfill [1]}}
-\def\notetwo{{\small \hfill [2]}}
+%\def\noteone{{\small \hfill [1]}}
+%\def\notetwo{{\small \hfill [2]}}
+\def\noteone{{\small [1]}}
+\def\notetwo{{\small [2]}}
 
 
 %**end of header
@@ -482,8 +484,8 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \section{TODO Items and Checkboxes}
 
 \key{rotate the state of the current item}{C-c C-t}
-\metax{select next/previous state}{S-LEFT/RIGHT}
-\metax{select next/previous set}{C-S-LEFT/RIGHT}
+\metax{select next/previous state}{\quad\quad S-LEFT/RIGHT}
+\metax{select next/previous set}{\quad\quad\quad C-S-LEFT/RIGHT}
 \key{toggle ORDERED property}{C-c C-x o}
 
 \key{view TODO items in a sparse tree}{C-c / t}
@@ -509,19 +511,19 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 
 \key{set property/effort}{C-c C-x p/e}
 \key{special commands in property lines}{C-c C-c}
-\key{next/previous allowed value}{S-left/right}
+\key{next/previous allowed value}{S-LEFT/RIGHT}
 \key{turn on column view}{C-c C-x C-c}
 \key{capture columns view in dynamic block}{C-c C-x i}
 
 \key{quit column view}{q}
 \key{show full value}{v}
 \key{edit value}{e}
-\metax{next/previous allowed value}{n/p or S-left/right}
+\metax{next/previous allowed value}{n/p or S-LEFT/RIGHT}
 \key{edit allowed values list}{a}
 \key{make column wider/narrower}{> / <}
-\key{move column left/right}{M-left/right}
-\key{add new column}{M-S-right}
-\key{Delete current column}{M-S-left}
+\key{move column left/right}{M-LEFT/RIGHT}
+\key{add new column}{M-S-RIGHT}
+\key{Delete current column}{M-S-LEFT}
 
 
 \section{Timestamps}
@@ -533,8 +535,8 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{insert SCHEDULED timestamp}{C-c C-s}
 \key{create sparse tree with all deadlines due}{C-c / d}
 \key{the time between 2 dates in a time range}{C-c C-y}
-\metax{change timestamp at cursor $\pm 1$ day}{S-RIGHT/LEFT\notetwo}
-\key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN\notetwo}
+\metax{change timestamp at cursor $\pm 1$ day}{\quad\quad\quad\quad S-RIGHT/LEFT \notetwo}
+\key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN \notetwo}
 \key{access the calendar for the current date}{C-c >}
 \key{insert timestamp matching date in calendar}{C-c <}
 \key{access agenda for current date}{C-c C-o}
