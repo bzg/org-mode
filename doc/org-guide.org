@@ -2589,10 +2589,10 @@ uses only one star and indents text to line with the heading:
 #+end_example
 
 This kind of view can be achieved dynamically at display time using
-Org Indent mode, which prepends intangible space to each line.  You
-can turn on Org Indent mode for all files by customizing the variable
-~org-startup-indented~, or you can turn it on for individual files
-using
+Org Indent mode ({{{kbd(M-x org-indent-mode RET)}}}), which prepends
+intangible space to each line.  You can turn on Org Indent mode for
+all files by customizing the variable ~org-startup-indented~, or you
+can turn it on for individual files using
 
 : #+STARTUP: indent
 
