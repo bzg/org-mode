@@ -10033,7 +10033,7 @@ the other commands, point needs to be in the desired line.
   persist, set ~org-agenda-bulk-persistent-marks~ to ~t~ or hit
   {{{kbd(p)}}} at the prompt.
 
-  - {{{kbd(*)}}} ::
+  - {{{kbd(p)}}} ::
 
     Toggle persistent marks.
 
