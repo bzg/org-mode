@@ -7576,11 +7576,11 @@ also press `-' or `+' to switch between filtering and excluding."
     (unless char
       (while (not (memq char valid-char-list))
 	(org-unlogged-message
-	 "%s by tag [%s ]:tag-char, [TAB]:tag, %s[/]:off, [+/-]:filter/exclude%s, [q]:quit"
-	 (if exclude "Exclude" "Filter")
+	 "%s by tag%s: [%s ]tag-char [TAB]tag %s[/]off [q]uit"
+	 (if exclude "Exclude[+]" "Filter[-]")
+	 (if expand "" " (no grouptag expand)")
 	 tag-chars
-	 (if org-agenda-auto-exclude-function "[RET], " "")
-	 (if expand "" ", no grouptag expand"))
+	 (if org-agenda-auto-exclude-function "[RET] " ""))
 	(setq char (read-char-exclusive))
 	;; Excluding or filtering down
 	(cond ((eq char ?-) (setq exclude t))
@@ -9915,9 +9915,9 @@ The prefix arg is passed through to the command if possible."
 
   ;; Prompt for the bulk command.
   (org-unlogged-message
-   (concat (if org-agenda-persistent-marks "Bulk (persistent): " "Bulk: ")
+   (concat "Bulk (" (if org-agenda-persistent-marks "" "don't ") "[p]ersist marks): "
 	   "[$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [d]eadline [r]efile "
-	   "[S]catter [f]unction [p]ersist-toggle    "
+	   "[S]catter [f]unction    "
 	   (and org-agenda-bulk-custom-functions
 		(format " Custom: [%s]"
 			(mapconcat (lambda (f) (char-to-string (car f)))
