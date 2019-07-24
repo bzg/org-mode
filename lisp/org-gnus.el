@@ -243,7 +243,9 @@ If `org-store-link' was called with a prefix arg the meaning of
 	       (let ((articles 1)
 		     group-opened)
 		 (while (and (not group-opened)
-			     ;; Stop on integer overflows.
+			     ;; Stop on integer overflows.  Note: We
+			     ;; can drop this once we require at least
+			     ;; Emacs 27, which supports bignums.
 			     (> articles 0))
 		   (setq group-opened (gnus-group-read-group articles t group))
 		   (setq articles (if (< articles 16)
