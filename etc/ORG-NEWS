@@ -123,6 +123,11 @@ auto-commit attachments to git:
   one need to require the =org-attach-git= module in the startup.
 
 ** New features
+*** Add split-window-right option for src block edit window placement
+Given the increasing popularity of wide screen monitors, splitting
+horizontally may make more sense than splitting vertically.  An
+option, ~split-window-right~, to request horizontal splitting has been
+added to ~org-src-window-setup~.
 *** Org-Attach has been refactored and extended
 Org attach has been refactored and the functionality extended.  It
 should now be easier to understand how it works.  A few improvements
