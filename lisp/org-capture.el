@@ -1571,7 +1571,7 @@ The template may still contain \"%?\" for cursor positioning."
 		  (replace-match "[[\\1][%^{Link description}]]" nil nil v-a)
 		v-a))
 	 (v-l (if (and v-a (string-match l-re v-a))
-		  (replace-match "\\1" nil nil v-a)
+		  (replace-match "[[\\1]]" nil nil v-a)
 		v-a))
 	 (v-n user-full-name)
 	 (v-k (if (marker-buffer org-clock-marker)
