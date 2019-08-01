@@ -142,11 +142,15 @@ org        Org's own internal method, using an encoding of the current time to
 
 uuid       Create random (version 4) UUIDs.  If the program defined in
            `org-id-uuid-program' is available it is used to create the ID.
-           Otherwise an internal functions is used."
+           Otherwise an internal functions is used.
+
+ts         Create ID's based on ISO8601 timestamps (without separators
+           and without timezone, local time).  Precision down to seconds."
   :group 'org-id
   :type '(choice
 	  (const :tag "Org's internal method" org)
-	  (const :tag "external: uuidgen" uuid)))
+	  (const :tag "external: uuidgen" uuid)
+	  (const :tag "ISO8601 timestamp" ts)))
 
 (defcustom org-id-prefix nil
   "The prefix for IDs.
@@ -163,7 +167,7 @@ to have no space characters in them."
   "Non-nil means add the domain name to new IDs.
 This ensures global uniqueness of IDs, and is also suggested by
 the relevant RFCs.  This is relevant only if `org-id-method' is
-`org'.  When uuidgen is used, the domain will never be added.
+`org' or `ts'.  When uuidgen is used, the domain will never be added.
 
 The default is to not use this because we have no really good way to get
 the true domain, and Org entries will normally not be shared with enough
@@ -368,6 +372,13 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 			    (require 'message)
 			    (concat "@" (message-make-fqdn))))))
 	(setq unique (concat etime postfix))))
+     ((eq org-id-method 'ts)
+      (let ((ts (format-time-string "%Y%m%dT%H%M%S"))
+	    (postfix (if org-id-include-domain
+			 (progn
+			   (require 'message)
+			   (concat "@" (message-make-fqdn))))))
+	(setq unique (concat ts postfix))))
      (t (error "Invalid `org-id-method'")))
     (concat prefix unique)))
 
