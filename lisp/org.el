@@ -10033,7 +10033,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
 	  (let* ((match-data (match-data))
 		 (startpos (copy-marker (line-beginning-position)))
-		 (force-log (equal arg '(64)))
+		 (force-log (and  (equal arg '(64)) (prog1 t (setq arg nil))))
 		 (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
 		 (org-log-done org-log-done)
 		 (org-log-repeat org-log-repeat)
