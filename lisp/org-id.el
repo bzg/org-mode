@@ -191,6 +191,22 @@ This variable is only relevant when `org-id-track-globally' is set."
   :group 'org-id
   :type 'file)
 
+(defcustom org-id-locations-file-relative nil
+  "Determines if org-id-locations should be stored as relative links.
+Non-nil means that links to locations are stored as links
+relative to the location of where `org-id-locations-file' is
+stored.
+
+Nil means to store absolute paths to files.
+
+This customization is useful when folders are shared across
+systems but mounted at different roots.  Relative path to
+`org-id-locations-file' still has to be maintained across
+systems."
+  :group 'org-id
+  :type 'boolean
+  :package-version '(Org . "9.3"))
+
 (defvar org-id-locations nil
   "List of files with IDs in those files.")
 
@@ -504,6 +520,16 @@ When FILES is given, scan also these files."
     (let ((out (if (hash-table-p org-id-locations)
 		   (org-id-hash-to-alist org-id-locations)
 		 org-id-locations)))
+      (when (and org-id-locations-file-relative out)
+	(setq out (mapcar
+                   (lambda (item)
+		     (if (file-name-absolute-p (car item))
+		         (cons (file-relative-name
+                                (car item) (file-name-directory
+					    org-id-locations-file))
+                               (cdr item))
+                       item))
+	           out)))
       (with-temp-file org-id-locations-file
 	(let ((print-level nil)
 	      (print-length nil))
@@ -517,7 +543,12 @@ When FILES is given, scan also these files."
       (condition-case nil
 	  (progn
 	    (insert-file-contents org-id-locations-file)
-	    (setq org-id-locations (read (current-buffer))))
+	    (setq org-id-locations (read (current-buffer)))
+	    (let ((loc (file-name-directory org-id-locations-file)))
+	      (mapc (lambda (item)
+		      (unless (file-name-absolute-p (car item))
+			(setf (car item) (expand-file-name (car item) loc))))
+		    org-id-locations)))
 	(error
 	 (message "Could not read org-id-values from %s.  Setting it to nil."
 		  org-id-locations-file))))
