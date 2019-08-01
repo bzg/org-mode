@@ -9987,6 +9987,9 @@ With a `\\[universal-argument] \\[universal-argument]' prefix, switch to the \
 next set of TODO \
 keywords (nextset).
 With a `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
+prefix, force logging the state change and take
+a logging note.
+With a `\\[universal-argument] \\[universal-argument]  \\[universal-argument] \\[universal-argument]' \
 prefix, circumvent any state blocking.
 With a numeric prefix arg of 0, inhibit note taking for the change.
 With a numeric prefix arg of -1, cancel repeater to allow marking as DONE.
@@ -10013,7 +10016,7 @@ When called through ELisp, arg is also interpreted in the following way:
     (let ((org-blocker-hook org-blocker-hook)
 	  commentp
 	  case-fold-search)
-      (when (equal arg '(64))
+      (when (equal arg '(256))
 	(setq arg nil org-blocker-hook nil))
       (when (and org-blocker-hook
 		 (or org-inhibit-blocking
@@ -10030,6 +10033,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
 	  (let* ((match-data (match-data))
 		 (startpos (copy-marker (line-beginning-position)))
+		 (force-log (equal arg '(64)))
 		 (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
 		 (org-log-done org-log-done)
 		 (org-log-repeat org-log-repeat)
@@ -10156,11 +10160,13 @@ When called through ELisp, arg is also interpreted in the following way:
 	    (setq now-done-p (and (member org-state org-done-keywords)
 				  (not (member this org-done-keywords))))
 	    (and logging (org-local-logging logging))
-	    (when (and (or org-todo-log-states org-log-done)
-		       (not (eq org-inhibit-logging t))
-		       (not (memq arg '(nextset previousset))))
+	    (when (or (and (or org-todo-log-states org-log-done)
+			   (not (eq org-inhibit-logging t))
+			   (not (memq arg '(nextset previousset))))
+		      force-log)
 	      ;; We need to look at recording a time and note.
-	      (setq dolog (or (nth 1 (assoc org-state org-todo-log-states))
+	      (setq dolog (or (if force-log 'note)
+			      (nth 1 (assoc org-state org-todo-log-states))
 			      (nth 2 (assoc this org-todo-log-states))))
 	      (when (and (eq dolog 'note) (eq org-inhibit-logging 'note))
 		(setq dolog 'time))

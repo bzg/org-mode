@@ -4028,7 +4028,7 @@ property (see [[*Properties and Columns]]):
 
 - {{{kbd(C-u C-u C-u C-c C-t)}}} ::
 
-  #+kindex: C-u C-u C-u C-c C-t
+  #+kindex: C-u C-u C-u C-u C-c C-t
   Change TODO state, regardless of any state blocking.
 
 #+vindex: org-agenda-dim-blocked-tasks
@@ -4169,6 +4169,12 @@ specific settings like =TODO(!)=.  For example:
   :LOGGING: nil
   :END:
 #+end_example
+
+#+kindex: C-u C-u C-u C-c C-t
+#+cindex: @samp{LOGGING}, forcing
+Even if you have not set up logging for a state, you can force logging
+the state change by giving three  {{{kbd(C-u)}}} to the =org-todo=
+command, i.e. press {{{kbd(C-u C-u C-u C-c C-t)}}}.
 
 *** Tracking your habits
 :PROPERTIES:
