@@ -446,81 +446,56 @@ and time is the usual three-integer representation of time."
 Store the relation between files and corresponding IDs.
 This will scan all agenda files, all associated archives, and all
 files currently mentioned in `org-id-locations'.
-When FILES is given, scan these files instead."
+When FILES is given, scan also these files."
   (interactive)
   (if (not org-id-track-globally)
       (error "Please turn on `org-id-track-globally' if you want to track IDs")
-    (let* ((org-id-search-archives
-	    (or org-id-search-archives
-		(and (symbolp org-id-extra-files)
-		     (symbol-value org-id-extra-files)
-		     (member 'agenda-archives org-id-extra-files))))
-	   (files
-	    (or files
-		(append
-		 ;; Agenda files and all associated archives
-		 (org-agenda-files t org-id-search-archives)
-		 ;; Explicit extra files
-		 (if (symbolp org-id-extra-files)
-		     (symbol-value org-id-extra-files)
-		   org-id-extra-files)
-		 ;; Files associated with live Org buffers
-		 (delq nil
-		       (mapcar (lambda (b)
-				 (with-current-buffer b
-				   (and (derived-mode-p 'org-mode) (buffer-file-name))))
-			       (buffer-list)))
-		 ;; All files known to have IDs
-		 org-id-files)))
-	   org-agenda-new-buffers
-	   file nfiles tfile ids reg found id seen (ndup 0))
-      (when (member 'agenda-archives files)
-	(setq files (delq 'agenda-archives (copy-sequence files))))
-      (setq nfiles (length files))
-      (while (setq file (pop files))
-	(unless silent
-	  (message "Finding ID locations (%d/%d files): %s"
-		   (- nfiles (length files)) nfiles file))
-	(setq tfile (file-truename file))
-	(when (and (file-exists-p file) (not (member tfile seen)))
-	  (push tfile seen)
-	  (setq ids nil)
-	  (with-current-buffer (org-get-agenda-file-buffer file)
-	    (save-excursion
-	      (save-restriction
-		(widen)
-		(goto-char (point-min))
-		(while (re-search-forward "^[ \t]*:ID:[ \t]+\\(\\S-+\\)[ \t]*$"
-					  nil t)
-		  (setq id (match-string-no-properties 1))
-		  (if (member id found)
-		      (progn
-			(message "Duplicate ID \"%s\", also in file %s"
-				 id (or (car (delq
-					      nil
-					      (mapcar
-					       (lambda (x)
-						 (if (member id (cdr x))
-						     (car x)))
-					       reg)))
-					(buffer-file-name)))
-			(when (= ndup 0)
-			  (ding)
-			  (sit-for 2))
-			(setq ndup (1+ ndup)))
-		    (push id found)
-		    (push id ids)))
-		(push (cons (abbreviate-file-name file) ids) reg))))))
-      (org-release-buffers org-agenda-new-buffers)
-      (setq org-agenda-new-buffers nil)
-      (setq org-id-locations reg)
+    (let* ((files (delete-dups
+		   (mapcar #'file-truename
+			   (append
+			    ;; Agenda files and all associated archives
+			    (org-agenda-files t org-id-search-archives)
+			    ;; Explicit extra files
+			    (unless (symbolp org-id-extra-files)
+			      org-id-extra-files)
+			    ;; All files known to have IDs
+			    org-id-files
+			    ;; function input
+			    files))))
+	   (nfiles (length files))
+	   ids seen-ids (ndup 0) (i 0) file-id-alist)
+      (with-temp-buffer
+	(delay-mode-hooks
+	  (org-mode)
+          (dolist (file files)
+	    (unless silent
+              (setq i (1+ i))
+              (message "Finding ID locations (%d/%d files): %s"
+                       i nfiles file))
+	    (when (file-exists-p file)
+	      (insert-file-contents file nil nil nil 'replace)
+	      (setq ids (org-map-entries
+			 (lambda ()
+			   (org-entry-get (point) "ID"))
+			 "ID<>\"\""))
+	      (dolist (id ids)
+		(if (member id seen-ids)
+		    (progn
+		      (message "Duplicate ID \"%s\"" id)
+		      (setq ndup (1+ ndup)))
+		  (push id seen-ids)))
+              (when ids
+		(setq file-id-alist (cons (cons (abbreviate-file-name file) ids)
+					  file-id-alist)))))))
+      (setq org-id-locations file-id-alist)
       (setq org-id-files (mapcar 'car org-id-locations))
-      (org-id-locations-save) ;; this function can also handle the alist form
+      (org-id-locations-save)
       ;; now convert to a hash
       (setq org-id-locations (org-id-alist-to-hash org-id-locations))
-      (if (> ndup 0)
-	  (message "WARNING: %d duplicate IDs found, check *Messages* buffer" ndup)
-	(message "%d unique files scanned for IDs" (length org-id-files)))
+      (when (> ndup 0)
+	(warn "WARNING: %d duplicate IDs found, check *Messages* buffer" ndup))
+      (message "%d files scanned, %d files contains IDs and in total %d IDs found."
+	       nfiles (length org-id-files) (hash-table-count org-id-locations))
       org-id-locations)))
 
 (defun org-id-locations-save ()
@@ -552,10 +527,12 @@ When FILES is given, scan these files instead."
 (defun org-id-add-location (id file)
   "Add the ID with location FILE to the database of ID locations."
   ;; Only if global tracking is on, and when the buffer has a file
-  (when (and org-id-track-globally id file)
-    (unless org-id-locations (org-id-locations-load))
-    (puthash id (abbreviate-file-name file) org-id-locations)
-    (add-to-list 'org-id-files (abbreviate-file-name file))))
+  (let ((afile (abbreviate-file-name file)))
+    (when (and org-id-track-globally id file)
+      (unless org-id-locations (org-id-locations-load))
+      (puthash id afile org-id-locations)
+      (unless (member afile org-id-files)
+	(add-to-list 'org-id-files afile)))))
 
 (unless noninteractive
   (add-hook 'kill-emacs-hook 'org-id-locations-save))
@@ -565,7 +542,7 @@ When FILES is given, scan these files instead."
   (let (res x)
     (maphash
      (lambda (k v)
-       (if (setq x (member v res))
+       (if (setq x (assoc v res))
 	   (setcdr x (cons k (cdr x)))
 	 (push (list v k) res)))
      hash)
