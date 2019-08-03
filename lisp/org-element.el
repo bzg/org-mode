@@ -973,7 +973,7 @@ Return value is a plist."
 Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:begin', `:end',
 `:pre-blank', `:contents-begin' and `:contents-end', `:level',
-`:priority', `:tags', `:todo-keyword',`:todo-type', `:scheduled',
+`:priority', `:tags', `:todo-keyword', `:todo-type', `:scheduled',
 `:deadline', `:closed', `:archivedp', `:commentedp'
 `:footnote-section-p', `:post-blank' and `:post-affiliated'
 keywords.
@@ -2879,7 +2879,7 @@ Assume point is at the beginning of the snippet."
 
 When at a footnote reference, return a list whose car is
 `footnote-reference' and cdr a plist with `:label', `:type',
-`:begin', `:end', `:content-begin', `:contents-end' and
+`:begin', `:end', `:contents-begin', `:contents-end' and
 `:post-blank' as keywords.  Otherwise, return nil."
   (when (looking-at org-footnote-re)
     (let ((closing (with-syntax-table org-element--pair-square-table
