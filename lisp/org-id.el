@@ -422,7 +422,7 @@ using `org-id-decode'."
   (setq time (or time (org-current-time-as-list)))
   (concat (org-id-int-to-b36 (nth 0 time) 4)
 	  (org-id-int-to-b36 (nth 1 time) 4)
-	  (org-id-int-to-b36 (or (nth 2 time) 0) 4)))
+	  (org-id-int-to-b36 (nth 2 time) 4)))
 
 (defun org-id-decode (id)
   "Split ID into the prefix and the time value that was used to create it.
