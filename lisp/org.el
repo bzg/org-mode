@@ -10062,7 +10062,7 @@ When called through ELisp, arg is also interpreted in the following way:
 					    (not (eq org-use-fast-todo-selection
 						     'prefix)))))
 			      ;; Use fast selection.
-			      (org-fast-todo-selection))
+			      (org-fast-todo-selection this))
 			     ((and (equal arg '(4))
 				   (or (not org-use-fast-todo-selection)
 				       (not org-todo-key-trigger)))
@@ -10570,10 +10570,13 @@ right sequence."
       (car org-todo-keywords-1))
      (t (nth 2 (assoc kwd org-todo-kwd-alist))))))
 
-(defun org-fast-todo-selection ()
+(defun org-fast-todo-selection (&optional current-state)
   "Fast TODO keyword selection with single keys.
-Returns the new TODO keyword, or nil if no state change should occur."
+Returns the new TODO keyword, or nil if no state change should occur.
+When CURRENT-STATE is given and selection letters are not unique globally,
+prefer a state in the current sequence over on in another sequence."
   (let* ((fulltable org-todo-key-alist)
+	 (head (org-get-todo-sequence-head current-state))
 	 (done-keywords org-done-keywords) ;; needed for the faces.
 	 (maxlen (apply 'max (mapcar
 			      (lambda (x)
@@ -10582,8 +10585,8 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	 (expert nil)
 	 (fwidth (+ maxlen 3 1 3))
 	 (ncol (/ (- (window-width) 4) fwidth))
-	 tg cnt e c tbl
-	 groups ingroup)
+	 tg cnt e c tbl subtable
+	 groups ingroup in-current-sequence)
     (save-excursion
       (save-window-excursion
 	(if expert
@@ -10601,7 +10604,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	      (insert "\n"))
 	    (insert "{ "))
 	   ((equal e '(:endgroup))
-	    (setq ingroup nil cnt 0)
+	    (setq ingroup nil cnt 0 in-current-sequence nil)
 	    (insert "}\n"))
 	   ((equal e '(:newline))
 	    (unless (= cnt 0)
@@ -10613,7 +10616,9 @@ Returns the new TODO keyword, or nil if no state change should occur."
 		(setq tbl (cdr tbl)))))
 	   (t
 	    (setq tg (car e) c (cdr e))
+	    (if (equal tg head) (setq in-current-sequence t))
 	    (when ingroup (push tg (car groups)))
+	    (when in-current-sequence (push e subtable))
 	    (setq tg (org-add-props tg nil 'face
 				    (org-get-todo-face tg)))
 	    (when (and (= cnt 0) (not ingroup)) (insert "  "))
@@ -10630,12 +10635,14 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	(unless expert (org-fit-window-to-buffer))
 	(message "[a-z..]:Set [SPC]:clear")
 	(setq c (let ((inhibit-quit t)) (read-char-exclusive)))
+	(setq subtable (nreverse subtable))
 	(cond
 	 ((or (= c ?\C-g)
 	      (and (= c ?q) (not (rassoc c fulltable))))
 	  (setq quit-flag t))
 	 ((= c ?\ ) nil)
-	 ((setq e (rassoc c fulltable) tg (car e))
+	 ((setq e (or (rassoc c subtable) (rassoc c fulltable))
+		tg (car e))
 	  tg)
 	 (t (setq quit-flag t)))))))
 
