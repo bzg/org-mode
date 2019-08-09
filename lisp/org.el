@@ -9980,16 +9980,18 @@ example: when the item starts with TODO, it is changed to DONE.
 When it starts with DONE, the DONE is removed.  And when neither TODO nor
 DONE are present, add TODO at the beginning of the heading.
 
-With `\\[universal-argument]' prefix ARG, use completion to determine the new \
-state.
+With `\\[universal-argument]' prefix ARG, change the keyword selection method. \
+See the docstring
+of the varible `org-use-fast-todo-selection' for more details.
 With numeric prefix ARG, switch to that state.
 With a `\\[universal-argument] \\[universal-argument]' prefix, switch to the \
 next set of TODO \
 keywords (nextset).
+Another way to achieve this is `S-C-<right>'.
 With a `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
 prefix, force logging the state change and take
 a logging note.
-With a `\\[universal-argument] \\[universal-argument]  \\[universal-argument] \\[universal-argument]' \
+With a `\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[universal-argument]' \
 prefix, circumvent any state blocking.
 With a numeric prefix arg of 0, inhibit note taking for the change.
 With a numeric prefix arg of -1, cancel repeater to allow marking as DONE.
