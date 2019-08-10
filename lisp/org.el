@@ -8111,6 +8111,7 @@ function is being called interactively."
 			      "(empty for default `sort-subr' predicate): ")
 		      'allow-empty))))
 	   ((member dcst '(?p ?t ?s ?d ?c ?k)) '<))))
+	(org-cycle-hide-drawers 'all)
 	(when restore-clock?
 	  (move-marker org-clock-marker
 		       (1+ (next-single-property-change
