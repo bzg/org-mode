@@ -3681,6 +3681,13 @@ org-level-* faces."
   :group 'org-appearance
   :type 'boolean)
 
+(defcustom org-fontify-whole-block-delimiter-line t
+  "Non-nil means fontify the whole line for begin/end lines of blocks.
+This is useful when setting a background color for the
+org-block-begin-line and org-block-end-line faces."
+  :group 'org-appearance
+  :type 'boolean)
+
 (defcustom org-highlight-latex-and-related nil
   "Non-nil means highlight LaTeX related syntax in the buffer.
 When non nil, the value should be a list containing any of the
@@ -5238,57 +5245,64 @@ by a #."
 	   "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
 	   limit t)
       (let ((beg (match-beginning 0))
-	    (block-start (match-end 0))
-	    (block-end nil)
-	    (lang (match-string 7))
-	    (beg1 (line-beginning-position 2))
+	    (end-of-beginline (match-end 0))
+	    (block-start (match-end 0))  ; includes the \n at end of #+begin line
+	    (block-end nil)              ; will include \n after end of block content
+	    (lang (match-string 7))      ; the language, if it is an src block
+	    (bol-after-beginline (line-beginning-position 2))
 	    (dc1 (downcase (match-string 2)))
 	    (dc3 (downcase (match-string 3)))
-	    end end1 quoting block-type)
+	    (whole-blockline org-fontify-whole-block-delimiter-line)
+	    beg-of-endline end-of-endline nl-before-endline quoting block-type)
 	(cond
 	 ((and (match-end 4) (equal dc3 "+begin"))
 	  ;; Truly a block
 	  (setq block-type (downcase (match-string 5))
-		quoting (member block-type org-protecting-blocks))
+		quoting (member block-type org-protecting-blocks)) ; src, example, export, maybe more
 	  (when (re-search-forward
 		 (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
 		 nil t)  ;; on purpose, we look further than LIMIT
-	    (setq end (min (point-max) (match-end 0))
-		  end1 (min (point-max) (1- (match-beginning 0))))
-	    (setq block-end (match-beginning 0))
+	    ;; We do have a matching #+end line
+	    (setq beg-of-endline (match-beginning 0)
+		  end-of-endline (match-end 0)
+		  nl-before-endline (1- (match-beginning 0)))
+	    (setq block-end (match-beginning 0)) ; includes the final newline.
 	    (when quoting
-	      (org-remove-flyspell-overlays-in beg1 end1)
-	      (remove-text-properties beg end
+	      (org-remove-flyspell-overlays-in bol-after-beginline nl-before-endline)
+	      (remove-text-properties beg end-of-endline
 				      '(display t invisible t intangible t)))
 	    (add-text-properties
-	     beg end '(font-lock-fontified t font-lock-multiline t))
-	    (add-text-properties beg beg1 '(face org-meta-line))
-	    (org-remove-flyspell-overlays-in beg beg1)
-	    (add-text-properties	; For end_src
-	     end1 (min (point-max) (1+ end)) '(face org-meta-line))
-	    (org-remove-flyspell-overlays-in end1 end)
+	     beg end-of-endline '(font-lock-fontified t font-lock-multiline t))
+	    (org-remove-flyspell-overlays-in beg bol-after-beginline)
+	    (org-remove-flyspell-overlays-in nl-before-endline end-of-endline)
 	    (cond
 	     ((and lang (not (string= lang "")) org-src-fontify-natively)
 	      (org-src-font-lock-fontify-block lang block-start block-end)
-	      (add-text-properties beg1 block-end '(src-block t)))
+	      (add-text-properties bol-after-beginline block-end '(src-block t)))
 	     (quoting
-	      (add-text-properties beg1 (min (point-max) (1+ end1))
-				   (list 'face
-					 (list :inherit
-					       (let ((face-name
-						      (intern (format "org-block-%s" lang))))
-						 (append (and (facep face-name) (list face-name))
-							 '(org-block))))))) ; end of source block
+	      (add-text-properties
+	       bol-after-beginline beg-of-endline
+	       (list 'face
+		     (list :inherit
+			   (let ((face-name
+				  (intern (format "org-block-%s" lang))))
+			     (append (and (facep face-name) (list face-name))
+				     '(org-block)))))))
 	     ((not org-fontify-quote-and-verse-blocks))
 	     ((string= block-type "quote")
 	      (add-face-text-property
-	       beg1 (min (point-max) (1+ end1)) 'org-quote t))
+	       bol-after-beginline beg-of-endline 'org-quote t))
 	     ((string= block-type "verse")
 	      (add-face-text-property
-	       beg1 (min (point-max) (1+ end1)) 'org-verse t)))
-	    (add-text-properties beg beg1 '(face org-block-begin-line))
-	    (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
-				 '(face org-block-end-line))
+	       bol-after-beginline beg-of-endline 'org-verse t)))
+	    ;; Fontify the #+begin and #+end lines of the blocks
+	    (add-text-properties
+	     beg (if whole-blockline bol-after-beginline end-of-beginline)
+	     '(face org-block-begin-line))
+	    (add-text-properties
+	     beg-of-endline
+	     (min (point-max) (if whole-blockline (min (point-max) (1+ end-of-endline)) end-of-endline))
+	     '(face org-block-end-line))
 	    t))
 	 ((member dc1 '("+title:" "+author:" "+email:" "+date:"))
 	  (org-remove-flyspell-overlays-in
@@ -5318,6 +5332,7 @@ by a #."
 			       '(font-lock-fontified t face org-block))
 	  t)
 	 ((member dc3 '(" " ""))
+	  ; Just a comment, the plus was not there
 	  (org-remove-flyspell-overlays-in beg (match-end 0))
 	  (add-text-properties
 	   beg (match-end 0)
