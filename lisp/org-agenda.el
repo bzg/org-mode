@@ -6739,8 +6739,9 @@ and stored in the variable `org-prefix-format-compiled'."
 	      (floor (abs (string-to-number (match-string 2 s)))))
 	(setq org-prefix-category-max-length
 	      (let ((x (match-string 2 s)))
-		(when (string-match-p "\\.[0-9]+" x)
-		  (string-to-number (substring (match-string 0 x) 1))))))
+		(save-match-data
+		  (and (string-match "\\.[0-9]+" x)
+		       (string-to-number (substring (match-string 0 x) 1)))))))
       (if (eq var 'eval)
 	  (setq varform `(format ,f (org-eval ,(read (match-string 4 s)))))
 	(if opt
