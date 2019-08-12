@@ -10229,7 +10229,9 @@ When called through ELisp, arg is also interpreted in the following way:
 				       (looking-at org-todo-line-regexp))
 		       (< (point) (+ 2 (or (match-end 2) (match-end 1)))))
 	      (goto-char (or (match-end 2) (match-end 1)))
-	      (and (looking-at " ") (just-one-space)))
+	      (and (looking-at " ")
+		   (not (looking-at " *:"))
+		   (just-one-space)))
 	    (when org-trigger-hook
 	      (save-excursion
 		(run-hook-with-args 'org-trigger-hook change-plist)))
