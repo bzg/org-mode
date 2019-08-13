@@ -174,7 +174,7 @@ export file for all source blocks.  Optional argument LANG can be
 used to limit the exported source code blocks by language.
 Return a list whose CAR is the tangled file name."
   (interactive "fFile to tangle: \nP")
-  (let ((visited-p (get-file-buffer (expand-file-name file)))
+  (let ((visited-p (find-buffer-visiting (expand-file-name file)))
 	to-be-removed)
     (prog1
 	(save-window-excursion
