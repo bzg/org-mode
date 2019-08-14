@@ -70,6 +70,13 @@
 
 ;;; Emacs < 27.1 compatibility
 
+(if (fboundp 'xor)
+    ;; `xor' was added in Emacs 27.1.
+    (defalias 'org-xor #'xor)
+  (defsubst org-xor (a b)
+    "Exclusive `or'."
+    (if a (not b) b)))
+
 (unless (fboundp 'pcomplete-uniquify-list)
   ;; The misspelled variant was made obsolete in Emacs 27.1
   (defalias 'pcomplete-uniquify-list 'pcomplete-uniqify-list))

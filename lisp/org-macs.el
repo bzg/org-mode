@@ -596,15 +596,6 @@ Optional argument REGEXP selects variables to clone."
 		  (or (null regexp) (string-match-p regexp (symbol-name name))))
 	 (ignore-errors (set (make-local-variable name) value)))))))
 
-
-
-;;; Logic
-
-(defsubst org-xor (a b)
-  "Exclusive `or'."
-  (if a (not b) b))
-
-
 
 ;;; Miscellaneous
 
