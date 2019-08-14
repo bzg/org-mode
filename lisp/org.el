@@ -2117,31 +2117,35 @@ more information."
   :type '(choice (const sequence)
 		 (const type)))
 
-(defcustom org-use-fast-todo-selection t
+(defcustom org-use-fast-todo-selection 'auto
   "\\<org-mode-map>\
 Non-nil means use the fast todo selection scheme with `\\[org-todo]'.
 This variable describes if and under what circumstances the cycling
 mechanism for TODO keywords will be replaced by a single-key, direct
-selection scheme.
+selection scheme, where the choices are displayed in a little window.
 
-When nil, fast selection is never used.
+When nil, fast selection is never used.  This means that the command
+will always switch to the next state.
 
-When the symbol `prefix', it will be used when `org-todo' is called
-with a prefix argument,  i.e. `\\[universal-argument] \\[org-todo]' \
-in an Org buffer, and
-`\\[universal-argument] t' in an agenda buffer.
+When it is the symbol `auto', fast selection is whenever selection
+keys have been defined.
 
-When t, fast selection is used by default.  In this case, the prefix
-argument forces cycling instead.
+`expert' is like `auto', but no special window with the keyword
+will be shown, choices will only be listed in the prompt.
 
 In all cases, the special interface is only used if access keys have
 actually been assigned by the user, i.e. if keywords in the configuration
 are followed by a letter in parenthesis, like TODO(t)."
   :group 'org-todo
+  :set (lambda (var val)
+	 (cond
+	  ((eq var t) (set var 'auto))
+	  ((eq var 'prefix) (set var nil))
+	  (t (set var val))))
   :type '(choice
 	  (const :tag "Never" nil)
-	  (const :tag "By default" t)
-	  (const :tag "Only with C-u C-c C-t" prefix)))
+	  (const :tag "Automatically, when key letter have been defined" auto)
+	  (const :tag "Automatically, but don't show the selection window" expert)))
 
 (defcustom org-provide-todo-statistics t
   "Non-nil means update todo statistics after insert and toggle.
@@ -9995,20 +9999,20 @@ By default the available states are \"TODO\" and \"DONE\".  So, for this
 example: when the item starts with TODO, it is changed to DONE.
 When it starts with DONE, the DONE is removed.  And when neither TODO nor
 DONE are present, add TODO at the beginning of the heading.
+You can set up single-charcter keys to fast-select the new state.  See the
+`org-todo-keywords' and `org-use-fast-todo-selection' for details.
 
-With `\\[universal-argument]' prefix ARG, change the keyword selection method. \
-See the docstring
-of the varible `org-use-fast-todo-selection' for more details.
-With numeric prefix ARG, switch to that state.
+With `\\[universal-argument]' prefix ARG, force logging the state change \
+and take a
+logging note.
 With a `\\[universal-argument] \\[universal-argument]' prefix, switch to the \
 next set of TODO \
 keywords (nextset).
 Another way to achieve this is `S-C-<right>'.
 With a `\\[universal-argument] \\[universal-argument] \\[universal-argument]' \
-prefix, force logging the state change and take
-a logging note.
-With a `\\[universal-argument] \\[universal-argument] \\[universal-argument] \\[universal-argument]' \
 prefix, circumvent any state blocking.
+With numeric prefix arg, switch to the Nth state.
+
 With a numeric prefix arg of 0, inhibit note taking for the change.
 With a numeric prefix arg of -1, cancel repeater to allow marking as DONE.
 
@@ -10034,7 +10038,7 @@ When called through ELisp, arg is also interpreted in the following way:
     (let ((org-blocker-hook org-blocker-hook)
 	  commentp
 	  case-fold-search)
-      (when (equal arg '(256))
+      (when (equal arg '(64))
 	(setq arg nil org-blocker-hook nil))
       (when (and org-blocker-hook
 		 (or org-inhibit-blocking
@@ -10051,7 +10055,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
 	  (let* ((match-data (match-data))
 		 (startpos (copy-marker (line-beginning-position)))
-		 (force-log (and  (equal arg '(64)) (prog1 t (setq arg nil))))
+		 (force-log (and  (equal arg '(4)) (prog1 t (setq arg nil))))
 		 (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
 		 (org-log-done org-log-done)
 		 (org-log-repeat org-log-repeat)
@@ -10071,14 +10075,10 @@ When called through ELisp, arg is also interpreted in the following way:
 		 (member (member this org-todo-keywords-1))
 		 (tail (cdr member))
 		 (org-state (cond
-			     ((and org-todo-key-trigger
-				   (or (and (equal arg '(4))
-					    (eq org-use-fast-todo-selection 'prefix))
-				       (and (not arg) org-use-fast-todo-selection
-					    (not (eq org-use-fast-todo-selection
-						     'prefix)))))
+			     ((and org-todo-key-trigger org-use-fast-todo-selection)
 			      ;; Use fast selection.
 			      (org-fast-todo-selection this))
+			     ;; FIXME: the following should go
 			     ((and (equal arg '(4))
 				   (or (not org-use-fast-todo-selection)
 				       (not org-todo-key-trigger)))
@@ -10097,6 +10097,7 @@ When called through ELisp, arg is also interpreted in the following way:
 					    (length tail) 2)
 					 org-todo-keywords-1)
 				  (org-last org-todo-keywords-1))))
+			     ;; FIXMEL the following should be removed.
 			     ((and (eq org-use-fast-todo-selection t) (equal arg '(4))
 				   (setq arg nil))) ;hack to fall back to cycling
 			     (arg
@@ -10600,7 +10601,8 @@ prefer a state in the current sequence over on in another sequence."
 			      (lambda (x)
 				(if (stringp (car x)) (string-width (car x)) 0))
 			      fulltable)))
-	 (expert nil)
+	 (expert (equal org-use-fast-todo-selection 'expert))
+	 (prompt "")
 	 (fwidth (+ maxlen 3 1 3))
 	 (ncol (/ (- (window-width) 4) fwidth))
 	 tg cnt e c tbl subtable
@@ -10609,7 +10611,9 @@ prefer a state in the current sequence over on in another sequence."
       (save-window-excursion
 	(if expert
 	    (set-buffer (get-buffer-create " *Org todo*"))
-	  (org-switch-to-buffer-other-window (get-buffer-create " *Org todo*")))
+	  (delete-other-windows)
+	  (set-window-buffer (split-window-vertically) (get-buffer-create " *Org todo*"))
+	  (org-switch-to-buffer-other-window " *Org todo*"))
 	(erase-buffer)
 	(setq-local org-done-keywords done-keywords)
 	(setq tbl fulltable cnt 0)
@@ -10620,9 +10624,11 @@ prefer a state in the current sequence over on in another sequence."
 	    (unless (= cnt 0)
 	      (setq cnt 0)
 	      (insert "\n"))
+	    (setq prompt (concat prompt "{"))
 	    (insert "{ "))
 	   ((equal e '(:endgroup))
 	    (setq ingroup nil cnt 0 in-current-sequence nil)
+	    (setq prompt (concat prompt "}"))
 	    (insert "}\n"))
 	   ((equal e '(:newline))
 	    (unless (= cnt 0)
@@ -10640,6 +10646,7 @@ prefer a state in the current sequence over on in another sequence."
 	    (setq tg (org-add-props tg nil 'face
 				    (org-get-todo-face tg)))
 	    (when (and (= cnt 0) (not ingroup)) (insert "  "))
+	    (setq prompt (concat prompt "[" (char-to-string c) "] " tg " ")) 
 	    (insert "[" c "] " tg (make-string
 				   (- fwidth 4 (length tg)) ?\ ))
 	    (when (and (= (setq cnt (1+ cnt)) ncol)
@@ -10651,7 +10658,8 @@ prefer a state in the current sequence over on in another sequence."
 	(insert "\n")
 	(goto-char (point-min))
 	(unless expert (org-fit-window-to-buffer))
-	(message "[a-z..]:Set [SPC]:clear")
+	(message (concat "[a-z..]:Set [SPC]:clear"
+			 (if expert (concat "\n" prompt) "")))
 	(setq c (let ((inhibit-quit t)) (read-char-exclusive)))
 	(setq subtable (nreverse subtable))
 	(cond

@@ -721,12 +721,19 @@ cursor still in the line to make the changes known to Org mode.
 :DESCRIPTION: Dates and notes for progress.
 :END:
 
-Org mode can automatically record a timestamp and optionally a note
-when you mark a TODO item as DONE, or even each time you change the
-state of a TODO item.  This system is highly configurable, settings
-can be on a per-keyword basis and can be localized to a file or even
-a subtree.  For information on how to clock working time for a task,
-see [[*Clocking Work Time]].
+To record a timestamp and a note when changing a TODO state, call the
+command ~org-todo~ with a prefix argument.
+
+#+attr_texinfo: :sep ,
+- {{{kbd(C-u C-c C-t)}}} ::
+  Prompt for a note and record a the time of the TODO state change.
+
+Org mode can also automatically record a timestamp and optionally a
+note when you mark a TODO item as DONE, or even each time you change
+the state of a TODO item.  This system is highly configurable,
+settings can be on a per-keyword basis and can be localized to a file
+or even a subtree.  For information on how to clock working time for a
+task, see [[*Clocking Work Time]].
 
 *** Closing items
 :PROPERTIES:
