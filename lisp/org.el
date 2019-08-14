@@ -10075,31 +10075,22 @@ When called through ELisp, arg is also interpreted in the following way:
 		 (member (member this org-todo-keywords-1))
 		 (tail (cdr member))
 		 (org-state (cond
-			     ((and org-todo-key-trigger org-use-fast-todo-selection)
-			      ;; Use fast selection.
-			      (org-fast-todo-selection this))
-			     ;; FIXME: the following should go
-			     ((and (equal arg '(4))
-				   (or (not org-use-fast-todo-selection)
-				       (not org-todo-key-trigger)))
-			      ;; Read a state with completion.
-			      (completing-read
-			       "State: " (mapcar #'list org-todo-keywords-1)
-			       nil t))
 			     ((eq arg 'right)
+			      ;; Next state
 			      (if this
 				  (if tail (car tail) nil)
 				(car org-todo-keywords-1)))
 			     ((eq arg 'left)
+			      ;; Previous state
 			      (unless (equal member org-todo-keywords-1)
 				(if this
 				    (nth (- (length org-todo-keywords-1)
 					    (length tail) 2)
 					 org-todo-keywords-1)
 				  (org-last org-todo-keywords-1))))
-			     ;; FIXMEL the following should be removed.
-			     ((and (eq org-use-fast-todo-selection t) (equal arg '(4))
-				   (setq arg nil))) ;hack to fall back to cycling
+			     ((and org-todo-key-trigger org-use-fast-todo-selection)
+			      ;; Use fast selection.
+			      (org-fast-todo-selection this))
 			     (arg
 			      ;; User or caller requests a specific state.
 			      (cond
