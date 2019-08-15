@@ -159,7 +159,6 @@
 (defconst org-latex-babel-language-alist
   '(("af" . "afrikaans")
     ("bg" . "bulgarian")
-    ("bt-br" . "brazilian")
     ("ca" . "catalan")
     ("cs" . "czech")
     ("cy" . "welsh")
@@ -195,6 +194,7 @@
     ("no" . "norsk")
     ("pl" . "polish")
     ("pt" . "portuguese")
+    ("pt-br" . "brazilian")
     ("ro" . "romanian")
     ("ru" . "russian")
     ("sa" . "sanskrit")
