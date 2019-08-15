@@ -3142,6 +3142,18 @@ This variable can be set on the per-file basis by inserting a line
   :group 'org-properties
   :type 'string)
 
+(defcustom org-columns-default-format-for-agenda nil
+  "The default column format in an agenda buffer.
+Whis will be used for column view in the agenda unless a format has
+been set by adding `org-overriding-columns-format' to the local
+settings list of a custom agenda view.  When nil, the columns format
+for the first item in the agenda list will be used, or as a fall-back,
+`org-columns-default-format'."
+  :group 'org-properties
+  :type '(choice
+	  (const :tag "No default" nil)
+	  (string :tag "Format string")))
+
 (defcustom org-columns-ellipses ".."
   "The ellipses to be used when a field in column view is truncated.
 When this is the empty string, as many characters as possible are shown,

@@ -10589,17 +10589,20 @@ that the entries in the agenda are no longer in their proper outline
 environment.  This causes the following issues:
 
 1.
+   #+vindex: org-columns-default-format-for-agenda
    #+vindex: org-columns-default-format
-   #+vindex: org-overriding-columns-format
    Org needs to make a decision which columns format to use.  Since
    the entries in the agenda are collected from different files, and
-   different files may have different columns formats, this is
-   a non-trivial problem.  Org first checks if the variable
+   different files may have different columns formats, this is a
+   non-trivial problem.  Org first checks if
    ~org-overriding-columns-format~ is currently set, and if so, takes
-   the format from there.  Otherwise it takes the format associated
-   with the first item in the agenda, or, if that item does not have
-   a specific format (defined in a property, or in its file), it uses
-   ~org-columns-default-format~.
+   the format from there.  You should set this variable only in the
+   /local settings section/ of a custom agenda command (see [[*Custom
+   Agenda Views]]) to make it valid for that specific agenda view.  If
+   no such binding exists, it checks, in sequence,
+   ~org-columns-default-format-for-agenda~, the format associated with
+   the first item in the agenda (through a property or a =#+COLUMNS=
+   setting in that buffer) and finally ~org-columns-default-format~.
 
 2.
    #+cindex: @samp{CLOCKSUM}, special property
