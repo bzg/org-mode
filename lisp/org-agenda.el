@@ -4648,7 +4648,7 @@ Press `\\[org-agenda-manipulate-query-add]', \
 `\\[org-agenda-manipulate-query-subtract]' to add/sub word, \
 `\\[org-agenda-manipulate-query-add-re]', \
 `\\[org-agenda-manipulate-query-subtract-re]' to add/sub regexp, \
-`\\[universal-argument] \\[org-agenda-redo]' to edit\n"))
+`\\[universal-argument] \\[org-agenda-redo]' for a fresh search\n"))
 	    (add-text-properties pos (1- (point))
 				 (list 'face 'org-agenda-structure)))
 	  (buffer-string)))
