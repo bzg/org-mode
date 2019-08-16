@@ -10100,9 +10100,6 @@ When called through ELisp, arg is also interpreted in the following way:
 					    (length tail) 2)
 					 org-todo-keywords-1)
 				  (org-last org-todo-keywords-1))))
-			     ((and org-todo-key-trigger org-use-fast-todo-selection)
-			      ;; Use fast selection.
-			      (org-fast-todo-selection this))
 			     (arg
 			      ;; User or caller requests a specific state.
 			      (cond
@@ -10121,6 +10118,9 @@ When called through ELisp, arg is also interpreted in the following way:
 				(user-error "State `%s' not valid in this file" arg))
 			       ((nth (1- (prefix-numeric-value arg))
 				     org-todo-keywords-1))))
+			     ((and org-todo-key-trigger org-use-fast-todo-selection)
+			      ;; Use fast selection.
+			      (org-fast-todo-selection this))
 			     ((null member) (or head (car org-todo-keywords-1)))
 			     ((equal this final-done-word) nil) ;-> make empty
 			     ((null tail) nil) ;-> first entry
