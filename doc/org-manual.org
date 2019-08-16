@@ -3170,7 +3170,7 @@ options:
 |            | =/ssh:me@some.where:papers/last.pdf= (same as above)     |
 |            | =file:sometextfile::NNN= (jump to line number)           |
 |            | =file:projects.org=                                      |
-|            | =file:projects.org::some words= (text search) [fn:28]    |
+|            | =file:projects.org::some words= (text search) [fn:27]    |
 |            | =file:projects.org::*task title= (headline search)       |
 |            | =file:projects.org::#custom-id= (headline search)        |
 | attachment | =attachment:projects.org=                                |
