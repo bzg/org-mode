@@ -383,6 +383,9 @@ the daily/weekly agenda, see `org-agenda-skip-function'.")
 			       (const :scheduled*)
 			       (const :timestamp)
 			       (const :sexp))))
+		   (list :tag "Columns format"
+			 (const org-overriding-columns-format)
+			 (string :tag "Format"))
 		   (list :tag "Standard skipping condition"
 			 :value (org-agenda-skip-function '(org-agenda-skip-entry-if))
 			 (const org-agenda-skip-function)
