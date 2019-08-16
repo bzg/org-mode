@@ -4177,14 +4177,6 @@ specific settings like =TODO(!)=.  For example:
   :END:
 #+end_example
 
-#+kindex: C-u C-c C-t
-#+cindex: @samp{LOGGING}, forcing
-Even if you have not set up logging for a state, you can force logging
-the state change by giving a {{{kbd(C-u)}}} to the =org-todo=
-command, i.e. press {{{kbd(C-u C-c C-t)}}}.  If you only occasionally
-want to log a state change note, this may be the most efficient and
-least distracting way to do so.
-
 *** Tracking your habits
 :PROPERTIES:
 :DESCRIPTION: How consistent have you been?
