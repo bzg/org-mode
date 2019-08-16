@@ -3671,17 +3671,9 @@ The most important commands to work with TODO entries are:
   interface; this is the default behavior when
   ~org-use-fast-todo-selection~ is non-~nil~.
 
-  The same rotation can also be done "remotely" from the agenda buffer
-  with the {{{kbd(t)}}} command key (see [[*Commands in the Agenda
-  Buffer]]).
-
-- {{{kbd(C-u C-c C-t)}}} ::
-
-  #+kindex: C-u C-c C-t
-  When TODO keywords have no selection keys, select a specific keyword
-  using completion; otherwise force cycling through TODO states with
-  no prompt.  When ~org-use-fast-todo-selection~ is set to ~prefix~,
-  use the fast selection interface.
+  The same state changing can also be done "remotely" from the agenda
+  buffer with the {{{kbd(t)}}} command key (see [[*Commands in the
+  Agenda Buffer]]).
 
 - {{{kbd(S-RIGHT)}}} {{{kbd(S-LEFT)}}} ::
 
@@ -3756,8 +3748,8 @@ TODO items in particular (see [[*Tags]]).
 #+cindex: TODO workflow
 #+cindex: workflow states as TODO keywords
 
-You can use TODO keywords to indicate different /sequential/ states in
-the process of working on an item, for example[fn:36]:
+You can use TODO keywords to indicate different, possibly /sequential/
+states in the process of working on an item, for example[fn:36]:
 
 #+begin_src emacs-lisp
 (setq org-todo-keywords
@@ -3774,12 +3766,13 @@ With this setup, the command {{{kbd(C-c C-t)}}} cycles an entry from
 =TODO= to =FEEDBACK=, then to =VERIFY=, and finally to =DONE= and
 =DELEGATED=.  You may also use a numeric prefix argument to quickly
 select a specific state.  For example {{{kbd(C-3 C-c C-t)}}} changes
-the state immediately to =VERIFY=.  Or you can use {{{kbd(S-LEFT)}}}
-to go backward through the sequence.  If you define many keywords, you
-can use in-buffer completion (see [[*Completion]]) or even a special
-one-key selection scheme (see [[*Fast access to TODO states]]) to insert
-these words into the buffer.  Changing a TODO state can be logged with
-a timestamp, see [[*Tracking TODO state changes]], for more information.
+the state immediately to =VERIFY=.  Or you can use {{{kbd(S-RIGHT)}}}
+and {{{kbd(S-LEFT)}}} to go forward and backward through the states.
+If you define many keywords, you can use in-buffer completion (see
+[[*Completion]]) or a special one-key selection scheme (see [[*Fast
+access to TODO states]]) to insert these words into the buffer.
+Changing a TODO state can be logged with a timestamp, see [[*Tracking
+TODO state changes]], for more information.
 
 *** TODO keywords as types
 :PROPERTIES:
@@ -3794,14 +3787,18 @@ The second possibility is to use TODO keywords to indicate different
 /types/ of action items.  For example, you might want to indicate that
 items are for "work" or "home".  Or, when you work with several people
 on a single project, you might want to assign action items directly to
-persons, by using their names as TODO keywords.  This would be set up
-like this:
+persons, by using their names as TODO keywords.  This type of
+functionality is actually much better served by using tags (see
+[[*Tags]]), so the TODO implementation is kept just for backward
+compatibility.
+
+Using TODO types, it would be set up like this:
 
 #+begin_src emacs-lisp
 (setq org-todo-keywords '((type "Fred" "Sara" "Lucy" "|" "DONE")))
 #+end_src
 
-In this case, different keywords do not indicate a sequence, but
+In this case, different keywords do not indicate states, but
 rather different types.  So the normal work flow would be to assign
 a task to a person, and later to mark it DONE.  Org mode supports this
 style by adapting the workings of the command {{{kbd(C-c
@@ -4055,20 +4052,30 @@ the contributed module =org-depend.el=.
 #+cindex: progress logging
 #+cindex: logging, of progress
 
-Org mode can automatically record a timestamp and optionally a note
-when you mark a TODO item as DONE, or even each time you change the
-state of a TODO item.  This system is highly configurable, settings
-can be on a per-keyword basis and can be localized to a file or even a
-subtree.  For information on how to clock working time for a task, see
-[[*Clocking Work Time]].
+To record a timestamp and a note when changing a TODO state, call the
+command ~org-todo~ with a prefix argument.
+
+- {{{kbd(C-u C-c C-t)}}} (~org-todo~) ::
+
+  #+kindex: C-u C-c C-t
+  Prompt for a note and record a the time of the TODO state change.
+  The note is inserted as a list item below the headline, but can also
+  be placed into a drawer, see [[*Tracking TODO state changes]].
+
+If you want to be more systematic, Org mode can automatically record a
+timestamp and optionally a note when you mark a TODO item as DONE, or
+even each time you change the state of a TODO item.  This system is
+highly configurable, settings can be on a per-keyword basis and can be
+localized to a file or even a subtree.  For information on how to
+clock working time for a task, see [[*Clocking Work Time]].
 
 *** Closing items
 :PROPERTIES:
 :DESCRIPTION: When was this entry marked as done?
 :END:
 
-The most basic logging is to keep track of /when/ a certain TODO item
-was marked as done.  This can be achieved with[fn:41]
+The most basic automatic logging is to keep track of /when/ a certain
+TODO item was marked as done.  This can be achieved with[fn:41]
 
 #+begin_src emacs-lisp
 (setq org-log-done 'time)
@@ -4090,7 +4097,7 @@ a note along with the timestamp, use[fn:42]
 #+end_src
 
 #+texinfo: @noindent
-You are then be prompted for a note, and that note is stored below the
+You are then prompted for a note, and that note is stored below the
 entry with a =Closing Note= heading.
 
 *** Tracking TODO state changes
@@ -4102,16 +4109,16 @@ entry with a =Closing Note= heading.
 #+vindex: org-log-states-order-reversed
 #+vindex: org-log-into-drawer
 #+cindex: @samp{LOG_INTO_DRAWER}, property
-When TODO keywords are used as workflow states (see [[*TODO keywords as workflow states][*Workflow states]]),
-you might want to keep track of when a state change occurred and maybe
-take a note about this change.  You can either record just a
-timestamp, or a time-stamped note.  These records are inserted after
-the headline as an itemized list, newest first[fn:43].  When taking a
-lot of notes, you might want to get the notes out of the way into a
-drawer (see [[*Drawers]]).  Customize the variable ~org-log-into-drawer~
-to get this behavior---the recommended drawer for this is called
-=LOGBOOK=[fn:44].  You can also overrule the setting of this variable
-for a subtree by setting a =LOG_INTO_DRAWER= property.
+You might want to automatically keep track of when a state change
+occurred and maybe take a note about this change.  You can either
+record just a timestamp, or a time-stamped note.  These records are
+inserted after the headline as an itemized list, newest first[fn:43].
+When taking a lot of notes, you might want to get the notes out of the
+way into a drawer (see [[*Drawers]]).  Customize the variable
+~org-log-into-drawer~ to get this behavior---the recommended drawer
+for this is called =LOGBOOK=[fn:44].  You can also overrule the
+setting of this variable for a subtree by setting a =LOG_INTO_DRAWER=
+property.
 
 Since it is normally too much to record a note for every state, Org
 mode expects configuration on a per-keyword basis for this.  This is
@@ -4125,7 +4132,7 @@ example, with the setting
 #+end_src
 
 #+texinfo: @noindent
-to record a timestamp without a note for TODO keywords configured with
+To record a timestamp without a note for TODO keywords configured with
 =@=, just type {{{kbd(C-c C-c)}}} to enter a blank note when prompted.
 
 #+vindex: org-log-done
@@ -4170,11 +4177,13 @@ specific settings like =TODO(!)=.  For example:
   :END:
 #+end_example
 
-#+kindex: C-u C-u C-u C-c C-t
+#+kindex: C-u C-c C-t
 #+cindex: @samp{LOGGING}, forcing
 Even if you have not set up logging for a state, you can force logging
-the state change by giving three  {{{kbd(C-u)}}} to the =org-todo=
-command, i.e. press {{{kbd(C-u C-u C-u C-c C-t)}}}.
+the state change by giving a {{{kbd(C-u)}}} to the =org-todo=
+command, i.e. press {{{kbd(C-u C-c C-t)}}}.  If you only occasionally
+want to log a state change note, this may be the most efficient and
+least distracting way to do so.
 
 *** Tracking your habits
 :PROPERTIES:
@@ -9771,7 +9780,9 @@ the other commands, point needs to be in the desired line.
   #+kindex: t
   #+findex: org-agenda-todo
   Change the TODO state of the item, both in the agenda and in the
-  original Org file.
+  original Org file. A prefix arg is passed through to the ~org-todo~
+  command, so for example a {{{kbd(C-u)}}} prefix are will trigger
+  taking a note to document the state change.
 
 - {{{kbd(C-S-RIGHT)}}} (~org-agenda-todo-nextset~) ::
 
@@ -10927,8 +10938,9 @@ a major LaTeX mode like AUCTeX in order to speed-up insertion of
 environments and math templates.  Inside Org mode, you can make use of
 some of the features of CDLaTeX mode.  You need to install
 =cdlatex.el= and =texmathp.el= (the latter comes also with AUCTeX)
-from [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/]].  Do not use
-CDLaTeX mode itself under Org mode, but use the light version Org
+using [[https://melpa.org/][MELPA]] with the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Package-Installation.html][Emacs packaging system]] or alternatively from
+[[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/]].  Do not use 
+CDLaTeX mode itself under Org mode, but use the special version Org
 CDLaTeX minor mode that comes as part of Org.  Turn it on for the
 current buffer with {{{kbd(M-x org-cdlatex-mode)}}}, or for all Org
 files with
