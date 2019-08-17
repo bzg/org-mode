@@ -19228,8 +19228,8 @@ line up with the outline headers.  You need these settings:
 #+cindex: Org Num mode
 #+cindex: number headlines
 The Org Num minor mode, toggled with {{{kbd(M-x org-num-mode)}}},
-displays on top of headlines.  It also updates numbering automatically
-upon changes to the structure of the document.
+displays outline numbering on top of headlines.  It also updates it
+automatically upon changes to the structure of the document.
 
 #+vindex: org-num-max-level
 #+vindex: org-num-skip-tags
