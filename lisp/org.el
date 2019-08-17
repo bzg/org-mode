@@ -6114,28 +6114,33 @@ a list of strings specifying which drawers should not be hidden."
 		;; `org-drawer-regexp'.
 		(goto-char (org-element-property :end drawer))))))))))
 
-(defun org-flag-drawer (flag &optional element)
+(defun org-flag-drawer (flag &optional element beg end)
   "When FLAG is non-nil, hide the drawer we are at.
-Otherwise make it visible.  When optional argument ELEMENT is
-a parsed drawer, as returned by `org-element-at-point', hide or
-show that drawer instead."
-  (let ((drawer (or element
-		    (and (save-excursion
-			   (beginning-of-line)
-			   (looking-at-p org-drawer-regexp))
-			 (org-element-at-point)))))
-    (when (memq (org-element-type drawer) '(drawer property-drawer))
-      (let ((post (org-element-property :post-affiliated drawer)))
-	(org-flag-region
-	 (save-excursion (goto-char post) (line-end-position))
-	 (save-excursion (goto-char (org-element-property :end drawer))
-			 (skip-chars-backward " \t\n")
-			 (line-end-position))
-	 flag 'org-hide-drawer)
-	;; When the drawer is hidden away, make sure point lies in
-	;; a visible part of the buffer.
-	(when (invisible-p (max (1- (point)) (point-min)))
-	  (goto-char post))))))
+Otherwise make it visible.
+
+When optional argument ELEMENT is a parsed drawer, as returned by
+`org-element-at-point', hide or show that drawer instead.
+
+When buffer positions BEG and END are provided, hide or show that
+region as a drawer without further ado."
+  (if (and beg end) (org-flag-region beg end flag 'org-hide-drawer)
+    (let ((drawer (or element
+		      (and (save-excursion
+			     (beginning-of-line)
+			     (looking-at-p org-drawer-regexp))
+			   (org-element-at-point)))))
+      (when (memq (org-element-type drawer) '(drawer property-drawer))
+	(let ((post (org-element-property :post-affiliated drawer)))
+	  (org-flag-region
+	   (save-excursion (goto-char post) (line-end-position))
+	   (save-excursion (goto-char (org-element-property :end drawer))
+			   (skip-chars-backward " \t\n")
+			   (line-end-position))
+	   flag 'org-hide-drawer)
+	  ;; When the drawer is hidden away, make sure point lies in
+	  ;; a visible part of the buffer.
+	  (when (invisible-p (max (1- (point)) (point-min)))
+	    (goto-char post)))))))
 
 ;;;; Visibility cycling
 
@@ -13566,7 +13571,9 @@ COLUMN formats in the current buffer."
      (delete-dups values))))
 
 (defun org-insert-property-drawer ()
-  "Insert a property drawer into the current entry."
+  "Insert a property drawer into the current entry.
+Do nothing if the drawer already exists.  The newly created
+drawer is immediately hidden."
   (org-with-wide-buffer
    (if (or (not (featurep 'org-inlinetask)) (org-inlinetask-in-task-p))
        (org-back-to-heading t)
@@ -13581,6 +13588,7 @@ COLUMN formats in the current buffer."
      (let ((begin (1+ (point)))
 	   (inhibit-read-only t))
        (insert "\n:PROPERTIES:\n:END:")
+       (org-flag-drawer t nil (line-end-position 0) (point))
        (when (eobp) (insert "\n"))
        (org-indent-region begin (point))))))
 
