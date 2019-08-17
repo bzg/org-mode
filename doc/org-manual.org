@@ -6985,7 +6985,7 @@ same commands.
   continue the old one.  This command also removes the timer from the
   mode line.
 
-* Refile, Copy and Archiving
+* Refiling and Archiving
 :PROPERTIES:
 :DESCRIPTION: Moving and copying information with ease.
 :END:
@@ -7241,7 +7241,7 @@ The following commands help manage the =ARCHIVE= tag:
   of its original context, including inherited tags and approximate
   position in the outline.
 
-* Capture, Attachments, RSS Feeds and Protocols
+* Capture and Attachments
 :PROPERTIES:
 :DESCRIPTION: Dealing with external data.
 :END:
@@ -7255,6 +7255,8 @@ An important part of any organization system is the ability to quickly
 capture new ideas and tasks, and to associate reference material with
 them.  Org does this using a process called /capture/.  It also can
 store files related to a task (/attachments/) in a special directory.
+Finally, it can parse RSS feeds for information and react to calls
+from other applications.
 
 ** Capture
 :PROPERTIES:
