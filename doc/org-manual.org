@@ -11113,9 +11113,9 @@ a shortcut is provided (see [[*Structure Templates]]).
   need to exit by pressing {{{kbd(C-c ')}}} again[fn:115].  The edited
   version then replaces the old version in the Org buffer.
   Fixed-width regions---where each line starts with a colon followed
-  by a space---are edited using ~artist-mode~[fn:116] to allow
-  creating ASCII drawings easily.  Using this command in an empty line
-  creates a new fixed-width region.
+  by a space---are edited using Artist mode[fn:116] to allow creating
+  ASCII drawings easily.  Using this command in an empty line creates
+  a new fixed-width region.
 
 #+cindex: storing link, in a source code buffer
 Calling ~org-store-link~ (see [[*Handling Links]]) while editing a source
@@ -21605,7 +21605,7 @@ a comma prepended, to keep them from being interpreted by Org as
 outline nodes or special syntax.  These commas are stripped when
 editing with {{{kbd(C-c ')}}}, and also before export.
 
-[fn:116] You may select a different-mode with the variable
+[fn:116] You may select a different mode with the variable
 ~org-edit-fixed-width-region-mode~.
 
 [fn:117] What Emacs considers to be an image depends on
