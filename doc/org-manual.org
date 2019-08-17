@@ -18900,264 +18900,264 @@ changes.
 
 - =#+STARTUP:= ::
 
-  #+cindex: @samp{STARTUP}, keyword
-  Startup options Org uses when first visiting a file.
+     #+cindex: @samp{STARTUP}, keyword
+     Startup options Org uses when first visiting a file.
 
-  #+vindex: org-startup-folded
-  The first set of options deals with the initial visibility of the
-  outline tree.  The corresponding variable for global default
-  settings is ~org-startup-folded~ with a default value of ~t~, which
-  is the same as ~overview~.
+     #+vindex: org-startup-folded
+     The first set of options deals with the initial visibility of the
+     outline tree.  The corresponding variable for global default
+     settings is ~org-startup-folded~ with a default value of ~t~, which
+     is the same as ~overview~.
 
-  - =overview= ::
+     - =overview= ::
 
-    Top-level headlines only.
+       Top-level headlines only.
 
-  - =content= ::
+     - =content= ::
 
-    All headlines.
+       All headlines.
 
-  - =showall= ::
+     - =showall= ::
 
-    No folding on any entry.
+       No folding on any entry.
 
-  - =showeverything= ::
+     - =showeverything= ::
 
-    Show even drawer contents.
+       Show even drawer contents.
 
-    #+vindex: org-startup-indented
-    Dynamic virtual indentation is controlled by the variable
-    ~org-startup-indented~[fn:146].
+     #+vindex: org-startup-indented
+     Dynamic virtual indentation is controlled by the variable
+     ~org-startup-indented~[fn:146].
 
-    - =indent= ::
+     - =indent= ::
 
-      Start with ~org-indent-mode~ turned on.
+       Start with ~org-indent-mode~ turned on.
 
-    - =noindent= ::
+     - =noindent= ::
 
-      Start with ~org-indent-mode~ turned off.
+       Start with ~org-indent-mode~ turned off.
 
-      #+vindex: org-startup-align-all-tables
-      Aligns tables consistently upon visiting a file.  The
-      corresponding variable is ~org-startup-align-all-tables~ with
-      ~nil~ as default value.
+     #+vindex: org-startup-align-all-tables
+     Aligns tables consistently upon visiting a file.  The
+     corresponding variable is ~org-startup-align-all-tables~ with
+     ~nil~ as default value.
 
-      - =align= ::
+     - =align= ::
 
-        Align all tables.
+       Align all tables.
 
-      - =noalign= ::
+     - =noalign= ::
 
-        Do not align tables on startup.
+       Do not align tables on startup.
 
-      #+vindex: org-startup-shrink-all-tables
-      Shrink table columns with a width cookie.  The corresponding
-      variable is ~org-startup-shrink-all-tables~ with ~nil~ as
-      default value.
+     #+vindex: org-startup-shrink-all-tables
+     Shrink table columns with a width cookie.  The corresponding
+     variable is ~org-startup-shrink-all-tables~ with ~nil~ as
+     default value.
 
-      #+vindex: org-startup-with-inline-images
-      When visiting a file, inline images can be automatically
-      displayed.  The corresponding variable is
-      ~org-startup-with-inline-images~, with a default value ~nil~ to
-      avoid delays when visiting a file.
+     #+vindex: org-startup-with-inline-images
+     When visiting a file, inline images can be automatically
+     displayed.  The corresponding variable is
+     ~org-startup-with-inline-images~, with a default value ~nil~ to
+     avoid delays when visiting a file.
 
-      - =inlineimages= ::
+     - =inlineimages= ::
 
-        Show inline images.
+       Show inline images.
 
-      - =noinlineimages= ::
+     - =noinlineimages= ::
 
         Do not show inline images on startup.
 
-      #+vindex: org-log-done
-      #+vindex: org-log-note-clock-out
-      #+vindex: org-log-repeat
-      Logging the closing and reopening of TODO items and clock
-      intervals can be configured using these options (see variables
-      ~org-log-done~, ~org-log-note-clock-out~, and ~org-log-repeat~).
+     #+vindex: org-log-done
+     #+vindex: org-log-note-clock-out
+     #+vindex: org-log-repeat
+     Logging the closing and reopening of TODO items and clock
+     intervals can be configured using these options (see variables
+     ~org-log-done~, ~org-log-note-clock-out~, and ~org-log-repeat~).
 
-      - =logdone= ::
+     - =logdone= ::
 
         Record a timestamp when an item is marked as done.
 
-      - =lognotedone= ::
+     - =lognotedone= ::
 
         Record timestamp and a note when DONE.
 
-      - =nologdone= ::
+     - =nologdone= ::
 
         Do not record when items are marked as done.
 
-      - =logrepeat= ::
+     - =logrepeat= ::
 
         Record a time when reinstating a repeating item.
 
-      - =lognoterepeat= ::
+     - =lognoterepeat= ::
 
         Record a note when reinstating a repeating item.
 
-      - =nologrepeat= ::
+     - =nologrepeat= ::
 
         Do not record when reinstating repeating item.
 
-      - =lognoteclock-out= ::
+     - =lognoteclock-out= ::
 
         Record a note when clocking out.
 
-      - =nolognoteclock-out= ::
+     - =nolognoteclock-out= ::
 
         Do not record a note when clocking out.
 
-      - =logreschedule= ::
+     - =logreschedule= ::
 
         Record a timestamp when scheduling time changes.
 
-      - =lognotereschedule= ::
+     - =lognotereschedule= ::
 
         Record a note when scheduling time changes.
 
-      - =nologreschedule= ::
+     - =nologreschedule= ::
 
         Do not record when a scheduling date changes.
 
-      - =logredeadline= ::
+     - =logredeadline= ::
 
         Record a timestamp when deadline changes.
 
-      - =lognoteredeadline= ::
+     - =lognoteredeadline= ::
 
         Record a note when deadline changes.
 
-      - =nologredeadline= ::
+     - =nologredeadline= ::
 
         Do not record when a deadline date changes.
 
-      - =logrefile= ::
+     - =logrefile= ::
 
         Record a timestamp when refiling.
 
-      - =lognoterefile= ::
+     - =lognoterefile= ::
 
         Record a note when refiling.
 
-      - =nologrefile= ::
+     - =nologrefile= ::
 
         Do not record when refiling.
 
-      #+vindex: org-hide-leading-stars
-      #+vindex: org-odd-levels-only
-      Here are the options for hiding leading stars in outline
-      headings, and for indenting outlines.  The corresponding
-      variables are ~org-hide-leading-stars~ and
-      ~org-odd-levels-only~, both with a default setting ~nil~
-      (meaning =showstars= and =oddeven=).
+     #+vindex: org-hide-leading-stars
+     #+vindex: org-odd-levels-only
+     Here are the options for hiding leading stars in outline
+     headings, and for indenting outlines.  The corresponding
+     variables are ~org-hide-leading-stars~ and
+     ~org-odd-levels-only~, both with a default setting ~nil~
+     (meaning =showstars= and =oddeven=).
 
-      - =hidestars= ::
+     - =hidestars= ::
 
         Make all but one of the stars starting a headline invisible.
 
-      - =showstars= ::
+     - =showstars= ::
 
         Show all stars starting a headline.
 
-      - =indent= ::
+     - =indent= ::
 
         Virtual indentation according to outline level.
 
-      - =noindent= ::
+     - =noindent= ::
 
         No virtual indentation according to outline level.
 
-      - =odd= ::
+     - =odd= ::
 
         Allow only odd outline levels (1, 3, ...).
 
-      - =oddeven= ::
+     - =oddeven= ::
 
         Allow all outline levels.
 
-      #+vindex: org-put-time-stamp-overlays
-      #+vindex: org-time-stamp-overlay-formats
-      To turn on custom format overlays over timestamps (variables
-      ~org-put-time-stamp-overlays~ and
-      ~org-time-stamp-overlay-formats~), use:
+     #+vindex: org-put-time-stamp-overlays
+     #+vindex: org-time-stamp-overlay-formats
+     To turn on custom format overlays over timestamps (variables
+     ~org-put-time-stamp-overlays~ and
+     ~org-time-stamp-overlay-formats~), use:
 
-      - =customtime= ::
+     - =customtime= ::
 
         Overlay custom time format.
 
-      #+vindex: constants-unit-system
-      The following options influence the table spreadsheet (variable
-      ~constants-unit-system~).
+     #+vindex: constants-unit-system
+     The following options influence the table spreadsheet (variable
+     ~constants-unit-system~).
 
-      - =constcgs= ::
+     - =constcgs= ::
 
         =constants.el= should use the c-g-s unit system.
 
-      - =constSI= ::
+     - =constSI= ::
 
         =constants.el= should use the SI unit system.
 
-      #+vindex: org-footnote-define-inline
-      #+vindex: org-footnote-auto-label
-      #+vindex: org-footnote-auto-adjust
-      To influence footnote settings, use the following keywords.  The
-      corresponding variables are ~org-footnote-define-inline~,
-      ~org-footnote-auto-label~, and ~org-footnote-auto-adjust~.
+     #+vindex: org-footnote-define-inline
+     #+vindex: org-footnote-auto-label
+     #+vindex: org-footnote-auto-adjust
+     To influence footnote settings, use the following keywords.  The
+     corresponding variables are ~org-footnote-define-inline~,
+     ~org-footnote-auto-label~, and ~org-footnote-auto-adjust~.
 
-      - =fninline= ::
+     - =fninline= ::
 
-        Define footnotes inline.
+       Define footnotes inline.
 
-      - =fnnoinline= ::
+     - =fnnoinline= ::
 
-        Define footnotes in separate section.
+       Define footnotes in separate section.
 
-      - =fnlocal= ::
+     - =fnlocal= ::
 
-        Define footnotes near first reference, but not inline.
+       Define footnotes near first reference, but not inline.
 
-      - =fnprompt= ::
+     - =fnprompt= ::
 
         Prompt for footnote labels.
 
-      - =fnauto= ::
+     - =fnauto= ::
 
         Create =[fn:1]=-like labels automatically (default).
 
-      - =fnconfirm= ::
+     - =fnconfirm= ::
 
         Offer automatic label for editing or confirmation.
 
-      - =fnadjust= ::
+     - =fnadjust= ::
 
         Automatically renumber and sort footnotes.
 
-      - =nofnadjust= ::
+     - =nofnadjust= ::
 
         Do not renumber and sort automatically.
 
-      #+vindex: org-hide-block-startup
-      To hide blocks on startup, use these keywords.  The
-      corresponding variable is ~org-hide-block-startup~.
+     #+vindex: org-hide-block-startup
+     To hide blocks on startup, use these keywords.  The
+     corresponding variable is ~org-hide-block-startup~.
 
-      - =hideblocks= ::
+     - =hideblocks= ::
 
         Hide all begin/end blocks on startup.
 
-      - =nohideblocks= ::
+     - =nohideblocks= ::
 
         Do not hide blocks on startup.
 
-      #+vindex: org-pretty-entities
-      The display of entities as UTF-8 characters is governed by the
-      variable ~org-pretty-entities~ and the keywords
+     #+vindex: org-pretty-entities
+     The display of entities as UTF-8 characters is governed by the
+     variable ~org-pretty-entities~ and the keywords
 
-      - =entitiespretty= ::
+     - =entitiespretty= ::
 
         Show entities as UTF-8 characters where possible.
 
-      - =entitiesplain= ::
+     - =entitiesplain= ::
 
         Leave entities plain.
 
