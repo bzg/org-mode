@@ -11018,7 +11018,7 @@ suited for source code and similar examples.
 There is one limitation, however.  You must insert a comma right
 before lines starting with either =*=, =,*=, =#+= or =,#+=, as those
 may be interpreted as outlines nodes or some other special syntax.
-Org transparenly strips these additonal commas whenever it accesses
+Org transparently strips these additonal commas whenever it accesses
 the contents of the block.
 
 #+begin_example
