@@ -7036,7 +7036,7 @@ special command:
   ~org-outline-path-complete-in-steps~.  If you would like to be able
   to create new nodes as new parents for refiling on the fly, check
   the variable ~org-refile-allow-creating-parent-nodes~.  When the
-  variable ~org-log-refile~[fn:88] is set, a timestamp or a note is
+  variable ~org-log-refile~[fn:82] is set, a timestamp or a note is
   recorded whenever an entry is refiled.
 
 - {{{kbd(C-u C-c C-w)}}} ::
@@ -7501,7 +7501,7 @@ Now lets look at the elements of a template definition.  Each entry in
 
   - =(file+olp+datetree "filename" [ "Level 1 heading" ...])= ::
 
-    This target[fn:82] creates a heading in a date tree[fn:83] for
+    This target[fn:83] creates a heading in a date tree[fn:84] for
     today's date.  If the optional outline path is given, the tree
     will be built under the node it is pointing to, instead of at top
     level.  Check out the ~:time-prompt~ and ~:tree-type~ properties
@@ -7607,7 +7607,7 @@ Now lets look at the elements of a template definition.  Each entry in
 :DESCRIPTION: Filling in information about time and context.
 :END:
 
-In the template itself, special "%-escapes"[fn:84] allow dynamic
+In the template itself, special "%-escapes"[fn:85] allow dynamic
 insertion of content.  The templates are expanded in the order given
 here:
 
@@ -7734,7 +7734,7 @@ here:
   After completing the template, position point here.
 
 #+vindex: org-store-link-props
-For specific link types, the following keywords are defined[fn:85]:
+For specific link types, the following keywords are defined[fn:86]:
 
 #+vindex: org-link-from-user-regexp
 | Link type    | Available keywords                                       |
@@ -7747,7 +7747,7 @@ For specific link types, the following keywords are defined[fn:85]:
 |              | =%:date= (message date header field)                     |
 |              | =%:date-timestamp= (date as active timestamp)            |
 |              | =%:date-timestamp-inactive= (date as inactive timestamp) |
-|              | =%:fromto= (either "to NAME" or "from NAME")[fn:86]      |
+|              | =%:fromto= (either "to NAME" or "from NAME")[fn:87]      |
 | gnus         | =%:group=, for messages also all email fields            |
 | w3, w3m      | =%:url=                                                  |
 | info         | =%:file=, =%:node=                                       |
@@ -7802,7 +7802,7 @@ By default, org-attach will use ID properties when adding attachments
 to outline nodes.  This makes working with attachments fully
 automated.  There is no decision needed for folder-name or location.
 ID-based directories are by default located in the =data/= directory,
-which lives in the same directory where your Org file lives[fn:87].
+which lives in the same directory where your Org file lives[fn:88].
 For more control over the setup, see [[*Attachment options]].
 
 When attachments are made using ~org-attach~ a default tag =ATTACH= is
@@ -19105,11 +19105,11 @@ manual, but here is a consolidated list for easy reference.
 #+cindex: odd-levels-only outlines
 #+cindex: clean outline view
 
-Org's default outline with stars and no indents can become too
-cluttered for short documents.  For /book-like/ long documents, the
-effect is not as noticeable.  Org provides an alternate stars and
-indentation scheme, as shown on the right in the following table.  It
-uses only one star and indents text to line with the heading:
+Org's outline with stars and no indents can look cluttered for short
+documents.  For /book-like/ long documents, the effect is not as
+noticeable.  Org provides an alternate stars and indentation scheme,
+as shown on the right in the following table.  It displays only one
+star and indents text to line up with the heading:
 
 #+begin_example
 ,* Top level headline             |    * Top level headline
@@ -19121,32 +19121,45 @@ uses only one star and indents text to line with the heading:
 ,* Another top level headline     |    * Another top level headline
 #+end_example
 
+Org can achieve this in two ways.  (1) By just displaying the buffer
+in this way without changing it (~org-indent-mode~), or (2) by
+actually indenting every line in the desired amount with hard spaces
+and hiding leading stars.
+
+*** Org Indent Mode
+
 #+cindex: Indent mode
 #+findex: org-indent-mode
-To turn this mode on, use the minor mode, ~org-indent-mode~.  Text
-lines that are not headlines are prefixed with spaces to vertically
-align with the headline text[fn:148].
+To display the buffer in the indented view, use the minor mode,
+~org-indent-mode~.  Text lines that are not headlines are prefixed
+with virtual spaces to vertically align with the headline
+text[fn:148].
 
 #+vindex: org-indent-indentation-per-level
 To make more horizontal space, the headlines are shifted by two stars.
 This can be configured by the ~org-indent-indentation-per-level~
 variable.  Only one star on each headline is visible, the rest are
-masked with the same font color as the background.
-
-Note that turning on ~org-indent-mode~ sets ~org-hide-leading-stars~
-to ~t~ and ~org-adapt-indentation~ to ~nil~.
+masked with the same font color as the background[fn:149].
 
 #+vindex: org-startup-indented
 To globally turn on ~org-indent-mode~ for all files, customize the
-variable ~org-startup-indented~.
-
-To turn on indenting for individual files, use =STARTUP= keyword as
-follows:
+variable ~org-startup-indented~.  To turn on indenting for individual
+files, use =STARTUP= keyword as follows:
 
 : #+STARTUP: indent
 
-Indent on startup makes Org use hard spaces to align text with
-headings as shown in examples below.
+*** Hard indentation
+
+It is possible to use hard spaces to achieve the indentation instead,
+if the bare ASCII file should have the indented look also outside
+Emacs[fn:150].  With Org's support, you have to indent all lines to
+line up with the outline headers.  You need these settings:
+
+  #+begin_src emacs-lisp
+  (setq org-adapt-indentation t
+        org-hide-leading-stars t
+        org-odd-levels-only t)
+  #+end_src
 
 - /Indentation of text below headlines/ ::
 
@@ -19160,7 +19173,7 @@ headings as shown in examples below.
   #+vindex: org-adapt-indentation
   Org supports this with paragraph filling, line wrapping, and
   structure editing, preserving or adapting the indentation as
-  appropriate[fn:149].
+  appropriate[fn:151].
 
 - /Hiding leading stars/ ::
 
@@ -19193,7 +19206,7 @@ headings as shown in examples below.
 
   #+vindex: org-odd-levels-only
   Using stars for only odd levels, 1, 3, 5, ..., can also clean up the
-  clutter.  This removes two stars from each level[fn:150].  For Org
+  clutter.  This removes two stars from each level[fn:152].  For Org
   to properly handle this cleaner structure during edits and exports,
   configure the variable ~org-odd-levels-only~.  To set this per-file,
   use either one of the following lines:
@@ -19592,7 +19605,7 @@ these variables.
 
 #+vindex: org-mobile-directory
 The mobile application needs access to a file directory on
-a server[fn:151] to interact with Emacs.  Pass its location through
+a server[fn:153] to interact with Emacs.  Pass its location through
 the ~org-mobile-directory~ variable.  If you can mount that directory
 locally just set the variable to point to that directory:
 
@@ -19613,7 +19626,7 @@ With a public server, consider encrypting the files.  Org also
 requires OpenSSL installed on the local computer.  To turn on
 encryption, set the same password in the mobile application and in
 Emacs.  Set the password in the variable
-~org-mobile-use-encryption~[fn:152].  Note that even after the mobile
+~org-mobile-use-encryption~[fn:154].  Note that even after the mobile
 application encrypts the file contents, the file name remains visible
 on the file systems of the local computer, the server, and the mobile
 device.
@@ -19629,15 +19642,15 @@ The command ~org-mobile-push~ copies files listed in
 ~org-mobile-files~ into the staging area.  Files include agenda files
 (as listed in ~org-agenda-files~).  Customize ~org-mobile-files~ to
 add other files.  File names are staged with paths relative to
-~org-directory~, so all files should be inside this directory[fn:153].
+~org-directory~, so all files should be inside this directory[fn:155].
 
 Push creates a special Org file =agendas.org= with custom agenda views
-defined by the user[fn:154].
+defined by the user[fn:156].
 
 Finally, Org writes the file =index.org=, containing links to other
 files.  The mobile application reads this file first from the server
 to determine what other files to download for agendas.  For faster
-downloads, it is expected to only read files whose checksums[fn:155]
+downloads, it is expected to only read files whose checksums[fn:157]
 have changed.
 
 *** Pulling from the mobile application
@@ -19654,7 +19667,7 @@ data in an inbox file format, through the following steps:
 
 1.
    #+vindex: org-mobile-inbox-for-pull
-   Org moves all entries found in =mobileorg.org=[fn:156] and appends
+   Org moves all entries found in =mobileorg.org=[fn:158] and appends
    them to the file pointed to by the variable
    ~org-mobile-inbox-for-pull~.  It should reside neither in the
    staging area nor on the server.  Each captured entry and each
@@ -19990,9 +20003,9 @@ of these strategies:
 #+cindex: @LaTeX{}, and Orgtbl mode
 
 To wrap a source table in LaTeX, use the =comment= environment
-provided by =comment.sty=[fn:157].  To activate it, put
+provided by =comment.sty=[fn:159].  To activate it, put
 ~\usepackage{comment}~ in the document header.  Orgtbl mode inserts
-a radio table skeleton[fn:158] with the command {{{kbd(M-x
+a radio table skeleton[fn:160] with the command {{{kbd(M-x
 orgtbl-insert-radio-table)}}}, which prompts for a table name.  For
 example, if =salesfigures= is the name, the template inserts:
 
@@ -20011,7 +20024,7 @@ The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
 the table at the target (receive) location named =salesfigures=.  Now
 the table is ready for data entry.  It can even use spreadsheet
-features[fn:159]:
+features[fn:161]:
 
 #+begin_example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -20228,7 +20241,7 @@ Dynamic blocks, like any other block, can be narrowed with
 #+vindex: org-agenda-skip-function
 #+vindex: org-agenda-skip-function-global
 Org provides a special hook to further limit items in agenda views:
-~agenda~, ~agenda*~[fn:160], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
+~agenda~, ~agenda*~[fn:162], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
 ~tags-tree~.  Specify a custom function that tests inclusion of every
 matched item in the view.  This function can also skip as much as is
 needed.
@@ -20271,7 +20284,7 @@ meaningful string suitable for the agenda view.
 #+vindex: org-agenda-skip-function
 Search for entries with a limit set on levels for the custom search.
 This is a general approach to creating custom searches in Org.  To
-include all levels, use =LEVEL>0=[fn:161].  Then to selectively pick
+include all levels, use =LEVEL>0=[fn:163].  Then to selectively pick
 the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
@@ -21457,32 +21470,32 @@ On other systems, idle time refers to Emacs idle time only.
 [fn:81] Please note the pitfalls of summing hierarchical data in
 a flat list (see [[*Using Column View in the Agenda]]).
 
-[fn:82] Org used to offer four different targets for date/week tree
+[fn:82] Note the corresponding =STARTUP= options =logrefile=,
+=lognoterefile=, and =nologrefile=.
+
+[fn:83] Org used to offer four different targets for date/week tree
 capture.  Now, Org automatically translates these to use
 ~file+olp+datetree~, applying the ~:time-prompt~ and ~:tree-type~
 properties.  Please rewrite your date/week-tree targets using
 ~file+olp+datetree~ since the older targets are now deprecated.
 
-[fn:83] A date tree is an outline structure with years on the highest
+[fn:84] A date tree is an outline structure with years on the highest
 level, months or ISO weeks as sublevels and then dates on the lowest
 level.  Tags are allowed in the tree structure.
 
-[fn:84] If you need one of these sequences literally, escape the =%=
+[fn:85] If you need one of these sequences literally, escape the =%=
 with a backslash.
 
-[fn:85] If you define your own link types (see [[*Adding Hyperlink
+[fn:86] If you define your own link types (see [[*Adding Hyperlink
 Types]]), any property you store with ~org-store-link-props~ can be
 accessed in capture templates in a similar way.
 
-[fn:86] This is always the other, not the user.  See the variable
+[fn:87] This is always the other, not the user.  See the variable
 ~org-link-from-user-regexp~.
 
-[fn:87] If you move entries or Org files from one directory to
+[fn:88] If you move entries or Org files from one directory to
 another, you may want to configure ~org-attach-id-dir~ to contain
 an absolute path.
-
-[fn:88] Note the corresponding =STARTUP= options =logrefile=,
-=lognoterefile=, and =nologrefile=.
 
 [fn:89] If the value of that variable is not a list, but a single file
 name, then the list of agenda files in maintained in that external
@@ -21713,40 +21726,46 @@ for indenting and wrapping long lines of headlines or text.  This
 minor mode handles ~visual-line-mode~ and directly applied settings
 through ~word-wrap~.
 
-[fn:149] Also see the variable ~org-adapt-indentation~.
+[fn:149] Note that turning on ~org-indent-mode~ sets
+~org-hide-leading-stars~ to ~t~ and ~org-adapt-indentation~ to ~nil~.
 
-[fn:150] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 5 stars, and so
+[fn:150] This works, but requires extra effort.  Org Indent mode is
+more convenient for most applications.
+
+[fn:151] Also see the variable ~org-adapt-indentation~.
+
+[fn:152] Because =LEVEL=2= has 3 stars, =LEVEL=3= has 5 stars, and so
 on.
 
-[fn:151] For a server to host files, consider using a WebDAV server,
+[fn:153] For a server to host files, consider using a WebDAV server,
 such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
-[fn:152] If Emacs is configured for safe storing of passwords, then
+[fn:154] If Emacs is configured for safe storing of passwords, then
 configure the variable ~org-mobile-encryption-password~; please read
 the docstring of that variable.
 
-[fn:153] Symbolic links in ~org-directory~ need to have the same name
+[fn:155] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
 
-[fn:154] While creating the agendas, Org mode forces =ID= properties
+[fn:156] While creating the agendas, Org mode forces =ID= properties
 on all referenced entries, so that these entries can be uniquely
 identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
 on outline paths, assuming they are unique.
 
-[fn:155] Checksums are stored automatically in the file
+[fn:157] Checksums are stored automatically in the file
 =checksums.dat=.
 
-[fn:156] The file will be empty after this operation.
+[fn:158] The file will be empty after this operation.
 
-[fn:157] https://www.ctan.org/pkg/comment
+[fn:159] https://www.ctan.org/pkg/comment
 
-[fn:158] By default this works only for LaTeX, HTML, and Texinfo.
+[fn:160] By default this works only for LaTeX, HTML, and Texinfo.
 Configure the variable ~orgtbl-radio-table-templates~ to install
 templates for other modes.
 
-[fn:159] If the =TBLFM= keyword contains an odd number of dollar
+[fn:161] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
 shown in the example you can fix this by adding an extra line inside
 the =comment= environment that is used to balance the dollar
@@ -21754,9 +21773,9 @@ expressions.  If you are using AUCTeX with the font-latex library,
 a much better solution is to add the =comment= environment to the
 variable ~LaTeX-verbatim-environments~.
 
-[fn:160] The ~agenda*~ view is the same as ~agenda~ except that it
+[fn:162] The ~agenda*~ view is the same as ~agenda~ except that it
 only considers /appointments/, i.e., scheduled and deadline items that
 have a time specification =[h]h:mm= in their time-stamps.
 
-[fn:161] Note that, for ~org-odd-levels-only~, a level number
+[fn:163] Note that, for ~org-odd-levels-only~, a level number
 corresponds to order in the hierarchy, not to the number of stars.
