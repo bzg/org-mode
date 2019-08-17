@@ -18551,27 +18551,6 @@ init file[fn:145].
 | {{{kbd(s)}}} | =#+BEGIN_SRC= ... =#+END_SRC=             |
 | {{{kbd(v)}}} | =#+BEGIN_VERSE= ... =#+END_VERSE=         |
 
-** Escape Character
-
-#+cindex: escape character
-#+cindex: zero width space
-You may sometimes want to write text that looks like Org syntax, but
-should really read as plain text.  Org may use a specific escape
-character in some situations, e.g., a backslash in macros (see [[*Macro
-Replacement]]) or a comma in source and example blocks (see [[*Literal
-Examples]]).  In the general case, however, we suggest to use the zero
-width space.  You can insert one with any of the following:
-
-: C-x 8 <RET> zero width space <RET>
-: C-x 8 <RET> 200B <RET>
-
-For example, in order to write =[[1,2]]= as-is in your document, you
-may write instead
-
-: [[X1,2]]
-
-where =X= denotes the zero width space character.
-
 ** Speed Keys
 :PROPERTIES:
 :DESCRIPTION: Electric commands at the beginning of a headline.
@@ -18601,90 +18580,211 @@ activated, {{{kbd(M-x org-speed-command-help)}}}, or {{{kbd(?)}}} when
 point is at the beginning of an Org headline, shows currently active
 Speed Keys, including the user-defined ones.
 
-** Code Evaluation and Security Issues
+** A Cleaner Outline View
 :PROPERTIES:
-:DESCRIPTION: Org files evaluate in-line code.
-:ALT_TITLE: Code Evaluation Security
+:DESCRIPTION: Getting rid of leading stars in the outline.
+:ALT_TITLE: Clean View
 :END:
+#+cindex: hiding leading stars
+#+cindex: dynamic indentation
+#+cindex: odd-levels-only outlines
+#+cindex: clean outline view
 
-Unlike plain text, running code comes with risk.  Each source code
-block, in terms of risk, is equivalent to an executable file.  Org
-therefore puts a few confirmation prompts by default.  This is to
-alert the casual user from accidentally running untrusted code.
+Org's outline with stars and no indents can look cluttered for short
+documents.  For /book-like/ long documents, the effect is not as
+noticeable.  Org provides an alternate stars and indentation scheme,
+as shown on the right in the following table.  It displays only one
+star and indents text to line up with the heading:
 
-For users who do not run code blocks or write code regularly, Org's
-default settings should suffice.  However, some users may want to
-tweak the prompts for fewer interruptions.  To weigh the risks of
-automatic execution of code blocks, here are some details about code
-evaluation.
+#+begin_example
+,* Top level headline             |    * Top level headline
+,** Second level                  |      * Second level
+,*** Third level                  |        * Third level
+    some text                    |          some text
+,*** Third level                  |        * Third level
+    more text                    |          more text
+,* Another top level headline     |    * Another top level headline
+#+end_example
 
-Org evaluates code in the following circumstances:
+Org can achieve this in two ways.  (1) By just displaying the buffer
+in this way without changing it (~org-indent-mode~), or (2) by
+actually indenting every line in the desired amount with hard spaces
+and hiding leading stars.
 
-- /Source code blocks/ ::
+*** Org Indent Mode
 
-  Org evaluates source code blocks in an Org file during export.  Org
-  also evaluates a source code block with the {{{kbd(C-c C-c)}}} key
-  chord.  Users exporting or running code blocks must load files only
-  from trusted sources.  Be wary of customizing variables that remove
-  or alter default security measures.
+#+cindex: Indent mode
+#+findex: org-indent-mode
+To display the buffer in the indented view, use the minor mode,
+~org-indent-mode~.  Text lines that are not headlines are prefixed
+with virtual spaces to vertically align with the headline
+text[fn:147].
 
-  #+attr_texinfo: :options org-confirm-babel-evaluate
-  #+begin_defopt
-  When ~t~, Org prompts the user for confirmation before executing
-  each code block.  When ~nil~, Org executes code blocks without
-  prompting the user for confirmation.  When this option is set to
-  a custom function, Org invokes the function with these two
-  arguments: the source code language and the body of the code block.
-  The custom function must return either a ~t~ or ~nil~, which
-  determines if the user is prompted.  Each source code language can
-  be handled separately through this function argument.
-  #+end_defopt
+#+vindex: org-indent-indentation-per-level
+To make more horizontal space, the headlines are shifted by two stars.
+This can be configured by the ~org-indent-indentation-per-level~
+variable.  Only one star on each headline is visible, the rest are
+masked with the same font color as the background[fn:148].
 
-  For example, here is how to execute ditaa code blocks without
-  prompting:
+#+vindex: org-startup-indented
+To globally turn on ~org-indent-mode~ for all files, customize the
+variable ~org-startup-indented~.  To turn on indenting for individual
+files, use =STARTUP= keyword as follows:
+
+: #+STARTUP: indent
+
+*** Hard indentation
+
+It is possible to use hard spaces to achieve the indentation instead,
+if the bare ASCII file should have the indented look also outside
+Emacs[fn:149].  With Org's support, you have to indent all lines to
+line up with the outline headers.  You need these settings:
 
   #+begin_src emacs-lisp
-  (defun my-org-confirm-babel-evaluate (lang body)
-    (not (string= lang "ditaa")))  ;don't ask for ditaa
-  (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
+  (setq org-adapt-indentation t
+        org-hide-leading-stars t
+        org-odd-levels-only t)
   #+end_src
 
-- /Following =shell= and =elisp= links/ ::
+- /Indentation of text below headlines/ ::
 
-  Org has two link types that can directly evaluate code (see
-  [[*External Links]]).  Because such code is not visible, these links
-  have a potential risk.  Org therefore prompts the user when it
-  encounters such links.  The customization variables are:
+  Indent text to align with the headline.
 
-  #+attr_texinfo: :options org-link-shell-confirm-function
-  #+begin_defopt
-  Function that prompts the user before executing a shell link.
-  #+end_defopt
+  #+begin_example
+  ,*** Third level
+      more text, now indented
+  #+end_example
 
-  #+attr_texinfo: :options org-link-elisp-confirm-function
-  #+begin_defopt
-  Function that prompts the user before executing an Emacs Lisp link.
-  #+end_defopt
+  #+vindex: org-adapt-indentation
+  Org supports this with paragraph filling, line wrapping, and
+  structure editing, preserving or adapting the indentation as
+  appropriate[fn:150].
 
-- /Formulas in tables/ ::
+- /Hiding leading stars/ ::
 
-  Formulas in tables (see [[*The Spreadsheet]]) are code that is evaluated
-  either by the Calc interpreter, or by the Emacs Lisp interpreter.
+  #+vindex: org-hide-leading-stars
+  Org can make leading stars invisible.  For global preference,
+  configure the variable ~org-hide-leading-stars~.  For per-file
+  preference, use these file =STARTUP= options:
 
-** Customization
+  #+begin_example
+  ,#+STARTUP: hidestars
+  ,#+STARTUP: showstars
+  #+end_example
+
+  With stars hidden, the tree is shown as:
+
+  #+begin_example
+  ,* Top level headline
+   ,* Second level
+    ,* Third level
+    ...
+  #+end_example
+
+  #+vindex: org-hide, face
+  Because Org makes the font color the same as the background color
+  to hide to stars, sometimes ~org-hide~ face may need tweaking to
+  get the effect right.  For some black and white combinations,
+  ~grey90~ on a white background might mask the stars better.
+
+- /Odd levels/ ::
+
+  #+vindex: org-odd-levels-only
+  Using stars for only odd levels, 1, 3, 5, ..., can also clean up the
+  clutter.  This removes two stars from each level[fn:151].  For Org
+  to properly handle this cleaner structure during edits and exports,
+  configure the variable ~org-odd-levels-only~.  To set this per-file,
+  use either one of the following lines:
+
+  #+begin_example
+  ,#+STARTUP: odd
+  ,#+STARTUP: oddeven
+  #+end_example
+
+  To switch between single and double stars layouts, use {{{kbd(M-x
+  org-convert-to-odd-levels)}}} and {{{kbd(M-x
+  org-convert-to-oddeven-levels)}}}.
+** Dynamic Headline Numbering
 :PROPERTIES:
-:DESCRIPTION: Adapting Org to your taste.
+:DESCRIPTION: Display and update outline numbering.
 :END:
-#+cindex: customization
-#+cindex: options, for customization
-#+cindex: variables, for customization
 
-Org has more than 500 variables for customization.  They can be
-accessed through the usual {{{kbd(M-x org-customize)}}} command.  Or
-through the Org menu: Org \rarr Customization \rarr Browse Org Group.
+#+cindex: Org Num mode
+#+cindex: number headlines
+The Org Num minor mode, toggled with {{{kbd(M-x org-num-mode)}}},
+displays outline numbering on top of headlines.  It also updates it
+automatically upon changes to the structure of the document.
 
-Org also has per-file settings for some variables (see [[*Summary of
-In-Buffer Settings]]).
+#+vindex: org-num-max-level
+#+vindex: org-num-skip-tags
+#+vindex: org-num-skip-commented
+#+vindex: org-num-skip-unnumbered
+By default, all headlines are numbered.  You can limit numbering to
+specific headlines according to their level, tags, =COMMENT= keyword,
+or =UNNUMBERED= property.  Set ~org-num-max-level~,
+~org-num-skip-tags~, ~org-num-skip-commented~,
+~org-num-skip-unnumbered~, or ~org-num-skip-footnotes~ accordingly.
+
+#+vindex: org-num-skip-footnotes
+If ~org-num-skip-footnotes~ is non-~nil~, footnotes sections (see
+[[*Creating Footnotes]]) are not numbered either.
+
+#+vindex: org-num-face
+#+vindex: org-num-format-function
+You can control how the numbering is displayed by setting
+~org-num-face~ and ~org-num-format-function~.
+
+** The Very Busy {{{kbd(C-c C-c)}}} Key
+:PROPERTIES:
+:DESCRIPTION: When in doubt, press @kbd{C-c C-c}.
+:END:
+#+kindex: C-c C-c
+#+cindex: @kbd{C-c C-c}, overview
+
+The {{{kbd(C-c C-c)}}} key in Org serves many purposes depending on
+the context.  It is probably the most over-worked, multi-purpose key
+combination in Org.  Its uses are well documented throughout this
+manual, but here is a consolidated list for easy reference.
+
+- If any highlights shown in the buffer from the creation of a sparse
+  tree, or from clock display, remove such highlights.
+
+- If point is in one of the special =KEYWORD= lines, scan the buffer
+  for these lines and update the information.  Also reset the Org file
+  cache used to temporary store the contents of URLs used as values
+  for keywords like =SETUPFILE=.
+
+- If point is inside a table, realign the table.  The table realigns
+  even if automatic table editor is turned off.
+
+- If point is on a =TBLFM= keyword, re-apply the formulas to the
+  entire table.
+
+- If the current buffer is a capture buffer, close the note and file
+  it.  With a prefix argument, also jump to the target location after
+  saving the note.
+
+- If point is on a =<<<target>>>=, update radio targets and
+  corresponding links in this buffer.
+
+- If point is on a property line or at the start or end of a property
+  drawer, offer property commands.
+
+- If point is at a footnote reference, go to the corresponding
+  definition, and /vice versa/.
+
+- If point is on a statistics cookie, update it.
+
+- If point is in a plain list item with a checkbox, toggle the status
+  of the checkbox.
+
+- If point is on a numbered item in a plain list, renumber the ordered
+  list.
+
+- If point is on the =#+BEGIN= line of a dynamic block, the block is
+  updated.
+
+- If point is at a timestamp, fix the day name in the timestamp.
 
 ** Summary of In-Buffer Settings
 :PROPERTIES:
@@ -19061,249 +19161,50 @@ changes.
   These lines set the TODO keywords and their interpretation in the
   current file.  The corresponding variable is ~org-todo-keywords~.
 
-** The Very Busy {{{kbd(C-c C-c)}}} Key
+** Org Syntax
 :PROPERTIES:
-:DESCRIPTION: When in doubt, press @kbd{C-c C-c}.
-:END:
-#+kindex: C-c C-c
-#+cindex: @kbd{C-c C-c}, overview
-
-The {{{kbd(C-c C-c)}}} key in Org serves many purposes depending on
-the context.  It is probably the most over-worked, multi-purpose key
-combination in Org.  Its uses are well documented throughout this
-manual, but here is a consolidated list for easy reference.
-
-- If any highlights shown in the buffer from the creation of a sparse
-  tree, or from clock display, remove such highlights.
-
-- If point is in one of the special =KEYWORD= lines, scan the buffer
-  for these lines and update the information.  Also reset the Org file
-  cache used to temporary store the contents of URLs used as values
-  for keywords like =SETUPFILE=.
-
-- If point is inside a table, realign the table.  The table realigns
-  even if automatic table editor is turned off.
-
-- If point is on a =TBLFM= keyword, re-apply the formulas to the
-  entire table.
-
-- If the current buffer is a capture buffer, close the note and file
-  it.  With a prefix argument, also jump to the target location after
-  saving the note.
-
-- If point is on a =<<<target>>>=, update radio targets and
-  corresponding links in this buffer.
-
-- If point is on a property line or at the start or end of a property
-  drawer, offer property commands.
-
-- If point is at a footnote reference, go to the corresponding
-  definition, and /vice versa/.
-
-- If point is on a statistics cookie, update it.
-
-- If point is in a plain list item with a checkbox, toggle the status
-  of the checkbox.
-
-- If point is on a numbered item in a plain list, renumber the ordered
-  list.
-
-- If point is on the =#+BEGIN= line of a dynamic block, the block is
-  updated.
-
-- If point is at a timestamp, fix the day name in the timestamp.
-
-** A Cleaner Outline View
-:PROPERTIES:
-:DESCRIPTION: Getting rid of leading stars in the outline.
-:ALT_TITLE: Clean View
-:END:
-#+cindex: hiding leading stars
-#+cindex: dynamic indentation
-#+cindex: odd-levels-only outlines
-#+cindex: clean outline view
-
-Org's outline with stars and no indents can look cluttered for short
-documents.  For /book-like/ long documents, the effect is not as
-noticeable.  Org provides an alternate stars and indentation scheme,
-as shown on the right in the following table.  It displays only one
-star and indents text to line up with the heading:
-
-#+begin_example
-,* Top level headline             |    * Top level headline
-,** Second level                  |      * Second level
-,*** Third level                  |        * Third level
-    some text                    |          some text
-,*** Third level                  |        * Third level
-    more text                    |          more text
-,* Another top level headline     |    * Another top level headline
-#+end_example
-
-Org can achieve this in two ways.  (1) By just displaying the buffer
-in this way without changing it (~org-indent-mode~), or (2) by
-actually indenting every line in the desired amount with hard spaces
-and hiding leading stars.
-
-*** Org Indent Mode
-
-#+cindex: Indent mode
-#+findex: org-indent-mode
-To display the buffer in the indented view, use the minor mode,
-~org-indent-mode~.  Text lines that are not headlines are prefixed
-with virtual spaces to vertically align with the headline
-text[fn:147].
-
-#+vindex: org-indent-indentation-per-level
-To make more horizontal space, the headlines are shifted by two stars.
-This can be configured by the ~org-indent-indentation-per-level~
-variable.  Only one star on each headline is visible, the rest are
-masked with the same font color as the background[fn:148].
-
-#+vindex: org-startup-indented
-To globally turn on ~org-indent-mode~ for all files, customize the
-variable ~org-startup-indented~.  To turn on indenting for individual
-files, use =STARTUP= keyword as follows:
-
-: #+STARTUP: indent
-
-*** Hard indentation
-
-It is possible to use hard spaces to achieve the indentation instead,
-if the bare ASCII file should have the indented look also outside
-Emacs[fn:149].  With Org's support, you have to indent all lines to
-line up with the outline headers.  You need these settings:
-
-  #+begin_src emacs-lisp
-  (setq org-adapt-indentation t
-        org-hide-leading-stars t
-        org-odd-levels-only t)
-  #+end_src
-
-- /Indentation of text below headlines/ ::
-
-  Indent text to align with the headline.
-
-  #+begin_example
-  ,*** Third level
-      more text, now indented
-  #+end_example
-
-  #+vindex: org-adapt-indentation
-  Org supports this with paragraph filling, line wrapping, and
-  structure editing, preserving or adapting the indentation as
-  appropriate[fn:150].
-
-- /Hiding leading stars/ ::
-
-  #+vindex: org-hide-leading-stars
-  Org can make leading stars invisible.  For global preference,
-  configure the variable ~org-hide-leading-stars~.  For per-file
-  preference, use these file =STARTUP= options:
-
-  #+begin_example
-  ,#+STARTUP: hidestars
-  ,#+STARTUP: showstars
-  #+end_example
-
-  With stars hidden, the tree is shown as:
-
-  #+begin_example
-  ,* Top level headline
-   ,* Second level
-    ,* Third level
-    ...
-  #+end_example
-
-  #+vindex: org-hide, face
-  Because Org makes the font color the same as the background color
-  to hide to stars, sometimes ~org-hide~ face may need tweaking to
-  get the effect right.  For some black and white combinations,
-  ~grey90~ on a white background might mask the stars better.
-
-- /Odd levels/ ::
-
-  #+vindex: org-odd-levels-only
-  Using stars for only odd levels, 1, 3, 5, ..., can also clean up the
-  clutter.  This removes two stars from each level[fn:151].  For Org
-  to properly handle this cleaner structure during edits and exports,
-  configure the variable ~org-odd-levels-only~.  To set this per-file,
-  use either one of the following lines:
-
-  #+begin_example
-  ,#+STARTUP: odd
-  ,#+STARTUP: oddeven
-  #+end_example
-
-  To switch between single and double stars layouts, use {{{kbd(M-x
-  org-convert-to-odd-levels)}}} and {{{kbd(M-x
-  org-convert-to-oddeven-levels)}}}.
-
-** Dynamic Headline Numbering
-:PROPERTIES:
-:DESCRIPTION: Display and update outline numbering.
+:DESCRIPTION: Formal description of Org's syntax.
 :END:
 
-#+cindex: Org Num mode
-#+cindex: number headlines
-The Org Num minor mode, toggled with {{{kbd(M-x org-num-mode)}}},
-displays outline numbering on top of headlines.  It also updates it
-automatically upon changes to the structure of the document.
+A reference document providing a formal description of Org's syntax is
+available as [[https://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
+Goaziou.  It defines Org's core internal concepts such as "headlines",
+"sections", "affiliated keywords", "(greater) elements" and "objects".
+Each part of an Org document belongs to one of the previous
+categories.
 
-#+vindex: org-num-max-level
-#+vindex: org-num-skip-tags
-#+vindex: org-num-skip-commented
-#+vindex: org-num-skip-unnumbered
-By default, all headlines are numbered.  You can limit numbering to
-specific headlines according to their level, tags, =COMMENT= keyword,
-or =UNNUMBERED= property.  Set ~org-num-max-level~,
-~org-num-skip-tags~, ~org-num-skip-commented~,
-~org-num-skip-unnumbered~, or ~org-num-skip-footnotes~ accordingly.
+To explore the abstract structure of an Org buffer, run this in
+a buffer:
 
-#+vindex: org-num-skip-footnotes
-If ~org-num-skip-footnotes~ is non-~nil~, footnotes sections (see
-[[*Creating Footnotes]]) are not numbered either.
+: M-: (org-element-parse-buffer) <RET>
 
-#+vindex: org-num-face
-#+vindex: org-num-format-function
-You can control how the numbering is displayed by setting
-~org-num-face~ and ~org-num-format-function~.
+#+texinfo: @noindent
+It outputs a list containing the buffer's content represented as an
+abstract structure.  The export engine relies on the information
+stored in this list.  Most interactive commands---e.g., for structure
+editing---also rely on the syntactic meaning of the surrounding
+context.
 
-** Using Org on a TTY
-:PROPERTIES:
-:DESCRIPTION: Using Org on a tty.
-:ALT_TITLE: TTY Keys
-:END:
-#+cindex: tty key bindings
+#+cindex: syntax checker
+#+cindex: linter
+#+findex: org-lint
+You can probe the syntax of your documents with the command
 
-Org provides alternative key bindings for TTY and modern mobile
-devices that cannot perform movement commands on point and key
-bindings with modifier keys.  Some of these workarounds may be more
-cumbersome than necessary.  Users should look into customizing these
-further based on their usage needs.  For example, the normal
-{{{kbd(S-<cursor>)}}} for editing timestamp might be better with
-{{{kbd(C-c .)}}} chord.
+: M-x org-lint <RET>
 
-#+attr_texinfo: :columns 0.2 0.28 0.15 0.21
-| Default              | Alternative 1            | Speed key    | Alternative 2        |
-|----------------------+--------------------------+--------------+----------------------|
-| {{{kbd(S-TAB)}}}     | {{{kbd(C-u TAB)}}}       | {{{kbd(C)}}} |                      |
-| {{{kbd(M-LEFT)}}}    | {{{kbd(C-c C-x l)}}}     | {{{kbd(l)}}} | {{{kbd(Esc LEFT)}}}  |
-| {{{kbd(M-S-LEFT)}}}  | {{{kbd(C-c C-x L)}}}     | {{{kbd(L)}}} |                      |
-| {{{kbd(M-RIGHT)}}}   | {{{kbd(C-c C-x r)}}}     | {{{kbd(r)}}} | {{{kbd(Esc RIGHT)}}} |
-| {{{kbd(M-S-RIGHT)}}} | {{{kbd(C-c C-x R)}}}     | {{{kbd(R)}}} |                      |
-| {{{kbd(M-UP)}}}      | {{{kbd(C-c C-x u)}}}     |              | {{{kbd(Esc UP)}}}    |
-| {{{kbd(M-S-UP)}}}    | {{{kbd(C-c C-x U)}}}     | {{{kbd(U)}}} |                      |
-| {{{kbd(M-DOWN)}}}    | {{{kbd(C-c C-x d)}}}     |              | {{{kbd(Esc DOWN)}}}  |
-| {{{kbd(M-S-DOWN)}}}  | {{{kbd(C-c C-x D)}}}     | {{{kbd(D)}}} |                      |
-| {{{kbd(S-RET)}}}     | {{{kbd(C-c C-x c)}}}     |              |                      |
-| {{{kbd(M-RET)}}}     | {{{kbd(C-c C-x m)}}}     |              | {{{kbd(Esc RET)}}}   |
-| {{{kbd(M-S-RET)}}}   | {{{kbd(C-c C-x M)}}}     |              |                      |
-| {{{kbd(S-LEFT)}}}    | {{{kbd(C-c LEFT)}}}      |              |                      |
-| {{{kbd(S-RIGHT)}}}   | {{{kbd(C-c RIGHT)}}}     |              |                      |
-| {{{kbd(S-UP)}}}      | {{{kbd(C-c UP)}}}        |              |                      |
-| {{{kbd(S-DOWN)}}}    | {{{kbd(C-c DOWN)}}}      |              |                      |
-| {{{kbd(C-S-LEFT)}}}  | {{{kbd(C-c C-x LEFT)}}}  |              |                      |
-| {{{kbd(C-S-RIGHT)}}} | {{{kbd(C-c C-x RIGHT)}}} |              |                      |
+#+texinfo: @noindent
+It runs a number of checks to find common mistakes.  It then displays
+their location in a dedicated buffer, along with a description and
+a "trust level", since false-positive are possible.  From there, you
+can operate on the reports with the following keys:
+
+#+attr_texinfo: :columns 0.22 0.78
+| {{{kbd(C-j)}}}, {{{kbd(TAB)}}} | Display the offending line                  |
+| {{{kbd(RET)}}}                 | Move point to the offending line            |
+| {{{kbd(g)}}}                   | Check the document again                    |
+| {{{kbd(h)}}}                   | Hide all reports from the same checker      |
+| {{{kbd(i)}}}                   | Also remove them from all subsequent checks |
+| {{{kbd(S)}}}                   | Sort reports by the column at point         |
 
 ** Context Dependent Documentation
 :PROPERTIES:
@@ -19320,6 +19221,97 @@ of the Org manual depending on the syntax at point.  For example,
 using it on a headline displays "Document Structure" section.
 
 {{{kbd(q)}}} closes the Info window.
+
+** Escape Character
+
+#+cindex: escape character
+#+cindex: zero width space
+You may sometimes want to write text that looks like Org syntax, but
+should really read as plain text.  Org may use a specific escape
+character in some situations, e.g., a backslash in macros (see [[*Macro
+Replacement]]) or a comma in source and example blocks (see [[*Literal
+Examples]]).  In the general case, however, we suggest to use the zero
+width space.  You can insert one with any of the following:
+
+: C-x 8 <RET> zero width space <RET>
+: C-x 8 <RET> 200B <RET>
+
+For example, in order to write =[[1,2]]= as-is in your document, you
+may write instead
+
+: [[X1,2]]
+
+where =X= denotes the zero width space character.
+
+** Code Evaluation and Security Issues
+:PROPERTIES:
+:DESCRIPTION: Org files evaluate in-line code.
+:ALT_TITLE: Code Evaluation Security
+:END:
+
+Unlike plain text, running code comes with risk.  Each source code
+block, in terms of risk, is equivalent to an executable file.  Org
+therefore puts a few confirmation prompts by default.  This is to
+alert the casual user from accidentally running untrusted code.
+
+For users who do not run code blocks or write code regularly, Org's
+default settings should suffice.  However, some users may want to
+tweak the prompts for fewer interruptions.  To weigh the risks of
+automatic execution of code blocks, here are some details about code
+evaluation.
+
+Org evaluates code in the following circumstances:
+
+- /Source code blocks/ ::
+
+  Org evaluates source code blocks in an Org file during export.  Org
+  also evaluates a source code block with the {{{kbd(C-c C-c)}}} key
+  chord.  Users exporting or running code blocks must load files only
+  from trusted sources.  Be wary of customizing variables that remove
+  or alter default security measures.
+
+  #+attr_texinfo: :options org-confirm-babel-evaluate
+  #+begin_defopt
+  When ~t~, Org prompts the user for confirmation before executing
+  each code block.  When ~nil~, Org executes code blocks without
+  prompting the user for confirmation.  When this option is set to
+  a custom function, Org invokes the function with these two
+  arguments: the source code language and the body of the code block.
+  The custom function must return either a ~t~ or ~nil~, which
+  determines if the user is prompted.  Each source code language can
+  be handled separately through this function argument.
+  #+end_defopt
+
+  For example, here is how to execute ditaa code blocks without
+  prompting:
+
+  #+begin_src emacs-lisp
+  (defun my-org-confirm-babel-evaluate (lang body)
+    (not (string= lang "ditaa")))  ;don't ask for ditaa
+  (setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
+  #+end_src
+
+- /Following =shell= and =elisp= links/ ::
+
+  Org has two link types that can directly evaluate code (see
+  [[*External Links]]).  Because such code is not visible, these links
+  have a potential risk.  Org therefore prompts the user when it
+  encounters such links.  The customization variables are:
+
+  #+attr_texinfo: :options org-link-shell-confirm-function
+  #+begin_defopt
+  Function that prompts the user before executing a shell link.
+  #+end_defopt
+
+  #+attr_texinfo: :options org-link-elisp-confirm-function
+  #+begin_defopt
+  Function that prompts the user before executing an Emacs Lisp link.
+  #+end_defopt
+
+- /Formulas in tables/ ::
+
+  Formulas in tables (see [[*The Spreadsheet]]) are code that is evaluated
+  either by the Calc interpreter, or by the Emacs Lisp interpreter.
 
 ** Interaction with Other Packages
 :PROPERTIES:
@@ -19542,6 +19534,42 @@ point moves across a special context.
               (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
               (define-key yas/keymap [tab] 'yas/next-field)))
   #+end_src
+** Using Org on a TTY
+:PROPERTIES:
+:DESCRIPTION: Using Org on a tty.
+:ALT_TITLE: TTY Keys
+:END:
+#+cindex: tty key bindings
+
+Org provides alternative key bindings for TTY and modern mobile
+devices that cannot perform movement commands on point and key
+bindings with modifier keys.  Some of these workarounds may be more
+cumbersome than necessary.  Users should look into customizing these
+further based on their usage needs.  For example, the normal
+{{{kbd(S-<cursor>)}}} for editing timestamp might be better with
+{{{kbd(C-c .)}}} chord.
+
+#+attr_texinfo: :columns 0.2 0.28 0.15 0.21
+| Default              | Alternative 1            | Speed key    | Alternative 2        |
+|----------------------+--------------------------+--------------+----------------------|
+| {{{kbd(S-TAB)}}}     | {{{kbd(C-u TAB)}}}       | {{{kbd(C)}}} |                      |
+| {{{kbd(M-LEFT)}}}    | {{{kbd(C-c C-x l)}}}     | {{{kbd(l)}}} | {{{kbd(Esc LEFT)}}}  |
+| {{{kbd(M-S-LEFT)}}}  | {{{kbd(C-c C-x L)}}}     | {{{kbd(L)}}} |                      |
+| {{{kbd(M-RIGHT)}}}   | {{{kbd(C-c C-x r)}}}     | {{{kbd(r)}}} | {{{kbd(Esc RIGHT)}}} |
+| {{{kbd(M-S-RIGHT)}}} | {{{kbd(C-c C-x R)}}}     | {{{kbd(R)}}} |                      |
+| {{{kbd(M-UP)}}}      | {{{kbd(C-c C-x u)}}}     |              | {{{kbd(Esc UP)}}}    |
+| {{{kbd(M-S-UP)}}}    | {{{kbd(C-c C-x U)}}}     | {{{kbd(U)}}} |                      |
+| {{{kbd(M-DOWN)}}}    | {{{kbd(C-c C-x d)}}}     |              | {{{kbd(Esc DOWN)}}}  |
+| {{{kbd(M-S-DOWN)}}}  | {{{kbd(C-c C-x D)}}}     | {{{kbd(D)}}} |                      |
+| {{{kbd(S-RET)}}}     | {{{kbd(C-c C-x c)}}}     |              |                      |
+| {{{kbd(M-RET)}}}     | {{{kbd(C-c C-x m)}}}     |              | {{{kbd(Esc RET)}}}   |
+| {{{kbd(M-S-RET)}}}   | {{{kbd(C-c C-x M)}}}     |              |                      |
+| {{{kbd(S-LEFT)}}}    | {{{kbd(C-c LEFT)}}}      |              |                      |
+| {{{kbd(S-RIGHT)}}}   | {{{kbd(C-c RIGHT)}}}     |              |                      |
+| {{{kbd(S-UP)}}}      | {{{kbd(C-c UP)}}}        |              |                      |
+| {{{kbd(S-DOWN)}}}    | {{{kbd(C-c DOWN)}}}      |              |                      |
+| {{{kbd(C-S-LEFT)}}}  | {{{kbd(C-c C-x LEFT)}}}  |              |                      |
+| {{{kbd(C-S-RIGHT)}}} | {{{kbd(C-c C-x RIGHT)}}} |              |                      |
 
 ** Org Crypt
 :PROPERTIES:
@@ -19721,51 +19749,6 @@ processing flagged entries.  Note that these entries may not be the
 most recent since the mobile application searches files that were last
 pulled.  To get an updated agenda view with changes since the last
 pull, pull again.
-
-** Org Syntax
-:PROPERTIES:
-:DESCRIPTION: Formal description of Org's syntax.
-:END:
-
-A reference document providing a formal description of Org's syntax is
-available as [[https://orgmode.org/worg/dev/org-syntax.html][a draft on Worg]], written and maintained by Nicolas
-Goaziou.  It defines Org's core internal concepts such as "headlines",
-"sections", "affiliated keywords", "(greater) elements" and "objects".
-Each part of an Org document belongs to one of the previous
-categories.
-
-To explore the abstract structure of an Org buffer, run this in
-a buffer:
-
-: M-: (org-element-parse-buffer) <RET>
-
-#+texinfo: @noindent
-It outputs a list containing the buffer's content represented as an
-abstract structure.  The export engine relies on the information
-stored in this list.  Most interactive commands---e.g., for structure
-editing---also rely on the syntactic meaning of the surrounding
-context.
-
-#+cindex: syntax checker
-#+cindex: linter
-#+findex: org-lint
-You can probe the syntax of your documents with the command
-
-: M-x org-lint <RET>
-
-#+texinfo: @noindent
-It runs a number of checks to find common mistakes.  It then displays
-their location in a dedicated buffer, along with a description and
-a "trust level", since false-positive are possible.  From there, you
-can operate on the reports with the following keys:
-
-#+attr_texinfo: :columns 0.22 0.78
-| {{{kbd(C-j)}}}, {{{kbd(TAB)}}} | Display the offending line                  |
-| {{{kbd(RET)}}}                 | Move point to the offending line            |
-| {{{kbd(g)}}}                   | Check the document again                    |
-| {{{kbd(h)}}}                   | Hide all reports from the same checker      |
-| {{{kbd(i)}}}                   | Also remove them from all subsequent checks |
-| {{{kbd(S)}}}                   | Sort reports by the column at point         |
 
 * Hacking
 :PROPERTIES:
