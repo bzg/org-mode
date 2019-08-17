@@ -12986,13 +12986,13 @@ general options (see [[*Export Settings]]).
      In order to be effective, the =babel= or =polyglossia=
      packages---according to the LaTeX compiler used---must be loaded
      with the appropriate language as argument.  This can be
-     accomplished by modifying the =org-latex-package-alist= variable,
+     accomplished by modifying the ~org-latex-packages-alist~ variable,
      e.g., with the following snippet:
 
     #+begin_src emacs-lisp
-    (add-to-list org-latex-package-alist
+    (add-to-list 'org-latex-packages-alist
 		 '("AUTO" "babel" t ("pdflatex")))
-    (add-to-list org-latex-package-alist
+    (add-to-list 'org-latex-packages-alist
 		 '("AUTO" "polyglossia" t ("xelatex" "lualatex")))
     #+end_src
 
