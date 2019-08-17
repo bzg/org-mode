@@ -7800,6 +7800,9 @@ directory belonging to an outline node.  Org uses directories either
 named by a unique ID of each entry, or by a =DIR= property.
 
 *** Attachment defaults and dispatcher
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 By default, org-attach will use ID properties when adding attachments
 to outline nodes.  This makes working with attachments fully
 automated.  There is no decision needed for folder-name or location.
@@ -7916,6 +7919,9 @@ The following commands deal with attachments:
     outline node.
 
 *** Attachment options
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 There are a couple of options for attachments that are worth
 mentioning.
 
@@ -8004,6 +8010,9 @@ See customization group =Org Attach= if you want to change the
 default settings.
 
 *** Attachment links
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 Attached files and folders can be referenced using attachment links.
 This makes it easy to refer to the material added to an outline node.
 Especially if it was attached using the unique ID of the entry!
@@ -8019,6 +8028,9 @@ See attached document for more information: [[attachment:info.org]]
 See [[*External Links]] for more information about these links.
 
 *** Automatic version-control with Git
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 If the directory attached to an outline node is a Git repository, Org
 can be configured to automatically commit changes to that repository
 when it sees them.
@@ -8031,6 +8043,9 @@ the following to your Emacs config:
 #+end_src
 
 *** Attach from Dired
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
 #+cindex: attach from Dired
 #+findex: org-attach-dired-to-subtree
 It is possible to attach files to a subtree from a Dired buffer.  To
