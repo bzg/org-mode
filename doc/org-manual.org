@@ -11014,11 +11014,9 @@ suited for source code and similar examples.
 ,#+END_EXAMPLE
 #+end_example
 
-Note that such blocks may be /indented/ in order to align nicely with
-indented text and in particular with plain list structure (see
-[[*Plain Lists]]).  For simplicity when using small examples, you can
-also start the example lines with a colon followed by a space.  There
-may also be additional whitespace before the colon:
+For simplicity when using small examples, you can also start the
+example lines with a colon followed by a space.  There may also be
+additional whitespace before the colon:
 
 #+begin_example
 Here is an example
@@ -11086,8 +11084,12 @@ jumps to point-min.
 #+end_example
 
 #+cindex: indentation, in source blocks
-Finally, you can use =-i= to preserve the indentation of a specific
-code block (see [[*Editing Source Code]]).
+Source code and examples may be /indented/ in order to align nicely
+with the surrounding text, and in particular with plain list structure
+(see [[*Plain Lists]]).  By default, Org only retains the relative
+indentation between lines, e.g., when exporting the contents of the
+block.  However, you can use the =-i= switch to also preserve the
+global indentation, if it does matter.  See [[*Editing Source Code]].
 
 #+vindex: org-coderef-label-format
 If the syntax for the label format conflicts with the language syntax,
