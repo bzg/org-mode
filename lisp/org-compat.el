@@ -70,16 +70,36 @@
 
 ;;; Emacs < 27.1 compatibility
 
+(unless (fboundp 'proper-list-p)
+  ;; `proper-list-p' was added in Emacs 27.1.  The function below is
+  ;; taken from Emacs subr.el 200195e824b^.
+  (defun proper-list-p (object)
+    "Return OBJECT's length if it is a proper list, nil otherwise.
+A proper list is neither circular nor dotted (i.e., its last cdr
+is nil)."
+    (and (listp object) (ignore-errors (length object)))))
+
+(if (fboundp 'xor)
+    ;; `xor' was added in Emacs 27.1.
+    (defalias 'org-xor #'xor)
+  (defsubst org-xor (a b)
+    "Exclusive `or'."
+    (if a (not b) b)))
+
 (unless (fboundp 'pcomplete-uniquify-list)
   ;; The misspelled variant was made obsolete in Emacs 27.1
   (defalias 'pcomplete-uniquify-list 'pcomplete-uniqify-list))
 
-(defun org-current-time-as-list ()
-  "Compatibility wrapper for `current-time'.
-As of Emacs 27.1, `current-time' callers should not assume a list
-return value."
-  (or (ignore-errors (encode-time nil 'list))
-      (current-time)))
+(if (fboundp 'time-convert)
+    (progn
+      (defsubst org-time-convert-to-integer (time)
+	(time-convert time 'integer))
+      (defsubst org-time-convert-to-list (time)
+	(time-convert time 'list)))
+  (defun org-time-convert-to-integer (time)
+    (floor (float-time time)))
+  (defun org-time-convert-to-list (time)
+    (seconds-to-time (float-time time))))
 
 
 ;;; Emacs < 26.1 compatibility
@@ -140,6 +160,35 @@ This is a floating point number if the size is too large for an integer."
     "Return non-nil if STRING1 is less than STRING2 in lexicographic order.
 Case is significant."
     (string< s1 s2)))
+
+;; The time- functions below translate nil to `current-time` and
+;; accept an integer as of Emacs 25.  `decode-time` and
+;; `format-time-string` accept nil on Emacs 24 but don't accept an
+;; integer until Emacs 25.
+(if (< emacs-major-version 25)
+    (let ((convert
+           (lambda (time)
+             (cond ((not time) (current-time))
+                   ((numberp time) (seconds-to-time time))
+                   (t time)))))
+      (defun org-decode-time (&optional time)
+        (decode-time (funcall convert time)))
+      (defun org-format-time-string (format-string &optional time universal)
+        (format-time-string format-string (funcall convert time) universal))
+      (defun org-time-add (a b)
+        (time-add (funcall convert a) (funcall convert b)))
+      (defun org-time-subtract (a b)
+        (time-subtract (funcall convert a) (funcall convert b)))
+      (defun org-time-since (time)
+        (time-since (funcall convert time)))
+      (defun org-time-less-p (t1 t2)
+        (time-less-p (funcall convert t1) (funcall convert t2))))
+  (defalias 'org-decode-time 'decode-time)
+  (defalias 'org-format-time-string 'format-time-string)
+  (defalias 'org-time-add 'time-add)
+  (defalias 'org-time-subtract 'time-subtract)
+  (defalias 'org-time-since 'time-since)
+  (defalias 'org-time-less-p 'time-less-p))
 
 
 ;;; Obsolete aliases (remove them after the next major release).
@@ -712,15 +761,6 @@ attention to case differences."
       (and (>= start-pos 0)
            (eq t (compare-strings suffix nil nil
                                   string start-pos nil ignore-case))))))
-
-(unless (fboundp 'proper-list-p)
-  ;; `proper-list-p' was added in Emacs 27.1.  The function below is
-  ;; taken from Emacs subr.el 200195e824b^.
-  (defun proper-list-p (object)
-    "Return OBJECT's length if it is a proper list, nil otherwise.
-A proper list is neither circular nor dotted (i.e., its last cdr
-is nil)."
-    (and (listp object) (ignore-errors (length object)))))
 
 
 ;;; Integration with and fixes for other packages

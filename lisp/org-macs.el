@@ -585,15 +585,6 @@ Optional argument REGEXP selects variables to clone."
 		  (or (null regexp) (string-match-p regexp (symbol-name name))))
 	 (ignore-errors (set (make-local-variable name) value)))))))
 
-
-
-;;; Logic
-
-(defsubst org-xor (a b)
-  "Exclusive `or'."
-  (if a (not b) b))
-
-
 
 ;;; Miscellaneous
 
@@ -1107,7 +1098,7 @@ nil, just return 0."
    ((numberp s) s)
    ((stringp s)
     (condition-case nil
-	(float-time (apply #'encode-time (org-parse-time-string s)))
+	(float-time (org-time-string-to-time s))
       (error 0)))
    (t 0)))
 

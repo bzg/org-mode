@@ -386,7 +386,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
   "Return string with random (version 4) UUID."
   (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
 			  (random)
-			  (org-current-time-as-list)
+			  (org-time-convert-to-list nil)
 			  (user-uid)
 			  (emacs-pid)
 			  (user-full-name)
@@ -442,18 +442,21 @@ The input I may be a character, or a single-letter string."
     r))
 
 (defun org-id-time-to-b36 (&optional time)
-  "Encode TIME as a 10-digit string.
+  "Encode TIME as a 12-digit string.
 This string holds the time to micro-second accuracy, and can be decoded
 using `org-id-decode'."
-  (setq time (or time (org-current-time-as-list)))
+  ;; FIXME: If TIME represents N seconds after the epoch, then
+  ;; this encoding assumes 0 <= N < 110075314176 = (* (expt 36 4) 65536),
+  ;; i.e., that TIME is from 1970-01-01 00:00:00 to 5458-02-23 20:09:36 UTC.
+  (setq time (org-time-convert-to-list nil))
   (concat (org-id-int-to-b36 (nth 0 time) 4)
 	  (org-id-int-to-b36 (nth 1 time) 4)
-	  (org-id-int-to-b36 (or (nth 2 time) 0) 4)))
+	  (org-id-int-to-b36 (nth 2 time) 4)))
 
 (defun org-id-decode (id)
   "Split ID into the prefix and the time value that was used to create it.
 The return value is (prefix . time) where PREFIX is nil or a string,
-and time is the usual three-integer representation of time."
+and TIME is a Lisp time value (HI LO USEC)."
   (let (prefix time parts)
     (setq parts (org-split-string id ":"))
     (if (= 2 (length parts))

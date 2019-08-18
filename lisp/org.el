@@ -4994,22 +4994,20 @@ When ROUNDING-MINUTES is not an integer, fall back on the car of
 the rounding returns a past time."
   (let ((r (or (and (integerp rounding-minutes) rounding-minutes)
 	       (car org-time-stamp-rounding-minutes)))
-	(time (decode-time)) res)
+	(now (current-time)))
     (if (< r 1)
-	(current-time)
-      (setq res
-	    (apply 'encode-time
-		   (append (list 0 (* r (floor (+ .5 (/ (float (nth 1 time)) r)))))
-			   (nthcdr 2 time))))
-      (if (and past (< (float-time (time-subtract (current-time) res)) 0))
-	  (seconds-to-time (- (float-time res) (* r 60)))
-	res))))
+	now
+      (let* ((time (decode-time now))
+	     (res (apply #'encode-time 0 (* r (round (nth 1 time) r))
+			 (nthcdr 2 time))))
+	(if (or (not past) (org-time-less-p res now))
+	    res
+	  (org-time-subtract res (* r 60)))))))
 
 (defun org-today ()
   "Return today date, considering `org-extend-today-until'."
   (time-to-days
-   (time-subtract (current-time)
-		  (list 0 (* 3600 org-extend-today-until) 0))))
+   (org-time-since (* 3600 org-extend-today-until))))
 
 ;;;; Font-Lock stuff, including the activators
 
@@ -10839,7 +10837,7 @@ This function is run automatically after each state change to a DONE state."
 		      (let ((nshiftmax 10)
 			    (nshift 0))
 			(while (or (= nshift 0)
-				   (not (time-less-p (current-time) time)))
+				   (not (org-time-less-p nil time)))
 			  (when (= nshiftmax (cl-incf nshift))
 			    (or (y-or-n-p
 				 (format "%d repeater intervals were not \
@@ -11012,7 +11010,7 @@ for calling org-schedule with, or if there is no scheduling,
 returns nil."
   (let ((time (org-entry-get pom "SCHEDULED" inherit)))
     (when time
-      (apply 'encode-time (org-parse-time-string time)))))
+      (org-time-string-to-time time))))
 
 (defun org-get-deadline-time (pom &optional inherit)
   "Get the deadline as a time tuple, of a format suitable for
@@ -11020,7 +11018,7 @@ calling org-deadline with, or if there is no scheduling, returns
 nil."
   (let ((time (org-entry-get pom "DEADLINE" inherit)))
     (when time
-      (apply 'encode-time (org-parse-time-string time)))))
+      (org-time-string-to-time time))))
 
 (defun org-remove-timestamp-with-keyword (keyword)
   "Remove all time stamps with KEYWORD in the current entry."
@@ -11079,7 +11077,7 @@ WHAT entry will also be removed."
 				       org-deadline-time-regexp)
 				     end t)
 	      (setq ts (match-string 1)
-		    default-time (apply 'encode-time (org-parse-time-string ts))
+		    default-time (org-time-string-to-time ts)
 		    default-input (and ts (org-get-compact-tod ts)))))))
       (when what
 	(setq time
@@ -14025,8 +14023,7 @@ non-nil."
 	      ((org-at-timestamp-p 'lax) (match-string 0))))
 	 ;; Default time is either the timestamp at point or today.
 	 ;; When entering a range, only the range start is considered.
-         (default-time (and ts
-			    (apply #'encode-time (org-parse-time-string ts))))
+         (default-time (and ts (org-time-string-to-time ts)))
          (default-input (and ts (org-get-compact-tod ts)))
          (repeater (and ts
 			(string-match "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ts)
@@ -14274,13 +14271,14 @@ user."
 		 "range representable on this machine"))
       (ding))
 
-    ;; One round trip to get rid of 34th of August and stuff like that....
-    (setq final (decode-time (apply 'encode-time final)))
+    (setq final (apply #'encode-time final))
 
     (setq org-read-date-final-answer ans)
 
     (if to-time
-	(apply 'encode-time final)
+	final
+      ;; This round-trip gets rid of 34th of August and stuff like that....
+      (setq final (decode-time final))
       (if (and (boundp 'org-time-was-given) org-time-was-given)
 	  (format "%04d-%02d-%02d %02d:%02d"
 		  (nth 5 final) (nth 4 final) (nth 3 final)
@@ -14310,7 +14308,7 @@ user."
 			  (and (boundp 'org-time-was-given) org-time-was-given))
 		      (cdr fmts)
 		    (car fmts)))
-	     (txt (format-time-string fmt (apply 'encode-time f)))
+	     (txt (format-time-string fmt (apply #'encode-time f)))
 	     (txt (if org-read-date-inactive (concat "[" (substring txt 1 -1) "]") txt))
 	     (txt (concat "=> " txt)))
 	(when (and org-end-time-was-given
@@ -14961,7 +14959,7 @@ signaled."
    (daynr (org-closest-date s daynr prefer))
    (t (time-to-days
        (condition-case errdata
-	   (apply #'encode-time (org-parse-time-string s))
+	   (org-time-string-to-time s)
 	 (error (error "Bad timestamp `%s'%s\nError was: %s"
 		       s
 		       (if (not (and buffer pos)) ""
@@ -15059,12 +15057,12 @@ stamp stay unchanged.  In any case, return value is an absolute
 day number."
   (if (not (string-match "\\+\\([0-9]+\\)\\([hdwmy]\\)" start))
       ;; No repeater.  Do not shift time stamp.
-      (time-to-days (apply #'encode-time (org-parse-time-string start)))
+      (time-to-days (org-time-string-to-time start))
     (let ((value (string-to-number (match-string 1 start)))
 	  (type (match-string 2 start)))
       (if (= 0 value)
 	  ;; Repeater with a 0-value is considered as void.
-	  (time-to-days (apply #'encode-time (org-parse-time-string start)))
+	  (time-to-days (org-time-string-to-time start))
 	(let* ((base (org-date-to-gregorian start))
 	       (target (org-date-to-gregorian current))
 	       (sday (calendar-absolute-from-gregorian base))
@@ -20063,13 +20061,12 @@ return an active timestamp."
   "Convert TIMESTAMP object into an Emacs internal time value.
 Use end of date range or time range when END is non-nil.
 Otherwise, use its start."
-  (apply #'encode-time
-	 (cons 0
-	       (mapcar
-		(lambda (prop) (or (org-element-property prop timestamp) 0))
-		(if end '(:minute-end :hour-end :day-end :month-end :year-end)
-		  '(:minute-start :hour-start :day-start :month-start
-				  :year-start))))))
+  (apply #'encode-time 0
+	 (mapcar
+	  (lambda (prop) (or (org-element-property prop timestamp) 0))
+	  (if end '(:minute-end :hour-end :day-end :month-end :year-end)
+	    '(:minute-start :hour-start :day-start :month-start
+			    :year-start)))))
 
 (defun org-timestamp-has-time-p (timestamp)
   "Non-nil when TIMESTAMP has a time specified."

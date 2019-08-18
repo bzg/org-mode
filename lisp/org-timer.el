@@ -139,9 +139,7 @@ the region 0:00:00."
 		   (format "Restart timer with offset [%s]: " def)))
 	  (unless (string-match "\\S-" s) (setq s def))
 	  (setq delta (org-timer-hms-to-secs (org-timer-fix-incomplete s)))))
-	(setq org-timer-start-time
-	      (seconds-to-time
-	       (- (float-time) delta))))
+	(setq org-timer-start-time (org-time-since delta)))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
       (message "Timer start time set to %s, current value is %s"
@@ -160,19 +158,14 @@ With prefix arg STOP, stop it entirely."
    (org-timer-pause-time
     (let ((start-secs (float-time org-timer-start-time))
 	  (pause-secs (float-time org-timer-pause-time)))
-      ;; Note: We pass the result of `current-time' to `time-add' and
-      ;; `float-time' below so that we can easily override the value
-      ;; in tests.
       (if org-timer-countdown-timer
 	  (let ((new-secs (- start-secs pause-secs)))
 	    (setq org-timer-countdown-timer
 		  (org-timer--run-countdown-timer
 		   new-secs org-timer-countdown-timer-title))
-	    (setq org-timer-start-time
-		  (time-add (current-time) (seconds-to-time new-secs))))
+	    (setq org-timer-start-time (org-time-add nil new-secs)))
 	(setq org-timer-start-time
-	      (seconds-to-time (- (float-time)
-				  (- pause-secs start-secs)))))
+	      (org-time-since (- pause-secs start-secs))))
       (setq org-timer-pause-time nil)
       (org-timer-set-mode-line 'on)
       (run-hooks 'org-timer-continue-hook)
@@ -386,16 +379,15 @@ VALUE can be `on', `off', or `paused'."
 (defun org-timer-show-remaining-time ()
   "Display the remaining time before the timer ends."
   (interactive)
-  (require 'time)
-  (if (not org-timer-countdown-timer)
-      (message "No timer set")
-    (let* ((rtime (decode-time
-		   (time-subtract (timer--time org-timer-countdown-timer)
-				  (current-time))))
-	   (rsecs (nth 0 rtime))
-	   (rmins (nth 1 rtime)))
-      (message "%d minute(s) %d seconds left before next time out"
-	       rmins rsecs))))
+  (message
+   (if (not org-timer-countdown-timer)
+       "No timer set"
+     (format-seconds
+      "%m minute(s) %s seconds left before next time out"
+      ;; Note: Once our minimal require is Emacs 27, we can drop this
+      ;; org-time-convert-to-integer call.
+      (org-time-convert-to-integer
+       (org-time-subtract (timer--time org-timer-countdown-timer) nil))))))
 
 ;;;###autoload
 (defun org-timer-set-timer (&optional opt)
@@ -456,10 +448,7 @@ using three `C-u' prefix arguments."
 		(org-timer--run-countdown-timer
 		 secs org-timer-countdown-timer-title))
 	  (run-hooks 'org-timer-set-hook)
-	  ;; Pass `current-time' result to `time-add' (instead of nil)
-	  ;; for for Emacs 24 compatibility.
-	  (setq org-timer-start-time
-		(time-add (current-time) (seconds-to-time secs)))
+	  (setq org-timer-start-time (org-time-add nil secs))
 	  (setq org-timer-pause-time nil)
 	  (org-timer-set-mode-line 'on))))))
 

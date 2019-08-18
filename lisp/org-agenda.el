@@ -5521,8 +5521,8 @@ displayed in agenda view."
 	    (substring
 	     (format-time-string
 	      (car org-time-stamp-formats)
-	      (apply #'encode-time	; DATE bound by calendar
-		     (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
+	      (encode-time	; DATE bound by calendar
+	       0 0 0 (nth 1 date) (car date) (nth 2 date)))
 	     1 11))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
@@ -5772,8 +5772,8 @@ then those holidays will be skipped."
 		   (substring
 		    (format-time-string
 		     (car org-time-stamp-formats)
-		     (apply 'encode-time  ; DATE bound by calendar
-			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
+		     (encode-time  ; DATE bound by calendar
+		      0 0 0 (nth 1 date) (car date) (nth 2 date)))
 		    1 11))))
 	 (org-agenda-search-headline-for-time nil)
 	 marker hdmarker priority category level tags closedp type
@@ -5893,10 +5893,8 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	      (throw 'next t))
 	    (setq ts (match-string 1)
 		  te (match-string 3)
-		  ts (float-time
-		      (apply #'encode-time (org-parse-time-string ts)))
-		  te (float-time
-		      (apply #'encode-time (org-parse-time-string te)))
+		  ts (float-time (org-time-string-to-time ts))
+		  te (float-time (org-time-string-to-time te))
 		  dt (- te ts))))
 	(cond
 	 ((> dt (* 60 maxtime))
@@ -5947,8 +5945,8 @@ See also the user option `org-agenda-clock-consistency-checks'."
       (throw 'exit t))
     ;; We have a shorter gap.
     ;; Now we have to get the minute of the day when these times are
-    (let* ((t1dec (decode-time (seconds-to-time t1)))
-	   (t2dec (decode-time (seconds-to-time t2)))
+    (let* ((t1dec (org-decode-time t1))
+	   (t2dec (org-decode-time t2))
 	   ;; compute the minute on the day
 	   (min1 (+ (nth 1 t1dec) (* 60 (nth 2 t1dec))))
 	   (min2 (+ (nth 1 t2dec) (* 60 (nth 2 t2dec)))))
@@ -9306,7 +9304,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (goto-char (point-max))
       (while (not (bobp))
 	(when (equal marker (org-get-at-bol 'org-marker))
-	  (remove-text-properties (point-at-bol) (point-at-eol) '(display))
+          (remove-text-properties (point-at-bol) (point-at-eol) '(display nil))
 	  (org-move-to-column (- (window-width) (length stamp)) t)
           (add-text-properties
 	   (1- (point)) (point-at-eol)
