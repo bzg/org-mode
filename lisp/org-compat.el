@@ -90,12 +90,16 @@ is nil)."
   ;; The misspelled variant was made obsolete in Emacs 27.1
   (defalias 'pcomplete-uniquify-list 'pcomplete-uniqify-list))
 
-(defun org-current-time-as-list ()
-  "Compatibility wrapper for `current-time'.
-As of Emacs 27.1, `current-time' callers should not assume a list
-return value."
-  (or (ignore-errors (encode-time nil 'list))
-      (current-time)))
+(if (fboundp 'time-convert)
+    (progn
+      (defsubst org-time-convert-to-integer (time)
+	(time-convert time 'integer))
+      (defsubst org-time-convert-to-list (time)
+	(time-convert time 'list)))
+  (defun org-time-convert-to-integer (time)
+    (floor (float-time time)))
+  (defun org-time-convert-to-list (time)
+    (seconds-to-time (float-time time))))
 
 
 ;;; Emacs < 26.1 compatibility
