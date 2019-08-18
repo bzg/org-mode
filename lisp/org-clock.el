@@ -729,8 +729,9 @@ menu\nmouse-2 will jump to task"))
 The time returned includes the time spent on this task in
 previous clocking intervals."
   (let ((currently-clocked-time
-	 (floor (- (float-time)
-		   (float-time org-clock-start-time)) 60)))
+	 (floor (org-time-convert-to-integer
+		 (org-time-since org-clock-start-time))
+		60)))
     (+ currently-clocked-time (or org-clock-total-time 0))))
 
 (defun org-clock-modify-effort-estimate (&optional value)
@@ -945,9 +946,7 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	 (org-clock-clock-out clock fail-quietly))
 	((org-is-active-clock clock) nil)
 	(t (org-clock-clock-in clock t))))
-      ((pred (time-less-p (current-time)))
-       ;; ^ NOTE: Here and in other `time-less-p' calls, we use
-       ;; (current-time) rather than nil for Emacs 24 compatibility.
+      ((pred (org-time-less-p nil))
        (error "RESOLVE-TO must refer to a time in the past"))
       (_
        (when restart (error "RESTART is not valid here"))
@@ -1046,11 +1045,8 @@ to be CLOCKED OUT."))))
 				   nil 45)))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
-	   (floor (/ (float-time
-		      ;; NOTE: Here and in other `time-subtract'
-		      ;; calls, we use (current-time) rather than nil
-		      ;; for Emacs 24 compatibility.
-		      (time-subtract (current-time) last-valid)) 60)))
+	   (floor (org-time-convert-to-integer (org-time-since last-valid))
+		  60))
 	 (keep
 	  (and (memq ch '(?k ?K))
 	       (read-number "Keep how many minutes? " default)))
@@ -1058,8 +1054,9 @@ to be CLOCKED OUT."))))
 	  (and (memq ch '(?g ?G))
 	       (read-number "Got back how many minutes ago? " default)))
 	 (subtractp (memq ch '(?s ?S)))
-	 (barely-started-p (< (- (float-time last-valid)
-				 (float-time (cdr clock))) 45))
+	 (barely-started-p (org-time-less-p
+			    (org-time-subtract last-valid (cdr clock))
+			    45))
 	 (start-over (and subtractp barely-started-p)))
     (cond
      ((memq ch '(?j ?J))
@@ -1085,10 +1082,9 @@ to be CLOCKED OUT."))))
 		   (and gotback (= gotback default)))
 	       'now)
 	      (keep
-	       (time-add last-valid (seconds-to-time (* 60 keep))))
+	       (org-time-add last-valid (* 60 keep)))
 	      (gotback
-	       (time-subtract (current-time)
-			      (seconds-to-time (* 60 gotback))))
+	       (org-time-since (* 60 gotback)))
 	      (t
 	       (error "Unexpected, please report this as a bug")))
        (and gotback last-valid)
@@ -1118,9 +1114,9 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 			(lambda (clock)
 			  (format
 			   "Dangling clock started %d mins ago"
-			   (floor (- (float-time)
-				     (float-time (cdr clock)))
-				  60)))))
+			   (floor (org-time-convert-to-integer
+                                   (org-time-since (cdr clock)))
+                                  60)))))
 		   (or last-valid
 		       (cdr clock)))))))))))
 
@@ -1170,7 +1166,7 @@ so long."
 	     org-clock-marker (marker-buffer org-clock-marker))
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
-	    (time-since (seconds-to-time org-clock-user-idle-seconds)))
+	    (org-time-since org-clock-user-idle-seconds))
 	   (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
 	  (org-clock-resolve
@@ -1331,9 +1327,10 @@ the default behavior."
 			  (y-or-n-p
 			   (format
 			    "You stopped another clock %d mins ago; start this one from then? "
-			    (/ (- (float-time
-				   (org-current-time org-clock-rounding-minutes t))
-				  (float-time leftover))
+			    (/ (org-time-convert-to-integer
+				(org-time-subtract
+				 (org-current-time org-clock-rounding-minutes t)
+				 leftover))
 			       60)))
 			  leftover)
 		     start-time
@@ -1584,14 +1581,12 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (delete-region (point) (point-at-eol))
 	  (insert "--")
 	  (setq te (org-insert-time-stamp (or at-time now) 'with-hm 'inactive))
-	  (setq s (- (float-time
-		      (apply #'encode-time (org-parse-time-string te)))
-		     (float-time
-		      (apply #'encode-time (org-parse-time-string ts))))
-		h (floor (/ s 3600))
-		s (- s (* 3600 h))
-		m (floor (/ s 60))
-		s (- s (* 60 s)))
+	  (setq s (org-time-convert-to-integer
+		   (time-subtract
+		    (org-time-string-to-time te)
+		    (org-time-string-to-time ts)))
+		h (floor s 3600)
+		m (floor (mod s 3600) 60))
 	  (insert " => " (format "%2d:%02d" h m))
 	  (move-marker org-clock-marker nil)
 	  (move-marker org-clock-hd-marker nil)
@@ -1842,8 +1837,8 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 		       tend
 		       (>= (float-time org-clock-start-time) tstart)
 		       (<= (float-time org-clock-start-time) tend))
-	      (let ((time (floor (- (float-time)
-				    (float-time org-clock-start-time))
+	      (let ((time (floor (org-time-convert-to-integer
+				  (org-time-since org-clock-start-time))
 				 60)))
 		(setq t1 (+ t1 time))))
 	    (let* ((headline-forced
@@ -2734,7 +2729,7 @@ The TS argument has the same type as the return values of
      (te (setq te (org-matcher-time te))))
     (setq tsb
 	  (if (eq step0 'week)
-	      (let ((dow (nth 6 (decode-time (seconds-to-time ts)))))
+	      (let ((dow (nth 6 (org-decode-time ts))))
 		(if (<= dow ws) ts
 		  (float-time (org-clocktable-increment-day ts ; decrement
 							    (- ws dow)))))

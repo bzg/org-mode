@@ -406,8 +406,8 @@ current time."
   "Insert consistency graph for any habitual tasks."
   (let ((inhibit-read-only t)
 	(buffer-invisibility-spec '(org-link))
-	(moment (time-subtract (current-time)
-			       (list 0 (* 3600 org-extend-today-until) 0))))
+	(moment (org-time-subtract nil
+				   (* 3600 org-extend-today-until))))
     (save-excursion
       (goto-char (if line (point-at-bol) (point-min)))
       (while (not (eobp))

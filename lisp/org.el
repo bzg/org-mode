@@ -5649,8 +5649,7 @@ the rounding returns a past time."
 (defun org-today ()
   "Return today date, considering `org-extend-today-until'."
   (time-to-days
-   (time-subtract (current-time)
-		  (list 0 (* 3600 org-extend-today-until) 0))))
+   (org-time-since (* 3600 org-extend-today-until))))
 
 ;;;; Font-Lock stuff, including the activators
 
@@ -12868,7 +12867,7 @@ This function is run automatically after each state change to a DONE state."
 		      (let ((nshiftmax 10)
 			    (nshift 0))
 			(while (or (= nshift 0)
-				   (not (time-less-p (current-time) time)))
+				   (not (org-time-less-p nil time)))
 			  (when (= nshiftmax (cl-incf nshift))
 			    (or (y-or-n-p
 				 (format "%d repeater intervals were not \
