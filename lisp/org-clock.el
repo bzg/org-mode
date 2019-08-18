@@ -2698,7 +2698,7 @@ LEVEL is an integer.  Indent by two spaces per level above 1."
   "Increment day in TS by N (defaulting to 1).
 The TS argument has the same type as the return values of
 `float-time' or `current-time'."
-  (let ((tsd (decode-time ts)))
+  (let ((tsd (org-decode-time ts)))
     (cl-incf (nth 3 tsd) (or n 1))
     (setf (nth 8 tsd) nil) ; no time zone: increasing day skips one whole day
     (apply 'encode-time tsd)))
@@ -2736,23 +2736,22 @@ The TS argument has the same type as the return values of
 	  (if (eq step0 'week)
 	      (let ((dow (nth 6 (decode-time (seconds-to-time ts)))))
 		(if (<= dow ws) ts
-		  (org-clocktable-increment-day ts ; decrement
-						(- ws dow))))
+		  (float-time (org-clocktable-increment-day ts ; decrement
+							    (- ws dow)))))
 	    ts))
-    (while (< (float-time tsb) te)
+    (while (< tsb te)
       (unless (bolp) (insert "\n"))
-      (let* ((start-time (seconds-to-time (max (float-time tsb) ts)))
-	     (dow (nth 6 (decode-time (seconds-to-time tsb))))
+      (let* ((start-time (max tsb ts))
+	     (dow (nth 6 (org-decode-time tsb)))
 	     (days-to-skip (cond ((eq step0 'day) 1)
 				 ;; else 'week:
 				 ((= dow ws) 7)
 				 (t (- ws dow)))))
-	(setq tsb (time-to-seconds (org-clocktable-increment-day tsb
-								 days-to-skip)))
+	(setq tsb (float-time (org-clocktable-increment-day tsb days-to-skip)))
 	(insert "\n"
 		(if (eq step0 'day) "Daily report: "
 		  "Weekly report starting on: ")
-		(format-time-string (org-time-stamp-format nil t) start-time)
+		(org-format-time-string (org-time-stamp-format nil t) start-time)
 		"\n")
 	(let ((table-begin (line-beginning-position 0))
 	      (step-time
@@ -2761,10 +2760,10 @@ The TS argument has the same type as the return values of
 		 params
 		 (list
 		  :header "" :step nil :block nil
-		  :tstart (format-time-string (org-time-stamp-format t t)
-					      start-time)
-		  :tend (format-time-string (org-time-stamp-format t t)
-					    (seconds-to-time (min te tsb))))))))
+		  :tstart (org-format-time-string (org-time-stamp-format t t)
+						  start-time)
+		  :tend (org-format-time-string (org-time-stamp-format t t)
+						(min te tsb)))))))
 	  (re-search-forward "^[ \t]*#\\+END:")
 	  (when (and stepskip0 (equal step-time 0))
 	    ;; Remove the empty table
