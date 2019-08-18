@@ -18454,10 +18454,11 @@ the background[fn:148].
 
 #+vindex: org-startup-indented
 To globally turn on ~org-indent-mode~ for all files, customize the
-variable ~org-startup-indented~.  To turn on indenting for individual
-files, use =STARTUP= keyword as follows:
+variable ~org-startup-indented~.  To control it for individual
+files, use =STARTUP= keywords as follows:
 
 : #+STARTUP: indent
+: #+STARTUP: noindent
 
 *** Hard indentation
 
