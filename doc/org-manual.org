@@ -7255,8 +7255,9 @@ An important part of any organization system is the ability to quickly
 capture new ideas and tasks, and to associate reference material with
 them.  Org does this using a process called /capture/.  It also can
 store files related to a task (/attachments/) in a special directory.
-Finally, it can parse RSS feeds for information and react to calls
-from other applications.
+Finally, it can parse RSS feeds for information.  To learn how to let
+external programs (for example a web browser) trigger Org to capture
+material, see [[*Protocols for External Access]].
 
 ** Capture
 :PROPERTIES:
@@ -7801,7 +7802,7 @@ named by a unique ID of each entry, or by a =DIR= property.
 
 *** Attachment defaults and dispatcher
 :PROPERTIES:
-:UNNUMBERED: notoc
+:DESCRIPTION: How to access attachment commands
 :END:
 By default, org-attach will use ID properties when adding attachments
 to outline nodes.  This makes working with attachments fully
@@ -7920,7 +7921,7 @@ The following commands deal with attachments:
 
 *** Attachment options
 :PROPERTIES:
-:UNNUMBERED: notoc
+:DESCRIPTION: Configuring the attachment system
 :END:
 There are a couple of options for attachments that are worth
 mentioning.
@@ -8011,7 +8012,7 @@ default settings.
 
 *** Attachment links
 :PROPERTIES:
-:UNNUMBERED: notoc
+:DESCRIPTION: Hyperlink access to attachments
 :END:
 Attached files and folders can be referenced using attachment links.
 This makes it easy to refer to the material added to an outline node.
@@ -8029,7 +8030,7 @@ See [[*External Links]] for more information about these links.
 
 *** Automatic version-control with Git
 :PROPERTIES:
-:UNNUMBERED: notoc
+:DESCRIPTION: Everything safely stored away
 :END:
 If the directory attached to an outline node is a Git repository, Org
 can be configured to automatically commit changes to that repository
@@ -8044,7 +8045,7 @@ the following to your Emacs config:
 
 *** Attach from Dired
 :PROPERTIES:
-:UNNUMBERED: notoc
+:DESCRIPTION: Using dired to select an attachment
 :END:
 #+cindex: attach from Dired
 #+findex: org-attach-dired-to-subtree
@@ -8124,197 +8125,6 @@ adding the same item several times.
 
 For more information, including how to read atom feeds, see
 =org-feed.el= and the docstring of ~org-feed-alist~.
-
-** Protocols for External Access
-:PROPERTIES:
-:DESCRIPTION: External access to Emacs and Org.
-:ALT_TITLE: Protocols
-:END:
-#+cindex: protocols, for external access
-
-Org protocol is a means to trigger custom actions in Emacs from
-external applications.  Any application that supports calling external
-programs with an URL as argument may be used with this functionality.
-For example, you can configure bookmarks in your web browser to send
-a link to the current page to Org and create a note from it using
-capture (see [[*Capture]]).  You can also create a bookmark that tells
-Emacs to open the local source file of a remote website you are
-browsing.
-
-#+cindex: Org protocol, set-up
-#+cindex: Installing Org protocol
-In order to use Org protocol from an application, you need to register
-=org-protocol://= as a valid scheme-handler.  External calls are
-passed to Emacs through the =emacsclient= command, so you also need to
-ensure an Emacs server is running.  More precisely, when the
-application calls
-
-: emacsclient org-protocol://PROTOCOL?key1=val1&key2=val2
-
-#+texinfo: @noindent
-Emacs calls the handler associated to {{{var(PROTOCOL)}}} with
-argument =(:key1 val1 :key2 val2)=.
-
-#+cindex: protocol, new protocol
-#+cindex: defining new protocols
-Org protocol comes with three predefined protocols, detailed in the
-following sections.  Configure ~org-protocol-protocol-alist~ to define
-your own.
-
-*** ~store-link~ protocol
-:PROPERTIES:
-:DESCRIPTION: Store a link, push URL to kill-ring.
-:END:
-#+cindex: store-link protocol
-#+cindex: protocol, store-link
-
-Using ~store-link~ handler, you can copy links, insertable through
-{{{kbd(M-x org-insert-link)}}} or yanking thereafter.  More precisely,
-the command
-
-: emacsclient org-protocol://store-link?url=URL&title=TITLE
-
-#+texinfo: @noindent
-stores the following link:
-
-: [[URL][TITLE]]
-
-In addition, {{{var(URL)}}} is pushed on the kill-ring for yanking.
-You need to encode {{{var(URL)}}} and {{{var(TITLE)}}} if they contain
-slashes, and probably quote those for the shell.
-
-To use this feature from a browser, add a bookmark with an arbitrary
-name, e.g., =Org: store-link= and enter this as /Location/:
-
-#+begin_example
-javascript:location.href='org-protocol://store-link?url='+
-      encodeURIComponent(location.href);
-#+end_example
-
-*** ~capture~ protocol
-:PROPERTIES:
-:DESCRIPTION: Fill a buffer with external information.
-:END:
-#+cindex: capture protocol
-#+cindex: protocol, capture
-
-Activating "capture" handler pops up a =Capture= buffer and fills the
-capture template associated to the =X= key with them.
-
-: emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
-
-To use this feature, add a bookmark with an arbitrary name, e.g.,
-=Org: capture=, and enter this as =Location=:
-
-#+begin_example
-javascript:location.href='org-protocol://capture?template=x'+
-      '&url='+encodeURIComponent(window.location.href)+
-      '&title='+encodeURIComponent(document.title)+
-      '&body='+encodeURIComponent(window.getSelection());
-#+end_example
-
-#+vindex: org-protocol-default-template-key
-The result depends on the capture template used, which is set in the
-bookmark itself, as in the example above, or in
-~org-protocol-default-template-key~.
-
-The following template placeholders are available:
-
-#+begin_example
-%:link          The URL
-%:description   The webpage title
-%:annotation    Equivalent to [[%:link][%:description]]
-%i              The selected text
-#+end_example
-
-*** ~open-source~ protocol
-:PROPERTIES:
-:DESCRIPTION: Edit published contents.
-:END:
-#+cindex: open-source protocol
-#+cindex: protocol, open-source
-
-The ~open-source~ handler is designed to help with editing local
-sources when reading a document.  To that effect, you can use
-a bookmark with the following location:
-
-#+begin_example
-javascript:location.href='org-protocol://open-source?&url='+
-      encodeURIComponent(location.href)
-#+end_example
-
-#+vindex: org-protocol-project-alist
-The variable ~org-protocol-project-alist~ maps URLs to local file
-names, by stripping URL parameters from the end and replacing the
-~:base-url~ with ~:working-directory~ and ~:online-suffix~ with
-~:working-suffix~.  For example, assuming you own a local copy of
-=https://orgmode.org/worg/= contents at =/home/user/worg=, you can set
-~org-protocol-project-alist~ to the following
-
-#+begin_src emacs-lisp
-(setq org-protocol-project-alist
-      '(("Worg"
-         :base-url "https://orgmode.org/worg/"
-         :working-directory "/home/user/worg/"
-         :online-suffix ".html"
-         :working-suffix ".org")))
-#+end_src
-
-#+texinfo: @noindent
-If you are now browsing
-=https://orgmode.org/worg/org-contrib/org-protocol.html= and find
-a typo or have an idea about how to enhance the documentation, simply
-click the bookmark and start editing.
-
-#+cindex: rewritten URL in open-source protocol
-#+cindex: protocol, open-source rewritten URL
-However, such mapping may not yield the desired results.  Suppose you
-maintain an online store located at =http://example.com/=.  The local
-sources reside in =/home/user/example/=.  It is common practice to
-serve all products in such a store through one file and rewrite URLs
-that do not match an existing file on the server.  That way, a request
-to =http://example.com/print/posters.html= might be rewritten on the
-server to something like
-=http://example.com/shop/products.php/posters.html.php=.  The
-~open-source~ handler probably cannot find a file named
-=/home/user/example/print/posters.html.php= and fails.
-
-Such an entry in ~org-protocol-project-alist~ may hold an additional
-property ~:rewrites~.  This property is a list of cons cells, each of
-which maps a regular expression to a path relative to the
-~:working-directory~.
-
-Now map the URL to the path =/home/user/example/products.php= by
-adding ~:rewrites~ rules like this:
-
-#+begin_src emacs-lisp
-(setq org-protocol-project-alist
-      '(("example.com"
-         :base-url "http://example.com/"
-         :working-directory "/home/user/example/"
-         :online-suffix ".php"
-         :working-suffix ".php"
-         :rewrites (("example.com/print/" . "products.php")
-                    ("example.com/$" . "index.php")))))
-#+end_src
-
-#+texinfo: @noindent
-Since =example.com/$= is used as a regular expression, it maps
-=http://example.com/=, =https://example.com=,
-=http://www.example.com/= and similar to
-=/home/user/example/index.php=.
-
-The ~:rewrites~ rules are searched as a last resort if and only if no
-existing file name is matched.
-
-#+cindex: protocol, open-source, set-up mapping
-#+cindex: mappings in open-source protocol
-#+findex: org-protocol-create
-#+findex: org-protocol-create-for-org
-Two functions can help you filling ~org-protocol-project-alist~ with
-valid contents: ~org-protocol-create~ and
-~org-protocol-create-for-org~.  The latter is of use if you're editing
-an Org file that is part of a publishing project.
 
 * Agenda Views
 :PROPERTIES:
@@ -18490,14 +18300,12 @@ shortcuts.
 
   Complete word at point.
 
-  - At the beginning of a headline, complete TODO keywords.
+  - At the beginning of an empty headline, complete TODO keywords.
 
   - After =\=, complete TeX symbols supported by the exporter.
 
   - After =*=, complete headlines in the current buffer so that they
-    can be used in search links like:
-
-    : [[*find this headline]]
+    can be used in search links like: =[[*find this headline]]=
 
   - After =:= in a headline, complete tags.  Org deduces the list of
     tags from the =TAGS= in-buffer option (see [[*Setting Tags]]), the
@@ -18909,46 +18717,25 @@ changes.
      settings is ~org-startup-folded~ with a default value of ~t~, which
      is the same as ~overview~.
 
-     - =overview= ::
-
-       Top-level headlines only.
-
-     - =content= ::
-
-       All headlines.
-
-     - =showall= ::
-
-       No folding on any entry.
-
-     - =showeverything= ::
-
-       Show even drawer contents.
-
+     | =overview=       | Top-level headlines only.  |
+     | =content=        | All headlines.             |
+     | =showall=        | No folding on any entry.   |
+     | =showeverything= | Show even drawer contents. |
+     
      #+vindex: org-startup-indented
      Dynamic virtual indentation is controlled by the variable
      ~org-startup-indented~[fn:146].
 
-     - =indent= ::
-
-       Start with ~org-indent-mode~ turned on.
-
-     - =noindent= ::
-
-       Start with ~org-indent-mode~ turned off.
-
+     | =indent=   | Start with ~org-indent-mode~ turned on.  |
+     | =noindent= | Start with ~org-indent-mode~ turned off. |
+     
      #+vindex: org-startup-align-all-tables
      Aligns tables consistently upon visiting a file.  The
      corresponding variable is ~org-startup-align-all-tables~ with
      ~nil~ as default value.
 
-     - =align= ::
-
-       Align all tables.
-
-     - =noalign= ::
-
-       Do not align tables on startup.
+     | =align=   | Align all tables.               |
+     | =noalign= | Do not align tables on startup. |
 
      #+vindex: org-startup-shrink-all-tables
      Shrink table columns with a width cookie.  The corresponding
@@ -18961,13 +18748,8 @@ changes.
      ~org-startup-with-inline-images~, with a default value ~nil~ to
      avoid delays when visiting a file.
 
-     - =inlineimages= ::
-
-       Show inline images.
-
-     - =noinlineimages= ::
-
-        Do not show inline images on startup.
+     | =inlineimages=   | Show inline images.                   |
+     | =noinlineimages= | Do not show inline images on startup. |
 
      #+vindex: org-log-done
      #+vindex: org-log-note-clock-out
@@ -18976,73 +18758,23 @@ changes.
      intervals can be configured using these options (see variables
      ~org-log-done~, ~org-log-note-clock-out~, and ~org-log-repeat~).
 
-     - =logdone= ::
-
-        Record a timestamp when an item is marked as done.
-
-     - =lognotedone= ::
-
-        Record timestamp and a note when DONE.
-
-     - =nologdone= ::
-
-        Do not record when items are marked as done.
-
-     - =logrepeat= ::
-
-        Record a time when reinstating a repeating item.
-
-     - =lognoterepeat= ::
-
-        Record a note when reinstating a repeating item.
-
-     - =nologrepeat= ::
-
-        Do not record when reinstating repeating item.
-
-     - =lognoteclock-out= ::
-
-        Record a note when clocking out.
-
-     - =nolognoteclock-out= ::
-
-        Do not record a note when clocking out.
-
-     - =logreschedule= ::
-
-        Record a timestamp when scheduling time changes.
-
-     - =lognotereschedule= ::
-
-        Record a note when scheduling time changes.
-
-     - =nologreschedule= ::
-
-        Do not record when a scheduling date changes.
-
-     - =logredeadline= ::
-
-        Record a timestamp when deadline changes.
-
-     - =lognoteredeadline= ::
-
-        Record a note when deadline changes.
-
-     - =nologredeadline= ::
-
-        Do not record when a deadline date changes.
-
-     - =logrefile= ::
-
-        Record a timestamp when refiling.
-
-     - =lognoterefile= ::
-
-        Record a note when refiling.
-
-     - =nologrefile= ::
-
-        Do not record when refiling.
+     | =logdone=            | Record a timestamp when an item is marked as done. |
+     | =lognotedone=        | Record timestamp and a note when DONE.             |
+     | =nologdone=          | Do not record when items are marked as done.       |
+     | =logrepeat=          | Record a time when reinstating a repeating item.   |
+     | =lognoterepeat=      | Record a note when reinstating a repeating item.   |
+     | =nologrepeat=        | Do not record when reinstating repeating item.     |
+     | =lognoteclock-out=   | Record a note when clocking out.                   |
+     | =nolognoteclock-out= | Do not record a note when clocking out.            |
+     | =logreschedule=      | Record a timestamp when scheduling time changes.   |
+     | =lognotereschedule=  | Record a note when scheduling time changes.        |
+     | =nologreschedule=    | Do not record when a scheduling date changes.      |
+     | =logredeadline=      | Record a timestamp when deadline changes.          |
+     | =lognoteredeadline=  | Record a note when deadline changes.               |
+     | =nologredeadline=    | Do not record when a deadline date changes.        |
+     | =logrefile=          | Record a timestamp when refiling.                  |
+     | =lognoterefile=      | Record a note when refiling.                       |
+     | =nologrefile=        | Do not record when refiling.                       |
 
      #+vindex: org-hide-leading-stars
      #+vindex: org-odd-levels-only
@@ -19052,29 +18784,12 @@ changes.
      ~org-odd-levels-only~, both with a default setting ~nil~
      (meaning =showstars= and =oddeven=).
 
-     - =hidestars= ::
-
-        Make all but one of the stars starting a headline invisible.
-
-     - =showstars= ::
-
-        Show all stars starting a headline.
-
-     - =indent= ::
-
-        Virtual indentation according to outline level.
-
-     - =noindent= ::
-
-        No virtual indentation according to outline level.
-
-     - =odd= ::
-
-        Allow only odd outline levels (1, 3, ...).
-
-     - =oddeven= ::
-
-        Allow all outline levels.
+     | =hidestars= | Make all but one of the stars starting a headline invisible. |
+     | =showstars= | Show all stars starting a headline.                          |
+     | =indent=    | Virtual indentation according to outline level.              |
+     | =noindent=  | No virtual indentation according to outline level.           |
+     | =odd=       | Allow only odd outline levels (1, 3, ...).                   |
+     | =oddeven=   | Allow all outline levels.                                    |
 
      #+vindex: org-put-time-stamp-overlays
      #+vindex: org-time-stamp-overlay-formats
@@ -19082,21 +18797,14 @@ changes.
      ~org-put-time-stamp-overlays~ and
      ~org-time-stamp-overlay-formats~), use:
 
-     - =customtime= ::
-
-        Overlay custom time format.
+     | =customtime= | Overlay custom time format. |
 
      #+vindex: constants-unit-system
      The following options influence the table spreadsheet (variable
      ~constants-unit-system~).
 
-     - =constcgs= ::
-
-        =constants.el= should use the c-g-s unit system.
-
-     - =constSI= ::
-
-        =constants.el= should use the SI unit system.
+     | =constcgs= | =constants.el= should use the c-g-s unit system. |
+     | =constSI=  | =constants.el= should use the SI unit system.    |
 
      #+vindex: org-footnote-define-inline
      #+vindex: org-footnote-auto-label
@@ -19105,61 +18813,28 @@ changes.
      corresponding variables are ~org-footnote-define-inline~,
      ~org-footnote-auto-label~, and ~org-footnote-auto-adjust~.
 
-     - =fninline= ::
-
-       Define footnotes inline.
-
-     - =fnnoinline= ::
-
-       Define footnotes in separate section.
-
-     - =fnlocal= ::
-
-       Define footnotes near first reference, but not inline.
-
-     - =fnprompt= ::
-
-        Prompt for footnote labels.
-
-     - =fnauto= ::
-
-        Create =[fn:1]=-like labels automatically (default).
-
-     - =fnconfirm= ::
-
-        Offer automatic label for editing or confirmation.
-
-     - =fnadjust= ::
-
-        Automatically renumber and sort footnotes.
-
-     - =nofnadjust= ::
-
-        Do not renumber and sort automatically.
+     | =fninline=   | Define footnotes inline.                               |
+     | =fnnoinline= | Define footnotes in separate section.                  |
+     | =fnlocal=    | Define footnotes near first reference, but not inline. |
+     | =fnprompt=   | Prompt for footnote labels.                            |
+     | =fnauto=     | Create =[fn:1]=-like labels automatically (default).   |
+     | =fnconfirm=  | Offer automatic label for editing or confirmation.     |
+     | =fnadjust=   | Automatically renumber and sort footnotes.             |
+     | =nofnadjust= | Do not renumber and sort automatically.                |
 
      #+vindex: org-hide-block-startup
      To hide blocks on startup, use these keywords.  The
      corresponding variable is ~org-hide-block-startup~.
 
-     - =hideblocks= ::
-
-        Hide all begin/end blocks on startup.
-
-     - =nohideblocks= ::
-
-        Do not hide blocks on startup.
+     | =hideblocks=   | Hide all begin/end blocks on startup. |
+     | =nohideblocks= | Do not hide blocks on startup.        |
 
      #+vindex: org-pretty-entities
      The display of entities as UTF-8 characters is governed by the
      variable ~org-pretty-entities~ and the keywords
 
-     - =entitiespretty= ::
-
-        Show entities as UTF-8 characters where possible.
-
-     - =entitiesplain= ::
-
-        Leave entities plain.
+     | =entitiespretty= | Show entities as UTF-8 characters where possible. |
+     | =entitiesplain=  | Leave entities plain.                             |
 
 - =#+TAGS: TAG1(c1) TAG2(c2)= ::
 
@@ -19588,6 +19263,195 @@ further based on their usage needs.  For example, the normal
 | {{{kbd(C-S-LEFT)}}}  | {{{kbd(C-c C-x LEFT)}}}  |              |                      |
 | {{{kbd(C-S-RIGHT)}}} | {{{kbd(C-c C-x RIGHT)}}} |              |                      |
 
+** Protocols for External Access
+:PROPERTIES:
+:DESCRIPTION: External access to Emacs and Org.
+:ALT_TITLE: Protocols
+:END:
+#+cindex: protocols, for external access
+
+Org protocol is a tool to trigger custom actions in Emacs from
+external applications.  Any application that supports calling external
+programs with an URL as argument may be used with this functionality.
+For example, you can configure bookmarks in your web browser to send a
+link to the current page to Org and create a note from it using
+capture (see [[*Capture]]).  You can also create a bookmark that tells
+Emacs to open the local source file of a remote website you are
+browsing.
+
+#+cindex: Org protocol, set-up
+#+cindex: Installing Org protocol
+In order to use Org protocol from an application, you need to register
+=org-protocol://= as a valid scheme-handler.  External calls are
+passed to Emacs through the =emacsclient= command, so you also need to
+ensure an Emacs server is running.  More precisely, when the
+application calls
+
+: emacsclient org-protocol://PROTOCOL?key1=val1&key2=val2
+
+#+texinfo: @noindent
+Emacs calls the handler associated to {{{var(PROTOCOL)}}} with
+argument =(:key1 val1 :key2 val2)=.
+
+#+cindex: protocol, new protocol
+#+cindex: defining new protocols
+Org protocol comes with three predefined protocols, detailed in the
+following sections.  Configure ~org-protocol-protocol-alist~ to define
+your own.
+
+*** The ~store-link~ protocol
+:PROPERTIES:
+:DESCRIPTION: Store a link, push URL to kill-ring.
+:END:
+#+cindex: store-link protocol
+#+cindex: protocol, store-link
+
+Using the ~store-link~ handler, you can copy links, to that they can
+be inserted using {{{kbd(M-x org-insert-link)}}} or yanking.  More
+precisely, the command
+
+: emacsclient org-protocol://store-link?url=URL&title=TITLE
+
+#+texinfo: @noindent
+stores the following link:
+
+: [[URL][TITLE]]
+
+In addition, {{{var(URL)}}} is pushed on the kill-ring for yanking.
+You need to encode {{{var(URL)}}} and {{{var(TITLE)}}} if they contain
+slashes, and probably quote those for the shell.
+
+To use this feature from a browser, add a bookmark with an arbitrary
+name, e.g., =Org: store-link= and enter this as /Location/:
+
+#+begin_example
+javascript:location.href='org-protocol://store-link?url='+
+      encodeURIComponent(location.href);
+#+end_example
+
+*** The ~capture~ protocol
+:PROPERTIES:
+:DESCRIPTION: Fill a buffer with external information.
+:END:
+#+cindex: capture protocol
+#+cindex: protocol, capture
+
+Activating the "capture" handler pops up a =Capture= buffer in Emacs,
+using acapture template.
+
+: emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
+
+To use this feature, add a bookmark with an arbitrary name, e.g.,
+=Org: capture=, and enter this as =Location=:
+
+#+begin_example
+javascript:location.href='org-protocol://capture?template=x'+
+      '&url='+encodeURIComponent(window.location.href)+
+      '&title='+encodeURIComponent(document.title)+
+      '&body='+encodeURIComponent(window.getSelection());
+#+end_example
+
+#+vindex: org-protocol-default-template-key
+The capture template to be used can be specified in the bookmark (like
+=X= above). If unspecified, the template key is set in the variable
+~org-protocol-default-template-key~. The following template
+placeholders are available:
+
+#+begin_example
+%:link          The URL
+%:description   The webpage title
+%:annotation    Equivalent to [[%:link][%:description]]
+%i              The selected text
+#+end_example
+
+*** The ~open-source~ protocol
+:PROPERTIES:
+:DESCRIPTION: Edit published contents.
+:END:
+#+cindex: open-source protocol
+#+cindex: protocol, open-source
+
+The ~open-source~ handler is designed to help with editing local
+sources when reading a document.  To that effect, you can use
+a bookmark with the following location:
+
+#+begin_example
+javascript:location.href='org-protocol://open-source?&url='+
+      encodeURIComponent(location.href)
+#+end_example
+
+#+vindex: org-protocol-project-alist
+The variable ~org-protocol-project-alist~ maps URLs to local file
+names, by stripping URL parameters from the end and replacing the
+~:base-url~ with ~:working-directory~ and ~:online-suffix~ with
+~:working-suffix~.  For example, assuming you own a local copy of
+=https://orgmode.org/worg/= contents at =/home/user/worg=, you can set
+~org-protocol-project-alist~ to the following
+
+#+begin_src emacs-lisp
+(setq org-protocol-project-alist
+      '(("Worg"
+         :base-url "https://orgmode.org/worg/"
+         :working-directory "/home/user/worg/"
+         :online-suffix ".html"
+         :working-suffix ".org")))
+#+end_src
+
+#+texinfo: @noindent
+If you are now browsing
+=https://orgmode.org/worg/org-contrib/org-protocol.html= and find
+a typo or have an idea about how to enhance the documentation, simply
+click the bookmark and start editing.
+
+#+cindex: rewritten URL in open-source protocol
+#+cindex: protocol, open-source rewritten URL
+However, such mapping may not always yield the desired results.
+Suppose you maintain an online store located at =http://example.com/=.
+The local sources reside in =/home/user/example/=.  It is common
+practice to serve all products in such a store through one file and
+rewrite URLs that do not match an existing file on the server.  That
+way, a request to =http://example.com/print/posters.html= might be
+rewritten on the server to something like
+=http://example.com/shop/products.php/posters.html.php=.  The
+~open-source~ handler probably cannot find a file named
+=/home/user/example/print/posters.html.php= and fails.
+
+Such an entry in ~org-protocol-project-alist~ may hold an additional
+property ~:rewrites~.  This property is a list of cons cells, each of
+which maps a regular expression to a path relative to the
+~:working-directory~.
+
+Now map the URL to the path =/home/user/example/products.php= by
+adding ~:rewrites~ rules like this:
+
+#+begin_src emacs-lisp
+(setq org-protocol-project-alist
+      '(("example.com"
+         :base-url "http://example.com/"
+         :working-directory "/home/user/example/"
+         :online-suffix ".php"
+         :working-suffix ".php"
+         :rewrites (("example.com/print/" . "products.php")
+                    ("example.com/$" . "index.php")))))
+#+end_src
+
+#+texinfo: @noindent
+Since =example.com/$= is used as a regular expression, it maps
+=http://example.com/=, =https://example.com=,
+=http://www.example.com/= and similar to
+=/home/user/example/index.php=.
+
+The ~:rewrites~ rules are searched as a last resort if and only if no
+existing file name is matched.
+
+#+cindex: protocol, open-source, set-up mapping
+#+cindex: mappings in open-source protocol
+#+findex: org-protocol-create
+#+findex: org-protocol-create-for-org
+Two functions can help you filling ~org-protocol-project-alist~ with
+valid contents: ~org-protocol-create~ and
+~org-protocol-create-for-org~.  The latter is of use if you're editing
+an Org file that is part of a publishing project.
 ** Org Crypt
 :PROPERTIES:
 :DESCRIPTION: Encrypting Org files.
