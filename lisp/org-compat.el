@@ -157,6 +157,35 @@ This is a floating point number if the size is too large for an integer."
 Case is significant."
     (string< s1 s2)))
 
+;; The time- functions below translate nil to `current-time` and
+;; accept an integer as of Emacs 25.  `decode-time` and
+;; `format-time-string` accept nil on Emacs 24 but don't accept an
+;; integer until Emacs 25.
+(if (< emacs-major-version 25)
+    (let ((convert
+           (lambda (time)
+             (cond ((not time) (current-time))
+                   ((numberp time) (seconds-to-time time))
+                   (t time)))))
+      (defun org-decode-time (&optional time)
+        (decode-time (funcall convert time)))
+      (defun org-format-time-string (format-string &optional time universal)
+        (format-time-string format-string (funcall convert time) universal))
+      (defun org-time-add (a b)
+        (time-add (funcall convert a) (funcall convert b)))
+      (defun org-time-subtract (a b)
+        (time-subtract (funcall convert a) (funcall convert b)))
+      (defun org-time-since (time)
+        (time-since (funcall convert time)))
+      (defun org-time-less-p (t1 t2)
+        (time-less-p (funcall convert t1) (funcall convert t2))))
+  (defalias 'org-decode-time 'decode-time)
+  (defalias 'org-format-time-string 'format-time-string)
+  (defalias 'org-time-add 'time-add)
+  (defalias 'org-time-subtract 'time-subtract)
+  (defalias 'org-time-since 'time-since)
+  (defalias 'org-time-less-p 'time-less-p))
+
 
 ;;; Obsolete aliases (remove them after the next major release).
 
