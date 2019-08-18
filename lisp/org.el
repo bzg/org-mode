@@ -16045,8 +16045,7 @@ non-nil."
 	      ((org-at-timestamp-p 'lax) (match-string 0))))
 	 ;; Default time is either the timestamp at point or today.
 	 ;; When entering a range, only the range start is considered.
-         (default-time (and ts
-			    (apply #'encode-time (org-parse-time-string ts))))
+         (default-time (and ts (org-time-string-to-time ts)))
          (default-input (and ts (org-get-compact-tod ts)))
          (repeater (and ts
 			(string-match "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ts)
