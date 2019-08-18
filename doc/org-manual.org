@@ -418,9 +418,10 @@ as a title for your own headings.
 
 Some people find the many stars too noisy and would prefer an outline
 that has whitespace followed by a single star as headline starters.
-See [[*A Cleaner Outline View]].
+This can be achieved using a minor mode, ~org-indent-mode~. See [[*A
+Cleaner Outline View]] for more information.
 
-Headline are not numbered.  However, you may want to dynamically
+Headlines are not numbered.  However, you may want to dynamically
 number some, or all, of them.  See [[*Dynamic Headline Numbering]].
 
 #+vindex: org-cycle-separator-lines
