@@ -334,7 +334,7 @@ dynamic block in ~org-dynamic-block-alist~.
 *** ~org-table-cell-left~
 *** ~org-table-cell-right~
 *** ~org-habit-toggle-display-in-agenda~
-** Removed functions
+** Removed functions and variables
 *** Removed Org Drill
 
 You can install it back from MELPA.
@@ -346,6 +346,8 @@ You can install it back from MELPA.
 It has been deprecated in favour of ~org-attach-id-dir~ which is less
 ambigous given the restructured org-attach.
 
+*** ~org-enable-fixed-width-editor~
+This variable was not used throught the code base.
 ** Miscellaneous
 *** Change signature for ~org-list-to-subtree~
 The function now accepts the level of the subtree as an optional

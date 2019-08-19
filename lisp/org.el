@@ -1698,13 +1698,6 @@ make an intelligent decision whether to insert a blank line or not."
   :group 'org-edit-structure
   :type 'hook)
 
-(defcustom org-enable-fixed-width-editor t
-  "Non-nil means lines starting with \":\" are treated as fixed-width.
-This currently only means they are never auto-wrapped.
-When nil, such lines will be treated like ordinary lines."
-  :group 'org-edit-structure
-  :type 'boolean)
-
 (defgroup org-sparse-trees nil
   "Options concerning sparse trees in Org mode."
   :tag "Org Sparse Trees"
