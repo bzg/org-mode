@@ -6080,7 +6080,7 @@ immediately after the task they refer to.
   date.
 
   #+vindex: org-agenda-skip-scheduled-if-done
-  The headline is listed under  the given date[fn:64].  In addition,
+  The headline is listed under the given date[fn:64].  In addition,
   a reminder that the scheduled date has passed is present in the
   compilation for /today/, until the entry is marked as done, i.e.,
   the task is automatically forwarded until completed.
