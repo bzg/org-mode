@@ -18441,7 +18441,7 @@ in the desired amount with hard spaces and hiding leading stars.
 #+cindex: Indent mode
 #+findex: org-indent-mode
 To display the buffer in the indented view, activate Org Indent minor
-mode, using {{{kbd(M-x org-indent-mode}}}.  Text lines that are not
+mode, using {{{kbd(M-x org-indent-mode)}}}.  Text lines that are not
 headlines are prefixed with virtual spaces to vertically align with
 the headline text[fn:146].
 
