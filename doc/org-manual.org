@@ -21573,20 +21573,20 @@ http://www.cs.tufts.edu/~nr/noweb/.
 [fn:145] For more information, please refer to the commentary section
 in =org-tempo.el=.
 
-[fn:149] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
-property, such that ~visual-line-mode~ (or purely setting ~word-wrap~)
-wraps long lines (including headlines) correctly indented.
-
-[fn:146] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
-for indenting and wrapping long lines of headlines or text.  This
-minor mode handles ~visual-line-mode~ and directly applied settings
+[fn:146] Org Indent mode also sets ~wrap-prefix~ correctly for
+indenting and wrapping long lines of headlines or text.  This minor
+mode also handles Visual Line mode and directly applied settings
 through ~word-wrap~.
 
-[fn:147] Note that turning on ~org-indent-mode~ sets
+[fn:147] Note that turning on Org Indent mode sets
 ~org-hide-leading-stars~ to ~t~ and ~org-adapt-indentation~ to ~nil~.
 
 [fn:148] This works, but requires extra effort.  Org Indent mode is
 more convenient for most applications.
+
+[fn:149] Note that Org Indent mode also sets the ~wrap-prefix~
+property, such that Visual Line mode (or purely setting ~word-wrap~)
+wraps long lines, including headlines, correctly indented.
 
 [fn:150] For a server to host files, consider using a WebDAV server,
 such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
