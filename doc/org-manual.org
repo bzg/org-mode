@@ -418,8 +418,8 @@ as a title for your own headings.
 
 Some people find the many stars too noisy and would prefer an outline
 that has whitespace followed by a single star as headline starters.
-This can be achieved using a minor mode, ~org-indent-mode~. See [[*A
-Cleaner Outline View]] for more information.
+This can be achieved using a Org Indent minor mode.  See [[*A Cleaner
+Outline View]] for more information.
 
 Headlines are not numbered.  However, you may want to dynamically
 number some, or all, of them.  See [[*Dynamic Headline Numbering]].
@@ -18432,31 +18432,29 @@ more text                        |          more text
 ,* Another top level headline     |    * Another top level headline
 #+end_example
 
-Org can achieve this in two ways.  (1) By just displaying the buffer
-in this way without changing it (~org-indent-mode~), or (2) by
-actually indenting every line in the desired amount with hard spaces
-and hiding leading stars.
+Org can achieve this in two ways, (1) by just displaying the buffer in
+this way without changing it, or (2) by actually indenting every line
+in the desired amount with hard spaces and hiding leading stars.
 
 *** Org Indent Mode
 
 #+cindex: Indent mode
 #+findex: org-indent-mode
-To display the buffer in the indented view, use the minor mode
-~org-indent-mode~.  Text lines that are not headlines are prefixed
-with virtual spaces to vertically align with the headline
-text[fn:146].
+To display the buffer in the indented view, activate Org Indent minor
+mode, using {{{kbd(M-x org-indent-mode}}}.  Text lines that are not
+headlines are prefixed with virtual spaces to vertically align with
+the headline text[fn:146].
 
 #+vindex: org-indent-indentation-per-level
 To make more horizontal space, the headlines are shifted by two
-characters.  This can be configured by the
-~org-indent-indentation-per-level~ variable.  Only one star on each
-headline is visible, the rest are masked with the same font color as
-the background[fn:147].
+characters.  Configure ~org-indent-indentation-per-level~ variable for
+a different number.  Only one star on each headline is visible, the
+rest are masked with the same font color as the background[fn:147].
 
 #+vindex: org-startup-indented
-To globally turn on ~org-indent-mode~ for all files, customize the
-variable ~org-startup-indented~.  To control it for individual
-files, use =STARTUP= keywords as follows:
+To globally turn on Org Indent mode for all files, customize the
+variable ~org-startup-indented~.  To control it for individual files,
+use =STARTUP= keyword as follows:
 
 : #+STARTUP: indent
 : #+STARTUP: noindent
