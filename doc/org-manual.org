@@ -18557,8 +18557,7 @@ manual, but here is a consolidated list for easy reference.
   cache used to temporary store the contents of URLs used as values
   for keywords like =SETUPFILE=.
 
-- If point is inside a table, realign the table.  The table realigns
-  even if automatic table editor is turned off.
+- If point is inside a table, realign the table.
 
 - If point is on a =TBLFM= keyword, re-apply the formulas to the
   entire table.
