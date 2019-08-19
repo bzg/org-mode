@@ -208,10 +208,10 @@ which selects Org mode for this buffer no matter what the file's name
 is.  See also the variable ~org-insert-mode-line-in-empty-file~.
 
 Many commands in Org work on the region if the region is /active/.  To
-make use of this, you need to have ~transient-mark-mode~ turned on,
-which is the default.  If you do not like ~transient-mark-mode~, you
-can create an active region by using the mouse to select a region, or
-pressing {{{kbd(C-SPC)}}} twice before moving point.
+make use of this, you need to have Transient Mark mode turned on,
+which is the default.  If you do not like it, you can create an active
+region by using the mouse to select a region, or pressing
+{{{kbd(C-SPC)}}} twice before moving point.
 
 ** Feedback
 :PROPERTIES:
@@ -3685,7 +3685,7 @@ The most important commands to work with TODO entries are:
   Useful mostly if more than two TODO states are possible (see
   [[*Extended Use of TODO Keywords]]).  See also [[*Packages that conflict
   with Org mode]], for a discussion of the interaction with
-  ~shift-selection-mode~.  See also the variable
+  shift-selection.  See also the variable
   ~org-treat-S-cursor-todo-selection-as-state-change~.
 
 - {{{kbd(C-c / t)}}} (~org-show-todo-tree~) ::
@@ -3854,8 +3854,8 @@ correct sequence.  In addition to typing a keyword or using completion
   above example, {{{kbd(C-u C-u C-c C-t)}}} or {{{kbd(C-S-RIGHT)}}}
   would jump from =TODO= or =DONE= to =REPORT=, and any of the words
   in the second row to =CANCELED=.  Note that the {{{kbd(C-S-)}}} key
-  binding conflict with ~shift-selection-mode~ (see [[*Packages that
-  conflict with Org mode]]).
+  binding conflict with shift-selection (see [[*Packages that conflict
+  with Org mode]]).
 
 - {{{kbd(S-RIGHT)}}}, {{{kbd(S-LEFT)}}} ::
 
@@ -3864,8 +3864,8 @@ correct sequence.  In addition to typing a keyword or using completion
   {{{kbd(S-LEFT)}}} and {{{kbd(S-RIGHT)}}} walk through /all/ keywords
   from all sub-sequences, so for example {{{kbd(S-RIGHT)}}} would
   switch from =DONE= to =REPORT= in the example above.  For
-  a discussion of the interaction with ~shift-selection-mode~, see
-  [[*Packages that conflict with Org mode]].
+  a discussion of the interaction with shift-selection, see [[*Packages
+  that conflict with Org mode]].
 
 *** Fast access to TODO states
 :PROPERTIES:
@@ -4337,7 +4337,7 @@ TODO items.
   Increase/decrease the priority of the current headline[fn:46].  Note
   that these keys are also used to modify timestamps (see [[*Creating
   Timestamps]]).  See also [[*Packages that conflict with Org mode]], for
-  a discussion of the interaction with ~shift-selection-mode~.
+  a discussion of the interaction with shift-selection.
 
 #+vindex: org-highest-priority
 #+vindex: org-lowest-priority
@@ -8558,7 +8558,7 @@ collected into a single place.
   Show the global TODO list.  This collects the TODO items from all
   agenda files (see [[*Agenda Views]]) into a single buffer.  By default,
   this lists items with a state the is not a DONE state.  The buffer
-  is in ~agenda-mode~, so there are commands to examine and manipulate
+  is in Agenda mode, so there are commands to examine and manipulate
   the TODO entries directly from that buffer (see [[*Commands in the
   Agenda Buffer]]).
 
@@ -12255,8 +12255,8 @@ a subgroup of $G$.  Then the order of $H$ divides the order of $G$.
 :DESCRIPTION: Editing support.
 :END:
 
-The ~org-beamer-mode~ is a special minor mode for faster editing of
-Beamer documents.
+Org Beamer mode is a special minor mode for faster editing of Beamer
+documents.
 
 : #+STARTUP: beamer
 
@@ -12264,9 +12264,8 @@ Beamer documents.
   #+kindex: C-c C-b
   #+findex: org-beamer-select-environment
 
-  The ~org-beamer-mode~ provides this key for quicker selections in
-  Beamer normal environments, and for selecting the =BEAMER_COL=
-  property.
+  Org Beamer mode provides this key for quicker selections in Beamer
+  normal environments, and for selecting the =BEAMER_COL= property.
 
 *** A Beamer example
 :PROPERTIES:
@@ -18705,8 +18704,8 @@ changes.
   Dynamic virtual indentation is controlled by the variable
   ~org-startup-indented~[fn:149].
 
-  | =indent=   | Start with ~org-indent-mode~ turned on.  |
-  | =noindent= | Start with ~org-indent-mode~ turned off. |
+  | =indent=   | Start with Org Indent mode turned on.  |
+  | =noindent= | Start with Org Indent mode turned off. |
 
   #+vindex: org-startup-align-all-tables
   Aligns tables consistently upon visiting a file.  The
@@ -19085,18 +19084,18 @@ packages are documented here.
 :ALT_TITLE: Conflicts
 :END:
 
-#+cindex: shift-selection-mode
+#+cindex: shift-selection
 #+vindex: org-support-shift-select
-In Emacs, ~shift-selection-mode~ combines motions of point with shift
-key to enlarge regions.  Emacs sets this mode by default.  This
-conflicts with Org's use of {{{kbd(S-<cursor>)}}} commands to change
-timestamps, TODO keywords, priorities, and item bullet types, etc.
-Since {{{kbd(S-<cursor>)}}} commands outside of specific contexts do
-not do anything, Org offers the variable ~org-support-shift-select~
-for customization.  Org mode accommodates shift selection by (i)
-making it available outside of the special contexts where special
-commands apply, and (ii) extending an existing active region even if
-point moves across a special context.
+In Emacs, shift-selection combines motions of point with shift key to
+enlarge regions.  Emacs sets this mode by default.  This conflicts
+with Org's use of {{{kbd(S-<cursor>)}}} commands to change timestamps,
+TODO keywords, priorities, and item bullet types, etc.  Since
+{{{kbd(S-<cursor>)}}} commands outside of specific contexts do not do
+anything, Org offers the variable ~org-support-shift-select~ for
+customization.  Org mode accommodates shift selection by (i) making it
+available outside of the special contexts where special commands
+apply, and (ii) extending an existing active region even if point
+moves across a special context.
 
 - =cua.el= by Kim\nbsp{}F.\nbsp{}Storm ::
 
@@ -19734,7 +19733,7 @@ A review of =org-man.el=:
 
    For example, ~org-man-store-link~ is responsible for storing a link
    when ~org-store-link~ (see [[*Handling Links]]) is called from a buffer
-   displaying a man page.  It first checks if the ~major-mode~ is
+   displaying a man page.  It first checks if the major mode is
    appropriate.  If check fails, the function returns ~nil~, which
    means it isn't responsible for creating a link to the current
    buffer.  Otherwise the function makes a link string by combining
