@@ -6080,7 +6080,7 @@ immediately after the task they refer to.
   date.
 
   #+vindex: org-agenda-skip-scheduled-if-done
-  The headline is listed under the given date[fn:64].  In addition,
+  The headline is listed under  the given date[fn:64].  In addition,
   a reminder that the scheduled date has passed is present in the
   compilation for /today/, until the entry is marked as done, i.e.,
   the task is automatically forwarded until completed.
@@ -18444,14 +18444,14 @@ and hiding leading stars.
 To display the buffer in the indented view, use the minor mode
 ~org-indent-mode~.  Text lines that are not headlines are prefixed
 with virtual spaces to vertically align with the headline
-text[fn:147].
+text[fn:146].
 
 #+vindex: org-indent-indentation-per-level
 To make more horizontal space, the headlines are shifted by two
 characters.  This can be configured by the
 ~org-indent-indentation-per-level~ variable.  Only one star on each
 headline is visible, the rest are masked with the same font color as
-the background[fn:148].
+the background[fn:147].
 
 #+vindex: org-startup-indented
 To globally turn on ~org-indent-mode~ for all files, customize the
@@ -18465,7 +18465,7 @@ files, use =STARTUP= keywords as follows:
 
 It is possible to use hard spaces to achieve the indentation instead,
 if the bare ASCII file should have the indented look also outside
-Emacs[fn:149].  With Org's support, you have to indent all lines to
+Emacs[fn:148].  With Org's support, you have to indent all lines to
 line up with the outline headers.  You would use these settings:
 
   #+begin_src emacs-lisp
@@ -18705,7 +18705,7 @@ changes.
      
      #+vindex: org-startup-indented
      Dynamic virtual indentation is controlled by the variable
-     ~org-startup-indented~[fn:146].
+     ~org-startup-indented~[fn:149].
 
      | =indent=   | Start with ~org-indent-mode~ turned on.  |
      | =noindent= | Start with ~org-indent-mode~ turned off. |
@@ -19513,7 +19513,7 @@ these variables.
 
 #+vindex: org-mobile-directory
 The mobile application needs access to a file directory on
-a server[fn:152] to interact with Emacs.  Pass its location through
+a server[fn:150] to interact with Emacs.  Pass its location through
 the ~org-mobile-directory~ variable.  If you can mount that directory
 locally just set the variable to point to that directory:
 
@@ -19534,7 +19534,7 @@ With a public server, consider encrypting the files.  Org also
 requires OpenSSL installed on the local computer.  To turn on
 encryption, set the same password in the mobile application and in
 Emacs.  Set the password in the variable
-~org-mobile-use-encryption~[fn:153].  Note that even after the mobile
+~org-mobile-use-encryption~[fn:151].  Note that even after the mobile
 application encrypts the file contents, the file name remains visible
 on the file systems of the local computer, the server, and the mobile
 device.
@@ -19550,15 +19550,15 @@ The command ~org-mobile-push~ copies files listed in
 ~org-mobile-files~ into the staging area.  Files include agenda files
 (as listed in ~org-agenda-files~).  Customize ~org-mobile-files~ to
 add other files.  File names are staged with paths relative to
-~org-directory~, so all files should be inside this directory[fn:154].
+~org-directory~, so all files should be inside this directory[fn:152].
 
 Push creates a special Org file =agendas.org= with custom agenda views
-defined by the user[fn:155].
+defined by the user[fn:153].
 
 Finally, Org writes the file =index.org=, containing links to other
 files.  The mobile application reads this file first from the server
 to determine what other files to download for agendas.  For faster
-downloads, it is expected to only read files whose checksums[fn:156]
+downloads, it is expected to only read files whose checksums[fn:154]
 have changed.
 
 *** Pulling from the mobile application
@@ -19575,7 +19575,7 @@ data in an inbox file format, through the following steps:
 
 1.
    #+vindex: org-mobile-inbox-for-pull
-   Org moves all entries found in =mobileorg.org=[fn:157] and appends
+   Org moves all entries found in =mobileorg.org=[fn:155] and appends
    them to the file pointed to by the variable
    ~org-mobile-inbox-for-pull~.  It should reside neither in the
    staging area nor on the server.  Each captured entry and each
@@ -19866,9 +19866,9 @@ of these strategies:
 #+cindex: @LaTeX{}, and Orgtbl mode
 
 To wrap a source table in LaTeX, use the =comment= environment
-provided by =comment.sty=[fn:158].  To activate it, put
+provided by =comment.sty=[fn:156].  To activate it, put
 ~\usepackage{comment}~ in the document header.  Orgtbl mode inserts
-a radio table skeleton[fn:159] with the command {{{kbd(M-x
+a radio table skeleton[fn:157] with the command {{{kbd(M-x
 orgtbl-insert-radio-table)}}}, which prompts for a table name.  For
 example, if =salesfigures= is the name, the template inserts:
 
@@ -19887,7 +19887,7 @@ The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
 the table at the target (receive) location named =salesfigures=.  Now
 the table is ready for data entry.  It can even use spreadsheet
-features[fn:160]:
+features[fn:158]:
 
 #+begin_example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -20104,7 +20104,7 @@ Dynamic blocks, like any other block, can be narrowed with
 #+vindex: org-agenda-skip-function
 #+vindex: org-agenda-skip-function-global
 Org provides a special hook to further limit items in agenda views:
-~agenda~, ~agenda*~[fn:161], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
+~agenda~, ~agenda*~[fn:159], ~todo~, ~alltodo~, ~tags~, ~tags-todo~,
 ~tags-tree~.  Specify a custom function that tests inclusion of every
 matched item in the view.  This function can also skip as much as is
 needed.
@@ -20147,7 +20147,7 @@ meaningful string suitable for the agenda view.
 #+vindex: org-agenda-skip-function
 Search for entries with a limit set on levels for the custom search.
 This is a general approach to creating custom searches in Org.  To
-include all levels, use =LEVEL>0=[fn:162].  Then to selectively pick
+include all levels, use =LEVEL>0=[fn:160].  Then to selectively pick
 the matched entries, use ~org-agenda-skip-function~, which also
 accepts Lisp forms, such as ~org-agenda-skip-entry-if~ and
 ~org-agenda-skip-subtree-if~.  For example:
@@ -21412,7 +21412,7 @@ a deadline string.  See ~org-agenda-entry-types~ on how to set what
 planning information is taken into account.
 
 [fn:102] For HTML you need to install Hrvoje Nikšić's =htmlize.el=
-from [[https://github.com/hniksic/emacs-htmlize][Hrvoje Nikšić's repository]].
+as an Emacs package from MELPA or from [[https://github.com/hniksic/emacs-htmlize][Hrvoje Nikšić's repository]].
 
 [fn:103] To create PDF output, the Ghostscript ps2pdf utility must be
 installed on the system.  Selecting a PDF file also creates the
@@ -21575,50 +21575,50 @@ http://www.cs.tufts.edu/~nr/noweb/.
 [fn:145] For more information, please refer to the commentary section
 in =org-tempo.el=.
 
-[fn:146] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
+[fn:149] Note that ~org-indent-mode~ also sets the ~wrap-prefix~
 property, such that ~visual-line-mode~ (or purely setting ~word-wrap~)
 wraps long lines (including headlines) correctly indented.
 
-[fn:147] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
+[fn:146] The ~org-indent-mode~ also sets the ~wrap-prefix~ correctly
 for indenting and wrapping long lines of headlines or text.  This
 minor mode handles ~visual-line-mode~ and directly applied settings
 through ~word-wrap~.
 
-[fn:148] Note that turning on ~org-indent-mode~ sets
+[fn:147] Note that turning on ~org-indent-mode~ sets
 ~org-hide-leading-stars~ to ~t~ and ~org-adapt-indentation~ to ~nil~.
 
-[fn:149] This works, but requires extra effort.  Org Indent mode is
+[fn:148] This works, but requires extra effort.  Org Indent mode is
 more convenient for most applications.
 
-[fn:152] For a server to host files, consider using a WebDAV server,
+[fn:150] For a server to host files, consider using a WebDAV server,
 such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
-[fn:153] If Emacs is configured for safe storing of passwords, then
+[fn:151] If Emacs is configured for safe storing of passwords, then
 configure the variable ~org-mobile-encryption-password~; please read
 the docstring of that variable.
 
-[fn:154] Symbolic links in ~org-directory~ need to have the same name
+[fn:152] Symbolic links in ~org-directory~ need to have the same name
 as their targets.
 
-[fn:155] While creating the agendas, Org mode forces =ID= properties
+[fn:153] While creating the agendas, Org mode forces =ID= properties
 on all referenced entries, so that these entries can be uniquely
 identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
 on outline paths, assuming they are unique.
 
-[fn:156] Checksums are stored automatically in the file
+[fn:154] Checksums are stored automatically in the file
 =checksums.dat=.
 
-[fn:157] The file will be empty after this operation.
+[fn:155] The file will be empty after this operation.
 
-[fn:158] https://www.ctan.org/pkg/comment
+[fn:156] https://www.ctan.org/pkg/comment
 
-[fn:159] By default this works only for LaTeX, HTML, and Texinfo.
+[fn:157] By default this works only for LaTeX, HTML, and Texinfo.
 Configure the variable ~orgtbl-radio-table-templates~ to install
 templates for other modes.
 
-[fn:160] If the =TBLFM= keyword contains an odd number of dollar
+[fn:158] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
 shown in the example you can fix this by adding an extra line inside
 the =comment= environment that is used to balance the dollar
@@ -21626,9 +21626,9 @@ expressions.  If you are using AUCTeX with the font-latex library,
 a much better solution is to add the =comment= environment to the
 variable ~LaTeX-verbatim-environments~.
 
-[fn:161] The ~agenda*~ view is the same as ~agenda~ except that it
+[fn:159] The ~agenda*~ view is the same as ~agenda~ except that it
 only considers /appointments/, i.e., scheduled and deadline items that
 have a time specification =[h]h:mm= in their time-stamps.
 
-[fn:162] Note that, for ~org-odd-levels-only~, a level number
+[fn:160] Note that, for ~org-odd-levels-only~, a level number
 corresponds to order in the hierarchy, not to the number of stars.
