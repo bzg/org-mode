@@ -7562,10 +7562,14 @@ should be used to exclude the search - the interactive user can
 also press `-' or `+' to switch between filtering and excluding."
   (interactive "P")
   (let* ((alist org-tag-alist-for-agenda)
+	 (seen-chars nil)
 	 (tag-chars (mapconcat
 		     (lambda (x) (if (and (not (symbolp (car x)))
-					  (cdr x))
-				     (char-to-string (cdr x))
+					  (cdr x)
+					  (not (member (cdr x) seen-chars)))
+				     (progn
+				       (push (cdr x) seen-chars)
+				       (char-to-string (cdr x)))
 				   ""))
 		     org-tag-alist-for-agenda ""))
 	 (valid-char-list (append '(?\t ?\r ?/ ?. ?\s ?q)
