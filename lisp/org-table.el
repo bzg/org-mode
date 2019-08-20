@@ -3190,7 +3190,7 @@ ARGS are passed as arguments to the `message' function.  Returns
 current time if a message is printed, otherwise returns T1.  If
 T1 is nil, always messages."
   (let ((curtime (current-time)))
-    (if (or (not t1) (< 0 (nth 1 (time-subtract curtime t1))))
+    (if (or (not t1) (org-time-less-p 1 (org-time-subtract curtime t1)))
 	(progn (apply 'message args)
 	       curtime)
       t1)))
