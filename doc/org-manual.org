@@ -18908,7 +18908,7 @@ width space.  You can insert one with any of the following:
 For example, in order to write =[[1,2]]= as-is in your document, you
 may write instead
 
-: [[X1,2]]
+: [X[1,2]]
 
 where =X= denotes the zero width space character.
 
