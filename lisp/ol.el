@@ -714,11 +714,12 @@ This should be called after the variable `org-link-parameters' has changed."
 	  (rx (seq "[["
 		   ;; URI part: match group 1.
 		   (group
-		    (*? anything)
 		    ;; Allow an even number of backslashes right
 		    ;; before the closing bracket.
-		    (not (any "\\"))
-		    (zero-or-more "\\\\"))
+		    (or (one-or-more "\\\\")
+			(and (*? anything)
+			     (not (any "\\"))
+			     (zero-or-more "\\\\"))))
 		   "]"
 		   ;; Description (optional): match group 2.
 		   (opt "[" (group (+? anything)) "]")
