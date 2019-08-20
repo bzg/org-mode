@@ -6824,46 +6824,44 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
   (should-not (org-timestamp-from-string "<2012-03-29"))
   ;; Otherwise, return a valid Org timestamp object.
   (should
-   (equal "<2012-03-29 Thu>"
-	  (let ((system-time-locale "en_US"))
-	       (org-element-interpret-data
-		(org-timestamp-from-string "<2012-03-29 Thu>")))))
+   (string-match-p "<2012-03-29 .+>"
+		   (org-element-interpret-data
+		    (org-timestamp-from-string "<2012-03-29 Thu>"))))
   (should
-   (equal "[2014-03-04 Tue]"
-	  (let ((system-time-locale "en_US"))
-	       (org-element-interpret-data
-		(org-timestamp-from-string "[2014-03-04 Tue]"))))))
+   (string-match-p "[2014-03-04 .+]"
+		   (org-element-interpret-data
+		    (org-timestamp-from-string "[2014-03-04 Tue]")))))
 
 (ert-deftest test-org/timestamp-from-time ()
   "Test `org-timestamp-from-time' specifications."
   ;; Standard test.
   (should
-   (equal "<2012-03-29 Thu>"
-	  (let ((system-time-locale "en_US"))
-	    (org-element-interpret-data
-	     (org-timestamp-from-time
-	      (apply #'encode-time
-		     (org-parse-time-string "<2012-03-29 Thu 16:40>")))))))
+   (string-match-p
+    "<2012-03-29 .+>"
+    (org-element-interpret-data
+     (org-timestamp-from-time
+      (apply #'encode-time
+	     (org-parse-time-string "<2012-03-29 Thu 16:40>"))))))
   ;; When optional argument WITH-TIME is non-nil, provide time
   ;; information.
   (should
-   (equal "<2012-03-29 Thu 16:40>"
-	  (let ((system-time-locale "en_US"))
-	    (org-element-interpret-data
-	     (org-timestamp-from-time
-	      (apply #'encode-time
-		     (org-parse-time-string "<2012-03-29 Thu 16:40>"))
-	      t)))))
+   (string-match-p
+    "<2012-03-29 .+ 16:40>"
+    (org-element-interpret-data
+     (org-timestamp-from-time
+      (apply #'encode-time
+	     (org-parse-time-string "<2012-03-29 Thu 16:40>"))
+      t))))
   ;; When optional argument INACTIVE is non-nil, return an inactive
   ;; timestamp.
   (should
-   (equal "[2012-03-29 Thu]"
-	  (let ((system-time-locale "en_US"))
-	    (org-element-interpret-data
-	     (org-timestamp-from-time
-	      (apply #'encode-time
-		     (org-parse-time-string "<2012-03-29 Thu 16:40>"))
-	      nil t))))))
+   (string-match-p
+    "[2012-03-29 .+]"
+    (org-element-interpret-data
+     (org-timestamp-from-time
+      (apply #'encode-time
+	     (org-parse-time-string "<2012-03-29 Thu 16:40>"))
+      nil t)))))
 
 (ert-deftest test-org/timestamp-to-time ()
   "Test `org-timestamp-to-time' specifications."
