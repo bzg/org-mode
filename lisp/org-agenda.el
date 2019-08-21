@@ -2482,8 +2482,18 @@ The following commands are available:
       :keys "v A"]
      "--"
      ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
-    ["Write view to file" org-agenda-write t]
+    ("Filter current view"
+     ["by category at cursor" org-agenda-filter-by-category t]
+     ["by tag" org-agenda-filter-by-tag t]
+     ["by effort" org-agenda-filter-by-effort t]
+     ["by regexp" org-agenda-filter-by-regexp t]
+     ["by top-level headline" org-agenda-filter-by-top-headline t]
+     "--"
+     ["Remove all filtering" org-agenda-filter-remove-all t]
+     "--"
+     ["limit" org-agenda-limit-interactively t])
     ["Rebuild buffer" org-agenda-redo t]
+    ["Write view to file" org-agenda-write t]
     ["Save all Org buffers" org-save-all-org-buffers t]
     "--"
     ["Show original entry" org-agenda-show t]
