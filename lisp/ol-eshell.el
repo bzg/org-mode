@@ -27,6 +27,8 @@
 (require 'esh-mode)
 (require 'ol)
 
+(declare-function eshell/pwd "em-dirs.el" (&rest args))
+
 (org-link-set-parameters "eshell"
 			 :follow #'org-eshell-open
 			 :store #'org-eshell-store-link)
@@ -55,7 +57,7 @@
   "Store a link that, when opened, switches back to the current eshell buffer
    and the current working directory."
   (when (eq major-mode 'eshell-mode)
-    (let* ((command (concat "cd " dired-directory))
+    (let* ((command (concat "cd " (eshell/pwd)))
            (link  (concat (buffer-name) ":" command)))
       (org-link-store-props
        :link (concat "eshell:" link)
