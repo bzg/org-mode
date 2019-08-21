@@ -7439,17 +7439,30 @@ With a prefix argument, do so in all agenda buffers."
   "Return the category of the agenda line."
   (org-get-at-bol 'org-category))
 
+(defun org-agenda-all-categories ()
+  "Return a list of all categories used in this agenda buffer."
+  (let ((pos (point-min)) categories)
+    (while (and (< pos (point-max))
+		(setq pos (next-single-property-change
+			   pos 'org-category nil (point-max))))
+      (push (get-text-property pos 'org-category) categories))
+    (nreverse (org-uniquify (delq nil categories)))))
+
 (defun org-agenda-filter-by-category (strip)
   "Filter lines in the agenda buffer that have a specific category.
 The category is that of the current line.
-Without prefix argument, keep only the lines of that category.
-With a prefix argument, exclude the lines of that category.
-"
+Without prefix argument STRIP, keep only the lines of that category.
+With a prefix argument, exclude the lines of that category."
   (interactive "P")
   (if (and org-agenda-filtered-by-category
 	   org-agenda-category-filter)
       (org-agenda-filter-show-all-cat)
-    (let ((cat (org-no-properties (org-agenda-get-category))))
+    (let* ((categories (org-agenda-all-categories))
+	   (defcat (org-no-properties (or (org-agenda-get-category)
+					  (car categories))))
+	   (cat (completing-read (format "Category [%s]: " defcat)
+				 (org-agenda-all-categories)
+				 nil t nil nil defcat)))
       (cond
        ((and cat strip)
         (org-agenda-filter-apply
