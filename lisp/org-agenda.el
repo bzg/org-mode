@@ -5888,7 +5888,14 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	      (error "No valid Clock line")
 	      (throw 'next t))
 	    (unless (match-end 3)
-	      (setq issue "No end time"
+	      (setq issue
+		    (format
+		     "No end time: (%s)"
+		     (org-duration-from-minutes
+		      (floor
+		       (- (float-time (org-current-time))
+			  (float-time (org-time-string-to-time (match-string 1))))
+		       60)))
 		    face (or (plist-get pl :no-end-time-face) face))
 	      (throw 'next t))
 	    (setq ts (match-string 1)
