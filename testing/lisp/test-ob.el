@@ -1532,6 +1532,32 @@ echo \"$data\"
        (buffer-substring-no-properties (line-beginning-position)
 				       (point-max)))))))
 
+(ert-deftest test-ob/preserve-comma-escape ()
+  "Preserve comma escapes when inserting results."
+  (should
+   (equal
+    "#+begin_example
+line 1
+,* headline 2
+,* headline 3
+,* headline 4
+,* headline 5
+#+end_example
+"
+    (org-test-with-temp-text "#+begin_src emacs-lisp :wrap example
+\"line 1
+,* headline 2
+,* headline 3
+,* headline 4
+,* headline 5
+\"
+#+end_src
+"
+      (org-babel-execute-src-block)
+      (let ((case-fold-search t)) (search-forward "result" nil t))
+      (downcase (buffer-substring-no-properties (line-beginning-position 2)
+						(point-max)))))))
+
 (ert-deftest test-ob/safe-header-args ()
   "Detect safe and unsafe header args."
   (let ((safe-args '((:cache . "foo")

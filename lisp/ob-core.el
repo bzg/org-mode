@@ -2307,7 +2307,7 @@ INFO may provide the values of these header arguments (in the
 			   (setq start inline-start)
 			   (setq finish inline-finish)
 			   (setq no-newlines t))
-			 (let ((before-finish (marker-position end)))
+			 (let ((before-finish (copy-marker end)))
 			   (goto-char end)
 			   (insert (concat finish (unless no-newlines "\n")))
 			   (goto-char beg)
