@@ -521,10 +521,10 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
   (org-defkey org-mode-map (kbd "C-c C-x <right>") #'org-shiftcontrolright)
   (org-defkey org-mode-map (kbd "C-c C-x <left>") #'org-shiftcontrolleft))
 
-;;;; Narrow map
-(org-defkey narrow-map "s" #'org-narrow-to-subtree)
-(org-defkey narrow-map "b" #'org-narrow-to-block)
-(org-defkey narrow-map "e" #'org-narrow-to-element)
+;;;; Narrowing bindings
+(org-defkey org-mode-map (kbd "C-x n s") #'org-narrow-to-subtree)
+(org-defkey org-mode-map (kbd "C-x n b") #'org-narrow-to-block)
+(org-defkey org-mode-map (kbd "C-x n e") #'org-narrow-to-element)
 
 ;;;; Remap usual Emacs bindings
 (org-remap org-mode-map
