@@ -500,7 +500,8 @@ by `org-babel-get-src-block-info'."
   (let ((link-data (pcase (or info (org-babel-get-src-block-info 'light))
 		     (`(,_ ,_ ,_ ,_ ,name ,start ,_)
 		      `(("start-line" . ,(org-with-point-at start
-					   (line-beginning-position)))
+					   (number-to-string
+					    (line-number-at-pos))))
 			("file" . ,(buffer-file-name))
 			("link" . ,(org-no-properties (org-store-link nil)))
 			("source-name" . ,name))))))
