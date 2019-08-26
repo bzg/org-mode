@@ -16653,6 +16653,8 @@ conventions:
      type.  In this case, that link must be a well-formed plain
      or angle link, i.e., it must have an explicit \"file\" type.
 
+Equip each image with the key-map `image-map'.
+
 When optional argument INCLUDE-LINKED is non-nil, also links with
 a text description part will be inlined.  This can be nice for
 a quick look at those images, but it does not reflect what
@@ -16771,6 +16773,7 @@ boundaries."
 			    (overlay-put
 			     ov 'modification-hooks
 			     (list 'org-display-inline-remove-overlay))
+			    (overlay-put ov 'keymap image-map)
 			    (push ov org-inline-image-overlays)))))))))))))))
 
 (defun org-display-inline-remove-overlay (ov after _beg _end &optional _len)
