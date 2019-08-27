@@ -7456,7 +7456,9 @@ With a prefix argument, exclude the lines of that category."
   (interactive "P")
   (if (and org-agenda-filtered-by-category
 	   org-agenda-category-filter)
-      (org-agenda-filter-show-all-cat)
+      (progn
+	(org-agenda-filter-show-all-cat)
+	(message "All categories are shown"))
     (let* ((categories (org-agenda-all-categories))
 	   (defcat (org-no-properties (or (org-agenda-get-category)
 					  (car categories))))
