@@ -7537,27 +7537,31 @@ With two prefix arguments, remove the effort filters."
 			   (mapcar (lambda (n) (mod n 10)) ;turn 10 into 0
 				   (number-sequence 1 (length efforts)))))
 	   (op nil))
-      (while (not (memq op '(?< ?> ?=)))
-	(setq op (read-char-exclusive "Effort operator? (> = or <)")))
+      (while (not (memq op '(?< ?> ?= ?_)))
+	(setq op (read-char-exclusive "Effort operator? (> = or <)     or press `_' again to remove filter")))
       ;; Select appropriate duration.  Ignore non-digit characters.
-      (let ((prompt
-	     (apply #'format
-		    (concat "Effort %c "
-			    (mapconcat (lambda (s) (concat "[%d]" s))
-				       efforts
-				       " "))
-		    op allowed-keys))
-	    (eff -1))
-	(while (not (memq eff allowed-keys))
-	  (message prompt)
-	  (setq eff (- (read-char-exclusive) 48)))
-	(setq org-agenda-effort-filter
-	      (list (concat (if strip "-" "+")
-			    (char-to-string op)
-			    ;; Numbering is 1 2 3 ... 9 0, but we want
-			    ;; 0 1 2 ... 8 9.
-			    (nth (mod (1- eff) 10) efforts)))))
-      (org-agenda-filter-apply org-agenda-effort-filter 'effort)))
+      (if (eq op ?_)
+	  (progn
+	    (org-agenda-filter-show-all-effort)
+	    (message "Effort filter removed"))
+	(let ((prompt
+	       (apply #'format
+		      (concat "Effort %c "
+			      (mapconcat (lambda (s) (concat "[%d]" s))
+					 efforts
+					 " "))
+		      op allowed-keys))
+	      (eff -1))
+	  (while (not (memq eff allowed-keys))
+	    (message prompt)
+	    (setq eff (- (read-char-exclusive) 48)))
+	  (setq org-agenda-effort-filter
+		(list (concat (if strip "-" "+")
+			      (char-to-string op)
+			      ;; Numbering is 1 2 3 ... 9 0, but we want
+			      ;; 0 1 2 ... 8 9.
+			      (nth (mod (1- eff) 10) efforts)))))
+	(org-agenda-filter-apply org-agenda-effort-filter 'effort))))
    (t (org-agenda-filter-show-all-effort)
       (message "Effort filter removed"))))
 
