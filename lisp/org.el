@@ -5356,9 +5356,10 @@ by a #."
   "Fontify drawers."
   (when (re-search-forward org-drawer-regexp limit t)
     (add-text-properties
-     (match-beginning 0) (match-end 0)
-     '(font-lock-fontified t face org-special-keyword))
-    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+     (line-beginning-position) (line-beginning-position 2)
+     '(font-lock-fontified t face org-drawer))
+    (org-remove-flyspell-overlays-in
+     (line-beginning-position) (line-beginning-position 2))
     t))
 
 (defun org-fontify-macros (limit)
@@ -5612,12 +5613,12 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '("^[ \t]*| *\\([#*]\\) *|" (1 'org-formula t))
 	   '("^[ \t]*|\\( *\\([$!_^/]\\) *|.*\\)|" (1 'org-formula t))
 	   '("| *\\(<[lrc]?[0-9]*>\\)" (1 'org-formula t))
-	   ;; Drawers
-	   '(org-fontify-drawers)
 	   ;; Properties
 	   (list org-property-re
 		 '(1 'org-special-keyword t)
 		 '(3 'org-property-value t))
+	   ;; Drawers
+	   '(org-fontify-drawers)
 	   ;; Link related fontification.
 	   '(org-activate-links)
 	   (when (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
