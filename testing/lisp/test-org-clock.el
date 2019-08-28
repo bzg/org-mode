@@ -1179,6 +1179,23 @@ CLOCK: [2017-10-02 Mon 11:00]--[2017-10-02 Mon 13:00] =>  2:00"
               (test-org-clock-clocktable-contents
                ":step week :block 2017-10 :stepskip0 t"))))))
 
+(ert-deftest test-org-clock/clocktable/hidefiles ()
+  "Test \":hidefiles\" parameter in Clock table."
+  ;; Test that hidefiles removes the file column.
+  (should
+   (equal
+    "| Headline     | Time   |
+|--------------+--------|
+| *Total time* | *1:00* |
+|--------------+--------|
+| Test         | 1:00   |"
+    (org-test-with-temp-text-in-file
+        "* Test
+CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
+      (let ((the-file (buffer-file-name)))
+        (org-test-with-temp-text-in-file ""
+          (test-org-clock-clocktable-contents
+           (format ":hidefiles t :scope (lambda () (list %S))" the-file))))))))
 
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
