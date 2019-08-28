@@ -3636,6 +3636,10 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-regexp-filter nil)
 (defvar org-agenda-effort-filter nil)
 (defvar org-agenda-top-headline-filter nil)
+(defvar org-agenda-represented-categories nil
+  "Cache for the list of all categories in the agenda.")
+(defvar org-agenda-represented-tags nil
+  "Cache for the list of all categories in the agenda.")
 (defvar org-agenda-tag-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
 This must be a list of strings, each string must be a single tag preceded
@@ -3844,6 +3848,8 @@ FILTER-ALIST is an alist of filters we need to apply when
 				     (org-with-point-at mrk
 				       (mapcar #'downcase (org-get-tags)))))))))
 	(run-hooks 'org-agenda-finalize-hook)
+	(setq org-agenda-represented-tags nil
+	      org-agenda-represented-categories nil)
 	(when org-agenda-top-headline-filter
 	  (org-agenda-filter-top-headline-apply
 	   org-agenda-top-headline-filter))
@@ -7439,15 +7445,7 @@ With a prefix argument, do so in all agenda buffers."
   "Return the category of the agenda line."
   (org-get-at-bol 'org-category))
 
-(defun org-agenda-all-categories ()
-  "Return a list of all categories used in this agenda buffer."
-  (let ((pos (point-min)) categories)
-    (while (and (< pos (point-max))
-		(setq pos (next-single-property-change
-			   pos 'org-category nil (point-max))))
-      (push (get-text-property pos 'org-category) categories))
-    (nreverse (org-uniquify (delq nil categories)))))
-
+  
 (defun org-agenda-filter-by-category (strip)
   "Filter lines in the agenda buffer that have a specific category.
 The category is that of the current line.
@@ -7666,17 +7664,32 @@ also press `-' or `+' to switch between filtering and excluding."
       (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))
      (t (error "Invalid tag selection character %c" char)))))
 
-(defun org-agenda-get-represented-tags ()
-  "Get a list of all tags currently represented in the agenda."
-  (let (p tags)
-    (save-excursion
-      (goto-char (point-min))
-      (while (setq p (next-single-property-change (point) 'tags))
-	(goto-char p)
-	(mapc (lambda (x) (add-to-list 'tags x))
-	      (get-text-property (point) 'tags))))
-    tags))
+(defun org-agenda-get-represented-categories ()
+  "Return a list of all categories used in this agenda buffer."
+  (or org-agenda-represented-categories
+      (when (derived-mode-p 'org-agenda-mode)
+	(let ((pos (point-min)) categories)
+	  (while (and (< pos (point-max))
+		      (setq pos (next-single-property-change
+				 pos 'org-category nil (point-max))))
+	    (push (get-text-property pos 'org-category) categories))
+	  (setq org-agenda-represented-categories
+		(nreverse (org-uniquify (delq nil categories))))))))
 
+(defun org-agenda-get-represented-tags ()
+  "Return a list of all tags used in this agenda buffer.
+These will be lower-case, for filtering."
+  (or org-agenda-represented-tags
+      (when (derived-mode-p 'org-agenda-mode)
+	(let ((pos (point-min)) tags-lists tt)
+	  (while (and (< pos (point-max))
+		      (setq pos (next-single-property-change
+				 pos 'tags nil (point-max))))
+	    (setq tt (get-text-property pos 'tags))
+	    (if tt (push tt tags-lists)))
+	  (setq org-agenda-represented-tags
+		(nreverse (org-uniquify
+			   (delq nil (apply 'append tags-lists)))))))))
 
 (defun org-agenda-filter-make-matcher (filter type &optional expand)
   "Create the form that tests a line for agenda filter.  Optional
