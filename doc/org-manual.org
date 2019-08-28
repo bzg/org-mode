@@ -6637,6 +6637,11 @@ using the =:formatter= parameter.
 
   Indent each headline field according to its level.
 
+- =:hidefiles= ::
+
+  Hide the file column when multiple files are used to produce the
+  table.
+
 - =:tcolumns= ::
 
   Number of columns to be used for times.  If this is smaller than
