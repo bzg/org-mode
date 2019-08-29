@@ -16729,7 +16729,6 @@ boundaries."
 		  (let ((width
 			 ;; Apply `org-image-actual-width' specifications.
 			 (cond
-			  ((not (image-type-available-p 'imagemagick)) nil)
 			  ((eq org-image-actual-width t) nil)
 			  ((listp org-image-actual-width)
 			   (or
@@ -16749,14 +16748,15 @@ boundaries."
 			    ;; Otherwise, fall-back to provided number.
 			    (car org-image-actual-width)))
 			  ((numberp org-image-actual-width)
-			   org-image-actual-width)))
+			   org-image-actual-width)
+			  (t nil)))
 			(old (get-char-property-and-overlay
 			      (org-element-property :begin link)
 			      'org-image-overlay)))
 		    (if (and (car-safe old) refresh)
 			(image-refresh (overlay-get (cdr old) 'display))
 		      (let ((image (create-image file
-						 (and width 'imagemagick)
+						 (and (image-type-available-p 'imagemagick) 'imagemagick)
 						 nil
 						 :width width)))
 			(when image
