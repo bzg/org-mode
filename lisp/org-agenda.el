@@ -3636,6 +3636,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-regexp-filter nil)
 (defvar org-agenda-effort-filter nil)
 (defvar org-agenda-top-headline-filter nil)
+
 (defvar org-agenda-represented-categories nil
   "Cache for the list of all categories in the agenda.")
 (defvar org-agenda-represented-tags nil
@@ -3649,6 +3650,19 @@ bind it in the options section.  The preset filter is a global property of
 the entire agenda view.  In a block agenda, it will not work reliably to
 define a filter for one of the individual blocks.  You need to set it in
 the global options and expect it to be applied to the entire view.")
+
+(defconst org-agenda-filter-variables
+  '((category . org-agenda-category-filter)
+    (tag . org-agenda-tag-filter)
+    (effort . org-agenda-effort-filter)
+    (regexp . org-agenda-regexp-filter))
+    "Alist of filter types and associated variables")
+(defun org-agenda-filter-any ()
+  "Is any filter active?"
+  (eval (cons 'or (mapcar (lambda (x)
+			    (or (symbol-value (cdr x))
+				(get :preset-filter x)))
+			  org-agenda-filter-variables))))
 
 (defvar org-agenda-category-filter-preset nil
   "A preset of the category filter used for secondary agenda filtering.
@@ -3747,6 +3761,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (put 'org-agenda-tag-filter :preset-filter nil)
 	  (put 'org-agenda-category-filter :preset-filter nil)
 	  (put 'org-agenda-regexp-filter :preset-filter nil)
+	  (put 'org-agenda-effort-filter :preset-filter nil)
 	  ;; Popup existing buffer
 	  (org-agenda-prepare-window (get-buffer org-agenda-buffer-name)
 				     filter-alist)
@@ -8392,56 +8407,51 @@ When called with a prefix argument, include all archive files as well."
 	       ((eq org-agenda-show-log 'clockcheck) " ClkCk")
 	       (org-agenda-show-log " Log")
 	       (t ""))
+	      (if (org-agenda-filter-any) " " "")
 	      (if (or org-agenda-category-filter
 		      (get 'org-agenda-category-filter :preset-filter))
 		  '(:eval (propertize
-	      		   (concat " <"
+	      		   (concat "["
 	      			   (mapconcat
 	      			    'identity
 	      			    (append
 	      			     (get 'org-agenda-category-filter :preset-filter)
 	      			     org-agenda-category-filter)
 	      			    "")
-	      			   ">")
+	      			   "]")
 	      		   'face 'org-agenda-filter-category
 	      		   'help-echo "Category used in filtering")) "")
 	      (if (or org-agenda-tag-filter
 		      (get 'org-agenda-tag-filter :preset-filter))
 		  '(:eval (propertize
-			   (concat " {"
-				   (mapconcat
+			   (concat (mapconcat
 				    'identity
 				    (append
 				     (get 'org-agenda-tag-filter :preset-filter)
 				     org-agenda-tag-filter)
-				    "")
-				   "}")
+				    ""))
 			   'face 'org-agenda-filter-tags
 			   'help-echo "Tags used in filtering")) "")
 	      (if (or org-agenda-effort-filter
 		      (get 'org-agenda-effort-filter :preset-filter))
 		  '(:eval (propertize
-			   (concat " {"
-				   (mapconcat
+			   (concat (mapconcat
 				    'identity
 				    (append
 				     (get 'org-agenda-effort-filter :preset-filter)
 				     org-agenda-effort-filter)
-				    "")
-				   "}")
+				    ""))
 			   'face 'org-agenda-filter-effort
 			   'help-echo "Effort conditions used in filtering")) "")
 	      (if (or org-agenda-regexp-filter
 		      (get 'org-agenda-regexp-filter :preset-filter))
 		  '(:eval (propertize
-			   (concat " ["
-				   (mapconcat
-				    'identity
+			   (concat (mapconcat
+				    (lambda (x) (concat (substring x 0 1) "/" (substring x 1) "/"))
 				    (append
 				     (get 'org-agenda-regexp-filter :preset-filter)
 				     org-agenda-regexp-filter)
-				    "")
-				   "]")
+				    ""))
 			   'face 'org-agenda-filter-regexp
 			   'help-echo "Regexp used in filtering")) "")
 	      (if org-agenda-archives-mode
