@@ -9109,12 +9109,6 @@ custom agenda commands.
   option ~org-agenda-category-filter-preset~.  See [[*Setting options
   for custom commands]].
 
-- {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
-
-  #+findex: org-agenda-filter-by-top-headline
-  Filter the current agenda view and only display the siblings and the
-  parent headline of the one at point.
-
 - {{{kbd(=)}}} (~org-agenda-filter-by-regexp~) ::
 
   #+findex: org-agenda-filter-by-regexp
@@ -9159,6 +9153,35 @@ custom agenda commands.
   You can add a filter preset in custom agenda commands through the
   option ~org-agenda-effort-filter-preset~.  See [[*Setting options for
   custom commands]].
+
+- {{{kbd(\)}}} (~org-agenda-filter~) ::
+
+  #+findex: org-agenda-filter
+  This is an alternative interface to all four filter methods
+  described above. At the prompt, one would specify different filter
+  elements in a single string, with full completion support.  For
+  example,
+
+  #+begin_example
+     +work-John<0:10-/plot/
+  #+end_example
+
+  selects entries with category `work' and effort estimates below 10
+  minutes, and deselects entries with tag `John' or matching the
+  regexp `plot'.  `+' can be left out if that does not lead to
+  ambiguities.  The sequence of elements is arbitrary.  The filter
+  syntax assumes that there is no overlap between categories and tags
+  (tags will take priority).  If you reply to the prompt with the
+  empty string, all filtering is removed.  If a filter is specified,
+  it replaces all current filters.  But if you call the command with a
+  prefix argument, the new filter elements are added to the active
+  ones.
+
+- {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
+
+  #+findex: org-agenda-filter-by-top-headline
+  Filter the current agenda view and only display the siblings and the
+  parent headline of the one at point.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
 
