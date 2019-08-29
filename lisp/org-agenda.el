@@ -7476,11 +7476,11 @@ With a prefix argument, exclude the lines of that category."
       (progn
 	(org-agenda-filter-show-all-cat)
 	(message "All categories are shown"))
-    (let* ((categories (org-agenda-all-categories))
+    (let* ((categories (org-agenda-get-represented-categories))
 	   (defcat (org-no-properties (or (org-agenda-get-category)
 					  (car categories))))
 	   (cat (completing-read (format "Category [%s]: " defcat)
-				 (org-agenda-all-categories)
+				 (org-agenda-get-represented-categories)
 				 nil t nil nil defcat)))
       (cond
        ((and cat strip)
@@ -7617,7 +7617,8 @@ get priority."
 	 (fc (if keep org-agenda-category-filter))
 	 (ft (if keep org-agenda-tag-filter))
 	 (fe (if keep org-agenda-effort-filter))
-	 (fr (if keep org-agenda-regexp-filter)))
+	 (fr (if keep org-agenda-regexp-filter))
+	 log s)
     (while (string-match "^[ \t]*\\([-+]\\)?\\(\\([^-+<>=/ \t]+\\)\\|\\([<>=][0-9:]+\\)\\|\\(/\\([^/]+\\)/?\\)\\)"
 			 f-string)
       (setq log (if (match-beginning 1) (match-string 1 f-string) "+"))
