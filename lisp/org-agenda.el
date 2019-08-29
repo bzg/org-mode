@@ -2402,6 +2402,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
 (org-defkey org-agenda-mode-map "_" 'org-agenda-filter-by-effort)
 (org-defkey org-agenda-mode-map "=" 'org-agenda-filter-by-regexp)
+(org-defkey org-agenda-mode-map "\\" 'org-agenda-filter)
 (org-defkey org-agenda-mode-map "|" 'org-agenda-filter-remove-all)
 (org-defkey org-agenda-mode-map "~" 'org-agenda-limit-interactively)
 (org-defkey org-agenda-mode-map "<" 'org-agenda-filter-by-category)
@@ -2483,6 +2484,8 @@ The following commands are available:
      "--"
      ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
     ("Filter current view"
+     ["with generic interface" org-agenda-filter t]
+     "--"
      ["by category at cursor" org-agenda-filter-by-category t]
      ["by tag" org-agenda-filter-by-tag t]
      ["by effort" org-agenda-filter-by-effort t]
@@ -3659,11 +3662,12 @@ the global options and expect it to be applied to the entire view.")
     "Alist of filter types and associated variables")
 (defun org-agenda-filter-any ()
   "Is any filter active?"
-  (eval (cons 'or (mapcar (lambda (x)
-			    (or (symbol-value (cdr x))
-				(get :preset-filter x)))
-			  org-agenda-filter-variables))))
-
+  (let ((form (cons 'or (mapcar (lambda (x)
+				  (if (or (symbol-value (cdr x))
+					  (get :preset-filter x))
+				      t nil))
+				org-agenda-filter-variables))))
+    (eval form)))
 (defvar org-agenda-category-filter-preset nil
   "A preset of the category filter used for secondary agenda filtering.
 This must be a list of strings, each string must be a single category
@@ -7579,6 +7583,105 @@ With two prefix arguments, remove the effort filters."
 	(org-agenda-filter-apply org-agenda-effort-filter 'effort))))
    (t (org-agenda-filter-show-all-effort)
       (message "Effort filter removed"))))
+
+
+(defun org-agenda-filter (&optional keep)
+  "Prompt for a general filter string and apply it to the agenda.
+The new filter replaces all existing elements.  When called with a
+prefix arg KEEP, add the new elements to the existing filter.
+
+The string may contain filter elements like
+
++category
++tag
++<effort        > and = are also allowed as effort operators
++/regexp/
+
+Instead of `+', `-' is allowed to strip the agenda of matching entries.
+`+' is optional if it is not required to separate two string parts.
+Multiple filter elements can be concatenated without spaces, for example
+
+     +work-John<0:10-/plot/
+
+selects entries with category `work' and effort estimates below 10 minutes,
+and deselects entries with tag `John' or matching the regexp `plot'.
+
+During entry of the filter, completion for tags, categories and effort
+values is offered.  Since the syntax for categories and tags is identical
+there should be no overlap between categoroes and tags.  If there is, tags
+get priority."
+  (interactive "P")
+  (let* ((tag-list (org-agenda-get-represented-tags))
+	 (category-list (org-agenda-get-represented-categories))
+	 (f-string (completing-read "Filter [+cat-tag<0:10-/regexp/]: " 'org-agenda-filter-completion-function))
+	 (fc (if keep org-agenda-category-filter))
+	 (ft (if keep org-agenda-tag-filter))
+	 (fe (if keep org-agenda-effort-filter))
+	 (fr (if keep org-agenda-regexp-filter)))
+    (while (string-match "^[ \t]*\\([-+]\\)?\\(\\([^-+<>=/ \t]+\\)\\|\\([<>=][0-9:]+\\)\\|\\(/\\([^/]+\\)/?\\)\\)"
+			 f-string)
+      (setq log (if (match-beginning 1) (match-string 1 f-string) "+"))
+      (cond
+       ((match-beginning 3)
+	;; category or tag
+	(setq s (match-string 3 f-string))
+	(cond ((member s tag-list)
+	       (push (concat log s) ft))
+	      ((member s category-list)
+	       (push (concat log s) fc))
+	      (t (message "`%s%s' filter ignored because it is not represented as tag or category" log s))))
+       ((match-beginning 4)
+	;; effort
+	(push (concat log (match-string 4 f-string)) fe))
+       ((match-beginning 5)
+	;; regexp
+	(push (concat log (match-string 6 f-string)) fr)))
+      (setq f-string (substring f-string (match-end 0))))
+    (org-agenda-filter-remove-all)
+    (and fc (org-agenda-filter-apply
+	     (setq org-agenda-category-filter fc) 'category))
+    (and ft (org-agenda-filter-apply
+	     (setq org-agenda-tag-filter ft) 'tag))
+    (and fe (org-agenda-filter-apply
+	     (setq org-agenda-effort-filter fe) 'effort))
+    (and fr (org-agenda-filter-apply
+	     (setq org-agenda-regexp-filter fr) 'regexp))
+    ))
+
+(defun org-agenda-filter-completion-function (string _predicate &optional flag)
+  "Complete a complex filter string
+FLAG specifies the type of completion operation to perform.  This
+function is passed as a collection function to `completing-read',
+which see."
+  (let ((completion-ignore-case t)	;tags are case-sensitive
+	(confirm (lambda (x) (stringp x)))
+	(prefix "")
+	(operator "")
+	table)
+    (when (string-match "^\\(.*\\([-+<>=]\\)\\)\\([^-+<>=]*\\)$" string)
+      (setq prefix (match-string 1 string)
+	    operator (match-string 2 string)
+	    string (match-string 3 string)))
+    (cond
+     ((member operator '("+" "-" "" nil))
+      (setq table (append (org-agenda-get-represented-categories)
+			  (org-agenda-get-represented-tags))))
+     ((member operator '("<" ">" "="))
+      (setq table (split-string
+		   (or (cdr (assoc (concat org-effort-property "_ALL")
+				   org-global-properties))
+		       "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")
+		   " +")))
+     (t (setq table nil)))
+    (pcase flag
+      (`t (all-completions string table confirm))
+      (`lambda (assoc string table)) ;exact match?
+      (`nil
+       (pcase (try-completion string table confirm)
+	 ((and completion (pred stringp))
+	  (concat prefix completion))
+	 (completion completion)))
+      (_ nil))))
 
 (defun org-agenda-filter-remove-all ()
   "Remove all filters from the current agenda buffer."
