@@ -7609,11 +7609,18 @@ and deselects entries with tag `John' or matching the regexp `plot'.
 During entry of the filter, completion for tags, categories and effort
 values is offered.  Since the syntax for categories and tags is identical
 there should be no overlap between categoroes and tags.  If there is, tags
-get priority."
+get priority.
+
+Instead of using the prefix argument to add to the current filter
+set, you can also add an additional leading `+' to filter string,
+like `+-John'."
   (interactive "P")
   (let* ((tag-list (org-agenda-get-represented-tags))
 	 (category-list (org-agenda-get-represented-categories))
 	 (f-string (completing-read "Filter [+cat-tag<0:10-/regexp/]: " 'org-agenda-filter-completion-function))
+	 (keep (or (if (string-match "^+[-+]" f-string)
+		       (progn (setq f-string (substring f-string 1)) t))
+		   keep))
 	 (fc (if keep org-agenda-category-filter))
 	 (ft (if keep org-agenda-tag-filter))
 	 (fe (if keep org-agenda-effort-filter))
@@ -7627,16 +7634,16 @@ get priority."
 	;; category or tag
 	(setq s (match-string 3 f-string))
 	(cond ((member s tag-list)
-	       (push (concat log s) ft))
+	       (add-to-list 'ft (concat log s) 'append 'equal))
 	      ((member s category-list)
-	       (push (concat log s) fc))
+	       (add-to-list 'fc (concat log s) 'append 'equal))
 	      (t (message "`%s%s' filter ignored because it is not represented as tag or category" log s))))
        ((match-beginning 4)
 	;; effort
-	(push (concat log (match-string 4 f-string)) fe))
+	(add-to-list 'fe (concat log (match-string 4 f-string)) 'append 'equal))
        ((match-beginning 5)
 	;; regexp
-	(push (concat log (match-string 6 f-string)) fr)))
+	(add-to-list 'fr (concat log (match-string 6 f-string)) 'append 'equal)))
       (setq f-string (substring f-string (match-end 0))))
     (org-agenda-filter-remove-all)
     (and fc (org-agenda-filter-apply

@@ -9174,8 +9174,9 @@ custom agenda commands.
   (tags will take priority).  If you reply to the prompt with the
   empty string, all filtering is removed.  If a filter is specified,
   it replaces all current filters.  But if you call the command with a
-  prefix argument, the new filter elements are added to the active
-  ones.
+  prefix argument, or if you add an additional `+' (e.g. `+-John') to
+  the front of the string, the new filter elements are added to the
+  active ones.
 
 - {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
 
