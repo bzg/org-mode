@@ -228,13 +228,7 @@ used to limit the exported source code blocks by language."
 	   (let* ((lang (car by-lang))
 		  (specs (cdr by-lang))
 		  (ext (or (cdr (assoc lang org-babel-tangle-lang-exts)) lang))
-		  (lang-f (intern
-			   (concat
-			    (or (and (cdr (assoc lang org-src-lang-modes))
-				     (symbol-name
-				      (cdr (assoc lang org-src-lang-modes))))
-				lang)
-			    "-mode")))
+		  (lang-f (org-src-get-lang-mode lang))
 		  she-banged)
 	     (mapc
 	      (lambda (spec)

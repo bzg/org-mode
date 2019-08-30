@@ -75,6 +75,7 @@
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-src-coderef-format "org-src" (&optional element))
 (declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
+(declare-function org-src-get-lang-mode "org-src" (lang))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-end "org-table" (&optional table-type))
 (declare-function org-table-import "org-table" (file arg))
@@ -2763,7 +2764,7 @@ block but are passed literally to the \"example-block\"."
 			      ;; Comment, according to LANG mode,
 			      ;; string S.  Return new string.
 			      (with-temp-buffer
-				(funcall (intern (concat lang "-mode")))
+				(funcall (org-src-get-lang-mode lang))
 				(comment-region (point)
 						(progn (insert s) (point)))
 				(org-trim (buffer-string)))))
