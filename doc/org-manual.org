@@ -9181,8 +9181,8 @@ custom agenda commands.
 - {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
 
   #+findex: org-agenda-filter-by-top-headline
-  Filter the current agenda view and only display the siblings and the
-  parent headline of the one at point.
+  Filter the current agenda view and only display items that fall
+  under the same top-level headline as the current entry.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
 
