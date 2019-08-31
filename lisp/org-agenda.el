@@ -2399,10 +2399,10 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "]" 'org-agenda-manipulate-query-subtract)
 (org-defkey org-agenda-mode-map "{" 'org-agenda-manipulate-query-add-re)
 (org-defkey org-agenda-mode-map "}" 'org-agenda-manipulate-query-subtract-re)
-(org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
+(org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag)
 (org-defkey org-agenda-mode-map "_" 'org-agenda-filter-by-effort)
 (org-defkey org-agenda-mode-map "=" 'org-agenda-filter-by-regexp)
-(org-defkey org-agenda-mode-map "\\" 'org-agenda-filter)
+(org-defkey org-agenda-mode-map "/" 'org-agenda-filter)
 (org-defkey org-agenda-mode-map "|" 'org-agenda-filter-remove-all)
 (org-defkey org-agenda-mode-map "~" 'org-agenda-limit-interactively)
 (org-defkey org-agenda-mode-map "<" 'org-agenda-filter-by-category)
@@ -7613,48 +7613,67 @@ get priority.
 
 Instead of using the prefix argument to add to the current filter
 set, you can also add an additional leading `+' to filter string,
-like `+-John'."
+like `+-John'.
+
+With a double prefix argument, execute the computed filtering defined in
+the variable `org-agenda-auto-exclude-function'."
   (interactive "P")
-  (let* ((tag-list (org-agenda-get-represented-tags))
-	 (category-list (org-agenda-get-represented-categories))
-	 (f-string (completing-read "Filter [+cat-tag<0:10-/regexp/]: " 'org-agenda-filter-completion-function))
-	 (keep (or (if (string-match "^+[-+]" f-string)
-		       (progn (setq f-string (substring f-string 1)) t))
-		   keep))
-	 (fc (if keep org-agenda-category-filter))
-	 (ft (if keep org-agenda-tag-filter))
-	 (fe (if keep org-agenda-effort-filter))
-	 (fr (if keep org-agenda-regexp-filter))
-	 log s)
-    (while (string-match "^[ \t]*\\([-+]\\)?\\(\\([^-+<>=/ \t]+\\)\\|\\([<>=][0-9:]+\\)\\|\\(/\\([^/]+\\)/?\\)\\)"
-			 f-string)
-      (setq log (if (match-beginning 1) (match-string 1 f-string) "+"))
-      (cond
-       ((match-beginning 3)
-	;; category or tag
-	(setq s (match-string 3 f-string))
-	(cond ((member s tag-list)
-	       (add-to-list 'ft (concat log s) 'append 'equal))
-	      ((member s category-list)
-	       (add-to-list 'fc (concat log s) 'append 'equal))
-	      (t (message "`%s%s' filter ignored because it is not represented as tag or category" log s))))
-       ((match-beginning 4)
-	;; effort
-	(add-to-list 'fe (concat log (match-string 4 f-string)) 'append 'equal))
-       ((match-beginning 5)
-	;; regexp
-	(add-to-list 'fr (concat log (match-string 6 f-string)) 'append 'equal)))
-      (setq f-string (substring f-string (match-end 0))))
-    (org-agenda-filter-remove-all)
-    (and fc (org-agenda-filter-apply
-	     (setq org-agenda-category-filter fc) 'category))
-    (and ft (org-agenda-filter-apply
-	     (setq org-agenda-tag-filter ft) 'tag))
-    (and fe (org-agenda-filter-apply
-	     (setq org-agenda-effort-filter fe) 'effort))
-    (and fr (org-agenda-filter-apply
-	     (setq org-agenda-regexp-filter fr) 'regexp))
-    ))
+  (if (equal keep '(16))
+      ;; Execute the auto-exclude action
+      (if (not org-agenda-auto-exclude-function)
+	  (user-error "`org-agenda-auto-exclude-function' is undefined")
+	(org-agenda-filter-show-all-tag)
+	(setq org-agenda-tag-filter nil)
+	(dolist (tag (org-agenda-get-represented-tags))
+	  (let ((modifier (funcall org-agenda-auto-exclude-function tag)))
+	    (when modifier
+	      (push modifier org-agenda-tag-filter))))
+	(unless (null org-agenda-tag-filter)
+	  (org-agenda-filter-apply org-agenda-tag-filter 'tag expand)))
+    ;; Prompt for a filter and act
+    (let* ((tag-list (org-agenda-get-represented-tags))
+	   (category-list (org-agenda-get-represented-categories))
+	   (f-string (completing-read "Filter [+cat-tag<0:10-/regexp/]: "
+				      'org-agenda-filter-completion-function))
+	   (keep (or (if (string-match "^+[-+]" f-string)
+			 (progn (setq f-string (substring f-string 1)) t))
+		     keep))
+	   (fc (if keep org-agenda-category-filter))
+	   (ft (if keep org-agenda-tag-filter))
+	   (fe (if keep org-agenda-effort-filter))
+	   (fr (if keep org-agenda-regexp-filter))
+	   pm s)
+      (while (string-match "^[ \t]*\\([-+]\\)?\\(\\([^-+<>=/ \t]+\\)\\|\\([<>=][0-9:]+\\)\\|\\(/\\([^/]+\\)/?\\)\\)" f-string)
+	(setq pm (if (match-beginning 1) (match-string 1 f-string) "+"))
+	(cond
+	 ((match-beginning 3)
+	  ;; category or tag
+	  (setq s (match-string 3 f-string))
+	  (cond
+	   ((member s tag-list)
+	    (add-to-list 'ft (concat pm s) 'append 'equal))
+	   ((member s category-list)
+	    (add-to-list 'fc (concat pm s) 'append 'equal))
+	   (t (message
+	       "`%s%s' filter ignored tag/category is not represented"
+	       pm s))))
+	 ((match-beginning 4)
+	  ;; effort
+	  (add-to-list 'fe (concat pm (match-string 4 f-string)) t 'equal))
+	 ((match-beginning 5)
+	  ;; regexp
+	  (add-to-list 'fr (concat pm (match-string 6 f-string)) t 'equal)))
+	(setq f-string (substring f-string (match-end 0))))
+      (org-agenda-filter-remove-all)
+      (and fc (org-agenda-filter-apply
+	       (setq org-agenda-category-filter fc) 'category))
+      (and ft (org-agenda-filter-apply
+	       (setq org-agenda-tag-filter ft) 'tag))
+      (and fe (org-agenda-filter-apply
+	       (setq org-agenda-effort-filter fe) 'effort))
+      (and fr (org-agenda-filter-apply
+	       (setq org-agenda-regexp-filter fr) 'regexp))
+      )))
 
 (defun org-agenda-filter-completion-function (string _predicate &optional flag)
   "Complete a complex filter string
@@ -7732,7 +7751,7 @@ also press `-' or `+' to switch between filtering and excluding."
 				       (char-to-string (cdr x)))
 				   ""))
 		     org-tag-alist-for-agenda ""))
-	 (valid-char-list (append '(?\t ?\r ?/ ?. ?\s ?q)
+	 (valid-char-list (append '(?\t ?\r ?\\ ?. ?\s ?q)
 				  (string-to-list tag-chars)))
 	 (exclude (or exclude (equal arg '(4))))
 	 (expand (not (equal arg '(16))))
