@@ -466,7 +466,7 @@ type     The command type, any of the following symbols:
           ...         A user-defined function.
 match    What to search for:
           - a single keyword for TODO keyword searches
-          - a tags match expression for tags searches
+          - a tags/property/todo match expression for searches
           - a word search expression for text searches.
           - a regular expression for occur searches
           For all other commands, this should be the empty string.
@@ -553,11 +553,11 @@ should provide a description for the prefix, like
 				       (const :format "" stuck)
 				       (const :tag "" :format "" "")
 				       ,org-agenda-custom-commands-local-options)
-				 (list :tag "Tags search"
+				 (list :tag "Tags/Property match (all agenda files)"
 				       (const :format "" tags)
 				       (string :tag "Match")
 				       ,org-agenda-custom-commands-local-options)
-				 (list :tag "Tags search, TODO entries only"
+				 (list :tag "Tags/Property match of TODO entries (all agenda files)"
 				       (const :format "" tags-todo)
 				       (string :tag "Match")
 				       ,org-agenda-custom-commands-local-options)
