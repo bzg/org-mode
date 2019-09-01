@@ -373,7 +373,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 			    (concat "@" (message-make-fqdn))))))
 	(setq unique (concat etime postfix))))
      ((eq org-id-method 'ts)
-      (let ((ts (format-time-string "%Y%m%dT%H%M%S"))
+      (let ((ts (format-time-string "%Y%m%dT%H%M%S.%6N"))
 	    (postfix (if org-id-include-domain
 			 (progn
 			   (require 'message)
