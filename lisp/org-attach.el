@@ -193,20 +193,20 @@ git-funtionality from this file.")
     ((?n ?\C-n) org-attach-new
      "Create a new attachment, as an Emacs buffer.")
     ((?z ?\C-z) org-attach-sync
-     "Synchronize the current task with its attachment\n directory, in case \
+     "Synchronize the current node with its attachment\n directory, in case \
 you added attachments yourself.\n")
     ((?o ?\C-o) org-attach-open
-     "Open current task's attachments.")
+     "Open current node's attachments.")
     ((?O) org-attach-open-in-emacs
      "Like \"o\", but force opening in Emacs.")
     ((?f ?\C-f) org-attach-reveal
-     "Open current task's attachment directory.")
+     "Open current node's attachment directory.  Create if not exist.")
     ((?F) org-attach-reveal-in-emacs
      "Like \"f\", but force using Dired in Emacs.\n")
     ((?d ?\C-d) org-attach-delete-one
      "Delete one attachment, you will be prompted for a file name.")
     ((?D) org-attach-delete-all
-     "Delete all of a task's attachments.  A safer way is\n to open the \
+     "Delete all of a node's attachments.  A safer way is\n to open the \
 directory in dired and delete from there.\n")
     ((?s ?\C-s) org-attach-set-directory
      "Set a specific attachment directory for this entry. Sets DIR property.")
@@ -233,7 +233,8 @@ Each entry in this list is a list of three elements:
   "The dispatcher for attachment commands.
 Shows a list of commands and prompts for another key to execute a command."
   (interactive)
-  (let (c marker)
+  (let ((dir (org-attach-dir))
+	c marker)
     (when (eq major-mode 'org-agenda-mode)
       (setq marker (or (get-text-property (point) 'org-hd-marker)
 		       (get-text-property (point) 'org-marker)))
@@ -250,8 +251,10 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (with-output-to-temp-buffer "*Org Attach*"
               (princ
                (concat "Attachment folder:\n"
-		       (or (org-attach-dir)
+		       (or dir
 			   "Can't find an existing attachment-folder")
+		       (unless (and dir (file-directory-p dir))
+			 "\n(Not yet created)")
 		       "\n\n"
 	               (format "Select an Attachment Command:\n\n%s"
 		               (mapconcat
@@ -290,9 +293,13 @@ properties also will be considered.
 
 If an ID property is found the default mechanism using that ID
 will be invoked to access the directory for the current entry.
+Note that this method returns the directory as declared by ID or
+DIR even if the directory doesn't exist in the filesystem.
 
 If CREATE-IF-NOT-EXIST-P is non-nil, `org-attach-dir-get-create'
-is run."
+is run.
+
+If no attachment directory exist, return nil."
   (let (attach-dir id)
     (cond
      (create-if-not-exists-p
@@ -310,9 +317,10 @@ is run."
 
 (defun org-attach-dir-get-create ()
   "Return existing or new directory associated with the current outline node.
+`org-attach-preferred-new-method' decides how to attach new
+directory if neither ID nor DIR property exist.
 
-`org-attach-preferred-new-method' decides how to attach
-new directory."
+If the attachment by some reason cannot be created an error will be raised."
   (interactive)
   (let ((attach-dir (org-attach-dir)))
     (unless attach-dir
@@ -557,20 +565,18 @@ This ignores files ending in \"~\"."
 
 (defun org-attach-reveal ()
   "Show the attachment directory of the current outline node.
-This will attempt to use an external program to show the directory."
+This will attempt to use an external program to show the
+directory.  Will create an attachment and folder if it doesn't
+exist yet.  Respects `org-attach-preferred-new-method'."
   (interactive)
-  (let ((attach-dir (org-attach-dir)))
-    (if attach-dir
-	(org-open-file attach-dir)
-      (error "No attachment directory exist"))))
+  (org-open-file (org-attach-dir-get-create)))
 
 (defun org-attach-reveal-in-emacs ()
-  "Show the attachment directory of the current outline node in dired."
+  "Show the attachment directory of the current outline node in dired.
+Will create an attachment and folder if it doesn't exist yet.
+Respects `org-attach-preferred-new-method'."
   (interactive)
-  (let ((attach-dir (org-attach-dir)))
-    (if attach-dir
-	(dired attach-dir)
-      (error "No attachment directory exist"))))
+  (dired (org-attach-dir-get-create)))
 
 (defun org-attach-open (&optional in-emacs)
   "Open an attachment of the current outline node.
