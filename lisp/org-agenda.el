@@ -7464,7 +7464,26 @@ With a prefix argument, do so in all agenda buffers."
   "Return the category of the agenda line."
   (org-get-at-bol 'org-category))
 
-  
+(defun org-agenda-filter-by-category (strip)
+  "Filter lines in the agenda buffer that have a specific category.
+The category is that of the current line.
+Without prefix argument, keep only the lines of that category.
+With a prefix argument, exclude the lines of that category."
+  (interactive "P")
+  (if (and org-agenda-filtered-by-category
+	   org-agenda-category-filter)
+      (org-agenda-filter-show-all-cat)
+    (let ((cat (org-no-properties (org-get-at-eol 'org-category 1))))
+      (cond
+       ((and cat strip)
+        (org-agenda-filter-apply
+         (push (concat "-" cat) org-agenda-category-filter) 'category))
+       (cat
+        (org-agenda-filter-apply
+         (setq org-agenda-category-filter
+	       (list (concat "+" cat))) 'category))
+       (t (error "No category at point"))))))
+
 (defun org-agenda-filter-by-category (strip)
   "Filter lines in the agenda buffer that have a specific category.
 The category is that of the current line.

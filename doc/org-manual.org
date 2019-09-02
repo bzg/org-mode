@@ -9085,10 +9085,10 @@ filter types.
 - {{{kbd(<)}}} (~org-agenda-filter-by-category~) ::
 
   #+findex: org-agenda-filter-by-category
-  Prompt for a category, defaulting to the category of the item at
-  point, and show only entries with this category.  Pressing
-  {{{kbd(<)}}} again removes this filter.  When called with a prefix
-  argument exclude the category of the item at point from the agenda.
+  Filter by category of the line at point, and show only entries with
+  this category.  Pressing {{{kbd(<)}}} again removes this filter.
+  When called with a prefix argument exclude the category of the item
+  at point from the agenda.
 
 - {{{kbd(=)}}} (~org-agenda-filter-by-regexp~) ::
 
@@ -9125,12 +9125,20 @@ filter types.
   condition.  With two universal prefix arguments, it clears effort
   filters, which can be accumulated.
 
+- {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
+
+  #+findex: org-agenda-filter-by-top-headline
+  Filter the current agenda view and only display items that fall
+  under the same top-level headline as the current entry.  So this
+  simulated the effect of restricting the agenda creation to this
+  tree.
+
 - {{{kbd(/)}}} (~org-agenda-filter~) ::
 
   #+findex: org-agenda-filter
-  This is the unified interface to all four filter methods described
-  above.  At the prompt, specify different filter elements in a single
-  string, with full completion support.  For example,
+  This a the unified interface to four of the five filter methods
+  described above.  At the prompt, specify different filter elements
+  in a single string, with full completion support.  For example,
 
   #+begin_example
      +work-John+<0:10-/plot/
@@ -9147,14 +9155,6 @@ filter types.
   prefix argument, or if you add an additional `+' (e.g. `++work') to
   the front of the string, the new filter elements are added to the
   active ones.
-
-- {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
-
-  #+findex: org-agenda-filter-by-top-headline
-  Filter the current agenda view and only display items that fall
-  under the same top-level headline as the current entry.  So this
-  simulated the effect of restricting the agenda creation to this
-  tree.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
 
