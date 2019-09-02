@@ -80,12 +80,20 @@
 		  (org-test-in-example-file org-test-attachments-file
 		    (goto-char 336) ;; H3
 		    (org-attach-file-list (org-attach-dir)))))
+  ;; Test for folder not initialized in the filesystem
+  (should-not (org-test-in-example-file org-test-attachments-file
+		(goto-char 401) ;; H3.1
+		(let ((org-attach-use-inheritance nil)
+		      (org-attach-id-dir "data/"))
+		  (org-attach-dir))))
+  ;; Not yet initialized folder should be found if no-fs-check is
+  ;; non-nil
   (should (equal "data/ab/cd12345"
 		 (org-test-in-example-file org-test-attachments-file
 		   (goto-char 401) ;; H3.1
 		   (let ((org-attach-use-inheritance nil)
 			 (org-attach-id-dir "data/"))
-		     (file-relative-name (org-attach-dir))))))
+		     (file-relative-name (org-attach-dir nil t))))))
   (should (equal '("fileA" "fileB")
 		 (org-test-in-example-file org-test-attachments-file
 		   (goto-char 401) ;; H3.1

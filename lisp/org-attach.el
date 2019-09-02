@@ -200,7 +200,7 @@ you added attachments yourself.\n")
     ((?O) org-attach-open-in-emacs
      "Like \"o\", but force opening in Emacs.")
     ((?f ?\C-f) org-attach-reveal
-     "Open current node's attachment directory.  Create if not exist.")
+     "Open current node's attachment directory.  Create if missing.")
     ((?F) org-attach-reveal-in-emacs
      "Like \"f\", but force using Dired in Emacs.\n")
     ((?d ?\C-d) org-attach-delete-one
@@ -233,7 +233,7 @@ Each entry in this list is a list of three elements:
   "The dispatcher for attachment commands.
 Shows a list of commands and prompts for another key to execute a command."
   (interactive)
-  (let ((dir (org-attach-dir))
+  (let ((dir (org-attach-dir nil 'no-fs-check))
 	c marker)
     (when (eq major-mode 'org-agenda-mode)
       (setq marker (or (get-text-property (point) 'org-hd-marker)
@@ -285,7 +285,7 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (call-interactively command)
 	  (error "No such attachment command: %c" c))))))
 
-(defun org-attach-dir (&optional create-if-not-exists-p)
+(defun org-attach-dir (&optional create-if-not-exists-p no-fs-check)
   "Return the directory associated with the current outline node.
 First check for DIR property, then ID property.
 `org-attach-use-inheritance' determines whether inherited
@@ -297,7 +297,9 @@ Note that this method returns the directory as declared by ID or
 DIR even if the directory doesn't exist in the filesystem.
 
 If CREATE-IF-NOT-EXIST-P is non-nil, `org-attach-dir-get-create'
-is run.
+is run.  If NO-FS-CHECK is non-nil, the function returns the path
+to the attachment even if it has not yet been initialized in the
+filesystem.
 
 If no attachment directory exist, return nil."
   (let (attach-dir id)
@@ -313,7 +315,10 @@ If no attachment directory exist, return nil."
      ((setq id (org-entry-get nil "ID" org-attach-use-inheritance))
       (org-attach-check-absolute-path nil)
       (setq attach-dir (org-attach-dir-from-id id))))
-    attach-dir))
+    (if no-fs-check
+	attach-dir
+      (when (and attach-dir (file-directory-p attach-dir))
+	attach-dir))))
 
 (defun org-attach-dir-get-create ()
   "Return existing or new directory associated with the current outline node.
@@ -322,7 +327,7 @@ directory if neither ID nor DIR property exist.
 
 If the attachment by some reason cannot be created an error will be raised."
   (interactive)
-  (let ((attach-dir (org-attach-dir)))
+  (let ((attach-dir (org-attach-dir nil 'no-fs-check)))
     (unless attach-dir
       (let (answer)
 	(when (eq org-attach-preferred-new-method 'ask)
