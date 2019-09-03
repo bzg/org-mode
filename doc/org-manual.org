@@ -9030,13 +9030,24 @@ the estimated effort of an entry (see [[*Effort Estimates]]).
 :DESCRIPTION: Dynamically narrow the agenda.
 :END:
 
+#+vindex: org-agenda-category-filter-preset
+#+vindex: org-agenda-tag-filter-preset
+#+vindex: org-agenda-effort-filter-preset
+#+vindex: org-agenda-regexp-filter-preset
 Agenda built-in or customized commands are statically defined.  Agenda
-filters and limits provide two ways of dynamically narrowing down the
-list of agenda entries: /filters/ and /limits/.  Filters only act on
-the display of the items, while limits take effect before the list of
-agenda entries is built.  Filters are more often used interactively,
-while limits are mostly useful when defined as local variables within
-custom agenda commands.
+filters and limits provide two ways of narrowing down the list of
+agenda entries.
+
+Filters only change the visibility of items, are very fast and are
+mostly used interactively[fn:96]. You can switch quickly between
+different filters without having to recreate the agenda.  If creating
+the agenda seems slow, one solution would be to create a view that
+contains everything you might want to work on for a while, and then
+use filtering to drill down.
+
+Limits on the other hand take effect before the agenda buffer is
+populated, so they are mostly useful when defined as local variables
+within custom agenda commands.
 
 **** Filtering in the agenda
 :PROPERTIES:
@@ -9050,64 +9061,34 @@ custom agenda commands.
 #+cindex: effort filtering, in agenda
 #+cindex: query editing, in agenda
 
-- {{{kbd(/)}}} (~org-agenda-filter-by-tag~) ::
+The general filtering command that gives access to the full
+functionality is ~org-agenda-filter~, bound to {{{kbd(/)}}}. But
+before we introduce it, we first describe commands for individual
+filter types.
+
+- {{{kbd(\)}}} (~org-agenda-filter-by-tag~) ::
 
   #+findex: org-agenda-filter-by-tag
-  #+vindex: org-agenda-tag-filter-preset
-  Filter the agenda view with respect to a tag and/or effort
-  estimates.  The difference between this and a custom agenda command
-  is that filtering is very fast, so that you can switch quickly
-  between different filters without having to recreate the
-  agenda.[fn:96]
+  Filter the agenda view with respect to a tag.  You are prompted for
+  a tag selection letter; {{{kbd(SPC)}}} means any tag at all.
+  Pressing {{{kbd(TAB)}}} at that prompt offers completion to select a
+  tag, including any tags that do not have a selection character.  The
+  command then hides all entries that do not contain or inherit this
+  tag.  Call the command repeatedly to add several tags to the
+  filter. When called with prefix argument, remove the entries that
+  /do/ have the tag.  Pressing {{{kbd(+)}}} or {{{kbd(-)}}} at the
+  prompt also switches between filtering for and against the next tag.
+  {{{kbd(\)}}} at the prompt turns off the filter and shows any hidden
+  entries.
 
-  You are prompted for a tag selection letter; {{{kbd(SPC)}}} means
-  any tag at all.  Pressing {{{kbd(TAB)}}} at that prompt offers
-  completion to select a tag, including any tags that do not have
-  a selection character.  The command then hides all entries that do
-  not contain or inherit this tag.  When called with prefix argument,
-  remove the entries that /do/ have the tag.  A second {{{kbd(/)}}} at
-  the prompt turns off the filter and shows any hidden entries.
-  Pressing {{{kbd(+)}}} or {{{kbd(-)}}} switches between filtering and
-  excluding the next tag.
-
-  #+vindex: org-agenda-auto-exclude-function
-  Org also supports automatic, context-aware tag filtering.  If the
-  variable ~org-agenda-auto-exclude-function~ is set to a user-defined
-  function, that function can decide which tags should be excluded
-  from the agenda automatically.  Once this is set, the {{{kbd(/)}}}
-  command then accepts {{{kbd(RET)}}} as a sub-option key and runs the
-  auto exclusion logic.  For example, let's say you use a =Net= tag to
-  identify tasks which need network access, an =Errand= tag for
-  errands in town, and a =Call= tag for making phone calls.  You could
-  auto-exclude these tags based on the availability of the Internet,
-  and outside of business hours, with something like this:
-
-  #+begin_src emacs-lisp
-  (defun org-my-auto-exclude-function (tag)
-    (and (cond
-          ((string= tag "Net")
-           (/= 0 (call-process "/sbin/ping" nil nil nil
-                               "-c1" "-q" "-t1" "mail.gnu.org")))
-          ((or (string= tag "Errand") (string= tag "Call"))
-           (let ((hour (nth 2 (decode-time))))
-             (or (< hour 8) (> hour 21)))))
-         (concat "-" tag)))
-
-  (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-function)
-  #+end_src
 
 - {{{kbd(<)}}} (~org-agenda-filter-by-category~) ::
 
   #+findex: org-agenda-filter-by-category
-  Filter the current agenda view with respect to the category of the
-  item at point.  Pressing {{{kbd(<)}}} another time removes this
-  filter.  When called with a prefix argument exclude the category of
-  the item at point from the agenda.
-
-  #+vindex: org-agenda-category-filter-preset
-  You can add a filter preset in custom agenda commands through the
-  option ~org-agenda-category-filter-preset~.  See [[*Setting options
-  for custom commands]].
+  Filter by category of the line at point, and show only entries with
+  this category.  Pressing {{{kbd(<)}}} again removes this filter.
+  When called with a prefix argument exclude the category of the item
+  at point from the agenda.
 
 - {{{kbd(=)}}} (~org-agenda-filter-by-regexp~) ::
 
@@ -9117,12 +9098,7 @@ custom agenda commands.
   called with a prefix argument, it filters /out/ entries matching the
   regexp.  Called in a regexp-filtered agenda view, remove the filter,
   unless there are two universal prefix arguments, in which case
-  filters are cumulated.
-
-  #+vindex: org-agenda-regexp-filter-preset
-  You can add a filter preset in custom agenda commands through the
-  option ~org-agenda-regexp-filter-preset~.  See [[*Setting options
-  for custom commands]].
+  filters are accumulated.
 
 - {{{kbd(_)}}} (~org-agenda-filter-by-effort~) ::
 
@@ -9149,21 +9125,23 @@ custom agenda commands.
   condition.  With two universal prefix arguments, it clears effort
   filters, which can be accumulated.
 
-  #+vindex: org-agenda-effort-filter-preset
-  You can add a filter preset in custom agenda commands through the
-  option ~org-agenda-effort-filter-preset~.  See [[*Setting options for
-  custom commands]].
+- {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
 
-- {{{kbd(\)}}} (~org-agenda-filter~) ::
+  #+findex: org-agenda-filter-by-top-headline
+  Filter the current agenda view and only display items that fall
+  under the same top-level headline as the current entry.  So this
+  simulated the effect of restricting the agenda creation to this
+  tree.
+
+- {{{kbd(/)}}} (~org-agenda-filter~) ::
 
   #+findex: org-agenda-filter
-  This is an alternative interface to all four filter methods
-  described above. At the prompt, one would specify different filter
-  elements in a single string, with full completion support.  For
-  example,
+  This a the unified interface to four of the five filter methods
+  described above.  At the prompt, specify different filter elements
+  in a single string, with full completion support.  For example,
 
   #+begin_example
-     +work-John<0:10-/plot/
+     +work-John+<0:10-/plot/
   #+end_example
 
   selects entries with category `work' and effort estimates below 10
@@ -9174,19 +9152,46 @@ custom agenda commands.
   (tags will take priority).  If you reply to the prompt with the
   empty string, all filtering is removed.  If a filter is specified,
   it replaces all current filters.  But if you call the command with a
-  prefix argument, or if you add an additional `+' (e.g. `+-John') to
+  prefix argument, or if you add an additional `+' (e.g. `++work') to
   the front of the string, the new filter elements are added to the
   active ones.
-
-- {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
-
-  #+findex: org-agenda-filter-by-top-headline
-  Filter the current agenda view and only display items that fall
-  under the same top-level headline as the current entry.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
 
   Remove all filters in the current agenda view.
+
+**** Computed exclusion filtering
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+#+vindex: org-agenda-auto-exclude-function
+If the variable ~org-agenda-auto-exclude-function~ is set to a
+user-defined function, that function can select tags that should be
+excluded from the agenda when requested. The function will be called
+with lower-case versions of all tags.  For example, let's say you use
+a =Net= tag to identify tasks which need network access, an =Errand=
+tag for errands in town, and a =Call= tag for making phone calls.  You
+could auto-exclude these tags based on the availability of the
+Internet, and outside of business hours, with something like this:
+
+#+begin_src emacs-lisp
+  (defun org-my-auto-exclude-fn (tag)
+    (and (cond
+	  ((string= tag "net")
+	   (/= 0 (call-process "/sbin/ping" nil nil nil
+			       "-c1" "-q" "-t1" "mail.gnu.org")))
+	  ((or (member tag '("errand" "call")))
+	   (let ((hr (nth 2 (decode-time))))
+	     (or (< hr 8) (> hr 21)))))
+	 (concat "-" tag)))
+
+  (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-fn)
+#+end_src
+
+You can apply this self-adapting filter by using a double prefix
+argument to ~org-agenda-filter~, i.e. press {{{kbd(C-u C-u /)}}}, or
+by pressing {{{kbd(RET)}}} in ~org-agenda-filter-by-tag~.
 
 **** Setting limits for the agenda
 :PROPERTIES:
@@ -21407,12 +21412,15 @@ to ISO and therefore independent of the value of
 [fn:95] You can, however, disable this by setting
 ~org-agenda-search-headline-for-time~ variable to a ~nil~ value.
 
-[fn:96] Custom commands can preset a filter by binding the variable
-~org-agenda-tag-filter-preset~ as an option.  This filter is then
-applied to the view and persists as a basic filter through refreshes
-and more secondary filtering.  The filter is a global property of the
-entire agenda view---in a block agenda, you should only set this in
-the global options section, not in the section of an individual block.
+[fn:96] Custom agenda commands can preset a filter by binding one of
+the variables ~org-agenda-tag-filter-preset~,
+~org-agenda-category-filter-preset~, ~org-agenda-effort-filter-preset~
+or ~org-agenda-regexp-filter-preset~ as an option.  This filter is
+then applied to the view and persists as a basic filter through
+refreshes and more secondary filtering.  The filter is a global
+property of the entire agenda view---in a block agenda, you should
+only set this in the global options section, not in the section of an
+individual block.
 
 [fn:97] Only tags filtering is respected here, effort filtering is
 ignored.
