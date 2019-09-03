@@ -7484,33 +7484,6 @@ With a prefix argument, exclude the lines of that category."
 	       (list (concat "+" cat))) 'category))
        (t (error "No category at point"))))))
 
-(defun org-agenda-filter-by-category (strip)
-  "Filter lines in the agenda buffer that have a specific category.
-The category is that of the current line.
-Without prefix argument STRIP, keep only the lines of that category.
-With a prefix argument, exclude the lines of that category."
-  (interactive "P")
-  (if (and org-agenda-filtered-by-category
-	   org-agenda-category-filter)
-      (progn
-	(org-agenda-filter-show-all-cat)
-	(message "All categories are shown"))
-    (let* ((categories (org-agenda-get-represented-categories))
-	   (defcat (org-no-properties (or (org-agenda-get-category)
-					  (car categories))))
-	   (cat (completing-read (format "Category [%s]: " defcat)
-				 (org-agenda-get-represented-categories)
-				 nil t nil nil defcat)))
-      (cond
-       ((and cat strip)
-        (org-agenda-filter-apply
-         (push (concat "-" cat) org-agenda-category-filter) 'category))
-       (cat
-        (org-agenda-filter-apply
-         (setq org-agenda-category-filter
-	       (list (concat "+" cat))) 'category))
-       (t (error "No category at point"))))))
-
 (defun org-find-top-headline (&optional pos)
   "Find the topmost parent headline and return it.
 POS when non-nil is the marker or buffer position to start the
