@@ -7753,7 +7753,7 @@ also press `-' or `+' to switch between filtering and excluding."
     (unless char
       (while (not (memq char valid-char-list))
 	(org-unlogged-message
-	 "%s by tag%s: [%s ]tag-char [TAB]tag %s[/]off [q]uit"
+	 "%s by tag%s: [%s ]tag-char [TAB]tag %s[\\]off [q]uit"
 	 (if exclude "Exclude[+]" "Filter[-]")
 	 (if expand "" " (no grouptag expand)")
 	 tag-chars
@@ -7780,7 +7780,7 @@ also press `-' or `+' to switch between filtering and excluding."
 	      (push modifier org-agenda-tag-filter))))
 	(unless (null org-agenda-tag-filter)
 	  (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))))
-     ((eq char ?/)
+     ((eq char ?\\)
       (org-agenda-filter-show-all-tag)
       (when (get 'org-agenda-tag-filter :preset-filter)
 	(org-agenda-filter-apply org-agenda-tag-filter 'tag expand)))
