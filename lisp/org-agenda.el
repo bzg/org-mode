@@ -7621,7 +7621,7 @@ the variable `org-agenda-auto-exclude-function'."
 	    (when modifier
 	      (push modifier org-agenda-tag-filter))))
 	(unless (null org-agenda-tag-filter)
-	  (org-agenda-filter-apply org-agenda-tag-filter 'tag expand)))
+	  (org-agenda-filter-apply org-agenda-tag-filter 'tag 'expand)))
     ;; Prompt for a filter and act
     (let* ((tag-list (org-agenda-get-represented-tags))
 	   (category-list (org-agenda-get-represented-categories))

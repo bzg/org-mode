@@ -9061,10 +9061,9 @@ within custom agenda commands.
 #+cindex: effort filtering, in agenda
 #+cindex: query editing, in agenda
 
-The general filtering command that gives access to the full
-functionality is ~org-agenda-filter~, bound to {{{kbd(/)}}}. But
-before we introduce it, we first describe commands for individual
-filter types.
+The general filtering command is ~org-agenda-filter~, bound to
+{{{kbd(/)}}}.  Before we introduce it, we describe commands for
+individual filter types.
 
 - {{{kbd(\)}}} (~org-agenda-filter-by-tag~) ::
 
@@ -9129,14 +9128,13 @@ filter types.
 
   #+findex: org-agenda-filter-by-top-headline
   Filter the current agenda view and only display items that fall
-  under the same top-level headline as the current entry.  So this
-  simulated the effect of restricting the agenda creation to this
-  tree.
+  under the same top-level headline as the current entry.  Press
+  {{{kbd(^)}}} again to turn this filter off.
 
 - {{{kbd(/)}}} (~org-agenda-filter~) ::
 
   #+findex: org-agenda-filter
-  This a the unified interface to four of the five filter methods
+  This is the unified interface to four of the five filter methods
   described above.  At the prompt, specify different filter elements
   in a single string, with full completion support.  For example,
 
@@ -9160,7 +9158,7 @@ filter types.
 
   Remove all filters in the current agenda view.
 
-**** Computed exclusion filtering
+**** Computed tag filtering
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
@@ -9168,12 +9166,15 @@ filter types.
 #+vindex: org-agenda-auto-exclude-function
 If the variable ~org-agenda-auto-exclude-function~ is set to a
 user-defined function, that function can select tags that should be
-excluded from the agenda when requested. The function will be called
-with lower-case versions of all tags.  For example, let's say you use
-a =Net= tag to identify tasks which need network access, an =Errand=
-tag for errands in town, and a =Call= tag for making phone calls.  You
-could auto-exclude these tags based on the availability of the
-Internet, and outside of business hours, with something like this:
+used as a tag filter when requested.  The function will be called with
+lower-case versions of all tags represented in the current view. The
+function should the return ="-tag"= if the filter should remove
+entries with that tag, ="+tag"= if only entries with this tag should
+be kept, or =nil= if that tag is irrelevant. For example, let's say
+you use a =Net= tag to identify tasks which need network access, an
+=Errand= tag for errands in town, and a =Call= tag for making phone
+calls.  You could auto-exclude these tags based on the availability of
+the Internet, and outside of business hours, with something like this:
 
 #+begin_src emacs-lisp
   (defun org-my-auto-exclude-fn (tag)
