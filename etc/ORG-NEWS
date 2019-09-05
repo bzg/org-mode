@@ -123,6 +123,13 @@ auto-commit attachments to git:
   one need to require the =org-attach-git= module in the startup.
 
 ** New features
+*** New option to handle schedules and deadlines in iCalendar export
+
+Export ignore done tasks with a deadline when
+~org-icalendar-use-deadline~ contains ~event-if-todo-not-done~.
+Likewise, scheduled done tasks are also ignored when
+~org-icalendar-use-scheduled~ contains the same symbol.
+
 *** Add split-window-right option for src block edit window placement
 Given the increasing popularity of wide screen monitors, splitting
 horizontally may make more sense than splitting vertically.  An
