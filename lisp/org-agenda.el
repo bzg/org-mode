@@ -7533,49 +7533,53 @@ two prefix arguments."
 (defvar org-agenda-effort-filter nil)
 (defun org-agenda-filter-by-effort (strip)
   "Filter agenda entries by effort.
-With no prefix argument, keep entries matching the effort condition.
-With one prefix argument, filter out entries matching the condition.
-With two prefix arguments, remove the effort filters."
+With no `\\[universal-argument]' prefix argument, keep entries matching the effort condition.
+With one `\\[universal-argument]' prefix argument, filter out entries matching the condition.
+With two `\\[universal-argument]' prefix arguments, add a second condition to the existing filter.
+This last option is in practice not very useful, but it is available for
+consistency with the other filter commands."
   (interactive "P")
-  (cond
-   ((member strip '(nil 4))
-    (let* ((efforts (split-string
-		     (or (cdr (assoc (concat org-effort-property "_ALL")
-				     org-global-properties))
-			 "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
-	   ;; XXX: the following handles only up to 10 different
-	   ;; effort values.
-	   (allowed-keys (if (null efforts) nil
-			   (mapcar (lambda (n) (mod n 10)) ;turn 10 into 0
-				   (number-sequence 1 (length efforts)))))
-	   (op nil))
-      (while (not (memq op '(?< ?> ?= ?_)))
-	(setq op (read-char-exclusive "Effort operator? (> = or <)     or press `_' again to remove filter")))
-      ;; Select appropriate duration.  Ignore non-digit characters.
-      (if (eq op ?_)
-	  (progn
-	    (org-agenda-filter-show-all-effort)
-	    (message "Effort filter removed"))
-	(let ((prompt
-	       (apply #'format
-		      (concat "Effort %c "
-			      (mapconcat (lambda (s) (concat "[%d]" s))
-					 efforts
-					 " "))
-		      op allowed-keys))
-	      (eff -1))
-	  (while (not (memq eff allowed-keys))
-	    (message prompt)
-	    (setq eff (- (read-char-exclusive) 48)))
-	  (setq org-agenda-effort-filter
-		(list (concat (if strip "-" "+")
-			      (char-to-string op)
-			      ;; Numbering is 1 2 3 ... 9 0, but we want
-			      ;; 0 1 2 ... 8 9.
-			      (nth (mod (1- eff) 10) efforts)))))
-	(org-agenda-filter-apply org-agenda-effort-filter 'effort))))
-   (t (org-agenda-filter-show-all-effort)
-      (message "Effort filter removed"))))
+  (let* ((efforts (split-string
+		   (or (cdr (assoc (concat org-effort-property "_ALL")
+				   org-global-properties))
+		       "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
+	 ;; XXX: the following handles only up to 10 different
+	 ;; effort values.
+	 (allowed-keys (if (null efforts) nil
+			 (mapcar (lambda (n) (mod n 10)) ;turn 10 into 0
+				 (number-sequence 1 (length efforts)))))
+	 (keep (equal strip '(16)))
+	 (current org-agenda-effort-filter)
+	 (op nil))
+    (while (not (memq op '(?< ?> ?= ?_)))
+      (setq op (read-char-exclusive
+		"Effort operator? (> = or <)     or press `_' again to remove filter")))
+    ;; Select appropriate duration.  Ignore non-digit characters.
+    (if (eq op ?_)
+	(progn
+	  (org-agenda-filter-show-all-effort)
+	  (message "Effort filter removed"))
+      (let ((prompt
+	     (apply #'format
+		    (concat "Effort %c "
+			    (mapconcat (lambda (s) (concat "[%d]" s))
+				       efforts
+				       " "))
+		    op allowed-keys))
+	    (eff -1))
+	(while (not (memq eff allowed-keys))
+	  (message prompt)
+	  (setq eff (- (read-char-exclusive) 48)))
+	(org-agenda-filter-show-all-effort)
+	(setq org-agenda-effort-filter
+	      (append
+	       (list (concat (if strip "-" "+")
+			     (char-to-string op)
+			     ;; Numbering is 1 2 3 ... 9 0, but we want
+			     ;; 0 1 2 ... 8 9.
+			     (nth (mod (1- eff) 10) efforts)))
+	       (if keep current nil)))
+	(org-agenda-filter-apply org-agenda-effort-filter 'effort)))))
 
 
 (defun org-agenda-filter (&optional strip)
