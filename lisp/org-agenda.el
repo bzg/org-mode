@@ -7725,14 +7725,17 @@ which see."
     (org-agenda-filter-show-all-effort))
   (org-agenda-finalize))
 
-(defun org-agenda-filter-by-tag (arg &optional char exclude)
+(defun org-agenda-filter-by-tag (strip &optional char exclude)
   "Keep only those lines in the agenda buffer that have a specific tag.
 
 The tag is selected with its fast selection letter, as configured.
 
-With a `\\[universal-argument]' prefix, exclude the agenda search.
+With a `\\[universal-argument]' prefix, apply the filter negatively, stripping all matches.
 
-With a `\\[universal-argument] \\[universal-argument]' prefix, filter the literal tag, \
+With a `\\[universal-argument] \\[universal-argument]' prefix, add the new tag to the existing filter
+instead of replacing it.
+
+With a `\\[universal-argument] \\[universal-argument] \\[universal-argument]' prefix, filter the literal tag, \
 i.e. don't
 filter on all its group members.
 
@@ -7753,8 +7756,9 @@ also press `-' or `+' to switch between filtering and excluding."
 		     org-tag-alist-for-agenda ""))
 	 (valid-char-list (append '(?\t ?\r ?\\ ?. ?\s ?q)
 				  (string-to-list tag-chars)))
-	 (exclude (or exclude (equal arg '(4))))
-	 (expand (not (equal arg '(16))))
+	 (exclude (or exclude (equal strip '(4))))
+	 (accumulate (equal strip '(16)))
+	 (expand (not (equal strip '(64))))
 	 (inhibit-read-only t)
 	 (current org-agenda-tag-filter)
 	 a n tag)
@@ -7805,7 +7809,7 @@ also press `-' or `+' to switch between filtering and excluding."
       (setq tag (car a))
       (setq org-agenda-tag-filter
 	    (cons (concat (if exclude "-" "+") tag)
-		  current))
+		  (if accumulate current nil)))
       (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))
      (t (error "Invalid tag selection character %c" char)))))
 
