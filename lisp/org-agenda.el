@@ -7578,10 +7578,8 @@ With two prefix arguments, remove the effort filters."
       (message "Effort filter removed"))))
 
 
-(defun org-agenda-filter (&optional keep)
+(defun org-agenda-filter (&optional strip)
   "Prompt for a general filter string and apply it to the agenda.
-The new filter replaces all existing elements.  When called with a
-prefix arg KEEP, add the new elements to the existing filter.
 
 The string may contain filter elements like
 
@@ -7604,14 +7602,17 @@ values is offered.  Since the syntax for categories and tags is identical
 there should be no overlap between categoroes and tags.  If there is, tags
 get priority.
 
-Instead of using the prefix argument to add to the current filter
-set, you can also add an additional leading `+' to filter string,
-like `+-John'.
+A single universal `C-u' prefix arg STRIP will negate the entire filter,
+which can be useful in connection with the prompt history.
 
-With a double prefix argument, execute the computed filtering defined in
+A double `C-u C-u' prefix arg will add the new filter elements to the
+existing ones. A shortcut for this is to add an additional `+' at the
+beginning of the string, like `+-John'.
+
+With a triple prefix argument, execute the computed filtering defined in
 the variable `org-agenda-auto-exclude-function'."
   (interactive "P")
-  (if (equal keep '(16))
+  (if (equal strip '(64))
       ;; Execute the auto-exclude action
       (if (not org-agenda-auto-exclude-function)
 	  (user-error "`org-agenda-auto-exclude-function' is undefined")
@@ -7626,11 +7627,15 @@ the variable `org-agenda-auto-exclude-function'."
     ;; Prompt for a filter and act
     (let* ((tag-list (org-agenda-get-represented-tags))
 	   (category-list (org-agenda-get-represented-categories))
-	   (f-string (completing-read "Filter [+cat-tag<0:10-/regexp/]: "
-				      'org-agenda-filter-completion-function))
+	   (negate (equal strip '(4)))
+	   (f-string (completing-read
+		      (concat
+		       (if negate "Negative filter" "Filter")
+		       " [+cat-tag<0:10-/regexp/]: ")
+		      'org-agenda-filter-completion-function))
 	   (keep (or (if (string-match "^+[-+]" f-string)
 			 (progn (setq f-string (substring f-string 1)) t))
-		     keep))
+		     (equal strip '(16))))
 	   (fc (if keep org-agenda-category-filter))
 	   (ft (if keep org-agenda-tag-filter))
 	   (fe (if keep org-agenda-effort-filter))
@@ -7638,6 +7643,8 @@ the variable `org-agenda-auto-exclude-function'."
 	   pm s)
       (while (string-match "^[ \t]*\\([-+]\\)?\\(\\([^-+<>=/ \t]+\\)\\|\\([<>=][0-9:]+\\)\\|\\(/\\([^/]+\\)/?\\)\\)" f-string)
 	(setq pm (if (match-beginning 1) (match-string 1 f-string) "+"))
+	(when negate
+	  (setq pm (if (equal pm "+") "-" "+")))
 	(cond
 	 ((match-beginning 3)
 	  ;; category or tag
