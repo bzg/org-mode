@@ -7512,11 +7512,13 @@ The top headline is that of the current line."
 
 (defvar org-agenda-regexp-filter nil)
 (defun org-agenda-filter-by-regexp (strip)
-  "Filter agenda entries by regular expressions.
+  "Filter agenda entries by a regular expressions.
+You will be prompted for the regular expresssion, and the agenda
+view will only show entires that are matched by that expression.
 
-With one prefix argument, filter out entries matching the regexp.
-If there is already a regexp filter, remove it unless called with
-two prefix arguments."
+With one `\\[universal-argument]' prefix argument, filter out entries matching the regexp.
+With two `\\[universal-argument]' prefix arguments, add the new condition to an already existing
+regexp filter."
   (interactive "P")
   (cond
    ((and org-agenda-regexp-filter (not (equal strip '(16))))
