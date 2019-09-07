@@ -9032,20 +9032,16 @@ the estimated effort of an entry (see [[*Effort Estimates]]).
 #+vindex: org-agenda-tag-filter-preset
 #+vindex: org-agenda-effort-filter-preset
 #+vindex: org-agenda-regexp-filter-preset
-Agenda built-in or customized commands are statically defined.  Agenda
-filters and limits provide two ways of narrowing down the list of
+Agenda built-in or custom commands are statically defined.  Agenda
+filters and limits provide allow to flexibly narrow down the list of
 agenda entries.
 
-Filters only change the visibility of items, are very fast and are
+/Filters/ only change the visibility of items, are very fast and are
 mostly used interactively[fn:96]. You can switch quickly between
-different filters without having to recreate the agenda.  If creating
-the agenda seems slow, one solution would be to create a view that
-contains everything you might want to work on for a while, and then
-use filtering to drill down.
-
-Limits on the other hand take effect before the agenda buffer is
-populated, so they are mostly useful when defined as local variables
-within custom agenda commands.
+different filters without having to recreate the agenda.  /Limits/ on
+the other hand take effect before the agenda buffer is populated, so
+they are mostly useful when defined as local variables within custom
+agenda commands.
 
 **** Filtering in the agenda
 :PROPERTIES:
