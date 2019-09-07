@@ -107,7 +107,7 @@ a property list containing the parameters of the block."
                                      (point-min) (point-max)))))
                               (cdr (assq :package params)))))))
      (org-babel-result-cond (cdr (assq :result-params params))
-       result
+       (org-strip-quotes result)
        (condition-case nil
            (read (org-babel-lisp-vector-to-list result))
          (error result))))
