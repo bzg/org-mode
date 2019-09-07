@@ -7912,7 +7912,7 @@ function to set the right switches in the returned form."
     (dolist (x tags (cons (if (eq op ?-) 'and 'or) form))
       (let* ((tag (substring x 1))
 	     (f (cond
-		 ((string= "" tag) '(not tags))
+		 ((string= "" tag) 'tags)
 		 ((and (string-match-p "\\`{" tag) (string-match-p "}\\'" tag))
 		  ;; TAG is a regexp.
 		  (list 'org-match-any-p (substring tag 1 -1) 'tags))
