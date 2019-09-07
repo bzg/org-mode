@@ -7499,7 +7499,8 @@ search from."
 (defvar org-agenda-filtered-by-top-headline nil)
 (defun org-agenda-filter-by-top-headline (strip)
   "Keep only those lines that are descendants from the same top headline.
-The top headline is that of the current line."
+The top headline is that of the current line.  With prefix arg STRIP, hide
+all lines of the category at point."
   (interactive "P")
   (if org-agenda-filtered-by-top-headline
       (progn
@@ -7511,29 +7512,32 @@ The top headline is that of the current line."
         (error "No top-level headline at point")))))
 
 (defvar org-agenda-regexp-filter nil)
-(defun org-agenda-filter-by-regexp (strip)
+(defun org-agenda-filter-by-regexp (strip-or-accumulate)
   "Filter agenda entries by a regular expressions.
 You will be prompted for the regular expresssion, and the agenda
 view will only show entires that are matched by that expression.
 
-With one `\\[universal-argument]' prefix argument, filter out entries matching the regexp.
-With two `\\[universal-argument]' prefix arguments, add the new condition to an already existing
-regexp filter."
+With one `\\[universal-argument]' prefix argument, hide entries matching the regexp.
+When there is already a regexp filter active, this command removed the
+filter.  However, with two `\\[universal-argument]' prefix arguments, add a new condition to
+an already existing regexp filter."
   (interactive "P")
-  (cond
-   ((and org-agenda-regexp-filter (not (equal strip '(16))))
-    (org-agenda-filter-show-all-re)
-    (message "Regexp filter removed"))
-   (t (let ((flt (concat (if (equal strip '(4)) "-" "+")
-			 (read-from-minibuffer
-			  (if (equal strip '(4))
-			      "Filter out entries matching regexp: "
-			    "Narrow to entries matching regexp: ")))))
-	(push flt org-agenda-regexp-filter)
-	(org-agenda-filter-apply org-agenda-regexp-filter 'regexp)))))
-
+  (let* ((strip (equal strip-or-accumulate '(4)))
+	 (accumulate (equal strip-or-accumulate '(16))))
+    (cond
+     ((and org-agenda-regexp-filter (not accumulate))
+      (org-agenda-filter-show-all-re)
+      (message "Regexp filter removed"))
+     (t (let ((flt (concat (if strip "-" "+")
+			   (read-from-minibuffer
+			    (if strip
+				"Hide entries matching regexp: "
+			      "Narrow to entries matching regexp: ")))))
+	  (push flt org-agenda-regexp-filter)
+	  (org-agenda-filter-apply org-agenda-regexp-filter 'regexp))))))
+  
 (defvar org-agenda-effort-filter nil)
-(defun org-agenda-filter-by-effort (strip)
+(defun org-agenda-filter-by-effort (strip-or-accumulate)
   "Filter agenda entries by effort.
 With no `\\[universal-argument]' prefix argument, keep entries matching the effort condition.
 With one `\\[universal-argument]' prefix argument, filter out entries matching the condition.
@@ -7550,7 +7554,8 @@ consistency with the other filter commands."
 	 (allowed-keys (if (null efforts) nil
 			 (mapcar (lambda (n) (mod n 10)) ;turn 10 into 0
 				 (number-sequence 1 (length efforts)))))
-	 (keep (equal strip '(16)))
+	 (keep (equal strip-or-accumulate '(16)))
+	 (negative (equal strip-or-accumulate '(4)))
 	 (current org-agenda-effort-filter)
 	 (op nil))
     (while (not (memq op '(?< ?> ?= ?_)))
@@ -7575,7 +7580,7 @@ consistency with the other filter commands."
 	(org-agenda-filter-show-all-effort)
 	(setq org-agenda-effort-filter
 	      (append
-	       (list (concat (if strip "-" "+")
+	       (list (concat (if negative "-" "+")
 			     (char-to-string op)
 			     ;; Numbering is 1 2 3 ... 9 0, but we want
 			     ;; 0 1 2 ... 8 9.
@@ -7584,7 +7589,7 @@ consistency with the other filter commands."
 	(org-agenda-filter-apply org-agenda-effort-filter 'effort)))))
 
 
-(defun org-agenda-filter (&optional strip)
+(defun org-agenda-filter (&optional strip-or-accumulate)
   "Prompt for a general filter string and apply it to the agenda.
 
 The string may contain filter elements like
@@ -7608,17 +7613,17 @@ values is offered.  Since the syntax for categories and tags is identical
 there should be no overlap between categoroes and tags.  If there is, tags
 get priority.
 
-A single universal `C-u' prefix arg STRIP will negate the entire filter,
-which can be useful in connection with the prompt history.
+A single `\\[universal-argument]' prefix arg STRIP-OR-ACCUMULATE will negate the
+entire filter, which can be useful in connection with the prompt history.
 
-A double `C-u C-u' prefix arg will add the new filter elements to the
+A double `\\[universal-argument] \\[universal-argument]' prefix arg will add the new filter elements to the
 existing ones. A shortcut for this is to add an additional `+' at the
 beginning of the string, like `+-John'.
 
 With a triple prefix argument, execute the computed filtering defined in
 the variable `org-agenda-auto-exclude-function'."
   (interactive "P")
-  (if (equal strip '(64))
+  (if (equal strip-or-accumulate '(64))
       ;; Execute the auto-exclude action
       (if (not org-agenda-auto-exclude-function)
 	  (user-error "`org-agenda-auto-exclude-function' is undefined")
@@ -7633,7 +7638,7 @@ the variable `org-agenda-auto-exclude-function'."
     ;; Prompt for a filter and act
     (let* ((tag-list (org-agenda-get-represented-tags))
 	   (category-list (org-agenda-get-represented-categories))
-	   (negate (equal strip '(4)))
+	   (negate (equal strip-or-accumulate '(4)))
 	   (f-string (completing-read
 		      (concat
 		       (if negate "Negative filter" "Filter")
@@ -7641,7 +7646,7 @@ the variable `org-agenda-auto-exclude-function'."
 		      'org-agenda-filter-completion-function))
 	   (keep (or (if (string-match "^+[-+]" f-string)
 			 (progn (setq f-string (substring f-string 1)) t))
-		     (equal strip '(16))))
+		     (equal strip-or-accumulate '(16))))
 	   (fc (if keep org-agenda-category-filter))
 	   (ft (if keep org-agenda-tag-filter))
 	   (fe (if keep org-agenda-effort-filter))
@@ -7661,7 +7666,7 @@ the variable `org-agenda-auto-exclude-function'."
 	   ((member s category-list)
 	    (add-to-list 'fc (concat pm s) 'append 'equal))
 	   (t (message
-	       "`%s%s' filter ignored tag/category is not represented"
+	       "`%s%s' filter ignored because tag/category is not represented"
 	       pm s))))
 	 ((match-beginning 4)
 	  ;; effort
@@ -7731,7 +7736,7 @@ which see."
     (org-agenda-filter-show-all-effort))
   (org-agenda-finalize))
 
-(defun org-agenda-filter-by-tag (strip &optional char exclude)
+(defun org-agenda-filter-by-tag (strip-or-accumulate &optional char exclude)
   "Keep only those lines in the agenda buffer that have a specific tag.
 
 The tag is selected with its fast selection letter, as configured.
@@ -7762,9 +7767,9 @@ also press `-' or `+' to switch between filtering and excluding."
 		     org-tag-alist-for-agenda ""))
 	 (valid-char-list (append '(?\t ?\r ?\\ ?. ?\s ?q)
 				  (string-to-list tag-chars)))
-	 (exclude (or exclude (equal strip '(4))))
-	 (accumulate (equal strip '(16)))
-	 (expand (not (equal strip '(64))))
+	 (exclude (or exclude (equal strip-or-accumulate '(4))))
+	 (accumulate (equal strip-or-accumulate '(16)))
+	 (expand (not (equal strip-or-accumulate '(64))))
 	 (inhibit-read-only t)
 	 (current org-agenda-tag-filter)
 	 a n tag)
@@ -7781,7 +7786,7 @@ also press `-' or `+' to switch between filtering and excluding."
 	(cond ((eq char ?-) (setq exclude t))
 	      ((eq char ?+) (setq exclude nil)))))
     (when (eq char ?\t)
-      (unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
+      (unless (local-variable-p 'org-global-tags-completion-table)
 	(setq-local org-global-tags-completion-table
 		    (org-global-tags-completion-table)))
       (let ((completion-ignore-case t))
@@ -7962,7 +7967,8 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
   ;; Deactivate `org-agenda-entry-text-mode' when filtering
   (when org-agenda-entry-text-mode (org-agenda-entry-text-mode))
   (let (tags cat txt)
-    (setq org-agenda-filter-form (org-agenda-filter-make-matcher filter type expand))
+    (setq org-agenda-filter-form (org-agenda-filter-make-matcher
+				  filter type expand))
     ;; Only set `org-agenda-filtered-by-category' to t when a unique
     ;; category is used as the filter:
     (setq org-agenda-filtered-by-category
@@ -8015,7 +8021,8 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
   (save-excursion
     (goto-char (point-min))
     (let ((inhibit-read-only t) pos)
-      (while (setq pos (text-property-any (point) (point-max) 'org-filter-type type))
+      (while (setq pos (text-property-any (point) (point-max)
+					  'org-filter-type type))
 	(goto-char pos)
 	(remove-text-properties
 	 (point) (next-single-property-change (point) 'org-filter-type)
