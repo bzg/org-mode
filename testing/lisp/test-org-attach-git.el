@@ -33,12 +33,12 @@
 	   ,@body))))
 
 (ert-deftest test-org-attach-git/use-annex ()
-  (test-org-attach-annex/with-annex
+  (test-org-attach-git/with-annex
    (let ((org-attach-git-annex-cutoff 1))
-     (should (org-attach-use-annex)))
+     (should (org-attach-git-use-annex)))
 
    (let ((org-attach-git-annex-cutoff nil))
-     (should-not (org-attach-use-annex))))
+     (should-not (org-attach-git-use-annex))))
 
   ;; test with non annex directory
   (let ((tmpdir (make-temp-file "org-annex-test" t "/")))
@@ -46,11 +46,11 @@
 	 (let ((default-directory tmpdir)
 	       (org-attach-id-dir tmpdir))
 	   (shell-command "git init")
-	   (should-not (org-attach-use-annex)))
+	   (should-not (org-attach-git-use-annex)))
        (delete-directory tmpdir 'recursive))))
 
 (ert-deftest test-org-attach-git/get-maybe ()
-  (test-org-attach-annex/with-annex
+  (test-org-attach-git/with-annex
    (let ((path (expand-file-name "test-file"))
 	 (annex-dup (make-temp-file "org-annex-test" t "/")))
      (with-temp-buffer
@@ -71,21 +71,21 @@
      (shell-command "git annex drop --force test-file")
      ;; test getting the file from the dup when we should ALWAYS get
      (should (not (file-exists-p (file-symlink-p (expand-file-name "test-file")))))
-     (let ((org-attach-annex-auto-get t))
-       (org-attach-annex-get-maybe (expand-file-name "test-file"))
+     (let ((org-attach-git-annex-auto-get t))
+       (org-attach-git-annex-get-maybe (expand-file-name "test-file"))
        ;; check that the file has the right contents
        (with-temp-buffer
 	 (insert-file-contents path)
 	 (should (string-equal "hello world\n" (buffer-string)))))
      ;; test getting the file from the dup when we should NEVER get
      (shell-command "git annex drop --force test-file")
-     (let ((org-attach-annex-auto-get nil))
-       (should-error (org-attach-annex-get-maybe (expand-file-name "test-file"))))
-     (let ((org-attach-annex-auto-get 'ask)
+     (let ((org-attach-git-annex-auto-get nil))
+       (should-error (org-attach-git-annex-get-maybe (expand-file-name "test-file"))))
+     (let ((org-attach-git-annex-auto-get 'ask)
 	   (called nil))
        (cl-letf (((symbol-function 'y-or-n-p)
 		  (lambda (_) (setq called 'was-called) t)))
-	 (org-attach-annex-get-maybe (expand-file-name "test-file"))
+	 (org-attach-git-annex-get-maybe (expand-file-name "test-file"))
 	 ;; check that the file has the right contents
 	 (with-temp-buffer
 	   (insert-file-contents path)

@@ -108,56 +108,62 @@
 (ert-deftest test-org-attach/dired-attach-to-next-best-subtree/1 ()
   "Attach file at point in dired to subtree."
   (should
-   (let ((a-filename (make-temp-file "a"))) ; file is an attach candidate.
+   (let ((a-filename (make-temp-file "a")) ; file is an attach candidate.
+	 (org-attach-id-dir "data/"))
      (unwind-protect
 	 (org-test-with-temp-text-in-file
-	  "* foo   :foo:"
-	  (split-window)
-	  (dired temporary-file-directory)
-	  (cl-assert (eq 'dired-mode major-mode))
-	  (revert-buffer)
-	  (dired-goto-file a-filename)
+	     "* foo   :foo:"
+	   (split-window)
+	   (let ((org-buffer (current-buffer))
+		 (dired-buffer (dired temporary-file-directory)))
+	     (cl-assert (eq 'dired-mode major-mode))
+	     (revert-buffer)
+	     (dired-goto-file a-filename)
 					; action
-	  (call-interactively #'org-attach-dired-to-subtree)
+	     (call-interactively #'org-attach-dired-to-subtree)
 					; check
-	  (delete-window)
-	  (cl-assert (eq 'org-mode major-mode))
-	  (beginning-of-buffer)
-	  (search-forward "* foo")
+	     (delete-window)
+	     (switch-to-buffer org-buffer)
+	     (cl-assert (eq 'org-mode major-mode)))
+	   (beginning-of-buffer)
+	   (search-forward "* foo")
 					; expectation.  tag ATTACH has been appended.
-	  (cl-reduce (lambda (x y) (or x y))
-		     (mapcar (lambda (x) (string-equal "ATTACH" x))
-			     (plist-get
+	   (cl-reduce (lambda (x y) (or x y))
+		      (mapcar (lambda (x) (string-equal "ATTACH" x))
 			      (plist-get
-			       (org-element-at-point) 'headline) :tags))))
+			       (plist-get
+				(org-element-at-point) 'headline) :tags))))
        (delete-file a-filename)))))
 
 (ert-deftest test-org-attach/dired-attach-to-next-best-subtree/2 ()
   "Attach 2 marked files."
   (should
    (let ((a-filename (make-temp-file "a"))
-	 (b-filename (make-temp-file "b"))) ; attach candidates.
+	 (b-filename (make-temp-file "b")) ; attach candidates.
+	 (org-attach-id-dir "data/"))
      (unwind-protect
 	 (org-test-with-temp-text-in-file
 	  "* foo"
 	  (split-window)
-	  (dired temporary-file-directory)
-	  (cl-assert (eq 'dired-mode major-mode))
-	  (revert-buffer)
-	  (dired-goto-file a-filename)
-	  (dired-mark 1)
-	  (dired-goto-file b-filename)
-	  (dired-mark 1)
+	  (let ((org-buffer (current-buffer))
+		(dired-buffer (dired temporary-file-directory)))
+	    (cl-assert (eq 'dired-mode major-mode))
+	    (revert-buffer)
+	    (dired-goto-file a-filename)
+	    (dired-mark 1)
+	    (dired-goto-file b-filename)
+	    (dired-mark 1)
 					; action
-	  (call-interactively #'org-attach-dired-to-subtree)
+	    (call-interactively #'org-attach-dired-to-subtree)
 					; check
-	  (delete-window)
+	    (delete-window)
+	    (switch-to-buffer org-buffer))
 	  (cl-assert (eq 'org-mode major-mode))
 	  (beginning-of-buffer)
 	  (search-forward "* foo")
 	  (and (file-exists-p (concat (org-attach-dir) "/"
 				      (file-name-nondirectory a-filename)))
-               (file-exists-p (concat (org-attach-dir) "/"
+	       (file-exists-p (concat (org-attach-dir) "/"
 				      (file-name-nondirectory b-filename)))))
        (delete-file a-filename)
        (delete-file b-filename)))))

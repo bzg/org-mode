@@ -23,10 +23,9 @@
 
 ;;; Commentary:
 
-;; An extention to org-attach.  If the attachment-directory to an
-;; outline node (using either DIR or ID) is initialized as a Git
-;; repository, then org-attach-git will automatically commit changes
-;; when it sees them.
+;; An extention to org-attach.  If `org-attach-id-dir' is initialized
+;; as a Git repository, then org-attach-git will automatically commit
+;; changes when it sees them.  Requires git-annex.
 
 ;;; Code:
 
@@ -81,9 +80,12 @@ Signals an error if the file content is not available and it was not retrieved."
 	(message "Running git annex get \"%s\"." path-relative)
 	(call-process "git" nil nil nil "annex" "get" path-relative)))))
 
-(defun org-attach-git-commit ()
+(defun org-attach-git-commit (&optional attach-dir)
   "Commit changes to git if `org-attach-id-dir' is properly initialized.
-This checks for the existence of a \".git\" directory in that directory."
+This checks for the existence of a \".git\" directory in that directory.
+
+Takes one optional argument ATTACH-DIR for the sake of being
+compatible with hook `org-attach-after-change-hook'."
   (let* ((dir (expand-file-name org-attach-id-dir))
 	 (git-dir (vc-git-root dir))
 	 (use-annex (org-attach-git-use-annex))
