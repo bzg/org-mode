@@ -80,12 +80,12 @@ Signals an error if the file content is not available and it was not retrieved."
 	(message "Running git annex get \"%s\"." path-relative)
 	(call-process "git" nil nil nil "annex" "get" path-relative)))))
 
-(defun org-attach-git-commit (&optional attach-dir)
+(defun org-attach-git-commit (&optional _)
   "Commit changes to git if `org-attach-id-dir' is properly initialized.
 This checks for the existence of a \".git\" directory in that directory.
 
-Takes one optional argument ATTACH-DIR for the sake of being
-compatible with hook `org-attach-after-change-hook'."
+Takes an unused optional argument for the sake of being compatible
+with hook `org-attach-after-change-hook'."
   (let* ((dir (expand-file-name org-attach-id-dir))
 	 (git-dir (vc-git-root dir))
 	 (use-annex (org-attach-git-use-annex))
