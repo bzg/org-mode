@@ -9073,7 +9073,8 @@ filter elements are accumulated.
   command then hides all entries that do not contain or inherit this
   tag.  Pressing {{{kbd(+)}}} or {{{kbd(-)}}} at the prompt switches
   between filtering for and against the next tag.  To clear the
-  filter, call the command again and press {{{kbd(\)}}} at the prompt.
+  filter, press {{{kbd(\)}}} twice (once to call the command again,
+  and once at the prompt).
 
 - {{{kbd(<)}}} (~org-agenda-filter-by-category~) ::
 
@@ -9111,8 +9112,8 @@ filter elements are accumulated.
   larger-or-equal than the selected value.  For application of the
   operator, entries without a defined effort are treated according to
   the value of ~org-sort-agenda-noeffort-is-high~.  To clear the
-  filter, call the command again and press {{{kbd(_)}}} again at the
-  operator prompt.
+  filter, press {{{kbd(_)}}} twice (once to call the command again,
+  and once at the first prompt).
 
 - {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
 
