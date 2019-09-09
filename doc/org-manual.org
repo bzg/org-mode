@@ -8928,12 +8928,10 @@ If you would like to have a special category for a single entry or
 a (sub)tree, give the entry a =CATEGORY= property with the special
 category you want to apply as the value.
 
-The display in the agenda buffer looks best if the category is not
-longer than 10 characters.
-
 #+vindex: org-agenda-category-icon-alist
-You can set up icons for category by customizing the
-~org-agenda-category-icon-alist~ variable.
+The display in the agenda buffer looks best if the category is not
+longer than 10 characters.  You can set up icons for category by
+customizing the ~org-agenda-category-icon-alist~ variable.
 
 *** Time-of-day specifications
 :PROPERTIES:
@@ -9039,20 +9037,16 @@ the estimated effort of an entry (see [[*Effort Estimates]]).
 #+vindex: org-agenda-tag-filter-preset
 #+vindex: org-agenda-effort-filter-preset
 #+vindex: org-agenda-regexp-filter-preset
-Agenda built-in or customized commands are statically defined.  Agenda
-filters and limits provide two ways of narrowing down the list of
-agenda entries.
+Agenda built-in or custom commands are statically defined.  Agenda
+filters and limits allow to flexibly narrow down the list of agenda
+entries.
 
-Filters only change the visibility of items, are very fast and are
+/Filters/ only change the visibility of items, are very fast and are
 mostly used interactively[fn:96]. You can switch quickly between
-different filters without having to recreate the agenda.  If creating
-the agenda seems slow, one solution would be to create a view that
-contains everything you might want to work on for a while, and then
-use filtering to drill down.
-
-Limits on the other hand take effect before the agenda buffer is
-populated, so they are mostly useful when defined as local variables
-within custom agenda commands.
+different filters without having to recreate the agenda.  /Limits/ on
+the other hand take effect before the agenda buffer is populated, so
+they are mostly useful when defined as local variables within custom
+agenda commands.
 
 **** Filtering in the agenda
 :PROPERTIES:
@@ -9068,7 +9062,11 @@ within custom agenda commands.
 
 The general filtering command is ~org-agenda-filter~, bound to
 {{{kbd(/)}}}.  Before we introduce it, we describe commands for
-individual filter types.
+individual filter types.  All filtering commands handle prefix
+arguments in the same way:  A single {{{kbd(C-u)}}} prefix negates the
+filter, so it removes lines selected by the filter.  A double prefix
+adds the new filter condition to the one(s) already in place, so
+filter elements are accumulated.
 
 - {{{kbd(\)}}} (~org-agenda-filter-by-tag~) ::
 
@@ -9078,37 +9076,32 @@ individual filter types.
   Pressing {{{kbd(TAB)}}} at that prompt offers completion to select a
   tag, including any tags that do not have a selection character.  The
   command then hides all entries that do not contain or inherit this
-  tag.  Call the command repeatedly to add several tags to the
-  filter. When called with prefix argument, remove the entries that
-  /do/ have the tag.  Pressing {{{kbd(+)}}} or {{{kbd(-)}}} at the
-  prompt also switches between filtering for and against the next tag.
-  {{{kbd(\)}}} at the prompt turns off the filter and shows any hidden
-  entries.
-
+  tag.  Pressing {{{kbd(+)}}} or {{{kbd(-)}}} at the prompt switches
+  between filtering for and against the next tag.  To clear the
+  filter, press {{{kbd(\)}}} twice (once to call the command again,
+  and once at the prompt).
 
 - {{{kbd(<)}}} (~org-agenda-filter-by-category~) ::
 
   #+findex: org-agenda-filter-by-category
   Filter by category of the line at point, and show only entries with
-  this category.  Pressing {{{kbd(<)}}} again removes this filter.
-  When called with a prefix argument exclude the category of the item
-  at point from the agenda.
+  this category.  When called with a prefix argument, hide all entries
+  with the category at point.  To clear the filter, call this command
+  again by pressing {{{kbd(<)}}}.
 
 - {{{kbd(=)}}} (~org-agenda-filter-by-regexp~) ::
 
   #+findex: org-agenda-filter-by-regexp
   Filter the agenda view by a regular expression: only show agenda
-  entries matching the regular expression the user entered.  When
-  called with a prefix argument, it filters /out/ entries matching the
-  regexp.  Called in a regexp-filtered agenda view, remove the filter,
-  unless there are two universal prefix arguments, in which case
-  filters are accumulated.
+  entries matching the regular expression the user entered. To clear
+  the filter, call the command again by pressing {{{kbd(=)}}}.
 
 - {{{kbd(_)}}} (~org-agenda-filter-by-effort~) ::
 
   #+findex: org-agenda-filter-by-effort
-  Filter the agenda view with respect to effort estimates.  You first
-  need to set up allowed efforts globally, for example
+  Filter the agenda view with respect to effort estimates, so select
+  tasks that take the right amount of time.  You first need to set up
+  a list of efforts globally, for example
 
   #+begin_src emacs-lisp
   (setq org-global-properties
@@ -9123,18 +9116,16 @@ individual filter types.
   restricts to entries with effort smaller-or-equal, equal, or
   larger-or-equal than the selected value.  For application of the
   operator, entries without a defined effort are treated according to
-  the value of ~org-sort-agenda-noeffort-is-high~.
-
-  When called with a prefix argument, it removes entries matching the
-  condition.  With two universal prefix arguments, it clears effort
-  filters, which can be accumulated.
+  the value of ~org-sort-agenda-noeffort-is-high~.  To clear the
+  filter, press {{{kbd(_)}}} twice (once to call the command again,
+  and once at the first prompt).
 
 - {{{kbd(^)}}} (~org-agenda-filter-by-top-headline~) ::
 
   #+findex: org-agenda-filter-by-top-headline
   Filter the current agenda view and only display items that fall
-  under the same top-level headline as the current entry.  Press
-  {{{kbd(^)}}} again to turn this filter off.
+  under the same top-level headline as the current entry.  To clear
+  the filter, call this command again by pressing {{{kbd(^)}}}.
 
 - {{{kbd(/)}}} (~org-agenda-filter~) ::
 
@@ -9155,9 +9146,10 @@ individual filter types.
   (tags will take priority).  If you reply to the prompt with the
   empty string, all filtering is removed.  If a filter is specified,
   it replaces all current filters.  But if you call the command with a
-  prefix argument, or if you add an additional `+' (e.g. `++work') to
-  the front of the string, the new filter elements are added to the
-  active ones.
+  double prefix argument, or if you add an additional `+'
+  (e.g. `++work') to the front of the string, the new filter elements
+  are added to the active ones.  A single prefix argument applies the
+  entire filter in a negative sense.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
 
