@@ -2957,21 +2957,23 @@ contextual information."
        ;; Case 3.  Use minted package.
        ((eq listings 'minted)
 	(let* ((caption-str (org-latex--caption/label-string src-block info))
+	       (placement (or (org-unbracket-string "[" "]" (plist-get attributes :placement))
+			      (plist-get info :latex-default-figure-position)))
 	       (float-env
 		(cond
 		 ((string= "multicolumn" float)
 		  (format "\\begin{listing*}[%s]\n%s%%s\n%s\\end{listing*}"
-			  (plist-get info :latex-default-figure-position)
+			  placement
 			  (if caption-above-p caption-str "")
 			  (if caption-above-p "" caption-str)))
 		 (caption
 		  (format "\\begin{listing}[%s]\n%s%%s\n%s\\end{listing}"
-			  (plist-get info :latex-default-figure-position)
+			  placement
 			  (if caption-above-p caption-str "")
 			  (if caption-above-p "" caption-str)))
 		 ((string= "t" float)
 		  (concat (format "\\begin{listing}[%s]\n"
-				  (plist-get info :latex-default-figure-position))
+				  placement)
 			  "%s\n\\end{listing}"))
 		 (t "%s")))
 	       (options (plist-get info :latex-minted-options))
