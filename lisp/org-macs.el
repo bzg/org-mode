@@ -335,7 +335,7 @@ if it fails."
 		 (let ((min-ind (point-max)))
 		   (save-excursion
 		     (while (re-search-forward "^[ \t]*\\S-" nil t)
-		       (let ((ind (1- (current-column))))
+		       (let ((ind (current-indentation)))
 			 (if (zerop ind) (throw :exit nil)
 			   (setq min-ind (min min-ind ind))))))
 		   min-ind))))
