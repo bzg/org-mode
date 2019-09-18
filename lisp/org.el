@@ -5151,8 +5151,8 @@ This includes angle, plain, and bracket links."
     (while (re-search-forward org-link-any-re limit t)
       (let* ((start (match-beginning 0))
 	     (end (match-end 0))
-	     (visible-start (or (match-beginning 4) (match-beginning 2)))
-	     (visible-end (or (match-end 4) (match-end 2)))
+	     (visible-start (or (match-beginning 3) (match-beginning 2)))
+	     (visible-end (or (match-end 3) (match-end 2)))
 	     (style (cond ((eq ?< (char-after start)) 'angle)
 			  ((eq ?\[ (char-after (1+ start))) 'bracket)
 			  (t 'plain))))
@@ -10646,7 +10646,7 @@ prefer a state in the current sequence over on in another sequence."
 	    (setq tg (org-add-props tg nil 'face
 				    (org-get-todo-face tg)))
 	    (when (and (= cnt 0) (not ingroup)) (insert "  "))
-	    (setq prompt (concat prompt "[" (char-to-string c) "] " tg " ")) 
+	    (setq prompt (concat prompt "[" (char-to-string c) "] " tg " "))
 	    (insert "[" c "] " tg (make-string
 				   (- fwidth 4 (length tg)) ?\ ))
 	    (when (and (= (setq cnt (1+ cnt)) ncol)
