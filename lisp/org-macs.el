@@ -643,7 +643,7 @@ program is needed for, so that the error message can be more informative."
 (defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
 (defun org-get-limited-outline-regexp ()
   "Return outline-regexp with limited number of levels.
-The number of levels is controlled by `org-inlinetask-min-level'"
+The number of levels is controlled by `org-inlinetask-min-level'."
   (cond ((not (derived-mode-p 'org-mode))
 	 outline-regexp)
 	((not (featurep 'org-inlinetask))
