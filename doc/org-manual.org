@@ -3160,7 +3160,7 @@ External links are URL-like locators.  They start with a short
 identifying string followed by a colon.  There can be no space after
 the colon.  The following list shows examples for each link type.
 
-| =http://www.astro.uva.nl/=dominik=        | on the web                     |
+| =https://staff.science.uva.nl/c.dominik/= | on the web                     |
 | =doi:10.1000/182=                         | DOI for an electronic resource |
 | =file:/home/dominik/images/jupiter.jpg=   | file, absolute path            |
 | =/home/dominik/images/jupiter.jpg=        | same as above                  |
