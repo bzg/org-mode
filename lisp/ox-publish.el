@@ -1171,7 +1171,10 @@ references with `org-export-get-reference'."
 	   (with-current-buffer (find-file-noselect file)
 	     (org-with-point-at 1
 	       (let ((org-link-search-must-match-exact-headline t))
-		 (org-link-search search nil t))
+		 (condition-case err
+		     (org-link-search search nil t)
+		   (error
+		    (signal 'org-link-broken (cdr err)))))
 	       (and (org-at-heading-p)
 		    (org-string-nw-p (org-entry-get (point) "CUSTOM_ID"))))))))
    ((not org-publish-cache)
