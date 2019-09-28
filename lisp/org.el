@@ -11678,7 +11678,7 @@ and by additional input from the age of a schedules or deadline entry."
   "Find priority cookie and return priority."
   (save-match-data
     (if (functionp org-get-priority-function)
-	(funcall org-get-priority-function)
+	(funcall org-get-priority-function s)
       (if (not (string-match org-priority-regexp s))
 	  (* 1000 (- org-lowest-priority org-default-priority))
 	(* 1000 (- org-lowest-priority
