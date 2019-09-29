@@ -2787,7 +2787,7 @@ When nil, only the minibuffer will be available."
 (defcustom org-extend-today-until 0
   "The hour when your day really ends.  Must be an integer.
 This has influence for the following applications:
-- When switching the agenda to \"today\".  It it is still earlier than
+- When switching the agenda to \"today\".  If it is still earlier than
   the time given here, the day recognized as TODAY is actually yesterday.
 - When a date is read from the user and it is still before the time given
   here, the current date and time will be assumed to be yesterday, 23:59.
@@ -3108,7 +3108,7 @@ and the properties ending in \"_ALL\" when they are used as descriptor
 for valid values of a property.
 
 Note for programmers:
-When querying an entry with `org-entry-get',  you can control if inheritance
+When querying an entry with `org-entry-get', you can control if inheritance
 should be used.  By default, `org-entry-get' looks only at the local
 properties.  You can request inheritance by setting the inherit argument
 to t (to force inheritance) or to `selective' (to respect the setting
@@ -3699,7 +3699,7 @@ org-block-begin-line and org-block-end-line faces."
 
 (defcustom org-highlight-latex-and-related nil
   "Non-nil means highlight LaTeX related syntax in the buffer.
-When non nil, the value should be a list containing any of the
+When non-nil, the value should be a list containing any of the
 following symbols:
   `native'   Highlight LaTeX snippets and environments natively.
   `latex'    Highlight LaTeX snippets and environments.
@@ -8356,7 +8356,7 @@ sub-tree if optional argument INHERIT is non-nil."
 			       'org-stats stats)))))))
 
 (defun org-refresh-effort-properties ()
-  "Refresh effort properties"
+  "Refresh effort properties."
   (org-refresh-properties
    org-effort-property
    '((effort . identity)
@@ -10318,7 +10318,7 @@ not relevant for the behavior, but it makes things more visible.
 Note that toggling the tag with tags commands will not change the property
 and therefore not influence behavior!
 
-This can be t, meaning the tag ORDERED should be used,  It can also be a
+This can be t, meaning the tag ORDERED should be used.  It can also be a
 string to select a different tag for this task."
   :group 'org-todo
   :type '(choice
@@ -12904,7 +12904,7 @@ but in some other way.")
 Being in this list makes sure that they are offered for completion.")
 
 (defun org--valid-property-p (property)
-  "Non nil when string PROPERTY is a valid property name."
+  "Non-nil when string PROPERTY is a valid property name."
   (not
    (or (equal property "")
        (string-match-p "\\s-" property))))
@@ -17442,7 +17442,7 @@ individual commands for more information."
 This does one of the following:
 
 - switch a timestamp at point one day into the future
-- on a headline, switch to the next TODO keyword.
+- on a headline, switch to the next TODO keyword
 - on an item, switch entire list to the next bullet type
 - on a property line, switch to the next allowed value
 - on a clocktable definition line, move time block into the future

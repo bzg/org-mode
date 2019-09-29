@@ -221,7 +221,7 @@ links created by planner."
   :type '(choice (const nil) (function))
   :safe #'null)
 
-(defcustom org-link-doi-server-url "http://dx.doi.org/"
+(defcustom org-link-doi-server-url "https://doi.org/"
   "The URL of the DOI server."
   :group 'org-link-follow
   :version "24.3"
