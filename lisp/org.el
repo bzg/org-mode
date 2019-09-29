@@ -20511,20 +20511,20 @@ unless optional argument NO-INHERITANCE is non-nil."
     (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p))))))
 
 (defun org-at-comment-p nil
-  "Is cursor in a commented line?"
+  "Return t if cursor is in a commented line."
   (save-excursion
     (save-match-data
       (beginning-of-line)
       (looking-at "^[ \t]*# "))))
 
 (defun org-at-drawer-p nil
-  "Is cursor at a drawer keyword?"
+  "Return t if cursor is at a drawer keyword."
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at org-drawer-regexp)))
 
 (defun org-at-block-p nil
-  "Is cursor at a block keyword?"
+  "Return t if cursor is at a block keyword."
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at org-block-regexp)))
