@@ -83,11 +83,11 @@
 	 (raw (org-trim clean))
 	 (result-params (cdr (assq :result-params params))))
     (string-match
-     "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =\\(\n\\| \\)\\(.+\\)$"
+     "\\(\\(.*\n\\)*\\)[^:\n]+ : \\([^=\n]+\\) =[[:space:]]+\\(\\(.\\|\n\\)+\\)$"
      raw)
     (let ((output (match-string 1 raw))
 	  (type (match-string 3 raw))
-	  (value (match-string 5 raw)))
+	  (value (match-string 4 raw)))
       (org-babel-reassemble-table
        (org-babel-result-cond result-params
 	 (cond
