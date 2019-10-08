@@ -172,6 +172,7 @@
     (:html-table-row-open-tag nil nil org-html-table-row-open-tag)
     (:html-table-row-close-tag nil nil org-html-table-row-close-tag)
     (:html-xml-declaration nil nil org-html-xml-declaration)
+    (:html-wrap-src-lines nil nil org-html-wrap-src-lines)
     (:html-klipsify-src nil nil org-html-klipsify-src)
     (:html-klipse-css nil nil org-html-klipse-css)
     (:html-klipse-js nil nil org-html-klipse-js)
@@ -931,6 +932,15 @@ in all modes you want.  Then, use the command
   "The prefix for CSS class names for htmlize font specifications."
   :group 'org-export-html
   :type 'string)
+
+(defcustom org-html-wrap-src-lines nil
+  "If non-nil, wrap individual lines of source blocks in \"code\" elements.
+In this case, add line number in attribute \"data-ox-html-linenr\" when line
+numbers are enabled."
+  :group 'org-export-html
+  :package-version '(Org . "9.3")
+  :type 'boolean
+  :safe t)
 
 ;;;; Table
 
@@ -2231,14 +2241,15 @@ is the language used for CODE, as a string, or nil."
 	    (if (and beg end) (substring code beg end) code)))))))))
 
 (defun org-html-do-format-code
-  (code &optional lang refs retain-labels num-start)
+  (code &optional lang refs retain-labels num-start wrap-lines)
   "Format CODE string as source code.
-Optional arguments LANG, REFS, RETAIN-LABELS and NUM-START are,
-respectively, the language of the source code, as a string, an
+Optional arguments LANG, REFS, RETAIN-LABELS, NUM-START, WRAP-LINES
+are, respectively, the language of the source code, as a string, an
 alist between line numbers and references (as returned by
 `org-export-unravel-code'), a boolean specifying if labels should
-appear in the source code, and the number associated to the first
-line of code."
+appear in the source code, the number associated to the first
+line of code, and a boolean specifying if lines of code should be
+wrapped in code elements."
   (let* ((code-lines (split-string code "\n"))
 	 (code-length (length code-lines))
 	 (num-fmt
@@ -2256,11 +2267,13 @@ line of code."
 		(format "<span class=\"linenr\">%s</span>"
 			(format num-fmt line-num)))
 	      ;; Transcoded src line.
-	      (format "<code%s>%s</code>"
-                      (if num-start
-                          (format " data-ox-html-linenr=\"%s\"" line-num)
-                        "")
-                      loc)
+	      (if wrap-lines
+		  (format "<code%s>%s</code>"
+			  (if num-start
+                              (format " data-ox-html-linenr=\"%s\"" line-num)
+                            "")
+			  loc)
+		loc)
 	      ;; Add label, if needed.
 	      (when (and ref retain-labels) (format " (%s)" ref))))
        ;; Mark transcoded line as an anchor, if needed.
@@ -2281,8 +2294,10 @@ used as a communication channel."
 	 ;; Does the source block contain labels?
 	 (retain-labels (org-element-property :retain-labels element))
 	 ;; Does it have line numbers?
-	 (num-start (org-export-get-loc element info)))
-    (org-html-do-format-code code lang refs retain-labels num-start)))
+	 (num-start (org-export-get-loc element info))
+	 ;; Should lines be wrapped in code elements?
+	 (wrap-lines (plist-get info :html-wrap-src-lines)))
+    (org-html-do-format-code code lang refs retain-labels num-start wrap-lines)))
 
 
 ;;; Tables of Contents
