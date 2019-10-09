@@ -258,6 +258,9 @@ issued in the language major mode buffer."
 (defvar-local org-src--block-indentation nil)
 (put 'org-src--block-indentation 'permanent-local t)
 
+(defvar-local org-src--content-indentation nil)
+(put 'org-src--content-indentation 'permanent-local t)
+
 (defvar-local org-src--end-marker nil)
 (put 'org-src--end-marker 'permanent-local t)
 
@@ -422,7 +425,7 @@ Assume point is in the corresponding edit buffer."
 	 (if org-src--preserve-indentation 0
 	   (+ (or org-src--block-indentation 0)
 	      (if (memq org-src--source-type '(example-block src-block))
-		  org-edit-src-content-indentation
+		  org-src--content-indentation
 		0))))
 	(use-tabs? (and (> org-src--tab-width 0) t))
 	(source-tab-width org-src--tab-width)
@@ -484,9 +487,9 @@ Leave point in edit buffer."
 	     (source-file-name (buffer-file-name (buffer-base-buffer)))
 	     (source-tab-width (if indent-tabs-mode tab-width 0))
 	     (type (org-element-type datum))
-	     (ind (org-with-wide-buffer
-		   (goto-char (org-element-property :begin datum))
-		   (current-indentation)))
+	     (block-ind (org-with-point-at (org-element-property :begin datum)
+			  (current-indentation)))
+	     (content-ind org-edit-src-content-indentation)
 	     (preserve-ind
 	      (and (memq type '(example-block src-block))
 		   (or (org-element-property :preserve-indent datum)
@@ -529,7 +532,8 @@ Leave point in edit buffer."
 	(setq org-src--end-marker end)
 	(setq org-src--remote remote)
 	(setq org-src--source-type type)
-	(setq org-src--block-indentation ind)
+	(setq org-src--block-indentation block-ind)
+	(setq org-src--content-indentation content-ind)
 	(setq org-src--preserve-indentation preserve-ind)
 	(setq org-src--overlay overlay)
 	(setq org-src--allow-write-back write-back)
