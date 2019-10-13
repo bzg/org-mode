@@ -1338,7 +1338,7 @@ For non-floats, see `org-latex--wrap-label'."
 		      (t (symbol-name type*)))
 		  ""))
 	      (if short (format "[%s]" (org-export-data short info)) "")
-	      label
+	      (org-trim label)
 	      (org-export-data main info))))))
 
 (defun org-latex-guess-inputenc (header)
