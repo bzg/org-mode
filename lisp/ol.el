@@ -1246,7 +1246,7 @@ PATH is a symbol name, as a string."
     ((and (pred boundp) function) (describe-variable function))
     (name (user-error "Unknown function or variable: %s" name))))
 
-(org-link-set-parameters "help" :follow #'org-link--open-elisp)
+(org-link-set-parameters "help" :follow #'org-link--open-help)
 
 ;;;; "http", "https", "mailto", "ftp", and "news" link types
 (dolist (scheme '("ftp" "http" "https" "mailto" "news"))
