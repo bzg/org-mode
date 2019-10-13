@@ -123,6 +123,12 @@ auto-commit attachments to git:
   one need to require the =org-attach-git= module in the startup.
 
 ** New features
+*** New option to wrap source code lines in HTML export
+
+When new option ~html-wrap-src-lines~ (with variable
+~org-html-wrap-src-lines~) is non-nil, HTML export wraps source code
+lines in HTML ~code~ elements.
+
 *** New option to handle schedules and deadlines in iCalendar export
 
 Export ignore done tasks with a deadline when
