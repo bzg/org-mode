@@ -3067,18 +3067,19 @@ point on or at a target.
 :END:
 #+cindex: links, external
 #+cindex: external links
-#+cindex: Gnus links
-#+cindex: BBDB links
-#+cindex: irc links
-#+cindex: URL links
-#+cindex: file links
 #+cindex: attachment links
-#+cindex: Rmail links
-#+cindex: MH-E links
-#+cindex: Usenet links
-#+cindex: shell links
-#+cindex: Info links
+#+cindex: BBDB links
 #+cindex: Elisp links
+#+cindex: file links
+#+cindex: Gnus links
+#+cindex: Help links
+#+cindex: IRC links
+#+cindex: Info links
+#+cindex: MH-E links
+#+cindex: Rmail links
+#+cindex: shell links
+#+cindex: URL links
+#+cindex: Usenet links
 
 Org supports links to files, websites, Usenet and email messages, BBDB
 database entries and links to both IRC conversations and their logs.
@@ -3125,7 +3126,11 @@ Here is the full set of built-in link types:
 
 - =gnus=, =rmail=, =mhe= ::
 
-  Links to messages or folders from a given Emacs' MUA.
+  Link to messages or folders from a given Emacs' MUA.
+
+- =help= ::
+
+  Display documentation of a symbol in =*Help*= buffer.
 
 - =http=, =https= ::
 
@@ -3188,6 +3193,7 @@ options:
 |            | =gnus:group#id= (article link)                           |
 | bbdb       | =bbdb:R.*Stallman= (record with regexp)                  |
 | irc        | =irc:/irc.com/#emacs/bob=                                |
+| help       | =help:org-store-link=                                    |
 | info       | =info:org#External links=                                |
 | shell      | =shell:ls *.org=                                         |
 | elisp      | =elisp:(find-file "Elisp.org")= (Elisp form to evaluate) |
