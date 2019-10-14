@@ -19902,13 +19902,12 @@ These commands update dynamic blocks:
 
 Before updating a dynamic block, Org removes content between the
 =BEGIN= and =END= markers.  Org then reads the parameters on the
-=BEGIN= line for passing to the writer function.  If the function
-expects to access the removed content, then Org expects an extra
-parameter, =:content=, on the =BEGIN= line.
+=BEGIN= line for passing to the writer function as a plist. The
+previous content of the dynamic block becomes erased from the buffer
+and appended to the plist under ~:content~.
 
 The syntax for naming a writer function with a dynamic block labelled
-=myblock= is: ~org-dblock-write:myblock~.  Parameters come from the
-=BEGIN= line.
+=myblock= is: ~org-dblock-write:myblock~.
 
 The following is an example of a dynamic block and a block writer function
 that updates the time when the function was last run:
