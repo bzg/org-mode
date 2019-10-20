@@ -759,6 +759,30 @@ x
 #+begin_src emacs-lisp
   baz
 #+end_src"
+	    (org-babel-expand-noweb-references))))
+  ;; Respect COMMENT headlines
+  (should
+   (equal "C"
+	  (org-test-with-temp-text "
+#+begin_src emacs-lisp :noweb yes<point>
+  <<foo>>
+#+end_src
+
+* COMMENT A
+#+name: foo
+#+begin_src emacs-lisp
+  A
+#+end_src
+
+* COMMENT B
+#+begin_src emacs-lisp :noweb-ref foo
+  B
+#+end_src
+
+* C
+#+begin_src emacs-lisp :noweb-ref foo
+  C
+#+end_src"
 	    (org-babel-expand-noweb-references)))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()
