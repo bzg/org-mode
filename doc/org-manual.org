@@ -8004,15 +8004,15 @@ mentioning.
   When attaching files to a heading it will be assigned a tag
   according to what is set here.
 
-- ~org-attach-id-to-path-function~ ::
-  #+vindex: org-attach-id-to-path-function
+- ~org-attach-id-to-path-function-list~ ::
+  #+vindex: org-attach-id-to-path-function-list
   When =ID= is used for attachments, the ID is parsed into a part of a
-  directory-path.  See ~org-attach-id-folder-format~ for the default
-  function.  Define a new one and add it to
-  ~org-attach-id-to-path-function~ if you want the folder structure
-  any other way.  Note that modifying this makes org-attach dependent
-  on your function also for opening attachments, not only setting
-  them!
+  directory-path.  See ~org-attach-id-uuid-folder-format~ for the
+  default function.  Define a new one and add it as first element in
+  ~org-attach-id-to-path-function-list~ if you want the folder
+  structure in any other way.  All functions in this list will be
+  tried when resolving existing ID's into paths, to maintain backward
+  compatability with existing folders in your system.
 
 - ~org-attach-expert~ ::
   #+vindex: org-attach-expert
