@@ -188,8 +188,9 @@ precedence and will be used.
 One can now also choose to build attachment-directory-paths in a
 customized way.  This is an advanced topic, but in some case it makes
 sense to parse an ID in a different way than the default one.  Create
-your own function and use it is ~org-attach-id-to-path-function~ if
-you want to customize the ID-based folder structure.
+your own function and add it to the beginning of
+~org-attach-id-to-path-function~list~ if you want to customize the ID
+based folder structure.
 
 If you've used ATTACH_DIR properties to manage attachments, use the
 following code to rename that property to DIR which supports the same
@@ -420,6 +421,11 @@ the attachment dispatcher.
 *** New ID method based on timestamp
 If one chooses, it is now possible to create ID's based on timestamp
 (ISO8601) instead of UUID by changing org-id-method to ts.
+
+For an improved folder structure when using timestamp as ID, make sure
+to promote ~org-attach-id-ts-folder-format~ to the first element of
+~org-attach-id-to-path-function-list~ in your configuration at the
+same time.
 
 *** New customization: ~org-id-locations-relative~
 New customization to make the persisting of org-id-locations between
