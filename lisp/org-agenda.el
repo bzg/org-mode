@@ -3109,16 +3109,42 @@ s   Search for keywords                 M   Like m, but only TODO entries
 	    (setq second-time t)
 	    (org-fit-window-to-buffer))
 
+	  ;; Hint to navigation if window too small for all information
+	  (setq header-line-format
+		(when (not (pos-visible-in-window-p (point-max)))
+		  "Use SPC, DEL, C-n or C-p to navigate."))
+
 	  ;; Ask for selection
-	  (message "Press key for agenda command%s:"
-		   (if (or restrict-ok org-agenda-overriding-restriction)
-		       (if org-agenda-overriding-restriction
-			   " (restriction lock active)"
-			 (if restriction
-			     (format " (restricted to %s)" restriction)
-			   " (unrestricted)"))
-		     ""))
-	  (setq c (read-char-exclusive))
+	  (cl-loop
+	   do (progn
+		(message "Press key for agenda command%s:"
+			 (if (or restrict-ok org-agenda-overriding-restriction)
+			     (if org-agenda-overriding-restriction
+				 " (restriction lock active)"
+			       (if restriction
+				   (format " (restricted to %s)" restriction)
+				 " (unrestricted)"))
+			   ""))
+		(setq c (read-char-exclusive)))
+	   until (not (memq c '(14 16 ?\s ?\d)))
+	   do (cl-case c
+		(14 (if (not (pos-visible-in-window-p (point-max)))
+			(ignore-errors (scroll-up 1))
+		      (message "End of buffer")
+		      (sit-for 1)))
+		(16 (if (not (pos-visible-in-window-p (point-min)))
+			(ignore-errors (scroll-down 1))
+		      (message "Beginning of buffer")
+		      (sit-for 1)))
+		(?\s (if (not (pos-visible-in-window-p (point-max)))
+			 (scroll-up nil)
+		       (message "End of buffer")
+		       (sit-for 1)))
+		(?\d (if (not (pos-visible-in-window-p (point-min)))
+			 (scroll-down nil)
+		       (message "Beginning of buffer")
+		       (sit-for 1)))))
+
 	  (message "")
 	  (cond
 	   ((assoc (char-to-string c) custom)
