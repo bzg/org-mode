@@ -7308,14 +7308,14 @@ subtree."
 ;;; Agenda commands
 
 (defun org-agenda-check-type (error &rest types)
-  "Check if agenda buffer is of allowed type.
+  "Check if agenda buffer or component is of allowed type.
 If ERROR is non-nil, throw an error, otherwise just return nil.
 Allowed types are `agenda' `todo' `tags' `search'."
   (cond ((not org-agenda-type)
 	 (error "No Org agenda currently displayed"))
 	((memq org-agenda-type types) t)
 	(error
-	 (error "Not allowed in %s-type agenda buffers" org-agenda-type))
+	 (error "Not allowed in '%s'-type agenda buffer or component" org-agenda-type))
 	(t nil)))
 
 (defun org-agenda-Quit ()
@@ -7561,7 +7561,7 @@ an already existing regexp filter."
 			      "Narrow to entries matching regexp: ")))))
 	  (push flt org-agenda-regexp-filter)
 	  (org-agenda-filter-apply org-agenda-regexp-filter 'regexp))))))
-  
+
 (defvar org-agenda-effort-filter nil)
 (defun org-agenda-filter-by-effort (strip-or-accumulate)
   "Filter agenda entries by effort.
