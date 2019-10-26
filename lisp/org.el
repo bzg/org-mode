@@ -16722,9 +16722,9 @@ boundaries."
 	      (let ((file (if (equal "attachment" linktype)
                               (progn
                                 (require 'org-attach)
-                                (org-attach-expand path))
+				(ignore-errors (org-attach-expand path)))
                             (expand-file-name path))))
-		(when (file-exists-p file)
+		(when (and file (file-exists-p file))
 		  (let ((width
 			 ;; Apply `org-image-actual-width' specifications.
 			 (cond
