@@ -2070,7 +2070,7 @@ in the buffer and update it."
 (org-dynamic-block-define "clocktable" #'org-clock-report)
 
 (defun org-day-of-week (day month year)
-  "Returns the day of the week as an integer."
+  "Return the day of the week as an integer."
   (nth 6
        (decode-time
 	(date-to-time
