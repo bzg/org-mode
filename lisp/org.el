@@ -3992,14 +3992,13 @@ Here are a few examples:
 	Archive in file ./basement (relative path), as level 3 trees
 	below the level 2 heading \"** Finished Tasks\".
 
-You may set this option on a per-file basis by adding to the buffer a
-line like
+You may define it locally by setting an ARCHIVE property.  If
+such a property is found in the file or in an entry, and anywhere
+up the hierarchy, it will be used.
 
-#+ARCHIVE: basement::** Finished Tasks
+You can also set it for the whole file using the keyword-syntax:
 
-You may also define it locally for a subtree by setting an ARCHIVE property
-in the entry.  If such a property is found in an entry, or anywhere up
-the hierarchy, it will be used."
+#+ARCHIVE: basement::** Finished Tasks"
   :group 'org-archive
   :type 'string)
 
