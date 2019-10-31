@@ -13627,14 +13627,12 @@ drawer is immediately hidden."
      ;; next one.  It prevents extending text properties or overlays
      ;; belonging to the latter.
      (when (and (bolp) (> (point) (point-min))) (backward-char))
-     (let ((begin (if (= (point) (point-min))
-		      (point)
-		    (1+ (point))))
+     (let ((begin (if (bobp) (point) (1+ (point))))
 	   (inhibit-read-only t))
-       (unless (= begin (point-min)) (insert "\n"))
+       (unless (bobp) (insert "\n"))
        (insert ":PROPERTIES:\n:END:")
        (org-flag-drawer t nil (line-end-position 0) (point))
-       (when (eobp) (insert "\n"))
+       (when (or (eobp) (= begin (point-min))) (insert "\n"))
        (org-indent-region begin (point))))))
 
 (defun org-insert-drawer (&optional arg drawer)

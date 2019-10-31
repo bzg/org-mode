@@ -481,6 +481,12 @@
 	  (org-test-with-temp-text "# C\n#+TITLE: T"
 	    (let ((org-adapt-indentation nil)) (org-insert-property-drawer))
 	    (buffer-string))))
+  ;; Insert drawer in document header with existing keyword.
+  (should
+   (equal ":PROPERTIES:\n:END:\n#+TITLE: T"
+	  (org-test-with-temp-text "#+TITLE: T"
+	    (let ((org-adapt-indentation nil)) (org-insert-property-drawer))
+	    (buffer-string))))
   (should
    (equal ":PROPERTIES:\n:END:"
 	  (org-test-with-temp-text ":PROPERTIES:\n:END:"
@@ -488,8 +494,8 @@
 	    (buffer-string))))
   ;; Insert drawer in document header with one existing heading in buffer.
   (should
-   (equal ":PROPERTIES:\n:END:\n* T\n"
-	  (org-test-with-temp-text "<point>\n* T\n"
+   (equal ":PROPERTIES:\n:END:\n\n* T\n"
+	  (org-test-with-temp-text "\n* T\n"
 	    (let ((org-adapt-indentation nil)) (org-insert-property-drawer))
 	    (buffer-string))))
   ;; Insert drawer right after headline if there is no planning line,
