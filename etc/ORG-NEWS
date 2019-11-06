@@ -24,6 +24,12 @@ for all headlines.
 *** New option to group captured datetime entries by month
 A new `:tree-type month' option was added to org-capture-templates to
 group new datetime entries by month.
+
+*** New header argument to pass Java command line arguments
+
+Babel Java blocks recognize header argument =:cmdargs= and pass its
+value in call to =java=.
+
 ** New functions
 *** ~org-columns-toggle-or-columns-quit~
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the

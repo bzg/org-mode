@@ -58,6 +58,7 @@ parameters may be used, like javac -verbose"
 	 (src-file (concat classname ".java"))
 	 (cmpflag (or (cdr (assq :cmpflag params)) ""))
 	 (cmdline (or (cdr (assq :cmdline params)) ""))
+	 (cmdargs (or (cdr (assq :cmdargs params)) ""))
 	 (full-body (org-babel-expand-body:generic body params)))
     (with-temp-file src-file (insert full-body))
     (org-babel-eval
@@ -66,7 +67,7 @@ parameters may be used, like javac -verbose"
     (unless (or (not packagename) (file-exists-p packagename))
       (make-directory packagename 'parents))
     (let ((results (org-babel-eval (concat org-babel-java-command
-                                           " " cmdline " " classname) "")))
+                                           " " cmdline " " classname " " cmdargs) "")))
       (org-babel-reassemble-table
        (org-babel-result-cond (cdr (assq :result-params params))
 	 (org-babel-read results)
