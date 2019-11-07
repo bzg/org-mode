@@ -7601,9 +7601,10 @@ Now lets look at the elements of a template definition.  Each entry in
 
   - ~:tree-type~ ::
 
-    When ~week~, make a week tree instead of the month tree, i.e.,
-    place the headings for each day under a heading with the current
-    ISO week.
+    Use ~week~ to make a week tree instead of the month-day tree,
+    i.e., place the headings for each day under a heading with the
+    current ISO week.  Use @code{month} to group entries by month
+    only.  Default is to group entries by day.
 
   - ~:unnarrowed~ ::
 

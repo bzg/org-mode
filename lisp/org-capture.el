@@ -998,9 +998,10 @@ Store them in the capture property list."
 	   ;; Make a date/week tree entry, with the current date (or
 	   ;; yesterday, if we are extending dates for a couple of hours)
 	   (funcall
-	    (if (eq (org-capture-get :tree-type) 'week)
-		#'org-datetree-find-iso-week-create
-	      #'org-datetree-find-date-create)
+	    (pcase (org-capture-get :tree-type)
+	      ('week #'org-datetree-find-iso-week-create)
+	      ('month #'org-datetree-find-month-create)
+	      (t #'org-datetree-find-date-create))
 	    (calendar-gregorian-from-absolute
 	     (cond
 	      (org-overriding-default-time

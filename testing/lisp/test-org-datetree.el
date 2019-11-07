@@ -113,6 +113,17 @@
 	(org-datetree-find-date-create '(3 29 2012)))
       (buffer-substring (point) (line-end-position))))))
 
+(ert-deftest test-org-datetree/find-month-create ()
+  "Test `org-datetree-find-month-create' specifications."
+  ;; When date is missing, create it with the entry under month.
+  (should
+   (string-match
+    "\\`\\* 2012\n\\*\\* 2012-03 .*\\'"
+    (org-test-with-temp-text ""
+      (let ((org-datetree-add-timestamp nil))
+	(org-datetree-find-month-create '(3 29 2012)))
+      (org-trim (buffer-string))))))
+
 (ert-deftest test-org-datetree/find-iso-week-create ()
   "Test `org-datetree-find-iso-date-create' specificaiton."
   ;; When date is missing, create it.
