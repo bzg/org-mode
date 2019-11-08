@@ -266,6 +266,13 @@ can now be inserted with this prefix argument.
 Source code block header argument =:file-mode= can set file
 permissions if =:file= argument is provided.
 
+*** =ob-plantuml=: now supports using PlantUML executable to generate diagrams
+
+Set =org-plantuml-exec-mode= to ='plantuml= in order to use the
+executable instead of JAR. When using an executable it is also
+possible to configure executable location as well as arguments via:
+=org-plantuml-executable-path= and =org-plantuml-executable-args=.
+
 ** New commands
 *** ~org-table-header-line-mode~
 
