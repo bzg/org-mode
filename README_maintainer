@@ -42,7 +42,7 @@ The release number for minor releases look like this: =9.1.7=
 
 Minor releases are small amends to main releases.  Usually they fix
 critical bugs discovered in a main release.  Minor bugs are usually
-not fixed -- they will be adressed in the next main release.
+not fixed -- they will be addressed in the next main release.
 
 Only the fix to the bug is bundled into a release, without the main
 development work going on in the master branch.  Since the bug fix
@@ -194,7 +194,7 @@ The list of all contributors from who we have the papers is kept on
 Worg at https://orgmode.org/worg/org-contribute.html, so that
 committers can check if a patch can go into the core.
 
-The assignment process does not allways go smoothly, and it has
+The assignment process does not always go smoothly, and it has
 happened several times that it gets stuck or forgotten at the FSF.
 The contact at the FSF for this is: mailto:copyright-clerk@fsf.org
 

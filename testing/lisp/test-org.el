@@ -2516,7 +2516,7 @@ Foo Bar
 		  (lambda (&rest args) (throw :result t))))
 	 ;; When point isn't on a tag it's going to try other things,
 	 ;; possibly trying to open attachments which will return an
-	 ;; error if there isn't an attachment. Supress that error.
+	 ;; error if there isn't an attachment. Suppress that error.
 	 (ignore-errors
 	     (org-open-at-point))
 	 nil)))))
@@ -4862,7 +4862,7 @@ Paragraph<point>"
 
 (ert-deftest test-org/buffer-property-keys ()
   "Test `org-buffer-property-keys' specifications."
-  ;; Retrieve properties accross siblings.
+  ;; Retrieve properties across siblings.
   (should
    (equal '("A" "B")
 	  (org-test-with-temp-text "
@@ -4875,7 +4875,7 @@ Paragraph<point>"
 :B: 1
 :END:"
 	    (org-buffer-property-keys))))
-  ;; Retrieve properties accross children.
+  ;; Retrieve properties across children.
   (should
    (equal '("A" "B")
 	  (org-test-with-temp-text "
@@ -6258,7 +6258,7 @@ Paragraph<point>"
 
 (ert-deftest test-org/tags-expand ()
   "Test `org-tags-expand' specifications."
-  ;; Expand tag groups as a regexp enclosed withing curly brackets.
+  ;; Expand tag groups as a regexp enclosed within curly brackets.
   (should
    (equal "{\\<[ABC]\\>}"
 	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"

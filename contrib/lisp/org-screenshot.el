@@ -86,7 +86,7 @@
 
 (defcustom org-screenshot-image-directory "./images/"
   "Directory in which screenshot image files will be stored, it
-be automatically created if it does't already exist."
+be automatically created if it doesn't already exist."
   :type 'string
   :group 'org-screenshot)
 
@@ -290,7 +290,7 @@ screenshot is done, any more `C-u' after that increases delay by
                    (setq num (* num 4)
                          cnt (+ cnt (if (< cnt 3) 1 2))))
                  cnt))
-              (t (error "Invald delay"))))
+              (t (error "Invalid delay"))))
   (when (and org-screenshot-process
              (member (process-status org-screenshot-process)
                      '(run stop)))
@@ -331,7 +331,7 @@ screenshot is done, any more `C-u' after that increases delay by
 (make-variable-buffer-local 'org-screenshot-rotation-index)
 
 (defun org-screenshot-rotation-init (lastfile)
-  "Initialize variable `org-screenshot-file-list' variabel with
+  "Initialize variable `org-screenshot-file-list' variable with
 the list of PNG files in `org-screenshot-image-directory' sorted
 by most recent first"
   (setq

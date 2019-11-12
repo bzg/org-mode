@@ -75,7 +75,7 @@ group 3.
 When tangling, user usually just wants to tangle literally code instead
 of prepend inserting a ~(ns ..)~ statement before source block
 code.  Now, when you have no ~:ns~ header argument specified, this
-behavior will not happend automatically.
+behavior will not happen automatically.
 *** Change in behavior on exit from an Org edit buffer
 Org will no longer attempt to restore the window configuration in the
 frame to which the user returns after editing a source block with
@@ -214,7 +214,7 @@ They are added mostly for internal restructuring purposes, but can
 ofc. be used for other things as well.
 
 *** New link-type: Attachment
-Attachment-links are now first-class citizens.  They mimick file-links
+Attachment-links are now first-class citizens.  They mimic file-links
 in everything they do but use the existing attachment-folder as a base
 when expanding the links. Both =DIR= and =ID= properties are used to
 try to resolve the links, in exactly the same way as Org-Attach uses
@@ -256,14 +256,14 @@ Supported LaTeX attributes are ~:float~, ~:center~, ~:font~ and
 *** Attach buffer contents to headline
 With =<b>= key from attachment dispatcher (=<C-c C-a>=), it is now
 possible to write the contents of a buffer to a file in the headline
-attachement directory.
+attachment directory.
 *** iCalendar export respects a =CLASS= property
 
 Set the =CLASS= property on an entry to specify a visibility class for
 that entry only during iCalendar export. The property can be set to
 anything the calendar server supports. The iCalendar standard defines
 the values =PUBLIC=, =CONFIDENTIAL=, =PRIVATE=, which can be
-interpreted as publicly visable, accessible to a specific group, and
+interpreted as publicly visible, accessible to a specific group, and
 private respectively.
 
 This property can be inherited during iCalendar export, depending on
@@ -296,8 +296,8 @@ days in the past.
 =<C-u K>= (~org-habit-toggle-display-in-agenda~) in an agenda toggles
 the display of all habits to those which are undone and scheduled.
 This is a function for convenience.
-*** New paramater for SQL Babel blocks: ~:dbconnection~
-The new paramater ~:dbconnection~ allows to specify a connection name
+*** New parameter for SQL Babel blocks: ~:dbconnection~
+The new parameter ~:dbconnection~ allows to specify a connection name
 in a SQL block header: this name is used to look up connection
 parameters in ~sql-connection-alist~.
 
@@ -358,10 +358,10 @@ You can install it back from MELPA.
 *** ~org-attach-directory~
 
 It has been deprecated in favour of ~org-attach-id-dir~ which is less
-ambigous given the restructured org-attach.
+ambiguous given the restructured org-attach.
 
 *** ~org-enable-fixed-width-editor~
-This variable was not used throught the code base.
+This variable was not used through the code base.
 ** Miscellaneous
 *** Change signature for ~org-list-to-subtree~
 The function now accepts the level of the subtree as an optional
@@ -456,7 +456,7 @@ Org 9.2 comes with a new template expansion mechanism, combining
 ~org-insert-structure-template~ bound to ~C-c C-,~.
 
 If you customized the ~org-structure-template-alist~ option manually,
-you probably need to udpate it, see the docstring for accepted values.
+you probably need to update it, see the docstring for accepted values.
 
 If you prefer using previous patterns, e.g. =<s=, you can activate
 them again by requiring Org Tempo library:
@@ -727,7 +727,7 @@ matcher.
 =ob-sql= library already support running SQL blocks against an Oracle
 database using ~sqlplus~.  Now it's possible to use alias names
 defined in =TNSNAMES= file instead of specifying full connection
-parameters.  See example bellow.
+parameters.  See example below.
 
 #+BEGIN_SRC org
   you can use the previous full connection parameters
@@ -781,7 +781,7 @@ will go back to the widen state.
 
 *** ~org-browse-news~
 
-Browse https://orgmode.org/Changes.html to let users read informations
+Browse https://orgmode.org/Changes.html to let users read information
 about the last major release.
 
 There is a new menu entry for this in the "Documentation" menu item.
@@ -2599,7 +2599,7 @@ everywhere in the buffer, possibly corrupting URLs.
 
 This undocumented option defaulted to the value of =shell-file-name= at
 the time of loading =ob-shell=.  The new behavior is to use the value
-of =shell-file-name= directly when the shell langage is =shell=.  To chose
+of =shell-file-name= directly when the shell language is =shell=.  To chose
 a different shell, either customize =shell-file-name= or bind this
 variable locally.
 
@@ -4677,7 +4677,7 @@ that Calc formulas can operate on them.
 
      : Percent escaping is used in Org mode to escape certain characters
      : in links that would either break the parser (e.g. square brackets
-     : in link target oder description) or are not allowed to appear in
+     : in link target or description) or are not allowed to appear in
      : a particular link type (e.g. non-ascii characters in a http:
      : link).
      :

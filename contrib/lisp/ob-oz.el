@@ -106,7 +106,7 @@
 ;; back any results from Oz to Emacs. The following code creates a
 ;; socket for sending code to the OPI compiler and results are
 ;; returned by the same socket. On the Oz side, a socket is opened and
-;; conected to the compiler of the OPI (via oz-send-string). On the
+;; connected to the compiler of the OPI (via oz-send-string). On the
 ;; Emacs side, a connection to this socket is created for feeding code
 ;; and receiving results. This additional communication channel to the
 ;; OPI compiler ensures that results are returned cleanly (e.g., only

@@ -3139,7 +3139,7 @@ This variable can be set on the per-file basis by inserting a line
 
 (defcustom org-columns-default-format-for-agenda nil
   "The default column format in an agenda buffer.
-Whis will be used for column view in the agenda unless a format has
+This will be used for column view in the agenda unless a format has
 been set by adding `org-overriding-columns-format' to the local
 settings list of a custom agenda view.  When nil, the columns format
 for the first item in the agenda list will be used, or as a fall-back,
@@ -11572,7 +11572,7 @@ from the `before-change-functions' in the current buffer."
 When called interactively with a `\\[universal-argument]' prefix,
 show the priority in the minibuffer instead of changing it.
 
-When called programatically, ACTION can be `set', `up', `down',
+When called programmatically, ACTION can be `set', `up', `down',
 or a character."
   (interactive "P")
   (when show
@@ -16340,7 +16340,7 @@ Some of the options can be changed using the variable
 (defun org-create-math-formula (latex-frag &optional mathml-file)
   "Convert LATEX-FRAG to MathML and store it in MATHML-FILE.
 Use `org-latex-to-mathml-convert-command'.  If the conversion is
-sucessful, return the portion between \"<math...> </math>\"
+successful, return the portion between \"<math...> </math>\"
 elements otherwise return nil.  When MATHML-FILE is specified,
 write the results in to that file.  When invoked as an
 interactive command, prompt for LATEX-FRAG, with initial value

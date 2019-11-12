@@ -429,7 +429,7 @@ language.")
   is replace on the value of the CDR. "
   :group 'org-export-groff
   :type '(list
-          (cons :tag "Character Subtitute"
+          (cons :tag "Character Substitute"
                 (string :tag "Original Character Group")
                 (string :tag "Replacement Character"))))
 

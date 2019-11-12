@@ -1,4 +1,4 @@
-;;; org-attach-git.el --- Automatic git commit extention to org-attach -*- lexical-binding: t; -*-
+;;; org-attach-git.el --- Automatic git commit extension to org-attach -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Free Software Foundation, Inc.
 
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; An extention to org-attach.  If `org-attach-id-dir' is initialized
+;; An extension to org-attach.  If `org-attach-id-dir' is initialized
 ;; as a Git repository, then org-attach-git will automatically commit
 ;; changes when it sees them.  Requires git-annex.
 

@@ -348,7 +348,7 @@ separated SEPARATOR."
        separator)))
 
 (defun org-passwords-substitute (string-to-change list-of-substitutions)
-  "Substitutes each appearence in STRING-TO-CHANGE of the `car' of
+  "Substitutes each appearance in STRING-TO-CHANGE of the `car' of
 each element of LIST-OF-SUBSTITUTIONS by the `cdr' of that
 element. For example:
  (org-passwords-substitute \"ab\" \'((\"a\" . \"b\") (\"b\" . \"c\")))

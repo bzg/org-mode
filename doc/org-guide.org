@@ -806,7 +806,7 @@ a difference only in the agenda.
 #+attr_texinfo: :sep ;
 - {{{kbd(C-c \,)}}} ::
 
-  Set the priority of the current headline.  Pres {{{kbd(A)}}},
+  Set the priority of the current headline.  Press {{{kbd(A)}}},
   {{{kbd(B)}}} or {{{kbd(C)}}} to select a priority, or {{{kbd(SPC)}}}
   to remove the cookie.
 

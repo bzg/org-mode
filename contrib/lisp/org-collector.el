@@ -111,7 +111,7 @@ a column, or through the generation of an error.")
 
 (defun org-dblock-write:propview (params)
   "collect the column specification from the #+cols line
-preceeding the dblock, then update the contents of the dblock."
+preceding the dblock, then update the contents of the dblock."
   (interactive)
   (condition-case er
       (let ((cols (plist-get params :cols))

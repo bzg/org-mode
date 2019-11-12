@@ -98,7 +98,7 @@
 		 (org-test-in-example-file org-test-attachments-file
 		   (goto-char 401) ;; H3.1
 		   (let ((org-attach-use-inheritance t))
-		     ;; This is where it get's a bit sketchy...! DIR always has
+		     ;; This is where it gets a bit sketchy...! DIR always has
 		     ;; priority over ID, even if ID is declared "higher up" in the
 		     ;; tree.  This can potentially be revised.  But it is also
 		     ;; pretty clean.  DIR is always higher in priority than ID right

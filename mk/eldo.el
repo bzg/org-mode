@@ -100,7 +100,7 @@
     (goto-char (point-max))))
 
 (defun eldo-write-commands (commands)
-  "Write commands documentaiton in the current buffer."
+  "Write commands documentation in the current buffer."
   (insert "\n* Commands\n")
   (org-set-property "CUSTOM_ID" "commands")
   (dolist (c commands)

@@ -1289,7 +1289,7 @@ Calculator Manual]]).
 Org makes it easy to format tables in plain ASCII.  Any line with =|=
 as the first non-whitespace character is considered part of a table.
 =|= is also the column separator[fn:17].  Moreover, a line starting
-with =|-= is a horizontal rule.  It separates rows explicitely.  Rows
+with =|-= is a horizontal rule.  It separates rows explicitly.  Rows
 before the first horizontal rule are header lines. A table might look
 like this:
 
@@ -3118,7 +3118,7 @@ Here is the full set of built-in link types:
 
 - =doi= ::
 
-  Link to an electronic ressource, through its handle.
+  Link to an electronic resource, through its handle.
 
 - =elisp= ::
 
@@ -8012,7 +8012,7 @@ mentioning.
   ~org-attach-id-to-path-function-list~ if you want the folder
   structure in any other way.  All functions in this list will be
   tried when resolving existing ID's into paths, to maintain backward
-  compatability with existing folders in your system.
+  compatibility with existing folders in your system.
 
 - ~org-attach-expert~ ::
   #+vindex: org-attach-expert
@@ -10879,7 +10879,7 @@ suited for source code and similar examples.
 There is one limitation, however.  You must insert a comma right
 before lines starting with either =*=, =,*=, =#+= or =,#+=, as those
 may be interpreted as outlines nodes or some other special syntax.
-Org transparently strips these additonal commas whenever it accesses
+Org transparently strips these additional commas whenever it accesses
 the contents of the block.
 
 #+begin_example
@@ -17402,7 +17402,7 @@ follows from the type specified above.
   Aligned if it is a table.  Usage example: =:results value raw=.
 
 #+cindex: @samp{wrap}, header argument
-The =wrap= header argument unconditionnally marks the results block by
+The =wrap= header argument unconditionally marks the results block by
 appending strings to =#+BEGIN_= and =#+END_=.  If no string is
 specified, Org wraps the results in a =#+BEGIN_results=
 ... =#+END_results= block.  It takes precedent over the =results=

@@ -814,7 +814,7 @@ form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
 TABLE-STYLE-NAME is the style associated with the table through
 \"#+ATTR_ODT: :style TABLE-STYLE-NAME\" line.
 
-TABLE-TEMPLATE-NAME is a set of - upto 9 - automatic
+TABLE-TEMPLATE-NAME is a set of - up to 9 - automatic
 TABLE-CELL-STYLE-NAMEs and PARAGRAPH-STYLE-NAMEs (as defined
 below) that is included in `org-odt-content-template-file'.
 
@@ -1414,7 +1414,7 @@ original parsed data.  INFO is a plist holding export options."
       ;; the resulting odt file.
       (setq-local backup-inhibited t)
 
-      ;; Outline numbering is retained only upto LEVEL.
+      ;; Outline numbering is retained only up to LEVEL.
       ;; To disable outline numbering pass a LEVEL of 0.
 
       (goto-char (point-min))
@@ -3241,7 +3241,7 @@ styles congruent with the ODF-1.2 specification."
     (when style-spec
       ;; LibreOffice - particularly the Writer - honors neither table
       ;; templates nor custom table-cell styles.  Inorder to retain
-      ;; inter-operability with LibreOffice, only automatic styles are
+      ;; interoperability with LibreOffice, only automatic styles are
       ;; used for styling of table-cells.  The current implementation is
       ;; congruent with ODF-1.2 specification and hence is
       ;; future-compatible.

@@ -4265,7 +4265,7 @@ extension of the given file name, and finally on the variable
 
 ;;;###autoload
 (defun org-table--align-field (field width align)
-  "Format FIELD according to column WIDTH and alignement ALIGN.
+  "Format FIELD according to column WIDTH and alignment ALIGN.
 FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 \"l\" or\"r\"."
   (let* ((spaces (- width (org-string-width field)))

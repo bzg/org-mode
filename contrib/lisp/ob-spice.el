@@ -58,7 +58,7 @@
           (progn  ;loop through the words
             (if (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word)
                 (progn 
-                  ;; if matchs a vector variable format
+                  ;; if matches a vector variable format
                   (setq varname (match-string 1 word))
                   (setq varindex (match-string 2 word))
                   ;; search varname in vars and use the value of varindex to word
@@ -75,7 +75,7 @@
               ) ; end of (if (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word))
             (if (string-match "\\$\\(.*\\)\\." word) ; if variable has a dot in the end
                 (progn
-                  ;; if matchs a non-vector variable format
+                  ;; if matches a non-vector variable format
                   (setq varname (match-string 1 word))
                   (setq newword
                         (assoc-default varname vars
@@ -92,7 +92,7 @@
               );; end of (if (string-match "\\$\\(.*\\)\\." word)
             (if (string-match "\\$\\(.*\\)" word)
                 (progn
-                  ;; if matchs a non-vector variable format
+                  ;; if matches a non-vector variable format
                   (setq varname (match-string 1 word))
                   (setq newword
                         (assoc-default varname vars
