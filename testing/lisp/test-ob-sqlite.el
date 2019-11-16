@@ -25,7 +25,7 @@
   (signal 'missing-test-dependency "Support for sqlite code blocks"))
 
 (ert-deftest ob-sqlite/table-variables-with-commas ()
-  "Test of a table variable that contains commas. This garantees that this code path results in a valid CSV."
+  "Test of a table variable that contains commas. This guarantees that this code path results in a valid CSV."
   (should
    (equal '(("Mr Test A. Sql"
 	     "Minister for Science, Eternal Happiness, and Finance"))

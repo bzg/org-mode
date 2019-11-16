@@ -3317,7 +3317,7 @@ todo         The todo keyword, if any
 tags         All tags including inherited ones, separated by colons
 date         The relevant date, like 2007-2-14
 time         The time, like 15:00-16:50
-extra        Sting with extra planning info
+extra        String with extra planning info
 priority-l   The priority letter if any was given
 priority-n   The computed numerical priority
 agenda-day   The day in the agenda where this is listed"
@@ -4021,7 +4021,7 @@ dimming them."
 the header at `org-hd-marker' is blocked according to
 `org-entry-blocked-p', then if `org-agenda-dim-blocked-tasks' is
 'invisible and the header is not blocked by checkboxes, set the
-text property `org-todo-blocked' to 'invisible, otherwise set it
+text property `org-todo-blocked' to `invisible', otherwise set it
 to t."
   (when (get-text-property 0 'todo-state entry)
     (let ((entry-marker (get-text-property 0 'org-hd-marker entry))
@@ -7540,8 +7540,8 @@ all lines of the category at point."
 (defvar org-agenda-regexp-filter nil)
 (defun org-agenda-filter-by-regexp (strip-or-accumulate)
   "Filter agenda entries by a regular expressions.
-You will be prompted for the regular expresssion, and the agenda
-view will only show entires that are matched by that expression.
+You will be prompted for the regular expression, and the agenda
+view will only show entries that are matched by that expression.
 
 With one `\\[universal-argument]' prefix argument, hide entries matching the regexp.
 When there is already a regexp filter active, this command removed the
@@ -10493,7 +10493,7 @@ to override `appt-message-warning-time'."
                   (append entries
                           (apply 'org-agenda-get-day-entries
                                  file today scope)))))
-    ;; Map thru entries and find if we should filter them out
+    ;; Map through entries and find if we should filter them out
     (mapc
      (lambda (x)
        (let* ((evt (org-trim

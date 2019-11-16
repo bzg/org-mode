@@ -90,7 +90,7 @@ This variable is only used when `org-toc-recenter-mode' is set to
 
 (defcustom org-toc-info-exclude '("ALLTAGS")
   "A list of excluded properties when displaying info in the
-echo-area. The COLUMNS property is always exluded."
+echo-area. The COLUMNS property is always excluded."
   :group 'org-toc
   :type 'lits)
 

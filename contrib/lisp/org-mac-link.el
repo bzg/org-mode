@@ -514,7 +514,7 @@ The links are of the form <link>::split::<name>."
 ;;;###autoload
 (defun org-mac-together-get-selected ()
   (interactive)
-  (message "Applescript: Getting Togther items...")
+  (message "Applescript: Getting Together items...")
   (org-mac-paste-applescript-links (as-get-selected-together-items)))
 
 ;;;###autoload

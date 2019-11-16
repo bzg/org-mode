@@ -28,7 +28,7 @@
 (eval-and-compile (require 'cl-lib))
 
 
-;; General auxilliaries
+;; General auxiliaries
 
 (defun org-test-agenda--agenda-buffers ()
   "Return agenda buffers in a list."

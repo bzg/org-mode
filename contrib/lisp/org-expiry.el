@@ -52,7 +52,7 @@
 ;; This entry will expire on the 14th, january 2008, one week after its
 ;; creation date.
 ;;
-;; What happen when an entry is expired?  Nothing until you explicitely
+;; What happen when an entry is expired?  Nothing until you explicitly
 ;; M-x org-expiry-process-entries When doing this, org-expiry will check
 ;; for expired entries and request permission to process them.
 ;;

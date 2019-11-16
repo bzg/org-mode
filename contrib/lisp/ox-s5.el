@@ -98,7 +98,7 @@ Can be overridden with S5_VERSION."
   :type 'string)
 
 (defcustom org-s5-theme-file nil
-"Url to S5 theme (slides.css) file. Can be overriden with the
+"Url to S5 theme (slides.css) file. Can be overridden with the
 S5_THEME_FILE property. If nil, defaults to
 `org-s5-ui-url'/default/slides.css. If it starts with anything but
 \"http\" or \"/\", it is used as-is. Otherwise the link in generated
@@ -111,7 +111,7 @@ generated relative to `org-s5-ui-url'/default."
 (defcustom org-s5-ui-url "ui"
   "Base url to directory containing S5 \"default\" subdirectory
 and the \"s5-notes.html\" file.
-Can be overriden with the S5_UI_URL property."
+Can be overridden with the S5_UI_URL property."
   :group 'org-export-s5
   :type 'string)
 

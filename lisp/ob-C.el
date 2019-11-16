@@ -393,9 +393,9 @@ of the same value."
 	(setq val (string-to-char val))))
     (let* ((type-data (org-babel-C-val-to-C-type val))
 	   (type (car type-data))
-	   (formated (org-babel-C-format-val type-data val))
-	   (suffix (car formated))
-	   (data (cdr formated)))
+	   (formatted (org-babel-C-format-val type-data val))
+	   (suffix (car formatted))
+	   (data (cdr formatted)))
       (format "%s %s%s = %s;"
 	      type
 	      var

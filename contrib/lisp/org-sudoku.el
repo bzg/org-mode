@@ -1,4 +1,4 @@
-;;; org-sudoku.el --- Greate and solve SUDOKU games in Org tables
+;;; org-sudoku.el --- Create and solve SUDOKU games in Org tables
 
 ;; Copyright (C) 2012-2018 Free Software Foundation, Inc.
 ;;

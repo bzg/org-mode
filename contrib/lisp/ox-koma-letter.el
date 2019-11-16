@@ -921,7 +921,7 @@ contents of hidden elements.
 When optional argument BODY-ONLY is non-nil, only write code
 between \"\\begin{letter}\" and \"\\end{letter}\".
 
-EXT-PLIST, when provided, is a proeprty list with external
+EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
