@@ -466,7 +466,8 @@ time is up."
 		 (run-hooks 'org-timer-done-hook)))))
 
 (defun org-timer--get-timer-title ()
-  "Construct timer title from heading or file name of Org buffer."
+  "Construct timer title.
+Try to use an Org header, otherwise use the buffer name."
   (cond
    ((derived-mode-p 'org-agenda-mode)
     (let* ((marker (or (get-text-property (point) 'org-marker)
@@ -482,7 +483,7 @@ time is up."
    ((derived-mode-p 'org-mode)
     (or (ignore-errors (org-get-heading))
 	(buffer-name (buffer-base-buffer))))
-   (t (error "Not in an Org buffer"))))
+   (t (buffer-name (buffer-base-buffer)))))
 
 (provide 'org-timer)
 
