@@ -5560,11 +5560,13 @@ The following commands are available:
 	      (lambda (&rest _) (org-show-context 'isearch)))
 
   ;; Setup the pcomplete hooks
-  (setq-local pcomplete-command-completion-function 'org-pcomplete-initial)
-  (setq-local pcomplete-command-name-function 'org-command-at-point)
-  (setq-local pcomplete-default-completion-function 'ignore)
-  (setq-local pcomplete-parse-arguments-function 'org-parse-arguments)
+  (setq-local pcomplete-command-completion-function #'org-pcomplete-initial)
+  (setq-local pcomplete-command-name-function #'org-command-at-point)
+  (setq-local pcomplete-default-completion-function #'ignore)
+  (setq-local pcomplete-parse-arguments-function #'org-parse-arguments)
   (setq-local pcomplete-termination-string "")
+  (add-hook 'completion-at-point-functions
+            #'pcomplete-completions-at-point nil t)
   (setq-local buffer-face-mode-face 'org-default)
 
   ;; If empty file that did not turn on Org mode automatically, make
@@ -18936,10 +18938,12 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-i") #'org-cycle)
 (org-defkey org-mode-map (kbd "<tab>") #'org-cycle)
 (org-defkey org-mode-map (kbd "C-<tab>") #'org-force-cycle-archived)
-(org-defkey org-mode-map (kbd "M-<tab>") #'pcomplete)
-(org-defkey org-mode-map (kbd "M-TAB") #'pcomplete)
-(org-defkey org-mode-map (kbd "ESC <tab>") #'pcomplete)
-(org-defkey org-mode-map (kbd "ESC TAB") #'pcomplete)
+;; Override text-mode binding to expose `complete-symbol' for
+;; pcomplete functionality.
+(org-defkey org-mode-map (kbd "M-<tab>") nil)
+(org-defkey org-mode-map (kbd "M-TAB") nil)
+(org-defkey org-mode-map (kbd "ESC <tab>") nil)
+(org-defkey org-mode-map (kbd "ESC TAB") nil)
 
 (org-defkey org-mode-map (kbd "<S-iso-leftab>") #'org-shifttab)
 (org-defkey org-mode-map (kbd "S-<tab>") #'org-shifttab)
