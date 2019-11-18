@@ -16807,7 +16807,8 @@ boundaries."
 		    (if (and (car-safe old) refresh)
 			(image-refresh (overlay-get (cdr old) 'display))
 		      (let ((image (create-image file
-						 (and (image-type-available-p 'imagemagick) 'imagemagick)
+						 (and (image-type-available-p 'imagemagick)
+						      width 'imagemagick)
 						 nil
 						 :width width)))
 			(when image
