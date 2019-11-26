@@ -9162,6 +9162,7 @@ the same tree node, and the headline of the tree node in the Org file."
 	 (hdmarker (org-get-at-bol 'org-hd-marker))
 	 (todayp (org-agenda-today-p (org-get-at-bol 'day)))
 	 (inhibit-read-only t)
+	 org-loop-over-headlines-in-active-region
 	 org-agenda-headline-snapshot-before-repeat newhead just-one)
     (org-with-remote-undo buffer
       (with-current-buffer buffer
