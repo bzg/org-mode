@@ -59,6 +59,7 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-escape-code-in-region "org-src" (beg end))
+(declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
 (declare-function org-indent-line "org" ())
 (declare-function org-list-get-list-end "org-list" (item struct prevs))
 (declare-function org-list-prevs-alist "org-list" (struct))
@@ -2780,7 +2781,8 @@ block but are passed literally to the \"example-block\"."
 				    (concat (funcall c-wrap (car cs)) "\n"
 					    b "\n"
 					    (funcall c-wrap (cadr cs)))))))))
-		      (if (re-search-forward name-regexp nil t)
+		      (if (and (re-search-forward name-regexp nil t)
+			       (not (org-in-commented-heading-p)))
 			  ;; Found a source block named SOURCE-NAME.
 			  ;; Assume it is unique; do not look after
 			  ;; `:noweb-ref' header argument.
@@ -2791,14 +2793,16 @@ block but are passed literally to the \"example-block\"."
 			;; those with a matching Noweb reference.
 			(let ((expansion nil))
 			  (org-babel-map-src-blocks nil
-			    (let* ((info (org-babel-get-src-block-info 'light))
-				   (parameters (nth 2 info)))
-			      (when (equal source-name
-					   (cdr (assq :noweb-ref parameters)))
-				(push (funcall expand-body info) expansion)
-				(push (or (cdr (assq :noweb-sep parameters))
-					  "\n")
-				      expansion))))
+			    (unless (org-in-commented-heading-p)
+			      (let* ((info
+				      (org-babel-get-src-block-info 'light))
+				     (parameters (nth 2 info)))
+				(when (equal source-name
+					     (cdr (assq :noweb-ref parameters)))
+				  (push (funcall expand-body info) expansion)
+				  (push (or (cdr (assq :noweb-sep parameters))
+					    "\n")
+					expansion)))))
 			  (when expansion
 			    (mapconcat #'identity
 				       (nreverse (cdr expansion))

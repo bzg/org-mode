@@ -13173,7 +13173,7 @@ general options (see [[*Export Settings]]).
   #+vindex: org-latex-subtitle-format
   The document's subtitle.  It is typeset as per
   ~org-latex-subtitle-format~.  If ~org-latex-subtitle-separate~ is
-  non-~nil~, it is typed as part of the ~\title~ macro.  See
+  non-~nil~, it is typed outside of the ~\title~ macro.  See
   ~org-latex-hyperref-template~ for customizing metadata items.  See
   ~org-latex-title-command~ for typesetting description into the
   document's front matter.

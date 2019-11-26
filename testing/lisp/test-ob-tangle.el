@@ -296,6 +296,90 @@ another block
 		    (org-split-string (buffer-string))))
 	      (delete-file file))))))
 
+(ert-deftest ob-tangle/commented-src-blocks ()
+  "Test omission of commented src blocks."
+  (should
+   (equal '("A")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		      (format "#+property: header-args :tangle %S
+* A
+
+  #+begin_src emacs-lisp
+  A
+  #+end_src
+
+* COMMENT B
+
+  #+begin_src emacs-lisp
+  B
+  #+end_src
+
+* C
+
+  # #+begin_src emacs-lisp
+  # C
+  # #+end_src
+
+* D
+
+  #+begin_comment
+  #+begin_src emacs-lisp
+  D
+  #+end_src
+  #+end_comment"
+			      file)
+		    (org-babel-tangle))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
+	      (delete-file file)))))
+  (should
+   (equal '("A")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		      (format "#+property: header-args :tangle %S
+* A
+
+  #+begin_src elisp :noweb yes
+  A
+  <<B>>
+  <<C>>
+  <<D>>
+  #+end_src
+
+* COMMENT B
+
+  #+begin_src elisp :noweb-ref B
+  B
+  #+end_src
+
+* C
+
+  # #+begin_src elisp :noweb-ref C
+  # C
+  # #+end_src
+
+* D
+
+  #+begin_comment
+  #+begin_src elisp :noweb-ref D
+  D
+  #+end_src
+  #+end_comment"
+			      file)
+		    (let (org-babel-noweb-error-all-langs
+			  org-babel-noweb-error-langs)
+		      (org-babel-tangle)))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
+	      (delete-file file))))))
+
 (provide 'test-ob-tangle)
 
 ;;; test-ob-tangle.el ends here
