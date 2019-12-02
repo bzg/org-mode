@@ -4910,11 +4910,13 @@ The following commands are available:
 	      (lambda (&rest _) (org-show-context 'isearch)))
 
   ;; Setup the pcomplete hooks
-  (setq-local pcomplete-command-completion-function 'org-pcomplete-initial)
-  (setq-local pcomplete-command-name-function 'org-command-at-point)
-  (setq-local pcomplete-default-completion-function 'ignore)
-  (setq-local pcomplete-parse-arguments-function 'org-parse-arguments)
+  (setq-local pcomplete-command-completion-function #'org-pcomplete-initial)
+  (setq-local pcomplete-command-name-function #'org-command-at-point)
+  (setq-local pcomplete-default-completion-function #'ignore)
+  (setq-local pcomplete-parse-arguments-function #'org-parse-arguments)
   (setq-local pcomplete-termination-string "")
+  (add-hook 'completion-at-point-functions
+            #'pcomplete-completions-at-point nil t)
   (setq-local buffer-face-mode-face 'org-default)
 
   ;; If empty file that did not turn on Org mode automatically, make
