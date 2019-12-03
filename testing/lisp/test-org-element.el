@@ -1925,6 +1925,15 @@ e^{i\\pi}+1=0
 	    (let ((element (org-element-at-point)))
 	      (list (org-element-property :key element)
 		    (org-element-property :value element))))))
+  ;; The insides of property blocks on document level are parsed the
+  ;; same way as headline property blocks.  I.e. the concept of
+  ;; `node-property' apply also for properties in those blocks.
+  (should
+   (equal '("abc" "value")
+	  (org-test-with-temp-text ":PROPERTIES:\n<point>:abc: value\n:END:"
+	    (let ((element (org-element-at-point)))
+	      (list (org-element-property :key element)
+		    (org-element-property :value element))))))
   ;; Value should be trimmed.
   (should
    (equal "value"
@@ -2110,6 +2119,18 @@ Outside list"
    (eq 'property-drawer
        (org-test-with-temp-text
 	   "* H\nDEADLINE: <2014-03-04 tue.>\n<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should
+   (eq 'property-drawer
+       (org-test-with-temp-text "<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should
+   (eq 'property-drawer
+       (org-test-with-temp-text "# C\n# C\n<point>:PROPERTIES:\n:prop: value\n:END:"
+	 (org-element-type (org-element-at-point)))))
+  (should-not
+   (eq 'property-drawer
+       (org-test-with-temp-text "\n<point>:PROPERTIES:\n:prop: value\n:END:"
 	 (org-element-type (org-element-at-point)))))
   ;; Allow properties without value and no property at all.
   (should

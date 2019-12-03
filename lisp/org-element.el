@@ -3910,7 +3910,10 @@ element it has to parse."
 	     ;; LaTeX Environment.
 	     ((looking-at org-element--latex-begin-environment)
 	      (org-element-latex-environment-parser limit affiliated))
-	     ;; Drawer and Property Drawer.
+	     ;; Property drawer (before first headline, else it's catched above).
+	     ((org-at-property-block-p)
+	      (org-element-property-drawer-parser limit))
+	     ;; Drawer.
 	     ((looking-at org-drawer-regexp)
 	      (org-element-drawer-parser limit affiliated))
 	     ;; Fixed Width

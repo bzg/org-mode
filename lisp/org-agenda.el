@@ -7992,29 +7992,26 @@ argument EXPAND can be used for the TYPE tag and will expand the
 tags in the FILTER if any of the tags in FILTER are grouptags."
   ;; Deactivate `org-agenda-entry-text-mode' when filtering
   (when org-agenda-entry-text-mode (org-agenda-entry-text-mode))
-  (let (tags cat txt)
-    (setq org-agenda-filter-form (org-agenda-filter-make-matcher
-				  filter type expand))
-    ;; Only set `org-agenda-filtered-by-category' to t when a unique
-    ;; category is used as the filter:
-    (setq org-agenda-filtered-by-category
-	  (and (eq type 'category)
-	       (not (equal (substring (car filter) 0 1) "-"))))
-    (org-agenda-set-mode-name)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-	(if (org-get-at-bol 'org-hd-marker)
-	    (progn
-	      (setq tags (org-get-at-bol 'tags)
-		    cat (org-agenda-get-category)
-		    txt (org-get-at-bol 'txt))
-	      (unless (eval org-agenda-filter-form)
-		(org-agenda-filter-hide-line type))
-	      (beginning-of-line 2))
-	  (beginning-of-line 2))))
-    (when (get-char-property (point) 'invisible)
-      (ignore-errors (org-agenda-previous-line)))))
+  (setq org-agenda-filter-form (org-agenda-filter-make-matcher
+				filter type expand))
+  ;; Only set `org-agenda-filtered-by-category' to t when a unique
+  ;; category is used as the filter:
+  (setq org-agenda-filtered-by-category
+	(and (eq type 'category)
+	     (not (equal (substring (car filter) 0 1) "-"))))
+  (org-agenda-set-mode-name)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (when (org-get-at-bol 'org-hd-marker)
+	(let ((tags (org-get-at-bol 'tags))
+	      (cat (org-agenda-get-category))
+	      (txt (org-get-at-bol 'txt)))
+	  (unless (eval org-agenda-filter-form)
+	    (org-agenda-filter-hide-line type))))
+      (beginning-of-line 2)))
+  (when (get-char-property (point) 'invisible)
+    (ignore-errors (org-agenda-previous-line))))
 
 (defun org-agenda-filter-top-headline-apply (hl &optional negative)
   "Filter by top headline HL."
