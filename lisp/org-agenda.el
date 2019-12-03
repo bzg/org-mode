@@ -7731,7 +7731,7 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
-	(if (org-get-at-bol 'org-marker)
+	(if (org-get-at-bol 'org-hd-marker)
 	    (progn
 	      (setq tags (org-get-at-bol 'tags)
 		    cat (org-agenda-get-category)
