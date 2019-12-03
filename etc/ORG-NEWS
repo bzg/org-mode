@@ -72,15 +72,19 @@ Link description, if any, is located in match group 2 instead of match
 group 3.
 
 *** ob-clojure does not auto prepend ~(ns ..)~ statement anymore
+
 When tangling, user usually just wants to tangle literally code instead
 of prepend inserting a ~(ns ..)~ statement before source block
 code.  Now, when you have no ~:ns~ header argument specified, this
 behavior will not happen automatically.
+
 *** Change in behavior on exit from an Org edit buffer
+
 Org will no longer attempt to restore the window configuration in the
 frame to which the user returns after editing a source block with
 ~org-edit-src-code~.  Instead, the window configuration will remain as
 it is.
+
 *** Change default value for ~org-email-link-description-format~
 
 When linking from a mail buffer, Org used to truncate the subject of
@@ -112,6 +116,7 @@ alternative was removed and there is no more a :use-xcolor options
 since now it's implicitly always true.
 
 *** Org-Attach Git commit
+
 [[*Org-Attach has been refactored and extended][Refactoring of Org-Attach]] affected the Git commit functionality.  Not
 much, but the following changes are required if you still need to
 auto-commit attachments to git:
@@ -137,11 +142,14 @@ Likewise, scheduled done tasks are also ignored when
 ~org-icalendar-use-scheduled~ contains the same symbol.
 
 *** Add split-window-right option for src block edit window placement
+
 Given the increasing popularity of wide screen monitors, splitting
 horizontally may make more sense than splitting vertically.  An
 option, ~split-window-right~, to request horizontal splitting has been
 added to ~org-src-window-setup~.
+
 *** Org-Attach has been refactored and extended
+
 Org attach has been refactored and the functionality extended.  It
 should now be easier to understand how it works.  A few improvements
 and extra options have been added as well.
@@ -214,6 +222,7 @@ They are added mostly for internal restructuring purposes, but can
 ofc. be used for other things as well.
 
 *** New link-type: Attachment
+
 Attachment-links are now first-class citizens.  They mimic file-links
 in everything they do but use the existing attachment-folder as a base
 when expanding the links. Both =DIR= and =ID= properties are used to
@@ -236,11 +245,15 @@ You can add new dynamic blocks with function
 ~org-dynamic-block-insert-dblock~ command.
 
 *** Babel
+
 **** ob-emacs-lisp sets ~lexical-binding~ in Org edit buffers
+
 When editing an Elisp src block, the editing buffer's
 ~lexical-binding~ is set according to the src block's =:lexical=
 parameter.
+
 **** Add LaTeX output support in PlantUML
+
 *** New minor mode to display headline numbering
 
 Use =<M-x org-num-mode>= to get a visual indication of the numbering
@@ -248,15 +261,21 @@ in the outline.  The numbering is also automatically updated upon
 changes in the buffer.
 
 *** New property =HTML_HEADLINE_CLASS= in HTML export
+
 The new property =HTML_HEADLINE_CLASS= assigns a class attribute to
 a headline.
+
 *** Allow LaTeX attributes and captions for "table.el" tables
+
 Supported LaTeX attributes are ~:float~, ~:center~, ~:font~ and
 ~:caption~.
+
 *** Attach buffer contents to headline
+
 With =<b>= key from attachment dispatcher (=<C-c C-a>=), it is now
 possible to write the contents of a buffer to a file in the headline
 attachment directory.
+
 *** iCalendar export respects a =CLASS= property
 
 Set the =CLASS= property on an entry to specify a visibility class for
@@ -270,6 +289,7 @@ This property can be inherited during iCalendar export, depending on
 the value of ~org-use-property-inheritance~.
 
 *** New parameter for =INCLUDE= keyword
+
 Add =:coding CODING-SYSTEM= to include files using a different coding
 system than the main Org document.  For example:
 
@@ -280,23 +300,32 @@ system than the main Org document.  For example:
 *** New values in clock tables' step: =month= and =year=
 *** ODT export handles numbers cookies in lists
 *** New cell movement functions in tables
+
 ~S-<UP>~, ~S-<DOWN>~, ~S-<RIGHT>~, and ~S-<LEFT>~ now move cells in
 the corresponding direction by swapping with the adjacent cell.
+
 *** New option to natively fontify LaTeX snippets and environments
+
 A 'native option was added to org-highlight-latex-and-related. It
 matches the same structures than 'latex but it calls
 org-src-font-lock-fontify-block instead, thus bringing about full
 LaTeX font locking.
+
 *** ~org-clone-subtree-with-time-shift~ learnt to shift backward in time
+
 =<C-c C-x c>= (~org-clone-subtree-with-time-shift~) now takes a
 negative value as a valid repeater to shift time stamps in backward
 in cloned subtrees.  You can give, for example, ‘-3d’ to shift three
 days in the past.
+
 *** Toggle display of all vs. undone scheduled habits conveniently
+
 =<C-u K>= (~org-habit-toggle-display-in-agenda~) in an agenda toggles
 the display of all habits to those which are undone and scheduled.
 This is a function for convenience.
+
 *** New parameter for SQL Babel blocks: ~:dbconnection~
+
 The new parameter ~:dbconnection~ allows to specify a connection name
 in a SQL block header: this name is used to look up connection
 parameters in ~sql-connection-alist~.
@@ -361,11 +390,15 @@ It has been deprecated in favour of ~org-attach-id-dir~ which is less
 ambiguous given the restructured org-attach.
 
 *** ~org-enable-fixed-width-editor~
+
 This variable was not used through the code base.
+
 ** Miscellaneous
 *** Change signature for ~org-list-to-subtree~
+
 The function now accepts the level of the subtree as an optional
 argument.  It no longer deduces it from the current level.
+
 *** LaTeX preview is simplified
 
 Function ~org-latex-preview~, formerly known as
@@ -385,7 +418,9 @@ after the bullet.  Special indentation used to introduce bugs when
 inserting sub-items in a description list.
 
 *** New hook: ~org-todo-repeat-hook~
+
 This hook was actually introduced in Org 9.2.1, but wasn't advertised.
+
 *** Org Table reads numbers starting with 0 as strings
 *** Disable fast tag selection interface via prefix arg
 
@@ -400,15 +435,18 @@ files. Now ~:mkdirp~ works for ~:dir~ too. This is more convenient for
 specify default directory and with ~:file~ header argument.
 
 *** New variable: ~org-agenda-breadcrumbs-separator~
+
 If breadcrumbs are showed in org-agenda with the help of "%b" format
 in ~org-agenda-prefix-format~, user can customize breadcrumbs's
 separator using ~org-agenda-breadcrumbs-separator~.
+
 *** New variable ~org-attach-commands~
 
 This variable makes it possible to customize the list of commands for
 the attachment dispatcher.
 
 *** New ID method based on timestamp
+
 If one chooses, it is now possible to create ID's based on timestamp
 (ISO8601) instead of UUID by changing org-id-method to ts.
 
@@ -418,6 +456,7 @@ to promote ~org-attach-id-ts-folder-format~ to the first element of
 same time.
 
 *** New customization: ~org-id-locations-relative~
+
 New customization to make the persisting of org-id-locations between
 sessions to store links to files as relative instead of absolute.  The
 links will be stored as relative to the path of org-id-locations-file.
