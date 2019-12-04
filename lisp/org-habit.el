@@ -409,7 +409,7 @@ current time."
 			   'help-echo
 			   (concat (format-time-string
 				    (org-time-stamp-format)
- 				    (time-add starting (days-to-time (- start (time-to-days starting)))))
+				    (time-add starting (days-to-time (- start (time-to-days starting)))))
 				   (if donep " DONE" ""))
 			   graph))
       (setq start (1+ start)

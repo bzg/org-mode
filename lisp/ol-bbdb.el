@@ -162,13 +162,13 @@ used."
   '(("birthday" .
      (lambda (name years suffix)
        (concat "Birthday: [[bbdb:" name "][" name " ("
-    	       (format "%s" years)        ; handles numbers as well as strings
-    	       suffix ")]]")))
+	       (format "%s" years)        ; handles numbers as well as strings
+	       suffix ")]]")))
     ("wedding" .
      (lambda (name years suffix)
        (concat "[[bbdb:" name "][" name "'s "
-    	       (format "%s" years)
-    	       suffix " wedding anniversary]]"))))
+	       (format "%s" years)
+	       suffix " wedding anniversary]]"))))
   "How different types of anniversaries should be formatted.
 An alist of elements (STRING . FORMAT) where STRING is the name of an
 anniversary class and format is either:
