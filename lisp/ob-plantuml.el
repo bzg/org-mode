@@ -69,10 +69,11 @@ function to convert variables to PlantUML assignments.
 
 If BODY does not contain @startXXX ... @endXXX clauses, @startuml
 ... @enduml will be added."
-  (let ((assignments (org-babel-variable-assignments:plantuml params)))
-    (if (string-prefix-p "@start" body t) assignments
-      (format "@startuml\n%s\n@enduml"
-	      (org-babel-expand-body:generic body params assignments)))))
+  (let ((full-body
+	 (org-babel-expand-body:generic
+	  body params (org-babel-variable-assignments:plantuml params))))
+    (if (string-prefix-p "@start" body t) full-body
+      (format "@startuml\n%s\n@enduml" full-body))))
 
 (defun org-babel-execute:plantuml (body params)
   "Execute a block of plantuml code with org-babel.
