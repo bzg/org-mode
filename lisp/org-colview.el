@@ -164,7 +164,7 @@ See `org-columns-summary-types' for details.")
 (org-defkey org-columns-map "o" 'org-overview)
 (org-defkey org-columns-map "e" 'org-columns-edit-value)
 (org-defkey org-columns-map "\C-c\C-t" 'org-columns-todo)
-(org-defkey org-columns-map "\C-c\C-c" 'org-columns-set-tags-or-toggle)
+(org-defkey org-columns-map "\C-c\C-c" 'org-columns-toggle-or-columns-quit)
 (org-defkey org-columns-map "\C-c\C-o" 'org-columns-open-link)
 (org-defkey org-columns-map "v" 'org-columns-show-value)
 (org-defkey org-columns-map "q" 'org-columns-quit)
@@ -554,13 +554,19 @@ for the duration of the command.")
   (interactive "P")
   (org-columns-edit-value "TODO"))
 
-(defun org-columns-set-tags-or-toggle (&optional _arg)
-  "Toggle checkbox at point, or set tags for current headline."
-  (interactive "P")
-  (if (string-match "\\`\\[[ xX-]\\]\\'"
-		    (get-char-property (point) 'org-columns-value))
-      (org-columns-next-allowed-value)
-    (org-columns-edit-value "TAGS")))
+(defun org-columns-toggle-or-columns-quit ()
+  "Toggle checkbox at point, or quit column view."
+  (interactive)
+  (or (org-columns--toggle)
+      (org-columns-quit)))
+
+(defun org-columns--toggle ()
+  "Toggle checkbox at point.  Return non-nil if toggle happened, else nil.
+See info documentation about realizing a suitable checkbox."
+  (when (string-match "\\`\\[[ xX-]\\]\\'"
+		      (get-char-property (point) 'org-columns-value))
+    (org-columns-next-allowed-value)
+    t))
 
 (defvar org-overriding-columns-format nil
   "When set, overrides any other format definition for the agenda.

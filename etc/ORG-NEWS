@@ -21,6 +21,22 @@ just as if it was at outline level 0.  Inheritance for properties will
 work also for this level.  In other words: defining things in a
 property drawer before the first headline will make them "inheritable"
 for all headlines.
+** New functions
+*** ~org-columns-toggle-or-columns-quit~
+=<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
+recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
+possible via column view value edit or with =<C-c C-q>=.
+
+** Removed functions and variables
+
+*** ~org-columns-set-tags-or-toggle~
+See [[*~org-columns-toggle-or-columns-quit~]]
+
+** Miscellaneous
+*** Exit column view with =<C-c C-c>=
+=<C-c C-c>= (almost) everywhere in a buffer exits column view.  Before
+there was only key =<q>= to exit column view and only functional on lines
+which were affected by the column view.
 
 * Version 9.3
 

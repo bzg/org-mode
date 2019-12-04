@@ -141,6 +141,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-clock-update-time-maybe "org-clock" ())
 (declare-function org-clocking-buffer "org-clock" ())
 (declare-function org-clocktable-shift "org-clock" (dir n))
+(declare-function org-columns-quit "org-colview" ())
 (declare-function org-columns-insert-dblock "org-colview" ())
 (declare-function org-duration-from-minutes "org-duration" (minutes &optional fmt canonical))
 (declare-function org-element-at-point "org-element" ())
@@ -17816,6 +17817,7 @@ This command does many different things, depending on context:
   inhibited by setting `org-babel-no-eval-on-ctrl-c-ctrl-c'."
   (interactive "P")
   (cond
+   ((bound-and-true-p org-columns-overlays) (org-columns-quit))
    ((or (bound-and-true-p org-clock-overlays) org-occur-highlights)
     (when (boundp 'org-clock-overlays) (org-clock-remove-overlays))
     (org-remove-occur-highlights)

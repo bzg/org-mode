@@ -5469,7 +5469,7 @@ either for all clocks or just for today.
   ~org-columns-default-format~, and column view is established for the
   current entry and its subtree.
 
-- {{{kbd(r)}}} or {{{kbd(g)}}} (~org-columns-redo~) ::
+- {{{kbd(r)}}} or {{{kbd(g)}}} on a columns view line (~org-columns-redo~) ::
 
   #+kindex: r
   #+kindex: g
@@ -5477,9 +5477,10 @@ either for all clocks or just for today.
   Recreate the column view, to include recent changes made in the
   buffer.
 
-- {{{kbd(q)}}} (~org-columns-quit~) ::
+- {{{kbd(C-c C-c)}}} or {{{kbd(q)}}} on a columns view line (~org-columns-quit~) ::
 
   #+kindex: q
+  #+kindex: C-c C-c
   #+findex: org-columns-quit
   Exit column view.
 
@@ -5519,11 +5520,12 @@ either for all clocks or just for today.
   property.  For example, the tag completion or fast selection
   interface pops up when editing a =TAGS= property.
 
-- {{{kbd(C-c C-c)}}} (~org-columns-set-tags-or-toggle~) ::
+- {{{kbd(C-c C-c)}}} (~org-columns-toggle-or-columns-quit~) ::
 
   #+kindex: C-c C-c
-  #+findex: org-columns-set-tags-or-toggle
-  When there is a checkbox at point, toggle it.
+  #+findex: org-columns-toggle-or-columns-quit
+  When there is a checkbox at point, toggle it.  Else exit column
+  view.
 
 - {{{kbd(v)}}} (~org-columns-show-value~) ::
 
@@ -18589,6 +18591,8 @@ The {{{kbd(C-c C-c)}}} key in Org serves many purposes depending on
 the context.  It is probably the most over-worked, multi-purpose key
 combination in Org.  Its uses are well documented throughout this
 manual, but here is a consolidated list for easy reference.
+
+- If column view (see [[*Column View]]) is on, exit column view.
 
 - If any highlights shown in the buffer from the creation of a sparse
   tree, or from clock display, remove such highlights.
