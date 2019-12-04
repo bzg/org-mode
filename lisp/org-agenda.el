@@ -8584,14 +8584,14 @@ When called with a prefix argument, include all archive files as well."
 	      (if (or org-agenda-category-filter
 		      (get 'org-agenda-category-filter :preset-filter))
 		  '(:eval (propertize
-	      		   (concat "["
+			   (concat "["
 	      			   (mapconcat
 	      			    'identity
 	      			    (append
 	      			     (get 'org-agenda-category-filter :preset-filter)
 	      			     org-agenda-category-filter)
 	      			    "")
-	      			   "]")
+				   "]")
 	      		   'face 'org-agenda-filter-category
 	      		   'help-echo "Category used in filtering")) "")
 	      (if (or org-agenda-tag-filter

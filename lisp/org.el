@@ -16154,7 +16154,7 @@ BEG and END are buffer positions."
        ;; Emacs cannot overlay images from remote hosts.  Create it in
        ;; `temporary-file-directory' instead.
        (if (or (not file) (file-remote-p file))
-    	   temporary-file-directory
+	   temporary-file-directory
 	 default-directory)
        'overlays nil 'forbuffer org-preview-latex-default-process))))
 
