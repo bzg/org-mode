@@ -1589,15 +1589,17 @@ non-nil."
       (cond ((not desc))
 	    ((equal desc "NONE") (setq desc nil))
 	    (t (setq desc (org-link-display-format desc))))
-      ;; Return the link
+      ;; Store and return the link
       (if (not (and interactive? link))
 	  (or agenda-link (and link (org-link-make-string link desc)))
-	(push (list link desc) org-stored-links)
-	(message "Stored: %s" (or desc link))
-	(when custom-id
-	  (setq link (concat "file:" (abbreviate-file-name
-				      (buffer-file-name)) "::#" custom-id))
-	  (push (list link desc) org-stored-links))
+	(if (member (list link desc) org-stored-links)
+	    (message "This link already exists")
+	  (push (list link desc) org-stored-links)
+	  (message "Stored: %s" (or desc link))
+	  (when custom-id
+	    (setq link (concat "file:" (abbreviate-file-name
+					(buffer-file-name)) "::#" custom-id))
+	    (push (list link desc) org-stored-links)))
 	(car org-stored-links)))))
 
 ;;;###autoload
