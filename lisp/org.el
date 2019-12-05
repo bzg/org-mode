@@ -7780,8 +7780,9 @@ If yes, remember the marker and the distance to BEG."
   "Narrow to the subtree at point or widen a narrowed buffer."
   (interactive)
   (if (buffer-narrowed-p)
-      (widen)
-    (org-narrow-to-subtree)))
+      (progn (widen) (message "Buffer widen"))
+    (org-narrow-to-subtree)
+    (message "Buffer narrowed to current subtree")))
 
 (defun org-narrow-to-block ()
   "Narrow buffer to the current block."
