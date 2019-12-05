@@ -7760,7 +7760,8 @@ which see."
     (org-agenda-filter-show-all-top-filter))
   (when org-agenda-effort-filter
     (org-agenda-filter-show-all-effort))
-  (org-agenda-finalize))
+  (org-agenda-finalize)
+  (message "All agenda filters removed"))
 
 (defun org-agenda-filter-by-tag (strip-or-accumulate &optional char exclude)
   "Keep only those lines in the agenda buffer that have a specific tag.
