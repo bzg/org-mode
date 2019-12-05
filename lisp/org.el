@@ -10192,7 +10192,7 @@ When called through ELisp, arg is also interpreted in the following way:
 		    (throw 'exit nil)))))
 	    (store-match-data match-data)
 	    (replace-match next t t)
-	    (cond ((equal this org-state)
+	    (cond ((and org-state (equal this org-state))
 		   (message "TODO state was already %s" (org-trim next)))
 		  ((not (pos-visible-in-window-p hl-pos))
 		   (message "TODO state changed to %s" (org-trim next))))
