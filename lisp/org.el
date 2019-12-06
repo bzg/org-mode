@@ -4974,7 +4974,8 @@ The following commands are available:
 		   ("8.3" . "26.1")
 		   ("9.0" . "26.1")
 		   ("9.1" . "26.1")
-		   ("9.2" . "27.1")))
+		   ("9.2" . "27.1")
+		   ("9.3" . "27.1")))
 
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table text-mode-syntax-table)))
@@ -7845,7 +7846,7 @@ with the original repeater."
 		"")))			;No time shift
 	 (doshift
 	  (and (org-string-nw-p shift)
-	       (or (string-match "\\`[ \t]*\\([\\+\\-]?[0-9]+\\)\\([dwmy]\\)[ \t]*\\'"
+	       (or (string-match "\\`[ \t]*\\([+-]?[0-9]+\\)\\([dwmy]\\)[ \t]*\\'"
 				 shift)
 		   (user-error "Invalid shift specification %s" shift)))))
     (goto-char end-of-tree)
