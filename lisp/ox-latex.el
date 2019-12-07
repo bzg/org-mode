@@ -2425,7 +2425,8 @@ used as a communication channel."
 		       (format "\\resizebox{%s}{%s}{%s}"
 			       (if (org-string-nw-p width) width "!")
 			       (if (org-string-nw-p height) height "!")
-			       image-code)))))
+			       image-code))
+		      (t image-code))))
       ;; For other images:
       ;; - add scale, or width and height to options.
       ;; - include the image with \includegraphics.
