@@ -996,12 +996,13 @@ Store them in the capture property list."
 	   (org-capture-put-target-region-and-position)
 	   (widen)
 	   ;; Make a date/week tree entry, with the current date (or
-	   ;; yesterday, if we are extending dates for a couple of hours)
+	   ;; yesterday, if we are extending dates for a couple of
+	   ;; hours)
 	   (funcall
 	    (pcase (org-capture-get :tree-type)
-	      ('week #'org-datetree-find-iso-week-create)
-	      ('month #'org-datetree-find-month-create)
-	      (t #'org-datetree-find-date-create))
+	      (`week #'org-datetree-find-iso-week-create)
+	      (`month #'org-datetree-find-month-create)
+	      (_ #'org-datetree-find-date-create))
 	    (calendar-gregorian-from-absolute
 	     (cond
 	      (org-overriding-default-time
