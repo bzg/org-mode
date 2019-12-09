@@ -21,12 +21,15 @@ just as if it was at outline level 0.  Inheritance for properties will
 work also for this level.  In other words: defining things in a
 property drawer before the first headline will make them "inheritable"
 for all headlines.
+*** New option to group captured datetime entries by month
+A new `:tree-type month' option was added to org-capture-templates to
+group new datetime entries by month.
 ** New functions
 *** ~org-columns-toggle-or-columns-quit~
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
 recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
 possible via column view value edit or with =<C-c C-q>=.
-
+*** ~org-datetree-find-month-create~
 ** Removed functions and variables
 
 *** ~org-columns-set-tags-or-toggle~
@@ -392,9 +395,6 @@ the headline to use for making the table of contents.
 ,* Another section
 ,#+TOC: headlines 1 :target "#TargetSection"
 #+end_example
-*** New option to group captured datetime entries by month
-A new `:tree-type month' option was added to org-capture-templates to
-group new datetime entries by month.
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
 
@@ -407,7 +407,6 @@ dynamic block in ~org-dynamic-block-alist~.
 *** ~org-table-cell-left~
 *** ~org-table-cell-right~
 *** ~org-habit-toggle-display-in-agenda~
-*** ~org-datetree-find-month-create~
 ** Removed functions and variables
 *** Removed Org Drill
 
