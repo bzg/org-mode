@@ -2903,6 +2903,12 @@ used as a predicate for `org-export-get-ordinal' or a value to
   (string-match-p org-latex-math-environments-re
                   (org-element-property :value element)))
 
+(defun org-html--latex-environment-numbered-p (element)
+  "Non-nil when ELEMENT contains a numbered LaTeX math environment.
+Starred and \"displaymath\" environments are not numbered."
+  (not (string-match-p "\\`[ \t]*\\\\begin{\\(.*\\*\\|displaymath\\)}"
+		       (org-element-property :value element))))
+
 (defun org-html--unlabel-latex-environment (latex-frag)
   "Change environment in LATEX-FRAG string to an unnumbered one.
 For instance, change an 'equation' environment to 'equation*'."
@@ -2923,10 +2929,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
         (attributes (org-export-read-attribute :attr_html latex-environment))
         (label (and (org-element-property :name latex-environment)
                     (org-export-get-reference latex-environment info)))
-        (caption (number-to-string
-                  (org-export-get-ordinal
-                   latex-environment info nil
-                   #'org-html--math-environment-p))))
+        (caption (and (org-html--latex-environment-numbered-p latex-environment)
+		      (number-to-string
+		       (org-export-get-ordinal
+			latex-environment info nil
+			(lambda (l _)
+			  (and (org-html--math-environment-p l)
+			       (org-html--latex-environment-numbered-p l))))))))
     (cond
      ((memq processing-type '(t mathjax))
       (org-html-format-latex
