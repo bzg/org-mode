@@ -8004,10 +8004,11 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
   (save-excursion
     (goto-char (point-min))
     (while (not (eobp))
-      (when (org-get-at-bol 'org-hd-marker)
+      (when (or (org-get-at-bol 'org-hd-marker)
+		(org-get-at-bol 'org-marker))
 	(let ((tags (org-get-at-bol 'tags))
 	      (cat (org-agenda-get-category))
-	      (txt (org-get-at-bol 'txt)))
+	      (txt (or (org-get-at-bol 'txt) "")))
 	  (unless (eval org-agenda-filter-form)
 	    (org-agenda-filter-hide-line type))))
       (beginning-of-line 2)))
