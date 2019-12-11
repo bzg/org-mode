@@ -45,7 +45,7 @@ Markdown.  New export backends can be derived from existing ones, or
 defined from scratch.
 
 Org files can include source code blocks, which makes Org uniquely
-suited for authoring technical documents with code examples. Org
+suited for authoring technical documents with code examples.  Org
 source code blocks are fully functional; they can be evaluated in
 place and their results can be captured in the file.  This makes it
 possible to create a single file reproducible research compendium.
@@ -1040,7 +1040,7 @@ My favorite scenes are (in this order)
 But in the end, no individual scenes matter but the film as a whole.
 Important actors in this film are:
 - Elijah Wood :: He plays Frodo
-- Sean Astin :: He plays Sam, Frodo's friend. I still remember him
+- Sean Astin :: He plays Sam, Frodo's friend.  I still remember him
      very well from his role as Mikey Walsh in /The Goonies/.
 #+end_example
 
@@ -1290,7 +1290,7 @@ Org makes it easy to format tables in plain ASCII.  Any line with =|=
 as the first non-whitespace character is considered part of a table.
 =|= is also the column separator[fn:17].  Moreover, a line starting
 with =|-= is a horizontal rule.  It separates rows explicitly.  Rows
-before the first horizontal rule are header lines. A table might look
+before the first horizontal rule are header lines.  A table might look
 like this:
 
 #+begin_example
@@ -3303,7 +3303,7 @@ current buffer:
   For any other file, the link points to the file, with a search
   string (see [[*Search Options in File Links]]) pointing to the contents
   of the current line.  If there is an active region, the selected
-  words form the basis of the search string. You can write custom Lisp
+  words form the basis of the search string.  You can write custom Lisp
   functions to select the search string and perform the search for
   particular file types (see [[*Custom Searches]]).
 
@@ -7955,7 +7955,7 @@ mentioning.
   parents according to ~org-use-property-inheritance~.  If one instead
   want to set inheritance specifically for org-attach that can be done
   using ~org-attach-use-inheritance~.  Inheriting documents through
-  the node hierarchy makes a lot of sense in most cases. Especially
+  the node hierarchy makes a lot of sense in most cases.  Especially
   since the introduction of [[* Attachment links]].  The following example
   shows one use case for attachment inheritance:
 
@@ -9048,7 +9048,7 @@ filters and limits allow to flexibly narrow down the list of agenda
 entries.
 
 /Filters/ only change the visibility of items, are very fast and are
-mostly used interactively[fn:96]. You can switch quickly between
+mostly used interactively[fn:96].  You can switch quickly between
 different filters without having to recreate the agenda.  /Limits/ on
 the other hand take effect before the agenda buffer is populated, so
 they are mostly useful when defined as local variables within custom
@@ -9099,7 +9099,7 @@ filter elements are accumulated.
 
   #+findex: org-agenda-filter-by-regexp
   Filter the agenda view by a regular expression: only show agenda
-  entries matching the regular expression the user entered. To clear
+  entries matching the regular expression the user entered.  To clear
   the filter, call the command again by pressing {{{kbd(=)}}}.
 
 - {{{kbd(_)}}} (~org-agenda-filter-by-effort~) ::
@@ -9168,10 +9168,10 @@ filter elements are accumulated.
 If the variable ~org-agenda-auto-exclude-function~ is set to
 a user-defined function, that function can select tags that should be
 used as a tag filter when requested.  The function will be called with
-lower-case versions of all tags represented in the current view. The
+lower-case versions of all tags represented in the current view.  The
 function should return ="-tag"= if the filter should remove
 entries with that tag, ="+tag"= if only entries with this tag should
-be kept, or =nil= if that tag is irrelevant. For example, let's say
+be kept, or =nil= if that tag is irrelevant.  For example, let's say
 you use a =Net= tag to identify tasks which need network access, an
 =Errand= tag for errands in town, and a =Call= tag for making phone
 calls.  You could auto-exclude these tags based on the availability of
@@ -9630,7 +9630,7 @@ the other commands, point needs to be in the desired line.
   #+kindex: t
   #+findex: org-agenda-todo
   Change the TODO state of the item, both in the agenda and in the
-  original Org file. A prefix arg is passed through to the ~org-todo~
+  original Org file.  A prefix arg is passed through to the ~org-todo~
   command, so for example a {{{kbd(C-u)}}} prefix are will trigger
   taking a note to document the state change.
 
@@ -11189,7 +11189,7 @@ back-ends:
 - /man/ (Man page format)
 
 Users can install libraries for additional formats from the Emacs
-packaging system. For easy discovery, these packages have a common
+packaging system.  For easy discovery, these packages have a common
 naming scheme: ~ox-NAME~, where {{{var(NAME)}}} is a format.  For
 example, ~ox-koma-letter~ for /koma-letter/ back-end.  More libraries
 can be found in the =contrib/= directory (see [[*Installation]]).
@@ -16991,7 +16991,7 @@ variable ~org-babel-inline-result-wrap~, which by default is set to
   This is the name of the code block (see [[*Structure of Code Blocks]])
   to be evaluated in the current document.  If the block is located in
   another file, start =<name>= with the file name followed by
-  a colon. For example, in order to execute a block named =clear-data=
+  a colon.  For example, in order to execute a block named =clear-data=
   in =file.org=, you can write the following:
 
   : #+CALL: file.org:clear-data()
@@ -17176,7 +17176,7 @@ they are mutually exclusive.
 
   When evaluating the code block in a session (see [[*Environment of
   a Code Block]]), Org passes the code to an interpreter running as an
-  interactive Emacs inferior process. Org gets the value from the
+  interactive Emacs inferior process.  Org gets the value from the
   source code interpreter's last statement output.  Org has to use
   language-specific methods to obtain the value.  For example, from
   the variable ~_~ in Python and Ruby, and the value of ~.Last.value~
@@ -19361,8 +19361,8 @@ javascript:location.href='org-protocol://capture?template=x'+
 
 #+vindex: org-protocol-default-template-key
 The capture template to be used can be specified in the bookmark (like
-=X= above). If unspecified, the template key is set in the variable
-~org-protocol-default-template-key~. The following template
+=X= above).  If unspecified, the template key is set in the variable
+~org-protocol-default-template-key~.  The following template
 placeholders are available:
 
 #+begin_example
@@ -20086,7 +20086,7 @@ These commands update dynamic blocks:
 
 Before updating a dynamic block, Org removes content between the
 =BEGIN= and =END= markers.  Org then reads the parameters on the
-=BEGIN= line for passing to the writer function as a plist. The
+=BEGIN= line for passing to the writer function as a plist.  The
 previous content of the dynamic block becomes erased from the buffer
 and appended to the plist under ~:content~.
 
@@ -20695,7 +20695,7 @@ Before I get to this list, a few special mentions are in order:
   a JavaScript program for displaying webpages derived from Org using
   an Info-like or a folding interface with single-key navigation.
 
-See below for the full list of contributions! Again, please let me
+See below for the full list of contributions!  Again, please let me
 know what I am missing here!
 
 ** From Bastien
@@ -21513,7 +21513,7 @@ this timestamp are exported.
 
 [fn:121] For export to LaTeX format---or LaTeX-related formats such as
 Beamer---, the =org-latex-package-alist= variable needs further
-configuration. See [[LaTeX specific export settings]].
+configuration.  See [[LaTeX specific export settings]].
 
 [fn:122] At the moment, some export back-ends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
