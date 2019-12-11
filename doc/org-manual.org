@@ -7417,7 +7417,7 @@ going through the interactive template selection, you can create your
 key binding like this:
 
 #+begin_src emacs-lisp
-(define-key global-map "\C-cx"
+(define-key global-map (kbd "C-c x")
   (lambda () (interactive) (org-capture nil "x")))
 #+end_src
 
