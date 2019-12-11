@@ -1676,12 +1676,12 @@ several columns or display them with a fixed width, regardless of
 content, as shown in the following example.
 
 #+begin_example
-|---+---------------------+--------|           |---+-------…|…|
+|---+---------------------+--------|           |---+-------…+…|
 |   | <6>                 |        |           |   | <6>   …|…|
 | 1 | one                 | some   |   ----\   | 1 | one   …|…|
 | 2 | two                 | boring |   ----/   | 2 | two   …|…|
 | 3 | This is a long text | column |           | 3 | This i…|…|
-|---+---------------------+--------|           |---+-------…|…|
+|---+---------------------+--------|           |---+-------…+…|
 #+end_example
 
 To set the width of a column, one field anywhere in the column may
