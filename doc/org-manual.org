@@ -9203,8 +9203,8 @@ the Internet, and outside of business hours, with something like this:
   (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-fn)
 #+end_src
 
-You can apply this self-adapting filter by using a double prefix
-argument to ~org-agenda-filter~, i.e. press {{{kbd(C-u C-u /)}}}, or
+You can apply this self-adapting filter by using a triple prefix
+argument to ~org-agenda-filter~, i.e. press {{{kbd(C-u C-u C-u /)}}}, or
 by pressing {{{kbd(RET)}}} in ~org-agenda-filter-by-tag~.
 
 **** Setting limits for the agenda
