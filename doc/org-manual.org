@@ -7426,7 +7426,7 @@ going through the interactive template selection, you can create your
 key binding like this:
 
 #+begin_src emacs-lisp
-(define-key global-map "\C-cx"
+(define-key global-map (kbd "C-c x")
   (lambda () (interactive) (org-capture nil "x")))
 #+end_src
 
@@ -9150,21 +9150,19 @@ filter elements are accumulated.
   described above.  At the prompt, specify different filter elements
   in a single string, with full completion support.  For example,
 
-  #+begin_example
-     +work-John+<0:10-/plot/
-  #+end_example
+  : +work-John+<0:10-/plot/
 
-  selects entries with category `work' and effort estimates below 10
-  minutes, and deselects entries with tag `John' or matching the
-  regexp `plot'.  `+' can be left out if that does not lead to
+  selects entries with category =work= and effort estimates below 10
+  minutes, and deselects entries with tag =John= or matching the
+  regexp =plot=.  You can leave =+= out if that does not lead to
   ambiguities.  The sequence of elements is arbitrary.  The filter
-  syntax assumes that there is no overlap between categories and tags
-  (tags will take priority).  If you reply to the prompt with the
+  syntax assumes that there is no overlap between categories and tags.
+  Otherwise, tags take priority.  If you reply to the prompt with the
   empty string, all filtering is removed.  If a filter is specified,
-  it replaces all current filters.  But if you call the command with a
-  double prefix argument, or if you add an additional `+'
-  (e.g. `++work') to the front of the string, the new filter elements
-  are added to the active ones.  A single prefix argument applies the
+  it replaces all current filters.  But if you call the command with
+  a double prefix argument, or if you add an additional =+= (e.g.,
+  =++work=) to the front of the string, the new filter elements are
+  added to the active ones.  A single prefix argument applies the
   entire filter in a negative sense.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
@@ -9177,8 +9175,8 @@ filter elements are accumulated.
 :END:
 
 #+vindex: org-agenda-auto-exclude-function
-If the variable ~org-agenda-auto-exclude-function~ is set to a
-user-defined function, that function can select tags that should be
+If the variable ~org-agenda-auto-exclude-function~ is set to
+a user-defined function, that function can select tags that should be
 used as a tag filter when requested.  The function will be called with
 lower-case versions of all tags represented in the current view. The
 function should the return ="-tag"= if the filter should remove
