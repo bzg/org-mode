@@ -9188,17 +9188,16 @@ calls.  You could auto-exclude these tags based on the availability of
 the Internet, and outside of business hours, with something like this:
 
 #+begin_src emacs-lisp
-  (defun org-my-auto-exclude-fn (tag)
-    (if (cond
-	 ((string= tag "net")
-	  (/= 0 (call-process "/sbin/ping" nil nil nil
-			      "-c1" "-q" "-t1" "mail.gnu.org")))
-	 ((member tag '("errand" "call"))
-	  (let ((hr (nth 2 (decode-time))))
-	    (or (< hr 8) (> hr 21)))))
-	(concat "-" tag)))
+(defun my-auto-exclude-fn (tag)
+  (when (cond ((string= tag "net")
+	       (/= 0 (call-process "/sbin/ping" nil nil nil
+			           "-c1" "-q" "-t1" "mail.gnu.org")))
+              ((member tag '("errand" "call"))
+	       (let ((hr (nth 2 (decode-time))))
+	         (or (< hr 8) (> hr 21)))))
+    (concat "-" tag)))
 
-  (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-fn)
+(setq org-agenda-auto-exclude-function #'my-auto-exclude-fn)
 #+end_src
 
 You can apply this self-adapting filter by using a triple prefix
