@@ -9169,7 +9169,7 @@ If the variable ~org-agenda-auto-exclude-function~ is set to
 a user-defined function, that function can select tags that should be
 used as a tag filter when requested.  The function will be called with
 lower-case versions of all tags represented in the current view. The
-function should the return ="-tag"= if the filter should remove
+function should return ="-tag"= if the filter should remove
 entries with that tag, ="+tag"= if only entries with this tag should
 be kept, or =nil= if that tag is irrelevant. For example, let's say
 you use a =Net= tag to identify tasks which need network access, an
