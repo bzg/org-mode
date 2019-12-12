@@ -698,21 +698,19 @@ of the day at point (if any) or the current HH:MM time."
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
-  (let ((txt (org-capture-get :template)) file)
-    (cond
-     ((and (listp txt) (eq (car txt) 'file))
-      (if (file-exists-p
-	   (setq file (expand-file-name (nth 1 txt) org-directory)))
-	  (setq txt (org-file-contents file))
-	(setq txt (format "* Template file %s not found" (nth 1 txt)))))
-     ((and (listp txt) (eq (car txt) 'function))
-      (if (fboundp (nth 1 txt))
-	  (setq txt (funcall (nth 1 txt)))
-	(setq txt (format "* Template function %s not found" (nth 1 txt)))))
-     ((not txt) (setq txt ""))
-     ((stringp txt))
-     (t (setq txt "* Invalid capture template")))
-    (org-capture-put :template txt)))
+  (org-capture-put
+   :template
+   (pcase (org-capture-get :template)
+     (`nil "")
+     ((and (pred stringp) template) template)
+     (`(file ,file)
+      (let ((filename (expand-file-name file org-directory)))
+	(if (file-exists-p filename) (org-file-contents filename)
+	  (format "* Template file %S not found" file))))
+     (`(function ,f)
+      (if (functionp f) (funcall f)
+	(format "* Template function %S not found" f)))
+     (_ "* Invalid capture template"))))
 
 (defun org-capture-finalize (&optional stay-with-capture)
   "Finalize the capture process.
