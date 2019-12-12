@@ -9889,9 +9889,9 @@ Elements of length one have a tab appended.  Elements of length
 two are kept as is.  Longer elements are truncated to length two.
 
 If an element cannot be made unique, an error is raised."
-  (let ((orderd-keys (cl-sort (copy-sequence keys) #'< :key #'length))
+  (let ((ordered-keys (cl-sort (copy-sequence keys) #'< :key #'length))
 	menu-keys)
-    (dolist (key orderd-keys)
+    (dolist (key ordered-keys)
       (let ((potential-key
 	     (cl-case (length key)
 	       (1 (concat key "\t"))
@@ -10043,7 +10043,7 @@ By default the available states are \"TODO\" and \"DONE\".  So, for this
 example: when the item starts with TODO, it is changed to DONE.
 When it starts with DONE, the DONE is removed.  And when neither TODO nor
 DONE are present, add TODO at the beginning of the heading.
-You can set up single-charcter keys to fast-select the new state.  See the
+You can set up single-character keys to fast-select the new state.  See the
 `org-todo-keywords' and `org-use-fast-todo-selection' for details.
 
 With `\\[universal-argument]' prefix ARG, force logging the state change \
