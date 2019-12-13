@@ -457,14 +457,6 @@ DIR-property exists (that is different than the unset one)."
   "Turn the autotag off."
   (org-attach-tag 'off))
 
-(defun org-attach-store-link (file)
-  "Add a link to `org-stored-link' when attaching a file.
-Only do this when `org-attach-store-link-p' is non-nil."
-  (setq org-stored-links
-	(cons (list (org-attach-expand-link file)
-		    (file-name-nondirectory file))
-	      org-stored-links)))
-
 (defun org-attach-url (url)
   (interactive "MURL of the file to attach: \n")
   (let ((org-attach-method 'url))
@@ -511,9 +503,13 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
       (run-hook-with-args 'org-attach-after-change-hook attach-dir)
       (org-attach-tag)
       (cond ((eq org-attach-store-link-p 'attached)
-             (org-attach-store-link fname))
+	     (push (list (concat "attachment:" (file-name-nondirectory fname))
+			 (file-name-nondirectory fname))
+		   org-stored-links))
             ((eq org-attach-store-link-p t)
-             (org-attach-store-link file)))
+             (push (list (concat "file:" file)
+			 (file-name-nondirectory file))
+		   org-stored-links)))
       (if visit-dir
           (dired attach-dir)
         (message "File %S is now an attachment." basename)))))
@@ -641,12 +637,6 @@ See `org-attach-open'."
   "Return the full path to the current entry's attachment file FILE.
 Basically, this adds the path to the attachment directory."
   (expand-file-name file (org-attach-dir)))
-
-(defun org-attach-expand-link (file)
-  "Return a file link pointing to the current entry's attachment file FILE.
-Basically, this adds the path to the attachment directory, and a \"file:\"
-prefix."
-  (concat "file:" (org-attach-expand file)))
 
 (org-link-set-parameters "attachment"
                          :follow #'org-attach-open-link

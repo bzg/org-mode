@@ -314,6 +314,8 @@ Counting starts at 1."
 
 (define-obsolete-variable-alias 'org-attach-directory
   'org-attach-id-dir "Org 9.3")
+(make-obsolete 'org-attach-store-link "No longer used" "Org 9.4")
+(make-obsolete 'org-attach-expand-link "No longer used" "Org 9.4")
 
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
