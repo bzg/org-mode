@@ -16554,12 +16554,16 @@ a HTML file."
 	(setq bg (org-latex-color :background))
       (setq bg (org-latex-color-format
 		(if (string= bg "Transparent") "white" bg))))
+    ;; Remove TeX \par at end of snippet to avoid trailing space.
+    (if (string-suffix-p string "\n")
+        (aset string (1- (length string)) ?%)
+      (setq string (concat string "%")))
     (with-temp-file texfile
       (insert latex-header)
       (insert "\n\\begin{document}\n"
-	      "\\definecolor{fg}{rgb}{" fg "}\n"
-	      "\\definecolor{bg}{rgb}{" bg "}\n"
-	      "\n\\pagecolor{bg}\n"
+	      "\\definecolor{fg}{rgb}{" fg "}%\n"
+	      "\\definecolor{bg}{rgb}{" bg "}%\n"
+	      "\n\\pagecolor{bg}%\n"
 	      "\n{\\color{fg}\n"
 	      string
 	      "\n}\n"
