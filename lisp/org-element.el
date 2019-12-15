@@ -1820,7 +1820,7 @@ containing `:begin', `:end', `:value', `:post-blank',
 
 Assume point is at comment beginning."
   (save-excursion
-    (let* ((begin (car affiliated))
+    (let* ((begin (or (car affiliated) (point)))
 	   (post-affiliated (point))
 	   (value (prog2 (looking-at "[ \t]*# ?")
 		      (buffer-substring-no-properties
@@ -3823,12 +3823,6 @@ Assume point is at the first equal sign marker."
 ;; `org-element--current-element' is the core function of this section.
 ;; It returns the Lisp representation of the element starting at
 ;; point.
-;;
-;; `org-element--current-element' makes use of special modes.  They
-;; are activated for fixed element chaining (e.g., `plain-list' >
-;; `item') or fixed conditional element chaining (e.g., `headline' >
-;; `section').  Special modes are: `first-section', `item',
-;; `node-property', `section' and `table-row'.
 
 (defun org-element--current-element (limit &optional granularity mode structure)
   "Parse the element starting at point.
@@ -3848,8 +3842,9 @@ nil), secondary values will not be parsed, since they only
 contain objects.
 
 Optional argument MODE, when non-nil, can be either
-`first-section', `section', `planning', `item', `node-property'
-and `table-row'.
+`first-section', `item', `node-property', `planning',
+`property-drawer', `section', `table-row', or `top-comment'.
+
 
 If STRUCTURE isn't provided but MODE is set to `item', it will be
 computed.
@@ -3879,15 +3874,22 @@ element it has to parse."
 	(org-element-section-parser
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
 	     limit)))
+       ;; Top-level comments.  Those cannot have affiliated keywords.
+       ((and (eq mode 'top-comment) (looking-at "#\\(?: \\|$\\)"))
+	(org-element-comment-parser limit nil))
        ;; Planning.
        ((and (eq mode 'planning)
 	     (eq ?* (char-after (line-beginning-position 0)))
 	     (looking-at org-planning-line-re))
 	(org-element-planning-parser limit))
        ;; Property drawer.
-       ((and (memq mode '(planning property-drawer))
-	     (eq ?* (char-after (line-beginning-position
-				 (if (eq mode 'planning) 0 -1))))
+       ((and (pcase mode
+	       (`planning (eq ?* (char-after (line-beginning-position 0))))
+	       ((or `property-drawer `top-comment)
+		(save-excursion
+		  (beginning-of-line 0)
+		  (not (looking-at "[[:blank:]]*$"))))
+	       (_ nil))
 	     (looking-at org-property-drawer-re))
 	(org-element-property-drawer-parser limit))
        ;; When not at bol, point is at the beginning of an item or
@@ -3910,9 +3912,6 @@ element it has to parse."
 	     ;; LaTeX Environment.
 	     ((looking-at org-element--latex-begin-environment)
 	      (org-element-latex-environment-parser limit affiliated))
-	     ;; Property drawer (before first headline, else it's catched above).
-	     ((org-at-property-block-p)
-	      (org-element-property-drawer-parser limit))
 	     ;; Drawer.
 	     ((looking-at org-drawer-regexp)
 	      (org-element-drawer-parser limit affiliated))
@@ -4323,34 +4322,41 @@ looking into captions:
 ;; `org-element--object-lex' to find the next object in the current
 ;; container.
 
-(defsubst org-element--next-mode (type parentp)
-  "Return next special mode according to TYPE, or nil.
-TYPE is a symbol representing the type of an element or object
-containing next element if PARENTP is non-nil, or before it
-otherwise.  Modes can be either `first-section', `item',
-`node-property', `planning', `property-drawer', `section',
-`table-row' or nil."
-  (if parentp
+(defsubst org-element--next-mode (mode type parent?)
+  "Return next mode according to current one.
+
+MODE is a symbol representing the expectation about the next
+element or object.  Meaningful values are `first-section',
+`item', `node-property', `planning', `property-drawer',
+`section', `table-row', `top-comment', and nil.
+
+TYPE is the type of the current element or object.
+
+If PARENT? is non-nil, assume the next element or object will be
+located inside the current one.  "
+  (if parent?
       (pcase type
 	(`headline 'section)
+	(`first-section 'top-comment)
 	(`inlinetask 'planning)
 	(`plain-list 'item)
 	(`property-drawer 'node-property)
 	(`section 'planning)
 	(`table 'table-row))
-    (pcase type
+    (pcase mode
       (`item 'item)
       (`node-property 'node-property)
-      (`planning 'property-drawer)
-      (`table-row 'table-row))))
+      ((and `planning (guard (eq type 'planning))) 'property-drawer)
+      (`table-row 'table-row)
+      ((and `top-comment (guard (eq type 'comment))) 'property-drawer))))
 
 (defun org-element--parse-elements
     (beg end mode structure granularity visible-only acc)
   "Parse elements between BEG and END positions.
 
 MODE prioritizes some elements over the others.  It can be set to
-`first-section', `section', `planning', `item', `node-property'
-or `table-row'.
+`first-section', `item', `node-property', `planning',
+`property-drawer', `section', `table-row', `top-comment', or nil.
 
 When value is `item', STRUCTURE will be used as the current list
 structure.
@@ -4399,7 +4405,7 @@ Elements are accumulated into ACC."
 	    (org-element--parse-elements
 	     cbeg (org-element-property :contents-end element)
 	     ;; Possibly switch to a special mode.
-	     (org-element--next-mode type t)
+	     (org-element--next-mode mode type t)
 	     (and (memq type '(item plain-list))
 		  (org-element-property :structure element))
 	     granularity visible-only element))
@@ -4411,7 +4417,7 @@ Elements are accumulated into ACC."
 	     (org-element-restriction type))))
 	  (push (org-element-put-property element :parent acc) elements)
 	  ;; Update mode.
-	  (setq mode (org-element--next-mode type nil))))
+	  (setq mode (org-element--next-mode mode type nil))))
       ;; Return result.
       (apply #'org-element-set-contents acc (nreverse elements)))))
 
@@ -5453,9 +5459,11 @@ the process stopped before finding the expected result."
         ;; element following headline above, or first element in
         ;; buffer.
         ((not cached)
-         (when (org-with-limited-levels (outline-previous-heading))
-           (setq mode 'planning)
-	   (forward-line))
+         (if (org-with-limited-levels (outline-previous-heading))
+             (progn
+	       (setq mode 'planning)
+	       (forward-line))
+	   (setq mode 'top-comment))
          (skip-chars-forward " \r\t\n")
          (beginning-of-line))
         ;; Cache returned exact match: return it.
@@ -5524,7 +5532,7 @@ the process stopped before finding the expected result."
 	      ;; after it.
 	      ((and (<= elem-end pos) (/= (point-max) elem-end))
 	       (goto-char elem-end)
-	       (setq mode (org-element--next-mode type nil)))
+	       (setq mode (org-element--next-mode mode type nil)))
 	      ;; A non-greater element contains point: return it.
 	      ((not (memq type org-element-greater-elements))
 	       (throw 'exit element))
@@ -5552,7 +5560,7 @@ the process stopped before finding the expected result."
 				    (and (= cend pos) (= (point-max) pos)))))
 		   (goto-char (or next cbeg))
 		   (setq next nil
-			 mode (org-element--next-mode type t)
+			 mode (org-element--next-mode mode type t)
 			 parent element
 			 end cend))))
 	      ;; Otherwise, return ELEMENT as it is the smallest

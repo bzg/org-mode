@@ -2120,6 +2120,8 @@ Outside list"
        (org-test-with-temp-text
 	   "* H\nDEADLINE: <2014-03-04 tue.>\n<point>:PROPERTIES:\n:prop: value\n:END:"
 	 (org-element-type (org-element-at-point)))))
+  ;; Parse property drawer at the beginning of the document, possibly
+  ;; after some initial comments.
   (should
    (eq 'property-drawer
        (org-test-with-temp-text "<point>:PROPERTIES:\n:prop: value\n:END:"
