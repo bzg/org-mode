@@ -1806,13 +1806,10 @@ Return a list whose CAR is `clock' and CDR is a plist containing
 
 ;;;; Comment
 
-(defun org-element-comment-parser (limit affiliated)
+(defun org-element-comment-parser (limit)
   "Parse a comment.
 
-LIMIT bounds the search.  AFFILIATED is a list of which CAR is
-the buffer position at the beginning of the first affiliated
-keyword and CDR is a plist of affiliated keywords along with
-their value.
+LIMIT bounds the search.
 
 Return a list whose CAR is `comment' and CDR is a plist
 containing `:begin', `:end', `:value', `:post-blank',
@@ -1820,8 +1817,7 @@ containing `:begin', `:end', `:value', `:post-blank',
 
 Assume point is at comment beginning."
   (save-excursion
-    (let* ((begin (or (car affiliated) (point)))
-	   (post-affiliated (point))
+    (let* ((begin (point))
 	   (value (prog2 (looking-at "[ \t]*# ?")
 		      (buffer-substring-no-properties
 		       (match-end 0) (line-end-position))
@@ -1843,13 +1839,11 @@ Assume point is at comment beginning."
 		       (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (line-beginning-position)))))
       (list 'comment
-	    (nconc
-	     (list :begin begin
-		   :end end
-		   :value value
-		   :post-blank (count-lines com-end end)
-		   :post-affiliated post-affiliated)
-	     (cdr affiliated))))))
+	    (list :begin begin
+		  :end end
+		  :value value
+		  :post-blank (count-lines com-end end)
+		  :post-affiliated begin)))))
 
 (defun org-element-comment-interpreter (comment _)
   "Interpret COMMENT element as Org syntax.
@@ -3874,9 +3868,9 @@ element it has to parse."
 	(org-element-section-parser
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
 	     limit)))
-       ;; Top-level comments.  Those cannot have affiliated keywords.
-       ((and (eq mode 'top-comment) (looking-at "#\\(?: \\|$\\)"))
-	(org-element-comment-parser limit nil))
+       ;; Comments.
+       ((looking-at "^[ \t]*#\\(?: \\|$\\)")
+	(org-element-comment-parser limit))
        ;; Planning.
        ((and (eq mode 'planning)
 	     (eq ?* (char-after (line-beginning-position 0)))
@@ -3898,7 +3892,7 @@ element it has to parse."
        ;; Clock.
        ((looking-at org-clock-line-re) (org-element-clock-parser limit))
        ;; Inlinetask.
-       ((org-at-heading-p)
+       ((looking-at "^\\*+ ")
 	(org-element-inlinetask-parser limit raw-secondary-p))
        ;; From there, elements can have affiliated keywords.
        (t (let ((affiliated (org-element--collect-affiliated-keywords
@@ -3920,13 +3914,10 @@ element it has to parse."
 	      (org-element-fixed-width-parser limit affiliated))
 	     ;; Inline Comments, Blocks, Babel Calls, Dynamic Blocks and
 	     ;; Keywords.
-	     ((looking-at "[ \t]*#")
+	     ((looking-at "[ \t]*#\\+")
 	      (goto-char (match-end 0))
 	      (cond
-	       ((looking-at "\\(?: \\|$\\)")
-		(beginning-of-line)
-		(org-element-comment-parser limit affiliated))
-	       ((looking-at "\\+BEGIN_\\(\\S-+\\)")
+	       ((looking-at "BEGIN_\\(\\S-+\\)")
 		(beginning-of-line)
 		(funcall (pcase (upcase (match-string 1))
 			   ("CENTER"  #'org-element-center-block-parser)
@@ -3939,13 +3930,13 @@ element it has to parse."
 			   (_         #'org-element-special-block-parser))
 			 limit
 			 affiliated))
-	       ((looking-at "\\+CALL:")
+	       ((looking-at "CALL:")
 		(beginning-of-line)
 		(org-element-babel-call-parser limit affiliated))
-	       ((looking-at "\\+BEGIN:? ")
+	       ((looking-at "BEGIN:? ")
 		(beginning-of-line)
 		(org-element-dynamic-block-parser limit affiliated))
-	       ((looking-at "\\+\\S-+:")
+	       ((looking-at "\\S-+:")
 		(beginning-of-line)
 		(org-element-keyword-parser limit affiliated))
 	       (t

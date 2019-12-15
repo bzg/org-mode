@@ -568,42 +568,38 @@ Some other text
 (ert-deftest test-org-element/comment-parser ()
   "Test `comment' parser."
   ;; Regular comment.
-  (should
-   (org-test-with-temp-text "# Comment"
-     (org-element-map (org-element-parse-buffer) 'comment 'identity)))
+  (should (eq 'comment
+	      (org-test-with-temp-text "# Comment"
+		(org-element-type (org-element-at-point)))))
   ;; Inline comment.
-  (should
-   (org-test-with-temp-text "  # Comment"
-     (org-element-map (org-element-parse-buffer) 'comment 'identity)))
+  (should (eq 'comment
+	      (org-test-with-temp-text "  # Comment"
+		(org-element-type (org-element-at-point)))))
   ;; Preserve indentation.
   (should
-   (equal
-    (org-element-property
-     :value
-     (org-test-with-temp-text "# No blank\n#  One blank"
-       (org-element-map (org-element-parse-buffer) 'comment 'identity nil t)))
-    "No blank\n One blank"))
+   (equal "No blank\n One blank"
+	  (org-element-property
+	   :value
+	   (org-test-with-temp-text "# No blank\n#  One blank"
+	     (org-element-at-point)))))
   ;; Comment with blank lines.
   (should
-   (equal
-    (org-element-property
-     :value
-     (org-test-with-temp-text "# First part\n# \n#\n# Second part"
-       (org-element-map (org-element-parse-buffer) 'comment 'identity nil t)))
-    "First part\n\n\nSecond part"))
+   (equal "First part\n\n\nSecond part"
+	  (org-element-property
+	   :value
+	   (org-test-with-temp-text "# First part\n# \n#\n# Second part"
+	     (org-element-at-point)))))
   ;; Do not mix comments and keywords.
   (should
    (eq 1
        (org-test-with-temp-text "#+keyword: value\n# comment\n#+keyword: value"
 	 (length (org-element-map (org-element-parse-buffer) 'comment
-		   'identity)))))
+		   #'identity)))))
   (should
    (equal "comment"
-	  (org-test-with-temp-text "#+keyword: value\n# comment\n#+keyword: value"
-	    (org-element-property
-	     :value
-	     (org-element-map (org-element-parse-buffer) 'comment
-	       'identity nil t)))))
+	  (org-test-with-temp-text
+	      "#+key: value\n<point># comment\n#+key: value"
+	    (org-element-property :value (org-element-at-point)))))
   ;; Correctly handle non-empty blank lines at the end of buffer.
   (should
    (org-test-with-temp-text "# A\n "
