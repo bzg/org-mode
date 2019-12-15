@@ -54,6 +54,7 @@
 (declare-function org-at-table-p "org-table" (&optional table-type))
 (declare-function org-clock-update-mode-line "org-clock" (&optional refresh))
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
+(declare-function org-datetree-find-month-create (d &optional keep-restriction))
 (declare-function org-decrypt-entry "org-crypt" ())
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-lineage "org-element" (datum &optional types with-self))
@@ -68,6 +69,7 @@
 
 (defvar dired-buffers)
 (defvar org-end-time-was-given)
+(defvar org-keyword-properties)
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
 (defvar org-store-link-plist)
