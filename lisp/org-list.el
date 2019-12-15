@@ -86,7 +86,6 @@
 (defvar org-clock-string)
 (defvar org-closed-string)
 (defvar org-deadline-string)
-(defvar org-description-max-indent)
 (defvar org-done-keywords)
 (defvar org-drawer-regexp)
 (defvar org-element-all-objects)
