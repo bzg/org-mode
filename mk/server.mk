@@ -38,7 +38,7 @@ ORGFULL   = README COPYING lisp/ \
 		etc/ contrib/ doc/ testing/
 ORGFULL  := $(ORGFULL:%/=%/*)
 ORGELPA   = README_ELPA COPYING etc/ORG-NEWS lisp/ \
-		doc/dir doc/org doc/orgcard.pdf \
+		doc/dir doc/org doc/orgguide doc/orgcard.pdf \
 		etc/styles/ org-pkg.el
 ORGELPA  := $(ORGELPA:%/=%/*)
 ORGELPAPLUS := $(ORGELPA:org-pkg%=org-plus-contrib-pkg%)
