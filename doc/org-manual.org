@@ -1937,7 +1937,7 @@ and ~org-table-current-column~.  Examples:
   Copy text or values of each row of column 1 of the table named
   {{{var(FOO)}}} into column 2 of the current table.
 
-- =@3 = 2 * remote(FOO, @@1$$#)= ::
+- =@3 = 2 * remote(FOO, @1$$#)= ::
 
   Insert the doubled value of each column of row 1 of the table
   named {{{var(FOO)}}} into row 3 of the current table.
