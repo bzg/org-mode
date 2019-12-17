@@ -2984,29 +2984,29 @@ Literal links.
 :END:
 #+cindex: internal links
 #+cindex: links, internal
-#+cindex: targets, for links
+
+A link that does not look like a URL---i.e., does not start with
+a known scheme or a file name---, refers to the current document.  You
+can follow it with {{{kbd(C-c C-o)}}} when point is on the link, or
+with a mouse click (see [[*Handling Links]]).
 
 #+cindex: @samp{CUSTOM_ID}, property
-If the link does not look like a URL, it is considered to be internal
-in the current file.  The most important case is a link like
-=[[#my-custom-id]]= which links to the entry with the =CUSTOM_ID= property
-=my-custom-id=.  You are responsible yourself to make sure these
-custom IDs are unique in a file.
+Org provides several refinements to internal navigation within
+a document.  Most notably, a construct like =[[#my-custom-id]]=
+specifically targets the entry with the =CUSTOM_ID= property set to
+=my-custom-id=.  Also, an internal link looking like =[[*Some
+section]]= points to a headline with the name =Some section=[fn:25].
 
-Links such as =[[My Target]]= or =[[My Target][Find my target]]= lead to a text search in
-the current file.
-
-The link can be followed with {{{kbd(C-c C-o)}}} when point is on
-the link, or with a mouse click (see [[*Handling Links]]).  Links to
-custom IDs point to the corresponding headline.  The preferred match
-for a text link is a /dedicated target/: the same string in double
-angular brackets, like =<<My Target>>=.
+#+cindex: targets, for links
+When the link does not belong to any of the cases above, Org looks for
+a /dedicated target/: the same string in double angular brackets, like
+=<<My Target>>=.
 
 #+cindex: @samp{NAME}, keyword
 If no dedicated target exists, the link tries to match the exact name
-of an element within the buffer.  Naming is done with the =NAME=
-keyword, which has to be put in the line before the element it refers
-to, as in the following example
+of an element within the buffer.  Naming is done, unsurprisingly, with
+the =NAME= keyword, which has to be put in the line before the element
+it refers to, as in the following example
 
 #+begin_example
 ,#+NAME: My Target
@@ -3015,9 +3015,15 @@ to, as in the following example
 | of | four cells |
 #+end_example
 
-If none of the above succeeds, Org searches for a headline that is
-exactly the link text but may also include a TODO keyword and
-tags[fn:25].
+#+vindex: org-link-search-must-match-exact-headline
+Ultimately, if none of the above succeeds, Org searches for a headline
+that is exactly the link text but may also include a TODO keyword and
+tags, or initiates a plain text search, according to the value of
+~org-link-search-must-match-exact-headline~.
+
+Note that you must make sure custom IDs, dedicated targets, and names
+are unique throughout the document.  Org provides a linter to assist
+you in the process, if needed.  See [[*Org Syntax]].
 
 During export, internal links are used to mark objects and assign them
 a number.  Marked objects are then referenced by links pointing to
@@ -3176,7 +3182,7 @@ options:
 |            | =/ssh:me@some.where:papers/last.pdf= (same as above)     |
 |            | =file:sometextfile::NNN= (jump to line number)           |
 |            | =file:projects.org=                                      |
-|            | =file:projects.org::some words= (text search) [fn:27]    |
+|            | =file:projects.org::some words= (text search)[fn:27]     |
 |            | =file:projects.org::*task title= (headline search)       |
 |            | =file:projects.org::#custom-id= (headline search)        |
 | attachment | =attachment:projects.org=                                |
