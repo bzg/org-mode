@@ -71,7 +71,8 @@
 (defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (org-babel--get-vars params))
-	(prepends (cdr (assq :prologue params))))
+	(prepends (cdr (assq :prologue params)))
+	(postpends (cdr (assq :epilogue params))))
     (concat (and prepends (concat prepends "\n"))
 	    (if (null vars) body
 	      (format "(let (%s)\n%s\n)"
@@ -80,7 +81,8 @@
 			 (format "%S" (print `(,(car var) ',(cdr var)))))
 		       vars
 		       "\n      ")
-		      body)))))
+		      body))
+	    (and postpends (concat "\n" postpends)))))
 
 
 (defvar org-babel-scheme-repl-map (make-hash-table :test #'equal)
