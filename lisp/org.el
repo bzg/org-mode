@@ -5269,7 +5269,15 @@ by a #."
   "Fontify #+ lines and blocks."
   (let ((case-fold-search t))
     (when (re-search-forward
-	   "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
+	   (rx bol (group (zero-or-more blank) "#"
+			  (group (group (or (seq "+" (one-or-more (any "a-zA-Z")) (optional ":"))
+					    space
+					    eol))
+				 (optional (group "_" (group (one-or-more (any "a-zA-Z"))))))
+			  (zero-or-more blank)
+			  (group (group (zero-or-more (not (any " \t\n"))))
+				 (zero-or-more blank)
+				 (group (zero-or-more any)))))
 	   limit t)
       (let ((beg (match-beginning 0))
 	    (end-of-beginline (match-end 0))
@@ -5287,7 +5295,12 @@ by a #."
 	  (setq block-type (downcase (match-string 5))
 		quoting (member block-type org-protecting-blocks)) ; src, example, export, maybe more
 	  (when (re-search-forward
-		 (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
+		 (rx-to-string `(group bol (or (seq (one-or-more "*") space)
+					       (seq (zero-or-more blank)
+						    "#+end"
+						    ,(match-string 4)
+						    word-end
+						    (zero-or-more any)))))
 		 nil t)  ;; on purpose, we look further than LIMIT
 	    ;; We do have a matching #+end line
 	    (setq beg-of-endline (match-beginning 0)
@@ -5326,10 +5339,14 @@ by a #."
 	    (add-text-properties
 	     beg (if whole-blockline bol-after-beginline end-of-beginline)
 	     '(face org-block-begin-line))
-	    (add-text-properties
-	     beg-of-endline
-	     (min (point-max) (if whole-blockline (min (point-max) (1+ end-of-endline)) end-of-endline))
-	     '(face org-block-end-line))
+	    (unless (string-prefix-p "*" (match-string 1))
+	      (add-text-properties
+	       beg-of-endline
+	       (if whole-blockline
+		   (let ((beg-of-next-line (1+ end-of-endline)))
+		     (min (point-max) beg-of-next-line))
+		 (min (point-max) end-of-endline))
+	       '(face org-block-end-line)))
 	    t))
 	 ((member dc1 '("+title:" "+author:" "+email:" "+date:"))
 	  (org-remove-flyspell-overlays-in
@@ -5352,7 +5369,11 @@ by a #."
 	  ;; Handle short captions.
 	  (save-excursion
 	    (beginning-of-line)
-	    (looking-at "\\([ \t]*#\\+caption\\(?:\\[.*\\]\\)?:\\)[ \t]*"))
+	    (looking-at (rx (group (zero-or-more blank)
+				   "#+caption"
+				   (optional "[" (zero-or-more any) "]")
+				   ":")
+			    (zero-or-more blank))))
 	  (add-text-properties (line-beginning-position) (match-end 1)
 			       '(font-lock-fontified t face org-meta-line))
 	  (add-text-properties (match-end 0) (line-end-position)
