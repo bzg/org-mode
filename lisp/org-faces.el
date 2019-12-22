@@ -243,6 +243,15 @@ is of course immediately visible, but for example a passed deadline is
 of the frame, for example."
   :group 'org-faces)
 
+(defface org-headline-todo	  ;Copied from `font-lock-string-face'
+  '((((class color) (min-colors 16) (background light)) (:foreground "Red4"))
+    (((class color) (min-colors 16) (background dark)) (:foreground "Pink2"))
+    (((class color) (min-colors 8)  (background light)) (:bold t)))
+  "Face used to indicate that a headline is marked as TODO.
+This face is only used if `org-fontify-todo-headline' is set.  If applies
+to the part of the headline after the TODO keyword."
+  :group 'org-faces)
+
 (defface org-headline-done	  ;Copied from `font-lock-string-face'
   '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
     (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))

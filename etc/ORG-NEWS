@@ -36,6 +36,12 @@ possible via column view value edit or with =<C-c C-q>=.
 See [[*~org-columns-toggle-or-columns-quit~]]
 
 ** Miscellaneous
+*** Fontify whole TODO headlines
+
+This feature is the same as ~org-fontify-done-headline~, but for TODO
+headlines instead.  This allows you to distinguish TODO headlines from
+normal headlines.  The face can be customized via ~org-headline-todo~.
+
 *** Exit column view with =<C-c C-c>=
 =<C-c C-c>= (almost) everywhere in a buffer exits column view.  Before
 there was only key =<q>= to exit column view and only functional on lines

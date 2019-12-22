@@ -3687,6 +3687,16 @@ hide them with `org-toggle-custom-properties-visibility'."
   :version "24.3"
   :type '(repeat (string :tag "Property Name")))
 
+(defcustom org-fontify-todo-headline nil
+  "Non-nil means change the face of a headline if it is marked as TODO.
+Normally, only the TODO/DONE keyword indicates the state of a headline.
+When this is non-nil, the headline after the keyword is set to the
+`org-headline-todo' as an additional indication."
+  :group 'org-appearance
+  :package-version '(Org . "9.4")
+  :type 'boolean
+  :safe t)
+
 (defcustom org-fontify-done-headline nil
   "Non-nil means change the face of a headline if it is marked DONE.
 Normally, only the TODO/DONE keyword indicates the state of a headline.
@@ -5677,15 +5687,22 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (list (format org-heading-keyword-regexp-format
 			 org-todo-regexp)
 		 '(2 (org-get-todo-face 2) t))
+	   ;; TODO
+	   (when org-fontify-todo-headline
+	     (list (format org-heading-keyword-regexp-format
+			   (concat
+			    "\\(?:"
+			    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
+			    "\\)"))
+		   '(2 'org-headline-todo t)))
 	   ;; DONE
-	   (if org-fontify-done-headline
-	       (list (format org-heading-keyword-regexp-format
-			     (concat
-			      "\\(?:"
-			      (mapconcat 'regexp-quote org-done-keywords "\\|")
-			      "\\)"))
-		     '(2 'org-headline-done t))
-	     nil)
+	   (when org-fontify-done-headline
+	     (list (format org-heading-keyword-regexp-format
+			   (concat
+			    "\\(?:"
+			    (mapconcat 'regexp-quote org-done-keywords "\\|")
+			    "\\)"))
+		   '(2 'org-headline-done t)))
 	   ;; Priorities
 	   '(org-font-lock-add-priority-faces)
 	   ;; Tags
