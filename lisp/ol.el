@@ -716,12 +716,10 @@ This should be called after the variable `org-link-parameters' has changed."
 	  (rx (seq "[["
 		   ;; URI part: match group 1.
 		   (group
-		    ;; Allow an even number of backslashes right
-		    ;; before the closing bracket.
-		    (or (one-or-more "\\\\")
-			(and (*? anything)
-			     (not (any "\\"))
-			     (zero-or-more "\\\\"))))
+		    (one-or-more
+                     (or (not (any "[]\\"))
+			 (and "\\" (zero-or-more "\\\\") (any "[]"))
+			 (and (one-or-more "\\") (not (any "[]"))))))
 		   "]"
 		   ;; Description (optional): match group 2.
 		   (opt "[" (group (+? anything)) "]")
@@ -838,30 +836,21 @@ E.g. \"%C3%B6\" becomes the german o-Umlaut."
 
 (defun org-link-escape (link)
   "Backslash-escape sensitive characters in string LINK."
-  ;; Escape closing square brackets followed by another square bracket
-  ;; or at the end of the link.  Also escape final backslashes so that
-  ;; we do not escape inadvertently URI's closing bracket.
-  (with-temp-buffer
-    (insert link)
-    (insert (make-string (- (skip-chars-backward "\\\\"))
-			 ?\\))
-    (while (search-backward "\]" nil t)
-      (when (looking-at-p "\\]\\(?:[][]\\|\\'\\)")
-	(insert (make-string (1+ (- (skip-chars-backward "\\\\")))
-			     ?\\))))
-    (buffer-string)))
+  (replace-regexp-in-string
+   (rx (seq (group (zero-or-more "\\")) (group (or string-end (any "[]")))))
+   (lambda (m)
+     (concat (match-string 1 m)
+	     (match-string 1 m)
+	     (and (/= (match-beginning 2) (match-end 2)) "\\")))
+   link nil t 1))
 
 (defun org-link-unescape (link)
   "Remove escaping backslash characters from string LINK."
-  (with-temp-buffer
-    (save-excursion (insert link))
-    (while (re-search-forward "\\(\\\\+\\)\\]\\(?:[][]\\|\\'\\)" nil t)
-      (replace-match (make-string (/ (- (match-end 1) (match-beginning 1)) 2)
-				  ?\\)
-		     nil t nil 1))
-    (goto-char (point-max))
-    (delete-char (/ (- (skip-chars-backward "\\\\")) 2))
-    (buffer-string)))
+  (replace-regexp-in-string
+   (rx (group (one-or-more "\\")) (or string-end (any "[]")))
+   (lambda (_)
+     (concat (make-string (/ (- (match-end 1) (match-beginning 1)) 2) ?\\)))
+   link nil t 1))
 
 (defun org-link-make-string (link &optional description)
   "Make a bracket link, consisting of LINK and DESCRIPTION.

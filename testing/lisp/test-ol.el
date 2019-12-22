@@ -55,49 +55,48 @@
 
 (ert-deftest test-ol/escape ()
   "Test `org-link-escape' specifications."
-  ;; No-op when there is no backslash or closing square bracket.
-  (should (string= "foo[" (org-link-escape "foo[")))
-  ;; Escape closing square bracket at the end of the link.
-  (should (string= "[foo\\]" (org-link-escape "[foo]")))
-  ;; Escape closing square brackets followed by another square
-  ;; bracket.
-  (should (string= "foo\\][bar" (org-link-escape "foo][bar")))
-  (should (string= "foo\\]]bar" (org-link-escape "foo]]bar")))
-  ;; However, escaping closing square bracket at the end of the link
-  ;; has precedence over the previous rule.
-  (should (string= "foo]\\]" (org-link-escape "foo]]")))
+  ;; No-op when there is no backslash or square bracket.
+  (should (string= "foo" (org-link-escape "foo")))
+  ;; Escape square brackets at boundaries of the link.
+  (should (string= "\\[foo\\]" (org-link-escape "[foo]")))
+  ;; Escape square brackets followed by another square bracket.
+  (should (string= "foo\\]\\[bar" (org-link-escape "foo][bar")))
+  (should (string= "foo\\]\\]bar" (org-link-escape "foo]]bar")))
+  (should (string= "foo\\[\\[bar" (org-link-escape "foo[[bar")))
+  (should (string= "foo\\[\\]bar" (org-link-escape "foo[]bar")))
   ;; Escape backslashes at the end of the link.
   (should (string= "foo\\\\" (org-link-escape "foo\\")))
   ;; Escape backslashes that could be confused with escaping
   ;; characters.
   (should (string= "foo\\\\\\]" (org-link-escape "foo\\]")))
-  (should (string= "foo\\\\\\][" (org-link-escape "foo\\][")))
-  (should (string= "foo\\\\\\]]bar" (org-link-escape "foo\\]]bar")))
+  (should (string= "foo\\\\\\]\\[" (org-link-escape "foo\\][")))
+  (should (string= "foo\\\\\\]\\]bar" (org-link-escape "foo\\]]bar")))
   ;; Do not escape backslash characters when unnecessary.
   (should (string= "foo\\bar" (org-link-escape "foo\\bar")))
-  (should (string= "foo\\]bar" (org-link-escape "foo\\]bar")))
   ;; Pathological cases: consecutive closing square brackets.
-  (should (string= "[[[foo\\]]\\]" (org-link-escape "[[[foo]]]")))
-  (should (string= "[[[foo]\\]] bar" (org-link-escape "[[[foo]]] bar"))))
+  (should (string= "\\[\\[\\[foo\\]\\]\\]" (org-link-escape "[[[foo]]]")))
+  (should (string= "\\[\\[foo\\]\\] bar" (org-link-escape "[[foo]] bar"))))
 
 (ert-deftest test-ol/unescape ()
   "Test `org-link-unescape' specifications."
   ;; No-op if there is no backslash.
-  (should (string= "foo[" (org-link-unescape "foo[")))
+  (should (string= "foo" (org-link-unescape "foo")))
   ;; No-op if backslashes are not escaping backslashes.
   (should (string= "foo\\bar" (org-link-unescape "foo\\bar")))
-  (should (string= "foo\\]bar" (org-link-unescape "foo\\]bar")))
-  ;;
+  ;; Unescape backslashes before square brackets.
+  (should (string= "foo]bar" (org-link-unescape "foo\\]bar")))
   (should (string= "foo\\]" (org-link-unescape "foo\\\\\\]")))
   (should (string= "foo\\][" (org-link-unescape "foo\\\\\\][")))
-  (should (string= "foo\\]]bar" (org-link-unescape "foo\\\\\\]]bar")))
+  (should (string= "foo\\]]bar" (org-link-unescape "foo\\\\\\]\\]bar")))
+  (should (string= "foo\\[[bar" (org-link-unescape "foo\\\\\\[\\[bar")))
+  (should (string= "foo\\[]bar" (org-link-unescape "foo\\\\\\[\\]bar")))
   ;; Unescape backslashes at the end of the link.
   (should (string= "foo\\" (org-link-unescape "foo\\\\")))
-  ;; Unescape closing square bracket at the end of the link.
-  (should (string= "[foo]" (org-link-unescape "[foo\\]")))
+  ;; Unescape closing square bracket at boundaries of the link.
+  (should (string= "[foo]" (org-link-unescape "\\[foo\\]")))
   ;; Pathological cases: consecutive closing square brackets.
-  (should (string= "[[[foo]]]" (org-link-unescape "[[[foo\\]]\\]")))
-  (should (string= "[[[foo]]] bar" (org-link-unescape "[[[foo]\\]] bar"))))
+  (should (string= "[[[foo]]]" (org-link-unescape "\\[\\[\\[foo\\]\\]\\]")))
+  (should (string= "[[foo]] bar" (org-link-unescape "\\[\\[foo\\]\\] bar"))))
 
 (ert-deftest test-ol/make-string ()
   "Test `org-link-make-string' specifications."
@@ -204,11 +203,11 @@
   ;; Store file link to non-Org buffer, with context.
   (should
    (let ((org-stored-links nil)
-	 (org-context-in-file-links t))
+	 (org-link-context-for-files t))
      (org-test-with-temp-text-in-file "one\n<point>two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::one]]" file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link nil))))))
   ;; Store file link to non-Org buffer, without context.
   (should
@@ -223,11 +222,11 @@
   ;; buffer.
   (should
    (let ((org-stored-links nil)
-	 (org-context-in-file-links nil))
+	 (org-link-context-for-files nil))
      (org-test-with-temp-text-in-file "one\n<point>two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s::one]]" file)
+	 (equal (format "[[file:%s::two]]" file)
 		(org-store-link '(4)))))))
   ;; A C-u C-u does *not* reverse `org-context-in-file-links' in
   ;; non-Org buffer.

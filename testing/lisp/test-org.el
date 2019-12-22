@@ -2331,7 +2331,7 @@ SCHEDULED: <2014-03-04 tue.>"
   ;; Handle escape characters.
   (should
    (org-test-with-temp-text
-       "* H1\n:PROPERTIES:\n:CUSTOM_ID: [%]\n:END:\n* H2\n[[#[%\\]<point>]]"
+       "* H1\n:PROPERTIES:\n:CUSTOM_ID: [%]\n:END:\n* H2\n[[#\\[%\\]<point>]]"
      (org-open-at-point)
      (looking-at-p "\\* H1")))
   ;; Throw an error on false positives.
@@ -2427,7 +2427,7 @@ Foo Bar
      (looking-at "\\* TODO COMMENT Test")))
   ;; Correctly un-escape fuzzy links.
   (should
-   (org-test-with-temp-text "* [foo]\n[[*[foo\\]][With escaped characters]]"
+   (org-test-with-temp-text "* [foo]\n[[*\\[foo\\]][With escaped characters]]"
      (org-open-at-point)
      (bobp)))
   ;; Match search strings containing newline characters, including
