@@ -1383,6 +1383,8 @@ original parsed data.  INFO is a plist holding export options."
 
     ;; create a manifest entry for styles.xml
     (org-odt-create-manifest-file-entry "text/xml" "styles.xml")
+    ;; Ensure we have write permissions to this file.
+    (set-file-modes (concat org-odt-zip-dir "styles.xml") #o600)
 
     ;; FIXME: Who is opening an empty styles.xml before this point?
     (with-current-buffer
