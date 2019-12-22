@@ -50,15 +50,11 @@ Org used to percent-encode sensitive characters in the URI part of the
 bracket links.
 
 Now, escaping mechanism uses the usual backslash character, according
-to the following rules, applied in order:
+to the following rules:
 
-1. All consecutive =\= characters at the end of the link must be
-   escaped;
-2. Any =]= character at the very end of the link must be escaped;
-3. All consecutive =\= characters preceding =][= or =]]= patterns must
-   be escaped;
-4. Any =]= character followed by either =[= or =]= must be escaped;
-5. Others =]= and =\= characters need not be escaped.
+1. All =[= and =]= characters in the URI must be escaped;
+2. Every =\= character preceding either =[= or =]= must be escaped;
+3. Every =\= character at the end of the URI must be escaped.
 
 When in doubt, use the function ~org-link-escape~ in order to turn
 a link string into its properly escaped form.
