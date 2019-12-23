@@ -156,10 +156,12 @@ split-window-right Show edit buffer to the right of the current window,
                    keeping all other windows.
 other-window       Use `switch-to-buffer-other-window' to display edit buffer.
 reorganize-frame   Show only two windows on the current frame, the current
-                   window and the edit buffer.  When exiting the edit buffer,
-                   return to one window.
+                   window and the edit buffer.
 other-frame        Use `switch-to-buffer-other-frame' to display edit buffer.
-                   Also, when exiting the edit buffer, kill that frame."
+                   Also, when exiting the edit buffer, kill that frame.
+
+Values that modify the window layout (reorganize-frame, split-window-below,
+split-window-right) will restore the layout after exiting the edit buffer."
   :group 'org-edit-structure
   :type '(choice
 	  (const current-window)
@@ -275,6 +277,9 @@ issued in the language major mode buffer."
 
 (defvar-local org-src--remote nil)
 (put 'org-src--remote 'permanent-local t)
+
+(defvar-local org-src--saved-temp-window-config nil)
+(put 'org-src--saved-temp-window-config 'permanent-local t)
 
 (defvar-local org-src--source-type nil
   "Type of element being edited, as a symbol.")
@@ -469,6 +474,10 @@ When REMOTE is non-nil, do not try to preserve point or mark when
 moving from the edit area to the source.
 
 Leave point in edit buffer."
+  (when (memq org-src-window-setup '(reorganize-frame
+				     split-window-below
+				     split-window-right))
+    (setq org-src--saved-temp-window-config (current-window-configuration)))
   (let* ((area (org-src--contents-area datum))
 	 (beg (copy-marker (nth 0 area)))
 	 (end (copy-marker (nth 1 area) t))
@@ -1182,8 +1191,11 @@ Throw an error if there is no such buffer."
        (write-back (org-src--goto-coordinates coordinates beg end))))
     ;; Clean up left-over markers and restore window configuration.
     (set-marker beg nil)
-    (set-marker end nil)))
-
+    (set-marker end nil)
+    (when org-src--saved-temp-window-config
+      (unwind-protect
+	  (set-window-configuration org-src--saved-temp-window-config)
+	(setq org-src--saved-temp-window-config nil)))))
 
 (provide 'org-src)
 

@@ -30,6 +30,11 @@ group new datetime entries by month.
 Babel Java blocks recognize header argument =:cmdargs= and pass its
 value in call to =java=.
 
+*** Refinement in window behavior on exiting Org source buffer
+
+After editing a source block, Org will restore the window layout when
+~org-src-window-setup~ is set to a value that modifies the layout.
+
 ** New functions
 *** ~org-columns-toggle-or-columns-quit~
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
