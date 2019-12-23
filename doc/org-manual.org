@@ -2984,7 +2984,7 @@ Literal links.
 #+cindex: links, internal
 
 A link that does not look like a URL---i.e., does not start with
-a known scheme or a file name---, refers to the current document.  You
+a known scheme or a file name---refers to the current document.  You
 can follow it with {{{kbd(C-c C-o)}}} when point is on the link, or
 with a mouse click (see [[*Handling Links]]).
 
