@@ -4,7 +4,6 @@
 
 ;; Author: Bjarte Johansen
 ;; Keywords: literate programming, reproducible research
-;; Version: 0.1.1
 
 ;; This file is part of GNU Emacs.
 

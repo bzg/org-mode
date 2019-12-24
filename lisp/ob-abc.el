@@ -5,7 +5,6 @@
 ;; Author: William Waites
 ;; Keywords: literate programming, music
 ;; Homepage: http://www.tardis.ed.ac.uk/wwaites
-;; Version: 0.01
 
 ;; This file is part of GNU Emacs.
 

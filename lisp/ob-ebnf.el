@@ -5,7 +5,6 @@
 ;; Author: Michael Gauland
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
-;; Version: 1.00
 
 ;; This file is part of GNU Emacs.
 
