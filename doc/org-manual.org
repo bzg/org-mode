@@ -18935,10 +18935,11 @@ using it on a headline displays "Document Structure" section.
 #+cindex: zero width space
 You may sometimes want to write text that looks like Org syntax, but
 should really read as plain text.  Org may use a specific escape
-character in some situations, e.g., a backslash in macros (see [[*Macro
-Replacement]]) or a comma in source and example blocks (see [[*Literal
-Examples]]).  In the general case, however, we suggest to use the zero
-width space.  You can insert one with any of the following:
+character in some situations, i.e., a backslash in macros (see [[*Macro
+Replacement]]) and links (see [[*Link Format]]), or a comma in source and
+example blocks (see [[*Literal Examples]]).  In the general case, however,
+we suggest to use the zero width space.  You can insert one with any
+of the following:
 
 : C-x 8 <RET> zero width space <RET>
 : C-x 8 <RET> 200B <RET>
