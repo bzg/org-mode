@@ -18012,9 +18012,15 @@ Move point to the beginning of first heading or end of buffer."
       (let ((org-note-abort t))
         (funcall org-finish-function))
     (if (org-before-first-heading-p)
-        (org-show-branches-buffer)
-      (outline-hide-subtree)
-      (outline-show-branches))))
+	(progn
+	  (org-show-branches-buffer)
+	  (org-hide-archived-subtrees (point-min) (point-max)))
+      (let ((beg (progn (outline-back-to-heading) (point)))
+	    (end (progn (outline-end-of-subtree) (point))))
+	(goto-char beg)
+	(outline-hide-subtree)
+	(outline-show-branches)
+	(org-hide-archived-subtrees beg end)))))
 
 (defun org-delete-indentation (&optional arg)
   "Join current line to previous and fix whitespace at join.

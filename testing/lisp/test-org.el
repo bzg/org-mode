@@ -7257,6 +7257,16 @@ Contents
      (org-set-visibility-according-to-property)
      (invisible-p (point)))))
 
+(ert-deftest test-org/visibility-show-branches ()
+  "Test visibility of inline archived subtrees."
+  (org-test-with-temp-text
+   "* Foo<point>
+** Bar :ARCHIVE:
+*** Baz
+"
+   (org-kill-note-or-show-branches)
+   (should (org-invisible-p (- (point-max) 2)))))
+
 
 ;;; Yank and Kill
 
