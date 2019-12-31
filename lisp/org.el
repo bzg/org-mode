@@ -16804,7 +16804,9 @@ buffer boundaries with possible narrowing."
 			      (overlay-put
 			       ov 'modification-hooks
 			       (list 'org-display-inline-remove-overlay))
-			      (overlay-put ov 'keymap image-map)
+			      (when (<= 26 emacs-major-version)
+				(cl-assert (boundp 'image-map))
+				(overlay-put ov 'keymap image-map))
 			      (push ov org-inline-image-overlays))))))))))))))))
 
 (defun org-display-inline-remove-overlay (ov after _beg _end &optional _len)
