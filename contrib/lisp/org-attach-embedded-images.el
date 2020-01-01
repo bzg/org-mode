@@ -1,6 +1,6 @@
 ;;; org-attach-embedded-images.el --- Transmute images to attachments
 ;;
-;; Copyright 2018, 2019 Free Software Foundation, Inc.
+;; Copyright 2018-2020 Free Software Foundation, Inc.
 ;;
 ;; Author: Marco Wahl
 ;; Version: 0.1

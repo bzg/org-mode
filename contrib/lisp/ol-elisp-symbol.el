@@ -1,6 +1,6 @@
 ;;; ol-elisp-symbol.el --- Links to Emacs-lisp symbols
 ;;
-;; Copyright 2007-2018 Free Software Foundation, Inc.
+;; Copyright 2007-2020 Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry
 ;; Version: 0.2

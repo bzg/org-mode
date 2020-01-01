@@ -1,7 +1,7 @@
 ;;; ob-sclang.el --- SCLang support for Org-mode Babel
 ;;; -*- coding: utf-8 -*-
 
-;; Copyright (C) 2017-2018 Free Software Foundation, Inc.
+;; Copyright (C) 2017-2020 Free Software Foundation, Inc.
 
 ;; Authors: stardiviner <numbchild@gmail.com>
 ;; Package-Version: 0.1

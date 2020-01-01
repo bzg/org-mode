@@ -1,6 +1,6 @@
 ;;; ob-eukleides.el --- Org-babel functions for eukleides evaluation
 
-;; Copyright (C) 2010-2018  Free Software Foundation, Inc.
+;; Copyright (C) 2010-2020  Free Software Foundation, Inc.
 
 ;; Author: Luis Anaya
 ;; Keywords: literate programming, reproducible research
