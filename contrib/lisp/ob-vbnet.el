@@ -1,6 +1,6 @@
 ;;; ob-vbnet.el --- org-babel functions for VB.Net evaluation
 
-;; Copyright (C) 2011-2018 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
 ;; Author: thomas "at" friendlyvillagers.com based on ob-java.el by Eric Schulte
 ;; Keywords: literate programming, reproducible research

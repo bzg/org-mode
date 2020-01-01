@@ -1,6 +1,6 @@
 ;;; ob-mathomatic.el --- Org-babel functions for mathomatic evaluation
 
-;; Copyright (C) 2009-2018  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2020  Free Software Foundation, Inc.
 
 ;; Author: Eric S Fraga
 ;;	Eric Schulte
