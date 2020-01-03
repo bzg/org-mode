@@ -561,8 +561,7 @@ use of this function is for the stuck project list."
 (define-obsolete-function-alias 'org-property-global-value
   'org-property-global-or-keyword-value "Org 9.3")
 
-(define-obsolete-variable-alias 'org-file-properties
-  'org-keyword-properties "Org 9.3")
+(make-obsolete-variable 'org-file-properties 'org-keyword-properties "Org 9.3")
 
 (define-obsolete-variable-alias 'org-angle-link-re
   'org-link-angle-re "Org 9.3")

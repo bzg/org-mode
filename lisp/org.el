@@ -3199,13 +3199,14 @@ or by adding lines like
 		(string :tag "Value"))))
 
 (defvar-local org-keyword-properties nil
-  "List of property/value pairs that can be inherited by any entry.
+  "List of property/value pairs inherited by any entry.
+
 Valid for the current buffer.  This variable is populated from
-#+PROPERTY lines.
+PROPERTY keywords.
 
 Note that properties are defined also in property drawers.
-Properties defined there will take precedence over properties
-defined as keywords.")
+Properties defined there take precedence over properties defined
+as keywords.")
 
 (defgroup org-agenda nil
   "Options concerning agenda views in Org mode."
