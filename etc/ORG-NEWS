@@ -42,6 +42,12 @@ possible via column view value edit or with =<C-c C-q>=.
 See [[*~org-columns-toggle-or-columns-quit~]]
 
 ** Miscellaneous
+*** Duration can be read and written in compact form
+
+~org-duration-to-minutes~ understands =1d3h5min= as a duration,
+whereas ~org-duration-from-minutes~ can output this compact form if
+the duration format contains the symbol ~compact~.
+
 *** Fontify whole TODO headlines
 
 This feature is the same as ~org-fontify-done-headline~, but for TODO
