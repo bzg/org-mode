@@ -19695,10 +19695,11 @@ process of adding Org links to Unix man pages, which look like this
 : [[man:printf][The printf manual]]
 
 #+texinfo: @noindent
-The following =org-man.el= file implements it
+The following =ol-man.el= file implements it
 
 #+begin_src emacs-lisp
-;;; org-man.el - Support for links to man pages in Org mode
+;;; ol-man.el - Support for links to man pages in Org mode
+(require 'ol)
 (require 'org)
 
 (org-link-set-parameters "man"
@@ -19741,8 +19742,8 @@ The following =org-man.el= file implements it
       (`ascii (format "%s (%s)" desc path))
       (t path))))
 
-(provide 'org-man)
-;;; org-man.el ends here
+(provide ol-man)
+;;; ol-man.el ends here
 #+end_src
 
 #+texinfo: @noindent
@@ -19750,13 +19751,15 @@ To activate links to man pages in Org, enter this in the Emacs init
 file:
 
 #+begin_src emacs-lisp
-(require 'org-man)
+(require 'ol-man)
 #+end_src
 
 #+texinfo: @noindent
-A review of =org-man.el=:
+A review of =ol-man.el=:
 
-1. First, =(require 'org)= ensures =org.el= is loaded.
+1. First, =(require 'ol)= ensures that =ol.el= is loaded and
+   =(require 'org)= ensures =org.el= is loaded.
+
 
 2.
 
