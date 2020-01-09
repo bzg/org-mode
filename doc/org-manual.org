@@ -19700,7 +19700,6 @@ The following =ol-man.el= file implements it
 #+begin_src emacs-lisp
 ;;; ol-man.el - Support for links to man pages in Org mode
 (require 'ol)
-(require 'org)
 
 (org-link-set-parameters "man"
                          :follow org-man-command
@@ -19719,7 +19718,7 @@ The following =ol-man.el= file implements it
     (let* ((page (org-man-get-page-name))
            (link (concat "man:" page))
            (description (format "Man page for %s" page)))
-      (org-store-link-props
+      (org-link-store-props
        :type "man"
        :link link
        :description description))))
@@ -19757,9 +19756,7 @@ file:
 #+texinfo: @noindent
 A review of =ol-man.el=:
 
-1. First, =(require 'ol)= ensures that =ol.el= is loaded and
-   =(require 'org)= ensures =org.el= is loaded.
-
+1. First, =(require 'ol)= ensures that =ol.el= is loaded.
 
 2.
 
