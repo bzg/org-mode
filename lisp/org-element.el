@@ -72,7 +72,6 @@
 (declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-escape-code-in-string "org-src" (s))
-(declare-function org-find-visible "org" ())
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 (declare-function org-macro-extract-arguments "org-macro" (s))
 (declare-function org-reduced-level "org" (l))

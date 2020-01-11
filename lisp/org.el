@@ -17622,18 +17622,6 @@ this numeric value."
    ((org-at-table-p) (call-interactively 'org-table-hline-and-move))
    (t (call-interactively 'org-insert-heading))))
 
-(defun org-find-visible ()
-  "Return closest visible buffer position, or `point-max'"
-  (if (org-invisible-p)
-      (next-single-char-property-change (point) 'invisible)
-    (point)))
-
-(defun org-find-invisible ()
-  "Return closest invisible buffer position, or `point-max'"
-  (if (org-invisible-p)
-      (point)
-    (next-single-char-property-change (point) 'invisible)))
-
 (defun org-copy-visible (beg end)
   "Copy the visible parts of the region."
   (interactive "r")
