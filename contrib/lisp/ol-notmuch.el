@@ -79,11 +79,11 @@ Should accept a notmuch search string as the sole argument."
 	   (from (notmuch-show-get-from))
 	   (date (org-trim (notmuch-show-get-date)))
 	   desc link)
-      (org-store-link-props :type "notmuch" :from from :to to :date date
+      (org-link-store-props :type "notmuch" :from from :to to :date date
        			    :subject subject :message-id message-id)
-      (setq desc (org-email-link-description))
+      (setq desc (org-link-email-description))
       (setq link (concat "notmuch:id:" message-id))
-      (org-add-link-props :link link :description desc)
+      (org-link-add-props :link link :description desc)
       link)))
 
 (defun org-notmuch-open (path)
@@ -108,7 +108,7 @@ Can link to more than one message, if so all matching messages are shown."
   (when (eq major-mode 'notmuch-search-mode)
     (let ((link (concat "notmuch-search:" notmuch-search-query-string))
 	  (desc (concat "Notmuch search: " notmuch-search-query-string)))
-      (org-store-link-props :type "notmuch-search"
+      (org-link-store-props :type "notmuch-search"
 			    :link link
 			    :description desc)
       link)))
@@ -134,7 +134,7 @@ Can link to more than one message, if so all matching messages are shown."
   (when (eq major-mode 'notmuch-tree-mode)
     (let ((link (concat "notmuch-tree:" (notmuch-tree-get-query)))
 	  (desc (concat "Notmuch tree: " (notmuch-tree-get-query))))
-      (org-store-link-props :type "notmuch-tree"
+      (org-link-store-props :type "notmuch-tree"
 			    :link link
 			    :description desc)
       link)))
