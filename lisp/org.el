@@ -17623,15 +17623,16 @@ this numeric value."
    (t (call-interactively 'org-insert-heading))))
 
 (defun org-find-visible ()
-  (let ((s (point)))
-    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
-		(get-char-property s 'invisible)))
-    s))
+  "Return closest visible buffer position, or `point-max'"
+  (if (org-invisible-p)
+      (next-single-char-property-change (point) 'invisible)
+    (point)))
+
 (defun org-find-invisible ()
-  (let ((s (point)))
-    (while (and (not (= (point-max) (setq s (next-overlay-change s))))
-		(not (get-char-property s 'invisible))))
-    s))
+  "Return closest invisible buffer position, or `point-max'"
+  (if (org-invisible-p)
+      (point)
+    (next-single-char-property-change (point) 'invisible)))
 
 (defun org-copy-visible (beg end)
   "Copy the visible parts of the region."
