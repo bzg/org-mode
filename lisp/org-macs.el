@@ -1065,10 +1065,16 @@ the value in cdr."
       (get-text-property (or (next-single-property-change 0 prop s) 0)
 			 prop s)))
 
-(defun org-invisible-p (&optional pos)
+(defun org-invisible-p (&optional pos folding-only)
   "Non-nil if the character after POS is invisible.
-If POS is nil, use `point' instead."
-  (get-char-property (or pos (point)) 'invisible))
+If POS is nil, use `point' instead.  When optional argument
+FOLDING-ONLY is non-nil, only consider invisible parts due to
+folding of a headline, a block or a drawer, i.e., not because of
+fontification."
+  (let ((value (get-char-property (or pos (point)) 'invisible)))
+    (cond ((not value) nil)
+	  (folding-only (memq value '(org-hide-block org-hide-drawer outline)))
+	  (t value))))
 
 (defun org-truely-invisible-p ()
   "Check if point is at a character currently not visible.
@@ -1085,6 +1091,18 @@ move it back by one char before doing this check."
     (when (and (eolp) (not (bobp)))
       (backward-char 1))
     (org-invisible-p)))
+
+(defun org-find-visible ()
+  "Return closest visible buffer position, or `point-max'"
+  (if (org-invisible-p)
+      (next-single-char-property-change (point) 'invisible)
+    (point)))
+
+(defun org-find-invisible ()
+  "Return closest invisible buffer position, or `point-max'"
+  (if (org-invisible-p)
+      (point)
+    (next-single-char-property-change (point) 'invisible)))
 
 
 ;;; Time
