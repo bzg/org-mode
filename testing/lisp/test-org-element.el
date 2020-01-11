@@ -3353,11 +3353,25 @@ Text
   "Test `org-element-parse-buffer' with visible only argument."
   (should
    (equal '("H1" "H3" "H5")
-      (org-test-with-temp-text
-	  "* H1\n** H2\n** H3 :visible:\n** H4\n** H5 :visible:"
-	(org-occur ":visible:")
-	(org-element-map (org-element-parse-buffer nil t) 'headline
-	  (lambda (hl) (org-element-property :raw-value hl)))))))
+	  (org-test-with-temp-text
+	      "* H1\n** H2\n** H3 :visible:\n** H4\n** H5 :visible:"
+	    (org-occur ":visible:")
+	    (org-element-map (org-element-parse-buffer nil t) 'headline
+	      (lambda (hl) (org-element-property :raw-value hl))))))
+  (should
+   (equal "Test"
+	  (let ((contents "Test"))
+	    (org-test-with-temp-text contents
+	      (add-text-properties 0 1 '(invisible t) contents)
+	      (org-element-map (org-element-parse-buffer nil t) 'plain-text
+		#'org-no-properties nil t)))))
+  (should
+   (equal "Test"
+	  (let ((contents "Test"))
+	    (org-test-with-temp-text (concat "- " contents)
+	      (add-text-properties 0 1 '(invisible t) contents)
+	      (org-element-map (org-element-parse-buffer nil t) 'plain-text
+		#'org-no-properties nil t))))))
 
 
 
