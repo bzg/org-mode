@@ -1,4 +1,4 @@
-;;; org-notmuch.el --- Links to notmuch messages
+;;; ol-notmuch.el --- Links to notmuch messages
 
 ;; Copyright (C) 2010-2014  Matthieu Lemerre
 
@@ -40,7 +40,6 @@
 ;;; Code:
 
 (require 'ol)
-(require 'org)
 
 ;; customisable notmuch open functions
 (defcustom org-notmuch-open-function
