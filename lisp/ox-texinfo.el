@@ -407,6 +407,8 @@ If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 
 (defconst org-texinfo-inline-image-rules
   (list (cons "file"
+	      (regexp-opt '("eps" "pdf" "png" "jpg" "jpeg" "gif" "svg")))
+	 (cons "attachment"
 	      (regexp-opt '("eps" "pdf" "png" "jpg" "jpeg" "gif" "svg"))))
   "Rules characterizing image files that can be inlined.")
 
@@ -1064,7 +1066,7 @@ INFO is a plist holding contextual information.  See
 		 (concat type ":" raw-path))
 		((string= type "file")
 		 (when (string= raw-type "attachment")
-		   (setq raw-path (org-attach-expand raw-path)))
+		   (setq raw-path (file-relative-name (org-attach-expand raw-path))))
 		 (org-export-file-uri raw-path))
 		(t raw-path))))
     (cond

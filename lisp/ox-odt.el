@@ -745,7 +745,8 @@ link's path."
 		:value-type (regexp :tag "Path")))
 
 (defcustom org-odt-inline-image-rules
-  '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'"))
+  '(("file" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
+    ("attachment" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg"))))
   "Rules characterizing image files that can be inlined into ODT.
 
 A rule consists in an association whose key is the type of link

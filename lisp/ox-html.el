@@ -886,6 +886,7 @@ link to the image."
 
 (defcustom org-html-inline-image-rules
   `(("file" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
+    ("attachment" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
     ("http" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
     ("https" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg"))))
   "Rules characterizing image files that can be inlined into HTML.
@@ -3079,11 +3080,8 @@ INFO is a plist holding contextual information.  See
 	   ((member type '("http" "https" "ftp" "mailto" "news"))
 	    (url-encode-url (concat type ":" raw-path)))
 	   ((string= type "file")
-	    ;; Pre-parse the path from attachment-format to
-	    ;; file-format to make attachment links use all export
-	    ;; functionality from file links with correct pathing.
 	    (when (string= raw-type "attachment")
-	      (setq raw-path (org-attach-expand raw-path)))
+	      (setq raw-path (file-relative-name (org-attach-expand raw-path))))
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
 	    ;; append "file" protocol to absolute file name.
