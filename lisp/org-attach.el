@@ -637,7 +637,6 @@ Basically, this adds the path to the attachment directory."
 
 (org-link-set-parameters "attachment"
                          :follow #'org-attach-open-link
-                         :export #'org-attach-export-link
                          :complete #'org-attach-complete-link)
 
 (defun org-attach-open-link (link &optional in-emacs)
@@ -677,26 +676,6 @@ and to use an external application to visit the file."
 	    (concat "attachment:" (match-string 1 (expand-file-name file))))
 	   (t (concat "attachment:" file))))
       (error "No attachment directory exist"))))
-
-(defun org-attach-export-link (link description format)
-  "Translate attachment LINK from Org mode format to exported FORMAT.
-Also includes the DESCRIPTION of the link in the export."
-  (save-excursion
-    (let (path desc)
-      (cond
-       ((string-match "::\\([0-9]+\\)\\'" link)
-        (setq link (substring link 0 (match-beginning 0))))
-       ((string-match "::\\(.+\\)\\'" link)
-        (setq link (substring link 0 (match-beginning 0)))))
-      (setq path (file-relative-name (org-attach-expand link))
-            desc (or description link))
-      (pcase format
-        (`html (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
-        (`latex (format "\\href{%s}{%s}" path desc))
-        (`texinfo (format "@uref{%s,%s}" path desc))
-        (`ascii (format "%s (%s)" desc path))
-        (`md (format "[%s](%s)" desc path))
-        (_ path)))))
 
 (defun org-attach-archive-delete-maybe ()
   "Maybe delete subtree attachments when archiving.

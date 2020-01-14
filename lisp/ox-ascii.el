@@ -31,7 +31,10 @@
 (require 'ox-publish)
 (require 'cl-lib)
 
+;;; Function Declarations
+
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
+(declare-function org-attach-expand "org-attach" (file))
 
 ;;; Define Back-End
 ;;
@@ -1567,13 +1570,24 @@ CONTENTS is nil.  INFO is a plist holding contextual
 
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information."
-  (let ((type (org-element-property :type link)))
+  (let* ((raw-type (org-element-property :type link))
+	 (type (if (string= raw-type "attachment")
+		   ;; Attachments are simplified representations of
+		   ;; file links.  When exporting, expose attachments
+		   ;; as if they were file links.
+		   "file"
+		 raw-type))
+	 (raw-path (org-element-property :path link))
+	 (path (cond
+		((string= raw-type "attachment")
+		 (setq raw-path (file-relative-name (org-attach-expand raw-path)))
+		 (concat type ":" raw-path))
+		(t (concat type ":" raw-path)))))
     (cond
      ((org-export-custom-protocol-maybe link desc 'ascii))
      ((string= type "coderef")
-      (let ((ref (org-element-property :path link)))
-	(format (org-export-get-coderef-format ref desc)
-		(org-export-resolve-coderef ref info))))
+      (format (org-export-get-coderef-format path desc)
+	      (org-export-resolve-coderef path info)))
      ;; Do not apply a special syntax on radio links.  Though, use
      ;; transcoded target's contents as output.
      ((string= type "radio") desc)
@@ -1605,13 +1619,10 @@ INFO is a plist holding contextual information."
 	  ;; Don't know what to do.  Signal it.
 	  (_ "???"))))
      (t
-      (let ((raw-link (concat (org-element-property :type link)
-			      ":"
-			      (org-element-property :path link))))
-	(if (not (org-string-nw-p desc)) (format "<%s>" raw-link)
-	  (concat (format "[%s]" desc)
-		  (and (not (plist-get info :ascii-links-to-notes))
-		       (format " (<%s>)" raw-link)))))))))
+      (if (not (org-string-nw-p desc)) (format "<%s>" path)
+	(concat (format "[%s]" desc)
+		(and (not (plist-get info :ascii-links-to-notes))
+		     (format " (<%s>)" path))))))))
 
 
 ;;;; Node Properties

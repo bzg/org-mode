@@ -32,6 +32,10 @@
 (require 'ox)
 (require 'table nil 'noerror)
 
+;;; Function Declarations
+
+(declare-function org-attach-expand "org-attach" (file))
+
 ;;; Define Back-End
 
 (org-export-define-backend 'odt
@@ -2692,7 +2696,13 @@ Return nil, otherwise."
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((type (org-element-property :type link))
+  (let* ((raw-type (org-element-property :type link))
+	 (type (if (string= raw-type "attachment")
+		   ;; Attachments are simplified representations of
+		   ;; file links.  When exporting, expose attachments
+		   ;; as if they were file links.
+		   "file"
+		 raw-type))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
@@ -2701,7 +2711,10 @@ INFO is a plist holding contextual information.  See
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		((string= type "file") (org-export-file-uri raw-path))
+		((string= type "file")
+		 (when (string= raw-type "attachment")
+		   (setq raw-path (file-relative-name (org-attach-expand raw-path))))
+		 (org-export-file-uri raw-path))
 		(t raw-path)))
 	 ;; Convert & to &amp; for correct XML representation
 	 (path (replace-regexp-in-string "&" "&amp;" path)))

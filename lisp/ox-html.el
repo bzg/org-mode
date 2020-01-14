@@ -42,6 +42,7 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 (declare-function mm-url-decode-entities "mm-url" ())
+(declare-function org-attach-expand "org-attach" (file))
 
 (defvar htmlize-css-name-prefix)
 (defvar htmlize-output-type)
@@ -884,10 +885,9 @@ link to the image."
   :type 'boolean)
 
 (defcustom org-html-inline-image-rules
-  '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'")
-    ("attachment" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'")
-    ("http" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'")
-    ("https" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'"))
+  `(("file" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
+    ("http" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
+    ("https" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg"))))
   "Rules characterizing image files that can be inlined into HTML.
 A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
@@ -3064,7 +3064,13 @@ INFO is a plist holding contextual information.  See
 	      (concat (file-name-sans-extension raw-path) "."
 		      (plist-get info :html-extension)))
 	     (t raw-path))))
-	 (type (org-element-property :type link))
+	 (raw-type (org-element-property :type link))
+	 (type (if (string= raw-type "attachment")
+		   ;; Attachments are simplified representations of
+		   ;; file links.  When exporting, expose attachments
+		   ;; as if they were file links.
+		   "file"
+		 raw-type))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (org-string-nw-p desc))
@@ -3073,6 +3079,11 @@ INFO is a plist holding contextual information.  See
 	   ((member type '("http" "https" "ftp" "mailto" "news"))
 	    (url-encode-url (concat type ":" raw-path)))
 	   ((string= type "file")
+	    ;; Pre-parse the path from attachment-format to
+	    ;; file-format to make attachment links use all export
+	    ;; functionality from file links with correct pathing.
+	    (when (string= raw-type "attachment")
+	      (setq raw-path (org-attach-expand raw-path)))
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
 	    ;; append "file" protocol to absolute file name.

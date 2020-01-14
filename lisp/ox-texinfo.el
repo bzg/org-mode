@@ -28,6 +28,10 @@
 (require 'cl-lib)
 (require 'ox)
 
+;;; Function Declarations
+
+(declare-function org-attach-expand "org-attach" (file))
+
 (defvar orgtbl-exp-regexp)
 
 
@@ -1045,14 +1049,23 @@ nil."
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((type (org-element-property :type link))
+  (let* ((raw-type (org-element-property :type link))
+	 (type (if (string= raw-type "attachment")
+		   ;; Attachments are simplified representations of
+		   ;; file links.  When exporting, expose attachments
+		   ;; as if they were file links.
+		   "file"
+		 raw-type))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (path (cond
 		((member type '("http" "https" "ftp"))
 		 (concat type ":" raw-path))
-		((string= type "file") (org-export-file-uri raw-path))
+		((string= type "file")
+		 (when (string= raw-type "attachment")
+		   (setq raw-path (org-attach-expand raw-path)))
+		 (org-export-file-uri raw-path))
 		(t raw-path))))
     (cond
      ((org-export-custom-protocol-maybe link desc 'texinfo))
