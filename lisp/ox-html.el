@@ -3081,7 +3081,9 @@ INFO is a plist holding contextual information.  See
 	    (url-encode-url (concat type ":" raw-path)))
 	   ((string= type "file")
 	    (when (string= raw-type "attachment")
-	      (setq raw-path (file-relative-name (org-attach-expand raw-path))))
+	      (setq raw-path (file-relative-name
+			      (org-with-point-at (org-element-property :begin link)
+				(org-attach-expand raw-path)))))
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
 	    ;; append "file" protocol to absolute file name.

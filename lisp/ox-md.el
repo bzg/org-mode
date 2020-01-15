@@ -413,7 +413,9 @@ INFO is a plist holding contextual information.  See
 		 (concat type ":" raw-path))
 		((string= type "file")
 		 (when (string= raw-type "attachment")
-		   (setq raw-path (file-relative-name (org-attach-expand raw-path))))
+		   (setq raw-path (file-relative-name
+				   (org-with-point-at (org-element-property :begin link)
+				     (org-attach-expand raw-path)))))
 		 (org-export-file-uri (funcall link-org-files-as-md raw-path)))
 		(t raw-path))))
     (cond

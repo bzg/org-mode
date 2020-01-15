@@ -2363,7 +2363,9 @@ used as a communication channel."
   (let* ((parent (org-export-get-parent-element link))
 	 (path (let ((raw-path (org-element-property :path link)))
 		 (when (string= (org-element-property :type link) "attachment")
-		   (setq raw-path (file-relative-name (org-attach-expand raw-path))))
+		   (setq raw-path (file-relative-name
+				   (org-with-point-at (org-element-property :begin link)
+				     (org-attach-expand raw-path)))))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
 	 (filetype (file-name-extension path))
@@ -2536,7 +2538,9 @@ INFO is a plist holding contextual information.  See
 		       (concat type ":" raw-path))
 		      ((string= type "file")
 		       (when (string= raw-type "attachment")
-			 (setq raw-path (file-relative-name (org-attach-expand raw-path))))
+			 (setq raw-path (file-relative-name
+					 (org-with-point-at (org-element-property :begin link)
+					   (org-attach-expand raw-path)))))
 		       (org-export-file-uri raw-path))
 		      (t
 		       raw-path)))))

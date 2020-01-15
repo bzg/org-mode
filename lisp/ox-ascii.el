@@ -1580,7 +1580,9 @@ INFO is a plist holding contextual information."
 	 (raw-path (org-element-property :path link))
 	 (path (cond
 		((string= raw-type "attachment")
-		 (setq raw-path (file-relative-name (org-attach-expand raw-path)))
+		 (setq raw-path (file-relative-name
+				 (org-with-point-at (org-element-property :begin link)
+				   (org-attach-expand raw-path))))
 		 (concat type ":" raw-path))
 		(t (concat type ":" raw-path)))))
     (cond
