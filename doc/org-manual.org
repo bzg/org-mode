@@ -3467,10 +3467,9 @@ generally, act on links.
   this also to {{{kbd(M-n)}}} and {{{kbd(M-p)}}}.
 
   #+begin_src emacs-lisp
-  (add-hook 'org-load-hook
-            (lambda ()
-              (define-key org-mode-map "\M-n" 'org-next-link)
-              (define-key org-mode-map "\M-p" 'org-previous-link)))
+  (with-eval-after-load 'org
+    (define-key org-mode-map "\M-n" 'org-next-link)
+    (define-key org-mode-map "\M-p" 'org-previous-link))
   #+end_src
 
 ** Using Links Outside Org
