@@ -3210,10 +3210,11 @@ Assume point is at the beginning of the link."
 	(setq post-blank
 	      (progn (goto-char link-end) (skip-chars-forward " \t")))
 	(setq end (point)))
-      ;; Special "file" type link processing.  Extract opening
-      ;; application and search option, if any.  Also normalize URI.
-      (when (string-match "\\`file\\(?:\\+\\(.+\\)\\)?\\'" type)
-	(setq application (match-string 1 type) type "file")
+      ;; Special "file" or "attachment" type link processing.  Extract
+      ;; opening application and search option, if any.  Also
+      ;; normalize URI.
+      (when (string-match "\\`\\(file\\|attachment\\)\\(?:\\+\\(.+\\)\\)?\\'" type)
+	(setq application (match-string 2 type) type (match-string 1 type))
 	(when (string-match "::\\(.*\\)\\'" path)
 	  (setq search-option (match-string 1 path))
 	  (setq path (replace-match "" nil nil path)))
@@ -3224,18 +3225,27 @@ Assume point is at the beginning of the link."
 	(when trans
 	  (setq type (car trans))
 	  (setq path (cdr trans))))
-      (list 'link
-	    (list :type type
-		  :path path
-		  :format format
-		  :raw-link (or raw-link path)
-		  :application application
-		  :search-option search-option
-		  :begin begin
-		  :end end
-		  :contents-begin contents-begin
-		  :contents-end contents-end
-		  :post-blank post-blank)))))
+      (let ((link
+	     (list 'link
+		   (list :type type
+			 :path path
+			 :format format
+			 :raw-link (or raw-link path)
+			 :application application
+			 :search-option search-option
+			 :begin begin
+			 :end end
+			 :contents-begin contents-begin
+			 :contents-end contents-end
+			 :post-blank post-blank))))
+	;; Add additional type specific properties for link types that
+	;; need it
+	(when (string= type "attachment")
+	  (org-element-put-property
+	   link :attachment-path
+	   (file-relative-name
+	    (org-attach-expand path))))
+	link))))
 
 (defun org-element-link-interpreter (link contents)
   "Interpret LINK object as Org syntax.

@@ -932,7 +932,9 @@ a \"file\" link."
   (let ((type (org-element-property :type link))
 	(path (org-element-property :path link)))
     (cond
-     ((equal type "file")
+     ((member type '("file" "attachment"))
+      (when (string= type "attachment")
+	(setq path (org-element-property :attachment-path link)))
       (if (string-match "[*?{]" (file-name-nondirectory path))
 	  (dired path)
 	;; Look into `org-link-parameters' in order to find

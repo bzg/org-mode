@@ -42,7 +42,6 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 (declare-function mm-url-decode-entities "mm-url" ())
-(declare-function org-attach-expand "org-attach" (file))
 
 (defvar htmlize-css-name-prefix)
 (defvar htmlize-output-type)
@@ -3065,13 +3064,7 @@ INFO is a plist holding contextual information.  See
 	      (concat (file-name-sans-extension raw-path) "."
 		      (plist-get info :html-extension)))
 	     (t raw-path))))
-	 (raw-type (org-element-property :type link))
-	 (type (if (string= raw-type "attachment")
-		   ;; Attachments are simplified representations of
-		   ;; file links.  When exporting, expose attachments
-		   ;; as if they were file links.
-		   "file"
-		 raw-type))
+	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (org-string-nw-p desc))
@@ -3079,11 +3072,9 @@ INFO is a plist holding contextual information.  See
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto" "news"))
 	    (url-encode-url (concat type ":" raw-path)))
-	   ((string= type "file")
-	    (when (string= raw-type "attachment")
-	      (setq raw-path (file-relative-name
-			      (org-with-point-at (org-element-property :begin link)
-				(org-attach-expand raw-path)))))
+	   ((member type '("file" "attachment"))
+	    (when (string= type "attachment")
+	      (setq raw-path (org-element-property :attachment-path link)))
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
 	    ;; append "file" protocol to absolute file name.

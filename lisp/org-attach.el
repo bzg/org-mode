@@ -636,28 +636,7 @@ Basically, this adds the path to the attachment directory."
   (expand-file-name file (org-attach-dir)))
 
 (org-link-set-parameters "attachment"
-                         :follow #'org-attach-open-link
                          :complete #'org-attach-complete-link)
-
-(defun org-attach-open-link (link &optional in-emacs)
-  "Attachment link type LINK is expanded with the attached directory and opened.
-
-With optional prefix argument IN-EMACS, Emacs will visit the file.
-With a double \\[universal-argument] \\[universal-argument] \
-prefix arg, Org tries to avoid opening in Emacs
-and to use an external application to visit the file."
-  (interactive "P")
-  (let (line search)
-    (cond
-     ((string-match "::\\([0-9]+\\)\\'" link)
-      (setq line (string-to-number (match-string 1 link))
-	    link (substring link 0 (match-beginning 0))))
-     ((string-match "::\\(.+\\)\\'" link)
-      (setq search (match-string 1 link)
-            link (substring link 0 (match-beginning 0)))))
-    (if (string-match "[*?{]" (file-name-nondirectory link))
-        (dired (org-attach-expand link))
-      (org-open-file (org-attach-expand link) in-emacs line search))))
 
 (defun org-attach-complete-link ()
   "Advise the user with the available files in the attachment directory."

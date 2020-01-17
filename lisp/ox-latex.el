@@ -32,8 +32,6 @@
 
 ;;; Function Declarations
 
-(declare-function org-attach-expand "org-attach" (file))
-
 (defvar org-latex-default-packages-alist)
 (defvar org-latex-packages-alist)
 (defvar orgtbl-exp-regexp)
@@ -2361,11 +2359,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
   (let* ((parent (org-export-get-parent-element link))
-	 (path (let ((raw-path (org-element-property :path link)))
-		 (when (string= (org-element-property :type link) "attachment")
-		   (setq raw-path (file-relative-name
-				   (org-with-point-at (org-element-property :begin link)
-				     (org-attach-expand raw-path)))))
+	 (path (let ((raw-path (if (string= (org-element-property :type link) "attachment")
+				   (org-element-property :attachment-path link)
+				 (org-element-property :path link))))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
 	 (filetype (file-name-extension path))
@@ -2521,13 +2517,7 @@ used as a communication channel."
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((raw-type (org-element-property :type link))
-	 (type (if (string= raw-type "attachment")
-		   ;; Attachments are simplified representations of
-		   ;; file links.  When exporting, expose attachments
-		   ;; as if they were file links.
-		   "file"
-		 raw-type))
+  (let* ((type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
@@ -2536,11 +2526,9 @@ INFO is a plist holding contextual information.  See
 	 (path (org-latex--protect-text
 		(cond ((member type '("http" "https" "ftp" "mailto" "doi"))
 		       (concat type ":" raw-path))
-		      ((string= type "file")
-		       (when (string= raw-type "attachment")
-			 (setq raw-path (file-relative-name
-					 (org-with-point-at (org-element-property :begin link)
-					   (org-attach-expand raw-path)))))
+		      ((member type '("file" "attachment"))
+		       (when (string= type "attachment")
+			 (setq raw-path (org-element-property :attachment-path link)))
 		       (org-export-file-uri raw-path))
 		      (t
 		       raw-path)))))

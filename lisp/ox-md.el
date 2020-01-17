@@ -35,8 +35,6 @@
 
 ;;; Function Declarations
 
-(declare-function org-attach-expand "org-attach" (file))
-
 ;;; User-Configurable Variables
 
 (defgroup org-export-md nil
@@ -400,22 +398,14 @@ INFO is a plist holding contextual information.  See
 	    (if (string= ".org" (downcase (file-name-extension raw-path ".")))
 		(concat (file-name-sans-extension raw-path) ".md")
 	      raw-path)))
-	 (raw-type (org-element-property :type link))
-	 (type (if (string= raw-type "attachment")
-		   ;; Attachments are simplified representations of
-		   ;; file links.  When exporting, expose attachments
-		   ;; as if they were file links.
-		   "file"
-		 raw-type))
+	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		((string= type "file")
-		 (when (string= raw-type "attachment")
-		   (setq raw-path (file-relative-name
-				   (org-with-point-at (org-element-property :begin link)
-				     (org-attach-expand raw-path)))))
+		((member type '("file" "attachment"))
+		 (when (string= type "attachment")
+		   (setq raw-path (org-element-property :attachment-path link)))
 		 (org-export-file-uri (funcall link-org-files-as-md raw-path)))
 		(t raw-path))))
     (cond
@@ -457,7 +447,8 @@ INFO is a plist holding contextual information.  See
 		       description
 		       (org-export-get-reference destination info))))))))
      ((org-export-inline-image-p link org-html-inline-image-rules)
-      (let ((path (cond ((not (equal "file" type)) (concat type ":" raw-path))
+      (let ((path (cond ((not (member type '("file" "attachment")))
+			 (concat type ":" raw-path))
 			((not (file-name-absolute-p raw-path)) raw-path)
 			(t (expand-file-name raw-path))))
 	    (caption (org-export-data
