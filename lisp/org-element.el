@@ -3116,7 +3116,11 @@ When at a link, return a list whose car is `link' and cdr a plist
 with `:type', `:path', `:format', `:raw-link', `:application',
 `:search-option', `:begin', `:end', `:contents-begin',
 `:contents-end' and `:post-blank' as keywords.  Otherwise, return
-nil.
+nil.  Additionally, in the context of attachment links one
+further property, `:attachment-path' is set.  That property
+contains the attachment link expanded into a full filesystem
+path.
+
 
 Assume point is at the beginning of the link."
   (catch 'no-object
