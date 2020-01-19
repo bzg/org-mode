@@ -35,6 +35,13 @@ value in call to =java=.
 After editing a source block, Org will restore the window layout when
 ~org-src-window-setup~ is set to a value that modifies the layout.
 
+*** New option to show source buffers using "plain" display-buffer
+
+Added option ~plain~ to ~org-src-window-setup~ to show source buffers
+using ~display-buffer~. This allows users to control how source
+buffers are displayed by modifying ~display-buffer-alist~ or
+~display-buffer-base-action~.
+
 ** New functions
 *** ~org-columns-toggle-or-columns-quit~
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the

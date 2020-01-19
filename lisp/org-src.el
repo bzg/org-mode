@@ -148,6 +148,9 @@ the existing edit buffer."
   "How the source code edit buffer should be displayed.
 Possible values for this option are:
 
+plain              Show edit buffer using `display-buffer'.  Users can
+                   further control the display behavior by modifying
+                   `display-buffer-alist' and its relatives.
 current-window     Show edit buffer in the current window, keeping all other
                    windows.
 split-window-below Show edit buffer below the current window, keeping all
@@ -801,6 +804,9 @@ Raise an error when current buffer is not a source editing buffer."
 
 (defun org-src-switch-to-buffer (buffer context)
   (pcase org-src-window-setup
+    (`plain
+     (when (eq context 'exit) (quit-restore-window))
+     (pop-to-buffer buffer))
     (`current-window (pop-to-buffer-same-window buffer))
     (`other-window
      (switch-to-buffer-other-window buffer))
