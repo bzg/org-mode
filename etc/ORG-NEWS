@@ -64,6 +64,10 @@ normal headlines.  The face can be customized via ~org-headline-todo~.
 there was only key =<q>= to exit column view and only functional on lines
 which were affected by the column view.
 
+*** New option in ~org-attach-store-link-p~
+~org-attach-store-link-p~ have a new option to store a file link to
+the attachment.
+
 * Version 9.3
 
 ** Incompatible changes

@@ -139,7 +139,8 @@ Selective means to respect the inheritance setting in
   :type '(choice
 	  (const :tag "Don't store link" nil)
 	  (const :tag "Link to origin location" t)
-	  (const :tag "Link to the attach-dir location" attached)))
+	  (const :tag "Attachment link to the attach-dir location" attached)
+	  (const :tag "File link to the attach-dir location" file)))
 
 (defcustom org-attach-archive-delete nil
   "Non-nil means attachments are deleted upon archiving a subtree.
@@ -506,6 +507,10 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
             ((eq org-attach-store-link-p t)
              (push (list (concat "file:" file)
 			 (file-name-nondirectory file))
+		   org-stored-links))
+	    ((eq org-attach-store-link-p 'file)
+	     (push (list (concat "file:" attach-file)
+			 (file-name-nondirectory attach-file))
 		   org-stored-links)))
       (if visit-dir
           (dired attach-dir)

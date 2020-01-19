@@ -8031,6 +8031,15 @@ mentioning.
   tried when resolving existing ID's into paths, to maintain backward
   compatibility with existing folders in your system.
 
+- ~org-attach-store-link-p~ ::
+  #+vindex: org-attach-store-link-p
+  Stores a link to the file that is being attached.  The link is
+  stored in ~org-stored-links~ for later insertion with {{{kbd(C-c
+  C-l)}}} (see [[*Handling Links]]).  Depending on what option is set in
+  ~org-attach-store-link-p~, the link is stored to either the original
+  location as a file link, the attachment location as an attachment
+  link or to the attachment location as a file link.
+
 - ~org-attach-expert~ ::
   #+vindex: org-attach-expert
   Do not show the splash buffer with the attach dispatcher when
