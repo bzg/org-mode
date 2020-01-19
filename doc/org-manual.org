@@ -8040,6 +8040,10 @@ mentioning.
   location as a file link, the attachment location as an attachment
   link or to the attachment location as a file link.
 
+- ~org-attach-commands~ ::
+  #+vindex: org-attach-commands
+  List of all commands used in the attach dispatcher.
+
 - ~org-attach-expert~ ::
   #+vindex: org-attach-expert
   Do not show the splash buffer with the attach dispatcher when
