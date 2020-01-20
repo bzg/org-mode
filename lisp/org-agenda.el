@@ -7926,7 +7926,7 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 		     filter)))
       (dolist (x filter)
 	(push (org-agenda-filter-effort-form x) f))))
-    (cons 'and (nreverse f))))
+    (cons (if (eq type 'category) 'or 'and) (nreverse f))))
 
 (defun org-agenda-filter-make-matcher-tag-exp (tags op)
   "Return a form associated to tag-expression TAGS.
