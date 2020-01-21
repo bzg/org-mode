@@ -859,11 +859,7 @@ a unique id will be associated to it."
                     "allocations")
                   allocate))
      (and complete (format "  complete %s\n" complete))
-     (and effort
-          (format "  effort %s\n"
-                  (let* ((minutes (org-duration-to-minutes effort))
-                         (hours (/ minutes 60.0)))
-                    (format "%.1fh" hours))))
+     (and effort (format "  effort %s\n" effort))
      (and priority (format "  priority %s\n" priority))
      (and milestone "  milestone\n")
      ;; Add other valid attributes.
