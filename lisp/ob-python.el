@@ -247,6 +247,25 @@ open('%s', 'w').write( pprint.pformat(main()) )")
    ")); "
    "__org_babel_python_fh.close()"))
 
+(defconst org-babel-python--eval-ast "\
+import ast
+try:
+    with open('%s') as f:
+        __org_babel_python_ast = ast.parse(f.read())
+    __org_babel_python_final = __org_babel_python_ast.body[-1]
+    if isinstance(__org_babel_python_final, ast.Expr):
+        __org_babel_python_ast.body = __org_babel_python_ast.body[:-1]
+        exec(compile(__org_babel_python_ast, '<string>', 'exec'))
+        __org_babel_python_final = eval(compile(ast.Expression(
+            __org_babel_python_final.value), '<string>', 'eval'))
+    else:
+        exec(compile(__org_babel_python_ast, '<string>', 'exec'))
+        __org_babel_python_final = None
+except Exception:
+    from traceback import format_exc
+    __org_babel_python_final = format_exc()
+    raise")
+
 (defun org-babel-python-evaluate
   (session body &optional result-type result-params preamble)
   "Evaluate BODY as Python code."
@@ -294,32 +313,9 @@ If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value of the
 last statement in BODY, as elisp."
   (let* ((send-wait (lambda () (comint-send-input nil t) (sleep-for 0 5)))
-	 (dump-last-value
-	  (lambda
-	    (tmp-file pp)
-	    (mapc
-	     (lambda (statement) (insert statement) (funcall send-wait))
-	     (if pp
-		 (list
-		  "import pprint"
-		  (format "open('%s', 'w').write(pprint.pformat(_))"
-			  (org-babel-process-file-name tmp-file 'noquote)))
-	       (list (format "open('%s', 'w').write(str(_))"
-			     (org-babel-process-file-name tmp-file
-                                                          'noquote)))))))
 	 (last-indent 0)
 	 (input-body (lambda (body)
 		       (dolist (line (split-string body "[\r\n]"))
-			 ;; Insert a blank line to end an indent
-			 ;; block.
-			 (let ((curr-indent (string-match "\\S-" line)))
-			   (if curr-indent
-			       (progn
-				 (when (< curr-indent last-indent)
-				   (insert "")
-				   (funcall send-wait))
-				 (setq last-indent curr-indent))
-			     (setq last-indent 0)))
 			 (insert line)
 			 (funcall send-wait))
 		       (funcall send-wait)))
@@ -344,17 +340,35 @@ last statement in BODY, as elisp."
 		   (funcall send-wait))
 		 2) "\n")))
             (`value
-             (let ((tmp-file (org-babel-temp-file "python-")))
+             (let ((tmp-results-file (org-babel-temp-file "python-"))
+		   (body (let ((tmp-src-file (org-babel-temp-file
+					      "python-")))
+			   (with-temp-file tmp-src-file (insert body))
+			   (format org-babel-python--eval-ast
+				   tmp-src-file))))
                (org-babel-comint-with-output
                    (session org-babel-python-eoe-indicator nil body)
                  (let ((comint-process-echoes nil))
                    (funcall input-body body)
-                   (funcall dump-last-value tmp-file
-                            (member "pp" result-params))
+		   (dolist
+		       (statement
+			(if (member "pp" result-params)
+			    (list
+			     "import pprint"
+			     (format "open('%s', 'w').write(pprint.pformat(\
+__org_babel_python_final))"
+				     (org-babel-process-file-name
+				      tmp-results-file 'noquote)))
+			  (list (format "open('%s', 'w').write(str(\
+__org_babel_python_final))"
+					(org-babel-process-file-name
+					 tmp-results-file 'noquote)))))
+		     (insert statement)
+		     (funcall send-wait))
                    (funcall send-wait) (funcall send-wait)
                    (insert org-babel-python-eoe-indicator)
                    (funcall send-wait)))
-               (org-babel-eval-read-file tmp-file))))))
+               (org-babel-eval-read-file tmp-results-file))))))
     (unless (string= (substring org-babel-python-eoe-indicator 1 -1) results)
       (org-babel-result-cond result-params
 	results
