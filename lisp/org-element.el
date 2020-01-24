@@ -4891,7 +4891,7 @@ with `org-element--cache-compare'.  This cache is used in
 
 A request is a vector with the following pattern:
 
- \[NEXT BEG END OFFSET PARENT PHASE]
+ [NEXT BEG END OFFSET PARENT PHASE]
 
 Processing a synchronization request consists of three phases:
 
