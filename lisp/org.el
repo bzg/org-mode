@@ -5837,20 +5837,17 @@ needs to be inserted at a specific position in the font-lock sequence.")
       (org-font-lock-ensure)
       (buffer-string))))
 
-(defvar org-m nil)
-(defvar org-l nil)
-(defvar org-f nil)
 (defun org-get-level-face (n)
   "Get the right face for match N in font-lock matching of headlines."
-  (setq org-l (- (match-end 2) (match-beginning 1) 1))
-  (when org-odd-levels-only (setq org-l (1+ (/ org-l 2))))
-  (if org-cycle-level-faces
-      (setq org-f (nth (% (1- org-l) org-n-level-faces) org-level-faces))
-    (setq org-f (nth (1- (min org-l org-n-level-faces)) org-level-faces)))
-  (cond
-   ((eq n 1) (if org-hide-leading-stars 'org-hide org-f))
-   ((eq n 2) org-f)
-   (t (unless org-level-color-stars-only org-f))))
+  (let* ((org-l0 (- (match-end 2) (match-beginning 1) 1))
+	 (org-l (when org-odd-levels-only (1+ (/ org-l0 2)) org-l0))
+	 (org-f (if org-cycle-level-faces
+		    (nth (% (1- org-l) org-n-level-faces) org-level-faces)
+		  (nth (1- (min org-l org-n-level-faces)) org-level-faces))))
+    (cond
+     ((eq n 1) (if org-hide-leading-stars 'org-hide org-f))
+     ((eq n 2) org-f)
+     (t (unless org-level-color-stars-only org-f)))))
 
 (defun org-face-from-face-or-color (context inherit face-or-color)
   "Create a face list that inherits INHERIT, but sets the foreground color.
