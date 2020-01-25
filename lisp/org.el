@@ -7865,7 +7865,7 @@ with the original repeater."
 	   (nmin 1)
 	   (nmax n)
 	   (n-no-remove -1)
-	   (idprop (org-entry-get nil "ID")))
+	   (idprop (org-entry-get beg "ID")))
       (when (and doshift
 		 (string-match-p "<[^<>\n]+ [.+]?\\+[0-9]+[hdwmy][^<>\n]*>"
 				 template))
