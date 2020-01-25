@@ -5840,7 +5840,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 (defun org-get-level-face (n)
   "Get the right face for match N in font-lock matching of headlines."
   (let* ((org-l0 (- (match-end 2) (match-beginning 1) 1))
-	 (org-l (when org-odd-levels-only (1+ (/ org-l0 2)) org-l0))
+	 (org-l (if org-odd-levels-only (1+ (/ org-l0 2)) org-l0))
 	 (org-f (if org-cycle-level-faces
 		    (nth (% (1- org-l) org-n-level-faces) org-level-faces)
 		  (nth (1- (min org-l org-n-level-faces)) org-level-faces))))
