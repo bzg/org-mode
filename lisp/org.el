@@ -14200,7 +14200,6 @@ with the current time without prompting the user."
 
 (defvar org-overriding-default-time nil) ; dynamically scoped
 (defvar org-read-date-overlay nil)
-(defvar org-dcst nil) ; dynamically scoped
 (defvar org-read-date-history nil)
 (defvar org-read-date-final-answer nil)
 (defvar org-read-date-analyze-futurep nil)
@@ -14270,7 +14269,6 @@ user."
 	  (if (equal org-with-time '(16))
 	      '(0 0)
 	    org-time-stamp-rounding-minutes))
-	 (org-dcst org-display-custom-times)
 	 (ct (org-current-time))
 	 (org-def (or org-overriding-default-time default-time ct))
 	 (org-defdecode (decode-time org-def))
@@ -14389,7 +14387,7 @@ user."
 			  " " (or org-ans1 org-ans2)))
 	     (org-end-time-was-given nil)
 	     (f (org-read-date-analyze ans org-def org-defdecode))
-	     (fmts (if org-dcst
+	     (fmts (if org-display-custom-times
 		       org-time-stamp-custom-formats
 		     org-time-stamp-formats))
 	     (fmt (if (or org-with-time
