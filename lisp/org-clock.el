@@ -1724,7 +1724,7 @@ Optional argument N tells to change by that many units."
 	  (delq 'org-mode-line-string global-mode-string))
     (org-clock-restore-frame-title-format)
     (force-mode-line-update)
-    (error "No active clock"))
+    (user-error "No active clock"))
   (save-excursion    ; Do not replace this with `with-current-buffer'.
     (with-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
@@ -1753,14 +1753,14 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 	 (m (cond
 	     (select
 	      (or (org-clock-select-task "Select task to go to: ")
-		  (error "No task selected")))
+		  (user-error "No task selected")))
 	     ((org-clocking-p) org-clock-marker)
 	     ((and org-clock-goto-may-find-recent-task
 		   (car org-clock-history)
 		   (marker-buffer (car org-clock-history)))
 	      (setq recent t)
 	      (car org-clock-history))
-	     (t (error "No active or recent clock task")))))
+	     (t (user-error "No active or recent clock task")))))
     (pop-to-buffer-same-window (marker-buffer m))
     (if (or (< m (point-min)) (> m (point-max))) (widen))
     (goto-char m)
@@ -2310,7 +2310,7 @@ the currently selected interval size."
   (save-excursion
     (goto-char (point-at-bol))
     (if (not (looking-at "^[ \t]*#\\+BEGIN:[ \t]+clocktable\\>.*?:block[ \t]+\\(\\S-+\\)"))
-	(error "Line needs a :block definition before this command works")
+	(user-error "Line needs a :block definition before this command works")
       (let* ((b (match-beginning 1)) (e (match-end 1))
 	     (s (match-string 1))
 	     block shift ins y mw d date wp m)
@@ -2369,7 +2369,7 @@ the currently selected interval size."
 		       (encode-time 0 0 0 1 (+ mw n) y))))
 	   (y
 	    (setq ins (number-to-string (+ y n))))))
-	 (t (error "Cannot shift clocktable block")))
+	 (t (user-error "Cannot shift clocktable block")))
 	(when ins
 	  (goto-char b)
 	  (insert ins)
@@ -2421,7 +2421,7 @@ the currently selected interval size."
       (when step
 	;; Write many tables, in steps
 	(unless (or block (and ts te))
-	  (error "Clocktable `:step' can only be used with `:block' or `:tstart,:end'"))
+	  (user-error "Clocktable `:step' can only be used with `:block' or `:tstart, :end'"))
 	(org-clocktable-steps params)
 	(throw 'exit nil))
 
@@ -2527,7 +2527,7 @@ from the dynamic block definition."
 	    (guard (string-match-p "\\`[0-9]+!\\'" (symbol-name narrow))))
        (setq narrow-cut-p t)
        (setq narrow (string-to-number (symbol-name narrow))))
-      (_ (error "Invalid value %s of :narrow property in clock table" narrow)))
+      (_ (user-error "Invalid value %s of :narrow property in clock table" narrow)))
 
     ;; Now we need to output this table stuff.
     (goto-char ipos)
