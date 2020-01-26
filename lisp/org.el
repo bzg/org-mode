@@ -7900,7 +7900,7 @@ with the original repeater."
 	   (nmin 1)
 	   (nmax n)
 	   (n-no-remove -1)
-	   (idprop (org-entry-get nil "ID")))
+	   (idprop (org-entry-get beg "ID")))
       (when (and doshift
 		 (string-match-p "<[^<>\n]+ [.+]?\\+[0-9]+[hdwmy][^<>\n]*>"
 				 template))
@@ -8730,31 +8730,31 @@ a link."
        ;; a link, a footnote reference.
        ((memq type '(headline inlinetask))
 	(org-match-line org-complex-heading-regexp)
-	(if (and (match-beginning 5)
-		 (>= (point) (match-beginning 5))
-		 (< (point) (match-end 5)))
-	    ;; On tags.
-	    (org-tags-view
-	     arg
-	     (save-excursion
-	       (let* ((beg (match-beginning 5))
-		      (end (match-end 5))
-		      (beg-tag (or (search-backward ":" beg 'at-limit) (point)))
-		      (end-tag (search-forward ":" end nil 2)))
-		 (buffer-substring (1+ beg-tag) (1- end-tag)))))
-	  ;; Not on tags.
-	  (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
-	    (`(nil . ,_)
-	     (require 'org-attach)
-	     (message "Opening attachment-dir")
-	     (if (equal arg '(4))
-		 (org-attach-reveal-in-emacs)
-	       (org-attach-reveal)))
-	    (`(,links . ,links-end)
-	     (dolist (link (if (stringp links) (list links) links))
-	       (search-forward link nil links-end)
-	       (goto-char (match-beginning 0))
-	       (org-open-at-point arg))))))
+	(let ((tags-beg (match-beginning 5))
+	      (tags-end (match-end 5))
+	      (tags-str (match-string 5)))
+	  (if (and tags-beg (>= (point) tags-beg) (< (point) tags-end))
+	      ;; On tags.
+	      (org-tags-view
+	       arg
+	       (save-excursion
+		 (let* ((beg-tag (or (search-backward ":" tags-beg 'at-limit) (point)))
+			(end-tag (search-forward ":" tags-end nil 2)))
+		   (buffer-substring (1+ beg-tag) (1- end-tag)))))
+	    ;; Not on tags.
+	    (pcase (org-offer-links-in-entry (current-buffer) (point) arg)
+	      (`(nil . ,_)
+	       (require 'org-attach)
+	       (when (org-attach-dir)
+		 (message "Opening attachment")
+		 (if (equal arg '(4))
+		     (org-attach-reveal-in-emacs)
+		   (org-attach-reveal))))
+	      (`(,links . ,links-end)
+	       (dolist (link (if (stringp links) (list links) links))
+		 (search-forward link nil links-end)
+		 (goto-char (match-beginning 0))
+		 (org-open-at-point arg)))))))
        ;; On a footnote reference or at definition's label.
        ((or (eq type 'footnote-reference)
 	    (and (eq type 'footnote-definition)

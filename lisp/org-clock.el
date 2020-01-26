@@ -823,6 +823,11 @@ use libnotify if available, or fall back on a message."
 	((executable-find "notify-send")
 	 (start-process "emacs-timer-notification" nil
 			"notify-send" notification))
+	((string-equal system-type "windows-nt")
+	 (w32-notification-close (w32-notification-notify
+				  :title "Org mode message"
+				  :body notification
+				  :urgency 'low)))
 	;; Maybe the handler will send a message, so only use message as
 	;; a fall back option
 	(t (message "%s" notification))))
