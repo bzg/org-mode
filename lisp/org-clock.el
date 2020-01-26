@@ -808,6 +808,7 @@ If PLAY-SOUND is non-nil, it overrides `org-clock-sound'."
   "Show notification.
 Use `org-show-notification-handler' if defined,
 use libnotify if available, or fall back on a message."
+  (ignore-errors (require 'notifications))
   (cond ((functionp org-show-notification-handler)
 	 (funcall org-show-notification-handler notification))
 	((stringp org-show-notification-handler)
@@ -823,11 +824,6 @@ use libnotify if available, or fall back on a message."
 	((executable-find "notify-send")
 	 (start-process "emacs-timer-notification" nil
 			"notify-send" notification))
-	((string-equal system-type "windows-nt")
-	 (w32-notification-close (w32-notification-notify
-				  :title "Org mode message"
-				  :body notification
-				  :urgency 'low)))
 	;; Maybe the handler will send a message, so only use message as
 	;; a fall back option
 	(t (message "%s" notification))))
