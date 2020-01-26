@@ -260,8 +260,11 @@ Shows a list of commands and prompts for another key to execute a command."
       (save-excursion
 	(save-window-excursion
 	  (unless org-attach-expert
-	    (with-output-to-temp-buffer "*Org Attach*"
-              (princ
+	    (switch-to-buffer-other-window (get-buffer-create "*Org Attach*"))
+	    (erase-buffer)
+	    (setq cursor-type nil
+	      header-line-format "Use SPC, DEL, C-n or C-p to navigate.")
+	    (insert
                (concat "Attachment folder:\n"
 		       (or dir
 			   "Can't find an existing attachment-folder")
@@ -284,11 +287,19 @@ Shows a list of commands and prompts for another key to execute a command."
 			              "Invalid `org-attach-commands' item: %S"
 			              entry))))
 		                org-attach-commands
-		                "\n"))))))
+		                "\n")))))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
-	  (message "Select command: [%s]"
-		   (concat (mapcar #'caar org-attach-commands)))
-	  (setq c (read-char-exclusive))
+	  (let ((msg (format "Select command: [%s]"
+			     (concat (mapcar #'caar org-attach-commands)))))
+	    (message msg)
+	    (setq c (read-char-exclusive))
+	    (while (memq c '(14 16 32 127))
+	      (cond ((= c 14) (ignore-errors (call-interactively 'scroll-up-line)))
+		    ((= c 16) (ignore-errors (call-interactively 'scroll-down-line)))
+		    ((= c 32) (ignore-errors (call-interactively 'scroll-up)))
+		    ((= c 127) (ignore-errors (call-interactively 'scroll-down))))
+	      (message msg)
+	      (setq c (read-char-exclusive))))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
       (let ((command (cl-some (lambda (entry)
 				(and (memq c (nth 0 entry)) (nth 1 entry)))
