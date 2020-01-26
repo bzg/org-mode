@@ -1225,16 +1225,17 @@ See `org-file-apps'.")
 
 (defcustom org-file-apps
   '((auto-mode . emacs)
+    (directory . emacs)
     ("\\.mm\\'" . default)
     ("\\.x?html?\\'" . default)
     ("\\.pdf\\'" . default))
-  "External applications for opening `file:path' items in a document.
+  "Applications for opening `file:path' items in a document.
 
 \\<org-mode-map>
-Org mode uses system defaults for different file types, but
-you can use this variable to set the application for a given file
-extension.  The entries in this list are cons cells where the car identifies
-files and the cdr the corresponding command.
+Org mode uses system defaults for different file types, but you
+can use this variable to set the application for a given file
+extension.  The entries in this list are cons cells where the car
+identifies files and the cdr the corresponding command.
 
 Possible values for the file identifier are:
 
@@ -1310,6 +1311,7 @@ For more examples, see the system specific constants
 `org-file-apps-windowsnt'
 `org-file-apps-gnu'."
   :group 'org
+  :package-version '(Org . "9.4")
   :type '(repeat
 	  (cons (choice :value ""
 			(string :tag "Extension")

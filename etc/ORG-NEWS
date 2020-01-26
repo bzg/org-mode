@@ -77,6 +77,10 @@ which were affected by the column view.
 ~org-attach-store-link-p~ have a new option to store a file link to
 the attachment.
 
+*** New default value for ~org-file-apps~
+
+The new value uses emacs as the application for opening directory.
+
 * Version 9.3
 
 ** Incompatible changes
