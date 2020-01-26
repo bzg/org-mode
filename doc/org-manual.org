@@ -19566,13 +19566,13 @@ compatible with Org Mobile.  It also describes synchronizing changes,
 such as to notes, between the mobile application and the computer.
 
 To change tags and TODO states in the mobile application, first
-customize the variables ~org-todo-keywords~ and ~org-tag-alist~.
-These should cover all the important tags and TODO keywords, even if
-Org files use only some of them.  Though the mobile application is
-expected to support in-buffer settings, it is required to understand
-TODO states /sets/ (see [[*Setting up keywords for individual files]]) and
-/mutually exclusive/ tags (see [[*Setting Tags]]) only for those set in
-these variables.
+customize the variables ~org-todo-keywords~, ~org-tag-alist~ and
+~org-tag-persistent-alist~.  These should cover all the important tags
+and TODO keywords, even if Org files use only some of them.  Though
+the mobile application is expected to support in-buffer settings, it
+is required to understand TODO states /sets/ (see [[*Setting up keywords
+for individual files]]) and /mutually exclusive/ tags (see [[*Setting
+Tags]]) only for those set in these variables.
 
 *** Setting up the staging area
 :PROPERTIES:
