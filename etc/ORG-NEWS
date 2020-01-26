@@ -42,6 +42,8 @@ using ~display-buffer~. This allows users to control how source
 buffers are displayed by modifying ~display-buffer-alist~ or
 ~display-buffer-base-action~.
 
+*** New option ~org-show-notification-timeout~
+
 ** New functions
 *** ~org-columns-toggle-or-columns-quit~
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the

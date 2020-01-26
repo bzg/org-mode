@@ -273,6 +273,15 @@ also using the face `org-mode-line-clock-overrun'."
 	  (const :tag "Just mark the time string" nil)
 	  (string :tag "Text to prepend")))
 
+(defcustom org-show-notification-timeout 3
+  "Number of seconds to wait before closing Org notifications.
+This is applied to notifications send with `notifications-notify'
+and `w32-notification-notify' only, not other mechanisms possibly
+set throug `org-show-notification-handler'."
+  :group 'org-clock
+  :package-version '(Org . "9.4")
+  :type 'integer)
+
 (defcustom org-show-notification-handler nil
   "Function or program to send notification with.
 The function or program will be called with the notification
@@ -814,10 +823,20 @@ use libnotify if available, or fall back on a message."
 	((stringp org-show-notification-handler)
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
+	((fboundp 'w32-notification-notify)
+	 (let ((id (w32-notification-notify
+		    :title "Org mode message"
+		    :body notification
+		    :urgency 'low)))
+	   (run-with-timer
+	    org-show-notification-timeout
+	    nil
+	    (lambda () (w32-notification-close id)))))
 	((fboundp 'notifications-notify)
 	 (notifications-notify
 	  :title "Org mode message"
 	  :body notification
+	  :timeout (* org-show-notification-timeout 1000)
 	  ;; FIXME how to link to the Org icon?
 	  ;; :app-icon "~/.emacs.d/icons/mail.png"
 	  :urgency 'low))
