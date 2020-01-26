@@ -20576,8 +20576,9 @@ interactive command with similar behavior."
   "Call `outline-back-to-heading', but provide a better error message."
   (condition-case nil
       (outline-back-to-heading invisible-ok)
-    (error (error "Before first headline at position %d in buffer %s"
-		  (point) (current-buffer)))))
+    (error
+     (user-error "Before first headline at position %d in buffer %s"
+		 (point) (current-buffer)))))
 
 (defun org-back-to-heading-or-point-min (&optional invisible-ok)
   "Go back to heading or first point in buffer.
