@@ -491,7 +491,7 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
 `org-attach-method'."
   (interactive
    (list
-    (read-file-name "File to keep as an attachment:"
+    (read-file-name "File to keep as an attachment: "
                     (or (progn
                           (require 'dired-aux)
                           (dired-dwim-target-directory))
@@ -516,7 +516,7 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
              (org-attach-store-link file)))
       (if visit-dir
           (dired attach-dir)
-        (message "File %S is now an attachment." basename)))))
+        (message "File %S is now an attachment" basename)))))
 
 (defun org-attach-attach-cp ()
   "Attach a file by copying it."
