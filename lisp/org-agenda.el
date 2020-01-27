@@ -2199,6 +2199,7 @@ The following commands are available:
   (interactive)
   (let ((agenda-local-vars-to-keep
 	 '(text-scale-mode-amount
+	   text-scale-mode
 	   text-scale-mode-lighter
 	   face-remapping-alist))
 	(save (buffer-local-variables)))
