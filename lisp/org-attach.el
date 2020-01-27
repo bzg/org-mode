@@ -3,7 +3,6 @@
 ;; Copyright (C) 2008-2020 Free Software Foundation, Inc.
 
 ;; Author: John Wiegley <johnw@newartisans.com>
-;; Maintainer: Bastien Guerry <bzg at gnu dot org>
 ;; Keywords: org data attachment
 ;; This file is part of GNU Emacs.
 ;;
