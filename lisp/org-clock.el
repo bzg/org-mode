@@ -40,6 +40,7 @@
 (declare-function org-link-make-string "ol" (link &optional description))
 (declare-function org-table-goto-line "org-table" (n))
 (declare-function org-dynamic-block-define "org" (type func))
+(declare-function w32-notification-notify "w32fns.c" (&rest params))
 
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
