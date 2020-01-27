@@ -17811,6 +17811,10 @@ Otherwise, return a user error."
 
 This command does many different things, depending on context:
 
+- If column view is active, quit it.
+
+- If there are highlights, remove them.
+
 - If a function in `org-ctrl-c-ctrl-c-hook' recognizes this location,
   this is what we do.
 
