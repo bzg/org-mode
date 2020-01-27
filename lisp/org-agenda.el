@@ -2422,6 +2422,8 @@ The following commands are available:
 (define-key org-agenda-mode-map [remap forward-paragraph] 'org-agenda-forward-block)
 (define-key org-agenda-mode-map [remap backward-paragraph] 'org-agenda-backward-block)
 
+(org-defkey org-agenda-mode-map "\C-c\C-c" 'org-agenda-ctrl-c-ctrl-c)
+
 (when org-agenda-mouse-1-follows-link
   (org-defkey org-agenda-mode-map [follow-link] 'mouse-face))
 (easy-menu-define org-agenda-menu org-agenda-mode-map "Agenda menu"
@@ -10547,6 +10549,11 @@ when defining today."
 	 (hour (nth 2 (decode-time (org-current-time))))
          (org-extend-today-until (1+ hour)))
     (org-agenda-todo arg)))
+
+(defun org-agenda-ctrl-c-ctrl-c ()
+  "If columns are active, deactivate them."
+  (interactive)
+  (when org-agenda-columns-active (org-columns-quit)))
 
 (provide 'org-agenda)
 

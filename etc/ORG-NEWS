@@ -50,6 +50,8 @@ buffers are displayed by modifying ~display-buffer-alist~ or
 recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
 possible via column view value edit or with =<C-c C-q>=.
 *** ~org-datetree-find-month-create~
+*** ~org-agenda-ctrl-c-ctrl-c~
+=<C-c C-c>= for agenda.  Up to now just deactivate columns.
 ** Removed functions and variables
 
 *** ~org-columns-set-tags-or-toggle~
