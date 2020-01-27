@@ -2411,7 +2411,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "^" 'org-agenda-filter-by-top-headline)
 (org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
 (org-defkey org-agenda-mode-map "\C-c\C-x_" 'org-timer-stop)
-(define-key org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
+(org-defkey org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 (org-defkey org-agenda-mode-map "\C-c\C-xI" 'org-info-find-node)
@@ -2419,8 +2419,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map [mouse-2] 'org-agenda-goto-mouse)
 (org-defkey org-agenda-mode-map [mouse-3] 'org-agenda-show-mouse)
 
-(define-key org-agenda-mode-map [remap forward-paragraph] 'org-agenda-forward-block)
-(define-key org-agenda-mode-map [remap backward-paragraph] 'org-agenda-backward-block)
+(org-defkey org-agenda-mode-map [remap forward-paragraph] 'org-agenda-forward-block)
+(org-defkey org-agenda-mode-map [remap backward-paragraph] 'org-agenda-backward-block)
 
 (org-defkey org-agenda-mode-map "\C-c\C-c" 'org-agenda-ctrl-c-ctrl-c)
 
