@@ -157,7 +157,6 @@
      (text-scale-set 11)
      (cl-assert (and (boundp text-scale-mode) text-scale-mode))
      (org-agenda-redo)
-     (should text-scale-mode)
      (should (= 11 text-scale-mode-amount)))
    (org-test-agenda--kill-all-agendas)))
 
