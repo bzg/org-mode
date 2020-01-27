@@ -8735,8 +8735,7 @@ a link."
        ((memq type '(headline inlinetask))
 	(org-match-line org-complex-heading-regexp)
 	(let ((tags-beg (match-beginning 5))
-	      (tags-end (match-end 5))
-	      (tags-str (match-string 5)))
+	      (tags-end (match-end 5)))
 	  (if (and tags-beg (>= (point) tags-beg) (< (point) tags-end))
 	      ;; On tags.
 	      (org-tags-view
