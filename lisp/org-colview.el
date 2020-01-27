@@ -1619,6 +1619,7 @@ PARAMS is a property list of parameters:
 	  (dolist (entry cache)
 	    (goto-char (car entry))
 	    (org-columns--display-here (cdr entry)))
+	  (setq-local org-agenda-columns-active t)
 	  (when org-agenda-columns-show-summaries
 	    (org-agenda-colview-summarize cache)))))))
 
@@ -1683,8 +1684,7 @@ This will add overlays to the date lines, to show the summary for each day."
 					      'face 'bold final))
 			 (list spec final final)))))
 		  fmt)
-		 'dateline)
-		(setq-local org-agenda-columns-active t))))
+		 'dateline))))
 	  (if (bobp) (throw :complete t) (forward-line -1)))))))
 
 (defun org-agenda-colview-compute (fmt)
