@@ -35,5 +35,6 @@ Check the [[https://orgmode.org][homepage of Org]] and the [[https://orgmode.org
 
 * License
 
-Org-mode is published under the GNU GPLv3 license or any later version,
-the same as GNU Emacs.  See the COPYING file in this directory.
+Org-mode is published under [[https://www.gnu.org/licenses/gpl-3.0.html][the GNU GPLv3 license]] or any later
+version, the same as GNU Emacs.  See the COPYING file in this
+directory.
