@@ -276,9 +276,9 @@ also using the face `org-mode-line-clock-overrun'."
 
 (defcustom org-show-notification-timeout 3
   "Number of seconds to wait before closing Org notifications.
-This is applied to notifications send with `notifications-notify'
+This is applied to notifications sent with `notifications-notify'
 and `w32-notification-notify' only, not other mechanisms possibly
-set throug `org-show-notification-handler'."
+set through `org-show-notification-handler'."
   :group 'org-clock
   :package-version '(Org . "9.4")
   :type 'integer)
