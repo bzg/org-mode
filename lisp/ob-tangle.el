@@ -516,14 +516,16 @@ which enable the original code blocks to be found."
     (goto-char (point-min))
     (let ((counter 0) new-body end)
       (while (re-search-forward org-link-bracket-re nil t)
-        (when (re-search-forward
-	       (concat " " (regexp-quote (match-string 2)) " ends here"))
-          (setq end (match-end 0))
-          (forward-line -1)
-          (save-excursion
-	    (when (setq new-body (org-babel-tangle-jump-to-org))
-	      (org-babel-update-block-body new-body)))
-          (setq counter (+ 1 counter)))
+        (if (and (match-string 2)
+		 (re-search-forward
+		  (concat " " (regexp-quote (match-string 2)) " ends here") nil t))
+	    (progn (setq end (match-end 0))
+		   (forward-line -1)
+		   (save-excursion
+		     (when (setq new-body (org-babel-tangle-jump-to-org))
+		       (org-babel-update-block-body new-body)))
+		   (setq counter (+ 1 counter)))
+	  (setq end (point)))
         (goto-char end))
       (prog1 counter (message "Detangled %d code blocks" counter)))))
 

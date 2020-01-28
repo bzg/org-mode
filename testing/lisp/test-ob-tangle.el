@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'subr-x)
+
 ;; TODO
 ;; (ert-deftest ob-tangle/noweb-on-tangle ()
 ;;   "Noweb header arguments tangle correctly.
@@ -379,6 +381,15 @@ another block
 		    (insert-file-contents file)
 		    (org-split-string (buffer-string))))
 	      (delete-file file))))))
+
+(ert-deftest ob-tangle/detangle-false-positive ()
+  "Test handling of false positive link during detangle."
+  (org-test-in-example-file (expand-file-name "babel.el" org-test-example-dir)
+    (org-babel-detangle)
+    (org-test-at-id "73115FB0-6565-442B-BB95-50195A499EF4"
+    (org-babel-next-src-block)
+    (should (equal (string-trim (org-element-property :value (org-element-at-point)))
+		   ";; detangle changes")))))
 
 (provide 'test-ob-tangle)
 
