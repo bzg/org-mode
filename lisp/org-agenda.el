@@ -10546,9 +10546,9 @@ when defining today."
     (org-agenda-todo arg)))
 
 (defun org-agenda-ctrl-c-ctrl-c ()
-  "If columns are active, deactivate them."
+  "Set tags in agenda buffer."
   (interactive)
-  (when org-agenda-columns-active (org-columns-quit)))
+  (org-agenda-set-tags))
 
 (provide 'org-agenda)
 

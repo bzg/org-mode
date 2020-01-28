@@ -17810,7 +17810,7 @@ Otherwise, return a user error."
 
 This command does many different things, depending on context:
 
-- If column view is active, quit it.
+- If column view is active, in agenda or org buffers, quit it.
 
 - If there are highlights, remove them.
 
@@ -17819,9 +17819,10 @@ This command does many different things, depending on context:
 
 - If the cursor is on a statistics cookie, update it.
 
-- If the cursor is in a headline, prompt for tags and insert them
-  into the current line, aligned to `org-tags-column'.  When called
-  with prefix arg, realign all tags in the current buffer.
+- If the cursor is in a headline, in an agenda or an org buffer,
+  prompt for tags and insert them into the current line, aligned
+  to `org-tags-column'.  When called with prefix arg, realign all
+  tags in the current buffer.
 
 - If the cursor is in one of the special #+KEYWORD lines, this
   triggers scanning the buffer for these lines and updating the
