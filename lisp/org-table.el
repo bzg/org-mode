@@ -1181,7 +1181,7 @@ value."
   (save-excursion
     (let* ((pos (point))
 	   (col (org-table-current-column))
-	   (cname (car (rassoc (int-to-string col) org-table-column-names)))
+	   (cname (car (rassoc (number-to-string col) org-table-column-names)))
 	   (name (car (rassoc (list (count-lines org-table-current-begin-pos
 						 (line-beginning-position))
 				    col)
@@ -1958,9 +1958,9 @@ toggle `org-table-follow-field-mode'."
 	  (coord
 	   (if (eq org-table-use-standard-references t)
 	       (concat (org-number-to-letters (org-table-current-column))
-		       (int-to-string (org-table-current-dline)))
-	     (concat "@" (int-to-string (org-table-current-dline))
-		     "$" (int-to-string (org-table-current-column)))))
+		       (number-to-string (org-table-current-dline)))
+	     (concat "@" (number-to-string (org-table-current-dline))
+		     "$" (number-to-string (org-table-current-column)))))
 	  (field (org-table-get-field))
 	  (cw (current-window-configuration))
 	  p)
@@ -2218,7 +2218,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	      (replace-match (concat key (cdr a)) t t)
 	      (message msg))
 	     ((and limit (> n limit))
-	      (replace-match (concat key (int-to-string (+ n delta))) t t)
+	      (replace-match (concat key (number-to-string (+ n delta))) t t)
 	      (message msg))))))
       (forward-line))))
 
@@ -4758,7 +4758,7 @@ This function sets up the following dynamically scoped variables:
 	  (dolist (name (org-split-string (match-string 1) " *| *"))
 	    (cl-incf c)
 	    (when (string-match "\\`[a-zA-Z][_a-zA-Z0-9]*\\'" name)
-	      (push (cons name (int-to-string c)) org-table-column-names)))))
+	      (push (cons name (number-to-string c)) org-table-column-names)))))
       (setq org-table-column-names (nreverse org-table-column-names))
       (setq org-table-column-name-regexp
 	    (format "\\$\\(%s\\)\\>"
@@ -5147,7 +5147,7 @@ command name.  KEYS are keys that should be checked in for a command
 to execute outside of tables."
   (eval
    (list 'defun
-	 (intern (concat "orgtbl-hijacker-command-" (int-to-string n)))
+	 (intern (concat "orgtbl-hijacker-command-" (number-to-string n)))
 	 '(arg)
 	 (concat "In tables, run `" (symbol-name fun) "'.\n"
 		 "Outside of tables, run the binding of `"

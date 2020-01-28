@@ -920,7 +920,8 @@ if necessary."
   (if (<= (length s) maxlength)
       s
     (let* ((n (max (- maxlength 4) 1))
-	   (re (concat "\\`\\(.\\{1," (int-to-string n) "\\}[^ ]\\)\\([ ]\\|\\'\\)")))
+	   (re (concat "\\`\\(.\\{1," (number-to-string n)
+		       "\\}[^ ]\\)\\([ ]\\|\\'\\)")))
       (if (string-match re s)
 	  (concat (match-string 1 s) "...")
 	(concat (substring s 0 (max (- maxlength 3) 0)) "...")))))

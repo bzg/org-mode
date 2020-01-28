@@ -20808,7 +20808,7 @@ If there is no such heading, return nil."
 	   ;; This means we can easily find the end by looking
 	   ;; only for the right number of stars.  Using a regexp to do
 	   ;; this is so much faster than using a Lisp loop.
-	   (let ((re (concat "^\\*\\{1," (int-to-string level) "\\} ")))
+	   (let ((re (concat "^\\*\\{1," (number-to-string level) "\\} ")))
 	     (forward-char 1)
 	     (and (re-search-forward re nil 'move) (beginning-of-line 1))))
 	  (t

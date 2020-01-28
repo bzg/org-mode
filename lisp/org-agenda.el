@@ -2332,7 +2332,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-d" #'org-agenda-deadline)
 (let ((l '(1 2 3 4 5 6 7 8 9 0)))
   (while l (org-defkey org-agenda-mode-map
-		       (int-to-string (pop l)) #'digit-argument)))
+		       (number-to-string (pop l)) #'digit-argument)))
 (org-defkey org-agenda-mode-map "F" #'org-agenda-follow-mode)
 (org-defkey org-agenda-mode-map "R" #'org-agenda-clockreport-mode)
 (org-defkey org-agenda-mode-map "E" #'org-agenda-entry-text-mode)
@@ -6871,7 +6871,7 @@ HH:MM."
 				  (< t0 1000)) "0" "")
 			 (if (< t0 100) "0" "")
 			 (if (< t0 10)  "0" "")
-			 (int-to-string t0))))
+			 (number-to-string t0))))
 	(if string (concat (substring t1 -4 -2) ":" (substring t1 -2)) t0)))))
 
 (defvar org-agenda-before-sorting-filter-function nil
