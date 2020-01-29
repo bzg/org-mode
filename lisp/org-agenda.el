@@ -7711,11 +7711,10 @@ the variable `org-agenda-auto-exclude-function'."
       (and fe (org-agenda-filter-apply
 	       (setq org-agenda-effort-filter fe) 'effort))
       (and fr (org-agenda-filter-apply
-	       (setq org-agenda-regexp-filter fr) 'regexp))
-      )))
+	       (setq org-agenda-regexp-filter fr) 'regexp)))))
 
 (defun org-agenda-filter-completion-function (string _predicate &optional flag)
-  "Complete a complex filter string
+  "Complete a complex filter string.
 FLAG specifies the type of completion operation to perform.  This
 function is passed as a collection function to `completing-read',
 which see."
