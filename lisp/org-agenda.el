@@ -7614,7 +7614,6 @@ consistency with the other filter commands."
 	       (if keep current nil)))
 	(org-agenda-filter-apply org-agenda-effort-filter 'effort)))))
 
-
 (defun org-agenda-filter (&optional strip-or-accumulate)
   "Prompt for a general filter string and apply it to the agenda.
 
@@ -7665,11 +7664,18 @@ the variable `org-agenda-auto-exclude-function'."
     (let* ((tag-list (org-agenda-get-represented-tags))
 	   (category-list (org-agenda-get-represented-categories))
 	   (negate (equal strip-or-accumulate '(4)))
+	   (cf (mapconcat #'identity org-agenda-category-filter ""))
+	   (tf (mapconcat #'identity org-agenda-tag-filter ""))
+	   (rpl-fn (lambda (c) (replace-regexp-in-string "^\+" "" (or (car c) ""))))
+	   (ef (replace-regexp-in-string "^\+" "" (or (car org-agenda-effort-filter) "")))
+	   (rf (replace-regexp-in-string "^\+" "" (or (car org-agenda-regexp-filter) "")))
+	   (ff (concat cf tf ef (when (not (equal rf "")) (concat "/" rf "/"))))
 	   (f-string (completing-read
 		      (concat
 		       (if negate "Negative filter" "Filter")
 		       " [+cat-tag<0:10-/regexp/]: ")
-		      'org-agenda-filter-completion-function))
+		      'org-agenda-filter-completion-function
+		      nil nil ff))
 	   (keep (or (if (string-match "^\\+[+-]" f-string)
 			 (progn (setq f-string (substring f-string 1)) t))
 		     (equal strip-or-accumulate '(16))))
