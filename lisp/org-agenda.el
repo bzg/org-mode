@@ -83,6 +83,7 @@
 (declare-function org-agenda-columns "org-colview" ())
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-capture "org-capture" (&optional goto keys))
+(declare-function org-clock-modify-effort-estimate "org-clock" (&optional value))
 
 (defvar calendar-mode-map)
 (defvar org-clock-current-task)
