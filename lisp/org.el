@@ -6403,13 +6403,11 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	(setq eos (save-excursion (org-end-of-subtree t t)
 				  (when (bolp) (backward-char)) (point)))
 	(setq has-children
-	      (or (save-excursion
-		    (let ((level (funcall outline-level)))
-		      (outline-next-heading)
-		      (and (org-at-heading-p t)
-			   (> (funcall outline-level) level))))
-		  (save-excursion
-		    (org-list-search-forward (org-item-beginning-re) eos t)))))
+	      (save-excursion
+		(let ((level (funcall outline-level)))
+		  (outline-next-heading)
+		  (and (org-at-heading-p t)
+		       (> (funcall outline-level) level))))))
       ;; Determine end invisible part of buffer (EOL)
       (beginning-of-line 2)
       (while (and (not (eobp)) ;This is like `next-line'.
