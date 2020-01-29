@@ -17,18 +17,23 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 Turn on the display of the first data row of the table at point in the
 window header line when this first row is not visible anymore in the
-buffer.  You can activate this minor mode by default by setting the
-option ~org-table-electric-header-p~ to ~t~.
+buffer.
 
-*** Property drawers before first headline, outline level 0
+You can activate this minor mode by default by setting the option
+~org-table-electric-header-p~ to ~t~.
 
-Property drawers will now work before first headline and Org mode is
-moving more towards making things before the first headline behave
-just as if it was at outline level 0.  Inheritance for properties will
-work also for this level.  In other words: defining things in a
-property drawer before the first headline will make them "inheritable"
-for all headlines.
+*** Property drawers allowed before first headline
+
+Property drawers are now allowed before the first headline.
+
+Org mode is moving more towards making things before the first
+headline behave just as if it was at outline level 0.  Inheritance for
+properties will work also for this level.  In other words: defining
+things in a property drawer before the first headline will make them
+"inheritable" for all headlines.
+
 *** New option to group captured datetime entries by month
+
 A new `:tree-type month' option was added to org-capture-templates to
 group new datetime entries by month.
 
@@ -51,18 +56,33 @@ buffers are displayed by modifying ~display-buffer-alist~ or
 
 *** New option ~org-show-notification-timeout~
 
-** New functions
+This option will add a timeout to notifications.
+
+** New commands
+*** ~org-table-electric-header-mode~
+
+Turn on a minor mode to display the first data row of the table at
+point in the header-line when the beginning of the table is invisible.
+
 *** ~org-columns-toggle-or-columns-quit~
+
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
 recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
 possible via column view value edit or with =<C-c C-q>=.
+
 *** ~org-datetree-find-month-create~
+
+Find or create a month entry for a date.
+
 *** ~org-agenda-ctrl-c-ctrl-c~
-=<C-c C-c>= for agenda.  Up to now just deactivate columns.
-** Removed functions and variables
+
+=<C-c C-c>= in agenda calls ~org-agenda-set-tags~.
+
+** Removed commands, functions and variables
 
 *** ~org-columns-set-tags-or-toggle~
-See [[*~org-columns-toggle-or-columns-quit~]]
+
+See [[*~org-columns-toggle-or-columns-quit~]].
 
 ** Miscellaneous
 *** Duration can be read and written in compact form
@@ -78,9 +98,10 @@ headlines instead.  This allows you to distinguish TODO headlines from
 normal headlines.  The face can be customized via ~org-headline-todo~.
 
 *** Exit column view with =<C-c C-c>=
-=<C-c C-c>= (almost) everywhere in a buffer exits column view.  Before
-there was only key =<q>= to exit column view and only functional on lines
-which were affected by the column view.
+
+=<C-c C-c>= Now exits the column view from (almost) any point in the
+buffer.  Before this change, only the key =<q>= was used for this, and
+it was only functional on lines displayed as columns.
 
 *** New option in ~org-attach-store-link-p~
 ~org-attach-store-link-p~ have a new option to store a file link to
@@ -217,7 +238,7 @@ Export ignore done tasks with a deadline when
 Likewise, scheduled done tasks are also ignored when
 ~org-icalendar-use-scheduled~ contains the same symbol.
 
-*** Add split-window-right option for src block edit window placement
+*** Add ~split-window-right~ option for src block edit window placement
 
 Given the increasing popularity of wide screen monitors, splitting
 horizontally may make more sense than splitting vertically.  An
