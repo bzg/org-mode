@@ -164,6 +164,12 @@ table, obtained by prompting the user."
   :tag "Org Table Settings"
   :group 'org-table)
 
+(defcustom org-table-electric-header-p nil
+  "Activate `org-table-electric-header-mode' by default?"
+  :type 'boolean
+  :package-version "9.4"
+  :group 'org-table)
+
 (defcustom org-table-default-size "5x2"
   "The default size for newly created tables, Columns x Rows."
   :group 'org-table-settings
@@ -440,6 +446,42 @@ prevents it from hanging Emacs."
   :group 'org-table-import-export
   :type 'integer
   :package-version '(Org . "8.3"))
+
+
+;;; Org table electric header minor mode
+(defvar org-table-temp-header-line nil)
+(defun org-table-set-header-line-format ()
+  "Set the header of table at point as the `header-line-format'.
+Assume `org-table-temp-header-line' already stores the previously
+existing value of `header-line-format' we might want to restore."
+  (if (org-at-table-p)
+      (run-with-timer
+       0 nil
+       (lambda ()
+	 (let* ((beg (org-table-begin))
+		(tbeg (if (save-excursion (goto-char beg) (org-at-table-hline-p))
+			  (save-excursion  (goto-char beg) (move-beginning-of-line 2) (point))
+			beg)))
+	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
+	       (setq header-line-format
+		     (concat (propertize " " 'display '(space :width left-fringe))
+			     (buffer-substring
+			      tbeg (+ tbeg (- (point-at-eol) (point-at-bol))))))
+	     (setq header-line-format org-table-temp-header-line)))))
+    (setq header-line-format org-table-temp-header-line)))
+
+(defvar org-table-electric-header-mode nil)
+(define-minor-mode org-table-electric-header-mode
+  "Display the first row of the table at point in the header line."
+  :init-value org-table-electric-header-p
+  :global nil
+  :variable org-table-electric-header-mode
+  :group 'org-table
+  (if org-table-electric-header-mode
+      (progn (setq org-table-temp-header-line header-line-format)
+	     (add-hook 'post-command-hook 'org-table-set-header-line-format))
+    (remove-hook 'post-command-hook 'org-table-set-header-line-format)
+    (setq header-line-format org-table-temp-header-line)))
 
 
 ;;; Regexps Constants

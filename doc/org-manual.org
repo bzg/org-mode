@@ -1638,6 +1638,15 @@ you, configure the option ~org-table-auto-blank-field~.
   the same as the format used by Orgtbl radio tables, see [[*Translator
   functions]], for a detailed description.
 
+- {{{kbd(M-x org-table-electric-header-mode)}}} :: 
+
+  #+findex: org-table-electric-header-mode
+  #+vindex: org-table-electric-header-p
+  Turn on the display of the first data row of the table at point in
+  the window header line when this first row is not visible anymore in
+  the buffer.  You can activate this minor mode by default by setting
+  the option ~org-table-electric-header-p~ to ~t~.
+
 ** Column Width and Alignment
 :PROPERTIES:
 :DESCRIPTION: Overrule the automatic settings.

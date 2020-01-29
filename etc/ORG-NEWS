@@ -13,6 +13,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 * Version 9.4 (not yet released)
 ** New features
 
+*** New minor mode ~org-table-electric-header-mode~
+
+Turn on the display of the first data row of the table at point in the
+window header line when this first row is not visible anymore in the
+buffer.  You can activate this minor mode by default by setting the
+option ~org-table-electric-header-p~ to ~t~.
+
 *** Property drawers before first headline, outline level 0
 
 Property drawers will now work before first headline and Org mode is
