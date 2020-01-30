@@ -40,6 +40,8 @@
 (require 'org-keys)
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
+(declare-function face-remap-remove-relative "face-remap" (cookie))
+(declare-function face-remap-add-relative "face-remap" (face &rest specs))
 (declare-function org-at-timestamp-p "org" (&optional extended))
 (declare-function org-delete-backward-char "org" (N))
 (declare-function org-element-at-point "org-element" ())
