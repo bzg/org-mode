@@ -111,6 +111,14 @@ the attachment.
 
 The new value uses emacs as the application for opening directory.
 
+*** Priority options have been renamed
+
+From ~org-lowest-priority~ to ~org-priority-lowest~.
+From ~org-default-priority~ to ~org-priority-default~.
+From ~org-highest-priority~ to ~org-priority-highest~.
+From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
+From ~org-show-priority~ to ~org-priority-show~.
+
 * Version 9.3
 
 ** Incompatible changes

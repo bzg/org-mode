@@ -2556,6 +2556,7 @@ property to one or more of these keywords."
   :tag "Org Priorities"
   :group 'org-todo)
 
+(defvaralias 'org-enable-priority-commands 'org-priority-enable-commands)
 (defcustom org-priority-enable-commands t
   "Non-nil means priority commands are active.
 When nil, these commands will be disabled, so that you never accidentally
@@ -2563,18 +2564,21 @@ set a priority."
   :group 'org-priorities
   :type 'boolean)
 
+(defvaralias 'org-highest-priority 'org-priority-highest)
 (defcustom org-priority-highest ?A
   "The highest priority of TODO items.  A character like ?A, ?B etc.
 Must have a smaller ASCII number than `org-priority-lowest'."
   :group 'org-priorities
   :type 'character)
 
+(defvaralias 'org-lowest-priority 'org-priority-lowest)
 (defcustom org-priority-lowest ?C
   "The lowest priority of TODO items.  A character like ?A, ?B etc.
 Must have a larger ASCII number than `org-priority-highest'."
   :group 'org-priorities
   :type 'character)
 
+(defvaralias 'org-default-priority 'org-priority-default)
 (defcustom org-priority-default ?B
   "The default priority of TODO items.
 This is the priority an item gets if no explicit priority is given.
@@ -2596,6 +2600,7 @@ See also `org-priority-default'."
   :group 'org-priorities
   :type 'boolean)
 
+(defvaralias 'org-get-priority-function 'org-priority-get-priority-function)
 (defcustom org-priority-get-priority-function nil
   "Function to extract the priority from a string.
 The string is normally the headline.  If this is nil Org computes the
@@ -11654,7 +11659,7 @@ or a character."
     ;; passed the SHOW argument should be removed.
     (warn "`org-priority' called with deprecated SHOW argument"))
   (if (equal action '(4))
-      (org-show-priority)
+      (org-priority-show)
     (unless org-priority-enable-commands
       (user-error "Priority commands are disabled"))
     (setq action (or action 'set))
@@ -11732,7 +11737,8 @@ or a character."
 	  (message "Priority removed")
 	(message "Priority of current item set to %s" news)))))
 
-(defun org-show-priority ()
+(defalias 'org-show-priority 'org-priority-show)
+(defun org-priority-show ()
   "Show the priority of the current item.
 This priority is composed of the main priority given with the [#A] cookies,
 and by additional input from the age of a schedules or deadline entry."

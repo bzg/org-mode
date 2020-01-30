@@ -2562,7 +2562,7 @@ The following commands are available:
      ["Set Priority" org-agenda-priority t]
      ["Increase Priority" org-agenda-priority-up t]
      ["Decrease Priority" org-agenda-priority-down t]
-     ["Show Priority" org-show-priority t])
+     ["Show Priority" org-priority-show t])
     ("Calendar/Diary"
      ["New Diary Entry" org-agenda-diary-entry (org-agenda-check-type nil 'agenda)]
      ["Goto Calendar" org-agenda-goto-calendar (org-agenda-check-type nil 'agenda)]
@@ -9335,7 +9335,7 @@ the same tree node, and the headline of the tree node in the Org file.
 Called with a universal prefix arg, show the priority instead of setting it."
   (interactive "P")
   (if (equal force-direction '(4))
-      (org-show-priority)
+      (org-priority-show)
     (unless org-priority-enable-commands
       (error "Priority commands are disabled"))
     (org-agenda-check-no-diary)
