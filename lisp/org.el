@@ -11576,8 +11576,6 @@ from the `before-change-functions' in the current buffer."
 (defvar org-priority-regexp ".*?\\(\\[#\\([A-Z0-9]\\)\\] ?\\)"
   "Regular expression matching the priority indicator.")
 
-(defvar org-remove-priority-next-time nil)
-
 (defun org-priority-up ()
   "Increase the priority of the current item."
   (interactive)
