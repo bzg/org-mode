@@ -4360,12 +4360,12 @@ TODO items.
   Timestamps]]).  See also [[*Packages that conflict with Org mode]], for
   a discussion of the interaction with shift-selection.
 
-#+vindex: org-highest-priority
-#+vindex: org-lowest-priority
-#+vindex: org-default-priority
+#+vindex: org-priority-highest
+#+vindex: org-priority-lowest
+#+vindex: org-priority-default
 You can change the range of allowed priorities by setting the
-variables ~org-highest-priority~, ~org-lowest-priority~, and
-~org-default-priority~.  For an individual buffer, you may set these
+variables ~org-priority-highest~, ~org-priority-lowest~, and
+~org-priority-default~.  For an individual buffer, you may set these
 values (highest, lowest, default) like this (please make sure that the
 highest priority is earlier in the alphabet than the lowest priority):
 
@@ -18736,9 +18736,9 @@ changes.
 - =#+PRIORITIES: highest lowest default= ::
 
   #+cindex: @samp{PRIORITIES}, keyword
-  #+vindex: org-highest-priority
-  #+vindex: org-lowest-priority
-  #+vindex: org-default-priority
+  #+vindex: org-priority-highest
+  #+vindex: org-priority-lowest
+  #+vindex: org-priority-default
   This line sets the limits and the default for the priorities.  All
   three must be either letters A--Z or numbers 0--9.  The highest
   priority must have a lower ASCII number than the lowest priority.

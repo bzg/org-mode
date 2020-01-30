@@ -2556,32 +2556,32 @@ property to one or more of these keywords."
   :tag "Org Priorities"
   :group 'org-todo)
 
-(defcustom org-enable-priority-commands t
+(defcustom org-priority-enable-commands t
   "Non-nil means priority commands are active.
 When nil, these commands will be disabled, so that you never accidentally
 set a priority."
   :group 'org-priorities
   :type 'boolean)
 
-(defcustom org-highest-priority ?A
+(defcustom org-priority-highest ?A
   "The highest priority of TODO items.  A character like ?A, ?B etc.
-Must have a smaller ASCII number than `org-lowest-priority'."
+Must have a smaller ASCII number than `org-priority-lowest'."
   :group 'org-priorities
   :type 'character)
 
-(defcustom org-lowest-priority ?C
+(defcustom org-priority-lowest ?C
   "The lowest priority of TODO items.  A character like ?A, ?B etc.
-Must have a larger ASCII number than `org-highest-priority'."
+Must have a larger ASCII number than `org-priority-highest'."
   :group 'org-priorities
   :type 'character)
 
-(defcustom org-default-priority ?B
+(defcustom org-priority-default ?B
   "The default priority of TODO items.
 This is the priority an item gets if no explicit priority is given.
 When starting to cycle on an empty priority the first step in the cycle
 depends on `org-priority-start-cycle-with-default'.  The resulting first
-step priority must not exceed the range from `org-highest-priority' to
-`org-lowest-priority' which means that `org-default-priority' has to be
+step priority must not exceed the range from `org-priority-highest' to
+`org-priority-lowest' which means that `org-priority-default' has to be
 in this range exclusive or inclusive the range boundaries.  Else the
 first step refuses to set the default and the second will fall back
 to (depending on the command used) the highest or lowest priority."
@@ -2592,11 +2592,11 @@ to (depending on the command used) the highest or lowest priority."
   "Non-nil means start with default priority when starting to cycle.
 When this is nil, the first step in the cycle will be (depending on the
 command used) one higher or lower than the default priority.
-See also `org-default-priority'."
+See also `org-priority-default'."
   :group 'org-priorities
   :type 'boolean)
 
-(defcustom org-get-priority-function nil
+(defcustom org-priority-get-priority-function nil
   "Function to extract the priority from a string.
 The string is normally the headline.  If this is nil Org computes the
 priority from the priority cookie like [#A] in the headline.  It returns
@@ -4395,9 +4395,9 @@ related expressions."
 	;; Priorities.
 	(let ((priorities (cdr (assq 'priorities alist))))
 	  (when priorities
-	    (setq-local org-highest-priority (nth 0 priorities))
-	    (setq-local org-lowest-priority (nth 1 priorities))
-	    (setq-local org-default-priority (nth 2 priorities))))
+	    (setq-local org-priority-highest (nth 0 priorities))
+	    (setq-local org-priority-lowest (nth 1 priorities))
+	    (setq-local org-priority-default (nth 2 priorities))))
 	;; Scripts.
 	(let ((scripts (assq 'scripts alist)))
 	  (when scripts
@@ -8171,7 +8171,7 @@ function is being called interactively."
 	     ((= dcst ?p)
 	      (if (re-search-forward org-priority-regexp (point-at-eol) t)
 		  (string-to-char (match-string 2))
-		org-default-priority))
+		org-priority-default))
 	     ((= dcst ?r)
 	      (or (org-entry-get nil property) ""))
 	     ((= dcst ?o)
@@ -11655,7 +11655,7 @@ or a character."
     (warn "`org-priority' called with deprecated SHOW argument"))
   (if (equal action '(4))
       (org-show-priority)
-    (unless org-enable-priority-commands
+    (unless org-priority-enable-commands
       (user-error "Priority commands are disabled"))
     (setq action (or action 'set))
     (let (current new news have remove)
@@ -11672,44 +11672,44 @@ or a character."
 	  (if (not (eq action 'set))
 	      (setq new action)
 	    (message "Priority %c-%c, SPC to remove: "
-		     org-highest-priority org-lowest-priority)
+		     org-priority-highest org-priority-lowest)
 	    (save-match-data
 	      (setq new (read-char-exclusive))))
-	  (when (and (= (upcase org-highest-priority) org-highest-priority)
-		     (= (upcase org-lowest-priority) org-lowest-priority))
+	  (when (and (= (upcase org-priority-highest) org-priority-highest)
+		     (= (upcase org-priority-lowest) org-priority-lowest))
 	    (setq new (upcase new)))
 	  (cond ((equal new ?\s) (setq remove t))
-		((or (< (upcase new) org-highest-priority) (> (upcase new) org-lowest-priority))
+		((or (< (upcase new) org-priority-highest) (> (upcase new) org-priority-lowest))
 		 (user-error "Priority must be between `%c' and `%c'"
-			     org-highest-priority org-lowest-priority))))
+			     org-priority-highest org-priority-lowest))))
 	 ((eq action 'up)
 	  (setq new (if have
 			(1- current)  ; normal cycling
 		      ;; last priority was empty
 		      (if (eq last-command this-command)
-			  org-lowest-priority  ; wrap around empty to lowest
+			  org-priority-lowest  ; wrap around empty to lowest
 			;; default
 			(if org-priority-start-cycle-with-default
-			    org-default-priority
-			  (1- org-default-priority))))))
+			    org-priority-default
+			  (1- org-priority-default))))))
 	 ((eq action 'down)
 	  (setq new (if have
 			(1+ current)  ; normal cycling
 		      ;; last priority was empty
 		      (if (eq last-command this-command)
-			  org-highest-priority  ; wrap around empty to highest
+			  org-priority-highest  ; wrap around empty to highest
 			;; default
 			(if org-priority-start-cycle-with-default
-			    org-default-priority
-			  (1+ org-default-priority))))))
+			    org-priority-default
+			  (1+ org-priority-default))))))
 	 (t (user-error "Invalid action")))
-	(when (or (< (upcase new) org-highest-priority)
-		  (> (upcase new) org-lowest-priority))
+	(when (or (< (upcase new) org-priority-highest)
+		  (> (upcase new) org-priority-lowest))
 	  (if (and (memq action '(up down))
 		   (not have) (not (eq last-command this-command)))
 	      ;; `new' is from default priority
 	      (error
-	       "The default can not be set, see `org-default-priority' why")
+	       "The default can not be set, see `org-priority-default' why")
 	    ;; normal cycling: `new' is beyond highest/lowest priority
 	    ;; and is wrapped around to the empty priority
 	    (setq remove t)))
@@ -11749,11 +11749,11 @@ and by additional input from the age of a schedules or deadline entry."
 (defun org-get-priority (s)
   "Find priority cookie and return priority."
   (save-match-data
-    (if (functionp org-get-priority-function)
-	(funcall org-get-priority-function s)
+    (if (functionp org-priority-get-priority-function)
+	(funcall org-priority-get-priority-function s)
       (if (not (string-match org-priority-regexp s))
-	  (* 1000 (- org-lowest-priority org-default-priority))
-	(* 1000 (- org-lowest-priority
+	  (* 1000 (- org-priority-lowest org-priority-default))
+	(* 1000 (- org-priority-lowest
 		   (string-to-char (match-string 2 s))))))))
 
 ;;;; Tags
@@ -13159,7 +13159,7 @@ strings."
 	      (push (cons "PRIORITY"
 			  (if (looking-at org-priority-regexp)
 			      (match-string-no-properties 2)
-			    (char-to-string org-default-priority)))
+			    (char-to-string org-priority-default)))
 		    props)
 	      (when specific (throw 'exit props)))
 	    (when (or (not specific) (string= specific "FILE"))
@@ -13923,8 +13923,8 @@ completion."
       (setq vals (org-with-point-at pom
 		   (append org-todo-keywords-1 '("")))))
      ((equal property "PRIORITY")
-      (let ((n org-lowest-priority))
-	(while (>= n org-highest-priority)
+      (let ((n org-priority-lowest))
+	(while (>= n org-priority-highest)
 	  (push (char-to-string n) vals)
 	  (setq n (1- n)))))
      ((equal property "CATEGORY"))
@@ -17499,7 +17499,7 @@ individual commands for more information."
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-down 'org-timestamp-up)))
    ((and (not (eq org-support-shift-select 'always))
-	 org-enable-priority-commands
+	 org-priority-enable-commands
 	 (org-at-heading-p))
     (call-interactively 'org-priority-up))
    ((and (not org-support-shift-select) (org-at-item-p))
@@ -17525,7 +17525,7 @@ individual commands for more information."
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-up 'org-timestamp-down)))
    ((and (not (eq org-support-shift-select 'always))
-	 org-enable-priority-commands
+	 org-priority-enable-commands
 	 (org-at-heading-p))
     (call-interactively 'org-priority-down))
    ((and (not org-support-shift-select) (org-at-item-p))

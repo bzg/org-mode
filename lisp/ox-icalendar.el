@@ -763,10 +763,10 @@ Return VTODO component as a string."
 	     "SEQUENCE:1\n"
 	     (format "PRIORITY:%d\n"
 		     (let ((pri (or (org-element-property :priority entry)
-				    org-default-priority)))
-		       (floor (- 9 (* 8. (/ (float (- org-lowest-priority pri))
-					    (- org-lowest-priority
-					       org-highest-priority)))))))
+				    org-priority-default)))
+		       (floor (- 9 (* 8. (/ (float (- org-priority-lowest pri))
+					    (- org-priority-lowest
+					       org-priority-highest)))))))
 	     (format "STATUS:%s\n"
 		     (if (eq (org-element-property :todo-type entry) 'todo)
 			 "NEEDS-ACTION"

@@ -386,7 +386,7 @@ DEFAULT is returned if no priority is given in the headline."
   (save-excursion
     (if (org-mouse-re-search-line org-mouse-priority-regexp)
 	(match-string 1)
-      (when default (char-to-string org-default-priority)))))
+      (when default (char-to-string org-priority-default)))))
 
 (defun org-mouse-delete-timestamp ()
   "Deletes the current timestamp as well as the preceding keyword.
@@ -407,7 +407,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	  (> (match-end 0) point))))))
 
 (defun org-mouse-priority-list ()
-  (cl-loop for priority from ?A to org-lowest-priority
+  (cl-loop for priority from ?A to org-priority-lowest
 	   collect (char-to-string priority)))
 
 (defun org-mouse-todo-menu (state)

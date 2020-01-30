@@ -1924,8 +1924,8 @@ However, settings in `org-priority-faces' will overrule these faces.
 When this variable is the symbol `cookies', only fontify the
 cookies, not the entire task.
 This may also be an association list of priority faces, whose
-keys are the character values of `org-highest-priority',
-`org-default-priority', and `org-lowest-priority' (the default values
+keys are the character values of `org-priority-highest',
+`org-priority-default', and `org-priority-lowest' (the default values
 are ?A, ?B, and ?C, respectively).  The face may be a named face, a
 color as a string, or a list like `(:background \"Red\")'.
 If it is a color, the variable `org-faces-easy-properties'
@@ -3959,10 +3959,10 @@ FILTER-ALIST is an alist of filters we need to apply when
     (let (b e p ov h l)
       (goto-char (point-min))
       (while (re-search-forward org-priority-regexp nil t)
-	(setq h (or (get-char-property (point) 'org-highest-priority)
-		    org-highest-priority)
-	      l (or (get-char-property (point) 'org-lowest-priority)
-		    org-lowest-priority)
+	(setq h (or (get-char-property (point) 'org-priority-highest)
+		    org-priority-highest)
+	      l (or (get-char-property (point) 'org-priority-lowest)
+		    org-priority-lowest)
 	      p (string-to-char (match-string 2))
 	      b (match-beginning 1)
 	      e (if (eq org-agenda-fontify-priorities 'cookies)
@@ -6676,8 +6676,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	(org-add-props rtn nil
 	  'org-category category
 	  'tags (mapcar 'org-downcase-keep-props tags)
-	  'org-highest-priority org-highest-priority
-	  'org-lowest-priority org-lowest-priority
+	  'org-priority-highest org-priority-highest
+	  'org-priority-lowest org-priority-lowest
 	  'time-of-day time-of-day
 	  'duration duration
 	  'breadcrumbs breadcrumbs
@@ -9336,7 +9336,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
   (interactive "P")
   (if (equal force-direction '(4))
       (org-show-priority)
-    (unless org-enable-priority-commands
+    (unless org-priority-enable-commands
       (error "Priority commands are disabled"))
     (org-agenda-check-no-diary)
     (let* ((col (current-column))

@@ -2354,13 +2354,13 @@ SCHEDULED: <2014-03-04 tue.>"
     '(?X ?Z ?Y)
     (org-test-with-temp-text "#+PRIORITIES: X Z Y"
       (org-mode-restart)
-      (list org-highest-priority org-lowest-priority org-default-priority))))
+      (list org-priority-highest org-priority-lowest org-priority-default))))
   (should
    (equal
     '(?A ?C ?B)
     (org-test-with-temp-text "#+PRIORITIES: X Z"
       (org-mode-restart)
-      (list org-highest-priority org-lowest-priority org-default-priority))))
+      (list org-priority-highest org-priority-lowest org-priority-default))))
   ;; STARTUP keyword.
   (should
    (equal '(t t)
@@ -5334,7 +5334,7 @@ Paragraph<point>"
 	  (org-test-with-temp-text "* [#A] H"
 	    (cdr (assoc "PRIORITY" (org-entry-properties))))))
   (should
-   (equal (char-to-string org-default-priority)
+   (equal (char-to-string org-priority-default)
 	  (org-test-with-temp-text "* H"
 	    (cdr (assoc "PRIORITY" (org-entry-properties nil "PRIORITY"))))))
   ;; Get "FILE" property.
