@@ -5886,9 +5886,11 @@ If TAG is a number, get the corresponding match group."
 	 'tag 'org-tag (cdr (assoc tag org-tag-faces)))
 	'org-tag)))
 
+(defvar org-priority-regexp) ; defined later in the file
+
 (defun org-font-lock-add-priority-faces (limit)
   "Add the special priority faces."
-  (while (re-search-forward "^\\*+ .*?\\(\\[#\\(.\\)\\]\\)" limit t)
+  (while (re-search-forward org-priority-regexp limit t)
     (add-text-properties
      (match-beginning 1) (match-end 1)
      (list 'face (org-get-priority-face (string-to-char (match-string 2)))
@@ -7965,8 +7967,6 @@ Optional argument WITH-CASE means sort case-sensitively."
     org-emph-re (lambda (m) (format " %s " (match-string 4 m)))
     (org-link-display-format s)
     t t) t t))
-
-(defvar org-priority-regexp) ; defined later in the file
 
 (defvar org-after-sorting-entries-or-items-hook nil
   "Hook that is run after a bunch of entries or items have been sorted.
@@ -11625,7 +11625,7 @@ from the `before-change-functions' in the current buffer."
 
 ;;;; Priorities
 
-(defvar org-priority-regexp ".*?\\(\\[#\\([A-Z0-9]\\)\\] ?\\)"
+(defvar org-priority-regexp ".*?\\(\\[#\\([A-Z0-9]+\\)\\] ?\\)"
   "Regular expression matching the priority indicator.")
 
 (defvar org-remove-priority-next-time nil)
