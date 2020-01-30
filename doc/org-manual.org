@@ -4328,10 +4328,18 @@ like this
 By default, Org mode supports three priorities: =A=, =B=, and =C=.
 =A= is the highest priority.  An entry without a cookie is treated as
 equivalent if it had priority =B=.  Priorities make a difference only
-for sorting in the agenda (see [[*Weekly/daily agenda]]); outside the
+for sorting in the agenda (see [[*Weekly/daily agenda]]).  Outside the
 agenda, they have no inherent meaning to Org mode.  The cookies are
 displayed with the face defined by the variable ~org-priority-faces~,
 which can be customized.
+
+You can also use numeric values for priorities, such as
+
+: *** TODO [#1] Write letter to Sam Fortune
+
+When using numeric priorities, you need to set ~org-priority-highest~,
+~org-priority-lowest~ and ~org-priority-default~ to integers, which
+must all be strictly inferior to 65.
 
 Priorities can be attached to any outline node; they do not need to be
 TODO items.
@@ -4371,6 +4379,10 @@ highest priority is earlier in the alphabet than the lowest priority):
 
 #+cindex: @samp{PRIORITIES}, keyword
 : #+PRIORITIES: A C B
+
+Or, using numeric values:
+
+: #+PRIORITIES: 1 10 5
 
 ** Breaking Down Tasks into Subtasks
 :PROPERTIES:

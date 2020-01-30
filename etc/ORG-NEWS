@@ -13,6 +13,18 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 * Version 9.4 (not yet released)
 ** New features
 
+*** Numeric priorities are now allowed (up to 65)
+
+You can now set ~org-priority-highest/lowest/default~ to integers to
+use numeric priorities globally or set, for example
+
+#+PRIORITIES: 1 10 5
+
+to define a buffer-local range and default for priorities.  Priority
+commands should work as usual.  You cannot use numbers superior to 64
+for numeric priorities, as it would clash with priorities like [#A]
+where the "A" is internally converted to its numeric value of 65.
+
 *** New minor mode ~org-table-electric-header-mode~
 
 Turn on the display of the first data row of the table at point in the
@@ -37,11 +49,6 @@ things in a property drawer before the first headline will make them
 A new `:tree-type month' option was added to org-capture-templates to
 group new datetime entries by month.
 
-*** New header argument to pass Java command line arguments
-
-Babel Java blocks recognize header argument =:cmdargs= and pass its
-value in call to =java=.
-
 *** Refinement in window behavior on exiting Org source buffer
 
 After editing a source block, Org will restore the window layout when
@@ -57,6 +64,11 @@ buffers are displayed by modifying ~display-buffer-alist~ or
 *** New option ~org-show-notification-timeout~
 
 This option will add a timeout to notifications.
+
+*** Babel: new header argument to pass Java command line arguments
+
+Babel Java blocks recognize header argument =:cmdargs= and pass its
+value in call to =java=.
 
 ** New commands
 *** ~org-table-electric-header-mode~

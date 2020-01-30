@@ -2566,17 +2566,23 @@ set a priority."
 
 (defvaralias 'org-highest-priority 'org-priority-highest)
 (defcustom org-priority-highest ?A
-  "The highest priority of TODO items.  A character like ?A, ?B etc.
-Must have a smaller ASCII number than `org-priority-lowest'."
+  "The highest priority of TODO items.
+A character like ?A, ?B, etc., or a numeric value like 1, 2, etc.
+Must be smaller than `org-priority-lowest'."
   :group 'org-priorities
-  :type 'character)
+  :type '(choice
+	  (character :tag "Character")
+	  (integer :tag "Integer (< 65)")))
 
 (defvaralias 'org-lowest-priority 'org-priority-lowest)
 (defcustom org-priority-lowest ?C
-  "The lowest priority of TODO items.  A character like ?A, ?B etc.
-Must have a larger ASCII number than `org-priority-highest'."
+  "The lowest priority of TODO items.
+A character like ?A, ?B, etc., or a numeric value like 1, 2, etc.
+Must be higher than `org-priority-highest'."
   :group 'org-priorities
-  :type 'character)
+  :type '(choice
+	  (character :tag "Character")
+	  (integer :tag "Integer (< 65)")))
 
 (defvaralias 'org-default-priority 'org-priority-default)
 (defcustom org-priority-default ?B
@@ -2586,11 +2592,13 @@ When starting to cycle on an empty priority the first step in the cycle
 depends on `org-priority-start-cycle-with-default'.  The resulting first
 step priority must not exceed the range from `org-priority-highest' to
 `org-priority-lowest' which means that `org-priority-default' has to be
-in this range exclusive or inclusive the range boundaries.  Else the
-first step refuses to set the default and the second will fall back
-to (depending on the command used) the highest or lowest priority."
+in this range exclusive or inclusive to the range boundaries.  Else the
+first step refuses to set the default and the second will fall back on
+(depending on the command used) the highest or lowest priority."
   :group 'org-priorities
-  :type 'character)
+  :type '(choice
+	  (character :tag "Character")
+	  (integer :tag "Integer (< 65)")))
 
 (defcustom org-priority-start-cycle-with-default t
   "Non-nil means start with default priority when starting to cycle.
@@ -2603,7 +2611,7 @@ See also `org-priority-default'."
 (defvaralias 'org-get-priority-function 'org-priority-get-priority-function)
 (defcustom org-priority-get-priority-function nil
   "Function to extract the priority from a string.
-The string is normally the headline.  If this is nil Org computes the
+The string is normally the headline.  If this is nil Org, computes the
 priority from the priority cookie like [#A] in the headline.  It returns
 an integer, increasing by 1000 for each priority level.
 The user can set a different function here, which should take a string
@@ -4502,6 +4510,13 @@ related expressions."
 		      "[ \t]*$"))
 	(org-compute-latex-and-related-regexp)))))
 
+(defsubst org-priority-to-value (s)
+  "Convert priority string S to its numeric value."
+  (or (save-match-data
+	(and (string-match "\\([0-9]+\\)" s)
+	     (string-to-number (match-string 1 s))))
+      (string-to-char s)))
+
 (defun org--setup-collect-keywords (regexp &optional files alist)
   "Return setup keywords values as an alist.
 
@@ -4561,8 +4576,11 @@ Return value contains the following keys: `archive', `category',
 	      ((equal key "PRIORITIES")
 	       (push (cons 'priorities
 			   (let ((prio (split-string value)))
-			     (if (< (length prio) 3) '(?A ?C ?B)
-			       (mapcar #'string-to-char prio))))
+			     (if (< (length prio) 3)
+				 (list org-priority-highest
+				       org-priority-lowest
+				       org-priority-default)
+			       (mapcar #'org-priority-to-value prio))))
 		     alist))
 	      ((equal key "PROPERTY")
 	       (when (string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" value)
@@ -11631,7 +11649,8 @@ from the `before-change-functions' in the current buffer."
 ;;;; Priorities
 
 (defvar org-priority-regexp ".*?\\(\\[#\\([A-Z0-9]+\\)\\] ?\\)"
-  "Regular expression matching the priority indicator.")
+  "Regular expression matching the priority indicator.
+A priority indicator can be e.g. [#A] or [#1].")
 
 (defun org-priority-up ()
   "Increase the priority of the current item."
@@ -11661,12 +11680,14 @@ or a character."
     (unless org-priority-enable-commands
       (user-error "Priority commands are disabled"))
     (setq action (or action 'set))
-    (let (current new news have remove)
+    (let ((nump (< org-priority-lowest 65))
+	  current new news have remove)
       (save-excursion
 	(org-back-to-heading t)
 	(when (looking-at org-priority-regexp)
-	  (setq current (string-to-char (match-string 2))
-		have t))
+	  (let ((ms (match-string 2)))
+	    (setq current (org-priority-to-value ms)
+		  have t)))
 	(cond
 	 ((eq action 'remove)
 	  (setq remove t new ?\ ))
@@ -11674,17 +11695,27 @@ or a character."
 	      (integerp action))
 	  (if (not (eq action 'set))
 	      (setq new action)
-	    (message "Priority %c-%c, SPC to remove: "
-		     org-priority-highest org-priority-lowest)
-	    (save-match-data
-	      (setq new (read-char-exclusive))))
+	    (setq
+	     new
+	     (if nump
+		 (string-to-number
+		  (read-string (format "Priority %s-%s, SPC to remove: "
+				       (number-to-string org-priority-highest)
+				       (number-to-string org-priority-lowest))))
+	       (progn (message "Priority %c-%c, SPC to remove: "
+				 org-priority-highest org-priority-lowest)
+			(save-match-data
+			  (setq new (read-char-exclusive)))))))
 	  (when (and (= (upcase org-priority-highest) org-priority-highest)
 		     (= (upcase org-priority-lowest) org-priority-lowest))
 	    (setq new (upcase new)))
 	  (cond ((equal new ?\s) (setq remove t))
 		((or (< (upcase new) org-priority-highest) (> (upcase new) org-priority-lowest))
-		 (user-error "Priority must be between `%c' and `%c'"
-			     org-priority-highest org-priority-lowest))))
+		 (user-error
+		  (if nump
+		      "Priority must be between `%s' and `%s'"
+		    "Priority must be between `%c' and `%c'")
+		  org-priority-highest org-priority-lowest))))
 	 ((eq action 'up)
 	  (setq new (if have
 			(1- current)  ; normal cycling
@@ -11716,7 +11747,9 @@ or a character."
 	    ;; normal cycling: `new' is beyond highest/lowest priority
 	    ;; and is wrapped around to the empty priority
 	    (setq remove t)))
-	(setq news (format "%c" new))
+	;; Numerical priorities are limited to 64, beyond that number,
+	;; assume the priority cookie is a character.
+	(setq news (if (> new 64) (format "%c" new) (format "%s" new)))
 	(if have
 	    (if remove
 		(replace-match "" t t nil 1)
@@ -11758,7 +11791,7 @@ and by additional input from the age of a schedules or deadline entry."
       (if (not (string-match org-priority-regexp s))
 	  (* 1000 (- org-priority-lowest org-priority-default))
 	(* 1000 (- org-priority-lowest
-		   (string-to-char (match-string 2 s))))))))
+		   (org-priority-to-value (match-string 2 s))))))))
 
 ;;;; Tags
 
