@@ -2611,11 +2611,13 @@ See also `org-priority-default'."
 (defvaralias 'org-get-priority-function 'org-priority-get-priority-function)
 (defcustom org-priority-get-priority-function nil
   "Function to extract the priority from a string.
-The string is normally the headline.  If this is nil Org, computes the
-priority from the priority cookie like [#A] in the headline.  It returns
-an integer, increasing by 1000 for each priority level.
-The user can set a different function here, which should take a string
-as an argument and return the numeric priority."
+The string is normally the headline.  If this is nil, Org
+computes the priority from the priority cookie like [#A] in the
+headline.  It returns an integer, increasing by 1000 for each
+priority level.
+
+The user can set a different function here, which should take a
+string as an argument and return the numeric priority."
   :group 'org-priorities
   :version "24.1"
   :type '(choice
@@ -11650,7 +11652,11 @@ from the `before-change-functions' in the current buffer."
 
 (defvar org-priority-regexp ".*?\\(\\[#\\([A-Z0-9]+\\)\\] ?\\)"
   "Regular expression matching the priority indicator.
-A priority indicator can be e.g. [#A] or [#1].")
+A priority indicator can be e.g. [#A] or [#1].
+This regular expression matches these groups:
+0 : the whole match, e.g. \"TODO [#A] Hack\"
+1 : the priority cookie, e.g. \"[#A]\"
+2 : the value of the priority cookie, e.g. \"A\".")
 
 (defun org-priority-up ()
   "Increase the priority of the current item."
@@ -11784,7 +11790,11 @@ and by additional input from the age of a schedules or deadline entry."
     (message "Priority is %d" (if pri pri -1000))))
 
 (defun org-get-priority (s)
-  "Find priority cookie and return priority."
+  "Find priority cookie and return priority.
+S is a string against which you can match `org-priority-regexp'.
+If `org-priority-get-priority-function' is set to a custom
+function, use it.  Otherwise process S and output the priority
+value, an integer."
   (save-match-data
     (if (functionp org-priority-get-priority-function)
 	(funcall org-priority-get-priority-function s)
