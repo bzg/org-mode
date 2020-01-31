@@ -7209,6 +7209,10 @@ came, its outline path the archiving time etc.  Configure the variable
 ~org-archive-save-context-info~ to adjust the amount of information
 added.
 
+#+vindex: org-archive-subtree-save-file-p
+When ~org-archive-subtree-save-file-p~ is non-~nil~, save the target
+archive buffer.
+
 *** Internal archiving
 :PROPERTIES:
 :DESCRIPTION: Switch off a tree but keep it in the file.

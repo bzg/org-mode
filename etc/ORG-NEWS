@@ -32,7 +32,7 @@ window header line when this first row is not visible anymore in the
 buffer.
 
 You can activate this minor mode by default by setting the option
-~org-table-electric-header-p~ to ~t~.
+~org-table-electric-header-p~ to =t=.
 
 *** Property drawers allowed before first headline
 
@@ -44,15 +44,27 @@ properties will work also for this level.  In other words: defining
 things in a property drawer before the first headline will make them
 "inheritable" for all headlines.
 
-*** New option to group captured datetime entries by month
-
-A new `:tree-type month' option was added to org-capture-templates to
-group new datetime entries by month.
-
 *** Refinement in window behavior on exiting Org source buffer
 
 After editing a source block, Org will restore the window layout when
 ~org-src-window-setup~ is set to a value that modifies the layout.
+
+*** Babel: new header argument to pass Java command line arguments
+
+Babel Java blocks recognize header argument =:cmdargs= and pass its
+value in call to =java=.
+
+** New options
+
+*** New option ~org-table-electric-header-p~
+
+Setting this option to =t= will activate
+~org-table-electric-header-mode~ in org-mode buffers.
+
+*** New option to group captured datetime entries by month
+
+A new `:tree-type month' option was added to org-capture-templates to
+group new datetime entries by month.
 
 *** New option to show source buffers using "plain" display-buffer
 
@@ -61,14 +73,20 @@ using ~display-buffer~. This allows users to control how source
 buffers are displayed by modifying ~display-buffer-alist~ or
 ~display-buffer-base-action~.
 
+*** New option ~org-archive-subtree-save-file-p~
+
+Archiving a subtree used to always save the target archive buffer.
+Commit [[https://code.orgmode.org/bzg/org-mode/commit/b186d1d7][b186d1d7]] changed this behavior by always not saving the target
+buffer, because batch archiving from agenda could take too much time.
+
+This new option ~org-archive-subtree-save-file-p~ defaults to the
+value =from-org= so that archiving a subtree will save the target
+buffer when done from an org-mode buffer, but not from the agenda.
+You can also set this option to =t= or to =from-agenda=.
+
 *** New option ~org-show-notification-timeout~
 
 This option will add a timeout to notifications.
-
-*** Babel: new header argument to pass Java command line arguments
-
-Babel Java blocks recognize header argument =:cmdargs= and pass its
-value in call to =java=.
 
 ** New commands
 *** ~org-table-electric-header-mode~
@@ -1392,9 +1410,9 @@ removed from Gnus circa September 2010.
 
 *** ~org-agenda-repeating-timestamp-show-all~ is removed.
 
-For an equivalent to a ~nil~ value, set
+For an equivalent to a =nil= value, set
 ~org-agenda-show-future-repeats~ to nil and
-~org-agenda-prefer-last-repeat~ to ~t~.
+~org-agenda-prefer-last-repeat~ to =t=.
 
 *** ~org-gnus-nnimap-query-article-no-from-file~ is removed.
 
@@ -1412,7 +1430,7 @@ equivalent to the removed format string.
 
 *** ~org-enable-table-editor~ is removed.
 
-Setting it to a ~nil~ value broke some other features (e.g., speed
+Setting it to a =nil= value broke some other features (e.g., speed
 keys).
 
 *** ~org-export-use-babel~ cannot be set to ~inline-only~
