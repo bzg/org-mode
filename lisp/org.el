@@ -9,7 +9,6 @@
 ;; Homepage: https://orgmode.org
 ;; Version: 9.4-dev
 
-;;
 ;; This file is part of GNU Emacs.
 ;;
 ;; GNU Emacs is free software: you can redistribute it and/or modify
