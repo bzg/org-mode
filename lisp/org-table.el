@@ -467,6 +467,9 @@ existing value of `header-line-format' we might want to restore."
        0.001 nil
        (lambda ()
 	 (let* ((beg (org-table-begin))
+		;; Are we using `org-indent-mode'?
+		(pre (and org-indent-mode
+			  (length (get-text-property (point) 'line-prefix))))
 		(tbeg (if (save-excursion
 			    (goto-char beg) (org-at-table-hline-p))
 			  (save-excursion
@@ -475,6 +478,7 @@ existing value of `header-line-format' we might want to restore."
 	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
 	       (setq header-line-format
 		     (concat (propertize " " 'display '(space :width left-fringe))
+			     (when pre (make-string pre 32))
 			     (buffer-substring
 			      tbeg (+ tbeg (- (point-at-eol) (point-at-bol))))))
 	     (setq header-line-format org-table-temp-header-line)))))
