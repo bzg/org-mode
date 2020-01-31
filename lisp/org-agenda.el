@@ -9337,7 +9337,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
   (if (equal force-direction '(4))
       (org-priority-show)
     (unless org-priority-enable-commands
-      (error "Priority commands are disabled"))
+      (user-error "Priority commands are disabled"))
     (org-agenda-check-no-diary)
     (let* ((col (current-column))
 	   (marker (or (org-get-at-bol 'org-marker)
