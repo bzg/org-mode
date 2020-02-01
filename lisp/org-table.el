@@ -468,7 +468,7 @@ existing value of `header-line-format' we might want to restore."
        (lambda ()
 	 (let* ((beg (org-table-begin))
 		;; Are we using `display-line-numbers-mode'?
-		(lin (and (fboundp 'display-line-numbers-mode)
+		(lin (and (boundp 'display-line-numbers-mode)
 			  display-line-numbers-mode
 			  (round (line-number-display-width 'columns))))
 		;; Are we using `org-indent-mode'?
