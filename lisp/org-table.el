@@ -495,10 +495,12 @@ existing value of `header-line-format' we might want to restore."
 			beg)))
 	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
 	       (setq header-line-format
-		     (concat (propertize " " 'display '(space :width left-fringe))
-			     (when lin (make-string (+ lin 2) 32))
-			     (when pre (make-string pre 32))
-			     (org-table-row-get-visible-string tbeg)))
+		     (propertize
+		      (concat (propertize " " 'display '(space :width left-fringe))
+			      (when lin (make-string (+ lin 2) 32))
+			      (when pre (make-string pre 32))
+			      (org-table-row-get-visible-string tbeg))
+		      'face 'org-table))
 	     (setq header-line-format org-table-temp-header-line)))))
     (setq header-line-format org-table-temp-header-line)))
 
