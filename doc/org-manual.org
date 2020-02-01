@@ -6899,9 +6899,14 @@ to produce offers with quotations of the estimated work effort, you
 may want to assign effort estimates to entries.  If you are also
 clocking your work, you may later want to compare the planned effort
 with the actual working time, a great way to improve planning
-estimates.  Effort estimates are stored in a special property
-=EFFORT=.  You can set the effort for an entry with the following
-commands:
+estimates.
+
+Effort estimates are stored in a special property =EFFORT=.  Multiple
+formats are supported, such as =3:12=, =1:23:45=, or =1d3h5min=; see
+the file =org-duration.el= for more detailed information about the
+format.
+
+You can set the effort for an entry with the following commands:
 
 - {{{kbd(C-c C-x e)}}}  (~org-set-effort~) ::
 
