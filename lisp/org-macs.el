@@ -416,6 +416,7 @@ is selected, only the bare key is returned."
     (let ((inhibit-quit t)
 	  (buffer (org-switch-to-buffer-other-window "*Org Select*"))
 	  (prompt (or prompt "Select: "))
+	  case-fold-search
 	  current)
       (unwind-protect
 	  (catch 'exit
