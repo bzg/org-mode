@@ -6273,6 +6273,10 @@ scheduled items with an hour specification like [h]h:mm."
 			    (org-agenda--timestamp-to-absolute deadline))
 			 org-scheduled-delay-days))
 		   (t 0))))
+	       (diff-r (abs (- repeat current)))
+	       (ddays-once (or (and (string-match "--\\([0-9]+\\)[hdwmy]" s)
+				    (string-to-number (match-string 1 s)))
+			       0))
 	       (ddays
 		(cond
 		 ;; Nullify delay when a repeater triggered already
@@ -6291,13 +6295,25 @@ scheduled items with an hour specification like [h]h:mm."
 	  (unless (and todayp
 		       habitp
 		       (bound-and-true-p org-habit-show-all-today))
-	    (when (or (and (> ddays 0) (< diff ddays))
-		      (> diff (or (and habitp org-habit-scheduled-past-days)
-				  org-scheduled-past-days))
-		      (> schedule current)
-		      (and (/= current schedule)
-			   (/= current today)
-			   (/= current repeat)))
+	    (when (or
+		   ;; no one-time delay, not repeated delay
+		   (and (not ddays-once) (not (= ddays diff-r)))
+		   ;; one-time delay, but not for today
+		   (and ddays-once
+			(not (= diff diff-r))
+			(= ddays-once diff-r))
+		   ;; normal delay, but already in the past
+		   (and (> ddays 0) (< diff ddays))
+		   ;; a habit, but past `org-habit-scheduled-past-days'
+		   (> diff (or (and habitp org-habit-scheduled-past-days)
+			       org-scheduled-past-days))
+		   ;; schedule in the future
+		   (> schedule current)
+		   ;; no delay, not scheduled today, no deadline for today
+		   (and (= ddays 0)
+			(/= current schedule)
+			(/= current today)
+			(/= current repeat)))
 	      (throw :skip nil)))
 	  ;; Possibly skip done tasks.
 	  (when (and donep
