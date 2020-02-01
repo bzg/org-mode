@@ -454,6 +454,21 @@ prevents it from hanging Emacs."
 (defvar org-table-temp-header-line nil)
 (defvar org-table-temp-header-remapping nil)
 (defvar org-table-header-line-mode nil)
+
+(defun org-table-row-get-visible-string (&optional pos)
+  "Get the visible string of a row.
+This is useful when columns have been shrunk."
+  (save-excursion
+    (when pos (goto-char pos))
+    (let ((beg (point-at-bol))
+	  (end (point-at-eol)) spc)
+      (goto-char beg)
+      (while (progn (org-table-next-field) (< (point) end))
+	(if-let ((ov (first (overlays-in (point) (1+ (point))))))
+	    (push (overlay-get ov 'display) spc)
+	  (push (org-table-get-field) spc)))
+      (format "|%s|" (mapconcat #'identity (reverse spc) "|")))))
+
 (defun org-table-set-header-line-format ()
   "Set the header of table at point as the `header-line-format'.
 Assume `org-table-temp-header-line' already stores the previously
@@ -470,22 +485,20 @@ existing value of `header-line-format' we might want to restore."
 		;; Are we using `display-line-numbers-mode'?
 		(lin (and (boundp 'display-line-numbers-mode)
 			  display-line-numbers-mode
-			  (round (line-number-display-width 'columns))))
+			  (line-number-display-width)))
 		;; Are we using `org-indent-mode'?
-		(pre (and org-indent-mode
+		(pre (and (boundp 'org-indent-mode) org-indent-mode
 			  (length (get-text-property (point) 'line-prefix))))
-		(tbeg (if (save-excursion
-			    (goto-char beg) (org-at-table-hline-p))
+		(tbeg (if (save-excursion (goto-char beg) (org-at-table-hline-p))
 			  (save-excursion
 			    (goto-char beg) (move-beginning-of-line 2) (point))
 			beg)))
 	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
 	       (setq header-line-format
 		     (concat (propertize " " 'display '(space :width left-fringe))
-			     (when lin (make-string lin 32))
+			     (when lin (make-string (+ lin 2) 32))
 			     (when pre (make-string pre 32))
-			     (buffer-substring
-			      tbeg (+ tbeg (- (point-at-eol) (point-at-bol))))))
+			     (org-table-row-get-visible-string tbeg)))
 	     (setq header-line-format org-table-temp-header-line)))))
     (setq header-line-format org-table-temp-header-line)))
 
