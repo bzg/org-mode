@@ -464,9 +464,9 @@ This is useful when columns have been shrunk."
 	  (end (point-at-eol)) spc)
       (goto-char beg)
       (while (progn (org-table-next-field) (< (point) end))
-	(if-let ((ov (first (overlays-in (point) (1+ (point))))))
-	    (push (overlay-get ov 'display) spc)
-	  (push (org-table-get-field) spc)))
+	(let ((ov (first (overlays-in (point) (1+ (point))))))
+	  (if ov (push (overlay-get ov 'display) spc)
+	    (push (org-table-get-field) spc))))
       (format "|%s|" (mapconcat #'identity (reverse spc) "|")))))
 
 (defun org-table-set-header-line-format ()
