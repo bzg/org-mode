@@ -565,7 +565,8 @@ An entry can be toggled between COMMENT and normal with
 
 (defconst org-effort-property "Effort"
   "The property that is being used to keep track of effort estimates.
-Effort estimates given in this property need to have the format H:MM.")
+Effort estimates given in this property need to be in the format
+defined in org-duration.el.")
 
 ;;;; Timestamp
 
