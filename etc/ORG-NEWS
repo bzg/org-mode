@@ -49,6 +49,12 @@ things in a property drawer before the first headline will make them
 After editing a source block, Org will restore the window layout when
 ~org-src-window-setup~ is set to a value that modifies the layout.
 
+*** Display remote inline images
+
+Added the capability to display remote images inline.  Whether the
+images are actually displayed are controlled by the new option
+~org-display-remote-inline-images~.
+
 *** Babel: new header argument to pass Java command line arguments
 
 Babel Java blocks recognize header argument =:cmdargs= and pass its
