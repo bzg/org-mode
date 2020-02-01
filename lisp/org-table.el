@@ -166,8 +166,8 @@ table, obtained by prompting the user."
   :tag "Org Table Settings"
   :group 'org-table)
 
-(defcustom org-table-electric-header-p nil
-  "Activate `org-table-electric-header-mode' by default?"
+(defcustom org-table-header-line-p nil
+  "Activate `org-table-header-line-mode' by default?"
   :type 'boolean
   :package-version "9.4"
   :group 'org-table)
@@ -453,7 +453,7 @@ prevents it from hanging Emacs."
 ;;; Org table electric header minor mode
 (defvar org-table-temp-header-line nil)
 (defvar org-table-temp-header-remapping nil)
-(defvar org-table-electric-header-mode nil)
+(defvar org-table-header-line-mode nil)
 (defun org-table-set-header-line-format ()
   "Set the header of table at point as the `header-line-format'.
 Assume `org-table-temp-header-line' already stores the previously
@@ -489,15 +489,15 @@ existing value of `header-line-format' we might want to restore."
     (setq header-line-format org-table-temp-header-line)))
 
 ;;;###autoload
-(define-minor-mode org-table-electric-header-mode
+(define-minor-mode org-table-header-line-mode
   "Display the first row of the table at point in the header line."
-  :init-value org-table-electric-header-p
+  :init-value org-table-header-line-p
   :global nil
-  :variable org-table-electric-header-mode
+  :variable org-table-header-line-mode
   :group 'org-table
   (unless (eq major-mode 'org-mode)
     (user-error "Cannot turn org table electric mode outside org-mode buffers"))
-  (if org-table-electric-header-mode
+  (if org-table-header-line-mode
       (progn (setq org-table-temp-header-line header-line-format)
 	     (add-hook 'post-command-hook 'org-table-set-header-line-format))
     (remove-hook 'post-command-hook 'org-table-set-header-line-format)

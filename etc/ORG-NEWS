@@ -25,14 +25,14 @@ commands should work as usual.  You cannot use numbers superior to 64
 for numeric priorities, as it would clash with priorities like [#A]
 where the "A" is internally converted to its numeric value of 65.
 
-*** New minor mode ~org-table-electric-header-mode~
+*** New minor mode ~org-table-header-line-mode~
 
 Turn on the display of the first data row of the table at point in the
 window header line when this first row is not visible anymore in the
 buffer.
 
 You can activate this minor mode by default by setting the option
-~org-table-electric-header-p~ to =t=.
+~org-table-header-line-p~ to =t=.
 
 *** Property drawers allowed before first headline
 
@@ -56,10 +56,10 @@ value in call to =java=.
 
 ** New options
 
-*** New option ~org-table-electric-header-p~
+*** New option ~org-table-header-line-p~
 
 Setting this option to =t= will activate
-~org-table-electric-header-mode~ in org-mode buffers.
+~org-table-header-line-mode~ in org-mode buffers.
 
 *** New option to group captured datetime entries by month
 
@@ -89,7 +89,7 @@ You can also set this option to =t= or to =from-agenda=.
 This option will add a timeout to notifications.
 
 ** New commands
-*** ~org-table-electric-header-mode~
+*** ~org-table-header-line-mode~
 
 Turn on a minor mode to display the first data row of the table at
 point in the header-line when the beginning of the table is invisible.
