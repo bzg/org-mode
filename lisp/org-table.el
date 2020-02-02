@@ -489,10 +489,12 @@ existing value of `header-line-format' we might want to restore."
 		;; Are we using `org-indent-mode'?
 		(pre (and (boundp 'org-indent-mode) org-indent-mode
 			  (length (get-text-property (point) 'line-prefix))))
-		(tbeg (if (save-excursion (goto-char beg) (org-at-table-hline-p))
-			  (save-excursion
-			    (goto-char beg) (move-beginning-of-line 2) (point))
-			beg)))
+		(tbeg (save-excursion
+			(goto-char beg)
+			(while (or (org-at-table-hline-p)
+				   (looking-at-p ".*|\\s-+<[0-9]+>"))
+			  (move-beginning-of-line 2))
+			(point))))
 	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
 	       (setq header-line-format
 		     (propertize
