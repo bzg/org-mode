@@ -8052,7 +8052,8 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 
 (defun org-agenda-filter-hide-line (type)
   "Hide lines with TYPE in the agenda buffer."
-  (let* ((b (max (point-min) (1- (point-at-bol))))
+  (let* (buffer-invisibility-spec
+	 (b (max (point-min) (1- (point-at-bol))))
 	 (e (point-at-eol)))
     (let ((inhibit-read-only t))
       (add-text-properties
