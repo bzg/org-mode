@@ -9563,7 +9563,8 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (while (not (bobp))
 	(when (equal marker (org-get-at-bol 'org-marker))
           (remove-text-properties (point-at-bol) (point-at-eol) '(display nil))
-	  (org-move-to-column (- (window-width) (length stamp)) t)
+	  (org-move-to-column
+	   (- (/ (window-width nil t) (window-font-width)) (length stamp)) t)
           (add-text-properties
 	   (1- (point)) (point-at-eol)
 	   (list 'display (org-add-props stamp nil
