@@ -94,8 +94,6 @@
 (defvar org-habit-show-all-today)
 (defvar org-habit-scheduled-past-days)
 
-(org-remap org-agenda-mode-map 'move-end-of-line 'org-agenda-end-of-line)
-
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name "*Org Agenda*")
 (defvar org-agenda-overriding-header nil)
@@ -2108,6 +2106,8 @@ evaluate to a string."
 (defvaralias 'org-agenda-keymap 'org-agenda-mode-map)
 (defvar org-agenda-mode-map (make-sparse-keymap)
   "Keymap for `org-agenda-mode'.")
+
+(org-remap org-agenda-mode-map 'move-end-of-line 'org-agenda-end-of-line)
 
 (defvar org-agenda-menu) ; defined later in this file.
 (defvar org-agenda-restrict nil) ; defined later in this file.
