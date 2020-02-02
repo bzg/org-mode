@@ -9725,12 +9725,6 @@ the other commands, point needs to be in the desired line.
   priority character.  If you reply with {{{kbd(SPC)}}}, the priority
   cookie is removed from the entry.
 
-- {{{kbd(P)}}} (~org-agenda-show-priority~) ::
-
-  #+kindex: P
-  #+findex: org-agenda-show-priority
-  Display weighted priority of current item.
-
 - {{{kbd(+)}}} or {{{kbd(S-UP)}}} (~org-agenda-priority-up~) ::
 
   #+kindex: +
