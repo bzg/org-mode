@@ -4319,8 +4319,8 @@ example.
 
 If you use Org mode extensively, you may end up with enough TODO items
 that it starts to make sense to prioritize them.  Prioritizing can be
-done by placing a /priority cookie/ into the headline of a TODO item,
-like this
+done by placing a /priority cookie/ into the headline of a TODO item
+right after the TODO keyword, like this:
 
 : *** TODO [#A] Write letter to Sam Fortune
 
