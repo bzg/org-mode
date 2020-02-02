@@ -94,6 +94,8 @@
 (defvar org-habit-show-all-today)
 (defvar org-habit-scheduled-past-days)
 
+(org-remap org-agenda-mode-map 'move-end-of-line 'org-agenda-end-of-line)
+
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name "*Org Agenda*")
 (defvar org-agenda-overriding-header nil)
@@ -1156,6 +1158,11 @@ argument, a calendar-style date list like (month day year)."
   :type '(choice
 	  (string :tag "Format string")
 	  (function :tag "Function")))
+
+(defun org-agenda-end-of-line ()
+  "Go to the end of visible line."
+  (interactive)
+  (goto-char (line-end-position)))
 
 (defun org-agenda-format-date-aligned (date)
   "Format a DATE string for display in the daily/weekly agenda.
@@ -8056,7 +8063,8 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 
 (defun org-agenda-filter-hide-line (type)
   "Hide lines with TYPE in the agenda buffer."
-  (let* ((b (max (point-min) (1- (point-at-bol))))
+  (let* (buffer-invisibility-spec
+	 (b (max (point-min) (1- (point-at-bol))))
 	 (e (point-at-eol)))
     (let ((inhibit-read-only t))
       (add-text-properties
