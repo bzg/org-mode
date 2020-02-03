@@ -2578,27 +2578,29 @@ location of point."
 		     ev)))
 
 	(when org-table-formula-debug
-	  (with-output-to-temp-buffer "*Substitution History*"
-	    (princ (format "Substitution history of formula
+	  (let ((wcf (current-window-configuration)))
+	    (with-output-to-temp-buffer "*Substitution History*"
+	      (princ (format "Substitution history of formula
 Orig:   %s
 $xyz->  %s
 @r$c->  %s
 $1->    %s\n" orig formula form0 form))
-	    (if (consp ev)
-		(princ (format "        %s^\nError:  %s"
-			       (make-string (car ev) ?\-) (nth 1 ev)))
-	      (princ (format "Result: %s\nFormat: %s\nFinal:  %s"
-			     ev (or fmt "NONE")
-			     (if fmt (format fmt (string-to-number ev)) ev)))))
-	  (setq bw (get-buffer-window "*Substitution History*"))
-	  (org-fit-window-to-buffer bw)
-	  (unless (and (called-interactively-p 'any) (not ndown))
-	    (unless (let (inhibit-redisplay)
-		      (y-or-n-p "Debugging Formula.  Continue to next? "))
-	      (org-table-align)
-	      (user-error "Abort"))
-	    (delete-window bw)
-	    (message "")))
+	      (if (consp ev)
+		  (princ (format "        %s^\nError:  %s"
+				 (make-string (car ev) ?\-) (nth 1 ev)))
+		(princ (format "Result: %s\nFormat: %s\nFinal:  %s"
+			       ev (or fmt "NONE")
+			       (if fmt (format fmt (string-to-number ev)) ev)))))
+	    (setq bw (get-buffer-window "*Substitution History*"))
+	    (org-fit-window-to-buffer bw)
+	    (unless (and (called-interactively-p 'any) (not ndown))
+	      (unless (let (inhibit-redisplay)
+			(y-or-n-p "Debugging Formula.  Continue to next? "))
+		(org-table-align)
+		(user-error "Abort"))
+	      (delete-window bw)
+	      (message "")
+	      (set-window-configuration wcf))))
 	(when (consp ev) (setq fmt nil ev "#ERROR"))
 	(org-table-justify-field-maybe
 	 (format org-table-formula-field-format
@@ -5041,66 +5043,66 @@ When LOCAL is non-nil, show references for the table at point."
 (put 'orgtbl-mode :menu-tag "Org Table Mode")
 
 (easy-menu-define orgtbl-mode-menu orgtbl-mode-map "OrgTbl menu"
-      '("OrgTbl"
-	["Create or convert" org-table-create-or-convert-from-region
-	 :active (not (org-at-table-p)) :keys "C-c |" ]
-	"--"
-	["Align" org-ctrl-c-ctrl-c :active (org-at-table-p) :keys "C-c C-c"]
-	["Next Field" org-cycle :active (org-at-table-p) :keys "TAB"]
-	["Previous Field" org-shifttab :active (org-at-table-p) :keys "S-TAB"]
-	["Next Row" org-return :active (org-at-table-p) :keys "RET"]
-	"--"
-	["Blank Field" org-table-blank-field :active (org-at-table-p) :keys "C-c SPC"]
-	["Edit Field" org-table-edit-field :active (org-at-table-p) :keys "C-c ` "]
-	["Copy Field from Above"
-	 org-table-copy-down :active (org-at-table-p) :keys "S-RET"]
-	"--"
-	("Column"
-	 ["Move Column Left" org-metaleft :active (org-at-table-p) :keys "M-<left>"]
-	 ["Move Column Right" org-metaright :active (org-at-table-p) :keys "M-<right>"]
-	 ["Delete Column" org-shiftmetaleft :active (org-at-table-p) :keys "M-S-<left>"]
-	 ["Insert Column" org-shiftmetaright :active (org-at-table-p) :keys "M-S-<right>"])
-	("Row"
-	 ["Move Row Up" org-metaup :active (org-at-table-p) :keys "M-<up>"]
-	 ["Move Row Down" org-metadown :active (org-at-table-p) :keys "M-<down>"]
-	 ["Delete Row" org-shiftmetaup :active (org-at-table-p) :keys "M-S-<up>"]
-	 ["Insert Row" org-shiftmetadown :active (org-at-table-p) :keys "M-S-<down>"]
-	 ["Sort lines in region" org-table-sort-lines :active (org-at-table-p) :keys "C-c ^"]
-	 "--"
-	 ["Insert Hline" org-table-insert-hline :active (org-at-table-p) :keys "C-c -"])
-	("Rectangle"
-	 ["Copy Rectangle" org-copy-special :active (org-at-table-p)]
-	 ["Cut Rectangle" org-cut-special :active (org-at-table-p)]
-	 ["Paste Rectangle" org-paste-special :active (org-at-table-p)]
-	 ["Fill Rectangle" org-table-wrap-region :active (org-at-table-p)])
-	"--"
-	("Radio tables"
-	 ["Insert table template" orgtbl-insert-radio-table
-	  (cl-assoc-if #'derived-mode-p orgtbl-radio-table-templates)]
-	 ["Comment/uncomment table" orgtbl-toggle-comment t])
-	"--"
-	["Set Column Formula" org-table-eval-formula :active (org-at-table-p) :keys "C-c ="]
-	["Set Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
-	["Edit Formulas" org-table-edit-formulas :active (org-at-table-p) :keys "C-c '"]
-	["Recalculate line" org-table-recalculate :active (org-at-table-p) :keys "C-c *"]
-	["Recalculate all" (org-table-recalculate '(4)) :active (org-at-table-p) :keys "C-u C-c *"]
-	["Iterate all" (org-table-recalculate '(16)) :active (org-at-table-p) :keys "C-u C-u C-c *"]
-	["Toggle Recalculate Mark" org-table-rotate-recalc-marks :active (org-at-table-p) :keys "C-c #"]
-	["Sum Column/Rectangle" org-table-sum
-	 :active (or (org-at-table-p) (org-region-active-p)) :keys "C-c +"]
-	["Which Column?" org-table-current-column :active (org-at-table-p) :keys "C-c ?"]
-	["Debug Formulas"
-	 org-table-toggle-formula-debugger :active (org-at-table-p)
-	 :keys "C-c {"
-	 :style toggle :selected org-table-formula-debug]
-	["Show Col/Row Numbers"
-	 org-table-toggle-coordinate-overlays :active (org-at-table-p)
-	 :keys "C-c }"
-	 :style toggle :selected org-table-overlay-coordinates]
-	"--"
-	("Plot"
-	 ["Ascii plot" orgtbl-ascii-plot :active (org-at-table-p) :keys "C-c \" a"]
-	 ["Gnuplot" org-plot/gnuplot :active (org-at-table-p) :keys "C-c \" g"])))
+  '("OrgTbl"
+    ["Create or convert" org-table-create-or-convert-from-region
+     :active (not (org-at-table-p)) :keys "C-c |" ]
+    "--"
+    ["Align" org-ctrl-c-ctrl-c :active (org-at-table-p) :keys "C-c C-c"]
+    ["Next Field" org-cycle :active (org-at-table-p) :keys "TAB"]
+    ["Previous Field" org-shifttab :active (org-at-table-p) :keys "S-TAB"]
+    ["Next Row" org-return :active (org-at-table-p) :keys "RET"]
+    "--"
+    ["Blank Field" org-table-blank-field :active (org-at-table-p) :keys "C-c SPC"]
+    ["Edit Field" org-table-edit-field :active (org-at-table-p) :keys "C-c ` "]
+    ["Copy Field from Above"
+     org-table-copy-down :active (org-at-table-p) :keys "S-RET"]
+    "--"
+    ("Column"
+     ["Move Column Left" org-metaleft :active (org-at-table-p) :keys "M-<left>"]
+     ["Move Column Right" org-metaright :active (org-at-table-p) :keys "M-<right>"]
+     ["Delete Column" org-shiftmetaleft :active (org-at-table-p) :keys "M-S-<left>"]
+     ["Insert Column" org-shiftmetaright :active (org-at-table-p) :keys "M-S-<right>"])
+    ("Row"
+     ["Move Row Up" org-metaup :active (org-at-table-p) :keys "M-<up>"]
+     ["Move Row Down" org-metadown :active (org-at-table-p) :keys "M-<down>"]
+     ["Delete Row" org-shiftmetaup :active (org-at-table-p) :keys "M-S-<up>"]
+     ["Insert Row" org-shiftmetadown :active (org-at-table-p) :keys "M-S-<down>"]
+     ["Sort lines in region" org-table-sort-lines :active (org-at-table-p) :keys "C-c ^"]
+     "--"
+     ["Insert Hline" org-table-insert-hline :active (org-at-table-p) :keys "C-c -"])
+    ("Rectangle"
+     ["Copy Rectangle" org-copy-special :active (org-at-table-p)]
+     ["Cut Rectangle" org-cut-special :active (org-at-table-p)]
+     ["Paste Rectangle" org-paste-special :active (org-at-table-p)]
+     ["Fill Rectangle" org-table-wrap-region :active (org-at-table-p)])
+    "--"
+    ("Radio tables"
+     ["Insert table template" orgtbl-insert-radio-table
+      (cl-assoc-if #'derived-mode-p orgtbl-radio-table-templates)]
+     ["Comment/uncomment table" orgtbl-toggle-comment t])
+    "--"
+    ["Set Column Formula" org-table-eval-formula :active (org-at-table-p) :keys "C-c ="]
+    ["Set Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
+    ["Edit Formulas" org-table-edit-formulas :active (org-at-table-p) :keys "C-c '"]
+    ["Recalculate line" org-table-recalculate :active (org-at-table-p) :keys "C-c *"]
+    ["Recalculate all" (org-table-recalculate '(4)) :active (org-at-table-p) :keys "C-u C-c *"]
+    ["Iterate all" (org-table-recalculate '(16)) :active (org-at-table-p) :keys "C-u C-u C-c *"]
+    ["Toggle Recalculate Mark" org-table-rotate-recalc-marks :active (org-at-table-p) :keys "C-c #"]
+    ["Sum Column/Rectangle" org-table-sum
+     :active (or (org-at-table-p) (org-region-active-p)) :keys "C-c +"]
+    ["Which Column?" org-table-current-column :active (org-at-table-p) :keys "C-c ?"]
+    ["Debug Formulas"
+     org-table-toggle-formula-debugger :active (org-at-table-p)
+     :keys "C-c {"
+     :style toggle :selected org-table-formula-debug]
+    ["Show Col/Row Numbers"
+     org-table-toggle-coordinate-overlays :active (org-at-table-p)
+     :keys "C-c }"
+     :style toggle :selected org-table-overlay-coordinates]
+    "--"
+    ("Plot"
+     ["Ascii plot" orgtbl-ascii-plot :active (org-at-table-p) :keys "C-c \" a"]
+     ["Gnuplot" org-plot/gnuplot :active (org-at-table-p) :keys "C-c \" g"])))
 
 ;;;###autoload
 (define-minor-mode orgtbl-mode
