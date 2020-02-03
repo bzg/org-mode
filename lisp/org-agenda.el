@@ -6480,7 +6480,6 @@ scheduled items with an hour specification like [h]h:mm."
 			  (and (eq org-agenda-show-inherited-tags t)
 			       (or (eq org-agenda-use-tag-inheritance t)
 				   (memq 'agenda org-agenda-use-tag-inheritance))))
-
 		      tags (org-get-tags nil (not inherited-tags)))
 		(setq level (make-string (org-reduced-level (org-outline-level)) ? ))
 		(looking-at "\\*+[ \t]+\\(.*\\)")
@@ -6498,12 +6497,19 @@ scheduled items with an hour specification like [h]h:mm."
 				   org-agenda-timerange-leaders)
 			      (1+ (- d0 d1)) (1+ (- d2 d1)))
 			     head level category tags
-			     (cond ((and (= d1 d0) (= d2 d0))
-				    (concat "<" start-time ">--<" end-time ">"))
-                                   ((= d1 d0)
-				    (concat "<" start-time ">"))
-				   ((= d2 d0)
-				    (concat "<" end-time ">")))
+			     (save-match-data
+			       (let ((hhmm1 (and (string-match org-ts-regexp1 s1)
+						 (match-string 6 s1)))
+				     (hhmm2 (and (string-match org-ts-regexp1 s2)
+						 (match-string 6 s2))))
+				 (cond ((string= hhmm1 hhmm2)
+					(concat "<" start-time ">--<" end-time ">"))
+				       ((and (= d1 d0) (= d2 d0))
+					(concat "<" start-time ">--<" end-time ">"))
+                                       ((= d1 d0)
+					(concat "<" start-time ">"))
+				       ((= d2 d0)
+					(concat "<" end-time ">")))))
 			     remove-re))))
 	      (org-add-props txt props
 		'org-marker marker 'org-hd-marker hdmarker
