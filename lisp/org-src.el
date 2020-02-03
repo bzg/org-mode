@@ -1039,9 +1039,8 @@ name of the sub-editing buffer."
 	   (babel-info (and (eq type 'src-block)
 			    (org-babel-get-src-block-info 'light)))
 	   deactivate-mark)
-      (when (and (called-interactively-p 'any)
-		 (eq type 'src-block) (not (functionp lang-f)))
-	(user-error "No such language mode: %s" lang-f))
+      (when (and (eq type 'src-block) (not (functionp lang-f)))
+	(error "No such language mode: %s" lang-f))
       (org-src--edit-element
        element
        (or edit-buffer-name
