@@ -492,7 +492,7 @@ existing value of `header-line-format' we might want to restore."
 		(tbeg (save-excursion
 			(goto-char beg)
 			(while (or (org-at-table-hline-p)
-				   (looking-at-p ".*|\\s-+<[0-9]+>"))
+				   (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
 			  (move-beginning-of-line 2))
 			(point))))
 	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
