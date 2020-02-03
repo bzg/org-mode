@@ -18762,14 +18762,22 @@ information about your Org version and configuration."
 	 (erase-buffer)
 	 (insert "You are about to submit a bug report to the Org mailing list.
 
-We would like to add your full Org and Outline configuration to the
-bug report.  This greatly simplifies the work of the maintainer and
-other experts on the mailing list.
+If your report is about Org installation, please read this section:
+https://orgmode.org/org.html#Installation
 
-HOWEVER, some variables you have customized may contain private
+Please read https://orgmode.org/org.html#Feedback on how to make
+a good report, it will help Org contributors fixing your problem.
+
+Search https://lists.gnu.org/archive/html/emacs-orgmode/ to see
+if the issue you are about to raise has already been dealt with.
+
+We also would like to add your full Org and Outline configuration
+to the bug report.  It will help us debugging the issue.
+
+*HOWEVER*, some variables you have customized may contain private
 information.  The names of customers, colleagues, or friends, might
-appear in the form of file names, tags, todo states, or search strings.
-If you answer yes to the prompt, you might want to check and remove
+appear in the form of file names, tags, todo states or search strings.
+If you answer \"yes\" to the prompt, you might want to check and remove
 such private information before sending the email.")
 	 (add-text-properties (point-min) (point-max) '(face org-warning))
 	 (when (yes-or-no-p "Include your Org configuration ")
