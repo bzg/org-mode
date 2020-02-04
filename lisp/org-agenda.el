@@ -9571,7 +9571,9 @@ Called with a universal prefix arg, show the priority instead of setting it."
       (goto-char (point-max))
       (while (not (bobp))
 	(when (equal marker (org-get-at-bol 'org-marker))
-          (remove-text-properties (point-at-bol) (point-at-eol) '(display nil))
+          (remove-text-properties (line-beginning-position)
+				  (line-end-position)
+				  '(display nil))
 	  (org-move-to-column
 	   (- (/ (window-width nil t) (window-font-width)) (length stamp)) t)
           (add-text-properties
@@ -9579,7 +9581,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	   (list 'display (org-add-props stamp nil
 			    'face '(secondary-selection default))))
 	  (beginning-of-line 1))
-	(beginning-of-line 0)))))
+	(org-agenda-previous-line)))))
 
 (defun org-agenda-date-prompt (arg)
   "Change the date of this item.  Date is prompted for, with default today.
