@@ -313,7 +313,6 @@ If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value of the
 last statement in BODY, as elisp."
   (let* ((send-wait (lambda () (comint-send-input nil t) (sleep-for 0 5)))
-	 (last-indent 0)
 	 (input-body (lambda (body)
 		       (dolist (line (split-string body "[\r\n]"))
 			 (insert line)
