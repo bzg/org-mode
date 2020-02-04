@@ -5148,7 +5148,8 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 					'(display t invisible t intangible t)))
 	      (add-text-properties (match-beginning 2) (match-end 2)
 				   '(font-lock-multiline t org-emphasis t))
-	      (when org-hide-emphasis-markers
+	      (when (and org-hide-emphasis-markers
+			 (not (org-at-comment-p)))
 		(add-text-properties (match-end 4) (match-beginning 5)
 				     '(invisible org-link))
 		(add-text-properties (match-beginning 3) (match-end 3)
