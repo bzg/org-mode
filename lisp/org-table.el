@@ -510,7 +510,7 @@ existing value of `header-line-format' we might want to restore."
 ;;;###autoload
 (define-minor-mode org-table-header-line-mode
   "Display the first row of the table at point in the header line."
-  nil " TblHl" nil
+  nil " TblHeader" nil
   :global nil
   :group 'org-table
   (unless (eq major-mode 'org-mode)
