@@ -238,15 +238,15 @@ properties are:
 
  :jump-to-captured   When set, jump to the captured entry when finished.
 
- :empty-lines        Set this to the number of lines the should be inserted
+ :empty-lines        Set this to the number of lines that should be inserted
                      before and after the new item.  Default 0, only common
                      other value is 1.
 
- :empty-lines-before Set this to the number of lines the should be inserted
+ :empty-lines-before Set this to the number of lines that should be inserted
                      before the new item.  Overrides :empty-lines for the
                      number lines inserted before.
 
- :empty-lines-after  Set this to the number of lines the should be inserted
+ :empty-lines-after  Set this to the number of lines that should be inserted
                      after the new item.  Overrides :empty-lines for the
                      number of lines inserted after.
 

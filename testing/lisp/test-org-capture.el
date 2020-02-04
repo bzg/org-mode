@@ -197,7 +197,7 @@
 	(org-capture-kill))
       (buffer-string)))))
 
-(ert-deftest test-org-caputre/entry ()
+(ert-deftest test-org-capture/entry ()
   "Test `entry' type in capture template."
   ;; Do not break next headline.
   (should
