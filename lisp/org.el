@@ -5000,6 +5000,10 @@ The following commands are available:
      (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))
      (when org-startup-truncated (setq truncate-lines t))
      (when org-startup-indented (require 'org-indent) (org-indent-mode 1))))
+
+  ;; Activate `org-table-header-line-mode'
+  (when org-table-header-line-p
+    (org-table-header-line-mode 1))
   ;; Set up Org menus
   (org-menu-define)
   ;; Try to set `org-hide' face correctly.

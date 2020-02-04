@@ -453,23 +453,23 @@ prevents it from hanging Emacs."
 ;;; Org table electric header minor mode
 (defvar org-table-temp-header-line nil)
 (defvar org-table-temp-header-remapping nil)
-(defvar org-table-header-line-mode nil)
 
 (defun org-table-row-get-visible-string (&optional pos)
   "Get the visible string of a row.
 This is useful when columns have been shrunk."
   (save-excursion
     (when pos (goto-char pos))
-    (let ((beg (point-at-bol))
-	  (end (point-at-eol)) spc)
-      (goto-char beg)
-      (while (progn (org-table-next-field) (< (point) end))
-	(let ((ov (nth 0 (overlays-in (point) (1+ (point))))))
-	  (if ov (push (overlay-get ov 'display) spc)
-	    (push (org-table-get-field) spc))))
-      (format "|%s|" (mapconcat #'identity (reverse spc) "|")))))
+    (goto-char (line-beginning-position))
+    (let ((end (line-end-position)) str)
+      (while (progn (forward-char 1) (< (point) end))
+	(let ((ov (car (overlays-at (point)))))
+	  (if (not ov)
+	      (push (char-to-string (char-after)) str)
+	    (push (overlay-get ov 'display) str)
+	    (goto-char (1- (overlay-end ov))))))
+      (format "|%s" (mapconcat #'identity (reverse str) "")))))
 
-(defun org-table-set-header-line-format ()
+(defun org-table-header-set-line ()
   "Set the header of table at point as the `header-line-format'.
 Assume `org-table-temp-header-line' already stores the previously
 existing value of `header-line-format' we might want to restore."
@@ -479,7 +479,7 @@ existing value of `header-line-format' we might want to restore."
 	(face-remap-add-relative 'header-line '(:inherit default)))
   (if (org-at-table-p)
       (run-with-timer
-       0.001 nil
+       0.01 nil
        (lambda ()
 	 (let* ((beg (org-table-begin))
 		;; Are we using `display-line-numbers-mode'?
@@ -497,7 +497,8 @@ existing value of `header-line-format' we might want to restore."
 			(point))))
 	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
 	       (setq header-line-format
-		     (concat (propertize " " 'display '(space :width left-fringe))
+		     (concat (propertize " " 'display
+					 '(space :width (+ left-fringe left-margin-width)))
 			     (when lin (propertize (make-string (+ lin 2) 32)
 						   'face 'line-number))
 			     (when pre (make-string pre 32))
@@ -509,16 +510,14 @@ existing value of `header-line-format' we might want to restore."
 ;;;###autoload
 (define-minor-mode org-table-header-line-mode
   "Display the first row of the table at point in the header line."
-  :init-value org-table-header-line-p
   :global nil
-  :variable org-table-header-line-mode
   :group 'org-table
   (unless (eq major-mode 'org-mode)
     (user-error "Cannot turn org table electric mode outside org-mode buffers"))
   (if org-table-header-line-mode
       (progn (setq org-table-temp-header-line header-line-format)
-	     (add-hook 'post-command-hook 'org-table-set-header-line-format))
-    (remove-hook 'post-command-hook 'org-table-set-header-line-format)
+	     (add-hook 'post-command-hook 'org-table-header-set-line))
+    (remove-hook 'post-command-hook 'org-table-header-set-line)
     (face-remap-remove-relative org-table-temp-header-remapping)
     (setq header-line-format org-table-temp-header-line)))
 
