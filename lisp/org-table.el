@@ -493,7 +493,7 @@ existing value of `header-line-format' we might want to restore."
 			      (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
 		     (move-beginning-of-line 2))
 		   (point))))
-      (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
+      (if (not (pos-visible-in-window-p tbeg))
 	  (setq header-line-format
 		(concat (when (eq scroll-bar-mode 'left)
 			  (propertize " " 'display '(space :width scroll-bar)))
