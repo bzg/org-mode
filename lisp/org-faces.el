@@ -364,6 +364,10 @@ changes."
   "Face used for tables."
   :group 'org-faces)
 
+(defface org-table-header '((t :inherit org-table :background "LightGray"))
+  "Face for table header."
+  :group 'org-faces)
+
 (defface org-formula
   '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
     (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))

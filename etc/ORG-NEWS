@@ -41,7 +41,8 @@ window header line when this first row is not visible anymore in the
 buffer.
 
 You can activate this minor mode by default by setting the option
-~org-table-header-line-p~ to =t=.
+~org-table-header-line-p~ to =t=.  You can also change the face for
+the header line by customizing the ~org-table-header~ face.
 
 *** Property drawers allowed before first headline
 

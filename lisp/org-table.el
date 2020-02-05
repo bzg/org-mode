@@ -469,7 +469,7 @@ This is useful when columns have been shrunk."
 	    (goto-char (1- (overlay-end ov))))))
       (format "|%s" (mapconcat #'identity (reverse str) "")))))
 
-(defun org-table-header-set-line ()
+(defun org-table-header-set-header ()
   "Set the header of table at point as the `header-line-format'.
 Assume `org-table-temp-header-line' already stores the previously
 existing value of `header-line-format' we might want to restore."
@@ -477,50 +477,50 @@ existing value of `header-line-format' we might want to restore."
   (face-remap-remove-relative org-table-temp-header-remapping)
   (setq org-table-temp-header-remapping
 	(face-remap-add-relative 'header-line '(:inherit default)))
-  (if (org-at-table-p)
-      (run-with-timer
-       0.01 nil
-       (lambda ()
-	 (let* ((beg (org-table-begin))
-		;; Are we using `display-line-numbers-mode'?
-		(lin (and (boundp 'display-line-numbers-mode)
-			  display-line-numbers-mode
-			  (line-number-display-width)))
-		;; Are we using `org-indent-mode'?
-		(pre (and (boundp 'org-indent-mode) org-indent-mode
-			  (length (get-text-property (point) 'line-prefix))))
-		(tbeg (save-excursion
-			(goto-char beg)
-			(while (or (org-at-table-hline-p)
-				   (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
-			  (move-beginning-of-line 2))
-			(point))))
-	   (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
-	       (setq header-line-format
-		     (concat (propertize " " 'display
-					 '(space :width (+ left-fringe left-margin-width)))
-			     (when lin (propertize (make-string (+ lin 2) 32)
-						   'face 'line-number))
-			     (when pre (make-string pre 32))
-			     (propertize (org-table-row-get-visible-string tbeg)
-					 'face 'org-table)))
-	     (setq header-line-format org-table-temp-header-line)))))
-    (setq header-line-format org-table-temp-header-line)))
+  (if (not (org-at-table-p))
+      (setq header-line-format org-table-temp-header-line)
+    (run-with-timer
+     0.01 nil
+     (lambda ()
+       (let* ((beg (org-table-begin))
+	      ;; Are we using `display-line-numbers-mode'?
+	      (lin (and (boundp 'display-line-numbers-mode)
+			display-line-numbers-mode
+			(line-number-display-width)))
+	      ;; Are we using `org-indent-mode'?
+	      (pre (and (boundp 'org-indent-mode) org-indent-mode
+			(length (get-text-property (point) 'line-prefix))))
+	      (tbeg (save-excursion
+		      (goto-char beg)
+		      (while (or (org-at-table-hline-p)
+				 (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
+			(move-beginning-of-line 2))
+		      (point))))
+	 (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
+	     (setq header-line-format
+		   (concat (propertize " " 'display
+				       '(space :width (+ left-fringe left-margin-width)))
+			   (when lin (propertize (make-string (+ lin 2) 32)
+						 'face 'line-number))
+			   (when pre (make-string pre 32))
+			   (propertize (org-table-row-get-visible-string tbeg)
+				       'face 'org-table-header)))
+	   (setq header-line-format org-table-temp-header-line)))
+       (force-window-update)))))
 
 ;;;###autoload
+(defvar-local org-table-header-line-mode nil)
 (define-minor-mode org-table-header-line-mode
   "Display the first row of the table at point in the header line."
   nil " TblHeader" nil
-  :global nil
-  :group 'org-table
   (unless (eq major-mode 'org-mode)
     (user-error "Cannot turn org table electric mode outside org-mode buffers"))
   (if org-table-header-line-mode
-      (progn (setq org-table-temp-header-line header-line-format)
-	     (add-hook 'post-command-hook 'org-table-header-set-line))
-    (remove-hook 'post-command-hook 'org-table-header-set-line)
+      (progn (setq-local org-table-temp-header-line header-line-format)
+	     (add-hook 'post-command-hook 'org-table-header-set-header))
+    (remove-hook 'post-command-hook 'org-table-header-set-header)
     (face-remap-remove-relative org-table-temp-header-remapping)
-    (setq header-line-format org-table-temp-header-line)))
+    (setq-local header-line-format org-table-temp-header-line)))
 
 
 ;;; Regexps Constants
