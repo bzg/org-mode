@@ -495,8 +495,10 @@ existing value of `header-line-format' we might want to restore."
 		   (point))))
       (if (< tbeg (save-excursion (move-to-window-line 0) (point)))
 	  (setq header-line-format
-		(concat (propertize " " 'display
-				    '(space :width (+ left-fringe left-margin-width)))
+		(concat (when (eq scroll-bar-mode 'left)
+			  (propertize " " 'display '(space :width scroll-bar)))
+			(propertize
+			 " " 'display '(space :width (+ left-fringe left-margin)))
 			(when lin (propertize (make-string (+ lin 2) 32)
 					      'face 'line-number))
 			(when pre (make-string pre 32))
