@@ -165,6 +165,10 @@ From ~org-highest-priority~ to ~org-priority-highest~.
 From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
+*** New =org-refile.el= file
+
+Org refile variables and functions have been moved to a new file.
+
 * Version 9.3
 
 ** Incompatible changes
@@ -634,7 +638,7 @@ and ~org-list-radio-lists-templates~) are removed from the code base.
 Note that only radio /lists/ have been removed, not radio tables.
 
 If you want to manipulate lists like in Org in other modes, we suggest
-to use orgalist.el, which you can install from GNU ELPA.
+to use =orgalist.el=, which you can install from GNU ELPA.
 
 If you want to use Org folding outside of Org buffers, you can have a
 look at the outshine package in the MELPA repository.
