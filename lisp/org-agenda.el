@@ -49,6 +49,7 @@
 (require 'ol)
 (require 'org)
 (require 'org-macs)
+(require 'org-refile)
 
 (declare-function diary-add-to-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
