@@ -7,7 +7,7 @@
 ;; Maintainer: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
-;; Version: 9.3.2
+;; Version: 9.3.3
 ;;
 ;; This file is part of GNU Emacs.
 ;;
