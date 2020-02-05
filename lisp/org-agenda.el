@@ -4371,7 +4371,7 @@ items if they have an hour specification like [h]h:mm."
 	  (insert tbl)))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
-      (unless (or (not (get-buffer-window))
+      (unless (or (not (get-buffer-window org-agenda-buffer-name))
 		  (and (pos-visible-in-window-p (point-min))
 		       (pos-visible-in-window-p (point-max))))
 	(goto-char (1- (point-max)))
