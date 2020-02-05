@@ -8929,11 +8929,14 @@ It also looks at the text of the entry itself."
 		  (setq trg (and (string-match org-link-bracket-re l)
 				 (match-string 1 l)))
 		  (if (or (not trg) (string-match org-link-any-re trg))
-		      (org-with-wide-buffer
-		       (goto-char marker)
-		       (when (search-forward l nil lkend)
-			 (goto-char (match-beginning 0))
-			 (org-open-at-point)))
+		      ;; Don't use `org-with-wide-buffer' here as
+		      ;; opening the link may result in moving the point
+		      (save-restriction
+			(widen)
+			(goto-char marker)
+			(when (search-forward l nil lkend)
+			  (goto-char (match-beginning 0))
+			  (org-open-at-point)))
 		    ;; This is an internal link, widen the buffer
 		    (switch-to-buffer-other-window buffer)
 		    (widen)
