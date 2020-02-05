@@ -5826,7 +5826,7 @@ element.
 
 Possible types are defined in `org-element-all-elements'.
 Properties depend on element or object type, but always include
-`:begin', `:end', `:parent' and `:post-blank' properties.
+`:begin', `:end', and `:post-blank' properties.
 
 As a special case, if point is at the very beginning of the first
 item in a list or sub-list, returned element will be that list
