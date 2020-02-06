@@ -479,32 +479,37 @@ existing value of `header-line-format' we might want to restore."
 	      (face-remap-add-relative 'header-line '(:inherit default)))
   (if (not (org-at-table-p))
       (setq header-line-format org-table-temp-header-line)
-    (let* ((beg (org-table-begin))
-	   ;; Are we using `display-line-numbers-mode'?
-	   (lin (and (boundp 'display-line-numbers-mode)
-		     display-line-numbers-mode
-		     (line-number-display-width)))
-	   ;; Are we using `org-indent-mode'?
-	   (pre (and (boundp 'org-indent-mode) org-indent-mode
-		     (length (get-text-property (point) 'line-prefix))))
-	   (tbeg (save-excursion
-		   (goto-char beg)
-		   (while (or (org-at-table-hline-p)
-			      (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
-		     (move-beginning-of-line 2))
-		   (point))))
-      (if (not (pos-visible-in-window-p tbeg))
-	  (setq header-line-format
-		(concat (when (eq scroll-bar-mode 'left)
-			  (propertize " " 'display '(space :width scroll-bar)))
-			(propertize
-			 " " 'display '(space :width (+ left-fringe left-margin)))
-			(when lin (propertize (make-string (+ lin 2) 32)
-					      'face 'line-number))
-			(when pre (make-string pre 32))
-			(propertize (org-table-row-get-visible-string tbeg)
-				    'face 'org-table-header)))
-	(setq header-line-format org-table-temp-header-line)))))
+    (run-with-timer
+     0.1 nil
+     (lambda ()
+       (let* ((beg (org-table-begin))
+	      ;; Are we using `display-line-numbers-mode'?
+	      (lin (and (boundp 'display-line-numbers-mode)
+			display-line-numbers-mode
+			(line-number-display-width)))
+	      ;; Are we using `org-indent-mode'?
+	      (pre (and (boundp 'org-indent-mode) org-indent-mode
+			(length (get-text-property (point) 'line-prefix))))
+	      (tbeg (save-excursion
+		      (goto-char beg)
+		      (while (or (org-at-table-hline-p)
+				 (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
+			(move-beginning-of-line 2))
+		      (point))))
+	 (if (not (pos-visible-in-window-p tbeg))
+	     (setq header-line-format
+		   (concat (when (eq scroll-bar-mode 'left)
+			     (propertize " " 'display '(space :width scroll-bar)))
+			   (propertize
+			    " " 'display '(space :width (+ left-fringe left-margin)))
+			   (when lin (propertize (make-string (+ lin 2) 32)
+						 'face 'line-number))
+			   (when pre (make-string pre 32))
+			   (substring
+			    (propertize (org-table-row-get-visible-string tbeg)
+					'face 'org-table-header)
+			    (window-hscroll))))
+	   (setq header-line-format org-table-temp-header-line)))))))
 
 ;;;###autoload
 (defvar-local org-table-header-line-mode nil)
