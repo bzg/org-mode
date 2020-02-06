@@ -30,6 +30,8 @@
 
 ;;; Function Declarations
 
+(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
+
 (defvar orgtbl-exp-regexp)
 
 
@@ -1058,7 +1060,7 @@ INFO is a plist holding contextual information.  See
 		 (concat type ":" raw-path))
 		((member type '("file" "attachment"))
 		 (when (string= type "attachment")
-		   (setq raw-path (org-element-property :attachment-path link)))
+		   (setq raw-path (org-attach-link-expand link)))
 		 (org-export-file-uri raw-path))
 		(t raw-path))))
     (cond

@@ -34,6 +34,7 @@
 ;;; Function Declarations
 
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
+(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
 
 ;;; Define Back-End
 ;;
@@ -1573,7 +1574,7 @@ INFO is a plist holding contextual information."
 	 (raw-path (org-element-property :path link))
 	 (path (cond
 		((string= type "attachment")
-		 (setq raw-path (org-element-property :attachment-path link))
+		 (setq raw-path (org-attach-link-expand link))
 		 (concat type ":" raw-path))
 		(t (concat type ":" raw-path)))))
     (cond

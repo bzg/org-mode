@@ -3116,11 +3116,7 @@ When at a link, return a list whose car is `link' and cdr a plist
 with `:type', `:path', `:format', `:raw-link', `:application',
 `:search-option', `:begin', `:end', `:contents-begin',
 `:contents-end' and `:post-blank' as keywords.  Otherwise, return
-nil.  Additionally, in the context of attachment links one
-further property, `:attachment-path' is set.  That property
-contains the attachment link expanded into a full filesystem
-path.
-
+nil.
 
 Assume point is at the beginning of the link."
   (catch 'no-object
@@ -3229,27 +3225,18 @@ Assume point is at the beginning of the link."
 	(when trans
 	  (setq type (car trans))
 	  (setq path (cdr trans))))
-      (let ((link
-	     (list 'link
-		   (list :type type
-			 :path path
-			 :format format
-			 :raw-link (or raw-link path)
-			 :application application
-			 :search-option search-option
-			 :begin begin
-			 :end end
-			 :contents-begin contents-begin
-			 :contents-end contents-end
-			 :post-blank post-blank))))
-	;; Add additional type specific properties for link types that
-	;; need it
-	(when (string= type "attachment")
-	  (org-element-put-property
-	   link :attachment-path
-	   (file-relative-name
-	    (org-attach-expand path))))
-	link))))
+      (list 'link
+	    (list :type type
+		  :path path
+		  :format format
+		  :raw-link (or raw-link path)
+		  :application application
+		  :search-option search-option
+		  :begin begin
+		  :end end
+		  :contents-begin contents-begin
+		  :contents-end contents-end
+		  :post-blank post-blank)))))
 
 (defun org-element-link-interpreter (link contents)
   "Interpret LINK object as Org syntax.

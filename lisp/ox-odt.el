@@ -34,6 +34,8 @@
 
 ;;; Function Declarations
 
+(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
+
 ;;; Define Back-End
 
 (org-export-define-backend 'odt
@@ -2706,7 +2708,7 @@ INFO is a plist holding contextual information.  See
 		 (concat type ":" raw-path))
 		((member type '("file" "attachment"))
 		 (when (string= type "attachment")
-		   (setq raw-path (org-element-property :attachment-path link)))
+		   (setq raw-path (org-attach-link-expand link)))
 		 (org-export-file-uri raw-path))
 		(t raw-path)))
 	 ;; Convert & to &amp; for correct XML representation
