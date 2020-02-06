@@ -473,7 +473,6 @@ This is useful when columns have been shrunk."
   "Set the header of table at point as the `header-line-format'.
 Assume `org-table-temp-header-line' already stores the previously
 existing value of `header-line-format' we might want to restore."
-  (ignore-errors (require 'face-remap))
   (face-remap-remove-relative org-table-temp-header-remapping)
   (setq-local org-table-temp-header-remapping
 	      (face-remap-add-relative 'header-line '(:inherit default)))
@@ -482,21 +481,22 @@ existing value of `header-line-format' we might want to restore."
     (run-with-timer
      0.1 nil
      (lambda ()
-       (let* ((beg (org-table-begin))
-	      ;; Are we using `display-line-numbers-mode'?
-	      (lin (and (boundp 'display-line-numbers-mode)
-			display-line-numbers-mode
-			(line-number-display-width)))
-	      ;; Are we using `org-indent-mode'?
-	      (pre (and (boundp 'org-indent-mode) org-indent-mode
-			(length (get-text-property (point) 'line-prefix))))
-	      (tbeg (save-excursion
-		      (goto-char beg)
-		      (while (or (org-at-table-hline-p)
-				 (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
-			(move-beginning-of-line 2))
-		      (point))))
-	 (if (not (pos-visible-in-window-p tbeg))
+       (let* ((beg (save-excursion
+		     (goto-char (org-table-begin))
+		     (while (or (org-at-table-hline-p)
+				(looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
+		       (move-beginning-of-line 2))
+		     (point))))
+	 (if (pos-visible-in-window-p beg)
+	     (setq header-line-format org-table-temp-header-line)
+	   (setq header-line-format nil)
+	   (let (;; Are we using `display-line-numbers-mode'?
+		 (lin (and (boundp 'display-line-numbers-mode)
+			   display-line-numbers-mode
+			   (line-number-display-width)))
+		 ;; Are we using `org-indent-mode'?
+		 (pre (and (boundp 'org-indent-mode) org-indent-mode
+			   (length (get-text-property (point) 'line-prefix)))))
 	     (setq header-line-format
 		   (concat (when (eq scroll-bar-mode 'left)
 			     (propertize " " 'display '(space :width scroll-bar)))
@@ -506,22 +506,22 @@ existing value of `header-line-format' we might want to restore."
 						 'face 'line-number))
 			   (when pre (make-string pre 32))
 			   (substring
-			    (propertize (org-table-row-get-visible-string tbeg)
+			    (propertize (org-table-row-get-visible-string beg)
 					'face 'org-table-header)
-			    (window-hscroll))))
-	   (setq header-line-format org-table-temp-header-line)))))))
+			    (window-hscroll)))))))))))
 
 ;;;###autoload
 (defvar-local org-table-header-line-mode nil)
 (define-minor-mode org-table-header-line-mode
   "Display the first row of the table at point in the header line."
   nil " TblHeader" nil
+  (ignore-errors (require 'face-remap))
   (unless (eq major-mode 'org-mode)
     (user-error "Cannot turn org table electric mode outside org-mode buffers"))
   (if org-table-header-line-mode
       (progn (setq-local org-table-temp-header-line header-line-format)
-	     (add-hook 'post-command-hook 'org-table-header-set-header))
-    (remove-hook 'post-command-hook 'org-table-header-set-header)
+	     (add-hook 'post-command-hook 'org-table-header-set-header nil t))
+    (remove-hook 'post-command-hook 'org-table-header-set-header t)
     (face-remap-remove-relative org-table-temp-header-remapping)
     (setq-local header-line-format org-table-temp-header-line)))
 
