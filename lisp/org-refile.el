@@ -244,6 +244,13 @@ converted to a headline before refiling."
 (defvar org-refile-markers nil
   "All the markers used for caching refile locations.")
 
+;; Add org refile commands to the main org menu
+(mapc (lambda (i) (easy-menu-add-item
+		   org-org-menu
+		   '("Edit Structure") i))
+      '(["Refile Subtree" org-refile (org-in-subtree-not-table-p)]
+	["Refile and copy Subtree" org-copy (org-in-subtree-not-table-p)]))
+
 (defun org-refile-marker (pos)
   "Get a new refile marker, but only if caching is in use."
   (if (not org-refile-use-cache)
