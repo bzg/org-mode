@@ -208,7 +208,6 @@
 	     (org-capture-templates
 	      `(("t" "Todo" entry (file+headline ,file "A") "** H1 %?"))))
 	(org-capture nil "t")
-	(goto-char (point-max))
 	(insert "Capture text")
 	(org-capture-finalize))
       (buffer-string))))
