@@ -472,7 +472,7 @@ This may be useful when columns have been shrunk."
   (when (overlayp org-table-header-overlay)
     (delete-overlay org-table-header-overlay))
   (run-with-timer
-   0.001 nil
+   0.01 nil
    (lambda ()
      (if (not (org-at-table-p))
 	 (when (overlayp org-table-header-overlay)
