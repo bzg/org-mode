@@ -364,7 +364,9 @@ changes."
   "Face used for tables."
   :group 'org-faces)
 
-(defface org-table-header '((t :inherit org-table :background "LightGray"))
+(defface org-table-header '((t :inherit org-table
+			       :background "LightGray"
+			       :foreground "Black"))
   "Face for table header."
   :group 'org-faces)
 
