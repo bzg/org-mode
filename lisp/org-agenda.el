@@ -3931,7 +3931,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
   ;; We need to widen when `org-agenda-finalize' is called from
-  ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
+  ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in').
   (when (bound-and-true-p org-clock-current-task)
     (save-restriction
       (widen)
