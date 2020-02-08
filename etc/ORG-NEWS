@@ -44,6 +44,14 @@ You can activate this minor mode by default by setting the option
 ~org-table-header-line-p~ to =t=.  You can also change the face for
 the header line by customizing the ~org-table-header~ face.
 
+*** Looping agenda commands over headlines
+
+~org-agenda-loop-over-headlines-in-active-region~ allows you to loop
+agenda commands over the active region.  When set to =t=, loop over
+all headlines.  When set to ='start-level=, loop over headlines with
+the same level than the first headline in the region.  When set to a
+string, loop over lines matching this regular expression.
+
 *** Property drawers allowed before first headline
 
 Property drawers are now allowed before the first headline.

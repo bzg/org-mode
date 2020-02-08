@@ -18602,6 +18602,29 @@ line up with the outline headers.  You would use these settings:
   {{{kbd(M-x org-convert-to-odd-levels)}}} and {{{kbd(M-x
   org-convert-to-oddeven-levels)}}}.
 
+** Execute commands in the active region
+:PROPERTIES:
+:DESCRIPTION: Execute commands on multiple items in Org or agenda view.
+:END:
+
+#+vindex: org-loop-over-headlines-in-active-region
+When in an Org buffer, you might want to apply a command to all the
+subtrees in the active region.  To enable this, set the option
+~org-loop-over-headlines-in-active-region~ to non-~nil~, activate the
+region and run the command normally.  For example, hitting {{{kbd(C-c
+C-s)}}} when multiple headlines are within the active region will
+successively prompt you for a new schedule date and time.
+
+#+vindex: org-agenda-loop-over-headlines-in-active-region
+~org-agenda-loop-over-headlines-in-active-region~ lets you obtain the
+same behavior within an agenda buffer.  In the agenda, you can also
+use [[*Bulk remote editing selected entries][bulk editing of selected entries]], which see.
+
+Not all commands can loop in the active region and what subtrees or
+headlines are considered can be refined: see the docstrings of these
+options for more details.
+
+
 ** Dynamic Headline Numbering
 :PROPERTIES:
 :DESCRIPTION: Display and update outline numbering.
