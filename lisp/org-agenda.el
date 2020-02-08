@@ -2216,11 +2216,11 @@ The following commands are available:
     (kill-all-local-variables)
     (cl-flet ((reset-saved (var-set)
 			   "Reset variables in VAR-SET to possibly stored value in SAVE."
-			(dolist (elem save)
-			  (pcase elem
-			    (`(,var . ,val)		;ignore unbound variables
-			     (when (and val (memq var var-set))
-			       (set var val)))))))
+			   (dolist (elem save)
+			     (pcase elem
+			       (`(,var . ,val)		;ignore unbound variables
+				(when (and val (memq var var-set))
+				  (set var val)))))))
       (cond (org-agenda-doing-sticky-redo
 	     ;; Refreshing sticky agenda-buffer
 	     ;;
@@ -2355,7 +2355,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "e" #'org-agenda-set-effort)
 (org-defkey org-agenda-mode-map "\C-c\C-xe" #'org-agenda-set-effort)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-e"
- #'org-clock-modify-effort-estimate)
+	    #'org-clock-modify-effort-estimate)
 (org-defkey org-agenda-mode-map "\C-c\C-xp" #'org-agenda-set-property)
 (org-defkey org-agenda-mode-map "q" #'org-agenda-quit)
 (org-defkey org-agenda-mode-map "Q" #'org-agenda-Quit)
@@ -2948,10 +2948,10 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       (when note
 		 (message "FLAGGING-NOTE ([?] for more info): %s"
 			  (org-add-props
-			   (replace-regexp-in-string
-			    "\\\\n" "//"
-			    (copy-sequence note))
-			   nil 'face 'org-warning))))))
+			      (replace-regexp-in-string
+			       "\\\\n" "//"
+			       (copy-sequence note))
+			      nil 'face 'org-warning))))))
 	 t t))
        ((equal org-keys "#") (call-interactively 'org-agenda-list-stuck-projects))
        ((equal org-keys "/") (call-interactively 'org-occur-in-agenda-files))
@@ -3693,7 +3693,7 @@ the global options and expect it to be applied to the entire view.")
     (tag . org-agenda-tag-filter)
     (effort . org-agenda-effort-filter)
     (regexp . org-agenda-regexp-filter))
-    "Alist of filter types and associated variables")
+  "Alist of filter types and associated variables")
 (defun org-agenda-filter-any ()
   "Is any filter active?"
   (let ((form (cons 'or (mapcar (lambda (x)
@@ -4663,12 +4663,12 @@ is active."
 				   (point-at-bol)
 				   (if hdl-only (point-at-eol) end)))
 			(mapc (lambda (wr) (when (string-match wr str)
-					(goto-char (1- end))
-					(throw :skip t)))
+					     (goto-char (1- end))
+					     (throw :skip t)))
 			      regexps-)
 			(mapc (lambda (wr) (unless (string-match wr str)
-					(goto-char (1- end))
-					(throw :skip t)))
+					     (goto-char (1- end))
+					     (throw :skip t)))
 			      (if todo-only
 				  (cons (concat "^\\*+[ \t]+"
                                                 org-not-done-regexp)
