@@ -56,7 +56,7 @@
 (declare-function org-clone-subtree-with-time-shift "org" (n &optional shift))
 (declare-function org-columns "org" (&optional global columns-fmt-string))
 (declare-function org-comment-dwim "org" (arg))
-(declare-function org-copy "org" ())
+(declare-function org-refile-copy "org" ())
 (declare-function org-copy-special "org" ())
 (declare-function org-copy-visible "org" (beg end))
 (declare-function org-ctrl-c-ctrl-c "org" (&optional arg))
@@ -580,7 +580,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-d") #'org-deadline)
 (org-defkey org-mode-map (kbd "C-c ;") #'org-toggle-comment)
 (org-defkey org-mode-map (kbd "C-c C-w") #'org-refile)
-(org-defkey org-mode-map (kbd "C-c M-w") #'org-copy)
+(org-defkey org-mode-map (kbd "C-c M-w") #'org-refile-copy)
 (org-defkey org-mode-map (kbd "C-c /") #'org-sparse-tree) ;minor-mode reserved
 (org-defkey org-mode-map (kbd "C-c \\") #'org-match-sparse-tree) ;minor-mode r.
 (org-defkey org-mode-map (kbd "C-c RET") #'org-ctrl-c-ret)

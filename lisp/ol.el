@@ -75,6 +75,7 @@
 (declare-function org-src-source-type "org-src" ())
 (declare-function org-time-stamp-format "org" (&optional long inactive))
 (declare-function outline-next-heading "outline" ())
+(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
 
 
 ;;; Customization
@@ -934,7 +935,7 @@ a \"file\" link."
     (cond
      ((member type '("file" "attachment"))
       (when (string= type "attachment")
-	(setq path (org-element-property :attachment-path link)))
+	(setq path (org-attach-link-expand link)))
       (if (string-match "[*?{]" (file-name-nondirectory path))
 	  (dired path)
 	;; Look into `org-link-parameters' in order to find

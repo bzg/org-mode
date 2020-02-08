@@ -49,6 +49,7 @@
 
 (require 'cl-lib)
 (require 'org)
+(require 'org-refile)
 
 (declare-function org-at-encrypted-entry-p "org-crypt" ())
 (declare-function org-at-table-p "org-table" (&optional table-type))
@@ -1155,7 +1156,7 @@ may have been stored before."
 	(org-capture-empty-lines-after)
 	(unless (org-at-heading-p) (outline-next-heading))
 	(org-capture-mark-kill-region origin (point))
-	(org-capture-narrow beg (1- (point)))
+	(org-capture-narrow beg (point))
 	(when (or (search-backward "%?" beg t)
 		  (search-forward "%?" nil t))
 	  (replace-match ""))))))

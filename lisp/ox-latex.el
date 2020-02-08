@@ -32,6 +32,8 @@
 
 ;;; Function Declarations
 
+(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
+
 (defvar org-latex-default-packages-alist)
 (defvar org-latex-packages-alist)
 (defvar orgtbl-exp-regexp)
@@ -1590,6 +1592,7 @@ INFO is a plist used as a communication channel."
 			lang))))
     `((?a . ,(org-export-data (plist-get info :author) info))
       (?t . ,(org-export-data (plist-get info :title) info))
+      (?s . ,(org-export-data (plist-get info :subtitle) info))
       (?k . ,(org-export-data (org-latex--wrap-latex-math-block
 			       (plist-get info :keywords) info)
 			      info))
@@ -2360,7 +2363,7 @@ LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
   (let* ((parent (org-export-get-parent-element link))
 	 (path (let ((raw-path (if (string= (org-element-property :type link) "attachment")
-				   (org-element-property :attachment-path link)
+				   (org-attach-link-expand link)
 				 (org-element-property :path link))))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
@@ -2528,7 +2531,7 @@ INFO is a plist holding contextual information.  See
 		       (concat type ":" raw-path))
 		      ((member type '("file" "attachment"))
 		       (when (string= type "attachment")
-			 (setq raw-path (org-element-property :attachment-path link)))
+			 (setq raw-path (org-attach-link-expand link)))
 		       (org-export-file-uri raw-path))
 		      (t
 		       raw-path)))))

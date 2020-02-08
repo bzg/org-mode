@@ -7126,10 +7126,10 @@ special command:
   by setting ~org-refile-use-cache~.  To make the command see new
   possible targets, you have to clear the cache with this command.
 
-- {{{kbd(C-c M-w)}}} (~org-copy~) ::
+- {{{kbd(C-c M-w)}}} (~org-refile-copy~) ::
 
   #+kindex: C-c M-w
-  #+findex: org-copy
+  #+findex: org-refile-copy
   Copying works like refiling, except that the original note is not
   deleted.
 

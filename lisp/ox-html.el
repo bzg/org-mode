@@ -42,6 +42,7 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 (declare-function mm-url-decode-entities "mm-url" ())
+(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
 
 (defvar htmlize-css-name-prefix)
 (defvar htmlize-output-type)
@@ -3074,7 +3075,7 @@ INFO is a plist holding contextual information.  See
 	    (url-encode-url (concat type ":" raw-path)))
 	   ((member type '("file" "attachment"))
 	    (when (string= type "attachment")
-	      (setq raw-path (org-element-property :attachment-path link)))
+	      (setq raw-path (org-attach-link-expand link)))
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
 	    ;; append "file" protocol to absolute file name.

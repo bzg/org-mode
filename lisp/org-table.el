@@ -450,13 +450,10 @@ prevents it from hanging Emacs."
   :package-version '(Org . "8.3"))
 
 
-;;; Org table electric header minor mode
-(defvar-local org-table-temp-header-line nil)
-(defvar-local org-table-temp-header-remapping nil)
-
+;;; Org table header minor mode
 (defun org-table-row-get-visible-string (&optional pos)
-  "Get the visible string of a row.
-This is useful when columns have been shrunk."
+  "Get the visible string of a table row.
+This may be useful when columns have been shrunk."
   (save-excursion
     (when pos (goto-char pos))
     (goto-char (line-beginning-position))
@@ -469,42 +466,32 @@ This is useful when columns have been shrunk."
 	    (goto-char (1- (overlay-end ov))))))
       (format "|%s" (mapconcat #'identity (reverse str) "")))))
 
+(defvar-local org-table-header-overlay nil)
 (defun org-table-header-set-header ()
-  "Set the header of table at point as the `header-line-format'.
-Assume `org-table-temp-header-line' already stores the previously
-existing value of `header-line-format' we might want to restore."
-  (ignore-errors (require 'face-remap))
-  (face-remap-remove-relative org-table-temp-header-remapping)
-  (setq-local org-table-temp-header-remapping
-	      (face-remap-add-relative 'header-line '(:inherit default)))
-  (if (not (org-at-table-p))
-      (setq header-line-format org-table-temp-header-line)
-    (let* ((beg (org-table-begin))
-	   ;; Are we using `display-line-numbers-mode'?
-	   (lin (and (boundp 'display-line-numbers-mode)
-		     display-line-numbers-mode
-		     (line-number-display-width)))
-	   ;; Are we using `org-indent-mode'?
-	   (pre (and (boundp 'org-indent-mode) org-indent-mode
-		     (length (get-text-property (point) 'line-prefix))))
-	   (tbeg (save-excursion
-		   (goto-char beg)
-		   (while (or (org-at-table-hline-p)
-			      (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
-		     (move-beginning-of-line 2))
-		   (point))))
-      (if (not (pos-visible-in-window-p tbeg))
-	  (setq header-line-format
-		(concat (when (eq scroll-bar-mode 'left)
-			  (propertize " " 'display '(space :width scroll-bar)))
-			(propertize
-			 " " 'display '(space :width (+ left-fringe left-margin)))
-			(when lin (propertize (make-string (+ lin 2) 32)
-					      'face 'line-number))
-			(when pre (make-string pre 32))
-			(propertize (org-table-row-get-visible-string tbeg)
-				    'face 'org-table-header)))
-	(setq header-line-format org-table-temp-header-line)))))
+  "Display the header of the table at point."
+  (when (overlayp org-table-header-overlay)
+    (delete-overlay org-table-header-overlay))
+  (run-with-timer
+   0.001 nil
+   (lambda ()
+     (if (not (org-at-table-p))
+	 (when (overlayp org-table-header-overlay)
+	   (delete-overlay org-table-header-overlay))
+       (let* ((ws (window-start))
+	      (beg (save-excursion
+		     (goto-char (org-table-begin))
+		     (while (or (org-at-table-hline-p)
+				(looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
+		       (move-beginning-of-line 2))
+		     (point)))
+	      (end (save-excursion (goto-char beg) (point-at-eol))))
+	 (when (not (pos-visible-in-window-p beg))
+	   (setq org-table-header-overlay
+		 (make-overlay ws (+ ws (- end beg))))
+	   (org-overlay-display
+	    org-table-header-overlay
+	    (org-table-row-get-visible-string beg)
+	    'org-table-header)))))))
 
 ;;;###autoload
 (defvar-local org-table-header-line-mode nil)
@@ -512,13 +499,12 @@ existing value of `header-line-format' we might want to restore."
   "Display the first row of the table at point in the header line."
   nil " TblHeader" nil
   (unless (eq major-mode 'org-mode)
-    (user-error "Cannot turn org table electric mode outside org-mode buffers"))
+    (user-error "Cannot turn org table header mode outside org-mode buffers"))
   (if org-table-header-line-mode
-      (progn (setq-local org-table-temp-header-line header-line-format)
-	     (add-hook 'post-command-hook 'org-table-header-set-header))
-    (remove-hook 'post-command-hook 'org-table-header-set-header)
-    (face-remap-remove-relative org-table-temp-header-remapping)
-    (setq-local header-line-format org-table-temp-header-line)))
+      (add-hook 'post-command-hook #'org-table-header-set-header nil t)
+    (when (overlayp org-table-header-overlay)
+      (delete-overlay org-table-header-overlay))
+    (remove-hook 'post-command-hook #'org-table-header-set-header t)))
 
 
 ;;; Regexps Constants

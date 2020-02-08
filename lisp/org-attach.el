@@ -40,6 +40,7 @@
 (require 'org-id)
 
 (declare-function dired-dwim-target-directory "dired-aux")
+(declare-function org-element-property "org-element" (property element))
 
 (defgroup org-attach nil
   "Options concerning attachments in Org mode."
@@ -649,6 +650,21 @@ See `org-attach-open'."
   "Return the full path to the current entry's attachment file FILE.
 Basically, this adds the path to the attachment directory."
   (expand-file-name file (org-attach-dir)))
+
+(defun org-attach-link-expand (link &optional buffer-or-name)
+  "Return the full path to the attachment in the LINK element.
+Takes LINK which is a link element, as defined by
+`org-element-link-parser'.  If LINK `:type' is attachment the
+full path to the attachment is expanded and returned.  Otherwise,
+return nil.  If BUFFER-OR-NAME is specified, LINK is expanded in
+that buffer, otherwise current buffer is assumed."
+  (let ((type (org-element-property :type link))
+	(file (org-element-property :path link))
+	(pos (org-element-property :begin link)))
+    (when (string= type "attachment")
+      (with-current-buffer (or buffer-or-name (current-buffer))
+	(goto-char pos)
+	(org-attach-expand file)))))
 
 (org-link-set-parameters "attachment"
                          :complete #'org-attach-complete-link)

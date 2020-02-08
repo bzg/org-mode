@@ -49,6 +49,7 @@
 (require 'ol)
 (require 'org)
 (require 'org-macs)
+(require 'org-refile)
 
 (declare-function diary-add-to-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
@@ -3930,7 +3931,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
   ;; We need to widen when `org-agenda-finalize' is called from
-  ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
+  ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in').
   (when (bound-and-true-p org-clock-current-task)
     (save-restriction
       (widen)
@@ -9589,7 +9590,7 @@ Called with a universal prefix arg, show the priority instead of setting it."
 	   (list 'display (org-add-props stamp nil
 			    'face '(secondary-selection default))))
 	  (beginning-of-line 1))
-	(org-agenda-previous-line)))))
+	(beginning-of-line 0)))))
 
 (defun org-agenda-date-prompt (arg)
   "Change the date of this item.  Date is prompted for, with default today.
