@@ -473,24 +473,25 @@ This may be useful when columns have been shrunk."
     (delete-overlay org-table-header-overlay))
   (run-with-timer
    0.001 nil
-   (if (not (org-at-table-p))
-       (when (overlayp org-table-header-overlay)
-	 (delete-overlay org-table-header-overlay))
-     (let* ((ws (window-start))
-	    (beg (save-excursion
-		   (goto-char (org-table-begin))
-		   (while (or (org-at-table-hline-p)
-			      (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
-		     (move-beginning-of-line 2))
-		   (point)))
-	    (end (save-excursion (goto-char beg) (point-at-eol))))
-       (when (not (pos-visible-in-window-p beg))
-	 (setq org-table-header-overlay
-	       (make-overlay ws (+ ws (- end beg))))
-	 (org-overlay-display
-	  org-table-header-overlay
-	  (org-table-row-get-visible-string beg)
-	  'org-table-header))))))
+   (lambda ()
+     (if (not (org-at-table-p))
+	 (when (overlayp org-table-header-overlay)
+	   (delete-overlay org-table-header-overlay))
+       (let* ((ws (window-start))
+	      (beg (save-excursion
+		     (goto-char (org-table-begin))
+		     (while (or (org-at-table-hline-p)
+				(looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
+		       (move-beginning-of-line 2))
+		     (point)))
+	      (end (save-excursion (goto-char beg) (point-at-eol))))
+	 (when (not (pos-visible-in-window-p beg))
+	   (setq org-table-header-overlay
+		 (make-overlay ws (+ ws (- end beg))))
+	   (org-overlay-display
+	    org-table-header-overlay
+	    (org-table-row-get-visible-string beg)
+	    'org-table-header)))))))
 
 ;;;###autoload
 (defvar-local org-table-header-line-mode nil)
