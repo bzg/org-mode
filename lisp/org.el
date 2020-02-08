@@ -903,7 +903,10 @@ The list of commands is: `org-schedule', `org-deadline',
 `org-todo', `org-set-tags-command', `org-archive-subtree',
 `org-archive-set-tag', `org-toggle-archive-tag' and
 `org-archive-to-archive-sibling'.  The archiving commands skip
-already archived entries."
+already archived entries.
+
+See `org-agenda-loop-over-headlines-in-active-region' for the
+equivalent option for agenda views."
   :type '(choice (const :tag "Don't loop" nil)
 		 (const :tag "All headlines in active region" t)
 		 (const :tag "In active region, headlines at the same level than the first one" start-level)

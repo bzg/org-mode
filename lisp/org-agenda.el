@@ -8779,7 +8779,7 @@ deletes the agenda entry and don't move to the next entry."
 		       (and match (looking-at-p match))
 		       (eq level (org-get-at-bol 'level))))
 	      (org-agenda-next-item 1)
-	    (overlay-put ov 'face 'org-agenda-clocking)
+	    (overlay-put ov 'face 'region)
 	    (if (or arg force-arg) (funcall cmd arg) (funcall cmd))
 	    (when (not delete) (org-agenda-next-item 1))
 	    (delete-overlay ov)))))))
@@ -10259,7 +10259,10 @@ performed on the matching headlines within the active region.
 
 The list of commands is: `org-agenda-schedule',
 `org-agenda-deadline', `org-agenda-date-prompt',
-`org-agenda-todo', `org-agenda-archive*', `org-agenda-kill'."
+`org-agenda-todo', `org-agenda-archive*', `org-agenda-kill'.
+
+See `org-loop-over-headlines-in-active-region' for the equivalent
+option for Org buffers."
   :type '(choice (const :tag "Don't loop" nil)
 		 (const :tag "All headlines in active region" t)
 		 (const :tag "In active region, headlines at the same level than the first one" start-level)
