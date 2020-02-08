@@ -18568,9 +18568,7 @@ list structure.  Instead, use \\<org-mode-map>`\\[org-shiftmetaleft]' or \
 
 Also align node properties according to `org-property-format'."
   (interactive)
-  (cond
-   ((org-at-heading-p) 'noindent)
-   (t
+  (if (org-at-heading-p) 'noindent
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
 	   (type (org-element-type element)))
       (cond ((and (memq type '(plain-list item))
@@ -18604,7 +18602,7 @@ Also align node properties according to `org-property-format'."
 	     (when (eq type 'node-property)
 	       (let ((column (current-column)))
 		 (org--align-node-property)
-		 (org-move-to-column column)))))))))
+		 (org-move-to-column column))))))))
 
 (defun org-indent-region (start end)
   "Indent each non-blank line in the region.
