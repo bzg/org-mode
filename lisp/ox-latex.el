@@ -1592,6 +1592,7 @@ INFO is a plist used as a communication channel."
 			lang))))
     `((?a . ,(org-export-data (plist-get info :author) info))
       (?t . ,(org-export-data (plist-get info :title) info))
+      (?s . ,(org-export-data (plist-get info :subtitle) info))
       (?k . ,(org-export-data (org-latex--wrap-latex-math-block
 			       (plist-get info :keywords) info)
 			      info))
