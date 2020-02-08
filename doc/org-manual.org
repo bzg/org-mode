@@ -17426,13 +17426,13 @@ follows from the type specified above.
 
 - =link=, =graphics= ::
 
-  Result is a link to the file specified in =:file= header argument.
-  However, unlike plain =:file=, nothing is written to the disk.  The
-  block is used for its side-effects only, as in the following
-  example:
+  When used along with =file= type, the result is a link to the file
+  specified in =:file= header argument.  However, unlike plain =file=
+  type, nothing is written to the disk.  The block is used for its
+  side-effects only, as in the following example:
 
   #+begin_example
-  ,#+begin_src shell :results link :file "download.tar.gz"
+  ,#+begin_src shell :results file link :file "download.tar.gz"
   wget -c "http://example.com/download.tar.gz"
   ,#+end_src
   #+end_example
