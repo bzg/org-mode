@@ -7252,11 +7252,11 @@ Assume point is at a heading or an inlinetask beginning."
    (when (looking-at org-property-drawer-re)
      (goto-char (match-end 0))
      (forward-line)
-     (save-excursion (org-indent-region (match-beginning 0) (match-end 0))))
+     (org-indent-region (match-beginning 0) (match-end 0)))
    (when (looking-at org-logbook-drawer-re)
      (goto-char (match-end 0))
      (forward-line)
-     (save-excursion (org-indent-region (match-beginning 0) (match-end 0))))
+     (org-indent-region (match-beginning 0) (match-end 0)))
    (catch 'no-shift
      (when (or (zerop diff) (not (eq org-adapt-indentation t)))
        (throw 'no-shift nil))
