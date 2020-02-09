@@ -6901,6 +6901,9 @@ set ~org-clock-auto-clockout-timer~ to a number of seconds and add
 When the clock is running and Emacs is idle for more than this number
 of seconds, the clock will be clocked out automatically.
 
+Use =M-x org-clock-toggle-auto-clockout RET= to temporarily turn this
+on or off.
+
 ** Effort Estimates
 :PROPERTIES:
 :DESCRIPTION: Planning work effort in advance.

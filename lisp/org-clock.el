@@ -1422,6 +1422,15 @@ is present in the user configuration."
      org-clock-auto-clockout-timer nil #'org-clock-out)))
 
 ;;;###autoload
+(defun org-clock-toggle-auto-clockout ()
+  (interactive)
+  (if (memq 'org-clock-auto-clockout org-clock-in-hook)
+      (progn (remove-hook 'org-clock-in-hook #'org-clock-auto-clockout)
+	     (message "Auto clock-out after idle time turned off"))
+    (add-hook 'org-clock-in-hook #'org-clock-auto-clockout t)
+    (message "Auto clock-out after idle time turned on")))
+
+;;;###autoload
 (defun org-clock-in-last (&optional arg)
   "Clock in the last closed clocked item.
 When already clocking in, send a warning.
