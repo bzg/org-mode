@@ -952,7 +952,7 @@ truncation for Org mode different to the other modes that use the
 variable `truncate-lines' and as a shortcut instead of putting
 the variable `truncate-lines' into the `org-mode-hook'.  If one
 wants to configure truncation for Org mode not statically but
-dynamically e. g. in a hook like `ediff-prepare-buffer-hook' then
+dynamically e.g. in a hook like `ediff-prepare-buffer-hook' then
 the variable `truncate-lines' has to be used because in such a
 case it is too late to set the variable `org-startup-truncated'."
   :group 'org-startup
