@@ -18648,7 +18648,7 @@ indent.  The function will not indent contents of example blocks,
 verse blocks and export blocks as leading white spaces are
 assumed to be significant there."
   (interactive "r")
-  (save-window-excursion
+  (save-excursion
     (goto-char start)
     (skip-chars-forward " \r\t\n")
     (unless (eobp) (beginning-of-line))
