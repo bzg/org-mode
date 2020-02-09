@@ -6886,6 +6886,21 @@ If you only want this from time to time, use three universal prefix
 arguments with ~org-clock-in~ and two {{{kbd(C-u C-u)}}} with
 ~org-clock-in-last~.
 
+**** Clocking out automatically after some idle time
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+#+cindex: auto clocking out after idle time
+
+#+vindex: org-clock-auto-clockout-timer
+When you often forget to clock out before being idle and you don't
+want to manually set the clocking time to take into account, you can
+set ~org-clock-auto-clockout-timer~ to a number of seconds and add
+=(org-clock-auto-clockout-insinuate)= to your =.emacs= file.
+
+When the clock is running and Emacs is idle for more than this number
+of seconds, the clock will be clocked out automatically.
+
 ** Effort Estimates
 :PROPERTIES:
 :DESCRIPTION: Planning work effort in advance.

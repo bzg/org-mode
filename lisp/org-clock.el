@@ -468,6 +468,19 @@ Valid values are: `today', `yesterday', `thisweek', `lastweek',
 		 (const :tag "Select range interactively" interactive))
   :safe #'symbolp)
 
+(defcustom org-clock-auto-clockout-timer nil
+  "Timer for auto clocking out when Emacs is idle.
+When set to a number, auto clock out the currently clocked in
+task after this number of seconds of idle time.
+
+This is only effective when `org-clock-auto-clockout-insinuate'
+is added to the user configuration."
+  :group 'org-clock
+  :package-version '(Org . "9.4")
+  :type '(choice
+	  (integer :tag "Clock out after Emacs is idle for X seconds")
+	  (const :tag "Never auto clock out" nil)))
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -1396,6 +1409,17 @@ the default behavior."
 	       (run-with-timer 60 60 'org-resolve-clocks-if-idle))
 	 (message "Clock starts at %s - %s" ts org--msg-extra)
 	 (run-hooks 'org-clock-in-hook))))))
+
+(defun org-clock-auto-clockout ()
+  "Clock out the currently clocked in task if Emacs is idle.
+See `org-clock-auto-clockout-timer' to set the idle time span.
+
+Thie is only effective when `org-clock-auto-clockout-insinuate'
+is present in the user configuration."
+  (when (and (numberp org-clock-auto-clockout-timer)
+	     org-clock-current-task)
+    (run-with-idle-timer
+     org-clock-auto-clockout-timer nil #'org-clock-out)))
 
 ;;;###autoload
 (defun org-clock-in-last (&optional arg)

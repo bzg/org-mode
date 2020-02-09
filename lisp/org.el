@@ -3766,6 +3766,14 @@ If yes, offer to stop it and to save the buffer with the changes."
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save))
 
+(defun org-clock-auto-clockout-insinuate ()
+  "Set up hook for auto clocking out when Emacs is idle.
+See `org-clock-auto-clockout-timer'.
+
+This function is meant to be added to the user configuration."
+  (require 'org-clock)
+  (add-hook 'org-clock-in-hook #'org-clock-auto-clockout t))
+
 (defgroup org-archive nil
   "Options concerning archiving in Org mode."
   :tag "Org Archive"

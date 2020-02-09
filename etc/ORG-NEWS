@@ -79,6 +79,15 @@ Babel Java blocks recognize header argument =:cmdargs= and pass its
 value in call to =java=.
 
 ** New options
+*** New option ~org-clock-auto-clockout-timer~
+
+When this option is set to a number and the user configuration
+contains =(org-clock-auto-clockout-insinuate)=, Org will clock out the
+currently clocked in task after that number of seconds of idle time.
+
+This is useful when you often forget to clock out before being idle
+and don't want to have to manually set the clocking time to take into
+account.
 
 *** New option ~org-table-header-line-p~
 
