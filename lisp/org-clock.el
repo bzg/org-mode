@@ -1350,7 +1350,6 @@ the default behavior."
 	  (t
 	   (insert-before-markers "\n")
 	   (backward-char 1)
-	   (org-indent-line)
 	   (when (and (save-excursion
 			(end-of-line 0)
 			(org-in-item-p)))
@@ -1375,7 +1374,8 @@ the default behavior."
 		     start-time
 		     (org-current-time org-clock-rounding-minutes t)))
 	   (setq ts (org-insert-time-stamp org-clock-start-time
-					   'with-hm 'inactive))))
+					   'with-hm 'inactive))
+	   (org-indent-line)))
 	 (move-marker org-clock-marker (point) (buffer-base-buffer))
 	 (move-marker org-clock-hd-marker
 		      (save-excursion (org-back-to-heading t) (point))

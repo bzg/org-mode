@@ -494,6 +494,12 @@ Group 1 contains drawer's name or \"END\".")
 (defconst org-clock-drawer-end-re "^[ \t]*:END:[ \t]*$"
   "Regular expression matching the last line of a clock drawer.")
 
+(defconst org-logbook-drawer-re
+  (concat "^[ \t]*:LOGBOOK:[ \t]*\n"
+	  "\\(?:[ \t]*.*\\(?: .*\\)?[ \t]*\n\\)*?"
+	  "[ \t]*:END:[ \t]*$")
+  "Matches an entire LOGBOOK drawer.")
+
 (defconst org-property-drawer-re
   (concat "^[ \t]*:PROPERTIES:[ \t]*\n"
 	  "\\(?:[ \t]*:\\S-+:\\(?: .*\\)?[ \t]*\n\\)*?"
@@ -1514,9 +1520,15 @@ lines to the buffer:
 (defcustom org-adapt-indentation t
   "Non-nil means adapt indentation to outline node level.
 
-When this variable is set, Org assumes that you write outlines by
-indenting text in each node to align with the headline (after the
-stars).  The following issues are influenced by this variable:
+When this variable is set to t, Org assumes that you write
+outlines by indenting text in each node to align with the
+headline (after the stars).
+
+When this variable is set to 'headline-data, only adapt the
+indentation of the data lines right below the headline, such as
+planning/clock lines and property/logbook drawers.
+
+The following issues are influenced by this variable:
 
 - The indentation is increased by one space in a demotion
   command, and decreased by one in a promotion command.  However,
@@ -1528,14 +1540,18 @@ stars).  The following issues are influenced by this variable:
   when this variable is set.  When nil, they will not be indented.
 
 - TAB indents a line relative to current level.  The lines below
-  a headline will be indented when this variable is set.
+  a headline will be indented when this variable is set to t.
 
 Note that this is all about true indentation, by adding and
 removing space characters.  See also \"org-indent.el\" which does
 level-dependent indentation in a virtual way, i.e. at display
 time in Emacs."
   :group 'org-edit-structure
-  :type 'boolean
+  :type '(choice
+	  (const :tag "Adapt indentation for all lines" t)
+	  (const :tag "Adapt indentation for headline data lines"
+		 'headline-data)
+	  (const :tag "Do not adapt indentation at all" nil))
   :safe #'booleanp)
 
 (defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e)
@@ -7237,8 +7253,13 @@ Assume point is at a heading or an inlinetask beginning."
      (goto-char (match-end 0))
      (forward-line)
      (save-excursion (org-indent-region (match-beginning 0) (match-end 0))))
+   (when (looking-at org-logbook-drawer-re)
+     (goto-char (match-end 0))
+     (forward-line)
+     (save-excursion (org-indent-region (match-beginning 0) (match-end 0))))
    (catch 'no-shift
-     (when (zerop diff) (throw 'no-shift nil))
+     (when (or (zerop diff) (not (eq org-adapt-indentation t)))
+       (throw 'no-shift nil))
      ;; If DIFF is negative, first check if a shift is possible at all
      ;; (e.g., it doesn't break structure).  This can only happen if
      ;; some contents are not properly indented.
@@ -18438,6 +18459,11 @@ ELEMENT."
 	 (t
 	  (goto-char start)
 	  (current-indentation))))
+      ((and
+	(eq org-adapt-indentation 'headline-data)
+	(memq type '(planning clock node-property property-drawer drawer)))
+       (org--get-expected-indentation
+	(org-element-property :parent element) t))
       ((memq type '(headline inlinetask nil))
        (if (org-match-line "[ \t]*$")
 	   (org--get-expected-indentation element t)
@@ -18451,7 +18477,8 @@ ELEMENT."
       ;; At first line: indent according to previous sibling, if any,
       ;; ignoring footnote definitions and inline tasks, or parent's
       ;; contents.
-      ((= (line-beginning-position) start)
+      ((and ( = (line-beginning-position) start)
+	    (eq org-adapt-indentation t))
        (catch 'exit
 	 (while t
 	   (if (= (point-min) start) (throw 'exit 0)
@@ -18476,7 +18503,7 @@ ELEMENT."
 			    (org--get-expected-indentation
 			     (org-element-property :parent previous) t))))))))))
       ;; Otherwise, move to the first non-blank line above.
-      (t
+      ((not (eq org-adapt-indentation 'headline-data))
        (beginning-of-line)
        (let ((pos (point)))
 	 (skip-chars-backward " \r\t\n")
@@ -18518,7 +18545,9 @@ ELEMENT."
 	     (goto-char start)
 	     (current-indentation)))
 	  ;; In any other case, indent like the current line.
-	  (t (current-indentation)))))))))
+	  (t (current-indentation)))))
+      ;; Finally, no indentation is needed, fall back to 0.
+      (t 0)))))
 
 (defun org--align-node-property ()
   "Align node property at point.
