@@ -174,13 +174,9 @@ normal headlines.  The face can be customized via ~org-headline-todo~.
 You can now use =C-n=, =C-p=, =SPC= and =DEL= key to scroll up and
 down the agenda commands dispatch window.
 
-*** Exit column view with =<C-c C-c>=
-
-=<C-c C-c>= now exits the column view from (almost) any point in the
-buffer.  Before this change, only the key =<q>= was used for this, and
-it was only functional on lines displayed as columns.
-
+*** C-c C-c in agenda calls ~org-agenda-set-tags~
 *** New option in ~org-attach-store-link-p~
+
 ~org-attach-store-link-p~ have a new option to store a file link to
 the attachment.
 
