@@ -1202,6 +1202,30 @@ Return 0. if S is not recognized as a valid value."
        ((string-match org-ts-regexp0 s) (org-2ft s))
        (t 0.)))))
 
+(defun org-scroll (key)
+  "Receive KEY and scroll the current window accordingly."
+  (cl-case key
+    ;; C-n
+    (14 (if (not (pos-visible-in-window-p (point-max)))
+	    (ignore-errors (scroll-up 1))
+	  (message "End of buffer")
+	  (sit-for 1)))
+    ;; C-p
+    (16 (if (not (pos-visible-in-window-p (point-min)))
+	    (ignore-errors (scroll-down 1))
+	  (message "Beginning of buffer")
+	  (sit-for 1)))
+    ;; SPC
+    (?\s (if (not (pos-visible-in-window-p (point-max)))
+	     (scroll-up nil)
+	   (message "End of buffer")
+	   (sit-for 1)))
+    ;; DEL
+    (?\d (if (not (pos-visible-in-window-p (point-min)))
+	     (scroll-down nil)
+	   (message "Beginning of buffer")
+	   (sit-for 1)))))
+
 
 
 (provide 'org-macs)
