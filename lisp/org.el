@@ -15971,11 +15971,10 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
 		 "No images to display inline")))))
 
 (defun org-redisplay-inline-images ()
-  "Refresh the display of inline images."
+  "Assure display of inline images and refresh them."
   (interactive)
-  (if (not org-inline-image-overlays)
-      (org-toggle-inline-images)
-    (org-toggle-inline-images)
+  (org-toggle-inline-images)
+  (unless org-inline-image-overlays
     (org-toggle-inline-images)))
 
 ;; For without-x builds.
