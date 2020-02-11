@@ -4531,6 +4531,21 @@ The following commands work with checkboxes:
 
   - If there is no active region, just toggle the checkbox at point.
 
+- {{{kbd(C-c C-x C-r)}}} (~org-toggle-radio-button~) ::
+
+  #+kindex: C-c C-x C-r
+  #+findex: org-toggle-radio-button
+  #+cindex: radio button, checkbox as
+  Toggle checkbox status by using the checkbox of the item at point as
+  a radio button: when turned on, all other checkboxes on the same
+  level will be turned off.  With a universal prefix argument, toggle
+  the presence of the checkbox.  With double prefix argument, set it
+  to =[-]=.
+
+  #+findex: org-list-checkbox-radio-mode
+  {{{kdb(C-c C-c)}}} can be told to consider checkboxes as radio buttons
+  by calling {{{kbd(M-x org-list-checkbox-radio-mode)}}}, as minor mode.
+
 - {{{kbd(M-S-RET)}}} (~org-insert-todo-heading~) ::
 
   #+kindex: M-S-RET

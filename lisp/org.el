@@ -17217,39 +17217,79 @@ This command does many different things, depending on context:
 	 ;; unconditionally, whereas `C-u' will toggle its presence.
 	 ;; Without a universal argument, if the item has a checkbox,
 	 ;; toggle it.  Otherwise repair the list.
-	 (let* ((box (org-element-property :checkbox context))
-		(struct (org-element-property :structure context))
-		(old-struct (copy-tree struct))
-		(parents (org-list-parents-alist struct))
-		(prevs (org-list-prevs-alist struct))
-		(orderedp (org-not-nil (org-entry-get nil "ORDERED"))))
-	   (org-list-set-checkbox
-	    (org-element-property :begin context) struct
-	    (cond ((equal arg '(16)) "[-]")
-		  ((and (not box) (equal arg '(4))) "[ ]")
-		  ((or (not box) (equal arg '(4))) nil)
-		  ((eq box 'on) "[ ]")
-		  (t "[X]")))
-	   ;; Mimic `org-list-write-struct' but with grabbing a return
-	   ;; value from `org-list-struct-fix-box'.
-	   (org-list-struct-fix-ind struct parents 2)
-	   (org-list-struct-fix-item-end struct)
-	   (org-list-struct-fix-bul struct prevs)
-	   (org-list-struct-fix-ind struct parents)
-	   (let ((block-item
-		  (org-list-struct-fix-box struct parents prevs orderedp)))
-	     (if (and box (equal struct old-struct))
-		 (if (equal arg '(16))
-		     (message "Checkboxes already reset")
-		   (user-error "Cannot toggle this checkbox: %s"
-			       (if (eq box 'on)
-				   "all subitems checked"
-				 "unchecked subitems")))
-	       (org-list-struct-apply-struct struct old-struct)
-	       (org-update-checkbox-count-maybe))
-	     (when block-item
-	       (message "Checkboxes were removed due to empty box at line %d"
-			(org-current-line block-item))))))
+	 (if (and (boundp org-list-checkbox-radio-mode)
+		  org-list-checkbox-radio-mode)
+	     (org-toggle-radio-button arg)
+	   (let* ((box (org-element-property :checkbox context))
+		  (struct (org-element-property :structure context))
+		  (old-struct (copy-tree struct))
+		  (parents (org-list-parents-alist struct))
+		  (prevs (org-list-prevs-alist struct))
+		  (orderedp (org-not-nil (org-entry-get nil "ORDERED"))))
+	     (org-list-set-checkbox
+	      (org-element-property :begin context) struct
+	      (cond ((equal arg '(16)) "[-]")
+		    ((and (not box) (equal arg '(4))) "[ ]")
+		    ((or (not box) (equal arg '(4))) nil)
+		    ((eq box 'on) "[ ]")
+		    (t "[X]")))
+	     ;; Mimic `org-list-write-struct' but with grabbing a return
+	     ;; value from `org-list-struct-fix-box'.
+	     (org-list-struct-fix-ind struct parents 2)
+	     (org-list-struct-fix-item-end struct)
+	     (org-list-struct-fix-bul struct prevs)
+	     (org-list-struct-fix-ind struct parents)
+	     (let ((block-item
+		    (org-list-struct-fix-box struct parents prevs orderedp)))
+	       (if (and box (equal struct old-struct))
+		   (if (equal arg '(16))
+		       (message "Checkboxes already reset")
+		     (user-error "Cannot toggle this checkbox: %s"
+				 (if (eq box 'on)
+				     "all subitems checked"
+				   "unchecked subitems")))
+		 (org-list-struct-apply-struct struct old-struct)
+		 (org-update-checkbox-count-maybe))
+	       (when block-item
+		 (message "Checkboxes were removed due to empty box at line %d"
+			  (org-current-line block-item)))))))
+	(`plain-list
+	 ;; At a plain list, with a double C-u argument, set
+	 ;; checkboxes of each item to "[-]", whereas a single one
+	 ;; will toggle their presence according to the state of the
+	 ;; first item in the list.  Without an argument, repair the
+	 ;; list.
+	 (if (and (boundp org-list-checkbox-radio-mode)
+		  org-list-checkbox-radio-mode)
+	     (org-toggle-radio-button arg)
+	   (let* ((begin (org-element-property :contents-begin context))
+		  (struct (org-element-property :structure context))
+		  (old-struct (copy-tree struct))
+		  (first-box (save-excursion
+			       (goto-char begin)
+			       (looking-at org-list-full-item-re)
+			       (match-string-no-properties 3)))
+		  (new-box (cond ((equal arg '(16)) "[-]")
+				 ((equal arg '(4)) (unless first-box "[ ]"))
+				 ((equal first-box "[X]") "[ ]")
+				 (t "[X]"))))
+	     (cond
+	      (arg
+	       (dolist (pos
+			(org-list-get-all-items
+			 begin struct (org-list-prevs-alist struct)))
+		 (org-list-set-checkbox pos struct new-box)))
+	      ((and first-box (eq (point) begin))
+	       ;; For convenience, when point is at bol on the first
+	       ;; item of the list and no argument is provided, simply
+	       ;; toggle checkbox of that item, if any.
+	       (org-list-set-checkbox begin struct new-box)))
+	     (when (equal
+		    (org-list-write-struct
+		     struct (org-list-parents-alist struct) old-struct)
+		    old-struct)
+	       (message "Cannot update this checkbox"))
+	     (org-update-checkbox-count-maybe))))
 	(`keyword
 	 (let ((org-inhibit-startup-visibility-stuff t)
 	       (org-startup-align-all-tables nil))
@@ -17258,40 +17298,6 @@ This command does many different things, depending on context:
 	     (setq org-table-coordinate-overlays nil))
 	   (org-save-outline-visibility 'use-markers (org-mode-restart)))
 	 (message "Local setup has been refreshed"))
-	(`plain-list
-	 ;; At a plain list, with a double C-u argument, set
-	 ;; checkboxes of each item to "[-]", whereas a single one
-	 ;; will toggle their presence according to the state of the
-	 ;; first item in the list.  Without an argument, repair the
-	 ;; list.
-	 (let* ((begin (org-element-property :contents-begin context))
-		(struct (org-element-property :structure context))
-		(old-struct (copy-tree struct))
-		(first-box (save-excursion
-			     (goto-char begin)
-			     (looking-at org-list-full-item-re)
-			     (match-string-no-properties 3)))
-		(new-box (cond ((equal arg '(16)) "[-]")
-			       ((equal arg '(4)) (unless first-box "[ ]"))
-			       ((equal first-box "[X]") "[ ]")
-			       (t "[X]"))))
-	   (cond
-	    (arg
-	     (dolist (pos
-		      (org-list-get-all-items
-		       begin struct (org-list-prevs-alist struct)))
-	       (org-list-set-checkbox pos struct new-box)))
-	    ((and first-box (eq (point) begin))
-	     ;; For convenience, when point is at bol on the first
-	     ;; item of the list and no argument is provided, simply
-	     ;; toggle checkbox of that item, if any.
-	     (org-list-set-checkbox begin struct new-box)))
-	   (when (equal
-		  (org-list-write-struct
-		   struct (org-list-parents-alist struct) old-struct)
-		  old-struct)
-	     (message "Cannot update this checkbox"))
-	   (org-update-checkbox-count-maybe)))
 	((or `property-drawer `node-property)
 	 (call-interactively #'org-property-action))
 	(`radio-target

@@ -2302,6 +2302,41 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
         (org-list-struct-fix-ind struct parents)
         (org-list-struct-apply-struct struct old-struct)))))
 
+;;;###autoload
+(define-minor-mode org-list-checkbox-radio-mode
+  "When turned on, use list checkboxes as radio buttons."
+  nil " CheckBoxRadio" nil
+  (unless (eq major-mode 'org-mode)
+    (user-error "Cannot turn this mode outside org-mode buffers")))
+
+(defun org-toggle-radio-button (&optional arg)
+  "Toggle off all checkboxes and toggle on the one at point."
+  (interactive "P")
+  (if (not (org-at-item-p))
+      (user-error "Cannot toggle checkbox outside of a list")
+    (let* ((cpos (org-in-item-p))
+	   (struct (org-list-struct))
+	   (orderedp (org-entry-get nil "ORDERED"))
+	   (parents (org-list-parents-alist struct))
+	   (old-struct (copy-tree struct))
+	   (cbox (org-list-get-checkbox cpos struct))
+           (prevs (org-list-prevs-alist struct))
+	   (start (org-list-get-list-begin (point-at-bol) struct prevs))
+	   (new (unless (and cbox (equal arg '(4)) (equal start cpos))
+		  "[ ]")))
+      (dolist (pos (org-list-get-all-items
+		    start struct (org-list-prevs-alist struct)))
+	(org-list-set-checkbox pos struct new))
+      (when new
+	(org-list-set-checkbox
+	 cpos struct
+	 (cond ((equal arg '(4)) (unless cbox "[ ]"))
+	       ((equal arg '(16)) (unless cbox "[-]"))
+	       (t (if (equal cbox "[X]") "[ ]" "[X]")))))
+      (org-list-struct-fix-box struct parents prevs orderedp)
+      (org-list-struct-apply-struct struct old-struct)
+      (org-update-checkbox-count-maybe))))
+
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
 
