@@ -136,25 +136,33 @@ This option will add a timeout to notifications.
 Turn on a minor mode to display the first data row of the table at
 point in the header-line when the beginning of the table is invisible.
 
+*** ~org-datetree-find-month-create~
+
+Find or create a month entry for a date.
+
 *** ~org-columns-toggle-or-columns-quit~
 
 =<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
 recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
 possible via column view value edit or with =<C-c C-q>=.
 
-*** ~org-datetree-find-month-create~
-
-Find or create a month entry for a date.
-
 *** ~org-agenda-ctrl-c-ctrl-c~
 
 =<C-c C-c>= in agenda calls ~org-agenda-set-tags~.
 
-** Removed commands, functions and variables
+** Removed or renamed commands, functions and variables
 
-*** ~org-columns-set-tags-or-toggle~
+*** Renamed ~org-columns-set-tags-or-toggle~
 
 See [[*~org-columns-toggle-or-columns-quit~]].
+
+*** Renamed priority options
+
+From ~org-lowest-priority~ to ~org-priority-lowest~.
+From ~org-default-priority~ to ~org-priority-default~.
+From ~org-highest-priority~ to ~org-priority-highest~.
+From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
+From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
 *** Duration can be read and written in compact form
@@ -183,14 +191,6 @@ the attachment.
 *** New default value for ~org-file-apps~
 
 The new value uses emacs as the application for opening directory.
-
-*** Priority options have been renamed
-
-From ~org-lowest-priority~ to ~org-priority-lowest~.
-From ~org-default-priority~ to ~org-priority-default~.
-From ~org-highest-priority~ to ~org-priority-highest~.
-From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
-From ~org-show-priority~ to ~org-priority-show~.
 
 *** New =org-refile.el= file
 
