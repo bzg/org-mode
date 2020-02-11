@@ -8309,7 +8309,7 @@ the value of the drawer property."
 (defun org-refresh-property (tprop p &optional inherit)
   "Refresh the buffer text property TPROP from the drawer property P.
 The refresh happens only for the current headline, or the whole
-sub-tree if optional argument INHERIT is non-nil."
+subtree if optional argument INHERIT is non-nil."
   (unless (org-before-first-heading-p)
     (save-excursion
       (org-back-to-heading t)
@@ -8352,7 +8352,7 @@ sub-tree if optional argument INHERIT is non-nil."
 		(throw 'buffer-category
 		       (org-element-property :value element)))))
 	  default-category))
-       ;; Set sub-tree specific categories.
+       ;; Set subtree specific categories.
        (goto-char (point-min))
        (let ((regexp (org-re-property "CATEGORY")))
 	 (while (re-search-forward regexp nil t)
@@ -13022,6 +13022,10 @@ variables is set."
 			(not (get-text-property 0 'org-unrestricted
 						(caar allowed))))))
 	      (completing-read "Effort: " allowed nil must-match))))))
+    ;; Test whether the value can be interpreted as a duration before
+    ;; inserting it in the buffer:
+    (org-duration-to-minutes value)
+    ;; Maybe update the effort value:
     (unless (equal current value)
       (org-entry-put nil org-effort-property value))
     (org-refresh-property '((effort . identity)
