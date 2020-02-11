@@ -192,6 +192,12 @@ the attachment.
 
 The new value uses emacs as the application for opening directory.
 
+*** Allowed empty HTML extension
+
+Using =(setq org-html-extension "")= or setting the HTML extension in
+any fashing will produce the expected output, with no trailing period
+to the HTML file.
+
 *** New =org-refile.el= file
 
 Org refile variables and functions have been moved to a new file.
