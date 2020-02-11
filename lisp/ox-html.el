@@ -241,8 +241,8 @@ property on the headline itself.")
        if(null != target) {
          elem.cacheClassElem = elem.className;
          elem.cacheClassTarget = target.className;
-         target.className = "code-highlighted";
-         elem.className   = "code-highlighted";
+         target.className = \"code-highlighted\";
+         elem.className   = \"code-highlighted\";
        }
      }
      function CodeHighlightOff(elem, id)
