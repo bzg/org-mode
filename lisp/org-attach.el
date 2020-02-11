@@ -263,7 +263,7 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (switch-to-buffer-other-window (get-buffer-create "*Org Attach*"))
 	    (erase-buffer)
 	    (setq cursor-type nil
-	      header-line-format "Use SPC, DEL, C-n or C-p to navigate.")
+	      header-line-format "Use C-v, M-v, C-n or C-p to navigate.")
 	    (insert
                (concat "Attachment folder:\n"
 		       (or dir
@@ -290,16 +290,12 @@ Shows a list of commands and prompts for another key to execute a command."
 		                "\n")))))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
 	  (let ((msg (format "Select command: [%s]"
-			     (concat (mapcar #'caar org-attach-commands)))))
+			     (concat (mapcar #'caar org-attach-commands))))
+		key)
 	    (message msg)
-	    (setq c (read-char-exclusive))
-	    (while (memq c '(14 16 32 127))
-	      (cond ((= c 14) (ignore-errors (call-interactively 'scroll-up-line)))
-		    ((= c 16) (ignore-errors (call-interactively 'scroll-down-line)))
-		    ((= c 32) (ignore-errors (call-interactively 'scroll-up)))
-		    ((= c 127) (ignore-errors (call-interactively 'scroll-down))))
-	      (message msg)
-	      (setq c (read-char-exclusive))))
+	    (while (and (setq key (read-char-exclusive prompt))
+		        (memq key '(14 16 22 134217846)))
+	      (org-scroll key t)))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
       (let ((command (cl-some (lambda (entry)
 				(and (memq c (nth 0 entry)) (nth 1 entry)))

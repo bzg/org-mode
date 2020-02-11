@@ -3119,7 +3119,7 @@ s   Search for keywords                 M   Like m, but only TODO entries
 	  ;; Hint to navigation if window too small for all information
 	  (setq header-line-format
 		(when (not (pos-visible-in-window-p (point-max)))
-		  "Use SPC, DEL, C-n or C-p to navigate."))
+		  "Use C-v, M-v, C-n or C-p to navigate."))
 
 	  ;; Ask for selection
 	  (cl-loop
@@ -3133,7 +3133,7 @@ s   Search for keywords                 M   Like m, but only TODO entries
 				 " (unrestricted)"))
 			   ""))
 		(setq c (read-char-exclusive)))
-	   until (not (memq c '(14 16 ?\s ?\d)))
+	   until (not (memq c '(14 16 22 134217846)))
 	   do (org-scroll c))
 
 	  (message "")
