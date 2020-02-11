@@ -177,7 +177,8 @@ is true; otherwise returns the last value."
 		(geiser-debug-show-debug-p nil))
 	    (let ((ret (geiser-eval-region (point-min) (point-max))))
 	      (setq result (if output
-			       (geiser-eval--retort-output ret)
+			       (or (geiser-eval--retort-output ret)
+				   "Geiser Interpreter produced no output")
 			     (geiser-eval--retort-result-str ret "")))))
 	  (when (not repl)
 	    (save-current-buffer (set-buffer repl-buffer)
