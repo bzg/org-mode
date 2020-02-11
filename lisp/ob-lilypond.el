@@ -67,12 +67,15 @@ the midi file is not automatically played.  Default value is t")
 (defvar org-babel-lilypond-ly-command ""
   "Command to execute lilypond on your system.
 Do not set it directly.  Customize `org-babel-lilypond-commands' instead.")
+
 (defvar org-babel-lilypond-pdf-command ""
   "Command to show a PDF file on your system.
 Do not set it directly.  Customize `org-babel-lilypond-commands' instead.")
+
 (defvar org-babel-lilypond-midi-command ""
   "Command to play a MIDI file on your system.
 Do not set it directly.  Customize `org-babel-lilypond-commands' instead.")
+
 (defcustom org-babel-lilypond-commands
   (cond
    ((eq system-type 'darwin)
@@ -94,7 +97,8 @@ you can leave the string empty on this case."
   :version "24.4"
   :package-version '(Org . "8.2.7")
   :set
-  (lambda (_symbol value)
+  (lambda (symbol value)
+    (set symbol value)
     (setq
      org-babel-lilypond-ly-command   (nth 0 value)
      org-babel-lilypond-pdf-command  (nth 1 value)
