@@ -8200,6 +8200,7 @@ the value of the drawer property."
 
 (defun org-refresh-property (tprop p &optional inherit)
   "Refresh the buffer text property TPROP from the drawer property P.
+
 The refresh happens only for the current entry, or the whole
 sub-tree if optional argument INHERIT is non-nil.
 
@@ -12337,6 +12338,10 @@ variables is set."
 			(not (get-text-property 0 'org-unrestricted
 						(caar allowed))))))
 	      (completing-read "Effort: " allowed nil must-match))))))
+    ;; Test whether the value can be interpreted as a duration before
+    ;; inserting it in the buffer:
+    (org-duration-to-minutes value)
+    ;; Maybe update the effort value:
     (unless (equal current value)
       (org-entry-put nil org-effort-property value))
     (org-refresh-property '((effort . identity)
