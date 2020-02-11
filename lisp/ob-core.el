@@ -2764,11 +2764,12 @@ block but are passed literally to the \"example-block\"."
 			    (lambda (s)
 			      ;; Comment, according to LANG mode,
 			      ;; string S.  Return new string.
-			      (with-temp-buffer
-				(funcall (org-src-get-lang-mode lang))
-				(comment-region (point)
-						(progn (insert s) (point)))
-				(org-trim (buffer-string)))))
+			      (unless org-babel-tangle-uncomment-comments
+				(with-temp-buffer
+				  (funcall (org-src-get-lang-mode lang))
+				  (comment-region (point)
+						  (progn (insert s) (point)))
+				  (org-trim (buffer-string))))))
 			   (expand-body
 			    (lambda (i)
 			      ;; Expand body of code blocked
