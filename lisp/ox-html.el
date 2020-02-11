@@ -2983,7 +2983,7 @@ DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((html-ext (plist-get info :html-extension))
-	 (dot (when (> (length html-extension) 0) "."))
+	 (dot (when (> (length html-ext) 0) "."))
 	 (link-org-files-as-html-maybe
 	  (lambda (raw-path info)
 	    ;; Treat links to `file.org' as links to `file.html', if
