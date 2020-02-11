@@ -2215,9 +2215,9 @@ contextual information."
 	    "\\item"
 	    (cond
 	     ((and checkbox tag)
-	      (format "[{%s %s}] %s" checkbox tag tag-footnotes))
+	      (format "{%s %s} %s" checkbox tag tag-footnotes))
 	     ((or checkbox tag)
-	      (format "[{%s}] %s" (or checkbox tag) tag-footnotes))
+	      (format "{%s} %s" (or checkbox tag) tag-footnotes))
 	     ;; Without a tag or a check-box, if CONTENTS starts with
 	     ;; an opening square bracket, add "\relax" to "\item",
 	     ;; unless the brackets comes from an initial export
