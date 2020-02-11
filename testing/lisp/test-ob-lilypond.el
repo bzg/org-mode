@@ -135,24 +135,6 @@
 	      "xdg-open"))))
   (custom-reevaluate-setting 'org-babel-lilypond-commands))
 
-(ert-deftest ob-lilypond/ly-commands/customize ()
-  (let ((system-type 'other)
-	org-babel-lilypond-ly-command
-	org-babel-lilypond-pdf-command
-	org-babel-lilypond-midi-command)
-    (custom-initialize-reset 'org-babel-lilypond-commands
-			     '(list "nonsense" "bla" "fasel"))
-    (should (equal
-	     (list
-	      org-babel-lilypond-ly-command
-	      org-babel-lilypond-pdf-command
-	      org-babel-lilypond-midi-command)
-	     (list
-	      "nonsense"
-	      "bla"
-	      "fasel"))))
-  (custom-reevaluate-setting 'org-babel-lilypond-commands))
-
 (ert-deftest ob-lilypond/ly-gen-png ()
   (should (boundp 'org-babel-lilypond-gen-png)))
 
