@@ -4805,9 +4805,6 @@ code."
 ;; `org-export-table-row-is-special-p' are predicates used to look for
 ;; meta-information about the table structure.
 ;;
-;; `org-table-has-header-p' tells when the rows before the first rule
-;;  should be considered as table's header.
-;;
 ;; `org-export-table-cell-width', `org-export-table-cell-alignment'
 ;; and `org-export-table-cell-borders' extract information from
 ;; a table-cell element.
