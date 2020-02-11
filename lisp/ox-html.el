@@ -3054,7 +3054,9 @@ images, set it to:
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((link-org-files-as-html-maybe
+  (let* ((html-ext (plist-get info :html-extension))
+	 (dot (when (> (length html-extension) 0) "."))
+	 (link-org-files-as-html-maybe
 	  (lambda (raw-path info)
 	    ;; Treat links to `file.org' as links to `file.html', if
 	    ;; needed.  See `org-html-link-org-files-as-html'.
@@ -3062,8 +3064,7 @@ INFO is a plist holding contextual information.  See
 	     ((and (plist-get info :html-link-org-files-as-html)
 		   (string= ".org"
 			    (downcase (file-name-extension raw-path "."))))
-	      (concat (file-name-sans-extension raw-path) "."
-		      (plist-get info :html-extension)))
+	      (concat (file-name-sans-extension raw-path) dot html-ext))
 	     (t raw-path))))
 	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
