@@ -293,7 +293,7 @@ Shows a list of commands and prompts for another key to execute a command."
 			     (concat (mapcar #'caar org-attach-commands))))
 		key)
 	    (message msg)
-	    (while (and (setq key (read-char-exclusive prompt))
+	    (while (and (setq key (read-char-exclusive))
 		        (memq key '(14 16 22 134217846)))
 	      (org-scroll key t)))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
