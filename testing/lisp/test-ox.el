@@ -1440,7 +1440,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (kill-buffer buffer))
 	  (when (file-exists-p subdir) (delete-directory subdir t))
 	  (when (file-exists-p includer) (delete-file includer)))))))
-  ;; Preserve relative bracket links without description.
+  ;; Preserve blanks after the link.
   (should
    (string-suffix-p
     "foo.org]] :tag:"
