@@ -2339,13 +2339,14 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
 
 (defsubst org-at-radio-list-p ()
   "Is point in a list with radio buttons?"
-  (let (attr)
-    (save-excursion
-      (org-at-item-p)
-      (goto-char (caar (org-list-struct)))
-      (org-backward-element)
-      (setq attr (car (org-element-property :attr_org (org-element-at-point))))
-      (when attr (string-match-p ":radio" attr)))))
+  (when (org-at-item-p)
+    (let (attr)
+      (save-excursion
+	(goto-char (caar (org-list-struct)))
+	(org-backward-element)
+	(setq attr (org-export-read-attribute
+		    :attr_org (org-element-at-point))))
+      (when (plist-get attr :radio) t))))
 
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.

@@ -54,7 +54,7 @@ If you want to occasionally toggle a checkbox as a radio button
 without turning this minor mode on, you can use =<C-c C-x C-r>= to
 call ~org-toggle-radio-button~.
 
-You can also add =#+ATTR_ORG: :radio= right before the list to tell
+You can also add =#+ATTR_ORG: :radio t= right before the list to tell
 Org to use radio buttons for this list only.
 
 *** Looping agenda commands over headlines

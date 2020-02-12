@@ -4537,14 +4537,14 @@ The following commands work with checkboxes:
   #+findex: org-toggle-radio-button
   #+cindex: radio button, checkbox as
   Toggle checkbox status by using the checkbox of the item at point as
-  a radio button: when turned on, all other checkboxes on the same
-  level will be turned off.  With a universal prefix argument, toggle
-  the presence of the checkbox.  With a double prefix argument, set it
-  to =[-]=.
+  a radio button: when the checkbox is turned on, all other checkboxes
+  on the same level will be turned off.  With a universal prefix
+  argument, toggle the presence of the checkbox.  With a double prefix
+  argument, set it to =[-]=.
 
   #+findex: org-list-checkbox-radio-mode
   {{{kdb(C-c C-c)}}} can be told to consider checkboxes as radio buttons by
-  setting =#+ATTR_ORG: :radio= right before the list or by calling
+  setting =#+ATTR_ORG: :radio t= right before the list or by calling
   {{{kbd(M-x org-list-checkbox-radio-mode)}}} to activate this minor mode.
 
 - {{{kbd(M-S-RET)}}} (~org-insert-todo-heading~) ::
