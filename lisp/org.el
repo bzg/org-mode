@@ -218,7 +218,8 @@ and then loads the resulting file using `load-file'.  With
 optional prefix argument COMPILE, the tangled Emacs Lisp file is
 byte-compiled before it is loaded."
   (interactive "fFile to load: \nP")
-  (let* ((tangled-file (concat (file-name-sans-extension file) ".el")))
+  (let* ((file (file-truename file))
+	 (tangled-file (concat (file-name-sans-extension file) ".el")))
     ;; Tangle only if the Org file is newer than the Elisp file.
     (unless (org-file-newer-than-p
 	     tangled-file

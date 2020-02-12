@@ -12,9 +12,9 @@
 
 # Contact Info
 #+texinfo_header: @set MAINTAINERSITE @uref{https://orgmode.org,maintainers webpage}
-#+texinfo_header: @set MAINTAINER Carsten Dominik
-#+texinfo_header: @set MAINTAINEREMAIL @email{carsten at orgmode dot org}
-#+texinfo_header: @set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
+#+texinfo_header: @set MAINTAINER Bastien Guerry
+#+texinfo_header: @set MAINTAINEREMAIL @email{bzg@gnu.org}
+#+texinfo_header: @set MAINTAINERCONTACT @uref{mailto:bzg@gnu.org,contact the maintainer}
 
 #+options: H:4 num:t toc:t author:t \n:nil ::t |:t ^:nil -:t f:t *:t <:t e:t ':t
 #+options: d:nil todo:nil pri:nil tags:not-in-toc stat:nil broken-links:mark
