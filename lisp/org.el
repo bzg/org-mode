@@ -17171,6 +17171,7 @@ This command does many different things, depending on context:
 			  src-block statistics-cookie table table-cell table-row
 			  timestamp)
 	     t))
+	   (radio-list-p (org-at-radio-list-p))
 	   (type (org-element-type context)))
       ;; For convenience: at the first line of a paragraph on the same
       ;; line as an item, apply function on that item instead.
@@ -17217,8 +17218,9 @@ This command does many different things, depending on context:
 	 ;; unconditionally, whereas `C-u' will toggle its presence.
 	 ;; Without a universal argument, if the item has a checkbox,
 	 ;; toggle it.  Otherwise repair the list.
-	 (if (and (boundp org-list-checkbox-radio-mode)
-		  org-list-checkbox-radio-mode)
+	 (if (or radio-list-p
+		 (and (boundp org-list-checkbox-radio-mode)
+		      org-list-checkbox-radio-mode))
 	     (org-toggle-radio-button arg)
 	   (let* ((box (org-element-property :checkbox context))
 		  (struct (org-element-property :structure context))
@@ -17259,8 +17261,9 @@ This command does many different things, depending on context:
 	 ;; will toggle their presence according to the state of the
 	 ;; first item in the list.  Without an argument, repair the
 	 ;; list.
-	 (if (and (boundp org-list-checkbox-radio-mode)
-		  org-list-checkbox-radio-mode)
+	 (if (or radio-list-p
+		 (and (boundp org-list-checkbox-radio-mode)
+		      org-list-checkbox-radio-mode))
 	     (org-toggle-radio-button arg)
 	   (let* ((begin (org-element-property :contents-begin context))
 		  (struct (org-element-property :structure context))

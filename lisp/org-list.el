@@ -2337,6 +2337,16 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
       (org-list-struct-apply-struct struct old-struct)
       (org-update-checkbox-count-maybe))))
 
+(defsubst org-at-radio-list-p ()
+  "Is point in a list with radio buttons?"
+  (let (attr)
+    (save-excursion
+      (org-at-item-p)
+      (goto-char (caar (org-list-struct)))
+      (org-backward-element)
+      (setq attr (car (org-element-property :attr_org (org-element-at-point))))
+      (when attr (string-match-p ":radio" attr)))))
+
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
 
@@ -2351,92 +2361,94 @@ If point is on a headline, apply this to all checkbox items in
 the text below the heading, taking as reference the first item in
 subtree, ignoring planning line and any drawer following it."
   (interactive "P")
-  (save-excursion
-    (let* (singlep
-	   block-item
-	   lim-up
-	   lim-down
-	   (orderedp (org-entry-get nil "ORDERED"))
-	   (_bounds
-	    ;; In a region, start at first item in region.
+  (if (org-at-radio-list-p)
+      (org-toggle-radio-button toggle-presence)
+    (save-excursion
+      (let* (singlep
+	     block-item
+	     lim-up
+	     lim-down
+	     (orderedp (org-entry-get nil "ORDERED"))
+	     (_bounds
+	      ;; In a region, start at first item in region.
+	      (cond
+	       ((org-region-active-p)
+		(let ((limit (region-end)))
+		  (goto-char (region-beginning))
+		  (if (org-list-search-forward (org-item-beginning-re) limit t)
+		      (setq lim-up (point-at-bol))
+		    (error "No item in region"))
+		  (setq lim-down (copy-marker limit))))
+	       ((org-at-heading-p)
+		;; On a heading, start at first item after drawers and
+		;; time-stamps (scheduled, etc.).
+		(let ((limit (save-excursion (outline-next-heading) (point))))
+		  (org-end-of-meta-data t)
+		  (if (org-list-search-forward (org-item-beginning-re) limit t)
+		      (setq lim-up (point-at-bol))
+		    (error "No item in subtree"))
+		  (setq lim-down (copy-marker limit))))
+	       ;; Just one item: set SINGLEP flag.
+	       ((org-at-item-p)
+		(setq singlep t)
+		(setq lim-up (point-at-bol)
+		      lim-down (copy-marker (point-at-eol))))
+	       (t (error "Not at an item or heading, and no active region"))))
+	     ;; Determine the checkbox going to be applied to all items
+	     ;; within bounds.
+	     (ref-checkbox
+	      (progn
+		(goto-char lim-up)
+		(let ((cbox (and (org-at-item-checkbox-p) (match-string 1))))
+		  (cond
+		   ((equal toggle-presence '(16)) "[-]")
+		   ((equal toggle-presence '(4))
+		    (unless cbox "[ ]"))
+		   ((equal "[X]" cbox) "[ ]")
+		   (t "[X]"))))))
+	;; When an item is found within bounds, grab the full list at
+	;; point structure, then: (1) set check-box of all its items
+	;; within bounds to REF-CHECKBOX, (2) fix check-boxes of the
+	;; whole list, (3) move point after the list.
+	(goto-char lim-up)
+	(while (and (< (point) lim-down)
+		    (org-list-search-forward (org-item-beginning-re)
+					     lim-down 'move))
+	  (let* ((struct (org-list-struct))
+		 (struct-copy (copy-tree struct))
+		 (parents (org-list-parents-alist struct))
+		 (prevs (org-list-prevs-alist struct))
+		 (bottom (copy-marker (org-list-get-bottom-point struct)))
+		 (items-to-toggle (cl-remove-if
+				   (lambda (e) (or (< e lim-up) (> e lim-down)))
+				   (mapcar #'car struct))))
+	    (mapc (lambda (e) (org-list-set-checkbox
+			       e struct
+			       ;; If there is no box at item, leave as-is
+			       ;; unless function was called with C-u prefix.
+			       (let ((cur-box (org-list-get-checkbox e struct)))
+				 (if (or cur-box (equal toggle-presence '(4)))
+				     ref-checkbox
+				   cur-box))))
+		  items-to-toggle)
+	    (setq block-item (org-list-struct-fix-box
+			      struct parents prevs orderedp))
+	    ;; Report some problems due to ORDERED status of subtree.
+	    ;; If only one box was being checked, throw an error, else,
+	    ;; only signal problems.
 	    (cond
-	     ((org-region-active-p)
-	      (let ((limit (region-end)))
-		(goto-char (region-beginning))
-		(if (org-list-search-forward (org-item-beginning-re) limit t)
-		    (setq lim-up (point-at-bol))
-		  (error "No item in region"))
-		(setq lim-down (copy-marker limit))))
-	     ((org-at-heading-p)
-	      ;; On a heading, start at first item after drawers and
-	      ;; time-stamps (scheduled, etc.).
-	      (let ((limit (save-excursion (outline-next-heading) (point))))
-		(org-end-of-meta-data t)
-		(if (org-list-search-forward (org-item-beginning-re) limit t)
-		    (setq lim-up (point-at-bol))
-		  (error "No item in subtree"))
-		(setq lim-down (copy-marker limit))))
-	     ;; Just one item: set SINGLEP flag.
-	     ((org-at-item-p)
-	      (setq singlep t)
-	      (setq lim-up (point-at-bol)
-		    lim-down (copy-marker (point-at-eol))))
-	     (t (error "Not at an item or heading, and no active region"))))
-	   ;; Determine the checkbox going to be applied to all items
-	   ;; within bounds.
-	   (ref-checkbox
-	    (progn
-	      (goto-char lim-up)
-	      (let ((cbox (and (org-at-item-checkbox-p) (match-string 1))))
-		(cond
-		 ((equal toggle-presence '(16)) "[-]")
-		 ((equal toggle-presence '(4))
-		  (unless cbox "[ ]"))
-		 ((equal "[X]" cbox) "[ ]")
-		 (t "[X]"))))))
-      ;; When an item is found within bounds, grab the full list at
-      ;; point structure, then: (1) set check-box of all its items
-      ;; within bounds to REF-CHECKBOX, (2) fix check-boxes of the
-      ;; whole list, (3) move point after the list.
-      (goto-char lim-up)
-      (while (and (< (point) lim-down)
-		  (org-list-search-forward (org-item-beginning-re)
-					   lim-down 'move))
-	(let* ((struct (org-list-struct))
-	       (struct-copy (copy-tree struct))
-	       (parents (org-list-parents-alist struct))
-	       (prevs (org-list-prevs-alist struct))
-	       (bottom (copy-marker (org-list-get-bottom-point struct)))
-	       (items-to-toggle (cl-remove-if
-				 (lambda (e) (or (< e lim-up) (> e lim-down)))
-				 (mapcar #'car struct))))
-	  (mapc (lambda (e) (org-list-set-checkbox
-			     e struct
-			     ;; If there is no box at item, leave as-is
-			     ;; unless function was called with C-u prefix.
-			     (let ((cur-box (org-list-get-checkbox e struct)))
-			       (if (or cur-box (equal toggle-presence '(4)))
-				   ref-checkbox
-				 cur-box))))
-		items-to-toggle)
-	  (setq block-item (org-list-struct-fix-box
-			    struct parents prevs orderedp))
-	  ;; Report some problems due to ORDERED status of subtree.
-	  ;; If only one box was being checked, throw an error, else,
-	  ;; only signal problems.
-	  (cond
-	   ((and singlep block-item (> lim-up block-item))
-	    (error
-	     "Checkbox blocked because of unchecked box at line %d"
-	     (org-current-line block-item)))
-	   (block-item
-	    (message
-	     "Checkboxes were removed due to unchecked box at line %d"
-	     (org-current-line block-item))))
-	  (goto-char bottom)
-	  (move-marker bottom nil)
-	  (org-list-struct-apply-struct struct struct-copy)))
-      (move-marker lim-down nil)))
+	     ((and singlep block-item (> lim-up block-item))
+	      (error
+	       "Checkbox blocked because of unchecked box at line %d"
+	       (org-current-line block-item)))
+	     (block-item
+	      (message
+	       "Checkboxes were removed due to unchecked box at line %d"
+	       (org-current-line block-item))))
+	    (goto-char bottom)
+	    (move-marker bottom nil)
+	    (org-list-struct-apply-struct struct struct-copy)))
+	(move-marker lim-down nil))))
   (org-update-checkbox-count-maybe))
 
 (defun org-reset-checkbox-state-subtree ()
