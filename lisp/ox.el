@@ -6865,7 +6865,7 @@ back to standard interface."
 	(org-switch-to-buffer-other-window
 	 (get-buffer-create "*Org Export Dispatcher*"))
 	(setq cursor-type nil
-	      header-line-format "Use C-v, M-v, C-n or C-p to navigate.")
+	      header-line-format "Use SPC, DEL, C-n or C-p to navigate.")
 	;; Make sure that invisible cursor will not highlight square
 	;; brackets.
 	(set-syntax-table (copy-syntax-table))
@@ -6901,7 +6901,9 @@ options as CDR."
     ;; C-p, SPC, DEL).
     (while (and (setq key (read-char-exclusive prompt))
 		(not expertp)
-		(memq key '(14 16 ?\s ?\d)))
+		;; FIXME: Don't use C-v (22) here, as it is used as a
+		;; modifier key in the export dispatch.
+		(memq key '(14 16 ?\s ?\d 134217846)))
       (org-scroll key t))
     (cond
      ;; Ignore undefined associations.
