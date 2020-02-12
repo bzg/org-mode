@@ -294,7 +294,7 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (message msg)
 	    (while (and (setq c (read-char-exclusive))
 		        (memq c '(14 16 22 134217846)))
-	      (org-scroll key t)))
+	      (org-scroll c t)))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
       (let ((command (cl-some (lambda (entry)
 				(and (memq c (nth 0 entry)) (nth 1 entry)))
