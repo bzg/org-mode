@@ -35,7 +35,7 @@
 
 ;; - gnuplot :: http://www.gnuplot.info/
 ;;
-;; - gnuplot-mode :: http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html
+;; - gnuplot-mode :: you can search the web for the latest active one.
 
 ;;; Code:
 (require 'ob)
