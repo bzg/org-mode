@@ -773,26 +773,29 @@ this function appends the default value from
 	       org-refile-target-table))
 	 (completion-ignore-case t)
 	 cdef
+	 (last-refile-loc (car org-refile-history))
+	 (last-refile-loc-path (concat last-refile-loc
+				       (if org-refile-use-outline-path "/")))
 	 (prompt (concat prompt
-			 (or (and (car org-refile-history)
-				  (concat " (default " (car org-refile-history) ")"))
+			 (or (and last-refile-loc
+				  (concat " (default " last-refile-loc ")"))
 			     (and (assoc cbnex tbl) (setq cdef cbnex)
 				  (concat " (default " cbnex ")"))) ": "))
 	 pa answ parent-target child parent old-hist)
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
-			nil 'org-refile-history (or cdef (car org-refile-history))))
+			nil 'org-refile-history (or cdef last-refile-loc-path)))
     (if (setq pa (org-refile--get-location answ tbl))
 	(progn
 	  (org-refile-check-position pa)
 	  (when (or (not org-refile-history)
 		    (not (eq old-hist org-refile-history))
-		    (not (equal (car pa) (car org-refile-history))))
+		    (not (equal (car pa) last-refile-loc)))
 	    (setq org-refile-history
-		  (cons (car pa) (if (assoc (car org-refile-history) tbl)
+		  (cons (car pa) (if (assoc last-refile-loc tbl)
 				     org-refile-history
 				   (cdr org-refile-history))))
-	    (when (equal (car org-refile-history) (nth 1 org-refile-history))
+	    (when (equal last-refile-loc (nth 1 org-refile-history))
 	      (pop org-refile-history)))
 	  pa)
       (if (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
