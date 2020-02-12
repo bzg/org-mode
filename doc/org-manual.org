@@ -4543,7 +4543,7 @@ The following commands work with checkboxes:
   argument, set it to =[-]=.
 
   #+findex: org-list-checkbox-radio-mode
-  {{{kdb(C-c C-c)}}} can be told to consider checkboxes as radio buttons by
+  {{{kbd(C-c C-c)}}} can be told to consider checkboxes as radio buttons by
   setting =#+ATTR_ORG: :radio t= right before the list or by calling
   {{{kbd(M-x org-list-checkbox-radio-mode)}}} to activate this minor mode.
 
