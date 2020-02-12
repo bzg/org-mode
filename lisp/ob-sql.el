@@ -73,6 +73,7 @@
 (declare-function orgtbl-to-csv "org-table" (table params))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
 (declare-function cygwin-convert-file-name-to-windows "cygw32.c" (file &optional absolute-p))
+(declare-function sql-set-product "sql" (product))
 
 (defvar sql-connection-alist)
 (defvar org-babel-default-header-args:sql '())
