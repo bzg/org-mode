@@ -2578,8 +2578,7 @@ holding contextual information."
               (first-content (car (org-element-contents headline))))
           (format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
                   (org-html--container headline info)
-                  (concat "outline-container-"
-			  (org-export-get-reference headline info))
+                  (format "outline-container-%s" id)
                   (concat (format "outline-%d" level)
                           (and extra-class " ")
                           extra-class)
