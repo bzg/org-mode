@@ -224,7 +224,7 @@ byte-compiled before it is loaded."
     (unless (org-file-newer-than-p
 	     tangled-file
 	     (file-attribute-modification-time (file-attributes file)))
-      (org-babel-tangle-file file tangled-file "emacs-lisp"))
+      (org-babel-tangle-file file tangled-file "emacs-lisp\\|elisp"))
     (if compile
 	(progn
 	  (byte-compile-file tangled-file 'load)
