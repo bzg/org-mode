@@ -61,7 +61,7 @@
 ;;; Customization variables
 
 (defcustom org-gnus-prefer-web-links nil
-  "If non-nil, `org-store-link' creates web links to Google groups or Gmane.
+  "If non-nil, `org-store-link' creates web links to Google groups.
 \\<org-mode-map>When nil, Gnus will be used for such links.
 Using a prefix argument to the command `\\[org-store-link]' (`org-store-link')
 negates this setting for the duration of the command."
@@ -87,8 +87,8 @@ negates this setting for the duration of the command."
 (defun org-gnus-group-link (group)
   "Create a link to the Gnus group GROUP.
 If GROUP is a newsgroup and `org-gnus-prefer-web-links' is
-non-nil, create a link to groups.google.com or gmane.org.
-Otherwise create a link to the group inside Gnus.
+non-nil, create a link to groups.google.com.  Otherwise create a
+link to the group inside Gnus.
 
 If `org-store-link' was called with a prefix arg the meaning of
 `org-gnus-prefer-web-links' is reversed."
@@ -96,10 +96,7 @@ If `org-store-link' was called with a prefix arg the meaning of
     (if (and (string-prefix-p "nntp" group) ;; Only for nntp groups
 	     (org-xor current-prefix-arg
 		      org-gnus-prefer-web-links))
-	(concat (if (string-match "gmane" unprefixed-group)
-		    "http://news.gmane.org/"
-		  "http://groups.google.com/group/")
-		unprefixed-group)
+	(concat "https://groups.google.com/group/" unprefixed-group)
       (concat "gnus:" group))))
 
 (defun org-gnus-article-link (group newsgroups message-id x-no-archive)
@@ -110,7 +107,7 @@ parameters are the Gnus GROUP, the NEWSGROUPS the article was
 posted to and the X-NO-ARCHIVE header value of that article.
 
 If GROUP is a newsgroup and `org-gnus-prefer-web-links' is
-non-nil, create a link to groups.google.com or gmane.org.
+non-nil, create a link to groups.google.com.
 Otherwise create a link to the article inside Gnus.
 
 If `org-store-link' was called with a prefix arg the meaning of
@@ -118,9 +115,7 @@ If `org-store-link' was called with a prefix arg the meaning of
   (if (and (org-xor current-prefix-arg org-gnus-prefer-web-links)
 	   newsgroups		  ;make web links only for nntp groups
 	   (not x-no-archive))	  ;and if X-No-Archive isn't set
-      (format (if (string-match-p "gmane\\." newsgroups)
-		  "http://mid.gmane.org/%s"
-		"http://groups.google.com/groups/search?as_umsgid=%s")
+      (format "https://groups.google.com/groups/search?as_umsgid=%s"
 	      (url-encode-url message-id))
     (concat "gnus:" group "#" message-id)))
 
