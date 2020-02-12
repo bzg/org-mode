@@ -4017,7 +4017,8 @@ When PARSE is non-nil, values from keywords belonging to
 			     (skip-chars-backward " \t")
 			     (point))))
 		  (if parsed?
-		      (org-element--parse-objects beg end nil restrict)
+		      (save-match-data
+			(org-element--parse-objects beg end nil restrict))
 		    (org-trim (buffer-substring-no-properties beg end)))))
 	       ;; If KWD is a dual keyword, find its secondary value.
 	       ;; Maybe parse it.
