@@ -21060,7 +21060,7 @@ modify this GNU manual."
 
 #+export_file_name: org.texi
 
-#+texinfo_dir_category: Emacs
+#+texinfo_dir_category: Emacs editing modes
 #+texinfo_dir_title: Org Mode: (org)
 #+texinfo_dir_desc: Outline-based notes management and organizer
 

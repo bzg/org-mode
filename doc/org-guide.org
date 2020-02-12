@@ -2616,7 +2616,7 @@ support in a file, use
 
 #+export_file_name: orgguide.texi
 
-#+texinfo_dir_category: Emacs
+#+texinfo_dir_category: Emacs editing modes
 #+texinfo_dir_title: Org Guide: (orgguide)
 #+texinfo_dir_desc: Abbreviated Org mode manual
 
