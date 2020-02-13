@@ -782,18 +782,14 @@ this function appends the default value from
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
 			nil 'org-refile-history
-			(or cdef (concat (car org-refile-history)
-					 (when (and org-refile-use-outline-path)
-					   "/")))))
+			(or cdef (concat (car org-refile-history) extra))))
     (if (setq pa (org-refile--get-location answ tbl))
 	(let* ((last-refile-loc (car org-refile-history))
-	       (last-refile-loc-path
-		(concat last-refile-loc
-			(when (and org-refile-use-outline-path) "/"))))
+	       (last-refile-loc-path (concat last-refile-loc extra)))
 	  (org-refile-check-position pa)
 	  (when (or (not org-refile-history)
 		    (not (eq old-hist org-refile-history))
-		    (not (equal (car pa) last-refile-loc)))
+		    (not (equal (car pa) last-refile-loc-path)))
 	    (setq org-refile-history
 		  (cons (car pa) (if (assoc last-refile-loc tbl)
 				     org-refile-history
