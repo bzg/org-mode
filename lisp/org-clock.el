@@ -1021,6 +1021,11 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 		     (org-flag-drawer nil element))
 		   (throw 'exit nil)))))))))))
 
+(defun org-clock-time-to-mins-to-keep (start-time)
+  "Ask the user for a time and return the number of minutes from START-TIME to that time."
+  (floor (/ (float-time
+	     (time-subtract (org-read-date t t) start-time)) 60)))
+
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)
   "Resolve an open Org clock.
 An open clock was found, with `dangling' possibly being non-nil.
@@ -1057,6 +1062,9 @@ k/K      Keep X minutes of the idle time (default is all).  If this
          that many minutes after the time that idling began, and then
          clocked back in at the present time.
 
+t/T      Like `k', but will ask you to specify a time, instead of a
+         number of minutes.
+
 g/G      Indicate that you \"got back\" X minutes ago.  This is quite
          different from `k': it clocks you out from the beginning of
          the idle period and clock you back in X minutes ago.
@@ -1076,19 +1084,21 @@ to be CLOCKED OUT."))))
 		(while (or (null char-pressed)
 			   (and (not (memq char-pressed
 					   '(?k ?K ?g ?G ?s ?S ?C
-						?j ?J ?i ?q)))
+						?j ?J ?i ?q ?t ?T)))
 				(or (ding) t)))
 		  (setq char-pressed
 			(read-char (concat (funcall prompt-fn clock)
-					   " [jkKgGSscCiq]? ")
+					   " [jkKtTgGSscCiq]? ")
 				   nil 45)))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
 	   (floor (org-time-convert-to-integer (org-time-since last-valid))
 		  60))
 	 (keep
-	  (and (memq ch '(?k ?K))
-	       (read-number "Keep how many minutes? " default)))
+	  (or (and (memq ch '(?k ?K))
+		   (read-number "Keep how many minutes? " default))
+	      (and (memq ch '(?t ?T))
+		   (org-clock-time-to-mins-to-keep last-valid))))
 	 (gotback
 	  (and (memq ch '(?g ?G))
 	       (read-number "Got back how many minutes ago? " default)))
@@ -1103,7 +1113,7 @@ to be CLOCKED OUT."))))
 	  (org-clock-resolve-clock clock 'now nil t nil fail-quietly))
       (org-clock-jump-to-current-clock clock))
      ((or (null ch)
-	  (not (memq ch '(?k ?K ?g ?G ?s ?S ?C))))
+	  (not (memq ch '(?k ?K ?g ?G ?s ?S ?C ?t ?T))))
       (message ""))
      (t
       (org-clock-resolve-clock
@@ -1127,7 +1137,7 @@ to be CLOCKED OUT."))))
 	      (t
 	       (error "Unexpected, please report this as a bug")))
        (and gotback last-valid)
-       (memq ch '(?K ?G ?S))
+       (memq ch '(?K ?G ?S ?T))
        (and start-over
 	    (not (memq ch '(?K ?G ?S ?C))))
        fail-quietly)))))
