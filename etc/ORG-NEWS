@@ -104,12 +104,6 @@ data lines, such as planning/clock lines and property/logbook drawers.
 Also, with this setting, =org-indent-mode= will keep these data lines
 correctly aligned with the headline above.
 
-*** New way to resolve clock after idle time
-
-When resolving a clock after idle time, you can now press "t" or "T"
-to tell at what time (i.e. HH:MM) you got back instead of, e.g., how
-many minutes ago you got back.
-
 *** Babel: new header argument to pass Java command line arguments
 
 Babel Java blocks recognize header argument =:cmdargs= and pass its
