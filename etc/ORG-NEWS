@@ -91,9 +91,10 @@ After editing a source block, Org will restore the window layout when
 
 *** Display remote inline images
 
-Added the capability to display remote images inline.  Whether the
-images are actually displayed are controlled by the new option
-~org-display-remote-inline-images~.
+Org now knows how to display remote images inline.
+
+Whether the images are actually displayed is controlled by the new
+option ~org-display-remote-inline-images~.
 
 *** New allowed value for ~org-adapt-indentation~
 
