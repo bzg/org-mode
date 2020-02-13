@@ -110,6 +110,13 @@ correctly aligned with the headline above.
 `k' option, but the user specifies a time of day, not a number of
 minutes.
 
+*** Babel: =ob-clojure.el= now supports executing ClojureScript
+
+You can now use =#+begin_src clojurescript= and execute ClojureScript
+code from Org files.  You will need to put the file in an directory
+from where ClojureScript knows how to start a nrepl connection: e.g.
+you can put your Org file at the root of a figwheel-main directory.
+
 *** Babel: new header argument to pass Java command line arguments
 
 Babel Java blocks recognize header argument =:cmdargs= and pass its
