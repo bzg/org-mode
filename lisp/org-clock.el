@@ -1021,11 +1021,6 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 		     (org-flag-drawer nil element))
 		   (throw 'exit nil)))))))))))
 
-(defun org-clock-time-to-mins-to-keep (start-time)
-  "Ask the user for a time and return the number of minutes from START-TIME to that time."
-  (floor (/ (float-time
-	     (time-subtract (org-read-date t t) start-time)) 60)))
-
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)
   "Resolve an open Org clock.
 An open clock was found, with `dangling' possibly being non-nil.
@@ -1062,8 +1057,8 @@ k/K      Keep X minutes of the idle time (default is all).  If this
          that many minutes after the time that idling began, and then
          clocked back in at the present time.
 
-t/T      Like `k', but will ask you to specify a time, instead of a
-         number of minutes.
+t/T      Like `k', but will ask you to specify a time (when you got
+         distracted away), instead of a number of minutes.
 
 g/G      Indicate that you \"got back\" X minutes ago.  This is quite
          different from `k': it clocks you out from the beginning of
@@ -1098,7 +1093,10 @@ to be CLOCKED OUT."))))
 	  (or (and (memq ch '(?k ?K))
 		   (read-number "Keep how many minutes? " default))
 	      (and (memq ch '(?t ?T))
-		   (org-clock-time-to-mins-to-keep last-valid))))
+		   (floor
+		    (/ (float-time
+			(org-time-subtract (org-read-date t t) last-valid))
+		       60)))))
 	 (gotback
 	  (and (memq ch '(?g ?G))
 	       (read-number "Got back how many minutes ago? " default)))
