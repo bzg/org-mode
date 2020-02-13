@@ -1061,8 +1061,6 @@ g/G      Indicate that you \"got back\" X minutes ago.  This is quite
          different from `k': it clocks you out from the beginning of
          the idle period and clock you back in X minutes ago.
 
-t/T      Indicate that you \"got back\" at time HH:MM.
-
 s/S      Subtract the idle time from the current clock.  This is the
          same as keeping 0 minutes.
 
@@ -1078,11 +1076,11 @@ to be CLOCKED OUT."))))
 		(while (or (null char-pressed)
 			   (and (not (memq char-pressed
 					   '(?k ?K ?g ?G ?s ?S ?C
-						?j ?J ?i ?q ?t ?T)))
+						?j ?J ?i ?q)))
 				(or (ding) t)))
 		  (setq char-pressed
 			(read-char (concat (funcall prompt-fn clock)
-					   " [jkKgGSscCiqtT]? ")
+					   " [jkKgGSscCiq]? ")
 				   nil 45)))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
@@ -1092,19 +1090,8 @@ to be CLOCKED OUT."))))
 	  (and (memq ch '(?k ?K))
 	       (read-number "Keep how many minutes? " default)))
 	 (gotback
-	  (or (and (memq ch '(?g ?G))
-		   (read-number "Got back how many minutes ago? " default))
-	      (and (memq ch '(?t ?T))
-		   (let* ((time (read-string "At what HH:MM time did you get back? "))
-			  (mins (floor (float-time
-					(org-time-subtract
-					 nil (encode-time
-					      (org-parse-time-string
-					       (concat (format-time-string "%F " last-valid)
-						       time)))))
-				       60)))
-		     (if (wholenump mins) mins
-		       (user-error "Enter a time in the past"))))))
+	  (and (memq ch '(?g ?G))
+	       (read-number "Got back how many minutes ago? " default)))
 	 (subtractp (memq ch '(?s ?S)))
 	 (barely-started-p (org-time-less-p
 			    (org-time-subtract last-valid (cdr clock))
@@ -1140,9 +1127,9 @@ to be CLOCKED OUT."))))
 	      (t
 	       (error "Unexpected, please report this as a bug")))
        (and gotback last-valid)
-       (memq ch '(?K ?G ?S ?T))
+       (memq ch '(?K ?G ?S))
        (and start-over
-	    (not (memq ch '(?K ?G ?S ?C ?T))))
+	    (not (memq ch '(?K ?G ?S ?C))))
        fail-quietly)))))
 
 ;;;###autoload
