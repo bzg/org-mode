@@ -61,10 +61,14 @@
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("clojure" . "clj"))
+(add-to-list 'org-babel-tangle-lang-exts '("clojurescript" . "cljs"))
 
 (defvar org-babel-default-header-args:clojure '())
 (defvar org-babel-header-args:clojure '((ns . :any)
 					(package . :any)))
+
+(defvar org-babel-default-header-args:clojurescript '())
+(defvar org-babel-header-args:clojurescript '((package . :any)))
 
 (defcustom org-babel-clojure-sync-nrepl-timeout 10
   "Timeout value, in seconds, of a Clojure sync call.
@@ -223,6 +227,11 @@ using the :show-process parameter."
 The underlying process performed by the code block can be output
 using the :show-process parameter."
   (org-babel-execute:clojure body (cons '(:target . "cljs") params)))
+
+(defun org-babel-edit-prep:clojure (babel-info)
+  "Set org-edit-special src block by injecting `cider-buffer-ns' as namespace."
+  (if-let* ((namespace (cdr (assq :ns (nth 2 babel-info)))))
+      (setq-local cider-buffer-ns namespace)))
 
 (defun org-babel-clojure-initiate-session (&optional session _params)
   "Initiate a session named SESSION according to PARAMS."
