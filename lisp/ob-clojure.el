@@ -135,7 +135,8 @@ using the :show-process parameter."
       (cider
        (require 'cider)
        (let ((result-params (cdr (assq :result-params params)))
-	     (show (cdr (assq :show-process params))))
+	     (show (cdr (assq :show-process params)))
+	     (connection (cider-current-connection (cdr (assq :target params)))))
          (if (member show '(nil "no"))
 	     ;; Run code without showing the process.
 	     (progn
@@ -143,7 +144,7 @@ using the :show-process parameter."
 		     (let ((nrepl-sync-request-timeout
 			    org-babel-clojure-sync-nrepl-timeout))
 		       (nrepl-sync-request:eval expanded
-						(cider-current-connection))))
+						connection)))
 	       (setq result
 		     (concat
 		      (nrepl-dict-get response
@@ -177,7 +178,7 @@ using the :show-process parameter."
 		(nrepl--merge response resp)
 		;; Update the status of the nREPL output session.
 		(setq status (nrepl-dict-get response "status")))
-	      (cider-current-connection))
+	      connection)
 
 	     ;; Wait until the nREPL code finished to be processed.
 	     (while (not (member "done" status))
@@ -216,6 +217,12 @@ using the :show-process parameter."
       result
       (condition-case nil (org-babel-script-escape result)
 	(error result)))))
+
+(defun org-babel-execute:clojurescript (body params)
+  "Execute a block of ClojureScript code with Babel.
+The underlying process performed by the code block can be output
+using the :show-process parameter."
+  (org-babel-execute:clojure body (cons '(:target . "cljs") params)))
 
 (defun org-babel-clojure-initiate-session (&optional session _params)
   "Initiate a session named SESSION according to PARAMS."
