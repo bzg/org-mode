@@ -86,42 +86,94 @@
   :group 'org)
 
 (defcustom org-link-parameters nil
-  "An alist of properties that defines all the links in Org mode.
+  "Alist of properties that defines all the links in Org mode.
+
 The key in each association is a string of the link type.
-Subsequent optional elements make up a plist of link properties.
+Subsequent optional elements make up a property list for that
+type.
 
-:follow - A function that takes the link path as an argument.
+All properties ar optional.  However, the most important ones
+are, in this order, `:follow', `:export', and `:store', described
+below.
 
-:export - A function that takes the link path, description and
-export-backend as arguments.
+`:follow'
 
-:store - A function responsible for storing the link.  See the
-function `org-store-link-functions'.
+  Function that takes the link path (a string) as an argument and
+  \"opens\" the link.
 
-:complete - A function that inserts a link with completion.  The
-function takes one optional prefix argument.
+`:export'
 
-:face - A face for the link, or a function that returns a face.
-The function takes one argument which is the link path.  The
-default face is `org-link'.
+  Function that accepts four arguments:
+  - the path, as a string,
+  - the description as a string, or nil,
+  - the export back-end,
+  - the export communication channel, as a plist.
 
-:mouse-face - The mouse-face. The default is `highlight'.
+  If the new link type is meant to be exported as a \"file\"-link
+  (or as an image), consider using `org-export-link-as-file',
+  either as an helper function, or as a value for this parameter.
 
-:display - `full' will not fold the link in descriptive
-display.  Default is `org-link'.
+  When nil, export for that type of link is delegated to the
+  back-end.
 
-:help-echo - A string or function that takes (window object position)
-as arguments and returns a string.
+`:store'
 
-:keymap - A keymap that is active on the link.  The default is
-`org-mouse-map'.
+  Function responsible for storing the link.  See the function
+  `org-store-link-functions' for a description of the expected
+  arguments.
 
-:htmlize-link - A function for the htmlize-link.  Defaults
-to (list :uri \"type:path\")
+Additional properties provide more specific control over the
+link.
 
-:activate-func - A function to run at the end of font-lock
-activation.  The function must accept (link-start link-end path bracketp)
-as arguments."
+`:activate-func'
+
+  Function to run at the end of Font Lock activation.  It must
+  accept four arguments:
+  - the buffer position at the start of the link,
+  - the buffer position at its end,
+  - the path, as a string,
+  - a boolean, non-nil when the link has brackets.
+
+`:complete'
+
+  Function that inserts a link with completion.  The function
+  takes one optional prefix argument.
+
+`:display'
+
+  Value for `invisible' text property on the hidden parts of the
+  link.  The most useful value is `full', which will not fold the
+  link in descriptive display.  Default is `org-link'.
+
+`:face'
+
+  Face for the link, or a function returning a face.  The
+  function takes one argument, which is the path.
+
+  The default face is `org-link'.
+
+`:help-echo'
+
+  String or function used as a value for the `help-echo' text
+  property.  The function is called with one argument, the help
+  string to display, and should return a string.
+
+`:htmlize-link'
+
+  Function or plist for the `htmlize-link' text property.  The
+  function takes no argument.
+
+  Default is (:uri \"type:path\")
+
+`:keymap'
+
+  Active keymap when point is on the link.  Default is
+  `org-mouse-map'.
+
+`:mouse-face'
+
+  Face used when hovering over the link.  Default is
+  `highlight'."
   :group 'org-link
   :package-version '(Org . "9.1")
   :type '(alist :tag "Link display parameters"

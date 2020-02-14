@@ -603,7 +603,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;; Link
 
 
-(defun org-man-link (link desc _info)
+(defun org-man-link (link desc info)
   "Transcode a LINK object from Org to Man.
 
 DESC is the description part of the link, or the empty string.
@@ -623,7 +623,7 @@ INFO is a plist holding contextual information.  See
                 (t raw-path))))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link desc 'man))
+     ((org-export-custom-protocol-maybe link desc 'man info))
      ;; External link with a description part.
      ((and path desc) (format "%s \\fBat\\fP \\fI%s\\fP" path desc))
      ;; External link without a description part.

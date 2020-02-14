@@ -2965,6 +2965,32 @@ Para2"
 
 ;;; Links
 
+(ert-deftest test-org-export/link-as-file ()
+  "Test `org-export-link-as-file' specifications."
+  ;; Export path as a "file"-type link.
+  (should
+   (equal "success"
+	  (let ((backend
+		 (org-export-create-backend
+		  :name 'test
+		  :transcoders
+		  '((link . (lambda (l _c _i)
+			      (if (equal "file" (org-element-property :type l))
+				  "success"
+				"failure")))))))
+	    (org-export-link-as-file "foo.org" nil backend nil))))
+  ;; Exported path handles "file"-type specific properties,
+  ;; e.g., :search-option.
+  (should
+   (equal "bar"
+	  (let ((backend
+		 (org-export-create-backend
+		  :name 'test
+		  :transcoders
+		  '((link . (lambda (l _c _i)
+			      (org-element-property :search-option l)))))))
+	    (org-export-link-as-file "foo.org::bar" nil backend nil)))))
+
 (ert-deftest test-org-export/custom-protocol-maybe ()
   "Test `org-export-custom-protocol-maybe' specifications."
   (should
@@ -2980,7 +3006,7 @@ Para2"
 	'((section . (lambda (s c i) c))
 	  (paragraph . (lambda (p c i) c))
 	  (link . (lambda (l c i)
-		    (or (org-export-custom-protocol-maybe l c 'test)
+		    (or (org-export-custom-protocol-maybe l c 'test i)
 			"failure")))))))))
   (should-not
    (string-match
@@ -2996,7 +3022,7 @@ Para2"
 	'((section . (lambda (s c i) c))
 	  (paragraph . (lambda (p c i) c))
 	  (link . (lambda (l c i)
-		    (or (org-export-custom-protocol-maybe l c 'no-test)
+		    (or (org-export-custom-protocol-maybe l c 'no-test i)
 			"failure")))))))))
   ;; Ignore anonymous back-ends.
   (should-not
@@ -3012,7 +3038,7 @@ Para2"
 	'((section . (lambda (s c i) c))
 	  (paragraph . (lambda (p c i) c))
 	  (link . (lambda (l c i)
-		    (or (org-export-custom-protocol-maybe l c nil)
+		    (or (org-export-custom-protocol-maybe l c nil i)
 			"failure"))))))))))
 
 (ert-deftest test-org-export/get-coderef-format ()

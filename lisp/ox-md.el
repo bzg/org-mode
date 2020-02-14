@@ -412,7 +412,7 @@ INFO is a plist holding contextual information.  See
 		(t raw-path))))
     (cond
      ;; Link type is handled by a special function.
-     ((org-export-custom-protocol-maybe link desc 'md))
+     ((org-export-custom-protocol-maybe link desc 'md info))
      ((member type '("custom-id" "id" "fuzzy"))
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)

@@ -957,7 +957,7 @@ channel."
 	((not (org-element-contents link)) nil)
 	;; Do not add a link already handled by custom export
 	;; functions.
-	((org-export-custom-protocol-maybe link anchor 'ascii) nil)
+	((org-export-custom-protocol-maybe link anchor 'ascii info) nil)
 	(t
 	 (concat
 	  (org-ascii--fill-string
@@ -1579,7 +1579,7 @@ INFO is a plist holding contextual information."
 		 (concat type ":" raw-path))
 		(t (concat type ":" raw-path)))))
     (cond
-     ((org-export-custom-protocol-maybe link desc 'ascii))
+     ((org-export-custom-protocol-maybe link desc 'ascii info))
      ((string= type "coderef")
       (format (org-export-get-coderef-format path desc)
 	      (org-export-resolve-coderef path info)))

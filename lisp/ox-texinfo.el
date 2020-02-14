@@ -1065,7 +1065,7 @@ INFO is a plist holding contextual information.  See
 		 (org-export-file-uri raw-path))
 		(t raw-path))))
     (cond
-     ((org-export-custom-protocol-maybe link desc 'texinfo))
+     ((org-export-custom-protocol-maybe link desc 'texinfo info))
      ((org-export-inline-image-p link org-texinfo-inline-image-rules)
       (org-texinfo--inline-image link info))
      ((equal type "radio")
