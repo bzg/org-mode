@@ -123,6 +123,25 @@ you can put your Org file at the root of a figwheel-main directory.
 Babel Java blocks recognize header argument =:cmdargs= and pass its
 value in call to =java=.
 
+** New commands
+*** ~org-table-header-line-mode~
+
+Turn on a minor mode to display the first data row of the table at
+point in the header-line when the beginning of the table is invisible.
+
+*** ~org-datetree-find-month-create~
+
+Find or create a month entry for a date.
+
+*** ~org-columns-toggle-or-columns-quit~
+
+=<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
+recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
+possible via column view value edit or with =<C-c C-q>=.
+
+*** ~org-agenda-ctrl-c-ctrl-c~
+
+=<C-c C-c>= in agenda calls ~org-agenda-set-tags~.
 ** New options
 *** New option ~org-clock-auto-clockout-timer~
 
@@ -166,27 +185,7 @@ You can also set this option to =t= or to =from-agenda=.
 
 This option will add a timeout to notifications.
 
-** New commands
-*** ~org-table-header-line-mode~
-
-Turn on a minor mode to display the first data row of the table at
-point in the header-line when the beginning of the table is invisible.
-
-*** ~org-datetree-find-month-create~
-
-Find or create a month entry for a date.
-
-*** ~org-columns-toggle-or-columns-quit~
-
-=<C-c C-c>= bound to ~org-columns-toggle-or-columns-quit~ replaces the
-recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
-possible via column view value edit or with =<C-c C-q>=.
-
-*** ~org-agenda-ctrl-c-ctrl-c~
-
-=<C-c C-c>= in agenda calls ~org-agenda-set-tags~.
-
-** Removed or renamed commands, functions and variables
+** Removed or renamed functions and variables
 
 *** Renamed ~org-columns-set-tags-or-toggle~
 
@@ -216,27 +215,36 @@ normal headlines.  The face can be customized via ~org-headline-todo~.
 *** C-n, C-p, SPC and DEL in agenda commands dispatch window
 
 You can now use =C-n=, =C-p=, =SPC= and =DEL= key to scroll up and
-down the agenda commands dispatch window.
+down the agenda and attach dispatch window.
 
-*** C-c C-c in agenda calls ~org-agenda-set-tags~
+*** =<C-c C-c>= in agenda calls ~org-agenda-set-tags~
+
+Both =<C-c C-q>= and =<C-c C-c>= set the tags of the headline in the
+Org buffer.  Both keybindings are now available from the agenda too.
+
 *** New option in ~org-attach-store-link-p~
 
-~org-attach-store-link-p~ have a new option to store a file link to
-the attachment.
+~org-attach-store-link-p~ has a new option to store a file link to the
+attachment.
 
 *** New default value for ~org-file-apps~
 
-The new value uses emacs as the application for opening directory.
+The new value uses Emacs as the application for opening directory.
 
 *** Allowed empty HTML extension
 
 Using =(setq org-html-extension "")= or setting the HTML extension in
 any fashing will produce the expected output, with no trailing period
-to the HTML file.
+to the resulting HTML file.
 
 *** New =org-refile.el= file
 
 Org refile variables and functions have been moved to a new file.
+
+*** The end of a 7 years old bug
+
+This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
+Hyatt has been fixed.  Thanks to both of them.
 
 * Version 9.3
 
