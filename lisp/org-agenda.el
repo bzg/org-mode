@@ -3986,7 +3986,7 @@ dimming them."
   (when (called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks..."))
   (dolist (o (overlays-in (point-min) (point-max)))
-    (when (eq (overlay-get o 'org-type) 'org-blocked-todo)
+    (when (eq (overlay-get o 'face) 'org-agenda-dimmed-todo-face)
       (delete-overlay o)))
   (save-excursion
     (let ((inhibit-read-only t))
@@ -3994,22 +3994,26 @@ dimming them."
       (while (let ((pos (text-property-not-all
 			 (point) (point-max) 'org-todo-blocked nil)))
 	       (when pos (goto-char pos)))
-	(let* ((invisible (eq (org-get-at-bol 'org-todo-blocked) 'invisible))
+	(let* ((invisible
+		(eq (org-get-at-bol 'org-todo-blocked) 'invisible))
+	       (todo-blocked
+		(eq (org-get-at-bol 'org-filter-type) 'todo-blocked))
 	       (ov (make-overlay (if invisible
 				     (line-end-position 0)
 				   (line-beginning-position))
 				 (line-end-position))))
-	  (if invisible
-	      (overlay-put ov 'invisible t)
+	  (when todo-blocked
 	    (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
-	  (overlay-put ov 'org-type 'org-blocked-todo))
-	(forward-line))))
+	  (when invisible
+	    (org-agenda-filter-hide-line 'todo-blocked)))
+	(move-beginning-of-line 2))))
   (when (called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks...done")))
 
 (defun org-agenda--mark-blocked-entry (entry)
-  "For ENTRY a string with the text property `org-hd-marker', if
-the header at `org-hd-marker' is blocked according to
+  "If ENTRY is blocked, mark it for fontification or invisibility.
+
+If the header at `org-hd-marker' is blocked according to
 `org-entry-blocked-p', then if `org-agenda-dim-blocked-tasks' is
 'invisible and the header is not blocked by checkboxes, set the
 text property `org-todo-blocked' to `invisible', otherwise set it
@@ -4033,7 +4037,9 @@ to t."
 	      (put-text-property
 	       0 (length entry) 'org-todo-blocked
 	       (if really-invisible 'invisible t)
-	       entry)))))))
+	       entry)
+	      (put-text-property
+	       0 (length entry) 'org-filter-type 'todo-blocked entry)))))))
   entry)
 
 (defvar org-agenda-skip-function nil
@@ -8053,13 +8059,13 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 	org-agenda-filtered-by-top-headline t))
 
 (defun org-agenda-filter-hide-line (type)
-  "Hide lines with TYPE in the agenda buffer."
+  "If current line is TYPE, hide it in the agenda buffer."
   (let* (buffer-invisibility-spec
-	 (b (max (point-min) (1- (point-at-bol))))
-	 (e (point-at-eol)))
+	 (beg (max (point-min) (1- (point-at-bol))))
+	 (end (point-at-eol)))
     (let ((inhibit-read-only t))
       (add-text-properties
-       b e `(invisible org-filtered org-filter-type ,type)))))
+       beg end `(invisible org-filtered org-filter-type ,type)))))
 
 (defun org-agenda-remove-filter (type)
   (interactive)
