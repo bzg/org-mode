@@ -933,7 +933,7 @@ ARG is an optional prefix argument.  Some link types may handle
 it.  For example, it determines what application to run when
 opening a \"file\" link.
 
-Function responsible for opening the link are either hard-coded
+Functions responsible for opening the link are either hard-coded
 for internal and \"file\" links, or stored as a parameter in
 `org-link-parameters', which see."
   (let ((type (org-element-property :type link))
