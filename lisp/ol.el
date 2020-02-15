@@ -928,8 +928,14 @@ Abbreviations are defined in `org-link-abbrev-alist'."
 
 (defun org-link-open (link &optional arg)
   "Open a link object LINK.
-Optional argument is passed to `org-open-file' when S is
-a \"file\" link."
+
+ARG is an optional prefix argument.  Some link types may handle
+it.  For example, it determines what application to run when
+opening a \"file\" link.
+
+Function responsible for opening the link are either hard-coded
+for internal and \"file\" links, or stored as a parameter in
+`org-link-parameters', which see."
   (let ((type (org-element-property :type link))
 	(path (org-element-property :path link)))
     (cond
@@ -971,8 +977,7 @@ a \"file\" link."
 	(let ((destination
 	       (org-with-wide-buffer
 		(if (equal type "radio")
-		    (org-link--search-radio-target
-		     (org-element-property :path link))
+		    (org-link--search-radio-target path)
 		  (org-link-search
 		   (pcase type
 		     ("custom-id" (concat "#" path))
