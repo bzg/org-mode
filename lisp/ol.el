@@ -98,8 +98,12 @@ below.
 
 `:follow'
 
-  Function that takes the link path (a string) as an argument and
-  \"opens\" the link.
+  Function used to follow the link, when the `org-open-at-point'
+  command runs on it.  It is called with two arguments: the path,
+  as a string, and a universal prefix argument.
+
+  Here, you may use `org-link-open-as-file' helper function for
+  types similar to \"file\".
 
 `:export'
 
@@ -991,60 +995,52 @@ for internal and \"file\" links, or stored as a parameter in
 `org-link-parameters', which see."
   (let ((type (org-element-property :type link))
 	(path (org-element-property :path link)))
-    (cond
-     ((member type '("file" "attachment"))
-      (when (string= type "attachment")
-	(setq path (org-attach-link-expand link)))
-      (if (string-match "[*?{]" (file-name-nondirectory path))
-	  (dired path)
-	;; Look into `org-link-parameters' in order to find
-	;; a DEDICATED-FUNCTION to open file.  The function will be
-	;; applied on raw link instead of parsed link due to the
-	;; limitation in `org-add-link-type' ("open" function called
-	;; with a single argument).  If no such function is found,
-	;; fallback to `org-open-file'.
-	(let* ((option (org-element-property :search-option link))
-	       (app (org-element-property :application link))
-	       (dedicated-function
-		(org-link-get-parameter (if app (concat type "+" app) type)
-					:follow)))
-	  (if dedicated-function
-	      (funcall dedicated-function
-		       (concat path
-			       (and option (concat "::" option))))
-	    (apply #'org-open-file
-		   path
-		   (cond (arg)
-			 ((equal app "emacs") 'emacs)
-			 ((equal app "sys") 'system))
-		   (cond ((not option) nil)
-			 ((string-match-p "\\`[0-9]+\\'" option)
-			  (list (string-to-number option)))
-			 (t (list nil option))))))))
-     ((functionp (org-link-get-parameter type :follow))
-      (funcall (org-link-get-parameter type :follow) path))
-     ((member type '("coderef" "custom-id" "fuzzy" "radio"))
-      (unless (run-hook-with-args-until-success 'org-open-link-functions path)
-	(if (not arg) (org-mark-ring-push)
-	  (switch-to-buffer-other-window (org-link--buffer-for-internals)))
-	(let ((destination
-	       (org-with-wide-buffer
-		(if (equal type "radio")
-		    (org-link--search-radio-target path)
-		  (org-link-search
-		   (pcase type
-		     ("custom-id" (concat "#" path))
-		     ("coderef" (format "(%s)" path))
-		     (_ path))
-		   ;; Prevent fuzzy links from matching themselves.
-		   (and (equal type "fuzzy")
-			(+ 2 (org-element-property :begin link)))))
-		(point))))
-	  (unless (and (<= (point-min) destination)
-		       (>= (point-max) destination))
-	    (widen))
-	  (goto-char destination))))
-     (t (browse-url-at-point)))))
+    (pcase type
+      ;; Opening a "file" link requires special treatment since we
+      ;; first need to integrate search option, if any.
+      ((or "file" "attachment")
+       (when (string= type "attachment")
+	 (setq path (org-attach-link-expand link)))
+       (let* ((option (org-element-property :search-option link))
+	      (path (if option (concat path "::" option) path)))
+	 (org-link-open-as-file path
+				(pcase (org-element-property :application link)
+				  ((guard arg) arg)
+				  ("emacs" 'emacs)
+				  ("sys" 'system)))))
+      ;; Internal links.
+      ((or "coderef" "custom-id" "fuzzy" "radio")
+       (unless (run-hook-with-args-until-success 'org-open-link-functions path)
+	 (if (not arg) (org-mark-ring-push)
+	   (switch-to-buffer-other-window (org-link--buffer-for-internals)))
+	 (let ((destination
+		(org-with-wide-buffer
+		 (if (equal type "radio")
+		     (org-link--search-radio-target path)
+		   (org-link-search
+		    (pcase type
+		      ("custom-id" (concat "#" path))
+		      ("coderef" (format "(%s)" path))
+		      (_ path))
+		    ;; Prevent fuzzy links from matching themselves.
+		    (and (equal type "fuzzy")
+			 (+ 2 (org-element-property :begin link)))))
+		 (point))))
+	   (unless (and (<= (point-min) destination)
+			(>= (point-max) destination))
+	     (widen))
+	   (goto-char destination))))
+      (_
+       ;; Look for a dedicated "follow" function in custom links.
+       (let ((f (org-link-get-parameter type :follow)))
+	 (when (functionp f)
+	   ;; Function defined in `:follow' parameter may use a single
+	   ;; argument, as it was mandatory before Org 9.4.  This is
+	   ;; deprecated, but support it for now.
+	   (condition-case nil
+	       (funcall (org-link-get-parameter type :follow) path arg)
+	     (wrong-number-of-arguments
+	      (funcall (org-link-get-parameter type :follow) path)))))))))
 
 (defun org-link-open-from-string (s &optional arg)
   "Open a link in the string S, as if it was in Org mode.
@@ -1242,6 +1238,28 @@ of matched result, which is either `dedicated' or `fuzzy'."
 				    (reverse slines))) "\n")))))
     (mapconcat #'identity (split-string s) " ")))
 
+(defun org-link-open-as-file (path arg)
+  "Pretend PATH is a file name and open it.
+
+According to \"file\"-link syntax, PATH may include additional
+search options, separated from the file name with \"::\".
+
+This function is meant to be used as a possible tool for
+`:follow' property in `org-link-parameters'."
+  (if (string-match "[*?{]" (file-name-nondirectory path))
+      (dired path)
+    (let* ((option (and (string-match "::\\(.*\\)\\'" path)
+			(match-string 1 path)))
+	   (path (if (not option) path
+		   (substring path 0 (match-beginning 0)))))
+      (apply #'org-open-file
+	     path
+	     arg
+	     (cond ((not option) nil)
+		   ((string-match-p "\\`[0-9]+\\'" option)
+		    (list (string-to-number option)))
+		   (t (list nil option)))))))
+
 (defun org-link-display-format (s)
   "Replace links in string S with their description.
 If there is no description, use the link target."
@@ -1304,7 +1322,8 @@ PATH is a symbol name, as a string."
 (dolist (scheme '("ftp" "http" "https" "mailto" "news"))
   (org-link-set-parameters scheme
 			   :follow
-			   (lambda (url) (browse-url (concat scheme ":" url)))))
+			   (lambda (url arg)
+			     (browse-url (concat scheme ":" url) arg))))
 
 ;;;; "shell" link type
 (defun org-link--open-shell (path)
