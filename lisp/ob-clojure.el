@@ -230,8 +230,9 @@ using the :show-process parameter."
 
 (defun org-babel-edit-prep:clojure (babel-info)
   "Set org-edit-special src block by injecting `cider-buffer-ns' as namespace."
-  (if-let* ((namespace (cdr (assq :ns (nth 2 babel-info)))))
-      (setq-local cider-buffer-ns namespace)))
+  (let ((namespace (cdr (assq :ns (nth 2 babel-info)))))
+    (when namespace
+      (setq-local cider-buffer-ns namespace))))
 
 (defun org-babel-clojure-initiate-session (&optional session _params)
   "Initiate a session named SESSION according to PARAMS."
