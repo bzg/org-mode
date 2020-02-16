@@ -2337,17 +2337,20 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
       (org-list-struct-apply-struct struct old-struct)
       (org-update-checkbox-count-maybe))))
 
-(defsubst org-at-radio-list-p ()
-  "Is point in a list with radio buttons?"
-  (when (org-at-item-p)
-    (save-excursion
-      (goto-char (caar (org-list-struct)))
-      (ignore-errors
-	(org-backward-element)
-	(string= (plist-get (org-export-read-attribute
-			     :attr_org (org-element-at-point))
-			    :radio)
-		 "t")))))
+(defun org-at-radio-list-p ()
+  "Is point at a list item with radio buttons?"
+  (when (org-match-line (org-item-re))	;short-circuit
+    (let* ((e (save-excursion (beginning-of-line) (org-element-at-point))))
+      ;; Check we're really on a line with a bullet.
+      (when (memq (org-element-type e) '(item plain-list))
+	;; Look for ATTR_ORG attribute in the current plain list.
+	(let ((plain-list (org-element-lineage e '(plain-list) t)))
+	  (org-with-point-at (org-element-property :post-affiliated plain-list)
+	    (let ((case-fold-search t)
+		  (regexp "^[ \t]*#\\+attr_org:.* :radio \\(\\S-+\\)")
+		  (begin (org-element-property :begin plain-list)))
+	      (and (re-search-backward regexp begin t)
+		   (not (string-equal "nil" (match-string 1)))))))))))
 
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
