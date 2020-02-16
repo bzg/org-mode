@@ -3884,7 +3884,6 @@ FILTER-ALIST is an alist of filters we need to apply when
 				     'tags
 				     (org-with-point-at mrk
 				       (mapcar #'downcase (org-get-tags)))))))))
-	(run-hooks 'org-agenda-finalize-hook)
 	(setq org-agenda-represented-tags nil
 	      org-agenda-represented-categories nil)
 	(when org-agenda-top-headline-filter
@@ -3910,7 +3909,8 @@ FILTER-ALIST is an alist of filters we need to apply when
 	(when (get 'org-agenda-effort-filter :preset-filter)
 	  (org-agenda-filter-apply
 	   (get 'org-agenda-effort-filter :preset-filter) 'effort))
-	(add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)))))
+	(add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)
+	(run-hooks 'org-agenda-finalize-hook)))))
 
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
