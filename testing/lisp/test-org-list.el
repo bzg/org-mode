@@ -917,6 +917,36 @@ b. Item 2<point>"
 		     (org-update-checkbox-count))
 		   (buffer-string)))))
 
+
+;;; API
+
+(ert-deftest test-org-list/at-radio-list-p ()
+  "Test `org-at-radio-list-p' specifications."
+  (should
+   (org-test-with-temp-text "#+attr_org: :radio t\n<point>- foo"
+     (org-at-radio-list-p)))
+  (should
+   (org-test-with-temp-text "#+attr_org: :radio t\n- foo\n<point>- bar"
+     (org-at-radio-list-p)))
+  (should
+   (org-test-with-temp-text "#+ATTR_ORG: :radio t\n<point>- foo"
+     (org-at-radio-list-p)))
+  (should
+   (org-test-with-temp-text "#+attr_org: :radio bar\n<point>- foo"
+     (org-at-radio-list-p)))
+  (should-not
+   (org-test-with-temp-text "#+attr_org: :radio nil\n<point>- foo"
+     (org-at-radio-list-p)))
+  (should-not
+   (org-test-with-temp-text "<point>- foo"
+     (org-at-radio-list-p)))
+  (should-not
+   (org-test-with-temp-text "#+attr_org: :radio t\n- foo\n  <point>bar"
+     (org-at-radio-list-p)))
+  (should-not
+   (org-test-with-temp-text
+       "#+attr_org: :radio t\n#+begin_example\n<point>- foo\n#+end_example"
+     (org-at-radio-list-p))))
 
 
 ;;; Miscellaneous
