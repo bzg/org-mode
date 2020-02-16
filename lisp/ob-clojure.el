@@ -30,9 +30,11 @@
 
 ;; - clojure (at least 1.2.0)
 ;; - clojure-mode
-;; - either cider or SLIME
+;; - inf-clojure, cider or SLIME
 
-;; For Cider, see https://github.com/clojure-emacs/cider
+;; For clojure-mode, see https://github.com/clojure-emacs/clojure-mode
+;; For cider, see https://github.com/clojure-emacs/cider
+;; For inf-clojure, see https://github.com/clojure-emacs/cider
 
 ;; For SLIME, the best way to install these components is by following
 ;; the directions as set out by Phil Hagelberg (Technomancy) on the
@@ -53,6 +55,8 @@
 (declare-function nrepl-request:eval "ext:nrepl-client" (input callback connection &optional ns line column additional-params tooling))
 (declare-function nrepl-sync-request:eval "ext:nrepl-client" (input connection &optional ns tooling))
 (declare-function slime-eval "ext:slime" (sexp &optional package))
+(declare-function inf-clojure "ext:inf-clojure" (cmd))
+(declare-function inf-clojure-eval-string "ext:inf-clojure" (code))
 
 (defvar nrepl-sync-request-timeout)
 (defvar cider-buffer-ns)
@@ -70,6 +74,15 @@
 (defvar org-babel-default-header-args:clojurescript '())
 (defvar org-babel-header-args:clojurescript '((package . :any)))
 
+(defcustom org-babel-clojure-backend nil
+  "Backend used to evaluate Clojure code blocks."
+  :group 'org-babel
+  :type '(choice
+	  (const :tag "inf-clojure" inf-clojure)
+	  (const :tag "cider" cider)
+	  (const :tag "slime" slime)
+	  (const :tag "Not configured yet" nil)))
+
 (defcustom org-babel-clojure-sync-nrepl-timeout 10
   "Timeout value, in seconds, of a Clojure sync call.
 If the value is nil, timeout is disabled."
@@ -78,15 +91,6 @@ If the value is nil, timeout is disabled."
   :version "26.1"
   :package-version '(Org . "9.1")
   :safe #'wholenump)
-
-(defcustom org-babel-clojure-backend
-  (cond ((featurep 'cider) 'cider)
-	(t 'slime))
-  "Backend used to evaluate Clojure code blocks."
-  :group 'org-babel
-  :type '(choice
-	  (const :tag "cider" cider)
-	  (const :tag "SLIME" slime)))
 
 (defcustom org-babel-clojure-default-ns "user"
   "Default Clojure namespace for source block when finding ns failed."
@@ -128,140 +132,122 @@ If the value is nil, timeout is disabled."
 	(format "(clojure.pprint/pprint (do %s))" body)
       body)))
 
+(defvar ob-clojure-inf-clojure-tmp-output nil)
+(defun ob-clojure-inf-clojure-output (s)
+  "Store a trimmed version of S in a variable and return S."
+  (sit-for .1) ; necessary to get the output ordered
+  (let ((s0 (org-trim s)))
+    (push s0 ob-clojure-inf-clojure-tmp-output))
+  s)
+
+(defvar inf-clojure-buffer)
+(defvar inf-clojure-comint-prompt-regexp)
 (defun org-babel-execute:clojure (body params)
-  "Execute a block of Clojure code with Babel.
-The underlying process performed by the code block can be output
-using the :show-process parameter."
+  "Execute a block of Clojure code with Babel."
+  (unless org-babel-clojure-backend
+    (user-error "You need to customize org-babel-clojure-backend"))
   (let* ((expanded (org-babel-expand-body:clojure body params))
 	 (response (list 'dict))
-         result)
-    (cl-case org-babel-clojure-backend
-      (cider
-       (require 'cider)
-       (let ((result-params (cdr (assq :result-params params)))
-	     (show (cdr (assq :show-process params)))
-	     (connection (cider-current-connection (cdr (assq :target params)))))
-         (if (member show '(nil "no"))
-	     ;; Run code without showing the process.
-	     (progn
-	       (setq response
-		     (let ((nrepl-sync-request-timeout
-			    org-babel-clojure-sync-nrepl-timeout))
-		       (nrepl-sync-request:eval expanded
-						connection)))
-	       (setq result
-		     (concat
-		      (nrepl-dict-get response
-				      (if (or (member "output" result-params)
-					      (member "pp" result-params))
-					  "out"
-					"value"))
-		      (nrepl-dict-get response "ex")
-		      (nrepl-dict-get response "root-ex")
-		      (nrepl-dict-get response "err"))))
-	   ;; Show the process in an output buffer/window.
-           (let ((process-buffer (switch-to-buffer-other-window
-				  "*Clojure Show Process Sub Buffer*"))
-		 status)
-	     ;; Run the Clojure code in nREPL.
-	     (nrepl-request:eval
-	      expanded
-	      (lambda (resp)
-		(when (member "out" resp)
-		  ;; Print the output of the nREPL in the output buffer.
-		  (princ (nrepl-dict-get resp "out") process-buffer))
-		(when (member "ex" resp)
-		  ;; In case there is an exception, then add it to the
-		  ;; output buffer as well.
-		  (princ (nrepl-dict-get resp "ex") process-buffer)
-		  (princ (nrepl-dict-get resp "root-ex") process-buffer))
-		(when (member "err" resp)
-		  ;; In case there is an error, then add it to the
-		  ;; output buffer as well.
-		  (princ (nrepl-dict-get resp "err") process-buffer))
-		(nrepl--merge response resp)
-		;; Update the status of the nREPL output session.
-		(setq status (nrepl-dict-get response "status")))
-	      connection)
-
-	     ;; Wait until the nREPL code finished to be processed.
-	     (while (not (member "done" status))
-	       (nrepl-dict-put response "status" (remove "need-input" status))
-	       (accept-process-output nil 0.01)
-	       (redisplay))
-
-	     ;; Delete the show buffer & window when the processing is
-	     ;; finalized.
-	     (mapc #'delete-window
-		   (get-buffer-window-list process-buffer nil t))
-	     (kill-buffer process-buffer)
-
-	     ;; Put the output or the value in the result section of
-	     ;; the code block.
-	     (setq result
-		   (concat
-		    (nrepl-dict-get response
-				    (if (or (member "output" result-params)
-					    (member "pp" result-params))
-					"out"
-				      "value"))
-		    (nrepl-dict-get response "ex")
-		    (nrepl-dict-get response "root-ex")
-		    (nrepl-dict-get response "err")))))))
-      (slime
-       (require 'slime)
-       (with-temp-buffer
-	 (insert expanded)
-	 (setq result
-	       (slime-eval
-		`(swank:eval-and-grab-output
-		  ,(buffer-substring-no-properties (point-min) (point-max)))
-		(cdr (assq :package params)))))))
-    (org-babel-result-cond (cdr (assq :result-params params))
+	 (result-params (cdr (assq :result-params params)))
+	 result)
+    (cond
+     ((eq org-babel-clojure-backend 'inf-clojure)
+      (condition-case nil (require 'inf-clojure)
+	(user-error "inf-clojure not available"))
+      (add-hook 'comint-preoutput-filter-functions
+		#'ob-clojure-inf-clojure-output)
+      (setq ob-clojure-inf-clojure-tmp-output nil)
+      (unless (and inf-clojure-buffer
+		   (buffer-live-p (get-buffer inf-clojure-buffer)))
+	(setq comint-prompt-regexp inf-clojure-comint-prompt-regexp)
+	(save-window-excursion (call-interactively #'inf-clojure))
+	(sit-for 5)
+	(setq ob-clojure-inf-clojure-tmp-output nil))
+      (inf-clojure-eval-string expanded)
+      (sit-for .3)
+      (remove-hook 'comint-preoutput-filter-functions
+		   #'ob-clojure-inf-clojure-output)
+      (setq result
+	    (mapconcat
+	     (lambda (s)
+	       ;; FIXME: don't hardcode "user=>" below
+	       (unless (or (string-match-p "user=>" s)) s))
+	     (delete "" ob-clojure-inf-clojure-tmp-output)
+	     "\n")))
+     ((eq org-babel-clojure-backend 'cider)
+      (condition-case nil (require 'cider)
+	(user-error "cider not available"))
+      (let ((connection (cider-current-connection (cdr (assq :target params)))))
+	(unless connection
+	  (message "Starting cider default session")
+	  (org-babel-clojure-initiate-session "default"))
+	(setq response
+	      (let ((nrepl-sync-request-timeout
+		     org-babel-clojure-sync-nrepl-timeout))
+		(nrepl-sync-request:eval expanded connection)))
+	(setq result
+	      (concat
+	       (nrepl-dict-get response
+			       (if (or (member "output" result-params)
+				       (member "pp" result-params))
+				   "out"
+				 "value"))
+	       (nrepl-dict-get response "ex")
+	       (nrepl-dict-get response "root-ex")
+	       (nrepl-dict-get response "err")))))
+     ((eq org-babel-clojure-backend 'slime)
+      (require 'slime)
+      (with-temp-buffer
+	(insert expanded)
+	(setq result
+	      (slime-eval
+	       `(swank:eval-and-grab-output
+		 ,(buffer-substring-no-properties (point-min) (point-max)))
+	       (cdr (assq :package params)))))))
+    (org-babel-result-cond result-params
       result
       (condition-case nil (org-babel-script-escape result)
 	(error result)))))
 
 (defun org-babel-execute:clojurescript (body params)
-  "Execute a block of ClojureScript code with Babel.
-The underlying process performed by the code block can be output
-using the :show-process parameter."
+  "Execute a block of ClojureScript code with Babel."
   (org-babel-execute:clojure body (cons '(:target . "cljs") params)))
 
 (defun org-babel-edit-prep:clojure (babel-info)
-  "Set org-edit-special src block by injecting `cider-buffer-ns' as namespace."
+  "Set `org-edit-special' src block by injecting `cider-buffer-ns' as namespace."
   (let ((namespace (cdr (assq :ns (nth 2 babel-info)))))
-    (when namespace
+    (when (and (eq org-babel-clojure-backend 'cider) namespace)
       (setq-local cider-buffer-ns namespace))))
 
-(defun org-babel-clojure-initiate-session (&optional session _params)
+(defun org-babel-clojure-initiate-session (session &optional _params)
   "Initiate a session named SESSION according to PARAMS."
-  (when (and session (not (string= session "none")))
+  (when (not (string= session "none"))
     (save-window-excursion
       (cond
+       ;; Session is already initiated
        ((org-babel-comint-buffer-livep session) nil)
-       ;; CIDER jack-in to the Clojure project directory.
+       ;; Initiate a session with CIDER jack-in
        ((eq org-babel-clojure-backend 'cider)
-        (require 'cider)
-        (let ((session-buffer
-	       (save-window-excursion
-		 (if (version< cider-version "0.18.0")
-		     ;; Older CIDER (without sesman) still need to use
-		     ;; old way.
-		     (cider-jack-in nil) ;jack-in without project
-		   ;; New CIDER (with sesman to manage sessions).
-		   (unless (cider-repls)
-		     (let ((sesman-system 'CIDER))
-		       (call-interactively 'sesman-link-with-directory))))
-                 (current-buffer))))
+	(condition-case nil (require 'cider)
+	  (user-error "cider not available"))
+	(let ((session-buffer
+	       (if (version< cider-version "0.18.0")
+		   ;; Older CIDER (without sesman) still need to use
+		   ;; old way.
+		   (cider-jack-in nil) ; jack-in without project
+		 ;; New CIDER (with sesman to manage sessions).
+		 (unless (cider-repls)
+		   (let ((sesman-system 'CIDER))
+		     (call-interactively 'sesman-link-with-directory)))
+		 (current-buffer))))
           (when (org-babel-comint-buffer-livep session-buffer)
-            (sit-for .25)
+            (sit-for .3)
 	    session-buffer)))
+       ((eq org-babel-clojure-backend 'inf-clojure)
+	(user-error "Session evaluation with inf-clojure is not supported"))
        ((eq org-babel-clojure-backend 'slime)
-        (error "Session evaluation with SLIME is not supported"))
-       (t
-        (error "Session initiate failed")))
-      (get-buffer session))))
+        (user-error "Session evaluation with SLIME is not supported"))
+       (t (user-error "Session initiate failed"))))))
 
 (defun org-babel-prep-session:clojure (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
