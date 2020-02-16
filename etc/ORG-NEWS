@@ -113,13 +113,18 @@ minutes.
 
 *** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 
-You can now use ~(setq org-babel-clojure-backend 'inf-clojure)~ and
-evaluate Clojure source blocks using [[https://github.com/clojure-emacs/inf-clojure][inf-clojure]].
+You can now set ~(setq org-babel-clojure-backend 'inf-clojure)~ and
+evaluate Clojure source blocks using [[https://github.com/clojure-emacs/inf-clojure][inf-clojure]].  With a header
+argument like =:alias "alias"= the Clojure REPL will boot with
+=clojure -Aalias=.  Otherwise Clojure will boot with =lein=, =boot= or
+=tools.deps=, depending on whether the current directory contains a
+=project.clj=, =build.boot= or =deps.edn=, falling back on
+~inf-clojure-generic-cmd~ in case no such file is present.
 
 Also, when using [[https://github.com/clojure-emacs/cider][cider]], you can now use =#+begin_src clojurescript= to
 execute ClojureScript code from Org files.  Note that this works only
 your Org file is associated with a cider session that knows how to run
-ClojureScript code---a bare =lein repl= session outside of a directory
+ClojureScript code.  A bare =lein repl= session outside of a directory
 configured for ClojureScript will /not/ work.
 
 *** =ob-java.el=: you can now pass Java command line arguments
