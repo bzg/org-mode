@@ -31,17 +31,13 @@ after this change.
 
 ** New features
 
-*** Numeric priorities are now allowed (up to 65)
+*** Looping agenda commands over headlines
 
-You can now set ~org-priority-highest/lowest/default~ to integers to
-use numeric priorities globally or set, for example
-
-#+PRIORITIES: 1 10 5
-
-to define a buffer-local range and default for priorities.  Priority
-commands should work as usual.  You cannot use numbers superior to 64
-for numeric priorities, as it would clash with priorities like [#A]
-where the "A" is internally converted to its numeric value of 65.
+~org-agenda-loop-over-headlines-in-active-region~ allows you to loop
+agenda commands over the active region.  When set to =t=, loop over
+all headlines.  When set to ='start-level=, loop over headlines with
+the same level than the first headline in the region.  When set to a
+string, loop over lines matching this regular expression.
 
 *** New minor mode ~org-table-header-line-mode~
 
@@ -66,13 +62,26 @@ call ~org-toggle-radio-button~.
 You can also add =#+ATTR_ORG: :radio t= right before the list to tell
 Org to use radio buttons for this list only.
 
-*** Looping agenda commands over headlines
+*** New allowed value for ~org-adapt-indentation~
 
-~org-agenda-loop-over-headlines-in-active-region~ allows you to loop
-agenda commands over the active region.  When set to =t=, loop over
-all headlines.  When set to ='start-level=, loop over headlines with
-the same level than the first headline in the region.  When set to a
-string, loop over lines matching this regular expression.
+~org-adapt-indentation~ now accepts a new value, ='headline-data=.
+
+When set to this value, Org will only adapt indentation of headline
+data lines, such as planning/clock lines and property/logbook drawers.
+Also, with this setting, =org-indent-mode= will keep these data lines
+correctly aligned with the headline above.
+
+*** Numeric priorities are now allowed (up to 65)
+
+You can now set ~org-priority-highest/lowest/default~ to integers to
+use numeric priorities globally or set, for example
+
+#+PRIORITIES: 1 10 5
+
+to define a buffer-local range and default for priorities.  Priority
+commands should work as usual.  You cannot use numbers superior to 64
+for numeric priorities, as it would clash with priorities like [#A]
+where the "A" is internally converted to its numeric value of 65.
 
 *** Property drawers allowed before first headline
 
@@ -96,29 +105,24 @@ Org now knows how to display remote images inline.
 Whether the images are actually displayed is controlled by the new
 option ~org-display-remote-inline-images~.
 
-*** New allowed value for ~org-adapt-indentation~
-
-~org-adapt-indentation~ now accepts a new value, ='headline-data=.
-
-When set to this value, Org will only adapt indentation of headline
-data lines, such as planning/clock lines and property/logbook drawers.
-Also, with this setting, =org-indent-mode= will keep these data lines
-correctly aligned with the headline above.
-
 *** New option to resolve open clock at a provided time
 
 ~org-resolve-clocks~ now has a `t' option, which works just like the
 `k' option, but the user specifies a time of day, not a number of
 minutes.
 
-*** Babel: =ob-clojure.el= now supports executing ClojureScript
+*** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 
-You can now use =#+begin_src clojurescript= and execute ClojureScript
-code from Org files.  You will need to put the file in an directory
-from where ClojureScript knows how to start a nrepl connection: e.g.
-you can put your Org file at the root of a figwheel-main directory.
+You can now use ~(setq org-babel-clojure-backend 'inf-clojure)~ and
+evaluate Clojure source blocks using [[https://github.com/clojure-emacs/inf-clojure][inf-clojure]].
 
-*** Babel: new header argument to pass Java command line arguments
+Also, when using [[https://github.com/clojure-emacs/cider][cider]], you can now use =#+begin_src clojurescript= to
+execute ClojureScript code from Org files.  Note that this works only
+your Org file is associated with a cider session that knows how to run
+ClojureScript code---a bare =lein repl= session outside of a directory
+configured for ClojureScript will /not/ work.
+
+*** =ob-java.el=: you can now pass Java command line arguments
 
 Babel Java blocks recognize header argument =:cmdargs= and pass its
 value in call to =java=.
