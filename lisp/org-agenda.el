@@ -1243,6 +1243,16 @@ in the past."
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-agenda-diary-file 'diary-file
+  "File to which to add new entries with the `i' key in agenda and calendar.
+When this is the symbol `diary-file', the functionality in the Emacs
+calendar will be used to add entries to the `diary-file'.  But when this
+points to a file, `org-agenda-diary-entry' will be used instead."
+  :group 'org-agenda
+  :type '(choice
+	  (const :tag "The standard Emacs diary file" diary-file)
+	  (file :tag "Special Org file diary entries")))
+
 (defcustom org-agenda-include-diary nil
   "If non-nil, include in the agenda entries from the Emacs Calendar's diary.
 Custom commands can set this variable in the options section."
