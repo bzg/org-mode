@@ -1055,9 +1055,7 @@ key."
 		   #'org-agenda-diary-entry)))
 
 (eval-after-load "calendar"
-  '(progn
-     (require 'org-agenda)
-     (add-hook 'calendar-mode-hook #'org--setup-calendar-bindings)))
+  '(add-hook 'calendar-mode-hook #'org--setup-calendar-bindings))
 
 ;;;; Saveplace
 
