@@ -79,18 +79,16 @@
   :type 'string
   :group 'org-babel)
 
-(defun org-babel-clojure-cider-current-ns ()
-  "Like `cider-current-ns' except `cider-find-ns'."
-  (or cider-buffer-ns
-      (let ((repl-buf (cider-current-connection)))
-	(and repl-buf (buffer-local-value 'cider-buffer-ns repl-buf)))
-      org-babel-clojure-default-ns))
-
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
 	 (ns (or (cdr (assq :ns params))
-		 (org-babel-clojure-cider-current-ns)))
+		 (if (eq org-babel-clojure-backend 'cider)
+		     (or cider-buffer-ns
+			 (let ((repl-buf (cider-current-connection)))
+			   (and repl-buf (buffer-local-value
+					  'cider-buffer-ns repl-buf))))
+		   org-babel-clojure-default-ns)))
 	 (result-params (cdr (assq :result-params params)))
 	 (print-level nil)
 	 (print-length nil)
@@ -114,14 +112,13 @@
 	(format "(clojure.pprint/pprint (do %s))" body)
       body)))
 
-(defvar ob-clojure-inf-clojure-tmp-output nil)
+(defvar ob-clojure-inf-clojure-filter-out)
+(defvar ob-clojure-inf-clojure-tmp-output)
 (defun ob-clojure-inf-clojure-output (s)
   "Store a trimmed version of S in a variable and return S."
   (let ((s0 (org-trim
 	     (replace-regexp-in-string
-	      "^nil\\|nil$" ""
-	      (replace-regexp-in-string
-	       "\\s-*user=>\\s-*" "" s)))))
+	      ob-clojure-inf-clojure-filter-out "" s))))
     (push s0 ob-clojure-inf-clojure-tmp-output))
   s)
 
@@ -146,6 +143,7 @@
     (mapcar #'list l)))
 
 (defvar inf-clojure-buffer)
+(defvar comint-prompt-regexp)
 (defvar inf-clojure-comint-prompt-regexp)
 (defun ob-clojure-eval-with-inf-clojure (expanded params)
   "Evaluate EXPANDED code block with PARAMS using inf-clojure."
@@ -161,10 +159,16 @@
 			     "clojure" (format "clojure -A%s" alias)
 			     cmd0)
 		    cmd0)))
+	(setq comint-prompt-regexp inf-clojure-comint-prompt-regexp)
 	(funcall-interactively #'inf-clojure cmd)
 	(goto-char (point-max))))
-    (sit-for 2))
+    (sit-for 1))
   ;; Now evaluate the code
+  (setq ob-clojure-inf-clojure-filter-out
+	(concat "^nil\\|nil$\\|\\s-*"
+		(or (cdr (assq :ns params))
+		    org-babel-clojure-default-ns)
+		"=>\\s-*"))
   (add-hook 'comint-preoutput-filter-functions
 	    #'ob-clojure-inf-clojure-output)
   (setq ob-clojure-inf-clojure-tmp-output nil)
@@ -194,17 +198,16 @@
     (if (not connection)
 	;; Display in the result instead of using `user-error'
 	(setq result0 "Please reevaluate when nREPL is connected")
-      (ob-clojure-with-temp-expanded
-       expanded params
-       (let ((response (nrepl-sync-request:eval exp connection)))
-	 (push (or (nrepl-dict-get response "root-ex")
-		   (nrepl-dict-get response "ex")
-		   (nrepl-dict-get
-		    response (if (or (member "output" result-params)
-				     (member "pp" result-params))
-				 "out"
-			       "value")))
-	       result0)))
+      (ob-clojure-with-temp-expanded expanded params
+	(let ((response (nrepl-sync-request:eval exp connection)))
+	  (push (or (nrepl-dict-get response "root-ex")
+		    (nrepl-dict-get response "ex")
+		    (nrepl-dict-get
+		     response (if (or (member "output" result-params)
+				      (member "pp" result-params))
+				  "out"
+				"value")))
+		result0)))
       (ob-clojure-string-or-list
        (reverse (delete "" (mapcar (lambda (r)
 				     (replace-regexp-in-string "nil" "" r))
