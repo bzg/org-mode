@@ -111,6 +111,11 @@ option ~org-display-remote-inline-images~.
 `k' option, but the user specifies a time of day, not a number of
 minutes.
 
+*** Allow text rescaling in column view
+
+You can now use =C-x C-+= in column view: the columns face size will
+increase or decrease, together with the column header size.
+
 *** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 
 You can now set ~(setq org-babel-clojure-backend 'inf-clojure)~ and

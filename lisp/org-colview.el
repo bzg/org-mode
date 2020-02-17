@@ -44,6 +44,8 @@
 (declare-function org-dynamic-block-define "org" (type func))
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-open-from-string "ol" (s &optional arg))
+(declare-function face-remap-remove-relative "face-remap" (cookie))
+(declare-function face-remap-add-relative "face-remap" (face &rest specs))
 
 (defvar org-agenda-columns-add-appointments-to-effort-sum)
 (defvar org-agenda-columns-compute-summary-properties)
@@ -364,11 +366,18 @@ ORIGINAL is the real string, i.e., before it is modified by
               ("TODO" (propertize v 'face (org-get-todo-face original)))
               (_ v)))))
 
+(defvar org-columns-header-line-remap nil
+  "Store the relative remapping of column header-line.
+This is needed to later remove this relative remapping.")
+
 (defun org-columns--display-here (columns &optional dateline)
   "Overlay the current line with column display.
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
 DATELINE is non-nil when the face used should be
 `org-agenda-column-dateline'."
+  (when (ignore-errors (require 'face-remap))
+    (setq org-columns-header-line-remap
+	  (face-remap-add-relative 'header-line '(:inherit default))))
   (save-excursion
     (beginning-of-line)
     (let* ((level-face (and (looking-at "\\(\\**\\)\\(\\* \\)")
@@ -378,8 +387,7 @@ DATELINE is non-nil when the face used should be
 			      (org-get-at-bol 'face))
 			 'default))
 	   (color (list :foreground (face-attribute ref-face :foreground)))
-	   (font (list :height (face-attribute 'default :height)
-		       :family (face-attribute 'default :family)))
+	   (font (list :family (face-attribute 'default :family)))
 	   (face (list color font 'org-column ref-face))
 	   (face1 (list color font 'org-agenda-column-dateline ref-face)))
       ;; Each column is an overlay on top of a character.  So there has
@@ -502,6 +510,9 @@ for the duration of the command.")
 (defun org-columns-remove-overlays ()
   "Remove all currently active column overlays."
   (interactive)
+  (when (and (fboundp 'face-remap-remove-relative)
+	     org-columns-header-line-remap)
+    (face-remap-remove-relative org-columns-header-line-remap))
   (when org-columns-overlays
     (when (local-variable-p 'org-previous-header-line-format)
       (setq header-line-format org-previous-header-line-format)
