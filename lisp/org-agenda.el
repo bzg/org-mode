@@ -7731,7 +7731,7 @@ the variable `org-agenda-auto-exclude-function'."
       (and fc (org-agenda-filter-apply
 	       (setq org-agenda-category-filter fc) 'category))
       (and ft (org-agenda-filter-apply
-	       (setq org-agenda-tag-filter ft) 'tag))
+	       (setq org-agenda-tag-filter ft) 'tag 'expand))
       (and fe (org-agenda-filter-apply
 	       (setq org-agenda-effort-filter fe) 'effort))
       (and fr (org-agenda-filter-apply
@@ -7889,6 +7889,7 @@ also press `-' or `+' to switch between filtering and excluding."
 	  (setq org-agenda-represented-categories
 		(nreverse (org-uniquify (delq nil categories))))))))
 
+(defvar org-tag-groups-alist-for-agenda)
 (defun org-agenda-get-represented-tags ()
   "Return a list of all tags used in this agenda buffer.
 These will be lower-case, for filtering."
@@ -7900,9 +7901,16 @@ These will be lower-case, for filtering."
 				 pos 'tags nil (point-max))))
 	    (setq tt (get-text-property pos 'tags))
 	    (if tt (push tt tags-lists)))
-	  (setq org-agenda-represented-tags
+	  (setq tags-lists
 		(nreverse (org-uniquify
-			   (delq nil (apply 'append tags-lists)))))))))
+			   (delq nil (apply 'append tags-lists)))))
+	  (dolist (tag tags-lists)
+	    (mapc
+	     (lambda (group)
+	       (when (member tag (mapcar #'downcase group))
+		 (push (downcase (car group)) tags-lists)))
+	     org-tag-groups-alist-for-agenda))
+	  (setq org-agenda-represented-tags tags-lists)))))
 
 (defun org-agenda-filter-make-matcher (filter type &optional expand)
   "Create the form that tests a line for agenda filter.  Optional
