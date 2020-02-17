@@ -201,6 +201,10 @@ You can also set this option to =t= or to =from-agenda=.
 
 This option will add a timeout to notifications.
 
+*** New hook ~org-agenda-filter-hook~
+
+Functions in this hook are run after ~org-agenda-filter~ is called.
+
 ** Removed or renamed functions and variables
 
 *** Renamed ~org-columns-set-tags-or-toggle~

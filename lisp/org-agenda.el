@@ -1014,6 +1014,12 @@ headlines as the agenda display heavily relies on them."
   :group 'org-agenda-startup
   :type 'hook)
 
+(defcustom org-agenda-filter-hook nil
+  "Hook run just after filtering with `org-agenda-filter'."
+  :group 'org-agenda-startup
+  :package-version '(Org . "9.4")
+  :type 'hook)
+
 (defcustom org-agenda-mouse-1-follows-link nil
   "Non-nil means mouse-1 on a link will follow the link in the agenda.
 A longer mouse click will still set point.  Needs to be set
@@ -3847,7 +3853,10 @@ FILTER-ALIST is an alist of filters we need to apply when
 (defvar org-overriding-columns-format)
 (defvar org-local-columns-format)
 (defun org-agenda-finalize ()
-  "Finishing touch for the agenda buffer, called just before displaying it."
+  "Finishing touch for the agenda buffer.
+This function is called just before displaying the agenda.  If
+you want to add your own functions to the finalization of the
+agenda display, configure `org-agenda-finalize-hook'."
   (unless org-agenda-multi
     (save-excursion
       (let ((inhibit-read-only t))
@@ -7745,7 +7754,8 @@ the variable `org-agenda-auto-exclude-function'."
       (and fe (org-agenda-filter-apply
 	       (setq org-agenda-effort-filter fe) 'effort))
       (and fr (org-agenda-filter-apply
-	       (setq org-agenda-regexp-filter fr) 'regexp)))))
+	       (setq org-agenda-regexp-filter fr) 'regexp))
+      (run-hooks 'org-agenda-filter-hook))))
 
 (defun org-agenda-filter-completion-function (string _predicate &optional flag)
   "Complete a complex filter string.
@@ -8015,7 +8025,8 @@ If the line does not have an effort defined, return nil."
 
 (defun org-agenda-filter-expand-tags (filter &optional no-operator)
   "Expand group tags in FILTER for the agenda.
-When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
+When NO-OPERATOR is non-nil, do not add the + operator to
+returned tags."
   (if org-group-tags
       (let ((case-fold-search t) rtn)
 	(mapc
@@ -8032,9 +8043,10 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
     filter))
 
 (defun org-agenda-filter-apply (filter type &optional expand)
-  "Set FILTER as the new agenda filter and apply it.  Optional
-argument EXPAND can be used for the TYPE tag and will expand the
-tags in the FILTER if any of the tags in FILTER are grouptags."
+  "Set FILTER as the new agenda filter and apply it.
+Optional argument EXPAND can be used for the TYPE tag and will
+expand the tags in the FILTER if any of the tags in FILTER are
+grouptags."
   ;; Deactivate `org-agenda-entry-text-mode' when filtering
   (when org-agenda-entry-text-mode (org-agenda-entry-text-mode))
   (setq org-agenda-filter-form (org-agenda-filter-make-matcher
