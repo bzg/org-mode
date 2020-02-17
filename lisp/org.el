@@ -3198,6 +3198,22 @@ When using LaTeXML set this option to
 	  (const :tag "None" nil)
 	  (string :tag "\nShell command")))
 
+(defcustom org-latex-to-html-convert-command nil
+  "Command to convert LaTeX fragments to HTML.
+This command is very open-ended: the output of the command will
+directly replace the LaTeX fragment in the resulting HTML.
+Replace format-specifiers in the command as noted below and use
+`shell-command' to convert LaTeX to HTML.
+%i:     The LaTeX fragment to be converted.
+
+For example, this could be used with LaTeXML as
+\"latexmlc 'literal:%i' --profile=math --preload=siunitx.sty 2>/dev/null\"."
+  :group 'org-latex
+  :package-version '(Org . "9.5")
+  :type '(choice
+	  (const :tag "None" nil)
+	  (string :tag "\nShell command")))
+
 (defcustom org-preview-latex-default-process 'dvipng
   "The default process to convert LaTeX fragments to image files.
 All available processes and theirs documents can be found in
@@ -15617,6 +15633,10 @@ Some of the options can be changed using the variable
 		    (if (string= (match-string 0 value) "$$")
 			(insert "\\[" (substring value 2 -2) "\\]")
 		      (insert "\\(" (substring value 1 -1) "\\)"))))
+		 ((eq processing-type 'html)
+		  (goto-char beg)
+		  (delete-region beg end)
+		  (insert (org-format-latex-as-html value)))
 		 ((assq processing-type org-preview-latex-process-alist)
 		  ;; Process to an image.
 		  (cl-incf cnt)
@@ -15781,6 +15801,15 @@ inspection."
 						'paragraph 'character)))
       ;; Failed conversion.  Return the LaTeX fragment verbatim
       latex-frag)))
+
+(defun org-format-latex-as-html (latex-frag)
+  "Convert LaTeX to HTML with a custom conversion command.
+`LATEX-FRAG' is the latex fragment
+Set the custom command with `org-latex-to-html-convert-command'."
+  (let ((cmd (format-spec org-latex-to-html-convert-command
+			  `((?i . ,latex-frag)))))
+    (message "Running %s" cmd)
+    (setq shell-command-output (shell-command-to-string cmd))))
 
 (defun org--get-display-dpi ()
   "Get the DPI of the display.

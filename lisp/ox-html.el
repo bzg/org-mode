@@ -775,6 +775,8 @@ e.g. \"tex:mathjax\".  Allowed values are:
   `verbatim'    Keep everything in verbatim
   `mathjax', t  Do MathJax preprocessing and arrange for MathJax.js to
                 be loaded.
+  `html'        Use `org-latex-to-html-convert-command' to convert
+                LaTeX fragments to HTML.
   SYMBOL        Any symbol defined in `org-preview-latex-process-alist',
                 e.g., `dvipng'."
   :group 'org-export-html
@@ -2769,12 +2771,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-html-format-latex (latex-frag processing-type info)
   "Format a LaTeX fragment LATEX-FRAG into HTML.
 PROCESSING-TYPE designates the tool used for conversion.  It can
-be `mathjax', `verbatim', nil, t or symbols in
+be `mathjax', `verbatim', `html', nil, t or symbols in
 `org-preview-latex-process-alist', e.g., `dvipng', `dvisvgm' or
 `imagemagick'.  See `org-html-with-latex' for more information.
 INFO is a plist containing export properties."
   (let ((cache-relpath "") (cache-dir ""))
-    (unless (eq processing-type 'mathjax)
+    (unless (or (eq processing-type 'mathjax)
+                (eq processing-type 'html))
       (let ((bfn (or (buffer-file-name)
 		     (make-temp-name
 		      (expand-file-name "latex" temporary-file-directory))))
@@ -2888,6 +2891,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((memq processing-type '(t mathjax))
       (org-html-format-latex latex-frag 'mathjax info))
+     ((memq processing-type '(t html))
+      (org-html-format-latex latex-frag 'html info))
      ((assq processing-type org-preview-latex-process-alist)
       (let ((formula-link
 	     (org-html-format-latex latex-frag processing-type info)))
