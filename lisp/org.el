@@ -3120,16 +3120,6 @@ A nil value means to remove them, after a query, from the list."
   :group 'org-agenda
   :type 'boolean)
 
-(defcustom org-agenda-diary-file 'diary-file
-  "File to which to add new entries with the `i' key in agenda and calendar.
-When this is the symbol `diary-file', the functionality in the Emacs
-calendar will be used to add entries to the `diary-file'.  But when this
-points to a file, `org-agenda-diary-entry' will be used instead."
-  :group 'org-agenda
-  :type '(choice
-	  (const :tag "The standard Emacs diary file" diary-file)
-	  (file :tag "Special Org file diary entries")))
-
 (defgroup org-latex nil
   "Options for embedding LaTeX code into Org mode."
   :tag "Org LaTeX"
