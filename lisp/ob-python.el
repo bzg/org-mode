@@ -260,7 +260,7 @@ try:
             __org_babel_python_final.value), '<string>', 'eval'))
     else:
         exec(compile(__org_babel_python_ast, '<string>', 'exec'))
-        __org_babel_python_final = ''
+        __org_babel_python_final = None
 except Exception:
     from traceback import format_exc
     __org_babel_python_final = format_exc()
