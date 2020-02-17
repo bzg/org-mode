@@ -8737,6 +8737,7 @@ When called with a prefix argument, include all archive files as well."
 		     (org-agenda-error)))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker)))
+    ;; FIXME: use `org-switch-to-buffer-other-window'?
     (switch-to-buffer-other-window buffer)
     (widen)
     (push-mark)
@@ -8987,6 +8988,7 @@ It also looks at the text of the entry itself."
 			  (goto-char (match-beginning 0))
 			  (org-open-at-point)))
 		    ;; This is an internal link, widen the buffer
+		    ;; FIXME: use `org-switch-to-buffer-other-window'?
 		    (switch-to-buffer-other-window buffer)
 		    (widen)
 		    (goto-char marker)

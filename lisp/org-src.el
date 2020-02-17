@@ -810,7 +810,7 @@ Raise an error when current buffer is not a source editing buffer."
     (`current-window (pop-to-buffer-same-window buffer))
     (`other-window
      (let ((cur-win (selected-window)))
-       (switch-to-buffer-other-window buffer)
+       (org-switch-to-buffer-other-window buffer)
        (when (eq context 'exit) (quit-restore-window cur-win))))
     (`split-window-below
      (if (eq context 'exit)
