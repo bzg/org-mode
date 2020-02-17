@@ -255,7 +255,7 @@ ENTITY is a message entity."
 	       (concat "@" (or (cdr server) (car server))))
 	     (if article (concat "#" article) "")))))
 
-(defun org-wl-open (path)
+(defun org-wl-open (path &rest _)
   "Follow the WL message link specified by PATH.
 When called with one prefix, open message in namazu search folder
 with `org-wl-namazu-default-index' as search index.  When called

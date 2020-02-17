@@ -236,7 +236,7 @@ date year)."
 			    :link link :description name)
       link)))
 
-(defun org-bbdb-export (path desc format)
+(defun org-bbdb-export (path desc format _)
   "Create the export version of a BBDB link specified by PATH or DESC.
 If exporting to either HTML or LaTeX FORMAT the link will be
 italicized, in all other cases it is left unchanged."
@@ -249,7 +249,7 @@ italicized, in all other cases it is left unchanged."
     (format "<text:span text:style-name=\"Emphasis\">%s</text:span>" desc))
    (t desc)))
 
-(defun org-bbdb-open (name)
+(defun org-bbdb-open (name _)
   "Follow a BBDB link to NAME."
   (require 'bbdb-com)
   (let ((inhibit-redisplay (not debug-on-error)))

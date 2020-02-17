@@ -19835,7 +19835,7 @@ The following =ol-man.el= file implements it
 (require 'ol)
 
 (org-link-set-parameters "man"
-                         :follow org-man-command
+                         :follow #'org-man-open
                          :export #'org-man-export
                          :store #'org-man-store-link)
 
@@ -19843,6 +19843,11 @@ The following =ol-man.el= file implements it
   "The Emacs command to be used to display a man page."
   :group 'org-link
   :type '(choice (const man) (const woman)))
+
+(defun org-man-open (path _)
+  "Visit the manpage on PATH.
+PATH should be a topic that can be thrown at the man command."
+  (funcall org-man-command path))
 
 (defun org-man-store-link ()
   "Store a link to a man page."
@@ -19863,7 +19868,7 @@ The following =ol-man.el= file implements it
       (match-string 1 (buffer-name))
     (error "Cannot create link to this man page")))
 
-(defun org-man-export (link description format)
+(defun org-man-export (link description format _)
   "Export a man page link from Org files."
   (let ((path (format "http://man.he.net/?topic=%s&section=all" link))
         (desc (or description link)))

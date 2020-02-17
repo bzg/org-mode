@@ -35,7 +35,7 @@
   :group 'org-link
   :type '(choice (const man) (const woman)))
 
-(defun org-man-open (path)
+(defun org-man-open (path _)
   "Visit the manpage on PATH.
 PATH should be a topic that can be thrown at the man command."
   (funcall org-man-command path))

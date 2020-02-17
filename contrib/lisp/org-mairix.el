@@ -139,7 +139,7 @@ the buffer just like 'message-send-and-exit' does."
           (cons (list link desc) org-stored-links)))
   (message-bury (current-buffer)))
 
-(defun org-mairix-open (search)
+(defun org-mairix-open (search _)
   "Function to open mairix link.
 
 We first need to split it into its individual parts, and then

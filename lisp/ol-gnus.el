@@ -210,7 +210,7 @@ If `org-store-link' was called with a prefix arg the meaning of
      (format "nntp+%s:%s" (or (cdr server) (car server)) group)
      article)))
 
-(defun org-gnus-open (path)
+(defun org-gnus-open (path _)
   "Follow the Gnus message or folder link specified by PATH."
   (unless (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path)
     (error "Error in Gnus link %S" path))

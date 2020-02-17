@@ -134,7 +134,6 @@
 (declare-function org-insert-heading "org" (&optional arg invisible-ok top))
 (declare-function org-map-entries "org" (func &optional match scope &rest skip))
 (declare-function org-narrow-to-subtree "org" ())
-(declare-function org-open-file "org" (path &optional in-emacs line search))
 (declare-function org-set-property "org" (property value))
 (declare-function org-toggle-tag "org" (tag &optional onoff))
 
@@ -483,12 +482,11 @@ With optional argument OPTIONAL, also prompt for optional fields."
 			 :follow #'org-bibtex-open
 			 :store #'org-bibtex-store-link)
 
-(defun org-bibtex-open (path)
-  "Visit the bibliography entry on PATH."
-  (let* ((search (when (string-match "::\\(.+\\)\\'" path)
-		   (match-string 1 path)))
-	 (path (substring path 0 (match-beginning 0))))
-    (org-open-file path t nil search)))
+(defun org-bibtex-open (path arg)
+  "Visit the bibliography entry on PATH.
+ARG, when non-nil, is a universal prefix argument.  See
+`org-open-file' for details."
+  (org-link-open-as-file path arg))
 
 (defun org-bibtex-store-link ()
   "Store a link to a BibTeX entry."

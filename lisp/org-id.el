@@ -75,7 +75,6 @@
 
 (declare-function message-make-fqdn "message" ())
 (declare-function org-goto-location "org-goto" (&optional _buf help))
-(declare-function org-link-set-parameters "ol" (type &rest rest))
 
 ;;; Customization
 
@@ -674,7 +673,7 @@ optional argument MARKERP, return the position as a new marker."
       (org-link-store-props :link link :description desc :type "id")
       link)))
 
-(defun org-id-open (id)
+(defun org-id-open (id _)
   "Go to the entry with id ID."
   (org-mark-ring-push)
   (let ((m (org-id-find id 'marker))

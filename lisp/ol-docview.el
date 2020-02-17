@@ -68,7 +68,7 @@
        ((eq format 'ascii) (format "%s (%s)" desc path))
        (t path)))))
 
-(defun org-docview-open (link)
+(defun org-docview-open (link _)
   (string-match "\\(.*?\\)\\(?:::\\([0-9]+\\)\\)?$" link)
   (let ((path (match-string 1 link))
 	(page (and (match-beginning 2)

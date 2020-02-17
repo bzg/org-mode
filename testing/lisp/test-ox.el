@@ -2997,7 +2997,7 @@ Para2"
    (string-match
     "success"
     (progn
-      (org-link-set-parameters "foo" :export (lambda (p d f) "success"))
+      (org-link-set-parameters "foo" :export (lambda (p d f i) "success"))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -3013,7 +3013,7 @@ Para2"
     "success"
     (progn
       (org-link-set-parameters
-       "foo" :export (lambda (p d f) (and (eq f 'test) "success")))
+       "foo" :export (lambda (p d f i) (and (eq f 'test) "success")))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -3030,7 +3030,7 @@ Para2"
     "success"
     (progn
       (org-link-set-parameters
-       "foo" :export (lambda (p d f) (and (eq f 'test) "success")))
+       "foo" :export (lambda (p d f i) (and (eq f 'test) "success")))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend

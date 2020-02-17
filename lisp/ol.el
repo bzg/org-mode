@@ -1279,15 +1279,15 @@ If there is no description, use the link target."
 ;;; Built-in link types
 
 ;;;; "doi" link type
-(defun org-link--open-doi (path)
+(defun org-link--open-doi (path arg)
   "Open a \"doi\" type link.
 PATH is a the path to search for, as a string."
-  (browse-url (url-encode-url (concat org-link-doi-server-url path))))
+  (browse-url (url-encode-url (concat org-link-doi-server-url path)) arg))
 
 (org-link-set-parameters "doi" :follow #'org-link--open-doi)
 
 ;;;; "elisp" link type
-(defun org-link--open-elisp (path)
+(defun org-link--open-elisp (path _)
   "Open a \"elisp\" type link.
 PATH is the sexp to evaluate, as a string."
   (if (or (and (org-string-nw-p org-link-elisp-skip-confirm-regexp)
@@ -1308,7 +1308,7 @@ PATH is the sexp to evaluate, as a string."
 (org-link-set-parameters "file" :complete #'org-link-complete-file)
 
 ;;;; "help" link type
-(defun org-link--open-help (path)
+(defun org-link--open-help (path _)
   "Open a \"help\" type link.
 PATH is a symbol name, as a string."
   (pcase (intern path)
@@ -1326,7 +1326,7 @@ PATH is a symbol name, as a string."
 			     (browse-url (concat scheme ":" url) arg))))
 
 ;;;; "shell" link type
-(defun org-link--open-shell (path)
+(defun org-link--open-shell (path _)
   "Open a \"shell\" type link.
 PATH is the command to execute, as a string."
   (if (or (and (org-string-nw-p org-link-shell-skip-confirm-regexp)
