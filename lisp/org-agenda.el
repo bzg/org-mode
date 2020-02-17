@@ -9740,7 +9740,7 @@ ARG is passed through to `org-deadline'."
   "Stop the currently running clock."
   (interactive)
   (unless (marker-buffer org-clock-marker)
-    (error "No running clock"))
+    (user-error "No running clock"))
   (let ((marker (make-marker)) (col (current-column)) newhead)
     (org-with-remote-undo (marker-buffer org-clock-marker)
       (with-current-buffer (marker-buffer org-clock-marker)

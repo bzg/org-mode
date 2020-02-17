@@ -1061,7 +1061,7 @@ Store them in the capture property list."
 		    (org-capture-put-target-region-and-position)
 		    (widen)
 		    (goto-char org-clock-hd-marker))
-	   (error "No running clock that could be used as capture target")))
+	   (user-error "No running clock that could be used as capture target")))
 	(target (error "Invalid capture target specification: %S" target)))
 
       (org-capture-put :buffer (current-buffer)
