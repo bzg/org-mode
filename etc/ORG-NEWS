@@ -12,13 +12,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.4 (not yet released)
 ** Incompatible changes
-*** Python session return values must be top-level expression statements
+*** Change how Python sessions handle return values
 
 Python blocks with ~:session :results value~ header arguments now only
-return a value if the last line is a top-level expression statement,
-otherwise the result is None. Also, None will now show up under
-"#+RESULTS:", as it already did with ~:results value~ for non-session
-blocks.
+return a value if the last line is a top-level expression
+statement. If the last line is not a top-level expression statement,
+the block will return a blank (empty) result.
+
+Also, a return value of ~None~ will now show up under "#+RESULTS:", as
+it already did for non-session blocks.
 
 *** In HTML export, change on how outline-container-* is set
 
