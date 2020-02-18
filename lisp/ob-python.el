@@ -30,7 +30,7 @@
 (require 'ob)
 (require 'org-macs)
 
-(declare-function py-shell "ext:python-mode" (&optional argprompt))
+(declare-function py-shell "ext:python-mode" (&rest args))
 (declare-function py-toggle-shells "ext:python-mode" (arg))
 (declare-function run-python "ext:python" (&optional cmd dedicated show))
 
@@ -208,8 +208,8 @@ then create.  Return the initialized session."
 			     "^\\*\\([^*]+\\)\\*$" "\\1" python-buffer)
 			  (concat "Python-" (symbol-name session))))
 	       (py-which-bufname bufname))
-	  (py-shell)
-	  (setq python-buffer (org-babel-python-with-earmuffs bufname))))
+	  (setq python-buffer (org-babel-python-with-earmuffs bufname))
+	  (py-shell nil nil t org-babel-python-command python-buffer nil nil t nil)))
        (t
 	(error "No function available for running an inferior Python")))
       (setq org-babel-python-buffers
