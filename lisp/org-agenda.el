@@ -185,7 +185,7 @@ and `org-agenda-entry-text-maxlines'."
   "Non-nil means export org-links as descriptive links in agenda added text.
 This variable applies to the text added to the agenda when
 `org-agenda-add-entry-text-maxlines' is larger than 0.
-When this variable nil, the URL will (also) be shown."
+When this variable is nil, the URL will (also) be shown."
   :group 'org-agenda
   :type 'boolean)
 
