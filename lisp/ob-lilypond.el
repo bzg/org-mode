@@ -391,7 +391,8 @@ If TEST is non-nil, the shell command is returned and is not run."
 (defun org-babel-lilypond-switch-extension (file-name ext)
   "Utility command to swap current FILE-NAME extension with EXT."
   (concat (file-name-sans-extension
-           file-name) ext))
+           file-name)
+	 ext))
 
 (defun org-babel-lilypond-get-header-args (mode)
   "Default arguments to use when evaluating a lilypond source block.

@@ -1143,8 +1143,4 @@ Return PDF file name or an error if it couldn't be produced."
 
 (provide 'ox-man)
 
-;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
-;; End:
-
 ;;; ox-man.el ends here

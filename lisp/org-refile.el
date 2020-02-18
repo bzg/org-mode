@@ -528,8 +528,9 @@ the *old* location.")
 (defvar org-refile-keep nil
   "Non-nil means `org-refile' will copy instead of refile.")
 
-;;;###autoload
 (define-obsolete-function-alias 'org-copy 'org-refile-copy)
+
+;;;###autoload
 (defun org-refile-copy ()
   "Like `org-refile', but preserve the refiled subtree."
   (interactive)

@@ -1,6 +1,6 @@
 ;;; eldo.el --- Elisp Doc-to-Org converter
 
-;; Copyright (C) 2012--2019  Bastien Guerry
+;; Copyright (C) 2012--2020  Bastien Guerry
 ;;
 ;; Author: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: elisp, documentation, org
@@ -94,7 +94,8 @@
 	 (if version (format "- *Since:* Emacs version %s\n" version) "")
 	 (format (concat "- *In file:* [[" eldo-git-raw-file "][%s]]\n") f f)
 	 (format (concat "- [[" eldo-git-search-string
-			 "][Find modifications in git logs]]\n\n") (symbol-name h)))
+			 "][Find modifications in git logs]]\n\n")
+		 (symbol-name h)))
 	(when (stringp d) (insert (eldo-make-verbatim d)))))
     (org-set-property "CUSTOM_ID" (symbol-name h))
     (goto-char (point-max))))
@@ -115,7 +116,8 @@
 	 (if (and key (not (string= key ""))) (format "\n- *Access:* ~%s~" key) "")
 	 (format (concat "\n- *In file:* [[" eldo-git-raw-file "][%s]]\n") f f)
 	 (format (concat "- [[" eldo-git-search-string
-			 "][Find modifications in git logs]]\n\n") (symbol-name c)))
+			 "][Find modifications in git logs]]\n\n")
+		 (symbol-name c)))
 	(when (stringp d) (insert (eldo-make-verbatim d))))
       (goto-char (point-max)))))
 
@@ -141,7 +143,8 @@
 	 (if version (format "- *Since:* Emacs version %s\n" version) "")
 	 (format (concat "- *In file:* [[" eldo-git-raw-file "][%s]]\n") f f)
 	 (format (concat "- [[" eldo-git-search-string
-			 "][Find modifications in git logs]]\n\n") (symbol-name o)))
+			 "][Find modifications in git logs]]\n\n")
+		 (symbol-name o)))
 	(when (stringp d) (insert (eldo-make-verbatim d)))))
     (org-set-property "CUSTOM_ID" (symbol-name o))
     (goto-char (point-max))))
