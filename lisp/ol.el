@@ -749,6 +749,8 @@ TYPE is a string and KEY is a plist keyword.  See
   "Set link TYPE properties to PARAMETERS.
 PARAMETERS should be keyword value pairs.  See
 `org-link-parameters' for supported keys."
+  (when (member type '("coderef" "custom-id" "fuzzy" "radio"))
+    (error "Cannot override reserved link type: %S" type))
   (let ((data (assoc type org-link-parameters)))
     (if data (setcdr data (org-combine-plists (cdr data) parameters))
       (push (cons type parameters) org-link-parameters)
