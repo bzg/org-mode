@@ -927,4 +927,8 @@ a-list placed behind the generic `org-babel-key-prefix'.")
 
 (provide 'org-keys)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-keys.el ends here

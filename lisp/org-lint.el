@@ -1259,4 +1259,8 @@ ARG can also be a list of checker names, as symbols, to run."
 
 (provide 'org-lint)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-lint.el ends here

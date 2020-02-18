@@ -1721,4 +1721,8 @@ This will add overlays to the date lines, to show the summary for each day."
 
 (provide 'org-colview)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-colview.el ends here

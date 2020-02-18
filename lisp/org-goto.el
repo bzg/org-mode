@@ -309,4 +309,8 @@ With a prefix argument, use the alternative interface: e.g., if
 
 (provide 'org-goto)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-goto.el ends here

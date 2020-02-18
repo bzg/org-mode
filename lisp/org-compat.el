@@ -1107,4 +1107,8 @@ key."
 
 (provide 'org-compat)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-compat.el ends here

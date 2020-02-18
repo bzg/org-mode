@@ -1905,4 +1905,8 @@ Also refresh fontification if needed."
 
 (provide 'ol)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; ol.el ends here

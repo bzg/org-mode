@@ -3552,4 +3552,8 @@ overruling parameters for `org-list-to-generic'."
 
 (provide 'org-list)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-list.el ends here

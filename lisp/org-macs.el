@@ -1235,4 +1235,8 @@ window."
 
 (provide 'org-macs)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-macs.el ends here

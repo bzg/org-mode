@@ -449,4 +449,8 @@ with \"H:MM:SS\" format, return `h:mm:ss'.  Otherwise, return
 
 (provide 'org-duration)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-duration.el ends here

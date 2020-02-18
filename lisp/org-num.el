@@ -468,4 +468,8 @@ NUMBERING is a list of numbers."
 
 (provide 'org-num)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-num.el ends here

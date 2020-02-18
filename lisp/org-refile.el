@@ -881,4 +881,8 @@ this function appends the default value from
 
 (provide 'org-refile)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-refile.el ends here
