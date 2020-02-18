@@ -7947,7 +7947,10 @@ These will be lower-case, for filtering."
   "Create the form that tests a line for agenda filter.  Optional
 argument EXPAND can be used for the TYPE tag and will expand the
 tags in the FILTER if any of the tags in FILTER are grouptags."
-  (let (f f1)
+  (let ((multi-pos-cats
+	 (string-match-p "\++"
+	  (mapconcat (lambda (cat) (substring cat 0 1)) filter "")))
+	f f1)
     (cond
      ;; Tag filter
      ((eq type 'tag)
@@ -7991,7 +7994,7 @@ tags in the FILTER if any of the tags in FILTER are grouptags."
 		     filter)))
       (dolist (x filter)
 	(push (org-agenda-filter-effort-form x) f))))
-    (cons (if (eq type 'category) 'or 'and) (nreverse f))))
+    (cons (if multi-pos-cats 'or 'and) (nreverse f))))
 
 (defun org-agenda-filter-make-matcher-tag-exp (tags op)
   "Return a form associated to tag-expression TAGS.
