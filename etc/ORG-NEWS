@@ -116,6 +116,12 @@ minutes.
 You can now use =C-x C-+= in column view: the columns face size will
 increase or decrease, together with the column header size.
 
+*** New startup option =#+startup: num=
+
+When this startup option is set, display headings as numeroted.
+
+Use =#+startup: nonum= to turn this off.
+
 *** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 
 You can now set ~(setq org-babel-clojure-backend 'inf-clojure)~ and
@@ -202,6 +208,14 @@ This option will add a timeout to notifications.
 *** New hook ~org-agenda-filter-hook~
 
 Functions in this hook are run after ~org-agenda-filter~ is called.
+
+*** New option ~org-startup-numeroted~
+
+When this option is =t=, Org files will start using ~(org-num-mode 1)~
+and headings will be visually numeroted.
+
+You can turn this on/off on a per-file basis with =#+startup: num= or
+=#+startup: nonum=.
 
 ** Removed or renamed functions and variables
 
