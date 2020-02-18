@@ -373,6 +373,4 @@ SET COLSEP '|'
 
 (provide 'ob-sql)
 
-
-
 ;;; ob-sql.el ends here

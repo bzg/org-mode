@@ -367,7 +367,8 @@ A headline is blocked when either
 (defun org-icalendar-use-UTC-date-time-p ()
   "Non-nil when `org-icalendar-date-time-format' requires UTC time."
   (char-equal (elt org-icalendar-date-time-format
-		   (1- (length org-icalendar-date-time-format))) ?Z))
+		   (1- (length org-icalendar-date-time-format)))
+	      ?Z))
 
 (defvar org-agenda-default-appointment-duration) ; From org-agenda.el.
 (defun org-icalendar-convert-timestamp (timestamp keyword &optional end tz)

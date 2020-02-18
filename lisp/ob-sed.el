@@ -67,7 +67,8 @@ function is called by `org-babel-execute-src-block'."
          (in-file (cdr (assq :in-file params)))
 	 (code-file (let ((file (org-babel-temp-file "sed-")))
                       (with-temp-file file
-			(insert body)) file))
+			(insert body))
+		      file))
 	 (stdin (let ((stdin (cdr (assq :stdin params))))
 		   (when stdin
 		     (let ((tmp (org-babel-temp-file "sed-stdin-"))
@@ -101,4 +102,5 @@ function is called by `org-babel-execute-src-block'."
       (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))
 
 (provide 'ob-sed)
+
 ;;; ob-sed.el ends here

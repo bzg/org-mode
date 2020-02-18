@@ -495,7 +495,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ["Check Deadlines"
       (if (functionp 'org-check-deadlines-and-todos)
 	  (org-check-deadlines-and-todos org-deadline-warning-days)
-	(org-check-deadlines org-deadline-warning-days)) t]
+	(org-check-deadlines org-deadline-warning-days))
+      t]
      ["Check TODOs" org-show-todo-tree t]
      ("Check Tags"
       ,@(org-mouse-keyword-menu
@@ -741,7 +742,8 @@ This means, between the beginning of line and the point."
 			       (?$ "($) Formula Parameters")
 			       (?# "(#) Recalculation: Auto")
 			       (?* "(*) Recalculation: Manual")
-			       (?' "(') Recalculation: None"))) t))))
+			       (?' "(') Recalculation: None")))
+			   t))))
      ((assq :table contextlist)
       (popup-menu
        '(nil

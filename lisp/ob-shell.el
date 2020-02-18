@@ -96,7 +96,8 @@ This function is called by `org-babel-execute-src-block'."
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (insert var) (comint-send-input nil t)
-              (org-babel-comint-wait-for-output session)) var-lines))
+              (org-babel-comint-wait-for-output session))
+	    var-lines))
     session))
 
 (defun org-babel-load-session:shell (session body params)
@@ -276,7 +277,5 @@ return the value of the last statement in BODY."
   string)
 
 (provide 'ob-shell)
-
-
 
 ;;; ob-shell.el ends here

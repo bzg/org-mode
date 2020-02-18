@@ -278,6 +278,4 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
 
 (provide 'ob-gnuplot)
 
-
-
 ;;; ob-gnuplot.el ends here

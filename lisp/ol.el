@@ -920,7 +920,8 @@ Abbreviations are defined in `org-link-abbrev-alist'."
 	 ((string-match "%(\\([^)]+\\))" rpl)
 	  (replace-match
 	   (save-match-data
-	     (funcall (intern-soft (match-string 1 rpl)) tag)) t t rpl))
+	     (funcall (intern-soft (match-string 1 rpl)) tag))
+	   t t rpl))
 	 ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
 	 ((string-match "%h" rpl)
 	  (replace-match (url-hexify-string (or tag "")) t t rpl))
@@ -1901,7 +1902,6 @@ Also refresh fontification if needed."
 ;;; Initialize Regexps
 
 (org-link-make-regexps)
-
 
 (provide 'ol)
 

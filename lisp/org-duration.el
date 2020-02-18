@@ -448,4 +448,5 @@ with \"H:MM:SS\" format, return `h:mm:ss'.  Otherwise, return
 (org-duration-set-regexps)
 
 (provide 'org-duration)
+
 ;;; org-duration.el ends here

@@ -144,7 +144,8 @@ and dependent variables."
 	 row-vals)
     (when (>= ind 0) ;; collect values of ind col
       (setf row-vals (mapcar (lambda (row) (setf counter (+ 1 counter))
-			       (cons counter (nth ind row))) table)))
+			       (cons counter (nth ind row)))
+			     table)))
     (when (or deps (>= ind 0)) ;; remove non-plotting columns
       (setf deps (delq ind deps))
       (setf table (mapcar (lambda (row)

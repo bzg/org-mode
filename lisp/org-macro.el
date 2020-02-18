@@ -417,6 +417,6 @@ Any other non-empty string resets the counter to 1."
                    (t 1))
              org-macro--counter-table)))
 
-
 (provide 'org-macro)
+
 ;;; org-macro.el ends here

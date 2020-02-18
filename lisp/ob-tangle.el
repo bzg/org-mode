@@ -544,7 +544,8 @@ which enable the original code blocks to be found."
 			    (save-match-data
 			      (re-search-forward
 			       (concat " " (regexp-quote block-name)
-				       " ends here") nil t)
+				       " ends here")
+			       nil t)
 			      (setq end (line-beginning-position))))))))
 	(unless (and start (< start mid) (< mid end))
 	  (error "Not in tangled code"))

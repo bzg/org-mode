@@ -1655,7 +1655,8 @@ Note: this function removes any hlines in TABLE."
       (mapcar (lambda (row)
                 (if (listp row)
                     (cons (or (pop rownames) "") row)
-                  row)) table)
+                  row))
+	      table)
     table))
 
 (defun org-babel-pick-name (names selector)

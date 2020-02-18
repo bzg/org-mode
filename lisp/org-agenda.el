@@ -5301,7 +5301,8 @@ function from a program - use `org-agenda-get-day-entries' instead."
     (when results
       (setq results
 	    (mapcar (lambda (i) (replace-regexp-in-string
-				 org-link-bracket-re "\\2" i)) results))
+				 org-link-bracket-re "\\2" i))
+		    results))
       (concat (org-agenda-finalize-entries results) "\n"))))
 
 ;;; Agenda entry finders
@@ -5520,10 +5521,12 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	       (cond
 		((eq org-agenda-todo-ignore-scheduled 'future)
 		 (> (org-time-stamp-to-now
-		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
+		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+		    0))
 		((eq org-agenda-todo-ignore-scheduled 'past)
 		 (<= (org-time-stamp-to-now
-		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
+		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+		     0))
 		((numberp org-agenda-todo-ignore-scheduled)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-scheduled))
@@ -5536,10 +5539,12 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		 (not (org-deadline-close-p (match-string 1))))
 		((eq org-agenda-todo-ignore-deadlines 'future)
 		 (> (org-time-stamp-to-now
-		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
+		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+		    0))
 		((eq org-agenda-todo-ignore-deadlines 'past)
 		 (<= (org-time-stamp-to-now
-		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
+		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+		     0))
 		((numberp org-agenda-todo-ignore-deadlines)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-deadlines))
@@ -5563,10 +5568,12 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		     (cond
 		      ((eq org-agenda-todo-ignore-timestamp 'future)
 		       (> (org-time-stamp-to-now
-			   (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
+			   (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+			  0))
 		      ((eq org-agenda-todo-ignore-timestamp 'past)
 		       (<= (org-time-stamp-to-now
-			    (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
+			    (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+			   0))
 		      ((numberp org-agenda-todo-ignore-timestamp)
 		       (org-agenda-todo-custom-ignore-p
 			(match-string 1) org-agenda-todo-ignore-timestamp))
@@ -7045,7 +7052,8 @@ The optional argument TYPE tells the agenda type."
 		   ;; that isn't there.
 		   pl
 		   (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
-					x pl) pl))
+					x pl)
+			  pl))
 	  (add-text-properties
 	   (or (match-end 1) (match-end 0)) (match-end 0)
 	   (list 'face (org-get-todo-face (match-string 2 x)))
@@ -7122,12 +7130,14 @@ The optional argument TYPE tells the agenda type."
 	 (case-fold-search nil))
     (when pla
       (when (string-match (concat "\\`[ \t]*" (or (get-text-property 0 'org-todo-regexp a) "")
-				  "\\([ \t]*\\[[a-zA-Z0-9]\\]\\)? *") ta)
+				  "\\([ \t]*\\[[a-zA-Z0-9]\\]\\)? *")
+			  ta)
 	(setq ta (substring ta (match-end 0))))
       (setq ta (downcase ta)))
     (when plb
       (when (string-match (concat "\\`[ \t]*" (or (get-text-property 0 'org-todo-regexp b) "")
-				  "\\([ \t]*\\[[a-zA-Z0-9]\\]\\)? *") tb)
+				  "\\([ \t]*\\[[a-zA-Z0-9]\\]\\)? *")
+			  tb)
 	(setq tb (substring tb (match-end 0))))
       (setq tb (downcase tb)))
     (cond ((not (or ta tb)) nil)
@@ -7547,7 +7557,8 @@ When there is already a category filter in place, this command removes the filte
        (cat
         (org-agenda-filter-apply
          (setq org-agenda-category-filter
-	       (list (concat "+" cat))) 'category))
+	       (list (concat "+" cat)))
+	 'category))
        (t (error "No category at point"))))))
 
 (defun org-find-top-headline (&optional pos)

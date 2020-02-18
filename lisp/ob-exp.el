@@ -406,7 +406,6 @@ inhibit insertion of results into the buffer."
 	     (let (org-confirm-babel-evaluate)
 	       (org-babel-execute-src-block nil info)))))))))
 
-
 (provide 'ob-exp)
 
 ;;; ob-exp.el ends here

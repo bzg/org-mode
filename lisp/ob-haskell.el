@@ -32,11 +32,9 @@
 
 ;;; Requirements:
 
-;; - haskell-mode :: http://www.iro.umontreal.ca/~monnier/elisp/#haskell-mode
-;;
-;; - inf-haskell :: http://www.iro.umontreal.ca/~monnier/elisp/#haskell-mode
-;;
-;; - (optionally) lhs2tex :: http://people.cs.uu.nl/andres/lhs2tex/
+;; - haskell-mode: http://www.iro.umontreal.ca/~monnier/elisp/#haskell-mode
+;; - inf-haskell: http://www.iro.umontreal.ca/~monnier/elisp/#haskell-mode
+;; - (optionally) lhs2tex: http://people.cs.uu.nl/andres/lhs2tex/
 
 ;;; Code:
 (require 'ob)
@@ -214,7 +212,5 @@ constructs (header arguments, no-web syntax etc...) are ignored."
       (message "running %s" command) (shell-command command) (find-file tex-file))))
 
 (provide 'ob-haskell)
-
-
 
 ;;; ob-haskell.el ends here

@@ -722,7 +722,8 @@ If not, show simply the clocked time like 01:50."
   (save-excursion
     (let ((end (save-excursion (org-end-of-subtree))))
       (when (re-search-forward (concat org-clock-string
-				       ".*\\]--\\(\\[[^]]+\\]\\)") end t)
+				       ".*\\]--\\(\\[[^]]+\\]\\)")
+			       end t)
 	(org-time-string-to-time (match-string 1))))))
 
 (defun org-clock-update-mode-line (&optional refresh)
@@ -749,7 +750,8 @@ menu\nmouse-2 will jump to task"))
       (setq org-mode-line-string
 	    (concat (propertize
 		     org-clock-task-overrun-text
-		     'face 'org-mode-line-clock-overrun) org-mode-line-string)))
+		     'face 'org-mode-line-clock-overrun)
+		    org-mode-line-string)))
   (force-mode-line-update))
 
 (defun org-clock-get-clocked-time ()
@@ -894,7 +896,8 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
 	(goto-char (point-min))
 	(while (re-search-forward org-clock-re nil t)
 	  (push (cons (copy-marker (match-end 1) t)
-		      (org-time-string-to-time (match-string 1))) clocks))))
+		      (org-time-string-to-time (match-string 1)))
+		clocks))))
     clocks))
 
 (defsubst org-is-active-clock (clock)

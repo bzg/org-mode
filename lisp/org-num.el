@@ -466,6 +466,6 @@ NUMBERING is a list of numbers."
     (remove-hook 'after-change-functions #'org-num--verify t)
     (remove-hook 'change-major-mode-hook #'org-num--clear t))))
 
-
 (provide 'org-num)
+
 ;;; org-num.el ends here

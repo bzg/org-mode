@@ -103,7 +103,8 @@ This function is called by `org-babel-execute-src-block'."
       (mapc (lambda (var)
               (insert var) (comint-send-input nil t)
               (org-babel-comint-wait-for-output session)
-              (sit-for .1) (goto-char (point-max))) var-lines))
+              (sit-for .1) (goto-char (point-max)))
+	    var-lines))
     session))
 
 (defun org-babel-load-session:ruby (session body params)
@@ -262,7 +263,5 @@ return the value of the last statement in BODY, as elisp."
 	 (org-babel-eval-read-file tmp-file))))))
 
 (provide 'ob-ruby)
-
-
 
 ;;; ob-ruby.el ends here

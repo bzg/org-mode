@@ -18256,7 +18256,8 @@ and :keyword."
       (when (memq 'org-formula faces)
 	(push (list :table-special
 		    (previous-single-property-change p 'face)
-		    (next-single-property-change p 'face)) clist)))
+		    (next-single-property-change p 'face))
+	      clist)))
      ((org-at-table-p 'any)
       (push (list :table-table) clist)))
     (goto-char p)
@@ -18269,14 +18270,16 @@ and :keyword."
 				  (re-search-backward "[ \t]*\\(#+BEGIN: clocktable\\)" nil t))
 			      (match-beginning 1))
 			 (and (re-search-forward "[ \t]*#\\+END:?" nil t)
-			      (match-end 0))) clist))
+			      (match-end 0)))
+		   clist))
 	    ((org-in-src-block-p)
 	     (push (list :src-block
 			 (and (or (looking-at "[ \t]*\\(#\\+BEGIN_SRC\\)")
 				  (re-search-backward "[ \t]*\\(#+BEGIN_SRC\\)" nil t))
 			      (match-beginning 1))
 			 (and (search-forward "#+END_SRC" nil t)
-			      (match-beginning 0))) clist))))
+			      (match-beginning 0)))
+		   clist))))
     (goto-char p)
 
     ;; Now the small context
@@ -18286,20 +18289,24 @@ and :keyword."
      ((memq 'org-link faces)
       (push (list :link
 		  (previous-single-property-change p 'face)
-		  (next-single-property-change p 'face)) clist))
+		  (next-single-property-change p 'face))
+	    clist))
      ((memq 'org-special-keyword faces)
       (push (list :keyword
 		  (previous-single-property-change p 'face)
-		  (next-single-property-change p 'face)) clist))
+		  (next-single-property-change p 'face))
+	    clist))
      ((setq o (cl-some
 	       (lambda (o)
 		 (and (eq (overlay-get o 'org-overlay-type) 'org-latex-overlay)
 		      o))
 	       (overlays-at (point))))
       (push (list :latex-fragment
-		  (overlay-start o) (overlay-end o)) clist)
+		  (overlay-start o) (overlay-end o))
+	    clist)
       (push (list :latex-preview
-		  (overlay-start o) (overlay-end o)) clist))
+		  (overlay-start o) (overlay-end o))
+	    clist))
      ((org-inside-LaTeX-fragment-p)
       ;; FIXME: positions wrong.
       (push (list :latex-fragment (point) (point)) clist)))

@@ -446,10 +446,10 @@ or far away in the future."
     (cond
      ((= delta 0) " -- today\\&")
      ((= delta 1) " -- tomorrow\\&")
-     ((< delta org-bbdb-general-anniversary-description-after) (format " -- in %d days\\&" delta))
+     ((< delta org-bbdb-general-anniversary-description-after)
+      (format " -- in %d days\\&" delta))
      ((pcase-let ((`(,month ,day ,year) anniv-date))
 	(format " -- %d-%02d-%02d\\&" year month day))))))
-
 
 (defun org-bbdb-anniversaries-future (&optional n)
   "Return list of anniversaries for today and the next n-1 days (default n=7)."

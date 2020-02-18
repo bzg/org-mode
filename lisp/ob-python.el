@@ -104,7 +104,8 @@ VARS contains resolved variable references."
     (org-babel-comint-in-buffer session
       (mapc (lambda (var)
               (end-of-line 1) (insert var) (comint-send-input)
-              (org-babel-comint-wait-for-output session)) var-lines))
+              (org-babel-comint-wait-for-output session))
+	    var-lines))
     session))
 
 (defun org-babel-load-session:python (session body params)
@@ -381,7 +382,5 @@ __org_babel_python_final))"
     string))
 
 (provide 'ob-python)
-
-
 
 ;;; ob-python.el ends here

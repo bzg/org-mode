@@ -2608,7 +2608,8 @@ location of point."
 		  ev (if (numberp ev) (number-to-string ev) ev)
 		  ev (if duration (org-table-time-seconds-to-string
 				   (string-to-number ev)
-				   duration-output-format) ev))
+				   duration-output-format)
+		       ev))
 
 	  ;; Use <...> time-stamps so that Calc can handle them.
 	  (setq form
@@ -4304,7 +4305,8 @@ extension of the given file name, and finally on the variable
 				     (and (string-match-p fileext f) f))
 				   formats)))
 		       org-table-export-default-format)
-		   t t) t t)))
+		   t t)
+		  t t)))
 	  (setq format
 		(org-completing-read
 		 "Format: " formats nil nil deffmt-readable))))

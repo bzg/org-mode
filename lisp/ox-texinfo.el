@@ -606,7 +606,8 @@ holding export options."
 	 "^@documentencoding \\(AUTO\\)$"
 	 coding
 	 (replace-regexp-in-string
-	  "^@documentlanguage \\(AUTO\\)$" language header t nil 1) t nil 1)))
+	  "^@documentlanguage \\(AUTO\\)$" language header t nil 1)
+	 t nil 1)))
      ;; Additional header options set by #+TEXINFO_HEADER.
      (let ((texinfo-header (plist-get info :texinfo-header)))
        (and texinfo-header (org-element-normalize-string texinfo-header)))

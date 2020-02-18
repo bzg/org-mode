@@ -81,6 +81,4 @@ parameters may be used, like javac -verbose"
 
 (provide 'ob-java)
 
-
-
 ;;; ob-java.el ends here

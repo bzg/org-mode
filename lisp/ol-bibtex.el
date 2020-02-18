@@ -556,7 +556,8 @@ With optional argument OPTIONAL, also prompt for optional fields."
     ;; We construct a regexp that searches for "@entrytype{" followed by the key
     (goto-char (point-min))
     (and (re-search-forward (concat "@[a-zA-Z]+[ \t\n]*{[ \t\n]*"
-				    (regexp-quote s) "[ \t\n]*,") nil t)
+				    (regexp-quote s) "[ \t\n]*,")
+			    nil t)
 	 (goto-char (match-beginning 0)))
     (if (and (match-beginning 0) (equal current-prefix-arg '(16)))
 	;; Use double prefix to indicate that any web link should be browsed
@@ -596,7 +597,8 @@ Headlines are exported using `org-bibtex-headline'."
              (with-temp-file filename
                (insert (mapconcat #'identity bibtex-entries "\n")))
              (message "Successfully exported %d BibTeX entries to %s"
-                      (length bibtex-entries) filename) nil))))
+                      (length bibtex-entries) filename)
+	     nil))))
     (when error-point
       (goto-char error-point)
       (message "Bibtex error at %S" (nth 4 (org-heading-components))))))
@@ -661,7 +663,8 @@ This uses `bibtex-parse-entry'."
 	     (when (and (> (length str) 1)
 			(= (aref str 0) (car pair))
 			(= (aref str (1- (length str))) (cdr pair)))
-	       (setf str (substring str 1 (1- (length str)))))) str)))
+	       (setf str (substring str 1 (1- (length str))))))
+	   str)))
     (push (mapcar
            (lambda (pair)
              (cons (let ((field (funcall keyword (car pair))))

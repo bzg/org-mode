@@ -137,7 +137,8 @@ This function is called by `org-babel-execute-src-block'."
     (mapcar (lambda (row)
 	      (if (eq 'hline row)
 		  'hline
-		(mapcar #'org-babel-string-read row))) result)))
+		(mapcar #'org-babel-string-read row)))
+	    result)))
 
 (defun org-babel-sqlite-offset-colnames (table headers-p)
   "If HEADERS-P is non-nil then offset the first row as column names."
@@ -151,7 +152,5 @@ Prepare SESSION according to the header arguments specified in PARAMS."
   (error "SQLite sessions not yet implemented"))
 
 (provide 'ob-sqlite)
-
-
 
 ;;; ob-sqlite.el ends here

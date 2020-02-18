@@ -108,6 +108,4 @@ corresponding :lexical source block argument."
 
 (provide 'ob-emacs-lisp)
 
-
-
 ;;; ob-emacs-lisp.el ends here

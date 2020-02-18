@@ -1257,6 +1257,6 @@ ARG can also be a list of checker names, as symbols, to run."
       (org-lint--display-reports (current-buffer) checkers)
       (message "Org linting process completed"))))
 
-
 (provide 'org-lint)
+
 ;;; org-lint.el ends here

@@ -5241,7 +5241,8 @@ rows (resp. columns)."
       (lambda (row)
 	(when (eq (org-element-property :type row) 'standard)
 	  (cl-incf rows)
-	  (unless first-row (setq first-row row)))) info)
+	  (unless first-row (setq first-row row))))
+      info)
     ;; Set number of columns.
     (org-element-map first-row 'table-cell (lambda (_) (cl-incf columns)) info)
     ;; Return value.

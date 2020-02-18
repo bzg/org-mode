@@ -1273,7 +1273,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-ascii--justify-element
    (org-ascii--box-string
     (org-remove-indentation
-     (org-element-property :value fixed-width)) info)
+     (org-element-property :value fixed-width))
+    info)
    fixed-width info))
 
 

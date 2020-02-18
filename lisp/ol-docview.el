@@ -98,7 +98,6 @@ and append it."
 	  "::"
 	  (read-from-minibuffer "Page:" "1")))
 
-
 (provide 'ol-docview)
 
 ;;; ol-docview.el ends here

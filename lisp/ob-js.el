@@ -201,6 +201,4 @@ then create.  Return the initialized session."
 
 (provide 'ob-js)
 
-
-
 ;;; ob-js.el ends here

@@ -138,6 +138,4 @@ The terminal should shortly flicker."
 
 (provide 'ob-screen)
 
-
-
 ;;; ob-screen.el ends here
