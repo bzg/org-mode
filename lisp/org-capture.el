@@ -1575,13 +1575,7 @@ The template may still contain \"%?\" for cursor positioning."
 	  (let ((a (or (plist-get org-store-link-plist :annotation)
 		       annotation
 		       (org-capture-get :annotation)
-		       ;; When immediately finishing and %a cannot be
-		       ;; expanded, through a user error:
-		       (if (org-capture-get :immediate-finish)
-			   (user-error "Missing initial annotation in this template: %s"
-				       (replace-regexp-in-string
-					"\n" " " (org-capture-get :template)))
-			 ""))))
+		       "")))
 	    ;; Is the link empty?  Then we do not want it...
 	    (if (equal a "[[]]") "" a)))
 	 (l-re "\\[\\[\\(.*?\\)\\]\\(\\[.*?\\]\\)?\\]")
