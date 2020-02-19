@@ -2932,9 +2932,10 @@ situations in which is it not appropriate."
 (defun org-babel--string-to-number (string)
   "If STRING represents a number return its value.
 Otherwise return nil."
-  (let ((interned-string (ignore-errors (read string))))
-    (when (numberp interned-string)
-      interned-string)))
+  (unless (string-match-p "\\s-" (org-trim string))
+    (let ((interned-string (ignore-errors (read string))))
+      (when (numberp interned-string)
+	interned-string))))
 
 (defun org-babel-import-elisp-from-file (file-name &optional separator)
   "Read the results located at FILE-NAME into an elisp table.
