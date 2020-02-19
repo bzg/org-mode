@@ -71,6 +71,16 @@ outside the Customize interface."
 	 (set-default symbol value)
 	 (org-babel-shell-initialize)))
 
+(defcustom ob-shell-return-value-is-exit-status nil
+  "Should we consider the shell exit status as the return value?
+When this is set to nil (the default), consider that the return
+value of a shell source block is the output of the commands.
+Otherwise, consider the return value to be the exit status of the
+last command of the block."
+  :group 'org-babel
+  :type 'boolean
+  :package-version '(Org . "9.4"))
+
 (defun org-babel-execute:shell (body params)
   "Execute a block of Shell commands with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -79,9 +89,13 @@ This function is called by `org-babel-execute-src-block'."
 	 (stdin (let ((stdin (cdr (assq :stdin params))))
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
+	 (value-is-exit-status (or (cdr (assq :value-is-exit-status params))
+				   ob-shell-return-value-is-exit-status))
 	 (cmdline (cdr (assq :cmdline params)))
-         (full-body (org-babel-expand-body:generic
-		     body params (org-babel-variable-assignments:shell params))))
+         (full-body (concat
+		     (org-babel-expand-body:generic
+		      body params (org-babel-variable-assignments:shell params))
+		     (when value-is-exit-status "\necho $?"))))
     (org-babel-reassemble-table
      (org-babel-sh-evaluate session full-body params stdin cmdline)
      (org-babel-pick-name
@@ -209,6 +223,8 @@ If RESULT-TYPE equals `output' then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
+	 (value-is-exit-status (or (cdr (assq :value-is-exit-status params))
+				   ob-shell-return-value-is-exit-status))
 	 (results
 	  (cond
 	   ((or stdin cmdline)	       ; external shell script w/STDIN
@@ -260,8 +276,9 @@ return the value of the last statement in BODY."
 		(insert body))
 	      (set-file-modes script-file #o755)
 	      (org-babel-eval script-file "")))
-	   (t
-	    (org-babel-eval shell-file-name (org-trim body))))))
+	   (t (org-babel-eval shell-file-name (org-trim body))))))
+    (when value-is-exit-status
+      (setq results (car (reverse (split-string results "\n" t)))))
     (when results
       (let ((result-params (cdr (assq :result-params params))))
         (org-babel-result-cond result-params
