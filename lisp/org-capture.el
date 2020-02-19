@@ -1576,11 +1576,11 @@ The template may still contain \"%?\" for cursor positioning."
 		       annotation
 		       (org-capture-get :annotation)
 		       ;; When immediately finishing and %a cannot be
-		       ;; expanded, through a user error:
+		       ;; expanded, warn the user:
 		       (if (org-capture-get :immediate-finish)
-			   (user-error "Missing initial annotation in this template: %s"
-				       (replace-regexp-in-string
-					"\n" " " (org-capture-get :template)))
+			   (warn "Missing initial annotation in this template: %s"
+				 (replace-regexp-in-string
+				  "\n" " " (org-capture-get :template)))
 			 ""))))
 	    ;; Is the link empty?  Then we do not want it...
 	    (if (equal a "[[]]") "" a)))
