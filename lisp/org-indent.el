@@ -71,8 +71,6 @@ Delay used when the buffer to initialize isn't current.")
 (defvar org-indent--initial-marker nil
   "Position of initialization before interrupt.
 This is used locally in each buffer being initialized.")
-(defvar org-hide-leading-stars-before-indent-mode nil
-  "Used locally.")
 (defvar org-indent-modified-headline-flag nil
   "Non-nil means the last deletion operated on a headline.
 It is modified by `org-indent-notify-modified-headline'.")
@@ -183,8 +181,6 @@ during idle time."
       (or (eq org-adapt-indentation 'headline-data)
 	  (setq-local org-adapt-indentation nil)))
     (when org-indent-mode-turns-on-hiding-stars
-      (setq-local org-hide-leading-stars-before-indent-mode
-		  org-hide-leading-stars)
       (setq-local org-hide-leading-stars t))
     (org-indent--compute-prefixes)
     (if (boundp 'filter-buffer-substring-functions)
@@ -216,9 +212,8 @@ during idle time."
 	  (delq (current-buffer) org-indent-agentized-buffers))
     (when (markerp org-indent--initial-marker)
       (set-marker org-indent--initial-marker nil))
-    (when (boundp 'org-hide-leading-stars-before-indent-mode)
-      (setq-local org-hide-leading-stars
-		  org-hide-leading-stars-before-indent-mode))
+    (when (local-variable-p 'org-hide-leading-stars)
+      (kill-local-variable 'org-hide-leading-stars))
     (if (boundp 'filter-buffer-substring-functions)
 	(remove-hook 'filter-buffer-substring-functions
 		     (lambda (fun start end delete)
