@@ -217,6 +217,17 @@ and headings will be visually numeroted.
 You can turn this on/off on a per-file basis with =#+startup: num= or
 =#+startup: nonum=.
 
+*** New option ~ob-shell-return-value-is-exit-status~
+
+When set to =t=, consider the return value of a shell source code
+block is the exit status of its last command.  
+
+The default for this option is =nil=, i.e. the return value of a shell
+block is the output of the commands.
+
+You can turn this on individual blocks by setting the header argument
+=:value-is-exit-status= to =t=.
+
 ** Removed or renamed functions and variables
 
 *** Renamed ~org-columns-set-tags-or-toggle~
