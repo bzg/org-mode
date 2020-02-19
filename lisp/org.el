@@ -989,9 +989,7 @@ the following lines anywhere in the buffer:
   "Non-nil means interpret \"_\" and \"^\" for display.
 
 If you want to control how Org exports those characters, see
-`org-export-with-sub-superscripts'.  `org-use-sub-superscripts'
-used to be an alias for `org-export-with-sub-superscripts' in
-Org <8.0, it is not anymore.
+`org-export-with-sub-superscripts'.
 
 When this option is turned on, you can use TeX-like syntax for
 sub- and superscripts within the buffer.  Several characters after
