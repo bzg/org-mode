@@ -1575,7 +1575,7 @@ When nil, `C-k' will call the default `kill-line' command.
 When t, the following will happen while the cursor is in the headline:
 
 - When the cursor is at the beginning of a headline, kill the entire
-  line and possible the folded subtree below the line.
+  line and possibly the folded subtree below the line.
 - When in the middle of the headline text, kill the headline up to the tags.
 - When after the headline text, kill the tags."
   :group 'org-edit-structure
