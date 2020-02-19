@@ -10700,11 +10700,25 @@ get in your way.  Configure the variable ~org-use-sub-superscripts~ to
 change this convention.  For example, when setting this variable to
 ~{}~, =a_b= is not interpreted as a subscript, but =a_{b}= is.
 
+You can set ~org-use-sub-superscripts~ in a file using the export
+option =^:= (see [[*Export Settings][Export Settings]]).  For example, =#+options: ^:{}=
+sets ~org-use-sub-superscripts~ to ='{}= and only the curly bracket
+notation of super- and subscripts will be used.
+
+You can also toggle the visual display of super- and subscripts:
+
 - {{{kbd(C-c C-x \)}}} (~org-toggle-pretty-entities~) ::
 
   #+kindex: C-c C-x \
   #+findex: org-toggle-pretty-entities
   This command formats sub- and superscripts in a WYSIWYM way.
+
+#+vindex: org-pretty-entities
+#+vindex: org-pretty-entities-include-sub-superscripts
+Set both ~org-pretty-entities~ and
+~org-pretty-entities-include-sub-superscripts~ to =t= to start with
+super- and subscripts /visually/ interpreted as specified by the
+option ~org-use-sub-superscripts~.
 
 ** Special Symbols
 :PROPERTIES:
