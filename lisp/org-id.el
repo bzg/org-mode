@@ -503,10 +503,11 @@ When FILES is given, scan also these files."
                        i nfiles file))
 	    (when (file-exists-p file)
 	      (insert-file-contents file nil nil nil 'replace)
-	      (setq ids (org-map-entries
-			 (lambda ()
-			   (org-entry-get (point) "ID"))
-			 "ID<>\"\""))
+	      (setq ids (delq nil
+			      (org-map-entries
+			       (lambda ()
+				 (org-entry-get (point) "ID"))
+			       "ID<>\"\"")))
 	      (dolist (id ids)
 		(if (member id seen-ids)
 		    (progn
