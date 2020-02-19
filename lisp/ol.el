@@ -748,6 +748,16 @@ White spaces are not significant."
   "Trim STRING, pack contiguous white spaces, and return it."
   (replace-regexp-in-string "[ \t\n]+" " " (org-trim string)))
 
+(defun org-link--clear-syntax-from-context (context)
+  "Remove special syntax from CONTEXT string and return it."
+  (while (cond ((and (string-prefix-p "(" context)
+		     (string-suffix-p ")" context))
+		(setq context (substring context 1 -1)))
+	       ((string-match "\\`[#*]+" context)
+		(setq context (substring context (match-end 0))))
+	       (t nil)))
+  context)
+
 
 ;;; Public API
 
@@ -1631,11 +1641,14 @@ non-nil."
 		    (name (org-element-property :name element))
 		    (context
 		     (cond
-		      ((org-link--context-from-region))
+		      ((let ((region (org-link--context-from-region)))
+			 (and region
+			      (org-link--clear-syntax-from-context region))))
 		      (name)
 		      ((org-before-first-heading-p)
-		       (org-link--squeeze-white-spaces
-			(org-current-line-string)))
+		       (org-link--clear-syntax-from-context
+			(org-link--squeeze-white-spaces
+			 (org-current-line-string))))
 		      (t (org-link-heading-search-string)))))
 	       (when (org-string-nw-p context)
 		 (setq cpltxt (format "%s::%s" cpltxt context))
@@ -1649,9 +1662,10 @@ non-nil."
 			      (buffer-file-name (buffer-base-buffer)))))
 	;; Add a context search string.
 	(when (org-xor org-link-context-for-files (equal arg '(4)))
-	  (let ((context (or (org-link--context-from-region)
-			     (org-link--squeeze-white-spaces
-			      (org-current-line-string)))))
+	  (let ((context (org-link--clear-syntax-from-context
+			  (or (org-link--context-from-region)
+			      (org-link--squeeze-white-spaces
+			       (org-current-line-string))))))
 	    ;; Only use search option if there is some text.
 	    (when (org-string-nw-p context)
 	      (setq cpltxt (format "%s::%s" cpltxt context))
