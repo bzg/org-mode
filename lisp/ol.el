@@ -45,6 +45,7 @@
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
 (declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
+(declare-function org-before-first-heading-p "org" ())
 (declare-function org-do-occur "org" (regexp &optional cleanup))
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-cache-refresh "org-element" (pos))
@@ -57,7 +58,6 @@
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-find-property "org" (property &optional value))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
-(declare-function org-heading-components "org" ())
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-id-store-link "org-id" ())
 (declare-function org-insert-heading "org" (&optional arg invisible-ok top))
@@ -731,6 +731,23 @@ White spaces are not significant."
       (goto-char origin)
       (user-error "No match for radio target: %s" target))))
 
+(defun org-link--context-from-region ()
+  "Return context string from active region, or nil."
+  (when (org-region-active-p)
+    (let ((context (buffer-substring (region-beginning) (region-end))))
+      (when (and (wholenump org-link-context-for-files)
+		 (> org-link-context-for-files 0))
+	(let ((lines (org-split-string context "\n")))
+	  (setq context
+		(mapconcat #'identity
+			   (cl-subseq lines 0 org-link-context-for-files)
+			   "\n"))))
+      (org-link--squeeze-white-spaces context))))
+
+(defun org-link--squeeze-white-spaces (string)
+  "Trim STRING, pack contiguous white spaces, and return it."
+  (replace-regexp-in-string "[ \t\n]+" " " (org-trim string)))
+
 
 ;;; Public API
 
@@ -1221,24 +1238,23 @@ of matched result, which is either `dedicated' or `fuzzy'."
     type))
 
 (defun org-link-heading-search-string (&optional string)
-  "Make search string for the current headline or STRING."
-  (let ((s (or string
-	       (and (derived-mode-p 'org-mode)
-		    (save-excursion
-		      (org-back-to-heading t)
-		      (org-element-property :raw-value
-					    (org-element-at-point))))))
-	(lines org-link-context-for-files))
-    (unless string (setq s (concat "*" s))) ;Add * for headlines
-    (setq s (replace-regexp-in-string "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" "" s))
-    (when (and string (integerp lines) (> lines 0))
-      (let ((slines (org-split-string s "\n")))
-	(when (< lines (length slines))
-	  (setq s (mapconcat
-		   #'identity
-		   (reverse (nthcdr (- (length slines) lines)
-				    (reverse slines))) "\n")))))
-    (mapconcat #'identity (split-string s) " ")))
+  "Make search string for the current headline or STRING.
+When optional argument STRING is non-nil, assume it a headline.
+Search string starts with an asterisk.  COMMENT keyword and
+statistics cookies are removed, and contiguous spaces are packed
+into a single one."
+  (let ((context
+	 (if (not string)
+	     (concat "*" (org-trim (org-get-heading nil nil nil t)))
+	   (let ((s (org-trim string))
+		 (comment-re (format "\\`%s[ \t]+" org-comment-string)))
+	     (unless (string-prefix-p "*" s) (setq s (concat "*" s)))
+	     (replace-regexp-in-string comment-re "" s))))
+	(cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"))
+    (org-trim
+     (replace-regexp-in-string
+      cookie-re ""
+      (org-link--squeeze-white-spaces context)))))
 
 (defun org-link-open-as-file (path arg)
   "Pretend PATH is a file name and open it.
@@ -1446,7 +1462,7 @@ non-nil."
 	    (move-beginning-of-line 2)
 	    (set-mark (point)))))
     (setq org-store-link-plist nil)
-    (let (link cpltxt desc description search txt custom-id agenda-link)
+    (let (link cpltxt desc description search custom-id agenda-link)
       (cond
        ;; Store a link using an external link type, if any function is
        ;; available. If more than one can generate a link from current
@@ -1605,30 +1621,25 @@ non-nil."
 				 (abbreviate-file-name
 				  (buffer-file-name (buffer-base-buffer))))))))
 	  (t
-	   ;; Just link to current headline
+	   ;; Just link to current headline.
 	   (setq cpltxt (concat "file:"
 				(abbreviate-file-name
 				 (buffer-file-name (buffer-base-buffer)))))
-	   ;; Add a context search string
+	   ;; Add a context search string.
 	   (when (org-xor org-link-context-for-files (equal arg '(4)))
 	     (let* ((element (org-element-at-point))
-		    (name (org-element-property :name element)))
-	       (setq txt (cond
-			  ((org-at-heading-p) nil)
-			  (name)
-			  ((org-region-active-p)
-			   (buffer-substring (region-beginning) (region-end)))))
-	       (when (or (null txt) (string-match "\\S-" txt))
-		 (setq cpltxt
-		       (concat cpltxt "::"
-			       (condition-case nil
-				   (org-link-heading-search-string txt)
-				 (error "")))
-		       desc (or name
-				(nth 4 (ignore-errors (org-heading-components)))
-				"NONE")))))
-	   (when (string-match "::\\'" cpltxt)
-	     (setq cpltxt (substring cpltxt 0 -2)))
+		    (name (org-element-property :name element))
+		    (context
+		     (cond
+		      ((org-link--context-from-region))
+		      (name)
+		      ((org-before-first-heading-p)
+		       (org-link--squeeze-white-spaces
+			(org-current-line-string)))
+		      (t (org-link-heading-search-string)))))
+	       (when (org-string-nw-p context)
+		 (setq cpltxt (format "%s::%s" cpltxt context))
+		 (setq desc (or name (org-get-heading t t t t) "NONE")))))
 	   (setq link cpltxt)))))
 
        ((buffer-file-name (buffer-base-buffer))
@@ -1636,16 +1647,15 @@ non-nil."
 	(setq cpltxt (concat "file:"
 			     (abbreviate-file-name
 			      (buffer-file-name (buffer-base-buffer)))))
-	;; Add a context string.
+	;; Add a context search string.
 	(when (org-xor org-link-context-for-files (equal arg '(4)))
-	  (setq txt (if (org-region-active-p)
-			(buffer-substring (region-beginning) (region-end))
-		      (buffer-substring (point-at-bol) (point-at-eol))))
-	  ;; Only use search option if there is some text.
-	  (when (string-match "\\S-" txt)
-	    (setq cpltxt
-		  (concat cpltxt "::" (org-link-heading-search-string txt))
-		  desc "NONE")))
+	  (let ((context (or (org-link--context-from-region)
+			     (org-link--squeeze-white-spaces
+			      (org-current-line-string)))))
+	    ;; Only use search option if there is some text.
+	    (when (org-string-nw-p context)
+	      (setq cpltxt (format "%s::%s" cpltxt context))
+	      (setq desc "NONE"))))
 	(setq link cpltxt))
 
        (interactive?

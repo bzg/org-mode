@@ -352,8 +352,9 @@ This needs more work, to handle headings with lots of spaces in them."
 	    (goto-char (point-min))
 	    (let (tbl)
 	      (while (re-search-forward org-outline-regexp nil t)
-		(push (org-link-heading-search-string (org-get-heading t t t t))
-		      tbl))
+		;; Remove the leading asterisk from
+		;; `org-link-heading-search-string' result.
+		(push (substring (org-link-heading-search-string) 1) tbl))
 	      (pcomplete-uniquify-list tbl)))
 	  ;; When completing a bracketed link, i.e., "[[*", argument
 	  ;; starts at the star, so remove this character.
