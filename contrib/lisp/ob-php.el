@@ -21,6 +21,16 @@
   "org-mode blocks for PHP."
   :group 'org)
 
+(defcustom org-babel-php-command "php"
+  "The command to execute babel body code."
+  :group 'ob-php
+  :type 'string)
+
+(defcustom org-babel-php-command-options nil
+  "The php command options to use when execute code."
+  :group 'ob-php
+  :type 'string)
+
 (defcustom ob-php:inf-php-buffer "*php*"
   "Default PHP inferior buffer."
   :group 'ob-php
@@ -29,10 +39,9 @@
 ;;;###autoload
 (defun org-babel-execute:php (body params)
   "Orgmode Babel PHP evaluate function for `BODY' with `PARAMS'."
-  (let* ((cmd "php")
+  (let* ((cmd (concat org-babel-php-command " " org-babel-php-command-options))
          (body (concat "<?php\n" body "\n?>")))
-    (org-babel-eval cmd body)
-    ))
+    (org-babel-eval cmd body)))
 
 ;;;###autoload
 (eval-after-load "org"
