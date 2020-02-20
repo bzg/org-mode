@@ -639,7 +639,7 @@ use of this function is for the stuck project list."
 
 (defconst org-maybe-keyword-time-regexp
   (concat "\\(\\<\\(\\(?:CLO\\(?:CK\\|SED\\)\\|DEADLINE\\|SCHEDULED\\):\\)\\)?"
-	  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?[]>]"
+	  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^]\r\n>]*[]>]"
 	  "\\|"
 	  "<%%([^\r\n>]*>\\)")
   "Matches a timestamp, possibly preceded by a keyword.")
