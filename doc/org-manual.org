@@ -10701,9 +10701,9 @@ change this convention.  For example, when setting this variable to
 ~{}~, =a_b= is not interpreted as a subscript, but =a_{b}= is.
 
 You can set ~org-use-sub-superscripts~ in a file using the export
-option =^:= (see [[*Export Settings][Export Settings]]).  For example, =#+options: ^:{}=
-sets ~org-use-sub-superscripts~ to ='{}= and only the curly bracket
-notation of super- and subscripts will be used.
+option =^:= (see [[*Export Settings][Export Settings]]).  For example, =#+OPTIONS: ^:{}=
+sets ~org-use-sub-superscripts~ to ~'{}~ and limits super- and
+subscripts to the curly bracket notation.
 
 You can also toggle the visual display of super- and subscripts:
 
@@ -10716,7 +10716,7 @@ You can also toggle the visual display of super- and subscripts:
 #+vindex: org-pretty-entities
 #+vindex: org-pretty-entities-include-sub-superscripts
 Set both ~org-pretty-entities~ and
-~org-pretty-entities-include-sub-superscripts~ to =t= to start with
+~org-pretty-entities-include-sub-superscripts~ to ~t~ to start with
 super- and subscripts /visually/ interpreted as specified by the
 option ~org-use-sub-superscripts~.
 
