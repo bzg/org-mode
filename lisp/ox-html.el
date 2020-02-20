@@ -42,7 +42,6 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 (declare-function mm-url-decode-entities "mm-url" ())
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
 
 (defvar htmlize-css-name-prefix)
 (defvar htmlize-output-type)
@@ -814,7 +813,6 @@ link to the image."
 
 (defcustom org-html-inline-image-rules
   `(("file" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
-    ("attachment" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
     ("http" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
     ("https" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg"))))
   "Rules characterizing image files that can be inlined into HTML.
@@ -2996,9 +2994,7 @@ INFO is a plist holding contextual information.  See
 	  (cond
 	   ((member type '("http" "https" "ftp" "mailto" "news"))
 	    (url-encode-url (concat type ":" raw-path)))
-	   ((member type '("file" "attachment"))
-	    (when (string= type "attachment")
-	      (setq raw-path (org-attach-link-expand link)))
+	   ((string= "file" type)
 	    ;; During publishing, turn absolute file names belonging
 	    ;; to base directory into relative file names.  Otherwise,
 	    ;; append "file" protocol to absolute file name.

@@ -32,8 +32,6 @@
 
 ;;; Function Declarations
 
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
-
 (defvar org-latex-default-packages-alist)
 (defvar org-latex-packages-alist)
 (defvar orgtbl-exp-regexp)
@@ -741,8 +739,6 @@ environment."
 
 (defcustom org-latex-inline-image-rules
   `(("file" . ,(regexp-opt
-		'("pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg")))
-    ("attachment" . ,(regexp-opt
 		'("pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg"))))
   "Rules characterizing image files that can be inlined into LaTeX.
 
@@ -2366,9 +2362,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
   (let* ((parent (org-export-get-parent-element link))
-	 (path (let ((raw-path (if (string= (org-element-property :type link) "attachment")
-				   (org-attach-link-expand link)
-				 (org-element-property :path link))))
+	 (path (let ((raw-path (org-element-property :path link)))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
 	 (filetype (file-name-extension path))
@@ -2531,14 +2525,13 @@ INFO is a plist holding contextual information.  See
 	 (imagep (org-export-inline-image-p
 		  link (plist-get info :latex-inline-image-rules)))
 	 (path (org-latex--protect-text
-		(cond ((member type '("http" "https" "ftp" "mailto" "doi"))
-		       (concat type ":" raw-path))
-		      ((member type '("file" "attachment"))
-		       (when (string= type "attachment")
-			 (setq raw-path (org-attach-link-expand link)))
-		       (org-export-file-uri raw-path))
-		      (t
-		       raw-path)))))
+		(pcase type
+		  ((or "http" "https" "ftp" "mailto" "doi")
+		   (concat type ":" raw-path))
+		  ("file"
+		   (org-export-file-uri raw-path))
+		  (_
+		   raw-path)))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'latex info))

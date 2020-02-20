@@ -41,6 +41,8 @@
 
 (declare-function dired-dwim-target-directory "dired-aux")
 (declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
+(declare-function org-export-link-as-file "org-export" (path description backend info))
 
 (defgroup org-attach nil
   "Options concerning attachments in Org mode."
@@ -646,22 +648,36 @@ See `org-attach-open'."
 Basically, this adds the path to the attachment directory."
   (expand-file-name file (org-attach-dir)))
 
-(defun org-attach-link-expand (link &optional buffer-or-name)
-  "Return the full path to the attachment in the LINK element.
-Takes LINK which is a link element, as defined by
-`org-element-link-parser'.  If LINK `:type' is attachment the
-full path to the attachment is expanded and returned.  Otherwise,
-return nil.  If BUFFER-OR-NAME is specified, LINK is expanded in
-that buffer, otherwise current buffer is assumed."
-  (let ((type (org-element-property :type link))
-	(file (org-element-property :path link))
-	(pos (org-element-property :begin link)))
-    (when (string= type "attachment")
-      (with-current-buffer (or buffer-or-name (current-buffer))
-	(goto-char pos)
-	(org-attach-expand file)))))
+(defun org-attach-expand-links (_)
+  "Expand links in current buffer.
+It is meant to be added to `org-export-before-parsing-hook'."
+  (save-excursion
+    (while (re-search-forward "attachment:" nil t)
+      (let ((link (org-element-context)))
+	(when (and (eq 'link (org-element-type link))
+		   (string-equal "attachment"
+				 (org-element-property :type link)))
+	  (let* ((description (and (org-element-property :contents-begin link)
+				   (buffer-substring-no-properties
+				    (org-element-property :contents-begin link)
+				    (org-element-property :contents-end link))))
+		 (file (org-element-property :path link))
+		 (new-link (org-link-make-string
+			    (concat "attachment:" (org-attach-expand file))
+			    description)))
+	    (goto-char (org-element-property :end link))
+	    (skip-chars-backward " \t")
+	    (delete-region (org-element-property :begin link) (point))
+	    (insert new-link)))))))
+
+(defun org-attach-follow (file arg)
+  "Open FILE attachment.
+See `org-open-file' for details about ARG."
+  (org-link-open-as-file (org-attach-expand file) arg))
 
 (org-link-set-parameters "attachment"
+			 :follow #'org-attach-follow
+			 :export #'org-export-link-as-file
                          :complete #'org-attach-complete-link)
 
 (defun org-attach-complete-link ()
@@ -729,6 +745,7 @@ Idea taken from `gnus-dired-attach'."
 
 
 (add-hook 'org-archive-hook 'org-attach-archive-delete-maybe)
+(add-hook 'org-export-before-parsing-hook 'org-attach-expand-links)
 
 (provide 'org-attach)
 

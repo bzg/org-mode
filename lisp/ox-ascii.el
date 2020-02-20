@@ -34,7 +34,6 @@
 ;;; Function Declarations
 
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
 
 ;;; Define Back-End
 ;;
@@ -1571,18 +1570,13 @@ CONTENTS is nil.  INFO is a plist holding contextual
 
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information."
-  (let* ((type (org-element-property :type link))
-	 (raw-path (org-element-property :path link))
-	 (path (cond
-		((string= type "attachment")
-		 (setq raw-path (org-attach-link-expand link))
-		 (concat type ":" raw-path))
-		(t (concat type ":" raw-path)))))
+  (let ((type (org-element-property :type link)))
     (cond
      ((org-export-custom-protocol-maybe link desc 'ascii info))
      ((string= type "coderef")
-      (format (org-export-get-coderef-format path desc)
-	      (org-export-resolve-coderef path info)))
+      (let ((ref (org-element-property :path link)))
+	(format (org-export-get-coderef-format ref desc)
+		(org-export-resolve-coderef ref info))))
      ;; Do not apply a special syntax on radio links.  Though, use
      ;; transcoded target's contents as output.
      ((string= type "radio") desc)
@@ -1614,10 +1608,11 @@ INFO is a plist holding contextual information."
 	  ;; Don't know what to do.  Signal it.
 	  (_ "???"))))
      (t
-      (if (not (org-string-nw-p desc)) (format "<%s>" path)
-	(concat (format "[%s]" desc)
-		(and (not (plist-get info :ascii-links-to-notes))
-		     (format " (<%s>)" path))))))))
+      (let ((path (org-element-property :raw-link link)))
+	(if (not (org-string-nw-p desc)) (format "<%s>" path)
+	  (concat (format "[%s]" desc)
+		  (and (not (plist-get info :ascii-links-to-notes))
+		       (format " (<%s>)" path)))))))))
 
 
 ;;;; Node Properties

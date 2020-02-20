@@ -42,8 +42,6 @@
 
 ;;; Function Declarations
 
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
-
 (defvar org-export-man-default-packages-alist)
 (defvar org-export-man-packages-alist)
 (defvar orgtbl-exp-regexp)
@@ -610,17 +608,14 @@ DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((type (org-element-property :type link))
-         (raw-path (org-element-property :path link))
+	 (raw-path (org-element-property :path link))
          ;; Ensure DESC really exists, or set it to nil.
          (desc (and (not (string= desc "")) desc))
-         (path (cond
-                ((member type '("http" "https" "ftp" "mailto"))
-                 (concat type ":" raw-path))
-                ((member type '("file" "attachment"))
-		 (when (string= type "attachment")
-		   (setq raw-path (org-attach-link-expand link)))
-		 (org-export-file-uri raw-path))
-                (t raw-path))))
+         (path (pcase type
+                 ((or "http" "https" "ftp" "mailto")
+                  (concat type ":" raw-path))
+                 ("file" (org-export-file-uri raw-path))
+                 (_ raw-path))))
     (cond
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'man info))

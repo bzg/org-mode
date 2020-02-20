@@ -3210,11 +3210,11 @@ Assume point is at the beginning of the link."
 	(setq post-blank
 	      (progn (goto-char link-end) (skip-chars-forward " \t")))
 	(setq end (point)))
-      ;; Special "file" or "attachment" type link processing.  Extract
-      ;; opening application and search option, if any.  Also
-      ;; normalize URI.
-      (when (string-match "\\`\\(file\\|attachment\\)\\(?:\\+\\(.+\\)\\)?\\'" type)
-	(setq application (match-string 2 type) type (match-string 1 type))
+      ;; Special "file"-type link processing.  Extract opening
+      ;; application and search option, if any.  Also normalize URI.
+      (when (string-match "\\`file\\(?:\\+\\(.+\\)\\)?\\'" type)
+	(setq application (match-string 1 type))
+	(setq type "file")
 	(when (string-match "::\\(.*\\)\\'" path)
 	  (setq search-option (match-string 1 path))
 	  (setq path (replace-match "" nil nil path)))

@@ -75,7 +75,6 @@
 (declare-function org-src-source-type "org-src" ())
 (declare-function org-time-stamp-format "org" (&optional long inactive))
 (declare-function outline-next-heading "outline" ())
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
 
 
 ;;; Customization
@@ -1027,9 +1026,7 @@ for internal and \"file\" links, or stored as a parameter in
     (pcase type
       ;; Opening a "file" link requires special treatment since we
       ;; first need to integrate search option, if any.
-      ((or "file" "attachment")
-       (when (string= type "attachment")
-	 (setq path (org-attach-link-expand link)))
+      ("file"
        (let* ((option (org-element-property :search-option link))
 	      (path (if option (concat path "::" option) path)))
 	 (org-link-open-as-file path

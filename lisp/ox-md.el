@@ -33,10 +33,6 @@
 (require 'ox-publish)
 
 
-;;; Function Declarations
-
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
-
 ;;; User-Configurable Variables
 
 (defgroup org-export-md nil
@@ -405,9 +401,7 @@ INFO is a plist holding contextual information.  See
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		((member type '("file" "attachment"))
-		 (when (string= type "attachment")
-		   (setq raw-path (org-attach-link-expand link)))
+		((string-equal  type "file")
 		 (org-export-file-uri (funcall link-org-files-as-md raw-path)))
 		(t raw-path))))
     (cond
@@ -449,7 +443,7 @@ INFO is a plist holding contextual information.  See
 		       description
 		       (org-export-get-reference destination info))))))))
      ((org-export-inline-image-p link org-html-inline-image-rules)
-      (let ((path (cond ((not (member type '("file" "attachment")))
+      (let ((path (cond ((not (string-equal type "file"))
 			 (concat type ":" raw-path))
 			((not (file-name-absolute-p raw-path)) raw-path)
 			(t (expand-file-name raw-path))))

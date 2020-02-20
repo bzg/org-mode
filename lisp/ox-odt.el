@@ -32,10 +32,6 @@
 (require 'ox)
 (require 'table nil 'noerror)
 
-;;; Function Declarations
-
-(declare-function org-attach-link-expand "org-attach" (link &optional buffer-or-name))
-
 ;;; Define Back-End
 
 (org-export-define-backend 'odt
@@ -745,8 +741,7 @@ link's path."
 		:value-type (regexp :tag "Path")))
 
 (defcustom org-odt-inline-image-rules
-  `(("file" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg")))
-    ("attachment" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg"))))
+  `(("file" . ,(regexp-opt '(".jpeg" ".jpg" ".png" ".gif" ".svg"))))
   "Rules characterizing image files that can be inlined into ODT.
 
 A rule consists in an association whose key is the type of link
@@ -2706,9 +2701,7 @@ INFO is a plist holding contextual information.  See
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		((member type '("file" "attachment"))
-		 (when (string= type "attachment")
-		   (setq raw-path (org-attach-link-expand link)))
+		((string= type "file")
 		 (org-export-file-uri raw-path))
 		(t raw-path)))
 	 ;; Convert & to &amp; for correct XML representation
