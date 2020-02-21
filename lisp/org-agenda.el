@@ -1642,7 +1642,9 @@ part of an agenda sorting strategy."
   :group 'org-agenda-sorting
   :type 'symbol)
 
-(defcustom org-sort-agenda-notime-is-late t
+(define-obsolete-variable-alias 'org-sort-agenda-notime-is-late
+  'org-agenda-sort-notime-is-late "9.4")
+(defcustom org-agenda-sort-notime-is-late t
   "Non-nil means items without time are considered late.
 This is only relevant for sorting.  When t, items which have no explicit
 time like 15:30 will be considered as 99:01, i.e. later than any items which
@@ -1652,7 +1654,9 @@ agenda entries."
   :group 'org-agenda-sorting
   :type 'boolean)
 
-(defcustom org-sort-agenda-noeffort-is-high t
+(define-obsolete-variable-alias 'org-sort-agenda-noeffort-is-high
+  'org-agenda-sort-noeffort-is-high "9.4")
+(defcustom org-agenda-sort-noeffort-is-high t
   "Non-nil means items without effort estimate are sorted as high effort.
 This also applies when filtering an agenda view with respect to the
 < or > effort operator.  Then, tasks with no effort defined will be treated
@@ -6966,7 +6970,7 @@ The optional argument TYPE tells the agenda type."
     (when max-effort
       (setq list (org-agenda-limit-entries
 		  list 'effort-minutes max-effort
-		  (lambda (e) (or e (if org-sort-agenda-noeffort-is-high
+		  (lambda (e) (or e (if org-agenda-sort-noeffort-is-high
 					32767 -1))))))
     (when max-todo
       (setq list (org-agenda-limit-entries list 'todo-state max-todo)))
@@ -7080,7 +7084,7 @@ The optional argument TYPE tells the agenda type."
 
 (defsubst org-cmp-effort (a b)
   "Compare the effort values of string A and B."
-  (let* ((def (if org-sort-agenda-noeffort-is-high 32767 -1))
+  (let* ((def (if org-agenda-sort-noeffort-is-high 32767 -1))
 	 ;; `effort-minutes' property is not directly accessible from
 	 ;; the strings, but is stored as a property in `txt'.
 	 (ea (or (get-text-property
@@ -7158,7 +7162,7 @@ The optional argument TYPE tells the agenda type."
 
 (defsubst org-cmp-time (a b)
   "Compare the time-of-day values of strings A and B."
-  (let* ((def (if org-sort-agenda-notime-is-late 9901 -1))
+  (let* ((def (if org-agenda-sort-notime-is-late 9901 -1))
 	 (ta (or (get-text-property 1 'time-of-day a) def))
 	 (tb (or (get-text-property 1 'time-of-day b) def)))
     (cond ((< ta tb) -1)
@@ -7170,7 +7174,7 @@ When TYPE is \"scheduled\", \"deadline\", \"timestamp\" or
 \"timestamp_ia\", compare within each of these type.  When TYPE
 is the empty string, compare all timestamps without respect of
 their type."
-  (let* ((def (and (not org-sort-agenda-notime-is-late) -1))
+  (let* ((def (and (not org-agenda-sort-notime-is-late) -1))
 	 (ta (or (and (string-match type (or (get-text-property 1 'type a) ""))
 		      (get-text-property 1 'ts-date a))
 		 def))
@@ -8034,7 +8038,7 @@ If the line does not have an effort defined, return nil."
   ;; current line but is stored as a property in `txt'.
   (let ((effort (get-text-property 0 'effort-minutes (org-get-at-bol 'txt))))
     (funcall op
-	     (or effort (if org-sort-agenda-noeffort-is-high 32767 -1))
+	     (or effort (if org-agenda-sort-noeffort-is-high 32767 -1))
 	     value)))
 
 (defun org-agenda-filter-expand-tags (filter &optional no-operator)
