@@ -12345,7 +12345,9 @@ in Lisp code use `org-set-tags' instead."
 				#'org-tags-completion-function
 				nil nil (org-make-tag-string current-tags)
 				'org-tags-history)))))))
-	  (org-set-tags tags)))))))
+	  (org-set-tags tags)))))
+    ;; `save-excursion' may not replace the point at the right position:
+    (when (looking-back "^\*+") (forward-char))))
 
 (defun org-align-tags (&optional all)
   "Align tags in current entry.
@@ -20394,7 +20396,8 @@ depending on context."
       (if (<= end (point))		;on tags part
 	  (kill-region (point) (line-end-position))
 	(kill-region (point) end)))
-    (org-align-tags))
+    ;; Only align tags when we are still on a heading:
+    (if (org-at-heading-p) (org-align-tags)))
    (t (kill-region (point) (line-end-position)))))
 
 (defun org-yank (&optional arg)
