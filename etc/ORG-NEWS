@@ -44,15 +44,28 @@ resulting <div> will be ~<div id="outline-container-my-headline">~.
 You may want to check whether your HTML files are rendered differently
 after this change.
 
+** New default settings for some options
+
+These options now defaults to =t=:
+
+- ~org-loop-over-headlines-in-active-region~
+- ~org-fontify-done-headline~
+- ~org-src-tab-acts-natively~
+
+You may want to read the docstrings of these options to understand the
+consequences of this change.
+
 ** New features
 
 *** Looping agenda commands over headlines
 
 ~org-agenda-loop-over-headlines-in-active-region~ allows you to loop
-agenda commands over the active region.  When set to =t=, loop over
-all headlines.  When set to ='start-level=, loop over headlines with
-the same level than the first headline in the region.  When set to a
-string, loop over lines matching this regular expression.
+agenda commands over the active region.
+
+When set to =t= (the default), loop over all headlines.  When set to
+='start-level=, loop over headlines with the same level than the first
+headline in the region.  When set to a string, loop over lines
+matching this regular expression.
 
 *** New minor mode ~org-table-header-line-mode~
 

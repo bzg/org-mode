@@ -237,11 +237,12 @@ green, respectability.
   :version "26.1"
   :package-version '(Org . "9.0"))
 
-(defcustom org-src-tab-acts-natively nil
+(defcustom org-src-tab-acts-natively t
   "If non-nil, the effect of TAB in a code block is as if it were
 issued in the language major mode buffer."
   :type 'boolean
-  :version "24.1"
+  :version "27.1"
+  :package-version "9.4"
   :group 'org-babel)
 
 

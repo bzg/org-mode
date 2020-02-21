@@ -893,7 +893,7 @@ will still edit the time stamp - this is just too good to give up."
 	  (const :tag "When outside special context" t)
 	  (const :tag "Everywhere except timestamps" always)))
 
-(defcustom org-loop-over-headlines-in-active-region nil
+(defcustom org-loop-over-headlines-in-active-region t
   "Shall some commands act upon headlines in the active region?
 
 When set to t, some commands will be performed in all headlines
@@ -919,7 +919,8 @@ equivalent option for agenda views."
 		 (const :tag "All headlines in active region" t)
 		 (const :tag "In active region, headlines at the same level than the first one" start-level)
 		 (string :tag "Tags/Property/Todo matcher"))
-  :version "24.1"
+  :version "27.1"
+  :package-version "9.4"
   :group 'org-todo
   :group 'org-archive)
 
@@ -3531,12 +3532,14 @@ When this is non-nil, the headline after the keyword is set to the
   :type 'boolean
   :safe t)
 
-(defcustom org-fontify-done-headline nil
+(defcustom org-fontify-done-headline t
   "Non-nil means change the face of a headline if it is marked DONE.
 Normally, only the TODO/DONE keyword indicates the state of a headline.
 When this is non-nil, the headline after the keyword is set to the
 `org-headline-done' as an additional indication."
   :group 'org-appearance
+  :version "27.1"
+  :package-version "9.4"
   :type 'boolean)
 
 (defcustom org-fontify-emphasized-text t

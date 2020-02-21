@@ -18661,22 +18661,21 @@ settings[fn:148]:
 :END:
 
 #+vindex: org-loop-over-headlines-in-active-region
-When in an Org buffer, you might want to apply a command to all the
-subtrees in the active region.  To enable this, set the option
-~org-loop-over-headlines-in-active-region~ to non-~nil~, activate the
-region and run the command normally.  For example, hitting {{{kbd(C-c
-C-s)}}} when multiple headlines are within the active region will
-successively prompt you for a new schedule date and time.
+When in an Org buffer and the region is active, some commands will
+apply to all the subtrees in the active region.  For example, hitting
+{{{kbd(C-c C-s)}}} when multiple headlines are within the active region will
+successively prompt you for a new schedule date and time.  To disable
+this, set the option ~org-loop-over-headlines-in-active-region~ to
+non-~t~, activate the region and run the command normally.
 
 #+vindex: org-agenda-loop-over-headlines-in-active-region
-~org-agenda-loop-over-headlines-in-active-region~ lets you obtain the
-same behavior within an agenda buffer.  In the agenda, you can also
-use [[*Bulk remote editing selected entries][bulk editing of selected entries]], which see.
+~org-agenda-loop-over-headlines-in-active-region~ is the equivalent
+option of the agenda buffer, where you can also use [[*Bulk remote editing selected entries][bulk editing of
+selected entries]].
 
 Not all commands can loop in the active region and what subtrees or
 headlines are considered can be refined: see the docstrings of these
 options for more details.
-
 
 ** Dynamic Headline Numbering
 :PROPERTIES:

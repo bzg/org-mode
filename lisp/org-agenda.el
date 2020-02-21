@@ -10284,7 +10284,7 @@ bulk action."
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-agenda-loop-over-headlines-in-active-region nil
+(defcustom org-agenda-loop-over-headlines-in-active-region t
   "Shall some commands act upon headlines in the active region?
 
 When set to t, some commands will be performed in all headlines
@@ -10307,6 +10307,7 @@ option for Org buffers."
 		 (const :tag "All headlines in active region" t)
 		 (const :tag "In active region, headlines at the same level than the first one" start-level)
 		 (regexp :tag "Regular expression matcher"))
+  :version "27.1"
   :package-version '(Org . "9.4")
   :group 'org-agenda)
 
