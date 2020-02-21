@@ -345,7 +345,8 @@ last statement in BODY, as elisp."
 					      "python-")))
 			   (with-temp-file tmp-src-file (insert body))
 			   (format org-babel-python--eval-ast
-				   tmp-src-file))))
+				   (file-local-name
+				    tmp-src-file)))))
                (org-babel-comint-with-output
                    (session org-babel-python-eoe-indicator nil body)
                  (let ((comint-process-echoes nil))
