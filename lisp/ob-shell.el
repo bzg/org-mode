@@ -71,7 +71,7 @@ outside the Customize interface."
 	 (set-default symbol value)
 	 (org-babel-shell-initialize)))
 
-(defcustom ob-shell-return-value-is-exit-status nil
+(defcustom org-babel-shell-return-value-is-exit-status nil
   "Should we consider the shell exit status as the return value?
 When this is set to nil (the default), consider that the return
 value of a shell source block is the output of the commands.
@@ -90,7 +90,7 @@ This function is called by `org-babel-execute-src-block'."
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
 	 (value-is-exit-status (or (cdr (assq :value-is-exit-status params))
-				   ob-shell-return-value-is-exit-status))
+				   org-babel-shell-return-value-is-exit-status))
 	 (cmdline (cdr (assq :cmdline params)))
          (full-body (concat
 		     (org-babel-expand-body:generic
@@ -144,15 +144,15 @@ This function is called by `org-babel-execute-src-block'."
     (varname values &optional sep hline)
   "Return a list of statements declaring the values as bash associative array."
   (format "unset %s\ndeclare -A %s\n%s"
-    varname varname
-    (mapconcat
-     (lambda (items)
-       (format "%s[%s]=%s"
-	       varname
-	       (org-babel-sh-var-to-sh (car items) sep hline)
-	       (org-babel-sh-var-to-sh (cdr items) sep hline)))
-     values
-     "\n")))
+	  varname varname
+	  (mapconcat
+	   (lambda (items)
+	     (format "%s[%s]=%s"
+		     varname
+		     (org-babel-sh-var-to-sh (car items) sep hline)
+		     (org-babel-sh-var-to-sh (cdr items) sep hline)))
+	   values
+	   "\n")))
 
 (defun org-babel--variable-assignments:bash (varname values &optional sep hline)
   "Represent the parameters as useful Bash shell variables."
@@ -224,7 +224,7 @@ of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
 	 (value-is-exit-status (or (cdr (assq :value-is-exit-status params))
-				   ob-shell-return-value-is-exit-status))
+				   org-babel-shell-return-value-is-exit-status))
 	 (results
 	  (cond
 	   ((or stdin cmdline)	       ; external shell script w/STDIN
