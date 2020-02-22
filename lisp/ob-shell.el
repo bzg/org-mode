@@ -71,16 +71,6 @@ outside the Customize interface."
 	 (set-default symbol value)
 	 (org-babel-shell-initialize)))
 
-(defcustom org-babel-shell-return-value-is-exit-status nil
-  "Should we consider the shell exit status as the return value?
-When this is set to nil (the default), consider that the return
-value of a shell source block is the output of the commands.
-Otherwise, consider the return value to be the exit status of the
-last command of the block."
-  :group 'org-babel
-  :type 'boolean
-  :package-version '(Org . "9.4"))
-
 (defun org-babel-execute:shell (body params)
   "Execute a block of Shell commands with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -89,8 +79,8 @@ This function is called by `org-babel-execute-src-block'."
 	 (stdin (let ((stdin (cdr (assq :stdin params))))
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
-	 (value-is-exit-status (or (cdr (assq :value-is-exit-status params))
-				   org-babel-shell-return-value-is-exit-status))
+	 (value-is-exit-status
+	  (member "value" (cdr (assq :result-params params))))
 	 (cmdline (cdr (assq :cmdline params)))
          (full-body (concat
 		     (org-babel-expand-body:generic
@@ -223,8 +213,8 @@ If RESULT-TYPE equals `output' then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
-	 (value-is-exit-status (or (cdr (assq :value-is-exit-status params))
-				   org-babel-shell-return-value-is-exit-status))
+	 (value-is-exit-status
+	  (member "value" (cdr (assq :result-params params))))
 	 (results
 	  (cond
 	   ((or stdin cmdline)	       ; external shell script w/STDIN

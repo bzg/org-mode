@@ -251,17 +251,6 @@ and headings will be visually numeroted.
 You can turn this on/off on a per-file basis with =#+startup: num= or
 =#+startup: nonum=.
 
-*** New option ~org-babel-shell-return-value-is-exit-status~
-
-When set to =t=, consider the return value of a shell source code
-block is the exit status of its last command.  
-
-The default for this option is =nil=, i.e. the return value of a shell
-block is the output of the commands.
-
-You can turn this on individual blocks by setting the header argument
-=:value-is-exit-status= to =t=.
-
 ** Removed or renamed functions and variables
 
 *** Renamed ~org-columns-set-tags-or-toggle~
@@ -322,6 +311,7 @@ Org refile variables and functions have been moved to a new file.
 
 This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
 Hyatt has been fixed.  Thanks to both of them.
+
 
 * Version 9.3
 
