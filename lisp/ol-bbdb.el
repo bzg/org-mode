@@ -362,7 +362,9 @@ This is used by Org to re-create the anniversary hash table."
 
 ;;;###autoload
 (defun org-bbdb-anniversaries ()
-  "Extract anniversaries from BBDB for display in the agenda."
+  "Extract anniversaries from BBDB for display in the agenda.
+When called programmatically, this function expects the `date'
+variable to be globally bound."
   (require 'bbdb)
   (require 'diary-lib)
   (unless (hash-table-p org-bbdb-anniv-hash)
