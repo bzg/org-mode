@@ -17287,8 +17287,7 @@ they are mutually exclusive.
   interactive Emacs inferior process.  Org gets the value from the
   source code interpreter's last statement output.  Org has to use
   language-specific methods to obtain the value.  For example, from
-  the variable ~_~ in Python and Ruby, and the value of ~.Last.value~
-  in R.
+  the variable ~_~ in Ruby, and the value of ~.Last.value~ in R.
 
 - =output= ::
 
@@ -17299,41 +17298,6 @@ they are mutually exclusive.
   When using a session, Org passes the code to the interpreter running
   as an interactive Emacs inferior process.  Org concatenates any text
   output from the interpreter and returns the collection as a result.
-
-  Note that this collection is not the same as that would be collected
-  from stdout of a non-interactive interpreter running as an external
-  process.  Compare for example these two blocks:
-
-  #+begin_example
-  ,#+BEGIN_SRC python :results output
-    print "hello"
-    2
-    print "bye"
-  ,#+END_SRC
-
-  ,#+RESULTS:
-  : hello
-  : bye
-  #+end_example
-
-  In the above non-session mode, the "2" is not printed; so it does
-  not appear in results.
-
-  #+begin_example
-  ,#+BEGIN_SRC python :results output :session
-    print "hello"
-    2
-    print "bye"
-  ,#+END_SRC
-
-  ,#+RESULTS:
-  : hello
-  : 2
-  : bye
-  #+end_example
-
-  In the above session, the interactive interpreter receives and
-  prints "2".  Results show that.
 
 *** Type
 :PROPERTIES:
