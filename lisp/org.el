@@ -369,6 +369,65 @@ FULL is given."
 (defconst org-dblock-end-re "^[ \t]*#\\+\\(?:END\\|end\\)\\([: \t\r\n]\\|$\\)"
   "Matches the end of a dynamic block.")
 
+;;;; Timestamp
+
+(defconst org-ts--internal-regexp
+  (rx (seq
+       (= 4 digit) "-" (= 2 digit) "-" (= 2 digit)
+       (optional " " (*? nonl))))
+  "Regular expression matching the innards of a time stamp.")
+
+(defconst org-ts-regexp (format "<\\(%s\\)>" org-ts--internal-regexp)
+  "Regular expression for fast time stamp matching.")
+
+(defconst org-ts-regexp-inactive
+  (format "\\[\\(%s\\)\\]" org-ts--internal-regexp)
+  "Regular expression for fast inactive time stamp matching.")
+
+(defconst org-ts-regexp-both (format "[[<]\\(%s\\)[]>]" org-ts--internal-regexp)
+  "Regular expression for fast time stamp matching.")
+
+(defconst org-ts-regexp0
+  "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\)\\( +[^]+0-9>\r\n -]+\\)?\\( +\\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+  "Regular expression matching time strings for analysis.
+This one does not require the space after the date, so it can be used
+on a string that terminates immediately after the date.")
+
+(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) *\\([^]+0-9>\r\n -]*\\)\\( \\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+  "Regular expression matching time strings for analysis.")
+
+(defconst org-ts-regexp2 (concat "<" org-ts-regexp1 "[^>\n]\\{0,16\\}>")
+  "Regular expression matching time stamps, with groups.")
+
+(defconst org-ts-regexp3 (concat "[[<]" org-ts-regexp1 "[^]>\n]\\{0,16\\}[]>]")
+  "Regular expression matching time stamps (also [..]), with groups.")
+
+(defconst org-tr-regexp (concat org-ts-regexp "--?-?" org-ts-regexp)
+  "Regular expression matching a time stamp range.")
+
+(defconst org-tr-regexp-both
+  (concat org-ts-regexp-both "--?-?" org-ts-regexp-both)
+  "Regular expression matching a time stamp range.")
+
+(defconst org-tsr-regexp (concat org-ts-regexp "\\(--?-?"
+				 org-ts-regexp "\\)?")
+  "Regular expression matching a time stamp or time stamp range.")
+
+(defconst org-tsr-regexp-both
+  (concat org-ts-regexp-both "\\(--?-?"
+	  org-ts-regexp-both "\\)?")
+  "Regular expression matching a time stamp or time stamp range.
+The time stamps may be either active or inactive.")
+
+(defconst org-repeat-re
+  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\
+\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
+  "Regular expression for specifying repeated events.
+After a match, group 1 contains the repeat expression.")
+
+(defconst org-time-stamp-formats '("<%Y-%m-%d %a>" . "<%Y-%m-%d %a %H:%M>")
+  "Formats for `format-time-string' which are used for time stamps.")
+
 ;;;; Clock and Planning
 
 (defconst org-clock-string "CLOCK:"
@@ -460,18 +519,6 @@ Matched keyword is in group 1.")
    " *[[<]\\([^]>]+\\)[]>]")
   "Matches any of the 3 keywords, together with the time stamp.")
 
-(defconst org-maybe-keyword-time-regexp
-  (concat "\\(\\<"
-	  (regexp-opt
-	   (list org-scheduled-string org-deadline-string org-closed-string
-		 org-clock-string)
-	   t)
-	  "\\)?"
-	  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?[]>]"
-	  "\\|"
-	  "<%%([^\r\n>]*>\\)")
-  "Matches a timestamp, possibly preceded by a keyword.")
-
 (defconst org-all-time-keywords
   (mapcar (lambda (w) (substring w 0 -1))
 	  (list org-scheduled-string org-deadline-string
@@ -497,9 +544,9 @@ Group 1 contains drawer's name or \"END\".")
   "Regular expression matching the last line of a clock drawer.")
 
 (defconst org-logbook-drawer-re
-  (concat "^[ \t]*:LOGBOOK:[ \t]*\n"
-	  "\\(?:[ \t]*.*\\(?: .*\\)?[ \t]*\n\\)*?"
-	  "[ \t]*:END:[ \t]*$")
+  (rx (seq bol (0+ (any "\t ")) ":LOGBOOK:" (0+ (any "\t ")) "\n"
+	   (*? (0+ nonl) "\n")
+	   (0+ (any "\t ")) ":END:" (0+ (any "\t ")) eol))
   "Matches an entire LOGBOOK drawer.")
 
 (defconst org-property-drawer-re
@@ -575,59 +622,6 @@ An entry can be toggled between COMMENT and normal with
   "The property that is being used to keep track of effort estimates.
 Effort estimates given in this property need to be in the format
 defined in org-duration.el.")
-
-;;;; Timestamp
-
-(defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
-  "Regular expression for fast time stamp matching.")
-
-(defconst org-ts-regexp-inactive
-  "\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)\\]"
-  "Regular expression for fast inactive time stamp matching.")
-
-(defconst org-ts-regexp-both "[[<]\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?\\)[]>]"
-  "Regular expression for fast time stamp matching.")
-
-(defconst org-ts-regexp0
-  "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\)\\( +[^]+0-9>\r\n -]+\\)?\\( +\\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
-  "Regular expression matching time strings for analysis.
-This one does not require the space after the date, so it can be used
-on a string that terminates immediately after the date.")
-
-(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) *\\([^]+0-9>\r\n -]*\\)\\( \\([0-9]\\{1,2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
-  "Regular expression matching time strings for analysis.")
-
-(defconst org-ts-regexp2 (concat "<" org-ts-regexp1 "[^>\n]\\{0,16\\}>")
-  "Regular expression matching time stamps, with groups.")
-
-(defconst org-ts-regexp3 (concat "[[<]" org-ts-regexp1 "[^]>\n]\\{0,16\\}[]>]")
-  "Regular expression matching time stamps (also [..]), with groups.")
-
-(defconst org-tr-regexp (concat org-ts-regexp "--?-?" org-ts-regexp)
-  "Regular expression matching a time stamp range.")
-
-(defconst org-tr-regexp-both
-  (concat org-ts-regexp-both "--?-?" org-ts-regexp-both)
-  "Regular expression matching a time stamp range.")
-
-(defconst org-tsr-regexp (concat org-ts-regexp "\\(--?-?"
-				 org-ts-regexp "\\)?")
-  "Regular expression matching a time stamp or time stamp range.")
-
-(defconst org-tsr-regexp-both
-  (concat org-ts-regexp-both "\\(--?-?"
-	  org-ts-regexp-both "\\)?")
-  "Regular expression matching a time stamp or time stamp range.
-The time stamps may be either active or inactive.")
-
-(defconst org-repeat-re
-  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\
-\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
-  "Regular expression for specifying repeated events.
-After a match, group 1 contains the repeat expression.")
-
-(defconst org-time-stamp-formats '("<%Y-%m-%d %a>" . "<%Y-%m-%d %a %H:%M>")
-  "Formats for `format-time-string' which are used for time stamps.")
 
 
 ;;; The custom variables

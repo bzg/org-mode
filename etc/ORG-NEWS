@@ -252,6 +252,9 @@ You can turn this on/off on a per-file basis with =#+startup: num= or
 Functions in this hook are run after ~org-agenda-filter~ is called.
 
 ** Removed or renamed functions and variables
+*** Removed  ~org-maybe-keyword-time-regexp~
+
+The variable was not used in the code base.
 
 *** Renamed ~org-columns-set-tags-or-toggle~
 
