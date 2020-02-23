@@ -12347,8 +12347,10 @@ in Lisp code use `org-set-tags' instead."
 				nil nil (org-make-tag-string current-tags)
 				'org-tags-history)))))))
 	  (org-set-tags tags)))))
-    ;; `save-excursion' may not replace the point at the right position:
-    (when (looking-back "^\*+") (forward-char))))
+    ;; `save-excursion' may not replace the point at the right
+    ;; position.
+    (when (save-excursion (skip-chars-backward "*") (bolp))
+      (forward-char))))
 
 (defun org-align-tags (&optional all)
   "Align tags in current entry.
