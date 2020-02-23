@@ -94,6 +94,7 @@ When a string, a %s formatter will be replaced by the file name."
 (defcustom org-archive-subtree-save-file-p 'from-org
   "Non-nil means save the archive file after archiving a subtree."
   :group 'org-archive
+  :package-version '(Org . "9.4")
   :type '(choice
 	  (const :tag "Always save the archive buffer" t)
 	  (const :tag "Save target buffer when archiving from an agenda view" from-agenda)
