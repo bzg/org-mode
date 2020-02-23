@@ -4354,7 +4354,7 @@ ignores white spaces and statistics cookies, if applicable."
     (`headline
      (let ((title (split-string
 		   (replace-regexp-in-string
-		    "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" ""
+		    "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" " "
 		    (org-element-property :raw-value datum)))))
        (delq nil
 	     (list

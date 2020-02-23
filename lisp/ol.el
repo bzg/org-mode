@@ -1192,7 +1192,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 		 (when (equal words
 			      (split-string
 			       (replace-regexp-in-string
-				cookie-re ""
+				cookie-re " "
 				(replace-regexp-in-string
 				 comment-re "" (org-get-heading t t t)))))
 		   (throw :found t)))
@@ -1258,10 +1258,8 @@ into a single one."
 	     (unless (string-prefix-p "*" s) (setq s (concat "*" s)))
 	     (replace-regexp-in-string comment-re "" s))))
 	(cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"))
-    (org-trim
-     (replace-regexp-in-string
-      cookie-re ""
-      (org-link--squeeze-white-spaces context)))))
+    (org-link--squeeze-white-spaces
+     (replace-regexp-in-string cookie-re " " context))))
 
 (defun org-link-open-as-file (path arg)
   "Pretend PATH is a file name and open it.
