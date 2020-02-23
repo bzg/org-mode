@@ -219,9 +219,9 @@ group new datetime entries by month.
 
 *** New option to show source buffers using "plain" display-buffer
 
-Added option ~plain~ to ~org-src-window-setup~ to show source buffers
-using ~display-buffer~. This allows users to control how source
-buffers are displayed by modifying ~display-buffer-alist~ or
+There is a new option ~plain~ to ~org-src-window-setup~ to show source
+buffers using ~display-buffer~.  This allows users to control how
+source buffers are displayed by modifying ~display-buffer-alist~ or
 ~display-buffer-base-action~.
 
 *** New option ~org-archive-subtree-save-file-p~
@@ -239,10 +239,6 @@ You can also set this option to =t= or to =from-agenda=.
 
 This option will add a timeout to notifications.
 
-*** New hook ~org-agenda-filter-hook~
-
-Functions in this hook are run after ~org-agenda-filter~ is called.
-
 *** New option ~org-startup-numeroted~
 
 When this option is =t=, Org files will start using ~(org-num-mode 1)~
@@ -250,6 +246,10 @@ and headings will be visually numeroted.
 
 You can turn this on/off on a per-file basis with =#+startup: num= or
 =#+startup: nonum=.
+
+*** New hook ~org-agenda-filter-hook~
+
+Functions in this hook are run after ~org-agenda-filter~ is called.
 
 ** Removed or renamed functions and variables
 
@@ -311,7 +311,6 @@ Org refile variables and functions have been moved to a new file.
 
 This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
 Hyatt has been fixed.  Thanks to both of them.
-
 
 * Version 9.3
 
