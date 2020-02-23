@@ -631,6 +631,12 @@ use of this function is for the stuck project list."
 (define-obsolete-function-alias 'org-babel-strip-quotes
   'org-strip-quotes "Org 9.2")
 
+(define-obsolete-variable-alias 'org-sort-agenda-notime-is-late
+  'org-agenda-sort-notime-is-late "9.4")
+
+(define-obsolete-variable-alias 'org-sort-agenda-noeffort-is-high
+  'org-agenda-sort-noeffort-is-high "9.4")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol

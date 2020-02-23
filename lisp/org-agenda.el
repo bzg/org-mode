@@ -1642,8 +1642,6 @@ part of an agenda sorting strategy."
   :group 'org-agenda-sorting
   :type 'symbol)
 
-(define-obsolete-variable-alias 'org-sort-agenda-notime-is-late
-  'org-agenda-sort-notime-is-late "9.4")
 (defcustom org-agenda-sort-notime-is-late t
   "Non-nil means items without time are considered late.
 This is only relevant for sorting.  When t, items which have no explicit
@@ -1654,8 +1652,6 @@ agenda entries."
   :group 'org-agenda-sorting
   :type 'boolean)
 
-(define-obsolete-variable-alias 'org-sort-agenda-noeffort-is-high
-  'org-agenda-sort-noeffort-is-high "9.4")
 (defcustom org-agenda-sort-noeffort-is-high t
   "Non-nil means items without effort estimate are sorted as high effort.
 This also applies when filtering an agenda view with respect to the
