@@ -631,7 +631,7 @@ When FILES is given, scan also these files."
   (or (and org-id-locations
 	   (hash-table-p org-id-locations)
 	   (gethash id org-id-locations))
-      ;; ball back on current buffer
+      ;; Fall back on current buffer
       (buffer-file-name (or (buffer-base-buffer (current-buffer))
 			    (current-buffer)))))
 
