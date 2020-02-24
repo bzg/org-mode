@@ -18340,9 +18340,6 @@ shortcuts.
 
   - After =\=, complete TeX symbols supported by the exporter.
 
-  - After =*=, complete headlines in the current buffer so that they
-    can be used in search links like: =[[*find this headline]]=
-
   - After =:= in a headline, complete tags.  Org deduces the list of
     tags from the =TAGS= in-buffer option (see [[*Setting Tags]]), the
     variable ~org-tag-alist~, or from all tags used in the current
@@ -18352,7 +18349,10 @@ shortcuts.
     of keys is constructed dynamically from all keys used in the
     current buffer.
 
-  - After =[=, complete link abbreviations (see [[*Link Abbreviations]]).
+  - After =[[=, complete link abbreviations (see [[*Link Abbreviations]]).
+
+  - After =[[*=, complete headlines in the current buffer so that they
+    can be used in search links like: =[[*find this headline]]=
 
   - After =#+=, complete the special keywords like =TYP_TODO= or
     file-specific =OPTIONS=.  After option keyword is complete,
