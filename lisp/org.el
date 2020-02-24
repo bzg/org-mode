@@ -15766,7 +15766,7 @@ inspection."
 	(write-region mathml nil mathml-file))
       (when (called-interactively-p 'any)
 	(message mathml)))
-     ((message "LaTeX to MathML conversion failed")
+     ((warn "LaTeX to MathML conversion failed")
       (message shell-command-output)))
     (delete-file tmp-in-file)
     (when (file-exists-p tmp-out-file)
@@ -15803,14 +15803,13 @@ inspection."
       ;; Failed conversion.  Return the LaTeX fragment verbatim
       latex-frag)))
 
-(defun org-format-latex-as-html (latex-frag)
-  "Convert LaTeX to HTML with a custom conversion command.
-`LATEX-FRAG' is the latex fragment
-Set the custom command with `org-latex-to-html-convert-command'."
+(defun org-format-latex-as-html (latex-fragment)
+  "Convert LATEX-FRAGMENT to HTML.
+This uses  `org-latex-to-html-convert-command', which see."
   (let ((cmd (format-spec org-latex-to-html-convert-command
-			  `((?i . ,latex-frag)))))
+			  `((?i . ,latex-fragment)))))
     (message "Running %s" cmd)
-    (setq shell-command-output (shell-command-to-string cmd))))
+    (shell-command-to-string cmd)))
 
 (defun org--get-display-dpi ()
   "Get the DPI of the display.
