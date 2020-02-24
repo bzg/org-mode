@@ -247,6 +247,11 @@ and headings will be visually numeroted.
 You can turn this on/off on a per-file basis with =#+startup: num= or
 =#+startup: nonum=.
 
+*** New option ~org-latex-to-html-convert-command~
+
+This new option allows you to convert a LaTeX fragment directly into
+HTML.
+
 *** New hook ~org-agenda-filter-hook~
 
 Functions in this hook are run after ~org-agenda-filter~ is called.
