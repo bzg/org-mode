@@ -12,6 +12,54 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.4 (not yet released)
 ** Incompatible changes
+*** Possibly broken internal file links: please check and fix
+
+A bug has been affecting internal links to headlines, like
+
+: [[*Headline][A link to a headline]]
+
+Storing a link to a headline may have been broken in your setup and
+those links may appear as
+
+: [[*TODO Headline][A link to a headline]]
+
+Following the link above will result in an error: the TODO keyword
+should not be part of internal file links.
+
+You can use the following command to fix links in an Org buffer:
+
+#+begin_src emacs-lisp
+(defun org-fix-links ()
+  "Fix ill-formatted internal links.
+E.g. replace [[*TODO Headline][headline]] by [[*Headline][headline]].
+Go through the buffer and ask for the replacement."
+  (interactive)
+  (visible-mode 1)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+	    (format "\\[\\[\\*%s\\s-+" (regexp-opt org-todo-keywords-1 t))
+	    nil t)
+      (when (y-or-n-p "Fix link (remove TODO keyword)? ")
+	(replace-match "[[*"))))
+  (visible-mode -1))
+#+end_src
+
+*** Calling conventions changes when opening or exporting custom links
+
+This changes affects export back-ends, and libraries providing new
+link types.
+
+Function used in ~:follow~ link parameter is required to accept a
+second argument.  Likewise, function used in ~:export~ parameter needs
+to accept a fourth argument.  See ~org-link-set-parameters~ for
+details.
+
+Eventually, the function ~org-export-custom-protocol-maybe~ is now
+called with a fourth argument.  Even though the 3-arguments definition
+is still supported, at least for now, we encourage back-end developers
+to switch to the new signature.
+
 *** Python session return values must be top-level expression statements
 
 Python blocks with ~:session :results value~ header arguments now only
@@ -19,21 +67,6 @@ return a value if the last line is a top-level expression statement,
 otherwise the result is None. Also, None will now show up under
 "#+RESULTS:", as it already did with ~:results value~ for non-session
 blocks.
-
-*** Calling conventions changes when opening or exporting custom links
-
-This changes affects export back-ends, and libraries providing new
-link types.
-
-Function used in ~:follow~ link parameter is required to accept
-a second argument.  Likewise, function used in ~:export~ parameter
-needs to accept a fourth argument.  See ~org-link-set-parameters~ for
-details.
-
-Eventually, the function ~org-export-custom-protocol-maybe~ is now
-called with a fourth argument.  Even though the 3-arguments definition
-is still supported, at least for now, we encourage back-end developers
-to switch to the new signature.
 
 *** In HTML export, change on how outline-container-* is set
 
