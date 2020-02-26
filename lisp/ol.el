@@ -1269,14 +1269,14 @@ search options, separated from the file name with \"::\".
 
 This function is meant to be used as a possible tool for
 `:follow' property in `org-link-parameters'."
-  (if (string-match "[*?{]" (file-name-nondirectory path))
-      (dired path)
-    (let* ((option (and (string-match "::\\(.*\\)\\'" path)
-			(match-string 1 path)))
-	   (path (if (not option) path
-		   (substring path 0 (match-beginning 0)))))
+  (let* ((option (and (string-match "::\\(.*\\)\\'" path)
+		      (match-string 1 path)))
+	 (file-name (if (not option) path
+		      (substring path 0 (match-beginning 0)))))
+    (if (string-match "[*?{]" (file-name-nondirectory file-name))
+	(dired file-name)
       (apply #'org-open-file
-	     path
+	     file-name
 	     arg
 	     (cond ((not option) nil)
 		   ((string-match-p "\\`[0-9]+\\'" option)
