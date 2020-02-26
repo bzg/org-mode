@@ -37,11 +37,14 @@ Go through the buffer and ask for the replacement."
   (visible-mode 1)
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward
-	    (format "\\[\\[\\*%s\\s-+" (regexp-opt org-todo-keywords-1 t))
-	    nil t)
-      (when (y-or-n-p "Fix link (remove TODO keyword)? ")
-	(replace-match "[[*"))))
+    (let ((regexp (format "\\[\\[\\*%s\\s-+"
+                          (regexp-opt org-todo-keywords-1 t))))
+      (while (re-search-forward regexp nil t)
+        (when (and (save-excursion
+                     (goto-char (match-beginning 0))
+                     (looking-at-p org-link-bracket-re))
+                   (y-or-n-p "Fix link (remove TODO keyword)? "))
+	  (replace-match "[[*")))))
   (visible-mode -1))
 #+end_src
 
