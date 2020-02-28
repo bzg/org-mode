@@ -112,10 +112,6 @@ below.
   - the export back-end,
   - the export communication channel, as a plist.
 
-  If the new link type is meant to be exported as a \"file\"-link
-  (or as an image), consider using `org-export-link-as-file',
-  either as an helper function, or as a value for this parameter.
-
   When nil, export for that type of link is delegated to the
   back-end.
 

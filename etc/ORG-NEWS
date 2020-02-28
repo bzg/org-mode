@@ -186,11 +186,11 @@ When this startup option is set, display headings as numeroted.
 
 Use =#+startup: nonum= to turn this off.
 
-*** New tools for custom links
+*** New tool for custom links
 
-Org provides two new tools, ~org-link-open-as-file~ and
-~org-export-link-as-file~, useful when defining new link types similar
-to "file"-type links.  See docstring for details.
+Org provides a new tool ~org-link-open-as-file~, useful when defining
+new link types similar to "file"-type links.  See docstring for
+details.
 
 *** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 

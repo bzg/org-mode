@@ -4185,21 +4185,6 @@ meant to be translated with `org-export-data' or alike."
 
 (org-define-error 'org-link-broken "Unable to resolve link; aborting")
 
-(defun org-export-link-as-file (path description backend info)
-  "Pretend PATH is a file name, and export it.
-
-DESCRIPTION, when non-nil, is the description of the link, as
-a string.  BACKEND is the symbol representing the back-end used
-for export.  INFO is the communication channel, as a plist.
-
-This function is meant to be used as a possible tool for
-`:export' property in `org-link-parameters'."
-  (org-export-data-with-backend
-   (org-element-parse-secondary-string
-    (org-link-make-string (concat "file:" path) description) '(link))
-   backend
-   info))
-
 (defun org-export-custom-protocol-maybe (link desc backend &optional info)
   "Try exporting LINK object with a dedicated function.
 
