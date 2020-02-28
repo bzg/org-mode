@@ -663,7 +663,7 @@ It is meant to be added to `org-export-before-parsing-hook'."
 				    (org-element-property :contents-end link))))
 		 (file (org-element-property :path link))
 		 (new-link (org-link-make-string
-			    (concat "attachment:" (org-attach-expand file))
+			    (concat "file:" (org-attach-expand file))
 			    description)))
 	    (goto-char (org-element-property :end link))
 	    (skip-chars-backward " \t")
@@ -677,7 +677,6 @@ See `org-open-file' for details about ARG."
 
 (org-link-set-parameters "attachment"
 			 :follow #'org-attach-follow
-			 :export #'org-export-link-as-file
                          :complete #'org-attach-complete-link)
 
 (defun org-attach-complete-link ()
