@@ -468,22 +468,21 @@ time is up."
 (defun org-timer--get-timer-title ()
   "Construct timer title.
 Try to use an Org header, otherwise use the buffer name."
-  (or
-   (cond
-    ((derived-mode-p 'org-agenda-mode)
-     (let* ((marker (or (get-text-property (point) 'org-marker)))
-	    (hdmarker (or (get-text-property (point) 'org-hd-marker)
-			  marker)))
-       (when (and marker (marker-buffer marker))
-	 (with-current-buffer (marker-buffer marker)
-	   (org-with-wide-buffer
-	    (goto-char hdmarker)
-	    (org-show-entry)
-	    (or (ignore-errors (org-get-heading))
-		(buffer-name (buffer-base-buffer))))))))
-    ((derived-mode-p 'org-mode)
-     (ignore-errors (org-get-heading))))
-   (buffer-name (buffer-base-buffer))))
+  (cond
+   ((derived-mode-p 'org-agenda-mode)
+    (let* ((marker (or (get-text-property (point) 'org-marker)))
+	   (hdmarker (or (get-text-property (point) 'org-hd-marker)
+			 marker)))
+      (when (and marker (marker-buffer marker))
+	(with-current-buffer (marker-buffer marker)
+	  (org-with-wide-buffer
+	   (goto-char hdmarker)
+	   (org-show-entry)
+	   (or (ignore-errors (org-get-heading))
+	       (buffer-name (buffer-base-buffer))))))))
+   ((derived-mode-p 'org-mode)
+    (ignore-errors (org-get-heading)))
+   (t (buffer-name (buffer-base-buffer)))))
 
 (provide 'org-timer)
 
