@@ -161,7 +161,11 @@
 (defun org-eldoc-load ()
   "Set up org-eldoc documentation function."
   (interactive)
-  (setq-local eldoc-documentation-function #'org-eldoc-documentation-function))
+  (if (boundp 'eldoc-documentation-functions)
+      (add-hook 'eldoc-documentation-functions
+		#'org-eldoc-documentation-function nil t)
+    (setq-local eldoc-documentation-function
+		#'org-eldoc-documentation-function)))
 
 ;;;###autoload
 (add-hook 'org-mode-hook #'org-eldoc-load)
