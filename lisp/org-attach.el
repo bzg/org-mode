@@ -574,13 +574,18 @@ The attachment is created as an Emacs buffer."
 (defun org-attach-delete-all (&optional force)
   "Delete all attachments from the current outline node.
 This actually deletes the entire attachment directory.
-A safer way is to open the directory in dired and delete from there."
+A safer way is to open the directory in dired and delete from there.
+
+With prefix argument FORCE, directory will be recursively deleted
+with no prompts."
   (interactive "P")
   (let ((attach-dir (org-attach-dir)))
     (when (and attach-dir
 	       (or force
 		   (yes-or-no-p "Really remove all attachments of this entry? ")))
-      (delete-directory attach-dir (yes-or-no-p "Recursive?") t)
+      (delete-directory attach-dir
+			(or force (yes-or-no-p "Recursive?"))
+			t)
       (message "Attachment directory removed")
       (run-hook-with-args 'org-attach-after-change-hook attach-dir)
       (org-attach-untag))))
