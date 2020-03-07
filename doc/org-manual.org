@@ -1890,11 +1890,12 @@ Here are a few examples:
 #+cindex: range references
 #+cindex: references, to ranges
 You may reference a rectangular range of fields by specifying two
-field references connected by two dots =..=.  If both fields are in
-the current row, you may simply use =$2..$7=, but if at least one
-field is in a different row, you need to use the general =@ROW$COLUMN=
-format at least for the first field, i.e., the reference must start
-with =@= in order to be interpreted correctly.  Examples:
+field references connected by two dots =..=.  The ends are included in
+the range.  If both fields are in the current row, you may simply use
+=$2..$7=, but if at least one field is in a different row, you need to
+use the general =@ROW$COLUMN= format at least for the first field,
+i.e., the reference must start with =@= in order to be interpreted
+correctly.  Examples:
 
 #+attr_texinfo: :columns 0.2 0.8
 | =$1..$3=      | first three fields in the current row                          |
