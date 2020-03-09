@@ -2949,7 +2949,7 @@ PROPERTIES: The list properties specified in the `:properties' parameter
 			     (org-trim
 			      (org-link-display-format
 			       (replace-regexp-in-string
-				"\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+				"\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]" ""
 				headline)))))))
 		       (tgs (and tags (org-get-tags)))
 		       (tsp
