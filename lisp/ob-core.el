@@ -2812,7 +2812,7 @@ block but are passed literally to the \"example-block\"."
 	     (mapconcat #'identity
 			(split-string expansion "[\n\r]")
 			(concat "\n" prefix))))))
-     body nil t 2)))
+     body t t 2)))
 
 (defun org-babel--script-escape-inner (str)
   (let (in-single in-double backslash out)

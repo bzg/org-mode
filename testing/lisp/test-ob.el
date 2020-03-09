@@ -783,6 +783,18 @@ x
 #+begin_src emacs-lisp :noweb-ref foo
   C
 #+end_src"
+	    (org-babel-expand-noweb-references))))
+  ;; Preserve case when replacing Noweb reference.
+  (should
+   (equal "(ignore)"
+	  (org-test-with-temp-text "
+#+begin_src emacs-lisp :noweb-ref AA
+\(ignore)
+#+end_src
+
+#+begin_src emacs-lisp :noweb yes<point>
+<<AA>>
+#+end_src"
 	    (org-babel-expand-noweb-references)))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()
