@@ -1180,17 +1180,14 @@ of matched result, which is either `dedicated' or `fuzzy'."
 			  org-outline-regexp-bol
 			  org-comment-string
 			  (mapconcat #'regexp-quote words ".+")))
-		 (cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]")
-		 (comment-re (format "\\`%s[ \t]+" org-comment-string)))
+		 (cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"))
 	     (goto-char (point-min))
 	     (catch :found
 	       (while (re-search-forward title-re nil t)
 		 (when (equal words
 			      (split-string
 			       (replace-regexp-in-string
-				cookie-re " "
-				(replace-regexp-in-string
-				 comment-re "" (org-get-heading t t t)))))
+				cookie-re " " (org-get-heading t t t t))))
 		   (throw :found t)))
 	       nil)))
       (beginning-of-line)
@@ -1242,18 +1239,21 @@ of matched result, which is either `dedicated' or `fuzzy'."
 
 (defun org-link-heading-search-string (&optional string)
   "Make search string for the current headline or STRING.
-When optional argument STRING is non-nil, assume it a headline.
+
 Search string starts with an asterisk.  COMMENT keyword and
 statistics cookies are removed, and contiguous spaces are packed
-into a single one."
-  (let ((context
+into a single one.
+
+When optional argument STRING is non-nil, assume it a headline,
+without any TODO or COMMENT keyword, and without any priority
+cookie or tag."
+  (let ((cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]")
+	(context
 	 (if (not string)
-	     (concat "*" (org-trim (org-get-heading nil nil nil t)))
-	   (let ((s (org-trim string))
-		 (comment-re (format "\\`%s[ \t]+" org-comment-string)))
-	     (unless (string-prefix-p "*" s) (setq s (concat "*" s)))
-	     (replace-regexp-in-string comment-re "" s))))
-	(cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"))
+	     (concat "*" (org-trim (org-get-heading t t t t)))
+	   (let ((s (org-trim string)))
+	     (if (string-prefix-p "*" s) s
+	       (setq s (concat "*" s)))))))
     (org-link--squeeze-white-spaces
      (replace-regexp-in-string cookie-re " " context))))
 

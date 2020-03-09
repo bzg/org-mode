@@ -133,6 +133,32 @@
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s::*H1][H1]]" file)
 		(org-store-link nil))))))
+  ;; On a headline, remove TODO and COMMENT keywords, priority cookie,
+  ;; and tags.
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* TODO H1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*H1][H1]]" file)
+		(org-store-link nil))))))
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* COMMENT H1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*H1][H1]]" file)
+		(org-store-link nil))))))
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* [#A] H1"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*H1][H1]]" file)
+		(org-store-link nil))))))
+  (should
+   (let (org-store-link-props org-stored-links)
+     (org-test-with-temp-text-in-file "* H1 :tag:"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*H1][H1]]" file)
+		(org-store-link nil))))))
   ;; On a headline, remove any link from description.
   (should
    (let (org-store-link-props org-stored-links)
@@ -217,7 +243,7 @@
        (fundamental-mode)
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s][file:%s]]" file file)
-	 	(org-store-link nil))))))
+		(org-store-link nil))))))
   ;; C-u prefix reverses `org-context-in-file-links' in non-Org
   ;; buffer.
   (should
@@ -237,7 +263,7 @@
        (fundamental-mode)
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s][file:%s]]" file file)
-	 	(org-store-link '(16))))))))
+		(org-store-link '(16))))))))
 
 
 ;;; Radio Targets
