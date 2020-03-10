@@ -2383,7 +2383,7 @@ set a priority."
   :group 'org-priorities
   :type 'boolean)
 
-(defalias 'org-highest-priority 'org-priority-highest)
+(defvaralias 'org-highest-priority 'org-priority-highest)
 
 (defcustom org-priority-highest ?A
   "The highest priority of TODO items.
@@ -2394,7 +2394,7 @@ Must be smaller than `org-priority-lowest'."
 	  (character :tag "Character")
 	  (integer :tag "Integer (< 65)")))
 
-(defalias 'org-lowest-priority 'org-priority-lowest)
+(defvaralias 'org-lowest-priority 'org-priority-lowest)
 (defcustom org-priority-lowest ?C
   "The lowest priority of TODO items.
 A character like ?A, ?B, etc., or a numeric value like 1, 2, etc.
@@ -2404,7 +2404,7 @@ Must be higher than `org-priority-highest'."
 	  (character :tag "Character")
 	  (integer :tag "Integer (< 65)")))
 
-(defalias 'org-default-priority 'org-priority-default)
+(defvaralias 'org-default-priority 'org-priority-default)
 (defcustom org-priority-default ?B
   "The default priority of TODO items.
 This is the priority an item gets if no explicit priority is given.
