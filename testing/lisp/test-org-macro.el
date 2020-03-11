@@ -304,6 +304,72 @@
       (buffer-substring-no-properties
        (line-beginning-position) (point-max))))))
 
+(ert-deftest test-org-macro/author ()
+  "Test {{{author}}} macro."
+  ;; Return AUTHOR keyword value.
+  (should
+   (equal "me"
+	  (org-test-with-temp-text "#+author: me\n<point>{{{author}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max)))))
+  ;; When AUTHOR keyword is missing, return the empty string.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "{{{author}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max))))))
+
+(ert-deftest test-org-macro/email ()
+  "Test {{{email}}} macro."
+  ;; Return EMAIL keyword value.
+  (should
+   (equal "me@home"
+	  (org-test-with-temp-text "#+email: me@home\n<point>{{{email}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max)))))
+  ;; When EMAIL keyword is missing, return the empty string.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "{{{email}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max))))))
+
+(ert-deftest test-org-macro/title ()
+  "Test {{{title}}} macro."
+  ;; Return TITLE keyword value.
+  (should
+   (equal "Foo!"
+	  (org-test-with-temp-text "#+title: Foo!\n<point>{{{title}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max)))))
+  ;; When TITLE keyword is missing, return the empty string.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "{{{title}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max)))))
+  ;; When multiple TITLE keywords are used, concatenate them.
+  (should
+   (equal "Foo Bar!"
+	  (org-test-with-temp-text
+	      "#+title: Foo\n#+title: Bar!\n<point>{{{title}}}"
+	    (org-macro-initialize-templates)
+	    (org-macro-replace-all org-macro-templates)
+	    (buffer-substring-no-properties
+	     (line-beginning-position) (point-max))))))
+
 (ert-deftest test-org-macro/escape-arguments ()
   "Test `org-macro-escape-arguments' specifications."
   ;; Regular tests.
