@@ -89,9 +89,9 @@ VALUE is the template of the macro.  The new value override the
 previous one, unless VALUE is nil.  TEMPLATES is the list of
 templates.  Return the updated list."
   (let ((old-definition (assoc name templates)))
-    (if (and value old-definition)
-	(setcdr old-definition value)
-      (push (cons name (or value "")) templates)))
+    (cond ((and value old-definition) (setcdr old-definition value))
+	  (old-definition)
+	  (t (push (cons name (or value "")) templates))))
   templates)
 
 (defun org-macro--collect-macros (&optional files templates)
