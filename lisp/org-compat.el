@@ -637,6 +637,11 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-sort-agenda-noeffort-is-high
   'org-agenda-sort-noeffort-is-high "9.4")
 
+(make-obsolete-variable
+ 'org-maybe-keyword-time-regexp
+ "use `org-planning-line-re', followed by `org-ts-regexp-both' instead."
+ "Org 9.4")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol
