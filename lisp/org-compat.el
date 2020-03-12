@@ -637,6 +637,12 @@ use of this function is for the stuck project list."
 (define-obsolete-variable-alias 'org-sort-agenda-noeffort-is-high
   'org-agenda-sort-noeffort-is-high "9.4")
 
+(defconst org-maybe-keyword-time-regexp
+  (concat "\\(\\<\\(\\(?:CLO\\(?:CK\\|SED\\)\\|DEADLINE\\|SCHEDULED\\):\\)\\)?"
+	  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?[]>]"
+	  "\\|"
+	  "<%%([^\r\n>]*>\\)")
+  "Matches a timestamp, possibly preceded by a keyword.")
 (make-obsolete-variable
  'org-maybe-keyword-time-regexp
  "use `org-planning-line-re', followed by `org-ts-regexp-both' instead."
