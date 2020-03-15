@@ -689,6 +689,7 @@ The following commands jump to other headlines in the buffer.
 #+cindex: sorting, of subtrees
 #+cindex: subtrees, cut and paste
 
+#+attr_texinfo: :sep ,
 - {{{kbd(M-RET)}}} (~org-meta-return~) ::
 
   #+kindex: M-RET
@@ -743,17 +744,23 @@ The following commands jump to other headlines in the buffer.
   level.  Yet another {{{kbd(TAB)}}}, and you are back to the initial
   level.
 
-- {{{kbd(M-LEFT)}}} (~org-do-promote~) ::
+- {{{kbd(M-LEFT)}}} (~org-do-promote~), {{{kbd(M-RIGHT)}}} (~org-do-demote~) ::
 
   #+kindex: M-LEFT
   #+findex: org-do-promote
-  Promote current heading by one level.
-
-- {{{kbd(M-RIGHT)}}} (~org-do-demote~) ::
-
   #+kindex: M-RIGHT
   #+findex: org-do-demote
-  Demote current heading by one level.
+  Promote or demote current heading by one level.
+
+  #+cindex: region, active
+  #+cindex: active region
+  #+cindex: transient mark mode
+  When there is an active region---i.e., when Transient Mark mode is
+  active---promotion and demotion work on all headlines in the region.
+  To select a region of headlines, it is best to place both point and
+  mark at the beginning of a line, mark at the beginning of the first
+  headline, and point at the line just after the last headline to
+  change.
 
 - {{{kbd(M-S-LEFT)}}} (~org-promote-subtree~) ::
 
@@ -889,16 +896,8 @@ The following commands jump to other headlines in the buffer.
   Finally, if the first line is a headline, remove the stars from all
   headlines in the region.
 
-#+cindex: region, active
-#+cindex: active region
-#+cindex: transient mark mode
-When there is an active region---i.e., when Transient Mark mode is
-active---promotion and demotion work on all headlines in the region.
-To select a region of headlines, it is best to place both point and
-mark at the beginning of a line, mark at the beginning of the first
-headline, and point at the line just after the last headline to
-change.  Note that when point is inside a table (see [[*Tables]]), the
-Meta-Cursor keys have different functionality.
+Note that when point is inside a table (see [[*Tables]]), the Meta-Cursor
+keys have different functionality.
 
 ** Sparse Trees
 :PROPERTIES:
