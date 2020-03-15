@@ -232,7 +232,7 @@ property on the headline itself.")
 
 (defconst org-html-scripts
   "<script type=\"text/javascript\">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
      function CodeHighlightOn(elem, id)
      {
@@ -510,12 +510,12 @@ means to use the maximum value consistent with other options."
 
 (defcustom org-html-infojs-template
   "<script type=\"text/javascript\" src=\"%SCRIPT_PATH\">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 // @license-end
 </script>
 
 <script type=\"text/javascript\">
-// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&dn=gpl-3.0.txt GPL-v3-or-Later
+// @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 <!--/*--><![CDATA[/*><!--*/
 %MANAGER_OPTIONS
 org_html_manager.setup();  // activate after the parameters are set
