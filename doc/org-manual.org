@@ -5242,7 +5242,7 @@ Searches]]).
   a {{{kbd(C-u)}}} prefix argument, ignore headlines that are not
   a TODO line.
 
-- {{{kbd(M-x org-agenda m)}}}, ~org-tags-view~ ::
+- {{{kbd(M-x org-agenda m)}}} (~org-tags-view~) ::
 
   #+kindex: m @r{(Agenda dispatcher)}
   #+findex: org-tags-view
