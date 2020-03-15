@@ -16292,7 +16292,7 @@ Source code blocks are one of many Org block types, which also include
 Details of Org's facilities for working with source code are described
 in the following sections.
 
-** Features
+** Features Overview
 :PROPERTIES:
 :DESCRIPTION: Enjoy the versatility of source blocks.
 :END:
@@ -17832,7 +17832,7 @@ code block header arguments:
 
 Code blocks in the following languages are supported.
 
-#+attr_texinfo: :columns 0.20 0.35 0.20 0.20
+#+attr_texinfo: :columns 0.25 0.25 0.25 0.20
 | Language   | Identifier    | Language       | Identifier   |
 |------------+---------------+----------------+--------------|
 | Asymptote  | =asymptote=   | Lisp           | =lisp=       |
