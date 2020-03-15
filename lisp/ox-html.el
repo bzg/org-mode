@@ -1279,7 +1279,7 @@ like that: \"%%\"."
 		(string :tag "Format string"))))
 
 (defcustom org-html-validation-link
-  "<a href=\"http://validator.w3.org/check?uri=referer\">Validate</a>"
+  "<a href=\"https://validator.w3.org/check?uri=referer\">Validate</a>"
   "Link to HTML validation service."
   :group 'org-export-html
   :type 'string)
