@@ -1282,6 +1282,7 @@ like that: \"%%\"."
   "<a href=\"https://validator.w3.org/check?uri=referer\">Validate</a>"
   "Link to HTML validation service."
   :group 'org-export-html
+  :package-version '(Org . "9.4")
   :type 'string)
 
 (defcustom org-html-creator-string
