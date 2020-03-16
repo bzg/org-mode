@@ -525,8 +525,7 @@ org_html_manager.setup();  // activate after the parameters are set
   "The template for the export style additions when org-info.js is used.
 Option settings will replace the %MANAGER-OPTIONS cookie."
   :group 'org-export-html
-  :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "9.4")
   :type 'string)
 
 (defun org-html-infojs-install-script (exp-plist _backend)
