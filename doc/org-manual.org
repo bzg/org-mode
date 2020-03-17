@@ -3468,8 +3468,8 @@ generally, act on links.
 
   #+begin_src emacs-lisp
   (with-eval-after-load 'org
-    (define-key org-mode-map "\M-n" 'org-next-link)
-    (define-key org-mode-map "\M-p" 'org-previous-link))
+    (define-key org-mode-map (kbd "M-n") 'org-next-link)
+    (define-key org-mode-map (kbd "M-p") 'org-previous-link))
   #+end_src
 
 ** Using Links Outside Org
