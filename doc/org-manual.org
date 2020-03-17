@@ -19040,6 +19040,9 @@ using it on a headline displays "Document Structure" section.
 {{{kbd(q)}}} closes the Info window.
 
 ** Escape Character
+:PROPERTIES:
+:DESCRIPTION: Prevent Org from interpreting your writing.
+:END:
 
 #+cindex: escape character
 #+cindex: zero width space
