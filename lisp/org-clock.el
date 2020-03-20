@@ -2784,6 +2784,7 @@ a number of clock tables."
           (pcase step
             (`day "Daily report: ")
             (`week "Weekly report starting on: ")
+            (`semimonth "Semimonthly report starting on: ")
             (`month "Monthly report starting on: ")
             (`year "Annual report starting on: ")
             (_ (user-error "Unknown `:step' specification: %S" step))))
@@ -2833,6 +2834,9 @@ a number of clock tables."
                           (let ((offset (if (= dow week-start) 7
                                           (mod (- week-start dow) 7))))
                             (list 0 0 org-extend-today-until (+ d offset) m y)))
+                         (`semimonth (list 0 0 0
+                                           (if (< d 16) 16 1)
+                                           (if (< d 16) m (1+ m)) y))
                          (`month (list 0 0 0 month-start (1+ m) y))
                          (`year (list 0 0 org-extend-today-until 1 1 (1+ y)))))))
              (table-begin (line-beginning-position 0))
