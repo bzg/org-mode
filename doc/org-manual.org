@@ -5658,6 +5658,13 @@ This dynamic block has the following parameters:
     create a globally unique ID for the current entry and copy it to
     the kill-ring.
 
+- =:match= ::
+
+  When set to a string, use this as a tags/property match filter to
+  select only a subset of the headline in the scope set by the ~:id~
+  parameter.
+
+
 - =:hlines= ::
 
   When ~t~, insert an hline after every line.  When a number N, insert
