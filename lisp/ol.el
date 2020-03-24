@@ -1643,7 +1643,17 @@ non-nil."
 		      (t (org-link-heading-search-string)))))
 	       (when (org-string-nw-p context)
 		 (setq cpltxt (format "%s::%s" cpltxt context))
-		 (setq desc (or name (org-get-heading t t t t) "NONE")))))
+		 (setq desc
+		       (or name
+			   ;; Although description is not a search
+			   ;; string, use `org-link--normalize-string'
+			   ;; to prettify it (contiguous white spaces)
+			   ;; and remove volatile contents (statistics
+			   ;; cookies).
+			   (and (not (org-before-first-heading-p))
+				(org-link--normalize-string
+				 (org-get-heading t t t t)))
+			   "NONE")))))
 	   (setq link cpltxt)))))
 
        ((buffer-file-name (buffer-base-buffer))
