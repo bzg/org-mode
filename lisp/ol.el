@@ -737,21 +737,28 @@ White spaces are not significant."
 		(mapconcat #'identity
 			   (cl-subseq lines 0 org-link-context-for-files)
 			   "\n"))))
-      (org-link--squeeze-white-spaces context))))
+      context)))
 
-(defun org-link--squeeze-white-spaces (string)
-  "Trim STRING, pack contiguous white spaces, and return it."
-  (replace-regexp-in-string "[ \t\n]+" " " (org-trim string)))
-
-(defun org-link--clear-syntax-from-context (context)
-  "Remove special syntax from CONTEXT string and return it."
-  (while (cond ((and (string-prefix-p "(" context)
-		     (string-suffix-p ")" context))
-		(setq context (substring context 1 -1)))
-	       ((string-match "\\`[#*]+" context)
-		(setq context (substring context (match-end 0))))
-	       (t nil)))
-  context)
+(defun org-link--normalize-string (string &optional context)
+  "Remove ignored contents from STRING string and return it.
+This function removes contiguous white spaces and statistics
+cookies.  When optional argument CONTEXT is non-nil, it assumes
+STRING is a context string, and also removes special search
+syntax around the string."
+  (when context
+    (while (cond ((and (string-prefix-p "(" string)
+		       (string-suffix-p ")" string))
+		  (setq string (substring string 1 -1)))
+		 ((string-match "\\`[#*]+" string)
+		  (setq string (substring string (match-end 0))))
+		 (t nil))))
+  (org-trim
+   (replace-regexp-in-string
+    (rx (or (one-or-more (any " \t"))
+	    ;; Statistics cookie regexp.
+	    (seq "[" (0+ digit) (or "%" (seq "/" (0+ digit))) "]")))
+    " "
+    string)))
 
 
 ;;; Public API
@@ -1179,15 +1186,14 @@ of matched result, which is either `dedicated' or `fuzzy'."
 		  (format "%s.*\\(?:%s[ \t]\\)?.*%s"
 			  org-outline-regexp-bol
 			  org-comment-string
-			  (mapconcat #'regexp-quote words ".+")))
-		 (cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]"))
+			  (mapconcat #'regexp-quote words ".+"))))
 	     (goto-char (point-min))
 	     (catch :found
 	       (while (re-search-forward title-re nil t)
 		 (when (equal words
 			      (split-string
-			       (replace-regexp-in-string
-				cookie-re " " (org-get-heading t t t t))))
+			       (org-link--normalize-string
+				(org-get-heading t t t t))))
 		   (throw :found t)))
 	       nil)))
       (beginning-of-line)
@@ -1247,15 +1253,12 @@ into a single one.
 When optional argument STRING is non-nil, assume it a headline,
 without any TODO or COMMENT keyword, and without any priority
 cookie or tag."
-  (let ((cookie-re "\\[[0-9]*\\(?:%\\|/[0-9]*\\)\\]")
-	(context
-	 (if (not string)
-	     (concat "*" (org-trim (org-get-heading t t t t)))
-	   (let ((s (org-trim string)))
-	     (if (string-prefix-p "*" s) s
-	       (setq s (concat "*" s)))))))
-    (org-link--squeeze-white-spaces
-     (replace-regexp-in-string cookie-re " " context))))
+  (org-link--normalize-string
+   (if (not string)
+       (concat "*" (org-trim (org-get-heading t t t t)))
+     (let ((s (org-trim string)))
+       (if (string-prefix-p "*" s) s
+	 (concat "*" s))))))
 
 (defun org-link-open-as-file (path arg)
   "Pretend PATH is a file name and open it.
@@ -1633,13 +1636,10 @@ non-nil."
 		    (context
 		     (cond
 		      ((let ((region (org-link--context-from-region)))
-			 (and region
-			      (org-link--clear-syntax-from-context region))))
+			 (and region (org-link--normalize-string region t))))
 		      (name)
 		      ((org-before-first-heading-p)
-		       (org-link--clear-syntax-from-context
-			(org-link--squeeze-white-spaces
-			 (org-current-line-string))))
+		       (org-link--normalize-string (org-current-line-string) t))
 		      (t (org-link-heading-search-string)))))
 	       (when (org-string-nw-p context)
 		 (setq cpltxt (format "%s::%s" cpltxt context))
@@ -1653,10 +1653,10 @@ non-nil."
 			      (buffer-file-name (buffer-base-buffer)))))
 	;; Add a context search string.
 	(when (org-xor org-link-context-for-files (equal arg '(4)))
-	  (let ((context (org-link--clear-syntax-from-context
+	  (let ((context (org-link--normalize-string
 			  (or (org-link--context-from-region)
-			      (org-link--squeeze-white-spaces
-			       (org-current-line-string))))))
+			      (org-current-line-string))
+			  t)))
 	    ;; Only use search option if there is some text.
 	    (when (org-string-nw-p context)
 	      (setq cpltxt (format "%s::%s" cpltxt context))
