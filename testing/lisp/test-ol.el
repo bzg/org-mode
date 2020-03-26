@@ -263,7 +263,95 @@
        (fundamental-mode)
        (let ((file (buffer-file-name)))
 	 (equal (format "[[file:%s][file:%s]]" file file)
-		(org-store-link '(16))))))))
+		(org-store-link '(16)))))))
+  ;; Context does not include special search syntax.
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "(two)"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "# two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "*two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "( two )"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "# two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "#( two )"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "#** ((## two) )"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  (should-not
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "(two"
+       (fundamental-mode)
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::two]]" file file)
+		(org-store-link nil))))))
+  ;; Context also ignore statistics cookies and special headlines
+  ;; data.
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "* TODO [#A] COMMENT foo :bar:"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*foo][foo]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "* foo[33%]bar"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*foo bar][foo bar]]" file file)
+		(org-store-link nil))))))
+  (should
+   (let ((org-stored-links nil)
+	 (org-context-in-file-links t))
+     (org-test-with-temp-text-in-file "* [%][/]  foo [35%] bar[3/5]"
+       (let ((file (buffer-file-name)))
+	 (equal (format "[[file:%s::*foo bar][foo bar]]" file file)
+		(org-store-link nil)))))))
 
 
 ;;; Radio Targets

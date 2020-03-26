@@ -745,20 +745,24 @@ This function removes contiguous white spaces and statistics
 cookies.  When optional argument CONTEXT is non-nil, it assumes
 STRING is a context string, and also removes special search
 syntax around the string."
-  (when context
-    (while (cond ((and (string-prefix-p "(" string)
-		       (string-suffix-p ")" string))
-		  (setq string (substring string 1 -1)))
-		 ((string-match "\\`[#*]+" string)
-		  (setq string (substring string (match-end 0))))
-		 (t nil))))
-  (org-trim
-   (replace-regexp-in-string
-    (rx (or (one-or-more (any " \t"))
+  (let ((string
+	 (org-trim
+	  (replace-regexp-in-string
+	   (rx (one-or-more (any " \t")))
+	   " "
+	   (replace-regexp-in-string
 	    ;; Statistics cookie regexp.
-	    (seq "[" (0+ digit) (or "%" (seq "/" (0+ digit))) "]")))
-    " "
-    string)))
+	    (rx (seq "[" (0+ digit) (or "%" (seq "/" (0+ digit))) "]"))
+	    " "
+	    string)))))
+    (when context
+      (while (cond ((and (string-prefix-p "(" string)
+			 (string-suffix-p ")" string))
+		    (setq string (org-trim (substring string 1 -1))))
+		   ((string-match "\\`[#*]+[ \t]*" string)
+		    (setq string (substring string (match-end 0))))
+		   (t nil))))
+    string))
 
 
 ;;; Public API
@@ -1251,14 +1255,11 @@ statistics cookies are removed, and contiguous spaces are packed
 into a single one.
 
 When optional argument STRING is non-nil, assume it a headline,
-without any TODO or COMMENT keyword, and without any priority
-cookie or tag."
-  (org-link--normalize-string
-   (if (not string)
-       (concat "*" (org-trim (org-get-heading t t t t)))
-     (let ((s (org-trim string)))
-       (if (string-prefix-p "*" s) s
-	 (concat "*" s))))))
+without any asterisk, TODO or COMMENT keyword, and without any
+priority cookie or tag."
+  (concat "*"
+	  (org-link--normalize-string
+	   (or string (org-get-heading t t t t)))))
 
 (defun org-link-open-as-file (path arg)
   "Pretend PATH is a file name and open it.
