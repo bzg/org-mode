@@ -175,6 +175,8 @@ option ~org-display-remote-inline-images~.
 `k' option, but the user specifies a time of day, not a number of
 minutes.
 
+*** New step value =semimonth= accepted for clock tables
+
 *** Allow text rescaling in column view
 
 You can now use =C-x C-+= in column view: the columns face size will
