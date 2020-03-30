@@ -2394,6 +2394,16 @@ See also `test-org-table/copy-field'."
 	    (org-table-insert-column)
 	    (buffer-string)))))
 
+(ert-deftest test-org-table/insert-column-with-formula ()
+  "Test `org-table-insert-column' with a formula in place."
+  (should
+   (equal "| 1 |   | 1 | 2 |
+#+TBLFM: $4=$1+$3"
+	  (org-test-with-temp-text
+	   "| 1<point> | 1 | 2 |
+#+TBLFM: $3=$1+$2"
+	   (org-table-insert-column)
+	   (buffer-substring-no-properties (point-min) (point-max))))))
 
 
 ;;; Moving single cells
