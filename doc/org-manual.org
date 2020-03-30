@@ -1429,7 +1429,7 @@ you, configure the option ~org-table-auto-blank-field~.
 
   #+kindex: M-S-RIGHT
   #+findex: org-table-insert-column
-  Insert a new column to the left of point position.
+  Insert a new column to the right of point position.
 
 - {{{kbd(M-UP)}}} (~org-table-move-row-up~) ::
 
