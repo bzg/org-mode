@@ -659,8 +659,8 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
     (let ((plist (cdr project)))
       (let ((fun (org-publish-property :preparation-function project)))
 	(cond
-	 ((consp fun) (dolist (f fun) (funcall f plist)))
-	 ((functionp fun) (funcall fun plist))))
+	 ((functionp fun) (funcall fun plist))
+	 ((consp fun) (dolist (f fun) (funcall f plist)))))
       ;; Each project uses its own cache file.
       (org-publish-initialize-cache (car project))
       (when (org-publish-property :auto-sitemap project)
@@ -685,8 +685,8 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	  (org-publish-file theindex project t)))
       (let ((fun (org-publish-property :completion-function project)))
 	(cond
-	 ((consp fun) (dolist (f fun) (funcall f plist)))
-	 ((functionp fun) (funcall fun plist)))))
+	 ((functionp fun) (funcall fun plist))
+	 ((consp fun) (dolist (f fun) (funcall f plist))))))
     (org-publish-write-cache-file)))
 
 
