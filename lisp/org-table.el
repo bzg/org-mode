@@ -1368,8 +1368,8 @@ However, when FORCE is non-nil, create new columns if necessary."
     ;; Fix TBLFM formulas, if desirable.
     (when (or (not org-table-fix-formulas-confirm)
 	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
-      (org-table-fix-formulas "$" nil (1- col) 1)
-      (org-table-fix-formulas "$LR" nil (1- col) 1))))
+      (org-table-fix-formulas "$" nil col 1)
+      (org-table-fix-formulas "$LR" nil col 1))))
 
 (defun org-table-find-dataline ()
   "Find a data line in the current table, which is needed for column commands.
