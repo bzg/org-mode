@@ -156,14 +156,20 @@ description  A short string describing the template, will be shown during
 type         The type of entry.  Valid types are:
                entry       an Org node, with a headline.  Will be filed
                            as the child of the target entry or as a
-                           top-level entry.
+                           top-level entry.  Its default template is:
+                             \"* %?\n %a\"
                item        a plain list item, will be placed in the
-                           first plain list at the target
-                           location.
+                           first plain list at the target location.
+                           Its default template is:
+                             \"- %?\"
                checkitem   a checkbox item.  This differs from the
                            plain list item only in so far as it uses a
-                           different default template.
+                           different default template.  Its default
+                           template is:
+                             \"- [ ] %?\"
                table-line  a new line in the first table at target location.
+                           Its default template is:
+                             \"| %? |\"
                plain       text to be inserted as it is.
 
 target       Specification of where the captured item should be placed.
@@ -211,9 +217,10 @@ target       Specification of where the captured item should be placed.
                 Most general way: write your own function which both visits
                 the file and moves point to the right location
 
-template     The template for creating the capture item.  If you leave this
-             empty, an appropriate default template will be used.  See below
-             for more details.  Instead of a string, this may also be one of
+template     The template for creating the capture item.
+             If it is an empty string or nil, a default template based on
+             the entry type will be used (see the \"type\" section above).
+             Instead of a string, this may also be one of:
 
                  (file \"/path/to/template-file\")
                  (function function-returning-the-template)
