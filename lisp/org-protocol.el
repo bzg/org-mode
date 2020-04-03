@@ -623,13 +623,13 @@ CLIENT is ignored."
             (let ((proto
 		   (concat the-protocol
 			   (regexp-quote (plist-get (cdr prolist) :protocol))
-			   "\\(:/+\\|\\?\\)")))
+			   "\\(:/+\\|/*\\?\\)")))
               (when (string-match proto fname)
                 (let* ((func (plist-get (cdr prolist) :function))
                        (greedy (plist-get (cdr prolist) :greedy))
                        (split (split-string fname proto))
                        (result (if greedy restoffiles (cadr split)))
-		       (new-style (string= (match-string 1 fname) "?")))
+		       (new-style (string-match "/*?" (match-string 1 fname))))
                   (when (plist-get (cdr prolist) :kill-client)
 		    (message "Greedy org-protocol handler.  Killing client.")
 		    (server-edit))
