@@ -665,8 +665,11 @@ optional argument MARKERP, return the position as a new marker."
     (let* ((link (concat "id:" (org-id-get-create)))
 	   (case-fold-search nil)
 	   (desc (save-excursion
-		   (org-back-to-heading t)
-		   (or (and (looking-at org-complex-heading-regexp)
+		   (org-back-to-heading-or-point-min t)
+		   (or (and (org-before-first-heading-p)
+			    (file-name-nondirectory
+			     (buffer-file-name (buffer-base-buffer))))
+		       (and (looking-at org-complex-heading-regexp)
 			    (if (match-end 4)
 				(match-string 4)
 			      (match-string 0)))

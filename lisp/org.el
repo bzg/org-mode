@@ -13140,7 +13140,8 @@ part of the buffer."
 	(while (re-search-forward re nil t)
 	  (when (if value (org-at-property-p)
 		  (org-entry-get (point) property nil t))
-	    (throw 'exit (progn (org-back-to-heading t) (point)))))))))
+	    (throw 'exit (progn (org-back-to-heading-or-point-min t)
+				(point)))))))))
 
 (defun org-delete-property (property)
   "In the current entry, delete PROPERTY."
