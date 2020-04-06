@@ -6337,6 +6337,10 @@ special repeaters =++= and =.+=.  For example:
 ,** TODO Check the batteries in the smoke detectors
    DEADLINE: <2005-11-01 Tue .+1m>
    Marking this DONE will shift the date to one month after today.
+
+,** TODO Wash my hands
+   DEADLINE: <2019-04-05 08:00 Sun .+1h>
+   Marking this DONE shifts the date to exactly one hour from now.
 #+end_example
 
 #+vindex: org-agenda-skip-scheduled-if-deadline-is-shown

@@ -6686,6 +6686,28 @@ Paragraph<point>"
      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2h>"
        (org-todo "DONE")
        (buffer-string))))
+  ;; Handle every repeater type using hours step.
+  (should
+   (string-match-p
+    "2014-03-04 .* 02:00"
+    (org-test-at-time "<2014-03-04 02:35>"
+      (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 +8h>"
+	(org-todo "DONE")
+	(buffer-string)))))
+  (should
+   (string-match-p
+    "2014-03-04 .* 10:00"
+    (org-test-at-time "<2014-03-04 02:35>"
+      (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 ++8h>"
+	(org-todo "DONE")
+	(buffer-string)))))
+  (should
+   (string-match-p
+    "2014-03-04 .* 10:35"
+    (org-test-at-time "<2014-03-04 02:35>"
+      (org-test-with-temp-text "* TODO H\n<2014-03-03 18:00 .+8h>"
+	(org-todo "DONE")
+	(buffer-string)))))
   ;; Do not repeat inactive time stamps with a repeater.
   (should-not
    (string-match-p

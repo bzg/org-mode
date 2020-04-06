@@ -10146,9 +10146,13 @@ This function is run automatically after each state change to a DONE state."
 			(repeater-type (match-string 1 ts)))
 		    (cond
 		     ((equal "." repeater-type)
-		      ;; Shift starting date to today.
-		      (org-timestamp-change (- (org-today) (time-to-days time))
-					    'day))
+		      ;; Shift starting date to today, or now if
+		      ;; repeater is by hours.
+		      (if (equal what "h")
+			  (org-timestamp-change
+			   (floor (- (org-time-stamp-to-now ts t)) 60) 'minute)
+			(org-timestamp-change
+			 (- (org-today) (time-to-days time)) 'day)))
 		     ((equal "+" repeater-type)
 		      (let ((nshiftmax 10)
 			    (nshift 0))

@@ -353,6 +353,17 @@ to the resulting HTML file.
 
 Org refile variables and functions have been moved to a new file.
 
+*** Handle repeated tasks with =.+= type and hours step
+
+A task using a =.+= repeater and hours step is repeated starting from
+now. E.g.,
+
+#+begin_example
+,,** TODO Wash my hands
+   DEADLINE: <2019-04-05 08:00 Sun .+1h>
+   Marking this DONE shifts the date to exactly one hour from now.
+#+end_example
+
 *** The end of a 7 years old bug
 
 This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
