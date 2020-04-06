@@ -2373,13 +2373,58 @@ INFO may provide the values of these header arguments (in the
 			     (org-babel-chomp result "\n"))))
 		   (t (goto-char beg) (insert result)))
 		  (setq end (copy-marker (point) t))
-		  ;; possibly wrap result
+		  ;; Possibly wrap result.
 		  (cond
 		   ((assq :wrap (nth 2 info))
-		    (let ((name (or (cdr (assq :wrap (nth 2 info))) "results")))
-		      (funcall wrap (concat "#+begin_" name)
-			       (concat "#+end_" (car (split-string name)))
-			       nil nil (concat "{{{results(@@" name ":") "@@)}}}")))
+		    (let* ((full (or (cdr (assq :wrap (nth 2 info))) "results"))
+			   (split (split-string full))
+			   (type (car split))
+			   (opening-line (concat "#+begin_" full))
+			   (closing-line (concat "#+end_" type)))
+		      (cond
+		       ;; Escape contents from "export" wrap.  Wrap
+		       ;; inline results within an export snippet with
+		       ;; appropriate value.
+		       ((eq t (compare-strings type nil nil "export" nil nil t))
+			(let ((backend (pcase split
+					 (`(,_) "none")
+					 (`(,_ ,b . ,_) b))))
+			  (funcall wrap
+				   opening-line closing-line
+				   nil nil
+				   (format "{{{results(@@%s:"
+					   backend) "@@)}}}")))
+		       ;; Escape contents from "example" wrap.  Mark
+		       ;; inline results as verbatim.
+		       ((eq t (compare-strings type nil nil "example" nil nil t))
+			(funcall wrap
+				 opening-line closing-line
+				 nil nil
+				 "{{{results(=" "=)}}}"))
+		       ;; Escape contents from "src" wrap.  Mark
+		       ;; inline results as inline source code.
+		       ((eq t (compare-strings type nil nil "src" nil nil t))
+			(let ((inline-open
+			       (pcase split
+				 (`(,_)
+				  "{{{results(src_none{")
+				 (`(,_ ,language)
+				  (format "{{{results(src_%s{" language))
+				 (`(,_ ,language . ,rest)
+				  (let ((r (mapconcat #'identity rest " ")))
+				    (format "{{{results(src_%s[%s]{"
+					    language r))))))
+			  (funcall wrap
+				   opening-line closing-line
+				   nil nil
+				   inline-open "})}}}")))
+		       ;; Do not escape contents in non-verbatim
+		       ;; blocks.  Return plain inline results.
+		       (t
+			(funcall wrap
+				 opening-line closing-line
+				 t nil
+				 "{{{results(" ")}}}")))))
 		   ((member "html" result-params)
 		    (funcall wrap "#+begin_export html" "#+end_export" nil nil
 			     "{{{results(@@html:" "@@)}}}"))

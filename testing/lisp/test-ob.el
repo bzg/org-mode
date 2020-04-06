@@ -465,6 +465,47 @@ at the beginning of a line."
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
 
+(ert-deftest test-ob/inline-src_blk-wrap ()
+  (let ((org-babel-inline-result-wrap "=%s="))
+    ;; Export: use export snippet.
+    (should
+     (string-match-p
+      "@@foo:1@@"
+      (org-test-with-temp-text "src_emacs-lisp[:wrap export foo]{1}"
+	(org-babel-execute-maybe)
+	(buffer-string))))
+    (should
+     (string-match-p
+      "src_foo{1}"
+      (org-test-with-temp-text "src_emacs-lisp[:wrap src foo]{1}"
+	(org-babel-execute-maybe)
+	(buffer-string))))
+    (should
+     (string-match-p
+      "src_foo\\[parameter\\]{1}"
+      (org-test-with-temp-text "src_emacs-lisp[:wrap src foo parameter]{1}"
+	(org-babel-execute-maybe)
+	(buffer-string))))
+    (should
+     (string-match-p
+      "=1="
+      (org-test-with-temp-text "src_emacs-lisp[:wrap example]{1}"
+	(org-babel-execute-maybe)
+	(buffer-string))))
+    ;; Anything else is ignored.
+    (should
+     (string-match-p
+      "{{{results(1)}}}"
+      (org-test-with-temp-text "src_emacs-lisp[:wrap foo]{1}"
+	(org-babel-execute-maybe)
+	(buffer-string))))
+    (should
+     (string-match-p
+      "{{{results(a\\\\,b)}}}"
+      (org-test-with-temp-text "src_emacs-lisp[:wrap foo]{\"a,b\"}"
+	(org-babel-execute-maybe)
+	(buffer-string))))))
+
 (ert-deftest test-ob/combining-scalar-and-raw-result-types ()
   (org-test-with-temp-text-in-file "
 
@@ -1603,7 +1644,32 @@ line 1
       (org-babel-execute-src-block)
       (let ((case-fold-search t)) (search-forward "result" nil t))
       (downcase (buffer-substring-no-properties (line-beginning-position 2)
-						(point-max)))))))
+						(point-max))))))
+  (should
+   (string-match-p
+    ",#"
+    (org-test-with-temp-text "#+begin_src emacs-lisp :wrap export foo
+\"#+keyword: value\"
+#+end_src"
+      (org-babel-execute-src-block)
+      (buffer-string))))
+  (should
+   (string-match-p
+    ",#"
+    (org-test-with-temp-text "#+begin_src emacs-lisp :wrap src foo
+\"#+keyword: value\"
+#+end_src"
+      (org-babel-execute-src-block)
+      (buffer-string))))
+  ;; Do not comma-escape when the block is not verbatim.
+  (should-not
+   (string-match-p
+    ",#"
+    (org-test-with-temp-text "#+begin_src emacs-lisp :wrap special
+\"#+keyword: value\"
+#+end_src"
+      (org-babel-execute-src-block)
+      (buffer-string)))))
 
 (ert-deftest test-ob/safe-header-args ()
   "Detect safe and unsafe header args."
