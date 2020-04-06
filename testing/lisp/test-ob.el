@@ -545,6 +545,17 @@ duplicate results block."
     (org-babel-next-src-block 1)
     (should (looking-at org-babel-src-block-regexp))))
 
+(ert-deftest test-ob/replace-special-block-result ()
+  (should-error
+   (org-test-with-temp-text "
+#+begin_src emacs-lisp :wrap special<point>
+'foo
+#+end_src"
+     (org-babel-execute-src-block)
+     (org-babel-execute-src-block)
+     (buffer-string)
+     (search-forward "#+begin_special" nil nil 2))))
+
 (ert-deftest test-ob/catches-all-references ()
   (org-test-with-temp-text "
 #+NAME: literal-example
