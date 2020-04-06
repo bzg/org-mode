@@ -748,7 +748,8 @@ holding export options."
                 (if (symbolp with-subject) with-subject
                   (mapconcat #'symbol-name with-subject ","))))
       ;; Hyperref.
-      (format-spec hyperref-template spec)
+      (and (stringp hyperref-template)
+	   (format-spec hyperref-template spec))
       ;; Document start.
       "\\begin{document}\n\n"
       ;; Subject and title.
