@@ -2490,7 +2490,7 @@ in the buffer."
 	   (if (memq (org-element-type element)
 		     ;; Possible results types.
 		     '(drawer example-block export-block fixed-width item
-			      plain-list src-block table))
+			      plain-list special-block src-block table))
 	       (save-excursion
 		 (goto-char (min (point-max) ;for narrowed buffers
 				 (org-element-property :end element)))
