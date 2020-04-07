@@ -92,7 +92,13 @@ When a string, a %s formatter will be replaced by the file name."
 	  (const :tag "Always" t)))
 
 (defcustom org-archive-subtree-save-file-p 'from-org
-  "Non-nil means save the archive file after archiving a subtree."
+  "Conditionally save the archive file after archiving a subtree.
+This variable can be any of the following symbols:
+
+t              saves in all cases.
+`from-org'     prevents saving from an agenda-view.
+`from-agenda'  saves only when the archive is initiated from an agenda-view.
+nil            prevents saving in all cases."
   :group 'org-archive
   :package-version '(Org . "9.4")
   :type '(choice
@@ -375,12 +381,11 @@ direct children of this heading."
 	      ;; buffer and depending on `org-archive-subtree-save-file-p'
 	      (unless (eq this-buffer buffer)
 		(when (or (eq org-archive-subtree-save-file-p t)
-			  (and (boundp 'org-archive-from-agenda)
-			       (eq org-archive-subtree-save-file-p 'from-agenda)))
+			  (eq org-archive-subtree-save-file-p
+			      (if (boundp 'org-archive-from-agenda)
+				  'from-agenda
+				'from-org)))
 		  (save-buffer)))
-	      ;; (unless (or (not org-archive-subtree-save-file-p)
-	      ;; 		  (eq this-buffer buffer))
-	      ;; 	(save-buffer))
 	      (widen))))
 	;; Here we are back in the original buffer.  Everything seems
 	;; to have worked.  So now run hooks, cut the tree and finish
