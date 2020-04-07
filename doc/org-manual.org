@@ -6313,8 +6313,8 @@ if you have not paid the rent for three months, marking this entry
 DONE still keeps it as an overdue deadline.  Depending on the task,
 this may not be the best way to handle it.  For example, if you forgot
 to call your father for 3 weeks, it does not make sense to call him
-3 times in a single day to make up for it.  Finally, there are tasks
-like changing batteries which should always repeat a certain time
+3 times in a single day to make up for it.  Finally, there are tasks,
+like changing batteries, which should always repeat a certain time
 /after/ the last time you did it.  For these tasks, Org mode has
 special repeaters =++= and =.+=.  For example:
 
