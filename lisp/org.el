@@ -14110,7 +14110,7 @@ If the user specifies a time like HH:MM or if this command is called with
 at least one prefix argument, the time stamp contains the date and the time.
 Otherwise, only the date is included.
 
-When called with two universal prefix arguments, insert an active time stamp
+When called with two universal prefix arguments, insert an inactive time stamp
 with the current time without prompting the user."
   (interactive "P")
   (org-time-stamp arg 'inactive))
