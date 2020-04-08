@@ -380,8 +380,8 @@ direct children of this heading."
 		     (point)
 		     (concat "ARCHIVE_" (upcase (symbol-name item)))
 		     value))))
-	      ;; Save and kill the buffer, if it is not the same
-	      ;; buffer and depending on `org-archive-subtree-save-file-p'
+	      ;; Save the buffer, if it is not the same buffer and
+	      ;; depending on `org-archive-subtree-save-file-p'.
 	      (unless (eq this-buffer buffer)
 		(when (or (eq org-archive-subtree-save-file-p t)
 			  (eq org-archive-subtree-save-file-p
