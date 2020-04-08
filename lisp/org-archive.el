@@ -98,14 +98,17 @@ This variable can be any of the following symbols:
 t              saves in all cases.
 `from-org'     prevents saving from an agenda-view.
 `from-agenda'  saves only when the archive is initiated from an agenda-view.
-nil            prevents saving in all cases."
+nil            prevents saving in all cases.
+
+Note that, regardless of this value, the archive buffer is never
+saved when archiving into a location in the current buffer."
   :group 'org-archive
   :package-version '(Org . "9.4")
   :type '(choice
-	  (const :tag "Always save the archive buffer" t)
-	  (const :tag "Save target buffer when archiving from an agenda view" from-agenda)
-	  (const :tag "Save target buffer when archiving from an org buffer" from-org)
-	  (const :tag "Do not save the archive buffer")))
+	  (const :tag "Save archive buffer" t)
+	  (const :tag "Save when archiving from agenda" from-agenda)
+	  (const :tag "Save when archiving from an Org buffer" from-org)
+	  (const :tag "Do not save")))
 
 (defcustom org-archive-save-context-info '(time file olpath category todo itags)
   "Parts of context info that should be stored as properties when archiving.
