@@ -7948,8 +7948,10 @@ These will be lower-case, for filtering."
 argument EXPAND can be used for the TYPE tag and will expand the
 tags in the FILTER if any of the tags in FILTER are grouptags."
   (let ((multi-pos-cats
-	 (string-match-p "\++"
-	  (mapconcat (lambda (cat) (substring cat 0 1)) filter "")))
+	 (and (eq type 'category)
+	      (string-match-p "\\+.*\\+"
+			      (mapconcat (lambda (cat) (substring cat 0 1))
+					 filter ""))))
 	f f1)
     (cond
      ;; Tag filter
