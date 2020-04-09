@@ -1233,125 +1233,122 @@ after the bullet.  Cursor will be after this text once the
 function ends.
 
 This function modifies STRUCT."
-  (let ((case-fold-search t))
-    ;; 1. Get information about list: ITEM containing POS, position of
-    ;;    point with regards to item start (BEFOREP), blank lines
-    ;;    number separating items (BLANK-NB), if we're allowed to
-    ;;    (SPLIT-LINE-P).
-    (let* ((item (goto-char (catch :exit
-			      (let ((inner-item 0))
-				(pcase-dolist (`(,i . ,_) struct)
-				  (cond
-				   ((= i pos) (throw :exit i))
-				   ((< i pos) (setq inner-item i))
-				   (t (throw :exit inner-item))))
-				inner-item))))
-	   (item-end (org-list-get-item-end item struct))
-	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
-	   (beforep
-	    (progn
-	      (looking-at org-list-full-item-re)
-	      (<= pos
-		  (cond
-		   ((not (match-beginning 4)) (match-end 0))
-		   ;; Ignore tag in a non-descriptive list.
-		   ((save-match-data (string-match "[.)]" (match-string 1)))
-		    (match-beginning 4))
-		   (t (save-excursion
-			(goto-char (match-end 4))
-			(skip-chars-forward " \t")
-			(point)))))))
-	   (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
-	   (blank-nb (org-list-separating-blank-lines-number
-		      pos struct prevs))
-	   ;; 2. Build the new item to be created.  Concatenate same
-	   ;;    bullet as item, checkbox, text AFTER-BULLET if
-	   ;;    provided, and text cut from point to end of item
-	   ;;    (TEXT-CUT) to form item's BODY.  TEXT-CUT depends on
-	   ;;    BEFOREP and SPLIT-LINE-P.  The difference of size
-	   ;;    between what was cut and what was inserted in buffer
-	   ;;    is stored in SIZE-OFFSET.
-	   (ind (org-list-get-ind item struct))
-	   (ind-size (if indent-tabs-mode
-			 (+ (/ ind tab-width) (mod ind tab-width))
-		       ind))
-	   (bullet (org-list-bullet-string (org-list-get-bullet item struct)))
-	   (box (when checkbox "[ ]"))
-	   (text-cut
-	    (and (not beforep) split-line-p
-		 (progn
-		   (goto-char pos)
-		   ;; If POS is greater than ITEM-END, then point is
-		   ;; in some white lines after the end of the list.
-		   ;; Those must be removed, or they will be left,
-		   ;; stacking up after the list.
-		   (when (< item-end pos)
-		     (delete-region (1- item-end) (point-at-eol)))
-		   (skip-chars-backward " \r\t\n")
-		   (setq pos (point))
-		   (delete-and-extract-region pos item-end-no-blank))))
-	   (body (concat bullet (when box (concat box " ")) after-bullet
-			 (and text-cut
-			      (if (string-match "\\`[ \t]+" text-cut)
-				  (replace-match "" t t text-cut)
-				text-cut))))
-	   (item-sep (make-string  (1+ blank-nb) ?\n))
-	   (item-size (+ ind-size (length body) (length item-sep)))
-	   (size-offset (- item-size (length text-cut))))
-      ;; 4. Insert effectively item into buffer.
-      (goto-char item)
-      (indent-to-column ind)
-      (insert body item-sep)
-      ;; 5. Add new item to STRUCT.
-      (mapc (lambda (e)
-              (let ((p (car e)) (end (nth 6 e)))
-                (cond
-		 ;; Before inserted item, positions don't change but
-		 ;; an item ending after insertion has its end shifted
-		 ;; by SIZE-OFFSET.
-		 ((< p item)
-		  (when (> end item) (setcar (nthcdr 6 e) (+ end size-offset))))
-		 ;; Trivial cases where current item isn't split in
-		 ;; two.  Just shift every item after new one by
-		 ;; ITEM-SIZE.
-		 ((or beforep (not split-line-p))
-		  (setcar e (+ p item-size))
-		  (setcar (nthcdr 6 e) (+ end item-size)))
-		 ;; Item is split in two: elements before POS are just
-		 ;; shifted by ITEM-SIZE.  In the case item would end
-		 ;; after split POS, ending is only shifted by
-		 ;; SIZE-OFFSET.
-		 ((< p pos)
-		  (setcar e (+ p item-size))
-		  (if (< end pos)
-		      (setcar (nthcdr 6 e) (+ end item-size))
-		    (setcar (nthcdr 6 e) (+ end size-offset))))
-		 ;; Elements after POS are moved into new item.
-		 ;; Length of ITEM-SEP has to be removed as ITEM-SEP
-		 ;; doesn't appear in buffer yet.
-		 ((< p item-end)
-		  (setcar e (+ p size-offset (- item pos (length item-sep))))
-		  (if (= end item-end)
-		      (setcar (nthcdr 6 e) (+ item item-size))
-		    (setcar (nthcdr 6 e)
-			    (+ end size-offset
-			       (- item pos (length item-sep))))))
-		 ;; Elements at ITEM-END or after are only shifted by
-		 ;; SIZE-OFFSET.
-		 (t (setcar e (+ p size-offset))
-		    (setcar (nthcdr 6 e) (+ end size-offset))))))
-	    struct)
-      (push (list item ind bullet nil box nil (+ item item-size)) struct)
-      (setq struct (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))
-      ;; 6. If not BEFOREP, new item must appear after ITEM, so
-      ;; exchange ITEM with the next item in list.  Position cursor
-      ;; after bullet, counter, checkbox, and label.
-      (if beforep
-	  (goto-char item)
-	(setq struct (org-list-swap-items item (+ item item-size) struct))
-	(goto-char (org-list-get-next-item
-		    item struct (org-list-prevs-alist struct))))
-      struct)))
+  (let* ((case-fold-search t)
+	 ;; Get information about list: ITEM containing POS, position
+	 ;; of point with regards to item start (BEFOREP), blank lines
+	 ;; number separating items (BLANK-NB), if we're allowed to
+	 ;; (SPLIT-LINE-P).
+	 (item
+	  (catch :exit
+	    ;; Do not initialize I as top item as we don't know if the
+	    ;; list is correctly structured.
+	    (let ((i nil))
+	      (pcase-dolist (`(,start ,_ ,_ ,_ ,_ ,_ ,end) struct)
+		(cond
+		 ((> start pos) (throw :exit i))
+		 ((< end pos) nil)	;skip sub-lists before point
+		 (t (setq i start))))
+	      (or i (org-list-get-top-point struct)))))
+	 (item-end (org-list-get-item-end item struct))
+	 (item-end-no-blank (org-list-get-item-end-before-blank item struct))
+	 (beforep
+	  (progn
+	    (goto-char item)
+	    (looking-at org-list-full-item-re)
+	    (<= pos
+		(cond
+		 ((not (match-beginning 4)) (match-end 0))
+		 ;; Ignore tag in a non-descriptive list.
+		 ((save-match-data (string-match "[.)]" (match-string 1)))
+		  (match-beginning 4))
+		 (t (save-excursion
+		      (goto-char (match-end 4))
+		      (skip-chars-forward " \t")
+		      (point)))))))
+	 (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
+	 (blank-nb (org-list-separating-blank-lines-number pos struct prevs))
+	 ;; Build the new item to be created.  Concatenate same bullet
+	 ;; as item, checkbox, text AFTER-BULLET if provided, and text
+	 ;; cut from point to end of item (TEXT-CUT) to form item's
+	 ;; BODY.  TEXT-CUT depends on BEFOREP and SPLIT-LINE-P.  The
+	 ;; difference of size between what was cut and what was
+	 ;; inserted in buffer is stored in SIZE-OFFSET.
+	 (ind (org-list-get-ind item struct))
+	 (ind-size (if indent-tabs-mode
+		       (+ (/ ind tab-width) (mod ind tab-width))
+		     ind))
+	 (bullet (org-list-bullet-string (org-list-get-bullet item struct)))
+	 (box (and checkbox "[ ]"))
+	 (text-cut
+	  (and (not beforep)
+	       split-line-p
+	       (progn
+		 (goto-char pos)
+		 ;; If POS is greater than ITEM-END, then point is in
+		 ;; some white lines after the end of the list.  Those
+		 ;; must be removed, or they will be left, stacking up
+		 ;; after the list.
+		 (when (< item-end pos)
+		   (delete-region (1- item-end) (point-at-eol)))
+		 (skip-chars-backward " \r\t\n")
+		 (setq pos (point))
+		 (delete-and-extract-region pos item-end-no-blank))))
+	 (body
+	  (concat bullet
+		  (and box (concat box " "))
+		  after-bullet
+		  (and text-cut
+		       (if (string-match "\\`[ \t]+" text-cut)
+			   (replace-match "" t t text-cut)
+			 text-cut))))
+	 (item-sep (make-string  (1+ blank-nb) ?\n))
+	 (item-size (+ ind-size (length body) (length item-sep)))
+	 (size-offset (- item-size (length text-cut))))
+    ;; Insert effectively item into buffer.
+    (goto-char item)
+    (indent-to-column ind)
+    (insert body item-sep)
+    ;; Add new item to STRUCT.
+    (dolist (e struct)
+      (let ((p (car e)) (end (nth 6 e)))
+	(cond
+	 ;; Before inserted item, positions don't change but an item
+	 ;; ending after insertion has its end shifted by SIZE-OFFSET.
+	 ((< p item)
+	  (when (> end item)
+	    (setcar (nthcdr 6 e) (+ end size-offset))))
+	 ;; Item where insertion happens may be split in two parts.
+	 ;; In this case, move start by ITEM-SIZE and end by
+	 ;; SIZE-OFFSET.
+	 ((and (= p item) (not beforep) split-line-p)
+	  (setcar e (+ p item-size))
+	  (setcar (nthcdr 6 e) (+ end size-offset)))
+	 ;; Items starting after modified item fall into two
+	 ;; categories.  If item was split, and current item was
+	 ;; located after split point, it was moved to the new
+	 ;; item. Practically speaking, this means that the part
+	 ;; between body start of body and split point was removed.
+	 ;; So we compute the offset and shit item's positions
+	 ;; accordingly.  In any other case, the item was simply
+	 ;; shifted by ITEM-SIZE.
+	 ((and split-line-p (not beforep) (>= p pos))
+	  (let ((offset (- pos item ind (length bullet) (length after-bullet))))
+	    (setcar e (- p offset))
+	    (setcar (nthcdr 6 e) (- end offset))))
+	 (t
+	  (setcar e (+ p item-size))
+	  (setcar (nthcdr 6 e) (+ end item-size))))))
+    (push (list item ind bullet nil box nil (+ item item-size)) struct)
+    (setq struct (sort struct #'car-less-than-car))
+    ;; If not BEFOREP, new item must appear after ITEM, so exchange
+    ;; ITEM with the next item in list.  Position cursor after bullet,
+    ;; counter, checkbox, and label.
+    (if beforep
+	(goto-char item)
+      (setq struct (org-list-swap-items item (+ item item-size) struct))
+      (goto-char (org-list-get-next-item
+		  item struct (org-list-prevs-alist struct))))
+    struct))
 
 (defun org-list-delete-item (item struct)
   "Remove ITEM from the list and return the new structure.
