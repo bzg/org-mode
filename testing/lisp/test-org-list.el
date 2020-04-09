@@ -607,9 +607,11 @@ b. Item 2<point>"
     (should-error (org-move-item-up)))
   ;; ... unless `org-list-use-circular-motion' is non-nil.  In this
   ;; case, move to the first item.
-  (org-test-with-temp-text "- item 1\n- item 2\n- item 3"
-    (let ((org-list-use-circular-motion t)) (org-move-item-up))
-    (should (equal (buffer-string) "- item 2\n- item 3\n- item 1")))
+  (should
+   (equal "- item 2\n- item 3\n- item 1"
+	  (org-test-with-temp-text "- item 1\n- item 2\n- item 3"
+	    (let ((org-list-use-circular-motion t)) (org-move-item-up))
+	    (buffer-string))))
   ;; Preserve item visibility.
   (org-test-with-temp-text "* Headline\n- item 1\n  body 1\n- item 2\n  body 2"
     (let ((org-cycle-include-plain-lists t))
@@ -784,7 +786,20 @@ b. Item 2<point>"
 	(org-cycle)
 	(org-insert-item)
 	(list (get-char-property (line-beginning-position 0) 'invisible)
-	      (get-char-property (line-end-position 2) 'invisible)))))))
+	      (get-char-property (line-end-position 2) 'invisible))))))
+  ;; Test insertion in area after a sub-list.  In particular, if point
+  ;; is right at the end of the previous sub-list, still insert
+  ;; a sub-item in that list.
+  (should
+   (= 2
+      (org-test-with-temp-text "- item\n  - sub-list\n<point>  resume item"
+	(org-insert-item)
+	(current-indentation))))
+  (should
+   (= 0
+      (org-test-with-temp-text "- item\n  - sub-list\n  resume item<point>"
+	(org-insert-item)
+	(current-indentation)))))
 
 (ert-deftest test-org-list/repair ()
   "Test `org-list-repair' specifications."
