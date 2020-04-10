@@ -1325,13 +1325,12 @@ This function modifies STRUCT."
 	  (setcar (nthcdr 6 e) (+ end size-offset)))
 	 ;; Items starting after modified item fall into two
 	 ;; categories.  If item was split, and current item was
-	 ;; located after split point, it was moved to the new
-	 ;; item. Practically speaking, this means that the part
-	 ;; between body start of body and split point was removed.
-	 ;; So we compute the offset and shit item's positions
-	 ;; accordingly.  In any other case, the item was simply
-	 ;; shifted by ITEM-SIZE.
-	 ((and split-line-p (not beforep) (>= p pos))
+	 ;; located after split point, it was moved to the new item.
+	 ;; This means that the part between body start of body and
+	 ;; split point was removed.  So we compute the offset and
+	 ;; shift item's positions accordingly.  In any other case,
+	 ;; the item was simply shifted by ITEM-SIZE.
+	 ((and split-line-p (not beforep) (>= p pos) (<= p item-end-no-blank))
 	  (let ((offset (- pos item ind (length bullet) (length after-bullet))))
 	    (setcar e (- p offset))
 	    (setcar (nthcdr 6 e) (- end offset))))
