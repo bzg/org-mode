@@ -787,6 +787,12 @@ b. Item 2<point>"
 	    (let ((org-M-RET-may-split-line  '((default . nil))))
 	      (org-insert-item))
 	    (buffer-string))))
+  ;; Re-order automatically.
+  (should
+   (equal "1. A\n\n2. \n\n3. \n\n4. B"
+	  (org-test-with-temp-text "1. A<point>\n\n2. \n\n3. B"
+	    (org-insert-item)
+	    (buffer-string))))
   ;; Preserve list visibility when inserting an item.
   (should
    (equal
