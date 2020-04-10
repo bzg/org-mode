@@ -38,6 +38,7 @@
 (defvar org-link-file-path-type)
 (defvar org-src-lang-modes)
 (defvar org-src-preserve-indentation)
+(defvar org-babel-tangle-uncomment-comments)
 
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-at-table-p "org" (&optional table-type))

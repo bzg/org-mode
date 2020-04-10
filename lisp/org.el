@@ -122,6 +122,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-archive-subtree-default "org-archive" ())
 (declare-function org-archive-to-archive-sibling "org-archive" ())
 (declare-function org-attach "org-attach" ())
+(declare-function org-attach-dir "org-attach"
+		  (&optional create-if-not-exists-p no-fs-check))
 (declare-function org-babel-do-in-edit-buffer "ob-core" (&rest body) t)
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 (declare-function org-beamer-mode "ox-beamer" (&optional prefix) t)
