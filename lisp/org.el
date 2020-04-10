@@ -123,6 +123,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-archive-subtree-default "org-archive" ())
 (declare-function org-archive-to-archive-sibling "org-archive" ())
 (declare-function org-attach "org-attach" ())
+(declare-function org-attach-dir "org-attach"
+		  (&optional create-if-not-exists-p no-fs-check))
 (declare-function org-babel-do-in-edit-buffer "ob-core" (&rest body) t)
 (declare-function org-babel-tangle-file "ob-tangle" (file &optional target-file lang))
 (declare-function org-beamer-mode "ox-beamer" (&optional prefix) t)
@@ -860,6 +862,7 @@ cursor keys will then execute Org commands in the following contexts:
 - in a plain list item, changing the bullet type
 - in a property definition line, switching between allowed values
 - in the BEGIN line of a clock table (changing the time block).
+- in a table, moving the cell in the specified direction.
 Outside these contexts, the commands will throw an error.
 
 When this variable is t and the cursor is not in a special
@@ -869,9 +872,9 @@ cycling will no longer happen anywhere in an item line, but only
 if the cursor is exactly on the bullet.
 
 If you set this variable to the symbol `always', then the keys
-will not be special in headlines, property lines, and item lines,
-to make shift selection work there as well.  If this is what you
-want, you can use the following alternative commands:
+will not be special in headlines, property lines, item lines, and
+table cells, to make shift selection work there as well.  If this is
+what you want, you can use the following alternative commands:
 `\\[org-todo]' and `\\[org-priority]' \
 to change TODO state and priority,
 `\\[universal-argument] \\[universal-argument] \\[org-todo]' \
@@ -16841,7 +16844,9 @@ individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-previous-item))
    ((org-clocktable-try-shift 'up arg))
-   ((org-at-table-p) (org-table-move-cell-up))
+   ((and (not (eq org-support-shift-select 'always))
+	 (org-at-table-p))
+    (org-table-move-cell-up))
    ((run-hook-with-args-until-success 'org-shiftup-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'previous-line))
@@ -16867,7 +16872,9 @@ individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-next-item))
    ((org-clocktable-try-shift 'down arg))
-   ((org-at-table-p) (org-table-move-cell-down))
+   ((and (not (eq org-support-shift-select 'always))
+	 (org-at-table-p))
+    (org-table-move-cell-down))
    ((run-hook-with-args-until-success 'org-shiftdown-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'next-line))
@@ -16905,7 +16912,9 @@ This does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
-   ((org-at-table-p) (org-table-move-cell-right))
+   ((and (not (eq org-support-shift-select 'always))
+	 (org-at-table-p))
+    (org-table-move-cell-right))
    ((run-hook-with-args-until-success 'org-shiftright-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'forward-char))
@@ -16943,7 +16952,9 @@ This does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
-   ((org-at-table-p) (org-table-move-cell-left))
+   ((and (not (eq org-support-shift-select 'always))
+	 (org-at-table-p))
+    (org-table-move-cell-left))
    ((run-hook-with-args-until-success 'org-shiftleft-final-hook))
    (org-support-shift-select
     (org-call-for-shift-select 'backward-char))
