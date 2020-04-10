@@ -1240,15 +1240,15 @@ This function modifies STRUCT."
 	 ;; (SPLIT-LINE-P).
 	 (item
 	  (catch :exit
-	    ;; Do not initialize I as top item as we don't know if the
-	    ;; list is correctly structured.
 	    (let ((i nil))
 	      (pcase-dolist (`(,start ,_ ,_ ,_ ,_ ,_ ,end) struct)
 		(cond
 		 ((> start pos) (throw :exit i))
 		 ((< end pos) nil)	;skip sub-lists before point
 		 (t (setq i start))))
-	      (or i (org-list-get-top-point struct)))))
+	      ;; If no suitable item is found, insert a sibling of the
+	      ;; last item in buffer.
+	      (or i (caar (reverse struct))))))
 	 (item-end (org-list-get-item-end item struct))
 	 (item-end-no-blank (org-list-get-item-end-before-blank item struct))
 	 (beforep

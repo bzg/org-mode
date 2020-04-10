@@ -749,6 +749,18 @@ b. Item 2<point>"
 	  (org-test-with-temp-text "- <point>item"
 	    (org-insert-item)
 	    (buffer-string))))
+  ;; When called at the very end of the list, insert new item as
+  ;; a sibling of the very last one.
+  (should
+   (equal "- A\n\n  - B\n\n  - "
+	  (org-test-with-temp-text "- A\n\n - B\n\n<point>"
+	    (org-insert-item)
+	    (buffer-string))))
+  (should
+   (equal "- A\n\n  - B\n\n  - "
+	  (org-test-with-temp-text "- A\n\n  - B\n\n  <point>"
+	    (org-insert-item)
+	    (buffer-string))))
   ;; When called on tag in a descriptive list, insert new item before
   ;; current one too.
   (should
