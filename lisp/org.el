@@ -13461,10 +13461,10 @@ non-nil."
 (defun org-time-stamp-inactive (&optional arg)
   "Insert an inactive time stamp.
 
-An inactive time stamp is enclosed in square brackets instead of angle
-brackets.  It is inactive in the sense that it does not trigger agenda entries,
-does not link to the calendar and cannot be changed with the S-cursor keys.
-So these are more for recording a certain time/date.
+An inactive time stamp is enclosed in square brackets instead of
+angle brackets.  It is inactive in the sense that it does not
+trigger agenda entries.  So these are more for recording a
+certain time/date.
 
 If the user specifies a time like HH:MM or if this command is called with
 at least one prefix argument, the time stamp contains the date and the time.
