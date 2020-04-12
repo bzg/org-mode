@@ -974,12 +974,12 @@ matching the string =FIXME=.
 The other sparse tree commands select headings based on TODO keywords,
 tags, or properties and are discussed later in this manual.
 
-#+kindex: C-c C-e v
+#+kindex: C-c C-e C-v
 #+cindex: printing sparse trees
 #+cindex: visible text, printing
 To print a sparse tree, you can use the Emacs command
 ~ps-print-buffer-with-faces~ which does not print invisible parts of
-the document.  Or you can use the command {{{kbd(C-c C-e v)}}} to
+the document.  Or you can use the command {{{kbd(C-c C-e C-v)}}} to
 export only the visible part of the document and print the resulting
 file.
 
