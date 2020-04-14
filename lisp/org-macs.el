@@ -1210,7 +1210,7 @@ window."
   (let ((scrlup (if additional-keys '(?\s 22) 22))
 	(scrldn (if additional-keys `(?\d 134217846) 134217846)))
     (eval
-     `(case ,key
+     `(cl-case ,key
 	;; C-n
 	(14 (if (not (pos-visible-in-window-p (point-max)))
 		(ignore-errors (scroll-up 1))
