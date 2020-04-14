@@ -8049,8 +8049,8 @@ mentioning.
   want to set inheritance specifically for org-attach that can be done
   using ~org-attach-use-inheritance~.  Inheriting documents through
   the node hierarchy makes a lot of sense in most cases.  Especially
-  since the introduction of [[*Attachment links]].  The following example
-  shows one use case for attachment inheritance:
+  when using attachment links (see [[*Attachment links]]).  The following
+  example shows one use case for attachment inheritance:
 
   #+begin_example
   ,* Chapter A ...
