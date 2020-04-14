@@ -8049,7 +8049,7 @@ mentioning.
   want to set inheritance specifically for org-attach that can be done
   using ~org-attach-use-inheritance~.  Inheriting documents through
   the node hierarchy makes a lot of sense in most cases.  Especially
-  since the introduction of [[* Attachment links]].  The following example
+  since the introduction of [[*Attachment links]].  The following example
   shows one use case for attachment inheritance:
 
   #+begin_example
@@ -8061,11 +8061,11 @@ mentioning.
   Some text
 
   #+NAME: Image 1
-  [[Attachment:image 1.jpg]]
+  [[attachment:image 1.jpg]]
   #+end_example
 
   Without inheritance one would not be able to resolve the link to
-  image =1.jpg=, since the link is inside a sub-heading to =Chapter
+  =image 1.jpg=, since the link is inside a sub-heading to =Chapter
   A=.
 
   Inheritance works the same way for both =ID= and =DIR= property.  If
