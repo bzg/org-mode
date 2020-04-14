@@ -1160,11 +1160,11 @@ to disable them individually.
   on ~org-plain-list-ordered-item-terminator~, the type of list, and
   its indentation.  With a numeric prefix argument N, select the Nth
   bullet from this list.  If there is an active region when calling
-  this, selected text is changed into an item.  With a prefix
-  argument, all lines are converted to list items.  If the first line
-  already was a list item, any item marker is removed from the list.
-  Finally, even without an active region, a normal line is converted
-  into a list item.
+  this, all lines are converted to list items.  With a prefix
+  argument, the selected text is changed into a single item.  If the
+  first line already was a list item, any item marker is removed from
+  the list.  Finally, even without an active region, a normal line is
+  converted into a list item.
 
 - {{{kbd(C-c *)}}} ::
 
