@@ -71,6 +71,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'org-refile)
 (require 'ol)
 
 (declare-function message-make-fqdn "message" ())

@@ -1096,6 +1096,43 @@ effective."
 (defvar org-display-table nil
   "The display table for Org mode, in case `org-ellipsis' is non-nil.")
 
+(defcustom org-directory "~/org"
+  "Directory with Org files.
+This is just a default location to look for Org files.  There is no need
+at all to put your files into this directory.  It is used in the
+following situations:
+
+1. When a capture template specifies a target file that is not an
+   absolute path.  The path will then be interpreted relative to
+   `org-directory'
+2. When the value of variable `org-agenda-files' is a single file, any
+   relative paths in this file will be taken as relative to
+   `org-directory'."
+  :group 'org-refile
+  :group 'org-capture
+  :type 'directory)
+
+(defcustom org-default-notes-file (convert-standard-filename "~/.notes")
+  "Default target for storing notes.
+Used as a fall back file for org-capture.el, for templates that
+do not specify a target file."
+  :group 'org-refile
+  :group 'org-capture
+  :type 'file)
+
+(defcustom org-reverse-note-order nil
+  "Non-nil means store new notes at the beginning of a file or entry.
+When nil, new notes will be filed to the end of a file or entry.
+This can also be a list with cons cells of regular expressions that
+are matched against file names, and values."
+  :group 'org-capture
+  :group 'org-refile
+  :type '(choice
+	  (const :tag "Reverse always" t)
+	  (const :tag "Reverse never" nil)
+	  (repeat :tag "By file name regexp"
+		  (cons regexp boolean))))
+
 (defgroup org-keywords nil
   "Keywords in Org mode."
   :tag "Org Keywords"
@@ -7826,6 +7863,128 @@ with the original repeater."
 			    (delete-region (match-beginning 1) (match-end 1)))))))
 		  (buffer-string)))))
     (goto-char beg)))
+
+;;; Outline path
+
+(defvar org-outline-path-cache nil
+  "Alist between buffer positions and outline paths.
+It value is an alist (POSITION . PATH) where POSITION is the
+buffer position at the beginning of an entry and PATH is a list
+of strings describing the outline path for that entry, in reverse
+order.")
+
+(defun org--get-outline-path-1 (&optional use-cache)
+  "Return outline path to current headline.
+
+Outline path is a list of strings, in reverse order.  When
+optional argument USE-CACHE is non-nil, make use of a cache.  See
+`org-get-outline-path' for details.
+
+Assume buffer is widened and point is on a headline."
+  (or (and use-cache (cdr (assq (point) org-outline-path-cache)))
+      (let ((p (point))
+	    (heading (let ((case-fold-search nil))
+		       (looking-at org-complex-heading-regexp)
+		       (if (not (match-end 4)) ""
+			 ;; Remove statistics cookies.
+			 (org-trim
+			  (org-link-display-format
+			   (replace-regexp-in-string
+			    "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			    (match-string-no-properties 4))))))))
+	(if (org-up-heading-safe)
+	    (let ((path (cons heading (org--get-outline-path-1 use-cache))))
+	      (when use-cache
+		(push (cons p path) org-outline-path-cache))
+	      path)
+	  ;; This is a new root node.  Since we assume we are moving
+	  ;; forward, we can drop previous cache so as to limit number
+	  ;; of associations there.
+	  (let ((path (list heading)))
+	    (when use-cache (setq org-outline-path-cache (list (cons p path))))
+	    path)))))
+
+(defun org-get-outline-path (&optional with-self use-cache)
+  "Return the outline path to the current entry.
+
+An outline path is a list of ancestors for current headline, as
+a list of strings.  Statistics cookies are removed and links are
+replaced with their description, if any, or their path otherwise.
+
+When optional argument WITH-SELF is non-nil, the path also
+includes the current headline.
+
+When optional argument USE-CACHE is non-nil, cache outline paths
+between calls to this function so as to avoid backtracking.  This
+argument is useful when planning to find more than one outline
+path in the same document.  In that case, there are two
+conditions to satisfy:
+  - `org-outline-path-cache' is set to nil before starting the
+    process;
+  - outline paths are computed by increasing buffer positions."
+  (org-with-wide-buffer
+   (and (or (and with-self (org-back-to-heading t))
+	    (org-up-heading-safe))
+	(reverse (org--get-outline-path-1 use-cache)))))
+
+(defun org-format-outline-path (path &optional width prefix separator)
+  "Format the outline path PATH for display.
+WIDTH is the maximum number of characters that is available.
+PREFIX is a prefix to be included in the returned string,
+such as the file name.
+SEPARATOR is inserted between the different parts of the path,
+the default is \"/\"."
+  (setq width (or width 79))
+  (setq path (delq nil path))
+  (unless (> width 0)
+    (user-error "Argument `width' must be positive"))
+  (setq separator (or separator "/"))
+  (let* ((org-odd-levels-only nil)
+	 (fpath (concat
+		 prefix (and prefix path separator)
+		 (mapconcat
+		  (lambda (s) (replace-regexp-in-string "[ \t]+\\'" "" s))
+		  (cl-loop for head in path
+			   for n from 0
+			   collect (org-add-props
+				       head nil 'face
+				       (nth (% n org-n-level-faces) org-level-faces)))
+		  separator))))
+    (when (> (length fpath) width)
+      (if (< width 7)
+	  ;; It's unlikely that `width' will be this small, but don't
+	  ;; waste characters by adding ".." if it is.
+	  (setq fpath (substring fpath 0 width))
+	(setf (substring fpath (- width 2)) "..")))
+    fpath))
+
+(defun org-display-outline-path (&optional file current separator just-return-string)
+  "Display the current outline path in the echo area.
+
+If FILE is non-nil, prepend the output with the file name.
+If CURRENT is non-nil, append the current heading to the output.
+SEPARATOR is passed through to `org-format-outline-path'.  It separates
+the different parts of the path and defaults to \"/\".
+If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
+  (interactive "P")
+  (let* (case-fold-search
+	 (bfn (buffer-file-name (buffer-base-buffer)))
+	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path)))
+	 res)
+    (when current (setq path (append path
+				     (save-excursion
+				       (org-back-to-heading t)
+				       (when (looking-at org-complex-heading-regexp)
+					 (list (match-string 4)))))))
+    (setq res
+	  (org-format-outline-path
+	   path
+	   (1- (frame-width))
+	   (and file bfn (concat (file-name-nondirectory bfn) separator))
+	   separator))
+    (if just-return-string
+	(org-no-properties res)
+      (org-unlogged-message "%s" res))))
 
 ;;; Outline Sorting
 
