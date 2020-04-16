@@ -192,6 +192,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (defvar org-radio-target-regexp)
 (defvar org-target-link-regexp)
 (defvar org-target-regexp)
+(defvar org-id-overriding-file-name)
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -7863,6 +7864,7 @@ with the original repeater."
 	   (nmin 1)
 	   (nmax n)
 	   (n-no-remove -1)
+	   (org-id-overriding-file-name (buffer-file-name (buffer-base-buffer)))
 	   (idprop (org-entry-get beg "ID")))
       (when (and doshift
 		 (string-match-p "<[^<>\n]+ [.+]?\\+[0-9]+[hdwmy][^<>\n]*>"
