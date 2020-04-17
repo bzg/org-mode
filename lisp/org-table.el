@@ -2272,11 +2272,10 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	    (setq s (match-string 1) n (string-to-number s))
 	    (cond
 	     ((setq a (assoc s replace))
-	      (replace-match (concat key (cdr a)) t t)
-	      (message msg))
+	      (replace-match (concat key (cdr a)) t t))
 	     ((and limit (> n limit))
-	      (replace-match (concat key (number-to-string (+ n delta))) t t)
-	      (message msg))))))
+	      (replace-match (concat key (number-to-string (+ n delta))) t t)))))
+	(message msg))
       (forward-line))))
 
 ;;;###autoload
