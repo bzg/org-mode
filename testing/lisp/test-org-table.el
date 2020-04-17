@@ -2351,45 +2351,45 @@ See also `test-org-table/copy-field'."
      (org-table-insert-column)))
   ;; Insert new column after current one.
   (should
-   (equal "| a |   |\n"
+   (equal "|   | a |\n"
 	  (org-test-with-temp-text "| a |"
 	    (org-table-insert-column)
 	    (buffer-string))))
   (should
-   (equal "| a |   | b |\n"
+   (equal "|   | a | b |\n"
 	  (org-test-with-temp-text "| <point>a | b |"
 	    (org-table-insert-column)
 	    (buffer-string))))
   ;; Move point into the newly created column.
   (should
-   (equal "  |"
+   (equal "  | a |"
 	  (org-test-with-temp-text "| <point>a |"
 	    (org-table-insert-column)
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   (should
-   (equal "  | b |"
+   (equal "  | a | b |"
 	  (org-test-with-temp-text "| <point>a | b |"
 	    (org-table-insert-column)
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   ;; Handle missing vertical bar in the last column.
   (should
-   (equal "| a |   |\n"
+   (equal "|   | a |\n"
 	  (org-test-with-temp-text "| a"
 	    (org-table-insert-column)
 	    (buffer-string))))
   (should
-   (equal "  |"
+   (equal "  | a |"
 	  (org-test-with-temp-text "| <point>a"
 	    (org-table-insert-column)
 	    (buffer-substring-no-properties (point) (line-end-position)))))
   ;; Handle column insertion when point is before first column.
   (should
-   (equal " | a |   |\n"
+   (equal " |   | a |\n"
 	  (org-test-with-temp-text " | a |"
 	    (org-table-insert-column)
 	    (buffer-string))))
   (should
-   (equal " | a |   | b |\n"
+   (equal " |   | a | b |\n"
 	  (org-test-with-temp-text " | a | b |"
 	    (org-table-insert-column)
 	    (buffer-string)))))
@@ -2397,8 +2397,8 @@ See also `test-org-table/copy-field'."
 (ert-deftest test-org-table/insert-column-with-formula ()
   "Test `org-table-insert-column' with a formula in place."
   (should
-   (equal "| 1 |   | 1 | 2 |
-#+TBLFM: $4=$1+$3"
+   (equal "|   | 1 | 1 | 2 |
+#+TBLFM: $4=$2+$3"
 	  (org-test-with-temp-text
 	   "| 1<point> | 1 | 2 |
 #+TBLFM: $3=$1+$2"

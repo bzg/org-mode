@@ -828,6 +828,11 @@ I.e. treat the whole file as if it was a subtree.
 
 *** Respect narrowing when agenda command is restricted to buffer
 
+*** ~org-table-insert-column~ inserts the column at point position
+
+Before, the new column was inserted to the right of the column at
+point position.
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
