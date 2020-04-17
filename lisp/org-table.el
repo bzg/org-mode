@@ -2250,8 +2250,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
   (save-excursion
     (goto-char (org-table-end))
     (while (let ((case-fold-search t)) (looking-at "[ \t]*#\\+tblfm:"))
-      (let ((msg "The formulas in #+TBLFM have been updated")
-	    (re (concat key "\\([0-9]+\\)"))
+      (let ((re (concat key "\\([0-9]+\\)"))
 	    (re2
 	     (when remove
 	       (if (or (equal key "$") (equal key "$LR"))
@@ -2275,7 +2274,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	      (replace-match (concat key (cdr a)) t t))
 	     ((and limit (> n limit))
 	      (replace-match (concat key (number-to-string (+ n delta))) t t)))))
-	(message msg))
+	(message "The formulas in #+TBLFM have been updated"))
       (forward-line))))
 
 ;;;###autoload
