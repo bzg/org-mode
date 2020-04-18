@@ -1021,7 +1021,7 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	       (let ((element (org-element-at-point)))
 		 (when (eq (org-element-type element) 'drawer)
 		   (when (> (org-element-property :end element) (car clock))
-		     (org-flag-drawer nil element))
+		     (org-hide-drawer-toggle 'off nil element))
 		   (throw 'exit nil)))))))))))
 
 (defun org-clock-resolve (clock &optional prompt-fn last-valid fail-quietly)

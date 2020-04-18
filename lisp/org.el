@@ -6036,32 +6036,11 @@ a list of strings specifying which drawers should not be hidden."
 	  (unless (member-ignore-case (match-string 1) exceptions)
 	    (let ((drawer (org-element-at-point)))
 	      (when (memq (org-element-type drawer) '(drawer property-drawer))
-		(org-flag-drawer t drawer)
+		(org-hide-drawer-toggle t nil drawer)
 		;; Make sure to skip drawer entirely or we might flag
 		;; it another time when matching its ending line with
 		;; `org-drawer-regexp'.
 		(goto-char (org-element-property :end drawer))))))))))
-
-(defun org-flag-drawer (flag &optional drawer beg end)
-  "When FLAG is non-nil, hide the drawer we are at.
-Otherwise make it visible.
-
-When optional argument DRAWER is a parsed drawer, as returned by
-`org-element-at-point', hide or show that drawer instead.
-
-When buffer positions BEG and END are provided, hide or show that
-region as a drawer without further ado.
-
-The function assumes either DRAWER, or BEG and END are non-nil."
-  (let ((beg (save-excursion
-	       (goto-char (or beg
-			      (org-element-property :post-affiliated drawer)))
-	       (line-end-position)))
-	(end (save-excursion
-	       (goto-char (or end (org-element-property :end drawer)))
-	       (skip-chars-backward " \t\n")
-	       (line-end-position))))
-    (org-flag-region beg end flag 'org-hide-drawer)))
 
 (defun org-hide-drawer-toggle (&optional force no-error element)
   "Toggle the visibility of the current drawer.
@@ -6095,7 +6074,7 @@ Return a non-nil value when toggling is successful."
 			    'org-hide-drawer)
 			nil)
 		       (t t))))
-	    (org-flag-drawer flag element))
+	    (org-flag-region start end flag 'org-hide-drawer))
 	  ;; When the drawer is hidden away, make sure point is left
 	  ;; in a visible part of the buffer.
 	  (when (invisible-p (max (1- (point)) (point-min)))
@@ -12996,7 +12975,7 @@ drawer is immediately hidden."
 	   (inhibit-read-only t))
        (unless (bobp) (insert "\n"))
        (insert ":PROPERTIES:\n:END:")
-       (org-flag-drawer t nil (line-end-position 0) (point))
+       (org-flag-region (line-end-position 0) (point) t 'org-hide-drawer)
        (when (or (eobp) (= begin (point-min))) (insert "\n"))
        (org-indent-region begin (point))))))
 

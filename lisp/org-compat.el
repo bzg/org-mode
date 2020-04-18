@@ -623,6 +623,36 @@ use of this function is for the stuck project list."
   (declare (obsolete "use `org-align-tags' instead." "Org 9.2"))
   (org-align-tags t))
 
+(defun org-flag-drawer (flag &optional element beg end)
+  "When FLAG is non-nil, hide the drawer we are at.
+Otherwise make it visible.
+
+When optional argument ELEMENT is a parsed drawer, as returned by
+`org-element-at-point', hide or show that drawer instead.
+
+When buffer positions BEG and END are provided, hide or show that
+region as a drawer without further ado."
+  (declare (obsolete "use `org-hide-drawer-toggle' instead." "Org 9.4"))
+  (if (and beg end) (org-flag-region beg end flag 'org-hide-drawer)
+    (let ((drawer
+	   (or element
+	       (and (save-excursion
+		      (beginning-of-line)
+		      (looking-at-p "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"))
+		    (org-element-at-point)))))
+      (when (memq (org-element-type drawer) '(drawer property-drawer))
+	(let ((post (org-element-property :post-affiliated drawer)))
+	  (org-flag-region
+	   (save-excursion (goto-char post) (line-end-position))
+	   (save-excursion (goto-char (org-element-property :end drawer))
+			   (skip-chars-backward " \t\n")
+			   (line-end-position))
+	   flag 'org-hide-drawer)
+	  ;; When the drawer is hidden away, make sure point lies in
+	  ;; a visible part of the buffer.
+	  (when (invisible-p (max (1- (point)) (point-min)))
+	    (goto-char post)))))))
+
 (defmacro org-with-silent-modifications (&rest body)
   (declare (obsolete "use `with-silent-modifications' instead." "Org 9.2")
 	   (debug (body)))

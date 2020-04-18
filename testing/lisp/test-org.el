@@ -7235,43 +7235,6 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 
 ;;; Visibility
 
-(ert-deftest test-org/flag-drawer ()
-  "Test `org-flag-drawer' specifications."
-  ;; Hide drawer.
-  (should
-   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (org-flag-drawer t (org-element-at-point))
-     (get-char-property (line-end-position) 'invisible)))
-  (should
-   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (org-flag-drawer t nil (point-min) (point-max))
-     (get-char-property (line-end-position) 'invisible)))
-  ;; Show drawer.
-  (should-not
-   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (org-flag-drawer t nil (point-min) (point-max))
-     (org-flag-drawer nil nil (point-min) (point-max))
-     (get-char-property (line-end-position) 'invisible)))
-  (should-not
-   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (org-flag-drawer t nil (point-min) (point-max))
-     (org-flag-drawer nil (org-element-at-point))
-     (get-char-property (line-end-position) 'invisible)))
-  ;; Hide drawer remotely.
-  (should
-   (org-test-with-temp-text "Text\n:D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
-     (let ((drawer (save-excursion (search-forward ":D2")
-				   (org-element-at-point))))
-       (org-flag-drawer t drawer)
-       (get-char-property (progn (search-forward ":D2") (line-end-position))
-			  'invisible))))
-  (should-not
-   (org-test-with-temp-text ":D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
-     (let ((drawer (save-excursion (search-forward ":D2")
-				   (org-element-at-point))))
-       (org-flag-drawer t drawer)
-       (get-char-property (line-end-position) 'invisible)))))
-
 (ert-deftest test-org/hide-drawer-toggle ()
   "Test `org-hide-drawer-toggle' specifications."
   ;; Error when not at a drawer.
