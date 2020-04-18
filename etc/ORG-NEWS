@@ -475,6 +475,11 @@ I.e. treat the whole file as if it was a subtree.
 Before, the new column was inserted to the right of the column at
 point position.
 
+*** Table column deletion now consistent with row deletion
+
+Point stays in the column at deletion, except when deleting the
+rightmost column.
+
 * Version 9.2
 ** Incompatible changes
 *** Removal of OrgStruct mode mode and radio lists
