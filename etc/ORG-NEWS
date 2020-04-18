@@ -1855,7 +1855,7 @@ Moreover, ~:export-block~ keyword used in ~org-export-define-backend~ and
 ~org-export-define-derived-backend~ is no longer used and needs to be
 removed.
 
-*** Footnotes
+*** Footnotes changes
 
 **** [1]-like constructs are not valid footnotes
 
