@@ -6005,10 +6005,6 @@ Return a non-nil value when toggling is successful."
      (no-error nil)
      (t (user-error "Not at a block")))))
 
-(defun org-hide-block-toggle-all ()
-  "Toggle the visibility of all blocks in the current buffer."
-  (org-block-map 'org-hide-block-toggle))
-
 (defun org-hide-block-all ()
   "Fold all blocks in the current buffer."
   (interactive)

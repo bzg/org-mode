@@ -661,6 +661,22 @@ an error.  Return a non-nil value when toggling is successful."
   (interactive)
   (ignore-errors (org-hide-block-toggle)))
 
+(defun org-hide-block-toggle-all ()
+  "Toggle the visibility of all blocks in the current buffer."
+  (declare (obsolete "please notify Org mailing list if you use this function."
+		     "Org 9.4"))
+  (let ((start (point-min))
+        (end (point-max)))
+    (save-excursion
+      (goto-char start)
+      (while (and (< (point) end)
+		  (re-search-forward "^[ \t]*#\\+begin_?\
+\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_?\\1[ \t]*$" end t))
+	(save-excursion
+	  (save-match-data
+            (goto-char (match-beginning 0))
+            (org-hide-block-toggle)))))))
+
 (defmacro org-with-silent-modifications (&rest body)
   (declare (obsolete "use `with-silent-modifications' instead." "Org 9.2")
 	   (debug (body)))
