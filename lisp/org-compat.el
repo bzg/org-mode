@@ -46,6 +46,7 @@
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
+(declare-function org-hide-block-toggle "org" (&optional force no-error element))
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-set-parameters "ol" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
@@ -659,7 +660,7 @@ Unlike to `org-hide-block-toggle', this function does not throw
 an error.  Return a non-nil value when toggling is successful."
   (declare (obsolete "use `org-hide-block-toggle' instead." "Org 9.4"))
   (interactive)
-  (ignore-errors (org-hide-block-toggle)))
+  (org-hide-block-toggle nil t))
 
 (defun org-hide-block-toggle-all ()
   "Toggle the visibility of all blocks in the current buffer."
