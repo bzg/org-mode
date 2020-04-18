@@ -653,6 +653,14 @@ region as a drawer without further ado."
 	  (when (invisible-p (max (1- (point)) (point-min)))
 	    (goto-char post)))))))
 
+(defun org-hide-block-toggle-maybe ()
+  "Toggle visibility of block at point.
+Unlike to `org-hide-block-toggle', this function does not throw
+an error.  Return a non-nil value when toggling is successful."
+  (declare (obsolete "use `org-hide-block-toggle' instead." "Org 9.4"))
+  (interactive)
+  (ignore-errors (org-hide-block-toggle)))
+
 (defmacro org-with-silent-modifications (&rest body)
   (declare (obsolete "use `with-silent-modifications' instead." "Org 9.2")
 	   (debug (body)))

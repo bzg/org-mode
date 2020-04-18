@@ -5960,13 +5960,6 @@ heading to appear."
 
 ;;;; Blocks visibility
 
-(defun org-hide-block-toggle-maybe ()
-  "Toggle visibility of block at point.
-Unlike to `org-hide-block-toggle', this function does not throw
-an error.  Return a non-nil value when toggling is successful."
-  (interactive)
-  (ignore-errors (org-hide-block-toggle)))
-
 (defun org-hide-block-toggle (&optional force no-error element)
   "Toggle the visibility of the current block.
 
@@ -6020,7 +6013,7 @@ Return a non-nil value when toggling is successful."
   "Fold all blocks in the current buffer."
   (interactive)
   (org-show-all '(blocks))
-  (org-block-map 'org-hide-block-toggle-maybe))
+  (org-block-map 'org-hide-block-toggle))
 
 ;;;; Drawers visibility
 
