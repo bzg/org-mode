@@ -6137,11 +6137,11 @@ When point is not at the beginning of a headline, execute the global
 binding for `TAB', which is re-indenting the line.  See the option
 `org-cycle-emulate-tab' for details.
 
-As a special case, if point is at the beginning of the buffer and there is
-no headline in line 1, this function will act as if called with prefix arg
-\(`\\[universal-argument] TAB', same as `S-TAB') also when called without \
-prefix arg, but only
-if the variable `org-cycle-global-at-bob' is t."
+As a special case, if point is at the very beginning of the buffer, if
+there is no headline there, and if the variable `org-cycle-global-at-bob'
+is non-nil, this function acts as if called with prefix argument \
+\(`\\[universal-argument] TAB',
+same as `S-TAB') also when called without prefix argument."
   (interactive "P")
   (org-load-modules-maybe)
   (unless (or (run-hook-with-args-until-success 'org-tab-first-hook)
@@ -6153,63 +6153,22 @@ if the variable `org-cycle-global-at-bob' is t."
 		(and (boundp 'org-inlinetask-min-level)
 		     org-inlinetask-min-level
 		     (1- org-inlinetask-min-level))))
-	   (nstars (and limit-level
-			(if org-odd-levels-only
-			    (and limit-level (1- (* limit-level 2)))
-			  limit-level)))
+	   (nstars
+	    (and limit-level
+		 (if org-odd-levels-only
+		     (1- (* 2 limit-level))
+		   limit-level)))
 	   (org-outline-regexp
-	    (if (not (derived-mode-p 'org-mode))
-		outline-regexp
-	      (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ "))))
-	   (bob-special (and org-cycle-global-at-bob (not arg) (bobp)
-			     (not (looking-at org-outline-regexp))))
-	   (org-cycle-hook
-	    (if bob-special
-		(delq 'org-optimize-window-after-visibility-change
-		      (copy-sequence org-cycle-hook))
-	      org-cycle-hook))
-	   (pos (point)))
-
+	    (format "\\*%s " (if nstars (format "\\{1,%d\\}" nstars) "+"))))
       (cond
-
        ((equal arg '(16))
 	(setq last-command 'dummy)
 	(org-set-startup-visibility)
 	(org-unlogged-message "Startup visibility, plus VISIBILITY properties"))
-
        ((equal arg '(64))
 	(org-show-all)
 	(org-unlogged-message "Entire buffer visible, including drawers"))
-
        ((equal arg '(4)) (org-cycle-internal-global))
-
-       ;; Try hiding block at point.
-       ((org-hide-block-toggle-maybe))
-
-       ;; Try cdlatex TAB completion
-       ((org-try-cdlatex-tab))
-
-       ;; Table: enter it or move to the next field.
-       ((org-at-table-p 'any)
-	(if (org-at-table.el-p)
-	    (message "%s" (substitute-command-keys "\\<org-mode-map>\
-Use `\\[org-edit-special]' to edit table.el tables"))
-	  (if arg (org-table-edit-field t)
-	    (org-table-justify-field-maybe)
-	    (call-interactively 'org-table-next-field))))
-
-       ((run-hook-with-args-until-success 'org-tab-after-check-for-table-hook))
-
-       ;; Global cycling: delegate to `org-cycle-internal-global'.
-       (bob-special (org-cycle-internal-global))
-
-       ;; Drawers: delegate to `org-flag-drawer'.
-       ((save-excursion
-	  (beginning-of-line 1)
-	  (looking-at org-drawer-regexp))
-	(org-flag-drawer		; toggle block visibility
-	 (not (get-char-property (match-end 0) 'invisible))))
-
        ;; Show-subtree, ARG levels up from here.
        ((integerp arg)
 	(save-excursion
@@ -6217,47 +6176,75 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	  (outline-up-heading (if (< arg 0) (- arg)
 				(- (funcall outline-level) arg)))
 	  (org-show-subtree)))
-
+       ;; Global cycling at BOB: delegate to `org-cycle-internal-global'.
+       ((and org-cycle-global-at-bob
+	     (bobp)
+	     (not (looking-at org-outline-regexp)))
+	(let ((org-cycle-hook
+	       (remq 'org-optimize-window-after-visibility-change
+		     org-cycle-hook)))
+	  (org-cycle-internal-global)))
+       ;; Try CDLaTeX TAB completion.
+       ((org-try-cdlatex-tab))
        ;; Inline task: delegate to `org-inlinetask-toggle-visibility'.
        ((and (featurep 'org-inlinetask)
 	     (org-inlinetask-at-task-p)
 	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	(org-inlinetask-toggle-visibility))
-
-       ;; At an item/headline: delegate to `org-cycle-internal-local'.
-       ((and (or (and org-cycle-include-plain-lists (org-at-item-p))
-		 (save-excursion (move-beginning-of-line 1)
-				 (looking-at org-outline-regexp)))
-	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
-	(org-cycle-internal-local))
-
-       ;; From there: TAB emulation and template completion.
-       (buffer-read-only (org-back-to-heading))
-
-       ((run-hook-with-args-until-success
-	 'org-tab-after-check-for-cycling-hook))
-
-       ((run-hook-with-args-until-success
-	 'org-tab-before-tab-emulation-hook))
-
-       ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
-	     (or (not (bolp))
-		 (not (looking-at org-outline-regexp))))
-	(call-interactively (global-key-binding "\t")))
-
-       ((if (and (memq org-cycle-emulate-tab '(white whitestart))
-		 (save-excursion (beginning-of-line 1) (looking-at "[ \t]*"))
-		 (or (and (eq org-cycle-emulate-tab 'white)
-			  (= (match-end 0) (point-at-eol)))
-		     (and (eq org-cycle-emulate-tab 'whitestart)
-			  (>= (match-end 0) pos))))
-	    t
-	  (eq org-cycle-emulate-tab t))
-	(call-interactively (global-key-binding "\t")))
-
-       (t (save-excursion
-	    (org-back-to-heading)
-	    (org-cycle)))))))
+       (t
+	(let ((pos (point))
+	      (element (org-element-at-point)))
+	  (cond
+	   ;; Try toggling visibility for block at point.
+	   ((org-hide-block-toggle nil t element))
+	   ;; Try toggling visibility for block at point.
+	   ((org-hide-drawer-toggle nil t element))
+	   ;; Table: enter it or move to the next field.
+	   ((and (org-match-line "[ \t]*[|+]")
+		 (org-element-lineage element '(table) t))
+	    (if (and (eq 'table (org-element-type element))
+		     (eq 'table.el (org-element-property :type element)))
+		(message (substitute-command-keys "\\<org-mode-map>\
+Use `\\[org-edit-special]' to edit table.el tables"))
+	      (org-table-justify-field-maybe)
+	      (call-interactively #'org-table-next-field)))
+	   ((run-hook-with-args-until-success
+	     'org-tab-after-check-for-table-hook))
+	   ;; At an item/headline: delegate to `org-cycle-internal-local'.
+	   ((and (or (and org-cycle-include-plain-lists
+			  (let ((item (org-element-lineage element
+							   '(item plain-list)
+							   t)))
+			    (and item
+				 (= (line-beginning-position)
+				    (org-element-property :post-affiliated
+							  item)))))
+		     (save-excursion (move-beginning-of-line 1)
+				     (looking-at org-outline-regexp)))
+		 (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
+	    (org-cycle-internal-local))
+	   ;; From there: TAB emulation and template completion.
+	   (buffer-read-only (org-back-to-heading))
+	   ((run-hook-with-args-until-success
+	     'org-tab-after-check-for-cycling-hook))
+	   ((run-hook-with-args-until-success
+	     'org-tab-before-tab-emulation-hook))
+	   ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
+		 (or (not (bolp))
+		     (not (looking-at org-outline-regexp))))
+	    (call-interactively (global-key-binding (kbd "TAB"))))
+	   ((or (eq org-cycle-emulate-tab t)
+		(and (memq org-cycle-emulate-tab '(white whitestart))
+		     (save-excursion (beginning-of-line 1) (looking-at "[ \t]*"))
+		     (or (and (eq org-cycle-emulate-tab 'white)
+			      (= (match-end 0) (point-at-eol)))
+			 (and (eq org-cycle-emulate-tab 'whitestart)
+			      (>= (match-end 0) pos)))))
+	    (call-interactively (global-key-binding (kbd "TAB"))))
+	   (t
+	    (save-excursion
+	      (org-back-to-heading)
+	      (org-cycle))))))))))
 
 (defun org-cycle-internal-global ()
   "Do the global cycling action."
