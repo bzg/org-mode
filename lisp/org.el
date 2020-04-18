@@ -5967,43 +5967,50 @@ an error.  Return a non-nil value when toggling is successful."
   (interactive)
   (ignore-errors (org-hide-block-toggle)))
 
-(defun org-hide-block-toggle (&optional force)
+(defun org-hide-block-toggle (&optional force no-error element)
   "Toggle the visibility of the current block.
+
 When optional argument FORCE is `off', make block visible.  If it
 is non-nil, hide it unconditionally.  Throw an error when not at
-a block.  Return a non-nil value when toggling is successful."
+a block, unless NO-ERROR is non-nil.  When optional argument
+ELEMENT is provided, consider it instead of the current block.
+
+Return a non-nil value when toggling is successful."
   (interactive)
-  (let ((element (org-element-at-point)))
-    (unless (memq (org-element-type element)
-		  '(center-block comment-block dynamic-block example-block
-				 export-block quote-block special-block
-				 src-block verse-block))
-      (user-error "Not at a block"))
-    (let* ((post (org-element-property :post-affiliated element))
-	   (start (save-excursion
-		    (goto-char post)
-		    (line-end-position)))
-	   (end (save-excursion
-		  (goto-char (org-element-property :end element))
-		  (skip-chars-backward " \t\n")
-		  (line-end-position))))
-      ;; Do nothing when not before or at the block opening line or at
-      ;; the block closing line.
-      (unless (let ((eol (line-end-position))) (and (> eol start) (/= eol end)))
-	(cond ((eq force 'off)
-	       (org-flag-region start end nil 'org-hide-block))
-	      (force
-	       (org-flag-region start end t 'org-hide-block))
-	      ((eq (get-char-property start 'invisible) 'org-hide-block)
-	       (org-flag-region start end nil 'org-hide-block))
-	      (t
-	       (org-flag-region start end t 'org-hide-block)))
-	;; When the block is hidden away, make sure point is left in
-	;; a visible part of the buffer.
-	(when (invisible-p (max (1- (point)) (point-min)))
-	  (goto-char post))
-	;; Signal success.
-	t))))
+  (let ((element (or element (org-element-at-point))))
+    (cond
+     ((memq (org-element-type element)
+	    '(center-block comment-block dynamic-block example-block
+			   export-block quote-block special-block src-block
+			   verse-block))
+      (let* ((post (org-element-property :post-affiliated element))
+	     (start (save-excursion
+		      (goto-char post)
+		      (line-end-position)))
+	     (end (save-excursion
+		    (goto-char (org-element-property :end element))
+		    (skip-chars-backward " \t\n")
+		    (line-end-position))))
+	;; Do nothing when not before or at the block opening line or at
+	;; the block closing line.
+	(unless (let ((eol (line-end-position)))
+		  (and (> eol start) (/= eol end)))
+	  (let ((flag
+		 (cond ((eq force 'off) nil)
+		       (force t)
+		       ((eq (get-char-property start 'invisible)
+			    'org-hide-drawer)
+			nil)
+		       (t t))))
+	    (org-flag-region start end flag 'org-hide-block))
+	  ;; When the block is hidden away, make sure point is left in
+	  ;; a visible part of the buffer.
+	  (when (invisible-p (max (1- (point)) (point-min)))
+	    (goto-char post))
+	  ;; Signal success.
+	  t)))
+     (no-error nil)
+     (t (user-error "Not at a block")))))
 
 (defun org-hide-block-toggle-all ()
   "Toggle the visibility of all blocks in the current buffer."
