@@ -754,7 +754,8 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
   (let* ((root (expand-file-name
 		(file-name-as-directory
 		 (org-publish-property :base-directory project))))
-	 (sitemap-filename (concat root (or sitemap-filename "sitemap.org")))
+	 (sitemap-filename (expand-file-name (or sitemap-filename "sitemap.org")
+					     root))
 	 (title (or (org-publish-property :sitemap-title project)
 		    (concat "Sitemap for project " (car project))))
 	 (style (or (org-publish-property :sitemap-style project)
