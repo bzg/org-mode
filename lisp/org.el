@@ -6042,33 +6042,68 @@ a list of strings specifying which drawers should not be hidden."
 		;; `org-drawer-regexp'.
 		(goto-char (org-element-property :end drawer))))))))))
 
-(defun org-flag-drawer (flag &optional element beg end)
+(defun org-flag-drawer (flag &optional drawer beg end)
   "When FLAG is non-nil, hide the drawer we are at.
 Otherwise make it visible.
 
-When optional argument ELEMENT is a parsed drawer, as returned by
+When optional argument DRAWER is a parsed drawer, as returned by
 `org-element-at-point', hide or show that drawer instead.
 
 When buffer positions BEG and END are provided, hide or show that
-region as a drawer without further ado."
-  (if (and beg end) (org-flag-region beg end flag 'org-hide-drawer)
-    (let ((drawer (or element
-		      (and (save-excursion
-			     (beginning-of-line)
-			     (looking-at-p org-drawer-regexp))
-			   (org-element-at-point)))))
-      (when (memq (org-element-type drawer) '(drawer property-drawer))
-	(let ((post (org-element-property :post-affiliated drawer)))
-	  (org-flag-region
-	   (save-excursion (goto-char post) (line-end-position))
-	   (save-excursion (goto-char (org-element-property :end drawer))
-			   (skip-chars-backward " \t\n")
-			   (line-end-position))
-	   flag 'org-hide-drawer)
-	  ;; When the drawer is hidden away, make sure point lies in
-	  ;; a visible part of the buffer.
+region as a drawer without further ado.
+
+The function assumes either DRAWER, or BEG and END are non-nil."
+  (let ((beg (save-excursion
+	       (goto-char (or beg
+			      (org-element-property :post-affiliated drawer)))
+	       (line-end-position)))
+	(end (save-excursion
+	       (goto-char (or end (org-element-property :end drawer)))
+	       (skip-chars-backward " \t\n")
+	       (line-end-position))))
+    (org-flag-region beg end flag 'org-hide-drawer)))
+
+(defun org-hide-drawer-toggle (&optional force no-error element)
+  "Toggle the visibility of the current drawer.
+
+When optional argument FORCE is `off', make drawer visible.  If
+it is non-nil, hide it unconditionally.  Throw an error when not
+at a drawer, unless NO-ERROR is non-nil.  When optional argument
+ELEMENT is provided, consider it instead of the current drawer.
+
+Return a non-nil value when toggling is successful."
+  (interactive)
+  (let ((element (or element (org-element-at-point))))
+    (cond
+     ((memq (org-element-type element) '(drawer property-drawer))
+      (let* ((post (org-element-property :post-affiliated element))
+	     (start (save-excursion
+		      (goto-char post)
+		      (line-end-position)))
+	     (end (save-excursion
+		    (goto-char (org-element-property :end element))
+		    (skip-chars-backward " \t\n")
+		    (line-end-position))))
+	;; Do nothing when not before or at the block opening line or at
+	;; the block closing line.
+	(unless (let ((eol (line-end-position)))
+		  (and (> eol start) (/= eol end)))
+	  (let ((flag
+		 (cond ((eq force 'off) nil)
+		       (force t)
+		       ((eq (get-char-property start 'invisible)
+			    'org-hide-drawer)
+			nil)
+		       (t t))))
+	    (org-flag-drawer flag element))
+	  ;; When the drawer is hidden away, make sure point is left
+	  ;; in a visible part of the buffer.
 	  (when (invisible-p (max (1- (point)) (point-min)))
-	    (goto-char post)))))))
+	    (goto-char post))
+	  ;; Signal success.
+	  t)))
+     (no-error nil)
+     (t (user-error "Not at a drawer")))))
 
 ;;;; Visibility cycling
 

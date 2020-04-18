@@ -7240,15 +7240,24 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
   ;; Hide drawer.
   (should
    (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (org-flag-drawer t)
+     (org-flag-drawer t (org-element-at-point))
+     (get-char-property (line-end-position) 'invisible)))
+  (should
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (org-flag-drawer t nil (point-min) (point-max))
      (get-char-property (line-end-position) 'invisible)))
   ;; Show drawer.
   (should-not
    (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (org-flag-drawer t)
-     (org-flag-drawer nil)
+     (org-flag-drawer t nil (point-min) (point-max))
+     (org-flag-drawer nil nil (point-min) (point-max))
      (get-char-property (line-end-position) 'invisible)))
-  ;; Test optional argument.
+  (should-not
+   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
+     (org-flag-drawer t nil (point-min) (point-max))
+     (org-flag-drawer nil (org-element-at-point))
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Hide drawer remotely.
   (should
    (org-test-with-temp-text "Text\n:D1:\nc1\n:END:\n\n:D2:\nc2\n:END:"
      (let ((drawer (save-excursion (search-forward ":D2")
@@ -7261,32 +7270,46 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
      (let ((drawer (save-excursion (search-forward ":D2")
 				   (org-element-at-point))))
        (org-flag-drawer t drawer)
-       (get-char-property (line-end-position) 'invisible))))
-  ;; Do not hide fake drawers.
-  (should-not
-   (org-test-with-temp-text "#+begin_example\n:D:\nc\n:END:\n#+end_example"
-     (forward-line 1)
-     (org-flag-drawer t)
+       (get-char-property (line-end-position) 'invisible)))))
+
+(ert-deftest test-org/hide-drawer-toggle ()
+  "Test `org-hide-drawer-toggle' specifications."
+  ;; Error when not at a drawer.
+  (should-error
+   (org-test-with-temp-text ":fake-drawer:\ncontents"
+     (org-hide-drawer-toggle 'off)
      (get-char-property (line-end-position) 'invisible)))
-  ;; Do not hide incomplete drawers.
-  (should-not
-   (org-test-with-temp-text ":D:\nparagraph"
-     (forward-line 1)
-     (org-flag-drawer t)
+  (should-error
+   (org-test-with-temp-text
+       "#+begin_example\n<point>:D:\nc\n:END:\n#+end_example"
+     (org-hide-drawer-toggle t)))
+  ;; Hide drawer.
+  (should
+   (org-test-with-temp-text ":drawer:\ncontents\n:end:"
+     (org-hide-drawer-toggle)
      (get-char-property (line-end-position) 'invisible)))
-  ;; Do not hide drawers when called from final blank lines.
+  ;; Show drawer unconditionally when optional argument is `off'.
   (should-not
-   (org-test-with-temp-text ":DRAWER:\nA\n:END:\n\n"
-     (goto-char (point-max))
-     (org-flag-drawer t)
+   (org-test-with-temp-text ":drawer:\ncontents\n:end:"
+     (org-hide-drawer-toggle)
+     (org-hide-drawer-toggle 'off)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Hide drawer unconditionally when optional argument is non-nil.
+  (should
+   (org-test-with-temp-text ":drawer:\ncontents\n:end:"
+     (org-hide-drawer-toggle t)
+     (get-char-property (line-end-position) 'invisible)))
+  ;; Do not hide drawer when called from final blank lines.
+  (should-not
+   (org-test-with-temp-text ":drawer:\ncontents\n:end:\n\n<point>"
+     (org-hide-drawer-toggle)
      (goto-char (point-min))
      (get-char-property (line-end-position) 'invisible)))
   ;; Don't leave point in an invisible part of the buffer when hiding
   ;; a drawer away.
   (should-not
-   (org-test-with-temp-text ":DRAWER:\ncontents\n:END:"
-     (goto-char (point-max))
-     (org-flag-drawer t)
+   (org-test-with-temp-text ":drawer:\ncontents\n<point>:end:"
+     (org-hide-drawer-toggle)
      (get-char-property (point) 'invisible))))
 
 (ert-deftest test-org/hide-block-toggle ()
@@ -7406,14 +7429,14 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
      (org-invisible-p2)))
   (should-not
    (org-test-with-temp-text ":DRAWER:\nText\n:END:"
-     (org-flag-drawer t)
+     (org-hide-drawer-toggle)
      (search-forward "Text")
      (org-show-set-visibility 'minimal)
      (org-invisible-p2)))
   (should-not
    (org-test-with-temp-text
        "#+BEGIN_QUOTE\n<point>:DRAWER:\nText\n:END:\n#+END_QUOTE"
-     (org-flag-drawer t)
+     (org-hide-drawer-toggle)
      (forward-line -1)
      (org-hide-block-toggle)
      (search-forward "Text")
