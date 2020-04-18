@@ -2352,31 +2352,37 @@ See also `test-org-table/copy-field'."
   (should
    (equal "| a |\n"
 	  (org-test-with-temp-text
-	   "| <point>  | a |\n"
-	   (org-table-delete-column)
-	   (buffer-string))))
+	      "| <point>  | a |\n"
+	    (org-table-delete-column)
+	    (buffer-string))))
   ;; Delete column and check location of point.
   (should
    (= 2
       (org-test-with-temp-text
-       "| a | <point>b  | c |"
-       (org-table-delete-column)
-       (org-table-current-column))))
-  ;; Delete column when at end of line and immediately after a "|".
+	  "| a | <point>b  | c |"
+	(org-table-delete-column)
+	(org-table-current-column))))
+  ;; Delete column when at end of line and after a "|".
   (should
    (equal "| a |\n"
-      (org-test-with-temp-text
-       "| a | b |<point>\n"
-       (org-table-delete-column)
-       (buffer-string))))
+	  (org-test-with-temp-text
+	      "| a | b |<point>\n"
+	    (org-table-delete-column)
+	    (buffer-string))))
+  (should
+   (equal "| a |\n"
+	  (org-test-with-temp-text
+	      "| a | b |   <point>\n"
+	    (org-table-delete-column)
+	    (buffer-string))))
   ;; Delete two columns starting with the last column.
   (should
    (equal "| a |\n"
-      (org-test-with-temp-text
-       "| a | b  | c<point> |"
-       (org-table-delete-column)
-       (org-table-delete-column)
-       (buffer-string)))))
+	  (org-test-with-temp-text
+	      "| a | b  | c<point> |"
+	    (org-table-delete-column)
+	    (org-table-delete-column)
+	    (buffer-string)))))
 
 
 ;;; Inserting rows, inserting columns
