@@ -5958,7 +5958,57 @@ heading to appear."
   (org-flag-region
    (point) (save-excursion (org-end-of-subtree t t)) nil 'outline))
 
-;;;; Blocks visibility
+;;;; Blocks and drawers visibility
+
+(defun org--hide-wrapper-toggle (element category force no-error)
+  "Toggle visibility for ELEMENT.
+
+ELEMENT is a block or drawer type parsed element.  CATEGORY is
+either `block' or `drawer'.  When FORCE is `off', show the block
+or drawer.  If it is non-nil, hide it unconditionally.  Throw an
+error when not at a block or drawer, unless NO-ERROR is non-nil.
+
+Return a non-nil value when toggling is successful."
+  (cond
+   ((memq (org-element-type element)
+	  (pcase category
+	    (`drawer '(drawer property-drawer))
+	    (`block '(center-block
+		      comment-block dynamic-block example-block export-block
+		      quote-block special-block src-block verse-block))
+	    (_ (error "Unknown category: %S" category))))
+    (let* ((post (org-element-property :post-affiliated element))
+	   (start (save-excursion
+		    (goto-char post)
+		    (line-end-position)))
+	   (end (save-excursion
+		  (goto-char (org-element-property :end element))
+		  (skip-chars-backward " \t\n")
+		  (line-end-position))))
+      ;; Do nothing when not before or at the block opening line or at
+      ;; the block closing line.
+      (unless (let ((eol (line-end-position)))
+		(and (> eol start) (/= eol end)))
+	(let* ((spec (if (eq category 'drawer)
+			 'org-hide-drawer
+		       'org-hide-block))
+	       (flag
+		(cond ((eq force 'off) nil)
+		      (force t)
+		      ((eq (get-char-property start 'invisible) spec) nil)
+		      (t t))))
+	  (org-flag-region start end flag spec))
+	;; When the block is hidden away, make sure point is left in
+	;; a visible part of the buffer.
+	(when (invisible-p (max (1- (point)) (point-min)))
+	  (goto-char post))
+	;; Signal success.
+	t)))
+   (no-error nil)
+   (t
+    (user-error (if (eq category 'drawer)
+		    "Not at a drawer"
+		  "Not at a block")))))
 
 (defun org-hide-block-toggle (&optional force no-error element)
   "Toggle the visibility of the current block.
@@ -5970,48 +6020,27 @@ ELEMENT is provided, consider it instead of the current block.
 
 Return a non-nil value when toggling is successful."
   (interactive)
-  (let ((element (or element (org-element-at-point))))
-    (cond
-     ((memq (org-element-type element)
-	    '(center-block comment-block dynamic-block example-block
-			   export-block quote-block special-block src-block
-			   verse-block))
-      (let* ((post (org-element-property :post-affiliated element))
-	     (start (save-excursion
-		      (goto-char post)
-		      (line-end-position)))
-	     (end (save-excursion
-		    (goto-char (org-element-property :end element))
-		    (skip-chars-backward " \t\n")
-		    (line-end-position))))
-	;; Do nothing when not before or at the block opening line or at
-	;; the block closing line.
-	(unless (let ((eol (line-end-position)))
-		  (and (> eol start) (/= eol end)))
-	  (let ((flag
-		 (cond ((eq force 'off) nil)
-		       (force t)
-		       ((eq (get-char-property start 'invisible)
-			    'org-hide-drawer)
-			nil)
-		       (t t))))
-	    (org-flag-region start end flag 'org-hide-block))
-	  ;; When the block is hidden away, make sure point is left in
-	  ;; a visible part of the buffer.
-	  (when (invisible-p (max (1- (point)) (point-min)))
-	    (goto-char post))
-	  ;; Signal success.
-	  t)))
-     (no-error nil)
-     (t (user-error "Not at a block")))))
+  (org--hide-wrapper-toggle
+   (or element (org-element-at-point)) 'block force no-error))
+
+(defun org-hide-drawer-toggle (&optional force no-error element)
+  "Toggle the visibility of the current drawer.
+
+When optional argument FORCE is `off', make drawer visible.  If
+it is non-nil, hide it unconditionally.  Throw an error when not
+at a drawer, unless NO-ERROR is non-nil.  When optional argument
+ELEMENT is provided, consider it instead of the current drawer.
+
+Return a non-nil value when toggling is successful."
+  (interactive)
+  (org--hide-wrapper-toggle
+   (or element (org-element-at-point)) 'drawer force no-error))
 
 (defun org-hide-block-all ()
   "Fold all blocks in the current buffer."
   (interactive)
   (org-show-all '(blocks))
   (org-block-map 'org-hide-block-toggle))
-
-;;;; Drawers visibility
 
 (defun org-cycle-hide-drawers (state &optional exceptions)
   "Re-hide all drawers after a visibility state change.
@@ -6037,48 +6066,6 @@ a list of strings specifying which drawers should not be hidden."
 		;; it another time when matching its ending line with
 		;; `org-drawer-regexp'.
 		(goto-char (org-element-property :end drawer))))))))))
-
-(defun org-hide-drawer-toggle (&optional force no-error element)
-  "Toggle the visibility of the current drawer.
-
-When optional argument FORCE is `off', make drawer visible.  If
-it is non-nil, hide it unconditionally.  Throw an error when not
-at a drawer, unless NO-ERROR is non-nil.  When optional argument
-ELEMENT is provided, consider it instead of the current drawer.
-
-Return a non-nil value when toggling is successful."
-  (interactive)
-  (let ((element (or element (org-element-at-point))))
-    (cond
-     ((memq (org-element-type element) '(drawer property-drawer))
-      (let* ((post (org-element-property :post-affiliated element))
-	     (start (save-excursion
-		      (goto-char post)
-		      (line-end-position)))
-	     (end (save-excursion
-		    (goto-char (org-element-property :end element))
-		    (skip-chars-backward " \t\n")
-		    (line-end-position))))
-	;; Do nothing when not before or at the block opening line or at
-	;; the block closing line.
-	(unless (let ((eol (line-end-position)))
-		  (and (> eol start) (/= eol end)))
-	  (let ((flag
-		 (cond ((eq force 'off) nil)
-		       (force t)
-		       ((eq (get-char-property start 'invisible)
-			    'org-hide-drawer)
-			nil)
-		       (t t))))
-	    (org-flag-region start end flag 'org-hide-drawer))
-	  ;; When the drawer is hidden away, make sure point is left
-	  ;; in a visible part of the buffer.
-	  (when (invisible-p (max (1- (point)) (point-min)))
-	    (goto-char post))
-	  ;; Signal success.
-	  t)))
-     (no-error nil)
-     (t (user-error "Not at a drawer")))))
 
 ;;;; Visibility cycling
 
