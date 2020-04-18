@@ -295,6 +295,14 @@ HTML.
 Functions in this hook are run after ~org-agenda-filter~ is called.
 
 ** Removed or renamed functions and variables
+*** Deprecated ~org-flag-dawer~ function
+Use ~org-hide-drawer-toggle~ instead.
+*** Deprecated ~org-hide-block-toggle-maybe~ function
+Use ~org-hide-block-toggle~ instead.
+*** Deprecated ~org-hide-block-toggle-all~ function
+This function was not used in the code base, and has no clear use
+either.  It has been marked for future removal.  Please contact the
+mailing list if you use this function.
 *** Removed  ~org-maybe-keyword-time-regexp~
 
 The variable was not used in the code base.
@@ -312,6 +320,13 @@ From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
+*** Drawers' folding use an API similar to block's
+
+Tooling for folding drawers interactively or programmatically is now
+on par with block folding.  In particular, the new
+~org-hide-drawer-toggle~ function is the central place for drawer
+folding.
+
 *** Duration can be read and written in compact form
 
 ~org-duration-to-minutes~ understands =1d3h5min= as a duration,
