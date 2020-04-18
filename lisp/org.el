@@ -15450,7 +15450,10 @@ looks only before point, not after."
   (catch 'exit
     (let ((pos (point))
 	  (dodollar (member "$" (plist-get org-format-latex-options :matchers)))
-	  (lim (save-excursion (org-backward-paragraph) (point)))
+	  (lim (progn
+		 (re-search-backward (concat "^\\(" paragraph-start "\\)") nil
+				     'move)
+		 (point)))
 	  dd-on str (start 0) m re)
       (goto-char pos)
       (when dodollar
