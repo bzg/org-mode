@@ -1488,7 +1488,8 @@ Swap with anything in target cell."
   (interactive)
   (unless (org-at-table-p) (user-error "Not at a table"))
   (org-table-find-dataline)
-  (and (eolp) (looking-back "|" 1) (backward-char)) ; Snap into last column.
+  (when (save-excursion (skip-chars-forward " \t") (eolp))
+    (search-backward "|"))		;snap into last column
   (org-table-check-inside-data-field nil t)
   (let* ((col (org-table-current-column))
 	 (beg (org-table-begin))
