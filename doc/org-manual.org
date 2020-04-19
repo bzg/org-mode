@@ -98,8 +98,7 @@ We *strongly recommend* sticking to a single installation method.
 
 Recent Emacs distributions include a packaging system which lets you
 install Elisp libraries.  You can install Org from the "package menu",
-with {{{kbd(M-x list-packages)}}}.  See [[info:emacs::Package Menu][Package Menu]] for more
-information.
+with {{{kbd(M-x list-packages)}}}.  See [[info:emacs::Package Menu][Package Menu]].
 
 #+attr_texinfo: :tag Important
 #+begin_quote
