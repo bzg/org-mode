@@ -5817,6 +5817,7 @@ them."
      ("nn" :default "Forfattar")
      ("pl" :default "Autor")
      ("pt_BR" :default "Autor")
+     ("ro" :default "Autor")
      ("ru" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
      ("sl" :default "Avtor")
      ("sv" :html "F&ouml;rfattare")
@@ -5834,6 +5835,7 @@ them."
      ("nl" :default "Vervolg van vorige pagina")
      ("pt" :default "Continuação da página anterior")
      ("pt_BR" :html "Continua&ccedil;&atilde;o da p&aacute;gina anterior" :ascii "Continuacao da pagina anterior" :default "Continuação da página anterior")
+     ("ro" :default "Continuare de pe pagina precedentă")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077;)"
       :utf-8 "(Продолжение)")
      ("sl" :default "Nadaljevanje s prejšnje strani"))
@@ -5848,12 +5850,14 @@ them."
      ("nl" :default "Vervolg op volgende pagina")
      ("pt" :default "Continua na página seguinte")
      ("pt_BR" :html "Continua na pr&oacute;xima p&aacute;gina" :ascii "Continua na proxima pagina" :default "Continua na próxima página")
+     ("ro" :default "Continuare pe pagina următoare")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077; &#1089;&#1083;&#1077;&#1076;&#1091;&#1077;&#1090;)"
       :utf-8 "(Продолжение следует)")
      ("sl" :default "Nadaljevanje na naslednji strani"))
     ("Created"
      ("cs" :default "Vytvořeno")
      ("pt_BR" :default "Criado em")
+     ("ro" :default "Creat")
      ("sl" :default "Ustvarjeno"))
     ("Date"
      ("ar" :default "بتاريخ")
@@ -5874,6 +5878,7 @@ them."
      ("nb" :default "Dato")
      ("nn" :default "Dato")
      ("pl" :default "Data")
+     ("ro" :default "Data")
      ("pt_BR" :default "Data")
      ("ru" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
      ("sl" :default "Datum")
@@ -5895,6 +5900,7 @@ them."
      ("nb" :default "Ligning")
      ("nn" :default "Likning")
      ("pt_BR" :html "Equa&ccedil;&atilde;o" :default "Equação" :ascii "Equacao")
+     ("ro" :default "Ecuația")
      ("ru" :html "&#1059;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077;"
       :utf-8 "Уравнение")
      ("sl" :default "Enačba")
@@ -5914,6 +5920,7 @@ them."
      ("nb" :default "Illustrasjon")
      ("nn" :default "Illustrasjon")
      ("pt_BR" :default "Figura")
+     ("ro" :default "Imaginea")
      ("ru" :html "&#1056;&#1080;&#1089;&#1091;&#1085;&#1086;&#1082;" :utf-8 "Рисунок")
      ("sv" :default "Illustration")
      ("zh-CN" :html "&#22270;" :utf-8 "图"))
@@ -5932,6 +5939,7 @@ them."
      ("nb" :default "Illustrasjon %d")
      ("nn" :default "Illustrasjon %d")
      ("pt_BR" :default "Figura %d:")
+     ("ro" :default "Imaginea %d:")
      ("ru" :html "&#1056;&#1080;&#1089;. %d.:" :utf-8 "Рис. %d.:")
      ("sl" :default "Slika %d")
      ("sv" :default "Illustration %d")
@@ -5957,6 +5965,7 @@ them."
      ("nn" :default "Fotnotar")
      ("pl" :default "Przypis")
      ("pt_BR" :html "Notas de Rodap&eacute;" :default "Notas de Rodapé" :ascii "Notas de Rodape")
+     ("ro" :default "Note de subsol")
      ("ru" :html "&#1057;&#1085;&#1086;&#1089;&#1082;&#1080;" :utf-8 "Сноски")
      ("sl" :default "Opombe")
      ("sv" :default "Fotnoter")
@@ -5995,6 +6004,7 @@ them."
      ("nb" :default "Tabeller")
      ("nn" :default "Tabeller")
      ("pt_BR" :html "&Iacute;ndice de Tabelas" :default "Índice de Tabelas" :ascii "Indice de Tabelas")
+     ("ro" :default "Tabele")
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1090;&#1072;&#1073;&#1083;&#1080;&#1094;"
       :utf-8 "Список таблиц")
      ("sl" :default "Seznam tabel")
@@ -6013,6 +6023,7 @@ them."
      ("no" :default "Dataprogram")
      ("nb" :default "Dataprogram")
      ("pt_BR" :default "Listagem")
+     ("ro" :default "Lista")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072;"
       :utf-8 "Распечатка")
      ("sl" :default "Izpis programa")
@@ -6029,6 +6040,7 @@ them."
      ("ja" :default "ソースコード%d:")
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
+     ("ro" :default "Lista %d")
      ("pt_BR" :default "Listagem %d:")
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
       :utf-8 "Распечатка %d.:")
@@ -6042,6 +6054,7 @@ them."
      ("fr" :ascii "References" :default "Références")
      ("it" :default "Riferimenti")
      ("pt_BR" :html "Refer&ecirc;ncias" :default "Referências" :ascii "Referencias")
+     ("ro" :default "Bibliografie")
      ("sl" :default "Reference"))
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
@@ -6049,12 +6062,14 @@ them."
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
      ("it" :default "Vedi figura %s")
      ("pt_BR" :default "Veja a figura %s")
+     ("ro" :default "Vezi figura %s")
      ("sl" :default "Glej sliko %s"))
     ("See listing %s"
      ("cs" :default "Viz program %s")
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
      ("pt_BR" :default "Veja a listagem %s")
+     ("ro" :default "Vezi tabelul %s")
      ("sl" :default "Glej izpis programa %s"))
     ("See section %s"
      ("ar" :default "انظر قسم %s")
@@ -6068,6 +6083,7 @@ them."
      ("ja" :default "セクション %s を参照")
      ("pt_BR" :html "Veja a se&ccedil;&atilde;o %s" :default "Veja a seção %s"
       :ascii "Veja a secao %s")
+     ("ro" :default "Vezi secțiunea %s")
      ("ru" :html "&#1057;&#1084;. &#1088;&#1072;&#1079;&#1076;&#1077;&#1083; %s"
       :utf-8 "См. раздел %s")
      ("sl" :default "Glej poglavje %d")
@@ -6078,6 +6094,7 @@ them."
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
      ("it" :default "Vedi tabella %s")
      ("pt_BR" :default "Veja a tabela %s")
+     ("ro" :default "Vezi tabelul %s")
      ("sl" :default "Glej tabelo %s"))
     ("Table"
      ("ar" :default "جدول")
@@ -6090,6 +6107,7 @@ them."
      ("it" :default "Tabella")
      ("ja" :default "表" :html "&#34920;")
      ("pt_BR" :default "Tabela")
+     ("ro" :default "Tabel")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;"
       :utf-8 "Таблица")
      ("zh-CN" :html "&#34920;" :utf-8 "表"))
@@ -6108,6 +6126,7 @@ them."
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
      ("pt_BR" :default "Tabela %d:")
+     ("ro" :default "Tabel %d")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072; %d.:"
       :utf-8 "Таблица %d.:")
      ("sl" :default "Tabela %d")
@@ -6134,6 +6153,7 @@ them."
      ("nn" :default "Innhald")
      ("pl" :html "Spis tre&#x015b;ci")
      ("pt_BR" :html "&Iacute;ndice" :utf8 "Índice" :ascii "Indice")
+     ("ro" :default "Cuprins")
      ("ru" :html "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;"
       :utf-8 "Содержание")
      ("sl" :default "Kazalo")
@@ -6151,6 +6171,7 @@ them."
      ("it" :default "Riferimento sconosciuto")
      ("ja" :default "不明な参照先")
      ("pt_BR" :html "Refer&ecirc;ncia desconhecida" :default "Referência desconhecida" :ascii "Referencia desconhecida")
+     ("ro" :default "Referință necunoscută")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
       :utf-8 "Неизвестная ссылка")
      ("sl" :default "Neznana referenca")
