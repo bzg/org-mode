@@ -17205,7 +17205,7 @@ A note of warning: when =cache= is used in a session, caching may
 cause unexpected results.
 
 When the caching mechanism tests for any source code changes, it does
-not expand Noweb style references (see [[*Noweb Reference Syntax]]).  For
+not expand noweb style references (see [[*Noweb Reference Syntax]]).  For
 reasons why, see http://thread.gmane.org/gmane.emacs.orgmode/79046.
 
 The =cache= header argument can have one of two values: =yes= or =no=.
@@ -17674,7 +17674,7 @@ code.
 When Org tangles code blocks, it expands, merges, and transforms them.
 Then Org recomposes them into one or more separate files, as
 configured through the options.  During this tangling process, Org
-expands variables in the source code, and resolves any Noweb style
+expands variables in the source code, and resolves any noweb style
 references (see [[*Noweb Reference Syntax]]).
 
 *** Header arguments
@@ -17740,7 +17740,7 @@ already exist in the code block.
 
 - =noweb= ::
 
-  Includes =link= option, expands Noweb references (see [[*Noweb
+  Includes =link= option, expands noweb references (see [[*Noweb
   Reference Syntax]]), and wraps them in link comments inside the body
   of the code block.
 
@@ -17779,7 +17779,7 @@ By default Org expands code blocks during tangling.  The =no-expand=
 header argument turns off such expansions.  Note that one side-effect
 of expansion by ~org-babel-expand-src-block~ also assigns values (see
 [[*Environment of a Code Block]]) to variables.  Expansions also replace
-Noweb references with their targets (see [[*Noweb Reference Syntax]]).
+noweb references with their targets (see [[*Noweb Reference Syntax]]).
 Some of these expansions may cause premature assignment, hence this
 option.  This option makes a difference only for tangling.  It has no
 effect when exporting since code blocks for execution have to be
@@ -17976,56 +17976,58 @@ for Python and Emacs Lisp languages.
 :PROPERTIES:
 :DESCRIPTION: Literate programming in Org mode.
 :END:
-#+cindex: code block, Noweb reference
-#+cindex: syntax, Noweb
-#+cindex: source code, Noweb reference
+#+cindex: code block, noweb reference
+#+cindex: syntax, noweb
+#+cindex: source code, noweb reference
 
 #+cindex: @samp{noweb-ref}, header argument
-Org supports named blocks in Noweb[fn:145] style syntax:
+Source code blocks can include references to other source code blocks,
+using a noweb[fn:145] style syntax:
 
 : <<CODE-BLOCK-ID>>
 
+#+texinfo: @noindent
 where {{{var(CODE-BLOCK-ID)}}} refers to either the =NAME= of
 a specific source code block, or a collection of source code blocks
 sharing the same =noweb-ref= header argument (see [[*Using Header
-Arguments]]).
+Arguments]]).  Org can replace such references with the source code---or
+concatenation thereof--- being referenced, or with the results of an
+evaluation.
 
 #+cindex: @samp{noweb}, header argument
-Org can replace the Noweb style reference with the source code---or
-concatenation thereof---, or even the results of an evaluation, as
-detailed below.  The =noweb= header argument controls expansion of
-Noweb syntax references.  Expansions occur when source code blocks are
-evaluated, tangled, or exported.
+The =noweb= header argument controls expansion of noweb syntax
+references.  Expansions occur when source code blocks are evaluated,
+tangled, or exported.
 
 - =no= ::
 
-  Default.  No expansion of Noweb syntax references in the body of the
+  Default.  No expansion of noweb syntax references in the body of the
   code when evaluating, tangling, or exporting.
 
 - =yes= ::
 
-  Expansion of Noweb syntax references in the body of the code block
+  Expansion of noweb syntax references in the body of the code block
   when evaluating, tangling, or exporting.
 
 - =tangle= ::
 
-  Expansion of Noweb syntax references in the body of the code block
+  Expansion of noweb syntax references in the body of the code block
   when tangling.  No expansion when evaluating or exporting.
 
 - =no-export= ::
 
-  Expansion of Noweb syntax references in the body of the code block
+  Expansion of noweb syntax references in the body of the code block
   when evaluating or tangling.  No expansion when exporting.
 
 - =strip-export= ::
 
-  Expansion of Noweb syntax references in the body of the code block
-  when expanding prior to evaluating or tangling.  Removes Noweb
+  Expansion of noweb syntax references in the body of the code block
+  when expanding prior to evaluating or tangling.  Removes noweb
   syntax references when exporting.
 
 - =eval= ::
 
-  Expansion of Noweb syntax references in the body of the code block
+  Expansion of noweb syntax references in the body of the code block
   only before evaluating.
 
 In the most simple case, the contents of a single source block is
@@ -18085,7 +18087,7 @@ concatenation to a pure code file when tangled.
 #+end_example
 
 #+cindex: @samp{noweb-sep}, header argument
-By default a newline separates each Noweb reference concatenation.  To
+By default a newline separates each noweb reference concatenation.  To
 use a different separator, edit the =noweb-sep= header argument.
 
 Eventually, Org can include the results of evaluation of a single code
@@ -18099,7 +18101,7 @@ code block name set by =NAME= keyword is required; the reference set
 by =noweb-ref= is not effective in that case.
 
 Here is an example that demonstrates how the exported content changes
-when Noweb style references are used with parentheses versus without.
+when noweb style references are used with parentheses versus without.
 With:
 
 #+begin_example
@@ -18123,7 +18125,7 @@ expands to:
 
 : print(num*10)
 
-Below, a similar Noweb style reference is used, but with parentheses,
+Below, a similar noweb style reference is used, but with parentheses,
 while setting a variable =num= to 10:
 
 #+begin_example
@@ -18138,10 +18140,10 @@ Note that the expansion now contains the results of the code block
 
 : 100
 
-Noweb insertions honor prefix characters that appear before the Noweb
+Noweb insertions honor prefix characters that appear before the noweb
 syntax reference.  This behavior is illustrated in the following
-example.  Because the =<<example>>= Noweb reference appears behind the
-SQL comment syntax, each line of the expanded Noweb reference is
+example.  Because the =<<example>>= noweb reference appears behind the
+SQL comment syntax, each line of the expanded noweb reference is
 commented.  With:
 
 #+begin_example
@@ -18171,8 +18173,8 @@ expands to:
 ,#+END_SRC
 #+end_example
 
-Since this change does not affect Noweb replacement text without
-newlines in them, inline Noweb references are acceptable.
+Since this change does not affect noweb replacement text without
+newlines in them, inline noweb references are acceptable.
 
 This feature can also be used for management of indentation in
 exported code snippets.  With:
@@ -21736,7 +21738,7 @@ the C language.
 identifier for such source blocks is =D=, you activate it by loading
 the C language.
 
-[fn:145] For Noweb literate programming details, see
+[fn:145] For noweb literate programming details, see
 http://www.cs.tufts.edu/~nr/noweb/.
 
 [fn:146] For more information, please refer to the commentary section
