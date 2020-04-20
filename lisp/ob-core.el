@@ -3098,7 +3098,9 @@ of `org-babel-temporary-directory'."
 		    (delete-file file)))
 		;; We do not want to delete "." and "..".
 		(directory-files org-babel-temporary-directory 'full
-				 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*"))
+				 ;; Note: Use `any' for compatibility
+				 ;; with Emacs < 27.
+				 (rx (or (not (any ".")) "..."))))
 	  (delete-directory org-babel-temporary-directory))
       (error
        (message "Failed to remove temporary Org-babel directory %s"
