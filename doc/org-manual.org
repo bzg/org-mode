@@ -15851,6 +15851,7 @@ Settings]]), however, override everything.
 | ~:html-link-use-abs-url~                       | ~org-html-link-use-abs-url~                       |
 | ~:html-mathjax-options~                        | ~org-html-mathjax-options~                        |
 | ~:html-mathjax-template~                       | ~org-html-mathjax-template~                       |
+| ~:html-equation-reference-format~              | ~org-html-equation-reference-format~              |
 | ~:html-metadata-timestamp-format~              | ~org-html-metadata-timestamp-format~              |
 | ~:html-postamble-format~                       | ~org-html-postamble-format~                       |
 | ~:html-postamble~                              | ~org-html-postamble~                              |

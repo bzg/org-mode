@@ -121,6 +121,7 @@
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
     (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
     (:html-mathjax "HTML_MATHJAX" nil "" space)
+    (:html-equation-reference-format "HTML_EQUATION_REFERENCE_FORMAT" nil org-html-equation-reference-format t)
     (:html-postamble nil "html-postamble" org-html-postamble)
     (:html-preamble nil "html-preamble" org-html-preamble)
     (:html-head "HTML_HEAD" nil org-html-head newline)
@@ -760,6 +761,24 @@ The function should return the string to be exported."
   :type 'function)
 
 ;;;; LaTeX
+
+(defcustom org-html-equation-reference-format "\\eqref{%s}"
+  "The MathJax command to use when referencing equations.
+
+This is a format control string that expects a single string argument
+specifying the label that is being referenced. The argument is
+generated automatically on export.
+
+The default is to wrap equations in parentheses (using \"\\eqref{%s}\)\".
+
+Most common values are:
+
+  \\eqref{%s}    Wrap the equation in parentheses
+  \\ref{%s}      Do not wrap the equation in parentheses"
+  :group 'org-export-html
+  :package-version '(Org . "9.4")
+  :type 'string
+  :safe t)
 
 (defcustom org-html-with-latex org-export-with-latex
   "Non-nil means process LaTeX math snippets.
@@ -3113,9 +3132,9 @@ INFO is a plist holding contextual information.  See
                     (eq 'latex-environment (org-element-type destination))
                     (eq 'math (org-latex--environment-type destination)))
                ;; Caption and labels are introduced within LaTeX
-	       ;; environment.  Use "eqref" macro to refer to those in
-	       ;; the document.
-               (format "\\eqref{%s}"
+	       ;; environment.  Use "ref" or "eqref" macro, depending on user
+               ;; preference to refer to those in the document.
+               (format (plist-get info :html-equation-reference-format)
                        (org-export-get-reference destination info))
              (let* ((ref (org-export-get-reference destination info))
                     (org-html-standalone-image-predicate

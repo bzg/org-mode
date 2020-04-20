@@ -384,6 +384,15 @@ now. E.g.,
 This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
 Hyatt has been fixed.  Thanks to both of them.
 
+*** Format of equation reference in HTML export can be specified
+
+By default, HTML (via MathJax) and LaTeX export equation references
+using different commands. LaTeX must use ~\ref{%s}~ because it is used
+for all labels; however, HTML (via MathJax) uses ~\eqref{%s}~ for
+equations producing inconsistent output. New option
+~org-html-equation-reference-format~ sets the command used in HTML
+export.
+
 * Version 9.3
 
 ** Incompatible changes
