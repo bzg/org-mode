@@ -17980,17 +17980,22 @@ for Python and Emacs Lisp languages.
 #+cindex: syntax, Noweb
 #+cindex: source code, Noweb reference
 
+#+cindex: @samp{noweb-ref}, header argument
 Org supports named blocks in Noweb[fn:145] style syntax:
 
 : <<CODE-BLOCK-ID>>
 
-Org can replace the construct with the source code, or the results of
-evaluation, of the code block identified as {{{var(CODE-BLOCK-ID)}}}.
+where {{{var(CODE-BLOCK-ID)}}} refers to either the =NAME= of
+a specific source code block, or a collection of source code blocks
+sharing the same =noweb-ref= header argument (see [[*Using Header
+Arguments]]).
 
 #+cindex: @samp{noweb}, header argument
-The =noweb= header argument controls expansion of Noweb syntax
-references.  Expansions occur when source code blocks are evaluated,
-tangled, or exported.
+Org can replace the Noweb style reference with the source code---or
+concatenation thereof---, or even the results of an evaluation, as
+detailed below.  The =noweb= header argument controls expansion of
+Noweb syntax references.  Expansions occur when source code blocks are
+evaluated, tangled, or exported.
 
 - =no= ::
 
@@ -18023,7 +18028,8 @@ tangled, or exported.
   Expansion of Noweb syntax references in the body of the code block
   only before evaluating.
 
-In the following example,
+In the most simple case, the contents of a single source block is
+inserted within other blocks.  Thus, in following example,
 
 #+begin_example
 ,#+NAME: initialization
@@ -18046,6 +18052,91 @@ the second code block is expanded as
   (reverse sentence)
 ,#+END_SRC
 #+end_example
+
+You may also concatenate the contents of multiple blocks sharing
+a common =noweb-ref= header argument.  For simple concatenation, set
+its value at the sub-tree or file level.  In the example Org file
+shown next, the body of the source code in each block is extracted for
+concatenation to a pure code file when tangled.
+
+#+begin_example
+,#+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
+  <<fullest-disk>>
+,#+END_SRC
+,* the mount point of the fullest disk
+  :PROPERTIES:
+  :header-args: :noweb-ref fullest-disk
+  :END:
+
+,** query all mounted disks
+,#+BEGIN_SRC sh
+  df \
+,#+END_SRC
+
+,** strip the header row
+,#+BEGIN_SRC sh
+  |sed '1d' \
+,#+END_SRC
+
+,** output mount point of fullest disk
+,#+BEGIN_SRC sh
+  |awk '{if (u < +$5) {u = +$5; m = $6}} END {print m}'
+,#+END_SRC
+#+end_example
+
+#+cindex: @samp{noweb-sep}, header argument
+By default a newline separates each Noweb reference concatenation.  To
+use a different separator, edit the =noweb-sep= header argument.
+
+Eventually, Org can include the results of evaluation of a single code
+block rather than its body.  To that effect, append parentheses,
+possibly including arguments, to the code block name, as shown below.
+
+: <<NAME(optional arguments)>>
+
+Note that when using the above approach to a code block's results, the
+code block name set by =NAME= keyword is required; the reference set
+by =noweb-ref= is not effective in that case.
+
+Here is an example that demonstrates how the exported content changes
+when Noweb style references are used with parentheses versus without.
+With:
+
+#+begin_example
+,#+NAME: some-code
+,#+BEGIN_SRC python :var num=0 :results output :exports none
+  print(num*10)
+,#+END_SRC
+#+end_example
+
+#+texinfo: @noindent
+this code block:
+
+#+begin_example
+,#+BEGIN_SRC text :noweb yes
+  <<some-code>>
+,#+END_SRC
+#+end_example
+
+#+texinfo: @noindent
+expands to:
+
+: print(num*10)
+
+Below, a similar Noweb style reference is used, but with parentheses,
+while setting a variable =num= to 10:
+
+#+begin_example
+,#+BEGIN_SRC text :noweb yes
+  <<some-code(num=10)>>
+,#+END_SRC
+#+end_example
+
+#+texinfo: @noindent
+Note that the expansion now contains the results of the code block
+=some-code=, not the code block itself:
+
+: 100
 
 Noweb insertions honor prefix characters that appear before the Noweb
 syntax reference.  This behavior is illustrated in the following
@@ -18119,95 +18210,6 @@ if true:
 else:
     print('do things when false')
 #+end_example
-
-#+cindex: @samp{noweb-ref}, header argument
-When expanding Noweb style references, Org concatenates code blocks by
-matching the reference name to either the code block name or, if none
-is found, to the =noweb-ref= header argument.
-
-For simple concatenation, set this =noweb-ref= header argument at the
-sub-tree or file level.  In the example Org file shown next, the body
-of the source code in each block is extracted for concatenation to
-a pure code file when tangled.
-
-#+begin_example
-,#+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
-  <<fullest-disk>>
-,#+END_SRC
-,* the mount point of the fullest disk
-  :PROPERTIES:
-  :header-args: :noweb-ref fullest-disk
-  :END:
-
-,** query all mounted disks
-,#+BEGIN_SRC sh
-  df \
-,#+END_SRC
-
-,** strip the header row
-,#+BEGIN_SRC sh
-  |sed '1d' \
-,#+END_SRC
-
-,** output mount point of fullest disk
-,#+BEGIN_SRC sh
-  |awk '{if (u < +$5) {u = +$5; m = $6}} END {print m}'
-,#+END_SRC
-#+end_example
-
-#+cindex: @samp{noweb-sep}, header argument
-By default a newline separates each noweb reference concatenation.  To
-change this newline separator, edit the =noweb-sep= header argument.
-
-Eventually, Org can include the results of a code block rather than
-its body.  To that effect, append parentheses, possibly including
-arguments, to the code block name, as shown below.
-
-: <<code-block-name(optional arguments)>>
-
-Note that when using the above approach to a code block's results, the
-code block name set by =NAME= keyword is required; the reference set
-by =noweb-ref= does not work in that case.
-
-Here is an example that demonstrates how the exported content changes
-when Noweb style references are used with parentheses versus without.
-With:
-
-#+begin_example
-,#+NAME: some-code
-,#+BEGIN_SRC python :var num=0 :results output :exports none
-  print(num*10)
-,#+END_SRC
-#+end_example
-
-#+texinfo: @noindent
-this code block:
-
-#+begin_example
-,#+BEGIN_SRC text :noweb yes
-  <<some-code>>
-,#+END_SRC
-#+end_example
-
-#+texinfo: @noindent
-expands to:
-
-: print(num*10)
-
-Below, a similar Noweb style reference is used, but with parentheses,
-while setting a variable =num= to 10:
-
-#+begin_example
-,#+BEGIN_SRC text :noweb yes
-  <<some-code(num=10)>>
-,#+END_SRC
-#+end_example
-
-#+texinfo: @noindent
-Note that now the expansion contains the results of the code block
-=some-code=, not the code block itself:
-
-: 100
 
 ** Library of Babel
 :PROPERTIES:
