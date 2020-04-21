@@ -5286,9 +5286,8 @@ by a #."
 (defun org-fontify-drawers (limit)
   "Fontify drawers."
   (when (re-search-forward org-drawer-regexp limit t)
-    (add-text-properties
-     (line-beginning-position) (line-beginning-position 2)
-     '(font-lock-fontified t face org-drawer))
+    (add-text-properties (1- (match-beginning 1)) (1+ (match-end 1))
+			 '(font-lock-fontified t face org-drawer))
     (org-remove-flyspell-overlays-in
      (line-beginning-position) (line-beginning-position 2))
     t))
