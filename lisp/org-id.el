@@ -258,6 +258,11 @@ Create an ID if necessary."
   (interactive)
   (org-kill-new (org-id-get nil 'create)))
 
+(defvar org-id-overriding-file-name nil
+  "Tell `org-id-get' to use this as the file name when creating an ID.
+This is useful when working with contents in a temporary buffer
+that will be copied back to the original.")
+
 ;;;###autoload
 (defun org-id-get (&optional pom create prefix)
   "Get the ID property of the entry at point-or-marker POM.
@@ -274,7 +279,9 @@ In any case, the ID of the entry is returned."
        (create
 	(setq id (org-id-new prefix))
 	(org-entry-put pom "ID" id)
-	(org-id-add-location id (buffer-file-name (buffer-base-buffer)))
+	(org-id-add-location id
+			     (or org-id-overriding-file-name
+				 (buffer-file-name (buffer-base-buffer))))
 	id)))))
 
 ;;;###autoload
@@ -572,8 +579,10 @@ When FILES is given, scan also these files."
 (defun org-id-add-location (id file)
   "Add the ID with location FILE to the database of ID locations."
   ;; Only if global tracking is on, and when the buffer has a file
+  (unless file
+    (error "bug: org-id-get expects a file-visiting buffer"))
   (let ((afile (abbreviate-file-name file)))
-    (when (and org-id-track-globally id file)
+    (when (and org-id-track-globally id)
       (unless org-id-locations (org-id-locations-load))
       (puthash id afile org-id-locations)
       (unless (member afile org-id-files)

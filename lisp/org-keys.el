@@ -219,7 +219,7 @@
 ;;; Variables
 
 (defvar org-mode-map (make-sparse-keymap)
-  "Keymap fo Org mode.")
+  "Keymap for Org mode.")
 
 (defvaralias 'org-CUA-compatible 'org-replace-disputed-keys)
 
