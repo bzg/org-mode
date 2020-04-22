@@ -17911,12 +17911,13 @@ using a noweb[fn:144] style syntax:
 : <<CODE-BLOCK-ID>>
 
 #+texinfo: @noindent
-where {{{var(CODE-BLOCK-ID)}}} refers to either the =NAME= of
-a specific source code block, or a collection of source code blocks
+where {{{var(CODE-BLOCK-ID)}}} refers to either the =NAME= of a single
+source code block, or a collection of one or more source code blocks
 sharing the same =noweb-ref= header argument (see [[*Using Header
-Arguments]]).  Org can replace such references with the source code---or
-concatenation thereof--- being referenced, or with the results of an
-evaluation.
+Arguments]]).  Org can replace such references with the source code of
+the block or blocks being referenced, or, in the case of a single
+source code block named with =NAME=, with the results of an evaluation
+of that block.
 
 #+cindex: @samp{noweb}, header argument
 The =noweb= header argument controls expansion of noweb syntax
@@ -17979,11 +17980,11 @@ the second code block is expanded as
 ,#+END_SRC
 #+end_example
 
-You may also concatenate the contents of multiple blocks sharing
-a common =noweb-ref= header argument.  For simple concatenation, set
-its value at the sub-tree or file level.  In the example Org file
-shown next, the body of the source code in each block is extracted for
-concatenation to a pure code file when tangled.
+You may also include the contents of multiple blocks sharing a common
+=noweb-ref= header argument, which can be set at the file, sub-tree,
+or code block level.  In the example Org file shown next, the body of
+the source code in each block is extracted for concatenation to a pure
+code file when tangled.
 
 #+begin_example
 ,#+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
@@ -18014,19 +18015,20 @@ concatenation to a pure code file when tangled.
 By default a newline separates each noweb reference concatenation.  To
 use a different separator, edit the =noweb-sep= header argument.
 
-Eventually, Org can include the results of evaluation of a single code
-block rather than its body.  To that effect, append parentheses,
-possibly including arguments, to the code block name, as shown below.
+Alternatively, Org can include the results of evaluation of a single
+code block rather than its body.  Evaluation occurs when parentheses,
+possibly including arguments, are appended to the code block name, as
+shown below.
 
 : <<NAME(optional arguments)>>
 
-Note that when using the above approach to a code block's results, the
-code block name set by =NAME= keyword is required; the reference set
-by =noweb-ref= is not effective in that case.
+Note that in this case, a code block name set by =NAME= keyword is
+required; the reference set by =noweb-ref= will not work when
+evaluation is desired.
 
 Here is an example that demonstrates how the exported content changes
 when noweb style references are used with parentheses versus without.
-With:
+Given:
 
 #+begin_example
 ,#+NAME: some-code
