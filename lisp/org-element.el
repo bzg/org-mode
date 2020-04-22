@@ -4329,7 +4329,7 @@ located inside the current one.  "
   (if parent?
       (pcase type
 	(`headline 'section)
-	(`first-section 'top-comment)
+	((and `section (guard (eq mode 'first-section))) 'top-comment)
 	(`inlinetask 'planning)
 	(`plain-list 'item)
 	(`property-drawer 'node-property)

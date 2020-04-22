@@ -541,15 +541,16 @@ Use :header-args: instead"
   (org-element-map ast 'drawer
     (lambda (d)
       (when (equal (org-element-property :drawer-name d) "PROPERTIES")
-	(let ((section (org-element-lineage d '(section))))
-	  (unless (org-element-map section 'property-drawer #'identity nil t)
-	    (list (org-element-property :post-affiliated d)
-		  (if (save-excursion
-			(goto-char (org-element-property :post-affiliated d))
-			(forward-line -1)
-			(or (org-at-heading-p) (org-at-planning-p)))
-		      "Incorrect contents for PROPERTIES drawer"
-		    "Incorrect location for PROPERTIES drawer"))))))))
+	(let ((headline? (org-element-lineage d '(headline)))
+	      (before
+	       (mapcar #'org-element-type
+		       (assq d (reverse (org-element-contents
+					 (org-element-property :parent d)))))))
+	  (list (org-element-property :post-affiliated d)
+		(if (or (and headline? (member before '(nil (planning))))
+			(and (null headline?) (member before '(nil (comment)))))
+		    "Incorrect contents for PROPERTIES drawer"
+		  "Incorrect location for PROPERTIES drawer")))))))
 
 (defun org-lint-invalid-effort-property (ast)
   (org-element-map ast 'node-property
