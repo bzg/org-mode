@@ -5412,33 +5412,46 @@ Result depends on variable `org-highlight-latex-and-related'."
 			   (append re-latex re-entities re-sub)
 			   "\\|"))))
 
-(defun org-do-latex-and-related (_limit)
+(defun org-do-latex-and-related (limit)
   "Highlight LaTeX snippets and environments, entities and sub/superscript.
 Stop at first highlighted object, if any.  Return t if some
 highlighting was done, nil otherwise."
   (when (org-string-nw-p org-latex-and-related-regexp)
-    (catch 'found
-      (while (re-search-forward org-latex-and-related-regexp
-				nil t) ;; on purpose, we ignore LIMIT
-	(unless (cl-some (lambda (f) (memq f '(org-code org-verbatim underline
-							org-special-keyword)))
-			 (save-excursion
-			   (goto-char (1+ (match-beginning 0)))
-			   (face-at-point nil t)))
-	  (let* ((offset (if (memq (char-after (1+ (match-beginning 0)))
-				   '(?_ ?^))
-			     1
-			   0))
-		 (start (+ offset (match-beginning 0)))
-		 (end (match-end 0)))
-	    (if (memq 'native org-highlight-latex-and-related)
-		(org-src-font-lock-fontify-block "latex" start end)
-	      (font-lock-prepend-text-property start end
-					       'face 'org-latex-and-related))
-	    (add-text-properties (+ offset (match-beginning 0)) (match-end 0)
-				 '(font-lock-multiline t)))
-	  (throw 'found t)))
-      nil)))
+    (let ((latex-prefix-re (rx (or "$" "\\(" "\\[")))
+	  (blank-line-re (rx (and "\n" (zero-or-more (or " " "\t")) "\n"))))
+      (catch 'found
+	(while (and (< (point) limit)
+		    (re-search-forward org-latex-and-related-regexp nil t))
+	  (cond
+	   ((cl-some (lambda (f)
+		       (memq f '(org-code org-verbatim underline
+					  org-special-keyword)))
+		     (save-excursion
+		       (goto-char (1+ (match-beginning 0)))
+		       (face-at-point nil t))))
+	   ;; Try to limit false positives.  In this case, ignore
+	   ;; $$...$$, \(...\), and \[...\] LaTeX constructs if they
+	   ;; contain an empty line.
+	   ((save-excursion
+	      (goto-char (match-beginning 0))
+	      (and (looking-at-p latex-prefix-re)
+		   (save-match-data
+		     (re-search-forward blank-line-re (1- (match-end 0)) t)))))
+	   (t
+	    (let* ((offset (if (memq (char-after (1+ (match-beginning 0)))
+				     '(?_ ?^))
+			       1
+			     0))
+		   (start (+ offset (match-beginning 0)))
+		   (end (match-end 0)))
+	      (if (memq 'native org-highlight-latex-and-related)
+		  (org-src-font-lock-fontify-block "latex" start end)
+		(font-lock-prepend-text-property start end
+						 'face 'org-latex-and-related))
+	      (add-text-properties (+ offset (match-beginning 0)) (match-end 0)
+				   '(font-lock-multiline t))
+	      (throw 'found t)))))
+	nil))))
 
 (defun org-restart-font-lock ()
   "Restart `font-lock-mode', to force refontification."
