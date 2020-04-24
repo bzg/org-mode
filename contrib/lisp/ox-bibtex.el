@@ -154,7 +154,8 @@ to `org-bibtex-citation-p' predicate."
 
 ;;; Follow cite: links
 
-(defun org-bibtex-file nil "Org-mode file of bibtex entries.")
+(defvar org-bibtex-file nil
+  "Org file of BibTeX entries.")
 
 (defun org-bibtex-goto-citation (&optional citation)
   "Visit a citation given its ID."
