@@ -18216,6 +18216,17 @@ else:
     print('do things when false')
 #+end_example
 
+When in doubt about the outcome of a source code block expansion, you
+can preview the results with the following command:
+
+- {{{kbd(C-c C-v v)}}} or {{{kbd(C-c C-v C-v)}}} (~org-babel-expand-src-block~) ::
+
+  #+findex: org-babel-expand-src-block
+  #+kindex: C-c C-v v
+  #+kindex: C-c C-v C-v
+  Expand the current source code block according to its header
+  arguments and pop open the results in a preview buffer.
+
 ** Library of Babel
 :PROPERTIES:
 :DESCRIPTION: Use and contribute to a library of useful code blocks.
