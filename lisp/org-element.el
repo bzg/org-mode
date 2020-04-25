@@ -4504,6 +4504,9 @@ to an appropriate container (e.g., a paragraph)."
 			 ((and ?f
 			       (guard (memq 'footnote-reference restriction)))
 			  (org-element-footnote-reference-parser))
+			 ((and (or ?% ?/)
+			       (guard (memq 'statistics-cookie restriction)))
+			  (org-element-statistics-cookie-parser))
 			 (_
 			  (or (and (memq 'timestamp restriction)
 				   (org-element-timestamp-parser))
