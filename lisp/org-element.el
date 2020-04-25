@@ -4497,15 +4497,18 @@ to an appropriate container (e.g., a paragraph)."
 			     (and (memq 'latex-fragment restriction)
 				  (org-element-latex-fragment-parser)))))
 		      (?\[
-		       (if (eq (aref result 1) ?\[)
-			   (and (memq 'link restriction)
-				(org-element-link-parser))
-			 (or (and (memq 'footnote-reference restriction)
-				  (org-element-footnote-reference-parser))
-			     (and (memq 'timestamp restriction)
-				  (org-element-timestamp-parser))
-			     (and (memq 'statistics-cookie restriction)
-				  (org-element-statistics-cookie-parser)))))
+		       (pcase (aref result 1)
+			 ((and ?\[
+			       (guard (memq 'link restriction)))
+			  (org-element-link-parser))
+			 ((and ?f
+			       (guard (memq 'footnote-reference restriction)))
+			  (org-element-footnote-reference-parser))
+			 (_
+			  (or (and (memq 'timestamp restriction)
+				   (org-element-timestamp-parser))
+			      (and (memq 'statistics-cookie restriction)
+				   (org-element-statistics-cookie-parser))))))
 		      ;; This is probably a plain link.
 		      (_ (and (memq 'link restriction)
 			      (org-element-link-parser)))))))
