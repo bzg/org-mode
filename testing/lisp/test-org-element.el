@@ -519,6 +519,144 @@ Some other text
      (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
+;;;; Citation
+
+(ert-deftest test-org-element/citation-parser ()
+  "Test `citation' parser"
+  ;; Parse citations.  They must contain at least a bare key.
+  (should
+   (eq 'citation
+       (org-test-with-temp-text "[cite:@key]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'citation
+       (org-test-with-temp-text "[cite:-@key]"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'citation
+       (org-test-with-temp-text "[cite:text]"
+	 (org-element-type (org-element-context)))))
+  ;; Citation may contain a style.
+  (should
+   (eq 'citation
+       (org-test-with-temp-text "[cite/style:@key]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (equal "style"
+	  (org-test-with-temp-text "[cite/style:@key]"
+	    (org-element-property :style (org-element-context)))))
+  ;; Handle multi citations separated with semi-columns.
+  (should
+   (eq 'citation
+       (org-test-with-temp-text "[cite:@a;@b;@c]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (equal '("a" "b" "c")
+	  (org-test-with-temp-text "[cite:@a;@b;@c]"
+	    (org-element-map (org-element-parse-buffer) 'citation-reference
+	      (lambda (r) (org-element-property :key r))))))
+  (should
+   (eq 'citation
+       (org-test-with-temp-text "[cite:@a;-@b]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (equal '("a" "b")
+	  (org-test-with-temp-text "[cite:@a;-@b]"
+	    (org-element-map (org-element-parse-buffer) 'citation-reference
+	      (lambda (r) (org-element-property :key r))))))
+  ;; Multi citations accept `:prefix' and `:suffix' properties.
+  (should
+   (equal '("common-prefix")
+	  (org-test-with-temp-text "[cite:common-prefix;@a]"
+	    (org-element-property :prefix (org-element-context)))))
+  (should
+   (equal '("common-suffix")
+	  (org-test-with-temp-text "[cite:@a;common-suffix]"
+	    (org-element-property :suffix (org-element-context)))))
+  ;; White spaces right after "cite" tags are ignored. So are white
+  ;; spaces at the end of the citation.
+  (should
+   (equal '("common-prefix ")
+	  (org-test-with-temp-text "[cite: common-prefix ;@a]"
+	    (org-element-property :prefix (org-element-context)))))
+  (should
+   (equal '(" common-suffix")
+	  (org-test-with-temp-text "[cite: @a; common-suffix ]"
+	    (org-element-property :suffix (org-element-context))))))
+
+
+;;;; Citation Reference
+
+(ert-deftest test-org-element/citation-reference-parser ()
+  "Test `citation' reference parser."
+  ;; Parse bare keys.
+  (should
+   (eq 'citation-reference
+       (org-test-with-temp-text "[cite:<point>@key]"
+	 (org-element-type (org-element-context)))))
+  ;; Bare keys can contain any word character, and some punctuation,
+  ;; but not semicolon, square brackets, and space.
+  (should
+   (equal "_key"
+	  (org-test-with-temp-text "[cite:@_k<point>ey]"
+	    (org-element-property :key (org-element-context)))))
+  (should
+   (eq 'citation-reference
+       (org-test-with-temp-text "[cite:<point>@a]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'citation-reference
+       (org-test-with-temp-text "[cite:<point>@ö]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (eq 'citation-reference
+       (org-test-with-temp-text "[cite:<point>@_]"
+	 (org-element-type (org-element-context)))))
+  (should
+   (equal "a:.#$%&-+?<>~/1"
+	  (org-test-with-temp-text "[cite:<point>@a:.#$%&-+?<>~/1]"
+	    (org-element-property :key (org-element-context)))))
+  (should-not
+   (eq 'citation-reference
+       (org-test-with-temp-text "[cite:<point>@;]"
+	 (org-element-type (org-element-context)))))
+  (should-not
+   (equal "key"
+	  (org-test-with-temp-text "[cite:<point>@[]]"
+	    (org-element-property :key (org-element-context)))))
+  ;; References in citations accept optional `:prefix' and `:suffix'
+  ;; properties.
+  (should
+   (equal '("pre ")
+	  (org-test-with-temp-text "[cite:pre <point>@key]"
+	    (org-element-property :prefix (org-element-context)))))
+  (should
+   (equal '(" post")
+	  (org-test-with-temp-text "[cite:<point>@key post]"
+	    (org-element-property :suffix (org-element-context)))))
+  ;; White spaces between "cite" tag and prefix are ignored.
+  (should
+   (equal '("pre ")
+	  (org-test-with-temp-text "[cite: pre <point>@key]"
+	    (org-element-property :prefix (org-element-context)))))
+  ;; Semicolons do not belong to prefix or suffix.
+  (should
+   (equal '("pre ")
+	  (org-test-with-temp-text "[cite:@key1;pre <point>@key2]"
+	    (org-element-property :prefix (org-element-context)))))
+  (should
+   (equal '(" post")
+	  (org-test-with-temp-text "[cite:@key1 <point>post;@key2]"
+	    (org-element-property :suffix (org-element-context)))))
+  (should
+   (equal '("pre ")
+	  (org-test-with-temp-text "[cite:global prefix;pre<point> @key1]"
+	    (org-element-property :prefix (org-element-context)))))
+  (should
+   (equal '(" post")
+	  (org-test-with-temp-text "[cite:@key1 <point>post; global suffix]"
+	    (org-element-property :suffix (org-element-context))))))
+
 ;;;; Clock
 
 (ert-deftest test-org-element/clock-parser ()
@@ -3123,6 +3261,36 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 (ert-deftest test-org-element/bold-interpreter ()
   "Test bold interpreter."
   (should (equal (org-test-parse-and-interpret "*text*") "*text*\n")))
+
+(ert-deftest test-org-element/citation-interpreter ()
+  "Test citation interpreter."
+  (should
+   (equal "[cite:@key]\n"
+	  (org-test-parse-and-interpret "[cite:@key]")))
+  (should
+   (equal "[cite:-@key]\n"
+	  (org-test-parse-and-interpret "[cite:-@key]")))
+  (should
+   (equal "[cite/style:@key]\n"
+	  (org-test-parse-and-interpret "[cite/style:@key]")))
+  (should
+   (equal "[cite:pre @key]\n"
+	  (org-test-parse-and-interpret "[cite:pre @key]")))
+  (should
+   (equal "[cite:@key post]\n"
+	  (org-test-parse-and-interpret "[cite:@key post]")))
+  (should
+   (equal "[cite:@a ;b]\n"
+	  (org-test-parse-and-interpret "[cite: @a ;b]")))
+  (should
+   (equal "[cite:@a;@b;@c]\n"
+	  (org-test-parse-and-interpret "[cite:@a;@b;@c]")))
+  (should
+   (equal "[cite:common-pre ; @a]\n"
+	  (org-test-parse-and-interpret "[cite:common-pre ; @a]")))
+  (should
+   (equal "[cite:@a ; common-post]\n"
+	  (org-test-parse-and-interpret "[cite:@a ; common-post]"))))
 
 (ert-deftest test-org-element/code-interpreter ()
   "Test code interpreter."
