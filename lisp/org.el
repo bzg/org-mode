@@ -4439,7 +4439,7 @@ related expressions."
 		      "[ \t]*$"))
 	(org-compute-latex-and-related-regexp)))))
 
-(defun org-collect-keywords (keywords &optional uniques)
+(defun org-collect-keywords (keywords &optional unique directory)
   "Return values for KEYWORDS in current buffer, as an alist.
 
 KEYWORDS is a list of strings.  Return value is a list of
@@ -4451,15 +4451,22 @@ where NAME is the upcase name of the keyword, and LIST-OF-VALUES
 is a list of non-empty values, as strings, in order of appearance
 in the buffer.
 
-When KEYWORD appears in UNIQUES list, LIST-OF-VALUE is its first
+When KEYWORD appears in UNIQUE list, LIST-OF-VALUE is its first
 value, empty or not, appearing in the buffer, as a string.
 
-Values are collected even in SETUPFILES."
+When KEYWORD appears in DIRECTORIES, each value is a cons cell:
+
+  (VALUE . DIRECTORY)
+
+where VALUE is the regular value, and DIRECTORY is the variable
+`default-directory' for the buffer containing the keyword.  This
+is important for values containing relative file names, since the
+function follows SETUPFILE keywords, and may change its working
+directory."
   (let* ((keywords (cons "SETUPFILE" (mapcar #'upcase keywords)))
-	 (uniques (mapcar #'upcase uniques))
+	 (unique (mapcar #'upcase unique))
 	 (alist (org--collect-keywords-1
-		 keywords
-		 uniques
+		 keywords unique directory
 		 (and buffer-file-name (list buffer-file-name))
 		 nil)))
     ;; Re-order results.
@@ -4469,7 +4476,7 @@ Values are collected even in SETUPFILES."
 	 (setcdr entry (nreverse value)))))
     (nreverse alist)))
 
-(defun org--collect-keywords-1 (keywords uniques files alist)
+(defun org--collect-keywords-1 (keywords unique directory files alist)
   (org-with-point-at 1
     (let ((case-fold-search t)
 	  (regexp (org-make-options-regexp keywords)))
@@ -4494,10 +4501,18 @@ Values are collected even in SETUPFILES."
 			 (let ((org-inhibit-startup t)) (org-mode))
 			 (setq alist
 			       (org--collect-keywords-1
-				keywords uniques (cons uri files) alist)))))))
+				keywords unique directory
+				(cons uri files)
+				alist)))))))
 		(key
-		 (let ((entry (assoc-string key alist t)))
-		   (cond ((member-ignore-case key uniques)
+		 (let ((entry (assoc-string key alist t))
+		       (value
+			(cond ((not (member key directory)) value)
+			      (buffer-file-name
+			       (cons value
+				     (file-name-directory buffer-file-name)))
+			      (t (cons value default-directory)))))
+		   (cond ((member key unique)
 			  (push (cons key value) alist)
 			  (setq keywords (remove key keywords))
 			  (setq regexp (org-make-options-regexp keywords)))
