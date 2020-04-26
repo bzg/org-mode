@@ -1585,44 +1585,10 @@ process."
 Also look for BIND keywords in setup files.  The return value is
 an alist where associations are (VARIABLE-NAME VALUE)."
   (when org-export-allow-bind-keywords
-    (letrec ((collect-bind
-	      (lambda (files alist)
-		;; Return an alist between variable names and their
-		;; value.  FILES is a list of setup files names read
-		;; so far, used to avoid circular dependencies.  ALIST
-		;; is the alist collected so far.
-		(let ((case-fold-search t))
-		  (org-with-wide-buffer
-		   (goto-char (point-min))
-		   (while (re-search-forward
-			   "^[ \t]*#\\+\\(BIND\\|SETUPFILE\\):" nil t)
-		     (let ((element (org-element-at-point)))
-		       (when (eq (org-element-type element) 'keyword)
-			 (let ((val (org-element-property :value element)))
-			   (if (equal (org-element-property :key element)
-				      "BIND")
-			       (push (read (format "(%s)" val)) alist)
-			     ;; Enter setup file.
-			     (let* ((uri (org-strip-quotes val))
-				    (uri-is-url (org-file-url-p uri))
-				    (uri (if uri-is-url
-					     uri
-					   (expand-file-name uri))))
-			       ;; Avoid circular dependencies.
-			       (unless (member uri files)
-				 (with-temp-buffer
-				   (unless uri-is-url
-				     (setq default-directory
-					   (file-name-directory uri)))
-				   (let ((org-inhibit-startup t)) (org-mode))
-				   (insert (org-file-contents uri 'noerror))
-				   (setq alist
-					 (funcall collect-bind
-						  (cons uri files)
-						  alist))))))))))
-		   alist)))))
-      ;; Return value in appropriate order of appearance.
-      (nreverse (funcall collect-bind nil nil)))))
+    (pcase (org-collect-keywords '("BIND"))
+      (`(("BIND" . ,values))
+       (mapcar (lambda (v) (read (format "(%s)" v)))
+	       values)))))
 
 ;; defsubst org-export-get-parent must be defined before first use,
 ;; was originally defined in the topology section
