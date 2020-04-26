@@ -4504,21 +4504,21 @@ directory."
 				keywords unique directory
 				(cons uri files)
 				alist)))))))
-		(key
-		 (let ((entry (assoc-string key alist t))
-		       (value
-			(cond ((not (member key directory)) value)
+		(keyword
+		 (let ((entry (assoc keyword alist))
+		       (final
+			(cond ((not (member keyword directory)) value)
 			      (buffer-file-name
 			       (cons value
 				     (file-name-directory buffer-file-name)))
 			      (t (cons value default-directory)))))
-		   (cond ((member key unique)
-			  (push (cons key value) alist)
-			  (setq keywords (remove key keywords))
+		   (cond ((member keyword unique)
+			  (push (cons keyword final) alist)
+			  (setq keywords (remove keyword keywords))
 			  (setq regexp (org-make-options-regexp keywords)))
 			 ((not (org-string-nw-p value)) nil)
-			 ((null entry) (push (list key value) alist))
-			 (t (push value (cdr entry)))))))))))
+			 ((null entry) (push (list keyword final) alist))
+			 (t (push final (cdr entry)))))))))))
       alist)))
 
 (defun org-tag-string-to-alist (s)
