@@ -4232,72 +4232,112 @@ See `org-tag-alist' for their structure."
       ;; Preserve order of ALIST1.
       (append (nreverse to-add) alist2)))))
 
+(defun org-priority-to-value (s)
+  "Convert priority string S to its numeric value."
+  (or (save-match-data
+	(and (string-match "\\([0-9]+\\)" s)
+	     (string-to-number (match-string 1 s))))
+      (string-to-char s)))
+
 (defun org-set-regexps-and-options (&optional tags-only)
   "Precompute regular expressions used in the current buffer.
 When optional argument TAGS-ONLY is non-nil, only compute tags
 related expressions."
   (when (derived-mode-p 'org-mode)
-    (let ((alist (org--setup-collect-keywords
-		  (org-make-options-regexp
-		   (append '("FILETAGS" "TAGS" "SETUPFILE")
-			   (and (not tags-only)
-				'("ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
-				  "LINK" "OPTIONS" "PRIORITIES" "PROPERTY"
-				  "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO")))))))
+    (let ((alist (org-collect-keywords
+		  (append '("FILETAGS" "TAGS")
+			  (and (not tags-only)
+			       '("ARCHIVE" "CATEGORY" "COLUMNS" "CONSTANTS"
+				 "LINK" "OPTIONS" "PRIORITIES" "PROPERTY"
+				 "SEQ_TODO" "STARTUP" "TODO" "TYP_TODO")))
+		  '("ARCHIVE" "CATEGORY" "COLUMNS" "PRIORITIES"))))
       ;; Startup options.  Get this early since it does change
       ;; behavior for other options (e.g., tags).
-      (let ((startup (cdr (assq 'startup alist))))
+      (let ((startup (cl-mapcan (lambda (value) (split-string value))
+				(cdr (assoc "STARTUP" alist)))))
 	(dolist (option startup)
-	  (let ((entry (assoc-string option org-startup-options t)))
-	    (when entry
-	      (let ((var (nth 1 entry))
-		    (val (nth 2 entry)))
-		(if (not (nth 3 entry)) (set (make-local-variable var) val)
-		  (unless (listp (symbol-value var))
-		    (set (make-local-variable var) nil))
-		  (add-to-list var val)))))))
+	  (pcase (assoc-string option org-startup-options t)
+	    (`(,_ ,variable ,value t)
+	     (unless (listp (symbol-value variable))
+	       (set (make-local-variable variable) nil))
+	     (add-to-list variable value))
+	    (`(,_ ,variable ,value . ,_)
+	     (set (make-local-variable variable) value))
+	    (_ nil))))
       (setq-local org-file-tags
 		  (mapcar #'org-add-prop-inherited
-			  (cdr (assq 'filetags alist))))
+			  (cl-mapcan (lambda (value)
+				       (cl-mapcan
+					(lambda (k) (org-split-string k ":"))
+					(split-string value)))
+				     (cdr (assoc "FILETAGS" alist)))))
       (setq org-current-tag-alist
 	    (org--tag-add-to-alist
 	     org-tag-persistent-alist
-	     (let ((tags (cdr (assq 'tags alist))))
-	       (if tags (org-tag-string-to-alist tags)
+	     (let ((tags (mapconcat #'identity
+				    (cdr (assoc "TAGS" alist))
+				    "\n")))
+	       (if (org-string-nw-p tags) (org-tag-string-to-alist tags)
 		 org-tag-alist))))
       (setq org-tag-groups-alist
 	    (org-tag-alist-to-groups org-current-tag-alist))
       (unless tags-only
 	;; Properties.
-	(setq-local org-keyword-properties (cdr (assq 'property alist)))
+	(let ((properties nil))
+	  (dolist (value (cdr (assoc "PROPERTY" alist)))
+	    (when (string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" value)
+	      (setq properties (org--update-property-plist
+				(match-string-no-properties 1 value)
+				(match-string-no-properties 2 value)
+				properties))))
+	  (setq-local org-keyword-properties properties))
 	;; Archive location.
-	(let ((archive (cdr (assq 'archive alist))))
+	(let ((archive (cdr (assoc "ARCHIVE" alist))))
 	  (when archive (setq-local org-archive-location archive)))
 	;; Category.
-	(let ((cat (org-string-nw-p (cdr (assq 'category alist)))))
-	  (when cat
-	    (setq-local org-category (intern cat))
+	(let ((category (cdr (assoc "CATEGORY" alist))))
+	  (when category
+	    (setq-local org-category (intern category))
 	    (setq-local org-keyword-properties
 			(org--update-property-plist
-			 "CATEGORY" cat org-keyword-properties))))
+			 "CATEGORY" category org-keyword-properties))))
 	;; Columns.
-	(let ((column (cdr (assq 'columns alist))))
+	(let ((column (cdr (assoc "COLUMNS" alist))))
 	  (when column (setq-local org-columns-default-format column)))
 	;; Constants.
-	(setq org-table-formula-constants-local (cdr (assq 'constants alist)))
+	(let ((store nil))
+	  (dolist (pair (cl-mapcan #'split-string
+				   (cdr (assoc "CONSTANTS" alist))))
+	    (when (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)" pair)
+	      (let* ((name (match-string 1 pair))
+		     (value (match-string 2 pair))
+		     (old (assoc name store)))
+		(if old (setcdr old value)
+		  (push (cons name value) store)))))
+	  (setq org-table-formula-constants-local store))
 	;; Link abbreviations.
-	(let ((links (cdr (assq 'link alist))))
+	(let ((links
+	       (delq nil
+		     (mapcar
+		      (lambda (value)
+			(and (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value)
+			     (cons (match-string-no-properties 1 value)
+				   (match-string-no-properties 2 value))))
+		      (cdr (assoc "LINK" alist))))))
 	  (when links (setq org-link-abbrev-alist-local (nreverse links))))
 	;; Priorities.
-	(let ((priorities (cdr (assq 'priorities alist))))
-	  (when priorities
-	    (setq-local org-priority-highest (nth 0 priorities))
-	    (setq-local org-priority-lowest (nth 1 priorities))
-	    (setq-local org-priority-default (nth 2 priorities))))
+	(let ((value (cdr (assoc "PRIORITIES" alist))))
+	  (pcase (and value (split-string value))
+	    (`(,high ,low ,default . ,_)
+	     (setq-local org-highest-priority (org-priority-to-value high))
+	     (setq-local org-lowest-priority (org-priority-to-value low))
+	     (setq-local org-default-priority (org-priority-to-value default)))))
 	;; Scripts.
-	(let ((scripts (assq 'scripts alist)))
-	  (when scripts
-	    (setq-local org-use-sub-superscripts (cdr scripts))))
+	(let ((value (cdr (assoc "OPTIONS" alist))))
+	  (dolist (option value)
+	    (when (string-match "\\^:\\(t\\|nil\\|{}\\)" option)
+	      (setq-local org-use-sub-superscripts
+			  (read (match-string 1 option))))))
 	;; TODO keywords.
 	(setq-local org-todo-kwd-alist nil)
 	(setq-local org-todo-key-alist nil)
@@ -4308,7 +4348,13 @@ related expressions."
 	(setq-local org-todo-sets nil)
 	(setq-local org-todo-log-states nil)
 	(let ((todo-sequences
-	       (or (nreverse (cdr (assq 'todo alist)))
+	       (or (append (mapcar (lambda (value)
+				     (cons 'type (split-string value)))
+				   (cdr (assoc "TYP_TODO" alist)))
+			   (mapcar (lambda (value)
+				     (cons 'sequence (split-string value)))
+				   (append (cdr (assoc "TODO" alist))
+					   (cdr (assoc "SEQ_TODO" alist)))))
 		   (let ((d (default-value 'org-todo-keywords)))
 		     (if (not (stringp (car d))) d
 		       ;; XXX: Backward compatibility code.
@@ -4393,119 +4439,72 @@ related expressions."
 		      "[ \t]*$"))
 	(org-compute-latex-and-related-regexp)))))
 
-(defsubst org-priority-to-value (s)
-  "Convert priority string S to its numeric value."
-  (or (save-match-data
-	(and (string-match "\\([0-9]+\\)" s)
-	     (string-to-number (match-string 1 s))))
-      (string-to-char s)))
+(defun org-collect-keywords (keywords &optional uniques)
+  "Return values for KEYWORDS in current buffer, as an alist.
 
-(defun org--setup-collect-keywords (regexp &optional files alist)
-  "Return setup keywords values as an alist.
+KEYWORDS is a list of strings.  Return value is a list of
+elements with the pattern:
 
-REGEXP matches a subset of setup keywords.  FILES is a list of
-file names already visited.  It is used to avoid circular setup
-files.  ALIST, when non-nil, is the alist computed so far.
+  (NAME . LIST-OF-VALUES)
 
-Return value contains the following keys: `archive', `category',
-`columns', `constants', `filetags', `link', `priorities',
-`property', `scripts', `startup', `tags' and `todo'."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (let ((case-fold-search t))
-     (while (re-search-forward regexp nil t)
-       (let ((element (org-element-at-point)))
-	 (when (eq (org-element-type element) 'keyword)
-	   (let ((key (org-element-property :key element))
-		 (value (org-element-property :value element)))
-	     (cond
-	      ((equal key "ARCHIVE")
-	       (when (org-string-nw-p value)
-		 (push (cons 'archive value) alist)))
-	      ((equal key "CATEGORY") (push (cons 'category value) alist))
-	      ((equal key "COLUMNS") (push (cons 'columns value) alist))
-	      ((equal key "CONSTANTS")
-	       (let* ((constants (assq 'constants alist))
-		      (store (cdr constants)))
-		 (dolist (pair (split-string value))
-		   (when (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)"
-				       pair)
-		     (let* ((name (match-string 1 pair))
-			    (value (match-string 2 pair))
-			    (old (assoc name store)))
-		       (if old (setcdr old value)
-			 (push (cons name value) store)))))
-		 (if constants (setcdr constants store)
-		   (push (cons 'constants store) alist))))
-	      ((equal key "FILETAGS")
-	       (when (org-string-nw-p value)
-		 (let ((old (assq 'filetags alist))
-		       (new (apply #'nconc
-				   (mapcar (lambda (x) (org-split-string x ":"))
-					   (split-string value)))))
-		   (if old (setcdr old (append new (cdr old)))
-		     (push (cons 'filetags new) alist)))))
-	      ((equal key "LINK")
-	       (when (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value)
-		 (let ((links (assq 'link alist))
-		       (pair (cons (match-string-no-properties 1 value)
-				   (match-string-no-properties 2 value))))
-		   (if links (push pair (cdr links))
-		     (push (list 'link pair) alist)))))
-	      ((equal key "OPTIONS")
-	       (when (and (org-string-nw-p value)
-			  (string-match "\\^:\\(t\\|nil\\|{}\\)" value))
-		 (push (cons 'scripts (read (match-string 1 value))) alist)))
-	      ((equal key "PRIORITIES")
-	       (push (cons 'priorities
-			   (let ((prio (split-string value)))
-			     (if (< (length prio) 3)
-				 (list org-priority-highest
-				       org-priority-lowest
-				       org-priority-default)
-			       (mapcar #'org-priority-to-value prio))))
-		     alist))
-	      ((equal key "PROPERTY")
-	       (when (string-match "\\(\\S-+\\)[ \t]+\\(.*\\)" value)
-		 (let* ((property (assq 'property alist))
-			(value (org--update-property-plist
-				(match-string-no-properties 1 value)
-				(match-string-no-properties 2 value)
-				(cdr property))))
-		   (if property (setcdr property value)
-		     (push (cons 'property value) alist)))))
-	      ((equal key "STARTUP")
-	       (let ((startup (assq 'startup alist)))
-		 (if startup
-		     (setcdr startup
-			     (append (cdr startup) (split-string value)))
-		   (push (cons 'startup (split-string value)) alist))))
-	      ((equal key "TAGS")
-	       (let ((tag-cell (assq 'tags alist)))
-		 (if tag-cell
-		     (setcdr tag-cell (concat (cdr tag-cell) "\n" value))
-		   (push (cons 'tags value) alist))))
-	      ((member key '("TODO" "SEQ_TODO" "TYP_TODO"))
-	       (let ((todo (assq 'todo alist))
-		     (value (cons (if (equal key "TYP_TODO") 'type 'sequence)
-				  (split-string value))))
-		 (if todo (push value (cdr todo))
-		   (push (list 'todo value) alist))))
-	      ((equal key "SETUPFILE")
-	       (unless buffer-read-only ; Do not check in Gnus messages.
-		 (let ((f (and (org-string-nw-p value)
-			       (expand-file-name (org-strip-quotes value)))))
-		   (when (and f (file-readable-p f) (not (member f files)))
-		     (with-temp-buffer
-		       (setq default-directory (file-name-directory f))
-		       (insert-file-contents f)
-		       (setq alist
-			     ;; Fake Org mode to benefit from cache
-			     ;; without recurring needlessly.
-			     (let ((major-mode 'org-mode))
-			       (org--setup-collect-keywords
-				regexp (cons f files) alist)))))))))))))))
-  alist)
+where NAME is the upcase name of the keyword, and LIST-OF-VALUES
+is a list of non-empty values, as strings, in order of appearance
+in the buffer.
+
+When KEYWORD appears in UNIQUES list, LIST-OF-VALUE is its first
+value, empty or not, appearing in the buffer, as a string.
+
+Values are collected even in SETUPFILES."
+  (let* ((keywords (cons "SETUPFILE" (mapcar #'upcase keywords)))
+	 (uniques (mapcar #'upcase uniques))
+	 (alist (org--collect-keywords-1
+		 keywords
+		 uniques
+		 (and buffer-file-name (list buffer-file-name))
+		 nil)))
+    ;; Re-order results.
+    (dolist (entry alist)
+      (pcase entry
+	(`(,_ . ,(and value (pred consp)))
+	 (setcdr entry (nreverse value)))))
+    (nreverse alist)))
+
+(defun org--collect-keywords-1 (keywords uniques files alist)
+  (org-with-point-at 1
+    (let ((case-fold-search t)
+	  (regexp (org-make-options-regexp keywords)))
+      (while (and keywords (re-search-forward regexp nil t))
+        (let ((element (org-element-at-point)))
+          (when (eq 'keyword (org-element-type element))
+            (let ((value (org-element-property :value element)))
+              (pcase (org-element-property :key element)
+		("SETUPFILE"
+		 (when (and (org-string-nw-p value)
+			    (not buffer-read-only)) ;FIXME: bug in Gnus?
+		   (let* ((uri (org-strip-quotes value))
+			  (uri-is-url (org-file-url-p uri))
+			  (uri (if uri-is-url
+				   uri
+				 (expand-file-name uri))))
+		     (unless (member uri files)
+		       (with-temp-buffer
+			 (unless uri-is-url
+			   (setq default-directory (file-name-directory uri)))
+			 (insert (org-file-contents uri 'noerror))
+			 (let ((org-inhibit-startup t)) (org-mode))
+			 (setq alist
+			       (org--collect-keywords-1
+				keywords uniques (cons uri files) alist)))))))
+		(key
+		 (let ((entry (assoc-string key alist t)))
+		   (cond ((member-ignore-case key uniques)
+			  (push (cons key value) alist)
+			  (setq keywords (remove key keywords))
+			  (setq regexp (org-make-options-regexp keywords)))
+			 ((not (org-string-nw-p value)) nil)
+			 ((null entry) (push (list key value) alist))
+			 (t (push value (cdr entry)))))))))))
+      alist)))
 
 (defun org-tag-string-to-alist (s)
   "Return tag alist associated to string S.

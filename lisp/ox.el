@@ -1474,104 +1474,56 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		   ;; Priority is given to back-end specific options.
 		   (org-export-get-all-options backend)
 		   org-export-options-alist))
-	 (regexp (format "^[ \t]*#\\+%s:"
-			 (regexp-opt (nconc (delq nil (mapcar #'cadr options))
-					    org-export-special-keywords))))
 	 plist to-parse)
-    (letrec ((find-properties
-	      (lambda (keyword)
-		;; Return all properties associated to KEYWORD.
-		(let (properties)
-		  (dolist (option options properties)
-		    (when (equal (nth 1 option) keyword)
-		      (cl-pushnew (car option) properties))))))
-	     (get-options
-	      (lambda (&optional files)
-		;; Recursively read keywords in buffer.  FILES is
-		;; a list of files read so far.  PLIST is the current
-		;; property list obtained.
-		(org-with-wide-buffer
-		 (goto-char (point-min))
-		 (while (re-search-forward regexp nil t)
-		   (let ((element (org-element-at-point)))
-		     (when (eq (org-element-type element) 'keyword)
-		       (let ((key (org-element-property :key element))
-			     (val (org-element-property :value element)))
-			 (cond
-			  ;; Options in `org-export-special-keywords'.
-			  ((equal key "SETUPFILE")
-			   (let* ((uri (org-strip-quotes (org-trim val)))
-				  (uri-is-url (org-file-url-p uri))
-				  (uri (if uri-is-url
-					   uri
-					 (expand-file-name uri))))
-			     ;; Avoid circular dependencies.
-			     (unless (member uri files)
-			       (with-temp-buffer
-				 (unless uri-is-url
-				   (setq default-directory
-					 (file-name-directory uri)))
-				 (insert (org-file-contents uri 'noerror))
-				 (let ((org-inhibit-startup t)) (org-mode))
-				 (funcall get-options (cons uri files))))))
-			  ((equal key "OPTIONS")
-			   (setq plist
-				 (org-combine-plists
-				  plist
-				  (org-export--parse-option-keyword
-				   val backend))))
-			  ((equal key "FILETAGS")
-			   (setq plist
-				 (org-combine-plists
-				  plist
-				  (list :filetags
-					(org-uniquify
-					 (append
-					  (org-split-string val ":")
-					  (plist-get plist :filetags)))))))
-			  (t
-			   ;; Options in `org-export-options-alist'.
-			   (dolist (property (funcall find-properties key))
-			     (setq
-			      plist
-			      (plist-put
-			       plist property
-			       ;; Handle value depending on specified
-			       ;; BEHAVIOR.
-			       (cl-case (nth 4 (assq property options))
-				 (parse
-				  (unless (memq property to-parse)
-				    (push property to-parse))
-				  ;; Even if `parse' implies `space'
-				  ;; behavior, we separate line with
-				  ;; "\n" so as to preserve
-				  ;; line-breaks.  However, empty
-				  ;; lines are forbidden since `parse'
-				  ;; doesn't allow more than one
-				  ;; paragraph.
-				  (let ((old (plist-get plist property)))
-				    (cond ((not (org-string-nw-p val)) old)
-					  (old (concat old "\n" val))
-					  (t val))))
-				 (space
-				  (if (not (plist-get plist property))
-				      (org-trim val)
-				    (concat (plist-get plist property)
-					    " "
-					    (org-trim val))))
-				 (newline
-				  (org-trim
-				   (concat (plist-get plist property)
-					   "\n"
-					   (org-trim val))))
-				 (split `(,@(plist-get plist property)
-					  ,@(split-string val)))
-				 ((t) val)
-				 (otherwise
-				  (if (not (plist-member plist property)) val
-				    (plist-get plist property)))))))))))))))))
+    (let ((find-properties
+	   (lambda (keyword)
+	     ;; Return all properties associated to KEYWORD.
+	     (let (properties)
+	       (dolist (option options properties)
+		 (when (equal (nth 1 option) keyword)
+		   (cl-pushnew (car option) properties)))))))
       ;; Read options in the current buffer and return value.
-      (funcall get-options (and buffer-file-name (list buffer-file-name)))
+      (dolist (entry (org-collect-keywords
+		      (nconc (delq nil (mapcar #'cadr options))
+			     org-export-special-keywords)))
+	(pcase entry
+	  (`("OPTIONS" . ,values)
+	   (setq plist
+		 (apply #'org-combine-plists
+			(mapcar (lambda (v)
+				  (org-export--parse-option-keyword v backend))
+				values))))
+	  (`("FILETAGS" . ,values)
+	   (setq plist
+		 (plist-put plist
+			    :filetags
+			    (org-uniquify
+			     (cl-mapcan (lambda (v) (org-split-string v ":"))
+					values)))))
+	  (`(,keyword . ,values)
+	   (dolist (property (funcall find-properties keyword))
+	     (setq plist
+		   (plist-put
+		    plist property
+		    ;; Handle value depending on specified BEHAVIOR.
+		    (cl-case (nth 4 (assq property options))
+		      (parse
+		       (unless (memq property to-parse)
+			 (push property to-parse))
+		       ;; Even if `parse' implies `space' behavior, we
+		       ;; separate line with "\n" so as to preserve
+		       ;; line-breaks.
+		       (mapconcat #'identity values "\n"))
+		      (space
+		       (mapconcat #'identity values " "))
+		      (newline
+		       (mapconcat #'identity values "\n"))
+		      (split
+		       (cl-mapcan (lambda (v) (split-string v)) values))
+		      ((t)
+		       (org-last values))
+		      (otherwise
+		       (car values)))))))))
       ;; Parse properties in TO-PARSE.  Remove newline characters not
       ;; involved in line breaks to simulate `space' behavior.
       ;; Finally return options.

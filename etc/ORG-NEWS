@@ -320,6 +320,7 @@ From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
+*** New function : ~org-collect-keywords~
 *** Drawers' folding use an API similar to block's
 
 Tooling for folding drawers interactively or programmatically is now
