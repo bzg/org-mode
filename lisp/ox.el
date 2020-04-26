@@ -172,12 +172,6 @@ All these properties should be back-end agnostic.  Back-end
 specific properties are set through `org-export-define-backend'.
 Properties redefined there have precedence over these.")
 
-(defconst org-export-special-keywords '("FILETAGS" "SETUPFILE" "OPTIONS")
-  "List of in-buffer keywords that require special treatment.
-These keywords are not directly associated to a property.  The
-way they are handled must be hard-coded into
-`org-export--get-inbuffer-options' function.")
-
 (defconst org-export-filters-alist
   '((:filter-body . org-export-filter-body-functions)
     (:filter-bold . org-export-filter-bold-functions)
@@ -1485,7 +1479,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
       ;; Read options in the current buffer and return value.
       (dolist (entry (org-collect-keywords
 		      (nconc (delq nil (mapcar #'cadr options))
-			     org-export-special-keywords)))
+			     '("FILETAGS" "OPTIONS"))))
 	(pcase entry
 	  (`("OPTIONS" . ,values)
 	   (setq plist

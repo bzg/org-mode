@@ -303,7 +303,11 @@ Use ~org-hide-block-toggle~ instead.
 This function was not used in the code base, and has no clear use
 either.  It has been marked for future removal.  Please contact the
 mailing list if you use this function.
-*** Removed  ~org-maybe-keyword-time-regexp~
+*** Removed ~org-maybe-keyword-time-regexp~
+
+The variable was not used in the code base.
+
+*** Removed ~org-export-special-keywords~
 
 The variable was not used in the code base.
 
