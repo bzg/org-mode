@@ -4497,13 +4497,15 @@ directory."
 		       (with-temp-buffer
 			 (unless uri-is-url
 			   (setq default-directory (file-name-directory uri)))
-			 (insert (org-file-contents uri 'noerror))
-			 (let ((org-inhibit-startup t)) (org-mode))
-			 (setq alist
-			       (org--collect-keywords-1
-				keywords unique directory
-				(cons uri files)
-				alist)))))))
+			 (let ((contents (org-file-contents uri :noerror)))
+			   (when contents
+			     (insert contents)
+			     (let ((org-inhibit-startup t)) (org-mode))
+			     (setq alist
+				   (org--collect-keywords-1
+				    keywords unique directory
+				    (cons uri files)
+				    alist)))))))))
 		(keyword
 		 (let ((entry (assoc keyword alist))
 		       (final
@@ -4631,7 +4633,7 @@ already cached in the `org--file-cache' hash table, the download step
 is skipped.
 
 If NOERROR is non-nil, ignore the error when unable to read the FILE
-from file or URL.
+from file or URL, and return nil.
 
 If NOCACHE is non-nil, do a fresh fetch of FILE even if cached version
 is available.  This option applies only if FILE is a URL."
@@ -4655,7 +4657,8 @@ is available.  This option applies only if FILE is a URL."
 		     org--file-cache)
 	  (funcall (if noerror #'message #'user-error)
 		   "Unable to fetch file from %S"
-		   file))))
+		   file)
+	  nil)))
      (t
       (with-temp-buffer
         (condition-case nil
@@ -4665,7 +4668,8 @@ is available.  This option applies only if FILE is a URL."
 	  (file-error
            (funcall (if noerror #'message #'user-error)
 		    "Unable to read file %S"
-		    file))))))))
+		    file)
+	   nil)))))))
 
 (defun org-extract-log-state-settings (x)
   "Extract the log state setting from a TODO keyword string.
