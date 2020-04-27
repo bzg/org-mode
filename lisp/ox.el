@@ -1484,6 +1484,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	  (`("OPTIONS" . ,values)
 	   (setq plist
 		 (apply #'org-combine-plists
+			plist
 			(mapcar (lambda (v)
 				  (org-export--parse-option-keyword v backend))
 				values))))
