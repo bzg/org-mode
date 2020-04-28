@@ -4500,12 +4500,14 @@ directory."
 			 (let ((contents (org-file-contents uri :noerror)))
 			   (when contents
 			     (insert contents)
-			     (let ((org-inhibit-startup t)) (org-mode))
-			     (setq alist
-				   (org--collect-keywords-1
-				    keywords unique directory
-				    (cons uri files)
-				    alist)))))))))
+			     ;; Fake Org mode: `org-element-at-point'
+			     ;; doesn't need full set-up.
+			     (let ((major-mode 'org-mode))
+			       (setq alist
+				     (org--collect-keywords-1
+				      keywords unique directory
+				      (cons uri files)
+				      alist))))))))))
 		(keyword
 		 (let ((entry (assoc keyword alist))
 		       (final
