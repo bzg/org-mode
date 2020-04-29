@@ -116,7 +116,7 @@ page]].
 :END:
 
 You can download Org latest release from [[https://orgmode.org/][Org's website]].  In this case,
-make sure you set the load-path correctly in your Emacs init file:
+make sure you set the load path correctly in your Emacs init file:
 
 #+begin_src emacs-lisp
 (add-to-list 'load-path "~/path/to/orgdir/lisp")
@@ -124,7 +124,7 @@ make sure you set the load-path correctly in your Emacs init file:
 
 The downloaded archive contains contributed libraries that are not
 included in Emacs.  If you want to use them, add the =contrib/=
-directory to your load-path:
+directory to your load path:
 
 #+begin_src emacs-lisp
 (add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
@@ -151,7 +151,7 @@ Note that in this case, =make autoloads= is mandatory: it defines
 Org's version in =org-version.el= and Org's autoloads in
 =org-loaddefs.el=.
 
-Remember to add the correct load-path as described in the method
+Remember to add the correct load path as described in the method
 above.
 
 You can also compile with =make=, generate the documentation with
