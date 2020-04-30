@@ -5466,14 +5466,29 @@ a radio table."
 The structure will be a list.  Each item is either the symbol `hline'
 for a horizontal separator line, or a list of field values as strings.
 The table is taken from the parameter TXT, or from the buffer at point."
-  (unless (or txt (org-at-table-p)) (user-error "No table at point"))
-  (let ((txt (or txt
-		 (buffer-substring-no-properties (org-table-begin)
-						 (org-table-end)))))
-    (mapcar (lambda (x)
-	      (if (string-match org-table-hline-regexp x) 'hline
-		(org-split-string (org-trim x) "\\s-*|\\s-*")))
-	    (org-split-string txt "[ \t]*\n[ \t]*"))))
+  (if txt
+      (with-temp-buffer
+        (insert txt)
+        (goto-char (point-min))
+        (org-table-to-lisp))
+    (unless (org-at-table-p) (user-error "No table at point"))
+    (save-excursion
+      (goto-char (org-table-begin))
+      (let ((table nil))
+        (while (search-forward "|" (line-end-position) t)
+	  (let ((row nil))
+	    (if (looking-at "-")
+		(push 'hline table)
+	      (while (not (progn (skip-chars-forward " \t") (eolp)))
+		(push
+		 (buffer-substring-no-properties
+		  (point)
+		  (progn (re-search-forward "[ \t]*\\(|\\|$\\)")
+			 (match-beginning 0)))
+		 row))
+	      (push (nreverse row) table)))
+	  (forward-line))
+        (nreverse table)))))
 
 (defun orgtbl-send-table (&optional maybe)
   "Send a transformed version of table at point to the receiver position.
