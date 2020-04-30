@@ -20512,156 +20512,300 @@ With ARG, repeats or can move forward if negative."
   (interactive "p")
   (org-next-visible-heading (- arg)))
 
-(defun org-forward-paragraph ()
-  "Move forward to beginning of next paragraph or equivalent.
+(defun org-forward-paragraph (&optional arg)
+  "Move forward by a paragraph, or equivalent, unit.
 
-The function moves point to the beginning of the next visible
-structural element, which can be a paragraph, a table, a list
-item, etc.  It also provides some special moves for convenience:
+With argument ARG, do it ARG times;
+a negative argument ARG = -N means move backward N paragraphs.
 
-  - On an affiliated keyword, jump to the beginning of the
-    relative element.
-  - On an item or a footnote definition, move to the second
-    element inside, if any.
-  - On a table or a property drawer, jump after it.
-  - On a verse or source block, stop after blank lines."
+The function moves point between two structural
+elements (paragraphs, tables, lists, etc.).
+
+It also provides the following special moves for convenience:
+
+  - on a table or a property drawer, move to its beginning;
+  - on comment, example, export, source and verse blocks, stop
+    at blank lines;
+  - skip consecutive clocks, diary S-exps, and keywords."
+  (interactive "^p")
+  (unless arg (setq arg 1))
+  (if (< arg 0) (org-backward-paragraph (- arg))
+    (while (and (> arg 0) (not (eobp)))
+      (org--forward-paragraph-once)
+      (cl-decf arg))
+    ;; Return moves left.
+    arg))
+
+(defun org-backward-paragraph (&optional arg)
+  "Move backward by a paragraph, or equivalent, unit.
+
+With argument ARG, do it ARG times;
+a negative argument ARG = -N means move forward N paragraphs.
+
+The function moves point between two structural
+elements (paragraphs, tables, lists, etc.).
+
+It also provides the following special moves for convenience:
+
+  - on a table or a property drawer, move to its beginning;
+  - on comment, example, export, source and verse blocks, stop
+    at blank lines;
+  - skip consecutive clocks, diary S-exps, and keywords."
+  (interactive "^p")
+  (unless arg (setq arg 1))
+  (if (< arg 0) (org-forward-paragraph (- arg))
+    (while (and (> arg 0) (not (bobp)))
+      (org--backward-paragraph-once)
+      (cl-decf arg))
+    ;; Return moves left.
+    arg))
+
+(defun org--paragraph-at-point ()
+  "Return paragraph, or equivalent, element at point.
+
+Paragraph element at point is the element at point, with the
+following special cases:
+
+- treat table rows (resp. node properties) as the table
+  \(resp. property drawer) containing them.
+
+- treat plain lists with an item every line as a whole.
+
+- treat consecutive keywords, clocks, and diary-sexps as a single
+  block.
+
+Function may return a real element, or a pseudo-element with type
+`pseudo-paragraph'."
+  (let* ((e (org-element-at-point))
+	 (type (org-element-type e))
+	 ;; If we need to fake a new pseudo-element, triplet is
+	 ;;
+	 ;;   (BEG END PARENT)
+	 ;;
+	 ;; where BEG and END are element boundaries, and PARENT the
+	 ;; element containing it, or nil.
+	 (triplet
+	  (cond
+	   ((memq type '(table property-drawer))
+	    (list (org-element-property :begin e)
+		  (org-element-property :end e)
+		  (org-element-property :parent e)))
+	   ((memq type '(node-property table-row))
+	    (let ((e (org-element-property :parent e)))
+	      (list (org-element-property :begin e)
+		    (org-element-property :end e)
+		    (org-element-property :parent e))))
+	   ((memq type '(clock diary-sexp keyword))
+	    (let* ((regexp (pcase type
+			     (`clock org-clock-line-re)
+			     (`diary-sexp "%%(")
+			     (_ org-keyword-regexp)))
+		   (end (if (< 0 (org-element-property :post-blank e))
+			    (org-element-property :end e)
+			  (org-with-wide-buffer
+			   (forward-line)
+			   (while (looking-at regexp) (forward-line))
+			   (skip-chars-forward " \t\n")
+			   (line-beginning-position))))
+		   (begin (org-with-point-at (org-element-property :begin e)
+			    (while (and (not (bobp)) (looking-at regexp))
+			      (forward-line -1))
+			    ;; We may have gotten one line too far.
+			    (if (looking-at regexp)
+				(point)
+			      (line-beginning-position 2)))))
+	      (list begin end (org-element-property :parent e))))
+	   ;; Find the full plain list containing point, the check it
+	   ;; contains exactly one line per item.
+	   ((let ((l (org-element-lineage e '(plain-list) t)))
+	      (while (memq (org-element-type (org-element-property :parent l))
+			   '(item plain-list))
+		(setq l (org-element-property :parent l)))
+	      (and l
+		   (org-with-point-at (org-element-property :post-affiliated l)
+		     (forward-line (length (org-element-property :structure l)))
+		     (= (point) (org-element-property :contents-end l)))
+		   ;; Return value.
+		   (list (org-element-property :begin l)
+			 (org-element-property :end l)
+			 (org-element-property :parent l)))))
+	   (t nil))))			;no triplet: return element
+    (pcase triplet
+      (`(,b ,e ,p)
+       (org-element-create
+	'pseudo-paragraph
+	(list :begin b :end e :parent p :post-blank 0 :post-affiliated b)))
+      (_ e))))
+
+(defun org--forward-paragraph-once ()
+  "Move forward to end of paragraph or equivalent, once.
+See `org-forward-paragraph'."
   (interactive)
-  (unless (eobp)
-    (let* ((deactivate-mark nil)
-	   (element (org-element-at-point))
-	   (type (org-element-type element))
-	   (post-affiliated (org-element-property :post-affiliated element))
-	   (contents-begin (org-element-property :contents-begin element))
-	   (contents-end (org-element-property :contents-end element))
-	   (end (let ((end (org-element-property :end element)) (parent element))
-		  (while (and (setq parent (org-element-property :parent parent))
-			      (= (org-element-property :contents-end parent) end))
-		    (setq end (org-element-property :end parent)))
-		  end)))
-      (cond ((not element)
-	     (skip-chars-forward " \r\t\n")
-	     (or (eobp) (beginning-of-line)))
-	    ;; On affiliated keywords, move to element's beginning.
-	    ((< (point) post-affiliated)
-	     (goto-char post-affiliated))
-	    ;; At a table row, move to the end of the table.  Similarly,
-	    ;; at a node property, move to the end of the property
-	    ;; drawer.
-	    ((memq type '(node-property table-row))
-	     (goto-char (org-element-property
-			 :end (org-element-property :parent element))))
-	    ((memq type '(property-drawer table)) (goto-char end))
-	    ;; Consider blank lines as separators in verse and source
-	    ;; blocks to ease editing.
-	    ((memq type '(src-block verse-block))
-	     (when (eq type 'src-block)
-	       (setq contents-end
-		     (save-excursion (goto-char end)
-				     (skip-chars-backward " \r\t\n")
-				     (line-beginning-position))))
-	     (beginning-of-line)
-	     (when (looking-at "[ \t]*$") (skip-chars-forward " \r\t\n"))
-	     (if (not (re-search-forward "^[ \t]*$" contents-end t))
-		 (goto-char end)
-	       (skip-chars-forward " \r\t\n")
-	       (if (= (point) contents-end) (goto-char end)
-		 (beginning-of-line))))
-	    ;; With no contents, just skip element.
-	    ((not contents-begin) (goto-char end))
-	    ;; If contents are invisible, skip the element altogether.
-	    ((org-invisible-p (line-end-position))
-	     (cl-case type
-	       (headline
-		(org-with-limited-levels (outline-next-visible-heading 1)))
-	       ;; At a plain list, make sure we move to the next item
-	       ;; instead of skipping the whole list.
-	       (plain-list (forward-char)
-			   (org-forward-paragraph))
-	       (otherwise (goto-char end))))
-	    ((>= (point) contents-end) (goto-char end))
-	    ((>= (point) contents-begin)
-	     ;; This can only happen on paragraphs and plain lists.
-	     (cl-case type
-	       (paragraph (goto-char end))
-	       ;; At a plain list, try to move to second element in
-	       ;; first item, if possible.
-	       (plain-list (end-of-line)
-			   (org-forward-paragraph))))
-	    ;; When contents start on the middle of a line (e.g. in
-	    ;; items and footnote definitions), try to reach first
-	    ;; element starting after current line.
-	    ((> (line-end-position) contents-begin)
-	     (end-of-line)
-	     (org-forward-paragraph))
-	    (t (goto-char contents-begin))))))
+  (save-restriction
+    (widen)
+    (skip-chars-forward " \t\n")
+    (cond
+     ((eobp) nil)
+     ;; When inside a folded part, move out of it.
+     ((pcase (get-char-property-and-overlay (point) 'invisible)
+	(`(,(or `outline `org-hide-block `org-hide-drawer) . ,o)
+	 (goto-char (overlay-end o))
+	 (forward-line)
+	 t)
+	(_ nil)))
+     (t
+      (let* ((element (org--paragraph-at-point))
+	     (type (org-element-type element))
+	     (contents-begin (org-element-property :contents-begin element))
+	     (end (org-element-property :end element))
+	     (post-affiliated (org-element-property :post-affiliated element)))
+	(cond
+	 ((eq type 'plain-list)
+	  (forward-char)
+	  (org--forward-paragraph-once))
+	 ;; If the element is folded, skip it altogether.
+	 ((pcase (org-with-point-at post-affiliated
+		   (get-char-property-and-overlay (line-end-position)
+						  'invisible))
+	    (`(,(or `outline `org-hide-block `org-hide-drawer) . ,o)
+	     (goto-char (overlay-end o))
+	     (forward-line)
+	     t)
+	    (_ nil)))
+	 ;; At a greater element, move inside.
+	 ((and contents-begin
+	       (> contents-begin (point))
+	       (not (eq type 'paragraph)))
+	  (goto-char contents-begin)
+	  ;; Items and footnote definitions contents may not start at
+	  ;; the beginning of the line.  In this case, skip until the
+	  ;; next paragraph.
+	  (cond
+	   ((not (bolp)) (org--forward-paragraph-once))
+	   ((org-previous-line-empty-p) (forward-line -1))
+	   (t nil)))
+	 ;; Move between empty lines in some blocks.
+	 ((memq type '(comment-block example-block export-block src-block
+				     verse-block))
+	  (let ((contents-start
+		 (org-with-point-at post-affiliated
+		   (line-beginning-position 2))))
+	    (if (< (point) contents-start)
+		(goto-char contents-start)
+	      (let ((contents-end
+		     (org-with-point-at end
+		       (skip-chars-backward " \t\n")
+		       (line-beginning-position))))
+		(cond
+		 ((>= (point) contents-end)
+		  (goto-char end)
+		  (skip-chars-backward " \t\n")
+		  (forward-line))
+		 ((re-search-forward "^[ \t]*\n" contents-end :move)
+		  (forward-line -1))
+		 (t nil))))))
+	 (t
+	  ;; Move to element's end.
+	  (goto-char end)
+	  (skip-chars-backward " \t\n")
+	  (forward-line))))))))
 
-(defun org-backward-paragraph ()
-  "Move backward to start of previous paragraph or equivalent.
-
-The function moves point to the beginning of the current
-structural element, which can be a paragraph, a table, a list
-item, etc., or to the beginning of the previous visible one if
-point is already there.  It also provides some special moves for
-convenience:
-
-  - On an affiliated keyword, jump to the first one.
-  - On a table or a property drawer, move to its beginning.
-  - On comment, example, export, src and verse blocks, stop
-    before blank lines."
+(defun org--backward-paragraph-once ()
+  "Move backward to start of paragraph or equivalent, once.
+See `org-backward-paragraph'."
   (interactive)
-  (unless (bobp)
-    (let* ((deactivate-mark nil)
-	   (element (org-element-at-point))
-	   (type (org-element-type element))
-	   (contents-end (org-element-property :contents-end element))
-	   (post-affiliated (org-element-property :post-affiliated element))
-	   (begin (org-element-property :begin element))
-	   (special?			;blocks handled specially
-	    (memq type '(comment-block example-block export-block src-block
-				       verse-block)))
-	   (contents-begin
-	    (if special?
-		;; These types have no proper contents.  Fake line
-		;; below the block opening line as contents beginning.
-		(save-excursion (goto-char begin) (line-beginning-position 2))
-	      (org-element-property :contents-begin element))))
-      (cond
-       ((not element) (goto-char (point-min)))
-       ((= (point) begin)
-	(backward-char)
-	(org-backward-paragraph))
-       ((<= (point) post-affiliated) (goto-char begin))
-       ;; Special behavior: on a table or a property drawer, move to
-       ;; its beginning.
-       ((memq type '(node-property table-row))
-	(goto-char (org-element-property
-		    :post-affiliated (org-element-property :parent element))))
-       (special?
-	(if (<= (point) contents-begin) (goto-char post-affiliated)
-	  ;; Inside a verse block, see blank lines as paragraph
-	  ;; separators.
-	  (let ((origin (point)))
-	    (skip-chars-backward " \r\t\n" contents-begin)
-	    (when (re-search-backward "^[ \t]*$" contents-begin 'move)
-	      (skip-chars-forward " \r\t\n" origin)
-	      (if (= (point) origin) (goto-char contents-begin)
-		(beginning-of-line))))))
-       ((eq type 'paragraph) (goto-char contents-begin)
-	;; When at first paragraph in an item or a footnote definition,
-	;; move directly to beginning of line.
-	(let ((parent-contents
-	       (org-element-property
-		:contents-begin (org-element-property :parent element))))
-	  (when (and parent-contents (= parent-contents contents-begin))
-	    (beginning-of-line))))
-       ;; At the end of a greater element, move to the beginning of
-       ;; the last element within.
-       ((and contents-end (>= (point) contents-end))
-	(goto-char (1- contents-end))
-	(org-backward-paragraph))
-       (t (goto-char (or post-affiliated begin))))
-      ;; Ensure we never leave point invisible.
-      (when (org-invisible-p (point)) (beginning-of-visual-line)))))
+  (save-restriction
+    (widen)
+    (cond
+     ((bobp) nil)
+     ;; Blank lines at the beginning of the buffer.
+     ((and (org-match-line "^[ \t]*$")
+	   (save-excursion (skip-chars-backward " \t\n") (bobp)))
+      (goto-char (point-min)))
+     ;; When inside a folded part, move out of it.
+     ((pcase (get-char-property-and-overlay (1- (point)) 'invisible)
+	(`(,(or `outline `org-hide-block `org-hide-drawer) . ,o)
+	 (goto-char (1- (overlay-start o)))
+	 (org--backward-paragraph-once)
+	 t)
+	(_ nil)))
+     (t
+      (let* ((element (org--paragraph-at-point))
+	     (type (org-element-type element))
+	     (begin (org-element-property :begin element))
+	     (post-affiliated (org-element-property :post-affiliated element))
+	     (contents-end (org-element-property :contents-end element))
+	     (end (org-element-property :end element))
+	     (parent (org-element-property :parent element))
+	     (reach
+	      ;; Move to the visible empty line above position P, or
+	      ;; to position P.  Return t.
+	      (lambda (p)
+		(goto-char p)
+		(when (and (org-previous-line-empty-p)
+			   (let ((end (line-end-position 0)))
+			     (or (= end (point-min))
+				 (not (org-invisible-p (1- end))))))
+		  (forward-line -1))
+		t)))
+	(cond
+	 ;; Already at the beginning of an element.
+	 ((= begin (point))
+	  (cond
+	   ;; There is a blank line above.  Move there.
+	   ((and (org-previous-line-empty-p)
+		 (not (org-invisible-p (1- (line-end-position 0)))))
+	    (forward-line -1))
+	   ;; At the beginning of the first element within a greater
+	   ;; element.  Move to the beginning of the greater element.
+	   ((and parent (= begin (org-element-property :contents-begin parent)))
+	    (funcall reach (org-element-property :begin parent)))
+	   ;; Since we have to move anyway, find the beginning
+	   ;; position of the element above.
+	   (t
+	    (forward-char -1)
+	    (org--backward-paragraph-once))))
+	 ;; Skip paragraphs at the very beginning of footnote
+	 ;; definitions or items.
+	 ((and (eq type 'paragraph)
+	       (org-with-point-at begin (not (bolp))))
+	  (funcall reach (progn (goto-char begin) (line-beginning-position))))
+	 ;; If the element is folded, skip it altogether.
+	 ((org-with-point-at post-affiliated
+	    (org-invisible-p (line-end-position) t))
+	  (funcall reach begin))
+	 ;; At the end of a greater element, move inside.
+	 ((and contents-end
+	       (<= contents-end (point))
+	       (not (eq type 'paragraph)))
+	  (cond
+	   ((memq type '(footnote-definition plain-list))
+	    (skip-chars-backward " \t\n")
+	    (org--backward-paragraph-once))
+	   ((= contents-end (point))
+	    (forward-char -1)
+	    (org--backward-paragraph-once))
+	   (t
+	    (goto-char contents-end))))
+	 ;; Move between empty lines in some blocks.
+	 ((and (memq type '(comment-block example-block export-block src-block
+					  verse-block))
+	       (let ((contents-start
+		      (org-with-point-at post-affiliated
+			(line-beginning-position 2))))
+		 (when (> (point) contents-start)
+		   (let ((contents-end
+			  (org-with-point-at end
+			    (skip-chars-backward " \t\n")
+			    (line-beginning-position))))
+		     (if (> (point) contents-end)
+			 (progn (goto-char contents-end) t)
+		       (skip-chars-backward " \t\n" begin)
+		       (re-search-backward "^[ \t]*\n" contents-start :move)
+		       t))))))
+	 ;; Move to element's start.
+	 (t
+	  (funcall reach begin))))))))
 
 (defun org-forward-element ()
   "Move forward by one element.

@@ -385,6 +385,15 @@ From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
+*** Forward/backward paragraph functions in line with the rest of Emacs
+~org-forward-paragraph~ and ~org-backward-paragraph~, bound to
+~<C-UP>~ and ~<C-DOWN>~ functions mimic more closely behaviour of
+~forward-paragraph~ and ~backward-paragraph~ functions when
+available.
+
+They also accept an optional argument for multiple calls.
+
+See their docstring for details.
 *** ~org-table-to-lisp~ no longer checks if point is at a table
 The caller is now responsible for the check.  It can use, e.g.,
 ~org-at-table-p~.

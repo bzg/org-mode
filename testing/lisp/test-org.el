@@ -3700,45 +3700,46 @@ SCHEDULED: <2017-05-06 Sat>
      t))
   ;; Standard test.
   (should
-   (org-test-with-temp-text "P1\n\nP2\n\nP3"
-     (org-forward-paragraph)
-     (looking-at "P2")))
-  ;; Ignore depth.
+   (= 2
+      (org-test-with-temp-text "P1\n\nP2"
+	(org-forward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "#+BEGIN_CENTER\nP1\n#+END_CENTER\nP2"
-     (org-forward-paragraph)
-     (looking-at "P1")))
+   (= 2
+      (org-test-with-temp-text "P1\n\nP2\n\nP3"
+	(org-forward-paragraph)
+	(org-current-line))))
+  ;; Enter greater elements.
+  (should
+   (= 2
+      (org-test-with-temp-text "#+begin_center\nP1\n#+end_center\nP2"
+	(org-forward-paragraph)
+	(org-current-line))))
   ;; Do not enter elements with invisible contents.
   (should
-   (org-test-with-temp-text "#+BEGIN_CENTER\nP1\n\nP2\n#+END_CENTER\nP3"
-     (org-hide-block-toggle)
-     (org-forward-paragraph)
-     (looking-at "P3")))
-  ;; On an affiliated keyword, jump to the beginning of the element.
+   (= 4
+      (org-test-with-temp-text "* H1\n  P1\n\n* H2"
+	(org-cycle)
+	(org-forward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "#+name: para\n#+caption: caption\nPara"
-     (org-forward-paragraph)
-     (looking-at "Para")))
-  ;; On an item or a footnote definition, move to the second element
+   (= 6
+      (org-test-with-temp-text "#+begin_center\nP1\n\nP2\n#+end_center\nP3"
+	(org-hide-block-toggle)
+	(org-forward-paragraph)
+	(org-current-line))))
+  ;; On an item or a footnote definition, move past the first element
   ;; inside, if any.
   (should
-   (org-test-with-temp-text "- Item1\n\n  Paragraph\n- Item2"
-     (org-forward-paragraph)
-     (looking-at "  Paragraph")))
+   (= 2
+      (org-test-with-temp-text "- Item1\n\n  Paragraph\n- Item2"
+	(org-forward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "[fn:1] Def1\n\nParagraph\n\n[fn:2] Def2"
-     (org-forward-paragraph)
-     (looking-at "Paragraph")))
-  ;; On an item, or a footnote definition, when the first line is
-  ;; empty, move to the first item.
-  (should
-   (org-test-with-temp-text "- \n\n  Paragraph\n- Item2"
-     (org-forward-paragraph)
-     (looking-at "  Paragraph")))
-  (should
-   (org-test-with-temp-text "[fn:1]\n\nParagraph\n\n[fn:2] Def2"
-     (org-forward-paragraph)
-     (looking-at "Paragraph")))
+   (= 2
+      (org-test-with-temp-text "[fn:1] Def1\n\nParagraph\n\n[fn:2] Def2"
+	(org-forward-paragraph)
+	(org-current-line))))
   ;; On a table (resp. a property drawer) do not move through table
   ;; rows (resp. node properties).
   (should
@@ -3750,15 +3751,59 @@ SCHEDULED: <2017-05-06 Sat>
        "* H\n<point>:PROPERTIES:\n:prop: value\n:END:\nParagraph"
      (org-forward-paragraph)
      (looking-at "Paragraph")))
-  ;; On a verse or source block, stop after blank lines.
+  ;; Skip consecutive keywords, clocks and diary S-exps.
   (should
-   (org-test-with-temp-text "#+BEGIN_VERSE\nL1\n\nL2\n#+END_VERSE"
+   (org-test-with-temp-text "#+key: val\n  #+key2: val\n#+key3: val\n"
      (org-forward-paragraph)
-     (looking-at "L2")))
+     (eobp)))
   (should
-   (org-test-with-temp-text "#+BEGIN_SRC\nL1\n\nL2\n#+END_SRC"
+   (org-test-with-temp-text "CLOCK: val\n  CLOCK: val\nCLOCK: val\n"
      (org-forward-paragraph)
-     (looking-at "L2"))))
+     (eobp)))
+  (should
+   (org-test-with-temp-text "%%(foo)\n%%(bar)\n%%(baz)\n"
+     (org-forward-paragraph)
+     (eobp)))
+  (should-not
+   (org-test-with-temp-text "#+key: val\n  #+key2: val\n\n#+key3: val\n"
+     (org-forward-paragraph)
+     (eobp)))
+  (should-not
+   (org-test-with-temp-text "#+key: val\nCLOCK: ...\n"
+     (org-forward-paragraph)
+     (eobp)))
+  ;; In a plain list with one item every line, skip the whole list,
+  ;; even with point in the middle of the list.
+  (should
+   (org-test-with-temp-text "- A\n  - B\n- C\n"
+     (org-forward-paragraph)
+     (eobp)))
+  (should
+   (org-test-with-temp-text "- A\n  - <point>B\n- C\n"
+     (org-forward-paragraph)
+     (eobp)))
+  ;; On a comment, verse or source block, stop at "contents"
+  ;; boundaries and blank lines.
+  (should
+   (= 2
+      (org-test-with-temp-text "#+begin_src emacs-lisp\nL1\n\nL2\n#+end_src"
+	(org-forward-paragraph)
+	(org-current-line))))
+  (should
+   (= 3
+      (org-test-with-temp-text "#+begin_verse\n<point>L1\n\nL2\n#+end_verse"
+	(org-forward-paragraph)
+	(org-current-line))))
+  (should
+   (= 5
+      (org-test-with-temp-text "#+begin_comment\nL1\n\n<point>L2\n#+end_comment"
+	(org-forward-paragraph)
+	(org-current-line))))
+  ;; Being on an affiliated keyword shouldn't make any difference.
+  (should
+   (org-test-with-temp-text "#+name: para\n#+caption: caption\nPara"
+     (org-forward-paragraph)
+     (eobp))))
 
 (ert-deftest test-org/backward-paragraph ()
   "Test `org-backward-paragraph' specifications."
@@ -3767,44 +3812,65 @@ SCHEDULED: <2017-05-06 Sat>
    (org-test-with-temp-text "Paragraph"
      (org-backward-paragraph)
      t))
+  ;; At blank lines at the very beginning of a buffer, move to
+  ;; point-min.
+  (should
+   (org-test-with-temp-text "\n\n<point>\n\nParagraph"
+     (org-backward-paragraph)
+     (bobp)))
   ;; Regular test.
   (should
-   (org-test-with-temp-text "P1\n\nP2\n\nP3<point>"
-     (org-backward-paragraph)
-     (looking-at "P3")))
+   (= 2
+      (org-test-with-temp-text "P1\n\nP2<point>"
+	(org-backward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "P1\n\nP2\n\n<point>P3"
-     (org-backward-paragraph)
-     (looking-at-p "P2")))
-  ;; Ignore depth.
+   (= 4
+      (org-test-with-temp-text "P1\n\nP2\n\nP3<point>"
+	(org-backward-paragraph)
+	(org-current-line))))
+  ;; Try to move on the line above current element.
   (should
-   (org-test-with-temp-text "P1\n\n#+BEGIN_CENTER\nP2\n#+END_CENTER\n<point>P3"
-     (org-backward-paragraph)
-     (looking-at-p "P2")))
-  ;; Ignore invisible elements.
+   (= 2
+      (org-test-with-temp-text "\n\n<point>Paragraph"
+	(org-backward-paragraph)
+	(org-current-line))))
+  ;; Do not leave point in an invisible area.
   (should
-   (org-test-with-temp-text "* H1\n  P1\n* H2"
+   (org-test-with-temp-text "* H1\n  P1\n\n* H2"
      (org-cycle)
      (goto-char (point-max))
      (beginning-of-line)
      (org-backward-paragraph)
      (bobp)))
-  ;; On an affiliated keyword, jump to the first one.
   (should
-   (org-test-with-temp-text
-       "P1\n#+name: n\n#+caption: c1\n#+caption: <point>c2\nP2"
+   (org-test-with-temp-text "#+begin_center\nP1\n\nP2\n#+end_center\n"
+     (org-hide-block-toggle)
+     (goto-char (point-max))
      (org-backward-paragraph)
-     (looking-at-p "#\\+name")))
+     (bobp)))
+  ;; On the first element in an item or a footnote definition, jump
+  ;; before the footnote or the item.
+  (should
+   (org-test-with-temp-text "- line1<point>"
+     (org-backward-paragraph)
+     (bobp)))
+  (should
+   (org-test-with-temp-text "[fn:1] line1n<point>"
+     (org-backward-paragraph)
+     (bobp)))
   ;; On the second element in an item or a footnote definition, jump
   ;; to item or the definition.
   (should
-   (org-test-with-temp-text "- line1\n\n<point>  line2"
-     (org-backward-paragraph)
-     (looking-at-p "- line1")))
+   (= 2
+      (org-test-with-temp-text "- line1\n\n<point>  line2"
+	(org-backward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "[fn:1] line1\n\n<point>  line2"
-     (org-backward-paragraph)
-     (looking-at-p "\\[fn:1\\] line1")))
+   (= 2
+      (org-test-with-temp-text "[fn:1] line1\n\n<point>  line2"
+	(org-backward-paragraph)
+	(org-current-line))))
   ;; On a table (resp. a property drawer), ignore table rows
   ;; (resp. node properties).
   (should
@@ -3812,38 +3878,75 @@ SCHEDULED: <2017-05-06 Sat>
      (org-backward-paragraph)
      (bobp)))
   (should
-   (org-test-with-temp-text "* H\n:PROPERTIES:\n:prop: value\n:END:\n<point>P1"
+   (= 2
+      (org-test-with-temp-text
+	  "* H\n:PROPERTIES:\n:prop: value\n:END:\n<point>P1"
+	(org-backward-paragraph)
+	(org-current-line))))
+  ;; In a plain list with one item every line, skip the whole list,
+  ;; even with point in the middle of the list.
+  (should
+   (org-test-with-temp-text "- A\n  - B\n- C\n<point>"
      (org-backward-paragraph)
-     (looking-at-p ":PROPERTIES:")))
-  ;; On a comment, example, src and verse blocks, stop before blank
+     (bobp)))
+  (should
+   (org-test-with-temp-text "- A\n  - B\n- <point>C\n"
+     (org-backward-paragraph)
+     (bobp)))
+  ;; Skip consecutive keywords, clocks and diary S-exps.
+  (should
+   (org-test-with-temp-text "#+key: val\n  #+key2: val\n#+key3: val\n<point>"
+     (org-backward-paragraph)
+     (bobp)))
+  (should
+   (org-test-with-temp-text "CLOCK: val\n  CLOCK: val\nCLOCK: val\n<point>"
+     (org-backward-paragraph)
+     (bobp)))
+  (should
+   (org-test-with-temp-text "%%(foo)\n%%(bar)\n%%(baz)\n<point>"
+     (org-backward-paragraph)
+     (bobp)))
+  (should-not
+   (org-test-with-temp-text "#+key: val\n  #+key2: val\n\n#+key3: val\n<point>"
+     (org-backward-paragraph)
+     (bobp)))
+  (should-not
+   (org-test-with-temp-text "#+key: val\nCLOCK: ...\n<point>"
+     (org-backward-paragraph)
+     (bobp)))
+  ;; On a comment, example, source and verse blocks, stop at blank
   ;; lines.
   (should
-   (org-test-with-temp-text "#+BEGIN_VERSE\nL1\n\nL2\n\n<point>L3\n#+END_VERSE"
-     (org-backward-paragraph)
-     (looking-at-p "L2")))
+   (= 1
+      (org-test-with-temp-text
+	  "#+begin_comment\n<point>L1\n\nL2\n\nL3\n#+end_comment"
+	(org-backward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "#+BEGIN_SRC\nL1\n\nL2\n\n<point>L3#+END_SRC"
-     (org-backward-paragraph)
-     (looking-at-p "L2")))
-  ;; In comment, example, export, src and verse blocks, stop below
-  ;; opening line when called from within the block.
+   (= 2
+      (org-test-with-temp-text
+	  "#+begin_verse\nL1\n\n<point>L2\n\nL3\n#+end_verse"
+	(org-backward-paragraph)
+	(org-current-line))))
   (should
-   (org-test-with-temp-text "#+BEGIN_VERSE\nL1\nL2<point>\n#+END_VERSE"
-     (org-backward-paragraph)
-     (looking-at-p "L1")))
-  (should
-   (org-test-with-temp-text "#+BEGIN_EXAMPLE\nL1\nL2<point>\n#+END_EXAMPLE"
-     (org-backward-paragraph)
-     (looking-at-p "L1")))
+   (= 3
+      (org-test-with-temp-text
+	  "#+begin_src emacs-lisp\nL1\n\nL2\n\n<point>L3\n#+end_src"
+	(org-backward-paragraph)
+	(org-current-line))))
   ;; When called from the opening line itself, however, move to
   ;; beginning of block.
   (should
-   (org-test-with-temp-text "#+BEGIN_<point>EXAMPLE\nL1\n#+END_EXAMPLE"
+   (org-test-with-temp-text "#+begin_<point>example\nL1\n#+end_example"
      (org-backward-paragraph)
      (bobp)))
-  ;; Pathological case: on an empty heading, move to its beginning.
+  ;; On an empty heading, move above it.
   (should
-   (org-test-with-temp-text "* <point>H"
+   (org-test-with-temp-text "\n* <point>"
+     (org-backward-paragraph)
+     (bobp)))
+  (should
+   (org-test-with-temp-text "\n* \n<point>"
      (org-backward-paragraph)
      (bobp))))
 
