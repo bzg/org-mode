@@ -21670,8 +21670,8 @@ and =#+STARTUP: nofnadjust=.
 this timestamp are exported.
 
 [fn:122] For export to LaTeX format---or LaTeX-related formats such as
-Beamer---, the =org-latex-package-alist= variable needs further
-configuration.  See [[LaTeX specific export settings]].
+Beamer---, the ~org-latex-package-alist~ variable needs further
+configuration.  See [[*LaTeX specific export settings]].
 
 [fn:123] At the moment, some export back-ends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
