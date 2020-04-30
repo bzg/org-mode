@@ -4790,8 +4790,12 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
                                                 (nth (1- arg) kwds))))
       (when (equal arg '(4))
         (setq org-select-this-todo-keyword
-              (completing-read "Keyword (or KWD1|K2D2|...): "
-                               (mapcar #'list kwds) nil nil)))
+              (mapconcat #'identity
+                         (let ((crm-separator "|"))
+                           (completing-read-multiple
+                            "Keyword (or KWD1|KWD2|...): "
+                            (mapcar #'list kwds) nil nil))
+                         "|")))
       (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
       (org-compile-prefix-format 'todo)
       (org-set-sorting-strategy 'todo)
