@@ -6804,27 +6804,6 @@ frame is not changed."
 
 ;;; Inserting headlines
 
-(defun org--line-empty-p (n)
-  "Is the Nth next line empty?
-
-Counts the current line as N = 1 and the previous line as N = 0;
-see `beginning-of-line'."
-  (save-excursion
-    (and (not (bobp))
-	 (or (beginning-of-line n) t)
-	 (save-match-data
-	   (looking-at "[ \t]*$")))))
-
-(defun org-previous-line-empty-p ()
-  "Is the previous line a blank line?
-When NEXT is non-nil, check the next line instead."
-  (org--line-empty-p 0))
-
-(defun org-next-line-empty-p ()
-  "Is the previous line a blank line?
-When NEXT is non-nil, check the next line instead."
-  (org--line-empty-p 2))
-
 (defun org--blank-before-heading-p (&optional parent)
   "Non-nil when an empty line should precede a new heading here.
 When optional argument PARENT is non-nil, consider parent

@@ -645,6 +645,25 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 			  limit-level)))
 	   (format "\\*\\{1,%d\\} " nstars)))))
 
+(defun org--line-empty-p (n)
+  "Is the Nth next line empty?
+Counts the current line as N = 1 and the previous line as N = 0;
+see `beginning-of-line'."
+  (and (not (bobp))
+       (save-excursion
+	 (beginning-of-line n)
+	 (looking-at-p "[ \t]*$"))))
+
+(defun org-previous-line-empty-p ()
+  "Is the previous line a blank line?
+When NEXT is non-nil, check the next line instead."
+  (org--line-empty-p 0))
+
+(defun org-next-line-empty-p ()
+  "Is the previous line a blank line?
+When NEXT is non-nil, check the next line instead."
+  (org--line-empty-p 2))
+
 
 
 ;;; Motion
