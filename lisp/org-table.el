@@ -5463,6 +5463,7 @@ a radio table."
 ;;;###autoload
 (defun org-table-to-lisp (&optional txt)
   "Convert the table at point to a Lisp structure.
+
 The structure will be a list.  Each item is either the symbol `hline'
 for a horizontal separator line, or a list of field values as strings.
 The table is taken from the parameter TXT, or from the buffer at point."
@@ -5471,7 +5472,6 @@ The table is taken from the parameter TXT, or from the buffer at point."
         (insert txt)
         (goto-char (point-min))
         (org-table-to-lisp))
-    (unless (org-at-table-p) (user-error "No table at point"))
     (save-excursion
       (goto-char (org-table-begin))
       (let ((table nil))

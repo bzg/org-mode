@@ -324,6 +324,12 @@ From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
+*** ~org-table-to-lisp~ no longer checks if point is at a table
+The caller is now responsible for the check.  It can use, e.g.,
+~org-at-table-p~.
+
+The function is also much more efficient than it used to, even on very
+large tables.
 *** New function : ~org-collect-keywords~
 *** Drawers' folding use an API similar to block's
 
