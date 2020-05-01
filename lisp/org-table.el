@@ -5475,17 +5475,16 @@ The table is taken from the parameter TXT, or from the buffer at point."
     (save-excursion
       (goto-char (org-table-begin))
       (let ((table nil))
-        (while (search-forward "|" (line-end-position) t)
+        (while (re-search-forward "\\=[ \t]*|" nil t)
 	  (let ((row nil))
 	    (if (looking-at "-")
 		(push 'hline table)
 	      (while (not (progn (skip-chars-forward " \t") (eolp)))
-		(push
-		 (buffer-substring-no-properties
-		  (point)
-		  (progn (re-search-forward "[ \t]*\\(|\\|$\\)")
-			 (match-beginning 0)))
-		 row))
+		(push (buffer-substring-no-properties
+		       (point)
+		       (progn (re-search-forward "[ \t]*\\(|\\|$\\)")
+			      (match-beginning 0)))
+		      row))
 	      (push (nreverse row) table)))
 	  (forward-line))
         (nreverse table)))))
