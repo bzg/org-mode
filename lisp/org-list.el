@@ -910,13 +910,13 @@ items, as returned by `org-list-prevs-alist'."
 STRUCT is the list structure."
   (let* ((item-end (org-list-get-item-end item struct))
 	 (sub-struct (cdr (member (assq item struct) struct)))
-	 subtree)
-    (catch 'exit
-      (mapc (lambda (e)
-	      (let ((pos (car e)))
-		(if (< pos item-end) (push pos subtree) (throw 'exit nil))))
-	    sub-struct))
-    (nreverse subtree)))
+	 items)
+    (catch :exit
+      (pcase-dolist (`(,pos . ,_) sub-struct)
+	(if (< pos item-end)
+	    (push pos items)
+	  (throw :exit nil))))
+    (nreverse items)))
 
 (defun org-list-get-all-items (item struct prevs)
   "List all items in the same sub-list as ITEM.
@@ -1788,10 +1788,9 @@ This function modifies STRUCT."
 	;; There are boxes checked after an unchecked one: fix that.
 	(when (member "[X]" after-unchecked)
 	  (let ((index (- (length struct) (length after-unchecked))))
-	    (mapc (lambda (e)
-		    (when (org-list-get-checkbox e struct)
-		      (org-list-set-checkbox e struct "[ ]")))
-		  (nthcdr index all-items))
+	    (dolist (e (nthcdr index all-items))
+	      (when (org-list-get-checkbox e struct)
+		(org-list-set-checkbox e struct "[ ]")))
 	    ;; Verify once again the structure, without ORDERED.
 	    (org-list-struct-fix-box struct parents prevs nil)
 	    ;; Return blocking item.
@@ -1802,24 +1801,22 @@ This function modifies STRUCT."
 
 This function modifies STRUCT."
   (let (end-list acc-end)
-    (mapc (lambda (e)
-	    (let* ((pos (car e))
-		   (ind-pos (org-list-get-ind pos struct))
-		   (end-pos (org-list-get-item-end pos struct)))
-	      (unless (assq end-pos struct)
-		;; To determine real ind of an ending position that is
-		;; not at an item, we have to find the item it belongs
-		;; to: it is the last item (ITEM-UP), whose ending is
-		;; further than the position we're interested in.
-		(let ((item-up (assoc-default end-pos acc-end '>)))
-		  (push (cons
-			 ;; Else part is for the bottom point.
-			 (if item-up (+ (org-list-get-ind item-up struct) 2) 0)
-			 end-pos)
-			end-list)))
-	      (push (cons ind-pos pos) end-list)
-	      (push (cons end-pos pos) acc-end)))
-	  struct)
+    (pcase-dolist (`(,pos . ,_) struct)
+      (let ((ind-pos (org-list-get-ind pos struct))
+	    (end-pos (org-list-get-item-end pos struct)))
+	(unless (assq end-pos struct)
+	  ;; To determine real ind of an ending position that is not
+	  ;; at an item, we have to find the item it belongs to: it is
+	  ;; the last item (ITEM-UP), whose ending is further than the
+	  ;; position we're interested in.
+	  (let ((item-up (assoc-default end-pos acc-end #'>)))
+	    (push (cons
+		   ;; Else part is for the bottom point.
+		   (if item-up (+ (org-list-get-ind item-up struct) 2) 0)
+		   end-pos)
+		  end-list)))
+	(push (cons ind-pos pos) end-list)
+	(push (cons end-pos pos) acc-end)))
     (setq end-list (sort end-list (lambda (e1 e2) (< (cdr e1) (cdr e2)))))
     (org-list-struct-assoc-end struct end-list)))
 
@@ -2016,10 +2013,9 @@ beginning of the item."
 	 (item (copy-marker (point-at-bol)))
 	 (all (org-list-get-all-items (marker-position item) struct prevs))
 	 (value init-value))
-    (mapc (lambda (e)
-	    (goto-char e)
-	    (setq value (apply function value args)))
-	  (nreverse all))
+    (dolist (e (nreverse all))
+      (goto-char e)
+      (setq value (apply function value args)))
     (goto-char item)
     (move-marker item nil)
     value))
@@ -2041,9 +2037,8 @@ Possible values are: `folded', `children' or `subtree'.  See
     ;; Then fold every child.
     (let* ((parents (org-list-parents-alist struct))
 	   (children (org-list-get-children item struct parents)))
-      (mapc (lambda (e)
-	      (org-list-set-item-visibility e struct 'folded))
-	    children)))
+      (dolist (child children)
+	(org-list-set-item-visibility child struct 'folded))))
    ((eq view 'subtree)
     ;; Show everything
     (let ((item-end (org-list-get-item-end item struct)))
@@ -2423,15 +2418,15 @@ subtree, ignoring planning line and any drawer following it."
 		 (items-to-toggle (cl-remove-if
 				   (lambda (e) (or (< e lim-up) (> e lim-down)))
 				   (mapcar #'car struct))))
-	    (mapc (lambda (e) (org-list-set-checkbox
-			       e struct
-			       ;; If there is no box at item, leave as-is
-			       ;; unless function was called with C-u prefix.
-			       (let ((cur-box (org-list-get-checkbox e struct)))
-				 (if (or cur-box (equal toggle-presence '(4)))
-				     ref-checkbox
-				   cur-box))))
-		  items-to-toggle)
+	    (dolist (e items-to-toggle)
+	      (org-list-set-checkbox
+	       e struct
+	       ;; If there is no box at item, leave as-is unless
+	       ;; function was called with C-u prefix.
+	       (let ((cur-box (org-list-get-checkbox e struct)))
+		 (if (or cur-box (equal toggle-presence '(4)))
+		     ref-checkbox
+		   cur-box))))
 	    (setq block-item (org-list-struct-fix-box
 			      struct parents prevs orderedp))
 	    ;; Report some problems due to ORDERED status of subtree.
@@ -2679,10 +2674,9 @@ Return t if successful."
 				     (org-list-bullet-string "-")))
 	      ;; Shift every item by OFFSET and fix bullets.  Then
 	      ;; apply changes to buffer.
-	      (mapc (lambda (e)
-		      (let ((ind (org-list-get-ind (car e) struct)))
-			(org-list-set-ind (car e) struct (+ ind offset))))
-		    struct)
+	      (pcase-dolist (`(,pos . ,_) struct)
+		(let ((ind (org-list-get-ind pos struct)))
+		  (org-list-set-ind pos struct (+ ind offset))))
 	      (org-list-struct-fix-bul struct prevs)
 	      (org-list-struct-apply-struct struct old-struct))))
 	 ;; Forbidden move:
