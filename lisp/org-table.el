@@ -1364,8 +1364,7 @@ However, when FORCE is non-nil, create new columns if necessary."
     ;; Fix TBLFM formulas, if desirable.
     (when (or (not org-table-fix-formulas-confirm)
 	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
-      (org-table-fix-formulas "$" nil (1- col) 1)
-      (org-table-fix-formulas "$LR" nil (1- col) 1))))
+      (org-table-fix-formulas "$" nil (1- col) 1))))
 
 (defun org-table-find-dataline ()
   "Find a data line in the current table, which is needed for column commands.
@@ -1516,9 +1515,7 @@ Swap with anything in target cell."
     (when (or (not org-table-fix-formulas-confirm)
 	      (funcall org-table-fix-formulas-confirm "Fix formulas? "))
       (org-table-fix-formulas
-       "$" (list (cons (number-to-string col) "INVALID")) col -1 col)
-      (org-table-fix-formulas
-       "$LR" (list (cons (number-to-string col) "INVALID")) col -1 col))))
+       "$" (list (cons (number-to-string col) "INVALID")) col -1 col))))
 
 ;;;###autoload
 (defun org-table-move-column-right ()
@@ -1579,11 +1576,7 @@ Swap with anything in target cell."
 		(funcall org-table-fix-formulas-confirm "Fix formulas? "))
 	(org-table-fix-formulas
 	 "$" (list (cons (number-to-string col) (number-to-string colpos))
-		   (cons (number-to-string colpos) (number-to-string col))))
-	(org-table-fix-formulas
-	 "$LR" (list
-		(cons (number-to-string col) (number-to-string colpos))
-		(cons (number-to-string colpos) (number-to-string col))))))))
+		   (cons (number-to-string colpos) (number-to-string col))))))))
 
 ;;;###autoload
 (defun org-table-move-row-down ()
@@ -2118,7 +2111,7 @@ When NAMED is non-nil, look for a named equation."
 		      (org-table-current-column)))
 	 (scol (cond
 		((not named) (format "$%d" (org-table-current-column)))
-		((and name (not (string-match "\\`LR[0-9]+\\'" name))) name)
+		(name)
 		(t ref)))
 	 (name (or name ref))
 	 (org-table-may-need-update nil)
@@ -2254,7 +2247,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
       (let ((re (concat key "\\([0-9]+\\)"))
 	    (re2
 	     (when remove
-	       (if (or (equal key "$") (equal key "$LR"))
+	       (if (equal key "$")
 		   (format "\\(@[0-9]+\\)?%s%d=.*?\\(::\\|$\\)"
 			   (regexp-quote key) remove)
 		 (format "@%d\\$[0-9]+=.*?\\(::\\|$\\)" remove))))
@@ -4879,23 +4872,10 @@ This function sets up the following dynamically scoped variables:
       ;; Get the number of columns from the first data line in table.
       (goto-char beg)
       (forward-line (aref org-table-dlines 1))
-      (let* ((fields
-	      (org-split-string
-	       (buffer-substring (line-beginning-position) (line-end-position))
-	       "[ \t]*|[ \t]*"))
-	     (nfields (length fields))
-	     al al2)
-	(setq org-table-current-ncol nfields)
-	(let ((last-dline
-	       (aref org-table-dlines (1- (length org-table-dlines)))))
-	  (dotimes (i nfields)
-	    (let ((column (1+ i)))
-	      (push (list (format "LR%d" column) last-dline column) al)
-	      (push (cons (format "LR%d" column) (nth i fields)) al2))))
-	(setq org-table-named-field-locations
-	      (append org-table-named-field-locations al))
-	(setq org-table-local-parameters
-	      (append org-table-local-parameters al2))))))
+      (setq org-table-current-ncol
+	    (length (org-split-string
+		     (buffer-substring (line-beginning-position) (line-end-position))
+		     "[ \t]*|[ \t]*"))))))
 
 (defun org-table--force-dataline ()
   "Move point to the closest data line in a table.
