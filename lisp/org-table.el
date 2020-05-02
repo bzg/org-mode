@@ -4302,9 +4302,7 @@ extension of the given file name, and finally on the variable
 	  (let ((transform (intern (match-string 1 format)))
 		(params (and (match-end 2)
 			     (read (concat "(" (match-string 2 format) ")"))))
-		(table (org-table-to-lisp
-			(buffer-substring-no-properties
-			 (org-table-begin) (org-table-end)))))
+		(table (org-table-to-lisp)))
 	    (unless (fboundp transform)
 	      (user-error "No such transformation function %s" transform))
 	    (let (buf)
@@ -5479,9 +5477,7 @@ for this table."
     ;; when non-interactive, we assume align has just happened.
     (when (called-interactively-p 'any) (org-table-align))
     (let ((dests (orgtbl-gather-send-defs))
-	  (table (org-table-to-lisp
-		  (buffer-substring-no-properties (org-table-begin)
-						  (org-table-end))))
+	  (table (org-table-to-lisp))
 	  (ntbl 0))
       (unless dests
 	(if maybe (throw 'exit nil)
