@@ -215,6 +215,32 @@ configured for ClojureScript will /not/ work.
 Babel Java blocks recognize header argument =:cmdargs= and pass its
 value in call to =java=.
 
+*** =RET= and =C-j= now obey ~electric-indent-mode~
+
+Since Emacs 24.4, ~electric-indent-mode~ is enabled by default.  In
+most major modes, this causes =RET= to reindent the current line and
+indent the new line, and =C-j= to insert a newline without indenting.
+
+Org mode now obeys this minor mode: when ~electric-indent-mode~ is
+enabled, and point is neither in a table nor on a timestamp or a link:
+
+- =RET= (bound to ~org-return~) reindents the current line and indents
+  the new line;
+- =C-j= (bound to the new command ~org-return-and-maybe-indent~)
+  merely inserts a newline.
+
+To get the previous behaviour back, disable ~electric-indent-mode~
+explicitly:
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook (lambda () (electric-indent-mode -1)))
+#+end_src
+
+*** New optional numeric argument for ~org-return~
+
+In situations where ~org-return~ calls ~newline~, multiple newlines
+can now be inserted with this prefix argument.
+
 ** New commands
 *** ~org-table-header-line-mode~
 
@@ -303,6 +329,13 @@ Use ~org-hide-block-toggle~ instead.
 This function was not used in the code base, and has no clear use
 either.  It has been marked for future removal.  Please contact the
 mailing list if you use this function.
+
+*** Deprecated ~org-return-indent~ function
+
+In Elisp code, use ~(org-return t)~ instead.  Interactively, =C-j= is
+now bound to ~org-return-and-maybe-indent~, which indents the new line
+when ~electric-indent-mode~ is disabled.
+
 *** Removed ~org-maybe-keyword-time-regexp~
 
 The variable was not used in the code base.

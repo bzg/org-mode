@@ -618,7 +618,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-k") #'org-kill-note-or-show-branches)
 (org-defkey org-mode-map (kbd "C-c #") #'org-update-statistics-cookies)
 (org-defkey org-mode-map (kbd "RET") #'org-return)
-(org-defkey org-mode-map (kbd "C-j") #'org-return-indent)
+(org-defkey org-mode-map (kbd "C-j") #'org-return-and-maybe-indent)
 (org-defkey org-mode-map (kbd "C-c ?") #'org-table-field-info)
 (org-defkey org-mode-map (kbd "C-c SPC") #'org-table-blank-field)
 (org-defkey org-mode-map (kbd "C-c +") #'org-table-sum)

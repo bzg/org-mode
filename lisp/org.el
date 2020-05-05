@@ -15580,7 +15580,7 @@ environment remains unintended."
       ;; Get indentation of next line unless at column 0.
       (let ((ind (if (bolp) 0
 		   (save-excursion
-		     (org-return-indent)
+		     (org-return t)
 		     (prog1 (current-indentation)
 		       (when (progn (skip-chars-forward " \t") (eolp))
 			 (delete-region beg (point)))))))
@@ -17647,20 +17647,31 @@ call `open-line' on the very first character."
       (org-table-insert-row)
     (open-line n)))
 
-(defun org-return (&optional indent)
+(defun org--newline (indent arg interactive)
+  "Call `newline-and-indent' or just `newline'.
+If INDENT is non-nil, call `newline-and-indent' with ARG to
+indent unconditionally; otherwise, call `newline' with ARG and
+INTERACTIVE, which can trigger indentation if
+`electric-indent-mode' is enabled."
+  (if indent
+      (newline-and-indent)
+    (newline arg interactive)))
+
+(defun org-return (&optional indent arg interactive)
   "Goto next table row or insert a newline.
 
 Calls `org-table-next-row' or `newline', depending on context.
 
 When optional INDENT argument is non-nil, call
-`newline-and-indent' instead of `newline'.
+`newline-and-indent' with ARG, otherwise call `newline' with ARG
+and INTERACTIVE.
 
 When `org-return-follows-link' is non-nil and point is on
 a timestamp or a link, call `org-open-at-point'.  However, it
 will not happen if point is in a table or on a \"dead\"
 object (e.g., within a comment).  In these case, you need to use
 `org-open-at-point' directly."
-  (interactive)
+  (interactive "*i\nP\np")
   (let ((context (if org-return-follows-link (org-element-context)
 		   (org-element-at-point))))
     (cond
@@ -17711,30 +17722,30 @@ object (e.g., within a comment).  In these case, you need to use
 	 (t (org--align-tags-here tags-column))) ;preserve tags column
 	(end-of-line)
 	(org-show-entry)
-	(if indent (newline-and-indent) (newline))
+	(org--newline indent arg interactive)
 	(when string (save-excursion (insert (org-trim string))))))
      ;; In a list, make sure indenting keeps trailing text within.
-     ((and indent
-	   (not (eolp))
+     ((and (not (eolp))
 	   (org-element-lineage context '(item)))
       (let ((trailing-data
 	     (delete-and-extract-region (point) (line-end-position))))
-	(newline-and-indent)
+	(org--newline indent arg interactive)
 	(save-excursion (insert trailing-data))))
      (t
       ;; Do not auto-fill when point is in an Org property drawer.
       (let ((auto-fill-function (and (not (org-at-property-p))
 				     auto-fill-function)))
-	(if indent
-	    (newline-and-indent)
-	  (newline)))))))
+	(org--newline indent arg interactive))))))
 
-(defun org-return-indent ()
-  "Goto next table row or insert a newline and indent.
-Calls `org-table-next-row' or `newline-and-indent', depending on
-context.  See the individual commands for more information."
+(defun org-return-and-maybe-indent ()
+  "Goto next table row, or insert a newline.
+Call `org-table-next-row' or `org-return', depending on context.
+See the individual commands for more information.
+
+When inserting a newline, indent the new line if
+`electric-indent-mode' is disabled."
   (interactive)
-  (org-return t))
+  (org-return (not electric-indent-mode)))
 
 (defun org-ctrl-c-tab (&optional arg)
   "Toggle columns width in a table, or show children.

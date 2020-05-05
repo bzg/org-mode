@@ -1310,6 +1310,94 @@
 	    (org-return)
 	    (buffer-string)))))
 
+(ert-deftest test-org/with-electric-indent ()
+  "Test RET and C-j specifications with `electric-indent-mode' on."
+  ;; Call commands interactively, since this is how `newline' knows it
+  ;; must run `post-self-insert-hook'.
+  ;;
+  ;; RET, like `newline', should indent.
+  (should
+   (equal "  Para\n  graph"
+	  (org-test-with-temp-text "  Para<point>graph"
+	    (electric-indent-local-mode 1)
+	    (call-interactively 'org-return)
+	    (buffer-string))))
+  (should
+   (equal "- item1\n  item2"
+	  (org-test-with-temp-text "- item1<point>item2"
+	    (electric-indent-local-mode 1)
+	    (call-interactively 'org-return)
+	    (buffer-string))))
+  (should
+   (equal "* heading\n  body"
+	  (org-test-with-temp-text "* heading<point>body"
+	    (electric-indent-local-mode 1)
+	    (call-interactively 'org-return)
+	    (buffer-string))))
+  ;; C-j, like `electric-newline-and-maybe-indent', should not indent.
+  (should
+   (equal "  Para\ngraph"
+	  (org-test-with-temp-text "  Para<point>graph"
+	    (electric-indent-local-mode 1)
+	    (call-interactively 'org-return-and-maybe-indent)
+	    (buffer-string))))
+  (should
+   (equal "- item1\nitem2"
+	  (org-test-with-temp-text "- item1<point>item2"
+	    (electric-indent-local-mode 1)
+	    (call-interactively 'org-return-and-maybe-indent)
+	    (buffer-string))))
+  (should
+   (equal "* heading\nbody"
+	  (org-test-with-temp-text "* heading<point>body"
+	    (electric-indent-local-mode 1)
+	    (call-interactively 'org-return-and-maybe-indent)
+	    (buffer-string)))))
+
+(ert-deftest test-org/without-electric-indent ()
+  "Test RET and C-j specifications with `electric-indent-mode' off."
+  ;; Call commands interactively, since this is how `newline' knows it
+  ;; must run `post-self-insert-hook'.
+  ;;
+  ;; RET, like `newline', should not indent.
+  (should
+   (equal "  Para\ngraph"
+	  (org-test-with-temp-text "  Para<point>graph"
+	    (electric-indent-local-mode 0)
+	    (call-interactively 'org-return)
+	    (buffer-string))))
+  (should
+   (equal "- item1\nitem2"
+	  (org-test-with-temp-text "- item1<point>item2"
+	    (electric-indent-local-mode 0)
+	    (call-interactively 'org-return)
+	    (buffer-string))))
+  (should
+   (equal "* heading\nbody"
+	  (org-test-with-temp-text "* heading<point>body"
+	    (electric-indent-local-mode 0)
+	    (call-interactively 'org-return)
+	    (buffer-string))))
+  ;; C-j, like `electric-newline-and-maybe-indent', should indent.
+  (should
+   (equal "  Para\n  graph"
+	  (org-test-with-temp-text "  Para<point>graph"
+	    (electric-indent-local-mode 0)
+	    (call-interactively 'org-return-and-maybe-indent)
+	    (buffer-string))))
+  (should
+   (equal "- item1\n  item2"
+	  (org-test-with-temp-text "- item1<point>item2"
+	    (electric-indent-local-mode 0)
+	    (call-interactively 'org-return-and-maybe-indent)
+	    (buffer-string))))
+  (should
+   (equal "* heading\n  body"
+	  (org-test-with-temp-text "* heading<point>body"
+	    (electric-indent-local-mode 0)
+	    (call-interactively 'org-return-and-maybe-indent)
+	    (buffer-string)))))
+
 (ert-deftest test-org/meta-return ()
   "Test M-RET (`org-meta-return') specifications."
   ;; In a table field insert a row above.

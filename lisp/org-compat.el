@@ -678,6 +678,15 @@ an error.  Return a non-nil value when toggling is successful."
             (goto-char (match-beginning 0))
             (org-hide-block-toggle)))))))
 
+(defun org-return-indent ()
+  "Goto next table row or insert a newline and indent.
+Calls `org-table-next-row' or `newline-and-indent', depending on
+context.  See the individual commands for more information."
+  (declare (obsolete "use `org-return' with INDENT set to t instead."
+		     "Org 9.4"))
+  (interactive)
+  (org-return t))
+
 (defmacro org-with-silent-modifications (&rest body)
   (declare (obsolete "use `with-silent-modifications' instead." "Org 9.2")
 	   (debug (body)))
