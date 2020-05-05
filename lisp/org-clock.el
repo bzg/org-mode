@@ -2068,7 +2068,10 @@ in the buffer and update it."
     (start (goto-char start)))
   (org-update-dblock))
 
-(org-dynamic-block-define "clocktable" #'org-clock-report)
+;;;###autoload
+(eval-after-load 'org
+  '(progn
+     (org-dynamic-block-define "clocktable" #'org-clock-report)))
 
 (defun org-day-of-week (day month year)
   "Return the day of the week as an integer."

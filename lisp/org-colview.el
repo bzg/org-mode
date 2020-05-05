@@ -1550,7 +1550,10 @@ PARAMS is a property list of parameters:
 		     (id)))))
   (org-update-dblock))
 
-(org-dynamic-block-define "columnview" #'org-columns-insert-dblock)
+;;;###autoload
+(eval-after-load 'org
+  '(progn
+     (org-dynamic-block-define "columnview" #'org-columns-insert-dblock)))
 
 
 ;;; Column view in the agenda
