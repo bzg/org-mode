@@ -9652,15 +9652,18 @@ block of such type."
     (`nil (push (cons type func) org-dynamic-block-alist))
     (def (setcdr def func))))
 
-(defun org-dynamic-block-insert-dblock (type)
+(defun org-dynamic-block-insert-dblock (type &optional interactive-p)
   "Insert a dynamic block of type TYPE.
 When used interactively, select the dynamic block types among
-defined types, per `org-dynamic-block-define'."
+defined types, per `org-dynamic-block-define'.  If INTERACTIVE-P
+is non-nil, call the dynamic block function interactively."
   (interactive (list (completing-read "Dynamic block: "
-				      (org-dynamic-block-types))))
+				      (org-dynamic-block-types))
+		     t))
   (pcase (org-dynamic-block-function type)
     (`nil (error "No such dynamic block: %S" type))
-    ((and f (pred functionp)) (funcall f))
+    ((and f (pred functionp))
+     (if interactive-p (call-interactively f) (funcall f)))
     (_ (error "Invalid function for dynamic block %S" type))))
 
 (defun org-dblock-update (&optional arg)
