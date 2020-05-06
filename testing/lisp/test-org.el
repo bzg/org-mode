@@ -4732,7 +4732,7 @@ Paragraph<point>"
   "Test `org-deadline' specifications."
   ;; Insert a new value or replace existing one.
   (should
-   (equal "* H\nDEADLINE: <2012-03-29>\n"
+   (equal "* H\nDEADLINE: <2012-03-29>"
 	  (org-test-with-temp-text "* H"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil))
@@ -4751,7 +4751,7 @@ Paragraph<point>"
 	     nil nil 1))))
   ;; Accept delta time, e.g., "+2d".
   (should
-   (equal "* H\nDEADLINE: <2015-03-04>\n"
+   (equal "* H\nDEADLINE: <2015-03-04>"
 	  (org-test-at-time "2014-03-04"
 	    (org-test-with-temp-text "* H"
 	      (let ((org-adapt-indentation nil)
@@ -4761,7 +4761,7 @@ Paragraph<point>"
 	       "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
   ;; Preserve repeater.
   (should
-   (equal "* H\nDEADLINE: <2012-03-29 +2y>\n"
+   (equal "* H\nDEADLINE: <2012-03-29 +2y>"
 	  (org-test-with-temp-text "* H"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil))
@@ -4818,7 +4818,7 @@ Paragraph<point>"
   ;; `org-loop-over-headlines-in-active-region' is non-nil, insert the
   ;; same value in all headlines in region.
   (should
-   (equal "* H1\nDEADLINE: <2012-03-29>\n* H2\nDEADLINE: <2012-03-29>\n"
+   (equal "* H1\nDEADLINE: <2012-03-29>\n* H2\nDEADLINE: <2012-03-29>"
 	  (org-test-with-temp-text "* H1\n* H2"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil)
@@ -4830,7 +4830,7 @@ Paragraph<point>"
 	    (replace-regexp-in-string
 	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
   (should-not
-   (equal "* H1\nDEADLINE: <2012-03-29>\n* H2\nDEADLINE: <2012-03-29>\n"
+   (equal "* H1\nDEADLINE: <2012-03-29>\n* H2\nDEADLINE: <2012-03-29>"
 	  (org-test-with-temp-text "* H1\n* H2"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil)
@@ -4846,7 +4846,7 @@ Paragraph<point>"
   "Test `org-schedule' specifications."
   ;; Insert a new value or replace existing one.
   (should
-   (equal "* H\nSCHEDULED: <2012-03-29>\n"
+   (equal "* H\nSCHEDULED: <2012-03-29>"
 	  (org-test-with-temp-text "* H"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil))
@@ -4865,7 +4865,7 @@ Paragraph<point>"
 	     nil nil 1))))
   ;; Accept delta time, e.g., "+2d".
   (should
-   (equal "* H\nSCHEDULED: <2015-03-04>\n"
+   (equal "* H\nSCHEDULED: <2015-03-04>"
 	  (org-test-at-time "2014-03-04"
 	    (org-test-with-temp-text "* H"
 	      (let ((org-adapt-indentation nil)
@@ -4875,7 +4875,7 @@ Paragraph<point>"
 	       "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1)))))
   ;; Preserve repeater.
   (should
-   (equal "* H\nSCHEDULED: <2012-03-29 +2y>\n"
+   (equal "* H\nSCHEDULED: <2012-03-29 +2y>"
 	  (org-test-with-temp-text "* H"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil))
@@ -4932,7 +4932,7 @@ Paragraph<point>"
   ;; `org-loop-over-headlines-in-active-region' is non-nil, insert the
   ;; same value in all headlines in region.
   (should
-   (equal "* H1\nSCHEDULED: <2012-03-29>\n* H2\nSCHEDULED: <2012-03-29>\n"
+   (equal "* H1\nSCHEDULED: <2012-03-29>\n* H2\nSCHEDULED: <2012-03-29>"
 	  (org-test-with-temp-text "* H1\n* H2"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil)
@@ -4944,7 +4944,7 @@ Paragraph<point>"
 	    (replace-regexp-in-string
 	     "\\( [.A-Za-z]+\\)>" "" (buffer-string) nil nil 1))))
   (should-not
-   (equal "* H1\nSCHEDULED: <2012-03-29>\n* H2\nSCHEDULED: <2012-03-29>\n"
+   (equal "* H1\nSCHEDULED: <2012-03-29>\n* H2\nSCHEDULED: <2012-03-29>"
 	  (org-test-with-temp-text "* H1\n* H2"
 	    (let ((org-adapt-indentation nil)
 		  (org-last-inserted-timestamp nil)

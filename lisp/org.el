@@ -10541,97 +10541,100 @@ the time to use.  If none is given, the user is prompted for
 a date.  REMOVE indicates what kind of entries to remove.  An old
 WHAT entry will also be removed."
   (let (org-time-was-given org-end-time-was-given default-time default-input)
-    (catch 'exit
-      (when (and (memq what '(scheduled deadline))
-		 (or (not time)
-		     (and (stringp time)
-			  (string-match "^[-+]+[0-9]" time))))
-	;; Try to get a default date/time from existing timestamp
-	(save-excursion
-	  (org-back-to-heading t)
-	  (let ((end (save-excursion (outline-next-heading) (point))) ts)
-	    (when (re-search-forward (if (eq what 'scheduled)
-					 org-scheduled-time-regexp
-				       org-deadline-time-regexp)
-				     end t)
-	      (setq ts (match-string 1)
-		    default-time (org-time-string-to-time ts)
-		    default-input (and ts (org-get-compact-tod ts)))))))
-      (when what
-	(setq time
-	      (if (stringp time)
-		  ;; This is a string (relative or absolute), set
-		  ;; proper date.
-		  (apply #'encode-time
-			 (org-read-date-analyze
-			  time default-time (decode-time default-time)))
-		;; If necessary, get the time from the user
-		(or time (org-read-date nil 'to-time nil
-					(cl-case what
-					  (deadline "DEADLINE")
-					  (scheduled "SCHEDULED")
-					  (otherwise nil))
-					default-time default-input)))))
-      (org-with-wide-buffer
-       (org-back-to-heading t)
-       (forward-line)
-       (unless (bolp) (insert "\n"))
-       (cond ((looking-at-p org-planning-line-re)
-	      ;; Move to current indentation.
-	      (skip-chars-forward " \t")
-	      ;; Check if we have to remove something.
-	      (dolist (type (if what (cons what remove) remove))
-		(save-excursion
-		  (when (re-search-forward
-			 (cl-case type
-			   (closed org-closed-time-regexp)
-			   (deadline org-deadline-time-regexp)
-			   (scheduled org-scheduled-time-regexp)
-			   (otherwise
-			    (error "Invalid planning type: %s" type)))
-			 (line-end-position) t)
-		    ;; Delete until next keyword or end of line.
-		    (delete-region
-		     (match-beginning 0)
-		     (if (re-search-forward org-keyword-time-not-clock-regexp
-					    (line-end-position)
-					    t)
-			 (match-beginning 0)
-		       (line-end-position))))))
-	      ;; If there is nothing more to add and no more keyword
-	      ;; is left, remove the line completely.
-	      (if (and (looking-at-p "[ \t]*$") (not what))
-		  (delete-region (line-beginning-position)
-				 (line-beginning-position 2))
-		;; If we removed last keyword, do not leave trailing
-		;; white space at the end of line.
-		(let ((p (point)))
-		  (save-excursion
-		    (end-of-line)
-		    (unless (= (skip-chars-backward " \t" p) 0)
-		      (delete-region (point) (line-end-position)))))))
-	     ((not what) (throw 'exit nil)) ; Nothing to do.
-	     (t (insert-before-markers "\n")
-		(backward-char 1)
-		(when org-adapt-indentation
-		  (indent-to-column (1+ (org-outline-level))))))
-       (when what
-	 ;; Insert planning keyword.
-	 (insert (cl-case what
-		   (closed org-closed-string)
-		   (deadline org-deadline-string)
-		   (scheduled org-scheduled-string)
-		   (otherwise (error "Invalid planning type: %s" what)))
-		 " ")
-	 ;; Insert associated timestamp.
-	 (let ((ts (org-insert-time-stamp
-		    time
-		    (or org-time-was-given
-			(and (eq what 'closed) org-log-done-with-time))
-		    (eq what 'closed)
-		    nil nil (list org-end-time-was-given))))
-	   (unless (eolp) (insert " "))
-	   ts))))))
+    (when (and (memq what '(scheduled deadline))
+	       (or (not time)
+		   (and (stringp time)
+			(string-match "^[-+]+[0-9]" time))))
+      ;; Try to get a default date/time from existing timestamp
+      (save-excursion
+	(org-back-to-heading t)
+	(let ((end (save-excursion (outline-next-heading) (point))) ts)
+	  (when (re-search-forward (if (eq what 'scheduled)
+				       org-scheduled-time-regexp
+				     org-deadline-time-regexp)
+				   end t)
+	    (setq ts (match-string 1)
+		  default-time (org-time-string-to-time ts)
+		  default-input (and ts (org-get-compact-tod ts)))))))
+    (when what
+      (setq time
+	    (if (stringp time)
+		;; This is a string (relative or absolute), set
+		;; proper date.
+		(apply #'encode-time
+		       (org-read-date-analyze
+			time default-time (decode-time default-time)))
+	      ;; If necessary, get the time from the user
+	      (or time (org-read-date nil 'to-time nil
+				      (cl-case what
+					(deadline "DEADLINE")
+					(scheduled "SCHEDULED")
+					(otherwise nil))
+				      default-time default-input)))))
+    (org-with-wide-buffer
+     (org-back-to-heading t)
+     (let ((planning? (save-excursion
+			(forward-line)
+			(looking-at-p org-planning-line-re))))
+       (cond
+	(planning?
+	 (forward-line)
+	 ;; Move to current indentation.
+	 (skip-chars-forward " \t")
+	 ;; Check if we have to remove something.
+	 (dolist (type (if what (cons what remove) remove))
+	   (save-excursion
+	     (when (re-search-forward
+		    (cl-case type
+		      (closed org-closed-time-regexp)
+		      (deadline org-deadline-time-regexp)
+		      (scheduled org-scheduled-time-regexp)
+		      (otherwise (error "Invalid planning type: %s" type)))
+		    (line-end-position)
+		    t)
+	       ;; Delete until next keyword or end of line.
+	       (delete-region
+		(match-beginning 0)
+		(if (re-search-forward org-keyword-time-not-clock-regexp
+				       (line-end-position)
+				       t)
+		    (match-beginning 0)
+		  (line-end-position))))))
+	 ;; If there is nothing more to add and no more keyword is
+	 ;; left, remove the line completely.
+	 (if (and (looking-at-p "[ \t]*$") (not what))
+	     (delete-region (line-beginning-position)
+			    (line-beginning-position 2))
+	   ;; If we removed last keyword, do not leave trailing white
+	   ;; space at the end of line.
+	   (let ((p (point)))
+	     (save-excursion
+	       (end-of-line)
+	       (unless (= (skip-chars-backward " \t" p) 0)
+		 (delete-region (point) (line-end-position)))))))
+	(what
+	 (end-of-line)
+	 (insert "\n")
+	 (when org-adapt-indentation
+	   (indent-to-column (1+ (org-outline-level)))))
+	(t nil)))
+     (when what
+       ;; Insert planning keyword.
+       (insert (cl-case what
+		 (closed org-closed-string)
+		 (deadline org-deadline-string)
+		 (scheduled org-scheduled-string)
+		 (otherwise (error "Invalid planning type: %s" what)))
+	       " ")
+       ;; Insert associated timestamp.
+       (let ((ts (org-insert-time-stamp
+		  time
+		  (or org-time-was-given
+		      (and (eq what 'closed) org-log-done-with-time))
+		  (eq what 'closed)
+		  nil nil (list org-end-time-was-given))))
+	 (unless (eolp) (insert " "))
+	 ts)))))
 
 (defvar org-log-note-marker (make-marker)
   "Marker pointing at the entry where the note is to be inserted.")
