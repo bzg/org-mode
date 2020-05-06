@@ -1086,11 +1086,10 @@ use that string instead.
 
 The change affects only Org mode (which will then use its own display table).
 Changing this requires executing `\\[org-mode]' in a buffer to become
-effective."
+effective.  It cannot be set as a local variable."
   :group 'org-startup
   :type '(choice (const :tag "Default" nil)
-		 (string :tag "String" :value "...#"))
-  :safe (lambda (v) (and (string-or-null-p v) (not (equal "" v)))))
+		 (string :tag "String" :value "...#")))
 
 (defvar org-display-table nil
   "The display table for Org mode, in case `org-ellipsis' is non-nil.")
