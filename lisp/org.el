@@ -919,8 +919,7 @@ equivalent option for agenda views."
 		 (const :tag "All headlines in active region" t)
 		 (const :tag "In active region, headlines at the same level than the first one" start-level)
 		 (string :tag "Tags/Property/Todo matcher"))
-  :version "27.1"
-  :package-version "9.4"
+  :package-version '(Org . "9.4")
   :group 'org-todo
   :group 'org-archive)
 
@@ -3592,8 +3591,7 @@ Normally, only the TODO/DONE keyword indicates the state of a headline.
 When this is non-nil, the headline after the keyword is set to the
 `org-headline-done' as an additional indication."
   :group 'org-appearance
-  :version "27.1"
-  :package-version "9.4"
+  :package-version '(Org . "9.4")
   :type 'boolean)
 
 (defcustom org-fontify-emphasized-text t

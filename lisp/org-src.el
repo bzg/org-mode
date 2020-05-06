@@ -241,8 +241,7 @@ green, respectability.
   "If non-nil, the effect of TAB in a code block is as if it were
 issued in the language major mode buffer."
   :type 'boolean
-  :version "27.1"
-  :package-version "9.4"
+  :package-version '(Org . "9.4")
   :group 'org-babel)
 
 

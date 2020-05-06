@@ -169,7 +169,7 @@ table, obtained by prompting the user."
 (defcustom org-table-header-line-p nil
   "Activate `org-table-header-line-mode' by default?"
   :type 'boolean
-  :package-version "9.4"
+  :package-version '(Org . "9.4")
   :group 'org-table)
 
 (defcustom org-table-default-size "5x2"
