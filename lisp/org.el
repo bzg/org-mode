@@ -17939,6 +17939,7 @@ an argument, unconditionally call `org-insert-heading'."
      ["Convert to odd/even levels" org-convert-to-oddeven-levels t])
     ("Editing"
      ["Emphasis..." org-emphasize t]
+     ["Add block structure" org-insert-structure-template t]
      ["Edit Source Example" org-edit-special t]
      "--"
      ["Footnote new/jump" org-footnote-action t]
