@@ -5700,12 +5700,16 @@ This dynamic block has the following parameters:
 
 The following commands insert or update the dynamic block:
 
-- {{{kbd(C-c C-x i)}}} (~org-insert-columns-dblock~) ::
+- ~org-columns-insert-dblock~ ::
 
-  #+kindex: C-c C-x i
-  #+findex: org-insert-columns-dblock
+  #+kindex: C-c C-x x
+  #+findex: org-columns-insert-dblock
   Insert a dynamic block capturing a column view.  Prompt for the
   scope or ID of the view.
+
+  This command can be invoked by calling
+  ~org-dynamic-block-insert-dblock~ ({{{kbd(C-c C-x x)}}}) and
+  selecting "columnview" (see [[*Dynamic Blocks]]).
 
 - {{{kbd(C-c C-c)}}} {{{kbd(C-c C-x C-u)}}} (~org-dblock-update~) ::
 
@@ -6545,13 +6549,19 @@ Org mode can produce quite complex reports based on the time clocking
 information.  Such a report is called a /clock table/, because it is
 formatted as one or several Org tables.
 
-You can insert, or update, a clock table through Org dynamic blocks
-insert command (see [[*Dynamic Blocks]]), by pressing {{{kbd(C-c C-x
-x c l o c k t a b l e RET)}}}.  When called with a prefix argument,
-jump to the first clock table in the current document and update it.
-The clock table includes archived trees.
-
 #+attr_texinfo: :sep ,
+- ~org-clock-report~ ::
+
+  #+kindex: C-c C-x x
+  #+findex: org-clock-report
+  Insert or update a clock table.  When called with a prefix argument,
+  jump to the first clock table in the current document and update it.
+  The clock table includes archived trees.
+
+  This command can be invoked by calling
+  ~org-dynamic-block-insert-dblock~ ({{{kbd(C-c C-x x)}}}) and
+  selecting "clocktable" (see [[*Dynamic Blocks]]).
+
 - {{{kbd(C-c C-c)}}} or {{{kbd(C-c C-x C-u)}}} (~org-dblock-update~) ::
 
   #+kindex: C-c C-c
@@ -6576,7 +6586,7 @@ The clock table includes archived trees.
   =:block= is =today=, it is shifted to =today-1=, etc.
 
 Here is an example of the frame for a clock table as it is inserted
-into the buffer with the {{{kbd(C-c C-x C-r)}}} command:
+into the buffer by ~org-clock-report~:
 
 #+cindex: @samp{BEGIN clocktable}
 #+begin_example
