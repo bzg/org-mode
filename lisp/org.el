@@ -17649,8 +17649,8 @@ call `open-line' on the very first character."
 
 (defun org--newline (indent arg interactive)
   "Call `newline-and-indent' or just `newline'.
-If INDENT is non-nil, call `newline-and-indent' with ARG to
-indent unconditionally; otherwise, call `newline' with ARG and
+If INDENT is non-nil, call `newline-and-indent' to indent
+unconditionally; otherwise, call `newline' with ARG and
 INTERACTIVE, which can trigger indentation if
 `electric-indent-mode' is enabled."
   (if indent
