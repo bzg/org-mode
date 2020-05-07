@@ -5204,6 +5204,11 @@ Paragraph<point>"
    (= 1
       (org-test-with-temp-text "* H\n:PROPERTIES:\n:PROP: value\n:END:"
 	(org-find-property "prop"))))
+  ;; Find properties in top-level property drawer.
+  (should
+   (= 1
+      (org-test-with-temp-text ":PROPERTIES:\n:PROP: value\n:END:"
+	(org-find-property "prop"))))
   ;; Ignore false positives.
   (should
    (= 27
