@@ -1152,9 +1152,7 @@ may have been stored before."
 	(unless (org-at-heading-p) (outline-next-heading))
 	(org-capture-mark-kill-region origin (point))
 	(org-capture-narrow beg (point))
-	(when (or (search-backward "%?" beg t)
-		  (search-forward "%?" nil t))
-	  (replace-match ""))))))
+	(org-capture--position-cursor beg (point))))))
 
 (defun org-capture-place-item ()
   "Place the template as a new plain list item."
@@ -1266,9 +1264,7 @@ may have been stored before."
 	;; not narrow at the beginning of the next line, possibly
 	;; altering its structure (e.g., when it is a headline).
 	(org-capture-narrow beg (1- end))
-	(when (or (search-backward "%?" beg t)
-		  (search-forward "%?" end t))
-	  (replace-match ""))))))
+	(org-capture--position-cursor beg end)))))
 
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
@@ -1350,9 +1346,7 @@ may have been stored before."
 	;; TEXT is guaranteed to end with a newline character.  Ignore
 	;; it when narrowing so as to not alter data on the next line.
 	(org-capture-narrow beg (1- end))
-	(when (or (search-backward "%?" beg t)
-		  (search-forward "%?" end t))
-	  (replace-match ""))))))
+	(org-capture--position-cursor beg (1- end))))))
 
 (defun org-capture-place-plain-text ()
   "Place the template plainly.
@@ -1387,9 +1381,7 @@ Of course, if exact position has been required, just put it there."
 	(org-capture-empty-lines-after)
 	(org-capture-mark-kill-region origin (point))
 	(org-capture-narrow beg end)
-	(when (or (search-backward "%?" beg t)
-		  (search-forward "%?" end t))
-	  (replace-match ""))))))
+	(org-capture--position-cursor beg end)))))
 
 (defun org-capture-mark-kill-region (beg end)
   "Mark the region that will have to be killed when aborting capture."
@@ -1435,8 +1427,15 @@ Of course, if exact position has been required, just put it there."
 (defun org-capture-narrow (beg end)
   "Narrow, unless configuration says not to narrow."
   (unless (org-capture-get :unnarrowed)
-    (narrow-to-region beg end)
-    (goto-char beg)))
+    (narrow-to-region beg end)))
+
+(defun org-capture--position-cursor (beg end)
+  "Move point to first \"%?\" location or at start of template.
+BEG and END are buffer positions at the begging and end position
+of the template."
+  (goto-char beg)
+  (when (search-forward "%?" end t)
+    (replace-match "")))
 
 (defun org-capture-empty-lines-before (&optional n)
   "Set the correct number of empty lines before the insertion point.

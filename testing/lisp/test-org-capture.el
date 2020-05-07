@@ -742,6 +742,16 @@
 		    `(("t" "Text" plain (file ,file) ""
 		       :immediate-finish t))))
 	      (org-capture nil "t")
+	      (buffer-string)))))
+  ;; Test :unnarrowed property without a "%?" marker.
+  (should
+   (equal "SUCCESS\n"
+	  (org-test-with-temp-text-in-file ""
+	    (let* ((file (buffer-file-name))
+		   (org-capture-templates
+		    `(("t" "Text" plain (file ,file) "SUCCESS"
+		       :unnarrowed t :immediate-finish t))))
+	      (org-capture nil "t")
 	      (buffer-string))))))
 
 (provide 'test-org-capture)
