@@ -17654,7 +17654,7 @@ indent unconditionally; otherwise, call `newline' with ARG and
 INTERACTIVE, which can trigger indentation if
 `electric-indent-mode' is enabled."
   (if indent
-      (newline-and-indent)
+      (org-newline-and-indent arg)
     (newline arg interactive)))
 
 (defun org-return (&optional indent arg interactive)

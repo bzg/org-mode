@@ -102,6 +102,12 @@ is nil)."
   (defun org-time-convert-to-list (time)
     (seconds-to-time (float-time time))))
 
+;; `newline-and-indent' did not take a numeric argument before 27.1.
+(if (version< emacs-version "27")
+    (defsubst org-newline-and-indent (&optional _arg)
+      (newline-and-indent))
+  (defalias 'org-newline-and-indent #'newline-and-indent))
+
 
 ;;; Emacs < 26.1 compatibility
 
