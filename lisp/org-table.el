@@ -4349,11 +4349,8 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
       (let* ((indent (progn (looking-at "[ \t]*") (match-string 0)))
 	     ;; Table's rows as lists of fields.  Rules are replaced
 	     ;; by nil.  Trailing spaces are removed.
-	     (fields (mapcar
-		      (lambda (l)
-			(and (not (string-match-p org-table-hline-regexp l))
-			     (org-split-string l "[ \t]*|[ \t]*")))
-		      (split-string (buffer-substring beg end) "\n" t)))
+	     (fields (mapcar (lambda (row) (and (listp row) row))
+			     (org-table-to-lisp)))
 	     ;; Compute number of columns.  If the table contains no
 	     ;; field, create a default table and bail out.
 	     (columns-number
