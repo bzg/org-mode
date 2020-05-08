@@ -4347,17 +4347,10 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
      (goto-char beg)
      (org-table-with-shrunk-columns
       (let* ((indent (progn (looking-at "[ \t]*") (match-string 0)))
-	     ;; Table's rows as lists of fields.  Rules are replaced
-	     ;; by nil.  Trailing spaces are removed.
-	     (fields (mapcar (lambda (row) (and (listp row) row))
-			     (org-table-to-lisp)))
-	     ;; Compute number of columns.  If the table contains no
-	     ;; field, create a default table and bail out.
-	     (columns-number
-	      (if fields (apply #'max (mapcar #'length fields))
-		(kill-region beg end)
-		(org-table-create org-table-default-size)
-		(user-error "Empty table - created default table")))
+	     (table (org-table-to-lisp))
+             (rows (remq 'hline table))
+	     ;; Compute number of columns.
+	     (columns-number (apply #'max (mapcar #'length rows)))
 	     (widths nil)
 	     (alignments nil))
 	;; Compute alignment and width for each column.
@@ -4366,7 +4359,7 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 		 (fixed-align? nil)
 		 (numbers 0)
 		 (non-empty 0))
-	    (dolist (row fields)
+	    (dolist (row rows)
 	      (let ((cell (or (nth i row) "")))
 		(setq max-width (max max-width (org-string-width cell)))
 		(cond (fixed-align? nil)
@@ -4391,12 +4384,12 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 	(setq org-table-last-column-widths widths)
 	;; Build new table rows.  Only replace rows that actually
 	;; changed.
-	(dolist (row fields)
+	(dolist (row table)
 	  (let ((previous (buffer-substring (point) (line-end-position)))
 		(new
 		 (format "%s|%s|"
 			 indent
-			 (if (null row)	;horizontal rule
+			 (if (eq row 'hline) ;horizontal rule
 			     (mapconcat (lambda (w) (make-string (+ 2 w) ?-))
 					widths
 					"+")
