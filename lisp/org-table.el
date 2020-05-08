@@ -5455,7 +5455,7 @@ The table is taken from the parameter TXT, or from the buffer at point."
 	    (if (looking-at "-")
 		(push 'hline table)
 	      (while (not (progn (skip-chars-forward " \t") (eolp)))
-		(push (buffer-substring-no-properties
+		(push (buffer-substring
 		       (point)
 		       (progn (re-search-forward "[ \t]*\\(|\\|$\\)")
 			      (match-beginning 0)))
