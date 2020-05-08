@@ -1446,7 +1446,7 @@ Of course, if exact position has been required, just put it there."
 
 (defun org-capture--position-cursor (beg end)
   "Move point to first \"%?\" location or at start of template.
-BEG and END are buffer positions at the begging and end position
+BEG and END are buffer positions at the beginning and end position
 of the template."
   (goto-char beg)
   (when (search-forward "%?" end t)
