@@ -357,6 +357,11 @@ FULL is given."
 
 
 ;;; Syntax Constants
+;;;; Comments
+(defconst org-comment-regexp
+  (rx (seq bol (zero-or-more (any "\t ")) "#" (or " " eol)))
+  "Regular expression for comment lines.")
+
 ;;;; Keyword
 (defconst org-keyword-regexp "^[ \t]*#\\+\\(\\S-+?\\):[ \t]*\\(.*\\)$"
   "Regular expression for keyword-lines")
@@ -12466,16 +12471,23 @@ FORCE is non-nil, or return nil."
 	      (cons pos pos)))))))
 
 (defun org-at-property-block-p ()
-  "Return t when point is at the first line of a property drawer.
-The property drawer is validated according to its positional
-rules using `org-get-property-block'."
-  (save-excursion
-    (beginning-of-line)
-    (and (looking-at org-property-start-re)
-	 (forward-line)
-	 (let ((property-drawer (org-get-property-block)))
-	   (and property-drawer
-		(= (point) (car property-drawer)))))))
+  "Non-nil when point is at the first line of a property drawer."
+  (org-with-wide-buffer
+   (beginning-of-line)
+   (and (looking-at org-property-start-re)
+	(or (bobp)
+	    (progn
+	      (forward-line -1)
+	      (cond ((org-at-heading-p))
+		    ((looking-at org-planning-line-re)
+		     (forward-line -1)
+		     (org-at-heading-p))
+		    ((looking-at org-comment-regexp)
+		     (forward-line -1)
+		     (while (and (not (bobp)) (looking-at org-comment-regexp))
+		       (forward-line -1))
+		     (looking-at org-comment-regexp))
+		    (t nil)))))))
 
 (defun org-at-property-p ()
   "Non-nil when point is inside a property drawer.
@@ -20169,7 +20181,7 @@ unless optional argument NO-INHERITANCE is non-nil."
   (save-excursion
     (save-match-data
       (beginning-of-line)
-      (looking-at "^[ \t]*# "))))
+      (looking-at org-comment-regexp))))
 
 (defun org-at-keyword-p nil
   "Return t if cursor is at a keyword-line."
