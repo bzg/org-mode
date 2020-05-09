@@ -6143,12 +6143,16 @@ STATE should be one of the symbols listed in the docstring of
 		      (t (save-excursion (org-end-of-subtree t))))))
       (org-with-point-at beg
 	(while (re-search-forward org-property-start-re (max end (point)) t)
-	  (let ((start (match-end 0)))
-	    (when (org-at-property-drawer-p)
-	      (let ((end (re-search-forward org-property-end-re)))
-		;; Property drawers use `outline' invisibility spec so
-		;; they can be swallowed once we hide the outline.
-		(org-flag-region start end t 'outline)))))))))
+	  (pcase (get-char-property-and-overlay (line-end-position) 'invisible)
+	    ;; Do not fold already folded drawers.
+	    (`(outline . ,o) (goto-char (overlay-end o)))
+	    (_
+	     (let ((start (match-end 0)))
+	       (when (org-at-property-drawer-p)
+		 (let ((end (re-search-forward org-property-end-re)))
+		   ;; Property drawers use `outline' invisibility spec so
+		   ;; they can be swallowed once we hide the outline.
+		   (org-flag-region start end t 'outline)))))))))))
 
 ;;;; Visibility cycling
 
