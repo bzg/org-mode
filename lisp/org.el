@@ -1537,6 +1537,7 @@ the values `folded', `children', or `subtree'."
   :type 'hook)
 
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
+			    org-cycle-hide-property-drawers
 			    org-cycle-show-empty-lines
 			    org-optimize-window-after-visibility-change)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
@@ -1546,9 +1547,8 @@ argument is a symbol.  After a global state change, it can have the values
 `overview', `contents', or `all'.  After a local state change, it can have
 the values `folded', `children', or `subtree'."
   :group 'org-cycle
-  :type 'hook
-  :version "26.1"
-  :package-version '(Org . "8.3"))
+  :package-version '(Org . "8.4")
+  :type 'hook)
 
 (defgroup org-edit-structure nil
   "Options concerning structure editing in Org mode."
@@ -5985,7 +5985,8 @@ Show the heading too, if it is currently invisible."
 	     (match-beginning 1)
 	   (point-max)))
        nil
-       'outline))))
+       'outline)
+      (org-cycle-hide-property-drawers 'children))))
 
 (defun org-show-children (&optional level)
   "Show all direct subheadings of this heading.
@@ -6114,6 +6115,26 @@ Return a non-nil value when toggling is successful."
   (interactive)
   (org-show-all '(blocks))
   (org-block-map 'org-hide-block-toggle))
+
+(defun org-cycle-hide-property-drawers (state)
+  "Re-hide all drawers after a visibility state change.
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'."
+  (when (and (derived-mode-p 'org-mode)
+	     (not (memq state '(overview folded contents))))
+    (let* ((global? (eq state 'all))
+	   (beg (if global? (point-min) (line-beginning-position)))
+	   (end (cond (global? (point-max))
+		      ((eq state 'children) (org-entry-end-position))
+		      (t (org-end-of-subtree t)))))
+      (org-with-point-at beg
+	(while (re-search-forward org-property-start-re (max end (point)) t)
+	  (let ((start (match-end 0)))
+	    (when (org-at-property-drawer-p)
+	      (let ((end (re-search-forward org-property-end-re)))
+		;; Property drawers use `outline' invisibility spec so
+		;; they can be swallowed once we hide the outline.
+		(org-flag-region start end t 'outline)))))))))
 
 (defun org-cycle-hide-drawers (state &optional exceptions)
   "Re-hide all drawers after a visibility state change.
@@ -6489,7 +6510,7 @@ With a numeric prefix, show all headlines up to that level."
     (when org-hide-block-startup (org-hide-block-all))
     (org-set-visibility-according-to-property)
     (org-cycle-hide-archived-subtrees 'all)
-    (org-cycle-hide-drawers 'all)
+    (org-cycle-hide-property-drawers 'all)
     (org-cycle-show-empty-lines t)))
 
 (defun org-set-visibility-according-to-property ()
@@ -6594,7 +6615,7 @@ This function is the default value of the hook `org-cycle-hook'."
 	    (when (and (not (org-invisible-p))
 		       (org-invisible-p (line-end-position)))
 	      (outline-hide-entry))))
-	(org-cycle-hide-drawers 'all)
+	(org-cycle-hide-property-drawers 'all)
 	(org-cycle-show-empty-lines 'overview)))))
 
 (defun org-cycle-show-empty-lines (state)
@@ -8240,7 +8261,7 @@ function is being called interactively."
 			      "(empty for default `sort-subr' predicate): ")
 		      'allow-empty))))
 	   ((member dcst '(?p ?t ?s ?d ?c ?k)) '<))))
-	(org-cycle-hide-drawers 'all)
+	(org-cycle-hide-property-drawers 'all)
 	(when restore-clock?
 	  (move-marker org-clock-marker
 		       (1+ (next-single-property-change
