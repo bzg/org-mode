@@ -11866,7 +11866,8 @@ in Lisp code use `org-set-tags' instead."
 	  (org-set-tags tags)))))
     ;; `save-excursion' may not replace the point at the right
     ;; position.
-    (when (save-excursion (skip-chars-backward "*") (bolp))
+    (when (and (save-excursion (skip-chars-backward "*") (bolp))
+	       (looking-at-p " "))
       (forward-char))))
 
 (defun org-align-tags (&optional all)
