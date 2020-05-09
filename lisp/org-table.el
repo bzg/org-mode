@@ -4346,8 +4346,7 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
      (move-marker org-table-aligned-end-marker end)
      (goto-char beg)
      (org-table-with-shrunk-columns
-      (let* ((indent (progn (looking-at "[ \t]*") (match-string 0)))
-	     (table (org-table-to-lisp))
+      (let* ((table (org-table-to-lisp))
              (rows (remq 'hline table))
 	     ;; Compute number of columns.
 	     (columns-number (apply #'max (mapcar #'length rows)))
@@ -4384,30 +4383,32 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 	(setq org-table-last-column-widths widths)
 	;; Build new table rows.  Only replace rows that actually
 	;; changed.
-	(dolist (row table)
-	  (let ((previous (buffer-substring (point) (line-end-position)))
-		(new
-		 (format "%s|%s|"
-			 indent
-			 (if (eq row 'hline) ;horizontal rule
-			     (mapconcat (lambda (w) (make-string (+ 2 w) ?-))
-					widths
-					"+")
-			   (let ((cells	;add missing fields
-				  (append row
-					  (make-list (- columns-number
-							(length row))
-						     ""))))
-			     (mapconcat #'identity
-					(cl-mapcar #'org-table--align-field
-						   cells
-						   widths
-						   alignments)
-					"|"))))))
-	    (if (equal new previous)
-		(forward-line)
-	      (insert new "\n")
-	      (delete-region (point) (line-beginning-position 2)))))
+	(let ((rule (and (memq 'hline table)
+			 (mapconcat (lambda (w) (make-string (+ 2 w) ?-))
+				    widths
+				    "+")))
+              (indent (progn (looking-at "[ \t]*|") (match-string 0))))
+	  (dolist (row table)
+	    (let ((previous (buffer-substring (point) (line-end-position)))
+		  (new
+                   (concat indent
+		           (if (eq row 'hline) rule
+		             (let* ((offset (- columns-number (length row)))
+			            (fields (if (= 0 offset) row
+                                              ;; Add missing fields.
+				              (append row
+						      (make-list offset "")))))
+			       (mapconcat #'identity
+				          (cl-mapcar #'org-table--align-field
+					             fields
+					             widths
+					             alignments)
+				          "|")))
+		           "|")))
+	      (if (equal new previous)
+		  (forward-line)
+		(insert new "\n")
+		(delete-region (point) (line-beginning-position 2))))))
 	(set-marker end nil)
 	(when org-table-overlay-coordinates (org-table-overlay-coordinates))
 	(setq org-table-may-need-update nil))))))
