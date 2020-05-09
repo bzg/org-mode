@@ -1547,7 +1547,7 @@ argument is a symbol.  After a global state change, it can have the values
 `overview', `contents', or `all'.  After a local state change, it can have
 the values `folded', `children', or `subtree'."
   :group 'org-cycle
-  :package-version '(Org . "8.4")
+  :package-version '(Org . "9.4")
   :type 'hook)
 
 (defgroup org-edit-structure nil
