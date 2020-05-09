@@ -6122,13 +6122,16 @@ Return a non-nil value when toggling is successful."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward org-drawer-regexp nil t)
-      (let ((drawer (org-element-at-point)))
-	(when (memq (org-element-type drawer) '(drawer property-drawer))
-	  (org-hide-drawer-toggle t nil drawer)
-	  ;; Make sure to skip drawer entirely or we might flag it
-	  ;; another time when matching its ending line with
-	  ;; `org-drawer-regexp'.
-	  (goto-char (org-element-property :end drawer)))))))
+      (pcase (get-char-property-and-overlay (point) 'invisible)
+	(`(_ . ,o) (goto-char (overlay-end o)))
+	(_
+	 (let ((drawer (org-element-at-point)))
+	   (when (memq (org-element-type drawer) '(drawer property-drawer))
+	     (org-hide-drawer-toggle t nil drawer)
+	     ;; Make sure to skip drawer entirely or we might flag it
+	     ;; another time when matching its ending line with
+	     ;; `org-drawer-regexp'.
+	     (goto-char (org-element-property :end drawer)))))))))
 
 (defun org-cycle-hide-property-drawers (state)
   "Re-hide all drawers after a visibility state change.
@@ -6142,10 +6145,10 @@ STATE should be one of the symbols listed in the docstring of
 		      ((eq state 'children) (org-entry-end-position))
 		      (t (save-excursion (org-end-of-subtree t))))))
       (org-with-point-at beg
-	(while (re-search-forward org-property-start-re (max end (point)) t)
-	  (pcase (get-char-property-and-overlay (line-end-position) 'invisible)
+	(while (re-search-forward org-property-start-re end t)
+	  (pcase (get-char-property-and-overlay (point) 'invisible)
 	    ;; Do not fold already folded drawers.
-	    (`(outline . ,o) (goto-char (overlay-end o)))
+	    (`(_ . ,o) (goto-char (overlay-end o)))
 	    (_
 	     (let ((start (match-end 0)))
 	       (when (org-at-property-drawer-p)
