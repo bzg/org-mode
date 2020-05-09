@@ -6041,46 +6041,47 @@ or drawer.  If it is non-nil, hide it unconditionally.  Throw an
 error when not at a block or drawer, unless NO-ERROR is non-nil.
 
 Return a non-nil value when toggling is successful."
-  (cond
-   ((memq (org-element-type element)
-	  (pcase category
-	    (`drawer '(drawer property-drawer))
-	    (`block '(center-block
-		      comment-block dynamic-block example-block export-block
-		      quote-block special-block src-block verse-block))
-	    (_ (error "Unknown category: %S" category))))
-    (let* ((post (org-element-property :post-affiliated element))
-	   (start (save-excursion
-		    (goto-char post)
-		    (line-end-position)))
-	   (end (save-excursion
-		  (goto-char (org-element-property :end element))
-		  (skip-chars-backward " \t\n")
-		  (line-end-position))))
-      ;; Do nothing when not before or at the block opening line or at
-      ;; the block closing line.
-      (unless (let ((eol (line-end-position)))
-		(and (> eol start) (/= eol end)))
-	(let* ((spec (if (eq category 'drawer)
-			 'org-hide-drawer
-		       'org-hide-block))
-	       (flag
-		(cond ((eq force 'off) nil)
-		      (force t)
-		      ((eq (get-char-property start 'invisible) spec) nil)
-		      (t t))))
-	  (org-flag-region start end flag spec))
-	;; When the block is hidden away, make sure point is left in
-	;; a visible part of the buffer.
-	(when (invisible-p (max (1- (point)) (point-min)))
-	  (goto-char post))
-	;; Signal success.
-	t)))
-   (no-error nil)
-   (t
-    (user-error (if (eq category 'drawer)
-		    "Not at a drawer"
-		  "Not at a block")))))
+  (let ((type (org-element-type element)))
+    (cond
+     ((memq type
+	    (pcase category
+	      (`drawer '(drawer property-drawer))
+	      (`block '(center-block
+			comment-block dynamic-block example-block export-block
+			quote-block special-block src-block verse-block))
+	      (_ (error "Unknown category: %S" category))))
+      (let* ((post (org-element-property :post-affiliated element))
+	     (start (save-excursion
+		      (goto-char post)
+		      (line-end-position)))
+	     (end (save-excursion
+		    (goto-char (org-element-property :end element))
+		    (skip-chars-backward " \t\n")
+		    (line-end-position))))
+	;; Do nothing when not before or at the block opening line or
+	;; at the block closing line.
+	(unless (let ((eol (line-end-position)))
+		  (and (> eol start) (/= eol end)))
+	  (let* ((spec (cond ((eq category 'block) 'org-hide-block)
+			     ((eq type 'property-drawer) 'outline)
+			     (t 'org-hide-drawer)))
+		 (flag
+		  (cond ((eq force 'off) nil)
+			(force t)
+			((eq (get-char-property start 'invisible) spec) nil)
+			(t t))))
+	    (org-flag-region start end flag spec))
+	  ;; When the block is hidden away, make sure point is left in
+	  ;; a visible part of the buffer.
+	  (when (invisible-p (max (1- (point)) (point-min)))
+	    (goto-char post))
+	  ;; Signal success.
+	  t)))
+     (no-error nil)
+     (t
+      (user-error (if (eq category 'drawer)
+		      "Not at a drawer"
+		    "Not at a block"))))))
 
 (defun org-hide-block-toggle (&optional force no-error element)
   "Toggle the visibility of the current block.
@@ -6269,7 +6270,7 @@ same as `S-TAB') also when called without prefix argument."
 	  (cond
 	   ;; Try toggling visibility for block at point.
 	   ((org-hide-block-toggle nil t element))
-	   ;; Try toggling visibility for block at point.
+	   ;; Try toggling visibility for drawer at point.
 	   ((org-hide-drawer-toggle nil t element))
 	   ;; Table: enter it or move to the next field.
 	   ((and (org-match-line "[ \t]*[|+]")
