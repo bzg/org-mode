@@ -397,22 +397,23 @@
 	  (org-test-with-temp-text ":PROPERTIES:\n<point>:PROP: t\n:END:\n"
 	    (org-at-property-p)))))
 
-(ert-deftest test-org/at-property-block-p ()
-  "Test `org-at-property-block-p' specifications."
+(ert-deftest test-org/at-property-drawer-p ()
+  "Test `org-at-property-drawer-p' specifications."
   (should
-   (equal 't
-	  (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:PROP: t\n:END:\n"
-	    (org-at-property-block-p))))
+   (org-test-with-temp-text "* H\n<point>:PROPERTIES:\n:PROP: t\n:END:\n"
+     (org-at-property-drawer-p)))
   (should
-   (equal 't
-	  (org-test-with-temp-text ":PROPERTIES:\n:PROP: t\n:END:\n"
-	    (org-at-property-block-p))))
-  ;; The function only returns t if point is at the first line of a
-  ;; property block.
+   (org-test-with-temp-text ":PROPERTIES:\n:PROP: t\n:END:\n"
+     (org-at-property-drawer-p)))
+  ;; The function only returns t if point is at the first line of
+  ;; a property block.
   (should-not
-   (equal 't
-	  (org-test-with-temp-text ":PROPERTIES:\n<point>:PROP: t\n:END:\n"
-	    (org-at-property-block-p)))))
+   (org-test-with-temp-text ":PROPERTIES:\n<point>:PROP: t\n:END:\n"
+     (org-at-property-drawer-p)))
+  ;; The function ignores incomplete drawers.
+  (should-not
+   (org-test-with-temp-text ":PROPERTIES:\n<point>:PROP: t\n"
+     (org-at-property-drawer-p))))
 
 (ert-deftest test-org/get-property-block ()
   "Test `org-get-property-block' specifications."

@@ -12474,7 +12474,7 @@ FORCE is non-nil, or return nil."
   "Non-nil when point is at the first line of a property drawer."
   (org-with-wide-buffer
    (beginning-of-line)
-   (and (looking-at org-property-start-re)
+   (and (looking-at org-property-drawer-re)
 	(or (bobp)
 	    (progn
 	      (forward-line -1)
