@@ -6140,7 +6140,7 @@ STATE should be one of the symbols listed in the docstring of
 	   (beg (if global? (point-min) (line-beginning-position)))
 	   (end (cond (global? (point-max))
 		      ((eq state 'children) (org-entry-end-position))
-		      (t (org-end-of-subtree t)))))
+		      (t (save-excursion (org-end-of-subtree t))))))
       (org-with-point-at beg
 	(while (re-search-forward org-property-start-re (max end (point)) t)
 	  (let ((start (match-end 0)))
