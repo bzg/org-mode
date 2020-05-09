@@ -12470,7 +12470,7 @@ FORCE is non-nil, or return nil."
 				       (line-beginning-position))))
 	      (cons pos pos)))))))
 
-(defun org-at-property-block-p ()
+(defun org-at-property-drawer-p ()
   "Non-nil when point is at the first line of a property drawer."
   (org-with-wide-buffer
    (beginning-of-line)

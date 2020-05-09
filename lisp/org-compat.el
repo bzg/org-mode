@@ -630,6 +630,9 @@ use of this function is for the stuck project list."
   (declare (obsolete "use `org-align-tags' instead." "Org 9.2"))
   (org-align-tags t))
 
+(define-obsolete-function-alias
+  'org-at-property-block-p 'org-at-property-drawer-p "Org 9.4")
+
 (defun org-flag-drawer (flag &optional element beg end)
   "When FLAG is non-nil, hide the drawer we are at.
 Otherwise make it visible.

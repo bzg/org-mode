@@ -344,6 +344,10 @@ The variable was not used in the code base.
 
 The variable was not used in the code base.
 
+*** Renamed ~org-at-property-block-p~
+
+The new name is ~org-at-property-drawer-p~, which is less confusing.
+
 *** Renamed ~org-columns-set-tags-or-toggle~
 
 See [[*~org-columns-toggle-or-columns-quit~]].
