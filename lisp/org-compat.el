@@ -663,6 +663,25 @@ region as a drawer without further ado."
 	  (when (invisible-p (max (1- (point)) (point-min)))
 	    (goto-char post)))))))
 
+(defun org-cycle-hide-drawers (state &optional exceptions)
+  "Re-hide all drawers after a visibility state change.
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'.  When non-nil, optional argument EXCEPTIONS is
+a list of strings specifying which drawers should not be hidden."
+  (declare (obsolete "use `org-hide-drawer' instead." "Org 9.4"))
+  (when (and (derived-mode-p 'org-mode)
+	     (not (memq state '(overview folded contents))))
+    (save-excursion
+      (let* ((globalp (eq state 'all))
+             (beg (if globalp (point-min) (point)))
+             (end (if globalp (point-max)
+		    (if (eq state 'children)
+			(save-excursion (outline-next-heading) (point))
+		      (org-end-of-subtree t)))))
+	(save-restriction
+	  (narrow-to-region beg end)
+	  (org-hide-drawer-all))))))
+
 (defun org-hide-block-toggle-maybe ()
   "Toggle visibility of block at point.
 Unlike to `org-hide-block-toggle', this function does not throw

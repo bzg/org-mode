@@ -9117,8 +9117,7 @@ The prefix arg selects the amount of information to display:
 1   just show the entry according to defaults.
 2   show the children view
 3   show the subtree view
-4   show the entire subtree and any LOGBOOK drawers
-5   show the entire subtree and any drawers
+4   show the entire subtree and any drawers
 With prefix argument FULL-ENTRY, make the entire entry visible
 if it was hidden in the outline."
   (interactive "p")
@@ -9148,13 +9147,7 @@ if it was hidden in the outline."
 	(org-back-to-heading)
 	(run-hook-with-args 'org-cycle-hook 'subtree))
       (message "Remote: SUBTREE"))
-     ((= more 4)
-      (outline-show-subtree)
-      (save-excursion
-	(org-back-to-heading)
-	(org-cycle-hide-drawers 'subtree '("LOGBOOK")))
-      (message "Remote: SUBTREE AND LOGBOOK"))
-     ((> more 4)
+     ((> more 3)
       (outline-show-subtree)
       (message "Remote: SUBTREE AND ALL DRAWERS")))
     (select-window win)))

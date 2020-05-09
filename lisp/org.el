@@ -6116,6 +6116,20 @@ Return a non-nil value when toggling is successful."
   (org-show-all '(blocks))
   (org-block-map 'org-hide-block-toggle))
 
+(defun org-hide-drawer-all ()
+  "Fold all drawers in the current buffer."
+  (org-show-all '(drawers))
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward org-drawer-regexp nil t)
+      (let ((drawer (org-element-at-point)))
+	(when (memq (org-element-type drawer) '(drawer property-drawer))
+	  (org-hide-drawer-toggle t nil drawer)
+	  ;; Make sure to skip drawer entirely or we might flag it
+	  ;; another time when matching its ending line with
+	  ;; `org-drawer-regexp'.
+	  (goto-char (org-element-property :end drawer)))))))
+
 (defun org-cycle-hide-property-drawers (state)
   "Re-hide all drawers after a visibility state change.
 STATE should be one of the symbols listed in the docstring of
@@ -6135,31 +6149,6 @@ STATE should be one of the symbols listed in the docstring of
 		;; Property drawers use `outline' invisibility spec so
 		;; they can be swallowed once we hide the outline.
 		(org-flag-region start end t 'outline)))))))))
-
-(defun org-cycle-hide-drawers (state &optional exceptions)
-  "Re-hide all drawers after a visibility state change.
-STATE should be one of the symbols listed in the docstring of
-`org-cycle-hook'.  When non-nil, optional argument EXCEPTIONS is
-a list of strings specifying which drawers should not be hidden."
-  (when (and (derived-mode-p 'org-mode)
-	     (not (memq state '(overview folded contents))))
-    (save-excursion
-      (let* ((globalp (eq state 'all))
-             (beg (if globalp (point-min) (point)))
-             (end (if globalp (point-max)
-		    (if (eq state 'children)
-			(save-excursion (outline-next-heading) (point))
-		      (org-end-of-subtree t)))))
-	(goto-char beg)
-	(while (re-search-forward org-drawer-regexp (max end (point)) t)
-	  (unless (member-ignore-case (match-string 1) exceptions)
-	    (let ((drawer (org-element-at-point)))
-	      (when (memq (org-element-type drawer) '(drawer property-drawer))
-		(org-hide-drawer-toggle t nil drawer)
-		;; Make sure to skip drawer entirely or we might flag
-		;; it another time when matching its ending line with
-		;; `org-drawer-regexp'.
-		(goto-char (org-element-property :end drawer))))))))))
 
 ;;;; Visibility cycling
 

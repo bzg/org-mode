@@ -323,6 +323,11 @@ Functions in this hook are run after ~org-agenda-filter~ is called.
 ** Removed or renamed functions and variables
 *** Deprecated ~org-flag-dawer~ function
 Use ~org-hide-drawer-toggle~ instead.
+*** Deprecated ~org-cycle-hide-drawers~ function
+
+Use new function ~org-hide-drawer-all~ instead.  Note there is also
+a new ~org-cycle-hide-property-drawers~ function.
+
 *** Deprecated ~org-hide-block-toggle-maybe~ function
 Use ~org-hide-block-toggle~ instead.
 *** Deprecated ~org-hide-block-toggle-all~ function
