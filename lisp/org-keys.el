@@ -148,7 +148,7 @@
 (declare-function org-remove-file "org" (&optional file))
 (declare-function org-resolve-clocks "org" (&optional only-dangling-p prompt-fn last-valid))
 (declare-function org-return "org" (&optional indent))
-(declare-function org-return-indent "org" ())
+(declare-function org-return-and-maybe-indent "org" ())
 (declare-function org-reveal "org" (&optional siblings))
 (declare-function org-schedule "org" (arg &optional time))
 (declare-function org-self-insert-command "org" (N))
