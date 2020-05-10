@@ -6122,16 +6122,20 @@ Return a non-nil value when toggling is successful."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward org-drawer-regexp nil t)
-      (pcase (get-char-property-and-overlay (point) 'invisible)
-	(`(_ . ,o) (goto-char (overlay-end o)))
-	(_
-	 (let ((drawer (org-element-at-point)))
-	   (when (memq (org-element-type drawer) '(drawer property-drawer))
-	     (org-hide-drawer-toggle t nil drawer)
-	     ;; Make sure to skip drawer entirely or we might flag it
-	     ;; another time when matching its ending line with
-	     ;; `org-drawer-regexp'.
-	     (goto-char (org-element-property :end drawer)))))))))
+      (let* ((drawer (org-element-at-point))
+	     (type (org-element-type drawer)))
+	(when (memq type '(drawer property-drawer))
+	  ;; We are sure regular drawers are unfolded because of
+	  ;; `org-show-all' call above.  However, property drawers may
+	  ;; be folded, or in a folded headline.  In that case, do not
+	  ;; re-hide it.
+	  (unless (and (eq type 'property-drawer)
+		       (eq 'outline (get-char-property (point) 'invisible)))
+	    (org-hide-drawer-toggle t nil drawer))
+	  ;; Make sure to skip drawer entirely or we might flag it
+	  ;; another time when matching its ending line with
+	  ;; `org-drawer-regexp'.
+	  (goto-char (org-element-property :end drawer)))))))
 
 (defun org-cycle-hide-property-drawers (state)
   "Re-hide all drawers after a visibility state change.
@@ -6148,13 +6152,14 @@ STATE should be one of the symbols listed in the docstring of
 	(while (re-search-forward org-property-start-re end t)
 	  (pcase (get-char-property-and-overlay (point) 'invisible)
 	    ;; Do not fold already folded drawers.
-	    (`(,_ . ,o) (goto-char (overlay-end o)))
+	    (`(outline . ,o) (goto-char (overlay-end o)))
 	    (_
 	     (let ((start (match-end 0)))
 	       (when (org-at-property-drawer-p)
 		 (let ((end (re-search-forward org-property-end-re)))
-		   ;; Property drawers use `outline' invisibility spec so
-		   ;; they can be swallowed once we hide the outline.
+		   ;; Property drawers use `outline' invisibility spec
+		   ;; so they can be swallowed once we hide the
+		   ;; outline.
 		   (org-flag-region start end t 'outline)))))))))))
 
 ;;;; Visibility cycling
