@@ -386,7 +386,7 @@ channel."
 ;;;; Link
 
 (defun org-md-link (link desc info)
-  "Transcode LINE-BREAK object into Markdown format.
+  "Transcode LINK object into Markdown format.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
