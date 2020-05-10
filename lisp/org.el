@@ -6557,22 +6557,17 @@ With a numeric prefix, show all headlines up to that level."
 (defun org-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
 With numerical argument N, show content up to level N."
-  (interactive "P")
-  (org-overview)
+  (interactive "p")
+  (org-show-all '(headings))
   (save-excursion
-    ;; Visit all headings and show their offspring
-    (and (integerp arg) (org-overview))
     (goto-char (point-max))
-    (catch 'exit
-      (while (and (progn (condition-case nil
-			     (outline-previous-visible-heading 1)
-			   (error (goto-char (point-min))))
-			 t)
-		  (looking-at org-outline-regexp))
-	(if (integerp arg)
-	    (org-show-children (1- arg))
-	  (outline-show-branches))
-	(when (bobp) (throw 'exit nil))))))
+    (let ((regexp (if (and (wholenump arg) (> arg 0))
+                      (format "^\\*\\{1,%d\\} " arg)
+                    "^\\*+ "))
+          (last (point)))
+      (while (re-search-backward regexp nil t)
+        (org-flag-region (line-end-position) last t 'outline)
+        (setq last (line-end-position 0))))))
 
 (defun org-optimize-window-after-visibility-change (state)
   "Adjust the window after a change in outline visibility.
