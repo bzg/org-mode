@@ -6479,18 +6479,15 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 With `\\[universal-argument]' prefix ARG, switch to startup visibility.
 With a numeric prefix, show all headlines up to that level."
   (interactive "P")
-  (let ((org-cycle-include-plain-lists
-	 (if (derived-mode-p 'org-mode) org-cycle-include-plain-lists nil)))
-    (cond
-     ((integerp arg)
-      (org-show-all '(headings blocks))
-      (outline-hide-sublevels arg)
-      (setq org-cycle-global-status 'contents))
-     ((equal arg '(4))
-      (org-set-startup-visibility)
-      (org-unlogged-message "Startup visibility, plus VISIBILITY properties."))
-     (t
-      (org-cycle '(4))))))
+  (cond
+   ((integerp arg)
+    (org-content arg)
+    (setq org-cycle-global-status 'contents))
+   ((equal arg '(4))
+    (org-set-startup-visibility)
+    (org-unlogged-message "Startup visibility, plus VISIBILITY properties."))
+   (t
+    (org-cycle '(4)))))
 
 (defun org-set-startup-visibility ()
   "Set the visibility required by startup options and properties."
