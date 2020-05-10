@@ -6538,20 +6538,21 @@ With a numeric prefix, show all headlines up to that level."
 	    (org-end-of-subtree)))))))
 
 (defun org-overview ()
-  "Switch to overview mode, showing only top-level headlines.
-This shows all headlines with a level equal or greater than the level
-of the first headline in the buffer.  This is important, because if the
-first headline is not level one, then (hide-sublevels 1) gives confusing
-results."
+  "Switch to overview mode, showing only top-level headlines."
   (interactive)
+  (org-show-all '(headings))
   (save-excursion
-    (let ((level
-	   (save-excursion
-	     (goto-char (point-min))
-	     (when (re-search-forward org-outline-regexp-bol nil t)
-	       (goto-char (match-beginning 0))
-	       (funcall outline-level)))))
-      (and level (outline-hide-sublevels level)))))
+    (goto-char (point-min))
+    (when (re-search-forward org-outline-regexp-bol nil t)
+      (let* ((last (line-end-position))
+             (level (- (match-end 0) (match-beginning 0) 1))
+             (regexp (format "^\\*\\{1,%d\\} " level)))
+        (while (re-search-forward regexp nil :move)
+          (org-flag-region last (line-end-position 0) t 'outline)
+          (setq last (line-end-position))
+          (setq level (- (match-end 0) (match-beginning 0) 1))
+          (setq regexp (format "^\\*\\{1,%d\\} " level)))
+        (org-flag-region last (point) t 'outline)))))
 
 (defun org-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
