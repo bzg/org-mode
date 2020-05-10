@@ -5169,11 +5169,11 @@ not be used as keys in the properties drawer:
 |                | ~org-clock-sum-today~ must be run first to compute the         |
 |                | values in the current buffer.                                  |
 | =CLOSED=       | When was this entry closed?                                    |
-| =DEADLINE=     | The deadline time string, without the angular brackets.        |
+| =DEADLINE=     | The deadline timestamp.                                        |
 | =FILE=         | The filename the entry is located in.                          |
 | =ITEM=         | The headline of the entry.                                     |
 | =PRIORITY=     | The priority of the entry, a string with a single letter.      |
-| =SCHEDULED=    | The scheduling timestamp, without the angular brackets.        |
+| =SCHEDULED=    | The scheduling timestamp.                                      |
 | =TAGS=         | The tags defined directly in the headline.                     |
 | =TIMESTAMP=    | The first keyword-less timestamp in the entry.                 |
 | =TIMESTAMP_IA= | The first inactive timestamp in the entry.                     |
