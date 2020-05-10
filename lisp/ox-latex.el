@@ -2389,8 +2389,11 @@ used as a communication channel."
 	      (format "[%s]" (plist-get info :latex-default-figure-position)))
 	     (t ""))))
 	 (center
-	  (if (plist-member attr :center) (plist-get attr :center)
-	    (plist-get info :latex-images-centered)))
+	  (cond
+	   ;; If link is an image link, do not center.
+	   ((eq 'link (org-element-type (org-export-get-parent link))) nil)
+	   ((plist-member attr :center) (plist-get attr :center))
+	   (t (plist-get info :latex-images-centered))))
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
 	 ;; It is possible to specify scale or width and height in
 	 ;; the ATTR_LATEX line, and also via default variables.
