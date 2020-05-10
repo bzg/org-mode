@@ -6148,7 +6148,7 @@ STATE should be one of the symbols listed in the docstring of
 	(while (re-search-forward org-property-start-re end t)
 	  (pcase (get-char-property-and-overlay (point) 'invisible)
 	    ;; Do not fold already folded drawers.
-	    (`(_ . ,o) (goto-char (overlay-end o)))
+	    (`(,_ . ,o) (goto-char (overlay-end o)))
 	    (_
 	     (let ((start (match-end 0)))
 	       (when (org-at-property-drawer-p)
