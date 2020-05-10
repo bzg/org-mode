@@ -6156,7 +6156,8 @@ STATE should be one of the symbols listed in the docstring of
 	    (_
 	     (let ((start (match-end 0)))
 	       (when (org-at-property-drawer-p)
-		 (let ((end (re-search-forward org-property-end-re)))
+		 (let* ((case-fold-search t)
+			(end (re-search-forward org-property-end-re)))
 		   ;; Property drawers use `outline' invisibility spec
 		   ;; so they can be swallowed once we hide the
 		   ;; outline.
