@@ -257,6 +257,8 @@ value for ITEM property."
 					  (if org-hide-leading-stars ?\s ?*))
 			     "* "))))
 	   (concat stars (org-link-display-format value))))
+	(`(,(or "DEADLINE" "SCHEDULED" "TIMESTAMP") . ,_)
+	 (replace-regexp-in-string org-ts-regexp "[\\1]" value))
 	(`(,_ ,_ ,_ ,_ nil) value)
 	;; If PRINTF is set, assume we are displaying a number and
 	;; obey to the format string.

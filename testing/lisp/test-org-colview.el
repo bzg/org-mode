@@ -1519,7 +1519,24 @@
     (org-test-with-temp-text
         "* H src_emacs-lisp{(+ 1 1)} 1\n<point>#+BEGIN: columnview\n#+END:"
       (let ((org-columns-default-format "%ITEM")) (org-update-dblock))
-      (buffer-substring-no-properties (point) (point-max))))))
+      (buffer-substring-no-properties (point) (point-max)))))
+  ;; Active time stamps are displayed as inactive.
+  (should
+   (equal
+    "#+BEGIN: columnview
+| ITEM | d                | s                | t                |
+|------+------------------+------------------+------------------|
+| H    | [2020-05-14 Thu] | [2020-05-11 Mon] | [2020-06-10 Wed] |
+#+END:"
+    (org-test-with-temp-text
+     "* H
+SCHEDULED: <2020-05-11 Mon> DEADLINE: <2020-05-14 Thu>
+<2020-06-10 Wed>
+<point>#+BEGIN: columnview\n#+END:"
+     (let ((org-columns-default-format
+	    "%ITEM %DEADLINE(d) %SCHEDULED(s) %TIMESTAMP(t)"))
+       (org-update-dblock))
+     (buffer-substring-no-properties (point) (point-max))))))
 
 (provide 'test-org-colview)
 ;;; test-org-colview.el ends here
