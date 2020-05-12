@@ -418,11 +418,17 @@ switches."
 				    (symbol-plist
 				     'org-babel-load-languages)
 				    'custom-type)))))))
-  (while (pcomplete-here
-	  '("-n" "-r" "-l"
-	    ":cache" ":colnames" ":comments" ":dir" ":eval" ":exports"
-	    ":file" ":hlines" ":no-expand" ":noweb" ":results" ":rownames"
-	    ":session" ":shebang" ":tangle" ":tangle-mode" ":var"))))
+  (let* ((info (org-babel-get-src-block-info 'light))
+	 (lang (car info))
+	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
+	 (headers (org-babel-combine-header-arg-lists
+		   org-babel-common-header-args-w-values
+		   (and (boundp lang-headers) (eval lang-headers t)))))
+    (while (pcomplete-here
+	    (append (mapcar
+		     (lambda (arg) (format ":%s" (symbol-name (car arg))))
+		     headers)
+		    '("-n" "-r" "-l"))))))
 
 (defun pcomplete/org-mode/block-option/clocktable ()
   "Complete keywords in a clocktable line."
