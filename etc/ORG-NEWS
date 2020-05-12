@@ -91,6 +91,8 @@ These options now defaults to =t=:
 You may want to read the docstrings of these options to understand the
 consequences of this change.
 
+Also, ~org-startup-folded~ now defaults to ~showeverything~.
+
 ** New features
 
 *** Looping agenda commands over headlines

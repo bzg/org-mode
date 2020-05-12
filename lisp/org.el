@@ -928,7 +928,7 @@ equivalent option for agenda views."
   :group 'org-todo
   :group 'org-archive)
 
-(defcustom org-startup-folded t
+(defcustom org-startup-folded 'showeverything
   "Non-nil means entering Org mode will switch to OVERVIEW.
 
 This can also be configured on a per-file basis by adding one of
@@ -943,6 +943,7 @@ Set `org-agenda-inhibit-startup' to a non-nil value if you want
 to ignore this option when Org opens agenda files for the first
 time."
   :group 'org-startup
+  :package-version '(Org . "9.4")
   :type '(choice
 	  (const :tag "nofold: show all" nil)
 	  (const :tag "fold: overview" t)
