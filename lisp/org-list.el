@@ -2835,8 +2835,8 @@ if the current locale allows for it.
 
 The command prompts for the sorting type unless it has been given
 to the function through the SORTING-TYPE argument, which needs to
-be a character, \(?n ?N ?a ?A ?t ?T ?f ?F ?x ?X).  Here is the
-detailed meaning of each character:
+be a character, among ?n ?N ?a ?A ?t ?T ?f ?F ?x or ?X.  Here is
+the detailed meaning of each character:
 
 n   Numerically, by converting the beginning of the item to a number.
 a   Alphabetically.  Only the first line of item is checked.
