@@ -16236,7 +16236,7 @@ Possible values of this option are:
 skip        Don't display remote images.
 download    Always download and display remote images.
 cache       Display remote images, and open them in separate buffers
-            for cacheing.  Silently update the image buffer when a file
+            for caching.  Silently update the image buffer when a file
             change is detected."
   :group 'org-appearance
   :package-version '(Org . "9.4")

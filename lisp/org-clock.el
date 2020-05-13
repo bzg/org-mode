@@ -1425,7 +1425,7 @@ the default behavior."
   "Clock out the currently clocked in task if Emacs is idle.
 See `org-clock-auto-clockout-timer' to set the idle time span.
 
-Thie is only effective when `org-clock-auto-clockout-insinuate'
+This is only effective when `org-clock-auto-clockout-insinuate'
 is present in the user configuration."
   (when (and (numberp org-clock-auto-clockout-timer)
 	     org-clock-current-task)

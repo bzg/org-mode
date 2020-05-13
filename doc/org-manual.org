@@ -21752,7 +21752,7 @@ In-Buffer Settings]]).
 
 [fn:142] For shell source blocks, the default is to return the output.
 If you want to enforce returning the exit status, add =:results value=
-explicitely.
+explicitly.
 
 [fn:143] C++ language is handled in =ob-C.el=.  Even though the
 identifier for such source blocks is =C++=, you activate it by loading
