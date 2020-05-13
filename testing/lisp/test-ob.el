@@ -2090,34 +2090,33 @@ default-directory
   ;; Handle hashes with times.
   (should
    (equal
-    "#+RESULTS[<2014-03-04 00:41:10> bbbb]:"
+    "#+RESULTS[(2014-03-04 00:41:10) bbbb]:"
     (org-test-with-temp-text
-	"
-<point>#+BEGIN_SRC emacs-lisp
+	"#+BEGIN_SRC emacs-lisp
 \(+ 1 1)
 #+END_SRC
 
-#+RESULTS[<2012-03-29 16:40:12> aaaa]:"
+#+RESULTS[(2012-03-29 16:40:12) aaaa]:"
       (let ((org-babel-results-keyword "RESULTS")
 	    (org-babel-hash-show-time t))
 	(cl-letf (((symbol-function 'format-time-string)
-		   (lambda (&rest _) "<2014-03-04 00:41:10>")))
+		   (lambda (&rest _) "(2014-03-04 00:41:10)")))
 	  (goto-char (org-babel-where-is-src-block-result nil nil "bbbb"))
 	  (org-trim (buffer-substring-no-properties (point) (point-max))))))))
   (should
    (equal
-    "#+RESULTS[<2012-03-29 16:40:12> aaaa]:"
+    "#+RESULTS[(2012-03-29 16:40:12) aaaa]:"
     (org-test-with-temp-text
 	"
 <point>#+BEGIN_SRC emacs-lisp
 \(+ 1 1)
 #+END_SRC
 
-#+RESULTS[<2012-03-29 16:40:12> aaaa]:"
+#+RESULTS[(2012-03-29 16:40:12) aaaa]:"
       (let ((org-babel-results-keyword "RESULTS")
 	    (org-babel-hash-show-time t))
 	(cl-letf (((symbol-function 'format-time-string)
-		   (lambda (&rest _) "<2014-03-04 00:41:10>")))
+		   (lambda (&rest _) "(2014-03-04 00:41:10)")))
 	  (goto-char (org-babel-where-is-src-block-result nil nil "aaaa"))
 	  (org-trim (buffer-substring-no-properties (point) (point-max))))))))
   ;; RESULTS keyword may not be the last affiliated keyword.

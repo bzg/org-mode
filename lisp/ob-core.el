@@ -165,7 +165,6 @@ This string must include a \"%s\" which will be replaced by the results."
   "Non-nil means show the time the code block was evaluated in the result hash."
   :group 'org-babel
   :type 'boolean
-  :version "26.1"
   :package-version '(Org . "9.0")
   :safe #'booleanp)
 
@@ -488,11 +487,21 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
   "Regexp matching a NAME keyword.")
 
 (defconst org-babel-result-regexp
-  (format "^[ \t]*#\\+%s\\(?:\\[\\(?:%s \\)?\\([[:alnum:]]+\\)\\]\\)?:[ \t]*"
-	  org-babel-results-keyword
-	  ;; <%Y-%m-%d %H:%M:%S>
-	  "<\\(?:[0-9]\\{4\\}-[0-1][0-9]-[0-3][0-9] \
-[0-2][0-9]\\(?::[0-5][0-9]\\)\\{2\\}\\)>")
+  (rx (seq bol
+           (zero-or-more (any "\t "))
+           "#+results"
+           (opt "["
+		;; Time stamp part.
+		(opt "("
+                     (= 4 digit) (= 2 "-" (= 2 digit))
+                     " "
+                     (= 2 digit) (= 2 ":" (= 2 digit))
+                     ") ")
+		;; SHA1 hash.
+		(group (one-or-more hex-digit))
+		"]")
+           ":"
+           (zero-or-more (any "\t "))))
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in match group 1.")
@@ -1940,7 +1949,7 @@ the results hash, or nil.  Leave point before the keyword."
 		  (cond ((not hash) nil)
 			(org-babel-hash-show-time
 			 (format "[%s %s]"
-				 (format-time-string "<%F %T>")
+				 (format-time-string "(%F %T)")
 				 hash))
 			(t (format "[%s]" hash)))
 		  ":"
