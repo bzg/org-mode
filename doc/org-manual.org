@@ -566,10 +566,9 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
 
 #+vindex: org-startup-folded
 When Emacs first visits an Org file, the global state is set to
-OVERVIEW, i.e., only the top level headlines are visible[fn:6].  This
-can be configured through the variable ~org-startup-folded~, or on
-a per-file basis by adding one of the following lines anywhere in the
-buffer:
+SHOWEVERYTHING, i.e., all file content is visible[fn:6].  This can be
+configured through the variable ~org-startup-folded~, or on a per-file
+basis by adding one of the following lines anywhere in the buffer:
 
 #+cindex: @samp{STARTUP}, keyword
 #+begin_example
@@ -18871,8 +18870,8 @@ changes.
   #+vindex: org-startup-folded
   The first set of options deals with the initial visibility of the
   outline tree.  The corresponding variable for global default
-  settings is ~org-startup-folded~ with a default value of ~t~, which
-  is the same as ~overview~.
+  settings is ~org-startup-folded~ with a default value of
+  ~showeverything~.
 
   | =overview=       | Top-level headlines only.  |
   | =content=        | All headlines.             |
