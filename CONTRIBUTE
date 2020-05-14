@@ -81,7 +81,6 @@ file into the Org mode core.  This means they will be moved up to the
 root directory and will also eventually be added to GNU Emacs git
 repository.  The final decision about this rests with the maintainer.
 
-* Org maintainance
+* Org maintenance
 
-Org maintainance is explained on Worg: see [[https://orgmode.org/worg/org-maintainance.html][org-maintainance]].
-
+Org maintenance is explained on Worg: see [[https://orgmode.org/worg/org-maintenance.html][org-maintenance]].
