@@ -1223,7 +1223,7 @@
      (let ((org-return-follows-link t)
 	   (org-link-search-must-match-exact-headline nil))
        (setq buffer-read-only t)
-       (org-return))
+       (call-interactively #'org-return))
      (looking-at-p "<<target>>")))
   ;; `org-return-follows-link' handle multi-line lines.
   (should
