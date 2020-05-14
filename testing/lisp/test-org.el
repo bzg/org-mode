@@ -1216,6 +1216,15 @@
 	   (org-link-search-must-match-exact-headline nil))
        (org-return))
      (looking-at-p "<<target>>")))
+  ;; Non-nil `org-return-follows-link' ignores read-only state of
+  ;; a buffer.
+  (should
+   (org-test-with-temp-text "Link [[target<point>]] <<target>>"
+     (let ((org-return-follows-link t)
+	   (org-link-search-must-match-exact-headline nil))
+       (setq buffer-read-only t)
+       (org-return))
+     (looking-at-p "<<target>>")))
   ;; `org-return-follows-link' handle multi-line lines.
   (should
    (org-test-with-temp-text

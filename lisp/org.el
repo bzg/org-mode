@@ -17702,7 +17702,7 @@ a timestamp or a link, call `org-open-at-point'.  However, it
 will not happen if point is in a table or on a \"dead\"
 object (e.g., within a comment).  In these case, you need to use
 `org-open-at-point' directly."
-  (interactive "*i\nP\np")
+  (interactive "i\nP\np")
   (let ((context (if org-return-follows-link (org-element-context)
 		   (org-element-at-point))))
     (cond
