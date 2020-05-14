@@ -489,10 +489,12 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   '--------------------------------------'
   #+end_example
 
-  When {{{kbd(S-TAB)}}} is called with a numeric prefix argument N,
-  the CONTENTS view up to headlines of level N are shown.  Note that
-  inside tables (see [[*Tables]]), {{{kbd(S-TAB)}}} jumps to the previous
-  field instead.
+  When {{{kbd(S-TAB)}}} is called with a numeric prefix argument
+  {{{var(N)}}}, view contents only up to headlines of level
+  {{{var(N)}}}.
+
+  Note that inside tables (see [[*Tables]]), {{{kbd(S-TAB)}}} jumps to the
+  previous field instead.
 
   #+vindex: org-cycle-global-at-bob
   You can run global cycling using {{{kbd(TAB)}}} only if point is at
@@ -520,10 +522,10 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   #+kindex: C-c C-r
   #+findex: org-reveal
   Reveal context around point, showing the current entry, the
-  following heading and the hierarchy above.  Useful for working near
-  a location that has been exposed by a sparse tree command (see
+  following heading and the hierarchy above.  It is useful for working
+  near a location that has been exposed by a sparse tree command (see
   [[*Sparse Trees]]) or an agenda command (see [[*Commands in the Agenda
-  Buffer]]).  With a prefix argument show, on each level, all sibling
+  Buffer]]).  With a prefix argument, show, on each level, all sibling
   headings.  With a double prefix argument, also show the entire
   subtree of the parent.
 
@@ -532,8 +534,7 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   #+cindex: show branches, command
   #+kindex: C-c C-k
   #+findex: outline-show-branches
-  Expose all the headings of the subtree, CONTENTS view for just one
-  subtree.
+  Expose all the headings of the subtree, but not their bodies.
 
 - {{{kbd(C-c TAB)}}} (~outline-show-children~) ::
 
@@ -541,17 +542,18 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   #+kindex: C-c TAB
   #+findex: outline-show-children
   Expose all direct children of the subtree.  With a numeric prefix
-  argument N, expose all children down to level N.
+  argument {{{var(N)}}}, expose all children down to level
+  {{{var(N)}}}.
 
 - {{{kbd(C-c C-x b)}}} (~org-tree-to-indirect-buffer~) ::
 
   #+kindex: C-c C-x b
   #+findex: org-tree-to-indirect-buffer
   Show the current subtree in an indirect buffer[fn:5].  With
-  a numeric prefix argument, N, go up to level N and then take that
-  tree.  If N is negative then go up that many levels.  With
-  a {{{kbd(C-u)}}} prefix, do not remove the previously used indirect
-  buffer.
+  a numeric prefix argument {{{var(N)}}}, go up to level {{{var(N)}}}
+  and then take that tree.  If {{{var(N)}}} is negative then go up
+  that many levels.  With a {{{kbd(C-u)}}} prefix, do not remove the
+  previously used indirect buffer.
 
 - {{{kbd(C-c C-x v)}}} (~org-copy-visible~) ::
 
@@ -566,9 +568,10 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
 
 #+vindex: org-startup-folded
 When Emacs first visits an Org file, the global state is set to
-SHOWEVERYTHING, i.e., all file content is visible[fn:6].  This can be
-configured through the variable ~org-startup-folded~, or on a per-file
-basis by adding one of the following lines anywhere in the buffer:
+~showeverything~, i.e., all file content is visible[fn:6].  This can
+be configured through the variable ~org-startup-folded~, or on
+a per-file basis by adding one of the following lines anywhere in the
+buffer:
 
 #+cindex: @samp{STARTUP}, keyword
 #+begin_example
