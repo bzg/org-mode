@@ -485,56 +485,58 @@ This will scan all agenda files, all associated archives, and all
 files currently mentioned in `org-id-locations'.
 When FILES is given, scan also these files."
   (interactive)
-  (if (not org-id-track-globally)
-      (error "Please turn on `org-id-track-globally' if you want to track IDs")
-    (let* ((files (delete-dups
-		   (mapcar #'file-truename
-			   (append
-			    ;; Agenda files and all associated archives
-			    (org-agenda-files t org-id-search-archives)
-			    ;; Explicit extra files
-			    (unless (symbolp org-id-extra-files)
-			      org-id-extra-files)
-			    ;; All files known to have IDs
-			    org-id-files
-			    ;; function input
-			    files))))
-	   (nfiles (length files))
-	   ids seen-ids (ndup 0) (i 0) file-id-alist)
-      (with-temp-buffer
-	(delay-mode-hooks
-	  (org-mode)
-          (dolist (file files)
-	    (unless silent
-              (setq i (1+ i))
-              (message "Finding ID locations (%d/%d files): %s"
-                       i nfiles file))
-	    (when (file-exists-p file)
-	      (insert-file-contents file nil nil nil 'replace)
-	      (setq ids (delq nil
-			      (org-map-entries
-			       (lambda ()
-				 (org-entry-get (point) "ID"))
-			       "ID<>\"\"")))
-	      (dolist (id ids)
-		(if (member id seen-ids)
-		    (progn
-		      (message "Duplicate ID \"%s\"" id)
-		      (setq ndup (1+ ndup)))
-		  (push id seen-ids)))
+  (unless org-id-track-globally
+    (error "Please turn on `org-id-track-globally' if you want to track IDs"))
+  (setq org-id-locations nil)
+  (let* ((files
+          (delete-dups
+           (mapcar #'file-truename
+                   (append
+                    ;; Agenda files and all associated archives.
+                    (org-agenda-files t org-id-search-archives)
+                    ;; Explicit extra files.
+                    (unless (symbolp org-id-extra-files) org-id-extra-files)
+                    ;; All files known to have IDs.
+                    org-id-files
+                    ;; Additional files from function call.
+                    files))))
+         (nfiles (length files))
+         (id-regexp
+	  (rx (seq bol (0+ (any "\t ")) ":ID:" (1+ " ") (not (any " ")))))
+         (seen-ids nil)
+         (ndup 0)
+         (i 0))
+    (dolist (file files)
+      (when (file-exists-p file)
+        (unless silent
+          (cl-incf i)
+          (message "Finding ID locations (%d/%d files): %s" i nfiles file))
+        (with-current-buffer (find-file-noselect file t)
+          (let ((ids nil)
+                (case-fold-search t))
+            (org-with-point-at 1
+              (while (re-search-forward id-regexp nil t)
+                (when (org-at-property-p)
+                  (push (org-entry-get (point) "ID") ids)))
               (when ids
-		(setq file-id-alist (cons (cons (abbreviate-file-name file) ids)
-					  file-id-alist)))))))
-      (setq org-id-locations file-id-alist)
-      (setq org-id-files (mapcar 'car org-id-locations))
-      (org-id-locations-save)
-      ;; now convert to a hash
-      (setq org-id-locations (org-id-alist-to-hash org-id-locations))
-      (when (> ndup 0)
-	(warn "WARNING: %d duplicate IDs found, check *Messages* buffer" ndup))
-      (message "%d files scanned, %d files contains IDs and in total %d IDs found."
-	       nfiles (length org-id-files) (hash-table-count org-id-locations))
-      org-id-locations)))
+                (push (cons (abbreviate-file-name file) ids)
+                      org-id-locations)
+                (dolist (id ids)
+                  (cond
+                   ((not (member id seen-ids)) (push id seen-ids))
+                   (silent nil)
+                   (t
+                    (message "Duplicate ID %S" id)
+                    (cl-incf ndup))))))))))
+    (setq org-id-files (mapcar #'car org-id-locations))
+    (org-id-locations-save)
+    ;; Now convert to a hash table.
+    (setq org-id-locations (org-id-alist-to-hash org-id-locations))
+    (when (and (not silent) (> ndup 0))
+      (warn "WARNING: %d duplicate IDs found, check *Messages* buffer" ndup))
+    (message "%d files scanned, %d files contains IDs, and %d IDs found."
+             nfiles (length org-id-files) (hash-table-count org-id-locations))
+    org-id-locations))
 
 (defun org-id-locations-save ()
   "Save `org-id-locations' in `org-id-locations-file'."
