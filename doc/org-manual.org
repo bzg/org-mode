@@ -7911,8 +7911,8 @@ See the docstring of the variable for more information.
 It is often useful to associate reference material with an outline
 node.  Small chunks of plain text can simply be stored in the subtree
 of a project.  Hyperlinks (see [[*Hyperlinks]]) can establish associations
-with files that live elsewhere on your computer or in the cloud, like
-emails or source code files belonging to a project.
+with files that live elsewhere on a local, or even remote, computer,
+like emails or source code files belonging to a project.
 
 Another method is /attachments/, which are files located in a
 directory belonging to an outline node.  Org uses directories either
@@ -7922,15 +7922,17 @@ named by a unique ID of each entry, or by a =DIR= property.
 :PROPERTIES:
 :DESCRIPTION: How to access attachment commands
 :END:
-By default, org-attach will use ID properties when adding attachments
-to outline nodes.  This makes working with attachments fully
-automated.  There is no decision needed for folder-name or location.
-ID-based directories are by default located in the =data/= directory,
-which lives in the same directory where your Org file lives[fn:89].
-For more control over the setup, see [[*Attachment options]].
+
+By default, Org attach uses ID properties when adding attachments to
+outline nodes.  This makes working with attachments fully automated.
+There is no decision needed for folder-name or location.  ID-based
+directories are by default located in the =data/= directory, which
+lives in the same directory where your Org file lives[fn:89].
 
 When attachments are made using ~org-attach~ a default tag =ATTACH= is
 added to the node that gets the attachments.
+
+For more control over the setup, see [[*Attachment options]].
 
 The following commands deal with attachments:
 
@@ -8041,6 +8043,7 @@ The following commands deal with attachments:
 :PROPERTIES:
 :DESCRIPTION: Configuring the attachment system
 :END:
+
 There are a couple of options for attachments that are worth
 mentioning.
 
@@ -8059,7 +8062,7 @@ mentioning.
   #+vindex: org-attach-use-inheritance
   By default folders attached to an outline node are inherited from
   parents according to ~org-use-property-inheritance~.  If one instead
-  want to set inheritance specifically for org-attach that can be done
+  want to set inheritance specifically for Org attach that can be done
   using ~org-attach-use-inheritance~.  Inheriting documents through
   the node hierarchy makes a lot of sense in most cases.  Especially
   when using attachment links (see [[*Attachment links]]).  The following
@@ -8145,6 +8148,7 @@ default settings.
 :PROPERTIES:
 :DESCRIPTION: Hyperlink access to attachments
 :END:
+
 Attached files and folders can be referenced using attachment links.
 This makes it easy to refer to the material added to an outline node.
 Especially if it was attached using the unique ID of the entry!
@@ -8163,6 +8167,7 @@ See [[*External Links]] for more information about these links.
 :PROPERTIES:
 :DESCRIPTION: Everything safely stored away
 :END:
+
 If the directory attached to an outline node is a Git repository, Org
 can be configured to automatically commit changes to that repository
 when it sees them.
@@ -8180,6 +8185,7 @@ the following to your Emacs config:
 :END:
 #+cindex: attach from Dired
 #+findex: org-attach-dired-to-subtree
+
 It is possible to attach files to a subtree from a Dired buffer.  To
 use this feature, have one window in Dired mode containing the file(s)
 to be attached and another window with point in the subtree that shall
