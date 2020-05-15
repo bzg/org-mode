@@ -20458,24 +20458,37 @@ Stop at the first and last subheadings of a superior heading."
   (org-forward-heading-same-level (if arg (- arg) -1) invisible-ok))
 
 (defun org-next-visible-heading (arg)
-  "Move to the next visible heading.
-
-This function wraps `outline-next-visible-heading' with
-`org-with-limited-levels' in order to skip over inline tasks and
-respect customization of `org-odd-levels-only'."
+  "Move to the next visible heading line.
+With ARG, repeats or can move backward if negative."
   (interactive "p")
-  (org-with-limited-levels
-   (outline-next-visible-heading arg)))
+  (let ((regexp (concat "^" (org-get-limited-outline-regexp)))
+	(initial-arg arg))
+    (if (< arg 0)
+	(beginning-of-line)
+      (end-of-line))
+    (while (and (< arg 0) (re-search-backward regexp nil :move))
+      (unless (bobp)
+	(pcase (get-char-property-and-overlay (point) 'invisible)
+	  (`(outline . ,o)
+	   (goto-char (overlay-start o))
+	   (beginning-of-line))
+	  (_ nil)))
+      (cl-incf arg))
+    (while (and (> arg 0) (re-search-forward regexp nil :move))
+      (pcase (get-char-property-and-overlay (point) 'invisible)
+	(`(outline . ,o)
+	 (goto-char (overlay-end o))
+	 (end-of-line 2))
+	(_
+	 (end-of-line)))
+      (cl-decf arg))
+    (when (/= arg initial-arg) (beginning-of-line))))
 
 (defun org-previous-visible-heading (arg)
   "Move to the previous visible heading.
-
-This function wraps `outline-previous-visible-heading' with
-`org-with-limited-levels' in order to skip over inline tasks and
-respect customization of `org-odd-levels-only'."
+With ARG, repeats or can move forward if negative."
   (interactive "p")
-  (org-with-limited-levels
-   (outline-previous-visible-heading arg)))
+  (org-next-visible-heading (- arg)))
 
 (defun org-forward-paragraph ()
   "Move forward to beginning of next paragraph or equivalent.
