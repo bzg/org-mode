@@ -90,9 +90,15 @@ See the \"Match syntax\" section of the org manual for more details."
 (defcustom org-crypt-key ""
   "The default key to use when encrypting the contents of a heading.
 
-This setting can also be overridden in the CRYPTKEY property."
-  :type 'string
-  :group 'org-crypt)
+The string is matched against all keys in the key ring.  In
+particular, the empty string matches no key.
+
+This setting can be overridden in the CRYPTKEY property.
+
+If no key is found, look for the `epa-file-encrypt-to' local
+variable.  Ultimately fall back to symmetric encryption."
+  :group 'org-crypt
+  :type 'string)
 
 (defcustom org-crypt-disable-auto-save 'ask
   "What org-decrypt should do if `auto-save-mode' is enabled.
@@ -149,22 +155,13 @@ See `org-crypt-disable-auto-save'."
      (t nil))))
 
 (defun org-crypt-key-for-heading ()
-  "Return the encryption key for the current heading."
-  (save-excursion
-    (org-back-to-heading t)
-    (or (org-entry-get nil "CRYPTKEY" 'selective)
-        org-crypt-key
-        (and (boundp 'epa-file-encrypt-to) epa-file-encrypt-to)
-        (message "No crypt key set, using symmetric encryption."))))
-
-(defun org-encrypt-string (str crypt-key)
-  "Return STR encrypted with CRYPT-KEY."
-  ;; Text and key have to be identical, otherwise we re-crypt.
-  (if (and (string= crypt-key (get-text-property 0 'org-crypt-key str))
-	   (string= (sha1 str) (get-text-property 0 'org-crypt-checksum str)))
-      (get-text-property 0 'org-crypt-text str)
-    (setq-local epg-context (epg-make-context nil t t))
-    (epg-encrypt-string epg-context str (epg-list-keys epg-context crypt-key))))
+  "Return the encryption key(s) for the current heading.
+Assume `epg-context' is set."
+  (or (epg-list-keys epg-context
+		     (or (org-entry-get nil "CRYPTKEY" 'selective)
+			 org-crypt-key))
+      (bound-and-true-p epa-file-encrypt-to)
+      (progn (message "No crypt key set, using symmetric encryption.") nil)))
 
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."
@@ -172,22 +169,32 @@ See `org-crypt-disable-auto-save'."
   (require 'epg)
   (org-with-wide-buffer
    (org-back-to-heading t)
-   (setq-local epg-context (epg-make-context nil t t))
    (let ((start-heading (point)))
      (org-end-of-meta-data)
      (unless (looking-at-p "-----BEGIN PGP MESSAGE-----")
+       (setq-local epg-context (epg-make-context nil t t))
        (let ((folded (org-invisible-p))
 	     (crypt-key (org-crypt-key-for-heading))
 	     (beg (point)))
 	 (goto-char start-heading)
 	 (org-end-of-subtree t t)
 	 (org-back-over-empty-lines)
-	 (let ((contents (delete-and-extract-region beg (point))))
+	 (let* ((contents (delete-and-extract-region beg (point)))
+		(key (get-text-property 0 'org-crypt-key contents))
+		(checksum (get-text-property 0 'org-crypt-checksum contents)))
 	   (condition-case err
-	       (insert (org-encrypt-string contents crypt-key))
+	       (insert
+		;; Text and key have to be identical, otherwise we
+		;; re-crypt.
+		(if (and (equal crypt-key key)
+			 (string= checksum (sha1 contents)))
+		    (get-text-property 0 'org-crypt-text contents)
+		  (epg-encrypt-string epg-context contents crypt-key)))
 	     ;; If encryption failed, make sure to insert back entry
 	     ;; contents in the buffer.
-	     (error (insert contents) (error (nth 1 err)))))
+	     (error
+	      (insert contents)
+	      (error (error-message-string err)))))
 	 (when folded
 	   (goto-char start-heading)
 	   (org-flag-subtree t))
@@ -211,14 +218,11 @@ See `org-crypt-disable-auto-save'."
 	 (setq-local epg-context (epg-make-context nil t t))
 	 (let* ((end (save-excursion
 		       (search-forward "-----END PGP MESSAGE-----")
-		       (forward-line)
-		       (point)))
+		       (line-beginning-position 2)))
 		(encrypted-text (buffer-substring-no-properties (point) end))
 		(decrypted-text
 		 (decode-coding-string
-		  (epg-decrypt-string
-		   epg-context
-		   encrypted-text)
+		  (epg-decrypt-string epg-context encrypted-text)
 		  'utf-8)))
 	   ;; Delete region starting just before point, because the
 	   ;; outline property starts at the \n of the heading.
