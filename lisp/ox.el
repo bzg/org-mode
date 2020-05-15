@@ -5769,6 +5769,7 @@ them."
      ("sl" :default "Nadaljevanje na naslednji strani"))
     ("Created"
      ("cs" :default "Vytvořeno")
+     ("nl" :default "Gemaakt op")  ;; must be followed by a date or date+time
      ("pt_BR" :default "Criado em")
      ("ro" :default "Creat")
      ("sl" :default "Ustvarjeno"))
@@ -5809,6 +5810,7 @@ them."
      ("fr" :ascii "Equation" :default "Équation")
      ("is" :default "Jafna")
      ("ja" :default "方程式")
+     ("nl" :default "Vergelijking")
      ("no" :default "Ligning")
      ("nb" :default "Ligning")
      ("nn" :default "Likning")
@@ -5829,6 +5831,7 @@ them."
      ("is" :default "Mynd")
      ("it" :default "Figura")
      ("ja" :default "図" :html "&#22259;")
+     ("nl" :default "Figuur")
      ("no" :default "Illustrasjon")
      ("nb" :default "Illustrasjon")
      ("nn" :default "Illustrasjon")
@@ -5848,6 +5851,7 @@ them."
      ("is" :default "Mynd %d")
      ("it" :default "Figura %d:")
      ("ja" :default "図%d: " :html "&#22259;%d: ")
+     ("nl" :default "Figuur %d:" :html "Figuur&nbsp;%d:")
      ("no" :default "Illustrasjon %d")
      ("nb" :default "Illustrasjon %d")
      ("nn" :default "Illustrasjon %d")
@@ -5895,6 +5899,7 @@ them."
      ("et" :default "Loendite nimekiri")
      ("fr" :default "Liste des programmes")
      ("ja" :default "ソースコード目次")
+     ("nl" :default "Lijst van programma's")
      ("no" :default "Dataprogrammer")
      ("nb" :default "Dataprogrammer")
      ("pt_BR" :html "&Iacute;ndice de Listagens" :default "Índice de Listagens" :ascii "Indice de Listagens")
@@ -5913,6 +5918,7 @@ them."
      ("is" :default "Töfluskrá" :html "T&ouml;fluskr&aacute;")
      ("it" :default "Indice delle tabelle")
      ("ja" :default "表目次")
+     ("nl" :default "Lijst van tabellen")
      ("no" :default "Tabeller")
      ("nb" :default "Tabeller")
      ("nn" :default "Tabeller")
@@ -5933,6 +5939,7 @@ them."
      ("fr" :default "Programme" :html "Programme")
      ("it" :default "Listato")
      ("ja" :default "ソースコード")
+     ("nl" :default "Programma")
      ("no" :default "Dataprogram")
      ("nb" :default "Dataprogram")
      ("pt_BR" :default "Listagem")
@@ -5951,6 +5958,7 @@ them."
      ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:")
      ("it" :default "Listato %d :")
      ("ja" :default "ソースコード%d:")
+     ("nl" :default "Programma %d:" :html "Programma&nbsp;%d:")
      ("no" :default "Dataprogram %d")
      ("nb" :default "Dataprogram %d")
      ("ro" :default "Lista %d")
@@ -5966,6 +5974,7 @@ them."
      ("es" :default "Referencias")
      ("fr" :ascii "References" :default "Références")
      ("it" :default "Riferimenti")
+     ("nl" :default "Bronverwijzingen")
      ("pt_BR" :html "Refer&ecirc;ncias" :default "Referências" :ascii "Referencias")
      ("ro" :default "Bibliografie")
      ("sl" :default "Reference"))
@@ -5974,6 +5983,8 @@ them."
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
      ("it" :default "Vedi figura %s")
+     ("nl" :default "Zie figuur %s"
+      :html "Zie figuur&nbsp;%s" :latex "Zie figuur~%s")
      ("pt_BR" :default "Veja a figura %s")
      ("ro" :default "Vezi figura %s")
      ("sl" :default "Glej sliko %s"))
@@ -5981,6 +5992,8 @@ them."
      ("cs" :default "Viz program %s")
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
+     ("nl" :default "Zie programma %s"
+      :html "Zie programma&nbsp;%s" :latex "Zie programma~%s")
      ("pt_BR" :default "Veja a listagem %s")
      ("ro" :default "Vezi tabelul %s")
      ("sl" :default "Glej izpis programa %s"))
@@ -5994,6 +6007,8 @@ them."
      ("fr" :default "cf. section %s")
      ("it" :default "Vedi sezione %s")
      ("ja" :default "セクション %s を参照")
+     ("nl" :default "Zie sectie %s"
+      :html "Zie sectie&nbsp;%s" :latex "Zie sectie~%s")
      ("pt_BR" :html "Veja a se&ccedil;&atilde;o %s" :default "Veja a seção %s"
       :ascii "Veja a secao %s")
      ("ro" :default "Vezi secțiunea %s")
@@ -6006,6 +6021,8 @@ them."
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
      ("it" :default "Vedi tabella %s")
+     ("nl" :default "Zie tabel %s"
+      :html "Zie tabel&nbsp;%s" :latex "Zie tabel~%s")
      ("pt_BR" :default "Veja a tabela %s")
      ("ro" :default "Vezi tabelul %s")
      ("sl" :default "Glej tabelo %s"))
@@ -6019,6 +6036,7 @@ them."
      ("is" :default "Tafla")
      ("it" :default "Tabella")
      ("ja" :default "表" :html "&#34920;")
+     ("nl" :default "Tabel")
      ("pt_BR" :default "Tabela")
      ("ro" :default "Tabel")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;"
@@ -6035,6 +6053,7 @@ them."
      ("is" :default "Tafla %d")
      ("it" :default "Tabella %d:")
      ("ja" :default "表%d:" :html "&#34920;%d:")
+     ("nl" :default "Tabel %d:" :html "Tabel&nbsp;%d:")
      ("no" :default "Tabell %d")
      ("nb" :default "Tabell %d")
      ("nn" :default "Tabell %d")
@@ -6083,6 +6102,7 @@ them."
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
      ("it" :default "Riferimento sconosciuto")
      ("ja" :default "不明な参照先")
+     ("nl" :default "Onbekende verwijzing")
      ("pt_BR" :html "Refer&ecirc;ncia desconhecida" :default "Referência desconhecida" :ascii "Referencia desconhecida")
      ("ro" :default "Referință necunoscută")
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
