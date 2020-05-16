@@ -94,15 +94,18 @@ See the \"Match syntax\" section of the org manual for more details."
 (defcustom org-crypt-key ""
   "The default key to use when encrypting the contents of a heading.
 
-The string is matched against all keys in the key ring.  In
-particular, the empty string matches no key.
+If this variable is nil, always use symmetric encryption, unconditionally.
 
-This setting can be overridden in the CRYPTKEY property.
+Otherwise, The string is matched against all keys in the key ring.
+In particular, the empty string matches no key.  If no key is found,
+look for the `epa-file-encrypt-to' local variable.  Ultimately fall back
+to symmetric encryption.
 
-If no key is found, look for the `epa-file-encrypt-to' local
-variable.  Ultimately fall back to symmetric encryption."
+This setting can be overridden in the CRYPTKEY property."
   :group 'org-crypt
-  :type 'string)
+  :type '(choice
+	  (string :tag "Public key(s) matching")
+	  (const :tag "Symmetric encryption" nil)))
 
 (defcustom org-crypt-disable-auto-save 'ask
   "What org-decrypt should do if `auto-save-mode' is enabled.
@@ -191,11 +194,14 @@ See `org-crypt-disable-auto-save'."
 (defun org-crypt-key-for-heading ()
   "Return the encryption key(s) for the current heading.
 Assume `epg-context' is set."
-  (or (epg-list-keys epg-context
-		     (or (org-entry-get nil "CRYPTKEY" 'selective)
-			 org-crypt-key))
-      (bound-and-true-p epa-file-encrypt-to)
-      (progn (message "No crypt key set, using symmetric encryption.") nil)))
+  (and org-crypt-key
+       (or (epg-list-keys epg-context
+			  (or (org-entry-get nil "CRYPTKEY" 'selective)
+			      org-crypt-key))
+	   (bound-and-true-p epa-file-encrypt-to)
+	   (progn
+	     (message "No crypt key set, using symmetric encryption.")
+	     nil))))
 
 ;;;###autoload
 (defun org-encrypt-entry ()
