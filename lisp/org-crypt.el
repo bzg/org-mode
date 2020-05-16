@@ -1,14 +1,8 @@
 ;;; org-crypt.el --- Public Key Encryption for Org Entries -*- lexical-binding: t; -*-
+;;
 ;; Copyright (C) 2007-2020 Free Software Foundation, Inc.
 
-;; Emacs Lisp Archive Entry
-;; Filename: org-crypt.el
-;; Keywords: org-mode
 ;; Author: John Wiegley <johnw@gnu.org>
-;; Maintainer: Peter Jones <pjones@pmade.com>
-;; Description: Adds public key encryption to Org buffers
-;; URL: http://www.newartisans.com/software/emacs.html
-;; Compatibility: Emacs22
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -47,9 +41,7 @@
 ;;
 ;; 3. To later decrypt an entry, use `org-decrypt-entries' or
 ;;    `org-decrypt-entry'.  It might be useful to bind this to a key,
-;;    like C-c C-/.  I hope that in the future, C-c C-r can be might
-;;    overloaded to also decrypt an entry if it's encrypted, since
-;;    that fits nicely with the meaning of "reveal".
+;;    like C-c C-/.
 ;;
 ;; 4. To automatically encrypt all necessary entries when saving a
 ;;    file, call `org-crypt-use-before-save-magic' after loading
@@ -60,9 +52,10 @@
 ;; - Carsten Dominik
 ;; - Vitaly Ostanin
 
-(require 'org)
-
 ;;; Code:
+
+(require 'org-macs)
+(require 'org-compat)
 
 (declare-function epg-decrypt-string "epg" (context cipher))
 (declare-function epg-list-keys "epg" (context &optional name mode))
@@ -74,6 +67,17 @@
 		  (context plain recipients &optional sign always-trust))
 (defvar epg-context)
 
+(declare-function org-back-over-empty-lines "org" ())
+(declare-function org-back-to-heading "org" (&optional invisible-ok))
+(declare-function org-before-first-heading-p "org" ())
+(declare-function org-end-of-meta-data "org" (&optional full))
+(declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
+(declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
+(declare-function org-flag-subtree "org" (flag))
+(declare-function org-make-tags-matcher "org" (match))
+(declare-function org-previous-visible-heading "org" (arg))
+(declare-function org-scan-tags "org" (action matcher todo-only &optional start-level))
+(declare-function org-set-property "org" (property value))
 
 (defgroup org-crypt nil
   "Org Crypt."
@@ -193,6 +197,7 @@ Assume `epg-context' is set."
       (bound-and-true-p epa-file-encrypt-to)
       (progn (message "No crypt key set, using symmetric encryption.") nil)))
 
+;;;###autoload
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."
   (interactive)
@@ -235,6 +240,7 @@ Assume `epg-context' is set."
 	   (org-flag-subtree t))
 	 nil)))))
 
+;;;###autoload
 (defun org-decrypt-entry ()
   "Decrypt the content of the current headline."
   (interactive)
@@ -272,6 +278,7 @@ Assume `epg-context' is set."
 	 nil)))
     (_ nil)))
 
+;;;###autoload
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
   (interactive)
@@ -281,6 +288,7 @@ Assume `epg-context' is set."
      (cdr (org-make-tags-matcher org-crypt-tag-matcher))
      org--matcher-tags-todo-only)))
 
+;;;###autoload
 (defun org-decrypt-entries ()
   "Decrypt all entries in the current buffer."
   (interactive)
@@ -290,6 +298,7 @@ Assume `epg-context' is set."
      (cdr (org-make-tags-matcher org-crypt-tag-matcher))
      org--matcher-tags-todo-only)))
 
+;;;###autoload
 (defun org-crypt-use-before-save-magic ()
   "Add a hook to automatically encrypt entries before a file is saved to disk."
   (add-hook
