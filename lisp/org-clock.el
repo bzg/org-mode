@@ -2453,20 +2453,21 @@ the currently selected interval size."
   (setq params (org-combine-plists org-clocktable-defaults params))
   (catch 'exit
     (let* ((scope (plist-get params :scope))
+	   (base-buffer (org-base-buffer (current-buffer)))
 	   (files (pcase scope
 		    (`agenda
 		     (org-agenda-files t))
 		    (`agenda-with-archives
 		     (org-add-archive-files (org-agenda-files t)))
 		    (`file-with-archives
-		     (and buffer-file-name
-			  (org-add-archive-files (list buffer-file-name))))
+		     (let ((base-file (buffer-file-name base-buffer)))
+		       (and base-file
+			    (org-add-archive-files (list base-file)))))
 		    ((or `nil `file `subtree `tree
 			 (and (pred symbolp)
 			      (guard (string-match "\\`tree\\([0-9]+\\)\\'"
 						   (symbol-name scope)))))
-		     (or (buffer-file-name (buffer-base-buffer))
-			 (current-buffer)))
+		     base-buffer)
 		    ((pred functionp) (funcall scope))
 		    ((pred consp) scope)
 		    (_ (user-error "Unknown scope: %S" scope))))
