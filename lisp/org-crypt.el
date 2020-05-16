@@ -124,6 +124,36 @@ nil      : Leave auto-save-mode enabled.
                  (const :tag "Ask"     ask)
                  (const :tag "Encrypt" encrypt)))
 
+(defun org-crypt--encrypted-text (beg end)
+  "Return encrypted text in between BEG and END."
+  ;; Ignore indentation.
+  (replace-regexp-in-string
+   "^[ \t]*" ""
+   (buffer-substring-no-properties beg end)))
+
+(defun org-at-encrypted-entry-p ()
+  "Is the current entry encrypted?
+When the entry is encrypted, return a pair (BEG . END) where BEG
+and END are buffer positions delimiting the encrypted area."
+  (org-with-wide-buffer
+   (unless (org-before-first-heading-p)
+     (org-back-to-heading t)
+     (org-end-of-meta-data)
+     (let ((case-fold-search nil)
+	   (banner-start (rx (seq bol
+				  (zero-or-more (any "\t "))
+				  "-----BEGIN PGP MESSAGE-----"
+				  eol))))
+       (when (looking-at banner-start)
+	 (let ((start (point))
+	       (banner-end (rx (seq bol
+				    (or (group (zero-or-more (any "\t "))
+					       "-----END PGP MESSAGE-----"
+					       eol)
+					(seq (one-or-more "*") " "))))))
+	   (when (and (re-search-forward banner-end nil t) (match-string 1))
+	     (cons start (line-beginning-position 2)))))))))
+
 (defun org-crypt-check-auto-save ()
   "Check whether auto-save-mode is enabled for the current buffer.
 
@@ -166,16 +196,21 @@ Assume `epg-context' is set."
 (defun org-encrypt-entry ()
   "Encrypt the content of the current headline."
   (interactive)
-  (require 'epg)
-  (org-with-wide-buffer
-   (org-back-to-heading t)
-   (let ((start-heading (point)))
-     (org-end-of-meta-data)
-     (unless (looking-at-p "-----BEGIN PGP MESSAGE-----")
-       (setq-local epg-context (epg-make-context nil t t))
-       (let ((folded (org-invisible-p))
-	     (crypt-key (org-crypt-key-for-heading))
-	     (beg (point)))
+  (unless (org-at-encrypted-entry-p)
+    (require 'epg)
+    (setq-local epg-context (epg-make-context nil t t))
+    (org-with-wide-buffer
+     (org-back-to-heading t)
+     (let ((start-heading (point))
+	   (crypt-key (org-crypt-key-for-heading))
+	   (folded? (org-invisible-p (line-beginning-position))))
+       (org-end-of-meta-data)
+       (let ((beg (point))
+	     (folded-heading
+	      (and folded?
+		   (save-excursion
+		     (org-previous-visible-heading 1)
+		     (point)))))
 	 (goto-char start-heading)
 	 (org-end-of-subtree t t)
 	 (org-back-over-empty-lines)
@@ -195,50 +230,47 @@ Assume `epg-context' is set."
 	     (error
 	      (insert contents)
 	      (error (error-message-string err)))))
-	 (when folded
-	   (goto-char start-heading)
+	 (when folded-heading
+	   (goto-char folded-heading)
 	   (org-flag-subtree t))
 	 nil)))))
 
 (defun org-decrypt-entry ()
   "Decrypt the content of the current headline."
   (interactive)
-  (require 'epg)
-  (unless (org-before-first-heading-p)
-    (org-with-wide-buffer
-     (org-back-to-heading t)
-     (let ((heading-point (point))
-	   (heading-was-invisible-p
-	    (save-excursion
-	      (outline-end-of-heading)
-	      (org-invisible-p))))
-       (org-end-of-meta-data)
-       (when (looking-at "-----BEGIN PGP MESSAGE-----")
-	 (org-crypt-check-auto-save)
-	 (setq-local epg-context (epg-make-context nil t t))
-	 (let* ((end (save-excursion
-		       (search-forward "-----END PGP MESSAGE-----")
-		       (line-beginning-position 2)))
-		(encrypted-text (buffer-substring-no-properties (point) end))
-		(decrypted-text
-		 (decode-coding-string
-		  (epg-decrypt-string epg-context encrypted-text)
-		  'utf-8)))
-	   ;; Delete region starting just before point, because the
-	   ;; outline property starts at the \n of the heading.
-	   (delete-region (1- (point)) end)
-	   ;; Store a checksum of the decrypted and the encrypted
-	   ;; text value.  This allows reusing the same encrypted text
-	   ;; if the text does not change, and therefore avoid a
-	   ;; re-encryption process.
-	   (insert "\n" (propertize decrypted-text
-				    'org-crypt-checksum (sha1 decrypted-text)
-				    'org-crypt-key (org-crypt-key-for-heading)
-				    'org-crypt-text encrypted-text))
-	   (when heading-was-invisible-p
-	     (goto-char heading-point)
-	     (org-flag-subtree t))
-	   nil))))))
+  (pcase (org-at-encrypted-entry-p)
+    (`(,beg . ,end)
+     (require 'epg)
+     (setq-local epg-context (epg-make-context nil t t))
+     (org-with-point-at beg
+       (org-crypt-check-auto-save)
+       (let* ((folded-heading
+	       (and (org-invisible-p)
+		    (save-excursion
+		      (org-previous-visible-heading 1)
+		      (point))))
+	      (encrypted-text (org-crypt--encrypted-text beg end))
+	      (decrypted-text
+	       (decode-coding-string
+		(epg-decrypt-string epg-context encrypted-text)
+		'utf-8)))
+	 ;; Delete region starting just before point, because the
+	 ;; outline property starts at the \n of the heading.
+	 (delete-region (1- (point)) end)
+	 ;; Store a checksum of the decrypted and the encrypted text
+	 ;; value.  This allows reusing the same encrypted text if the
+	 ;; text does not change, and therefore avoid a re-encryption
+	 ;; process.
+	 (insert "\n"
+		 (propertize decrypted-text
+			     'org-crypt-checksum (sha1 decrypted-text)
+			     'org-crypt-key (org-crypt-key-for-heading)
+			     'org-crypt-text encrypted-text))
+	 (when folded-heading
+	   (goto-char folded-heading)
+	   (org-flag-subtree t))
+	 nil)))
+    (_ nil)))
 
 (defun org-encrypt-entries ()
   "Encrypt all top-level entries in the current buffer."
@@ -257,14 +289,6 @@ Assume `epg-context' is set."
      'org-decrypt-entry
      (cdr (org-make-tags-matcher org-crypt-tag-matcher))
      org--matcher-tags-todo-only)))
-
-(defun org-at-encrypted-entry-p ()
-  "Is the current entry encrypted?"
-  (unless (org-before-first-heading-p)
-    (save-excursion
-      (org-back-to-heading t)
-      (search-forward "-----BEGIN PGP MESSAGE-----"
-		      (save-excursion (outline-next-heading)) t))))
 
 (defun org-crypt-use-before-save-magic ()
   "Add a hook to automatically encrypt entries before a file is saved to disk."
