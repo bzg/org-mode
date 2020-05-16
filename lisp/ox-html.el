@@ -2894,10 +2894,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
               (org-html--unlabel-latex-environment latex-frag)
               processing-type info)))
         (when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
-          (org-html--wrap-latex-environment
-           (org-html--format-image
-            (match-string 1 formula-link) attributes info)
-           info caption label))))
+          (let ((source (org-export-file-uri (match-string 1 formula-link))))
+	    (org-html--wrap-latex-environment
+	     (org-html--format-image source attributes info)
+	     info caption label)))))
      (t (org-html--wrap-latex-environment latex-frag info caption label)))))
 
 ;;;; Latex Fragment
@@ -2916,7 +2916,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (let ((formula-link
 	     (org-html-format-latex latex-frag processing-type info)))
 	(when (and formula-link (string-match "file:\\([^]]*\\)" formula-link))
-	  (org-html--format-image (match-string 1 formula-link) nil info))))
+	  (let ((source (org-export-file-uri (match-string 1 formula-link))))
+	    (org-html--format-image source nil info)))))
      (t latex-frag))))
 
 ;;;; Line Break
