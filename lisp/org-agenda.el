@@ -3018,7 +3018,8 @@ Agenda views are separated by `org-agenda-block-separator'."
 	(erase-buffer)
 	(insert (eval-when-compile
 		  (let ((header
-			 "Press key for an agenda command:
+			 (copy-sequence
+			  "Press key for an agenda command:
 --------------------------------        <   Buffer, subtree/region restriction
 a   Agenda for current week or day      >   Remove restriction
 t   List of all TODO entries            e   Export agenda views
@@ -3027,7 +3028,7 @@ s   Search for keywords                 M   Like m, but only TODO entries
 /   Multi-occur                         S   Like s, but only TODO entries
 ?   Find :FLAGGED: entries              C   Configure custom agenda commands
 *   Toggle sticky agenda views          #   List stuck projects (!=configure)
-")
+"))
 			(start 0))
 		    (while (string-match
 			    "\\(^\\|   \\|(\\)\\(\\S-\\)\\( \\|=\\)"
