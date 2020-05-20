@@ -4523,7 +4523,6 @@ directory."
 			  (push (cons keyword final) alist)
 			  (setq keywords (remove keyword keywords))
 			  (setq regexp (org-make-options-regexp keywords)))
-			 ((not (org-string-nw-p value)) nil)
 			 ((null entry) (push (list keyword final) alist))
 			 (t (push final (cdr entry)))))))))))
       alist)))

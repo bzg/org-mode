@@ -280,7 +280,12 @@ num:2 <:active")))
   (should-not
    (equal "Mine"
 	  (org-test-with-parsed-data "* COMMENT H1\n** H2\n#+EMAIL: Mine"
-				     (plist-get info :email)))))
+				     (plist-get info :email))))
+  ;; Keywords can be set to an empty value.
+  (should-not
+   (let ((user-full-name "Me"))
+     (org-test-with-parsed-data "#+AUTHOR:"
+				(plist-get info :author)))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."
