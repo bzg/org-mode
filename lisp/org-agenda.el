@@ -4082,8 +4082,10 @@ continue from there."
     (when (or
 	   (save-excursion (goto-char p) (looking-at comment-start-skip))
 	   (and org-agenda-skip-archived-trees (not org-agenda-archives-mode)
-		(get-text-property p :org-archived)
-		(org-end-of-subtree t))
+		(or (and (get-text-property p :org-archived)
+			 (org-end-of-subtree t))
+		    (and (member org-archive-tag org-file-tags)
+			 (goto-char (point-max)))))
 	   (and org-agenda-skip-comment-trees
 		(get-text-property p :org-comment)
 		(org-end-of-subtree t))
