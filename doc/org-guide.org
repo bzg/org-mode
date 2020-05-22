@@ -114,8 +114,8 @@ the entire show and hide functionalities into a single command,
 :END:
 
 Headlines define the structure of an outline tree.  The headlines in
-Org start with one or more stars, on the left margin[fn:1].  For
-example:
+Org start on the left margin[fn:1] with one or more stars followed by
+a space.  For example:
 
 #+begin_example
 ,* Top level headline
