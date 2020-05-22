@@ -275,8 +275,8 @@ account.
 
 *** New option ~org-table-header-line-p~
 
-Setting this option to =t= will activate
-~org-table-header-line-mode~ in org-mode buffers.
+Setting this option to =t= will activate ~org-table-header-line-mode~
+in org-mode buffers.
 
 *** New option to group captured datetime entries by month
 
@@ -324,15 +324,20 @@ Functions in this hook are run after ~org-agenda-filter~ is called.
 
 ** Removed or renamed functions and variables
 *** Deprecated ~org-flag-dawer~ function
+
 Use ~org-hide-drawer-toggle~ instead.
+
 *** Deprecated ~org-cycle-hide-drawers~ function
 
-Use new function ~org-hide-drawer-all~ instead.  Note there is also
-a new ~org-cycle-hide-property-drawers~ function.
+Use the new function ~org-hide-drawer-all~ instead.  Note that there
+is also a new ~org-cycle-hide-property-drawers~ function.
 
 *** Deprecated ~org-hide-block-toggle-maybe~ function
+
 Use ~org-hide-block-toggle~ instead.
+
 *** Deprecated ~org-hide-block-toggle-all~ function
+
 This function was not used in the code base, and has no clear use
 either.  It has been marked for future removal.  Please contact the
 mailing list if you use this function.
@@ -1820,16 +1825,20 @@ is now obsolete.
 
 Now ~=...=~ markup uses ~@samp{}~ instead of ~@verb{}~.  You can use
 ~@verb{}~ again by customizing the variable.
+
 *** Texinfo exports example blocks as ~@example~
 *** Texinfo exports inline source blocks as ~@code{}~
 *** Texinfo default table markup is ~@asis~
+
 It used to be ~@samp~ but ~@asis~ is neutral and, therefore, more
 suitable as a default value.
+
 *** Texinfo default process includes ~--no-split~ option
 *** New entities : ~\dollar~ and ~\USD~
 *** Support for date style URLs in =org-protocol://open-source=
-    URLs like =https://cool-blog.com/2017/05/20/cool-post/= are
-    covered by rewrite rules.
+
+URLs like =https://cool-blog.com/2017/05/20/cool-post/= are covered by
+rewrite rules.
 
 *** Add (C) =COMMENT= support to ~org-structure-template-alist~
 
