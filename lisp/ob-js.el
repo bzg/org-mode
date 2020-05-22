@@ -65,7 +65,7 @@
   :safe #'stringp)
 
 (defvar org-babel-js-function-wrapper
-  "require('sys').print(require('sys').inspect(function(){\n%s\n}()));"
+  "require('process').stdout.write(require('util').inspect(function(){%s}()));"
   "Javascript code to print value of body.")
 
 (defun org-babel-execute:js (body params)
