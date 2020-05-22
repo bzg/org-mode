@@ -400,8 +400,8 @@ the entire show and hide functionalities into a single command,
 #+vindex: org-special-ctrl-k
 #+vindex: org-ctrl-k-protect-subtree
 
-Headlines define the structure of an outline tree.   headlines in
-Org start on the left margin[fn:3] with one or more stars followed by
+Headlines define the structure of an outline tree.  Org headlines
+start on the left margin[fn:3] with one or more stars followed by
 a space.  For example:
 
 #+begin_example
