@@ -125,15 +125,17 @@
             (if (org-string-nw-p contents) contents ""))))
 
 (defun org-confluence-link (link desc info)
-  (let ((raw-link (org-element-property :raw-link link)))
-    (concat "["
-            (when (org-string-nw-p desc) (format "%s|" desc))
-            (cond
-             ((string-match "^confluence:" raw-link)
-              (replace-regexp-in-string "^confluence:" "" raw-link))
-             (t
-              raw-link))
-            "]")))
+  (if (string= "radio" (org-element-property :type link))
+      desc
+    (let ((raw-link (org-element-property :raw-link link)))
+      (concat "["
+              (when (org-string-nw-p desc) (format "%s|" desc))
+              (cond
+               ((string-match "^confluence:" raw-link)
+		(replace-regexp-in-string "^confluence:" "" raw-link))
+               (t
+		raw-link))
+              "]"))))
 
 (defun org-confluence-paragraph (paragraph contents info)
   "Transcode PARAGRAPH element for Confluence.
