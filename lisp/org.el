@@ -5315,7 +5315,7 @@ by a #."
 	  (org-remove-flyspell-overlays-in (match-end 2) (match-end 0))
 	  (remove-text-properties (match-beginning 0) (match-end 0)
 				  '(display t invisible t intangible t))
-	  ;; Handle short captions.
+	  ;; Handle short captions
 	  (save-excursion
 	    (beginning-of-line)
 	    (looking-at (rx (group (zero-or-more blank)
@@ -5329,12 +5329,12 @@ by a #."
 			       '(font-lock-fontified t face org-block))
 	  t)
 	 ((member dc3 '(" " ""))
-	  ; Just a comment, the plus was not there
+	  ;; Just a comment, the plus was not there
 	  (org-remove-flyspell-overlays-in beg (match-end 0))
 	  (add-text-properties
 	   beg (match-end 0)
 	   '(font-lock-fontified t face font-lock-comment-face)))
-	 (t ;; just any other in-buffer setting, but not indented
+	 (t ;; Just any other in-buffer setting, but not indented
 	  (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	  (remove-text-properties (match-beginning 0) (match-end 0)
 				  '(display t invisible t intangible t))
