@@ -669,7 +669,7 @@ region as a drawer without further ado."
   "Re-hide all drawers after a visibility state change.
 STATE should be one of the symbols listed in the docstring of
 `org-cycle-hook'."
-  (declare (obsolete "use `org-hide-drawer' instead." "Org 9.4"))
+  (declare (obsolete "use `org-hide-drawer-all' instead." "Org 9.4"))
   (when (and (derived-mode-p 'org-mode)
 	     (not (memq state '(overview folded contents))))
     (save-excursion
