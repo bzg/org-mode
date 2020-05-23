@@ -947,9 +947,7 @@ E.g. \"%C3%B6\" becomes the german o-Umlaut."
 (defun org-link-make-string (link &optional description)
   "Make a bracket link, consisting of LINK and DESCRIPTION.
 LINK is escaped with backslashes for inclusion in buffer."
-  (unless (org-string-nw-p link) (error "Empty link"))
-  (let* ((uri (org-link-escape link))
-	 (zero-width-space (string ?\x200B))
+  (let* ((zero-width-space (string ?\x200B))
 	 (description
 	  (and (org-string-nw-p description)
 	       ;; Description cannot contain two consecutive square
@@ -962,9 +960,10 @@ LINK is escaped with backslashes for inclusion in buffer."
 		(replace-regexp-in-string "]\\'"
 					  (concat "\\&" zero-width-space)
 					  (org-trim description))))))
-    (format "[[%s]%s]"
-	    uri
-	    (if description (format "[%s]" description) ""))))
+    (if (not (org-string-nw-p link)) description
+      (format "[[%s]%s]"
+	      (org-link-escape link)
+	      (if description (format "[%s]" description) "")))))
 
 (defun org-store-link-functions ()
   "List of functions that are called to create and store a link.
