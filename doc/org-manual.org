@@ -8455,9 +8455,13 @@ commands:
   to specify the number of context lines for each match, default is
   1.
 
-- {{{kbd(#)}}}, {{{kbd(!)}}} ::
+- {{{kbd(#)}}} ::
 
   Create a list of stuck projects (see [[*Stuck projects]]).
+
+- {{{kbd(!)}}} ::
+
+  Configure the list of stuck projects (see [[*Stuck projects]]).
 
 - {{{kbd(<)}}} ::
 
