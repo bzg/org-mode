@@ -10304,8 +10304,10 @@ Another possibility is the construction of agenda views that comprise
 the results of /several/ commands, each of which creates a block in
 the agenda buffer.  The available commands include ~agenda~ for the
 daily or weekly agenda (as created with {{{kbd(a)}}}) , ~alltodo~ for
-the global TODO list (as constructed with {{{kbd(t)}}}), and the
+the global TODO list (as constructed with {{{kbd(t)}}}), ~stuck~ for
+the list of stuck projects (as obtained with {{{kbd(#)}}}) and the
 matching commands discussed above: ~todo~, ~tags~, and ~tags-todo~.
+
 Here are two examples:
 
 #+begin_src emacs-lisp
