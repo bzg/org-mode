@@ -453,6 +453,12 @@ equations producing inconsistent output. New option
 ~org-html-equation-reference-format~ sets the command used in HTML
 export.
 
+*** ob-haskell: add support for compilation with =:compile= header argument
+
+By default, Haskell blocks are interpreted. By adding =:compile yes=
+to a Haskell source block, it will be compiled, executed and the
+results will be displayed.
+
 * Version 9.3
 
 ** Incompatible changes

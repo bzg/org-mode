@@ -23,12 +23,13 @@
 
 ;;; Commentary:
 
-;; Org-Babel support for evaluating haskell source code.  This one will
-;; be sort of tricky because haskell programs must be compiled before
+;; Org Babel support for evaluating Haskell source code.
+;; Haskell programs must be compiled before
 ;; they can be run, but haskell code can also be run through an
 ;; interactive interpreter.
 ;;
-;; For now lets only allow evaluation using the haskell interpreter.
+;; By default we evaluate using the Haskell interpreter.
+;; To use the compiler, specify :compile yes in the header.
 
 ;;; Requirements:
 
@@ -45,6 +46,7 @@
 (declare-function run-haskell "ext:inf-haskell" (&optional arg))
 (declare-function inferior-haskell-load-file
 		  "ext:inf-haskell" (&optional reload))
+(declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("haskell" . "hs"))
@@ -58,8 +60,63 @@
 
 (defvar haskell-prompt-regexp)
 
-(defun org-babel-execute:haskell (body params)
-  "Execute a block of Haskell code."
+(defcustom org-babel-haskell-compiler "ghc"
+  "Command used to compile a Haskell source code file into an executable.
+May be either a command in the path, like \"ghc\" or an absolute
+path name, like \"/usr/local/bin/ghc\".  The command can include
+a parameter, such as \"ghc -v\"."
+  :group 'org-babel
+  :package-version '(Org "9.4")
+  :type 'string)
+
+(defconst org-babel-header-args:haskell '(compile . :any)
+  "Haskell-specific header arguments.")
+
+(defun org-babel-haskell-execute (body params)
+  "This function should only be called by `org-babel-execute:haskell'"
+  (let* ((tmp-src-file (org-babel-temp-file "Haskell-src-" ".hs"))
+         (tmp-bin-file
+          (org-babel-process-file-name
+           (org-babel-temp-file "Haskell-bin-" org-babel-exeext)))
+         (cmdline (cdr (assq :cmdline params)))
+         (cmdline (if cmdline (concat " " cmdline) ""))
+         (flags (cdr (assq :flags params)))
+         (flags (mapconcat #'identity
+		           (if (listp flags)
+                               flags
+                             (list flags))
+			   " "))
+         (libs (org-babel-read
+	        (or (cdr (assq :libs params))
+	            (org-entry-get nil "libs" t))
+	        nil))
+         (libs (mapconcat #'identity
+		          (if (listp libs) libs (list libs))
+		          " ")))
+    (with-temp-file tmp-src-file (insert body))
+    (org-babel-eval
+     (format "%s -o %s %s %s %s"
+             org-babel-haskell-compiler
+	     tmp-bin-file
+	     flags
+	     (org-babel-process-file-name tmp-src-file)
+	     libs)
+     "")
+    (let ((results (org-babel-eval (concat tmp-bin-file cmdline) "")))
+      (when results
+        (setq results (org-trim (org-remove-indentation results)))
+        (org-babel-reassemble-table
+         (org-babel-result-cond (cdr (assq :result-params params))
+	   (org-babel-read results t)
+	   (let ((tmp-file (org-babel-temp-file "Haskell-")))
+	     (with-temp-file tmp-file (insert results))
+	     (org-babel-import-elisp-from-file tmp-file)))
+         (org-babel-pick-name
+	  (cdr (assq :colname-names params)) (cdr (assq :colnames params)))
+         (org-babel-pick-name
+	  (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))))
+
+(defun org-babel-interpret-haskell (body params)
   (require 'inf-haskell)
   (add-hook 'inferior-haskell-hook
             (lambda ()
@@ -93,6 +150,13 @@
 			  (cdr (assq :colname-names params)))
      (org-babel-pick-name (cdr (assq :rowname-names params))
 			  (cdr (assq :rowname-names params))))))
+
+(defun org-babel-execute:haskell (body params)
+  "Execute a block of Haskell code."
+  (let ((compile (string= "yes" (cdr (assq :compile params)))))
+    (if (not compile)
+	(org-babel-interpret-haskell body params)
+      (org-babel-haskell-execute body params))))
 
 (defun org-babel-haskell-initiate-session (&optional _session _params)
   "Initiate a haskell session.
