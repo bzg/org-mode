@@ -173,6 +173,14 @@ _ = 'failure'
 #+end_src"
 	    (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob-python/multiline-var ()
+  (should
+   (equal "a\nb\nc"
+	  (org-test-with-temp-text "#+begin_src python :var text=\"a\\nb\\nc\"
+return text
+#+end_src"
+	    (org-babel-execute-src-block)))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here
