@@ -81,6 +81,7 @@
 (require 'org-compat)
 
 (defvar org-M-RET-may-split-line)
+(defvar org-adapt-indentation)
 (defvar org-auto-align-tags)
 (defvar org-blank-before-new-entry)
 (defvar org-clock-string)
@@ -2774,51 +2775,83 @@ If a region is active, all items inside will be moved."
      (t (error "Not at an item")))))
 
 (defvar org-tab-ind-state)
-(defvar org-adapt-indentation)
 (defun org-cycle-item-indentation ()
   "Cycle levels of indentation of an empty item.
+
 The first run indents the item, if applicable.  Subsequent runs
 outdent it at meaningful levels in the list.  When done, item is
 put back at its original position with its original bullet.
 
 Return t at each successful move."
   (when (org-at-item-p)
-    (let* ((org-adapt-indentation nil)
-	   (struct (org-list-struct))
-	   (ind (org-list-get-ind (point-at-bol) struct))
-	   (bullet (org-trim (buffer-substring (point-at-bol) (point-at-eol)))))
+    (let* ((struct (org-list-struct))
+	   (item (line-beginning-position))
+	   (ind (org-list-get-ind item struct)))
       ;; Accept empty items or if cycle has already started.
       (when (or (eq last-command 'org-cycle-item-indentation)
-		(and (save-excursion
-		       (beginning-of-line)
-		       (looking-at org-list-full-item-re))
-		     (>= (match-end 0) (save-excursion
-					 (goto-char (org-list-get-item-end
-						     (point-at-bol) struct))
-					 (skip-chars-backward " \r\t\n")
-					 (point)))))
+		(and (org-match-line org-list-full-item-re)
+		     (>= (match-end 0)
+			 (save-excursion
+			   (goto-char (org-list-get-item-end item struct))
+			   (skip-chars-backward " \t\n")
+			   (point)))))
 	(setq this-command 'org-cycle-item-indentation)
-	;; When in the middle of the cycle, try to outdent first.  If
-	;; it fails, and point is still at initial position, indent.
-	;; Else, re-create it at its original position.
-	(if (eq last-command 'org-cycle-item-indentation)
+	(let ((prevs (org-list-prevs-alist struct))
+	      (parents (org-list-parents-alist struct)))
+	  (if (eq last-command 'org-cycle-item-indentation)
+	      ;; When in the middle of the cycle, try to outdent.  If
+	      ;; it fails, move point back to its initial position and
+	      ;; reset cycle.
+	      (pcase-let ((`(,old-ind . ,old-bul) org-tab-ind-state)
+			  (allow-outdent
+			   (lambda (struct prevs parents)
+			     ;; Non-nil if current item can be
+			     ;; outdented.
+			     (and (not (org-list-get-next-item item nil prevs))
+				  (not (org-list-has-child-p item struct))
+				  (org-list-get-parent item struct parents)))))
+		(cond
+		 ((and (> ind old-ind)
+		       (org-list-get-prev-item item nil prevs))
+		  (org-list-indent-item-generic 1 t struct))
+		 ((and (< ind old-ind)
+		       (funcall allow-outdent struct prevs parents))
+		  (org-list-indent-item-generic -1 t struct))
+		 (t
+		  (delete-region (line-beginning-position) (line-end-position))
+		  (indent-to-column old-ind)
+		  (insert old-bul " ")
+		  (let* ((struct (org-list-struct))
+			 (parents (org-list-parents-alist struct)))
+		    (if (and (> ind old-ind)
+			     ;; We were previously indenting item.  It
+			     ;; is no longer possible.  Try to outdent
+			     ;; from initial position.
+			     (funcall allow-outdent
+				      struct
+				      (org-list-prevs-alist struct)
+				      parents))
+			(org-list-indent-item-generic -1 t struct)
+		      (org-list-write-struct struct parents)
+		      ;; Start cycle over.
+		      (setq this-command 'identity)
+		      t)))))
+	    ;; If a cycle is starting, remember initial indentation
+	    ;; and bullet, then try to indent.  If it fails, try to
+	    ;; outdent.
+	    (setq org-tab-ind-state
+		  (cons ind (org-trim (org-current-line-string))))
 	    (cond
-	     ((ignore-errors (org-list-indent-item-generic -1 t struct)))
-	     ((and (= ind (car org-tab-ind-state))
-		   (ignore-errors (org-list-indent-item-generic 1 t struct))))
-	     (t (delete-region (point-at-bol) (point-at-eol))
-		(indent-to-column (car org-tab-ind-state))
-		(insert (cdr org-tab-ind-state) " ")
-		;; Break cycle
-		(setq this-command 'identity)))
-	  ;; If a cycle is starting, remember indentation and bullet,
-	  ;; then try to indent.  If it fails, try to outdent.
-	  (setq org-tab-ind-state (cons ind bullet))
-	  (cond
-	   ((ignore-errors (org-list-indent-item-generic 1 t struct)))
-	   ((ignore-errors (org-list-indent-item-generic -1 t struct)))
-	   (t (user-error "Cannot move item"))))
-	t))))
+	     ((org-list-get-prev-item item nil prevs)
+	      (org-list-indent-item-generic 1 t struct))
+	     ((and (not (org-list-get-next-item item nil prevs))
+		   (org-list-get-parent item struct parents))
+	      (org-list-indent-item-generic -1 t struct))
+	     (t
+	      ;; This command failed.  So will the following one.
+	      ;; There's no point in starting the cycle.
+	      (setq this-command 'identity)
+	      (user-error "Cannot move item")))))))))
 
 (defun org-sort-list
     (&optional with-case sorting-type getkey-func compare-func interactive?)
