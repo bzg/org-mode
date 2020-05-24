@@ -459,6 +459,13 @@ By default, Haskell blocks are interpreted. By adding =:compile yes=
 to a Haskell source block, it will be compiled, executed and the
 results will be displayed.
 
+*** Support for ~org-edit-special~ with LaTeX fragments.
+
+Calling ~org-edit-special~ on an inline LaTeX fragment calls a new
+function, ~org-edit-latex-fragment~. This functions in a comparable
+manner to editing inline source blocks, bringing up a minibuffer set
+to LaTeX mode. The math-mode deliminators are read only.
+
 * Version 9.3
 
 ** Incompatible changes

@@ -17347,6 +17347,7 @@ Otherwise, return a user error."
 	 (pcase (org-element-type context)
 	   (`footnote-reference (org-edit-footnote-reference))
 	   (`inline-src-block (org-edit-inline-src-code))
+	   (`latex-fragment (org-edit-latex-fragment))
 	   (`timestamp (if (eq 'inactive (org-element-property :type context))
 			   (call-interactively #'org-time-stamp-inactive)
 			 (call-interactively #'org-time-stamp)))
