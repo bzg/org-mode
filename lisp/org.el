@@ -10474,7 +10474,11 @@ TYPE is either `deadline' or `scheduled'.  See `org-deadline' or
 		org-last-inserted-timestamp)))))
 
 (defun org-deadline (arg &optional time)
-  "Insert the \"DEADLINE:\" string with a timestamp to make a deadline.
+  "Insert a \"DEADLINE:\" string with a timestamp to make a deadline.
+
+When called interactively, this command pops up the Emacs calendar to let
+the user select a date.
+
 With one universal prefix argument, remove any deadline from the item.
 With two universal prefix arguments, prompt for a warning delay.
 With argument TIME, set the deadline at the corresponding date.  TIME
@@ -10491,7 +10495,11 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
     (org--deadline-or-schedule arg 'deadline time)))
 
 (defun org-schedule (arg &optional time)
-  "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
+  "Insert a \"SCHEDULED:\" string with a timestamp to schedule an item.
+
+When called interactively, this command pops up the Emacs calendar to let
+the user select a date.
+
 With one universal prefix argument, remove any scheduling date from the item.
 With two universal prefix arguments, prompt for a delay cookie.
 With argument TIME, scheduled at the corresponding date.  TIME can
