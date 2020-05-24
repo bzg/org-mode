@@ -3608,8 +3608,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 	     (when org-agenda-add-entry-text-descriptive-links
 	       (goto-char (point-min))
 	       (while (org-activate-links (point-max))
-		 (add-text-properties (match-beginning 0) (match-end 0)
-				      '(face org-link))))
+		 (goto-char (match-end 0))))
 	     (goto-char (point-min))
 	     (while (re-search-forward org-link-bracket-re (point-max) t)
 	       (set-text-properties (match-beginning 0) (match-end 0)
@@ -3871,8 +3870,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 	(goto-char (point-min))
 	(save-excursion
 	  (while (org-activate-links (point-max))
-	    (add-text-properties (match-beginning 0) (match-end 0)
-				 '(face org-link))))
+	    (goto-char (match-end 0))))
 	(unless (eq org-agenda-remove-tags t)
 	  (org-agenda-align-tags))
 	(unless org-agenda-with-colors
