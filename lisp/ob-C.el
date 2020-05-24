@@ -232,7 +232,10 @@ its header arguments."
 	       (list
 		;; includes
 		(mapconcat
-		 (lambda (inc) (format "#include %s" inc))
+		 (lambda (inc)
+		   (if (string-prefix-p "<" inc)
+		       (format "#include %s" inc)
+		     (format "#include \"%s\"" inc)))
 		 includes "\n")
 		;; defines
 		(mapconcat
