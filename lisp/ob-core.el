@@ -1890,9 +1890,9 @@ region is not active then the point is demarcated."
 	 (block (and start (match-string 0)))
 	 (headers (and start (match-string 4)))
 	 (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
-	 (lower-case-p (and block
+	 (upper-case-p (and block
 			    (let (case-fold-search)
-			      (string-match-p "#\\+begin_src" block)))))
+			      (string-match-p "#\\+BEGIN_SRC" block)))))
     (if info
         (mapc
          (lambda (place)
@@ -1906,9 +1906,9 @@ region is not active then the point is demarcated."
 		 (delete-region (point-at-bol) (point-at-eol)))
                (insert (concat
 			(if (looking-at "^") "" "\n")
-			indent (funcall (if lower-case-p 'downcase 'upcase) "#+end_src\n")
+			indent (if upper-case-p "#+END_SRC\n" "#+end_src\n")
 			(if arg stars indent) "\n"
-			indent (funcall (if lower-case-p 'downcase 'upcase) "#+begin_src ")
+			indent (if upper-case-p "#+BEGIN_SRC\n" "#+begin_src\n")
 			lang
 			(if (> (length headers) 1)
 			    (concat " " headers) headers)
@@ -1929,14 +1929,16 @@ region is not active then the point is demarcated."
 		   (if (org-region-active-p) (mark) (point)) (point))))
 	(insert (concat (if (looking-at "^") "" "\n")
 			(if arg (concat stars "\n") "")
-			(funcall (if lower-case-p 'downcase 'upcase) "#+begin_src ")
-			lang "\n"
-			body
+			(if upper-case-p "#+BEGIN_SRC " "#+begin_src ")
+			lang "\n" body
 			(if (or (= (length body) 0)
 				(string-suffix-p "\r" body)
-				(string-suffix-p "\n" body)) "" "\n")
-			(funcall (if lower-case-p 'downcase 'upcase) "#+end_src\n")))
-	(goto-char start) (move-end-of-line 1)))))
+				(string-suffix-p "\n" body))
+			    ""
+			  "\n")
+			(if upper-case-p "#+END_SRC\n" "#+end_src\n")))
+	(goto-char start)
+	(move-end-of-line 1)))))
 
 (defun org-babel--insert-results-keyword (name hash)
   "Insert RESULTS keyword with NAME value at point.
