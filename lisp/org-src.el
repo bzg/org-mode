@@ -929,7 +929,7 @@ A coderef format regexp can only match at the end of a line."
 	   ;; remove any newline characters in order to preserve
 	   ;; table's structure.
 	   (when (org-element-lineage definition '(table-cell))
-	     (while (search-forward "\n" nil t) (replace-match "")))))
+	     (while (search-forward "\n" nil t) (replace-match " ")))))
        contents
        'remote))
     ;; Report success.
