@@ -977,7 +977,7 @@ Throw an error when not at such a table."
 	     (org-element-property :begin context)
 	     (- (org-element-property :end context)
 		(org-element-property :post-blank context))))
-	   (delim-length (if (string-match "\\`\\$[^$]" contents)) 1 2))
+	   (delim-length (if (string-match "\\`\\$[^$]" contents) 1 2)))
       ;; Make the LaTeX deliminators read-only.
       (add-text-properties 0 delim-length
 			   (list 'read-only "Cannot edit LaTeX deliminator"
