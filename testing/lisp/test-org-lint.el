@@ -393,6 +393,9 @@ SCHEDULED: <2012-03-29 thu.>"
   (should
    (org-test-with-temp-text ":DRAWER:"
      (org-lint '(incomplete-drawer))))
+  (should
+   (org-test-with-temp-text ":DRAWER:\n:ODD:\n:END:"
+     (org-lint '(incomplete-drawer))))
   (should-not
    (org-test-with-temp-text ":DRAWER:\n:END:"
      (org-lint '(incomplete-drawer)))))

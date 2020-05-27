@@ -794,15 +794,25 @@ Use \"export %s\" instead"
       (let ((name (org-trim (match-string-no-properties 0)))
 	    (element (org-element-at-point)))
 	(pcase (org-element-type element)
-	  ((or `drawer `property-drawer)
-	   (goto-char (org-element-property :end element))
-	   nil)
+	  (`drawer
+	   ;; Find drawer opening lines within non-empty drawers.
+	   (let ((end (org-element-property :contents-end element)))
+	     (when end
+	       (while (re-search-forward org-drawer-regexp end t)
+		 (let ((n (org-trim (match-string-no-properties 0))))
+		   (push (list (line-beginning-position)
+			       (format "Possible misleading drawer entry %S" n))
+			 reports))))
+	     (goto-char (org-element-property :end element))))
+	  (`property-drawer
+	   (goto-char (org-element-property :end element)))
 	  ((or `comment-block `example-block `export-block `src-block
 	       `verse-block)
 	   nil)
 	  (_
+	   ;; Find drawer opening lines outside of any drawer.
 	   (push (list (line-beginning-position)
-		       (format "Possible incomplete drawer \"%s\"" name))
+		       (format "Possible incomplete drawer %S" name))
 		 reports)))))
     reports))
 
