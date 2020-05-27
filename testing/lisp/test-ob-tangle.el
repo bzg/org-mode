@@ -384,12 +384,17 @@ another block
 
 (ert-deftest ob-tangle/detangle-false-positive ()
   "Test handling of false positive link during detangle."
-  (org-test-in-example-file (expand-file-name "babel.el" org-test-example-dir)
-    (org-babel-detangle)
-    (org-test-at-id "73115FB0-6565-442B-BB95-50195A499EF4"
-    (org-babel-next-src-block)
-    (should (equal (string-trim (org-element-property :value (org-element-at-point)))
-		   ";; detangle changes")))))
+  (let (buffer)
+    (unwind-protect
+	(org-test-in-example-file (expand-file-name "babel.el" org-test-example-dir)
+	  (org-babel-detangle)
+	  (org-test-at-id "73115FB0-6565-442B-BB95-50195A499EF4"
+	    (setq buffer (current-buffer))
+	    (org-babel-next-src-block)
+	    (should (equal (string-trim (org-element-property
+					 :value (org-element-at-point)))
+			   ";; detangle changes"))))
+      (kill-buffer buffer))))
 
 (provide 'test-ob-tangle)
 
