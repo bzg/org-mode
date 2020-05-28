@@ -82,14 +82,10 @@ This function is called by `org-babel-execute-src-block'."
 	 (return-val (when (and (eq result-type 'value) (not session))
 		       (cdr (assq :return params))))
 	 (preamble (cdr (assq :preamble params)))
-	 (preamble (concat preamble (and preamble "\n")
-			   (mapconcat #'identity
-				      (org-babel-variable-assignments:python params)
-				      "\n")))
          (full-body
 	  (org-babel-expand-body:generic
 	   (concat body (if return-val (format "\nreturn %s" return-val) ""))
-	   params))
+	   params (org-babel-variable-assignments:python params)))
          (result (org-babel-python-evaluate
 		  session full-body result-type result-params preamble)))
     (org-babel-reassemble-table
@@ -276,8 +272,7 @@ except Exception:
   "Evaluate BODY as Python code."
   (if session
       (org-babel-python-evaluate-session
-       session (concat preamble (and preamble "\n") body)
-       result-type result-params)
+       session body result-type result-params)
     (org-babel-python-evaluate-external-process
      body result-type result-params preamble)))
 

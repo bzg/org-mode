@@ -174,6 +174,7 @@ _ = 'failure'
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/multiline-var ()
+  :expected-result :failed
   (should
    (equal "a\nb\nc"
 	  (org-test-with-temp-text "#+begin_src python :var text=\"a\\nb\\nc\"
