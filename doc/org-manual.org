@@ -20799,7 +20799,7 @@ be complete if the ones above were not mentioned in this manual.
 :UNNUMBERED: notoc
 :END:
 
-- Russel Adams came up with the idea for drawers.
+- Russell Adams came up with the idea for drawers.
 
 - Thomas Baumann wrote =ol-bbdb.el= and =ol-mhe.el=.
 
