@@ -728,16 +728,6 @@ captured item after finalizing."
 
   (run-hooks 'org-capture-prepare-finalize-hook)
 
-  ;; Fix missing final newline, as it may have been deleted by accident
-  (when (eq (org-capture-get :type 'local) 'entry)
-    (save-excursion
-      (goto-char (point-max))
-      (and (not (looking-at-p "^"))
-	   (org-with-wide-buffer
-	    (and (not (looking-at-p org-heading-regexp))
-		 (not (eobp))))
-	   (insert "\n"))))
-
   ;; Did we start the clock in this capture buffer?
   (when (and org-capture-clock-was-started
 	     org-clock-marker
@@ -1166,7 +1156,7 @@ may have been stored before."
 	(org-capture-empty-lines-after)
 	(unless (org-at-heading-p) (outline-next-heading))
 	(org-capture-mark-kill-region origin (point))
-	(org-capture-narrow beg (point))
+	(org-capture-narrow beg (if (eobp) (point) (1- (point))))
 	(org-capture--position-cursor beg (point))))))
 
 (defun org-capture-place-item ()
