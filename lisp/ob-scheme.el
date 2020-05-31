@@ -43,6 +43,7 @@
 (require 'geiser-impl nil t)
 (defvar geiser-repl--repl)             ; Defined in geiser-repl.el
 (defvar geiser-impl--implementation)   ; Defined in geiser-impl.el
+(defvar geiser-scheme-implementation)  ; Defined in geiser-impl.el
 (defvar geiser-default-implementation) ; Defined in geiser-impl.el
 (defvar geiser-active-implementations) ; Defined in geiser-impl.el
 (defvar geiser-debug-show-debug-p)     ; Defined in geiser-debug.el
@@ -211,6 +212,7 @@ This function is called by `org-babel-execute-src-block'."
       (let* ((result-type (cdr (assq :result-type params)))
 	     (impl (or (when (cdr (assq :scheme params))
 			 (intern (cdr (assq :scheme params))))
+		       geiser-scheme-implementation
 		       geiser-default-implementation
 		       (car geiser-active-implementations)))
 	     (session (org-babel-scheme-make-session-name
