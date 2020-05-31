@@ -21150,10 +21150,11 @@ ones already marked."
 	(set-mark
 	 (save-excursion
 	   (goto-char (mark))
-	   (goto-char (org-element-property :end (org-element-at-point)))))
+	   (goto-char (org-element-property :end (org-element-at-point)))
+	   (point)))
       (let ((element (org-element-at-point)))
 	(end-of-line)
-	(push-mark (org-element-property :end element) t t)
+	(push-mark (min (point-max) (org-element-property :end element)) t t)
 	(goto-char (org-element-property :begin element))))))
 
 (defun org-narrow-to-element ()
