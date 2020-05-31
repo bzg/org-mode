@@ -20482,15 +20482,16 @@ With ARG, repeats or can move backward if negative."
 	   (beginning-of-line))
 	  (_ nil)))
       (cl-incf arg))
-    (while (and (> arg 0) (re-search-forward regexp nil :move))
+    (while (and (> arg 0) (re-search-forward regexp nil t))
       (pcase (get-char-property-and-overlay (point) 'invisible)
 	(`(outline . ,o)
 	 (goto-char (overlay-end o))
-	 (end-of-line 2))
+	 (skip-chars-forward " \t\n")
+	 (end-of-line))
 	(_
 	 (end-of-line)))
       (cl-decf arg))
-    (when (/= arg initial-arg) (beginning-of-line))))
+    (if (> arg 0) (goto-char (point-max)) (beginning-of-line))))
 
 (defun org-previous-visible-heading (arg)
   "Move to the previous visible heading.

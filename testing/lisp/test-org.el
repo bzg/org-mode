@@ -3114,6 +3114,54 @@ SCHEDULED: <2017-05-06 Sat>
 
 ;;; Navigation
 
+(ert-deftest test-org/next-visible-heading ()
+  "Test `org-next-visible-heading' specifications."
+  ;; Move to the beginning of the next headline, taking into
+  ;; consideration ARG.
+  (should
+   (org-test-with-temp-text "* H1\n* H2"
+     (org-next-visible-heading 1)
+     (looking-at "\\* H2")))
+  (should
+   (org-test-with-temp-text "* H1\n* H2\n* H3"
+     (org-next-visible-heading 2)
+     (looking-at "\\* H3")))
+  ;; Ignore invisible headlines.
+  (should
+   (org-test-with-temp-text "* H1\n** H2\n* H3"
+     (org-cycle)
+     (org-next-visible-heading 1)
+     (looking-at "\\* H3")))
+  (should
+   (org-test-with-temp-text "* H1\n* H2\n* H3"
+     (org-next-visible-heading 1)
+     (looking-at "\\* H2")))
+  ;; Move point between headlines, not on blank lines between.
+  (should
+   (org-test-with-temp-text "* H1\n** H2\n\n\n\n* H3"
+     (let ((org-cycle-separator-lines 1))
+       (org-cycle)
+       (org-next-visible-heading 1))
+     (looking-at "\\* H3")))
+  ;; Move at end of buffer when there is no more headline.
+  (should
+   (org-test-with-temp-text "* H1"
+     (org-next-visible-heading 1)
+     (eobp)))
+  (should
+   (org-test-with-temp-text "* H1\n* H2"
+     (org-next-visible-heading 2)
+     (eobp)))
+  ;; With a negative argument, move backwards.
+  (should
+   (org-test-with-temp-text "* H1\n* H2\n<point>* H3"
+     (org-next-visible-heading -1)
+     (looking-at "\\* H2")))
+  (should
+   (org-test-with-temp-text "* H1\n* H2\n<point>* H3"
+     (org-next-visible-heading -2)
+     (looking-at "\\* H1"))))
+
 (ert-deftest test-org/forward-heading-same-level ()
   "Test `org-forward-heading-same-level' specifications."
   ;; Test navigation at top level, forward and backward.
