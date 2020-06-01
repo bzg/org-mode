@@ -1908,7 +1908,7 @@ region is not active then the point is demarcated."
 			(if (looking-at "^") "" "\n")
 			indent (if upper-case-p "#+END_SRC\n" "#+end_src\n")
 			(if arg stars indent) "\n"
-			indent (if upper-case-p "#+BEGIN_SRC\n" "#+begin_src\n")
+			indent (if upper-case-p "#+BEGIN_SRC " "#+begin_src ")
 			lang
 			(if (> (length headers) 1)
 			    (concat " " headers) headers)
