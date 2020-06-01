@@ -2582,7 +2582,9 @@ INFO is a plist holding contextual information.  See
      ;; equivalent line number.
      ((string= type "coderef")
       (format (org-export-get-coderef-format path desc)
-	      (org-export-resolve-coderef path info)))
+	      ;; Resolve with RAW-PATH since PATH could be tainted
+	      ;; with `org-latex--protect-text' call above.
+	      (org-export-resolve-coderef raw-path info)))
      ;; External link with a description part.
      ((and path desc) (format "\\href{%s}{%s}" path desc))
      ;; External link without a description part.
