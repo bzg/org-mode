@@ -80,6 +80,12 @@ resulting <div> will be ~<div id="outline-container-my-headline">~.
 You may want to check whether your HTML files are rendered differently
 after this change.
 
+*** New keybinding =<C-c C-TAB>= for ~org-force-cycle-archived~
+
+~org-force-cycle-archived~ used to be associated with =<C-TAB>= but
+this keybinding is used in Emacs for navigating tabs in Emacs.  The
+new keybinding is =<C-c C-TAB>=.
+
 ** New default settings for some options
 
 These options now defaults to =t=:
