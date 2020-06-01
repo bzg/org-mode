@@ -445,7 +445,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;;;; TAB key with modifiers
 (org-defkey org-mode-map (kbd "C-i") #'org-cycle)
 (org-defkey org-mode-map (kbd "<tab>") #'org-cycle)
-(org-defkey org-mode-map (kbd "C-<tab>") #'org-force-cycle-archived)
+(org-defkey org-mode-map (kbd "C-c C-<tab>") #'org-force-cycle-archived)
 ;; Override text-mode binding to expose `complete-symbol' for
 ;; pcomplete functionality.
 (org-defkey org-mode-map (kbd "M-<tab>") nil)
