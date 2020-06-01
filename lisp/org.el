@@ -20469,8 +20469,7 @@ Stop at the first and last subheadings of a superior heading."
   "Move to the next visible heading line.
 With ARG, repeats or can move backward if negative."
   (interactive "p")
-  (let ((regexp (concat "^" (org-get-limited-outline-regexp)))
-	(initial-arg arg))
+  (let ((regexp (concat "^" (org-get-limited-outline-regexp))))
     (if (< arg 0)
 	(beginning-of-line)
       (end-of-line))
