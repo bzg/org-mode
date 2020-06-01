@@ -2156,7 +2156,8 @@ is the language used for CODE, as a string, or nil."
 	  ;; htmlize
 	  (setq code
 		(let ((output-type org-html-htmlize-output-type)
-		      (font-prefix org-html-htmlize-font-prefix))
+		      (font-prefix org-html-htmlize-font-prefix)
+		      (inhibit-read-only t))
 		  (with-temp-buffer
 		    ;; Switch to language-specific mode.
 		    (funcall lang-mode)
