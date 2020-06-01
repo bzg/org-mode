@@ -6393,8 +6393,10 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	    (setq has-children (org-list-has-child-p (point) struct)))
 	(org-back-to-heading)
 	(setq eoh (save-excursion (outline-end-of-heading) (point)))
-	(setq eos (save-excursion (org-end-of-subtree t t)
-				  (when (bolp) (backward-char)) (point)))
+	(setq eos (save-excursion
+		    (org-end-of-subtree t t)
+		    (unless (eobp) (forward-char -1))
+		    (point)))
 	(setq has-children
 	      (or
 	       (save-excursion
@@ -6407,7 +6409,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 		      (org-list-search-forward (org-item-beginning-re) eos t))))))
       ;; Determine end invisible part of buffer (EOL)
       (beginning-of-line 2)
-      (while (and (not (eobp)) ;This is like `next-line'.
+      (while (and (not (eobp))		;this is like `next-line'
 		  (get-char-property (1- (point)) 'invisible))
 	(goto-char (next-single-char-property-change (point) 'invisible))
 	(and (eolp) (beginning-of-line 2)))
