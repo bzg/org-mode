@@ -202,6 +202,12 @@ Org provides a new tool ~org-link-open-as-file~, useful when defining
 new link types similar to "file"-type links.  See docstring for
 details.
 
+*** =ob-C.el= allows you to include non-system header files
+
+In C and C++ blocks, ~:includes~ arguments that do not start with a
+~<~ character will now be formatted as double-quoted ~#include~
+statements.
+
 *** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 
 You can now set ~(setq org-babel-clojure-backend 'inf-clojure)~ and
