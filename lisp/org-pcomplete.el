@@ -32,6 +32,8 @@
 (require 'pcomplete)
 
 (declare-function org-at-heading-p "org" (&optional ignored))
+(declare-function org-babel-combine-header-arg-lists "ob-core" (original &rest others))
+(declare-function org-babel-get-src-block-info "ob-core" (&optional light datum))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-buffer-property-keys "org" (&optional specials defaults columns))
 (declare-function org-element-at-point "org-element" ())
@@ -47,6 +49,7 @@
 (declare-function org-link-heading-search-string "ol" (&optional string))
 (declare-function org-tag-alist-to-string "org" (alist &optional skip-key))
 
+(defvar org-babel-common-header-args-w-values)
 (defvar org-current-tag-alist)
 (defvar org-priority-default)
 (defvar org-drawer-regexp)
