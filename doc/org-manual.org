@@ -6060,6 +6060,7 @@ dash(es) as the separator in the former case and use =+= as the
 separator in the latter case, e.g.:
 
 | =11am-1:15pm=  | \rArr{} 11:00-13:15   |
+| =11h-13h15=    | \rArr{} same as above |
 | =11am--1:15pm= | \rArr{} same as above |
 | =11am+2:15=    | \rArr{} same as above |
 

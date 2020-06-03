@@ -14104,6 +14104,19 @@ user."
 	       (setq ans (replace-match (format "%02d:%02d" hour minute)
 					t t ans))))
 
+    ;; Help matching HHhMM times, similarly as for am/pm times.
+    (cl-loop for i from 1 to 2 do	; twice, for end time as well
+	     (when (and (not (string-match "\\(\\`\\|[^+]\\)[012]?[0-9]:[0-9][0-9]\\([ \t\n]\\|$\\)" ans))
+			(string-match "\\(?:\\(?1:[012]?[0-9]\\)?h\\(?2:[0-5][0-9]\\)\\)\\|\\(?:\\(?1:[012]?[0-9]\\)h\\(?2:[0-5][0-9]\\)?\\)\\>" ans))
+	       (setq hour (if (match-end 1)
+				(string-to-number (match-string 1 ans))
+			      0)
+		     minute (if (match-end 2)
+				(string-to-number (match-string 2 ans))
+			      0))
+	       (setq ans (replace-match (format "%02d:%02d" hour minute)
+					t t ans))))
+
     ;; Check if a time range is given as a duration
     (when (string-match "\\([012]?[0-9]\\):\\([0-6][0-9]\\)\\+\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)?" ans)
       (setq hour (string-to-number (match-string 1 ans))
