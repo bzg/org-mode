@@ -3153,10 +3153,6 @@ SCHEDULED: <2017-05-06 Sat>
      (org-cycle)
      (org-next-visible-heading 1)
      (looking-at "\\* H3")))
-  (should
-   (org-test-with-temp-text "* H1\n* H2\n* H3"
-     (org-next-visible-heading 1)
-     (looking-at "\\* H2")))
   ;; Move point between headlines, not on blank lines between.
   (should
    (org-test-with-temp-text "* H1\n** H2\n\n\n\n* H3"
@@ -3182,6 +3178,59 @@ SCHEDULED: <2017-05-06 Sat>
    (org-test-with-temp-text "* H1\n* H2\n<point>* H3"
      (org-next-visible-heading -2)
      (looking-at "\\* H1"))))
+
+(ert-deftest test-org/previous-visible-heading ()
+  "Test `org-previous-visible-heading' specifications."
+  ;; Move to the beginning of the next headline, taking into
+  ;; consideration ARG.
+  (should
+   (org-test-with-temp-text "* H1\n<point>* H2"
+     (org-previous-visible-heading 1)
+     (looking-at "\\* H1")))
+  (should
+   (org-test-with-temp-text "* H1\n* H2\n<point>* H3"
+     (org-previous-visible-heading 2)
+     (looking-at "\\* H1")))
+  ;; Ignore invisible headlines.
+  (should
+   (org-test-with-temp-text "* H1\n** H2\n<point>* H3"
+     (org-overview)
+     (org-previous-visible-heading 1)
+     (looking-at "\\* H1")))
+  ;; Move point between headlines, not on blank lines between.
+  (should
+   (org-test-with-temp-text "* H1\n\n\n\n** H2\n<point>* H3"
+     (let ((org-cycle-separator-lines 1))
+       (org-overview)
+       (org-previous-visible-heading 1))
+     (looking-at "\\* H1")))
+  ;; Move at end of buffer when there is no more headline.
+  (should
+   (org-test-with-temp-text "* H1"
+     (org-previous-visible-heading 1)
+     (bobp)))
+  (should
+   (org-test-with-temp-text "* H1\n* <point>H2"
+     (org-previous-visible-heading 2)
+     (bobp)))
+  ;; Invisible parts may not start at a headline, i.e., when revealing
+  ;; parts of the buffer.  Handle this.
+  (should
+   (org-test-with-temp-text "* Main\n** H1\nFoo\n** H2\nBar\n** H3\nBaz"
+     (org-overview)
+     (search-forward "H1")
+     (org-show-context 'minimal)
+     (org-cycle)
+     (search-forward "H3")
+     (org-show-context 'minimal)
+     ;; At this point, buffer displays, with point at "|",
+     ;;
+     ;; * Main
+     ;; ** H1
+     ;;    Foo
+     ;; ** H3|
+     (org-previous-visible-heading 1)
+     (looking-at "\\*+ H1"))))
 
 (ert-deftest test-org/forward-heading-same-level ()
   "Test `org-forward-heading-same-level' specifications."
