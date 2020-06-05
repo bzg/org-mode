@@ -18900,29 +18900,28 @@ list structure.  Instead, use \\<org-mode-map>`\\[org-shiftmetaleft]' or \
 
 Also align node properties according to `org-property-format'."
   (interactive)
-  (if (org-at-heading-p) 'noindent
+  (unless (org-at-heading-p)
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
 	   (type (org-element-type element)))
       (cond ((and (memq type '(plain-list item))
 		  (= (line-beginning-position)
 		     (org-element-property :post-affiliated element)))
-	     'noindent)
+	     nil)
 	    ((and (eq type 'latex-environment)
 		  (>= (point) (org-element-property :post-affiliated element))
-		  (< (point) (org-with-wide-buffer
-			      (goto-char (org-element-property :end element))
-			      (skip-chars-backward " \r\t\n")
-			      (line-beginning-position 2))))
-	     'noindent)
+		  (< (point)
+		     (org-with-point-at (org-element-property :end element)
+		       (skip-chars-backward " \t\n")
+		       (line-beginning-position 2))))
+	     nil)
 	    ((and (eq type 'src-block)
 		  org-src-tab-acts-natively
 		  (> (line-beginning-position)
 		     (org-element-property :post-affiliated element))
 		  (< (line-beginning-position)
-		     (org-with-wide-buffer
-		      (goto-char (org-element-property :end element))
-		      (skip-chars-backward " \r\t\n")
-		      (line-beginning-position))))
+		     (org-with-point-at (org-element-property :end element)
+		       (skip-chars-backward " \t\n")
+		       (line-beginning-position))))
 	     (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
 	    (t
 	     (let ((column (org--get-expected-indentation element nil)))
