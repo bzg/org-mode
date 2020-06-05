@@ -1047,18 +1047,16 @@ DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((type (org-element-property :type link))
-	 (raw-path
-	  (replace-regexp-in-string
-	   "[@{}]" "@\\&"
-	   (org-element-property :path link)))
+	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
-	 (path (cond
-		((member type '("http" "https" "ftp"))
-		 (concat type ":" raw-path))
-		((string-equal type "file")
-		 (org-export-file-uri raw-path))
-		(t raw-path))))
+	 (path (org-texinfo--sanitize-content
+		(cond
+		 ((member type '("http" "https" "ftp"))
+		  (concat type ":" raw-path))
+		 ((string-equal type "file")
+		  (org-export-file-uri raw-path))
+		 (t raw-path)))))
     (cond
      ((org-export-custom-protocol-maybe link desc 'texinfo info))
      ((org-export-inline-image-p link org-texinfo-inline-image-rules)
@@ -1074,8 +1072,7 @@ INFO is a plist holding contextual information.  See
 	       (org-export-resolve-id-link link info))))
 	(pcase (org-element-type destination)
 	  (`nil
-	   (format org-texinfo-link-with-unknown-path-format
-		   (org-texinfo--sanitize-content path)))
+	   (format org-texinfo-link-with-unknown-path-format path))
 	  ;; Id link points to an external file.
 	  (`plain-text
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
@@ -1093,8 +1090,7 @@ INFO is a plist holding contextual information.  See
 	  (_ (org-texinfo--@ref destination desc info)))))
      ((string= type "mailto")
       (format "@email{%s}"
-	      (concat (org-texinfo--sanitize-content path)
-		      (and desc (concat ", " desc)))))
+	      (concat path (and desc (concat ", " desc)))))
      ;; External link with a description part.
      ((and path desc) (format "@uref{%s, %s}" path desc))
      ;; External link without a description part.
