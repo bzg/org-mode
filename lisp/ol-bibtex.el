@@ -95,7 +95,7 @@
 ;; The link creation part has been part of Org for a long time.
 ;;
 ;; Creating better capture template information was inspired by a request
-;; of Austin Frank: http://article.gmane.org/gmane.emacs.orgmode/4112
+;; of Austin Frank: https://orgmode.org/list/m0myu03vbx.fsf@gmail.com
 ;; and then implemented by Bastien Guerry.
 ;;
 ;; Eric Schulte eventually added the functions for translating between
