@@ -47,7 +47,6 @@
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
 (declare-function org-hide-block-toggle "org" (&optional force no-error element))
-(declare-function org-hide-drawer-all "org" ())
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-set-parameters "ol" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
@@ -645,7 +644,7 @@ When optional argument ELEMENT is a parsed drawer, as returned by
 When buffer positions BEG and END are provided, hide or show that
 region as a drawer without further ado."
   (declare (obsolete "use `org-hide-drawer-toggle' instead." "Org 9.4"))
-  (if (and beg end) (org-flag-region beg end flag 'org-hide-drawer)
+  (if (and beg end) (org-flag-region beg end flag 'outline)
     (let ((drawer
 	   (or element
 	       (and (save-excursion
@@ -659,29 +658,11 @@ region as a drawer without further ado."
 	   (save-excursion (goto-char (org-element-property :end drawer))
 			   (skip-chars-backward " \t\n")
 			   (line-end-position))
-	   flag 'org-hide-drawer)
+	   flag 'outline)
 	  ;; When the drawer is hidden away, make sure point lies in
 	  ;; a visible part of the buffer.
 	  (when (invisible-p (max (1- (point)) (point-min)))
 	    (goto-char post)))))))
-
-(defun org-cycle-hide-drawers (state &optional _)
-  "Re-hide all drawers after a visibility state change.
-STATE should be one of the symbols listed in the docstring of
-`org-cycle-hook'."
-  (declare (obsolete "use `org-hide-drawer-all' instead." "Org 9.4"))
-  (when (and (derived-mode-p 'org-mode)
-	     (not (memq state '(overview folded contents))))
-    (save-excursion
-      (let* ((globalp (eq state 'all))
-             (beg (if globalp (point-min) (point)))
-             (end (if globalp (point-max)
-		    (if (eq state 'children)
-			(save-excursion (outline-next-heading) (point))
-		      (org-end-of-subtree t)))))
-	(save-restriction
-	  (narrow-to-region beg end)
-	  (org-hide-drawer-all))))))
 
 (defun org-hide-block-toggle-maybe ()
   "Toggle visibility of block at point.

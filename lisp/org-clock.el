@@ -1578,7 +1578,7 @@ line and position cursor in that line."
 	      (insert ":" drawer ":\n:END:\n")
 	      (org-indent-region beg (point))
 	      (org-flag-region
-	       (line-end-position -1) (1- (point)) t 'org-hide-drawer)
+	       (line-end-position -1) (1- (point)) t 'outline)
 	      (forward-line -1))))
 	 ;; When a clock drawer needs to be created because of the
 	 ;; number of clock items or simply if it is missing, collect
@@ -1603,7 +1603,7 @@ line and position cursor in that line."
 	    (let ((end (point-marker)))
 	      (goto-char beg)
 	      (save-excursion (insert ":" drawer ":\n"))
-	      (org-flag-region (line-end-position) (1- end) t 'org-hide-drawer)
+	      (org-flag-region (line-end-position) (1- end) t 'outline)
 	      (org-indent-region (point) end)
 	      (forward-line)
 	      (unless org-log-states-order-reversed

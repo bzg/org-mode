@@ -9093,7 +9093,7 @@ fold drawers."
 	  (ignore-errors (scroll-up)))
       (org-agenda-goto t)
       (org-show-entry)
-      (if arg (org-cycle-hide-property-drawers 'children)
+      (if arg (org-cycle-hide-drawers 'children)
 	(org-with-wide-buffer
 	 (narrow-to-region (org-entry-beginning-position)
 			   (org-entry-end-position))

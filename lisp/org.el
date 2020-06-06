@@ -1538,7 +1538,7 @@ the values `folded', `children', or `subtree'."
   :type 'hook)
 
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
-			    org-cycle-hide-property-drawers
+			    org-cycle-hide-drawers
 			    org-cycle-show-empty-lines
 			    org-optimize-window-after-visibility-change)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
@@ -4789,7 +4789,6 @@ The following commands are available:
   (org-install-agenda-files-menu)
   (when org-link-descriptive (add-to-invisibility-spec '(org-link)))
   (add-to-invisibility-spec '(org-hide-block . t))
-  (add-to-invisibility-spec '(org-hide-drawer . t))
   (setq-local outline-regexp org-outline-regexp)
   (setq-local outline-level 'org-outline-level)
   (setq bidi-paragraph-direction 'left-to-right)
@@ -5986,7 +5985,7 @@ Show the heading too, if it is currently invisible."
 	   (point-max)))
        nil
        'outline)
-      (org-cycle-hide-property-drawers 'children))))
+      (org-cycle-hide-drawers 'children))))
 
 (defun org-show-children (&optional level)
   "Show all direct subheadings of this heading.
@@ -6063,13 +6062,11 @@ Return a non-nil value when toggling is successful."
 	;; at the block closing line.
 	(unless (let ((eol (line-end-position)))
 		  (and (> eol start) (/= eol end)))
-	  (let* ((spec (cond ((eq category 'block) 'org-hide-block)
-			     ((eq type 'property-drawer) 'outline)
-			     (t 'org-hide-drawer)))
+	  (let* ((spec (if (eq category 'block) 'org-hide-block 'outline))
 		 (flag
 		  (cond ((eq force 'off) nil)
 			(force t)
-			((eq (get-char-property start 'invisible) spec) nil)
+			((eq spec (get-char-property start 'invisible)) nil)
 			(t t))))
 	    (org-flag-region start end flag spec))
 	  ;; When the block is hidden away, make sure point is left in
@@ -6118,26 +6115,26 @@ Return a non-nil value when toggling is successful."
 
 (defun org-hide-drawer-all ()
   "Fold all drawers in the current buffer."
-  (org-show-all '(drawers))
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward org-drawer-regexp nil t)
-      (let* ((drawer (org-element-at-point))
-	     (type (org-element-type drawer)))
-	(when (memq type '(drawer property-drawer))
-	  ;; We are sure regular drawers are unfolded because of
-	  ;; `org-show-all' call above.  However, property drawers may
-	  ;; be folded, or in a folded headline.  In that case, do not
-	  ;; re-hide it.
-	  (unless (and (eq type 'property-drawer)
-		       (eq 'outline (get-char-property (point) 'invisible)))
-	    (org-hide-drawer-toggle t nil drawer))
-	  ;; Make sure to skip drawer entirely or we might flag it
-	  ;; another time when matching its ending line with
-	  ;; `org-drawer-regexp'.
-	  (goto-char (org-element-property :end drawer)))))))
+      (let* ((pair (get-char-property-and-overlay (line-beginning-position)
+						  'invisible))
+	     (o (cdr-safe pair)))
+	(if (overlayp o) (goto-char (overlay-end o)) ;invisible drawer
+	  (pcase (get-char-property-and-overlay (point) 'invisible)
+	    (`(outline . ,o) (goto-char (overlay-end o))) ;already folded
+	    (_
+	     (let* ((drawer (org-element-at-point))
+		    (type (org-element-type drawer)))
+	       (when (memq type '(drawer property-drawer))
+		 (org-hide-drawer-toggle t nil drawer)
+		 ;; Make sure to skip drawer entirely or we might flag it
+		 ;; another time when matching its ending line with
+		 ;; `org-drawer-regexp'.
+		 (goto-char (org-element-property :end drawer)))))))))))
 
-(defun org-cycle-hide-property-drawers (state)
+(defun org-cycle-hide-drawers (state)
   "Re-hide all drawers after a visibility state change.
 STATE should be one of the symbols listed in the docstring of
 `org-cycle-hook'."
@@ -6147,21 +6144,20 @@ STATE should be one of the symbols listed in the docstring of
 	   (beg (if global? (point-min) (line-beginning-position)))
 	   (end (cond (global? (point-max))
 		      ((eq state 'children) (org-entry-end-position))
-		      (t (save-excursion (org-end-of-subtree t))))))
+		      (t (save-excursion (org-end-of-subtree t t))))))
       (org-with-point-at beg
-	(while (re-search-forward org-property-start-re end t)
+	(while (re-search-forward org-drawer-regexp end t)
 	  (pcase (get-char-property-and-overlay (point) 'invisible)
 	    ;; Do not fold already folded drawers.
 	    (`(outline . ,o) (goto-char (overlay-end o)))
 	    (_
-	     (let ((start (match-end 0)))
-	       (when (org-at-property-drawer-p)
-		 (let* ((case-fold-search t)
-			(end (re-search-forward org-property-end-re)))
-		   ;; Property drawers use `outline' invisibility spec
-		   ;; so they can be swallowed once we hide the
-		   ;; outline.
-		   (org-flag-region start end t 'outline)))))))))))
+	     (let ((drawer (org-element-at-point)))
+	       (when (memq (org-element-type drawer) '(drawer property-drawer))
+		 (org-hide-drawer-toggle t nil drawer)
+		 ;; Make sure to skip drawer entirely or we might flag
+		 ;; it another time when matching its ending line with
+		 ;; `org-drawer-regexp'.
+		 (goto-char (org-element-property :end drawer)))))))))))
 
 ;;;; Visibility cycling
 
@@ -6176,13 +6172,31 @@ By default, the function expands headings, blocks and drawers.
 When optional argument TYPE is a list of symbols among `blocks',
 `drawers' and `headings', to only expand one specific type."
   (interactive)
-  (dolist (type (or types '(blocks drawers headings)))
-    (org-flag-region (point-min) (point-max) nil
-		     (pcase type
-		       (`blocks 'org-hide-block)
-		       (`drawers 'org-hide-drawer)
-		       (`headings 'outline)
-		       (_ (error "Invalid type: %S" type))))))
+  (let ((types (or types '(blocks drawers headings))))
+    (when (memq 'blocks types)
+      (org-flag-region (point-min) (point-max) nil 'org-hide-block))
+    (cond
+     ;; Fast path.  Since headings and drawers share the same
+     ;; invisible spec, clear everything in one go.
+     ((and (memq 'headings types)
+	   (memq 'drawers types))
+      (org-flag-region (point-min) (point-max) nil 'outline))
+     ((memq 'headings types)
+      (org-flag-region (point-min) (point-max) nil 'outline)
+      (org-cycle-hide-drawers 'all))
+     ((memq 'drawers types)
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward org-drawer-regexp nil t)
+	  (let* ((pair (get-char-property-and-overlay (line-beginning-position)
+						      'invisible))
+		 (o (cdr-safe pair)))
+	    (if (overlayp o) (goto-char (overlay-end o))
+	      (pcase (get-char-property-and-overlay (point) 'invisible)
+		(`(outline . ,o)
+		 (goto-char (overlay-end o))
+		 (delete-overlay o))
+		(_ nil))))))))))
 
 ;;;###autoload
 (defun org-cycle (&optional arg)
@@ -6511,7 +6525,7 @@ With a numeric prefix, show all headlines up to that level."
     (when org-hide-block-startup (org-hide-block-all))
     (org-set-visibility-according-to-property)
     (org-cycle-hide-archived-subtrees 'all)
-    (org-cycle-hide-property-drawers 'all)
+    (org-cycle-hide-drawers 'all)
     (org-cycle-show-empty-lines t)))
 
 (defun org-set-visibility-according-to-property ()
@@ -6545,7 +6559,7 @@ With a numeric prefix, show all headlines up to that level."
 (defun org-overview ()
   "Switch to overview mode, showing only top-level headlines."
   (interactive)
-  (org-show-all '(headings))
+  (org-show-all '(headings drawers))
   (save-excursion
     (goto-char (point-min))
     (when (re-search-forward org-outline-regexp-bol nil t)
@@ -6563,7 +6577,7 @@ With a numeric prefix, show all headlines up to that level."
   "Show all headlines in the buffer, like a table of contents.
 With numerical argument N, show content up to level N."
   (interactive "p")
-  (org-show-all '(headings))
+  (org-show-all '(headings drawers))
   (save-excursion
     (goto-char (point-max))
     (let ((regexp (if (and (wholenump arg) (> arg 0))
@@ -6612,7 +6626,7 @@ This function is the default value of the hook `org-cycle-hook'."
 	    (when (and (not (org-invisible-p))
 		       (org-invisible-p (line-end-position)))
 	      (outline-hide-entry))))
-	(org-cycle-hide-property-drawers 'all)
+	(org-cycle-hide-drawers 'all)
 	(org-cycle-show-empty-lines 'overview)))))
 
 (defun org-cycle-show-empty-lines (state)
@@ -6798,7 +6812,7 @@ frame is not changed."
       (pop-to-buffer ibuf))
      (t (error "Invalid value")))
     (narrow-to-region beg end)
-    (org-show-all '(headings blocks))
+    (org-show-all '(headings drawers blocks))
     (goto-char pos)
     (run-hook-with-args 'org-cycle-hook 'all)
     (and (window-live-p cwin) (select-window cwin))))
@@ -8121,7 +8135,7 @@ function is being called interactively."
       (setq end (point-max))
       (setq what "top-level")
       (goto-char start)
-      (org-show-all '(headings blocks))))
+      (org-show-all '(headings drawers blocks))))
 
     (setq beg (point))
     (when (>= beg end) (goto-char start) (user-error "Nothing to sort"))
@@ -8258,7 +8272,7 @@ function is being called interactively."
 			      "(empty for default `sort-subr' predicate): ")
 		      'allow-empty))))
 	   ((member dcst '(?p ?t ?s ?d ?c ?k)) '<))))
-	(org-cycle-hide-property-drawers 'all)
+	(org-cycle-hide-drawers 'all)
 	(when restore-clock?
 	  (move-marker org-clock-marker
 		       (1+ (next-single-property-change
@@ -10722,8 +10736,7 @@ narrowing."
 	     (let ((beg (point)))
 	       (insert ":" drawer ":\n:END:\n")
 	       (org-indent-region beg (point))
-	       (org-flag-region
-		(line-end-position -1) (1- (point)) t 'org-hide-drawer))
+	       (org-flag-region (line-end-position -1) (1- (point)) t 'outline))
 	     (end-of-line -1)))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
