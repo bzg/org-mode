@@ -33,6 +33,8 @@
 (declare-function py-shell "ext:python-mode" (&rest args))
 (declare-function py-toggle-shells "ext:python-mode" (arg))
 (declare-function run-python "ext:python" (&optional cmd dedicated show))
+(declare-function python-syntax-context "ext:python" (&rest args))
+(declare-function python-indent-shift-right "ext:python" (&rest args))
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
@@ -296,11 +298,17 @@ last statement in BODY, as elisp."
 			(if (member "pp" result-params)
 			    org-babel-python-pp-wrapper-method
 			  org-babel-python-wrapper-method)
-			(mapconcat
-			 (lambda (line) (format "\t%s" line))
-			 (split-string (org-remove-indentation (org-trim body))
-				       "[\r\n]")
-			 "\n")
+			(with-temp-buffer
+			  (require 'python)
+			  (python-mode)
+			  (insert body)
+			  (goto-char (point-min))
+			  (while (not (eobp))
+			    (unless (python-syntax-context 'string)
+			      (python-indent-shift-right (line-beginning-position)
+							 (line-end-position)))
+			   (forward-line 1))
+			 (buffer-string))
 			(org-babel-process-file-name tmp-file 'noquote))))
 		     (org-babel-eval-read-file tmp-file))))))
     (org-babel-result-cond result-params

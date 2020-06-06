@@ -174,10 +174,28 @@ _ = 'failure'
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/multiline-var ()
-  :expected-result :failed
   (should
    (equal "a\nb\nc"
 	  (org-test-with-temp-text "#+begin_src python :var text=\"a\\nb\\nc\"
+return text
+#+end_src"
+	    (org-babel-execute-src-block)))))
+
+(ert-deftest test-ob-python/multiline-str ()
+  (should
+   (equal "a\nb\nc"
+	  (org-test-with-temp-text "#+begin_src python
+text=\"a\\nb\\nc\"
+return text
+#+end_src"
+	    (org-babel-execute-src-block)))))
+
+(ert-deftest test-ob-python/header-var-assignment ()
+  (should
+   (equal "success"
+	  (org-test-with-temp-text "#+begin_src python :var text=\"failure\"
+text
+text=\"success\"
 return text
 #+end_src"
 	    (org-babel-execute-src-block)))))
