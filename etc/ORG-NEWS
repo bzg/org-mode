@@ -478,6 +478,7 @@ function, ~org-edit-latex-fragment~. This functions in a comparable
 manner to editing inline source blocks, bringing up a minibuffer set
 to LaTeX mode. The math-mode deliminators are read only.
 
+*** org-capture: ~org-capture-current-plist~ accessible during ~org-capture-mode-hook~
 * Version 9.3
 
 ** Incompatible changes

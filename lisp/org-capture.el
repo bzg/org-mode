@@ -1128,8 +1128,8 @@ may have been stored before."
     (`plain (org-capture-place-plain-text))
     (`item (org-capture-place-item))
     (`checkitem (org-capture-place-item)))
-  (org-capture-mode 1)
-  (setq-local org-capture-current-plist org-capture-plist))
+  (setq-local org-capture-current-plist org-capture-plist)
+  (org-capture-mode 1))
 
 (defun org-capture-place-entry ()
   "Place the template as a new Org entry."
