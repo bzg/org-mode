@@ -4582,7 +4582,7 @@ See https://orgmode.org/elpa/
 
      You can temporarily activate continuous clocking with =C-u C-u
      C-u M-x= [[doc::org-clock-in][org-clock-in]] =RET= (three universal prefix arguments)
-     and =C-u C-u M-x= [[org-clock-in-last][org-clock-in-last]] =RET= (two universal prefix
+     and =C-u C-u M-x= [[doc::org-clock-in-last][org-clock-in-last]] =RET= (two universal prefix
      arguments).
 
 
