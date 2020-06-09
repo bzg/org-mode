@@ -120,6 +120,43 @@ echo 1
                   (search-forward "[H:2]]" nil t))))
        (delete-file "test-ob-tangle.el")))))
 
+(ert-deftest ob-tangle/comment-links-relative-file ()
+  "Test relative file name handling when commenting with links."
+  (should
+   (org-test-with-temp-text-in-file
+       "* H
+#+header: :tangle \"test-ob-tangle.el\" :comments link
+#+begin_src emacs-lisp
+1
+#+end_src"
+     (unwind-protect
+	 (let ((org-babel-tangle-use-relative-file-links t))
+	   (org-babel-tangle)
+	   (with-temp-buffer
+	     (insert-file-contents "test-ob-tangle.el")
+	     (buffer-string)
+	     (goto-char (point-min))
+	     (search-forward
+	      (concat "[file:" (file-name-nondirectory file))
+	      nil t)))
+       (delete-file "test-ob-tangle.el"))))
+  (should
+   (org-test-with-temp-text-in-file
+       "* H
+#+header: :tangle \"test-ob-tangle.el\" :comments link
+#+begin_src emacs-lisp
+1
+#+end_src"
+     (unwind-protect
+	 (let ((org-babel-tangle-use-relative-file-links nil))
+	   (org-babel-tangle)
+	   (with-temp-buffer
+	     (insert-file-contents "test-ob-tangle.el")
+	     (buffer-string)
+	     (goto-char (point-min))
+	     (search-forward (concat "[file:" file) nil t)))
+       (delete-file "test-ob-tangle.el")))))
+
 (ert-deftest ob-tangle/jump-to-org ()
   "Test `org-babel-tangle-jump-to-org' specifications."
   ;; Standard test.

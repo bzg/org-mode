@@ -471,9 +471,9 @@ non-nil, return the full association list to be used by
 		  file)
 		(if (and org-babel-tangle-use-relative-file-links
 			 (string-match org-link-types-re link)
-			 (string= (match-string 0 link) "file"))
+			 (string= (match-string 1 link) "file"))
 		    (concat "file:"
-			    (file-relative-name (match-string 1 link)
+			    (file-relative-name (substring link (match-end 0))
 						(file-name-directory
 						 (cdr (assq :tangle params)))))
 		  link)
