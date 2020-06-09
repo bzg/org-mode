@@ -4821,10 +4821,12 @@ indentation removed from its contents."
 ;;
 ;; A single public function is provided: `org-element-cache-reset'.
 ;;
-;; Cache is enabled by default, but can be disabled globally with
+;; Cache is disabled by default for now because it sometimes triggers
+;; freezes, but it can be enabled globally with
 ;; `org-element-use-cache'.  `org-element-cache-sync-idle-time',
-;; org-element-cache-sync-duration' and `org-element-cache-sync-break'
-;; can be tweaked to control caching behavior.
+;; `org-element-cache-sync-duration' and
+;; `org-element-cache-sync-break' can be tweaked to control caching
+;; behavior.
 ;;
 ;; Internally, parsed elements are stored in an AVL tree,
 ;; `org-element--cache'.  This tree is updated lazily: whenever
