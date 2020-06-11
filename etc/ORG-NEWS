@@ -88,7 +88,7 @@ new keybinding is =<C-c C-TAB>=.
 
 ** New default settings for some options
 
-These options now defaults to =t=:
+These options now default to =t=:
 
 - ~org-loop-over-headlines-in-active-region~
 - ~org-fontify-done-headline~
@@ -107,7 +107,7 @@ Also, ~org-startup-folded~ now defaults to ~showeverything~.
 agenda commands over the active region.
 
 When set to =t= (the default), loop over all headlines.  When set to
-='start-level=, loop over headlines with the same level than the first
+='start-level=, loop over headlines with the same level as the first
 headline in the region.  When set to a string, loop over lines
 matching this regular expression.
 
@@ -220,9 +220,9 @@ argument like =:alias "alias"= the Clojure REPL will boot with
 
 Also, when using [[https://github.com/clojure-emacs/cider][cider]], you can now use =#+begin_src clojurescript= to
 execute ClojureScript code from Org files.  Note that this works only
-your Org file is associated with a cider session that knows how to run
-ClojureScript code.  A bare =lein repl= session outside of a directory
-configured for ClojureScript will /not/ work.
+if your Org file is associated with a cider session that knows how to
+run ClojureScript code.  A bare =lein repl= session outside of a
+directory configured for ClojureScript will /not/ work.
 
 *** =ob-java.el=: you can now pass Java command line arguments
 
@@ -335,7 +335,7 @@ HTML.
 Functions in this hook are run after ~org-agenda-filter~ is called.
 
 ** Removed or renamed functions and variables
-*** Deprecated ~org-flag-dawer~ function
+*** Deprecated ~org-flag-drawer~ function
 
 Use ~org-hide-drawer-toggle~ instead.
 
@@ -389,8 +389,8 @@ From ~org-show-priority~ to ~org-priority-show~.
 The caller is now responsible for the check.  It can use, e.g.,
 ~org-at-table-p~.
 
-The function is also much more efficient than it used to, even on very
-large tables.
+The function is also much more efficient than it used to be, even on
+very large tables.
 *** New function : ~org-collect-keywords~
 *** Drawers' folding use an API similar to block's
 
@@ -433,7 +433,7 @@ The new value uses Emacs as the application for opening directory.
 *** Allowed empty HTML extension
 
 Using =(setq org-html-extension "")= or setting the HTML extension in
-any fashing will produce the expected output, with no trailing period
+any fashion will produce the expected output, with no trailing period
 to the resulting HTML file.
 
 *** New =org-refile.el= file
