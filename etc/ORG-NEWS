@@ -192,7 +192,7 @@ increase or decrease, together with the column header size.
 
 *** New startup option =#+startup: num=
 
-When this startup option is set, display headings as numeroted.
+When this startup option is set, display headings as numerated.
 
 Use =#+startup: nonum= to turn this off.
 
@@ -317,10 +317,10 @@ You can also set this option to =t= or to =from-agenda=.
 
 This option will add a timeout to notifications.
 
-*** New option ~org-startup-numeroted~
+*** New option ~org-startup-numerated~
 
 When this option is =t=, Org files will start using ~(org-num-mode 1)~
-and headings will be visually numeroted.
+and headings will be visually numerated.
 
 You can turn this on/off on a per-file basis with =#+startup: num= or
 =#+startup: nonum=.

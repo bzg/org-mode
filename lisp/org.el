@@ -978,7 +978,7 @@ the following lines anywhere in the buffer:
 	  (const :tag "Not" nil)
 	  (const :tag "Globally (slow on startup in large files)" t)))
 
-(defcustom org-startup-numeroted nil
+(defcustom org-startup-numerated nil
   "Non-nil means turn on `org-num-mode' on startup.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
@@ -4120,8 +4120,8 @@ After a match, the following groups carry important information:
     ("content" org-startup-folded content)
     ("indent" org-startup-indented t)
     ("noindent" org-startup-indented nil)
-    ("num" org-startup-numeroted t)
-    ("nonum" org-startup-numeroted nil)
+    ("num" org-startup-numerated t)
+    ("nonum" org-startup-numerated nil)
     ("hidestars" org-hide-leading-stars t)
     ("showstars" org-hide-leading-stars nil)
     ("odd" org-odd-levels-only t)
@@ -4899,7 +4899,7 @@ The following commands are available:
      (when org-startup-with-latex-preview (org-latex-preview '(16)))
      (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))
      (when org-startup-truncated (setq truncate-lines t))
-     (when org-startup-numeroted (require 'org-num) (org-num-mode 1))
+     (when org-startup-numerated (require 'org-num) (org-num-mode 1))
      (when org-startup-indented (require 'org-indent) (org-indent-mode 1))))
 
   ;; Activate `org-table-header-line-mode'

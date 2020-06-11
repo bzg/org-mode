@@ -18724,9 +18724,9 @@ If ~org-num-skip-footnotes~ is non-~nil~, footnotes sections (see
 You can control how the numbering is displayed by setting
 ~org-num-face~ and ~org-num-format-function~.
 
-#+vindex: org-startup-numeroted
+#+vindex: org-startup-numerated
 You can also turn this mode globally for all Org files by setting the
-option ~org-startup-numeroted~ to =t=, or locally on a file by using
+option ~org-startup-numerated~ to =t=, or locally on a file by using
 =#+startup: num=.
 
 ** The Very Busy {{{kbd(C-c C-c)}}} Key
@@ -18900,9 +18900,9 @@ changes.
   | =indent=   | Start with Org Indent mode turned on.  |
   | =noindent= | Start with Org Indent mode turned off. |
 
-  #+vindex: org-startup-numeroted
-  Dynamic virtual numerotation of headlines is controlled by the variable
-  ~org-startup-numeroted~.
+  #+vindex: org-startup-numerated
+  Dynamic virtual numeration of headlines is controlled by the variable
+  ~org-startup-numerated~.
 
   | =num=   | Start with Org num mode turned on.  |
   | =nonum= | Start with Org num mode turned off. |
