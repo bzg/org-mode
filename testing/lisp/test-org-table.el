@@ -1304,6 +1304,66 @@ See also `test-org-table/copy-field'."
       (should (string= got
 		       expect)))))
 
+
+;;; Tables as Lisp
+
+(ert-deftest test-org-table/to-lisp ()
+  "Test `orgtbl-to-lisp' specifications."
+  ;; 2x2 no header
+  (should
+   (equal '(("a" "b") ("c" "d"))
+	  (org-table-to-lisp "|a|b|\n|c|d|")))
+  ;; 2x2 with 1-line header
+  (should
+   (equal '(("a" "b") hline ("c" "d"))
+	  (org-table-to-lisp "|a|b|\n|-\n|c|d|")))
+  ;; 2x4 with 2-line header
+  (should
+   (equal '(("a" "b") ("A" "B") hline ("c" "d") ("aa" "bb"))
+	  (org-table-to-lisp "|a|b|\n|A|B|\n|-\n|c|d|\n|aa|bb|")))
+  ;; leading hlines do not get stripped
+  (should
+   (equal '(hline ("a" "b") hline ("c" "d"))
+	  (org-table-to-lisp "|-\n|a|b|\n|-\n|c|d|")))
+  (should
+   (equal '(hline ("a" "b") ("c" "d"))
+	  (org-table-to-lisp "|-\n|a|b|\n|c|d|")))
+  (should
+   (equal '(hline hline hline hline ("a" "b") ("c" "d"))
+	  (org-table-to-lisp "|-\n|-\n|-\n|-\n|a|b|\n|c|d|"))))
+
+(ert-deftest test-org-table/collapse-header ()
+  "Test `orgtbl-to-lisp' specifications."
+  ;; 2x2 no header - no collapsing
+  (should
+   (equal '(("a" "b") ("c" "d"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|c|d|"))))
+  ;; 2x2 with 1-line header - no collapsing
+  (should
+   (equal '(("a" "b") hline ("c" "d"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|-\n|c|d|"))))
+  ;; 2x4 with 2-line header - collapsed
+  (should
+   (equal '(("a A" "b B") hline ("c" "d") ("aa" "bb"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|A|B|\n|-\n|c|d|\n|aa|bb|"))))
+  ;; 2x4 with 2-line header, custom glue - collapsed
+  (should
+   (equal '(("a.A" "b.B") hline ("c" "d") ("aa" "bb"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|A|B|\n|-\n|c|d|\n|aa|bb|") ".")))
+  ;; 2x4 with 2-line header, threshold 1 - not collapsed
+  (should
+   (equal '(("a" "b") ("A" "B") hline ("c" "d") ("aa" "bb"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|A|B|\n|-\n|c|d|\n|aa|bb|") nil 1)))
+  ;; 2x4 with 2-line header, threshold 2 - collapsed
+  (should
+   (equal '(("a A" "b B") hline ("c" "d") ("aa" "bb"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|A|B|\n|-\n|c|d|\n|aa|bb|") nil 2)))
+  ;; 2x8 with 6-line header, default threshold 5 - not collapsed
+  (should
+   (equal '(("a" "b") ("A" "B") ("a" "b") ("A" "B") ("a" "b") ("A" "B") hline ("c" "d") ("aa" "bb"))
+	  (org-table-collapse-header (org-table-to-lisp "|a|b|\n|A|B|\n|a|b|\n|A|B|\n|a|b|\n|A|B|\n|-\n|c|d|\n|aa|bb|")))))
+
+
 ;;; Radio Tables
 
 (ert-deftest test-org-table/to-generic ()
@@ -1905,7 +1965,7 @@ See also `test-org-table/copy-field'."
       (org-table-sort-lines nil ?n)
       (buffer-string)))))
 
-
+
 ;;; Formulas
 
 (ert-deftest test-org-table/eval-formula ()

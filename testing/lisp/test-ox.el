@@ -4129,6 +4129,16 @@ Another text. (ref:text)
      (org-export-table-has-header-p
       (org-element-map tree 'table 'identity info 'first-match)
       info)))
+  ;; With a multi-line header.
+  (should
+   (org-test-with-parsed-data "
+| a | b |
+| 0 | 1 |
+|---+---|
+| a | w |"
+     (org-export-table-has-header-p
+      (org-element-map tree 'table 'identity info 'first-match)
+      info)))
   ;; Without an header.
   (should-not
    (org-test-with-parsed-data "

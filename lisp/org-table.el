@@ -5468,6 +5468,31 @@ The table is taken from the parameter TXT, or from the buffer at point."
 	  (forward-line))
         (nreverse table)))))
 
+(defun org-table-collapse-header (table &optional separator max-header-lines)
+  "Collapse the lines before 'hline into a single header.
+
+The given TABLE is a list of lists as returned by `org-table-to-lisp'.
+The leading lines before the first `hline' symbol are considered
+forming the table header.  This function collapses all leading header
+lines into a single header line, followed by the `hline' symbol, and
+the rest of the TABLE.  Header cells are glued together with a space,
+or the given SEPARATOR."
+  (while (eq (car table) 'hline) (pop table))
+  (let* ((separator (or separator " "))
+	 (max-header-lines (or max-header-lines 4))
+	 (trailer table)
+	 (header-lines (cl-loop for line in table
+				until (eq 'hline line)
+				collect (pop trailer))))
+    (if (and trailer (<= (length header-lines) max-header-lines))
+	(cons (apply #'cl-mapcar
+		     (lambda (&rest x)
+		       (org-trim
+			(mapconcat #'identity x separator)))
+		     header-lines)
+	      trailer)
+      table)))
+
 (defun orgtbl-send-table (&optional maybe)
   "Send a transformed version of table at point to the receiver position.
 With argument MAYBE, fail quietly if no transformation is defined
@@ -6149,7 +6174,7 @@ which will prompt for the width."
 	       ((numberp ask) ask)
 	       (t 12))))
     ;; Skip any hline a the top of table.
-    (while (eq (car table) 'hline) (setq table (cdr table)))
+    (while (eq (car table) 'hline) (pop table))
     ;; Skip table header if any.
     (dolist (x (or (cdr (memq 'hline table)) table))
       (when (consp x)

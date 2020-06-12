@@ -289,14 +289,12 @@ line directly before or after the table."
 	(setf params (plist-put params (car pair) (cdr pair)))))
     ;; collect table and table information
     (let* ((data-file (make-temp-file "org-plot"))
-	   (table (org-table-to-lisp))
-	   (num-cols (length (if (eq (nth 0 table) 'hline) (nth 1 table)
-			       (nth 0 table)))))
+	   (table (org-table-collapse-header (org-table-to-lisp)))
+	   (num-cols (length (car table))))
       (run-with-idle-timer 0.1 nil #'delete-file data-file)
-      (while (eq 'hline (car table)) (setf table (cdr table)))
       (when (eq (cadr table) 'hline)
 	(setf params
-	      (plist-put params :labels (nth 0 table))) ; headers to labels
+	      (plist-put params :labels (car table))) ; headers to labels
 	(setf table (delq 'hline (cdr table)))) ; clean non-data from table
       ;; Collect options.
       (save-excursion (while (and (equal 0 (forward-line -1))
