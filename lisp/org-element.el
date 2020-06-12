@@ -2174,9 +2174,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `keyword' and CDR is a plist
-containing `:key', `:value', `:begin', `:end', `:post-blank' and
-`:post-affiliated' keywords."
+Return a list whose CAR is a normalized `keyword' (uppercase) and
+CDR is a plist containing `:key', `:value', `:begin', `:end',
+`:post-blank' and `:post-affiliated' keywords."
   (save-excursion
     ;; An orphaned affiliated keyword is considered as a regular
     ;; keyword.  In this case AFFILIATED is nil, so we take care of
