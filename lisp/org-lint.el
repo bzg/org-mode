@@ -423,8 +423,10 @@ instead"
 
 (defun org-lint-deprecated-header-syntax (ast)
   (let* ((deprecated-babel-properties
-	  (mapcar (lambda (arg) (symbol-name (car arg)))
-		  org-babel-common-header-args-w-values))
+	  ;; DIR is also used for attachments.
+	  (delete "dir"
+		  (mapcar (lambda (arg) (downcase (symbol-name (car arg))))
+			  org-babel-common-header-args-w-values)))
 	 (deprecated-re
 	  (format "\\`%s[ \t]" (regexp-opt deprecated-babel-properties t))))
     (org-element-map ast '(keyword node-property)
