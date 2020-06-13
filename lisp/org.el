@@ -6145,7 +6145,8 @@ STATE should be one of the symbols listed in the docstring of
 	   (end (cond (global? (point-max))
 		      ((eq state 'children) (org-entry-end-position))
 		      (t (save-excursion (org-end-of-subtree t t))))))
-      (org-with-point-at beg
+      (save-excursion
+	(goto-char beg)
 	(while (re-search-forward org-drawer-regexp end t)
 	  (pcase (get-char-property-and-overlay (point) 'invisible)
 	    ;; Do not fold already folded drawers.
