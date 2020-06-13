@@ -5317,7 +5317,7 @@ by a #."
 	    (add-text-properties
 	     beg (if whole-blockline bol-after-beginline end-of-beginline)
 	     '(face org-block-begin-line))
-	    (unless (string-prefix-p "*" (match-string 1))
+	    (unless (eq (char-after beg-of-endline) ?*)
 	      (add-text-properties
 	       beg-of-endline
 	       (if whole-blockline
