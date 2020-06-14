@@ -68,6 +68,7 @@ PATH should be a topic that can be thrown at the man command."
      ((eq format 'latex) (format "\\href{%s}{%s}" path desc))
      ((eq format 'texinfo) (format "@uref{%s,%s}" path desc))
      ((eq format 'ascii) (format "%s (%s)" desc path))
+     ((eq format 'md) (format "[%s](%s)" desc path))
      (t path))))
 
 (provide 'ol-man)
