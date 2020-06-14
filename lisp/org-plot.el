@@ -309,26 +309,20 @@ line directly before or after the table."
 	(`grid (let ((y-labels (org-plot/gnuplot-to-grid-data
 				table data-file params)))
 		 (when y-labels (plist-put params :ylabels y-labels)))))
-      ;; Check for timestamp ind column.
-      (let ((ind (1- (plist-get params :ind))))
-	(when (and (>= ind 0) (eq '2d (plist-get params :plot-type)))
-	  (if (= (length
-		  (delq 0 (mapcar
-			   (lambda (el)
-			     (if (string-match org-ts-regexp3 el) 0 1))
-			   (mapcar (lambda (row) (nth ind row)) table))))
-		 0)
-	      (plist-put params :timeind t)
-	    ;; Check for text ind column.
-	    (if (or (string= (plist-get params :with) "hist")
-		    (> (length
-			(delq 0 (mapcar
-				 (lambda (el)
-				   (if (string-match org-table-number-regexp el)
-				       0 1))
-				 (mapcar (lambda (row) (nth ind row)) table))))
-		       0))
-		(plist-put params :textind t)))))
+      ;; Check type of ind column (timestamp? text?)
+      (when (eq `2d (plist-get params :plot-type))
+	(let* ((ind (1- (plist-get params :ind)))
+	       (ind-column (mapcar (lambda (row) (nth ind row)) table)))
+	  (cond ((< ind 0) nil) ; ind is implicit
+		((cl-every (lambda (el)
+			     (string-match org-ts-regexp3 el))
+			   ind-column)
+		 (plist-put params :timeind t)) ; ind holds timestamps
+		((or (string= (plist-get params :with) "hist")
+		     (cl-notevery (lambda (el)
+				    (string-match org-table-number-regexp el))
+				  ind-column))
+		 (plist-put params :textind t))))) ; ind holds text
       ;; Write script.
       (with-temp-buffer
 	(if (plist-get params :script)	; user script
