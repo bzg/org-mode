@@ -4348,35 +4348,45 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
      (org-table-with-shrunk-columns
       (let* ((table (org-table-to-lisp))
              (rows (remq 'hline table))
-	     ;; Compute number of columns.
-	     (columns-number (apply #'max (mapcar #'length rows)))
 	     (widths nil)
-	     (alignments nil))
-	;; Compute alignment and width for each column.
-	(dotimes (i columns-number)
-	  (let* ((max-width 1)
-		 (fixed-align? nil)
-		 (numbers 0)
-		 (non-empty 0))
-	    (dolist (row rows)
-	      (let ((cell (or (nth i row) "")))
-		(setq max-width (max max-width (org-string-width cell)))
-		(cond (fixed-align? nil)
-		      ((equal cell "") nil)
-		      ((string-match "\\`<\\([lrc]\\)[0-9]*>\\'" cell)
-		       (setq fixed-align? (match-string 1 cell)))
-		      (t
-		       (cl-incf non-empty)
-		       (when (string-match-p org-table-number-regexp cell)
-			 (cl-incf numbers))))))
-	    (push max-width widths)
-	    (push (cond
-		   (fixed-align?)
-		   ((>= numbers (* org-table-number-fraction non-empty)) "r")
-		   (t "l"))
-		  alignments)))
-	(setq widths (nreverse widths))
-	(setq alignments (nreverse alignments))
+	     (alignments nil)
+	     (columns-number 1))
+	(if (null rows)
+	    ;; Table contains only horizontal rules.  Compute the
+	    ;; number of columns anyway, and choose an arbitrary width
+	    ;; and alignment.
+	    (let ((end (line-end-position)))
+	      (save-excursion
+		(while (search-forward "+" end t)
+		  (cl-incf columns-number)))
+	      (setq widths (make-list columns-number 1))
+	      (setq alignments (make-list columns-number "l")))
+	  ;; Compute alignment and width for each column.
+	  (setq columns-number (apply #'max (mapcar #'length rows)))
+	  (dotimes (i columns-number)
+	    (let ((max-width 1)
+		  (fixed-align? nil)
+		  (numbers 0)
+		  (non-empty 0))
+	      (dolist (row rows)
+		(let ((cell (or (nth i row) "")))
+		  (setq max-width (max max-width (org-string-width cell)))
+		  (cond (fixed-align? nil)
+			((equal cell "") nil)
+			((string-match "\\`<\\([lrc]\\)[0-9]*>\\'" cell)
+			 (setq fixed-align? (match-string 1 cell)))
+			(t
+			 (cl-incf non-empty)
+			 (when (string-match-p org-table-number-regexp cell)
+			   (cl-incf numbers))))))
+	      (push max-width widths)
+	      (push (cond
+		     (fixed-align?)
+		     ((>= numbers (* org-table-number-fraction non-empty)) "r")
+		     (t "l"))
+		    alignments)))
+	  (setq widths (nreverse widths))
+	  (setq alignments (nreverse alignments)))
 	;; Store alignment of this table, for later editing of single
 	;; fields.
 	(setq org-table-last-alignment alignments)

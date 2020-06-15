@@ -1768,7 +1768,16 @@ See also `test-org-table/copy-field'."
    (equal "| <c> |\n|  1  |\n| 123 |"
 	  (org-test-with-temp-text "| <c> |\n| 1 |\n| 123 |"
 	    (let ((org-table-number-fraction 0.5)) (org-table-align))
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; Handle gracefully tables with only horizontal rules.
+  (should
+   (org-test-with-temp-text "|-<point>--|"
+     (org-table-align)
+     t))
+  (should
+   (org-test-with-temp-text "|-<point>--|---------|\n|---|---|-----|"
+     (org-table-align)
+     t)))
 
 (ert-deftest test-org-table/align-buffer-tables ()
   "Align all tables when updating buffer."
