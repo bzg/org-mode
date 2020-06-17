@@ -17665,7 +17665,9 @@ Move point to the beginning of first heading or end of buffer."
 If previous line is a headline add to headline title.  Otherwise
 the function calls `delete-indentation'.
 
-With a non-nil optional argument, join it to the following one."
+I.e. with a non-nil optional argument, join the line with the
+following one.  If there is a region then join the lines in that
+region."
   (interactive "*P")
   (if (save-excursion
 	(beginning-of-line (if arg 1 0))
@@ -17690,7 +17692,8 @@ With a non-nil optional argument, join it to the following one."
 	 ((not tags-column))		;no tags
 	 (org-auto-align-tags (org-align-tags))
 	 (t (org--align-tags-here tags-column)))) ;preserve tags column
-    (delete-indentation arg)))
+    (let ((current-prefix-arg arg))
+      (call-interactively #'delete-indentation))))
 
 (defun org-open-line (n)
   "Insert a new row in tables, call `open-line' elsewhere.
