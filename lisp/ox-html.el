@@ -62,7 +62,6 @@
     (export-block . org-html-export-block)
     (export-snippet . org-html-export-snippet)
     (fixed-width . org-html-fixed-width)
-    (footnote-definition . org-html-footnote-definition)
     (footnote-reference . org-html-footnote-reference)
     (headline . org-html-headline)
     (horizontal-rule . org-html-horizontal-rule)
