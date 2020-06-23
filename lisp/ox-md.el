@@ -147,6 +147,137 @@ Assume BACKEND is `md'."
   ;; Return updated tree.
   tree)
 
+
+;;; Internal functions
+
+(defun org-md--headline-referred-p (headline info)
+  "Non-nil when HEADLINE is being referred to.
+INFO is a plist used as a communication channel.  Links and table
+of contents can refer to headlines."
+  (unless (org-element-property :footnote-section-p headline)
+    (or
+     ;; Global table of contents includes HEADLINE.
+     (and (plist-get info :with-toc)
+	  (memq headline
+		(org-export-collect-headlines info (plist-get info :with-toc))))
+     ;; A local table of contents includes HEADLINE.
+     (cl-some
+      (lambda (h)
+	(let ((section (car (org-element-contents h))))
+	  (and
+	   (eq 'section (org-element-type section))
+	   (org-element-map section 'keyword
+	     (lambda (keyword)
+	       (when (equal "TOC" (org-element-property :key keyword))
+		 (let ((case-fold-search t)
+		       (value (org-element-property :value keyword)))
+		   (and (string-match-p "\\<headlines\\>" value)
+			(let ((n (and
+				  (string-match "\\<[0-9]+\\>" value)
+				  (string-to-number (match-string 0 value))))
+			      (local? (string-match-p "\\<local\\>" value)))
+			  (memq headline
+				(org-export-collect-headlines
+				 info n (and local? keyword))))))))
+	     info t))))
+      (org-element-lineage headline))
+     ;; A link refers internally to HEADLINE.
+     (org-element-map (plist-get info :parse-tree) 'link
+       (lambda (link)
+	 (eq headline
+	     (pcase (org-element-property :type link)
+	       ((or "custom-id" "id") (org-export-resolve-id-link link info))
+	       ("fuzzy" (org-export-resolve-fuzzy-link link info))
+	       (_ nil))))
+       info t))))
+
+(defun org-md--headline-title (style level title &optional anchor tags)
+  "Generate a headline title in the preferred Markdown headline style.
+STYLE is the preferred style (`atx' or `setext').  LEVEL is the
+header level.  TITLE is the headline title.  ANCHOR is the HTML
+anchor tag for the section as a string.  TAGS are the tags set on
+the section."
+  (let ((anchor-lines (and anchor (concat anchor "\n\n"))))
+    ;; Use "Setext" style
+    (if (and (eq style 'setext) (< level 3))
+        (let* ((underline-char (if (= level 1) ?= ?-))
+               (underline (concat (make-string (length title) underline-char)
+				  "\n")))
+          (concat "\n" anchor-lines title tags "\n" underline "\n"))
+        ;; Use "Atx" style
+        (let ((level-mark (make-string level ?#)))
+          (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
+
+(defun org-md--build-toc (info &optional n _keyword scope)
+  "Return a table of contents.
+
+INFO is a plist used as a communication channel.
+
+Optional argument N, when non-nil, is an integer specifying the
+depth of the table.
+
+When optional argument SCOPE is non-nil, build a table of
+contents according to the specified element."
+  (concat
+   (unless scope
+     (let ((style (plist-get info :md-headline-style))
+	   (title (org-html--translate "Table of Contents" info)))
+       (org-md--headline-title style 1 title nil)))
+   (mapconcat
+    (lambda (headline)
+      (let* ((indentation
+	      (make-string
+	       (* 4 (1- (org-export-get-relative-level headline info)))
+	       ?\s))
+	     (bullet
+	      (if (not (org-export-numbered-headline-p headline info)) "-   "
+		(let ((prefix
+		       (format "%d." (org-last (org-export-get-headline-number
+						headline info)))))
+		  (concat prefix (make-string (max 1 (- 4 (length prefix)))
+					      ?\s)))))
+	     (title
+	      (format "[%s](#%s)"
+		      (org-export-data-with-backend
+		       (org-export-get-alt-title headline info)
+		       (org-export-toc-entry-backend 'md)
+		       info)
+		      (or (org-element-property :CUSTOM_ID headline)
+			  (org-export-get-reference headline info))))
+	     (tags (and (plist-get info :with-tags)
+			(not (eq 'not-in-toc (plist-get info :with-tags)))
+			(org-make-tag-string
+			 (org-export-get-tags headline info)))))
+	(concat indentation bullet title tags)))
+    (org-export-collect-headlines info n scope) "\n")
+   "\n"))
+
+(defun org-md--footnote-formatted (footnote info)
+  "Formats a single footnote entry FOOTNOTE.
+FOOTNOTE is a cons cell of the form (number . definition).
+INFO is a plist with contextual information."
+  (let* ((fn-num (car footnote))
+         (fn-text (cdr footnote))
+         (fn-format (plist-get info :md-footnote-format))
+         (fn-anchor (format "fn.%d" fn-num))
+         (fn-href (format " href=\"#fnr.%d\"" fn-num))
+         (fn-link-to-ref (org-html--anchor fn-anchor fn-num fn-href info)))
+    (concat (format fn-format fn-link-to-ref) " " fn-text "\n")))
+
+(defun org-md--footnote-section (info)
+  "Format the footnote section.
+INFO is a plist used as a communication channel."
+  (let* ((fn-alist (org-export-collect-footnote-definitions info))
+         (fn-alist (cl-loop for (n _type raw) in fn-alist collect
+                            (cons n (org-trim (org-export-data raw info)))))
+         (headline-style (plist-get info :md-headline-style))
+         (section-title (org-html--translate "Footnotes" info)))
+    (when fn-alist
+      (format (plist-get info :md-footnotes-section)
+              (org-md--headline-title headline-style 1 section-title)
+              (mapconcat (lambda (fn) (org-md--footnote-formatted fn info))
+                         fn-alist
+                         "\n")))))
 
 
 ;;; Transcode Functions
@@ -241,65 +372,6 @@ a communication channel."
 				(org-export-get-reference headline info))))))
 	  (concat (org-md--headline-title style level heading anchor tags)
 		  contents)))))))
-
-
-(defun org-md--headline-referred-p (headline info)
-  "Non-nil when HEADLINE is being referred to.
-INFO is a plist used as a communication channel.  Links and table
-of contents can refer to headlines."
-  (unless (org-element-property :footnote-section-p headline)
-    (or
-     ;; Global table of contents includes HEADLINE.
-     (and (plist-get info :with-toc)
-	  (memq headline
-		(org-export-collect-headlines info (plist-get info :with-toc))))
-     ;; A local table of contents includes HEADLINE.
-     (cl-some
-      (lambda (h)
-	(let ((section (car (org-element-contents h))))
-	  (and
-	   (eq 'section (org-element-type section))
-	   (org-element-map section 'keyword
-	     (lambda (keyword)
-	       (when (equal "TOC" (org-element-property :key keyword))
-		 (let ((case-fold-search t)
-		       (value (org-element-property :value keyword)))
-		   (and (string-match-p "\\<headlines\\>" value)
-			(let ((n (and
-				  (string-match "\\<[0-9]+\\>" value)
-				  (string-to-number (match-string 0 value))))
-			      (local? (string-match-p "\\<local\\>" value)))
-			  (memq headline
-				(org-export-collect-headlines
-				 info n (and local? keyword))))))))
-	     info t))))
-      (org-element-lineage headline))
-     ;; A link refers internally to HEADLINE.
-     (org-element-map (plist-get info :parse-tree) 'link
-       (lambda (link)
-	 (eq headline
-	     (pcase (org-element-property :type link)
-	       ((or "custom-id" "id") (org-export-resolve-id-link link info))
-	       ("fuzzy" (org-export-resolve-fuzzy-link link info))
-	       (_ nil))))
-       info t))))
-
-(defun org-md--headline-title (style level title &optional anchor tags)
-  "Generate a headline title in the preferred Markdown headline style.
-STYLE is the preferred style (`atx' or `setext').  LEVEL is the
-header level.  TITLE is the headline title.  ANCHOR is the HTML
-anchor tag for the section as a string.  TAGS are the tags set on
-the section."
-  (let ((anchor-lines (and anchor (concat anchor "\n\n"))))
-    ;; Use "Setext" style
-    (if (and (eq style 'setext) (< level 3))
-        (let* ((underline-char (if (= level 1) ?= ?-))
-               (underline (concat (make-string (length title) underline-char)
-				  "\n")))
-          (concat "\n" anchor-lines title tags "\n" underline "\n"))
-        ;; Use "Atx" style
-        (let ((level-mark (make-string level ?#)))
-          (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
 
 ;;;; Horizontal Rule
 
@@ -554,77 +626,6 @@ a communication channel."
 
 
 ;;;; Template
-
-(defun org-md--build-toc (info &optional n _keyword scope)
-  "Return a table of contents.
-
-INFO is a plist used as a communication channel.
-
-Optional argument N, when non-nil, is an integer specifying the
-depth of the table.
-
-When optional argument SCOPE is non-nil, build a table of
-contents according to the specified element."
-  (concat
-   (unless scope
-     (let ((style (plist-get info :md-headline-style))
-	   (title (org-html--translate "Table of Contents" info)))
-       (org-md--headline-title style 1 title nil)))
-   (mapconcat
-    (lambda (headline)
-      (let* ((indentation
-	      (make-string
-	       (* 4 (1- (org-export-get-relative-level headline info)))
-	       ?\s))
-	     (bullet
-	      (if (not (org-export-numbered-headline-p headline info)) "-   "
-		(let ((prefix
-		       (format "%d." (org-last (org-export-get-headline-number
-						headline info)))))
-		  (concat prefix (make-string (max 1 (- 4 (length prefix)))
-					      ?\s)))))
-	     (title
-	      (format "[%s](#%s)"
-		      (org-export-data-with-backend
-		       (org-export-get-alt-title headline info)
-		       (org-export-toc-entry-backend 'md)
-		       info)
-		      (or (org-element-property :CUSTOM_ID headline)
-			  (org-export-get-reference headline info))))
-	     (tags (and (plist-get info :with-tags)
-			(not (eq 'not-in-toc (plist-get info :with-tags)))
-			(org-make-tag-string
-			 (org-export-get-tags headline info)))))
-	(concat indentation bullet title tags)))
-    (org-export-collect-headlines info n scope) "\n")
-   "\n"))
-
-(defun org-md--footnote-formatted (footnote info)
-  "Formats a single footnote entry FOOTNOTE.
-FOOTNOTE is a cons cell of the form (number . definition).
-INFO is a plist with contextual information."
-  (let* ((fn-num (car footnote))
-         (fn-text (cdr footnote))
-         (fn-format (plist-get info :md-footnote-format))
-         (fn-anchor (format "fn.%d" fn-num))
-         (fn-href (format " href=\"#fnr.%d\"" fn-num))
-         (fn-link-to-ref (org-html--anchor fn-anchor fn-num fn-href info)))
-    (concat (format fn-format fn-link-to-ref) " " fn-text "\n")))
-
-(defun org-md--footnote-section (info)
-  "Format the footnote section.
-INFO is a plist used as a communication channel."
-  (let* ((fn-alist (org-export-collect-footnote-definitions info))
-         (fn-alist (cl-loop for (n _type raw) in fn-alist collect
-                            (cons n (org-trim (org-export-data raw info)))))
-         (headline-style (plist-get info :md-headline-style))
-         (section-title (org-html--translate "Footnotes" info)))
-    (when fn-alist
-      (format (plist-get info :md-footnotes-section)
-              (org-md--headline-title headline-style 1 section-title)
-              (mapconcat (lambda (fn) (org-md--footnote-formatted fn info))
-                         fn-alist
-                         "\n")))))
 
 (defun org-md-inner-template (contents info)
   "Return body of document after converting it to Markdown syntax.
