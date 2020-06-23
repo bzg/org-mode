@@ -85,13 +85,17 @@ The %s will be replaced by the footnote reference itself."
 	      (if a (org-md-export-to-markdown t s v)
 		(org-open-file (org-md-export-to-markdown nil s v)))))))
   :translate-alist '((bold . org-md-bold)
+		     (center-block . org-md--convert-to-html)
 		     (code . org-md-verbatim)
+		     (drawer . org-md--identity)
+		     (dynamic-block . org-md--identity)
 		     (example-block . org-md-example-block)
 		     (export-block . org-md-export-block)
 		     (fixed-width . org-md-example-block)
 		     (headline . org-md-headline)
 		     (horizontal-rule . org-md-horizontal-rule)
 		     (inline-src-block . org-md-verbatim)
+		     (inlinetask . org-md--convert-to-html)
 		     (inner-template . org-md-inner-template)
 		     (italic . org-md-italic)
 		     (item . org-md-item)
@@ -105,7 +109,9 @@ The %s will be replaced by the footnote reference itself."
 		     (property-drawer . org-md-property-drawer)
 		     (quote-block . org-md-quote-block)
 		     (section . org-md-section)
+		     (special-block . org-md--convert-to-html)
 		     (src-block . org-md-example-block)
+		     (table . org-md--convert-to-html)
 		     (template . org-md-template)
 		     (verbatim . org-md-verbatim))
   :options-alist
@@ -278,6 +284,14 @@ INFO is a plist used as a communication channel."
               (mapconcat (lambda (fn) (org-md--footnote-formatted fn info))
                          fn-alist
                          "\n")))))
+
+(defun org-md--convert-to-html (datum _contents info)
+  "Convert DATUM into raw HTML, including contents."
+  (org-export-data-with-backend datum 'html info))
+
+(defun org-md--identity (_datum contents _info)
+  "Return CONTENTS only"
+  contents)
 
 
 ;;; Transcode Functions
