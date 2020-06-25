@@ -290,7 +290,7 @@ INFO is a plist used as a communication channel."
   (org-export-data-with-backend datum 'html info))
 
 (defun org-md--identity (_datum contents _info)
-  "Return CONTENTS only"
+  "Return CONTENTS only."
   contents)
 
 
