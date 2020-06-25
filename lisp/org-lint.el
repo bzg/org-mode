@@ -567,16 +567,22 @@ Use :header-args: instead"
 (defun org-lint-link-to-local-file (ast)
   (org-element-map ast 'link
     (lambda (l)
-      (when (equal "file" (org-element-property :type l))
-	(let ((file (org-element-property :path l)))
-	  (and (not (file-remote-p file))
-	       (not (file-exists-p file))
-	       (list (org-element-property :begin l)
-		     (format (if (org-element-lineage l '(link))
-				 "Link to non-existent image file \"%s\"\
- in link description"
-			       "Link to non-existent local file \"%s\"")
-			     file))))))))
+      (let ((type (org-element-property :type l)))
+	(pcase type
+	  ((or "attachment" "file")
+	   (let* ((path (org-element-property :path l))
+		  (file (if (string= type "file")
+			    path
+			  (org-attach-expand path))))
+	     (and (not (file-remote-p file))
+		  (not (file-exists-p file))
+		  (list (org-element-property :begin l)
+			(format (if (org-element-lineage l '(link))
+				    "Link to non-existent image file %S \
+in description"
+				  "Link to non-existent local file %S"
+				  file))))))
+	  (_ nil))))))
 
 (defun org-lint-non-existent-setupfile-parameter (ast)
   (org-element-map ast 'keyword
