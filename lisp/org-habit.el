@@ -343,7 +343,9 @@ current time."
 	      (if (and in-the-past-p
 		       (not last-done-date)
 		       (not (< scheduled now)))
-		  '(org-habit-clear-face . org-habit-clear-future-face)
+		  (if (= start (car all-done-dates))
+		      '(org-habit-ready-face . org-habit-ready-future-face)
+		    '(org-habit-clear-face . org-habit-clear-future-face))
 		(org-habit-get-faces
 		 habit start
 		 (and in-the-past-p
