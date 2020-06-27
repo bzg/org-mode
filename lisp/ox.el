@@ -6878,10 +6878,12 @@ back to standard interface."
       (with-current-buffer "*Org Export Dispatcher*"
 	;; Refresh help.  Maintain display continuity by re-visiting
 	;; previous window position.
-	(let ((pos (window-start)))
+	(let ((pt (point))
+	      (wstart (window-start)))
 	  (erase-buffer)
 	  (insert help)
-	  (set-window-start nil pos)))
+	  (goto-char pt)
+	  (set-window-start nil wstart)))
       (org-fit-window-to-buffer)
       (org-export--dispatch-action
        standard-prompt allowed-keys entries options first-key expertp))))
