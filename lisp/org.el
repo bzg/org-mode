@@ -10066,8 +10066,8 @@ When called through ELisp, arg is also interpreted in the following way:
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 (lambda () (org-todo arg))
-	 org-loop-over-headlines-in-active-region
-	 cl (when (org-invisible-p) (org-end-of-subtree nil t))))
+	 nil cl
+	 (when (org-invisible-p) (org-end-of-subtree nil t))))
     (when (equal arg '(16)) (setq arg 'nextset))
     (when (equal arg -1) (org-cancel-repeater) (setq arg nil))
     (let ((org-blocker-hook org-blocker-hook)
