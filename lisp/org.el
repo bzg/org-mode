@@ -10065,7 +10065,7 @@ When called through ELisp, arg is also interpreted in the following way:
 		    'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
-	 `(org-todo ,arg)
+	 (lambda () (org-todo arg))
 	 org-loop-over-headlines-in-active-region
 	 cl (when (org-invisible-p) (org-end-of-subtree nil t))))
     (when (equal arg '(16)) (setq arg 'nextset))
