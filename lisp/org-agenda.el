@@ -3858,8 +3858,8 @@ This function is called just before displaying the agenda.  If
 you want to add your own functions to the finalization of the
 agenda display, configure `org-agenda-finalize-hook'."
   (unless org-agenda-multi
-    (save-excursion
-      (let ((inhibit-read-only t))
+    (let ((inhibit-read-only t))
+      (save-excursion
 	(goto-char (point-min))
 	(save-excursion
 	  (while (org-activate-links (point-max))
@@ -3927,8 +3927,8 @@ agenda display, configure `org-agenda-finalize-hook'."
 	(when (get 'org-agenda-effort-filter :preset-filter)
 	  (org-agenda-filter-apply
 	   (get 'org-agenda-effort-filter :preset-filter) 'effort))
-	(add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)
-	(run-hooks 'org-agenda-finalize-hook)))))
+	(add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local))
+      (run-hooks 'org-agenda-finalize-hook))))
 
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
