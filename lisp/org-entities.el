@@ -226,7 +226,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("beth" "\\beth" t "&beth;" "beth" "beth" "ב")
      ("dalet" "\\daleth" t "&daleth;" "dalet" "dalet" "ד")
 
-     "** Dead languages"
+     "** Icelandic"
      ("ETH" "\\DH{}" nil "&ETH;" "D" "Ð" "Ð")
      ("eth" "\\dh{}" nil "&eth;" "dh" "ð" "ð")
      ("THORN" "\\TH{}" nil "&THORN;" "TH" "Þ" "Þ")
