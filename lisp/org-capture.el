@@ -625,7 +625,7 @@ of the day at point (if any) or the current HH:MM time."
     (setq org-overriding-default-time
 	  (org-get-cursor-date (equal goto 1))))
   (cond
-   ((equal goto '(4)) (org-capture-goto-target))
+   ((equal goto '(4))  (org-capture-goto-target keys))
    ((equal goto '(16)) (org-capture-goto-last-stored))
    (t
     (let* ((orig-buf (current-buffer))
