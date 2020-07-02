@@ -558,6 +558,10 @@ Leave point in edit buffer."
 	(setq org-src-source-file-name source-file-name)
 	;; Start minor mode.
 	(org-src-mode)
+	;; Clear undo information so we cannot undo back to the
+	;; initial empty buffer.
+	(buffer-disable-undo (current-buffer))
+	(buffer-enable-undo)
 	;; Move mark and point in edit buffer to the corresponding
 	;; location.
 	(if remote
