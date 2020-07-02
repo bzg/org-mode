@@ -108,6 +108,7 @@
 (require 'cl-lib)
 (require 'ob)
 (require 'ol)
+(require 'org-attach)
 (require 'org-macro)
 (require 'ox)
 
