@@ -122,7 +122,7 @@ means that the buffer should stay alive during the operation,
 because otherwise all these markers will point to nowhere."
   (declare (debug (form body)) (indent 1))
   (org-with-gensyms (data invisible-types markers?)
-    `(let* ((,invisible-types '(org-hide-block org-hide-drawer outline))
+    `(let* ((,invisible-types '(org-hide-block outline))
 	    (,markers? ,use-markers)
 	    (,data
 	     (mapcar (lambda (o)
@@ -1094,7 +1094,7 @@ folding of a headline, a block or a drawer, i.e., not because of
 fontification."
   (let ((value (get-char-property (or pos (point)) 'invisible)))
     (cond ((not value) nil)
-	  (folding-only (memq value '(org-hide-block org-hide-drawer outline)))
+	  (folding-only (memq value '(org-hide-block outline)))
 	  (t value))))
 
 (defun org-truely-invisible-p ()

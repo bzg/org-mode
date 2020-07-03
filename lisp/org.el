@@ -6699,8 +6699,7 @@ information."
     ;; If point is hidden within a drawer or a block, make sure to
     ;; expose it.
     (dolist (o (overlays-at (point)))
-      (when (memq (overlay-get o 'invisible)
-		  '(org-hide-block org-hide-drawer outline))
+      (when (memq (overlay-get o 'invisible) '(org-hide-block outline))
 	(delete-overlay o)))
     (unless (org-before-first-heading-p)
       (org-with-limited-levels
@@ -20652,7 +20651,7 @@ See `org-forward-paragraph'."
      ((eobp) nil)
      ;; When inside a folded part, move out of it.
      ((pcase (get-char-property-and-overlay (point) 'invisible)
-	(`(,(or `outline `org-hide-block `org-hide-drawer) . ,o)
+	(`(,(or `outline `org-hide-block) . ,o)
 	 (goto-char (overlay-end o))
 	 (forward-line)
 	 t)
@@ -20671,7 +20670,7 @@ See `org-forward-paragraph'."
 	 ((pcase (org-with-point-at post-affiliated
 		   (get-char-property-and-overlay (line-end-position)
 						  'invisible))
-	    (`(,(or `outline `org-hide-block `org-hide-drawer) . ,o)
+	    (`(,(or `outline `org-hide-block) . ,o)
 	     (goto-char (overlay-end o))
 	     (forward-line)
 	     t)
@@ -20728,7 +20727,7 @@ See `org-backward-paragraph'."
       (goto-char (point-min)))
      ;; When inside a folded part, move out of it.
      ((pcase (get-char-property-and-overlay (1- (point)) 'invisible)
-	(`(,(or `outline `org-hide-block `org-hide-drawer) . ,o)
+	(`(,(or `outline `org-hide-block) . ,o)
 	 (goto-char (1- (overlay-start o)))
 	 (org--backward-paragraph-once)
 	 t)
