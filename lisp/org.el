@@ -4864,10 +4864,6 @@ The following commands are available:
       (regexp . "^[ \t]*#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
       (modes . '(org-mode)))))
 
-  ;; Make isearch reveal context
-  (setq-local outline-isearch-open-invisible-function
-	      (lambda (&rest _) (org-show-context 'isearch)))
-
   ;; Setup the pcomplete hooks
   (setq-local pcomplete-command-completion-function #'org-pcomplete-initial)
   (setq-local pcomplete-command-name-function #'org-command-at-point)

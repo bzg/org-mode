@@ -715,7 +715,9 @@ SPEC is the invisibility spec, as a symbol."
     (let ((o (make-overlay from to nil 'front-advance)))
       (overlay-put o 'evaporate t)
       (overlay-put o 'invisible spec)
-      (overlay-put o 'isearch-open-invisible #'delete-overlay))))
+      (overlay-put o
+		   'isearch-open-invisible
+		   (lambda (&rest _) (org-show-context 'isearch))))))
 
 
 
