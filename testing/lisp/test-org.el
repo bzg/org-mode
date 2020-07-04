@@ -3035,6 +3035,33 @@ SCHEDULED: <2017-05-06 Sat>
      (org-end-of-meta-data t)
      (looking-at "Contents"))))
 
+(ert-deftest test-org/shiftright-heading ()
+  "Test `org-shiftright' on headings."
+  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+    (should
+     (equal "* TODO a1\n** a2\n* DONE b1\n"
+	    (org-test-with-temp-text "* a1\n** a2\n* DONE b1\n"
+	      (org-shiftright)
+	      (buffer-string))))
+    (should
+     (equal "* TODO a1\n** TODO a2\n* b1\n"
+    	    (org-test-with-temp-text "* a1\n** a2\n* DONE b1\n"
+    	      (let ((org-loop-over-headlines-in-active-region t))
+    		(transient-mark-mode 1)
+    		(push-mark (point) t t)
+    		(search-forward "* DONE b1")
+    		(org-shiftright))
+    	      (buffer-string))))
+    (should
+     (equal "* TODO a1\n** a2\n* b1\n"
+    	    (org-test-with-temp-text "* a1\n** a2\n* DONE b1\n"
+    	      (let ((org-loop-over-headlines-in-active-region 'start-level))
+    		(transient-mark-mode 1)
+    		(push-mark (point) t t)
+    		(search-forward "* DONE b1")
+    		(org-shiftright))
+    	      (buffer-string))))))
+
 (ert-deftest test-org/beginning-of-line ()
   "Test `org-beginning-of-line' specifications."
   ;; Move to beginning of line.  If current line in invisible, move to
