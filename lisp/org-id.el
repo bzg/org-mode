@@ -495,7 +495,9 @@ When FILES is given, scan also these files."
                     ;; Agenda files and all associated archives.
                     (org-agenda-files t org-id-search-archives)
                     ;; Explicit extra files.
-                    (unless (symbolp org-id-extra-files) org-id-extra-files)
+                    (if (symbolp org-id-extra-files)
+			(symbol-value org-id-extra-files)
+		      org-id-extra-files)
                     ;; All files known to have IDs.
                     org-id-files
                     ;; Additional files from function call.
