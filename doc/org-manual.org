@@ -6379,7 +6379,7 @@ clock.  When you stop working on that task, or when you mark the task
 done, the clock is stopped and the corresponding time interval is
 recorded.  It also computes the total time spent on each
 subtree[fn:71] of a project.  And it remembers a history or tasks
-recently clocked, to that you can jump quickly between a number of
+recently clocked, so that you can jump quickly between a number of
 tasks absorbing your time.
 
 To save the clock history across Emacs sessions, use:
