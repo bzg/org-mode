@@ -5966,22 +5966,21 @@ open and agenda-wise Org files."
 ;;;; Headlines visibility
 
 (defun org-show-entry ()
-  "Show the body directly following this heading.
+  "Show the body directly following its heading.
 Show the heading too, if it is currently invisible."
   (interactive)
   (save-excursion
-    (ignore-errors
-      (org-back-to-heading t)
-      (org-flag-region
-       (line-end-position 0)
-       (save-excursion
-	 (if (re-search-forward
-	      (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
-	     (match-beginning 1)
-	   (point-max)))
-       nil
-       'outline)
-      (org-cycle-hide-drawers 'children))))
+    (org-back-to-heading-or-point-min t)
+    (org-flag-region
+     (line-end-position 0)
+     (save-excursion
+       (if (re-search-forward
+	    (concat "[\r\n]\\(" org-outline-regexp "\\)") nil t)
+	   (match-beginning 1)
+	 (point-max)))
+     nil
+     'outline)
+    (org-cycle-hide-drawers 'children)))
 
 (defun org-show-children (&optional level)
   "Show all direct subheadings of this heading.
