@@ -17802,17 +17802,19 @@ When inserting a newline, indent the new line if
 (defun org-ctrl-c-tab (&optional arg)
   "Toggle columns width in a table, or show children.
 Call `org-table-toggle-column-width' if point is in a table.
-Otherwise, call `org-show-children'.  ARG is the level to hide."
+Otherwise provide a compact view of the children.  ARG is the
+level to hide."
   (interactive "p")
-  (if (org-at-table-p)
-      (call-interactively #'org-table-toggle-column-width)
-    (if (org-before-first-heading-p)
-        (progn
-          (org-flag-above-first-heading)
-          (outline-hide-sublevels (or arg 1))
-          (goto-char (point-min)))
-      (outline-hide-subtree)
-      (org-show-children arg))))
+  (cond
+   ((org-at-table-p)
+    (call-interactively #'org-table-toggle-column-width))
+   ((org-before-first-heading-p)
+    (save-excursion
+      (org-flag-above-first-heading)
+      (outline-hide-sublevels (or arg 1))))
+   (t
+    (outline-hide-subtree)
+    (org-show-children arg))))
 
 (defun org-ctrl-c-star ()
   "Compute table, or change heading status of lines.
