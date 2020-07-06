@@ -1330,14 +1330,14 @@ This function modifies STRUCT."
 	 ;; This means that the part between body start of body and
 	 ;; split point was removed.  So we compute the offset and
 	 ;; shift item's positions accordingly.  In any other case,
-	 ;; the item was simply shifted by ITEM-SIZE.
+	 ;; the item was simply shifted by SIZE-OFFSET.
 	 ((and split-line-p (not beforep) (>= p pos) (<= p item-end-no-blank))
 	  (let ((offset (- pos item ind (length bullet) (length after-bullet))))
 	    (setcar e (- p offset))
 	    (setcar (nthcdr 6 e) (- end offset))))
 	 (t
-	  (setcar e (+ p item-size))
-	  (setcar (nthcdr 6 e) (+ end item-size))))))
+	  (setcar e (+ p size-offset))
+	  (setcar (nthcdr 6 e) (+ end size-offset))))))
     (push (list item ind bullet nil box nil (+ item item-size)) struct)
     (setq struct (sort struct #'car-less-than-car))
     ;; If not BEFOREP, new item must appear after ITEM, so exchange

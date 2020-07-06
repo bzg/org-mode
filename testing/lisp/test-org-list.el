@@ -863,6 +863,11 @@ b. Item 2<point>"
 	  (org-test-with-temp-text "1. A<point>\n\n2. \n\n3. B"
 	    (org-insert-item)
 	    (buffer-string))))
+  (should
+   (equal "1. a\n2. \n   b\n3. c"
+	  (org-test-with-temp-text "1. a<point>\n   b\n2. c"
+	    (org-insert-item)
+	    (buffer-string))))
   ;; Preserve list visibility when inserting an item.
   (should
    (equal
