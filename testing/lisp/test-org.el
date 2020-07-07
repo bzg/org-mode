@@ -5409,6 +5409,27 @@ Paragraph<point>"
    (equal '("A")
 	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
 	    (org-buffer-property-keys))))
+  ;; Add bare property if xxx_ALL property is there
+  (should
+   (equal '("A" "B" "B_ALL")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:B_ALL: foo bar\n:END:"
+	    (org-buffer-property-keys))))
+  ;; Add bare property if xxx_ALL property is there - check dupes
+  (should
+   (equal '("A" "B" "B_ALL")
+	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:B_ALL: foo bar\n:END:"
+	    (org-buffer-property-keys))))
+  ;; Retrieve properties from #+PROPERTY keyword lines
+  (should
+   (equal '("A" "C")
+	  (org-test-with-temp-text "#+PROPERTY: C foo\n* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
+	    (org-buffer-property-keys))))
+  ;; Retrieve properties from #+PROPERTY keyword lines - make sure an _ALL property also
+  ;; adds the bare property
+  (should
+   (equal '("A" "C" "C_ALL")
+	  (org-test-with-temp-text "#+PROPERTY: C_ALL foo bar\n* H\n:PROPERTIES:\n:A: 1\n:A+: 2\n:END:"
+	    (org-buffer-property-keys))))
   ;; With non-nil COLUMNS, extract property names from columns.
   (should
    (equal '("A" "B")

@@ -13084,7 +13084,10 @@ COLUMN formats in the current buffer."
 	(props (append
 		(and specials org-special-properties)
 		(and defaults (cons org-effort-property org-default-properties))
-		nil)))
+		;; Get property names from #+PROPERTY keywords as well
+		(mapcar (lambda (s)
+			  (nth 0 (split-string s)))
+			(cdar (org-collect-keywords '("PROPERTY")))))))
     (org-with-wide-buffer
      (goto-char (point-min))
      (while (re-search-forward org-property-start-re nil t)
@@ -13132,7 +13135,15 @@ COLUMN formats in the current buffer."
 		 (let ((p (match-string-no-properties 1 value)))
 		   (unless (member-ignore-case p org-special-properties)
 		     (push p props))))))))))
-    (sort (delete-dups props) (lambda (a b) (string< (upcase a) (upcase b))))))
+    (sort (delete-dups
+	   (append props
+		   ;; for each xxx_ALL property, make sure the bare
+		   ;; xxx property is also included
+		   (delq nil (mapcar (lambda (p)
+				       (and (string-match-p "._ALL\\'" p)
+					    (substring p 0 -4)))
+				     props))))
+	  (lambda (a b) (string< (upcase a) (upcase b))))))
 
 (defun org-property-values (key)
   "List all non-nil values of property KEY in current buffer."
