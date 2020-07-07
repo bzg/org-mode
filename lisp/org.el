@@ -19361,12 +19361,18 @@ filling the current element."
 	(unwind-protect
 	    (progn
 	      (goto-char (region-end))
+	      (skip-chars-backward " \t\n")
 	      (while (> (point) start)
-		(org-backward-paragraph)
-		(org-fill-element justify)))
+		(org-fill-element justify)
+		(org-backward-paragraph))
+	      (org-fill-element justify))
 	  (goto-char origin)
 	  (set-marker origin nil))))
-     (t (org-fill-element justify)))
+     (t
+      (save-excursion
+	(when (org-match-line "[ \t]*$")
+	  (skip-chars-forward " \t\n"))
+	(org-fill-element justify))))
     ;; If we didn't change anything in the buffer (and the buffer was
     ;; previously unmodified), then flip the modification status back
     ;; to "unchanged".

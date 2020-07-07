@@ -697,6 +697,63 @@
 	      (org-fill-element)
 	      (buffer-string))))))
 
+(ert-deftest test-org/fill-paragraph ()
+  "Test `org-fill-paragraph' specifications."
+  ;; Regular test.
+  (should
+   (equal "012345678\n9"
+	  (org-test-with-temp-text "012345678 9"
+	    (let ((fill-column 10))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Fill paragraph even at end of buffer.
+  (should
+   (equal "012345678\n9\n"
+	  (org-test-with-temp-text "012345678 9\n<point>"
+	    (let ((fill-column 10))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Between two paragraphs, fill the next one.
+  (should
+   (equal "012345678 9\n\n012345678\n9"
+	  (org-test-with-temp-text "012345678 9\n<point>\n012345678 9"
+	    (let ((fill-column 10))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  (should
+   (equal "012345678\n9\n\n012345678 9"
+	  (org-test-with-temp-text "012345678 9<point>\n\n012345678 9"
+	    (let ((fill-column 10))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Fill paragraph in a comment block.
+  (should
+   (equal "#+begin_comment\n012345678\n9\n#+end_comment"
+	  (org-test-with-temp-text
+	      "#+begin_comment\n<point>012345678 9\n#+end_comment"
+	    (let ((fill-column 10))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; When a region is selected, fill every paragraph in the region.
+  (should
+   (equal "012345678\n9\n\n012345678\n9"
+	  (org-test-with-temp-text "012345678 9\n\n012345678 9"
+	    (let ((fill-column 10))
+	      (transient-mark-mode 1)
+	      (push-mark (point-min) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'org-fill-paragraph)
+	      (buffer-string)))))
+  (should
+   (equal "012345678\n9\n\n012345678 9"
+	  (org-test-with-temp-text "012345678 9\n<point>\n012345678 9"
+	    (let ((fill-column 10))
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-min))
+	      (call-interactively #'org-fill-paragraph)
+	      (buffer-string))))))
+
 (ert-deftest test-org/auto-fill-function ()
   "Test auto-filling features."
   ;; Auto fill paragraph.
