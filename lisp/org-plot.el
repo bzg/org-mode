@@ -64,6 +64,11 @@ Returns the resulting property list."
 		("map"       . :map)
 		("timeind"   . :timeind)
 		("timefmt"   . :timefmt)
+		("min"       . :ymin)
+		("max"       . :ymax)
+		("ymin"      . :ymin)
+		("xmax"      . :xmax)
+		("ticks"     . :ticks)
 		("trans"     . :transpose)
 		("transpose" . :transpose)))
 	  (multiples '("set" "line"))
@@ -181,6 +186,101 @@ and dependent variables."
 	  (insert front-edge) (insert "\n") ;; front edge
 	  (setf back-edge "") (setf front-edge ""))))
     row-vals))
+
+(defun org--plot/values-stats (nums &optional hard-min hard-max)
+  "From a list of NUMS return a plist containing some rudamentry statistics on the
+values, namely regarding the range."
+  (let* ((minimum (or hard-min (apply #'min nums)))
+	 (maximum (or hard-max (apply #'max nums)))
+	 (range (- maximum minimum))
+	 (rangeOrder (ceiling (- 1 (log10 range))))
+	 (range-factor (expt 10 rangeOrder))
+	 (nice-min (/ (float (floor (* minimum range-factor))) range-factor))
+	 (nice-max (/ (float (ceiling (* maximum range-factor))) range-factor)))
+    `(:min ,minimum :max ,maximum :range ,range
+      :range-factor ,range-factor
+      :nice-min ,nice-min :nice-max ,nice-max :nice-range ,(- nice-max nice-min))))
+
+(defun org--plot/sensible-tick-num (table &optional hard-min hard-max)
+  "From a the values in a TABLE of data, attempt to guess an appropriate number of ticks."
+  (let* ((row-data
+	  (mapcar (lambda (row) (org--plot/values-stats
+			    (mapcar #'string-to-number (cdr row))
+			    hard-min
+			    hard-max)) table))
+	 (row-normalised-ranges (mapcar (lambda (r-data)
+					  (let ((val (round (*
+							     (plist-get r-data :range-factor)
+							     (plist-get r-data :nice-range)))))
+					    (if (= (% val 10) 0) (/ val 10) val)))
+					row-data))
+	 (range-prime-decomposition (mapcar #'org--plot/prime-factors row-normalised-ranges))
+	 (weighted-factors (sort (apply #'org--plot/merge-alists #'+ 0
+					(mapcar (lambda (factors) (org--plot/item-frequencies factors t))
+						range-prime-decomposition))
+				 (lambda (a b) (> (cdr a) (cdr b))))))
+    (apply #'* (org--plot/nice-frequency-pick weighted-factors))))
+
+(defun org--plot/nice-frequency-pick (frequencies)
+  "From a list of frequences, try to sensibly pick a sample of the most frequent."
+  ;; TODO this mosly works decently, but counld do with some tweaking to work more consistently.
+  (case (length frequencies)
+    (1 (list (car (nth 0 frequencies))))
+    (2 (if (<= 3 (/ (cdr (nth 0 frequencies))
+		    (cdr (nth 1 frequencies))))
+	   (make-list 2
+		      (car (nth 0 frequencies)))
+	 (list (car (nth 0 frequencies))
+	       (car (nth 1 frequencies)))))
+    (t
+     (let* ((total-count (apply #'+ (mapcar #'cdr frequencies)))
+	    (n-freq (mapcar (lambda (freq) `(,(car freq) . ,(/ (float (cdr freq)) total-count))) frequencies))
+	    (f-pick (list (car (car n-freq))))
+	    (1-2-ratio (/ (cdr (nth 0 n-freq))
+			  (cdr (nth 1 n-freq))))
+	    (2-3-ratio (/ (cdr (nth 1 n-freq))
+			  (cdr (nth 2 n-freq))))
+	    (1-3-ratio (* 1-2-ratio 2-3-ratio))
+	    (1-val (car (nth 0 n-freq)))
+	    (2-val (car (nth 1 n-freq)))
+	    (3-val (car (nth 2 n-freq))))
+       (when (> 1-2-ratio 4) (push 1-val f-pick))
+       (when (and (< 1-2-ratio 2-val)
+		  (< (* (apply #'* f-pick) 2-val) 30))
+	 (push 2-val f-pick))
+       (when (and (< 1-3-ratio 3-val)
+		  (< (* (apply #'* f-pick) 3-val) 30))
+	 (push 3-val f-pick))
+       f-pick))))
+
+(defun org--plot/merge-alists (function default alist1 alist2 &rest alists)
+  "Using FUNCTION, combine the elements of all given ALISTS. When an element is
+only present in one alist, DEFAULT is used as the second argument for the FUNCTION."
+  (when (> (length alists) 0)
+    (setq alist2 (apply #'org--plot/merge-alists function default alist2 alists)))
+  (flet ((keys (alist) (mapcar #'car alist))
+	 (lookup (key alist) (or (cdr (assoc key alist)) default)))
+    (loop with keys = (union (keys alist1) (keys alist2) :test 'equal)
+	  for k in keys collect
+	  (cons k (funcall function (lookup k alist1) (lookup k alist2))))))
+
+(defun org--plot/item-frequencies (values &optional normalise)
+  "Return an alist indicating the frequency of values in VALUES list."
+  (let ((normaliser (if normalise (float (length values)) 1)))
+    (cl-loop for (n . m) in (seq-group-by #'identity values)
+	     collect (cons n (/ (length m) normaliser)))))
+
+(defun org--plot/prime-factors (value)
+  "Return the prime decomposition of VALUE, e.g. for 12, '(3 2 2)"
+  (let ((factors '(1)) (i 1))
+    (while (/= 1 value)
+      (setq i (1+ i))
+      (when (eq 0 (% value i))
+	(push i factors)
+	(setq value (/ value i))
+	(setq i (1- i))
+	))
+    (subseq factors 0 -1)))
 
 (defcustom org-plot/gnuplot-script-preamble ""
   "String or function which provides content to be inserted into the GNUPlot
