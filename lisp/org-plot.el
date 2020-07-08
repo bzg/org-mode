@@ -324,7 +324,9 @@ If a function, it is called with the plot type as the argument."
 	    (let* ((type (plist-get params :plot-type))
 		   (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
 	    (list (format "'%s' with %s title ''"
-			  data-file with))))))
+			  data-file with)))))
+    (radar (lambda (data-file num-cols params plot-str)
+	     (list (org--plot/radar table params)))))
   "List of plot presets with the type name as the car, and a function
 which yeilds plot-lines (a list of strings) as the cdr.
 The parameters of `org-plot/gnuplot-script' and PLOT-STR are passed to
@@ -332,6 +334,140 @@ that function. i.e. it is called with the following arguments:
   DATA-FILE NUM-COLS PARAMS PLOT-STR"
   :group 'org-plot
   :type '(alist :value-type (symbol group)))
+
+(defvar org--plot/radar-template
+  "### spider plot/chart with gnuplot
+# also known as: radar chart, web chart, star chart, cobweb chart,
+#                radar plot,  web plot,  star plot,  cobweb plot,  etc. ...
+set datafile separator ' '
+set size square
+unset tics
+set angles degree
+set key bmargin center horizontal
+unset border
+
+# Load data and settup
+load \"%s\"
+
+# General settings
+DataColCount = words($Data[1])-1
+AxesCount = |$Data|-HeaderLines
+AngleOffset = 90
+Max = 1
+d=0.1*Max
+Direction = -1   # counterclockwise=1, clockwise = -1
+
+# Tic settings
+TicCount = %s
+TicOffset = 0.1
+TicValue(axis,i) = real(i)*(word($Settings[axis],3)-word($Settings[axis],2)) \\
+	  / word($Settings[axis],4)+word($Settings[axis],2)
+TicLabelPosX(axis,i) = PosX(axis,i/TicCount) + PosY(axis, TicOffset)
+TicLabelPosY(axis,i) = PosY(axis,i/TicCount) - PosX(axis, TicOffset)
+TicLen = 0.03
+TicdX(axis,i) = 0.5*TicLen*cos(alpha(axis)-90)
+TicdY(axis,i) = 0.5*TicLen*sin(alpha(axis)-90)
+
+# Label
+LabOffset = 0.10
+LabX(axis) = PosX(axis+1,Max+2*d) + PosY(axis, LabOffset)
+LabY(axis) = PosY($0+1,Max+2*d)
+
+# Functions
+alpha(axis) = (axis-1)*Direction*360.0/AxesCount+AngleOffset
+PosX(axis,R) = R*cos(alpha(axis))
+PosY(axis,R) = R*sin(alpha(axis))
+Scale(axis,value) = real(value-word($Settings[axis],2))/(word($Settings[axis],3)-word($Settings[axis],2))
+
+# Spider settings
+set style arrow 1 dt 1 lw 1.0 @fgal head filled size 0.06,25     # style for axes
+set style arrow 2 dt 2 lw 0.5 @fgal nohead   # style for weblines
+set style arrow 3 dt 1 lw 1 @fgal nohead     # style for axis tics
+set samples AxesCount
+set isosamples TicCount
+set urange[1:AxesCount]
+set vrange[1:TicCount]
+set style fill transparent solid 0.2
+
+set xrange[-Max-4*d:Max+4*d]
+set yrange[-Max-4*d:Max+4*d]
+plot \\
+    '+' u (0):(0):(PosX($0,Max+d)):(PosY($0,Max+d)) w vec as 1 not, \\
+    $Data u (LabX($0)): \\
+	(LabY($0)):1 every ::HeaderLines w labels center enhanced @fgt not, \\
+    for [i=1:DataColCount] $Data u (PosX($0+1,Scale($0+1,column(i+1)))): \\
+	(PosY($0+1,Scale($0+1,column(i+1)))) every ::HeaderLines w filledcurves lt i title word($Data[1],i+1), \\
+%s
+#    '++' u (PosX($1,$2/TicCount)-TicdX($1,$2/TicCount)): \\
+#        (PosY($1,$2/TicCount)-TicdY($1,$2/TicCount)): \\
+#        (2*TicdX($1,$2/TicCount)):(2*TicdY($1,$2/TicCount)) \\
+#        w vec as 3 not, \\
+### end of code
+")
+
+(defvar org--plot/radar-ticks
+  "    '++' u (PosX($1,$2/TicCount)):(PosY($1,$2/TicCount)): \\
+	(PosX($1+1,$2/TicCount)-PosX($1,$2/TicCount)):  \\
+	(PosY($1+1,$2/TicCount)-PosY($1,$2/TicCount)) w vec as 2 not, \\
+    '++' u (TicLabelPosX(%s,$2)):(TicLabelPosY(%s,$2)): \\
+	(sprintf('%%g',TicValue(%s,$2))) w labels font ',8' @fgat not")
+
+(defvar org--plot/radar-setup-template
+  "# Data
+$Data <<HEREHAVESOMEDATA
+%s
+HEREHAVESOMEDATA
+HeaderLines = 1
+
+# Settings for scale and offset adjustments
+# axis min max tics axisLabelXoff axisLabelYoff
+$Settings <<EOD
+%s
+EOD
+")
+
+(defun org--plot/radar (table params)
+  (let* ((data
+	  (concat "\"" (s-join "\" \"" (plist-get params :labels)) "\""
+		  "\n"
+		  (s-join "\n"
+			  (mapcar (lambda (row)
+				    (format
+				     "\"%s\" %s"
+				     (car row)
+				     (s-join " " (cdr row))))
+				  table))))
+	 (ticks (or (plist-get params :ticks)
+		    (org--plot/sensible-tick-num table
+						 (plist-get params :ymin)
+						 (plist-get params :ymax))))
+	 (settings
+	  (s-join "\n"
+		  (mapcar (lambda (row)
+			    (let ((data (org--plot/values-stats
+					 (mapcar #'string-to-number (cdr row)))))
+			      (format
+			       "\"%s\" %s %s %s"
+			       (car row)
+			       (or (plist-get params :ymin)
+				   (plist-get data :nice-min))
+			       (or (plist-get params :ymax)
+				   (plist-get data :nice-max))
+			       (if (eq ticks 0) 2 ticks)
+			       )))
+			  table)))
+	 (setup-file (make-temp-file "org-plot-setup")))
+    (f-write-text (format org--plot/radar-setup-template data settings)
+		  'utf-8 setup-file)
+    (format org--plot/radar-template
+	    setup-file
+	    (if (eq ticks 0) 2 ticks)
+	    (if (eq ticks 0) ""
+	      (apply #'format org--plot/radar-ticks
+		     (make-list 3 (if (and (plist-get params :ymin)
+					   (plist-get params :ymax))
+				      ;; FIXME multi-drawing of tick labels with "1"
+				      "1" "$1")))))))
 
 (defcustom org-plot/gnuplot-term-extra ""
   "String or function which provides the extra term options.
