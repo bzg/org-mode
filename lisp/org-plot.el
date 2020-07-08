@@ -326,12 +326,12 @@ line directly before or after the table."
       (with-temp-buffer
 	(if (plist-get params :script)	; user script
 	    (progn (insert
-                    (org-plot/gnuplot-script data-file num-cols params t))
-                   (insert "\n")
-                   (insert-file-contents (plist-get params :script))
-                   (goto-char (point-min))
-                   (while (re-search-forward "\\$datafile" nil t)
-                     (replace-match data-file nil nil)))
+		    (org-plot/gnuplot-script data-file num-cols params t))
+		   (insert "\n")
+		   (insert-file-contents (plist-get params :script))
+		   (goto-char (point-min))
+		   (while (re-search-forward "\\$datafile" nil t)
+		     (replace-match data-file nil nil)))
 	  (insert (org-plot/gnuplot-script data-file num-cols params)))
 	;; Graph table.
 	(gnuplot-mode)
