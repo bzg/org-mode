@@ -189,6 +189,49 @@ other content generated in `org-plot/gnuplot-script'."
   :group 'org-plot
   :type '(choice string function))
 
+(defcustom org-plot/preset-plot-types
+  '((2d (lambda (data-file num-cols params plot-str)
+	  (let* ((type (plist-get params :plot-type))
+		 (with (if (eq type 'grid) 'pm3d (plist-get params :with)))
+		 (ind (plist-get params :ind))
+		 (deps (if (plist-member params :deps) (plist-get params :deps)))
+		 (text-ind (plist-get params :textind))
+		 (col-labels (plist-get params :labels))
+		 res)
+	    (dotimes (col num-cols res)
+	      (unless (and (eq type '2d)
+			   (or (and ind (equal (1+ col) ind))
+			       (and deps (not (member (1+ col) deps)))))
+		(setf res
+		      (cons
+		       (format plot-str data-file
+			       (or (and ind (> ind 0)
+					(not text-ind)
+					(format "%d:" ind)) "")
+			       (1+ col)
+			       (if text-ind (format ":xticlabel(%d)" ind) "")
+			       with
+			       (or (nth col col-labels)
+				   (format "%d" (1+ col))))
+		       res)))))))
+    (3d (lambda (data-file num-cols params plot-str)
+	  (let* ((type (plist-get params :plot-type))
+		 (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
+	    (list (format "'%s' matrix with %s title ''"
+			  data-file with)))))
+    (grid (lambda (data-file num-cols params plot-str)
+	    (let* ((type (plist-get params :plot-type))
+		   (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
+	    (list (format "'%s' with %s title ''"
+			  data-file with))))))
+  "List of plot presets with the type name as the car, and a function
+which yeilds plot-lines (a list of strings) as the cdr.
+The parameters of `org-plot/gnuplot-script' and PLOT-STR are passed to
+that function. i.e. it is called with the following arguments:
+  DATA-FILE NUM-COLS PARAMS PLOT-STR"
+  :group 'org-plot
+  :type '(alist :value-type (symbol group)))
+
 (defun org-plot/gnuplot-script (data-file num-cols params &optional preface)
   "Write a gnuplot script to DATA-FILE respecting the options set in PARAMS.
 NUM-COLS controls the number of columns plotted in a 2-d plot.
@@ -255,29 +298,11 @@ manner suitable for prepending to a user-specified script."
 			   (or timefmt	; timefmt passed to gnuplot
 			       "%Y-%m-%d-%H:%M:%S") "\"")))
     (unless preface
-      (pcase type			; plot command
-	(`2d (dotimes (col num-cols)
-	       (unless (and (eq type '2d)
-			    (or (and ind (equal (1+ col) ind))
-				(and deps (not (member (1+ col) deps)))))
-		 (setf plot-lines
-		       (cons
-			(format plot-str data-file
-				(or (and ind (> ind 0)
-					 (not text-ind)
-					 (format "%d:" ind)) "")
-				(1+ col)
-				(if text-ind (format ":xticlabel(%d)" ind) "")
-				with
-				(or (nth col col-labels)
-				    (format "%d" (1+ col))))
-			plot-lines)))))
-	(`3d
-	 (setq plot-lines (list (format "'%s' matrix with %s title ''"
-					data-file with))))
-	(`grid
-	 (setq plot-lines (list (format "'%s' with %s title ''"
-					data-file with)))))
+      (let ((type-func (cadr (assoc type org-plot/preset-plot-types))))
+	(when type-func
+	  (setq plot-lines
+		(funcall type-func data-file num-cols params plot-str))))
+
       (funcall ats
 	       (concat plot-cmd " " (mapconcat #'identity
 					       (reverse plot-lines)
