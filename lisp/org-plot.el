@@ -182,6 +182,13 @@ and dependent variables."
 	  (setf back-edge "") (setf front-edge ""))))
     row-vals))
 
+(defcustom org-plot/gnuplot-script-preamble ""
+  "String or function which provides content to be inserted into the GNUPlot
+script before the plot command. Not that this is in addition to, not instead of
+other content generated in `org-plot/gnuplot-script'."
+  :group 'org-plot
+  :type '(choice string function))
+
 (defun org-plot/gnuplot-script (data-file num-cols params &optional preface)
   "Write a gnuplot script to DATA-FILE respecting the options set in PARAMS.
 NUM-COLS controls the number of columns plotted in a 2-d plot.
@@ -214,6 +221,12 @@ manner suitable for prepending to a user-specified script."
     (when file				; output file
       (funcall ats (format "set term %s" (file-name-extension file)))
       (funcall ats (format "set output '%s'" file)))
+
+    (funcall ats
+	     (if (stringp org-plot/gnuplot-script-preamble)
+		 org-plot/gnuplot-script-preamble
+	       (org-plot/gnuplot-script-preamble)))
+
     (pcase type				; type
       (`2d ())
       (`3d (when map (funcall ats "set map")))
