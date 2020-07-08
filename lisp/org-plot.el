@@ -332,6 +332,13 @@ that function. i.e. it is called with the following arguments:
   :group 'org-plot
   :type '(alist :value-type (symbol group)))
 
+(defcustom org-plot/gnuplot-term-extra ""
+  "String or function which provides the extra term options.
+E.g. a value of \"size 1050,650\" would cause
+\"set term ... size 1050,650\" to be used."
+  :group 'org-plot
+  :type '(choice string function))
+
 (defun org-plot/gnuplot-script (data-file num-cols params &optional preface)
   "Write a gnuplot script to DATA-FILE respecting the options set in PARAMS.
 NUM-COLS controls the number of columns plotted in a 2-d plot.
@@ -361,8 +368,15 @@ manner suitable for prepending to a user-specified script."
 	 ;; ats = add-to-script
 	 (ats (lambda (line) (setf script (concat script "\n" line))))
 	 plot-lines)
-    (when file				; output file
-      (funcall ats (format "set term %s" (file-name-extension file)))
+
+
+    ;; handle output file, background, and size
+    (funcall ats (format "set term %s %s"
+			 (if file (file-name-extension file) "GNUTERM")
+			 (if (stringp org-plot/gnuplot-term-extra)
+			     org-plot/gnuplot-term-extra
+			   (org-plot/gnuplot-term-extra))))
+    (when file ; output file
       (funcall ats (format "set output '%s'" file)))
 
     (funcall ats
