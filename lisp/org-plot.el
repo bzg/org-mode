@@ -285,7 +285,8 @@ only present in one alist, DEFAULT is used as the second argument for the FUNCTI
 (defcustom org-plot/gnuplot-script-preamble ""
   "String or function which provides content to be inserted into the GNUPlot
 script before the plot command. Not that this is in addition to, not instead of
-other content generated in `org-plot/gnuplot-script'."
+other content generated in `org-plot/gnuplot-script'.
+If a function, it is called with the plot type as the argument."
   :group 'org-plot
   :type '(choice string function))
 
@@ -335,7 +336,8 @@ that function. i.e. it is called with the following arguments:
 (defcustom org-plot/gnuplot-term-extra ""
   "String or function which provides the extra term options.
 E.g. a value of \"size 1050,650\" would cause
-\"set term ... size 1050,650\" to be used."
+\"set term ... size 1050,650\" to be used.
+If a function, it is called with the plot type as the argument."
   :group 'org-plot
   :type '(choice string function))
 
@@ -375,14 +377,14 @@ manner suitable for prepending to a user-specified script."
 			 (if file (file-name-extension file) "GNUTERM")
 			 (if (stringp org-plot/gnuplot-term-extra)
 			     org-plot/gnuplot-term-extra
-			   (org-plot/gnuplot-term-extra))))
+			   (org-plot/gnuplot-term-extra type))))
     (when file ; output file
       (funcall ats (format "set output '%s'" file)))
 
     (funcall ats
 	     (if (stringp org-plot/gnuplot-script-preamble)
 		 org-plot/gnuplot-script-preamble
-	       (org-plot/gnuplot-script-preamble)))
+	       (org-plot/gnuplot-script-preamble type)))
 
     (pcase type				; type
       (`2d ())
