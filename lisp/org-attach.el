@@ -130,8 +130,7 @@ Selective means to respect the inheritance setting in
   :type '(choice
 	  (const :tag "Don't use inheritance" nil)
 	  (const :tag "Inherit parent node attachments" t)
-	  (const :tag "Respect org-use-property-inheritance" selective))
-  :type 'boolean)
+	  (const :tag "Respect org-use-property-inheritance" selective)))
 
 (defcustom org-attach-store-link-p nil
   "Non-nil means store a link to a file when attaching it."
