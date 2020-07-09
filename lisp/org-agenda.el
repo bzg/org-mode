@@ -7611,8 +7611,9 @@ This last option is in practice not very useful, but it is available for
 consistency with the other filter commands."
   (interactive "P")
   (let* ((efforts (split-string
-		   (or (cdr (assoc (concat org-effort-property "_ALL")
-				   org-global-properties))
+		   (or (cdr (assoc-string (concat org-effort-property "_ALL")
+					  org-global-properties
+					  t))
 		       "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")))
 	 ;; XXX: the following handles only up to 10 different
 	 ;; effort values.
@@ -7777,8 +7778,9 @@ which see."
 			  (org-agenda-get-represented-tags))))
      ((member operator '("<" ">" "="))
       (setq table (split-string
-		   (or (cdr (assoc (concat org-effort-property "_ALL")
-				   org-global-properties))
+		   (or (cdr (assoc-string (concat org-effort-property "_ALL")
+					  org-global-properties
+					  t))
 		       "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00")
 		   " +")))
      (t (setq table nil)))
