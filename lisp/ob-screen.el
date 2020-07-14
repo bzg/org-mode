@@ -40,7 +40,8 @@
 In case you want to use a different screen than one selected by your $PATH")
 
 (defvar org-babel-default-header-args:screen
-  '((:results . "silent") (:session . "default") (:cmd . "sh") (:terminal . "xterm"))
+  '((:results . "silent") (:session . "default") (:cmd . "sh")
+    (:terminal . "xterm") (:screenrc . "/dev/null"))
   "Default arguments to use when running screen source blocks.")
 
 (defun org-babel-execute:screen (body params)
@@ -59,10 +60,11 @@ In case you want to use a different screen than one selected by your $PATH")
   (let* ((session (cdr (assq :session params)))
          (cmd (cdr (assq :cmd params)))
          (terminal (cdr (assq :terminal params)))
+         (screenrc (cdr (assq :screenrc params)))
          (process-name (concat "org-babel: terminal (" session ")")))
     (apply 'start-process process-name "*Messages*"
            terminal `("-T" ,(concat "org-babel: " session) "-e" ,org-babel-screen-location
-		      "-c" "/dev/null" "-mS" ,session ,cmd))
+		      "-c" ,screenrc "-mS" ,session ,cmd))
     ;; XXX: Is there a better way than the following?
     (while (not (org-babel-screen-session-socketname session))
       ;; wait until screen session is available before returning

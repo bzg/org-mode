@@ -229,6 +229,12 @@ directory configured for ClojureScript will /not/ work.
 Babel Java blocks recognize header argument =:cmdargs= and pass its
 value in call to =java=.
 
+*** =ob-screen.el=: Screen now accepts =:screenrc= header argument
+
+Screen blocks now recognize the =:screenrc= header argument and pass
+its value to the screen command via the "-c" option. The default
+remains =/dev/null= (i.e. a clean screen session)
+
 *** =RET= and =C-j= now obey ~electric-indent-mode~
 
 Since Emacs 24.4, ~electric-indent-mode~ is enabled by default.  In
