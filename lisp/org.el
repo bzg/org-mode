@@ -19375,8 +19375,7 @@ filling the current element."
 	      (skip-chars-backward " \t\n")
 	      (while (> (point) start)
 		(org-fill-element justify)
-		(org-backward-paragraph))
-	      (org-fill-element justify))
+		(org-backward-paragraph)))
 	  (goto-char origin)
 	  (set-marker origin nil))))
      (t

@@ -752,6 +752,15 @@
 	      (push-mark (point) t t)
 	      (goto-char (point-min))
 	      (call-interactively #'org-fill-paragraph)
+	      (buffer-string)))))
+  (should
+   (equal "012345678 9\n\n012345678\n9"
+	  (org-test-with-temp-text "012345678 9\n<point>\n012345678 9"
+	    (let ((fill-column 10))
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'org-fill-paragraph)
 	      (buffer-string))))))
 
 (ert-deftest test-org/auto-fill-function ()
