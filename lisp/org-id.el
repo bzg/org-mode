@@ -491,17 +491,21 @@ When FILES is given, scan also these files."
   (let* ((files
           (delete-dups
            (mapcar #'file-truename
-                   (append
-                    ;; Agenda files and all associated archives.
-                    (org-agenda-files t org-id-search-archives)
-                    ;; Explicit extra files.
-                    (if (symbolp org-id-extra-files)
-			(symbol-value org-id-extra-files)
-		      org-id-extra-files)
-                    ;; All files known to have IDs.
-                    org-id-files
-                    ;; Additional files from function call.
-                    files))))
+                   (cl-remove-if-not
+		    ;; Default `org-id-extra-files' value contains
+		    ;; `agenda-archives' symbol.
+		    #'stringp
+		    (append
+		     ;; Agenda files and all associated archives.
+		     (org-agenda-files t org-id-search-archives)
+		     ;; Explicit extra files.
+		     (if (symbolp org-id-extra-files)
+			 (symbol-value org-id-extra-files)
+		       org-id-extra-files)
+		     ;; All files known to have IDs.
+		     org-id-files
+		     ;; Additional files from function call.
+		     files)))))
          (nfiles (length files))
          (id-regexp
 	  (rx (seq bol (0+ (any "\t ")) ":ID:" (1+ " ") (not (any " ")))))
