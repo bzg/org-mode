@@ -108,6 +108,7 @@ In case you want to use a different screen than one selected by your $PATH")
   (let ((tmpfile (org-babel-temp-file "screen-")))
     (with-temp-file tmpfile
       (insert body)
+      (insert "\n")
 
       ;; org-babel has superfluous spaces
       (goto-char (point-min))
