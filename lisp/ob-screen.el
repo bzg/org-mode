@@ -62,8 +62,7 @@ In case you want to use a different screen than one selected by your $PATH")
          (process-name (concat "org-babel: terminal (" session ")")))
     (apply 'start-process process-name "*Messages*"
            terminal `("-T" ,(concat "org-babel: " session) "-e" ,org-babel-screen-location
-		      "-c" "/dev/null" "-mS" ,(concat "org-babel-session-" session)
-		      ,cmd))
+		      "-c" "/dev/null" "-mS" ,session ,cmd))
     ;; XXX: Is there a better way than the following?
     (while (not (org-babel-screen-session-socketname session))
       ;; wait until screen session is available before returning
@@ -97,8 +96,7 @@ In case you want to use a different screen than one selected by your $PATH")
 			 nil
 			 (mapcar
 			  (lambda (x)
-			    (when (string-match
-				   (concat "org-babel-session-" session) x)
+			    (when (string-match session x)
 			      x))
 			  sockets)))))
     (when match-socket (car (split-string match-socket)))))

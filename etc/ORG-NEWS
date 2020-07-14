@@ -380,6 +380,13 @@ From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
+*** =ob-screen.el=: Respect screen =:session= name
+
+Screen babel session are now named based on the =:session= header
+argument (defaults to ~default~).
+
+Previously all session names had  ~org-babel-session-~ prepended.
+
 *** Forward/backward paragraph functions in line with the rest of Emacs
 ~org-forward-paragraph~ and ~org-backward-paragraph~, bound to
 ~<C-UP>~ and ~<C-DOWN>~ functions mimic more closely behaviour of
