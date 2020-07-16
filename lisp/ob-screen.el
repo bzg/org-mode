@@ -98,8 +98,8 @@ In case you want to use a different screen than one selected by your $PATH")
 			 nil
 			 (mapcar
 			  (lambda (x)
-			    (when (string-match session x)
-			      x))
+			    (and (string-match-p (regexp-quote session) x)
+				 x))
 			  sockets)))))
     (when match-socket (car (split-string match-socket)))))
 
