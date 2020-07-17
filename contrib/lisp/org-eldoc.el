@@ -127,7 +127,7 @@
 (declare-function php-eldoc-function "php-eldoc" ())
 (declare-function go-eldoc--documentation-function "go-eldoc" ())
 
-(defun org-eldoc-documentation-function ()
+(defun org-eldoc-documentation-function (&rest _ignored)
   "Return breadcrumbs when on a headline, args for src block header-line,
   calls other documentation functions depending on lang when inside src body."
   (or
@@ -161,11 +161,18 @@
 (defun org-eldoc-load ()
   "Set up org-eldoc documentation function."
   (interactive)
-  (if (boundp 'eldoc-documentation-functions)
+  ;; This approach is taken from python.el.
+  (with-no-warnings
+    (cond
+     ((null eldoc-documentation-function) ; Emacs<25
+      (setq-local eldoc-documentation-function
+		  #'org-eldoc-documentation-function))
+     ((boundp 'eldoc-documentation-functions) ; Emacs>=28
       (add-hook 'eldoc-documentation-functions
-		#'org-eldoc-documentation-function nil t)
-    (setq-local eldoc-documentation-function
-		#'org-eldoc-documentation-function)))
+		#'org-eldoc-documentation-function nil t))
+     (t
+      (add-function :before-until (local 'eldoc-documentation-function)
+		    #'org-eldoc-documentation-function)))))
 
 ;;;###autoload
 (add-hook 'org-mode-hook #'org-eldoc-load)
