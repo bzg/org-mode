@@ -5982,6 +5982,22 @@ Show the heading too, if it is currently invisible."
      'outline)
     (org-cycle-hide-drawers 'children)))
 
+(defun org-hide-entry ()
+  "Hide the body directly following its heading."
+  (interactive)
+  (save-excursion
+    (org-back-to-heading-or-point-min t)
+    (when (org-at-heading-p) (forward-line))
+    (org-flag-region
+     (line-end-position 0)
+     (save-excursion
+       (if (re-search-forward
+	    (concat "[\r\n]" org-outline-regexp) nil t)
+           (line-end-position 0)
+	 (point-max)))
+     t
+     'outline)))
+
 (defun org-show-children (&optional level)
   "Show all direct subheadings of this heading.
 Prefix arg LEVEL is how many levels below the current level

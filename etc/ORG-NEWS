@@ -280,6 +280,11 @@ possible via column view value edit or with =<C-c C-q>=.
 *** ~org-agenda-ctrl-c-ctrl-c~
 
 =<C-c C-c>= in agenda calls ~org-agenda-set-tags~.
+
+*** ~org-hide-entry~
+
+Counterpart of ~org-show-entry~.
+
 ** New options
 *** New option ~org-clock-auto-clockout-timer~
 
