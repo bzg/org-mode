@@ -13513,15 +13513,9 @@ completion."
 
 (defun org-find-olp (path &optional this-buffer)
   "Return a marker pointing to the entry at outline path OLP.
-If anything goes wrong, throw an error.
-You can wrap this call to catch the error like this:
-
-  (condition-case msg
-      (org-mobile-locate-entry (match-string 4))
-    (error (nth 1 msg)))
-
-The return value will then be either a string with the error message,
-or a marker if everything is OK.
+If anything goes wrong, throw an error, and if you need to do
+something based on this error, you can catch it with
+`condition-case'.
 
 If THIS-BUFFER is set, the outline path does not contain a file,
 only headings."
