@@ -732,6 +732,11 @@ captured item after finalizing."
 
   (run-hooks 'org-capture-prepare-finalize-hook)
 
+  ;; Update `org-capture-plist' with the buffer-local value.  Since
+  ;; captures can be run concurrently, this is to ensure that
+  ;; `org-capture-after-finalize-hook' accesses the proper plist.
+  (setq org-capture-plist org-capture-current-plist)
+
   ;; Did we start the clock in this capture buffer?
   (when (and org-capture-clock-was-started
 	     org-clock-marker
