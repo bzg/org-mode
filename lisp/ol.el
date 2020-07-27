@@ -91,7 +91,7 @@ The key in each association is a string of the link type.
 Subsequent optional elements make up a property list for that
 type.
 
-All properties ar optional.  However, the most important ones
+All properties are optional.  However, the most important ones
 are, in this order, `:follow', `:export', and `:store', described
 below.
 
