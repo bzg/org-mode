@@ -253,7 +253,7 @@ To get the previous behaviour back, disable ~electric-indent-mode~
 explicitly:
 
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook (lambda () (electric-indent-mode -1)))
+(add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
 
 *** New optional numeric argument for ~org-return~
