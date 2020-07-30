@@ -291,7 +291,10 @@ If a function, it is called with the plot type as the argument."
   :type '(choice string function))
 
 (defcustom org-plot/preset-plot-types
-  '((2d (lambda (data-file num-cols params plot-str)
+  '((2d :plot-cmd "plot"
+	:check-ind-type t
+	:plot-func
+	(lambda (_table data-file num-cols params plot-str)
 	  (let* ((type (plist-get params :plot-type))
 		 (with (if (eq type 'grid) 'pm3d (plist-get params :with)))
 		 (ind (plist-get params :ind))
@@ -315,23 +318,60 @@ If a function, it is called with the plot type as the argument."
 			       (or (nth col col-labels)
 				   (format "%d" (1+ col))))
 		       res)))))))
-    (3d (lambda (data-file num-cols params plot-str)
+    (3d :plot-cmd "splot"
+	:plot-pre (lambda (_table _data-file _num-cols params _plot-str)
+		    (if (plist-get params :map) "set map"))
+	:plot-func
+	(lambda (_table data-file _num-cols params _plot-str)
 	  (let* ((type (plist-get params :plot-type))
 		 (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
 	    (list (format "'%s' matrix with %s title ''"
 			  data-file with)))))
-    (grid (lambda (data-file num-cols params plot-str)
+    (grid :plot-cmd "splot"
+	  :plot-pre (lambda (_table _data-file _num-cols params _plot-str)
+		      (if (plist-get params :map) "set pm3d map" "set map"))
+	  :data-dump (lambda (table data-file params _num-cols)
+		       (let ((y-labels (org-plot/gnuplot-to-grid-data
+					table data-file params)))
+			 (when y-labels (plist-put params :ylabels y-labels))))
+	  :plot-func
+	  (lambda (table data-file _num-cols params _plot-str)
 	    (let* ((type (plist-get params :plot-type))
 		   (with (if (eq type 'grid) 'pm3d (plist-get params :with))))
-	    (list (format "'%s' with %s title ''"
-			  data-file with)))))
-    (radar (lambda (data-file num-cols params plot-str)
+	      (list (format "'%s' with %s title ''"
+			    data-file with)))))
+    (radar :plot-func
+	   (lambda (table _data-file _num-cols params plot-str)
 	     (list (org--plot/radar table params)))))
-  "List of plot presets with the type name as the car, and a function
-which yeilds plot-lines (a list of strings) as the cdr.
-The parameters of `org-plot/gnuplot-script' and PLOT-STR are passed to
-that function. i.e. it is called with the following arguments:
-  DATA-FILE NUM-COLS PARAMS PLOT-STR"
+  "List of plists describing the avalible plot types.
+The car is the type name, and the property :plot-func must be set.
+The value of :plot-func is a lambda which yields plot-lines
+(a list of strings) as the cdr.
+
+All lambda functions have the parameters of `org-plot/gnuplot-script' and PLOT-STR passed to them.
+i.e. they are called with the following signature: (TABLE DATA-FILE NUM-COLS PARAMS PLOT-STR)
+
+Potentially useful parameters in PARAMS include:
+ :set :line :map :title :file :ind :timeind :timefmt :textind
+ :deps :labels :xlabels :ylabels :xmin :xmax :ymin :ymax :ticks
+
+In addition to :plot-func, the following optional properties may be set.
+
+- :plot-cmd - A gnuplot command appended to each plot-line.
+  Accepts string or nil. Default value: nil.
+
+- :check-ind-type - Whether the types of ind values should be checked.
+  Accepts boolean.
+
+- :plot-str - the formula string passed to :plot-func as PLOT-STR
+  Accepts string. Default value: \"'%s' using %s%d%s with %s title '%s'\"
+
+- :data-dump - Function to dump the table to a datafile for ease of use.
+  Accepts lambda function. Default lambda body: (org-plot/gnuplot-to-data table data-file params)
+
+- :plot-pre - Gnuplot code to be inserted early into the script, just after term and output have been set.
+   Accepts string, nil, or lambda function which returns string or nil. Defaults to nil.
+"
   :group 'org-plot
   :type '(alist :value-type (symbol group)))
 
@@ -477,89 +517,90 @@ If a function, it is called with the plot type as the argument."
   :group 'org-plot
   :type '(choice string function))
 
-(defun org-plot/gnuplot-script (data-file num-cols params &optional preface)
+(defun org-plot/gnuplot-script (table data-file num-cols params &optional preface)
   "Write a gnuplot script to DATA-FILE respecting the options set in PARAMS.
 NUM-COLS controls the number of columns plotted in a 2-d plot.
 Optional argument PREFACE returns only option parameters in a
 manner suitable for prepending to a user-specified script."
-  (let* ((type (plist-get params :plot-type))
-	 (with (if (eq type 'grid) 'pm3d (plist-get params :with)))
-	 (sets (plist-get params :set))
-	 (lines (plist-get params :line))
-	 (map (plist-get params :map))
-	 (title (plist-get params :title))
-	 (file (plist-get params :file))
-	 (ind (plist-get params :ind))
-	 (time-ind (plist-get params :timeind))
-	 (timefmt (plist-get params :timefmt))
-	 (text-ind (plist-get params :textind))
-	 (deps (if (plist-member params :deps) (plist-get params :deps)))
-	 (col-labels (plist-get params :labels))
-	 (x-labels (plist-get params :xlabels))
-	 (y-labels (plist-get params :ylabels))
-	 (plot-str "'%s' using %s%d%s with %s title '%s'")
-	 (plot-cmd (pcase type
-		     (`2d "plot")
-		     (`3d "splot")
-		     (`grid "splot")))
-	 (script "reset")
-	 ;; ats = add-to-script
-	 (ats (lambda (line) (setf script (concat script "\n" line))))
-	 plot-lines)
+  (let* ((type-name (plist-get params :plot-type))
+	 (type (cdr (assoc type-name org-plot/preset-plot-types))))
+    (unless type
+      (user-error "Org-plot type `%s' is undefined." type-name))
+    (let* ((sets (plist-get params :set))
+	   (lines (plist-get params :line))
+	   (map (plist-get params :map))
+	   (title (plist-get params :title))
+	   (file (plist-get params :file))
+	   (ind (plist-get params :ind))
+	   (time-ind (plist-get params :timeind))
+	   (timefmt (plist-get params :timefmt))
+	   (text-ind (plist-get params :textind))
+	   (deps (if (plist-member params :deps) (plist-get params :deps)))
+	   (col-labels (plist-get params :labels))
+	   (x-labels (plist-get params :xlabels))
+	   (y-labels (plist-get params :ylabels))
+	   (plot-str (or (plist-get type :plot-str)
+			 "'%s' using %s%d%s with %s title '%s'"))
+	   (plot-cmd (plist-get type :plot-cmd))
+	   (plot-pre (plist-get type :plot-pre))
+	   (script "reset")
+	   ;; ats = add-to-script
+	   (ats (lambda (line) (when line (setf script (concat script "\n" line)))))
+	   plot-lines)
 
 
-    ;; handle output file, background, and size
-    (funcall ats (format "set term %s %s"
-			 (if file (file-name-extension file) "GNUTERM")
-			 (if (stringp org-plot/gnuplot-term-extra)
-			     org-plot/gnuplot-term-extra
-			   (org-plot/gnuplot-term-extra type))))
-    (when file ; output file
-      (funcall ats (format "set output '%s'" file)))
+      ;; handle output file, background, and size
+      (funcall ats (format "set term %s %s"
+			   (if file (file-name-extension file) "GNUTERM")
+			   (if (stringp org-plot/gnuplot-term-extra)
+			       org-plot/gnuplot-term-extra
+			     (funcall org-plot/gnuplot-term-extra type))))
+      (when file ; output file
+	(funcall ats (format "set output '%s'" file)))
 
-    (funcall ats
-	     (if (stringp org-plot/gnuplot-script-preamble)
-		 org-plot/gnuplot-script-preamble
-	       (org-plot/gnuplot-script-preamble type)))
-
-    (pcase type				; type
-      (`2d ())
-      (`3d (when map (funcall ats "set map")))
-      (`grid (funcall ats (if map "set pm3d map" "set pm3d"))))
-    (when title (funcall ats (format "set title '%s'" title))) ; title
-    (mapc ats lines)					       ; line
-    (dolist (el sets) (funcall ats (format "set %s" el)))      ; set
-    ;; Unless specified otherwise, values are TAB separated.
-    (unless (string-match-p "^set datafile separator" script)
-      (funcall ats "set datafile separator \"\\t\""))
-    (when x-labels			; x labels (xtics)
-      (funcall ats
-	       (format "set xtics (%s)"
-		       (mapconcat (lambda (pair)
-				    (format "\"%s\" %d" (cdr pair) (car pair)))
-				  x-labels ", "))))
-    (when y-labels			; y labels (ytics)
-      (funcall ats
-	       (format "set ytics (%s)"
-		       (mapconcat (lambda (pair)
-				    (format "\"%s\" %d" (cdr pair) (car pair)))
-				  y-labels ", "))))
-    (when time-ind			; timestamp index
-      (funcall ats "set xdata time")
-      (funcall ats (concat "set timefmt \""
-			   (or timefmt	; timefmt passed to gnuplot
-			       "%Y-%m-%d-%H:%M:%S") "\"")))
-    (unless preface
-      (let ((type-func (cadr (assoc type org-plot/preset-plot-types))))
-	(when type-func
-	  (setq plot-lines
-		(funcall type-func data-file num-cols params plot-str))))
+      (when plot-pre
+	(funcall ats (funcall plot-pre table data-file num-cols params plot-str)))
 
       (funcall ats
-	       (concat plot-cmd " " (mapconcat #'identity
-					       (reverse plot-lines)
-					       ",\\\n    "))))
-    script))
+	       (if (stringp org-plot/gnuplot-script-preamble)
+		   org-plot/gnuplot-script-preamble
+		 (funcall org-plot/gnuplot-script-preamble type)))
+
+      (when title (funcall ats (format "set title '%s'" title))) ; title
+      (mapc ats lines)					       ; line
+      (dolist (el sets) (funcall ats (format "set %s" el)))      ; set
+      ;; Unless specified otherwise, values are TAB separated.
+      (unless (string-match-p "^set datafile separator" script)
+	(funcall ats "set datafile separator \"\\t\""))
+      (when x-labels			; x labels (xtics)
+	(funcall ats
+		 (format "set xtics (%s)"
+			 (mapconcat (lambda (pair)
+				      (format "\"%s\" %d" (cdr pair) (car pair)))
+				    x-labels ", "))))
+      (when y-labels			; y labels (ytics)
+	(funcall ats
+		 (format "set ytics (%s)"
+			 (mapconcat (lambda (pair)
+				      (format "\"%s\" %d" (cdr pair) (car pair)))
+				    y-labels ", "))))
+      (when time-ind			; timestamp index
+	(funcall ats "set xdata time")
+	(funcall ats (concat "set timefmt \""
+			     (or timefmt	; timefmt passed to gnuplot
+				 "%Y-%m-%d-%H:%M:%S") "\"")))
+      (unless preface
+	(let ((type-func (plist-get type :plot-func)))
+	  (when type-func
+	    (setq plot-lines
+		  (funcall type-func table data-file num-cols params plot-str))))
+	(funcall ats
+		 (concat plot-cmd
+			 (when plot-cmd " ")
+			 (mapconcat #'identity
+				    (reverse plot-lines)
+				    ",\\\n    "))))
+      script)))
 
 ;;-----------------------------------------------------------------------------
 ;; facade functions
@@ -599,7 +640,13 @@ line directly before or after the table."
 			(push 'hline (cdr tbl))))
 		    tbl))
 	   (num-cols (length (if (eq (nth 0 table) 'hline) (nth 1 table)
-			       (nth 0 table)))))
+			       (nth 0 table))))
+	   (type (assoc (plist-get params :plot-type)
+			org-plot/preset-plot-types)))
+
+      (unless type
+	(user-error "Org-plot type `%s' is undefined." type-name))
+
       (run-with-idle-timer 0.1 nil #'delete-file data-file)
       (when (eq (cadr table) 'hline)
 	(setf params
@@ -609,15 +656,12 @@ line directly before or after the table."
       (save-excursion (while (and (equal 0 (forward-line -1))
 				  (looking-at "[[:space:]]*#\\+"))
 			(setf params (org-plot/collect-options params))))
-      ;; Dump table to datafile (very different for grid).
-      (pcase (plist-get params :plot-type)
-	(`2d   (org-plot/gnuplot-to-data table data-file params))
-	(`3d   (org-plot/gnuplot-to-data table data-file params))
-	(`grid (let ((y-labels (org-plot/gnuplot-to-grid-data
-				table data-file params)))
-		 (when y-labels (plist-put params :ylabels y-labels)))))
+      ;; Dump table to datafile
+      (if-let ((dump-func (plist-get type :data-dump)))
+	  (funcall dump-func table data-file num-cols params)
+	(org-plot/gnuplot-to-data table data-file params))
       ;; Check type of ind column (timestamp? text?)
-      (when (eq `2d (plist-get params :plot-type))
+      (when (plist-get params :check-ind-type)
 	(let* ((ind (1- (plist-get params :ind)))
 	       (ind-column (mapcar (lambda (row) (nth ind row)) table)))
 	  (cond ((< ind 0) nil) ; ind is implicit
@@ -634,13 +678,13 @@ line directly before or after the table."
       (with-temp-buffer
 	(if (plist-get params :script)	; user script
 	    (progn (insert
-		    (org-plot/gnuplot-script data-file num-cols params t))
+		    (org-plot/gnuplot-script table data-file num-cols params t))
 		   (insert "\n")
 		   (insert-file-contents (plist-get params :script))
 		   (goto-char (point-min))
 		   (while (re-search-forward "\\$datafile" nil t)
 		     (replace-match data-file nil nil)))
-	  (insert (org-plot/gnuplot-script data-file num-cols params)))
+	  (insert (org-plot/gnuplot-script table data-file num-cols params)))
 	;; Graph table.
 	(gnuplot-mode)
 	(gnuplot-send-buffer-to-gnuplot))
