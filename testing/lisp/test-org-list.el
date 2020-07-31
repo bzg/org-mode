@@ -1004,6 +1004,13 @@ b. Item 2<point>"
 	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n\n\nText"
 	    (org-toggle-item nil)
 	    (buffer-string))))
+  ;; When no region is marked and point is on a blank line
+  ;; only operate on current line.
+  (should
+   (equal " \n* H :tag:"
+	  (org-test-with-temp-text "<point> \n* H :tag:"
+	    (org-toggle-item nil)
+	    (buffer-string))))
   ;; When a region is marked and first line is a headline, all
   ;; headlines are turned into items.
   (should
