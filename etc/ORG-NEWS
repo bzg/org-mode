@@ -261,6 +261,11 @@ explicitly:
 In situations where ~org-return~ calls ~newline~, multiple newlines
 can now be inserted with this prefix argument.
 
+*** New source code block header argument =:file-mode=
+
+Source code block header argument =:file-mode= can set file
+permissions if =:file= argument is provided.
+
 ** New commands
 *** ~org-table-header-line-mode~
 

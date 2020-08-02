@@ -17444,6 +17444,17 @@ default behavior is to automatically determine the result type.
   TAB-delimited output.  You can choose a different separator with
   the =sep= header argument.
 
+  #+cindex: @samp{file-mode}, header argument
+  The =file-mode= header argument defines the file permissions.  To
+  make it executable, use =:file-mode (identity #o755)=.
+
+  #+begin_example
+  ,#+BEGIN_SRC shell :results file :file script.sh :file-mode (identity #o755)
+    echo "#!/bin/bash"
+    echo "echo Hello World"
+  ,#+END_SRC
+  #+end_example
+
 *** Format
 :PROPERTIES:
 :UNNUMBERED: notoc

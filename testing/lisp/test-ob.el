@@ -1746,6 +1746,20 @@ line 1
 		   (cdr (assq :file (nth 2 (org-babel-get-src-block-info t))))))
     ))
 
+(ert-deftest test-ob/file-mode ()
+  "Ensure that :file-mode results in expected permissions."
+  (should
+   (equal #o755
+          (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp :results file :file t.sh :file-mode (identity #o755)
+nil
+#+end_src"
+            (org-babel-next-src-block)
+            (org-babel-execute-src-block)
+            (unwind-protect
+                (file-modes "t.sh")
+              (delete-file "t.sh"))))))
+
 (ert-deftest test-ob-core/dir-mkdirp ()
   "Test :mkdirp with :dir header combination."
   (should-not
