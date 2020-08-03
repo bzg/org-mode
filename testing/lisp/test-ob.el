@@ -1847,6 +1847,25 @@ default-directory
 	(message (car pair))
 	(should (eq (org-test-babel-confirm-evaluate (car pair)) (cdr pair)))))))
 
+(ert-deftest test-ob/check-eval-noweb-expanded ()
+  "`org-confirm-babel-evaluate' function receives expanded noweb refs."
+  (should
+   (equal t
+	  (org-test-with-temp-text "
+#+name: foo
+#+begin_src emacs-lisp
+  :bar
+#+end_src
+
+<point>#+begin_src emacs-lisp :noweb yes
+  <<foo>>
+#+end_src"
+	    (let ((org-confirm-babel-evaluate
+		   (lambda (_ body)
+		     (not (string-match-p ":bar" body)))))
+	      (org-babel-check-confirm-evaluate
+	       (org-babel-get-src-block-info)))))))
+
 (defun org-test-ob/update-block-body ()
   "Test `org-babel-update-block-body' specifications."
   (should
