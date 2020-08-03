@@ -238,7 +238,10 @@ should be asked whether to allow evaluation."
 		    (if (functionp org-confirm-babel-evaluate)
 			(funcall org-confirm-babel-evaluate
 				 ;; Language, code block body.
-				 (nth 0 info) (nth 1 info))
+				 (nth 0 info)
+				 (if (org-babel-noweb-p headers :eval)
+				     (org-babel-expand-noweb-references info)
+				   (nth 1 info)))
 		      org-confirm-babel-evaluate))))
     (cond
      (noeval nil)
