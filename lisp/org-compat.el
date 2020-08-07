@@ -101,6 +101,14 @@ is nil)."
   (defun org-time-convert-to-list (time)
     (seconds-to-time (float-time time))))
 
+(defun org--set-faces-extend (faces extend-p)
+  "Set the :extend attribute of FACES to EXTEND-P.
+
+This is a no-op for Emacs versions lower than 27, since face
+extension beyond end of line was not controllable."
+  (when (fboundp 'set-face-extend)
+    (mapc (lambda (f) (set-face-extend f extend-p)) faces)))
+
 
 ;;; Emacs < 26.1 compatibility
 
