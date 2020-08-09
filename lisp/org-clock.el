@@ -1580,7 +1580,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	     org-clock-out-switch-to-state))
 	  (now (org-current-time org-clock-rounding-minutes))
 	  ts te s h m remove)
-      (setq org-clock-out-time now)
+      (setq org-clock-out-time (or at-time now))
       (save-excursion ; Do not replace this with `with-current-buffer'.
 	(with-no-warnings (set-buffer (org-clocking-buffer)))
 	(save-restriction
