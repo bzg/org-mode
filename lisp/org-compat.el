@@ -109,6 +109,14 @@ is nil)."
       (newline-and-indent))
   (defalias 'org-newline-and-indent #'newline-and-indent))
 
+(defun org--set-faces-extend (faces extend-p)
+  "Set the :extend attribute of FACES to EXTEND-P.
+
+This is a no-op for Emacs versions lower than 27, since face
+extension beyond end of line was not controllable."
+  (when (fboundp 'set-face-extend)
+    (mapc (lambda (f) (set-face-extend f extend-p)) faces)))
+
 
 ;;; Emacs < 26.1 compatibility
 

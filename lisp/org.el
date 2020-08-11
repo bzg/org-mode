@@ -4904,7 +4904,11 @@ The following commands are available:
   ;; Try to set `org-hide' face correctly.
   (let ((foreground (org-find-invisible-foreground)))
     (when foreground
-      (set-face-foreground 'org-hide foreground))))
+      (set-face-foreground 'org-hide foreground)))
+  ;; Set face extension as requested.
+  (org--set-faces-extend '(org-block-begin-line org-block-end-line)
+                         org-fontify-whole-block-delimiter-line)
+  (org--set-faces-extend org-level-faces org-fontify-whole-heading-line))
 
 ;; Update `customize-package-emacs-version-alist'
 (add-to-list 'customize-package-emacs-version-alist
@@ -18731,7 +18735,7 @@ earliest time on the cursor date that Org treats as that date
   (let (date day defd tp hod mod)
     (when with-time
       (setq tp (get-text-property (point) 'time))
-      (when (and tp (string-match "\\([0-9][0-9]\\):\\([0-9][0-9]\\)" tp))
+      (when (and tp (string-match "\\([0-2]?[0-9]\\):\\([0-5][0-9]\\)" tp))
 	(setq hod (string-to-number (match-string 1 tp))
 	      mod (string-to-number (match-string 2 tp))))
       (or tp (let ((now (decode-time)))

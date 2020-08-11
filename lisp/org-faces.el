@@ -408,7 +408,8 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
   "Face for #+TITLE:, #+AUTHOR:, #+EMAIL: and #+DATE: keywords."
   :group 'org-faces)
 
-(defface org-block '((t :inherit shadow))
+(defface org-block `((t :inherit shadow
+			,@(and (>= emacs-major-version 27) '(:extend t))))
   "Face text in #+begin ... #+end blocks.
 For source-blocks `org-src-block-faces' takes precedence."
   :group 'org-faces
