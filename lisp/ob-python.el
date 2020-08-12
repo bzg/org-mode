@@ -335,7 +335,8 @@ last statement in BODY, as elisp."
 						  "python-")))
 			       (with-temp-file tmp-src-file (insert body))
 			       (format org-babel-python--exec-tmpfile
-				       tmp-src-file))
+				       (org-babel-process-file-name
+					tmp-src-file 'noquote)))
 			   body)))
 	       (mapconcat
 		#'org-trim
@@ -353,7 +354,8 @@ last statement in BODY, as elisp."
 					      "python-")))
 			   (with-temp-file tmp-src-file (insert body))
 			   (format org-babel-python--eval-ast
-				   tmp-src-file))))
+				   (org-babel-process-file-name
+				    tmp-src-file 'noquote)))))
                (org-babel-comint-with-output
                    (session org-babel-python-eoe-indicator nil body)
                  (let ((comint-process-echoes nil))
