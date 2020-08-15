@@ -136,10 +136,16 @@
    (let ((lang (org-eldoc-get-src-lang)))
      (cond ((or
              (string= lang "emacs-lisp")
-             (string= lang "elisp")) (if (fboundp 'elisp-eldoc-documentation-function)
-                                         (elisp-eldoc-documentation-function)
-                                       (let (eldoc-documentation-function)
-                                         (eldoc-print-current-symbol-info))))
+             (string= lang "elisp"))
+	    (cond ((boundp 'eldoc-documentation-functions) ; Emacs>=28
+		   (let ((eldoc-documentation-functions
+			  '(elisp-eldoc-var-docstring elisp-eldoc-funcall)))
+		     (eldoc-print-current-symbol-info)))
+		  ((fboundp 'elisp-eldoc-documentation-function)
+		   (elisp-eldoc-documentation-function))
+		  (t  			; Emacs<25
+		   (let (eldoc-documentation-function)
+		     (eldoc-print-current-symbol-info)))))
            ((or
              (string= lang "c") ;; http://github.com/nflath/c-eldoc
              (string= lang "C")) (when (require 'c-eldoc nil t)
