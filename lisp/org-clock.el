@@ -35,6 +35,10 @@
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-inlinetask-at-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
+(declare-function org-inlinetask-goto-end "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-heading-search-string "ol" (&optional string))
 (declare-function org-link-make-string "ol" (link &optional description))
@@ -1891,7 +1895,12 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
   "Return time, clocked on current item in total."
   (save-excursion
     (save-restriction
-      (org-narrow-to-subtree)
+      (if (and (featurep 'org-inlinetask)
+	       (or (org-inlinetask-at-task-p)
+		   (org-inlinetask-in-task-p)))
+	  (narrow-to-region (save-excursion (org-inlinetask-goto-beginning) (point))
+			    (save-excursion (org-inlinetask-goto-end) (point)))
+	(org-narrow-to-subtree))
       (org-clock-sum tstart)
       org-clock-file-total-minutes)))
 
