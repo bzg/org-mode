@@ -1292,8 +1292,11 @@ This function modifies STRUCT."
 		 (when (< item-end pos)
 		   (delete-region (1- item-end) (point-at-eol)))
 		 (skip-chars-backward " \r\t\n")
-		 (setq pos (point))
-		 (delete-and-extract-region pos item-end-no-blank))))
+		 ;; Cut position is after any blank on the line.
+		 (save-excursion
+		   (skip-chars-forward " \t")
+		   (setq pos (point)))
+		 (delete-and-extract-region (point) item-end-no-blank))))
 	 (body
 	  (concat bullet
 		  (and box (concat box " "))
@@ -1325,12 +1328,15 @@ This function modifies STRUCT."
 	  (setcar e (+ p item-size))
 	  (setcar (nthcdr 6 e) (+ end size-offset)))
 	 ;; Items starting after modified item fall into two
-	 ;; categories.  If item was split, and current item was
-	 ;; located after split point, it was moved to the new item.
-	 ;; This means that the part between body start of body and
-	 ;; split point was removed.  So we compute the offset and
-	 ;; shift item's positions accordingly.  In any other case,
-	 ;; the item was simply shifted by SIZE-OFFSET.
+	 ;; categories.
+	 ;;
+	 ;; If modified item was split, and current sub-item was
+	 ;; located after split point, it was moved to the new item:
+	 ;; the part between body start and split point (POS) was
+	 ;; removed.  So we compute the length of that part and shift
+	 ;; item's positions accordingly.
+	 ;;
+	 ;; Otherwise, the item was simply shifted by SIZE-OFFSET.
 	 ((and split-line-p (not beforep) (>= p pos) (<= p item-end-no-blank))
 	  (let ((offset (- pos item ind (length bullet) (length after-bullet))))
 	    (setcar e (- p offset))

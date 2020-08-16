@@ -892,7 +892,13 @@ b. Item 2<point>"
    (= 0
       (org-test-with-temp-text "- item\n  - sub-list\n  resume item<point>"
 	(org-insert-item)
-	(current-indentation)))))
+	(current-indentation))))
+  ;; Test splitting with blanks around.
+  (should
+   (equal "- A\n  B\n- C\n  - D\n- [ ] E"
+    (org-test-with-temp-text "- A\n  B <point> C\n  - D\n- [ ] E"
+      (org-insert-item)
+      (buffer-string)))))
 
 (ert-deftest test-org-list/repair ()
   "Test `org-list-repair' specifications."
