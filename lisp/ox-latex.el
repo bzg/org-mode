@@ -738,8 +738,9 @@ environment."
   :safe #'stringp)
 
 (defcustom org-latex-inline-image-rules
-  `(("file" . ,(regexp-opt
-		'("pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg"))))
+  `(("file" . ,(rx "."
+		   (or "pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg")
+		   eos)))
   "Rules characterizing image files that can be inlined into LaTeX.
 
 A rule consists in an association whose key is the type of link
@@ -752,8 +753,7 @@ pdflatex, pdf, jpg and png images are OK.  When processing
 through dvi to Postscript, only ps and eps are allowed.  The
 default we use here encompasses both."
   :group 'org-export-latex
-  :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "9.4")
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
