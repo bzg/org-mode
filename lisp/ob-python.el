@@ -330,14 +330,12 @@ last statement in BODY, as elisp."
          (results
           (pcase result-type
             (`output
-	     (let ((body (if (string-match-p ".\n+." body) ; Multiline
-			     (let ((tmp-src-file (org-babel-temp-file
-						  "python-")))
-			       (with-temp-file tmp-src-file (insert body))
-			       (format org-babel-python--exec-tmpfile
-				       (org-babel-process-file-name
-					tmp-src-file 'noquote)))
-			   body)))
+	     (let ((body (let ((tmp-src-file (org-babel-temp-file
+					      "python-")))
+			   (with-temp-file tmp-src-file (insert body))
+			   (format org-babel-python--exec-tmpfile
+				   (org-babel-process-file-name
+				    tmp-src-file 'noquote)))))
 	       (mapconcat
 		#'org-trim
 		(butlast
