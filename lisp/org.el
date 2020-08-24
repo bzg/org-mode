@@ -12290,7 +12290,8 @@ According to `org-use-tag-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
 `org-file-tags'.  In this case, the returned list of tags
 contains tags in this order: file tags, tags inherited from
-parent headlines, local tags.
+parent headlines, local tags.  If a tag appears multiple times,
+only the most local tag is returned.
 
 However, when optional argument LOCAL is non-nil, only return
 tags specified at the headline.
@@ -12306,12 +12307,13 @@ Inherited tags have the `inherited' text property."
         (let ((ltags (org--get-local-tags)) itags)
           (if (or local (not org-use-tag-inheritance)) ltags
             (while (org-up-heading-safe)
-              (setq itags (append (mapcar #'org-add-prop-inherited
-                                          (org--get-local-tags))
-                                  itags)))
+              (setq itags (nconc (mapcar #'org-add-prop-inherited
+					 (org--get-local-tags))
+				 itags)))
             (setq itags (append org-file-tags itags))
-            (delete-dups
-             (append (org-remove-uninherited-tags itags) ltags))))))))
+            (nreverse
+	     (delete-dups
+	      (nreverse (nconc (org-remove-uninherited-tags itags) ltags))))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
