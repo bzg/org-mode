@@ -254,6 +254,7 @@ otherwise."
              org-footnote-section
              (equal title org-footnote-section))
         (and org-num-skip-commented
+	     title
              (let ((case-fold-search nil))
                (string-match org-num--comment-re title))
              t)
