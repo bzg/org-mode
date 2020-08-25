@@ -66,8 +66,8 @@ to switch to the new signature.
 *** Python session return values must be top-level expression statements
 
 Python blocks with ~:session :results value~ header arguments now only
-return a value if the last line is a top-level expression statement,
-otherwise the result is None. Also, None will now show up under
+return a value if the last line is a top-level expression statement.
+Also, when a None value is returned, "None" will be printed under
 "#+RESULTS:", as it already did with ~:results value~ for non-session
 blocks.
 
