@@ -1100,14 +1100,21 @@ reorganize-frame  Show only two windows on the current frame, the current
                   window and the agenda.
 other-frame       Use `switch-to-buffer-other-frame' to display agenda.
                   Also, when exiting the agenda, kill that frame.
+other-tab         Use `switch-to-buffer-other-tab' to display the
+                  agenda, making use of the `tab-bar-mode' introduced
+                  in Emacs version 27.1.  Also, kill that tab when
+                  exiting the agenda view.
+
 See also the variable `org-agenda-restore-windows-after-quit'."
   :group 'org-agenda-windows
   :type '(choice
 	  (const current-window)
 	  (const other-frame)
+	  (const other-tab)
 	  (const other-window)
 	  (const only-window)
-	  (const reorganize-frame)))
+	  (const reorganize-frame))
+  :package-version '(Org . "9.4"))
 
 (defcustom org-agenda-window-frame-fractions '(0.5 . 0.75)
   "The min and max height of the agenda window as a fraction of frame height.
@@ -1118,11 +1125,11 @@ It only matters if `org-agenda-window-setup' is `reorganize-frame'."
 
 (defcustom org-agenda-restore-windows-after-quit nil
   "Non-nil means restore window configuration upon exiting agenda.
-Before the window configuration is changed for displaying the agenda,
-the current status is recorded.  When the agenda is exited with
-`q' or `x' and this option is set, the old state is restored.  If
-`org-agenda-window-setup' is `other-frame', the value of this
-option will be ignored."
+Before the window configuration is changed for displaying the
+agenda, the current status is recorded.  When the agenda is
+exited with `q' or `x' and this option is set, the old state is
+restored.  If `org-agenda-window-setup' is `other-frame' or
+`other-tab', the value of this option will be ignored."
   :group 'org-agenda-windows
   :type 'boolean)
 
@@ -3769,6 +3776,10 @@ FILTER-ALIST is an alist of filters we need to apply when
       (org-switch-to-buffer-other-window abuf))
      ((eq org-agenda-window-setup 'other-frame)
       (switch-to-buffer-other-frame abuf))
+     ((eq org-agenda-window-setup 'other-tab)
+      (if (fboundp 'switch-to-buffer-other-tab)
+	  (switch-to-buffer-other-tab abuf)
+	(user-error "Your version of Emacs does not have tab bar support")))
      ((eq org-agenda-window-setup 'only-window)
       (delete-other-windows)
       (pop-to-buffer-same-window abuf))
@@ -7389,6 +7400,10 @@ agenda."
       (cond
        ((eq org-agenda-window-setup 'other-frame)
 	(delete-frame))
+       ((eq org-agenda-window-setup 'other-tab)
+	(if (fboundp 'tab-bar-close-tab)
+	    (tab-bar-close-tab)
+	  (user-error "Your version of Emacs does not have tab bar mode support")))
        ((and org-agenda-restore-windows-after-quit
 	     wconf)
 	;; Maybe restore the pre-agenda window configuration.  Reset

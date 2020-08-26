@@ -291,6 +291,12 @@ possible via column view value edit or with =<C-c C-q>=.
 Counterpart of ~org-show-entry~.
 
 ** New options
+*** New option for using tabs in ~org-agenda-window-setup~
+
+Choosing ~other-tab~ for ~org-agenda-window-setup~ will open the
+agenda view in a new tab.  This will work with versions of Emacs since
+27.1 when ~tab-bar-mode~ was introduced.
+
 *** New option ~org-clock-auto-clockout-timer~
 
 When this option is set to a number and the user configuration
