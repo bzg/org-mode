@@ -1699,8 +1699,10 @@ non-nil."
 	  (push (list link desc) org-stored-links)
 	  (message "Stored: %s" (or desc link))
 	  (when custom-id
-	    (setq link (concat "file:" (abbreviate-file-name
-					(buffer-file-name)) "::#" custom-id))
+	    (setq link (concat "file:"
+			       (abbreviate-file-name
+				(buffer-file-name (buffer-base-buffer)))
+			       "::#" custom-id))
 	    (push (list link desc) org-stored-links)))
 	(car org-stored-links)))))
 
@@ -1841,13 +1843,14 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     ;; Check if we are linking to the current file with a search
     ;; option If yes, simplify the link by using only the search
     ;; option.
-    (when (and buffer-file-name
+    (when (and (buffer-file-name (buffer-base-buffer))
 	       (let ((case-fold-search nil))
 		 (string-match "\\`file:\\(.+?\\)::" link)))
       (let ((path (match-string-no-properties 1 link))
 	    (search (substring-no-properties link (match-end 0))))
 	(save-match-data
-	  (when (equal (file-truename buffer-file-name) (file-truename path))
+	  (when (equal (file-truename (buffer-file-name (buffer-base-buffer)))
+		       (file-truename path))
 	    ;; We are linking to this same file, with a search option
 	    (setq link search)))))
 
