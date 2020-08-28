@@ -472,7 +472,35 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
     (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no"))
-  "Default arguments to use when evaluating a source block.")
+  "Default arguments to use when evaluating a source block.
+
+This is a list in which each element is an alist.  Each key
+corresponds to a header argument, and each value to that header's
+value.  The value can either be a string or a closure that
+evaluates to a string.  The closure is evaluated when the source
+block is being evaluated (e.g. during execution or export), with
+point at the source block.  It is not possible to use an
+arbitrary function symbol (e.g. 'some-func), since org uses
+lexical binding.  To achieve the same functionality, call the
+function within a closure (e.g. (lambda () (some-func))).
+
+To understand how closures can be used as default header
+arguments, imagine you'd like to set the file name output of a
+latex source block to a sha1 of its contents.  We could achieve
+this with:
+
+(defun org-src-sha ()
+  (let ((elem (org-element-at-point)))
+    (concat (sha1 (org-element-property :value elem)) \".svg\")))
+
+(setq org-babel-default-header-args:latex
+      `((:results . \"file link replace\")
+        (:file . (lambda () (org-src-sha)))))
+
+Because the closure is evaluated with point at the source block,
+the call to `org-element-at-point' above will always retrieve
+information about the current source block.")
+
 (put 'org-babel-default-header-args 'safe-local-variable
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
@@ -582,6 +610,19 @@ through use of the :var header argument) this marker points to
 the outer-most code block.")
 
 (defvar *this*)
+
+(defun org-babel-eval-headers (headers)
+  "Compute header list set with HEADERS.
+
+Evaluate all header arguments set to functions prior to returning
+the list of header arguments."
+  (let ((lst nil))
+    (dolist (elem headers)
+      (if (and (cdr elem)
+	       (functionp (cdr elem)))
+          (push `(,(car elem) . ,(funcall (cdr elem))) lst)
+        (push elem lst)))
+    lst))
 
 (defun org-babel-get-src-block-info (&optional light datum)
   "Extract information from a source block or inline source block.
@@ -2698,12 +2739,21 @@ parameters when merging lists."
 				  results-exclusive-groups
 				  results
 				  (split-string
-				   (if (stringp value) value (eval value t))))))
+				   (if (stringp value)
+				       value
+				     (if (functionp value)
+					 (funcall value)
+				       (eval value t)))))))
 	  (`(:exports . ,value)
 	   (setq exports (funcall merge
 				  exports-exclusive-groups
 				  exports
-				  (split-string (or value "")))))
+				  (split-string (or
+						 (if value
+						     (if (functionp value)
+							 (funcall value)
+						       value)
+						   ""))))))
 	  ;; Regular keywords: any value overwrites the previous one.
 	  (_ (setq params (cons pair (assq-delete-all (car pair) params)))))))
     ;; Handle `:var' and clear out colnames and rownames for replaced
@@ -2718,14 +2768,14 @@ parameters when merging lists."
 			      (cdr (assq param params))))
 	  (setq params
 		(cl-remove-if (lambda (pair) (and (equal (car pair) param)
-					     (null (cdr pair))))
+						  (null (cdr pair))))
 			      params)))))
     ;; Handle other special keywords, which accept multiple values.
     (setq params (nconc (list (cons :results (mapconcat #'identity results " "))
 			      (cons :exports (mapconcat #'identity exports " ")))
 			params))
     ;; Return merged params.
-    params))
+    (org-babel-eval-headers params)))
 
 (defun org-babel-noweb-p (params context)
   "Check if PARAMS require expansion in CONTEXT.
