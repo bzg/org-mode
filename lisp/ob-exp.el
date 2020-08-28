@@ -104,7 +104,7 @@ Assume point is at block opening line."
 		       (apply #'org-babel-merge-params
 			      org-babel-default-header-args
 			      (and (boundp lang-headers)
-				   (symbol-value lang-headers))
+				   (eval-default-headers lang-headers))
 			      (append (org-babel-params-from-properties lang)
 				      (list raw-params)))))))
 	  (setf hash (org-babel-sha1-hash info :export)))
