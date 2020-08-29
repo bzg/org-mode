@@ -3003,13 +3003,18 @@ If the table is trivial, then return it as a scalar."
 	 (with-temp-buffer
 	   (condition-case err
 	       (progn
-		 (org-table-import file-name separator)
+		 (insert-file-contents file-name)
 		 (delete-file file-name)
-		 (delq nil
-		       (mapcar (lambda (row)
-				 (and (not (eq row 'hline))
-				      (mapcar #'org-babel-string-read row)))
-			       (org-table-to-lisp))))
+		 (let ((pmax (point-max)))
+		   ;; If the file was empty, don't bother trying to
+		   ;; convert the table.
+		   (when (> pmax 1)
+		     (org-table-convert-region (point-min) pmax separator)
+		     (delq nil
+			   (mapcar (lambda (row)
+				     (and (not (eq row 'hline))
+					  (mapcar #'org-babel-string-read row)))
+				   (org-table-to-lisp))))))
 	     (error
 	      (display-warning 'org-babel
 			       (format "Error reading results: %S" err)

@@ -2252,6 +2252,34 @@ abc
     (should (=  0.1    (org-babel--string-to-number "0.1")))
     (should (=  1.0    (org-babel--string-to-number "1.0"))))
 
+(ert-deftest test-ob/import-elisp-from-file ()
+  "Test `org-babel-import-elisp-from-file'."
+  (should
+   (equal
+    (org-test-with-temp-text-in-file "line 1\nline 2\n"
+      (cl-letf (((symbol-function 'display-warning)
+		 (lambda (&rest _) (error "No warnings should occur"))
+		 (org-table-convert-region-max-lines 2)))
+	(org-babel-import-elisp-from-file (buffer-file-name))))
+    '(("line" 1)
+      ("line" 2))))
+  ;; If an error occurs during table conversion, it is shown with
+  ;; `display-warning' rather than as a message to make sure the
+  ;; caller sees it.
+  (should-error
+   (org-test-with-temp-text-in-file "line 1\nline 2\n"
+     (cl-letf (((symbol-function 'display-warning)
+		(lambda (&rest _) (error "Warning should be displayed")))
+	       (org-table-convert-region-max-lines 1))
+       (org-babel-import-elisp-from-file (buffer-file-name)))))
+  ;; But an empty file (as is the case when there are no execution
+  ;; results) does not trigger a warning.
+  (should-not
+   (org-test-with-temp-text-in-file ""
+     (cl-letf (((symbol-function 'display-warning)
+		(lambda (&rest _) (error "No warnings should occur"))))
+       (org-babel-import-elisp-from-file (buffer-file-name))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
