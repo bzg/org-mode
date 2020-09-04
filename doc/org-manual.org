@@ -6040,19 +6040,22 @@ can control the calendar fully from the minibuffer:
 #+kindex: M-S-RIGHT
 #+kindex: M-S-LEFT
 #+kindex: RET
+#+kindex: .
+#+kindex: C-.
 #+attr_texinfo: :columns 0.25 0.55
-| {{{kbd(RET)}}}       | Choose date at point in calendar.      |
-| {{{kbd(mouse-1)}}}   | Select date by clicking on it.         |
-| {{{kbd(S-RIGHT)}}}   | One day forward.                       |
-| {{{kbd(S-LEFT)}}}    | One day backward.                      |
-| {{{kbd(S-DOWN)}}}    | One week forward.                      |
-| {{{kbd(S-UP)}}}      | One week backward.                     |
-| {{{kbd(M-S-RIGHT)}}} | One month forward.                     |
-| {{{kbd(M-S-LEFT)}}}  | One month backward.                    |
-| {{{kbd(>)}}}         | Scroll calendar forward by one month.  |
-| {{{kbd(<)}}}         | Scroll calendar backward by one month. |
-| {{{kbd(M-v)}}}       | Scroll calendar forward by 3 months.   |
-| {{{kbd(C-v)}}}       | Scroll calendar backward by 3 months.  |
+| {{{kbd(RET)}}}                 | Choose date at point in calendar.      |
+| {{{kbd(mouse-1)}}}             | Select date by clicking on it.         |
+| {{{kbd(S-RIGHT)}}}             | One day forward.                       |
+| {{{kbd(S-LEFT)}}}              | One day backward.                      |
+| {{{kbd(S-DOWN)}}}              | One week forward.                      |
+| {{{kbd(S-UP)}}}                | One week backward.                     |
+| {{{kbd(M-S-RIGHT)}}}           | One month forward.                     |
+| {{{kbd(M-S-LEFT)}}}            | One month backward.                    |
+| {{{kbd(>)}}}                   | Scroll calendar forward by one month.  |
+| {{{kbd(<)}}}                   | Scroll calendar backward by one month. |
+| {{{kbd(M-v)}}}                 | Scroll calendar forward by 3 months.   |
+| {{{kbd(C-v)}}}                 | Scroll calendar backward by 3 months.  |
+| {{{kbd(.)}}} or {{{kbd(C-.)}}} | Select today's date                    |
 
 #+vindex: org-read-date-display-live
 The actions of the date/time prompt may seem complex, but I assure you
