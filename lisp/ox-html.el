@@ -311,7 +311,7 @@ for the JavaScript code in this tag.
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
