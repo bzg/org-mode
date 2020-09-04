@@ -8042,13 +8042,14 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 				       (when (looking-at org-complex-heading-regexp)
 					 (list (match-string 4)))))))
     (setq res
-	  (org-format-outline-path
-	   path
-	   (1- (frame-width))
-	   (and file bfn (concat (file-name-nondirectory bfn) separator))
-	   separator))
+	  (org-no-properties
+	   (org-format-outline-path
+	    path
+	    (1- (frame-width))
+	    (and file bfn (concat (file-name-nondirectory bfn) separator))
+	    separator)))
     (if just-return-string
-	(org-no-properties res)
+	res
       (org-unlogged-message "%s" res))))
 
 ;;; Outline Sorting
