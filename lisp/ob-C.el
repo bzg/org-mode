@@ -182,7 +182,7 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
 		       cmdline)))
 	    "")))
       (when results
-	(setq results (org-trim (org-remove-indentation results)))
+	(setq results (org-remove-indentation results))
 	(org-babel-reassemble-table
 	 (org-babel-result-cond (cdr (assq :result-params params))
 	   (org-babel-read results t)
