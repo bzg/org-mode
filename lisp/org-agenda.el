@@ -7523,7 +7523,7 @@ in the agenda."
     (and top-hl-filter (org-agenda-filter-top-headline-apply top-hl-filter))
     (and cols (called-interactively-p 'any) (org-agenda-columns))
     (org-goto-line line)
-    (recenter window-line)))
+    (when (called-interactively-p 'any) (recenter window-line))))
 
 (defun org-agenda-redo-all (&optional exhaustive)
   "Rebuild all agenda views in the current buffer.
