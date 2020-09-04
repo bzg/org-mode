@@ -7709,6 +7709,11 @@ the variable `org-agenda-auto-exclude-function'."
 	   (fe (if keep org-agenda-effort-filter))
 	   (fr (if keep org-agenda-regexp-filter))
 	   pm s)
+      ;; If the filter contains a double-quoted string, replace a
+      ;; single hyphen by the arbitrary and temporary string "~~~"
+      ;; to disambiguate such hyphens from syntactic ones.
+      (setq f-string (replace-regexp-in-string
+		      "\"\\([^\"]*\\)-\\([^\"]*\\)\"" "\"\\1~~~\\2\"" f-string))
       (while (string-match "^[ \t]*\\([-+]\\)?\\(\\([^-+<>=/ \t]+\\)\\|\\([<>=][0-9:]+\\)\\|\\(/\\([^/]+\\)/?\\)\\)" f-string)
 	(setq pm (if (match-beginning 1) (match-string 1 f-string) "+"))
 	(when negate
@@ -7716,12 +7721,15 @@ the variable `org-agenda-auto-exclude-function'."
 	(cond
 	 ((match-beginning 3)
 	  ;; category or tag
-	  (setq s (match-string 3 f-string))
+	  (setq s (replace-regexp-in-string ; Remove the temporary special string.
+		   "~~~" "-" (match-string 3 f-string)))
 	  (cond
 	   ((member s tag-list)
 	    (add-to-list 'ft (concat pm s) 'append 'equal))
 	   ((member s category-list)
-	    (add-to-list 'fc (concat pm s) 'append 'equal))
+	    (add-to-list 'fc (concat pm ; Remove temporary double quotes.
+				     (replace-regexp-in-string "\"\\(.*\\)\"" "\\1" s))
+			 'append 'equal))
 	   (t (message
 	       "`%s%s' filter ignored because tag/category is not represented"
 	       pm s))))
@@ -7890,7 +7898,10 @@ also press `-' or `+' to switch between filtering and excluding."
 				 pos 'org-category nil (point-max))))
 	    (push (get-text-property pos 'org-category) categories))
 	  (setq org-agenda-represented-categories
-		(nreverse (org-uniquify (delq nil categories))))))))
+		;; Enclose category names with a hyphen in double
+		;; quotes to process them specially in `org-agenda-filter'.
+		(mapcar (lambda (s) (if (string-match-p "-" s) (format "\"%s\"" s) s))
+			(nreverse (org-uniquify (delq nil categories)))))))))
 
 (defun org-agenda-get-represented-tags ()
   "Return a list of all tags used in this agenda buffer.
