@@ -2015,7 +2015,7 @@ category, you can use:
 					  (string :tag "File or data")
 					  (symbol :tag "Type")
 					  (boolean :tag "Data?")
-					  (repeat :tag "Extra image properties" :inline t symbol))
+					  (repeat :tag "Extra image properties" :inline t sexp))
 				    (list :tag "Display properties" sexp))))
 
 (defgroup org-agenda-column-view nil
