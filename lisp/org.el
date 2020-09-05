@@ -2657,7 +2657,9 @@ stamps outside of this range."
 
 (defcustom org-read-date-display-live t
   "Non-nil means display current interpretation of date prompt live.
-This display will be in an overlay, in the minibuffer."
+This display will be in an overlay, in the minibuffer.  Note that
+live display is only active when `org-read-date-popup-calendar'
+is non-nil."
   :group 'org-time
   :type 'boolean)
 
