@@ -3,6 +3,7 @@
 ;; Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel
+;; Maintainer: Joseph Novakovich <josephnovakovich@gmail.com>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
