@@ -5937,7 +5937,7 @@ and subscripts."
   "Remove outline overlays that do not contain non-white stuff."
   (dolist (o (overlays-at pos))
     (and (eq 'outline (overlay-get o 'invisible))
-	 (not (string-match "\\S-" (buffer-substring (overlay-start o)
+	 (not (string-match-p "\\S-" (buffer-substring (overlay-start o)
 						     (overlay-end o))))
 	 (delete-overlay o))))
 
@@ -6352,7 +6352,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 (defun org-cycle-internal-global ()
   "Do the global cycling action."
   ;; Hack to avoid display of messages for .org  attachments in Gnus
-  (let ((ga (string-match "\\*fontification" (buffer-name))))
+  (let ((ga (string-match-p "\\*fontification" (buffer-name))))
     (cond
      ((and (eq last-command this-command)
 	   (eq org-cycle-global-status 'overview))
