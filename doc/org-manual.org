@@ -13073,17 +13073,15 @@ simpler ways of customizing as described above.
 :END:
 
 Sebastian Rose has written a JavaScript program especially designed to
-enhance the web viewing experience of HTML files created with Org.
-This program enhances large files in two different ways of viewing.
-One is an /Info/-like mode where each section is displayed separately
-and navigation can be done with the {{{kbd(n)}}} and {{{kbd(p)}}}
-keys, and some other keys as well, press {{{kbd(?)}}} for an overview
-of the available keys.  The second one has a /folding/ view, much like
-Org provides inside Emacs.  The script is available at
-https://orgmode.org/org-info.js and the documentation at
-https://orgmode.org/worg/code/org-info-js/.  The script is hosted on
-https://orgmode.org, but for reliability, prefer installing it on your
-own web server.
+allow two different ways of viewing HTML files created with Org.  One
+is an /Info/-like mode where each section is displayed separately and
+navigation can be done with the {{{kbd(n)}}} and {{{kbd(p)}}} keys, and some other
+keys as well, press {{{kbd(?)}}} for an overview of the available keys.  The
+second one has a /folding/ view, much like Org provides inside Emacs.
+The script is available at https://orgmode.org/org-info.js and the
+documentation at https://orgmode.org/worg/code/org-info-js/.  The
+script is hosted on https://orgmode.org, but for reliability, prefer
+installing it on your own web server.
 
 To use this program, just add this line to the Org file:
 
@@ -15596,6 +15594,32 @@ In-place conversions are particularly handy for quick conversion of
 tables and lists in foreign buffers.  For example, in an HTML buffer,
 write a list in Org syntax, select it, and convert it to HTML with
 {{{kbd(M-x org-html-convert-region-to-html)}}}.
+
+*** Exporting to minimal HTML
+:PROPERTIES:
+:DESCRIPTION: Exporting HTML without CSS, Javascript, etc.
+:ALT_TITLE: Bare HTML
+:END:
+
+If you want to output a minimal HTML file, with no CSS, no Javascript,
+no preamble or postamble, here are the variable you would need to set:
+
+#+vindex: org-html-head
+#+vindex: org-html-head-extra
+#+vindex: org-html-head-include-default-style
+#+vindex: org-html-head-include-scripts
+#+vindex: org-html-preamble
+#+vindex: org-html-postamble
+#+vindex: org-html-use-infojs
+#+begin_src emacs-lisp
+(setq org-html-head ""
+      org-html-head-extra ""
+      org-html-head-include-default-style nil
+      org-html-head-include-scripts nil
+      org-html-preamble nil
+      org-html-postamble nil
+      org-html-use-infojs nil)
+#+end_src
 
 * Publishing
 :PROPERTIES:
