@@ -1638,7 +1638,8 @@ a communication channel."
      (org-html--make-attribute-string
       (org-combine-plists
        (list :src source
-	     :alt (if (string-match-p "^ltxpng/" source)
+	     :alt (if (string-match-p
+		       (concat "^" org-preview-latex-image-directory) source)
 		      (org-html-encode-plain-text
 		       (org-find-text-property-in-string 'org-latex-src source))
 		    (file-name-nondirectory source)))

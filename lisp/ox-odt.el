@@ -3730,7 +3730,8 @@ contextual information."
 		 (cache-dir (file-name-directory input-file))
 		 (cache-subdir (concat
 				(cl-case processing-type
-				  ((dvipng imagemagick) "ltxpng/")
+				  ((dvipng imagemagick)
+				   org-preview-latex-image-directory)
 				  (mathml "ltxmathml/"))
 				(file-name-sans-extension
 				 (file-name-nondirectory input-file))))
