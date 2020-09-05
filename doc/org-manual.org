@@ -6541,10 +6541,9 @@ into the buffer by ~org-clock-report~:
 #+end_example
 
 #+vindex: org-clocktable-defaults
-The =#+BEGIN= line and specify a number of options to define the
-scope, structure, and formatting of the report.  Defaults for all
-these options can be configured in the variable
-~org-clocktable-defaults~.
+The =#+BEGIN= line contains options to define the scope, structure,
+and formatting of the report.  Defaults for all these options can be
+configured in the variable ~org-clocktable-defaults~.
 
 First there are options that determine which clock entries are to
 be selected:
