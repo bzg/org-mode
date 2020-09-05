@@ -11096,7 +11096,7 @@ among `closed', `deadline', `scheduled' and nil.  TIME indicates
 the time to use.  If none is given, the user is prompted for
 a date.  REMOVE indicates what kind of entries to remove.  An old
 WHAT entry will also be removed."
-  (let (org-time-was-given org-end-time-was-given default-time default-input)
+  (let (org-end-time-was-given default-time default-input)
     (catch 'exit
       (when (and (memq what '(scheduled deadline))
 		 (or (not time)
