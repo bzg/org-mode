@@ -240,9 +240,14 @@ should be asked whether to allow evaluation."
 			(funcall org-confirm-babel-evaluate
 				 ;; Language, code block body.
 				 (nth 0 info)
-				 (if (org-babel-noweb-p headers :eval)
-				     (org-babel-expand-noweb-references info)
-				   (nth 1 info)))
+				 (let ((coderef (nth 6 info))
+				       (expand
+					(if (org-babel-noweb-p headers :eval)
+					    (org-babel-expand-noweb-references info)
+					  (nth 1 info))))
+				   (if (not coderef) expand
+				     (replace-regexp-in-string
+				      (org-src-coderef-regexp coderef) "" expand nil nil 1))))
 		      org-confirm-babel-evaluate))))
     (cond
      (noeval nil)
