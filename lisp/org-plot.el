@@ -193,10 +193,13 @@ values, namely regarding the range."
   (let* ((minimum (or hard-min (apply #'min nums)))
 	 (maximum (or hard-max (apply #'max nums)))
 	 (range (- maximum minimum))
-	 (rangeOrder (ceiling (- 1 (log10 range))))
+	 (rangeOrder (if (= range 0) 0
+			 (ceiling (- 1 (log10 range)))))
 	 (range-factor (expt 10 rangeOrder))
-	 (nice-min (/ (float (floor (* minimum range-factor))) range-factor))
-	 (nice-max (/ (float (ceiling (* maximum range-factor))) range-factor)))
+	 (nice-min (if (= range 0) (car nums)
+		     (/ (float (floor (* minimum range-factor))) range-factor)))
+	 (nice-max (if (= range 0) (car nums)
+		     (/ (float (ceiling (* maximum range-factor))) range-factor))))
     `(:min ,minimum :max ,maximum :range ,range
       :range-factor ,range-factor
       :nice-min ,nice-min :nice-max ,nice-max :nice-range ,(- nice-max nice-min))))
