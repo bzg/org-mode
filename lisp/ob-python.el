@@ -33,7 +33,6 @@
 
 (declare-function py-shell "ext:python-mode" (&rest args))
 (declare-function py-toggle-shells "ext:python-mode" (arg))
-(declare-function py-shell-send-string "ext:python-mode" (strg &optional process))
 (declare-function py-send-string-no-output "ext:python-mode" (strg &optional process buffer-name))
 
 (defvar org-babel-tangle-lang-exts)
@@ -225,6 +224,9 @@ then create.  Return the initialized session."
     (org-babel-python-session-buffer
      (org-babel-python-initiate-session-by-key session))))
 
+(defvar org-babel-python-eoe-indicator "'org_babel_python_eoe'"
+  "A string to indicate that evaluation has completed.")
+
 (defconst org-babel-python-wrapper-method
   "
 def main():
@@ -249,9 +251,9 @@ to evaluate.")
 
 (defconst org-babel-python--eval-ast "\
 import ast
-
 with open('%s') as f:
     __org_babel_python_ast = ast.parse(f.read())
+
 __org_babel_python_final = __org_babel_python_ast.body[-1]
 
 if isinstance(__org_babel_python_final, ast.Expr):
@@ -326,13 +328,18 @@ last statement in BODY, as elisp."
 If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value of the
 last statement in BODY, as elisp."
-  (require org-babel-python-mode)
   (let* ((python-shell-buffer-name (org-babel-python-without-earmuffs session))
+	 (send-wait (lambda () (comint-send-input nil t) (sleep-for 0 5)))
+	 (input-body (lambda (body)
+		       (dolist (line (split-string body "[\r\n]"))
+			 (insert line)
+			 (funcall send-wait))
+		       (funcall send-wait)))
 	 (tmp-src-file (org-babel-temp-file "python-"))
-	 (results
+         (results
 	  (progn
 	    (with-temp-file tmp-src-file (insert body))
-	    (pcase result-type
+            (pcase result-type
 	      (`output
 	       (let ((src-str (format org-babel-python--exec-tmpfile
 				      (org-babel-process-file-name
@@ -341,21 +348,27 @@ last statement in BODY, as elisp."
 		     (py-send-string-no-output
 		      src-str (get-buffer-process session) session)
 		   (python-shell-send-string-no-output src-str))))
-	      (`value
-	       (let* ((results-file (org-babel-temp-file "python-"))
-		      (src-str (format
-				org-babel-python--eval-ast
-				(org-babel-process-file-name tmp-src-file 'noquote)
-				(org-babel-process-file-name results-file 'noquote)
-				(org-babel-python-var-to-python result-params))))
-		 (if (eq 'python-mode org-babel-python-mode)
-		     (py-shell-send-string src-str (get-buffer-process session))
-		   (python-shell-send-string src-str))
-		 (sleep-for 0 5)
-		 (org-babel-eval-read-file results-file)))))))
-    (org-babel-result-cond result-params
-      results
-      (org-babel-python-table-or-string results))))
+              (`value
+               (let* ((tmp-results-file (org-babel-temp-file "python-"))
+		      (body (format org-babel-python--eval-ast
+				    (org-babel-process-file-name
+				     tmp-src-file 'noquote)
+				    (org-babel-process-file-name
+				     tmp-results-file 'noquote)
+				    (if (member "pp" result-params)
+					"True" "False"))))
+		 (org-babel-comint-with-output
+                     (session org-babel-python-eoe-indicator nil body)
+                   (let ((comint-process-echoes nil))
+                     (funcall input-body body)
+                     (funcall send-wait) (funcall send-wait)
+                     (insert org-babel-python-eoe-indicator)
+                     (funcall send-wait)))
+		 (org-babel-eval-read-file tmp-results-file)))))))
+    (unless (string= (substring org-babel-python-eoe-indicator 1 -1) results)
+      (org-babel-result-cond result-params
+	results
+        (org-babel-python-table-or-string results)))))
 
 (defun org-babel-python-read-string (string)
   "Strip \\='s from around Python string."

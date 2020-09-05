@@ -200,6 +200,16 @@ return text
 #+end_src"
 	    (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob-python/session-value-sleep ()
+  (should
+   (equal "success"
+	  (org-test-with-temp-text "#+begin_src python :session :results value
+import time
+time.sleep(.1)
+'success'
+#+end_src"
+	    (org-babel-execute-src-block)))))
+
 (provide 'test-ob-python)
 
 ;;; test-ob-python.el ends here
