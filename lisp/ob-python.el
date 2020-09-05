@@ -4,6 +4,7 @@
 
 ;; Authors: Eric Schulte
 ;;	 Dan Davison
+;; Maintainer: Jack Kamm <jackkamm@gmail.com>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
