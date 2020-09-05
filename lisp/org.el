@@ -6588,16 +6588,26 @@ With numerical argument N, show content up to level N."
 	  (outline-show-branches))
 	(when (bobp) (throw 'exit nil))))))
 
+(defvar org-scroll-position-to-restore nil
+  "Temporarily store scroll position to restore.")
 (defun org-optimize-window-after-visibility-change (state)
   "Adjust the window after a change in outline visibility.
 This function is the default value of the hook `org-cycle-hook'."
   (when (get-buffer-window (current-buffer))
-    (cond
-     ((eq state 'content)  nil)
-     ((eq state 'all)      nil)
-     ((eq state 'folded)   nil)
-     ((eq state 'children) (or (org-subtree-end-visible-p) (recenter 1)))
-     ((eq state 'subtree)  (or (org-subtree-end-visible-p) (recenter 1))))))
+    (let ((wstart (window-start)))
+      (cond
+       ((eq state 'content)  nil)
+       ((eq state 'all)      nil)
+       ((and (eq state 'folded) (eq last-command this-command))
+	(set-window-start nil org-scroll-position-to-restore))
+       ((eq state 'folded) nil)
+       ((eq state 'children)
+	(setq org-scroll-position-to-restore (window-start))
+	(or (org-subtree-end-visible-p) (recenter 1)))
+       ((eq state 'subtree)
+	(when (not (eq last-command this-command))
+	  (setq org-scroll-position-to-restore (window-start)))
+	(or (org-subtree-end-visible-p) (recenter 1)))))))
 
 (defun org-clean-visibility-after-subtree-move ()
   "Fix visibility issues after moving a subtree."
