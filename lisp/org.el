@@ -11945,7 +11945,7 @@ are also TODO tasks."
   (interactive "P")
   (org-agenda-prepare-buffers (list (current-buffer)))
   (let ((org--matcher-tags-todo-only todo-only))
-    (org-scan-tags 'sparse-tree (cdr (org-make-tags-matcher match))
+    (org-scan-tags 'sparse-tree (cdr (org-make-tags-matcher match t))
 		   org--matcher-tags-todo-only)))
 
 (defalias 'org-tags-sparse-tree 'org-match-sparse-tree)
@@ -11986,7 +11986,7 @@ instead of the agenda files."
 		   (if (car-safe files) files
 		     (org-agenda-files))))))))
 
-(defun org-make-tags-matcher (match)
+(defun org-make-tags-matcher (match &optional only-local-tags)
   "Create the TAGS/TODO matcher form for the selection string MATCH.
 
 Returns a cons of the selection string MATCH and a function
@@ -12004,6 +12004,9 @@ This function sets the variable `org--matcher-tags-todo-only' to
 a non-nil value if the matcher restricts matching to TODO
 entries, otherwise it is not touched.
 
+When ONLY-LOCAL-TAGS is non-nil, ignore the global tag completion
+table, only get buffer tags.
+
 See also `org-scan-tags'."
   (unless match
     ;; Get a new match request, with completion against the global
@@ -12011,7 +12014,8 @@ See also `org-scan-tags'."
     (let ((org-last-tags-completion-table
 	   (org--tag-add-to-alist
 	    (org-get-buffer-tags)
-	    (org-global-tags-completion-table))))
+	    (unless only-local-tags
+	      (org-global-tags-completion-table)))))
       (setq match
 	    (completing-read
 	     "Match: "
