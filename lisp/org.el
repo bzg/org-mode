@@ -6433,8 +6433,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	(goto-char eos)
 	(outline-next-heading)
 	(when (org-invisible-p) (org-flag-heading nil))))
-     ((and (or (>= eol eos)
-	       (not (string-match "\\S-" (buffer-substring eol eos))))
+     ((and (>= eol eos)
 	   (or has-children
 	       (not (setq children-skipped
 			  org-cycle-skip-children-state-if-no-children))))
