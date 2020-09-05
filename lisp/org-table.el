@@ -4460,7 +4460,7 @@ Optional argument NEW may specify text to replace the current field content."
 			  ((not new)
 			   (concat (org-table--align-field field width align)
 				   "|"))
-			  ((<= (org-string-width new) width)
+			  ((and width (<= (org-string-width new) width))
 			   (concat (org-table--align-field new width align)
 				   "|"))
 			  (t
