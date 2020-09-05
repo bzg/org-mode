@@ -7668,10 +7668,26 @@ Now lets look at the elements of a template definition.  Each entry in
     immediately.  This makes sense if the template only needs
     information that can be added automatically.
 
+  - ~:jump-to-captured~ ::
+
+    When set, jump to the captured entry when finished.
+
   - ~:empty-lines~ ::
 
     Set this to the number of lines to insert before and after the new
     item.  Default 0, and the only other common value is 1.
+
+  - ~:empty-lines-after~ ::
+
+    Set this to the number of lines that should be inserted after the
+    new item.  Overrides ~:empty-lines~ for the number of lines
+    inserted after.
+
+  - ~:empty-lines-before~ ::
+
+    Set this to the number of lines that should be inserted before the
+    new item.  Overrides ~:empty-lines~ for the number lines inserted
+    before.
 
   - ~:clock-in~ ::
 
