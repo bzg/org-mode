@@ -215,7 +215,7 @@ Assume `epg-context' is set."
      (let ((start-heading (point))
 	   (crypt-key (org-crypt-key-for-heading))
 	   (folded? (org-invisible-p (line-beginning-position))))
-       (org-end-of-meta-data)
+       (org-end-of-meta-data t)
        (let ((beg (point))
 	     (folded-heading
 	      (and folded?
