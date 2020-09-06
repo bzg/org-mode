@@ -240,14 +240,7 @@ should be asked whether to allow evaluation."
 			(funcall org-confirm-babel-evaluate
 				 ;; Language, code block body.
 				 (nth 0 info)
-				 (let ((coderef (nth 6 info))
-				       (expand
-					(if (org-babel-noweb-p headers :eval)
-					    (org-babel-expand-noweb-references info)
-					  (nth 1 info))))
-				   (if (not coderef) expand
-				     (replace-regexp-in-string
-				      (org-src-coderef-regexp coderef) "" expand nil nil 1))))
+				 (org-babel--expand-body info))
 		      org-confirm-babel-evaluate))))
     (cond
      (noeval nil)
@@ -631,6 +624,17 @@ a list with the following pattern:
 	(setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info)))
 	info))))
 
+(defun org-babel--expand-body (info)
+  "Expand noweb references in body and remove any coderefs."
+  (let ((coderef (nth 6 info))
+	(expand
+	 (if (org-babel-noweb-p (nth 2 info) :eval)
+	     (org-babel-expand-noweb-references info)
+	   (nth 1 info))))
+    (if (not coderef) expand
+      (replace-regexp-in-string
+       (org-src-coderef-regexp coderef) "" expand nil nil 1))))
+
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
@@ -676,17 +680,7 @@ block."
 	 ((org-babel-confirm-evaluate info)
 	  (let* ((lang (nth 0 info))
 		 (result-params (cdr (assq :result-params params)))
-		 ;; Expand noweb references in BODY and remove any
-		 ;; coderef.
-		 (body
-		  (let ((coderef (nth 6 info))
-			(expand
-			 (if (org-babel-noweb-p params :eval)
-			     (org-babel-expand-noweb-references info)
-			   (nth 1 info))))
-		    (if (not coderef) expand
-		      (replace-regexp-in-string
-		       (org-src-coderef-regexp coderef) "" expand nil nil 1))))
+		 (body (org-babel--expand-body info))
 		 (dir (cdr (assq :dir params)))
 		 (mkdirp (cdr (assq :mkdirp params)))
 		 (default-directory
