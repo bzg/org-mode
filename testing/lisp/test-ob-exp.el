@@ -190,9 +190,9 @@ a table."
 (ert-deftest ob-exp/exports-inline ()
   (should
    (string-match
-    (regexp-quote "Here is one in the middle {{{results(=1=)}}} of a line.
-Here is one at the end of a line. {{{results(=2=)}}}
-{{{results(=3=)}}} Here is one at the beginning of a line.")
+    (regexp-quote "Here is one in the middle {{{results(=0=)}}} of a line.
+Here is one at the end of a line. {{{results(=0=)}}}
+{{{results(=0=)}}} Here is one at the beginning of a line.")
     (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
       (org-narrow-to-subtree)
       (let ((org-babel-inline-result-wrap "=%s="))
@@ -252,7 +252,7 @@ Here is one at the end of a line. {{{results(=2=)}}}
      (regexp-quote "Here is one in the middle src_sh[]{echo 1} of a line.
 Here is one at the end of a line. src_sh[]{echo 2}
 src_sh[]{echo 3} Here is one at the beginning of a line.
-Here is one that is also evaluated: src_sh[]{echo 4} {{{results(=4=)}}}")
+Here is one that is also evaluated: src_sh[]{echo 4} {{{results(=0=)}}}")
      nil t)
     (org-test-at-id "cd54fc88-1b6b-45b6-8511-4d8fa7fc8076"
       (org-narrow-to-subtree)

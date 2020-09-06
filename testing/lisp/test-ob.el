@@ -277,7 +277,7 @@ at the beginning of a line."
 	(org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/inline-src_blk-default-results-replace-line-1 ()
-  (let ((test-line "src_sh{echo 1}")
+  (let ((test-line "src_sh[:results output]{echo 1}")
 	(org-babel-inline-result-wrap "=%s="))
     ;; src_ at bol line 1...
     (org-test-with-temp-text
@@ -548,7 +548,7 @@ echo \"[[file:./cv.cls]]\"
 (ert-deftest test-ob/just-one-results-block ()
   "Test that evaluating two times the same code block does not result in a
 duplicate results block."
-  (org-test-with-temp-text "#+begin_src sh\necho Hello\n#+end_src\n"
+  (org-test-with-temp-text "#+begin_src sh :results output\necho Hello\n#+end_src\n"
     (org-babel-execute-src-block)
     (org-babel-execute-src-block)     ; second code block execution
     (should (search-forward "Hello")) ; the string inside the source code block
@@ -1055,7 +1055,7 @@ x
 #+end_src
 
 * next heading")))
-	  '("sh" "emacs-lisp")))
+	  '("emacs-lisp")))
 
 (ert-deftest test-ob/org-babel-results-indented-wrap ()
   "Ensure that wrapped results are inserted correction when indented.
@@ -1487,7 +1487,7 @@ Paragraph"
 |  1 | bar  |
 |  2 | baz  |
 
-#+begin_src sh :var data=input-table :exports results :colnames '(Rev Author)
+#+begin_src sh :var data=input-table :results table :exports results :colnames '(Rev Author)
 echo \"$data\"
 #+end_src
 
@@ -1504,7 +1504,7 @@ echo \"$data\"
 |  1 | bar  |
 |  2 | baz  |
 
-#+begin_src sh :var data=input-table :exports results :colnames '(Rev Author)
+#+begin_src sh :var data=input-table :results table :exports results :colnames '(Rev Author)
 echo \"$data\"
 #+end_src
 "

@@ -87,7 +87,7 @@
     (regexp-quote "# [[https://orgmode.org][Org mode]]")
     (org-test-with-temp-text-in-file
         "[[https://orgmode.org][Org mode]]
-#+header: :comments org :tangle \"test-ob-tangle.sh\"
+#+header: :comments org :results output :tangle \"test-ob-tangle.sh\"
 #+begin_src sh
 echo 1
 #+end_src"
