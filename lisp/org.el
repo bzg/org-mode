@@ -364,7 +364,7 @@ FULL is given."
 
 ;;;; Keyword
 (defconst org-keyword-regexp "^[ \t]*#\\+\\(\\S-+?\\):[ \t]*\\(.*\\)$"
-  "Regular expression for keyword-lines")
+  "Regular expression for keyword-lines.")
 
 ;;;; Block
 
@@ -1661,8 +1661,8 @@ When t, the following will happen while the cursor is in the headline:
   :type 'boolean)
 
 (defcustom org-ctrl-k-protect-subtree nil
-  "Non-nil means, do not delete a hidden subtree with C-k.
-When set to the symbol `error', simply throw an error when C-k is
+  "Non-nil means, do not delete a hidden subtree with `C-k'.
+When set to the symbol `error', simply throw an error when `C-k' is
 used to kill (part-of) a headline that has hidden text behind it.
 Any other non-nil value will result in a query to the user, if it is
 OK to kill that hidden subtree.  When nil, kill without remorse."
@@ -2461,7 +2461,7 @@ step priority must not exceed the range from `org-priority-highest' to
 `org-priority-lowest' which means that `org-priority-default' has to be
 in this range exclusive or inclusive to the range boundaries.  Else the
 first step refuses to set the default and the second will fall back on
-(depending on the command used) the highest or lowest priority."
+\(depending on the command used) the highest or lowest priority."
   :group 'org-priorities
   :type '(choice
 	  (character :tag "Character")
@@ -2836,7 +2836,7 @@ automatically if necessary."
 When nil, you have to press RET to exit it.
 During fast tag selection, you can toggle this flag with `C-c'.
 This variable can also have the value `expert'.  In this case, the window
-displaying the tags menu is not even shown, until you press C-c again."
+displaying the tags menu is not even shown, until you press `C-c' again."
   :group 'org-tags
   :type '(choice
 	  (const :tag "No" nil)
@@ -9310,8 +9310,7 @@ block can be inserted by pressing TAB after the string \"<KEY\"."
 (defun org--check-org-structure-template-alist (&optional checklist)
   "Check whether `org-structure-template-alist' is set up correctly.
 In particular, check if the Org 9.2 format is used as opposed to
-previous format.
-"
+previous format."
   (let ((elm (cl-remove-if-not (lambda (x) (listp (cdr x)))
 			       (or (eval checklist)
 				   org-structure-template-alist))))
@@ -10081,8 +10080,7 @@ when there is a statistics cookie in the headline!
  (defun org-summary-todo (n-done n-not-done)
    \"Switch entry to DONE when all subentries are done, to TODO otherwise.\"
    (let (org-log-done org-log-states)   ; turn off logging
-     (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
-")
+     (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))")
 
 (defvar org-todo-statistics-hook nil
   "Hook that is run whenever Org thinks TODO statistics should be updated.
@@ -10720,8 +10718,9 @@ WHAT entry will also be removed."
 (defvar org-log-note-window-configuration nil)
 (defvar org-log-note-return-to (make-marker))
 (defvar org-log-note-effective-time nil
-  "Remembered current time so that dynamically scoped
-`org-extend-today-until' affects timestamps in state change log")
+  "Remembered current time.
+So that dynamically scoped `org-extend-today-until' affects
+timestamps in state change log.")
 
 (defvar org-log-post-message nil
   "Message to be displayed after a log note has been stored.
@@ -11020,7 +11019,7 @@ on `org-remove-highlights-with-change'), this variable is emptied
 as well.")
 
 (defun org-occur (regexp &optional keep-previous callback)
-  "Make a compact tree which shows all matches of REGEXP.
+  "Make a compact tree showing all matches of REGEXP.
 
 The tree will show the lines where the regexp matches, and any other context
 defined in `org-show-context-detail', which see.
@@ -14590,7 +14589,7 @@ signaled."
 		       (cdr errdata))))))))
 
 (defun org-days-to-iso-week (days)
-  "Return the iso week number."
+  "Return the ISO week number."
   (require 'cal-iso)
   (car (calendar-iso-from-absolute days)))
 
@@ -16715,7 +16714,7 @@ word constituents."
 (defvar org-ctrl-c-ctrl-c-hook nil
   "Hook for functions attaching themselves to `C-c C-c'.
 
-This can be used to add additional functionality to the C-c C-c
+This can be used to add additional functionality to the `C-c C-c'
 key which executes context-dependent commands.  This hook is run
 before any other test, while `org-ctrl-c-ctrl-c-final-hook' is
 run after the last test.
@@ -16728,7 +16727,7 @@ context is wrong, just do nothing and return nil.")
 (defvar org-ctrl-c-ctrl-c-final-hook nil
   "Hook for functions attaching themselves to `C-c C-c'.
 
-This can be used to add additional functionality to the C-c C-c
+This can be used to add additional functionality to the `C-c C-c'
 key which executes context-dependent commands.  This hook is run
 after any other test, while `org-ctrl-c-ctrl-c-hook' is run
 before the first test.
@@ -17286,7 +17285,7 @@ this numeric value."
   (org-increase-number-at-point (- (or inc 1))))
 
 (defun org-ctrl-c-ret ()
-  "Call `org-table-hline-and-move' or `org-insert-heading' dep. on context."
+  "Call `org-table-hline-and-move' or `org-insert-heading'."
   (interactive)
   (cond
    ((org-at-table-p) (call-interactively 'org-table-hline-and-move))
@@ -17652,6 +17651,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 	   "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))))))
 
 (defun org-mode-restart ()
+"Restart `org-mode'."
   (interactive)
   (let ((indent-status (bound-and-true-p org-indent-mode)))
     (funcall major-mode)
@@ -18337,6 +18337,7 @@ Your bug report will be posted to the Org mailing list.
 
 
 (defun org-install-agenda-files-menu ()
+  "Install agenda file menu."
   (let ((bl (buffer-list)))
     (save-excursion
       (while bl
