@@ -133,7 +133,7 @@ This function is called by `org-babel-execute-src-block'."
   "If RESULT looks like a trivial table, then unwrap it."
   (if (and (equal 1 (length result))
 	   (equal 1 (length (car result))))
-      (org-babel-read (caar result))
+      (org-babel-read (caar result) t)
     (mapcar (lambda (row)
 	      (if (eq 'hline row)
 		  'hline
