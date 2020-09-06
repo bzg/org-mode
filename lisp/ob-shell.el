@@ -79,8 +79,9 @@ This function is called by `org-babel-execute-src-block'."
 	 (stdin (let ((stdin (cdr (assq :stdin params))))
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
-	 (value-is-exit-status
-	  (not (member "output" (cdr (assq :result-params params)))))
+	 (results-params (cdr (assq :result-params params)))
+	 (value-is-exit-status (or (equal '("replace") results-params)
+				   (member "value" results-params)))
 	 (cmdline (cdr (assq :cmdline params)))
          (full-body (concat
 		     (org-babel-expand-body:generic
@@ -213,8 +214,9 @@ If RESULT-TYPE equals `output' then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
-	 (value-is-exit-status
-	  (not (member "output" (cdr (assq :result-params params)))))
+	 (results-params (cdr (assq :result-params params)))
+	 (value-is-exit-status (or (equal '("replace") results-params)
+				   (member "value" results-params)))
 	 (results
 	  (cond
 	   ((or stdin cmdline)	       ; external shell script w/STDIN
