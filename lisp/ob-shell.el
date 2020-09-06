@@ -80,7 +80,7 @@ This function is called by `org-babel-execute-src-block'."
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
 	 (value-is-exit-status
-	  (member "value" (cdr (assq :result-params params))))
+	  (not (member "output" (cdr (assq :result-params params)))))
 	 (cmdline (cdr (assq :cmdline params)))
          (full-body (concat
 		     (org-babel-expand-body:generic
@@ -214,7 +214,7 @@ of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
 	 (value-is-exit-status
-	  (member "value" (cdr (assq :result-params params))))
+	  (not (member "output" (cdr (assq :result-params params)))))
 	 (results
 	  (cond
 	   ((or stdin cmdline)	       ; external shell script w/STDIN
