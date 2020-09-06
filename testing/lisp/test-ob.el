@@ -1956,6 +1956,26 @@ default-directory
 		   (lambda (_ body)
 		     (not (string-match-p ":bar" body)))))
 	      (org-babel-check-confirm-evaluate
+	       (org-babel-get-src-block-info))))))
+  ;; The code block passed to `org-confirm-babel-evaluate' does not
+  ;; include coderefs.
+  (should
+   (equal t
+	  (org-test-with-temp-text "
+#+name: foo
+#+begin_src emacs-lisp
+  :bar
+#+end_src
+
+<point>#+begin_src emacs-lisp :noweb yes
+  #(ref:foo)
+  <<foo>>
+#+end_src"
+	    (let ((org-coderef-label-format "#(ref:%s)")
+		  (org-confirm-babel-evaluate
+		   (lambda (_ body)
+		     (string-match-p "ref:foo" body))))
+	      (org-babel-check-confirm-evaluate
 	       (org-babel-get-src-block-info)))))))
 
 (defun org-test-ob/update-block-body ()
