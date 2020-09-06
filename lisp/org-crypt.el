@@ -145,7 +145,7 @@ and END are buffer positions delimiting the encrypted area."
   (org-with-wide-buffer
    (unless (org-before-first-heading-p)
      (org-back-to-heading t)
-     (org-end-of-meta-data)
+     (org-end-of-meta-data t)
      (let ((case-fold-search nil)
 	   (banner-start (rx (seq bol
 				  (zero-or-more (any "\t "))
