@@ -79,6 +79,7 @@
 (declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 (declare-function org-src-get-lang-mode "org-src" (lang))
 (declare-function org-table-align "org-table" ())
+(declare-function org-table-convert-region "org-table" (beg0 end0 &optional separator))
 (declare-function org-table-end "org-table" (&optional table-type))
 (declare-function org-table-import "org-table" (file arg))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
