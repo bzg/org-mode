@@ -70,7 +70,7 @@ parameters may be used, like javac -verbose"
                                            " " cmdline " " classname " " cmdargs) "")))
       (org-babel-reassemble-table
        (org-babel-result-cond (cdr (assq :result-params params))
-	 (org-babel-read results)
+	 (org-babel-read results t)
          (let ((tmp-file (org-babel-temp-file "c-")))
            (with-temp-file tmp-file (insert results))
            (org-babel-import-elisp-from-file tmp-file)))
