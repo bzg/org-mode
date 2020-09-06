@@ -2994,7 +2994,8 @@ situations in which is it not appropriate."
 (defun org-babel--string-to-number (string)
   "If STRING represents a number return its value.
 Otherwise return nil."
-  (unless (string-match-p "\\s-" (org-trim string))
+  (unless (or (string-match-p "\\s-" (org-trim string))
+	      (not (string-match-p "^[0-9-e.+ ]+$" string)))
     (let ((interned-string (ignore-errors (read string))))
       (when (numberp interned-string)
 	interned-string))))
