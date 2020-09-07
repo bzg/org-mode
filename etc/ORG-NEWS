@@ -576,6 +576,23 @@ of all relational operators (~<*~, ~=*~, ~!=*~, etc.) that work like
 the regular, unstarred operators but match a headline only if the
 tested property is actually present.
 
+*** =ob-python.el=: Support for more result types and plotting
+
+=ob-python= now converts the following objects to org-mode tables when
+":results table" header arg is set:
+
+- Dictionaries
+- Numpy arrays
+- Pandas DataFrames
+- Pandas Series
+
+When the header argument =:results graphics= is set, =ob-python= will
+use matplotlib to save graphics. The behavior depends on whether value
+or output results are used. For value results, the last line should
+return a matplotlib Figure object to plot. For output results, the
+current figure (as returned by =pyplot.gcf()=) is cleared before
+evaluation, and then plotted afterwards.
+
 ** New functions and changes in function arguments
 *** =TYPES= argument in ~org-element-lineage~ can now be a symbol
 
