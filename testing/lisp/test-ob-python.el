@@ -102,9 +102,6 @@ return x
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/session-multiline ()
-  ;; FIXME workaround to prevent starting prompt leaking into output
-  (run-python)
-  (sleep-for 0 10)
   (should
    (equal "20"
 	  (org-test-with-temp-text "#+begin_src python :session :results output

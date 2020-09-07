@@ -187,15 +187,13 @@ then create.  Return the initialized session."
 		    (concat org-babel-python-command " -i")
 		  org-babel-python-command)))
       (cond
-       ((and (eq 'python org-babel-python-mode)
-	     (fboundp 'run-python)) ; python.el
-	(if (not (version< "24.1" emacs-version))
-	    (run-python cmd)
-	  (unless py-buffer
-	    (setq py-buffer (org-babel-python-with-earmuffs session)))
-	  (let ((python-shell-buffer-name
-		 (org-babel-python-without-earmuffs py-buffer)))
-	    (run-python cmd))))
+       ((eq 'python org-babel-python-mode) ; python.el
+	(unless py-buffer
+	  (setq py-buffer (org-babel-python-with-earmuffs session)))
+	(let ((python-shell-buffer-name
+	       (org-babel-python-without-earmuffs py-buffer)))
+	  (run-python cmd)
+	  (sleep-for 0 10)))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
 	(require 'python-mode)
