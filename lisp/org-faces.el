@@ -411,7 +411,7 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
 (defface org-block `((t :inherit shadow
 			,@(and (>= emacs-major-version 27) '(:extend t))))
   "Face text in #+begin ... #+end blocks.
-For source-blocks `org-src-block-faces' takes precedence."
+For source-blocks, `org-src-block-faces' takes precedence."
   :group 'org-faces
   :version "26.1")
 

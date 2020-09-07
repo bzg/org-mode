@@ -5231,9 +5231,9 @@ by a #."
 	   limit t)
       (let ((beg (match-beginning 0))
 	    (end-of-beginline (match-end 0))
-	    (block-start (match-end 0))  ; includes the \n at end of #+begin line
+	    (block-start (match-end 0))  ; Includes the \n at end of #+begin line
 	    (block-end nil)              ; will include \n after end of block content
-	    (lang (match-string 7))      ; the language, if it is an src block
+	    (lang (match-string 7))      ; the language, if it is an src block.
 	    (bol-after-beginline (line-beginning-position 2))
 	    (dc1 (downcase (match-string 2)))
 	    (dc3 (downcase (match-string 3)))
@@ -5251,12 +5251,12 @@ by a #."
 						    ,(match-string 4)
 						    word-end
 						    (zero-or-more any)))))
-		 nil t)  ;; on purpose, we look further than LIMIT
-	    ;; We do have a matching #+end line
+		 nil t)  ; On purpose, we look further than LIMIT.
+	    ;; We do have a matching #+end line.
 	    (setq beg-of-endline (match-beginning 0)
 		  end-of-endline (match-end 0)
 		  nl-before-endline (1- (match-beginning 0)))
-	    (setq block-end (match-beginning 0)) ; includes the final newline.
+	    (setq block-end (match-beginning 0)) ; Includes the final newline.
 	    (when quoting
 	      (org-remove-flyspell-overlays-in bol-after-beginline nl-before-endline)
 	      (remove-text-properties beg end-of-endline
@@ -5285,7 +5285,10 @@ by a #."
 	     ((string= block-type "verse")
 	      (add-face-text-property
 	       bol-after-beginline beg-of-endline 'org-verse t)))
-	    ;; Fontify the #+begin and #+end lines of the blocks
+	    ;; Use the org-block face for all true blocks.
+	    (add-text-properties
+	     bol-after-beginline beg-of-endline (list 'face 'org-block))
+	    ;; Fontify the #+begin and #+end lines of the blocks.
 	    (add-text-properties
 	     beg (if whole-blockline bol-after-beginline end-of-beginline)
 	     '(face org-block-begin-line))
