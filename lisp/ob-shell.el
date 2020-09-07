@@ -71,6 +71,19 @@ outside the Customize interface."
 	 (set-default symbol value)
 	 (org-babel-shell-initialize)))
 
+(defcustom org-babel-shell-results-defaults-to-output t
+  "Let shell execution defaults to \":results output\".
+
+When set to t, use \":results output\" when no :results setting
+is set.  This is especially useful for inline source blocks.
+
+When set to nil, stick to the convention of using :results value
+as the default setting when no :results is set, the \"value\" of
+a shell execution being its exit code."
+  :group 'org-babel
+  :type 'boolean
+  :package-version '(Org . "9.4"))
+
 (defun org-babel-execute:shell (body params)
   "Execute a block of Shell commands with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -80,8 +93,11 @@ This function is called by `org-babel-execute-src-block'."
                   (when stdin (org-babel-sh-var-to-string
                                (org-babel-ref-resolve stdin)))))
 	 (results-params (cdr (assq :result-params params)))
-	 (value-is-exit-status (or (equal '("replace") results-params)
-				   (member "value" results-params)))
+	 (value-is-exit-status
+	  (or (and
+	       (equal '("replace") results-params)
+	       (not org-babel-shell-results-defaults-to-output))
+	      (member "value" results-params)))
 	 (cmdline (cdr (assq :cmdline params)))
          (full-body (concat
 		     (org-babel-expand-body:generic
@@ -215,8 +231,11 @@ of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
 	 (results-params (cdr (assq :result-params params)))
-	 (value-is-exit-status (or (equal '("replace") results-params)
-				   (member "value" results-params)))
+	 (value-is-exit-status
+	  (or (and
+	       (equal '("replace") results-params)
+	       (not org-babel-shell-results-defaults-to-output))
+	      (member "value" results-params)))
 	 (results
 	  (cond
 	   ((or stdin cmdline)	       ; external shell script w/STDIN

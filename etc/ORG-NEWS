@@ -359,6 +359,25 @@ You can turn this on/off on a per-file basis with =#+startup: num= or
 This new option allows you to convert a LaTeX fragment directly into
 HTML.
 
+*** New option ~org-babel-shell-results-defaults-to-output~
+
+By default, source code blocks are executed in "functional mode": it
+means that the results of executing them are the value of their last
+statement (see [[https://orgmode.org/manual/Results-of-Evaluation.html][the documentation]].)
+
+The value of a shell script's execution is its exit code.  But most
+users expect the results of executing a shell script to be its output,
+not its exit code.
+
+So we introduced this option, that you can set to =nil= if you want
+to stick using ~:results value~ as the implicit header.
+
+In all Babel libraries, the absence of a ~:results~ header should
+produce the same result than setting ~:results value~, unless there is
+an option to explicitly create an exception.
+
+See [[https://orgmode.org/list/CA+A2iZaziAfMeGpBqL6qGrzrWEVvLvC0DUw++T4gCF3NGuW-DQ@mail.gmail.com/][this thread]] for more context.
+
 *** New hook ~org-agenda-filter-hook~
 
 Functions in this hook are run after ~org-agenda-filter~ is called.
@@ -5669,7 +5688,7 @@ that Calc formulas can operate on them.
 
      Thanks to Nicolas Goaziou for coding these changes.
 
-**** A property value of "nil" now means to unset a property
+**** A property value of =nil= now means to unset a property
 
      This can be useful in particular with property inheritance, if
      some upper level has the property, and some grandchild of it
