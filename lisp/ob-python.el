@@ -245,7 +245,10 @@ with open('%s') as f:
 Has a single %s escape, the tempfile containing the source code
 to evaluate.")
 
-(defconst org-babel-python--eval-ast "\
+(defun org-babel-python-format-session-value
+    (src-file result-file result-params)
+  "Return Python code to evaluate SRC-FILE and write result to RESULT-FILE."
+  (format "\
 import ast
 with open('%s') as f:
     __org_babel_python_ast = ast.parse(f.read())
@@ -264,12 +267,9 @@ if isinstance(__org_babel_python_final, ast.Expr):
 else:
     exec(compile(__org_babel_python_ast, '<string>', 'exec'))
     __org_babel_python_final = None"
-  "Template for Python session command with value results.
-
-Has three %s escapes to be filled in:
-1. Tempfile containing source to evaluate.
-2. Tempfile to write results to.
-3. Whether to pretty print, \"True\" or \"False\".")
+	  (org-babel-process-file-name src-file 'noquote)
+	  (org-babel-process-file-name result-file 'noquote)
+	  (if (member "pp" result-params) "True" "False")))
 
 (defun org-babel-python-evaluate
   (session body &optional result-type result-params preamble)
@@ -359,13 +359,8 @@ last statement in BODY, as elisp."
 		 (org-babel-python--send-string session body)))
               (`value
                (let* ((tmp-results-file (org-babel-temp-file "python-"))
-		      (body (format org-babel-python--eval-ast
-				    (org-babel-process-file-name
-				     tmp-src-file 'noquote)
-				    (org-babel-process-file-name
-				     tmp-results-file 'noquote)
-				    (if (member "pp" result-params)
-					"True" "False"))))
+		      (body (org-babel-python-format-session-value
+			     tmp-src-file tmp-results-file result-params)))
 		 (org-babel-python--send-string session body)
 		 (sleep-for 0 10)
 		 (org-babel-eval-read-file tmp-results-file)))))))
