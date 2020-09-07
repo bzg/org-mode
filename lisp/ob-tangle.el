@@ -41,6 +41,7 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
+(declare-function org-in-archived-heading-p "org" (&optional no-inheritance))
 (declare-function outline-previous-heading "outline" ())
 
 (defcustom org-babel-tangle-lang-exts
@@ -382,7 +383,8 @@ code blocks by target file."
 	(if (eq last-heading-pos current-heading-pos) (cl-incf counter)
 	  (setq counter 1)
 	  (setq last-heading-pos current-heading-pos)))
-      (unless (org-in-commented-heading-p)
+      (unless (or (org-in-commented-heading-p)
+		  (org-in-archived-heading-p))
 	(let* ((info (org-babel-get-src-block-info 'light))
 	       (src-lang (nth 0 info))
 	       (src-tfile (cdr (assq :tangle (nth 2 info)))))

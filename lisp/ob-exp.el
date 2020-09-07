@@ -33,6 +33,7 @@
 (declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-export-copy-buffer "ox" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
+(declare-function org-in-archived-heading-p "org" (&optional no-inheritance))
 
 (defvar org-src-preserve-indentation)
 
@@ -157,7 +158,8 @@ this template."
 	      ;; encountered.
 	      (goto-char (point-min))
 	      (while (re-search-forward regexp nil t)
-		(unless (save-match-data (org-in-commented-heading-p))
+		(unless (save-match-data (or (org-in-commented-heading-p)
+					     (org-in-archived-heading-p)))
 		  (let* ((object? (match-end 1))
 			 (element (save-match-data
 				    (if object? (org-element-context)

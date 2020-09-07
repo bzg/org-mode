@@ -20265,6 +20265,20 @@ unless optional argument NO-INHERITANCE is non-nil."
    (t
     (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p))))))
 
+(defun org-in-archived-heading-p (&optional no-inheritance)
+  "Non-nil if point is under an archived heading.
+This function also checks ancestors of the current headline,
+unless optional argument NO-INHERITANCE is non-nil."
+  (cond
+   ((org-before-first-heading-p) nil)
+   ((let ((tags (nth 5 (org-heading-components))))
+      (and tags
+	   (let ((case-fold-search nil))
+	     (string-match-p org-archive-tag tags)))))
+   (no-inheritance nil)
+   (t
+    (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p))))))
+
 (defun org-at-comment-p nil
   "Return t if cursor is in a commented line."
   (save-excursion

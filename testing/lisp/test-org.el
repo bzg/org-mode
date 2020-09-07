@@ -2087,6 +2087,24 @@
      (goto-char (point-max))
      (org-in-commented-heading-p t))))
 
+(ert-deftest test-org/in-archived-heading-p ()
+  "Test `org-in-archived-heading-p' specifications."
+  ;; Archived headline.
+  (should
+   (org-test-with-temp-text "* Headline :ARCHIVE:\nBody"
+     (goto-char (point-max))
+     (org-in-archived-heading-p)))
+  ;; Archived ancestor.
+  (should
+   (org-test-with-temp-text "* Headline :ARCHIVE:\n** Level 2\nBody"
+     (goto-char (point-max))
+     (org-in-archived-heading-p)))
+  ;; Optional argument.
+  (should-not
+   (org-test-with-temp-text "* Headline :ARCHIVE:\n** Level 2\nBody"
+     (goto-char (point-max))
+     (org-in-archived-heading-p t))))
+
 (ert-deftest test-org/entry-blocked-p ()
   ;; Check other dependencies.
   (should
