@@ -7574,7 +7574,10 @@ search from."
       (when pos (goto-char pos))
       ;; Skip up to the topmost parent.
       (while (org-up-heading-safe))
-      (ignore-errors (nth 4 (org-heading-components))))))
+      (ignore-errors
+	(replace-regexp-in-string
+	 "^\\[[0-9]+/[0-9]+\\] *\\|^\\[%[0-9]+\\] *" ""
+	 (nth 4 (org-heading-components)))))))
 
 (defvar org-agenda-filtered-by-top-headline nil)
 (defun org-agenda-filter-by-top-headline (strip)
