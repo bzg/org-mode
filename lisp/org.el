@@ -10618,7 +10618,7 @@ among `closed', `deadline', `scheduled' and nil.  TIME indicates
 the time to use.  If none is given, the user is prompted for
 a date.  REMOVE indicates what kind of entries to remove.  An old
 WHAT entry will also be removed."
-  (let (org-time-was-given org-end-time-was-given default-time default-input)
+  (let (default-time default-input)
     (when (and (memq what '(scheduled deadline))
 	       (or (not time)
 		   (and (stringp time)
@@ -10707,10 +10707,12 @@ WHAT entry will also be removed."
        ;; Insert associated timestamp.
        (let ((ts (org-insert-time-stamp
 		  time
-		  (or org-time-was-given
+		  (or (and (boundp 'org-time-was-given) org-time-was-given)
 		      (and (eq what 'closed) org-log-done-with-time))
 		  (eq what 'closed)
-		  nil nil (list org-end-time-was-given))))
+		  nil nil
+		  (when (boundp 'org-end-time-was-given)
+		    (list org-end-time-was-given)))))
 	 (unless (eolp) (insert " "))
 	 ts)))))
 
