@@ -3,6 +3,7 @@
 ;; Copyright (C) 2008-2020 Free Software Foundation, Inc.
 ;;
 ;; Author: Eric Schulte <schulte dot eric at gmail dot com>
+;; Maintainer: TEC <tecosaur@gmail.com>
 ;; Keywords: tables, plotting
 ;; Homepage: https://orgmode.org
 ;;
