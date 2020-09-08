@@ -20545,6 +20545,13 @@ non-nil it will also look at invisible ones."
 	    (cond ((< l level) (setq count 0))
 		  ((and (= l level)
 			(or invisible-ok
+			    ;; FIXME: See commit a700fadd72 and the
+			    ;; related discussion on why using
+			    ;; `org--line-fully-invisible-p' is needed
+			    ;; here, which is to serve the needs of an
+			    ;; external package.  If the change is
+			    ;; wrong regarding Org itself, it should
+			    ;; be removed.
 			    (not (org--line-fully-invisible-p))))
 		   (cl-decf count)
 		   (when (= l level) (setq result (point)))))))
