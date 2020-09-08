@@ -1047,10 +1047,7 @@ DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((type (org-element-property :type link))
-	 (raw-path
-	  (replace-regexp-in-string
-	   "[@{}]" "@\\&"
-	   (org-element-property :path link)))
+	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (path (org-texinfo--sanitize-content
