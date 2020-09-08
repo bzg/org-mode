@@ -298,6 +298,13 @@ possible via column view value edit or with =<C-c C-q>=.
 Counterpart of ~org-show-entry~.
 
 ** New options
+*** New option ~org-html-prefer-user-labels~
+
+When non-nil, use =NAME= affiliated keyword, or raw target values, to
+generate anchor's ID.  Otherwise, consistently use internal naming
+scheme.
+
+=CUSTOM_ID= values are still always used, when available.
 *** New option for using tabs in ~org-agenda-window-setup~
 
 Choosing ~other-tab~ for ~org-agenda-window-setup~ will open the

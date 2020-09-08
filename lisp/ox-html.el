@@ -152,6 +152,7 @@
     (:html-metadata-timestamp-format nil nil org-html-metadata-timestamp-format)
     (:html-postamble-format nil nil org-html-postamble-format)
     (:html-preamble-format nil nil org-html-preamble-format)
+    (:html-prefer-user-labels nil nil org-html-prefer-user-labels)
     (:html-self-link-headlines nil nil org-html-self-link-headlines)
     (:html-table-align-individual-fields
      nil nil org-html-table-align-individual-fields)
@@ -733,6 +734,24 @@ but without \"name\" attribute."
   "When non-nil, the headlines contain a hyperlink to themselves."
   :group 'org-export-html
   :package-version '(Org . "9.3")
+  :type 'boolean
+  :safe #'booleanp)
+
+(defcustom org-html-prefer-user-labels nil
+  "When non-nil use user-defined names and ID over internal ones.
+
+By default, Org generates its own internal ID values during HTML
+export.  This process ensures that these values are unique and
+valid, but the keys are not available in advance of the export
+process, and not so readable.
+
+When this variable is non-nil, Org will use NAME keyword, or the
+real name of the target to create the ID attribute.
+
+Independently of this variable, however, CUSTOM_ID are always
+used as a reference."
+  :group 'org-export-html
+  :package-version '(Org . "9.4")
   :type 'boolean
   :safe #'booleanp)
 
@@ -1607,6 +1626,36 @@ attribute with a nil value will be omitted from the result."
                              "\"" "&quot;" (org-html-encode-plain-text item))))
                  (setcar output (format "%s=\"%s\"" key value))))))))
 
+(defun org-html--reference (datum info &optional named-only)
+  "Return an appropriate reference for DATUM.
+
+DATUM is an element or a `target' type object.  INFO is the
+current export state, as a plist.
+
+When NAMED-ONLY is non-nil and DATUM has no NAME keyword, return
+nil.  This doesn't apply to headlines, inline tasks, radio
+targets and targets."
+  (let* ((type (org-element-type datum))
+	 (user-label
+	  (org-element-property
+	   (pcase type
+	     ((or `headline `inlinetask) :CUSTOM_ID)
+	     ((or `radio-target `target) :value)
+	     (_ :name))
+	   datum)))
+    (cond
+     ((and user-label
+	   (or (plist-get info :html-prefer-user-labels)
+	       ;; Used CUSTOM_ID property unconditionally.
+	       (memq type '(headline inlinetask))))
+      user-label)
+     ((and named-only
+	   (not (memq type '(headline inlinetask radio-target target)))
+	   (not user-label))
+      nil)
+     (t
+      (org-export-get-reference datum info)))))
+
 (defun org-html--wrap-image (contents info &optional caption label)
   "Wrap CONTENTS string within an appropriate environment for images.
 INFO is a plist used as a communication channel.  When optional
@@ -2314,8 +2363,7 @@ INFO is a plist used as a communication channel."
 		    (org-export-get-tags headline info))))
     (format "<a href=\"#%s\">%s</a>"
 	    ;; Label.
-	    (or (org-element-property :CUSTOM_ID headline)
-		(org-export-get-reference headline info))
+	    (org-html--reference headline info)
 	    ;; Body.
 	    (concat
 	     (and (not (org-export-low-level-p headline info))
@@ -2343,8 +2391,7 @@ of listings as a string, or nil if it is empty."
 					 (org-html--translate "Listing %d:" info))))
 		(mapconcat
 		 (lambda (entry)
-		   (let ((label (and (org-element-property :name entry)
-				     (org-export-get-reference entry info)))
+		   (let ((label (org-html--reference entry info t))
 			 (title (org-trim
 				 (org-export-data
 				  (or (org-export-get-caption entry t)
@@ -2382,8 +2429,7 @@ of tables as a string, or nil if it is empty."
 					 (org-html--translate "Table %d:" info))))
 		(mapconcat
 		 (lambda (entry)
-		   (let ((label (and (org-element-property :name entry)
-				     (org-export-get-reference entry info)))
+		   (let ((label (org-html--reference entry info t))
 			 (title (org-trim
 				 (org-export-data
 				  (or (org-export-get-caption entry t)
@@ -2484,11 +2530,11 @@ information."
     (if (plist-get attributes :textarea)
 	(org-html--textarea-block example-block)
       (format "<pre class=\"example\"%s>\n%s</pre>"
-	      (let* ((name (org-element-property :name example-block))
+	      (let* ((reference (org-html--reference example-block info))
 		     (a (org-html--make-attribute-string
-			 (if (or (not name) (plist-member attributes :id))
+			 (if (or (not reference) (plist-member attributes :id))
 			     attributes
-			   (plist-put attributes :id name)))))
+			   (plist-put attributes :id reference)))))
 		(if (org-string-nw-p a) (concat " " a) ""))
 	      (org-html-format-code example-block info)))))
 
@@ -2564,8 +2610,7 @@ holding contextual information."
            (full-text (funcall (plist-get info :html-format-headline-function)
                                todo todo-type priority text tags info))
            (contents (or contents ""))
-	   (id (or (org-element-property :CUSTOM_ID headline)
-		   (org-export-get-reference headline info)))
+	   (id (org-html--reference headline info))
 	   (formatted-text
 	    (if (plist-get info :html-self-link-headlines)
 		(format "<a href=\"#%s\">%s</a>" id full-text)
@@ -2652,8 +2697,7 @@ contextual information."
 		(org-element-property :value inline-src-block)
 		lang))
 	 (label
-	  (let ((lbl (and (org-element-property :name inline-src-block)
-			  (org-export-get-reference inline-src-block info))))
+	  (let ((lbl (org-html--reference inline-src-block info t)))
 	    (if (not lbl) "" (format " id=\"%s\"" lbl)))))
     (format "<code class=\"src src-%s\"%s>%s</code>" lang label code)))
 
@@ -2869,8 +2913,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(latex-frag (org-remove-indentation
 		     (org-element-property :value latex-environment)))
         (attributes (org-export-read-attribute :attr_html latex-environment))
-        (label (and (org-element-property :name latex-environment)
-                    (org-export-get-reference latex-environment info)))
+        (label (org-html--reference latex-environment info t))
         (caption (and (org-html--latex-environment-numbered-p latex-environment)
 		      (number-to-string
 		       (org-export-get-ordinal
@@ -3107,8 +3150,7 @@ INFO is a plist holding contextual information.  See
 			(org-element-property :raw-link link) info))))
 	  ;; Link points to a headline.
 	  (`headline
-	   (let ((href (or (org-element-property :CUSTOM_ID destination)
-			   (org-export-get-reference destination info)))
+	   (let ((href (org-html--reference destination info))
 		 ;; What description to use?
 		 (desc
 		  ;; Case 1: Headline is numbered and LINK has no
@@ -3135,8 +3177,8 @@ INFO is a plist holding contextual information.  See
 	       ;; environment.  Use "ref" or "eqref" macro, depending on user
                ;; preference to refer to those in the document.
                (format (plist-get info :html-equation-reference-format)
-                       (org-export-get-reference destination info))
-             (let* ((ref (org-export-get-reference destination info))
+                       (org-html--reference destination info))
+             (let* ((ref (org-html--reference destination info))
                     (org-html-standalone-image-predicate
                      #'org-html--has-caption-p)
                     (counter-predicate
@@ -3233,8 +3275,7 @@ the plist used as a communication channel."
 				  info nil #'org-html-standalone-image-p))
 			 " </span>"
 			 raw))))
-	    (label (and (org-element-property :name paragraph)
-			(org-export-get-reference paragraph info))))
+	    (label (org-html--reference paragraph info)))
 	(org-html--wrap-image contents info caption label)))
      ;; Regular paragraph.
      (t (format "<p%s%s>\n%s</p>"
@@ -3340,17 +3381,17 @@ holding contextual information."
 
 ;;;; Quote Block
 
-(defun org-html-quote-block (quote-block contents _info)
+(defun org-html-quote-block (quote-block contents info)
   "Transcode a QUOTE-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (format "<blockquote%s>\n%s</blockquote>"
-	  (let* ((name (org-element-property :name quote-block))
+	  (let* ((reference (org-html--reference quote-block info t))
 		 (attributes (org-export-read-attribute :attr_html quote-block))
 		 (a (org-html--make-attribute-string
-		     (if (or (not name) (plist-member attributes :id))
+		     (if (or (not reference) (plist-member attributes :id))
 			 attributes
-		       (plist-put attributes :id name)))))
+		       (plist-put attributes :id reference)))))
 	    (if (org-string-nw-p a) (concat " " a) ""))
 	  contents))
 
@@ -3385,7 +3426,7 @@ holding contextual information."
   "Transcode a RADIO-TARGET object from Org to HTML.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (let ((ref (org-export-get-reference radio-target info)))
+  (let ((ref (org-html--reference radio-target info)))
     (org-html--anchor ref text nil info)))
 
 ;;;; Special Block
@@ -3404,11 +3445,11 @@ holding contextual information."
                                     (if class (concat class " " block-type)
                                       block-type)))))
     (let* ((contents (or contents ""))
-	   (name (org-element-property :name special-block))
+	   (reference (org-html--reference special-block info))
 	   (a (org-html--make-attribute-string
-	       (if (or (not name) (plist-member attributes :id))
+	       (if (or (not reference) (plist-member attributes :id))
 		   attributes
-		 (plist-put attributes :id name))))
+		 (plist-put attributes :id reference))))
 	   (str (if (org-string-nw-p a) (concat " " a) "")))
       (if html5-fancy
 	  (format "<%s%s>\n%s</%s>" block-type str contents block-type)
@@ -3424,8 +3465,7 @@ contextual information."
       (org-html--textarea-block src-block)
     (let* ((lang (org-element-property :language src-block))
 	  (code (org-html-format-code src-block info))
-	  (label (let ((lbl (and (org-element-property :name src-block)
-				 (org-export-get-reference src-block info))))
+	  (label (let ((lbl (org-html--reference src-block info t)))
 		   (if lbl (format " id=\"%s\"" lbl) "")))
 	  (klipsify  (and  (plist-get info :html-klipsify-src)
                            (member lang '("javascript" "js"
@@ -3620,8 +3660,7 @@ contextual information."
 	   (attributes
 	    (org-html--make-attribute-string
 	     (org-combine-plists
-	      (and (org-element-property :name table)
-		   (list :id (org-export-get-reference table info)))
+	      (list :id (org-html--reference table info t))
 	      (and (not (org-html-html5-p info))
 		   (plist-get info :html-table-attributes))
 	      (org-export-read-attribute :attr_html table))))
@@ -3668,7 +3707,7 @@ contextual information."
   "Transcode a TARGET object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((ref (org-export-get-reference target info)))
+  (let ((ref (org-html--reference target info)))
     (org-html--anchor ref nil nil info)))
 
 ;;;; Timestamp
