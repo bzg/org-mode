@@ -20514,6 +20514,16 @@ entry."
 		((looking-at-p re) (forward-line))
 		(t (throw 'exit t))))))))
 
+(defun org--line-fully-invisible-p ()
+  "Return non-nil if the current line is fully invisible."
+  (let ((line-beg (line-beginning-position))
+	(line-pos (1- (line-end-position)))
+	(is-invisible t))
+    (while (and (< line-beg line-pos) is-invisible)
+      (setq is-invisible (org-invisible-p line-pos))
+      (setq line-pos (1- line-pos)))
+    is-invisible))
+
 (defun org-forward-heading-same-level (arg &optional invisible-ok)
   "Move forward to the ARG'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading.
@@ -20535,8 +20545,7 @@ non-nil it will also look at invisible ones."
 	    (cond ((< l level) (setq count 0))
 		  ((and (= l level)
 			(or invisible-ok
-			    (not (org-invisible-p
-				  (line-beginning-position)))))
+			    (not (org--line-fully-invisible-p))))
 		   (cl-decf count)
 		   (when (= l level) (setq result (point)))))))
 	(goto-char result))
