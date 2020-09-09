@@ -8042,12 +8042,14 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 				       (when (looking-at org-complex-heading-regexp)
 					 (list (match-string 4)))))))
     (setq res
-	  (org-no-properties
-	   (org-format-outline-path
-	    path
-	    (1- (frame-width))
-	    (and file bfn (concat (file-name-nondirectory bfn) separator))
-	    separator)))
+	  (org-format-outline-path
+	   path
+	   (1- (frame-width))
+	   (and file bfn (concat (file-name-nondirectory bfn) separator))
+	   separator))
+    (add-face-text-property 0 (length res)
+			    `((t :height ,(face-attribute 'default :height)))
+			    nil res)
     (if just-return-string
 	res
       (org-unlogged-message "%s" res))))
