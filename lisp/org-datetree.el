@@ -185,6 +185,8 @@ inserted into the buffer."
 
 (defun org-datetree-insert-line (year &optional month day text)
   (delete-region (save-excursion (skip-chars-backward " \t\n") (point)) (point))
+  (when (assq 'heading org-blank-before-new-entry)
+    (insert "\n"))
   (insert "\n" (make-string org-datetree-base-level ?*) " \n")
   (backward-char)
   (when month (org-do-demote))
