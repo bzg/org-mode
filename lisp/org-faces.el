@@ -410,8 +410,15 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
 
 (defface org-block `((t :inherit shadow
 			,@(and (>= emacs-major-version 27) '(:extend t))))
-  "Face text in #+begin ... #+end blocks.
-For source-blocks `org-src-block-faces' takes precedence."
+  "Face used for text inside various blocks.
+
+It is always used for source blocks.  You can refine what face
+should be used depending on the source block language by setting,
+`org-src-block-faces', which takes precedence.
+
+When `org-fontify-quote-and-verse-blocks' is not nil, text inside
+verse and quote blocks are fontified using the `org-verse' and
+`org-quote' faces, which inherit from `org-block'."
   :group 'org-faces
   :version "26.1")
 

@@ -5231,9 +5231,11 @@ by a #."
 	   limit t)
       (let ((beg (match-beginning 0))
 	    (end-of-beginline (match-end 0))
-	    (block-start (match-end 0))  ; includes the \n at end of #+begin line
-	    (block-end nil)              ; will include \n after end of block content
-	    (lang (match-string 7))      ; the language, if it is an src block
+	    ;; Including \n at end of #+begin line will include \n
+	    ;; after the end of block content.
+	    (block-start (match-end 0))
+	    (block-end nil)
+	    (lang (match-string 7)) ; The language, if it is a source block.
 	    (bol-after-beginline (line-beginning-position 2))
 	    (dc1 (downcase (match-string 2)))
 	    (dc3 (downcase (match-string 3)))
@@ -5243,7 +5245,8 @@ by a #."
 	 ((and (match-end 4) (equal dc3 "+begin"))
 	  ;; Truly a block
 	  (setq block-type (downcase (match-string 5))
-		quoting (member block-type org-protecting-blocks)) ; src, example, export, maybe more
+		;; Src, example, export, maybe more.
+		quoting (member block-type org-protecting-blocks))
 	  (when (re-search-forward
 		 (rx-to-string `(group bol (or (seq (one-or-more "*") space)
 					       (seq (zero-or-more blank)
@@ -5251,12 +5254,13 @@ by a #."
 						    ,(match-string 4)
 						    word-end
 						    (zero-or-more any)))))
-		 nil t)  ;; on purpose, we look further than LIMIT
-	    ;; We do have a matching #+end line
+		 ;; We look further than LIMIT on purpose.
+		 nil t)
+	    ;; We do have a matching #+end line.
 	    (setq beg-of-endline (match-beginning 0)
 		  end-of-endline (match-end 0)
 		  nl-before-endline (1- (match-beginning 0)))
-	    (setq block-end (match-beginning 0)) ; includes the final newline.
+	    (setq block-end (match-beginning 0)) ; Include the final newline.
 	    (when quoting
 	      (org-remove-flyspell-overlays-in bol-after-beginline nl-before-endline)
 	      (remove-text-properties beg end-of-endline
