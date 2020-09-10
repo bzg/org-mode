@@ -202,38 +202,15 @@ Org provides a new tool ~org-link-open-as-file~, useful when defining
 new link types similar to "file"-type links.  See docstring for
 details.
 
-*** =ob-C.el= allows you to include non-system header files
+*** New optional numeric argument for ~org-return~
 
-In C and C++ blocks, ~:includes~ arguments that do not start with a
-~<~ character will now be formatted as double-quoted ~#include~
-statements.
+In situations where ~org-return~ calls ~newline~, multiple newlines
+can now be inserted with this prefix argument.
 
-*** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
+*** New source code block header argument =:file-mode=
 
-You can now set ~(setq org-babel-clojure-backend 'inf-clojure)~ and
-evaluate Clojure source blocks using [[https://github.com/clojure-emacs/inf-clojure][inf-clojure]].  With a header
-argument like =:alias "alias"= the Clojure REPL will boot with
-=clojure -Aalias=.  Otherwise Clojure will boot with =lein=, =boot= or
-=tools.deps=, depending on whether the current directory contains a
-=project.clj=, =build.boot= or =deps.edn=, falling back on
-~inf-clojure-generic-cmd~ in case no such file is present.
-
-Also, when using [[https://github.com/clojure-emacs/cider][cider]], you can now use =#+begin_src clojurescript= to
-execute ClojureScript code from Org files.  Note that this works only
-if your Org file is associated with a cider session that knows how to
-run ClojureScript code.  A bare =lein repl= session outside of a
-directory configured for ClojureScript will /not/ work.
-
-*** =ob-java.el=: you can now pass Java command line arguments
-
-Babel Java blocks recognize header argument =:cmdargs= and pass its
-value in call to =java=.
-
-*** =ob-screen.el=: Screen now accepts =:screenrc= header argument
-
-Screen blocks now recognize the =:screenrc= header argument and pass
-its value to the screen command via the "-c" option. The default
-remains =/dev/null= (i.e. a clean screen session)
+Source code block header argument =:file-mode= can set file
+permissions if =:file= argument is provided.
 
 *** =RET= and =C-j= now obey ~electric-indent-mode~
 
@@ -256,15 +233,38 @@ explicitly:
 (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
 
-*** New optional numeric argument for ~org-return~
+*** =ob-C.el= allows the inclusion of non-system header files
 
-In situations where ~org-return~ calls ~newline~, multiple newlines
-can now be inserted with this prefix argument.
+In C and C++ blocks, ~:includes~ arguments that do not start with a
+~<~ character will now be formatted as double-quoted ~#include~
+statements.
 
-*** New source code block header argument =:file-mode=
+*** =ob-clojure.el= supports inf-clojure.el and ClojureScript evaluation
 
-Source code block header argument =:file-mode= can set file
-permissions if =:file= argument is provided.
+You can now set ~(setq org-babel-clojure-backend 'inf-clojure)~ and
+evaluate Clojure source blocks using [[https://github.com/clojure-emacs/inf-clojure][inf-clojure]].  With a header
+argument like =:alias "alias"= the Clojure REPL will boot with
+=clojure -Aalias=.  Otherwise Clojure will boot with =lein=, =boot= or
+=tools.deps=, depending on whether the current directory contains a
+=project.clj=, =build.boot= or =deps.edn=, falling back on
+~inf-clojure-generic-cmd~ in case no such file is present.
+
+Also, when using [[https://github.com/clojure-emacs/cider][cider]], you can now use =#+begin_src clojurescript= to
+execute ClojureScript code from Org files.  Note that this works only
+if your Org file is associated with a cider session that knows how to
+run ClojureScript code.  A bare =lein repl= session outside of a
+directory configured for ClojureScript will /not/ work.
+
+*** =ob-java.el= supports Java command line arguments
+
+Babel Java blocks recognize header argument =:cmdargs= and pass its
+value in call to =java=.
+
+*** =ob-screen.el= now accepts =:screenrc= header argument
+
+Screen blocks now recognize the =:screenrc= header argument and pass
+its value to the screen command via the "-c" option. The default
+remains =/dev/null= (i.e. a clean screen session)
 
 *** =ob-plantuml=: now supports using PlantUML executable to generate diagrams
 
@@ -279,9 +279,13 @@ possible to configure executable location as well as arguments via:
 Turn on a minor mode to display the first data row of the table at
 point in the header-line when the beginning of the table is invisible.
 
-*** ~org-datetree-find-month-create~
+*** ~org-agenda-ctrl-c-ctrl-c~
 
-Find or create a month entry for a date.
+Hitting =<C-c C-c>= in an agenda view now calls ~org-agenda-set-tags~.
+
+*** ~org-hide-entry~
+
+This command is the counterpart of ~org-show-entry~.
 
 *** ~org-columns-toggle-or-columns-quit~
 
@@ -289,15 +293,11 @@ Find or create a month entry for a date.
 recent ~org-columns-set-tags-or-toggle~.  Tag setting is still
 possible via column view value edit or with =<C-c C-q>=.
 
-*** ~org-agenda-ctrl-c-ctrl-c~
+*** ~org-datetree-find-month-create~
 
-=<C-c C-c>= in agenda calls ~org-agenda-set-tags~.
+Find or create a month entry for a date.
 
-*** ~org-hide-entry~
-
-Counterpart of ~org-show-entry~.
-
-** New options
+** New options and settings
 *** New option ~org-html-prefer-user-labels~
 
 When non-nil, use =NAME= affiliated keyword, or raw target values, to
@@ -311,6 +311,19 @@ Choosing ~other-tab~ for ~org-agenda-window-setup~ will open the
 agenda view in a new tab.  This will work with versions of Emacs since
 27.1 when ~tab-bar-mode~ was introduced.
 
+*** New option ~org-table-header-line-p~
+
+Setting this option to =t= will activate ~org-table-header-line-mode~
+in org-mode buffers.
+
+*** New option ~org-startup-numerated~
+
+When this option is =t=, Org files will start using ~(org-num-mode 1)~
+and headings will be visually numerated.
+
+You can turn this on/off on a per-file basis with =#+startup: num= or
+=#+startup: nonum=.
+
 *** New option ~org-clock-auto-clockout-timer~
 
 When this option is set to a number and the user configuration
@@ -320,11 +333,6 @@ currently clocked in task after that number of seconds of idle time.
 This is useful when you often forget to clock out before being idle
 and don't want to have to manually set the clocking time to take into
 account.
-
-*** New option ~org-table-header-line-p~
-
-Setting this option to =t= will activate ~org-table-header-line-mode~
-in org-mode buffers.
 
 *** New option to group captured datetime entries by month
 
@@ -353,14 +361,6 @@ You can also set this option to =t= or to =from-agenda=.
 
 This option will add a timeout to notifications.
 
-*** New option ~org-startup-numerated~
-
-When this option is =t=, Org files will start using ~(org-num-mode 1)~
-and headings will be visually numerated.
-
-You can turn this on/off on a per-file basis with =#+startup: num= or
-=#+startup: nonum=.
-
 *** New option ~org-latex-to-html-convert-command~
 
 This new option allows you to convert a LaTeX fragment directly into
@@ -384,6 +384,20 @@ produce the same result than setting ~:results value~, unless there is
 an option to explicitly create an exception.
 
 See [[https://orgmode.org/list/CA+A2iZaziAfMeGpBqL6qGrzrWEVvLvC0DUw++T4gCF3NGuW-DQ@mail.gmail.com/][this thread]] for more context.
+
+*** New option in ~org-attach-store-link-p~
+
+~org-attach-store-link-p~ has a new option to store a file link to the
+attachment.
+*** New option ~org-fontify-todo-headline~
+
+This feature is the same as ~org-fontify-done-headline~, but for TODO
+headlines instead.  This allows you to distinguish TODO headlines from
+normal headlines.  The face can be customized via ~org-headline-todo~.
+
+*** New default value for ~org-file-apps~
+
+The new value uses Emacs as the application for opening directory.
 
 *** New hook ~org-agenda-filter-hook~
 
@@ -435,7 +449,7 @@ From ~org-enable-priority-commands~ to ~org-priority-enable-commands~.
 From ~org-show-priority~ to ~org-priority-show~.
 
 ** Miscellaneous
-*** =ob-screen.el=: Respect screen =:session= name
+*** =ob-screen.el= now respects screen =:session= name
 
 Screen babel session are now named based on the =:session= header
 argument (defaults to ~default~).
@@ -443,6 +457,7 @@ argument (defaults to ~default~).
 Previously all session names had  ~org-babel-session-~ prepended.
 
 *** Forward/backward paragraph functions in line with the rest of Emacs
+
 ~org-forward-paragraph~ and ~org-backward-paragraph~, bound to
 ~<C-UP>~ and ~<C-DOWN>~ functions mimic more closely behaviour of
 ~forward-paragraph~ and ~backward-paragraph~ functions when
@@ -452,18 +467,19 @@ They also accept an optional argument for multiple calls.
 
 See their docstring for details.
 *** ~org-table-to-lisp~ no longer checks if point is at a table
+
 The caller is now responsible for the check.  It can use, e.g.,
 ~org-at-table-p~.
 
 The function is also much more efficient than it used to be, even on
 very large tables.
-*** New function : ~org-collect-keywords~
+
+*** New function ~org-collect-keywords~
 *** Drawers' folding use an API similar to block's
 
 Tooling for folding drawers interactively or programmatically is now
-on par with block folding.  In particular, the new
-~org-hide-drawer-toggle~ function is the central place for drawer
-folding.
+on par with block folding.  In particular, ~org-hide-drawer-toggle~,
+a new function, is the central place for drawer folding.
 
 *** Duration can be read and written in compact form
 
@@ -471,40 +487,21 @@ folding.
 whereas ~org-duration-from-minutes~ can output this compact form if
 the duration format contains the symbol ~compact~.
 
-*** Fontify whole TODO headlines
-
-This feature is the same as ~org-fontify-done-headline~, but for TODO
-headlines instead.  This allows you to distinguish TODO headlines from
-normal headlines.  The face can be customized via ~org-headline-todo~.
-
 *** C-n, C-p, SPC and DEL in agenda commands dispatch window
 
-You can now use =C-n=, =C-p=, =SPC= and =DEL= key to scroll up and
-down the agenda and attach dispatch window.
+You can now use =<C-n>=, =<C-p>=, =<SPC>= and =<DEL>= key to scroll up
+and down the agenda and attach dispatch window.
 
 *** =<C-c C-c>= in agenda calls ~org-agenda-set-tags~
 
 Both =<C-c C-q>= and =<C-c C-c>= set the tags of the headline in the
 Org buffer.  Both keybindings are now available from the agenda too.
 
-*** New option in ~org-attach-store-link-p~
-
-~org-attach-store-link-p~ has a new option to store a file link to the
-attachment.
-
-*** New default value for ~org-file-apps~
-
-The new value uses Emacs as the application for opening directory.
-
-*** Allowed empty HTML extension
+*** Allow to use an empty HTML extension
 
 Using =(setq org-html-extension "")= or setting the HTML extension in
 any fashion will produce the expected output, with no trailing period
 to the resulting HTML file.
-
-*** New =org-refile.el= file
-
-Org refile variables and functions have been moved to a new file.
 
 *** Handle repeated tasks with =.+= type and hours step
 
@@ -517,12 +514,7 @@ now. E.g.,
    Marking this DONE shifts the date to exactly one hour from now.
 #+end_example
 
-*** The end of a 7 years old bug
-
-This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
-Hyatt has been fixed.  Thanks to both of them.
-
-*** Format of equation reference in HTML export can be specified
+*** The format of equation reference in HTML export can now be specified
 
 By default, HTML (via MathJax) and LaTeX export equation references
 using different commands. LaTeX must use ~\ref{%s}~ because it is used
@@ -531,20 +523,29 @@ equations producing inconsistent output. New option
 ~org-html-equation-reference-format~ sets the command used in HTML
 export.
 
-*** ob-haskell: add support for compilation with =:compile= header argument
+*** =ob-haskell.el= supports compilation with =:compile= header argument
 
 By default, Haskell blocks are interpreted. By adding =:compile yes=
 to a Haskell source block, it will be compiled, executed and the
 results will be displayed.
 
-*** Support for ~org-edit-special~ with LaTeX fragments.
+*** Support for ~org-edit-special~ with LaTeX fragments
 
 Calling ~org-edit-special~ on an inline LaTeX fragment calls a new
 function, ~org-edit-latex-fragment~. This functions in a comparable
 manner to editing inline source blocks, bringing up a minibuffer set
 to LaTeX mode. The math-mode deliminators are read only.
 
-*** org-capture: ~org-capture-current-plist~ accessible during ~org-capture-mode-hook~
+*** ~org-capture-current-plist~ is now accessible during ~org-capture-mode-hook~
+*** New =org-refile.el= file
+
+Org refile variables and functions have been moved to a new file.
+
+*** The end of a 7 years old bug
+
+This bug [[https://lists.gnu.org/archive/html/emacs-orgmode/2013-08/msg00072.html][originally reported]] by Matt Lundin and investigated by Andrew
+Hyatt has been fixed.  Thanks to both of them.
+
 * Version 9.3
 
 ** Incompatible changes
