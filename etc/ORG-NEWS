@@ -404,6 +404,12 @@ The new value uses Emacs as the application for opening directory.
 
 Functions in this hook are run after ~org-agenda-filter~ is called.
 
+*** New option ~org-id-ts-format~
+
+Earlier, IDs generated using =ts= method had a hard-coded format (i.e. =20200923T160237.891616=).
+The new option allows user to customise the format.
+Defaults are unchanged.
+
 ** Removed or renamed functions and variables
 *** Deprecated ~org-flag-drawer~ function
 

@@ -128,6 +128,10 @@ nil   Never use an ID to make a link, instead link using a text search for
   :group 'org-id
   :type 'string)
 
+(defcustom org-id-ts-format "%Y%m%dT%H%M%S.%6N"
+  "Default format for IDs generated using `ts' `org-id-method'.
+The format should be suitable to pass as an argument to `format-time-string'.")
+
 (defcustom org-id-method 'uuid
   "The method that should be used to create new IDs.
 
@@ -380,7 +384,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 			    (concat "@" (message-make-fqdn))))))
 	(setq unique (concat etime postfix))))
      ((eq org-id-method 'ts)
-      (let ((ts (format-time-string "%Y%m%dT%H%M%S.%6N"))
+      (let ((ts (format-time-string org-id-ts-format))
 	    (postfix (if org-id-include-domain
 			 (progn
 			   (require 'message)
