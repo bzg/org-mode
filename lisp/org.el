@@ -6352,7 +6352,7 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 				 (= (line-beginning-position)
 				    (org-element-property :post-affiliated
 							  item)))))
-		     (save-excursion (move-beginning-of-line 1)
+		     (save-excursion (beginning-of-line 1)
 				     (looking-at org-outline-regexp)))
 		 (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	    (org-cycle-internal-local))
