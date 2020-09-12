@@ -12817,7 +12817,7 @@ following lines before the table in the Org file:
 #+cindex: @samp{ATTR_HTML}, keyword
 #+begin_example
 ,#+CAPTION: This is a table with lines around and between cells
-,#+ATTR_HTML: border="2" rules="all" frame="border"
+,#+ATTR_HTML: :border 2 :rules all :frame border
 #+end_example
 
 The HTML export back-end preserves column groupings in Org tables (see
