@@ -101,6 +101,21 @@ keyword."
   :group 'org-export-icalendar
   :type '(repeat (string :tag "Tag")))
 
+(defcustom org-icalendar-scheduled-summary-prefix "S: "
+  "String prepended to exported scheduled headlines."
+  :group 'org-export-icalendar
+  :type 'string
+  :package-version '(Org . "9.6")
+  :safe #'stringp)
+
+
+(defcustom org-icalendar-deadline-summary-prefix "DL: "
+  "String prepended to exported headlines with a deadline."
+  :group 'org-export-icalendar
+  :type 'string
+  :package-version '(Org . "9.6")
+  :safe #'stringp)
+
 (defcustom org-icalendar-use-deadline '(event-if-not-todo todo-due)
   "Contexts where iCalendar export should use a deadline time stamp.
 
@@ -624,7 +639,8 @@ inlinetask within the section."
 		   (_ (memq 'event-if-not-todo use-deadline)))
 		 (org-icalendar--vevent
 		  entry deadline (concat "DL-" uid)
-		  (concat "DL: " summary) loc desc cat tz class)))
+		  (concat org-icalendar-deadline-summary-prefix summary)
+                  loc desc cat tz class)))
 	  (let ((scheduled (org-element-property :scheduled entry))
 		(use-scheduled (plist-get info :icalendar-use-scheduled)))
 	    (and scheduled
@@ -635,7 +651,8 @@ inlinetask within the section."
 		   (_ (memq 'event-if-not-todo use-scheduled)))
 		 (org-icalendar--vevent
 		  entry scheduled (concat "SC-" uid)
-		  (concat "S: " summary) loc desc cat tz class)))
+		  (concat org-icalendar-scheduled-summary-prefix summary)
+                  loc desc cat tz class)))
 	  ;; When collecting plain timestamps from a headline and its
 	  ;; title, skip inlinetasks since collection will happen once
 	  ;; ENTRY is one of them.

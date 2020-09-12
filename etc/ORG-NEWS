@@ -295,6 +295,13 @@ Use the header argument =:var x=code-block[]= or
 to pass the contents of a named code block as a string argument.
 
 ** New options
+*** New custom settings =org-icalendar-scheduled-summary-prefix= and =org-icalendar-deadline-summary-prefix=
+
+These settings allow users to define prefixes for exported summary
+lines in ICS exports.  The customization can be used to disable
+the prefixes completely or make them a little bit more verbose
+(e.g. "Deadline: " instead of the default "DL: ").
+
 *** A new custom setting =org-hide-drawer-startup= to control initial folding state of drawers
 
 Previously, all the drawers were always folded when opening an Org
