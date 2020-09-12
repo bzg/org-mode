@@ -69,6 +69,17 @@ for timed events.  If non-zero, alarms are created.
   :version "24.1"
   :type 'integer)
 
+(defcustom org-icalendar-force-alarm nil
+  "Non-nil means alarm will be created even if is set to zero.
+
+This overrides default behaviour where zero means no alarm.  With
+this set to non-nil and alarm set to zero, alarm will be created
+and will fire at the event start."
+  :group 'org-export-icalendar
+  :type 'boolean
+  :package-version '(Org . "9.6")
+  :safe #'booleanp)
+
 (defcustom org-icalendar-combined-name "OrgMode"
   "Calendar name for the combined iCalendar representing all agenda files."
   :group 'org-export-icalendar
@@ -795,8 +806,11 @@ Return VALARM component as a string, or nil if it isn't allowed."
   (let ((alarm-time
 	 (let ((warntime
 		(org-element-property :APPT_WARNTIME entry)))
-	   (if warntime (string-to-number warntime) 0))))
-    (and (or (> alarm-time 0) (> org-icalendar-alarm-time 0))
+	   (if warntime (string-to-number warntime) nil))))
+    (and (or (and alarm-time
+		  (> alarm-time 0))
+	     (> org-icalendar-alarm-time 0)
+	     org-icalendar-force-alarm)
 	 (org-element-property :hour-start timestamp)
 	 (format "BEGIN:VALARM
 ACTION:DISPLAY
@@ -804,8 +818,10 @@ DESCRIPTION:%s
 TRIGGER:-P0DT0H%dM0S
 END:VALARM\n"
 		 summary
-		 (if (zerop alarm-time) org-icalendar-alarm-time alarm-time)))))
-
+                 (cond
+                  ((and alarm-time org-icalendar-force-alarm) alarm-time)
+                  ((and alarm-time (not (zerop alarm-time))) alarm-time)
+                  (t org-icalendar-alarm-time))))))
 
 ;;;; Template
 
