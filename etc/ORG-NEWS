@@ -324,6 +324,12 @@ value of ~org-babel-clojure-backend~. For example:
 #+end_src
 
 ** New options
+*** A new option for custom setting ~org-agenda-show-outline-path~ to show document title
+
+Setting ~org-agenda-show-outline-path~ to ~'title~ will show title
+instead of the file name at the beginning of the outline.  The title of
+the document can be set by special keyword =#+title:=.
+
 *** New custom settings =org-icalendar-scheduled-summary-prefix= and =org-icalendar-deadline-summary-prefix=
 
 These settings allow users to define prefixes for exported summary
