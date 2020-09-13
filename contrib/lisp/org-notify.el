@@ -57,7 +57,7 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
+(eval-when-compile (require 'cl-lib))
 (require 'org-element)
 
 (declare-function appt-delete-window    "appt"          ())
@@ -155,7 +155,7 @@ PERIOD."
       (message "Warning: notification for \"%s\" behind schedule!" heading))
   t)
 
-(defun org-notify-process ()
+(cl-defun org-notify-process ()
   "Process the todo-list, and possibly notify user about upcoming or
 forgotten tasks."
   (cl-macrolet ((prm (k) `(plist-get prms ,k))  (td (k) `(plist-get todo ,k)))
@@ -163,7 +163,7 @@ forgotten tasks."
       (let* ((deadline (td :deadline))  (heading (td :heading))
              (uid (td :uid))            (last-run-sym
                                          (intern (concat ":last-run-" uid))))
-        (dolist (prms (plist-get org-notify-map (td :notify)))
+        (cl-dolist (prms (plist-get org-notify-map (td :notify)))
           (when (< deadline (org-notify-string->seconds (prm :time)))
             (let ((period (org-notify-string->seconds (prm :period)))
                   (last-run (prm last-run-sym))  (now (float-time))
@@ -184,7 +184,7 @@ forgotten tasks."
                              (intern (concat "org-notify-action"
                                              (symbol-name action))))
                            plist))))
-            (return)))))))
+            (cl-return)))))))
 
 (defun org-notify-add (name &rest params)
   "Add a new notification type.
