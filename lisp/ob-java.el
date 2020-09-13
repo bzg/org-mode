@@ -60,12 +60,12 @@ parameters may be used, like javac -verbose"
 	 (cmdline (or (cdr (assq :cmdline params)) ""))
 	 (cmdargs (or (cdr (assq :cmdargs params)) ""))
 	 (full-body (org-babel-expand-body:generic body params)))
-    (with-temp-file src-file (insert full-body))
-    (org-babel-eval
-     (concat org-babel-java-compiler " " cmpflag " " src-file) "")
     ;; created package-name directories if missing
     (unless (or (not packagename) (file-exists-p packagename))
       (make-directory packagename 'parents))
+    (with-temp-file src-file (insert full-body))
+    (org-babel-eval
+     (concat org-babel-java-compiler " " cmpflag " " src-file) "")
     (let ((results (org-babel-eval (concat org-babel-java-command
                                            " " cmdline " " classname " " cmdargs) "")))
       (org-babel-reassemble-table
