@@ -921,19 +921,22 @@ nil      When nil, the command tries to be smart and figure out the
 The command tries to be smart and figure out the separator in the
 following way:
 
-  - when each line contains a TAB, assume TAB-separated material
-  - when each line contains a comma, assume CSV material
-  - else, assume one or more SPACE characters as separator.
+- when each line contains a TAB, assume TAB-separated material;
+- when each line contains a comma, assume CSV material;
+- else, assume one or more SPACE characters as separator.
 
 When non-nil, SEPARATOR specifies the field separator in the
 lines.  It can have the following values:
 
-(4)     Use the comma as a field separator
-(16)    Use a TAB as field separator
-(64)    Prompt for a regular expression as field separator
-integer When a number, use that many spaces, or a TAB, as field separator
-regexp  When a regular expression, use it to match the separator."
+- (4)     Use the comma as a field separator.
+- (16)    Use a TAB as field separator.
+- (64)    Prompt for a regular expression as field separator.
+- integer When a number, use that many spaces, or a TAB, as field separator.
+- regexp  When a regular expression, use it to match the separator."
   (interactive "f\nP")
+  (when (and (called-interactively-p 'any)
+	     (not (string-match-p "\.\\(?:[tc]sv\\|txt\\)$" file)))
+    (user-error "Cannot import such file"))
   (unless (bolp) (insert "\n"))
   (let ((beg (point))
 	(pm (point-max)))
