@@ -20495,26 +20495,40 @@ If there is no such heading, return nil."
 
 (defun org-end-of-meta-data (&optional full)
   "Skip planning line and properties drawer in current entry.
-When optional argument FULL is non-nil, also skip empty lines,
-clocking lines and regular drawers at the beginning of the
-entry."
+
+When optional argument FULL is t, also skip planning information,
+clocking lines and any kind of drawer.
+
+When FULL is non-nil but not t, skip planning information,
+clocking lines and only non-regular drawers, i.e. properties and
+logbook drawers."
   (org-back-to-heading t)
   (forward-line)
+  ;; Skip planning information.
   (when (looking-at-p org-planning-line-re) (forward-line))
+  ;; Skip property drawer.
   (when (looking-at org-property-drawer-re)
     (goto-char (match-end 0))
     (forward-line))
+  ;; When FULL is not nil, skip more.
   (when (and full (not (org-at-heading-p)))
     (catch 'exit
       (let ((end (save-excursion (outline-next-heading) (point)))
 	    (re (concat "[ \t]*$" "\\|" org-clock-line-re)))
 	(while (not (eobp))
-	  (cond ((looking-at-p org-drawer-regexp)
-		 (if (re-search-forward "^[ \t]*:END:[ \t]*$" end t)
-		     (forward-line)
-		   (throw 'exit t)))
-		((looking-at-p re) (forward-line))
-		(t (throw 'exit t))))))))
+	  (cond ;; Skip clock lines.
+	   ((looking-at-p re) (forward-line))
+	   ;; Skip logbook drawer.
+	   ((looking-at-p org-logbook-drawer-re)
+	    (if (re-search-forward "^[ \t]*:END:[ \t]*$" end t)
+		(forward-line)
+	      (throw 'exit t)))
+	   ;; When FULL is t, skip regular drawer too.
+	   ((and (eq full t) (looking-at-p org-drawer-regexp))
+	    (if (re-search-forward "^[ \t]*:END:[ \t]*$" end t)
+		(forward-line)
+	      (throw 'exit t)))
+	   (t (throw 'exit t))))))))
 
 (defun org--line-fully-invisible-p ()
   "Return non-nil if the current line is fully invisible."

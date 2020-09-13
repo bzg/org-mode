@@ -145,7 +145,7 @@ and END are buffer positions delimiting the encrypted area."
   (org-with-wide-buffer
    (unless (org-before-first-heading-p)
      (org-back-to-heading t)
-     (org-end-of-meta-data t)
+     (org-end-of-meta-data 'standard)
      (let ((case-fold-search nil)
 	   (banner-start (rx (seq bol
 				  (zero-or-more (any "\t "))
@@ -215,7 +215,7 @@ Assume `epg-context' is set."
      (let ((start-heading (point))
 	   (crypt-key (org-crypt-key-for-heading))
 	   (folded? (org-invisible-p (line-beginning-position))))
-       (org-end-of-meta-data t)
+       (org-end-of-meta-data 'standard)
        (let ((beg (point))
 	     (folded-heading
 	      (and folded?
