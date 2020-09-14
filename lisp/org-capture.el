@@ -332,7 +332,7 @@ be replaced with content and expanded:
   %^L         Like %^C, but insert as link.
   %^{prop}p   Prompt the user for a value for property `prop'.
   %^{prompt}  Prompt the user for a string and replace this sequence with it.
-              A default value and a completion table ca be specified like this:
+              A default value and a completion table can be specified like this:
               %^{prompt|default|completion2|completion3|...}.
   %?          After completing the template, position cursor here.
   %\\1 ... %\\N Insert the text entered at the nth %^{prompt}, where N
