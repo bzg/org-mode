@@ -315,6 +315,7 @@ be replaced with content and expanded:
   %a          Annotation, normally the link created with `org-store-link'.
   %A          Like %a, but prompt for the description part.
   %l          Like %a, but only insert the literal link.
+  %L          Like %l, but without brackets (the link content itself).
   %c          Current kill ring head.
   %x          Content of the X clipboard.
   %k          Title of currently clocked task.
@@ -1592,6 +1593,9 @@ The template may still contain \"%?\" for cursor positioning."
 	 (v-l (if (and v-a (string-match l-re v-a))
 		  (replace-match "[[\\1]]" nil nil v-a)
 		v-a))
+	 (v-L (if (or v-a (string-match l-re v-a))
+		  (replace-match "\\1" nil nil v-a)
+		v-a))
 	 (v-n user-full-name)
 	 (v-k (if (marker-buffer org-clock-marker)
 		  (org-no-properties org-clock-heading)
@@ -1644,7 +1648,7 @@ The template may still contain \"%?\" for cursor positioning."
       ;; Mark %() embedded elisp for later evaluation.
       (org-capture-expand-embedded-elisp 'mark)
       ;; Expand non-interactive templates.
-      (let ((regexp "%\\(:[-A-Za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlntTuUx]\\)"))
+      (let ((regexp "%\\(:[-A-Za-z]+\\|<\\([^>\n]+\\)>\\|[aAcfFikKlLntTuUx]\\)"))
 	(save-excursion
 	  (while (re-search-forward regexp nil t)
 	    ;; `org-capture-escaped-%' may modify buffer and cripple
@@ -1681,6 +1685,7 @@ The template may still contain \"%?\" for cursor positioning."
 			  (?k v-k)
 			  (?K v-K)
 			  (?l v-l)
+			  (?L v-L)
 			  (?n v-n)
 			  (?t v-t)
 			  (?T v-T)

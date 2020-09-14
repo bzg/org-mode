@@ -7799,6 +7799,10 @@ here:
 
   Like =%a=, but only insert the literal link.
 
+- =%L= ::
+
+  Like =%l=, but without brackets (the link content itself).
+
 - =%c= ::
 
   Current kill ring head.
