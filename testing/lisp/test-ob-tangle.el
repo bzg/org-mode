@@ -420,6 +420,38 @@ another block
 		    (org-split-string (buffer-string))))
 	      (delete-file file))))))
 
+(ert-deftest ob-tangle/multiple-noweb-in-line ()
+  "Test handling of multiple noweb references in a single line."
+  (should
+   (equal '("1" "2" "1")
+	  (let ((file (make-temp-file "org-tangle-")))
+	    (unwind-protect
+		(progn
+		  (org-test-with-temp-text-in-file
+		      (format "
+#+name: block1
+#+begin_src elisp
+1
+#+end_src
+
+#+name: block2
+#+begin_src elisp
+2
+#+end_src
+
+#+name: block3
+#+begin_src elisp :noweb yes :tangle %s
+<<block1>> <<block2>> <<block1>>
+#+end_src"
+			      file)
+		    (let ((org-babel-noweb-error-all-langs nil)
+			  (org-babel-noweb-error-langs nil))
+		      (org-babel-tangle)))
+		  (with-temp-buffer
+		    (insert-file-contents file)
+		    (org-split-string (buffer-string))))
+	      (delete-file file))))))
+
 (ert-deftest ob-tangle/detangle-false-positive ()
   "Test handling of false positive link during detangle."
   (let (buffer)
