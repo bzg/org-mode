@@ -5219,14 +5219,14 @@ by a #."
   "Fontify #+ lines and blocks."
   (let ((case-fold-search t))
     (when (re-search-forward
-	   (rx bol (group (zero-or-more blank) "#"
+	   (rx bol (group (zero-or-more (any " \t")) "#"
 			  (group (group (or (seq "+" (one-or-more (any "a-zA-Z")) (optional ":"))
-					    space
+					    (any " \t")
 					    eol))
 				 (optional (group "_" (group (one-or-more (any "a-zA-Z"))))))
-			  (zero-or-more blank)
+			  (zero-or-more (any " \t"))
 			  (group (group (zero-or-more (not (any " \t\n"))))
-				 (zero-or-more blank)
+				 (zero-or-more (any " \t"))
 				 (group (zero-or-more any)))))
 	   limit t)
       (let ((beg (match-beginning 0))
@@ -5249,7 +5249,7 @@ by a #."
 		quoting (member block-type org-protecting-blocks))
 	  (when (re-search-forward
 		 (rx-to-string `(group bol (or (seq (one-or-more "*") space)
-					       (seq (zero-or-more blank)
+					       (seq (zero-or-more (any " \t"))
 						    "#+end"
 						    ,(match-string 4)
 						    word-end
@@ -5323,11 +5323,11 @@ by a #."
 	  ;; Handle short captions
 	  (save-excursion
 	    (beginning-of-line)
-	    (looking-at (rx (group (zero-or-more blank)
+	    (looking-at (rx (group (zero-or-more (any " \t"))
 				   "#+caption"
 				   (optional "[" (zero-or-more any) "]")
 				   ":")
-			    (zero-or-more blank))))
+			    (zero-or-more (any " \t")))))
 	  (add-text-properties (line-beginning-position) (match-end 1)
 			       '(font-lock-fontified t face org-meta-line))
 	  (add-text-properties (match-end 0) (line-end-position)
