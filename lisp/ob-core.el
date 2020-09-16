@@ -2781,7 +2781,7 @@ block but are passed literally to the \"example-block\"."
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (comment (string= "noweb" (cdr (assq :comments (nth 2 info)))))
-	 (noweb-re (format "^\\(.*?\\)\\(%s\\)"
+	 (noweb-re (format "\\(.*?\\)\\(%s\\)"
 			   (with-current-buffer parent-buffer
 			     (org-babel-noweb-wrap))))
 	 (cache nil)
