@@ -4324,7 +4324,7 @@ located inside the current one.  "
   (if parent?
       (pcase type
 	(`headline 'section)
-	((and `section (guard (eq mode 'first-section))) 'top-comment)
+	((and (guard (eq mode 'first-section)) `section) 'top-comment)
 	(`inlinetask 'planning)
 	(`plain-list 'item)
 	(`property-drawer 'node-property)
