@@ -5142,30 +5142,31 @@ This includes angle, plain, and bracket links."
 		 (link (org-element-property :raw-link link-object))
 		 (type (org-element-property :type link-object))
 		 (path (org-element-property :path link-object))
+                 (face-property (pcase (org-link-get-parameter type :face)
+				  ((and (pred functionp) face) (funcall face path))
+				  ((and (pred facep) face) face)
+				  ((and (pred consp) face) face) ;anonymous
+				  (_ 'org-link)))
 		 (properties		;for link's visible part
-		  (list
-		   'face (pcase (org-link-get-parameter type :face)
-			   ((and (pred functionp) face) (funcall face path))
-			   ((and (pred facep) face) face)
-			   ((and (pred consp) face) face) ;anonymous
-			   (_ 'org-link))
-		   'mouse-face (or (org-link-get-parameter type :mouse-face)
-				   'highlight)
-		   'keymap (or (org-link-get-parameter type :keymap)
-			       org-mouse-map)
-		   'help-echo (pcase (org-link-get-parameter type :help-echo)
-				((and (pred stringp) echo) echo)
-				((and (pred functionp) echo) echo)
-				(_ (concat "LINK: " link)))
-		   'htmlize-link (pcase (org-link-get-parameter type
-								:htmlize-link)
-				   ((and (pred functionp) f) (funcall f))
-				   (_ `(:uri ,link)))
-		   'font-lock-multiline t)))
+		  (list 'mouse-face (or (org-link-get-parameter type :mouse-face)
+					'highlight)
+			'keymap (or (org-link-get-parameter type :keymap)
+				    org-mouse-map)
+			'help-echo (pcase (org-link-get-parameter type :help-echo)
+				     ((and (pred stringp) echo) echo)
+				     ((and (pred functionp) echo) echo)
+				     (_ (concat "LINK: " link)))
+			'htmlize-link (pcase (org-link-get-parameter type
+								  :htmlize-link)
+					((and (pred functionp) f) (funcall f))
+					(_ `(:uri ,link)))
+			'font-lock-multiline t)))
 	    (org-remove-flyspell-overlays-in start end)
 	    (org-rear-nonsticky-at end)
 	    (if (not (eq 'bracket style))
-		(add-text-properties start end properties)
+		(progn
+                  (add-face-text-property start end face-property)
+		  (add-text-properties start end properties))
 	      ;; Handle invisible parts in bracket links.
 	      (remove-text-properties start end '(invisible nil))
 	      (let ((hidden
@@ -5174,6 +5175,7 @@ This includes angle, plain, and bracket links."
 				    'org-link))
 			     properties)))
 		(add-text-properties start visible-start hidden)
+                (add-face-text-property visible-start visible-end face-property)
 		(add-text-properties visible-start visible-end properties)
 		(add-text-properties visible-end end hidden)
 		(org-rear-nonsticky-at visible-start)
@@ -5642,7 +5644,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; TODO keyword
 	   (list (format org-heading-keyword-regexp-format
 			 org-todo-regexp)
-		 '(2 (org-get-todo-face 2) t))
+		 '(2 (org-get-todo-face 2) prepend))
 	   ;; TODO
 	   (when org-fontify-todo-headline
 	     (list (format org-heading-keyword-regexp-format
@@ -5650,7 +5652,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			    "\\(?:"
 			    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
 			    "\\)"))
-		   '(2 'org-headline-todo t)))
+		   '(2 'org-headline-todo prepend)))
 	   ;; DONE
 	   (when org-fontify-done-headline
 	     (list (format org-heading-keyword-regexp-format
@@ -5658,7 +5660,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			    "\\(?:"
 			    (mapconcat 'regexp-quote org-done-keywords "\\|")
 			    "\\)"))
-		   '(2 'org-headline-done t)))
+		   '(2 'org-headline-done prepend)))
 	   ;; Priorities
 	   '(org-font-lock-add-priority-faces)
 	   ;; Tags
@@ -5842,18 +5844,24 @@ If TAG is a number, get the corresponding match group."
 (defun org-font-lock-add-priority-faces (limit)
   "Add the special priority faces."
   (while (re-search-forward org-priority-regexp limit t)
+    (add-face-text-property
+     (match-beginning 1)
+     (match-end 1)
+     (org-get-priority-face (string-to-char (match-string 2))))
     (add-text-properties
      (match-beginning 1) (match-end 1)
-     (list 'face (org-get-priority-face (string-to-char (match-string 2)))
-	   'font-lock-fontified t))))
+     (list 'font-lock-fontified t))))
 
 (defun org-font-lock-add-tag-faces (limit)
   "Add the special tag faces."
   (when (and org-tag-faces org-tags-special-faces-re)
     (while (re-search-forward org-tags-special-faces-re limit t)
+      (add-face-text-property
+       (match-beginning 1)
+       (match-end 1)
+       (org-get-tag-face 1))
       (add-text-properties (match-beginning 1) (match-end 1)
-			   (list 'face (org-get-tag-face 1)
-				 'font-lock-fontified t))
+			   (list 'font-lock-fontified t))
       (backward-char 1))))
 
 (defun org-unfontify-region (beg end &optional _maybe_loudly)
