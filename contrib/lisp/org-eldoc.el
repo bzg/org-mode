@@ -1,4 +1,4 @@
-;;; org-eldoc.el --- display org header and src block info using eldoc
+;;; org-eldoc.el --- display org header and src block info using eldoc -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2014-2020 Free Software Foundation, Inc.
 
@@ -114,11 +114,18 @@
         doc-func)
     (if (eq 'empty cached-func)
         (when (fboundp mode-func)
-          (with-temp-buffer
-            (funcall mode-func)
-            (setq doc-func (and eldoc-documentation-function
-                                (symbol-value 'eldoc-documentation-function)))
-            (puthash lang doc-func org-eldoc-local-functions-cache))
+	  (with-temp-buffer
+	    (funcall mode-func)
+	    (setq doc-func (if (boundp 'eldoc-documentation-functions)
+			       (let ((doc-funs eldoc-documentation-functions))
+				 (lambda (callback)
+				   (let ((eldoc-documentation-functions doc-funs))
+				     (run-hook-with-args-until-success
+				      'eldoc-documentation-functions
+				      callback))))
+			     (and eldoc-documentation-function
+				  (symbol-value 'eldoc-documentation-function))))
+	    (puthash lang doc-func org-eldoc-local-functions-cache))
           doc-func)
       cached-func)))
 
@@ -127,7 +134,7 @@
 (declare-function php-eldoc-function "php-eldoc" ())
 (declare-function go-eldoc--documentation-function "go-eldoc" ())
 
-(defun org-eldoc-documentation-function (&rest _ignored)
+(defun org-eldoc-documentation-function (&rest args)
   "Return breadcrumbs when on a headline, args for src block header-line,
   calls other documentation functions depending on lang when inside src body."
   (or
@@ -160,8 +167,12 @@
              (string= lang "go")
              (string= lang "golang")) (when (require 'go-eldoc nil t)
                                         (go-eldoc--documentation-function)))
-           (t (let ((doc-fun (org-eldoc-get-mode-local-documentation-function lang)))
-                (when (functionp doc-fun) (funcall doc-fun))))))))
+           (t (let ((doc-fun (org-eldoc-get-mode-local-documentation-function lang))
+		    (callback (car args)))
+                (when (functionp doc-fun)
+		  (if (functionp callback)
+		      (funcall doc-fun callback)
+		    (funcall doc-fun)))))))))
 
 ;;;###autoload
 (defun org-eldoc-load ()
