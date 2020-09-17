@@ -3282,7 +3282,7 @@ All available processes and theirs documents can be found in
      :image-output-type "png"
      :image-size-adjust (1.0 . 1.0)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvipng -D %D -T tight -o %O %f"))
+     :image-converter ("dvipng -D %D -T tight -bg Transparent -o %O %f"))
     (dvisvgm
      :programs ("latex" "dvisvgm")
      :description "dvi > svg"
@@ -16146,10 +16146,10 @@ a HTML file."
     (if (eq fg 'default)
 	(setq fg (org-latex-color :foreground))
       (setq fg (org-latex-color-format fg)))
-    (if (eq bg 'default)
-	(setq bg (org-latex-color :background))
-      (setq bg (org-latex-color-format
-		(if (string= bg "Transparent") "white" bg))))
+    (setq bg (cond
+	      ((eq bg 'default) (org-latex-color :background))
+	      ((string= bg "Transparent") nil)
+	      (t (org-latex-color-format bg))))
     ;; Remove TeX \par at end of snippet to avoid trailing space.
     (if (string-suffix-p string "\n")
         (aset string (1- (length string)) ?%)
@@ -16158,8 +16158,10 @@ a HTML file."
       (insert latex-header)
       (insert "\n\\begin{document}\n"
 	      "\\definecolor{fg}{rgb}{" fg "}%\n"
-	      "\\definecolor{bg}{rgb}{" bg "}%\n"
-	      "\n\\pagecolor{bg}%\n"
+	      (if bg
+		  (concat "\\definecolor{bg}{rgb}{" bg "}%\n"
+			  "\n\\pagecolor{bg}%\n")
+		"")
 	      "\n{\\color{fg}\n"
 	      string
 	      "\n}\n"
