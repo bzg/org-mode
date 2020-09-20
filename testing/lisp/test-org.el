@@ -2457,6 +2457,11 @@ SCHEDULED: <2014-03-04 tue.>"
 	    (org-test-with-temp-text "#+TAGS: [ A : B C ]"
 	      (org-mode-restart)
 	      org-tag-groups-alist))))
+  (should-not
+   (let ((org-tag-alist '(("A"))))
+     (org-test-with-temp-text "#+TAGS:"
+       (org-mode-restart)
+       org-current-tag-alist)))
   ;; FILETAGS keyword.
   (should
    (equal '("A" "B" "C")

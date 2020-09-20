@@ -1167,7 +1167,7 @@ are matched against file names, and values."
   "Alist between context and visibility span when revealing a location.
 
 \\<org-mode-map>Some actions may move point into invisible
-locations.  As a consequence, Org always expose a neighborhood
+locations.  As a consequence, Org always exposes a neighborhood
 around point.  How much is shown depends on the initial action,
 or context.  Valid contexts are
 
@@ -4279,10 +4279,10 @@ related expressions."
       (setq org-current-tag-alist
 	    (org--tag-add-to-alist
 	     org-tag-persistent-alist
-	     (let ((tags (mapconcat #'identity
-				    (cdr (assoc "TAGS" alist))
-				    "\n")))
-	       (if (org-string-nw-p tags) (org-tag-string-to-alist tags)
+	     (let ((tags (cdr (assoc "TAGS" alist))))
+	       (if tags
+		   (org-tag-string-to-alist
+		    (mapconcat #'identity tags "\n"))
 		 org-tag-alist))))
       (setq org-tag-groups-alist
 	    (org-tag-alist-to-groups org-current-tag-alist))
