@@ -6821,7 +6821,60 @@ Paragraph<point>"
    (org-test-with-temp-text "* H1"
      (let* ((org-refile-use-outline-path 'buffer-name)
 	    (org-refile-targets `((nil :level . 1))))
-       (member (buffer-name) (mapcar #'car (org-refile-get-targets)))))))
+       (member (buffer-name) (mapcar #'car (org-refile-get-targets))))))
+  ;; When `org-refile-use-outline-path' is `title', return extracted
+  ;; document title
+  (should
+   (equal '("T" "T/H1")
+     (org-test-with-temp-text-in-file "#+title: T\n* H1"
+      (let* ((org-refile-use-outline-path 'title)
+             (org-refile-targets `((nil :level . 1))))
+        (mapcar #'car (org-refile-get-targets))))))
+  ;; When `org-refile-use-outline-path' is `title' validate that
+  ;; deeper levels are correctly reported too (the same behaviour as
+  ;; 'file)
+  (should
+   (equal '("T" "T/H1" "T/H1/H2" "T/H1/H2/H3" "T/H1")
+     (org-test-with-temp-text-in-file "#+title: T\n* H1\n** H2\n*** H3\n* H1"
+       (let ((org-refile-use-outline-path 'title)
+             (org-refile-targets `((nil :maxlevel . 3))))
+         (mapcar #'car (org-refile-get-targets))))))
+  ;; When `org-refile-use-outline-path' is `title' and document do not
+  ;; have an extracted document title, return just the file name
+  (should
+   (org-test-with-temp-text-in-file "* H1"
+     (let* ((filename (buffer-file-name))
+            (org-refile-use-outline-path 'title)
+            (org-refile-targets `((nil :level . 1))))
+       (member (file-name-nondirectory filename)
+               (mapcar #'car (org-refile-get-targets))))))
+  ;; When `org-refile-use-outline-path' is `title' and document is a
+  ;; temporary buffer without a file, it is still possible to extract
+  ;; a title
+  (should
+   (equal '("T" "T/H1")
+     (org-test-with-temp-text "#+title: T\n* H1\n** H2"
+      (let* ((org-refile-use-outline-path 'title)
+             (org-refile-targets `((nil :level . 1))))
+      (mapcar #'car (org-refile-get-targets))))))
+  ;; When `org-refile-use-outline-path' is `title' and there are two
+  ;; title keywords in the file, titles are concatenated into a single
+  ;; one.
+  (should
+   (equal '("T1 T2" "T1 T2/H1")
+     (org-test-with-temp-text "#+title: T1\n#+title: T2\n* H1\n** H2"
+       (let* ((org-refile-use-outline-path 'title)
+              (org-refile-targets `((nil :level . 1))))
+       (mapcar #'car (org-refile-get-targets))))))
+  ;; When `org-refile-use-outline-path' is `title' and there are two
+  ;; title keywords in the file, titles are concatenated into a single
+  ;; one even if they are in the middle of the file.
+  (should
+   (equal '("T1 T2" "T1 T2/H1")
+     (org-test-with-temp-text "#+title: T1\n* H1\n** H2\n#+title: T2\n"
+       (let* ((org-refile-use-outline-path 'title)
+              (org-refile-targets `((nil :level . 1))))
+       (mapcar #'car (org-refile-get-targets)))))))
 
 
 

@@ -324,6 +324,12 @@ value of ~org-babel-clojure-backend~. For example:
 #+end_src
 
 ** New options
+*** A new option for custom setting ~org-refile-use-outline-path~ to show document title in refile targets
+
+Setting ~org-refile-use-outline-path~ to ~'title~ will show title
+instead of the file name in refile targets.  If the document do not have
+a title, the filename will be used, similar to ~'file~ option.
+
 *** A new option for custom setting ~org-agenda-show-outline-path~ to show document title
 
 Setting ~org-agenda-show-outline-path~ to ~'title~ will show title

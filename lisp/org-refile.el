@@ -160,7 +160,8 @@ When `buffer-name', use the buffer name."
 	  (const :tag "Yes" t)
 	  (const :tag "Start with file name" file)
 	  (const :tag "Start with full file path" full-file-path)
-	  (const :tag "Start with buffer name" buffer-name)))
+	  (const :tag "Start with buffer name" buffer-name)
+	  (const :tag "Start with document title" title)))
 
 (defcustom org-outline-path-complete-in-steps t
   "Non-nil means complete the outline path in hierarchical steps.
@@ -319,6 +320,11 @@ converted to a headline before refiling."
 		 (push (list (and (buffer-file-name (buffer-base-buffer))
                                   (file-truename (buffer-file-name (buffer-base-buffer))))
                              f nil nil) tgs))
+               (when (eq org-refile-use-outline-path 'title)
+                 (push (list (or (org-get-title)
+                                 (and f (file-name-nondirectory f)))
+                             f nil nil)
+                       tgs))
 	       (org-with-wide-buffer
 		(goto-char (point-min))
 		(setq org-outline-path-cache nil)
@@ -345,7 +351,12 @@ converted to a headline before refiling."
                                            (and (buffer-file-name (buffer-base-buffer))
                                                 (file-name-nondirectory
                                                  (buffer-file-name (buffer-base-buffer))))))
-				   (`full-file-path
+                                   (`title (list
+                                            (or (org-get-title)
+                                                (and (buffer-file-name (buffer-base-buffer))
+                                                     (file-name-nondirectory
+                                                      (buffer-file-name (buffer-base-buffer)))))))
+                                   (`full-file-path
 				    (list (buffer-file-name
 					   (buffer-base-buffer))))
 				   (`buffer-name
@@ -633,7 +644,7 @@ this function appends the default value from
 	 (tbl (mapcar
 	       (lambda (x)
 		 (if (and (not (member org-refile-use-outline-path
-				       '(file full-file-path)))
+				       '(file full-file-path title)))
 			  (not (equal filename (nth 1 x))))
 		     (cons (concat (car x) extra " ("
 				   (file-name-nondirectory (nth 1 x)) ")")
