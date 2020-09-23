@@ -13300,11 +13300,12 @@ This is computed according to `org-property-set-functions-alist'."
   (or (cdr (assoc property org-property-set-functions-alist))
       'org-completing-read))
 
-(defun org-read-property-value (property &optional pom)
+(defun org-read-property-value (property &optional pom default)
   "Read value for PROPERTY, as a string.
 When optional argument POM is non-nil, completion uses additional
 information, i.e., allowed or existing values at point or marker
-POM."
+POM.
+Optional argument DEFAULT provides a default value for PROPERTY."
   (let* ((completion-ignore-case t)
 	 (allowed
 	  (or (org-property-get-allowed-values nil property 'table)
@@ -13320,7 +13321,8 @@ POM."
      (if allowed
 	 (funcall set-function
 		  prompt allowed nil
-		  (not (get-text-property 0 'org-unrestricted (caar allowed))))
+		  (not (get-text-property 0 'org-unrestricted (caar allowed)))
+		  default nil default)
        (let ((all (mapcar #'list
 			  (append (org-property-values property)
 				  (and pom

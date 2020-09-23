@@ -332,6 +332,8 @@ be replaced with content and expanded:
   %^C         Interactive selection of which kill or clip to use.
   %^L         Like %^C, but insert as link.
   %^{prop}p   Prompt the user for a value for property `prop'.
+              A default value can be specified like this:
+              %^{prop|default}p.
   %^{prompt}  Prompt the user for a string and replace this sequence with it.
               A default value and a completion table can be specified like this:
               %^{prompt|default|completion2|completion3|...}.
@@ -1787,7 +1789,8 @@ The template may still contain \"%?\" for cursor positioning."
 					   (setq l (org-up-heading-safe)))
 					 (if l (point-marker)
 					   (point-min-marker)))))))
-			    (value (org-read-property-value prompt pom)))
+			    (value
+			     (org-read-property-value prompt pom default)))
 		       (org-set-property prompt value)))
 		    ((or "t" "T" "u" "U")
 		     ;; These are the date/time related ones.

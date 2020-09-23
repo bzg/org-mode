@@ -7858,7 +7858,8 @@ here:
 
 - =%^{PROP}p= ::
 
-  Prompt the user for a value for property {{{var(PROP)}}}.
+  Prompt the user for a value for property {{{var(PROP)}}}.  You may
+  specify a default value with =%^{PROP|default}=.
 
 - =%^{PROMPT}= ::
 
