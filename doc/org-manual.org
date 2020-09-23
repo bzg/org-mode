@@ -19697,8 +19697,8 @@ an Org file that is part of a publishing project.
 :END:
 
 Org Crypt encrypts the text of an entry, but not the headline, or
-properties.  Behind the scene, it uses the Emacs EasyPG library to
-encrypt and decrypt files.
+properties.  Behind the scene, it uses the [[info:epa][Emacs EasyPG Library]] to
+encrypt and decrypt files, and EasyPG needs a correct [[info:gnupg][GnuPG]] setup.
 
 #+vindex: org-crypt-tag-matcher
 Any text below a headline that has a =crypt= tag is automatically
