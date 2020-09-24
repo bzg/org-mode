@@ -11,6 +11,12 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.5 (not yet released)
+** New options and settings
+*** New formatting directive ~%L~ for org-capture
+
+The new ~%L~ formatting directive contains the bare link target, and
+may be used to create links with programmatically generated
+descriptions.
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
