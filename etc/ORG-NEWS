@@ -17,6 +17,13 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 The new ~%L~ formatting directive contains the bare link target, and
 may be used to create links with programmatically generated
 descriptions.
+
+*** New option ~org-id-ts-format~
+
+Earlier, IDs generated using =ts= method had a hard-coded format (i.e. =20200923T160237.891616=).
+The new option allows user to customise the format.
+Defaults are unchanged.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
@@ -409,12 +416,6 @@ The new value uses Emacs as the application for opening directory.
 *** New hook ~org-agenda-filter-hook~
 
 Functions in this hook are run after ~org-agenda-filter~ is called.
-
-*** New option ~org-id-ts-format~
-
-Earlier, IDs generated using =ts= method had a hard-coded format (i.e. =20200923T160237.891616=).
-The new option allows user to customise the format.
-Defaults are unchanged.
 
 ** Removed or renamed functions and variables
 *** Deprecated ~org-flag-drawer~ function
