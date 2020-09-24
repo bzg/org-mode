@@ -130,7 +130,9 @@ nil   Never use an ID to make a link, instead link using a text search for
 
 (defcustom org-id-ts-format "%Y%m%dT%H%M%S.%6N"
   "Default format for IDs generated using `ts' `org-id-method'.
-The format should be suitable to pass as an argument to `format-time-string'.")
+The format should be suitable to pass as an argument to `format-time-string'."
+  :type 'string
+  :package-version '(Org . "9.5"))
 
 (defcustom org-id-method 'uuid
   "The method that should be used to create new IDs.
