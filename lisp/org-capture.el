@@ -1595,7 +1595,7 @@ The template may still contain \"%?\" for cursor positioning."
 	 (v-l (if (and v-a (string-match l-re v-a))
 		  (replace-match "[[\\1]]" nil nil v-a)
 		v-a))
-	 (v-L (if (or v-a (string-match l-re v-a))
+	 (v-L (if (and v-a (string-match l-re v-a))
 		  (replace-match "\\1" nil nil v-a)
 		v-a))
 	 (v-n user-full-name)
