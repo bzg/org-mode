@@ -574,15 +574,16 @@ Use :header-args: instead"
 	   (let* ((path (org-element-property :path l))
 		  (file (if (string= type "file")
 			    path
-			  (org-attach-expand path))))
+                          (org-with-point-at (org-element-property :begin l)
+			    (org-attach-expand path)))))
 	     (and (not (file-remote-p file))
 		  (not (file-exists-p file))
 		  (list (org-element-property :begin l)
 			(format (if (org-element-lineage l '(link))
 				    "Link to non-existent image file %S \
 in description"
-				  "Link to non-existent local file %S"
-				  file))))))
+				  "Link to non-existent local file %S")
+                                file)))))
 	  (_ nil))))))
 
 (defun org-lint-non-existent-setupfile-parameter (ast)
