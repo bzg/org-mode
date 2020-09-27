@@ -24,6 +24,59 @@ Earlier, IDs generated using =ts= method had a hard-coded format (i.e. =20200923
 The new option allows user to customise the format.
 Defaults are unchanged.
 
+** New features
+*** =ob-python= improvements to =:return= header argument 
+
+The =:return= header argument in =ob-python= now works for session
+blocks as well as non-session blocks.  Also, it now works with the
+=:epilogue= header argument -- previously, setting the =:return=
+header would cause the =:epilogue= to be ignored.
+
+This change allows more easily moving boilerplate out of the main code
+block and into the header. For example, for plotting, we need to add
+boilerplate to save the figure to a file and return the
+filename. Instead of doing this within the code block, we can now
+handle it through the header arguments as follows:
+
+#+BEGIN_SRC org
+,#+header: :var fname="/home/jack/tmp/plot.svg"
+,#+header: :epilogue plt.savefig(fname)
+,#+header: :return fname
+,#+begin_src python :results value file
+  import matplotlib, numpy
+  import matplotlib.pyplot as plt
+  fig=plt.figure(figsize=(4,2))
+  x=numpy.linspace(-15,15)
+  plt.plot(numpy.sin(x)/x)
+  fig.tight_layout()
+,#+end_src
+
+,#+RESULTS:
+[[file:/home/jack/tmp/plot.svg]]
+#+END_SRC
+
+As another example, we can use =:return= with the external [[https://pypi.org/project/tabulate/][tabulate]]
+package, to convert pandas Dataframes into orgmode tables:
+
+#+begin_src org
+,#+header: :prologue from tabulate import tabulate
+,#+header: :return tabulate(table, headers=table.columns, tablefmt="orgtbl")
+,#+begin_src python :results value raw :session
+  import pandas as pd
+  table = pd.DataFrame({
+      "a": [1,2,3],
+      "b": [4,5,6]
+  })
+,#+end_src
+
+,#+RESULTS:
+|   | a | b |
+|---+---+---|
+| 0 | 1 | 4 |
+| 1 | 2 | 5 |
+| 2 | 3 | 6 |
+#+end_src
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix

@@ -81,13 +81,16 @@ This function is called by `org-babel-execute-src-block'."
 		   (cdr (assq :session params))))
          (result-params (cdr (assq :result-params params)))
          (result-type (cdr (assq :result-type params)))
-	 (return-val (when (and (eq result-type 'value) (not session))
+	 (return-val (when (eq result-type 'value)
 		       (cdr (assq :return params))))
 	 (preamble (cdr (assq :preamble params)))
          (full-body
-	  (org-babel-expand-body:generic
-	   (concat body (if return-val (format "\nreturn %s" return-val) ""))
-	   params (org-babel-variable-assignments:python params)))
+	  (concat
+	   (org-babel-expand-body:generic
+	    body params
+	    (org-babel-variable-assignments:python params))
+	   (when return-val
+	     (format (if session "\n%s" "\nreturn %s") return-val))))
          (result (org-babel-python-evaluate
 		  session full-body result-type result-params preamble)))
     (org-babel-reassemble-table
