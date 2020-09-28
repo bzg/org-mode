@@ -7106,7 +7106,14 @@ Paragraph<point>"
    (equal "{A+}"
 	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
 	    (org-mode-restart)
-	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "{A+}"))))))
+	    (let ((org-tag-alist-for-agenda nil)) (org-tags-expand "{A+}")))))
+  ;; Uppercase MATCH works with a non-nil DOWNCASED and SINGLE-AS-LIST.
+  (should
+   (equal (list "a" "b" "c")
+	  (org-test-with-temp-text "#+TAGS: [ A : B C ]"
+	    (org-mode-restart)
+	    (let ((org-tag-alist-for-agenda nil))
+	      (sort (org-tags-expand "A" t t) #'string-lessp))))))
 
 
 ;;; TODO keywords

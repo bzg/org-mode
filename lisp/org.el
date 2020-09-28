@@ -11742,7 +11742,9 @@ When DOWNCASED is non-nil, expand downcased TAGS."
 	   (if (not downcased) g
 	     (mapcar (lambda (s) (mapcar #'downcase s)) g)))))
     (cond
-     (single-as-list (org--tags-expand-group (list match) tag-groups nil))
+     (single-as-list (org--tags-expand-group
+		      (list (if downcased (downcase match) match))
+		      tag-groups nil))
      (org-group-tags
       (let* ((case-fold-search t)
 	     (tag-syntax org-mode-syntax-table)
