@@ -11703,7 +11703,7 @@ See also `org-scan-tags'."
       (cons match0 `(lambda (todo tags-list level) ,matcher)))))
 
 (defun org--tags-expand-group (group tag-groups expanded)
-  "Recursively Expand all tags in GROUP, according to TAG-GROUPS.
+  "Recursively expand all tags in GROUP, according to TAG-GROUPS.
 TAG-GROUPS is the list of groups used for expansion.  EXPANDED is
 an accumulator used in recursive calls."
   (dolist (tag group)
@@ -11751,7 +11751,9 @@ When DOWNCASED is non-nil, expand downcased TAGS."
 	   (if (not downcased) g
 	     (mapcar (lambda (s) (mapcar #'downcase s)) g)))))
     (cond
-     (single-as-list (org--tags-expand-group (list match) tag-groups nil))
+     (single-as-list (org--tags-expand-group
+		      (list (if downcased (downcase match) match))
+		      tag-groups nil))
      (org-group-tags
       (let* ((case-fold-search t)
 	     (tag-syntax org-mode-syntax-table)
