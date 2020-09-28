@@ -11694,7 +11694,7 @@ See also `org-scan-tags'."
       (cons match0 `(lambda (todo tags-list level) ,matcher)))))
 
 (defun org--tags-expand-group (group tag-groups expanded)
-  "Recursively Expand all tags in GROUP, according to TAG-GROUPS.
+  "Recursively expand all tags in GROUP, according to TAG-GROUPS.
 TAG-GROUPS is the list of groups used for expansion.  EXPANDED is
 an accumulator used in recursive calls."
   (dolist (tag group)
