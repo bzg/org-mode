@@ -17482,10 +17482,12 @@ default behavior is to automatically determine the result type.
   #+end_example
 
   #+cindex: @samp{file-desc}, header argument
-  The =file-desc= header argument defines the description (see
-  [[*Link Format]]) for the link.  If =file-desc= is present but has no value,
+  The =file-desc= header argument defines the description (see [[*Link
+  Format]]) for the link.  If =file-desc= is present but has no value,
   the =file= value is used as the link description.  When this
-  argument is not present, the description is omitted.
+  argument is not present, the description is omitted.  If you want to
+  provide the =file-desc= argument but omit the description, you can
+  provide it with an empty vector (i.e., :file-desc []).
 
   #+cindex: @samp{sep}, header argument
   By default, Org assumes that a table written to a file has

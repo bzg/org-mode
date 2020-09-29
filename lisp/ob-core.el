@@ -646,6 +646,14 @@ a list with the following pattern:
       (replace-regexp-in-string
        (org-src-coderef-regexp coderef) "" expand nil nil 1))))
 
+(defun org-babel--file-desc (params result)
+  "Retrieve file description."
+  (pcase (assq :file-desc params)
+    (`nil nil)
+    (`(:file-desc) result)
+    (`(:file-desc . ,(and (pred stringp) val)) val)
+    (`(:file-desc . []) nil)))
+
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
@@ -749,8 +757,7 @@ block."
 		    (let ((*this* (if (not file) result
 				    (org-babel-result-to-file
 				     file
-				     (let ((desc (assq :file-desc params)))
-				       (and desc (or (cdr desc) result)))))))
+				     (org-babel--file-desc params result)))))
 		      (setq result (org-babel-ref-resolve post))
 		      (when file
 			(setq result-params (remove "file" result-params))))))
@@ -2257,9 +2264,8 @@ INFO may provide the values of these header arguments (in the
 	 (setq result (org-no-properties result))
 	 (when (member "file" result-params)
 	   (setq result (org-babel-result-to-file
-			 result (when (assq :file-desc (nth 2 info))
-				  (or (cdr (assq :file-desc (nth 2 info)))
-				      result))))))
+			 result
+			 (org-babel--file-desc (nth 2 info) result)))))
 	((listp result))
 	(t (setq result (format "%S" result))))
   (if (and result-params (member "silent" result-params))

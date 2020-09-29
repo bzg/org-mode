@@ -24,6 +24,17 @@ Earlier, IDs generated using =ts= method had a hard-coded format (i.e. =20200923
 The new option allows user to customise the format.
 Defaults are unchanged.
 
+*** New argument for ~file-desc~ babel header
+
+It is now possible to provide the =file-desc= header argument for a
+babel source block but omit the description by passing an empty vector
+as an argument (i.e., :file-desc []).  This can be useful because
+providing =file-desc= without an argument results in the result of
+=file= being used in the description.  Previously, the only way to
+omit a file description was to omit the header argument entirely,
+which made it difficult/impossible to provide a default value for
+=file-desc=.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
