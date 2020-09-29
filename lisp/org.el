@@ -10693,8 +10693,8 @@ WHAT entry will also be removed."
 	 ;; If there is nothing more to add and no more keyword is
 	 ;; left, remove the line completely.
 	 (if (and (looking-at-p "[ \t]*$") (not what))
-	     (delete-region (line-beginning-position)
-			    (line-beginning-position 2))
+	     (delete-region (line-end-position 0)
+			    (line-end-position))
 	   ;; If we removed last keyword, do not leave trailing white
 	   ;; space at the end of line.
 	   (let ((p (point)))
