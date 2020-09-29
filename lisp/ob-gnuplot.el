@@ -92,7 +92,21 @@ code."
 		      (tablep (or (listp first) (symbolp first))))
 		 (if tablep val (mapcar 'list val)))
 	       (org-babel-temp-file "gnuplot-") params)
-	  val))))
+	    (if (and (file-remote-p val)  ;; check if val is a remote file
+		     (file-exists-p val)) ;; call to file-exists-p is slow, maybe remove it
+		(let* ((local-name (concat ;; create a unique filename to avoid multiple downloads
+				org-babel-temporary-directory
+				"/gnuplot/"
+				(file-remote-p val 'host)
+				(file-local-name val))))
+		  (if (and (file-exists-p local-name) ;; only download file if remote is newer
+			   (file-newer-than-file-p local-name val))
+		      local-name
+		    (make-directory (file-name-directory local-name) t)
+		    (copy-file val local-name t)
+		  ))
+	      val
+		)))))
      (org-babel--get-vars params))))
 
 (defun org-babel-expand-body:gnuplot (body params)
