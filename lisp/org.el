@@ -16577,7 +16577,7 @@ overwritten, and the table is not marked as requiring realignment."
 		(1+ org-self-insert-command-undo-counter))))))))
 
 (defun org-check-before-invisible-edit (kind)
-  "Check is editing if kind KIND would be dangerous with invisible text around.
+  "Check if editing kind KIND would be dangerous with invisible text around.
 The detailed reaction depends on the user option `org-catch-invisible-edits'."
   ;; First, try to get out of here as quickly as possible, to reduce overhead
   (when (and org-catch-invisible-edits

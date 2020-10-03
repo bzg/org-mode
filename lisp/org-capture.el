@@ -1150,10 +1150,11 @@ may have been stored before."
      (insert-here?
       ;; FIXME: level should probably set directly within (let ...).
       (setq level (org-get-valid-level
-		   (if (or (org-at-heading-p)
-			   (ignore-errors (org-back-to-heading t)))
-		       (org-outline-level)
-		     1))))
+                   (if (or (org-at-heading-p)
+                           (ignore-errors
+			     (save-excursion (org-back-to-heading t))))
+                       (org-outline-level)
+                     1))))
      ;; Insert as a child of the current entry.
      ((org-capture-get :target-entry-p)
       (setq level (org-get-valid-level
