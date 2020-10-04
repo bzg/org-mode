@@ -386,7 +386,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("exists" "\\exists" t "&exist;" "[there exists]" "[there exists]" "∃")
      ("nexist" "\\nexists" t "&exist;" "[there does not exists]" "[there does not  exists]" "∄")
      ("nexists" "\\nexists" t "&exist;" "[there does not exists]" "[there does not  exists]" "∄")
-     ("empty" "\\empty" t "&empty;" "[empty set]" "[empty set]" "∅")
+     ("empty" "\\emptyset" t "&empty;" "[empty set]" "[empty set]" "∅")
      ("emptyset" "\\emptyset" t "&empty;" "[empty set]" "[empty set]" "∅")
      ("isin" "\\in" t "&isin;" "[element of]" "[element of]" "∈")
      ("in" "\\in" t "&isin;" "[element of]" "[element of]" "∈")
