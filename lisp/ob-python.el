@@ -241,8 +241,8 @@ def main():
 open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defconst org-babel-python--exec-tmpfile "\
-with open('%s') as f:
-    exec(compile(f.read(), f.name, 'exec'))"
+with open('%s') as __org_babel_python_tmpfile:
+    exec(compile(__org_babel_python_tmpfile.read(), __org_babel_python_tmpfile.name, 'exec'))"
   "Template for Python session command with output results.
 
 Has a single %s escape, the tempfile containing the source code
@@ -253,20 +253,20 @@ to evaluate.")
   "Return Python code to evaluate SRC-FILE and write result to RESULT-FILE."
   (format "\
 import ast
-with open('%s') as f:
-    __org_babel_python_ast = ast.parse(f.read())
+with open('%s') as __org_babel_python_tmpfile:
+    __org_babel_python_ast = ast.parse(__org_babel_python_tmpfile.read())
 __org_babel_python_final = __org_babel_python_ast.body[-1]
 if isinstance(__org_babel_python_final, ast.Expr):
     __org_babel_python_ast.body = __org_babel_python_ast.body[:-1]
     exec(compile(__org_babel_python_ast, '<string>', 'exec'))
     __org_babel_python_final = eval(compile(ast.Expression(
         __org_babel_python_final.value), '<string>', 'eval'))
-    with open('%s', 'w') as f:
+    with open('%s', 'w') as __org_babel_python_tmpfile:
         if %s:
             import pprint
-            f.write(pprint.pformat(__org_babel_python_final))
+            __org_babel_python_tmpfile.write(pprint.pformat(__org_babel_python_final))
         else:
-            f.write(str(__org_babel_python_final))
+            __org_babel_python_tmpfile.write(str(__org_babel_python_final))
 else:
     exec(compile(__org_babel_python_ast, '<string>', 'exec'))
     __org_babel_python_final = None"
