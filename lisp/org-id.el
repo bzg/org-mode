@@ -661,20 +661,27 @@ When FILES is given, scan also these files."
 
 (defun org-id-find-id-in-file (id file &optional markerp)
   "Return the position of the entry ID in FILE.
+
 If that files does not exist, or if it does not contain this ID,
 return nil.
+
 The position is returned as a cons cell (file-name . position).  With
 optional argument MARKERP, return the position as a new marker."
-  (let (org-agenda-new-buffers buf pos)
-    (cond
-     ((not file) nil)
-     ((not (file-exists-p file)) nil)
-     (t (with-current-buffer (setq buf (org-get-agenda-file-buffer file))
-	  (setq pos (org-find-entry-with-id id))
-	  (when pos
-	    (if markerp
-		(move-marker (make-marker) pos buf)
-	      (cons file pos))))))))
+  (cond
+   ((not file) nil)
+   ((not (file-exists-p file)) nil)
+   (t
+    (let* ((visiting (find-buffer-visiting file))
+	   (buffer (or visiting (find-file-noselect file))))
+      (unwind-protect
+	  (with-current-buffer buffer
+	    (let ((pos (org-find-entry-with-id id)))
+	      (cond
+	       ((null pos) nil)
+	       (markerp (move-marker (make-marker) pos buffer))
+	       (t (cons file pos)))))
+	;; Remove opened buffer in the process.
+	(unless (or visiting markerp) (kill-buffer buffer)))))))
 
 ;; id link type
 
