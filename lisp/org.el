@@ -8057,7 +8057,7 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 	   (and file bfn (concat (file-name-nondirectory bfn) separator))
 	   separator))
     (add-face-text-property 0 (length res)
-			    `((t :height ,(face-attribute 'default :height)))
+			    `(:height ,(face-attribute 'default :height))
 			    nil res)
     (if just-return-string
 	res
