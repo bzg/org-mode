@@ -5684,7 +5684,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	     1 'org-checkbox prepend)
 	   (when (cdr (assq 'checkbox org-list-automatic-rules))
 	     '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
-	       (0 (org-get-checkbox-statistics-face) t)))
+	       (0 (org-get-checkbox-statistics-face) prepend)))
 	   ;; Description list items
 	   '("^[ \t]*[-+*][ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
 	     1 'org-list-dt prepend)
