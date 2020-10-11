@@ -5843,7 +5843,7 @@ If TAG is a number, get the corresponding match group."
   "Add the special priority faces."
   (while (re-search-forward org-priority-regexp limit t)
     (add-text-properties
-     (match-beginning 1) (match-end 1)
+     (match-beginning 1) (1+ (match-end 2))
      (list 'face (org-get-priority-face (string-to-char (match-string 2)))
 	   'font-lock-fontified t))))
 
