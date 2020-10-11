@@ -5845,13 +5845,14 @@ If TAG is a number, get the corresponding match group."
 (defun org-font-lock-add-priority-faces (limit)
   "Add the special priority faces."
   (while (re-search-forward org-priority-regexp limit t)
-    (add-face-text-property
-     (match-beginning 1)
-     (match-end 1)
-     (org-get-priority-face (string-to-char (match-string 2))))
-    (add-text-properties
-     (match-beginning 1) (match-end 1)
-     (list 'font-lock-fontified t))))
+    (let ((beg (match-beginning 1))
+	  (end (match-end 1)))
+      (add-face-text-property
+       beg end
+       (org-get-priority-face (string-to-char (match-string 2))))
+      (add-text-properties
+       beg end
+       (list 'font-lock-fontified t)))))
 
 (defun org-font-lock-add-tag-faces (limit)
   "Add the special tag faces."
