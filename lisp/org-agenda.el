@@ -3987,7 +3987,7 @@ agenda display, configure `org-agenda-finalize-hook'."
 	      p (string-to-char (match-string 2))
 	      b (match-beginning 1)
 	      e (if (eq org-agenda-fontify-priorities 'cookies)
-		    (match-end 1)
+		    (1+ (match-end 2))
 		  (point-at-eol))
 	      ov (make-overlay b e))
 	(overlay-put

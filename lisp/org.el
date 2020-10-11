@@ -5846,7 +5846,7 @@ If TAG is a number, get the corresponding match group."
   "Add the special priority faces."
   (while (re-search-forward org-priority-regexp limit t)
     (let ((beg (match-beginning 1))
-	  (end (match-end 1)))
+	  (end (1+ (match-end 2))))
       (add-face-text-property
        beg end
        (org-get-priority-face (string-to-char (match-string 2))))
