@@ -6706,7 +6706,7 @@ back to standard interface."
 	    ;; on the first key, if any.  A nil value means KEY will
 	    ;; only be activated at first level.
 	    (if (or (eq access-key t) (eq access-key first-key))
-		(propertize key 'face 'org-warning)
+		(propertize key 'face 'org-dispatcher-highlight)
 	      key)))
 	 (fontify-value
 	  (lambda (value)
