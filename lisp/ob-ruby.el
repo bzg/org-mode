@@ -74,6 +74,9 @@ This function is called by `org-babel-execute-src-block'."
 		   (cdr (assq :session params))))
          (result-params (cdr (assq :result-params params)))
          (result-type (cdr (assq :result-type params)))
+	 (org-babel-ruby-command
+	  (or (cdr (assq :ruby params))
+	      org-babel-ruby-command))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:ruby params)))
          (result (if (member "xmp" result-params)
