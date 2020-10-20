@@ -414,7 +414,16 @@ being set to t and copy to the target location, don't move it.
 Beware that keeping refiled entries may result in duplicated ID
 properties.
 
-RFLOC can be a refile location obtained in a different way.
+RFLOC can be a refile location obtained in a different way.  It
+should be a list with the following 4 elements:
+
+1. Name - an identifier for the refile location, typically the
+headline text
+2. File - the file the refile location is in
+3. nil - used for generating refile location candidates, not
+needed when passing RFLOC
+4. Position - the position in the specified file of the
+headline to refile under
 
 MSG is a string to replace \"Refile\" in the default prompt with
 another verb.  E.g. `org-copy' sets this parameter to \"Copy\".

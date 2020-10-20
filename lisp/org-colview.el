@@ -1586,6 +1586,7 @@ PARAMS is a property list of parameters:
       (move-marker org-columns-begin-marker (point))
     (setq org-columns-begin-marker (point-marker)))
   (let* ((org-columns--time (float-time))
+	 (org-done-keywords org-done-keywords-for-agenda)
 	 (fmt
 	  (cond
 	   ((bound-and-true-p org-overriding-columns-format))

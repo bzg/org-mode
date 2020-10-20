@@ -662,6 +662,7 @@ defined in org-duration.el.")
 (defvar org-modules-loaded nil
   "Have the modules been loaded already?")
 
+;;;###autoload
 (defun org-load-modules-maybe (&optional force)
   "Load all extensions listed in `org-modules'."
   (when (or force (not org-modules-loaded))
