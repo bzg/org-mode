@@ -125,22 +125,22 @@
 Look through BODY for the package and class.  If found, put them
 together into a fully qualified class name and return.  Else just
 return class name.  If that isn't found either, default to Main."
-  (let ((package (if (string-match "package \\\([^ ]*\\\);" body)
+  (let ((package (if (string-match org-babel-java--package-re body)
                      (match-string 1 body)))
-        (class (if (string-match "public class \\\([^ \n]*\\\)" body)
+        (class (if (string-match org-babel-java--class-re body)
                    (match-string 1 body))))
     (or (and package class (concat package "." class))
         (and class class)
         (and package (concat package ".Main"))
         "Main")))
 
-(defconst org-babel-java--package-re "^[[:space:]]*package .*;$"
+(defconst org-babel-java--package-re "^[[:space:]]*package[[:space:]]+\\\([[:alnum:]_\.]+\\\);$"
   "Regexp for the package statement.")
-(defconst org-babel-java--imports-re "^[[:space:]]*import .*;$"
+(defconst org-babel-java--imports-re "^[[:space:]]*import[[:space:]]+\\\([[:alnum:]_\.]+\\\);$"
   "Regexp for import statements.")
-(defconst org-babel-java--class-re "^public class [[:alnum:]_]+[[:space:]]*\n?[[:space:]]*{"
+(defconst org-babel-java--class-re "^[[:space:]]*\\\(?:public[[:space:]]+\\\)?class[[:space:]]+\\\([[:alnum:]_]+\\\)[[:space:]]*\n?[[:space:]]*{"
   "Regexp for the class declaration.")
-(defconst org-babel-java--main-re "public static void main(String\\(?:\\[]\\)? args\\(?:\\[]\\)?).*\n?[[:space:]]*{"
+(defconst org-babel-java--main-re "public static void main(String\\\(?:\\[]\\\)?[[:space:]]+[^ ]+\\\(?:\\[]\\\)?).*\n?[[:space:]]*{"
   "Regexp for the main method declaration.")
 (defconst org-babel-java--any-method-re "public .*(.*).*\n?[[:space:]]*{"
   "Regexp for any method.")

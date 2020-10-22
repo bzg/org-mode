@@ -137,6 +137,18 @@ public class Simple {
 #+end_src"
    (should (string= "42" (org-babel-execute-src-block)))))
 
+(ert-deftest ob-java/simple-with-non-public-class ()
+  "Hello world program that defines a non-public class."
+  (org-test-with-temp-text
+      "#+begin_src java :results output silent
+class Simple {
+    public static void main(String[] args) {
+        System.out.print(42);
+    }
+}
+#+end_src"
+   (should (string= "42" (org-babel-execute-src-block)))))
+
 (ert-deftest ob-java/simple-with-class-and-package ()
   "Hello world program that defines a class and package."
   (org-test-with-temp-text
