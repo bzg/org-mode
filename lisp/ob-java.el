@@ -218,7 +218,7 @@ RESULT-FILE is the temp file to write the result."
       (org-babel-java--move-past org-babel-java--class-re)
       (insert "\n    public static void main(String[] args) {
         System.out.print(\"success\");
-}\n\n"))
+    }\n\n"))
 
     ;; special handling to return value
     (when (eq result-type 'value)
