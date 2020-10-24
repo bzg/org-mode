@@ -394,7 +394,7 @@ load \"%s\"
 
 # General settings
 DataColCount = words($Data[1])-1
-AxesCount = |$Data|-HeaderLines
+AxesCount = |$Data|-HeaderLines-1
 AngleOffset = 90
 Max = 1
 d=0.1*Max
@@ -479,7 +479,7 @@ EOD
 				     "\"%s\" %s"
 				     (car row)
 				     (s-join " " (cdr row))))
-				  table))))
+				  (append table (list (car table)))))))
 	 (ticks (or (plist-get params :ticks)
 		    (org--plot/sensible-tick-num table
 						 (plist-get params :ymin)
@@ -498,7 +498,7 @@ EOD
 				   (plist-get data :nice-max))
 			       (if (eq ticks 0) 2 ticks)
 			       )))
-			  table)))
+			  (append table (list (car table))))))
 	 (setup-file (make-temp-file "org-plot-setup")))
     (let ((coding-system-for-write 'utf-8))
       (write-region (format org--plot/radar-setup-template data settings) nil setup-file nil :silent))
