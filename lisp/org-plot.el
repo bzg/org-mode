@@ -194,7 +194,7 @@ values, namely regarding the range."
 	 (maximum (or hard-max (apply #'max nums)))
 	 (range (- maximum minimum))
 	 (rangeOrder (if (= range 0) 0
-			 (ceiling (- 1 (log10 range)))))
+		       (ceiling (- 1 (log10 range)))))
 	 (range-factor (expt 10 rangeOrder))
 	 (nice-min (if (= range 0) (car nums)
 		     (/ (float (floor (* minimum range-factor))) range-factor)))
@@ -228,44 +228,44 @@ values, namely regarding the range."
   "From a list of frequences, try to sensibly pick a sample of the most frequent."
   ;; TODO this mosly works decently, but counld do with some tweaking to work more consistently.
   (case (length frequencies)
-    (1 (list (car (nth 0 frequencies))))
-    (2 (if (<= 3 (/ (cdr (nth 0 frequencies))
-		    (cdr (nth 1 frequencies))))
-	   (make-list 2
-		      (car (nth 0 frequencies)))
-	 (list (car (nth 0 frequencies))
-	       (car (nth 1 frequencies)))))
-    (t
-     (let* ((total-count (apply #'+ (mapcar #'cdr frequencies)))
-	    (n-freq (mapcar (lambda (freq) `(,(car freq) . ,(/ (float (cdr freq)) total-count))) frequencies))
-	    (f-pick (list (car (car n-freq))))
-	    (1-2-ratio (/ (cdr (nth 0 n-freq))
-			  (cdr (nth 1 n-freq))))
-	    (2-3-ratio (/ (cdr (nth 1 n-freq))
-			  (cdr (nth 2 n-freq))))
-	    (1-3-ratio (* 1-2-ratio 2-3-ratio))
-	    (1-val (car (nth 0 n-freq)))
-	    (2-val (car (nth 1 n-freq)))
-	    (3-val (car (nth 2 n-freq))))
-       (when (> 1-2-ratio 4) (push 1-val f-pick))
-       (when (and (< 1-2-ratio 2-val)
-		  (< (* (apply #'* f-pick) 2-val) 30))
-	 (push 2-val f-pick))
-       (when (and (< 1-3-ratio 3-val)
-		  (< (* (apply #'* f-pick) 3-val) 30))
-	 (push 3-val f-pick))
-       f-pick))))
+	(1 (list (car (nth 0 frequencies))))
+	(2 (if (<= 3 (/ (cdr (nth 0 frequencies))
+			(cdr (nth 1 frequencies))))
+	       (make-list 2
+			  (car (nth 0 frequencies)))
+	     (list (car (nth 0 frequencies))
+		   (car (nth 1 frequencies)))))
+	(t
+	 (let* ((total-count (apply #'+ (mapcar #'cdr frequencies)))
+		(n-freq (mapcar (lambda (freq) `(,(car freq) . ,(/ (float (cdr freq)) total-count))) frequencies))
+		(f-pick (list (car (car n-freq))))
+		(1-2-ratio (/ (cdr (nth 0 n-freq))
+			      (cdr (nth 1 n-freq))))
+		(2-3-ratio (/ (cdr (nth 1 n-freq))
+			      (cdr (nth 2 n-freq))))
+		(1-3-ratio (* 1-2-ratio 2-3-ratio))
+		(1-val (car (nth 0 n-freq)))
+		(2-val (car (nth 1 n-freq)))
+		(3-val (car (nth 2 n-freq))))
+	   (when (> 1-2-ratio 4) (push 1-val f-pick))
+	   (when (and (< 1-2-ratio 2-val)
+		      (< (* (apply #'* f-pick) 2-val) 30))
+	     (push 2-val f-pick))
+	   (when (and (< 1-3-ratio 3-val)
+		      (< (* (apply #'* f-pick) 3-val) 30))
+	     (push 3-val f-pick))
+	   f-pick))))
 
 (defun org--plot/merge-alists (function default alist1 alist2 &rest alists)
   "Using FUNCTION, combine the elements of all given ALISTS. When an element is
 only present in one alist, DEFAULT is used as the second argument for the FUNCTION."
   (when (> (length alists) 0)
     (setq alist2 (apply #'org--plot/merge-alists function default alist2 alists)))
-  (flet ((keys (alist) (mapcar #'car alist))
-	 (lookup (key alist) (or (cdr (assoc key alist)) default)))
-    (loop with keys = (union (keys alist1) (keys alist2) :test 'equal)
-	  for k in keys collect
-	  (cons k (funcall function (lookup k alist1) (lookup k alist2))))))
+  (cl-flet ((keys (alist) (mapcar #'car alist))
+	    (lookup (key alist) (or (cdr (assoc key alist)) default)))
+    (cl-loop with keys = (cl-union (keys alist1) (keys alist2) :test 'equal)
+	     for k in keys collect
+	     (cons k (funcall function (lookup k alist1) (lookup k alist2))))))
 
 (defun org--plot/item-frequencies (values &optional normalise)
   "Return an alist indicating the frequency of values in VALUES list."
@@ -283,7 +283,7 @@ only present in one alist, DEFAULT is used as the second argument for the FUNCTI
 	(setq value (/ value i))
 	(setq i (1- i))
 	))
-    (subseq factors 0 -1)))
+    (cl-subseq factors 0 -1)))
 
 (defcustom org-plot/gnuplot-script-preamble ""
   "String or function which provides content to be inserted into the GNUPlot
@@ -500,8 +500,8 @@ EOD
 			       )))
 			  table)))
 	 (setup-file (make-temp-file "org-plot-setup")))
-    (f-write-text (format org--plot/radar-setup-template data settings)
-		  'utf-8 setup-file)
+    (let ((coding-system-for-write 'utf-8))
+      (write-region (format org--plot/radar-setup-template data settings) nil setup-file nil :silent))
     (format org--plot/radar-template
 	    setup-file
 	    (if (eq ticks 0) 2 ticks)
