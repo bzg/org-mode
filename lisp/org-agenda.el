@@ -4127,8 +4127,8 @@ functions do."
 
 (defun org-agenda-new-marker (&optional pos)
   "Return a new agenda marker.
-Maker is at point, or at POS if non-nil.  Org mode keeps a list of
-these markers and resets them when they are no longer in use."
+Marker is at point, or at POS if non-nil.  Org mode keeps a list
+of these markers and resets them when they are no longer in use."
   (let ((m (copy-marker (or pos (point)) t)))
     (setq org-agenda-last-marker-time (float-time))
     (if org-agenda-buffer
