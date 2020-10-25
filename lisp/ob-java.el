@@ -2,7 +2,9 @@
 
 ;; Copyright (C) 2011-2020 Free Software Foundation, Inc.
 
-;; Author: Ian Martins <ianxm@jhu.edu>
+;; Authors: Eric Schulte
+;;          Dan Davison
+;; Maintainer: Ian Martins <ianxm@jhu.edu>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
@@ -31,108 +33,43 @@
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("java" . "java"))
 
+(defvar org-babel-temporary-directory) ; from ob-core
+
 (defvar org-babel-default-header-args:java '()
   "Default header args for java source blocks.")
 
 (defconst org-babel-header-args:java '((imports . :any))
   "Java-specific header arguments.")
 
-(defvar org-babel-java-compiler-command "javac"
-  "Name of the command to execute the java compiler.")
+(defcustom org-babel-java-command "java"
+  "Name of the java command.
+May be either a command in the path, like java or an absolute
+path name, like /usr/local/bin/java.  Parameters may be used,
+like java -verbose."
+  :group 'org-babel
+  :package-version '(Org . "9.5")
+  :type 'string)
 
-(defvar org-babel-java-runtime-command "java"
-  "Name of the command to run the java runtime.")
+(defcustom org-babel-java-compiler "javac"
+  "Name of the java compiler.
+May be either a command in the path, like javac or an absolute
+path name, like /usr/local/bin/javac.  Parameters may be used,
+like javac -verbose."
+  :group 'org-babel
+  :package-version '(Org . "9.5")
+  :type 'string)
 
 (defcustom org-babel-java-hline-to "null"
   "Replace hlines in incoming tables with this when translating to java."
   :group 'org-babel
-  :version "25.2"
-  :package-version '(Org . "9.3")
+  :package-version '(Org . "9.5")
   :type 'string)
 
 (defcustom org-babel-java-null-to 'hline
   "Replace `null' in java tables with this before returning."
   :group 'org-babel
-  :version "25.2"
-  :package-version '(Org . "9.3")
+  :package-version '(Org . "9.5")
   :type 'symbol)
-
-(defun org-babel-execute:java (body params)
-  "Execute a java source block with BODY code and PARAMS params."
-  (let* (;; if true, run from babel temp directory
-         (run-from-temp (not (assq :dir params)))
-         ;; class and package
-         (fullclassname (or (cdr (assq :classname params))
-                            (org-babel-java-find-classname body)))
-         ;; just the class name
-         (classname (car (last (split-string fullclassname "\\."))))
-         ;; just the package name
-         (packagename (if (seq-contains fullclassname ?.)
-                          (file-name-base fullclassname)))
-         ;; the base dir that contains the top level package dir
-         (basedir (file-name-as-directory (if run-from-temp
-                                              org-babel-temporary-directory
-                                            ".")))
-         ;; the dir to write the source file
-         (packagedir (if (and (not run-from-temp) packagename)
-                         (file-name-as-directory
-                          (concat basedir (replace-regexp-in-string "\\\." "/" packagename)))
-                       basedir))
-         ;; the filename of the source file
-         (src-file (concat packagedir classname ".java"))
-	 ;; compiler flags
-	 (cmpflag (or (cdr (assq :cmpflag params)) ""))
-	 ;; runtime flags
-         (cmdline (or (cdr (assq :cmdline params)) ""))
-         ;; command line args
-	 (cmdargs (or (cdr (assq :cmdargs params)) ""))
-         ;; the command to compile and run
-         (cmd (concat org-babel-java-compiler-command " " cmpflag " "
-                      (org-babel-process-file-name src-file 'noquote)
-                      " && " org-babel-java-runtime-command
-                      " -cp " (org-babel-process-file-name basedir 'noquote)
-		      " " cmdline " " (if run-from-temp classname fullclassname)
-		      " " cmdargs))
-         ;; header args for result processing
-         (result-type (cdr (assq :result-type params)))
-         (result-params (cdr (assq :result-params params)))
-         (result-file (and (eq result-type 'value)
-                           (org-babel-temp-file "java-")))
-         ;; the expanded body of the source block
-         (full-body (org-babel-expand-body:java body params)))
-
-    ;; created package-name directories if missing
-    (unless (or (not packagedir) (file-exists-p packagedir))
-      (make-directory packagedir 'parents))
-
-    ;; write the source file
-    (setq full-body (org-babel-java--expand-for-evaluation
-		     full-body run-from-temp result-type result-file))
-    (with-temp-file src-file (insert full-body))
-
-    ;; compile, run, process result
-    (org-babel-reassemble-table
-     (org-babel-java-evaluate cmd result-type result-params result-file)
-     (org-babel-pick-name
-      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
-     (org-babel-pick-name
-      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
-
-;; helper functions
-
-(defun org-babel-java-find-classname (body)
-  "Try to find fully qualified class name in BODY.
-Look through BODY for the package and class.  If found, put them
-together into a fully qualified class name and return.  Else just
-return class name.  If that isn't found either, default to Main."
-  (let ((package (if (string-match org-babel-java--package-re body)
-                     (match-string 1 body)))
-        (class (if (string-match org-babel-java--class-re body)
-                   (match-string 1 body))))
-    (or (and package class (concat package "." class))
-        (and class class)
-        (and package (concat package ".Main"))
-        "Main")))
 
 (defconst org-babel-java--package-re "^[[:space:]]*package[[:space:]]+\\\([[:alnum:]_\.]+\\\);$"
   "Regexp for the package statement.")
@@ -188,6 +125,83 @@ it wants to return to a temporary file so that ob-java can read
 it back.  The name of the temporary file to write must be
 replaced in this string.")
 
+(defun org-babel-execute:java (body params)
+  "Execute a java source block with BODY code and PARAMS params."
+  (let* (;; if true, run from babel temp directory
+         (run-from-temp (not (assq :dir params)))
+         ;; class and package
+         (fullclassname (or (cdr (assq :classname params))
+                            (org-babel-java-find-classname body)))
+         ;; just the class name
+         (classname (car (last (split-string fullclassname "\\."))))
+         ;; just the package name
+         (packagename (if (string-match-p "\\." fullclassname)
+                          (file-name-base fullclassname)))
+         ;; the base dir that contains the top level package dir
+         (basedir (file-name-as-directory (if run-from-temp
+                                              org-babel-temporary-directory
+                                            ".")))
+         ;; the dir to write the source file
+         (packagedir (if (and (not run-from-temp) packagename)
+                         (file-name-as-directory
+                          (concat basedir (replace-regexp-in-string "\\\." "/" packagename)))
+                       basedir))
+         ;; the filename of the source file
+         (src-file (concat packagedir classname ".java"))
+         ;; compiler flags
+         (cmpflag (or (cdr (assq :cmpflag params)) ""))
+         ;; runtime flags
+         (cmdline (or (cdr (assq :cmdline params)) ""))
+         ;; command line args
+         (cmdargs (or (cdr (assq :cmdargs params)) ""))
+         ;; the command to compile and run
+         (cmd (concat org-babel-java-compiler " " cmpflag " "
+                      (org-babel-process-file-name src-file 'noquote)
+                      " && " org-babel-java-command
+                      " -cp " (org-babel-process-file-name basedir 'noquote)
+                      " " cmdline " " (if run-from-temp classname fullclassname)
+                      " " cmdargs))
+         ;; header args for result processing
+         (result-type (cdr (assq :result-type params)))
+         (result-params (cdr (assq :result-params params)))
+         (result-file (and (eq result-type 'value)
+                           (org-babel-temp-file "java-")))
+         ;; the expanded body of the source block
+         (full-body (org-babel-expand-body:java body params)))
+
+    ;; created package-name directories if missing
+    (unless (or (not packagedir) (file-exists-p packagedir))
+      (make-directory packagedir 'parents))
+
+    ;; write the source file
+    (setq full-body (org-babel-java--expand-for-evaluation
+                     full-body run-from-temp result-type result-file))
+    (with-temp-file src-file (insert full-body))
+
+    ;; compile, run, process result
+    (org-babel-reassemble-table
+     (org-babel-java-evaluate cmd result-type result-params result-file)
+     (org-babel-pick-name
+      (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
+     (org-babel-pick-name
+      (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params))))))
+
+;; helper functions
+
+(defun org-babel-java-find-classname (body)
+  "Try to find fully qualified class name in BODY.
+Look through BODY for the package and class.  If found, put them
+together into a fully qualified class name and return.  Else just
+return class name.  If that isn't found either, default to Main."
+  (let ((package (if (string-match org-babel-java--package-re body)
+                     (match-string 1 body)))
+        (class (if (string-match org-babel-java--class-re body)
+                   (match-string 1 body))))
+    (or (and package class (concat package "." class))
+        (and class class)
+        (and package (concat package ".Main"))
+        "Main")))
+
 (defun org-babel-java--expand-for-evaluation (body suppress-package-p result-type result-file)
   "Expand source block for evaluation.
 In order to return a value we have to add a __toString method.
@@ -209,7 +223,7 @@ RESULT-FILE is the temp file to write the result."
     ;; suppress package statement
     (goto-char (point-min))
     (when (and suppress-package-p
-	       (re-search-forward org-babel-java--package-re nil t))
+               (re-search-forward org-babel-java--package-re nil t))
       (replace-match ""))
 
     ;; add a dummy main method if needed
@@ -225,7 +239,7 @@ RESULT-FILE is the temp file to write the result."
       (goto-char (point-min))
       (org-babel-java--move-past org-babel-java--class-re)
       (insert (format org-babel-java--result-wrapper
-		      (org-babel-process-file-name result-file 'noquote)))
+                      (org-babel-process-file-name result-file 'noquote)))
       (search-forward "public static void main(") ; rename existing main
       (replace-match "public static Object _main("))
 
@@ -263,7 +277,7 @@ is simplest to expand the code block from the inside out."
   (let* ((fullclassname (or (cdr (assq :classname params)) ; class and package
                             (org-babel-java-find-classname body)))
          (classname (car (last (split-string fullclassname "\\.")))) ; just class name
-         (packagename (if (seq-contains fullclassname ?.)  ; just package name
+         (packagename (if (string-match-p "\\." fullclassname)       ; just package name
                           (file-name-base fullclassname)))
          (var-lines (org-babel-variable-assignments:java params))
          (imports-val (assq :imports params))
@@ -405,17 +419,17 @@ Emacs-lisp table, otherwise return the results as a string."
   "Evaluate using an external java process.
 CMD the command to execute.
 
-If RESULT-TYPE equals 'output then return standard output as a
-string.  If RESULT-TYPE equals 'value then return the value
+If RESULT-TYPE equals `output' then return standard output as a
+string.  If RESULT-TYPE equals `value' then return the value
 returned by the source block, as elisp.
 
 RESULT-PARAMS input params used to format the reponse.
 
 RESULT-FILE filename of the tempfile to store the returned value in
-for 'value RESULT-TYPE.  Not used for 'output RESULT-TYPE."
+for `value' RESULT-TYPE.  Not used for `output' RESULT-TYPE."
   (let ((raw (pcase result-type
-               ('output (org-babel-eval cmd ""))
-               ('value (org-babel-eval cmd "")
+               (`output (org-babel-eval cmd ""))
+               (`value (org-babel-eval cmd "")
                        (org-babel-eval-read-file result-file)))))
     (org-babel-result-cond result-params raw
       (org-babel-java-table-or-string raw))))

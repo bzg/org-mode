@@ -1,7 +1,9 @@
 ;;; test-ob-java.el --- tests for ob-java.el
 
-;; Copyright (c) 2020 Ian Martins
-;; Authors: Ian Martins
+;; Copyright (c) 2020 Free Software Foundation, Inc.
+;; Authors: Eric Schulte
+;;          Dan Davison
+;; Maintainer: Ian Martins <ianxm@jhu.edu>
 
 ;; This file is not part of GNU Emacs.
 
