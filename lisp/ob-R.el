@@ -4,6 +4,7 @@
 
 ;; Author: Eric Schulte
 ;;	Dan Davison
+;; Maintainer: Jeremie Juste
 ;; Keywords: literate programming, reproducible research, R, statistics
 ;; Homepage: https://orgmode.org
 
