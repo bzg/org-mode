@@ -3,6 +3,7 @@
 ;; Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
 ;; Author: Benjamin Andresen
+;; Maintainer: Ken Mankoff
 ;; Keywords: literate programming, interactive shell
 ;; Homepage: https://orgmode.org
 
