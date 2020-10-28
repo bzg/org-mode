@@ -3,6 +3,7 @@
 ;; Copyright (C) 2010-2020 Free Software Foundation, Inc.
 
 ;; Author: Juan Pechiar
+;; Maintainer: Justin Abrahms
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
