@@ -35,6 +35,24 @@ omit a file description was to omit the header argument entirely,
 which made it difficult/impossible to provide a default value for
 =file-desc=.
 
+*** New option to set ~org-link-file-path-type~ to a function
+
+~org-link-file-path-type~ can now be set to a function that takes the
+full filename as an argument and returns the path to link to.
+
+For example, if you use ~project.el~, you can set this function to use
+relative links within a project as follows:
+
+#+begin_src emacs-lisp
+(setq (org-link-file-path-type
+       (lambda (path)
+         (let* ((proj (project-current))
+                (root (if proj (project-root proj) default-directory)))
+           (if (string-prefix-p (expand-file-name root) path)
+               (file-relative-name path)
+             (abbreviate-file-name path))))))
+#+end_src
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
