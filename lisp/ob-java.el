@@ -35,8 +35,14 @@
 
 (defvar org-babel-temporary-directory) ; from ob-core
 
-(defvar org-babel-default-header-args:java '()
-  "Default header args for java source blocks.")
+(defvar org-babel-default-header-args:java '((:results . "output"))
+  "Default header args for java source blocks.
+The docs say functional mode should be the default [1], but
+ob-java didn't support functional mode until recently, so we keep
+scripting mode as the default for now to maintain existing
+behavior.
+
+[1] https://orgmode.org/manual/Results-of-Evaluation.html")
 
 (defconst org-babel-header-args:java '((imports . :any))
   "Java-specific header arguments.")

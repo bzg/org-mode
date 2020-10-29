@@ -37,9 +37,10 @@
 ; simple tests
 
 (ert-deftest ob-java/simple ()
-  "Hello world program that writes output."
+  "Hello world program that writes output. Also tests that
+ob-java defaults to scripting mode."
   (org-test-with-temp-text
-      "#+begin_src java :results output silent
+      "#+begin_src java :results silent
 System.out.print(42);
 #+end_src"
    (should (string= "42" (org-babel-execute-src-block)))))
@@ -63,7 +64,7 @@ System.out.print(\"\\\"42\\\"\");
 (ert-deftest ob-java/simple-return-int ()
   "Hello world program that returns an int value."
   (org-test-with-temp-text
-      "#+begin_src java :results silent
+      "#+begin_src java :results value silent
 return 42;
 #+end_src"
    (should (eq 42 (org-babel-execute-src-block)))))
@@ -71,7 +72,7 @@ return 42;
 (ert-deftest ob-java/simple-return-float ()
   "Hello world program that returns a float value."
   (org-test-with-temp-text
-      "#+begin_src java :results silent
+      "#+begin_src java :results value silent
 return 42.0;
 #+end_src"
    (should (equal 42.0 (org-babel-execute-src-block)))))
@@ -79,7 +80,7 @@ return 42.0;
 (ert-deftest ob-java/simple-return-string ()
   "Hello world program that returns a string value."
   (org-test-with-temp-text
-      "#+begin_src java :results silent
+      "#+begin_src java :results value silent
 return \"forty two\";
 #+end_src"
     (should (string= "forty two" (org-babel-execute-src-block)))))
@@ -291,7 +292,7 @@ System.out.print(String.format(\"%s, len=%d\", a, a.length()));
 (ert-deftest ob-java/return-vector-using-list ()
   "Return a vector using a list."
   (org-test-with-temp-text
-      "#+begin_src java :results vector silent
+      "#+begin_src java :results value vector silent
 import java.util.List;
 import java.util.Arrays;
 List<List<Integer>> a = Arrays.asList(Arrays.asList(4),
@@ -304,7 +305,7 @@ return a;
 (ert-deftest ob-java/return-vector-using-array ()
   "Return a vector using an array."
   (org-test-with-temp-text
-      "#+begin_src java :results vector silent
+      "#+begin_src java :results value vector silent
 Integer[][] a = {{4}, {2}};
 return a;
 #+end_src"
@@ -314,7 +315,7 @@ return a;
 (ert-deftest ob-java/read-return-list ()
   "Read and return a list."
   (org-test-with-temp-text
-      "#+begin_src java :var a=java_list :results silent
+      "#+begin_src java :var a=java_list :results value silent
 import java.util.List;
 import java.util.Arrays;
 List<String> b = Arrays.asList(a.get(0).get(0),
@@ -331,7 +332,7 @@ return b;
 (ert-deftest ob-java/read-list-return-array ()
   "Read a list and return an array."
   (org-test-with-temp-text
-      "#+begin_src java :var a=java_list :results silent
+      "#+begin_src java :var a=java_list :results value silent
 String[] b = {a.get(0).get(0), a.get(1).get(0)};
 return b;
 #+end_src
@@ -345,7 +346,7 @@ return b;
 (ert-deftest ob-java/read-return-list-with-package ()
   "Return a vector."
   (org-test-with-temp-text
-      "#+begin_src java :var a=java_list :results silent
+      "#+begin_src java :var a=java_list :results value silent
 package pkg;
 import java.util.List;
 import java.util.Arrays;
@@ -375,7 +376,7 @@ System.out.println(\"forty two\");
 (ert-deftest ob-java/list-var ()
   "Read and write a list variable."
   (org-test-with-temp-text
-      "#+begin_src java :var a='(\"forty\" \"two\") :results silent
+      "#+begin_src java :var a='(\"forty\" \"two\") :results value silent
 import java.util.List;
 List<String> b = a;
 return b;
@@ -386,7 +387,7 @@ return b;
 (ert-deftest ob-java/vector-var ()
   "Read and write a vector variable."
   (org-test-with-temp-text
-      "#+begin_src java :var a='[\"forty\" \"two\"] :results silent
+      "#+begin_src java :var a='[\"forty\" \"two\"] :results value silent
 import java.util.List;
 List<String> b = a;
 return b;
@@ -397,7 +398,7 @@ return b;
 (ert-deftest ob-java/matrix-var ()
   "Read and write matrix variable."
   (org-test-with-temp-text
-      "#+begin_src java :var a=java_matrix :results silent
+      "#+begin_src java :var a=java_matrix :results value silent
 import java.util.List;
 import java.util.Arrays;
 List<List<Integer>> b = Arrays.asList(Arrays.asList(a.get(0).get(0), a.get(1).get(0)),
@@ -455,7 +456,7 @@ for (int ii=0; ii<a.size(); ii++) {
 (ert-deftest ob-java/inhomogeneous_table ()
   "Read and write an inhomogeneous table."
   (org-test-with-temp-text
-      "#+begin_src java :var a=java_table :results silent
+      "#+begin_src java :var a=java_table :results value silent
 import java.util.List;
 import java.util.Arrays;
 List<List> b = Arrays.asList(Arrays.asList(a.get(0).get(0),
