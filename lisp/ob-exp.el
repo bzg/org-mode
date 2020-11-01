@@ -405,8 +405,7 @@ inhibit insertion of results into the buffer."
 	  (`lob
 	   (save-excursion
 	     (goto-char (nth 5 info))
-	     (let (org-confirm-babel-evaluate)
-	       (org-babel-execute-src-block nil info)))))))))
+	     (org-babel-execute-src-block nil info))))))))
 
 (provide 'ob-exp)
 
