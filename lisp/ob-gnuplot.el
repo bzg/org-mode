@@ -47,6 +47,8 @@
 (declare-function gnuplot-send-string-to-gnuplot "ext:gnuplot-mode" (str txt))
 (declare-function gnuplot-send-buffer-to-gnuplot "ext:gnuplot-mode" ())
 
+(defvar org-babel-temporary-directory)
+
 (defvar org-babel-default-header-args:gnuplot
   '((:results . "file") (:exports . "results") (:session . nil))
   "Default arguments to use when evaluating a gnuplot source block.")
