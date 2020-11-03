@@ -543,7 +543,12 @@ INFO is a plist holding contextual information.  See
      ((string= type "coderef")
       (format (org-export-get-coderef-format path desc)
 	      (org-export-resolve-coderef path info)))
-     ((equal type "radio") desc)
+     ((string= type "radio")
+      (let ((destination (org-export-resolve-radio-link link info)))
+	(if (not destination) desc
+	  (format "<a href=\"#%s\">%s</a>"
+		  (org-export-get-reference destination info)
+		  desc))))
      (t (if (not desc) (format "<%s>" path)
 	  (format "[%s](%s)" desc path))))))
 
