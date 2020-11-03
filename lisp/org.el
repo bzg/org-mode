@@ -5307,7 +5307,7 @@ by a #."
 		 (min (point-max) end-of-endline))
 	       '(face org-block-end-line)))
 	    t))
-	 ((member dc1 '("+title:" "+author:" "+email:" "+date:"))
+	 ((member dc1 '("+title:" "+subtitle:" "+author:" "+email:" "+date:"))
 	  (org-remove-flyspell-overlays-in
 	   (match-beginning 0)
 	   (if (equal "+title:" dc1) (match-end 2) (match-end 0)))
