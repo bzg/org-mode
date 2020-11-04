@@ -6149,9 +6149,38 @@ Return a non-nil value when toggling is successful."
 
 (defun org-hide-drawer-all ()
   "Fold all drawers in the current buffer."
+  (let ((begin (point-min))
+	(end (point-max)))
+    (org--hide-drawers begin end)))
+
+(defun org-cycle-hide-drawers (state)
+  "Re-hide all drawers after a visibility state change.
+STATE should be one of the symbols listed in the docstring of
+`org-cycle-hook'."
+  (when (derived-mode-p 'org-mode)
+    (cond ((not (memq state '(overview folded contents)))
+	   (let* ((global? (eq state 'all))
+		  (beg (if global? (point-min) (line-beginning-position)))
+		  (end (cond (global? (point-max))
+			     ((eq state 'children) (org-entry-end-position))
+			     (t (save-excursion (org-end-of-subtree t t))))))
+	     (org--hide-drawers beg end)))
+	  ((memq state '(overview contents))
+	   ;; Hide drawers before first heading.
+	   (let ((beg (point-min))
+		 (end (save-excursion
+			(goto-char (point-min))
+			(if (org-before-first-heading-p)
+			    (org-entry-end-position)
+			  (point-min)))))
+	     (when (< beg end)
+	       (org--hide-drawers beg end)))))))
+
+(defun org--hide-drawers (begin end)
+  "Hide all drawers between BEGIN and END."
   (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward org-drawer-regexp nil t)
+    (goto-char begin)
+    (while (re-search-forward org-drawer-regexp end t)
       (let* ((pair (get-char-property-and-overlay (line-beginning-position)
 						  'invisible))
 	     (o (cdr-safe pair)))
@@ -6165,32 +6194,6 @@ Return a non-nil value when toggling is successful."
 		 (org-hide-drawer-toggle t nil drawer)
 		 ;; Make sure to skip drawer entirely or we might flag it
 		 ;; another time when matching its ending line with
-		 ;; `org-drawer-regexp'.
-		 (goto-char (org-element-property :end drawer)))))))))))
-
-(defun org-cycle-hide-drawers (state)
-  "Re-hide all drawers after a visibility state change.
-STATE should be one of the symbols listed in the docstring of
-`org-cycle-hook'."
-  (when (and (derived-mode-p 'org-mode)
-	     (not (memq state '(overview folded contents))))
-    (let* ((global? (eq state 'all))
-	   (beg (if global? (point-min) (line-beginning-position)))
-	   (end (cond (global? (point-max))
-		      ((eq state 'children) (org-entry-end-position))
-		      (t (save-excursion (org-end-of-subtree t t))))))
-      (save-excursion
-	(goto-char beg)
-	(while (re-search-forward org-drawer-regexp end t)
-	  (pcase (get-char-property-and-overlay (point) 'invisible)
-	    ;; Do not fold already folded drawers.
-	    (`(outline . ,o) (goto-char (overlay-end o)))
-	    (_
-	     (let ((drawer (org-element-at-point)))
-	       (when (memq (org-element-type drawer) '(drawer property-drawer))
-		 (org-hide-drawer-toggle t nil drawer)
-		 ;; Make sure to skip drawer entirely or we might flag
-		 ;; it another time when matching its ending line with
 		 ;; `org-drawer-regexp'.
 		 (goto-char (org-element-property :end drawer)))))))))))
 
