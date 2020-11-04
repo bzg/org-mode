@@ -518,28 +518,31 @@ When FILES is given, scan also these files."
          (seen-ids nil)
          (ndup 0)
          (i 0))
-    (dolist (file files)
-      (when (file-exists-p file)
-        (unless silent
-          (cl-incf i)
-          (message "Finding ID locations (%d/%d files): %s" i nfiles file))
-        (with-current-buffer (find-file-noselect file t)
-          (let ((ids nil)
-                (case-fold-search t))
-            (org-with-point-at 1
-              (while (re-search-forward id-regexp nil t)
-                (when (org-at-property-p)
-                  (push (org-entry-get (point) "ID") ids)))
-              (when ids
-                (push (cons (abbreviate-file-name file) ids)
-                      org-id-locations)
-                (dolist (id ids)
-                  (cond
-                   ((not (member id seen-ids)) (push id seen-ids))
-                   (silent nil)
-                   (t
-                    (message "Duplicate ID %S" id)
-                    (cl-incf ndup))))))))))
+    (with-temp-buffer
+      (delay-mode-hooks
+	(org-mode)
+	(dolist (file files)
+	  (when (file-exists-p file)
+            (unless silent
+              (cl-incf i)
+              (message "Finding ID locations (%d/%d files): %s" i nfiles file))
+	    (insert-file-contents file nil nil nil 'replace)
+            (let ((ids nil)
+		  (case-fold-search t))
+              (org-with-point-at 1
+		(while (re-search-forward id-regexp nil t)
+		  (when (org-at-property-p)
+                    (push (org-entry-get (point) "ID") ids)))
+		(when ids
+		  (push (cons (abbreviate-file-name file) ids)
+			org-id-locations)
+		  (dolist (id ids)
+                    (cond
+                     ((not (member id seen-ids)) (push id seen-ids))
+                     (silent nil)
+                     (t
+                      (message "Duplicate ID %S" id)
+                      (cl-incf ndup)))))))))))
     (setq org-id-files (mapcar #'car org-id-locations))
     (org-id-locations-save)
     ;; Now convert to a hash table.
