@@ -6286,7 +6286,7 @@ organize such tasks using a so-called repeater in a =DEADLINE=,
 the =+1m= is a repeater; the intended interpretation is that the task
 has a deadline on =<2005-10-01>= and repeats itself every (one) month
 starting from that time.  You can use yearly, monthly, weekly, daily
-and hourly repeat cookies by using the =y=, =w=, =m=, =d= and =h=
+and hourly repeat cookies by using the =y=, =m=, =w=, =d= and =h=
 letters.  If you need both a repeater and a special warning period in
 a deadline entry, the repeater should come first and the warning
 period last
