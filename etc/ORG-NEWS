@@ -88,6 +88,18 @@ package, to convert pandas Dataframes into orgmode tables:
 | 2 | 3 | 6 |
 #+end_src
 
+** Miscellaneous
+*** =org-goto-first-child= now works before first heading
+
+When point is before first heading =org-goto-first-child= will move
+point to the first child heading, or return nil if no heading exist
+in buffer.  This is in line with the fact that everything before first
+heading is regarded as outline level 0, i.e. the parent level of all
+headings in the buffer.
+
+Previously =org-goto-first-child= would do nothing before first
+heading, except return nil.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix

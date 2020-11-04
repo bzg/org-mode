@@ -20427,10 +20427,10 @@ move point."
 Return t when a child was found.  Otherwise don't move point and
 return nil."
   (let (level (pos (point)) (re org-outline-regexp-bol))
-    (when (ignore-errors (org-back-to-heading t))
-      (setq level (outline-level))
+    (when (org-back-to-heading-or-point-min t)
+      (setq level (org-outline-level))
       (forward-char 1)
-      (if (and (re-search-forward re nil t) (> (outline-level) level))
+      (if (and (re-search-forward re nil t) (> (org-outline-level) level))
 	  (progn (goto-char (match-beginning 0)) t)
 	(goto-char pos) nil))))
 
