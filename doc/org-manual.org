@@ -21796,14 +21796,6 @@ to remove code evaluation from the {{{kbd(C-c C-c)}}} key binding.
 are not evaluated when they appear in a keyword (see [[*Summary of
 In-Buffer Settings]]).
 
-[fn:159] C++ language is handled in =ob-C.el=.  Even though the
-identifier for such source blocks is =C++=, you activate it by loading
-the C language.
-
-[fn:160] D language is handled in =ob-C.el=.  Even though the
-identifier for such source blocks is =D=, you activate it by loading
-the C language.
-
 [fn:142] For noweb literate programming details, see
 http://www.cs.tufts.edu/~nr/noweb/.
 
