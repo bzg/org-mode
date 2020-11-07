@@ -414,14 +414,15 @@ changes."
   '((((class color) (background light)) (:foreground "midnight blue"))
     (((class color) (background dark)) (:foreground "pale turquoise"))
     (t nil))
-  "Face for document subtitle, date, author and email; i.e. that
-which follows a #+SUBTITLE:, #+DATE:, #+AUTHOR: or #+EMAIL:
-keyword."
+  "Face for document information such as the author and date.
+This applies to the text that follows a #+SUBTITLE:, #+DATE:,
+#+AUTHOR: or #+EMAIL: keyword."
   :group 'org-faces)
 
 (defface org-document-info-keyword '((t :inherit shadow))
-  "Face for #+TITLE:, #+SUBTITLE:, #+AUTHOR:, #+EMAIL: and
-#+DATE: keywords."
+  "Face for document information keywords.
+This face applies to the #+TITLE:, #+SUBTITLE:, #+AUTHOR:,
+#+EMAIL: and #+DATE: keywords."
   :group 'org-faces)
 
 (defface org-block `((t :inherit shadow
