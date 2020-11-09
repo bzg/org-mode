@@ -3760,6 +3760,14 @@ generating a new one."
       ;; does not have org variables local
       org-agenda-this-buffer-is-sticky))))
 
+(defvar org-agenda-buffer-tmp-name nil)
+
+(defun org-agenda--get-buffer-name (sticky-name)
+  (or org-agenda-buffer-tmp-name
+      (and org-agenda-doing-sticky-redo org-agenda-buffer-name)
+      sticky-name
+      "*Org Agenda*"))
+
 (defun org-agenda-prepare-window (abuf filter-alist)
   "Setup agenda buffer in the window.
 ABUF is the buffer for the agenda window.
@@ -4210,7 +4218,6 @@ See the docstring of `org-read-date' for details.")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-arg-loc nil) ; local variable
 
-(defvar org-agenda-buffer-tmp-name nil)
 ;;;###autoload
 (defun org-agenda-list (&optional arg start-day span with-hour)
   "Produce a daily/weekly view from all files in variable `org-agenda-files'.
@@ -4238,15 +4245,13 @@ items if they have an hour specification like [h]h:mm."
       (user-error "Agenda creation impossible for this span(=%d days)." span)))
   (catch 'exit
     (setq org-agenda-buffer-name
-	  (or org-agenda-buffer-tmp-name
-	      (and org-agenda-doing-sticky-redo org-agenda-buffer-name)
-	      (when org-agenda-sticky
+	  (org-agenda--get-buffer-name
+	   (and org-agenda-sticky
 		(cond ((and org-keys (stringp org-match))
 		       (format "*Org Agenda(%s:%s)*" org-keys org-match))
 		      (org-keys
 		       (format "*Org Agenda(%s)*" org-keys))
-		      (t "*Org Agenda(a)*")))
-	      "*Org Agenda*"))
+		      (t "*Org Agenda(a)*")))))
     (org-agenda-prepare "Day/Week")
     (setq start-day (or start-day org-agenda-start-day))
     (when (stringp start-day)
@@ -4536,12 +4541,15 @@ is active."
 		     (edit-at string))
 		    'org-agenda-search-history)))
     (catch 'exit
-      (when org-agenda-sticky
-	(setq org-agenda-buffer-name
-	      (if (stringp string)
-		  (format "*Org Agenda(%s:%s)*"
-			  (or org-keys (or (and todo-only "S") "s")) string)
-		(format "*Org Agenda(%s)*" (or (and todo-only "S") "s")))))
+      (setq org-agenda-buffer-name
+	    (org-agenda--get-buffer-name
+	     (and org-agenda-sticky
+		  (if (stringp string)
+		      (format "*Org Agenda(%s:%s)*"
+			      (or org-keys (or (and todo-only "S") "s"))
+			      string)
+		    (format "*Org Agenda(%s)*"
+			    (or (and todo-only "S") "s"))))))
       (org-agenda-prepare "SEARCH")
       (org-compile-prefix-format 'search)
       (org-set-sorting-strategy 'search)
@@ -4788,12 +4796,13 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	 (completion-ignore-case t)
          kwds org-select-this-todo-keyword rtn rtnall files file pos)
     (catch 'exit
-      (when org-agenda-sticky
-	(setq org-agenda-buffer-name
-	      (if (stringp org-select-this-todo-keyword)
-		  (format "*Org Agenda(%s:%s)*" (or org-keys "t")
-			  org-select-this-todo-keyword)
-		(format "*Org Agenda(%s)*" (or org-keys "t")))))
+      (setq org-agenda-buffer-name
+	    (org-agenda--get-buffer-name
+	     (and org-agenda-sticky
+		  (if (stringp org-select-this-todo-keyword)
+		      (format "*Org Agenda(%s:%s)*" (or org-keys "t")
+			      org-select-this-todo-keyword)
+		    (format "*Org Agenda(%s)*" (or org-keys "t"))))))
       (org-agenda-prepare "TODO")
       (setq kwds org-todo-keywords-for-agenda
             org-select-this-todo-keyword (if (stringp arg) arg
@@ -4880,13 +4889,15 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
     (when (and (stringp match) (not (string-match "\\S-" match)))
       (setq match nil))
     (catch 'exit
-      ;; TODO: this code is repeated a lot...
-      (when org-agenda-sticky
-	(setq org-agenda-buffer-name
-	      (if (stringp match)
-		  (format "*Org Agenda(%s:%s)*"
-			  (or org-keys (or (and todo-only "M") "m")) match)
-		(format "*Org Agenda(%s)*" (or (and todo-only "M") "m")))))
+      (setq org-agenda-buffer-name
+	    (org-agenda--get-buffer-name
+	     (and org-agenda-sticky
+		  (if (stringp match)
+		      (format "*Org Agenda(%s:%s)*"
+			      (or org-keys (or (and todo-only "M") "m"))
+			      match)
+		    (format "*Org Agenda(%s)*"
+			    (or (and todo-only "M") "m"))))))
       (setq matcher (org-make-tags-matcher match))
       ;; Prepare agendas (and `org-tag-alist-for-agenda') before
       ;; expanding tags within `org-make-tags-matcher'
