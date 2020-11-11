@@ -841,8 +841,8 @@ a unique id will be associated to it."
          (priority
           (let ((pri (org-element-property :priority task)))
             (and pri
-                 (max 1 (/ (* 1000 (- org-lowest-priority pri))
-                           (- org-lowest-priority org-highest-priority)))))))
+                 (max 1 (/ (* 1000 (- org-priority-lowest pri))
+                           (- org-priority-lowest org-priority-highest)))))))
     (concat
      ;; Opening task.
      (format "task %s \"%s\" {\n"
