@@ -4336,9 +4336,9 @@ related expressions."
 	(let ((value (cdr (assoc "PRIORITIES" alist))))
 	  (pcase (and value (split-string value))
 	    (`(,high ,low ,default . ,_)
-	     (setq-local org-highest-priority (org-priority-to-value high))
-	     (setq-local org-lowest-priority (org-priority-to-value low))
-	     (setq-local org-default-priority (org-priority-to-value default)))))
+	     (setq-local org-priority-highest (org-priority-to-value high))
+	     (setq-local org-priority-lowest (org-priority-to-value low))
+	     (setq-local org-priority-default (org-priority-to-value default)))))
 	;; Scripts.
 	(let ((value (cdr (assoc "OPTIONS" alist))))
 	  (dolist (option value)
