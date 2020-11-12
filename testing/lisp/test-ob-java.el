@@ -128,6 +128,24 @@ public static void main(String args[]) {
 #+end_src"
     (should (string= "42" (org-babel-execute-src-block)))))
 
+(ert-deftest ob-java/simple-with-main-whitespace ()
+  "Hello world program that defines a main function with the square brackets after `args'."
+  (org-test-with-temp-text
+      "#+begin_src java :results output silent
+public
+static
+void
+main
+ (
+ String
+ args []
+ )
+{
+    System.out.print(42);
+}
+#+end_src"
+    (should (string= "42" (org-babel-execute-src-block)))))
+
 (ert-deftest ob-java/simple-with-class ()
   "Hello world program that defines a class."
   (org-test-with-temp-text

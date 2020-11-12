@@ -77,15 +77,40 @@ like javac -verbose."
   :package-version '(Org . "9.5")
   :type 'symbol)
 
-(defconst org-babel-java--package-re "^[[:space:]]*package[[:space:]]+\\\([[:alnum:]_\.]+\\\);$"
+(defconst org-babel-java--package-re (rx line-start (0+ space) "package"
+					 (1+ space) (group (1+ (in alnum ?_ ?.))) ; capture the package name
+					 (0+ space) ?\; line-end)
   "Regexp for the package statement.")
-(defconst org-babel-java--imports-re "^[[:space:]]*import[[:space:]]+\\\([[:alnum:]_\.]+\\\);$"
+(defconst org-babel-java--imports-re (rx line-start (0+ space) "import"
+					 (1+ space) (group (1+ (in alnum ?_ ?.))) ; capture the fully qualified class name
+					 (0+ space) ?\; line-end)
   "Regexp for import statements.")
-(defconst org-babel-java--class-re "^[[:space:]]*\\\(?:public[[:space:]]+\\\)?class[[:space:]]+\\\([[:alnum:]_]+\\\)[[:space:]]*\n?[[:space:]]*{"
+(defconst org-babel-java--class-re (rx line-start (0+ space) (opt (seq "public" (1+ space)))
+				       "class" (1+ space)
+				       (group (1+ (in alnum ?_))) ; capture the class name
+				       (0+ space) ?{)
   "Regexp for the class declaration.")
-(defconst org-babel-java--main-re "public static void main(String\\\(?:\\[]\\\)?[[:space:]]+[^ ]+\\\(?:\\[]\\\)?).*\n?[[:space:]]*{"
+(defconst org-babel-java--main-re (rx line-start (0+ space) "public"
+				      (1+ space) "static"
+				      (1+ space) "void"
+				      (1+ space) "main"
+				      (0+ space) ?\(
+				      (0+ space) "String"
+				      (0+ space) (1+ (in alnum ?_ ?\[ ?\] space)) ; "[] args" or "args[]"
+				      (0+ space) ?\)
+				      (0+ space) (opt "throws" (1+ (in alnum ?_ ?, ?. space)))
+				      ?{)
   "Regexp for the main method declaration.")
-(defconst org-babel-java--any-method-re "public .*(.*).*\n?[[:space:]]*{"
+(defconst org-babel-java--any-method-re (rx line-start
+					    (0+ space) (opt (seq (1+ alnum) (1+ space)))   ; visibility
+					    (opt (seq "static" (1+ space)))                ; binding
+					    (1+ (in alnum ?_ ?\[ ?\]))                     ; return type
+                                            (1+ space) (1+ (in alnum ?_))                  ; method name
+					    (0+ space) ?\(
+					    (0+ space) (0+ (in alnum ?_ ?\[ ?\] ?, space)) ; params
+					    (0+ space) ?\)
+					    (0+ space) (opt "throws" (1+ (in alnum ?_ ?, ?. space)))
+					    ?{)
   "Regexp for any method.")
 (defconst org-babel-java--result-wrapper "\n    public static String __toString(Object val) {
         if (val instanceof String) {
