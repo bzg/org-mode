@@ -296,7 +296,7 @@ is simplest to expand the code block from the inside out."
       ;; wrap main.  If there are methods defined, but no main method
       ;; and no class, wrap everything in a generic main method.
       (goto-char (point-min))
-      (when (and (not (re-search-forward org-babel-java--class-re nil t))
+      (when (and (not (re-search-forward org-babel-java--main-re nil t))
                  (not (re-search-forward org-babel-java--any-method-re nil t)))
         (org-babel-java--move-past org-babel-java--package-re) ; if package is defined, move past it
         (org-babel-java--move-past org-babel-java--imports-re) ; if imports are defined, move past them
