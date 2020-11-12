@@ -9881,6 +9881,13 @@ the other commands, point needs to be in the desired line.
   #+findex: org-agenda-priority-down
   Decrease the priority of the current item.
 
+- {{{kbd(C-c C-x e)}}} or short {{{kbd(e)}}} (~org-agenda-set-effort~) ::
+
+  #+kindex: e
+  #+kindex: C-c C-x e
+  #+findex: org-agenda-set-effort
+  Set the effort property for the current item.
+
 - {{{kbd(C-c C-z)}}} or short {{{kbd(z)}}} (~org-agenda-add-note~) ::
 
   #+kindex: z
