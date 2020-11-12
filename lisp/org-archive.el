@@ -249,12 +249,20 @@ direct children of this heading."
 			   ((find-buffer-visiting afile))
 			   ((find-file-noselect afile))
 			   (t (error "Cannot access file \"%s\"" afile))))
+	     (org-odd-levels-only
+	      (if (local-variable-p 'org-odd-levels-only (current-buffer))
+		  org-odd-levels-only
+		tr-org-odd-levels-only))
 	     level datetree-date datetree-subheading-p)
-	(when (string-match "\\`datetree/" heading)
-	  ;; Replace with ***, to represent the 3 levels of headings the
-	  ;; datetree has.
-	  (setq heading (replace-regexp-in-string "\\`datetree/" "***" heading))
-	  (setq datetree-subheading-p (> (length heading) 3))
+	(when (string-match "\\`datetree/\\(\\**\\)" heading)
+	  ;; "datetree/" corresponds to 3 levels of headings.
+	  (let ((nsub (length (match-string 1 heading))))
+	    (setq heading (concat (make-string
+				   (+ (if org-odd-levels-only 5 3)
+				      (* (org-level-increment) nsub))
+				   ?*)
+				  (substring heading (match-end 0))))
+	    (setq datetree-subheading-p (> nsub 0)))
 	  (setq datetree-date (org-date-to-gregorian
 			       (or (org-entry-get nil "CLOSED" t) time))))
 	(if (and (> (length heading) 0)
@@ -309,11 +317,7 @@ direct children of this heading."
 		  (org-todo-kwd-alist tr-org-todo-kwd-alist)
 		  (org-done-keywords tr-org-done-keywords)
 		  (org-todo-regexp tr-org-todo-regexp)
-		  (org-todo-line-regexp tr-org-todo-line-regexp)
-		  (org-odd-levels-only
-		   (if (local-variable-p 'org-odd-levels-only (current-buffer))
-		       org-odd-levels-only
-		     tr-org-odd-levels-only)))
+		  (org-todo-line-regexp tr-org-todo-line-regexp))
 	      (goto-char (point-min))
 	      (org-show-all '(headings blocks))
 	      (if (and heading (not (and datetree-date (not datetree-subheading-p))))
