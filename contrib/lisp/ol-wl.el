@@ -104,9 +104,10 @@ googlegroups otherwise."
 (defvar elmo-nntp-default-server)
 
 (defconst org-wl-folder-types
-  '(("%" . imap) ("-" . nntp) ("+" . mh) ("=" . spool)
-    ("$" . archive) ("&" . pop) ("@" . shimbun) ("[" . search)
-    ("*" . multi) ("/" . filter) ("|" . pipe) ("'" . internal))
+  '(("%" . imap) ("-" . nntp) ("+" . mh) ("." . maildir)
+    ("=" . spool) ("$" . archive) ("&" . pop) ("@" . shimbun)
+    ("rss" . rss) ("[" . search) ("*" . multi) ("/" . filter)
+    ("|" . pipe) ("'" . internal) )
   "List of folder indicators.  See Wanderlust manual, section 3.")
 
 ;; Install the link type
