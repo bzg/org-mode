@@ -2205,11 +2205,10 @@ SHORT-CAPTION are strings."
                   (inches (/ pixels dpi)))
               (* cms-per-inch inches))))
 	 (--size-in-cms
-	  (function
-	   (lambda (size-in-pixels dpi)
-	     (and size-in-pixels
-		  (cons (funcall --pixels-to-cms (car size-in-pixels) dpi)
-			(funcall --pixels-to-cms (cdr size-in-pixels) dpi))))))
+	  (lambda (size-in-pixels dpi)
+	    (and size-in-pixels
+		 (cons (funcall --pixels-to-cms (car size-in-pixels) dpi)
+		       (funcall --pixels-to-cms (cdr size-in-pixels) dpi)))))
 	 (dpi (or dpi (plist-get info :odt-pixels-per-inch)))
 	 (anchor-type (or embed-as "paragraph"))
 	 (user-width (and (not scale) user-width))
