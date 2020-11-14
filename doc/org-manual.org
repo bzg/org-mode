@@ -2178,38 +2178,54 @@ It is also possible to write a formula in Emacs Lisp.  This can be
 useful for string manipulation and control structures, if Calc's
 functionality is not enough.
 
-If a formula starts with a single-quote followed by an opening
-parenthesis, then it is evaluated as a Lisp form.  The evaluation
-should return either a string or a number.  Just as with Calc
-formulas, you can specify modes and a ~printf~ format after
-a semicolon.
+A formula is evaluated as a Lisp form when it starts with a
+single-quote followed by an opening parenthesis.  Cell table
+references are interpolated into the Lisp form before execution.  The
+evaluation should return either a string or a number.  Evaluation
+modes and a ~printf~ format used to render the returned values can be
+specified after a semicolon.
 
-With Emacs Lisp forms, you need to be conscious about the way field
-references are interpolated into the form.  By default, a reference is
-interpolated as a Lisp string (in double-quotes) containing the field.
-If you provide the =N= mode switch, all referenced elements are
-numbers---non-number fields will be zero---and interpolated as Lisp
-numbers, without quotes.  If you provide the =L= flag, all fields are
-interpolated literally, without quotes.  For example, if you want a
-reference to be interpreted as a string by the Lisp form, enclose the
-reference operator itself in double-quotes, like ="$3"=.  Ranges are
-inserted as space-separated fields, so you can embed them in list or
-vector syntax.
+By default, references are interpolated as literal Lisp strings: the
+field content is replaced in the Lisp form stripped of leading and
+trailing white space and surrounded in double-quotes.  For example:
 
-Here are a few examples---note how the =N= mode is used when we do
-computations in Lisp:
+: '(concat $1 $2)
 
-- ='(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))= ::
+#+texinfo: @noindent
+concatenates the content of columns 1 and column 2.
 
-  Swap the first two characters of the content of column 1.
+When the =N= flag is used, all referenced elements are parsed as
+numbers and interpolated as Lisp numbers, without quotes. Fields that
+cannot be parsed as numbers are interpolated as zeros.  For example:
 
-- ='(+ $1 $2);N= ::
+: '(+ $1 $2);N
 
-  Add columns 1 and 2, equivalent to Calc's =$1+$2=.
+#+texinfo: @noindent
+adds columns 1 and 2, equivalent to Calc's =$1+$2=.  Ranges are
+inserted as space-separated fields, so they can be embedded in list or
+vector syntax. For example:
 
-- ='(apply '+ '($1..$4));N= ::
+: '(apply '+ '($1..$4));N
 
-  Compute the sum of columns 1 to 4, like Calc's =vsum($1..$4)=.
+#+texinfo: @noindent
+computes the sum of columns 1 to 4, like Calc's =vsum($1..$4)=.
+
+When the =L= flag is used, all fields are interpolated literally: the
+cell content is replaced in the Lisp form stripped of leading and
+trailing white space and without quotes.  If a reference is intended
+to be interpreted as a string by the Lisp form, the reference operator
+itself should be enclosed in double-quotes, like ="$3"=.  The =L= flag
+is useful when strings and numbers are used in the same Lisp form.  For
+example:
+
+: '(substring "$1" $2 $3);L
+
+#+texinfo: @noindent
+extracts the part of the string in column 1 between the character
+positions specified in the integers in column 2 and 3 and it is easier
+to read than the equivalent:
+
+: '(substring $1 (string-to-number $2) (string-to-number $3))
 
 *** Durations and time values
 :PROPERTIES:
