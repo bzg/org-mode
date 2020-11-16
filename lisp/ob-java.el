@@ -35,12 +35,17 @@
 
 (defvar org-babel-temporary-directory) ; from ob-core
 
-(defvar org-babel-default-header-args:java '((:results . "output"))
+(defvar org-babel-default-header-args:java '((:results . "output")
+					     (:dir . "."))
   "Default header args for java source blocks.
 The docs say functional mode should be the default [1], but
-ob-java didn't support functional mode until recently, so we keep
-scripting mode as the default for now to maintain existing
+ob-java didn't originally support functional mode, so we keep
+scripting mode as the default for now to maintain previous
 behavior.
+
+Most languages write tempfiles to babel's temporary directory,
+but ob-java originally had to write them to the current
+directory, so we keep that as the default behavior.
 
 [1] https://orgmode.org/manual/Results-of-Evaluation.html")
 
@@ -159,7 +164,7 @@ replaced in this string.")
 (defun org-babel-execute:java (body params)
   "Execute a java source block with BODY code and PARAMS params."
   (let* (;; if true, run from babel temp directory
-         (run-from-temp (not (assq :dir params)))
+         (run-from-temp (not (alist-get :dir params)))
          ;; class and package
          (fullclassname (or (cdr (assq :classname params))
                             (org-babel-java-find-classname body)))
