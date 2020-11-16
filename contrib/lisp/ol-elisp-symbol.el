@@ -2,7 +2,7 @@
 ;;
 ;; Copyright 2007-2020 Free Software Foundation, Inc.
 ;;
-;; Author: Bastien Guerry
+;; Author: Bastien Guerry <bzg@gnu.org>
 ;; Version: 0.2
 ;; Keywords: org, remember, lisp
 ;; URL: http://www.cognition.ens.fr/~guerry/u/org-elisp-symbol.el
