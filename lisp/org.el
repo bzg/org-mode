@@ -3569,10 +3569,11 @@ lines to the buffer:
 For example, a value \\='(title) for this list makes the document's title
 appear in the buffer without the initial \"#+TITLE:\" part."
   :group 'org-appearance
-  :version "24.1"
+  :package-version '(Org . "9.5")
   :type '(set (const :tag "#+AUTHOR" author)
 	      (const :tag "#+DATE" date)
 	      (const :tag "#+EMAIL" email)
+	      (const :tag "#+SUBTITLE" subtitle)
 	      (const :tag "#+TITLE" title)))
 
 (defcustom org-custom-properties nil

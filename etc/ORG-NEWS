@@ -12,6 +12,12 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.5 (not yet released)
 ** New options and settings
+*** Option ~org-hidden-keywords~ now also applies to #+SUBTITLE:
+
+The option ~org-hidden-keywords~ previously applied
+to #+TITLE:, #+AUTHOR:, #+DATE:, and #+EMAIL:.  Now it can also be
+used to hide the #+SUBTITLE: keyword.
+
 *** New formatting directive ~%L~ for org-capture
 
 The new ~%L~ formatting directive contains the bare link target, and
