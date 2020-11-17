@@ -1940,33 +1940,32 @@ CONTENTS is the row contents.  INFO is a plist used as
 a communication channel."
   (when (eq (org-element-property :type table-row) 'standard)
     (let ((build-hline
-	   (function
-	    (lambda (lcorner horiz vert rcorner)
-	      (concat
-	       (apply
-		'concat
-		(org-element-map table-row 'table-cell
-		  (lambda (cell)
-		    (let ((width (org-ascii--table-cell-width cell info))
-			  (borders (org-export-table-cell-borders cell info)))
-		      (concat
-		       ;; In order to know if CELL starts the row, do
-		       ;; not compare it with the first cell in the
-		       ;; row as there might be a special column.
-		       ;; Instead, compare it with first exportable
-		       ;; cell, obtained with `org-element-map'.
-		       (when (and (memq 'left borders)
-				  (eq (org-element-map table-row 'table-cell
-					'identity info t)
-				      cell))
-			 lcorner)
-		       (make-string (+ 2 width) (string-to-char horiz))
-		       (cond
-			((not (memq 'right borders)) nil)
-			((eq (car (last (org-element-contents table-row))) cell)
-			 rcorner)
-			(t vert)))))
-		  info)) "\n"))))
+	   (lambda (lcorner horiz vert rcorner)
+	     (concat
+	      (apply
+	       'concat
+	       (org-element-map table-row 'table-cell
+		 (lambda (cell)
+		   (let ((width (org-ascii--table-cell-width cell info))
+			 (borders (org-export-table-cell-borders cell info)))
+		     (concat
+		      ;; In order to know if CELL starts the row, do
+		      ;; not compare it with the first cell in the
+		      ;; row as there might be a special column.
+		      ;; Instead, compare it with first exportable
+		      ;; cell, obtained with `org-element-map'.
+		      (when (and (memq 'left borders)
+				 (eq (org-element-map table-row 'table-cell
+				       'identity info t)
+				     cell))
+			lcorner)
+		      (make-string (+ 2 width) (string-to-char horiz))
+		      (cond
+		       ((not (memq 'right borders)) nil)
+		       ((eq (car (last (org-element-contents table-row))) cell)
+			rcorner)
+		       (t vert)))))
+		 info)) "\n")))
 	  (utf8p (eq (plist-get info :ascii-charset) 'utf-8))
 	  (borders (org-export-table-cell-borders
 		    (org-element-map table-row 'table-cell 'identity info t)

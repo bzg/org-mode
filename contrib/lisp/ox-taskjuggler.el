@@ -720,9 +720,8 @@ Return complete project plan as a string in TaskJuggler syntax."
 	      (mapconcat
 	       'org-element-normalize-string
 	       (mapcar
-		(function
-		 (lambda (report)
-		   (replace-regexp-in-string "%title" report-title  report t t)))
+		(lambda (report)
+		  (replace-regexp-in-string "%title" report-title  report t t))
 		org-taskjuggler-default-reports) "")))))))))
 
 (defun org-taskjuggler--build-project (project info)

@@ -15322,9 +15322,8 @@ used by the agenda files.  If ARCHIVE is `ifmode', do this only if
 			       files)))
     (when org-agenda-skip-unavailable-files
       (setq files (delq nil
-			(mapcar (function
-				 (lambda (file)
-				   (and (file-readable-p file) file)))
+			(mapcar (lambda (file)
+				  (and (file-readable-p file) file))
 				files))))
     (when (or (eq archives t)
 	      (and (eq archives 'ifmode) (eq org-agenda-archives-mode t)))
@@ -17942,15 +17941,14 @@ when a numeric prefix argument is given, its value determines the
 number of stars to add."
   (interactive "P")
   (let ((skip-blanks
-	 (function
-	  ;; Return beginning of first non-blank line, starting from
-	  ;; line at POS.
-	  (lambda (pos)
-	    (save-excursion
-	      (goto-char pos)
-	      (while (org-at-comment-p) (forward-line))
-	      (skip-chars-forward " \r\t\n")
-	      (point-at-bol)))))
+	 ;; Return beginning of first non-blank line, starting from
+	 ;; line at POS.
+	 (lambda (pos)
+	   (save-excursion
+	     (goto-char pos)
+	     (while (org-at-comment-p) (forward-line))
+	     (skip-chars-forward " \r\t\n")
+	     (point-at-bol))))
 	beg end toggled)
     ;; Determine boundaries of changes.  If a universal prefix has
     ;; been given, put the list in a region.  If region ends at a bol,
