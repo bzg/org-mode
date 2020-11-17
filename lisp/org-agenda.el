@@ -8620,7 +8620,10 @@ log items, nothing else."
 When called with a prefix argument, include all archive files as well."
   (interactive "P")
   (setq org-agenda-archives-mode
-	(if with-files t (if org-agenda-archives-mode nil 'trees)))
+	(cond ((and with-files (eq org-agenda-archives-mode t)) nil)
+	      (with-files t)
+	      (org-agenda-archives-mode nil)
+	      (t 'trees)))
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message
