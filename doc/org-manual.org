@@ -1649,6 +1649,11 @@ you, configure the option ~org-table-auto-blank-field~.
   the buffer.  You can activate this minor mode by default by setting
   the option ~org-table-header-line-p~ to ~t~.
 
+- {{{kbd(M-x org-table-transpose-table-at-point)}}} ::
+
+  #+findex: org-table-transpose-table-at-point
+  Transpose the table at point and eliminate hlines.
+
 ** Column Width and Alignment
 :PROPERTIES:
 :DESCRIPTION: Overrule the automatic settings.
