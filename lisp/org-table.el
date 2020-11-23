@@ -2422,51 +2422,42 @@ location of point."
 	   (calc-modes (copy-sequence org-calc-default-modes))
 	   (numbers nil)	   ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal
+	   form form0 formrpl formrg bw fmt ev orig lispp literal
 	   duration duration-output-format)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
-      (if (string-match ";" formula)
-	  (let ((tmp (org-split-string formula ";")))
-	    (setq formula (car tmp)
-		  fmt (concat (cdr (assoc "%" org-table-local-parameters))
-			      (nth 1 tmp)))
+      (if (string-match "\\(.*\\);\\(.*\\)" formula)
+	  (progn
+	    (setq fmt (concat (cdr (assoc "%" org-table-local-parameters))
+			      (match-string-no-properties 2 formula)))
+	    (setq formula (match-string-no-properties 1 formula))
 	    (while (string-match "\\([pnfse]\\)\\(-?[0-9]+\\)" fmt)
-	      (setq c (string-to-char (match-string 1 fmt))
-		    n (string-to-number (match-string 2 fmt)))
-	      (if (= c ?p)
-		  (setf (cl-getf calc-modes 'calc-internal-prec) n)
-		(setf (cl-getf calc-modes
-			       'calc-float-format)
-			       (list (cdr (assoc c '((?n . float) (?f . fix)
-						     (?s . sci) (?e . eng))))
-				     n)))
+	      (let ((c (string-to-char (match-string 1 fmt)))
+		    (n (string-to-number (match-string 2 fmt))))
+		(cl-case c
+		  (?p (setf (cl-getf calc-modes 'calc-internal-prec) n))
+		  (?n (setf (cl-getf calc-modes 'calc-float-format) (list 'float n)))
+		  (?f (setf (cl-getf calc-modes 'calc-float-format) (list 'fix n)))
+		  (?s (setf (cl-getf calc-modes 'calc-float-format) (list 'sci n)))
+		  (?e (setf (cl-getf calc-modes 'calc-float-format) (list 'eng n)))))
+	      ;; Remove matched flags from the mode string.
 	      (setq fmt (replace-match "" t t fmt)))
-	    (if (string-match "[tTU]" fmt)
-		(let ((ff (match-string 0 fmt)))
-		  (setq duration t numbers t
-			duration-output-format
-			(cond ((equal ff "T") nil)
-			      ((equal ff "t") org-table-duration-custom-format)
-			      ((equal ff "U") 'hh:mm))
-			fmt (replace-match "" t t fmt))))
-	    (if (string-match "N" fmt)
-		(setq numbers t
-		      fmt (replace-match "" t t fmt)))
-	    (if (string-match "L" fmt)
-		(setq literal t
-		      fmt (replace-match "" t t fmt)))
-	    (if (string-match "E" fmt)
-		(setq keep-empty t
-		      fmt (replace-match "" t t fmt)))
-	    (while (string-match "[DRFS]" fmt)
-	      (let* ((c (string-to-char (match-string 0 fmt)))
-		     (mode (cdr (assoc c '((?D calc-angle-mode deg)
-					   (?R calc-angle-mode rad)
-					   (?F calc-prefer-frac t)
-					   (?S calc-symbolic-mode t))))))
-		(setf (cl-getf calc-modes (car mode)) (cadr mode))
-		(setq fmt (replace-match "" t t fmt))))
+	    (while (string-match "\\([tTUNLEDRFS]\\)" fmt)
+	      (let ((c (string-to-char (match-string 1 fmt))))
+		(cl-case c
+		  (?t (setq duration t numbers t
+		      	    duration-output-format org-table-duration-custom-format))
+		  (?T (setq duration t numbers t duration-output-format nil))
+		  (?U (setq duration t numbers t duration-output-format 'hh:mm))
+		  (?N (setq numbers t))
+		  (?L (setq literal t))
+		  (?E (setq keep-empty t))
+		  (?D (setf (cl-getf calc-modes 'calc-angle-mode) 'deg))
+		  (?R (setf (cl-getf calc-modes 'calc-angle-mode) 'rad))
+		  (?F (setf (cl-getf calc-modes 'calc-prefer-frac) t))
+		  (?S (setf (cl-getf calc-modes 'calc-symbolic-mode) t))))
+	      ;; Remove matched flags from the mode string.
+	      (setq fmt (replace-match "" t t fmt)))
 	    (unless (string-match "\\S-" fmt)
 	      (setq fmt nil))))
       (when (and (not suppress-const) org-table-formula-use-constants)
@@ -2567,17 +2558,17 @@ location of point."
 	(setq form0 form)
 	;; Insert the references to fields in same row
 	(while (string-match "\\$\\(\\([-+]\\)?[0-9]+\\)" form)
-	  (setq n (+ (string-to-number (match-string 1 form))
-		     (if (match-end 2) n0 0))
-		x (nth (1- (if (= n 0) n0 (max n 1))) fields)
-		formrpl (save-match-data
-			  (org-table-make-reference
-			   x keep-empty numbers lispp)))
-	  (when (or (not x)
-		    (save-match-data
-		      (string-match (regexp-quote formula) formrpl)))
-	    (user-error "Invalid field specifier \"%s\""
-			(match-string 0 form)))
+	  (let* ((n (+ (string-to-number (match-string 1 form))
+		       (if (match-end 2) n0 0)))
+		 (x (nth (1- (if (= n 0) n0 (max n 1))) fields)))
+	    (setq formrpl (save-match-data
+			    (org-table-make-reference
+			     x keep-empty numbers lispp)))
+	    (when (or (not x)
+		      (save-match-data
+			(string-match (regexp-quote formula) formrpl)))
+	      (user-error "Invalid field specifier \"%s\""
+			  (match-string 0 form))))
 	  (setq form (replace-match formrpl t t form)))
 
 	(if lispp
