@@ -175,8 +175,12 @@ replaced in this string.")
                           (file-name-base fullclassname)))
          ;; the base dir that contains the top level package dir
          (basedir (file-name-as-directory (if run-from-temp
-                                              org-babel-temporary-directory
-                                            ".")))
+                                              (if (file-remote-p default-directory)
+                                                  (concat
+                                                   (file-remote-p default-directory)
+                                                   org-babel-remote-temporary-directory)
+                                                org-babel-temporary-directory)
+                                            default-directory)))
          ;; the dir to write the source file
          (packagedir (if (and (not run-from-temp) packagename)
                          (file-name-as-directory
