@@ -2442,7 +2442,7 @@ location of point."
 		  (?e (setf (cl-getf calc-modes 'calc-float-format) (list 'eng n)))))
 	      ;; Remove matched flags from the mode string.
 	      (setq fmt (replace-match "" t t fmt)))
-	    (while (string-match "\\([tTUNLEDRFS]\\)" fmt)
+	    (while (string-match "\\([tTUNLEDRFSu]\\)" fmt)
 	      (let ((c (string-to-char (match-string 1 fmt))))
 		(cl-case c
 		  (?t (setq duration t numbers t
@@ -2455,7 +2455,8 @@ location of point."
 		  (?D (setf (cl-getf calc-modes 'calc-angle-mode) 'deg))
 		  (?R (setf (cl-getf calc-modes 'calc-angle-mode) 'rad))
 		  (?F (setf (cl-getf calc-modes 'calc-prefer-frac) t))
-		  (?S (setf (cl-getf calc-modes 'calc-symbolic-mode) t))))
+		  (?S (setf (cl-getf calc-modes 'calc-symbolic-mode) t))
+		  (?u (setf (cl-getf calc-modes 'calc-simplify-mode) 'units))))
 	      ;; Remove matched flags from the mode string.
 	      (setq fmt (replace-match "" t t fmt)))
 	    (unless (string-match "\\S-" fmt)

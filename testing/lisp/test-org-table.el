@@ -380,6 +380,18 @@ reference (with row).  Mode string N."
 "
      1 calc)))
 
+(ert-deftest test-org-table/mode-string-u ()
+  "Basic: verify that mode string u results in units
+simplification mode applied to Calc formulas."
+  (org-test-table-target-expect
+   "
+| 1.5 A/B | 2.0 B | |
+"
+   "
+| 1.5 A/B | 2.0 B | 3. A |
+"
+   1 "#+TBLFM: $3=$1*$2;u"))
+
 (ert-deftest test-org-table/lisp-return-value ()
   "Basic: Return value of Lisp formulas."
   (org-test-table-target-expect

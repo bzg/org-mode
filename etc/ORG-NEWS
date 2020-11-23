@@ -112,6 +112,11 @@ package, to convert pandas Dataframes into orgmode tables:
 | 2 | 3 | 6 |
 #+end_src
 
+*** New =u= table formula flag to enable Calc units simplification mode
+
+A new =u= mode flag for Calc formulas in Org tables has been added to
+enable Calc units simplification mode.
+
 ** Miscellaneous
 *** =org-goto-first-child= now works before first heading
 

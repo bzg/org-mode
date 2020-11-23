@@ -2075,6 +2075,14 @@ variable ~org-calc-default-modes~.
 
   Fraction and symbolic modes of Calc.
 
+- =u= ::
+
+  Units simplification mode of Calc.  Calc is also a symbolic
+  calculator and is capable of working with values having a unit,
+  represented with numerals followed by a unit string in Org table
+  cells.  This mode instructs Calc to simplify the units in the
+  computed expression before returning the result.
+
 - =T=, =t=, =U= ::
 
   Duration computations in Calc or Lisp, [[*Durations and time values]].
