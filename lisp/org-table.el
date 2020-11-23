@@ -676,8 +676,6 @@ Will be filled automatically during use.")
     ("_" . "Names for values in row below this one.")
     ("^" . "Names for values in row above this one.")))
 
-(defvar org-tbl-calc-modes nil)
-
 (defvar org-pos nil)
 
 
@@ -720,18 +718,6 @@ Field is restored even in case of abnormal exit."
 	 (goto-char ,line)
 	 (org-table-goto-column ,column)
 	 (set-marker ,line nil)))))
-
-(defsubst org-table--set-calc-mode (var &optional value)
-  (if (stringp var)
-      (setq var (assoc var '(("D" calc-angle-mode deg)
-			     ("R" calc-angle-mode rad)
-			     ("F" calc-prefer-frac t)
-			     ("S" calc-symbolic-mode t)))
-	    value (nth 2 var) var (nth 1 var)))
-  (if (memq var org-tbl-calc-modes)
-      (setcar (cdr (memq var org-tbl-calc-modes)) value)
-    (cons var (cons value org-tbl-calc-modes)))
-  org-tbl-calc-modes)
 
 
 ;;; Predicates
@@ -2433,7 +2419,7 @@ location of point."
 			equation
 		      (org-table-get-formula equation (equal arg '(4)))))
 	   (n0 (org-table-current-column))
-	   (org-tbl-calc-modes (copy-sequence org-calc-default-modes))
+	   (calc-modes (copy-sequence org-calc-default-modes))
 	   (numbers nil)	   ; was a variable, now fixed default
 	   (keep-empty nil)
 	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal
@@ -2449,14 +2435,12 @@ location of point."
 	      (setq c (string-to-char (match-string 1 fmt))
 		    n (string-to-number (match-string 2 fmt)))
 	      (if (= c ?p)
-		  (setq org-tbl-calc-modes
-			(org-table--set-calc-mode 'calc-internal-prec n))
-		(setq org-tbl-calc-modes
-		      (org-table--set-calc-mode
-		       'calc-float-format
-		       (list (cdr (assoc c '((?n . float) (?f . fix)
-					     (?s . sci) (?e . eng))))
-			     n))))
+		  (setf (cl-getf calc-modes 'calc-internal-prec) n)
+		(setf (cl-getf calc-modes
+			       'calc-float-format)
+			       (list (cdr (assoc c '((?n . float) (?f . fix)
+						     (?s . sci) (?e . eng))))
+				     n)))
 	      (setq fmt (replace-match "" t t fmt)))
 	    (if (string-match "[tTU]" fmt)
 		(let ((ff (match-string 0 fmt)))
@@ -2476,9 +2460,13 @@ location of point."
 		(setq keep-empty t
 		      fmt (replace-match "" t t fmt)))
 	    (while (string-match "[DRFS]" fmt)
-	      (setq org-tbl-calc-modes
-		    (org-table--set-calc-mode (match-string 0 fmt)))
-	      (setq fmt (replace-match "" t t fmt)))
+	      (let* ((c (string-to-char (match-string 0 fmt)))
+		     (mode (cdr (assoc c '((?D calc-angle-mode deg)
+					   (?R calc-angle-mode rad)
+					   (?F calc-prefer-frac t)
+					   (?S calc-symbolic-mode t))))))
+		(setf (cl-getf calc-modes (car mode)) (cadr mode))
+		(setq fmt (replace-match "" t t fmt))))
 	    (unless (string-match "\\S-" fmt)
 	      (setq fmt nil))))
       (when (and (not suppress-const) org-table-formula-use-constants)
@@ -2621,7 +2609,7 @@ location of point."
 
 	  (setq ev (if (and duration (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" form))
 		       form
-		     (calc-eval (cons form org-tbl-calc-modes)
+		     (calc-eval (cons form calc-modes)
 				(when (and (not keep-empty) numbers) 'num)))
 		ev (if duration (org-table-time-seconds-to-string
 				 (if (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" ev)
