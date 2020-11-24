@@ -4756,7 +4756,6 @@ This is for getting out of special buffers like capture.")
 (require 'time-date)
 (unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
 (require 'easymenu)
-(autoload 'easy-menu-add "easymenu")
 (require 'overlay)
 
 (require 'org-entities)
