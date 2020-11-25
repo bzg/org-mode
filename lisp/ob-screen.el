@@ -40,8 +40,8 @@
 In case you want to use a different screen than one selected by your $PATH")
 
 (defvar org-babel-default-header-args:screen
-  '((:results . "silent") (:session . "default") (:cmd . "sh")
-    (:terminal . "xterm") (:screenrc . "/dev/null"))
+  `((:results . "silent") (:session . "default") (:cmd . "sh")
+    (:terminal . "xterm") (:screenrc . ,null-device))
   "Default arguments to use when running screen source blocks.")
 
 (defun org-babel-execute:screen (body params)
