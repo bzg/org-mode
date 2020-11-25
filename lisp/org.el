@@ -16882,7 +16882,8 @@ When ARG is a numeric prefix, show contents of this level."
       (message "Content view to level: %d" arg)
       (org-content (prefix-numeric-value arg2))
       (org-cycle-show-empty-lines t)
-      (setq org-cycle-global-status 'overview)))
+      (setq org-cycle-global-status 'overview)
+      (run-hook-with-args 'org-cycle-hook 'overview)))
    (t (call-interactively 'org-global-cycle))))
 
 (defun org-shiftmetaleft ()
