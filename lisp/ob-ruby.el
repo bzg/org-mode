@@ -39,7 +39,8 @@
 (require 'ob)
 (require 'org-macs)
 
-(declare-function run-ruby "ext:inf-ruby" (&optional command name))
+(declare-function run-ruby-or-pop-to-buffer "ext:inf-ruby" (command &optional name buffer))
+(declare-function inf-ruby-buffer "ext:inf-ruby" ())
 (declare-function xmp "ext:rcodetools" (&optional option))
 
 (defvar inf-ruby-default-implementation)
@@ -163,7 +164,10 @@ then create one.  Return the initialized session."
 				inf-ruby-implementations))))
 	   (buffer (get-buffer (format "*%s*" session)))
 	   (session-buffer (or buffer (save-window-excursion
-					(run-ruby cmd session)
+					(run-ruby-or-pop-to-buffer
+					 cmd (or session "ruby")
+					 (unless session
+					   (inf-ruby-buffer)))
 					(current-buffer)))))
       (if (org-babel-comint-buffer-livep session-buffer)
 	  (progn (sit-for .25) session-buffer)
