@@ -4924,7 +4924,7 @@ The following commands are available:
 		   ("9.1" . "26.1")
 		   ("9.2" . "27.1")
 		   ("9.3" . "27.1")
-		   ("9.4" . "28.1")))
+		   ("9.4" . "27.2")))
 
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table text-mode-syntax-table)))
