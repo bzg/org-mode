@@ -22,27 +22,8 @@
 
 ;;; Code:
 
-(require 'org-macs)
-(require 'org-compat)
-
-(declare-function org-at-heading-p "org" (&optional ignored))
-(declare-function org-beginning-of-line "org" (&optional n))
-(declare-function org-defkey "org" (keymap key def))
-(declare-function org-mark-ring-push "org" (&optional pos buffer))
-(declare-function org-overview "org" ())
-(declare-function org-refile-check-position "org" (refile-pointer))
-(declare-function org-refile-get-location "org" (&optional prompt default-buffer new-nodes))
-(declare-function org-show-context "org" (&optional key))
-(declare-function org-show-set-visibility "org" (detail))
-
-(defvar org-complex-heading-regexp)
-(defvar org-startup-align-all-tables)
-(defvar org-startup-folded)
-(defvar org-startup-truncated)
-(defvar org-special-ctrl-a/e)
-(defvar org-refile-target-verify-function)
-(defvar org-refile-use-outline-path)
-(defvar org-refile-targets)
+(require 'org)
+(require 'org-refile)
 
 (defvar org-goto-exit-command nil)
 (defvar org-goto-map nil)
