@@ -1173,10 +1173,9 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	     (catch :name-match
 	       (goto-char (point-min))
 	       (while (re-search-forward name nil t)
-		 (let ((element (org-element-at-point)))
-		   (when (equal words
-				(split-string
-				 (org-element-property :name element)))
+		 (let* ((element (org-element-at-point))
+			(name (org-element-property :name element)))
+		   (when (and name (equal words (split-string name)))
 		     (setq type 'dedicated)
 		     (beginning-of-line)
 		     (throw :name-match t))))
