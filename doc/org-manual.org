@@ -4860,9 +4860,10 @@ In this interface, you can also use the following special keys:
 
   #+kindex: TAB
   Enter a tag in the minibuffer, even if the tag is not in the
-  predefined list.  You can complete on all tags present in the
-  buffer.  You can also add several tags: just separate them with
-  a comma.
+  predefined list.  You can complete on all tags present in the buffer
+  and globally pre-defined tags from ~org-tag-alist~ and
+  ~org-tag-persistent-alist~.  You can also add several tags: just
+  separate them with a comma.
 
 - {{{kbd(SPC)}}} ::
 

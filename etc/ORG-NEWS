@@ -149,6 +149,13 @@ Example:
 A new =u= mode flag for Calc formulas in Org tables has been added to
 enable Calc units simplification mode.
 
+*** =org-set-tags-command= select tags from ~org-global-tags-completion-table~
+
+Let ~org-set-tags-command~ TAB fast tag completion interface complete
+tags including from both buffer local and user defined persistent
+global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
+option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
+
 ** Miscellaneous
 *** =org-goto-first-child= now works before first heading
 

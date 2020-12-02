@@ -12139,7 +12139,7 @@ Returns the new tags string, or nil to not change the current settings."
 				  fulltable))))
 	 (buf (current-buffer))
 	 (expert (eq org-fast-tag-selection-single-key 'expert))
-	 (buffer-tags nil)
+	 (tab-tags nil)
 	 (fwidth (+ maxlen 3 1 3))
 	 (ncol (/ (- (window-width) 4) fwidth))
 	 (i-face 'org-done)
@@ -12274,16 +12274,21 @@ Returns the new tags string, or nil to not change the current settings."
 		    (setq current nil)
 		    (when exit-after-next (setq exit-after-next 'now)))
 		   ((= c ?\t)
-		    (condition-case nil
-			(setq tg (completing-read
-				  "Tag: "
-				  (or buffer-tags
-				      (with-current-buffer buf
-					(setq buffer-tags
-					      (org-get-buffer-tags))))))
-		      (quit (setq tg "")))
+                    (condition-case nil
+                        (unless tab-tags
+                          (setq tab-tags
+                                (delq nil
+                                      (mapcar (lambda (x)
+                                                (let ((item (car-safe x)))
+                                                  (and (stringp item)
+                                                       (list item))))
+                                              (org--tag-add-to-alist
+                                               (with-current-buffer buf
+                                                 (org-get-buffer-tags))
+                                               table))))))
+                    (setq tg (completing-read "Tag: " tab-tags))
 		    (when (string-match "\\S-" tg)
-		      (cl-pushnew (list tg) buffer-tags :test #'equal)
+		      (cl-pushnew (list tg) tab-tags :test #'equal)
 		      (if (member tg current)
 			  (setq current (delete tg current))
 			(push tg current)))
