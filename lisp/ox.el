@@ -5745,6 +5745,7 @@ them."
      ("ru" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
      ("sl" :default "Avtor")
      ("sv" :html "F&ouml;rfattare")
+     ("tr" :default "Yazar")
      ("uk" :html "&#1040;&#1074;&#1090;&#1086;&#1088;" :utf-8 "Автор")
      ("zh-CN" :html "&#20316;&#32773;" :utf-8 "作者")
      ("zh-TW" :html "&#20316;&#32773;" :utf-8 "作者"))
@@ -5763,7 +5764,8 @@ them."
      ("ro" :default "Continuare de pe pagina precedentă")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077;)"
       :utf-8 "(Продолжение)")
-     ("sl" :default "Nadaljevanje s prejšnje strani"))
+     ("sl" :default "Nadaljevanje s prejšnje strani")
+     ("tr" :default "Önceki sayfadan devam ediyor"))
     ("Continued on next page"
      ("ar" :default "التتمة في الصفحة التالية")
      ("cs" :default "Pokračuje na další stránce")
@@ -5779,13 +5781,15 @@ them."
      ("ro" :default "Continuare pe pagina următoare")
      ("ru" :html "(&#1055;&#1088;&#1086;&#1076;&#1086;&#1083;&#1078;&#1077;&#1085;&#1080;&#1077; &#1089;&#1083;&#1077;&#1076;&#1091;&#1077;&#1090;)"
       :utf-8 "(Продолжение следует)")
-     ("sl" :default "Nadaljevanje na naslednji strani"))
+     ("sl" :default "Nadaljevanje na naslednji strani")
+     ("tr" :default "Devamı sonraki sayfada"))
     ("Created"
      ("cs" :default "Vytvořeno")
      ("nl" :default "Gemaakt op")  ;; must be followed by a date or date+time
      ("pt_BR" :default "Criado em")
      ("ro" :default "Creat")
-     ("sl" :default "Ustvarjeno"))
+     ("sl" :default "Ustvarjeno")
+     ("tr" :default "Oluşturuldu"))
     ("Date"
      ("ar" :default "بتاريخ")
      ("ca" :default "Data")
@@ -5810,6 +5814,7 @@ them."
      ("ru" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
      ("sl" :default "Datum")
      ("sv" :default "Datum")
+     ("tr" :default "Tarih")
      ("uk" :html "&#1044;&#1072;&#1090;&#1072;" :utf-8 "Дата")
      ("zh-CN" :html "&#26085;&#26399;" :utf-8 "日期")
      ("zh-TW" :html "&#26085;&#26399;" :utf-8 "日期"))
@@ -5833,6 +5838,7 @@ them."
       :utf-8 "Уравнение")
      ("sl" :default "Enačba")
      ("sv" :default "Ekvation")
+     ("tr" :default "Eşitlik")
      ("zh-CN" :html "&#26041;&#31243;" :utf-8 "方程"))
     ("Figure"
      ("ar" :default "شكل")
@@ -5852,6 +5858,7 @@ them."
      ("ro" :default "Imaginea")
      ("ru" :html "&#1056;&#1080;&#1089;&#1091;&#1085;&#1086;&#1082;" :utf-8 "Рисунок")
      ("sv" :default "Illustration")
+     ("tr" :default "Şekil")
      ("zh-CN" :html "&#22270;" :utf-8 "图"))
     ("Figure %d:"
      ("ar" :default "شكل %d:")
@@ -5873,6 +5880,7 @@ them."
      ("ru" :html "&#1056;&#1080;&#1089;. %d.:" :utf-8 "Рис. %d.:")
      ("sl" :default "Slika %d")
      ("sv" :default "Illustration %d")
+     ("tr" :default "Şekil %d:")
      ("zh-CN" :html "&#22270;%d&nbsp;" :utf-8 "图%d "))
     ("Footnotes"
      ("ar" :default "الهوامش")
@@ -5899,6 +5907,7 @@ them."
      ("ru" :html "&#1057;&#1085;&#1086;&#1089;&#1082;&#1080;" :utf-8 "Сноски")
      ("sl" :default "Opombe")
      ("sv" :default "Fotnoter")
+     ("tr" :default "Dipnotlar")
      ("uk" :html "&#1055;&#1088;&#1080;&#1084;&#1110;&#1090;&#1082;&#1080;"
       :utf-8 "Примітки")
      ("zh-CN" :html "&#33050;&#27880;" :utf-8 "脚注")
@@ -5919,6 +5928,7 @@ them."
      ("ru" :html "&#1057;&#1087;&#1080;&#1089;&#1086;&#1082; &#1088;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1086;&#1082;"
       :utf-8 "Список распечаток")
      ("sl" :default "Seznam programskih izpisov")
+     ("tr" :default "Program Listesi")
      ("zh-CN" :html "&#20195;&#30721;&#30446;&#24405;" :utf-8 "代码目录"))
     ("List of Tables"
      ("ar" :default "قائمة بالجداول")
@@ -5941,6 +5951,7 @@ them."
       :utf-8 "Список таблиц")
      ("sl" :default "Seznam tabel")
      ("sv" :default "Tabeller")
+     ("tr" :default "Tablo Listesi")
      ("zh-CN" :html "&#34920;&#26684;&#30446;&#24405;" :utf-8 "表格目录"))
     ("Listing"
      ("ar" :default "برنامج")
@@ -5960,6 +5971,7 @@ them."
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072;"
       :utf-8 "Распечатка")
      ("sl" :default "Izpis programa")
+     ("tr" :default "Program")
      ("zh-CN" :html "&#20195;&#30721;" :utf-8 "代码"))
     ("Listing %d:"
      ("ar" :default "برنامج %d:")
@@ -5979,6 +5991,7 @@ them."
      ("ru" :html "&#1056;&#1072;&#1089;&#1087;&#1077;&#1095;&#1072;&#1090;&#1082;&#1072; %d.:"
       :utf-8 "Распечатка %d.:")
      ("sl" :default "Izpis programa %d")
+     ("tr" :default "Program %d:")
      ("zh-CN" :html "&#20195;&#30721;%d&nbsp;" :utf-8 "代码%d "))
     ("References"
      ("ar" :default "المراجع")
@@ -5990,7 +6003,8 @@ them."
      ("nl" :default "Bronverwijzingen")
      ("pt_BR" :html "Refer&ecirc;ncias" :default "Referências" :ascii "Referencias")
      ("ro" :default "Bibliografie")
-     ("sl" :default "Reference"))
+     ("sl" :default "Reference")
+     ("tr" :default "Referanslar"))
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
      ("fr" :default "cf. figure %s"
@@ -6000,7 +6014,8 @@ them."
       :html "Zie figuur&nbsp;%s" :latex "Zie figuur~%s")
      ("pt_BR" :default "Veja a figura %s")
      ("ro" :default "Vezi figura %s")
-     ("sl" :default "Glej sliko %s"))
+     ("sl" :default "Glej sliko %s")
+     ("tr" :default "bkz. şekil %s"))
     ("See listing %s"
      ("cs" :default "Viz program %s")
      ("fr" :default "cf. programme %s"
@@ -6009,7 +6024,8 @@ them."
       :html "Zie programma&nbsp;%s" :latex "Zie programma~%s")
      ("pt_BR" :default "Veja a listagem %s")
      ("ro" :default "Vezi tabelul %s")
-     ("sl" :default "Glej izpis programa %s"))
+     ("sl" :default "Glej izpis programa %s")
+     ("tr" :default "bkz. program %s"))
     ("See section %s"
      ("ar" :default "انظر قسم %s")
      ("cs" :default "Viz sekce %s")
@@ -6028,6 +6044,7 @@ them."
      ("ru" :html "&#1057;&#1084;. &#1088;&#1072;&#1079;&#1076;&#1077;&#1083; %s"
       :utf-8 "См. раздел %s")
      ("sl" :default "Glej poglavje %d")
+     ("tr" :default "bkz. bölüm %s")
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
     ("See table %s"
      ("cs" :default "Viz tabulka %s")
@@ -6038,7 +6055,8 @@ them."
       :html "Zie tabel&nbsp;%s" :latex "Zie tabel~%s")
      ("pt_BR" :default "Veja a tabela %s")
      ("ro" :default "Vezi tabelul %s")
-     ("sl" :default "Glej tabelo %s"))
+     ("sl" :default "Glej tabelo %s")
+     ("tr" :default "bkz. tablo %s"))
     ("Table"
      ("ar" :default "جدول")
      ("cs" :default "Tabulka")
@@ -6054,6 +6072,7 @@ them."
      ("ro" :default "Tabel")
      ("ru" :html "&#1058;&#1072;&#1073;&#1083;&#1080;&#1094;&#1072;"
       :utf-8 "Таблица")
+     ("tr" :default "Tablo")
      ("zh-CN" :html "&#34920;" :utf-8 "表"))
     ("Table %d:"
      ("ar" :default "جدول %d:")
@@ -6076,6 +6095,7 @@ them."
       :utf-8 "Таблица %d.:")
      ("sl" :default "Tabela %d")
      ("sv" :default "Tabell %d")
+     ("tr" :default "Tablo %d")
      ("zh-CN" :html "&#34920;%d&nbsp;" :utf-8 "表%d "))
     ("Table of Contents"
      ("ar" :default "قائمة المحتويات")
@@ -6103,6 +6123,7 @@ them."
       :utf-8 "Содержание")
      ("sl" :default "Kazalo")
      ("sv" :html "Inneh&aring;ll")
+     ("tr" :default "İçindekiler")
      ("uk" :html "&#1047;&#1084;&#1110;&#1089;&#1090;" :utf-8 "Зміст")
      ("zh-CN" :html "&#30446;&#24405;" :utf-8 "目录")
      ("zh-TW" :html "&#30446;&#37636;" :utf-8 "目錄"))
@@ -6121,6 +6142,7 @@ them."
      ("ru" :html "&#1053;&#1077;&#1080;&#1079;&#1074;&#1077;&#1089;&#1090;&#1085;&#1072;&#1103; &#1089;&#1089;&#1099;&#1083;&#1082;&#1072;"
       :utf-8 "Неизвестная ссылка")
      ("sl" :default "Neznana referenca")
+     ("tr" :default "Bilinmeyen referans")
      ("zh-CN" :html "&#26410;&#30693;&#24341;&#29992;" :utf-8 "未知引用")))
   "Dictionary for export engine.
 
