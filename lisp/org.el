@@ -20282,10 +20282,9 @@ This function also checks ancestors of the current headline,
 unless optional argument NO-INHERITANCE is non-nil."
   (cond
    ((org-before-first-heading-p) nil)
-   ((let ((tags (nth 5 (org-heading-components))))
+   ((let ((tags (org-get-tags nil 'local)))
       (and tags
-	   (let ((case-fold-search nil))
-	     (string-match-p org-archive-tag tags)))))
+	   (cl-some (apply-partially #'string= org-archive-tag) tags))))
    (no-inheritance nil)
    (t
     (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p))))))
