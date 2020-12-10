@@ -6618,7 +6618,8 @@ This function is the default value of the hook `org-cycle-hook'."
     (cond
      ((eq state 'content)  nil)
      ((eq state 'all)      nil)
-     ((and (eq state 'folded) (eq last-command this-command))
+     ((and org-scroll-position-to-restore
+	   (eq state 'folded) (eq last-command this-command))
       (set-window-start nil org-scroll-position-to-restore))
      ((eq state 'folded) nil)
      ((eq state 'children)
