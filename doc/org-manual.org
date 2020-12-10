@@ -578,6 +578,10 @@ buffer:
 ,#+STARTUP: overview
 ,#+STARTUP: content
 ,#+STARTUP: showall
+,#+STARTUP: show2levels
+,#+STARTUP: show3levels
+,#+STARTUP: show4levels
+,#+STARTUP: show5levels
 ,#+STARTUP: showeverything
 #+end_example
 
@@ -18960,6 +18964,10 @@ changes.
   | =overview=       | Top-level headlines only.  |
   | =content=        | All headlines.             |
   | =showall=        | No folding on any entry.   |
+  | =show2levels=    | Headline levels 1-2.       |
+  | =show3levels=    | Headline levels 1-3.       |
+  | =show4levels=    | Headline levels 1-4.       |
+  | =show5levels=    | Headline levels 1-5.       |
   | =showeverything= | Show even drawer contents. |
 
   #+vindex: org-startup-indented
