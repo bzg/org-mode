@@ -6629,19 +6629,23 @@ With numerical argument N, show content up to level N."
   "Adjust the window after a change in outline visibility.
 This function is the default value of the hook `org-cycle-hook'."
   (when (get-buffer-window (current-buffer))
-    (cond
-     ((eq state 'content)  nil)
-     ((eq state 'all)      nil)
-     ((and (eq state 'folded) (eq last-command this-command))
-      (set-window-start nil org-scroll-position-to-restore))
-     ((eq state 'folded) nil)
-     ((eq state 'children)
-      (setq org-scroll-position-to-restore (window-start))
-      (or (org-subtree-end-visible-p) (recenter 1)))
-     ((eq state 'subtree)
-      (when (not (eq last-command this-command))
-	(setq org-scroll-position-to-restore (window-start)))
-      (or (org-subtree-end-visible-p) (recenter 1))))))
+    (let ((repeat (eq last-command this-command)))
+      (unless repeat
+	(setq org-scroll-position-to-restore nil))
+      (cond
+       ((eq state 'content)  nil)
+       ((eq state 'all)      nil)
+       ((and org-scroll-position-to-restore repeat
+	     (eq state 'folded))
+	(set-window-start nil org-scroll-position-to-restore))
+       ((eq state 'folded) nil)
+       ((eq state 'children)
+	(setq org-scroll-position-to-restore (window-start))
+	(or (org-subtree-end-visible-p) (recenter 1)))
+       ((eq state 'subtree)
+	(unless repeat
+	  (setq org-scroll-position-to-restore (window-start)))
+	(or (org-subtree-end-visible-p) (recenter 1)))))))
 
 (defun org-clean-visibility-after-subtree-move ()
   "Fix visibility issues after moving a subtree."
