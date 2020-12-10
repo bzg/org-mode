@@ -214,7 +214,7 @@ converted to a headline before refiling."
 		   org-org-menu
 		   '("Edit Structure") i))
       '(["Refile Subtree" org-refile (org-in-subtree-not-table-p)]
-	["Refile and copy Subtree" org-copy (org-in-subtree-not-table-p)]))
+	["Refile and copy Subtree" org-refile-copy (org-in-subtree-not-table-p)]))
 
 (defun org-refile-marker (pos)
   "Get a new refile marker, but only if caching is in use."
@@ -426,7 +426,7 @@ needed when passing RFLOC
 headline to refile under
 
 MSG is a string to replace \"Refile\" in the default prompt with
-another verb.  E.g. `org-copy' sets this parameter to \"Copy\".
+another verb.  E.g. `org-refile-copy' sets this parameter to \"Copy\".
 
 See also `org-refile-use-outline-path'.
 
