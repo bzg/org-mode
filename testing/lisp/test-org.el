@@ -2103,7 +2103,12 @@
   (should-not
    (org-test-with-temp-text "* Headline :ARCHIVE:\n** Level 2\nBody"
      (goto-char (point-max))
-     (org-in-archived-heading-p t))))
+     (org-in-archived-heading-p t)))
+   ;; Archive tag containing ARCHIVE as substring
+   (should-not
+    (org-test-with-temp-text "* Headline :NOARCHIVE:\n** Level 2\nBody"
+     (goto-char (point-max))
+     (org-in-archived-heading-p))))
 
 (ert-deftest test-org/entry-blocked-p ()
   ;; Check other dependencies.
