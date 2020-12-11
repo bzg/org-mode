@@ -234,6 +234,10 @@ explicitly:
 (add-hook 'org-mode-hook (lambda () (electric-indent-local-mode -1)))
 #+end_src
 
+Alternatively, if you wish to keep =RET= as the "smart-return" key,
+but dislike Org's default indentation of sections, you may prefer to
+customize ~org-adapt-indentation~ to either =nil= or ='headline-data=.
+
 *** =ob-C.el= allows the inclusion of non-system header files
 
 In C and C++ blocks, ~:includes~ arguments that do not start with a
