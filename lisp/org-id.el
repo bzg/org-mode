@@ -303,7 +303,7 @@ If necessary, the ID is created."
 	  (if (caar org-refile-targets) 'file t))
 	 (org-refile-target-verify-function nil)
 	 (spos (org-refile-get-location "Entry"))
-	 (pom (and spos (move-marker (make-marker) (nth 3 spos)
+	 (pom (and spos (move-marker (make-marker) (or (nth 3 spos) 1)
 				     (get-file-buffer (nth 1 spos))))))
     (prog1 (org-id-get pom 'create)
       (move-marker pom nil))))
