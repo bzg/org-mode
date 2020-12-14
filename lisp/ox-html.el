@@ -1425,6 +1425,23 @@ not be modified."
 
 ;;;; Template :: Styles
 
+(defcustom org-html-meta-tags #'org-html-meta-tags-default
+  "Form that is used to produce meta tags in the HTML head.
+
+Can be a list where each item is a list of arguments to be passed
+to `org-html--build-meta-entry'.  Any nil items are ignored.
+
+Also accept a function which gives such a list when called with a
+single argument (INFO, a communication plist)."
+  :group 'org-export-html
+  :package-version '(Org . "9.5")
+  :type '(choice
+	  (repeat
+	   (list (string :tag "Meta label")
+		 (string :tag "label value")
+		 (string :tag "Content value")))
+	  function))
+
 (defcustom org-html-head-include-default-style t
   "Non-nil means include the default style in exported HTML files.
 The actual style is defined in `org-html-style-default' and
@@ -1835,6 +1852,28 @@ INFO is a plist used as a communication channel."
 
 ;;; Template
 
+(defun org-html-meta-tags-default (info)
+  "A default value for `org-html-meta-tags'.
+
+Generate a list items, each of which is a list of arguments that can
+be passed to `org-html--build-meta-entry', to generate meta tags to be
+included in the HTML head.
+
+Use document's plist INFO to derive relevant information for the tags."
+  (let ((author (and (plist-get info :with-author)
+                     (let ((auth (plist-get info :author)))
+                       ;; Return raw Org syntax.
+                       (and auth (org-element-interpret-data auth))))))
+    (list
+     (when (org-string-nw-p author)
+       (list "name" "author" author))
+     (when (org-string-nw-p (plist-get info :description))
+       (list "name" "description"
+             (plist-get info :description)))
+     (when (org-string-nw-p (plist-get info :keywords))
+       (list "name" "keywords" (plist-get info :keywords)))
+     '("name" "generator" "Org Mode"))))
+
 (defun org-html--build-meta-entry
     (label identity &optional content-format &rest content-formatters)
   "Build a meta tag using the provided information.
@@ -1864,11 +1903,6 @@ INFO is a plist used as a communication channel."
 	 ;; Set title to an invisible character instead of leaving it
 	 ;; empty, which is invalid.
 	 (title (if (org-string-nw-p title) title "&lrm;"))
-	 (author (and (plist-get info :with-author)
-		      (let ((auth (plist-get info :author)))
-			;; Return raw Org syntax.
-			(and auth (org-html-plain-text
-				   (org-element-interpret-data auth) info)))))
 	 (charset (or (and org-html-coding-system
 			   (fboundp 'coding-system-get)
 			   (symbol-name
@@ -1899,16 +1933,12 @@ INFO is a plist used as a communication channel."
 
      (format "<title>%s</title>\n" title)
 
-     (when (org-string-nw-p author)
-       (org-html--build-meta-entry "name" "author" author))
-
-     (when (org-string-nw-p (plist-get info :description))
-       (org-html--build-meta-entry "name" "description" (plist-get info :description)))
-
-     (when (org-string-nw-p (plist-get info :keywords))
-	(org-html--build-meta-entry "keywords" (plist-get info :keywords)))
-
-     (org-html--build-meta-entry "name" "generator" "Org Mode"))))
+     (mapconcat
+      (lambda (args) (apply #'org-html--build-meta-entry args))
+      (delq nil (if (functionp org-html-meta-tags)
+		    (funcall org-html-meta-tags info)
+		  org-html-meta-tags))
+      ""))))
 
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.
