@@ -59,6 +59,28 @@ relative links within a project as follows:
              (abbreviate-file-name path))))))
 #+end_src
 
+*** New options and new behavior for babel LaTeX SVG image files
+
+Org babel now uses a two-stage process for converting latex source
+blocks to SVG image files (when the extension of the output file is
+~.svg~).  The first stage in the process converts the latex block into
+a PDF file, which is then converted into an SVG file in the second
+stage.  The TeX->PDF part uses the existing infrastructure for
+~org-babel-latex-tex-to-pdf~.  The PDF->SVG part uses a command
+specified in a new customization,
+~org-babel-latex-pdf-svg-process~. By default, this uses inkscape for
+conversion, but since it is fully customizable, any other command can
+be used in its place. For instance, dvisvgm might be used here. This
+two-part processing replaces the previous use of htlatex to process
+LaTeX directly to SVG (htlatex is still used for HTML conversion).
+
+Conversion to SVG exposes a number of additional customizations that
+give the user full control over the contents of the latex source
+block. ~org-babel-latex-preamble~, ~org-babel-latex-begin-env~ and
+~org-babel-latex-end-env~ are new customization options added to allow
+the user to specify the preamble and code that preceedes and proceeds
+the contents of the source block.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
