@@ -1835,78 +1835,80 @@ INFO is a plist used as a communication channel."
 
 ;;; Template
 
+(defun org-html--build-meta-entry
+    (label identity &optional content-format &rest content-formatters)
+  "Build a meta tag using the provided information.
+
+Construct <meta> tag of form <meta LABEL=\"IDENTITY\" />, or when CONTENT-FORMAT
+is present: <meta LABEL=\"IDENTITY\" content=\"{content}\" />
+
+Here {content} is determined by applying any CONTENT-FORMATTERS to the
+CONTENT-FORMAT and encoding the result as plain text."
+  (concat "<meta "
+	  (format "%s=\"%s" label identity)
+	  (when content-format
+	    (concat "\" content=\""
+		    (replace-regexp-in-string
+		     "\"" "&quot;"
+		     (org-html-encode-plain-text
+		      (if content-formatters
+			  (apply #'format content-format content-formatters)
+			content-format)))))
+	  "\" />\n"))
+
 (defun org-html--build-meta-info (info)
   "Return meta tags for exported document.
 INFO is a plist used as a communication channel."
-  (let* ((protect-string
-          (lambda (str)
-            (replace-regexp-in-string
-             "\"" "&quot;" (org-html-encode-plain-text str))))
-         (title (org-export-data (plist-get info :title) info))
-         ;; Set title to an invisible character instead of leaving it
-         ;; empty, which is invalid.
-         (title (if (org-string-nw-p title) title "&lrm;"))
-         (author (and (plist-get info :with-author)
-                      (let ((auth (plist-get info :author)))
+  (let* ((title (org-html-plain-text
+		 (org-element-interpret-data (plist-get info :title)) info))
+	 ;; Set title to an invisible character instead of leaving it
+	 ;; empty, which is invalid.
+	 (title (if (org-string-nw-p title) title "&lrm;"))
+	 (author (and (plist-get info :with-author)
+		      (let ((auth (plist-get info :author)))
 			;; Return raw Org syntax.
-                        (and auth (org-element-interpret-data auth)))))
-         (description (plist-get info :description))
-         (keywords (plist-get info :keywords))
-         (charset (or (and org-html-coding-system
-                           (fboundp 'coding-system-get)
-                           (coding-system-get org-html-coding-system
-                                              'mime-charset))
-                      "iso-8859-1")))
+			(and auth (org-html-plain-text
+				   (org-element-interpret-data auth) info)))))
+	 (charset (or (and org-html-coding-system
+			   (fboundp 'coding-system-get)
+			   (symbol-name
+			    (coding-system-get org-html-coding-system
+					       'mime-charset)))
+		      "iso-8859-1")))
     (concat
      (when (plist-get info :time-stamp-file)
        (format-time-string
 	(concat "<!-- "
 		(plist-get info :html-metadata-timestamp-format)
 		" -->\n")))
-     (format
-      (if (org-html-html5-p info)
-	  (org-html-close-tag "meta" "charset=\"%s\"" info)
-	(org-html-close-tag
-	 "meta" "http-equiv=\"Content-Type\" content=\"text/html;charset=%s\""
-	 info))
-      charset) "\n"
+
+     (if (org-html-html5-p info)
+	 (org-html--build-meta-entry "charset" charset)
+       (org-html--build-meta-entry "http-equiv" "Content-Type"
+				   (concat "text/html;charset=" charset)))
+
      (let ((viewport-options
 	    (cl-remove-if-not (lambda (cell) (org-string-nw-p (cadr cell)))
 			      (plist-get info :html-viewport))))
-       (and viewport-options
-	    (concat
-	     (org-html-close-tag
-	      "meta"
-	      (format "name=\"viewport\" content=\"%s\""
-		      (mapconcat
-		       (lambda (elm) (format "%s=%s" (car elm) (cadr elm)))
-		       viewport-options ", "))
-	      info)
-	     "\n")))
+       (if viewport-options
+	   (org-html--build-meta-entry "name" "viewport"
+				       (mapconcat
+					(lambda (elm)
+                                          (format "%s=%s" (car elm) (cadr elm)))
+					viewport-options ", "))))
+
      (format "<title>%s</title>\n" title)
-     (org-html-close-tag "meta" "name=\"generator\" content=\"Org mode\"" info)
-     "\n"
-     (and (org-string-nw-p author)
-	  (concat
-	   (org-html-close-tag "meta"
-			       (format "name=\"author\" content=\"%s\""
-				       (funcall protect-string author))
-			       info)
-	   "\n"))
-     (and (org-string-nw-p description)
-	  (concat
-	   (org-html-close-tag "meta"
-			       (format "name=\"description\" content=\"%s\"\n"
-				       (funcall protect-string description))
-			       info)
-	   "\n"))
-     (and (org-string-nw-p keywords)
-	  (concat
-	   (org-html-close-tag "meta"
-			       (format "name=\"keywords\" content=\"%s\""
-				       (funcall protect-string keywords))
-			       info)
-	   "\n")))))
+
+     (when (org-string-nw-p author)
+       (org-html--build-meta-entry "name" "author" author))
+
+     (when (org-string-nw-p (plist-get info :description))
+       (org-html--build-meta-entry "name" "description" (plist-get info :description)))
+
+     (when (org-string-nw-p (plist-get info :keywords))
+	(org-html--build-meta-entry "keywords" (plist-get info :keywords)))
+
+     (org-html--build-meta-entry "name" "generator" "Org Mode"))))
 
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.
