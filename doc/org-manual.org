@@ -3581,12 +3581,11 @@ replacement text.  Here is an example:
 
 #+begin_src emacs-lisp
 (setq org-link-abbrev-alist
-      '(("bugzilla"  . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
-        ("url-to-ja" . "http://translate.google.fr/translate?sl=en&tl=ja&u=%h")
-        ("google"    . "http://www.google.com/search?q=")
-        ("gmap"      . "http://maps.google.com/maps?q=%s")
-        ("omap"      . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
-        ("ads"       . "https://ui.adsabs.harvard.edu/search/q=%20author%3A\"%s\"")))
+      '(("bugzilla"        . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
+        ("Nu Html Checker" . "https://validator.w3.org/nu/?doc=%h") 
+	("duckduckgo"      . "https://duckduckgo.com/?q=%s")
+        ("omap"            . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+        ("ads"             . "https://ui.adsabs.harvard.edu/search/q=%20author%3A\"%s\"")))
 #+end_src
 
 If the replacement text contains the string =%s=, it is replaced with
