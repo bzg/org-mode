@@ -3,6 +3,7 @@
 ;; Copyright (C) 2010-2014 Julien Danjou <julien@danjou.info>
 
 ;; Author: Julien Danjou <julien@danjou.info>
+;; Maintainer: stardiviner <numbchild@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar
 ;;
 ;; This file is NOT part of GNU Emacs.
