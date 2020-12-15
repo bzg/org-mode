@@ -17354,8 +17354,7 @@ A note of warning: when =cache= is used in a session, caching may
 cause unexpected results.
 
 When the caching mechanism tests for any source code changes, it does
-not expand noweb style references (see [[*Noweb Reference Syntax]]).  For
-reasons why, see https://orgmode.org/list/86fvqqc8jb.fsf@somewhere.org
+not expand noweb style references (see [[*Noweb Reference Syntax]]).
 
 The =cache= header argument can have one of two values: =yes= or =no=.
 
