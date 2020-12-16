@@ -21214,8 +21214,4 @@ Started from `gnus-info-find-node'."
 
 (run-hooks 'org-load-hook)
 
-;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
-;; End:
-
 ;;; org.el ends here
