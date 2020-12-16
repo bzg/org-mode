@@ -912,7 +912,7 @@ selected items in DEVONthink Pro Office and make link(s) out of it/them."
   "Visit the message with MESSAGE-ID.
 This will use the command `open' with the message URL."
   (start-process (concat "open message:" message-id) nil
-                 "open" (concat "message://<" (substring message-id 2) ">")))
+                 "open" (concat "message://%3C" (substring message-id 2) "%3E")))
 
 (defun org-as-get-selected-mail ()
   "AppleScript to create links to selected messages in Mail.app."
