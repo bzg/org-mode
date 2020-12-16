@@ -8,7 +8,11 @@
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
 
+<<<<<<< HEAD
 ;; Version: 9.5-dev
+=======
+;; Version: 9.4.3
+>>>>>>> maint
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -21247,9 +21251,5 @@ Started from `gnus-info-find-node'."
 (provide 'org)
 
 (run-hooks 'org-load-hook)
-
-;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
-;; End:
 
 ;;; org.el ends here
