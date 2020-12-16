@@ -94,7 +94,8 @@ code."
 		      (tablep (or (listp first) (symbolp first))))
 		 (if tablep val (mapcar 'list val)))
 	       (org-babel-temp-file "gnuplot-") params)
-	    (if (and (file-remote-p val)  ;; check if val is a remote file
+	    (if (and (stringp val)
+		     (file-remote-p val)  ;; check if val is a remote file
 		     (file-exists-p val)) ;; call to file-exists-p is slow, maybe remove it
 		(let* ((local-name (concat ;; create a unique filename to avoid multiple downloads
 				org-babel-temporary-directory
