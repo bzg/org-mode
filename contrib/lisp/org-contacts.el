@@ -1157,8 +1157,8 @@ are effectively trimmed).  If nil, all zero-length substrings are retained."
 
 (defun org-contacts-link-store ()
   "Store the contact in `org-contacts-files' with a link."
-  (when (eq major-mode 'org-mode)
-    ;; (member (buffer-file-name) (mapcar 'expand-file-name org-contacts-files))
+  (when (and (eq major-mode 'org-mode)
+	     (member (buffer-file-name) (mapcar 'expand-file-name org-contacts-files)))
     (let ((headline-str (substring-no-properties (org-get-heading t t t t))))
       (org-store-link-props
        :type "org-contact"
