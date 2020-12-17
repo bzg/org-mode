@@ -256,7 +256,14 @@ Shows a list of commands and prompts for another key to execute a command."
       (unless marker
 	(error "No item in current line")))
     (org-with-point-at marker
-      (org-back-to-heading-or-point-min t)
+      (if (and (featurep 'org-inlinetask)
+	       (not (org-inlinetask-in-task-p)))
+	  (org-with-limited-levels
+	   (org-back-to-heading-or-point-min t))
+        (if (and (featurep 'org-inlinetask)
+		 (org-inlinetask-in-task-p))
+            (org-inlinetask-goto-beginning)
+          (org-back-to-heading-or-point-min t)))
       (save-excursion
 	(save-window-excursion
 	  (unless org-attach-expert
