@@ -3,6 +3,7 @@
 ;; Copyright (C) 2009-2020 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
+;; Maintainer: Lawrence Bottorff <borgauf@gmail.com>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
