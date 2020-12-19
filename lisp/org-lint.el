@@ -1191,7 +1191,6 @@ CHECKERS is the list of checkers used."
       (setf org-lint--source-buffer source)
       (setf org-lint--local-checkers checkers)
       (org-lint--refresh-reports)
-      (tabulated-list-print)
       (add-hook 'tabulated-list-revert-hook #'org-lint--refresh-reports nil t))
     (pop-to-buffer buffer)))
 
