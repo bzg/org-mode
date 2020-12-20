@@ -1222,7 +1222,7 @@ are effectively trimmed).  If nil, all zero-length substrings are retained."
   (cond
    ((string-match "/.*/" path)
     '(:background "sky blue" :overline t :slant 'italic))
-   (t '(:background "green yellow" :underline t))))
+   (t '(:inherit 'org-link))))
 
 (provide 'org-contacts)
 
