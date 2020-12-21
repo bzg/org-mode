@@ -157,6 +157,35 @@ headings in the buffer.
 Previously =org-goto-first-child= would do nothing before first
 heading, except return nil.
 
+*** Faces of all the heading text elements now conform to the headline face
+
+In the past, faces of todo keywords, emphasised text, tags, and
+priority cookies inherited =default= face.  The resulting headline
+fontification was not always consistent, as discussed in [[https://lists.gnu.org/archive/html/emacs-orgmode/2020-09/msg00331.html][this bug
+report]].  Now, the relevant faces adapt to face used to fontify the
+current headline level.
+
+Users who prefer to keep the old behaviour should change their face
+customisation explicitly stating that =default= face is inherited.
+
+Example of old face customisation:
+
+#+begin_src emacs-lisp
+(setq org-todo-keyword-faces '(("TODO"
+                                :background "chocolate"
+                                :height 0.75)))
+#+end_src
+
+To preserve the old behaviour the above customisation should be
+changed to
+
+#+begin_src emacs-lisp
+(setq org-todo-keyword-faces '(("TODO"
+                                :inherit default
+                                :background "chocolate"
+                                :height 0.75)))
+#+end_src
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
