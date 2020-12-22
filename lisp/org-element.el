@@ -3950,13 +3950,24 @@ element it has to parse."
 	     ((or (looking-at "[ \t]*|")
 		  ;; There is no strict definition of a table.el
 		  ;; table.  Try to prevent false positive while being
-		  ;; quick.
-		  (let ((rule-regexp "[ \t]*\\+\\(-+\\+\\)+[ \t]*$")
+		  ;; quick.  Hence, we consider a table.el table is at
+		  ;; least one rule, any number of data lines
+		  ;; (starting with a vertical bar), and another rule.
+		  (let ((rule-regexp
+			 (rx (zero-or-more (any " \t"))
+			     "+"
+			     (one-or-more (one-or-more "-") "+")
+			     (zero-or-more (any " \t"))
+			     eol))
+			(non-table.el-data-line
+			 (rx bol
+			     (zero-or-more (any " \t"))
+			     (or eol (not (any "| \t")))))
 			(next (line-beginning-position 2)))
 		    (and (looking-at rule-regexp)
 			 (save-excursion
-			   (forward-line)
-			   (re-search-forward "^[ \t]*\\($\\|[^|]\\)" limit t)
+			   (end-of-line)
+			   (re-search-forward non-table.el-data-line limit t)
 			   (and (> (line-beginning-position) next)
 				(org-match-line rule-regexp))))))
 	      (org-element-table-parser limit affiliated))
