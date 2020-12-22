@@ -3950,26 +3950,37 @@ element it has to parse."
 	     ((or (looking-at "[ \t]*|")
 		  ;; There is no strict definition of a table.el
 		  ;; table.  Try to prevent false positive while being
-		  ;; quick.  Hence, we consider a table.el table is at
-		  ;; least one rule, any number of data lines
-		  ;; (starting with a vertical bar), and another rule.
+		  ;; quick.
 		  (let ((rule-regexp
 			 (rx (zero-or-more (any " \t"))
 			     "+"
 			     (one-or-more (one-or-more "-") "+")
 			     (zero-or-more (any " \t"))
 			     eol))
-			(non-table.el-data-line
+			(non-table.el-line
 			 (rx bol
 			     (zero-or-more (any " \t"))
-			     (or eol (not (any "| \t")))))
+			     (or eol (not (any "+| \t")))))
 			(next (line-beginning-position 2)))
-		    (and (looking-at rule-regexp)
-			 (save-excursion
-			   (end-of-line)
-			   (re-search-forward non-table.el-data-line limit t)
-			   (and (> (line-beginning-position) next)
-				(org-match-line rule-regexp))))))
+		    ;; Start with a full rule.
+		    (and
+		     (looking-at rule-regexp)
+		     (< next limit)	;no room for a table.el table
+		     (save-excursion
+		       (end-of-line)
+		       (cond
+			;; Must end with a full rule.
+			((not (re-search-forward non-table.el-line limit 'move))
+			 (beginning-of-line)
+			 (looking-at rule-regexp))
+			;; Ignore pseudo-tables with a single
+			;; rule.
+			((= next (line-beginning-position))
+			 nil)
+			;; Must end with a full rule.
+			(t
+			 (forward-line -1)
+			 (looking-at rule-regexp)))))))
 	      (org-element-table-parser limit affiliated))
 	     ;; List.
 	     ((looking-at (org-item-re))
