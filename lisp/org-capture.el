@@ -1955,8 +1955,4 @@ Assume sexps have been marked with
 
 (provide 'org-capture)
 
-;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
-;; End:
-
 ;;; org-capture.el ends here
