@@ -140,6 +140,10 @@ These startup options complement the existing =overview=, =content=,
 =showall=, =showeverything= with a way to start the document with n
 levels shown, where n goes from 2 to 5.
 
+Example:
+
+: #+startup: show3levels
+
 *** New =u= table formula flag to enable Calc units simplification mode
 
 A new =u= mode flag for Calc formulas in Org tables has been added to
