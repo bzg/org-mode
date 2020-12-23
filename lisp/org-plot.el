@@ -196,7 +196,7 @@ values, namely regarding the range."
 	 (maximum (or hard-max (apply #'max nums)))
 	 (range (- maximum minimum))
 	 (rangeOrder (if (= range 0) 0
-		       (ceiling (- 1 (log10 range)))))
+		       (ceiling (- 1 (log range 10)))))
 	 (range-factor (expt 10 rangeOrder))
 	 (nice-min (if (= range 0) (car nums)
 		     (/ (float (floor (* minimum range-factor))) range-factor)))
@@ -229,34 +229,34 @@ values, namely regarding the range."
 (defun org--plot/nice-frequency-pick (frequencies)
   "From a list of frequences, try to sensibly pick a sample of the most frequent."
   ;; TODO this mosly works decently, but counld do with some tweaking to work more consistently.
-  (case (length frequencies)
-	(1 (list (car (nth 0 frequencies))))
-	(2 (if (<= 3 (/ (cdr (nth 0 frequencies))
-			(cdr (nth 1 frequencies))))
-	       (make-list 2
-			  (car (nth 0 frequencies)))
-	     (list (car (nth 0 frequencies))
-		   (car (nth 1 frequencies)))))
-	(t
-	 (let* ((total-count (apply #'+ (mapcar #'cdr frequencies)))
-		(n-freq (mapcar (lambda (freq) `(,(car freq) . ,(/ (float (cdr freq)) total-count))) frequencies))
-		(f-pick (list (car (car n-freq))))
-		(1-2-ratio (/ (cdr (nth 0 n-freq))
-			      (cdr (nth 1 n-freq))))
-		(2-3-ratio (/ (cdr (nth 1 n-freq))
-			      (cdr (nth 2 n-freq))))
-		(1-3-ratio (* 1-2-ratio 2-3-ratio))
-		(1-val (car (nth 0 n-freq)))
-		(2-val (car (nth 1 n-freq)))
-		(3-val (car (nth 2 n-freq))))
-	   (when (> 1-2-ratio 4) (push 1-val f-pick))
-	   (when (and (< 1-2-ratio 2-val)
-		      (< (* (apply #'* f-pick) 2-val) 30))
-	     (push 2-val f-pick))
-	   (when (and (< 1-3-ratio 3-val)
-		      (< (* (apply #'* f-pick) 3-val) 30))
-	     (push 3-val f-pick))
-	   f-pick))))
+  (cl-case (length frequencies)
+    (1 (list (car (nth 0 frequencies))))
+    (2 (if (<= 3 (/ (cdr (nth 0 frequencies))
+		    (cdr (nth 1 frequencies))))
+	   (make-list 2
+		      (car (nth 0 frequencies)))
+	 (list (car (nth 0 frequencies))
+	       (car (nth 1 frequencies)))))
+    (t
+     (let* ((total-count (apply #'+ (mapcar #'cdr frequencies)))
+	    (n-freq (mapcar (lambda (freq) `(,(car freq) . ,(/ (float (cdr freq)) total-count))) frequencies))
+	    (f-pick (list (car (car n-freq))))
+	    (1-2-ratio (/ (cdr (nth 0 n-freq))
+			  (cdr (nth 1 n-freq))))
+	    (2-3-ratio (/ (cdr (nth 1 n-freq))
+			  (cdr (nth 2 n-freq))))
+	    (1-3-ratio (* 1-2-ratio 2-3-ratio))
+	    (1-val (car (nth 0 n-freq)))
+	    (2-val (car (nth 1 n-freq)))
+	    (3-val (car (nth 2 n-freq))))
+       (when (> 1-2-ratio 4) (push 1-val f-pick))
+       (when (and (< 1-2-ratio 2-val)
+		  (< (* (apply #'* f-pick) 2-val) 30))
+	 (push 2-val f-pick))
+       (when (and (< 1-3-ratio 3-val)
+		  (< (* (apply #'* f-pick) 3-val) 30))
+	 (push 3-val f-pick))
+       f-pick))))
 
 (defun org--plot/merge-alists (function default alist1 alist2 &rest alists)
   "Using FUNCTION, combine the elements of all given ALISTS. When an element is
@@ -473,34 +473,34 @@ EOD
 
 (defun org--plot/radar (table params)
   (let* ((data
-	  (concat "\"" (s-join "\" \"" (plist-get params :labels)) "\""
+	  (concat "\"" (mapconcat #'identity (plist-get params :labels) "\" \"") "\""
 		  "\n"
-		  (s-join "\n"
-			  (mapcar (lambda (row)
-				    (format
-				     "\"%s\" %s"
-				     (car row)
-				     (s-join " " (cdr row))))
-				  (append table (list (car table)))))))
+		  (mapconcat (lambda (row)
+			       (format
+				"\"%s\" %s"
+				(car row)
+				(mapconcat #'identity (cdr row) " ")))
+			     (append table (list (car table)))
+			     "\n")))
 	 (ticks (or (plist-get params :ticks)
 		    (org--plot/sensible-tick-num table
 						 (plist-get params :ymin)
 						 (plist-get params :ymax))))
 	 (settings
-	  (s-join "\n"
-		  (mapcar (lambda (row)
-			    (let ((data (org--plot/values-stats
-					 (mapcar #'string-to-number (cdr row)))))
-			      (format
-			       "\"%s\" %s %s %s"
-			       (car row)
-			       (or (plist-get params :ymin)
-				   (plist-get data :nice-min))
-			       (or (plist-get params :ymax)
-				   (plist-get data :nice-max))
-			       (if (eq ticks 0) 2 ticks)
-			       )))
-			  (append table (list (car table))))))
+	  (mapconcat (lambda (row)
+		       (let ((data (org--plot/values-stats
+				    (mapcar #'string-to-number (cdr row)))))
+			 (format
+			  "\"%s\" %s %s %s"
+			  (car row)
+			  (or (plist-get params :ymin)
+			      (plist-get data :nice-min))
+			  (or (plist-get params :ymax)
+			      (plist-get data :nice-max))
+			  (if (eq ticks 0) 2 ticks)
+			  )))
+		     (append table (list (car table)))
+		     "\n"))
 	 (setup-file (make-temp-file "org-plot-setup")))
     (let ((coding-system-for-write 'utf-8))
       (write-region (format org--plot/radar-setup-template data settings) nil setup-file nil :silent))
@@ -533,15 +533,10 @@ manner suitable for prepending to a user-specified script."
       (user-error "Org-plot type `%s' is undefined." type-name))
     (let* ((sets (plist-get params :set))
 	   (lines (plist-get params :line))
-	   (map (plist-get params :map))
 	   (title (plist-get params :title))
 	   (file (plist-get params :file))
-	   (ind (plist-get params :ind))
 	   (time-ind (plist-get params :timeind))
 	   (timefmt (plist-get params :timefmt))
-	   (text-ind (plist-get params :textind))
-	   (deps (if (plist-member params :deps) (plist-get params :deps)))
-	   (col-labels (plist-get params :labels))
 	   (x-labels (plist-get params :xlabels))
 	   (y-labels (plist-get params :ylabels))
 	   (plot-str (or (plist-get type :plot-str)
@@ -650,7 +645,7 @@ line directly before or after the table."
 			org-plot/preset-plot-types)))
 
       (unless type
-	(user-error "Org-plot type `%s' is undefined." type-name))
+	(user-error "Org-plot type `%s' is undefined." (plist-get params :plot-type)))
 
       (run-with-idle-timer 0.1 nil #'delete-file data-file)
       (when (eq (cadr table) 'hline)
