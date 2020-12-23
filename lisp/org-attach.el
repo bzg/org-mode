@@ -42,6 +42,8 @@
 (declare-function dired-dwim-target-directory "dired-aux")
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 
 (defgroup org-attach nil
   "Options concerning attachments in Org mode."
