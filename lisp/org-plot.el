@@ -634,9 +634,9 @@ line directly before or after the table."
     (let* ((data-file (make-temp-file "org-plot"))
 	   (table (let ((tbl (org-table-to-lisp)))
 		    (when (pcase (plist-get params :transpose)
-			    ('y   t)
-			    ('yes t)
-			    ('t   t))
+			    (`y   t)
+			    (`yes t)
+			    (`t   t))
 		      (if (not (memq 'hline tbl))
 			  (setq tbl (apply #'cl-mapcar #'list tbl))
 			;; When present, remove hlines as they can't (currentily) be easily transposed.
