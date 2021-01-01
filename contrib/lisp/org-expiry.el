@@ -1,6 +1,6 @@
 ;;; org-expiry.el --- expiry mechanism for Org entries
 ;;
-;; Copyright 2007-2020 Free Software Foundation, Inc.
+;; Copyright 2007-2021 Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry <bzg@gnu.org>
 ;; Version: 0.2
