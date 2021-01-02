@@ -43,6 +43,15 @@
 (defvar org-babel-default-header-args:lilypond '()
   "Default header arguments for lilypond code blocks.
 NOTE: The arguments are determined at lilypond compile time.
+See `org-babel-lilypond-set-header-args'
+To configure, see `ob-lilypond-header-args'
+.")
+
+(defvar ob-lilypond-header-args
+  '((:results . "file") (:exports . "results"))
+  "User-configurable header arguments for lilypond code blocks.
+NOTE: The final value used by org-babel is computed at compile-time
+and stored in  `org-babel-default-header-args:lilypond'
 See `org-babel-lilypond-set-header-args'.")
 
 (defvar org-babel-lilypond-compile-post-tangle t
@@ -404,8 +413,7 @@ These depend upon whether we are in Arrange mode i.e. MODE is t."
            (:cache . "yes")
            (:comments . "yes")))
         (t
-         '((:results . "file")
-           (:exports . "results")))))
+          ob-lilypond-header-args)))
 
 (defun org-babel-lilypond-set-header-args (mode)
   "Set org-babel-default-header-args:lilypond
