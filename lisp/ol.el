@@ -1496,9 +1496,9 @@ non-nil."
 		  (apply #'org-link-store-props
 			 (cdr (assoc-string
 			       (completing-read
-				"Which function for creating the link? "
-				(mapcar #'car results-alist)
-				nil t (symbol-name name))
+                                (format "Store link with (default %s): " name)
+                                (mapcar #'car results-alist)
+                                nil t nil nil (symbol-name name))
 			       results-alist)))
 		  t))))
 	(setq link (plist-get org-store-link-plist :link))
