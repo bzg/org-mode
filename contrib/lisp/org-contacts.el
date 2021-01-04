@@ -54,8 +54,8 @@
 ;;;; Usage:
 
 ;;; How to search?
-;;; 
-;;; You can use `org-spare-tree' [C-c / p] to filter based on a
+;;;
+;;; You can use `org-sparse-tree' [C-c / p] to filter based on a
 ;;; specific property. Or other matcher on `org-sparse-tree'.
 
 ;;; Code:
