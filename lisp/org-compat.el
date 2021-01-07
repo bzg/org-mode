@@ -732,6 +732,8 @@ context.  See the individual commands for more information."
  "use `org-planning-line-re', followed by `org-ts-regexp-both' instead."
  "Org 9.4")
 
+(define-obsolete-function-alias 'org-copy 'org-refile-copy "Org 9.4")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol
