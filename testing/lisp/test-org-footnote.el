@@ -138,7 +138,20 @@
 	  (org-test-with-temp-text
 	      "Paragraph<point>\n# Local Variables:\n# foo: t\n# End:"
 	    (let ((org-footnote-section "Footnotes")) (org-footnote-new))
-	    (buffer-string)))))
+	    (buffer-string))))
+  (should
+   (equal "Para[fn:1]
+* Footnotes
+:properties:
+:custom_id: id
+:end:
+
+\[fn:1]"
+          (org-test-with-temp-text
+              "Para<point>\n* Footnotes\n:properties:\n:custom_id: id\n:end:"
+            (let ((org-footnote-section "Footnotes"))
+              (org-footnote-new))
+            (org-trim (buffer-string))))))
 
 (ert-deftest test-org-footnote/delete ()
   "Test `org-footnote-delete' specifications."
