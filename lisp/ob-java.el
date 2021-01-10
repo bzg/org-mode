@@ -87,6 +87,7 @@ like javac -verbose."
 					 (0+ space) ?\; line-end)
   "Regexp for the package statement.")
 (defconst org-babel-java--imports-re (rx line-start (0+ space) "import"
+                                         (opt (1+ space) "static")
 					 (1+ space) (group (1+ (in alnum ?_ ?.))) ; capture the fully qualified class name
 					 (0+ space) ?\; line-end)
   "Regexp for import statements.")
