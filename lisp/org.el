@@ -144,7 +144,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-clock-timestamps-down "org-clock" (&optional n))
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-update-time-maybe "org-clock" ())
-(declare-function org-clocking-buffer "org-clock" ())
 (declare-function org-clocktable-shift "org-clock" (dir n))
 (declare-function org-columns-quit "org-colview" ())
 (declare-function org-columns-insert-dblock "org-colview" ())
@@ -3828,10 +3827,11 @@ This is needed for font-lock setup.")
   "Marker recording the last clock-in, but the headline position.")
 (defvar org-clock-heading ""
   "The heading of the current clock entry.")
-(defun org-clock-is-active ()
+(defun org-clocking-buffer ()
   "Return the buffer where the clock is currently running.
 Return nil if no clock is running."
   (marker-buffer org-clock-marker))
+(defalias 'org-clock-is-active #'org-clocking-buffer)
 
 (defun org-check-running-clock ()
   "Check if the current buffer contains the running clock.
@@ -8254,7 +8254,7 @@ function is being called interactively."
 	     ;; The clock marker is lost when using `sort-subr'; mark
 	     ;; the clock with temporary `:org-clock-marker-backup'
 	     ;; text property.
-	     (when (and (eq (org-clock-is-active) (current-buffer))
+	     (when (and (eq (org-clocking-buffer) (current-buffer))
 			(<= start (marker-position org-clock-marker))
 			(>= end (marker-position org-clock-marker)))
 	       (with-silent-modifications

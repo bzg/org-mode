@@ -618,10 +618,6 @@ cannot be translated."
 	  ((stringp drawer) drawer)
 	  (t nil))))
 
-(defun org-clocking-buffer ()
-  "Return the clocking buffer if we are currently clocking a task or nil."
-  (marker-buffer org-clock-marker))
-
 (defun org-clocking-p ()
   "Return t when clocking a task."
   (not (equal (org-clocking-buffer) nil)))
