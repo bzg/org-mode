@@ -704,7 +704,7 @@ function doesn't move point."
 	   (concat "^\\*+[ \t]+" (regexp-quote org-footnote-section) "[ \t]*$")
 	   nil t))
 	(goto-char (match-end 0))
-	(forward-line)
+        (org-end-of-meta-data t)
 	(unless (bolp) (insert "\n")))
        (t (org-footnote--clear-footnote-section)))
       (when (zerop (org-back-over-empty-lines)) (insert "\n"))
