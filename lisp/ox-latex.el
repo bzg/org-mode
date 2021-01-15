@@ -3660,12 +3660,12 @@ produced."
 		     (match-string 0)))
 	      "pdflatex"))
 	 (process (if (functionp org-latex-pdf-process) org-latex-pdf-process
-		    ;; Replace "%latex" and "%bibtex" with,
-		    ;; respectively, "%L" and "%B" so as to adhere to
-		    ;; `format-spec' specifications.
+		    ;; Replace "%latex" with "%L" and "%bib" and
+		    ;; "%bibtex" with "%B" to adhere to `format-spec'
+		    ;; specifications.
 		    (mapcar (lambda (command)
 			      (replace-regexp-in-string
-			       "%\\(?:bib\\|la\\)tex\\>"
+                               "%\\(?:\\(?:bib\\|la\\)tex\\|bib\\)\\>"
 			       (lambda (m) (upcase (substring m 0 2)))
 			       command))
 			    org-latex-pdf-process)))
