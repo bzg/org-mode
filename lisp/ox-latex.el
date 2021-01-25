@@ -956,7 +956,7 @@ URL `https://orgmode.org/worg/org-tutorials/org-latex-preview.html'."
     (tex "TeX") (latex "[LaTeX]TeX")
     (shell-script "bash")
     (gnuplot "Gnuplot")
-    (ocaml "Caml") (caml "Caml")
+    (ocaml "[Objective]Caml") (caml "Caml")
     (sql "SQL") (sqlite "sql")
     (makefile "make")
     (R "r"))
