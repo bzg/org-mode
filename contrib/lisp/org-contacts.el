@@ -1197,6 +1197,7 @@ are effectively trimmed).  If nil, all zero-length substrings are retained."
   "Open contacts: link type with jumping or searching."
   (let ((query path))
     (cond
+     ;; /query/ format searching
      ((string-match "/.*/" query)
       (let* ((f (car org-contacts-files))
 	     (buf (get-buffer (file-name-nondirectory f))))
@@ -1204,12 +1205,14 @@ are effectively trimmed).  If nil, all zero-length substrings are retained."
 	(with-current-buffer buf
 	  (string-match "/\\(.*\\)/" query)
 	  (occur (match-string 1 query)))))
+     ;; jump to contact headline directly
      (t
       (let* ((f (car org-contacts-files))
 	     (buf (get-buffer (file-name-nondirectory f))))
 	(unless (buffer-live-p buf) (find-file f))
 	(with-current-buffer buf
-	  (goto-char (marker-position (org-find-exact-headline-in-buffer query)))))
+	  (goto-char (marker-position (org-find-exact-headline-in-buffer query))))
+        (display-buffer buf '(display-buffer-below-selected)))
       ;; FIXME
       ;; (let* ((contact-entry (plist-get (org-contacts--all-contacts) query))
       ;; 	     (contact-name (plist-get contact-entry :name))
