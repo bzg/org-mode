@@ -6053,15 +6053,17 @@ various inputs are interpreted, the items filled in by Org mode are in
 | =2012-w04-5=   | \rArr{} Same as above                           |
 
 Furthermore you can specify a relative date by giving, as the /first/
-thing in the input: a plus/minus sign, a number and a letter---=d=,
-=w=, =m= or =y=---to indicate change in days, weeks, months, or
-years.  With a single plus or minus, the date is always relative to
-today.  With a double plus or minus, it is relative to the default
-date.  If instead of a single letter, you use the abbreviation of day
-name, the date is the Nth such day, e.g.:
+thing in the input: a plus/minus sign, a number and a letter---=h=,
+=d=, =w=, =m= or =y=---to indicate a change in hours, days, weeks,
+months, or years.  With =h= the date is relative to the current time,
+with the other letters and a single plus or minus, the date is
+relative to today at 00:00.  With a double plus or minus, it is
+relative to the default date.  If instead of a single letter, you use
+the abbreviation of day name, the date is the Nth such day, e.g.:
 
 | =+0=    | \rArr{} today                       |
 | =.=     | \rArr{} today                       |
+| =+2h=   | \rArr{} two hours from now          |
 | =+4d=   | \rArr{} four days from today        |
 | =+4=    | \rArr{} same as +4d                 |
 | =+2w=   | \rArr{} two weeks from today        |

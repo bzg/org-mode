@@ -1228,10 +1228,11 @@ Return 0. if S is not recognized as a valid value."
        ((string= s "<tomorrow>") (+ 86400.0 today))
        ((string= s "<yesterday>") (- today 86400.0))
        ((string-match "\\`<\\([-+][0-9]+\\)\\([hdwmy]\\)>\\'" s)
-	(+ today
+	(+ (if (string= (match-string 2 s) "h") (float-time) today)
 	   (* (string-to-number (match-string 1 s))
 	      (cdr (assoc (match-string 2 s)
-			  '(("d" . 86400.0)   ("w" . 604800.0)
+			  '(("h" . 3600.0)
+			    ("d" . 86400.0)   ("w" . 604800.0)
 			    ("m" . 2678400.0) ("y" . 31557600.0)))))))
        ((string-match org-ts-regexp0 s) (org-2ft s))
        (t 0.)))))
