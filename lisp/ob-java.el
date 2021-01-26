@@ -88,7 +88,7 @@ like javac -verbose."
   "Regexp for the package statement.")
 (defconst org-babel-java--imports-re (rx line-start (0+ space) "import"
                                          (opt (1+ space) "static")
-					 (1+ space) (group (1+ (in alnum ?_ ?.))) ; capture the fully qualified class name
+					 (1+ space) (group (1+ (in alnum ?_ ?. ?*))) ; capture the fully qualified class name
 					 (0+ space) ?\; line-end)
   "Regexp for import statements.")
 (defconst org-babel-java--class-re (rx line-start (0+ space) (opt (seq "public" (1+ space)))
@@ -311,7 +311,8 @@ RESULT-FILE is the temp file to write the result."
     (goto-char (point-min))
     (setq class-found (re-search-forward class nil t))
     (goto-char (point-min))
-    (setq import-found (re-search-forward (concat "^import .*" package ".*" class ";") nil t))
+    (setq import-found
+          (re-search-forward (concat "^import .*" package ".*\\(?:\\*\\|" class "\\);") nil t))
     (when (and class-found (not import-found))
       (org-babel-java--move-past org-babel-java--package-re)
       (insert (concat "import " package "." class ";\n")))))
