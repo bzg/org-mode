@@ -81,6 +81,13 @@ block. ~org-babel-latex-preamble~, ~org-babel-latex-begin-env~ and
 the user to specify the preamble and code that preceedes and proceeds
 the contents of the source block.
 
+*** New option ~org-html-meta-tags~ allows for HTML meta tags customization
+
+New variable ~org-html-meta-tags~ makes it possible to customize the
+=<meta>= tags used in an HTML export.  Accepts either a static list of
+values, or a function that generates such a list (see
+~org-html-meta-tags-default~ as an example of the latter).
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 

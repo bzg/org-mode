@@ -12624,6 +12624,9 @@ settings described in [[*Export Settings]].
   multiple =DESCRIPTION= lines.  The exporter takes care of wrapping
   the lines properly.
 
+  The exporter includes a number of other meta tags, which can be customized
+  by modifying ~org-html-meta-tags~.
+
 - =HTML_DOCTYPE= ::
 
   #+cindex: @samp{HTML_DOCTYPE}, keyword
