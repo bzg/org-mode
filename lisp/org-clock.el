@@ -2702,7 +2702,18 @@ from the dynamic block definition."
 	     (format (concat "| %s %s | %s%s%s"
 			     (format org-clock-file-time-cell-format
 				     (org-clock--translate "File time" lang))
-			     " | *%s*|\n")
+
+			     ;; The file-time rollup value goes in the first time
+			     ;; column (of which there is always at least one)...
+			     " | *%s*|"
+			     ;; ...and the remaining file time cols (if any) are blank.
+			     (make-string (max 0 (1- time-columns)) ?|)
+
+			     ;; Optionally show the percentage contribution of "this"
+			     ;; file time to the total time.
+			     (if (eq formula '%) " %s |" "")
+			     "\n")
+
 		     (file-name-nondirectory file-name)
 		     (if level?    "| " "") ;level column, maybe
 		     (if timestamp "| " "") ;timestamp column, maybe
@@ -2710,7 +2721,12 @@ from the dynamic block definition."
 		     (if properties	    ;properties columns, maybe
 			 (make-string (length properties) ?|)
 		       "")
-		     (org-duration-from-minutes file-time)))) ;time
+		     (org-duration-from-minutes file-time) ;time
+
+		     (cond ((not (eq formula '%)) "")	   ;time percentage, maybe
+			   ((or (not total-time) (= total-time 0)) "0.0")
+			   (t
+			    (format "%.1f" (* 100 (/ file-time (float total-time)))))))))
 
 	  ;; Get the list of node entries and iterate over it
 	  (when (> maxlevel 0)
