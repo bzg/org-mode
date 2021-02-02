@@ -1104,14 +1104,7 @@ ELEMENT is the element at point."
        (org-show-context 'bookmark-jump)))
 
 ;; Make `bookmark-jump' shows the jump location if it was hidden.
-(eval-after-load 'bookmark
-  '(if (boundp 'bookmark-after-jump-hook)
-       ;; We can use the hook
-       (add-hook 'bookmark-after-jump-hook 'org-bookmark-jump-unhide)
-     ;; Hook not available, use advice
-     (defadvice bookmark-jump (after org-make-visible activate)
-       "Make the position visible."
-       (org-bookmark-jump-unhide))))
+(add-hook 'bookmark-after-jump-hook 'org-bookmark-jump-unhide)
 
 ;;;; Calendar
 
