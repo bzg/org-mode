@@ -40,6 +40,7 @@
 ;; - dbuser
 ;; - dbpassword
 ;; - dbconnection (to reference connections in sql-connection-alist)
+;; - dbinstance (currently only used by SAP HANA)
 ;; - database
 ;; - colnames (default, nil, means "yes")
 ;; - result-params
@@ -58,6 +59,7 @@
 ;; - postgresql (postgres)
 ;; - oracle
 ;; - vertica
+;; - saphana
 ;;
 ;; TODO:
 ;;
@@ -85,6 +87,7 @@
     (dbport	       . :any)
     (dbuser	       . :any)
     (dbpassword	       . :any)
+    (dbinstance	       . :any)
     (database	       . :any))
   "SQL-specific header arguments.")
 
@@ -175,6 +178,20 @@ Pass nil to omit that arg."
 			  (when database (format "-d %s" database))))
 	      " "))
 
+(defun org-babel-sql-dbstring-saphana (host port instance user password database)
+  "Make SAP HANA command line args for database connection.
+Pass nil to omit that arg."
+  (mapconcat #'identity
+             (delq nil
+                   (list (and host port (format "-n %s:%s" host port))
+                         (and host (not port) (format "-n %s" host))
+                         (and instance (format "-i %d" instance))
+                         (and user (format "-u %s" user))
+                         (and password (format "-p %s"
+                                               (shell-quote-argument password)))
+                         (and database (format "-d %s" database))))
+             " "))
+
 (defun org-babel-sql-convert-standard-filename (file)
   "Convert FILE to OS standard file name.
 If in Cygwin environment, uses Cygwin specific function to
@@ -198,6 +215,7 @@ database connections."
                              (:dbport . sql-port)
                              (:dbuser . sql-user)
                              (:dbpassword . sql-password)
+                             (:dbinstance . sql-dbinstance)
                              (:database . sql-database)))
              (mapped-name (cdr (assq name name-mapping))))
         (cadr (assq mapped-name
@@ -213,6 +231,7 @@ This function is called by `org-babel-execute-src-block'."
          (dbport (org-babel-find-db-connection-param params :dbport))
          (dbuser (org-babel-find-db-connection-param params :dbuser))
          (dbpassword (org-babel-find-db-connection-param params :dbpassword))
+         (dbinstance (org-babel-find-db-connection-param params :dbinstance))
          (database (org-babel-find-db-connection-param params :database))
          (engine (cdr (assq :engine params)))
          (colnames-p (not (equal "no" (cdr (assq :colnames params)))))
@@ -280,6 +299,12 @@ footer=off -F \"\t\"  %s -f %s -o %s %s"
 			      dbhost dbport dbuser dbpassword database)
 			     (org-babel-process-file-name in-file)
 			     (org-babel-process-file-name out-file)))
+		    (saphana (format "hdbsql %s -I %s -o %s %s"
+				     (org-babel-sql-dbstring-saphana
+				      dbhost dbport dbinstance dbuser dbpassword database)
+				     (org-babel-process-file-name in-file)
+				     (org-babel-process-file-name out-file)
+				     (or cmdline "")))
                     (t (user-error "No support for the %s SQL engine" engine)))))
     (with-temp-file in-file
       (insert
@@ -313,7 +338,7 @@ SET COLSEP '|'
 	(progn (insert-file-contents-literally out-file) (buffer-string)))
       (with-temp-buffer
 	(cond
-	 ((memq (intern engine) '(dbi mysql postgresql postgres sqsh vertica))
+	 ((memq (intern engine) '(dbi mysql postgresql postgres saphana sqsh vertica))
 	  ;; Add header row delimiter after column-names header in first line
 	  (cond
 	   (colnames-p
