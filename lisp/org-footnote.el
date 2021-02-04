@@ -37,6 +37,7 @@
 (declare-function org-at-comment-p "org" ())
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-back-over-empty-lines "org" ())
+(declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-edit-footnote-reference "org-src" ())
 (declare-function org-element-at-point "org-element" ())
 (declare-function org-element-class "org-element" (datum &optional parent))
