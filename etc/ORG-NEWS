@@ -197,6 +197,13 @@ changed to
                                 :height 0.75)))
 #+end_src
 
+*** Storing ID-links before first heading uses title as description
+
+Storing links to files using ~org-store-link~ (=<C-c l>=) when
+~org-id-link-to-org-use-id~ is not nil will now store the title as
+description of the link, if available.  If no title exists it falls
+back to the filename as before.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
