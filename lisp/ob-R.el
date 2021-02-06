@@ -349,7 +349,7 @@ Each member of this list is a list with three members:
                         {
                             tfile<-tempfile()
                             write.table(object, file=tfile, sep=\"\\t\",
-                                        na=\"nil\",row.names=%s,col.names=%s,
+                                        na=\"\",row.names=%s,col.names=%s,
                                         quote=FALSE)
                             file.rename(tfile,transfer.file)
                         },
