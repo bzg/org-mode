@@ -172,7 +172,7 @@ replaced in this string.")
           (or (cdr (assq :java params))
               org-babel-java-command))
          ;; if true, run from babel temp directory
-         (run-from-temp (not (alist-get :dir params)))
+         (run-from-temp (not (assq :dir params)))
          ;; class and package
          (fullclassname (or (cdr (assq :classname params))
                             (org-babel-java-find-classname body)))

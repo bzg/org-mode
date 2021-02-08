@@ -706,7 +706,7 @@ or filename if no title."
                    (cond ((org-before-first-heading-p)
                           (let ((keywords (org-collect-keywords '("TITLE"))))
                             (if keywords
-                                (car (alist-get "TITLE" keywords nil nil 'equal))
+                                (cadr (assoc "TITLE" keywords))
                               (file-name-nondirectory
 			       (buffer-file-name (buffer-base-buffer))))))
 		         ((looking-at org-complex-heading-regexp)
