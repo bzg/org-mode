@@ -105,6 +105,10 @@ behavior.
 
 By default ox-html now inlines webp images.
 
+*** New option ~org-html-content-class~
+
+This is the CSS class name to use for the top level content wrapper.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 

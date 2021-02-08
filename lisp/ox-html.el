@@ -113,6 +113,7 @@
   :options-alist
   '((:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
+    (:html-content-class "HTML_CONTENT_CLASS" nil org-html-content-class)
     (:description "DESCRIPTION" nil nil newline)
     (:keywords "KEYWORDS" nil nil space)
     (:html-html5-fancy nil "html5-fancy" org-html-html5-fancy)
@@ -1079,6 +1080,16 @@ org-info.js for your website."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'string)
+
+(defcustom org-html-content-class "content"
+  "CSS class name to use for the top level content wrapper.
+Can be set with the in-buffer HTML_CONTENT_CLASS property or for
+publishing, with :html-content-class."
+  :group 'org-export-html
+  :version "27.2"
+  :package-version '(Org . "9.5")
+  :type 'string)
+
 
 (defcustom org-html-divs
   '((preamble  "div" "preamble")
@@ -2091,7 +2102,10 @@ holding export options."
    (org-html--build-pre/postamble 'preamble info)
    ;; Document contents.
    (let ((div (assq 'content (plist-get info :html-divs))))
-     (format "<%s id=\"%s\">\n" (nth 1 div) (nth 2 div)))
+     (format "<%s id=\"%s\" class=\"%s\">\n"
+             (nth 1 div)
+             (nth 2 div)
+             (plist-get info :html-content-class)))
    ;; Document title.
    (when (plist-get info :with-title)
      (let ((title (and (plist-get info :with-title)
