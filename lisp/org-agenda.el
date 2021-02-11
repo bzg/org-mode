@@ -7767,8 +7767,8 @@ the variable `org-agenda-auto-exclude-function'."
 	  (setq s (replace-regexp-in-string ; Remove the temporary special string.
 		   "~~~" "-" (match-string 3 f-string)))
 	  (cond
-	   ((member s tag-list)
-	    (add-to-list 'ft (concat pm s) 'append 'equal))
+	   ((member (downcase s) tag-list)
+	    (add-to-list 'ft (concat pm (downcase s)) 'append 'equal))
 	   ((member s category-list)
 	    (add-to-list 'fc (concat pm ; Remove temporary double quotes.
 				     (replace-regexp-in-string "\"\\(.*\\)\"" "\\1" s))
