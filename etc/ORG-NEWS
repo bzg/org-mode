@@ -88,6 +88,12 @@ New variable ~org-html-meta-tags~ makes it possible to customize the
 values, or a function that generates such a list (see
 ~org-html-meta-tags-default~ as an example of the latter).
 
+*** Option ~org-agenda-bulk-custom-functions~ now supports collecting bulk arguments
+
+When specifying a custom agenda bulk option, you can now also specify
+a function which collects the arguments to be used with each call to
+the custom function.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
