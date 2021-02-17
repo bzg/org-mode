@@ -1366,7 +1366,7 @@ the default behavior."
 			(end-of-line 0)
 			(org-in-item-p)))
 	     (beginning-of-line 1)
-	     (indent-line-to (- (current-indentation) 2)))
+	     (indent-line-to (max 0 (- (current-indentation) 2))))
 	   (insert org-clock-string " ")
 	   (setq org-clock-effort (org-entry-get (point) org-effort-property))
 	   (setq org-clock-total-time (org-clock-sum-current-item
