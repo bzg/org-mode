@@ -281,7 +281,6 @@ re-read the iCalendar file.")
 		     (inlinetask . ignore)
 		     (planning . ignore)
 		     (section . ignore)
-		     (inner-template . (lambda (c i) c))
 		     (template . org-icalendar-template))
   :options-alist
   '((:exclude-tags
