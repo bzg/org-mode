@@ -8238,13 +8238,13 @@ Negative selection means regexp must not match for selection of an entry."
 (defun org-add-to-string (var string)
   (set var (concat (symbol-value var) string)))
 
-(defun org-agenda-goto-date (span)
+(defun org-agenda-goto-date (date)
   "Jump to DATE in agenda."
-  (interactive "P")
-  (let* ((org-read-date-prefer-future
-	  (eval org-agenda-jump-prefer-future))
-	 (date (org-read-date))
-	 (day (time-to-days (org-time-string-to-time date)))
+  (interactive
+   (list
+    (let ((org-read-date-prefer-future org-agenda-jump-prefer-future))
+      (org-read-date))))
+  (let* ((day (time-to-days (org-time-string-to-time date)))
 	 (org-agenda-sticky-orig org-agenda-sticky)
 	 (org-agenda-buffer-tmp-name (buffer-name))
 	 (args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
