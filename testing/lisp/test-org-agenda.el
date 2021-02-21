@@ -141,6 +141,18 @@
   (org-toggle-sticky-agenda)
   (org-test-agenda--kill-all-agendas))
 
+(ert-deftest test-org-agenda/goto-date ()
+  "Test `org-agenda-goto-date'."
+  (unwind-protect
+      (should
+       (equal
+        (time-to-days (org-time-string-to-time "2019-12-30"))
+        (let ((org-agenda-files nil))
+          (org-agenda-list nil nil 'day)
+          (org-agenda-goto-date "2019-12-30")
+          (get-text-property (point) 'day))))
+    (org-test-agenda--kill-all-agendas)))
+
 
 ;; agenda redo
 
