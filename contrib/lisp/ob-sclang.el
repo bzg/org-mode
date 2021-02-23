@@ -60,7 +60,7 @@
 (require 'org)
 (require 'ob)
 
-(require 'sclang)
+(require 'sclang nil t)
 
 (defgroup ob-sclang nil
   "org-mode blocks for SuperCollider SCLang."

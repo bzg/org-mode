@@ -21,7 +21,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(require 'org-test)
+(require 'org-test "../testing/org-test")
 
 (require 'ob-core)
 (defvar org-babel-temporary-directory ; from ob-core

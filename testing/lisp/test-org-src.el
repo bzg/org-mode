@@ -21,7 +21,7 @@
 
 ;;; Code:
 
-(require 'org-test)
+(require 'org-test "../testing/org-test")
 
 
 

@@ -20,7 +20,7 @@
 ;;; Code:
 
 (require 'ob-clojure)
-(require 'cider)
+(require 'cider nil t)
 
 (defgroup ob-clojure-literate nil
   "Clojure's Org-mode Literate Programming."

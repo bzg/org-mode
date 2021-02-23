@@ -24,7 +24,7 @@
 
 ;;; Code:
 
-(require 'org-test)
+(require 'org-test "../testing/org-test")
 (require 'org-attach)
 (eval-and-compile (require 'cl-lib))
 

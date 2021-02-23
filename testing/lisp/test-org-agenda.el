@@ -23,7 +23,7 @@
 
 ;;; Code:
 
-(require 'org-test)
+(require 'org-test "../testing/org-test")
 (require 'org-agenda)
 (eval-and-compile (require 'cl-lib))
 

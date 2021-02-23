@@ -172,7 +172,7 @@ because otherwise all these markers will point to nowhere."
        ,@body)))
 
 (defmacro org-eval-in-environment (environment form)
-  (declare (debug (form form)) (indent 1))
+  (declare (debug (form form)) (indent 1) (obsolete cl-progv "Mar 2021"))
   `(eval (list 'let ,environment ',form)))
 
 ;;;###autoload
@@ -366,15 +366,17 @@ error when the user input is empty."
 	  (allow-empty? nil)
 	  (t (user-error "Empty input is not valid")))))
 
+(declare-function org-time-stamp-inactive "org" (&optional arg))
+
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."
   (let ((enable-recursive-minibuffers t)
 	(minibuffer-local-completion-map
 	 (copy-keymap minibuffer-local-completion-map)))
-    (define-key minibuffer-local-completion-map " " 'self-insert-command)
-    (define-key minibuffer-local-completion-map "?" 'self-insert-command)
+    (define-key minibuffer-local-completion-map " " #'self-insert-command)
+    (define-key minibuffer-local-completion-map "?" #'self-insert-command)
     (define-key minibuffer-local-completion-map (kbd "C-c !")
-      'org-time-stamp-inactive)
+      #'org-time-stamp-inactive)
     (apply #'completing-read args)))
 
 (defun org--mks-read-key (allowed-keys prompt navigation-keys)
@@ -626,6 +628,30 @@ program is needed for, so that the error message can be more informative."
   "Display a message, but avoid logging it in the *Messages* buffer."
   (let ((message-log-max nil))
     (apply #'message args)))
+
+(defmacro org-dlet (binders &rest body)
+  "Like `let*' but using dynamic scoping."
+  (declare (indent 1) (debug let))
+  (let ((vars (mapcar (lambda (binder)
+                        (if (consp binder) (car binder) binder))
+                      binders)))
+    `(progn
+       (with-no-warnings
+         ,@(mapcar (lambda (var) `(defvar ,var)) vars))
+       (let* ,binders ,@body))))
+
+(defmacro org-pushnew-to-end (val var)
+  "Like `cl-pushnew' but pushes to the end of the list.
+Uses `equal' for comparisons.
+
+Beware: this performs O(N) memory allocations, so if you use it in a loop, you
+get an unnecessary O(N²) space complexity, so you're usually better off using
+`cl-pushnew' (with a final `reverse' if you care about the order of elements)."
+  (declare (debug (form gv-place)))
+  (let ((v (make-symbol "v")))
+    `(let ((,v ,val))
+       (unless (member ,v ,var)
+         (setf ,var (append ,var (list ,v)))))))
 
 (defun org-eval (form)
   "Eval FORM and return result."
@@ -974,7 +1000,7 @@ IF WIDTH is nil and LINES is non-nil, the string is forced into at most that
 many lines, whatever width that takes.
 The return value is a list of lines, without newlines at the end."
   (let* ((words (split-string string))
-	 (maxword (apply 'max (mapcar 'org-string-width words)))
+	 (maxword (apply #'max (mapcar #'org-string-width words)))
 	 w ll)
     (cond (width
 	   (org--do-wrap words (max maxword width)))
@@ -1071,10 +1097,11 @@ that will be added to PLIST.  Returns the string that was modified."
   string)
 
 (defun org-make-parameter-alist (flat)
+  ;; FIXME: "flat" is called a "plist"!
   "Return alist based on FLAT.
 FLAT is a list with alternating symbol names and values.  The
 returned alist is a list of lists with the symbol name in car and
-the value in cdr."
+the value in cadr."
   (when flat
     (cons (list (car flat) (cadr flat))
 	  (org-make-parameter-alist (cddr flat)))))
