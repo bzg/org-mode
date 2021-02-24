@@ -15980,15 +15980,25 @@ Some of the options can be changed using the variable
 			 (fg
 			  (let ((color (plist-get org-format-latex-options
 						  :foreground)))
-			    (if (and forbuffer (eq color 'auto))
-				(face-attribute face :foreground nil 'default)
-			      color)))
+                            (if forbuffer
+                                (cond
+                                 ((eq color 'auto)
+                                  (face-attribute face :foreground nil 'default))
+                                 ((eq color 'default)
+                                  (face-attribute 'default :foreground nil))
+                                 (t color))
+                              color)))
 			 (bg
 			  (let ((color (plist-get org-format-latex-options
 						  :background)))
-			    (if (and forbuffer (eq color 'auto))
-				(face-attribute face :background nil 'default)
-			      color)))
+                            (if forbuffer
+                                (cond
+                                 ((eq color 'auto)
+                                  (face-attribute face :background nil 'default))
+                                 ((eq color 'default)
+                                  (face-attribute 'default :background nil))
+                                 (t color))
+                              color)))
 			 (hash (sha1 (prin1-to-string
 				      (list org-format-latex-header
 					    org-latex-default-packages-alist
