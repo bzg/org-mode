@@ -349,34 +349,42 @@ If a function, it is called with the plot type as the argument."
 	   (lambda (table _data-file _num-cols params plot-str)
 	     (list (org--plot/radar table params)))))
   "List of plists describing the avalible plot types.
-The car is the type name, and the property :plot-func must be set.
-The value of :plot-func is a lambda which yields plot-lines
+The car is the type name, and the property :plot-func must be
+set.  The value of :plot-func is a lambda which yields plot-lines
 (a list of strings) as the cdr.
 
-All lambda functions have the parameters of `org-plot/gnuplot-script' and PLOT-STR passed to them.
-i.e. they are called with the following signature: (TABLE DATA-FILE NUM-COLS PARAMS PLOT-STR)
+All lambda functions have the parameters of
+`org-plot/gnuplot-script' and PLOT-STR passed to them.  i.e. they
+are called with the following signature: (TABLE DATA-FILE
+NUM-COLS PARAMS PLOT-STR)
 
 Potentially useful parameters in PARAMS include:
  :set :line :map :title :file :ind :timeind :timefmt :textind
  :deps :labels :xlabels :ylabels :xmin :xmax :ymin :ymax :ticks
 
-In addition to :plot-func, the following optional properties may be set.
+In addition to :plot-func, the following optional properties may
+be set.
 
 - :plot-cmd - A gnuplot command appended to each plot-line.
-  Accepts string or nil. Default value: nil.
+  Accepts string or nil.  Default value: nil.
 
 - :check-ind-type - Whether the types of ind values should be checked.
   Accepts boolean.
 
 - :plot-str - the formula string passed to :plot-func as PLOT-STR
-  Accepts string. Default value: \"'%s' using %s%d%s with %s title '%s'\"
+  Accepts string.  Default value: \"'%s' using %s%d%s with %s title '%s'\"
 
-- :data-dump - Function to dump the table to a datafile for ease of use.
-  Accepts lambda function. Default lambda body: (org-plot/gnuplot-to-data table data-file params)
+- :data-dump - Function to dump the table to a datafile for ease of
+  use.
 
-- :plot-pre - Gnuplot code to be inserted early into the script, just after term and output have been set.
-   Accepts string, nil, or lambda function which returns string or nil. Defaults to nil.
-"
+  Accepts lambda function.  Default lambda body:
+  (org-plot/gnuplot-to-data table data-file params)
+
+- :plot-pre - Gnuplot code to be inserted early into the script, just
+  after term and output have been set.
+
+   Accepts string, nil, or lambda function which returns string
+   or nil.  Defaults to nil."
   :group 'org-plot
   :type '(alist :value-type (symbol group)))
 
