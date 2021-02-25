@@ -1804,7 +1804,31 @@
 		 (lambda (&rest args) "+1d")))
 	(org-clone-subtree-with-time-shift 1))
       (buffer-substring-no-properties (line-beginning-position 2)
-				      (line-end-position 2))))))
+				      (line-end-position 2)))))
+  ;; Hour shift.
+  (should
+   (equal "\
+* H1\n<2015-06-21 20:00>
+* H1\n<2015-06-21 23:00>
+* H1\n<2015-06-22 02:00>
+"
+          (org-test-with-temp-text "* H1\n<2015-06-21 Sun 20:00>"
+            (org-clone-subtree-with-time-shift 2 "+3h")
+            (replace-regexp-in-string
+             "\\( [.A-Za-z]+\\)\\( [0-9][0-9]:[0-9][0-9]\\)?>" ""
+             (buffer-substring-no-properties (point-min) (point-max))
+             nil nil 1))))
+  (should
+   (equal "\
+* H1\n<2015-06-21 20:00>
+* H1\n<2015-06-21 18:00>
+"
+          (org-test-with-temp-text "* H1\n<2015-06-21 Sun 20:00>"
+            (org-clone-subtree-with-time-shift 1 "-2h")
+            (replace-regexp-in-string
+             "\\( [.A-Za-z]+\\)\\( [0-9][0-9]:[0-9][0-9]\\)?>" ""
+             (buffer-substring-no-properties (point-min) (point-max))
+             nil nil 1)))))
 
 
 ;;; Fixed-Width Areas
