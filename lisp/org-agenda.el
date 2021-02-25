@@ -5275,15 +5275,7 @@ each date.  It also removes lines that contain only whitespace."
 Needed to avoid empty dates which mess up holiday display."
   ;; Catch the error if dealing with the new add-to-diary-alist
   (when org-disable-agenda-to-diary
-    (condition-case nil
-	(org-add-to-diary-list original-date "Org mode dummy" "")
-      (error
-       (org-add-to-diary-list original-date  "Org mode dummy" "" nil)))))
-
-(defun org-add-to-diary-list (&rest args)
-  (if (fboundp 'diary-add-to-list)
-      (apply 'diary-add-to-list args)
-    (apply 'add-to-diary-list args)))
+    (diary-add-to-list original-date "Org mode dummy" "")))
 
 (defvar org-diary-last-run-time nil)
 
