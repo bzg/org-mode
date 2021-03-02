@@ -15769,7 +15769,7 @@ following properties
 Publishing means that a file is copied to the destination directory
 and possibly transformed in the process.  The default transformation
 is to export Org files as HTML files, and this is done by the function
-~org-publish-org-to-html~ which calls the HTML exporter (see [[*HTML
+~org-html-publish-to-html~ which calls the HTML exporter (see [[*HTML
 Export]]).  But you can also publish your content as PDF files using
 ~org-publish-org-to-pdf~, or as ASCII, Texinfo, etc., using the
 corresponding functions.
