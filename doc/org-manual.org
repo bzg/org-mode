@@ -16248,6 +16248,7 @@ directory on the local machine.
 (setq org-publish-project-alist
       '(("org"
          :base-directory "~/org/"
+         :publishing-function org-html-publish-to-html
          :publishing-directory "~/public_html"
          :section-numbers nil
          :table-of-contents nil
