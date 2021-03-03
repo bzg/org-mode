@@ -350,8 +350,13 @@ SET COLSEP '|'
 	 (org-babel-pick-name (cdr (assq :rowname-names params))
 			      (cdr (assq :rownames params))))))))
 
-(defun org-babel-sql-expand-vars (body vars)
-  "Expand the variables held in VARS in BODY."
+(defun org-babel-sql-expand-vars (body vars &optional sqlite)
+  "Expand the variables held in VARS in BODY.
+
+If SQLITE has been provided, prevent passing a format to
+`orgtbl-to-csv'.  This prevents overriding the default format, which if
+there were commas in the context of the table broke the table as an
+argument mechanism."
   (mapc
    (lambda (pair)
      (setq body
@@ -362,9 +367,11 @@ SET COLSEP '|'
                   (let ((data-file (org-babel-temp-file "sql-data-")))
                     (with-temp-file data-file
                       (insert (orgtbl-to-csv
-                               val '(:fmt (lambda (el) (if (stringp el)
+                               val (if sqlite
+                                       nil
+                                     '(:fmt (lambda (el) (if (stringp el)
                                                       el
-                                                    (format "%S" el)))))))
+                                                    (format "%S" el))))))))
                     data-file)
                 (if (stringp val) val (format "%S" val))))
 	    body)))
