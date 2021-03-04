@@ -94,6 +94,13 @@ When specifying a custom agenda bulk option, you can now also specify
 a function which collects the arguments to be used with each call to
 the custom function.
 
+*** New option ~org-clock-ask-before-exiting~
+
+By default, a function is now added to ~kill-emacs-query-functions~
+that asks whether to clock out and save when there's a running clock.
+Customize ~org-clock-ask-before-exiting~~ to nil to disable this new
+behavior.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
