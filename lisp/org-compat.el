@@ -1025,8 +1025,7 @@ ELEMENT is the element at point."
 (defun org-mode-flyspell-verify ()
   "Function used for `flyspell-generic-check-word-predicate'."
   (if (org-at-heading-p)
-      ;; At a headline or an inlinetask, check title only.  This is
-      ;; faster than relying on `org-element-at-point'.
+      ;; At a headline or an inlinetask, check title only.
       (and (save-excursion (beginning-of-line)
 			   (and (let ((case-fold-search t))
 				  (not (looking-at-p "\\*+ END[ \t]*$")))
@@ -1035,7 +1034,9 @@ ELEMENT is the element at point."
 	   (match-beginning 4)
 	   (>= (point) (match-beginning 4))
 	   (or (not (match-beginning 5))
-	       (< (point) (match-beginning 5))))
+	       (< (point) (match-beginning 5)))
+           ;; Ignore checks in code, verbatim and others.
+           (org--flyspell-object-check-p (org-element-at-point)))
     (let* ((element (org-element-at-point))
 	   (post-affiliated (org-element-property :post-affiliated element)))
       (cond
