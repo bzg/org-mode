@@ -101,6 +101,10 @@ that asks whether to clock out and save when there's a running clock.
 Customize ~org-clock-ask-before-exiting~~ to nil to disable this new
 behavior.
 
+*** Option ~org-html-inline-image-rules~ now includes .webp
+
+By default ox-html now inlines webp images.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
