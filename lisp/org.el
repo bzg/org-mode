@@ -7,6 +7,7 @@
 ;; Maintainer: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
+;; Package-Requires: ((emacs "24.3"))
 
 ;; Version: 9.5-dev
 
