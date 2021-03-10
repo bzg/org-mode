@@ -811,7 +811,7 @@ STATE should be one of the symbols listed in the docstring of
                          (org-get-tags nil 'local)))
 	(message "%s" (substitute-command-keys
 		       "Subtree is archived and stays closed.  Use \
-`\\[org-force-cycle-archived]' to cycle it anyway."))))))
+`\\[org-cycle-force-archived]' to cycle it anyway."))))))
 
 (provide 'org-cycle)
 
