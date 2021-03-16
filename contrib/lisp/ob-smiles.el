@@ -14,7 +14,10 @@
 ;; Maintainer: stardiviner [numbchild@gmail.com]
 
 ;;; Code:
-
+
+(require 'ob)
+(require 'org-element)
+
 ;; Org-mode Babel
 (defun org-babel-execute:smiles (body params)
   "Execute SMILES babel `BODY' with `PARAMS'."
@@ -36,10 +39,10 @@
      ((eq 'html backend)
       (format "<a href=\"#%s\">%s</a>" name name)))))
 
-(org-add-link-type
+(org-link-set-parameters
  "molecule"
- 'molecule-jump
- 'molecule-export)
+ :follow 'molecule-jump
+ :export 'molecule-export)
 
 ;; org-mode element
 (org-element-map (org-element-parse-buffer)
