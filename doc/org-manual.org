@@ -21735,7 +21735,7 @@ a fragment, see the documentation of the function
 version 1.34 of the =htmlize.el= package, which you need to install).
 Fontified code chunks in LaTeX can be achieved using either the
 [[https://www.ctan.org/pkg/listings][listings]] package or the [[https://www.ctan.org/pkg/minted][minted]] package.  Refer to
-~org-export-latex-listings~ for details.
+~org-latex-listings~ for details.
 
 [fn:115] Source code in code blocks may also be evaluated either
 interactively or on export.  See [[*Working with Source Code]] for more
