@@ -3309,7 +3309,7 @@ A link should be enclosed in double brackets and may contain
 descriptive text to be displayed instead of the URL (see [[*Link
 Format]]), for example:
 
-: [[http://www.gnu.org/software/emacs/][GNU Emacs]]
+: [[https://www.gnu.org/software/emacs/][GNU Emacs]]
 
 If the description is a file name or URL that points to an image, HTML
 export (see [[*HTML Export]]) inlines the image as a clickable button.  If

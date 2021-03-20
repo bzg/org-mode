@@ -155,7 +155,7 @@ and code on the right side.  This function has two parts.
             (error "leftover points")))))))
 #+end_src
 
-We'll use Emacs [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html][File Local Variables]] and the
+We'll use Emacs [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Specifying-File-Variables.html][File Local Variables]] and the
 =org-export-html-final-hook= to control which buffers have
 =org-docco-buffer= run as part of their export process.
 #+begin_src emacs-lisp

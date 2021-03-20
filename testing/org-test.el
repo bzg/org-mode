@@ -7,7 +7,7 @@
 ;;     David Maus, Brunswick, Germany, dmaus ictsoc de
 
 ;; Released under the GNU General Public License version 3
-;; see: http://www.gnu.org/licenses/gpl-3.0.html
+;; see: https://www.gnu.org/licenses/gpl-3.0.html
 
 ;; Definition of `special-mode' copied from Emacs23's simple.el to be
 ;; provide a testing environment for Emacs22.
@@ -313,7 +313,7 @@ setting `pp-escape-newlines' to nil manually."
 	 " " user-full-name "\n"
 	 ";; Authors: " user-full-name "\n\n"
 	 ";; Released under the GNU General Public License version 3\n"
-	 ";; see: http://www.gnu.org/licenses/gpl-3.0.html\n\n"
+	 ";; see: https://www.gnu.org/licenses/gpl-3.0.html\n\n"
 	 ";;;; Comments:\n\n"
 	 ";; Template test file for Org tests\n\n"
 	 "\n"
