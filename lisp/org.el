@@ -8734,7 +8734,21 @@ If the file does not exist, throw an error."
 
       (save-window-excursion
 	(message "Running %s...done" cmd)
-	(start-process-shell-command cmd nil cmd)
+        ;; Handlers such as "gio open" and kde-open5 start viewer in background
+        ;; and exit immediately.  Avoid `start-process' since it assumes
+        ;; :connection-type 'pty and kills children processes with SIGHUP
+        ;; when temporary terminal session is finished.
+        (make-process
+         :name "org-open-file" :connection-type 'pipe :noquery t
+         :buffer nil ; use "*Messages*" for debugging
+         :sentinel (lambda (proc event)
+                     (when (and (memq (process-status proc) '(exit signal))
+                                (/= (process-exit-status proc) 0))
+                       (message
+                        "Command %s: %s."
+                        (mapconcat #'identity (process-command proc) " ")
+                        (substring event 0 -1))))
+         :command (list shell-file-name shell-command-switch cmd))
 	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))))
      ((or (stringp cmd)
 	  (eq cmd 'emacs))
