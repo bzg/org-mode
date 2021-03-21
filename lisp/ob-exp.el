@@ -216,8 +216,11 @@ this template."
 			     (delete-region begin end)
 			     (insert replacement)))))
 		      ((or `babel-call `inline-babel-call)
-		       (org-babel-exp-do-export (org-babel-lob-get-info element)
-						'lob)
+                       (org-babel-exp-do-export
+                        (or (org-babel-lob-get-info element)
+                            (user-error "Unknown Babel reference: %s"
+                                        (org-element-property :call element)))
+                        'lob)
 		       (let ((rep
 			      (org-fill-template
 			       org-babel-exp-call-line-template

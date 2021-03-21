@@ -585,6 +585,14 @@ src_emacs-lisp{(+ 1 1)}"
 	      (org-babel-exp-process-buffer))
 	    (buffer-string)))))
 
+(ert-deftest ob-exp/unknown-call-reference ()
+  "Test exporting with a call that references an unknown name."
+  (should-error
+   (org-test-with-temp-text
+       "call_foo()"
+     (let ((org-export-use-babel t))
+       (org-babel-exp-process-buffer)))
+   :type 'user-error))
 
 (provide 'test-ob-exp)
 
