@@ -2826,7 +2826,7 @@ either graphically or in ASCII art.
 
 #+cindex: @samp{PLOT}, keyword
 Org Plot can produce 2D and 3D graphs of information stored in Org
-tables using [[http://www.gnuplot.info/][Gnuplot]] and [[http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html][Gnuplot mode]].  To see this in action, ensure
+tables using [[https://www.gnuplot.info/][Gnuplot]] and [[http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html][Gnuplot mode]].  To see this in action, ensure
 that you have both Gnuplot and Gnuplot mode installed on your system,
 then call {{{kbd(C-c \quot g)}}} or {{{kbd(M-x org-plot/gnuplot)}}} on the
 following table.
@@ -8331,7 +8331,7 @@ variable has detailed information.  With the following
 #+begin_src emacs-lisp
 (setq org-feed-alist
       '(("Slashdot"
-         "http://rss.slashdot.org/Slashdot/slashdot"
+         "https://rss.slashdot.org/Slashdot/slashdot"
          "~/txt/org/feeds.org" "Slashdot Entries")))
 #+end_src
 
@@ -10935,7 +10935,7 @@ pretty output for a number of export back-ends.
 Org mode can contain LaTeX math fragments, and it supports ways to
 process these for several export back-ends.  When exporting to LaTeX,
 the code is left as it is.  When exporting to HTML, Org can use either
-[[http://www.mathjax.org][MathJax]] (see [[*Math formatting in HTML export]]) or transcode the math
+[[https://www.mathjax.org][MathJax]] (see [[*Math formatting in HTML export]]) or transcode the math
 into images (see [[*Previewing LaTeX fragments]]).
 
 LaTeX fragments do not need any special marking at all.  The following
@@ -13000,7 +13000,7 @@ as-is.
 
 #+vindex: org-html-mathjax-options~
 LaTeX math snippets (see [[*LaTeX fragments]]) can be displayed in two
-different ways on HTML pages.  The default is to use the [[http://www.mathjax.org][MathJax]],
+different ways on HTML pages.  The default is to use the [[https://www.mathjax.org][MathJax]],
 which should work out of the box with Org[fn:129][fn:130].  Some MathJax
 display options can be configured via ~org-html-mathjax-options~, or
 in the buffer.  For example, with the following settings,
@@ -17627,7 +17627,7 @@ follows from the type specified above.
 
   #+begin_example
   ,#+begin_src shell :results file link :file "download.tar.gz"
-  wget -c "http://example.com/download.tar.gz"
+  wget -c "https://example.com/download.tar.gz"
   ,#+end_src
   #+end_example
 
@@ -19707,13 +19707,13 @@ click the bookmark and start editing.
 #+cindex: rewritten URL in open-source protocol
 #+cindex: protocol, open-source rewritten URL
 However, such mapping may not always yield the desired results.
-Suppose you maintain an online store located at =http://example.com/=.
+Suppose you maintain an online store located at =https://example.com/=.
 The local sources reside in =/home/user/example/=.  It is common
 practice to serve all products in such a store through one file and
 rewrite URLs that do not match an existing file on the server.  That
-way, a request to =http://example.com/print/posters.html= might be
+way, a request to =https://example.com/print/posters.html= might be
 rewritten on the server to something like
-=http://example.com/shop/products.php/posters.html.php=.  The
+=https://example.com/shop/products.php/posters.html.php=.  The
 ~open-source~ handler probably cannot find a file named
 =/home/user/example/print/posters.html.php= and fails.
 
@@ -19728,7 +19728,7 @@ adding ~:rewrites~ rules like this:
 #+begin_src emacs-lisp
 (setq org-protocol-project-alist
       '(("example.com"
-         :base-url "http://example.com/"
+         :base-url "https://example.com/"
          :working-directory "/home/user/example/"
          :online-suffix ".php"
          :working-suffix ".php"
@@ -21840,7 +21840,7 @@ to make it visible.  The tag serves as a visual aid and has no
 semantic relevance.
 
 [fn:129] By default Org loads MathJax from [[https://cdnjs.com][cdnjs.com]] as recommended by
-[[http://www.mathjax.org][MathJax]].
+[[https://www.mathjax.org][MathJax]].
 
 [fn:130] Please note that exported formulas are part of an HTML
 document, and that signs such as =<=, =>=, or =&= have special

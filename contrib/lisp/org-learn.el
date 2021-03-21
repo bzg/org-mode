@@ -26,9 +26,9 @@
 ;;; Commentary:
 
 ;; The file implements the learning algorithm described at
-;; http://supermemo.com/english/ol/sm5.htm, which is a system for reading
+;; https://supermemo.com/english/ol/sm5.htm, which is a system for reading
 ;; material according to "spaced repetition".  See
-;; http://en.wikipedia.org/wiki/Spaced_repetition for more details.
+;; https://en.wikipedia.org/wiki/Spaced_repetition for more details.
 ;;
 ;; To use, turn on state logging and schedule some piece of information you
 ;; want to read.  Then in the agenda buffer type

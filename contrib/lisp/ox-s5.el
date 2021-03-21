@@ -28,7 +28,7 @@
 ;; Installation
 ;; ------------
 ;; Get the s5 scripts from
-;;    http://meyerweb.com/eric/tools/s5/
+;;    https://meyerweb.com/eric/tools/s5/
 ;; (Note that the default s5 version is set for using the alpha, 1.2a2.
 ;; Copy the ui dir to somewhere reachable from your published presentation
 ;; The default (`org-s5-ui-url') is set to "ui" (e.g., in the

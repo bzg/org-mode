@@ -32,9 +32,9 @@
 ;; read Paul Grahams essay "The hundred year language"
 ;; (http://www.paulgraham.com/hundred.html) and then study the various
 ;; documents and essays published in the PicoLisp wiki
-;; (http://picolisp.com/5000/-2.html). PicoLisp is included in some
+;; (https://picolisp.com/5000/-2.html). PicoLisp is included in some
 ;; GNU/Linux Distributions, and can be downloaded here:
-;; http://software-lab.de/down.html.  It ships with a picolisp-mode and
+;; https://software-lab.de/down.html.  It ships with a picolisp-mode and
 ;; an inferior-picolisp-mode for Emacs (to be found in the /lib/el/
 ;; directory).
 

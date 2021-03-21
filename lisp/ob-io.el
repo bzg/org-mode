@@ -27,7 +27,7 @@
 ;; :results output repl -- runs in repl mode
 
 ;;; Requirements:
-;; - Io language :: http://iolanguage.org/
+;; - Io language :: https://iolanguage.org/
 ;; - Io major mode :: Can be installed from Io sources
 ;;  https://github.com/stevedekorte/io/blob/master/extras/SyntaxHighlighters/Emacs/io-mode.el
 

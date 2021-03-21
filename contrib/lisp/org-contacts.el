@@ -976,7 +976,7 @@ address."
 (defun org-contacts-vcard-escape (str)
   "Escape ; , and \n in STR for the VCard format."
   ;; Thanks to this library for the regexp:
-  ;; http://www.emacswiki.org/cgi-bin/wiki/bbdb-vcard-export.el
+  ;; https://www.emacswiki.org/cgi-bin/wiki/bbdb-vcard-export.el
   (when str
     (replace-regexp-in-string
      "\n" "\\\\n"

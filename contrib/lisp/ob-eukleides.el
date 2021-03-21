@@ -26,7 +26,7 @@
 ;; Org-Babel support for evaluating eukleides script.
 ;;
 ;; Inspired by Ian Yang's org-export-blocks-format-eukleides
-;; http://www.emacswiki.org/emacs/org-export-blocks-format-eukleides.el
+;; https://www.emacswiki.org/emacs/org-export-blocks-format-eukleides.el
 
 ;;; Requirements:
 

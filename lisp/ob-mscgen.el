@@ -29,7 +29,7 @@
 ;; sequence definition, and must therefore be installed in the system.
 ;;
 ;; Mscgen is available and documented at
-;; http://www.mcternan.me.uk/mscgen/index.html
+;; https://www.mcternan.me.uk/mscgen/index.html
 ;;
 ;; This code is directly inspired by Eric Schulte's ob-dot.el
 ;;

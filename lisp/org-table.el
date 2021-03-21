@@ -6089,7 +6089,7 @@ supported.  It is also possible to use the following ones:
 
   When non-nil, use \"ascii-art-to-unicode\" package to translate
   the table.  You can download it here:
-  http://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el.
+  https://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el.
 
 :narrow
 

@@ -27,9 +27,9 @@
 ;; https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-lilypond.html
 ;;
 ;; Lilypond documentation can be found at
-;; http://lilypond.org/manuals.html
+;; https://lilypond.org/manuals.html
 ;;
-;; This depends on epstopdf --- See http://www.ctan.org/pkg/epstopdf.
+;; This depends on epstopdf --- See https://www.ctan.org/pkg/epstopdf.
 
 ;;; Code:
 (require 'ob)

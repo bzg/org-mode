@@ -3,7 +3,7 @@
 #+Style: <link rel="stylesheet" href="docco.css" type="text/css">
 #+Property: tangle yes
 
-The =docco= tool (see http://jashkenas.github.com/docco/) generates
+The =docco= tool (see https://jashkenas.github.com/docco/) generates
 HTML from JavaScript source code providing an attractive side-by-side
 display of source code and comments.  This file (see [[https://orgmode.org/cgit.cgi/org-mode.git/plain/contrib/scripts/org-docco.org][org-docco.org]])
 generates the same type of output from Org-mode documents with code

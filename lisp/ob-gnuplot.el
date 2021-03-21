@@ -33,7 +33,7 @@
 
 ;;; Requirements:
 
-;; - gnuplot :: http://www.gnuplot.info/
+;; - gnuplot :: https://www.gnuplot.info/
 ;;
 ;; - gnuplot-mode :: you can search the web for the latest active one.
 

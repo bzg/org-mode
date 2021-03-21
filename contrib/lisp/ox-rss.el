@@ -34,8 +34,8 @@
 ;; This backend understands three new option keywords:
 ;;
 ;; #+RSS_EXTENSION: xml
-;; #+RSS_IMAGE_URL: http://myblog.org/mypicture.jpg
-;; #+RSS_FEED_URL: http://myblog.org/feeds/blog.xml
+;; #+RSS_IMAGE_URL: https://myblog.org/mypicture.jpg
+;; #+RSS_FEED_URL: https://myblog.org/feeds/blog.xml
 ;;
 ;; It uses #+HTML_LINK_HOME: to set the base url of the feed.
 ;;

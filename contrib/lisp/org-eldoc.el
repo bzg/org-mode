@@ -154,7 +154,7 @@
 		   (let (eldoc-documentation-function)
 		     (eldoc-print-current-symbol-info)))))
            ((or
-             (string= lang "c") ;; http://github.com/nflath/c-eldoc
+             (string= lang "c") ;; https://github.com/nflath/c-eldoc
              (string= lang "C")) (when (require 'c-eldoc nil t)
                                    (c-eldoc-print-current-symbol-info)))
            ;; https://github.com/zenozeng/css-eldoc

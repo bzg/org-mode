@@ -176,7 +176,7 @@ Possible properties are:
 
   :online-suffix     - the suffix to strip from the published URLs
   :working-suffix    - the replacement for online-suffix
-  :base-url          - the base URL, e.g. http://www.example.com/project/
+  :base-url          - the base URL, e.g. https://www.example.com/project/
                        Last slash required.
   :working-directory - the local working directory.  This is, what base-url will
                        be replaced with.

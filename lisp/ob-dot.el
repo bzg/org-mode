@@ -26,7 +26,7 @@
 
 ;; Org-Babel support for evaluating dot source code.
 ;;
-;; For information on dot see http://www.graphviz.org/
+;; For information on dot see https://www.graphviz.org/
 ;;
 ;; This differs from most standard languages in that
 ;;
