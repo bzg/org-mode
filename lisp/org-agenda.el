@@ -6654,14 +6654,14 @@ The flag is set if the currently compiled format contains a `%b'.")
 	  (cl-return (cadr entry))
 	(cl-return (apply #'create-image (cdr entry)))))))
 
-(defun org-agenda-format-item (extra txt &optional level category tags dotime
+(defun org-agenda-format-item (extra txt &optional with-level with-category tags dotime
 				     remove-re habitp)
   "Format TXT to be inserted into the agenda buffer.
 In particular, add the prefix and corresponding text properties.
 
 EXTRA must be a string to replace the `%s' specifier in the prefix format.
-LEVEL may be a string to replace the `%l' specifier.
-CATEGORY (a string, a symbol or nil) may be used to overrule the default
+WITH-LEVEL may be a string to replace the `%l' specifier.
+WITH-CATEGORY (a string, a symbol or nil) may be used to overrule the default
 category taken from local variable or file name.  It will replace the `%c'
 specifier in the format.
 DOTIME, when non-nil, indicates that a time-of-day should be extracted from
@@ -6698,7 +6698,7 @@ Any match of REMOVE-RE will be removed from TXT."
         (defvar breadcrumbs) (defvar category) (defvar category-icon)
         (defvar effort) (defvar extra)
         (defvar level) (defvar tag) (defvar time))
-      (let* ((category (or category
+      (let* ((category (or with-category
 			   (if buffer-file-name
 			       (file-name-sans-extension
 				(file-name-nondirectory buffer-file-name))
@@ -6796,7 +6796,7 @@ Any match of REMOVE-RE will be removed from TXT."
                                 time-grid-trailing-characters)))
 			 (t ""))
 	      category (if (symbolp category) (symbol-name category) category)
-	      level (or level ""))
+	      level (or with-level ""))
 	(if (string-match org-link-bracket-re category)
 	    (progn
 	      (setq l (string-width (or (match-string 2) (match-string 1))))
