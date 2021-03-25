@@ -15776,7 +15776,7 @@ corresponding functions.
 
 If you want to publish the Org file as an =.org= file but with
 /archived/, /commented/, and /tag-excluded/ trees removed, use
-~org-org-publish-to-org~.  This produces =file.org= and put it in the
+~org-org-publish-to-org~.  This produces =file.org= and puts it in the
 publishing directory.  If you want a htmlized version of this file,
 set the parameter ~:htmlized-source~ to ~t~.  It produces
 =file.org.html= in the publishing directory[fn:140].
