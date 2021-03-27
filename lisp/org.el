@@ -5502,6 +5502,8 @@ highlighting was done, nil otherwise."
 	(while (and (< (point) limit)
 		    (re-search-forward org-latex-and-related-regexp nil t))
 	  (cond
+           ((>= (match-beginning 0) limit)
+	    (throw 'found nil))
 	   ((cl-some (lambda (f)
 		       (memq f '(org-code org-verbatim underline
 					  org-special-keyword)))
