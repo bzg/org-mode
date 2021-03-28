@@ -19587,7 +19587,7 @@ javascript:location.href='org-protocol://store-link?url='+
 Activating the "capture" handler pops up a =Capture= buffer in Emacs,
 using acapture template.
 
-: emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
+: emacsclient org-protocol://capture?template=X&url=URL&title=TITLE&body=BODY
 
 To use this feature, add a bookmark with an arbitrary name, e.g.,
 =Org: capture=, and enter this as =Location=:
