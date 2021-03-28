@@ -49,7 +49,7 @@
 ;;   4.) Try this from the command line (adjust the URL as needed):
 ;;
 ;;       $ emacsclient \
-;;         org-protocol://store-link?url=http:%2F%2Flocalhost%2Findex.html&title=The%20title
+;;         "org-protocol://store-link?url=http:%2F%2Flocalhost%2Findex.html&title=The%20title"
 ;;
 ;;   5.) Optionally add custom sub-protocols and handlers:
 ;;
