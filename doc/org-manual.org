@@ -19588,7 +19588,7 @@ passed to Emacs through the =emacsclient= command, so you also need to
 ensure an Emacs server is running.  More precisely, when the
 application calls
 
-: emacsclient org-protocol://PROTOCOL?key1=val1&key2=val2
+: emacsclient "org-protocol://PROTOCOL?key1=val1&key2=val2"
 
 #+texinfo: @noindent
 Emacs calls the handler associated to {{{var(PROTOCOL)}}} with
@@ -19611,7 +19611,7 @@ Using the ~store-link~ handler, you can copy links, to that they can
 be inserted using {{{kbd(M-x org-insert-link)}}} or yanking.  More
 precisely, the command
 
-: emacsclient org-protocol://store-link?url=URL&title=TITLE
+: emacsclient "org-protocol://store-link?url=URL&title=TITLE"
 
 #+texinfo: @noindent
 stores the following link:
@@ -19640,7 +19640,7 @@ javascript:location.href='org-protocol://store-link?url='+
 Activating the "capture" handler pops up a =Capture= buffer in Emacs,
 using acapture template.
 
-: emacsclient org-protocol://capture?template=X?url=URL?title=TITLE?body=BODY
+: emacsclient "org-protocol://capture?template=X&url=URL&title=TITLE&body=BODY"
 
 To use this feature, add a bookmark with an arbitrary name, e.g.,
 =Org: capture=, and enter this as =Location=:
