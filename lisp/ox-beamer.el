@@ -384,7 +384,7 @@ used as a communication channel."
 				 'beamer object contents info)))
 		      (if (org-string-nw-p code) (concat "\\protect" code)
 			code)))))
-	     (mapcar #'(lambda (type) (cons type protected-output))
+             (mapcar (lambda (type) (cons type protected-output))
 		     '(bold footnote-reference italic strike-through timestamp
 			    underline))))
 	  headline

@@ -3115,7 +3115,7 @@ locally for the subtree through node properties."
     (when options
       (let ((items
 	     (mapcar
-	      #'(lambda (opt) (format "%s:%S" (car opt) (cdr opt)))
+              (lambda (opt) (format "%s:%S" (car opt) (cdr opt)))
 	      (sort options (lambda (k1 k2) (string< (car k1) (car k2)))))))
 	(if subtreep
 	    (org-entry-put
