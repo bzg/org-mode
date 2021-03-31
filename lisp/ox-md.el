@@ -101,6 +101,8 @@ The %s will be replaced by the footnote reference itself."
 		     (italic . org-md-italic)
 		     (item . org-md-item)
 		     (keyword . org-md-keyword)
+                     (latex-environment . org-md-latex-environment)
+                     (latex-fragment . org-md-latex-fragment)
 		     (line-break . org-md-line-break)
 		     (link . org-md-link)
 		     (node-property . org-md-node-property)
@@ -460,6 +462,35 @@ channel."
 	    (org-md--build-toc info depth keyword scope)))))))
     (_ (org-export-with-backend 'html keyword contents info))))
 
+
+;;;; Latex Environment
+
+(defun org-md-latex-environment (latex-environment contents info)
+  "Transcode a LATEX-ENVIRONMENT object from Org to Markdown.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (plist-get info :with-latex)
+    (let ((latex-frag (org-remove-indentation
+                       (org-element-property :value latex-environment)))
+          (label (org-html--reference latex-environment info t)))
+      (if (org-string-nw-p label)
+          (replace-regexp-in-string "\\`.*"
+                                    (format "\\&\n\\\\label{%s}" label)
+                                    latex-frag)
+        latex-frag))))
+
+;;;; Latex Fragment
+
+(defun org-md-latex-fragment (latex-fragment contents info)
+  "Transcode a LATEX-FRAGMENT object from Org to Markdown.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (when (plist-get info :with-latex)
+    (let ((frag (org-element-property :value latex-fragment)))
+      (cond
+       ((string-match-p "^\\\\(" frag)
+        (concat "$" (substring frag 2 -2) "$"))
+       ((string-match-p "^\\\\\\[" frag)
+        (concat "$$" (substring frag 2 -2) "$$"))
+       (t frag))))) ; either already $-deliminated or a macro
 
 ;;;; Line Break
 
