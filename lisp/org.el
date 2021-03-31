@@ -5704,6 +5704,11 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   ;; Description list items
 	   '("^[ \t]*[-+*][ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
 	     1 'org-list-dt prepend)
+           ;; Inline export snippets
+           '("\\(@@\\)\\([a-z-]+:\\).*?\\(@@\\)"
+             (1 'font-lock-comment-face t)
+             (2 'org-tag t)
+             (3 'font-lock-comment-face t))
 	   ;; ARCHIVEd headings
 	   (list (concat
 		  org-outline-regexp-bol
