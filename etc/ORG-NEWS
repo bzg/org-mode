@@ -125,11 +125,11 @@ explicitly:
 
 Alternatively, if you wish to keep =RET= as the "smart-return" key,
 but dislike Org's default indentation of sections, you may prefer to
-customize ~org-adapt-indentation~ to either =nil= or ='headline-data=.
+customize ~org-adapt-indentation~ to either =nil= or =headline-data=.
 
 *** New allowed value for ~org-adapt-indentation~
 
-~org-adapt-indentation~ now accepts a new value, ='headline-data=.
+~org-adapt-indentation~ now accepts a new value, =headline-data=.
 
 When set to this value, Org will only adapt indentation of headline
 data lines, such as planning/clock lines and property/logbook drawers.
