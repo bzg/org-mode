@@ -1192,7 +1192,7 @@ a plist containing contextual information."
 	      ;; Colons are used as a separator between title and node
 	      ;; name.  Remove them.
 	      (replace-regexp-in-string
-	       "[ \t]+:+" ""
+	       "[ \t]*:+" ""
 	       (org-texinfo--sanitize-title
 		(org-export-get-alt-title h info) info)))
 	     (node (org-texinfo--get-node h info))
