@@ -40,7 +40,7 @@
 		      "url=https%3A%2F%2Forgmode.org%2Forg.html%23capture-protocol&"
 		      "title=The%20Org%20Manual&"
 		      "body=9.4.2%20capture%20protocol"))
-	 (data (org-protocol-parse-parameters url)))
+	 (data (org-protocol-parse-parameters url t)))
     (should (string= (plist-get data :template) "p"))
     (should (string= (plist-get data :url) "https://orgmode.org/org.html#capture-protocol"))
     (should (string= (plist-get data :title) "The Org Manual"))
