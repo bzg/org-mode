@@ -4792,6 +4792,7 @@ The following commands are available:
   (org-load-modules-maybe)
   (org-install-agenda-files-menu)
   (when org-link-descriptive (add-to-invisibility-spec '(org-link)))
+  (make-local-variable 'org-link-descriptive)
   (add-to-invisibility-spec '(org-hide-block . t))
   (setq-local outline-regexp org-outline-regexp)
   (setq-local outline-level 'org-outline-level)
