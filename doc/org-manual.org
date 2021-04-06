@@ -19784,9 +19784,18 @@ To use this feature from a browser, add a bookmark with an arbitrary
 name, e.g., =Org: store-link= and enter this as /Location/:
 
 #+begin_example
+javascript:location.href='org-protocol://store-link?' +
+      new URLSearchParams({url:location.href, title:document.title});
+#+end_example
+
+Title is an optional parameter.  Another expression was recommended earlier:
+
+#+begin_example
 javascript:location.href='org-protocol://store-link?url='+
       encodeURIComponent(location.href);
 #+end_example
+
+The latter form is compatible with older Org versions from 9.0 to 9.4.
 
 *** The ~capture~ protocol
 :PROPERTIES:
@@ -19804,11 +19813,24 @@ To use this feature, add a bookmark with an arbitrary name, e.g.,
 =Org: capture=, and enter this as =Location=:
 
 #+begin_example
+javascript:location.href='org-protocol://capture?' +
+      new URLSearchParams({
+            template: 'x', url: window.location.href,
+            title: document.title, body: window.getSelection()});
+#+end_example
+
+You might have seen another expression:
+
+#+begin_example
 javascript:location.href='org-protocol://capture?template=x'+
       '&url='+encodeURIComponent(window.location.href)+
       '&title='+encodeURIComponent(document.title)+
       '&body='+encodeURIComponent(window.getSelection());
 #+end_example
+
+It is a bit more cluttered than the former one, but it is compatible with
+previous Org versions 9.0-9.4. In these versions encoding of space as "+"
+character was not supported by URI decoder.
 
 #+vindex: org-protocol-default-template-key
 The capture template to be used can be specified in the bookmark (like

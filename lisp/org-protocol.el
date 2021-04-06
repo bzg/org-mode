@@ -94,6 +94,15 @@
 ;; You may use the same bookmark URL for all those standard handlers and just
 ;; adjust the sub-protocol used:
 ;;
+;;     javascript:location.href='org-protocol://sub-protocol?'+
+;;           new URLSearchParams({
+;;                 url: location.href,
+;;                 title: document.title,
+;;                 body: window.getSelection()})
+;;
+;; Alternatively use the following expression that encodes space as \"%20\"
+;; instead of \"+\", so it is compatible with Org versions from 9.0 to 9.4:
+;;
 ;;     location.href='org-protocol://sub-protocol?url='+
 ;;           encodeURIComponent(location.href)+'&title='+
 ;;           encodeURIComponent(document.title)+'&body='+
@@ -102,6 +111,11 @@
 ;; The handler for the sub-protocol \"capture\" detects an optional template
 ;; char that, if present, triggers the use of a special template.
 ;; Example:
+;;
+;;     location.href='org-protocol://capture?'+
+;;           new URLSearchParams({template:'x', /* ... */})
+;;
+;; or
 ;;
 ;;     location.href='org-protocol://capture?template=x'+ ...
 ;;
@@ -427,7 +441,12 @@ Parameters: url, title (optional), body (optional)
 Old-style links such as org-protocol://store-link://URL/TITLE are
 also recognized.
 
-The location for a browser's bookmark has to look like this:
+The location for a browser's bookmark may look like this:
+
+  javascript:location.href = \\='org-protocol://store-link?\\=' +
+       new URLSearchParams({url:location.href, title:document.title});
+
+or to keep compatibility with Org versions from 9.0 to 9.4 it may be:
 
   javascript:location.href = \\
       \\='org-protocol://store-link?url=\\=' + \\
@@ -436,7 +455,9 @@ The location for a browser's bookmark has to look like this:
 
 Don't use `escape()'!  Use `encodeURIComponent()' instead.  The
 title of the page could contain slashes and the location
-definitely will.
+definitely will.  Org 9.4 and earlier could not decode \"+\"
+to space, that is why less readable latter expression may be necessary
+for backward compatibility.
 
 The sub-protocol used to reach this function is set in
 `org-protocol-protocol-alist'.
@@ -463,6 +484,14 @@ The sub-protocol used to reach this function is set in
 
 This function detects an URL, title and optional text, separated
 by `/'.  The location for a browser's bookmark looks like this:
+
+  javascript:location.href = \\='org-protocol://capture?\\=' +
+        new URLSearchParams({
+              url: location.href,
+              title: document.title,
+              body: window.getSelection()})
+
+or to keep compatibility with Org versions from 9.0 to 9.4:
 
   javascript:location.href = \\='org-protocol://capture?url=\\='+ \\
         encodeURIComponent(location.href) + \\='&title=\\=' + \\
@@ -519,10 +548,11 @@ Now template ?b will be used."
 (defun org-protocol-convert-query-to-plist (query)
   "Convert QUERY key=value pairs in the URL to a property list."
   (when query
-    (apply 'append (mapcar (lambda (x)
-			     (let ((c (split-string x "=")))
-			       (list (intern (concat ":" (car c))) (cadr c))))
-			   (split-string query "&")))))
+    (let ((plus-decoded (replace-regexp-in-string "\\+" " " query t t)))
+      (apply 'append (mapcar (lambda (x)
+			       (let ((c (split-string x "=")))
+				 (list (intern (concat ":" (car c))) (cadr c))))
+			     (split-string plus-decoded "&"))))))
 
 (defun org-protocol-open-source (fname)
   "Process an org-protocol://open-source?url= style URL with FNAME.
@@ -531,6 +561,12 @@ Change a filename by mapping URLs to local filenames as set
 in `org-protocol-project-alist'.
 
 The location for a browser's bookmark should look like this:
+
+  javascript:location.href = \\='org-protocol://open-source?\\=' +
+        new URLSearchParams({url: location.href})
+
+or if you prefer to keep compatibility with older Org versions (9.0 to 9.4),
+consider the following expression:
 
   javascript:location.href = \\='org-protocol://open-source?url=\\=' + \\
         encodeURIComponent(location.href)"

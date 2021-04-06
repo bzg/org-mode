@@ -517,6 +517,17 @@ Use =org-get-previous-sibling= instead.  This is just a rename to have
 a more consistent naming.  E.g. recall the pair of funtctions
 =next-line= / =previous-line=.
 
+*** Make org-protocol compatible with =URLSearchParams= JavaScript class
+
+Decoder of query part of org-protocol URI recognizes "+" as an encoded
+space characters now, so it is possible to avoid call to =encodeURIComponent=
+for each parameter and use more readable expression in bookmarklet:
+
+#+begin_example
+'org-protocol://store-link?' + new URLSearchParams({
+      url: location.href, title: document.title})
+#+end_example
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
