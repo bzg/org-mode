@@ -1961,8 +1961,8 @@ holding contextual information."
                ;; commands (like \section, etc.), and this causes compilation to fail.
                ;; So, within headings it's a good idea to replace any instances of \verb
                ;; with \texttt.
-               (code . (lambda (_ c _) (org-latex--protect-texttt c)))
-               (verbatim . (lambda (_ c _) (org-latex--protect-texttt c))))))
+               (code . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o))))
+               (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o)))))))
 	   (text
 	    (org-export-data-with-backend
 	     (org-element-property :title headline) section-back-end info))
