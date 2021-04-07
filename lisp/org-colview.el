@@ -1167,7 +1167,12 @@ properties drawers."
 	 (printf (nth 4 spec))
 	 (operator (nth 3 spec))
 	 (collect (and operator (org-columns--collect operator)))
-	 (summarize (and operator (org-columns--summarize operator))))
+	 (summarize (and operator (org-columns--summarize operator)))
+         ;; Special properties are not set in a property drawer, and
+         ;; therefore should not be updated.
+         (update
+          (and update
+               (not (member property org-special-properties)))))
     (org-with-wide-buffer
      ;; Find the region to compute.
      (goto-char org-columns-top-level-marker)
