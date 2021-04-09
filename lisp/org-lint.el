@@ -671,7 +671,7 @@ Use \"export %s\" instead"
 	(when (string= (org-element-property :key k) "OPTIONS")
 	  (let ((value (org-element-property :value k))
 		(start 0))
-	    (while (string-match "\\(.+?\\):\\((.*?)\\|\\S-*\\)[ \t]*"
+	    (while (string-match "\\(.+?\\):\\((.*?)\\|\\S-+\\)?[ \t]*"
 				 value
 				 start)
 	      (setf start (match-end 0))
@@ -679,7 +679,11 @@ Use \"export %s\" instead"
 		(unless (member item allowed)
 		  (push (list (org-element-property :post-affiliated k)
 			      (format "Unknown OPTIONS item \"%s\"" item))
-			reports))))))))
+			reports))
+                (unless (match-string 2 value)
+                  (push (list (org-element-property :post-affiliated k)
+                              (format "Missing value for option item %S" item))
+                        reports))))))))
     reports))
 
 (defun org-lint-invalid-macro-argument-and-template (ast)
