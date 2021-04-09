@@ -313,6 +313,9 @@ This is not a node property
   "Test `org-lint-unknown-options-item' checker."
   (should
    (org-test-with-temp-text "#+options: foobarbaz:t"
+     (org-lint '(unknown-options-item))))
+  (should
+   (org-test-with-temp-text "#+options: H:"
      (org-lint '(unknown-options-item)))))
 
 (ert-deftest test-org-lint/invalid-macro-argument-and-template ()
