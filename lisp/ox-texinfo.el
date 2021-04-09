@@ -559,6 +559,14 @@ strings (e.g., returned by `org-export-get-caption')."
     (format "@float %s%s\n%s\n%s%s@end float"
 	    type (if label (concat "," label) "") value caption-str short-str)))
 
+(defun org-texinfo--sectioning-structure (info)
+  "Return sectioning structure used in the document.
+INFO is a plist holding export options."
+  (let ((class (plist-get info :texinfo-class)))
+    (pcase (assoc class (plist-get info :texinfo-classes))
+      (`(,_ ,_ . ,sections) sections)
+      (_ (user-error "Unknown Texinfo class: %S" class)))))
+
 ;;; Template
 
 (defun org-texinfo-template (contents info)
@@ -858,25 +866,22 @@ holding contextual information."
 	   (notoc? (org-export-excluded-from-toc-p headline info))
 	   (command
 	    (and
-	     (not (org-export-low-level-p headline info))
-	     (let ((class (plist-get info :texinfo-class)))
-	       (pcase (assoc class (plist-get info :texinfo-classes))
-		 (`(,_ ,_ . ,sections)
-		  (pcase (nth (1- (org-export-get-relative-level headline info))
-			      sections)
-		    (`(,numbered ,unnumbered ,unnumbered-no-toc ,appendix)
-		     (cond
-		      ((org-not-nil
-			(org-export-get-node-property :APPENDIX headline t))
-		       appendix)
-		      (numbered? numbered)
-		      (index unnumbered)
-		      (notoc? unnumbered-no-toc)
-		      (t unnumbered)))
-		    (`nil nil)
-		    (_ (user-error "Invalid Texinfo class specification: %S"
-				   class))))
-		 (_ (user-error "Unknown Texinfo class: %S" class))))))
+             (not (org-export-low-level-p headline info))
+	     (let ((sections (org-texinfo--sectioning-structure info)))
+               (pcase (nth (1- (org-export-get-relative-level headline info))
+			   sections)
+		 (`(,numbered ,unnumbered ,unnumbered-no-toc ,appendix)
+		  (cond
+		   ((org-not-nil
+		     (org-export-get-node-property :APPENDIX headline t))
+		    appendix)
+		   (numbered? numbered)
+		   (index unnumbered)
+		   (notoc? unnumbered-no-toc)
+		   (t unnumbered)))
+		 (`nil nil)
+		 (_ (user-error "Invalid Texinfo class specification: %S"
+				(plist-get info :texinfo-class)))))))
 	   (todo
 	    (and (plist-get info :with-todo-keywords)
 		 (let ((todo (org-element-property :todo-keyword headline)))
@@ -1215,12 +1220,15 @@ holding contextual information."
 			       :texinfo-entries-cache)))
 	 (cached-entries (gethash scope cache 'no-cache)))
     (if (not (eq cached-entries 'no-cache)) cached-entries
-      (puthash scope
-	       (cl-remove-if
-		(lambda (h)
-		  (org-not-nil (org-export-get-node-property :COPYING h t)))
-		(org-export-collect-headlines info 1 scope))
-	       cache))))
+      (let ((sections (org-texinfo--sectioning-structure info)))
+        (puthash scope
+	         (cl-remove-if
+		  (lambda (h)
+		    (or (org-not-nil (org-export-get-node-property :COPYING h t))
+                        (>= (org-export-get-relative-level h info)
+                            (length sections))))
+		  (org-export-collect-headlines info 1 scope))
+	         cache)))))
 
 ;;;; Node Property
 
