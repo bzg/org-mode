@@ -899,11 +899,12 @@ holding contextual information."
 	   (contents
 	    (concat "\n"
 		    (if (org-string-nw-p contents) (concat "\n" contents) "")
-		    (and index (format "\n@printindex %s\n" index)))))
+		    (and index (format "\n@printindex %s\n" index))))
+           (node (org-texinfo--get-node headline info)))
       (if (not command)
 	  (concat (and (org-export-first-sibling-p headline info)
 		       (format "@%s\n" (if numbered? 'enumerate 'itemize)))
-		  "@item\n" full-text "\n"
+		  (format "@item\n@anchor{%s}%s\n" node full-text)
 		  contents
 		  (if (org-export-last-sibling-p headline info)
 		      (format "@end %s" (if numbered? 'enumerate 'itemize))
@@ -911,8 +912,7 @@ holding contextual information."
 	(concat
 	 ;; Even if HEADLINE is using @subheading and al., leave an
 	 ;; anchor so cross-references in the Org document still work.
-	 (format (if notoc? "@anchor{%s}\n" "@node %s\n")
-		 (org-texinfo--get-node headline info))
+	 (format (if notoc? "@anchor{%s}\n" "@node %s\n") node)
 	 (format command full-text)
 	 contents))))))
 
