@@ -1386,11 +1386,13 @@ e.g., `org-export-create-backend'.  It specifies which back-end
 specific items to read, if any."
   (let ((line
 	 (let ((s 0) alist)
-	   (while (string-match "\\(.+?\\):\\((.*?)\\|\\S-+\\)[ \t]*" options s)
+	   (while (string-match "\\(.+?\\):\\((.*?)\\|\\S-+\\)?[ \t]*" options s)
 	     (setq s (match-end 0))
-	     (push (cons (match-string 1 options)
-			 (read (match-string 2 options)))
-		   alist))
+	     (let ((value (match-string 2 options)))
+               (when value
+                 (push (cons (match-string 1 options)
+                             (read value))
+		       alist))))
 	   alist))
 	;; Priority is given to back-end specific options.
 	(all (append (org-export-get-all-options backend)

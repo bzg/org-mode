@@ -163,7 +163,12 @@ num:2 <:active")))
 	  (org-export--parse-option-keyword
 	   "opt:t"
 	   (org-export-create-backend
-	    :options '((:opt1 nil "opt") (:opt2 nil "opt")))))))
+	    :options '((:opt1 nil "opt") (:opt2 nil "opt"))))))
+  ;; Ignore options with a missing value.
+  (should
+   (let ((options (org-export--parse-option-keyword "H: num:t")))
+     (and (not (plist-get options :headline-levels))
+          (plist-get options :section-numbers)))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
