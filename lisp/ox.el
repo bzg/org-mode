@@ -2949,10 +2949,8 @@ Return code as a string."
 			     (org-export-backend-name backend))
 	 (org-export-expand-include-keyword)
 	 (org-export--delete-comment-trees)
-	 (org-macro-initialize-templates)
-	 (org-macro-replace-all (append org-macro-templates
-					org-export-global-macros)
-				parsed-keywords)
+	 (org-macro-initialize-templates org-export-global-macros)
+	 (org-macro-replace-all org-macro-templates parsed-keywords)
 	 ;; Refresh buffer properties and radio targets after previous
 	 ;; potentially invasive changes.
 	 (org-set-regexps-and-options)
