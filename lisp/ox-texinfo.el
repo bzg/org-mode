@@ -846,9 +846,17 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 FOOTNOTE is the footnote to define.  CONTENTS is nil.  INFO is a
 plist holding contextual information."
-  (let ((def (org-export-get-footnote-definition footnote info)))
+  (let* ((contents (org-export-get-footnote-definition footnote info))
+         (data (org-export-data contents info)))
     (format "@footnote{%s}"
-	    (org-trim (org-export-data def info)))))
+            ;; It is invalid to close a footnote on a line starting
+            ;; with "@end".  As a safety net, we leave a newline
+            ;; character before the closing brace.  However, when the
+            ;; footnote ends with a paragraph, it is visually pleasing
+            ;; to move the brace right after its end.
+            (if (eq 'paragraph (org-element-type (org-last contents)))
+                (org-trim data)
+              data))))
 
 ;;;; Headline
 
