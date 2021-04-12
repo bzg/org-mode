@@ -1288,6 +1288,11 @@ Some other text
    (eq 'inline-src-block
        (org-test-with-temp-text "src_emacs-lisp[:foo\nbar]{(+ 1 1)}"
 	 (org-element-type (org-element-context)))))
+  ;; Properly un-escape code.
+  (should
+   (equal "(\n* 1 2)"
+          (org-test-with-temp-text "src_emacs-lisp[:foo bar]{(\n,* 1 2)}"
+	    (org-element-property :value (org-element-context)))))
   ;; Besides curly brackets, ignore any other bracket type.
   (should
    (equal "[foo"
