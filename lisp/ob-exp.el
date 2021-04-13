@@ -360,9 +360,12 @@ replaced with its value."
   (org-fill-template
    (if (eq type 'inline)
        org-babel-exp-inline-code-template
-       org-babel-exp-code-template)
+     org-babel-exp-code-template)
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(org-escape-code-in-string (nth 1 info)))
+     ;; Inline source code should not be escaped.
+     ("body"  . ,(let ((body (nth 1 info)))
+                   (if (eq type 'inline) body
+                     (org-escape-code-in-string body))))
      ("switches" . ,(let ((f (nth 3 info)))
 		      (and (org-string-nw-p f) (concat " " f))))
      ("flags" . ,(let ((f (assq :flags (nth 2 info))))
