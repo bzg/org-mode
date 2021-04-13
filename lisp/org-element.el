@@ -2980,7 +2980,7 @@ Assume point is at the beginning of the inline source block."
 	      (post-blank (skip-chars-forward " \t")))
 	  (list 'inline-src-block
 		(list :language language
-		      :value (org-unescape-code-in-string value)
+		      :value value
 		      :parameters parameters
 		      :begin begin
 		      :end (point)
@@ -2994,7 +2994,7 @@ Assume point is at the beginning of the inline source block."
     (format "src_%s%s{%s}"
 	    language
 	    (if arguments (format "[%s]" arguments) "")
-	    (org-trim (org-escape-code-in-string body)))))
+	    body)))
 
 ;;;; Italic
 
