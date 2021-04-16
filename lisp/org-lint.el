@@ -731,25 +731,30 @@ Use \"export %s\" instead"
 	(lambda (macro)
 	  (let* ((name (org-element-property :key macro))
 		 (template (cdr (assoc-string name templates t))))
-	    (if (not template)
-		(push (list (org-element-property :begin macro)
-			    (format "Undefined macro \"%s\"" name))
-		      reports)
-	      (let ((arg-numbers (funcall extract-placeholders template)))
-		(when arg-numbers
-		  (let ((spurious-args
-			 (nthcdr (apply #'max arg-numbers)
-				 (org-element-property :args macro))))
-		    (when spurious-args
-		      (push
-		       (list (org-element-property :begin macro)
-			     (format "Unused argument%s in macro \"%s\": %s"
-				     (if (> (length spurious-args) 1) "s" "")
-				     name
-				     (mapconcat (lambda (a) (format "\"%s\"" a))
-						spurious-args
-						", ")))
-		       reports))))))))))
+            (pcase template
+              (`nil
+               (push (list (org-element-property :begin macro)
+			   (format "Undefined macro %S" name))
+		     reports))
+              ((pred functionp) nil)    ;ignore it
+              (_
+               (let ((arg-numbers (funcall extract-placeholders template)))
+		 (when arg-numbers
+		   (let ((spurious-args
+			  (nthcdr (apply #'max arg-numbers)
+				  (org-element-property :args macro))))
+		     (when spurious-args
+		       (push
+		        (list (org-element-property :begin macro)
+                              (pcase spurious-args
+                                (`(,arg)
+                                 (format "Unused argument in macro %S: %s"
+                                         name arg))
+                                (args
+                                 (format "Unused arguments in macro %S: %s"
+                                         name
+                                         (mapconcat #'org-trim spurious-args ", ")))))
+		        reports)))))))))))
     reports))
 
 (defun org-lint-undefined-footnote-reference (ast)
