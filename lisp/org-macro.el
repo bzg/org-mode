@@ -91,10 +91,11 @@ directly, use instead:
       (setq i (match-end 0))
       (setq max (max max (string-to-number (match-string 1 template)))))
     (let ((args '(&rest _)))
-      (while (> max 0)
-        (push (intern (format "$%d" max)) args)
-        (setq max (1- max)))
-      (cons '&optional args))))
+      (if (< max 1) args ;Avoid `&optional &rest', refused by Emacs-26!
+        (while (> max 0)
+          (push (intern (format "$%d" max)) args)
+          (setq max (1- max)))
+        (cons '&optional args)))))
 
 (defun org-macro--set-templates (templates)
   "Set template for the macro NAME.
