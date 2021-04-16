@@ -5255,9 +5255,7 @@ of what a project is and how to check if it stuck, customize the variable
 	 (org-disable-agenda-to-diary t))
     (save-excursion
       (save-window-excursion
-	(funcall (if (fboundp 'diary-list-entries)
-		     'diary-list-entries 'list-diary-entries)
-		 date 1)))
+        (diary-list-entries date 1)))
     (if (not (get-buffer diary-fancy-buffer))
 	(setq entries nil)
       (with-current-buffer diary-fancy-buffer
