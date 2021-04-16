@@ -181,6 +181,8 @@ global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
 option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
 
 ** Miscellaneous
+*** Missing or empty placeholders in "eval" macros are now nil
+They used to be the empty string.
 *** =org-goto-first-child= now works before first heading
 
 When point is before first heading =org-goto-first-child= will move
