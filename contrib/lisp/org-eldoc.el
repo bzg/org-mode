@@ -144,7 +144,9 @@
      (cond ((or
              (string= lang "emacs-lisp")
              (string= lang "elisp"))
-	    (cond ((boundp 'eldoc-documentation-functions) ; Emacs>=28
+	    (cond ((and (boundp 'eldoc-documentation-functions) ; Emacs>=28
+			(fboundp 'elisp-eldoc-var-docstring)
+			(fboundp 'elisp-eldoc-funcall))
 		   (let ((eldoc-documentation-functions
 			  '(elisp-eldoc-var-docstring elisp-eldoc-funcall)))
 		     (eldoc-print-current-symbol-info)))

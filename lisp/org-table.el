@@ -472,25 +472,29 @@ This may be useful when columns have been shrunk."
 (defvar-local org-table-header-overlay nil)
 (defun org-table-header-set-header ()
   "Display the header of the table at point."
-  (when (overlayp org-table-header-overlay)
-    (delete-overlay org-table-header-overlay))
-  (let* ((ws (window-start))
-	 (beg (save-excursion
-		(goto-char (org-table-begin))
-		(while (or (org-at-table-hline-p)
-			   (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
-		  (move-beginning-of-line 2))
-		(point)))
-	 (end (save-excursion (goto-char beg) (point-at-eol))))
-    (if (pos-visible-in-window-p beg)
-	(when (overlayp org-table-header-overlay)
-	  (delete-overlay org-table-header-overlay))
-      (setq org-table-header-overlay
-	    (make-overlay ws (+ ws (- end beg))))
-      (org-overlay-display
-       org-table-header-overlay
-       (org-table-row-get-visible-string beg)
-       'org-table-header))))
+  (let ((gcol temporary-goal-column))
+    (unwind-protect
+        (progn
+          (when (overlayp org-table-header-overlay)
+            (delete-overlay org-table-header-overlay))
+          (let* ((ws (window-start))
+                 (beg (save-excursion
+                        (goto-char (org-table-begin))
+                        (while (or (org-at-table-hline-p)
+                                   (looking-at-p ".*|\\s-+<[rcl]?\\([0-9]+\\)?>"))
+                          (move-beginning-of-line 2))
+                        (point)))
+                 (end (save-excursion (goto-char beg) (point-at-eol))))
+            (if (pos-visible-in-window-p beg)
+                (when (overlayp org-table-header-overlay)
+                  (delete-overlay org-table-header-overlay))
+              (setq org-table-header-overlay
+                    (make-overlay ws (+ ws (- end beg))))
+              (org-overlay-display
+               org-table-header-overlay
+               (org-table-row-get-visible-string beg)
+               'org-table-header))))
+      (setq temporary-goal-column gcol))))
 
 ;;;###autoload
 (define-minor-mode org-table-header-line-mode
