@@ -282,13 +282,6 @@ links created by planner."
   :type '(choice (const nil) (function))
   :safe #'null)
 
-(defcustom org-link-doi-server-url "https://doi.org/"
-  "The URL of the DOI server."
-  :group 'org-link-follow
-  :version "24.3"
-  :type 'string
-  :safe #'stringp)
-
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
     (vm-imap . vm-visit-imap-folder-other-frame)
@@ -1305,14 +1298,6 @@ If there is no description, use the link target."
 
 
 ;;; Built-in link types
-
-;;;; "doi" link type
-(defun org-link--open-doi (path arg)
-  "Open a \"doi\" type link.
-PATH is a the path to search for, as a string."
-  (browse-url (url-encode-url (concat org-link-doi-server-url path)) arg))
-
-(org-link-set-parameters "doi" :follow #'org-link--open-doi)
 
 ;;;; "elisp" link type
 (defun org-link--open-elisp (path _)

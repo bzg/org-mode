@@ -680,7 +680,7 @@ defined in org-duration.el.")
     (org-load-modules-maybe 'force)
     (org-element-cache-reset 'all)))
 
-(defcustom org-modules '(ol-w3m ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-eww)
+(defcustom org-modules '(ol-doi ol-w3m ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-eww)
   "Modules that should always be loaded together with org.el.
 
 If a description starts with <C>, the file is not part of Emacs
@@ -697,8 +697,7 @@ to add the symbol `xyz', and the package must have a call to:
 For export specific modules, see also `org-export-backends'."
   :group 'org
   :set 'org-set-modules
-  :version "26.1"
-  :package-version '(Org . "9.2")
+  :package-version '(Org . "9.5")
   :type
   '(set :greedy t
 	(const :tag "   bbdb:              Links to BBDB entries" ol-bbdb)
@@ -706,6 +705,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "   crypt:             Encryption of subtrees" org-crypt)
 	(const :tag "   ctags:             Access to Emacs tags with links" org-ctags)
 	(const :tag "   docview:           Links to Docview buffers" ol-docview)
+        (const :tag "   doi:               Links to DOI references" ol-docview)
 	(const :tag "   eww:               Store link to URL of Eww" ol-eww)
 	(const :tag "   gnus:              Links to GNUS folders/messages" ol-gnus)
 	(const :tag "   habit:             Track your consistency with habits" org-habit)
