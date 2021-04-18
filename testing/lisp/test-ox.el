@@ -3812,6 +3812,17 @@ Another text. (ref:text)
 	    (org-export-data-with-backend paragraph backend nil)))))
 
 
+;;; Raw objects
+
+(ert-deftest test-org-export/raw-strings ()
+  "Test exporting raw objects."
+  (should
+   (equal "foo"
+          (let ((backend (org-export-create-backend))
+                (object (org-export-raw-string "foo")))
+            (org-export-data-with-backend object backend nil)))))
+
+
 ;;; Src-block and example-block
 
 (ert-deftest test-org-export/unravel-code ()
