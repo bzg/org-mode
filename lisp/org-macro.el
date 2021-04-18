@@ -166,7 +166,7 @@ a file, \"input-file\" and \"modification-time\"."
 		 `("modification-time" .
 		   ,(let ((modtime (file-attribute-modification-time
 			            (file-attributes visited-file))))
-		      (lambda (arg1 arg2 &rest _)
+		      (lambda (arg1 &optional arg2 &rest _)
 		        (format-time-string
                          arg1
                          (or (and (org-string-nw-p arg2)
