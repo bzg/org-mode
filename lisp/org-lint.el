@@ -753,7 +753,7 @@ Use \"export %s\" instead"
                                 (args
                                  (format "Unused arguments in macro %S: %s"
                                          name
-                                         (mapconcat #'org-trim spurious-args ", ")))))
+                                         (mapconcat #'org-trim args ", ")))))
 		        reports)))))))))))
     reports))
 
