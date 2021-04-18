@@ -173,6 +173,9 @@ Example:
 A new =u= mode flag for Calc formulas in Org tables has been added to
 enable Calc units simplification mode.
 
+*** Export DOI links
+Org now supports export for DOI links, through its new =ol-doi.el=
+library.  For backward compatibility, it is loaded by default.
 *** =org-set-tags-command= select tags from ~org-global-tags-completion-table~
 
 Let ~org-set-tags-command~ TAB fast tag completion interface complete
