@@ -1,7 +1,6 @@
 #+title: The Org Manual
 #+subtitle:  Release {{{version}}}
 #+author:    The Org Mode Developers
-#+date:      {{{modification-time}}}
 #+language:  en
 
 
