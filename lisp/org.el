@@ -8955,9 +8955,10 @@ a link."
 	    ;; closest one.
 	    (org-element-lineage
 	     (org-element-context)
-	     '(clock comment comment-block footnote-definition
-		     footnote-reference headline inline-src-block inlinetask
-		     keyword link node-property planning src-block timestamp)
+	     '(citation citation-reference clock comment comment-block
+                        footnote-definition footnote-reference headline
+                        inline-src-block inlinetask keyword link node-property
+                        planning src-block timestamp)
 	     t))
 	   (type (org-element-type context))
 	   (value (org-element-property :value context)))
@@ -8968,7 +8969,7 @@ a link."
        ((memq type '(comment comment-block node-property keyword))
 	(call-interactively #'org-open-at-point-global))
        ;; On a headline or an inlinetask, but not on a timestamp,
-       ;; a link, a footnote reference.
+       ;; a link, a footnote reference or a citation.
        ((memq type '(headline inlinetask))
 	(org-match-line org-complex-heading-regexp)
 	(let ((tags-beg (match-beginning 5))
@@ -9031,6 +9032,7 @@ a link."
        ((eq type 'inline-src-block) (org-babel-open-src-block-result))
        ((eq type 'timestamp) (org-follow-timestamp-link))
        ((eq type 'link) (org-link-open context arg))
+       ((memq type '(citation citation-reference)) (org-cite-follow context arg))
        (t (user-error "No link found")))))
   (run-hook-with-args 'org-follow-link-hook))
 
