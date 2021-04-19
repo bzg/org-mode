@@ -129,8 +129,11 @@ nil   Never use an ID to make a link, instead link using a text search for
   :type 'string)
 
 (defcustom org-id-ts-format "%Y%m%dT%H%M%S.%6N"
-  "Default format for IDs generated using `ts' `org-id-method'.
-The format should be suitable to pass as an argument to `format-time-string'."
+  "Timestamp format for IDs generated using `ts' `org-id-method'.
+The format should be suitable to pass as an argument to `format-time-string'.
+
+Defaults to ISO8601 timestamps without separators and without
+timezone, local time and precision down to 1e-6 seconds."
   :type 'string
   :package-version '(Org . "9.5"))
 
@@ -150,13 +153,12 @@ uuid       Create random (version 4) UUIDs.  If the program defined in
            `org-id-uuid-program' is available it is used to create the ID.
            Otherwise an internal functions is used.
 
-ts         Create ID's based on ISO8601 timestamps (without separators
-           and without timezone, local time).  Precision down to seconds."
+ts         Create ID's based on timestamps as specified in `org-id-ts-format'."
   :group 'org-id
   :type '(choice
 	  (const :tag "Org's internal method" org)
 	  (const :tag "external: uuidgen" uuid)
-	  (const :tag "ISO8601 timestamp" ts)))
+	  (const :tag "Timestamp with format `org-id-ts-format'" ts)))
 
 (defcustom org-id-prefix nil
   "The prefix for IDs.

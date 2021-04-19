@@ -3356,8 +3356,9 @@ current buffer:
   =ID= property for the link[fn:29].  So using this command in Org
   buffers potentially creates two links: a human-readable link from
   the custom ID, and one that is globally unique and works even if the
-  entry is moved from file to file.  Later, when inserting the link,
-  you need to decide which one to use.
+  entry is moved from file to file.  The =ID= property can be either a
+  UUID (default) or a timestamp, depending on ~org-id-method~.  Later,
+  when inserting the link, you need to decide which one to use.
 
 - /Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus/ ::
 
