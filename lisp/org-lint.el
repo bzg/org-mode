@@ -757,7 +757,6 @@ Use \"export %s\" instead"
       (org-element-map ast 'macro
 	(lambda (macro)
 	  (let* ((name (org-element-property :key macro))
-                 (args (org-element-property :args macro))
 		 (template (cdr (assoc-string name templates t))))
             (pcase template
               (`nil
