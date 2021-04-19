@@ -2613,7 +2613,12 @@ Outside list"
 	  (org-element-interpret-data
 	   '(center nil
 		    (pseudo-element (:post-blank 1) (paragraph nil "A"))
-		    (paragraph nil "B"))))))
+		    (paragraph nil "B")))))
+  ;; Obey post-blank property in strings.
+  (should
+   (equal "A "
+	  (org-element-interpret-data
+           (org-element-put-property "A" :post-blank 1)))))
 
 (ert-deftest test-org-element/center-block-interpreter ()
   "Test center block interpreter."
