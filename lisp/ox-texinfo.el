@@ -489,16 +489,18 @@ node or anchor name is unique."
 	  ;; Org exports deeper elements before their parents.  If two
 	  ;; node names collide -- e.g., they have the same title --
 	  ;; within the same hierarchy, the second one would get the
-	  ;; shorter node name.  This is counter-intuitive.
-	  ;; Consequently, we ensure that every parent headline get
-	  ;; its node beforehand. As a recursive operation, this
+	  ;; smaller node name.  This is counter-intuitive.
+	  ;; Consequently, we ensure that every parent headline gets
+	  ;; its node beforehand.  As a recursive operation, this
 	  ;; achieves the desired effect.
 	  (let ((parent (org-element-lineage datum '(headline))))
 	    (when (and parent (not (assq parent cache)))
 	      (org-texinfo--get-node parent info)
 	      (setq cache (plist-get info :texinfo-node-cache))))
-	  ;; Ensure NAME is unique and not reserved node name "Top".
-	  (while (or (equal name "Top") (rassoc name cache))
+	  ;; Ensure NAME is unique and not reserved node name "Top",
+          ;; no matter what case is used.
+	  (while (or (string-equal "Top" (capitalize name))
+                     (rassoc name cache))
 	    (setq name (concat basename (format " (%d)" (cl-incf salt)))))
 	  (plist-put info :texinfo-node-cache (cons (cons datum name) cache))
 	  name))))
