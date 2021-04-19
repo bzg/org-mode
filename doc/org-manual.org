@@ -16324,10 +16324,10 @@ directory on the local machine.
          :publishing-function org-html-publish-to-html
          :publishing-directory "~/public_html"
          :section-numbers nil
-         :table-of-contents nil
-         :style "<link rel=\"stylesheet\"
-                href=\"../other/mystyle.css\"
-                type=\"text/css\"/>")))
+         :with-toc nil
+         :html-head "<link rel=\"stylesheet\"
+                    href=\"../other/mystyle.css\"
+                    type=\"text/css\"/>")))
 #+end_src
 
 *** Example: complex publishing configuration
