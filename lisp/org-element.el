@@ -4662,7 +4662,7 @@ to interpret.  Return Org syntax as a string."
 				   (eq (org-element-property :pre-blank parent)
 				       0)))))
 			  ""))))))
-		(if (memq type '(org-data plain-text nil)) results
+		(if (memq type '(org-data nil)) results
 		  ;; Build white spaces.  If no `:post-blank' property
 		  ;; is specified, assume its value is 0.
 		  (let ((blank (or (org-element-property :post-blank data) 0)))
