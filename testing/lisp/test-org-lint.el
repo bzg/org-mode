@@ -339,6 +339,12 @@ This is not a node property
   (should-not
    (org-test-with-temp-text
        "#+macro: valid $1 $2\n{{{valid(1, 2)}}}"
+     (org-lint '(invalid-macro-argument-and-template))))
+  (should
+   (org-test-with-temp-text "{{{keyword}}}"
+     (org-lint '(invalid-macro-argument-and-template))))
+  (should
+   (org-test-with-temp-text "{{{keyword(one, too many)}}}"
      (org-lint '(invalid-macro-argument-and-template)))))
 
 (ert-deftest test-org-lint/undefined-footnote-reference ()
