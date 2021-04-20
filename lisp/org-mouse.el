@@ -893,7 +893,7 @@ This means, between the beginning of line and the point."
 		(font-lock-add-keywords
 		 nil
 		 `(("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)"
-		    (2 `(face bold keymap ,org-mouse-map mouse-face highlight) t)))
+		    (2 `(face org-checkbox keymap ,org-mouse-map mouse-face highlight) t)))
 		 t))
 
 	      (defadvice org-open-at-point (around org-mouse-open-at-point activate)
