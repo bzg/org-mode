@@ -1571,7 +1571,7 @@ process."
 		 plist
 		 prop
 		 ;; Evaluate default value provided.
-		 (let ((value (eval (nth 3 cell))))
+		 (let ((value (eval (nth 3 cell) t)))
 		   (if (eq (nth 4 cell) 'parse)
 		       (org-element-parse-secondary-string
 			value (org-element-restriction 'keyword))
@@ -2561,16 +2561,16 @@ another buffer, effectively cloning the original buffer there.
 
 The function assumes BUFFER's major mode is `org-mode'."
   (with-current-buffer buffer
-    `(lambda ()
-       (let ((inhibit-modification-hooks t))
-	 ;; Set major mode. Ignore `org-mode-hook' as it has been run
-	 ;; already in BUFFER.
-	 (let ((org-mode-hook nil) (org-inhibit-startup t)) (org-mode))
-	 ;; Copy specific buffer local variables and variables set
-	 ;; through BIND keywords.
-	 ,@(let ((bound-variables (org-export--list-bound-variables))
-		 vars)
-	     (dolist (entry (buffer-local-variables (buffer-base-buffer)) vars)
+    (let ((str (org-with-wide-buffer (buffer-string)))
+          (narrowing
+           (if (org-region-active-p)
+	       (list (region-beginning) (region-end))
+	     (list (point-min) (point-max))))
+	  (pos (point))
+	  (varvals
+	   (let ((bound-variables (org-export--list-bound-variables))
+		 (varvals nil))
+	     (dolist (entry (buffer-local-variables (buffer-base-buffer)))
 	       (when (consp entry)
 		 (let ((var (car entry))
 		       (val (cdr entry)))
@@ -2585,27 +2585,35 @@ The function assumes BUFFER's major mode is `org-mode'."
 			;; Skip unreadable values, as they cannot be
 			;; sent to external process.
 			(or (not val) (ignore-errors (read (format "%S" val))))
-			(push `(set (make-local-variable (quote ,var))
-				    (quote ,val))
-			      vars))))))
-	 ;; Whole buffer contents.
-	 (insert ,(org-with-wide-buffer (buffer-string)))
-	 ;; Narrowing.
-	 ,(if (org-region-active-p)
-	      `(narrow-to-region ,(region-beginning) ,(region-end))
-	    `(narrow-to-region ,(point-min) ,(point-max)))
-	 ;; Current position of point.
-	 (goto-char ,(point))
-	 ;; Overlays with invisible property.
-	 ,@(let (ov-set)
-	     (dolist (ov (overlays-in (point-min) (point-max)) ov-set)
+			(push (cons var val) varvals)))))
+             varvals))
+	  (ols
+	   (let (ov-set)
+	     (dolist (ov (overlays-in (point-min) (point-max)))
 	       (let ((invis-prop (overlay-get ov 'invisible)))
 		 (when invis-prop
-		   (push `(overlay-put
-			   (make-overlay ,(overlay-start ov)
-					 ,(overlay-end ov))
-			   'invisible (quote ,invis-prop))
-			 ov-set)))))))))
+		   (push (list (overlay-start ov) (overlay-end ov)
+			       invis-prop)
+			 ov-set))))
+	     ov-set)))
+      (lambda ()
+	(let ((inhibit-modification-hooks t))
+	  ;; Set major mode. Ignore `org-mode-hook' as it has been run
+	  ;; already in BUFFER.
+	  (let ((org-mode-hook nil) (org-inhibit-startup t)) (org-mode))
+	  ;; Copy specific buffer local variables and variables set
+	  ;; through BIND keywords.
+	  (pcase-dolist (`(,var . ,val) varvals)
+	    (set (make-local-variable var) val))
+	  ;; Whole buffer contents.
+	  (insert str)
+	  ;; Narrowing.
+	  (apply #'narrow-to-region narrowing)
+	  ;; Current position of point.
+	  (goto-char pos)
+	  ;; Overlays with invisible property.
+	  (pcase-dolist (`(,start ,end ,invis) ols)
+	    (overlay-put (make-overlay start end) 'invisible invis)))))))
 
 (defun org-export--delete-comment-trees ()
   "Delete commented trees and commented inlinetasks in the buffer.
@@ -3104,11 +3112,11 @@ locally for the subtree through node properties."
          (keyword (unless (assoc keyword keywords)
                     (let ((value
                            (if (eq (nth 4 entry) 'split)
-                               (mapconcat #'identity (eval (nth 3 entry)) " ")
-                             (eval (nth 3 entry)))))
+                               (mapconcat #'identity (eval (nth 3 entry) t) " ")
+                             (eval (nth 3 entry) t))))
                       (push (cons keyword value) keywords))))
          (option (unless (assoc option options)
-                   (push (cons option (eval (nth 3 entry))) options))))))
+                   (push (cons option (eval (nth 3 entry) t)) options))))))
     ;; Move to an appropriate location in order to insert options.
     (unless subtreep (beginning-of-line))
     ;; First (multiple) OPTIONS lines.  Never go past fill-column.
@@ -3119,7 +3127,7 @@ locally for the subtree through node properties."
 	      (sort options (lambda (k1 k2) (string< (car k1) (car k2)))))))
 	(if subtreep
 	    (org-entry-put
-	     node "EXPORT_OPTIONS" (mapconcat 'identity items " "))
+	     node "EXPORT_OPTIONS" (mapconcat #'identity items " "))
 	  (while items
 	    (insert "#+options:")
 	    (let ((width 10))
@@ -3609,7 +3617,7 @@ will become the empty string."
 	 (attributes
 	  (let ((value (org-element-property attribute element)))
 	    (when value
-	      (let ((s (mapconcat 'identity value " ")) result)
+	      (let ((s (mapconcat #'identity value " ")) result)
 		(while (string-match
 			"\\(?:^\\|[ \t]+\\)\\(:[-a-zA-Z0-9_]+\\)\\([ \t]+\\|$\\)"
 			s)
@@ -4702,7 +4710,7 @@ code."
 	     ;; should start six columns after the widest line of code,
 	     ;; wrapped with parenthesis.
 	     (max-width
-	      (+ (apply 'max (mapcar 'length code-lines))
+	      (+ (apply #'max (mapcar #'length code-lines))
 		 (if (not num-start) 0 (length (format num-fmt num-start))))))
 	(org-export-format-code
 	 code
@@ -6200,91 +6208,87 @@ to `:default' encoding.  If it fails, return S."
 ;; For back-ends, `org-export-add-to-stack' add a new source to stack.
 ;; It should be used whenever `org-export-async-start' is called.
 
-(defmacro org-export-async-start  (fun &rest body)
+(defun org-export-async-start  (fun body)
   "Call function FUN on the results returned by BODY evaluation.
 
-FUN is an anonymous function of one argument.  BODY evaluation
-happens in an asynchronous process, from a buffer which is an
-exact copy of the current one.
+FUN is an anonymous function of one argument.  BODY should be a valid
+ELisp source expression.  BODY evaluation happens in an asynchronous process,
+from a buffer which is an exact copy of the current one.
 
 Use `org-export-add-to-stack' in FUN in order to register results
 in the stack.
 
 This is a low level function.  See also `org-export-to-buffer'
 and `org-export-to-file' for more specialized functions."
-  (declare (indent 1) (debug t))
-  (org-with-gensyms (process temp-file copy-fun proc-buffer coding)
-    ;; Write the full sexp evaluating BODY in a copy of the current
-    ;; buffer to a temporary file, as it may be too long for program
-    ;; args in `start-process'.
-    `(with-temp-message "Initializing asynchronous export process"
-       (let ((,copy-fun (org-export--generate-copy-script (current-buffer)))
-             (,temp-file (make-temp-file "org-export-process"))
-             (,coding buffer-file-coding-system))
-         (with-temp-file ,temp-file
-           (insert
-            ;; Null characters (from variable values) are inserted
-            ;; within the file.  As a consequence, coding system for
-            ;; buffer contents will not be recognized properly.  So,
-            ;; we make sure it is the same as the one used to display
-            ;; the original buffer.
-            (format ";; -*- coding: %s; -*-\n%S"
-                    ,coding
-                    `(with-temp-buffer
-                       (when org-export-async-debug '(setq debug-on-error t))
-                       ;; Ignore `kill-emacs-hook' and code evaluation
-                       ;; queries from Babel as we need a truly
-                       ;; non-interactive process.
-                       (setq kill-emacs-hook nil
-                             org-babel-confirm-evaluate-answer-no t)
-                       ;; Initialize export framework.
-                       (require 'ox)
-                       ;; Re-create current buffer there.
-                       (funcall ,,copy-fun)
-                       (restore-buffer-modified-p nil)
-                       ;; Sexp to evaluate in the buffer.
-                       (print (progn ,,@body))))))
-         ;; Start external process.
-         (let* ((process-connection-type nil)
-                (,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
-                (,process
-		 (apply
-		  #'start-process
-		  (append
-		   (list "org-export-process"
-			 ,proc-buffer
-			 (expand-file-name invocation-name invocation-directory)
-			 "--batch")
-		   (if org-export-async-init-file
-		       (list "-Q" "-l" org-export-async-init-file)
-		     (list "-l" user-init-file))
-		   (list "-l" ,temp-file)))))
-           ;; Register running process in stack.
-           (org-export-add-to-stack (get-buffer ,proc-buffer) nil ,process)
-           ;; Set-up sentinel in order to catch results.
-           (let ((handler ,fun))
-             (set-process-sentinel
-              ,process
-              `(lambda (p status)
-                 (let ((proc-buffer (process-buffer p)))
-                   (when (eq (process-status p) 'exit)
-                     (unwind-protect
-                         (if (zerop (process-exit-status p))
-                             (unwind-protect
-                                 (let ((results
-                                        (with-current-buffer proc-buffer
-                                          (goto-char (point-max))
-                                          (backward-sexp)
-                                          (read (current-buffer)))))
-                                   (funcall ,handler results))
-                               (unless org-export-async-debug
-                                 (and (get-buffer proc-buffer)
-                                      (kill-buffer proc-buffer))))
-                           (org-export-add-to-stack proc-buffer nil p)
-                           (ding)
-                           (message "Process `%s' exited abnormally" p))
-                       (unless org-export-async-debug
-                         (delete-file ,,temp-file)))))))))))))
+  (declare (indent 1))
+  ;; Write the full sexp evaluating BODY in a copy of the current
+  ;; buffer to a temporary file, as it may be too long for program
+  ;; args in `start-process'.
+  (with-temp-message "Initializing asynchronous export process"
+    (let ((copy-fun (org-export--generate-copy-script (current-buffer)))
+          (temp-file (make-temp-file "org-export-process")))
+      (let ((coding-system-for-write 'utf-8-emacs-unix))
+        (write-region
+         ;; Null characters (from variable values) are inserted
+         ;; within the file.  As a consequence, coding system for
+         ;; buffer contents could fail to be recognized properly.
+         (format ";; -*- coding: utf-8-emacs-unix; lexical-binding:t -*-\n%S"
+                 `(with-temp-buffer
+                    ,(when org-export-async-debug '(setq debug-on-error t))
+                    ;; Ignore `kill-emacs-hook' and code evaluation
+                    ;; queries from Babel as we need a truly
+                    ;; non-interactive process.
+                    (setq kill-emacs-hook nil
+                          org-babel-confirm-evaluate-answer-no t)
+                    ;; Initialize export framework.
+                    (require 'ox)
+                    ;; Re-create current buffer there.
+                    (funcall ',copy-fun)
+                    (restore-buffer-modified-p nil)
+                    ;; Sexp to evaluate in the buffer.
+                    (print ,body)))
+         nil temp-file nil 'silent))
+      ;; Start external process.
+      (let* ((process-connection-type nil)
+             (proc-buffer (generate-new-buffer-name "*Org Export Process*"))
+             (process
+	      (apply
+	       #'start-process
+	       (append
+		(list "org-export-process"
+		      proc-buffer
+		      (expand-file-name invocation-name invocation-directory)
+		      "--batch")
+		(if org-export-async-init-file
+		    (list "-Q" "-l" org-export-async-init-file)
+		  (list "-l" user-init-file))
+		(list "-l" temp-file)))))
+        ;; Register running process in stack.
+        (org-export-add-to-stack (get-buffer proc-buffer) nil process)
+        ;; Set-up sentinel in order to catch results.
+        (let ((handler fun))
+          (set-process-sentinel
+           process
+           (lambda (p _status)
+             (let ((proc-buffer (process-buffer p)))
+               (when (eq (process-status p) 'exit)
+                 (unwind-protect
+                     (if (zerop (process-exit-status p))
+                         (unwind-protect
+                             (let ((results
+                                    (with-current-buffer proc-buffer
+                                      (goto-char (point-max))
+                                      (backward-sexp)
+                                      (read (current-buffer)))))
+                               (funcall handler results))
+                           (unless org-export-async-debug
+                             (and (get-buffer proc-buffer)
+                                  (kill-buffer proc-buffer))))
+                       (org-export-add-to-stack proc-buffer nil p)
+                       (ding)
+                       (message "Process `%s' exited abnormally" p))
+                   (unless org-export-async-debug
+                     (delete-file temp-file))))))))))))
 
 ;;;###autoload
 (defun org-export-to-buffer
@@ -6325,14 +6329,15 @@ This function returns BUFFER."
   (declare (indent 2))
   (if async
       (org-export-async-start
-	  `(lambda (output)
-	     (with-current-buffer (get-buffer-create ,buffer)
-	       (erase-buffer)
-	       (setq buffer-file-coding-system ',buffer-file-coding-system)
-	       (insert output)
-	       (goto-char (point-min))
-	       (org-export-add-to-stack (current-buffer) ',backend)
-	       (ignore-errors (funcall ,post-process))))
+	  (let ((cs buffer-file-coding-system))
+	    (lambda (output)
+	      (with-current-buffer (get-buffer-create buffer)
+	        (erase-buffer)
+	        (setq buffer-file-coding-system cs)
+	        (insert output)
+	        (goto-char (point-min))
+	        (org-export-add-to-stack (current-buffer) backend)
+	        (ignore-errors (funcall post-process)))))
 	`(org-export-as
 	  ',backend ,subtreep ,visible-only ,body-only ',ext-plist))
     (let ((output
@@ -6391,8 +6396,8 @@ or FILE."
 	  (encoding (or org-export-coding-system buffer-file-coding-system)))
       (if async
           (org-export-async-start
-	      `(lambda (file)
-		 (org-export-add-to-stack (expand-file-name file) ',backend))
+	      (lambda (file)
+		(org-export-add-to-stack (expand-file-name file) backend))
 	    `(let ((output
 		    (org-export-as
 		     ',backend ,subtreep ,visible-only ,body-only
@@ -6526,16 +6531,16 @@ within Emacs."
 (defvar org-export-stack-mode-map
   (let ((km (make-sparse-keymap)))
     (set-keymap-parent km tabulated-list-mode-map)
-    (define-key km " " 'next-line)
-    (define-key km "\C-n" 'next-line)
-    (define-key km [down] 'next-line)
-    (define-key km "\C-p" 'previous-line)
-    (define-key km "\C-?" 'previous-line)
-    (define-key km [up] 'previous-line)
-    (define-key km "C" 'org-export-stack-clear)
-    (define-key km "v" 'org-export-stack-view)
-    (define-key km (kbd "RET") 'org-export-stack-view)
-    (define-key km "d" 'org-export-stack-remove)
+    (define-key km " " #'next-line)
+    (define-key km "\C-n" #'next-line)
+    (define-key km [down] #'next-line)
+    (define-key km "\C-p" #'previous-line)
+    (define-key km "\C-?" #'previous-line)
+    (define-key km [up] #'previous-line)
+    (define-key km "C"  #'org-export-stack-clear)
+    (define-key km "v"  #'org-export-stack-view)
+    (define-key km (kbd "RET") #'org-export-stack-view)
+    (define-key km "d" #'org-export-stack-remove)
     km)
   "Keymap for Org Export Stack.")
 
@@ -6752,16 +6757,16 @@ back to standard interface."
 			  (cond ((and (numberp key-a) (numberp key-b))
 				 (< key-a key-b))
 				((numberp key-b) t)))))
-		'car-less-than-car))
+		#'car-less-than-car))
 	 ;; Compute a list of allowed keys based on the first key
 	 ;; pressed, if any.  Some keys
 	 ;; (?^B, ?^V, ?^S, ?^F, ?^A, ?&, ?# and ?q) are always
 	 ;; available.
 	 (allowed-keys
 	  (nconc (list 2 22 19 6 1)
-		 (if (not first-key) (org-uniquify (mapcar 'car entries))
+		 (if (not first-key) (org-uniquify (mapcar #'car entries))
 		   (let (sub-menu)
-		     (dolist (entry entries (sort (mapcar 'car sub-menu) '<))
+		     (dolist (entry entries (sort (mapcar #'car sub-menu) #'<))
 		       (when (eq (car entry) first-key)
 			 (setq sub-menu (append (nth 2 entry) sub-menu))))))
 		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
