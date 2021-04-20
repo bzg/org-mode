@@ -168,6 +168,14 @@ set the properties in the `org-column' face.  For example, set
   "Face for headline with the ARCHIVE tag."
   :group 'org-faces)
 
+(defface org-cite '((t :inherit link))
+  "Face for citations."
+  :group 'org-faces)
+
+(defface org-cite-key '((t :inherit link))
+  "Face for citation keys."
+  :group 'org-faces)
+
 (defface org-link '((t :inherit link))
   "Face for links."
   :group 'org-faces)
