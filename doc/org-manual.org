@@ -11524,7 +11524,7 @@ further alter what is exported, and how.
 
   Toggle visible-only export.  This is useful for exporting only
   certain parts of an Org document by adjusting the visibility of
-  particular headings.
+  particular headings.  See also [[*Sparse Trees]].
 
 ** Export Settings
 :PROPERTIES:
