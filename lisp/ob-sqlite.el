@@ -3,6 +3,7 @@
 ;; Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
+;; Maintainer: Nick Savage
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
