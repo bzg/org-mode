@@ -637,15 +637,16 @@ line directly before or after the table."
     (when (get-buffer "*gnuplot*") ; reset *gnuplot* if it already running
       (with-current-buffer "*gnuplot*"
 	(goto-char (point-max))))
-    (org-plot/goto-nearest-table)
-    ;; Set default options.
-    (dolist (pair org-plot/gnuplot-default-options)
-      (unless (plist-member params (car pair))
-	(setf params (plist-put params (car pair) (cdr pair)))))
-    ;; Collect options.
-    (save-excursion (while (and (equal 0 (forward-line -1))
-				(looking-at "[[:space:]]*#\\+"))
-		      (setf params (org-plot/collect-options params))))
+    (save-excursion
+      (org-plot/goto-nearest-table)
+      ;; Set default options.
+      (dolist (pair org-plot/gnuplot-default-options)
+        (unless (plist-member params (car pair))
+          (setf params (plist-put params (car pair) (cdr pair)))))
+      ;; Collect options.
+      (while (and (equal 0 (forward-line -1))
+                  (looking-at "[[:space:]]*#\\+"))
+        (setf params (org-plot/collect-options params))))
     ;; collect table and table information
     (let* ((data-file (make-temp-file "org-plot"))
 	   (table (let ((tbl (org-table-to-lisp)))
