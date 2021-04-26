@@ -17705,24 +17705,29 @@ This command does many different things, depending on context:
 	 ;; send the table if necessary.  If the table has
 	 ;; a `table.el' type, just give up.  At a table row or cell,
 	 ;; maybe recalculate line but always align table.
-	 (if (eq (org-element-property :type context) 'table.el)
-	     (message "%s" (substitute-command-keys "\\<org-mode-map>\
-Use `\\[org-edit-special]' to edit table.el tables"))
-	   (if (or (eq type 'table)
-		   ;; Check if point is at a TBLFM line.
-		   (and (eq type 'table-row)
-			(= (point) (org-element-property :end context))))
-	       (save-excursion
-		 (if (org-at-TBLFM-p)
-		     (progn (require 'org-table)
-			    (org-table-calc-current-TBLFM))
-		   (goto-char (org-element-property :contents-begin context))
-		   (org-call-with-arg 'org-table-recalculate (or arg t))
-		   (orgtbl-send-table 'maybe)))
-	     (org-table-maybe-eval-formula)
-	     (cond (arg (call-interactively #'org-table-recalculate))
-		   ((org-table-maybe-recalculate-line))
-		   (t (org-table-align))))))
+         (cond
+          ((and (< (point) (org-element-property :post-affiliated context))
+                (org-match-line "[ \t]*#\\+plot:"))
+           (org-plot/gnuplot))
+          ((eq (org-element-property :type context) 'table.el)
+           (message "%s" (substitute-command-keys "\\<org-mode-map>\
+Use `\\[org-edit-special]' to edit table.el tables")))
+          ((or (eq type 'table)
+               ;; Check if point is at a TBLFM line.
+               (and (eq type 'table-row)
+                    (= (point) (org-element-property :end context))))
+           (save-excursion
+             (if (org-at-TBLFM-p)
+                 (progn (require 'org-table)
+                        (org-table-calc-current-TBLFM))
+               (goto-char (org-element-property :contents-begin context))
+               (org-call-with-arg 'org-table-recalculate (or arg t))
+               (orgtbl-send-table 'maybe))))
+          (t
+           (org-table-maybe-eval-formula)
+           (cond (arg (call-interactively #'org-table-recalculate))
+                 ((org-table-maybe-recalculate-line))
+                 (t (org-table-align))))))
 	((or `timestamp (and `planning (guard (org-at-timestamp-p 'lax))))
 	 (org-timestamp-change 0 'day))
 	((and `nil (guard (org-at-heading-p)))
