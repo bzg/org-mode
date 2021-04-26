@@ -616,6 +616,13 @@ manner suitable for prepending to a user-specified script."
 				    ",\\\n    "))))
       script)))
 
+(defun org-plot/redisplay-img-in-buffer (img-file)
+  "Find any overlays for IMG-FILE in the current Org buffer, and refresh them."
+  (dolist (img-overlay org-inline-image-overlays)
+    (when (string= img-file (plist-get (cdr (overlay-get img-overlay 'display)) :file))
+      (when (file-exists-p img-file)
+        (image-refresh (overlay-get img-overlay 'display))))))
+
 ;;-----------------------------------------------------------------------------
 ;; facade functions
 ;;;###autoload
@@ -703,7 +710,10 @@ line directly before or after the table."
 	(gnuplot-mode)
 	(gnuplot-send-buffer-to-gnuplot))
       ;; Cleanup.
-      (bury-buffer (get-buffer "*gnuplot*")))))
+      (bury-buffer (get-buffer "*gnuplot*"))
+      ;; Refresh any displayed images
+      (when (plist-get params :file)
+        (org-plot/redisplay-img-in-buffer (expand-file-name (plist-get params :file)))))))
 
 (provide 'org-plot)
 
