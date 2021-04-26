@@ -190,8 +190,9 @@ and dependent variables."
     row-vals))
 
 (defun org--plot/values-stats (nums &optional hard-min hard-max)
-  "From a list of NUMS return a plist containing some rudamentry statistics on the
-values, namely regarding the range."
+  "Rudimentary statistics about NUMS, useful for guessing axis ticks.
+If HARD-MIN or HARD-MAX are set, they will be used instead of the min/max
+of the NUMS."
   (let* ((minimum (or hard-min (apply #'min nums)))
 	 (maximum (or hard-max (apply #'max nums)))
 	 (range (- maximum minimum))
@@ -207,7 +208,8 @@ values, namely regarding the range."
       :nice-min ,nice-min :nice-max ,nice-max :nice-range ,(- nice-max nice-min))))
 
 (defun org--plot/sensible-tick-num (table &optional hard-min hard-max)
-  "From a the values in a TABLE of data, attempt to guess an appropriate number of ticks."
+  "From a the values in a TABLE of data, guess an appropriate number of ticks.
+If HARD-MIN and HARD-MAX can be used to fix the ends of the axis."
   (let* ((row-data
 	  (mapcar (lambda (row) (org--plot/values-stats
 			    (mapcar #'string-to-number (cdr row))
@@ -227,7 +229,7 @@ values, namely regarding the range."
     (apply #'* (org--plot/nice-frequency-pick weighted-factors))))
 
 (defun org--plot/nice-frequency-pick (frequencies)
-  "From a list of frequences, try to sensibly pick a sample of the most frequent."
+  "From a list of FREQUENCIES, try to sensibly pick a sample of the most frequent."
   ;; TODO this mosly works decently, but counld do with some tweaking to work more consistently.
   (cl-case (length frequencies)
     (1 (list (car (nth 0 frequencies))))
@@ -259,8 +261,9 @@ values, namely regarding the range."
        f-pick))))
 
 (defun org--plot/merge-alists (function default alist1 alist2 &rest alists)
-  "Using FUNCTION, combine the elements of all given ALISTS. When an element is
-only present in one alist, DEFAULT is used as the second argument for the FUNCTION."
+  "Using FUNCTION, combine the elements of ALIST1, ALIST2 and any other ALISTS.
+When an element is only present in one alist, DEFAULT is used as the second
+argument for the FUNCTION."
   (when (> (length alists) 0)
     (setq alist2 (apply #'org--plot/merge-alists function default alist2 alists)))
   (cl-flet ((keys (alist) (mapcar #'car alist))
@@ -270,13 +273,14 @@ only present in one alist, DEFAULT is used as the second argument for the FUNCTI
 	     (cons k (funcall function (lookup k alist1) (lookup k alist2))))))
 
 (defun org--plot/item-frequencies (values &optional normalise)
-  "Return an alist indicating the frequency of values in VALUES list."
+  "Return an alist indicating the frequency of values in VALUES list.
+When NORMALISE is non-nil, the count is divided by the number of values."
   (let ((normaliser (if normalise (float (length values)) 1)))
     (cl-loop for (n . m) in (seq-group-by #'identity values)
 	     collect (cons n (/ (length m) normaliser)))))
 
 (defun org--plot/prime-factors (value)
-  "Return the prime decomposition of VALUE, e.g. for 12, '(3 2 2)"
+  "Return the prime decomposition of VALUE, e.g. for 12, '(3 2 2)."
   (let ((factors '(1)) (i 1))
     (while (/= 1 value)
       (setq i (1+ i))
@@ -288,10 +292,11 @@ only present in one alist, DEFAULT is used as the second argument for the FUNCTI
     (cl-subseq factors 0 -1)))
 
 (defcustom org-plot/gnuplot-script-preamble ""
-  "String or function which provides content to be inserted into the GNUPlot
-script before the plot command. Not that this is in addition to, not instead of
-other content generated in `org-plot/gnuplot-script'.
-If a function, it is called with the plot type as the argument."
+  "String of function to be inserted before the gnuplot plot command is run.
+
+Note that this is in addition to, not instead of other content generated in
+`org-plot/gnuplot-script'.  If a function, it is called with the plot type as
+the argument, and must return a string to be used."
   :group 'org-plot
   :type '(choice string function))
 
@@ -351,7 +356,7 @@ If a function, it is called with the plot type as the argument."
   "List of plists describing the avalible plot types.
 The car is the type name, and the property :plot-func must be
 set.  The value of :plot-func is a lambda which yields plot-lines
-(a list of strings) as the cdr.
+\(a list of strings) as the cdr.
 
 All lambda functions have the parameters of
 `org-plot/gnuplot-script' and PLOT-STR passed to them.  i.e. they
@@ -480,6 +485,7 @@ EOD
 ")
 
 (defun org--plot/radar (table params)
+  "Create gnuplot code for a radar plot of TABLE with PARAMS."
   (let* ((data
 	  (concat "\"" (mapconcat #'identity (plist-get params :labels) "\" \"") "\""
 		  "\n"
@@ -531,14 +537,14 @@ If a function, it is called with the plot type as the argument."
   :type '(choice string function))
 
 (defun org-plot/gnuplot-script (table data-file num-cols params &optional preface)
-  "Write a gnuplot script to DATA-FILE respecting the options set in PARAMS.
+  "Write a gnuplot script for TABLE to DATA-FILE respecting options in PARAMS.
 NUM-COLS controls the number of columns plotted in a 2-d plot.
 Optional argument PREFACE returns only option parameters in a
 manner suitable for prepending to a user-specified script."
   (let* ((type-name (plist-get params :plot-type))
 	 (type (cdr (assoc type-name org-plot/preset-plot-types))))
     (unless type
-      (user-error "Org-plot type `%s' is undefined." type-name))
+      (user-error "Org-plot type `%s' is undefined" type-name))
     (let* ((sets (plist-get params :set))
 	   (lines (plist-get params :line))
 	   (title (plist-get params :title))
@@ -653,7 +659,7 @@ line directly before or after the table."
 			org-plot/preset-plot-types)))
 
       (unless type
-	(user-error "Org-plot type `%s' is undefined." (plist-get params :plot-type)))
+	(user-error "Org-plot type `%s' is undefined" (plist-get params :plot-type)))
 
       (run-with-idle-timer 0.1 nil #'delete-file data-file)
       (when (eq (cadr table) 'hline)
