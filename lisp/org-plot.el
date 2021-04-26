@@ -708,7 +708,8 @@ line directly before or after the table."
 	  (insert (org-plot/gnuplot-script table data-file num-cols params)))
 	;; Graph table.
 	(gnuplot-mode)
-	(gnuplot-send-buffer-to-gnuplot))
+        (ignore-error buffer-read-only
+          (gnuplot-send-buffer-to-gnuplot)))
       ;; Cleanup.
       (bury-buffer (get-buffer "*gnuplot*"))
       ;; Refresh any displayed images
