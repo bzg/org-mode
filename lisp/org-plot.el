@@ -570,7 +570,7 @@ manner suitable for prepending to a user-specified script."
 			       org-plot/gnuplot-term-extra
 			     (funcall org-plot/gnuplot-term-extra type))))
       (when file ; output file
-	(funcall ats (format "set output '%s'" file)))
+	(funcall ats (format "set output '%s'" (expand-file-name file))))
 
       (when plot-pre
 	(funcall ats (funcall plot-pre table data-file num-cols params plot-str)))
