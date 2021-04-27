@@ -2221,7 +2221,7 @@ compatible with XHTML 1.0 strict standard.
 - {{{kbd(C-c C-e h h)}}} ::
 
   Export as HTML file with a =.html= extension.  For =myfile.org=, Org
-  exports to =myfile.html=, overwriting without warning.  {{{kbd{C-c
+  exports to =myfile.html=, overwriting without warning.  {{{kbd(C-c
   C-e h o)}}} exports to HTML and opens it in a web browser.
 
 The HTML export back-end transforms =<= and =>= to =&lt;= and =&gt;=.

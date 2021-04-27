@@ -12599,7 +12599,7 @@ compatible with XHTML 1.0 strict standard.
   #+findex: org-html-export-to-html
 
   Export as HTML file with a =.html= extension.  For =myfile.org=, Org
-  exports to =myfile.html=, overwriting without warning.  {{{kbd{C-c
+  exports to =myfile.html=, overwriting without warning.  {{{kbd(C-c
   C-e h o)}}} exports to HTML and opens it in a web browser.
 
 - {{{kbd(C-c C-e h H)}}} (~org-html-export-as-html~) ::
