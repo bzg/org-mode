@@ -344,7 +344,7 @@ conventions:
 
 - =boss=, =ARCHIVE= ::
 
-  Tags are case-sensitive.  User-defined tags are written in
+  Tags are case-sensitive.  User-defined tags are usually written in
   lowercase; built-in tags with special meaning are written as they
   should appear in the document, usually with all capitals.
 
