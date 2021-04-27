@@ -6424,7 +6424,10 @@ Return file name as a string."
 			 (throw :found
 				(org-element-property :value element))))))))
 	     ;; Extract from buffer's associated file, if any.
-	     (and visited-file (file-name-nondirectory visited-file))
+	     (and visited-file
+                  (file-name-nondirectory
+                   ;; For a .gpg visited file, remove the .gpg extension:
+                   (replace-regexp-in-string "\\.gpg\\'" "" visited-file)))
 	     ;; Can't determine file name on our own: ask user.
 	     (read-file-name
 	      "Output file: " pub-dir nil nil nil
