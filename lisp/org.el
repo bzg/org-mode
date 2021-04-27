@@ -17528,7 +17528,7 @@ When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an export block, call `org-edit-export-block'.
 When in a LaTeX environment, call `org-edit-latex-environment'.
-When at an #+INCLUDE keyword, visit the included file.
+When at an INCLUDE, SETUPFILE or BIBLIOGRAPHY keyword, visit the included file.
 When at a footnote reference, call `org-edit-footnote-reference'.
 When at a planning line call, `org-deadline' and/or `org-schedule'.
 When at an active timestamp, call `org-time-stamp'.
@@ -17554,7 +17554,7 @@ Otherwise, return a user error."
 		       session params))))))
       (`keyword
        (unless (member (org-element-property :key element)
-		       '("INCLUDE" "SETUPFILE"))
+		       '("BIBLIOGRAPHY" "INCLUDE" "SETUPFILE"))
 	 (user-error "No special environment to edit here"))
        (let ((value (org-element-property :value element)))
 	 (unless (org-string-nw-p value) (user-error "No file to edit"))
