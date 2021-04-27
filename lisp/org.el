@@ -7393,7 +7393,9 @@ Assume point is at a heading or an inlinetask beginning."
 	   (col (+ (current-indentation) diff)))
        (when (wholenump col)
 	 (while (< (point) end-marker)
-	   (indent-line-to col)
+           (if (natnump diff)
+	       (insert (make-string diff 32))
+             (delete-char (abs diff)))
 	   (forward-line)))))
    (catch 'no-shift
      (when (or (zerop diff) (not (eq org-adapt-indentation t)))
