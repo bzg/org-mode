@@ -1330,6 +1330,7 @@ PATH is a symbol name, as a string."
     (name (user-error "Unknown function or variable: %s" name))))
 
 (defun org-link--store-help ()
+  "Store \"help\" type link."
   (when (eq major-mode 'help-mode)
     (let ((symbol
            (replace-regexp-in-string
