@@ -237,6 +237,10 @@ Storing links to files using ~org-store-link~ (=<C-c l>=) when
 description of the link, if available.  If no title exists it falls
 back to the filename as before.
 
+*** Change in =org-tags-expand= signature
+
+The function does not allow for a third optional parameter anymore.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix

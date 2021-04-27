@@ -11763,7 +11763,7 @@ an accumulator used in recursive calls."
 		(org--tags-expand-group (cdr group) tag-groups expanded))))))
   expanded)
 
-(defun org-tags-expand (match &optional single-as-list downcased)
+(defun org-tags-expand (match &optional single-as-list)
   "Expand group tags in MATCH.
 
 This replaces every group tag in MATCH with a regexp tag search.
@@ -11790,9 +11790,7 @@ will be replaced like this:
 
 When the optional argument SINGLE-AS-LIST is non-nil, MATCH is
 assumed to be a single group tag, and the function will return
-the list of tags in this group.
-
-The DOWNCASED argument is obsolete and has no effect."
+the list of tags in this group."
   (unless (org-string-nw-p match) (error "Invalid match tag: %S" match))
   (let ((tag-groups
          (or org-tag-groups-alist-for-agenda org-tag-groups-alist)))
