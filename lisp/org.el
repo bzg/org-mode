@@ -18843,7 +18843,16 @@ ELEMENT."
 	  (current-indentation))))
       ((and
 	(eq org-adapt-indentation 'headline-data)
-	(memq type '(planning clock node-property property-drawer drawer)))
+        (or (memq type '(planning clock node-property property-drawer drawer))
+            ;; FIXME: when storing a note in a LOGBOOK drawer,
+            ;; `org-store-log-note' needs to insert a new line before
+            ;; the newly inserted note, thus the `type' at point will
+            ;; return `paragraph' instead of the expected `drawer', so
+            ;; we need to manually detect the drawer.
+            (and (looking-at-p "^$")
+                 (save-excursion
+                   (backward-char)
+                   (looking-back org-drawer-regexp (point-at-bol))))))
        (org--get-expected-indentation
 	(org-element-property :parent element) t))
       ((memq type '(headline inlinetask nil))
