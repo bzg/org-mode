@@ -3984,7 +3984,7 @@ agenda display, configure `org-agenda-finalize-hook'."
 		  (put-text-property (point-at-bol) (point-at-eol)
 				     'tags
 				     (org-with-point-at mrk
-				       (mapcar #'downcase (org-get-tags)))))))))
+				       (org-get-tags))))))))
 	(setq org-agenda-represented-tags nil
 	      org-agenda-represented-categories nil)
 	(when org-agenda-top-headline-filter
@@ -6813,8 +6813,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	(remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
 	(org-add-props rtn nil
 	  'org-category category
-	  'tags (mapcar #'org-downcase-keep-props tags)
-	  'org-priority-highest org-priority-highest
+          'tags tags
+          'org-priority-highest org-priority-highest
 	  'org-priority-lowest org-priority-lowest
 	  'time-of-day time-of-day
 	  'duration duration
@@ -6857,12 +6857,6 @@ The modified list may contain inherited tags, and tags matched by
 			   tags ":")
 			  (if have-i "::" ":"))))))
   txt)
-
-(defun org-downcase-keep-props (s)
-  (let ((props (text-properties-at 0 s)))
-    (setq s (downcase s))
-    (add-text-properties 0 (length s) props s)
-    s))
 
 (defvar org-agenda-sorting-strategy) ;; because the def is in a let form
 
@@ -8161,7 +8155,7 @@ If the line does not have an effort defined, return nil."
 When NO-OPERATOR is non-nil, do not add the + operator to
 returned tags."
   (if org-group-tags
-      (let ((case-fold-search t) rtn)
+      (let (case-fold-search rtn)
 	(mapc
 	 (lambda (f)
 	   (let (f0 dir)
@@ -8169,7 +8163,7 @@ returned tags."
 		 (setq dir (match-string 1 f) f0 (match-string 2 f))
 	       (setq dir (if no-operator "" "+") f0 f))
 	     (setq rtn (append (mapcar (lambda(f1) (concat dir f1))
-				       (org-tags-expand f0 t t))
+				       (org-tags-expand f0 t))
 			       rtn))))
 	 filter)
 	(reverse rtn))
