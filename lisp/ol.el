@@ -1339,7 +1339,9 @@ PATH is a symbol name, as a string."
              ;; function instead.
              (search-forward "runs the command " (line-end-position) t)
              (read (current-buffer)))))
-      (org-link-store-props :type "help" :link (format "help:%s" symbol)))))
+      (org-link-store-props :type "help"
+                            :link (format "help:%s" symbol)
+                            :description nil))))
 
 (org-link-set-parameters "help"
                          :follow #'org-link--open-help
@@ -1501,8 +1503,11 @@ non-nil."
 			       results-alist)))
 		  t))))
 	(setq link (plist-get org-store-link-plist :link))
-	(setq desc (or (plist-get org-store-link-plist :description)
-		       link)))
+        ;; If store function actually set `:description' property, use
+        ;; it, even if it is nil.  Otherwise, fallback to link value.
+	(setq desc (if (plist-member org-store-link-plist :description)
+                       (plist-get org-store-link-plist :description)
+		     link)))
 
        ;; Store a link from a remote editing buffer.
        ((org-src-edit-buffer-p)
