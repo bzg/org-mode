@@ -6406,12 +6406,7 @@ When optional argument PUB-DIR is set, use it as the publishing
 directory.
 
 Return file name as a string."
-  (let* ((visited-file
-          ;; If a buffer is visiting a .gpg file, remove the .gpg
-          ;; extension from the name of the exported file.
-          (replace-regexp-in-string
-           "\\.gpg\\'" ""
-           (buffer-file-name (buffer-base-buffer))))
+  (let* ((visited-file (buffer-file-name (buffer-base-buffer)))
 	 (base-name
 	  (concat
 	   (file-name-sans-extension
