@@ -109,6 +109,10 @@ By default ox-html now inlines webp images.
 
 This is the CSS class name to use for the top level content wrapper.
 
+*** Some faces now use fixed-pitch
+
+See https://orgmode.org/list/875z8njaol.fsf@protesilaos.com.
+
 ** New features
 *** =ob-python= improvements to =:return= header argument 
 
