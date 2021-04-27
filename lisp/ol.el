@@ -1333,16 +1333,10 @@ PATH is a symbol name, as a string."
   "Store \"help\" type link."
   (when (eq major-mode 'help-mode)
     (let ((symbol
-           (replace-regexp-in-string
-	    ;; Help mode escapes backquotes and backslashes before
-	    ;; displaying them.  E.g., "`" appears as "\'" for
-	    ;; reasons.  Work around this.
-	    (rx "\\" (group (or "`" "\\"))) "\\1"
-	    (save-excursion
-	      (goto-char (point-min))
-              (re-search-forward "\\S_" (line-end-position) t)
-	      (buffer-substring (point-min) (point))))))
-      (org-link-store-props :type "help" :link (concat "help:" symbol)))))
+           (save-excursion
+	     (goto-char (point-min))
+             (read (current-buffer)))))
+      (org-link-store-props :type "help" :link (format "help:%s" symbol)))))
 
 (org-link-set-parameters "help"
                          :follow #'org-link--open-help
