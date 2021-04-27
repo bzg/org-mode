@@ -56,7 +56,7 @@
 			"#" Info-current-node)))
       (org-link-store-props :type "info" :file Info-current-file
 			    :node Info-current-node
-			    :link link :desc desc)
+			    :link link :description desc)
       link)))
 
 (defun org-info-open (path _)
