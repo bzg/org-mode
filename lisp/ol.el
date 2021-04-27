@@ -1335,6 +1335,9 @@ PATH is a symbol name, as a string."
     (let ((symbol
            (save-excursion
 	     (goto-char (point-min))
+             ;; In case the help is about the key-binding, store the
+             ;; function instead.
+             (search-forward "runs the command " (line-end-position) t)
              (read (current-buffer)))))
       (org-link-store-props :type "help" :link (format "help:%s" symbol)))))
 
