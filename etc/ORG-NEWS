@@ -11,6 +11,25 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.5 (not yet released)
+
+** Important announcements
+
+*** Org ELPA and Org archives won't be available for Org > 9.5
+
+[[https://orgmode.org/elpa.html][Org ELPA]] is still available for installing Org 9.5, either with or
+without contributed packages, but future versions won't be available
+via Org ELPA, as we are deprecating this installation method.
+
+Also, Org 9.5 is available as =tar.gz= and =zip= archives, but this
+installation method is also deprecated.
+
+If you want to install the latest stable versions of Org, please use
+the GNU ELPA package.  If you want to install the contributed files,
+please use the NonGNU ELPA package.  If you want to keep up with the
+latest unstable Org, please install from the Git repository.
+
+See https://orgmode.org/org.html#Installation for the details.
+
 ** New options and settings
 *** Option ~org-hidden-keywords~ now also applies to #+SUBTITLE:
 

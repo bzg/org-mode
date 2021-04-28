@@ -82,11 +82,8 @@ probably do not need to install it.  Most users will simply activate
 Org and begin exploring its many features.
 
 If, for one reason or another, you want to install Org on top of this
-pre-packaged version, there are three ways to do it:
-
-- by using the Emacs package system;
-- by downloading Org as an archive; or
-- by using Org's git repository.
+pre-packaged version, you can use the Emacs package system or clone
+Org's git repository.
 
 We *strongly recommend* sticking to a single installation method.
 
@@ -105,32 +102,6 @@ You need to do this in a session where no =.org= file has been
 visited, i.e., where no Org built-in function have been loaded.
 Otherwise autoload Org functions will mess up the installation.
 #+end_quote
-
-If you want to use Org's package repository, check out the [[https://orgmode.org/elpa.html][Org ELPA
-page]].
-
-*** Downloading Org as an archive
-:PROPERTIES:
-:UNNUMBERED: notoc
-:END:
-
-You can download Org latest release from [[https://orgmode.org/][Org's website]].  In this case,
-make sure you set the load path correctly in your Emacs init file:
-
-#+begin_src emacs-lisp
-(add-to-list 'load-path "~/path/to/orgdir/lisp")
-#+end_src
-
-The downloaded archive contains contributed libraries that are not
-included in Emacs.  If you want to use them, add the =contrib/=
-directory to your load path:
-
-#+begin_src emacs-lisp
-(add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
-#+end_src
-
-Optionally, you can compile the files and/or install them in your
-system.  Run =make help= to list compilation and installation options.
 
 *** Using Org's git repository
 :PROPERTIES:
