@@ -259,6 +259,7 @@ property on the headline itself.")
 
 (defconst org-html-style-default
   "<style type=\"text/css\">
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
