@@ -464,7 +464,7 @@ This function detects an URL, title and optional text, separated
 by `/'.  The location for a browser's bookmark looks like this:
 
   javascript:location.href = \\='org-protocol://capture?url=\\='+ \\
-        encodeURIComponent(location.href) + \\='&title=\\=' \\
+        encodeURIComponent(location.href) + \\='&title=\\=' + \\
         encodeURIComponent(document.title) + \\='&body=\\=' + \\
         encodeURIComponent(window.getSelection())
 
