@@ -8081,12 +8081,11 @@ Optional argument WITH-CASE means sort case-sensitively."
   "Remove invisible part of links and emphasis markers from string S."
   (remove-text-properties 0 (length s) org-rm-props s)
   (replace-regexp-in-string
-   org-verbatim-re (lambda (m) (format "%s" (match-string 4 m)))
+   org-verbatim-re (lambda (m) (format "%s " (match-string 4 m)))
    (replace-regexp-in-string
-    org-emph-re (lambda (m) (format "%s" (match-string 4 m)))
+    org-emph-re (lambda (m) (format " %s " (match-string 4 m)))
     (org-link-display-format s)
-    t t)
-   t t))
+    t t) t t))
 
 (defvar org-after-sorting-entries-or-items-hook nil
   "Hook that is run after a bunch of entries or items have been sorted.
