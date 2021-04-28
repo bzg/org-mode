@@ -109,6 +109,11 @@ By default ox-html now inlines webp images.
 
 This is the CSS class name to use for the top level content wrapper.
 
+*** You can now configure ~org-html-scripts~ and ~org-html-style-default~
+
+~org-html-scripts~ and ~org-html-style-default~ used to be constants,
+you can now configure them.
+
 *** Some faces now use fixed-pitch
 
 See https://orgmode.org/list/875z8njaol.fsf@protesilaos.com.
