@@ -235,7 +235,6 @@ property on the headline itself.")
 (defconst org-html-scripts
   "<script type=\"text/javascript\">
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
      function CodeHighlightOn(elem, id)
      {
        var target = document.getElementById(id);
@@ -254,14 +253,12 @@ property on the headline itself.")
        if(elem.cacheClassTarget)
          target.className = elem.cacheClassTarget;
      }
-    /*]]>*///-->
 // @license-end
 </script>"
   "Basic JavaScript that is needed by HTML files produced by Org mode.")
 
 (defconst org-html-style-default
   "<style type=\"text/css\">
- <!--/*--><![CDATA[/*><!--*/
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -442,7 +439,6 @@ property on the headline itself.")
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { width: 90%; }
-  /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
 You can use `org-html-head' and `org-html-head-extra' to add to
@@ -518,10 +514,8 @@ means to use the maximum value consistent with other options."
 
 <script type=\"text/javascript\">
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
-<!--/*--><![CDATA[/*><!--*/
 %MANAGER_OPTIONS
 org_html_manager.setup();  // activate after the parameters are set
-/*]]>*///-->
 // @license-end
 </script>"
   "The template for the export style additions when org-info.js is used.
@@ -1474,13 +1468,11 @@ done, timestamp, timestamp-kwd, tag, target.
 For example, a valid value would be:
 
    <style type=\"text/css\">
-    /*<![CDATA[*/
       p { font-weight: normal; color: gray; }
       h1 { color: black; }
       .title { text-align: center; }
       .todo, .timestamp-kwd { color: red; }
       .done { color: green; }
-    /*]]>*/
    </style>
 
 If you want to refer to an external style, use something like
