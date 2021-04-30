@@ -233,7 +233,7 @@ property on the headline itself.")
   "Regular expressions for special string conversion.")
 
 (defcustom org-html-scripts
-  "<script type=\"text/javascript\">
+  "<script>
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
      function CodeHighlightOn(elem, id)
      {
@@ -515,12 +515,12 @@ means to use the maximum value consistent with other options."
 	   org-html-infojs-opts-table)))
 
 (defcustom org-html-infojs-template
-  "<script type=\"text/javascript\" src=\"%SCRIPT_PATH\">
+  "<script src=\"%SCRIPT_PATH\">
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 // @license-end
 </script>
 
-<script type=\"text/javascript\">
+<script>
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
 %MANAGER_OPTIONS
 org_html_manager.setup();  // activate after the parameters are set
@@ -1263,8 +1263,7 @@ For further information about MathJax options, see the MathJax documentation:
              }
 });
 </script>
-<script type=\"text/javascript\"
-        src=\"%PATH\"></script>"
+<script src=\"%PATH\"></script>"
   "The MathJax template.  See also `org-html-mathjax-options'."
   :group 'org-export-html
   :type 'string)
