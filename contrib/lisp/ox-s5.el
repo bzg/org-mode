@@ -255,7 +255,7 @@ INFO is a plist used as a communication channel."
       "<!-- S5 JS -->"
       (concat
        "<script src='" dir
-       "/default/slides.js' type='text/javascript'></script>")) "\n")))
+       "/default/slides.js'></script>")) "\n")))
 
 (defun org-s5--build-meta-info (info)
   (concat

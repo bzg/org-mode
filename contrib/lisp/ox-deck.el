@@ -425,10 +425,10 @@ holding export options."
       (mapconcat
        (lambda (script)
          (format
-          "<script src='%s' type='text/javascript'></script>" script))
+          "<script src='%s'></script>" script))
        (plist-get pkg-info :scripts) "\n")
       (org-html--build-mathjax-config info)
-      "<script type='text/javascript'>"
+      "<script>"
       "  $(document).ready(function () { $.deck('.slide'); });"
       "</script>"
       (org-html--build-head info)
