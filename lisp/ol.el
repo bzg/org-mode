@@ -1325,8 +1325,8 @@ PATH is the sexp to evaluate, as a string."
   "Open a \"help\" type link.
 PATH is a symbol name, as a string."
   (pcase (intern path)
-    ((and (pred fboundp) variable) (describe-function variable))
-    ((and (pred boundp) function) (describe-variable function))
+    ((and (pred fboundp) function) (describe-function function))
+    ((and (pred boundp) variable) (describe-variable variable))
     (name (user-error "Unknown function or variable: %s" name))))
 
 (defun org-link--store-help ()
