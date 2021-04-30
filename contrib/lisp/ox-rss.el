@@ -245,7 +245,7 @@ communication channel."
 			(or (org-element-property :CATEGORY headline) "") info))
 	     (pubdate0 (org-element-property :PUBDATE headline))
 	     (pubdate (let ((system-time-locale "C"))
-			(if pubdate0
+			(if (and pubdate0 (not (string-empty-p pubdate0)))
 			    (format-time-string
 			     "%a, %d %b %Y %H:%M:%S %z"
 			     (org-time-string-to-time pubdate0)))))
@@ -270,7 +270,7 @@ communication channel."
 			  (org-element-property :CUSTOM_ID headline)
 			  publink)
 		      info))))
-	(if (not pubdate0) "" ;; Skip entries with no PUBDATE prop
+	(if (not pubdate) "" ;; Skip entries with no PUBDATE prop
 	  (format
 	   (concat
 	    "<item>\n"
