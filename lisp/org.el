@@ -6167,8 +6167,9 @@ Return nil before first heading."
       (let ((case-fold-search nil))
 	(looking-at org-complex-heading-regexp)
         ;; When using `org-fold-core--optimise-for-huge-buffers',
-        ;; returned text may be invisible.  Clear it up.
-        (org-fold-core-remove-optimisation (match-beginning 0) (match-end 0))
+        ;; returned text will be invisible.  Clear it up.
+        (save-match-data
+          (org-fold-core-remove-optimisation (match-beginning 0) (match-end 0)))
         (let ((todo (and (not no-todo) (match-string 2)))
 	      (priority (and (not no-priority) (match-string 3)))
 	      (headline (pcase (match-string 4)
