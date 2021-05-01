@@ -239,19 +239,16 @@ property on the headline itself.")
      {
        var target = document.getElementById(id);
        if(null != target) {
-         elem.cacheClassElem = elem.className;
-         elem.cacheClassTarget = target.className;
-         target.className = \"code-highlighted\";
-         elem.className   = \"code-highlighted\";
+         elem.classList.add(\"code-highlighted\");
+         target.classList.add(\"code-highlighted\");
        }
      }
      function CodeHighlightOff(elem, id)
      {
        var target = document.getElementById(id);
-       if(elem.cacheClassElem)
-         elem.className = elem.cacheClassElem;
-       if(elem.cacheClassTarget)
-         target.className = elem.cacheClassTarget;
+       if(null != target) {
+         elem.classList.remove(\"code-highlighted\");
+         target.classList.remove(\"code-highlighted\");
      }
     /*]]>*///-->
 // @license-end
