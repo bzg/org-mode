@@ -219,6 +219,12 @@ Example:
 A new =u= mode flag for Calc formulas in Org tables has been added to
 enable Calc units simplification mode.
 
+*** Add a new :refile-targets template option
+
+When exiting capture mode via ~org-capture-refile~, the variable
+~org-refile-targets~ will be temporarily bound to the value of this
+template option.
+
 *** Export DOI links
 Org now supports export for DOI links, through its new =ol-doi.el=
 library.  For backward compatibility, it is loaded by default.
