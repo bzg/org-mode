@@ -17695,17 +17695,19 @@ This command does many different things, depending on context:
 	(`statistics-cookie
 	 (call-interactively #'org-update-statistics-cookies))
 	((or `table `table-cell `table-row)
-	 ;; At a table, recalculate every field and align it.  Also
-	 ;; send the table if necessary.  If the table has
-	 ;; a `table.el' type, just give up.  At a table row or cell,
-	 ;; maybe recalculate line but always align table.
+	 ;; At a table, generate a plot if on the #+plot line,
+         ;; recalculate every field and align it otherwise.  Also
+	 ;; send the table if necessary.
          (cond
-          ((and (< (point) (org-element-property :post-affiliated context))
-                (org-match-line "[ \t]*#\\+plot:"))
+          ((and (org-match-line "[ \t]*#\\+plot:")
+                (< (point) (org-element-property :post-affiliated context)))
            (org-plot/gnuplot))
+          ;; If the table has a `table.el' type, just give up.
           ((eq (org-element-property :type context) 'table.el)
            (message "%s" (substitute-command-keys "\\<org-mode-map>\
 Use `\\[org-edit-special]' to edit table.el tables")))
+          ;; At a table row or cell, maybe recalculate line but always
+	  ;; align table.
           ((or (eq type 'table)
                ;; Check if point is at a TBLFM line.
                (and (eq type 'table-row)
