@@ -288,6 +288,10 @@ back to the filename as before.
 *** Change in =org-tags-expand= signature
 
 The function does not allow for a third optional parameter anymore.
+*** LaTeX environment =#+results= are now removed
+
+If a babel src block produces a raw LaTeX environment, it will now be
+recognised as a result, and so replaced when re-evaluated.
 
 * Version 9.4
 ** Incompatible changes
