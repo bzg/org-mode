@@ -9798,7 +9798,12 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 				  (line-end-position)
 				  '(display nil))
 	  (org-move-to-column
-	   (- (/ (window-width nil t) (window-font-width)) (length stamp)) t)
+           (- (if (fboundp 'window-font-width)
+                  (/ (window-width nil t) (window-font-width))
+                ;; Fall back to pre-9.3.3 behavior on Emacs <25.
+                (window-width))
+              (length stamp))
+           t)
           (add-text-properties
 	   (1- (point)) (point-at-eol)
 	   (list 'display (org-add-props stamp nil

@@ -481,11 +481,11 @@ specifying a variable with the name of the table."
   (let ((table (car head))
         (headers (cdr head))
         (typename (pcase type
-                    ('integerp "int")
-                    ('floatp "double")
-                    ('stringp (pcase org-babel-c-variant
-                                ((or 'c 'cpp) "const char*")
-                                ('d "string"))))))
+                    (`integerp "int")
+                    (`floatp "double")
+                    (`stringp (pcase org-babel-c-variant
+                                ((or `c `cpp) "const char*")
+                                (`d "string"))))))
     (concat
       (pcase org-babel-c-variant
 	((or `c `cpp)
