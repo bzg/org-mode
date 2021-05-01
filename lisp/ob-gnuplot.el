@@ -101,7 +101,7 @@ code."
 				org-babel-temporary-directory
 				"/gnuplot/"
 				(file-remote-p val 'host)
-				(file-local-name val))))
+				(org-babel-local-file-name val))))
 		  (if (and (file-exists-p local-name) ;; only download file if remote is newer
 			   (file-newer-than-file-p local-name val))
 		      local-name
