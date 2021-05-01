@@ -11731,7 +11731,7 @@ an accumulator used in recursive calls."
 		(org--tags-expand-group (cdr group) tag-groups expanded))))))
   expanded)
 
-(defun org-tags-expand (match &optional single-as-list downcased)
+(defun org-tags-expand (match &optional single-as-list _downcased)
   "Expand group tags in MATCH.
 
 This replaces every group tag in MATCH with a regexp tag search.
