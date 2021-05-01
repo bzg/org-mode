@@ -929,7 +929,8 @@ lines.  It can have the following values:
 - regexp  When a regular expression, use it to match the separator."
   (interactive "f\nP")
   (when (and (called-interactively-p 'any)
-	     (not (string-match-p (rx "." (or "txt" "tsv" "csv") eos) file)))
+	     (not (string-match-p (rx "." (or "txt" "tsv" "csv") eos) file))
+             (not (yes-or-no-p "The file's extension is not .txt, .tsv or .csv.  Import? ")))
     (user-error "Cannot import such file"))
   (unless (bolp) (insert "\n"))
   (let ((beg (point))
