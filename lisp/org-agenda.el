@@ -7848,8 +7848,8 @@ the variable `org-agenda-auto-exclude-function'."
 	  (setq s (replace-regexp-in-string ; Remove the temporary special string.
 		   "~~~" "-" (match-string 3 f-string)))
 	  (cond
-	   ((member (downcase s) tag-list)
-	    (org-pushnew-to-end (concat pm (downcase s)) ft))
+	   ((member s tag-list)
+	    (org-pushnew-to-end (concat pm s) ft))
 	   ((member s category-list)
 	    (org-pushnew-to-end (concat pm ; Remove temporary double quotes.
 				        (replace-regexp-in-string "\"\\(.*\\)\"" "\\1" s))
@@ -8049,8 +8049,8 @@ These will be lower-case, for filtering."
 	  (dolist (tag tags-lists)
 	    (mapc
 	     (lambda (group)
-	       (when (member tag (mapcar #'downcase group))
-		 (push (downcase (car group)) tags-lists)))
+	       (when (member tag group)
+		 (push (car group) tags-lists)))
 	     org-tag-groups-alist-for-agenda))
 	  (setq org-agenda-represented-tags tags-lists)))))
 
@@ -8124,7 +8124,7 @@ function to set the right switches in the returned form."
 		 ((and (string-match-p "\\`{" tag) (string-match-p "}\\'" tag))
 		  ;; TAG is a regexp.
 		  (list 'org-match-any-p (substring tag 1 -1) 'tags))
-		 (t (list 'member (downcase tag) 'tags)))))
+		 (t (list 'member tag 'tags)))))
 	(push (if (eq op ?-) (list 'not f) f) form)))))
 
 (defun org-agenda-filter-effort-form (e)
