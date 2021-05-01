@@ -148,6 +148,10 @@ you can now configure them.
 See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 
 ** New features
+*** Support fontification of inline export snippets
+
+See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
+
 *** =ob-python= improvements to =:return= header argument 
 
 The =:return= header argument in =ob-python= now works for session
