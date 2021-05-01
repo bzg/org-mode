@@ -128,6 +128,11 @@ By default ox-html now inlines webp images.
 
 This is the CSS class name to use for the top level content wrapper.
 
+*** New option ~org-babel-plantuml-svg-text-to-path~
+
+This option, nil by default, allows to add a SVG-specific post-export
+step that runs inkscape text-to-path replacement over the output file.
+
 *** You can now configure ~org-html-scripts~ and ~org-html-style-default~
 
 ~org-html-scripts~ and ~org-html-style-default~ used to be constants,
