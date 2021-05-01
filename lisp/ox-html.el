@@ -3038,7 +3038,8 @@ images, set it to:
 		     (`paragraph element)
 		     (`link (org-export-get-parent element)))))
     (and (eq (org-element-type paragraph) 'paragraph)
-	 (or (not (fboundp 'org-html-standalone-image-predicate))
+	 (or (not (and (boundp 'org-html-standalone-image-predicate)
+                       (fboundp org-html-standalone-image-predicate)))
 	     (funcall org-html-standalone-image-predicate paragraph))
 	 (catch 'exit
 	   (let ((link-count 0))
