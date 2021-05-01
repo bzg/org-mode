@@ -246,6 +246,10 @@ properties are:
 
  :jump-to-captured   When set, jump to the captured entry when finished.
 
+ :refile-targets     When exiting capture mode via `org-capture-refile', the
+                     variable `org-refile-targets' will be temporarily bound
+                     to the value of this property.
+
  :empty-lines        Set this to the number of lines that should be inserted
                      before and after the new item.  Default 0, only common
                      other value is 1.
@@ -885,7 +889,8 @@ for `entry'-type templates"))
 	 (pos (make-marker))
 	 (org-capture-is-refiling t)
 	 (kill-buffer (org-capture-get :kill-buffer 'local))
-	 (jump-to-captured (org-capture-get :jump-to-captured 'local)))
+	 (jump-to-captured (org-capture-get :jump-to-captured 'local))
+	 (refile-targets (org-capture-get :refile-targets 'local)))
     ;; Since `org-capture-finalize' may alter buffer contents (e.g.,
     ;; empty lines) around entry, use a marker to refer to the
     ;; headline to be refiled.  Place the marker in the base buffer,
@@ -895,11 +900,12 @@ for `entry'-type templates"))
     ;; early.  We want to wait for the refiling to be over, so we
     ;; control when the latter function is called.
     (org-capture-put :kill-buffer nil :jump-to-captured nil)
-    (org-capture-finalize)
-    (save-window-excursion
-      (with-current-buffer base
-	(org-with-point-at pos
-	  (call-interactively 'org-refile))))
+    (let ((org-refile-targets (or refile-targets org-refile-targets)))
+      (org-capture-finalize)
+      (save-window-excursion
+        (with-current-buffer base
+	  (org-with-point-at pos
+	    (call-interactively 'org-refile)))))
     (when kill-buffer
       (with-current-buffer base (save-buffer))
       (kill-buffer base))
