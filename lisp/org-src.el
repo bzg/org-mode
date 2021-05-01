@@ -327,8 +327,7 @@ a cons cell (LINE . COLUMN) or symbol `end'.  See also
      (cons (count-lines beg (line-beginning-position))
 	   ;; Column is relative to the end of line to avoid problems of
 	   ;; comma escaping or colons appended in front of the line.
-	   (- (current-column)
-	      (progn (end-of-line) (current-column)))))))
+	   (- (point) (min end (line-end-position)))))))
 
 (defun org-src--goto-coordinates (coord beg end)
   "Move to coordinates COORD relatively to BEG and END.
@@ -341,9 +340,9 @@ which see.  BEG and END are buffer positions."
      (org-with-wide-buffer
       (goto-char beg)
       (forward-line (car coord))
-      (end-of-line)
-      (org-move-to-column (max (+ (current-column) (cdr coord)) 0))
-      (point)))))
+      (max (point)
+           (+ (min end (line-end-position))
+              (cdr coord)))))))
 
 (defun org-src--contents-area (datum)
   "Return contents boundaries of DATUM.
