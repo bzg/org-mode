@@ -9570,33 +9570,35 @@ current line."
 
 (defun org-agenda-priority (&optional force-direction)
   "Set the priority of line at point, also in Org file.
-This changes the line at point, all other lines in the agenda referring to
-the same tree node, and the headline of the tree node in the Org file.
-Called with a universal prefix arg, show the priority instead of setting it."
+This changes the line at point, all other lines in the agenda
+referring to the same tree node, and the headline of the tree
+node in the Org file.
+
+Called with one universal prefix arg, show the priority instead
+of setting it.
+
+When called programmatically, FORCE-DIRECTION can be `set', `up',
+`down', or a character."
   (interactive "P")
-  (if (equal force-direction '(4))
-      (org-priority-show)
-    (unless org-priority-enable-commands
-      (user-error "Priority commands are disabled"))
-    (org-agenda-check-no-diary)
-    (let* ((col (current-column))
-	   ;; (marker (or (org-get-at-bol 'org-marker)
-	   ;;             (org-agenda-error)))
-	   (hdmarker (org-get-at-bol 'org-hd-marker))
-	   (buffer (marker-buffer hdmarker))
-	   (pos (marker-position hdmarker))
-	   (inhibit-read-only t)
-	   newhead)
-      (org-with-remote-undo buffer
-	(with-current-buffer buffer
-	  (widen)
-	  (goto-char pos)
-	  (org-show-context 'agenda)
-	  (org-priority force-direction)
-	  (end-of-line 1)
-	  (setq newhead (org-get-heading)))
-	(org-agenda-change-all-lines newhead hdmarker)
-	(org-move-to-column col)))))
+  (unless org-priority-enable-commands
+    (user-error "Priority commands are disabled"))
+  (org-agenda-check-no-diary)
+  (let* ((col (current-column))
+	 (hdmarker (org-get-at-bol 'org-hd-marker))
+	 (buffer (marker-buffer hdmarker))
+	 (pos (marker-position hdmarker))
+	 (inhibit-read-only t)
+	 newhead)
+    (org-with-remote-undo buffer
+      (with-current-buffer buffer
+	(widen)
+	(goto-char pos)
+	(org-show-context 'agenda)
+	(org-priority force-direction)
+	(end-of-line 1)
+	(setq newhead (org-get-heading)))
+      (org-agenda-change-all-lines newhead hdmarker)
+      (org-move-to-column col))))
 
 ;; FIXME: should fix the tags property of the agenda line.
 (defun org-agenda-set-tags (&optional tag onoff)
