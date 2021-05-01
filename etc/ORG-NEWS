@@ -235,6 +235,23 @@ tags including from both buffer local and user defined persistent
 global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
 option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
 
+*** Clocktable option =:formula %= now shows the per-file time percentages
+
+This change only has an effect when multiple files are contributing to
+a given clocktable (such as when =:scope agenda= has been specified).
+The existing behavior is that such tables have an extra 'File' column,
+and each individual file that contributes has its own summary line
+with the headline value '*File time*'.  Those summary rows also
+produce a rollup time value for the file in the 'Time' column.
+
+Prior to this change, the built-in =%= formula did not produce a
+calculation for those per-file times in the '%' column (the relevant
+cells in the '%' column were blank).  With this change, the
+percentage contribution of each individual file time to the total
+time is shown.
+
+The more agenda files you have, the more useful this behavior becomes.
+
 ** Miscellaneous
 *** Missing or empty placeholders in "eval" macros are now nil
 They used to be the empty string.
