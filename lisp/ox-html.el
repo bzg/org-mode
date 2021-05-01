@@ -253,7 +253,7 @@ property on the headline itself.")
      }
 // @license-end
 </script>"
-  "Basic JavaScript that is needed by HTML files produced by Org mode."
+  "Basic JavaScript to allow highlighting references in code blocks."
   :group 'org-export-html
   :package-version '(Org . "9.5")
   :type 'string)
@@ -1422,10 +1422,9 @@ ignored."
 
 ;;;; Template :: Scripts
 
-(defcustom org-html-head-include-scripts t
+(defcustom org-html-head-include-scripts nil
   "Non-nil means include the JavaScript snippets in exported HTML files.
-The actual script is defined in `org-html-scripts' and should
-not be modified."
+The actual script is defined in `org-html-scripts'."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")

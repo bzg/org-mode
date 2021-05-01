@@ -4,6 +4,7 @@ ORG NEWS -- history of user-visible changes.   -*- mode: org; coding: utf-8 -*-
 
 #+LINK: doc https://orgmode.org/worg/doc.html#%s
 #+LINK: git https://code.orgmode.org/bzg/org-mode/commit/%s
+#+LINK: msg https://orgmode.org/list/%s/
 
 Copyright (C) 2012-2021 Free Software Foundation, Inc.
 See the end of the file for license conditions.
@@ -124,6 +125,10 @@ behavior.
 
 By default ox-html now inlines webp images.
 
+*** ~org-html-head-include-scripts~ is now =nil= by default
+
+See [[msg:498dbe2e-0cd2-c81e-7960-4a26c566a1f7@memebeam.org][this thread]].
+
 *** New option ~org-html-content-class~
 
 This is the CSS class name to use for the top level content wrapper.
@@ -140,7 +145,7 @@ you can now configure them.
 
 *** Some faces now use fixed-pitch
 
-See https://orgmode.org/list/875z8njaol.fsf@protesilaos.com.
+See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 
 ** New features
 *** =ob-python= improvements to =:return= header argument 
@@ -651,7 +656,7 @@ In all Babel libraries, the absence of a ~:results~ header should
 produce the same result than setting ~:results value~, unless there is
 an option to explicitly create an exception.
 
-See [[https://orgmode.org/list/CA+A2iZaziAfMeGpBqL6qGrzrWEVvLvC0DUw++T4gCF3NGuW-DQ@mail.gmail.com/][this thread]] for more context.
+See [[msg:CA+A2iZaziAfMeGpBqL6qGrzrWEVvLvC0DUw++T4gCF3NGuW-DQ@mail.gmail.com][this thread]] for more context.
 
 *** New option in ~org-attach-store-link-p~
 
@@ -5394,7 +5399,7 @@ that Calc formulas can operate on them.
 
     The new system has a technically cleaner implementation and more
     possibilities for capturing different types of data.  See
-    [[https://orgmode.org/list/C46F10DC-DE51-43D4-AFFE-F71E440D1E1F@gmail.com][Carsten's announcement]] for more details.
+    [[msg:C46F10DC-DE51-43D4-AFFE-F71E440D1E1F@gmail.com][Carsten's announcement]] for more details.
 
     To switch over to the new system:
 
@@ -5525,7 +5530,7 @@ that Calc formulas can operate on them.
 
 **** Modified link escaping
 
-     David Maus worked on `org-link-escape'.  See [[https://orgmode.org/list/87k4gysacq.wl%dmaus@ictsoc.de][his message]]:
+     David Maus worked on `org-link-escape'.  See [[msg:87k4gysacq.wl%dmaus@ictsoc.de][his message]]:
 
      : Percent escaping is used in Org mode to escape certain characters
      : in links that would either break the parser (e.g. square brackets
