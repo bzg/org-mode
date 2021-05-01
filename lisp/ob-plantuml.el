@@ -151,7 +151,6 @@ This function is called by `org-babel-execute-src-block'."
 			 " ")))
     (with-temp-file in-file (insert full-body))
     (message "%s" cmd) (org-babel-eval cmd "")
-    (org-babel-plantuml-post-process out-file)
     (if (and (string= (file-name-extension out-file) "svg")
              org-babel-plantuml-svg-text-to-path)
         (org-babel-eval (format "inkscape %s -T -l %s" out-file out-file) ""))
