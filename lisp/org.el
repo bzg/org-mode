@@ -5059,9 +5059,9 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 	      (when (and org-hide-emphasis-markers
 			 (not (org-at-comment-p)))
 		(add-text-properties (match-end 4) (match-beginning 5)
-				     '(invisible org-link))
+				     '(invisible t))
 		(add-text-properties (match-beginning 3) (match-end 3)
-				     '(invisible org-link)))
+				     '(invisible t)))
 	      (throw :exit t))))))))
 
 (defun org-emphasize (&optional char)
