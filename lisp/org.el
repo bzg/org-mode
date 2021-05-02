@@ -20964,7 +20964,11 @@ See `org-backward-paragraph'."
 	  (cond
 	   ;; There is a blank line above.  Move there.
 	   ((and (org-previous-line-empty-p)
-		 (not (org-invisible-p (1- (line-end-position 0)))))
+                 (let ((lep (line-end-position 0)))
+                   ;; When the first headline start at point 2, don't choke while
+                   ;; checking with `org-invisible-p'.
+                   (or (= lep 1)
+		       (not (org-invisible-p (1- (line-end-position 0)))))))
 	    (forward-line -1))
 	   ;; At the beginning of the first element within a greater
 	   ;; element.  Move to the beginning of the greater element.
