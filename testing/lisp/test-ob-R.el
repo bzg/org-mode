@@ -142,6 +142,15 @@ log10(10)
 #+end_src"
      (should (string= "[1] 14\n[1] 2.302585\n[1] 1\n[1] 20\n[1] 0.3333333\n[1] Inf\n" (org-babel-execute-src-block))))))
 
+(ert-deftest test-ob-r/NA-blank ()
+  "For :results value, NAs should be empty"
+  (let (ess-ask-for-ess-directory ess-history-file)
+    (should (equal '(("A" "B") hline ("" 1) (1 2) (1 "") (1 4) (1 4))
+  (org-test-with-temp-text "#+BEGIN_SRC R :results value :colnames yes
+  data.frame(A=c(NA,1,1,1,1),B=c(1,2,NA,4,4))
+#+end_src"     
+  (org-babel-execute-src-block))))))
+
 (provide 'test-ob-R)
 
 ;;; test-ob-R.el ends here
