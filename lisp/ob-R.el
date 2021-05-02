@@ -451,11 +451,13 @@ last statement in BODY, as elisp."
 		      (car (split-string line "\n")))
 		     (substring line (match-end 1))
 		   line))
-	       (org-babel-comint-with-output (session org-babel-R-eoe-output)
-		 (insert (mapconcat 'org-babel-chomp
-				    (list body org-babel-R-eoe-indicator)
-				    "\n"))
-		 (inferior-ess-send-input)))))) "\n"))))
+	       (with-current-buffer session
+		 (let ((comint-prompt-regexp (concat "^" comint-prompt-regexp)))
+		   (org-babel-comint-with-output (session org-babel-R-eoe-output)
+		     (insert (mapconcat 'org-babel-chomp
+					(list body org-babel-R-eoe-indicator)
+					"\n"))
+		     (inferior-ess-send-input)))))))) "\n"))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value.
