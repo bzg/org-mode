@@ -97,6 +97,52 @@ x
      (org-babel-goto-named-result "TESTSRC") (forward-line 1)
      (should (string= "[[file:junk/test.org]]"
 		      (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+
+
+
+(ert-deftest test-ob-r/output-with-<> ()
+  "make sure angle brackets are well formatted"
+    (let (ess-ask-for-ess-directory ess-history-file)
+      (should (string="[1] \"<X> <Y> <!>\"
+[1] \"one <two> three\"
+[1] \"end35\"
+"
+  (org-test-with-temp-text "#+begin_src R :results output
+     print(\"<X> <Y> <!>\")
+     print(\"one <two> three\")
+     print(\"end35\")
+   #+end_src
+"
+    (org-babel-execute-src-block))
+))))
+
+
+;; (ert-deftest test-ob-r/output-with-error ()
+;;   "make sure angle brackets are well formatted"
+;;     (let (ess-ask-for-ess-directory ess-history-file)
+;;       (should (string="Error in print(1/a) : object 'a' not found"
+;;   (org-test-with-temp-text "#+begin_src R :results output
+;;   print(1/a)
+;;  #+end_src
+;; "
+;;     (org-babel-execute-src-block))
+;; ))))
+
+
+(ert-deftest test-ob-R/output-nonprinted ()
+  (let (ess-ask-for-ess-directory ess-history-file)
+    (org-test-with-temp-text
+     "#+begin_src R :results output
+4.0 * 3.5
+log(10)
+log10(10)
+(3 + 1) * 5
+3^-1
+1/0
+#+end_src"
+     (should (string= "[1] 14\n[1] 2.302585\n[1] 1\n[1] 20\n[1] 0.3333333\n[1] Inf\n" (org-babel-execute-src-block))))))
+
 (provide 'test-ob-R)
 
 ;;; test-ob-R.el ends here
+ 
