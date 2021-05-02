@@ -879,7 +879,8 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	    (unless (local-variable-p 'org-colview-initial-truncate-line-value)
 	      (setq-local org-colview-initial-truncate-line-value
 			  truncate-lines))
-	    (setq truncate-lines t)
+            (if (not global-visual-line-mode)
+              (setq truncate-lines t))
 	    (dolist (entry cache)
 	      (goto-char (car entry))
 	      (org-columns--display-here (cdr entry)))))))))
