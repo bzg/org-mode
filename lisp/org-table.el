@@ -1928,8 +1928,9 @@ of lists of fields."
 	(forward-line))
       (set-marker end nil))
     (when cut (org-table-align))
-    (message (substitute-command-keys "Cells in the region copied, use \
-\\[org-table-paste-rectangle] to paste them in a table."))
+    (when (called-interactively-p 'any)
+      (message (substitute-command-keys "Cells in the region copied, use \
+\\[org-table-paste-rectangle] to paste them in a table.")))
     (setq org-table-clip (nreverse region))))
 
 ;;;###autoload
@@ -4660,19 +4661,24 @@ blank, and the content is appended to the field above."
   (if (org-region-active-p)
       ;; There is a region: fill as a paragraph.
       (let ((start (region-beginning)))
-	(org-table-cut-region (region-beginning) (region-end))
-	(when (> (length (car org-table-clip)) 1)
-	  (user-error "Region must be limited to single column"))
-	(let ((nlines (cond ((not arg) (length org-table-clip))
-			    ((< arg 1) (+ (length org-table-clip) arg))
-			    (t arg))))
-	  (setq org-table-clip
-		(mapcar #'list
-			(org-wrap (mapconcat #'car org-table-clip " ")
-				  nil
-				  nlines))))
-	(goto-char start)
-	(org-table-paste-rectangle))
+        (save-restriction
+          (narrow-to-region
+           (save-excursion (goto-char start) (move-beginning-of-line 1))
+           (save-excursion (org-forward-paragraph) (point)))
+          (org-table-cut-region (region-beginning) (region-end))
+	   (when (> (length (car org-table-clip)) 1)
+	     (user-error "Region must be limited to single column"))
+	   (let ((nlines (cond ((not arg) (length org-table-clip))
+			       ((< arg 1) (+ (length org-table-clip) arg))
+			       (t arg))))
+	     (setq org-table-clip
+		   (mapcar #'list
+			   (org-wrap (mapconcat #'car org-table-clip " ")
+				     nil
+				     nlines))))
+	   (goto-char start)
+	   (org-table-paste-rectangle))
+        (org-table-align))
     ;; No region, split the current field at point.
     (unless (org-get-alist-option org-M-RET-may-split-line 'table)
       (skip-chars-forward "^\r\n|"))
