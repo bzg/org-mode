@@ -1497,7 +1497,7 @@ With this output format, create a link to the file specified in
 
 #+begin_example
 ,#+begin_src shell :dir "data/tmp" :results link :file "crackzor_1.0.c.gz"
-wget -c "http://ben.akrin.com/crackzor/crackzor_1.0.c.gz"
+wget -c "https://ben.akrin.com/crackzor/crackzor_1.0.c.gz"
 ,#+end_src
 
 ,#+results:
@@ -1948,7 +1948,7 @@ this ~:prologue "fpprintprec: 2; linel: 50;"~ for presenting Maxima
 results in a beamer presentation.
 **** PlantUML: add support for header arguments
 
-[[http://plantuml.com/][Plantuml]] source blocks now support the [[https://orgmode.org/manual/prologue.html#prologue][~:prologue~]], [[https://orgmode.org/manual/epilogue.html#epilogue][~:epilogue~]] and
+[[https://plantuml.com/][Plantuml]] source blocks now support the [[https://orgmode.org/manual/prologue.html#prologue][~:prologue~]], [[https://orgmode.org/manual/epilogue.html#epilogue][~:epilogue~]] and
 [[https://orgmode.org/manual/var.html#var][~:var~]] header arguments.
 
 **** SQL: new engine added ~sqsh~
@@ -2584,7 +2584,7 @@ The postgresql engine in a sql code block supports now ~:dbport~ nd
 
 **** Support for additional plantuml output formats
 
-The support for output formats of [[http://plantuml.com/][plantuml]] has been extended to now
+The support for output formats of [[https://plantuml.com/][plantuml]] has been extended to now
 include:
 
 All Diagrams:
@@ -2617,7 +2617,7 @@ Alice <-- Bob: another authentication Response
 #+end_src
 
 Please note that *pdf* *does not work out of the box* and needs additional
-setup in addition to plantuml.  See [[http://plantuml.com/pdf.html]] for
+setup in addition to plantuml.  See [[https://plantuml.com/pdf.html]] for
 details and setup information.
 
 *** Rewrite of radio lists
@@ -3747,11 +3747,11 @@ then inline code snippets will be wrapped into the formatting string.
 ** New contributed packages
 
 - =ox-bibtex.el= by Nicolas Goaziou :: an utility to handle BibTeX
-     export to both LaTeX and HTML exports.  It uses the [[http://www.lri.fr/~filliatr/bibtex2html/][bibtex2html]]
+     export to both LaTeX and HTML exports.  It uses the [[https://www.lri.fr/~filliatr/bibtex2html/][bibtex2html]]
      software.
 
 - =org-screenshot.el= by Max Mikhanosha :: an utility to handle
-     screenshots easily from Org, using the external tool [[http://freecode.com/projects/scrot][scrot]].
+     screenshots easily from Org, using the external tool [[https://freecode.com/projects/scrot][scrot]].
 
 ** Miscellaneous
 
@@ -3902,7 +3902,7 @@ manual for details and check [[https://orgmode.org/worg/org-8.0.html][this Worg 
 *** ~ox-md.el~ by Nicolas Goaziou
 
     =ox-md.el= allows you to export Org files to Markdown files, using the
-    vanilla [[http://daringfireball.net/projects/markdown/][Markdown syntax]].
+    vanilla [[https://daringfireball.net/projects/markdown/][Markdown syntax]].
 
 *** ~ox-texinfo.el~ by Jonathan Leech-Pepin
 
@@ -3912,14 +3912,14 @@ manual for details and check [[https://orgmode.org/worg/org-8.0.html][this Worg 
 
 *** ~ob-julia.el~ by G. Jay Kerns
 
-    [[http://julialang.org/][Julia]] is a new programming language.
+    [[https://julialang.org/][Julia]] is a new programming language.
 
     =ob-julia.el= provides Org Babel support for evaluating Julia source
     code.
 
 *** ~ob-mathomatic.el~ by Luis Anaya
 
-    [[http://www.mathomatic.org/][mathomatic]] a portable, command-line, educational CAS and calculator
+    [[https://www.mathomatic.org/][mathomatic]] a portable, command-line, educational CAS and calculator
     software, written entirely in the C programming language.
 
     ~ob-mathomatic.el~ provides Org Babel support for evaluating mathomatic
@@ -3927,7 +3927,7 @@ manual for details and check [[https://orgmode.org/worg/org-8.0.html][this Worg 
 
 *** ~ob-tcl.el~ by Luis Anaya
 
-    ~ob-tcl.el~ provides Org Babel support for evaluating [[http://www.tcl.tk/][Tcl]] source code.
+    ~ob-tcl.el~ provides Org Babel support for evaluating [[https://www.tcl.tk/][Tcl]] source code.
 
 *** ~org-bullets.el~ by Evgeni Sabof
 
@@ -3953,7 +3953,7 @@ manual for details and check [[https://orgmode.org/worg/org-8.0.html][this Worg 
     presentations.  ~ox-deck.el~ exports Org files to HTML presentations
     using =deck.js=.
 
-    [[http://meyerweb.com/eric/tools/s5/][s5]] is a set of scripts which also allows to display HTML pages as
+    [[https://meyerweb.com/eric/tools/s5/][s5]] is a set of scripts which also allows to display HTML pages as
     presentations.  ~ox-s5.el~ exports Org files to HTML presentations
     using =s5=.
 
@@ -4060,13 +4060,13 @@ forward and backward.
 
 Now Org will sort this list
 
-: - [[http://abc.org][B]]
-: - [[http://def.org][A]]
+: - [[https://abc.org][B]]
+: - [[https://def.org][A]]
 
 like this:
 
-: - [[http://def.org][A]]
-: - [[http://abc.org][B]]
+: - [[https://def.org][A]]
+: - [[https://abc.org][B]]
 
 by comparing the descriptions, not the links.
 Same when sorting headlines instead of list items.
