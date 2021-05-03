@@ -15,6 +15,16 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 ** Important announcements
 
+*** The =contrib/= now lives in a separate repository
+
+Org's repository has been trimmed from the =contrib/= directory.
+
+The old contents of the =contrib/= directory now lives in a separate
+repository at https://git.sr.ht/~bzg/org-contrib.
+
+You can install this repository by cloning it and updating your
+~load-path~ accordingly.
+
 *** Org ELPA and Org archives won't be available for Org > 9.5
 
 [[https://orgmode.org/elpa.html][Org ELPA]] is still available for installing Org 9.5, either with or
