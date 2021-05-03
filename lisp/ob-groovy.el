@@ -26,7 +26,7 @@
 ;; Currently only supports the external execution.  No session support yet.
 
 ;;; Requirements:
-;; - Groovy language :: http://groovy.codehaus.org
+;; - Groovy language :: https://groovy-lang.org
 ;; - Groovy major mode :: Can be installed from MELPA or
 ;;   https://github.com/russel/Emacs-Groovy-Mode
 
