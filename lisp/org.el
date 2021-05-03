@@ -18973,7 +18973,7 @@ ELEMENT."
 			    (org--get-expected-indentation
 			     (org-element-property :parent previous) t))))))))))
       ;; Otherwise, move to the first non-blank line above.
-      ((not (eq org-adapt-indentation 'headline-data))
+      (t
        (beginning-of-line)
        (let ((pos (point)))
 	 (skip-chars-backward " \r\t\n")
@@ -19050,7 +19050,7 @@ Indentation is done according to the following rules:
        Else, indent like parent's first line.
 
     3. Otherwise, indent relatively to current level, if
-       `org-adapt-indentation' is non-nil, or to left margin.
+       `org-adapt-indentation' is `t', or to left margin.
 
   - On a blank line at the end of an element, indent according to
     the type of the element.  More precisely
@@ -19075,7 +19075,11 @@ list structure.  Instead, use \\<org-mode-map>`\\[org-shiftmetaleft]' or \
 
 Also align node properties according to `org-property-format'."
   (interactive)
-  (unless (org-at-heading-p)
+  (unless (or (org-at-heading-p)
+              (and (eq org-adapt-indentation 'headline-data)
+                   (save-excursion
+                     (move-beginning-of-line 0)
+                     (org-at-heading-p))))
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
 	   (type (org-element-type element)))
       (cond ((and (memq type '(plain-list item))
