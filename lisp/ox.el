@@ -6394,7 +6394,8 @@ or FILE."
   (declare (indent 2))
   (if (not (file-writable-p file)) (error "Output file not writable")
     (let ((ext-plist (org-combine-plists `(:output-file ,file) ext-plist))
-	  (encoding (or org-export-coding-system buffer-file-coding-system)))
+	  (encoding (or org-export-coding-system buffer-file-coding-system))
+          auto-mode-alist)
       (if async
           (org-export-async-start
 	      (lambda (file)
