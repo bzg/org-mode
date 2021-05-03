@@ -59,7 +59,6 @@ subdirectories to the Emacs load path.  To do this, add the following
 line to your Emacs init file:
 
 : (add-to-list 'load-path "~/path/to/orgdir/lisp")
-: (add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
 
 #+texinfo: @noindent
 If you have been using git or a tar ball to get Org, you need to run

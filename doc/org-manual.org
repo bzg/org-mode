@@ -132,6 +132,16 @@ list of compilation/installation options.
 For more detailed explanations on Org's build system, please check the
 Org Build System page on [[https://orgmode.org/worg/dev/org-build-system.html][Worg]].
 
+*** Installing Org's contributed packages
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+Org's repository used to contain =contrib/= directory for add-ons
+contributed by others.  As of Org 9.5, the directory has bee moved to
+this new dedicated [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository, which you can install
+separately.
+
 ** Activation
 :PROPERTIES:
 :DESCRIPTION: How to activate Org for certain buffers.
@@ -244,7 +254,6 @@ shown below.
 
 ;; Add latest Org mode to load path.
 (add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
-(add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp" t))
 #+end_src
 
 If an error occurs, a "backtrace" can be very useful---see below on
@@ -3260,9 +3269,10 @@ options:
 #+cindex: VM links
 #+cindex: Wanderlust links
 On top of these built-in link types, additional ones are available
-through the =contrib/= directory (see [[*Installation]]).  For example,
-these links to VM or Wanderlust messages are available when you load
-the corresponding libraries from the =contrib/= directory:
+through the =org-contrib= repository (see [[*Installation]]).  For
+example, these links to VM or Wanderlust messages are available when
+you load the corresponding libraries from the =org-contrib=
+repository:
 
 | =vm:folder=                            | VM folder link          |
 | =vm:folder#id=                         | VM message link         |
@@ -4107,7 +4117,7 @@ checkboxes is blocked from switching to DONE.
 
 If you need more complex dependency structures, for example
 dependencies between entries in different trees or files, check out
-the contributed module =org-depend.el=.
+the module =org-depend.el= in the =org-contrib= repository.
 
 ** Progress Logging
 :PROPERTIES:
@@ -5775,8 +5785,8 @@ block.  If there is a =TBLFM= keyword after the table, the table is
 recalculated automatically after an update.
 
 An alternative way to capture and process property values into a table
-is provided by Eric Schulte's =org-collector.el=, which is
-a contributed package[fn:58].  It provides a general API to collect
+is provided by Eric Schulte's =org-collector.el=, which is a package
+in =org-contrib=[fn:58].  It provides a general API to collect
 properties from entries in a certain scope, and arbitrary Lisp
 expressions to process these values before inserting them into a table
 or a dynamic block.
@@ -11408,7 +11418,7 @@ Users can install libraries for additional formats from the Emacs
 packaging system.  For easy discovery, these packages have a common
 naming scheme: ~ox-NAME~, where {{{var(NAME)}}} is a format.  For
 example, ~ox-koma-letter~ for /koma-letter/ back-end.  More libraries
-can be found in the =contrib/= directory (see [[*Installation]]).
+can be found in the =org-contrib= repository (see [[*Installation]]).
 
 #+vindex: org-export-backends
 Org only loads back-ends for the following formats by default: ASCII,
@@ -19934,12 +19944,10 @@ https://orgmode.org/worg/doc.html#hooks.
 :END:
 #+cindex: add-on packages
 
-Various authors wrote a large number of add-on packages for Org.
-
-These packages are not part of Emacs, but they are distributed as
-contributed packages with the separate release available at
-https://orgmode.org.  See the =contrib/README= file in the source code
-directory for a list of contributed files.  Worg page with more
+Various authors wrote a large number of add-on packages for Org.  Some
+of these packages used to be part of the =org-mode= repository but are
+now hosted in a separate =org-contrib= repository
+[[https://git.sr.ht/~bzg/org-contrib][here]].  A Worg page with more
 information is at: https://orgmode.org/worg/org-contrib/.
 
 ** Adding Hyperlink Types
@@ -21203,7 +21211,7 @@ be complete if the ones above were not mentioned in this manual.
   literal examples, and remote highlighting for referenced code lines.
 
 - Stathis Sideris wrote the =ditaa.jar= ASCII to PNG converter that is
-  now packaged into Org's =contrib/= directory.
+  now packaged into the [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository.
 
 - Daniel Sinder came up with the idea of internal archiving by locking
   subtrees.
@@ -21627,12 +21635,12 @@ lognoteclock-out=.
 line---the line is broken here only to fit it into the manual.
 
 [fn:81] On computers using macOS, idleness is based on actual user
-idleness, not just Emacs' idle time.  For X11, you can install
-a utility program =x11idle.c=, available in the =contrib/scripts/=
-directory of the Org Git distribution, or install the xprintidle
-package and set it to the variable ~org-clock-x11idle-program-name~ if
-you are running Debian, to get the same general treatment of idleness.
-On other systems, idle time refers to Emacs idle time only.
+idleness, not just Emacs' idle time.  For X11, you can install a
+utility program =x11idle.c=, available in the =org-contrib/=
+repository, or install the xprintidle package and set it to the
+variable ~org-clock-x11idle-program-name~ if you are running Debian,
+to get the same general treatment of idleness.  On other systems, idle
+time refers to Emacs idle time only.
 
 [fn:82] Please note the pitfalls of summing hierarchical data in
 a flat list (see [[*Using Column View in the Agenda]]).
