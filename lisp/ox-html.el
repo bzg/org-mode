@@ -2665,7 +2665,7 @@ holding contextual information."
                                 (format
                                  "<span class=\"section-number-%d\">%s</span> "
                                  level
-                                 (mapconcat #'number-to-string numbers ".")))
+                                 (concat (mapconcat #'number-to-string numbers ".") ".")))
                            formatted-text)
                           level)
                   ;; When there is no section, pretend there is an
