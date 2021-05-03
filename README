@@ -1,5 +1,3 @@
--*- mode: org; fill-column:70 -*-
-
 This is a distribution of Org, a plain text notes and project planning
 tool for Emacs.
 
@@ -11,8 +9,9 @@ Check the [[https://orgmode.org][homepage of Org]] and the [[https://orgmode.org
 
 - COPYING :: The GNU General Public License.
 
-- Makefile :: The makefile to compile and install Org.  For installation
-  instructions, see the manual or [[https://orgmode.org/worg/dev/org-build-system.html][the more detailed procedure on Worg]].
+- Makefile :: The makefile to compile and install Org.  For
+  installation instructions, see the manual or [[https://orgmode.org/worg/dev/org-build-system.html][the more detailed
+  procedure on Worg]].
   
 - mk/ :: Files needed for building Org.
 
@@ -29,6 +28,19 @@ Check the [[https://orgmode.org][homepage of Org]] and the [[https://orgmode.org
   and get processed with the FSF before contributed changes can be
   integrated into the Org core.  All files in this distribution have
   copyright assigned to the FSF.
+
+* Join the GNU Project
+
+Org is part of GNU Emacs.
+
+GNU Emacs is part of the GNU Operating System, developed by the GNU
+Project.  To learn more about Free (libre) Software, you can read this
+page: https://gnu.org/philosophy/free-sw.html
+
+If you are the author of an awesome program and want to join us in
+writing Free (libre) Software, please consider making it an official
+GNU program and become a GNU Maintainer.  You can find instructions 
+on how to do this here: http://www.gnu.org/help/evaluation
 
 * License
 
