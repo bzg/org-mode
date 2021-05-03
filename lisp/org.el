@@ -17950,12 +17950,13 @@ object (e.g., within a comment).  In these case, you need to use
 	(org--newline indent arg interactive))))))
 
 (defun org-return-and-maybe-indent ()
-  "Goto next table row, or insert a newline.
+  "Goto next table row, or insert a newline, maybe indented.
 Call `org-table-next-row' or `org-return', depending on context.
 See the individual commands for more information.
 
-When inserting a newline, indent the new line if
-`electric-indent-mode' is disabled."
+When inserting a newline, if `org-adapt-indentation' is `t':
+indent the line if `electric-indent-mode' is disabled, don't
+indent it if it is enabled."
   (interactive)
   (org-return (not electric-indent-mode)))
 
