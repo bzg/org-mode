@@ -19081,7 +19081,9 @@ Also align node properties according to `org-property-format'."
                    (save-excursion
                      (beginning-of-line 1)
                      (skip-chars-backward "\n")
-                     (org-at-heading-p))))
+                     (or (org-at-heading-p)
+                         (org-at-drawer-p)
+                         (org-at-planning-p)))))
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
 	   (type (org-element-type element)))
       (cond ((and (memq type '(plain-list item))
