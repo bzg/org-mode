@@ -836,12 +836,11 @@ Also sets `org-columns-top-level-marker' to the new position."
 (defun org-columns (&optional global columns-fmt-string)
   "Turn on column view on an Org mode file.
 
-Column view applies to the whole buffer if point is before the
-first headline.  Otherwise, it applies to the first ancestor
-setting \"COLUMNS\" property.  If there is none, it defaults to
-the current headline.  With a `\\[universal-argument]' prefix \
-argument, turn on column
-view for the whole buffer unconditionally.
+Column view applies to the whole buffer if point is before the first
+headline.  Otherwise, it applies to the first ancestor setting
+\"COLUMNS\" property.  If there is none, it defaults to the current
+headline.  With a `\\[universal-argument]' prefix \ argument, GLOBAL,
+turn on column view for the whole buffer unconditionally.
 
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive "P")
@@ -867,9 +866,8 @@ When COLUMNS-FMT-STRING is non-nil, use it as the column format."
 	(let ((cache
 	       ;; Collect contents of columns ahead of time so as to
 	       ;; compute their maximum width.
-	       (org-map-entries
-		(lambda () (cons (point) (org-columns--collect-values)))
-		nil nil (and org-columns-skip-archived-trees 'archive))))
+               (org-scan-tags
+		(lambda () (cons (point) (org-columns--collect-values))) t org--matcher-tags-todo-only)))
 	  (when cache
 	    (org-columns--set-widths cache)
 	    (org-columns--display-here-title)
