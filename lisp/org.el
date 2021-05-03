@@ -18846,17 +18846,6 @@ ELEMENT."
 	 (t
 	  (goto-char start)
 	  (current-indentation))))
-      ((and
-	(eq org-adapt-indentation 'headline-data)
-        (or (memq type '(planning clock node-property property-drawer drawer))
-            ;; When storing a note in a LOGBOOK drawer,
-            ;; `org-store-log-note' needs to insert a new line before
-            ;; the newly inserted note, thus the `type' at point will
-            ;; return `paragraph' instead of the expected `drawer', so
-            ;; we need to manually detect the drawer.
-            (eq (org-element-type (car (org-element-lineage element))) 'drawer)))
-       (org--get-expected-indentation
-	(org-element-property :parent element) t))
       ((memq type '(headline inlinetask nil))
        (if (org-match-line "[ \t]*$")
 	   (org--get-expected-indentation element t)
@@ -19000,11 +18989,12 @@ Also align node properties according to `org-property-format'."
   (interactive)
   (unless (or (org-at-heading-p)
               (and (eq org-adapt-indentation 'headline-data)
+                   (not (org-at-clock-log-p))
                    (save-excursion
                      (beginning-of-line 1)
                      (skip-chars-backward "\n")
                      (or (org-at-heading-p)
-                         (org-at-drawer-p)
+                         (looking-back ":END:.*")
                          (org-at-planning-p)))))
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
 	   (type (org-element-type element)))
