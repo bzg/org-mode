@@ -21,17 +21,14 @@ Check the [[https://orgmode.org][homepage of Org]] and the [[https://orgmode.org
 - doc/ :: The documentation files.  org.texi is the source of the
   documentation, org.html and org.pdf are formatted versions of it.
 
-- contrib/ :: A directory with third-party additions for Org.  Some
-  really cool stuff is in there.
-
 - etc/ :: Files needed for the ODT exporter.
 
 - testing/ :: Testing suite for Org.
 
 - request-assign-future.txt :: The form that contributors have to sign
   and get processed with the FSF before contributed changes can be
-  integrated into the Org core.  All files in this distribution except
-  the contrib/ directory have copyright assigned to the FSF.
+  integrated into the Org core.  All files in this distribution have
+  copyright assigned to the FSF.
 
 * License
 
