@@ -438,12 +438,11 @@ specifications than `frame-title-format', which see."
 (defcustom org-clock-x11idle-program-name "x11idle"
   "Name of the program which prints X11 idle time in milliseconds.
 
-You can find x11idle.c in the contrib/scripts directory of the
-Org git distribution. Or, you can do:
+you can do \"~$ sudo apt-get install xprintidle\" if you are using
+a Debian-based distribution.
 
-    sudo apt-get install xprintidle
-
-if you are using Debian."
+Alternatively, can find x11idle.c in the org-contrib repository at
+https://git.sr.ht/~bzg/org-contrib"
   :group 'org-clock
   :version "24.4"
   :package-version '(Org . "8.0")
