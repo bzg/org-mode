@@ -19079,6 +19079,7 @@ Also align node properties according to `org-property-format'."
   (unless (or (org-at-heading-p)
               (and (eq org-adapt-indentation 'headline-data)
                    (save-excursion
+                     (beginning-of-line 1)
                      (skip-chars-backward "\n")
                      (org-at-heading-p))))
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
