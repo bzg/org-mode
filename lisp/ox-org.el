@@ -3,6 +3,7 @@
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou@gmail.com>
+;; Maintainer: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: org, wp
 
 ;; This file is part of GNU Emacs.
