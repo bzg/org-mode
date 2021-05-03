@@ -13,7 +13,7 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.5 (not yet released)
 
-** Important announcements
+** Important announcements and breaking changes
 
 *** The =contrib/= now lives in a separate repository
 
@@ -40,6 +40,11 @@ please use the NonGNU ELPA package.  If you want to keep up with the
 latest unstable Org, please install from the Git repository.
 
 See https://orgmode.org/org.html#Installation for the details.
+
+*** ~org-speed-commands-user~ is obsolete, use ~org-speed-commands~
+
+Setting ~org-speed-commands-user~ in your configuration won't have any
+effect.  Please set ~org-speed-commands~ instead, which see.
 
 ** New options and settings
 *** Option ~org-hidden-keywords~ now also applies to #+SUBTITLE:

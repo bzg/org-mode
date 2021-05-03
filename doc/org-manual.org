@@ -18656,14 +18656,14 @@ the variable ~org-use-speed-commands~ to a non-~nil~ value.  To
 trigger a Speed Key, point must be at the beginning of an Org
 headline, before any of the stars.
 
-#+vindex: org-speed-commands-user
+#+vindex: org-speed-commands
 #+findex: org-speed-command-help
 Org comes with a pre-defined list of Speed Keys.  To add or modify
-Speed Keys, customize the variable, ~org-speed-commands-user~.  For
-more details, see the variable's docstring.  With Speed Keys
-activated, {{{kbd(M-x org-speed-command-help)}}}, or {{{kbd(?)}}} when
-point is at the beginning of an Org headline, shows currently active
-Speed Keys, including the user-defined ones.
+Speed Keys, customize the option ~org-speed-commands~.  For more
+details, see the variable's docstring.  With Speed Keys activated,
+{{{kbd(M-x org-speed-command-help)}}}, or {{{kbd(?)}}} when point is at the
+beginning of an Org headline, shows currently active Speed Keys,
+including the user-defined ones.
 
 ** A Cleaner Outline View
 :PROPERTIES:
