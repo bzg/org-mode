@@ -8432,7 +8432,8 @@ With prefix ARG, go forward that many times the current span."
 	  (org-agenda-overriding-arguments
 	   (list (car args) sd span)))
       (org-agenda-redo)
-      (org-agenda-find-same-or-today-or-agenda cnt))))
+      (org-agenda-find-same-or-today-or-agenda cnt))
+    (set-window-start nil 1)))
 
 (defun org-agenda-earlier (arg)
   "Go backward in time by the current span.
