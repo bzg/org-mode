@@ -16797,7 +16797,11 @@ the =var= header argument.
 body.  {{{var(ASSIGN)}}} is a literal value, such as a string,
 a number, a reference to a table, a list, a literal example, another
 code block---with or without arguments---or the results of evaluating
-a code block.
+a code block.  {{{var(ASSIGN)}}} may specify a filename for references
+to elements in a different file, using a =:= to separate the filename
+from the reference.
+
+: :var NAME=FILE:REFERENCE
 
 Here are examples of passing values by reference:
 
