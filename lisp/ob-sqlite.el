@@ -137,7 +137,7 @@ This function is called by `org-babel-execute-src-block'."
     (mapcar (lambda (row)
 	      (if (eq 'hline row)
 		  'hline
-		(mapcar #'org-babel-string-read row)))
+		(mapcar #'org-babel-sqlite--read-cell row)))
 	    result)))
 
 (defun org-babel-sqlite-offset-colnames (table headers-p)
@@ -150,6 +150,10 @@ This function is called by `org-babel-execute-src-block'."
   "Raise an error because support for SQLite sessions isn't implemented.
 Prepare SESSION according to the header arguments specified in PARAMS."
   (error "SQLite sessions not yet implemented"))
+
+(defun org-babel-sqlite--read-cell (cell)
+  "Process CELL to remove unnecessary characters."
+  (org-babel-read cell t))
 
 (provide 'ob-sqlite)
 
