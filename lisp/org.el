@@ -18994,7 +18994,7 @@ Also align node properties according to `org-property-format'."
                      (beginning-of-line 1)
                      (skip-chars-backward "\n")
                      (or (org-at-heading-p)
-                         (looking-back ":END:.*")
+                         (looking-back ":END:.*" (point-at-bol))
                          (org-at-planning-p)))))
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point)))
 	   (type (org-element-type element)))
