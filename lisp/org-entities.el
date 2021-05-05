@@ -114,6 +114,8 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("igrave" "\\`{i}" nil "&igrave;" "i" "ì" "ì")
      ("Iacute" "\\'{I}" nil "&Iacute;" "I" "Í" "Í")
      ("iacute" "\\'{i}" nil "&iacute;" "i" "í" "í")
+     ("Idot" "\\.{I}" nil "&idot;" "I" "İ" "İ")
+     ("inodot" "\\i" nil "&inodot;" "i" "ı" "ı")
      ("Icirc" "\\^{I}" nil "&Icirc;" "I" "Î" "Î")
      ("icirc" "\\^{i}" nil "&icirc;" "i" "î" "î")
      ("Iuml" "\\\"{I}" nil "&Iuml;" "I" "Ï" "Ï")
