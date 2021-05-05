@@ -21018,6 +21018,9 @@ be complete if the ones above were not mentioned in this manual.
 - Charles Cave's suggestion sparked the implementation of templates
   for Remember, which are now templates for capture.
 
+- Timothy E Chapman worked on a complete overhaul of the orgmode.org
+  website in 2020 and helped fixing various bugs.
+
 - Pavel Chalmoviansky influenced the agenda treatment of items with
   specified time.
 
