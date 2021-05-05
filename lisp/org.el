@@ -1583,14 +1583,13 @@ lines to the buffer:
   :group 'org-appearance
   :type 'boolean)
 
-(defcustom org-adapt-indentation t
+(defcustom org-adapt-indentation nil
   "Non-nil means adapt indentation to outline node level.
 
-When this variable is set to t, Org assumes that you write
-outlines by indenting text in each node to align with the
-headline (after the stars).
+When set to t, Org assumes that you write outlines by indenting
+text in each node to align with the headline, after the stars.
 
-When this variable is set to `headline-data', only adapt the
+When this variable is set to `headline-data', Org only adapts the
 indentation of the data lines right below the headline, such as
 planning/clock lines and property/logbook drawers.
 

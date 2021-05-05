@@ -41,6 +41,17 @@ latest unstable Org, please install from the Git repository.
 
 See https://orgmode.org/org.html#Installation for the details.
 
+*** ~org-adapt-indentation~ now defaults to =nil=
+
+If you want to automatically indent headlines' metadata, set it to
+=headline-data=.
+
+If you want to automatically indent every line to the headline's
+current indentation, set it to =t=.
+
+Also beware that the behavior of =RET= and =C-j= also depends on the
+value of ~electric-indent-mode~. See [[https://orgmode.org/worg/org-faq.html#indentation][this FAQ]] for more details.
+
 *** ~org-speed-commands-user~ is obsolete, use ~org-speed-commands~
 
 Setting ~org-speed-commands-user~ in your configuration won't have any
@@ -268,7 +279,7 @@ time is shown.
 The more agenda files you have, the more useful this behavior becomes.
 
 ** Miscellaneous
-*** Missing or empty placeholders in "eval" macros are now nil
+*** Missing or empty placeholders in "eval" macros are now =nil=
 They used to be the empty string.
 *** =org-goto-first-child= now works before first heading
 
@@ -439,7 +450,7 @@ explicitly:
 
 Alternatively, if you wish to keep =RET= as the "smart-return" key,
 but dislike Org's default indentation of sections, you may prefer to
-customize ~org-adapt-indentation~ to either =nil= or =headline-data=.
+customize ~org-adapt-indentation~ to either nil or =headline-data=.
 
 *** New allowed value for ~org-adapt-indentation~
 
@@ -695,8 +706,8 @@ The value of a shell script's execution is its exit code.  But most
 users expect the results of executing a shell script to be its output,
 not its exit code.
 
-So we introduced this option, that you can set to =nil= if you want
-to stick using ~:results value~ as the implicit header.
+So we introduced this option, that you can set to nil if you want to
+stick using ~:results value~ as the implicit header.
 
 In all Babel libraries, the absence of a ~:results~ header should
 produce the same result than setting ~:results value~, unless there is
@@ -1852,7 +1863,9 @@ Use "/!" markup when filtering TODO keywords to get only not-done TODO
 keywords.
 
 *** ~org-split-string~ returns ~("")~ when called on an empty string
+
 It used to return nil.
+
 *** Removal of =ob-scala.el=
 
 See [[https://github.com/ensime/emacs-scala-mode/issues/114][this github issue]].
@@ -1920,7 +1933,8 @@ before this let form.
 
 Creation of a new setting to specify the Cider timeout.  By setting
 the =org-babel-clojure-sync-nrepl-timeout= setting option.  The value
-is in seconds and if set to =nil= then no timeout will occur.
+is in seconds and if set to nil then no timeout will occur.
+
 **** Clojure: new header ~:show-process~
 
 A new block code header has been created for Org Babel that enables
@@ -2136,9 +2150,8 @@ removed from Gnus circa September 2010.
 
 *** ~org-agenda-repeating-timestamp-show-all~ is removed.
 
-For an equivalent to a =nil= value, set
-~org-agenda-show-future-repeats~ to nil and
-~org-agenda-prefer-last-repeat~ to =t=.
+For an equivalent to a nil value, set ~org-agenda-show-future-repeats~
+to nil and ~org-agenda-prefer-last-repeat~ to =t=.
 
 *** ~org-gnus-nnimap-query-article-no-from-file~ is removed.
 
@@ -2156,7 +2169,7 @@ equivalent to the removed format string.
 
 *** ~org-enable-table-editor~ is removed.
 
-Setting it to a =nil= value broke some other features (e.g., speed
+Setting it to a nil value broke some other features (e.g., speed
 keys).
 
 *** ~org-export-use-babel~ cannot be set to ~inline-only~
@@ -4616,7 +4629,7 @@ lines even if `org-use-tag-inheritance' was nil.  The default is now
 to *never* display inherited tags in agenda lines, but to /know/ about
 them when the agenda type is listed in [[doc::org-agenda-use-tag-inheritance][org-agenda-use-tag-inheritance]].
 
-** New default value nil for [[doc::org-agenda-dim-blocked-tasks][org-agenda-dim-blocked-tasks]]
+** New default value =nil= for [[doc::org-agenda-dim-blocked-tasks][org-agenda-dim-blocked-tasks]]
 
 Using `nil' as the default value speeds up the agenda generation.  You
 can hit `#' (or `C-u #') in agenda buffers to temporarily dim (or turn
