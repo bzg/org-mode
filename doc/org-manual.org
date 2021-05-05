@@ -21148,6 +21148,9 @@ be complete if the ones above were not mentioned in this manual.
 
 - Jason\nbsp{}F.\nbsp{}McBrayer suggested agenda export to CSV format.
 
+- Kyle Meyer helped setting up the [[https://public-inbox.org/][public-inbox]] archive of the [[https://orgmode.org/list/][Org
+  mailing list]] and has been fixing many bugs.
+
 - Max Mikhanosha came up with the idea of refiling.
 
 - Dmitri Minaev sent a patch to set priority limits on a per-file
@@ -21184,6 +21187,9 @@ be complete if the ones above were not mentioned in this manual.
 
 - Martin Pohlack provided the code snippet to bundle character
   insertion into bundles of 20 for undo.
+
+- Ihor Radchenko helped with fixing bugs and improving the user
+  experience regarding Org's speed.
 
 - T.\nbsp{}V.\nbsp{}Raman reported bugs and suggested improvements.
 
