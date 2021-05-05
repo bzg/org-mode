@@ -705,7 +705,7 @@ For export specific modules, see also `org-export-backends'."
 	(const :tag "   crypt:             Encryption of subtrees" org-crypt)
 	(const :tag "   ctags:             Access to Emacs tags with links" org-ctags)
 	(const :tag "   docview:           Links to Docview buffers" ol-docview)
-        (const :tag "   doi:               Links to DOI references" ol-docview)
+        (const :tag "   doi:               Links to DOI references" ol-doi)
 	(const :tag "   eww:               Store link to URL of Eww" ol-eww)
 	(const :tag "   gnus:              Links to GNUS folders/messages" ol-gnus)
 	(const :tag "   habit:             Track your consistency with habits" org-habit)
