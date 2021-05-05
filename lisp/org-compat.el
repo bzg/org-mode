@@ -119,6 +119,32 @@ extension beyond end of line was not controllable."
   (when (fboundp 'set-face-extend)
     (mapc (lambda (f) (set-face-extend f extend-p)) faces)))
 
+(if (fboundp 'string-distance)
+    (defalias 'org-string-distance 'string-distance)
+  (defun org-string-distance (s1 s2)
+    "Return the edit (levenshtein) distance between strings S1 S2."
+    (let* ((l1 (length s1))
+	   (l2 (length s2))
+	   (dist (vconcat (mapcar (lambda (_) (make-vector (1+ l2) nil))
+				  (number-sequence 1 (1+ l1)))))
+	   (in (lambda (i j) (aref (aref dist i) j))))
+      (setf (aref (aref dist 0) 0) 0)
+      (dolist (j (number-sequence 1 l2))
+        (setf (aref (aref dist 0) j) j))
+      (dolist (i (number-sequence 1 l1))
+        (setf (aref (aref dist i) 0) i)
+        (dolist (j (number-sequence 1 l2))
+	  (setf (aref (aref dist i) j)
+	        (min
+	         (1+ (funcall in (1- i) j))
+	         (1+ (funcall in i (1- j)))
+	         (+ (if (equal (aref s1 (1- i)) (aref s2 (1- j))) 0 1)
+		    (funcall in (1- i) (1- j)))))))
+      (funcall in l1 l2))))
+
+(define-obsolete-function-alias 'org-babel-edit-distance 'org-string-distance
+  "Org 9.5")
+
 
 ;;; Emacs < 26.1 compatibility
 

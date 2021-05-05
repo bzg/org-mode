@@ -809,27 +809,6 @@ arguments and pop open the results in a preview buffer."
 	 expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
       expanded)))
 
-(defun org-babel-edit-distance (s1 s2)
-  "Return the edit (levenshtein) distance between strings S1 S2."
-  (let* ((l1 (length s1))
-	 (l2 (length s2))
-	 (dist (vconcat (mapcar (lambda (_) (make-vector (1+ l2) nil))
-				(number-sequence 1 (1+ l1)))))
-	 (in (lambda (i j) (aref (aref dist i) j))))
-    (setf (aref (aref dist 0) 0) 0)
-    (dolist (j (number-sequence 1 l2))
-      (setf (aref (aref dist 0) j) j))
-    (dolist (i (number-sequence 1 l1))
-      (setf (aref (aref dist i) 0) i)
-      (dolist (j (number-sequence 1 l2))
-	(setf (aref (aref dist i) j)
-	      (min
-	       (1+ (funcall in (1- i) j))
-	       (1+ (funcall in i (1- j)))
-	       (+ (if (equal (aref s1 (1- i)) (aref s2 (1- j))) 0 1)
-		  (funcall in (1- i) (1- j)))))))
-    (funcall in l1 l2)))
-
 (defun org-babel-combine-header-arg-lists (original &rest others)
   "Combine a number of lists of header argument names and arguments."
   (let ((results (copy-sequence original)))
@@ -858,7 +837,7 @@ arguments and pop open the results in a preview buffer."
 				   (match-string 4))))))
       (dolist (name names)
 	(when (and (not (string= header name))
-		   (<= (org-babel-edit-distance header name) too-close)
+		   (<= (org-string-distance header name) too-close)
 		   (not (member header names)))
 	  (error "Supplied header \"%S\" is suspiciously close to \"%S\""
 		 header name))))
