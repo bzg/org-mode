@@ -377,6 +377,7 @@ be used to limit the collected code blocks by target file."
 	    ;; Add the spec for this block to blocks under its tangled
 	    ;; file name.
 	    (let* ((block (org-babel-tangle-single-block counter))
+                   (src-tfile (cdr (assq :tangle (nth 4 block))))
 		   (base-name (cond
 			       ((string= "yes" src-tfile)
                                 ;; buffer name
