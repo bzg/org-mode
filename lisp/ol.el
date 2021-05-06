@@ -1602,9 +1602,8 @@ non-nil."
 
        ((and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
 	(org-with-limited-levels
-	 (setq custom-id (org-entry-get nil "CUSTOM_ID"))
-	 (cond
-	  ;; Store a link using the target at point
+         (cond
+	  ;; Store a link using the target at point.
 	  ((org-in-regexp "[^<]<<\\([^<>]+\\)>>[^>]" 1)
 	   (setq cpltxt
 		 (concat "file:"
@@ -1612,6 +1611,15 @@ non-nil."
 			  (buffer-file-name (buffer-base-buffer)))
 			 "::" (match-string 1))
 		 link cpltxt))
+          ;; Store a link using the CUSTOM_ID property.
+          ((setq custom-id (org-entry-get nil "CUSTOM_ID"))
+           (setq cpltxt
+		 (concat "file:"
+			 (abbreviate-file-name
+			  (buffer-file-name (buffer-base-buffer)))
+			 "::#" custom-id)
+		 link cpltxt))
+          ;; Store a link using (and perhaps creating) the ID property.
 	  ((and (featurep 'org-id)
 		(or (eq org-id-link-to-org-use-id t)
 		    (and interactive?
@@ -1620,14 +1628,13 @@ non-nil."
 				      'create-if-interactive-and-no-custom-id)
 				  (not custom-id))))
 		    (and org-id-link-to-org-use-id (org-entry-get nil "ID"))))
-	   ;; Store a link using the ID at point
 	   (setq link (condition-case nil
 			  (prog1 (org-id-store-link)
 			    (setq desc (or (plist-get org-store-link-plist
 						      :description)
 					   "")))
 			(error
-			 ;; Probably before first headline, link only to file
+			 ;; Probably before first headline, link only to file.
 			 (concat "file:"
 				 (abbreviate-file-name
 				  (buffer-file-name (buffer-base-buffer))))))))
