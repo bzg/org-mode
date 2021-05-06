@@ -6999,6 +6999,11 @@ unconditionally."
 	 (when (equal arg '(16)) (org-up-heading-safe))
 	 (org-end-of-subtree)))
       (unless (bolp) (insert "\n"))
+      (when (and blank? (save-excursion
+                          (backward-char)
+                          (org-before-first-heading-p)))
+        (insert "\n")
+        (backward-char))
       (unless level (backward-char))
       (unless (and blank? (org-previous-line-empty-p))
 	(org-N-empty-lines-before-current (if blank? 1 0)))
