@@ -16394,9 +16394,9 @@ extract, export, and publish source code blocks.  Org can also compile
 and execute a source code block, then capture the results.  The Org
 mode literature sometimes refers to source code blocks as /live code/
 blocks because they can alter the content of the Org document or the
-material that it exports.  Users can control how live they want each
-source code block by tweaking the header arguments (see [[*Using Header
-Arguments]]) for compiling, execution, extraction, and exporting.
+material that it exports.  Users can control how the "liveliness" of
+each source code block by tweaking the header arguments (see [[*Using
+Header Arguments]]) for compiling, execution, extraction, and exporting.
 
 For editing and formatting a source code block, Org uses an
 appropriate Emacs major mode that includes features specifically
