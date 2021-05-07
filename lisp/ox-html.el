@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;;      Jambunathan K <kjambunathan at gmail dot com>
 ;; Maintainer: TEC <tecosaur@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp

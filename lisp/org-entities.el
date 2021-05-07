@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>,
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>,
 ;;         Ulf Stegemann <ulf at zeitform dot de>
 ;; Keywords: outlines, calendar, wp
 ;; Homepage: https://orgmode.org

@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2018-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 
 ;; This file is part of GNU Emacs.

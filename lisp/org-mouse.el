@@ -3,7 +3,7 @@
 ;; Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
-;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
+;; Maintainer: Carsten Dominik <carsten.dominik@gmail.com>
 
 ;; This file is part of GNU Emacs.
 
