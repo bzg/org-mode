@@ -250,6 +250,7 @@ property on the headline itself.")
        if(null != target) {
          elem.classList.remove(\"code-highlighted\");
          target.classList.remove(\"code-highlighted\");
+       }
      }
 // @license-end
 </script>"
