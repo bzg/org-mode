@@ -3,6 +3,7 @@
 ;; Copyright (C) 2011-2021 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
+;; Maintainer: Tyler Smith <tyler@plantarum.ca>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
