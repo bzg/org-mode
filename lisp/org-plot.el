@@ -650,7 +650,11 @@ line directly before or after the table."
         (setf params (org-plot/collect-options params))))
     ;; collect table and table information
     (let* ((data-file (make-temp-file "org-plot"))
-	   (table (let ((tbl (org-table-to-lisp)))
+           (table (let ((tbl (save-excursion
+                               ;; needed due to particularities of `org-table-begin'
+                               (when (= (current-column) 0)
+                                 (forward-char 1))
+                               (org-table-to-lisp))))
 		    (when (pcase (plist-get params :transpose)
 			    (`y   t)
 			    (`yes t)
