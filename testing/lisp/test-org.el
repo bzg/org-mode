@@ -1404,12 +1404,14 @@
 	    (electric-indent-local-mode 1)
 	    (call-interactively 'org-return)
 	    (buffer-string))))
-  (should
-   (equal "* heading\n  body"
-	  (org-test-with-temp-text "* heading<point>body"
-	    (electric-indent-local-mode 1)
-	    (call-interactively 'org-return)
-	    (buffer-string))))
+  ;; TODO: test more values of `org-adapt-indentation'.
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "* heading\n  body"
+	    (org-test-with-temp-text "* heading<point>body"
+	      (electric-indent-local-mode 1)
+	      (call-interactively 'org-return)
+	      (buffer-string)))))
   ;; C-j, like `electric-newline-and-maybe-indent', should not indent.
   (should
    (equal "  Para\ngraph"
@@ -1423,12 +1425,14 @@
 	    (electric-indent-local-mode 1)
 	    (call-interactively 'org-return-and-maybe-indent)
 	    (buffer-string))))
-  (should
-   (equal "* heading\nbody"
-	  (org-test-with-temp-text "* heading<point>body"
-	    (electric-indent-local-mode 1)
-	    (call-interactively 'org-return-and-maybe-indent)
-	    (buffer-string)))))
+  ;; TODO: test more values of `org-adapt-indentation'.
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "* heading\nbody"
+	    (org-test-with-temp-text "* heading<point>body"
+	      (electric-indent-local-mode 1)
+	      (call-interactively 'org-return-and-maybe-indent)
+	      (buffer-string))))))
 
 (ert-deftest test-org/without-electric-indent ()
   "Test RET and C-j specifications with `electric-indent-mode' off."
@@ -1467,12 +1471,14 @@
 	    (electric-indent-local-mode 0)
 	    (call-interactively 'org-return-and-maybe-indent)
 	    (buffer-string))))
-  (should
-   (equal "* heading\n  body"
-	  (org-test-with-temp-text "* heading<point>body"
-	    (electric-indent-local-mode 0)
-	    (call-interactively 'org-return-and-maybe-indent)
-	    (buffer-string)))))
+  ;; TODO: test more values of `org-adapt-indentation'.
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "* heading\n  body"
+	    (org-test-with-temp-text "* heading<point>body"
+	      (electric-indent-local-mode 0)
+	      (call-interactively 'org-return-and-maybe-indent)
+	      (buffer-string))))))
 
 (ert-deftest test-org/meta-return ()
   "Test M-RET (`org-meta-return') specifications."
