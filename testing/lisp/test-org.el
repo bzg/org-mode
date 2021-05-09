@@ -1007,22 +1007,23 @@
   ;; At the first line of an element, indent like previous element's
   ;; first line, ignoring footnotes definitions and inline tasks, or
   ;; according to parent.
-  (should
-   (= 2
-      (org-test-with-temp-text "A\n\n  B\n\nC<point>"
-	(org-indent-line)
-	(org-get-indentation))))
-  (should
-   (= 1
-      (org-test-with-temp-text " A\n\n[fn:1] B\n\n\nC<point>"
-	(org-indent-line)
-	(org-get-indentation))))
-  (should
-   (= 1
-      (org-test-with-temp-text
-	  " #+BEGIN_CENTER\n<point>  Contents\n#+END_CENTER"
-	(org-indent-line)
-	(org-get-indentation))))
+  (let ((org-adapt-indentation t))
+    (should
+     (= 2
+        (org-test-with-temp-text "A\n\n  B\n\nC<point>"
+	                         (org-indent-line)
+	                         (org-get-indentation))))
+    (should
+     (= 1
+        (org-test-with-temp-text " A\n\n[fn:1] B\n\n\nC<point>"
+	                         (org-indent-line)
+	                         (org-get-indentation))))
+    (should
+     (= 1
+        (org-test-with-temp-text
+	 " #+BEGIN_CENTER\n<point>  Contents\n#+END_CENTER"
+	 (org-indent-line)
+	 (org-get-indentation)))))
   ;; Within code part of a source block, use language major mode if
   ;; `org-src-tab-acts-natively' is non-nil.  Otherwise, indent
   ;; according to line above.
@@ -1066,11 +1067,12 @@
 (ert-deftest test-org/indent-region ()
   "Test `org-indent-region' specifications."
   ;; Indent paragraph.
-  (should
-   (equal "A\nB\nC"
-	  (org-test-with-temp-text " A\nB\n  C"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "A\nB\nC"
+	    (org-test-with-temp-text " A\nB\n  C"
+	                             (org-indent-region (point-min) (point-max))
+	                             (buffer-string)))))
   ;; Indent greater elements along with their contents.
   (should
    (equal "#+BEGIN_CENTER\nA\nB\n#+END_CENTER"
@@ -1083,11 +1085,12 @@
 	  (org-test-with-temp-text "#+BEGIN_VERSE\n A\n  B\n#+END_VERSE"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
-  (should
-   (equal "#+BEGIN_VERSE\n  A\n   B\n#+END_VERSE"
-	  (org-test-with-temp-text " #+BEGIN_VERSE\n  A\n   B\n #+END_VERSE"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "#+BEGIN_VERSE\n  A\n   B\n#+END_VERSE"
+	    (org-test-with-temp-text " #+BEGIN_VERSE\n  A\n   B\n #+END_VERSE"
+	                             (org-indent-region (point-min) (point-max))
+	                             (buffer-string)))))
   ;; Indent example blocks as a single block, unless indentation
   ;; should be preserved.  In this case only indent the block markers.
   (should
@@ -1095,36 +1098,38 @@
 	  (org-test-with-temp-text "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
-  (should
-   (equal "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
-	  (org-test-with-temp-text " #+BEGIN_EXAMPLE\n  A\n   B\n #+END_EXAMPLE"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
-  (should
-   (equal "#+BEGIN_EXAMPLE -i\n  A\n   B\n#+END_EXAMPLE"
-	  (org-test-with-temp-text
-	      " #+BEGIN_EXAMPLE -i\n  A\n   B\n #+END_EXAMPLE"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
-  (should
-   (equal "#+BEGIN_EXAMPLE\n  A\n   B\n#+END_EXAMPLE"
-	  (org-test-with-temp-text
-	      " #+BEGIN_EXAMPLE\n  A\n   B\n #+END_EXAMPLE"
-	    (let ((org-src-preserve-indentation t))
-	      (org-indent-region (point-min) (point-max)))
-	    (buffer-string))))
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "#+BEGIN_EXAMPLE\n A\n  B\n#+END_EXAMPLE"
+	    (org-test-with-temp-text " #+BEGIN_EXAMPLE\n  A\n   B\n #+END_EXAMPLE"
+	                             (org-indent-region (point-min) (point-max))
+	                             (buffer-string))))
+    (should
+     (equal "#+BEGIN_EXAMPLE -i\n  A\n   B\n#+END_EXAMPLE"
+	    (org-test-with-temp-text
+	     " #+BEGIN_EXAMPLE -i\n  A\n   B\n #+END_EXAMPLE"
+	     (org-indent-region (point-min) (point-max))
+	     (buffer-string))))
+    (should
+     (equal "#+BEGIN_EXAMPLE\n  A\n   B\n#+END_EXAMPLE"
+	    (org-test-with-temp-text
+	     " #+BEGIN_EXAMPLE\n  A\n   B\n #+END_EXAMPLE"
+	     (let ((org-src-preserve-indentation t))
+	       (org-indent-region (point-min) (point-max)))
+	     (buffer-string)))))
   ;; Treat export blocks as a whole.
   (should
    (equal "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
 	  (org-test-with-temp-text "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string))))
-  (should
-   (equal "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
-	  (org-test-with-temp-text
-	      " #+BEGIN_EXPORT latex\n  A\n   B\n #+END_EXPORT"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "#+BEGIN_EXPORT latex\n A\n  B\n#+END_EXPORT"
+	    (org-test-with-temp-text
+	        " #+BEGIN_EXPORT latex\n  A\n   B\n #+END_EXPORT"
+	      (org-indent-region (point-min) (point-max))
+	      (buffer-string)))))
   ;; Indent according to mode if `org-src-tab-acts-natively' is
   ;; non-nil.  Otherwise, do not indent code at all.
   (should
@@ -1160,16 +1165,17 @@
 	      (org-indent-region (point) (point-max)))
 	    (buffer-string))))
   ;; Indent plain lists.
-  (should
-   (equal "- A\n  B\n  - C\n\n    D"
-	  (org-test-with-temp-text "- A\n   B\n  - C\n\n     D"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
-  (should
-   (equal "- A\n\n- B"
-	  (org-test-with-temp-text " - A\n\n - B"
-	    (org-indent-region (point-min) (point-max))
-	    (buffer-string))))
+  (let ((org-adapt-indentation t))
+    (should
+     (equal "- A\n  B\n  - C\n\n    D"
+	    (org-test-with-temp-text "- A\n   B\n  - C\n\n     D"
+	      (org-indent-region (point-min) (point-max))
+	      (buffer-string))))
+    (should
+     (equal "- A\n\n- B"
+	    (org-test-with-temp-text " - A\n\n - B"
+	      (org-indent-region (point-min) (point-max))
+	      (buffer-string)))))
   ;; Indent footnote definitions.
   (should
    (equal "[fn:1] Definition\n\nDefinition"
