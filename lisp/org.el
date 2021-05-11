@@ -4117,7 +4117,7 @@ groups carry important information:
 (defconst org-stamp-time-of-day-regexp
   (concat
    "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} +\\sw+ +\\)"
-   "\\([012][0-9]:[0-5][0-9]\\(-\\([012][0-9]:[0-5][0-9]\\)\\)?[^\n\r>]*?\\)>"
+   "\\([012][0-9]:[0-5][0-9]\\)\\(-\\([012][0-9]:[0-5][0-9]\\)\\)?[^\n\r>]*?>"
    "\\(--?"
    "<\\1\\([012][0-9]:[0-5][0-9]\\)>\\)?")
   "Regular expression to match a timestamp time or time range.
