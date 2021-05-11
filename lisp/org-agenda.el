@@ -6739,10 +6739,6 @@ Any match of REMOVE-RE will be removed from TXT."
 			   (= (match-beginning 0) 0)
 			 t))
 	      (setq txt (replace-match "" nil nil txt))))
-	  ;; Normalize the time(s) to 24 hour
-	  (when s1 (setq s1 (org-get-time-of-day s1 'string t)))
-	  (when s2 (setq s2 (org-get-time-of-day s2 'string t)))
-
 	  ;; Try to set s2 if s1 and
 	  ;; `org-agenda-default-appointment-duration' are set
 	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
@@ -6751,12 +6747,13 @@ Any match of REMOVE-RE will be removed from TXT."
 		   (+ (org-duration-to-minutes s1 t)
 		      org-agenda-default-appointment-duration)
 		   nil t)))
-
 	  ;; Compute the duration
 	  (when s2
 	    (setq duration (- (org-duration-to-minutes s2)
-			      (org-duration-to-minutes s1)))))
-
+			      (org-duration-to-minutes s1))))
+          ;; Normalize the time(s) to 24 hour
+	  (when s1 (setq s1 (org-get-time-of-day s1 'string t)))
+	  (when s2 (setq s2 (org-get-time-of-day s2 'string t))))
 	(when (string-match org-tag-group-re txt)
 	  ;; Tags are in the string
 	  (if (or (eq org-agenda-remove-tags t)
