@@ -10012,7 +10012,7 @@ all statistics cookies in the buffer."
   (if all
       (progn
 	(org-update-checkbox-count 'all)
-	(org-map-entries 'org-update-parent-todo-statistics))
+	(org-map-region 'org-update-parent-todo-statistics (point-min) (point-max)))
     (if (not (org-at-heading-p))
 	(org-update-checkbox-count)
       (let ((pos (point-marker))
