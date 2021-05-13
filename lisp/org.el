@@ -15355,7 +15355,7 @@ used by the agenda files.  If ARCHIVE is `ifmode', do this only if
 				 (if (file-directory-p f)
 				     (directory-files
 				      f t org-agenda-file-regexp)
-				   (list f)))
+				   (list (expand-file-name f org-directory))))
 			       files)))
     (when org-agenda-skip-unavailable-files
       (setq files (delq nil
