@@ -1,3 +1,5 @@
+-*- mode: org; fill-column:70 -*-
+
 The text below explains the rules for participating in Org mode
 development.
 
@@ -9,8 +11,7 @@ Org maintenance is explained on Worg: see [[https://orgmode.org/worg/org-mainten
 
 1. The master git repository is hosted publicly at [[https://orgmode.org][orgmode.org]].
 
-   Anyone can get a clone of the current repository state using the
-   command
+   Anyone can get a clone of the current repository like this:
 
    : git clone https://code.orgmode.org/bzg/org-mode.git
 
@@ -19,16 +20,15 @@ Org maintenance is explained on Worg: see [[https://orgmode.org/worg/org-mainten
    repository.
 
 2. People who are interested in participating to the Org mode
-   development can do so by sending patches to this address:
+   development can do so by sending patches to the mailing list:
 
    : emacs-orgmode@gnu.org
 
-3. An interested developer can also request push access to the central
-   repository by creating an account on code.orgmode.org and by
-   sending her/his user info to the maintainer.
+3. An interested developer can also request push access to the
+   repository by sending an email to the maintainer to request an
+   account on code.orgmode.org.
 
-   After you have been added as a user with push privileges, clone the
-   repository through ssh using
+   After you have been added as a user with push privileges:
 
    : git clone git@code.orgmode.org:bzg/org-mode.git
 
@@ -69,6 +69,6 @@ effectively.
 
 * The =contrib/= directory
 
-The git repository used to contain a =contrib/= directory, which was
-moved to https://git.sr.ht/~bzg/org-contrib before Org 9.5, which see.
-
+The git repository used to contain a =contrib/= directory.  Files in
+this directory where moved to a new [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository before Org
+9.5.  You can install the new =org-contrib= from [[https://elpa.nongnu.org/nongnu/][NonGNU ELPA]].
