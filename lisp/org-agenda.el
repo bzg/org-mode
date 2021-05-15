@@ -5986,7 +5986,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		       '((:background "DarkRed") (:foreground "white"))))
 	 issue face m te ts dt ov)
     (goto-char (point-min))
-    (while (re-search-forward " Clocked: +(-\\|\\([0-9]+:[0-9]+\\))" nil t)
+    (while (re-search-forward " Clocked: +(\\(?:-\\|\\([0-9]+:[0-9]+\\)\\))" nil t)
       (setq issue nil face def-face)
       (catch 'next
 	(setq m (org-get-at-bol 'org-marker)
