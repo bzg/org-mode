@@ -383,7 +383,18 @@ the *old* location.")
   (let ((org-refile-keep t))
     (org-refile nil nil nil "Copy")))
 
+;;;###autoload
+(defun org-refile-reverse (&optional arg default-buffer rfloc msg)
+  "Refile while temporarily toggling `org-reverse-note-order'.
+So if `org-refile' would append the entry as the last entry under
+the target heading, `org-refile-reverse' will prepend it as the
+first entry, and vice-versa."
+  (interactive "P")
+  (let ((org-reverse-note-order (not (org-notes-order-reversed-p))))
+    (org-refile arg default-buffer rfloc msg)))
+
 (defvar org-capture-last-stored-marker)
+
 
 ;;;###autoload
 (defun org-refile (&optional arg default-buffer rfloc msg)

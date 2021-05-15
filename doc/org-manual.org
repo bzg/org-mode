@@ -7246,6 +7246,16 @@ special command:
   Copying works like refiling, except that the original note is not
   deleted.
 
+- {{{kbd(C-c C-M-w)}}} (~org-refile-reverse~) ::
+
+  #+kindex: C-c C-M-w
+  #+findex: org-refile-reverse
+  Works like refiling, except that it temporarily toggles how the
+  value of ~org-reverse-note-order~ applies to the current buffer.  So
+  if ~org-refile~ would append the entry as the last entry under the
+  target header, ~org-refile-reverse~ will prepend it as the first
+  entry, and vice-versa.
+
 ** Archiving
 :PROPERTIES:
 :DESCRIPTION: What to do with finished products.
