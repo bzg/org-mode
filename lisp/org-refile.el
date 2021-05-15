@@ -310,11 +310,13 @@ converted to a headline before refiling."
 		 (setq f (buffer-file-name (buffer-base-buffer f))))
 	       (setq f (and f (expand-file-name f)))
 	       (when (eq org-refile-use-outline-path 'file)
-		 (push (list (file-name-nondirectory f) f nil nil) tgs))
+		 (push (list (and f (file-name-nondirectory f)) f nil nil) tgs))
 	       (when (eq org-refile-use-outline-path 'buffer-name)
 		 (push (list (buffer-name (buffer-base-buffer)) f nil nil) tgs))
 	       (when (eq org-refile-use-outline-path 'full-file-path)
-		 (push (list (file-truename (buffer-file-name (buffer-base-buffer))) f nil nil) tgs))
+		 (push (list (and (buffer-file-name (buffer-base-buffer))
+                                  (file-truename (buffer-file-name (buffer-base-buffer))))
+                             f nil nil) tgs))
 	       (org-with-wide-buffer
 		(goto-char (point-min))
 		(setq org-outline-path-cache nil)
@@ -337,9 +339,10 @@ converted to a headline before refiling."
 				#'identity
 				(append
 				 (pcase org-refile-use-outline-path
-				   (`file (list (file-name-nondirectory
-						 (buffer-file-name
-						  (buffer-base-buffer)))))
+				   (`file (list
+                                           (and (buffer-file-name (buffer-base-buffer))
+                                                (file-name-nondirectory
+                                                 (buffer-file-name (buffer-base-buffer))))))
 				   (`full-file-path
 				    (list (buffer-file-name
 					   (buffer-base-buffer))))
