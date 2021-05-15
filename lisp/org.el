@@ -18469,7 +18469,7 @@ Your bug report will be posted to the Org mailing list.
 ------------------------------------------------------------------------")
     (save-excursion
       (when (re-search-backward "^\\(Subject: \\)Org mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
-	(replace-match "\\1Bug: \\3 [\\2]")))))
+	(replace-match "\\1[BUG] \\3 [\\2]")))))
 
 
 (defun org-install-agenda-files-menu ()
