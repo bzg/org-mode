@@ -2384,8 +2384,8 @@ used as a communication channel."
 			((string= float "sideways") 'sideways)
 			((string= float "multicolumn") 'multicolumn)
 			((and (plist-member attr :float) (not float)) 'nonfloat)
-			((or float
-			     (org-element-property :caption parent)
+                        (float float)
+			((or (org-element-property :caption parent)
 			     (org-string-nw-p (plist-get attr :caption)))
 			 'figure)
 			(t 'nonfloat))))
@@ -2477,6 +2477,18 @@ used as a communication channel."
 						   nil t))))
     ;; Return proper string, depending on FLOAT.
     (pcase float
+      ((and (pred stringp) env-string)
+       (format "\\begin{%s}%s
+%s%s
+%s%s
+%s\\end{%s}"
+               env-string
+               placement
+               (if caption-above-p caption "")
+               (if center "\\centering" "")
+               comment-include image-code
+               (if caption-above-p "" caption)
+               env-string))
       (`wrap (format "\\begin{wrapfigure}%s
 %s%s
 %s%s
@@ -3207,9 +3219,9 @@ centered."
 (defun org-latex--decorate-table (table attributes caption above? info)
   "Decorate TABLE string with caption and float environment.
 
-ATTRIBUTES is the plist containing is LaTeX attributes.  CAPTION
-is its caption, as a string or nil.  It is located above the
-table if ABOVE? is non-nil.  INFO is the plist containing current
+ATTRIBUTES is the plist containing LaTeX attributes.  CAPTION is
+its caption, as a string or nil.  It is located above the table
+if ABOVE? is non-nil.  INFO is the plist containing current
 export parameters.
 
 Return new environment, as a string."
@@ -3218,7 +3230,8 @@ Return new environment, as a string."
 	    (cond ((and (not float) (plist-member attributes :float)) nil)
 		  ((member float '("sidewaystable" "sideways")) "sidewaystable")
 		  ((equal float "multicolumn") "table*")
-		  ((or float (org-string-nw-p caption)) "table")
+                  (float float)
+		  ((org-string-nw-p caption) "table")
 		  (t nil))))
 	 (placement
 	  (or (plist-get attributes :placement)
