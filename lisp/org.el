@@ -11258,10 +11258,13 @@ or a character."
 	    (setq
 	     new
 	     (if nump
-		 (string-to-number
-		  (read-string (format "Priority %s-%s, SPC to remove: "
-				       (number-to-string org-priority-highest)
-				       (number-to-string org-priority-lowest))))
+                 (let ((msg (format "Priority %s-%s, SPC to remove: "
+				    (number-to-string org-priority-highest)
+				    (number-to-string org-priority-lowest))))
+                   (if (< 9 org-priority-lowest)
+		       (string-to-number (read-string msg))
+                     (message msg)
+                     (string-to-number (char-to-string (read-char-exclusive)))))
 	       (progn (message "Priority %c-%c, SPC to remove: "
 				 org-priority-highest org-priority-lowest)
 			(save-match-data
