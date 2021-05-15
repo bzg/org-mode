@@ -2484,10 +2484,10 @@ With optional prefix argument ALL, do this for the whole buffer."
    (let* ((cookie-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
 	  (box-re "^[ \t]*\\([-+*]\\|\\([0-9]+\\|[A-Za-z]\\)[.)]\\)[ \t]+\
 \\(?:\\[@\\(?:start:\\)?\\([0-9]+\\|[A-Za-z]\\)\\][ \t]*\\)?\\(\\[[- X]\\]\\)")
+          (cookie-data (or (org-entry-get nil "COOKIE_DATA") ""))
 	  (recursivep
 	   (or (not org-checkbox-hierarchical-statistics)
-	       (string-match "\\<recursive\\>"
-			     (or (org-entry-get nil "COOKIE_DATA") ""))))
+	       (string-match-p "\\<recursive\\>" cookie-data)))
 	  (within-inlinetask (and (not all)
 				  (featurep 'org-inlinetask)
 				  (org-inlinetask-in-task-p)))
@@ -2533,7 +2533,8 @@ With optional prefix argument ALL, do this for the whole buffer."
      (while (re-search-forward cookie-re end t)
        (let ((context (save-excursion (backward-char)
 				      (save-match-data (org-element-context)))))
-	 (when (eq (org-element-type context) 'statistics-cookie)
+	 (when (and (eq (org-element-type context) 'statistics-cookie)
+                    (not (string-match-p "\\<todo\\>" cookie-data)))
 	   (push
 	    (append
 	     (list (match-beginning 1) (match-end 1) (match-end 2))
