@@ -169,6 +169,12 @@ step that runs inkscape text-to-path replacement over the output file.
 ~org-html-scripts~ and ~org-html-style-default~ used to be constants,
 you can now configure them.
 
+*** New option ~org-attach-git-dir~
+
+~org-attach-git-dir~ will decide whether to use ~org-attach-git-dir~
+(the default) or use the attachment directory of the current node, if
+it is correctly configured as a Git repository.
+
 *** Some faces now use fixed-pitch
 
 See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
