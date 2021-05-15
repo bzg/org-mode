@@ -382,17 +382,15 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 	(setq unique (org-id-uuid))))
      ((eq org-id-method 'org)
       (let* ((etime (org-reverse-string (org-id-time-to-b36)))
-	     (postfix (if org-id-include-domain
-			  (progn
-			    (require 'message)
-			    (concat "@" (message-make-fqdn))))))
+	     (postfix (when org-id-include-domain
+			(require 'message)
+			(concat "@" (message-make-fqdn)))))
 	(setq unique (concat etime postfix))))
      ((eq org-id-method 'ts)
       (let ((ts (format-time-string org-id-ts-format))
-	    (postfix (if org-id-include-domain
-			 (progn
-			   (require 'message)
-			   (concat "@" (message-make-fqdn))))))
+	    (postfix (when org-id-include-domain
+		       (require 'message)
+		       (concat "@" (message-make-fqdn)))))
 	(setq unique (concat ts postfix))))
      (t (error "Invalid `org-id-method'")))
     (concat prefix unique)))
@@ -591,7 +589,7 @@ When FILES is given, scan also these files."
 			(setf (car item) (expand-file-name (car item) loc))))
 		    org-id-locations)))
 	(error
-	 (message "Could not read org-id-values from %s.  Setting it to nil."
+	 (message "Could not read `org-id-values' from %s, setting it to nil"
 		  org-id-locations-file))))
     (setq org-id-files (mapcar 'car org-id-locations))
     (setq org-id-locations (org-id-alist-to-hash org-id-locations))))
@@ -600,7 +598,7 @@ When FILES is given, scan also these files."
   "Add the ID with location FILE to the database of ID locations."
   ;; Only if global tracking is on, and when the buffer has a file
   (unless file
-    (error "bug: org-id-get expects a file-visiting buffer"))
+    (error "`org-id-get' expects a file-visiting buffer"))
   (let ((afile (abbreviate-file-name file)))
     (when (and org-id-track-globally id)
       (unless org-id-locations (org-id-locations-load))
@@ -612,7 +610,8 @@ When FILES is given, scan also these files."
   (add-hook 'kill-emacs-hook 'org-id-locations-save))
 
 (defun org-id-hash-to-alist (hash)
-  "Turn an org-id hash into an alist, so that it can be written to a file."
+  "Turn an org-id hash into an alist.
+This is to be able to write it to a file."
   (let (res x)
     (maphash
      (lambda (k v)
@@ -636,7 +635,7 @@ When FILES is given, scan also these files."
     res))
 
 (defun org-id-paste-tracker (txt &optional buffer-or-file)
-  "Update any IDs in TXT and assign BUFFER-OR-FILE to them."
+  "Update any ids in TXT and assign BUFFER-OR-FILE to them."
   (when org-id-track-globally
     (save-match-data
       (setq buffer-or-file (or buffer-or-file (current-buffer)))
@@ -655,7 +654,7 @@ When FILES is given, scan also these files."
 
 ;;;###autoload
 (defun org-id-find-id-file (id)
-  "Query the id database for the file in which this ID is located."
+  "Query the id database for the file in which ID is located."
   (unless org-id-locations (org-id-locations-load))
   (or (and org-id-locations
 	   (hash-table-p org-id-locations)
