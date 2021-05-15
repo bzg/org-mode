@@ -17898,12 +17898,13 @@ will not happen if point is in a table or on a \"dead\"
 object (e.g., within a comment).  In these case, you need to use
 `org-open-at-point' directly."
   (interactive "i\nP\np")
-  (let ((context (if org-return-follows-link (org-element-context)
-		   (org-element-at-point))))
+  (let* ((context (if org-return-follows-link (org-element-context)
+		   (org-element-at-point)))
+         (element-type (org-element-type context)))
     (cond
      ;; In a table, call `org-table-next-row'.  However, before first
      ;; column or after last one, split the table.
-     ((or (and (eq 'table (org-element-type context))
+     ((or (and (eq 'table element-type)
 	       (not (eq 'table.el (org-element-property :type context)))
 	       (>= (point) (org-element-property :contents-begin context))
 	       (< (point) (org-element-property :contents-end context)))
@@ -17917,7 +17918,7 @@ object (e.g., within a comment).  In these case, you need to use
      ;; `org-return-follows-link' allows it.  Tolerate fuzzy
      ;; locations, e.g., in a comment, as `org-open-at-point'.
      ((and org-return-follows-link
-	   (or (and (eq 'link (org-element-type context))
+	   (or (and (eq 'link element-type)
 		    ;; Ensure point is not on the white spaces after
 		    ;; the link.
 		    (let ((origin (point)))
@@ -17957,6 +17958,10 @@ object (e.g., within a comment).  In these case, you need to use
 	     (delete-and-extract-region (point) (line-end-position))))
 	(org--newline indent arg interactive)
 	(save-excursion (insert trailing-data))))
+     ;; FIXME: In a source block, don't try to indent as it may result
+     ;; in weird results due to `electric-indent-mode' being `t'.
+     ((eq element-type 'src-block)
+      (org--newline nil nil nil))
      (t
       ;; Do not auto-fill when point is in an Org property drawer.
       (let ((auto-fill-function (and (not (org-at-property-p))
@@ -19102,7 +19107,7 @@ Also align node properties according to `org-property-format'."
 		       (line-beginning-position 2))))
 	     nil)
 	    ((and (eq type 'src-block)
-		  org-src-tab-acts-natively
+                  org-src-tab-acts-natively
 		  (> (line-beginning-position)
 		     (org-element-property :post-affiliated element))
 		  (< (line-beginning-position)
