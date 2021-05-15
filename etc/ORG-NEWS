@@ -178,7 +178,81 @@ See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 
 See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
 
-*** =ob-python= improvements to =:return= header argument
+*** New command =org-refile-reverse= bound to =C-c C-M-w=
+
+You can now use =C-c C-M-w= to run ~org-refile-reverse~.
+
+It is almost identical to ~org-refile~, except that it temporarily
+toggles how ~org-reverse-note-order~ applies to the current buffer.
+So if ~org-refile~ would append the entry as the last entry under the
+target heading, ~org-refile-reverse~ will prepend it as the first
+entry, and vice-versa.
+
+*** Add a new ~:refile-targets~ template option
+
+When exiting capture mode via ~org-capture-refile~, the variable
+~org-refile-targets~ will be temporarily bound to the value of this
+template option.
+
+*** New startup options =#+startup: show<n>levels=
+
+These startup options complement the existing =overview=, =content=,
+=showall=, =showeverything= with a way to start the document with n
+levels shown, where n goes from 2 to 5.
+
+Example:
+
+: #+startup: show3levels
+
+*** New =u= table formula flag to enable Calc units simplification mode
+
+A new =u= mode flag for Calc formulas in Org tables has been added to
+enable Calc units simplification mode.
+
+*** Support exporting DOI links
+
+Org now supports export for DOI links, through its new =ol-doi.el=
+library.  For backward compatibility, it is loaded by default.
+
+*** LaTeX attribute ~:float~ now passes through arbitrary values
+
+LaTeX users are able to define arbitrary float types, e.g. with the
+float package.  The Org mode LaTeX exporter is now able to process and
+export arbitrary float types.  The user is responsible for ensuring
+that Org mode configures LaTeX to process any new float type.
+
+*** Support verse blocks in LaTeX export
+
+The LaTeX export back-end accepts four attributes for verse blocks:
+=:lines=, =:center=, =:versewidth= and =:latexcode=. The three first
+require the external LaTeX package =verse.sty=, wich is an extension
+of the standard LaTeX environment. The purpose of these attributes is
+explained below.
+
+*** =org-set-tags-command= selects tags from ~org-global-tags-completion-table~
+
+Let ~org-set-tags-command~ TAB fast tag completion interface complete
+tags including from both buffer local and user defined persistent
+global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
+option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
+
+*** Clocktable option =:formula %= now shows the per-file time percentages
+
+This change only has an effect when multiple files are contributing to
+a given clocktable (such as when =:scope agenda= has been specified).
+The existing behavior is that such tables have an extra 'File' column,
+and each individual file that contributes has its own summary line
+with the headline value '*File time*'.  Those summary rows also
+produce a rollup time value for the file in the 'Time' column.
+
+Prior to this change, the built-in =%= formula did not produce a
+calculation for those per-file times in the '%' column (the relevant
+cells in the '%' column were blank).  With this change, the percentage
+contribution of each individual file time to the total time is shown.
+
+The more agenda files you have, the more useful this behavior becomes.
+
+*** =ob-python.el= improvements to =:return= header argument
 
 The =:return= header argument in =ob-python= now works for session
 blocks as well as non-session blocks.  Also, it now works with the
@@ -229,71 +303,6 @@ package, to convert pandas Dataframes into orgmode tables:
 | 1 | 2 | 5 |
 | 2 | 3 | 6 |
 #+end_src
-
-*** New command ~org-refile-reverse~ (=C-c C-M-w=)
-
-You can now use =C-c C-M-w= to run ~org-refile-reverse~.
-
-It is almost identical to ~org-refile~, except that it temporarily
-toggles how ~org-reverse-note-order~ applies to the current buffer.
-So if ~org-refile~ would append the entry as the last entry under the
-target heading, ~org-refile-reverse~ will prepend it as the first
-entry, and vice-versa.
-
-*** New startup options =#+startup: show<n>levels=
-
-These startup options complement the existing =overview=, =content=,
-=showall=, =showeverything= with a way to start the document with n
-levels shown, where n goes from 2 to 5.
-
-Example:
-
-: #+startup: show3levels
-
-*** LaTeX attribute ~:float~ now passes through arbitrary values
-
-LaTeX users are able to define arbitrary float types, e.g. with the
-float package.  The Org mode LaTeX exporter is now able to process and
-export arbitrary float types.  The user is responsible for ensuring
-that Org mode configures LaTeX to process any new float type.
-
-*** New =u= table formula flag to enable Calc units simplification mode
-
-A new =u= mode flag for Calc formulas in Org tables has been added to
-enable Calc units simplification mode.
-
-*** Add a new :refile-targets template option
-
-When exiting capture mode via ~org-capture-refile~, the variable
-~org-refile-targets~ will be temporarily bound to the value of this
-template option.
-
-*** Export DOI links
-Org now supports export for DOI links, through its new =ol-doi.el=
-library.  For backward compatibility, it is loaded by default.
-*** =org-set-tags-command= select tags from ~org-global-tags-completion-table~
-
-Let ~org-set-tags-command~ TAB fast tag completion interface complete
-tags including from both buffer local and user defined persistent
-global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
-option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
-
-*** Clocktable option =:formula %= now shows the per-file time percentages
-
-This change only has an effect when multiple files are contributing to
-a given clocktable (such as when =:scope agenda= has been specified).
-The existing behavior is that such tables have an extra 'File' column,
-and each individual file that contributes has its own summary line
-with the headline value '*File time*'.  Those summary rows also
-produce a rollup time value for the file in the 'Time' column.
-
-Prior to this change, the built-in =%= formula did not produce a
-calculation for those per-file times in the '%' column (the relevant
-cells in the '%' column were blank).  With this change, the
-percentage contribution of each individual file time to the total
-time is shown.
-
-The more agenda files you have, the more useful this behavior becomes.
 
 ** Miscellaneous
 *** Missing or empty placeholders in "eval" macros are now =nil=
