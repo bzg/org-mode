@@ -230,6 +230,16 @@ package, to convert pandas Dataframes into orgmode tables:
 | 2 | 3 | 6 |
 #+end_src
 
+*** New command ~org-refile-reverse~ (=C-c C-M-w=)
+
+You can now use =C-c C-M-w= to run ~org-refile-reverse~.
+
+It is almost identical to ~org-refile~, except that it temporarily
+toggles how ~org-reverse-note-order~ applies to the current buffer.
+So if ~org-refile~ would append the entry as the last entry under the
+target heading, ~org-refile-reverse~ will prepend it as the first
+entry, and vice-versa.
+
 *** New startup options =#+startup: show<n>levels=
 
 These startup options complement the existing =overview=, =content=,
