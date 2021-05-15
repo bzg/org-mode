@@ -23,7 +23,8 @@ The old contents of the =contrib/= directory now lives in a separate
 repository at https://git.sr.ht/~bzg/org-contrib.
 
 You can install this repository by cloning it and updating your
-~load-path~ accordingly.
+~load-path~ accordingly.  You can also install =org-contrib= as a
+[[https://elpa.nongnu.org/nongnu/][NonGNU ELPA]] package.
 
 *** Org ELPA and Org archives won't be available for Org > 9.5
 
@@ -40,6 +41,11 @@ please use the NonGNU ELPA package.  If you want to keep up with the
 latest unstable Org, please install from the Git repository.
 
 See https://orgmode.org/org.html#Installation for the details.
+
+*** =ditaa.jar= is not bundled with Org anymore
+
+=ditaa.jar= used to be bundled with Org but it is not anymore.
+See [[https://github.com/stathissideris/ditaa][the ditaa repository]] on how to install it.
 
 *** ~org-adapt-indentation~ now defaults to =nil=
 
