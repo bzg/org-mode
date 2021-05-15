@@ -3526,26 +3526,37 @@ channel."
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
-  (concat
-   (org-latex--wrap-label
-    verse-block
-    ;; In a verse environment, add a line break to each newline
-    ;; character and change each white space at beginning of a line
-    ;; into a space of 1 em.  Also change each blank line with
-    ;; a vertical space of 1 em.
-    (format "\\begin{verse}\n%s\\end{verse}"
-	    (replace-regexp-in-string
-	     "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
-	     (replace-regexp-in-string
-	      "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
+  (let* ((lin (org-export-read-attribute :attr_latex verse-block :lines))
+         (latcode (org-export-read-attribute :attr_latex verse-block :latexcode))
+         (cent (org-export-read-attribute :attr_latex verse-block :center))
+         (attr (concat
+	        (if cent "[\\versewidth]" "")
+	        (if lin (format "\n\\poemlines{%s}" lin) "")
+	        (if latcode (format "\n%s" latcode) "")))
+         (versewidth (org-export-read-attribute :attr_latex verse-block :versewidth))
+         (vwidth (if versewidth (format "\\settowidth{\\versewidth}{%s}\n" versewidth) ""))
+         (linreset (if lin "\n\\poemlines{0}" "")))
+    (concat
+     (org-latex--wrap-label
+      verse-block
+      ;; In a verse environment, add a line break to each newline
+      ;; character and change each white space at beginning of a line
+      ;; into a space of 1 em.  Also change each blank line with
+      ;; a vertical space of 1 em.
+      (format "%s\\begin{verse}%s\n%s\\end{verse}%s"
+	      vwidth
+	      attr
 	      (replace-regexp-in-string
-	       "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
-	       contents nil t) nil t) nil t))
-    info)
-   ;; Insert footnote definitions, if any, after the environment, so
-   ;; the special formatting above is not applied to them.
-   (org-latex--delayed-footnotes-definitions verse-block info)))
-
+	       "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
+	       (replace-regexp-in-string
+	        "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
+	        (replace-regexp-in-string
+	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
+	         contents nil t) nil t) nil t) linreset)
+      info)
+     ;; Insert footnote definitions, if any, after the environment, so
+     ;; the special formatting above is not applied to them.
+     (org-latex--delayed-footnotes-definitions verse-block info))))
 
 
 ;;; End-user functions
