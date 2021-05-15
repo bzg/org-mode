@@ -178,7 +178,7 @@ See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 
 See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
 
-*** =ob-python= improvements to =:return= header argument 
+*** =ob-python= improvements to =:return= header argument
 
 The =:return= header argument in =ob-python= now works for session
 blocks as well as non-session blocks.  Also, it now works with the
@@ -249,6 +249,13 @@ levels shown, where n goes from 2 to 5.
 Example:
 
 : #+startup: show3levels
+
+*** LaTeX attribute ~:float~ now passes through arbitrary values
+
+LaTeX users are able to define arbitrary float types, e.g. with the
+float package.  The Org mode LaTeX exporter is now able to process and
+export arbitrary float types.  The user is responsible for ensuring
+that Org mode configures LaTeX to process any new float type.
 
 *** New =u= table formula flag to enable Calc units simplification mode
 
