@@ -6995,7 +6995,7 @@ HH:MM."
 	     (h2 (if (and string mod24 (not (and (= m 0) (= h1 24))))
 		     (mod h1 24) h1))
 	     (t0 (+ (* 100 h2) m))
-	     (t1 (concat (if (>= h1 24) "+" " ")
+	     (t1 (concat (if (>= h1 24) "+" "0")
 			 (if (and org-agenda-time-leading-zero
 				  (< t0 1000)) "0" "")
 			 (if (< t0 100) "0" "")
