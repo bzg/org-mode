@@ -826,13 +826,13 @@ e.g. \"tex:mathjax\".  Allowed values are:
 ;;;; Links :: Generic
 
 (defcustom org-html-link-org-files-as-html t
-  "Non-nil means make file links to `file.org' point to `file.html'.
-When `org-mode' is exporting an `org-mode' file to HTML, links to
-non-html files are directly put into a href tag in HTML.
-However, links to other Org files (recognized by the extension
-\".org\") should become links to the corresponding HTML
-file, assuming that the linked `org-mode' file will also be
-converted to HTML.
+  "Non-nil means make file links to \"file.org\" point to \"file.html\".
+
+When Org mode is exporting an Org file to HTML, links to non-HTML files
+are directly put into a \"href\" tag in HTML.  However, links to other Org files
+(recognized by the extension \".org\") should become links to the corresponding
+HTML file, assuming that the linked Org file will also be converted to HTML.
+
 When nil, the links still point to the plain \".org\" file."
   :group 'org-export-html
   :type 'boolean)
