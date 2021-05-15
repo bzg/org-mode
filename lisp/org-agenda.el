@@ -7146,12 +7146,12 @@ The optional argument TYPE tells the agenda type."
 		   (substring x 0 (match-end 1))
                    (unless (string-empty-p org-agenda-todo-keyword-format)
 		     (format org-agenda-todo-keyword-format
-			     (match-string 2 x))
-		     ;; Remove `display' property as the icon could leak
-		     ;; on the white space.
-		     (org-add-props " " (org-plist-delete (text-properties-at 0 x)
-			 				  'display)))
-		   (substring x (match-end 3)))))))
+			     (match-string 2 x)))
+                   ;; Remove `display' property as the icon could leak
+		   ;; on the white space.
+		   (org-add-props " " (org-plist-delete (text-properties-at 0 x)
+			 				'display)))
+		  (substring x (match-end 3))))))
       x)))
 
 (defsubst org-cmp-values (a b property)
