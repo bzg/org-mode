@@ -465,7 +465,7 @@ channel."
 
 ;;;; Latex Environment
 
-(defun org-md-latex-environment (latex-environment contents info)
+(defun org-md-latex-environment (latex-environment _contents info)
   "Transcode a LATEX-ENVIRONMENT object from Org to Markdown.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (plist-get info :with-latex)
@@ -480,7 +480,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Fragment
 
-(defun org-md-latex-fragment (latex-fragment contents info)
+(defun org-md-latex-fragment (latex-fragment _contents info)
   "Transcode a LATEX-FRAGMENT object from Org to Markdown.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (plist-get info :with-latex)
