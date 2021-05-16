@@ -433,7 +433,7 @@ spaces after it as being outside."
 	      (point))))))
 
 (defun org-src--contents-for-write-back (write-back-buf)
-  "Populate write-back-buf with contents in a format appropriate for write back.
+  "Populate WRITE-BACK-BUF with contents in the appropriate format.
 Assume point is in the corresponding edit buffer."
   (let ((indentation-offset
 	 (if org-src--preserve-indentation 0
@@ -1218,38 +1218,45 @@ Throw an error if there is no such buffer."
 (defun org-edit-src-exit ()
   "Kill current sub-editing buffer and return to source buffer."
   (interactive)
-  (unless (org-src-edit-buffer-p) (error "Not in a sub-editing buffer"))
+  (unless (org-src-edit-buffer-p)
+    (error "Not in a sub-editing buffer"))
   (let* ((beg org-src--beg-marker)
 	 (end org-src--end-marker)
 	 (write-back org-src--allow-write-back)
 	 (remote org-src--remote)
 	 (coordinates (and (not remote)
 			   (org-src--coordinates (point) 1 (point-max))))
-	 (write-back-buf (and write-back (generate-new-buffer "*org-src-write-back*"))))
+	 (write-back-buf
+          (and write-back (generate-new-buffer "*org-src-write-back*"))))
     (when write-back (org-src--contents-for-write-back write-back-buf))
     (set-buffer-modified-p nil)
     ;; Switch to source buffer.  Kill sub-editing buffer.
     (let ((edit-buffer (current-buffer))
 	  (source-buffer (marker-buffer beg)))
-      (unless source-buffer (error "Source buffer disappeared.  Aborting"))
+      (unless source-buffer
+        (when write-back-buf (kill-buffer write-back-buf))
+        (error "Source buffer disappeared.  Aborting"))
       (org-src-switch-to-buffer source-buffer 'exit)
       (kill-buffer edit-buffer))
     ;; Insert modified code.  Ensure it ends with a newline character.
     (org-with-wide-buffer
-     (when (and write-back (not (equal (buffer-substring beg end)
-				       (with-current-buffer write-back-buf (buffer-string)))))
+     (when (and write-back
+                (not (equal (buffer-substring beg end)
+			    (with-current-buffer write-back-buf
+                              (buffer-string)))))
        (undo-boundary)
        (goto-char beg)
        (let ((expecting-bol (bolp)))
 	 (if (version< emacs-version "26.1")
 	     (progn (delete-region beg end)
-		    (insert (with-current-buffer write-back-buf (buffer-string))))
+		    (insert (with-current-buffer write-back-buf
+                              (buffer-string))))
 	     (save-restriction
 	       (narrow-to-region beg end)
 	       (replace-buffer-contents write-back-buf)
 	       (goto-char (point-max))))
 	 (when (and expecting-bol (not (bolp))) (insert "\n")))
-       (kill-buffer write-back-buf)))
+       (when write-back-buf (kill-buffer write-back-buf))))
     ;; If we are to return to source buffer, put point at an
     ;; appropriate location.  In particular, if block is hidden, move
     ;; to the beginning of the block opening line.
