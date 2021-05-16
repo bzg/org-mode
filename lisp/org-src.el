@@ -1255,8 +1255,8 @@ Throw an error if there is no such buffer."
 	       (narrow-to-region beg end)
 	       (replace-buffer-contents write-back-buf)
 	       (goto-char (point-max))))
-	 (when (and expecting-bol (not (bolp))) (insert "\n")))
-       (when write-back-buf (kill-buffer write-back-buf))))
+	 (when (and expecting-bol (not (bolp))) (insert "\n")))))
+    (when write-back-buf (kill-buffer write-back-buf))
     ;; If we are to return to source buffer, put point at an
     ;; appropriate location.  In particular, if block is hidden, move
     ;; to the beginning of the block opening line.
