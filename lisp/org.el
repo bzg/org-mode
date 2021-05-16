@@ -8141,14 +8141,37 @@ Optional argument WITH-CASE means sort case-sensitively."
    with-case))
 
 (defun org-sort-remove-invisible (s)
-  "Remove invisible part of links and emphasis markers from string S."
-  (remove-text-properties 0 (length s) org-rm-props s)
-  (replace-regexp-in-string
-   org-verbatim-re (lambda (m) (format "%s " (match-string 4 m)))
-   (replace-regexp-in-string
-    org-emph-re (lambda (m) (format " %s " (match-string 4 m)))
-    (org-link-display-format s)
-    t t) t t))
+  "Remove emphasis markers and any invisible property from string S.
+Assume S may contain only objects."
+  ;; org-element-interpret-data clears any text property, including
+  ;; invisible part.
+  (org-element-interpret-data
+   (let ((tree (org-element-parse-secondary-string
+                s (org-element-restriction 'paragraph))))
+     (org-element-map tree '(bold code italic link strike-through underline verbatim)
+       (lambda (o)
+         (pcase (org-element-type o)
+           ;; Terminal object.  Replace it with its value.
+           ((or `code `verbatim)
+            (let ((new (org-element-property :value o)))
+              (org-element-insert-before new o)
+              (org-element-put-property
+               new :post-blank (org-element-property :post-blank o))))
+           ;; Non-terminal objects.  Splice contents.
+           (type
+            (let ((contents
+                   (or (org-element-contents o)
+                       (and (eq type 'link)
+                            (list (org-element-property :raw-link o)))))
+                  (c nil))
+              (while contents
+                (setq c (pop contents))
+                (org-element-insert-before c o))
+              (org-element-put-property
+               c :post-blank (org-element-property :post-blank o)))))
+         (org-element-extract-element o)))
+     ;; Return modified tree.
+     tree)))
 
 (defvar org-after-sorting-entries-or-items-hook nil
   "Hook that is run after a bunch of entries or items have been sorted.
