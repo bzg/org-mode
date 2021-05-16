@@ -48,10 +48,10 @@ org-version.tex:	orgcard.tex
 
 install:	org orgguide
 	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
-	$(CP) org $(DESTDIR)$(infodir)
-	$(CP) orgguide $(DESTDIR)$(infodir)
-	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) org
-	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) orgguide
+	$(CP) org.info $(DESTDIR)$(infodir)
+	$(CP) orgguide.info $(DESTDIR)$(infodir)
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) org.info
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) orgguide.info
 
 clean:
 	$(RM) org orgguide *.pdf *.html *_letter.tex org-version.inc \
@@ -68,7 +68,7 @@ clean-install:
 .SUFFIXES:	.texi .tex .txt _letter.tex
 
 %:		%.texi org-version.inc
-	$(MAKEINFO) --no-split $< -o $@
+	$(MAKEINFO) --no-split $< -o $@.info
 
 # the following two lines work around a bug in some versions of texi2dvi
 %.pdf:		LC_ALL=C
