@@ -94,6 +94,7 @@
 (require 'org-compat)
 (require 'org-keys)
 (require 'ol)
+(require 'oc)
 (require 'org-table)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
@@ -5765,7 +5766,9 @@ needs to be inserted at a specific position in the font-lock sequence.")
 		 org-comment-string)
 		'(9 'org-special-keyword t))
 	  ;; Blocks and meta lines
-	  '(org-fontify-meta-lines-and-blocks))))
+	  '(org-fontify-meta-lines-and-blocks)
+          ;; Citations
+          '(org-cite-activate))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     (run-hooks 'org-font-lock-set-keywords-hook)
     ;; Now set the full font-lock-keywords
