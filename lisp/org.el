@@ -656,7 +656,7 @@ defined in org-duration.el.")
 
 (make-obsolete-variable
  'org-load-hook
- "use `with-eval-after-load' instead." "Org 9.5")
+ "use `with-eval-after-load' instead." "9.5")
 
 (defcustom org-log-buffer-setup-hook nil
   "Hook that is run after an Org log buffer is created."

@@ -114,7 +114,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-sqlite-expand-vars (body vars)
   "Expand the variables held in VARS in BODY."
-  (declare (obsolete "use `org-babel-sql-expand-vars' instead." "Org 9.5"))
+  (declare (obsolete "use `org-babel-sql-expand-vars' instead." "9.5"))
   (org-babel-sql-expand-vars body vars t))
 
 (defun org-babel-sqlite-table-or-scalar (result)

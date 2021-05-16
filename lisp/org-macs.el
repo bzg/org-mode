@@ -172,7 +172,7 @@ because otherwise all these markers will point to nowhere."
        ,@body)))
 
 (defmacro org-eval-in-environment (environment form)
-  (declare (debug (form form)) (indent 1) (obsolete cl-progv "Mar 2021"))
+  (declare (debug (form form)) (indent 1) (obsolete cl-progv "2021"))
   `(eval (list 'let ,environment ',form)))
 
 ;;;###autoload
