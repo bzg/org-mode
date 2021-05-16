@@ -662,6 +662,9 @@ Some other text
   (should-not
    (org-test-with-temp-text ":TEST:"
      (org-element-map (org-element-parse-buffer) 'drawer 'identity nil t)))
+  (should-not
+   (org-test-with-temp-text ":END:"
+     (org-element-map (org-element-parse-buffer) 'drawer 'identity nil t)))
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text ":TEST:\nC\n:END:\n "
