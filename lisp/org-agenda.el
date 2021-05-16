@@ -3247,11 +3247,11 @@ s   Search for keywords                 M   Like m, but only TODO entries
 (defvar org-agenda-overriding-cmd-arguments nil)
 
 (defun org-let (list &rest body) ;FIXME: So many kittens are suffering here.
-  (declare (indent 1) (obsolete cl-progv "Mar 2021"))
+  (declare (indent 1) (obsolete cl-progv "2021"))
   (eval (cons 'let (cons list body))))
 
 (defun org-let2 (list1 list2 &rest body) ;FIXME: Where did our karma go?
-  (declare (indent 2) (obsolete cl-progv "Mar 2021"))
+  (declare (indent 2) (obsolete cl-progv "2021"))
   (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
 
 (defun org-agenda-run-series (name series)
