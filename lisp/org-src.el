@@ -432,8 +432,8 @@ spaces after it as being outside."
 		(line-end-position)
 	      (point))))))
 
-(defun org-src--contents-for-write-back ()
-  "Return buffer contents in a format appropriate for write back.
+(defun org-src--contents-for-write-back (write-back-buf)
+  "Populate write-back-buf with contents in a format appropriate for write back.
 Assume point is in the corresponding edit buffer."
   (let ((indentation-offset
 	 (if org-src--preserve-indentation 0
@@ -445,7 +445,7 @@ Assume point is in the corresponding edit buffer."
 	(source-tab-width org-src--tab-width)
 	(contents (org-with-wide-buffer (buffer-string)))
 	(write-back org-src--allow-write-back))
-    (with-temp-buffer
+    (with-current-buffer write-back-buf
       ;; Reproduce indentation parameters from source buffer.
       (setq indent-tabs-mode use-tabs?)
       (when (> source-tab-width 0) (setq tab-width source-tab-width))
@@ -462,8 +462,7 @@ Assume point is in the corresponding edit buffer."
 	    (let ((i (current-column)))
 	      (delete-region (line-beginning-position) (point))
 	      (indent-to (+ i indentation-offset))))
-	  (forward-line)))
-      (buffer-string))))
+	  (forward-line))))))
 
 (defun org-src--edit-element
     (datum name &optional initialize write-back contents remote)
@@ -1189,20 +1188,27 @@ Throw an error if there is no such buffer."
   (interactive)
   (unless (org-src-edit-buffer-p) (user-error "Not in a sub-editing buffer"))
   (set-buffer-modified-p nil)
-  (let ((edited-code (org-src--contents-for-write-back))
+  (let ((write-back-buf (generate-new-buffer "*org-src-write-back*"))
 	(beg org-src--beg-marker)
 	(end org-src--end-marker)
 	(overlay org-src--overlay))
+    (org-src--contents-for-write-back write-back-buf)
     (with-current-buffer (org-src-source-buffer)
       (undo-boundary)
       (goto-char beg)
       ;; Temporarily disable read-only features of OVERLAY in order to
       ;; insert new contents.
       (delete-overlay overlay)
-      (delete-region beg end)
       (let ((expecting-bol (bolp)))
-	(insert edited-code)
+	(if (version< emacs-version "26.1")
+	    (progn (delete-region beg end)
+		   (insert (with-current-buffer write-back-buf (buffer-string))))
+	    (save-restriction
+	      (narrow-to-region beg end)
+	      (replace-buffer-contents write-back-buf)
+	      (goto-char (point-max))))
 	(when (and expecting-bol (not (bolp))) (insert "\n")))
+      (kill-buffer write-back-buf)
       (save-buffer)
       (move-overlay overlay beg (point))))
   ;; `write-contents-functions' requires the function to return
@@ -1219,7 +1225,8 @@ Throw an error if there is no such buffer."
 	 (remote org-src--remote)
 	 (coordinates (and (not remote)
 			   (org-src--coordinates (point) 1 (point-max))))
-	 (code (and write-back (org-src--contents-for-write-back))))
+	 (write-back-buf (and write-back (generate-new-buffer "*org-src-write-back*"))))
+    (when write-back (org-src--contents-for-write-back write-back-buf))
     (set-buffer-modified-p nil)
     ;; Switch to source buffer.  Kill sub-editing buffer.
     (let ((edit-buffer (current-buffer))
@@ -1229,13 +1236,20 @@ Throw an error if there is no such buffer."
       (kill-buffer edit-buffer))
     ;; Insert modified code.  Ensure it ends with a newline character.
     (org-with-wide-buffer
-     (when (and write-back (not (equal (buffer-substring beg end) code)))
+     (when (and write-back (not (equal (buffer-substring beg end)
+				       (with-current-buffer write-back-buf (buffer-string)))))
        (undo-boundary)
        (goto-char beg)
-       (delete-region beg end)
        (let ((expecting-bol (bolp)))
-	 (insert code)
-	 (when (and expecting-bol (not (bolp))) (insert "\n")))))
+	 (if (version< emacs-version "26.1")
+	     (progn (delete-region beg end)
+		    (insert (with-current-buffer write-back-buf (buffer-string))))
+	     (save-restriction
+	       (narrow-to-region beg end)
+	       (replace-buffer-contents write-back-buf)
+	       (goto-char (point-max))))
+	 (when (and expecting-bol (not (bolp))) (insert "\n")))
+       (kill-buffer write-back-buf)))
     ;; If we are to return to source buffer, put point at an
     ;; appropriate location.  In particular, if block is hidden, move
     ;; to the beginning of the block opening line.
