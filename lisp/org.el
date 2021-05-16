@@ -10472,8 +10472,7 @@ This function is run automatically after each state change to a DONE state."
 	(org-entry-put nil "LAST_REPEAT" (format-time-string
 					  (org-time-stamp-format t t))))
       (when org-log-repeat
-	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
-		(memq 'org-add-log-note post-command-hook))
+	(if org-log-setup
 	    ;; We are already setup for some record.
 	    (when (eq org-log-repeat 'note)
 	      ;; Make sure we take a note, not only a time stamp.
@@ -10923,6 +10922,7 @@ narrowing."
 	 (forward-line)))))
    (if (bolp) (point) (line-beginning-position 2))))
 
+(defvar org-log-setup nil)
 (defun org-add-log-setup (&optional purpose state prev-state how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
@@ -10934,8 +10934,11 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	org-log-note-previous-state prev-state
 	org-log-note-how how
 	org-log-note-extra extra
-	org-log-note-effective-time (org-current-effective-time))
-  (add-hook 'post-command-hook 'org-add-log-note 'append))
+	org-log-note-effective-time (org-current-effective-time)
+        org-log-setup t)
+  (if (eq how 'note)
+      (add-hook 'post-command-hook 'org-add-log-note 'append)
+    (org-add-log-note purpose)))
 
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
@@ -10963,6 +10966,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 (defun org-add-log-note (&optional _purpose)
   "Pop up a window for taking a note, and add this note later."
   (remove-hook 'post-command-hook 'org-add-log-note)
+  (setq org-log-setup nil)
   (setq org-log-note-window-configuration (current-window-configuration))
   (delete-other-windows)
   (move-marker org-log-note-return-to (point))
@@ -11071,19 +11075,13 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	     (indent-line-to ind)
 	     (insert line)))
 	 (message "Note stored")
-	 (org-back-to-heading t))
-	;; Fix `buffer-undo-list' when `org-store-log-note' is called
-	;; from within `org-add-log-note' because `buffer-undo-list'
-	;; is then modified outside of `org-with-remote-undo'.
-	(when (eq this-command 'org-agenda-todo)
-	  (setcdr buffer-undo-list (cddr buffer-undo-list))))))
+	 (org-back-to-heading t)))))
   ;; Don't add undo information when called from `org-agenda-todo'.
-  (let ((buffer-undo-list (eq this-command 'org-agenda-todo)))
-    (set-window-configuration org-log-note-window-configuration)
-    (with-current-buffer (marker-buffer org-log-note-return-to)
-      (goto-char org-log-note-return-to))
-    (move-marker org-log-note-return-to nil)
-    (when org-log-post-message (message "%s" org-log-post-message))))
+  (set-window-configuration org-log-note-window-configuration)
+  (with-current-buffer (marker-buffer org-log-note-return-to)
+    (goto-char org-log-note-return-to))
+  (move-marker org-log-note-return-to nil)
+  (when org-log-post-message (message "%s" org-log-post-message)))
 
 (defun org-remove-empty-drawer-at (pos)
   "Remove an empty drawer at position POS.
