@@ -2929,7 +2929,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       ((eq type 'tags)
 		(org-let lprops '(org-tags-view current-prefix-arg org-match)))
 	       ((eq type 'tags-todo)
-		(org-let lprops '(org-tags-view '(4) org-match)))
+		(org-let lprops '(org-tags-view nil org-match)))
 	       ((eq type 'todo)
 		(org-let lprops '(org-todo-list org-match)))
 	       ((eq type 'tags-tree)
@@ -3265,7 +3265,7 @@ s   Search for keywords                 M   Like m, but only TODO entries
 	    '(org-tags-view current-prefix-arg match)))
 	 ((eq type 'tags-todo)
 	  (org-let2 gprops lprops
-	    '(org-tags-view '(4) match)))
+	    '(org-tags-view nil match)))
 	 ((eq type 'todo)
 	  (org-let2 gprops lprops
 	    '(org-todo-list match)))
