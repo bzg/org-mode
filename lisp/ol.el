@@ -1720,7 +1720,7 @@ non-nil."
       (if (not (and interactive? link))
 	  (or agenda-link (and link (org-link-make-string link desc)))
 	(if (member (list link desc) org-stored-links)
-	    (message "This link already exists")
+	    (message "This link has already been stored")
 	  (push (list link desc) org-stored-links)
 	  (message "Stored: %s" (or desc link))
 	  (when custom-id
