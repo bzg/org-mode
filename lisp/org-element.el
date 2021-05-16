@@ -737,7 +737,9 @@ Return a list whose CAR is `drawer' and CDR is a plist containing
 
 Assume point is at beginning of drawer."
   (let ((case-fold-search t))
-    (if (not (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
+    (if (not (save-excursion
+               (goto-char (min limit (line-end-position)))
+               (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
 	;; Incomplete drawer: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (save-excursion
