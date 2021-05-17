@@ -2951,7 +2951,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	          (`tags
 	           (org-tags-view current-prefix-arg org-match))
 	          (`tags-todo
-	           (org-tags-view nil org-match))
+	           (org-tags-view '(4) org-match))
 	          (`todo
 		   (org-todo-list org-match))
 		  (`tags-tree
