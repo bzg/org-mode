@@ -39,6 +39,7 @@
 (declare-function org-string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
 
 (defvar org-ts-regexp0)
+(defvar ffap-url-regexp)
 
 
 ;;; Macros
@@ -807,6 +808,10 @@ return nil."
 	   (list context (match-beginning group) (match-end group))
 	 t)))
 
+(defun org-url-p (s)
+  "Non-nil if string S is a URL."
+  (require 'ffap)
+  (string-match-p ffap-url-regexp s))
 
 
 ;;; String manipulation

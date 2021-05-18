@@ -361,6 +361,8 @@ Counting starts at 1."
 (make-obsolete 'org-attach-store-link "No longer used" "9.4")
 (make-obsolete 'org-attach-expand-link "No longer used" "9.4")
 
+(define-obsolete-function-alias 'org-file-url-p 'org-url-p "9.5")
+
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
   (save-match-data

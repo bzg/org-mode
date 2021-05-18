@@ -593,7 +593,7 @@ in description"
 	(let ((file (org-unbracket-string
 			"\"" "\""
 		      (org-element-property :value k))))
-	  (and (not (org-file-url-p file))
+	  (and (not (org-url-p file))
 	       (not (file-remote-p file))
 	       (not (file-exists-p file))
 	       (list (org-element-property :begin k)
