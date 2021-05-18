@@ -316,6 +316,21 @@ package, to convert pandas Dataframes into orgmode tables:
 | 2 | 3 | 6 |
 #+end_src
 
+*** Async session evaluation
+
+The =:async= header argument can be used for asynchronous evaluation
+in session blocks for certain languages.
+
+Currently, async evaluation is supported in Python.  There is also
+functionality to implement async evaluation in other languages that
+use comint, but this needs to be done on a per-language basis.
+
+By default, async evaluation is disabled unless the =:async= header
+argument is present.  You can also set =:async no= to force it off
+(for example if you've set =:async= in a property drawer).
+
+Async evaluation is disabled during export.
+
 ** Miscellaneous
 *** Missing or empty placeholders in "eval" macros are now =nil=
 They used to be the empty string.
