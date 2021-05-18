@@ -453,15 +453,14 @@ Assume point is in the corresponding edit buffer."
       (insert (org-no-properties contents))
       (goto-char (point-min))
       (when (functionp write-back) (save-excursion (funcall write-back)))
-      ;; Add INDENTATION-OFFSET to every non-empty line in buffer,
+      ;; Add INDENTATION-OFFSET to every line in buffer,
       ;; unless indentation is meant to be preserved.
       (when (> indentation-offset 0)
 	(while (not (eobp))
 	  (skip-chars-forward " \t")
-	  (unless (eolp)		;ignore blank lines
-	    (let ((i (current-column)))
-	      (delete-region (line-beginning-position) (point))
-	      (indent-to (+ i indentation-offset))))
+	  (let ((i (current-column)))
+	    (delete-region (line-beginning-position) (point))
+	    (indent-to (+ i indentation-offset)))
 	  (forward-line))))))
 
 (defun org-src--edit-element

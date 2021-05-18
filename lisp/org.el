@@ -18018,10 +18018,6 @@ object (e.g., within a comment).  In these case, you need to use
 	     (delete-and-extract-region (point) (line-end-position))))
 	(org--newline indent arg interactive)
 	(save-excursion (insert trailing-data))))
-     ;; FIXME: In a source block, don't try to indent as it may result
-     ;; in weird results due to `electric-indent-mode' being `t'.
-     ((eq element-type 'src-block)
-      (org--newline nil nil nil))
      (t
       ;; Do not auto-fill when point is in an Org property drawer.
       (let ((auto-fill-function (and (not (org-at-property-p))
@@ -19167,7 +19163,7 @@ Also align node properties according to `org-property-format'."
 		       (line-beginning-position 2))))
 	     nil)
 	    ((and (eq type 'src-block)
-                  org-src-tab-acts-natively
+		  org-src-tab-acts-natively
 		  (> (line-beginning-position)
 		     (org-element-property :post-affiliated element))
 		  (< (line-beginning-position)
