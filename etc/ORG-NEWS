@@ -55,8 +55,11 @@ If you want to automatically indent headlines' metadata, set it to
 If you want to automatically indent every line to the headline's
 current indentation, set it to =t=.
 
-Also beware that the behavior of =RET= and =C-j= also depends on the
-value of ~electric-indent-mode~. See [[https://orgmode.org/worg/org-faq.html#indentation][this FAQ]] for more details.
+Indent added by =RET= and =C-j= also depends on the value of
+~electric-indent-mode~.  Enabling this mode by default in 9.4 revealed
+some bugs caused confusing behavior.  If you disabled
+~electric-indent-mode~ for this reason, it is time to try it again.
+Hopefully problems have been fixed.  See [[https://orgmode.org/worg/org-faq.html#indentation][this FAQ]] for more details.
 
 *** ~org-speed-commands-user~ is obsolete, use ~org-speed-commands~
 
