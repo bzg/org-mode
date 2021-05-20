@@ -13899,8 +13899,8 @@ explained below.
 A complete example with Shakespeare's first sonnet:
 
 #+begin_src org
-,#+ATTR_LaTeX: :center t :latexcode \color{red} :lines 5
-,#+ATTR_LaTeX: :versewidth Feed’st thy light’st flame with self-substantial fuel,
+,#+ATTR_LATEX: :center t :latexcode \color{red} :lines 5
+,#+ATTR_LATEX: :versewidth Feed’st thy light’st flame with self-substantial fuel,
 ,#+begin_verse
 From fairest creatures we desire increase,
 That thereby beauty’s rose might never die,
