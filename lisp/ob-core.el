@@ -1712,9 +1712,10 @@ of the vars, cnames and rnames."
     (list
      (mapcar
       (lambda (var)
-        (when (listp (cdr var))
+        (when (proper-list-p (cdr var))
           (when (and (not (equal colnames "no"))
-                     (or colnames (and (eq (nth 1 (cdr var)) 'hline)
+                     (or colnames (and (length> (cdr var) 1)
+                                       (eq (nth 1 (cdr var)) 'hline)
                                        (not (member 'hline (cddr (cdr var)))))))
             (let ((both (org-babel-get-colnames (cdr var))))
               (setq cnames (cons (cons (car var) (cdr both))

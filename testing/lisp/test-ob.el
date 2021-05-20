@@ -178,6 +178,22 @@ should still return the link."
 			    (point-at-bol)
 			    (point-at-eol))))))
 
+(ert-deftest test-ob/cons-cell-as-variable ()
+  "Test that cons cell can be assigned as variable."
+  (org-test-with-temp-text "
+
+#+name: cons
+#+begin_src emacs-lisp
+  (cons 1 2)
+#+end_src
+
+#+begin_src emacs-lisp :var x=cons
+  x
+#+end_src"
+
+    (org-babel-next-src-block 2)
+    (should (equal (cons 1 2) (org-babel-execute-src-block)))))
+
 (ert-deftest test-ob/multi-line-header-arguments ()
   "Test that multi-line header arguments and can be read."
   (org-test-with-temp-text-in-file "

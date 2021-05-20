@@ -88,7 +88,7 @@ code."
        (cons
 	(car pair) ;; variable name
 	(let* ((val (cdr pair)) ;; variable value
-	       (lp  (listp val)))
+	       (lp  (proper-list-p val)))
 	  (if lp
 	      (org-babel-gnuplot-table-to-data
 	       (let* ((first  (car val))
