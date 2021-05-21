@@ -58,6 +58,7 @@ clean:
 	      org-version.tex *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys \
               *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
 cleanall:	clean
+	$(RM) org.texi orgguide.texi
 	$(RMR) guide manual
 
 clean-install:
