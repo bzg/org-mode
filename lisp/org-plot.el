@@ -651,9 +651,7 @@ line directly before or after the table."
     ;; collect table and table information
     (let* ((data-file (make-temp-file "org-plot"))
            (table (let ((tbl (save-excursion
-                               ;; needed due to particularities of `org-table-begin'
-                               (when (= (current-column) 0)
-                                 (forward-char 1))
+                               (org-plot/goto-nearest-table)
                                (org-table-to-lisp))))
 		    (when (pcase (plist-get params :transpose)
 			    (`y   t)
