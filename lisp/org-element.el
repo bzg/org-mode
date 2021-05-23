@@ -1021,7 +1021,10 @@ Assume point is at beginning of the headline."
 	   (commentedp
 	    (and (let (case-fold-search) (looking-at org-comment-string))
 		 (goto-char (match-end 0))))
-	   (title-start (point))
+	   (title-start (prog1 (point)
+                          (unless (or todo priority commentedp)
+                            ;; Headline like "* :tag:"
+                            (skip-syntax-backward " \t"))))
 	   (tags (when (re-search-forward
 			"[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
 			(line-end-position)
