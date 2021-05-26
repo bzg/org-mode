@@ -1494,7 +1494,10 @@ nil."
 	       (pcase-let ((`(,keyword ,value) pair))
 		 (concat keyword
 			 (and (> (length value) 0)
-			      (concat "=" value)))))
+			      (concat "="
+                                      (if (string-match-p (rx (any "[]")) value)
+                                          (format "{%s}" value)
+                                        value))))))
 	     options
 	     ","))
 
