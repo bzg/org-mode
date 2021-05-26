@@ -121,6 +121,7 @@
     (:latex-classes nil nil org-latex-classes)
     (:latex-default-figure-position nil nil org-latex-default-figure-position)
     (:latex-default-table-environment nil nil org-latex-default-table-environment)
+    (:latex-default-quote-environment nil nil org-latex-default-quote-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
     (:latex-diary-timestamp-format nil nil org-latex-diary-timestamp-format)
     (:latex-footnote-defined-format nil nil org-latex-footnote-defined-format)
@@ -771,6 +772,13 @@ default we use here encompasses both."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'string)
+
+(defcustom org-latex-default-quote-environment "quote"
+  "Default environment used to `quote' blocks."
+  :group 'org-export-latex
+  :package-version '(Org . "9.5")
+  :type 'string
+  :safe t)
 
 (defcustom org-latex-default-table-mode 'table
   "Default mode for tables.
@@ -2895,9 +2903,19 @@ channel."
   "Transcode a QUOTE-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
+  (let ((environment
+	  (or (org-export-read-attribute :attr_latex quote-block :environment)
+	      (plist-get info :latex-default-quote-environment)))
+	 (options
+	  (or (org-export-read-attribute :attr_latex quote-block :options)
+	      "")))
   (org-latex--wrap-label
-   quote-block (format "\\begin{quote}\n%s\\end{quote}" contents) info))
-
+   quote-block (format "\\begin{%s}%s\n%s\\end{%s}"
+			     environment
+			     options
+			     contents
+			     environment)
+   info)))
 
 ;;;; Radio Target
 

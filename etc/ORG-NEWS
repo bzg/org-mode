@@ -244,6 +244,13 @@ require the external LaTeX package =verse.sty=, wich is an extension
 of the standard LaTeX environment. The purpose of these attributes is
 explained below.
 
+*** Support quote blocks in LaTeX export
+
+The LaTeX export back-end accepts two attributes for quote blocks:
+=:environment=, for an arbitrary quoting environment (the default
+value is that of =org-latex-default-quote-environment=: ="quote"=) and
+=:options=.
+
 *** =org-set-tags-command= selects tags from ~org-global-tags-completion-table~
 
 Let ~org-set-tags-command~ TAB fast tag completion interface complete

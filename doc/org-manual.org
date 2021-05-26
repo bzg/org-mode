@@ -13919,6 +13919,48 @@ To eat the world’s due, by the grave and thee.
 ,#+END_VERSE
 #+end_src
 
+*** Quote blocks in LaTeX export
+:PROPERTIES:
+:DESCRIPTION: Attributes specific to quote blocks.
+:END:
+
+#+cindex: quote blocks, in @LaTeX{} export
+#+cindex: @samp{ATTR_LATEX}, keyword
+#+cindex: org-latex-default-quote-environment
+
+The LaTeX export back-end accepts two attributes for quote blocks:
+=:environment=, for an arbitrary quoting environment (the default
+value is that of ~org-latex-default-quote-environment~: ~"quote"~) and
+=:options=. For example, to choose the environment =quotation=,
+included as an alternative to =quote= in standard LaTeX classes:
+
+#+begin_example
+,#+ATTR_LATEX: :environment quotation
+,#+BEGIN_QUOTE
+some text...
+,#+END_QUOTE
+#+end_example
+
+To choose the =foreigndisplayquote= environment, included in the LaTeX
+package =csquotes=, with the =german= option, use this syntax:
+
+#+begin_example
+,#+LATEX_HEADER:\usepackage[autostyle=true]{csquotes}
+,#+ATTR_LATEX: :environment foreigndisplayquote :options {german}
+,#+BEGIN_QUOTE
+some text in German...
+,#+END_QUOTE
+#+end_example
+
+#+texinfo: @noindent
+which is exported to LaTeX as
+
+#+begin_example
+\begin{foreigndisplayquote}{german}
+some text in German...
+\end{foreigndisplayquote}
+#+end_example
+
 ** Markdown Export
 :PROPERTIES:
 :DESCRIPTION: Exporting to Markdown.
