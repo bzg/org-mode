@@ -5440,7 +5440,9 @@ by a #."
 	  t)))))
 
 (defun org-fontify-extend-region (beg end _old-len)
-  (let ((begin-re "\\(\\\\\\[\\|\\(#\\+begin_\\|\\\\begin{\\)\\S-+\\)")
+  (let ((end (if (progn (goto-char end) (looking-at-p "^[*#]"))
+                 (1+ end) end))
+        (begin-re "\\(\\\\\\[\\|\\(#\\+begin_\\|\\\\begin{\\)\\S-+\\)")
 	(end-re "\\(\\\\\\]\\|\\(#\\+end_\\|\\\\end{\\)\\S-+\\)")
 	(extend
          (lambda (r1 r2 dir)
@@ -5450,15 +5452,14 @@ by a #."
                        "[][]" r2
 		       (match-string-no-properties 0)))))
 	     (re-search-forward (regexp-quote re) nil t dir)))))
+    (goto-char beg)
+    (back-to-indentation)
     (save-match-data
-      (save-excursion
-	(goto-char beg)
-	(back-to-indentation)
-	(cond ((looking-at end-re)
-	       (cons (or (funcall extend "begin" "[" -1) beg) end))
-	      ((looking-at begin-re)
-	       (cons beg (or (funcall extend "end" "]" 1) end)))
-	      (t (cons beg end)))))))
+      (cond ((looking-at end-re)
+	     (cons (or (funcall extend "begin" "[" -1) beg) end))
+	    ((looking-at begin-re)
+	     (cons beg (or (funcall extend "end" "]" 1) end)))
+	    (t (cons beg end))))))
 
 (defun org-activate-footnote-links (limit)
   "Add text properties for footnotes."
