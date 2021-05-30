@@ -6947,7 +6947,7 @@ and stored in the variable `org-prefix-format-compiled'."
 		  (and (string-match "\\.[0-9]+" x)
 		       (string-to-number (substring (match-string 0 x) 1)))))))
       (if (eq var 'eval)
-	  (setq varform `(format ,f (org-eval ,(read (match-string 4 s)))))
+	  (setq varform `(format ,f (org-eval ,(read (substring s (match-beginning 4))))))
 	(if opt
 	    (setq varform
 		  `(if (member ,var '("" nil))
@@ -6956,7 +6956,12 @@ and stored in the variable `org-prefix-format-compiled'."
 	  (setq varform
 		`(format ,f (if (member ,var '("" nil)) ""
 			      (concat ,var ,c (get-text-property 0 'extra-space ,var)))))))
-      (setq s (replace-match "%s" t nil s))
+      (if (eq var 'eval)
+          (setf (substring s (match-beginning 0)
+                           (+ (match-beginning 4)
+                              (length (format "%S" (read (substring s (match-beginning 4)))))))
+                "%s")
+        (setq s (replace-match "%s" t nil s)))
       (push varform vars))
     (setq vars (nreverse vars))
     (with-current-buffer (or org-agenda-buffer (current-buffer))
