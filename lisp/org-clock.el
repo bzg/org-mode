@@ -1682,7 +1682,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 				(line-beginning-position 2)))
 		(org-log-note-clock-out
 		 (org-add-log-setup
-		  'clock-out nil nil nil
+		  'clock-out nil nil 'note
 		  (concat "# Task: " (org-get-heading t) "\n\n"))))
 	  (when org-clock-mode-line-timer
 	    (cancel-timer org-clock-mode-line-timer)
