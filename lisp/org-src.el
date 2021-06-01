@@ -1199,12 +1199,12 @@ Throw an error if there is no such buffer."
       ;; insert new contents.
       (delete-overlay overlay)
       (let ((expecting-bol (bolp)))
-	(if (version< emacs-version "26.1")
+	(if (version< emacs-version "27.1")
 	    (progn (delete-region beg end)
 		   (insert (with-current-buffer write-back-buf (buffer-string))))
 	    (save-restriction
 	      (narrow-to-region beg end)
-	      (replace-buffer-contents write-back-buf)
+	      (replace-buffer-contents write-back-buf 0.1 nil)
 	      (goto-char (point-max))))
 	(when (and expecting-bol (not (bolp))) (insert "\n")))
       (kill-buffer write-back-buf)
@@ -1246,13 +1246,13 @@ Throw an error if there is no such buffer."
        (undo-boundary)
        (goto-char beg)
        (let ((expecting-bol (bolp)))
-	 (if (version< emacs-version "26.1")
+	 (if (version< emacs-version "27.1")
 	     (progn (delete-region beg end)
 		    (insert (with-current-buffer write-back-buf
                               (buffer-string))))
 	     (save-restriction
 	       (narrow-to-region beg end)
-	       (replace-buffer-contents write-back-buf)
+	       (replace-buffer-contents write-back-buf 0.1 nil)
 	       (goto-char (point-max))))
 	 (when (and expecting-bol (not (bolp))) (insert "\n")))))
     (when write-back-buf (kill-buffer write-back-buf))
