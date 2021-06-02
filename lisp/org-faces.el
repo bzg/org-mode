@@ -507,6 +507,16 @@ content of these blocks will still be treated as Org syntax."
   "Face used in agenda for captions and dates."
   :group 'org-faces)
 
+(defface org-agenda-structure-secondary '((t (:inherit org-agenda-structure)))
+  "Face used for secondary information in agenda block headers."
+  :group 'org-faces)
+
+(defface org-agenda-structure-filter '((t (:inherit (org-warning org-agenda-structure))))
+  "Face used for the current type of task filter in the agenda.
+It inherits from `org-agenda-structure' so it can adapt to
+it (e.g. if that is assigned a diffent font height or family)."
+  :group 'org-faces)
+
 (defface org-agenda-date '((t (:inherit org-agenda-structure)))
   "Face used in agenda for normal days."
   :group 'org-faces)
@@ -514,6 +524,10 @@ content of these blocks will still be treated as Org syntax."
 (defface org-agenda-date-today
   '((t (:inherit org-agenda-date :weight bold :italic t)))
   "Face used in agenda for today."
+  :group 'org-faces)
+
+(defface org-agenda-date-weekend-today '((t (:inherit org-agenda-date-today)))
+  "Face used in agenda for today during weekends."
   :group 'org-faces)
 
 (defface org-agenda-clocking '((t (:inherit secondary-selection)))
@@ -558,6 +572,11 @@ which days belong to the weekend."
   "Face for items scheduled previously, and not yet done."
   :group 'org-faces)
 
+(defface org-imminent-deadline '((t :inherit org-warning))
+  "Face for current deadlines in the agenda.
+See also `org-agenda-deadline-faces'."
+  :group 'org-faces)
+
 (defface org-upcoming-deadline
   '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
     (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
@@ -573,7 +592,7 @@ See also `org-agenda-deadline-faces'."
 See also `org-agenda-deadline-faces'.")
 
 (defcustom org-agenda-deadline-faces
-  '((1.0 . org-warning)
+  '((1.0 . org-imminent-deadline)
     (0.5 . org-upcoming-deadline)
     (0.0 . org-upcoming-distant-deadline))
   "Faces for showing deadlines in the agenda.

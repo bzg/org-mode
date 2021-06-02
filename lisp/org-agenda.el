@@ -4266,6 +4266,9 @@ This check for agenda markers in all agenda buffers currently active."
   "Return the face DATE should be displayed with."
   (cond ((and (functionp org-agenda-day-face-function)
 	      (funcall org-agenda-day-face-function date)))
+	((and (org-agenda-today-p date)
+              (memq (calendar-day-of-week date) org-agenda-weekend-days))
+         'org-agenda-date-weekend-today)
 	((org-agenda-today-p date) 'org-agenda-date-today)
 	((memq (calendar-day-of-week date) org-agenda-weekend-days)
 	 'org-agenda-date-weekend)
@@ -4804,7 +4807,7 @@ is active."
 			       (list 'face 'org-agenda-structure))
 	  (setq pos (point))
 	  (insert string "\n")
-	  (add-text-properties pos (1- (point)) (list 'face 'org-warning))
+	  (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure-filter))
 	  (setq pos (point))
 	  (unless org-agenda-multi
 	    (insert (substitute-command-keys "\\<org-agenda-mode-map>\
@@ -4814,7 +4817,7 @@ Press `\\[org-agenda-manipulate-query-add]', \
 `\\[org-agenda-manipulate-query-subtract-re]' to add/sub regexp, \
 `\\[universal-argument] \\[org-agenda-redo]' for a fresh search\n"))
 	    (add-text-properties pos (1- (point))
-				 (list 'face 'org-agenda-structure)))
+				 (list 'face 'org-agenda-structure-secondary)))
 	  (buffer-string)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
@@ -4835,10 +4838,10 @@ Press `\\[org-agenda-manipulate-query-add]', \
   "Use `org-todo-keyword-faces' for the selected todo KEYWORDS."
   (concat
    (if (or (equal keywords "ALL") (not keywords))
-       (propertize "ALL" 'face 'warning)
+       (propertize "ALL" 'face 'org-agenda-structure-filter)
      (mapconcat
       (lambda (kw)
-        (propertize kw 'face (org-get-todo-face kw)))
+        (propertize kw 'face (list (org-get-todo-face kw) 'org-agenda-structure)))
       (org-split-string keywords "|")
       "|"))
    "\n"))
@@ -4923,7 +4926,7 @@ to search again: (0)[ALL]"))
                     (insert "\n                     "))
                   (insert " " s))))
 	    (insert "\n"))
-	  (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure))
+	  (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure-secondary))
 	  (buffer-string)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
@@ -5014,7 +5017,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 				     (concat "Match: " match)))
 	  (setq pos (point))
 	  (insert match "\n")
-	  (add-text-properties pos (1- (point)) (list 'face 'org-warning))
+	  (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure-filter))
 	  (setq pos (point))
 	  (unless org-agenda-multi
 	    (insert (substitute-command-keys
@@ -5022,7 +5025,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 \\<org-agenda-mode-map>`\\[universal-argument] \\[org-agenda-redo]' \
 to search again\n")))
 	  (add-text-properties pos (1- (point))
-			       (list 'face 'org-agenda-structure))
+			       (list 'face 'org-agenda-structure-secondary))
 	  (buffer-string)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
