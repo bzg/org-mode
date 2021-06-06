@@ -381,6 +381,9 @@ will be exported to LaTeX as:
   This is section \\ref{sec:foo}.
   And this is still section \\ref{sec:foo}.
 
+A non-default value of `org-latex-reference-command' will change the
+command (\\ref by default) used to create label references.
+
 Note, however, that setting this variable introduces a limitation
 on the possible values for CUSTOM_ID and NAME.  When this
 variable is non-nil, Org passes their value to \\label unchanged.
@@ -399,6 +402,18 @@ references."
   :type 'boolean
   :version "26.1"
   :package-version '(Org . "8.3"))
+
+(defcustom org-latex-reference-command "\\ref{%s}"
+  "Format string that takes a reference to produce a LaTeX reference command.
+
+The reference is a label such as sec:intro.  A format string of \"\\ref{%s}\"
+produces numbered references and will always work.  It may be desirable to make
+use of a package such as hyperref or cleveref and then change the format string
+to \"\\autoref{%s}\" or \"\\cref{%s}\" for example."
+  :group 'org-export-latex
+  :type 'string
+  :version "28.1"
+  :package-version '(Org . "9.5"))
 
 ;;;; Preamble
 
@@ -2606,7 +2621,7 @@ INFO is a plist holding contextual information.  See
 	   (let ((label (org-latex--label destination info t)))
 	     (if (and (not desc)
 		      (org-export-numbered-headline-p destination info))
-		 (format "\\ref{%s}" label)
+		 (format org-latex-reference-command label)
 	       (format "\\hyperref[%s]{%s}" label
 		       (or desc
 			   (org-export-data
@@ -2614,7 +2629,7 @@ INFO is a plist holding contextual information.  See
           ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
 	   (let ((ref (org-latex--label destination info t)))
-	     (if (not desc) (format "\\ref{%s}" ref)
+	     (if (not desc) (format org-latex-reference-command ref)
 	       (format "\\hyperref[%s]{%s}" ref desc)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
