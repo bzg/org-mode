@@ -412,8 +412,8 @@ use of a package such as hyperref or cleveref and then change the format string
 to \"\\autoref{%s}\" or \"\\cref{%s}\" for example."
   :group 'org-export-latex
   :type 'string
-  :version "28.1"
-  :package-version '(Org . "9.5"))
+  :package-version '(Org . "9.5")
+  :safe t)
 
 ;;;; Preamble
 
