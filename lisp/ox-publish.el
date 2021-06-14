@@ -1290,29 +1290,28 @@ the file including them will be republished as well."
 	 (org-inhibit-startup t)
 	 included-files-ctime)
     (when (equal (file-name-extension filename) "org")
-      (let ((visiting (find-buffer-visiting filename))
-	    (buf (find-file-noselect filename))
-	    (case-fold-search t))
-	(unwind-protect
-	    (with-current-buffer buf
-	      (goto-char (point-min))
-	      (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
-		(let ((element (org-element-at-point)))
-		  (when (eq 'keyword (org-element-type element))
-		    (let* ((value (org-element-property :value element))
-			   (filename
-			    (and (string-match "\\`\\(\".+?\"\\|\\S-+\\)" value)
-				 (let ((m (org-strip-quotes
-					   (match-string 1 value))))
-				   ;; Ignore search suffix.
-				   (if (string-match "::.*?\\'" m)
-				       (substring m 0 (match-beginning 0))
-				     m)))))
-		      (when filename
-			(push (org-publish-cache-ctime-of-src
-			       (expand-file-name filename))
-			      included-files-ctime)))))))
-	  (unless visiting (kill-buffer buf)))))
+      (let ((case-fold-search t))
+	(with-temp-buffer
+          (delay-mode-hooks
+            (org-mode)
+            (insert-file-contents filename)
+	    (goto-char (point-min))
+	    (while (re-search-forward "^[ \t]*#\\+INCLUDE:" nil t)
+	      (let ((element (org-element-at-point)))
+	        (when (eq 'keyword (org-element-type element))
+		  (let* ((value (org-element-property :value element))
+		         (include-filename
+			  (and (string-match "\\`\\(\".+?\"\\|\\S-+\\)" value)
+			       (let ((m (org-strip-quotes
+				         (match-string 1 value))))
+			         ;; Ignore search suffix.
+			         (if (string-match "::.*?\\'" m)
+				     (substring m 0 (match-beginning 0))
+				   m)))))
+		    (when include-filename
+		      (push (org-publish-cache-ctime-of-src
+			     (expand-file-name include-filename (file-name-directory filename)))
+			    included-files-ctime))))))))))
     (or (null pstamp)
 	(let ((ctime (org-publish-cache-ctime-of-src filename)))
 	  (or (time-less-p pstamp ctime)
