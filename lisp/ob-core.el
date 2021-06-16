@@ -2828,8 +2828,6 @@ block but are passed literally to the \"example-block\"."
 		     (setq cache nil)
 		     (let ((raw (org-babel-ref-resolve id)))
 		       (if (stringp raw) raw (format "%S" raw))))
-		    ;; Retrieve from the Library of Babel.
-		    ((nth 2 (assoc-string id org-babel-library-of-babel)))
 		    ;; Return the contents of headlines literally.
 		    ((org-babel-ref-goto-headline-id id)
 		     (org-babel-ref-headline-body))
@@ -2842,6 +2840,8 @@ block but are passed literally to the \"example-block\"."
 			      (not (org-in-commented-heading-p))
 			      (funcall expand-body
 				       (org-babel-get-src-block-info t))))))
+		    ;; Retrieve from the Library of Babel.
+		    ((nth 2 (assoc-string id org-babel-library-of-babel)))
 		    ;; All Noweb references were cached in a previous
 		    ;; run.  Extract the information from the cache.
 		    ((hash-table-p cache)
