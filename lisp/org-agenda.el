@@ -6739,6 +6739,9 @@ Any match of REMOVE-RE will be removed from TXT."
 			   (= (match-beginning 0) 0)
 			 t))
 	      (setq txt (replace-match "" nil nil txt))))
+          ;; Normalize the time(s) to 24 hour.
+	  (when s1 (setq s1 (org-get-time-of-day s1 t)))
+	  (when s2 (setq s2 (org-get-time-of-day s2 t)))
 	  ;; Try to set s2 if s1 and
 	  ;; `org-agenda-default-appointment-duration' are set
 	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
@@ -6751,9 +6754,9 @@ Any match of REMOVE-RE will be removed from TXT."
 	  (when s2
 	    (setq duration (- (org-duration-to-minutes s2)
 			      (org-duration-to-minutes s1))))
-          ;; Normalize the time(s) to 24 hour
-	  (when s1 (setq s1 (org-get-time-of-day s1 'string t)))
-	  (when s2 (setq s2 (org-get-time-of-day s2 'string t))))
+          ;; Format S1 and S2 for display.
+	  (when s1 (setq s1 (org-get-time-of-day s1 'overtime)))
+	  (when s2 (setq s2 (org-get-time-of-day s2 'overtime))))
 	(when (string-match org-tag-group-re txt)
 	  ;; Tags are in the string
 	  (if (or (eq org-agenda-remove-tags t)
@@ -6973,35 +6976,46 @@ and stored in the variable `org-prefix-format-compiled'."
 	      (cdr (assq 'agenda org-agenda-sorting-strategy))
 	      '(time-up category-keep priority-down)))))
 
-(defun org-get-time-of-day (s &optional string mod24)
+(defun org-get-time-of-day (s &optional string)
   "Check string S for a time of day.
+
 If found, return it as a military time number between 0 and 2400.
 If not found, return nil.
+
 The optional STRING argument forces conversion into a 5 character wide string
-HH:MM."
-  (save-match-data
-    (when
-	(and
-	 (or (string-match "\\<\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)\\([AaPp][Mm]\\)?\\> *" s)
-	     (string-match "\\<\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)?\\([AaPp][Mm]\\)\\> *" s))
-	 (not (eq (get-text-property 1 'face s) 'org-link)))
-      (let* ((h (string-to-number (match-string 1 s)))
-	     (m (if (match-end 3) (string-to-number (match-string 3 s)) 0))
-	     (ampm (when (match-end 4) (downcase (match-string 4 s))))
-	     (am-p (equal ampm "am"))
-	     (h1   (cond ((not ampm) h)
-			 ((= h 12) (if am-p 0 12))
-			 (t (+ h (if am-p 0 12)))))
-	     (h2 (if (and string mod24 (not (and (= m 0) (= h1 24))))
-		     (mod h1 24) h1))
-	     (t0 (+ (* 100 h2) m))
-	     (t1 (concat (if (>= h1 24) "+" "0")
-			 (if (and org-agenda-time-leading-zero
-				  (< t0 1000)) "0" "")
-			 (if (< t0 100) "0" "")
-			 (if (< t0 10)  "0" "")
-			 (number-to-string t0))))
-	(if string (concat (substring t1 -4 -2) ":" (substring t1 -2)) t0)))))
+HH:MM.  When it is `overtime', any time above 24:00 is turned into \"+H:MM\"
+where H:MM is the duration above midnight."
+  (let ((case-fold-search t)
+        (time-regexp
+         (rx word-start
+             (group (opt (any "012")) digit)        ;group 1: hours
+             (opt ":" (group (any "012345") digit)) ;group 2: minutes
+             (opt (group (or "am" "pm")))           ;group 3: am/pm
+             word-end)))
+    (save-match-data
+      (when (and (not (eq 'org-link (get-text-property 1 'face s)))
+                 (string-match time-regexp s)
+                 (or (match-end 2) (match-end 3)))
+        (let ((hours
+               (let* ((ampm (and (match-end 3) (downcase (match-string 3 s))))
+                      (am-p (equal ampm "am")))
+                 (pcase (string-to-number (match-string 1 s))
+                   ((and (guard (not ampm)) h) h)
+                   (12 (if am-p 0 12))
+                   (h (+ h (if am-p 0 12))))))
+              (minutes
+               (if (match-end 2) (string-to-number (match-string 2 s)) 0)))
+          (pcase string
+            (`nil (+ minutes (* hours 100)))
+            ((and `overtime
+                  (guard (or (> hours 24)
+                             (and (= hours 24)
+                                  (> minutes 0)))))
+             (format "+%d:%02d" (- hours 24) minutes))
+            ((guard org-agenda-time-leading-zero)
+             (format "%02d:%02d" hours minutes))
+            (_
+             (format "%d:%02d" hours minutes))))))))
 
 (defvar org-agenda-before-sorting-filter-function nil
   "Function to be applied to agenda items prior to sorting.
