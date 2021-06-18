@@ -6988,14 +6988,15 @@ where H:MM is the duration above midnight."
   (let ((case-fold-search t)
         (time-regexp
          (rx word-start
-             (group (opt (any "012")) digit)        ;group 1: hours
-             (opt ":" (group (any "012345") digit)) ;group 2: minutes
-             (opt (group (or "am" "pm")))           ;group 3: am/pm
+             (group (opt (any "012")) digit)           ;group 1: hours
+             (or (and ":" (group (any "012345") digit) ;group 2: minutes
+                      (opt (group (or "am" "pm"))))    ;group 3: am/pm
+                 ;; Special "HHam/pm" case.
+                 (group-n 3 (or "am" "pm")))
              word-end)))
     (save-match-data
       (when (and (not (eq 'org-link (get-text-property 1 'face s)))
-                 (string-match time-regexp s)
-                 (or (match-end 2) (match-end 3)))
+                 (string-match time-regexp s))
         (let ((hours
                (let* ((ampm (and (match-end 3) (downcase (match-string 3 s))))
                       (am-p (equal ampm "am")))
@@ -7004,7 +7005,9 @@ where H:MM is the duration above midnight."
                    (12 (if am-p 0 12))
                    (h (+ h (if am-p 0 12))))))
               (minutes
-               (if (match-end 2) (string-to-number (match-string 2 s)) 0)))
+               (if (match-end 2)
+                   (string-to-number (match-string 2 s))
+                 0)))
           (pcase string
             (`nil (+ minutes (* hours 100)))
             ((and `overtime
