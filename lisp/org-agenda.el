@@ -6995,8 +6995,8 @@ where H:MM is the duration above midnight."
                  (group-n 3 (or "am" "pm")))
              word-end)))
     (save-match-data
-      (when (and (not (eq 'org-link (get-text-property 1 'face s)))
-                 (string-match time-regexp s))
+      (when (and (string-match time-regexp s)
+                 (not (eq 'org-link (get-text-property 1 'face s))))
         (let ((hours
                (let* ((ampm (and (match-end 3) (downcase (match-string 3 s))))
                       (am-p (equal ampm "am")))
