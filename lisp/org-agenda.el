@@ -4042,7 +4042,9 @@ dimming them."
 	    (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
 	  (when invisible
 	    (org-agenda-filter-hide-line 'todo-blocked)))
-	(move-beginning-of-line 2))))
+        (if (= (point-max) (line-end-position))
+            (goto-char (point-max))
+	  (move-beginning-of-line 2)))))
   (when (called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks...done")))
 
