@@ -260,7 +260,7 @@ property on the headline itself.")
   :type 'string)
 
 (defcustom org-html-style-default
-  "<style type=\"text/css\">
+  "<style>
   #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
@@ -1060,13 +1060,7 @@ publishing, with :html-doctype."
 
 (defcustom org-html-html5-fancy nil
   "Non-nil means using new HTML5 elements.
-This variable is ignored for anything other than HTML5 export.
-
-For compatibility with Internet Explorer, it's probably a good
-idea to download some form of the html5shiv (for instance
-https://code.google.com/p/html5shiv/) and add it to your
-HTML_HEAD_EXTRA, so that your pages don't break for users of IE
-versions 8 and below."
+This variable is ignored for anything other than HTML5 export."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -1472,7 +1466,7 @@ done, timestamp, timestamp-kwd, tag, target.
 
 For example, a valid value would be:
 
-   <style type=\"text/css\">
+   <style>
       p { font-weight: normal; color: gray; }
       h1 { color: black; }
       .title { text-align: center; }
@@ -1818,12 +1812,12 @@ INFO is a plist used as a communication channel."
 		    (anchor (org-html--anchor
 			     (format "fn.%d" n)
 			     n
-			     (format " class=\"footnum\" href=\"#fnr.%d\"" n)
+			     (format " class=\"footnum\" href=\"#fnr.%d\" role=\"doc-backlink\"" n)
 			     info))
 		    (contents (org-trim (org-export-data def info))))
 		(format "<div class=\"footdef\">%s %s</div>\n"
 			(format (plist-get info :html-footnote-format) anchor)
-			(format "<div class=\"footpara\">%s</div>"
+			(format "<div class=\"footpara\" role=\"doc-footnote\">%s</div>"
 				(if (not inline?) contents
 				  (format "<p class=\"footpara\">%s</p>"
 					  contents))))))))
@@ -2120,7 +2114,7 @@ holding export options."
 	  (if subtitle
 	      (format
 	       (if html5-fancy
-		   "<p class=\"subtitle\">%s</p>\n"
+		   "<p class=\"subtitle\" role=\"doc-subtitle\">%s</p>\n"
 		 (concat "\n" (org-html-close-tag "br" nil info) "\n"
 			 "<span class=\"subtitle\">%s</span>\n"))
 	       (org-export-data subtitle info))
@@ -2321,14 +2315,14 @@ of contents as a string, or nil if it is empty."
 			 (org-export-get-relative-level headline info)))
 		 (org-export-collect-headlines info depth scope))))
     (when toc-entries
-      (let ((toc (concat "<div id=\"text-table-of-contents\">"
+      (let ((toc (concat "<div id=\"text-table-of-contents\" role=\"doc-toc\">"
 			 (org-html--toc-text toc-entries)
 			 "</div>\n")))
 	(if scope toc
 	  (let ((outer-tag (if (org-html--html5-fancy-p info)
 			       "nav"
 			     "div")))
-	    (concat (format "<%s id=\"table-of-contents\">\n" outer-tag)
+	    (concat (format "<%s id=\"table-of-contents\" role=\"doc-toc\">\n" outer-tag)
 		    (let ((top-level (plist-get info :html-toplevel-hlevel)))
 		      (format "<h%d>%s</h%d>\n"
 			      top-level
@@ -2601,7 +2595,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (format
       (plist-get info :html-footnote-format)
       (org-html--anchor
-       id n (format " class=\"footref\" href=\"#fn.%d\"" n) info)))))
+       id n (format " class=\"footref\" href=\"#fn.%d\" role=\"doc-backlink\"" n) info)))))
 
 ;;;; Headline
 
