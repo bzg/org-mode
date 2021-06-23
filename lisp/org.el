@@ -19186,6 +19186,21 @@ Also align node properties according to `org-property-format'."
 		     (org-with-point-at (org-element-property :end element)
 		       (skip-chars-backward " \t\n")
 		       (line-beginning-position))))
+             ;; At the beginning of a blank line, do some preindentation.  This
+             ;; signals org-src--edit-element to preserve the indentation on exit
+             (when (and (looking-at-p "^[[:space:]]*$")
+                        (not org-src-preserve-indentation))
+               (let ((element (org-element-at-point))
+                      block-content-ind some-ind)
+                 (org-with-point-at (org-element-property :begin element)
+                   (setq block-content-ind (+ (current-indentation)
+                                              org-edit-src-content-indentation))
+                   (forward-line)
+		   (save-match-data (re-search-forward "^[ \t]*\\S-" nil t))
+                   (backward-char)
+                   (setq some-ind (if (looking-at-p "#\\+end_src")
+                                      block-content-ind (current-indentation))))
+                 (indent-line-to (min block-content-ind some-ind))))
 	     (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
 	    (t
 	     (let ((column (org--get-expected-indentation element nil)))

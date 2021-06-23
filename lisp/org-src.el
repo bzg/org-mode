@@ -299,6 +299,9 @@ is 0.")
   "File name associated to Org source buffer, or nil.")
 (put 'org-src-source-file-name 'permanent-local t)
 
+(defvar-local org-src--preserve-blank-line nil)
+(put 'org-src--preserve-blank-line 'permanent-local t)
+
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
   (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
@@ -443,14 +446,21 @@ Assume point is in the corresponding edit buffer."
 		0))))
 	(use-tabs? (and (> org-src--tab-width 0) t))
 	(source-tab-width org-src--tab-width)
-	(contents (org-with-wide-buffer (buffer-string)))
-	(write-back org-src--allow-write-back))
+	(contents (org-with-wide-buffer
+                   (let ((eol (line-end-position)))
+                     (list (buffer-substring (point-min) eol)
+                           (buffer-substring eol (point-max))))))
+	(write-back org-src--allow-write-back)
+        (preserve-blank-line org-src--preserve-blank-line)
+        marker)
     (with-current-buffer write-back-buf
       ;; Reproduce indentation parameters from source buffer.
       (setq indent-tabs-mode use-tabs?)
       (when (> source-tab-width 0) (setq tab-width source-tab-width))
       ;; Apply WRITE-BACK function on edit buffer contents.
-      (insert (org-no-properties contents))
+      (insert (org-no-properties (car contents)))
+      (setq marker (point-marker))
+      (insert (org-no-properties (car (cdr contents))))
       (goto-char (point-min))
       (when (functionp write-back) (save-excursion (funcall write-back)))
       ;; Add INDENTATION-OFFSET to every line in buffer,
@@ -458,10 +468,14 @@ Assume point is in the corresponding edit buffer."
       (when (> indentation-offset 0)
 	(while (not (eobp))
 	  (skip-chars-forward " \t")
-	  (let ((i (current-column)))
-	    (delete-region (line-beginning-position) (point))
-	    (indent-to (+ i indentation-offset)))
-	  (forward-line))))))
+          (when (or (not (eolp))                               ; not a blank line
+                    (and (eq (point) (marker-position marker)) ; current line
+                         preserve-blank-line))
+	    (let ((i (current-column)))
+	      (delete-region (line-beginning-position) (point))
+	      (indent-to (+ i indentation-offset))))
+	  (forward-line)))
+      (set-marker marker nil))))
 
 (defun org-src--edit-element
     (datum name &optional initialize write-back contents remote)
@@ -506,6 +520,11 @@ Leave point in edit buffer."
 	     (block-ind (org-with-point-at (org-element-property :begin datum)
 			  (current-indentation)))
 	     (content-ind org-edit-src-content-indentation)
+             (blank-line (save-excursion (beginning-of-line)
+                                         (looking-at-p "^[[:space:]]*$")))
+             (empty-line (and blank-line (looking-at-p "^$")))
+             (preserve-blank-line (or (and blank-line (not empty-line))
+                                      (and empty-line (= (+ block-ind content-ind) 0))))
 	     (preserve-ind
 	      (and (memq type '(example-block src-block))
 		   (or (org-element-property :preserve-indent datum)
@@ -554,6 +573,7 @@ Leave point in edit buffer."
 	(setq org-src--overlay overlay)
 	(setq org-src--allow-write-back write-back)
 	(setq org-src-source-file-name source-file-name)
+        (setq org-src--preserve-blank-line preserve-blank-line)
 	;; Start minor mode.
 	(org-src-mode)
 	;; Clear undo information so we cannot undo back to the
