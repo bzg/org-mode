@@ -189,6 +189,13 @@ it is correctly configured as a Git repository.
 See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 
 ** New features
+
+*** ~ox-koma-letter.el~ is now part of Org's core
+
+~ox-koma-letter.el~ provides a KOMA scrlttr2 back-end for the Org
+export engine.  It used to be in the =contrib/= directory but it is
+now part of Org's core.
+
 *** Support fontification of inline export snippets
 
 See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
