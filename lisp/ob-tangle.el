@@ -529,6 +529,7 @@ non-nil, return the full association list to be used by
 			 (match-end 0)
 		       (point-min))))
 	      (point)))))
+         (src-tfile (cdr (assq :tangle params)))
 	 (result
 	  (list start-line
 		(if org-babel-tangle-use-relative-file-links
@@ -536,11 +537,12 @@ non-nil, return the full association list to be used by
 		  file)
 		(if (and org-babel-tangle-use-relative-file-links
 			 (string-match org-link-types-re link)
-			 (string= (match-string 1 link) "file"))
+			 (string= (match-string 1 link) "file")
+                         (stringp src-tfile))
 		    (concat "file:"
 			    (file-relative-name (substring link (match-end 0))
 						(file-name-directory
-						 (cdr (assq :tangle params)))))
+						 src-tfile)))
 		  link)
 		source-name
 		params
@@ -549,8 +551,7 @@ non-nil, return the full association list to be used by
 		  (org-trim (org-remove-indentation body)))
 		comment)))
     (if only-this-block
-        (let* ((src-tfile (cdr (assq :tangle (nth 4 result))))
-               (file-name (org-babel-effective-tangled-filename
+        (let* ((file-name (org-babel-effective-tangled-filename
                            (nth 1 result) src-lang src-tfile)))
           (list (cons file-name (list (cons src-lang result)))))
       result)))
