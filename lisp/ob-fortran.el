@@ -40,9 +40,11 @@
 
 (defvar org-babel-default-header-args:fortran '())
 
-(defvar org-babel-fortran-compiler "gfortran"
-  "fortran command used to compile a fortran source code file into an
-  executable.")
+(defcustom org-babel-fortran-compiler "gfortran"
+  "Fortran command used to compile Fortran source code file."
+  :group 'org-babel
+  :package-version '(Org . "9.5")
+  :type  'string)
 
 (defun org-babel-execute:fortran (body params)
   "This function should only be called by `org-babel-execute:fortran'."
