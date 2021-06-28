@@ -349,6 +349,9 @@ argument is present.  You can also set =:async no= to force it off
 Async evaluation is disabled during export.
 
 ** Miscellaneous
+*** =org-bibtex= includes =doi= and =url= entries when exporting to BiBTeX
+=doi= and =url= entries have been made optional for some publication
+types and will be exported if present for those types.
 *** Missing or empty placeholders in "eval" macros are now =nil=
 They used to be the empty string.
 *** =org-goto-first-child= now works before first heading
