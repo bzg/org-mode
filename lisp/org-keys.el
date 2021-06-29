@@ -726,7 +726,7 @@ hook.  The default setting is `org-speed-command-activate'."
     ("B" . org-previous-block)
     ("u" . (org-speed-move-safe 'outline-up-heading))
     ("j" . org-goto)
-    ("g" . (org-refile t))
+    ("g" . (org-refile '(4)))
     ("Outline Visibility")
     ("c" . org-cycle)
     ("C" . org-shifttab)
