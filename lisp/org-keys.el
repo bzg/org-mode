@@ -31,6 +31,8 @@
 
 (defvar org-outline-regexp)
 
+(require 'oc)
+
 (declare-function org-add-note "org" ())
 (declare-function org-agenda "org" (&optional arg org-keys restriction))
 (declare-function org-agenda-file-to-front "org" (&optional to-end))
@@ -662,6 +664,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-x !") #'org-reload)
 (org-defkey org-mode-map (kbd "C-c C-x g") #'org-feed-update-all)
 (org-defkey org-mode-map (kbd "C-c C-x G") #'org-feed-goto-inbox)
+(org-defkey org-mode-map (kbd "C-c C-x @") #'org-cite-insert)
 (org-defkey org-mode-map (kbd "C-c C-x [") #'org-reftex-citation)
 (org-defkey org-mode-map (kbd "C-c C-x I") #'org-info-find-node)
 
