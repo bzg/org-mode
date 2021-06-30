@@ -9165,24 +9165,26 @@ or to another Org file, automatically push the old position onto the ring."
 (defvar org-agenda-start-on-weekday)
 (defun org-follow-timestamp-link ()
   "Open an agenda view for the time-stamp date/range at point."
-  (cond
-   ((org-at-date-range-p t)
-    (let ((org-agenda-start-on-weekday)
-	  (t1 (match-string 1))
-	  (t2 (match-string 2)) tt1 tt2)
-      (setq tt1 (time-to-days (org-time-string-to-time t1))
-	    tt2 (time-to-days (org-time-string-to-time t2)))
+  ;; Avoid changing the global value.
+  (let ((org-agenda-buffer-name org-agenda-buffer-name))
+    (cond
+     ((org-at-date-range-p t)
+      (let ((org-agenda-start-on-weekday)
+	    (t1 (match-string 1))
+	    (t2 (match-string 2)) tt1 tt2)
+	(setq tt1 (time-to-days (org-time-string-to-time t1))
+	      tt2 (time-to-days (org-time-string-to-time t2)))
+	(let ((org-agenda-buffer-tmp-name
+	       (format "*Org Agenda(a:%s)"
+		       (concat (substring t1 0 10) "--" (substring t2 0 10)))))
+	  (org-agenda-list nil tt1 (1+ (- tt2 tt1))))))
+     ((org-at-timestamp-p 'lax)
       (let ((org-agenda-buffer-tmp-name
-	     (format "*Org Agenda(a:%s)"
-		     (concat (substring t1 0 10) "--" (substring t2 0 10)))))
-	(org-agenda-list nil tt1 (1+ (- tt2 tt1))))))
-   ((org-at-timestamp-p 'lax)
-    (let ((org-agenda-buffer-tmp-name
-	   (format "*Org Agenda(a:%s)" (substring (match-string 1) 0 10))))
-      (org-agenda-list nil (time-to-days (org-time-string-to-time
-					  (substring (match-string 1) 0 10)))
-		       1)))
-   (t (error "This should not happen"))))
+	     (format "*Org Agenda(a:%s)" (substring (match-string 1) 0 10))))
+	(org-agenda-list nil (time-to-days (org-time-string-to-time
+					    (substring (match-string 1) 0 10)))
+			 1)))
+     (t (error "This should not happen")))))
 
 
 ;;; Following file links
