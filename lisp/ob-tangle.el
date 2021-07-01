@@ -359,6 +359,7 @@ as computed by `org-babel-tangle-single-block'."
                     ((string= "yes" src-tfile)
                      ;; Use the buffer name
                      (file-name-sans-extension buffer-fn))
+                    ((string= "no" src-tfile) nil)
                     ((> (length src-tfile) 0) src-tfile)))
         (ext (or (cdr (assoc src-lang org-babel-tangle-lang-exts)) src-lang)))
     (when base-name
