@@ -337,7 +337,6 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
   (org-defkey org-mouse-map [follow-link] 'mouse-face))
 
 (when org-tab-follows-link
-  (org-defkey org-mouse-map (kbd "<tab>") #'org-open-at-point)
   (org-defkey org-mouse-map (kbd "TAB") #'org-open-at-point))
 
 
@@ -443,18 +442,13 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-x") (make-sparse-keymap))
 
 ;;;; TAB key with modifiers
-(org-defkey org-mode-map (kbd "C-i") #'org-cycle)
-(org-defkey org-mode-map (kbd "<tab>") #'org-cycle)
-(org-defkey org-mode-map (kbd "C-c C-<tab>") #'org-force-cycle-archived)
+(org-defkey org-mode-map (kbd "TAB") #'org-cycle)
+(org-defkey org-mode-map (kbd "C-c C-TAB") #'org-force-cycle-archived)
 ;; Override text-mode binding to expose `complete-symbol' for
 ;; pcomplete functionality.
-(org-defkey org-mode-map (kbd "M-<tab>") nil)
 (org-defkey org-mode-map (kbd "M-TAB") nil)
-(org-defkey org-mode-map (kbd "ESC <tab>") nil)
 (org-defkey org-mode-map (kbd "ESC TAB") nil)
 
-(org-defkey org-mode-map (kbd "<S-iso-leftab>") #'org-shifttab)
-(org-defkey org-mode-map (kbd "S-<tab>") #'org-shifttab)
 (org-defkey org-mode-map (kbd "S-TAB") #'org-shifttab)
 (define-key org-mode-map (kbd "<backtab>") #'org-shifttab)
 
