@@ -453,15 +453,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;; RET/<return> key with modifiers
 (org-defkey org-mode-map (kbd "S-<return>") #'org-table-copy-down)
-(org-defkey org-mode-map (kbd "S-RET") #'org-table-copy-down)
 (org-defkey org-mode-map (kbd "M-S-<return>") #'org-insert-todo-heading)
-(org-defkey org-mode-map (kbd "M-S-RET") #'org-insert-todo-heading)
-(org-defkey org-mode-map (kbd "ESC S-<return>") #'org-insert-todo-heading)
-(org-defkey org-mode-map (kbd "ESC S-RET") #'org-insert-todo-heading)
-(org-defkey org-mode-map (kbd "M-<return>") #'org-meta-return)
 (org-defkey org-mode-map (kbd "M-RET") #'org-meta-return)
-(org-defkey org-mode-map (kbd "ESC <return>") #'org-meta-return)
-(org-defkey org-mode-map (kbd "ESC RET") #'org-meta-return)
 
 ;;;; Cursor keys with modifiers
 (org-defkey org-mode-map (kbd "M-<left>") #'org-metaleft)
