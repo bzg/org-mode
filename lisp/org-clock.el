@@ -859,6 +859,10 @@ use libnotify if available, or fall back on a message."
 	    org-show-notification-timeout
 	    nil
 	    (lambda () (w32-notification-close id)))))
+        ((fboundp 'ns-do-applescript)
+         (ns-do-applescript
+          (format "display notification \"%s\" with title \"Org mode notification\""
+                  (replace-regexp-in-string "\"" "#" notification))))
 	((fboundp 'notifications-notify)
 	 (notifications-notify
 	  :title "Org mode message"
