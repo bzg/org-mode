@@ -69,6 +69,7 @@
 (declare-function org-table-goto-line "org-table" (N))
 
 (defvar dired-buffers)
+(defvar crm-separator)
 (defvar org-end-time-was-given)
 (defvar org-keyword-properties)
 (defvar org-remember-default-headline)
@@ -1739,12 +1740,11 @@ The template may still contain \"%?\" for cursor positioning."
 			    (org-add-colon-after-tag-completion t)
 			    (ins (mapconcat
 				  #'identity
-				  (org-split-string
-				   (completing-read
-				    (if prompt (concat prompt ": ") "Tags: ")
-				    'org-tags-completion-function nil nil nil
-				    'org-tags-history)
-				   "[^[:alnum:]_@#%]+")
+				  (let ((crm-separator "[ \t]*:[ \t]*"))
+                                    (completing-read-multiple
+				     (if prompt (concat prompt ": ") "Tags: ")
+				     org-last-tags-completion-table nil nil nil
+				     'org-tags-history))
 				  ":")))
 		       (when (org-string-nw-p ins)
 			 (unless (eq (char-before) ?:) (insert ":"))

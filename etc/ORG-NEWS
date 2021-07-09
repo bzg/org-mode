@@ -409,6 +409,12 @@ The function does not allow for a third optional parameter anymore.
 If a babel src block produces a raw LaTeX environment, it will now be
 recognised as a result, and so replaced when re-evaluated.
 
+*** Tag completion now uses =completing-read-multiple=
+
+Tag completion now uses =completing-read-multiple= with a simple
+completion table, which should allow better interoperability with
+custom completion functions.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix

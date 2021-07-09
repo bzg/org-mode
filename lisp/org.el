@@ -201,6 +201,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
 
+(defvar crm-separator)  ; dynamically scoped param
+
 ;;;###autoload
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
@@ -12054,12 +12056,15 @@ in Lisp code use `org-set-tags' instead."
 		      inherited-tags
 		      table
 		      (and org-fast-tag-selection-include-todo org-todo-key-alist))
-		   (let ((org-add-colon-after-tag-completion (< 1 (length table))))
-		     (org-trim (completing-read
-				"Tags: "
-				#'org-tags-completion-function
-				nil nil (org-make-tag-string current-tags)
-				'org-tags-history)))))))
+		   (let ((org-add-colon-after-tag-completion (< 1 (length table)))
+                         (crm-separator "[ \t]*:[ \t]*"))
+		     (mapconcat #'identity
+                                (completing-read-multiple
+			         "Tags: "
+			         org-last-tags-completion-table
+			         nil nil (org-make-tag-string current-tags)
+			         'org-tags-history)
+                                ":"))))))
 	  (org-set-tags tags)))))
     ;; `save-excursion' may not replace the point at the right
     ;; position.
@@ -12139,7 +12144,7 @@ This works in the agenda, and also in an Org buffer."
 		     (org-global-tags-completion-table))
 		  (org-global-tags-completion-table))))
 	   (completing-read
-	    "Tag: " 'org-tags-completion-function nil nil nil
+	    "Tag: " org-last-tags-completion-table nil nil nil
 	    'org-tags-history))
 	 (progn
 	   (message "[s]et or [r]emove? ")
