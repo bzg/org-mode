@@ -188,6 +188,12 @@ it is correctly configured as a Git repository.
 
 See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 
+*** New option ~org-attach-sync-delete-empty-dir~
+
+~org-attach-sync-delete-empty-dir~ controls the deletion of an empty
+attachment directory at calls of ~org-attach-sync~.  There is
+Never delete, Always delete and Query the user (default).
+
 ** New features
 
 *** ~ox-koma-letter.el~ is now part of Org's core

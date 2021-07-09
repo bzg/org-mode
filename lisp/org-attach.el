@@ -245,6 +245,17 @@ Each entry in this list is a list of three elements:
 		       (function :tag "Command")
 		       (string :tag "Docstring"))))
 
+(defcustom org-attach-sync-delete-empty-dir 'query
+  "Determine what to do with an empty attachment directory on sync.
+When set to nil, don't touch the directory.  When set to `query',
+ask the user instead, else remove without asking."
+  :group 'org-attach
+  :package-version '(Org . "9.5")
+  :type '(choice
+	  (const :tag "Never delete" nil)
+	  (const :tag "Always delete" t)
+	  (const :tag "Query the user" query)))
+
 ;;;###autoload
 (defun org-attach ()
   "The dispatcher for attachment commands.
@@ -600,14 +611,22 @@ with no prompts."
 
 (defun org-attach-sync ()
   "Synchronize the current outline node with its attachments.
-This can be used after files have been added externally."
+Useful after files have been added/removed externally.  Option
+`org-attach-sync-delete-empty-dir' controls the behavior for
+empty attachment directories."
   (interactive)
   (let ((attach-dir (org-attach-dir)))
-    (when attach-dir
+    (if (not attach-dir)
+        (org-attach-tag 'off)
       (run-hook-with-args 'org-attach-after-change-hook attach-dir)
       (let ((files (org-attach-file-list attach-dir)))
-	(org-attach-tag (not files))))
-    (unless attach-dir (org-attach-tag t))))
+	(org-attach-tag (not files)))
+      (when org-attach-sync-delete-empty-dir
+        (when (and (directory-empty-p attach-dir)
+                   (if (eq 'query org-attach-sync-delete-empty-dir)
+                       (yes-or-no-p "Attachment directory is empty.  Delete?")
+                     t))
+          (delete-directory attach-dir))))))
 
 (defun org-attach-file-list (dir)
   "Return a list of files in the attachment directory.
