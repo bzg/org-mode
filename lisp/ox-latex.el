@@ -1180,9 +1180,11 @@ A better approach is to use a compiler suit such as `latexmk'."
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-pdf-process
-  '("%latex -interaction nonstopmode -output-directory %o %f"
-    "%latex -interaction nonstopmode -output-directory %o %f"
-    "%latex -interaction nonstopmode -output-directory %o %f")
+  (if (executable-find "latexmk")
+      '("latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f")
+    '("%latex -interaction nonstopmode -output-directory %o %f"
+      "%latex -interaction nonstopmode -output-directory %o %f"
+      "%latex -interaction nonstopmode -output-directory %o %f"))
   "Commands to process a LaTeX file to a PDF file.
 
 This is a list of strings, each of them will be given to the
@@ -1226,7 +1228,7 @@ file name as its single argument."
 	  (const :tag "texi2dvi"
 		 ("cd %o; LATEX=\"%latex\" texi2dvi -p -b -V %b.tex"))
 	  (const :tag "latexmk"
-		 ("latexmk -g -pdf -pdflatex=\"%latex\" -outdir=%o %f"))
+		 ("latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
 	  (function)))
 
 (defcustom org-latex-logfiles-extensions
