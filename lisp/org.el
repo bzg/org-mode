@@ -5228,7 +5228,7 @@ This includes angle, plain, and bracket links."
 				    'org-link))
 			     properties)))
 		(add-text-properties start visible-start hidden)
-                (add-face-text-property visible-start visible-end face-property)
+                (add-face-text-property start end face-property)
 		(add-text-properties visible-start visible-end properties)
 		(add-text-properties visible-end end hidden)
 		(org-rear-nonsticky-at visible-start)
