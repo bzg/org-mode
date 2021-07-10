@@ -7411,7 +7411,28 @@ Paragraph<point>"
 SCHEDULED: <2012-03-29 Thu +2y>
 CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 	(org-todo "DONE")
-	(buffer-string))))))
+	(buffer-string)))))
+  ;; Make sure that logbook state change record does not get
+  ;; duplicated when `org-log-repeat' `org-log-done' are non-nil.
+  (should
+   (string-match-p
+    (rx "* TODO Read book
+SCHEDULED: <2021-06-16 Wed +1d>
+:PROPERTIES:
+:LAST_REPEAT:" (1+ nonl) "
+:END:
+- State \"DONE\"       from \"TODO\"" (1+ nonl) buffer-end)
+    (let ((org-log-repeat 'time)
+	  (org-todo-keywords '((sequence "TODO" "|" "DONE(d!)")))
+          (org-log-into-drawer nil))
+      (org-test-with-temp-text
+          "* TODO Read book
+SCHEDULED: <2021-06-15 Tue +1d>"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string))))))
+
 
 
 ;;; Timestamps API

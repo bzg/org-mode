@@ -10945,9 +10945,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	org-log-note-extra extra
 	org-log-note-effective-time (org-current-effective-time)
         org-log-setup t)
-  (if (eq how 'note)
-      (add-hook 'post-command-hook 'org-add-log-note 'append)
-    (org-add-log-note purpose)))
+  (add-hook 'post-command-hook 'org-add-log-note 'append))
 
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."
