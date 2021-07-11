@@ -417,7 +417,14 @@ non-nil, return the full association list to be used by
 	 (extra (nth 3 info))
          (coderef (nth 6 info))
 	 (cref-regexp (org-src-coderef-regexp coderef))
-	 (link (let ((l (org-no-properties (org-store-link nil))))
+	 (link (let* (
+                      ;; The created link is transient.  Using ID is
+                      ;; not necessary, but could have side-effects if
+                      ;; used.  An ID property may be added to
+                      ;; existing entries thus creatin unexpected file
+                      ;; modifications.
+                      (org-id-link-to-org-use-id nil)
+                      (l (org-no-properties (org-store-link nil))))
                  (and (string-match org-link-bracket-re l)
                       (match-string 1 l))))
 	 (source-name
@@ -500,7 +507,13 @@ by `org-babel-get-src-block-info'."
 					   (number-to-string
 					    (line-number-at-pos))))
 			("file" . ,(buffer-file-name))
-			("link" . ,(org-no-properties (org-store-link nil)))
+			("link" . ,(let (;; The created link is transient.  Using ID is
+                                         ;; not necessary, but could have side-effects if
+                                         ;; used.  An ID property may be added to
+                                         ;; existing entries thus creatin unexpected file
+                                         ;; modifications.
+                                         (org-id-link-to-org-use-id nil))
+                                     (org-no-properties (org-store-link nil))))
 			("source-name" . ,name))))))
     (list (org-fill-template org-babel-tangle-comment-format-beg link-data)
 	  (org-fill-template org-babel-tangle-comment-format-end link-data))))
