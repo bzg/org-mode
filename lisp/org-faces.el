@@ -459,6 +459,10 @@ verse and quote blocks are fontified using the `org-verse' and
   "Face used for the line delimiting the end of source blocks."
   :group 'org-faces)
 
+(defface org-inline-src-block '((t (:inherit org-block)))
+  "Face used for inline source blocks as a whole."
+  :group 'org-faces)
+
 (defface org-verbatim '((t (:inherit (fixed-pitch shadow))))
   "Face for fixed-with text like code snippets."
   :group 'org-faces

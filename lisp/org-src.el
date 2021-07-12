@@ -654,6 +654,50 @@ as `org-src-fontify-natively' is non-nil."
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
 	(set-buffer-modified-p modified)))))
 
+(defun org-fontify-inline-src-blocks (limit)
+  "Try to apply `org-fontify-inline-src-blocks-1'."
+  (condition-case nil
+      (org-fontify-inline-src-blocks-1 limit)
+    (error (message "Org mode fontification error in %S at %d"
+                    (current-buffer)
+                    (line-number-at-pos)))))
+
+(defun org-fontify-inline-src-blocks-1 (limit)
+  "Fontify inline src_LANG blocks, from `point' up to LIMIT."
+  (let ((case-fold-search t)
+        (initial-point (point)))
+    (while (re-search-forward "\\_<src_\\([^ \t\n[{]+\\)[{[]?" limit t) ; copied from `org-element-inline-src-block-parser'
+      (let ((beg (match-beginning 0))
+            (lang-beg (match-beginning 1))
+            (lang-end (match-end 1))
+            pt)
+        (font-lock-append-text-property lang-beg lang-end 'face 'org-meta-line)
+        (font-lock-append-text-property beg lang-beg 'face 'shadow)
+        (font-lock-append-text-property beg lang-end 'face 'org-inline-src-block)
+        (setq pt (goto-char lang-end))
+        ;; `org-element--parse-paired-brackets' doesn't take a limit, so to
+        ;; prevent it searching the entire rest of the buffer we temporarily
+        ;; narrow the active region.
+        (save-restriction
+          (narrow-to-region beg (min limit (or (save-excursion (and (search-forward "\n" limit t 2) (point)))
+                                               (point-max))))
+          (message "buf: %S" (substring-no-properties (buffer-string)))
+          (when (ignore-errors (org-element--parse-paired-brackets ?\[))
+            (font-lock-append-text-property pt (point) 'face 'org-inline-src-block)
+            (setq pt (point)))
+          (when (ignore-errors (org-element--parse-paired-brackets ?\{))
+            (remove-text-properties pt (point) '(face nil))
+            (font-lock-append-text-property pt (1+ pt) 'face '(org-inline-src-block shadow))
+            (unless (= (1+ pt) (1- (point)))
+              (if org-src-fontify-natively
+                  (org-src-font-lock-fontify-block
+                   (buffer-substring-no-properties lang-beg lang-end)
+                   (1+ pt) (1- (point)))
+                (font-lock-append-text-property (1+ pt) (1- (point)) 'face 'org-inline-src-block)))
+            (font-lock-append-text-property (1- (point)) (point)'face '(org-inline-src-block shadow))
+            (setq pt (point)))))
+      t)))
+
 
 ;;; Escape contents
 

@@ -5785,6 +5785,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 		'(9 'org-special-keyword t))
 	  ;; Blocks and meta lines
 	  '(org-fontify-meta-lines-and-blocks)
+          '(org-fontify-inline-src-blocks)
           ;; Citations
           '(org-cite-activate))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
