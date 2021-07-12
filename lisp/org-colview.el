@@ -1398,8 +1398,9 @@ other rows.  Each row is a list of fields, as strings, or
 				  (org-get-tags))))
 	     (push (cons (org-reduced-level (org-current-level)) (nreverse row))
 		   table)))))
-     (or (and maxlevel (format "LEVEL<=%d" maxlevel))
-	 (and match match))
+     (if match
+         (concat match (and maxlevel (format "+LEVEL<=%d" maxlevel)))
+       (and maxlevel (format "LEVEL<=%d" maxlevel)))
      (and local 'tree)
      'archive 'comment)
     (org-columns-quit)
