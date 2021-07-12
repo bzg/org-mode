@@ -177,9 +177,14 @@ Used only when `second-field-align' is activated by the used CSL style."
 
 ;;; Internal variables
 (defconst org-cite-csl--etc-dir
-  (expand-file-name
-   (concat (file-name-directory (locate-library "oc"))
-           "../etc/csl/"))
+  (let* ((oc-root (file-name-directory (locate-library "oc")))
+         (oc-etc-dir-1 (expand-file-name "../etc/csl/" oc-root)))
+      ;; package.el and straight will put all of org-mode/lisp/ in org-mode/.
+      ;; This will cause .. to resolve to the directory above Org.
+      ;; To make life easier for people using package.el or straight, we can
+      ;; check to see if ../etc/csl exists, and if it doesn't try ./etc/csl.
+    (if (file-exists-p oc-etc-dir-1) oc-etc-dir-1
+      (expand-file-name "etc/csl/" oc-root)))
   "Directory \"etc/\" from repository.")
 
 (defconst org-cite-csl--fallback-locales-dir org-cite-csl--etc-dir
