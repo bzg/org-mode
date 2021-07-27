@@ -2126,8 +2126,8 @@ contextual information."
   (let* ((code (org-element-property :value inline-src-block))
 	 (separator (org-latex--find-verb-separator code)))
     (cl-case (plist-get info :latex-listings)
-      ;; Do not use a special package: transcode it verbatim.
-      ((nil) (format "\\texttt{%s}" (org-latex--text-markup code 'code info)))
+      ;; Do not use a special package: transcode it verbatim, as code.
+      ((nil) (org-latex--text-markup code 'code info))
       ;; Use minted package.
       (minted
        (let* ((org-lang (org-element-property :language inline-src-block))
