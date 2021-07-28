@@ -372,8 +372,8 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
       ;; Ignore inline babel call and inline source block as formulas
       ;; are possible.  Also ignore line breaks and statistics
       ;; cookies.
-      (table-cell export-snippet footnote-reference link macro radio-target
-		  target timestamp ,@minimal-set)
+      (table-cell citation export-snippet footnote-reference link macro
+                  radio-target target timestamp ,@minimal-set)
       (table-row table-cell)
       (underline ,@standard-set)
       (verse-block ,@standard-set)))

@@ -528,10 +528,6 @@ Some other text
    (eq 'citation
        (org-test-with-temp-text "[cite:@key]"
 	 (org-element-type (org-element-context)))))
-  (should
-   (eq 'citation
-       (org-test-with-temp-text "[cite:-@key]"
-	 (org-element-type (org-element-context)))))
   (should-not
    (eq 'citation
        (org-test-with-temp-text "[cite:text]"
@@ -582,7 +578,12 @@ Some other text
   (should
    (equal '(" common-suffix")
 	  (org-test-with-temp-text "[cite: @a; common-suffix ]"
-	    (org-element-property :suffix (org-element-context))))))
+	    (org-element-property :suffix (org-element-context)))))
+  ;; Allow citations in a table cell.
+  (should
+   (eq 'citation
+       (org-test-with-temp-text "| <point>[cite:@key] |"
+	 (org-element-type (org-element-context))))))
 
 
 ;;;; Citation Reference
