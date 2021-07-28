@@ -1768,7 +1768,17 @@ arguments.  Replace citation with \"@\" character in the output."
            (org-cite-insert-processor 'foo))
        (org-cite-register-processor 'foo
          :insert (lambda (_ _) (throw :exit 'success)))
-       (call-interactively #'org-cite-insert)))))
+       (call-interactively #'org-cite-insert))))
+  ;; Allow inserting citations in captions.
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "#+caption: <point>\n| table |"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert)))))))
 
 (provide 'test-oc)
 ;;; test-oc.el ends here

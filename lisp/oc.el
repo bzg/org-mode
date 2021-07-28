@@ -58,6 +58,7 @@
 (require 'org-compat)
 (require 'org-macs)
 
+(declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
 
 (declare-function org-element-adopt-elements "org-element" (parent &rest children))
@@ -73,6 +74,7 @@
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
+(declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-put-property "org-element" (element property value))
 (declare-function org-element-restriction "org-element" (element))
@@ -85,9 +87,11 @@
 (declare-function org-export-get-previous-element "org-export" (blob info &optional n))
 (declare-function org-export-raw-string "org-export" (s))
 
+(defvar org-complex-heading-regexp)
 (defvar org-element-all-objects)
 (defvar org-element-citation-key-re)
 (defvar org-element-citation-prefix-re)
+(defvar org-element-parsed-keywords)
 
 
 ;;; Constants
@@ -1363,12 +1367,24 @@ ARG is the prefix argument received when calling `org-open-at-point', or nil."
 ;;; Meta-command for citation insertion (insert capability)
 (defun org-cite--allowed-p (context)
   "Non-nil when a citation can be inserted at point."
-  (let* ((type (org-element-type context)))
+  (let ((type (org-element-type context)))
     (cond
-     ;; No citation in attributes.
+     ;; No citation in attributes, except in parsed ones.
+     ;;
+     ;; XXX: Inserting citation in a secondary value is not allowed
+     ;; yet.  Is it useful?
      ((let ((post (org-element-property :post-affiliated context)))
 	(and post (< (point) post)))
-      nil)
+      (let ((case-fold-search t))
+        (looking-back
+         (rx-to-string
+          `(seq line-start (0+ (any " \t"))
+                "#+"
+                (or ,@org-element-parsed-keywords)
+                ":"
+                (0+ nonl))
+          t)
+         (line-beginning-position))))
      ;; Paragraphs and blank lines at top of document are fine.
      ((memq type '(nil paragraph)))
      ;; So are contents of verse blocks.
