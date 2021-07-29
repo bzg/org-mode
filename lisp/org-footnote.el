@@ -291,7 +291,8 @@ otherwise."
        ((eq type 'table-cell)
         ;; :contents-begin is not reliable on empty cells, so special
         ;; case it.
-        (<= (point) (org-element-property :contents-end context)))
+        (<= (save-excursion (skip-chars-backward " \t") (point))
+            (org-element-property :contents-end context)))
        ((let ((cbeg (org-element-property :contents-begin context))
 	      (cend (org-element-property :contents-end context)))
 	  (and cbeg (>= (point) cbeg) (<= (point) cend))))))))

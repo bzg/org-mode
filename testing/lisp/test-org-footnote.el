@@ -90,7 +90,7 @@
     (org-test-with-temp-text " *bold*<point>"
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
-  ;; Arrow new footnotes in empty cells.
+  ;; Arrow new footnotes in table cells.
   (should
    (string-match-p
     " \\[fn:1\\]"
@@ -107,6 +107,12 @@
    (string-match-p
     " \\[fn:1\\]"
     (org-test-with-temp-text "| <point>|"
+      (let ((org-footnote-auto-label t)) (org-footnote-new))
+      (buffer-string))))
+  (should
+   (string-match-p
+    " \\[fn:1\\]"
+    (org-test-with-temp-text "| contents   <point>|"
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
   ;; When creating a new footnote, move to its definition.
