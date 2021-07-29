@@ -1778,6 +1778,34 @@ arguments.  Replace citation with \"@\" character in the output."
                  (org-cite-insert-processor 'foo))
              (org-cite-register-processor 'foo
                :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert))))))
+  ;; Allow inserting citations in table cells.
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "| <point>table |"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert))))))
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "| table<point> |"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert))))))
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "| table  <point> |"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
              (call-interactively #'org-cite-insert)))))))
 
 (provide 'test-oc)
