@@ -67,6 +67,8 @@
 (require 'bibtex)
 (require 'oc)
 
+(declare-function org-open-at-point "org" (&optional arg))
+
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
@@ -399,21 +401,28 @@ Optional argument INFO is the export state, as a property list."
                     (org-string-distance k key)))
               keys))
 
-(defun org-cite-basic--make-repair-keymap (beg end suggestions)
-  "Return keymap active on wrong citation keys.
-BEG and END are boundaries of the wrong citation.  SUGGESTIONS is a list of
-replacement keys, as strings."
-  (let ((km (make-sparse-keymap))
-        (f (lambda ()
-             (interactive)
-             (setf (buffer-substring beg end)
-                   (concat "@"
-                           (if (= 1 (length suggestions))
-                               (car suggestions)
-                             (completing-read "Substitute key: "
-                                              suggestions nil t)))))))
-    (define-key km (kbd "<mouse-1>") f)
-    km))
+(defun org-cite-basic--set-keymap (beg end suggestions)
+  "Set keymap on citation key between BEG and END positions.
+
+When the key is know, SUGGESTIONS is nil.  Otherwise, it may be
+a list of replacement keys, as strings, which will be offered as
+substitutes for the unknown key.  Finally, it may be the symbol
+`all'."
+  (let ((km (make-sparse-keymap)))
+    (define-key km (kbd "<mouse-1>")
+      (pcase suggestions
+        ('nil #'org-open-at-point)
+        ('all #'org-cite-insert)
+        (_
+         (lambda ()
+           (interactive)
+           (setf (buffer-substring beg end)
+                 (concat "@"
+                         (if (= 1 (length suggestions))
+                             (car suggestions)
+                           (completing-read "Did you mean: "
+                                            suggestions nil t))))))))
+    (put-text-property beg end 'keymap km)))
 
 (defun org-cite-basic-activate (citation)
   "Set various text properties on CITATION object.
@@ -438,24 +447,26 @@ them with a mouse click."
         (if (member key keys)
             ;; Activate a correct key.  Face is `org-cite-key' and
             ;; `help-echo' displays bibliography entry, for reference.
+            ;; <mouse-1> calls `org-open-at-point'.
             (let* ((entry (org-cite-basic--get-entry key))
                    (bibliography-entry
                     (org-element-interpret-data
                      (org-cite-basic--print-entry entry "plain"))))
               (add-face-text-property beg end 'org-cite-key)
-              (put-text-property beg end 'help-echo bibliography-entry))
+              (put-text-property beg end 'help-echo bibliography-entry)
+              (org-cite-basic--set-keymap beg end nil))
           ;; Activate a wrong key.  Face is `error', `help-echo'
-          ;; displays possible suggestions, and <mouse-1> provides
-          ;; completion to fix the key.
+          ;; displays possible suggestions.
           (add-face-text-property beg end 'error)
           (let ((close-keys (org-cite-basic--close-keys key keys)))
             (when close-keys
               (put-text-property beg end 'help-echo
                                  (concat "Suggestions (mouse-1 to substitute): "
-                                         (mapconcat #'identity close-keys " ")))
-              (put-text-property beg end 'keymap
-                                 (org-cite-basic--make-repair-keymap
-                                  beg end close-keys)))))))))
+                                         (mapconcat #'identity close-keys " "))))
+            ;; When the are close know keys, <mouse-1> provides
+            ;; completion to fix the current one.  Otherwise, call
+            ;; `org-cite-insert'.
+            (org-cite-basic--set-keymap beg end (or close-keys 'all))))))))
 
 
 ;;; "Export" capability
