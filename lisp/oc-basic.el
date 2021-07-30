@@ -654,12 +654,15 @@ present in the citation."
             (`(,f . ,_) f)
             (_  (user-error "Cannot find citation key: %S" key)))))
     (org-open-file file '(4))
-    (if (not (equal "json" (file-name-extension file)))
-        (bibtex-search-entry key)
-      (let ((regexp (rx "\"id\":" (0+ (any "[ \t]")) "\"" (literal key) "\"")))
-        (goto-char (point-min))
-        (re-search-forward regexp)
-        (search-backward "{")))))
+    (pcase (file-name-extension file)
+      ("json"
+       (let ((regexp (rx "\"id\":" (0+ (any "[ \t]")) "\"" (literal key) "\"")))
+         (goto-char (point-min))
+         (re-search-forward regexp)
+         (search-backward "{")))
+      (_
+       (bibtex-set-dialect)
+       (bibtex-search-entry key)))))
 
 
 ;;; "Insert" capability
