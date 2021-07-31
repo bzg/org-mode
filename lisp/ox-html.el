@@ -1707,7 +1707,9 @@ a communication channel."
                     (org-html-encode-plain-text
                      (org-find-text-property-in-string 'org-latex-src source))
                   (file-name-nondirectory source)))
-     attributes))
+     (if (string= "svg" (file-name-extension source))
+         (org-combine-plists '(:class "org-svg") attributes '(:fallback nil))
+       attributes)))
    info))
 
 (defun org-html--textarea-block (element)
