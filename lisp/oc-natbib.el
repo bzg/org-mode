@@ -185,4 +185,5 @@ OUTPUT is the final output of the export process."
      ("bare-full" "bf") ("caps-full" "cf") ("bare-caps-full" "bcf"))))
 
 (provide 'org-cite-natbib)
+(provide 'oc-natbib)
 ;;; oc-natbib.el ends here
