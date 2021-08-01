@@ -762,5 +762,4 @@ Raise an error when no bibliography is set in the buffer."
     (("nil") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))))
 
 (provide 'org-cite-basic)
-(provide 'oc-basic)
 ;;; oc-default.el ends here

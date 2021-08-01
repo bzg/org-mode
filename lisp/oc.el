@@ -1565,5 +1565,4 @@ ARG is the prefix argument received when calling interactively the function."
           (user-error "Cannot insert a citation here"))))))))
 
 (provide 'org-cite)
-(provide 'oc)
 ;;; oc.el ends here
