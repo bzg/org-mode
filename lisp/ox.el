@@ -5928,7 +5928,7 @@ them."
      ("da" :default "Fodnoter")
      ("de" :html "Fu&szlig;noten" :default "Fußnoten")
      ("eo" :default "Piednotoj")
-     ("es" :ascii "Nota al pie de pagina" :html "Nota al pie de p&aacute;gina" :default "Nota al pie de página")
+     ("es" :ascii "Notas al pie de pagina" :html "Notas al pie de p&aacute;gina" :default "Notas al pie de página")
      ("et" :html "Allm&#228;rkused" :utf-8 "Allmärkused")
      ("fi" :default "Alaviitteet")
      ("fr" :default "Notes de bas de page")
