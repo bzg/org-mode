@@ -7080,7 +7080,7 @@ The optional argument TYPE tells the agenda type."
 	    (setq x
 		  (concat
 		   (substring x 0 (match-end 1))
-                   (unless (string-empty-p org-agenda-todo-keyword-format)
+                   (unless (string= org-agenda-todo-keyword-format "")
 		     (format org-agenda-todo-keyword-format
 			     (match-string 2 x)))
                    ;; Remove `display' property as the icon could leak
