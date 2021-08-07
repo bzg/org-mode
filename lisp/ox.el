@@ -1212,12 +1212,12 @@ keywords are understood:
       or
 
       \\='(?l \"Export to LaTeX\"
-           (?p \"As PDF file\" org-latex-export-to-pdf)
-           (?o \"As PDF file and open\"
-               (lambda (a s v b)
-                 (if a (org-latex-export-to-pdf t s v b)
-                   (org-open-file
-                    (org-latex-export-to-pdf nil s v b)))))))
+           ((?p \"As PDF file\" org-latex-export-to-pdf)
+            (?o \"As PDF file and open\"
+                (lambda (a s v b)
+                  (if a (org-latex-export-to-pdf t s v b)
+                    (org-open-file
+                     (org-latex-export-to-pdf nil s v b)))))))
 
       or the following, which will be added to the previous
       sub-menu,
