@@ -232,7 +232,11 @@ byte-compiled before it is loaded."
 	     tangled-file
 	     (file-attribute-modification-time
 	      (file-attributes (file-truename file))))
-      (org-babel-tangle-file file tangled-file "emacs-lisp\\|elisp"))
+      (org-babel-tangle-file file
+                             tangled-file
+                             (rx string-start
+                                 (or "emacs-lisp" "elisp")
+                                 string-end)))
     (if compile
 	(progn
 	  (byte-compile-file tangled-file)
