@@ -78,32 +78,40 @@ If \"natbib\" package is already required in the document, e.g., through
   "Return command name to use according to STYLE pair."
   (pcase style
     ;; "author" style.
-    (`(,(or "author" "a") . ,(or "caps" "c"))           "\\Citeauthor")
-    (`(,(or "author" "a") . ,(or "full" "f"))           "\\citeauthor*")
-    (`(,(or "author" "a") . ,_)                         "\\citeauthor")
+    (`(,(or "author" "a") . ,variant)
+     (pcase variant
+       ((or "caps" "c")             "\\Citeauthor")
+       ((or "full" "f")             "\\citeauthor*")
+       (_                           "\\citeauthor")))
     ;; "noauthor" style.
-    (`(,(or "noauthor" "na") . ,(or "bare" "b"))        "\\citeyear")
-    (`(,(or "noauthor" "na") . ,_)                      "\\citeyearpar")
+    (`(,(or "noauthor" "na") . ,variant)
+     (pcase variant
+       ((or "bare" "b")             "\\citeyear")
+       (_                           "\\citeyearpar")))
     ;; "nocite" style.
-    (`(,(or "nocite" "n") . ,_)                         "\\nocite")
+    (`(,(or "nocite" "n") . ,_)     "\\nocite")
     ;; "text" style.
-    (`(,(or "text" "t") . ,(or "bare" "b"))             "\\citealt")
-    (`(,(or "text" "t") . ,(or "caps" "c"))             "\\Citet")
-    (`(,(or "text" "t") . ,(or "full" "f"))             "\\citet*")
-    (`(,(or "text" "t") . ,(or "bare-caps" "bc"))       "\\Citealt")
-    (`(,(or "text" "t") . ,(or "bare-full" "bf"))       "\\citealt*")
-    (`(,(or "text" "t") . ,(or "caps-full" "cf"))       "\\Citet*")
-    (`(,(or "text" "t") . ,(or "bare-caps-full" "bcf")) "\\Citealt*")
-    (`(,(or "text" "t") . ,_)                           "\\citet")
+    (`(,(or "text" "t") . ,variant)
+     (pcase variant
+       ((or "bare" "b")             "\\citealt")
+       ((or "caps" "c")             "\\Citet")
+       ((or "full" "f")             "\\citet*")
+       ((or "bare-caps" "bc")       "\\Citealt")
+       ((or "bare-full" "bf")       "\\citealt*")
+       ((or "caps-full" "cf")       "\\Citet*")
+       ((or "bare-caps-full" "bcf") "\\Citealt*")
+       (_ "\\citet")))
     ;; Default ("nil") style.
-    (`(,_ . ,(or "bare" "b"))                           "\\citealp")
-    (`(,_ . ,(or "caps" "c"))                           "\\Citep")
-    (`(,_ . ,(or "full" "f"))                           "\\citep*")
-    (`(,_ . ,(or "bare-caps" "bc"))                     "\\Citealp")
-    (`(,_ . ,(or "bare-full" "bf"))                     "\\citealp*")
-    (`(,_ . ,(or "caps-full" "cf"))                     "\\Citep*")
-    (`(,_ . ,(or "bare-caps-full" "bcf"))               "\\Citealp*")
-    (`(,_ . ,_)                                         "\\citep")
+    (`(,_ . ,variant)
+     (pcase variant
+       ((or "bare" "b")             "\\citealp")
+       ((or "caps" "c")             "\\Citep")
+       ((or "full" "f")             "\\citep*")
+       ((or "bare-caps" "bc")       "\\Citealp")
+       ((or "bare-full" "bf")       "\\citealp*")
+       ((or "caps-full" "cf")       "\\Citep*")
+       ((or "bare-caps-full" "bcf") "\\Citealp*")
+       (_                           "\\citep")))
     ;; This should not happen.
     (_ (error "Invalid style: %S" style))))
 
