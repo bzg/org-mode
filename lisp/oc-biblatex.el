@@ -260,7 +260,7 @@ to the document, and set styles."
       ;; Then set options.
       (goto-char (match-beginning 0))
       (let ((re (rx "\\usepackage"
-                    (opt (group "[" (*? anychar) "]"))
+                    (opt (group "[" (*? anything) "]"))
                     "{biblatex}")))
         (cond
          ;; No "biblatex" package loaded.  Insert "usepackage" command

@@ -253,10 +253,13 @@ If nil then the Chicago author-date style is used as a fallback.")
   "Alist mapping locator names to locators.")
 
 (defconst org-cite-csl--label-regexp
-  (rx word-start
-      (regexp (regexp-opt (mapcar #'car org-cite-csl--label-alist) t))
-      (0+ digit)
-      (or word-start line-end (any ?\s ?\t)))
+  ;; Prior to Emacs-27.1 argument of `regexp' form must be a string literal.
+  ;; It is the reason why `rx' is avoided here.
+  (rx-to-string `(seq word-start
+                  (regexp ,(regexp-opt (mapcar #'car org-cite-csl--label-alist) t))
+                  (0+ digit)
+                  (or word-start line-end (any ?\s ?\t)))
+                t)
   "Regexp matching a label in a citation reference suffix.
 Label is in match group 1.")
 

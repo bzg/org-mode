@@ -667,7 +667,9 @@ present in the citation."
     (org-open-file file '(4))
     (pcase (file-name-extension file)
       ("json"
-       (let ((regexp (rx "\"id\":" (0+ (any "[ \t]")) "\"" (literal key) "\"")))
+       ;; `rx' can not be used with Emacs <27.1 since `literal' form
+       ;; is not supported.
+       (let ((regexp (rx-to-string `(seq "\"id\":" (0+ (any "[ \t]")) "\"" ,key "\"") t)))
          (goto-char (point-min))
          (re-search-forward regexp)
          (search-backward "{")))

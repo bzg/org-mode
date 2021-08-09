@@ -878,14 +878,19 @@ the same object, call `org-cite-adjust-punctuation' first."
   (when org-cite-adjust-note-numbers
     (pcase-let* ((rule (or rule (org-cite--get-note-rule info)))
                  (punct-re (regexp-opt (or punct org-cite-punctuation-marks)))
+                 ;; with Emacs <27.1. Argument of `regexp' form (PUNCT-RE this case)
+                 ;; must be a string literal.
                  (previous-punct-re
-                  (rx (opt (group (0+ (any blank ?\n)) (regexp punct-re)))
-                      (opt (0+ (any blank ?\n)) (group ?\"))
-                      (opt (group (1+ (any blank ?\n))))
-                      string-end))
+                  (rx-to-string `(seq (opt (group (regexp ,(rx (0+ (any blank ?\n))))
+                                                  (regexp ,punct-re)))
+                                      (regexp ,(rx (opt (0+ (any blank ?\n)) (group ?\"))
+                                                   (opt (group (1+ (any blank ?\n))))
+                                                   string-end)))
+                                t))
                  (next-punct-re
-                  (rx string-start
-                      (group (0+ (any blank ?\n)) (regexp punct-re))))
+                  (rx-to-string `(seq string-start
+                                      (group (0+ (any blank ?\n)) (regexp ,punct-re)))
+                                t))
                  (next (org-export-get-next-element citation info))
                  (final-punct
                   (and (stringp next)
@@ -928,7 +933,9 @@ the same object, call `org-cite-adjust-punctuation' first."
                      (concat final-punct "\"") previous nil nil 2))
                    (new-next
                     (replace-regexp-in-string
-                     (rx string-start (literal final-punct))
+                     ;; Before Emacs-27.1 `literal' `rx' form with a variable
+                     ;; as an argument is not available.
+                     (rx-to-string `(seq string-start ,final-punct) t)
                      "" next)))
                (org-element-set-element previous new-prev)
                (org-element-set-element next new-next)
