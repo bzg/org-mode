@@ -65,7 +65,10 @@
 ;;; Code:
 
 (require 'bibtex)
+(require 'json)
 (require 'oc)
+(require 'org)
+(require 'seq)
 
 (declare-function org-open-at-point "org" (&optional arg))
 

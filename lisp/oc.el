@@ -57,6 +57,7 @@
 
 (require 'org-compat)
 (require 'org-macs)
+(require 'seq)
 
 (declare-function org-at-heading-p "org" (&optional _))
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
