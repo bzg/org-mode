@@ -72,6 +72,16 @@
 (defvar org-table1-hline-regexp)
 
 
+;;; Emacs < 28.1 compatibility
+
+(if (version< emacs-version "28")
+    (defun org-directory-empty-p (dir)
+      "Return t if DIR names an existing directory containing no other files."
+      (and (file-directory-p dir)
+           (null (directory-files dir nil directory-files-no-dot-files-regexp t 1))))
+  (defalias 'org-directory-empty-p #'directory-empty-p))
+
+
 ;;; Emacs < 27.1 compatibility
 
 (unless (fboundp 'proper-list-p)

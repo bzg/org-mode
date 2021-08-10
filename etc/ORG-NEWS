@@ -421,6 +421,8 @@ Tag completion now uses =completing-read-multiple= with a simple
 completion table, which should allow better interoperability with
 custom completion functions.
 
+*** Providing =directory-empty-p= from Emacs 28 as =org-directory-empty-p=
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
