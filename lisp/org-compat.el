@@ -78,7 +78,7 @@
     (defun org-directory-empty-p (dir)
       "Return t if DIR names an existing directory containing no other files."
       (and (file-directory-p dir)
-           (null (directory-files dir nil directory-files-no-dot-files-regexp t 1))))
+           (null (directory-files dir nil directory-files-no-dot-files-regexp t))))
   (defalias 'org-directory-empty-p #'directory-empty-p))
 
 
