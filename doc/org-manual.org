@@ -4205,10 +4205,6 @@ example, with the setting
       '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
 #+end_src
 
-#+texinfo: @noindent
-To record a timestamp without a note for TODO keywords configured with
-=@=, just type {{{kbd(C-c C-c)}}} to enter a blank note when prompted.
-
 #+vindex: org-log-done
 You not only define global TODO keywords and fast access keys, but
 also request that a time is recorded when the entry is set to =DONE=,
@@ -4227,6 +4223,9 @@ You can use the exact same syntax for setting logging preferences local
 to a buffer:
 
 : #+TODO: TODO(t) WAIT(w@/!) | DONE(d!) CANCELED(c@)
+
+To record a timestamp without a note for TODO keywords configured with
+=@=, just type {{{kbd(C-c C-c)}}} to enter a blank note when prompted.
 
 #+cindex: @samp{LOGGING}, property
 In order to define logging settings that are local to a subtree or
