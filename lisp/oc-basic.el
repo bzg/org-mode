@@ -242,7 +242,7 @@ Optional argument INFO is the export state, as a property list."
         (when (file-readable-p file)
           (with-temp-buffer
             (insert-file-contents file)
-	    (let* ((file-id (cons file (buffer-hash)))
+	    (let* ((file-id (cons file (org-buffer-hash)))
                    (entries
                     (or (cdr (assoc file-id org-cite-basic--bibliography-cache))
                         (let ((table
