@@ -221,27 +221,35 @@ a property list."
    #'org-cite-biblatex--command citation info
    (pcase style
      ;; "author" style.
-     (`(,(or "author" "a") . ,(or "caps" "c"))         '("Citeauthor*"))
-     (`(,(or "author" "a") . ,(or "full" "f"))         '("citeauthor"))
-     (`(,(or "author" "a") . ,(or "caps-full" "cf"))   '("Citeauthor"))
-     (`(,(or "author" "a") . ,_)                       '("citeauthor*"))
+     (`(,(or "author" "a") . ,variant)
+      (pcase variant
+        ((or "caps" "c")            '("Citeauthor*"))
+        ((or "full" "f")            '("citeauthor"))
+        ((or "caps-full" "cf")      '("Citeauthor"))
+        (_                          '("citeauthor*"))))
      ;; "locators" style.
-     (`(,(or "locators" "l") . ,(or "bare" "b"))       '("notecite"))
-     (`(,(or "locators" "l") . ,(or "caps" "c"))       '("Pnotecite"))
-     (`(,(or "locators" "l") . ,(or "bare-caps" "bc")) '("Notecite"))
-     (`(,(or "locators" "l") . ,_)                     '("pnotecite"))
+     (`(,(or "locators" "l") . ,variant)
+      (pcase variant
+        ((or "bare" "b")            '("notecite"))
+        ((or "caps" "c")            '("Pnotecite"))
+        ((or "bare-caps" "bc")      '("Notecite"))
+        (_                          '("pnotecite"))))
      ;; "noauthor" style.
-     (`(,(or "noauthor" "na") . ,_)                    '("autocite*"))
+     (`(,(or "noauthor" "na") . ,_) '("autocite*"))
      ;; "nocite" style.
-     (`(,(or "nocite" "n") . ,_)                       '("nocite" nil t))
+     (`(,(or "nocite" "n") . ,_)    '("nocite" nil t))
      ;; "text" style.
-     (`(,(or "text" "t") . ,(or "caps" "c"))           '("Textcite" t))
-     (`(,(or "text" "t") . ,_)                         '("textcite" t))
+     (`(,(or "text" "t") . ,variant)
+      (pcase variant
+        ((or "caps" "c")            '("Textcite" t))
+        (_                          '("textcite" t))))
      ;; Default "nil" style.
-     (`(,_ . ,(or "bare" "b"))                         '("cite" t))
-     (`(,_ . ,(or "caps" "c"))                         '("Autocite" t))
-     (`(,_ . ,(or "bare-caps" "bc"))                   '("Cite" t))
-     (`(,_ . ,_)                                       '("autocite" t))
+     (`(,_ . ,variant)
+      (pcase variant
+        ((or "bare" "b")            '("cite" t))
+        ((or "caps" "c")            '("Autocite" t))
+        ((or "bare-caps" "bc")      '("Cite" t))
+        (_                          '("autocite" t))))
      ;; This should not happen.
      (_ (error "Invalid style: %S" style)))))
 
