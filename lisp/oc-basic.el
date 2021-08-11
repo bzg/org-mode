@@ -682,7 +682,7 @@ present in the citation."
 
 
 ;;; "Insert" capability
-(defun org-cite-basic--complete-style ()
+(defun org-cite-basic--complete-style (_)
   "Offer completion for style.
 Return chosen style as a string."
   (let* ((styles

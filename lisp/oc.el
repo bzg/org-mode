@@ -1449,6 +1449,16 @@ ARG is the prefix argument received when calling `org-open-at-point', or nil."
         (insert-before-markers  string ";")
       (insert-before-markers ";" string))))
 
+(defun org-cite--keys-to-citation (keys)
+  "Build a citation object from a list of citation KEYS.
+Citation keys are strings without the leading \"@\"."
+  (apply #'org-element-create
+         'citation
+         nil
+         (mapcar (lambda (k)
+                   (org-element-create 'citation-reference (list :key k)))
+                 keys)))
+
 (defun org-cite-make-insert-processor (select-key select-style)
   "Build a function appropriate as an insert processor.
 
@@ -1457,8 +1467,8 @@ should return a citation key as a string, or nil.  Otherwise, the function
 should return a list of such keys, or nil.  The keys should not have any leading
 \"@\" character.
 
-SELECT-STYLE is a function called without any argument.  It should return a
-style string, or nil.
+SELECT-STYLE is a function called with one argument, the citation object being
+edited or constructed so far.  It should return a style string, or nil.
 
 The return value is a function of two arguments: CONTEXT and ARG.  CONTEXT is
 either a citation reference, a citation object, or nil.  ARG is a prefix
@@ -1541,7 +1551,8 @@ The generated function inserts or edit a citation at point.  More specifically,
          (insert
           (format "[cite%s:%s]"
                   (if arg
-                      (let ((style (funcall select-style)))
+                      (let ((style (funcall select-style
+                                            (org-cite--keys-to-citation keys))))
                         (if (org-string-nw-p style)
                             (concat "/" style)
                           ""))
