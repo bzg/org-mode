@@ -315,6 +315,5 @@ to the document, and set styles."
     (("text" "t") ("caps" "c"))
     (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))))
 
-(provide 'org-cite-biblatex)
 (provide 'oc-biblatex)
 ;;; oc-biblatex.el ends here

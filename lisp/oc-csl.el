@@ -87,7 +87,7 @@
 ;;; Code:
 (require 'bibtex)
 (require 'json)
-(require 'org-cite)
+(require 'oc)
 
 (require 'citeproc nil t)
 (declare-function citeproc-style-cite-note "ext:citeproc")
@@ -606,6 +606,5 @@ property list."
   '((("noauthor" "na") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))
     (("nil") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))))
 
-(provide 'org-cite-csl)
 (provide 'oc-csl)
 ;;; oc-citeproc.el ends here
