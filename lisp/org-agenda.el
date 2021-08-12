@@ -2132,7 +2132,8 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 The inserted header depends on `org-agenda-overriding-header'.
 If the empty string, don't insert a header.  If any other string,
 insert it as a header.  If nil, insert DEFAULT, which should
-evaluate to a string."
+evaluate to a string.  If a function, call it and insert the
+string that it returns."
   (declare (debug (form)) (indent defun))
   `(cond
     ((not org-agenda-overriding-header) (insert ,default))
@@ -2141,6 +2142,8 @@ evaluate to a string."
      (insert (propertize org-agenda-overriding-header
 			 'face 'org-agenda-structure)
 	     "\n"))
+    ((functionp org-agenda-overriding-header)
+     (insert (funcall org-agenda-overriding-header)))
     (t (user-error "Invalid value for `org-agenda-overriding-header': %S"
 		   org-agenda-overriding-header))))
 
@@ -5052,10 +5055,11 @@ used by user-defined selections using `org-agenda-skip-function'.")
 (defvar org-agenda-overriding-header nil
   "When set during agenda, todo and tags searches it replaces the header.
 If an empty string, no header will be inserted.  If any other
-string, it will be inserted as a header.  If nil, a header will
-be generated automatically according to the command.  This
-variable should not be set directly, but custom commands can bind
-it in the options section.")
+string, it will be inserted as a header.  If a function, insert
+the string returned by the function as a header.  If nil, a
+header will be generated automatically according to the command.
+This variable should not be set directly, but custom commands can
+bind it in the options section.")
 
 (defun org-agenda-skip-entry-if (&rest conditions)
   "Skip entry if any of CONDITIONS is true.
