@@ -17771,6 +17771,11 @@ Handling options after collecting the results.
   Do not insert results in the Org mode buffer, but echo them in the
   minibuffer.  Usage example: =:results output silent=.
 
+- =none= ::
+
+  Do not process results at all. No inserting in the Org mode buffer
+  nor echo them in the minibuffer.  Usage example: =:results none=.
+
 - =append= ::
 
   Append results to the Org buffer.  Latest results are at the bottom.
