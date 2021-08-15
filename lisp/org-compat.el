@@ -74,12 +74,12 @@
 
 ;;; Emacs < 28.1 compatibility
 
-(if (version< emacs-version "28")
-    (defun org-directory-empty-p (dir)
-      "Return t if DIR names an existing directory containing no other files."
-      (and (file-directory-p dir)
-           (null (directory-files dir nil directory-files-no-dot-files-regexp t))))
-  (defalias 'org-directory-empty-p #'directory-empty-p))
+(if (fboundp 'directory-empty-p)
+    (defalias 'org-directory-empty-p #'directory-empty-p)
+  (defun org-directory-empty-p (dir)
+    "Return t if DIR names an existing directory containing no other files."
+    (and (file-directory-p dir)
+         (null (directory-files dir nil directory-files-no-dot-files-regexp t)))))
 
 
 ;;; Emacs < 27.1 compatibility
