@@ -2185,6 +2185,10 @@ silent -- no results are inserted into the Org buffer but
           ingested by Emacs (a potentially time consuming
           process).
 
+none ---- no results are inserted into the Org buffer nor
+          echoed to the minibuffer. they are not processed into
+          Emacs-lisp objects at all.
+
 file ---- the results are interpreted as a file path, and are
           inserted into the buffer using the Org file syntax.
 
