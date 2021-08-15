@@ -17761,15 +17761,15 @@ value listed above.  E.g.,
 
 Handling options after collecting the results.
 
-- =silent= ::
-
-  Do not insert results in the Org mode buffer, but echo them in the
-  minibuffer.  Usage example: =:results output silent=.
-
 - =replace= ::
 
   Default.  Insert results in the Org buffer.  Remove previous
   results.  Usage example: =:results output replace=.
+
+- =silent= ::
+
+  Do not insert results in the Org mode buffer, but echo them in the
+  minibuffer.  Usage example: =:results output silent=.
 
 - =append= ::
 
