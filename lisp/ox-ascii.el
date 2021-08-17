@@ -480,6 +480,9 @@ HOW determines the type of justification: it can be `left',
     (insert s)
     (goto-char (point-min))
     (let ((fill-column text-width)
+          ;; Ensure that `indent-tabs-mode' is nil so that indentation
+          ;; will always be achieved using spaces rather than tabs.
+          (indent-tabs-mode nil)
 	  ;; Disable `adaptive-fill-mode' so it doesn't prevent
 	  ;; filling lines matching `adaptive-fill-regexp'.
 	  (adaptive-fill-mode nil))
