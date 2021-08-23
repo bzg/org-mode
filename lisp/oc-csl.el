@@ -595,7 +595,7 @@ property list."
         (goto-char (match-beginning 0))
         (let ((re (rx "\\usepackage" (opt "[" (*? nonl) "]") "{hanging}")))
           (unless (re-search-backward re nil t)
-            (insert "\\usepackage{hanging}\n"))))
+            (insert "\\usepackage[notquote]{hanging}\n"))))
       (buffer-string))))
 
 
