@@ -7381,7 +7381,7 @@ When in a restricted subtree, remove it.
 
 The restriction will span over the entire file if TYPE is `file',
 or if type is '(4), or if the cursor is before the first headline
-in the file. Otherwise, only apply the restriction to the current
+in the file.  Otherwise, only apply the restriction to the current
 subtree."
   (interactive "P")
   (if (and org-agenda-overriding-restriction
@@ -10198,7 +10198,7 @@ entries in that Org file."
 	 (date (calendar-gregorian-from-absolute
 		(get-text-property point 'day))))
     ;; the following 2 vars are needed in the calendar
-    (org-dlet 
+    (org-dlet
 	((displayed-month (car date))
 	 (displayed-year (nth 2 date)))
       (unwind-protect
