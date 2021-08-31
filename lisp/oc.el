@@ -1420,6 +1420,12 @@ ARG is the prefix argument received when calling `org-open-at-point', or nil."
 			  (skip-chars-backward " \r\t\n")
 			  (if (eq (org-element-class context) 'object) (point)
 			    (line-beginning-position 2)))))
+     ;; At the start of a list item is fine, as long as the bullet is unaffected.
+     ((eq type 'item)
+      (> (point) (+ (org-element-property :begin context)
+                    (org-get-indentation)
+                    (if (org-element-property :checkbox context)
+                        5 1))))
      ;; Other elements are invalid.
      ((eq (org-element-class context) 'element) nil)
      ;; Just before object is fine.
