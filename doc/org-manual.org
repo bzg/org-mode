@@ -170,9 +170,9 @@ to globally available keys, like the ones reserved for users (see
 please modify the keys to your own liking.
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-c l") 'org-store-link)
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c l") #'org-store-link)
+(global-set-key (kbd "C-c a") #'org-agenda)
+(global-set-key (kbd "C-c c") #'org-capture)
 #+end_src
 
 #+cindex: Org mode, turning on
@@ -1789,7 +1789,7 @@ mode with {{{kbd(M-x orgtbl-mode)}}}.  To turn it on by default, for
 example in Message mode, use
 
 #+begin_src emacs-lisp
-(add-hook 'message-mode-hook 'turn-on-orgtbl)
+(add-hook 'message-mode-hook #'turn-on-orgtbl)
 #+end_src
 
 Furthermore, with some special setup, it is possible to maintain
@@ -3521,8 +3521,8 @@ generally, act on links.
 
   #+begin_src emacs-lisp
   (with-eval-after-load 'org
-    (define-key org-mode-map (kbd "M-n") 'org-next-link)
-    (define-key org-mode-map (kbd "M-p") 'org-previous-link))
+    (define-key org-mode-map (kbd "M-n") #'org-next-link)
+    (define-key org-mode-map (kbd "M-p") #'org-previous-link))
   #+end_src
 
 ** Using Links Outside Org
@@ -3563,7 +3563,7 @@ replacement text.  Here is an example:
 #+begin_src emacs-lisp
 (setq org-link-abbrev-alist
       '(("bugzilla"        . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
-        ("Nu Html Checker" . "https://validator.w3.org/nu/?doc=%h") 
+        ("Nu Html Checker" . "https://validator.w3.org/nu/?doc=%h")
 	("duckduckgo"      . "https://duckduckgo.com/?q=%s")
         ("omap"            . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
         ("ads"             . "https://ui.adsabs.harvard.edu/search/q=%20author%3A\"%s\"")))
@@ -4489,7 +4489,7 @@ all children are done, you can use the following setup:
   (let (org-log-done org-log-states)   ; turn off logging
     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
-(add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+(add-hook 'org-after-todo-statistics-hook #'org-summary-todo)
 #+end_src
 
 Another possibility is the use of checkboxes to identify (a hierarchy
@@ -11034,7 +11034,7 @@ current buffer with {{{kbd(M-x org-cdlatex-mode)}}}, or for all Org
 files with
 
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'turn-on-org-cdlatex)
+(add-hook 'org-mode-hook #'turn-on-org-cdlatex)
 #+end_src
 
 When this mode is enabled, the following features are present (for
@@ -15581,7 +15581,7 @@ BACKEND is the export back-end being used, as a symbol."
   (org-map-entries
    (lambda () (delete-region (point) (line-beginning-position 2)))))
 
-(add-hook 'org-export-before-parsing-hook 'my-headline-removal)
+(add-hook 'org-export-before-parsing-hook #'my-headline-removal)
 #+end_src
 
 *** Filters
@@ -21451,7 +21451,7 @@ modify this GNU manual."
 * Footnotes
 
 [fn:1] If you do not use Font Lock globally turn it on in Org buffer
-with =(add-hook 'org-mode-hook 'turn-on-font-lock)=.
+with =(add-hook 'org-mode-hook #'turn-on-font-lock)=.
 
 [fn:2] Please consider subscribing to the mailing list in order to
 minimize the work the mailing list moderators have to do.

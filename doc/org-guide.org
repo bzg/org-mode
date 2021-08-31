@@ -76,9 +76,9 @@ keys for three commands that are useful in any Emacs buffer, not just
 Org buffers.  Please choose suitable keys yourself.
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-c l") 'org-store-link)
-(global-set-key (kbd "C-c a") 'org-agenda)
-(global-set-key (kbd "C-c c") 'org-capture)
+(global-set-key (kbd "C-c l") #'org-store-link)
+(global-set-key (kbd "C-c a") #'org-agenda)
+(global-set-key (kbd "C-c c") #'org-capture)
 #+end_src
 
 Files with extension =.org= will be put into Org mode automatically.
