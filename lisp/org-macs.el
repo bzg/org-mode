@@ -811,7 +811,7 @@ return nil."
 (defun org-url-p (s)
   "Non-nil if string S is a URL."
   (require 'ffap)
-  (string-match-p ffap-url-regexp s))
+  (and ffap-url-regexp (string-match-p ffap-url-regexp s)))
 
 
 ;;; String manipulation
