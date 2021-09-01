@@ -19362,7 +19362,9 @@ a footnote definition, try to fill the first paragraph within."
       ;; the buffer.  In that case, ignore filling.
       (cl-case (org-element-type element)
 	;; Use major mode filling function is source blocks.
-	(src-block (org-babel-do-key-sequence-in-edit-buffer (kbd "M-q")))
+	(src-block (org-babel-do-in-edit-buffer
+                    (mark-whole-buffer)
+                    (funcall-interactively #'fill-paragraph justify 'region)))
 	;; Align Org tables, leave table.el tables as-is.
 	(table-row (org-table-align) t)
 	(table
@@ -19497,7 +19499,9 @@ filling the current element."
     ;; previously unmodified), then flip the modification status back
     ;; to "unchanged".
     (when (and hash (equal hash (org-buffer-hash)))
-      (set-buffer-modified-p nil))))
+      (set-buffer-modified-p nil))
+    ;; Return non-nil.
+    t))
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
