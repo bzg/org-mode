@@ -916,16 +916,16 @@ commands can be accessed through a dispatcher:
   #+kindex: C-c / /
   #+findex: org-occur
   #+vindex: org-remove-highlights-with-change
-  Prompts for a regexp and shows a sparse tree with all matches.  If
-  the match is in a headline, the headline is made visible.  If the
-  match is in the body of an entry, headline and body are made
-  visible.  In order to provide minimal context, also the full
-  hierarchy of headlines above the match is shown, as well as the
-  headline following the match.  Each match is also highlighted; the
-  highlights disappear when the buffer is changed by an editing
-  command, or by pressing {{{kbd(C-c C-c)}}}[fn:8].  When called with
-  a {{{kbd(C-u)}}} prefix argument, previous highlights are kept, so
-  several calls to this command can be stacked.
+  Prompts for a regexp (see [[*Regular Expressions]]) and shows a sparse
+  tree with all matches.  If the match is in a headline, the headline
+  is made visible.  If the match is in the body of an entry, headline
+  and body are made visible.  In order to provide minimal context,
+  also the full hierarchy of headlines above the match is shown, as
+  well as the headline following the match.  Each match is also
+  highlighted; the highlights disappear when the buffer is changed by
+  an editing command, or by pressing {{{kbd(C-c C-c)}}}[fn:8].  When
+  called with a {{{kbd(C-u)}}} prefix argument, previous highlights
+  are kept, so several calls to this command can be stacked.
 
 - {{{kbd(M-g n)}}} or {{{kbd(M-g M-n)}}} (~next-error~) ::
 
@@ -3663,10 +3663,10 @@ link, together with explanations for each:
 
 - =/REGEXP/= ::
 
-  Do a regular expression search for {{{var(REGEXP)}}}.  This uses the
-  Emacs command ~occur~ to list all matches in a separate window.  If
-  the target file is in Org mode, ~org-occur~ is used to create
-  a sparse tree with the matches.
+  Do a regular expression search for {{{var(REGEXP)}}} (see [[*Regular
+  Expressions]]).  This uses the Emacs command ~occur~ to list all
+  matches in a separate window.  If the target file is in Org mode,
+  ~org-occur~ is used to create a sparse tree with the matches.
 
 As a degenerate case, a file link with an empty file name can be used
 to search the current file.  For example, =[[file:::find me]]= does
@@ -4978,8 +4978,9 @@ mutually exclusive.
 
 Furthermore, the members of a group tag can also be regular
 expressions, creating the possibility of a more dynamic and rule-based
-tag structure.  The regular expressions in the group must be specified
-within curly brackets.  Here is an expanded example:
+tag structure (see [[*Regular Expressions]]).  The regular expressions in
+the group must be specified within curly brackets.  Here is an
+expanded example:
 
 #+begin_example
 ,#+TAGS: [ Vision : {V@.+} ]
@@ -5321,7 +5322,7 @@ single property:
   tree is created with all entries that define this property with the
   given value.  If you enclose the value in curly braces, it is
   interpreted as a regular expression and matched against the property
-  values.
+  values (see [[*Regular Expressions]]).
 
 ** Property Inheritance
 :PROPERTIES:
@@ -8913,8 +8914,9 @@ only tags.
 
 #+cindex: regular expressions, with tags search
 Instead of a tag, you may also specify a regular expression enclosed
-in curly braces.  For example, =work+{^boss.*}= matches headlines that
-contain the tag =:work:= and any tag /starting/ with =boss=.
+in curly braces (see [[*Regular Expressions]]).  For example,
+=work+{^boss.*}= matches headlines that contain the tag =:work:= and
+any tag /starting/ with =boss=.
 
 #+cindex: group tags, as regular expressions
 Group tags (see [[*Tag Hierarchy]]) are expanded as regular expressions.
@@ -8954,7 +8956,7 @@ to test the value of a property.  Here is a complex example:
 
 #+begin_example
 +work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2
-         +With={Sarah|Denny}+SCHEDULED>="<2008-10-11>"
+         +With={Sarah\|Denny}+SCHEDULED>="<2008-10-11>"
 #+end_example
 
 #+texinfo: @noindent
@@ -8984,7 +8986,7 @@ So the search string in the example finds entries tagged =work= but
 not =boss=, which also have a priority value =A=, a =Coffee= property
 with the value =unlimited=, an =EFFORT= property that is numerically
 smaller than 2, a =With= property that is matched by the regular
-expression =Sarah|Denny=, and that are scheduled on or after October
+expression =Sarah\|Denny=, and that are scheduled on or after October
 11, 2008.
 
 You can configure Org mode to use property inheritance during
@@ -9362,16 +9364,16 @@ filter elements are accumulated.
 
   selects entries with category =work= and effort estimates below 10
   minutes, and deselects entries with tag =John= or matching the
-  regexp =plot=.  You can leave =+= out if that does not lead to
-  ambiguities.  The sequence of elements is arbitrary.  The filter
-  syntax assumes that there is no overlap between categories and tags.
-  Otherwise, tags take priority.  If you reply to the prompt with the
-  empty string, all filtering is removed.  If a filter is specified,
-  it replaces all current filters.  But if you call the command with
-  a double prefix argument, or if you add an additional =+= (e.g.,
-  =++work=) to the front of the string, the new filter elements are
-  added to the active ones.  A single prefix argument applies the
-  entire filter in a negative sense.
+  regexp =plot= (see [[*Regular Expressions]]).  You can leave =+= out if
+  that does not lead to ambiguities.  The sequence of elements is
+  arbitrary.  The filter syntax assumes that there is no overlap
+  between categories and tags.  Otherwise, tags take priority.  If you
+  reply to the prompt with the empty string, all filtering is removed.
+  If a filter is specified, it replaces all current filters.  But if
+  you call the command with a double prefix argument, or if you add an
+  additional =+= (e.g., =++work=) to the front of the string, the new
+  filter elements are added to the active ones.  A single prefix
+  argument applies the entire filter in a negative sense.
 
 - {{{kbd(|)}}} (~org-agenda-filter-remove-all~) ::
 
@@ -19242,6 +19244,22 @@ changes.
   #+vindex: org-todo-keywords
   These lines set the TODO keywords and their interpretation in the
   current file.  The corresponding variable is ~org-todo-keywords~.
+  
+** Regular Expressions
+:PROPERTIES:
+:DESCRIPTION: Elisp regular expressions.
+:END:
+#+cindex: regular expressions syntax
+#+cindex: regular expressions, in searches
+
+Org, as an Emacs mode, makes use of Elisp regular expressions for
+searching, matching and filtering.  Elisp regular expressions have a
+somewhat different syntax then some common standards.  Most notably,
+alternation is indicated using =\|= and matching groups are denoted by
+=\(...\)=.  For example the string =home\|work= matches either =home=
+or =work=.
+
+For more information, see [[info:emacs::Regexps][Regular Expressions in Emacs]].
 
 ** Org Syntax
 :PROPERTIES:
