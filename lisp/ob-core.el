@@ -413,6 +413,7 @@ then run `org-babel-switch-to-session'."
     (noweb	. ((yes no tangle no-export strip-export)))
     (noweb-ref	. :any)
     (noweb-sep  . :any)
+    (noweb-prefix . ((no yes)))
     (output-dir . :any)
     (padline	. ((yes no)))
     (post       . :any)
@@ -438,8 +439,8 @@ specific header arguments as well.")
 
 (defconst org-babel-safe-header-args
   '(:cache :colnames :comments :exports :epilogue :hlines :noeval
-	   :noweb :noweb-ref :noweb-sep :padline :prologue :rownames
-	   :sep :session :tangle :wrap
+	   :noweb :noweb-ref :noweb-sep :noweb-prefix :padline
+           :prologue :rownames :sep :session :tangle :wrap
 	   (:eval . ("never" "query"))
 	   (:results . (lambda (str) (not (string-match "file" str)))))
   "A list of safe header arguments for babel source blocks.
@@ -2827,6 +2828,10 @@ block but are passed literally to the \"example-block\"."
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (comment (string= "noweb" (cdr (assq :comments (nth 2 info)))))
+         (noweb-prefix (let ((v (assq :noweb-prefix (nth 2 info))))
+                         (or (not v)
+                             (and (org-not-nil (cdr v))
+                                  (not (equal (cdr v) "no"))))))
 	 (noweb-re (format "\\(.*?\\)\\(%s\\)"
 			   (with-current-buffer parent-buffer
 			     (org-babel-noweb-wrap))))
@@ -2923,9 +2928,11 @@ block but are passed literally to the \"example-block\"."
 			    (push info (gethash ref cache))))))
 		     (funcall expand-references id cache)))))
 	     ;; Interpose PREFIX between every line.
-	     (mapconcat #'identity
-			(split-string expansion "[\n\r]")
-			(concat "\n" prefix))))))
+	     (if noweb-prefix
+                 (mapconcat #'identity
+			    (split-string expansion "[\n\r]")
+			    (concat "\n" prefix))
+               expansion)))))
      body t t 2)))
 
 (defun org-babel--script-escape-inner (str)

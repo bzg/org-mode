@@ -18760,6 +18760,23 @@ else:
     print('do things when false')
 #+end_example
 
+This prefix behavior can be turned off in a block by setting the
+=noweb-prefix= header argument to =no=, as in:
+
+#+begin_example
+,#+BEGIN_SRC elisp :noweb-prefix no
+  (setq example-data "<<example>>")
+,#+END_SRC
+#+end_example
+
+#+texinfo: @noindent
+which expands to:
+
+#+begin_example
+(setq example-data "this is the
+multi-line body of example")
+#+end_example
+
 When in doubt about the outcome of a source code block expansion, you
 can preview the results with the following command:
 

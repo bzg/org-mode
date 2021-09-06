@@ -150,7 +150,7 @@ The entry points are ~org-persist-register~, ~org-persist-unregister~,
 ~org-persist-read~, and ~org-persist-read-all~.  Storing circular
 structures is supported.  Storing references between different
 variables is also supported (see =:inherit= key in
-~org-persist-register~).  
+~org-persist-register~).
 
 The library permits storing buffer-local variables.  Such variables
 are linked to the buffer text, file =inode=, and file path.
@@ -175,6 +175,10 @@ the =compact-itemx= export option, or globally using the
 Items in a description list that begin with =Function:=, =Variable:=
 or certain related prefixes are converted using Texinfo definition
 commands.
+*** New =:noweb-prefix= babel header argument
+
+=:noweb-prefix= can be set to =no= to prevent the prefix characters
+from being repeated when expanding a multiline noweb reference.
 
 ** New functions and changes in function arguments
 
