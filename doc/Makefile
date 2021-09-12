@@ -54,9 +54,9 @@ install:	org orgguide
 	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) orgguide.info
 
 clean:
-	$(RM) org orgguide *.pdf *.html *_letter.tex org-version.inc \
-	      org-version.tex *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys \
-              *.pg *.pgs *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
+	$(RM) *.pdf *.html *.info *_letter.tex org-version.inc org-version.tex \
+	      *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs *.toc \
+              *.tp *.tps *.vr *.vrs *.log *.ps
 cleanall:	clean
 	$(RM) org.texi orgguide.texi
 	$(RMR) guide manual
