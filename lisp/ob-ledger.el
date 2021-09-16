@@ -44,8 +44,8 @@
   "Default arguments to use when evaluating a ledger source block.")
 
 (defun org-babel-execute:ledger (body params)
-  "Execute a block of Ledger entries with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+  "Execute a block of Ledger entries with org-babel.
+This function is called by `org-babel-execute-src-block'."
   (message "executing Ledger source code block")
   (let ((cmdline (cdr (assq :cmdline params)))
         (in-file (org-babel-temp-file "ledger-"))

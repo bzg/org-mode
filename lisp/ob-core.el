@@ -538,7 +538,7 @@ to raise errors for all languages.")
   "Number of initial characters to show of a hidden results hash.")
 
 (defvar org-babel-after-execute-hook nil
-  "Hook for functions to be called after `org-babel-execute-src-block'")
+  "Hook for functions to be called after `org-babel-execute-src-block'.")
 
 (defun org-babel-named-src-block-regexp-for-name (&optional name)
   "Generate a regexp used to match a source block named NAME.
@@ -1706,7 +1706,7 @@ of the vars, cnames and rnames."
 (defun org-babel-reassemble-table (table colnames rownames)
   "Add column and row names to a table.
 Given a TABLE and set of COLNAMES and ROWNAMES add the names
-to the table for reinsertion to org-mode."
+to the table for reinsertion to `org-mode'."
   (if (listp table)
       (let ((table (if (and rownames (= (length table) (length rownames)))
                        (org-babel-put-rownames table rownames) table)))
@@ -2966,7 +2966,7 @@ block but are passed literally to the \"example-block\"."
 
 (defun org-babel-read (cell &optional inhibit-lisp-eval)
   "Convert the string value of CELL to a number if appropriate.
-Otherwise if CELL looks like lisp (meaning it starts with a
+Otherwise if CELL looks like Lisp (meaning it starts with a
 \"(\", \"\\='\", \"\\=`\" or a \"[\") then read and evaluate it as
 lisp, otherwise return it unmodified as a string.  Optional
 argument INHIBIT-LISP-EVAL inhibits lisp evaluation for

@@ -331,7 +331,7 @@ relies on the variables to be present in the list."
 The default value is `hours', and will output the results as a
 number of hours.  Other allowed values are `seconds', `minutes' and
 `days', and the output will be a fraction of seconds, minutes or
-days. `hh:mm' selects to use hours and minutes, ignoring seconds.
+days.  `hh:mm' selects to use hours and minutes, ignoring seconds.
 The `U' flag in a table formula will select this specific format for
 a single formula."
   :group 'org-table-calculation
@@ -3267,7 +3267,7 @@ Parameters get priority."
     (org-defkey map "\C-c}"    'org-table-fedit-toggle-coordinates)
     map))
 
-(easy-menu-define org-table-fedit-menu org-table-fedit-map "Org Edit Formulas Menu"
+(easy-menu-define org-table-fedit-menu org-table-fedit-map "Org Edit Formulas Menu."
   '("Edit-Formulas"
     ["Finish and Install" org-table-fedit-finish t]
     ["Finish, Install, and Apply" (org-table-fedit-finish t) :keys "C-u C-c C-c"]
@@ -5076,7 +5076,7 @@ When LOCAL is non-nil, show references for the table at point."
 (put 'orgtbl-mode :included t)
 (put 'orgtbl-mode :menu-tag "Org Table Mode")
 
-(easy-menu-define orgtbl-mode-menu orgtbl-mode-map "OrgTbl menu"
+(easy-menu-define orgtbl-mode-menu orgtbl-mode-map "OrgTbl menu."
   '("OrgTbl"
     ["Create or convert" org-table-create-or-convert-from-region
      :active (not (org-at-table-p)) :keys "C-c |" ]
@@ -5326,7 +5326,7 @@ With prefix arg, also recompute table."
 (defun orgtbl-create-or-convert-from-region (_arg)
   "Create table or convert region to table, if no conflicting binding.
 This installs the table binding `C-c |', but only if there is no
-conflicting binding to this key outside orgtbl-mode."
+conflicting binding to this key outside `orgtbl-mode'."
   (interactive "P")
   (let* (orgtbl-mode (cmd (key-binding "\C-c|")))
     (if cmd
@@ -5565,7 +5565,7 @@ First element has index 0, or I0 if given."
 
 ;;;###autoload
 (defun orgtbl-to-generic (table params)
-  "Convert the orgtbl-mode TABLE to some other format.
+  "Convert the `orgtbl-mode' TABLE to some other format.
 
 This generic routine can be used for many standard cases.
 
@@ -5952,12 +5952,12 @@ information."
 
 ;;;###autoload
 (defun orgtbl-to-tsv (table params)
-  "Convert the orgtbl-mode table to TAB separated material."
+  "Convert the `orgtbl-mode' TABLE to TAB separated material."
   (orgtbl-to-generic table (org-combine-plists '(:sep "\t") params)))
 
 ;;;###autoload
 (defun orgtbl-to-csv (table params)
-  "Convert the orgtbl-mode table to CSV material.
+  "Convert the `orgtbl-mode' TABLE to CSV material.
 This does take care of the proper quoting of fields with comma or quotes."
   (orgtbl-to-generic table
 		     (org-combine-plists '(:sep "," :fmt org-quote-csv-field)
@@ -5965,7 +5965,7 @@ This does take care of the proper quoting of fields with comma or quotes."
 
 ;;;###autoload
 (defun orgtbl-to-latex (table params)
-  "Convert the orgtbl-mode TABLE to LaTeX.
+  "Convert the `orgtbl-mode' TABLE to LaTeX.
 
 TABLE is a list, each entry either the symbol `hline' for
 a horizontal separator line, or a list of fields for that line.
@@ -5998,7 +5998,7 @@ supported.  It is also possible to use the following ones:
 
 ;;;###autoload
 (defun orgtbl-to-html (table params)
-  "Convert the orgtbl-mode TABLE to HTML.
+  "Convert the `orgtbl-mode' TABLE to HTML.
 
 TABLE is a list, each entry either the symbol `hline' for
 a horizontal separator line, or a list of fields for that line.
@@ -6029,7 +6029,7 @@ supported.  It is also possible to use the following one:
 
 ;;;###autoload
 (defun orgtbl-to-texinfo (table params)
-  "Convert the orgtbl-mode TABLE to Texinfo.
+  "Convert the `orgtbl-mode' TABLE to Texinfo.
 
 TABLE is a list, each entry either the symbol `hline' for
 a horizontal separator line, or a list of fields for that line.
@@ -6060,7 +6060,7 @@ supported.  It is also possible to use the following one:
 
 ;;;###autoload
 (defun orgtbl-to-orgtbl (table params)
-  "Convert the orgtbl-mode TABLE into another orgtbl-mode table.
+  "Convert the `orgtbl-mode' TABLE into another orgtbl-mode table.
 
 TABLE is a list, each entry either the symbol `hline' for
 a horizontal separator line, or a list of fields for that line.
@@ -6075,7 +6075,7 @@ be set to provide ORGTBL directives for the generated table."
   (orgtbl-to-generic table (org-combine-plists params (list :backend 'org))))
 
 (defun orgtbl-to-table.el (table params)
-  "Convert the orgtbl-mode TABLE into a table.el table.
+  "Convert the `orgtbl-mode' TABLE into a table.el table.
 TABLE is a list, each entry either the symbol `hline' for
 a horizontal separator line, or a list of fields for that line.
 PARAMS is a property list of parameters that can influence the
@@ -6089,7 +6089,7 @@ supported."
      (replace-regexp-in-string "|-" "+-" (buffer-substring 1 (buffer-size))))))
 
 (defun orgtbl-to-unicode (table params)
-  "Convert the orgtbl-mode TABLE into a table with unicode characters.
+  "Convert the `orgtbl-mode' TABLE into a table with unicode characters.
 
 TABLE is a list, each entry either the symbol `hline' for
 a horizontal separator line, or a list of fields for that line.
@@ -6206,7 +6206,7 @@ which will prompt for the width."
 
 (defun orgtbl-uc-draw-grid (value min max &optional width)
   "Draw a bar in a table using block unicode characters.
-It is a variant of orgtbl-ascii-draw with Unicode block
+It is a variant of `orgtbl-ascii-draw' with Unicode block
 characters, for a smooth display.  Bars appear as grids (to the
 extent the font allows)."
   ;; https://en.wikipedia.org/wiki/Block_Elements
@@ -6216,7 +6216,7 @@ extent the font allows)."
 
 (defun orgtbl-uc-draw-cont (value min max &optional width)
   "Draw a bar in a table using block unicode characters.
-It is a variant of orgtbl-ascii-draw with Unicode block
+It is a variant of `orgtbl-ascii-draw' with Unicode block
 characters, for a smooth display.  Bars are solid (to the extent
 the font allows)."
   (orgtbl-ascii-draw value min max width

@@ -74,7 +74,7 @@ a parameter, such as \"ghc -v\"."
   "Haskell-specific header arguments.")
 
 (defun org-babel-haskell-execute (body params)
-  "This function should only be called by `org-babel-execute:haskell'"
+  "This function should only be called by `org-babel-execute:haskell'."
   (let* ((tmp-src-file (org-babel-temp-file "Haskell-src-" ".hs"))
          (tmp-bin-file
           (org-babel-process-file-name

@@ -276,7 +276,7 @@ STRING contains the output originally inserted into the comint buffer."
 (defun org-babel-comint-async-register
     (session-buffer org-buffer indicator-regexp
 		    chunk-callback file-callback)
-  "Sets local org-babel-comint-async variables in SESSION-BUFFER.
+  "Set local org-babel-comint-async variables in SESSION-BUFFER.
 ORG-BUFFER is added to `org-babel-comint-async-buffers' if not
 present.  `org-babel-comint-async-indicator',
 `org-babel-comint-async-chunk-callback', and

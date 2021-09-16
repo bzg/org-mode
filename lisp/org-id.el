@@ -204,7 +204,7 @@ This variable is only relevant when `org-id-track-globally' is set."
   :type 'file)
 
 (defcustom org-id-locations-file-relative nil
-  "Determines if org-id-locations should be stored as relative links.
+  "Determine if `org-id-locations' should be stored as relative links.
 Non-nil means that links to locations are stored as links
 relative to the location of where `org-id-locations-file' is
 stored.

@@ -213,7 +213,7 @@ See `org-columns-summary-types' for details.")
 	      (lambda () (interactive)
 		(org-columns-next-allowed-value nil i))))
 
-(easy-menu-define org-columns-menu org-columns-map "Org Column Menu"
+(easy-menu-define org-columns-menu org-columns-map "Org Column Menu."
   '("Column"
     ["Edit property" org-columns-edit-value t]
     ["Next allowed value" org-columns-next-allowed-value t]

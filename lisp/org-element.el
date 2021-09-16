@@ -4489,7 +4489,7 @@ element or object.  Meaningful values are `first-section',
 TYPE is the type of the current element or object.
 
 If PARENT? is non-nil, assume the next element or object will be
-located inside the current one.  "
+located inside the current one."
   (if parent?
       (pcase type
 	(`headline 'section)

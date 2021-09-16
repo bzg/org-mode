@@ -92,7 +92,7 @@ This function is called by `org-babel-execute-src-block'."
        (org-babel-J-eval-string full-body sit-time)))))
 
 (defun org-babel-J-eval-string (str sit-time)
-  "Sends STR to the `j-console-cmd' session and executes it."
+  "Sends STR to the `j-console-cmd' session and execute it."
   (let ((session (j-console-ensure-session)))
     (with-current-buffer (process-buffer session)
       (goto-char (point-max))

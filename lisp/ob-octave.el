@@ -45,8 +45,8 @@
 
 (defvar org-babel-matlab-with-emacs-link nil
   "If non-nil use matlab-shell-run-region for session evaluation.
-  This will use EmacsLink if (matlab-with-emacs-link) evaluates
-  to a non-nil value.")
+This will use EmacsLink if (matlab-with-emacs-link) evaluates
+to a non-nil value.")
 
 (defvar org-babel-matlab-emacs-link-wrapper-method
   "%s

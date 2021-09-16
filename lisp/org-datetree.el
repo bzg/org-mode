@@ -72,8 +72,8 @@ will be built under the headline at point."
 (defun org-datetree--find-create-group
     (d time-grouping &optional keep-restriction)
   "Find or create an entry for date D.
-If time-period is day, group entries by day. If time-period is
-month, then group entries by month."
+If time-period is day, group entries by day.
+If time-period is month, then group entries by month."
   (setq-local org-datetree-base-level 1)
   (save-restriction
     (if (eq keep-restriction 'subtree-at-point)

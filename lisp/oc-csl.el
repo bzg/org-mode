@@ -609,4 +609,4 @@ property list."
     (("nil") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))))
 
 (provide 'oc-csl)
-;;; oc-citeproc.el ends here
+;;; oc-csl.el ends here

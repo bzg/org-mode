@@ -297,7 +297,7 @@
     ("uk" "ukrainian")
     ("ur" "urdu")
     ("vi" "vietnamese"))
-  "Alist between language code and corresponding Polyglossia option")
+  "Alist between language code and corresponding Polyglossia option.")
 
 (defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
 					  ("qbordermatrix" . "\\cr")

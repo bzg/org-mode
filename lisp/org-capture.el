@@ -108,7 +108,7 @@
 
 (defun org-capture-upgrade-templates (templates)
   "Update the template list to the new format.
-TEMPLATES is a template list, as in `org-capture-templates'. The
+TEMPLATES is a template list, as in `org-capture-templates'.  The
 new format unifies all the date/week tree targets into one that
 also allows for an optional outline path to specify a target."
   (let ((modified-templates
@@ -475,8 +475,7 @@ The capture buffer is current and still narrowed."
   :type 'hook)
 
 (defcustom org-capture-bookmark t
-  "When non-nil, add a bookmark pointing at the last stored
-position when capturing."
+  "When non-nil, add bookmark pointing at the last stored position when capturing."
   :group 'org-capture
   :version "24.3"
   :type 'boolean)
@@ -496,7 +495,7 @@ is copied to this variable, which is local in the indirect buffer.")
 
 (defvar org-capture-clock-keep nil
   "Local variable to store the value of the :clock-keep parameter.
-This is needed in case org-capture-finalize is called interactively.")
+This is needed in case `org-capture-finalize' is called interactively.")
 
 (defun org-capture-put (&rest stuff)
   "Add properties to the capture property list `org-capture-plist'."

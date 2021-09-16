@@ -30,7 +30,7 @@
 ;; Adding :cmd and :terminal as header arguments
 ;; :terminal must support the -T (title) and -e (command) parameter
 ;;
-;; You can test the default setup. (xterm + sh) with
+;; You can test the default setup (xterm + sh) with
 ;; M-x org-babel-screen-test RET
 
 ;;; Code:

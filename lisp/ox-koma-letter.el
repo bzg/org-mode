@@ -77,8 +77,8 @@
 ;;
 ;; The following variables works differently from the main LaTeX class
 ;;   - AUTHOR: Default to user-full-name but may be disabled.
-;;     (See also `org-koma-letter-author'),
-;;   - EMAIL: Same as AUTHOR. (see also `org-koma-letter-email'),
+;;     (See also `org-koma-letter-author'.)
+;;   - EMAIL: Same as AUTHOR.  (See also `org-koma-letter-email'.)
 ;;
 ;; FROM_LOGO uses LaTeX markup.  FROM_LOGO provides the
 ;; "includegraphics" command to tell LaTeX where to find the logo.
@@ -478,7 +478,7 @@ e.g. \"title-subject:t\"."
   "Header tags to be inserted in the letter after closing.")
 
 (defconst org-koma-letter-special-tags-as-macro '(ps encl cc)
-  "Header tags to be inserted as macros")
+  "Header tags to be inserted as macros.")
 
 (defconst org-koma-letter-special-tags-after-letter '(after_letter)
   "Header tags to be inserted after the letter.")
@@ -607,7 +607,7 @@ such as the one tagged with PS."
 
 
 (defun org-koma-letter--add-latex-newlines (string)
-  "Replace regular newlines with LaTeX newlines (i.e. `\\\\')"
+  "Replace regular newlines with LaTeX newlines (i.e. `\\\\')."
   (let ((str (org-trim string)))
     (when (org-string-nw-p str)
       (replace-regexp-in-string "\n" "\\\\\\\\\n" str))))

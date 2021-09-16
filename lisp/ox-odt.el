@@ -251,7 +251,7 @@ Use `org-odt-add-automatic-style' to add update this variable.'")
 
 (defvar org-odt-object-counters nil
   "Running counters for various OBJECT-TYPEs.
-Use this to generate automatic names and style-names. See
+Use this to generate automatic names and style-names.  See
 `org-odt-add-automatic-style'.")
 
 (defvar org-odt-src-block-paragraph-format
@@ -277,8 +277,7 @@ according to the default face identified by the `htmlfontify'.")
 (defvar org-odt-default-image-sizes-alist
   '(("as-char" . (5 . 0.4))
     ("paragraph" . (5 . 5)))
-  "Hardcoded image dimensions one for each of the anchor
-  methods.")
+  "Hardcoded image dimensions one for each of the anchor methods.")
 
 ;; A4 page size is 21.0 by 29.7 cms
 ;; The default page settings has 2cm margin on each of the sides. So
@@ -450,7 +449,7 @@ Valid values are one of:
 4. list of the form (ODT-OR-OTT-FILE (FILE-MEMBER-1 FILE-MEMBER-2
 ...))
 
-In case of option 1, an in-built styles.xml is used. See
+In case of option 1, an in-built styles.xml is used.  See
 `org-odt-styles-dir' for more information.
 
 In case of option 3, the specified file is unzipped and the
@@ -2176,7 +2175,7 @@ SHORT-CAPTION are strings."
 ;;;; Links :: Inline Images
 
 (defun org-odt--copy-image-file (path)
-  "Return the internal name of the file"
+  "Return the internal name of the file."
   (let* ((image-type (file-name-extension path))
 	 (media-type (format "image/%s" image-type))
 	 (target-dir "Images/")
@@ -2380,7 +2379,7 @@ used as a communication channel."
 	(concat equation "<text:tab/>" label))))))
 
 (defun org-odt--copy-formula-file (src-file)
-  "Return the internal name of the file"
+  "Return the internal name of the file."
   (let* ((target-dir (format "Formula-%04d/"
 			     (cl-incf org-odt-embedded-formulas-count)))
 	 (target-file (concat target-dir "content.xml")))

@@ -161,7 +161,7 @@ it is intended to operate on.  If nil, then the action has been invoked
 indirectly, for example, through the agenda buffer.")
 
 (defgroup org-mouse nil
-  "Mouse support for org-mode."
+  "Mouse support for `org-mode'."
   :tag "Org Mouse"
   :group 'org)
 

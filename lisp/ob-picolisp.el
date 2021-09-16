@@ -26,13 +26,13 @@
 
 ;; This library enables the use of PicoLisp in the multi-language
 ;; programming framework Org-Babel.  PicoLisp is a minimal yet
-;; fascinating lisp dialect and a highly productive application
+;; fascinating Lisp dialect and a highly productive application
 ;; framework for web-based client-server applications on top of
 ;; object-oriented databases.  A good way to learn PicoLisp is to first
 ;; read Paul Grahams essay "The hundred year language"
 ;; (http://www.paulgraham.com/hundred.html) and then study the various
 ;; documents and essays published in the PicoLisp wiki
-;; (https://picolisp.com/5000/-2.html). PicoLisp is included in some
+;; (https://picolisp.com/5000/-2.html).  PicoLisp is included in some
 ;; GNU/Linux Distributions, and can be downloaded here:
 ;; https://software-lab.de/down.html.  It ships with a picolisp-mode and
 ;; an inferior-picolisp-mode for Emacs (to be found in the /lib/el/
@@ -44,7 +44,7 @@
 ;; make it a valuable addition to Org Babel:
 
 ;; PicoLisp _is_ an object-oriented database with a Prolog-based query
-;; language implemented in PicoLisp (Pilog). Database objects are
+;; language implemented in PicoLisp (Pilog).  Database objects are
 ;; first-class members of the language.
 
 ;; PicoLisp is an extremely productive framework for the development
@@ -166,8 +166,8 @@ This function is called by `org-babel-execute-src-block'."
       (read result))))
 
 (defun org-babel-picolisp-initiate-session (&optional session-name)
-  "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session."
+  "If there is not a current inferior-process-buffer in SESSION then create.
+Return the initialized session."
   (unless (string= session-name "none")
     (require 'inferior-picolisp)
     ;; provide a reasonable default session name

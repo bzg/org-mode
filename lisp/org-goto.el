@@ -250,7 +250,7 @@ want.
 
 This command works around this by showing a copy of the current
 buffer in an indirect buffer, in overview mode.  You can dive
-into the tree in that copy, use org-occur and incremental search
+into the tree in that copy, use `org-occur' and incremental search
 to find a location.  When pressing RET or `Q', the command
 returns to the original buffer in which the visibility is still
 unchanged.  After RET it will also jump to the location selected

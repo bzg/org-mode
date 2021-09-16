@@ -3154,7 +3154,7 @@ it in the document property drawer.  For example:
 :CATEGORY: ELisp
 :END:
 
-Other ways to define it is as an emacs file variable, for example
+Other ways to define it is as an Emacs file variable, for example
 
 #   -*- mode: org; org-category: \"ELisp\"
 
@@ -9561,7 +9561,7 @@ If an element cannot be made unique, an error is raised."
 				(mapcar (apply-partially #'concat (substring  key 0 1))
 					(split-string (substring key 1) "" t)))))))
 	(if (or (not potential-key) (assoc potential-key menu-keys))
-	    (user-error "Could not make unique key for %s." key)
+            (user-error "Could not make unique key for `%s'" key)
 	  (push (cons potential-key key) menu-keys))))
     (mapcar #'car
 	    (cl-sort menu-keys #'<
@@ -12506,12 +12506,12 @@ Inherited tags have the `inherited' text property."
 (defun org-map-entries (func &optional match scope &rest skip)
   "Call FUNC at each headline selected by MATCH in SCOPE.
 
-FUNC is a function or a lisp form.  The function will be called without
+FUNC is a function or a Lisp form.  The function will be called without
 arguments, with the cursor positioned at the beginning of the headline.
 The return values of all calls to the function will be collected and
 returned as a list.
 
-The call to FUNC will be wrapped into a save-excursion form, so FUNC
+The call to FUNC will be wrapped into a `save-excursion' form, so FUNC
 does not need to preserve point.  After evaluation, the cursor will be
 moved to the end of the line (presumably of the headline of the
 processed entry) and search continues from there.  Under some
@@ -13803,7 +13803,7 @@ If there is already a timestamp at the cursor, it is replaced.
 With two universal prefix arguments, insert an active timestamp
 with the current time without prompting the user.
 
-When called from lisp, the timestamp is inactive if INACTIVE is
+When called from Lisp, the timestamp is inactive if INACTIVE is
 non-nil."
   (interactive "P")
   (let* ((ts (cond
@@ -15376,9 +15376,9 @@ This function is useful in a setup where one tracks Org files
 with a version control system, to revert on one machine after pulling
 changes from another.  I believe the procedure must be like this:
 
-1. M-x org-save-all-org-buffers
+1. \\[org-save-all-org-buffers]
 2. Pull changes from the other machine, resolve conflicts
-3. M-x org-revert-all-org-buffers"
+3. \\[org-revert-all-org-buffers]"
   (interactive)
   (unless (yes-or-no-p "Revert all Org buffers from their files? ")
     (user-error "Abort"))
@@ -18039,7 +18039,7 @@ object (e.g., within a comment).  In these case, you need to use
 Call `org-table-next-row' or `org-return', depending on context.
 See the individual commands for more information.
 
-When inserting a newline, if `org-adapt-indentation' is `t':
+When inserting a newline, if `org-adapt-indentation' is t:
 indent the line if `electric-indent-mode' is disabled, don't
 indent it if it is enabled."
   (interactive)
@@ -18209,7 +18209,7 @@ an argument, unconditionally call `org-insert-heading'."
        (not (org-at-table-p))))
 
 ;; Define the Org mode menus
-(easy-menu-define org-org-menu org-mode-map "Org menu"
+(easy-menu-define org-org-menu org-mode-map "Org menu."
   `("Org"
     ("Show/Hide"
      ["Cycle Visibility" org-cycle :active (or (bobp) (outline-on-heading-p))]
@@ -18394,7 +18394,7 @@ an argument, unconditionally call `org-insert-heading'."
      ["Reload Org (after update)" org-reload t]
      ["Reload Org uncompiled" (org-reload t) :active t :keys "C-u C-c C-x !"])))
 
-(easy-menu-define org-tbl-menu org-mode-map "Org Table menu"
+(easy-menu-define org-tbl-menu org-mode-map "Org Table menu."
   '("Table"
     ["Align" org-ctrl-c-ctrl-c :active (org-at-table-p)]
     ["Next Field" org-cycle (org-at-table-p)]
@@ -19125,7 +19125,7 @@ Indentation is done according to the following rules:
        Else, indent like parent's first line.
 
     3. Otherwise, indent relatively to current level, if
-       `org-adapt-indentation' is `t', or to left margin.
+       `org-adapt-indentation' is t, or to left margin.
 
   - On a blank line at the end of an element, indent according to
     the type of the element.  More precisely
@@ -20090,7 +20090,7 @@ it has a `diary' type."
 (defvar org--rds)
 
 (defun org-reftex-citation ()
-  "Use reftex-citation to insert a citation into the buffer.
+  "Use `reftex-citation' to insert a citation into the buffer.
 This looks for a line like
 
 #+BIBLIOGRAPHY: foo plain option:-d
@@ -20410,7 +20410,7 @@ interactive command with similar behavior."
 	(call-interactively command))))))
 
 (defun org-yank-folding-would-swallow-text (beg end)
-  "Would hide-subtree at BEG swallow any text after END?"
+  "Would `hide-subtree' at BEG swallow any text after END?"
   (let (level)
     (org-with-limited-levels
      (save-excursion

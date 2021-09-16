@@ -421,8 +421,8 @@ If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 (defun org-texinfo--normalize-headlines (tree _backend info)
   "Normalize headlines in TREE.
 
-BACK-END is the symbol specifying back-end used for export. INFO
-is a plist used as a communication channel.
+BACK-END is the symbol specifying back-end used for export.
+INFO is a plist used as a communication channel.
 
 Make sure every headline in TREE contains a section, since those
 are required to install a menu.  Also put exactly one blank line
@@ -1606,7 +1606,7 @@ channel."
 
 (defun org-texinfo-verse-block (_verse-block contents _info)
   "Transcode a VERSE-BLOCK element from Org to Texinfo.
-CONTENTS is verse block contents. INFO is a plist holding
+CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
   (format "@display\n%s@end display" contents))
 

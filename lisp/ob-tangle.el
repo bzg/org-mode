@@ -169,11 +169,14 @@ evaluating BODY."
 (defun org-babel-tangle-file (file &optional target-file lang-re)
   "Extract the bodies of source code blocks in FILE.
 Source code blocks are extracted with `org-babel-tangle'.
+
 Optional argument TARGET-FILE can be used to specify a default
-export file for all source blocks.  Optional argument LANG-RE can
-be used to limit the exported source code blocks by languages
-matching a regular expression.  Return a list whose CAR is the
-tangled file name."
+export file for all source blocks.
+
+Optional argument LANG-RE can be used to limit the exported
+source code blocks by languages matching a regular expression.
+
+Return a list whose CAR is the tangled file name."
   (interactive "fFile to tangle: \nP")
   (let ((visited-p (find-buffer-visiting (expand-file-name file)))
 	to-be-removed)
@@ -371,10 +374,13 @@ as computed by `org-babel-tangle-single-block'."
   "Collect source blocks in the current Org file.
 Return an association list of language and source-code block
 specifications of the form used by `org-babel-spec-to-string'
-grouped by tangled file name. Optional argument LANG-RE can be
-used to limit the collected source code blocks by languages
-matching a regular expression. Optional argument TANGLE-FILE can
-be used to limit the collected code blocks by target file."
+grouped by tangled file name.
+
+Optional argument LANG-RE can be used to limit the collected
+source code blocks by languages matching a regular expression.
+
+Optional argument TANGLE-FILE can be used to limit the collected
+code blocks by target file."
   (let ((counter 0) last-heading-pos blocks)
     (org-babel-map-src-blocks (buffer-file-name)
       (let ((current-heading-pos

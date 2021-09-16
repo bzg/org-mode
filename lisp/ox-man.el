@@ -365,9 +365,9 @@ holding contextual information."
 
 (defun org-man-drawer (_drawer contents _info)
   "Transcode a DRAWER element from Org to Man.
-   DRAWER holds the drawer information
-   CONTENTS holds the contents of the block.
-   INFO is a plist holding contextual information. "
+DRAWER holds the drawer information
+CONTENTS holds the contents of the block.
+INFO is a plist holding contextual information."
   contents)
 
 

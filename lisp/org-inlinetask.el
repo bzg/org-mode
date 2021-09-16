@@ -189,7 +189,7 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 
 (defun org-inlinetask-goto-end ()
   "Go to the end of the inline task at point.
-    Return point."
+Return point."
   (save-match-data
     (beginning-of-line)
     (let ((case-fold-search t)

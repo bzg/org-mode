@@ -2468,7 +2468,7 @@ The following commands are available:
 (when org-agenda-mouse-1-follows-link
   (org-defkey org-agenda-mode-map [follow-link] 'mouse-face))
 
-(easy-menu-define org-agenda-menu org-agenda-mode-map "Agenda menu"
+(easy-menu-define org-agenda-menu org-agenda-mode-map "Agenda menu."
   '("Agenda"
     ("Agenda Files")
     "--"
@@ -3765,7 +3765,7 @@ the global options and expect it to be applied to the entire view.")
     (tag . org-agenda-tag-filter)
     (effort . org-agenda-effort-filter)
     (regexp . org-agenda-regexp-filter))
-  "Alist of filter types and associated variables")
+  "Alist of filter types and associated variables.")
 (defun org-agenda-filter-any ()
   "Is any filter active?"
   (cl-some (lambda (x)
@@ -4306,7 +4306,7 @@ items if they have an hour specification like [h]h:mm."
     (setq span arg arg nil))
   (when (numberp span)
     (unless (< 0 span)
-      (user-error "Agenda creation impossible for this span(=%d days)." span)))
+      (user-error "Agenda creation impossible for this span(=%d days)" span)))
   (catch 'exit
     (setq org-agenda-buffer-name
 	  (org-agenda--get-buffer-name
@@ -5062,7 +5062,7 @@ See `org-agenda-skip-if' for details."
   (org-agenda-skip-if t conditions))
 
 (defun org-agenda-skip-if (subtree conditions)
-  "Checks current entity for CONDITIONS.
+  "Check current entity for CONDITIONS.
 If SUBTREE is non-nil, the entire subtree is checked.  Otherwise, only
 the entry (i.e. the text before the next heading) is checked.
 
@@ -7806,7 +7806,7 @@ A single `\\[universal-argument]' prefix arg STRIP-OR-ACCUMULATE will negate the
 entire filter, which can be useful in connection with the prompt history.
 
 A double `\\[universal-argument] \\[universal-argument]' prefix arg will add the new filter elements to the
-existing ones. A shortcut for this is to add an additional `+' at the
+existing ones.  A shortcut for this is to add an additional `+' at the
 beginning of the string, like `+-John'.
 
 With a triple prefix argument, execute the computed filtering defined in
@@ -7957,7 +7957,7 @@ With a `\\[universal-argument] \\[universal-argument] \\[universal-argument]' pr
 i.e. don't
 filter on all its group members.
 
-A lisp caller can specify CHAR.  EXCLUDE means that the new tag
+A Lisp caller can specify CHAR.  EXCLUDE means that the new tag
 should be used to exclude the search - the interactive user can
 also press `-' or `+' to switch between filtering and excluding."
   (interactive "P")
@@ -8070,9 +8070,10 @@ These will be lower-case, for filtering."
 	  (setq org-agenda-represented-tags tags-lists)))))
 
 (defun org-agenda-filter-make-matcher (filter type &optional expand)
-  "Create the form that tests a line for agenda filter.  Optional
-argument EXPAND can be used for the TYPE tag and will expand the
-tags in the FILTER if any of the tags in FILTER are grouptags."
+  "Create the form that tests a line for agenda filter.
+Optional argument EXPAND can be used for the TYPE tag and will
+expand the tags in the FILTER if any of the tags in FILTER are
+grouptags."
   (let ((multi-pos-cats
 	 (and (eq type 'category)
 	      (string-match-p "\\+.*\\+"
@@ -8936,7 +8937,7 @@ Point is in the buffer where the item originated.")
 
 (defun org-agenda-do-in-region (beg end cmd &optional arg force-arg delete)
   "Between region BEG and END, call agenda command CMD.
-When optional argument ARG is non-nil or FORCE-ARG is `t', pass
+When optional argument ARG is non-nil or FORCE-ARG is t, pass
 ARG to CMD.  When optional argument DELETE is non-nil, assume CMD
 deletes the agenda entry and don't move to the next entry."
   (save-excursion

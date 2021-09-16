@@ -60,7 +60,7 @@
 ;;
 ;; CLASS-OR-FORMAT-STRING is one of two things:
 ;;
-;;  - an identifier for a class of anniversaries (eg. birthday or
+;;  - an identifier for a class of anniversaries (e.g. birthday or
 ;;    wedding) from `org-bbdb-anniversary-format-alist' which then
 ;;    defines the format string for this class
 ;;  - the (format) string displayed in the diary.

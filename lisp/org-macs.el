@@ -1154,13 +1154,13 @@ move it back by one char before doing this check."
     (org-invisible-p)))
 
 (defun org-find-visible ()
-  "Return closest visible buffer position, or `point-max'"
+  "Return closest visible buffer position, or `point-max'."
   (if (org-invisible-p)
       (next-single-char-property-change (point) 'invisible)
     (point)))
 
 (defun org-find-invisible ()
-  "Return closest invisible buffer position, or `point-max'"
+  "Return closest invisible buffer position, or `point-max'."
   (if (org-invisible-p)
       (point)
     (next-single-char-property-change (point) 'invisible)))

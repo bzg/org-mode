@@ -28,9 +28,12 @@
 ;;; It requires that the abcm2ps program is installed.
 ;;; See http://moinejf.free.fr/
 
+;;; Code:
+
 (require 'ob)
 
 ;; optionally define a file extension for this language
+
 (add-to-list 'org-babel-tangle-lang-exts '("abc" . "abc"))
 
 ;; optionally declare default header arguments for this language
@@ -54,8 +57,8 @@
     body))
 
 (defun org-babel-execute:abc (body params)
-  "Execute a block of ABC code with org-babel.  This function is
-   called by `org-babel-execute-src-block'"
+  "Execute a block of ABC code with org-babel.
+This function is called by `org-babel-execute-src-block'."
   (message "executing Abc source code block")
   (let* ((cmdline (cdr (assq :cmdline params)))
 	 (out-file (let ((file (cdr (assq :file params))))

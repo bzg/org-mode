@@ -24,15 +24,15 @@
 ;;; Commentary:
 
 ;; Org-Babel support for using ebnf2ps to generate encapsulated postscript
-;; railroad diagrams. It recognizes these arguments:
+;; railroad diagrams.  It recognizes these arguments:
 ;;
 ;;     :file is required; it must include the extension '.eps.' All the rules
-;;           in the block will be drawn in the same file. This is done by
+;;           in the block will be drawn in the same file.  This is done by
 ;;           inserting a '[<file>' comment at the start of the block (see the
 ;;           documentation for ebnf-eps-buffer for more information).
 ;;
-;;     :style specifies a value in ebnf-style-database. This provides the
-;;            ability to customize the output. The style can also specify the
+;;     :style specifies a value in ebnf-style-database.  This provides the
+;;            ability to customize the output.  The style can also specify the
 ;;            grammar syntax (by setting ebnf-syntax); note that only ebnf,
 ;;            iso-ebnf, and yacc are supported by this file.
 

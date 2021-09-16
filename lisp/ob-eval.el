@@ -44,7 +44,7 @@
 (defun org-babel-eval (command query)
   "Run COMMAND on QUERY.
 Writes QUERY into a temp-buffer that is processed with
-org-babel--shell-command-on-region.  If COMMAND succeeds then return
+`org-babel--shell-command-on-region'.  If COMMAND succeeds then return
 its results, otherwise display STDERR with
 `org-babel-eval-error-notify'."
   (let ((error-buffer (get-buffer-create " *Org-Babel Error*")) exit-code)

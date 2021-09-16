@@ -95,8 +95,7 @@ This function calls `org-babel-execute:C++'."
   (org-babel-execute:C++ body params))
 
 (defun org-babel-expand-body:cpp (body params)
-  "Expand a block of C++ code with org-babel according to its
-header arguments."
+  "Expand a block of C++ code with org-babel according to its header arguments."
   (org-babel-expand-body:C++ body params))
 
 (defun org-babel-execute:C++ (body params)
@@ -105,8 +104,7 @@ This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'cpp)) (org-babel-C-execute body params)))
 
 (defun org-babel-expand-body:C++ (body params)
-  "Expand a block of C++ code with org-babel according to its
-header arguments."
+  "Expand a block of C++ code with org-babel according to its header arguments."
   (let ((org-babel-c-variant 'cpp)) (org-babel-C-expand-C++ body params)))
 
 (defun org-babel-execute:D (body params)
@@ -115,8 +113,7 @@ This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'd)) (org-babel-C-execute body params)))
 
 (defun org-babel-expand-body:D (body params)
-  "Expand a block of D code with org-babel according to its
-header arguments."
+  "Expand a block of D code with org-babel according to its header arguments."
   (let ((org-babel-c-variant 'd)) (org-babel-C-expand-D body params)))
 
 (defun org-babel-execute:C (body params)
@@ -125,8 +122,7 @@ This function is called by `org-babel-execute-src-block'."
   (let ((org-babel-c-variant 'c)) (org-babel-C-execute body params)))
 
 (defun org-babel-expand-body:C (body params)
-  "Expand a block of C code with org-babel according to its
-header arguments."
+  "Expand a block of C code with org-babel according to its header arguments."
   (let ((org-babel-c-variant 'c)) (org-babel-C-expand-C body params)))
 
 (defun org-babel-C-execute (body params)
@@ -197,13 +193,11 @@ or `org-babel-execute:C++' or `org-babel-execute:D'."
       )))
 
 (defun org-babel-C-expand-C++ (body params)
-  "Expand a block of C or C++ code with org-babel according to
-its header arguments."
+  "Expand a block of C/C++ code with org-babel according to its header arguments."
   (org-babel-C-expand-C body params))
 
 (defun org-babel-C-expand-C (body params)
-  "Expand a block of C or C++ code with org-babel according to
-its header arguments."
+  "Expand a block of C/C++ code with org-babel according to its header arguments."
   (let ((vars (org-babel--get-vars params))
 	(colnames (cdr (assq :colname-names params)))
 	(main-p (not (string= (cdr (assq :main params)) "no")))
@@ -272,8 +266,7 @@ its header arguments."
 		  body) "\n") "\n")))
 
 (defun org-babel-C-expand-D (body params)
-  "Expand a block of D code with org-babel according to
-its header arguments."
+  "Expand a block of D code with org-babel according to its header arguments."
   (let ((vars (org-babel--get-vars params))
 	(colnames (cdr (assq :colname-names params)))
 	(main-p (not (string= (cdr (assq :main params)) "no")))
@@ -348,7 +341,7 @@ FORMAT can be either a format string or a function which is called with VAL."
 	     (list
 	      (if (eq org-babel-c-variant 'd) "string" "const char*")
 	      "\"%s\""))
-	    (_ (error "unknown type %S" basetype)))))
+            (_ (error "Unknown type %S" basetype)))))
     (cond
      ((integerp val) type) ;; an integer declared in the #+begin_src line
      ((floatp val) type) ;; a numeric declared in the #+begin_src line
@@ -405,8 +398,7 @@ FORMAT can be either a format string or a function which is called with VAL."
    (t 'stringp)))
 
 (defun org-babel-C-var-to-C (pair)
-  "Convert an elisp val into a string of C code specifying a var
-of the same value."
+  "Convert an elisp val into a string of C code specifying a var of the same value."
   ;; TODO list support
   (let ((var (car pair))
 	(val (cdr pair)))
@@ -446,8 +438,7 @@ of the same value."
       (format "const int %s_cols = %d;" (car pair) (length (cdr pair)))))))
 
 (defun org-babel-C-utility-header-to-C ()
-  "Generate a utility function to convert a column name
-into a column number."
+  "Generate a utility function to convert a column name into a column number."
   (pcase org-babel-c-variant
     ((or `c `cpp)
      (concat

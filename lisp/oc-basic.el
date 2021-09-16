@@ -632,7 +632,7 @@ export communication channel, as a property list."
 (defun org-cite-basic-export-bibliography (keys _files style _props backend info)
   "Generate bibliography.
 KEYS is the list of cited keys, as strings.  STYLE is the expected bibliography
-style, as a string.  BACKEND is the export back-end, as a symbol. INFO is the
+style, as a string.  BACKEND is the export back-end, as a symbol.  INFO is the
 export state, as a property list."
   (mapconcat
    (lambda (k)
@@ -767,4 +767,4 @@ Raise an error when no bibliography is set in the buffer."
     (("nil") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))))
 
 (provide 'oc-basic)
-;;; oc-default.el ends here
+;;; oc-basic.el ends here

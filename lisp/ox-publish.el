@@ -1270,7 +1270,7 @@ If FREE-CACHE, empty the cache."
   org-publish-cache)
 
 (defun org-publish-reset-cache ()
-  "Empty org-publish-cache and reset it nil."
+  "Empty `org-publish-cache' and reset it nil."
   (message "%s" "Resetting org-publish-cache")
   (when (hash-table-p org-publish-cache)
     (clrhash org-publish-cache))

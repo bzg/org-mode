@@ -120,7 +120,7 @@ lns   create a symbol link.  Note that this is not supported
 (defcustom org-attach-use-inheritance 'selective
   "Attachment inheritance for the outline.
 
-Enabling inheritance for org-attach implies two things.  First,
+Enabling inheritance for `org-attach' implies two things.  First,
 that attachment links will look through all parent headings until
 it finds the linked attachment.  Second, that running org-attach
 inside a node without attachments will make org-attach operate on
@@ -385,7 +385,7 @@ If the attachment by some reason cannot be created an error will be raised."
     attach-dir))
 
 (defun org-attach-dir-from-id (id  &optional try-all)
-  "Returns a folder path based on `org-attach-id-dir' and ID.
+  "Return a folder path based on `org-attach-id-dir' and ID.
 If TRY-ALL is non-nil, try all id-to-path functions in
 `org-attach-id-to-path-function-list' and return the first path
 that exist in the filesystem, or the first one if none exist.
@@ -446,7 +446,7 @@ Return the directory."
     new))
 
 (defun org-attach-unset-directory ()
-  "Removes DIR node property.
+  "Remove DIR node property.
 If attachment folder is changed due to removal of DIR-property
 ask to move attachments to new location and ask to delete old
 attachment-folder.

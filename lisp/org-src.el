@@ -584,7 +584,7 @@ Leave point in edit buffer."
 
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
-This function is called by emacs automatic fontification, as long
+This function is called by Emacs' automatic fontification, as long
 as `org-src-fontify-natively' is non-nil."
   (let ((lang-mode (org-src-get-lang-mode lang)))
     (when (fboundp lang-mode)

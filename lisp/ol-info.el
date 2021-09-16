@@ -91,7 +91,7 @@
     "pgg" "rcirc" "reftex" "remember" "sasl" "sc" "semantic" "ses" "sieve"
     "smtpmail" "speedbar" "srecode" "todo-mode" "tramp" "url" "vip" "viper"
     "widget" "wisent" "woman")
-  "List of emacs documents available.
+  "List of Emacs documents available.
 Taken from <https://www.gnu.org/software/emacs/manual/html_mono/.>")
 
 (defconst org-info-other-documents

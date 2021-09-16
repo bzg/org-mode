@@ -30,7 +30,7 @@
 ;; `org-macro-initialize-templates', which recursively calls
 ;; `org-macro--collect-macros' in order to read setup files.
 
-;; Argument in macros are separated with commas. Proper escaping rules
+;; Argument in macros are separated with commas.  Proper escaping rules
 ;; are implemented in `org-macro-escape-arguments' and arguments can
 ;; be extracted from a string with `org-macro-extract-arguments'.
 

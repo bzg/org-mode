@@ -95,8 +95,8 @@ in BODY as elisp."
   (error "Sessions are not (yet) supported for Io"))
 
 (defun org-babel-io-initiate-session (&optional _session)
-  "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session.  Sessions are not
+  "If there is not a current inferior-process-buffer in SESSION then create.
+Return the initialized session.  Sessions are not
 supported in Io."
   nil)
 
