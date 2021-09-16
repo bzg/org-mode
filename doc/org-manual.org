@@ -13880,7 +13880,7 @@ The LaTeX export back-end converts horizontal rules by the specified
 
 The LaTeX export back-end accepts four attributes for verse blocks:
 =:lines=, =:center=, =:versewidth= and =:latexcode=. The three first
-require the external LaTeX package =verse.sty=, wich is an extension
+require the external LaTeX package =verse.sty=, which is an extension
 of the standard LaTeX environment. The purpose of these attributes is
 explained below.
 
@@ -13904,7 +13904,7 @@ A complete example with Shakespeare's first sonnet:
 From fairest creatures we desire increase,
 That thereby beauty’s rose might never die,
 But as the riper should by time decrease,
-His tender heir mught bear his memeory:
+His tender heir mught bear his memory:
 But thou, contracted to thine own bright eyes,
 Feed’st thy light’st flame with self-substantial fuel,
 Making a famine where abundance lies,

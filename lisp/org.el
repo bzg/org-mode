@@ -8857,7 +8857,7 @@ If the file does not exist, throw an error."
       (save-window-excursion
 	(message "Running %s...done" cmd)
         ;; Handlers such as "gio open" and kde-open5 start viewer in background
-        ;; and exit immediately.  Use pipe connnection type instead of pty to
+        ;; and exit immediately.  Use pipe connection type instead of pty to
         ;; avoid killing children processes with SIGHUP when temporary terminal
         ;; session is finished.
         ;;

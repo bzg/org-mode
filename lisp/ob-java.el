@@ -472,7 +472,7 @@ If RESULT-TYPE equals `output' then return standard output as a
 string.  If RESULT-TYPE equals `value' then return the value
 returned by the source block, as elisp.
 
-RESULT-PARAMS input params used to format the reponse.
+RESULT-PARAMS input params used to format the response.
 
 RESULT-FILE filename of the tempfile to store the returned value in
 for `value' RESULT-TYPE.  Not used for `output' RESULT-TYPE."

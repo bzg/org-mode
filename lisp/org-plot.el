@@ -230,7 +230,7 @@ If HARD-MIN and HARD-MAX can be used to fix the ends of the axis."
 
 (defun org--plot/nice-frequency-pick (frequencies)
   "From a list of FREQUENCIES, try to sensibly pick a sample of the most frequent."
-  ;; TODO this mosly works decently, but counld do with some tweaking to work more consistently.
+  ;; TODO this mosly works decently, but could do with some tweaking to work more consistently.
   (cl-case (length frequencies)
     (1 (list (car (nth 0 frequencies))))
     (2 (if (<= 3 (/ (cdr (nth 0 frequencies))
@@ -354,7 +354,7 @@ the argument, and must return a string to be used."
     (radar :plot-func
 	   (lambda (table _data-file _num-cols params plot-str)
 	     (list (org--plot/radar table params)))))
-  "List of plists describing the avalible plot types.
+  "List of plists describing the available plot types.
 The car is the type name, and the property :plot-func must be
 set.  The value of :plot-func is a lambda which yields plot-lines
 \(a list of strings) as the cdr.
@@ -405,7 +405,7 @@ set angles degree
 set key bmargin center horizontal
 unset border
 
-# Load data and settup
+# Load data and setup
 load \"%s\"
 
 # General settings
