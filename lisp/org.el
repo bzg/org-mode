@@ -20714,8 +20714,7 @@ When optional argument FULL is t, also skip planning information,
 clocking lines and any kind of drawer.
 
 When FULL is non-nil but not t, skip planning information,
-clocking lines and only non-regular drawers, i.e. properties and
-logbook drawers."
+properties, clocking lines and logbook drawers."
   (org-back-to-heading t)
   (forward-line)
   ;; Skip planning information.
