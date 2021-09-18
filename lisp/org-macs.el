@@ -345,31 +345,56 @@ in target-prerequisite files relation."
 (defun org-compile-file (source process ext &optional err-msg log-buf spec)
   "Compile a SOURCE file using PROCESS.
 
-PROCESS is either a function or a list of shell commands, as
-strings.  EXT is a file extension, without the leading dot, as
-a string.  It is used to check if the process actually succeeded.
+See `org-compile-file-commands' for information on PROCESS, EXT, and SPEC.
+If PROCESS fails, an error will be raised.  The error message can
+then be refined by providing string ERR-MSG, which is appended to
+the standard message.
 
 PROCESS must create a file with the same base name and directory
 as SOURCE, but ending with EXT.  The function then returns its
-filename.  Otherwise, it raises an error.  The error message can
-then be refined by providing string ERR-MSG, which is appended to
-the standard message.
+filename.  Otherwise, it raises an error.
+
+When PROCESS is a list of commands, optional argument LOG-BUF can
+be set to a buffer or a buffer name.  `shell-command' then uses
+it for output."
+  (let* ((commands (org-compile-file-commands source process ext spec err-msg))
+         (output (expand-file-name (concat (file-name-base source) "." ext)
+                                   (file-name-directory source)))
+         (log-buf (and log-buf (get-buffer-create log-buf)))
+         (time (file-attribute-modification-time (file-attributes output))))
+    (save-window-excursion
+      (dolist (command commands)
+        (cond
+         ((functionp command)
+          (funcall command (shell-quote-argument (file-relative-name source))))
+         ((stringp command) (shell-command command log-buf)))))
+    ;; Check for process failure.  Output file is expected to be
+    ;; located in the same directory as SOURCE.
+    (unless (org-file-newer-than-p output time)
+      (error (format "File %S wasn't produced%s" output err-msg)))
+    output))
+
+(defun org-compile-file-commands (source process ext &optional spec err-msg)
+  "Create commands to compile SOURCE.
+
+The commands are formed from PROCESS, which is either a function or
+a list of shell commands, as strings.  EXT is a file extension, without
+the leading dot, as a string.  After PROCESS has been executed,
+a file with the same basename and directory as SOURCE but with the
+file extension EXT is expected to be produced.
+Failure to produce this file will be interpreted as PROCESS failing.
 
 If PROCESS is a function, it is called with a single argument:
 the SOURCE file.
 
-If it is a list of commands, each of them is called using
+If PROCESS is a list of commands, each of them is called using
 `shell-command'.  By default, in each command, %b, %f, %F, %o and
 %O are replaced with, respectively, SOURCE base name, name, full
 name, directory and absolute output file name.  It is possible,
 however, to use more place-holders by specifying them in optional
 argument SPEC, as an alist following the pattern
 
-  (CHARACTER . REPLACEMENT-STRING).
-
-When PROCESS is a list of commands, optional argument LOG-BUF can
-be set to a buffer or a buffer name.  `shell-command' then uses
-it for output."
+  (CHARACTER . REPLACEMENT-STRING)."
   (let* ((base-name (file-name-base source))
 	 (full-name (file-truename source))
          (relative-name (file-relative-name source))
@@ -378,34 +403,19 @@ it for output."
                       ;; in the shell command call.
                       (file-name-directory full-name)
                     "./"))
-	 (output (expand-file-name (concat base-name "." ext) out-dir))
-	 (time (file-attribute-modification-time (file-attributes output)))
+	 (output (expand-file-name (concat (file-name-base source) "." ext) out-dir))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
-    (save-window-excursion
       (pcase process
-	((pred functionp) (funcall process (shell-quote-argument relative-name)))
+	((pred functionp) process)
 	((pred consp)
-	 (let ((log-buf (and log-buf (get-buffer-create log-buf)))
-	       (spec (append spec
+	 (let ((spec (append spec
 			     `((?b . ,(shell-quote-argument base-name))
 			       (?f . ,(shell-quote-argument relative-name))
 			       (?F . ,(shell-quote-argument full-name))
 			       (?o . ,(shell-quote-argument out-dir))
 			       (?O . ,(shell-quote-argument output))))))
-           ;; Combine output of all commands in PROCESS.
-           (with-current-buffer log-buf
-             (let (buffer-read-only)
-               (erase-buffer)))
-           (let ((shell-command-dont-erase-buffer t))
-	     (dolist (command process)
-	       (shell-command (format-spec command spec) log-buf)))
-	   (when log-buf (with-current-buffer log-buf (compilation-mode)))))
-	(_ (error "No valid command to process %S%s" source err-msg))))
-    ;; Check for process failure.  Output file is expected to be
-    ;; located in the same directory as SOURCE.
-    (unless (org-file-newer-than-p output time)
-      (error (format "File %S wasn't produced%s" output err-msg)))
-    output))
+           (mapcar (lambda (command) (format-spec command spec)) process)))
+	(_ (error "No valid command to process %S%s" source err-msg)))))
 
 
 
