@@ -1604,6 +1604,21 @@
   ;; point.
   (should
    (equal
+    "* "
+    (org-test-with-temp-text ""
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
+  (should
+   (equal
+    "entry
+* "
+    (org-test-with-temp-text "entry"
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
+  (should
+   (equal
     "* H1\n** H2\n* "
     (org-test-with-temp-text "* H1\n** H2"
       (let ((org-insert-heading-respect-content nil))
