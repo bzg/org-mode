@@ -890,8 +890,8 @@ This means, between the beginning of line and the point."
             (when (memq 'activate-checkboxes org-mouse-features)
               (font-lock-add-keywords
                nil
-               `(("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)"
-                  (2 `(face org-checkbox keymap ,org-mouse-map mouse-face highlight) t)))
+               `(("^[ \t]*\\(?:[-+*]\\|[0-9]+[.)]\\)[ \t]+\\(?:\\[@\\(?:start:\\)?[0-9]+\\][ \t]*\\)?\\(\\[[- X]\\]\\)"
+                  (1 `(face nil keymap ,org-mouse-map mouse-face highlight) prepend)))
                t))
 
             (defadvice org-open-at-point (around org-mouse-open-at-point activate)
