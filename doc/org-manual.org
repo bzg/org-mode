@@ -16981,6 +16981,9 @@ Here are examples of passing values by reference:
   | two | 16 | 17 | 18 | 19 | 20 |
   #+end_example
 
+To refer to a table in another file, join the filename and table name with
+a colon, for example: =:var table=other-file.org:example-table=.
+
 - list ::
 
   A simple named list.
