@@ -1423,7 +1423,7 @@ ARG is the prefix argument received when calling `org-open-at-point', or nil."
      ;; At the start of a list item is fine, as long as the bullet is unaffected.
      ((eq type 'item)
       (> (point) (+ (org-element-property :begin context)
-                    (org-get-indentation)
+                    (current-indentation)
                     (if (org-element-property :checkbox context)
                         5 1))))
      ;; Other elements are invalid.
