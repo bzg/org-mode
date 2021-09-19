@@ -423,6 +423,12 @@ custom completion functions.
 
 *** Providing =directory-empty-p= from Emacs 28 as =org-directory-empty-p=
 
+*** =org-get-last-sibling= marked as obsolete
+
+Use =org-get-previous-sibling= instead.  This is just a rename to have
+a more consistent naming.  E.g. recall the pair of funtctions
+=next-line= / =previous-line=.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix

@@ -772,6 +772,8 @@ context.  See the individual commands for more information."
 
 (define-obsolete-function-alias 'org-copy 'org-refile-copy "9.4")
 
+(define-obsolete-function-alias 'org-get-last-sibling 'org-get-previous-sibling "9.4")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol
