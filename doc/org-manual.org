@@ -13906,7 +13906,7 @@ A complete example with Shakespeare's first sonnet:
 From fairest creatures we desire increase,
 That thereby beauty’s rose might never die,
 But as the riper should by time decrease,
-His tender heir mught bear his memory:
+His tender heir mught bear his memeory:
 But thou, contracted to thine own bright eyes,
 Feed’st thy light’st flame with self-substantial fuel,
 Making a famine where abundance lies,
@@ -19247,7 +19247,7 @@ changes.
   #+vindex: org-todo-keywords
   These lines set the TODO keywords and their interpretation in the
   current file.  The corresponding variable is ~org-todo-keywords~.
-  
+
 ** Regular Expressions
 :PROPERTIES:
 :DESCRIPTION: Elisp regular expressions.
