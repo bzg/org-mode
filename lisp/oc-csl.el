@@ -99,6 +99,7 @@
 (declare-function citeproc-append-citations "ext:citeproc")
 (declare-function citeproc-render-citations "ext:citeproc")
 (declare-function citeproc-render-bib "ext:citeproc")
+(declare-function citeproc-hash-itemgetter-from-any "ext:citeproc")
 
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
@@ -336,34 +337,6 @@ or raise an error if the variable is unset."
     (other
      (user-error "Cannot handle relative style file name" other))))
 
-(defun org-cite-csl--itemgetter (bibliography)
-  "Return Citeproc's \"itemgetter\" function for BIBLIOGRAPHY files.
-The function handles \".bib\", \".bibtex\" and \".json\" files."
-  (let ((cache (make-hash-table :test #'equal)))
-    (dolist (file bibliography)
-      (pcase (file-name-extension file)
-        ("json"
-         (let ((json-array-type 'list)
-               (json-key-type 'symbol))
-           (dolist (item (json-read-file file))
-             (puthash (cdr (assq 'id item)) item cache))))
-        ((and (or "bib" "bibtex") ext)
-         (with-temp-buffer
-	   (insert-file-contents file)
-	   (goto-char (point-min))
-	   (bibtex-set-dialect (if (string= ext "bib") 'biblatex 'BibTeX) t)
-	   (bibtex-map-entries
-	    (lambda (key &rest _)
-              (puthash key
-                       (citeproc-bt-entry-to-csl (bibtex-parse-entry))
-                       cache)))))
-        (ext
-         (user-error "Unknown bibliography extension: %S" ext))))
-    (lambda (itemids)
-      (mapcar (lambda (id)
-                (cons id (gethash id cache)))
-              itemids))))
-
 (defun org-cite-csl--locale-getter ()
   "Return a locale getter.
 The getter looks for locales in `org-cite-csl-locales-dir' directory.  If it
@@ -391,7 +364,7 @@ property in INFO."
              (processor
               (citeproc-create
                (org-cite-csl--style-file info)
-               (org-cite-csl--itemgetter bibliography)
+               (citeproc-hash-itemgetter-from-any bibliography)
                (org-cite-csl--locale-getter)
                locale)))
         (plist-put info :cite-citeproc-processor processor)
