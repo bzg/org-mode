@@ -70,7 +70,7 @@ a parameter, such as \"ghc -v\"."
   :package-version '(Org "9.4")
   :type 'string)
 
-(defconst org-babel-header-args:haskell '(compile . :any)
+(defconst org-babel-header-args:haskell '((compile . :any))
   "Haskell-specific header arguments.")
 
 (defun org-babel-haskell-execute (body params)
