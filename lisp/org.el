@@ -16617,22 +16617,36 @@ buffer boundaries with possible narrowing."
 			   (cond
 			    ((eq org-image-actual-width t) nil)
 			    ((listp org-image-actual-width)
-			     (or
-			      ;; First try to find a width among
-			      ;; attributes associated to the paragraph
-			      ;; containing link.
-			      (pcase (org-element-lineage link '(paragraph))
-				(`nil nil)
-				(p
-				 (let* ((case-fold-search t)
-					(end (org-element-property :post-affiliated p))
-					(re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"))
-				   (when (org-with-point-at
-					     (org-element-property :begin p)
-					   (re-search-forward re end t))
-				     (string-to-number (match-string 1))))))
-			      ;; Otherwise, fall-back to provided number.
-			      (car org-image-actual-width)))
+                             (let ((width
+                                    (or
+                                     ;; First try to find a width among
+                                     ;; attributes associated to the paragraph
+                                     ;; containing link.
+                                     (pcase (org-element-lineage link '(paragraph))
+                                       (`nil nil)
+                                       (par (let* ((case-fold-search t)
+                                                   (end (org-element-property :post-affiliated par))
+                                                   (re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"))
+                                              (when (org-with-point-at
+                                                        (org-element-property :begin par)
+                                                      (re-search-forward re end t))
+                                                (string-to-number (match-string 1)))))))
+                                    ;; Otherwise, fall-back to provided number.
+                                    (car org-image-actual-width))))
+                             (if (and (floatp width) (<= 0 width 2.0))
+                                 ;; A float in [0,2] should be interpereted as this portion of
+                                 ;; the text width in the window.  This works well with cases like
+                                 ;; #+attr_latex: :width 0.X\{line,page,column,etc.}width,
+                                 ;; as the "0.X" is pulled out as a float.  We use 2 as the upper
+                                 ;; bound as cases such as 1.2\linewidth are feasible.
+                                 (round (* width
+                                           (window-pixel-width)
+                                           (/ (or (and (bound-and-true-p visual-fill-column-mode)
+                                                       (or visual-fill-column-width auto-fill-function))
+                                                  (when auto-fill-function fill-column)
+                                                  (window-text-width))
+                                              (float (window-total-width)))))
+                               width))
 			    ((numberp org-image-actual-width)
 			     org-image-actual-width)
 			    (t nil)))
