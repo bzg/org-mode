@@ -15,8 +15,8 @@ ifneq ($(wildcard .git),)
   ifeq ($(ORGVERSION),)
     # In elpa.git, there are no tags available.  Fall back to using
     # the org.el header.
-    ORGVERSION := $(shell $(BATCH) --eval "(require 'lisp-mnt)" \
-      --visit lisp/org.el --eval '(princ (lm-header "version"))')
+    ORGVERSION := $(patsubst %-dev,%,$(shell $(BATCH) --eval "(require 'lisp-mnt)" \
+      --visit lisp/org.el --eval '(princ (lm-header "version"))'))
     GITVERSION ?= $(ORGVERSION)-g$(shell git rev-parse --short=6 HEAD)
   else
     GITVERSION ?= $(shell git describe --match release\* --abbrev=6 HEAD)
