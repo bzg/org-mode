@@ -3991,9 +3991,9 @@ interpretation, but it means the same as =#+TODO=, or
 A setup for using several sets in parallel would be:
 
 #+begin_example
-,#+TODO: TODO | DONE
-,#+TODO: REPORT BUG KNOWNCAUSE | FIXED
-,#+TODO: | CANCELED
+,#+TODO: TODO(t) | DONE(d)
+,#+TODO: REPORT(r) BUG(b) KNOWNCAUSE(k) | FIXED(f)
+,#+TODO: | CANCELED(c)
 #+end_example
 
 #+cindex: completion, of option keywords
