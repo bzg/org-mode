@@ -38,7 +38,7 @@ development.
      applies are:
 
      - all *.el files in the lisp directory of the repository
-     - org.texi, orgcard.tex in the doc/ directory
+     - orgcard.tex and all *.org files in the doc/ directory
 
    - Before making any significant changes, please explain and discuss
      them on the mailing list [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]].
