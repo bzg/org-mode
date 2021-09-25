@@ -2994,22 +2994,20 @@ contextual information."
       (cond
        ;; Case 1.  No source fontification.
        ((or (not lang) (not listings))
-	(let* ((caption-str (org-latex--caption/label-string src-block info))
-	       (float-env
-		(cond ((string= "multicolumn" float)
-		       (format "\\begin{figure*}[%s]\n%s%%s\n%s\\end{figure*}"
-			       (plist-get info :latex-default-figure-position)
-			       (if caption-above-p caption-str "")
-			       (if caption-above-p "" caption-str)))
-		      (caption (concat
-				(if caption-above-p caption-str "")
-				"%s"
-				(if caption-above-p "" (concat "\n" caption-str))))
-		      (t "%s"))))
-	  (format
-	   float-env
-	   (concat (format "\\begin{verbatim}\n%s\\end{verbatim}"
-			   (org-export-format-code-default src-block info))))))
+	(let ((caption-str (org-latex--caption/label-string src-block info))
+              (verbatim (format "\\begin{verbatim}\n%s\\end{verbatim}"
+                                (org-export-format-code-default src-block info))))
+          (cond ((string= "multicolumn" float)
+                 (format "\\begin{figure*}[%s]\n%s%s\n%s\\end{figure*}"
+                         (plist-get info :latex-default-figure-position)
+                         (if caption-above-p caption-str "")
+                         verbatim
+                         (if caption-above-p "" caption-str)))
+                (caption (concat
+                          (if caption-above-p caption-str "")
+                          verbatim
+                          (if caption-above-p "" (concat "\n" caption-str))))
+                (t verbatim))))
        ;; Case 2.  Custom environment.
        (custom-env
 	(let ((caption-str (org-latex--caption/label-string src-block info))

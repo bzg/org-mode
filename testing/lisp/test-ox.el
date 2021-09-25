@@ -3907,6 +3907,103 @@ Another text. (ref:text)
 	      (org-export-format-code-default
 	       (org-element-map tree 'src-block #'identity info t) info))))))
 
+(ert-deftest test-org-export/latex-src-block-verbatim-caption ()
+  "Test `org-latex-src-block' caption for verbatim environment.
+Check that percent sign does not become a part of format.
+This test does not cover listings and custom environments."
+  (let ((export
+	 (lambda (buffer-text)
+	   (org-test-with-parsed-data
+	       buffer-text
+	     (let* ((backend (org-export-get-backend 'latex))
+		    (info (org-combine-plists
+			   (org-export--get-export-attributes backend)
+			   (org-export-get-environment backend)))
+		    (result (org-latex-src-block
+			     (org-element-map tree 'src-block #'identity info t)
+			     t info)))
+	       ;; Remove properties to make failure reports more clear.
+	       (set-text-properties 0 (length result) nil result)
+	       result)))))
+
+    (should (equal
+	     "\
+\\begin{verbatim}
+\"No float, no listings, 20%S\"
+\\end{verbatim}
+\\captionof{figure}{Caption of verbatim is below, 20\\%s}
+"
+	     (funcall export
+		      "\
+#+CAPTION: Caption of verbatim is below, 20%s
+#+BEGIN_SRC emacs-lisp
+  \"No float, no listings, 20%S\"
+#+END_SRC")))
+
+    ;; `org-latex-caption-above' has no associated property or keyword.
+    (should (equal
+	     "\
+\\captionof{figure}{Caption of verbatim is above, 40\\%s}
+\\begin{verbatim}
+\"No float, no listings, 40%S\"
+\\end{verbatim}"
+	     (let ((org-latex-caption-above t))
+	       (funcall export
+			"\
+#+CAPTION: Caption of verbatim is above, 40%s
+#+BEGIN_SRC emacs-lisp
+  \"No float, no listings, 40%S\"
+#+END_SRC"))))
+
+    (should (equal
+	     "\
+\\begin{figure*}[tp]
+\\caption{Caption is above, 60\\%s}
+\\begin{verbatim}
+\"Float, no listings, 60%S\"
+\\end{verbatim}
+\\end{figure*}"
+	     (let ((org-latex-caption-above t)
+		   (org-latex-default-figure-position "tp"))
+	       (funcall export
+			"\
+#+CAPTION: Caption is above, 60%s
+#+ATTR_LATEX: :float multicolumn
+#+BEGIN_SRC emacs-lisp
+  \"Float, no listings, 60%S\"
+#+END_SRC"))))
+
+    (should (equal
+	     "\
+\\begin{figure*}[tp]
+\\begin{verbatim}
+\"Float, no lang, listings, 80%S\"
+\\end{verbatim}
+\\caption{Caption is below, 60\\%s}
+\\end{figure*}"
+	     (let ((org-latex-listings 'minted) ; inactive due to missing lang
+		   (org-latex-default-figure-position "tp"))
+	       ;; Namely "multicolumn" value to get just figure environment
+	       ;; looks like a bug.
+	       (funcall export
+			"\
+#+CAPTION: Caption is below, 60%s
+#+ATTR_LATEX: :float multicolumn
+#+BEGIN_SRC
+  \"Float, no lang, listings, 80%S\"
+#+END_SRC"))))
+
+    (should (equal
+	     "\
+\\begin{verbatim}
+\"No caption, no float, no listings, 100%S\"
+\\end{verbatim}"
+	     (funcall export
+		      "\
+#+BEGIN_SRC emacs-lisp
+  \"No caption, no float, no listings, 100%S\"
+#+END_SRC")))))
+
 
 
 ;;; Smart Quotes
