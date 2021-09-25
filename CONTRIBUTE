@@ -24,9 +24,11 @@ development.
    After you have been added as a user with push privileges, you can
    clone the repository like this:
 
-   : git clone git://git.savannah.gnu.org/emacs/org-mode.git
+   : git clone USERNAME@git.savannah.gnu.org:/srv/git/emacs/org-mode.git
 
-   By requesting push access, you acknowledge that you have read and
+   Replace =USERNAME= with your Savannah username.
+
+4. By requesting push access, you acknowledge that you have read and
    agreed with the following rules:
 
    - Org mode is part of GNU Emacs.  Therefore, we need to be very
@@ -62,6 +64,9 @@ The git repository contains a =contrib/= directory.  This directory is
 the playing field for any developer, also people who have not (yet)
 signed the papers with the FSF.  You are free to add files to this
 directory, implementing extensions, new link types etc.
+=======
+See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
+>>>>>>> Stashed changes
 
 Also non-Lisp extensions like scripts to process Org files in different
 ways are welcome in this directory.  You should provide documentation
