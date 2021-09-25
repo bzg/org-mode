@@ -67,5 +67,5 @@ See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for gu
 * The =contrib/= directory
 
 The git repository used to contain a =contrib/= directory.  Files in
-this directory where moved to a new [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository before Org
+this directory were moved to a new [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository before Org
 9.5.  You can install the new =org-contrib= from [[https://elpa.nongnu.org/nongnu/][NonGNU ELPA]].
