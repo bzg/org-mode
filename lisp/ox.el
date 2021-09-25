@@ -5437,6 +5437,16 @@ transcoding it."
      (secondary-closing
       :utf-8 "‘" :html "&lsquo;" :latex "\\grq{}" :texinfo "@quoteleft{}")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
+    ("el"
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
+     (secondary-closing :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("en"
      (primary-opening :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
      (primary-closing :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
