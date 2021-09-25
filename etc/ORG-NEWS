@@ -3,7 +3,7 @@ ORG NEWS -- history of user-visible changes.   -*- mode: org; coding: utf-8 -*-
 #+STARTUP: overview
 
 #+LINK: doc https://orgmode.org/worg/doc.html#%s
-#+LINK: git https://code.orgmode.org/bzg/org-mode/commit/%s
+#+LINK: git https://git.savannah.gnu.org/cgit/emacs/org-mode.git/commit/?id=%s
 
 Copyright (C) 2012-2021 Free Software Foundation, Inc.
 See the end of the file for license conditions.
@@ -354,7 +354,7 @@ source buffers are displayed by modifying ~display-buffer-alist~ or
 *** New option ~org-archive-subtree-save-file-p~
 
 Archiving a subtree used to always save the target archive buffer.
-Commit [[https://code.orgmode.org/bzg/org-mode/commit/b186d1d7][b186d1d7]] changed this behavior by always not saving the target
+Commit [[git::b186d1d7][b186d1d7]] changed this behavior by always not saving the target
 buffer, because batch archiving from agenda could take too much time.
 
 This new option ~org-archive-subtree-save-file-p~ defaults to the
@@ -388,7 +388,7 @@ In all Babel libraries, the absence of a ~:results~ header should
 produce the same result than setting ~:results value~, unless there is
 an option to explicitly create an exception.
 
-See [[https://orgmode.org/list/CA+A2iZaziAfMeGpBqL6qGrzrWEVvLvC0DUw++T4gCF3NGuW-DQ@mail.gmail.com/][this thread]] for more context.
+See [[https://list.orgmode.org/CA+A2iZaziAfMeGpBqL6qGrzrWEVvLvC0DUw++T4gCF3NGuW-DQ@mail.gmail.com/][this thread]] for more context.
 
 *** New option in ~org-attach-store-link-p~
 
@@ -5131,7 +5131,7 @@ that Calc formulas can operate on them.
 
     The new system has a technically cleaner implementation and more
     possibilities for capturing different types of data.  See
-    [[https://orgmode.org/list/C46F10DC-DE51-43D4-AFFE-F71E440D1E1F@gmail.com][Carsten's announcement]] for more details.
+    [[https://list.orgmode.org/C46F10DC-DE51-43D4-AFFE-F71E440D1E1F@gmail.com][Carsten's announcement]] for more details.
 
     To switch over to the new system:
 
@@ -5262,7 +5262,7 @@ that Calc formulas can operate on them.
 
 **** Modified link escaping
 
-     David Maus worked on `org-link-escape'.  See [[https://orgmode.org/list/87k4gysacq.wl%dmaus@ictsoc.de][his message]]:
+     David Maus worked on `org-link-escape'.  See [[https://list.orgmode.org/87k4gysacq.wl%dmaus@ictsoc.de][his message]]:
 
      : Percent escaping is used in Org mode to escape certain characters
      : in links that would either break the parser (e.g. square brackets
