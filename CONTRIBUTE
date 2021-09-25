@@ -58,20 +58,19 @@ development.
      simplicity, cleanness and consistency.  We should try to preserve
      them and ask everyone to keep this in mind when posting changes.
 
+See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
+
 * The contrib/ directory
 
 The git repository contains a =contrib/= directory.  This directory is
 the playing field for any developer, also people who have not (yet)
 signed the papers with the FSF.  You are free to add files to this
 directory, implementing extensions, new link types etc.
-=======
-See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
->>>>>>> Stashed changes
 
-Also non-Lisp extensions like scripts to process Org files in different
-ways are welcome in this directory.  You should provide documentation
-with your extensions, at least in the form of commentary in the file,
-better on worg.  Please discuss your extensions on
+Also non-Lisp extensions like scripts to process Org files in
+different ways are welcome in this directory.  You should provide
+documentation with your extensions, at least in the form of commentary
+in the file, better on worg.  Please discuss your extensions on
 [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]].
 
 After files have been tested in =contrib/= and found to be generally
