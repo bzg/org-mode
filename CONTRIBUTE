@@ -28,9 +28,11 @@ Org maintenance is detailed on Worg: see [[https://orgmode.org/worg/org-maintena
    After you have been added as a user with push privileges, you can
    clone the repository like this:
 
-   : git clone git://git.savannah.gnu.org/emacs/org-mode.git
+   : git clone USERNAME@git.savannah.gnu.org:/srv/git/emacs/org-mode.git
 
-   By requesting push access, you acknowledge that you have read and
+   Replace =USERNAME= with your Savannah username.
+
+4. By requesting push access, you acknowledge that you have read and
    agreed with the following rules:
 
    - Org mode is part of GNU Emacs.  Therefore, we need to be very
@@ -60,8 +62,7 @@ Org maintenance is detailed on Worg: see [[https://orgmode.org/worg/org-maintena
      simplicity, cleanness and consistency.  We should try to preserve
      them and ask everyone to keep this in mind when posting changes.
 
-See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for more guidance on how to contribute
-effectively.
+See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
 
 * The =contrib/= directory
 
