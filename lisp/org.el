@@ -7888,7 +7888,8 @@ called immediately, to move the markers with the entries."
   "Check if MARKER is between BEG and END.
 If yes, remember the marker and the distance to BEG."
   (when (and (marker-buffer marker)
-	     (equal (marker-buffer marker) (current-buffer))
+	     (or (equal (marker-buffer marker) (current-buffer))
+                 (equal (marker-buffer marker) (buffer-base-buffer (current-buffer))))
 	     (>= marker beg) (< marker end))
     (push (cons marker (- marker beg)) org-markers-to-move)))
 
