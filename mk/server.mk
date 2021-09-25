@@ -26,7 +26,7 @@ helpserver::
 
 #----------------------------------------------------------------------
 
-SERVROOT ?= /var/www/orgmode.org
+SERVROOT ?= upload
 SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
