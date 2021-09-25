@@ -66,6 +66,7 @@
 (declare-function org-export-install-filters "ox" (info))
 (declare-function org-export-table-has-special-column-p "ox" (table))
 (declare-function org-export-table-row-is-special-p "ox" (table-row info))
+(declare-function org-forward-paragraph "org" (&optional arg))
 (declare-function org-id-find "org-id" (id &optional markerp))
 (declare-function org-indent-line "org" ())
 (declare-function org-load-modules-maybe "org" (&optional force))
