@@ -40,6 +40,7 @@
 (require 'org-id)
 
 (declare-function dired-dwim-target-directory "dired-aux")
+(declare-function dired-get-marked-files "dired" (&optional localp arg filter distinguish-one-marked error))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
