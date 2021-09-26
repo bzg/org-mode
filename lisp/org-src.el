@@ -443,20 +443,14 @@ Assume point is in the corresponding edit buffer."
 		0))))
 	(use-tabs? (and (> org-src--tab-width 0) t))
 	(source-tab-width org-src--tab-width)
-	(contents (org-with-wide-buffer
-                   (let ((eol (progn (end-of-line) (point))))
-                     (list (buffer-substring (point-min) eol)
-                           (buffer-substring eol (point-max))))))
-	(write-back org-src--allow-write-back)
-        marker)
+	(contents (org-with-wide-buffer (buffer-string)))
+	(write-back org-src--allow-write-back))
     (with-current-buffer write-back-buf
       ;; Reproduce indentation parameters from source buffer.
       (setq indent-tabs-mode use-tabs?)
       (when (> source-tab-width 0) (setq tab-width source-tab-width))
       ;; Apply WRITE-BACK function on edit buffer contents.
-      (insert (org-no-properties (car contents)))
-      (setq marker (point-marker))
-      (insert (org-no-properties (car (cdr contents))))
+      (insert (org-no-properties contents))
       (goto-char (point-min))
       (when (functionp write-back) (save-excursion (funcall write-back)))
       ;; Add INDENTATION-OFFSET to every line in buffer,
@@ -464,13 +458,10 @@ Assume point is in the corresponding edit buffer."
       (when (> indentation-offset 0)
 	(while (not (eobp))
 	  (skip-chars-forward " \t")
-          (when (or (not (eolp)) ; ignore blank lines
-                    (eq (point) (marker-position marker)))
-	    (let ((i (current-column)))
-	      (delete-region (line-beginning-position) (point))
-	      (indent-to (+ i indentation-offset))))
-	  (forward-line)))
-      (set-marker marker nil))))
+	  (let ((i (current-column)))
+	    (delete-region (line-beginning-position) (point))
+	    (indent-to (+ i indentation-offset)))
+	  (forward-line))))))
 
 (defun org-src--edit-element
     (datum name &optional initialize write-back contents remote)
