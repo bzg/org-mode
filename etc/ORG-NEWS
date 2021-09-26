@@ -168,6 +168,44 @@ When specifying a custom agenda bulk option, you can now also specify
 a function which collects the arguments to be used with each call to
 the custom function.
 
+*** New faces to improve the contextuality of Org agenda views
+
+Four new faces improve certain styles and offer more flexibility for
+some Org agenda views: ~org-agenda-date-weekend-today~,
+~org-imminent-deadline~, ~org-agenda-structure-secondary~,
+~org-agenda-structure-filter~.  They inherit from existing faces in
+order to remain backward-compatible.
+
+Quoting from [[https://list.orgmode.org/87lf7q7gpq.fsf@protesilaos.com/][this thread]]:
+
+#+begin_quote
++ The 'org-imminent-deadline' is useful to disambiguate generic
+  warnings from deadlines.  For example, a warning could be rendered
+  in a yellow colored text and have a bold weight, whereas a deadline
+  might be red and styled with italics.
+
++ The 'org-agenda-structure-filter' applies to all tag/term filters
+  in agenda views that search for keywords or patterns.  It is
+  designed to inherit from 'org-agenda-structure' in addition to the
+  'org-warning' face that was present before (and removes the
+  generic 'warning' face from one place).  This offers the benefit
+  of consistency, as, say, an increase in font height or a change in
+  font family in 'org-agenda-structure' will propagate to the filter
+  as well.  The whole header line thus looks part of a singular
+  design.
+
++ The 'org-agenda-structure-secondary' complements the above for those
+  same views where a description follows the header.  For instance, the
+  tags view provides information to "Press N r" to filter by a
+  numbered tag.  Themes/users may prefer to disambiguate this line
+  from the header above it, such as by using a less intense color or by
+  reducing its height relative to the 'org-agenda-structure'.
+
++ The 'org-agenda-date-weekend-today' provides the option to
+  differentiate the current date on a weekend from the current date on
+  weekdays.
+#+end_quote
+
 *** New option ~org-clock-ask-before-exiting~
 
 By default, a function is now added to ~kill-emacs-query-functions~
