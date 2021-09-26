@@ -93,8 +93,15 @@
 
 (defun org-babel-expand-body:sql (body params)
   "Expand BODY according to the values of PARAMS."
-  (org-babel-sql-expand-vars
-   body (org-babel--get-vars params)))
+  (let ((prologue (cdr (assq :prologue params)))
+	(epilogue (cdr (assq :epilogue params))))
+  (mapconcat 'identity
+             (list
+              prologue
+              (org-babel-sql-expand-vars
+               body (org-babel--get-vars params))
+              epilogue)
+             "\n")))
 
 (defun org-babel-edit-prep:sql (info)
   "Set `sql-product' in Org edit buffer.
