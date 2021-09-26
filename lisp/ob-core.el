@@ -679,8 +679,7 @@ a list with the following pattern:
   (pcase (assq :file-desc params)
     (`nil nil)
     (`(:file-desc) result)
-    (`(:file-desc . ,(and (pred stringp) val)) val)
-    (`(:file-desc . []) nil)))
+    (`(:file-desc . ,(and (pred stringp) val)) val)))
 
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
