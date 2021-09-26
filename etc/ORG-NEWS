@@ -3,12 +3,8 @@ ORG NEWS -- history of user-visible changes.   -*- mode: org; coding: utf-8 -*-
 #+STARTUP: overview
 
 #+LINK: doc https://orgmode.org/worg/doc.html#%s
-<<<<<<< HEAD
-#+LINK: git https://code.orgmode.org/bzg/org-mode/commit/%s
-#+LINK: msg https://orgmode.org/list/%s/
-=======
+#+LINK: msg https://list.orgmode.org/%s/
 #+LINK: git https://git.savannah.gnu.org/cgit/emacs/org-mode.git/commit/?id=%s
->>>>>>> bugfix
 
 Copyright (C) 2012-2021 Free Software Foundation, Inc.
 See the end of the file for license conditions.
@@ -69,6 +65,25 @@ Hopefully problems have been fixed.  See [[https://orgmode.org/worg/org-faq.html
 
 Setting ~org-speed-commands-user~ in your configuration won't have any
 effect.  Please set ~org-speed-commands~ instead, which see.
+
+*** Some =ob-*.el= files have migrate to the org-contrib repo
+
+These files have been moved to https://git.sr.ht/~bzg/org-contrib:
+
+- ob-vala.el
+- ob-shen.el
+- ob-picolisp.el
+- ob-mscgen.el
+- ob-ledger.el
+- ob-io.el
+- ob-hledger.el
+- ob-ebnf.el
+- ob-coq.el
+- ob-asymptote.el
+- ob-abc.el
+- ob-J.el 
+
+See the discussion [[msg::87bl9rq29m.fsf@gnu.org][here]].
 
 ** New options and settings
 *** Option ~org-hidden-keywords~ now also applies to #+SUBTITLE:
