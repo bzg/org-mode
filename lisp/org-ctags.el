@@ -509,10 +509,7 @@ Uses `ido-mode' if available.
 If the user enters a string that does not match an existing tag, create
 a new topic."
   (interactive)
-  (let* ((completing-read-fn (if (fboundp 'ido-completing-read)
-                                 'ido-completing-read
-                               'completing-read))
-         (tag (funcall completing-read-fn "Topic: " org-ctags-tag-list
+  (let* ((tag (ido-completing-read "Topic: " org-ctags-tag-list
                        nil 'confirm nil 'org-ctags-find-tag-history)))
     (when tag
       (cond

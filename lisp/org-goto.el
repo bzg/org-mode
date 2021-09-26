@@ -110,10 +110,8 @@ When nil, you can use these keybindings to navigate the buffer:
 	  (org-defkey map [(down)] 'outline-next-visible-heading)
 	  (org-defkey map [(up)] 'outline-previous-visible-heading)
 	  (if org-goto-auto-isearch
-	      (if (fboundp 'define-key-after)
-		  (define-key-after map [t] 'org-goto-local-auto-isearch)
-		nil)
-	    (org-defkey map "q" 'org-goto-quit)
+              (define-key-after map [t] 'org-goto-local-auto-isearch)
+            (org-defkey map "q" 'org-goto-quit)
 	    (org-defkey map "n" 'outline-next-visible-heading)
 	    (org-defkey map "p" 'outline-previous-visible-heading)
 	    (org-defkey map "f" 'outline-forward-same-level)

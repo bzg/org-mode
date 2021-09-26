@@ -1884,7 +1884,6 @@ INFO is a plist used as a communication channel."
 	 ;; empty, which is invalid.
 	 (title (if (org-string-nw-p title) title "&lrm;"))
 	 (charset (or (and org-html-coding-system
-			   (fboundp 'coding-system-get)
 			   (symbol-name
 			    (coding-system-get org-html-coding-system
 					       'mime-charset)))
@@ -2071,7 +2070,7 @@ holding export options."
 	 (format "%s\n"
 		 (format decl
 			 (or (and org-html-coding-system
-				  (fboundp 'coding-system-get)
+                                  ;; FIXME: Use Emacs 22 style here, see `coding-system-get'.
 				  (coding-system-get org-html-coding-system 'mime-charset))
 			     "iso-8859-1"))))))
    (org-html-doctype info)

@@ -70,6 +70,7 @@
 	     ,@body)
 	 (set-buffer-modified-p ,was-modified)))))
 
+;; FIXME: `partial-completion-mode' is obsolete since Emacs 24.1.
 (defmacro org-without-partial-completion (&rest body)
   (declare (debug (body)))
   `(if (and (boundp 'partial-completion-mode)
@@ -220,14 +221,12 @@ WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
 passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
 `shrink-window-if-larger-than-buffer' instead, the height limit is
 ignored in this case."
-  (cond ((if (fboundp 'window-full-width-p)
-             (not (window-full-width-p window))
-           ;; Do nothing if another window would suffer.
-           (> (frame-width) (window-width window))))
-        ((and (fboundp 'fit-window-to-buffer) (not shrink-only))
+  (cond ((not (window-full-width-p window))
+         ;; Do nothing if another window would suffer.
+         )
+        ((not shrink-only)
          (fit-window-to-buffer window max-height min-height))
-        ((fboundp 'shrink-window-if-larger-than-buffer)
-         (shrink-window-if-larger-than-buffer window)))
+        (t (shrink-window-if-larger-than-buffer window)))
   (or window (selected-window)))
 
 (defun org-buffer-list (&optional predicate exclude-tmp)

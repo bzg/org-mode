@@ -358,7 +358,7 @@ In non-interactive uses, a reduced version string is output unless
 FULL is given."
   (interactive (list current-prefix-arg t (not current-prefix-arg)))
   (let ((org-dir (ignore-errors (org-find-library-dir "org")))
-	(save-load-suffixes (when (boundp 'load-suffixes) load-suffixes))
+        (save-load-suffixes load-suffixes)
 	(load-suffixes (list ".el"))
 	(org-install-dir
 	 (ignore-errors (org-find-library-dir "org-loaddefs"))))
@@ -11458,7 +11458,7 @@ This works in the agenda, and also in an Org buffer."
 	 (progn
 	   (message "[s]et or [r]emove? ")
 	   (equal (read-char-exclusive) ?r))))
-  (when (fboundp 'deactivate-mark) (deactivate-mark))
+  (deactivate-mark)
   (let ((agendap (equal major-mode 'org-agenda-mode))
 	l1 l2 m buf pos newhead (cnt 0))
     (goto-char end)
@@ -17908,7 +17908,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 				   feats)))
 		  'string-lessp)
 		 (list "org-version" "org")))
-	 (load-suffixes (when (boundp 'load-suffixes) load-suffixes))
 	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
 	 load-uncore load-misses)
     (setq load-misses
@@ -18706,14 +18705,12 @@ assumed to be significant there."
 (defun org-setup-filling ()
   (require 'org-element)
   ;; Prevent auto-fill from inserting unwanted new items.
-  (when (boundp 'fill-nobreak-predicate)
-    (setq-local
-     fill-nobreak-predicate
-     (org-uniquify
-      (append fill-nobreak-predicate
-	      '(org-fill-line-break-nobreak-p
-		org-fill-n-macro-as-item-nobreak-p
-		org-fill-paragraph-with-timestamp-nobreak-p)))))
+  (setq-local fill-nobreak-predicate
+              (org-uniquify
+               (append fill-nobreak-predicate
+                       '(org-fill-line-break-nobreak-p
+                         org-fill-n-macro-as-item-nobreak-p
+                         org-fill-paragraph-with-timestamp-nobreak-p))))
   (let ((paragraph-ending (substring org-element-paragraph-separate 1)))
     (setq-local paragraph-start paragraph-ending)
     (setq-local paragraph-separate paragraph-ending))

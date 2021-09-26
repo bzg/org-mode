@@ -367,6 +367,7 @@ returned list."
 	  ret)
       l)))
 
+;; `flatten-tree' was added in Emacs 27.1.
 (defalias 'org-protocol-flatten
   (if (fboundp 'flatten-tree) 'flatten-tree
     (lambda (list)
