@@ -2175,7 +2175,7 @@ LOCATION instead."
 	    (goto-char (match-beginning 3))
 	    (delete-region (match-beginning 3) (match-end 0)))
 	(org-indent-line)
-	(insert (or (match-string 2) "#+TBLFM:")))
+	(insert "#+TBLFM:"))
       (insert " "
 	      (mapconcat (lambda (x) (concat (car x) "=" (cdr x)))
 			 (sort alist #'org-table-formula-less-p)
