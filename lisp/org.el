@@ -9177,6 +9177,7 @@ or to another Org file, automatically push the old position onto the ring."
 
 (defvar org-agenda-buffer-tmp-name)
 (defvar org-agenda-start-on-weekday)
+(defvar org-agenda-buffer-name)
 (defun org-follow-timestamp-link ()
   "Open an agenda view for the time-stamp date/range at point."
   ;; Avoid changing the global value.
@@ -10442,6 +10443,7 @@ repeater from there instead."
 (defvar org-log-note-purpose)
 (defvar org-log-note-how nil)
 (defvar org-log-note-extra)
+(defvar org-log-setup nil)
 (defun org-auto-repeat-maybe (done-word)
   "Check if the current headline contains a repeated time-stamp.
 
@@ -10932,7 +10934,6 @@ narrowing."
 	 (forward-line)))))
    (if (bolp) (point) (line-beginning-position 2))))
 
-(defvar org-log-setup nil)
 (defun org-add-log-setup (&optional purpose state prev-state how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
