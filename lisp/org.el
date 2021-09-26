@@ -689,12 +689,13 @@ defined in org-duration.el.")
 (defcustom org-modules '(ol-doi ol-w3m ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-eww)
   "Modules that should always be loaded together with org.el.
 
-If a description starts with <C>, the file is not part of Emacs
-and loading it will require that you have downloaded and properly
-installed the Org mode distribution.
+If a description starts with <C>, the file is not part of Emacs and Org mode,
+so loading it will require that you have properly installed org-contrib
+package from NonGNU Emacs Lisp Package Archive
+http://elpa.nongnu.org/nongnu/org-contrib.html
 
 You can also use this system to load external packages (i.e. neither Org
-core modules, nor modules from the CONTRIB directory).  Just add symbols
+core modules, nor org-contrib modules).  Just add symbols
 to the end of the list.  If the package is called org-xyz.el, then you need
 to add the symbol `xyz', and the package must have a call to:
 
@@ -768,9 +769,10 @@ For export specific modules, see also `org-export-backends'."
 (defcustom org-export-backends '(ascii html icalendar latex odt)
   "List of export back-ends that should be always available.
 
-If a description starts with <C>, the file is not part of Emacs
-and loading it will require that you have downloaded and properly
-installed the Org mode distribution.
+If a description starts with <C>, the file is not part of Emacs and Org mode,
+so loading it will require that you have properly installed org-contrib
+package from NonGNU Emacs Lisp Package Archive
+http://elpa.nongnu.org/nongnu/org-contrib.html
 
 Unlike to `org-modules', libraries in this list will not be
 loaded along with Org, but only once the export framework is
