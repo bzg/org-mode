@@ -677,7 +677,8 @@ This uses `bibtex-parse-entry'."
                        (_ field)))
                    (funcall clean-space (funcall strip-delim (cdr pair)))))
            (save-excursion (bibtex-beginning-of-entry) (bibtex-parse-entry)))
-          org-bibtex-entries)))
+          org-bibtex-entries)
+    (unless (car org-bibtex-entries) (pop org-bibtex-entries))))
 
 (defun org-bibtex-read-buffer (buffer)
   "Read all bibtex entries in BUFFER and save to `org-bibtex-entries'.
