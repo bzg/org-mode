@@ -5335,7 +5335,8 @@ by a #."
 	    (org-remove-flyspell-overlays-in nl-before-endline end-of-endline)
 	    (cond
 	     ((and lang (not (string= lang "")) org-src-fontify-natively)
-	      (org-src-font-lock-fontify-block lang block-start block-end)
+	      (save-match-data
+                (org-src-font-lock-fontify-block lang block-start block-end))
 	      (add-text-properties bol-after-beginline block-end '(src-block t)))
 	     (quoting
 	      (add-text-properties
@@ -19507,7 +19508,9 @@ a footnote definition, try to fill the first paragraph within."
       ;; the buffer.  In that case, ignore filling.
       (cl-case (org-element-type element)
 	;; Use major mode filling function is source blocks.
-	(src-block (org-babel-do-key-sequence-in-edit-buffer (kbd "M-q")))
+	(src-block (org-babel-do-in-edit-buffer
+                    (mark-whole-buffer)
+                    (funcall-interactively #'fill-paragraph justify 'region)))
 	;; Align Org tables, leave table.el tables as-is.
 	(table-row (org-table-align) t)
 	(table
@@ -19642,7 +19645,9 @@ filling the current element."
     ;; previously unmodified), then flip the modification status back
     ;; to "unchanged".
     (when (and hash (equal hash (org-buffer-hash)))
-      (set-buffer-modified-p nil))))
+      (set-buffer-modified-p nil))
+    ;; Return non-nil.
+    t))
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
