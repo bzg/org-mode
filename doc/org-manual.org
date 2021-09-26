@@ -11346,7 +11346,7 @@ footnote reference is simply the marker in square brackets, inside
 text.  Markers always start with =fn:=.  For example:
 
 #+begin_example
-The Org homepage[fn:1] now looks a lot better than it used to.
+The Org website[fn:1] now looks a lot better than it used to.
 ...
 [fn:1] The link is: https://orgmode.org
 #+end_example
@@ -12907,7 +12907,7 @@ changing the link's title and style:
 
 #+cindex: @samp{ATTR_HTML}, keyword
 #+begin_example
-,#+ATTR_HTML: :title The Org mode homepage :style color:red;
+,#+ATTR_HTML: :title The Org mode website :style color:red;
 [[https://orgmode.org]]
 #+end_example
 

@@ -5,7 +5,7 @@
 ;; Author: Benjamin Andresen
 ;; Maintainer: Ken Mankoff <mankoff@gmail.com>
 ;; Keywords: literate programming, interactive shell
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 

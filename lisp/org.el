@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Maintainer: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: outlines, hypermedia, calendar, wp
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 ;; Package-Requires: ((emacs "25.1"))
 
 ;; Version: 9.6-dev
@@ -56,10 +56,10 @@
 ;; Documentation
 ;; -------------
 ;; The documentation of Org mode can be found in the TeXInfo file.  The
-;; distribution also contains a PDF version of it.  At the homepage of
-;; Org mode, you can read the same text online as HTML.  There is also an
-;; excellent reference card made by Philip Rooke.  This card can be found
-;; in the doc/ directory.
+;; distribution also contains a PDF version of it.  At the Org mode website,
+;; you can read the same text online as HTML.  There is also an excellent
+;; reference card made by Philip Rooke.  This card can be found in the
+;; doc/ directory.
 ;;
 ;; A list of recent changes can be found at
 ;; https://orgmode.org/Changes.html

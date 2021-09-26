@@ -4,7 +4,7 @@
 ;; Authors: G. Jay Kerns
 ;; Maintainer: Pedro Bruel <pedro.bruel@gmail.com>
 ;; Keywords: literate programming, reproducible research, scientific computing
-;; Homepage: https://github.com/phrb/ob-julia
+;; URL: https://github.com/phrb/ob-julia
 
 ;; This file is part of GNU Emacs.
 

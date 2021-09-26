@@ -5,7 +5,7 @@
 ;; Author: Eric Schulte
 ;; Maintainer: Tyler Smith <tyler@plantarum.ca>
 ;; Keywords: literate programming, reproducible research
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 

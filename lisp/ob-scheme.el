@@ -5,7 +5,7 @@
 ;; Authors: Eric Schulte
 ;;	    Michael Gauland
 ;; Keywords: literate programming, reproducible research, scheme
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 

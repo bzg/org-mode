@@ -2066,7 +2066,7 @@ footnote reference is simply the marker in square brackets, inside
 text.  For example:
 
 #+begin_example
-The Org homepage[fn:1] now looks a lot better than it used to.
+The Org website[fn:1] now looks a lot better than it used to.
 ...
 [fn:1] The link is: https://orgmode.org
 #+end_example

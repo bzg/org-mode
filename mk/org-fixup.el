@@ -2,7 +2,7 @@
 ;;
 ;; Author: Achim Gratz
 ;; Keywords: orgmode
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

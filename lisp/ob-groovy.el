@@ -5,7 +5,7 @@
 ;; Author: Miro Bezjak <bezjak.miro@gmail.com>
 ;; Maintainer: Palak Mathur <palakmathur@gmail.com>
 ;; Keywords: literate programming, reproducible research
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 

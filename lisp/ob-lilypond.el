@@ -4,7 +4,7 @@
 
 ;; Author: Martyn Jago
 ;; Keywords: babel language, literate programming
-;; Homepage: https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-lilypond.html
+;; URL: https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-lilypond.html
 
 ;; This file is part of GNU Emacs.
 

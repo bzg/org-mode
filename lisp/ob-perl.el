@@ -6,7 +6,7 @@
 ;;	 Eric Schulte
 ;; Maintainer: Corwin Brust <corwin@bru.st>
 ;; Keywords: literate programming, reproducible research
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 

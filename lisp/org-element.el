@@ -3482,7 +3482,7 @@ Assume point is at the beginning of the link."
 	(setq path (match-string-no-properties 1))
 	(setq contents-begin (match-beginning 1))
 	(setq contents-end (match-end 1)))
-       ;; Type 2: Standard link, i.e. [[https://orgmode.org][homepage]]
+       ;; Type 2: Standard link, i.e. [[https://orgmode.org][website]]
        ((looking-at org-link-bracket-re)
 	(setq format 'bracket)
 	(setq contents-begin (match-beginning 2))

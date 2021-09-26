@@ -6,7 +6,7 @@
 ;;      Thierry Banel
 ;; Maintainer: Thierry Banel <tbanelwebmin@free.fr>
 ;; Keywords: literate programming, reproducible research
-;; Homepage: https://orgmode.org
+;; URL: https://orgmode.org
 
 ;; This file is part of GNU Emacs.
 
