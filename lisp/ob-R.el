@@ -526,8 +526,11 @@ by `org-babel-comint-async-filter'."
          (insert body)
          (insert "\n")
          (insert (format ob-session-async-R-indicator
-					  "end" uuid))
+			 "end" uuid))
+         (setq tmp ess-eval-visibly)
+         (setq ess-eval-visibly nil)
          (ess-eval-buffer nil))
+         (setq ess-eval-visibly tmp)
        uuid))))
 
 (defun ob-session-async-R-value-callback (params tmp-file)
