@@ -1038,8 +1038,10 @@ the same object, call `org-cite-adjust-punctuation' first."
 ;;; Tools generating or operating on parsed data
 (defun org-cite-parse-elements (s)
   "Parse string S as a list of Org elements.
-The return value is suitable as a replacement for a \"print_bibliography\" keyword.
-As a consequence, the function raises an error if S contains a headline."
+
+The return value is suitable as a replacement for a
+\"print_bibliography\" keyword.  As a consequence, the function
+raises an error if S contains a headline."
   (with-temp-buffer
     (insert s)
     (pcase (org-element-contents (org-element-parse-buffer))
