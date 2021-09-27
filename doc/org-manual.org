@@ -16509,7 +16509,7 @@ of the commands above, or by customizing the variable
 particular if files include other files via =SETUPFILE= or =INCLUDE=
 keywords.
 
-* Citations handling
+* Citation handling
 :PROPERTIES:
 :DESCRIPTION: create, follow and export citations.
 :END:
