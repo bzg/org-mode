@@ -66,7 +66,7 @@ Hopefully problems have been fixed.  See [[https://orgmode.org/worg/org-faq.html
 Setting ~org-speed-commands-user~ in your configuration won't have any
 effect.  Please set ~org-speed-commands~ instead, which see.
 
-*** Some =ob-*.el= files have migrate to the org-contrib repo
+*** Some =ob-*.el= files have been moved to the org-contrib repo
 
 These files have been moved to https://git.sr.ht/~bzg/org-contrib:
 
@@ -81,11 +81,185 @@ These files have been moved to https://git.sr.ht/~bzg/org-contrib:
 - ob-coq.el
 - ob-asymptote.el
 - ob-abc.el
-- ob-J.el 
+- ob-J.el
 
 See the discussion [[msg::87bl9rq29m.fsf@gnu.org][here]].
 
-** New options and settings
+** New features
+
+*** New citation engine
+
+Org 9.5 provides a new library =oc.el= which provides tooling to
+handle citations in Org, e.g., activate, follow, insert, and export
+them, respectively called "activate", "follow", "insert" and "export"
+capabilities.  Libraries responsible for providing some, or all, of
+these capabilities are called "citation processors".
+
+The manual contains a few pointers to let you start and you may want
+to check [[https://blog.tecosaur.com/tmio/2021-07-31-citations.html][this blog post]].  If you need help using this new features,
+please ask on the mailing list.
+
+Thanks to Nicolas Goaziou for implementing this, to Bruce D’Arcus for
+helping him and to John Kitchin for paving the way with =org-ref.el=.
+
+*** Async session evaluation
+
+The =:async= header argument can be used for asynchronous evaluation
+in session blocks for certain languages.
+
+Currently, async evaluation is supported in Python.  There is also
+functionality to implement async evaluation in other languages that
+use comint, but this needs to be done on a per-language basis.
+
+By default, async evaluation is disabled unless the =:async= header
+argument is present.  You can also set =:async no= to force it off
+(for example if you've set =:async= in a property drawer).
+
+Async evaluation is disabled during export.
+*** ~ox-koma-letter.el~ is now part of Org's core
+
+~ox-koma-letter.el~ provides a KOMA scrlttr2 back-end for the Org
+export engine.  It used to be in the =contrib/= directory but it is
+now part of Org's core.
+
+*** Support exporting DOI links
+
+Org now supports export for DOI links, through its new =ol-doi.el=
+library.  For backward compatibility, it is loaded by default.
+
+*** Add a new ~:refile-targets~ template option
+
+When exiting capture mode via ~org-capture-refile~, the variable
+~org-refile-targets~ will be temporarily bound to the value of this
+template option.
+
+*** New startup options =#+startup: show<n>levels=
+
+These startup options complement the existing =overview=, =content=,
+=showall=, =showeverything= with a way to start the document with n
+levels shown, where n goes from 2 to 5.
+
+Example:
+
+: #+startup: show3levels
+
+*** New =u= table formula flag to enable Calc units simplification mode
+
+A new =u= mode flag for Calc formulas in Org tables has been added to
+enable Calc units simplification mode.
+
+*** Support fontification of inline export snippets
+
+Inline 
+
+See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
+
+*** New command =org-refile-reverse= bound to =C-c C-M-w=
+
+You can now use =C-c C-M-w= to run ~org-refile-reverse~.
+
+It is almost identical to ~org-refile~, except that it temporarily
+toggles how ~org-reverse-note-order~ applies to the current buffer.
+So if ~org-refile~ would append the entry as the last entry under the
+target heading, ~org-refile-reverse~ will prepend it as the first
+entry, and vice-versa.
+
+*** LaTeX attribute ~:float~ now passes through arbitrary values
+
+LaTeX users are able to define arbitrary float types, e.g. with the
+float package.  The Org mode LaTeX exporter is now able to process and
+export arbitrary float types.  The user is responsible for ensuring
+that Org mode configures LaTeX to process any new float type.
+
+*** Support verse and quote blocks in LaTeX export
+
+The LaTeX export back-end accepts four attributes for verse blocks:
+=:lines=, =:center=, =:versewidth= and =:latexcode=. The three first
+require the external LaTeX package =verse.sty=, which is an extension
+of the standard LaTeX environment. The purpose of these attributes is
+explained below.
+
+The LaTeX export back-end accepts two attributes for quote blocks:
+=:environment=, for an arbitrary quoting environment (the default
+value is that of =org-latex-default-quote-environment=: ="quote"=) and
+=:options=.
+
+*** =org-set-tags-command= selects tags from ~org-global-tags-completion-table~
+
+Let ~org-set-tags-command~ TAB fast tag completion interface complete
+tags including from both buffer local and user defined persistent
+global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
+option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
+
+*** Clocktable option =:formula %= now shows the per-file time percentages
+
+This change only has an effect when multiple files are contributing to
+a given clocktable (such as when =:scope agenda= has been specified).
+The existing behavior is that such tables have an extra 'File' column,
+and each individual file that contributes has its own summary line
+with the headline value '*File time*'.  Those summary rows also
+produce a rollup time value for the file in the 'Time' column.
+
+Prior to this change, the built-in =%= formula did not produce a
+calculation for those per-file times in the '%' column (the relevant
+cells in the '%' column were blank).  With this change, the percentage
+contribution of each individual file time to the total time is shown.
+
+The more agenda files you have, the more useful this behavior becomes.
+
+*** =ob-python.el= improvements to =:return= header argument
+
+The =:return= header argument in =ob-python= now works for session
+blocks as well as non-session blocks.  Also, it now works with the
+=:epilogue= header argument -- previously, setting the =:return=
+header would cause the =:epilogue= to be ignored.
+
+This change allows more easily moving boilerplate out of the main code
+block and into the header. For example, for plotting, we need to add
+boilerplate to save the figure to a file and return the
+filename. Instead of doing this within the code block, we can now
+handle it through the header arguments as follows:
+
+#+BEGIN_SRC org
+,#+header: :var fname="/home/jack/tmp/plot.svg"
+,#+header: :epilogue plt.savefig(fname)
+,#+header: :return fname
+,#+begin_src python :results value file
+  import matplotlib, numpy
+  import matplotlib.pyplot as plt
+  fig=plt.figure(figsize=(4,2))
+  x=numpy.linspace(-15,15)
+  plt.plot(numpy.sin(x)/x)
+  fig.tight_layout()
+,#+end_src
+
+,#+RESULTS:
+[[file:/home/jack/tmp/plot.svg]]
+#+END_SRC
+
+As another example, we can use =:return= with the external [[https://pypi.org/project/tabulate/][tabulate]]
+package, to convert pandas Dataframes into orgmode tables:
+
+#+begin_src org
+,#+header: :prologue from tabulate import tabulate
+,#+header: :return tabulate(table, headers=table.columns, tablefmt="orgtbl")
+,#+begin_src python :results value raw :session
+  import pandas as pd
+  table = pd.DataFrame({
+      "a": [1,2,3],
+      "b": [4,5,6]
+  })
+,#+end_src
+
+,#+RESULTS:
+|   | a | b |
+|---+---+---|
+| 0 | 1 | 4 |
+| 1 | 2 | 5 |
+| 2 | 3 | 6 |
+#+end_src
+
+** New options
 *** Option ~org-hidden-keywords~ now also applies to #+SUBTITLE:
 
 The option ~org-hidden-keywords~ previously applied
@@ -250,166 +424,6 @@ See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 ~org-attach-sync-delete-empty-dir~ controls the deletion of an empty
 attachment directory at calls of ~org-attach-sync~.  There is
 Never delete, Always delete and Query the user (default).
-
-** New features
-
-*** ~ox-koma-letter.el~ is now part of Org's core
-
-~ox-koma-letter.el~ provides a KOMA scrlttr2 back-end for the Org
-export engine.  It used to be in the =contrib/= directory but it is
-now part of Org's core.
-
-*** Support fontification of inline export snippets
-
-See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
-
-*** New command =org-refile-reverse= bound to =C-c C-M-w=
-
-You can now use =C-c C-M-w= to run ~org-refile-reverse~.
-
-It is almost identical to ~org-refile~, except that it temporarily
-toggles how ~org-reverse-note-order~ applies to the current buffer.
-So if ~org-refile~ would append the entry as the last entry under the
-target heading, ~org-refile-reverse~ will prepend it as the first
-entry, and vice-versa.
-
-*** Add a new ~:refile-targets~ template option
-
-When exiting capture mode via ~org-capture-refile~, the variable
-~org-refile-targets~ will be temporarily bound to the value of this
-template option.
-
-*** New startup options =#+startup: show<n>levels=
-
-These startup options complement the existing =overview=, =content=,
-=showall=, =showeverything= with a way to start the document with n
-levels shown, where n goes from 2 to 5.
-
-Example:
-
-: #+startup: show3levels
-
-*** New =u= table formula flag to enable Calc units simplification mode
-
-A new =u= mode flag for Calc formulas in Org tables has been added to
-enable Calc units simplification mode.
-
-*** Support exporting DOI links
-
-Org now supports export for DOI links, through its new =ol-doi.el=
-library.  For backward compatibility, it is loaded by default.
-
-*** LaTeX attribute ~:float~ now passes through arbitrary values
-
-LaTeX users are able to define arbitrary float types, e.g. with the
-float package.  The Org mode LaTeX exporter is now able to process and
-export arbitrary float types.  The user is responsible for ensuring
-that Org mode configures LaTeX to process any new float type.
-
-*** Support verse blocks in LaTeX export
-
-The LaTeX export back-end accepts four attributes for verse blocks:
-=:lines=, =:center=, =:versewidth= and =:latexcode=. The three first
-require the external LaTeX package =verse.sty=, which is an extension
-of the standard LaTeX environment. The purpose of these attributes is
-explained below.
-
-*** Support quote blocks in LaTeX export
-
-The LaTeX export back-end accepts two attributes for quote blocks:
-=:environment=, for an arbitrary quoting environment (the default
-value is that of =org-latex-default-quote-environment=: ="quote"=) and
-=:options=.
-
-*** =org-set-tags-command= selects tags from ~org-global-tags-completion-table~
-
-Let ~org-set-tags-command~ TAB fast tag completion interface complete
-tags including from both buffer local and user defined persistent
-global list (~org-tag-alist~ and ~org-tag-persistent-alist~).  Now
-option ~org-complete-tags-always-offer-all-agenda-tags~ is honored.
-
-*** Clocktable option =:formula %= now shows the per-file time percentages
-
-This change only has an effect when multiple files are contributing to
-a given clocktable (such as when =:scope agenda= has been specified).
-The existing behavior is that such tables have an extra 'File' column,
-and each individual file that contributes has its own summary line
-with the headline value '*File time*'.  Those summary rows also
-produce a rollup time value for the file in the 'Time' column.
-
-Prior to this change, the built-in =%= formula did not produce a
-calculation for those per-file times in the '%' column (the relevant
-cells in the '%' column were blank).  With this change, the percentage
-contribution of each individual file time to the total time is shown.
-
-The more agenda files you have, the more useful this behavior becomes.
-
-*** =ob-python.el= improvements to =:return= header argument
-
-The =:return= header argument in =ob-python= now works for session
-blocks as well as non-session blocks.  Also, it now works with the
-=:epilogue= header argument -- previously, setting the =:return=
-header would cause the =:epilogue= to be ignored.
-
-This change allows more easily moving boilerplate out of the main code
-block and into the header. For example, for plotting, we need to add
-boilerplate to save the figure to a file and return the
-filename. Instead of doing this within the code block, we can now
-handle it through the header arguments as follows:
-
-#+BEGIN_SRC org
-,#+header: :var fname="/home/jack/tmp/plot.svg"
-,#+header: :epilogue plt.savefig(fname)
-,#+header: :return fname
-,#+begin_src python :results value file
-  import matplotlib, numpy
-  import matplotlib.pyplot as plt
-  fig=plt.figure(figsize=(4,2))
-  x=numpy.linspace(-15,15)
-  plt.plot(numpy.sin(x)/x)
-  fig.tight_layout()
-,#+end_src
-
-,#+RESULTS:
-[[file:/home/jack/tmp/plot.svg]]
-#+END_SRC
-
-As another example, we can use =:return= with the external [[https://pypi.org/project/tabulate/][tabulate]]
-package, to convert pandas Dataframes into orgmode tables:
-
-#+begin_src org
-,#+header: :prologue from tabulate import tabulate
-,#+header: :return tabulate(table, headers=table.columns, tablefmt="orgtbl")
-,#+begin_src python :results value raw :session
-  import pandas as pd
-  table = pd.DataFrame({
-      "a": [1,2,3],
-      "b": [4,5,6]
-  })
-,#+end_src
-
-,#+RESULTS:
-|   | a | b |
-|---+---+---|
-| 0 | 1 | 4 |
-| 1 | 2 | 5 |
-| 2 | 3 | 6 |
-#+end_src
-
-*** Async session evaluation
-
-The =:async= header argument can be used for asynchronous evaluation
-in session blocks for certain languages.
-
-Currently, async evaluation is supported in Python.  There is also
-functionality to implement async evaluation in other languages that
-use comint, but this needs to be done on a per-language basis.
-
-By default, async evaluation is disabled unless the =:async= header
-argument is present.  You can also set =:async no= to force it off
-(for example if you've set =:async= in a property drawer).
-
-Async evaluation is disabled during export.
 
 ** Miscellaneous
 *** =org-bibtex= includes =doi= and =url= entries when exporting to BiBTeX
