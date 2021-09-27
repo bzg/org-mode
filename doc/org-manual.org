@@ -16509,6 +16509,50 @@ of the commands above, or by customizing the variable
 particular if files include other files via =SETUPFILE= or =INCLUDE=
 keywords.
 
+* Citations handling
+:PROPERTIES:
+:DESCRIPTION: create, follow and export citations.
+:END:
+#+cindex: citation
+
+Org 9.5 provides a new library =oc.el= which provides tooling to
+handle citations in Org, e.g., activate, follow, insert, and export
+them, respectively called "activate", "follow", "insert" and "export"
+capabilities.  Libraries responsible for providing some, or all, of
+these capabilities are called "citation processors".
+
+Such processors are defined using ~org-cite-register-processor~.
+Using this function, it is possible, in addition to giving it a name,
+to attach functions associated to capabilities.  As such, a processor
+handling citation export must set the ~:export-citation~ property to
+an appropriate function.  Likewise, "activate" capability requires an
+appropriate ~:activate~ property, "insert" requires ~:insert~ property
+and, unsurprisingly, "follow" capability implies ~:follow~ property.
+
+As a user, the first thing to do is setting a bibliography, either
+globally with ~org-cite-global-bibliography~, or locally using one or
+more "bibliography" keywords.  Then one can select any registered
+processor for each capability by providing a processor name to the
+variables ~org-cite-activate-processor~ and
+~org-cite-follow-processor~.
+
+The "export" capability is slightly more involved as one need to
+select the processor providing it, but may also provide a default
+style for citations and bibliography.  Also, the choice of an export
+processor may depend of the current export back-end.  The association
+between export back-ends and triplets of parameters can be set in
+~org-cite-export-processors~ variable, or in a document, through the
+"cite_export" keyword.
+
+Eventually, this library provides some tools, mainly targeted at
+processor implementors.  Most are export-specific and are located in
+the "Tools only available during export" and "Tools generating or
+operating on parsed data" sections.
+
+This section of this manual will be enhanced with more practical
+information.  In the meantime, if you need help, please send an email
+to the mailing list at =emacs-orgmode@gnu.org=.
+
 * Working with Source Code
 :PROPERTIES:
 :DESCRIPTION: Export, evaluate, and tangle code blocks.
