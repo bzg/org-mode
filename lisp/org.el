@@ -16612,44 +16612,7 @@ buffer boundaries with possible narrowing."
 				  (ignore-errors (org-attach-expand path)))
                               (expand-file-name path))))
 		  (when (and file (file-exists-p file))
-		    (let ((width
-			   ;; Apply `org-image-actual-width' specifications.
-			   (cond
-			    ((eq org-image-actual-width t) nil)
-			    ((listp org-image-actual-width)
-                             (let ((width
-                                    (or
-                                     ;; First try to find a width among
-                                     ;; attributes associated to the paragraph
-                                     ;; containing link.
-                                     (pcase (org-element-lineage link '(paragraph))
-                                       (`nil nil)
-                                       (par (let* ((case-fold-search t)
-                                                   (end (org-element-property :post-affiliated par))
-                                                   (re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)"))
-                                              (when (org-with-point-at
-                                                        (org-element-property :begin par)
-                                                      (re-search-forward re end t))
-                                                (string-to-number (match-string 1)))))))
-                                    ;; Otherwise, fall-back to provided number.
-                                    (car org-image-actual-width))))
-                             (if (and (floatp width) (<= 0 width 2.0))
-                                 ;; A float in [0,2] should be interpereted as this portion of
-                                 ;; the text width in the window.  This works well with cases like
-                                 ;; #+attr_latex: :width 0.X\{line,page,column,etc.}width,
-                                 ;; as the "0.X" is pulled out as a float.  We use 2 as the upper
-                                 ;; bound as cases such as 1.2\linewidth are feasible.
-                                 (round (* width
-                                           (window-pixel-width)
-                                           (/ (or (and (bound-and-true-p visual-fill-column-mode)
-                                                       (or visual-fill-column-width auto-fill-function))
-                                                  (when auto-fill-function fill-column)
-                                                  (window-text-width))
-                                              (float (window-total-width)))))
-                               width))
-			    ((numberp org-image-actual-width)
-			     org-image-actual-width)
-			    (t nil)))
+		    (let ((width (org-display-inline-image--width link))
 			  (old (get-char-property-and-overlay
 				(org-element-property :begin link)
 				'org-image-overlay)))
@@ -16673,6 +16636,52 @@ buffer boundaries with possible narrowing."
 			      (when (boundp 'image-map)
 				(overlay-put ov 'keymap image-map))
 			      (push ov org-inline-image-overlays))))))))))))))))
+
+(defun org-display-inline-image--width (link)
+  "Determine the display width of the image LINK, in pixels.
+- When `org-image-actual-width' is t, the image's pixel width is used.
+- When `org-image-actual-width' is a number, that value will is used.
+- When `org-image-actual-width' is nil or a list, the first :width attribute
+  set (if it exists) is used to set the image width.
+  If no :width attribute is given and `org-image-actual-width' is a list with
+  a number as the car, then that number is used as the default value.
+  If the value is a float between 0 and 2, it interpreted as that proportion
+  of the text width in the buffer."
+  ;; Apply `org-image-actual-width' specifications.
+  (cond
+   ((eq org-image-actual-width t) nil)
+   ((listp org-image-actual-width)
+    (let* ((case-fold-search t)
+           (par (org-element-lineage link '(paragraph)))
+           (attr-re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)")
+           (par-end (org-element-property :post-affiliated par))
+           ;; Try to find an attribute providing a :width.
+           (attr-width
+            (when (and par (org-with-point-at
+                               (org-element-property :begin par)
+                             (re-search-forward attr-re par-end t)))
+              (match-string 1)))
+           (attr-width-val
+            (when attr-width (string-to-number attr-width)))
+           ;; Fallback to `org-image-actual-width' if no explicit width is given.
+           (width (or attr-width-val (car org-image-actual-width))))
+      (if (and (floatp width) (<= 0.0 width 2.0))
+          ;; A float in [0,2] should be interpereted as this portion of
+          ;; the text width in the window.  This works well with cases like
+          ;; #+attr_latex: :width 0.X\{line,page,column,etc.}width,
+          ;; as the "0.X" is pulled out as a float.  We use 2 as the upper
+          ;; bound as cases such as 1.2\linewidth are feasible.
+          (round (* width
+                    (window-pixel-width)
+                    (/ (or (and (bound-and-true-p visual-fill-column-mode)
+                                (or visual-fill-column-width auto-fill-function))
+                           (when auto-fill-function fill-column)
+                           (window-text-width))
+                       (float (window-total-width)))))
+        width)))
+   ((numberp org-image-actual-width)
+    org-image-actual-width)
+   (t nil)))
 
 (defun org-display-inline-remove-overlay (ov after _beg _end &optional _len)
   "Remove inline-display overlay if a corresponding region is modified."
