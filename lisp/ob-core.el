@@ -1713,7 +1713,9 @@ of the vars, cnames and rnames."
       (lambda (var)
         (when (proper-list-p (cdr var))
           (when (and (not (equal colnames "no"))
-                     (or colnames (and (length> (cdr var) 1)
+                     ;; Compatibility note: avoid `length>', which
+                     ;; isn't available until Emacs 28.
+                     (or colnames (and (> (length (cdr var)) 1)
                                        (eq (nth 1 (cdr var)) 'hline)
                                        (not (member 'hline (cddr (cdr var)))))))
             (let ((both (org-babel-get-colnames (cdr var))))
