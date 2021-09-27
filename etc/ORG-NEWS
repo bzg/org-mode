@@ -259,6 +259,23 @@ package, to convert pandas Dataframes into orgmode tables:
 | 2 | 3 | 6 |
 #+end_src
 
+*** Display images with width proportional to the buffer text width
+
+Previously, if you used a =:width= attribute like =#+attr_html: :width 70%= or
+=#+attr_latex: :width 0.7\linewidth= this would be interpreted as a 70px wide and
+0.7px wide width specification respectively.
+
+Now, percentages are transformed into floats (i.e. 70% becomes 0.7),
+and float width specifications between 0.0 and 2.0 are now interpreted
+as that portion of the text width in the buffer. For instance, the
+above examples of =70%= and =0.7\linewidth= will result in an image
+with width equal to the pixel-width of the buffer text multiplied by 0.7.
+
+This functionality is implemented in a new function,
+~org-display-inline-image--width~ which contains the width
+determination logic previously in ~org-display-inline-images~ and the
+new behaviour.
+
 ** New options
 *** Option ~org-hidden-keywords~ now also applies to #+SUBTITLE:
 
