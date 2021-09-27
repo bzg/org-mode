@@ -76,7 +76,15 @@
   ;; New link style
   (let ((uri "/some/directory/org-protocol://store-link?url=URL3&title=TITLE3"))
     (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
-    (should (equal (car org-stored-links) '("URL3" "TITLE3")))))
+    (should (equal (car org-stored-links) '("URL3" "TITLE3"))))
+  ;; Do not decode "+" in old-style link
+  (let ((uri "/org-protocol:/store-link:/one+one/plus+preserved"))
+    (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
+    (should (equal (car org-stored-links) '("one+one" "plus+preserved"))))
+  ;; Decode "+" to space in new-style link
+  (let ((uri "/org-protocol:/store-link/?url=one+two&title=plus+is+space"))
+    (should (null (org-protocol-check-filename-for-protocol uri (list uri) nil)))
+    (should (equal (car org-stored-links) '("one two" "plus is space")))))
 
 (ert-deftest test-org-protocol/org-protocol-store-link-file ()
   "store-link: `org-protocol-sanitize-uri' could distort URL."
@@ -133,6 +141,12 @@
 	    ;; - query parameters, not sure how to include them in template
 	    ("/some/directory/org-protocol:/capture?template=x&url=URL&title=TITLE&body=BODY&from=example"
 	     . "** SOMEDAY\n\nBODY\n\n[[URL][TITLE]]\n")
+            ;; - "+" is not decoded to space in old-style URIs
+            ("/org-protocol:/capture:/t/https%3A%2F%2Forgmode.org%2Fsome+thing/org+mode/Body+plus"
+             . "** TODO\n\nBody+plus\n\n[[https://orgmode.org/some+thing][org+mode]]\n")
+            ;; - decode "+" to space
+            ("/org-protocol:/capture?template=t&url=URL&title=Mailing+list&body=Body+no+plus"
+             . "** TODO\n\nBody no plus\n\n[[URL][Mailing list]]\n")
 	    )))
     ;; Old link style
     (mapc
