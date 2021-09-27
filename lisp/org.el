@@ -19365,7 +19365,9 @@ a footnote definition, try to fill the first paragraph within."
       (cl-case (org-element-type element)
 	;; Use major mode filling function is source blocks.
 	(src-block (org-babel-do-in-edit-buffer
-                    (mark-whole-buffer)
+                    (push-mark (point-min))
+                    (goto-char (point-max))
+                    (setq mark-active t)
                     (funcall-interactively #'fill-paragraph justify 'region)))
 	;; Align Org tables, leave table.el tables as-is.
 	(table-row (org-table-align) t)
