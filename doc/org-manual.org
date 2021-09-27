@@ -21766,7 +21766,9 @@ and =#+STARTUP: nofnadjust=.
 [fn:122] The variable ~org-export-date-timestamp-format~ defines how
 this timestamp are exported.
 
-[fn:123] DEFINITION NOT FOUND.
+[fn:123] For export to LaTeX format---or LaTeX-related formats such as
+Beamer---, the =org-latex-package-alist= variable needs further
+configuration. See [[LaTeX specific export settings]].
 
 [fn:124] At the moment, some export back-ends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
