@@ -33,7 +33,7 @@
 ;; implies `:follow' property.
 
 ;; As a user, the first thing to do is setting a bibliography, either globally
-;; with `org-cite-global-bibliography', or locally using one; ore more
+;; with `org-cite-global-bibliography', or locally using one or more
 ;; "bibliography" keywords.  Then one can select any registered processor for
 ;; each capability by providing a processor name to the variables
 ;; `org-cite-activate-processor' and `org-cite-follow-processor'.
