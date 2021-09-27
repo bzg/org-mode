@@ -16642,7 +16642,8 @@ buffer boundaries with possible narrowing."
 - When `org-image-actual-width' is t, the image's pixel width is used.
 - When `org-image-actual-width' is a number, that value will is used.
 - When `org-image-actual-width' is nil or a list, the first :width attribute
-  set (if it exists) is used to set the image width.
+  set (if it exists) is used to set the image width.  A width of X% is
+  divided by 100.
   If no :width attribute is given and `org-image-actual-width' is a list with
   a number as the car, then that number is used as the default value.
   If the value is a float between 0 and 2, it interpreted as that proportion
@@ -16662,7 +16663,11 @@ buffer boundaries with possible narrowing."
                              (re-search-forward attr-re par-end t)))
               (match-string 1)))
            (attr-width-val
-            (when attr-width (string-to-number attr-width)))
+            (cond
+             ((null attr-width) nil)
+             ((string-match-p "\\`[0-9.]+%" attr-width)
+              (/ (string-to-number attr-width) 100.0))
+             (t (string-to-number attr-width))))
            ;; Fallback to `org-image-actual-width' if no explicit width is given.
            (width (or attr-width-val (car org-image-actual-width))))
       (if (and (floatp width) (<= 0.0 width 2.0))
