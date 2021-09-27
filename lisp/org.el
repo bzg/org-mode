@@ -3467,13 +3467,11 @@ header, or they will be appended."
   '(("AUTO" "inputenc"  t ("pdflatex"))
     ("T1"   "fontenc"   t ("pdflatex"))
     (""     "graphicx"  t)
-    (""     "grffile"   t)
     (""     "longtable" nil)
     (""     "wrapfig"   nil)
     (""     "rotating"  nil)
     ("normalem" "ulem"  t)
     (""     "amsmath"   t)
-    (""     "textcomp"  t)
     (""     "amssymb"   t)
     (""     "capt-of"   nil)
     (""     "hyperref"  nil))
@@ -3487,15 +3485,14 @@ Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
 - graphicx: for including images
-- grffile: allow periods and spaces in graphics file names
 - longtable: For multipage tables
 - wrapfig: for figure placement
 - rotating: for sideways figures and tables
 - ulem: for underline and strike-through
 - amsmath: for subscript and superscript and math environments
-- textcomp, amssymb: for various symbols used
-  for interpreting the entities in `org-entities'.  You can skip
-  some of these packages if you don't use any of their symbols.
+- amssymb: for various symbols used for interpreting the entities
+  in `org-entities'.  You can skip some of this package if you don't
+  use any of the symbols.
 - capt-of: for captions outside of floats
 - hyperref: for cross references
 

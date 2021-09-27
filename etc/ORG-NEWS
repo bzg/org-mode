@@ -528,6 +528,12 @@ for each parameter and use more readable expression in bookmarklet:
       url: location.href, title: document.title})
 #+end_example
 
+*** Remove obsolete LaTeX packages from ~org-latex-default-packages-alist~
+
+The LaTeX packages =grffile= and =textcomp= are redundant, with their
+capabilities being merged into =graphicx= and the LaTeX core
+respectively a while ago.
+
 * Version 9.4
 ** Incompatible changes
 *** Possibly broken internal file links: please check and fix
