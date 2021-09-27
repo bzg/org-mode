@@ -19,39 +19,43 @@
 
 ;;; Commentary:
 
-;; This library provides tooling to handle citations in Org, e.g, activate,
-;; follow, insert, and export them, respectively called "activate", "follow",
-;; "insert" and "export" capabilities.  Libraries responsible for providing
-;; some, or all, of these capabilities are called "citation processors".
+;; This library provides tooling to handle citations in Org, e.g,
+;; activate, follow, insert, and export them, respectively called
+;; "activate", "follow", "insert" and "export" capabilities.
+;; Libraries responsible for providing some, or all, of these
+;; capabilities are called "citation processors".
 
-;; Such processors are defined using `org-cite-register-processor'.  Using this
-;; function, it is possible, in addition to giving it a name, to attach
-;; functions associated to capabilities.  As such, a processor handling citation
-;; export must set the `:export-citation' property to an appropriate function.
-;; Likewise, "activate" capability requires an appropriate `:activate' property,
-;; "insert" requires `:insert' property and, unsurprisingly, "follow" capability
-;; implies `:follow' property.
+;; Such processors are defined using `org-cite-register-processor'.
+;; Using this function, it is possible, in addition to giving it a
+;; name, to attach functions associated to capabilities.  As such, a
+;; processor handling citation export must set the `:export-citation'
+;; property to an appropriate function.  Likewise, "activate"
+;; capability requires an appropriate `:activate' property, "insert"
+;; requires `:insert' property and, unsurprisingly, "follow"
+;; capability implies `:follow' property.
 
-;; As a user, the first thing to do is setting a bibliography, either globally
-;; with `org-cite-global-bibliography', or locally using one or more
-;; "bibliography" keywords.  Then one can select any registered processor for
-;; each capability by providing a processor name to the variables
-;; `org-cite-activate-processor' and `org-cite-follow-processor'.
+;; As a user, the first thing to do is setting a bibliography, either
+;; globally with `org-cite-global-bibliography', or locally using one
+;; or more "bibliography" keywords.  Then one can select any
+;; registered processor for each capability by providing a processor
+;; name to the variables `org-cite-activate-processor' and
+;; `org-cite-follow-processor'.
 
-;; The "export" capability is slightly more involved as one need to select the
-;; processor providing it, but may also provide a default style for citations
-;; and bibliography.  Also, the choice of an export processor may depend of the
-;; current export back-end.  The association between export back-ends and
-;; triplets of parameters can be set in `org-cite-export-processors' variable,
-;; or in a document, through the "cite_export" keyword.
+;; The "export" capability is slightly more involved as one need to
+;; select the processor providing it, but may also provide a default
+;; style for citations and bibliography.  Also, the choice of an
+;; export processor may depend of the current export back-end.  The
+;; association between export back-ends and triplets of parameters can
+;; be set in `org-cite-export-processors' variable, or in a document,
+;; through the "cite_export" keyword.
 
-;; Eventually, this library provides some tools, mainly targeted at processor
-;; implementors.  Most are export-specific and are located in the "Tools only
-;; available during export" and "Tools generating or operating on parsed data"
-;; sections.
+;; Eventually, this library provides some tools, mainly targeted at
+;; processor implementors.  Most are export-specific and are located
+;; in the "Tools only available during export" and "Tools generating
+;; or operating on parsed data" sections.
 
-;; The few others can be used directly from an Org buffer, or operate on
-;; processors.  See "Generic tools" section.
+;; The few others can be used directly from an Org buffer, or operate
+;; on processors.  See "Generic tools" section.
 
 ;;; Code:
 
@@ -334,79 +338,88 @@ Return nil if no such processor is found."
 (defun org-cite-register-processor (name &rest body)
   "Mark citation processor NAME as available.
 
-NAME is a symbol.  BODY is a property list, where the following optional keys
-can be set:
+NAME is a symbol.  BODY is a property list, where the following
+optional keys can be set:
 
   `:activate'
 
-    Function activating a citation.  It is called with a single argument: a
-    citation object extracted from the current buffer.  It may add text
-    properties to the buffer.  If it is not provided, `org-cite-fontify-default'
-    is used.
+    Function activating a citation.  It is called with a single
+    argument: a citation object extracted from the current
+    buffer.  It may add text properties to the buffer.  If it is
+    not provided, `org-cite-fontify-default' is used.
 
   `:export-bibliography'
 
-    Function rendering a bibliography.  It is called with six arguments: the
-    list of citation keys used in the document, as strings, a list of
-    bibliography files, the style, as a string or nil, the local properties, as
-    a property list, the export back-end, as a symbol, and the communication
-    channel, as a property list.
+    Function rendering a bibliography.  It is called with six
+    arguments: the list of citation keys used in the document, as
+    strings, a list of bibliography files, the style, as a string
+    or nil, the local properties, as a property list, the export
+    back-end, as a symbol, and the communication channel, as a
+    property list.
 
-    It is called at each \"print_bibliography\" keyword in the parse tree.
-    It may return a string, a parsed element, a list of parsed elements, or nil.
-    When it returns nil, the keyword is ignored.  Otherwise, the value it returns
-    replaces the keyword in the export output.
+    It is called at each \"print_bibliography\" keyword in the
+    parse tree.  It may return a string, a parsed element, a list
+    of parsed elements, or nil.  When it returns nil, the keyword
+    is ignored.  Otherwise, the value it returns replaces the
+    keyword in the export output.
 
   `:export-citation'    (mandatory for \"export\" capability)
 
-    Function rendering citations.  It is called with four arguments: a citation
-    object, the style, as a pair, the export back-end, as a symbol, and the
-    communication channel, as a property list.
+    Function rendering citations.  It is called with four
+    arguments: a citation object, the style, as a pair, the
+    export back-end, as a symbol, and the communication channel,
+    as a property list.
 
-    It is called on each citation object in the parse tree.  It may return
-    a string, a parsed object, a secondary string, or nil.  When it returns nil,
-    the citation is ignored.  Otherwise, the value it returns replaces the
-    citation object in the export output.
+    It is called on each citation object in the parse tree.  It
+    may return a string, a parsed object, a secondary string, or
+    nil.  When it returns nil, the citation is ignored.
+    Otherwise, the value it returns replaces the citation object
+    in the export output.
 
   `:export-finalizer'
 
-    Function called at the end of export process.  It must accept six arguments:
-    the output, as a string, a list of citation keys used in the document, a
-    list of bibliography files, the expected bibliography style, as a string or
-    nil, the export back-end, as a symbol, and the communication channel, as a
+    Function called at the end of export process.  It must accept
+    six arguments: the output, as a string, a list of citation
+    keys used in the document, a list of bibliography files, the
+    expected bibliography style, as a string or nil, the export
+    back-end, as a symbol, and the communication channel, as a
     property list.
 
-    It must return a string, which will become the final output from the export
-    process, barring subsequent modifications from export filters.
+    It must return a string, which will become the final output
+    from the export process, barring subsequent modifications
+    from export filters.
 
   `:follow'
 
-    Function called to follow a citation.  It accepts two arguments, the
-    citation or citation reference object at point, and any prefix argument
-    received during interactive call of `org-open-at-point'.
+    Function called to follow a citation.  It accepts two
+    arguments, the citation or citation reference object at
+    point, and any prefix argument received during interactive
+    call of `org-open-at-point'.
 
   `:insert'
 
-    Function called to insert a citation.  It accepts two arguments, the
-    citation or citation reference object at point or nil, and any prefix
-    argument received.
+    Function called to insert a citation.  It accepts two
+    arguments, the citation or citation reference object at point
+    or nil, and any prefix argument received.
 
   `:cite-styles'
 
-    When the processor has export capability, the value can specify what cite
-    styles, variants, and their associated shortcuts are supported.  It can be
-    useful information for completion or linting.
+    When the processor has export capability, the value can
+    specify what cite styles, variants, and their associated
+    shortcuts are supported.  It can be useful information for
+    completion or linting.
 
     The expected format is
 
       ((STYLE . SHORTCUTS) . VARIANTS))
 
-    where STYLE is a string, SHORTCUTS a list of strings or nil, and VARIANTS is
-    a list of pairs (VARIANT . SHORTCUTS), VARIANT being a string and SHORTCUTS
-    a list of strings or nil.
+    where STYLE is a string, SHORTCUTS a list of strings or nil,
+    and VARIANTS is a list of pairs (VARIANT . SHORTCUTS),
+    VARIANT being a string and SHORTCUTS a list of strings or
+    nil.
 
-    The \"nil\" style denotes the processor fall-back style.  It should have a
-    corresponding entry in the value.
+    The \"nil\" style denotes the processor fall-back style.  It
+    should have a corresponding entry in the value.
 
 Return a non-nil value on a successful operation."
   (declare (indent 1))
