@@ -16763,6 +16763,7 @@ because, in this case the deletion might narrow the column."
 (put 'org-delete-char 'delete-selection 'supersede)
 (put 'org-delete-backward-char 'delete-selection 'supersede)
 (put 'org-yank 'delete-selection 'yank)
+(put 'org-return 'delete-selection t)
 
 ;; Make `flyspell-mode' delay after some commands
 (put 'org-self-insert-command 'flyspell-delayed t)
