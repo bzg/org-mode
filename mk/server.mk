@@ -123,6 +123,7 @@ doc-up:	info pdf card html
 	$(MAKE) -C doc manual guide
 	$(CP) doc/org.html     $(SERVROOT)
 	$(CP) doc/org.pdf      $(SERVROOT)
+	$(CP) doc/orgguide.html $(SERVROOT)
 	$(CP) doc/orgguide.pdf $(SERVROOT)
 	$(CP) doc/manual/*     $(SERVROOT)/manual
 	$(CP) doc/guide/*      $(SERVROOT)/guide
