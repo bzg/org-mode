@@ -70,18 +70,19 @@ effect.  Please set ~org-speed-commands~ instead, which see.
 
 These files have been moved to https://git.sr.ht/~bzg/org-contrib:
 
-- ob-vala.el
-- ob-shen.el
-- ob-picolisp.el
-- ob-mscgen.el
-- ob-ledger.el
-- ob-io.el
-- ob-hledger.el
-- ob-ebnf.el
-- ob-coq.el
-- ob-asymptote.el
 - ob-abc.el
+- ob-asymptote.el
+- ob-coq.el
+- ob-ebnf.el
+- ob-hledger.el
+- ob-io.el
 - ob-J.el
+- ob-ledger.el
+- ob-mscgen.el
+- ob-picolisp.el
+- ob-shen.el
+- ob-stan.el
+- ob-vala.el
 
 See the discussion [[msg::87bl9rq29m.fsf@gnu.org][here]].
 
