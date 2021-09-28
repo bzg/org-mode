@@ -306,13 +306,15 @@ be replaced with content and expanded:
               current template.
   %(sexp)     Evaluate elisp `(sexp)' and replace it with the results.
               Only placeholders pre-existing within the template, or
-              introduced with %[pathname] are expanded this way.  Since this
-              happens after expanding non-interactive %-escapes, those can
-              be used to fill the expression.
-  %<...>      The result of format-time-string on the ... format specification.
-  %t          Time stamp, date only.  The time stamp is the current time,
-              except when called from agendas with `\\[org-agenda-capture]' or
-              with `org-capture-use-agenda-date' set.
+              introduced with %[pathname] are expanded this way.
+              Since this happens after expanding non-interactive
+              %-escapes, those can be used to fill the expression.
+  %<...>      The result of `format-time-string' on the ... format
+              specification.
+  %t          Time stamp, date only.  The time stamp is the current
+              time, except when called from agendas with
+              `\\[org-agenda-capture]' or with
+              `org-capture-use-agenda-date' set.
   %T          Time stamp as above, with date and time.
   %u, %U      Like the above, but inactive time stamps.
   %i          Initial content, copied from the active region.  If
@@ -328,7 +330,7 @@ be replaced with content and expanded:
   %k          Title of currently clocked task.
   %K          Link to currently clocked task.
   %n          User name (taken from the variable `user-full-name').
-  %f          File visited by current buffer when org-capture was called.
+  %f          File visited by current buffer when `org-capture' was called.
   %F          Full path of the file or directory visited by current buffer.
   %:keyword   Specific information for certain link types, see below.
   %^g         Prompt for tags, with completion on tags in target file.
@@ -497,17 +499,17 @@ is copied to this variable, which is local in the indirect buffer.")
   "Local variable to store the value of the :clock-keep parameter.
 This is needed in case `org-capture-finalize' is called interactively.")
 
-(defun org-capture-put (&rest stuff)
-  "Add properties to the capture property list `org-capture-plist'."
-  (while stuff
+(defun org-capture-put (&rest elements)
+  "Add ELEMENTS to the capture property list `org-capture-plist'."
+  (while elements
     (setq org-capture-plist (plist-put org-capture-plist
-				       (pop stuff) (pop stuff)))))
-(defun org-capture-get (prop &optional local)
-  "Get properties from the capture property list `org-capture-plist'.
+				       (pop elements) (pop elements)))))
+(defun org-capture-get (property &optional local)
+  "Get PROPERTY from the capture property list `org-capture-plist'.
 When LOCAL is set, use the local variable `org-capture-current-plist',
 this is necessary after initialization of the capture process,
 to avoid conflicts with other active capture processes."
-  (plist-get (if local org-capture-current-plist org-capture-plist) prop))
+  (plist-get (if local org-capture-current-plist org-capture-plist) property))
 
 ;;; The minor mode
 
@@ -1119,7 +1121,7 @@ FILE is a generalized file location, as handled by
 
 (defun org-capture-place-template (&optional inhibit-wconf-store)
   "Insert the template at the target location, and display the buffer.
-When `inhibit-wconf-store', don't store the window configuration, as it
+When INHIBIT-WCONF-STORE is non-nil, don't store the window configuration, as it
 may have been stored before."
   (unless inhibit-wconf-store
     (org-capture-put :return-to-wconf (current-window-configuration)))
@@ -1414,21 +1416,21 @@ Of course, if exact position has been required, just put it there."
 	(org-capture--position-cursor beg end)))))
 
 (defun org-capture-mark-kill-region (beg end)
-  "Mark the region that will have to be killed when aborting capture."
+  "Mark region between BEG and END to be killed on aborted capture."
   (let ((m1 (copy-marker beg))
 	(m2 (copy-marker end t)))
     (org-capture-put :begin-marker m1)
     (org-capture-put :end-marker m2)))
 
-(defun org-capture-position-for-last-stored (where)
-  "Memorize the position that should later become the position of last capture."
+(defun org-capture-position-for-last-stored (position)
+  "Put POSITION on `org-capture-plist' for future use as `last capture`."
   (cond
-   ((integerp where)
+   ((integerp position)
     (org-capture-put :position-for-last-stored
-		     (move-marker (make-marker) where
+		     (move-marker (make-marker) position
 				  (or (buffer-base-buffer (current-buffer))
 				      (current-buffer)))))
-   ((eq where 'table-line)
+   ((eq position 'table-line)
     (org-capture-put :position-for-last-stored
 		     (list 'table-line
 			   (org-table-current-dline))))
@@ -1455,7 +1457,8 @@ Of course, if exact position has been required, just put it there."
 	(move-marker org-capture-last-stored-marker (point))))))
 
 (defun org-capture-narrow (beg end)
-  "Narrow, unless configuration says not to narrow."
+  "Possibly narrow to region between BEG and END.
+If configuration contains non-nil :unnarrowed property, do not narrow."
   (unless (org-capture-get :unnarrowed)
     (narrow-to-region beg end)))
 
@@ -1468,8 +1471,9 @@ of the template."
     (replace-match "")))
 
 (defun org-capture-empty-lines-before (&optional n)
-  "Set the correct number of empty lines before the insertion point.
-Point will be after the empty lines, so insertion can directly be done."
+  "Insert N empty lines before the insertion point.
+Point will be after the empty lines, so insertion can directly be done.
+If N is nil, :empty-lines-before or :empty-lines are considered."
   (setq n (or n (org-capture-get :empty-lines-before)
 	      (org-capture-get :empty-lines) 0))
   (let ((pos (point)))
@@ -1479,7 +1483,8 @@ Point will be after the empty lines, so insertion can directly be done."
 
 (defun org-capture-empty-lines-after (&optional n)
   "Set the correct number of empty lines after the inserted string.
-Point will remain at the first line after the inserted text."
+Point will remain at the first line after the inserted text.
+If N is nil, :empty-lines-after or :empty-lines are considered."
   (setq n (or n (org-capture-get :empty-lines-after)
 	      (org-capture-get :empty-lines) 0))
   (org-back-over-empty-lines)
@@ -1491,7 +1496,7 @@ Point will remain at the first line after the inserted text."
 (defvar org-clock-marker) ; Defined in org.el
 
 (defun org-capture-set-plist (entry)
-  "Initialize the property list from the template definition."
+  "Initialize the property list for ENTRY from the template definition."
   (setq org-capture-plist (copy-sequence (nthcdr 5 entry)))
   (org-capture-put :key (car entry) :description (nth 1 entry)
 		   :target (nth 3 entry))
@@ -1508,7 +1513,7 @@ Point will remain at the first line after the inserted text."
 
 (defun org-capture-goto-target (&optional template-key)
   "Go to the target location of a capture template.
-The user is queried for the template."
+If TEMPLATE-KEY is nil, the user is queried for the template."
   (interactive)
   (let ((entry (org-capture-select-template template-key)))
     (unless entry (error "No capture template selected"))
@@ -1518,7 +1523,7 @@ The user is queried for the template."
     (goto-char (org-capture-get :pos))))
 
 (defun org-capture-get-indirect-buffer (&optional buffer prefix)
-  "Make an indirect buffer for a capture process.
+  "Make an indirect BUFFER for a capture process.
 Use PREFIX as a prefix for the name of the indirect buffer."
   (setq buffer (or buffer (current-buffer)))
   (let ((n 1) (base (buffer-name buffer)) bname)
@@ -1560,8 +1565,10 @@ Lisp programs can force the template by setting KEYS to a string."
   "List various clipboards values.")
 
 (defun org-capture-fill-template (&optional template initial annotation)
-  "Fill a template and return the filled template as a string.
-The template may still contain \"%?\" for cursor positioning."
+  "Fill a TEMPLATE and return the filled template as a string.
+The template may still contain \"%?\" for cursor positioning.
+INITIAL content and/or ANNOTATION may be specified, but will be overridden
+by their respective `org-store-link-plist' properties if present."
   (let* ((template (or template (org-capture-get :template)))
 	 (buffer (org-capture-get :buffer))
 	 (file (buffer-file-name (or (buffer-base-buffer buffer) buffer)))
@@ -1848,7 +1855,7 @@ The template may still contain \"%?\" for cursor positioning."
 
 (defun org-capture-escaped-% ()
   "Non-nil if % was escaped.
-If yes, unescape it now.  Assume match-data contains the
+If yes, unescape it now.  Assume `match-data' contains the
 placeholder to check."
   (save-excursion
     (goto-char (match-beginning 0))
