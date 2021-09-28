@@ -16634,6 +16634,7 @@ buffer boundaries with possible narrowing."
 				(overlay-put ov 'keymap image-map))
 			      (push ov org-inline-image-overlays))))))))))))))))
 
+(defvar visual-fill-column-width) ; Silence compiler warning
 (defun org-display-inline-image--width (link)
   "Determine the display width of the image LINK, in pixels.
 - When `org-image-actual-width' is t, the image's pixel width is used.
