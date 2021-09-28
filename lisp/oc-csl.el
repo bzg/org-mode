@@ -284,50 +284,44 @@ INFO is the export state, as a property list."
   "Return citeproc structure creation params for CITATION object.
 STYLE is the citation style, as a string or nil. INFO is the export state, as
 a property list."
-  (let* ((style (org-cite-citation-style citation info)))
-   (pcase style
-     ;; "author" style.
-     (`(,(or "author" "a") . ,(or "caps" "c"))
-      '(:mode author-only :capitalize-first t :suppress-affixes t))
-     (`(,(or "author" "a") . ,(or "full" "f"))
-      '(:mode author-only :ignore-et-al t :suppress-affixes t))
-     (`(,(or "author" "a") . ,(or "caps-full" "cf"))
-      '(:mode author-only :capitalize-first t :ignore-et-al t :suppress-affixes t))
-     (`(,(or "author" "a") . ,_)
-      '(:mode author-only :suppress-affixes t))
-     ;; "noauthor" style.
-     (`(,(or "noauthor" "na") . ,(or "bare" "b"))
-      '(:mode suppress-author :suppress-affixes t))
-     (`(,(or "noauthor" "na") . ,(or "caps" "c"))
-      '(:mode suppress-author :capitalize-first t))
-     (`(,(or "noauthor" "na") . ,(or "bare-caps" "bc"))
-      '(:mode suppress-author :suppress-affixes t :capitalize-first t))
-     (`(,(or "noauthor" "na") . ,_)
-      '(:mode suppress-author))
-     ;; "year" style.
-     (`(,(or "year" "y") . ,(or "bare" "b"))
-      '(:mode year-only :suppress-affixes t))
-     (`(,(or "year" "y") . ,_)
-      '(:mode year-only))
-     ;; "text" style.
-     (`(,(or "text" "t") . ,(or "caps" "c"))
-      '(:mode textual :capitalize-first t))
-     (`(,(or "text" "t") . ,(or "full" "f"))
-      '(:mode textual :ignore-et-al t))
-     (`(,(or "text" "t") . ,(or "caps-full" "cf"))
-      '(:mode textual :ignore-et-al t :capitalize-first t))
-     (`(,(or "text" "t") . ,_)
-      '(:mode textual))
-     ;; Default "nil" style.
-     (`(,_ . ,(or "bare" "b"))
-      '(:suppress-affixes t))
-     (`(,_ . ,(or "caps" "c"))
-      '(:capitalize-first t))
-     (`(,_ . ,(or "bare-caps" "bc"))
-      '(:suppress-affixes t :capitalize-first t))
-     (`(,_ . ,_) nil)
-     ;; This should not happen.
-     (_ (error "Invalid style: %S" style)))))
+  (let ((style (org-cite-citation-style citation info)))
+    (pcase style
+      ;; "author" style.
+      (`(,(or "author" "a") . ,variant)
+       (pcase variant
+	 ((or "caps" "c") '(:mode author-only :capitalize-first t))
+	 ((or "full" "f") '(:mode author-only :ignore-et-al t))
+	 ((or "caps-full" "cf") '(:mode author-only :capitalize-first t :ignore-et-al t))
+	 (_ '(:mode author-only))))
+      ;; "noauthor" style.
+      (`(,(or "noauthor" "na") . ,variant)
+       (pcase variant
+	 ((or "bare" "b") '(:mode suppress-author :suppress-affixes t))
+	 ((or "caps" "c") '(:mode suppress-author :capitalize-first t))
+	 ((or "bare-caps" "bc")
+          '(:mode suppress-author :suppress-affixes t :capitalize-first t))
+	 (_ '(:mode suppress-author))))
+      ;; "year" style.
+      (`(,(or "year" "y") . ,variant)
+       (pcase variant
+	 ((or "bare" "b") '(:mode year-only :suppress-affixes t))
+	 (_ '(:mode year-only))))
+      ;; "text" style.
+      (`(,(or "text" "t") . ,variant)
+       (pcase variant
+         ((or "caps" "c") '(:mode textual :capitalize-first t))
+         ((or "full" "f") '(:mode textual :ignore-et-al t))
+         ((or "caps-full" "cf") '(:mode textual :ignore-et-al t :capitalize-first t))
+         (_ '(:mode textual))))
+      ;; Default "nil" style.
+      (`(,_ . ,variant)
+       (pcase variant
+         ((or "caps" "c") '(:capitalize-first t))
+         ((or "bare" "b") '(:suppress-affixes t))
+         ((or "bare-caps" "bc") '(:suppress-affixes t :capitalize-first t))
+         (_  nil)))
+      ;; This should not happen.
+      (_ (error "Invalid style: %S" style)))))
 
 (defun org-cite-csl--no-citelinks-p (info)
   "Non-nil when export BACKEND should not create cite-reference links."
