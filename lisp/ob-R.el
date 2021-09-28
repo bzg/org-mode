@@ -528,9 +528,12 @@ by `org-babel-comint-async-filter'."
          (insert (format ob-session-async-R-indicator
 			 "end" uuid))
          (setq tmp ess-eval-visibly)
+         (setq user-inject-src-param ess-inject-source)
          (setq ess-eval-visibly nil)
+         (setq  ess-inject-source 'function-and-buffer)
          (ess-eval-buffer nil))
-         (setq ess-eval-visibly tmp)
+       (setq ess-eval-visibly tmp)
+       (setq ess-inject-source user-inject-src-param)
        uuid))))
 
 (defun ob-session-async-R-value-callback (params tmp-file)
