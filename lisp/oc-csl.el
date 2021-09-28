@@ -54,7 +54,10 @@
 
 ;; The library supports the following citation styles:
 ;;
+;; - author (a), including caps (c), full (f), and caps-full (cf) variants,
 ;; - noauthor (na), including bare (b), caps (c) and bare-caps (bc) variants,
+;; - year (y), including a bare (b) variant,
+;; - text (t). including caps (c), full (f), and caps-full (cf) variants,
 ;; - default style, including bare (b), caps (c) and bare-caps (bc) variants.
 
 ;; CSL styles recognize "locator" in citation references' suffix.  For example,
@@ -277,26 +280,54 @@ INFO is the export state, as a property list."
    (citeproc-proc-style
     (org-cite-csl--processor info))))
 
-(defun org-cite-csl--no-affixes-p (citation info)
-  "Non-nil when CITATION should be exported without affix.
-INFO is the export data, as a property list."
-  (pcase (org-cite-citation-style citation info)
-    (`(,(or "noauthor" "na" `nil) . ,(or "bare" "b" "bare-caps" "bc")) t)
-    (_ nil)))
-
-(defun org-cite-csl--capitalize-p (citation info)
-  "Non-nil when CITATION should be capitalized.
-INFO is the export-data, as a property list."
-  (pcase (org-cite-citation-style citation info)
-    (`(,(or "noauthor" "na" `nil) . ,(or "caps" "c" "bare-caps" "bc")) t)
-    (_ nil)))
-
-(defun org-cite-csl--no-author-p (reference info)
-  "Non-nil when citation REFERENCE should be exported without author.
-INFO is the export data, as a property list."
-  (pcase (org-cite-citation-style (org-element-property :parent reference) info)
-    (`(,(or "noauthor" "na") . ,_) t)
-    (_ nil)))
+(defun org-cite-csl--create-structure-params (citation info)
+  "Return citeproc structure creation params for CITATION object.
+STYLE is the citation style, as a string or nil. INFO is the export state, as
+a property list."
+  (let* ((style (org-cite-citation-style citation info)))
+   (pcase style
+     ;; "author" style.
+     (`(,(or "author" "a") . ,(or "caps" "c"))
+      '(:mode author-only :capitalize-first t :suppress-affixes t))
+     (`(,(or "author" "a") . ,(or "full" "f"))
+      '(:mode author-only :ignore-et-al t :suppress-affixes t))
+     (`(,(or "author" "a") . ,(or "caps-full" "cf"))
+      '(:mode author-only :capitalize-first t :ignore-et-al t :suppress-affixes t))
+     (`(,(or "author" "a") . ,_)
+      '(:mode author-only :suppress-affixes t))
+     ;; "noauthor" style.
+     (`(,(or "noauthor" "na") . ,(or "bare" "b"))
+      '(:mode suppress-author :suppress-affixes t))
+     (`(,(or "noauthor" "na") . ,(or "caps" "c"))
+      '(:mode suppress-author :capitalize-first t))
+     (`(,(or "noauthor" "na") . ,(or "bare-caps" "bc"))
+      '(:mode suppress-author :suppress-affixes t :capitalize-first t))
+     (`(,(or "noauthor" "na") . ,_)
+      '(:mode suppress-author))
+     ;; "year" style.
+     (`(,(or "year" "y") . ,(or "bare" "b"))
+      '(:mode year-only :suppress-affixes t))
+     (`(,(or "year" "y") . ,_)
+      '(:mode year-only))
+     ;; "text" style.
+     (`(,(or "text" "t") . ,(or "caps" "c"))
+      '(:mode textual :capitalize-first t))
+     (`(,(or "text" "t") . ,(or "full" "f"))
+      '(:mode textual :ignore-et-al t))
+     (`(,(or "text" "t") . ,(or "caps-full" "cf"))
+      '(:mode textual :ignore-et-al t :capitalize-first t))
+     (`(,(or "text" "t") . ,_)
+      '(:mode textual))
+     ;; Default "nil" style.
+     (`(,_ . ,(or "bare" "b"))
+      '(:suppress-affixes t))
+     (`(,_ . ,(or "caps" "c"))
+      '(:capitalize-first t))
+     (`(,_ . ,(or "bare-caps" "bc"))
+      '(:suppress-affixes t :capitalize-first t))
+     (`(,_ . ,_) nil)
+     ;; This should not happen.
+     (_ (error "Invalid style: %S" style)))))
 
 (defun org-cite-csl--no-citelinks-p (info)
   "Non-nil when export BACKEND should not create cite-reference links."
@@ -375,8 +406,8 @@ property in INFO."
 
 INFO is the export state, as a property list.
 
-The result is a association list.  Keys are: `id', `suppress-author', `prefix',
-`suffix', `location', `locator' and `label'."
+The result is a association list.  Keys are: `id', `prefix',`suffix',
+`location', `locator' and `label'."
   (let (label location-start locator-start location locator prefix suffix)
     ;; Parse suffix.  Insert it in a temporary buffer to find
     ;; different parts: pre-label, label, locator, location (label +
@@ -434,8 +465,7 @@ The result is a association list.  Keys are: `id', `suppress-author', `prefix',
         (suffix . ,(funcall export suffix))
         (locator . ,locator)
         (label . ,label)
-        (location . ,location)
-        (suppress-author . ,(org-cite-csl--no-author-p reference info))))))
+        (location . ,location)))))
 
 (defun org-cite-csl--create-structure (citation info)
   "Create Citeproc structure for CITATION object.
@@ -465,11 +495,11 @@ INFO is the export state, as a property list."
       (org-cite-adjust-note citation info)
       (org-cite-wrap-citation citation info))
     ;; Return structure.
-    (citeproc-citation-create
-     :note-index (and footnote (org-export-get-footnote-number footnote info))
-     :cites cites
-     :capitalize-first (or footnote (org-cite-csl--capitalize-p citation info))
-     :suppress-affixes (org-cite-csl--no-affixes-p citation info))))
+    (apply #'citeproc-citation-create
+           `(:note-index
+             ,(and footnote (org-export-get-footnote-number footnote info))
+             :cites ,cites
+             ,@(org-cite-csl--create-structure-params citation info)))))
 
 (defun org-cite-csl--rendered-citations (info)
   "Return the rendered citations as an association list.
@@ -578,8 +608,11 @@ property list."
   :export-bibliography #'org-cite-csl-render-bibliography
   :export-finalizer #'org-cite-csl-finalizer
   :cite-styles
-  '((("noauthor" "na") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))
-    (("nil") ("bare" "b") ("bare-caps" "bc") ("caps" "c"))))
+  '((("author" "a") ("full" "f") ("caps" "c") ("caps-full" "cf"))
+    (("noauthor" "na") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
+    (("year" "y") ("bare" "b"))
+    (("text" "t") ("caps" "c") ("full" "f") ("caps-full" "cf"))
+    (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))))
 
 (provide 'oc-csl)
 ;;; oc-csl.el ends here
