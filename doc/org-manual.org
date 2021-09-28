@@ -16515,9 +16515,9 @@ keywords.
 :END:
 #+cindex: citation
 
-As of Org 9.5, a includes a new library =oc.el= provides tooling to
-handle citations in Org via "citation processors" that offer some or
-all of the following capabilities:
+As of Org 9.5, a new library =oc.el= provides tooling to handle
+citations in Org via "citation processors" that offer some or all of
+the following capabilities:
 
 - "activate" :: Fontification, tooltip preview, etc.
 - "follow" :: At-point actions on citations via ~org-open-at-point~.
