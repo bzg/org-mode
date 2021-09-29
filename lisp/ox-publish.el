@@ -617,7 +617,8 @@ files, when entire projects are published (see
 			  (abbreviate-file-name filename))))
 	 (project-plist (cdr project))
 	 (publishing-function
-	  (pcase (org-publish-property :publishing-function project)
+	  (pcase (org-publish-property :publishing-function project
+                                       'org-html-publish-to-html)
 	    (`nil (user-error "No publishing function chosen"))
 	    ((and f (pred listp)) f)
 	    (f (list f))))

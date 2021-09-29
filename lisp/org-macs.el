@@ -538,6 +538,11 @@ that may remove elements by altering the list structure."
     (setq list (delete (pop elts) list)))
   list)
 
+(defun org-plist-delete-all (plist props)
+  "Delete all elements in PROPS from PLIST."
+  (dolist (e props plist)
+    (setq plist (org-plist-delete plist e))))
+
 (defun org-plist-delete (plist property)
   "Delete PROPERTY from PLIST.
 This is in contrast to merely setting it to 0."
