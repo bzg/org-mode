@@ -2915,9 +2915,10 @@ For more information and examples see the [[https://orgmode.org/worg/org-tutoria
 
 - ticks ::
 
-  Provides a desired number of axis ticks to display, that may be used by a plot
-  type. If none is given a plot type that requires ticks will use
-  ~org--plot/sensible-tick-num~ to try to determine a good value.
+  Provides a desired number of axis ticks to display, that may be used
+  by a plot type.  If none is given a plot type that requires ticks
+  will use ~org--plot/sensible-tick-num~ to try to determine a good
+  value.
 
 - =timefmt= ::
 
@@ -3160,14 +3161,14 @@ Here is the full set of built-in link types:
 
 - =file= ::
 
-   File links.  File name may be remote, absolute, or relative.
+  File links.  File name may be remote, absolute, or relative.
 
-   Additionally, you can specify a line number, or a text search.
-   In Org files, you may link to a headline name, a custom ID, or a
-   code reference instead.
+  Additionally, you can specify a line number, or a text search.
+  In Org files, you may link to a headline name, a custom ID, or a
+  code reference instead.
 
-   As a special case, "file" prefix may be omitted if the file name
-   is complete, e.g., it starts with =./=, or =/=.
+  As a special case, "file" prefix may be omitted if the file name
+  is complete, e.g., it starts with =./=, or =/=.
 
 - =attachment= ::
 
@@ -8268,7 +8269,7 @@ To make Org mode take care of versioning of attachments for you, add
 the following to your Emacs config:
 
 #+begin_src emacs-lisp
-  (require 'org-attach-git)
+(require 'org-attach-git)
 #+end_src
 
 *** Attach from Dired
@@ -11374,7 +11375,7 @@ The following command handles footnotes:
   #+attr_texinfo: :columns 0.1 0.9
   | {{{kbd(s)}}} | Sort the footnote definitions by reference sequence.               |
   | {{{kbd(r)}}} | Renumber the simple =fn:N= footnotes.                              |
-  | {{{kbd(S)}}} | Short for first {{{kbd(r)}}}, then {{{kbd(s)}}} action.            |
+  | {{{kbd(S)}}} | Short for first {{{kbd(r)}}}, then {{{kbd(s)}}} action.                        |
   | {{{kbd(n)}}} | Rename all footnotes into a =fn:1= ... =fn:n= sequence.            |
   | {{{kbd(d)}}} | Delete the footnote at point, including definition and references. |
 
@@ -12031,7 +12032,7 @@ example
 #+texinfo: @noindent
 becomes
 
-: Rose is red, violet's blue. Life's ordered: Org assists you.
+: Rose is red, violet's blue.  Life's ordered: Org assists you.
 
 As a special case, Org parses any replacement text starting with
 =(eval= as an Emacs Lisp expression and evaluates it accordingly.
@@ -12766,8 +12767,8 @@ exports to:
 #+begin_src html
 <video controls="controls" width="350">
   <source src="movie.mp4" type="video/mp4">
-    <source src="movie.ogg" type="video/ogg">
-      <p>Your browser does not support the video tag.</p>
+  <source src="movie.ogg" type="video/ogg">
+  <p>Your browser does not support the video tag.</p>
 </video>
 #+end_src
 
@@ -13883,11 +13884,11 @@ The LaTeX export back-end converts horizontal rules by the specified
 #+cindex: @samp{ATTR_LATEX}, keyword
 
 The LaTeX export back-end accepts four attributes for verse blocks:
-=:lines=, =:center=, =:versewidth= and =:latexcode=. The three first
+=:lines=, =:center=, =:versewidth= and =:latexcode=.  The three first
 require the external LaTeX package =verse.sty=, which is an extension
 of the standard LaTeX environment.
 
-- =:lines= :: To add marginal verse numbering. Its value is an
+- =:lines= :: To add marginal verse numbering.  Its value is an
   integer, the sequence in which the verses should be numbered.
 - =:center= :: With value =t= all the verses on the page are optically
   centered (a typographic convention for poetry), taking as a
@@ -13933,7 +13934,7 @@ To eat the world’s due, by the grave and thee.
 The LaTeX export back-end accepts two attributes for quote blocks:
 =:environment=, for an arbitrary quoting environment (the default
 value is that of ~org-latex-default-quote-environment~: ~"quote"~) and
-=:options=. For example, to choose the environment =quotation=,
+=:options=.  For example, to choose the environment =quotation=,
 included as an alternative to =quote= in standard LaTeX classes:
 
 #+begin_example
@@ -15321,7 +15322,7 @@ To specify the author of the quotation, use the =:author= attribute.
 ,#+BEGIN_QUOTE
 The Lady of the Lake, her arm clad in the purest shimmering samite,
 held aloft Excalibur from the bosom of the water, signifying by divine
-providence that I, Arthur, was to carry Excalibur. That is why I am
+providence that I, Arthur, was to carry Excalibur.  That is why I am
 your king.
 ,#+END_QUOTE
 #+end_example
@@ -17902,7 +17903,7 @@ Handling options after collecting the results.
 
 - =none= ::
 
-  Do not process results at all. No inserting in the Org mode buffer
+  Do not process results at all.  No inserting in the Org mode buffer
   nor echo them in the minibuffer.  Usage example: =:results none=.
 
 - =append= ::
@@ -18862,7 +18863,7 @@ init file[fn:145].
 | {{{kbd(c)}}} | =#+BEGIN_CENTER= ... =#+END_CENTER=       |
 | {{{kbd(C)}}} | =#+BEGIN_COMMENT= ... =#+END_COMMENT=     |
 | {{{kbd(e)}}} | =#+BEGIN_EXAMPLE= ... =#+END_EXAMPLE=     |
-| {{{kbd(E)}}} | =#+BEGIN_EXPORT= ... =#+END_EXPORT= |
+| {{{kbd(E)}}} | =#+BEGIN_EXPORT= ... =#+END_EXPORT=       |
 | {{{kbd(h)}}} | =#+BEGIN_EXPORT html= ... =#+END_EXPORT=  |
 | {{{kbd(l)}}} | =#+BEGIN_EXPORT latex= ... =#+END_EXPORT= |
 | {{{kbd(q)}}} | =#+BEGIN_QUOTE= ... =#+END_QUOTE=         |
@@ -18967,11 +18968,11 @@ Emacs[fn:147].  With Org's support, you have to indent all lines to
 line up with the outline headers.  You would use these
 settings[fn:148]:
 
-  #+begin_src emacs-lisp
-  (setq org-adapt-indentation t
-        org-hide-leading-stars t
-        org-odd-levels-only t)
-  #+end_src
+#+begin_src emacs-lisp
+(setq org-adapt-indentation t
+      org-hide-leading-stars t
+      org-odd-levels-only t)
+#+end_src
 
 - /Indentation of text below headlines/ (~org-adapt-indentation~) ::
 
@@ -19908,9 +19909,9 @@ javascript:location.href='org-protocol://capture?template=x'+
       '&body='+encodeURIComponent(window.getSelection());
 #+end_example
 
-It is a bit more cluttered than the former one, but it is compatible with
-previous Org versions 9.0-9.4. In these versions encoding of space as "+"
-character was not supported by URI decoder.
+It is a bit more cluttered than the former one, but it is compatible
+with previous Org versions 9.0-9.4.  In these versions encoding of
+space as "+" character was not supported by URI decoder.
 
 #+vindex: org-protocol-default-template-key
 The capture template to be used can be specified in the bookmark (like
@@ -22086,7 +22087,7 @@ this timestamp are exported.
 
 [fn:123] For export to LaTeX format---or LaTeX-related formats such as
 Beamer---, the =org-latex-package-alist= variable needs further
-configuration. See [[LaTeX specific export settings]].
+configuration.  See [[LaTeX specific export settings]].
 
 [fn:124] At the moment, some export back-ends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
