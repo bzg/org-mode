@@ -7182,7 +7182,7 @@ The optional argument TYPE tells the agenda type."
                    ;; Remove `display' property as the icon could leak
 		   ;; on the white space.
 		   (org-add-props " " (org-plist-delete (text-properties-at 0 x)
-			 				'display))
+                                                        'display))
                    (substring x (match-end 3)))))))
       x)))
 
@@ -8807,15 +8807,15 @@ When called with a prefix argument, include all archive files as well."
 		  '(:eval (propertize
 			   (concat "["
 	      			   (mapconcat
-	      			    #'identity
+                                    #'identity
 	      			    (append
 	      			     (get 'org-agenda-category-filter :preset-filter)
 	      			     org-agenda-category-filter)
 	      			    "")
 				   "]")
 	      		   'face 'org-agenda-filter-category
-	      		   'help-echo "Category used in filtering"))
-	      	"")
+                           'help-echo "Category used in filtering"))
+                "")
 	      (if (or org-agenda-tag-filter
 		      (get 'org-agenda-tag-filter :preset-filter))
 		  '(:eval (propertize

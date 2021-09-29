@@ -2457,7 +2457,7 @@ location of point."
 	      (let ((c (string-to-char (match-string 1 fmt))))
 		(cl-case c
 		  (?t (setq duration t numbers t
-		      	    duration-output-format org-table-duration-custom-format))
+                            duration-output-format org-table-duration-custom-format))
 		  (?T (setq duration t numbers t duration-output-format nil))
 		  (?U (setq duration t numbers t duration-output-format 'hh:mm))
 		  (?N (setq numbers t))
