@@ -337,7 +337,9 @@ If TEST is non-nil, the shell command is returned and is not run."
 FILE-NAME is full path to lilypond file.
 If TEST is non-nil, the shell command is returned and is not run."
   (when org-babel-lilypond-play-midi-post-tangle
-    (let ((midi-file (org-babel-lilypond-switch-extension file-name ".midi")))
+    (let* ((ext (if (eq system-type 'windows-nt)
+                    ".mid" ".midi"))
+           (midi-file (org-babel-lilypond-switch-extension file-name ext)))
       (if (file-exists-p midi-file)
           (let ((cmd-string
                  (concat org-babel-lilypond-midi-command " " midi-file)))
