@@ -26,10 +26,6 @@ infodir = $(prefix)/info
 # the branch when undefined.
 GIT_BRANCH =
 
-# Define if you want to include some (or all) files from contrib/lisp
-# just the filename please (no path prefix, no .el suffix), maybe with globbing
-#ORG_ADD_CONTRIB = ox-* # e.g. the contributed exporter
-
 # Where to create temporary files for the testsuite
 # respect TMPDIR if it is already defined in the environment
 TMPDIR ?= /tmp
