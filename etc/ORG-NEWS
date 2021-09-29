@@ -187,8 +187,7 @@ that Org mode configures LaTeX to process any new float type.
 The LaTeX export back-end accepts four attributes for verse blocks:
 =:lines=, =:center=, =:versewidth= and =:latexcode=. The three first
 require the external LaTeX package =verse.sty=, which is an extension
-of the standard LaTeX environment. The purpose of these attributes is
-explained below.
+of the standard LaTeX environment.
 
 The LaTeX export back-end accepts two attributes for quote blocks:
 =:environment=, for an arbitrary quoting environment (the default
