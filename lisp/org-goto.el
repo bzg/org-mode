@@ -219,9 +219,9 @@ position or nil."
 	    (error (make-indirect-buffer (current-buffer) "*org-goto*" t))))
 	 (let (temp-buffer-show-function temp-buffer-show-hook)
 	   (with-output-to-temp-buffer "*Org Help*"
-	   (princ (format help (if org-goto-auto-isearch
-				   "  Just type for auto-isearch."
-				 "  n/p/f/b/u to navigate, q to quit.")))))
+	     (princ (format help (if org-goto-auto-isearch
+				     "  Just type for auto-isearch."
+				   "  n/p/f/b/u to navigate, q to quit.")))))
 	 (org-fit-window-to-buffer (get-buffer-window "*Org Help*"))
 	 (org-overview)
 	 (setq buffer-read-only t)

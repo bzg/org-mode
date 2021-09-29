@@ -99,18 +99,18 @@ code."
 		     (file-remote-p val)  ;; check if val is a remote file
 		     (file-exists-p val)) ;; call to file-exists-p is slow, maybe remove it
 		(let* ((local-name (concat ;; create a unique filename to avoid multiple downloads
-				org-babel-temporary-directory
-				"/gnuplot/"
-				(file-remote-p val 'host)
-				(org-babel-local-file-name val))))
+				    org-babel-temporary-directory
+				    "/gnuplot/"
+				    (file-remote-p val 'host)
+				    (org-babel-local-file-name val))))
 		  (if (and (file-exists-p local-name) ;; only download file if remote is newer
 			   (file-newer-than-file-p local-name val))
 		      local-name
 		    (make-directory (file-name-directory local-name) t)
 		    (copy-file val local-name t)
-		  ))
+		    ))
 	      val
-		)))))
+	      )))))
      (org-babel--get-vars params))))
 
 (defun org-babel-expand-body:gnuplot (body params)

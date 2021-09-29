@@ -154,7 +154,7 @@ Emacs-lisp table, otherwise return the results as a string."
   (let ((res (org-babel-script-escape results)))
     (if (listp res)
         (mapcar (lambda (el) (if (eq el 'None)
-                            org-babel-python-None-to el))
+                                 org-babel-python-None-to el))
                 res)
       res)))
 
@@ -280,7 +280,7 @@ else:
 	  (if (member "pp" result-params) "True" "False")))
 
 (defun org-babel-python-evaluate
-  (session body &optional result-type result-params preamble async)
+    (session body &optional result-type result-params preamble async)
   "Evaluate BODY as Python code."
   (if session
       (if async

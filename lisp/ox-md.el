@@ -58,10 +58,10 @@ This variable can be set to either `atx' or `setext'."
   "Format string for the footnotes section.
 The first %s placeholder will be replaced with the localized Footnotes section
 heading, the second with the contents of the Footnotes section."
- :group 'org-export-md
- :type 'string
- :version "26.1"
- :package-version '(Org . "9.0"))
+  :group 'org-export-md
+  :type 'string
+  :version "26.1"
+  :package-version '(Org . "9.0"))
 
 (defcustom org-md-footnote-format "<sup>%s</sup>"
   "Format string for the footnote reference.
@@ -213,9 +213,9 @@ the section."
                (underline (concat (make-string (length title) underline-char)
 				  "\n")))
           (concat "\n" anchor-lines title tags "\n" underline "\n"))
-        ;; Use "Atx" style
-        (let ((level-mark (make-string level ?#)))
-          (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
+      ;; Use "Atx" style
+      (let ((level-mark (make-string level ?#)))
+        (concat "\n" anchor-lines level-mark " " title tags "\n\n")))))
 
 (defun org-md--build-toc (info &optional n _keyword scope)
   "Return a table of contents.

@@ -194,7 +194,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 			       (message-tokenize-header
 				(mail-fetch-field "gcc" nil t) " ,"))))
 	       (id (org-unbracket-string "<" ">"
-					 (mail-fetch-field "Message-ID")))
+		     (mail-fetch-field "Message-ID")))
 	       (to (mail-fetch-field "To"))
 	       (from (mail-fetch-field "From"))
 	       (subject (mail-fetch-field "Subject"))

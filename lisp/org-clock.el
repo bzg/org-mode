@@ -683,19 +683,19 @@ pointing to it."
     (let (cat task heading prefix)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
 	(org-with-wide-buffer
-	  (ignore-errors
-	    (goto-char marker)
-	    (setq cat (org-get-category)
-		  heading (org-get-heading 'notags)
-		  prefix (save-excursion
-			   (org-back-to-heading t)
-			   (looking-at org-outline-regexp)
-			   (match-string 0))
-		  task (substring
-			(org-fontify-like-in-org-mode
-			 (concat prefix heading)
-			 org-odd-levels-only)
-			(length prefix))))))
+	 (ignore-errors
+	   (goto-char marker)
+	   (setq cat (org-get-category)
+		 heading (org-get-heading 'notags)
+		 prefix (save-excursion
+			  (org-back-to-heading t)
+			  (looking-at org-outline-regexp)
+			  (match-string 0))
+		 task (substring
+		       (org-fontify-like-in-org-mode
+			(concat prefix heading)
+			org-odd-levels-only)
+		       (length prefix))))))
       (when (and cat task)
 	(insert (format "[%c] %-12s  %s\n" i cat task))
 	(cons i marker)))))
@@ -2756,13 +2756,13 @@ from the dynamic block definition."
 		 (if timestamp (concat ts "|") "")   ;timestamp, maybe
 		 (if tags (concat (mapconcat #'identity tgs ", ") "|") "")   ;tags, maybe
 		 (if properties		;properties columns, maybe
-		     (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
-					properties
-					"|")
-			     "|")
+		   (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
+				      properties
+				      "|")
+			   "|")
 		   "")
 		 (if indent		;indentation
-		     (org-clocktable-indent-string level)
+		   (org-clocktable-indent-string level)
 		   "")
 		 (format-field headline)
 		 ;; Empty fields for higher levels.
@@ -2770,7 +2770,7 @@ from the dynamic block definition."
 		 (format-field (org-duration-from-minutes time))
 		 (make-string (max 0 (- time-columns level)) ?|)
 		 (if (eq formula '%)
-		     (format "%.1f |" (* 100 (/ time (float total-time))))
+		   (format "%.1f |" (* 100 (/ time (float total-time))))
 		   "")
 		 "\n")))))))
     (delete-char -1)

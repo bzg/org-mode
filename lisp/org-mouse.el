@@ -220,7 +220,7 @@ this function is called.  Otherwise, the current major mode menu is used."
 	  (if (fboundp 'mouse-menu-major-mode-map)
 	      (popup-menu (mouse-menu-major-mode-map) event prefix)
 	    (with-no-warnings ; don't warn about fallback, obsolete since 23.1
-	     (mouse-major-mode-menu event prefix)))))
+	      (mouse-major-mode-menu event prefix)))))
     (setq this-command 'mouse-save-then-kill)
     (mouse-save-then-kill event)))
 
@@ -291,18 +291,18 @@ string to (format ITEMFORMAT keyword).  If it is neither a string
 nor a function, elements of KEYWORDS are used directly."
   (mapcar
    (lambda (keyword)
-      (vector (cond
-	       ((functionp itemformat) (funcall itemformat keyword))
-	       ((stringp itemformat) (format itemformat keyword))
-	       (t keyword))
-	      (list 'funcall function keyword)
-	      :style (cond
-		      ((null selected) t)
-		      ((functionp selected) 'toggle)
-		      (t 'radio))
-	      :selected (if (functionp selected)
-			    (and (funcall selected keyword) t)
-			  (equal selected keyword))))
+     (vector (cond
+	      ((functionp itemformat) (funcall itemformat keyword))
+	      ((stringp itemformat) (format itemformat keyword))
+	      (t keyword))
+	     (list 'funcall function keyword)
+	     :style (cond
+		     ((null selected) t)
+		     ((functionp selected) 'toggle)
+		     (t 'radio))
+	     :selected (if (functionp selected)
+			   (and (funcall selected keyword) t)
+			 (equal selected keyword))))
    keywords))
 
 (defun org-mouse-remove-match-and-spaces ()
@@ -424,11 +424,11 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      (org-mouse-keyword-menu
       (sort (mapcar #'car (org-get-buffer-tags)) #'string-lessp)
       (lambda (tag)
-	 (org-mouse-set-tags
-	  (sort (if (member tag tags)
-		    (delete tag tags)
-		  (cons tag tags))
-		#'string-lessp)))
+	(org-mouse-set-tags
+	 (sort (if (member tag tags)
+		   (delete tag tags)
+		 (cons tag tags))
+	       #'string-lessp)))
       (lambda (tag) (member tag tags))
       ))
    '("--"
@@ -517,7 +517,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ,@(org-mouse-keyword-menu
 	(mapcar #'car org-agenda-custom-commands)
         (lambda (key)
-	    (org-agenda nil (string-to-char key)))
+	  (org-agenda nil (string-to-char key)))
 	nil
         (lambda (key)
           (let ((entry (assoc key org-agenda-custom-commands)))

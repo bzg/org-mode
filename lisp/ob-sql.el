@@ -95,13 +95,13 @@
   "Expand BODY according to the values of PARAMS."
   (let ((prologue (cdr (assq :prologue params)))
 	(epilogue (cdr (assq :epilogue params))))
-  (mapconcat 'identity
-             (list
-              prologue
-              (org-babel-sql-expand-vars
-               body (org-babel--get-vars params))
-              epilogue)
-             "\n")))
+    (mapconcat 'identity
+               (list
+                prologue
+                (org-babel-sql-expand-vars
+                 body (org-babel--get-vars params))
+                epilogue)
+               "\n")))
 
 (defun org-babel-edit-prep:sql (info)
   "Set `sql-product' in Org edit buffer.
@@ -179,13 +179,13 @@ SQL Server on Windows and Linux platform."
   "Make Vertica command line args for database connection.
 Pass nil to omit that arg."
   (mapconcat #'identity
-	      (delq nil
-		    (list (when host     (format "-h %s" host))
-			  (when port     (format "-p %d" port))
-			  (when user     (format "-U %s" user))
-			  (when password (format "-w %s" (shell-quote-argument password) ))
-			  (when database (format "-d %s" database))))
-	      " "))
+	     (delq nil
+		   (list (when host     (format "-h %s" host))
+			 (when port     (format "-p %d" port))
+			 (when user     (format "-U %s" user))
+			 (when password (format "-w %s" (shell-quote-argument password) ))
+			 (when database (format "-d %s" database))))
+	     " "))
 
 (defun org-babel-sql-dbstring-saphana (host port instance user password database)
   "Make SAP HANA command line args for database connection.
@@ -404,8 +404,8 @@ argument mechanism."
                                val (if sqlite
                                        nil
                                      '(:fmt (lambda (el) (if (stringp el)
-                                                      el
-                                                    (format "%S" el))))))))
+                                                             el
+                                                           (format "%S" el))))))))
                     data-file)
                 (if (stringp val) val (format "%S" val))))
 	    body)))

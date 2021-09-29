@@ -205,9 +205,9 @@ specific arguments to =org-babel-tangle=."
 If error in compilation, attempt to mark the error in lilypond org file."
   (when org-babel-lilypond-compile-post-tangle
     (let ((org-babel-lilypond-tangled-file (org-babel-lilypond-switch-extension
-                            (buffer-file-name) ".lilypond"))
+                                            (buffer-file-name) ".lilypond"))
           (org-babel-lilypond-temp-file (org-babel-lilypond-switch-extension
-                         (buffer-file-name) ".ly")))
+                                         (buffer-file-name) ".ly")))
       (if (not (file-exists-p org-babel-lilypond-tangled-file))
 	  (error "Error: Tangle Failed!")
 	(when (file-exists-p org-babel-lilypond-temp-file)
@@ -401,7 +401,7 @@ If TEST is non-nil, the shell command is returned and is not run."
   "Utility command to swap current FILE-NAME extension with EXT."
   (concat (file-name-sans-extension
            file-name)
-	 ext))
+	  ext))
 
 (defun org-babel-lilypond-get-header-args (mode)
   "Default arguments to use when evaluating a lilypond source block.
@@ -413,7 +413,7 @@ These depend upon whether we are in Arrange mode i.e. MODE is t."
            (:cache . "yes")
            (:comments . "yes")))
         (t
-          ob-lilypond-header-args)))
+         ob-lilypond-header-args)))
 
 (defun org-babel-lilypond-set-header-args (mode)
   "Set org-babel-default-header-args:lilypond

@@ -19214,7 +19214,7 @@ Also align node properties according to `org-property-format'."
              (when (and (looking-at-p "^[[:space:]]*$")
                         (not org-src-preserve-indentation))
                (let ((element (org-element-at-point))
-                      block-content-ind some-ind)
+                     block-content-ind some-ind)
                  (org-with-point-at (org-element-property :begin element)
                    (setq block-content-ind (+ (current-indentation)
                                               org-edit-src-content-indentation))

@@ -290,9 +290,9 @@ environment, to override this check."
 		     (format "Evaluate this %s code block%son your system? "
 			     lang name-string)))
 	       (progn
-		(message "Evaluation of this %s code block%sis aborted."
-			 lang name-string)
-		nil)))
+		 (message "Evaluation of this %s code block%sis aborted."
+			  lang name-string)
+		 nil)))
       (x (error "Unexpected value `%s' from `org-babel-check-confirm-evaluate'" x)))))
 
 ;;;###autoload
@@ -1472,7 +1472,7 @@ portions of results lines."
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
 	  (lambda () (add-hook 'change-major-mode-hook
-			  #'org-babel-show-result-all 'append 'local)))
+			       #'org-babel-show-result-all 'append 'local)))
 
 (defun org-babel-params-from-properties (&optional lang no-eval)
   "Retrieve source block parameters specified as properties.
@@ -1576,11 +1576,11 @@ balanced instances of \"[ \t]:\", set ALTS to ((32 9) . 58)."
 	(first= (lambda (str) (= ch (aref str 0)))))
     (reverse
      (cl-reduce (lambda (acc el)
-		   (let ((head (car acc)))
-		     (if (and head (or (funcall last= head) (funcall first= el)))
-			 (cons (concat head el) (cdr acc))
-		       (cons el acc))))
-		 list :initial-value nil))))
+		  (let ((head (car acc)))
+		    (if (and head (or (funcall last= head) (funcall first= el)))
+			(cons (concat head el) (cdr acc))
+		      (cons el acc))))
+		list :initial-value nil))))
 
 (defun org-babel-parse-header-arguments (string &optional no-eval)
   "Parse header arguments in STRING.
@@ -1654,7 +1654,7 @@ shown below.
 				(t 'value))))
      (cl-remove-if
       (lambda (x) (memq (car x) '(:colname-names :rowname-names :result-params
-					    :result-type :var)))
+					         :result-type :var)))
       params))))
 
 ;; row and column names
@@ -1784,7 +1784,7 @@ If the point is not on a source block then return nil."
   "Go to the beginning of the current code block."
   (interactive)
   (let ((head (org-babel-where-is-src-block-head)))
-     (if head (goto-char head) (error "Not currently in a code block"))))
+    (if head (goto-char head) (error "Not currently in a code block"))))
 
 ;;;###autoload
 (defun org-babel-goto-named-src-block (name)
@@ -2356,7 +2356,7 @@ INFO may provide the values of these header arguments (in the
 		      (if results-switches (concat " " results-switches) ""))
 		(let ((wrap
 		       (lambda (start finish &optional no-escape no-newlines
-				 inline-start inline-finish)
+				      inline-start inline-finish)
 			 (when inline
 			   (setq start inline-start)
 			   (setq finish inline-finish)
@@ -2603,9 +2603,9 @@ file's directory then expand relative links."
     (let ((same-directory?
 	   (and (buffer-file-name (buffer-base-buffer))
 		(not (string= (expand-file-name default-directory)
-			    (expand-file-name
-			     (file-name-directory
-			      (buffer-file-name (buffer-base-buffer)))))))))
+			      (expand-file-name
+			       (file-name-directory
+			        (buffer-file-name (buffer-base-buffer)))))))))
       (format "[[file:%s]%s]"
 	      (if (and default-directory
 		       (buffer-file-name (buffer-base-buffer)) same-directory?)
@@ -3190,7 +3190,7 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 	  (and entry
 	       (consp entry)
 	       (cond ((functionp (cdr entry))
-		       (funcall (cdr entry) (cdr pair)))
+		      (funcall (cdr entry) (cdr pair)))
 		     ((listp (cdr entry))
 		      (member (cdr pair) (cdr entry)))
 		     (t nil)))))))
@@ -3210,10 +3210,10 @@ Otherwise, the :file parameter is treated as a full file name,
 and the output file name is the directory (as calculated above)
 plus the parameter value."
   (let* ((file-cons (assq :file params))
-	   (file-ext-cons (assq :file-ext params))
-	   (file-ext (cdr-safe file-ext-cons))
-	   (dir (cdr-safe (assq :output-dir params)))
-	   fname)
+	 (file-ext-cons (assq :file-ext params))
+	 (file-ext (cdr-safe file-ext-cons))
+	 (dir (cdr-safe (assq :output-dir params)))
+	 fname)
     ;; create the output-dir if it does not exist
     (when dir
       (make-directory dir t))

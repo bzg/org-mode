@@ -481,7 +481,7 @@ for `value' RESULT-TYPE.  Not used for `output' RESULT-TYPE."
                (`value (org-babel-eval cmd "")
                        (org-babel-eval-read-file result-file)))))
     (org-babel-result-cond result-params raw
-      (org-babel-java-table-or-string raw))))
+                           (org-babel-java-table-or-string raw))))
 
 (provide 'ob-java)
 

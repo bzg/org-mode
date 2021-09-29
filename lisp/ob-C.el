@@ -478,18 +478,18 @@ specifying a variable with the name of the table."
                                 ((or `c `cpp) "const char*")
                                 (`d "string"))))))
     (concat
-      (pcase org-babel-c-variant
-	((or `c `cpp)
-         (format "const char* %s_header[%d] = {%s};"
-                 table
-                 (length headers)
-                 (mapconcat (lambda (h) (format "\"%s\"" h)) headers ",")))
-	(`d
-         (format "string[%d] %s_header = [%s];"
-                 (length headers)
-                 table
-                 (mapconcat (lambda (h) (format "\"%s\"" h)) headers ","))))
-      "\n"
+     (pcase org-babel-c-variant
+       ((or `c `cpp)
+        (format "const char* %s_header[%d] = {%s};"
+                table
+                (length headers)
+                (mapconcat (lambda (h) (format "\"%s\"" h)) headers ",")))
+       (`d
+        (format "string[%d] %s_header = [%s];"
+                (length headers)
+                table
+                (mapconcat (lambda (h) (format "\"%s\"" h)) headers ","))))
+     "\n"
      (pcase org-babel-c-variant
        ((or `c `cpp)
 	(format

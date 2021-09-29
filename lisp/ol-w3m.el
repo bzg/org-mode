@@ -84,36 +84,36 @@ so that it can be yanked into an Org  buffer with links working correctly."
         (or (get-text-property (point) 'w3m-href-anchor) (org-w3m-get-next-link-start))
         (cond
          ((<= (point) transform-end) ; point is inside transform bound
-           ;; get content between two links.
-           (when (> (point) temp-position)
-             (setq return-content (concat return-content
-                                          (buffer-substring
-                                           temp-position (point)))))
-           (cond
-            ((setq link-location (get-text-property (point) 'w3m-href-anchor))
-             ;; current point is a link
-             ;; (we thus also got link location at current point)
-             ;; get link title at current point.
-             (setq link-title (buffer-substring (point)
-                                                (org-w3m-get-anchor-end)))
-             ;; concat Org style url to `return-content'.
-             (setq return-content
-               (concat return-content
-                       (if (org-string-nw-p link-location)
-                         (org-link-make-string link-location link-title)
-                        link-title))))
-            ((setq link-location (get-text-property (point) 'w3m-image))
-             ;; current point is an image
-             ;; (we thus also got image link location at current point)
-             ;; get link title at current point.
-             (setq link-title (buffer-substring (point) (org-w3m-get-image-end)))
-             ;; concat Org style url to `return-content'.
-             (setq return-content
-               (concat return-content
-                       (if (org-string-nw-p link-location)
-                         (org-link-make-string link-location link-title)
-                        link-title))))
-            (t nil))); current point is neither a link nor an image
+          ;; get content between two links.
+          (when (> (point) temp-position)
+            (setq return-content (concat return-content
+                                         (buffer-substring
+                                          temp-position (point)))))
+          (cond
+           ((setq link-location (get-text-property (point) 'w3m-href-anchor))
+            ;; current point is a link
+            ;; (we thus also got link location at current point)
+            ;; get link title at current point.
+            (setq link-title (buffer-substring (point)
+                                               (org-w3m-get-anchor-end)))
+            ;; concat Org style url to `return-content'.
+            (setq return-content
+                  (concat return-content
+                          (if (org-string-nw-p link-location)
+                              (org-link-make-string link-location link-title)
+                            link-title))))
+           ((setq link-location (get-text-property (point) 'w3m-image))
+            ;; current point is an image
+            ;; (we thus also got image link location at current point)
+            ;; get link title at current point.
+            (setq link-title (buffer-substring (point) (org-w3m-get-image-end)))
+            ;; concat Org style url to `return-content'.
+            (setq return-content
+                  (concat return-content
+                          (if (org-string-nw-p link-location)
+                              (org-link-make-string link-location link-title)
+                            link-title))))
+           (t nil))); current point is neither a link nor an image
          (t ; point is NOT inside transform bound
           (goto-char temp-position) ; reset point before jump next anchor
           (setq out-bound t))))	    ; for break out `while' loop
@@ -152,16 +152,16 @@ so that it can be yanked into an Org  buffer with links working correctly."
   (let (pos start-pos anchor-pos image-pos)
     (setq pos (setq start-pos (point)))
     (setq anchor-pos
-      (catch 'reach
-        (while (setq pos (next-single-property-change pos 'w3m-anchor-sequence))
-          (when (get-text-property pos 'w3m-href-anchor)
-            (throw 'reach pos)))))
+          (catch 'reach
+            (while (setq pos (next-single-property-change pos 'w3m-anchor-sequence))
+              (when (get-text-property pos 'w3m-href-anchor)
+                (throw 'reach pos)))))
     (setq pos start-pos)
     (setq image-pos
-      (catch 'reach
-        (while (setq pos (next-single-property-change pos 'w3m-image))
-          (when (get-text-property pos 'w3m-image)
-            (throw 'reach pos)))))
+          (catch 'reach
+            (while (setq pos (next-single-property-change pos 'w3m-image))
+              (when (get-text-property pos 'w3m-image)
+                (throw 'reach pos)))))
     (goto-char (min (or anchor-pos (point-max)) (or image-pos (point-max))))))
 
 (defun org-w3m-get-prev-link-start ()

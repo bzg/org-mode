@@ -358,7 +358,7 @@ You can overwrite this default per project in your
   (concat "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
 (defun org-publish-needed-p
-  (filename &optional pub-dir pub-func _true-pub-dir base-dir)
+    (filename &optional pub-dir pub-func _true-pub-dir base-dir)
   "Non-nil if FILENAME should be published in PUB-DIR using PUB-FUNC.
 TRUE-PUB-DIR is where the file will truly end up.  Currently we
 are not using this - maybe it can eventually be used to check if
@@ -375,7 +375,7 @@ still decide about that independently."
     rtn))
 
 (defun org-publish-update-timestamp
-  (filename &optional pub-dir pub-func _base-dir)
+    (filename &optional pub-dir pub-func _base-dir)
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-publish-timestamp-filename filename pub-dir pub-func))
@@ -1065,7 +1065,7 @@ publishing directory."
 		  (setq full-index
 			(sort (nreverse full-index)
 			      (lambda (a b) (string< (downcase (car a))
-						(downcase (car b)))))))
+						     (downcase (car b)))))))
       (let ((index (org-publish-cache-get-file-property file :index)))
 	(dolist (term index)
 	  (unless (member term full-index) (push term full-index)))))
@@ -1320,7 +1320,7 @@ the file including them will be republished as well."
 		       included-files-ctime))))))
 
 (defun org-publish-cache-set-file-property
-  (filename property value &optional project-name)
+    (filename property value &optional project-name)
   "Set the VALUE for a PROPERTY of file FILENAME in publishing cache to VALUE.
 Use cache file of PROJECT-NAME.  If the entry does not exist, it
 will be created.  Return VALUE."

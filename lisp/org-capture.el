@@ -381,78 +381,78 @@ you can escape ambiguous cases with a backward slash, e.g., \\%i."
 				(function :tag "Function")
 				(variable :tag "Variable")
 				(sexp :tag "Form"))))
-  `(repeat
-    (choice :value ("" "" entry (file "~/org/notes.org") "")
-	    (list :tag "Multikey description"
-		  (string :tag "Keys       ")
-		  (string :tag "Description"))
-	    (list :tag "Template entry"
-		  (string :tag "Keys           ")
-		  (string :tag "Description    ")
-		  (choice :tag "Capture Type   " :value entry
-			  (const :tag "Org entry" entry)
-			  (const :tag "Plain list item" item)
-			  (const :tag "Checkbox item" checkitem)
-			  (const :tag "Plain text" plain)
-			  (const :tag "Table line" table-line))
-		  (choice :tag "Target location"
-			  (list :tag "File"
-				(const :format "" file)
-				,file-variants)
-			  (list :tag "ID"
-				(const :format "" id)
-				(string :tag "  ID"))
-			  (list :tag "File & Headline"
-				(const :format "" file+headline)
-				,file-variants
-				(string :tag "  Headline"))
-			  (list :tag "File & Outline path"
-				(const :format "" file+olp)
-				,file-variants
-				(repeat :tag "Outline path" :inline t
-					(string :tag "Headline")))
-			  (list :tag "File & Regexp"
-				(const :format "" file+regexp)
-				,file-variants
-				(regexp :tag "  Regexp"))
-			  (list :tag "File [ & Outline path ] & Date tree"
-				(const :format "" file+olp+datetree)
-				,file-variants
-				(option (repeat :tag "Outline path" :inline t
-						(string :tag "Headline"))))
-			  (list :tag "File & function"
-				(const :format "" file+function)
-				,file-variants
-				(sexp :tag "  Function"))
-			  (list :tag "Current clocking task"
-				(const :format "" clock))
-			  (list :tag "Function"
-				(const :format "" function)
-				(sexp :tag "  Function")))
-		  (choice :tag "Template       "
-			  (string)
-			  (list :tag "File"
-				(const :format "" file)
-				(file :tag "Template file"))
-			  (list :tag "Function"
-				(const :format "" function)
-				(function :tag "Template function")))
-		  (plist :inline t
-			 ;; Give the most common options as checkboxes
-			 :options (((const :format "%v " :prepend) (const t))
-				   ((const :format "%v " :immediate-finish) (const t))
-				   ((const :format "%v " :jump-to-captured) (const t))
-				   ((const :format "%v " :empty-lines) (const 1))
-				   ((const :format "%v " :empty-lines-before) (const 1))
-				   ((const :format "%v " :empty-lines-after) (const 1))
-				   ((const :format "%v " :clock-in) (const t))
-				   ((const :format "%v " :clock-keep) (const t))
-				   ((const :format "%v " :clock-resume) (const t))
-				   ((const :format "%v " :time-prompt) (const t))
-				   ((const :format "%v " :tree-type) (const week))
-				   ((const :format "%v " :unnarrowed) (const t))
-				   ((const :format "%v " :table-line-pos) (string))
-				   ((const :format "%v " :kill-buffer) (const t)))))))))
+    `(repeat
+      (choice :value ("" "" entry (file "~/org/notes.org") "")
+	      (list :tag "Multikey description"
+		    (string :tag "Keys       ")
+		    (string :tag "Description"))
+	      (list :tag "Template entry"
+		    (string :tag "Keys           ")
+		    (string :tag "Description    ")
+		    (choice :tag "Capture Type   " :value entry
+			    (const :tag "Org entry" entry)
+			    (const :tag "Plain list item" item)
+			    (const :tag "Checkbox item" checkitem)
+			    (const :tag "Plain text" plain)
+			    (const :tag "Table line" table-line))
+		    (choice :tag "Target location"
+			    (list :tag "File"
+				  (const :format "" file)
+				  ,file-variants)
+			    (list :tag "ID"
+				  (const :format "" id)
+				  (string :tag "  ID"))
+			    (list :tag "File & Headline"
+				  (const :format "" file+headline)
+				  ,file-variants
+				  (string :tag "  Headline"))
+			    (list :tag "File & Outline path"
+				  (const :format "" file+olp)
+				  ,file-variants
+				  (repeat :tag "Outline path" :inline t
+					  (string :tag "Headline")))
+			    (list :tag "File & Regexp"
+				  (const :format "" file+regexp)
+				  ,file-variants
+				  (regexp :tag "  Regexp"))
+			    (list :tag "File [ & Outline path ] & Date tree"
+				  (const :format "" file+olp+datetree)
+				  ,file-variants
+				  (option (repeat :tag "Outline path" :inline t
+						  (string :tag "Headline"))))
+			    (list :tag "File & function"
+				  (const :format "" file+function)
+				  ,file-variants
+				  (sexp :tag "  Function"))
+			    (list :tag "Current clocking task"
+				  (const :format "" clock))
+			    (list :tag "Function"
+				  (const :format "" function)
+				  (sexp :tag "  Function")))
+		    (choice :tag "Template       "
+			    (string)
+			    (list :tag "File"
+				  (const :format "" file)
+				  (file :tag "Template file"))
+			    (list :tag "Function"
+				  (const :format "" function)
+				  (function :tag "Template function")))
+		    (plist :inline t
+			   ;; Give the most common options as checkboxes
+			   :options (((const :format "%v " :prepend) (const t))
+				     ((const :format "%v " :immediate-finish) (const t))
+				     ((const :format "%v " :jump-to-captured) (const t))
+				     ((const :format "%v " :empty-lines) (const 1))
+				     ((const :format "%v " :empty-lines-before) (const 1))
+				     ((const :format "%v " :empty-lines-after) (const 1))
+				     ((const :format "%v " :clock-in) (const t))
+				     ((const :format "%v " :clock-keep) (const t))
+				     ((const :format "%v " :clock-resume) (const t))
+				     ((const :format "%v " :time-prompt) (const t))
+				     ((const :format "%v " :tree-type) (const week))
+				     ((const :format "%v " :unnarrowed) (const t))
+				     ((const :format "%v " :table-line-pos) (string))
+				     ((const :format "%v " :kill-buffer) (const t)))))))))
 
 (defcustom org-capture-before-finalize-hook nil
   "Hook that is run right before a capture process is finalized.
@@ -588,17 +588,17 @@ to avoid duplicates.)"
 		       (string :tag "        Capture key")
 		       (string :tag "Replace by template")
 		       (repeat :tag "Available when"
-			      (choice
-			       (cons :tag "Condition"
-				     (choice
-				      (const :tag "In file" in-file)
-				      (const :tag "Not in file" not-in-file)
-				      (const :tag "In buffer" in-buffer)
-				      (const :tag "Not in buffer" not-in-buffer)
-				      (const :tag "In mode" in-mode)
-				      (const :tag "Not in mode" not-in-mode))
-				     (regexp))
-			       (function :tag "Custom function"))))))
+			       (choice
+			        (cons :tag "Condition"
+				      (choice
+				       (const :tag "In file" in-file)
+				       (const :tag "Not in file" not-in-file)
+				       (const :tag "In buffer" in-buffer)
+				       (const :tag "Not in buffer" not-in-buffer)
+				       (const :tag "In mode" in-mode)
+				       (const :tag "Not in mode" not-in-mode))
+				      (regexp))
+			        (function :tag "Custom function"))))))
 
 (defcustom org-capture-use-agenda-date nil
   "Non-nil means use the date at point when capturing from agendas.
@@ -927,7 +927,7 @@ for `entry'-type templates"))
   (interactive)
   (org-goto-marker-or-bmk org-capture-last-stored-marker
 			  (plist-get org-bookmark-names-plist
-				 :last-capture))
+				     :last-capture))
   (message "This is the last note stored by a capture process"))
 
 ;;; Supporting functions for handling the process

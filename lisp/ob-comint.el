@@ -130,7 +130,7 @@ statement (not large blocks of code)."
       (accept-process-output (get-buffer-process buffer)))))
 
 (defun org-babel-comint-eval-invisibly-and-wait-for-file
-  (buffer file string &optional period)
+    (buffer file string &optional period)
   "Evaluate STRING in BUFFER invisibly.
 Don't return until FILE exists.  Code in STRING must ensure that
 FILE exists at end of evaluation."
@@ -192,8 +192,8 @@ STRING contains the output originally inserted into the comint buffer."
   ;; Remove outdated Org mode buffers
   (setq org-babel-comint-async-buffers
 	(cl-loop for buf in org-babel-comint-async-buffers
-	      if (buffer-live-p buf)
-	      collect buf))
+	         if (buffer-live-p buf)
+	         collect buf))
   (let* ((indicator org-babel-comint-async-indicator)
 	 (org-buffers org-babel-comint-async-buffers)
 	 (file-callback org-babel-comint-async-file-callback)
@@ -214,23 +214,23 @@ STRING contains the output originally inserted into the comint buffer."
 	       ;; insert results from tmp-file
 	       (let ((tmp-file (match-string 2)))
 		 (cl-loop for buf in org-buffers
-		       until
-		       (with-current-buffer buf
-			 (save-excursion
-			   (goto-char (point-min))
-			   (when (search-forward tmp-file nil t)
-			     (org-babel-previous-src-block)
-                             (let* ((info (org-babel-get-src-block-info))
-                                    (params (nth 2 info))
-                                    (result-params
-                                     (cdr (assq :result-params params))))
-                               (org-babel-insert-result
-                                 (funcall file-callback
-                                          (nth
-                                           2 (org-babel-get-src-block-info))
-                                          tmp-file)
-                                result-params info))
-			     t))))))))
+		          until
+		          (with-current-buffer buf
+			    (save-excursion
+			      (goto-char (point-min))
+			      (when (search-forward tmp-file nil t)
+			        (org-babel-previous-src-block)
+                                (let* ((info (org-babel-get-src-block-info))
+                                       (params (nth 2 info))
+                                       (result-params
+                                        (cdr (assq :result-params params))))
+                                  (org-babel-insert-result
+                                   (funcall file-callback
+                                            (nth
+                                             2 (org-babel-get-src-block-info))
+                                            tmp-file)
+                                   result-params info))
+			        t))))))))
       ;; Truncate dangling to only the most recent output
       (when (> (length new-dangling) (length string))
 	(setq new-dangling string)))
@@ -258,18 +258,18 @@ STRING contains the output originally inserted into the comint buffer."
                                      res-str-raw)))
 	      ;; Search for uuid in associated org-buffers to insert results
 	      (cl-loop for buf in org-buffers
-		    until (with-current-buffer buf
-			    (save-excursion
-			      (goto-char (point-min))
-			      (when (search-forward uuid nil t)
-				(org-babel-previous-src-block)
-                                (let* ((info (org-babel-get-src-block-info))
-                                       (params (nth 2 info))
-                                       (result-params
-                                        (cdr (assq :result-params params))))
-				  (org-babel-insert-result
-                                   res-str result-params info))
-				t))))
+		       until (with-current-buffer buf
+			       (save-excursion
+			         (goto-char (point-min))
+			         (when (search-forward uuid nil t)
+				   (org-babel-previous-src-block)
+                                   (let* ((info (org-babel-get-src-block-info))
+                                          (params (nth 2 info))
+                                          (result-params
+                                           (cdr (assq :result-params params))))
+				     (org-babel-insert-result
+                                      res-str result-params info))
+				   t))))
 	      ;; Remove uuid from the list to search for
 	      (setq uuid-list (delete uuid uuid-list)))))))))
 

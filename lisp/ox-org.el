@@ -239,7 +239,7 @@ a communication channel."
 
 ;;;###autoload
 (defun org-org-export-as-org
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an Org buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -274,7 +274,7 @@ non-nil."
 
 ;;;###autoload
 (defun org-org-export-to-org
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an Org file.
 
 If narrowing is active in the current buffer, only export its

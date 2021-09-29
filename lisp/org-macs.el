@@ -473,8 +473,8 @@ is selected, only the bare key is returned."
 		(goto-char (point-min))
 		(org-fit-window-to-buffer)
 		(message "") ; With this line the prompt appears in
-			     ; the minibuffer. Else keystrokes may
-			     ; appear, which is spurious.
+                                        ; the minibuffer. Else keystrokes may
+                                        ; appear, which is spurious.
 		(let ((pressed (org--mks-read-key
 				allowed-keys prompt
 				(not (pos-visible-in-window-p (1- (point-max)))))))
@@ -1276,13 +1276,13 @@ window."
 	(scrldn (if additional-keys `(?\d ?\M-v) ?\M-v)))
     (pcase key
       (?\C-n (if (not (pos-visible-in-window-p (point-max)))
-	      (ignore-errors (scroll-up 1))
-	    (message "End of buffer")
-	    (sit-for 1)))
+	         (ignore-errors (scroll-up 1))
+	       (message "End of buffer")
+	       (sit-for 1)))
       (?\C-p (if (not (pos-visible-in-window-p (point-min)))
-	      (ignore-errors (scroll-down 1))
-	    (message "Beginning of buffer")
-	    (sit-for 1)))
+	         (ignore-errors (scroll-down 1))
+	       (message "Beginning of buffer")
+	       (sit-for 1)))
       ;; SPC or
       ((guard (memq key scrlup))
        (if (not (pos-visible-in-window-p (point-max)))

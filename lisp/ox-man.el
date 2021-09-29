@@ -301,12 +301,12 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let* ((title (when (plist-get info :with-title)
 		  (org-export-data (plist-get info :title) info)))
-        (attr (read (format "(%s)"
-                            (mapconcat
-                             #'identity
-                             (list (plist-get info :man-class-options))
-                             " "))))
-        (section-item (plist-get attr :section-id)))
+         (attr (read (format "(%s)"
+                             (mapconcat
+                              #'identity
+                              (list (plist-get info :man-class-options))
+                              " "))))
+         (section-item (plist-get attr :section-id)))
 
     (concat
 
@@ -825,10 +825,10 @@ contextual information."
    ;; Case 1: verbatim table.
    ((or (plist-get info :man-tables-verbatim)
         (let ((attr (read (format "(%s)"
-                 (mapconcat
-                  #'identity
-                  (org-element-property :attr_man table)
-                  " ")))))
+                                  (mapconcat
+                                   #'identity
+                                   (org-element-property :attr_man table)
+                                   " ")))))
 
           (and attr (plist-get attr :verbatim))))
 
@@ -1053,7 +1053,7 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-man-export-to-man
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Man file.
 
 If narrowing is active in the current buffer, only export its
@@ -1086,7 +1086,7 @@ Return output file's name."
       async subtreep visible-only body-only ext-plist)))
 
 (defun org-man-export-to-pdf
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Groff then process through to PDF.
 
 If narrowing is active in the current buffer, only export its

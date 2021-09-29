@@ -659,7 +659,7 @@ This uses `bibtex-parse-entry'."
   (interactive)
   (let ((keyword (lambda (str) (intern (concat ":" (downcase str)))))
 	(clean-space (lambda (str) (replace-regexp-in-string
-			       "[[:space:]\n\r]+" " " str)))
+			            "[[:space:]\n\r]+" " " str)))
 	(strip-delim
 	 (lambda (str)		     ; strip enclosing "..." and {...}
 	   (dolist (pair '((34 . 34) (123 . 125)))

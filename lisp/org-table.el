@@ -4667,18 +4667,18 @@ blank, and the content is appended to the field above."
            (save-excursion (goto-char start) (move-beginning-of-line 1))
            (save-excursion (org-forward-paragraph) (point)))
           (org-table-cut-region (region-beginning) (region-end))
-	   (when (> (length (car org-table-clip)) 1)
-	     (user-error "Region must be limited to single column"))
-	   (let ((nlines (cond ((not arg) (length org-table-clip))
-			       ((< arg 1) (+ (length org-table-clip) arg))
-			       (t arg))))
-	     (setq org-table-clip
-		   (mapcar #'list
-			   (org-wrap (mapconcat #'car org-table-clip " ")
-				     nil
-				     nlines))))
-	   (goto-char start)
-	   (org-table-paste-rectangle))
+	  (when (> (length (car org-table-clip)) 1)
+	    (user-error "Region must be limited to single column"))
+	  (let ((nlines (cond ((not arg) (length org-table-clip))
+			      ((< arg 1) (+ (length org-table-clip) arg))
+			      (t arg))))
+	    (setq org-table-clip
+		  (mapcar #'list
+			  (org-wrap (mapconcat #'car org-table-clip " ")
+				    nil
+				    nlines))))
+	  (goto-char start)
+	  (org-table-paste-rectangle))
         (org-table-align))
     ;; No region, split the current field at point.
     (unless (org-get-alist-option org-M-RET-may-split-line 'table)

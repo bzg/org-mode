@@ -928,7 +928,7 @@ holding contextual information."
 	 contents))))))
 
 (defun org-texinfo-format-headline-default-function
-  (todo _todo-type priority text tags)
+    (todo _todo-type priority text tags)
   "Default format function for a headline.
 See `org-texinfo-format-headline-function' for details."
   (concat (and todo (format "@strong{%s} " todo))
@@ -965,7 +965,7 @@ holding contextual information."
 	     todo todo-type priority title tags contents)))
 
 (defun org-texinfo-format-inlinetask-default-function
-  (todo _todo-type priority title tags contents)
+    (todo _todo-type priority title tags contents)
   "Default format function for inlinetasks.
 See `org-texinfo-format-inlinetask-function' for details."
   (let ((full-title
@@ -1615,7 +1615,7 @@ contextual information."
 
 ;;;###autoload
 (defun org-texinfo-export-to-texinfo
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Texinfo file.
 
 If narrowing is active in the current buffer, only export its
@@ -1666,7 +1666,7 @@ Usage: emacs -batch -f org-texinfo-export-to-texinfo-batch INFILE OUTFILE"
 
 ;;;###autoload
 (defun org-texinfo-export-to-info
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Texinfo then process through to INFO.
 
 If narrowing is active in the current buffer, only export its

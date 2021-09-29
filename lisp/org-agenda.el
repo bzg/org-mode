@@ -2260,26 +2260,26 @@ The following commands are available:
 	(save (buffer-local-variables)))
     (kill-all-local-variables)
     (cl-flet ((reset-saved (var-set)
-			   "Reset variables in VAR-SET to possibly stored value in SAVE."
-			   (dolist (elem save)
-			     (pcase elem
-			       (`(,var . ,val)		;ignore unbound variables
-				(when (and val (memq var var-set))
-				  (set var val)))))))
+		"Reset variables in VAR-SET to possibly stored value in SAVE."
+		(dolist (elem save)
+		  (pcase elem
+		    (`(,var . ,val)		;ignore unbound variables
+		     (when (and val (memq var var-set))
+		       (set var val)))))))
       (cond (org-agenda-doing-sticky-redo
-	     ;; Refreshing sticky agenda-buffer
-	     ;;
-	     ;; Preserve the value of `org-agenda-local-vars' variables.
-	     (mapc #'make-local-variable org-agenda-local-vars)
-	     (reset-saved org-agenda-local-vars)
-	     (setq-local org-agenda-this-buffer-is-sticky t))
+	      ;; Refreshing sticky agenda-buffer
+	      ;;
+	      ;; Preserve the value of `org-agenda-local-vars' variables.
+	      (mapc #'make-local-variable org-agenda-local-vars)
+	      (reset-saved org-agenda-local-vars)
+	      (setq-local org-agenda-this-buffer-is-sticky t))
 	    (org-agenda-sticky
-	     ;; Creating a sticky Agenda buffer for the first time
-	     (mapc #'make-local-variable org-agenda-local-vars)
-	     (setq-local org-agenda-this-buffer-is-sticky t))
+	      ;; Creating a sticky Agenda buffer for the first time
+	      (mapc #'make-local-variable org-agenda-local-vars)
+	      (setq-local org-agenda-this-buffer-is-sticky t))
 	    (t
-	     ;; Creating a non-sticky agenda buffer
-	     (setq-local org-agenda-this-buffer-is-sticky nil)))
+	      ;; Creating a non-sticky agenda buffer
+	      (setq-local org-agenda-this-buffer-is-sticky nil)))
       (mapc #'make-local-variable agenda-local-vars-to-keep)
       (reset-saved agenda-local-vars-to-keep)))
   (setq org-agenda-undo-list nil
@@ -2970,7 +2970,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 		   (org-occur org-match))
 		  ((pred functionp)
 		   (funcall type org-match))
-		   ;; FIXME: Will signal an error since it's not `functionp'!
+		  ;; FIXME: Will signal an error since it's not `functionp'!
 		  ((pred fboundp) (funcall type org-match))
 		  (_ (user-error "Invalid custom agenda command type %s" type)))))
 	  (org-agenda-run-series (nth 1 entry) (cddr entry))))
@@ -3395,7 +3395,7 @@ agenda-day   The day in the agenda where this is listed"
       ;; FIXME: Shouldn't this be 1 (see commit 10173ad6d610b)?
       (if (> (length cmd-key) 2)
 	  (org-tags-view nil cmd-key)
-	 (org-agenda nil cmd-key))))
+	(org-agenda nil cmd-key))))
   (set-buffer org-agenda-buffer-name)
   (let ((lines (org-split-string (buffer-string) "\n")))
     (dolist (line lines)
@@ -3405,7 +3405,7 @@ agenda-day   The day in the agenda where this is listed"
 	(princ
 	 (mapconcat #'org-agenda-export-csv-mapper
 		    '(org-category txt type todo tags date time extra
-		      priority-letter priority agenda-day)
+		                   priority-letter priority agenda-day)
 		    ","))
 	(princ "\n")))))
 

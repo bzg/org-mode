@@ -201,13 +201,13 @@ end"
 	       (buffer-name))))
 	  (current-buffer))))))
 
-; (defun org-babel-julia-associate-session (session)
-;   "Associate julia code buffer with a julia session.
-; Make SESSION be the inferior ESS process associated with the
-; current code buffer."
-;   (setq ess-local-process-name
-; 	(process-name (get-buffer-process session)))
-;   (ess-make-buffer-current))
+                                        ; (defun org-babel-julia-associate-session (session)
+                                        ;   "Associate julia code buffer with a julia session.
+                                        ; Make SESSION be the inferior ESS process associated with the
+                                        ; current code buffer."
+                                        ;   (setq ess-local-process-name
+                                        ; 	(process-name (get-buffer-process session)))
+                                        ;   (ess-make-buffer-current))
 
 (defun org-babel-julia-graphical-output-file (params)
   "Name of file to which julia should send graphical output."
@@ -251,7 +251,7 @@ end"
 end")
 
 (defun org-babel-julia-evaluate
-  (session body result-type result-params column-names-p row-names-p)
+    (session body result-type result-params column-names-p row-names-p)
   "Evaluate julia code in BODY."
   (if session
       (org-babel-julia-evaluate-session
@@ -260,7 +260,7 @@ end")
      body result-type result-params column-names-p row-names-p)))
 
 (defun org-babel-julia-evaluate-external-process
-  (body result-type result-params column-names-p row-names-p)
+    (body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in external julia process.
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
@@ -284,7 +284,7 @@ last statement in BODY, as elisp."
     (output (org-babel-eval org-babel-julia-command body))))
 
 (defun org-babel-julia-evaluate-session
-  (session body result-type result-params column-names-p row-names-p)
+    (session body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in SESSION.
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the

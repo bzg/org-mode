@@ -2726,8 +2726,8 @@ a list of footnote definitions or in the widened buffer."
 	  ) ;; seen
       (dolist (l (funcall list-labels tree))
 	(cond ;; ((member l seen))
-	      ((member l known-definitions) (push l defined))
-	      (t (push l undefined)))))
+	 ((member l known-definitions) (push l defined))
+	 (t (push l undefined)))))
     ;; Complete MISSING-DEFINITIONS by finding the definition of every
     ;; undefined label, first by looking into DEFINITIONS, then by
     ;; searching the widened buffer.  This is a recursive process
@@ -2739,7 +2739,7 @@ a list of footnote definitions or in the widened buffer."
 	       (cond
 		((cl-some
 		  (lambda (d) (and (equal (org-element-property :label d) label)
-			      d))
+			           d))
 		  definitions))
 		((pcase (org-footnote-get-definition label)
 		   (`(,_ ,beg . ,_)
@@ -2802,16 +2802,16 @@ containing their first reference."
    ;; the definitions at the end of the tree.
    (org-footnote-section
     (org-element-adopt-elements
-     tree
-     (org-element-create 'headline
-			 (list :footnote-section-p t
-			       :level 1
-			       :title org-footnote-section
-			       :raw-value org-footnote-section)
-			 (apply #'org-element-create
-				'section
-				nil
-				(nreverse definitions)))))
+        tree
+      (org-element-create 'headline
+			  (list :footnote-section-p t
+			        :level 1
+			        :title org-footnote-section
+			        :raw-value org-footnote-section)
+			  (apply #'org-element-create
+				 'section
+				 nil
+				 (nreverse definitions)))))
    ;; Otherwise add each definition at the end of the section where it
    ;; is first referenced.
    (t
@@ -2834,8 +2834,8 @@ containing their first reference."
 					  d))
 				   definitions)))
 			    (org-element-adopt-elements
-			     (org-element-lineage reference '(section))
-			     definition)
+			        (org-element-lineage reference '(section))
+			      definition)
 			    ;; Also insert definitions for nested
 			    ;; references, if any.
 			    (funcall insert-definitions definition))))))))))
@@ -4222,10 +4222,10 @@ Return modified DATA."
 			     (or rules org-export-default-inline-image-rule))
 		;; Replace contents with image link.
 		(org-element-adopt-elements
-		 (org-element-set-contents l nil)
-		 (with-temp-buffer
-		   (save-excursion (insert contents))
-		   (org-element-link-parser))))))))
+		    (org-element-set-contents l nil)
+		  (with-temp-buffer
+		    (save-excursion (insert contents))
+		    (org-element-link-parser))))))))
       info nil nil t))
   data)
 
@@ -5121,8 +5121,8 @@ INFO is a plist used as a communication channel."
   ;; A cell ends a column group either when it is at the end of a row
   ;; or when it has a right border.
   (or (eq (car (last (org-element-contents
-			 (org-export-get-parent table-cell))))
-	     table-cell)
+		      (org-export-get-parent table-cell))))
+	  table-cell)
       (memq 'right (org-export-table-cell-borders table-cell info))))
 
 (defun org-export-table-row-starts-rowgroup-p (table-row info)
@@ -6339,9 +6339,9 @@ and `org-export-to-file' for more specialized functions."
 
 ;;;###autoload
 (defun org-export-to-buffer
-  (backend buffer
-	   &optional async subtreep visible-only body-only ext-plist
-	   post-process)
+    (backend buffer
+	     &optional async subtreep visible-only body-only ext-plist
+	     post-process)
   "Call `org-export-as' with output to a specified buffer.
 
 BACKEND is either an export back-end, as returned by, e.g.,
@@ -6405,8 +6405,8 @@ This function returns BUFFER."
 
 ;;;###autoload
 (defun org-export-to-file
-  (backend file &optional async subtreep visible-only body-only ext-plist
-	   post-process)
+    (backend file &optional async subtreep visible-only body-only ext-plist
+	     post-process)
   "Call `org-export-as' with output to a specified file.
 
 BACKEND is either an export back-end, as returned by, e.g.,
@@ -6563,7 +6563,7 @@ If optional argument SOURCE is non-nil, remove it instead."
   (let ((source (or source (org-export--stack-source-at-point))))
     (setq org-export-stack-contents
 	  (cl-remove-if (lambda (el) (equal (car el) source))
-			 org-export-stack-contents))))
+			org-export-stack-contents))))
 
 (defun org-export-stack-view (&optional in-emacs)
   "View export results at point in stack.

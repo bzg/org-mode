@@ -590,7 +590,7 @@ consider the following expression:
 		   (f1 (substring f 0 (string-match "\\([\\?#].*\\)?$" f)))
                    (start-pos (+ (string-match wsearch f1) (length base-url)))
                    (end-pos (if strip-suffix
-			      (string-match (regexp-quote strip-suffix) f1)
+			        (string-match (regexp-quote strip-suffix) f1)
 			      (length f1)))
 		   ;; We have to compare redirects without suffix below:
 		   (f2 (concat wdir (substring f1 start-pos end-pos)))

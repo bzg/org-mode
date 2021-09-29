@@ -284,31 +284,31 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (org-switch-to-buffer-other-window "*Org Attach*")
 	    (erase-buffer)
 	    (setq cursor-type nil
-	      header-line-format "Use C-v, M-v, C-n or C-p to navigate.")
+	          header-line-format "Use C-v, M-v, C-n or C-p to navigate.")
 	    (insert
-               (concat "Attachment folder:\n"
-		       (or dir
-			   "Can't find an existing attachment-folder")
-		       (unless (and dir (file-directory-p dir))
-			 "\n(Not yet created)")
-		       "\n\n"
-	               (format "Select an Attachment Command:\n\n%s"
-		               (mapconcat
-		                (lambda (entry)
-		                  (pcase entry
-		                    (`((,key . ,_) ,_ ,docstring)
-		                     (format "%c       %s"
-			                     key
-			                     (replace-regexp-in-string "\n\\([\t ]*\\)"
-							               "        "
-							               docstring
-							               nil nil 1)))
-		                    (_
-		                     (user-error
-			              "Invalid `org-attach-commands' item: %S"
-			              entry))))
-		                org-attach-commands
-		                "\n")))))
+             (concat "Attachment folder:\n"
+		     (or dir
+			 "Can't find an existing attachment-folder")
+		     (unless (and dir (file-directory-p dir))
+		       "\n(Not yet created)")
+		     "\n\n"
+	             (format "Select an Attachment Command:\n\n%s"
+		             (mapconcat
+		              (lambda (entry)
+		                (pcase entry
+		                  (`((,key . ,_) ,_ ,docstring)
+		                   (format "%c       %s"
+			                   key
+			                   (replace-regexp-in-string "\n\\([\t ]*\\)"
+							             "        "
+							             docstring
+							             nil nil 1)))
+		                  (_
+		                   (user-error
+			            "Invalid `org-attach-commands' item: %S"
+			            entry))))
+		              org-attach-commands
+		              "\n")))))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
 	  (let ((msg (format "Select command: [%s]"
 			     (concat (mapcar #'caar org-attach-commands)))))

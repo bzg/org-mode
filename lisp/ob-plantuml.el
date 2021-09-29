@@ -84,9 +84,9 @@ contain multiple entries for the key `:var'.  `:var' entries in PARAMS
 are expected to be scalar variables."
   (mapcar
    (lambda (pair)
-       (format "!define %s %s"
-	       (car pair)
-	       (replace-regexp-in-string "\"" "" (cdr pair))))
+     (format "!define %s %s"
+	     (car pair)
+	     (replace-regexp-in-string "\"" "" (cdr pair))))
    (org-babel--get-vars params)))
 
 (defun org-babel-plantuml-make-body (body params)

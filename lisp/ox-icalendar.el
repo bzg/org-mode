@@ -722,7 +722,7 @@ Return VEVENT component as a string."
 	     "END:VEVENT"))))
 
 (defun org-icalendar--vtodo
-  (entry uid summary location description categories timezone class)
+    (entry uid summary location description categories timezone class)
   "Create a VTODO component.
 
 ENTRY is either a headline or an inlinetask element.  UID is the
@@ -849,7 +849,7 @@ CALSCALE:GREGORIAN\n"
 
 ;;;###autoload
 (defun org-icalendar-export-to-ics
-  (&optional async subtreep visible-only body-only)
+    (&optional async subtreep visible-only body-only)
   "Export current buffer to an iCalendar file.
 
 If narrowing is active in the current buffer, only export its

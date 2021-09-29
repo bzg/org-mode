@@ -183,10 +183,10 @@ Used only when `second-field-align' is activated by the used CSL style."
 (defconst org-cite-csl--etc-dir
   (let* ((oc-root (file-name-directory (locate-library "oc")))
          (oc-etc-dir-1 (expand-file-name "../etc/csl/" oc-root)))
-      ;; package.el and straight will put all of org-mode/lisp/ in org-mode/.
-      ;; This will cause .. to resolve to the directory above Org.
-      ;; To make life easier for people using package.el or straight, we can
-      ;; check to see if ../etc/csl exists, and if it doesn't try ./etc/csl.
+    ;; package.el and straight will put all of org-mode/lisp/ in org-mode/.
+    ;; This will cause .. to resolve to the directory above Org.
+    ;; To make life easier for people using package.el or straight, we can
+    ;; check to see if ../etc/csl exists, and if it doesn't try ./etc/csl.
     (if (file-exists-p oc-etc-dir-1) oc-etc-dir-1
       (expand-file-name "etc/csl/" oc-root)))
   "Directory \"etc/\" from repository.")
@@ -260,9 +260,9 @@ If nil then the Chicago author-date style is used as a fallback.")
   ;; Prior to Emacs-27.1 argument of `regexp' form must be a string literal.
   ;; It is the reason why `rx' is avoided here.
   (rx-to-string `(seq word-start
-                  (regexp ,(regexp-opt (mapcar #'car org-cite-csl--label-alist) t))
-                  (0+ digit)
-                  (or word-start line-end (any ?\s ?\t)))
+                      (regexp ,(regexp-opt (mapcar #'car org-cite-csl--label-alist) t))
+                      (0+ digit)
+                      (or word-start line-end (any ?\s ?\t)))
                 t)
   "Regexp matching a label in a citation reference suffix.
 Label is in match group 1.")

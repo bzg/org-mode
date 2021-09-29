@@ -324,7 +324,7 @@ Each member of this list is a list with three members:
 	 (device-info (or (assq (intern (concat ":" device))
 				org-babel-R-graphics-devices)
                           (assq :png org-babel-R-graphics-devices)))
-        (extra-args (cdr (assq :R-dev-args params))) filearg args)
+         (extra-args (cdr (assq :R-dev-args params))) filearg args)
     (setq device (nth 1 device-info))
     (setq filearg (nth 2 device-info))
     (setq args (mapconcat
@@ -373,14 +373,14 @@ Has four %s escapes to be filled in:
 4. The name of the file to write to")
 
 (defun org-babel-R-evaluate
-  (session body result-type result-params column-names-p row-names-p async)
+    (session body result-type result-params column-names-p row-names-p async)
   "Evaluate R code in BODY."
   (if session
       (if async
           (ob-session-async-org-babel-R-evaluate-session
            session body result-type result-params column-names-p row-names-p)
-      (org-babel-R-evaluate-session
-       session body result-type result-params column-names-p row-names-p))
+        (org-babel-R-evaluate-session
+         session body result-type result-params column-names-p row-names-p))
     (org-babel-R-evaluate-external-process
      body result-type result-params column-names-p row-names-p)))
 
@@ -521,7 +521,7 @@ by `org-babel-comint-async-filter'."
             (process-name (get-buffer-process session))))
        (with-temp-buffer
          (insert (format ob-session-async-R-indicator
-					  "start" uuid))
+			 "start" uuid))
          (insert "\n")
          (insert body)
          (insert "\n")

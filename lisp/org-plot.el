@@ -204,17 +204,17 @@ of the NUMS."
 	 (nice-max (if (= range 0) (car nums)
 		     (/ (float (ceiling (* maximum range-factor))) range-factor))))
     `(:min ,minimum :max ,maximum :range ,range
-      :range-factor ,range-factor
-      :nice-min ,nice-min :nice-max ,nice-max :nice-range ,(- nice-max nice-min))))
+           :range-factor ,range-factor
+           :nice-min ,nice-min :nice-max ,nice-max :nice-range ,(- nice-max nice-min))))
 
 (defun org--plot/sensible-tick-num (table &optional hard-min hard-max)
   "From a the values in a TABLE of data, guess an appropriate number of ticks.
 If HARD-MIN and HARD-MAX can be used to fix the ends of the axis."
   (let* ((row-data
 	  (mapcar (lambda (row) (org--plot/values-stats
-			    (mapcar #'string-to-number (cdr row))
-			    hard-min
-			    hard-max)) table))
+			         (mapcar #'string-to-number (cdr row))
+			         hard-min
+			         hard-max)) table))
 	 (row-normalised-ranges (mapcar (lambda (r-data)
 					  (let ((val (round (*
 							     (plist-get r-data :range-factor)

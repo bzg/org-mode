@@ -1114,15 +1114,15 @@ org-info.js for your website."
 
 (defconst org-html-checkbox-types
   '((unicode .
-     ((on . "&#x2611;") (off . "&#x2610;") (trans . "&#x2610;")))
+             ((on . "&#x2611;") (off . "&#x2610;") (trans . "&#x2610;")))
     (ascii .
-     ((on . "<code>[X]</code>")
-      (off . "<code>[&#xa0;]</code>")
-      (trans . "<code>[-]</code>")))
+           ((on . "<code>[X]</code>")
+            (off . "<code>[&#xa0;]</code>")
+            (trans . "<code>[-]</code>")))
     (html .
 	  ((on . "<input type='checkbox' checked='checked' />")
-	  (off . "<input type='checkbox' />")
-	  (trans . "<input type='checkbox' />"))))
+	   (off . "<input type='checkbox' />")
+	   (trans . "<input type='checkbox' />"))))
   "Alist of checkbox types.
 The cdr of each entry is an alist list three checkbox types for
 HTML export: `on', `off' and `trans'.
@@ -1605,7 +1605,7 @@ CSS classes, then this prefix can be very useful."
 
 (defun org-html-html5-p (info)
   (let ((dt (downcase (plist-get info :html-doctype))))
-	(member dt '("html5" "xhtml5" "<!doctype html>"))))
+    (member dt '("html5" "xhtml5" "<!doctype html>"))))
 
 (defun org-html--html5-fancy-p (info)
   "Non-nil when exporting to HTML5 with fancy elements.
@@ -2244,7 +2244,7 @@ is the language used for CODE, as a string, or nil."
 	    (if (and beg end) (substring code beg end) code)))))))))
 
 (defun org-html-do-format-code
-  (code &optional lang refs retain-labels num-start wrap-lines)
+    (code &optional lang refs retain-labels num-start wrap-lines)
   "Format CODE string as source code.
 Optional arguments LANG, REFS, RETAIN-LABELS, NUM-START, WRAP-LINES
 are, respectively, the language of the source code, as a string, an
@@ -2732,7 +2732,7 @@ holding contextual information."
 	     todo todo-type priority text tags contents info)))
 
 (defun org-html-format-inlinetask-default-function
-  (todo todo-type priority text tags contents info)
+    (todo todo-type priority text tags contents info)
   "Default format function for inlinetasks.
 See `org-html-format-inlinetask-function' for details."
   (format "<div class=\"inlinetask\">\n<b>%s</b>%s\n%s</div>"
@@ -3477,12 +3477,12 @@ contextual information."
   (if (org-export-read-attribute :attr_html src-block :textarea)
       (org-html--textarea-block src-block)
     (let* ((lang (org-element-property :language src-block))
-	  (code (org-html-format-code src-block info))
-	  (label (let ((lbl (org-html--reference src-block info t)))
-		   (if lbl (format " id=\"%s\"" lbl) "")))
-	  (klipsify  (and  (plist-get info :html-klipsify-src)
-                           (member lang '("javascript" "js"
-					  "ruby" "scheme" "clojure" "php" "html")))))
+	   (code (org-html-format-code src-block info))
+	   (label (let ((lbl (org-html--reference src-block info t)))
+		    (if lbl (format " id=\"%s\"" lbl) "")))
+	   (klipsify  (and  (plist-get info :html-klipsify-src)
+                            (member lang '("javascript" "js"
+					   "ruby" "scheme" "clojure" "php" "html")))))
       (if (not lang) (format "<pre class=\"example\"%s>\n%s</pre>" label code)
 	(format "<div class=\"org-src-container\">\n%s%s\n</div>"
 		;; Build caption.
@@ -3786,7 +3786,7 @@ contextual information."
 
 ;;;###autoload
 (defun org-html-export-as-html
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an HTML buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -3831,7 +3831,7 @@ to convert it."
 
 ;;;###autoload
 (defun org-html-export-to-html
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a HTML file.
 
 If narrowing is active in the current buffer, only export its

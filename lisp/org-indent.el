@@ -148,10 +148,10 @@ useful to make it ever so slightly different."
         (aset org-indent--text-line-prefixes
 	      n
 	      (org-add-props
-	       (concat (make-string (+ n indentation) ?\s)
-		       (and (> n 0)
-			    (char-to-string org-indent-boundary-char)))
-	       nil 'face 'org-indent))))))
+	          (concat (make-string (+ n indentation) ?\s)
+		          (and (> n 0)
+			       (char-to-string org-indent-boundary-char)))
+	          nil 'face 'org-indent))))))
 
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
