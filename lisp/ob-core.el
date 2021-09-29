@@ -691,6 +691,9 @@ a list with the following pattern:
     (`(:file-desc) result)
     (`(:file-desc . ,(and (pred stringp) val)) val)))
 
+(defvar *this*) ; Dynamically bound in `org-babel-execute-src-block'
+                ; and `org-babel-read'
+
 ;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
