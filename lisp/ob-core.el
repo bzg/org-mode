@@ -472,23 +472,7 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 (defvar org-babel-default-header-args
   '((:session . "none") (:results . "replace") (:exports . "code")
     (:cache . "no") (:noweb . "no") (:hlines . "no") (:tangle . "no"))
-  "Default arguments to use when evaluating a source block.
-
-This is a list in which each element is an alist.  Each key
-corresponds to a header argument, and each value to that header's
-value.  The value can either be a string or a closure that
-evaluates to a string at runtime.  For instance, imagine you'd
-like to set the file name output of a latex source block to a
-sha1 of its contents.  We could achieve this with:
-
-(defun org-src-sha ()
-  (let ((elem (org-element-at-point)))
-    (concat (sha1 (org-element-property :value elem)) \".svg\")))
-
-(setq org-babel-default-header-args:latex
-      `((:results . \"file link replace\")
-        (:file . (lambda () (org-src-sha)))))")
-
+  "Default arguments to use when evaluating a source block.")
 (put 'org-babel-default-header-args 'safe-local-variable
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
 
@@ -599,18 +583,6 @@ the outer-most code block.")
 
 (defvar *this*)
 
-(defun eval-default-headers (headers)
-  "Compute default header list set with HEADERS.
-
-  Evaluate all default header arguments set to functions prior to
-  returning the list of header arguments."
-  (let ((lst nil))
-    (dolist (elem (eval headers t))
-      (if (listp (cdr elem))
-          (push `(,(car elem) . ,(funcall (cdr elem))) lst)
-        (push elem lst)))
-    lst))
-
 (defun org-babel-get-src-block-info (&optional light datum)
   "Extract information from a source block or inline source block.
 
@@ -642,7 +614,7 @@ a list with the following pattern:
 	       (apply #'org-babel-merge-params
 		      (if inline org-babel-default-inline-header-args
 			org-babel-default-header-args)
-		      (and (boundp lang-headers) (eval-default-headers lang-headers))
+		      (and (boundp lang-headers) (eval lang-headers t))
 		      (append
 		       ;; If DATUM is provided, make sure we get node
 		       ;; properties applicable to its location within
