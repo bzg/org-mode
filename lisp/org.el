@@ -8,7 +8,7 @@
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
 
-;; Version: 9.4.6
+;; Version: 9.4.7
 
 ;; This file is part of GNU Emacs.
 ;;
