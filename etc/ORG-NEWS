@@ -441,6 +441,33 @@ See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
 attachment directory at calls of ~org-attach-sync~.  There is
 Never delete, Always delete and Query the user (default).
 
+*** ~org-babel-default-header-args~ can now be specified as closures or strings
+
+~org-babel-default-header-args~ now also accepts closures that
+evaluate to a string. Previously, only direct strings were
+supported. These closures are evaluated when point is at the source
+block, which allows them to make use of contextual information at the
+relevant source block. One example that illustrates the usefulness of
+this addition (also given in the documentation for
+~org-babel-default-header-args~) is:
+
+#+begin_src elisp
+(defun org-src-sha ()
+  (let ((elem (org-element-at-point)))
+    (concat (sha1 (org-element-property :value elem)) \".svg\")))
+
+(setq org-babel-default-header-args:latex
+      `((:results . \"file link replace\")
+        (:file . (lambda () (org-src-sha)))))
+#+end_src
+
+This will set the ~:file~ header argument to the sha1 checksum of the
+contents of the current latex source block.
+
+Finally, the closures are only evaluated if they're not overridden for
+a source block. This improves efficiency in cases where the result of
+a compute-expensive closure would otherwise be discarded.
+
 ** Miscellaneous
 *** =org-bibtex= includes =doi= and =url= entries when exporting to BiBTeX
 =doi= and =url= entries have been made optional for some publication
