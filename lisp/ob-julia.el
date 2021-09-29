@@ -1,6 +1,6 @@
 ;;; ob-julia.el --- org-babel functions for julia code evaluation
 
-;; Copyright (C) 2013, 2014, 2021 G. Jay Kerns
+;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 ;; Authors: G. Jay Kerns, based on ob-R.el by Eric Schulte and Dan Davison
 ;; Maintainer: Pedro Bruel <pedro.bruel@gmail.com>
 ;; Keywords: literate programming, reproducible research, scientific computing
