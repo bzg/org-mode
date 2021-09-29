@@ -9,7 +9,7 @@ all:		$(ORG_MAKE_DOC)
 
 info:		org orgguide
 
-html:		org.html
+html:		org.html orgguide.html
 
 pdf:		org.pdf orgguide.pdf
 
