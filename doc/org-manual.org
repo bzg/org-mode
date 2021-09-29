@@ -141,9 +141,13 @@ Org Build System page on [[https://orgmode.org/worg/dev/org-build-system.html][W
 :END:
 
 Org's repository used to contain =contrib/= directory for add-ons
-contributed by others.  As of Org 9.5, the directory has bee moved to
-this new dedicated [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository, which you can install
-separately.
+contributed by others.  As of Org 9.5, the directory has been moved to
+the dedicated org-contrib [[https://git.sr.ht/~bzg/org-contrib][repository]], which you can install
+separately as a [[https://elpa.nongnu.org/nongnu/org-contrib.html][package]] from NonGNU ELPA.
+
+There are enough valuable packages maintained outside of the Org repository.
+Worg has a list of [[https://orgmode.org/worg/org-contrib/index.html][org-contrib and external packages]], certainly it is not
+exhaustive.
 
 ** Activation
 :PROPERTIES:
