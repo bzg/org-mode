@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2018-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 
 ;; This file is part of GNU Emacs.
@@ -214,13 +214,18 @@ relative  Relative to the current directory, i.e. the directory of the file
 absolute  Absolute path, if possible with ~ for home directory.
 noabbrev  Absolute path, no abbreviation of home directory.
 adaptive  Use relative path for files in the current directory and sub-
-          directories of it.  For other files, use an absolute path."
+          directories of it.  For other files, use an absolute path.
+
+Alternatively, users may supply a custom function that takes the
+full filename as an argument and returns the path."
   :group 'org-link
   :type '(choice
 	  (const relative)
 	  (const absolute)
 	  (const noabbrev)
-	  (const adaptive))
+	  (const adaptive)
+	  (function))
+  :package-version '(Org . "9.5")
   :safe #'symbolp)
 
 (defcustom org-link-abbrev-alist nil
@@ -276,13 +281,6 @@ links created by planner."
   :group 'org-link-follow
   :type '(choice (const nil) (function))
   :safe #'null)
-
-(defcustom org-link-doi-server-url "https://doi.org/"
-  "The URL of the DOI server."
-  :group 'org-link-follow
-  :version "24.3"
-  :type 'string
-  :safe #'stringp)
 
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
@@ -376,9 +374,9 @@ changes to the current buffer."
 
 Shell links can be dangerous: just think about a link
 
-     [[shell:rm -rf ~/*][Google Search]]
+     [[shell:rm -rf ~/*][Web Search]]
 
-This link would show up in your Org document as \"Google Search\",
+This link would show up in your Org document as \"Web Search\",
 but really it would remove your entire home directory.
 Therefore we advise against setting this variable to nil.
 Just change it to `y-or-n-p' if you want to confirm with a
@@ -401,9 +399,9 @@ single keystroke rather than having to type \"yes\"."
   "Non-nil means ask for confirmation before executing Emacs Lisp links.
 Elisp links can be dangerous: just think about a link
 
-     [[elisp:(shell-command \"rm -rf ~/*\")][Google Search]]
+     [[elisp:(shell-command \"rm -rf ~/*\")][Web Search]]
 
-This link would show up in your Org document as \"Google Search\",
+This link would show up in your Org document as \"Web Search\",
 but really it would remove your entire home directory.
 Therefore we advise against setting this variable to nil.
 Just change it to `y-or-n-p' if you want to confirm with a
@@ -444,7 +442,7 @@ negates this setting for the duration of the command."
   :safe (lambda (val) (or (booleanp val) (integerp val))))
 
 (defcustom org-link-email-description-format "Email %c: %s"
-  "Format of the description part of a link to an email or usenet message.
+  "Format of the description part of a link to an email or Usenet message.
 The following %-escapes will be replaced by corresponding information:
 
 %F   full \"From\" field
@@ -508,7 +506,7 @@ links more efficient."
   "Regular expression matching radio targets in plain text.")
 
 (defvar org-link-types-re nil
-  "Matches a link that has a url-like prefix like \"http:\"")
+  "Matches a link that has a url-like prefix like \"http:\".")
 
 (defvar org-link-angle-re nil
   "Matches link with angular brackets, spaces are allowed.")
@@ -594,7 +592,7 @@ handle this as a special case.
 
 When the function does handle the link, it must return a non-nil value.
 If it decides that it is not responsible for this link, it must return
-nil to indicate that that Org can continue with other options like
+nil to indicate that Org can continue with other options like
 exact and fuzzy text search.")
 
 
@@ -931,7 +929,7 @@ and dates."
 
 (defun org-link-encode (text table)
   "Return percent escaped representation of string TEXT.
-TEXT is a string with the text to escape. TABLE is a list of
+TEXT is a string with the text to escape.  TABLE is a list of
 characters that should be escaped."
   (mapconcat
    (lambda (c)
@@ -1322,14 +1320,6 @@ If there is no description, use the link target."
 
 ;;; Built-in link types
 
-;;;; "doi" link type
-(defun org-link--open-doi (path arg)
-  "Open a \"doi\" type link.
-PATH is a the path to search for, as a string."
-  (browse-url (url-encode-url (concat org-link-doi-server-url path)) arg))
-
-(org-link-set-parameters "doi" :follow #'org-link--open-doi)
-
 ;;;; "elisp" link type
 (defun org-link--open-elisp (path _)
   "Open a \"elisp\" type link.
@@ -1360,7 +1350,23 @@ PATH is a symbol name, as a string."
     ((and (pred boundp) variable) (describe-variable variable))
     (name (user-error "Unknown function or variable: %s" name))))
 
-(org-link-set-parameters "help" :follow #'org-link--open-help)
+(defun org-link--store-help ()
+  "Store \"help\" type link."
+  (when (eq major-mode 'help-mode)
+    (let ((symbol
+           (save-excursion
+	     (goto-char (point-min))
+             ;; In case the help is about the key-binding, store the
+             ;; function instead.
+             (search-forward "runs the command " (line-end-position) t)
+             (read (current-buffer)))))
+      (org-link-store-props :type "help"
+                            :link (format "help:%s" symbol)
+                            :description nil))))
+
+(org-link-set-parameters "help"
+                         :follow #'org-link--open-help
+                         :store #'org-link--store-help)
 
 ;;;; "http", "https", "mailto", "ftp", and "news" link types
 (dolist (scheme '("ftp" "http" "https" "mailto" "news"))
@@ -1488,7 +1494,7 @@ non-nil."
 	    (move-beginning-of-line 2)
 	    (set-mark (point)))))
     (setq org-store-link-plist nil)
-    (let (link cpltxt desc description search custom-id agenda-link)
+    (let (link cpltxt desc search custom-id agenda-link) ;; description
       (cond
        ;; Store a link using an external link type, if any function is
        ;; available. If more than one can generate a link from current
@@ -1512,14 +1518,17 @@ non-nil."
 		  (apply #'org-link-store-props
 			 (cdr (assoc-string
 			       (completing-read
-				"Which function for creating the link? "
-				(mapcar #'car results-alist)
-				nil t (symbol-name name))
+                                (format "Store link with (default %s): " name)
+                                (mapcar #'car results-alist)
+                                nil t nil nil (symbol-name name))
 			       results-alist)))
 		  t))))
 	(setq link (plist-get org-store-link-plist :link))
-	(setq desc (or (plist-get org-store-link-plist :description)
-		       link)))
+        ;; If store function actually set `:description' property, use
+        ;; it, even if it is nil.  Otherwise, fallback to link value.
+	(setq desc (if (plist-member org-store-link-plist :description)
+                       (plist-get org-store-link-plist :description)
+		     link)))
 
        ;; Store a link from a remote editing buffer.
        ((org-src-edit-buffer-p)
@@ -1577,19 +1586,6 @@ non-nil."
 			      nil nil nil))))
 	  (org-link-store-props :type "calendar" :date cd)))
 
-       ((eq major-mode 'help-mode)
-	(let ((symbol (replace-regexp-in-string
-		       ;; Help mode escapes backquotes and backslashes
-		       ;; before displaying them.  E.g., "`" appears
-		       ;; as "\'" for reasons.  Work around this.
-		       (rx "\\" (group (or "`" "\\"))) "\\1"
-		       (save-excursion
-			 (goto-char (point-min))
-			 (looking-at "^[^ ]+")
-			 (match-string 0)))))
-	  (setq link (concat "help:" symbol)))
-	(org-link-store-props :type "help"))
-
        ((eq major-mode 'w3-mode)
 	(setq cpltxt (if (and (buffer-name)
 			      (not (string-match "Untitled" (buffer-name))))
@@ -1619,7 +1615,7 @@ non-nil."
 		      'org-create-file-search-functions))
 	(setq link (concat "file:" (abbreviate-file-name buffer-file-name)
 			   "::" search))
-	(setq cpltxt (or description link)))
+	(setq cpltxt (or link))) ;; description
 
        ((and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
 	(org-with-limited-levels
@@ -1724,7 +1720,7 @@ non-nil."
       (if (not (and interactive? link))
 	  (or agenda-link (and link (org-link-make-string link desc)))
 	(if (member (list link desc) org-stored-links)
-	    (message "This link already exists")
+	    (message "This link has already been stored")
 	  (push (list link desc) org-stored-links)
 	  (message "Stored: %s" (or desc link))
 	  (when custom-id
@@ -1906,6 +1902,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	    (setq path (expand-file-name path)))
 	   ((eq org-link-file-path-type 'relative)
 	    (setq path (file-relative-name path)))
+	   ((functionp org-link-file-path-type)
+	    (setq path (funcall org-link-file-path-type
+				(expand-file-name path))))
 	   (t
 	    (save-match-data
 	      (if (string-match (concat "^" (regexp-quote

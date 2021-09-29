@@ -17,7 +17,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
 
@@ -3810,6 +3810,17 @@ Another text. (ref:text)
 		(paragraph '(paragraph nil)))
 	    (org-element-adopt-elements paragraph "begin " object "end")
 	    (org-export-data-with-backend paragraph backend nil)))))
+
+
+;;; Raw objects
+
+(ert-deftest test-org-export/raw-strings ()
+  "Test exporting raw objects."
+  (should
+   (equal "foo"
+          (let ((backend (org-export-create-backend))
+                (object (org-export-raw-string "foo")))
+            (org-export-data-with-backend object backend nil)))))
 
 
 ;;; Src-block and example-block

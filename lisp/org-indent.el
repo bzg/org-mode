@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2009-2021 Free Software Foundation, Inc.
 ;;
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
 ;;
@@ -85,15 +85,13 @@ it may be prettier to customize the `org-indent' face."
   :type 'character)
 
 (defcustom org-indent-mode-turns-off-org-adapt-indentation t
-  "Non-nil means setting the variable `org-indent-mode' will \
-turn off indentation adaptation.
+  "Non-nil means setting `org-indent-mode' will turn off indentation adaptation.
 For details see the variable `org-adapt-indentation'."
   :group 'org-indent
   :type 'boolean)
 
 (defcustom org-indent-mode-turns-on-hiding-stars t
-  "Non-nil means setting the variable `org-indent-mode' will \
-turn on `org-hide-leading-stars'."
+  "Non-nil means setting `org-indent-mode' will turn on `org-hide-leading-stars'."
   :group 'org-indent
   :type 'boolean)
 
@@ -128,31 +126,32 @@ useful to make it ever so slightly different."
 	(make-vector org-indent--deepest-level nil))
   (setq org-indent--text-line-prefixes
 	(make-vector org-indent--deepest-level nil))
-  (dotimes (n org-indent--deepest-level)
-    (let ((indentation (if (<= n 1) 0
-			 (* (1- org-indent-indentation-per-level)
-			    (1- n)))))
-      ;; Headlines line prefixes.
-      (let ((heading-prefix (make-string indentation ?*)))
-	(aset org-indent--heading-line-prefixes
+  (when (> org-indent-indentation-per-level 0)
+    (dotimes (n org-indent--deepest-level)
+      (let ((indentation (if (<= n 1) 0
+			   (* (1- org-indent-indentation-per-level)
+			      (1- n)))))
+        ;; Headlines line prefixes.
+        (let ((heading-prefix (make-string indentation ?*)))
+	  (aset org-indent--heading-line-prefixes
+	        n
+	        (org-add-props heading-prefix nil 'face 'org-indent))
+	  ;; Inline tasks line prefixes
+	  (aset org-indent--inlinetask-line-prefixes
+	        n
+	        (cond ((<= n 1) "")
+		      ((bound-and-true-p org-inlinetask-show-first-star)
+		       (concat org-indent-inlinetask-first-star
+			       (substring heading-prefix 1)))
+		      (t (org-add-props heading-prefix nil 'face 'org-indent)))))
+        ;; Text line prefixes.
+        (aset org-indent--text-line-prefixes
 	      n
-	      (org-add-props heading-prefix nil 'face 'org-indent))
-	;; Inline tasks line prefixes
-	(aset org-indent--inlinetask-line-prefixes
-	      n
-	      (cond ((<= n 1) "")
-		    ((bound-and-true-p org-inlinetask-show-first-star)
-		     (concat org-indent-inlinetask-first-star
-			     (substring heading-prefix 1)))
-		    (t (org-add-props heading-prefix nil 'face 'org-indent)))))
-      ;; Text line prefixes.
-      (aset org-indent--text-line-prefixes
-	    n
-	    (org-add-props
-		(concat (make-string (+ n indentation) ?\s)
-			(and (> n 0)
-			     (char-to-string org-indent-boundary-char)))
-		nil 'face 'org-indent)))))
+	      (org-add-props
+	          (concat (make-string (+ n indentation) ?\s)
+		          (and (> n 0)
+			       (char-to-string org-indent-boundary-char)))
+	          nil 'face 'org-indent))))))
 
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
@@ -169,7 +168,7 @@ properties, after each buffer modification, on the modified zone.
 The process is synchronous.  Though, initial indentation of
 buffer, which can take a few seconds on large buffers, is done
 during idle time."
-  nil " Ind" nil
+  :lighter " Ind"
   (cond
    (org-indent-mode
     ;; mode was turned on.

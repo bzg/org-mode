@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2008-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
 ;;
@@ -366,7 +366,7 @@ VALUE can be `on', `off', or `paused'."
        (setq org-timer-mode-line-timer nil))
      (when org-timer-display
        (setq org-timer-mode-line-timer
-	     (run-with-timer 1 1 'org-timer-update-mode-line))))))
+	     (run-with-timer 1 1 #'org-timer-update-mode-line))))))
 
 (defun org-timer-update-mode-line ()
   "Update the timer time in the mode line."
@@ -400,16 +400,16 @@ prompt the user if she wants to replace it.
 Called with a numeric prefix argument, use this numeric value as
 the duration of the timer in minutes.
 
-Called with a `C-u' prefix arguments, use `org-timer-default-timer'
+Called with a \\[universal-argument] prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration.
 
-With two `C-u' prefix arguments, use `org-timer-default-timer'
+With two \\[universal-argument] prefix arguments, use `org-timer-default-timer'
 without prompting the user for a duration and automatically
 replace any running timer.
 
 By default, the timer duration will be set to the number of
 minutes in the Effort property, if any.  You can ignore this by
-using three `C-u' prefix arguments."
+using three \\[universal-argument] prefix arguments."
   (interactive "P")
   (when (and org-timer-start-time
 	     (not org-timer-countdown-timer))
@@ -456,14 +456,15 @@ using three `C-u' prefix arguments."
   "Start countdown timer that will last SECS.
 TITLE will be appended to the notification message displayed when
 time is up."
-  (let ((msg (format "%s: time out" title)))
+  (let ((msg (format "%s: time out" title))
+        (sound org-clock-sound))
     (run-with-timer
-     secs nil `(lambda ()
-		 (setq org-timer-countdown-timer nil
-		       org-timer-start-time nil)
-		 (org-notify ,msg ,org-clock-sound)
-		 (org-timer-set-mode-line 'off)
-		 (run-hooks 'org-timer-done-hook)))))
+     secs nil (lambda ()
+		(setq org-timer-countdown-timer nil
+		      org-timer-start-time nil)
+		(org-notify msg sound)
+		(org-timer-set-mode-line 'off)
+		(run-hooks 'org-timer-done-hook)))))
 
 (defun org-timer--get-timer-title ()
   "Construct timer title.

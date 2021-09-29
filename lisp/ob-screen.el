@@ -3,6 +3,7 @@
 ;; Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
 ;; Author: Benjamin Andresen
+;; Maintainer: Ken Mankoff
 ;; Keywords: literate programming, interactive shell
 ;; Homepage: https://orgmode.org
 
@@ -29,7 +30,7 @@
 ;; Adding :cmd and :terminal as header arguments
 ;; :terminal must support the -T (title) and -e (command) parameter
 ;;
-;; You can test the default setup. (xterm + sh) with
+;; You can test the default setup (xterm + sh) with
 ;; M-x org-babel-screen-test RET
 
 ;;; Code:

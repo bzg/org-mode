@@ -5,7 +5,7 @@
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 
 ;; Released under the GNU General Public License version 3
-;; see: http://www.gnu.org/licenses/gpl-3.0.html
+;; see: https://www.gnu.org/licenses/gpl-3.0.html
 
 ;;;; Comments
 

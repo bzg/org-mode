@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2004-2021 Free Software Foundation, Inc.
 ;;
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;;	   Bastien Guerry <bzg@gnu.org>
 ;;         Dan Davison <davison at stats dot ox dot ac dot uk>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -299,6 +299,9 @@ is 0.")
   "File name associated to Org source buffer, or nil.")
 (put 'org-src-source-file-name 'permanent-local t)
 
+(defvar-local org-src--preserve-blank-line nil)
+(put 'org-src--preserve-blank-line 'permanent-local t)
+
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
   "Construct the buffer name for a source editing buffer."
   (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
@@ -443,14 +446,21 @@ Assume point is in the corresponding edit buffer."
 		0))))
 	(use-tabs? (and (> org-src--tab-width 0) t))
 	(source-tab-width org-src--tab-width)
-	(contents (org-with-wide-buffer (buffer-string)))
-	(write-back org-src--allow-write-back))
+	(contents (org-with-wide-buffer
+                   (let ((eol (line-end-position)))
+                     (list (buffer-substring (point-min) eol)
+                           (buffer-substring eol (point-max))))))
+	(write-back org-src--allow-write-back)
+        (preserve-blank-line org-src--preserve-blank-line)
+        marker)
     (with-current-buffer write-back-buf
       ;; Reproduce indentation parameters from source buffer.
       (setq indent-tabs-mode use-tabs?)
       (when (> source-tab-width 0) (setq tab-width source-tab-width))
       ;; Apply WRITE-BACK function on edit buffer contents.
-      (insert (org-no-properties contents))
+      (insert (org-no-properties (car contents)))
+      (setq marker (point-marker))
+      (insert (org-no-properties (car (cdr contents))))
       (goto-char (point-min))
       (when (functionp write-back) (save-excursion (funcall write-back)))
       ;; Add INDENTATION-OFFSET to every line in buffer,
@@ -458,10 +468,14 @@ Assume point is in the corresponding edit buffer."
       (when (> indentation-offset 0)
 	(while (not (eobp))
 	  (skip-chars-forward " \t")
-	  (let ((i (current-column)))
-	    (delete-region (line-beginning-position) (point))
-	    (indent-to (+ i indentation-offset)))
-	  (forward-line))))))
+          (when (or (not (eolp))                               ; not a blank line
+                    (and (eq (point) (marker-position marker)) ; current line
+                         preserve-blank-line))
+	    (let ((i (current-column)))
+	      (delete-region (line-beginning-position) (point))
+	      (indent-to (+ i indentation-offset))))
+	  (forward-line)))
+      (set-marker marker nil))))
 
 (defun org-src--edit-element
     (datum name &optional initialize write-back contents remote)
@@ -506,6 +520,11 @@ Leave point in edit buffer."
 	     (block-ind (org-with-point-at (org-element-property :begin datum)
 			  (current-indentation)))
 	     (content-ind org-edit-src-content-indentation)
+             (blank-line (save-excursion (beginning-of-line)
+                                         (looking-at-p "^[[:space:]]*$")))
+             (empty-line (and blank-line (looking-at-p "^$")))
+             (preserve-blank-line (or (and blank-line (not empty-line))
+                                      (and empty-line (= (+ block-ind content-ind) 0))))
 	     (preserve-ind
 	      (and (memq type '(example-block src-block))
 		   (or (org-element-property :preserve-indent datum)
@@ -554,6 +573,7 @@ Leave point in edit buffer."
 	(setq org-src--overlay overlay)
 	(setq org-src--allow-write-back write-back)
 	(setq org-src-source-file-name source-file-name)
+        (setq org-src--preserve-blank-line preserve-blank-line)
 	;; Start minor mode.
 	(org-src-mode)
 	;; Clear undo information so we cannot undo back to the
@@ -584,7 +604,7 @@ Leave point in edit buffer."
 
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
-This function is called by emacs automatic fontification, as long
+This function is called by Emacs' automatic fontification, as long
 as `org-src-fontify-natively' is non-nil."
   (let ((lang-mode (org-src-get-lang-mode lang)))
     (when (fboundp lang-mode)
@@ -679,7 +699,7 @@ This minor mode is turned on in two situations:
 \\{org-src-mode-map}
 
 See also `org-src-mode-hook'."
-  nil " OrgSrc" nil
+  :lighter " OrgSrc"
   (when org-edit-src-persistent-message
     (setq header-line-format
 	  (substitute-command-keys
@@ -1199,13 +1219,13 @@ Throw an error if there is no such buffer."
       ;; insert new contents.
       (delete-overlay overlay)
       (let ((expecting-bol (bolp)))
-	(if (version< emacs-version "26.1")
+	(if (version< emacs-version "27.1")
 	    (progn (delete-region beg end)
 		   (insert (with-current-buffer write-back-buf (buffer-string))))
-	    (save-restriction
-	      (narrow-to-region beg end)
-	      (replace-buffer-contents write-back-buf)
-	      (goto-char (point-max))))
+	  (save-restriction
+	    (narrow-to-region beg end)
+	    (replace-buffer-contents write-back-buf 0.1 nil)
+	    (goto-char (point-max))))
 	(when (and expecting-bol (not (bolp))) (insert "\n")))
       (kill-buffer write-back-buf)
       (save-buffer)
@@ -1246,14 +1266,14 @@ Throw an error if there is no such buffer."
        (undo-boundary)
        (goto-char beg)
        (let ((expecting-bol (bolp)))
-	 (if (version< emacs-version "26.1")
+	 (if (version< emacs-version "27.1")
 	     (progn (delete-region beg end)
 		    (insert (with-current-buffer write-back-buf
                               (buffer-string))))
-	     (save-restriction
-	       (narrow-to-region beg end)
-	       (replace-buffer-contents write-back-buf)
-	       (goto-char (point-max))))
+	   (save-restriction
+	     (narrow-to-region beg end)
+	     (replace-buffer-contents write-back-buf 0.1 nil)
+	     (goto-char (point-max))))
 	 (when (and expecting-bol (not (bolp))) (insert "\n")))))
     (when write-back-buf (kill-buffer write-back-buf))
     ;; If we are to return to source buffer, put point at an

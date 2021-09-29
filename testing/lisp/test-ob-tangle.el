@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Comments:
 
@@ -308,7 +308,7 @@ another block
 	      (delete-file file)))))
   ;; Preserve order with mixed languages.
   (should
-   (equal '("1" "3" "2" "4")
+   (equal '("1" "2" "3" "4")
 	  (let ((file (make-temp-file "org-tangle-")))
 	    (unwind-protect
 		(progn

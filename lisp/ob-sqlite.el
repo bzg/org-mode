@@ -3,6 +3,7 @@
 ;; Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
+;; Maintainer: Nick Savage
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 
@@ -27,6 +28,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'ob-sql)
 
 (declare-function org-table-convert-region "org-table"
 		  (beg0 end0 &optional separator))
@@ -51,8 +53,8 @@
 
 (defun org-babel-expand-body:sqlite (body params)
   "Expand BODY according to the values of PARAMS."
-  (org-babel-sqlite-expand-vars
-   body (org-babel--get-vars params)))
+  (org-babel-sql-expand-vars
+   body (org-babel--get-vars params) t))
 
 (defvar org-babel-sqlite3-command "sqlite3")
 
@@ -112,22 +114,8 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-sqlite-expand-vars (body vars)
   "Expand the variables held in VARS in BODY."
-  ;; FIXME: Redundancy with org-babel-sql-expand-vars!
-  (mapc
-   (lambda (pair)
-     (setq body
-	   (replace-regexp-in-string
-	    (format "$%s" (car pair))
-	    (let ((val (cdr pair)))
-              (if (listp val)
-                  (let ((data-file (org-babel-temp-file "sqlite-data-")))
-                    (with-temp-file data-file
-                      (insert (orgtbl-to-csv val nil)))
-                    data-file)
-                (if (stringp val) val (format "%S" val))))
-	    body)))
-   vars)
-  body)
+  (declare (obsolete "use `org-babel-sql-expand-vars' instead." "9.5"))
+  (org-babel-sql-expand-vars body vars t))
 
 (defun org-babel-sqlite-table-or-scalar (result)
   "If RESULT looks like a trivial table, then unwrap it."

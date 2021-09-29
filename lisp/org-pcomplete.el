@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2004-2021 Free Software Foundation, Inc.
 ;;
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;;         John Wiegley <johnw at gnu dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
@@ -21,8 +21,7 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
+
 ;;; Code:
 
 ;;;; Require other packages
@@ -186,7 +185,7 @@ When completing for #+STARTUP, for example, this function returns
 	(cons (reverse args) (reverse begins))))))
 
 (defun org-pcomplete-initial ()
-  "Calls the right completion function for first argument completions."
+  "Call the right completion function for first argument completions."
   (ignore
    (funcall (or (pcomplete-find-completion-function
 		 (car (org-thing-at-point)))
@@ -239,11 +238,11 @@ When completing for #+STARTUP, for example, this function returns
   (require 'ox)
   (pcomplete-here
    (and org-export-exclude-tags
-	(list (mapconcat 'identity org-export-exclude-tags " ")))))
+	(list (mapconcat #'identity org-export-exclude-tags " ")))))
 
 (defun pcomplete/org-mode/file-option/filetags ()
   "Complete arguments for the #+FILETAGS file option."
-  (pcomplete-here (and org-file-tags (mapconcat 'identity org-file-tags " "))))
+  (pcomplete-here (and org-file-tags (mapconcat #'identity org-file-tags " "))))
 
 (defun pcomplete/org-mode/file-option/language ()
   "Complete arguments for the #+LANGUAGE file option."
@@ -264,13 +263,13 @@ When completing for #+STARTUP, for example, this function returns
   (require 'ox)
   (pcomplete-here
    (and org-export-select-tags
-	(list (mapconcat 'identity org-export-select-tags " ")))))
+	(list (mapconcat #'identity org-export-select-tags " ")))))
 
 (defun pcomplete/org-mode/file-option/startup ()
   "Complete arguments for the #+STARTUP file option."
   (while (pcomplete-here
 	  (let ((opts (pcomplete-uniquify-list
-		       (mapcar 'car org-startup-options))))
+		       (mapcar #'car org-startup-options))))
 	    ;; Some options are mutually exclusive, and shouldn't be completed
 	    ;; against if certain other options have already been seen.
 	    (dolist (arg pcomplete-args)
@@ -340,7 +339,8 @@ When completing for #+STARTUP, for example, this function returns
   "Complete against TeX-style HTML entity names."
   (require 'org-entities)
   (while (pcomplete-here
-	  (pcomplete-uniquify-list (remove nil (mapcar 'car-safe org-entities)))
+	  (pcomplete-uniquify-list
+	   (remove nil (mapcar #'car-safe org-entities)))
 	  (substring pcomplete-stub 1))))
 
 (defun pcomplete/org-mode/todo ()

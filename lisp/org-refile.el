@@ -2,23 +2,23 @@
 
 ;; Copyright (C) 2010-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;;
 ;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -214,7 +214,7 @@ converted to a headline before refiling."
 		   org-org-menu
 		   '("Edit Structure") i))
       '(["Refile Subtree" org-refile (org-in-subtree-not-table-p)]
-	["Refile and copy Subtree" org-copy (org-in-subtree-not-table-p)]))
+	["Refile and copy Subtree" org-refile-copy (org-in-subtree-not-table-p)]))
 
 (defun org-refile-marker (pos)
   "Get a new refile marker, but only if caching is in use."
@@ -383,7 +383,18 @@ the *old* location.")
   (let ((org-refile-keep t))
     (org-refile nil nil nil "Copy")))
 
+;;;###autoload
+(defun org-refile-reverse (&optional arg default-buffer rfloc msg)
+  "Refile while temporarily toggling `org-reverse-note-order'.
+So if `org-refile' would append the entry as the last entry under
+the target heading, `org-refile-reverse' will prepend it as the
+first entry, and vice-versa."
+  (interactive "P")
+  (let ((org-reverse-note-order (not (org-notes-order-reversed-p))))
+    (org-refile arg default-buffer rfloc msg)))
+
 (defvar org-capture-last-stored-marker)
+
 
 ;;;###autoload
 (defun org-refile (&optional arg default-buffer rfloc msg)
@@ -427,7 +438,7 @@ needed when passing RFLOC
 headline to refile under
 
 MSG is a string to replace \"Refile\" in the default prompt with
-another verb.  E.g. `org-copy' sets this parameter to \"Copy\".
+another verb.  E.g. `org-refile-copy' sets this parameter to \"Copy\".
 
 See also `org-refile-use-outline-path'.
 

@@ -593,7 +593,7 @@ in description"
 	(let ((file (org-unbracket-string
 			"\"" "\""
 		      (org-element-property :value k))))
-	  (and (not (org-file-url-p file))
+	  (and (not (org-url-p file))
 	       (not (file-remote-p file))
 	       (not (file-exists-p file))
 	       (list (org-element-property :begin k)
@@ -687,15 +687,42 @@ Use \"export %s\" instead"
     reports))
 
 (defun org-lint-invalid-macro-argument-and-template (ast)
-  (let ((extract-placeholders
-	 (lambda (template)
-	   (let ((start 0)
-		 args)
-	     (while (string-match "\\$\\([1-9][0-9]*\\)" template start)
-	       (setf start (match-end 0))
-	       (push (string-to-number (match-string 1 template)) args))
-	     (sort (org-uniquify args) #'<))))
-	reports)
+  (let* ((reports nil)
+         (extract-placeholders
+	  (lambda (template)
+	    (let ((start 0)
+		  args)
+	      (while (string-match "\\$\\([1-9][0-9]*\\)" template start)
+	        (setf start (match-end 0))
+	        (push (string-to-number (match-string 1 template)) args))
+	      (sort (org-uniquify args) #'<))))
+         (check-arity
+          (lambda (arity macro)
+            (let* ((name (org-element-property :key macro))
+                   (pos (org-element-property :begin macro))
+                   (args (org-element-property :args macro))
+                   (l (length args)))
+              (cond
+               ((< l (1- (car arity)))
+                (push (list pos (format "Missing arguments in macro %S" name))
+                      reports))
+               ((< l (car arity))
+                (push (list pos (format "Missing argument in macro %S" name))
+                      reports))
+               ((> l (1+ (cdr arity)))
+                (push (let ((spurious-args (nthcdr (cdr arity) args)))
+                        (list pos
+                              (format "Spurious arguments in macro %S: %s"
+                                      name
+                                      (mapconcat #'org-trim spurious-args ", "))))
+                      reports))
+               ((> l (cdr arity))
+                (push (list pos
+                            (format "Spurious argument in macro %S: %s"
+                                    name
+                                    (org-last args)))
+                      reports))
+               (t nil))))))
     ;; Check arguments for macro templates.
     (org-element-map ast 'keyword
       (lambda (k)
@@ -731,25 +758,29 @@ Use \"export %s\" instead"
 	(lambda (macro)
 	  (let* ((name (org-element-property :key macro))
 		 (template (cdr (assoc-string name templates t))))
-	    (if (not template)
-		(push (list (org-element-property :begin macro)
-			    (format "Undefined macro \"%s\"" name))
-		      reports)
-	      (let ((arg-numbers (funcall extract-placeholders template)))
-		(when arg-numbers
-		  (let ((spurious-args
-			 (nthcdr (apply #'max arg-numbers)
-				 (org-element-property :args macro))))
-		    (when spurious-args
-		      (push
-		       (list (org-element-property :begin macro)
-			     (format "Unused argument%s in macro \"%s\": %s"
-				     (if (> (length spurious-args) 1) "s" "")
-				     name
-				     (mapconcat (lambda (a) (format "\"%s\"" a))
-						spurious-args
-						", ")))
-		       reports))))))))))
+            (pcase template
+              (`nil
+               (push (list (org-element-property :begin macro)
+			   (format "Undefined macro %S" name))
+		     reports))
+              ((guard (string= name "keyword"))
+               (funcall check-arity '(1 . 1) macro))
+              ((guard (string= name "modification-time"))
+               (funcall check-arity '(1 . 2) macro))
+              ((guard (string= name "n"))
+               (funcall check-arity '(0 . 2) macro))
+              ((guard (string= name "property"))
+               (funcall check-arity '(1 . 2) macro))
+              ((guard (string= name "time"))
+               (funcall check-arity '(1 . 1) macro))
+              ((pred functionp))        ;ignore (eval ...) templates
+              (_
+               (let* ((arg-numbers (funcall extract-placeholders template))
+                      (arity (if (null arg-numbers)
+                                 '(0 . 0)
+                               (let ((m (apply #'max arg-numbers)))
+                                 (cons m m)))))
+                 (funcall check-arity arity macro))))))))
     reports))
 
 (defun org-lint-undefined-footnote-reference (ast)
@@ -1195,7 +1226,6 @@ CHECKERS is the list of checkers used."
       (setf org-lint--source-buffer source)
       (setf org-lint--local-checkers checkers)
       (org-lint--refresh-reports)
-      (tabulated-list-print)
       (add-hook 'tabulated-list-revert-hook #'org-lint--refresh-reports nil t))
     (pop-to-buffer buffer)))
 
@@ -1221,7 +1251,7 @@ CHECKERS is the list of checkers used."
   (let ((c (org-lint--current-checker)))
     (setf tabulated-list-entries
 	  (cl-remove-if (lambda (e) (equal c (org-lint--current-checker e)))
-			 tabulated-list-entries))
+			tabulated-list-entries))
     (tabulated-list-print)))
 
 (defun org-lint--ignore-checker ()
@@ -1275,7 +1305,7 @@ ARG can also be a list of checker names, as symbols, to run."
 		     (throw 'exit c)))))))
 	   ((pred consp)
 	    (cl-remove-if-not (lambda (c) (memq (org-lint-checker-name c) arg))
-			       org-lint--checkers))
+			      org-lint--checkers))
 	   (_ (user-error "Invalid argument `%S' for `org-lint'" arg)))))
     (if (not (called-interactively-p 'any))
 	(org-lint--generate-reports (current-buffer) checkers)

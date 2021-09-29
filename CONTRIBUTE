@@ -3,6 +3,10 @@
 The text below explains the rules for participating in Org mode
 development.
 
+* Org maintenance
+
+Org maintenance is detailed on Worg: see [[https://orgmode.org/worg/org-maintenance.html][org-maintenance]].
+
 * Main contribution rules
 
 1. The master git repository is hosted publicly on [[https://savannah.gnu.org][savannah.gnu.org]].
@@ -60,25 +64,8 @@ development.
 
 See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
 
-* The contrib/ directory
+* The =contrib/= directory
 
-The git repository contains a =contrib/= directory.  This directory is
-the playing field for any developer, also people who have not (yet)
-signed the papers with the FSF.  You are free to add files to this
-directory, implementing extensions, new link types etc.
-
-Also non-Lisp extensions like scripts to process Org files in
-different ways are welcome in this directory.  You should provide
-documentation with your extensions, at least in the form of commentary
-in the file, better on worg.  Please discuss your extensions on
-[[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]].
-
-After files have been tested in =contrib/= and found to be generally
-useful, we may decide to clarify copyright questions and then move the
-file into the Org mode core.  This means they will be moved up to the
-root directory and will also eventually be added to GNU Emacs git
-repository.  The final decision about this rests with the maintainer.
-
-* Org maintenance
-
-Org maintenance is explained on Worg: see [[https://orgmode.org/worg/org-maintenance.html][org-maintenance]].
+The git repository used to contain a =contrib/= directory.  Files in
+this directory were moved to a new [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository before Org
+9.5.  You can install the new =org-contrib= from [[https://elpa.nongnu.org/nongnu/][NonGNU ELPA]].

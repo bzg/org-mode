@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2004-2021 Free Software Foundation, Inc.
 
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
 ;;
@@ -85,7 +85,7 @@ function `org-clock-into-drawer' instead."
 	  (string :tag "Into Drawer named...")))
 
 (defun org-clock-into-drawer ()
-  "Value of `org-clock-into-drawer'. but let properties overrule.
+  "Value of `org-clock-into-drawer', but let properties overrule.
 
 If the current entry has or inherits a CLOCK_INTO_DRAWER
 property, it will be used instead of the default value.
@@ -438,12 +438,11 @@ specifications than `frame-title-format', which see."
 (defcustom org-clock-x11idle-program-name "x11idle"
   "Name of the program which prints X11 idle time in milliseconds.
 
-You can find x11idle.c in the contrib/scripts directory of the
-Org git distribution. Or, you can do:
+you can do \"~$ sudo apt-get install xprintidle\" if you are using
+a Debian-based distribution.
 
-    sudo apt-get install xprintidle
-
-if you are using Debian."
+Alternatively, can find x11idle.c in the org-contrib repository at
+https://git.sr.ht/~bzg/org-contrib"
   :group 'org-clock
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -485,6 +484,17 @@ is added to the user configuration."
 	  (integer :tag "Clock out after Emacs is idle for X seconds")
 	  (const :tag "Never auto clock out" nil)))
 
+(defcustom org-clock-ask-before-exiting t
+  "If non-nil, ask if the user wants to clock out before exiting Emacs.
+This variable only has effect if set with \\[customize]."
+  :set (lambda (symbol value)
+         (if value
+             (add-hook 'kill-emacs-query-functions #'org-clock-kill-emacs-query)
+           (remove-hook 'kill-emacs-query-functions #'org-clock-kill-emacs-query))
+         (set symbol value))
+  :type 'boolean
+  :package-version '(Org . "9.5"))
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -503,9 +513,9 @@ to add an effort property.")
   "Has the clock been used during the current Emacs session?")
 
 (defvar org-clock-stored-history nil
-  "Clock history, populated by `org-clock-load'")
+  "Clock history, populated by `org-clock-load'.")
 (defvar org-clock-stored-resume-clock nil
-  "Clock to resume, saved by `org-clock-load'")
+  "Clock to resume, saved by `org-clock-load'.")
 
 ;;; The clock for measuring work time.
 
@@ -539,8 +549,8 @@ of a different task.")
   "Marker pointing to the task that has been interrupted by the current clock.")
 
 (defvar org-clock-mode-line-map (make-sparse-keymap))
-(define-key org-clock-mode-line-map [mode-line mouse-2] 'org-clock-goto)
-(define-key org-clock-mode-line-map [mode-line mouse-1] 'org-clock-menu)
+(define-key org-clock-mode-line-map [mode-line mouse-2] #'org-clock-goto)
+(define-key org-clock-mode-line-map [mode-line mouse-1] #'org-clock-menu)
 
 (defun org-clock--translate (s language)
   "Translate string S into using string LANGUAGE.
@@ -606,10 +616,6 @@ cannot be translated."
 	     (if (stringp log-drawer) log-drawer "LOGBOOK")))
 	  ((stringp drawer) drawer)
 	  (t nil))))
-
-(defun org-clocking-buffer ()
-  "Return the clocking buffer if we are currently clocking a task or nil."
-  (marker-buffer org-clock-marker))
 
 (defun org-clocking-p ()
   "Return t when clocking a task."
@@ -677,19 +683,19 @@ pointing to it."
     (let (cat task heading prefix)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
 	(org-with-wide-buffer
-	  (ignore-errors
-	    (goto-char marker)
-	    (setq cat (org-get-category)
-		  heading (org-get-heading 'notags)
-		  prefix (save-excursion
-			   (org-back-to-heading t)
-			   (looking-at org-outline-regexp)
-			   (match-string 0))
-		  task (substring
-			(org-fontify-like-in-org-mode
-			 (concat prefix heading)
-			 org-odd-levels-only)
-			(length prefix))))))
+	 (ignore-errors
+	   (goto-char marker)
+	   (setq cat (org-get-category)
+		 heading (org-get-heading 'notags)
+		 prefix (save-excursion
+			  (org-back-to-heading t)
+			  (looking-at org-outline-regexp)
+			  (match-string 0))
+		 task (substring
+		       (org-fontify-like-in-org-mode
+			(concat prefix heading)
+			org-odd-levels-only)
+		       (length prefix))))))
       (when (and cat task)
 	(insert (format "[%c] %-12s  %s\n" i cat task))
 	(cons i marker)))))
@@ -853,6 +859,10 @@ use libnotify if available, or fall back on a message."
 	    org-show-notification-timeout
 	    nil
 	    (lambda () (w32-notification-close id)))))
+        ((fboundp 'ns-do-applescript)
+         (ns-do-applescript
+          (format "display notification \"%s\" with title \"Org mode notification\""
+                  (replace-regexp-in-string "\"" "#" notification))))
 	((fboundp 'notifications-notify)
 	 (notifications-notify
 	  :title "Org mode message"
@@ -911,17 +921,17 @@ If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
 
 (defmacro org-with-clock-position (clock &rest forms)
   "Evaluate FORMS with CLOCK as the current active clock."
+  (declare (indent 1) (debug t))
   `(with-current-buffer (marker-buffer (car ,clock))
      (org-with-wide-buffer
       (goto-char (car ,clock))
       (beginning-of-line)
       ,@forms)))
-(def-edebug-spec org-with-clock-position (form body))
-(put 'org-with-clock-position 'lisp-indent-function 1)
 
 (defmacro org-with-clock (clock &rest forms)
   "Evaluate FORMS with CLOCK as the current active clock.
 This macro also protects the current active clock from being altered."
+  (declare (indent 1) (debug t))
   `(org-with-clock-position ,clock
      (let ((org-clock-start-time (cdr ,clock))
 	   (org-clock-total-time)
@@ -932,8 +942,6 @@ This macro also protects the current active clock from being altered."
 				  (org-back-to-heading t)
 				  (point-marker))))
        ,@forms)))
-(def-edebug-spec org-with-clock (form body))
-(put 'org-with-clock 'lisp-indent-function 1)
 
 (defsubst org-clock-clock-in (clock &optional resume start-time)
   "Clock in to the clock located by CLOCK.
@@ -1164,13 +1172,12 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 		  (org-clock-resolve
 		   clock
 		   (or prompt-fn
-		       (function
-			(lambda (clock)
-			  (format
-			   "Dangling clock started %d mins ago"
-			   (floor (org-time-convert-to-integer
-                                   (org-time-since (cdr clock)))
-                                  60)))))
+		       (lambda (clock)
+			 (format
+			  "Dangling clock started %d mins ago"
+			  (floor (org-time-convert-to-integer
+				  (org-time-since (cdr clock)))
+				 60))))
 		   (or last-valid
 		       (cdr clock)))))))))))
 
@@ -1416,12 +1423,12 @@ the default behavior."
 	   (setq org-clock-mode-line-timer
 		 (run-with-timer org-clock-update-period
 				 org-clock-update-period
-				 'org-clock-update-mode-line)))
+				 #'org-clock-update-mode-line)))
 	 (when org-clock-idle-timer
 	   (cancel-timer org-clock-idle-timer)
 	   (setq org-clock-idle-timer nil))
 	 (setq org-clock-idle-timer
-	       (run-with-timer 60 60 'org-resolve-clocks-if-idle))
+	       (run-with-timer 60 60 #'org-resolve-clocks-if-idle))
 	 (message "Clock starts at %s - %s" ts org--msg-extra)
 	 (run-hooks 'org-clock-in-hook))))))
 
@@ -1673,17 +1680,13 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (insert " => " (format "%2d:%02d" h m))
 	  (move-marker org-clock-marker nil)
 	  (move-marker org-clock-hd-marker nil)
-	  ;; Possibly remove zero time clocks.  However, do not add
-	  ;; a note associated to the CLOCK line in this case.
-	  (cond ((and org-clock-out-remove-zero-time-clocks
-		      (= 0 h m))
-		 (setq remove t)
-		 (delete-region (line-beginning-position)
-				(line-beginning-position 2)))
-		(org-log-note-clock-out
-		 (org-add-log-setup
-		  'clock-out nil nil 'note
-		  (concat "# Task: " (org-get-heading t) "\n\n"))))
+	  ;; Possibly remove zero time clocks.
+          (when (and org-clock-out-remove-zero-time-clocks
+		     (= 0 h m))
+            (setq remove t)
+	    (delete-region (line-beginning-position)
+			   (line-beginning-position 2)))
+          (org-clock-remove-empty-clock-drawer)
 	  (when org-clock-mode-line-timer
 	    (cancel-timer org-clock-mode-line-timer)
 	    (setq org-clock-mode-line-timer nil))
@@ -1714,11 +1717,14 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		       "Clock stopped at %s after %s => LINE REMOVED"
 		     "Clock stopped at %s after %s")
 		   te (org-duration-from-minutes (+ (* 60 h) m)))
-	  (run-hooks 'org-clock-out-hook)
-	  (unless (org-clocking-p)
-	    (setq org-clock-current-task nil)))))))
-
-(add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer)
+          (unless (org-clocking-p)
+	    (setq org-clock-current-task nil))
+          (run-hooks 'org-clock-out-hook)
+          ;; Add a note, but only if we didn't remove the clock line.
+          (when (and org-log-note-clock-out (not remove))
+            (org-add-log-setup
+	     'clock-out nil nil nil
+	     (concat "# Task: " (org-get-heading t) "\n\n"))))))))
 
 (defun org-clock-remove-empty-clock-drawer ()
   "Remove empty clock drawers in current subtree."
@@ -2014,7 +2020,7 @@ Use `\\[org-clock-remove-overlays]' to remove the subtree times."
 	      (when time (org-clock-put-overlay time)))))
 	;; Arrange to remove the overlays upon next change.
 	(when org-remove-highlights-with-change
-	  (add-hook 'before-change-functions 'org-clock-remove-overlays
+	  (add-hook 'before-change-functions #'org-clock-remove-overlays
 		    nil 'local))))
     (let* ((h (/ org-clock-file-total-minutes 60))
 	   (m (- org-clock-file-total-minutes (* 60 h))))
@@ -2065,7 +2071,7 @@ If NOREMOVE is nil, remove this function from the
     (setq org-clock-overlays nil)
     (unless noremove
       (remove-hook 'before-change-functions
-		   'org-clock-remove-overlays 'local))))
+		   #'org-clock-remove-overlays 'local))))
 
 ;;;###autoload
 (defun org-clock-out-if-current ()
@@ -2241,7 +2247,7 @@ have priority."
 		  ((>= month 7) 3)
 		  ((>= month 4) 2)
 		  (t 1)))
-	 m1 h1 d1 month1 y1 shiftedy shiftedm shiftedq)
+	 h1 d1 month1 y1 shiftedy shiftedm shiftedq) ;; m1
     (cond
      ((string-match "\\`[0-9]+\\'" skey)
       (setq y (string-to-number skey) month 1 d 1 key 'year))
@@ -2344,7 +2350,7 @@ have priority."
 		  (`interactive (org-read-date nil t nil "Range end? "))
 		  (`untilnow (current-time))
 		  (_ (encode-time 0
-				  (or m1 m)
+				  m ;; (or m1 m)
 				  (or h1 h)
 				  (or d1 d)
 				  (or month1 month)
@@ -2391,7 +2397,7 @@ the currently selected interval size."
 	(user-error "Line needs a :block definition before this command works")
       (let* ((b (match-beginning 1)) (e (match-end 1))
 	     (s (match-string 1))
-	     block shift ins y mw d date wp m)
+	     block shift ins y mw d date wp) ;; m
 	(cond
 	 ((equal s "yesterday") (setq s "today-1"))
 	 ((equal s "lastweek") (setq s "thisweek-1"))
@@ -2416,7 +2422,7 @@ the currently selected interval size."
 	  (cond
 	   (d (setq ins (format-time-string
 			 "%Y-%m-%d"
-			 (encode-time 0 0 0 (+ d n) m y))))
+			 (encode-time 0 0 0 (+ d n) nil y)))) ;; m
 	   ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
 	    (require 'cal-iso)
 	    (setq date (calendar-gregorian-from-absolute
@@ -2698,7 +2704,18 @@ from the dynamic block definition."
 	     (format (concat "| %s %s | %s%s%s"
 			     (format org-clock-file-time-cell-format
 				     (org-clock--translate "File time" lang))
-			     " | *%s*|\n")
+
+			     ;; The file-time rollup value goes in the first time
+			     ;; column (of which there is always at least one)...
+			     " | *%s*|"
+			     ;; ...and the remaining file time cols (if any) are blank.
+			     (make-string (max 0 (1- time-columns)) ?|)
+
+			     ;; Optionally show the percentage contribution of "this"
+			     ;; file time to the total time.
+			     (if (eq formula '%) " %s |" "")
+			     "\n")
+
 		     (file-name-nondirectory file-name)
 		     (if level?    "| " "") ;level column, maybe
 		     (if timestamp "| " "") ;timestamp column, maybe
@@ -2706,7 +2723,12 @@ from the dynamic block definition."
 		     (if properties	    ;properties columns, maybe
 			 (make-string (length properties) ?|)
 		       "")
-		     (org-duration-from-minutes file-time)))) ;time
+		     (org-duration-from-minutes file-time) ;time
+
+		     (cond ((not (eq formula '%)) "")	   ;time percentage, maybe
+			   ((or (not total-time) (= total-time 0)) "0.0")
+			   (t
+			    (format "%.1f" (* 100 (/ file-time (float total-time)))))))))
 
 	  ;; Get the list of node entries and iterate over it
 	  (when (> maxlevel 0)
@@ -2734,13 +2756,13 @@ from the dynamic block definition."
 		 (if timestamp (concat ts "|") "")   ;timestamp, maybe
 		 (if tags (concat (mapconcat #'identity tgs ", ") "|") "")   ;tags, maybe
 		 (if properties		;properties columns, maybe
-		     (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
-					properties
-					"|")
-			     "|")
+		   (concat (mapconcat (lambda (p) (or (cdr (assoc p props)) ""))
+				      properties
+				      "|")
+			   "|")
 		   "")
 		 (if indent		;indentation
-		     (org-clocktable-indent-string level)
+		   (org-clocktable-indent-string level)
 		   "")
 		 (format-field headline)
 		 ;; Empty fields for higher levels.
@@ -2748,7 +2770,7 @@ from the dynamic block definition."
 		 (format-field (org-duration-from-minutes time))
 		 (make-string (max 0 (- time-columns level)) ?|)
 		 (if (eq formula '%)
-		     (format "%.1f |" (* 100 (/ time (float total-time))))
+		   (format "%.1f |" (* 100 (/ time (float total-time))))
 		   "")
 		 "\n")))))))
     (delete-char -1)
@@ -2934,12 +2956,12 @@ PROPERTIES: The list properties specified in the `:properties' parameter
     (save-excursion
       (org-clock-sum ts te
 		     (when matcher
-		       `(lambda ()
-			  (let* ((todo (org-get-todo-state))
-				 (tags-list (org-get-tags))
-				 (org-scanner-tags tags-list)
-				 (org-trust-scanner-tags t))
-			    (funcall ,matcher todo tags-list nil)))))
+		       (lambda ()
+			 (let* ((todo (org-get-todo-state))
+				(tags-list (org-get-tags))
+				(org-scanner-tags tags-list)
+				(org-trust-scanner-tags t))
+			   (funcall matcher todo tags-list nil)))))
       (goto-char (point-min))
       (setq st t)
       (while (or (and (bobp) (prog1 st (setq st nil))
@@ -3102,6 +3124,17 @@ The details of what will be saved are regulated by the variable
 	       (org-clock-in)
 	       (when (org-invisible-p) (org-show-context))))))
 	(_ nil)))))
+
+(defun org-clock-kill-emacs-query ()
+  "Query user when killing Emacs.
+This function is added to `kill-emacs-query-functions'."
+  (let ((buf (org-clocking-buffer)))
+    (when (and buf (yes-or-no-p "Clock out and save? "))
+      (with-current-buffer buf
+        (org-clock-out)
+        (save-buffer))))
+  ;; Unconditionally return t for `kill-emacs-query-functions'.
+  t)
 
 ;; Suggested bindings
 (org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)

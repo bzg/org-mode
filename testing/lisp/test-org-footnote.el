@@ -15,7 +15,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
 
@@ -90,7 +90,7 @@
     (org-test-with-temp-text " *bold*<point>"
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
-  ;; Arrow new footnotes in empty cells.
+  ;; Arrow new footnotes in table cells.
   (should
    (string-match-p
     " \\[fn:1\\]"
@@ -107,6 +107,12 @@
    (string-match-p
     " \\[fn:1\\]"
     (org-test-with-temp-text "| <point>|"
+      (let ((org-footnote-auto-label t)) (org-footnote-new))
+      (buffer-string))))
+  (should
+   (string-match-p
+    " \\[fn:1\\]"
+    (org-test-with-temp-text "| contents   <point>|"
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
   ;; When creating a new footnote, move to its definition.

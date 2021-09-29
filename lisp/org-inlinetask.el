@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2009-2021 Free Software Foundation, Inc.
 ;;
-;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
 
@@ -189,7 +189,7 @@ The number of levels is controlled by `org-inlinetask-min-level'."
 
 (defun org-inlinetask-goto-end ()
   "Go to the end of the inline task at point.
-    Return point."
+Return point."
   (save-match-data
     (beginning-of-line)
     (let ((case-fold-search t)
@@ -265,8 +265,8 @@ If the task has an end part, also demote it."
 	(replace-match down-task nil t nil 1)
 	(org-inlinetask-goto-end)
         (if (and (eobp) (looking-back "END\\s-*" (point-at-bol)))
-              (beginning-of-line)
-            (forward-line -1))
+            (beginning-of-line)
+          (forward-line -1))
 	(unless (= (point) beg)
           (looking-at (org-inlinetask-outline-regexp))
 	  (replace-match down-task nil t nil 1)

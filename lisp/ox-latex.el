@@ -121,6 +121,7 @@
     (:latex-classes nil nil org-latex-classes)
     (:latex-default-figure-position nil nil org-latex-default-figure-position)
     (:latex-default-table-environment nil nil org-latex-default-table-environment)
+    (:latex-default-quote-environment nil nil org-latex-default-quote-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
     (:latex-diary-timestamp-format nil nil org-latex-diary-timestamp-format)
     (:latex-footnote-defined-format nil nil org-latex-footnote-defined-format)
@@ -296,7 +297,7 @@
     ("uk" "ukrainian")
     ("ur" "urdu")
     ("vi" "vietnamese"))
-  "Alist between language code and corresponding Polyglossia option")
+  "Alist between language code and corresponding Polyglossia option.")
 
 (defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
 					  ("qbordermatrix" . "\\cr")
@@ -307,14 +308,14 @@
   (format
    "\\`[ \t]*\\\\begin{%s\\*?}"
    (regexp-opt
-	   '("equation" "eqnarray" "math" "displaymath"
-	     "align"  "gather" "multline" "flalign"  "alignat"
-	     "xalignat" "xxalignat"
-	     "subequations"
-	     ;; breqn
-	     "dmath" "dseries" "dgroup" "darray"
-	     ;; empheq
-	     "empheq")))
+    '("equation" "eqnarray" "math" "displaymath"
+      "align"  "gather" "multline" "flalign"  "alignat"
+      "xalignat" "xxalignat"
+      "subequations"
+      ;; breqn
+      "dmath" "dseries" "dgroup" "darray"
+      ;; empheq
+      "empheq")))
   "Regexp of LaTeX math environments.")
 
 
@@ -345,7 +346,7 @@ symbols are: `image', `table', `src-block' and `special-block'."
 	       (const :tag "Special blocks" special-block))))
 
 (defcustom org-latex-prefer-user-labels nil
-   "Use user-provided labels instead of internal ones when non-nil.
+  "Use user-provided labels instead of internal ones when non-nil.
 
 When this variable is non-nil, Org will use the value of
 CUSTOM_ID property, NAME keyword or Org target as the key for the
@@ -380,6 +381,9 @@ will be exported to LaTeX as:
   This is section \\ref{sec:foo}.
   And this is still section \\ref{sec:foo}.
 
+A non-default value of `org-latex-reference-command' will change the
+command (\\ref by default) used to create label references.
+
 Note, however, that setting this variable introduces a limitation
 on the possible values for CUSTOM_ID and NAME.  When this
 variable is non-nil, Org passes their value to \\label unchanged.
@@ -398,6 +402,18 @@ references."
   :type 'boolean
   :version "26.1"
   :package-version '(Org . "8.3"))
+
+(defcustom org-latex-reference-command "\\ref{%s}"
+  "Format string that takes a reference to produce a LaTeX reference command.
+
+The reference is a label such as sec:intro.  A format string of \"\\ref{%s}\"
+produces numbered references and will always work.  It may be desirable to make
+use of a package such as hyperref or cleveref and then change the format string
+to \"\\autoref{%s}\" or \"\\cref{%s}\" for example."
+  :group 'org-export-latex
+  :type 'string
+  :package-version '(Org . "9.5")
+  :safe t)
 
 ;;;; Preamble
 
@@ -772,6 +788,13 @@ default we use here encompasses both."
   :package-version '(Org . "8.0")
   :type 'string)
 
+(defcustom org-latex-default-quote-environment "quote"
+  "Default environment used to `quote' blocks."
+  :group 'org-export-latex
+  :package-version '(Org . "9.5")
+  :type 'string
+  :safe t)
+
 (defcustom org-latex-default-table-mode 'table
   "Default mode for tables.
 
@@ -932,7 +955,7 @@ using customize, or with
   (add-to-list \\='org-latex-packages-alist \\='(\"newfloat\" \"minted\"))
 
 In addition, it is necessary to install pygments
-\(URL `http://pygments.org>'), and to configure the variable
+\(URL `https://pygments.org>'), and to configure the variable
 `org-latex-pdf-process' so that the -shell-escape option is
 passed to pdflatex.
 
@@ -1157,9 +1180,11 @@ A better approach is to use a compiler suit such as `latexmk'."
   :package-version '(Org . "9.0"))
 
 (defcustom org-latex-pdf-process
-  '("%latex -interaction nonstopmode -output-directory %o %f"
-    "%latex -interaction nonstopmode -output-directory %o %f"
-    "%latex -interaction nonstopmode -output-directory %o %f")
+  (if (executable-find "latexmk")
+      '("latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f")
+    '("%latex -interaction nonstopmode -output-directory %o %f"
+      "%latex -interaction nonstopmode -output-directory %o %f"
+      "%latex -interaction nonstopmode -output-directory %o %f"))
   "Commands to process a LaTeX file to a PDF file.
 
 This is a list of strings, each of them will be given to the
@@ -1203,7 +1228,7 @@ file name as its single argument."
 	  (const :tag "texi2dvi"
 		 ("cd %o; LATEX=\"%latex\" texi2dvi -p -b -V %b.tex"))
 	  (const :tag "latexmk"
-		 ("latexmk -g -pdf -pdflatex=\"%latex\" -outdir=%o %f"))
+		 ("latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
 	  (function)))
 
 (defcustom org-latex-logfiles-extensions
@@ -1486,7 +1511,10 @@ nil."
 	       (pcase-let ((`(,keyword ,value) pair))
 		 (concat keyword
 			 (and (> (length value) 0)
-			      (concat "=" value)))))
+			      (concat "="
+                                      (if (string-match-p (rx (any "[]")) value)
+                                          (format "{%s}" value)
+                                        value))))))
 	     options
 	     ","))
 
@@ -1605,9 +1633,9 @@ INFO is a plist used as a communication channel."
   "Insert LaTeX_compiler info into the document.
 INFO is a plist used as a communication channel."
   (let ((compiler (plist-get info :latex-compiler)))
-       (and (org-string-nw-p org-latex-compiler-file-string)
-	    (member (or compiler "") org-latex-compilers)
-	    (format org-latex-compiler-file-string compiler))))
+    (and (org-string-nw-p org-latex-compiler-file-string)
+	 (member (or compiler "") org-latex-compilers)
+	 (format org-latex-compiler-file-string compiler))))
 
 
 ;;; Filters
@@ -1889,10 +1917,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(org-export-get-footnote-definition footnote-reference info)
 		info t)))
       ;; Use \footnotemark if reference is within another footnote
-      ;; reference, footnote definition, table cell or item's tag.
+      ;; reference, footnote definition, table cell, verse block, or
+      ;; item's tag.
       ((or (org-element-lineage footnote-reference
 				'(footnote-reference footnote-definition
-						     table-cell))
+						     table-cell verse-block))
 	   (eq 'item (org-element-type
 		      (org-export-get-parent-element footnote-reference))))
        "\\footnotemark")
@@ -1904,7 +1933,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		  ;; Only insert a \label if there exist another
 		  ;; reference to def.
 		  (cond ((not label) "")
-			((org-element-map (plist-get info :parse-tree) 'footnote-reference
+			((org-element-map (plist-get info :parse-tree)
+			     'footnote-reference
 			   (lambda (f)
 			     (and (not (eq f footnote-reference))
 				  (equal (org-element-property :label f) label)
@@ -2096,8 +2126,8 @@ contextual information."
   (let* ((code (org-element-property :value inline-src-block))
 	 (separator (org-latex--find-verb-separator code)))
     (cl-case (plist-get info :latex-listings)
-      ;; Do not use a special package: transcode it verbatim.
-      ((nil) (format "\\texttt{%s}" (org-latex--text-markup code 'code info)))
+      ;; Do not use a special package: transcode it verbatim, as code.
+      ((nil) (org-latex--text-markup code 'code info))
       ;; Use minted package.
       (minted
        (let* ((org-lang (org-element-property :language inline-src-block))
@@ -2382,8 +2412,8 @@ used as a communication channel."
 			((string= float "sideways") 'sideways)
 			((string= float "multicolumn") 'multicolumn)
 			((and (plist-member attr :float) (not float)) 'nonfloat)
-			((or float
-			     (org-element-property :caption parent)
+                        (float float)
+			((or (org-element-property :caption parent)
 			     (org-string-nw-p (plist-get attr :caption)))
 			 'figure)
 			(t 'nonfloat))))
@@ -2475,6 +2505,18 @@ used as a communication channel."
 						   nil t))))
     ;; Return proper string, depending on FLOAT.
     (pcase float
+      ((and (pred stringp) env-string)
+       (format "\\begin{%s}%s
+%s%s
+%s%s
+%s\\end{%s}"
+               env-string
+               placement
+               (if caption-above-p caption "")
+               (if center "\\centering" "")
+               comment-include image-code
+               (if caption-above-p "" caption)
+               env-string))
       (`wrap (format "\\begin{wrapfigure}%s
 %s%s
 %s%s
@@ -2581,7 +2623,7 @@ INFO is a plist holding contextual information.  See
 	   (let ((label (org-latex--label destination info t)))
 	     (if (and (not desc)
 		      (org-export-numbered-headline-p destination info))
-		 (format "\\ref{%s}" label)
+		 (format org-latex-reference-command label)
 	       (format "\\hyperref[%s]{%s}" label
 		       (or desc
 			   (org-export-data
@@ -2589,7 +2631,7 @@ INFO is a plist holding contextual information.  See
           ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
 	   (let ((ref (org-latex--label destination info t)))
-	     (if (not desc) (format "\\ref{%s}" ref)
+	     (if (not desc) (format org-latex-reference-command ref)
 	       (format "\\hyperref[%s]{%s}" ref desc)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
@@ -2881,9 +2923,19 @@ channel."
   "Transcode a QUOTE-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (org-latex--wrap-label
-   quote-block (format "\\begin{quote}\n%s\\end{quote}" contents) info))
-
+  (let ((environment
+	 (or (org-export-read-attribute :attr_latex quote-block :environment)
+	     (plist-get info :latex-default-quote-environment)))
+	(options
+	 (or (org-export-read-attribute :attr_latex quote-block :options)
+	     "")))
+    (org-latex--wrap-label
+     quote-block (format "\\begin{%s}%s\n%s\\end{%s}"
+			 environment
+			 options
+			 contents
+			 environment)
+     info)))
 
 ;;;; Radio Target
 
@@ -3203,9 +3255,9 @@ centered."
 (defun org-latex--decorate-table (table attributes caption above? info)
   "Decorate TABLE string with caption and float environment.
 
-ATTRIBUTES is the plist containing is LaTeX attributes.  CAPTION
-is its caption, as a string or nil.  It is located above the
-table if ABOVE? is non-nil.  INFO is the plist containing current
+ATTRIBUTES is the plist containing LaTeX attributes.  CAPTION is
+its caption, as a string or nil.  It is located above the table
+if ABOVE? is non-nil.  INFO is the plist containing current
 export parameters.
 
 Return new environment, as a string."
@@ -3214,7 +3266,8 @@ Return new environment, as a string."
 	    (cond ((and (not float) (plist-member attributes :float)) nil)
 		  ((member float '("sidewaystable" "sideways")) "sidewaystable")
 		  ((equal float "multicolumn") "table*")
-		  ((or float (org-string-nw-p caption)) "table")
+                  (float float)
+		  ((org-string-nw-p caption) "table")
 		  (t nil))))
 	 (placement
 	  (or (plist-get attributes :placement)
@@ -3509,29 +3562,44 @@ channel."
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
-  (org-latex--wrap-label
-   verse-block
-   ;; In a verse environment, add a line break to each newline
-   ;; character and change each white space at beginning of a line
-   ;; into a space of 1 em.  Also change each blank line with
-   ;; a vertical space of 1 em.
-   (format "\\begin{verse}\n%s\\end{verse}"
-	   (replace-regexp-in-string
-	    "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
-	    (replace-regexp-in-string
-	     "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
-	     (replace-regexp-in-string
-	      "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
-	      contents nil t) nil t) nil t))
-   info))
-
+  (let* ((lin (org-export-read-attribute :attr_latex verse-block :lines))
+         (latcode (org-export-read-attribute :attr_latex verse-block :latexcode))
+         (cent (org-export-read-attribute :attr_latex verse-block :center))
+         (attr (concat
+	        (if cent "[\\versewidth]" "")
+	        (if lin (format "\n\\poemlines{%s}" lin) "")
+	        (if latcode (format "\n%s" latcode) "")))
+         (versewidth (org-export-read-attribute :attr_latex verse-block :versewidth))
+         (vwidth (if versewidth (format "\\settowidth{\\versewidth}{%s}\n" versewidth) ""))
+         (linreset (if lin "\n\\poemlines{0}" "")))
+    (concat
+     (org-latex--wrap-label
+      verse-block
+      ;; In a verse environment, add a line break to each newline
+      ;; character and change each white space at beginning of a line
+      ;; into a space of 1 em.  Also change each blank line with
+      ;; a vertical space of 1 em.
+      (format "%s\\begin{verse}%s\n%s\\end{verse}%s"
+	      vwidth
+	      attr
+	      (replace-regexp-in-string
+	       "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
+	       (replace-regexp-in-string
+	        "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
+	        (replace-regexp-in-string
+	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
+	         contents nil t) nil t) nil t) linreset)
+      info)
+     ;; Insert footnote definitions, if any, after the environment, so
+     ;; the special formatting above is not applied to them.
+     (org-latex--delayed-footnotes-definitions verse-block info))))
 
 
 ;;; End-user functions
 
 ;;;###autoload
 (defun org-latex-export-as-latex
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a LaTeX buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -3575,7 +3643,7 @@ command to convert it."
 
 ;;;###autoload
 (defun org-latex-export-to-latex
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a LaTeX file.
 
 If narrowing is active in the current buffer, only export its
@@ -3607,7 +3675,7 @@ file-local settings."
 
 ;;;###autoload
 (defun org-latex-export-to-pdf
-  (&optional async subtreep visible-only body-only ext-plist)
+    (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to LaTeX then process through to PDF.
 
 If narrowing is active in the current buffer, only export its

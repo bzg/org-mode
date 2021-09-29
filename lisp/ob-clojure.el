@@ -3,6 +3,7 @@
 ;; Copyright (C) 2009-2021 Free Software Foundation, Inc.
 
 ;; Author: Joel Boehland, Eric Schulte, Oleh Krehel, Frederick Giasson
+;; Maintainer: Bastien Guerry <bzg@gnu.org>
 ;;
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
@@ -38,7 +39,7 @@
 
 ;; For SLIME, the best way to install these components is by following
 ;; the directions as set out by Phil Hagelberg (Technomancy) on the
-;; web page: http://technomancy.us/126
+;; web page: https://technomancy.us/126
 
 ;;; Code:
 (require 'ob)

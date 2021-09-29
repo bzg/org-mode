@@ -16,7 +16,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;; Template test file for Org tests
 
@@ -1604,6 +1604,21 @@
   ;; point.
   (should
    (equal
+    "* "
+    (org-test-with-temp-text ""
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
+  (should
+   (equal
+    "entry
+* "
+    (org-test-with-temp-text "entry"
+      (let ((org-insert-heading-respect-content nil))
+	(org-insert-heading '(4)))
+      (buffer-string))))
+  (should
+   (equal
     "* H1\n** H2\n* "
     (org-test-with-temp-text "* H1\n** H2"
       (let ((org-insert-heading-respect-content nil))
@@ -1816,7 +1831,31 @@
 		 (lambda (&rest args) "+1d")))
 	(org-clone-subtree-with-time-shift 1))
       (buffer-substring-no-properties (line-beginning-position 2)
-				      (line-end-position 2))))))
+				      (line-end-position 2)))))
+  ;; Hour shift.
+  (should
+   (equal "\
+* H1\n<2015-06-21 20:00>
+* H1\n<2015-06-21 23:00>
+* H1\n<2015-06-22 02:00>
+"
+          (org-test-with-temp-text "* H1\n<2015-06-21 Sun 20:00>"
+            (org-clone-subtree-with-time-shift 2 "+3h")
+            (replace-regexp-in-string
+             "\\( [.A-Za-z]+\\)\\( [0-9][0-9]:[0-9][0-9]\\)?>" ""
+             (buffer-substring-no-properties (point-min) (point-max))
+             nil nil 1))))
+  (should
+   (equal "\
+* H1\n<2015-06-21 20:00>
+* H1\n<2015-06-21 18:00>
+"
+          (org-test-with-temp-text "* H1\n<2015-06-21 Sun 20:00>"
+            (org-clone-subtree-with-time-shift 1 "-2h")
+            (replace-regexp-in-string
+             "\\( [.A-Za-z]+\\)\\( [0-9][0-9]:[0-9][0-9]\\)?>" ""
+             (buffer-substring-no-properties (point-min) (point-max))
+             nil nil 1)))))
 
 
 ;;; Fixed-Width Areas
@@ -6945,8 +6984,8 @@ Paragraph<point>"
   (should
    (equal "* H1 :foo:"
 	  (org-test-with-temp-text "* H1"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -6955,8 +6994,8 @@ Paragraph<point>"
   (should
    (equal "* H1 :foo:\nContents"
 	  (org-test-with-temp-text "* H1\n<point>Contents"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -6964,30 +7003,20 @@ Paragraph<point>"
   (should-not
    (equal "* H1 :foo:\nContents2"
 	  (org-test-with-temp-text "* H1\n<point>Contents2"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
 	    (org-at-heading-p))))
-  ;; Strip all forbidden characters from user-entered tags.
-  (should
-   (equal "* H1 :foo:"
-	  (org-test-with-temp-text "* H1"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ": foo *:")))
-	      (let ((org-use-fast-tag-selection nil)
-		    (org-tags-column 1))
-		(org-set-tags-command)))
-	    (buffer-string))))
   ;; When a region is active and
   ;; `org-loop-over-headlines-in-active-region' is non-nil, insert the
   ;; same value in all headlines in region.
   (should
    (equal "* H1 :foo:\nContents\n* H2 :foo:"
 	  (org-test-with-temp-text "* H1\nContents\n* H2"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-loop-over-headlines-in-active-region t)
 		    (org-tags-column 1))
@@ -6999,8 +7028,8 @@ Paragraph<point>"
   (should
    (equal "* H1\nContents\n* H2 :foo:"
 	  (org-test-with-temp-text "* H1\nContents\n* H2"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-loop-over-headlines-in-active-region nil)
 		    (org-tags-column 1))
@@ -7019,8 +7048,8 @@ Paragraph<point>"
   (should
    (equal ":foo:"
 	  (org-test-with-temp-text "* <point>"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7029,8 +7058,8 @@ Paragraph<point>"
   (should
    (equal "* H1 :foo:"
 	  (org-test-with-temp-text "* H1"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7039,8 +7068,8 @@ Paragraph<point>"
   (should
    (equal "* H1 :foo:"
 	  (org-test-with-temp-text "*<point>* H1"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7049,8 +7078,8 @@ Paragraph<point>"
   (should
    (equal " b :foo:"
 	  (org-test-with-temp-text "* a<point> b"
-	    (cl-letf (((symbol-function 'completing-read)
-		       (lambda (&rest args) ":foo:")))
+	    (cl-letf (((symbol-function 'completing-read-multiple)
+		       (lambda (&rest args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7059,9 +7088,9 @@ Paragraph<point>"
   (should
    (equal "b :foo:"
 	  (org-test-with-temp-text "* a :foo:\n** <point>b :foo:"
-	    (cl-letf (((symbol-function 'completing-read)
+	    (cl-letf (((symbol-function 'completing-read-multiple)
 		       (lambda (prompt coll &optional pred req initial &rest args)
-			 initial)))
+			 (list initial))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7382,7 +7411,154 @@ Paragraph<point>"
 SCHEDULED: <2012-03-29 Thu +2y>
 CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
 	(org-todo "DONE")
-	(buffer-string))))))
+	(buffer-string)))))
+  ;; Make sure that logbook state change record does not get
+  ;; duplicated when `org-log-repeat' `org-log-done' are non-nil.
+  (should
+   (string-match-p
+    (rx "* TODO Read book
+SCHEDULED: <2021-06-16 Wed +1d>
+:PROPERTIES:
+:LAST_REPEAT:" (1+ nonl) "
+:END:
+- State \"DONE\"       from \"TODO\"" (1+ nonl) buffer-end)
+    (let ((org-log-repeat 'time)
+	  (org-todo-keywords '((sequence "TODO" "|" "DONE(d!)")))
+          (org-log-into-drawer nil))
+      (org-test-with-temp-text
+          "* TODO Read book
+SCHEDULED: <2021-06-15 Tue +1d>"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string))))))
+
+(ert-deftest test-org/org-log-done ()
+  "Test `org-log-done' specifications."
+  ;; nil value.
+  (should
+   (string=
+    "* DONE task"
+    (let ((org-log-done nil)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "* TODO task"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string)))))
+  ;; `time' value.
+  (should
+   (string=
+    (format
+    "* DONE task
+CLOSED: %s"
+    (org-test-with-temp-text ""
+      (org-insert-time-stamp (current-time) t t)
+      (buffer-string)))
+    (let ((org-log-done 'time)
+          (org-log-done-with-time t)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "* TODO task"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string)))))
+  (should
+   (string=
+    (format
+    "* DONE task
+CLOSED: %s"
+    (org-test-with-temp-text ""
+      (org-insert-time-stamp (current-time) nil t)
+      (buffer-string)))
+    (let ((org-log-done 'time)
+          (org-log-done-with-time nil)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "* TODO task"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string)))))
+  ;; TODO: Test `note' value.
+  ;; Test startup overrides.
+  (should
+   (string=
+    "#+STARTUP: nologdone
+* DONE task"
+    (let ((org-log-done 'time)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "#+STARTUP: nologdone
+<point>* TODO task"
+        (org-set-regexps-and-options)
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string)))))
+  (should
+   (string=
+    (format
+    "#+STARTUP: logdone
+* DONE task
+CLOSED: %s"
+    (org-test-with-temp-text ""
+      (org-insert-time-stamp (current-time) t t)
+      (buffer-string)))
+    (let ((org-log-done nil)
+          (org-log-done-with-time t)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "#+STARTUP: logdone
+<point>* TODO task"
+        (org-set-regexps-and-options)
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string)))))
+  ;; Test local property overrides.
+  (should
+   (string=
+    "* DONE task
+:PROPERTIES:
+:LOGGING: nil
+:END:"
+    (let ((org-log-done 'time)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "* TODO task
+:PROPERTIES:
+:LOGGING: nil
+:END:"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string)))))
+  (should
+   (string=
+    (format
+    "* DONE task
+CLOSED: %s
+:PROPERTIES:
+:LOGGING: logdone
+:END:"
+    (org-test-with-temp-text ""
+      (org-insert-time-stamp (current-time) t t)
+      (buffer-string)))
+    (let ((org-log-done nil)
+          (org-log-done-with-time t)
+          (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text
+          "* TODO task
+:PROPERTIES:
+:LOGGING: logdone
+:END:"
+        (org-todo "DONE")
+        (when (memq 'org-add-log-note post-command-hook)
+          (org-add-log-note))
+        (buffer-string))))))
 
 
 ;;; Timestamps API
@@ -7963,6 +8139,10 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
     (should (equal '(0 7 8 9) (funcall list-visible-lines 'local nil)))
     (should (equal '(0 3 7) (funcall list-visible-lines 'ancestors t)))
     (should (equal '(0 3 7 8) (funcall list-visible-lines 'ancestors nil)))
+    (should (equal '(0 3 7 8 9 10 11)
+                   (funcall list-visible-lines 'ancestors-full t)))
+    (should (equal '(0 3 7 8 9 10 11)
+                   (funcall list-visible-lines 'ancestors-full nil)))
     (should (equal '(0 3 5 7 12) (funcall list-visible-lines 'lineage t)))
     (should (equal '(0 3 5 7 8 9 12) (funcall list-visible-lines 'lineage nil)))
     (should (equal '(0 1 3 5 7 12 13) (funcall list-visible-lines 'tree t)))

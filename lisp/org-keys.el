@@ -31,6 +31,8 @@
 
 (defvar org-outline-regexp)
 
+(require 'oc)
+
 (declare-function org-add-note "org" ())
 (declare-function org-agenda "org" (&optional arg org-keys restriction))
 (declare-function org-agenda-file-to-front "org" (&optional to-end))
@@ -175,7 +177,6 @@
 (declare-function org-show-subtree "org" ())
 (declare-function org-sort "org" (&optional with-case))
 (declare-function org-sparse-tree "org" (&optional arg type))
-(declare-function org-table-blank-field "org" ())
 (declare-function org-table-copy-down "org" (n))
 (declare-function org-table-create-or-convert-from-region "org" (arg))
 (declare-function org-table-create-with-table\.el "org-table" ())
@@ -572,6 +573,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c ;") #'org-toggle-comment)
 (org-defkey org-mode-map (kbd "C-c C-w") #'org-refile)
 (org-defkey org-mode-map (kbd "C-c M-w") #'org-refile-copy)
+(org-defkey org-mode-map (kbd "C-c C-M-w") #'org-refile-reverse)
 (org-defkey org-mode-map (kbd "C-c /") #'org-sparse-tree) ;minor-mode reserved
 (org-defkey org-mode-map (kbd "C-c \\") #'org-match-sparse-tree) ;minor-mode r.
 (org-defkey org-mode-map (kbd "C-c RET") #'org-ctrl-c-ret)
@@ -610,7 +612,6 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "RET") #'org-return)
 (org-defkey org-mode-map (kbd "C-j") #'org-return-and-maybe-indent)
 (org-defkey org-mode-map (kbd "C-c ?") #'org-table-field-info)
-(org-defkey org-mode-map (kbd "C-c SPC") #'org-table-blank-field)
 (org-defkey org-mode-map (kbd "C-c +") #'org-table-sum)
 (org-defkey org-mode-map (kbd "C-c =") #'org-table-eval-formula)
 (org-defkey org-mode-map (kbd "C-c '") #'org-edit-special)
@@ -666,6 +667,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-x !") #'org-reload)
 (org-defkey org-mode-map (kbd "C-c C-x g") #'org-feed-update-all)
 (org-defkey org-mode-map (kbd "C-c C-x G") #'org-feed-goto-inbox)
+(org-defkey org-mode-map (kbd "C-c C-x @") #'org-cite-insert)
 (org-defkey org-mode-map (kbd "C-c C-x [") #'org-reftex-citation)
 (org-defkey org-mode-map (kbd "C-c C-x I") #'org-info-find-node)
 
@@ -688,28 +690,6 @@ star at the beginning of the headline, you can do this:
 	  (const :tag "At beginning of headline stars" t)
 	  (function)))
 
-(defcustom org-speed-commands-user nil
-  "Alist of additional speed commands.
-This list will be checked before `org-speed-commands-default'
-when the variable `org-use-speed-commands' is non-nil
-and when the cursor is at the beginning of a headline.
-The car of each entry is a string with a single letter, which must
-be assigned to `self-insert-command' in the global map.
-The cdr is either a command to be called interactively, a function
-to be called, or a form to be evaluated.
-An entry that is just a list with a single string will be interpreted
-as a descriptive headline that will be added when listing the speed
-commands in the Help buffer using the `?' speed command."
-  :group 'org-structure
-  :type '(repeat :value ("k" . ignore)
-		 (choice :value ("k" . ignore)
-			 (list :tag "Descriptive Headline" (string :tag "Headline"))
-			 (cons :tag "Letter and Command"
-			       (string :tag "Command letter")
-			       (choice
-				(function)
-				(sexp))))))
-
 (defcustom org-speed-command-hook
   '(org-speed-command-activate org-babel-speed-command-activate)
   "Hook for activating speed commands at strategic locations.
@@ -729,7 +709,7 @@ hook.  The default setting is `org-speed-command-activate'."
   :version "24.1"
   :type 'hook)
 
-(defconst org-speed-commands-default
+(defcustom org-speed-commands
   '(("Outline Navigation")
     ("n" . (org-speed-move-safe 'org-next-visible-heading))
     ("p" . (org-speed-move-safe 'org-previous-visible-heading))
@@ -739,7 +719,7 @@ hook.  The default setting is `org-speed-command-activate'."
     ("B" . org-previous-block)
     ("u" . (org-speed-move-safe 'outline-up-heading))
     ("j" . org-goto)
-    ("g" . (org-refile t))
+    ("g" . (org-refile '(4)))
     ("Outline Visibility")
     ("c" . org-cycle)
     ("C" . org-shifttab)
@@ -754,8 +734,7 @@ hook.  The default setting is `org-speed-command-activate'."
     ("l" . org-metaleft)
     ("R" . org-shiftmetaright)
     ("L" . org-shiftmetaleft)
-    ("i" . (progn (forward-char 1) (call-interactively
-				    'org-insert-heading-respect-content)))
+    ("i" . (progn (forward-char 1) (call-interactively 'org-insert-heading-respect-content)))
     ("^" . org-sort)
     ("w" . org-refile)
     ("a" . org-archive-subtree-default-with-confirmation)
@@ -774,8 +753,7 @@ hook.  The default setting is `org-speed-command-activate'."
     (":" . org-set-tags-command)
     ("e" . org-set-effort)
     ("E" . org-inc-effort)
-    ("W" . (lambda(m) (interactive "sMinutes before warning: ")
-	     (org-entry-put (point) "APPT_WARNTIME" m)))
+    ("W" . (lambda (m) (interactive "sMinutes before warning: ") (org-entry-put (point) "APPT_WARNTIME" m)))
     ("Agenda Views etc")
     ("v" . org-agenda)
     ("/" . org-sparse-tree)
@@ -784,7 +762,28 @@ hook.  The default setting is `org-speed-command-activate'."
     ("?" . org-speed-command-help)
     ("<" . (org-agenda-set-restriction-lock 'subtree))
     (">" . (org-agenda-remove-restriction-lock)))
-  "The default speed commands.")
+  "Alist of speed commands.
+
+The car of each entry is a string with a single letter, which
+must be assigned to `self-insert-command' in the global map.
+
+The cdr is either a command to be called interactively, a
+function to be called, or a form to be evaluated.
+
+An entry that is just a list with a single string will be
+interpreted as a descriptive headline that will be added when
+listing the speed commands in the Help buffer using the `?' speed
+command."
+  :group 'org-structure
+  :package-version '(Org . "9.5")
+  :type '(repeat :value ("k" . ignore)
+		 (choice :value ("k" . ignore)
+			 (list :tag "Descriptive Headline" (string :tag "Headline"))
+			 (cons :tag "Letter and Command"
+			       (string :tag "Command letter")
+			       (choice
+				(function)
+				(sexp))))))
 
 (defun org-print-speed-command (e)
   (if (> (length (car e)) 1)
@@ -806,12 +805,18 @@ hook.  The default setting is `org-speed-command-activate'."
   (interactive)
   (unless org-use-speed-commands
     (user-error "Speed commands are not activated, customize `org-use-speed-commands'"))
+  ;; FIXME: remove this warning for 9.6
+  (when (boundp 'org-speed-commands-user)
+    (message "`org-speed-command-user' is obsolete, please use `org-speed-commands'")
+    (sit-for 3))
   (with-output-to-temp-buffer "*Help*"
-    (princ "User-defined Speed commands\n===========================\n")
-    (mapc #'org-print-speed-command org-speed-commands-user)
-    (princ "\n")
-    (princ "Built-in Speed commands\n=======================\n")
-    (mapc #'org-print-speed-command org-speed-commands-default))
+    (princ "Speed commands\n==============\n")
+    (mapc #'org-print-speed-command
+          ;; FIXME: don't check `org-speed-commands-user' past 9.6
+          (if (boundp 'org-speed-commands-user)
+              (append org-speed-commands
+                      org-speed-commands-user)
+            org-speed-commands)))
   (with-current-buffer "*Help*"
     (setq truncate-lines t)))
 
@@ -827,13 +832,16 @@ If not, return to the original position and throw an error."
 
 (defun org-speed-command-activate (keys)
   "Hook for activating single-letter speed commands.
-`org-speed-commands-default' specifies a minimal command set.
-Use `org-speed-commands-user' for further customization."
+See `org-speed-commands' for configuring them."
   (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
 		 (funcall org-use-speed-commands)))
-    (cdr (assoc keys (append org-speed-commands-user
-			     org-speed-commands-default)))))
+    (cdr (assoc keys
+                ;; FIXME: don't check `org-speed-commands-user' past 9.6
+                (if (boundp 'org-speed-commands-user)
+                    (append org-speed-commands
+                            org-speed-commands-user)
+                  org-speed-commands)))))
 
 
 ;;; Babel speed keys
