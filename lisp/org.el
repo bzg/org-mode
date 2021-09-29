@@ -16706,7 +16706,7 @@ according to the value of `org-display-remote-inline-images'."
 			 width
 			 'imagemagick)
 		    remote?
-		    :width width))))
+		    :width width :scale 1))))
 
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
