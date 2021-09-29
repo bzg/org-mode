@@ -151,8 +151,6 @@ enable Calc units simplification mode.
 
 *** Support fontification of inline export snippets
 
-Inline 
-
 See [[msg:87im57fh8j.fsf@gmail.com][this thread]].
 
 *** New command =org-refile-reverse= bound to =C-c C-M-w=
