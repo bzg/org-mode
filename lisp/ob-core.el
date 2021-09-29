@@ -609,8 +609,6 @@ multiple blocks are being executed (e.g., in chained execution
 through use of the :var header argument) this marker points to
 the outer-most code block.")
 
-(defvar *this*)
-
 (defun org-babel-eval-headers (headers)
   "Compute header list set with HEADERS.
 
@@ -618,11 +616,10 @@ Evaluate all header arguments set to functions prior to returning
 the list of header arguments."
   (let ((lst nil))
     (dolist (elem headers)
-      (if (and (cdr elem)
-	       (functionp (cdr elem)))
+      (if (and (cdr elem) (functionp (cdr elem)))
           (push `(,(car elem) . ,(funcall (cdr elem))) lst)
         (push elem lst)))
-    lst))
+    (reverse lst)))
 
 (defun org-babel-get-src-block-info (&optional light datum)
   "Extract information from a source block or inline source block.
@@ -2739,21 +2736,17 @@ parameters when merging lists."
 				  results-exclusive-groups
 				  results
 				  (split-string
-				   (if (stringp value)
-				       value
-				     (if (functionp value)
-					 (funcall value)
-				       (eval value t)))))))
+				   (cond ((stringp value) value)
+                                         ((functionp value) (funcall value))
+                                         (t (eval value t)))))))
 	  (`(:exports . ,value)
 	   (setq exports (funcall merge
 				  exports-exclusive-groups
 				  exports
-				  (split-string (or
-						 (if value
-						     (if (functionp value)
-							 (funcall value)
-						       value)
-						   ""))))))
+				  (split-string
+                                   (cond ((and value (functionp value)) (funcall value))
+                                         (value value)
+                                         (t ""))))))
 	  ;; Regular keywords: any value overwrites the previous one.
 	  (_ (setq params (cons pair (assq-delete-all (car pair) params)))))))
     ;; Handle `:var' and clear out colnames and rownames for replaced
