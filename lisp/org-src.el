@@ -37,6 +37,7 @@
 (require 'org-compat)
 (require 'org-keys)
 
+(declare-function org--get-expected-indentation "org" (element contentsp))
 (declare-function org-mode "org" ())
 (declare-function org--get-expected-indentation "org" (element contentsp))
 (declare-function org-element-at-point "org-element" ())
@@ -240,8 +241,7 @@ green, respectability.
   :package-version '(Org . "9.0"))
 
 (defcustom org-src-tab-acts-natively t
-  "If non-nil, the effect of TAB in a code block is as if it were
-issued in the language major mode buffer."
+  "If non-nil, TAB uses the language's major-mode binding in code blocks."
   :type 'boolean
   :package-version '(Org . "9.4")
   :group 'org-babel)
@@ -304,7 +304,8 @@ is 0.")
 (put 'org-src--preserve-blank-line 'permanent-local t)
 
 (defun org-src--construct-edit-buffer-name (org-buffer-name lang)
-  "Construct the buffer name for a source editing buffer."
+  "Construct the buffer name for a source editing buffer.
+Format is \"*Org Src ORG-BUFFER-NAME [ LANG ]*\"."
   (concat "*Org Src " org-buffer-name "[ " lang " ]*"))
 
 (defun org-src--edit-buffer (beg end)
@@ -614,7 +615,7 @@ Leave point in edit buffer."
 ;;; Fontification of source blocks
 
 (defun org-src-font-lock-fontify-block (lang start end)
-  "Fontify code block.
+  "Fontify code block between START and END using LANG's syntax.
 This function is called by Emacs' automatic fontification, as long
 as `org-src-fontify-natively' is non-nil."
   (let ((lang-mode (org-src-get-lang-mode lang)))
@@ -760,7 +761,9 @@ See also `org-src-mode-hook'."
 ;;; Babel related functions
 
 (defun org-src-associate-babel-session (info)
-  "Associate edit buffer with comint session."
+  "Associate edit buffer with comint session.
+INFO should be a list simlar in format to the return value of
+`org-babel-get-src-block-info'."
   (interactive)
   (let ((session (cdr (assq :session (nth 2 info)))))
     (and session (not (string= session "none"))
@@ -770,6 +773,7 @@ See also `org-src-mode-hook'."
            (and (fboundp f) (funcall f session))))))
 
 (defun org-src-babel-configure-edit-buffer ()
+  "Configure src editing buffer."
   (when org-src--babel-info
     (org-src-associate-babel-session org-src--babel-info)))
 
@@ -842,6 +846,7 @@ Raise an error when current buffer is not a source editing buffer."
   org-src--source-type)
 
 (defun org-src-switch-to-buffer (buffer context)
+  "Switch to BUFFER considering CONTEXT and `org-src-window-setup'."
   (pcase org-src-window-setup
     (`plain
      (when (eq context 'exit) (quit-restore-window))
@@ -1204,11 +1209,12 @@ the area in the Org mode buffer."
   (interactive)
   (let (org-src--allow-write-back) (org-edit-src-exit)))
 
-(defun org-edit-src-continue (e)
+(defun org-edit-src-continue (event)
   "Unconditionally return to buffer editing area under point.
-Throw an error if there is no such buffer."
+Throw an error if there is no such buffer.
+EVENT is passed to `mouse-set-point'."
   (interactive "e")
-  (mouse-set-point e)
+  (mouse-set-point event)
   (let ((buf (get-char-property (point) 'edit-buffer)))
     (if buf (org-src-switch-to-buffer buf 'continue)
       (user-error "No sub-editing buffer for area at point"))))
