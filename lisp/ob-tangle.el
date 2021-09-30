@@ -140,6 +140,14 @@ result.  The default value is `org-remove-indentation'."
   :version "24.1"
   :type 'function)
 
+(defcustom org-babel-tangle-default-mode #o544
+  "The default mode used for tangled files, as an integer.
+The default value 356 correspands to the octal #o544, which is
+read-write permissions for the user, read-only for everyone else."
+  :group 'org-babel
+  :version "9.6"
+  :type 'integer)
+
 (defun org-babel-find-file-noselect-refresh (file)
   "Find file ensuring that the latest changes on disk are
 represented in the file."
@@ -255,7 +263,7 @@ matching a regular expression."
 		        (when she-bang
 			  (unless tangle-mode (setq tangle-mode #o755)))
 		        (when tangle-mode
-			  (add-to-list 'modes tangle-mode))
+			  (add-to-list 'modes (org-babel-interpret-file-mode tangle-mode)))
 		        ;; Possibly create the parent directories for file.
 		        (let ((m (funcall get-spec :mkdirp)))
 			  (and m fnd (not (string= m "no"))
@@ -297,6 +305,31 @@ matching a regular expression."
 	       (run-hooks 'org-babel-post-tangle-hook)))
 	   path-collector))
 	path-collector))))
+
+(defun org-babel-interpret-file-mode (mode)
+  "Determine the integer representation of a file MODE specification.
+The following forms are currently recognised:
+- an integer (returned without modification)
+- \"755\" (chmod style octal)
+- \"rwxrw-r--\" (ls style specification)
+- \"a=rw,u+x\" (chmod style) *
+
+* The interpretation of these forms relies on `file-modes-symbolic-to-number',
+  and uses `org-babel-tangle-default-mode' as the base mode."
+  (cond
+   ((integerp mode) mode)
+   ((not (stringp mode))
+    (error "File mode %S not recognised as a valid format." mode))
+   ((string-match-p "^0?[0-7][0-7][0-7]$" mode)
+    (string-to-number mode 8))
+   ((string-match-p "^[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\(,[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\)*$" mode)
+    (file-modes-symbolic-to-number mode org-babel-tangle-default-mode))
+   ((string-match-p "^[rwx-]\\{9\\}$" mode)
+    (file-modes-symbolic-to-number (concat  "u=" (substring mode 0 3)
+                                            ",g=" (substring mode 3 6)
+                                            ",a=" (substring mode 6 9))
+                                   0))
+   (t (error "File mode %S not recognised as a valid format. See `org-babel-interpret-file-mode'." mode))))
 
 (defun org-babel-tangle-clean ()
   "Remove comments inserted by `org-babel-tangle'.
