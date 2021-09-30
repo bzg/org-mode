@@ -1,4 +1,4 @@
-;;; ob-julia.el --- org-babel functions for julia code evaluation
+;;; ob-julia.el --- org-babel functions for julia code evaluation -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 ;; Authors: G. Jay Kerns, based on ob-R.el by Eric Schulte and Dan Davison
@@ -59,6 +59,7 @@
 
 (defvar ess-current-process-name) ; dynamically scoped
 (defvar ess-local-process-name) ; dynamically scoped
+(defvar ess-eval-visibly-p) ; dynamically scoped
 (defun org-babel-edit-prep:julia (info)
   (let ((session (cdr (assq :session (nth 2 info)))))
     (when (and session
@@ -89,17 +90,13 @@ This function is called by `org-babel-execute-src-block'."
 	   (graphics-file (and (member "graphics" (assq :result-params params))
 			       (org-babel-graphical-output-file params)))
 	   (colnames-p (unless graphics-file (cdr (assq :colnames params))))
-	   (rownames-p (unless graphics-file (cdr (assq :rownames params))))
 	   (full-body (org-babel-expand-body:julia body params graphics-file))
 	   (result
 	    (org-babel-julia-evaluate
 	     session full-body result-type result-params
 	     (or (equal "yes" colnames-p)
 		 (org-babel-pick-name
-		  (cdr (assq :colname-names params)) colnames-p))
-	     (or (equal "yes" rownames-p)
-		 (org-babel-pick-name
-		  (cdr (assq :rowname-names params)) rownames-p)))))
+		  (cdr (assq :colname-names params)) colnames-p)))))
       (if graphics-file nil result))))
 
 (defun org-babel-normalize-newline (result)
@@ -133,11 +130,7 @@ This function is called by `org-babel-execute-src-block'."
   "Return list of julia statements assigning the block's variables."
   (let ((vars (org-babel--get-vars params)))
     (mapcar
-     (lambda (pair)
-       (org-babel-julia-assign-elisp
-	(car pair) (cdr pair)
-	(equal "yes" (cdr (assq :colnames params)))
-	(equal "yes" (cdr (assq :rownames params)))))
+     (lambda (pair) (org-babel-julia-assign-elisp (car pair) (cdr pair)))
      (mapcar
       (lambda (i)
 	(cons (car (nth i vars))
@@ -153,7 +146,7 @@ This function is called by `org-babel-execute-src-block'."
       (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
     (format "%S" s)))
 
-(defun org-babel-julia-assign-elisp (name value colnames-p rownames-p)
+(defun org-babel-julia-assign-elisp (name value)
   "Construct julia code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
       (let* ((lengths (mapcar 'length (cl-remove-if-not 'sequencep value)))
@@ -161,10 +154,7 @@ This function is called by `org-babel-execute-src-block'."
              (min (if lengths (apply 'min lengths) 0)))
         ;; Ensure VALUE has an orgtbl structure (depth of at least 2).
         (unless (listp (car value)) (setq value (list value)))
-        (let ((file (orgtbl-to-csv value '(:fmt org-babel-julia-quote-csv-field)))
-              (header (if (or (eq (nth 1 value) 'hline) colnames-p)
-                          "TRUE" "FALSE"))
-              (row-names (if rownames-p "1" "NULL")))
+        (let ((file (orgtbl-to-csv value '(:fmt org-babel-julia-quote-csv-field))))
           (if (= max min)
               (format "%s = begin
     using CSV
@@ -251,16 +241,16 @@ end"
 end")
 
 (defun org-babel-julia-evaluate
-    (session body result-type result-params column-names-p row-names-p)
+    (session body result-type result-params column-names-p)
   "Evaluate julia code in BODY."
   (if session
       (org-babel-julia-evaluate-session
-       session body result-type result-params column-names-p row-names-p)
+       session body result-type result-params column-names-p)
     (org-babel-julia-evaluate-external-process
-     body result-type result-params column-names-p row-names-p)))
+     body result-type result-params column-names-p)))
 
 (defun org-babel-julia-evaluate-external-process
-    (body result-type result-params column-names-p row-names-p)
+    (body result-type result-params column-names-p)
   "Evaluate BODY in external julia process.
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
@@ -284,7 +274,7 @@ last statement in BODY, as elisp."
     (output (org-babel-eval org-babel-julia-command body))))
 
 (defun org-babel-julia-evaluate-session
-    (session body result-type result-params column-names-p row-names-p)
+    (session body result-type result-params column-names-p)
   "Evaluate BODY in SESSION.
 If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the

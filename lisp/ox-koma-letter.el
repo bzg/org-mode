@@ -1,4 +1,4 @@
-;;; ox-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine
+;;; ox-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2021  Free Software Foundation, Inc.
 
@@ -618,7 +618,7 @@ such as the one tagged with PS."
 
 ;;;; Export Block
 
-(defun org-koma-letter-export-block (export-block contents info)
+(defun org-koma-letter-export-block (export-block _contents _info)
   "Transcode an EXPORT-BLOCK element into KOMA Scrlttr2 code.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
@@ -628,7 +628,7 @@ channel."
 
 ;;;; Export Snippet
 
-(defun org-koma-letter-export-snippet (export-snippet contents info)
+(defun org-koma-letter-export-snippet (export-snippet _contents _info)
   "Transcode an EXPORT-SNIPPET object into KOMA Scrlttr2 code.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
