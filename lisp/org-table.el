@@ -5649,6 +5649,9 @@ strings, or the current cell) returning a string:
 
     (:fmt (2 \"$%s$\" 4 (lambda (c) (format \"$%s$\" c))))
 
+  The format is ignored for empty fields.  Use :raw t with non-nil
+  :backend option to force formatting empty fields.
+
 :hlstart :hllstart :hlend :hllend :hsep :hlfmt :hllfmt :hfmt
 
  Same as above, specific for the header lines in the table.
