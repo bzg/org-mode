@@ -358,7 +358,8 @@ This function is meant to be used in `org-cycle-hook'."
 	   (or (org-inlinetask-at-task-p)
 	       (and (outline-next-heading) (org-inlinetask-at-task-p)))
 	 (org-inlinetask-toggle-visibility)
-	 (org-inlinetask-goto-end))))))
+	 (org-inlinetask-goto-end)
+         (backward-char))))))
 
 (defun org-inlinetask-remove-END-maybe ()
   "Remove an END line when present."
