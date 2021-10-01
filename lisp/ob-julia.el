@@ -1,4 +1,4 @@
-;;; ob-julia.el --- org-babel functions for julia code evaluation -*- lexical-binding: t; -*-
+;;; ob-julia.el --- org-babel functions for julia code evaluation  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 ;; Authors: G. Jay Kerns, based on ob-R.el by Eric Schulte and Dan Davison
@@ -149,7 +149,7 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-julia-assign-elisp (name value)
   "Construct julia code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
-      (let* ((lengths (mapcar #'length (cl-remove-if-not 'sequencep value)))
+      (let* ((lengths (mapcar #'length (cl-remove-if-not #'sequencep value)))
              (max (if lengths (apply #'max lengths) 0))
              (min (if lengths (apply #'min lengths) 0)))
         ;; Ensure VALUE has an orgtbl structure (depth of at least 2).
