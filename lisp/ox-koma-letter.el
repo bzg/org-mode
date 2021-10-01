@@ -1,4 +1,4 @@
-;;; ox-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2021  Free Software Foundation, Inc.
 
