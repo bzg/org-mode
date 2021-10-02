@@ -13,7 +13,7 @@ while (<IN>) {
   } elsif (/<div class="contents">/) {
     print OUT;
     print OUT '<p>This is the official manual for the latest <a href="https://orgmode.org">Org mode</a> release.</p><div id="table-of-contents">';
-  } elsif (/<h2>Table of Contents<\/h2>/) {
+  } elsif (/<h2>Table of Contents<\/h2>|<h2 class="contents-heading">/) {
     print OUT;
     print OUT '<a href="https://orgmode.org">https://orgmode.org</a><br/><div id="text-table-of-contents">';
     $toc = 1;
