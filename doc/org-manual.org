@@ -127,12 +127,6 @@ Make sure you set the load path correctly in your Emacs init file:
 (add-to-list 'load-path "~/src/org-mode/lisp")
 #+end_src
 
-Alternatively, if you intention is to test the latest version and you are
-not going to use it permanently then suppress regular initialization,
-optionally provide minimal init file and specify load path in command line:
-
-: $ emacs -Q -L ~/src/org-mode/lisp -l /path/to/init-git.el
-
 You can also compile with =make=, generate the documentation with
 =make doc=, create a local configuration with =make config= and
 install Org with =make install=.  Please run =make help= to get the
