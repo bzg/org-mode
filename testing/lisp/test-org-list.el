@@ -298,7 +298,21 @@ b. Item 2<point>"
 	    (push-mark (point) t t)
 	    (goto-char (point-max))
 	    (let (org-list-demote-modify-bullet) (org-indent-item))
-	    (buffer-string)))))
+	    (buffer-string))))
+  ;; When point is right after empty item, do not move point.
+  (should
+   (= 13
+      (org-test-with-temp-text "
+- item
+- <point> ::"
+        (org-indent-item)
+        (point))))
+  ;; Preserve space after point upon promoting level.
+  (org-test-with-temp-text "
+- item
+- <point> 	::"
+    (org-indent-item)
+    (should (looking-at-p " \t"))))
 
 (ert-deftest test-org-list/indent-item-tree ()
   "Test `org-indent-item-tree' specifications."

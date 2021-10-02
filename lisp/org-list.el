@@ -1940,7 +1940,19 @@ Initial position of cursor is restored after the changes."
 	      (looking-at org-list-full-item-re)
 	      ;; a.  Replace bullet
 	      (unless (equal old-bul new-bul)
-		(replace-match new-bul nil nil nil 1))
+                (let ((keep-space ""))
+                  (save-excursion
+                    ;; If origin is inside the bullet, preserve the
+                    ;; spaces after origin.
+                    (when (<= (match-beginning 1) origin (match-end 1))
+                      (org-with-point-at origin
+                        (save-match-data
+                          (when (looking-at "[ \t]+")
+                            (setq keep-space (match-string 0))))))
+                    (replace-match "" nil nil nil 1)
+                    (goto-char (match-end 1))
+                    (insert-before-markers new-bul)
+                    (insert keep-space))))
 	      ;; b.  Replace checkbox.
 	      (cond
 	       ((equal (match-string 3) new-box))
@@ -2286,6 +2298,7 @@ item is invisible."
 	  (setq struct (org-list-insert-item pos struct prevs checkbox desc))
 	  (org-list-write-struct struct (org-list-parents-alist struct))
 	  (when checkbox (org-update-checkbox-count-maybe))
+          (beginning-of-line)
 	  (looking-at org-list-full-item-re)
 	  (goto-char (if (and (match-beginning 4)
 			      (save-match-data
