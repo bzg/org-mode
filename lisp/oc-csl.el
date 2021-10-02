@@ -197,7 +197,7 @@ Used only when `second-field-align' is activated by the used CSL style."
      ;; and when running directly from Emacs repository.
      (t
       (expand-file-name "org/csl/" data-directory))))
-  "Directory \"etc/\" from repository.")
+  "Directory containing CSL-related data files.")
 
 (defconst org-cite-csl--fallback-locales-dir org-cite-csl--etc-dir
   "Fallback CSL locale files directory.")
