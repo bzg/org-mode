@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2013-2021 Free Software Foundation, Inc.
 
-;; Author: Miro Bezjak
-;; Maintainer: Palak Mathur
+;; Author: Miro Bezjak <bezjak.miro@gmail.com>
+;; Maintainer: Palak Mathur <palakmathur@gmail.com>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: https://orgmode.org
 

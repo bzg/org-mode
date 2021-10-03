@@ -2,7 +2,7 @@
 ;; Copyright (C) 2006-2021 Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
-;; Maintainer: Nicolas Goaziou <n.goaziou at gmail dot com>
+;; Maintainer: Nicolas Goaziou <mail@nicolasgoaziou.fr>
 ;; Keywords: hypermedia, outlines, wp
 
 ;; This file is part of GNU Emacs.
