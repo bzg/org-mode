@@ -1273,7 +1273,7 @@ arguments.  Replace citation with \"@\" character in the output."
                   (list "b" (org-element-create 'bold nil "c"))) " ")))))
 
 
-;;; TEST capabilities.
+;;; Test capabilities.
 (ert-deftest test-org-cite/activate-capability ()
   "Test \"activate\" capability."
   ;; Standard test.
@@ -1393,6 +1393,29 @@ arguments.  Replace citation with \"@\" character in the output."
                               '((section . (lambda (_ c _) c))
                                 (paragraph . (lambda (_ c _) c))
                                 (bold . (lambda (&rest _) "bold")))))))))
+  ;; Make sure to have a space between a quote and a citation.
+  (should
+   (equal "\"quotation\" citation\n"
+          (org-test-with-temp-text "\"quotation\"[cite:@key]"
+            (let ((org-cite--processors nil)
+                  (org-cite-export-processors '((t . (foo nil nil)))))
+              (org-cite-register-processor 'foo
+                :export-citation (lambda (&rest _) "citation"))
+              (org-export-as (org-export-create-backend
+                              :transcoders
+                              '((section . (lambda (_ c _) c))
+                                (paragraph . (lambda (_ c _) c)))))))))
+  (should
+   (equal "\"quotation\"  citation\n"
+          (org-test-with-temp-text "\"quotation\"  [cite:@key]"
+            (let ((org-cite--processors nil)
+                  (org-cite-export-processors '((t . (foo nil nil)))))
+              (org-cite-register-processor 'foo
+                :export-citation (lambda (&rest _) "citation"))
+              (org-export-as (org-export-create-backend
+                              :transcoders
+                              '((section . (lambda (_ c _) c))
+                                (paragraph . (lambda (_ c _) c)))))))))
   ;; Regular bibliography export.
   (should
    (eq 'success
