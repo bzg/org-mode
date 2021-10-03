@@ -1274,11 +1274,13 @@ by side-effect."
           ;; Before removing the citation, transfer its `:post-blank'
           ;; property to the object before, if any.
           (org-cite--set-previous-post-blank cite blanks info)
-        ;; We want to be sure any non-note citation is preceded by
-        ;; a space.  This is particularly important when using
+        ;; Make sure there is a space between a quotation mark and
+        ;; a citation.  This is particularly important when using
         ;; `adaptive' note rule.  See `org-cite-note-rules'.
-        (unless (org-cite-inside-footnote-p cite t)
-          (org-cite--set-previous-post-blank cite 1 info))
+        (let ((previous (org-export-get-previous-element cite info)))
+          (when (and (org-string-nw-p previous)
+                     (string-suffix-p "\"" previous))
+            (org-cite--set-previous-post-blank cite 1 info)))
         (pcase replacement
           ;; String.
           ((pred stringp)
