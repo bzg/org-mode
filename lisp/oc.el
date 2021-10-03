@@ -883,7 +883,7 @@ When nil, it defaults to `org-cite-punctuation-marks'.
 Parse tree is modified by side-effect.
 
 Note: when calling both `org-cite-adjust-note' and `org-cite-wrap-citation' on
-the same object, call `org-cite-adjust-punctuation' first."
+the same object, call `org-cite-adjust-note' first."
   (when org-cite-adjust-note-numbers
     (pcase-let* ((rule (or rule (org-cite--get-note-rule info)))
                  (punct-re (regexp-opt (or punct org-cite-punctuation-marks)))
