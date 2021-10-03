@@ -18183,10 +18183,11 @@ to pass data between code blocks.
 It is possible to export the /code/ of code blocks, the /results/ of
 code block evaluation, /both/ the code and the results of code block
 evaluation, or /none/.  Org defaults to exporting /code/ for most
-languages.  For some languages, such as ditaa, Org defaults to
-/results/.  To export just the body of code blocks, see [[*Literal
-Examples]].  To selectively export sub-trees of an Org document, see
-[[*Exporting]].
+languages and /results/ for inline code blocks.  For some languages,
+such as ditaa, Org defaults to /results/ both in ordinary source
+blocks and in inline source blocks.  To export just the body of code
+blocks, see [[*Literal Examples]].  To selectively export sub-trees of an
+Org document, see [[*Exporting]].
 
 #+cindex: @samp{exports}, header argument
 The =exports= header argument is to specify if that part of the Org
