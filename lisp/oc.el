@@ -152,10 +152,10 @@ triplet following the pattern
   (NAME BIBLIOGRAPHY-STYLE CITATION-STYLE)
 
 There, NAME is the name of a registered citation processor providing export
-functionality, as a symbol.  BIBLIOGRAPHY-STYLE (resp. CITATION-STYLE) is the
-desired default style to use when printing a bibliography (resp. exporting a
-citation), as a string or nil.  Both BIBLIOGRAPHY-STYLE and CITATION-STYLE are
-optional.  NAME is mandatory.
+functionality, as a symbol.  BIBLIOGRAPHY-STYLE (respectively CITATION-STYLE)
+is the desired default style to use when printing a bibliography (respectively
+exporting a citation), as a string or nil.  Both BIBLIOGRAPHY-STYLE and
+CITATION-STYLE are optional.  NAME is mandatory.
 
 The export process selects the citation processor associated to the current
 export back-end, or the most specific back-end the current one is derived from,
@@ -502,8 +502,8 @@ This function assumes S precedes CITATION."
 
 (defun org-cite--move-punct-before (punct citation s info)
   "Move punctuation PUNCT before CITATION object.
-String S contains PUNCT.  The function assumes S follows CITATION.
-Parse tree is modified by side-effect."
+String S contains PUNCT.  INFO is the export state, as a property list.
+The function assumes S follows CITATION.  Parse tree is modified by side-effect."
   (if (equal s punct)
       (org-element-extract-element s)   ;it would be empty anyway
     (org-element-set-element s (substring s (length punct))))
@@ -876,6 +876,9 @@ modified by side-effect."
   "Adjust note number location for CITATION object, and punctuation around it.
 
 INFO is the export state, as a property list.
+
+Optional argument RULE is the punctuation rule used, as a triplet.  When nil,
+rule is determined according to `org-cite-note-rules', which see.
 
 Optional argument PUNCT is a list of punctuation marks to be considered.
 When nil, it defaults to `org-cite-punctuation-marks'.
@@ -1386,7 +1389,8 @@ ARG is the prefix argument received when calling `org-open-at-point', or nil."
 
 ;;; Meta-command for citation insertion (insert capability)
 (defun org-cite--allowed-p (context)
-  "Non-nil when a citation can be inserted at point."
+  "Non-nil when a citation can be inserted at point.
+CONTEXT is the element or object at point, as returned by `org-element-context'."
   (let ((type (org-element-type context)))
     (cond
      ;; No citation in attributes, except in parsed ones.
