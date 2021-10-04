@@ -12,6 +12,15 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.6 (not yet released)
+
+** Miscellaneous
+
+*** New =transparent-image-converter= property for =dvipng=
+
+The =dvipng= option in ~org-preview-latex-process-alist~ has a new
+property =transparent-image-converter= which is used instead of
+=image-converter= when producing transparent images.
+
 * Version 9.5
 
 ** Important announcements and breaking changes
