@@ -6754,7 +6754,7 @@ be selected:
 
 - =:step= ::
 
-  Set to =day=, =week=, =semimonth=, =month=, or =year= to split the
+  Set to =day=, =week=, =semimonth=, =month=, =quarter=, or =year= to split the
   table into chunks.  To use this, either =:block=, or =:tstart= and
   =:tend= are required.
 

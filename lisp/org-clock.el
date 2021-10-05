@@ -2846,6 +2846,7 @@ a number of clock tables."
             (`semimonth "Semimonthly report starting on: ")
             (`month "Monthly report starting on: ")
             (`year "Annual report starting on: ")
+            (`quarter "Quarterly report starting on: ")
             (_ (user-error "Unknown `:step' specification: %S" step))))
          (week-start (or (plist-get params :wstart) 1))
          (month-start (or (plist-get params :mstart) 1))
@@ -2898,6 +2899,7 @@ a number of clock tables."
                                                (if (< d 16) 16 1)
                                                (if (< d 16) m (1+ m)) y))
                   (`month (org-encode-time 0 0 0 month-start (1+ m) y))
+                  (`quarter (org-encode-time 0 0 0 month-start (+ 3 m) y))
                   (`year (org-encode-time 0 0 org-extend-today-until 1 1 (1+ y))))))
              (table-begin (line-beginning-position 0))
 	     (step-time
