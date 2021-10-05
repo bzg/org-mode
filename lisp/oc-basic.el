@@ -535,7 +535,7 @@ INFO is the export state as a property list."
 INFO is the export state, as a property list."
   (and field
        (lambda (a b)
-         (org-string-collate-lessp
+         (string-collate-lessp
           (org-cite-basic--get-field field a info 'raw)
           (org-cite-basic--get-field field b info 'raw)
           nil t))))

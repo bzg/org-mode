@@ -36,7 +36,7 @@
 
 (declare-function org-mode "org" ())
 (declare-function org-show-context "org" (&optional key))
-(declare-function org-string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
+(declare-function string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
 
 (defvar org-ts-regexp0)
 (defvar ffap-url-regexp)
@@ -825,17 +825,17 @@ return nil."
 ;;; String manipulation
 
 (defun org-string< (a b)
-  (org-string-collate-lessp a b))
+  (string-collate-lessp a b))
 
 (defun org-string<= (a b)
-  (or (string= a b) (org-string-collate-lessp a b)))
+  (or (string= a b) (string-collate-lessp a b)))
 
 (defun org-string>= (a b)
-  (not (org-string-collate-lessp a b)))
+  (not (string-collate-lessp a b)))
 
 (defun org-string> (a b)
   (and (not (string= a b))
-       (not (org-string-collate-lessp a b))))
+       (not (string-collate-lessp a b))))
 
 (defun org-string<> (a b)
   (not (string= a b)))

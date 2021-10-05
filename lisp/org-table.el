@@ -2868,7 +2868,7 @@ ARGS are passed as arguments to the `message' function.  Returns
 current time if a message is printed, otherwise returns T1.  If
 T1 is nil, always messages."
   (let ((curtime (current-time)))
-    (if (or (not t1) (org-time-less-p 1 (org-time-subtract curtime t1)))
+    (if (or (not t1) (time-less-p 1 (time-subtract curtime t1)))
 	(progn (apply 'message args)
 	       curtime)
       t1)))
@@ -4562,8 +4562,8 @@ function is being called interactively."
 	     (predicate
 	      (cl-case sorting-type
 		((?n ?N ?t ?T) #'<)
-		((?a ?A) (if with-case #'org-string-collate-lessp
-			   (lambda (s1 s2) (org-string-collate-lessp s1 s2 nil t))))
+		((?a ?A) (if with-case #'string-collate-lessp
+			   (lambda (s1 s2) (string-collate-lessp s1 s2 nil t))))
 		((?f ?F)
 		 (or compare-func
 		     (and interactive?

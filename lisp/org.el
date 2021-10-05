@@ -2974,7 +2974,7 @@ is better to limit inheritance to certain tags using the variables
   :group 'org-tags
   :type '(choice
 	  (const :tag "No sorting" nil)
-	  (const :tag "Alphabetical" org-string-collate-lessp)
+	  (const :tag "Alphabetical" string-collate-lessp)
 	  (const :tag "Reverse alphabetical" org-string-collate-greaterp)
 	  (function :tag "Custom function" nil)))
 
@@ -5019,14 +5019,14 @@ the rounding returns a past time."
       (let* ((time (decode-time now))
 	     (res (apply #'encode-time 0 (* r (round (nth 1 time) r))
 			 (nthcdr 2 time))))
-	(if (or (not past) (org-time-less-p res now))
+	(if (or (not past) (time-less-p res now))
 	    res
-	  (org-time-subtract res (* r 60)))))))
+	  (time-subtract res (* r 60)))))))
 
 (defun org-today ()
   "Return today date, considering `org-extend-today-until'."
   (time-to-days
-   (org-time-since (* 3600 org-extend-today-until))))
+   (time-since (* 3600 org-extend-today-until))))
 
 ;;;; Font-Lock stuff, including the activators
 
@@ -8430,7 +8430,7 @@ function is being called interactively."
 	     (t (error "Invalid sorting type `%c'" sorting-type))))
 	  nil
 	  (cond
-	   ((= dcst ?a) 'org-string-collate-lessp)
+	   ((= dcst ?a) 'string-collate-lessp)
 	   ((= dcst ?f)
 	    (or compare-func
 		(and interactive?
@@ -8530,7 +8530,7 @@ definitions."
 ;; string-collate-greaterp in Emacs.
 (defun org-string-collate-greaterp (s1 s2)
   "Return non-nil if S1 is greater than S2 in collation order."
-  (not (org-string-collate-lessp s1 s2)))
+  (not (string-collate-lessp s1 s2)))
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
@@ -10542,7 +10542,7 @@ This function is run automatically after each state change to a DONE state."
 		      (let ((nshiftmax 10)
 			    (nshift 0))
 			(while (or (= nshift 0)
-				   (not (org-time-less-p nil time)))
+				   (not (time-less-p nil time)))
 			  (when (= nshiftmax (cl-incf nshift))
 			    (or (y-or-n-p
 				 (format "%d repeater intervals were not \

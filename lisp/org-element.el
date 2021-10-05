@@ -5336,7 +5336,7 @@ Assume ELEMENT belongs to cache and that a cache is active."
   (setq org-element--cache-sync-timer
 	(run-with-idle-timer
 	 (let ((idle (current-idle-time)))
-	   (if idle (org-time-add idle org-element-cache-sync-break)
+	   (if idle (time-add idle org-element-cache-sync-break)
 	     org-element-cache-sync-idle-time))
 	 nil
 	 #'org-element--cache-sync
@@ -5347,7 +5347,7 @@ Assume ELEMENT belongs to cache and that a cache is active."
 TIME-LIMIT is a time value or nil."
   (and time-limit
        (or (input-pending-p)
-	   (org-time-less-p time-limit nil))))
+	   (time-less-p time-limit nil))))
 
 (defsubst org-element--cache-shift-positions (element offset &optional props)
   "Shift ELEMENT properties relative to buffer positions by OFFSET.
@@ -5401,8 +5401,7 @@ updated before current modification are actually submitted."
 	     (and next (aref next 0))
 	     threshold
 	     (and (not threshold)
-		  (org-time-add nil
-				org-element-cache-sync-duration))
+		  (time-add nil org-element-cache-sync-duration))
 	     future-change)
 	    ;; Request processed.  Merge current and next offsets and
 	    ;; transfer ending position.

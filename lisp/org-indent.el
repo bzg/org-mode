@@ -330,7 +330,7 @@ stopped."
      (let* ((case-fold-search t)
 	    (limited-re (org-get-limited-outline-regexp))
 	    (level (or (org-current-level) 0))
-	    (time-limit (and delay (org-time-add nil delay))))
+	    (time-limit (and delay (time-add nil delay))))
        ;; For each line, set `line-prefix' and `wrap-prefix'
        ;; properties depending on the type of line (headline, inline
        ;; task, item or other).
@@ -343,7 +343,7 @@ stopped."
 	    ;; In asynchronous mode, take a break of
 	    ;; `org-indent-agent-resume-delay' every DELAY to avoid
 	    ;; blocking any other idle timer or process output.
-	    ((and delay (org-time-less-p time-limit nil))
+	    ((and delay (time-less-p time-limit nil))
 	     (setq org-indent-agent-resume-timer
 		   (run-with-idle-timer
 		    (time-add (current-idle-time) org-indent-agent-resume-delay)

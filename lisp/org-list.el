@@ -2910,7 +2910,7 @@ function is being called interactively."
 		   (error "Missing key extractor"))))
 	 (sort-func
 	  (cond
-	   ((= dcst ?a) #'org-string-collate-lessp)
+	   ((= dcst ?a) #'string-collate-lessp)
 	   ((= dcst ?f)
 	    (or compare-func
 		(and interactive?

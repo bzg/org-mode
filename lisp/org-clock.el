@@ -770,7 +770,7 @@ The time returned includes the time spent on this task in
 previous clocking intervals."
   (let ((currently-clocked-time
 	 (floor (org-time-convert-to-integer
-		 (org-time-since org-clock-start-time))
+		 (time-since org-clock-start-time))
 		60)))
     (+ currently-clocked-time (or org-clock-total-time 0))))
 
@@ -1000,7 +1000,7 @@ CLOCK is a cons cell of the form (MARKER START-TIME)."
 	 (org-clock-clock-out clock fail-quietly))
 	((org-is-active-clock clock) nil)
 	(t (org-clock-clock-in clock t))))
-      ((pred (org-time-less-p nil))
+      ((pred (time-less-p nil))
        (error "RESOLVE-TO must refer to a time in the past"))
       (_
        (when restart (error "RESTART is not valid here"))
@@ -1102,7 +1102,7 @@ to be CLOCKED OUT."))))
 				   nil 45)))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
-	   (floor (org-time-convert-to-integer (org-time-since last-valid))
+	   (floor (org-time-convert-to-integer (time-since last-valid))
 		  60))
 	 (keep
 	  (or (and (memq ch '(?k ?K))
@@ -1110,14 +1110,14 @@ to be CLOCKED OUT."))))
 	      (and (memq ch '(?t ?T))
 		   (floor
 		    (/ (float-time
-			(org-time-subtract (org-read-date t t) last-valid))
+			(time-subtract (org-read-date t t) last-valid))
 		       60)))))
 	 (gotback
 	  (and (memq ch '(?g ?G))
 	       (read-number "Got back how many minutes ago? " default)))
 	 (subtractp (memq ch '(?s ?S)))
-	 (barely-started-p (org-time-less-p
-			    (org-time-subtract last-valid (cdr clock))
+	 (barely-started-p (time-less-p
+			    (time-subtract last-valid (cdr clock))
 			    45))
 	 (start-over (and subtractp barely-started-p)))
     (cond
@@ -1144,9 +1144,9 @@ to be CLOCKED OUT."))))
 		   (and gotback (= gotback default)))
 	       'now)
 	      (keep
-	       (org-time-add last-valid (* 60 keep)))
+	       (time-add last-valid (* 60 keep)))
 	      (gotback
-	       (org-time-since (* 60 gotback)))
+	       (time-since (* 60 gotback)))
 	      (t
 	       (error "Unexpected, please report this as a bug")))
        (and gotback last-valid)
@@ -1176,7 +1176,7 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 			 (format
 			  "Dangling clock started %d mins ago"
 			  (floor (org-time-convert-to-integer
-				  (org-time-since (cdr clock)))
+				  (time-since (cdr clock)))
 				 60))))
 		   (or last-valid
 		       (cdr clock)))))))))))
@@ -1227,7 +1227,7 @@ so long."
 	     org-clock-marker (marker-buffer org-clock-marker))
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
-	    (org-time-since org-clock-user-idle-seconds))
+	    (time-since org-clock-user-idle-seconds))
 	   (org-clock-resolving-clocks-due-to-idleness t))
       (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
 	  (org-clock-resolve
@@ -1388,7 +1388,7 @@ the default behavior."
 			   (format
 			    "You stopped another clock %d mins ago; start this one from then? "
 			    (/ (org-time-convert-to-integer
-				(org-time-subtract
+				(time-subtract
 				 (org-current-time org-clock-rounding-minutes t)
 				 leftover))
 			       60)))
@@ -1928,7 +1928,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 		       (>= (float-time org-clock-start-time) tstart)
 		       (<= (float-time org-clock-start-time) tend))
 	      (let ((time (floor (org-time-convert-to-integer
-				  (org-time-since org-clock-start-time))
+				  (time-since org-clock-start-time))
 				 60)))
 		(setq t1 (+ t1 time))))
 	    (let* ((headline-forced

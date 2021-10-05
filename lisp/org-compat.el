@@ -181,70 +181,6 @@ This is a floating point number if the size is too large for an integer."
     (nth 7 attributes)))
 
 
-;;; Emacs < 25.1 compatibility
-
-(when (< emacs-major-version 25)
-  (defalias 'outline-hide-entry 'hide-entry)
-  (defalias 'outline-hide-sublevels 'hide-sublevels)
-  (defalias 'outline-hide-subtree 'hide-subtree)
-  (defalias 'outline-show-branches 'show-branches)
-  (defalias 'outline-show-children 'show-children)
-  (defalias 'outline-show-entry 'show-entry)
-  (defalias 'outline-show-subtree 'show-subtree)
-  (defalias 'xref-find-definitions 'find-tag)
-  (defalias 'format-message 'format)
-  (defalias 'gui-get-selection 'x-get-selection))
-
-(unless (fboundp 'directory-name-p)
-  (defun directory-name-p (name)
-    "Return non-nil if NAME ends with a directory separator character."
-    (let ((len (length name))
-	  (lastc ?.))
-      (if (> len 0)
-	  (setq lastc (aref name (1- len))))
-      (or (= lastc ?/)
-	  (and (memq system-type '(windows-nt ms-dos))
-	       (= lastc ?\\))))))
-
-;; `string-collate-lessp' is new in Emacs 25.
-(if (fboundp 'string-collate-lessp)
-    (defalias 'org-string-collate-lessp
-      'string-collate-lessp)
-  (defun org-string-collate-lessp (s1 s2 &rest _)
-    "Return non-nil if STRING1 is less than STRING2 in lexicographic order.
-Case is significant."
-    (string< s1 s2)))
-
-;; The time- functions below translate nil to 'current-time' and
-;; accept an integer as of Emacs 25.  'decode-time' and
-;; 'format-time-string' accept nil on Emacs 24 but don't accept an
-;; integer until Emacs 25.
-(if (< emacs-major-version 25)
-    (let ((convert
-           (lambda (time)
-             (cond ((not time) (current-time))
-                   ((numberp time) (seconds-to-time time))
-                   (t time)))))
-      (defun org-decode-time (&optional time)
-        (decode-time (funcall convert time)))
-      (defun org-format-time-string (format-string &optional time universal)
-        (format-time-string format-string (funcall convert time) universal))
-      (defun org-time-add (a b)
-        (time-add (funcall convert a) (funcall convert b)))
-      (defun org-time-subtract (a b)
-        (time-subtract (funcall convert a) (funcall convert b)))
-      (defun org-time-since (time)
-        (time-since (funcall convert time)))
-      (defun org-time-less-p (t1 t2)
-        (time-less-p (funcall convert t1) (funcall convert t2))))
-  (defalias 'org-decode-time 'decode-time)
-  (defalias 'org-format-time-string 'format-time-string)
-  (defalias 'org-time-add 'time-add)
-  (defalias 'org-time-subtract 'time-subtract)
-  (defalias 'org-time-since 'time-since)
-  (defalias 'org-time-less-p 'time-less-p))
-
-
 ;;; Obsolete aliases (remove them after the next major release).
 
 ;;;; XEmacs compatibility, now removed.
@@ -289,6 +225,14 @@ Counting starts at 1."
                "use cl-subseq (note the 0-based counting)."
                "9.0")
 
+;;;; Functions available since Emacs 25.1
+(define-obsolete-function-alias 'org-string-collate-lessp 'string-collate-lessp "9.6")
+(define-obsolete-function-alias 'org-decode-time 'decode-time "9.6")
+(define-obsolete-function-alias 'org-format-time-string 'format-time-string "9.6")
+(define-obsolete-function-alias 'org-time-add 'time-add "9.6")
+(define-obsolete-function-alias 'org-time-subtract 'time-subtract "9.6")
+(define-obsolete-function-alias 'org-time-since 'time-since "9.6")
+(define-obsolete-function-alias 'org-time-less-p 'time-less-p "9.6")
 
 ;;;; Functions available since Emacs 24.3
 (define-obsolete-function-alias 'org-buffer-narrowed-p 'buffer-narrowed-p "9.0")
