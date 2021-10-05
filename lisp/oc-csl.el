@@ -56,7 +56,8 @@
 
 ;; The library supports the following citation styles:
 ;;
-;; - author (a), including caps (c), full (f), and caps-full (cf) variants,
+;; - author (a), including bare (b), caps (c), bare-caps (bc), full (f),
+;;   caps-full (cf), and bare-caps-full (bcf) variants,
 ;; - noauthor (na), including bare (b), caps (c) and bare-caps (bc) variants,
 ;; - year (y), including a bare (b) variant,
 ;; - text (t). including caps (c), full (f), and caps-full (cf) variants,
@@ -301,9 +302,13 @@ a property list."
       ;; "author" style.
       (`(,(or "author" "a") . ,variant)
        (pcase variant
+	 ((or "bare" "b") '(:mode author-only :suppress-affixes t))
 	 ((or "caps" "c") '(:mode author-only :capitalize-first t))
 	 ((or "full" "f") '(:mode author-only :ignore-et-al t))
+	 ((or "bare-caps" "bc") '(:mode author-only :suppress-affixes t :capitalize-first t))
+	 ((or "bare-full" "bf") '(:mode author-only :suppress-affixes t :ignore-et-al t))
 	 ((or "caps-full" "cf") '(:mode author-only :capitalize-first t :ignore-et-al t))
+	 ((or "bare-caps-full" "bcf") '(:mode author-only :suppress-affixes t :capitalize-first t :ignore-et-al t))
 	 (_ '(:mode author-only))))
       ;; "noauthor" style.
       (`(,(or "noauthor" "na") . ,variant)
@@ -616,7 +621,7 @@ property list."
   :export-bibliography #'org-cite-csl-render-bibliography
   :export-finalizer #'org-cite-csl-finalizer
   :cite-styles
-  '((("author" "a") ("full" "f") ("caps" "c") ("caps-full" "cf"))
+  '((("author" "a") ("bare" "b") ("caps" "c") ("full" "f") ("bare-caps" "bc") ("caps-full" "cf") ("bare-caps-full" "bcf"))
     (("noauthor" "na") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
     (("year" "y") ("bare" "b"))
     (("text" "t") ("caps" "c") ("full" "f") ("caps-full" "cf"))
