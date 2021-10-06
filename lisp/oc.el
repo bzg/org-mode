@@ -1436,7 +1436,11 @@ CONTEXT is the element or object at point, as returned by `org-element-context'.
 			  (skip-chars-backward " \r\t\n")
 			  (if (eq (org-element-class context) 'object) (point)
 			    (line-beginning-position 2)))))
-     ;; At the start of a list item is fine, as long as the bullet is unaffected.
+     ;; At the beginning of a footnote definition, right after the
+     ;; label, is OK.
+     ((eq type 'footnote-definition) (looking-at (rx space)))
+     ;; At the start of a list item is fine, as long as the bullet is
+     ;; unaffected.
      ((eq type 'item)
       (> (point) (+ (org-element-property :begin context)
                     (current-indentation)
