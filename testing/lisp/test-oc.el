@@ -1792,6 +1792,49 @@ arguments.  Replace citation with \"@\" character in the output."
        (org-cite-register-processor 'foo
          :insert (lambda (_ _) (throw :exit 'success)))
        (call-interactively #'org-cite-insert))))
+  ;; Allow inserting citations at the beginning of a footnote
+  ;; definition, right after the label.
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "[fn:1]<point>"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert))))))
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "[fn:1] <point>"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert))))))
+  (should
+   (eq 'success
+       (catch :exit
+         (org-test-with-temp-text "[fn:1]<point>\nParagraph"
+           (let ((org-cite--processors nil)
+                 (org-cite-insert-processor 'foo))
+             (org-cite-register-processor 'foo
+               :insert (lambda (_ _) (throw :exit 'success)))
+             (call-interactively #'org-cite-insert))))))
+  (should-error
+   (org-test-with-temp-text "[fn:1<point>]"
+     (let ((org-cite--processors nil)
+           (org-cite-insert-processor 'foo))
+       (org-cite-register-processor 'foo
+         :insert (lambda (_ _) (throw :exit 'success)))
+       (call-interactively #'org-cite-insert))))
+  (should-error
+   (org-test-with-temp-text "<point>[fn:1]"
+     (let ((org-cite--processors nil)
+           (org-cite-insert-processor 'foo))
+       (org-cite-register-processor 'foo
+         :insert (lambda (_ _) (throw :exit 'success)))
+       (call-interactively #'org-cite-insert))))
   ;; Allow inserting citations in captions.
   (should
    (eq 'success
