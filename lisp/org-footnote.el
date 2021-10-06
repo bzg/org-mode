@@ -282,6 +282,9 @@ otherwise."
 			    (skip-chars-backward " \r\t\n")
 			    (if (eq (org-element-class context) 'object) (point)
 			      (1+ (line-beginning-position 2))))))
+       ;; At the beginning of a footnote definition, right after the
+       ;; label, is OK.
+       ((eq type 'footnote-definition) (looking-at (rx (or space buffer-end))))
        ;; Other elements are invalid.
        ((eq (org-element-class context) 'element) nil)
        ;; Just before object is fine.
