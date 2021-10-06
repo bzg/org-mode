@@ -90,7 +90,34 @@
     (org-test-with-temp-text " *bold*<point>"
       (let ((org-footnote-auto-label t)) (org-footnote-new))
       (buffer-string))))
-  ;; Arrow new footnotes in table cells.
+  ;; Allow new footnotes at the start of a footnote definition.
+  (should
+   (string-match-p
+    "\\[fn:1\\]\\[fn:2\\]"
+    (org-test-with-temp-text "[fn:1]<point>"
+      (let ((org-footnote-auto-label t)) (org-footnote-new))
+      (buffer-string))))
+  (should
+   (string-match-p
+    "\\[fn:1\\] \\[fn:2\\]"
+    (org-test-with-temp-text "[fn:1] <point>"
+      (let ((org-footnote-auto-label t)) (org-footnote-new))
+      (buffer-string))))
+  (should
+   (string-match-p
+    "\\[fn:1\\]\\[fn:2\\]"
+    (org-test-with-temp-text "[fn:1]<point> \nParagraph"
+      (let ((org-footnote-auto-label t)) (org-footnote-new))
+      (buffer-string))))
+  (should-error
+   (org-test-with-temp-text "[fn:<point>1]"
+     (let ((org-footnote-auto-label t)) (org-footnote-new))
+     (buffer-string)))
+  (should-error
+   (org-test-with-temp-text "<point>[fn:1]"
+     (let ((org-footnote-auto-label t)) (org-footnote-new))
+     (buffer-string)))
+  ;; Allow new footnotes in table cells.
   (should
    (string-match-p
     " \\[fn:1\\]"
