@@ -1362,9 +1362,8 @@ you, configure the option ~org-table-auto-blank-field~.
   Re-align the table, move to the next field.  Creates a new row if
   necessary.
 
-- {{{kbd(C-c SPC)}}} (~org-table-blank-field~) ::
+- {{{kbd(M-x org-table-blank-field)}}} ::
 
-  #+kindex: C-c SPC
   #+findex: org-table-blank-field
   Blank the field at point.
 
