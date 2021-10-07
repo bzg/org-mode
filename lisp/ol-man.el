@@ -1,4 +1,4 @@
-;;; ol-man.el --- Links to man pages
+;;; ol-man.el --- Links to man pages -*- lexical-binding: t; -*-
 ;;
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Maintainer: Bastien Guerry <bzg@gnu.org>
