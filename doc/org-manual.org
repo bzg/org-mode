@@ -16589,7 +16589,7 @@ Org currently includes the following export processors:
 - Two processors can export to a variety of formats, including =latex=
   (and therefore =pdf=), =html=, =odt= and plain (UTF8) text:
 
-  - basic :: a basic export processors, well adapted to situations
+  - basic :: a basic export processor, well adapted to situations
     where backward compatibility is not a requirement and formatting
     needs are minimal;
 
@@ -16599,45 +16599,42 @@ Org currently includes the following export processors:
 - In contrast, two other processors target LaTeX and LaTeX-derived
   formats exclusively:
 
-  - natbib :: this export processor uses =bibtex=, the historical
+  - natbib :: this export processor uses BibTeX, the historical
     bibliographic processor used with LaTeX, thus allowing the use of
-    data and style files compatible with this processor (including a
-    large number of publishers' styles).  It uses citation commands
-    implemented in the LaTeX package =natbib=, allowing more stylistic
-    variants that LaTeX's =\cite= command.
+    data and style files compatible with this processor (including
+    a large number of publishers' styles).  It uses citation commands
+    implemented in the LaTeX package ~natbib~, allowing more stylistic
+    variants that LaTeX's ~\cite~ command.
 
   - biblatex :: this backend allows the use of data and formats
-    prepared for =biblatex=, an alternate bibliographic processor used
-    with LaTeX, which overcomes some serious =bibtex= limitations, but
+    prepared for BibLaTeX, an alternate bibliographic processor used
+    with LaTeX, which overcomes some serious BibTeX limitations, but
     has not (yet?) been widely adopted by publishers.
 
-The =#+cite_export:= keyword specifies the export processor and the
+The =CITE_EXPORT= keyword specifies the export processor and the
 citation (and possibly reference) style(s); for example (all arguments
 are optional)
 
-#+begin_example
-#+cite_export: basic author author-year
-#+end_example
+: #+cite_export: basic author author-year
 
+#+texinfo: @noindent
 specifies the "basic" export processor with citations inserted as
 author's name and references indexed by author's names and year;
 
-#+begin_example
-#+cite_export: csl /some/path/to/vancouver-brackets.csl
-#+end_example
+: #+cite_export: csl /some/path/to/vancouver-brackets.csl
 
+#+texinfo: @noindent
 specifies the "csl" processor and CSL style, which in this case
 defines numeric citations and numeric references according to the
 =Vancouver= specification (as style used in many medical journals),
 following a typesetting variation putting citations between brackets;
 
-#+begin_example
-#+cite_export: natbib kluwer
-#+end_example
+: #+cite_export: natbib kluwer
 
-specifies the "natbib" export processor with a label citation style
+#+texinfo: @noindent
+specifies the =natbib= export processor with a label citation style
 conformant to the Harvard style and the specification of the
-Wolkers-Kluwer publisher; since it relies on the =bibtex= processor of
+Wolkers-Kluwer publisher; since it relies on the ~bibtex~ processor of
 your LaTeX installation, it won't export to anything but PDF.
 
 * Working with Source Code
