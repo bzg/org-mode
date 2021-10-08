@@ -16516,16 +16516,16 @@ keywords.
 :END:
 #+cindex: citation
 
-As of Org 9.5, a new library =oc.el= provides tooling to handle
-citations in Org via "citation processors" that offer some or all of
-the following capabilities:
+The =oc.el= library provides tooling to handle citations in Org via
+"citation processors" that offer some or all of the following
+capabilities:
 
-- "activate" :: Fontification, tooltip preview, etc.
-- "follow" :: At-point actions on citations via ~org-open-at-point~.
-- "insert" :: Add and edit citations via ~org-cite-insert~.
-- "export" :: Via different libraries for different target formats.
+- activate :: Fontification, tooltip preview, etc.
+- follow :: At-point actions on citations via ~org-open-at-point~.
+- insert :: Add and edit citations via ~org-cite-insert~.
+- export :: Via different libraries for different target formats.
 
-The user can configure these with ~org-cite-active-processor~,
+The user can configure these with ~org-cite-activate-processor~,
 ~org-cite-follow-processor~, ~org-cite-insert-processor~, and
 ~org-cite-export-processors~ respectively.
 
@@ -16543,8 +16543,10 @@ more "bibliography" keywords.
 #+bibliography: "/some/file/with spaces/in its name.bib"
 #+end_example
 
+#+kindex: C-c C-x @
+#+findex: org-cite-insert
 One can then insert and edit citations using ~org-cite-insert~, called
-with {{{kbd(M-x org-cite-insert)}}}.
+with {{{kbd(C-c C-x @)}}}.
 
 A /citation/ requires one or more citation /key(s)/, elements
 identifying a reference in the bibliography.
@@ -16553,9 +16555,10 @@ identifying a reference in the bibliography.
 
 - Each key starts with the character =@=.
 
-- Each key can be qualified by a /prefix/ (e.g. "see ") and/or a
-  /suffix/ (e.g. "p. 123"), giving informations useful or necessary fo
-  the comprehension of the citation but not included in the reference.
+- Each key can be qualified by a /prefix/ (e.g.\nbsp{}"see ") and/or
+  a /suffix/ (e.g.\nbsp{}"p.\nbsp{}123"), giving informations useful or necessary
+  fo the comprehension of the citation but not included in the
+  reference.
 
 - A single citation can cite more than one reference ; the keys are
   separated by semicolons ; the formatting of such citation groups is
@@ -16563,11 +16566,9 @@ identifying a reference in the bibliography.
 
 - One can also specify a stylistic variation for the citations by
   inserting a =/= and a style name between the =cite= keyword and the
-  colon ; this usially makes sense only for the author-year styles.
+  colon; this usually makes sense only for the author-year styles.
 
-#+begin_example
-[cite/style:common prefix ;prefix @key suffix; ... ; common suffix]
-#+end_example
+: [cite/style:common prefix ;prefix @key suffix; ... ; common suffix]
 
 The only mandatory elements are:
 
@@ -16596,13 +16597,13 @@ Org currently includes the following export processors:
     bibliographic processor used with LaTeX, thus allowing the use of
     data and style files compatible with this processor (including
     a large number of publishers' styles).  It uses citation commands
-    implemented in the LaTeX package ~natbib~, allowing more stylistic
-    variants that LaTeX's ~\cite~ command.
+    implemented in the LaTeX package =natbib=, allowing more stylistic
+    variants that LaTeX's =\cite= command.
 
   - biblatex :: this backend allows the use of data and formats
     prepared for BibLaTeX, an alternate bibliographic processor used
     with LaTeX, which overcomes some serious BibTeX limitations, but
-    has not (yet?) been widely adopted by publishers.
+    has not (yet?)\nbsp{}been widely adopted by publishers.
 
 The =CITE_EXPORT= keyword specifies the export processor and the
 citation (and possibly reference) style(s); for example (all arguments
