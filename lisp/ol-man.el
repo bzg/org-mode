@@ -1,10 +1,10 @@
 ;;; ol-man.el --- Links to man pages -*- lexical-binding: t; -*-
 ;;
+;; Copyright (C) 2020-2021 Free Software Foundation, Inc.
 ;; Author: Carsten Dominik <carsten.dominik@gmail.com>
 ;; Maintainer: Bastien Guerry <bzg@gnu.org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: https://orgmode.org
-;; Version: 1.0
 ;;
 ;; This file is part of GNU Emacs.
 ;;
