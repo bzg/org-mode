@@ -67,7 +67,6 @@
 
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-export-data "org-export" (data info))
-(declare-function org-export-get-next-element "org-export" (blob info &optional n))
 
 
 ;;; Customization
