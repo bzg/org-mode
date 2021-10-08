@@ -35,6 +35,9 @@
 ;; Bibliography should consist of ".bib" files only.
 
 ;;; Code:
+(require 'oc)
+
+(declare-function org-element-property "org-element" (property element))
 
 (declare-function org-export-data "org-export" (data info))
 
