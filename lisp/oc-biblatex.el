@@ -310,6 +310,7 @@ to the document, and set styles."
   '((("author" "a") ("caps" "c") ("full" "f") ("caps-full" "cf"))
     (("locators" "l") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
     (("noauthor" "na"))
+    (("nocite" "n"))
     (("text" "t") ("caps" "c"))
     (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))))
 
