@@ -41,7 +41,7 @@
 ;;
 ;; - author (a), including caps (c), full (f) and caps-full (cf) variants,
 ;; - locators (l), including bare (b), caps (c) and bare-caps (bc) variants,
-;; - noauthor (na),
+;; - noauthor (na), including bare (b) variant,
 ;; - nocite (n),
 ;; - text (t), including caps (c) variant,
 ;; - default style, including bare (b), caps (c) and bare-caps (bc) variants.
@@ -232,7 +232,10 @@ a property list."
         ((or "bare-caps" "bc")      '("Notecite"))
         (_                          '("pnotecite"))))
      ;; "noauthor" style.
-     (`(,(or "noauthor" "na") . ,_) '("autocite*"))
+     (`(,(or "noauthor" "na") . ,variant)
+      (pcase variant
+        ((or "bare" "b")            '("cite*"))
+        (_                          '("autocite*"))))
      ;; "nocite" style.
      (`(,(or "nocite" "n") . ,_)    '("nocite" nil t))
      ;; "text" style.
@@ -308,7 +311,7 @@ to the document, and set styles."
   :cite-styles
   '((("author" "a") ("caps" "c") ("full" "f") ("caps-full" "cf"))
     (("locators" "l") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
-    (("noauthor" "na"))
+    (("noauthor" "na") ("bare" "b"))
     (("nocite" "n"))
     (("text" "t") ("caps" "c"))
     (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))))
