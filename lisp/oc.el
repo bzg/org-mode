@@ -1598,7 +1598,7 @@ The generated function inserts or edit a citation at point.  More specifically,
                             (concat "/" style)
                           ""))
                     "")
-                  (mapconcat (lambda (k) (concat "@" k)) keys ";"))))))))
+                  (mapconcat (lambda (k) (concat "@" k)) keys "; "))))))))
 
 (defun org-cite-insert (arg)
   "Insert a citation at point.
