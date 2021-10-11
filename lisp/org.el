@@ -565,7 +565,7 @@ Group 1 contains drawer's name or \"END\".")
 
 (defconst org-property-drawer-re
   (concat "^[ \t]*:PROPERTIES:[ \t]*\n"
-	  "\\(?:[ \t]*:\\S-+:\\(?: .*\\)?[ \t]*\n\\)*?"
+	  "\\(?:[ \t]*:\\S-+:\\(?:[ \t].*\\)?[ \t]*\n\\)*?"
 	  "[ \t]*:END:[ \t]*$")
   "Matches an entire property drawer.")
 

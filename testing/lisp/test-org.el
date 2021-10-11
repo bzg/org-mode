@@ -413,6 +413,10 @@
   ;; The function ignores incomplete drawers.
   (should-not
    (org-test-with-temp-text ":PROPERTIES:\n<point>:PROP: t\n"
+                            (org-at-property-drawer-p)))
+  ;; tab separating the value.
+  (should
+   (org-test-with-temp-text ":PROPERTIES:\n:PROP:	t\n:END:\n"
      (org-at-property-drawer-p))))
 
 (ert-deftest test-org/get-property-block ()
