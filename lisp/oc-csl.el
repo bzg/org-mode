@@ -271,10 +271,10 @@ If nil then the Chicago author-date style is used as a fallback.")
   ;; Prior to Emacs-27.1 argument of `regexp' form must be a string literal.
   ;; It is the reason why `rx' is avoided here.
   (rx-to-string
-   `(seq word-start
+   `(seq (or line-start space)
          (regexp ,(regexp-opt (mapcar #'car org-cite-csl--label-alist) t))
          (0+ digit)
-         (or word-start line-end space ? ))
+         (or word-end line-end space " "))
    t)
   "Regexp matching a label in a citation reference suffix.
 Label is in match group 1.")
@@ -426,7 +426,9 @@ The result is a association list.  Keys are: `id', `prefix',`suffix',
        ((re-search-forward org-cite-csl--label-regexp nil t)
         (setq location-start (match-beginning 0))
         (setq label (cdr (assoc (match-string 1) org-cite-csl--label-alist)))
-        (setq locator-start (match-end 1)))
+        (goto-char (match-end 1))
+        (skip-chars-forward "[:space:] ")
+        (setq locator-start (point)))
        ((re-search-forward (rx digit) nil t)
         (setq location-start (match-beginning 0))
         (setq label "page")
