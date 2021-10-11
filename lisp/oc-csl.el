@@ -372,7 +372,7 @@ or raise an error if the variable is unset."
     ((and (guard org-cite-csl-styles-dir) file)
      (expand-file-name file org-cite-csl-styles-dir))
     (other
-     (user-error "Cannot handle relative style file name" other))))
+     (user-error "Cannot handle relative style file name: %S" other))))
 
 (defun org-cite-csl--locale-getter ()
   "Return a locale getter.
