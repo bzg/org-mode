@@ -16540,7 +16540,13 @@ capabilities:
 - insert :: Add and edit citations via ~org-cite-insert~.
 - export :: Via different libraries for different target formats.
 
-The user can configure these with ~org-cite-activate-processor~,
+To use a "citation processor", the user must load them; for example;
+
+#+begin_src emacs-lisp
+(require 'oc-bibtex)
+#+end_src
+
+They can then configure them with ~org-cite-activate-processor~,
 ~org-cite-follow-processor~, ~org-cite-insert-processor~, and
 ~org-cite-export-processors~ respectively.
 
@@ -16605,15 +16611,18 @@ Org currently includes the following export processors:
   - csl :: this export processor uses format files written in [[https://en.wikipedia.org/wiki/Citation_Style_Language][Citation
     Style Language]] via [[https://github.com/andras-simonyi/citeproc-el][citeproc-el]];
 
-- In contrast, two other processors target LaTeX and LaTeX-derived
+- In contrast, three other processors target LaTeX and LaTeX-derived
   formats exclusively:
 
-  - natbib :: this export processor uses BibTeX, the historical
+  - bibtex :: this export processor uses BibTeX, the historical
     bibliographic processor used with LaTeX, thus allowing the use of
-    data and style files compatible with this processor (including
-    a large number of publishers' styles).  It uses citation commands
-    implemented in the LaTeX package =natbib=, allowing more stylistic
-    variants that LaTeX's =\cite= command.
+    data and style files compatible with this processor (including a
+    large number of publishers' styles). It only supports LaTeX's
+    =\cite= and =\nocite= commands.
+
+  - natbib :: as with the bibtex processor, but using the LaTeX
+    package =natbib=, allowing more stylistic variants that LaTeX's
+    =\cite= command.
 
   - biblatex :: this backend allows the use of data and formats
     prepared for BibLaTeX, an alternate bibliographic processor used
@@ -16645,6 +16654,11 @@ specifies the =natbib= export processor with a label citation style
 conformant to the Harvard style and the specification of the
 Wolkers-Kluwer publisher; since it relies on the ~bibtex~ processor of
 your LaTeX installation, it won't export to anything but PDF.
+
+The =PRINT_BIBLIOGRAPHY= keyword specifies where the bibliography
+should print.
+
+: #+print_bibliography:
 
 * Working with Source Code
 :PROPERTIES:
