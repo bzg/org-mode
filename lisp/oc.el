@@ -1600,6 +1600,7 @@ The generated function inserts or edit a citation at point.  More specifically,
                     "")
                   (mapconcat (lambda (k) (concat "@" k)) keys "; "))))))))
 
+;;;###autoload
 (defun org-cite-insert (arg)
   "Insert a citation at point.
 Insertion is done according to the processor set in `org-cite-insert-processor'.
@@ -1608,7 +1609,7 @@ ARG is the prefix argument received when calling interactively the function."
   (let ((name org-cite-insert-processor))
     (cond
      ((null name)
-      (user-error "No processor set to follow citations"))
+      (user-error "No processor set to insert citations"))
      ((not (org-cite--get-processor name))
       (user-error "Unknown processor %S" name))
      ((not (org-cite-processor-has-capability-p name 'insert))
