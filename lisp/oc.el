@@ -1608,7 +1608,7 @@ ARG is the prefix argument received when calling interactively the function."
   (let ((name org-cite-insert-processor))
     (cond
      ((null name)
-      (user-error "No processor set to follow citations"))
+      (user-error "No processor set to insert citations"))
      ((not (org-cite--get-processor name))
       (user-error "Unknown processor %S" name))
      ((not (org-cite-processor-has-capability-p name 'insert))
