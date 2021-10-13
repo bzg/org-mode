@@ -1600,6 +1600,7 @@ The generated function inserts or edit a citation at point.  More specifically,
                     "")
                   (mapconcat (lambda (k) (concat "@" k)) keys "; "))))))))
 
+;;;###autoload
 (defun org-cite-insert (arg)
   "Insert a citation at point.
 Insertion is done according to the processor set in `org-cite-insert-processor'.
