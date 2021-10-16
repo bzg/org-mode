@@ -12472,10 +12472,15 @@ TAGS is a list of strings."
 (defun org--get-local-tags ()
   "Return list of tags for the current headline.
 Assume point is at the beginning of the headline."
-  (and (looking-at org-tag-line-re)
-       (split-string (match-string-no-properties 2) ":" t)))
-
-(defun org-get-tags (&optional pos local)
+  (let* ((cached (and (org-element--cache-active-p) (org-element-at-point nil 'cached)))
+         (cached-tags (org-element-property :tags cached)))
+    (if cached
+        ;; If we do not wrap result into `cl-copy-list', reference would
+        ;; be returned and cache element might be modified directly.
+        (cl-copy-list cached-tags)
+      ;; Parse tags manually.
+      (and (looking-at org-tag-line-re)
+           (split-string (match-string-no-properties 2) ":" t)))))
   "Get the list of tags specified in the current headline.
 
 When argument POS is non-nil, retrieve tags for headline at POS.
