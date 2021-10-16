@@ -2055,8 +2055,11 @@ to HASH."
 	 ((or `inline-babel-call `inline-src-block)
 	  ;; Results for inline objects are located right after them.
 	  ;; There is no RESULTS line to insert either.
-	  (let ((limit (org-element-property
-			:contents-end (org-element-property :parent context))))
+	  (let ((limit (pcase (org-element-type (org-element-property :parent context))
+                         (`section (org-element-property
+		                    :end (org-element-property :parent context)))
+                         (_ (org-element-property
+		             :contents-end (org-element-property :parent context))))))
 	    (goto-char (org-element-property :end context))
 	    (skip-chars-forward " \t\n" limit)
 	    (throw :found
@@ -2089,8 +2092,11 @@ to HASH."
 	     ;; No possible anonymous results at the very end of
 	     ;; buffer or outside CONTEXT parent.
 	     ((eq (point)
-		  (or (org-element-property
-		       :contents-end (org-element-property :parent context))
+		  (or (pcase (org-element-type (org-element-property :parent context))
+                        ((or `section `org-data) (org-element-property
+		                                  :end (org-element-property :parent context)))
+                        (_ (org-element-property
+		            :contents-end (org-element-property :parent context))))
 		      (point-max))))
 	     ;; Check if next element is an anonymous result below
 	     ;; the current block.

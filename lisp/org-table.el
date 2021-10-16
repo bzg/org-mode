@@ -5697,6 +5697,7 @@ This may be either a string or a function of two arguments:
 		((consp e)
 		 (princ "| ") (dolist (c e) (princ c) (princ " |"))
 		 (princ "\n")))))
+      (org-element-cache-reset)
       ;; Add back-end specific filters, but not user-defined ones.  In
       ;; particular, make sure to call parse-tree filters on the
       ;; table.

@@ -4879,6 +4879,9 @@ The following commands are available:
   (org-setup-comments-handling)
   ;; Initialize cache.
   (org-element-cache-reset)
+  (when (and org-element-cache-persistent
+             org-element-use-cache)
+    (org-persist-read 'org-element--cache (current-buffer)))
   ;; Beginning/end of defun
   (setq-local beginning-of-defun-function 'org-backward-element)
   (setq-local end-of-defun-function
@@ -21243,7 +21246,9 @@ Move to the previous element at the same level, when possible."
       (unless (org-up-heading-safe) (user-error "No surrounding element"))
     (let* ((elem (org-element-at-point))
 	   (parent (org-element-property :parent elem)))
-      (if parent (goto-char (org-element-property :begin parent))
+      (if (and parent
+               (not (memq (org-element-type parent) '(section org-data))))
+          (goto-char (org-element-property :begin parent))
 	(if (org-with-limited-levels (org-before-first-heading-p))
 	    (user-error "No surrounding element")
 	  (org-with-limited-levels (org-back-to-heading)))))))

@@ -239,6 +239,13 @@ a definition in TEMPLATES."
 		     (goto-char (match-beginning 0))
 		     (org-element-macro-parser))))))
 	   (when macro
+             ;; `:parent' property might change as we modify buffer.
+             ;; We do not care about it when checking for circular
+             ;; dependencies.  So, setting `:parent' to nil making sure
+             ;; that actual macro element (if org-element-cache is
+             ;; active) is unchanged.
+             (setq macro (cl-copy-list macro))
+             (org-element-put-property macro :parent nil)
 	     (let* ((key (org-element-property :key macro))
 		    (value (org-macro-expand macro templates))
 		    (begin (org-element-property :begin macro))
@@ -338,7 +345,7 @@ in the buffer."
 	  (result nil))
       (catch :exit
 	(while (re-search-forward regexp nil t)
-	  (let ((element (org-element-at-point)))
+	  (let ((element (org-with-point-at (match-beginning 0) (org-element-keyword-parser (line-end-position) (list (match-beginning 0))))))
 	    (when (eq 'keyword (org-element-type element))
 	      (let ((value (org-element-property :value element)))
 		(if (not collect) (throw :exit value)

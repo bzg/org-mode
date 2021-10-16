@@ -195,12 +195,12 @@ Some other text
   "Test `org-element-extract-element' specifications."
   ;; Extract a greater element.
   (should
-   (equal '(org-data nil)
-	  (org-test-with-temp-text "* Headline"
-	    (let* ((tree (org-element-parse-buffer))
-		   (element (org-element-map tree 'headline 'identity nil t)))
-	      (org-element-extract-element element)
-	      tree))))
+   (eq 'org-data
+       (org-test-with-temp-text "* Headline"
+	 (let* ((tree (org-element-parse-buffer))
+		(element (org-element-map tree 'headline 'identity nil t)))
+	   (org-element-extract-element element)
+	   (org-element-type tree)))))
   ;; Extract an element.
   (should-not
    (org-element-map
@@ -3599,8 +3599,8 @@ Text
 	   (parent (org-element-property
 		    :parent (org-element-map tree 'italic 'identity nil t))))
       (should parent)
-      (should (eq parent
-		  (org-element-map tree 'headline 'identity nil t))))))
+      (should (equal parent
+		     (org-element-map tree 'headline 'identity nil t))))))
 
 
 
@@ -3858,7 +3858,7 @@ Text
   ;; `org-element-at-point' or `org-element-context', the list is
   ;; limited to the current section.
   (should
-   (equal '(paragraph center-block)
+   (equal '(paragraph center-block section headline)
 	  (org-test-with-temp-text
 	      "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
 	    (mapcar #'car (org-element-lineage (org-element-context))))))
@@ -3883,7 +3883,7 @@ Text
      (org-element-lineage (org-element-context) '(example-block))))
   ;; Test WITH-SELF optional argument.
   (should
-   (equal '(bold paragraph center-block)
+   (equal '(bold paragraph center-block section headline)
 	  (org-test-with-temp-text
 	      "* H1\n** H2\n#+BEGIN_CENTER\n*bold<point>*\n#+END_CENTER"
 	    (mapcar #'car (org-element-lineage (org-element-context) nil t)))))
