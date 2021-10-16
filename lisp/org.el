@@ -20777,17 +20777,32 @@ move point."
     (while (org-goto-sibling 'previous)
       (org-flag-heading nil))))
 
-(defun org-goto-first-child ()
+(defun org-goto-first-child (&optional element)
   "Goto the first child, even if it is invisible.
 Return t when a child was found.  Otherwise don't move point and
 return nil."
-  (let (level (pos (point)) (re org-outline-regexp-bol))
-    (when (org-back-to-heading-or-point-min t)
-      (setq level (org-outline-level))
-      (forward-char 1)
-      (if (and (re-search-forward re nil t) (> (org-outline-level) level))
-	  (progn (goto-char (match-beginning 0)) t)
-	(goto-char pos) nil))))
+  (if (org-element--cache-active-p)
+      (when-let ((heading (org-element-lineage
+                           (or element (org-element-at-point))
+                           '(headline inlinetask org-data)
+                           t)))
+        (unless (or (eq 'inlinetask (org-element-type heading))
+                    (not (org-element-property :contents-begin heading)))
+          (let ((pos (point)))
+            (goto-char (org-element-property :contents-begin heading))
+            (if (re-search-forward
+                 org-outline-regexp-bol
+                 (org-element-property :end heading)
+                 t)
+                (progn (goto-char (match-beginning 0)) t)
+              (goto-char pos) nil))))
+    (let (level (pos (point)) (re org-outline-regexp-bol))
+      (when (org-back-to-heading-or-point-min t)
+        (setq level (org-outline-level))
+        (forward-char 1)
+        (if (and (re-search-forward re nil t) (> (org-outline-level) level))
+	    (progn (goto-char (match-beginning 0)) t)
+	  (goto-char pos) nil)))))
 
 (defun org-show-hidden-entry ()
   "Show an entry where even the heading is hidden."
