@@ -20567,21 +20567,39 @@ interactive command with similar behavior."
 		     (<= (org-outline-level) level))))))))
 
 (defun org-back-to-heading (&optional invisible-ok)
-  "Call `outline-back-to-heading', but provide a better error message."
-  (condition-case nil
-      (outline-back-to-heading invisible-ok)
-    (error
-     (user-error "Before first headline at position %d in buffer %s"
-		 (point) (current-buffer)))))
+  "Go back to beginning of heading."
+  (beginning-of-line)
+  (or (org-at-heading-p (not invisible-ok))
+      (let (found)
+	(save-excursion
+          ;; At inlinetask end.  Move to bol, so that the following
+          ;; search goes to the beginning of the inlinetask.
+          (when (and (featurep 'org-inlinetask)
+                     (fboundp 'org-inlinetask-end-p)
+                     (org-inlinetask-end-p))
+            (goto-char (line-beginning-position)))
+	  (while (not found)
+	    (or (re-search-backward (concat "^\\(?:" outline-regexp "\\)")
+				    nil t)
+                (user-error "Before first headline at position %d in buffer %s"
+		            (point) (current-buffer)))
+            ;; Skip inlinetask end.
+            (if (and (featurep 'org-inlinetask)
+                     (fboundp 'org-inlinetask-end-p)
+                     (org-inlinetask-end-p))
+                (org-inlinetask-goto-beginning)
+	      (setq found (and (or invisible-ok (not (org-invisible-p)))
+			       (point))))))
+	(goto-char found)
+	found)))
 
 (defun org-back-to-heading-or-point-min (&optional invisible-ok)
   "Go back to heading or first point in buffer.
 If point is before first heading go to first point in buffer
 instead of back to heading."
-  (condition-case nil
-      (outline-back-to-heading invisible-ok)
-    (error
-     (goto-char (point-min)))))
+  (if (org-before-first-heading-p)
+      (goto-char (point-min))
+    (org-back-to-heading invisible-ok)))
 
 (defun org-before-first-heading-p ()
   "Before first heading?"
@@ -20712,7 +20730,9 @@ level of the headline found (down to 0) or nil if already at a
 point before the first headline or at point-min."
   (when (ignore-errors (org-back-to-heading t))
     (if (< 1 (funcall outline-level))
-	(org-up-heading-safe)
+	(or (org-up-heading-safe)
+            ;; The first heading may not be level 1 heading.
+            (goto-char (point-min)))
       (unless (= (point) (point-min)) (goto-char (point-min))))))
 
 (defun org-first-sibling-p ()
