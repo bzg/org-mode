@@ -74,6 +74,33 @@
 
 ;;; Emacs < 28.1 compatibility
 
+(if (fboundp 'length>)
+    (defalias 'org-length> #'length>)
+  (defun org-length> (sequence length)
+    "Return non-nil if SEQUENCE is longer than LENGTH."
+    (> (length sequence) length)))
+
+(if (fboundp 'file-name-concat)
+    (defalias 'org-file-name-concat #'file-name-concat)
+  (defun org-file-name-concat (directory &rest components)
+    "Append COMPONENTS to DIRECTORY and return the resulting string.
+
+Elements in COMPONENTS must be a string or nil.
+DIRECTORY or the non-final elements in COMPONENTS may or may not end
+with a slash -- if they don't end with a slash, a slash will be
+inserted before contatenating."
+    (save-match-data
+      (mapconcat
+       #'identity
+       (delq nil
+             (mapcar
+              (lambda (str)
+                (when (and str (not (string-empty-p str))
+                           (string-match "\\(.+\\)/?" str))
+                  (match-string 1 str)))
+              (cons directory components)))
+       "/"))))
+
 (if (fboundp 'directory-empty-p)
     (defalias 'org-directory-empty-p #'directory-empty-p)
   (defun org-directory-empty-p (dir)
