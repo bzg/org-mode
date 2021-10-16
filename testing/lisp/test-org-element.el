@@ -2165,8 +2165,13 @@ e^{i\\pi}+1=0
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+BEGIN_CENTER\nC\n#+END_CENTER\n  "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
-
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  (should
+   (org-test-with-temp-text "#+BEGIN_CENTER\n<point>C\n#+END_CENTER\n  "
+     (= (org-element-property :end (org-element-at-point))
+        (save-excursion
+          (search-forward "END")
+          (line-beginning-position))))))
 
 ;;;; Plain List
 
@@ -2204,7 +2209,11 @@ Outside list"
   ;; beginning.
   (should
    (org-test-with-temp-text "- list\n   \n   "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; Correctly compute list ending when list is before first headline.
+  (dolist (org-element-use-cache '(t nil))
+    (org-test-with-temp-text "- list\n* Headline\n"
+      (should (= (org-element-property :end (org-element-at-point)) 8)))))
 
 
 ;;;; Planning
@@ -3732,6 +3741,14 @@ Text
        (org-test-with-temp-text "- Para1\n- Para2\n\nPara3"
 	 (progn (forward-line 2)
 		(org-element-type (org-element-at-point))))))
+  ;; Special case: at the last blank line in a plain list at the end of
+  ;; a headline, return the plain list, not the last item, and not the
+  ;; headline.
+  (should
+   (eq 'plain-list
+       (org-test-with-temp-text "* Headline\n- Para1\n- Para2\n\nPara3\n* Another headline"
+	 (progn (forward-line 3)
+		(org-element-type (org-element-at-point))))))
   ;; Special case: when a list ends at the end of buffer and there's
   ;; no final newline, return last element in last item.
   (should
@@ -4063,19 +4080,165 @@ Text
 
 (ert-deftest test-org-element/cache-bugs ()
   "Test basic expectations and common pitfalls for cache."
-  :expected-result :failed
   ;; Unindented second row of the table should not be re-parented by
   ;; inserted item.
   (should
    (eq 'table
        (let ((org-element-use-cache t))
 	 (org-test-with-temp-text
-	  "#+begin_center\nP0\n\n<point>\n\n  P1\n  | a | b |\n| c | d |\n#+end_center"
+	  "#+begin_center
+P0
+
+<point>
+
+  P1
+  | a | b |
+| c | d |
+#+end_center"
 	  (save-excursion (search-forward "| c |") (org-element-at-point))
 	  (insert "- item")
 	  (search-forward "| c |")
 	  (beginning-of-line)
+	  (org-element-type (org-element-at-point))))))
+  (should
+   (eq 'table
+       (let ((org-element-use-cache t))
+	 (org-test-with-temp-text
+	  "
+- item 1
+
+<point>
+  | a | b |
+| c | d |
+#+end_center"
+	  (save-excursion (search-forward "| c |") (org-element-at-point))
+          (delete-char 1)
+	  (search-forward "| c |")
+	  (beginning-of-line)
+	  (org-element-type (org-element-at-point))))))
+  (should
+   (eq 'table-row
+       (let ((org-element-use-cache t))
+	 (org-test-with-temp-text
+	  "
+- item 1
+<point>
+  | a | b |
+| c | d |
+#+end_center"
+	  (save-excursion (search-forward "| c |") (org-element-at-point))
+          (insert "\n")
+	  (search-forward "| c |")
+	  (beginning-of-line)
 	  (org-element-type (org-element-at-point)))))))
+
+(ert-deftest test-org-element/cache-headline ()
+  "Test basic expectations and common pitfalls for cached headings."
+  ;; Appending to final headline in a subtree.
+  (org-test-with-temp-text
+      "
+* Heading
+Aliquam erat volutpat.
+
+*** Subheading
+** Another
+** Final
+:PROPERTIES:
+:ID: some
+<point>:END:
+* Heading 2
+** End
+"
+    (let ((org-element-use-cache t))
+      (org-element-at-point)
+      (save-excursion
+        (goto-char (point-max))
+        (org-element-at-point))
+      (insert ":CATEOGORY: cat\n")
+      (search-backward "* Heading")
+      (should
+       (eq (org-element-property :end (org-element-at-point))
+           (save-excursion
+             (search-forward "* Heading 2")
+             (line-beginning-position))))
+      (search-forward "* Heading 2")
+      (beginning-of-line)
+      (insert "\n\n")
+      (search-backward "* Heading")
+      (should
+       (eq (org-element-property :end (org-element-at-point))
+           (save-excursion
+             (search-forward "* Heading 2")
+             (line-beginning-position))))))
+  ;; Appending at eob.
+  (org-test-with-temp-text
+      "
+* Heading
+*** Sub-heading
+** Another
+*** 1
+***** 2
+** 3
+ Aenean in sem ac leo mollis blandit.
+
+
+<point>"
+    (let ((org-element-use-cache t))
+      (org-element-at-point (point-max))
+      (insert "\n\nTest\n")
+      (search-backward "* Heading")
+      (should
+       (eq (point-max)
+           (org-element-property :end (org-element-at-point))))))
+  ;; Breaking headline at eob.
+  (org-test-with-temp-text
+      "
+* Heading
+*** Sub-heading
+<point>"
+    (let ((org-element-use-cache t))
+      (org-element-at-point (point-max))
+      (insert "* heading 2")
+      (beginning-of-line)
+      (should
+       (eq (point-max)
+           (org-element-property :end (org-element-at-point))))
+      (delete-char 1)
+      (search-backward "* Heading")
+      (should
+       (eq (point-max)
+           (org-element-property :end (org-element-at-point))))))
+  ;; Inserting low-level headline in-between.
+  (org-test-with-temp-text
+      "
+* Heading
+*** Sub-heading
+<point>
+*** Sub-heading 2
+*** Sub-heading 3
+"
+    (let ((org-element-use-cache t))
+      (org-element-at-point (point-max))
+      (insert "** heading 2")
+      (search-forward "*** Sub-heading 2")
+      (should
+       (equal (org-element-property :parent (org-element-at-point))
+              (progn
+                (search-backward "** heading 2")
+                (org-element-at-point))))))
+  ;; Test when `org-element--cache-for-removal' modifies common parent
+  ;; (`org-data' in this case) around changed region.
+  (org-test-with-temp-text
+      "blah
+:DRAWER:
+<point>test
+:END:
+paragraph
+* headline"
+    (let ((org-element-use-cache t))
+      (org-element-at-point (point-max))
+      (delete-region (point) (point-max))
+      (should (eq 'paragraph (org-element-type (org-element-at-point)))))))
 
 (provide 'test-org-element)
 
