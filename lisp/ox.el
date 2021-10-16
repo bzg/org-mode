@@ -260,6 +260,8 @@ rules.")
 
 (defconst org-export-ignored-local-variables
   '(org-font-lock-keywords
+    org-element--cache-change-tic org-element--cache-change-tic org-element--cache-size
+    org-element--cache-sync-keys-value org-element--cache-change-warning
     org-element--cache org-element--cache-objects org-element--cache-sync-keys
     org-element--cache-sync-requests org-element--cache-sync-timer)
   "List of variables not copied through upon buffer duplication.
@@ -2614,6 +2616,9 @@ The function assumes BUFFER's major mode is `org-mode'."
 	    (set (make-local-variable var) val))
 	  ;; Whole buffer contents.
 	  (insert str)
+          ;; Make org-element-cache not complain about changed buffer
+          ;; state.
+          (org-element-cache-reset)
 	  ;; Narrowing.
 	  (apply #'narrow-to-region narrowing)
 	  ;; Current position of point.
