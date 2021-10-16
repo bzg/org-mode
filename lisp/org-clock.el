@@ -35,6 +35,7 @@
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-element--cache-active-p "org-element" ())
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
@@ -1265,7 +1266,8 @@ time as the start time.  See `org-clock-continuously' to make this
 the default behavior."
   (interactive "P")
   (setq org-clock-notification-was-shown nil)
-  (org-refresh-effort-properties)
+  (unless (org-element--cache-active-p)
+    (org-refresh-effort-properties))
   (catch 'abort
     (let ((interrupting (and (not org-clock-resolving-clocks-due-to-idleness)
 			     (org-clocking-p)))

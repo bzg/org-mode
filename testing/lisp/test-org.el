@@ -6279,13 +6279,13 @@ Paragraph<point>"
 	  (org-test-with-temp-text
 	      ":PROPERTIES:\n:CATEGORY: cat1\n:END:"
 	    (org-refresh-category-properties)
-	    (get-text-property (point) 'org-category))))
+            (org-get-category))))
   (should
    (equal "cat1"
 	  (org-test-with-temp-text
 	      "* H\n:PROPERTIES:\n:CATEGORY: cat1\n:END:"
 	    (org-refresh-category-properties)
-	    (get-text-property (point) 'org-category))))
+	    (org-get-category))))
   ;; Even though property-inheritance is deactivated, category
   ;; property should be inherited.  As described in
   ;; `org-use-property-inheritance'.
@@ -6296,7 +6296,7 @@ Paragraph<point>"
 	    (org-mode-restart)
 	    (let ((org-use-property-inheritance nil))
 	      (org-refresh-category-properties))
-	    (get-text-property (point) 'org-category))))
+	    (org-get-category))))
   (should
    (equal "cat1"
 	  (org-test-with-temp-text
@@ -6304,7 +6304,7 @@ Paragraph<point>"
 	    (org-mode-restart)
 	    (let ((org-use-property-inheritance t))
 	      (org-refresh-category-properties))
-	    (get-text-property (point) 'org-category))))
+	    (org-get-category))))
   (should
    (equal "cat2"
 	  (org-test-with-temp-text
@@ -6312,7 +6312,7 @@ Paragraph<point>"
 	    (org-mode-restart)
 	    (let ((org-use-property-inheritance t))
 	      (org-refresh-category-properties))
-	    (get-text-property (point) 'org-category)))))
+	    (org-get-category)))))
 
 
 ;;; Refile

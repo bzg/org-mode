@@ -8565,9 +8565,15 @@ call CMD."
   (save-match-data
     (when force-refresh (org-refresh-category-properties))
     (let ((pos (or pos (point))))
-      (or (get-text-property pos 'org-category)
-	  (progn (org-refresh-category-properties)
-		 (get-text-property pos 'org-category))))))
+      (if (org-element--cache-active-p)
+          ;; Sync cache.
+          (org-with-point-at (org-element-property :begin (org-element-at-point pos))
+            (or (org-entry-get-with-inheritance "CATEGORY")
+                "???"))
+        (or (get-text-property pos 'org-category)
+            (progn
+              (org-refresh-category-properties)
+              (get-text-property pos 'org-category)))))))
 
 ;;; Refresh properties
 
@@ -8614,57 +8620,59 @@ the whole buffer."
 			(org-end-of-subtree t t))
 		       ((outline-next-heading))
 		       ((point-max))))))
-      (if (symbolp tprop)
-	  ;; TPROP is a text property symbol.
-	  (put-text-property start end tprop p)
-	;; TPROP is an alist with (property . function) elements.
-	(pcase-dolist (`(,prop . ,f) tprop)
-	  (put-text-property start end prop (funcall f p)))))))
+      (with-silent-modifications
+	(if (symbolp tprop)
+	    ;; TPROP is a text property symbol.
+	    (put-text-property start end tprop p)
+	  ;; TPROP is an alist with (property . function) elements.
+	  (pcase-dolist (`(,prop . ,f) tprop)
+	    (put-text-property start end prop (funcall f p))))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
-  (let ((case-fold-search t)
-	(inhibit-read-only t)
-	(default-category
-	  (cond ((null org-category)
-		 (if buffer-file-name
-		     (file-name-sans-extension
-		      (file-name-nondirectory buffer-file-name))
-		   "???"))
-		((symbolp org-category) (symbol-name org-category))
-		(t org-category))))
-    (with-silent-modifications
-      (org-with-wide-buffer
-       ;; Set buffer-wide property from keyword.  Search last #+CATEGORY
-       ;; keyword.  If none is found, fall-back to `org-category' or
-       ;; buffer file name, or set it by the document property drawer.
-       (put-text-property
-	(point-min) (point-max)
-	'org-category
-	(catch 'buffer-category
-	  (goto-char (point-max))
-	  (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
-	    (let ((element (org-element-at-point)))
-	      (when (eq (org-element-type element) 'keyword)
-		(throw 'buffer-category
-		       (org-element-property :value element)))))
-	  default-category))
-       ;; Set categories from the document property drawer or
-       ;; property drawers in the outline.  If category is found in
-       ;; the property drawer for the whole buffer that value
-       ;; overrides the keyword-based value set above.
-       (goto-char (point-min))
-       (let ((regexp (org-re-property "CATEGORY")))
-	 (while (re-search-forward regexp nil t)
-	   (let ((value (match-string-no-properties 3)))
-	     (when (org-at-property-p)
-	       (put-text-property
-		(save-excursion (org-back-to-heading-or-point-min t))
-		(save-excursion (if (org-before-first-heading-p)
-				    (point-max)
-				  (org-end-of-subtree t t)))
-		'org-category
-		value)))))))))
+  (unless (org-element--cache-active-p)
+    (let ((case-fold-search t)
+	  (inhibit-read-only t)
+	  (default-category
+	    (cond ((null org-category)
+		   (if buffer-file-name
+		       (file-name-sans-extension
+		        (file-name-nondirectory buffer-file-name))
+		     "???"))
+		  ((symbolp org-category) (symbol-name org-category))
+		  (t org-category))))
+      (let ((category (catch 'buffer-category
+                        (org-with-wide-buffer
+	                 (goto-char (point-max))
+	                 (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
+	                   (let ((element (org-element-at-point-no-context)))
+	                     (when (eq (org-element-type element) 'keyword)
+		               (throw 'buffer-category
+		                      (org-element-property :value element))))))
+	                default-category)))
+        (with-silent-modifications
+          (org-with-wide-buffer
+           ;; Set buffer-wide property from keyword.  Search last #+CATEGORY
+           ;; keyword.  If none is found, fall-back to `org-category' or
+           ;; buffer file name, or set it by the document property drawer.
+           (put-text-property (point-min) (point-max)
+                              'org-category category)
+           ;; Set categories from the document property drawer or
+           ;; property drawers in the outline.  If category is found in
+           ;; the property drawer for the whole buffer that value
+           ;; overrides the keyword-based value set above.
+           (goto-char (point-min))
+           (let ((regexp (org-re-property "CATEGORY")))
+             (while (re-search-forward regexp nil t)
+               (let ((value (match-string-no-properties 3)))
+                 (when (org-at-property-p)
+                   (put-text-property
+                    (save-excursion (org-back-to-heading-or-point-min t))
+                    (save-excursion (if (org-before-first-heading-p)
+        			        (point-max)
+        			      (org-end-of-subtree t t)))
+                    'org-category
+                    value)))))))))))
 
 (defun org-refresh-stats-properties ()
   "Refresh stats text properties in the buffer."
@@ -11806,7 +11814,7 @@ See also `org-scan-tags'."
 		     (propp
 		      (let* ((gv (pcase (upcase (match-string 5 term))
 				   ("CATEGORY"
-				    '(get-text-property (point) 'org-category))
+				    '(org-get-category (point)))
 				   ("TODO" 'todo)
 				   (p `(org-cached-entry-get nil ,p))))
 			     (pv (match-string 7 term))
@@ -15746,13 +15754,9 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 (defun org-agenda-prepare-buffers (files)
   "Create buffers for all agenda files, protect archived trees and comments."
   (interactive)
-  (let ((pa '(:org-archived t))
-	(pc '(:org-comment t))
-	(pall '(:org-archived t :org-comment t))
-	(inhibit-read-only t)
+  (let ((inhibit-read-only t)
 	(org-inhibit-startup org-agenda-inhibit-startup)
-	(rea (org-make-tag-string (list org-archive-tag)))
-	re pos)
+	pos)
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)
     (save-excursion
@@ -15771,7 +15775,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (or (memq 'stats org-agenda-ignore-properties)
 		(org-refresh-stats-properties))
 	    (or (memq 'effort org-agenda-ignore-properties)
-		(org-refresh-effort-properties))
+                (unless (org-element--cache-active-p)
+		  (org-refresh-effort-properties)))
 	    (or (memq 'appt org-agenda-ignore-properties)
 		(org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
 	    (setq org-todo-keywords-for-agenda
@@ -15792,20 +15797,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (if old
 		      (setcdr old (org-uniquify (append (cdr old) (cdr alist))))
 		    (push alist org-tag-groups-alist-for-agenda)))))
-	    (with-silent-modifications
-	      (save-excursion
-		(remove-text-properties (point-min) (point-max) pall)
-		(when org-agenda-skip-archived-trees
-		  (goto-char (point-min))
-		  (while (re-search-forward rea nil t)
-		    (when (org-at-heading-p t)
-		      (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
-		(goto-char (point-min))
-		(setq re (format "^\\*+ .*\\<%s\\>" org-comment-string))
-		(while (re-search-forward re nil t)
-		  (when (save-match-data (org-in-commented-heading-p t))
-		    (add-text-properties
-		     (match-beginning 0) (org-end-of-subtree t) pc)))))
 	    (goto-char pos)))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
