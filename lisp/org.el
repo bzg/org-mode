@@ -12481,9 +12481,12 @@ Assume point is at the beginning of the headline."
       ;; Parse tags manually.
       (and (looking-at org-tag-line-re)
            (split-string (match-string-no-properties 2) ":" t)))))
+
+(defun org-get-tags (&optional pos-or-element local)
   "Get the list of tags specified in the current headline.
 
-When argument POS is non-nil, retrieve tags for headline at POS.
+When argument POS-OR-ELEMENT is non-nil, retrieve tags for headline at
+POS.
 
 According to `org-use-tag-inheritance', tags may be inherited
 from parent headlines, and from the whole document, through
@@ -12496,23 +12499,40 @@ However, when optional argument LOCAL is non-nil, only return
 tags specified at the headline.
 
 Inherited tags have the `inherited' text property."
-  (if (and org-trust-scanner-tags
-           (or (not pos) (eq pos (point)))
-           (not local))
-      org-scanner-tags
-    (org-with-point-at (or pos (point))
-      (unless (org-before-first-heading-p)
-        (org-back-to-heading t)
-        (let ((ltags (org--get-local-tags)) itags)
-          (if (or local (not org-use-tag-inheritance)) ltags
-            (while (org-up-heading-safe)
-              (setq itags (nconc (mapcar #'org-add-prop-inherited
-					 (org--get-local-tags))
-				 itags)))
-            (setq itags (append org-file-tags itags))
-            (nreverse
-	     (delete-dups
-	      (nreverse (nconc (org-remove-uninherited-tags itags) ltags))))))))))
+  (save-match-data
+    (if (and org-trust-scanner-tags
+             (or (not pos-or-element) (eq pos-or-element (point)))
+             (not local))
+        org-scanner-tags
+      (org-with-point-at (unless (org-element-type pos-or-element)
+                           (or pos-or-element (point)))
+        (unless (and (not (org-element-type pos-or-element))
+                     (org-before-first-heading-p))
+          (unless (org-element-type pos-or-element) (org-back-to-heading t))
+          (let ((ltags (if (org-element-type pos-or-element)
+                           (org-element-property :tags (org-element-lineage pos-or-element '(headline) t))
+                         (org--get-local-tags)))
+                itags)
+            (if (or local (not org-use-tag-inheritance)) ltags
+              (let ((cached (and (org-element--cache-active-p)
+                                 (if (org-element-type pos-or-element)
+                                     (org-element-lineage pos-or-element '(headline) t)
+                                   (org-element-at-point nil 'cached)))))
+                (if cached
+                    (while (setq cached (org-element-property :parent cached))
+                      (setq itags (nconc (mapcar #'org-add-prop-inherited
+                                                 ;; If we do not wrap result into `cl-copy-list', reference would
+                                                 ;; be returned and cache element might be modified directly.
+                                                 (cl-copy-list (org-element-property :tags cached)))
+                                         itags)))
+                  (while (org-up-heading-safe)
+                    (setq itags (nconc (mapcar #'org-add-prop-inherited
+					       (org--get-local-tags))
+				       itags)))))
+              (setq itags (append org-file-tags itags))
+              (nreverse
+	       (delete-dups
+	        (nreverse (nconc (org-remove-uninherited-tags itags) ltags)))))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
