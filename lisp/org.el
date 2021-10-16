@@ -7267,7 +7267,9 @@ When a subtree is being promoted, the hook will be called for each node.")
 See also `org-promote'."
   (interactive)
   (save-excursion
-    (org-with-limited-levels (org-map-tree 'org-promote)))
+    (org-back-to-heading t)
+    (combine-change-calls (point) (save-excursion (org-end-of-subtree t))
+      (org-with-limited-levels (org-map-tree 'org-promote))))
   (org-fix-position-after-promote))
 
 (defun org-demote-subtree ()
@@ -7275,7 +7277,9 @@ See also `org-promote'."
 See `org-demote' and `org-promote'."
   (interactive)
   (save-excursion
-    (org-with-limited-levels (org-map-tree 'org-demote)))
+    (org-back-to-heading t)
+    (combine-change-calls (point) (save-excursion (org-end-of-subtree t))
+      (org-with-limited-levels (org-map-tree 'org-demote))))
   (org-fix-position-after-promote))
 
 (defun org-do-promote ()
@@ -7809,26 +7813,29 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
        (org-next-visible-heading 1)
        (unless (bolp) (insert "\n")))
      (setq beg (point))
-     (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
-     (insert-before-markers txt)
-     (unless (string-suffix-p "\n" txt) (insert "\n"))
-     (setq newend (point))
-     (org-reinstall-markers-in-region beg)
-     (setq end (point))
-     (goto-char beg)
-     (skip-chars-forward " \t\n\r")
-     (setq beg (point))
-     (when (and (org-invisible-p) visp)
-       (save-excursion (outline-show-heading)))
-     ;; Shift if necessary.
-     (unless (= shift 0)
-       (save-restriction
-	 (narrow-to-region beg end)
-	 (while (not (= shift 0))
-	   (org-map-region func (point-min) (point-max))
-	   (setq shift (+ delta shift)))
-	 (goto-char (point-min))
-	 (setq newend (point-max))))
+     ;; Avoid re-parsing cache elements when i.e. level 1 heading
+     ;; is inserted and then promoted.
+     (combine-change-calls beg beg
+       (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
+       (insert-before-markers txt)
+       (unless (string-suffix-p "\n" txt) (insert "\n"))
+       (setq newend (point))
+       (org-reinstall-markers-in-region beg)
+       (setq end (point))
+       (goto-char beg)
+       (skip-chars-forward " \t\n\r")
+       (setq beg (point))
+       (when (and (org-invisible-p) visp)
+         (save-excursion (outline-show-heading)))
+       ;; Shift if necessary.
+       (unless (= shift 0)
+         (save-restriction
+	   (narrow-to-region beg end)
+	   (while (not (= shift 0))
+	     (org-map-region func (point-min) (point-max))
+	     (setq shift (+ delta shift)))
+	   (goto-char (point-min))
+	   (setq newend (point-max)))))
      (when (or for-yank (called-interactively-p 'interactive))
        (message "Clipboard pasted as level %d subtree" new-level))
      (when (and (not for-yank) ; in this case, org-yank will decide about folding
@@ -19212,11 +19219,11 @@ Alignment is done according to `org-property-format', which see."
   (when (save-excursion
 	  (beginning-of-line)
 	  (looking-at org-property-re))
-    (replace-match
-     (concat (match-string 4)
-	     (org-trim
-	      (format org-property-format (match-string 1) (match-string 3))))
-     t t)))
+    (combine-change-calls (match-beginning 0) (match-end 0)
+      (let ((newtext (concat (match-string 4)
+	                     (org-trim
+	                      (format org-property-format (match-string 1) (match-string 3))))))
+        (setf (buffer-substring (match-beginning 0) (match-end 0)) newtext)))))
 
 (defun org-indent-line ()
   "Indent line depending on context.
