@@ -10770,15 +10770,18 @@ nil."
   "Non-nil when point is on a planning info line."
   ;; This is as accurate and faster than `org-element-at-point' since
   ;; planning info location is fixed in the section.
-  (org-with-wide-buffer
-   (beginning-of-line)
-   (and (looking-at-p org-planning-line-re)
-	(eq (point)
-	    (ignore-errors
-	      (if (and (featurep 'org-inlinetask) (org-inlinetask-in-task-p))
-		  (org-back-to-heading t)
-		(org-with-limited-levels (org-back-to-heading t)))
-	      (line-beginning-position 2))))))
+  (or (let ((cached (org-element-at-point nil 'cached)))
+        (and cached
+             (eq 'planning (org-element-type cached))))
+      (org-with-wide-buffer
+       (beginning-of-line)
+       (and (looking-at-p org-planning-line-re)
+	    (eq (point)
+	        (ignore-errors
+	          (if (and (featurep 'org-inlinetask) (org-inlinetask-in-task-p))
+		      (org-back-to-heading t)
+		    (org-with-limited-levels (org-back-to-heading t)))
+	          (line-beginning-position 2)))))))
 
 (defun org-add-planning-info (what &optional time &rest remove)
   "Insert new timestamp with keyword in the planning line.
