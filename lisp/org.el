@@ -20698,29 +20698,42 @@ headline found, or nil if no higher level is found.
 Also, this function will be a lot faster than `outline-up-heading',
 because it relies on stars being the outline starters.  This can really
 make a significant difference in outlines with very many siblings."
-  (when (ignore-errors (org-back-to-heading t))
-    (let (level-cache)
-      (unless org--up-heading-cache
-        (setq org--up-heading-cache (make-hash-table)))
-      (if (and (eq (buffer-chars-modified-tick) org--up-heading-cache-tick)
-               (setq level-cache (gethash (point) org--up-heading-cache)))
-          (when (<= (point-min) (car level-cache) (point-max))
-            ;; Parent is inside accessible part of the buffer.
-            (progn (goto-char (car level-cache))
-                   (cdr level-cache)))
-        ;; Buffer modified.  Invalidate cache.
-        (unless (eq (buffer-chars-modified-tick) org--up-heading-cache-tick)
-          (setq-local org--up-heading-cache-tick
-                      (buffer-chars-modified-tick))
-          (clrhash org--up-heading-cache))
-        (let* ((level-up (1- (funcall outline-level)))
-               (pos (point))
-               (result (and (> level-up 0)
-	                    (re-search-backward
-                             (format "^\\*\\{1,%d\\} " level-up) nil t)
-	                    (funcall outline-level))))
-          (when result (puthash pos (cons (point) result) org--up-heading-cache))
-          result)))))
+  (if-let ((element (and (org-element--cache-active-p)
+                         (org-element-at-point nil t))))
+      (let* ((current-heading (org-element-lineage element '(headline) 'with-self))
+             (parent (org-element-lineage current-heading '(headline))))
+        (if (and parent
+                 (<= (point-min) (org-element-property :begin parent)))
+            (progn
+              (goto-char (org-element-property :begin parent))
+              (org-element-property :level parent))
+          (when (and current-heading
+                     (<= (point-min) (org-element-property :begin current-heading)))
+            (goto-char (org-element-property :begin current-heading))
+            nil)))
+    (when (ignore-errors (org-back-to-heading t))
+      (let (level-cache)
+        (unless org--up-heading-cache
+          (setq org--up-heading-cache (make-hash-table)))
+        (if (and (eq (buffer-chars-modified-tick) org--up-heading-cache-tick)
+                 (setq level-cache (gethash (point) org--up-heading-cache)))
+            (when (<= (point-min) (car level-cache) (point-max))
+              ;; Parent is inside accessible part of the buffer.
+              (progn (goto-char (car level-cache))
+                     (cdr level-cache)))
+          ;; Buffer modified.  Invalidate cache.
+          (unless (eq (buffer-chars-modified-tick) org--up-heading-cache-tick)
+            (setq-local org--up-heading-cache-tick
+                        (buffer-chars-modified-tick))
+            (clrhash org--up-heading-cache))
+          (let* ((level-up (1- (funcall outline-level)))
+                 (pos (point))
+                 (result (and (> level-up 0)
+	                      (re-search-backward
+                               (format "^\\*\\{1,%d\\} " level-up) nil t)
+	                      (funcall outline-level))))
+            (when result (puthash pos (cons (point) result) org--up-heading-cache))
+            result))))))
 
 (defun org-up-heading-or-point-min ()
   "Move to the heading line of which the present is a subheading, or point-min.
