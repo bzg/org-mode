@@ -5857,7 +5857,7 @@ Paragraph<point>"
    (equal
     "1 2"
     (org-test-with-temp-text
-	"* H1\n:PROPERTIES:\n:A: 1\n:END:\n* H2.1\n* H2.2\n:PROPERTIES:\n:A+: 2\n:END:"
+	"* H1\n:PROPERTIES:\n:A: 1\n:END:\n** H2.1\n** H2.2\n:PROPERTIES:\n:A+: 2\n:END:"
       (org-entry-get (point-max) "A" t))))
   (should
    (equal "1"
