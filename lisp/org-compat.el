@@ -1047,8 +1047,8 @@ ELEMENT is the element at point."
 	   (or (not (match-beginning 5))
 	       (< (point) (match-beginning 5)))
            ;; Ignore checks in code, verbatim and others.
-           (org--flyspell-object-check-p (org-element-at-point)))
-    (let* ((element (org-element-at-point))
+           (org--flyspell-object-check-p (org-element-at-point-no-context)))
+    (let* ((element (org-element-at-point-no-context))
 	   (post-affiliated (org-element-property :post-affiliated element)))
       (cond
        ;; Ignore checks in all affiliated keywords but captions.
