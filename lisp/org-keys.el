@@ -128,7 +128,7 @@
 (declare-function org-metaup "org" (&optional _arg))
 (declare-function org-narrow-to-block "org" ())
 (declare-function org-narrow-to-element "org" ())
-(declare-function org-narrow-to-subtree "org" ())
+(declare-function org-narrow-to-subtree "org" (&optional element))
 (declare-function org-next-block "org" (arg &optional backward block-regexp))
 (declare-function org-next-link "org" (&optional search-backward))
 (declare-function org-next-visible-heading "org" (arg))

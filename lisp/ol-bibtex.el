@@ -133,7 +133,7 @@
 (declare-function org-heading-components "org" ())
 (declare-function org-insert-heading "org" (&optional arg invisible-ok top))
 (declare-function org-map-entries "org" (func &optional match scope &rest skip))
-(declare-function org-narrow-to-subtree "org" ())
+(declare-function org-narrow-to-subtree "org" (&optional element))
 (declare-function org-set-property "org" (property value))
 (declare-function org-toggle-tag "org" (tag &optional onoff))
 

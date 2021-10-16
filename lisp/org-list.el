@@ -133,7 +133,7 @@
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-mode "org" ())
-(declare-function org-narrow-to-subtree "org" ())
+(declare-function org-narrow-to-subtree "org" (&optional element))
 (declare-function org-outline-level "org" ())
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))

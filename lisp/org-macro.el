@@ -55,6 +55,8 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-copy "org-element" (datum))
 (declare-function org-element-macro-parser "org-element" ())
+(declare-function org-element-keyword-parser "org-element" (limit affiliated))
+(declare-function org-element-put-property "org-element" (element property value))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-restriction "org-element" (element))
