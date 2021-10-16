@@ -20639,18 +20639,25 @@ Optional argument ELEMENT contains element at point."
        (t
         (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p))))))))
 
-(defun org-in-archived-heading-p (&optional no-inheritance)
+(defun org-in-archived-heading-p (&optional no-inheritance element)
   "Non-nil if point is under an archived heading.
 This function also checks ancestors of the current headline,
-unless optional argument NO-INHERITANCE is non-nil."
+unless optional argument NO-INHERITANCE is non-nil.
+
+Optional argument ELEMENT contains element at point."
   (cond
    ((org-before-first-heading-p) nil)
-   ((let ((tags (org-get-tags nil 'local)))
-      (and tags
-	   (cl-some (apply-partially #'string= org-archive-tag) tags))))
+   ((if element
+        (org-element-property :archivedp element)
+      (let ((tags (org-get-tags element 'local)))
+        (and tags
+	     (cl-some (apply-partially #'string= org-archive-tag) tags)))))
    (no-inheritance nil)
    (t
-    (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p))))))
+    (if (org-element--cache-active-p)
+        (cl-some (lambda (el) (org-element-property :archivedp el))
+                 (org-element-lineage (org-element-at-point) nil t))
+      (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p)))))))
 
 (defun org-at-comment-p nil
   "Return t if cursor is in a commented line."
