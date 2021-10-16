@@ -7899,17 +7899,26 @@ If yes, remember the marker and the distance to BEG."
     (move-marker (car x) (+ beg (cdr x))))
   (setq org-markers-to-move nil))
 
-(defun org-narrow-to-subtree ()
+(defun org-narrow-to-subtree (&optional element)
   "Narrow buffer to the current subtree."
   (interactive)
-  (save-excursion
-    (save-match-data
-      (org-with-limited-levels
-       (narrow-to-region
-	(progn (org-back-to-heading t) (point))
-	(progn (org-end-of-subtree t t)
-	       (when (and (org-at-heading-p) (not (eobp))) (backward-char 1))
-	       (point)))))))
+  (if (org-element--cache-active-p)
+      (if-let* ((heading (org-element-lineage
+                          (or element (org-element-at-point))
+                          '(headline) t))
+                (end (org-element-property :end heading)))
+          (narrow-to-region (org-element-property :begin heading)
+                            (if (= end (point-max))
+                                end (1- end)))
+        (signal 'outline-before-first-heading nil))
+    (save-excursion
+      (save-match-data
+        (org-with-limited-levels
+         (narrow-to-region
+	  (progn (org-back-to-heading t) (point))
+	  (progn (org-end-of-subtree t t)
+	         (when (and (org-at-heading-p) (not (eobp))) (backward-char 1))
+	         (point))))))))
 
 (defun org-toggle-narrow-to-subtree ()
   "Narrow to the subtree at point or widen a narrowed buffer."
