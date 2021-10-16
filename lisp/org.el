@@ -13209,7 +13209,7 @@ no match, the marker will point nowhere.
 Note that also `org-entry-get' calls this function, if the INHERIT flag
 is set.")
 
-(defun org-entry-get-with-inheritance (property &optional literal-nil)
+(defun org-entry-get-with-inheritance (property &optional literal-nil element)
   "Get PROPERTY of entry or content at point, search higher levels if needed.
 The search will stop at the first ancestor which has the property defined.
 If the value found is \"nil\", return nil to show that the property
@@ -13217,27 +13217,61 @@ should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
   (org-with-wide-buffer
-   (let (value)
+   (let (value at-bob-no-heading)
      (catch 'exit
-       (while t
-	 (let ((v (org--property-local-values property literal-nil)))
-	   (when v
-	     (setq value
-		   (concat (mapconcat #'identity (delq nil v) " ")
-			   (and value " ")
-			   value)))
-	   (cond
-	    ((car v)
-	     (org-back-to-heading-or-point-min t)
-	     (move-marker org-entry-property-inherited-from (point))
-	     (throw 'exit nil))
-	    ((org-up-heading-or-point-min))
-	    (t
-	     (let ((global (org--property-global-or-keyword-value property literal-nil)))
-	       (cond ((not global))
-		     (value (setq value (concat global " " value)))
-		     (t (setq value global))))
-	     (throw 'exit nil))))))
+       (if-let ((element (or element
+                             (and (org-element--cache-active-p)
+                                  (org-element-at-point nil 'cached)))))
+           (let ((element (org-element-lineage element '(headline org-data inlinetask) 'with-self)))
+             (while t
+               (let* ((v (org--property-local-values property literal-nil element))
+                      (v (if (listp v) v (list v))))
+                 (when v
+                   (setq value
+                         (concat (mapconcat #'identity (delq nil v) " ")
+                                 (and value " ")
+                                 value)))
+                 (cond
+	          ((car v)
+	           (move-marker org-entry-property-inherited-from (org-element-property :begin element))
+	           (throw 'exit nil))
+	          ((org-element-property :parent element)
+                   (setq element (org-element-property :parent element)))
+	          (t
+	           (let ((global (org--property-global-or-keyword-value property literal-nil)))
+	             (cond ((not global))
+		           (value (setq value (concat global " " value)))
+		           (t (setq value global))))
+	           (throw 'exit nil))))))
+         (while t
+	   (let ((v (org--property-local-values property literal-nil)))
+	     (when v
+	       (setq value
+		     (concat (mapconcat #'identity (delq nil v) " ")
+			     (and value " ")
+			     value)))
+	     (cond
+	      ((car v)
+	       (org-back-to-heading-or-point-min t)
+	       (move-marker org-entry-property-inherited-from (point))
+	       (throw 'exit nil))
+	      ((or (org-up-heading-safe)
+                   (and (not (bobp))
+                        (goto-char (point-min))
+                        nil)
+                   ;; `org-up-heading-safe' returned nil.  We are at low
+                   ;; level heading or bob.  If there is headline
+                   ;; there, do not try to fetch its properties.
+                   (and (bobp)
+                        (not at-bob-no-heading)
+                        (not (org-at-heading-p))
+                        (setq at-bob-no-heading t))))
+	      (t
+	       (let ((global (org--property-global-or-keyword-value property literal-nil)))
+	         (cond ((not global))
+		       (value (setq value (concat global " " value)))
+		       (t (setq value global))))
+	       (throw 'exit nil)))))))
      (if literal-nil value (org-not-nil value)))))
 
 (defvar org-property-changed-functions nil
