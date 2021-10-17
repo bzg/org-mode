@@ -13,6 +13,81 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.6 (not yet released)
 
+** Important announcements and breaking changes
+
+*** Element cache is enabled by default and work for headings
+
+The old element cache code has been refactored.  Emacs does not hang
+anymore when the cache is enabled.
+
+When cache is enabled, ~org-element-at-point~ for headings is
+guaranteed to return valid =:parent= property.  The highest-level
+headings contain new =org-data= element as their parent.
+
+The new =org-data= element provides properties from top-level property
+drawer, buffer-global category, and =:path= property containing file
+path for file Org buffers.
+
+The new cache still need to be tested extensively.  Please, report any
+warning coming from element cache.  If you see warnings regularly, it
+would be helpful to set ~org-element--cache-self-verify~ to
+='backtrace= and provide the backtrace to Org mailing list.
+
+*** Element cache persists across Emacs sessions
+
+The cache state is saved between Emacs sessions.  Enabled by default.
+
+The cache persistence can be controlled via
+~org-element-cache-persistent~.
+
+** New features
+
+*** New library =org-persist.el= implements variable persistence across Emacs sessions
+
+The library stored variable data in ~org-persist-path~ (set to XDG
+cache dir by default).
+
+The entry points are ~org-persist-register~, ~org-persist-unregister~,
+~org-persist-read~, and ~org-persist-read-all~.  Storing circular
+structures is supported.  Storing references between different
+variables is also supported (see =:inherit= key in
+~org-persist-register~).
+
+** New functions and changes in function arguments
+
+*** New function ~org-element-cache-map~ for quick mapping across Org elements
+
+When element cache is enabled, the new function provides the best
+possible performance to map across large Org buffers.
+
+It is recommended to provide =:next-re= and =:fail-re= parameters for
+best speed.
+
+Diagnostic information about execution speed can be provided according
+to ~org-element--cache-map-statistics~ and
+~org-element--cache-map-statistics-threshold~.
+
+~org-scan-tags~ and tag views in agenda utilise the new function.
+
+*** New function ~org-element-at-point-no-context~
+
+This function is like ~org-element-at-point~, but it does not try to
+update the cache and does not guarantee correct =:parent= properties
+for =headline= elements.
+
+This function is faster than ~org-element-at-point~ when used together
+with frequent buffer edits.
+*** Various Org API functions now use cache and accept Org elements as optional arguments
+
+~org-in-archived-heading-p~, ~org-in-commented-heading-p~,
+~org-up-heading-safe~, ~org-end-of-subtree~, ~org-goto-first-child~,
+~org-back-to-heading~, ~org-entry-get-with-inheritance~, and
+~org-narrow-to-subtree~ all accept Org element as an extra optional
+argument.
+
+~org-get-tags~ now accepts Org element or buffer position as first
+argument.
+
 ** Miscellaneous
 
 *** New =transparent-image-converter= property for =dvipng=
