@@ -249,16 +249,17 @@ When BUFFER is `all', unregister VAR in all buffers."
   "Remove stored data for not existing files or unregistered variables."
   (let (new-index)
     (dolist (index org-persist--index)
-      (when-let ((file (plist-get index :path))
-                 (persist-file (org-file-name-concat
-                                org-persist-path
-                                (plist-get index :persist-file))))
-        (if (file-exists-p file)
-            (push index new-index)
-          (when (file-exists-p persist-file)
-            (delete-file persist-file)
-            (when (org-directory-empty-p (file-name-directory persist-file))
-              (delete-directory (file-name-directory persist-file)))))))
+      (let ((file (plist-get index :path))
+            (persist-file (org-file-name-concat
+                           org-persist-path
+                           (plist-get index :persist-file))))
+        (when (and file persist-file)
+          (if (file-exists-p file)
+              (push index new-index)
+            (when (file-exists-p persist-file)
+              (delete-file persist-file)
+              (when (org-directory-empty-p (file-name-directory persist-file))
+                (delete-directory (file-name-directory persist-file))))))))
     (setq org-persist--index (nreverse new-index))))
 
 (add-hook 'kill-emacs-hook #'org-persist-gc)

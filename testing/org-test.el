@@ -466,8 +466,13 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
 	       (apply ,(symbol-function 'current-time-zone)
 		      (or time ,at) args)))
 	    ((symbol-function 'decode-time)
-	     (lambda (&optional time zone form) (funcall ,(symbol-function 'decode-time)
-					            (or time ,at) zone form)))
+	     (lambda (&optional time zone form)
+               (condition-case err
+                   (funcall ,(symbol-function 'decode-time)
+			    (or time ,at) zone form)
+                 ;; Fallback for Emacs <27.1.
+                 (error (funcall ,(symbol-function 'decode-time)
+			         (or time ,at) zone)))))
 	    ((symbol-function 'encode-time)
 	     (lambda (time &rest args)
 	       (apply ,(symbol-function 'encode-time) (or time ,at) args)))

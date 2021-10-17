@@ -1241,7 +1241,7 @@ EVENT is passed to `mouse-set-point'."
 		   (insert (with-current-buffer write-back-buf (buffer-string))))
 	  (save-restriction
 	    (narrow-to-region beg end)
-	    (replace-buffer-contents write-back-buf 0.1 nil)
+	    (org-replace-buffer-contents write-back-buf 0.1 nil)
 	    (goto-char (point-max))))
 	(when (and expecting-bol (not (bolp))) (insert "\n")))
       (kill-buffer write-back-buf)
@@ -1278,8 +1278,8 @@ EVENT is passed to `mouse-set-point'."
     (org-with-wide-buffer
      (when (and write-back
                 (not (equal (buffer-substring beg end)
-			    (with-current-buffer write-back-buf
-                              (buffer-string)))))
+			  (with-current-buffer write-back-buf
+                            (buffer-string)))))
        (undo-boundary)
        (goto-char beg)
        (let ((expecting-bol (bolp)))
@@ -1289,7 +1289,7 @@ EVENT is passed to `mouse-set-point'."
                               (buffer-string))))
 	   (save-restriction
 	     (narrow-to-region beg end)
-	     (replace-buffer-contents write-back-buf 0.1 nil)
+	     (org-replace-buffer-contents write-back-buf 0.1 nil)
 	     (goto-char (point-max))))
 	 (when (and expecting-bol (not (bolp))) (insert "\n")))))
     (when write-back-buf (kill-buffer write-back-buf))
