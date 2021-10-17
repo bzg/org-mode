@@ -7058,6 +7058,7 @@ of FUNC.  Changes to elements made in FUNC will also alter the cache."
                                (inhibit-message t))
                            (condition-case nil
                                (if (and (fboundp 'native-comp-available-p)
+                                        (fboundp 'native-compile)
                                         (native-comp-available-p))
                                    ;; Use native compilation to even better
                                    ;; performance.

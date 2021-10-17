@@ -110,7 +110,9 @@ dependency means that data shared between variables will be preserved
   (when inherit
     (let ((inherited-index (org-persist--get-index inherit buffer)))
       (unless (memq var (plist-get inherited-index :variable))
-        (push var (plist-get inherited-index :variable)))))
+        (setq inherited-index
+              (plist-put inherited-index :variable
+                         (cons var (plist-get inherited-index :variable)))))))
   (org-persist--get-index var buffer)
   (when buffer
     (add-hook 'kill-buffer-hook #'org-persist-write-all-buffer 1000 'local)))
@@ -128,7 +130,7 @@ When BUFFER is `all', unregister VAR in all buffers."
                                (or (buffer-base-buffer buffer)
                                    buffer))
                               (plist-get plist :path))))
-             (if (length> (plist-get plist :variable) 1)
+             (if (> (length (plist-get plist :variable)) 1)
                  (progn
                    (setq plist
                          (plist-put plist :variable
@@ -137,7 +139,7 @@ When BUFFER is `all', unregister VAR in all buffers."
                    nil)
                (let ((persist-file (org-file-name-concat org-persist-path (plist-get plist :persist-file))))
                  (delete-file persist-file)
-                 (when (directory-empty-p (file-name-directory persist-file))
+                 (when (org-directory-empty-p (file-name-directory persist-file))
                    (delete-directory (file-name-directory persist-file))))
                'delete-from-index)))
          org-persist--index))
@@ -249,7 +251,7 @@ When BUFFER is `all', unregister VAR in all buffers."
             (push index new-index)
           (when (file-exists-p persist-file)
             (delete-file persist-file)
-            (when (directory-empty-p (file-name-directory persist-file))
+            (when (org-directory-empty-p (file-name-directory persist-file))
               (delete-directory (file-name-directory persist-file)))))))
     (setq org-persist--index (nreverse new-index))))
 

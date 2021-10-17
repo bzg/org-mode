@@ -75,12 +75,6 @@
 
 ;;; Emacs < 28.1 compatibility
 
-(if (fboundp 'length>)
-    (defalias 'org-length> #'length>)
-  (defun org-length> (sequence length)
-    "Return non-nil if SEQUENCE is longer than LENGTH."
-    (> (length sequence) length)))
-
 (if (fboundp 'file-name-concat)
     (defalias 'org-file-name-concat #'file-name-concat)
   (defun org-file-name-concat (directory &rest components)
