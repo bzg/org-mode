@@ -6499,6 +6499,7 @@ scheduled items with an hour specification like [h]h:mm."
 			              org-habit-show-habits-only-for-today))))
 	           (throw :skip nil))
 	         (save-excursion
+                   (goto-char (org-element-property :begin el))
 	           (let* ((category (org-get-category))
                           (effort (save-match-data
                                     (or (get-text-property (point) 'effort)
