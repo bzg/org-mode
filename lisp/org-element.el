@@ -5182,17 +5182,20 @@ indentation removed from its contents."
 
 ;;; Cache
 ;;
-;; Implement a caching mechanism for `org-element-at-point' and
-;; `org-element-context', which see.
+;; Implement a caching mechanism for `org-element-at-point', `org-element-context', and for
+;; fast mapping across Org elements in `org-element-cache-map', which see.
 ;;
-;; A single public function is provided: `org-element-cache-reset'.
+;; When cache is enabled, the elements returned by `org-element-at-point' and
+;; `org-element-context' are returned by reference.  Altering these elements will
+;; also alter their cache representation.  The same is true for
+;; elements passed to mapping function in `org-element-cache-map'.
 ;;
-;; Cache is disabled by default for now because it sometimes triggers
-;; freezes, but it can be enabled globally with
-;; `org-element-use-cache'.  `org-element-cache-sync-idle-time',
-;; `org-element-cache-sync-duration' and
-;; `org-element-cache-sync-break' can be tweaked to control caching
-;; behavior.
+;; Public functions are: `org-element-cache-reset', `org-element-cache-refresh', and
+;; `org-element-cache-map'.
+;;
+;; Cache can be controlled using `org-element-use-cache' and `org-element-cache-persistent'.
+;;  `org-element-cache-sync-idle-time', `org-element-cache-sync-duration' and
+;; `org-element-cache-sync-break' can be tweaked to control caching behavior.
 ;;
 ;; Internally, parsed elements are stored in an AVL tree,
 ;; `org-element--cache'.  This tree is updated lazily: whenever
@@ -5224,7 +5227,14 @@ indentation removed from its contents."
 ;; associated to a key, obtained with `org-element--cache-key'.  This
 ;; mechanism is robust enough to preserve total order among elements
 ;; even when the tree is only partially synchronized.
-
+;;
+;; The cache code debuggin is fairly complex because cache request
+;; state is often hard to reproduce.  An extensive diagnostics
+;; functionality is built into the cache code to assist hunting bugs.
+;; See `org-element--cache-self-verify', `org-element--cache-self-verify-frequency',
+;; `org-element--cache-diagnostics', `org-element--cache-diagnostics-level',
+;; `org-element--cache-diagnostics-ring-size', `org-element--cache-map-statistics',
+;; `org-element--cache-map-statistics-threshold'.
 
 (defvar org-element-use-cache t
   "Non-nil when Org parser should cache its results.")
