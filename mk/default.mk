@@ -85,7 +85,7 @@ EMACSQ  = $(EMACS)  -Q
 
 # Using emacs in batch mode.
 BATCH	= $(EMACSQ) -batch \
-	  --eval '(setq vc-handled-backends nil org-startup-folded nil)'
+	  --eval '(setq vc-handled-backends nil org-startup-folded nil org-element-cache-persistent nil)'
 
 # Emacs must be started in toplevel directory
 BATCHO	= $(BATCH) \
