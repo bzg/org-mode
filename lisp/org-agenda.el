@@ -76,6 +76,9 @@
 (declare-function org-columns-quit              "org-colview" ())
 (declare-function diary-date-display-form       "diary-lib"  (&optional type))
 (declare-function org-mobile-write-agenda-for-mobile "org-mobile" (file))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element--cache-active-p "org-element"
+                  (&optional called-from-cache-change-func-p))
 (declare-function org-habit-insert-consistency-graphs
 		  "org-habit" (&optional line))
 (declare-function org-is-habit-p "org-habit" (&optional pom))
@@ -5587,7 +5590,11 @@ and the timestamp type relevant for the sorting strategy in
 			   (memq 'todo org-agenda-use-tag-inheritance))))
 	      tags (org-get-tags nil (not inherited-tags))
 	      level (make-string (org-reduced-level (org-outline-level)) ? )
-	      txt (org-agenda-format-item "" txt level category tags t)
+	      txt (org-agenda-format-item ""
+                                (org-add-props txt nil
+                                  'effort effort
+                                  'effort-minutes effort-minutes)
+                                level category tags t)
 	      priority (1+ (org-get-priority txt)))
         (setq effort-minutes (when effort (save-match-data (org-duration-to-minutes effort))))
 	(org-add-props txt props
@@ -5816,7 +5823,10 @@ displayed in agenda view."
 		   (item
 		    (org-agenda-format-item
 		     (and inactive? org-agenda-inactive-leader)
-		     head level category tags time-stamp org-ts-regexp habit?)))
+                     (org-add-props head nil
+                       'effort effort
+                       'effort-minutes effort-minutes)
+                     level category tags time-stamp org-ts-regexp habit?)))
 	      (org-add-props item props
 		'priority (if habit?
 			      (org-habit-get-priority (org-habit-parse-todo))
@@ -5893,7 +5903,11 @@ displayed in agenda view."
 	    (if (string-match "\\S-" r)
 		(setq txt r)
 	      (setq txt "SEXP entry returned empty string"))
-	    (setq txt (org-agenda-format-item extra txt level category tags 'time))
+	    (setq txt (org-agenda-format-item extra
+                                    (org-add-props txt nil
+                                      'effort effort
+                                      'effort-minutes effort-minutes)
+                                    level category tags 'time))
 	    (org-add-props txt props 'org-marker marker
 			   'date date 'todo-state todo-state
                            'effort effort 'effort-minutes effort-minutes
@@ -6049,7 +6063,10 @@ then those holidays will be skipped."
 			(closedp "Closed:    ")
 			(statep (concat "State:     (" state ")"))
 			(t (concat "Clocked:   (" clocked  ")")))
-		       txt level category tags timestr)))
+                       (org-add-props txt nil
+                         'effort effort
+                         'effort-minutes effort-minutes)
+		       level category tags timestr)))
 	  (setq type (cond (closedp "closed")
 			   (statep "state")
 			   (t "clock")))
@@ -6315,7 +6332,10 @@ specification like [h]h:mm."
 			((and today? (< deadline today)) (format past (- diff)))
 			((and today? (> deadline today)) (format future diff))
 			(t now)))
-		     head level category tags time))
+		     (org-add-props head nil
+                       'effort effort
+                       'effort-minutes effort-minutes)
+                     level category tags time))
 		   (face (org-agenda-deadline-face
 			  (- 1 (/ (float diff) (max wdays 1)))))
 		   (upcoming? (and today? (> deadline today)))
@@ -6503,7 +6523,7 @@ scheduled items with an hour specification like [h]h:mm."
 	           (let* ((category (org-get-category))
                           (effort (save-match-data
                                     (or (get-text-property (point) 'effort)
-                                        (org-element-property org-effort-property el))))
+                                        (org-element-property (intern (concat ":" (upcase org-effort-property))) el))))
                           (effort-minutes (when effort (save-match-data (org-duration-to-minutes effort))))
 		          (inherited-tags
 		           (or (eq org-agenda-show-inherited-tags 'always)
@@ -6543,7 +6563,10 @@ scheduled items with an hour specification like [h]h:mm."
 		              (if (and todayp pastschedp)
 			          (format past diff)
 			        first))
-		            head level category tags time nil habitp))
+		            (org-add-props head nil
+                              'effort effort
+                              'effort-minutes effort-minutes)
+                            level category tags time nil habitp))
 		          (face (cond ((and (not habitp) pastschedp)
 				       'org-scheduled-previously)
 			              ((and habitp futureschedp)
@@ -6725,7 +6748,10 @@ scheduled items with an hour specification like [h]h:mm."
 		         (if (and todayp pastschedp)
 			     (format past diff)
 			   first))
-		       head level category tags time nil habitp))
+		       (org-add-props head nil
+                         'effort effort
+                         'effort-minutes effort-minutes)
+                       level category tags time nil habitp))
 		     (face (cond ((and (not habitp) pastschedp)
 				  'org-scheduled-previously)
 			         ((and habitp futureschedp)
@@ -6836,7 +6862,10 @@ scheduled items with an hour specification like [h]h:mm."
 			      (nth (if (= d1 d2) 0 1)
 				   org-agenda-timerange-leaders)
 			      (1+ (- d0 d1)) (1+ (- d2 d1)))
-			     head level category tags
+			     (org-add-props head nil
+                               'effort effort
+                               'effort-minutes effort-minutes)
+                             level category tags
 			     (save-match-data
 			       (let ((hhmm1 (and (string-match org-ts-regexp1 s1)
 						 (match-string 6 s1)))
@@ -9720,7 +9749,7 @@ the same tree node, and the headline of the tree node in the Org file."
       (org-add-note))))
 
 (defun org-agenda-change-all-lines (newhead hdmarker
-					    &optional fixface just-this)
+				  &optional fixface just-this)
   "Change all lines in the agenda buffer which match HDMARKER.
 The new content of the line will be NEWHEAD (as modified by
 `org-agenda-format-item').  HDMARKER is checked with
@@ -9734,7 +9763,8 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
 	 (org-agenda-buffer (current-buffer))
 	 (thetags (with-current-buffer (marker-buffer hdmarker)
 		    (org-get-tags hdmarker)))
-	 props m undone-face done-face finish new dotime level cat tags) ;; pl
+	 props m undone-face done-face finish new dotime level cat tags
+         effort effort-minutes) ;; pl
     (save-excursion
       (goto-char (point-max))
       (beginning-of-line 1)
@@ -9748,6 +9778,8 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
 		cat (org-agenda-get-category)
 		level (org-get-at-bol 'level)
 		tags thetags
+                effort (org-get-at-bol 'effort)
+                effort-minutes (org-get-at-bol 'effort-minutes)
 		new
 		(let ((org-prefix-format-compiled
 		       (or (get-text-property (min (1- (point-max)) (point)) 'format)
@@ -9755,7 +9787,11 @@ If FORCE-TAGS is non-nil, the car of it returns the new tags."
 		      (extra (org-get-at-bol 'extra)))
 		  (with-current-buffer (marker-buffer hdmarker)
 		    (org-with-wide-buffer
-		     (org-agenda-format-item extra newhead level cat tags dotime))))
+		     (org-agenda-format-item extra
+                                   (org-add-props newhead nil
+                                     'effort effort
+                                     'effort-minutes effort-minutes)
+                                   level cat tags dotime))))
 		;; pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
