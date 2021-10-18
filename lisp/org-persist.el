@@ -35,12 +35,13 @@
 (declare-function org-next-visible-heading "org" (arg))
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
-(defvar org-persist-path (org-file-name-concat
-               (let ((cache-dir (xdg-cache-home)))
-                 (if (seq-empty-p cache-dir)
-                     user-emacs-directory
-                   cache-dir))
-               "org-persist/")
+(defvar org-persist-path (expand-file-name
+               (org-file-name-concat
+                (let ((cache-dir (xdg-cache-home)))
+                  (if (seq-empty-p cache-dir)
+                      user-emacs-directory
+                    cache-dir))
+                "org-persist/"))
   "Directory where the data is stored.")
 
 (defvar org-persist-index-file "index"
