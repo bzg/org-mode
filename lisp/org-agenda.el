@@ -6406,6 +6406,10 @@ scheduled items with an hour specification like [h]h:mm."
                                      :raw-value
                                      (org-element-property :scheduled el))
                                     1 -1))
+                      (pos (save-excursion
+                             (goto-char (org-element-property :contents-begin el))
+                             (re-search-forward regexp)
+                             (1- (match-beginning 1))))
                       (todo-state (org-element-property :todo-keyword el))
 	              (donep (eq 'done (org-element-property :todo-type el)))
 	              (sexp? (eq 'diary
@@ -6420,7 +6424,7 @@ scheduled items with an hour specification like [h]h:mm."
 		        ((or (eq org-agenda-prefer-last-repeat t)
 		             (member todo-state org-agenda-prefer-last-repeat))
 		         (org-agenda--timestamp-to-absolute
-		          s today 'past (current-buffer) (point)))
+		          s today 'past (current-buffer) pos))
 		        (t (org-agenda--timestamp-to-absolute s))))
 	              ;; REPEAT is the future repeat closest from CURRENT,
 	              ;; according to `org-agenda-show-future-repeats'. If
@@ -6436,7 +6440,7 @@ scheduled items with an hour specification like [h]h:mm."
 				         (1+ today)
 				       current)))
 		           (org-agenda--timestamp-to-absolute
-		            s base 'future (current-buffer) (point))))))
+		            s base 'future (current-buffer) pos)))))
 	              (diff (- current schedule))
 	              (warntime (get-text-property (point) 'org-appt-warntime))
 	              (pastschedp (< schedule today))
@@ -6577,7 +6581,7 @@ scheduled items with an hour specification like [h]h:mm."
 	             (org-add-props item props
 		       'undone-face face
 		       'face (if donep 'org-agenda-done face)
-		       'org-marker (org-agenda-new-marker (org-element-property :contents-begin el))
+		       'org-marker (org-agenda-new-marker pos)
 		       'org-hd-marker (org-agenda-new-marker (line-beginning-position))
 		       'type (if pastschedp "past-scheduled" "scheduled")
 		       'date (if pastschedp schedule date)
