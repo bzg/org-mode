@@ -78,6 +78,7 @@ a data variable.  Each plist contains the following properties:
 (defun org-persist--get-index (var &optional buffer)
   "Return plist used to store VAR in BUFFER.
 When BUFFER is nil, return plist for global VAR."
+  (org-persist--read-index)
   (let* ((buffer-file (when buffer (buffer-file-name (or (buffer-base-buffer buffer)
                                                          buffer))))
          (inode (when buffer-file (file-attribute-inode-number (file-attributes buffer-file)))))
@@ -103,10 +104,12 @@ When BUFFER is nil, return plist for global VAR."
 (defun org-persist--read-index ()
   "Read `org-persist--index'"
   (unless org-persist--index
-    (when (file-exists-p (org-file-name-concat org-persist-directory org-persist-index-file))
-      (with-temp-buffer
-        (insert-file-contents (org-file-name-concat org-persist-directory org-persist-index-file))
-        (setq org-persist--index (read (current-buffer)))))))
+    (if (file-exists-p (org-file-name-concat org-persist-directory org-persist-index-file))
+        (with-temp-buffer
+          (insert-file-contents (org-file-name-concat org-persist-directory org-persist-index-file))
+          (setq org-persist--index (read (current-buffer))))
+      (warn "Cannot read org-persist index from %s."
+            (org-file-name-concat org-persist-directory org-persist-index-file)))))
 
 (cl-defun org-persist-register (var &optional buffer &key inherit)
   "Register VAR in BUFFER to be persistent.
@@ -172,6 +175,17 @@ When BUFFER is `all', unregister VAR in all buffers."
                             (plist-get index :variable))
             (unless (file-exists-p org-persist-directory)
               (make-directory org-persist-directory))
+            (unless (file-exists-p org-persist-directory)
+              (warn "Failed to create org-persist storage in %s."
+                    org-persist-directory)
+              (let ((dir (directory-file-name
+                          (file-name-as-directory org-persist-directory))))
+                (while (and (not (file-exists-p dir))
+                            (not (equal dir (setq dir (directory-file-name
+                                                     (file-name-directory dir)))))))
+                (unless (file-writable-p dir)
+                  (message "Missing write access rights to org-persist-directory: %S"
+                           org-persist-directory))))
             (with-temp-file (org-file-name-concat org-persist-directory org-persist-index-file)
               (prin1 org-persist--index (current-buffer)))
             (let ((file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
