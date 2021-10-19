@@ -35,13 +35,13 @@
 (declare-function org-next-visible-heading "org" (arg))
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
-(defvar org-persist-path (expand-file-name
-               (org-file-name-concat
-                (let ((cache-dir (xdg-cache-home)))
-                  (if (seq-empty-p cache-dir)
-                      user-emacs-directory
-                    cache-dir))
-                "org-persist/"))
+(defvar org-persist-directory (expand-file-name
+                               (org-file-name-concat
+                                (let ((cache-dir (xdg-cache-home)))
+                                  (if (seq-empty-p cache-dir)
+                                      user-emacs-directory
+                                    cache-dir))
+                                "org-persist/"))
   "Directory where the data is stored.")
 
 (defvar org-persist-index-file "index"
@@ -103,9 +103,9 @@ When BUFFER is nil, return plist for global VAR."
 (defun org-persist--read-index ()
   "Read `org-persist--index'"
   (unless org-persist--index
-    (when (file-exists-p (org-file-name-concat org-persist-path org-persist-index-file))
+    (when (file-exists-p (org-file-name-concat org-persist-directory org-persist-index-file))
       (with-temp-buffer
-        (insert-file-contents (org-file-name-concat org-persist-path org-persist-index-file))
+        (insert-file-contents (org-file-name-concat org-persist-directory org-persist-index-file))
         (setq org-persist--index (read (current-buffer)))))))
 
 (cl-defun org-persist-register (var &optional buffer &key inherit)
@@ -144,7 +144,7 @@ When BUFFER is `all', unregister VAR in all buffers."
                                     (delq var (plist-get plist :variable))))
                    ;; Do not remove the index though.
                    nil)
-               (let ((persist-file (org-file-name-concat org-persist-path (plist-get plist :persist-file))))
+               (let ((persist-file (org-file-name-concat org-persist-directory (plist-get plist :persist-file))))
                  (delete-file persist-file)
                  (when (org-directory-empty-p (file-name-directory persist-file))
                    (delete-directory (file-name-directory persist-file))))
@@ -170,11 +170,11 @@ When BUFFER is `all', unregister VAR in all buffers."
           (unless (seq-find (lambda (v)
                               (run-hook-with-args-until-success 'org-persist-before-write-hook v buffer))
                             (plist-get index :variable))
-            (unless (file-exists-p org-persist-path)
-              (make-directory org-persist-path))
-            (with-temp-file (org-file-name-concat org-persist-path org-persist-index-file)
+            (unless (file-exists-p org-persist-directory)
+              (make-directory org-persist-directory))
+            (with-temp-file (org-file-name-concat org-persist-directory org-persist-index-file)
               (prin1 org-persist--index (current-buffer)))
-            (let ((file (org-file-name-concat org-persist-path (plist-get index :persist-file)))
+            (let ((file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
                   (data (mapcar (lambda (s) (cons s (symbol-value s)))
                                 (plist-get index :variable))))
               (unless (file-exists-p (file-name-directory file))
@@ -202,7 +202,7 @@ When BUFFER is `all', unregister VAR in all buffers."
 (defun org-persist-read (var &optional buffer)
   "Restore VAR data in BUFFER."
   (let* ((index (org-persist--get-index var buffer))
-         (persist-file (org-file-name-concat org-persist-path (plist-get index :persist-file)))
+         (persist-file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
          (data nil))
     (when (and (file-exists-p persist-file)
                (or (not buffer)
@@ -252,7 +252,7 @@ When BUFFER is `all', unregister VAR in all buffers."
     (dolist (index org-persist--index)
       (let ((file (plist-get index :path))
             (persist-file (org-file-name-concat
-                           org-persist-path
+                           org-persist-directory
                            (plist-get index :persist-file))))
         (when (and file persist-file)
           (if (file-exists-p file)
