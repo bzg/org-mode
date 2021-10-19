@@ -186,15 +186,16 @@ When BUFFER is `all', unregister VAR in all buffers."
                 (unless (file-writable-p dir)
                   (message "Missing write access rights to org-persist-directory: %S"
                            org-persist-directory))))
-            (with-temp-file (org-file-name-concat org-persist-directory org-persist-index-file)
-              (prin1 org-persist--index (current-buffer)))
-            (let ((file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
-                  (data (mapcar (lambda (s) (cons s (symbol-value s)))
-                                (plist-get index :variable))))
-              (unless (file-exists-p (file-name-directory file))
-                (make-directory (file-name-directory file) t))
-              (with-temp-file file
-                (prin1 data (current-buffer))))))))))
+            (when (file-exists-p org-persist-directory)
+              (with-temp-file (org-file-name-concat org-persist-directory org-persist-index-file)
+                (prin1 org-persist--index (current-buffer)))
+              (let ((file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
+                    (data (mapcar (lambda (s) (cons s (symbol-value s)))
+                                  (plist-get index :variable))))
+                (unless (file-exists-p (file-name-directory file))
+                  (make-directory (file-name-directory file) t))
+                (with-temp-file file
+                  (prin1 data (current-buffer)))))))))))
 
 (defun org-persist-write-all (&optional buffer)
   "Save all the persistent data."
