@@ -278,7 +278,7 @@ When BUFFER is `all', unregister VAR in all buffers."
     (setq org-persist--index (nreverse new-index))))
 
 (add-hook 'kill-emacs-hook #'org-persist-gc)
-(add-hook 'kill-emacs-hook #'org-persist-write-all 1000)
+(add-hook 'kill-emacs-hook #'org-persist-write-all 100)
 (add-hook 'after-init-hook #'org-persist-read-all)
 
 (provide 'org-persist)
