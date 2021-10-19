@@ -231,9 +231,9 @@ When BUFFER is `all', unregister VAR in all buffers."
           ;; FIXME: Reading sometimes fails to read circular objects.
           ;; I suspect that it happens when we have object reference
           ;; #N# read before object definition #N=.  If it is really
-          ;; #so, it should be Emacs bug - either in `read' or in
-          ;; #`prin1'.  Meanwhile, just fail silently when `read'
-          ;; #fails to parse the saved cache object.
+          ;; so, it should be Emacs bug - either in `read' or in
+          ;; `prin1'.  Meanwhile, just fail silently when `read'
+          ;; fails to parse the saved cache object.
           (condition-case err
               (setq data (read (current-buffer)))
             (error
