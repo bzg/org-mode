@@ -278,8 +278,18 @@ When BUFFER is `all', unregister VAR in all buffers."
                 (delete-directory (file-name-directory persist-file))))))))
     (setq org-persist--index (nreverse new-index))))
 
-(add-hook 'kill-emacs-hook #'org-persist-gc)
-(add-hook 'kill-emacs-hook #'org-persist-write-all 100)
+;; Automatically write the data, but only when we have write access.
+(let ((dir (directory-file-name
+            (file-name-as-directory org-persist-directory))))
+  (while (and (not (file-exists-p dir))
+              (not (equal dir (setq dir (directory-file-name
+                                       (file-name-directory dir)))))))
+  (if (not (file-writable-p dir))
+      (message "Missing write access rights to org-persist-directory: %S"
+               org-persist-directory)
+    (add-hook 'kill-emacs-hook #'org-persist-gc)
+    (add-hook 'kill-emacs-hook #'org-persist-write-all 100)))
+
 (add-hook 'after-init-hook #'org-persist-read-all)
 
 (provide 'org-persist)
