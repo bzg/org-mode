@@ -104,12 +104,10 @@ When BUFFER is nil, return plist for global VAR."
 (defun org-persist--read-index ()
   "Read `org-persist--index'"
   (unless org-persist--index
-    (if (file-exists-p (org-file-name-concat org-persist-directory org-persist-index-file))
-        (with-temp-buffer
-          (insert-file-contents (org-file-name-concat org-persist-directory org-persist-index-file))
-          (setq org-persist--index (read (current-buffer))))
-      (warn "Cannot read org-persist index from %s."
-            (org-file-name-concat org-persist-directory org-persist-index-file)))))
+    (when (file-exists-p (org-file-name-concat org-persist-directory org-persist-index-file))
+      (with-temp-buffer
+        (insert-file-contents (org-file-name-concat org-persist-directory org-persist-index-file))
+        (setq org-persist--index (read (current-buffer)))))))
 
 (cl-defun org-persist-register (var &optional buffer &key inherit)
   "Register VAR in BUFFER to be persistent.
