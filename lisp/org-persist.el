@@ -107,7 +107,11 @@ When BUFFER is nil, return plist for global VAR."
     (when (file-exists-p (org-file-name-concat org-persist-directory org-persist-index-file))
       (with-temp-buffer
         (insert-file-contents (org-file-name-concat org-persist-directory org-persist-index-file))
-        (setq org-persist--index (read (current-buffer)))))))
+        (setq org-persist--index
+              (condition-case err
+                  (read (current-buffer))
+                ;; Recover gracefully if index file is corrupted.
+                (error nil)))))))
 
 (cl-defun org-persist-register (var &optional buffer &key inherit)
   "Register VAR in BUFFER to be persistent.
