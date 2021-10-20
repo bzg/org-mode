@@ -44,7 +44,7 @@ The cache persistence can be controlled via
 
 *** New library =org-persist.el= implements variable persistence across Emacs sessions
 
-The library stored variable data in ~org-persist-path~ (set to XDG
+The library stored variable data in ~org-persist-directory~ (set to XDG
 cache dir by default).
 
 The entry points are ~org-persist-register~, ~org-persist-unregister~,
