@@ -131,7 +131,7 @@ dependency means that data shared between variables will be preserved
                          (cons var (plist-get inherited-index :variable)))))))
   (org-persist--get-index var buffer)
   (when buffer
-    (add-hook 'kill-buffer-hook #'org-persist-write-all-buffer 'local)))
+    (add-hook 'kill-buffer-hook #'org-persist-write-all-buffer nil 'local)))
 
 (defun org-persist-unregister (var &optional buffer)
   "Unregister VAR in BUFFER to be persistent.
