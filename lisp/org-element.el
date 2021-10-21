@@ -5772,6 +5772,10 @@ Properties are modified by side-effect."
 			(plist-get properties key))))
 	(and value (plist-put properties key (+ offset value)))))))
 
+(defvar org-element--cache-interrupt-C-g nil)
+(defvar org-element--cache-interrupt-C-g-max-count 5)
+(defvar org-element--cache-interrupt-C-g-count 0)
+
 (defun org-element--cache-sync (buffer &optional threshold future-change)
   "Synchronize cache with recent modification in BUFFER.
 
@@ -5797,6 +5801,7 @@ updated before current modification are actually submitted."
                           this-command)
             (org-element-cache-reset))
         (let ((inhibit-quit t) request next)
+          (setq org-element--cache-interrupt-C-g-count 0)
 	  (when org-element--cache-sync-timer
 	    (cancel-timer org-element--cache-sync-timer))
           (let ((time-limit (time-add nil org-element-cache-sync-duration)))
@@ -6262,8 +6267,17 @@ the process stopped before finding the expected result."
            (while t
 	     (when (org-element--cache-interrupt-p time-limit)
                (throw 'interrupt nil))
+             (when (and inhibit-quit org-element--cache-interrupt-C-g)
+               (when quit-flag
+	         (cl-incf org-element--cache-interrupt-C-g-count)
+                 (setq quit-flag nil))
+               (when (> org-element--cache-interrupt-C-g-count
+                        org-element--cache-interrupt-C-g-max-count)
+                 (setq quit-flag t)
+                 (org-element-cache-reset)
+                 (error "org-element: Parsing aborted by user.  Cache has been cleared.")))
 	     (unless element
-               ;; Do not try to parse withi blank at EOB.
+               ;; Do not try to parse within blank at EOB.
                (unless (save-excursion
                          (org-skip-whitespace)
                          (eobp))
