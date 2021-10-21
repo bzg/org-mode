@@ -111,7 +111,11 @@ When BUFFER is nil, return plist for global VAR."
               (condition-case err
                   (read (current-buffer))
                 ;; Recover gracefully if index file is corrupted.
-                (error nil)))))))
+                (error
+                 (warn "Emacs reader failed to read data for `org-persist--index' from %S. The error was: %S"
+                       (org-file-name-concat org-persist-directory org-persist-index-file)
+                       (error-message-string err))
+                 nil)))))))
 
 (cl-defun org-persist-register (var &optional buffer &key inherit)
   "Register VAR in BUFFER to be persistent.
