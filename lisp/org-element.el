@@ -6668,9 +6668,7 @@ change, as an integer."
         ;; yet to the otherwise correct part of the cache (i.e, before
         ;; the first request).
         (org-element--cache-log-message "Adding new phase 0 request")
-        ;; FIXME: Disabling this optimisation to hunt errors.
-        ;; (when next (org-element--cache-sync (current-buffer) end beg))
-        (when next (org-element--cache-sync (current-buffer) end))
+        (when next (org-element--cache-sync (current-buffer) end beg))
         (let ((first (org-element--cache-for-removal beg end offset)))
 	  (if first
 	      (push (let ((first-beg (org-element-property :begin first))
