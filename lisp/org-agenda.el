@@ -6449,7 +6449,9 @@ scheduled items with an hour specification like [h]h:mm."
                                    (string= "habit" (org-element-property :STYLE el))))
 	              (suppress-delay
 		       (let ((deadline (and org-agenda-skip-scheduled-delay-if-deadline
-                                            (org-element-property :deadline el))))
+                                            (org-element-property
+                                             :raw-value
+                                             (org-element-property :deadline el)))))
 		         (cond
 		          ((not deadline) nil)
 		          ;; The current item has a deadline date, so
