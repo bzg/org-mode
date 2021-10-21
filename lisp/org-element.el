@@ -5843,7 +5843,7 @@ updated before current modification are actually submitted."
 	  ;; Otherwise, reset keys.
 	  (if org-element--cache-sync-requests
 	      (org-element--cache-set-timer buffer)
-            (setq org-element--cache-sync-keys-value (buffer-chars-modified-tick))))))))
+            (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value))))))))
 
 (defun org-element--cache-process-request
     (request next-request-key threshold time-limit future-change)
@@ -6819,6 +6819,12 @@ Return non-nil when verification failed."
              org-element-cache-persistent
              (eq var 'org-element--cache))
     (with-current-buffer buffer
+      ;; Cleanup cache request keys to avoid collisions during next
+      ;; Emacs session.
+      (avl-tree-mapc
+       (lambda (el)
+         (org-element-put-property el :org-element--cache-sync-key nil))
+       org-element--cache)
       (org-with-wide-buffer
        (org-element-at-point (point-max))))
     nil))
@@ -6872,7 +6878,7 @@ buffers."
 		    (avl-tree-create #'org-element--cache-compare))
         (setq-local org-element--cache-size 0)
         (setq-local org-element--headline-cache-size 0)
-	(setq-local org-element--cache-sync-keys-value (buffer-chars-modified-tick))
+	(setq-local org-element--cache-sync-keys-value 0)
 	(setq-local org-element--cache-change-warning nil)
 	(setq-local org-element--cache-sync-requests nil)
 	(setq-local org-element--cache-sync-timer nil)
