@@ -5772,9 +5772,16 @@ Properties are modified by side-effect."
 			(plist-get properties key))))
 	(and value (plist-put properties key (+ offset value)))))))
 
-(defvar org-element--cache-interrupt-C-g nil)
-(defvar org-element--cache-interrupt-C-g-max-count 5)
-(defvar org-element--cache-interrupt-C-g-count 0)
+(defvar org-element--cache-interrupt-C-g t
+  "When non-nil, allow the user to abort `org-element--cache-sync'.
+The execution is aborted upon pressing `\\[keyboard-quit]'
+`org-element--cache-interrupt-C-g-max-count' times.")
+(defvar org-element--cache-interrupt-C-g-max-count 5
+  "`\\[keyboard-quit]' count to interrupt `org-element--cache-sync'.
+See `org-element--cache-interrupt-C-g'.")
+(defvar org-element--cache-interrupt-C-g-count 0
+  "Current number of `org-element--cache-sync' calls.
+See `org-element--cache-interrupt-C-g'.")
 
 (defun org-element--cache-sync (buffer &optional threshold future-change)
   "Synchronize cache with recent modification in BUFFER.
@@ -6267,15 +6274,21 @@ the process stopped before finding the expected result."
            (while t
 	     (when (org-element--cache-interrupt-p time-limit)
                (throw 'interrupt nil))
-             (when (and inhibit-quit org-element--cache-interrupt-C-g)
+             (when (and inhibit-quit org-element--cache-interrupt-C-g quit-flag)
                (when quit-flag
 	         (cl-incf org-element--cache-interrupt-C-g-count)
                  (setq quit-flag nil))
-               (when (> org-element--cache-interrupt-C-g-count
+               (when (>= org-element--cache-interrupt-C-g-count
                         org-element--cache-interrupt-C-g-max-count)
                  (setq quit-flag t)
+                 (setq org-element--cache-interrupt-C-g-count 0)
                  (org-element-cache-reset)
-                 (error "org-element: Parsing aborted by user.  Cache has been cleared.")))
+                 (error "org-element: Parsing aborted by user.  Cache has been cleared.
+If you observe Emacs hangs frequently, please report this to Org mode mailing list (M-x org-submit-bug-report)."))
+               (message (substitute-command-keys
+                         "`org-element--parse-buffer': Suppressed `\\[keyboard-quit]'.  Press `\\[keyboard-quit]' %d more times to force interruption.")
+                        (- org-element--cache-interrupt-C-g-max-count
+                           org-element--cache-interrupt-C-g-count)))
 	     (unless element
                ;; Do not try to parse within blank at EOB.
                (unless (save-excursion
