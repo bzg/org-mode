@@ -7102,7 +7102,15 @@ of FUNC.  Changes to elements made in FUNC will also alter the cache."
                  continue-flag
                  ;; Byte-compile FUNC making sure that it is as performant
                  ;; as it could be.
-                 (func (if (or (byte-code-function-p func))
+                 (func (if (or (byte-code-function-p func)
+                               ;; FIXME: Working around bug
+                               ;; https://list.orgmode.org/87tuha62rq.fsf@localhost/T/#t
+                               ;; Byte-compilation in
+                               ;; `org-agenda-get-scheduled' call
+                               ;; somehow alters the FUNC result in
+                               ;; Emacs 26 and 27, but not in Emacs
+                               ;; >=28.
+                               (version< emacs-version "28"))
                            func
                          (let ((warning-minimum-log-level :error)
                                (inhibit-message t))
