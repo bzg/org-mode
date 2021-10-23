@@ -2648,6 +2648,11 @@ SCHEDULED: <2014-03-04 tue.>"
 	    (org-mode-restart)
 	    (cdr (assoc "a" org-keyword-properties))))))
 
+(ert-deftest test-org/collect-keywords ()
+  "Test `org-collect-keywords'."
+  (should-not
+   (org-test-with-temp-text "#+begin_example\n#+foo: bar\n#+end_example"
+     (org-collect-keywords '("FOO")))))
 
 
 ;;; Links
