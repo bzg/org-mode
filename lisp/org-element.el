@@ -7110,7 +7110,7 @@ of FUNC.  Changes to elements made in FUNC will also alter the cache."
                                ;; somehow alters the FUNC result in
                                ;; Emacs 26 and 27, but not in Emacs
                                ;; >=28.
-                               (version< emacs-version "28"))
+                               (version< emacs-version "29"))
                            func
                          (let ((warning-minimum-log-level :error)
                                (inhibit-message t))
