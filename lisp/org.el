@@ -19218,6 +19218,10 @@ ELEMENT."
       (contentsp
        (cl-case type
 	 ((diary-sexp footnote-definition) 0)
+         (section
+          (org--get-expected-indentation
+           (org-element-property :parent element)
+           t))
 	 ((headline inlinetask nil)
 	  (if (not org-adapt-indentation) 0
 	    (let ((level (org-current-level)))

@@ -1168,6 +1168,13 @@
 		  (org-adapt-indentation nil))
 	      (org-indent-region (point) (point-max)))
 	    (buffer-string))))
+  ;; Indent property drawers according to `org-adapt-indentation'.
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* H\n  :PROPERTIES:\n  :key:\n  :END:"
+            (org-test-with-temp-text "* H\n:PROPERTIES:\n:key:\n:END:"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
   ;; Indent plain lists.
   (let ((org-adapt-indentation t))
     (should
