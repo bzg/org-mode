@@ -7048,8 +7048,7 @@ of FUNC.  Changes to elements made in FUNC will also alter the cache."
                       ;; Find expected begin position of an element after
                       ;; DATA.
                       (next-element-start
-                       (data) `(let (next-start
-                                     (data ,data))
+                       (data) `(let (next-start)
                                  (if (memq granularity '(headline headline+inlinetask))
                                      (setq next-start (or (when (memq (org-element-type data) '(headline org-data))
                                                             (org-element-property :contents-begin data))
