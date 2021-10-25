@@ -20747,7 +20747,7 @@ unless optional argument NO-INHERITANCE is non-nil.
 
 Optional argument ELEMENT contains element at point."
   (cond
-   ((org-before-first-heading-p) nil)
+   ((and (not element) (org-before-first-heading-p)) nil)
    ((if element
         (org-element-property :archivedp element)
       (let ((tags (org-get-tags element 'local)))
@@ -20757,7 +20757,7 @@ Optional argument ELEMENT contains element at point."
    (t
     (if (org-element--cache-active-p)
         (cl-some (lambda (el) (org-element-property :archivedp el))
-                 (org-element-lineage (org-element-at-point) nil t))
+                 (org-element-lineage (or element (org-element-at-point)) nil t))
       (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p)))))))
 
 (defun org-at-comment-p nil
