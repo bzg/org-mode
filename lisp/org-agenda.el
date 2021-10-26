@@ -5577,6 +5577,7 @@ and the timestamp type relevant for the sorting strategy in
 	      category (org-get-category)
               effort (save-match-data (or (get-text-property (point) 'effort)
                                           (org-entry-get (point) org-effort-property)))
+              effort-minutes (when effort (save-match-data (org-duration-to-minutes effort)))
 	      ts-date-pair (org-agenda-entry-get-agenda-timestamp (point))
 	      ts-date (car ts-date-pair)
 	      ts-date-type (cdr ts-date-pair)
@@ -5596,7 +5597,6 @@ and the timestamp type relevant for the sorting strategy in
                                   'effort-minutes effort-minutes)
                                 level category tags t)
 	      priority (1+ (org-get-priority txt)))
-        (setq effort-minutes (when effort (save-match-data (org-duration-to-minutes effort))))
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
 	  'priority priority
