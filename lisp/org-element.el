@@ -5816,7 +5816,7 @@ The buffer is: %s\n Current command: %S"
 	  (when org-element--cache-sync-timer
 	    (cancel-timer org-element--cache-sync-timer))
           (let ((time-limit (time-add nil org-element-cache-sync-duration)))
-	    (catch 'interrupt
+	    (catch 'org-element--cache-interrupt
               (when org-element--cache-sync-requests
                 (org-element--cache-log-message "Syncing down to %S-%S" (or future-change threshold) threshold))
 	      (while org-element--cache-sync-requests
@@ -5875,8 +5875,8 @@ When non-nil, FUTURE-CHANGE is a buffer position where changes
 not registered yet in the cache are going to happen.  See
 `org-element--cache-submit-request' for more information.
 
-Throw `interrupt' if the process stops before completing the
-request."
+Throw `org-element--cache-interrupt' if the process stops before
+completing the request."
   (org-element--cache-log-message "org-element-cache: Processing request %s up to %S-%S, next: %S"
                        (let ((print-length 10) (print-level 3)) (prin1-to-string request))
                        future-change
@@ -5897,7 +5897,7 @@ request."
           (while t
 	    (when (org-element--cache-interrupt-p time-limit)
               (org-element--cache-log-message "Interrupt: time limit")
-	      (throw 'interrupt nil))
+	      (throw 'org-element--cache-interrupt nil))
 	    (let ((request-key (org-element--request-key request))
 		  (end (org-element--request-end request))
 		  (node (org-element--cache-root))
@@ -6010,7 +6010,7 @@ request."
       (let ((limit (+ (org-element--request-beg request) (org-element--request-offset request))))
 	(cond ((and threshold (> limit threshold))
                (org-element--cache-log-message "Interrupt: position %d after threshold %d" limit threshold)
-               (throw 'interrupt nil))
+               (throw 'org-element--cache-interrupt nil))
 	      ((and future-change (>= limit future-change))
 	       ;; Changes happened around this element and they will
 	       ;; trigger another phase 1 request.  Skip re-parenting
@@ -6084,7 +6084,7 @@ request."
                 (org-element--cache-log-message "Interrupt: %s" (if exit-flag "threshold" "time limit"))
                 (setf (org-element--request-key request) key)
                 (setf (org-element--request-parent request) parent)
-                (throw 'interrupt nil))
+                (throw 'org-element--cache-interrupt nil))
 	      ;; Shift element.
 	      (unless (zerop offset)
                 (when (>= org-element--cache-diagnostics-level 3)
@@ -6205,8 +6205,9 @@ POS.
 When optional argument SYNCP is non-nil, return the parent of the
 element containing POS instead.  In that case, it is also
 possible to provide TIME-LIMIT, which is a time value specifying
-when the parsing should stop.  The function throws `interrupt' if
-the process stopped before finding the expected result."
+when the parsing should stop.  The function throws
+`org-element--cache-interrupt' if the process stopped before finding
+the expected result."
   (catch 'exit
     (save-match-data
       (org-with-wide-buffer
@@ -6278,7 +6279,7 @@ the process stopped before finding the expected result."
 	       (parent (org-element-property :parent element)))
            (while t
 	     (when (org-element--cache-interrupt-p time-limit)
-               (throw 'interrupt nil))
+               (throw 'org-element--cache-interrupt nil))
              (when (and inhibit-quit org-element--cache-interrupt-C-g quit-flag)
                (when quit-flag
 	         (cl-incf org-element--cache-interrupt-C-g-count)
