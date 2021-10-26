@@ -7102,6 +7102,12 @@ of FUNC.  Changes to elements made in FUNC will also alter the cache."
                  ;; Byte-compile FUNC making sure that it is as performant
                  ;; as it could be.
                  (func (if (or (byte-code-function-p func)
+                               (and (symbolp func)
+                                    (subrp (symbol-function func)))
+                               (and (symbolp func)
+                                    (native-comp-available-p)
+                                    (fboundp 'subr-native-elisp-p)
+                                    (subr-native-elisp-p (symbol-function func)))
                                ;; FIXME: Working around bug
                                ;; https://list.orgmode.org/87tuha62rq.fsf@localhost/T/#t
                                ;; Byte-compilation in
