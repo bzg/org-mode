@@ -11595,18 +11595,25 @@ headlines matching this string."
                             (effort-minutes (when effort (save-match-data (org-duration-to-minutes effort)))))
 	               (setq txt (org-agenda-format-item
 			          ""
-			          (concat
-			           (if (eq org-tags-match-list-sublevels 'indented)
-			               (make-string (1- level) ?.) "")
-                                   (org-add-props
-			               (org-get-heading)
-                                       nil
-                                     'effort effort
-                                     'effort-minutes effort-minutes))
+                                  ;; Add `effort' and `effort-minutes'
+                                  ;; properties for prefix format.
+                                  (org-add-props
+                                      (concat
+			               (if (eq org-tags-match-list-sublevels 'indented)
+			                   (make-string (1- level) ?.) "")
+			               (org-get-heading))
+                                      nil
+                                    'effort effort
+                                    'effort-minutes effort-minutes)
 			          (make-string level ?\s)
 			          category
 			          tags-list)
-		             priority (org-get-priority txt)))
+		             priority (org-get-priority txt))
+                       ;; Now add `effort' and `effort-minutes' to
+                       ;; full agenda line.
+                       (setq txt (org-add-props txt nil
+                                   'effort effort
+                                   'effort-minutes effort-minutes)))
 	             (goto-char (org-element-property :begin el))
 	             (setq marker (org-agenda-new-marker))
 	             (org-add-props txt props
