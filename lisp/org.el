@@ -21399,7 +21399,9 @@ See `org-backward-paragraph'."
 	    (forward-line -1))
 	   ;; At the beginning of the first element within a greater
 	   ;; element.  Move to the beginning of the greater element.
-	   ((and parent (= begin (org-element-property :contents-begin parent)))
+	   ((and parent
+                 (not (eq 'section (org-element-type parent)))
+                 (= begin (org-element-property :contents-begin parent)))
 	    (funcall reach (org-element-property :begin parent)))
 	   ;; Since we have to move anyway, find the beginning
 	   ;; position of the element above.
