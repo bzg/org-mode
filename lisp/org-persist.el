@@ -81,12 +81,14 @@ When BUFFER is nil, return plist for global VAR."
   (org-persist--read-index)
   (let* ((buffer-file (when buffer (buffer-file-name (or (buffer-base-buffer buffer)
                                                          buffer))))
-         (inode (when buffer-file (file-attribute-inode-number (file-attributes buffer-file)))))
+         (inode (when buffer-file (file-attribute-inode-number (file-attributes buffer-file))))
+         (buffer-hash (when buffer (secure-hash 'md5 buffer))))
     (let ((result (seq-find (lambda (plist)
                               (and (or (memq var (plist-get plist :variable))
                                        (eq var (plist-get plist :variable)))
-                                   (or (equal inode (plist-get plist :inode))
-                                       (equal buffer-file (plist-get plist :path)))))
+                                   (or (and inode (equal inode (plist-get plist :inode)))
+                                       (and buffer-file (equal buffer-file (plist-get plist :path)))
+                                       (and buffer-hash (equal buffer-hash (plist-get plist :hash))))))
                             org-persist--index)))
       (when result
         (unless (equal buffer-file (plist-get result :path))
@@ -96,7 +98,7 @@ When BUFFER is nil, return plist for global VAR."
                     :persist-file (replace-regexp-in-string "^.." "\\&/" (org-id-uuid))
                     :path buffer-file
                     :inode inode
-                    :hash (when buffer (secure-hash 'md5 buffer)))
+                    :hash buffer-hash)
               org-persist--index)
         (setf result (car org-persist--index)))
       result)))
@@ -225,7 +227,8 @@ When BUFFER is `all', unregister VAR in all buffers."
   (let* ((index (org-persist--get-index var buffer))
          (persist-file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
          (data nil))
-    (when (and (file-exists-p persist-file)
+    (when (and index
+               (file-exists-p persist-file)
                (or (not buffer)
                    (equal (secure-hash 'md5 buffer) (plist-get index :hash))))
       (unless (seq-find (lambda (v)
@@ -258,10 +261,7 @@ When BUFFER is `all', unregister VAR in all buffers."
   "Restore all the persistent data in BUFFER."
   (unless org-persist--index (org-persist--read-index))
   (dolist (index org-persist--index)
-    (when (equal (buffer-file-name (or (buffer-base-buffer buffer)
-                                       buffer))
-                 (plist-get index :path))
-      (org-persist-read (plist-get index :variable) buffer))))
+    (org-persist-read (plist-get index :variable) buffer)))
 
 (defun org-persist-read-all-buffer ()
   "Call `org-persist-read-all' in current buffer."
