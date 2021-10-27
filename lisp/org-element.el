@@ -5257,9 +5257,10 @@ seconds.")
 See `org-element-cache-sync-duration' for more information.")
 
 (defvar org-element--cache-self-verify t
-  "Activate extra consistency for the cache.
+  "Activate extra consistency checks for the cache.
 
-This will cause performance degradation.
+This may cause serious performance degradation depending on the value
+of `org-element--cache-self-verify-frequency'.
 
 When set to symbol `backtrace', record and display backtrace log if
 any inconsistency is detected.")
