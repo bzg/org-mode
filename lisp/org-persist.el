@@ -207,16 +207,16 @@ When BUFFER is `all', unregister VAR in all buffers."
 
 (defun org-persist-write-all (&optional buffer)
   "Save all the persistent data."
-  (dolist (index org-persist--index)
-    (when (or (not (plist-get index :path))
-              (and (get-file-buffer (plist-get index :path))
-                   (or (not buffer)
-                       (equal (buffer-file-name (or (buffer-base-buffer buffer)
-                                                    buffer))
-                              (plist-get index :path)))))
-      (org-persist-write (plist-get index :variable)
-              (when (plist-get index :path)
-                (get-file-buffer (plist-get index :path)))))))
+  (unless (and buffer (not (buffer-file-name buffer)))
+    (dolist (index org-persist--index)
+      (when (or (not (plist-get index :path))
+                (and (get-file-buffer (plist-get index :path))
+                     (or (not buffer)
+                         (equal (buffer-file-name buffer)
+                                (plist-get index :path)))))
+        (org-persist-write (plist-get index :variable)
+                (when (plist-get index :path)
+                  (get-file-buffer (plist-get index :path))))))))
 
 (defun org-persist-write-all-buffer ()
   "Call `org-persist-write-all' in current buffer."
