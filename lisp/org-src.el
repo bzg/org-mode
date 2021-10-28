@@ -642,7 +642,8 @@ as `org-src-fontify-natively' is non-nil."
 		  (put-text-property
 		   (+ start (1- pos)) (1- (+ start next)) prop new-prop
 		   org-buffer)))
-	      (setq pos next))))
+	      (setq pos next)))
+          (set-buffer-modified-p nil))
 	;; Add Org faces.
 	(let ((src-face (nth 1 (assoc-string lang org-src-block-faces t))))
           (when (or (facep src-face) (listp src-face))
