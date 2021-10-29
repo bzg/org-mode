@@ -5600,15 +5600,22 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
   (and org-element-use-cache
        org-element--cache
        (derived-mode-p 'org-mode)
-       ;; org-num-mode calls some Org structure analysis functions
-       ;; that can trigger cache update in the middle of changes.  See
-       ;; `org-num--verify' calling `org-num--skip-value' calling
-       ;; `org-entry-get' that uses cache.
-       ;; Forcefully disable cache when called from inside a
-       ;; modification hook, where `inhibit-modification-hooks' is set
-       ;; to t.
        (or called-from-cache-change-func-p
-           (not inhibit-modification-hooks)
+           (and
+            ;; org-num-mode calls some Org structure analysis functions
+            ;; that can trigger cache update in the middle of changes.  See
+            ;; `org-num--verify' calling `org-num--skip-value' calling
+            ;; `org-entry-get' that uses cache.
+            ;; Forcefully disable cache when called from inside a
+            ;; modification hook, where `inhibit-modification-hooks' is set
+            ;; to t.
+            (not inhibit-modification-hooks)
+            ;; `combine-change-calls' sets `after-change-functions' to
+            ;; nil.  We need not to use cache inside
+            ;; `combine-change-calls' because the buffer is potentially
+            ;; changed without notice (the change will be registered
+            ;; after exiting the `combine-change-calls' body though).
+            (memq #'org-element--cache-after-change after-change-functions))
            (eq org-element--cache-change-tic (buffer-chars-modified-tick)))))
 
 (defun org-element--cache-find (pos &optional side)
