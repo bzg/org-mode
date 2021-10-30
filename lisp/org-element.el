@@ -7131,6 +7131,7 @@ of FUNC.  Changes to elements made in FUNC will also alter the cache."
                                (and (symbolp func)
                                     (subrp (symbol-function func)))
                                (and (symbolp func)
+                                    (fboundp 'native-comp-available-p)
                                     (native-comp-available-p)
                                     (fboundp 'subr-native-elisp-p)
                                     (subr-native-elisp-p (symbol-function func)))
