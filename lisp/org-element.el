@@ -5814,9 +5814,10 @@ updated before current modification are actually submitted."
           (progn
             (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
-The buffer is: %s\n Current command: %S"
+The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
                           (buffer-name (current-buffer))
-                          this-command)
+                          this-command
+                          (backtrace-to-string (backtrace-get-frames 'backtrace)))
             (org-element-cache-reset))
         (let ((inhibit-quit t) request next)
           (setq org-element--cache-interrupt-C-g-count 0)
