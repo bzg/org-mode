@@ -249,8 +249,10 @@ When BUFFER is `all', unregister VAR in all buffers."
           (condition-case err
               (setq data (read (current-buffer)))
             (error
-             (warn "Emacs reader failed to read data for %S:%S. The error was: %S"
-                   (or buffer "global") var (error-message-string err))
+             ;; Do not report the known error to user.
+             (unless (string-match-p "Invalid read syntax" (error-message-string err))
+               (warn "Emacs reader failed to read data for %S:%S. The error was: %S"
+                     (or buffer "global") var (error-message-string err)))
              (setq data nil))))
         (with-current-buffer (or buffer (current-buffer))
           (cl-loop for var1 in (plist-get index :variable)
