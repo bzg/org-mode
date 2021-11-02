@@ -872,7 +872,9 @@ When non-nil, the return value if the footnote container."
 INFO is the export state, as a property list.
 
 White space before the citation, if any, are removed.  The parse tree is
-modified by side-effect."
+modified by side-effect.
+
+Return newly created footnote object."
   (let ((footnote
          (list 'footnote-reference
                (list :label nil

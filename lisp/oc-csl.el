@@ -506,8 +506,7 @@ INFO is the export state, as a property list."
     ;; a footnote, but isn't yet.
     (when (and (not footnote) (org-cite-csl--note-style-p info))
       (org-cite-adjust-note citation info)
-      (org-cite-wrap-citation citation info)
-      (setq footnote (org-element-lineage citation '(footnote-reference))))
+      (setq footnote (org-cite-wrap-citation citation info)))
     ;; Return structure.
     (apply #'citeproc-citation-create
            `(:note-index
