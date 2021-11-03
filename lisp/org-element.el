@@ -669,7 +669,21 @@ is cleared and contents are removed in the process."
 	(`plain-text (substring-no-properties datum))
 	(`nil (copy-sequence datum))
 	(_
-	 (list type (plist-put (copy-sequence (nth 1 datum)) :parent nil)))))))
+         (let ((element-copy (list type (plist-put (copy-sequence (nth 1 datum)) :parent nil))))
+           ;; We cannot simply return the copies property list.  When
+           ;; DATUM is i.e. a headline, it's property list (`:title'
+           ;; in case of headline) can contain parsed objects.  The
+           ;; objects will contain `:parent' property set to the DATUM
+           ;; iteself.  When copied, these inner `:parent' propery
+           ;; values will contain incorrect object decoupled from
+           ;; DATUM.  Changes to the DATUM copy will not longer be
+           ;; reflected in the `:parent' properties.  So, we need to
+           ;; reassign inner `:parent' propreties to the DATUM copy
+           ;; explicitly.
+           (org-element-map element-copy (cons 'plain-text org-element-all-objects)
+             (lambda (obj) (when (equal datum (org-element-property :parent obj))
+                        (org-element-put-property obj :parent element-copy))))
+           element-copy))))))
 
 
 
@@ -4729,8 +4743,20 @@ Elements are accumulated into ACC."
 	      (when (and (eolp) (not (eobp))) (forward-char)))
 	  ;; Find current element's type and parse it accordingly to
 	  ;; its category.
-	  (let* ((element (org-element--current-element
-			   end granularity mode structure))
+	  (let* ((element (org-element-copy
+                           ;; `org-element--current-element' may return cached
+                           ;; elements.  Below code reassigns
+                           ;; `:parent' property of the element and
+                           ;; may interfere with cache
+                           ;; synchronisation if parent element is not
+                           ;; yet in cache.  Moreover, the returned
+                           ;; structure may be altered by caller code
+                           ;; arbitrarily.  Hence, we return a copy of
+                           ;; the potentially cached element to make
+                           ;; potential modifications safe for element
+                           ;; cache.
+                           (org-element--current-element
+			    end granularity mode structure)))
 		 (type (org-element-type element))
 		 (cbeg (org-element-property :contents-begin element)))
 	    (goto-char (org-element-property :end element))
