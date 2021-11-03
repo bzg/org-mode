@@ -619,15 +619,7 @@ export communication channel, as a property list."
       ;; When using this style on citations with multiple references,
       ;; use global affixes and ignore local ones.
       (`(,(or "numeric" "nb") . ,_)
-       (let* ((references (org-cite-get-references citation))
-              (prefix
-               (or (org-element-property :prefix citation)
-                   (and (= 1 (length references))
-                        (org-element-property :prefix (car references)))))
-              (suffix
-               (or (org-element-property :suffix citation)
-                   (and (= 1 (length references))
-                        (org-element-property :suffix (car references))))))
+       (pcase-let ((`(,prefix . ,suffix) (org-cite-main-affixes citation)))
          (org-export-data
           (org-cite-concat
            "(" prefix (org-cite-basic--citation-numbers citation info) suffix ")")
