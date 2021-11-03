@@ -62,11 +62,7 @@ state, as a property list."
             (pcase style
               (`(,(or "nocite" "n") . ,_) "nocite")
               (_ "cite"))
-            (let ((suffix
-                   (org-element-property :suffix
-                                         (pcase references
-                                           (`(,ref) ref)
-                                           (_ citation)))))
+            (let ((suffix (cdr (org-cite-main-affixes citation))))
               (if suffix
                   (format "[%s]" (org-trim (org-export-data suffix info)))
                 ""))
