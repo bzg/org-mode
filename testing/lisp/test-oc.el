@@ -251,6 +251,45 @@
                (car boundaries)
                (cdr boundaries)))))))
 
+(ert-deftest test-org-cite/main-affixes ()
+  "Test`org-cite-main-affixes'."
+  (should
+   (equal '(nil . nil)
+          (org-test-with-temp-text "[cite:@key]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(nil . nil)
+          (org-test-with-temp-text "[cite:@key1;@key2]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(("pre ") . nil)
+          (org-test-with-temp-text "[cite:pre @key]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(("pre ") . (" post"))
+          (org-test-with-temp-text "[cite:pre @key post]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(("pre ") . nil)
+          (org-test-with-temp-text "[cite:global pre;pre @key]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(nil . (" post"))
+          (org-test-with-temp-text "[cite:@key post;global post]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(("global pre") . ("global post"))
+          (org-test-with-temp-text "[cite:global pre;@key1;@key2;global post]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(("global pre") . nil)
+          (org-test-with-temp-text "[cite:global pre;pre1 @key1;pre2 @key2]"
+            (org-cite-main-affixes (org-element-context)))))
+  (should
+   (equal '(nil . ("global post"))
+          (org-test-with-temp-text "[cite:@key1 post1;@key2 post2; global post]"
+            (org-cite-main-affixes (org-element-context))))))
+
 (ert-deftest test-org-cite/supported-styles ()
   "Test `org-cite-supported-styles'."
   ;; Default behavior is to use export processors.

@@ -638,6 +638,24 @@ in the current buffer.  Positions include leading \"@\" character."
       (re-search-forward org-element-citation-key-re end t)
       (cons (match-beginning 0) (match-end 0)))))
 
+(defun org-cite-main-affixes (citation)
+  "Return main affixes for CITATION object.
+
+Some export back-ends only support a single pair of affixes per
+citation, even if it contains multiple keys.  This function
+decides what affixes are the most appropriate.
+
+Return a pair (PREFIX . SUFFIX) where PREFIX and SUFFIX are
+parsed data."
+  (let ((source
+         ;; When there are multiple references, use global affixes.
+         ;; Otherwise, local affixes have priority.
+         (pcase (org-cite-get-references citation)
+           (`(,reference) reference)
+           (_ citation))))
+    (cons (org-element-property :prefix source)
+          (org-element-property :suffix source))))
+
 (defun org-cite-supported-styles (&optional processors)
   "List of supported citation styles and variants.
 
