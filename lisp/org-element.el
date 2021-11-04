@@ -6415,7 +6415,7 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                                   ;; the headline section.
 			          (and (org-element--open-end-p element)
                                        (or (= (org-element-property :end element) (point-max))
-                                           (and (> pos (org-element-property :contents-end element))
+                                           (and (>= pos (org-element-property :contents-end element))
                                                 (memq (org-element-type element) '(org-data section headline)))))))
 		     (goto-char (or next cbeg))
 		     (setq mode (if next mode (org-element--next-mode mode type t))
