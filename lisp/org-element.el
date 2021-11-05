@@ -6874,7 +6874,9 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
   (when (and org-element-use-cache
              buffer
              org-element-cache-persistent
-             (eq var 'org-element--cache))
+             (eq var 'org-element--cache)
+             (derived-mode-p 'org-mode)
+             org-element--cache)
     (with-current-buffer buffer
       ;; Cleanup cache request keys to avoid collisions during next
       ;; Emacs session.
