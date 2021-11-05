@@ -1668,7 +1668,9 @@ non-nil."
 			 (abbreviate-file-name
 			  (buffer-file-name (buffer-base-buffer)))
 			 "::" (match-string 1))
-		 link cpltxt))
+		 link cpltxt
+                 ;; Do not append #CUSTOM_ID link below.
+                 custom-id nil))
 	  ((and (featurep 'org-id)
 		(or (eq org-id-link-to-org-use-id t)
 		    (and interactive?
