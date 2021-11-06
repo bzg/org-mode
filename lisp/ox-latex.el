@@ -3314,6 +3314,7 @@ This function assumes TABLE has `org' as its `:type' property and
 `table' as its `:mode' attribute."
   (let* ((attr (org-export-read-attribute :attr_latex table))
 	 (alignment (org-latex--align-string table info))
+         (opt (org-export-read-attribute :attr_latex table :options))
 	 (table-env (or (plist-get attr :environment)
 			(plist-get info :latex-default-table-environment)))
 	 (width
@@ -3343,8 +3344,9 @@ This function assumes TABLE has `org' as its `:type' property and
 		(format "\\end{%s}" table-env)
 		(and fontsize "}"))))
      (t
-      (let ((output (format "\\begin{%s}%s{%s}\n%s\\end{%s}"
+      (let ((output (format "\\begin{%s}%s%s{%s}\n%s\\end{%s}"
 			    table-env
+                            (if opt (format "[%s]" opt) "")
 			    width
 			    alignment
 			    contents

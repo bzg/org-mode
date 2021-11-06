@@ -53,6 +53,13 @@ structures is supported.  Storing references between different
 variables is also supported (see =:inherit= key in
 ~org-persist-register~).
 
+*** New =:options= attribute when exporting tables to LaTeX
+
+The =:options= attribute allows adding an optional argument with a
+list of various table options (between brackets in LaTeX export),
+since certain tabular environments, such as longtblr of the
+tabularray LaTeX package, provides this structure.
+
 ** New functions and changes in function arguments
 
 *** New function ~org-element-cache-map~ for quick mapping across Org elements
@@ -1555,6 +1562,7 @@ the headline to use for making the table of contents.
 ,* Another section
 ,#+TOC: headlines 1 :target "#TargetSection"
 #+end_example
+
 ** New functions
 *** ~org-dynamic-block-insert-dblock~
 
@@ -1845,6 +1853,7 @@ CIDER version which has not =sesman= integrated, only has
 (dissoc Clojure 'JVM)
 (conj clojurists "stardiviner")
 #+end_src
+
 *** Add ~:results link~ support for Babel
 
 With this output format, create a link to the file specified in
@@ -1863,14 +1872,17 @@ wget -c "https://ben.akrin.com/crackzor/crackzor_1.0.c.gz"
 #+begin_src js :session "*Javascript REPL*"
 console.log("stardiviner")
 #+end_src
+
 *** Add ~:session~ support of ob-js for Indium
 #+begin_src js :session "*JS REPL*"
 console.log("stardiviner")
 #+end_src
+
 *** Add ~:session~ support of ob-js for skewer-mode
 #+begin_src js :session "*skewer-repl*"
 console.log("stardiviner")
 #+end_src
+
 *** Add support for links to LaTeX equations in HTML export
 Use MathJax links when enabled (by ~org-html-with-latex~), otherwise
 add a label to the rendered equation.
@@ -1957,6 +1969,7 @@ you should expect to see something like:
 #+BEGIN_EXAMPLE
   ,#+STARTUP: shrink
 #+END_EXAMPLE
+
 *** Allow to filter by tags/property when capturing colview
 
 You can now use =:match= to filter entries using a todo/tags/properties
@@ -2339,6 +2352,7 @@ To use =vertica= in an sql =SRC_BLK= set the =:engine= like this:
   SELECT * FROM nodes;
   ,#+END_SRC
 #+END_EXAMPLE
+
 **** C++: New header ~:namespaces~
 
 The new ~:namespaces~ export option can be used to specify namespaces

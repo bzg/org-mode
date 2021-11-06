@@ -13572,6 +13572,14 @@ include:
   The LaTeX export back-end uses these attributes for regular tables
   to set their alignments, fonts, and widths.
 
+- =:options= ::
+
+  The =:options= attribute allows adding an optional argument with
+  a list of various table options (between brackets in LaTeX export),
+  since certain tabular environments, such as longtblr of the
+  tabularray LaTeX package, provides this structure.  For example:
+  =:options remark{Note}={note},remark{Source}={source}=.
+
 - =:spread= ::
 
   When =:spread= is non-~nil~, the LaTeX export back-end spreads or
@@ -19770,6 +19778,7 @@ moves across a special context.
               (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
               (define-key yas/keymap [tab] 'yas/next-field)))
   #+end_src
+
 ** Using Org on a TTY
 :PROPERTIES:
 :DESCRIPTION: Using Org on a tty.
