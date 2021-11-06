@@ -1663,12 +1663,17 @@ non-nil."
 	 (cond
 	  ;; Store a link using the target at point
 	  ((org-in-regexp "[^<]<<\\([^<>]+\\)>>[^>]" 1)
-	   (setq cpltxt
+	   (setq link
 		 (concat "file:"
 			 (abbreviate-file-name
 			  (buffer-file-name (buffer-base-buffer)))
 			 "::" (match-string 1))
-		 link cpltxt
+                 ;; Target may be shortened when link is inserted.
+                 ;; Avoid [[target][file:~/org/test.org::target]]
+                 ;; links.  Maybe the case of identical target and
+                 ;; description should be handled by `org-insert-link'.
+                 cpltxt nil
+                 desc nil
                  ;; Do not append #CUSTOM_ID link below.
                  custom-id nil))
 	  ((and (featurep 'org-id)
