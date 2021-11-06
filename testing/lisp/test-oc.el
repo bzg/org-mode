@@ -252,7 +252,7 @@
                (cdr boundaries)))))))
 
 (ert-deftest test-org-cite/main-affixes ()
-  "Test`org-cite-main-affixes'."
+  "Test `org-cite-main-affixes'."
   (should
    (equal '(nil . nil)
           (org-test-with-temp-text "[cite:@key]"
@@ -286,7 +286,7 @@
           (org-test-with-temp-text "[cite:global pre;pre1 @key1;pre2 @key2]"
             (org-cite-main-affixes (org-element-context)))))
   (should
-   (equal '(nil . ("global post"))
+   (equal '(nil . (" global post"))
           (org-test-with-temp-text "[cite:@key1 post1;@key2 post2; global post]"
             (org-cite-main-affixes (org-element-context))))))
 
