@@ -18709,6 +18709,8 @@ assumed to be significant there."
 ;; `org-setup-filling' installs filling and auto-filling related
 ;; variables during `org-mode' initialization.
 
+(defvar org--single-lines-list-is-paragraph) ; defined later
+
 (defun org-setup-filling ()
   (require 'org-element)
   ;; Prevent auto-fill from inserting unwanted new items.
@@ -18722,6 +18724,10 @@ assumed to be significant there."
     (setq-local paragraph-start paragraph-ending)
     (setq-local paragraph-separate paragraph-ending))
   (setq-local fill-paragraph-function 'org-fill-paragraph)
+  (setq-local fill-forward-paragraph-function
+              (lambda (&optional arg)
+                (let ((org--single-lines-list-is-paragraph nil))
+                  (org-forward-paragraph arg))))
   (setq-local auto-fill-inhibit-regexp nil)
   (setq-local adaptive-fill-function 'org-adaptive-fill-function)
   (setq-local normal-auto-fill-function 'org-auto-fill-function)
@@ -18951,9 +18957,11 @@ filling the current element."
 	    (progn
 	      (goto-char (region-end))
 	      (skip-chars-backward " \t\n")
-	      (while (> (point) start)
-		(org-fill-element justify)
-		(org-backward-paragraph)))
+	      (let ((org--single-lines-list-is-paragraph nil))
+                (while (> (point) start)
+		  (org-fill-element justify)
+		  (org-backward-paragraph)
+                  (skip-chars-backward " \t\n"))))
 	  (goto-char origin)
 	  (set-marker origin nil))))
      (t
@@ -20301,6 +20309,9 @@ It also provides the following special moves for convenience:
     ;; Return moves left.
     arg))
 
+(defvar org--single-lines-list-is-paragraph t
+  "Treat plain lists with single line items as a whole paragraph")
+
 (defun org--paragraph-at-point ()
   "Return paragraph, or equivalent, element at point.
 
@@ -20362,7 +20373,7 @@ Function may return a real element, or a pseudo-element with type
 	      (while (memq (org-element-type (org-element-property :parent l))
 			   '(item plain-list))
 		(setq l (org-element-property :parent l)))
-	      (and l
+	      (and l org--single-lines-list-is-paragraph
 		   (org-with-point-at (org-element-property :post-affiliated l)
 		     (forward-line (length (org-element-property :structure l)))
 		     (= (point) (org-element-property :contents-end l)))

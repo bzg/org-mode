@@ -765,7 +765,48 @@
 	      (push-mark (point) t t)
 	      (goto-char (point-max))
 	      (call-interactively #'org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Fill every list item in a region
+  (should
+   (equal "\n- 2345678\n  9\n- 2345678\n  9"
+	  (org-test-with-temp-text "\n- 2345678 9\n- 2345678 9"
+	    (let ((fill-column 10))
+	      (transient-mark-mode 1)
+	      (push-mark (point-min) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'org-fill-paragraph)
+	      (buffer-string)))))
+  (should
+   (equal "\n- 2345678\n  9\n- 2345678"
+	  (org-test-with-temp-text "\n- 2345678 9\n- 2345678"
+	    (let ((fill-column 10))
+	      (transient-mark-mode 1)
+	      (push-mark (point-min) t t)
+	      (goto-char (point-max))
+	      (call-interactively #'org-fill-paragraph)
 	      (buffer-string))))))
+
+(ert-deftest test-org/fill-region ()
+  "Test `fill-region' behaviour."
+  ;; fill-region should fill every item of a list
+  (should
+   (equal "\n- 2345678\n  9\n- 2345678\n  9"
+	  (org-test-with-temp-text "\n- 2345678 9\n- 2345678 9"
+	                           (let ((fill-column 10))
+	                             (transient-mark-mode 1)
+	                             (push-mark (point-min) t t)
+	                             (goto-char (point-max))
+	                             (call-interactively #'fill-region)
+	                             (buffer-string)))))
+  (should
+   (equal "\n- 1 2\n- 1 2"
+	  (org-test-with-temp-text "\n- 1\n  2\n- 1\n  2"
+	                           (let ((fill-column 10))
+	                             (transient-mark-mode 1)
+	                             (push-mark (point-min) t t)
+	                             (goto-char (point-max))
+	                             (call-interactively #'fill-region)
+	                             (buffer-string)))))  )
 
 (ert-deftest test-org/auto-fill-function ()
   "Test auto-filling features."
