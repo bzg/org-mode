@@ -252,7 +252,7 @@
                (cdr boundaries)))))))
 
 (ert-deftest test-org-cite/main-affixes ()
-  "Test`org-cite-main-affixes'."
+  "Test `org-cite-main-affixes'."
   (should
    (equal '(nil . nil)
           (org-test-with-temp-text "[cite:@key]"
