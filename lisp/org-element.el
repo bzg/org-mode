@@ -7487,9 +7487,10 @@ element ending there."
                     (condition-case err
                         (org-element--parse-to pom)
                       (error
-                       (org-element--cache-warn "Cache corruption detected in %s. Resetting.\n The error was: %S\n Please report this to Org mode mailing list (M-x org-submit-bug-report)."
+                       (org-element--cache-warn "Cache corruption detected in %s. Resetting.\n The error was: %S\n Backtrace:\n%S\n Please report this to Org mode mailing list (M-x org-submit-bug-report)."
                                      (buffer-name (current-buffer))
-                                     err)
+                                     err
+                                     (backtrace-to-string (backtrace-get-frames 'backtrace)))
                        (org-element-cache-reset)
                        (org-element--parse-to pom)))))
     (when (and (org-element--cache-active-p)
