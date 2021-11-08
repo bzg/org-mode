@@ -60,6 +60,7 @@
 
 (require 'avl-tree)
 (require 'ring)
+(require 'backtrace)
 (require 'cl-lib)
 (require 'ol)
 (require 'org)
