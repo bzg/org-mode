@@ -60,7 +60,6 @@
 
 (require 'avl-tree)
 (require 'ring)
-(require 'backtrace)
 (require 'cl-lib)
 (require 'ol)
 (require 'org)
@@ -5844,7 +5843,9 @@ If this warning appears regularly, please report it to Org mode mailing list (M-
 The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
                           (buffer-name (current-buffer))
                           this-command
-                          (backtrace-to-string (backtrace-get-frames 'backtrace)))
+                          (when (and (fboundp 'backtrace-get-frames)
+                                     (fboundp 'backtrace-to-string))
+                            (backtrace-to-string (backtrace-get-frames 'backtrace))))
             (org-element-cache-reset))
         (let ((inhibit-quit t) request next)
           (setq org-element--cache-interrupt-C-g-count 0)
@@ -7491,7 +7492,9 @@ element ending there."
                        (org-element--cache-warn "Cache corruption detected in %s. Resetting.\n The error was: %S\n Backtrace:\n%S\n Please report this to Org mode mailing list (M-x org-submit-bug-report)."
                                      (buffer-name (current-buffer))
                                      err
-                                     (backtrace-to-string (backtrace-get-frames 'backtrace)))
+                                     (when (and (fboundp 'backtrace-get-frames)
+                                                (fboundp 'backtrace-to-string))
+                                       (backtrace-to-string (backtrace-get-frames 'backtrace))))
                        (org-element-cache-reset)
                        (org-element--parse-to pom)))))
     (when (and (org-element--cache-active-p)
