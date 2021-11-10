@@ -29,7 +29,7 @@
 
 (require 'org-compat)
 (require 'org-id)
-(require 'xdg)
+(require 'xdg nil t)
 
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-next-visible-heading "org" (arg))
@@ -37,9 +37,13 @@
 
 (defvar org-persist-directory (expand-file-name
                     (org-file-name-concat
-                     (let ((cache-dir (xdg-cache-home)))
+                     (let ((cache-dir (when (fboundp 'xdg-cache-home)
+                                        (xdg-cache-home))))
                        (if (or (seq-empty-p cache-dir)
-                               (not (file-exists-p cache-dir)))
+                               (not (file-exists-p cache-dir))
+                               (file-exists-p (org-file-name-concat
+                                               user-emacs-directory
+                                               "org-persist")))
                            user-emacs-directory
                          cache-dir))
                      "org-persist/"))
