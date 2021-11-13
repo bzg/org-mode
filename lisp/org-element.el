@@ -5835,8 +5835,21 @@ updated before current modification are actually submitted."
     (with-current-buffer (or (buffer-base-buffer buffer) buffer)
       ;; Check if the buffer have been changed outside visibility of
       ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
-      (if (/= org-element--cache-change-tic
-             (buffer-chars-modified-tick))
+      (if (and (/= org-element--cache-change-tic
+                  (buffer-chars-modified-tick))
+               ;; FIXME: Below is a heuristics noticed by observation.
+               ;; quail.el with non-latin input does silent
+               ;; modifications in buffer increasing the tick counter
+               ;; but not actually changing the buffer text:
+               ;; https://list.orgmode.org/87sfw2luhj.fsf@localhost/T/#you
+               ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2021-11/msg00894.html
+               ;; However, the values of `buffer-chars-modified-tick'
+               ;; and `buffer-modified-tick' appear to be same after
+               ;; the quail.el's changes in buffer.  We do not
+               ;; consider these exact changes as a dangerous silent
+               ;; edit.
+               (/= (buffer-chars-modified-tick)
+                  (buffer-modified-tick)))
           (progn
             (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
