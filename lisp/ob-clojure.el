@@ -36,6 +36,8 @@
 ;; For clojure-mode, see https://github.com/clojure-emacs/clojure-mode
 ;; For cider, see https://github.com/clojure-emacs/cider
 ;; For inf-clojure, see https://github.com/clojure-emacs/cider
+;; For babashka, see https://github.com/babashka/babashka
+;; For nbb, see https://github.com/babashka/nbb
 
 ;; For SLIME, the best way to install these components is by following
 ;; the directions as set out by Phil Hagelberg (Technomancy) on the
@@ -77,11 +79,23 @@
 	  (const :tag "inf-clojure" inf-clojure)
 	  (const :tag "cider" cider)
 	  (const :tag "slime" slime)
+	  (const :tag "babashka" babashka)
+	  (const :tag "nbb" nbb)
 	  (const :tag "Not configured yet" nil)))
 
 (defcustom org-babel-clojure-default-ns "user"
   "Default Clojure namespace for source block when finding ns failed."
   :type 'string
+  :group 'org-babel)
+
+(defcustom ob-clojure-babashka-command (executable-find "bb")
+  "Path to the babashka executable."
+  :type 'file
+  :group 'org-babel)
+
+(defcustom ob-clojure-nbb-command (executable-find "nbb")
+  "Path to the nbb executable."
+  :type 'file
   :group 'org-babel)
 
 (defun org-babel-expand-body:clojure (body params)
@@ -229,6 +243,15 @@
        ,(buffer-substring-no-properties (point-min) (point-max)))
      (cdr (assq :package params)))))
 
+(defun ob-clojure-eval-with-babashka (bb expanded)
+  "Evaluate EXPANDED code block using BB (babashka or nbb)."
+  (let ((script-file (org-babel-temp-file "clojure-bb-script-" ".clj")))
+    (with-temp-file script-file
+      (insert expanded))
+    (org-babel-eval
+     (format "%s %s" bb (org-babel-process-file-name script-file))
+     "")))
+
 (defun org-babel-execute:clojure (body params)
   "Execute a block of Clojure code with Babel."
   (unless org-babel-clojure-backend
@@ -240,6 +263,10 @@
 	  (cond
 	   ((eq org-babel-clojure-backend 'inf-clojure)
 	    (ob-clojure-eval-with-inf-clojure expanded params))
+           ((eq org-babel-clojure-backend 'babashka)
+	    (ob-clojure-eval-with-babashka ob-clojure-babashka-command expanded))
+           ((eq org-babel-clojure-backend 'nbb)
+	    (ob-clojure-eval-with-babashka ob-clojure-nbb-command expanded))
 	   ((eq org-babel-clojure-backend 'cider)
 	    (ob-clojure-eval-with-cider expanded params))
 	   ((eq org-babel-clojure-backend 'slime)
