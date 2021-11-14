@@ -5306,6 +5306,17 @@ to be correct.  Setting this to a value less than 0.0001 is useless.")
 (defvar org-element--cache-map-statistics-threshold 0.1
   "Time threshold in seconds to log statistics for `org-element-cache-map'.")
 
+(defvar org-element--cache-diagnostics-modifications t
+  "Non-nil enables cache warnings when for silent modifications.
+
+Silent modifications are the modifications in Org buffers that are not
+registered by `org-element--cache-before-change' and `org-element--cache-after-change'.
+
+This variable may cause false-positives because some Emacs versions
+can change `buffer-chars-modified-tick' internally even though no
+visible changes in buffer are being made.  Some of such expected cases
+are covered by heuristics, but not all.")
+
 (defvar org-element--cache-diagnostics-level 2
   "Detail level of the diagnostics.")
 
@@ -5849,16 +5860,25 @@ updated before current modification are actually submitted."
                ;; consider these exact changes as a dangerous silent
                ;; edit.
                (/= (buffer-chars-modified-tick)
-                  (buffer-modified-tick)))
+                  (buffer-modified-tick))
+               ;; FIXME: Another heuristics noticed by observation.
+               ;; `replace-match' in `org-toggle-heading' in Emacs <28
+               ;; makes safe silent changes when first letter in the
+               ;; line is a cyrillic capital letter.
+               ;; https://list.orgmode.org/87pmr6lu1y.fsf@localhost/T/#t
+               (not (= (buffer-chars-modified-tick)
+                     (- (buffer-modified-tick) 7))))
           (progn
-            (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
+            (when (or org-element--cache-diagnostics-modifications
+                      (and (boundp 'org-batch-test) org-batch-test))
+              (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
 The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
-                          (buffer-name (current-buffer))
-                          this-command
-                          (when (and (fboundp 'backtrace-get-frames)
-                                     (fboundp 'backtrace-to-string))
-                            (backtrace-to-string (backtrace-get-frames 'backtrace))))
+                            (buffer-name (current-buffer))
+                            this-command
+                            (when (and (fboundp 'backtrace-get-frames)
+                                       (fboundp 'backtrace-to-string))
+                              (backtrace-to-string (backtrace-get-frames 'backtrace)))))
             (org-element-cache-reset))
         (let ((inhibit-quit t) request next)
           (setq org-element--cache-interrupt-C-g-count 0)
