@@ -93,7 +93,6 @@
 (defvar org-drawer-regexp)
 (defvar org-edit-src-content-indentation)
 (defvar org-emph-re)
-(defvar org-emphasis-regexp-components)
 (defvar org-keyword-time-not-clock-regexp)
 (defvar org-match-substring-regexp)
 (defvar org-odd-levels-only)
@@ -193,9 +192,7 @@ specially in `org-element--object-lex'.")
 		      "\\(?:[_^][-{(*+.,[:alnum:]]\\)"
 		      ;; Bold, code, italic, strike-through, underline
 		      ;; and verbatim.
-		      (concat "[*~=+_/]"
-			      (format "[^%s]"
-				      (nth 2 org-emphasis-regexp-components)))
+                      (rx (or "*" "~" "=" "+" "_" "/") (not space))
 		      ;; Plain links.
 		      (concat "\\<" link-types ":")
 		      ;; Objects starting with "[": citations,
