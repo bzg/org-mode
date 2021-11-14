@@ -6394,7 +6394,10 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                      (unless (when (and (/= 1 (org-element-property :level element))
                                         (re-search-forward
                                          (rx-to-string
-                                          `(and bol (repeat 1 ,(1- (org-element-property :level element)) "*") " "))
+                                          `(and bol (repeat 1 ,(1- (let ((level (org-element-property :level element)))
+                                                                     (if org-odd-levels-only (1- (* level 2)) level)))
+                                                            "*")
+                                                " "))
                                          pos t))
                                (beginning-of-line)
                                t)
@@ -6406,7 +6409,10 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                        (goto-char pos)
                        (re-search-backward
                         (rx-to-string
-                         `(and bol (repeat ,(org-element-property :level element) "*") " "))
+                         `(and bol (repeat ,(let ((level (org-element-property :level element)))
+                                              (if org-odd-levels-only (1- (* level 2)) level))
+                                           "*")
+                               " "))
                         elem-end t))))
 	         (setq mode (org-element--next-mode mode type nil)))
 	        ;; A non-greater element contains point: return it.
@@ -6524,7 +6530,7 @@ The function returns the new value of `org-element--cache-change-warning'."
                                       until (= min-level 1))
                              (goto-char beg)
                              (beginning-of-line)
-                             (or min-level
+                             (or (and min-level (org-reduced-level min-level))
                                  (when (looking-at-p "^[ \t]*#\\+CATEGORY:")
                                    'org-data)
                                  t))))))
