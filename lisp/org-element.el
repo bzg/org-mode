@@ -5821,6 +5821,9 @@ updated before current modification are actually submitted."
                ;; edit.
                (/= (buffer-chars-modified-tick)
                   (buffer-modified-tick))
+               ;; FIXME: Similar for "S-\" in russian-computer input.
+               (not (= (buffer-chars-modified-tick)
+                     (- (buffer-modified-tick) 6)))
                ;; FIXME: Another heuristics noticed by observation.
                ;; `replace-match' in `org-toggle-heading' in Emacs <28
                ;; makes safe silent changes when first letter in the
