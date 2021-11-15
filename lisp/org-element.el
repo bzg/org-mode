@@ -92,7 +92,6 @@
 (defvar org-done-keywords)
 (defvar org-drawer-regexp)
 (defvar org-edit-src-content-indentation)
-(defvar org-emph-re)
 (defvar org-keyword-time-not-clock-regexp)
 (defvar org-match-substring-regexp)
 (defvar org-odd-levels-only)
@@ -107,7 +106,6 @@
 (defvar org-time-stamp-formats)
 (defvar org-todo-regexp)
 (defvar org-ts-regexp-both)
-(defvar org-verbatim-re)
 
 
 ;;; Definitions And Rules
@@ -2900,6 +2898,50 @@ CONTENTS is verse block contents."
 
 ;;;; Bold
 
+(defun org-element--parse-generic-emphasis (mark type)
+  "Parse emphasis object at point, if any.
+
+MARK is the delimiter string used.  TYPE is a symbol among
+‘bold’, ‘code’, ‘italic’, ‘strike-through’, ‘underline’, and
+‘verbatim’.
+
+Assume point is at first MARK."
+  (save-excursion
+    (let ((origin (point)))
+      (unless (bolp) (forward-char -1))
+      (let ((opening-re
+             (rx-to-string
+              `(seq (or line-start (any space ?- ?\( ?' ?\" ?\{))
+                    ,mark
+                    (not space)))))
+        (when (looking-at opening-re)
+          (goto-char (1+ origin))
+          (let ((closing-re
+                 (rx-to-string
+                  `(seq
+                    (not space)
+                    (group ,mark)
+                    (or (any space ?- ?. ?, ?\; ?: ?! ?? ?' ?\" ?\) ?\} ?\\ ?\[)
+                        line-end)))))
+            (when (re-search-forward closing-re nil t)
+              (let ((closing (match-end 1)))
+                (goto-char closing)
+                (let* ((post-blank (skip-chars-forward " \t"))
+                       (contents-begin (1+ origin))
+                       (contents-end (1- closing)))
+                  (list type
+                        (append
+                         (list :begin origin
+                               :end (point)
+                               :post-blank post-blank)
+                         (if (memq type '(code verbatim))
+                             (list :value
+                                   (and (memq type '(code verbatim))
+                                        (buffer-substring
+                                         contents-begin contents-end)))
+                           (list :contents-begin contents-begin
+                                 :contents-end contents-end)))))))))))))
+
 (defun org-element-bold-parser ()
   "Parse bold object at point, if any.
 
@@ -2909,21 +2951,7 @@ is a plist with `:begin', `:end', `:contents-begin' and
 nil.
 
 Assume point is at the first star marker."
-  (save-excursion
-    (unless (bolp) (backward-char 1))
-    (when (looking-at org-emph-re)
-      (let ((begin (match-beginning 2))
-	    (contents-begin (match-beginning 4))
-	    (contents-end (match-end 4))
-	    (post-blank (progn (goto-char (match-end 2))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(list 'bold
-	      (list :begin begin
-		    :end end
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-		    :post-blank post-blank))))))
+  (org-element--parse-generic-emphasis "*" 'bold))
 
 (defun org-element-bold-interpreter (_ contents)
   "Interpret bold object as Org syntax.
@@ -3064,19 +3092,7 @@ is a plist with `:value', `:begin', `:end' and `:post-blank'
 keywords.  Otherwise, return nil.
 
 Assume point is at the first tilde marker."
-  (save-excursion
-    (unless (bolp) (backward-char 1))
-    (when (looking-at org-verbatim-re)
-      (let ((begin (match-beginning 2))
-	    (value (match-string-no-properties 4))
-	    (post-blank (progn (goto-char (match-end 2))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(list 'code
-	      (list :value value
-		    :begin begin
-		    :end end
-		    :post-blank post-blank))))))
+  (org-element--parse-generic-emphasis "~" 'code))
 
 (defun org-element-code-interpreter (code _)
   "Interpret CODE object as Org syntax."
@@ -3310,21 +3326,7 @@ cdr is a plist with `:begin', `:end', `:contents-begin' and
 nil.
 
 Assume point is at the first slash marker."
-  (save-excursion
-    (unless (bolp) (backward-char 1))
-    (when (looking-at org-emph-re)
-      (let ((begin (match-beginning 2))
-	    (contents-begin (match-beginning 4))
-	    (contents-end (match-end 4))
-	    (post-blank (progn (goto-char (match-end 2))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(list 'italic
-	      (list :begin begin
-		    :end end
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-		    :post-blank post-blank))))))
+  (org-element--parse-generic-emphasis "/" 'italic))
 
 (defun org-element-italic-interpreter (_ contents)
   "Interpret italic object as Org syntax.
@@ -3690,21 +3692,7 @@ When at a strike-through object, return a list whose car is
 Otherwise, return nil.
 
 Assume point is at the first plus sign marker."
-  (save-excursion
-    (unless (bolp) (backward-char 1))
-    (when (looking-at org-emph-re)
-      (let ((begin (match-beginning 2))
-	    (contents-begin (match-beginning 4))
-	    (contents-end (match-end 4))
-	    (post-blank (progn (goto-char (match-end 2))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(list 'strike-through
-	      (list :begin begin
-		    :end end
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-		    :post-blank post-blank))))))
+  (org-element--parse-generic-emphasis "+" 'strike-through))
 
 (defun org-element-strike-through-interpreter (_ contents)
   "Interpret strike-through object as Org syntax.
@@ -4058,21 +4046,7 @@ When at an underline object, return a list whose car is
 Otherwise, return nil.
 
 Assume point is at the first underscore marker."
-  (save-excursion
-    (unless (bolp) (backward-char 1))
-    (when (looking-at org-emph-re)
-      (let ((begin (match-beginning 2))
-	    (contents-begin (match-beginning 4))
-	    (contents-end (match-end 4))
-	    (post-blank (progn (goto-char (match-end 2))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(list 'underline
-	      (list :begin begin
-		    :end end
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-		    :post-blank post-blank))))))
+  (org-element--parse-generic-emphasis "_" 'underline))
 
 (defun org-element-underline-interpreter (_ contents)
   "Interpret underline object as Org syntax.
@@ -4090,19 +4064,7 @@ and cdr is a plist with `:value', `:begin', `:end' and
 `:post-blank' keywords.  Otherwise, return nil.
 
 Assume point is at the first equal sign marker."
-  (save-excursion
-    (unless (bolp) (backward-char 1))
-    (when (looking-at org-verbatim-re)
-      (let ((begin (match-beginning 2))
-	    (value (match-string-no-properties 4))
-	    (post-blank (progn (goto-char (match-end 2))
-			       (skip-chars-forward " \t")))
-	    (end (point)))
-	(list 'verbatim
-	      (list :value value
-		    :begin begin
-		    :end end
-		    :post-blank post-blank))))))
+  (org-element--parse-generic-emphasis "=" 'verbatim))
 
 (defun org-element-verbatim-interpreter (verbatim _)
   "Interpret VERBATIM object as Org syntax."
