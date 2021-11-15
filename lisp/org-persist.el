@@ -218,7 +218,9 @@ When BUFFER is `all', unregister VAR in all buffers."
                      (not buffer))
                 (and (plist-get index :path)
                      (get-file-buffer (plist-get index :path))
-                     (equal (buffer-file-name buffer)
+                     (equal (buffer-file-name
+                             (or buffer
+                                 (get-file-buffer (plist-get index :path))))
                             (plist-get index :path))))
         (org-persist-write (plist-get index :variable)
                 (when (plist-get index :path)
