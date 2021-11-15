@@ -5269,7 +5269,8 @@ to be correct.  Setting this to a value less than 0.0001 is useless.")
   "Non-nil enables cache warnings when for silent modifications.
 
 Silent modifications are the modifications in Org buffers that are not
-registered by `org-element--cache-before-change' and `org-element--cache-after-change'.
+registered by `org-element--cache-before-change' and
+`org-element--cache-after-change'.
 
 This variable may cause false-positives because some Emacs versions
 can change `buffer-chars-modified-tick' internally even though no
