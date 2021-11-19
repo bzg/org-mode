@@ -5863,25 +5863,30 @@ updated before current modification are actually submitted."
                ;; consider these exact changes as a dangerous silent
                ;; edit.
                (/= (buffer-chars-modified-tick)
-                  (buffer-modified-tick))
-               ;; FIXME: Similar for "S-\" in russian-computer input.
-               (not (= (buffer-chars-modified-tick)
-                     (- (buffer-modified-tick) 6)))
-               ;; FIXME: Another heuristics noticed by observation.
-               ;; `replace-match' in `org-toggle-heading' in Emacs <28
-               ;; makes safe silent changes when first letter in the
-               ;; line is a cyrillic capital letter.
-               ;; https://list.orgmode.org/87pmr6lu1y.fsf@localhost/T/#t
-               (not (= (buffer-chars-modified-tick)
-                     (- (buffer-modified-tick) 7))))
+                  (buffer-modified-tick)))
           (progn
-            (when (or org-element--cache-diagnostics-modifications
+            (when (or (and org-element--cache-diagnostics-modifications
+                           ;; FIXME: Some more special cases when
+                           ;; non-latin input in Emacs <28 triggers
+                           ;; changes in `buffer-chars-modified-tick'
+                           ;; even though the buffer text remains
+                           ;; unchanged.  We still reset the cache as
+                           ;; safety precaution, but do not show the
+                           ;; warning.
+                           (not (memq (- (buffer-modified-tick)
+                                       (buffer-chars-modified-tick))
+                                    ;; Note: 4 is a footprint for
+                                    ;; (let ((inhibit-modification-hooks t))
+                                    ;; (insert "blah"))
+                                    '(1 3 6 7))))
                       (and (boundp 'org-batch-test) org-batch-test))
               (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
-The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
+The buffer is: %s\n Current command: %S\n Chars modified: %S\n Buffer modified: %S\n Backtrace:\n%S"
                             (buffer-name (current-buffer))
-                            this-command
+                            (list this-command (buffer-chars-modified-tick) (buffer-modified-tick))
+                            (buffer-chars-modified-tick)
+                            (buffer-modified-tick)
                             (when (and (fboundp 'backtrace-get-frames)
                                        (fboundp 'backtrace-to-string))
                               (backtrace-to-string (backtrace-get-frames 'backtrace)))))
