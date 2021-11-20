@@ -309,6 +309,20 @@ non-nil."
         (org-export-raw-string value)
       value)))
 
+(defun org-cite-basic--shorten-names (names)
+  "Return a list of family names from a list of full NAMES.
+
+To better accomomodate corporate names, this will only shorten
+personal names of the form 'family, given'."
+  (when (stringp names)
+    (mapconcat
+     (lambda (name)
+       (if (eq 1 (length name))
+           (cdr (split-string name))
+         (car (split-string name ", "))))
+     (split-string names " and ")
+     ", ")))
+
 (defun org-cite-basic--number-to-suffix (n)
   "Compute suffix associated to number N.
 This is used for disambiguation."
@@ -395,7 +409,8 @@ Optional argument INFO is the export state, as a property list."
       ("plain"
        (let ((year (org-cite-basic--get-year entry info 'no-suffix)))
          (org-cite-concat
-          author ". " title (and from (list ", " from)) ", " year ".")))
+          (org-cite-basic--shorten-names author) ". "
+          title (and from (list ", " from)) ", " year ".")))
       ("numeric"
        (let ((n (org-cite-basic--key-number (cdr (assq 'id entry)) info))
              (year (org-cite-basic--get-year entry info 'no-suffix)))
