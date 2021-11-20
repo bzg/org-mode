@@ -140,7 +140,7 @@ result.  The default value is `org-remove-indentation'."
   :version "24.1"
   :type 'function)
 
-(defcustom org-babel-tangle-default-mode #o544
+(defcustom org-babel-tangle-default-file-mode #o544
   "The default mode used for tangled files, as an integer.
 The default value 356 correspands to the octal #o544, which is
 read-write permissions for the user, read-only for everyone else."
@@ -315,7 +315,7 @@ The following forms are currently recognised:
 - \"a=rw,u+x\" (chmod style) *
 
 * The interpretation of these forms relies on `file-modes-symbolic-to-number',
-  and uses `org-babel-tangle-default-mode' as the base mode."
+  and uses `org-babel-tangle-default-file-mode' as the base mode."
   (cond
    ((integerp mode)
     (if (string-match-p "^[0-7][0-7][0-7]$" (format "%o" mode))
@@ -328,7 +328,7 @@ Did you give the decimal value %1$d by mistake?" mode)))
     (string-to-number (replace-regexp-in-string "^o" "" mode) 8))
    ((string-match-p "^[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\(,[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\)*$" mode)
     ;; Match regexp taken from `file-modes-symbolic-to-number'.
-    (file-modes-symbolic-to-number mode org-babel-tangle-default-mode))
+    (file-modes-symbolic-to-number mode org-babel-tangle-default-file-mode))
    ((string-match-p "^\\(?:[r-][w-][x-]\\)\\{3\\}$" mode)
     (file-modes-symbolic-to-number (concat  "u=" (substring mode 0 3)
                                             ",g=" (substring mode 3 6)
