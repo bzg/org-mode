@@ -145,7 +145,7 @@ result.  The default value is `org-remove-indentation'."
 The default value 356 correspands to the octal #o544, which is
 read-write permissions for the user, read-only for everyone else."
   :group 'org-babel
-  :version "9.6"
+  :package-version '(Org . "9.6")
   :type 'integer)
 
 (defun org-babel-find-file-noselect-refresh (file)
