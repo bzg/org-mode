@@ -317,7 +317,11 @@ The following forms are currently recognised:
 * The interpretation of these forms relies on `file-modes-symbolic-to-number',
   and uses `org-babel-tangle-default-mode' as the base mode."
   (cond
-   ((integerp mode) mode)
+   ((integerp mode)
+    (if (string-match-p "^[0-7][0-7][0-7]$" (format "%o" mode))
+        mode
+      (user-error "%1$o is not a valid file mode octal. \
+Did you give the decimal value %1$d by mistake?" mode)))
    ((not (stringp mode))
     (error "File mode %S not recognised as a valid format." mode))
    ((string-match-p "^o0?[0-7][0-7][0-7]$" mode)
