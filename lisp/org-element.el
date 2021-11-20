@@ -6964,6 +6964,11 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
 
 ;;;; Public Functions
 
+(defvar-local org-element--cache-gapless nil
+  "An alist containing (granularity . `org-element--cache-change-tic') elements.
+Each element indicates the latest `org-element--cache-change-tic' when
+change did not contain gaps.")
+
 ;;;###autoload
 (defun org-element-cache-reset (&optional all)
   "Reset cache in current buffer.
@@ -7007,10 +7012,7 @@ buffers."
     (org-element--cache-set-timer (current-buffer))))
 
 (defvar warning-minimum-log-level) ; Defined in warning.el
-(defvar-local org-element--cache-gapless nil
-  "An alist containing (granularity . `org-element--cache-change-tic') elements.
-Each element indicates the latest `org-element--cache-change-tic' when
-change did not contain gaps.")
+
 (defvar org-element-cache-map--recurse nil)
 ;;;###autoload
 (cl-defun org-element-cache-map (func &key (granularity 'headline+inlinetask) restrict-elements
