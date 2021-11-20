@@ -72,7 +72,6 @@
 (require 'org-table)
 
 (declare-function org-at-heading-p "org" (&optional _))
-(declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 (declare-function org-macro-extract-arguments "org-macro" (s))
@@ -1090,8 +1089,9 @@ parsed as a secondary string, but as a plain string instead.
 Assume point is at beginning of the headline."
   (save-excursion
     (let* ((begin (point))
-	   (level (prog1 (org-reduced-level (skip-chars-forward "*"))
-		    (skip-chars-forward " \t")))
+           (true-level (prog1 (skip-chars-forward "*")
+                         (skip-chars-forward " \t")))
+	   (level (org-reduced-level true-level))
 	   (todo (and org-todo-regexp
 		      (let (case-fold-search) (looking-at (concat org-todo-regexp " ")))
 		      (progn (goto-char (match-end 0))
@@ -1124,17 +1124,13 @@ Assume point is at beginning of the headline."
 				    (string= org-footnote-section raw-value)))
 	   (standard-props (org-element--get-node-properties))
 	   (time-props (org-element--get-time-properties))
-	   (end (save-excursion
-                  ;; Make sure that `org-end-of-subtree' does not try
-                  ;; to use cache.  The headline parser might be
-                  ;; called in the midst of cache processing.
-                  ;; FIXME: We cannot simply bind `org-element-use-cache' here
-                  ;; because apparently some magic related to lexical
-                  ;; scoping prevents `org-element--cache-active-p' call inside
-                  ;; `org-end-of-subtree' to use the overridden value
-                  ;; of `org-element-use-cache'.
-                  (org-element-with-disabled-cache
-                      (org-end-of-subtree t t))))
+	   (end
+            (save-excursion
+              (let ((re (rx-to-string
+                         `(seq line-start (** 1 ,true-level "*") " "))))
+                (if (re-search-forward re nil t)
+                    (line-beginning-position)
+                  (point-max)))))
 	   (contents-begin (save-excursion
 			     (forward-line)
 			     (skip-chars-forward " \r\t\n" end)
