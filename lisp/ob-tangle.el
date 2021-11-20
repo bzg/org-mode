@@ -310,7 +310,7 @@ matching a regular expression."
   "Determine the integer representation of a file MODE specification.
 The following forms are currently recognised:
 - an integer (returned without modification)
-- \"755\" (chmod style octal)
+- \"o755\" (chmod style octal)
 - \"rwxrw-r--\" (ls style specification)
 - \"a=rw,u+x\" (chmod style) *
 
@@ -320,8 +320,8 @@ The following forms are currently recognised:
    ((integerp mode) mode)
    ((not (stringp mode))
     (error "File mode %S not recognised as a valid format." mode))
-   ((string-match-p "^0?[0-7][0-7][0-7]$" mode)
-    (string-to-number mode 8))
+   ((string-match-p "^o0?[0-7][0-7][0-7]$" mode)
+    (string-to-number (replace-regexp-in-string "^o" "" mode) 8))
    ((string-match-p "^[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\(,[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\)*$" mode)
     (file-modes-symbolic-to-number mode org-babel-tangle-default-mode))
    ((string-match-p "^[rwx-]\\{9\\}$" mode)
