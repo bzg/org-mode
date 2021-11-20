@@ -103,6 +103,18 @@ The =dvipng= option in ~org-preview-latex-process-alist~ has a new
 property =transparent-image-converter= which is used instead of
 =image-converter= when producing transparent images.
 
+*** =:tangle-mode= now accepts more permissions formats
+
+Previously =:tangle-mode (identity #o755)= was the only reasonable way
+to set the file mode. ~org-babel-interpret-file-mode~ has been
+introduced which will accept three new formats:
++ Short octals, e.g. =:tangle-mode o755=
++ ls-style, e.g. =:tangle-mode rwxrw-rw-=
++ chmod-style, e.g. =:tangle-mode u+x=
+
+Chmod-style permissions are based on the new variable
+~org-babel-tangle-default-file-mode~.
+
 * Version 9.5
 
 ** Important announcements and breaking changes

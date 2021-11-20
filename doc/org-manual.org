@@ -18182,13 +18182,23 @@ the tangled file's executable permission.
 
 #+cindex: @samp{tangle-mode}, header argument
 The =tangle-mode= header argument specifies what permissions to set
-for tangled files by ~set-file-modes~.  For example, to make
-a read-only tangled file, use =:tangle-mode (identity #o444)=.  To
-make it executable, use =:tangle-mode (identity #o755)=.  It also
-overrides executable permission granted by =shebang=.  When multiple
-source code blocks tangle to a single file with different and
-conflicting =tangle-mode= header arguments, Org's behavior is
-undefined.
+for tangled files by ~set-file-modes~.  Permissions are given by an
+octal value, which can be provided calling the ~identity~ function on
+an elisp octal value. For instance, to create a read-only file one may
+use =:tangle-mode (identity #o444)=. To reduce the verbosity required,
+a octal shorthand is defined, =oXXX= (=o= for octal). Using this, our
+read-only example is =:tangle-mode o444=. Omitting the =o= prefix will
+cause the argument to be interpreted as an integer, which can lead to
+unexpected results (=444= is the same as =o674=).
+Two other shorthands are recognised, ls-style strings like
+=rw-r--r--=, and chmod-style permissions like =g+w=.
+Note that chmod-style permissions are based on
+~org-babel-tangle-default-file-mode~, which is =#o544= by default.
+
+When =:tangle-mode= and =:shebang= are both specified, the give
+=:tangle-mode= will override the permissions from =:shebang=. When
+multiple source code blocks tangle to a single file with conflicting
+=:tangle-mode= header arguments, Org's behaviour is undefined.
 
 #+cindex: @samp{no-expand}, header argument
 By default Org expands code blocks during tangling.  The =no-expand=
