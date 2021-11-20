@@ -1199,32 +1199,27 @@ Some other text
   "Test COMMENT keyword recognition."
   ;; Reference test.
   (org-test-with-temp-text "* Headline"
-    (let ((org-comment-string "COMMENT"))
-      (should-not (org-element-property :commentedp (org-element-at-point)))))
+    (should-not (org-element-property :commentedp (org-element-at-point))))
   ;; Standard position.
   (org-test-with-temp-text "* COMMENT Headline"
-    (let ((org-comment-string "COMMENT")
-	  (headline (org-element-at-point)))
+    (let ((headline (org-element-at-point)))
       (should (org-element-property :commentedp headline))
       (should (equal (org-element-property :raw-value headline) "Headline"))))
   ;; Case sensitivity.
-  (org-test-with-temp-text "* COMMENT Headline"
-    (let* ((org-comment-string "Comment")
-	   (headline (org-element-at-point)))
+  (org-test-with-temp-text "* Comment Headline"
+    (let ((headline (org-element-at-point)))
       (should-not (org-element-property :commentedp headline))
       (should (equal (org-element-property :raw-value headline)
-		     "COMMENT Headline"))))
+		     "Comment Headline"))))
   ;; With another keyword.
   (org-test-with-temp-text "* TODO COMMENT Headline"
-    (let* ((org-comment-string "COMMENT")
-	   (org-todo-keywords '((sequence "TODO" "DONE")))
+    (let* ((org-todo-keywords '((sequence "TODO" "DONE")))
 	   (headline (org-element-at-point)))
       (should (org-element-property :commentedp headline))
       (should (equal (org-element-property :raw-value headline) "Headline"))))
   ;; With the keyword only.
   (org-test-with-temp-text "* COMMENT"
-    (let* ((org-comment-string "COMMENT")
-	   (headline (org-element-at-point)))
+    (let* ((headline (org-element-at-point)))
       (should (org-element-property :commentedp headline))
       (should (equal (org-element-property :raw-value headline) "")))))
 
@@ -1233,23 +1228,19 @@ Some other text
   ;; Reference test.
   (should-not
    (org-test-with-temp-text "* Headline"
-     (let ((org-archive-tag "ARCHIVE"))
-       (org-element-property :archivedp (org-element-at-point)))))
+     (org-element-property :archivedp (org-element-at-point))))
   ;; Single tag.
   (org-test-with-temp-text "* Headline :ARCHIVE:"
-    (let ((org-archive-tag "ARCHIVE"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :archivedp headline)))))
+    (let ((headline (org-element-at-point)))
+      (should (org-element-property :archivedp headline))))
   ;; Multiple tags.
   (org-test-with-temp-text "* Headline :test:ARCHIVE:"
-    (let ((org-archive-tag "ARCHIVE"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :archivedp headline)))))
+    (let ((headline (org-element-at-point)))
+      (should (org-element-property :archivedp headline))))
   ;; Tag is case-sensitive.
   (should-not
-   (org-test-with-temp-text "* Headline :ARCHIVE:"
-     (let ((org-archive-tag "Archive"))
-       (org-element-property :archivedp (org-element-at-point))))))
+   (org-test-with-temp-text "* Headline :Archive:"
+     (org-element-property :archivedp (org-element-at-point)))))
 
 (ert-deftest test-org-element/headline-properties ()
   "Test properties from property drawer."

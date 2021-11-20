@@ -536,24 +536,21 @@ Paragraph"
    (equal ""
 	  (let (org-export-filter-body-functions
 		org-export-filter-final-output-functions)
-	    (org-test-with-temp-text "* Head1 :archive:"
-	      (let ((org-archive-tag "archive"))
-		(org-export-as (org-test-default-backend)
-			       nil nil nil '(:with-archived-trees nil)))))))
+	    (org-test-with-temp-text "* Head1 :ARCHIVE:"
+	      (org-export-as (org-test-default-backend)
+			     nil nil nil '(:with-archived-trees nil))))))
   (should
    (string-match
-    "\\* Head1[ \t]+:archive:"
+    "\\* Head1[ \t]+:ARCHIVE:"
     (org-test-with-temp-text "* Head1 :archive:\nbody\n** Sub-head 2"
-      (let ((org-archive-tag "archive"))
-	(org-export-as (org-test-default-backend) nil nil nil
-		       '(:with-archived-trees headline))))))
+      (org-export-as (org-test-default-backend) nil nil nil
+		     '(:with-archived-trees headline)))))
   (should
    (string-match
-    "\\`\\* Head1[ \t]+:archive:\n\\'"
-    (org-test-with-temp-text "* Head1 :archive:"
-      (let ((org-archive-tag "archive"))
-	(org-export-as (org-test-default-backend)
-		       nil nil nil '(:with-archived-trees t))))))
+    "\\`\\* Head1[ \t]+:ARCHIVE:\n\\'"
+    (org-test-with-temp-text "* Head1 :ARCHIVE:"
+      (org-export-as (org-test-default-backend)
+		     nil nil nil '(:with-archived-trees t)))))
   ;; Broken links.  Depending on `org-export-with-broken-links', raise
   ;; an error, ignore link or mark is as broken in output.
   (should-error
