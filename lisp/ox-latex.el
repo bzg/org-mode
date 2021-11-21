@@ -37,6 +37,8 @@
 (defvar org-latex-packages-alist)
 (defvar orgtbl-exp-regexp)
 
+(declare-function engrave-faces-latex-gen-preamble "ext:engrave-faces-latex")
+(declare-function engrave-faces-latex-buffer "ext:engrave-faces-latex")
 
 
 ;;; Define Back-End
@@ -125,6 +127,8 @@
     (:latex-default-quote-environment nil nil org-latex-default-quote-environment)
     (:latex-default-table-mode nil nil org-latex-default-table-mode)
     (:latex-diary-timestamp-format nil nil org-latex-diary-timestamp-format)
+    (:latex-engraved-options nil nil org-latex-engraved-options)
+    (:latex-engraved-preamble nil nil org-latex-engraved-preamble)
     (:latex-footnote-defined-format nil nil org-latex-footnote-defined-format)
     (:latex-footnote-separator nil nil org-latex-footnote-separator)
     (:latex-format-drawer-function nil nil org-latex-format-drawer-function)
@@ -937,22 +941,48 @@ The function should return the string to be exported."
   "Non-nil means export source code using the listings package.
 
 This package will fontify source code, possibly even with color.
-If you want to use this, you also need to make LaTeX use the
-listings package, and if you want to have color, the color
-package.  Just add these to `org-latex-packages-alist', for
-example using customize, or with something like:
+There are four implementations of this functionality you may
+choose from (ordered from least to most capable):
+1. Verbatim (nil)
+2. Listings (t)
+3. Minted (minted)
+4. Engraved (engraved)
+
+The first two options provide basic syntax
+highlighting (listings), or none at all (verbatim).
+
+When using listings, you also need to make use of the LaTeX
+\"listings\" package. The \"color\" package is also needed if you
+would like color too.  These can simply be added to
+`org-latex-packages-alist', using customise or something like:
 
   (require \\='ox-latex)
   (add-to-list \\='org-latex-packages-alist \\='(\"\" \"listings\"))
   (add-to-list \\='org-latex-packages-alist \\='(\"\" \"color\"))
 
-Alternatively,
+There are two further options for more comprehensive
+fontification. The first can be set with,
+
+  (setq org-latex-listings \\='engraved)
+
+which causes source code to be run through
+`engrave-faces-latex-buffer', which generates colorings using
+Emacs' font-lock information.  This requires the engrave-faces
+package (availible from ELPA), and the fvextra LaTeX package be
+installed.
+
+The styling of the engraved result can customised with
+`org-latex-engraved-preamble' and `org-latex-engraved-options'.
+The default preamble also uses the tcolorbox LaTeX package in
+addition to fvextra.
+
+The second more comprehensive option can be set with,
 
   (setq org-latex-listings \\='minted)
 
-causes source code to be exported using the minted package as
-opposed to listings.  If you want to use minted, you need to add
-the minted package to `org-latex-packages-alist', for example
+which causes source code to be exported using the minted package
+as opposed to listings.  If you want to use minted, you need to
+add the minted package to `org-latex-packages-alist', for example
 using customize, or with
 
   (require \\='ox-latex)
@@ -971,8 +1001,9 @@ URL `https://orgmode.org/worg/org-tutorials/org-latex-preview.html'."
   :type '(choice
 	  (const :tag "Use listings" t)
 	  (const :tag "Use minted" minted)
+	  (const :tag "Use engrave-faces-latex" engraved)
 	  (const :tag "Export verbatim" nil))
-  :safe (lambda (s) (memq s '(t nil minted))))
+  :safe (lambda (s) (memq s '(t nil minted engraved))))
 
 (defcustom org-latex-listings-langs
   '((emacs-lisp "Lisp") (lisp "Lisp") (clojure "Lisp")
@@ -1142,6 +1173,151 @@ will produce
   :version "26.1"
   :package-version '(Org . "9.0"))
 
+(defcustom org-latex-engraved-preamble
+  "\\usepackage{fvextra}
+
+[FVEXTRA-SETUP]
+
+% Make line numbers smaller and grey.
+\\renewcommand\\theFancyVerbLine{\\footnotesize\\color{black!40!white}\\arabic{FancyVerbLine}}
+
+\\usepackage{xcolor}
+
+% In case engrave-faces-latex-gen-preamble has not been run.
+\\providecolor{EfD}{HTML}{f7f7f7}
+\\providecolor{EFD}{HTML}{28292e}
+
+% Define a Code environment to prettily wrap the fontified code.
+\\usepackage[breakable,xparse]{tcolorbox}
+\\DeclareTColorBox[]{Code}{o}%
+{colback=EfD!98!EFD, colframe=EfD!95!EFD,
+  fontupper=\\footnotesize\\setlength{\\fboxsep}{0pt},
+  colupper=EFD,
+  IfNoValueTF={#1}%
+  {boxsep=2pt, arc=2.5pt, outer arc=2.5pt,
+    boxrule=0.5pt, left=2pt}%
+  {boxsep=2.5pt, arc=0pt, outer arc=0pt,
+    boxrule=0pt, leftrule=1.5pt, left=0.5pt},
+  right=2pt, top=1pt, bottom=0.5pt,
+  breakable}
+
+[LISTINGS-SETUP]"
+  "Preamble content injected when using engrave-faces-latex for source blocks.
+This is relevant when `org-latex-listings' is set to `engraved'.
+
+There is quite a lot of flexibility in what this preamble can be,
+as long as it:
+- Loads the fvextra package.
+- Loads the package xcolor (if it is not already loaded elsewhere).
+- Defines a \"Code\" environment (note the capital C), which all
+  \"Verbatim\" environments (provided by fvextra) will be wrapped with.
+
+In the default value the colors \"EFD\" and \"EfD\" are provided
+as they are respectively the foreground and background colours,
+just in case they aren't provided by the generated preamble, so
+we can asume they are always set.
+
+Within this preamble there are two recognised macro-like placeholders:
+
+  [FVEXTRA-SETUP]
+
+  [LISTINGS-SETUP]
+
+Unless you have a very good reason, both of these placeholders
+should be included in the preamble.
+
+FVEXTRA-SETUP sets fvextra's defaults according to
+`org-latex-engraved-options', and LISTINGS-SETUP creates the
+listings environment used for captioned or floating code blocks,
+as well as defining \\listoflistings."
+  :group 'org-export-latex
+  :type 'string
+  :package-version '(Org . "9.6"))
+
+(defcustom org-latex-engraved-options
+  '(("commandchars" . "\\\\\\{\\}")
+    ("highlightcolor" . "white!95!black!80!blue")
+    ("breaklines" . "true")
+    ("breaksymbol" . "\\color{white!60!black}\\tiny\\ensuremath{\\hookrightarrow}"))
+  "Association list of options for the latex fvextra package when engraving code.
+
+These options are set using \\fvset{...} in the preamble of the
+LaTeX export.  Each element of the alist should be a list or cons
+cell containing two strings: the name of the option, and the
+value.  For example,
+
+  (setq org-latex-engraved-options
+    \\='((\"highlightcolor\" \"green\") (\"frame\" \"lines\")))
+  ; or
+  (setq org-latex-engraved-options
+    \\='((\"highlightcolor\" . \"green\") (\"frame\" . \"lines\")))
+
+will result in the following LaTeX in the preamble
+
+\\fvset{%
+  bgcolor=bg,
+  frame=lines}
+
+This will affect all fvextra environments.  Note that the same
+options will be applied to all blocks.  If you need
+block-specific options, you may use the following syntax:
+
+  #+ATTR_LATEX: :options key1=value1,key2=value2
+  #+BEGIN_SRC <LANG>
+  ...
+  #+END_SRC"
+  :group 'org-export-latex
+  :type '(alist :key-type (string :tag "option")
+                :value-type (string :tag "value")))
+
+(defun org-latex-generate-engraved-preamble (info syntax-colours-p)
+  "Generate the preamble to setup engraved code.
+The result is constructed from the :latex-engraved-preamble and
+:latex-engraved-optionsn export options, the default values of
+which are given by `org-latex-engraved-preamble' and
+`org-latex-engraved-options' respectively."
+  (let* ((engraved-options
+          (plist-get info :latex-engraved-options))
+         (engraved-preamble (plist-get info :latex-engraved-preamble)))
+    (when (string-match "^[ \t]*\\[FVEXTRA-SETUP\\][ \t]*\n?" engraved-preamble)
+      (setq engraved-preamble
+            (replace-match
+             (concat
+              "\\fvset{%\n  "
+              (org-latex--make-option-string engraved-options ",\n  ")
+              "}\n")
+             t t
+             engraved-preamble)))
+    (when (string-match "^[ \t]*\\[LISTINGS-SETUP\\][ \t]*\n?" engraved-preamble)
+      (setq engraved-preamble
+            (replace-match
+             (format
+              "%% Support listings with captions
+\\usepackage{float}
+\\floatstyle{%s}
+\\newfloat{listing}{htbp}{lst}
+\\newcommand{\\listingsname}{Listing}
+\\floatname{listing}{\\listingsname}
+\\newcommand{\\listoflistingsname}{List of Listings}
+\\providecommand{\\listoflistings}{\\listof{listing}{\\listoflistingsname}}\n"
+              (if (memq 'src-block org-latex-caption-above)
+                  "plaintop" "plain"))
+             t t
+             engraved-preamble)))
+    (if syntax-colours-p
+        (concat
+         "\n% Setup for code blocks [1/2]\n\n"
+         engraved-preamble
+         "\n\n% Setup for code blocks [2/2]: syntax highlighting colors\n"
+         (if (require 'engrave-faces-latex nil t)
+             (engrave-faces-latex-gen-preamble)
+           (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
+           "% WARNING syntax highlighting unavailible as engrave-faces-latex was missing.\n")
+         "\n")
+      (concat
+       "\n% Setup for code blocks\n\n"
+       engraved-preamble
+       "\n"))))
 
 ;;;; Compilation
 
@@ -1756,6 +1932,12 @@ holding export options."
      (let ((template (plist-get info :latex-hyperref-template)))
        (and (stringp template)
             (format-spec template spec)))
+     ;; engrave-faces-latex preamble
+     (when (and (eq org-latex-listings 'engraved)
+                (org-element-map (plist-get info :parse-tree)
+                    '(src-block inline-src-block) #'identity
+                    info t))
+       (org-latex-generate-engraved-preamble info t))
      ;; Document start.
      "\\begin{document}\n\n"
      ;; Title command.
@@ -2142,6 +2324,7 @@ contextual information."
     (pcase (plist-get info :latex-listings)
       ('nil (org-latex--text-markup code 'code info))
       ('minted (org-latex-inline-src-block--minted info code lang))
+      ('engraved (org-latex-inline-src-block--engraved info code lang))
       (_ (org-latex-inline-src-block--listings info code lang)))))
 
 (defun org-latex-inline-src-block--minted (info code lang)
@@ -2156,6 +2339,11 @@ INFO, CODE, and LANG are provided by `org-latex-inline-src-block'."
             (if (string= options "") "" (format "[%s]" options))
             mint-lang
             code)))
+
+(defun org-latex-inline-src-block--engraved (_info code lang)
+  "Transcode an inline src block's content from Org to LaTeX, using engrave-faces.
+INFO, CODE, and LANG are provided by `org-latex-inline-src-block'."
+  (format "\\Verb{%s}" (org-latex-src--engrave-code code lang)))
 
 (defun org-latex-inline-src-block--listings (info code lang)
   "Transcode an inline src block's content from Org to LaTeX, using lstlistings.
@@ -2323,6 +2511,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (cl-case (plist-get info :latex-listings)
 	    ((nil) "\\listoffigures")
 	    (minted "\\listoflistings")
+	    (engraved "\\listoflistings")
 	    (otherwise "\\lstlistoflistings")))))))))
 
 
@@ -3017,6 +3206,9 @@ contextual information."
                                      num-start retain-labels attributes float custom-env))
        ((eq listings 'minted)
         (org-latex-src-block--minted src-block info lang caption caption-above-p label
+                                     num-start retain-labels attributes float))
+       ((eq listings 'engraved)
+        (org-latex-src-block--engraved src-block info lang caption caption-above-p label
                                        num-start retain-labels attributes float))
        (t
         (org-latex-src-block--listings src-block info lang caption caption-above-p label
@@ -3131,6 +3323,88 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                            (format "(%s)" ref)))))
               nil (and retain-labels (cdr code-info)))))))
     ;; Return value.
+    (format float-env body)))
+
+(defun org-latex-src--engrave-code (content lang)
+  "Engrave CONTENT to LaTeX in a LANG-mode buffer, and give the result."
+  (if (require 'engrave-faces-latex nil t)
+      (let* ((lang-mode (and lang (org-src-get-lang-mode lang)))
+             (engraved-buffer
+              (with-temp-buffer
+                (insert content)
+                (when lang-mode
+                  (if (functionp lang-mode)
+                      (funcall lang-mode)
+                    (message "Cannot engrave code as %s. %s is undefined."
+                             lang lang-mode)))
+                (engrave-faces-latex-buffer)))
+             (engraved-code
+              (with-current-buffer engraved-buffer
+                (buffer-string))))
+        (kill-buffer engraved-buffer)
+        engraved-code)
+    (user-error "Cannot engrave code as `engrave-faces-latex' is unavailible.")))
+
+(defun org-latex-src-block--engraved
+    (src-block info lang caption caption-above-p _label
+               num-start retain-labels attributes float)
+  "Transcode a SRC-BLOCK element from Org to LaTeX, using engrave-faces-latex.
+LANG, CAPTION, CAPTION-ABOVE-P, LABEL, NUM-START, RETAIN-LABELS, ATTRIBUTES
+and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
+  (let* ((caption-str (org-latex--caption/label-string src-block info))
+         (placement (or (org-unbracket-string "[" "]" (plist-get attributes :placement))
+                        (plist-get info :latex-default-figure-position)))
+         (float-env
+          (cond
+           ((string= "multicolumn" float)
+            (format "\\begin{listing*}[%s]\n%s%%s\n%s\\end{listing*}"
+                    placement
+                    (if caption-above-p caption-str "")
+                    (if caption-above-p "" caption-str)))
+           (caption
+            (format "\\begin{listing}[%s]\n%s%%s\n%s\\end{listing}"
+                    placement
+                    (if caption-above-p caption-str "")
+                    (if caption-above-p "" caption-str)))
+           ((string= "t" float)
+            (concat (format "\\begin{listing}[%s]\n"
+                            placement)
+                    "%s\n\\end{listing}"))
+           (t "%s")))
+         (options (plist-get info :latex-engraved-options))
+         (content
+          (let* ((code-info (org-export-unravel-code src-block))
+                 (max-width
+                  (apply 'max
+                         (mapcar 'string-width
+                                 (org-split-string (car code-info)
+                                                   "\n")))))
+            (org-export-format-code
+             (car code-info)
+             (lambda (loc _num ref)
+               (concat
+                loc
+                (when ref
+                  ;; Ensure references are flushed to the right,
+                  ;; separated with 6 spaces from the widest line
+                  ;; of code.
+                  (concat (make-string (+ (- max-width (length loc)) 6)
+                                       ?\s)
+                          (format "(%s)" ref)))))
+             nil (and retain-labels (cdr code-info)))))
+         (body
+          (format
+           "\\begin{Code}\n\\begin{Verbatim}[%s]\n%s\\end{Verbatim}\n\\end{Code}"
+           ;; Options.
+           (concat
+            (org-latex--make-option-string
+             (append
+              (when (and num-start (not (assoc "linenos" options)))
+                `(("linenos")
+                  ("firstnumber" ,(number-to-string (1+ num-start)))))
+              (let ((local-options (plist-get attributes :options)))
+                (and local-options (list local-options))))))
+           (org-latex-src--engrave-code content lang))))
     (format float-env body)))
 
 (defun org-latex-src-block--listings
