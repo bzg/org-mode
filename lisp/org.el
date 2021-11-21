@@ -16880,7 +16880,7 @@ buffer boundaries with possible narrowing."
                     (/ (or (and (bound-and-true-p visual-fill-column-mode)
                                 (or visual-fill-column-width auto-fill-function))
                            (when auto-fill-function fill-column)
-                           (- (window-text-width) (or display-line-numbers-width 0)))
+                           (- (window-text-width) (line-number-display-width)))
                        (float (window-total-width)))))
         width)))
    ((numberp org-image-actual-width)
