@@ -6534,7 +6534,8 @@ The function returns the new value of `org-element--cache-change-warning'."
                            (let (min-level)
                              (cl-loop while (re-search-forward
                                              (rx-to-string
-                                              (if min-level
+                                              (if (and min-level
+                                                       (> min-level 1))
                                                   `(and bol (repeat 1 ,(1- min-level) "*") " ")
                                                 `(and bol (+ "*") " ")))
                                              bottom t)
