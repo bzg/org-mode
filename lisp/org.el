@@ -16860,15 +16860,18 @@ buffer boundaries with possible narrowing."
             (when (and par (org-with-point-at
                                (org-element-property :begin par)
                              (re-search-forward attr-re par-end t)))
-              (match-string 1)))
-           (attr-width-val
+              (match-string 1))))
             (cond
-             ((null attr-width) nil)
+             ;; Treat :width t as if `org-image-actual-width' were t.
+             ((string= attr-width "t") nil)
+             ;; Fallback to `org-image-actual-width' if no interprable width is given.
+             ((or (null attr-width)
+                  (string-match-p "\\`[^0-9]"))
+              (car org-image-actual-width))
+             ;; Convert numeric widths to numbers, converting percentages.
              ((string-match-p "\\`[0-9.]+%" attr-width)
               (/ (string-to-number attr-width) 100.0))
              (t (string-to-number attr-width))))
-           ;; Fallback to `org-image-actual-width' if no explicit width is given.
-           (width (or attr-width-val (car org-image-actual-width))))
       (if (and (floatp width) (<= 0.0 width 2.0))
           ;; A float in [0,2] should be interpereted as this portion of
           ;; the text width in the window.  This works well with cases like
