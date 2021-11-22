@@ -6788,6 +6788,19 @@ Paragraph<point>"
   (should
    (equal '("foo" "bar")
 	  (org-test-with-temp-text "* Test :foo:bar:" (org-get-tags))))
+  ;; Tags for inlinetasks.
+  (should
+   (equal '("foo" "bar")
+          (progn
+            (require 'org-inlinetask)
+            (org-test-with-temp-text (concat (make-string org-inlinetask-min-level ?*) " Test :foo:bar:")
+              (org-get-tags (org-element-at-point))))))
+  (should
+   (equal '("foo" "bar")
+          (progn
+            (require 'org-inlinetask)
+            (org-test-with-temp-text (concat (make-string org-inlinetask-min-level ?*) " Test :foo:bar:")
+              (org-get-tags nil)))))
   ;; Return nil when there is no tag.
   (should-not
    (org-test-with-temp-text "* Test" (org-get-tags)))

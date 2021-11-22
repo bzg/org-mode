@@ -12629,34 +12629,34 @@ Inherited tags have the `inherited' text property."
              (not local))
         org-scanner-tags
       (org-with-point-at (unless (org-element-type pos-or-element)
-                           (or pos-or-element (point)))
-        (unless (and (not (org-element-type pos-or-element))
-                     (org-before-first-heading-p))
-          (unless (org-element-type pos-or-element) (org-back-to-heading t))
-          (let ((ltags (if (org-element-type pos-or-element)
-                           (org-element-property :tags (org-element-lineage pos-or-element '(headline) t))
-                         (org--get-local-tags)))
-                itags)
-            (if (or local (not org-use-tag-inheritance)) ltags
-              (let ((cached (and (org-element--cache-active-p)
-                                 (if (org-element-type pos-or-element)
-                                     (org-element-lineage pos-or-element '(headline) t)
-                                   (org-element-at-point nil 'cached)))))
-                (if cached
-                    (while (setq cached (org-element-property :parent cached))
-                      (setq itags (nconc (mapcar #'org-add-prop-inherited
-                                                 ;; If we do not wrap result into `cl-copy-list', reference would
-                                                 ;; be returned and cache element might be modified directly.
-                                                 (cl-copy-list (org-element-property :tags cached)))
-                                         itags)))
-                  (while (org-up-heading-safe)
+                        (or pos-or-element (point)))
+        (unless (or (org-element-type pos-or-element)
+                    (org-before-first-heading-p))
+          (org-back-to-heading t))
+        (let ((ltags (if (org-element-type pos-or-element)
+                         (org-element-property :tags (org-element-lineage pos-or-element '(headline inlinetask) t))
+                       (org--get-local-tags)))
+              itags)
+          (if (or local (not org-use-tag-inheritance)) ltags
+            (let ((cached (and (org-element--cache-active-p)
+                               (if (org-element-type pos-or-element)
+                                   (org-element-lineage pos-or-element '(headline org-data inlinetask) t)
+                                 (org-element-at-point nil 'cached)))))
+              (if cached
+                  (while (setq cached (org-element-property :parent cached))
                     (setq itags (nconc (mapcar #'org-add-prop-inherited
-					       (org--get-local-tags))
-				       itags)))))
-              (setq itags (append org-file-tags itags))
-              (nreverse
-	       (delete-dups
-	        (nreverse (nconc (org-remove-uninherited-tags itags) ltags)))))))))))
+                                               ;; If we do not wrap result into `cl-copy-list', reference would
+                                               ;; be returned and cache element might be modified directly.
+                                               (cl-copy-list (org-element-property :tags cached)))
+                                       itags)))
+                (while (org-up-heading-safe)
+                  (setq itags (nconc (mapcar #'org-add-prop-inherited
+					     (org--get-local-tags))
+				     itags)))))
+            (setq itags (append org-file-tags itags))
+            (nreverse
+	     (delete-dups
+	      (nreverse (nconc (org-remove-uninherited-tags itags) ltags))))))))))
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
@@ -20735,7 +20735,7 @@ Optional argument ELEMENT contains element at point."
     (let ((el (or element (org-element-at-point nil 'cached))))
       (if el
           (catch :found
-            (setq el (org-element-lineage el '(headline) 'include-self))
+            (setq el (org-element-lineage el '(headline inlinetask) 'include-self))
             (if no-inheritance
                 (org-element-property :commentedp el)
               (while el
