@@ -16867,7 +16867,7 @@ buffer boundaries with possible narrowing."
              ((string= attr-width "t") nil)
              ;; Fallback to `org-image-actual-width' if no interprable width is given.
              ((or (null attr-width)
-                  (string-match-p "\\`[^0-9]"))
+                  (string-match-p "\\`[^0-9]" attr-width))
               (car org-image-actual-width))
              ;; Convert numeric widths to numbers, converting percentages.
              ((string-match-p "\\`[0-9.]+%" attr-width)
