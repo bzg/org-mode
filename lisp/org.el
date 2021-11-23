@@ -12660,12 +12660,21 @@ Inherited tags have the `inherited' text property."
 
 (defun org-get-buffer-tags ()
   "Get a table of all tags used in the buffer, for completion."
-  (org-with-point-at 1
-    (let (tags)
-      (while (re-search-forward org-tag-line-re nil t)
-	(setq tags (nconc (split-string (match-string-no-properties 2) ":")
-			  tags)))
-      (mapcar #'list (delete-dups (append org-file-tags tags))))))
+  (if (org-element--cache-active-p)
+      ;; `org-element-cache-map' is about 2x faster compared to regexp
+      ;; search.
+      (let ((tags (org-element-cache-map
+                   (lambda (el) (org-element-property :tags el)))))
+        (mapcar #'list (mapcar #'substring-no-properties
+                               (delete-dups
+                                (append org-file-tags
+                                        (apply #'append tags))))))
+    (org-with-point-at 1
+      (let (tags)
+        (while (re-search-forward org-tag-line-re nil t)
+	  (setq tags (nconc (split-string (match-string-no-properties 2) ":")
+			    tags)))
+        (mapcar #'list (delete-dups (append org-file-tags tags)))))))
 
 ;;;; The mapping API
 
