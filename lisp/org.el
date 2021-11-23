@@ -16860,7 +16860,8 @@ buffer boundaries with possible narrowing."
             (when (and par (org-with-point-at
                                (org-element-property :begin par)
                              (re-search-forward attr-re par-end t)))
-              (match-string 1))))
+              (match-string 1)))
+           (width
             (cond
              ;; Treat :width t as if `org-image-actual-width' were t.
              ((string= attr-width "t") nil)
@@ -16871,7 +16872,7 @@ buffer boundaries with possible narrowing."
              ;; Convert numeric widths to numbers, converting percentages.
              ((string-match-p "\\`[0-9.]+%" attr-width)
               (/ (string-to-number attr-width) 100.0))
-             (t (string-to-number attr-width))))
+             (t (string-to-number attr-width)))))
       (if (and (floatp width) (<= 0.0 width 2.0))
           ;; A float in [0,2] should be interpereted as this portion of
           ;; the text width in the window.  This works well with cases like
