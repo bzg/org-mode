@@ -3904,7 +3904,9 @@ Assume point is at the beginning of the timestamp."
 	     (activep (eq (char-after) ?<))
 	     (raw-value
 	      (progn
-		(looking-at "\\([<[]\\(%%\\)?.*?\\)[]>]\\(?:--\\([<[].*?[]>]\\)\\)?")
+		(looking-at (concat "\\([<[]\\(%%\\)?.*?\\)[]>]\\(?:--\\("
+                                    org-ts-regexp-both
+                                    "\\)\\)?"))
 		(match-string-no-properties 0)))
 	     (date-start (match-string-no-properties 1))
 	     (date-end (match-string 3))
