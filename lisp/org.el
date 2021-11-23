@@ -16493,6 +16493,10 @@ Calls `org-promote-subtree', `org-outdent-item-tree', or
 individual commands for more information."
   (interactive)
   (cond
+   ((and (eq system-type 'darwin)
+         (or (eq org-support-shift-select 'always)
+             (and org-support-shift-select (org-region-active-p))))
+    (org-call-for-shift-select 'backward-char))
    ((run-hook-with-args-until-success 'org-shiftmetaleft-hook))
    ((org-at-table-p) (call-interactively 'org-table-delete-column))
    ((org-at-heading-p) (call-interactively 'org-promote-subtree))
@@ -16509,6 +16513,10 @@ Calls `org-demote-subtree', `org-indent-item-tree', or
 individual commands for more information."
   (interactive)
   (cond
+   ((and (eq system-type 'darwin)
+         (or (eq org-support-shift-select 'always)
+             (and org-support-shift-select (org-region-active-p))))
+    (org-call-for-shift-select 'forward-char))
    ((run-hook-with-args-until-success 'org-shiftmetaright-hook))
    ((org-at-table-p) (call-interactively 'org-table-insert-column))
    ((org-at-heading-p) (call-interactively 'org-demote-subtree))
