@@ -1141,17 +1141,14 @@ and must return either a string, an object, or a secondary string."
 
 
 ;;; Internal interface with fontification (activate capability)
-(defun org-cite-fontify-default (datum)
-  "Fontify DATUM with `org-cite' and `org-cite-key' face.
-DATUM is a citation object, or a citation reference.  In any case, apply
-`org-cite' face on the whole citation, and `org-cite-key' face on each key."
-  (let* ((cite (if (eq 'citation-reference (org-element-type datum))
-                   (org-element-property :parent datum)
-                 datum))
-         (beg (org-element-property :begin cite))
-         (end (org-with-point-at (org-element-property :end cite)
-                (skip-chars-backward " \t")
-                (point))))
+(defun org-cite-fontify-default (cite)
+  "Fontify CITE with `org-cite' and `org-cite-key' faces.
+CITE is a citation object.  The function applies `org-cite' face
+on the whole citation, and `org-cite-key' face on each key."
+  (let ((beg (org-element-property :begin cite))
+        (end (org-with-point-at (org-element-property :end cite)
+               (skip-chars-backward " \t")
+               (point))))
     (add-text-properties beg end '(font-lock-multiline t))
     (add-face-text-property beg end 'org-cite)
     (dolist (reference (org-cite-get-references cite))
