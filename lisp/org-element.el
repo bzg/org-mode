@@ -7025,13 +7025,18 @@ buffers."
   "Map all elements in current buffer with FUNC according to
 GRANULARITY.  Collect non-nil return values into result list.
 
+FUNC should accept a single argument - the element.
+
+FUNC can safely modify the buffer, but doing so may reduce
+performance.
+
 If some elements are not yet in cache, they will be added.
 
 GRANULARITY can be `headline', `headline+inlinetask'
 `greater-element', or `element'.  The default is
 `headline+inlinetask'.  `object' granularity is not supported.
 
-ELEMENTS is a list of elements to be mapped over.
+RESTRICT-ELEMENTS is a list of element types to be mapped over.
 
 NEXT-RE is a regexp used to search next candidate match when FUNC
 returns non-nil and to search the first candidate match.  FAIL-RE is a
@@ -7052,9 +7057,10 @@ returns non-nil.
 
 NARROW controls whether current buffer narrowing should be preserved.
 
-This function is a subset of what `org-element-map' does, but much
-more performant.  Cached elements are supplied as the single argument
-of FUNC.  Changes to elements made in FUNC will also alter the cache."
+This function does a subset of what `org-element-map' does, but with
+much better performance.  Cached elements are supplied as the single
+argument of FUNC.  Changes to elements made in FUNC will also alter
+the cache."
   (unless (org-element--cache-active-p)
     (error "Cache must be active."))
   (unless (memq granularity '( headline headline+inlinetask
