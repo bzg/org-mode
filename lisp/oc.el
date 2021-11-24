@@ -1163,16 +1163,20 @@ DATUM is a citation object, or a citation reference.  In any case, apply
   "Activate citations from up to LIMIT buffer position.
 Each citation encountered is activated using the appropriate function
 from the processor set in `org-cite-activate-processor'."
-  (let ((name org-cite-activate-processor))
-    (let ((activate
-           (or (and name
-                    (org-cite-processor-has-capability-p name 'activate)
-                    (org-cite-processor-activate (org-cite--get-processor name)))
-               #'org-cite-fontify-default)))
-      (while (re-search-forward org-element-citation-prefix-re limit t)
-        (let ((cite (org-with-point-at (match-beginning 0)
-                      (org-element-citation-parser))))
-          (when cite (save-excursion (funcall activate cite))))))))
+  (let* ((name org-cite-activate-processor)
+         (activate
+          (or (and name
+                   (org-cite-processor-has-capability-p name 'activate)
+                   (org-cite-processor-activate (org-cite--get-processor name)))
+              #'org-cite-fontify-default)))
+    (when (re-search-forward org-element-citation-prefix-re limit t)
+      (let ((cite (org-with-point-at (match-beginning 0)
+                    (org-element-citation-parser))))
+        (when cite
+          (funcall activate cite)
+          ;; Move after cite object and make sure to return
+          ;; a non-nil value.
+          (goto-char (org-element-property :end cite)))))))
 
 
 ;;; Internal interface with Org Export library (export capability)
