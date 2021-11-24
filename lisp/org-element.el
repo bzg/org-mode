@@ -5461,7 +5461,7 @@ better to remove the commands adviced in such way from this list.")
                                    ,format-string))
             (format-string (funcall #'format format-string ,@args)))
        (if org-element--cache-diagnostics
-           (warn "%s" format-string)
+           (display-warning 'org-element-cache format-string)
          (unless org-element--cache-diagnostics-ring
            (setq org-element--cache-diagnostics-ring
                  (make-ring org-element--cache-diagnostics-ring-size)))
@@ -5485,7 +5485,8 @@ better to remove the commands adviced in such way from this list.")
                (setq org-element--cache-diagnostics-ring nil)))))
      (if (and (boundp 'org-batch-test) org-batch-test)
          (error "%s" (concat "org-element--cache: " format-string))
-       (warn "%s" (concat "org-element--cache: " format-string)))))
+       (display-warning 'org-element-cache
+                        (concat "org-element--cache: " format-string)))))
 
 (defsubst org-element--cache-key (element)
   "Return a unique key for ELEMENT in cache tree.
