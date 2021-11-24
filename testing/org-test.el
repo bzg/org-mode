@@ -373,7 +373,11 @@ setting `pp-escape-newlines' to nil manually."
 		   (condition-case err
 		       (when (string-match "^[A-Za-z].*\\.el$"
 					   (file-name-nondirectory path))
-			 (load-file path))
+                         (let ((feature-name
+                                (intern
+                                 (file-name-base
+                                  (file-name-nondirectory path)))))
+			   (require feature-name path)))
 		     (missing-test-dependency
 		      (let ((name (intern
 				   (concat "org-missing-dependency/"
