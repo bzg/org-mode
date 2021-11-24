@@ -6408,7 +6408,7 @@ scheduled items with an hour specification like [h]h:mm."
                                     1 -1))
                       (pos (save-excursion
                              (goto-char (org-element-property :contents-begin el))
-                             (re-search-forward regexp)
+                             (re-search-forward regexp nil t)
                              (1- (match-beginning 1))))
                       (todo-state (org-element-property :todo-keyword el))
 	              (donep (eq 'done (org-element-property :todo-type el)))
