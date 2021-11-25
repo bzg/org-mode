@@ -6398,7 +6398,14 @@ scheduled items with an hour specification like [h]h:mm."
     (if (org-element--cache-active-p)
         (org-element-cache-map
          (lambda (el)
-           (when (org-element-property :scheduled el)
+           (when (and (org-element-property :scheduled el)
+                      (or (not with-hour)
+                          (org-element-property
+                           :hour-start
+                           (org-element-property :scheduled el))
+                          (org-element-property
+                           :hour-end
+                           (org-element-property :scheduled el))))
              (goto-char (org-element-property :contents-begin el))
              (catch :skip
                (org-agenda-skip el)
@@ -6408,7 +6415,12 @@ scheduled items with an hour specification like [h]h:mm."
                                     1 -1))
                       (pos (save-excursion
                              (goto-char (org-element-property :contents-begin el))
-                             (re-search-forward regexp nil t)
+                             ;; We intentionally leave NOERROR
+                             ;; argument in `re-search-forward' nil.  If
+                             ;; the search fails here, something went
+                             ;; wrong and we are looking at
+                             ;; non-matching headline.
+                             (re-search-forward regexp (line-end-position))
                              (1- (match-beginning 1))))
                       (todo-state (org-element-property :todo-keyword el))
 	              (donep (eq 'done (org-element-property :todo-type el)))
