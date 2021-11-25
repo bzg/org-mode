@@ -4478,7 +4478,8 @@ or objects within the parse tree.
 This function assumes that current major mode is `org-mode'."
   (save-excursion
     (goto-char (point-min))
-    (let ((org-data (org-element-org-data-parser)))
+    (let ((org-data (org-element-org-data-parser))
+          (gc-cons-threshold #x40000000))
       (org-skip-whitespace)
       (org-element--parse-elements
        (point-at-bol) (point-max)
