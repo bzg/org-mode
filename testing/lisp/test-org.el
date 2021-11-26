@@ -7417,7 +7417,7 @@ CLOCK: [2012-03-29 Thu 10:00]--[2012-03-29 Thu 16:40] =>  6:40"
   (should
    (string-match-p
     (rx "* TODO Read book
-SCHEDULED: <2021-06-16 Wed +1d>
+SCHEDULED: <2021-06-16 " (1+ (not space)) " +1d>
 :PROPERTIES:
 :LAST_REPEAT:" (1+ nonl) "
 :END:
