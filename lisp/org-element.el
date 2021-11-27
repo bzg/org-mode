@@ -6700,7 +6700,9 @@ known element in cache (it may start after END)."
 	      (when robust-flag (setq robust-flag nil))))
           (unless (or (org-element-property :parent up)
                       (eq 'org-data (org-element-type up)))
-            (org-element--cache-warn "Got element without parent. Please report it to Org mode mailing list (M-x org-submit-bug-report).\n%S" up))
+            (org-element--cache-warn "Got element without parent. Please report it to Org mode mailing list (M-x org-submit-bug-report).\n%S" up)
+            (org-element-cache-reset)
+            (error "org-element--cache: Emergency exit"))
 	  (setq up (org-element-property :parent up)))
         ;; We're at top level element containing ELEMENT: if it's
         ;; altered by buffer modifications, it is first element in
