@@ -92,4 +92,5 @@
 	   (should (string-equal "hello world\n" (buffer-string))))
 	 (should (eq called 'was-called)))))))
 
+(provide 'test-org-attach-git)
 ;;; test-org-attach-git.el ends here
