@@ -326,6 +326,9 @@ processors.")
 (defun org-cite--get-processor (name)
   "Return citation processor named after symbol NAME.
 Return nil if no such processor is found."
+  ;; Opportunistically try to load the library providing the
+  ;; processor.
+  (require (intern (concat "oc-" (symbol-name name))) nil t)
   (seq-find (lambda (p) (eq name (org-cite-processor-name p)))
 	    org-cite--processors))
 
@@ -419,10 +422,10 @@ Return a non-nil value on a successful operation."
   (declare (indent 1))
   (unless (and name (symbolp name))
     (error "Invalid processor name: %S" name))
-  (when (org-cite--get-processor name)
-    (org-cite-unregister-processor name))
-  (push (apply #'org-cite--make-processor :name name body)
-	org-cite--processors))
+  (setq org-cite--processors
+        (cons (apply #'org-cite--make-processor :name name body)
+              (seq-remove (lambda (p) (eq name (org-cite-processor-name p)))
+                          org-cite--processors))))
 
 (defun org-cite-unregister-processor (name)
   "Unregister citation processor NAME.
