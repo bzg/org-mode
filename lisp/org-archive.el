@@ -35,6 +35,9 @@
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 
+;; From org-element.el
+(defvar org-element--cache-avoid-synchronous-headline-re-parsing)
+
 (defcustom org-archive-default-command 'org-archive-subtree
   "The default archiving command."
   :group 'org-archive
@@ -253,7 +256,9 @@ direct children of this heading."
 	      (if (local-variable-p 'org-odd-levels-only (current-buffer))
 		  org-odd-levels-only
 		tr-org-odd-levels-only))
-	     level datetree-date datetree-subheading-p)
+	     level datetree-date datetree-subheading-p
+             ;; Suppress on-the-fly headline updates.
+             (org-element--cache-avoid-synchronous-headline-re-parsing t))
 	(when (string-match "\\`datetree/\\(\\**\\)" heading)
 	  ;; "datetree/" corresponds to 3 levels of headings.
 	  (let ((nsub (length (match-string 1 heading))))
