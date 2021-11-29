@@ -7034,7 +7034,7 @@ the inserted text when done.
 
 When REMOVE is non-nil, remove the subtree from the clipboard."
   (interactive "P")
-  (setq tree (or tree (and kill-ring (current-kill 0))))
+  (setq tree (or tree (current-kill 0)))
   (unless (org-kill-is-subtree-p tree)
     (user-error
      (substitute-command-keys
