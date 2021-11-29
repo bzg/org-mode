@@ -329,10 +329,10 @@ Did you give the decimal value %1$d by mistake?" mode)))
    ((string-match-p "^[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\(,[ugoa]*\\(?:[+-=][rwxXstugo]*\\)+\\)*$" mode)
     ;; Match regexp taken from `file-modes-symbolic-to-number'.
     (file-modes-symbolic-to-number mode org-babel-tangle-default-file-mode))
-   ((string-match-p "^\\(?:[r-][w-][x-]\\)\\{3\\}$" mode)
+   ((string-match-p "^[r-][w-][xs-][r-][w-][xs-][r-][w-][x-]$" mode)
     (file-modes-symbolic-to-number (concat  "u=" (substring mode 0 3)
                                             ",g=" (substring mode 3 6)
-                                            ",a=" (substring mode 6 9))
+                                            ",o=" (substring mode 6 9))
                                    0))
    (t (error "File mode %S not recognised as a valid format. See `org-babel-interpret-file-mode'." mode))))
 
