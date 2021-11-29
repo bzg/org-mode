@@ -6688,8 +6688,11 @@ known element in cache (it may start after END)."
                               t)))
                      ;; If UP is org-data, the situation is similar to
                      ;; headline case.  We just need to re-parse the
-                     ;; org-data itself.
-                     (when (eq 'org-data (org-element-type up))
+                     ;; org-data itself, unless the change is made
+                     ;; within blank lines at BOB (that could
+                     ;; potentially alter first-section).
+                     (when (and (eq 'org-data (org-element-type up))
+                                (>= beg (org-element-property :contents-begin up)))
                        (org-element-set-element up (org-with-point-at 1 (org-element-org-data-parser)))
                        (org-element--cache-log-message "Found non-robust change invalidating org-data. Re-parsing: %S"
                                             (org-element--format-element up))
