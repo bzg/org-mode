@@ -5880,7 +5880,7 @@ updated before current modification are actually submitted."
                                     ;; Note: 4 is a footprint for
                                     ;; (let ((inhibit-modification-hooks t))
                                     ;; (insert "blah"))
-                                    '(1 3 6 7))))
+                                    '(1 3 6 7 8))))
                       (and (boundp 'org-batch-test) org-batch-test))
               (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
