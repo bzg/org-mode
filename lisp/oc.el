@@ -792,6 +792,39 @@ INFO is a plist used as a communication channel."
       (cons (org-not-nil (car global))
             (or (cdr local) (cdr global)))))))
 
+(defun org-cite-read-processor-declaration (s)
+  "Read processor declaration from string S.
+
+Return (NAME BIBLIOGRAPHY-STYLE CITATION-STYLE) triplet, when
+NAME is the processor name, as a symbol, and both
+BIBLIOGRAPHY-STYLE and CITATION-STYLE are strings or nil.  Those
+strings may contain spaces if they are enclosed within double
+quotes.
+
+String S is expected to contain between 1 and 3 tokens.  The
+function raises an error when it contains too few or too many
+tokens.  Spurious spaces are ignored."
+  (with-temp-buffer
+    (save-excursion (insert s))
+    (let ((result (list (read (current-buffer)))))
+      (dotimes (_ 2)
+        (skip-chars-forward " \t")
+        (cond
+         ((eobp) (push nil result))
+         ((char-equal ?\" (char-after))
+          (push (org-not-nil (read (current-buffer)))
+                result))
+         (t
+          (let ((origin (point)))
+            (skip-chars-forward "^ \t")
+            (push (org-not-nil (buffer-substring origin (point)))
+                  result)))))
+      (skip-chars-forward " \t")
+      (unless (eobp)
+        (error "Trailing garbage following cite export processor declaration %S"
+               s))
+      (nreverse result))))
+
 (defun org-cite-bibliography-style (info)
   "Return expected bibliography style.
 INFO is a plist used as a communication channel."
@@ -1194,40 +1227,22 @@ INFO is the communication channel, as a plist.  It is modified by side-effect."
 
 Export processor is stored as a triplet, or nil.
 
-When non-nil, it is defined as (NAME BIBLIOGRAPHY-STYLE CITATION-STYLE) where
-NAME is a symbol, whereas BIBLIOGRAPHY-STYLE and CITATION-STYLE are strings,
-or nil.
+When non-nil, it is defined as (NAME BIBLIOGRAPHY-STYLE
+CITATION-STYLE) where NAME is a symbol, whereas
+BIBLIOGRAPHY-STYLE and CITATION-STYLE are strings, or nil.
 
-INFO is the communication channel, as a plist.  It is modified by side-effect."
+INFO is the communication channel, as a plist.  It is modified by
+side-effect."
   (let* ((err
           (lambda (s)
-            (user-error "Invalid cite export processor definition: %S" s)))
+            (user-error "Invalid cite export processor declaration: %S" s)))
          (processor
           (pcase (plist-get info :cite-export)
             ((or "" `nil) nil)
             ;; Value is a string.  It comes from a "cite_export"
-            ;; keyword.  It may contain between 1 and 3 tokens, the
-            ;; first one being a symbol and the other (optional) two,
-            ;; strings.
+            ;; keyword.
             ((and (pred stringp) s)
-             (with-temp-buffer
-               (save-excursion (insert s))
-               (let ((result (list (read (current-buffer)))))
-                 (dotimes (_ 2)
-                   (skip-chars-forward " \t")
-                   (cond
-                    ((eobp) (push nil result))
-                    ((char-equal ?\" (char-after))
-                     (condition-case _
-                         (push (org-not-nil (read (current-buffer))) result)
-                       (error (funcall err s))))
-                    (t
-                     (let ((origin (point)))
-                       (skip-chars-forward "^ \t")
-                       (push (org-not-nil (buffer-substring origin (point)))
-                             result)))))
-                 (unless (eobp) (funcall err s))
-                 (nreverse result))))
+             (org-cite-read-processor-declaration s))
             ;; Value is an alist.  It must come from
             ;; `org-cite-export-processors' variable.  Find the most
             ;; appropriate processor according to current export
