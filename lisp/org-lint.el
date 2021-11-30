@@ -101,12 +101,17 @@
 ;;   - obsolete QUOTE section
 ;;   - obsolete "file+application" link
 ;;   - spurious colons in tags
+;;   - non-existent bibliography file
+;;   - missing "print_bibliography" keyword
+;;   - invalid "cite_export" value
+;;   - incomplete citation object
 
 
 ;;; Code:
 
 (require 'cl-lib)
 (require 'ob)
+(require 'oc)
 (require 'ol)
 (require 'org-attach)
 (require 'org-macro)
@@ -296,7 +301,24 @@
    (make-org-lint-checker
     :name 'spurious-colons
     :description "Report spurious colons in tags"
-    :categories '(tags)))
+    :categories '(tags))
+   (make-org-lint-checker
+    :name 'non-existent-bibliography
+    :description "Report invalid bibliography file"
+    :categories '(cite))
+   (make-org-lint-checker
+    :name 'missing-print-bibliography
+    :description "Report missing \"print_bibliography\" keyword"
+    :categories '(cite))
+   (make-org-lint-checker
+    :name 'invalid-cite-export-declaration
+    :description "Report invalid value for \"cite_export\" keyword"
+    :categories '(cite))
+   (make-org-lint-checker
+    :name 'incomplete-citation
+    :description "Report incomplete citation object"
+    :categories '(cite)
+    :trust 'low))
   "List of all available checkers.")
 
 (defun org-lint--collect-duplicates
@@ -1121,6 +1143,55 @@ Use \"export %s\" instead"
 	(list (org-element-property :begin h)
 	      "Tags contain a spurious colon")))))
 
+(defun org-lint-non-existent-bibliography (ast)
+  (org-element-map ast 'keyword
+    (lambda (k)
+      (when (equal "BIBLIOGRAPHY" (org-element-property :key k))
+        (let ((file (org-strip-quotes (org-element-property :value k))))
+          (and (not (file-remote-p file))
+	       (not (file-exists-p file))
+	       (list (org-element-property :begin k)
+		     (format "Non-existent bibliography %S" file))))))))
+
+(defun org-lint-missing-print-bibliography (ast)
+  (and (org-element-map ast 'citation #'identity nil t)
+       (not (org-element-map ast 'keyword
+              (lambda (k)
+                (equal "PRINT_BIBLIOGRAPHY" (org-element-property :key k)))
+              nil t))
+       (list
+        (list (point-max) "Possibly missing \"PRINT_BIBLIOGRAPHY\" keyword"))))
+
+(defun org-lint-invalid-cite-export-declaration (ast)
+  (org-element-map ast 'keyword
+    (lambda (k)
+      (when (equal "CITE_EXPORT" (org-element-property :key k))
+        (let ((value (org-element-property :value k))
+              (source (org-element-property :begin k)))
+          (if (equal value "")
+              (list source "Missing export processor name")
+            (condition-case _
+                (pcase (org-cite-read-processor-declaration value)
+                  (`(,(and (pred symbolp) name)
+                     ,(pred string-or-null-p)
+                     ,(pred string-or-null-p))
+                   (unless (org-cite-get-processor name)
+                     (list source "Unknown cite export processor %S" name)))
+                  (_
+                   (list source "Invalid cite export processor declaration")))
+              (error
+               (list source "Invalid cite export processor declaration")))))))))
+
+(defun org-lint-incomplete-citation (ast)
+  (org-element-map ast 'plain-text
+    (lambda (text)
+      (and (string-match-p org-element-citation-prefix-re text)
+           ;; XXX: The code below signals the error at the beginning
+           ;; of the paragraph containing the faulty object.  It is
+           ;; not very accurate but may be enough for now.
+           (list (org-element-property :contents-begin
+                                       (org-element-property :parent text))
+                 "Possibly incomplete citation markup")))))
 
 
 ;;; Reports UI

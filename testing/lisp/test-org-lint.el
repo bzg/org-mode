@@ -573,6 +573,56 @@ SCHEDULED: <2012-03-29 thu.>"
    (org-test-with-temp-text "* H :tag::"
      (org-lint '(spurious-colons)))))
 
+(ert-deftest test-org-lint/non-existent-bibliography ()
+  "Test `org-lint-non-existent-bibliography' checker."
+  (should
+   (org-test-with-temp-text "#+bibliography: Idonotexist.bib"
+     (org-lint '(non-existent-bibliography)))))
+
+(ert-deftest test-org-lint/missing-print-bibliography ()
+  "Test `org-lint-missing-print-bibliography' checker."
+  (should
+   (org-test-with-temp-text "[cite:@foo]"
+     (org-lint '(missing-print-bibliography))))
+  (should-not
+   (org-test-with-temp-text "[cite:@foo]\n#+print_bibliography:"
+     (org-lint '(missing-print-bibliography))))
+  (should-not
+   (org-test-with-temp-text ""
+     (org-lint '(missing-print-bibliography)))))
+
+(ert-deftest test-org-lint/invalid-cite-export-declaration ()
+  "Test `org-lint-invalid-cite-export-declaration' checker."
+  (should
+   (org-test-with-temp-text "#+cite_export: "
+     (org-lint '(invalid-cite-export-declaration))))
+  (should
+   (org-test-with-temp-text "#+cite_export: 2"
+     (org-lint '(invalid-cite-export-declaration))))
+  (should
+   (org-test-with-temp-text "#+cite_export: basic bar baz qux"
+     (org-lint '(invalid-cite-export-declaration))))
+  (should
+   (org-test-with-temp-text "#+cite_export: basic \"bar"
+     (org-lint '(invalid-cite-export-declaration))))
+  (should
+   (org-test-with-temp-text "#+cite_export: unknown"
+     (org-lint '(invalid-cite-export-declaration))))
+  (should-not
+   (org-test-with-temp-text "#+cite_export: basic"
+     (org-lint '(invalid-cite-export-declaration)))))
+
+(ert-deftest test-org-lint/incomplete-citation ()
+  "Test `org-lint-incomplete-citation' checker."
+  (should
+   (org-test-with-temp-text "[cite:foo]"
+     (org-lint '(incomplete-citation))))
+  (should
+   (org-test-with-temp-text "[cite:@foo"
+     (org-lint '(incomplete-citation))))
+  (should-not
+   (org-test-with-temp-text "[cite:@foo]"
+     (org-lint '(incomplete-citation)))))
 
 (provide 'test-org-lint)
 ;;; test-org-lint.el ends here
