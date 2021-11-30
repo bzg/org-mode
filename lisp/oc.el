@@ -323,15 +323,6 @@ place note numbers according to rules defined in `org-cite-note-rules'."
 See `org-cite-register-processor' for more information about
 processors.")
 
-(defun org-cite--get-processor (name)
-  "Return citation processor named after symbol NAME.
-Return nil if no such processor is found."
-  ;; Opportunistically try to load the library providing the
-  ;; processor.
-  (require (intern (concat "oc-" (symbol-name name))) nil t)
-  (seq-find (lambda (p) (eq name (org-cite-processor-name p)))
-	    org-cite--processors))
-
 (defun org-cite-register-processor (name &rest body)
   "Mark citation processor NAME as available.
 
@@ -427,13 +418,22 @@ Return a non-nil value on a successful operation."
               (seq-remove (lambda (p) (eq name (org-cite-processor-name p)))
                           org-cite--processors))))
 
+(defun org-cite-get-processor (name)
+  "Return citation processor named after symbol NAME.
+Return nil if no such processor is found."
+  ;; Opportunistically try to load the library providing the
+  ;; processor.
+  (require (intern (concat "oc-" (symbol-name name))) nil t)
+  (seq-find (lambda (p) (eq name (org-cite-processor-name p)))
+	    org-cite--processors))
+
 (defun org-cite-unregister-processor (name)
   "Unregister citation processor NAME.
 NAME is a symbol.  Raise an error if processor is not registered.
 Return a non-nil value on a successful operation."
   (unless (and name (symbolp name))
     (error "Invalid processor name: %S" name))
-  (pcase (org-cite--get-processor name)
+  (pcase (org-cite-get-processor name)
     ('nil (error "Processor %S not registered" name))
     (processor
      (setq org-cite--processors (delete processor org-cite--processors))))
@@ -443,7 +443,7 @@ Return a non-nil value on a successful operation."
   "Return non-nil if PROCESSOR is able to handle CAPABILITY.
 PROCESSOR is the name of a cite processor, as a symbol.  CAPABILITY is
 `activate', `export', `follow', or `insert'."
-  (let ((p (org-cite--get-processor processor)))
+  (let ((p (org-cite-get-processor processor)))
     (pcase capability
       ((guard (not p)) nil)             ;undefined processor
       ('activate (functionp (org-cite-processor-activate p)))
@@ -676,7 +676,7 @@ strings."
   (let ((collection
          (seq-mapcat
           (lambda (name)
-            (org-cite-processor-cite-styles (org-cite--get-processor name)))
+            (org-cite-processor-cite-styles (org-cite-get-processor name)))
           (or processors
               (mapcar (pcase-lambda (`(,_ . (,name . ,_))) name)
                       org-cite-export-processors))))
@@ -1200,7 +1200,7 @@ from the processor set in `org-cite-activate-processor'."
          (activate
           (or (and name
                    (org-cite-processor-has-capability-p name 'activate)
-                   (org-cite-processor-activate (org-cite--get-processor name)))
+                   (org-cite-processor-activate (org-cite-get-processor name)))
               #'org-cite-fontify-default)))
     (when (re-search-forward org-element-citation-prefix-re limit t)
       (let ((cite (org-with-point-at (match-beginning 0)
@@ -1280,7 +1280,7 @@ side-effect."
       ('nil nil)
       (`(,name . ,_)
        (cond
-        ((not (org-cite--get-processor name))
+        ((not (org-cite-get-processor name))
          (user-error "Unknown processor %S" name))
         ((not (org-cite-processor-has-capability-p name 'export))
          (user-error "Processor %S is unable to handle citation export" name)))))
@@ -1293,7 +1293,7 @@ selected citation processor."
   (pcase (plist-get info :cite-export)
     ('nil nil)
     (`(,p ,_ ,_)
-     (funcall (org-cite-processor-export-citation (org-cite--get-processor p))
+     (funcall (org-cite-processor-export-citation (org-cite-get-processor p))
 	      citation
               (org-cite-citation-style citation info)
               (plist-get info :back-end)
@@ -1309,7 +1309,7 @@ used as a communication channel."
     (`(,p ,_ ,_)
      (let ((export-bibilography
             (org-cite-processor-export-bibliography
-             (org-cite--get-processor p))))
+             (org-cite-get-processor p))))
        (when export-bibilography
          (funcall export-bibilography
 	          (org-cite-list-keys info)
@@ -1410,7 +1410,7 @@ channel, as a property list."
     ('nil output)
     (`(,p ,_ ,_)
      (let ((finalizer
-            (org-cite-processor-export-finalizer (org-cite--get-processor p))))
+            (org-cite-processor-export-finalizer (org-cite-get-processor p))))
        (if (not finalizer)
            output
          (funcall finalizer
@@ -1432,12 +1432,12 @@ ARG is the prefix argument received when calling `org-open-at-point', or nil."
     (cond
      ((null name)
       (user-error "No processor set to follow citations"))
-     ((not (org-cite--get-processor name))
+     ((not (org-cite-get-processor name))
       (user-error "Unknown processor %S" name))
      ((not (org-cite-processor-has-capability-p name 'follow))
       (user-error "Processor %S cannot follow citations" name))
      (t
-      (let ((follow (org-cite-processor-follow (org-cite--get-processor name))))
+      (let ((follow (org-cite-processor-follow (org-cite-get-processor name))))
         (funcall follow datum arg))))))
 
 
@@ -1653,13 +1653,13 @@ ARG is the prefix argument received when calling interactively the function."
     (cond
      ((null name)
       (user-error "No processor set to insert citations"))
-     ((not (org-cite--get-processor name))
+     ((not (org-cite-get-processor name))
       (user-error "Unknown processor %S" name))
      ((not (org-cite-processor-has-capability-p name 'insert))
       (user-error "Processor %S cannot insert citations" name))
      (t
       (let ((context (org-element-context))
-            (insert (org-cite-processor-insert (org-cite--get-processor name))))
+            (insert (org-cite-processor-insert (org-cite-get-processor name))))
         (cond
          ((memq (org-element-type context) '(citation citation-reference))
           (funcall insert context arg))
