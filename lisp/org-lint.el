@@ -22,89 +22,65 @@
 
 ;;; Commentary:
 
-;; This library implements linting for Org syntax.  The sole public
-;; function is `org-lint', which see.
+;; This library implements linting for Org syntax.  The process is
+;; started by calling `org-lint' command, which see.
 
-;; Internally, the library defines a new structure:
-;; `org-lint-checker', with the following slots:
-
-;;   - NAME: Unique check identifier, as a non-nil symbol that doesn't
-;;     start with an hyphen.
-;;
-;;     The check is done calling the function `org-lint-NAME' with one
-;;     mandatory argument, the parse tree describing the current Org
-;;     buffer.  Such function calls are wrapped within
-;;     a `save-excursion' and point is always at `point-min'.  Its
-;;     return value has to be an alist (POSITION MESSAGE) when
-;;     POSITION refer to the buffer position of the error, as an
-;;     integer, and MESSAGE is a string describing the error.
-
-;;   - DESCRIPTION: Summary about the check, as a string.
-
-;;   - CATEGORIES: Categories relative to the check, as a list of
-;;     symbol.  They are used for filtering when calling `org-lint'.
-;;     Checkers not explicitly associated to a category are collected
-;;     in the `default' one.
-
-;;   - TRUST: The trust level one can have in the check.  It is either
-;;     `low' or `high', depending on the heuristics implemented and
-;;     the nature of the check.  This has an indicative value only and
-;;     is displayed along reports.
-
-;; All checks have to be listed in `org-lint--checkers'.
+;; New checkers are added by `org-lint-add-checker' function.
+;; Internally, all checks are listed in `org-lint--checkers'.
 
 ;; Results are displayed in a special "*Org Lint*" buffer with
 ;; a dedicated major mode, derived from `tabulated-list-mode'.
-;;
 ;; In addition to the usual key-bindings inherited from it, "C-j" and
 ;; "TAB" display problematic line reported under point whereas "RET"
 ;; jumps to it.  Also, "h" hides all reports similar to the current
 ;; one.  Additionally, "i" removes them from subsequent reports.
 
-;; Checks currently implemented are:
+;; Checks currently implemented report the following:
 
-;;   - duplicate CUSTOM_ID properties
-;;   - duplicate NAME values
-;;   - duplicate targets
-;;   - duplicate footnote definitions
-;;   - orphaned affiliated keywords
-;;   - obsolete affiliated keywords
-;;   - missing language in source blocks
-;;   - missing back-end in export blocks
-;;   - invalid Babel call blocks
-;;   - NAME values with a colon
-;;   - deprecated export block syntax
-;;   - deprecated Babel header properties
-;;   - wrong header arguments in source blocks
-;;   - misuse of CATEGORY keyword
-;;   - "coderef" links with unknown destination
-;;   - "custom-id" links with unknown destination
-;;   - "fuzzy" links with unknown destination
-;;   - "id" links with unknown destination
-;;   - links to non-existent local files
-;;   - SETUPFILE keywords with non-existent file parameter
-;;   - INCLUDE keywords with wrong link parameter
-;;   - obsolete markup in INCLUDE keyword
-;;   - unknown items in OPTIONS keyword
-;;   - spurious macro arguments or invalid macro templates
-;;   - special properties in properties drawer
-;;   - obsolete syntax for PROPERTIES drawers
-;;   - Invalid EFFORT property value
-;;   - missing definition for footnote references
-;;   - missing reference for footnote definitions
-;;   - non-footnote definitions in footnote section
-;;   - probable invalid keywords
-;;   - invalid blocks
-;;   - misplaced planning info line
-;;   - incomplete drawers
-;;   - indented diary-sexps
-;;   - obsolete QUOTE section
-;;   - obsolete "file+application" link
-;;   - spurious colons in tags
-;;   - non-existent bibliography file
-;;   - missing "print_bibliography" keyword
-;;   - invalid "cite_export" value
-;;   - incomplete citation object
+;; - duplicates CUSTOM_ID properties,
+;; - duplicate NAME values,
+;; - duplicate targets,
+;; - duplicate footnote definitions,
+;; - orphaned affiliated keywords,
+;; - obsolete affiliated keywords,
+;; - deprecated export block syntax,
+;; - deprecated Babel header syntax,
+;; - missing language in source blocks,
+;; - missing back-end in export blocks,
+;; - invalid Babel call blocks,
+;; - NAME values with a colon,
+;; - wrong babel headers,
+;; - invalid value in babel headers,
+;; - misuse of CATEGORY keyword,
+;; - "coderef" links with unknown destination,
+;; - "custom-id" links with unknown destination,
+;; - "fuzzy" links with unknown destination,
+;; - "id" links with unknown destination,
+;; - links to non-existent local files,
+;; - SETUPFILE keywords with non-existent file parameter,
+;; - INCLUDE keywords with misleading link parameter,
+;; - obsolete markup in INCLUDE keyword,
+;; - unknown items in OPTIONS keyword,
+;; - spurious macro arguments or invalid macro templates,
+;; - special properties in properties drawers,
+;; - obsolete syntax for properties drawers,
+;; - invalid duration in EFFORT property,
+;; - missing definition for footnote references,
+;; - missing reference for footnote definitions,
+;; - non-footnote definitions in footnote section,
+;; - probable invalid keywords,
+;; - invalid blocks,
+;; - misplaced planning info line,
+;; - probable incomplete drawers,
+;; - probable indented diary-sexps,
+;; - obsolete QUOTE section,
+;; - obsolete "file+application" link,
+;; - obsolete escape syntax in links,
+;; - spurious colons in tags,
+;; - invalid bibliography file,
+;; - missing "print_bibliography" keyword,
+;; - invalid value for "cite_export" keyword,
+;; - incomplete citation object.
 
 
 ;;; Code:
@@ -116,210 +92,69 @@
 (require 'org-attach)
 (require 'org-macro)
 (require 'ox)
+(require 'seq)
 
 
-;;; Checkers
+;;; Checkers structure
 
 (cl-defstruct (org-lint-checker (:copier nil))
-  (name 'missing-checker-name)
-  (description "")
-  (categories '(default))
-  (trust 'high))			; `low' or `high'
+  name summary function trust categories)
 
-(defun org-lint-missing-checker-name (_)
-  (error
-   "`A checker has no `:name' property.  Please verify `org-lint--checkers'"))
+(defvar org-lint--checkers nil
+  "List of all available checkers.
+This list is populated by `org-lint-add-checker' function.")
 
-(defconst org-lint--checkers
-  (list
-   (make-org-lint-checker
-    :name 'duplicate-custom-id
-    :description "Report duplicates CUSTOM_ID properties"
-    :categories '(link))
-   (make-org-lint-checker
-    :name 'duplicate-name
-    :description "Report duplicate NAME values"
-    :categories '(babel link))
-   (make-org-lint-checker
-    :name 'duplicate-target
-    :description "Report duplicate targets"
-    :categories '(link))
-   (make-org-lint-checker
-    :name 'duplicate-footnote-definition
-    :description "Report duplicate footnote definitions"
-    :categories '(footnote))
-   (make-org-lint-checker
-    :name 'orphaned-affiliated-keywords
-    :description "Report orphaned affiliated keywords"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'obsolete-affiliated-keywords
-    :description "Report obsolete affiliated keywords"
-    :categories '(obsolete))
-   (make-org-lint-checker
-    :name 'deprecated-export-blocks
-    :description "Report deprecated export block syntax"
-    :categories '(obsolete export)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'deprecated-header-syntax
-    :description "Report deprecated Babel header syntax"
-    :categories '(obsolete babel)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'missing-language-in-src-block
-    :description "Report missing language in source blocks"
-    :categories '(babel))
-   (make-org-lint-checker
-    :name 'missing-backend-in-export-block
-    :description "Report missing back-end in export blocks"
-    :categories '(export))
-   (make-org-lint-checker
-    :name 'invalid-babel-call-block
-    :description "Report invalid Babel call blocks"
-    :categories '(babel))
-   (make-org-lint-checker
-    :name 'colon-in-name
-    :description "Report NAME values with a colon"
-    :categories '(babel))
-   (make-org-lint-checker
-    :name 'wrong-header-argument
-    :description "Report wrong babel headers"
-    :categories '(babel))
-   (make-org-lint-checker
-    :name 'wrong-header-value
-    :description "Report invalid value in babel headers"
-    :categories '(babel)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'deprecated-category-setup
-    :description "Report misuse of CATEGORY keyword"
-    :categories '(obsolete))
-   (make-org-lint-checker
-    :name 'invalid-coderef-link
-    :description "Report \"coderef\" links with unknown destination"
-    :categories '(link))
-   (make-org-lint-checker
-    :name 'invalid-custom-id-link
-    :description "Report \"custom-id\" links with unknown destination"
-    :categories '(link))
-   (make-org-lint-checker
-    :name 'invalid-fuzzy-link
-    :description "Report \"fuzzy\" links with unknown destination"
-    :categories '(link))
-   (make-org-lint-checker
-    :name 'invalid-id-link
-    :description "Report \"id\" links with unknown destination"
-    :categories '(link))
-   (make-org-lint-checker
-    :name 'link-to-local-file
-    :description "Report links to non-existent local files"
-    :categories '(link)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'non-existent-setupfile-parameter
-    :description "Report SETUPFILE keywords with non-existent file parameter"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'wrong-include-link-parameter
-    :description "Report INCLUDE keywords with misleading link parameter"
-    :categories '(export)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'obsolete-include-markup
-    :description "Report obsolete markup in INCLUDE keyword"
-    :categories '(obsolete export)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'unknown-options-item
-    :description "Report unknown items in OPTIONS keyword"
-    :categories '(export)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'invalid-macro-argument-and-template
-    :description "Report spurious macro arguments or invalid macro templates"
-    :categories '(export)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'special-property-in-properties-drawer
-    :description "Report special properties in properties drawers"
-    :categories '(properties))
-   (make-org-lint-checker
-    :name 'obsolete-properties-drawer
-    :description "Report obsolete syntax for properties drawers"
-    :categories '(obsolete properties))
-   (make-org-lint-checker
-    :name 'invalid-effort-property
-    :description "Report invalid duration in EFFORT property"
-    :categories '(properties))
-   (make-org-lint-checker
-    :name 'undefined-footnote-reference
-    :description "Report missing definition for footnote references"
-    :categories '(footnote))
-   (make-org-lint-checker
-    :name 'unreferenced-footnote-definition
-    :description "Report missing reference for footnote definitions"
-    :categories '(footnote))
-   (make-org-lint-checker
-    :name 'extraneous-element-in-footnote-section
-    :description "Report non-footnote definitions in footnote section"
-    :categories '(footnote))
-   (make-org-lint-checker
-    :name 'invalid-keyword-syntax
-    :description "Report probable invalid keywords"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'invalid-block
-    :description "Report invalid blocks"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'misplaced-planning-info
-    :description "Report misplaced planning info line"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'incomplete-drawer
-    :description "Report probable incomplete drawers"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'indented-diary-sexp
-    :description "Report probable indented diary-sexps"
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'quote-section
-    :description "Report obsolete QUOTE section"
-    :categories '(obsolete)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'file-application
-    :description "Report obsolete \"file+application\" link"
-    :categories '(link obsolete))
-   (make-org-lint-checker
-    :name 'percent-encoding-link-escape
-    :description "Report obsolete escape syntax in links"
-    :categories '(link obsolete)
-    :trust 'low)
-   (make-org-lint-checker
-    :name 'spurious-colons
-    :description "Report spurious colons in tags"
-    :categories '(tags))
-   (make-org-lint-checker
-    :name 'non-existent-bibliography
-    :description "Report invalid bibliography file"
-    :categories '(cite))
-   (make-org-lint-checker
-    :name 'missing-print-bibliography
-    :description "Report missing \"print_bibliography\" keyword"
-    :categories '(cite))
-   (make-org-lint-checker
-    :name 'invalid-cite-export-declaration
-    :description "Report invalid value for \"cite_export\" keyword"
-    :categories '(cite))
-   (make-org-lint-checker
-    :name 'incomplete-citation
-    :description "Report incomplete citation object"
-    :categories '(cite)
-    :trust 'low))
-  "List of all available checkers.")
+;;;###autoload
+(defun org-lint-add-checker (name summary fun &rest props)
+  "Add a new checker for linter.
+
+NAME is a unique check identifier, as a non-nil symbol.  SUMMARY
+is a short description of the check, as a string.
+
+The check is done calling the function FUN with one mandatory
+argument, the parse tree describing the current Org buffer.  Such
+function calls are wrapped within a `save-excursion' and point is
+always at `point-min'.  Its return value has to be an
+alist (POSITION MESSAGE) where POSITION refer to the buffer
+position of the error, as an integer, and MESSAGE is a one-line
+string describing the error.
+
+Optional argument PROPS provides additional information about the
+checker.  Currently, two properties are supported:
+
+  `:categories'
+
+     Categories relative to the check, as a list of symbol.  They
+     are used for filtering when calling `org-lint'.  Checkers
+     not explicitly associated to a category are collected in the
+     `default' one.
+
+  `:trust'
+
+    The trust level one can have in the check.  It is either
+    `low' or `high', depending on the heuristics implemented and
+    the nature of the check.  This has an indicative value only
+    and is displayed along reports."
+  (declare (indent 1))
+  ;; Sanity checks.
+  (pcase name
+    (`nil (error "Name field is mandatory for checkers"))
+    ((pred symbolp) nil)
+    (_ (error "Invalid type for name field")))
+  (unless (functionp fun)
+    (error "Checker field is expected to be a valid function"))
+  ;; Install checker in `org-lint--checkers'; uniquify by name.
+  (setq org-lint--checkers
+        (cons (apply #'make-org-lint-checker
+                     :name name
+                     :summary summary
+                     :function fun
+                     props)
+              (seq-remove (lambda (c) (eq name (org-lint-checker-name c)))
+                          org-lint--checkers))))
+
+
+;;; Checker functions
 
 (defun org-lint--collect-duplicates
     (ast type extract-key extract-position build-message)
@@ -1194,6 +1029,229 @@ Use \"export %s\" instead"
                  "Possibly incomplete citation markup")))))
 
 
+;;; Checkers declaration
+
+(org-lint-add-checker 'duplicate-custom-id
+  "Report duplicates CUSTOM_ID properties"
+  #'org-lint-duplicate-custom-id
+  :categories '(link))
+
+(org-lint-add-checker 'duplicate-name
+  "Report duplicate NAME values"
+  #'org-lint-duplicate-name
+  :categories '(babel 'link))
+
+(org-lint-add-checker 'duplicate-target
+  "Report duplicate targets"
+  #'org-lint-duplicate-target
+  :categories '(link))
+
+(org-lint-add-checker 'duplicate-footnote-definition
+  "Report duplicate footnote definitions"
+  #'org-lint-duplicate-footnote-definition
+  :categories '(footnote))
+
+(org-lint-add-checker 'orphaned-affiliated-keywords
+  "Report orphaned affiliated keywords"
+  #'org-lint-orphaned-affiliated-keywords
+  :trust 'low)
+
+(org-lint-add-checker 'obsolete-affiliated-keywords
+  "Report obsolete affiliated keywords"
+  #'org-lint-obsolete-affiliated-keywords
+  :categories '(obsolete))
+
+(org-lint-add-checker 'deprecated-export-blocks
+  "Report deprecated export block syntax"
+  #'org-lint-deprecated-export-blocks
+  :trust 'low :categories '(obsolete export))
+
+(org-lint-add-checker 'deprecated-header-syntax
+  "Report deprecated Babel header syntax"
+  #'org-lint-deprecated-header-syntax
+  :trust 'low :categories '(obsolete babel))
+
+(org-lint-add-checker 'missing-language-in-src-block
+  "Report missing language in source blocks"
+  #'org-lint-missing-language-in-src-block
+  :categories '(babel))
+
+(org-lint-add-checker 'missing-backend-in-export-block
+  "Report missing back-end in export blocks"
+  #'org-lint-missing-backend-in-export-block
+  :categories '(export))
+
+(org-lint-add-checker 'invalid-babel-call-block
+  "Report invalid Babel call blocks"
+  #'org-lint-invalid-babel-call-block
+  :categories '(babel))
+
+(org-lint-add-checker 'colon-in-name
+  "Report NAME values with a colon"
+  #'org-lint-colon-in-name
+  :categories '(babel))
+
+(org-lint-add-checker 'wrong-header-argument
+  "Report wrong babel headers"
+  #'org-lint-wrong-header-argument
+  :categories '(babel))
+
+(org-lint-add-checker 'wrong-header-value
+  "Report invalid value in babel headers"
+  #'org-lint-wrong-header-value
+  :categories '(babel) :trust 'low)
+
+(org-lint-add-checker 'deprecated-category-setup
+  "Report misuse of CATEGORY keyword"
+  #'org-lint-deprecated-category-setup
+  :categories '(obsolete))
+
+(org-lint-add-checker 'invalid-coderef-link
+  "Report \"coderef\" links with unknown destination"
+  #'org-lint-invalid-coderef-link
+  :categories '(link))
+
+(org-lint-add-checker 'invalid-custom-id-link
+  "Report \"custom-id\" links with unknown destination"
+  #'org-lint-invalid-custom-id-link
+  :categories '(link))
+
+(org-lint-add-checker 'invalid-fuzzy-link
+  "Report \"fuzzy\" links with unknown destination"
+  #'org-lint-invalid-fuzzy-link
+  :categories '(link))
+
+(org-lint-add-checker 'invalid-id-link
+  "Report \"id\" links with unknown destination"
+  #'org-lint-invalid-id-link
+  :categories '(link))
+
+(org-lint-add-checker 'link-to-local-file
+  "Report links to non-existent local files"
+  #'org-lint-link-to-local-file
+  :categories '(link) :trust 'low)
+
+(org-lint-add-checker 'non-existent-setupfile-parameter
+  "Report SETUPFILE keywords with non-existent file parameter"
+  #'org-lint-non-existent-setupfile-parameter
+  :trust 'low)
+
+(org-lint-add-checker 'wrong-include-link-parameter
+  "Report INCLUDE keywords with misleading link parameter"
+  #'org-lint-wrong-include-link-parameter
+  :categories '(export) :trust 'low)
+
+(org-lint-add-checker 'obsolete-include-markup
+  "Report obsolete markup in INCLUDE keyword"
+  #'org-lint-obsolete-include-markup
+  :categories '(obsolete export) :trust 'low)
+
+(org-lint-add-checker 'unknown-options-item
+  "Report unknown items in OPTIONS keyword"
+  #'org-lint-unknown-options-item
+  :categories '(export) :trust 'low)
+
+(org-lint-add-checker 'invalid-macro-argument-and-template
+  "Report spurious macro arguments or invalid macro templates"
+  #'org-lint-invalid-macro-argument-and-template
+  :categories '(export) :trust 'low)
+
+(org-lint-add-checker 'special-property-in-properties-drawer
+  "Report special properties in properties drawers"
+  #'org-lint-special-property-in-properties-drawer
+  :categories '(properties))
+
+(org-lint-add-checker 'obsolete-properties-drawer
+  "Report obsolete syntax for properties drawers"
+  #'org-lint-obsolete-properties-drawer
+  :categories '(obsolete properties))
+
+(org-lint-add-checker 'invalid-effort-property
+  "Report invalid duration in EFFORT property"
+  #'org-lint-invalid-effort-property
+  :categories '(properties))
+
+(org-lint-add-checker 'undefined-footnote-reference
+  "Report missing definition for footnote references"
+  #'org-lint-undefined-footnote-reference
+  :categories '(footnote))
+
+(org-lint-add-checker 'unreferenced-footnote-definition
+  "Report missing reference for footnote definitions"
+  #'org-lint-unreferenced-footnote-definition
+  :categories '(footnote))
+
+(org-lint-add-checker 'extraneous-element-in-footnote-section
+  "Report non-footnote definitions in footnote section"
+  #'org-lint-extraneous-element-in-footnote-section
+  :categories '(footnote))
+
+(org-lint-add-checker 'invalid-keyword-syntax
+  "Report probable invalid keywords"
+  #'org-lint-invalid-keyword-syntax
+  :trust 'low)
+
+(org-lint-add-checker 'invalid-block
+  "Report invalid blocks"
+  #'org-lint-invalid-block
+  :trust 'low)
+
+(org-lint-add-checker 'misplaced-planning-info
+  "Report misplaced planning info line"
+  #'org-lint-misplaced-planning-info
+  :trust 'low)
+
+(org-lint-add-checker 'incomplete-drawer
+  "Report probable incomplete drawers"
+  #'org-lint-incomplete-drawer
+  :trust 'low)
+
+(org-lint-add-checker 'indented-diary-sexp
+  "Report probable indented diary-sexps"
+  #'org-lint-indented-diary-sexp
+  :trust 'low)
+
+(org-lint-add-checker 'quote-section
+  "Report obsolete QUOTE section"
+  #'org-lint-quote-section
+  :categories '(obsolete) :trust 'low)
+
+(org-lint-add-checker 'file-application
+  "Report obsolete \"file+application\" link"
+  #'org-lint-file-application
+  :categories '(link obsolete))
+
+(org-lint-add-checker 'percent-encoding-link-escape
+  "Report obsolete escape syntax in links"
+  #'org-lint-percent-encoding-link-escape
+  :categories '(link obsolete) :trust 'low)
+
+(org-lint-add-checker 'spurious-colons
+  "Report spurious colons in tags"
+  #'org-lint-spurious-colons
+  :categories '(tags))
+
+(org-lint-add-checker 'non-existent-bibliography
+  "Report invalid bibliography file"
+  #'org-lint-non-existent-bibliography
+  :categories '(cite))
+
+(org-lint-add-checker 'missing-print-bibliography
+  "Report missing \"print_bibliography\" keyword"
+  #'org-lint-missing-print-bibliography
+  :categories '(cite))
+
+(org-lint-add-checker 'invalid-cite-export-declaration
+  "Report invalid value for \"cite_export\" keyword"
+  #'org-lint-invalid-cite-export-declaration
+  :categories '(cite))
+
+(org-lint-add-checker 'incomplete-citation
+  "Report incomplete citation object"
+  #'org-lint-incomplete-citation
+  :categories '(cite) :trust 'low)
+
+
 ;;; Reports UI
 
 (defvar org-lint--report-mode-map
@@ -1259,10 +1317,8 @@ for `tabulated-list-printer'."
 		     (lambda (report)
 		       (list (car report) trust (nth 1 report) c))
 		     (save-excursion
-		       (funcall
-			(intern (format "org-lint-%s"
-					(org-lint-checker-name c)))
-			ast)))))
+		       (funcall (org-lint-checker-function c)
+			        ast)))))
 		checkers)
 	       #'car-less-than-car))))))
 

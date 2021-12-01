@@ -97,6 +97,11 @@ argument.
 
 ** Miscellaneous
 
+*** Users can add checkers to the linting process
+
+The function ~org-lint-add-checker~ allows one to add personal checks
+when calling ~org-lint~.   See its docstring for more information.
+
 *** New =transparent-image-converter= property for =dvipng=
 
 The =dvipng= option in ~org-preview-latex-process-alist~ has a new

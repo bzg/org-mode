@@ -19,6 +19,26 @@
 
 ;;; Code:
 
+(ert-deftest test-org-lint/add-checker ()
+  "Test `org-lint-add-checker'."
+  ;; Name should be a non-nil symbol.
+  (should-error (org-lint-add-checker nil "Nil check" #'ignore))
+  (should-error (org-lint-add-checker 2 "Odd check" #'ignore))
+  ;; Check function should be valid.
+  (should-error (org-lint-add-checker 'check "check" (gensym)))
+  ;; Checkers must be named uniquely.
+  (should
+   (= 1
+      (let ((org-lint--checkers nil))
+        (org-lint-add-checker 'check "check" #'ignore)
+        (length org-lint--checkers))))
+  (should-not
+   (= 2
+      (let ((org-lint--checkers nil))
+        (org-lint-add-checker 'check "check" #'ignore)
+        (org-lint-add-checker 'check "other check" #'ignore)
+        (length org-lint--checkers)))))
+
 (ert-deftest test-org-lint/duplicate-custom-id ()
   "Test `org-lint-duplicate-custom-id' checker."
   (should
