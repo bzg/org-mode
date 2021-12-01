@@ -154,6 +154,194 @@ checker.  Currently, two properties are supported:
                           org-lint--checkers))))
 
 
+;;; Reports UI
+
+(defvar org-lint--report-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map tabulated-list-mode-map)
+    (define-key map (kbd "RET") 'org-lint--jump-to-source)
+    (define-key map (kbd "TAB") 'org-lint--show-source)
+    (define-key map (kbd "C-j") 'org-lint--show-source)
+    (define-key map (kbd "h") 'org-lint--hide-checker)
+    (define-key map (kbd "i") 'org-lint--ignore-checker)
+    map)
+  "Local keymap for `org-lint--report-mode' buffers.")
+
+(define-derived-mode org-lint--report-mode tabulated-list-mode "OrgLint"
+  "Major mode used to display reports emitted during linting.
+\\{org-lint--report-mode-map}"
+  (setf tabulated-list-format
+	`[("Line" 6
+	   (lambda (a b)
+	     (< (string-to-number (aref (cadr a) 0))
+		(string-to-number (aref (cadr b) 0))))
+	   :right-align t)
+	  ("Trust" 5 t)
+	  ("Warning" 0 t)])
+  (tabulated-list-init-header))
+
+(defun org-lint--generate-reports (buffer checkers)
+  "Generate linting report for BUFFER.
+
+CHECKERS is the list of checkers used.
+
+Return an alist (ID [LINE TRUST DESCRIPTION CHECKER]), suitable
+for `tabulated-list-printer'."
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-min))
+      (let ((ast (org-element-parse-buffer))
+	    (id 0)
+	    (last-line 1)
+	    (last-pos 1))
+	;; Insert unique ID for each report.  Replace buffer positions
+	;; with line numbers.
+	(mapcar
+	 (lambda (report)
+	   (list
+	    (cl-incf id)
+	    (apply #'vector
+		   (cons
+		    (progn
+		      (goto-char (car report))
+		      (beginning-of-line)
+		      (prog1 (number-to-string
+			      (cl-incf last-line
+				       (count-lines last-pos (point))))
+			(setf last-pos (point))))
+		    (cdr report)))))
+	 ;; Insert trust level in generated reports.  Also sort them
+	 ;; by buffer position in order to optimize lines computation.
+	 (sort (cl-mapcan
+		(lambda (c)
+		  (let ((trust (symbol-name (org-lint-checker-trust c))))
+		    (mapcar
+		     (lambda (report)
+		       (list (car report) trust (nth 1 report) c))
+		     (save-excursion
+		       (funcall (org-lint-checker-function c)
+			        ast)))))
+		checkers)
+	       #'car-less-than-car))))))
+
+(defvar-local org-lint--source-buffer nil
+  "Source buffer associated to current report buffer.")
+
+(defvar-local org-lint--local-checkers nil
+  "List of checkers used to build current report.")
+
+(defun org-lint--refresh-reports ()
+  (setq tabulated-list-entries
+	(org-lint--generate-reports org-lint--source-buffer
+				    org-lint--local-checkers))
+  (tabulated-list-print))
+
+(defun org-lint--current-line ()
+  "Return current report line, as a number."
+  (string-to-number (aref (tabulated-list-get-entry) 0)))
+
+(defun org-lint--current-checker (&optional entry)
+  "Return current report checker.
+When optional argument ENTRY is non-nil, use this entry instead
+of current one."
+  (aref (if entry (nth 1 entry) (tabulated-list-get-entry)) 3))
+
+(defun org-lint--display-reports (source checkers)
+  "Display linting reports for buffer SOURCE.
+CHECKERS is the list of checkers used."
+  (let ((buffer (get-buffer-create "*Org Lint*")))
+    (with-current-buffer buffer
+      (org-lint--report-mode)
+      (setf org-lint--source-buffer source)
+      (setf org-lint--local-checkers checkers)
+      (org-lint--refresh-reports)
+      (add-hook 'tabulated-list-revert-hook #'org-lint--refresh-reports nil t))
+    (pop-to-buffer buffer)))
+
+(defun org-lint--jump-to-source ()
+  "Move to source line that generated the report at point."
+  (interactive)
+  (let ((l (org-lint--current-line)))
+    (switch-to-buffer-other-window org-lint--source-buffer)
+    (org-goto-line l)
+    (org-show-set-visibility 'local)
+    (recenter)))
+
+(defun org-lint--show-source ()
+  "Show source line that generated the report at point."
+  (interactive)
+  (let ((buffer (current-buffer)))
+    (org-lint--jump-to-source)
+    (switch-to-buffer-other-window buffer)))
+
+(defun org-lint--hide-checker ()
+  "Hide all reports from checker that generated the report at point."
+  (interactive)
+  (let ((c (org-lint--current-checker)))
+    (setf tabulated-list-entries
+	  (cl-remove-if (lambda (e) (equal c (org-lint--current-checker e)))
+			tabulated-list-entries))
+    (tabulated-list-print)))
+
+(defun org-lint--ignore-checker ()
+  "Ignore all reports from checker that generated the report at point.
+Checker will also be ignored in all subsequent reports."
+  (interactive)
+  (setf org-lint--local-checkers
+	(remove (org-lint--current-checker) org-lint--local-checkers))
+  (org-lint--hide-checker))
+
+
+;;; Main function
+
+;;;###autoload
+(defun org-lint (&optional arg)
+  "Check current Org buffer for syntax mistakes.
+
+By default, run all checkers.  With a `\\[universal-argument]' prefix ARG, \
+select one
+category of checkers only.  With a `\\[universal-argument] \
+\\[universal-argument]' prefix, run one precise
+checker by its name.
+
+ARG can also be a list of checker names, as symbols, to run."
+  (interactive "P")
+  (unless (derived-mode-p 'org-mode) (user-error "Not in an Org buffer"))
+  (when (called-interactively-p 'any)
+    (message "Org linting process starting..."))
+  (let ((checkers
+	 (pcase arg
+	   (`nil org-lint--checkers)
+	   (`(4)
+	    (let ((category
+		   (completing-read
+		    "Checker category: "
+		    (mapcar #'org-lint-checker-categories org-lint--checkers)
+		    nil t)))
+	      (cl-remove-if-not
+	       (lambda (c)
+		 (assoc-string (org-lint-checker-categories c) category))
+	       org-lint--checkers)))
+	   (`(16)
+	    (list
+	     (let ((name (completing-read
+			  "Checker name: "
+			  (mapcar #'org-lint-checker-name org-lint--checkers)
+			  nil t)))
+	       (catch 'exit
+		 (dolist (c org-lint--checkers)
+		   (when (string= (org-lint-checker-name c) name)
+		     (throw 'exit c)))))))
+	   ((pred consp)
+	    (cl-remove-if-not (lambda (c) (memq (org-lint-checker-name c) arg))
+			      org-lint--checkers))
+	   (_ (user-error "Invalid argument `%S' for `org-lint'" arg)))))
+    (if (not (called-interactively-p 'any))
+	(org-lint--generate-reports (current-buffer) checkers)
+      (org-lint--display-reports (current-buffer) checkers)
+      (message "Org linting process completed"))))
+
+
 ;;; Checker functions
 
 (defun org-lint--collect-duplicates
@@ -1250,194 +1438,6 @@ Use \"export %s\" instead"
   "Report incomplete citation object"
   #'org-lint-incomplete-citation
   :categories '(cite) :trust 'low)
-
-
-;;; Reports UI
-
-(defvar org-lint--report-mode-map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map tabulated-list-mode-map)
-    (define-key map (kbd "RET") 'org-lint--jump-to-source)
-    (define-key map (kbd "TAB") 'org-lint--show-source)
-    (define-key map (kbd "C-j") 'org-lint--show-source)
-    (define-key map (kbd "h") 'org-lint--hide-checker)
-    (define-key map (kbd "i") 'org-lint--ignore-checker)
-    map)
-  "Local keymap for `org-lint--report-mode' buffers.")
-
-(define-derived-mode org-lint--report-mode tabulated-list-mode "OrgLint"
-  "Major mode used to display reports emitted during linting.
-\\{org-lint--report-mode-map}"
-  (setf tabulated-list-format
-	`[("Line" 6
-	   (lambda (a b)
-	     (< (string-to-number (aref (cadr a) 0))
-		(string-to-number (aref (cadr b) 0))))
-	   :right-align t)
-	  ("Trust" 5 t)
-	  ("Warning" 0 t)])
-  (tabulated-list-init-header))
-
-(defun org-lint--generate-reports (buffer checkers)
-  "Generate linting report for BUFFER.
-
-CHECKERS is the list of checkers used.
-
-Return an alist (ID [LINE TRUST DESCRIPTION CHECKER]), suitable
-for `tabulated-list-printer'."
-  (with-current-buffer buffer
-    (save-excursion
-      (goto-char (point-min))
-      (let ((ast (org-element-parse-buffer))
-	    (id 0)
-	    (last-line 1)
-	    (last-pos 1))
-	;; Insert unique ID for each report.  Replace buffer positions
-	;; with line numbers.
-	(mapcar
-	 (lambda (report)
-	   (list
-	    (cl-incf id)
-	    (apply #'vector
-		   (cons
-		    (progn
-		      (goto-char (car report))
-		      (beginning-of-line)
-		      (prog1 (number-to-string
-			      (cl-incf last-line
-				       (count-lines last-pos (point))))
-			(setf last-pos (point))))
-		    (cdr report)))))
-	 ;; Insert trust level in generated reports.  Also sort them
-	 ;; by buffer position in order to optimize lines computation.
-	 (sort (cl-mapcan
-		(lambda (c)
-		  (let ((trust (symbol-name (org-lint-checker-trust c))))
-		    (mapcar
-		     (lambda (report)
-		       (list (car report) trust (nth 1 report) c))
-		     (save-excursion
-		       (funcall (org-lint-checker-function c)
-			        ast)))))
-		checkers)
-	       #'car-less-than-car))))))
-
-(defvar-local org-lint--source-buffer nil
-  "Source buffer associated to current report buffer.")
-
-(defvar-local org-lint--local-checkers nil
-  "List of checkers used to build current report.")
-
-(defun org-lint--refresh-reports ()
-  (setq tabulated-list-entries
-	(org-lint--generate-reports org-lint--source-buffer
-				    org-lint--local-checkers))
-  (tabulated-list-print))
-
-(defun org-lint--current-line ()
-  "Return current report line, as a number."
-  (string-to-number (aref (tabulated-list-get-entry) 0)))
-
-(defun org-lint--current-checker (&optional entry)
-  "Return current report checker.
-When optional argument ENTRY is non-nil, use this entry instead
-of current one."
-  (aref (if entry (nth 1 entry) (tabulated-list-get-entry)) 3))
-
-(defun org-lint--display-reports (source checkers)
-  "Display linting reports for buffer SOURCE.
-CHECKERS is the list of checkers used."
-  (let ((buffer (get-buffer-create "*Org Lint*")))
-    (with-current-buffer buffer
-      (org-lint--report-mode)
-      (setf org-lint--source-buffer source)
-      (setf org-lint--local-checkers checkers)
-      (org-lint--refresh-reports)
-      (add-hook 'tabulated-list-revert-hook #'org-lint--refresh-reports nil t))
-    (pop-to-buffer buffer)))
-
-(defun org-lint--jump-to-source ()
-  "Move to source line that generated the report at point."
-  (interactive)
-  (let ((l (org-lint--current-line)))
-    (switch-to-buffer-other-window org-lint--source-buffer)
-    (org-goto-line l)
-    (org-show-set-visibility 'local)
-    (recenter)))
-
-(defun org-lint--show-source ()
-  "Show source line that generated the report at point."
-  (interactive)
-  (let ((buffer (current-buffer)))
-    (org-lint--jump-to-source)
-    (switch-to-buffer-other-window buffer)))
-
-(defun org-lint--hide-checker ()
-  "Hide all reports from checker that generated the report at point."
-  (interactive)
-  (let ((c (org-lint--current-checker)))
-    (setf tabulated-list-entries
-	  (cl-remove-if (lambda (e) (equal c (org-lint--current-checker e)))
-			tabulated-list-entries))
-    (tabulated-list-print)))
-
-(defun org-lint--ignore-checker ()
-  "Ignore all reports from checker that generated the report at point.
-Checker will also be ignored in all subsequent reports."
-  (interactive)
-  (setf org-lint--local-checkers
-	(remove (org-lint--current-checker) org-lint--local-checkers))
-  (org-lint--hide-checker))
-
-
-;;; Public function
-
-;;;###autoload
-(defun org-lint (&optional arg)
-  "Check current Org buffer for syntax mistakes.
-
-By default, run all checkers.  With a `\\[universal-argument]' prefix ARG, \
-select one
-category of checkers only.  With a `\\[universal-argument] \
-\\[universal-argument]' prefix, run one precise
-checker by its name.
-
-ARG can also be a list of checker names, as symbols, to run."
-  (interactive "P")
-  (unless (derived-mode-p 'org-mode) (user-error "Not in an Org buffer"))
-  (when (called-interactively-p 'any)
-    (message "Org linting process starting..."))
-  (let ((checkers
-	 (pcase arg
-	   (`nil org-lint--checkers)
-	   (`(4)
-	    (let ((category
-		   (completing-read
-		    "Checker category: "
-		    (mapcar #'org-lint-checker-categories org-lint--checkers)
-		    nil t)))
-	      (cl-remove-if-not
-	       (lambda (c)
-		 (assoc-string (org-lint-checker-categories c) category))
-	       org-lint--checkers)))
-	   (`(16)
-	    (list
-	     (let ((name (completing-read
-			  "Checker name: "
-			  (mapcar #'org-lint-checker-name org-lint--checkers)
-			  nil t)))
-	       (catch 'exit
-		 (dolist (c org-lint--checkers)
-		   (when (string= (org-lint-checker-name c) name)
-		     (throw 'exit c)))))))
-	   ((pred consp)
-	    (cl-remove-if-not (lambda (c) (memq (org-lint-checker-name c) arg))
-			      org-lint--checkers))
-	   (_ (user-error "Invalid argument `%S' for `org-lint'" arg)))))
-    (if (not (called-interactively-p 'any))
-	(org-lint--generate-reports (current-buffer) checkers)
-      (org-lint--display-reports (current-buffer) checkers)
-      (message "Org linting process completed"))))
 
 (provide 'org-lint)
 
