@@ -6420,14 +6420,18 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                        ;; may exist though.  Parse starting from the
                        ;; last sibling or from ELEM-END if there are
                        ;; no other siblings.
-                       (goto-char pos)
-                       (re-search-backward
-                        (rx-to-string
-                         `(and bol (repeat ,(let ((level (org-element-property :level element)))
-                                              (if org-odd-levels-only (1- (* level 2)) level))
-                                           "*")
-                               " "))
-                        elem-end t))))
+                       (let ((p (point)))
+                         (goto-char pos)
+                         (unless
+                             (re-search-backward
+                              (rx-to-string
+                               `(and bol (repeat ,(let ((level (org-element-property :level element)))
+                                                    (if org-odd-levels-only (1- (* level 2)) level))
+                                                 "*")
+                                     " "))
+                              elem-end t)
+                           ;; Roll-back to normal parsing.
+                           (goto-char p))))))
 	         (setq mode (org-element--next-mode mode type nil)))
 	        ;; A non-greater element contains point: return it.
 	        ((not (memq type org-element-greater-elements))
