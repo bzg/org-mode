@@ -421,9 +421,6 @@ Return a non-nil value on a successful operation."
 (defun org-cite-get-processor (name)
   "Return citation processor named after symbol NAME.
 Return nil if no such processor is found."
-  ;; Opportunistically try to load the library providing the
-  ;; processor.
-  (require (intern (concat "oc-" (symbol-name name))) nil t)
   (seq-find (lambda (p) (eq name (org-cite-processor-name p)))
 	    org-cite--processors))
 
@@ -454,6 +451,13 @@ PROCESSOR is the name of a cite processor, as a symbol.  CAPABILITY is
 
 
 ;;; Internal functions
+(defun org-cite--try-load-processor (name)
+  "Try loading citation processor NAME if unavailable.
+NAME is a symbol.  When the NAME processor is unregistered, try
+loading \"oc-NAME\" library beforehand, then cross fingers."
+  (unless (org-cite-get-processor name)
+    (require (format "oc-%s" name) nil t)))
+
 (defun org-cite--set-post-blank (datum blanks)
   "Set `:post-blank' property from element or object before DATUM to BLANKS.
 DATUM is an element or object.  BLANKS is an integer.  DATUM is modified
@@ -1279,6 +1283,7 @@ side-effect."
     (pcase processor
       ('nil nil)
       (`(,name . ,_)
+       (org-cite--try-load-processor name)
        (cond
         ((not (org-cite-get-processor name))
          (user-error "Unknown processor %S" name))
@@ -1428,10 +1433,11 @@ channel, as a property list."
   "Follow citation or citation-reference DATUM.
 Following is done according to the processor set in `org-cite-follow-processor'.
 ARG is the prefix argument received when calling `org-open-at-point', or nil."
+  (unless org-cite-follow-processor
+    (user-error "No processor set to follow citations"))
+  (org-cite--try-load-processor org-cite-follow-processor)
   (let ((name org-cite-follow-processor))
     (cond
-     ((null name)
-      (user-error "No processor set to follow citations"))
      ((not (org-cite-get-processor name))
       (user-error "Unknown processor %S" name))
      ((not (org-cite-processor-has-capability-p name 'follow))
@@ -1649,10 +1655,11 @@ More specifically,
 Insertion is done according to the processor set in `org-cite-insert-processor'.
 ARG is the prefix argument received when calling interactively the function."
   (interactive "P")
+  (unless org-cite-insert-processor
+    (user-error "No processor set to insert citations"))
+  (org-cite--try-load-processor org-cite-insert-processor)
   (let ((name org-cite-insert-processor))
     (cond
-     ((null name)
-      (user-error "No processor set to insert citations"))
      ((not (org-cite-get-processor name))
       (user-error "Unknown processor %S" name))
      ((not (org-cite-processor-has-capability-p name 'insert))
