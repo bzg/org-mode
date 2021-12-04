@@ -5868,19 +5868,15 @@ updated before current modification are actually submitted."
                   (buffer-modified-tick)))
           (progn
             (when (or (and org-element--cache-diagnostics-modifications
-                           ;; FIXME: Some more special cases when
-                           ;; non-latin input in Emacs <28 triggers
-                           ;; changes in `buffer-chars-modified-tick'
-                           ;; even though the buffer text remains
-                           ;; unchanged.  We still reset the cache as
-                           ;; safety precaution, but do not show the
-                           ;; warning.
-                           (not (memq (- (buffer-modified-tick)
-                                       (buffer-chars-modified-tick))
-                                    ;; Note: 4 is a footprint for
-                                    ;; (let ((inhibit-modification-hooks t))
-                                    ;; (insert "blah"))
-                                    '(1 3 6 7 8 9))))
+                           ;; A number of Emacs internal operations in
+                           ;; Emacs 26 and 27 alter
+                           ;; `buffer-chars-modified-tick' (see
+                           ;; https://list.orgmode.org/87ee7jdv70.fsf@localhost/T/#t).
+                           ;; We have no way to distinguish them from
+                           ;; dangerious silent edits.  So, we can
+                           ;; only reset the cache, but do not show
+                           ;; warning to not irritate the users.)
+                           (not (version< emacs-version "28")))
                       (and (boundp 'org-batch-test) org-batch-test))
               (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
