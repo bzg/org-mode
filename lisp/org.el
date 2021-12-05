@@ -5786,8 +5786,12 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	  ;; Blocks and meta lines
 	  '(org-fontify-meta-lines-and-blocks)
           '(org-fontify-inline-src-blocks)
-          ;; Citations
-          '(org-cite-activate))))
+          ;; Citations.  When an activate processor is specified, if
+          ;; specified, try loading it beforehand.
+          (progn
+            (unless (null org-cite-activate-processor)
+              (org-cite-try-load-processor org-cite-activate-processor))
+            '(org-cite-activate)))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     (run-hooks 'org-font-lock-set-keywords-hook)
     ;; Now set the full font-lock-keywords
