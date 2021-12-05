@@ -95,7 +95,6 @@
 (require 'org-keys)
 (require 'ol)
 (require 'oc)
-(require 'oc-basic)
 (require 'org-table)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in

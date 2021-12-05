@@ -75,7 +75,6 @@
 (require 'cl-lib)
 (require 'ob-exp)
 (require 'oc)
-(require 'oc-basic)    ;default value for `org-cite-export-processors'
 (require 'ol)
 (require 'org-element)
 (require 'org-macro)
