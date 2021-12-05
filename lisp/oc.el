@@ -456,7 +456,7 @@ PROCESSOR is the name of a cite processor, as a symbol.  CAPABILITY is
 NAME is a symbol.  When the NAME processor is unregistered, try
 loading \"oc-NAME\" library beforehand, then cross fingers."
   (unless (org-cite-get-processor name)
-    (require (format "oc-%s" name) nil t)))
+    (require (intern (format "oc-%s" name)) nil t)))
 
 (defun org-cite--set-post-blank (datum blanks)
   "Set `:post-blank' property from element or object before DATUM to BLANKS.
