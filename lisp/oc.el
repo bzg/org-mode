@@ -418,6 +418,13 @@ Return a non-nil value on a successful operation."
               (seq-remove (lambda (p) (eq name (org-cite-processor-name p)))
                           org-cite--processors))))
 
+(defun org-cite-try-load-processor (name)
+  "Try loading citation processor NAME if unavailable.
+NAME is a symbol.  When the NAME processor is unregistered, try
+loading \"oc-NAME\" library beforehand, then cross fingers."
+  (unless (org-cite-get-processor name)
+    (require (intern (format "oc-%s" name)) nil t)))
+
 (defun org-cite-get-processor (name)
   "Return citation processor named after symbol NAME.
 Return nil if no such processor is found."
@@ -451,13 +458,6 @@ PROCESSOR is the name of a cite processor, as a symbol.  CAPABILITY is
 
 
 ;;; Internal functions
-(defun org-cite--try-load-processor (name)
-  "Try loading citation processor NAME if unavailable.
-NAME is a symbol.  When the NAME processor is unregistered, try
-loading \"oc-NAME\" library beforehand, then cross fingers."
-  (unless (org-cite-get-processor name)
-    (require (intern (format "oc-%s" name)) nil t)))
-
 (defun org-cite--set-post-blank (datum blanks)
   "Set `:post-blank' property from element or object before DATUM to BLANKS.
 DATUM is an element or object.  BLANKS is an integer.  DATUM is modified
@@ -1283,7 +1283,7 @@ side-effect."
     (pcase processor
       ('nil nil)
       (`(,name . ,_)
-       (org-cite--try-load-processor name)
+       (org-cite-try-load-processor name)
        (cond
         ((not (org-cite-get-processor name))
          (user-error "Unknown processor %S" name))
@@ -1435,7 +1435,7 @@ Following is done according to the processor set in `org-cite-follow-processor'.
 ARG is the prefix argument received when calling `org-open-at-point', or nil."
   (unless org-cite-follow-processor
     (user-error "No processor set to follow citations"))
-  (org-cite--try-load-processor org-cite-follow-processor)
+  (org-cite-try-load-processor org-cite-follow-processor)
   (let ((name org-cite-follow-processor))
     (cond
      ((not (org-cite-get-processor name))
@@ -1657,7 +1657,7 @@ ARG is the prefix argument received when calling interactively the function."
   (interactive "P")
   (unless org-cite-insert-processor
     (user-error "No processor set to insert citations"))
-  (org-cite--try-load-processor org-cite-insert-processor)
+  (org-cite-try-load-processor org-cite-insert-processor)
   (let ((name org-cite-insert-processor))
     (cond
      ((not (org-cite-get-processor name))
