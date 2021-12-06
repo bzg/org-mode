@@ -45,6 +45,7 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element"
 		  (blob &optional types with-self))
+(declare-function org-element--parse-paired-brackets "org-element" (char))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-footnote-goto-definition "org-footnote"
@@ -614,6 +615,7 @@ Leave point in edit buffer."
 
 ;;; Fontification of source blocks
 
+(defvar org-src-fontify-natively) ; Defined in org.el
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block between START and END using LANG's syntax.
 This function is called by Emacs' automatic fontification, as long
