@@ -731,8 +731,9 @@ reference.  Values are the cite key."
 (defun org-cite-basic--complete-key (&optional multiple)
   "Prompt for a reference key and return a citation reference string.
 
-When optional argument MULTIPLE is non-nil, prompt for multiple keys, until one
-of them is nil.  Then return the list of reference strings selected.
+When optional argument MULTIPLE is non-nil, prompt for multiple
+keys, until one of them is nil.  Then return the list of
+reference strings selected.
 
 Raise an error when no bibliography is set in the buffer."
   (let* ((table
@@ -748,9 +749,9 @@ Raise an error when no bibliography is set in the buffer."
              (build-prompt
               (lambda ()
                 (if keys
-                    (format "Key (\"\" to exit) %s: "
+                    (format "Key (empty input exits) %s: "
                             (mapconcat #'identity (reverse keys) ";"))
-                  "Key (\"\" to exit): "))))
+                  "Key (empty input exits): "))))
         (let ((key (funcall prompt (funcall build-prompt))))
           (while (org-string-nw-p key)
             (push (gethash key table) keys)
