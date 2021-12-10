@@ -134,13 +134,15 @@ If nil then only the fallback en-US locale will be available."
 
 (defcustom org-cite-csl-styles-dir nil
   "Directory of CSL style files.
-When non-nil, relative style file names are expanded relatively to this
-directory.  This variable is ignored when style file is absolute."
+
+Relative style file names are expanded according to document's
+default directory.  If it fails and the variable is non-nil, Org
+looks for style files in this directory, too."
   :group 'org-cite
   :package-version '(Org . "9.5")
   :type '(choice
           (directory :tag "Styles directory")
-          (const :tag "Use absolute file names" nil))
+          (const :tag "No central directory for style files" nil))
   ;; It's not obvious to me that arbitrary locations are safe.
 ;;;  :safe #'string-or-null-p
   )
@@ -370,15 +372,21 @@ corresponding to one of the output formats supported by Citeproc: `html',
 
 INFO is the export state, as a property list.
 
-When file name is relative, expand it according to `org-cite-csl-styles-dir',
-or raise an error if the variable is unset."
+When file name is relative, look for it in buffer's default
+directory, failing that in `org-cite-csl-styles-dir' if non-nil.
+Raise an error if no style file can be found."
   (pcase (org-cite-bibliography-style info)
     ('nil org-cite-csl--fallback-style-file)
     ((and (pred file-name-absolute-p) file) file)
-    ((and (guard org-cite-csl-styles-dir) file)
+    ((and (pred file-exists-p) file) (expand-file-name file))
+    ((and (guard org-cite-csl-styles-dir)
+          (pred (lambda (f)
+                  (file-exists-p
+                   (expand-file-name f org-cite-csl-styles-dir))))
+          file)
      (expand-file-name file org-cite-csl-styles-dir))
     (other
-     (user-error "Cannot handle relative style file name: %S" other))))
+     (user-error "CSL style file not found: %S" other))))
 
 (defun org-cite-csl--locale-getter ()
   "Return a locale getter.

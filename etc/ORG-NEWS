@@ -97,6 +97,11 @@ argument.
 
 ** Miscellaneous
 
+*** Org also searches for CSL style files in default directory
+
+When CSL style file name is relative, Org first looks into
+default-directory before trying ~org-cite-csl-styles-dir~.
+
 *** Users can add checkers to the linting process
 
 The function ~org-lint-add-checker~ allows one to add personal checks
