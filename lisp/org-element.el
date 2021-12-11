@@ -6495,7 +6495,7 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
    org-list-full-item-re "\\|"
    ":\\(?: \\|$\\)" "\\|"
    "\\\\begin{[A-Za-z0-9*]+}" "\\|"
-   ":\\(?:\\w\\|[-_]\\)+:[ \t]*.*$"
+   ":\\(?:\\w\\|[-_]\\)+:[ \t]*$"
    "\\)")
   "Regexp matching a sensitive line, structure wise.
 A sensitive line is a headline, inlinetask, block, drawer, or
@@ -6619,11 +6619,6 @@ known element in cache (it may start after END)."
     (if (not before) after
       (let ((up before)
 	    (robust-flag t))
-        (when (and (eq 'org-data (org-element-type up))
-                   org-element--cache-change-warning)
-          ;; We may be doing changes in first section that affect
-          ;; org-data.
-          (setq org-element--cache-change-warning 'org-data))
 	(while up
 	  (if (let ((type (org-element-type up)))
                 (or (and (memq type '( center-block dynamic-block
@@ -6649,17 +6644,7 @@ known element in cache (it may start after END)."
                          (pcase type
                            ;; Sensitive change in section.  Need to
                            ;; re-parse.
-                           (`section
-                            (or (not org-element--cache-change-warning) ; robust
-                                (when (and org-element--cache-change-warning
-                                           (eq 'org-data
-                                               (org-element-type (org-element-property :parent up))))
-                                  ;; Breaking change in section
-                                  ;; potentially breaks org-data
-                                  ;; (i.e. top property drawer change).
-                                  (setq org-element--cache-change-warning 'org-data)
-                                  ;; Not robust
-                                  nil)))
+                           (`section (not org-element--cache-change-warning))
                            ;; Headline might be inserted.  This is non-robust
                            ;; change when `up' is a `headline' or `section'
                            ;; with `>' level compared to the inserted headline.
@@ -6680,7 +6665,18 @@ known element in cache (it may start after END)."
                                      (when (looking-at org-property-drawer-re)
                                        (< beg (match-end 0))))
                                  'robust))))
-                           (`org-data (not (eq org-element--cache-change-warning 'org-data)))
+                           (`org-data (and (not (eq org-element--cache-change-warning 'org-data))
+                                           ;; Property drawer could
+                                           ;; have been inserted.  It
+                                           ;; is not robust change
+                                           ;; then.
+                                           (org-with-wide-buffer
+                                            (goto-char (point-min))
+                                            (while (and (org-at-comment-p) (bolp)) (forward-line))
+                                            ;; Should not see property
+                                            ;; drawer inside robust
+                                            ;; region.
+                                            (not (looking-at org-property-drawer-re)))))
                            (_ 'robust)))))
 	      ;; UP is a robust greater element containing changes.
 	      ;; We only need to extend its ending boundaries.
