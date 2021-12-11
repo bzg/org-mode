@@ -1566,7 +1566,7 @@ More specifically,
 
   On a citation reference:
 
-    - on the prefix or right before th \"@\" character, insert
+    - on the prefix or right before the \"@\" character, insert
       a new reference before the current one,
     - on the suffix, insert it after the reference,
     - otherwise, update the cite key, preserving both affixes.
