@@ -306,6 +306,14 @@
             (org-cite-register-processor 'test
               :cite-styles '((("foo" "f")) ((""))))
             (org-cite-supported-styles))))
+  ;; Also support functions generating the list.
+  (should
+   (equal '((("foo" "f")) (("")))
+          (let ((org-cite--processors nil)
+                (org-cite-export-processors '((t test))))
+            (org-cite-register-processor 'test
+              :cite-styles (lambda () '((("foo" "f")) (("")))))
+            (org-cite-supported-styles))))
   ;; Explicitly provide a processor.
   (should
    (equal '((("")))

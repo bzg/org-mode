@@ -97,6 +97,12 @@ argument.
 
 ** Miscellaneous
 
+*** Citation processors can declare styles dynamically
+
+When a citation processor is registered, it is now possible to set
+~:cite-styles~ key to a function, which will be called whenever the
+list of styles is required.
+
 *** Org also searches for CSL style files in default directory
 
 When CSL style file name is relative, Org first looks into

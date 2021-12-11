@@ -409,6 +409,9 @@ optional keys can be set:
     The \"nil\" style denotes the processor fall-back style.  It
     should have a corresponding entry in the value.
 
+    The value can also be a function.  It will be called without
+    any argument and should return a list structured as the above.
+
 Return a non-nil value on a successful operation."
   (declare (indent 1))
   (unless (and name (symbolp name))
@@ -680,7 +683,10 @@ strings."
   (let ((collection
          (seq-mapcat
           (lambda (name)
-            (org-cite-processor-cite-styles (org-cite-get-processor name)))
+            (pcase (org-cite-processor-cite-styles
+                    (org-cite-get-processor name))
+              ((and (pred functionp) f) (funcall f))
+              (static-data static-data)))
           (or processors
               (mapcar (pcase-lambda (`(,_ . (,name . ,_))) name)
                       org-cite-export-processors))))
