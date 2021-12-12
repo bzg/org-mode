@@ -97,6 +97,12 @@ argument.
 
 ** Miscellaneous
 
+*** Styles are customizable in ~biblatex~ citation processor
+
+It is now possible to add new styles or modify old ones in ~biblatex~
+citation processor.  See ~org-cite-biblatex-styles~ for more
+information.
+
 *** Citation processors can declare styles dynamically
 
 When a citation processor is registered, it is now possible to set
