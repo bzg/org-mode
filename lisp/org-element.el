@@ -6779,7 +6779,7 @@ change, as an integer."
                 ;; new modification may also have non-nil
                 ;; `org-element--cache-change-warning'.  In the latter case, we
                 ;; also need to update the request.
-                (let ((first (org-element--cache-for-removal beg end offset) ; Shift as needed.
+                (let ((first (org-element--cache-for-removal delete-from end offset) ; Shift as needed.
                              ))
                   (org-element--cache-log-message "Current request is inside next. Candidate parent: %S"
                                        (org-element--format-element first))
