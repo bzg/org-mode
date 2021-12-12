@@ -170,18 +170,18 @@ INFO is the export state, as a property list."
             ;; a \relax unconditionally.
             "\\relax")))
 
-(defun org-cite-biblatex--command (citation info base &optional multi no-opt)
-  "Return biblatex command using BASE name for CITATION object.
+(defun org-cite-biblatex--command (citation info name &optional multi no-opt)
+  "Return BibLaTeX command NAME for CITATION object.
 
 INFO is the export state, as a property list.
 
-When optional argument MULTI is non-nil, generate a \"multicite\" command when
-appropriate.  When optional argument NO-OPT is non-nil, do not add optional
-arguments to the command."
-  (format "\\%s%s"
-          base
-          (if (and multi (org-cite-biblatex--multicite-p citation))
-              (concat "s" (org-cite-biblatex--multi-arguments citation info))
+When optional argument MULTI is non-nil, use it as a multicite
+command name when appropriate.  When optional argument NO-OPT is
+non-nil, do not add optional arguments to the command."
+  (if (and multi (org-cite-biblatex--multicite-p citation))
+      (format "\\%s%s" multi (org-cite-biblatex--multi-arguments citation info))
+    (format "\\%s%s"
+            name
             (org-cite-biblatex--atomic-arguments
              (org-cite-get-references citation) info no-opt))))
 
@@ -241,15 +241,15 @@ INFO is the export state, as a property list."
      ;; "text" style.
      (`(,(or "text" "t") . ,variant)
       (pcase variant
-        ((or "caps" "c")            '("Textcite" t))
-        (_                          '("textcite" t))))
+        ((or "caps" "c")            '("Textcite" "Textcites"))
+        (_                          '("textcite" "textcites"))))
      ;; Default "nil" style.
      (`(,_ . ,variant)
       (pcase variant
-        ((or "bare" "b")            '("cite" t))
-        ((or "caps" "c")            '("Autocite" t))
-        ((or "bare-caps" "bc")      '("Cite" t))
-        (_                          '("autocite" t))))
+        ((or "bare" "b")            '("cite" "cites"))
+        ((or "caps" "c")            '("Autocite" "Autocites"))
+        ((or "bare-caps" "bc")      '("Cite" "Cites"))
+        (_                          '("autocite" "autocites"))))
      ;; This should not happen.
      (_ (error "Invalid style: %S" style)))))
 
