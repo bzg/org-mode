@@ -154,6 +154,7 @@ names.  See `org-cite-biblatex-style-shortcuts'."
 (defcustom org-cite-biblatex-style-shortcuts
   '(("a"  . "author")
     ("b"  . "bare")
+    ("bc" . "bare-caps")
     ("c"  . "caps")
     ("cf" . "caps-full")
     ("f"  . "full")
