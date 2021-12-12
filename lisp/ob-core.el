@@ -739,7 +739,8 @@ block."
 	    (forward-line)
 	    (skip-chars-forward " \t")
 	    (let ((result (org-babel-read-result)))
-	      (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
+	      (message (format "Cached: %s"
+                               (replace-regexp-in-string "%" "%%" (format "%S" result))))
 	      result)))
 	 ((org-babel-confirm-evaluate info)
 	  (let* ((lang (nth 0 info))
@@ -3155,6 +3156,22 @@ additionally processed by `shell-quote-argument'."
 Used by `org-babel-temp-file'.  This directory will be removed on
 Emacs shutdown."))
 
+(defvar org-babel-temporary-stable-directory)
+(unless (or noninteractive (boundp 'org-babel-temporary-stable-directory))
+  (defvar org-babel-temporary-stable-directory
+    (or (and (boundp 'org-babel-temporary-stable-directory)
+	     (file-exists-p org-babel-temporary-stable-directory)
+	     org-babel-temporary-stable-directory)
+        (condition-case nil
+            (make-directory
+	     (expand-file-name
+              "babel-stable"
+              (temporary-file-directory)))
+          (t nil)))
+    "Directory to hold temporary files created to execute code blocks.
+Used by `org-babel-temp-file'.  This directory will be removed on
+Emacs shutdown."))
+
 (defcustom org-babel-remote-temporary-directory "/tmp/"
   "Directory to hold temporary files on remote hosts."
   :group 'org-babel
@@ -3198,6 +3215,30 @@ of `org-babel-temporary-directory'."
 	       temporary-file-directory)))
       (make-temp-file prefix nil suffix))))
 
+(defun org-babel-temp-stable-file (data prefix &optional suffix)
+  "Create a temporary file in the `org-babel-remove-temporary-stable-directory'.
+The file name is stable with respect to DATA.  The file name is
+constructed like the following: PREFIXDATAhashSUFFIX."
+  (if (file-remote-p default-directory)
+      (let* ((prefix
+              (concat (file-remote-p default-directory)
+                      (expand-file-name
+		       prefix org-babel-temporary-stable-directory)))
+             (path (concat prefix (format "%s" (sxhash data)) (or suffix ""))))
+        (with-temp-file path)
+        path)
+    (let* ((temporary-file-directory
+	    (or (and (boundp 'org-babel-temporary-stable-directory)
+		     (file-exists-p org-babel-temporary-stable-directory)
+		     org-babel-temporary-stable-directory)
+	        temporary-file-directory))
+           (path (concat
+                  (expand-file-name
+		   prefix org-babel-temporary-stable-directory)
+                  (format "%s" (sxhash data)) (or suffix ""))))
+      (with-temp-file path)
+      path)))
+
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."
   (when (and (boundp 'org-babel-temporary-directory)
@@ -3221,7 +3262,16 @@ of `org-babel-temporary-directory'."
 		    org-babel-temporary-directory
 		  "[directory not defined]"))))))
 
+(defun org-babel-remove-temporary-stable-directory ()
+  "Remove `org-babel-temporary-stable-directory' and on Emacs shutdown."
+  (when (and (boundp 'org-babel-temporary-stable-directory)
+	     (file-exists-p org-babel-temporary-stable-directory))
+    (let ((org-babel-temporary-directory
+           org-babel-temporary-stable-directory))
+      (org-babel-remove-temporary-directory))))
+
 (add-hook 'kill-emacs-hook #'org-babel-remove-temporary-directory)
+(add-hook 'kill-emacs-hook #'org-babel-remove-temporary-stable-directory)
 
 (defun org-babel-one-header-arg-safe-p (pair safe-list)
   "Determine if the PAIR is a safe babel header arg according to SAFE-LIST.

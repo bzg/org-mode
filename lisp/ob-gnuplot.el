@@ -94,7 +94,10 @@ code."
 	       (let* ((first  (car val))
 		      (tablep (or (listp first) (symbolp first))))
 		 (if tablep val (mapcar 'list val)))
-	       (org-babel-temp-file "gnuplot-") params)
+               ;; Make temporary file name stable with respect to data.
+               ;; If we do not do it, :cache argument becomes useless.
+               (org-babel-temp-stable-file params "gnuplot-")
+               params)
 	    (if (and (stringp val)
 		     (file-remote-p val)  ;; check if val is a remote file
 		     (file-exists-p val)) ;; call to file-exists-p is slow, maybe remove it
