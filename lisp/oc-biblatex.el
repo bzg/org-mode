@@ -62,6 +62,7 @@
 ;;    #+print_bibliography: :keyword abc,xyz :title "Primary Sources"
 
 ;;; Code:
+(require 'map)
 (require 'org-macs)
 (require 'oc)
 
@@ -291,6 +292,24 @@ non-nil, do not add optional arguments to the command."
                variant)))
     (_ (error "This should not happen"))))
 
+(defun org-cite-biblatex-list-styles ()
+  "List styles and variants supported in `biblatex' citation processor.
+The output format is appropriate as a value for `:cite-styles' keyword
+in `org-cite-register-processor', which see."
+  (let ((shortcuts (make-hash-table :test #'equal))
+        (variants (make-hash-table :test #'equal)))
+    (pcase-dolist (`(,name . ,full-name) org-cite-biblatex-style-shortcuts)
+      (push name (gethash full-name shortcuts)))
+    (pcase-dolist (`(,name ,variant . ,_) org-cite-biblatex-styles)
+      (unless (null variant) (push variant (gethash name variants))))
+    (map-apply (lambda (style-name variants)
+                 (cons (cons (or style-name "nil")
+                             (gethash style-name shortcuts))
+                       (mapcar (lambda (v)
+                                 (cons v (gethash v shortcuts)))
+                               variants)))
+               variants)))
+
 
 ;;; Export capability
 (defun org-cite-biblatex-export-bibliography (_keys _files _style props &rest _)
@@ -412,13 +431,7 @@ to the document, and set styles."
   :export-bibliography #'org-cite-biblatex-export-bibliography
   :export-citation #'org-cite-biblatex-export-citation
   :export-finalizer #'org-cite-biblatex-prepare-preamble
-  :cite-styles
-  '((("author" "a") ("caps" "c") ("full" "f") ("caps-full" "cf"))
-    (("locators" "l") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
-    (("noauthor" "na") ("bare" "b"))
-    (("nocite" "n"))
-    (("text" "t") ("caps" "c"))
-    (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))))
+  :cite-styles #'org-cite-biblatex-list-styles)
 
 (provide 'oc-biblatex)
 ;;; oc-biblatex.el ends here
