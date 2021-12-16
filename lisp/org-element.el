@@ -6491,10 +6491,9 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
    "^\\*+ " "\\|"
    "\\\\end{[A-Za-z0-9*]+}[ \t]*$" "\\|"
    "^[ \t]*\\(?:"
-   "#\\+\\(?:BEGIN[:_]\\|END\\(?:_\\|:?[ \t]*$\\)\\)" "\\|"
+   "#\\+END\\(?:_\\|:?[ \t]*$\\)" "\\|"
    org-list-full-item-re "\\|"
    ":\\(?: \\|$\\)" "\\|"
-   "\\\\begin{[A-Za-z0-9*]+}" "\\|"
    ":\\(?:\\w\\|[-_]\\)+:[ \t]*$"
    "\\)")
   "Regexp matching a sensitive line, structure wise.
