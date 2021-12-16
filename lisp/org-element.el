@@ -5932,6 +5932,7 @@ The buffer is: %s\n Current command: %S\n Chars modified: %S\n Buffer modified: 
 	  ;; Otherwise, reset keys.
 	  (if org-element--cache-sync-requests
 	      (org-element--cache-set-timer buffer)
+            (setq org-element--cache-change-warning nil)
             (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value))))))))
 
 (defun org-element--cache-process-request
@@ -6533,6 +6534,17 @@ The function returns the new value of `org-element--cache-change-warning'."
                            end
                          (line-end-position)))))
          (prog1
+             ;; Use the worst change warning to not miss important edits.
+             ;; This function is called before edit and after edit by
+             ;; `org-element--cache-after-change'.  Before the edit, we still
+             ;; want to use the old value if it comes from previous
+             ;; not yet processed edit (they may be merged by
+             ;; `org-element--cache-submit-request').  After the edit, we want to
+             ;; look if there was a sensitive removed during edit.
+             ;; FIXME: This is not the most efficient way and we now
+             ;; have to delete more elemetns than needed in some
+             ;; cases.  A better approach may be storing the warning
+             ;; in the modification request itself.
              (let ((org-element--cache-change-warning-before org-element--cache-change-warning)
                    (org-element--cache-change-warning-after))
                (setq org-element--cache-change-warning-after
