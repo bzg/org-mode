@@ -6674,9 +6674,11 @@ known element in cache (it may start after END)."
                                             (goto-char (point-min))
                                             (while (and (org-at-comment-p) (bolp)) (forward-line))
                                             ;; Should not see property
-                                            ;; drawer inside robust
+                                            ;; drawer within changed
                                             ;; region.
-                                            (not (looking-at org-property-drawer-re)))))
+                                            (save-match-data
+                                              (or (not (looking-at org-property-drawer-re))
+                                                  (> beg (match-end 0)))))))
                            (_ 'robust)))))
 	      ;; UP is a robust greater element containing changes.
 	      ;; We only need to extend its ending boundaries.
