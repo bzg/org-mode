@@ -6716,7 +6716,7 @@ known element in cache (it may start after END)."
                           ;; The change is not inside headline.  Not
                           ;; updating here.
                           (not (<= beg (org-element-property :begin up)))
-                          (not (>= end (org-element-property :end up)))
+                          (not (> end (org-element-property :end up)))
                           (let ((current (org-with-point-at (org-element-property :begin up)
                                            (org-element-with-disabled-cache
                                                (org-element--current-element (point-max))))))
