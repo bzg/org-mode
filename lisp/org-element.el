@@ -6631,7 +6631,10 @@ known element in cache (it may start after END)."
 	(while up
 	  (if (let ((type (org-element-type up)))
                 (or (and (memq type '( center-block dynamic-block
-                                       quote-block special-block))
+                                       quote-block special-block
+                                       drawer))
+                         (or (not (eq type 'drawer))
+                             (not (string= "PROPERTIES" (org-element-property :drawer-name up))))
                          ;; Sensitive change.  This is
                          ;; unconditionally non-robust change.
                          (not org-element--cache-change-warning)
