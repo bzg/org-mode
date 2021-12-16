@@ -4069,8 +4069,8 @@ Text
 	    :end (org-element-property :parent (org-element-at-point)))
 	   (+ parent-end 3))))))
 
-(ert-deftest test-org-element/cache-bugs ()
-  "Test basic expectations and common pitfalls for cache."
+(ert-deftest test-org-element/cache-table ()
+  "Test handling edits in tables."
   ;; Unindented second row of the table should not be re-parented by
   ;; inserted item.
   (should
