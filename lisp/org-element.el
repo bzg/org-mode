@@ -6522,7 +6522,17 @@ The function returns the new value of `org-element--cache-change-warning'."
        (setq org-element--cache-change-tic (buffer-chars-modified-tick))
        (goto-char beg)
        (beginning-of-line)
-       (let ((bottom (save-excursion (goto-char end) (line-end-position))))
+       (let ((bottom (save-excursion
+                       (goto-char end)
+                       (if (bolp)
+                           ;; FIXME: Potential pitfall.
+                           ;; We are appending to an element end.
+                           ;; Unless the last inserted char is not
+                           ;; newline, the next element is not broken
+                           ;; and does not need to be purged from the
+                           ;; cache.
+                           end
+                         (line-end-position)))))
          (prog1
              (let ((org-element--cache-change-warning-before org-element--cache-change-warning)
                    (org-element--cache-change-warning-after))
