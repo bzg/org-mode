@@ -4045,6 +4045,29 @@ Text
 	   (delete-char -1)
 	   (search-backward "Para1")
 	   (org-element-type (org-element-at-point))))))
+  ;; Make sure that we do not generate intersecting elements.
+  (should (eq 'paragraph
+              (org-test-with-temp-text ":DRAWER:\nP1\n<point>\n:END:\n#+END_EXAMPLE"
+                (let ((org-element-use-cache t))
+                  (org-element-at-point (point-max))
+                  (org-element-at-point)
+                  (insert "#+BEGIN_EXAMPLE")
+                  (org-element-type (org-element-at-point))))))
+  ;; But yet correctly slurp obsolete elements inside a new element.
+  (should (eq 'example-block
+              (org-test-with-temp-text ":DRAWER:\nP1\n<point>\nP2\n#+END_EXAMPLE\n:END:"
+                (let ((org-element-use-cache t))
+                  (org-element-at-point (point-max))
+                  (save-excursion
+                    (re-search-forward "P2")
+                    (should (eq 'paragraph (org-element-type (org-element-at-point))))
+                    (re-search-forward "END_")
+                    (should (eq 'paragraph (org-element-type (org-element-at-point)))))
+                  (insert "#+BEGIN_EXAMPLE")
+                  (re-search-forward "P2")
+                  (should (eq 'example-block (org-element-type (org-element-at-point))))
+                  (re-search-forward "END_")
+                  (org-element-type (org-element-at-point))))))
   ;; Corner case: watch out drawers named "PROPERTIES" as they are
   ;; fragile, unlike to other drawers.
   (should
