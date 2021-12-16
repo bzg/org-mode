@@ -6247,7 +6247,7 @@ completing the request."
 		;; Cache is up-to-date past THRESHOLD.  Request
 		;; interruption.
 		(when (and threshold (> begin threshold))
-                  (org-element--cache-log-message "Reached threshold %d: %S"
+                  (org-element--cache-log-message "Reached threshold %S: %S"
                                                   threshold
                                                   (org-element--format-element data))
                   (setq exit-flag t))))
