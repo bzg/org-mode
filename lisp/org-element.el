@@ -7507,7 +7507,7 @@ the cache."
                                          (eq cache-size (cache-size)))
                               ;; START may no longer be valid, update
                               ;; it to beginning of real element.
-                              (goto-char start)
+                              (when start (goto-char start))
                               ;; Upon modification, START may lay
                               ;; inside an element.  We want to move
                               ;; it to real beginning then despite
