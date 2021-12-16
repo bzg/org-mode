@@ -4004,6 +4004,15 @@ Text
 	 (equal (cons (org-element-property :begin element)
 		      (org-element-property :end element))
 		(cons (point-min) (point-max)))))))
+  (org-test-with-temp-text ":DRAWER:\ntest\n:END:\n <point>#\nParagraph"
+    (let ((org-element-use-cache t))
+      (org-element-cache-map #'ignore :granularity 'element)
+      (should (eq 'comment (org-element-type (org-element-at-point))))
+      (should (eq 0 (org-element-property :post-blank (org-element-at-point (point-min)))))
+      (insert " ") (delete-char -1)
+      (org-element-cache-map #'ignore :granularity 'element)
+      (delete-char 1)
+      (should (eq 1 (org-element-property :post-blank (org-element-at-point (point-min)))))))
   ;; Sensitive change: adding a line alters document structure both
   ;; above and below.
   (should
