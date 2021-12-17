@@ -284,6 +284,7 @@ then create one.  Return the initialized session.  The current
 (defun org-babel-gnuplot-table-to-data (table data-file params)
   "Export TABLE to DATA-FILE in a format readable by gnuplot.
 Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
+  (require 'ox-org)
   (with-temp-file data-file
     (insert (let ((org-babel-gnuplot-timestamp-fmt
 		   (or (plist-get params :timefmt) "%Y-%m-%d-%H:%M:%S")))
