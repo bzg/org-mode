@@ -5834,6 +5834,12 @@ See `org-element--cache-interrupt-C-g'.")
   "Current number of `org-element--cache-sync' calls.
 See `org-element--cache-interrupt-C-g'.")
 
+(defvar org-element--cache-change-warning nil
+  "Non-nil when a sensitive line is about to be changed.
+It is a symbol among nil, t, or a number representing smallest level of
+modified headline.  The level considers headline levels both before
+and after the modification.")
+
 (defun org-element--cache-sync (buffer &optional threshold future-change)
   "Synchronize cache with recent modification in BUFFER.
 
@@ -6502,12 +6508,6 @@ A sensitive line is a headline, inlinetask, block, drawer, or
 latex-environment boundary.  When such a line is modified,
 structure changes in the document may propagate in the whole
 section, possibly making cache invalid.")
-
-(defvar org-element--cache-change-warning nil
-  "Non-nil when a sensitive line is about to be changed.
-It is a symbol among nil, t, or a number representing smallest level of
-modified headline.  The level considers headline levels both before
-and after the modification.")
 
 (defun org-element--cache-before-change (beg end)
   "Detect modifications in sensitive parts of Org buffer.
