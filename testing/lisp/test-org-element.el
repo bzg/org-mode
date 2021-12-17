@@ -4080,19 +4080,30 @@ Text
   ;; Test edits near :end of element
   (should-not (eq 'headline
                   (org-test-with-temp-text "* H1\nP1\n<point>*H2\n"
-                    (org-element-cache-map #'ignore :granularity 'element)
-                    (insert "Blah")
-                    (org-element-type (org-element-at-point)))))
+                    (let ((org-element-use-cache t))
+                      (org-element-cache-map #'ignore :granularity 'element)
+                      (insert "Blah")
+                      (org-element-type (org-element-at-point))))))
   (should-not (eq 'headline
                   (org-test-with-temp-text "* H1\nP1\n<point>*H2\n"
-                    (org-element-cache-map #'ignore :granularity 'element)
-                    (backward-delete-char 1)
-                    (org-element-type (org-element-at-point)))))
+                    (let ((org-element-use-cache t))  
+                      (org-element-cache-map #'ignore :granularity 'element)
+                      (backward-delete-char 1)
+                      (org-element-type (org-element-at-point))))))
+  (org-test-with-temp-text "Paragraph.\n #<point> comment"
+    (let ((org-element-use-cache t))
+      (org-element-cache-map #'ignore :granularity 'element)
+      (should (eq 'comment (org-element-type (org-element-at-point))))
+      (insert "not comment anymore")
+      (org-element-cache-map #'ignore :granularity 'element)
+      (should-not (eq 'comment (org-element-type (org-element-at-point))))
+      (should (eq (org-element-at-point) (org-element-at-point 1)))))
   (should (eq 'headline
               (org-test-with-temp-text "* H1\nP1\n<point*H2\n"
-                (org-element-cache-map #'ignore :granularity 'element)
-                (insert "Blah\n")
-                (org-element-type (org-element-at-point)))))
+                (let ((org-element-use-cache t))
+                  (org-element-cache-map #'ignore :granularity 'element)
+                  (insert "Blah\n")
+                  (org-element-type (org-element-at-point))))))
   ;; Corner case: watch out drawers named "PROPERTIES" as they are
   ;; fragile, unlike to other drawers.
   (should

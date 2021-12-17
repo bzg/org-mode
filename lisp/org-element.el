@@ -6602,10 +6602,8 @@ that range.  See `after-change-functions' for more information."
         ;; sure that we capture preceding element.
         (setq beg (save-excursion
                     (goto-char beg)
-                    (skip-chars-backward " \t")
-                    (if (not (bolp)) beg
-                      (cl-incf pre (- beg (point)))
-                      (point))))
+                    (cl-incf pre (- beg (line-beginning-position)))
+                    (line-beginning-position)))
         ;; Store synchronization request.
         (let ((offset (- end beg pre)))
           (save-match-data
