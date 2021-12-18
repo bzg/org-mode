@@ -44,14 +44,17 @@ The cache persistence can be controlled via
 
 *** New library =org-persist.el= implements variable persistence across Emacs sessions
 
-The library stored variable data in ~org-persist-directory~ (set to XDG
+The library stores variable data in ~org-persist-directory~ (set to XDG
 cache dir by default).
 
 The entry points are ~org-persist-register~, ~org-persist-unregister~,
 ~org-persist-read~, and ~org-persist-read-all~.  Storing circular
 structures is supported.  Storing references between different
 variables is also supported (see =:inherit= key in
-~org-persist-register~).
+~org-persist-register~).  
+
+The library permits storing buffer-local variables.  Such variables
+are linked to the buffer text, file =inode=, and file path.
 
 *** New =:options= attribute when exporting tables to LaTeX
 
