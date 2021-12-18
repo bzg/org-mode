@@ -35,19 +35,27 @@
 (declare-function org-next-visible-heading "org" (arg))
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
-(defvar org-persist-directory (expand-file-name
-                    (org-file-name-concat
-                     (let ((cache-dir (when (fboundp 'xdg-cache-home)
-                                        (xdg-cache-home))))
-                       (if (or (seq-empty-p cache-dir)
-                               (not (file-exists-p cache-dir))
-                               (file-exists-p (org-file-name-concat
-                                               user-emacs-directory
-                                               "org-persist")))
-                           user-emacs-directory
-                         cache-dir))
-                     "org-persist/"))
-  "Directory where the data is stored.")
+
+(defgroup org-persist nil
+  "Persistent cache for Org mode."
+  :tag "Org persist"
+  :group 'org)
+
+(defcustom org-persist-directory (expand-file-name
+                       (org-file-name-concat
+                        (let ((cache-dir (when (fboundp 'xdg-cache-home)
+                                           (xdg-cache-home))))
+                          (if (or (seq-empty-p cache-dir)
+                                  (not (file-exists-p cache-dir))
+                                  (file-exists-p (org-file-name-concat
+                                                  user-emacs-directory
+                                                  "org-persist")))
+                              user-emacs-directory
+                            cache-dir))
+                        "org-persist/"))
+  "Directory where the data is stored."
+  :group 'org-persist
+  :type 'directory)
 
 (defvar org-persist-index-file "index"
   "File name used to store the data index.")
