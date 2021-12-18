@@ -181,10 +181,12 @@ Return a list whose CAR is the tangled file name."
   (interactive "fFile to tangle: \nP")
   (let* ((visited (find-buffer-visiting file))
          (buffer (or visited (find-file-noselect file))))
-    (with-current-buffer buffer
-      (org-with-wide-buffer
-       (mapcar #'expand-file-name (org-babel-tangle nil target-file lang-re))))
-    (unless visited (kill-buffer buffer))))
+    (prog1
+        (with-current-buffer buffer
+          (org-with-wide-buffer
+           (mapcar #'expand-file-name
+                   (org-babel-tangle nil target-file lang-re))))
+      (unless visited (kill-buffer buffer)))))
 
 (defun org-babel-tangle-publish (_ filename pub-dir)
   "Tangle FILENAME and place the results in PUB-DIR."
