@@ -179,8 +179,8 @@ source code blocks by languages matching a regular expression.
 
 Return a list whose CAR is the tangled file name."
   (interactive "fFile to tangle: \nP")
-  (let ((visited (find-buffer-visiting file))
-        (buffer (or visited (find-file-noselect file))))
+  (let* ((visited (find-buffer-visiting file))
+         (buffer (or visited (find-file-noselect file))))
     (with-current-buffer buffer
       (org-with-wide-buffer
        (mapcar #'expand-file-name (org-babel-tangle nil target-file lang-re))))
