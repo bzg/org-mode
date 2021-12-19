@@ -1322,7 +1322,7 @@ the default behavior."
       ;; Clock in at which position?
       (setq target-pos
 	    (if (and (eobp) (not (org-at-heading-p)))
-		(point-at-bol 0)
+		(org-with-wide-buffer (point-at-bol 0))
 	      (point)))
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
