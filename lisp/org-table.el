@@ -5290,6 +5290,7 @@ to execute outside of tables."
       (org-remap orgtbl-mode-map
 		 'self-insert-command 'orgtbl-self-insert-command
 		 'delete-char 'org-delete-char
+                 'delete-forward-char 'org-delete-char
 		 'delete-backward-char 'org-delete-backward-char)
       (org-defkey orgtbl-mode-map "|" 'org-force-self-insert))
     t))
