@@ -94,7 +94,9 @@ When BUFFER is nil, return plist for global VAR."
   (org-persist--read-index)
   (let* ((buffer-file (when buffer (buffer-file-name (or (buffer-base-buffer buffer)
                                                          buffer))))
-         (inode (when buffer-file (file-attribute-inode-number (file-attributes buffer-file))))
+         (inode (when buffer-file
+                  (and (fboundp 'file-attribute-inode-number)
+                       (file-attribute-inode-number (file-attributes buffer-file)))))
          (buffer-hash (when buffer (secure-hash 'md5 buffer))))
     (let ((result (seq-find (lambda (plist)
                               (and (or (memq var (plist-get plist :variable))
