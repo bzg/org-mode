@@ -159,10 +159,10 @@ When BUFFER is `all', unregister VAR in all buffers."
          (lambda (plist)
            (when (and (memq var (plist-get plist :variable))
                       (or (eq buffer 'all)
-                          (eq (buffer-file-name
-                               (or (buffer-base-buffer buffer)
-                                   buffer))
-                              (plist-get plist :path))))
+                          (string= (buffer-file-name
+                                    (or (buffer-base-buffer buffer)
+                                        buffer))
+                                   (or (plist-get plist :path) ""))))
              (if (> (length (plist-get plist :variable)) 1)
                  (progn
                    (setq plist
