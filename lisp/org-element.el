@@ -6421,9 +6421,10 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                (unless (save-excursion
                          (org-skip-whitespace)
                          (eobp))
-                 (setq element (org-element--current-element
-			        end 'element mode
-			        (org-element-property :structure parent))))
+                 (org-element-with-disabled-cache
+                     (setq element (org-element--current-element
+			            end 'element mode
+			            (org-element-property :structure parent)))))
                ;; Make sure that we return referenced element in cache
                ;; that can be altered directly.
                (if element
