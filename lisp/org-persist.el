@@ -88,6 +88,16 @@ a data variable.  Each plist contains the following properties:
   - `:inode':      buffer file inode, if any
   - `:hash':       buffer hash, if any")
 
+(defvar org-persist--report-time 0.5
+  "Whether to report read/write time.
+
+When the value is a number, it is a threshold number of seconds.  If
+the read/write time of a single variable exceeds the threashold, a
+message is displayed.
+
+When the value is a non-nil non-number, always display the message.
+When the value is nil, never diplay the message.")
+
 (defun org-persist--get-index (var &optional buffer)
   "Return plist used to store VAR in BUFFER.
 When BUFFER is nil, return plist for global VAR."
@@ -183,7 +193,8 @@ When BUFFER is `all', unregister VAR in all buffers."
   (unless (and buffer (not (get-buffer buffer)))
     (unless (listp var) (setq var (list var)))
     (with-current-buffer (or buffer (current-buffer))
-      (let ((index (org-persist--get-index var buffer)))
+      (let ((index (org-persist--get-index var buffer))
+            (start-time (float-time)))
         (setf index (plist-put index :hash (when buffer (secure-hash 'md5 buffer))))
         (let ((print-circle t)
               print-level
@@ -218,7 +229,18 @@ When BUFFER is `all', unregister VAR in all buffers."
                 (unless (file-exists-p (file-name-directory file))
                   (make-directory (file-name-directory file) t))
                 (with-temp-file file
-                  (prin1 data (current-buffer)))))))))))
+                  (prin1 data (current-buffer)))
+                (let ((duration (- (float-time) start-time)))
+                  (when (or (and org-persist--report-time
+                                 (numberp org-persist--report-time)
+                                 (>= duration org-persist--report-time))
+                            (and org-persist--report-time
+                                 (not (numberp org-persist--report-time))))
+                    (if buffer
+                        (message "org-persist: Writing %S from %S took %.2f sec"
+                                 var buffer duration)
+                      (message "org-persist: Writing %S took %.2f sec"
+                               var duration))))))))))))
 
 (defun org-persist-write-all (&optional buffer)
   "Save all the persistent data."
@@ -244,7 +266,8 @@ When BUFFER is `all', unregister VAR in all buffers."
   "Restore VAR data in BUFFER."
   (let* ((index (org-persist--get-index var buffer))
          (persist-file (org-file-name-concat org-persist-directory (plist-get index :persist-file)))
-         (data nil))
+         (data nil)
+         (start-time (float-time)))
     (when (and index
                (file-exists-p persist-file)
                (or (not buffer)
@@ -275,7 +298,18 @@ When BUFFER is `all', unregister VAR in all buffers."
                    do
                    (when (alist-get var1 data)
                      (setf (symbol-value var1) (alist-get var1 data)))
-                   (run-hook-with-args 'org-persist-after-read-hook var1 buffer)))))))
+                   (run-hook-with-args 'org-persist-after-read-hook var1 buffer)))
+        (let ((duration (- (float-time) start-time)))
+          (when (or (and org-persist--report-time
+                         (numberp org-persist--report-time)
+                         (>= duration org-persist--report-time))
+                    (and org-persist--report-time
+                         (not (numberp org-persist--report-time))))
+            (if buffer
+                (message "org-persist: Reading %S from %S took %.2f sec"
+                         var buffer duration)
+              (message "org-persist: Reading %S took %.2f sec"
+                       var duration))))))))
 
 (defun org-persist-read-all (&optional buffer)
   "Restore all the persistent data in BUFFER."
