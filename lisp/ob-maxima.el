@@ -81,8 +81,11 @@ This function is called by `org-babel-execute-src-block'."
 	(result
 	 (let* ((cmdline (or (cdr (assq :cmdline params)) ""))
 		(in-file (org-babel-temp-file "maxima-" ".max"))
-		(cmd (format "%s --very-quiet -r 'batchload(%S)$' %s"
-			     org-babel-maxima-command in-file cmdline)))
+		(cmd (format "%s --very-quiet -r %s$ %s"
+			     org-babel-maxima-command
+                             (shell-quote-argument
+                              (format "batchload(%S)" in-file))
+                             cmdline)))
 	   (with-temp-file in-file (insert (org-babel-maxima-expand body params)))
 	   (message cmd)
            ;; " | grep -v batch | grep -v 'replaced' | sed '/^$/d' "
