@@ -2126,7 +2126,7 @@ e^{i\\pi}+1=0
 	    (= (point-max) (org-element-property :end elem))))))
   ;; Include incomplete dynamic blocks.
   (should
-   (org-test-with-temp-text "#+BEGIN: \nParagraph"
+   (org-test-with-temp-text "#+BEGIN: \n<point>Paragraph"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
 	    (= (point-max) (org-element-property :end elem))))))

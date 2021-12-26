@@ -4268,7 +4268,9 @@ element it has to parse."
 	            ((looking-at "CALL:")
 		     (beginning-of-line)
 		     (org-element-babel-call-parser limit affiliated))
-	            ((looking-at "BEGIN:? ")
+	            ((save-excursion
+                       (beginning-of-line)
+                       (looking-at org-element-dynamic-block-open-re))
 		     (beginning-of-line)
 		     (org-element-dynamic-block-parser limit affiliated))
 	            ((looking-at "\\S-+:")
