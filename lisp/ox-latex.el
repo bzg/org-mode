@@ -2453,10 +2453,10 @@ See `org-latex-format-inlinetask-function' for details."
 			    (mapcar #'org-latex--protect-text tags)))))))
     (concat "\\begin{center}\n"
 	    "\\fbox{\n"
-	    "\\begin{minipage}[c]{.6\\textwidth}\n"
+	    "\\begin{minipage}[c]{.6\\linewidth}\n"
 	    full-title "\n\n"
 	    (and (org-string-nw-p contents)
-		 (concat "\\rule[.8em]{\\textwidth}{2pt}\n\n" contents))
+		 (concat "\\rule[.8em]{\\linewidth}{2pt}\n\n" contents))
 	    "\\end{minipage}\n"
 	    "}\n"
 	    "\\end{center}")))
