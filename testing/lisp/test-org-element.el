@@ -3306,7 +3306,16 @@ Outside list"
    (= 2
       (org-test-with-temp-text "__test__"
 	(length
-	 (org-element-map (org-element-parse-buffer) 'underline 'identity))))))
+	 (org-element-map (org-element-parse-buffer) 'underline 'identity)))))
+  ;; Starting after non-blank
+  (should
+   (eq 'underline
+       (org-test-with-temp-text "(_under<point>line_)"
+         (org-element-type (org-element-context)))))
+  (should-not
+   (eq 'underline
+       (org-test-with-temp-text "x_under<point>line_)"
+         (org-element-type (org-element-context))))))
 
 
 ;;;; Verbatim
