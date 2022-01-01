@@ -11641,6 +11641,7 @@ headlines matching this string."
 	             (goto-char (1- (org-element-property :end el))))))
                ;; Get the correct position from where to continue
 	       (when org-map-continue-from
+                 (setq org-element-cache-map-continue-from org-map-continue-from)
 	         (goto-char org-map-continue-from))
                ;; Return nil.
                nil)

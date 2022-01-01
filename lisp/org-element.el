@@ -7118,6 +7118,10 @@ buffers."
 (defvar warning-minimum-log-level) ; Defined in warning.el
 
 (defvar org-element-cache-map--recurse nil)
+(defvar org-element-cache-map-continue-from nil
+  "Position from where mapping should continue.
+This variable can be set by called function, especially when the
+function modified the buffer.")
 ;;;###autoload
 (cl-defun org-element-cache-map (func &key (granularity 'headline+inlinetask) restrict-elements
                            next-re fail-re from-pos (to-pos (point-max-marker)) after-element limit-count
@@ -7127,8 +7131,14 @@ GRANULARITY.  Collect non-nil return values into result list.
 
 FUNC should accept a single argument - the element.
 
-FUNC can safely modify the buffer, but doing so may reduce
-performance.
+FUNC can modify the buffer, but doing so may reduce performance.  If
+buffer is modified, the mapping will continue from an element starting
+after the last mapped element.  If the last mapped element is deleted,
+the subsequent element will be skipped as it cannot be distinguished
+deterministically from a changed element.  If FUNC is expected to
+delete the element, it should directly set the value of
+`org-element-cache-map-continue-from' to force `org-element-cache-map'
+continue from the right point in buffer.
 
 If some elements are not yet in cache, they will be added.
 
@@ -7264,7 +7274,7 @@ the cache."
                                           (setq start (match-beginning 0))
                                         (setq start (max (or start -1)
                                                          (or (org-element-property :begin data) -1)
-                                                         (org-element-property :begin (element-match-at-point)))))
+                                                         (or (org-element-property :begin (element-match-at-point)) -1))))
                                       (when (>= start to-pos) (cache-walk-abort)))
                                   (cache-walk-abort))))
                       ;; Find expected begin position of an element after
@@ -7507,6 +7517,7 @@ the cache."
                               ;; DATA matches restriction.  FUNC may
                               ;; 
                               ;; Call FUNC.  FUNC may move point.
+                              (setq org-element-cache-map-continue-from nil)
                               (if org-element--cache-map-statistics
                                   (progn
                                     (setq before-time (float-time))
@@ -7523,6 +7534,8 @@ the cache."
                               (setq last-match (car result))
                               ;; If FUNC moved point forward, update
                               ;; START.
+                              (when org-element-cache-map-continue-from
+                                (goto-char org-element-cache-map-continue-from))
                               (when (> (point) start)
                                 (move-start-to-next-match nil))
                               ;; Drop nil.
@@ -7541,7 +7554,6 @@ the cache."
                                          (eq cache-size (cache-size)))
                               ;; START may no longer be valid, update
                               ;; it to beginning of real element.
-                              (when start (goto-char start))
                               ;; Upon modification, START may lay
                               ;; inside an element.  We want to move
                               ;; it to real beginning then despite
@@ -7553,11 +7565,15 @@ the cache."
                               ;; Make sure that we continue from an
                               ;; element past already processed
                               ;; place.
-                              (when (<= start (org-element-property :begin data))
+                              (when (and (<= start (org-element-property :begin data))
+                                         (not org-element-cache-map-continue-from))
                                 (goto-char start)
                                 (setq data (element-match-at-point))
-                                (goto-char (next-element-start))
-                                (move-start-to-next-match next-element-re))
+                                ;; If DATA is nil, buffer is
+                                ;; empty. Abort.
+                                (when data
+                                  (goto-char (next-element-start))
+                                  (move-start-to-next-match next-element-re)))
                               (org-element-at-point to-pos)
                               (cache-walk-restart))
                             ;; Reached LIMIT-COUNT.  Abort.
