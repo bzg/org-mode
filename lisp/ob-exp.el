@@ -26,7 +26,7 @@
 (require 'ob-core)
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))

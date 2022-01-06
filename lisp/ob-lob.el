@@ -28,7 +28,7 @@
 (require 'ob-table)
 
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))

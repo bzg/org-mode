@@ -81,7 +81,7 @@
 (declare-function org-display-outline-path "org" (&optional file current separator just-return-string))
 (declare-function org-down-element "org" ())
 (declare-function org-edit-special "org" (&optional arg))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-emphasize "org" (&optional char))
 (declare-function org-end-of-line "org" (&optional n))

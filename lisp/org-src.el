@@ -40,7 +40,7 @@
 (declare-function org--get-expected-indentation "org" (element contentsp))
 (declare-function org-mode "org" ())
 (declare-function org--get-expected-indentation "org" (element contentsp))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element"

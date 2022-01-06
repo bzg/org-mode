@@ -39,7 +39,7 @@
 (declare-function org-back-over-empty-lines "org" ())
 (declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-edit-footnote-reference "org-src" ())
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element" (blob &optional types with-self))

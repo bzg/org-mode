@@ -47,7 +47,7 @@
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-do-occur "org" (regexp &optional cleanup))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-cache-refresh "org-element" (pos))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-lineage "org-element" (datum &optional types with-self))

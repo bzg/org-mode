@@ -51,7 +51,7 @@
 (require 'org-compat)
 
 (declare-function org-collect-keywords "org" (keywords &optional unique directory))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-copy "org-element" (datum))
 (declare-function org-element-macro-parser "org-element" ())

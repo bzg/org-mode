@@ -37,7 +37,7 @@
 (declare-function org-babel-update-block-body "ob-core" (new-body))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-heading-components "org" ())
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance))

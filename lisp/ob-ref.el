@@ -54,7 +54,7 @@
 (require 'cl-lib)
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-end-of-meta-data "org" (&optional full))

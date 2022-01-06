@@ -57,7 +57,7 @@
 (declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 (declare-function org-datetree-find-month-create (d &optional keep-restriction))
 (declare-function org-decrypt-entry "org-crypt" ())
-(declare-function org-element-at-point "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-lineage "org-element" (datum &optional types with-self))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-encrypt-entry "org-crypt" ())
