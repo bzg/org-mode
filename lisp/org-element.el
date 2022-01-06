@@ -5321,6 +5321,17 @@ can change `buffer-chars-modified-tick' internally even though no
 visible changes in buffer are being made.  Some of such expected cases
 are covered by heuristics, but not all.")
 
+(defvar org-element--cache-silent-modification-check t
+  "Detect changes in buffer made inside `with-silent-modifications'.
+
+Note that some internal Emacs functions may also trigger a warning and
+cache reset.  The warning can be suppressed by setting
+`org-element--cache-diagnostics-modifications' to nil, but the cache
+will still be refreshed to be safe.
+
+WARNING: Setting this variable to nil may cause cache corruption is some
+third-party packages make undetected changes in buffers.")
+
 (defvar org-element--cache-diagnostics-level 2
   "Detail level of the diagnostics.")
 
@@ -5859,7 +5870,8 @@ actually submitted."
       ;; Check if the buffer have been changed outside visibility of
       ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
       (if (and (/= org-element--cache-change-tic
-                  (buffer-chars-modified-tick))
+                   (buffer-chars-modified-tick))
+               org-element--cache-silent-modification-check
                ;; FIXME: Below is a heuristics noticed by observation.
                ;; quail.el with non-latin input does silent
                ;; modifications in buffer increasing the tick counter
@@ -5878,7 +5890,8 @@ actually submitted."
                            ;; A number of Emacs internal operations in
                            ;; Emacs 26 and 27 alter
                            ;; `buffer-chars-modified-tick' (see
-                           ;; https://list.orgmode.org/87ee7jdv70.fsf@localhost/T/#t).
+                           ;; https://list.orgmode.org/87ee7jdv70.fsf@localhost/T/#t
+                           ;; https://list.orgmode.org/2022-01-06T12-13-17@devnull.Karl-Voit.at/T/#mb3771758f81b31721ba2f420878a4d16081dc483).
                            ;; We have no way to distinguish them from
                            ;; dangerious silent edits.  So, we can
                            ;; only reset the cache, but do not show
