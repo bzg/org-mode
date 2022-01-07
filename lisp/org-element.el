@@ -7580,14 +7580,15 @@ the cache."
                               ;; inside an element.  We want to move
                               ;; it to real beginning then despite
                               ;; START being larger.
-                              (setq start -1)
+                              (setq start nil)
                               (move-start-to-next-match nil)
                               ;; The new element may now start before
                               ;; or at already processed position.
                               ;; Make sure that we continue from an
                               ;; element past already processed
                               ;; place.
-                              (when (and (<= start (org-element-property :begin data))
+                              (when (and start
+                                         (<= start (org-element-property :begin data))
                                          (not org-element-cache-map-continue-from))
                                 (goto-char start)
                                 (setq data (element-match-at-point))

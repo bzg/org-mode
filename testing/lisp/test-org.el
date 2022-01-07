@@ -2414,6 +2414,19 @@ SCHEDULED: <2014-03-04 tue.>"
                (lambda ()
                  (org-cut-subtree)
                  (setq org-map-continue-from (point))))
+              (buffer-string))))
+  (should
+   (string= "* H1\n* H2\n* H3\n"
+            (org-test-with-temp-text "* H1\n* H2\n* H3\n* H4"
+              (org-map-entries
+               (lambda ()
+                 (when (string= "H4"
+                                (org-element-property
+                                 :raw-value (org-element-at-point)))
+                   (org-cut-subtree)
+                   (setq org-map-continue-from
+                         (org-element-property
+                          :begin (org-element-at-point))))))
               (buffer-string)))))
 
 (ert-deftest test-org/edit-headline ()
