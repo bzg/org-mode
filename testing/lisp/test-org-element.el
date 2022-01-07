@@ -4128,6 +4128,20 @@ Text
 	    :end (org-element-property :parent (org-element-at-point)))
 	   (+ parent-end 3))))))
 
+(ert-deftest test-org-element/cache-affiliated ()
+  "Test updating affiliated keywords."
+  ;; Inserting a line right after other keywords.
+  (let ((org-element-use-cache t))
+    (org-test-with-temp-text "
+#+caption: test
+#+name: test
+<point>
+line"
+      (org-element-cache-map #'ignore :granularity 'element)
+      (should (eq 'keyword (org-element-type (org-element-at-point))))
+      (insert "#")
+      (should (eq 2 (org-element-property :begin (org-element-at-point)))))))
+
 (ert-deftest test-org-element/cache-table ()
   "Test handling edits in tables."
   ;; Unindented second row of the table should not be re-parented by
