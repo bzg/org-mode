@@ -2442,7 +2442,7 @@ INFO may provide the values of these header arguments (in the
 		   ((member "list" result-params)
 		    (insert
 		     (org-trim
-		      (org-list-to-generic
+		      (org-list-to-org
 		       (cons 'unordered
 			     (mapcar
 			      (lambda (e)
