@@ -1219,6 +1219,15 @@ For example, 9:30am would become 09:30 rather than  9:30."
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-agenda-clock-report-header nil
+  "Header for org agenda clock report mode"
+  :group 'org-agenda
+  :type '(choice
+    (string :tag "Header")
+    (const :tag "No header" nil))
+  :safe #'stringp
+  :package-version '(Org . "9.6"))
+
 (defun org-agenda-time-of-day-to-ampm (time)
   "Convert TIME of a string like \"13:45\" to an AM/PM style time string."
   (let* ((hour-number (string-to-number (substring time 0 -3)))
@@ -4475,6 +4484,8 @@ items if they have an hour specification like [h]h:mm."
 	  (setq p (plist-put p :tend clocktable-end))
 	  (setq p (plist-put p :scope 'agenda))
 	  (setq tbl (apply #'org-clock-get-clocktable p))
+    (when org-agenda-clock-report-header
+      (insert (propertize org-agenda-clock-report-header 'face 'org-agenda-structure)))
 	  (insert tbl)))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))

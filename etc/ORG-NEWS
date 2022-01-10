@@ -140,6 +140,7 @@ introduced which will accept three new formats:
 Chmod-style permissions are based on the new variable
 ~org-babel-tangle-default-file-mode~.
 
+*** A new custom setting =org-agenda-clock-report-header= to add a header to org agenda clock report
 * Version 9.5
 
 ** Important announcements and breaking changes

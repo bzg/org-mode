@@ -9742,8 +9742,8 @@ the other commands, point needs to be in the desired line.
   variable ~org-agenda-start-with-clockreport-mode~.  By using
   a prefix argument when toggling this mode (i.e., {{{kbd(C-u R)}}}),
   the clock table does not show contributions from entries that are
-  hidden by agenda filtering[fn:99].  See also the variable
-  ~org-clock-report-include-clocking-task~.
+  hidden by agenda filtering[fn:99].  See also the variables
+  ~org-clock-report-include-clocking-task~ and ~org-agenda-clock-report-header~.
 
 - {{{kbd(v c)}}} ::
 
