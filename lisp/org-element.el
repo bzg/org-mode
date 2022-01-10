@@ -7362,36 +7362,6 @@ the cache."
                  ;; returned non-nil).
                  (last-match t)
                  continue-flag
-                 ;; Byte-compile FUNC making sure that it is as performant
-                 ;; as it could be.
-                 (func (if (or (byte-code-function-p func)
-                               (and (symbolp func)
-                                    (subrp (symbol-function func)))
-                               (and (symbolp func)
-                                    (fboundp 'native-comp-available-p)
-                                    (native-comp-available-p)
-                                    (fboundp 'subr-native-elisp-p)
-                                    (subr-native-elisp-p (symbol-function func)))
-                               ;; FIXME: Working around bug
-                               ;; https://list.orgmode.org/87tuha62rq.fsf@localhost/T/#t
-                               ;; Byte-compilation in
-                               ;; `org-agenda-get-scheduled' call
-                               ;; somehow alters the FUNC result in
-                               ;; Emacs 26 and 27, but not in Emacs
-                               ;; >=28.
-                               (version< emacs-version "29"))
-                           func
-                         (let ((warning-minimum-log-level :error)
-                               (inhibit-message t))
-                           (condition-case nil
-                               (if (and (fboundp 'native-comp-available-p)
-                                        (fboundp 'native-compile)
-                                        (native-comp-available-p))
-                                   ;; Use native compilation to even better
-                                   ;; performance.
-                                   (native-compile func)
-                                 (byte-compile func))
-                             (error func)))))
                  ;; Generic regexp to search next potential match.  If it
                  ;; is a cons of (regexp . 'match-beg), we are 100% sure
                  ;; that the match beginning is the existing element
