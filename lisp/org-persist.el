@@ -355,6 +355,9 @@ or file-path, (:inode inode), (:hash hash), or or (:key key)."
        container)
       (_ (error "org-persist: Unknown container type: %S" container)))))
 
+(defvar org-persist--associated-buffer-cache (make-hash-table :weakness 'key)
+  "Buffer hash cache.")
+
 (defun org-persist--normalize-associated (associated)
   "Normalize ASSOCIATED representation into (:type value)."
   (pcase associated
@@ -368,14 +371,26 @@ or file-path, (:inode inode), (:hash hash), or or (:key key)."
        rtn))
     ((or (pred bufferp) `(:buffer ,associated2))
      (when associated2 (setq associated associated2))
-     (let* ((file (buffer-file-name
-                   (or (buffer-base-buffer associated)
-                       associated)))
-            (inode (when (and file
-                              (fboundp 'file-attribute-inode-number))
-                     (file-attribute-inode-number
-                      (file-attributes file))))
-            (hash (secure-hash 'md5 associated)))
+     (let ((cached (gethash associated org-persist--associated-buffer-cache))
+           file inode hash)
+       (if (and cached (eq (buffer-modified-tick associated)
+                           (car cached)))
+           (progn
+             (setq file (nth 1 cached)
+                   inode (nth 2 cached)
+                   hash (nth 3 cached)))
+         (setq file (buffer-file-name
+                     (or (buffer-base-buffer associated)
+                         associated)))
+         (setq inode (when (and file
+                                (fboundp 'file-attribute-inode-number))
+                       (file-attribute-inode-number
+                        (file-attributes file))))
+         (setq hash (secure-hash 'md5 associated))
+         (puthash associated
+                  (list (buffer-modified-tick associated)
+                        file inode hash)
+                  org-persist--associated-buffer-cache))
        (let ((rtn `(:hash ,hash)))
          (when file (setq rtn (plist-put rtn :file file)))
          (when inode (setq rtn (plist-put rtn :inode inode)))
