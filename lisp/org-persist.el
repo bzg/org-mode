@@ -649,8 +649,12 @@ A buffer is treated as (:buffer ASSOCIATED).
 A string is treated as (:file ASSOCIATED)."
   (setq associated (org-persist--normalize-associated associated))
   (setq container (org-persist--normalize-container container))
-  (let* ((collection (org-persist--get-collection container associated))
-         (persist-file (org-file-name-concat org-persist-directory (plist-get collection :persist-file)))
+  (let* ((collection (org-persist--find-index `(:container ,container :associated ,associated)))
+         (persist-file
+          (when collection
+            (org-file-name-concat
+             org-persist-directory
+             (plist-get collection :persist-file))))
          (data nil))
     (when (and collection
                (file-exists-p persist-file)
