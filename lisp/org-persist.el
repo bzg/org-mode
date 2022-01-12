@@ -102,7 +102,7 @@
 (require 'org-id)
 (require 'xdg nil t)
 
-(defconst org-persist--storage-version "2.0"
+(defconst org-persist--storage-version "2.1"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
