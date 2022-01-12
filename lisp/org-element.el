@@ -7125,7 +7125,8 @@ buffers."
         (when (not org-element-cache-persistent)
           (org-persist-unregister 'org-element--headline-cache (current-buffer))
           (org-persist-unregister 'org-element--cache (current-buffer)))
-        (when org-element-cache-persistent
+        (when (and org-element-cache-persistent
+                   (buffer-file-name (current-buffer)))
           (org-persist-register 'org-element--cache (current-buffer))
           (org-persist-register 'org-element--headline-cache
                                 (current-buffer)
