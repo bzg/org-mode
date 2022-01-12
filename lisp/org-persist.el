@@ -625,17 +625,20 @@ EXPIRY key has no effect when INHERIT is non-nil."
   "Unregister CONTAINER in ASSOCIATED to be persistent.
 When ASSOCIATED is `all', unregister CONTAINER everywhere."
   (unless org-persist--index (org-persist--load-index))
+  (setq container (org-persist--normalize-container container))
+  (setq associated (org-persist--normalize-associated associated))
   (if (eq associated 'all)
       (mapc (lambda (collection)
               (when (member container (plist-get collection :container))
                 (org-persist-unregister container (plist-get collection :associated))))
             org-persist--index)
-    (let ((collection (org-persist--get-collection container associated)))
-      (if (= (length (plist-get collection :container)) 1)
-          (org-persist--remove-from-index collection)
-        (plist-put collection :container
-                   (remove container (plist-get collection :container)))
-        (org-persist--add-to-index collection)))))
+    (let ((collection (org-persist--find-index `(:container ,container :associated ,associated))))
+      (when collection
+        (if (= (length (plist-get collection :container)) 1)
+            (org-persist--remove-from-index collection)
+          (plist-put collection :container
+                     (remove container (plist-get collection :container)))
+          (org-persist--add-to-index collection))))))
 
 (defun org-persist-read (container &optional associated hash-must-match load?)
   "Restore CONTAINER data for ASSOCIATED.
