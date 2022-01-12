@@ -756,10 +756,11 @@ Do nothing in an indirect buffer."
      (`nil t)
      (`never nil)
      ((pred numberp)
-      (<= (float-time) (+ (plist-get ,collection :access-time) (* ,cnd 24 60 60))))
+      (when (plist-get ,collection :access-time)
+        (<= (float-time) (+ (plist-get ,collection :access-time) (* ,cnd 24 60 60)))))
      ((pred functionp)
       (funcall ,cnd ,collection))
-     (_ (error "org-persist: Unsupported expiry type %S" cnd))))
+     (_ (error "org-persist: Unsupported expiry type %S" ,cnd))))
 
 (defun org-persist-gc ()
   "Remove expired or unregisted containers.
