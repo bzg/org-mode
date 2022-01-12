@@ -328,6 +328,7 @@ Return PLIST."
     (when existing
       (org-persist-collection-let collection
         (dolist (cont (cons container container))
+          (org-persist-gc:generic cont collection)
           (remhash (cons cont associated) org-persist--index-hash)
           (when path (remhash (cons cont (list :file path)) org-persist--index-hash))
           (when inode (remhash (cons cont (list :inode inode)) org-persist--index-hash))
@@ -494,6 +495,11 @@ COLLECTION is the plist holding data collectin."
     (if org-persist--index
         (mapc (lambda (collection) (org-persist--add-to-index collection 'hash)) org-persist--index)
       (setq org-persist--index nil)
+      (when (file-exists-p org-persist-directory)
+        (dolist (file (directory-files org-persist-directory 'absolute "^[^.][^.]"))
+          (if (file-directory-p file)
+              (delete-directory file t)
+            (delete-file file))))
       (plist-put (org-persist--get-collection container) :expiry 'never))))
 
 (defun org-persist--load-index ()
