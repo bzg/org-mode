@@ -143,6 +143,20 @@ password prompts to log in."
                  (number :tag "Keep not more than X files")
                  (const :tag "Check if exist on remote" 'check-existence)))
 
+(defcustom org-persist-default-expiry 30
+  "Default expiry condition for persistent data.
+
+When this variable is `nil', all the data vanishes at the end of Emacs
+session.  When `never', the data never vanishes.  When a number, the
+data is deleted that number days after last access.  When a function,
+it should be a function returning non-nil when the data is expired.  The
+function will be called with a single argument - collection."
+  :group 'org-persist
+  :type '(choice (const :tag "Never" 'never)
+                 (const :tag "Always" nil)
+                 (number :tag "Keep N days")
+                 (function :tag "Function")))
+
 (defconst org-persist-index-file "index"
   "File name used to store the data index.")
 
@@ -571,7 +585,7 @@ COLLECTION is the plist holding data collectin."
 
 ;;;; Public API
 
-(cl-defun org-persist-register (container &optional associated &rest misc &key inherit &key (expiry 'never) &allow-other-keys)
+(cl-defun org-persist-register (container &optional associated &rest misc &key inherit &key (expiry org-persist-default-expiry) &allow-other-keys)
   "Register CONTAINER in ASSOCIATED to be persistent across Emacs sessions.
 Optional key INHERIT makes CONTAINER dependent on another container.
 Such dependency means that data shared between variables will be
