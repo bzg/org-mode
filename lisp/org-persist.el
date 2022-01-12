@@ -328,7 +328,8 @@ Return PLIST."
     (when existing
       (org-persist-collection-let collection
         (dolist (cont (cons container container))
-          (org-persist-gc:generic cont collection)
+          (unless (listp (car container))
+            (org-persist-gc:generic cont collection))
           (remhash (cons cont associated) org-persist--index-hash)
           (when path (remhash (cons cont (list :file path)) org-persist--index-hash))
           (when inode (remhash (cons cont (list :inode inode)) org-persist--index-hash))
