@@ -1253,6 +1253,8 @@ parser (e.g. `:end' and :END:).  Return value is a plist."
    (while (and (org-at-comment-p) (bolp)) (forward-line))
    (org-element--get-node-properties t)))
 
+
+(defvar org-element-org-data-parser--recurse nil)
 (defun org-element-org-data-parser (&optional _)
   "Parse org-data."
   (org-with-wide-buffer
@@ -1286,13 +1288,17 @@ parser (e.g. `:end' and :END:).  Return value is a plist."
 		          ((symbolp org-category) (symbol-name org-category))
 		          (t org-category)))
           (category (catch 'buffer-category
-                      (org-with-point-at end
-	                (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
-                          (org-element-with-disabled-cache
-	                      (let ((element (org-element-at-point-no-context)))
-	                        (when (eq (org-element-type element) 'keyword)
-		                  (throw 'buffer-category
-		                         (org-element-property :value element)))))))
+                      (unless org-element-org-data-parser--recurse
+                        (org-with-point-at end
+                          ;; Avoid recusrive calls from
+                          ;; `org-element-at-point-no-context'.
+                          (let ((org-element-org-data-parser--recurse t))
+	                    (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
+                              (org-element-with-disabled-cache
+	                          (let ((element (org-element-at-point-no-context)))
+	                            (when (eq (org-element-type element) 'keyword)
+		                      (throw 'buffer-category
+		                             (org-element-property :value element)))))))))
 	              category))
           (properties (org-element--get-global-node-properties)))
      (unless (plist-get properties :CATEGORY)
@@ -6378,7 +6384,8 @@ the expected result."
                  (setq element (org-element-headline-parser nil 'fast))
 	         (setq mode 'planning)
 	         (forward-line))
-	     (setq mode 'top-comment))
+             (setq element (org-element-org-data-parser))
+	     (setq mode 'org-data))
            (org-skip-whitespace)
            (beginning-of-line))
           ;; Check if CACHED or any of its ancestors contain point.
