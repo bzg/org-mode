@@ -501,11 +501,11 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   Switch back to the startup visibility of the buffer (see [[*Initial
   visibility]]).
 
-- {{{kbd(C-u C-u C-u TAB)}}} (~outline-show-all~) ::
+- {{{kbd(C-u C-u C-u TAB)}}} (~org-show-all~) ::
 
   #+cindex: show all, command
   #+kindex: C-u C-u C-u TAB
-  #+findex: outline-show-all
+  #+findex: org-show-all
   Show all, including drawers.
 
 - {{{kbd(C-c C-r)}}} (~org-reveal~) ::
@@ -521,18 +521,18 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   headings.  With a double prefix argument, also show the entire
   subtree of the parent.
 
-- {{{kbd(C-c C-k)}}} (~outline-show-branches~) ::
+- {{{kbd(C-c C-k)}}} (~org-show-branches~) ::
 
   #+cindex: show branches, command
   #+kindex: C-c C-k
-  #+findex: outline-show-branches
+  #+findex: org-show-branches
   Expose all the headings of the subtree, but not their bodies.
 
-- {{{kbd(C-c TAB)}}} (~outline-show-children~) ::
+- {{{kbd(C-c TAB)}}} (~org-show-children~) ::
 
   #+cindex: show children, command
   #+kindex: C-c TAB
-  #+findex: outline-show-children
+  #+findex: org-show-children
   Expose all direct children of the subtree.  With a numeric prefix
   argument {{{var(N)}}}, expose all children down to level
   {{{var(N)}}}.
@@ -7375,7 +7375,7 @@ its location in the outline tree, but behaves in the following way:
   command (see [[*Visibility Cycling]]).  You can force cycling archived
   subtrees with {{{kbd(C-TAB)}}}, or by setting the option
   ~org-cycle-open-archived-trees~.  Also normal outline commands, like
-  ~outline-show-all~, open archived subtrees.
+  ~org-show-all~, open archived subtrees.
 
 -
   #+vindex: org-sparse-tree-open-archived-trees
