@@ -148,6 +148,11 @@
 (require 'org-id)
 (require 'xdg nil t)
 
+(declare-function org-back-to-heading "org" (&optional invisible-ok))
+(declare-function org-next-visible-heading "org" (arg))
+(declare-function org-at-heading-p "org" (&optional invisible-not-ok))
+
+
 (defconst org-persist--storage-version "2.2"
   "Persistent storage layout version.")
 

@@ -204,6 +204,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar org-agenda-buffer-name)
 (defvar org-element-paragraph-separate)
+(defvar org-element-cache-map-continue-from)
 (defvar org-indent-indentation-per-level)
 (defvar org-radio-target-regexp)
 (defvar org-target-link-regexp)
