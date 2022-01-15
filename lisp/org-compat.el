@@ -471,6 +471,8 @@ Counting starts at 1."
 (define-obsolete-variable-alias 'org-reveal-start-hook
   'org-fold-reveal-start-hook "9.6")
 (define-obsolete-function-alias 'org-file-url-p 'org-url-p "9.6")
+(define-obsolete-variable-alias 'org-plantuml-executable-args 'org-plantuml-args
+  "Org 9.6")
 (defun org-in-fixed-width-region-p ()
   "Non-nil if point in a fixed-width region."
   (save-match-data

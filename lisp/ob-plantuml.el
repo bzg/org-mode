@@ -65,8 +65,8 @@ You can also configure extra arguments via `org-plantuml-executable-args'."
   :package-version '(Org . "9.4")
   :type 'string)
 
-(defcustom org-plantuml-executable-args (list "-headless")
-  "The arguments passed to plantuml executable when executing PlantUML."
+(defcustom org-plantuml-args (list "-headless")
+  "The arguments passed to plantuml when executing PlantUML."
   :group 'org-babel
   :package-version '(Org . "9.4")
   :type '(repeat string))
@@ -116,15 +116,15 @@ This function is called by `org-babel-execute-src-block'."
 	 (java (or (cdr (assq :java params)) ""))
 	 (executable (cond ((eq org-plantuml-exec-mode 'plantuml) org-plantuml-executable-path)
 			   (t "java")))
-	 (executable-args (cond ((eq org-plantuml-exec-mode 'plantuml) org-plantuml-executable-args)
+	 (executable-args (cond ((eq org-plantuml-exec-mode 'plantuml) org-plantuml-args)
 				((string= "" org-plantuml-jar-path)
 				 (error "`org-plantuml-jar-path' is not set"))
 				((not (file-exists-p org-plantuml-jar-path))
 				 (error "Could not find plantuml.jar at %s" org-plantuml-jar-path))
-				(t (list java
-					 "-Djava.awt.headless=true"
-					 "-jar"
-					 (shell-quote-argument (expand-file-name org-plantuml-jar-path))))))
+				(t `(,java
+				     "-jar"
+				     ,(shell-quote-argument (expand-file-name org-plantuml-jar-path))
+                                     ,@org-plantuml-args))))
 	 (full-body (org-babel-plantuml-make-body body params))
 	 (cmd (mapconcat #'identity
 			 (append

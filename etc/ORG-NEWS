@@ -224,6 +224,11 @@ files that are exported to Texinfo.
 
 =org-at-heading-p= now returns t by default on headings inside folds.
 Passing optional argument will produce the old behaviour.
+** Removed or renamed functions and variables
+*** =org-plantump-executable-args= is renamed and applies to jar as well
+
+The new variable name is =org-plantuml-args=.  It now applies to both
+jar PlantUML file and executable.
 
 ** Miscellaneous
 
