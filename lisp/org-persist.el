@@ -102,7 +102,7 @@
 (require 'org-id)
 (require 'xdg nil t)
 
-(defconst org-persist--storage-version "2.1"
+(defconst org-persist--storage-version "2.2"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
@@ -422,6 +422,7 @@ COLLECTION is the plist holding data collectin."
   `(let* ((c (org-persist--normalize-container ,container))
           (read-func-symbol (intern (format "org-persist-read:%s" (car c)))))
      (setf ,collection (plist-put ,collection :last-access (float-time)))
+     (setf ,collection (plist-put ,collection :last-access-hr (format-time-string "%FT%T%z" (float-time))))
      (unless (fboundp read-func-symbol)
        (error "org-persist: Read function %s not defined"
               read-func-symbol))
@@ -469,6 +470,7 @@ COLLECTION is the plist holding data collectin."
   `(let* ((container (org-persist--normalize-container ,container))
           (load-func-symbol (intern (format "org-persist-load:%s" (car container)))))
      (setf ,collection (plist-put ,collection :last-access (float-time)))
+     (setf ,collection (plist-put ,collection :last-access-hr (format-time-string "%FT%T%z" (float-time))))
      (unless (fboundp load-func-symbol)
        (error "org-persist: Load function %s not defined"
               load-func-symbol))
@@ -516,6 +518,8 @@ COLLECTION is the plist holding data collectin."
   "Write CONTAINER in COLLECTION."
   `(let* ((c (org-persist--normalize-container ,container))
           (write-func-symbol (intern (format "org-persist-write:%s" (car c)))))
+     (setf ,collection (plist-put ,collection :last-access (float-time)))
+     (setf ,collection (plist-put ,collection :last-access-hr (format-time-string "%FT%T%z" (float-time))))
      (unless (fboundp write-func-symbol)
        (error "org-persist: Write function %s not defined"
               write-func-symbol))
