@@ -90,7 +90,7 @@
 ;; The data collections can expire, in which case they will be removed
 ;; from the persistent storage at the end of Emacs session.  The
 ;; expiry condition can be set when saving/registering data
-;; containers. The expirty condition can be `never' - data will never
+;; containers.  The expirty condition can be `never' - data will never
 ;; expire; `nil' - data will expire at the end of current Emacs session;
 ;; a number - data will expire after the number days from last access;
 ;; a function - data will expire if the function, called with a single
@@ -130,9 +130,9 @@
   "Whether to keep persistent data for remote files.
 
 When this variable is nil, never save persitent data associated with
-remote files.  When `t', always keep the data.  When
+remote files.  When t, always keep the data.  When
 `check-existence', contact remote server containing the file and only
-keep the data when the file exists on the server. When a number, keep
+keep the data when the file exists on the server.  When a number, keep
 up to that number persistent values for remote files.
 
 Note that the last option `check-existence' may cause Emacs to show
@@ -146,7 +146,7 @@ password prompts to log in."
 (defcustom org-persist-default-expiry 30
   "Default expiry condition for persistent data.
 
-When this variable is `nil', all the data vanishes at the end of Emacs
+When this variable is nil, all the data vanishes at the end of Emacs
 session.  When `never', the data never vanishes.  When a number, the
 data is deleted that number days after last access.  When a function,
 it should be a function returning non-nil when the data is expired.  The
@@ -341,7 +341,8 @@ Return PLIST."
   "Return or create collection used to store CONTAINER for ASSOCIATED.
 When ASSOCIATED is nil, it is a global CONTAINER.
 ASSOCIATED can also be a (:buffer buffer) or buffer, (:file file-path)
-or file-path, (:inode inode), (:hash hash), or or (:key key)."
+or file-path, (:inode inode), (:hash hash), or or (:key key).
+MISC, if non-nil will be appended to the collection."
   (unless (and (listp container) (listp (car container)))
     (setq container (list container)))
   (setq associated (org-persist--normalize-associated associated))
@@ -429,25 +430,25 @@ COLLECTION is the plist holding data collectin."
      (funcall read-func-symbol c ,reference-data ,collection)))
 
 (defun org-persist-read:elisp (_ lisp-value _)
-  "Read elisp container and return the stored data."
+  "Read elisp container and return LISP-VALUE."
   lisp-value)
 
 (defun org-persist-read:version (container _ _)
-  "Read version container."
+  "Read version CONTAINER."
   (cadr container))
 
 (defun org-persist-read:file (_ path _)
-  "Read file container."
+  "Read file container from PATH."
   (when (and path (file-exists-p (concat org-persist-directory path)))
     (concat org-persist-directory path)))
 
 (defun org-persist-read:url (_ path _)
-  "Read file container."
+  "Read file container from PATH."
   (when (and path (file-exists-p (concat org-persist-directory path)))
     (concat org-persist-directory path)))
 
 (defun org-persist-read:index (cont index-file _)
-  "Read index container."
+  "Read index container CONT from INDEX-FILE."
   (when (file-exists-p index-file)
     (let ((index (org-persist--read-elisp-file index-file)))
       (when index
@@ -477,7 +478,7 @@ COLLECTION is the plist holding data collectin."
      (funcall load-func-symbol container ,reference-data ,collection)))
 
 (defun org-persist-load:elisp (container lisp-value collection)
-  "Load elisp variable container and assign the data to variable symbol."
+  "Assign elisp CONTAINER in COLLECTION LISP-VALUE."
   (let ((lisp-symbol (cadr container))
         (buffer (when (plist-get (plist-get collection :associated) :file)
                   (get-file-buffer (plist-get (plist-get collection :associated) :file)))))
@@ -491,7 +492,7 @@ COLLECTION is the plist holding data collectin."
 (defalias 'org-persist-load:file #'org-persist-read:file)
 
 (defun org-persist-load:index (container index-file _)
-  "Load `org-persist--index'."
+  "Load `org-persist--index' from INDEX-FILE according to CONTAINER."
   (unless org-persist--index
     (setq org-persist--index (org-persist-read:index container index-file nil))
     (setq org-persist--index-hash nil)
@@ -526,7 +527,7 @@ COLLECTION is the plist holding data collectin."
      (funcall write-func-symbol c ,collection)))
 
 (defun org-persist-write:elisp (container collection)
-  "Write elisp CONTAINER."
+  "Write elisp CONTAINER according to COLLECTION."
   (if (and (plist-get (plist-get collection :associated) :file)
            (get-file-buffer (plist-get (plist-get collection :associated) :file)))
       (buffer-local-value
@@ -537,7 +538,7 @@ COLLECTION is the plist holding data collectin."
 (defalias 'org-persist-write:version #'ignore)
 
 (defun org-persist-write:file (container collection)
-  "Write file container."
+  "Write file CONTAINER according to COLLECTION."
   (org-persist-collection-let collection
     (when (and path (file-exists-p path))
       (let* ((persist-file (plist-get collection :persist-file))
@@ -552,7 +553,7 @@ COLLECTION is the plist holding data collectin."
         (format "%s-file.%s" persist-file ext)))))
 
 (defun org-persist-write:url (container collection)
-  "Write url container."
+  "Write url CONTAINER according to COLLECTION."
   (org-persist-collection-let collection
     (when path
       (let* ((persist-file (plist-get collection :persist-file))
@@ -567,7 +568,7 @@ COLLECTION is the plist holding data collectin."
         (format "%s-file.%s" persist-file ext)))))
 
 (defun org-persist-write:index (container _)
-  "Write index container."
+  "Write index CONTAINER."
   (org-persist--get-collection container)
   (unless (file-exists-p org-persist-directory)
     (make-directory org-persist-directory))
@@ -602,9 +603,10 @@ Optional key INHERIT makes CONTAINER dependent on another container.
 Such dependency means that data shared between variables will be
 preserved (see elisp#Circular Objects).
 Optional key EXPIRY will set the expiry condition of the container.
-It can be `never', `nil' - until end of session, a number of days since
+It can be `never', nil - until end of session, a number of days since
 last access, or a function accepting a single argument - collection.
-EXPIRY key has no effect when INHERIT is non-nil."
+EXPIRY key has no effect when INHERIT is non-nil.
+MISC will be appended to CONTAINER."
   (unless org-persist--index (org-persist--load-index))
   (setq container (org-persist--normalize-container container))
   (when inherit
@@ -651,7 +653,8 @@ When HASH-MUST-MATCH is non-nil, do not restore data if hash for
 ASSOCIATED file or buffer does not match.
 ASSOCIATED can be a plist, a buffer, or a string.
 A buffer is treated as (:buffer ASSOCIATED).
-A string is treated as (:file ASSOCIATED)."
+A string is treated as (:file ASSOCIATED).
+When LOAD? is non-nil, load the data instead of reading."
   (setq associated (org-persist--normalize-associated associated))
   (setq container (org-persist--normalize-container container))
   (let* ((collection (org-persist--find-index `(:container ,container :associated ,associated)))
@@ -723,7 +726,8 @@ A string is treated as (:file ASSOCIATED)."
           (org-persist--write-elisp-file file data))))))
 
 (defun org-persist-write-all (&optional associated)
-  "Save all the persistent data."
+  "Save all the persistent data.
+When ASSOCIATED is non-nil, only save the matching data."
   (unless org-persist--index (org-persist--load-index))
   (setq associated (org-persist--normalize-associated associated))
   (let (all-containers)
@@ -755,13 +759,13 @@ Do nothing in an indirect buffer."
 (defalias 'org-persist-gc:index #'ignore)
 
 (defun org-persist-gc:file (container collection)
-  "Garbage collect file container."
+  "Garbage collect file CONTAINER in COLLECTION."
   (let ((file (org-persist-read container (plist-get collection :associated))))
     (when (file-exists-p file)
       (delete-file file))))
 
 (defun org-persist-gc:url (container collection)
-  "Garbage collect url container."
+  "Garbage collect url CONTAINER in COLLECTION."
   (let ((file (org-persist-read container (plist-get collection :associated))))
     (when (file-exists-p file)
       (delete-file file))))
@@ -774,7 +778,7 @@ Do nothing in an indirect buffer."
        (delete-directory (file-name-directory ,persist-file)))))
 
 (defmacro org-persist--gc-expired-p (cnd collection)
-  "Check if expiry condition CND triggers."
+  "Check if expiry condition CND triggers for COLLECTION."
   `(pcase ,cnd
      (`nil t)
      (`never nil)
