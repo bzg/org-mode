@@ -5869,6 +5869,10 @@ Paragraph<point>"
    (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n** H2"
      (let ((org-use-property-inheritance nil))
        (org-entry-get (point-max) "A" 'selective))))
+  (should-not
+   (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:END:\n* H2"
+     (let ((org-use-property-inheritance t))
+       (org-entry-get (point-max) "A" t))))
   (should
    (equal
     "1 2"
