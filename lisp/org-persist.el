@@ -474,11 +474,11 @@ COLLECTION is the plist holding data collectin."
               load-func-symbol))
      (funcall load-func-symbol container ,reference-data ,collection)))
 
-(defun org-persist-load:elisp (container lisp-value associated)
+(defun org-persist-load:elisp (container lisp-value collection)
   "Load elisp variable container and assign the data to variable symbol."
   (let ((lisp-symbol (cadr container))
-        (buffer (when (plist-get associated :file)
-                  (get-file-buffer (plist-get associated :file)))))
+        (buffer (when (plist-get (plist-get collection :associated) :file)
+                  (get-file-buffer (plist-get (plist-get collection :associated) :file)))))
     (if buffer
         (with-current-buffer buffer
           (make-variable-buffer-local lisp-symbol)
