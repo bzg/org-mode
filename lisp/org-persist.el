@@ -702,6 +702,11 @@ ASSOCIATED can be a plist, a buffer, or a string.
 A buffer is treated as (:buffer ASSOCIATED).
 A string is treated as (:file ASSOCIATED)."
   (setq associated (org-persist--normalize-associated associated))
+  ;; Update hash
+  (when (and (plist-get associated :file)
+             (plist-get associated :hash)
+             (get-file-buffer (plist-get associated :file)))
+    (setq associated (org-persist--normalize-associated (get-file-buffer (plist-get associated :file)))))
   (let ((collection (org-persist--get-collection container associated)))
     (setf collection (plist-put collection :associated associated))
     (unless (seq-find (lambda (v)
