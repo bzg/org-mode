@@ -1,4 +1,4 @@
-;;; org-persist.el --- Persist data across Emacs sessions         -*- lexical-binding: t; -*-
+;;; org-persist.el --- Persist cached data across Emacs sessions         -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
@@ -22,8 +22,46 @@
 
 ;;; Commentary:
 ;;
-;; This file implements persistant data storage across Emacs sessions.
-;; Both global and buffer-local data can be stored.
+;; This file implements persistant cache storage across Emacs sessions.
+;; Both global and buffer-local data can be stored.  This
+;; implementation is not meant to be used to store important data -
+;; all the caches should be safe to remove at any time.
+;;
+;; Example usage:
+;;
+;; 1. Temporarily cache Elisp symbol value to disk.  Remove upon
+;;    closing Emacs:
+;;    (org-persist-write 'variable-symbol)
+;;    (org-persist-read 'variable-symbol) ;; read the data later
+;; 2. Temporarily cache a remote URL file to disk.  Remove upon
+;;    closing Emacs:
+;;    (org-persist-write '("url") "https://static.fsf.org/common/img/logo-new.png")
+;;    (org-persist-read '("url") "https://static.fsf.org/common/img/logo-new.png")
+;;    `org-persist-read' will return the cached file location or nil if cached file
+;;    has been removed.
+;; 3. Temporarily cache a file, including TRAMP path to disk:
+;;    (org-persist-write '("file") "/path/to/file")
+;; 4. Cache value of a Elisp variable to disk.  The value will be
+;;    saved and restored automatically (except buffer-local
+;;    variables).
+;;    ;; Until `org-persist-default-expiry'
+;;    (org-persist-register 'variable-symbol)
+;;    ;; Specify expiry explicitly
+;;    (org-persist-register 'variable-symbol :expiry 'never)
+;;    ;; Save buffer-local variable (buffer-local will not be
+;;    ;; autoloaded!)
+;;    (org-persist-register 'org-element--cache (current-buffer))
+;;    ;; Save buffer-local variable preserving circular links:
+;;    (org-persist-register 'org-element--headline-cache (current-buffer)
+;;               :inherit 'org-element--cache)
+;; 5. Load variable by side effects assigning variable symbol:
+;;    (org-persist-load 'variable-symbol (current-buffer))
+;; 6. Version variable value:
+;;    (org-persist-register '(("elisp" variable-symbol) (version "2.0")))
+;; 7. Cancel variable persistence:
+;;    (org-persist-unregister 'variable-symbol 'all) ; in all buffers
+;;    (org-persist-unregister 'variable-symbol) ;; global variable
+;;    (org-persist-unregister 'variable-symbol (current-buffer)) ;; buffer-local
 ;;
 ;; Most common data type is variable data.  However, other data types
 ;; can also be stored.
@@ -73,7 +111,7 @@
 ;;                    file;
 ;; - `:persist-file': data file name;
 ;; - `:associated'  : list of associated objects;
-;; - `:last-access' : last date when the container has been read;
+;; - `:last-access' : last date when the container has been accessed;
 ;; - `:expiry'      : list of expiry conditions.
 ;; - all other keywords are ignored
 ;;
@@ -95,6 +133,14 @@
 ;; a number - data will expire after the number days from last access;
 ;; a function - data will expire if the function, called with a single
 ;; argument - collection, returns non-nil.
+;;
+;;
+;; Data collections associated with files will automatically expire
+;; when the file is removed.  If the associated file is remote, the
+;; expiry is controlled by `org-persist-remote-files' instead.
+;;
+;; Data loading/writing can be more accurately controlled using
+;; `org-persist-before-write-hook', `org-persist-before-read-hook', and `org-persist-after-read-hook'.
 
 ;;; Code:
 
