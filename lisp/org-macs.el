@@ -889,71 +889,64 @@ end of string are ignored."
 		      results		;skip trailing separator
 		    (cons (substring string i) results)))))))
 
-(defun org--string-from-props (s property beg end)
-  "Return the visible part of string S.
-Visible part is determined according to text PROPERTY, which is
-either `invisible' or `display'.  BEG and END are 0-indices
-delimiting S."
-  (let ((width 0)
-	(cursor beg))
-    (while (setq beg (text-property-not-all beg end property nil s))
-      (let* ((next (next-single-property-change beg property s end))
-	     (props (text-properties-at beg s))
-	     (spec (plist-get props property))
-	     (value
-	      (pcase property
-		(`invisible
-		 ;; If `invisible' property in PROPS means text is to
-		 ;; be invisible, return 0.  Otherwise return nil so
-		 ;; as to resume search.
-		 (and (or (eq t buffer-invisibility-spec)
-			  (assoc-string spec buffer-invisibility-spec))
-		      0))
-		(`display
-		 (pcase spec
-		   (`nil nil)
-		   (`(space . ,props)
-		    (let ((width (plist-get props :width)))
-		      (and (wholenump width) width)))
-		   (`(image . ,_)
-                    (and (fboundp 'image-size)
-                         (ceiling (car (image-size spec)))))
-		   ((pred stringp)
-		    ;; Displayed string could contain invisible parts,
-		    ;; but no nested display.
-		    (org--string-from-props spec 'invisible 0 (length spec)))
-		   (_
-		    ;; Un-handled `display' value.  Ignore it.
-		    ;; Consider the original string instead.
-		    nil)))
-		(_ (error "Unknown property: %S" property)))))
-	(when value
-	  (cl-incf width
-		   ;; When looking for `display' parts, we still need
-		   ;; to look for `invisible' property elsewhere.
-		   (+ (cond ((eq property 'display)
-			     (org--string-from-props s 'invisible cursor beg))
-			    ((= cursor beg) 0)
-			    (t (string-width (substring s cursor beg))))
-		      value))
-	  (setq cursor next))
-	(setq beg next)))
-    (+ width
-       ;; Look for `invisible' property in the last part of the
-       ;; string.  See above.
-       (cond ((eq property 'display)
-	      (org--string-from-props s 'invisible cursor end))
-	     ((= cursor end) 0)
-	     (t (string-width (substring s cursor end)))))))
-
-(defun org-string-width (string)
+(defun org-string-width (string &optional pixels)
   "Return width of STRING when displayed in the current buffer.
-Unlike `string-width', this function takes into consideration
-`invisible' and `display' text properties.  It supports the
-latter in a limited way, mostly for combinations used in Org.
-Results may be off sometimes if it cannot handle a given
-`display' value."
-  (org--string-from-props string 'display 0 (length string)))
+Return width in pixels when PIXELS is non-nil."
+  ;; Wrap/line prefix will make `window-text-pizel-size' return too
+  ;; large value including the prefix.
+  ;; Face should be removed to make sure that all the string symbols
+  ;; are using default face with constant width.  Constant char width
+  ;; is critical to get right string width from pixel width.
+  (remove-text-properties 0 (length string)
+                          '(wrap-prefix t line-prefix t face t)
+                          string)
+  (let (;; We need to remove the folds to make sure that folded table
+        ;; alignment is not messed up.
+        (current-invisibility-spec
+         (or (and (not (listp buffer-invisibility-spec))
+                  buffer-invisibility-spec)
+             (let (result)
+               (dolist (el buffer-invisibility-spec)
+                 (unless (or (memq el
+                                   '(org-fold-drawer
+                                     org-fold-block
+                                     org-fold-outline))
+                             (and (listp el)
+                                  (memq (car el)
+                                        '(org-fold-drawer
+                                          org-fold-block
+                                          org-fold-outline))))
+                   (push el result)))
+               result)))
+        (current-char-property-alias-alist char-property-alias-alist))
+    (with-temp-buffer
+      (setq-local display-line-numbers nil)
+      (setq-local buffer-invisibility-spec
+                  current-invisibility-spec)
+      (setq-local char-property-alias-alist
+                  current-char-property-alias-alist)
+      (let (pixel-width symbol-width)
+        (with-silent-modifications
+          (setf (buffer-string) string)
+          (setq pixel-width
+                (if (get-buffer-window (current-buffer))
+                    (car (window-text-pixel-size
+                          nil (line-beginning-position) (point-max)))
+                  (set-window-buffer nil (current-buffer))
+                  (car (window-text-pixel-size
+                        nil (line-beginning-position) (point-max)))))
+          (unless pixels
+            (setf (buffer-string) "a")
+            (setq symbol-width
+                  (if (get-buffer-window (current-buffer))
+                      (car (window-text-pixel-size
+                            nil (line-beginning-position) (point-max)))
+                    (set-window-buffer nil (current-buffer))
+                    (car (window-text-pixel-size
+                          nil (line-beginning-position) (point-max)))))))
+        (if pixels
+            pixel-width
+          (/ pixel-width symbol-width))))))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
