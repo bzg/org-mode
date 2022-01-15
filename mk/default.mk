@@ -32,6 +32,20 @@ TMPDIR ?= /tmp
 testdir = $(TMPDIR)/tmp-orgtest
 
 # Configuration for testing
+# Verbose ERT summary by default for Emacs-28 and above.
+# To override:
+# - Add to local.mk
+#   EMACS_TEST_VERBOSE =
+# - Export EMACS_TEST_VERBOSE environment variable with empty value
+# - Run tests as
+#   EMACS_TEST_VERBOSE= make test [OTHER_ARGUMENTS...]
+#   or as
+#   make test EMACS_TEST_VERBOSE= [OTHER_ARGUMENTS...]
+EMACS_TEST_VERBOSE ?= yes
+ifeq (,$(EMACS_TEST_VERBOSE))
+# Emacs-28 considers empty value as true, fixed in Emacs-29
+unexport EMACS_TEST_VERBOSE
+endif
 # add options before standard load-path
 BTEST_PRE   =
 # add options after standard load path
