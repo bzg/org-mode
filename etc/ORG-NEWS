@@ -40,6 +40,105 @@ The cache state is saved between Emacs sessions.  Enabled by default.
 The cache persistence can be controlled via
 ~org-element-cache-persistent~.
 
+*** Users experiencing performance issues can use new folding backend
+
+The old folding backend used in Org is poorly scalable when the file
+size increases beyond few Mbs.  The symptoms usually include slow
+cursor motion, especially in long-running Emacs sessions.
+
+A new optimised folding backend is now available, and enabled by
+default.  To disable it, put the following to the Emacs config *before*
+loading Org:
+
+#+begin_src emacs-lisp
+(setq org-fold-core-style 'overlays)
+#+end_src
+
+Even more performance optimisation can be enabled by customising
+=org-fold-core--optimise-for-huge-buffers=.  However, this option may
+be dangerous.  Please, read the variable docstring carefully to
+understand the possible consequences.
+
+When =org-fold-core-style= is set to =text-properties=, several new
+features will become available and several notable changes will happen
+to the Org behaviour.  The new features and changes are listed below.
+
+**** Hidden parts of the links can now be searched and revealed during isearch
+
+In the past, hidden parts of the links could not be searched using
+isearch (=C-s=).  Now, they are searchable by default.  The hidden
+match is also revealed temporarily during isearch.
+
+To restore the old behaviour add the following core to your Emacs
+config:
+
+#+begin_src emacs-lisp
+(defun org-hidden-link-ignore-isearch ()
+  "Do not match hidden parts of links during isearch."
+  (org-fold-core-set-folding-spec-property 'org-link :isearch-open nil)
+  (org-fold-core-set-folding-spec-property 'org-link :isearch-ignore t))
+(add-hook 'org-mode-hook #'org-hidden-link-ignore-isearch)
+#+end_src
+
+See docstring of =org-fold-core--specs= to see more details about
+=:isearch-open= and =:isearch-ignore= properties.
+
+**** =org-catch-invisible-edits= now works for hidden parts of the links and for emphasis markers
+
+In the past, user could edit invisible parts of the links and emphasis markers.  Now, the editing is respecting the value of =org-catch-invisible-edits=.
+
+Note that hidden parts of sub-/super-scripts are still not handled.
+
+**** Breaking structure of folded elements automatically reveals the folded text
+
+In the past, the user could be left with unfoldable text after breaking the org structure.
+
+For example, if
+
+#+begin_src org
+:DRAWER:
+like this
+:END:
+#+end_src
+
+is folded and then edited into
+
+#+begin_src org
+DRAWER:
+like this
+:END:
+#+end_src
+The hidden text would not be revealed.
+
+Now, breaking structure of drawers, blocks, and headings automatically
+reveals the folded text.
+
+**** Folding state of the drawers is now preserved when cycling headline visibility
+
+In the past drawers were folded every time a headline is unfolded.
+
+Now, it is not the case anymore.  The drawer folding state is
+preserved.  The initial folding state of all the drawers in buffer is
+set according to the startup visibility settings.
+
+To restore the old behaviour, add the following code to Emacs config:
+
+#+begin_src emacs-lisp
+(add-hook 'org-cycle-hook #'org-cycle-hide-drawers)
+#+end_src
+
+Note that old behaviour may cause performance issues when cycling
+headline visibility in large buffers.
+
+**** =outline-*= functions may no longer work correctly in Org mode
+
+The new folding backend breaks some of the =outline-*= functions that
+rely on the details of visibility state implementation in
+=outline.el=.  The old Org folding backend was compatible with the
+=outline.el= folding, but it is not the case anymore with the new
+backend.  From now on, using =outline-*= functions is strongly
+discouraged when working with Org files.
+
 ** New features
 
 *** New library =org-persist.el= implements variable persistence across Emacs sessions
@@ -116,6 +215,11 @@ argument.
 
 This function is intended for us in the definition of a ~kbd~ macro in
 files that are exported to Texinfo.
+
+*** =org-at-heading-p= now recognises optional argument. Its meaning is inverted.
+
+=org-at-heading-p= now returns t by default on headings inside folds.
+Passing optional argument will produce the old behaviour.
 
 ** Miscellaneous
 
