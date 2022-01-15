@@ -271,32 +271,45 @@ FORMAT and ARGS are passed to `message'."
      (- (float-time) start-time)
      "Writing to %S" file)))
 
+(defmacro org-persist-gc:generic (container collection)
+  "Garbage collect CONTAINER data from COLLECTION."
+  `(let* ((c (org-persist--normalize-container ,container))
+          (gc-func-symbol (intern (format "org-persist-gc:%s" (car c)))))
+     (unless (fboundp gc-func-symbol)
+       (error "org-persist: GC function %s not defined"
+              gc-func-symbol))
+     (funcall gc-func-symbol c ,collection)))
+
 ;;;; Working with index
 
 (defmacro org-persist-collection-let (collection &rest body)
   "Bind container and associated from COLLECTION and execute BODY."
   (declare (debug (form body)) (indent 1))
-  `(let* ((container (plist-get ,collection :container))
-          (associated (plist-get ,collection :associated))
-          (path (plist-get associated :file))
-          (inode (plist-get associated :inode))
-          (hash (plist-get associated :hash))
-          (key (plist-get associated :key)))
-     ,@body))
+  `(with-no-warnings
+     ;; FIXME: We only need to suppress warnings about unused
+     ;; let-bindings.  However, it is unclear how to achieve it with
+     ;; `with-suppressed-warnings'.
+     (let* ((container (plist-get ,collection :container))
+            (associated (plist-get ,collection :associated))
+            (path (plist-get associated :file))
+            (inode (plist-get associated :inode))
+            (hash (plist-get associated :hash))
+            (key (plist-get associated :key)))
+       ,@body)))
 
 (defun org-persist--find-index (collection)
-  "Find COLLECTION in `org-persist--index'."
-  (org-persist-collection-let collection
-    (and org-persist--index-hash
-         (catch :found
-           (dolist (cont (cons container container))
-             (let (r)
-               (setq r (or (gethash (cons cont associated) org-persist--index-hash)
-                           (and path (gethash (cons cont (list :file path)) org-persist--index-hash))
-                           (and inode (gethash (cons cont (list :inode inode)) org-persist--index-hash))
-                           (and hash (gethash (cons cont (list :hash hash)) org-persist--index-hash))
-                           (and key (gethash (cons cont (list :key key)) org-persist--index-hash))))
-               (when r (throw :found r))))))))
+"Find COLLECTION in `org-persist--index'."
+(org-persist-collection-let collection
+  (and org-persist--index-hash
+       (catch :found
+         (dolist (cont (cons container container))
+           (let (r)
+             (setq r (or (gethash (cons cont associated) org-persist--index-hash)
+                         (and path (gethash (cons cont (list :file path)) org-persist--index-hash))
+                         (and inode (gethash (cons cont (list :inode inode)) org-persist--index-hash))
+                         (and hash (gethash (cons cont (list :hash hash)) org-persist--index-hash))
+                         (and key (gethash (cons cont (list :key key)) org-persist--index-hash))))
+             (when r (throw :found r))))))))
 
 (defun org-persist--add-to-index (collection &optional hash-only)
   "Add or update COLLECTION in `org-persist--index'.
@@ -537,8 +550,8 @@ COLLECTION is the plist holding data collectin."
 
 (defalias 'org-persist-write:version #'ignore)
 
-(defun org-persist-write:file (container collection)
-  "Write file CONTAINER according to COLLECTION."
+(defun org-persist-write:file (_ collection)
+  "Write file container according to COLLECTION."
   (org-persist-collection-let collection
     (when (and path (file-exists-p path))
       (let* ((persist-file (plist-get collection :persist-file))
@@ -552,8 +565,8 @@ COLLECTION is the plist holding data collectin."
           (copy-file path file-copy 'overwrite))
         (format "%s-file.%s" persist-file ext)))))
 
-(defun org-persist-write:url (container collection)
-  "Write url CONTAINER according to COLLECTION."
+(defun org-persist-write:url (_ collection)
+  "Write url container according to COLLECTION."
   (org-persist-collection-let collection
     (when path
       (let* ((persist-file (plist-get collection :persist-file))
@@ -745,15 +758,6 @@ When ASSOCIATED is non-nil, only save the matching data."
 Do nothing in an indirect buffer."
   (unless (buffer-base-buffer (current-buffer))
     (org-persist-write-all (current-buffer))))
-
-(defmacro org-persist-gc:generic (container collection)
-  "Garbage collect CONTAINER data from COLLECTION."
-  `(let* ((c (org-persist--normalize-container ,container))
-          (gc-func-symbol (intern (format "org-persist-gc:%s" (car c)))))
-     (unless (fboundp gc-func-symbol)
-       (error "org-persist: GC function %s not defined"
-              gc-func-symbol))
-     (funcall gc-func-symbol c ,collection)))
 
 (defalias 'org-persist-gc:elisp #'ignore)
 (defalias 'org-persist-gc:index #'ignore)
