@@ -605,6 +605,22 @@ exact and fuzzy text search.")
 (defvar org-link--search-failed nil
   "Non-nil when last link search failed.")
 
+
+(defvar-local org-link--link-folding-spec '(org-link
+                                            (:global t)
+                                            (:ellipsis . nil)
+                                            (:isearch-open . t)
+                                            (:fragile . org-link--reveal-maybe))
+  "Folding spec used to hide invisible parts of links.")
+
+(defvar-local org-link--description-folding-spec '(org-link-description
+                                                   (:global t)
+                                                   (:ellipsis . nil)
+                                                   (:visible . t)
+                                                   (:isearch-open . nil)
+                                                   (:fragile . org-link--reveal-maybe))
+  "Folding spec used to reveal link description.")
+
 
 ;;; Internal Functions
 
@@ -761,6 +777,13 @@ syntax around the string."
 		    (setq string (substring string (match-end 0))))
 		   (t nil))))
     string))
+
+(defun org-link--reveal-maybe (region _)
+  "Reveal folded link in REGION when needed.
+This function is intended to be used as :fragile property of a folding
+spec."
+  (org-with-point-at (car region)
+    (not (org-in-regexp org-link-any-re))))
 
 
 ;;; Public API
@@ -1444,14 +1467,31 @@ If the link is in hidden text, expose it."
   (interactive)
   (org-next-link t))
 
+(defun org-link-descriptive-ensure ()
+  "Toggle the literal or descriptive display of links in current buffer if needed."
+  (if org-link-descriptive
+      (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible nil)
+    (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible t)))
+
 ;;;###autoload
-(defun org-toggle-link-display ()
+(defun org-toggle-link-display--overlays ()
   "Toggle the literal or descriptive display of links."
   (interactive)
   (if org-link-descriptive (remove-from-invisibility-spec '(org-link))
     (add-to-invisibility-spec '(org-link)))
   (org-restart-font-lock)
   (setq org-link-descriptive (not org-link-descriptive)))
+(defun org-toggle-link-display--text-properties ()
+  "Toggle the literal or descriptive display of links in current buffer."
+  (interactive)
+  (setq org-link-descriptive (not org-link-descriptive))
+  (org-link-descriptive-ensure))
+(defsubst org-toggle-link-display ()
+  "Toggle the literal or descriptive display of links."
+  (interactive)
+  (if (eq org-fold-core-style 'text-properties)
+      (org-toggle-link-display--text-properties)
+    (org-toggle-link-display--overlays)))
 
 ;;;###autoload
 (defun org-store-link (arg &optional interactive?)

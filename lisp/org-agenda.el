@@ -2325,7 +2325,8 @@ The following commands are available:
 	  org-agenda-show-log org-agenda-start-with-log-mode
 	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode))
   (add-to-invisibility-spec '(org-filtered))
-  (add-to-invisibility-spec '(org-link))
+  (org-fold-core-initialize `(,org-link--description-folding-spec
+                              ,org-link--link-folding-spec))
   (easy-menu-change
    '("Agenda") "Agenda Files"
    (append

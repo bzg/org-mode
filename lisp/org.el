@@ -4563,9 +4563,16 @@ The following commands are available:
   (setq-local org-mode-loading t)
   (org-load-modules-maybe)
   (org-install-agenda-files-menu)
-  (when org-link-descriptive (add-to-invisibility-spec '(org-link)))
+  (when (and org-link-descriptive
+             (eq org-fold-core-style 'overlays))
+    (add-to-invisibility-spec '(org-link)))
+  (org-fold-initialize (or (and (stringp org-ellipsis) (not (equal "" org-ellipsis)) org-ellipsis)
+                        "..."))
   (make-local-variable 'org-link-descriptive)
-  (add-to-invisibility-spec '(org-hide-block . t))
+  (when (eq org-fold-core-style 'overlays) (add-to-invisibility-spec '(org-hide-block . t)))
+  (if org-link-descriptive
+      (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible nil)
+    (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible t))
   (setq-local outline-regexp org-outline-regexp)
   (setq-local outline-level 'org-outline-level)
   (setq bidi-paragraph-direction 'left-to-right)
