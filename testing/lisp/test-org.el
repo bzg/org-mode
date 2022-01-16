@@ -1522,6 +1522,7 @@
   (should
    (org-test-with-temp-text ":MYDRAWER:\n- a\n:END:"
      (forward-line)
+     (org-fold-reveal)
      (org-meta-return)
      (beginning-of-line)
      (looking-at "- $"))))
@@ -2943,6 +2944,7 @@ Foo Bar
    (let ((org-custom-properties '("FOO" "BAR")))
      (org-test-with-temp-text
 	 "* H\n:PROPERTIES:\n<point>:FOO: val\n:P: 1\n:BAR: baz\n:END:\n"
+       (org-fold-reveal)
        (org-toggle-custom-properties-visibility)
        (and (org-invisible-p2)
 	    (not (progn (forward-line) (org-invisible-p2)))
@@ -2963,6 +2965,7 @@ Foo Bar
    (let ((org-custom-properties '("A")))
      (org-test-with-temp-text
 	 "* H\n:PROPERTIES:\n:A: 1\n:END:\n\n:PROPERTIES:\n<point>:A: 2\n:END:"
+       (org-fold-reveal)
        (org-toggle-custom-properties-visibility)
        (org-invisible-p2)))))
 

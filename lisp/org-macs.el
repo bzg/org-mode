@@ -170,16 +170,8 @@
        (when local-variables
 	 (org-with-wide-buffer
 	  (goto-char (point-max))
-	  ;; If last section is folded, make sure to also hide file
-	  ;; local variables after inserting them back.
-	  (let ((overlay
-		 (cl-find-if (lambda (o)
-			       (eq 'outline (overlay-get o 'invisible)))
-			     (overlays-at (1- (point))))))
-	    (unless (bolp) (insert "\n"))
-	    (insert local-variables)
-	    (when overlay
-	      (move-overlay overlay (overlay-start overlay) (point-max)))))))))
+	  (unless (bolp) (insert "\n"))
+	  (insert local-variables))))))
 
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows and evaluate BODY."

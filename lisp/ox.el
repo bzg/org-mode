@@ -2588,7 +2588,9 @@ The function assumes BUFFER's major mode is `org-mode'."
 			(or (memq var
 				  '(default-directory
 				     buffer-file-name
-				     buffer-file-coding-system))
+				     buffer-file-coding-system
+                                     ;; Needed to preserve folding state
+                                     char-property-alias-alist))
 			    (assq var bound-variables)
 			    (string-match "^\\(org-\\|orgtbl-\\)"
 					  (symbol-name var)))

@@ -1557,8 +1557,8 @@ echo \"$data\"
     (org-test-with-temp-text "  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
       (org-babel-execute-src-block)
       (let ((case-fold-search t)) (search-forward "RESULTS"))
-      (list (org-get-indentation)
-	    (progn (forward-line) (org-get-indentation))))))
+      (list (current-indentation)
+	    (progn (forward-line) (current-indentation))))))
   (should
    (equal
     '(2 2)
@@ -1566,8 +1566,8 @@ echo \"$data\"
 	"  #+name: block\n  #+begin_src emacs-lisp\n(+ 1 1)\n  #+end_src"
       (org-babel-execute-src-block)
       (let ((case-fold-search t)) (search-forward "RESULTS"))
-      (list (org-get-indentation)
-	    (progn (forward-line) (org-get-indentation))))))
+      (list (current-indentation)
+	    (progn (forward-line) (current-indentation))))))
   ;; Don't get fooled by TAB-based indentation.
   (should
    (equal
@@ -1577,8 +1577,8 @@ echo \"$data\"
       (setq tab-width 4)
       (org-babel-execute-src-block)
       (let ((case-fold-search t)) (search-forward "RESULTS"))
-      (list (org-get-indentation)
-	    (progn (forward-line) (org-get-indentation))))))
+      (list (current-indentation)
+	    (progn (forward-line) (current-indentation))))))
   ;; Properly indent examplified blocks.
   (should
    (equal
