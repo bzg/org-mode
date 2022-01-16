@@ -714,7 +714,7 @@ Return a non-nil value when toggling is successful."
   "Hide all drawers between BEGIN and END."
   (save-excursion
     (goto-char begin)
-    (while (re-search-forward org-drawer-regexp end t)
+    (while (and (< (point) end) (re-search-forward org-drawer-regexp end t))
       (let* ((pair (get-char-property-and-overlay (line-beginning-position)
                                                   'invisible))
              (o (cdr-safe pair)))
