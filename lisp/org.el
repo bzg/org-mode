@@ -5788,6 +5788,7 @@ If TAG is a number, get the corresponding match group."
 			    '(mouse-face t keymap t org-linked-text t
 					 invisible t intangible t
 					 org-emphasis t))
+    (org-fold-core-update-optimisation beg end)
     (org-remove-font-lock-display-properties beg end)))
 
 (defconst org-script-display  '(((raise -0.3) (height 0.7))
@@ -6158,7 +6159,11 @@ Return nil before first heading."
       (org-back-to-heading t)
       (let ((case-fold-search nil))
 	(looking-at org-complex-heading-regexp)
-	(let ((todo (and (not no-todo) (match-string 2)))
+        ;; When using `org-fold-core--optimise-for-huge-buffers',
+        ;; returned text may be invisible.  Clear it up.
+        (save-match-data
+          (org-fold-core-remove-optimisation (match-beginning 0) (match-end 0)))
+        (let ((todo (and (not no-todo) (match-string 2)))
 	      (priority (and (not no-priority) (match-string 3)))
 	      (headline (pcase (match-string 4)
 			  (`nil "")
@@ -6169,6 +6174,8 @@ Return nil before first heading."
 			    "" h))
 			  (h h)))
 	      (tags (and (not no-tags) (match-string 5))))
+          ;; Restore cleared optimisation.
+          (org-fold-core-update-optimisation (match-beginning 0) (match-end 0))
 	  (mapconcat #'identity
 		     (delq nil (list todo priority headline tags))
 		     " "))))))
@@ -6185,18 +6192,21 @@ This is a list with the following elements:
   (save-excursion
     (org-back-to-heading t)
     (when (let (case-fold-search) (looking-at org-complex-heading-regexp))
-      (list (length (match-string 1))
-	    (org-reduced-level (length (match-string 1)))
-	    (match-string-no-properties 2)
-	    (and (match-end 3) (aref (match-string 3) 2))
-	    (match-string-no-properties 4)
-	    (match-string-no-properties 5)))))
+      (org-fold-core-remove-optimisation (match-beginning 0) (match-end 0))
+      (prog1
+          (list (length (match-string 1))
+	        (org-reduced-level (length (match-string 1)))
+	        (match-string-no-properties 2)
+	        (and (match-end 3) (aref (match-string 3) 2))
+	        (match-string-no-properties 4)
+	        (match-string-no-properties 5))
+        (org-fold-core-update-optimisation (match-beginning 0) (match-end 0))))))
 
 (defun org-get-entry ()
   "Get the entry text, after heading, entire subtree."
   (save-excursion
     (org-back-to-heading t)
-    (buffer-substring (point-at-bol 2) (org-end-of-subtree t))))
+    (filter-buffer-substring (point-at-bol 2) (org-end-of-subtree t))))
 
 (defun org-edit-headline (&optional heading)
   "Edit the current headline.
