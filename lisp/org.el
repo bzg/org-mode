@@ -106,7 +106,6 @@
 (defalias 'org-overview #'org-cycle-overview)
 (defalias 'org-content #'org-cycle-content)
 (defalias 'org-reveal #'org-fold-reveal)
-(defalias 'org-force-cycle-archived #'org-cycle-force-archived)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
@@ -6169,8 +6168,7 @@ Return nil before first heading."
 	(looking-at org-complex-heading-regexp)
         ;; When using `org-fold-core--optimise-for-huge-buffers',
         ;; returned text may be invisible.  Clear it up.
-        (save-match-data
-          (org-fold-core-remove-optimisation (match-beginning 0) (match-end 0)))
+        (org-fold-core-remove-optimisation (match-beginning 0) (match-end 0))
         (let ((todo (and (not no-todo) (match-string 2)))
 	      (priority (and (not no-priority) (match-string 3)))
 	      (headline (pcase (match-string 4)
@@ -11699,7 +11697,7 @@ Assume point is at the beginning of the headline."
   (let* ((cached (and (org-element--cache-active-p) (org-element-at-point nil 'cached)))
          (cached-tags (org-element-property :tags cached)))
     (if cached
-        ;; If we do explicitly copy the result, reference would
+        ;; If we do not explicitly copy the result, reference would
         ;; be returned and cache element might be modified directly.
         (mapcar #'copy-sequence cached-tags)
       ;; Parse tags manually.
