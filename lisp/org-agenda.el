@@ -1,4 +1,4 @@
-;;; org-agenda.el --- Dynamic task and appointment lists for Org  -*- lexical-binding: t; -*-
+;;; org-agenda.el --- Dynamic task and appointment lists for Org  -*- lexical-binding: t; no-native-compile: t; -*-
 
 ;; Copyright (C) 2004-2022 Free Software Foundation, Inc.
 
