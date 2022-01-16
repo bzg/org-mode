@@ -1358,8 +1358,10 @@ EVENT is passed to `mouse-set-point'."
       (goto-char beg)
       (cond
        ;; Block is hidden; move at start of block.
-       ((cl-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
-		 (overlays-at (point)))
+       ((if (eq org-fold-core-style 'text-properties)
+            (org-fold-folded-p nil 'block)
+          (cl-some (lambda (o) (eq (overlay-get o 'invisible) 'org-hide-block))
+		   (overlays-at (point))))
 	(beginning-of-line 0))
        (write-back (org-src--goto-coordinates coordinates beg end))))
     ;; Clean up left-over markers and restore window configuration.

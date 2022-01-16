@@ -26,7 +26,9 @@
 (require 'cl-lib)
 (require 'ob-eval)
 (require 'org-macs)
+(require 'org-fold)
 (require 'org-compat)
+(require 'org-cycle)
 
 (defconst org-babel-exeext
   (if (memq system-type '(windows-nt cygwin))
@@ -50,7 +52,7 @@
 (declare-function org-babel-ref-split-args "ob-ref" (arg-string))
 (declare-function org-babel-tangle-comment-links "ob-tangle" (&optional info))
 (declare-function org-current-level "org" ())
-(declare-function org-cycle "org" (&optional arg))
+(declare-function org-cycle "org-cycle" (&optional arg))
 (declare-function org-edit-src-code "org-src" (&optional code edit-buffer-name))
 (declare-function org-edit-src-exit "org-src"  ())
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
@@ -75,7 +77,7 @@
 (declare-function org-next-block "org" (arg &optional backward block-regexp))
 (declare-function org-open-at-point "org" (&optional in-emacs reference-buffer))
 (declare-function org-previous-block "org" (arg &optional block-regexp))
-(declare-function org-show-context "org" (&optional key))
+(declare-function org-fold-show-context "org-fold" (&optional key))
 (declare-function org-src-coderef-format "org-src" (&optional element))
 (declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 (declare-function org-src-get-lang-mode "org-src" (lang))
@@ -945,7 +947,7 @@ arguments and pop open the results in a preview buffer."
     (insert (concat header " " (or arg "")))
     (cons header arg)))
 
-(add-hook 'org-tab-first-hook 'org-babel-header-arg-expand)
+(add-hook 'org-cycle-tab-first-hook 'org-babel-header-arg-expand)
 
 ;;;###autoload
 (defun org-babel-load-in-session (&optional _arg info)
@@ -1469,7 +1471,7 @@ portions of results lines."
 	(push ov org-babel-hide-result-overlays)))))
 
 ;; org-tab-after-check-for-cycling-hook
-(add-hook 'org-tab-first-hook #'org-babel-hide-result-toggle-maybe)
+(add-hook 'org-cycle-tab-first-hook #'org-babel-hide-result-toggle-maybe)
 ;; Remove overlays when changing major mode
 (add-hook 'org-mode-hook
 	  (lambda () (add-hook 'change-major-mode-hook
@@ -1817,7 +1819,7 @@ If the point is not on a source block then return nil."
   (let ((point (org-babel-find-named-block name)))
     (if point
         ;; Taken from `org-open-at-point'.
-        (progn (org-mark-ring-push) (goto-char point) (org-show-context))
+        (progn (org-mark-ring-push) (goto-char point) (org-fold-show-context))
       (message "source-code block `%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-block (name)
@@ -1857,7 +1859,7 @@ to `org-babel-named-src-block-regexp'."
   (let ((point (org-babel-find-named-result name)))
     (if point
         ;; taken from `org-open-at-point'
-        (progn (goto-char point) (org-show-context))
+        (progn (goto-char point) (org-fold-show-context))
       (message "result `%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-result (name)

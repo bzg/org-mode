@@ -73,7 +73,7 @@
 (declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
-(declare-function org-flag-subtree "org" (flag))
+(declare-function org-fold-subtree "org-fold" (flag))
 (declare-function org-make-tags-matcher "org" (match))
 (declare-function org-previous-visible-heading "org" (arg))
 (declare-function org-scan-tags "org" (action matcher todo-only &optional start-level))
@@ -243,7 +243,7 @@ Assume `epg-context' is set."
 	      (error (error-message-string err)))))
 	 (when folded-heading
 	   (goto-char folded-heading)
-	   (org-flag-subtree t))
+	   (org-fold-subtree t))
 	 nil)))))
 
 ;;;###autoload
@@ -280,7 +280,7 @@ Assume `epg-context' is set."
 			     'org-crypt-text encrypted-text))
 	 (when folded-heading
 	   (goto-char folded-heading)
-	   (org-flag-subtree t))
+	   (org-fold-subtree t))
 	 nil)))
     (_ nil)))
 
@@ -313,7 +313,7 @@ Assume `epg-context' is set."
    'org-mode-hook
    (lambda () (add-hook 'before-save-hook 'org-encrypt-entries nil t))))
 
-(add-hook 'org-reveal-start-hook 'org-decrypt-entry)
+(add-hook 'org-fold-reveal-start-hook 'org-decrypt-entry)
 
 (provide 'org-crypt)
 

@@ -29,6 +29,7 @@
 
 (require 'org-compat)
 (require 'org-macs)
+(require 'org-fold)
 
 (defvar clean-buffer-list-kill-buffer-names)
 (defvar org-agenda-buffer-name)
@@ -66,10 +67,10 @@
 (declare-function org-mode "org" ())
 (declare-function org-occur "org" (regexp &optional keep-previous callback))
 (declare-function org-open-file "org" (path &optional in-emacs line search))
-(declare-function org-overview "org" ())
+(declare-function org-cycle-overview "org-cycle" ())
 (declare-function org-restart-font-lock "org" ())
 (declare-function org-run-like-in-org-mode "org" (cmd))
-(declare-function org-show-context "org" (&optional key))
+(declare-function org-fold-show-context "org-fold" (&optional key))
 (declare-function org-src-coderef-format "org-src" (&optional element))
 (declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
 (declare-function org-src-edit-buffer-p "org-src" (&optional buffer))
@@ -700,7 +701,7 @@ followed by another \"%[A-F0-9]{2}\" group."
 		(make-indirect-buffer (current-buffer)
 				      indirect-buffer-name
 				      'clone))))
-      (with-current-buffer indirect-buffer (org-overview))
+      (with-current-buffer indirect-buffer (org-cycle-overview))
       indirect-buffer))))
 
 (defun org-link--search-radio-target (target)
@@ -718,7 +719,7 @@ White spaces are not significant."
 	(let ((object (org-element-context)))
 	  (when (eq (org-element-type object) 'radio-target)
 	    (goto-char (org-element-property :begin object))
-	    (org-show-context 'link-search)
+	    (org-fold-show-context 'link-search)
 	    (throw :radio-match nil))))
       (goto-char origin)
       (user-error "No match for radio target: %s" target))))
@@ -1257,7 +1258,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 	(error "No match for fuzzy expression: %s" normalized)))
     ;; Disclose surroundings of match, if appropriate.
     (when (and (derived-mode-p 'org-mode) (not stealth))
-      (org-show-context 'link-search))
+      (org-fold-show-context 'link-search))
     type))
 
 (defun org-link-heading-search-string (&optional string)
@@ -1430,7 +1431,7 @@ is non-nil, move backward."
 	    (`nil nil)
 	    (link
 	     (goto-char (org-element-property :begin link))
-	     (when (org-invisible-p) (org-show-context))
+	     (when (org-invisible-p) (org-fold-show-context))
 	     (throw :found t)))))
       (goto-char pos)
       (setq org-link--search-failed t)

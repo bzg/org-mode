@@ -159,8 +159,8 @@ See `org-columns-summary-types' for details.")
 (defun org-columns-content ()
   "Switch to contents view while in columns view."
   (interactive)
-  (org-overview)
-  (org-content))
+  (org-cycle-overview)
+  (org-cycle-content))
 
 (org-defkey org-columns-map "c"        #'org-columns-content)
 (org-defkey org-columns-map "o"        #'org-overview)
@@ -701,7 +701,7 @@ FUN is a function called with no argument."
 			  (move-beginning-of-line 2)
 			  (org-at-heading-p)))))
     (unwind-protect (funcall fun)
-      (when hide-body (outline-hide-entry)))))
+      (when hide-body (org-fold-hide-entry)))))
 
 (defun org-columns-previous-allowed-value ()
   "Switch to the previous allowed value for this column."

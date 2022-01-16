@@ -1064,7 +1064,7 @@ be returned that indicates what went wrong."
 	  (progn
 	    ;; Workaround a `org-insert-heading-respect-content' bug
 	    ;; which prevents correct insertion when point is invisible
-	    (org-show-subtree)
+	    (org-fold-show-subtree)
 	    (end-of-line 1)
 	    (org-insert-heading-respect-content t)
 	    (org-demote))

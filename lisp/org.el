@@ -96,6 +96,9 @@
 (require 'ol)
 (require 'oc)
 (require 'org-table)
+(require 'org-fold)
+
+(require 'org-cycle)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
@@ -4670,7 +4673,7 @@ The following commands are available:
 	t))
      (when org-startup-with-inline-images (org-display-inline-images))
      (when org-startup-with-latex-preview (org-latex-preview '(16)))
-     (unless org-inhibit-startup-visibility-stuff (org-set-startup-visibility))
+     (unless org-inhibit-startup-visibility-stuff (org-cycle-set-startup-visibility))
      (when org-startup-truncated (setq truncate-lines t))
      (when org-startup-numerated (require 'org-num) (org-num-mode 1))
      (when org-startup-indented (require 'org-indent) (org-indent-mode 1))))
@@ -5865,7 +5868,7 @@ frame is not changed."
       (pop-to-buffer ibuf))
      (t (error "Invalid value")))
     (narrow-to-region beg end)
-    (org-show-all '(headings drawers blocks))
+    (org-fold-show-all '(headings drawers blocks))
     (goto-char pos)
     (run-hook-with-args 'org-cycle-hook 'all)
     (and (window-live-p cwin) (select-window cwin))))
@@ -5977,10 +5980,15 @@ unconditionally."
       ;; When INVISIBLE-OK is non-nil, ensure newly created headline
       ;; is visible.
       (unless invisible-ok
-	(pcase (get-char-property-and-overlay (point) 'invisible)
-	  (`(outline . ,o)
-	   (move-overlay o (overlay-start o) (line-end-position 0)))
-	  (_ nil))))
+        (if (eq org-fold-core-style 'text-properties)
+	    (cond
+	     ((org-fold-folded-p (line-beginning-position) 'headline)
+	      (org-fold-region (line-end-position 0) (line-end-position) nil 'headline))
+	     (t nil))
+          (pcase (get-char-property-and-overlay (point) 'invisible)
+	    (`(outline . ,o)
+	     (move-overlay o (overlay-start o) (line-end-position 0)))
+	    (_ nil)))))
      ;; At a headline...
      ((org-at-heading-p)
       (cond ((bolp)
@@ -6522,7 +6530,7 @@ case."
   (goto-char (point-min))
   ;; First check if there are no even levels
   (when (re-search-forward "^\\(\\*\\*\\)+ " nil t)
-    (org-show-set-visibility 'canonical)
+    (org-fold-show-set-visibility 'canonical)
     (error "Not all levels are odd in this file.  Conversion not possible"))
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd-even? ")
     (let ((outline-regexp org-outline-regexp)
@@ -6615,9 +6623,9 @@ case."
      (setq txt (buffer-substring beg end))
      (org-save-markers-in-region beg end)
      (delete-region beg end)
-     (org-remove-empty-overlays-at beg)
-     (unless (= beg (point-min)) (org-flag-region (1- beg) beg nil 'outline))
-     (unless (bobp) (org-flag-region (1- (point)) (point) nil 'outline))
+     (when (eq org-fold-core-style 'overlays) (org-remove-empty-overlays-at beg))
+     (unless (= beg (point-min)) (org-fold-region (1- beg) beg nil 'outline))
+     (unless (bobp) (org-fold-region (1- (point)) (point) nil 'outline))
      (and (not (bolp)) (looking-at "\n") (forward-char 1))
      (let ((bbb (point)))
        (insert-before-markers txt)
@@ -6628,9 +6636,9 @@ case."
      (org-skip-whitespace)
      (move-marker ins-point nil)
      (if folded
-	 (org-flag-subtree t)
-       (org-show-entry)
-       (org-show-children))
+	 (org-fold-subtree t)
+       (org-fold-show-entry)
+       (org-fold-show-children))
      (org-clean-visibility-after-subtree-move)
      ;; move back to the initial column we were at
      (move-to-column col))))
@@ -6988,7 +6996,7 @@ with the original repeater."
 		  (insert template)
 		  (org-mode)
 		  (goto-char (point-min))
-		  (org-show-subtree)
+		  (org-fold-show-subtree)
 		  (and idprop (if org-clone-delete-id
 				  (org-entry-delete nil "ID")
 				(org-id-get-create t)))
@@ -7260,7 +7268,7 @@ function is being called interactively."
 		       (point))
 	    what "children")
       (goto-char start)
-      (outline-show-subtree)
+      (org-fold-show-subtree)
       (outline-next-heading))
      (t
       ;; we will sort the top-level entries in this file
@@ -7276,7 +7284,7 @@ function is being called interactively."
       (setq end (point-max))
       (setq what "top-level")
       (goto-char start)
-      (org-show-all '(headings drawers blocks))))
+      (org-fold-show-all '(headings drawers blocks))))
 
     (setq beg (point))
     (when (>= beg end) (goto-char start) (user-error "Nothing to sort"))
@@ -7860,7 +7868,7 @@ If the file does not exist, throw an error."
       (funcall (cdr (assq 'file org-link-frame-setup)) file)
       (widen)
       (cond (line (org-goto-line line)
-		  (when (derived-mode-p 'org-mode) (org-reveal)))
+		  (when (derived-mode-p 'org-mode) (org-fold-reveal)))
 	    (search (condition-case err
 			(org-link-search search)
 		      ;; Save position before error-ing out so user
@@ -8156,7 +8164,7 @@ or to another Org file, automatically push the old position onto the ring."
     (setq m (car p))
     (pop-to-buffer-same-window (marker-buffer m))
     (goto-char m)
-    (when (or (org-invisible-p) (org-invisible-p2)) (org-show-context 'mark-goto))))
+    (when (or (org-invisible-p) (org-invisible-p2)) (org-fold-show-context 'mark-goto))))
 
 ;;; Following specific links
 
@@ -10167,7 +10175,7 @@ as well.")
   "Make a compact tree showing all matches of REGEXP.
 
 The tree will show the lines where the regexp matches, and any other context
-defined in `org-show-context-detail', which see.
+defined in `org-fold-show-context-detail', which see.
 
 When optional argument KEEP-PREVIOUS is non-nil, highlighting and exposing
 done by a previous call to `org-occur' will be kept, to allow stacking of
@@ -10189,7 +10197,7 @@ The function must neither move point nor alter narrowing."
       (when (or (not keep-previous)	    ; do not want to keep
 		(not org-occur-highlights)) ; no previous matches
 	;; hide everything
-	(org-overview))
+	(org-cycle-overview))
       (let ((case-fold-search (if (eq org-occur-case-fold-search 'smart)
 				  (isearch-no-upper-case-p regexp t)
 				org-occur-case-fold-search)))
@@ -10199,12 +10207,12 @@ The function must neither move point nor alter narrowing."
 	    (setq cnt (1+ cnt))
 	    (when org-highlight-sparse-tree-matches
 	      (org-highlight-new-match (match-beginning 0) (match-end 0)))
-	    (org-show-context 'occur-tree)))))
+	    (org-fold-show-context 'occur-tree)))))
     (when org-remove-highlights-with-change
       (add-hook 'before-change-functions 'org-remove-occur-highlights
 		nil 'local))
     (unless org-sparse-tree-open-archived-trees
-      (org-hide-archived-subtrees (point-min) (point-max)))
+      (org-fold-hide-archived-subtrees (point-min) (point-max)))
     (run-hooks 'org-occur-hook)
     (when (called-interactively-p 'interactive)
       (message "%d match(es) for regexp %s" cnt regexp))
@@ -10488,7 +10496,7 @@ headlines matching this string."
     (save-excursion
       (goto-char (point-min))
       (when (eq action 'sparse-tree)
-	(org-overview)
+	(org-cycle-overview)
 	(org-remove-occur-highlights))
       (if (org-element--cache-active-p)
           (let ((fast-re (concat "^"
@@ -10537,7 +10545,7 @@ headlines matching this string."
 		          (org-get-heading) (match-end 0)
 		          (org-highlight-new-match
 		           (match-beginning 1) (match-end 1)))
-	             (org-show-context 'tags-tree))
+	             (org-fold-show-context 'tags-tree))
 	            ((eq action 'agenda)
                      (let* ((effort (org-entry-get (point) org-effort-property))
                             (effort-minutes (when effort (save-match-data (org-duration-to-minutes effort)))))
@@ -10663,7 +10671,7 @@ headlines matching this string."
 		     (org-get-heading) (match-end 0)
 		     (org-highlight-new-match
 		      (match-beginning 1) (match-end 1)))
-	        (org-show-context 'tags-tree))
+	        (org-fold-show-context 'tags-tree))
 	       ((eq action 'agenda)
 	        (setq txt (org-agenda-format-item
 			   ""
@@ -10701,7 +10709,7 @@ headlines matching this string."
 	    (and (= (point) lspos) (end-of-line 1))))))
     (when (and (eq action 'sparse-tree)
 	       (not org-sparse-tree-open-archived-trees))
-      (org-hide-archived-subtrees (point-min) (point-max)))
+      (org-fold-hide-archived-subtrees (point-min) (point-max)))
     (nreverse rtn)))
 
 (defun org-remove-uninherited-tags (tags)
@@ -12549,7 +12557,7 @@ drawer is immediately hidden."
 	   (inhibit-read-only t))
        (unless (bobp) (insert "\n"))
        (insert ":PROPERTIES:\n:END:")
-       (org-flag-region (line-end-position 0) (point) t 'outline)
+       (org-fold-region (line-end-position 0) (point) t (if (eq org-fold-core-style 'text-properties) 'drawer 'outline))
        (when (or (eobp) (= begin (point-min))) (insert "\n"))
        (org-indent-region begin (point))))))
 
@@ -14392,7 +14400,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
 		  (message "No clock to adjust")
 		(save-excursion
 		  (org-goto-marker-or-bmk clfixpos)
-		  (org-show-subtree)
+		  (org-fold-show-subtree)
 		  (when (re-search-forward clrgx nil t)
 		    (goto-char (match-beginning 1))
 		    (let (org-clock-adjust-closest)
@@ -15894,7 +15902,7 @@ either not currently on a tagged headline or on a tag."
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
-  (org-check-before-invisible-edit 'insert)
+  (org-fold-check-before-invisible-edit 'insert)
   (cond
    ((and org-use-speed-commands
 	 (let ((kv (this-command-keys-vector)))
@@ -15964,7 +15972,7 @@ still be marked for re-alignment if the field did fill the entire column,
 because, in this case the deletion might narrow the column."
   (interactive "p")
   (save-match-data
-    (org-check-before-invisible-edit 'delete-backward)
+    (org-fold-check-before-invisible-edit 'delete-backward)
     (if (and (= N 1)
 	     (not overwrite-mode)
 	     (not (org-region-active-p))
@@ -15984,7 +15992,7 @@ still be marked for re-alignment if the field did fill the entire column,
 because, in this case the deletion might narrow the column."
   (interactive "p")
   (save-match-data
-    (org-check-before-invisible-edit 'delete)
+    (org-fold-check-before-invisible-edit 'delete)
     (cond
      ((or (/= N 1)
 	  (eq (char-after) ?|)
@@ -16170,11 +16178,11 @@ When ARG is a numeric prefix, show contents of this level."
    ((integerp arg)
     (let ((arg2 (if org-odd-levels-only (1- (* 2 arg)) arg)))
       (message "Content view to level: %d" arg)
-      (org-content (prefix-numeric-value arg2))
+      (org-cycle-content (prefix-numeric-value arg2))
       (org-cycle-show-empty-lines t)
       (setq org-cycle-global-status 'overview)
       (run-hook-with-args 'org-cycle-hook 'overview)))
-   (t (call-interactively 'org-global-cycle))))
+   (t (call-interactively 'org-cycle-global))))
 
 (defun org-shiftmetaleft ()
   "Promote subtree or delete table column.
@@ -16328,14 +16336,14 @@ this function returns t, nil otherwise."
 	  (setq beg (point-at-bol))
 	  (beginning-of-line 2)
 	  (while (and (not (eobp)) ;; this is like `next-line'
-		      (get-char-property (1- (point)) 'invisible))
+		      (org-invisible-p (1- (point))))
 	    (beginning-of-line 2))
 	  (setq end (point))
 	  (goto-char beg)
 	  (goto-char (point-at-eol))
 	  (setq end (max end (point)))
 	  (while (re-search-forward re end t)
-	    (when (get-char-property (match-beginning 0) 'invisible)
+	    (when (org-invisible-p (match-beginning 0))
 	      (throw 'exit t))))
 	nil))))
 
@@ -16623,11 +16631,18 @@ this numeric value."
   (interactive "r")
   (let ((result ""))
     (while (/= beg end)
-      (if (invisible-p beg)
-          (setq beg (next-single-char-property-change beg 'invisible nil end))
+      (if (eq org-fold-core-style 'text-properties)
+          (progn
+            (while (org-invisible-p beg)
+	      (setq beg (org-fold-next-visibility-change beg end)))
+            (let ((next (org-fold-next-visibility-change beg end)))
+	      (setq result (concat result (buffer-substring beg next)))
+	      (setq beg next)))
+        (when (invisible-p beg)
+	  (setq beg (next-single-char-property-change beg 'invisible nil end)))
         (let ((next (next-single-char-property-change beg 'invisible nil end)))
-          (setq result (concat result (buffer-substring beg next)))
-          (setq beg next))))
+	  (setq result (concat result (buffer-substring beg next)))
+	  (setq beg next))))
     (setq deactivate-mark t)
     (kill-new result)
     (message "Visible strings have been copied to the kill ring.")))
@@ -17001,14 +17016,14 @@ Use `\\[org-edit-special]' to edit table.el tables")))
   (cond (org-finish-function
 	 (let ((org-note-abort t)) (funcall org-finish-function)))
 	((org-before-first-heading-p)
-	 (org-show-branches-buffer)
-	 (org-hide-archived-subtrees (point-min) (point-max)))
+	 (org-fold-show-branches-buffer)
+	 (org-fold-hide-archived-subtrees (point-min) (point-max)))
 	(t
 	 (let ((beg (progn (org-back-to-heading) (point)))
 	       (end (save-excursion (org-end-of-subtree t t) (point))))
-	   (outline-hide-subtree)
-	   (outline-show-branches)
-	   (org-hide-archived-subtrees beg end)))))
+	   (org-fold-hide-subtree)
+	   (org-fold-show-branches)
+	   (org-fold-hide-archived-subtrees beg end)))))
 
 (defun org-delete-indentation (&optional arg)
   "Join current line to previous and fix whitespace at join.
@@ -17131,7 +17146,7 @@ object (e.g., within a comment).  In these case, you need to use
 	 (org-auto-align-tags (org-align-tags))
 	 (t (org--align-tags-here tags-column))) ;preserve tags column
 	(end-of-line)
-	(org-show-entry)
+	(org-fold-show-entry)
 	(org--newline indent arg interactive)
 	(when string (save-excursion (insert (org-trim string))))))
      ;; In a list, make sure indenting keeps trailing text within.
@@ -17169,11 +17184,11 @@ level to hide."
     (call-interactively #'org-table-toggle-column-width))
    ((org-before-first-heading-p)
     (save-excursion
-      (org-flag-above-first-heading)
-      (outline-hide-sublevels (or arg 1))))
+      (org-fold-flag-above-first-heading)
+      (org-fold-hide-sublevels (or arg 1))))
    (t
-    (outline-hide-subtree)
-    (org-show-children arg))))
+    (org-fold-hide-subtree)
+    (org-fold-show-children arg))))
 
 (defun org-ctrl-c-star ()
   "Compute table, or change heading status of lines.
@@ -17308,7 +17323,7 @@ Calls `org-insert-heading', `org-insert-item' or
 `org-table-wrap-region', depending on context.  When called with
 an argument, unconditionally call `org-insert-heading'."
   (interactive "P")
-  (org-check-before-invisible-edit 'insert)
+  (org-fold-check-before-invisible-edit 'insert)
   (or (run-hook-with-args-until-success 'org-metareturn-hook)
       (call-interactively (cond (arg #'org-insert-heading)
 				((org-at-table-p) #'org-table-wrap-region)
@@ -17328,8 +17343,8 @@ an argument, unconditionally call `org-insert-heading'."
      ["Cycle Visibility" org-cycle :active (or (bobp) (outline-on-heading-p))]
      ["Cycle Global Visibility" org-shifttab :active (not (org-at-table-p))]
      ["Sparse Tree..." org-sparse-tree t]
-     ["Reveal Context" org-reveal t]
-     ["Show All" org-show-all t]
+     ["Reveal Context" org-fold-reveal t]
+     ["Show All" org-fold-show-all t]
      "--"
      ["Subtree to indirect buffer" org-tree-to-indirect-buffer t])
     "--"
@@ -17788,7 +17803,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 	(when (or (> marker (point-max)) (< marker (point-min)))
 	  (widen))
 	(goto-char marker)
-	(org-show-context 'org-goto))
+	(org-fold-show-context 'org-goto))
     (if bookmark
 	(bookmark-jump bookmark)
       (error "Cannot find location"))))
@@ -18025,7 +18040,7 @@ block from point."
      regexp)))
 
 (add-hook 'occur-mode-find-occurrence-hook
-	  (lambda () (when (derived-mode-p 'org-mode) (org-reveal))))
+	  (lambda () (when (derived-mode-p 'org-mode) (org-fold-reveal))))
 
 (defun org-occur-link-in-agenda-files ()
   "Create a link and search for it in the agendas.
@@ -18961,7 +18976,7 @@ Throw an error if no block is found."
 	  (cl-decf count))))
     (if (= count 0)
 	(prog1 (goto-char (org-element-property :post-affiliated last-element))
-	  (save-match-data (org-show-context)))
+	  (save-match-data (org-fold-show-context)))
       (goto-char origin)
       (user-error "No %s code blocks" (if backward "previous" "further")))))
 
@@ -19442,7 +19457,7 @@ depending on context."
    ((or (not org-special-ctrl-k)
 	(bolp)
 	(not (org-at-heading-p)))
-    (when (and (get-char-property (line-end-position) 'invisible)
+    (when (and (org-invisible-p (line-end-position))
 	       org-ctrl-k-protect-subtree
 	       (or (eq org-ctrl-k-protect-subtree 'error)
 		   (not (y-or-n-p "Kill hidden subtree along with headline? "))))
@@ -19530,7 +19545,7 @@ interactive command with similar behavior."
 	     (or (looking-at org-outline-regexp)
 		 (re-search-forward org-outline-regexp-bol end t))
 	     (while (and (< (point) end) (looking-at org-outline-regexp))
-	       (org-flag-subtree t)
+	       (org-fold-subtree t)
 	       (org-cycle-show-empty-lines 'folded)
 	       (condition-case nil
 		   (outline-forward-same-level 1)
@@ -19587,7 +19602,7 @@ interactive command with similar behavior."
                      (fboundp 'org-inlinetask-end-p)
                      (org-inlinetask-end-p))
                 (org-inlinetask-goto-beginning)
-	      (setq found (and (or invisible-ok (not (org-invisible-p)))
+	      (setq found (and (or invisible-ok (not (org-fold-folded-p)))
 			       (point))))))
 	(goto-char found)
 	found)))
@@ -20624,9 +20639,9 @@ Started from `gnus-info-find-node'."
 
 ;;; Finish up
 
-(add-hook 'org-mode-hook     ;remove overlays when changing major mode
+(add-hook 'org-mode-hook     ;remove folds when changing major mode
 	  (lambda () (add-hook 'change-major-mode-hook
-			       'org-show-all 'append 'local)))
+			  'org-fold-show-all 'append 'local)))
 
 (provide 'org)
 

@@ -34,7 +34,7 @@
 ;;; Code:
 (require 'ob)
 
-(declare-function org-show-all "org" (&optional types))
+(declare-function org-fold-show-all "org-fold" (&optional types))
 
 (defalias 'lilypond-mode 'LilyPond-mode)
 
@@ -279,7 +279,7 @@ LINE is the erroneous line."
     (setq case-fold-search nil)
     (if (search-forward line nil t)
         (progn
-          (org-show-all)
+          (org-fold-show-all)
           (set-mark (point))
           (goto-char (- (point) (length line))))
       (goto-char temp))))

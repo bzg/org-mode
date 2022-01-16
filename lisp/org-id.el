@@ -333,7 +333,7 @@ Move the cursor to that entry in that buffer."
     (pop-to-buffer-same-window (marker-buffer m))
     (goto-char m)
     (move-marker m nil)
-    (org-show-context)))
+    (org-fold-show-context)))
 
 ;;;###autoload
 (defun org-id-find (id &optional markerp)
@@ -745,7 +745,7 @@ or filename if no title."
 	(funcall cmd (marker-buffer m)))
     (goto-char m)
     (move-marker m nil)
-    (org-show-context)))
+    (org-fold-show-context)))
 
 (org-link-set-parameters "id" :follow #'org-id-open)
 

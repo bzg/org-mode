@@ -79,6 +79,7 @@
 (require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)
+(require 'org-fold-core)
 
 (defvar org-M-RET-may-split-line)
 (defvar org-adapt-indentation)
@@ -138,7 +139,8 @@
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-reduced-level "org" (L))
 (declare-function org-set-tags "org" (tags))
-(declare-function org-show-subtree "org" ())
+(declare-function org-fold-show-subtree "org-fold" ())
+(declare-function org-fold-region "org-fold" (from to flag &optional spec))
 (declare-function org-sort-remove-invisible "org" (S))
 (declare-function org-time-string-to-seconds "org" (s))
 (declare-function org-timer-hms-to-secs "org-timer" (hms))
@@ -2029,7 +2031,7 @@ Possible values are: `folded', `children' or `subtree'.  See
    ((eq view 'folded)
     (let ((item-end (org-list-get-item-end-before-blank item struct)))
       ;; Hide from eol
-      (org-flag-region (save-excursion (goto-char item) (line-end-position))
+      (org-fold-region (save-excursion (goto-char item) (line-end-position))
 		       item-end t 'outline)))
    ((eq view 'children)
     ;; First show everything.
@@ -2042,7 +2044,7 @@ Possible values are: `folded', `children' or `subtree'.  See
    ((eq view 'subtree)
     ;; Show everything
     (let ((item-end (org-list-get-item-end item struct)))
-      (org-flag-region item item-end nil 'outline)))))
+      (org-fold-region item item-end nil 'outline)))))
 
 (defun org-list-item-body-column (item)
   "Return column at which body of ITEM should start."
@@ -2455,7 +2457,7 @@ subtree, ignoring planning line and any drawer following it."
     (save-restriction
       (save-excursion
 	(org-narrow-to-subtree)
-	(org-show-subtree)
+	(org-fold-show-subtree)
 	(goto-char (point-min))
 	(let ((end (point-max)))
 	  (while (< (point) end)

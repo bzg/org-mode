@@ -521,7 +521,7 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		(goto-char (cond (pos)
 				 ((org-notes-order-reversed-p) (point-min))
 				 (t (point-max))))
-		(org-show-context 'org-goto))
+		(org-fold-show-context 'org-goto))
 	    (if regionp
 		(progn
 		  (org-kill-new (buffer-substring region-start region-end))

@@ -1007,10 +1007,10 @@ This means, between the beginning of line and the point."
 	    (with-current-buffer buffer
 	      (widen)
 	      (goto-char pos)
-	      (org-show-hidden-entry)
+	      (org-fold-show-hidden-entry)
 	      (save-excursion
 		(and (outline-next-heading)
-		     (org-flag-heading nil)))   ; show the next heading
+		     (org-fold-heading nil)))   ; show the next heading
 	      (org-back-to-heading)
 	      (setq marker (point-marker))
 	      (goto-char (max (point-at-bol) (- (point-at-eol) anticol)))

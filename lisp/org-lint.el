@@ -91,6 +91,7 @@
 (require 'ol)
 (require 'org-attach)
 (require 'org-macro)
+(require 'org-fold)
 (require 'ox)
 (require 'seq)
 
@@ -264,7 +265,7 @@ CHECKERS is the list of checkers used."
   (let ((l (org-lint--current-line)))
     (switch-to-buffer-other-window org-lint--source-buffer)
     (org-goto-line l)
-    (org-show-set-visibility 'local)
+    (org-fold-show-set-visibility 'local)
     (recenter)))
 
 (defun org-lint--show-source ()

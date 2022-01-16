@@ -329,7 +329,7 @@ Return output file name."
 	   newbuf)
       (with-current-buffer work-buffer
         (org-font-lock-ensure)
-        (org-show-all)
+        (org-fold-show-all)
         (setq newbuf (htmlize-buffer)))
       (with-current-buffer newbuf
 	(when org-org-htmlized-css-url

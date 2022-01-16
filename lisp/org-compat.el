@@ -50,18 +50,20 @@
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
-(declare-function org-hide-block-toggle "org" (&optional force no-error element))
+(declare-function org-fold-hide-block-toggle "org-fold" (&optional force no-error element))
 (declare-function org-link-display-format "ol" (s))
 (declare-function org-link-set-parameters "ol" (type &rest rest))
 (declare-function org-log-into-drawer "org" ())
 (declare-function org-make-tag-string "org" (tags))
 (declare-function org-reduced-level "org" (l))
 (declare-function org-return "org" (&optional indent arg interactive))
-(declare-function org-show-context "org" (&optional key))
+(declare-function org-fold-show-context "org-fold" (&optional key))
 (declare-function org-table-end "org-table" (&optional table-type))
 (declare-function outline-next-heading "outline" ())
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
+(declare-function org-fold-region "org-fold" (from to flag &optional spec))
+(declare-function org-fold-show-all "org-fold" (&optional types))
 
 (defvar calendar-mode-map)
 (defvar org-complex-heading-regexp)
@@ -72,6 +74,7 @@
 (defvar org-table-dataline-regexp)
 (defvar org-table-tab-recognizes-table.el)
 (defvar org-table1-hline-regexp)
+(defvar org-fold-core-style)
 
 
 ;;; Emacs < 29 compatibility
@@ -656,7 +659,7 @@ use of this function is for the stuck project list."
 (defun org-show-block-all ()
   "Unfold all blocks in the current buffer."
   (interactive)
-  (remove-overlays nil nil 'invisible 'org-hide-block))
+  (org-fold-show-all '(blocks)))
 
 (make-obsolete 'org-show-block-all
 	       "use `org-show-all' instead."
@@ -699,7 +702,7 @@ When optional argument ELEMENT is a parsed drawer, as returned by
 When buffer positions BEG and END are provided, hide or show that
 region as a drawer without further ado."
   (declare (obsolete "use `org-hide-drawer-toggle' instead." "9.4"))
-  (if (and beg end) (org-flag-region beg end flag 'outline)
+  (if (and beg end) (org-fold-region beg end flag (if (eq org-fold-core-style 'text-properties) 'drawer 'outline))
     (let ((drawer
 	   (or element
 	       (and (save-excursion
@@ -708,12 +711,12 @@ region as a drawer without further ado."
 		    (org-element-at-point)))))
       (when (memq (org-element-type drawer) '(drawer property-drawer))
 	(let ((post (org-element-property :post-affiliated drawer)))
-	  (org-flag-region
+	  (org-fold-region
 	   (save-excursion (goto-char post) (line-end-position))
 	   (save-excursion (goto-char (org-element-property :end drawer))
 			   (skip-chars-backward " \t\n")
 			   (line-end-position))
-	   flag 'outline)
+	   flag (if (eq org-fold-core-style 'text-properties) 'drawer 'outline))
 	  ;; When the drawer is hidden away, make sure point lies in
 	  ;; a visible part of the buffer.
 	  (when (invisible-p (max (1- (point)) (point-min)))
@@ -725,7 +728,7 @@ Unlike to `org-hide-block-toggle', this function does not throw
 an error.  Return a non-nil value when toggling is successful."
   (declare (obsolete "use `org-hide-block-toggle' instead." "9.4"))
   (interactive)
-  (org-hide-block-toggle nil t))
+  (org-fold-hide-block-toggle nil t))
 
 (defun org-hide-block-toggle-all ()
   "Toggle the visibility of all blocks in the current buffer."
@@ -741,7 +744,7 @@ an error.  Return a non-nil value when toggling is successful."
 	(save-excursion
 	  (save-match-data
             (goto-char (match-beginning 0))
-            (org-hide-block-toggle)))))))
+            (org-fold-hide-block-toggle)))))))
 
 (defun org-return-indent ()
   "Goto next table row or insert a newline and indent.
@@ -973,7 +976,7 @@ This also applied for speedbar access."
      (add-hook 'imenu-after-jump-hook
 	       (lambda ()
 		 (when (derived-mode-p 'org-mode)
-		   (org-show-context 'org-goto))))
+		   (org-fold-show-context 'org-goto))))
      (add-hook 'org-mode-hook
 	       (lambda ()
 		 (setq imenu-create-index-function 'org-imenu-get-tree)))))
@@ -1038,7 +1041,7 @@ To get rid of the restriction, use `\\[org-agenda-remove-restriction-lock]'."
      (define-key speedbar-file-key-map ">" 'org-agenda-remove-restriction-lock)
      (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
      (add-hook 'speedbar-visiting-tag-hook
-	       (lambda () (and (derived-mode-p 'org-mode) (org-show-context 'org-goto))))))
+	       (lambda () (and (derived-mode-p 'org-mode) (org-fold-show-context 'org-goto))))))
 
 ;;;; Add Log
 
@@ -1152,7 +1155,7 @@ ELEMENT is the element at point."
        (or (org-invisible-p)
 	   (save-excursion (goto-char (max (point-min) (1- (point))))
 			   (org-invisible-p)))
-       (org-show-context 'bookmark-jump)))
+       (org-fold-show-context 'bookmark-jump)))
 
 ;; Make `bookmark-jump' shows the jump location if it was hidden.
 (add-hook 'bookmark-after-jump-hook #'org-bookmark-jump-unhide)
@@ -1217,7 +1220,7 @@ key."
 (defun org--ecb-show-context (&rest _)
   "Make hierarchy visible when jumping into location from ECB tree buffer."
   (when (derived-mode-p 'org-mode)
-    (org-show-context)))
+    (org-fold-show-context)))
 
 ;;;; Simple
 
@@ -1225,7 +1228,7 @@ key."
   "Make the point visible with `org-show-context' after jumping to the mark."
   (when (and (derived-mode-p 'org-mode)
 	     (org-invisible-p))
-    (org-show-context 'mark-goto)))
+    (org-fold-show-context 'mark-goto)))
 
 (advice-add 'pop-to-mark-command :after #'org-mark-jump-unhide)
 

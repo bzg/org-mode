@@ -35,11 +35,16 @@
 (require 'format-spec)
 
 (declare-function org-mode "org" ())
-(declare-function org-show-context "org" (&optional key))
+(declare-function org-agenda-files "org" (&optional unrestricted archives))
+(declare-function org-fold-show-context "org-fold" (&optional key))
+(declare-function org-fold-save-outline-visibility "org-fold" (use-markers &rest body))
+(declare-function org-fold-next-visibility-change "org-fold" (&optional pos limit ignore-hidden-p previous-p))
+(declare-function org-fold-folded-p "org-fold" (&optional pos limit ignore-hidden-p previous-p))
 (declare-function string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
 
 (defvar org-ts-regexp0)
 (defvar ffap-url-regexp)
+(defvar org-fold-core-style)
 
 
 ;;; Macros
@@ -117,38 +122,7 @@
   (declare (debug (body)))
   `(let ((inhibit-read-only t)) ,@body))
 
-(defmacro org-save-outline-visibility (use-markers &rest body)
-  "Save and restore outline visibility around BODY.
-If USE-MARKERS is non-nil, use markers for the positions.  This
-means that the buffer may change while running BODY, but it also
-means that the buffer should stay alive during the operation,
-because otherwise all these markers will point to nowhere."
-  (declare (debug (form body)) (indent 1))
-  (org-with-gensyms (data invisible-types markers?)
-    `(let* ((,invisible-types '(org-hide-block outline))
-	    (,markers? ,use-markers)
-	    (,data
-	     (mapcar (lambda (o)
-		       (let ((beg (overlay-start o))
-			     (end (overlay-end o))
-			     (type (overlay-get o 'invisible)))
-			 (and beg end
-			      (> end beg)
-			      (memq type ,invisible-types)
-			      (list (if ,markers? (copy-marker beg) beg)
-				    (if ,markers? (copy-marker end t) end)
-				    type))))
-		     (org-with-wide-buffer
-		      (overlays-in (point-min) (point-max))))))
-       (unwind-protect (progn ,@body)
-	 (org-with-wide-buffer
-	  (dolist (type ,invisible-types)
-	    (remove-overlays (point-min) (point-max) 'invisible type))
-	  (pcase-dolist (`(,beg ,end ,type) (delq nil ,data))
-	    (org-flag-region beg end t type)
-	    (when ,markers?
-	      (set-marker beg nil)
-	      (set-marker end nil))))))))
+(defalias 'org-save-outline-visibility #'org-fold-save-outline-visibility)
 
 (defmacro org-with-wide-buffer (&rest body)
   "Execute body while temporarily widening the buffer."
