@@ -5597,7 +5597,10 @@ needs to be inserted at a specific position in the font-lock sequence.")
     (let ((org-odd-levels-only odd-levels))
       (org-mode)
       (org-font-lock-ensure)
-      (buffer-string))))
+      (if org-link-descriptive
+          (org-link-display-format
+           (buffer-string))
+        (buffer-string)))))
 
 (defun org-get-level-face (n)
   "Get the right face for match N in font-lock matching of headlines."
@@ -5727,6 +5730,8 @@ and subscripts."
 			   (if (equal (char-after (match-beginning 2)) ?^)
 			       (nth (if table-p 3 1) org-script-display)
 			     (nth (if table-p 2 0) org-script-display)))
+        (put-text-property (match-beginning 2) (match-end 3)
+                           'org-emphasis t)
 	(add-text-properties (match-beginning 2) (match-end 2)
 			     (list 'invisible t))
 	(when (and (eq (char-after (match-beginning 3)) ?{)
