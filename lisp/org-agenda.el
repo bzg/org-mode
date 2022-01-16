@@ -10524,7 +10524,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
       (anniversary
        (or (re-search-forward "^\\*[ \t]+Anniversaries" nil t)
 	   (progn
-	     (or (org-at-heading-p t)
+	     (or (org-at-heading-p)
 		 (progn
 		   (outline-next-heading)
 		   (insert "* Anniversaries\n\n")
