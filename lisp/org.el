@@ -4912,7 +4912,7 @@ prompted for."
 (defsubst org-rear-nonsticky-at (pos)
   (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
 
-(defun org-activate-links (limit)
+(defun org-activate-links--overlays (limit)
   "Add link properties to links.
 This includes angle, plain, and bracket links."
   (catch :exit
@@ -4927,13 +4927,13 @@ This includes angle, plain, and bracket links."
 	(when (and (memq style org-highlight-links)
 		   ;; Do not span over paragraph boundaries.
 		   (not (string-match-p org-element-paragraph-separate
-					(match-string 0)))
+				      (match-string 0)))
 		   ;; Do not confuse plain links with tags.
 		   (not (and (eq style 'plain)
-			     (let ((face (get-text-property
-					  (max (1- start) (point-min)) 'face)))
-			       (if (consp face) (memq 'org-tag face)
-				 (eq 'org-tag face))))))
+			   (let ((face (get-text-property
+					(max (1- start) (point-min)) 'face)))
+			     (if (consp face) (memq 'org-tag face)
+			       (eq 'org-tag face))))))
 	  (let* ((link-object (save-excursion
 				(goto-char start)
 				(save-match-data (org-element-link-parser))))
@@ -4983,6 +4983,99 @@ This includes angle, plain, and bracket links."
 		(funcall f start end path (eq style 'bracket))))
 	    (throw :exit t)))))		;signal success
     nil))
+(defun org-activate-links--text-properties (limit)
+  "Add link properties to links.
+This includes angle, plain, and bracket links."
+  (catch :exit
+    (while (re-search-forward org-link-any-re limit t)
+      (let* ((start (match-beginning 0))
+	     (end (match-end 0))
+	     (visible-start (or (match-beginning 3) (match-beginning 2)))
+	     (visible-end (or (match-end 3) (match-end 2)))
+	     (style (cond ((eq ?< (char-after start)) 'angle)
+			  ((eq ?\[ (char-after (1+ start))) 'bracket)
+			  (t 'plain))))
+	(when (and (memq style org-highlight-links)
+		   ;; Do not span over paragraph boundaries.
+		   (not (string-match-p org-element-paragraph-separate
+					(match-string 0)))
+		   ;; Do not confuse plain links with tags.
+		   (not (and (eq style 'plain)
+			     (let ((face (get-text-property
+					  (max (1- start) (point-min)) 'face)))
+			       (if (consp face) (memq 'org-tag face)
+				 (eq 'org-tag face))))))
+	  (let* ((link-object (save-excursion
+				(goto-char start)
+				(save-match-data (org-element-link-parser))))
+		 (link (org-element-property :raw-link link-object))
+		 (type (org-element-property :type link-object))
+		 (path (org-element-property :path link-object))
+                 (face-property (pcase (org-link-get-parameter type :face)
+				  ((and (pred functionp) face) (funcall face path))
+				  ((and (pred facep) face) face)
+				  ((and (pred consp) face) face) ;anonymous
+				  (_ 'org-link)))
+		 (properties		;for link's visible part
+		  (list 'mouse-face (or (org-link-get-parameter type :mouse-face)
+					'highlight)
+			'keymap (or (org-link-get-parameter type :keymap)
+				    org-mouse-map)
+			'help-echo (pcase (org-link-get-parameter type :help-echo)
+				     ((and (pred stringp) echo) echo)
+				     ((and (pred functionp) echo) echo)
+				     (_ (concat "LINK: " link)))
+			'htmlize-link (pcase (org-link-get-parameter type
+								  :htmlize-link)
+					((and (pred functionp) f) (funcall f))
+					(_ `(:uri ,link)))
+			'font-lock-multiline t)))
+	    (org-remove-flyspell-overlays-in start end)
+	    (org-rear-nonsticky-at end)
+	    (if (not (eq 'bracket style))
+		(progn
+                  (add-face-text-property start end face-property)
+		  (add-text-properties start end properties))
+              ;; Initialise folding when used ouside org-mode.
+              (unless (or (derived-mode-p 'org-mode)
+			  (and (org-fold-folding-spec-p 'org-link-description)
+                               (org-fold-folding-spec-p 'org-link)))
+                (org-fold-initialize (or (and (stringp org-ellipsis) (not (equal "" org-ellipsis)) org-ellipsis)
+                                      "...")))
+	      ;; Handle invisible parts in bracket links.
+	      (let ((spec (or (org-link-get-parameter type :display)
+			      'org-link)))
+                (unless (org-fold-folding-spec-p spec)
+                  (org-fold-add-folding-spec spec
+                                          (cdr org-link--link-folding-spec)
+                                          nil
+                                          'append)
+                  (org-fold-core-set-folding-spec-property spec :visible t))
+                (org-fold-region start end nil 'org-link)
+                (org-fold-region start end nil 'org-link-description)
+                ;; We are folding the whole emphasised text with SPEC
+                ;; first.  It makes everything invisible (or whatever
+                ;; the user wants).
+                (org-fold-region start end t spec)
+                ;; The visible part of the text is folded using
+                ;; 'org-link-description, which is forcing this part of
+                ;; the text to be visible.
+                (org-fold-region visible-start visible-end t 'org-link-description)
+		(add-text-properties start end properties)
+                (add-face-text-property start end face-property)
+		(org-rear-nonsticky-at visible-start)
+		(org-rear-nonsticky-at visible-end)))
+	    (let ((f (org-link-get-parameter type :activate-func)))
+	      (when (functionp f)
+		(funcall f start end path (eq style 'bracket))))
+	    (throw :exit t)))))		;signal success
+    nil))
+(defsubst org-activate-links (limit)
+  "Add link properties to links.
+This includes angle, plain, and bracket links."
+  (if (eq org-fold-core-style 'text-properties)
+      (org-activate-links--text-properties limit)
+    (org-activate-links--overlays limit)))
 
 (defun org-activate-code (limit)
   (when (re-search-forward "^[ \t]*\\(:\\(?: .*\\|$\\)\n?\\)" limit t)
@@ -6740,81 +6833,82 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
      (substitute-command-keys
       "The kill is not a (set of) tree(s).  Use `\\[yank]' to yank anyway")))
   (org-with-limited-levels
-   (let* ((visp (not (org-invisible-p)))
-	  (txt tree)
-	  (old-level (if (string-match org-outline-regexp-bol txt)
-			 (- (match-end 0) (match-beginning 0) 1)
-		       -1))
-	  (force-level
-	   (cond
-	    (level (prefix-numeric-value level))
-	    ;; When point is after the stars in an otherwise empty
-	    ;; headline, use the number of stars as the forced level.
-	    ((and (org-match-line "^\\*+[ \t]*$")
-		  (not (eq ?* (char-after))))
-	     (org-outline-level))
-	    ((looking-at-p org-outline-regexp-bol) (org-outline-level))))
-	  (previous-level
-	   (save-excursion
-	     (org-previous-visible-heading 1)
-	     (if (org-at-heading-p) (org-outline-level) 1)))
-	  (next-level
-	   (save-excursion
-	     (if (org-at-heading-p) (org-outline-level)
-	       (org-next-visible-heading 1)
-	       (if (org-at-heading-p) (org-outline-level) 1))))
-	  (new-level (or force-level (max previous-level next-level)))
-	  (shift (if (or (= old-level -1)
-			 (= new-level -1)
-			 (= old-level new-level))
-		     0
-		   (- new-level old-level)))
-	  (delta (if (> shift 0) -1 1))
-	  (func (if (> shift 0) #'org-demote #'org-promote))
-	  (org-odd-levels-only nil)
-	  beg end newend)
-     ;; Remove the forced level indicator.
-     (when (and force-level (not level))
-       (delete-region (line-beginning-position) (point)))
-     ;; Paste before the next visible heading or at end of buffer,
-     ;; unless point is at the beginning of a headline.
-     (unless (and (bolp) (org-at-heading-p))
-       (org-next-visible-heading 1)
-       (unless (bolp) (insert "\n")))
-     (setq beg (point))
-     ;; Avoid re-parsing cache elements when i.e. level 1 heading
-     ;; is inserted and then promoted.
-     (combine-change-calls beg beg
-       (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
-       (insert-before-markers txt)
-       (unless (string-suffix-p "\n" txt) (insert "\n"))
-       (setq newend (point))
-       (org-reinstall-markers-in-region beg)
-       (setq end (point))
-       (goto-char beg)
-       (skip-chars-forward " \t\n\r")
-       (setq beg (point))
-       (when (and (org-invisible-p) visp)
-         (save-excursion (outline-show-heading)))
-       ;; Shift if necessary.
-       (unless (= shift 0)
-         (save-restriction
-	   (narrow-to-region beg end)
-	   (while (not (= shift 0))
-	     (org-map-region func (point-min) (point-max))
-	     (setq shift (+ delta shift)))
-	   (goto-char (point-min))
-	   (setq newend (point-max)))))
-     (when (or for-yank (called-interactively-p 'interactive))
-       (message "Clipboard pasted as level %d subtree" new-level))
-     (when (and (not for-yank) ; in this case, org-yank will decide about folding
-		kill-ring
-		(equal org-subtree-clip (current-kill 0))
-		org-subtree-clip-folded)
-       ;; The tree was folded before it was killed/copied
-       (org-flag-subtree t))
-     (when for-yank (goto-char newend))
-     (when remove (pop kill-ring)))))
+   (org-fold-core-ignore-fragility-checks
+       (let* ((visp (not (org-invisible-p)))
+	      (txt tree)
+	      (old-level (if (string-match org-outline-regexp-bol txt)
+			     (- (match-end 0) (match-beginning 0) 1)
+		           -1))
+	      (force-level
+	       (cond
+	        (level (prefix-numeric-value level))
+	        ;; When point is after the stars in an otherwise empty
+	        ;; headline, use the number of stars as the forced level.
+	        ((and (org-match-line "^\\*+[ \t]*$")
+		      (not (eq ?* (char-after))))
+	         (org-outline-level))
+	        ((looking-at-p org-outline-regexp-bol) (org-outline-level))))
+	      (previous-level
+	       (save-excursion
+	         (org-previous-visible-heading 1)
+	         (if (org-at-heading-p) (org-outline-level) 1)))
+	      (next-level
+	       (save-excursion
+	         (if (org-at-heading-p) (org-outline-level)
+	           (org-next-visible-heading 1)
+	           (if (org-at-heading-p) (org-outline-level) 1))))
+	      (new-level (or force-level (max previous-level next-level)))
+	      (shift (if (or (= old-level -1)
+			     (= new-level -1)
+			     (= old-level new-level))
+		         0
+		       (- new-level old-level)))
+	      (delta (if (> shift 0) -1 1))
+	      (func (if (> shift 0) #'org-demote #'org-promote))
+	      (org-odd-levels-only nil)
+	      beg end newend)
+         ;; Remove the forced level indicator.
+         (when (and force-level (not level))
+           (delete-region (line-beginning-position) (point)))
+         ;; Paste before the next visible heading or at end of buffer,
+         ;; unless point is at the beginning of a headline.
+         (unless (and (bolp) (org-at-heading-p))
+           (org-next-visible-heading 1)
+           (unless (bolp) (insert "\n")))
+         (setq beg (point))
+         ;; Avoid re-parsing cache elements when i.e. level 1 heading
+         ;; is inserted and then promoted.
+         (combine-change-calls beg beg
+           (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
+           (insert-before-markers txt)
+           (unless (string-suffix-p "\n" txt) (insert "\n"))
+           (setq newend (point))
+           (org-reinstall-markers-in-region beg)
+           (setq end (point))
+           (goto-char beg)
+           (skip-chars-forward " \t\n\r")
+           (setq beg (point))
+           (when (and (org-invisible-p) visp)
+             (save-excursion (org-fold-heading nil)))
+           ;; Shift if necessary.
+           (unless (= shift 0)
+             (save-restriction
+	       (narrow-to-region beg end)
+	       (while (not (= shift 0))
+	         (org-map-region func (point-min) (point-max))
+	         (setq shift (+ delta shift)))
+	       (goto-char (point-min))
+	       (setq newend (point-max)))))
+         (when (or for-yank (called-interactively-p 'interactive))
+           (message "Clipboard pasted as level %d subtree" new-level))
+         (when (and (not for-yank) ; in this case, org-yank will decide about folding
+		    kill-ring
+		    (equal org-subtree-clip (current-kill 0))
+		    org-subtree-clip-folded)
+           ;; The tree was folded before it was killed/copied
+           (org-fold-subtree t))
+         (when for-yank (goto-char newend))
+         (when remove (pop kill-ring))))))
 
 (defun org-kill-is-subtree-p (&optional txt)
   "Check if the current kill is an outline subtree, or a set of trees.
@@ -20014,7 +20108,7 @@ Stop at the first and last subheadings of a superior heading."
   (interactive "p")
   (org-forward-heading-same-level (if arg (- arg) -1) invisible-ok))
 
-(defun org-next-visible-heading (arg)
+(defun org-next-visible-heading--overlays (arg)
   "Move to the next visible heading line.
 With ARG, repeats or can move backward if negative."
   (interactive "p")
@@ -20040,6 +20134,35 @@ With ARG, repeats or can move backward if negative."
 		nil)))			;leave the loop
       (cl-decf arg))
     (if (> arg 0) (goto-char (point-max)) (beginning-of-line))))
+(defun org-next-visible-heading--text-properties (arg)
+  "Move to the next visible heading line.
+With ARG, repeats or can move backward if negative."
+  (interactive "p")
+  (let ((regexp (concat "^" (org-get-limited-outline-regexp))))
+    (if (< arg 0)
+	(beginning-of-line)
+      (end-of-line))
+    (while (and (< arg 0) (re-search-backward regexp nil :move))
+      (unless (bobp)
+	(when (org-fold-folded-p)
+	  (goto-char (org-fold-previous-visibility-change))
+          (unless (looking-at-p regexp)
+            (re-search-backward regexp nil :mode))))
+      (cl-incf arg))
+    (while (and (> arg 0) (re-search-forward regexp nil :move))
+      (when (org-fold-folded-p)
+	(goto-char (org-fold-next-visibility-change))
+        (skip-chars-forward " \t\n")
+	(end-of-line))
+      (cl-decf arg))
+    (if (> arg 0) (goto-char (point-max)) (beginning-of-line))))
+(defun org-next-visible-heading (arg)
+  "Move to the next visible heading line.
+With ARG, repeats or can move backward if negative."
+  (interactive "p")
+  (if (eq org-fold-core-style 'text-properties)
+      (org-next-visible-heading--text-properties arg)
+    (org-next-visible-heading--overlays arg)))
 
 (defun org-previous-visible-heading (arg)
   "Move to the previous visible heading.
@@ -20172,7 +20295,7 @@ Function may return a real element, or a pseudo-element with type
 	(list :begin b :end e :parent p :post-blank 0 :post-affiliated b)))
       (_ e))))
 
-(defun org--forward-paragraph-once ()
+(defun org--forward-paragraph-once--overlays ()
   "Move forward to end of paragraph or equivalent, once.
 See `org-forward-paragraph'."
   (interactive)
@@ -20244,8 +20367,84 @@ See `org-forward-paragraph'."
 	  (goto-char end)
 	  (skip-chars-backward " \t\n")
 	  (forward-line))))))))
+(defun org--forward-paragraph-once--text-properties ()
+  "Move forward to end of paragraph or equivalent, once.
+See `org-forward-paragraph'."
+  (interactive)
+  (save-restriction
+    (widen)
+    (skip-chars-forward " \t\n")
+    (cond
+     ((eobp) nil)
+     ;; When inside a folded part, move out of it.
+     ((when (org-invisible-p nil t)
+        (goto-char (cdr (org-fold-get-region-at-point)))
+        (forward-line)
+        t))
+     (t
+      (let* ((element (org--paragraph-at-point))
+	     (type (org-element-type element))
+	     (contents-begin (org-element-property :contents-begin element))
+	     (end (org-element-property :end element))
+	     (post-affiliated (org-element-property :post-affiliated element)))
+	(cond
+	 ((eq type 'plain-list)
+	  (forward-char)
+	  (org--forward-paragraph-once))
+	 ;; If the element is folded, skip it altogether.
+         ((when (org-with-point-at post-affiliated (org-invisible-p (line-end-position) t))
+            (goto-char (cdr (org-fold-get-region-at-point
+			     nil
+			     (org-with-point-at post-affiliated
+			       (line-end-position)))))
+	    (forward-line)
+	    t))
+	 ;; At a greater element, move inside.
+	 ((and contents-begin
+	       (> contents-begin (point))
+	       (not (eq type 'paragraph)))
+	  (goto-char contents-begin)
+	  ;; Items and footnote definitions contents may not start at
+	  ;; the beginning of the line.  In this case, skip until the
+	  ;; next paragraph.
+	  (cond
+	   ((not (bolp)) (org--forward-paragraph-once))
+	   ((org-previous-line-empty-p) (forward-line -1))
+	   (t nil)))
+	 ;; Move between empty lines in some blocks.
+	 ((memq type '(comment-block example-block export-block src-block
+				     verse-block))
+	  (let ((contents-start
+		 (org-with-point-at post-affiliated
+		   (line-beginning-position 2))))
+	    (if (< (point) contents-start)
+		(goto-char contents-start)
+	      (let ((contents-end
+		     (org-with-point-at end
+		       (skip-chars-backward " \t\n")
+		       (line-beginning-position))))
+		(cond
+		 ((>= (point) contents-end)
+		  (goto-char end)
+		  (skip-chars-backward " \t\n")
+		  (forward-line))
+		 ((re-search-forward "^[ \t]*\n" contents-end :move)
+		  (forward-line -1))
+		 (t nil))))))
+	 (t
+	  ;; Move to element's end.
+	  (goto-char end)
+	  (skip-chars-backward " \t\n")
+	  (forward-line))))))))
+(defun org--forward-paragraph-once ()
+  "Move forward to end of paragraph or equivalent, once.
+See `org-forward-paragraph'."
+  (interactive)
+  (if (eq org-fold-core-style 'text-properties)
+      (org--forward-paragraph-once--text-properties)
+    (org--forward-paragraph-once--overlays)))
 
-(defun org--backward-paragraph-once ()
+(defun org--backward-paragraph-once--overlays ()
   "Move backward to start of paragraph or equivalent, once.
 See `org-backward-paragraph'."
   (interactive)
@@ -20347,6 +20546,108 @@ See `org-backward-paragraph'."
 	 ;; Move to element's start.
 	 (t
 	  (funcall reach begin))))))))
+(defun org--backward-paragraph-once--text-properties ()
+  "Move backward to start of paragraph or equivalent, once.
+See `org-backward-paragraph'."
+  (interactive)
+  (save-restriction
+    (widen)
+    (cond
+     ((bobp) nil)
+     ;; Blank lines at the beginning of the buffer.
+     ((and (org-match-line "^[ \t]*$")
+	   (save-excursion (skip-chars-backward " \t\n") (bobp)))
+      (goto-char (point-min)))
+     ;; When inside a folded part, move out of it.
+     ((when (org-invisible-p (1- (point)) t)
+        (goto-char (1- (car (org-fold-get-region-at-point nil (1- (point))))))
+	(org--backward-paragraph-once)
+	t))
+     (t
+      (let* ((element (org--paragraph-at-point))
+	     (type (org-element-type element))
+	     (begin (org-element-property :begin element))
+	     (post-affiliated (org-element-property :post-affiliated element))
+	     (contents-end (org-element-property :contents-end element))
+	     (end (org-element-property :end element))
+	     (parent (org-element-property :parent element))
+	     (reach
+	      ;; Move to the visible empty line above position P, or
+	      ;; to position P.  Return t.
+	      (lambda (p)
+		(goto-char p)
+		(when (and (org-previous-line-empty-p)
+			   (let ((end (line-end-position 0)))
+			     (or (= end (point-min))
+				 (not (org-invisible-p (1- end))))))
+		  (forward-line -1))
+		t)))
+	(cond
+	 ;; Already at the beginning of an element.
+	 ((= begin (point))
+	  (cond
+	   ;; There is a blank line above.  Move there.
+	   ((and (org-previous-line-empty-p)
+		 (not (org-invisible-p (1- (line-end-position 0)))))
+	    (forward-line -1))
+	   ;; At the beginning of the first element within a greater
+	   ;; element.  Move to the beginning of the greater element.
+	   ((and parent
+                 (not (eq 'section (org-element-type parent)))
+                 (= begin (org-element-property :contents-begin parent)))
+	    (funcall reach (org-element-property :begin parent)))
+	   ;; Since we have to move anyway, find the beginning
+	   ;; position of the element above.
+	   (t
+	    (forward-char -1)
+	    (org--backward-paragraph-once))))
+	 ;; Skip paragraphs at the very beginning of footnote
+	 ;; definitions or items.
+	 ((and (eq type 'paragraph)
+	       (org-with-point-at begin (not (bolp))))
+	  (funcall reach (progn (goto-char begin) (line-beginning-position))))
+	 ;; If the element is folded, skip it altogether.
+	 ((org-with-point-at post-affiliated (org-invisible-p (line-end-position) t))
+	  (funcall reach begin))
+	 ;; At the end of a greater element, move inside.
+	 ((and contents-end
+	       (<= contents-end (point))
+	       (not (eq type 'paragraph)))
+	  (cond
+	   ((memq type '(footnote-definition plain-list))
+	    (skip-chars-backward " \t\n")
+	    (org--backward-paragraph-once))
+	   ((= contents-end (point))
+	    (forward-char -1)
+	    (org--backward-paragraph-once))
+	   (t
+	    (goto-char contents-end))))
+	 ;; Move between empty lines in some blocks.
+	 ((and (memq type '(comment-block example-block export-block src-block
+					  verse-block))
+	       (let ((contents-start
+		      (org-with-point-at post-affiliated
+			(line-beginning-position 2))))
+		 (when (> (point) contents-start)
+		   (let ((contents-end
+			  (org-with-point-at end
+			    (skip-chars-backward " \t\n")
+			    (line-beginning-position))))
+		     (if (> (point) contents-end)
+			 (progn (goto-char contents-end) t)
+		       (skip-chars-backward " \t\n" begin)
+		       (re-search-backward "^[ \t]*\n" contents-start :move)
+		       t))))))
+	 ;; Move to element's start.
+	 (t
+	  (funcall reach begin))))))))
+(defun org--backward-paragraph-once ()
+  "Move backward to start of paragraph or equivalent, once.
+See `org-backward-paragraph'."
+  (interactive)
+  (if (eq org-fold-core-style 'text-properties)
+      (org--backward-paragraph-once--text-properties)
+    (org--backward-paragraph-once--overlays)))
 
 (defun org-forward-element ()
   "Move forward by one element.

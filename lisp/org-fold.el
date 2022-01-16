@@ -53,10 +53,7 @@
 (defvar org-property-end-re)
 (defvar org-link-descriptive)
 (defvar org-outline-regexp-bol)
-(defvar org-custom-properties-hidden-p)
 (defvar org-archive-tag)
-
-;; Needed for overlays only
 (defvar org-custom-properties-overlays)
 
 (declare-function isearch-filter-visible "isearch" (beg end))
@@ -1101,7 +1098,7 @@ The detailed reaction depends on the user option
       (when (or invisible-at-point invisible-before-point)
 	(when (eq org-fold-catch-invisible-edits 'error)
 	  (user-error "Editing in invisible areas is prohibited, make them visible first"))
-	(if (and org-custom-properties-hidden-p
+	(if (and org-custom-properties-overlays
 		 (y-or-n-p "Display invisible properties in this buffer? "))
 	    (org-toggle-custom-properties-visibility)
 	  ;; Make the area visible

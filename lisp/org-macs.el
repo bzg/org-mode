@@ -1109,7 +1109,18 @@ the value in cadr."
       (get-text-property (or (next-single-property-change 0 prop s) 0)
 			 prop s)))
 
-(defun org-invisible-p (&optional pos folding-only)
+;; FIXME: move to org-fold?
+(defun org-invisible-p--text-properties (&optional pos folding-only)
+  "Non-nil if the character after POS is invisible.
+If POS is nil, use `point' instead.  When optional argument
+FOLDING-ONLY is non-nil, only consider invisible parts due to
+folding of a headline, a block or a drawer, i.e., not because of
+fontification."
+  (let ((value (invisible-p (or pos (point)))))
+    (cond ((not value) nil)
+	  (folding-only (org-fold-folded-p (or pos (point))))
+	  (t value))))
+(defun org-invisible-p--overlays (&optional pos folding-only)
   "Non-nil if the character after POS is invisible.
 If POS is nil, use `point' instead.  When optional argument
 FOLDING-ONLY is non-nil, only consider invisible parts due to
@@ -1118,7 +1129,16 @@ fontification."
   (let ((value (get-char-property (or pos (point)) 'invisible)))
     (cond ((not value) nil)
 	  (folding-only (memq value '(org-hide-block outline)))
-	  (t value))))
+	  (t (and (invisible-p (or pos (point))) value)))))
+(defsubst org-invisible-p (&optional pos folding-only)
+  "Non-nil if the character after POS is invisible.
+If POS is nil, use `point' instead.  When optional argument
+FOLDING-ONLY is non-nil, only consider invisible parts due to
+folding of a headline, a block or a drawer, i.e., not because of
+fontification."
+  (if (eq org-fold-core-style 'text-properties)
+      (org-invisible-p--text-properties pos folding-only)
+    (org-invisible-p--overlays pos folding-only)))
 
 (defun org-truly-invisible-p ()
   "Check if point is at a character currently not visible.
@@ -1136,17 +1156,43 @@ move it back by one char before doing this check."
       (backward-char 1))
     (org-invisible-p)))
 
-(defun org-find-visible ()
+(defun org-region-invisible-p (beg end)
+  "Check if region if completely hidden."
+  (org-with-wide-buffer
+   (and (org-invisible-p beg)
+        (org-invisible-p (org-fold-next-visibility-change beg end)))))
+
+(defun org-find-visible--overlays ()
   "Return closest visible buffer position, or `point-max'."
   (if (org-invisible-p)
       (next-single-char-property-change (point) 'invisible)
     (point)))
+(defun org-find-visible--text-properties ()
+  "Return closest visible buffer position, or `point-max'."
+  (if (org-invisible-p)
+      (org-fold-next-visibility-change (point))
+    (point)))
+(defsubst org-find-visible ()
+  "Return closest visible buffer position, or `point-max'."
+  (if (eq org-fold-core-style 'text-properties)
+      (org-find-visible--text-properties)
+    (org-find-visible--overlays)))
 
-(defun org-find-invisible ()
+(defun org-find-invisible--overlays ()
   "Return closest invisible buffer position, or `point-max'."
   (if (org-invisible-p)
       (point)
     (next-single-char-property-change (point) 'invisible)))
+(defun org-find-invisible--text-properties ()
+  "Return closest invisible buffer position, or `point-max'."
+  (if (org-invisible-p)
+      (point)
+    (org-fold-next-visibility-change (point))))
+(defsubst org-find-invisible ()
+  "Return closest invisible buffer position, or `point-max'."
+  (if (eq org-fold-core-style 'text-properties)
+      (org-find-invisible--text-properties)
+    (org-find-invisible--overlays)))
 
 
 ;;; Time
