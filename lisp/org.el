@@ -99,6 +99,14 @@
 (require 'org-fold)
 
 (require 'org-cycle)
+(defvaralias 'org-hide-block-startup 'org-cycle-hide-block-startup)
+(defvaralias 'org-pre-cycle-hook 'org-cycle-pre-hook)
+(defvaralias 'org-tab-first-hook 'org-cycle-tab-first-hook)
+(defalias 'org-global-cycle #'org-cycle-global)
+(defalias 'org-overview #'org-cycle-overview)
+(defalias 'org-content #'org-cycle-content)
+(defalias 'org-reveal #'org-fold-reveal)
+(defalias 'org-force-cycle-archived #'org-cycle-force-archived)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-bound in
 ;; some places -- e.g. see the macro `org-with-limited-levels'.
