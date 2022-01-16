@@ -582,20 +582,38 @@ b. Item 2<point>"
   ;; Preserve item visibility.
   (should
    (equal
+    (make-list 2 'org-fold-outline)
+    (let ((org-fold-core-style 'text-properties))
+      (org-test-with-temp-text
+       "* Headline\n<point>- item 1\n  body 1\n- item 2\n  body 2"
+       (let ((org-cycle-include-plain-lists t))
+         (org-cycle)
+         (search-forward "- item 2")
+         (org-cycle))
+       (search-backward "- item 1")
+       (org-move-item-down)
+       (forward-line)
+       (list (org-fold-get-folding-spec)
+	     (progn
+	       (search-backward " body 2")
+	       (org-fold-get-folding-spec)))))))
+  (should
+   (equal
     '(outline outline)
-    (org-test-with-temp-text
-	"* Headline\n<point>- item 1\n  body 1\n- item 2\n  body 2"
-      (let ((org-cycle-include-plain-lists t))
-	(org-cycle)
-	(search-forward "- item 2")
-	(org-cycle))
-      (search-backward "- item 1")
-      (org-move-item-down)
-      (forward-line)
-      (list (org-invisible-p2)
-	    (progn
-	      (search-backward " body 2")
-	      (org-invisible-p2))))))
+    (let ((org-fold-core-style 'overlays))
+      (org-test-with-temp-text
+       "* Headline\n<point>- item 1\n  body 1\n- item 2\n  body 2"
+       (let ((org-cycle-include-plain-lists t))
+         (org-cycle)
+         (search-forward "- item 2")
+         (org-cycle))
+       (search-backward "- item 1")
+       (org-move-item-down)
+       (forward-line)
+       (list (org-invisible-p2)
+	     (progn
+	       (search-backward " body 2")
+	       (org-invisible-p2)))))))
   ;; Preserve children visibility.
   (org-test-with-temp-text "* Headline
 - item 1
@@ -871,15 +889,28 @@ b. Item 2<point>"
   ;; Preserve list visibility when inserting an item.
   (should
    (equal
+    `(org-fold-outline org-fold-outline)
+    (let ((org-fold-core-style 'text-properties))
+      (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
+                               (let ((org-cycle-include-plain-lists t))
+	                         (org-cycle)
+	                         (forward-line 2)
+	                         (org-cycle)
+	                         (org-insert-item)
+	                         (list (org-fold-get-folding-spec nil (line-beginning-position 0))
+	                               (org-fold-get-folding-spec nil (line-end-position 2))))))))
+  (should
+   (equal
     '(outline outline)
-    (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
-      (let ((org-cycle-include-plain-lists t))
-	(org-cycle)
-	(forward-line 2)
-	(org-cycle)
-	(org-insert-item)
-	(list (get-char-property (line-beginning-position 0) 'invisible)
-	      (get-char-property (line-end-position 2) 'invisible))))))
+    (let ((org-fold-core-style 'overlays))
+      (org-test-with-temp-text "- A\n  - B\n- C\n  - D"
+                               (let ((org-cycle-include-plain-lists t))
+	                         (org-cycle)
+	                         (forward-line 2)
+	                         (org-cycle)
+	                         (org-insert-item)
+	                         (list (get-char-property (line-beginning-position 0) 'invisible)
+	                               (get-char-property (line-end-position 2) 'invisible)))))))
   ;; Test insertion in area after a sub-list.  In particular, if point
   ;; is right at the end of the previous sub-list, still insert
   ;; a sub-item in that list.

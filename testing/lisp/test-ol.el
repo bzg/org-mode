@@ -50,6 +50,30 @@
 	     (org-link-encode "http://some.host.com/form?&id=blah%2Bblah25"
 			      '(?\s ?\[ ?\] ?%))))))
 
+(ert-deftest test-ol/org-toggle-link-display ()
+  "Make sure that `org-toggle-link-display' is working.
+See https://github.com/yantar92/org/issues/4."
+  (dolist (org-link-descriptive '(nil t))
+    (org-test-with-temp-text "* Org link test
+[[https://example.com][A link to a site]]"
+      (dotimes (_ 2)
+        (goto-char 1)
+        (re-search-forward "\\[")
+        (should-not (xor org-link-descriptive (org-invisible-p)))
+        (re-search-forward "example")
+        (should-not (xor org-link-descriptive (org-invisible-p)))
+        (re-search-forward "com")
+        (should-not (xor org-link-descriptive (org-invisible-p)))
+        (re-search-forward "]")
+        (should-not (xor org-link-descriptive (org-invisible-p)))
+        (re-search-forward "\\[")
+        (should-not (org-invisible-p))
+        (re-search-forward "link")
+        (should-not (org-invisible-p))
+        (re-search-forward "]")
+        (should-not (xor org-link-descriptive (org-invisible-p)))
+        (org-toggle-link-display)))))
+
 
 ;;; Escape and Unescape Links
 

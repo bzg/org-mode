@@ -4462,7 +4462,9 @@ Outside."
   ;; Preserve visibility of elements and their contents.
   (should
    (equal '((63 . 82) (26 . 48))
-	  (org-test-with-temp-text "
+          (let ((org-fold-core-style 'text-properties))
+	    (org-test-with-temp-text
+             "
 #+BEGIN_CENTER
 Text.
 #+END_CENTER
@@ -4470,11 +4472,35 @@ Text.
   #+BEGIN_QUOTE
   Text.
   #+END_QUOTE"
-	    (while (search-forward "BEGIN_" nil t) (org-cycle))
-	    (search-backward "- item 1")
-	    (org-drag-element-backward)
-	    (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
-		    (overlays-in (point-min) (point-max))))))
+	     (while (search-forward "BEGIN_" nil t) (org-cycle))
+	     (search-backward "- item 1")
+	     (org-drag-element-backward)
+             (let (regions)
+               (goto-char (point-min))
+               (while (< (point) (point-max))
+	         (let ((region (org-fold-get-region-at-point)))
+                   (if (not region)
+                       (goto-char (org-fold-next-folding-state-change))
+                     (goto-char (cdr region))
+                     (push region regions))))
+               regions)))))
+  (should
+   (equal '((63 . 82) (26 . 48))
+          (let ((org-fold-core-style 'overlays))
+	    (org-test-with-temp-text
+             "
+#+BEGIN_CENTER
+Text.
+#+END_CENTER
+- item 1
+  #+BEGIN_QUOTE
+  Text.
+  #+END_QUOTE"
+             (while (search-forward "BEGIN_" nil t) (org-cycle))
+	     (search-backward "- item 1")
+	     (org-drag-element-backward)
+	     (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+		     (overlays-in (point-min) (point-max)))))))
   ;; Pathological case: handle call with point in blank lines right
   ;; after a headline.
   (should
@@ -4511,7 +4537,9 @@ Text.
     (should (equal (buffer-string) "Para2\n\n\nParagraph 1\n\nPara3"))
     (should (looking-at " 1")))
   ;; 5. Preserve visibility of elements and their contents.
-  (org-test-with-temp-text "
+  (let ((org-fold-core-style 'text-properties))
+    (org-test-with-temp-text
+     "
 #+BEGIN_CENTER
 Text.
 #+END_CENTER
@@ -4519,14 +4547,39 @@ Text.
   #+BEGIN_QUOTE
   Text.
   #+END_QUOTE"
-    (while (search-forward "BEGIN_" nil t) (org-cycle))
-    (search-backward "#+BEGIN_CENTER")
-    (org-drag-element-forward)
-    (should
-     (equal
-      '((63 . 82) (26 . 48))
-      (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
-	      (overlays-in (point-min) (point-max)))))))
+     (while (search-forward "BEGIN_" nil t) (org-cycle))
+     (search-backward "#+BEGIN_CENTER")
+     (org-drag-element-forward)
+     (should
+      (equal
+       '((63 . 82) (26 . 48))
+       (let (regions)
+         (goto-char (point-min))
+         (while (< (point) (point-max))
+	   (let ((region (org-fold-get-region-at-point)))
+             (if (not region)
+                 (goto-char (org-fold-next-folding-state-change))
+               (goto-char (cdr region))
+               (push region regions))))
+         regions)))))
+  (let ((org-fold-core-style 'overlays))
+    (org-test-with-temp-text
+     "
+#+BEGIN_CENTER
+Text.
+#+END_CENTER
+- item 1
+  #+BEGIN_QUOTE
+  Text.
+  #+END_QUOTE"
+     (while (search-forward "BEGIN_" nil t) (org-cycle))
+     (search-backward "#+BEGIN_CENTER")
+     (org-drag-element-forward)
+     (should
+      (equal
+       '((63 . 82) (26 . 48))
+       (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+	       (overlays-in (point-min) (point-max))))))))
 
 (ert-deftest test-org/next-block ()
   "Test `org-next-block' specifications."
@@ -8418,6 +8471,100 @@ Contents
 "
    (org-kill-note-or-show-branches)
    (should (org-invisible-p (- (point-max) 2)))))
+
+(ert-deftest test-org/org-cycle-narrowed-subtree ()
+  "Test cycling in narrowed buffer."
+  (org-test-with-temp-text
+   "* Heading 1<point>
+** Child 1.1
+** Child 1.2
+some text
+*** Sub-child 1.2.1
+* Heading 2"
+   (org-overview)
+   (org-narrow-to-subtree)
+   (org-cycle)
+   (re-search-forward "Sub-child")
+   (should (org-invisible-p))))
+
+(ert-deftest test-org/org-fold-reveal-broken-structure ()
+  "Test unfolding broken elements."
+  (let ((org-fold-core-style 'text-properties))
+    (org-test-with-temp-text
+     "<point>* Heading 1
+Text here"
+     (org-overview)
+     (re-search-forward "Text")
+     (should (org-invisible-p))
+     (goto-char 1)
+     (delete-char 1)
+     (re-search-forward "Text")
+     (should-not (org-invisible-p)))
+    (org-test-with-temp-text
+     "* Heading 1
+<point>:PROPERTIES:
+:ID: something
+:END:
+Text here"
+     (org-cycle)
+     (org-fold-hide-drawer-all)
+     (re-search-forward "ID")
+     (should (org-invisible-p))
+     (re-search-backward ":PROPERTIES:")
+     (delete-char 1)
+     (re-search-forward "ID")
+     (should-not (org-invisible-p)))
+    (org-test-with-temp-text
+     "* Heading 1
+<point>:PROPERTIES:
+:ID: something
+:END:
+Text here"
+     (org-cycle)
+     (org-fold-hide-drawer-all)
+     (re-search-forward "ID")
+     (should (org-invisible-p))
+     (re-search-forward ":END:")
+     (delete-char -1)
+     (re-search-backward "ID")
+     (should-not (org-invisible-p)))
+    (org-test-with-temp-text
+     "* Heading 1
+<point>#+begin_src emacs-lisp
+(+ 1 2)
+#+end_src
+Text here"
+     (org-cycle)
+     (org-fold-hide-drawer-all)
+     (re-search-forward "end")
+     (should (org-invisible-p))
+     (delete-char -1)
+     (re-search-backward "2")
+     (should-not (org-invisible-p)))))
+
+(ert-deftest test-org/re-hide-edits-inside-fold ()
+  "Test edits inside folded regions."
+  (org-test-with-temp-text
+      "<point>* Heading 1
+Text here"
+    (org-overview)
+    (org-set-property "TEST" "1")
+    (re-search-forward "TEST")
+    (should (org-invisible-p)))
+  (org-test-with-temp-text
+      "* Heading 1<point>
+Text here"
+    (org-overview)
+    (insert " and extra heading text")
+    (re-search-backward "heading")
+    (should-not (org-invisible-p)))
+  (org-test-with-temp-text
+      "* Heading 1
+Text<point> here"
+    (org-overview)
+    (insert " and extra text")
+    (re-search-backward "extra")
+    (should (org-invisible-p))))
 
 
 ;;; Yank and Kill
