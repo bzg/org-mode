@@ -1330,11 +1330,81 @@ key."
 (eval-after-load 'session
   '(add-to-list 'session-globals-exclude 'org-mark-ring))
 
+;;;; outline-mode
+
+;; Folding in outline-mode is not compatible with org-mode folding
+;; anymore. Working around to avoid breakage of external packages
+;; assuming the compatibility.
+(defadvice outline-flag-region (around outline-flag-region@fix-for-org-fold (from to flag) activate)
+  "Run `org-fold-region' when in org-mode."
+  (if (eq major-mode 'org-mode)
+      (setq ad-return-value (org-fold-region (max from (point-min)) (min to (point-max)) flag 'headline))
+    ad-do-it))
+
+(defadvice outline-next-visible-heading (around outline-next-visible-heading@fix-for-org-fold (arg) activate)
+  "Run `org-next-visible-heading' when in org-mode."
+  (interactive "p")
+  (if (eq major-mode 'org-mode)
+      (setq ad-return-value (org-next-visible-heading arg))
+    ad-do-it))
+
+(defadvice outline-back-to-heading (around outline-back-to-heading@fix-for-org-fold (&optional invisible-ok) activate)
+  "Run `org-back-to-heading' when in org-mode."
+  (if (eq major-mode 'org-mode)
+      (setq ad-return-value
+            (progn
+              (beginning-of-line)
+              (or (org-at-heading-p (not invisible-ok))
+                  (let (found)
+	            (save-excursion
+	              (while (not found)
+	                (or (re-search-backward (concat "^\\(?:" outline-regexp "\\)")
+				                nil t)
+                            (signal 'outline-before-first-heading nil))
+	                (setq found (and (or invisible-ok (not (org-fold-folded-p)))
+			                 (point)))))
+	            (goto-char found)
+	            found))))
+    ad-do-it))
+
+(defadvice outline-on-heading-p (around outline-on-heading-p@fix-for-org-fold (&optional invisible-ok) activate)
+  "Run `org-at-heading-p' when in org-mode."
+  (if (eq major-mode 'org-mode)
+      (setq ad-return-value (org-at-heading-p (not invisible-ok)))
+    ad-do-it))
+
+(defadvice outline-hide-sublevels (around outline-hide-sublevels@fix-for-org-fold (levels) activate)
+  "Run `org-fold-hide-sublevels' when in org-mode."
+  (interactive (list
+		(cond
+		 (current-prefix-arg (prefix-numeric-value current-prefix-arg))
+		 ((save-excursion (beginning-of-line)
+				  (looking-at outline-regexp))
+		  (funcall outline-level))
+		 (t 1))))
+  (if (eq major-mode 'org-mode)
+      (setq ad-return-value (org-fold-hide-sublevels levels))
+    ad-do-it))
+
+(defadvice outline-toggle-children (around outline-toggle-children@fix-for-org-fold () activate)
+  "Run `org-fold-hide-sublevels' when in org-mode."
+  (interactive)
+  (if (eq major-mode 'org-mode)
+      (setq ad-return-value
+            (save-excursion
+              (org-back-to-heading)
+              (if (not (org-fold-folded-p (line-end-position)))
+                  (org-fold-hide-subtree)
+                (org-fold-show-children)
+                (org-fold-show-entry))))
+    ad-do-it))
+
+;; TODO: outline-headers-as-kill
+
 ;;;; Speed commands
 
 (make-obsolete-variable 'org-speed-commands-user
                         "configure `org-speed-commands' instead." "9.5")
-
 (provide 'org-compat)
 
 ;; Local variables:
