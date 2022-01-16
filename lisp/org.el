@@ -5984,7 +5984,13 @@ frame is not changed."
 			     (number-to-string n))))))
       (setq n (1+ n)))
     (condition-case nil
-        (make-indirect-buffer buffer bname 'clone)
+        (let ((indirect-buffer (make-indirect-buffer buffer bname 'clone)))
+          ;; Decouple folding state.  We need to do it manually since
+          ;; `make-indirect-buffer' does not run
+          ;; `clone-indirect-buffer-hook'.
+          (org-fold-core-decouple-indirect-buffer-folds)
+          ;; Return the buffer.
+          indirect-buffer)
       (error (make-indirect-buffer buffer bname)))))
 
 (defun org-set-frame-title (title)
