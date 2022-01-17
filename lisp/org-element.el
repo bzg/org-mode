@@ -7751,7 +7751,7 @@ Providing it allows for quicker computation."
   (catch 'objects-forbidden
     (org-with-wide-buffer
      (let* ((pos (point))
-	    (element (or element (org-element-at-point-no-context)))
+	    (element (or element (org-element-at-point)))
 	    (type (org-element-type element))
 	    (post (org-element-property :post-affiliated element)))
        ;; If point is inside an element containing objects or
