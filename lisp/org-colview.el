@@ -377,7 +377,8 @@ This is needed to later remove this relative remapping.")
 COLUMNS is an alist (SPEC VALUE DISPLAYED).  Optional argument
 DATELINE is non-nil when the face used should be
 `org-agenda-column-dateline'."
-  (when (ignore-errors (require 'face-remap))
+  (when (and (ignore-errors (require 'face-remap))
+             org-columns-header-line-remap)
     (setq org-columns-header-line-remap
 	  (face-remap-add-relative 'header-line '(:inherit default))))
   (save-excursion
@@ -514,7 +515,8 @@ for the duration of the command.")
   (interactive)
   (when (and (fboundp 'face-remap-remove-relative)
 	     org-columns-header-line-remap)
-    (face-remap-remove-relative org-columns-header-line-remap))
+    (face-remap-remove-relative org-columns-header-line-remap)
+    (setq org-columns-header-line-remap nil))
   (when org-columns-overlays
     (when (local-variable-p 'org-previous-header-line-format)
       (setq header-line-format org-previous-header-line-format)
