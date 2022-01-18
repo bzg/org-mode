@@ -17468,10 +17468,10 @@ for more information."
    ((run-hook-with-args-until-success 'org-metaup-hook))
    ((org-region-active-p)
     (let* ((a (save-excursion
-		(goto-char (min (region-beginning) (region-end)))
+		(goto-char (region-beginning))
 		(line-beginning-position)))
 	   (b (save-excursion
-		(goto-char (max (region-beginning) (region-end)))
+		(goto-char (region-end))
 		(if (bolp) (1- (point)) (line-end-position))))
 	   (c (save-excursion
 		(goto-char a)
@@ -17501,10 +17501,10 @@ commands for more information."
    ((run-hook-with-args-until-success 'org-metadown-hook))
    ((org-region-active-p)
     (let* ((a (save-excursion
-		(goto-char (min (region-beginning) (region-end)))
+		(goto-char (region-beginning))
 		(line-beginning-position)))
 	   (b (save-excursion
-		(goto-char (max (region-beginning) (region-end)))
+		(goto-char (region-end))
 		(if (bolp) (1- (point)) (line-end-position))))
 	   (c (save-excursion
 		(goto-char b)
