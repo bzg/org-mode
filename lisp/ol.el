@@ -2020,7 +2020,8 @@ Also refresh fontification if needed."
 				    (list old-regexp org-target-link-regexp)
 				    "\\|")
 				   after-re)))))
-	(when (featurep 'org-element)
+	(when (and (featurep 'org-element)
+                   (not (bound-and-true-p org-mode-loading)))
 	  (org-with-point-at 1
 	    (while (re-search-forward regexp nil t)
 	      (org-element-cache-refresh (match-beginning 1))))))
