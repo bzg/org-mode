@@ -6571,9 +6571,9 @@ BEG and END are the beginning and end of the range of changed
 text.  See `before-change-functions' for more information.
 
 The function returns the new value of `org-element--cache-change-warning'."
-  (when (org-element--cache-active-p t)
-    (with-current-buffer (or (buffer-base-buffer (current-buffer))
-                             (current-buffer))
+  (with-current-buffer (or (buffer-base-buffer (current-buffer))
+                           (current-buffer))
+    (when (org-element--cache-active-p t)
       (org-with-wide-buffer
        (setq org-element--cache-change-tic (buffer-chars-modified-tick))
        (goto-char beg)
@@ -6647,9 +6647,9 @@ The function returns the new value of `org-element--cache-change-warning'."
 BEG and END are the beginning and end of the range of changed
 text, and the length in bytes of the pre-change text replaced by
 that range.  See `after-change-functions' for more information."
-  (when (org-element--cache-active-p t)
-    (with-current-buffer (or (buffer-base-buffer (current-buffer))
-                             (current-buffer))
+  (with-current-buffer (or (buffer-base-buffer (current-buffer))
+                           (current-buffer))
+    (when (org-element--cache-active-p t)
       (when (not (eq org-element--cache-change-tic (buffer-chars-modified-tick)))
         (org-element--cache-log-message "After change")
         (setq org-element--cache-change-warning (org-element--cache-before-change beg end))
