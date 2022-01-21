@@ -4099,7 +4099,7 @@ Text
       (should-not (eq 'comment (org-element-type (org-element-at-point))))
       (should (eq (org-element-at-point) (org-element-at-point 1)))))
   (should (eq 'headline
-              (org-test-with-temp-text "* H1\nP1\n<point*H2\n"
+              (org-test-with-temp-text "* H1\nP1\n<point>* H2\n"
                 (let ((org-element-use-cache t))
                   (org-element-cache-map #'ignore :granularity 'element)
                   (insert "Blah\n")
