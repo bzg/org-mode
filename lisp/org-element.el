@@ -5785,7 +5785,7 @@ Assume ELEMENT belongs to cache and that a cache is active."
         ;; This should not happen, but if it is, would be better to know
         ;; where it happens.
         (org-element--cache-warn "Failed to delete %S element in %S at %S. The element cache key was %S.
-If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report)."
+If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report)."
                       (org-element-type element)
                       (current-buffer)
                       (org-element-property :begin element)
@@ -5905,7 +5905,7 @@ actually submitted."
                            (not (version< emacs-version "28")))
                       (and (boundp 'org-batch-test) org-batch-test))
               (org-element--cache-warn "Unregistered buffer modifications detected. Resetting.
-If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
+If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
 The buffer is: %s\n Current command: %S\n Chars modified: %S\n Buffer modified: %S\n Backtrace:\n%S"
                             (buffer-name (current-buffer))
                             (list this-command (buffer-chars-modified-tick) (buffer-modified-tick))
@@ -6297,7 +6297,9 @@ completing the request."
                          ;; such error happens within
                          ;; `org-element--cache-process-request' or somewhere
                          ;; else.
-                         (org-element--cache-warn "Added org-data parent to non-headline element: %S\nIf this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report)." data)
+                         (org-element--cache-warn "Added org-data parent to non-headline element: %S
+If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report)."
+                                       data)
                          (org-element-cache-reset)
                          (throw 'org-element--cache-quit t))
 		       (org-element-put-property data :parent parent)
@@ -7008,7 +7010,7 @@ Return non-nil when verification failed."
         (unless (or (= (point) (org-element-property :begin (org-element-property :parent element)))
                     (eq (point) (point-min)))
           (org-element--cache-warn "Cached element has wrong parent in %s. Resetting.
-If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
+If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
 The element is: %S\n The parent is: %S\n The real parent is: %S"
                         (buffer-name (current-buffer))
                         (org-element--format-element element)
@@ -7036,7 +7038,7 @@ The element is: %S\n The parent is: %S\n The real parent is: %S"
                      (or (not (org-element-property :ID real-element))
                          (string= (org-element-property :ID real-element) (org-element-property :ID element))))
           (org-element--cache-warn "(%S) Cached element is incorrect in %s. (Cache tic up to date: %S) Resetting.
-If this warning appears regularly, please report it to Org mode mailing list (M-x org-submit-bug-report).
+If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
 The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
                         this-command
                         (buffer-name (current-buffer))
