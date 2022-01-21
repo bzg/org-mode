@@ -12609,9 +12609,9 @@ Assume point is at the beginning of the headline."
   (let* ((cached (and (org-element--cache-active-p) (org-element-at-point nil 'cached)))
          (cached-tags (org-element-property :tags cached)))
     (if cached
-        ;; If we do not wrap result into `cl-copy-list', reference would
+        ;; If we do explicitly copy the result, reference would
         ;; be returned and cache element might be modified directly.
-        (cl-copy-list cached-tags)
+        (mapcar #'copy-sequence cached-tags)
       ;; Parse tags manually.
       (and (looking-at org-tag-line-re)
            (split-string (match-string-no-properties 2) ":" t)))))
@@ -12655,9 +12655,9 @@ Inherited tags have the `inherited' text property."
               (if cached
                   (while (setq cached (org-element-property :parent cached))
                     (setq itags (nconc (mapcar #'org-add-prop-inherited
-                                               ;; If we do not wrap result into `cl-copy-list', reference would
+                                               ;; If we do explicitly copy the result, reference would
                                                ;; be returned and cache element might be modified directly.
-                                               (cl-copy-list (org-element-property :tags cached)))
+                                               (mapcar #'copy-sequence (org-element-property :tags cached)))
                                        itags)))
                 (while (org-up-heading-safe)
                   (setq itags (nconc (mapcar #'org-add-prop-inherited
