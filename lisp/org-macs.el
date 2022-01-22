@@ -926,7 +926,16 @@ Return width in pixels when PIXELS is non-nil."
     (with-temp-buffer
       (setq-local display-line-numbers nil)
       (setq-local buffer-invisibility-spec
-                  current-invisibility-spec)
+                  (if (listp current-invisibility-spec)
+                      (mapcar (lambda (el)
+                                ;; Consider elipsis to have 0 width.
+                                ;; It is what Emacs 28+ does, but we have
+                                ;; to force it in earlier Emacs versions.
+                                (if (and (consp el) (cdr el))
+                                    (list (car el))
+                                  el))
+                              current-invisibility-spec)
+                    current-invisibility-spec))
       (setq-local char-property-alias-alist
                   current-char-property-alias-alist)
       (let (pixel-width symbol-width)
