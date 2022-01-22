@@ -307,7 +307,7 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("trade" "\\texttrademark{}" nil "&trade;" "TM" "TM" "™")
 
      "** Science et al."
-     ("minus" "\\minus" t "&minus;" "-" "-" "−")
+     ("minus" "-" t "&minus;" "-" "-" "−")
      ("pm" "\\textpm{}" nil "&plusmn;" "+-" "±" "±")
      ("plusmn" "\\textpm{}" nil "&plusmn;" "+-" "±" "±")
      ("times" "\\texttimes{}" nil "&times;" "*" "×" "×")
