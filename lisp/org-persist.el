@@ -443,7 +443,8 @@ MISC, if non-nil will be appended to the collection."
   "Normalize ASSOCIATED representation into (:type value)."
   (pcase associated
     ((or (pred stringp) `(:file ,associated2))
-     (when associated2 (setq associated associated2))
+     (unless (stringp associated)
+       (setq associated (cadr associated)))
      (let* ((rtn `(:file ,associated))
             (inode (and (fboundp 'file-attribute-inode-number)
                         (file-attribute-inode-number
@@ -451,7 +452,8 @@ MISC, if non-nil will be appended to the collection."
        (when inode (plist-put rtn :inode inode))
        rtn))
     ((or (pred bufferp) `(:buffer ,associated2))
-     (when associated2 (setq associated associated2))
+     (unless (bufferp associated)
+       (setq associated (cadr associated)))
      (let ((cached (gethash associated org-persist--associated-buffer-cache))
            file inode hash)
        (if (and cached (eq (buffer-modified-tick associated)
@@ -493,20 +495,20 @@ COLLECTION is the plist holding data collectin."
               read-func-symbol))
      (funcall read-func-symbol c ,reference-data ,collection)))
 
-(defun org-persist-read:elisp (_ lisp-value _)
+(defun org-persist-read:elisp (_ lisp-value __)
   "Read elisp container and return LISP-VALUE."
   lisp-value)
 
-(defun org-persist-read:version (container _ _)
+(defun org-persist-read:version (container _ __)
   "Read version CONTAINER."
   (cadr container))
 
-(defun org-persist-read:file (_ path _)
+(defun org-persist-read:file (_ path __)
   "Read file container from PATH."
   (when (and path (file-exists-p (concat org-persist-directory path)))
     (concat org-persist-directory path)))
 
-(defun org-persist-read:url (_ path _)
+(defun org-persist-read:url (_ path __)
   "Read file container from PATH."
   (when (and path (file-exists-p (concat org-persist-directory path)))
     (concat org-persist-directory path)))
