@@ -3759,7 +3759,24 @@ Text
   (should
    (org-test-with-temp-text "* H\n"
      (forward-line)
-     (or (org-element-at-point) t))))
+     (or (org-element-at-point) t)))
+  ;; Return greater element when ouside contents.
+  (should
+   (eq 'drawer
+       (org-test-with-temp-text
+        ":DRAWER:\ntest\n:EN<point>D:\n"
+        (org-element-type (org-element-at-point)))))
+  (should
+   (eq 'drawer
+       (org-test-with-temp-text
+        ":DRA<point>WER:\ntest\n:END:\n"
+        (org-element-type (org-element-at-point)))))
+  ;; Return greater element when at :contents-end.
+  (should
+   (eq 'drawer
+       (org-test-with-temp-text
+        ":DRAWER:\ntest\n<point>:END:\n"
+        (org-element-type (org-element-at-point))))))
 
 (ert-deftest test-org-element/context ()
   "Test `org-element-context' specifications."
