@@ -41,7 +41,13 @@
 ;;    has been removed.
 ;; 3. Temporarily cache a file, including TRAMP path to disk:
 ;;    (org-persist-write '("file") "/path/to/file")
-;; 4. Cache value of a Elisp variable to disk.  The value will be
+;; 4. Cache file or URL while some other file exists.
+;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file") :expiry 'never)
+;;    (org-persist-write '("url" "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file"))
+;;    or, if the other file is current buffer file
+;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") (current-buffer) :expiry 'never)
+;;    (org-persist-write '("url" "https://static.fsf.org/common/img/logo-new.png") (current-buffer))
+;; 5. Cache value of a Elisp variable to disk.  The value will be
 ;;    saved and restored automatically (except buffer-local
 ;;    variables).
 ;;    ;; Until `org-persist-default-expiry'
@@ -54,11 +60,11 @@
 ;;    ;; Save buffer-local variable preserving circular links:
 ;;    (org-persist-register 'org-element--headline-cache (current-buffer)
 ;;               :inherit 'org-element--cache)
-;; 5. Load variable by side effects assigning variable symbol:
+;; 6. Load variable by side effects assigning variable symbol:
 ;;    (org-persist-load 'variable-symbol (current-buffer))
-;; 6. Version variable value:
+;; 7. Version variable value:
 ;;    (org-persist-register '(("elisp" variable-symbol) (version "2.0")))
-;; 7. Cancel variable persistence:
+;; 8. Cancel variable persistence:
 ;;    (org-persist-unregister 'variable-symbol 'all) ; in all buffers
 ;;    (org-persist-unregister 'variable-symbol) ;; global variable
 ;;    (org-persist-unregister 'variable-symbol (current-buffer)) ;; buffer-local
@@ -120,6 +126,7 @@
 ;;    elisp variable data.
 ;; 2. ("file") :: Store a copy of the associated file preserving the
 ;;    extension.
+;;    ("file" "/path/to/a/file") :: Store a copy of the file in path.
 ;; 3. ("version" "version number") :: Version the data collection.
 ;;     If the stored collection has different version than "version
 ;;     number", disregard it.
@@ -153,7 +160,7 @@
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
 
-(defconst org-persist--storage-version "2.2"
+(defconst org-persist--storage-version "2.3"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
@@ -603,35 +610,39 @@ COLLECTION is the plist holding data collectin."
 
 (defalias 'org-persist-write:version #'ignore)
 
-(defun org-persist-write:file (_ collection)
-  "Write file container according to COLLECTION."
+(defun org-persist-write:file (c collection)
+  "Write file container C according to COLLECTION."
   (org-persist-collection-let collection
-    (when (and path (file-exists-p path))
+    (when (or (and path (file-exists-p path))
+              (and (stringp (cadr c)) (file-exists-p (cadr c))))
+      (when (and (stringp (cadr c)) (file-exists-p (cadr c)))
+        (setq path (cadr c)))
       (let* ((persist-file (plist-get collection :persist-file))
              (ext (file-name-extension path))
              (file-copy (org-file-name-concat
                          org-persist-directory
-                         (format "%s-file.%s" persist-file ext))))
+                         (format "%s-%s.%s" persist-file (md5 path) ext))))
         (unless (file-exists-p (file-name-directory file-copy))
           (make-directory (file-name-directory file-copy) t))
         (unless (file-exists-p file-copy)
           (copy-file path file-copy 'overwrite))
-        (format "%s-file.%s" persist-file ext)))))
+        (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
-(defun org-persist-write:url (_ collection)
-  "Write url container according to COLLECTION."
+(defun org-persist-write:url (c collection)
+  "Write url container C according to COLLECTION."
   (org-persist-collection-let collection
-    (when path
+    (when (or path (cadr c))
+      (when (cadr c) (setq path (cadr c)))
       (let* ((persist-file (plist-get collection :persist-file))
              (ext (file-name-extension path))
              (file-copy (org-file-name-concat
                          org-persist-directory
-                         (format "%s-file.%s" persist-file ext))))
+                         (format "%s-%s.%s" persist-file (md5 path) ext))))
         (unless (file-exists-p (file-name-directory file-copy))
           (make-directory (file-name-directory file-copy) t))
         (unless (file-exists-p file-copy)
           (url-copy-file path file-copy 'overwrite))
-        (format "%s-file.%s" persist-file ext)))))
+        (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
 (defun org-persist-write:index (container _)
   "Write index CONTAINER."
