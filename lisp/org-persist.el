@@ -42,11 +42,9 @@
 ;; 3. Temporarily cache a file, including TRAMP path to disk:
 ;;    (org-persist-write '("file") "/path/to/file")
 ;; 4. Cache file or URL while some other file exists.
-;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file") :expiry 'never)
-;;    (org-persist-write '("url" "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file"))
+;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file") :expiry 'never :write-immediately t)
 ;;    or, if the other file is current buffer file
-;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") (current-buffer) :expiry 'never)
-;;    (org-persist-write '("url" "https://static.fsf.org/common/img/logo-new.png") (current-buffer))
+;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") (current-buffer) :expiry 'never :write-immediately t)
 ;; 5. Cache value of a Elisp variable to disk.  The value will be
 ;;    saved and restored automatically (except buffer-local
 ;;    variables).
@@ -674,7 +672,11 @@ COLLECTION is the plist holding data collectin."
 
 ;;;; Public API
 
-(cl-defun org-persist-register (container &optional associated &rest misc &key inherit &key (expiry org-persist-default-expiry) &allow-other-keys)
+(cl-defun org-persist-register (container &optional associated &rest misc
+                               &key inherit
+                               &key (expiry org-persist-default-expiry)
+                               &key (write-immediately nil)
+                               &allow-other-keys)
   "Register CONTAINER in ASSOCIATED to be persistent across Emacs sessions.
 Optional key INHERIT makes CONTAINER dependent on another container.
 Such dependency means that data shared between variables will be
@@ -683,6 +685,8 @@ Optional key EXPIRY will set the expiry condition of the container.
 It can be `never', nil - until end of session, a number of days since
 last access, or a function accepting a single argument - collection.
 EXPIRY key has no effect when INHERIT is non-nil.
+Optional key WRITE-IMMEDIATELY controls whether to save the container
+data immediately.
 MISC will be appended to CONTAINER."
   (unless org-persist--index (org-persist--load-index))
   (setq container (org-persist--normalize-container container))
@@ -699,6 +703,7 @@ MISC will be appended to CONTAINER."
   (let ((collection (org-persist--get-collection container associated misc)))
     (when (and expiry (not inherit))
       (when expiry (plist-put collection :expiry expiry))))
+  (when write-immediately (org-persist-write container associated))
   (when (or (bufferp associated) (bufferp (plist-get associated :buffer)))
     (with-current-buffer (if (bufferp associated)
                              associated
