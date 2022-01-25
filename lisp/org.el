@@ -20742,11 +20742,16 @@ instead of back to heading."
     (org-back-to-heading invisible-ok)))
 
 (defun org-before-first-heading-p ()
-  "Before first heading?"
-  (org-with-limited-levels
-   (save-excursion
-     (end-of-line)
-     (null (re-search-backward org-outline-regexp-bol nil t)))))
+  "Before first heading?
+Respect narrowing."
+  (if (org-element--cache-active-p)
+      (let ((cached-headline (org-element-lineage (org-element-at-point) '(headline) t)))
+        (or (not cached-headline)
+            (< (org-element-property :begin cached-headline) (point-min))))
+    (org-with-limited-levels
+     (save-excursion
+       (end-of-line)
+       (null (re-search-backward org-outline-regexp-bol nil t))))))
 
 (defun org-at-heading-p (&optional _)
   "Non-nil when on a headline."
