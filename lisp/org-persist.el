@@ -743,6 +743,9 @@ When LOAD? is non-nil, load the data instead of reading."
          (data nil))
     (when (and collection
                (file-exists-p persist-file)
+               (or (not (plist-get collection :expiry)) ; current session
+                   (not (org-persist--gc-expired-p
+                       (plist-get collection :expiry) collection)))
                (or (not hash-must-match)
                    (and (plist-get associated :hash)
                         (equal (plist-get associated :hash)
