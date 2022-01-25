@@ -449,7 +449,7 @@ MISC, if non-nil will be appended to the collection."
 (defun org-persist--normalize-associated (associated)
   "Normalize ASSOCIATED representation into (:type value)."
   (pcase associated
-    ((or (pred stringp) `(:file ,associated2))
+    ((or (pred stringp) `(:file ,_))
      (unless (stringp associated)
        (setq associated (cadr associated)))
      (let* ((rtn `(:file ,associated))
@@ -458,7 +458,7 @@ MISC, if non-nil will be appended to the collection."
                          (file-attributes associated)))))
        (when inode (plist-put rtn :inode inode))
        rtn))
-    ((or (pred bufferp) `(:buffer ,associated2))
+    ((or (pred bufferp) `(:buffer ,_))
      (unless (bufferp associated)
        (setq associated (cadr associated)))
      (let ((cached (gethash associated org-persist--associated-buffer-cache))
