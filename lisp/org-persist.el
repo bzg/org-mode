@@ -35,16 +35,16 @@
 ;;    (org-persist-read 'variable-symbol) ;; read the data later
 ;; 2. Temporarily cache a remote URL file to disk.  Remove upon
 ;;    closing Emacs:
-;;    (org-persist-write '("url") "https://static.fsf.org/common/img/logo-new.png")
-;;    (org-persist-read '("url") "https://static.fsf.org/common/img/logo-new.png")
+;;    (org-persist-write 'url "https://static.fsf.org/common/img/logo-new.png")
+;;    (org-persist-read 'url "https://static.fsf.org/common/img/logo-new.png")
 ;;    `org-persist-read' will return the cached file location or nil if cached file
 ;;    has been removed.
 ;; 3. Temporarily cache a file, including TRAMP path to disk:
-;;    (org-persist-write '("file") "/path/to/file")
+;;    (org-persist-write 'file "/path/to/file")
 ;; 4. Cache file or URL while some other file exists.
-;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file") :expiry 'never :write-immediately t)
+;;    (org-persist-register '(url "https://static.fsf.org/common/img/logo-new.png") '(:file "/path to the other file") :expiry 'never :write-immediately t)
 ;;    or, if the other file is current buffer file
-;;    (org-persist-register '("url" "https://static.fsf.org/common/img/logo-new.png") (current-buffer) :expiry 'never :write-immediately t)
+;;    (org-persist-register '(url "https://static.fsf.org/common/img/logo-new.png") (current-buffer) :expiry 'never :write-immediately t)
 ;; 5. Cache value of a Elisp variable to disk.  The value will be
 ;;    saved and restored automatically (except buffer-local
 ;;    variables).
@@ -61,7 +61,7 @@
 ;; 6. Load variable by side effects assigning variable symbol:
 ;;    (org-persist-load 'variable-symbol (current-buffer))
 ;; 7. Version variable value:
-;;    (org-persist-register '(("elisp" variable-symbol) (version "2.0")))
+;;    (org-persist-register '((elisp variable-symbol) (version "2.0")))
 ;; 8. Cancel variable persistence:
 ;;    (org-persist-unregister 'variable-symbol 'all) ; in all buffers
 ;;    (org-persist-unregister 'variable-symbol) ;; global variable
@@ -86,9 +86,9 @@
 ;; 1. Container :: a type of data to be stored
 ;;    Containers can store elisp variables, files, and version
 ;;    numbers.  Each container can be customized with container
-;;    options.  For example, "elisp" container is customized with
-;;    variable symbol.  ("elisp" variable) is a container storing
-;;    Lisp variable value.  Similarly, ("version" "2.0") container
+;;    options.  For example, `elisp' container is customized with
+;;    variable symbol.  (elisp variable) is a container storing
+;;    Lisp variable value.  Similarly, (version "2.0") container
 ;;    will store version number.
 ;; 2. Associated :: an object the container is associated with.  The
 ;;    object can be a buffer, file, inode number, file contents hash,
@@ -120,15 +120,15 @@
 ;; - all other keywords are ignored
 ;;
 ;; The available types of data containers are:
-;; 1. ("elisp" variable-symbol) or just variable-symbol :: Storing
+;; 1. (file variable-symbol) or just variable-symbol :: Storing
 ;;    elisp variable data.
-;; 2. ("file") :: Store a copy of the associated file preserving the
+;; 2. (file) :: Store a copy of the associated file preserving the
 ;;    extension.
-;;    ("file" "/path/to/a/file") :: Store a copy of the file in path.
-;; 3. ("version" "version number") :: Version the data collection.
+;;    (file "/path/to/a/file") :: Store a copy of the file in path.
+;; 3. (version "version number") :: Version the data collection.
 ;;     If the stored collection has different version than "version
 ;;     number", disregard it.
-;; 4. ("url") :: Store a downloaded copy of URL object.
+;; 4. (url) :: Store a downloaded copy of URL object.
 ;;
 ;; The data collections can expire, in which case they will be removed
 ;; from the persistent storage at the end of Emacs session.  The
@@ -158,7 +158,7 @@
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
 
-(defconst org-persist--storage-version "2.3"
+(defconst org-persist--storage-version "2.4"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
@@ -445,11 +445,11 @@ MISC, if non-nil will be appended to the collection."
   (if (and (listp container) (listp (car container)))
       (mapcar #'org-persist--normalize-container container)
     (pcase container
-      ((pred symbolp)
-       (list "elisp" container))
-      ((pred stringp)
+      ((or `elisp `version `file `index `url)
        (list container nil))
-      (`(,(or "elisp" "version" "file" "index" "url") . ,_)
+      ((pred symbolp)
+       (list `elisp container))
+      (`(,(or `elisp `version `file `index `url) . ,_)
        container)
       (_ (error "org-persist: Unknown container type: %S" container)))))
 
@@ -540,7 +540,7 @@ COLLECTION is the plist holding data collectin."
             (org-persist-collection-let collection
               (when (and (not associated)
                          (pcase container
-                           (`(("index" ,version))
+                           (`((index ,version))
                             (equal version (cadr cont)))
                            (_ nil)))
                 (throw :found index)))))))))
@@ -592,7 +592,7 @@ COLLECTION is the plist holding data collectin."
 (defun org-persist--load-index ()
   "Load `org-persist--index."
   (org-persist-load:index
-   `("index" ,org-persist--storage-version)
+   `(index ,org-persist--storage-version)
    (org-file-name-concat org-persist-directory org-persist-index-file)
    nil))
 
@@ -678,7 +678,7 @@ COLLECTION is the plist holding data collectin."
 (defun org-persist--save-index ()
   "Save `org-persist--index."
   (org-persist-write:index
-   `("index" ,org-persist--storage-version) nil))
+   `(index ,org-persist--storage-version) nil))
 
 ;;;; Public API
 
