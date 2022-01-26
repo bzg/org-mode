@@ -37,6 +37,9 @@
 (declare-function org-babel-update-block-body "ob-core" (new-body))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-before-first-heading-p "org" ())
+(declare-function org-element--cache-active-p "org-element" ())
+(declare-function org-element-lineage "org-element" (datum &optional types with-self))
+(declare-function org-element-property "org-element" (property element))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-heading-components "org" ())
@@ -425,8 +428,10 @@ code blocks by target file."
   (let ((counter 0) last-heading-pos blocks)
     (org-babel-map-src-blocks (buffer-file-name)
       (let ((current-heading-pos
-	     (org-with-wide-buffer
-	      (org-with-limited-levels (outline-previous-heading)))))
+             (if (org-element--cache-active-p)
+                 (or (org-element-property :begin (org-element-lineage (org-element-at-point) '(headline) t)) 1)
+	       (org-with-wide-buffer
+	        (org-with-limited-levels (outline-previous-heading))))))
 	(if (eq last-heading-pos current-heading-pos) (cl-incf counter)
 	  (setq counter 1)
 	  (setq last-heading-pos current-heading-pos)))
