@@ -675,7 +675,7 @@ COLLECTION is the plist holding data collectin."
      (org-file-name-concat org-persist-directory org-persist-index-file)
      org-persist--index
      t t)
-    t))
+    (org-file-name-concat org-persist-directory org-persist-index-file)))
 
 (defun org-persist--save-index ()
   "Save `org-persist--index."
