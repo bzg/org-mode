@@ -697,7 +697,9 @@ last access, or a function accepting a single argument - collection.
 EXPIRY key has no effect when INHERIT is non-nil.
 Optional key WRITE-IMMEDIATELY controls whether to save the container
 data immediately.
-MISC will be appended to CONTAINER."
+MISC will be appended to CONTAINER.
+When WRITE-IMMEDIATELY is non-nil, the return value will be the same
+with `org-persist-write'."
   (unless org-persist--index (org-persist--load-index))
   (setq container (org-persist--normalize-container container))
   (when inherit
@@ -713,12 +715,12 @@ MISC will be appended to CONTAINER."
   (let ((collection (org-persist--get-collection container associated misc)))
     (when (and expiry (not inherit))
       (when expiry (plist-put collection :expiry expiry))))
-  (when write-immediately (org-persist-write container associated))
   (when (or (bufferp associated) (bufferp (plist-get associated :buffer)))
     (with-current-buffer (if (bufferp associated)
                              associated
                            (plist-get associated :buffer))
-      (add-hook 'kill-buffer-hook #'org-persist-write-all-buffer nil 'local))))
+      (add-hook 'kill-buffer-hook #'org-persist-write-all-buffer nil 'local)))
+  (when write-immediately (org-persist-write container associated)))
 
 (defun org-persist-unregister (container &optional associated)
   "Unregister CONTAINER in ASSOCIATED to be persistent.
