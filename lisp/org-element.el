@@ -7056,7 +7056,7 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
 
 (defun org-element--cache-persist-before-write (container &optional associated)
   "Sync cache before saving."
-  (when (equal container '("elisp" org-element--cache))
+  (when (equal container '(elisp org-element--cache))
     (if (and org-element-use-cache
              (plist-get associated :file)
              (get-file-buffer (plist-get associated :file))
@@ -7079,7 +7079,7 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
 
 (defun org-element--cache-persist-before-read (container &optional associated)
   "Avoid reading cache before Org mode is loaded."
-  (when (equal container '("elisp" org-element--cache))
+  (when (equal container '(elisp org-element--cache))
     (if (not (and (plist-get associated :file)
                 (get-file-buffer (plist-get associated :file))))
         'forbid
@@ -7097,9 +7097,9 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
              (get-file-buffer (plist-get associated :file)))
     (with-current-buffer (get-file-buffer (plist-get associated :file))
       (when (and org-element-use-cache org-element-cache-persistent)
-        (when (and (equal container '("elisp" org-element--cache)) org-element--cache)
+        (when (and (equal container '(elisp org-element--cache)) org-element--cache)
           (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
-        (when (and (equal container '("elisp" org-element--headline-cache)) org-element--headline-cache)
+        (when (and (equal container '(elisp org-element--headline-cache)) org-element--headline-cache)
           (setq-local org-element--headline-cache-size (avl-tree-size org-element--headline-cache)))))))
 
 (add-hook 'org-persist-before-write-hook #'org-element--cache-persist-before-write)
