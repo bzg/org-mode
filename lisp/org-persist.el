@@ -634,8 +634,7 @@ COLLECTION is the plist holding data collectin."
                          (format "%s-%s.%s" persist-file (md5 path) ext))))
         (unless (file-exists-p (file-name-directory file-copy))
           (make-directory (file-name-directory file-copy) t))
-        (unless (file-exists-p file-copy)
-          (copy-file path file-copy 'overwrite))
+        (copy-file path file-copy 'overwrite)
         (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
 (defun org-persist-write:url (c collection)
@@ -650,8 +649,7 @@ COLLECTION is the plist holding data collectin."
                          (format "%s-%s.%s" persist-file (md5 path) ext))))
         (unless (file-exists-p (file-name-directory file-copy))
           (make-directory (file-name-directory file-copy) t))
-        (unless (file-exists-p file-copy)
-          (url-copy-file path file-copy 'overwrite))
+        (url-copy-file path file-copy 'overwrite)
         (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
 (defun org-persist-write:index (container _)
