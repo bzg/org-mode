@@ -336,6 +336,18 @@ FORMAT and ARGS are passed to `message'."
               gc-func-symbol))
      (funcall gc-func-symbol c ,collection)))
 
+(defmacro org-persist--gc-expired-p (cnd collection)
+  "Check if expiry condition CND triggers for COLLECTION."
+  `(pcase ,cnd
+     (`nil t)
+     (`never nil)
+     ((pred numberp)
+      (when (plist-get ,collection :access-time)
+        (<= (float-time) (+ (plist-get ,collection :access-time) (* ,cnd 24 60 60)))))
+     ((pred functionp)
+      (funcall ,cnd ,collection))
+     (_ (error "org-persist: Unsupported expiry type %S" ,cnd))))
+
 ;;;; Working with index
 
 (defmacro org-persist-collection-let (collection &rest body)
@@ -792,7 +804,9 @@ The arguments have the same meaning as in `org-persist-read'."
   "Save CONTAINER according to ASSOCIATED.
 ASSOCIATED can be a plist, a buffer, or a string.
 A buffer is treated as (:buffer ASSOCIATED).
-A string is treated as (:file ASSOCIATED)."
+A string is treated as (:file ASSOCIATED).
+The return value is nil when writing fails and the written value (as
+returned by `org-persist-read') on success."
   (setq associated (org-persist--normalize-associated associated))
   ;; Update hash
   (when (and (plist-get associated :file)
@@ -808,7 +822,8 @@ A string is treated as (:file ASSOCIATED)."
         (let ((file (org-file-name-concat org-persist-directory (plist-get collection :persist-file)))
               (data (mapcar (lambda (c) (cons c (org-persist-write:generic c collection)))
                             (plist-get collection :container))))
-          (org-persist--write-elisp-file file data))))))
+          (org-persist--write-elisp-file file data)
+          (org-persist-read container associated))))))
 
 (defun org-persist-write-all (&optional associated)
   "Save all the persistent data.
@@ -852,18 +867,6 @@ Do nothing in an indirect buffer."
      (delete-file ,persist-file)
      (when (org-directory-empty-p (file-name-directory ,persist-file))
        (delete-directory (file-name-directory ,persist-file)))))
-
-(defmacro org-persist--gc-expired-p (cnd collection)
-  "Check if expiry condition CND triggers for COLLECTION."
-  `(pcase ,cnd
-     (`nil t)
-     (`never nil)
-     ((pred numberp)
-      (when (plist-get ,collection :access-time)
-        (<= (float-time) (+ (plist-get ,collection :access-time) (* ,cnd 24 60 60)))))
-     ((pred functionp)
-      (funcall ,cnd ,collection))
-     (_ (error "org-persist: Unsupported expiry type %S" ,cnd))))
 
 (defun org-persist-gc ()
   "Remove expired or unregisted containers.
