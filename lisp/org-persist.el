@@ -800,13 +800,15 @@ The arguments have the same meaning as in `org-persist-read'."
   "Call `org-persist-load-all' in current buffer."
   (org-persist-load-all (current-buffer)))
 
-(defun org-persist-write (container &optional associated)
+(defun org-persist-write (container &optional associated ignore-return)
   "Save CONTAINER according to ASSOCIATED.
 ASSOCIATED can be a plist, a buffer, or a string.
 A buffer is treated as (:buffer ASSOCIATED).
 A string is treated as (:file ASSOCIATED).
 The return value is nil when writing fails and the written value (as
-returned by `org-persist-read') on success."
+returned by `org-persist-read') on success.
+When IGNORE-RETURN is non-nil, just return t on success without calling
+`org-persist-read'."
   (setq associated (org-persist--normalize-associated associated))
   ;; Update hash
   (when (and (plist-get associated :file)
@@ -823,7 +825,7 @@ returned by `org-persist-read') on success."
               (data (mapcar (lambda (c) (cons c (org-persist-write:generic c collection)))
                             (plist-get collection :container))))
           (org-persist--write-elisp-file file data)
-          (org-persist-read container associated))))))
+          (or ignore-return (org-persist-read container associated)))))))
 
 (defun org-persist-write-all (&optional associated)
   "Save all the persistent data.
@@ -835,10 +837,10 @@ When ASSOCIATED is non-nil, only save the matching data."
       (if associated
           (when collection
             (cl-pushnew (plist-get collection :container) all-containers :test #'equal))
-        (org-persist-write (plist-get collection :container) (plist-get collection :associated))))
+        (org-persist-write (plist-get collection :container) (plist-get collection :associated) t)))
     (dolist (container all-containers)
       (when (org-persist--find-index `(:container ,container :associated ,associated))
-        (org-persist-write container associated)))))
+        (org-persist-write container associated t)))))
 
 (defun org-persist-write-all-buffer ()
   "Call `org-persist-write-all' in current buffer.
