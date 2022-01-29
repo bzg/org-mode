@@ -7054,43 +7054,53 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
 
 ;;; Cache persistance
 
-(defun org-element--cache-persist-before-write (var &optional buffer)
+(defun org-element--cache-persist-before-write (container &optional associated)
   "Sync cache before saving."
-  (when (and org-element-use-cache
-             buffer
-             org-element-cache-persistent
-             (eq var 'org-element--cache)
-             (derived-mode-p 'org-mode)
-             org-element--cache)
-    (with-current-buffer buffer
-      ;; Cleanup cache request keys to avoid collisions during next
-      ;; Emacs session.
-      (avl-tree-mapc
-       (lambda (el)
-         (org-element-put-property el :org-element--cache-sync-key nil))
-       org-element--cache)
-      (org-with-wide-buffer
-       (org-element-at-point (point-max))))
-    nil))
+  (when (equal container '(elisp org-element--cache))
+    (if (and org-element-use-cache
+             (plist-get associated :file)
+             (get-file-buffer (plist-get associated :file))
+             org-element-cache-persistent)
+        (with-current-buffer (get-file-buffer (plist-get associated :file))
+          (if (and (derived-mode-p 'org-mode)
+                   org-element--cache)
+              (progn
+                ;; Cleanup cache request keys to avoid collisions during next
+                ;; Emacs session.
+                (avl-tree-mapc
+                 (lambda (el)
+                   (org-element-put-property el :org-element--cache-sync-key nil))
+                 org-element--cache)
+                (org-with-wide-buffer
+                 (org-element-at-point (point-max)))
+                nil)
+            'forbid))
+      'forbid)))
 
-(defun org-element--cache-persist-before-read (var &optional buffer)
+(defun org-element--cache-persist-before-read (container &optional associated)
   "Avoid reading cache before Org mode is loaded."
-  (when (memq var '(org-element--cache org-element--headline-cache))
-    (if (not buffer) 'forbid
-      (with-current-buffer buffer
+  (when (equal container '(elisp org-element--cache))
+    (if (not (and (plist-get associated :file)
+                (get-file-buffer (plist-get associated :file))))
+        'forbid
+      (with-current-buffer (get-file-buffer (plist-get associated :file))
         (unless (and org-element-use-cache
                      org-element-cache-persistent
-                     (derived-mode-p 'org-mode))
+                     (derived-mode-p 'org-mode)
+                     (equal (secure-hash 'md5 (current-buffer))
+                            (plist-get associated :hash)))
           'forbid)))))
 
-(defun org-element--cache-persist-after-read (var &optional buffer)
+(defun org-element--cache-persist-after-read (container &optional associated)
   "Setup restored cache."
-  (with-current-buffer buffer
-    (when (and org-element-use-cache org-element-cache-persistent)
-      (when (and (eq var 'org-element--cache) org-element--cache)
-        (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
-      (when (and (eq var 'org-element--headline-cache) org-element--headline-cache)
-        (setq-local org-element--headline-cache-size (avl-tree-size org-element--headline-cache))))))
+  (when (and (plist-get associated :file)
+             (get-file-buffer (plist-get associated :file)))
+    (with-current-buffer (get-file-buffer (plist-get associated :file))
+      (when (and org-element-use-cache org-element-cache-persistent)
+        (when (and (equal container '(elisp org-element--cache)) org-element--cache)
+          (setq-local org-element--cache-size (avl-tree-size org-element--cache)))
+        (when (and (equal container '(elisp org-element--headline-cache)) org-element--headline-cache)
+          (setq-local org-element--headline-cache-size (avl-tree-size org-element--headline-cache)))))))
 
 (add-hook 'org-persist-before-write-hook #'org-element--cache-persist-before-write)
 (add-hook 'org-persist-before-read-hook #'org-element--cache-persist-before-read)
@@ -7115,7 +7125,8 @@ buffers."
         (when (not org-element-cache-persistent)
           (org-persist-unregister 'org-element--headline-cache (current-buffer))
           (org-persist-unregister 'org-element--cache (current-buffer)))
-        (when org-element-cache-persistent
+        (when (and org-element-cache-persistent
+                   (buffer-file-name (current-buffer)))
           (org-persist-register 'org-element--cache (current-buffer))
           (org-persist-register 'org-element--headline-cache
                                 (current-buffer)
