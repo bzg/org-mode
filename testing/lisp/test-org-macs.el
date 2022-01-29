@@ -65,7 +65,11 @@
   (should (= 4 (org-string-width
 		#("123" 1 2 (display #("abc" 1 2 (invisible t)))))))
   ;; Test `space' property in `display'.
-  (should (= 2 (org-string-width #(" " 0 1 (display (space :width 2)))))))
+  (should (= 2 (org-string-width #(" " 0 1 (display (space :width 2))))))
+  ;; Test `wrap-prefix' property.
+  (should (= 2 (org-string-width #("ab" 0 2 (wrap-prefix "  ")))))
+  ;; Test `line-prefix' property.
+  (should (= 2 (org-string-width #("ab" 0 2 (line-prefix "  "))))))
 
 
 ;;; Regexp
