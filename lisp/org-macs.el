@@ -1192,7 +1192,8 @@ so values can contain further %-escapes if they are define later in TABLE."
   "Return fontified region between BEG and END."
   (when (bound-and-true-p jit-lock-mode)
     (org-with-forced-fontification
-        (when (text-property-not-all beg end 'org-fold-core-fontified t)
+        (when (or (text-property-not-all beg end 'org-fold-core-fontified t)
+                  (text-property-not-all beg end 'fontified t))
           (save-match-data (font-lock-fontify-region beg end)))))
   (buffer-substring beg end))
 
@@ -1201,9 +1202,12 @@ so values can contain further %-escapes if they are define later in TABLE."
   (prog1 (looking-at re)
     (when (bound-and-true-p jit-lock-mode)
       (org-with-forced-fontification
-          (when (text-property-not-all
-                 (match-beginning 0) (match-end 0)
-                 'org-fold-core-fontified t)
+          (when (or (text-property-not-all
+                     (match-beginning 0) (match-end 0)
+                     'org-fold-core-fontified t)
+                    (text-property-not-all
+                     (match-beginning 0) (match-end 0)
+                     'fontified t))
             (save-match-data
               (font-lock-fontify-region (match-beginning 0)
                                 (match-end 0))))))))
