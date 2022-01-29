@@ -840,7 +840,7 @@ DETAIL is either nil, `minimal', `local', `ancestors',
             (org-with-point-at (car region)
               (beginning-of-line)
               (let (font-lock-extend-region-functions)
-                (font-lock-fontify-region (1- (car region)) (cdr region))))))
+                (font-lock-fontify-region (max (point-min) (1- (car region))) (cdr region))))))
         (when region
           (org-fold-region (car region) (cdr region) nil))))
     (unless (org-before-first-heading-p)
