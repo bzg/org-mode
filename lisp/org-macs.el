@@ -39,6 +39,7 @@
 (declare-function org-fold-show-context "org-fold" (&optional key))
 (declare-function org-fold-save-outline-visibility "org-fold" (use-markers &rest body))
 (declare-function org-fold-next-visibility-change "org-fold" (&optional pos limit ignore-hidden-p previous-p))
+(declare-function org-fold-core-with-forced-fontification "org-fold" (&rest body))
 (declare-function org-fold-folded-p "org-fold" (&optional pos limit ignore-hidden-p previous-p))
 (declare-function string-collate-lessp "org-compat" (s1 s2 &optional locale ignore-case))
 
@@ -1177,6 +1178,36 @@ so values can contain further %-escapes if they are define later in TABLE."
 				   rear-nonsticky t mouse-map t fontified t
 				   org-emphasis t)
   "Properties to remove when a string without properties is wanted.")
+
+(defvar org-fold-core--force-fontification)
+(defmacro org-with-forced-fontification (&rest body)
+  "Run BODY forcing fontification of folded regions."
+  (declare (debug (form body)) (indent 1))
+  `(unwind-protect
+       (progn
+         (setq org-fold-core--force-fontification t)
+         ,@body)
+     (setq org-fold-core--force-fontification nil)))
+
+(defun org-buffer-substring-fontified (beg end)
+  "Return fontified region between BEG and END."
+  (when (bound-and-true-p jit-lock-mode)
+    (org-with-forced-fontification
+        (when (text-property-not-all beg end 'org-fold-core-fontified t)
+          (save-match-data (font-lock-fontify-region beg end)))))
+  (buffer-substring beg end))
+
+(defun org-looking-at-fontified (re)
+  "Call `looking-at' RE and make sure that the match is fontified."
+  (prog1 (looking-at re)
+    (when (bound-and-true-p jit-lock-mode)
+      (org-with-forced-fontification
+          (when (text-property-not-all
+                 (match-beginning 0) (match-end 0)
+                 'org-fold-core-fontified t)
+            (save-match-data
+              (font-lock-fontify-region (match-beginning 0)
+                                (match-end 0))))))))
 
 (defsubst org-no-properties (s &optional restricted)
   "Remove all text properties from string S.
