@@ -999,7 +999,9 @@ LINK is escaped with backslashes for inclusion in buffer."
 		(replace-regexp-in-string "]\\'"
 					  (concat "\\&" zero-width-space)
 					  (org-trim description))))))
-    (if (not (org-string-nw-p link)) description
+    (if (not (org-string-nw-p link))
+        (or description
+            (error "Empty link"))
       (format "[[%s]%s]"
 	      (org-link-escape link)
 	      (if description (format "[%s]" description) "")))))
