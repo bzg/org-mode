@@ -755,8 +755,11 @@ environment."
 
 (defcustom org-latex-inline-image-rules
   `(("file" . ,(rx "."
-		   (or "pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg")
-		   eos)))
+                   (or "pdf" "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg")
+                   eos))
+    ("https" . ,(rx "."
+                    (or "jpeg" "jpg" "png" "ps" "eps" "tikz" "pgf" "svg")
+                    eos)))
   "Rules characterizing image files that can be inlined into LaTeX.
 
 A rule consists in an association whose key is the type of link
@@ -2588,7 +2591,7 @@ INFO is a plist holding contextual information.  See
      ;; Link type is handled by a special function.
      ((org-export-custom-protocol-maybe link desc 'latex info))
      ;; Image file.
-     (imagep (org-latex--inline-image link info))
+     (imagep (org-latex--inline-image (org-export-link-localise link) info))
      ;; Radio link: Transcode target's contents and use them as link's
      ;; description.
      ((string= type "radio")

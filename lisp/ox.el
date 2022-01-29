@@ -4446,6 +4446,47 @@ Return value can be an object or an element:
 	   (concat (if (string-prefix-p "/" fullname) "file://" "file:///")
 		   fullname)))))
 
+(defun org-export-link-remote-p (link)
+  "Returns non-nil if the link refers to a remote resource."
+  (or (member (org-element-property :type link) '("http" "https" "ftp"))
+      (and (string= (org-element-property :type link) "file")
+           (file-remote-p (org-element-property :path link)))))
+
+(defun org-export-link--remote-local-copy (link)
+  "Download the remote resource specified by LINK, and return its local path."
+  ;; TODO work this into ol.el as a link parameter, say :download.
+  (let* ((location-type
+          (pcase (org-element-property :type link)
+            ((or "http" "https" "ftp") 'url)
+            ((and "file" (guard (file-remote-p
+                                 (org-element-property :path link))))
+             'file)
+            (_ (error "Cannot copy %s:%s to a local file"
+                      (org-element-property :type link)
+                      (org-element-property :path link)))))
+         (path
+          (pcase location-type
+            ('url
+             (concat (org-element-property :type link)
+                     ":" (org-element-property :path link)))
+            ('file
+             (org-element-property :path link)))))
+    (or (org-persist-read location-type path)
+        (org-persist-register location-type path
+                              :write-immediately t))))
+
+(defun org-export-link-localise (link)
+  "If LINK refers to a remote resource, modify it to point to a local downloaded copy."
+  (when (org-export-link-remote-p link)
+    (let* ((local-path (org-export-link--remote-local-copy link)))
+      (setcdr link
+              (thread-first (cadr link)
+                            (plist-put :type "file")
+                            (plist-put :path local-path)
+                            (plist-put :raw-link (concat "file:" local-path))
+                            list))))
+  link)
+
 ;;;; For References
 ;;
 ;; `org-export-get-reference' associate a unique reference for any
