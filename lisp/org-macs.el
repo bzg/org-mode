@@ -903,14 +903,13 @@ delimiting S."
 	(cursor beg))
     (while (setq beg (text-property-not-all beg end property nil s))
       (let* ((next (next-single-property-change beg property s end))
-	     (props (text-properties-at beg s))
-	     (spec (plist-get props property))
+	     (spec (get-text-property beg property s))
 	     (value
 	      (pcase property
 		(`invisible
-		 ;; If `invisible' property in PROPS means text is to
-		 ;; be invisible, return 0.  Otherwise return nil so
-		 ;; as to resume search.
+		 ;; If `invisible' property means text is to be
+		 ;; invisible, return 0.  Otherwise return nil so as
+		 ;; to resume search.
 		 (and (or (eq t buffer-invisibility-spec)
 			  (assoc-string spec buffer-invisibility-spec))
 		      0))
