@@ -212,6 +212,12 @@ because otherwise all these markers will point to nowhere."
   `(let (pop-up-frames pop-up-windows)
      ,@body))
 
+(defmacro org-element-with-disabled-cache (&rest body)
+  "Run BODY without active org-element-cache."
+  (declare (debug (form body)) (indent 1))
+  `(cl-letf (((symbol-function #'org-element--cache-active-p) (lambda (&rest _) nil)))
+     ,@body))
+
 
 ;;; Buffer and windows
 
