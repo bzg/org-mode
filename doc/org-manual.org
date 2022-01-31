@@ -15353,6 +15353,33 @@ your king.
 ,#+END_QUOTE
 #+end_example
 
+*** Key bindings in Texinfo export
+:PROPERTIES:
+:DESCRIPTION: @@kbd Texinfo command.
+:END:
+
+Org does not provide any markup for key bindings that corresponds to
+Texinfo's ~@kbd~ and ~@key~ commands.  One way to deal with this is to
+fall back to code syntax.  =~C-x SPC~=, for example, is transcoded to
+~@code{C-x SPC}~.
+
+A better approach is to define and use an Org macro named ~kbd~.  To
+make that easier the function ~org-texinfo-kbd-macro~ is provided,
+which is intended to be used like this:
+
+#+begin_example
+#+macro: kbd (eval (org-texinfo-kbd-macro $1))
+
+Type {{{kbd(C-c SPC)}}}.
+#+end_example
+
+#+texinfo: @noindent
+which becomes
+
+#+begin_example
+Type @kbd{C-c @key{SPC}}.
+#+end_example
+
 *** Special blocks in Texinfo export
 :PROPERTIES:
 :DESCRIPTION: Special block attributes.

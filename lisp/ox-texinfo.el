@@ -407,6 +407,13 @@ If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 	      (regexp-opt '("eps" "pdf" "png" "jpg" "jpeg" "gif" "svg"))))
   "Rules characterizing image files that can be inlined.")
 
+(defvar org-texinfo--quoted-keys-regexp
+  (regexp-opt '("BS" "TAB" "RET" "ESC" "SPC" "DEL"
+		"LFD" "DELETE" "SHIFT" "Ctrl" "Meta" "Alt"
+		"Cmd" "Super" "UP" "LEFT" "RIGHT" "DOWN")
+	      'words)
+  "Regexp matching keys that have to be quoted using @key{KEY}.")
+
 
 ;;; Internal Functions
 
@@ -1611,7 +1618,28 @@ contextual information."
   (format "@display\n%s@end display" contents))
 
 
-;;; Interactive functions
+;;; Public Functions
+
+(defun org-texinfo-kbd-macro (key &optional noquote)
+  "Quote KEY using @kbd{...} and if necessary @key{...}.
+
+This is intended to be used as an Org macro like so:
+
+  #+macro: kbd (eval (org-texinfo-kbd-macro $1))
+  Type {{{kbd(C-c SPC)}}}.
+
+Also see info node `(org)Key bindings in Texinfo export'.
+
+If optional NOQOUTE is non-nil, then do not add the quoting
+that is necessary when using this in an Org macro."
+  (format (if noquote "@kbd{%s}" "@@texinfo:@kbd{@@%s@@texinfo:}@@")
+	  (let ((case-fold-search nil))
+	    (replace-regexp-in-string
+	     org-texinfo--quoted-keys-regexp
+	     (if noquote "@key{\\&}" "@@texinfo:@key{@@\\&@@texinfo:}@@")
+	     key t))))
+
+;;; Interactive Functions
 
 ;;;###autoload
 (defun org-texinfo-export-to-texinfo
