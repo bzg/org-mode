@@ -15307,11 +15307,14 @@ example is transcoded to the same output as above.
   This is the common text for variables foo and bar.
 #+end_example
 
-Likewise, the Texinfo export back-end supports two approaches to
-writing Texinfo definition commands (see [[info:texinfo::Definition
-Commands]]).  One of them uses description lists and is described below,
-the other relies on special blocks (see [[*Special blocks in Texinfo
-export]]).
+Support for this compact syntax can also be enabled for all lists in
+a file using the =compact-itemx= export option, or globally using the
+variable ~org-texinfo-compact-itemx~.
+
+The Texinfo export back-end also supports two approaches to writing
+Texinfo definition commands (see [[info:texinfo::Definition Commands]]).
+One of them uses description lists and is described below, the other
+relies on special blocks (see [[*Special blocks in Texinfo export]]).
 
 Items in a description list in a Org file that begin with =Function:=
 or certain other prefixes are converted using Texinfo definition
@@ -16333,6 +16336,7 @@ Settings]]), however, override everything.
 | ~:texinfo-active-timestamp-format~       | ~org-texinfo-active-timestamp-format~       |
 | ~:texinfo-classes~                       | ~org-texinfo-classes~                       |
 | ~:texinfo-class~                         | ~org-texinfo-default-class~                 |
+| ~:texinfo-compact-itemx                  | ~org-texinfo-compact-itemx~                 |
 | ~:texinfo-table-default-markup~          | ~org-texinfo-table-default-markup~          |
 | ~:texinfo-diary-timestamp-format~        | ~org-texinfo-diary-timestamp-format~        |
 | ~:texinfo-filename~                      | ~org-texinfo-filename~                      |

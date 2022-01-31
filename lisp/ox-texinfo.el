@@ -119,8 +119,8 @@
     (:texinfo-table-default-markup nil nil org-texinfo-table-default-markup)
     (:texinfo-text-markup-alist nil nil org-texinfo-text-markup-alist)
     (:texinfo-format-drawer-function nil nil org-texinfo-format-drawer-function)
-    (:texinfo-format-inlinetask-function nil nil org-texinfo-format-inlinetask-function)))
-
+    (:texinfo-format-inlinetask-function nil nil org-texinfo-format-inlinetask-function)
+    (:texinfo-compact-itemx nil "compact-itemx" org-texinfo-compact-itemx)))
 
 
 ;;; User Configurable Variables
@@ -354,6 +354,20 @@ The function must accept six parameters:
 The function should return the string to be exported."
   :group 'org-export-texinfo
   :type 'function)
+
+;;;; Itemx
+
+(defcustom org-texinfo-compact-itemx nil
+  "Non-nil means certain items in description list become `@itemx'.
+
+If this is non-nil and an item in a description list has no
+body but is followed by another item, then the second item is
+transcoded to `@itemx'.  See info node `(org)Plain lists in
+Texinfo export' for how to enable this for individual lists."
+  :package-version '(Org . "9.6")
+  :group 'org-export-texinfo
+  :type 'boolean
+  :safe t)
 
 ;;;; Compilation
 
@@ -614,7 +628,7 @@ Return new tree."
 		(org-texinfo--split-definition plain-list item cmd args))
 	       (t
 		(when args
-		  (org-texinfo--massage-key-item plain-list item args))
+		  (org-texinfo--massage-key-item plain-list item args info))
 		(push item items)))))
 	  (unless (org-element-contents plain-list)
 	    (org-element-extract-element plain-list)))))
@@ -663,7 +677,7 @@ new plain list."
 	  (mapc #'org-element-extract-element items))
    plain-list))
 
-(defun org-texinfo--massage-key-item (plain-list item args)
+(defun org-texinfo--massage-key-item (plain-list item args info)
   "In PLAIN-LIST modify ITEM based on ARGS.
 
 Reformat ITEM's tag property and determine the arguments for the
@@ -674,7 +688,9 @@ If PLAIN-LIST is a description list whose `:compact' attribute is
 non-nil and ITEM has no content but is followed by another item,
 then store the `@findex' and `@kindex' values in the next item.
 If the previous item stored its respecive values in this item,
-then move them to the next item."
+then move them to the next item.
+
+INFO is a plist used as a communication channel."
   (let ((key nil)
 	(cmd nil))
     (if (string-match (rx (+ " ")
@@ -701,8 +717,9 @@ then move them to the next item."
 	(setq kindex (nconc kindex (list key))))
       (cond
        ((and next-item
-	     (org-not-nil
-	      (org-export-read-attribute :attr_texinfo plain-list :compact))
+             (or (plist-get info :texinfo-compact-itemx)
+	         (org-not-nil
+	          (org-export-read-attribute :attr_texinfo plain-list :compact)))
 	     (not (org-element-contents item))
 	     (eq 1 (org-element-property :post-blank item)))
 	(org-element-put-property next-item :findex findex)
@@ -1138,8 +1155,9 @@ contextual information."
   (let* ((tag (org-element-property :tag item))
          (plain-list (org-element-property :parent item))
          (compact (and (eq (org-element-property :type plain-list) 'descriptive)
-                       (org-not-nil (org-export-read-attribute
-                                     :attr_texinfo plain-list :compact))))
+                       (or (plist-get info :texinfo-compact-itemx)
+                           (org-not-nil (org-export-read-attribute
+                                         :attr_texinfo plain-list :compact)))))
          (previous-item nil))
     (when (and compact
                (org-export-get-next-element item info)
