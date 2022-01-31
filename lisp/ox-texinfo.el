@@ -997,25 +997,41 @@ contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((tag (org-element-property :tag item))
-	 (split (org-string-nw-p
-		 (org-export-read-attribute :attr_texinfo
-					    (org-element-property :parent item)
-					    :sep)))
-	 (items (and tag
-		     (let ((tag (org-export-data tag info)))
-		       (if split
-			   (split-string tag (regexp-quote split) t "[ \t\n]+")
-			 (list tag))))))
-    (format "%s\n%s"
-	    (pcase items
-	      (`nil "@item")
-	      (`(,item) (concat "@item " item))
-	      (`(,item . ,items)
-	       (concat "@item " item "\n"
-		       (mapconcat (lambda (i) (concat "@itemx " i))
-				  items
-				  "\n"))))
-	    (or contents ""))))
+         (plain-list (org-element-property :parent item))
+         (compact (and (eq (org-element-property :type plain-list) 'descriptive)
+                       (org-not-nil (org-export-read-attribute
+                                     :attr_texinfo plain-list :compact))))
+         (previous-item nil))
+    (when (and compact
+               (org-export-get-next-element item info)
+               (not (org-element-contents item))
+               (eq 1 (org-element-property :post-blank item)))
+      (org-element-put-property item :post-blank 0))
+    (if (and compact
+             (setq previous-item (org-export-get-previous-element item info))
+             (not (org-element-contents previous-item))
+	     (eq 0 (org-element-property :post-blank previous-item)))
+        (format "@itemx%s\n%s"
+                (if tag (concat " " (org-export-data tag info)) "")
+                (or contents ""))
+      (let* ((split (org-string-nw-p (org-export-read-attribute
+                                      :attr_texinfo plain-list :sep)))
+	     (items (and tag
+		         (let ((tag (org-export-data tag info)))
+		           (if split
+			       (split-string tag (regexp-quote split)
+                                             t "[ \t\n]+")
+			     (list tag))))))
+        (format "%s\n%s"
+	        (pcase items
+	          (`nil "@item")
+	          (`(,item) (concat "@item " item))
+	          (`(,item . ,items)
+	           (concat "@item " item "\n"
+		           (mapconcat (lambda (i) (concat "@itemx " i))
+				      items
+				      "\n"))))
+	        (or contents ""))))))
 
 ;;;; Keyword
 

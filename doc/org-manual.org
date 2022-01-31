@@ -15236,6 +15236,23 @@ This paragraph is preceded by...
 :DESCRIPTION: List attributes.
 :END:
 
+#+cindex: lettered lists, in Texinfo export
+#+cindex: enum, Texinfo attribute
+The Texinfo export back-end converts unordered and ordered lists in
+the Org file using the default command =@itemize=.
+
+Ordered lists are numbered when exported to Texinfo format.  Such
+numbering obeys any counter (see [[*Plain Lists]]) in the first item of
+the list.  The =:enum= attribute also let you start the list at a
+specific number, or switch to a lettered list, as illustrated here:
+
+#+begin_example
+#+ATTR_TEXINFO: :enum A
+1. Alpha
+2. Bravo
+3. Charlie
+#+end_example
+
 #+cindex: @samp{ATTR_TEXINFO}, keyword
 #+cindex: two-column tables, in Texinfo export
 #+cindex: table-type, Texinfo attribute
@@ -15277,18 +15294,17 @@ This is the common text for variables foo and bar.
 @end table
 #+end_example
 
-#+cindex: lettered lists, in Texinfo export
-#+cindex: enum, Texinfo attribute
-Ordered lists are numbered when exported to Texinfo format.  Such
-numbering obeys any counter (see [[*Plain Lists]]) in the first item of
-the list.  The =:enum= attribute also let you start the list at
-a specific number, or switch to a lettered list, as illustrated here
+The =:compact= attribute is an alternative to the =:sep= attribute,
+which allows writing each entry on its own line.  If this attribute is
+non-nil and an item in a description list has no body but is followed
+by another item, then the second item is transcoded to =@itemx=.  This
+example is transcoded to the same output as above.
 
 #+begin_example
-#+ATTR_TEXINFO: :enum A
-1. Alpha
-2. Bravo
-3. Charlie
+,#+ATTR_TEXINFO: :table-type vtable :indic asis :compact t
+- foo ::
+- bar ::
+  This is the common text for variables foo and bar.
 #+end_example
 
 *** Tables in Texinfo export
