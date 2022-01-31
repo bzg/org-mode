@@ -15307,6 +15307,73 @@ example is transcoded to the same output as above.
   This is the common text for variables foo and bar.
 #+end_example
 
+Likewise, the Texinfo export back-end supports two approaches to
+writing Texinfo definition commands (see [[info:texinfo::Definition
+Commands]]).  One of them uses description lists and is described below,
+the other relies on special blocks (see [[*Special blocks in Texinfo
+export]]).
+
+Items in a description list in a Org file that begin with =Function:=
+or certain other prefixes are converted using Texinfo definition
+commands.  This works even if other items in the same list do not have
+such a prefix; if necessary a single description list is converted
+using multiple tables (such as =@vtable=) and definition commands
+(such as =@defun=).
+
+#+begin_example
+- Function: org-texinfo-drawer drawer contents info ::
+  Transcode a DRAWER element from Org to Texinfo.
+#+end_example
+
+#+texinfo: @noindent
+becomes
+
+#+begin_example
+@defun org-texinfo-drawer drawer contents info ::
+  Transcode a DRAWER element from Org to Texinfo.
+@end defun
+#+end_example
+
+The recognized prefixes are =Command:=, =Function:=, =Macro:=,
+=Special Form:=, =Variable:= and =User Option:=.  These are the same
+prefixes that appear in the Info file for the respective definition
+commands.  For example a =Function:= item in the Org file is converted
+to a =@defun= command in the Texinfo file, which in turn is converted
+to a definition prefixed with =-- Function:= in the Info file.
+
+As a special case the prefix =Key:= is also recognized.  No Texinfo
+definition command exists for key bindings and the output in Info
+files also lacks the =Key:= prefix.  Even so this special case is
+supported because it provides a convenient shorthand, as illustrated
+here:
+
+#+begin_example
+- Key: C-c C-c (do-something) ::
+  This command does something.
+
+- User Option: do-something-somehow ::
+  This option controls how exactly ~do-something~ does its thing.
+#+end_example
+
+#+texinfo: @noindent
+becomes
+
+#+begin_example
+@table @asis
+@item @kbd{C-c C-c} (@code{do-something})
+@kindex C-c C-c
+@findex do-something
+This command does something.
+@end table
+
+@defopt do-something-somehow
+This option controls how exactly @code{do-something} does its thing.
+@end defopt
+#+end_example
+
+#+texinfo: @noindent
+Command in parenthesis, as done above, is optional.
+
 *** Tables in Texinfo export
 :PROPERTIES:
 :DESCRIPTION: Table attributes.
@@ -15400,6 +15467,10 @@ Type @kbd{C-c @key{SPC}}.
 :PROPERTIES:
 :DESCRIPTION: Special block attributes.
 :END:
+
+The Texinfo export back-end supports two approaches to writing Texinfo
+definition commands.  One of them is described here, the other in
+[[*Plain lists in Texinfo export]].
 
 #+cindex: @samp{ATTR_TEXINFO}, keyword
 
