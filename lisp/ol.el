@@ -1377,7 +1377,7 @@ PATH is the command to execute, as a string."
 	       (string-match-p org-link-shell-skip-confirm-regexp path))
 	  (not org-link-shell-confirm-function)
 	  (funcall org-link-shell-confirm-function
-		   (format "Execute %S in shell? "
+		   (format "Execute %s in shell? "
 			   (org-add-props path nil 'face 'org-warning))))
       (let ((buf (generate-new-buffer "*Org Shell Output*")))
 	(message "Executing %s" path)
