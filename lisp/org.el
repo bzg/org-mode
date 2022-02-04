@@ -13601,9 +13601,8 @@ drawer is immediately hidden."
      (org-with-limited-levels (org-back-to-heading-or-point-min t)))
    (if (org-before-first-heading-p)
        (while (and (org-at-comment-p) (bolp)) (forward-line))
-     (progn
-       (forward-line)
-       (when (looking-at-p org-planning-line-re) (forward-line))))
+     (forward-line)
+     (when (looking-at-p org-planning-line-re) (forward-line)))
    (unless (looking-at-p org-property-drawer-re)
      ;; Make sure we start editing a line from current entry, not from
      ;; next one.  It prevents extending text properties or overlays
