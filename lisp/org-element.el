@@ -6447,6 +6447,13 @@ If you observe Emacs hangs frequently, please report this to Org mode mailing li
                    (setq element (or (org-element--cache-put element) element))
                  ;; Nothing to parse (i.e. empty file).
                  (throw 'exit parent))
+               (unless (or (not (org-element--cache-active-p)) parent)
+                 (org-element--cache-warn "Got empty parent while parsing. Please report it to Org mode mailing list (M-x org-submit-bug-report).\n Backtrace:\n%S"
+                               (when (and (fboundp 'backtrace-get-frames)
+                                          (fboundp 'backtrace-to-string))
+                                 (backtrace-to-string (backtrace-get-frames 'backtrace))
+                                 (org-element-cache-reset)
+                                 (error "org-element--cache: Emergency exit"))))
 	       (org-element-put-property element :parent parent))
 	     (let ((elem-end (org-element-property :end element))
 	           (type (org-element-type element)))
@@ -6988,6 +6995,10 @@ change, as an integer."
 
 Return non-nil when verification failed."
   ;; Verify correct parent for the element.
+  (unless (or (org-element-property :parent element)
+              (eq 'org-data (org-element-type element)))
+    (org-element--cache-warn "Got element without parent (cache active?: %S). Please report it to Org mode mailing list (M-x org-submit-bug-report).\n%S" (org-element--cache-active-p)  element)
+    (org-element-cache-reset))
   (let ((org-element--cache-self-verify (or org-element--cache-self-verify
                                  (and (boundp 'org-batch-test) org-batch-test)))
         (org-element--cache-self-verify-frequency (if (and (boundp 'org-batch-test) org-batch-test)
