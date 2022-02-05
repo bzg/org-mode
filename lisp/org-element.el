@@ -6575,7 +6575,9 @@ The function returns the new value of `org-element--cache-change-warning'."
        (beginning-of-line)
        (let ((bottom (save-excursion
                        (goto-char end)
-                       (if (bolp)
+                       (if (and (bolp)
+                                ;; When beg == end, still extent to eol.
+                                (> (point) beg))
                            ;; FIXME: Potential pitfall.
                            ;; We are appending to an element end.
                            ;; Unless the last inserted char is not
