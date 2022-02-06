@@ -1436,40 +1436,43 @@ folded regions.")
 (defun org-fold-core-fontify-region (beg end loudly &optional force)
   "Run `font-lock-default-fontify-region' in visible regions."
   (with-silent-modifications
-    (let ((pos beg) next
-          (force (or force org-fold-core--force-fontification))
-          (org-fold-core--fontifying t)
-          (skip-specs
-           (let (result)
-             (dolist (spec (org-fold-core-folding-spec-list))
-               (when (and (not (org-fold-core-get-folding-spec-property spec :visible))
-                          (org-fold-core-get-folding-spec-property spec :font-lock-skip))
-                 (push spec result)))
-             result)))
+    (let* ((pos beg) next
+           (force (or force org-fold-core--force-fontification))
+           (org-fold-core--fontifying t)
+           (skip-specs
+            (unless force
+              (let (result)
+                (dolist (spec (org-fold-core-folding-spec-list))
+                  (when (and (not (org-fold-core-get-folding-spec-property spec :visible))
+                             (org-fold-core-get-folding-spec-property spec :font-lock-skip))
+                    (push spec result)))
+                result))))
       ;; Move POS to first visible point within BEG..END.
-      (while (and (catch :found
-                    (dolist (spec (org-fold-core-get-folding-spec 'all pos))
-                      (when (org-fold-core-get-folding-spec-property spec :font-lock-skip)
-                        (throw :found spec))))
-                  (< pos end))
-        (setq pos (org-fold-core-next-folding-state-change nil pos end)))
+      (unless force
+        (while (and (catch :found
+                      (dolist (spec (org-fold-core-get-folding-spec 'all pos))
+                        (when (org-fold-core-get-folding-spec-property spec :font-lock-skip)
+                          (throw :found spec))))
+                    (< pos end))
+          (setq pos (org-fold-core-next-folding-state-change nil pos end))))
       (when force (setq pos beg next end))
       (while (< pos end)
         (unless force
-          (setq next (org-fold-core-next-folding-state-change skip-specs pos end)))
-        ;; Move to the end of the region to be fontified.
-        (while (and (not (catch :found
-                         (dolist (spec (org-fold-core-get-folding-spec 'all next))
-                           (when (org-fold-core-get-folding-spec-property spec :font-lock-skip)
-                             (throw :found spec)))))
-                    (< next end))
-          (setq next (org-fold-core-next-folding-state-change nil next end)))
+          (setq next (org-fold-core-next-folding-state-change skip-specs pos end))
+          ;; Move to the end of the region to be fontified.
+          (while (and (not (catch :found
+                           (dolist (spec (org-fold-core-get-folding-spec 'all next))
+                             (when (org-fold-core-get-folding-spec-property spec :font-lock-skip)
+                               (throw :found spec)))))
+                      (< next end))
+            (setq next (org-fold-core-next-folding-state-change nil next end))))
         (save-excursion
           (font-lock-default-fontify-region pos next loudly)
           (save-match-data
             (unless (<= pos (point) next)
               (run-hook-with-args 'org-fold-core-first-unfold-functions pos next))))
         (put-text-property pos next 'org-fold-core-fontified t)
+        (put-text-property pos next 'fontified t)
         (setq pos next)))))
 
 (defun org-fold-core-update-optimisation (beg end)
