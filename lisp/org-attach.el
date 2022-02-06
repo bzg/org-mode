@@ -314,7 +314,7 @@ Shows a list of commands and prompts for another key to execute a command."
 			     (concat (mapcar #'caar org-attach-commands)))))
 	    (message msg)
 	    (while (and (setq c (read-char-exclusive))
-		        (memq c '(14 16 22 134217846)))
+                        (memq c '(?\C-n ?\C-p ?\C-v ?\M-v)))
 	      (org-scroll c t)))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
       (let ((command (cl-some (lambda (entry)
