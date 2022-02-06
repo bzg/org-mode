@@ -320,8 +320,8 @@ Shows a list of commands and prompts for another key to execute a command."
       (let ((command (cl-some (lambda (entry)
 				(and (memq c (nth 0 entry)) (nth 1 entry)))
 			      org-attach-commands)))
-	(if (commandp command t)
-	    (call-interactively command)
+	(if (commandp command)
+	    (command-execute command)
 	  (error "No such attachment command: %c" c))))))
 
 (defun org-attach-dir (&optional create-if-not-exists-p no-fs-check)
