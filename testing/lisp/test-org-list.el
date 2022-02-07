@@ -900,6 +900,70 @@ b. Item 2<point>"
       (org-insert-item)
       (buffer-string)))))
 
+(ert-deftest test-org-list/send-item ()
+  "Test `org-list-send-item' specifications."
+  ;; Move to beginning
+  (should
+   (equal "- item3\n- item1\n- item2\n"
+          (org-test-with-temp-text
+              "- item1\n- item2\n- item3\n"
+            (org-list-send-item (caar (last (org-list-struct)))
+                                'begin (org-list-struct))
+            (buffer-string))))
+  ;; Move to beginning with child item
+  (should
+   (equal "- item3\n  - item4\n- item1\n- item2\n"
+          (org-test-with-temp-text
+              "- item1\n- item2\n- item3\n  - item4\n"
+            (org-list-send-item (car (nth 2 (org-list-struct)))
+                                'begin (org-list-struct))
+            (buffer-string))))
+  ;; Move to end
+  (should
+   (equal "- item2\n- item3\n  - item4\n- item1\n  - item1child\n"
+          (org-test-with-temp-text
+              "- item1\n  - item1child\n- item2\n- item3\n  - item4\n"
+            (org-list-send-item (car (nth 0 (org-list-struct)))
+                                'end (org-list-struct))
+            (buffer-string))))
+  ;; Move to item number by string should move the item before the specified one
+  (should
+   (equal "- item2\n- item1\n  - item1child\n- item3\n- item4\n- item5\n"
+          (org-test-with-temp-text
+              "- item1\n  - item1child\n- item2\n- item3\n- item4\n- item5\n"
+            (org-list-send-item (car (nth 0 (org-list-struct)))
+                                "3" (org-list-struct))
+            (buffer-string))))
+  ;; Move to item number by position should move the item before the specified one
+  (should
+   (equal "- item2\n- item1\n  - item1child\n- item3\n- item4\n- item5\n"
+          (org-test-with-temp-text
+              "- item1\n  - item1child\n- item2\n- item3\n- item4\n- item5\n"
+            (re-search-forward "item3")
+            (org-list-send-item (car (nth 0 (org-list-struct)))
+                                (point-at-bol) (org-list-struct))
+            (buffer-string))))
+  ;; Delete
+  (should
+   (equal "- item1\n  - item1child\n- item2\n- item4\n- item5\n"
+          (org-test-with-temp-text
+              "- item1\n  - item1child\n- item2\n- item3\n- item4\n- item5\n"
+            (re-search-forward "item3")
+            (org-list-send-item (point-at-bol)
+                                'delete (org-list-struct))
+            (buffer-string))))
+  ;; Kill
+  (let ((kill-ring nil))
+    (org-test-with-temp-text
+        "- item1\n  - item1child\n- item2\n- item3\n  - item3child\n- item4\n- item5\n"
+      (re-search-forward "item3")
+      (org-list-send-item (point-at-bol)
+                          'kill (org-list-struct))
+      (should (equal "- item1\n  - item1child\n- item2\n- item4\n- item5\n"
+                     (buffer-string)))
+      (should (equal "item3\n  - item3child"
+                     (current-kill 0 t))))))
+
 (ert-deftest test-org-list/repair ()
   "Test `org-list-repair' specifications."
   ;; Repair indentation.
