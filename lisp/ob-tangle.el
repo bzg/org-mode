@@ -485,16 +485,20 @@ non-nil, return the full association list to be used by
 	 (extra (nth 3 info))
          (coderef (nth 6 info))
 	 (cref-regexp (org-src-coderef-regexp coderef))
-	 (link (let* (
-                      ;; The created link is transient.  Using ID is
-                      ;; not necessary, but could have side-effects if
-                      ;; used.  An ID property may be added to
-                      ;; existing entries thus creatin unexpected file
-                      ;; modifications.
-                      (org-id-link-to-org-use-id nil)
-                      (l (org-no-properties (org-store-link nil))))
-                 (and (string-match org-link-bracket-re l)
-                      (match-string 1 l))))
+	 (link (if (string= "no" (cdr (assq :comments params))) ""
+                 (let* (
+                        ;; The created link is transient.  Using ID is
+                        ;; not necessary, but could have side-effects if
+                        ;; used.  An ID property may be added to
+                        ;; existing entries thus creating unexpected
+                        ;; file modifications.
+                        (org-id-link-to-org-use-id nil)
+                        (l (org-no-properties
+                            (cl-letf (((symbol-function 'org-store-link-functions)
+                                       (lambda () nil)))
+                              (org-store-link nil)))))
+                   (and (string-match org-link-bracket-re l)
+                        (match-string 1 l)))))
 	 (source-name
 	  (or (nth 4 info)
 	      (format "%s:%d"
