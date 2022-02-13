@@ -340,6 +340,18 @@ This is used for disambiguation."
                         ((= n 27) (throw :complete (cons 0 (cons 0 result))))
                         (t nil))))))))
 
+(defun org-cite-basic--get-author (entry-or-key info)
+  "Return author associated to ENTRY-OR-KEY.
+
+ENTRY-OR-KEY is either an association list, as returned by
+`org-cite-basic--get-entry', or a string representing a citation
+key.  INFO is the export state, as a property list.
+
+Author is obtained from the \"author\" field, if available, or
+from the \"editor\" field otherwise."
+  (or (org-cite-basic--get-field 'author entry-or-key info 'raw)
+      (org-cite-basic--get-field 'editor entry-or-key info 'raw)))
+
 (defun org-cite-basic--get-year (entry-or-key info &optional no-suffix)
   "Return year associated to ENTRY-OR-KEY.
 
@@ -363,7 +375,7 @@ necessary, unless optional argument NO-SUFFIX is non-nil."
   ;; KEY-SUFFIX-ALIST is an association (KEY . SUFFIX), where KEY is
   ;; the cite key, as a string, and SUFFIX is the generated suffix
   ;; string, or the empty string.
-  (let* ((author (org-cite-basic--get-field 'author entry-or-key info 'raw))
+  (let* ((author (org-cite-basic--get-author entry-or-key info))
          (year
           (or (org-cite-basic--get-field 'year entry-or-key info 'raw)
               (let ((date
@@ -399,7 +411,7 @@ necessary, unless optional argument NO-SUFFIX is non-nil."
   "Format ENTRY according to STYLE string.
 ENTRY is an alist, as returned by `org-cite-basic--get-entry'.
 Optional argument INFO is the export state, as a property list."
-  (let ((author (org-cite-basic--get-field 'author entry info))
+  (let ((author (org-cite-basic--get-author entry info))
         (title (org-cite-basic--get-field 'title entry info))
         (from
          (or (org-cite-basic--get-field 'publisher entry info)
@@ -527,7 +539,7 @@ INFO is the export state, as a property list."
                      (suffix (org-element-property :suffix ref)))
                  (funcall format-ref
                           prefix
-                          (org-cite-basic--get-field 'author k info)
+                          (org-cite-basic--get-author k info)
                           (org-cite-basic--get-year k info)
                           suffix)))
              (org-cite-get-references citation)
@@ -599,7 +611,7 @@ export communication channel, as a property list."
          (org-export-data
           (mapconcat
            (lambda (key)
-             (let ((author (org-cite-basic--get-field 'author key info)))
+             (let ((author (org-cite-basic--get-author key info)))
                (if caps (capitalize author) author)))
            (org-cite-get-references citation t)
            org-cite-basic-author-year-separator)
@@ -736,7 +748,7 @@ Return nil if there are no bibliography files or no entries."
       (dolist (key (org-cite-basic--all-keys))
         (let ((completion
                (concat
-                (let ((author (org-cite-basic--get-field 'author key nil t)))
+                (let ((author (org-cite-basic--get-author key nil)))
                   (if author
                       (truncate-string-to-width
                        (replace-regexp-in-string " and " "; " author)
