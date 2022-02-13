@@ -379,6 +379,9 @@ This is not a node property
    (org-test-with-temp-text "Text[fn:1:inline reference]"
      (org-lint '(undefined-footnote-reference))))
   (should-not
+   (org-test-with-temp-text "Text[fn:1:inline reference] [fn:1]"
+     (org-lint '(undefined-footnote-reference))))
+  (should-not
    (org-test-with-temp-text "Text[fn::anonymous reference]"
      (org-lint '(undefined-footnote-reference)))))
 
