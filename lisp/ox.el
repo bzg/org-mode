@@ -4476,7 +4476,9 @@ Return value can be an object or an element:
                               :write-immediately t))))
 
 (defun org-export-link-localise (link)
-  "If LINK refers to a remote resource, modify it to point to a local downloaded copy."
+  "Convert remote LINK to local link.
+If LINK refers to a remote resource, modify it to point to a local
+downloaded copy.  Otherwise, return unchanged LINK."
   (when (org-export-link-remote-p link)
     (let* ((local-path (org-export-link--remote-local-copy link)))
       (setcdr link
