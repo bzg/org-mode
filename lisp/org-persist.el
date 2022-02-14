@@ -614,8 +614,11 @@ COLLECTION is the plist holding data collectin."
   (if (and (plist-get (plist-get collection :associated) :file)
            (get-file-buffer (plist-get (plist-get collection :associated) :file)))
       (let ((buf (get-file-buffer (plist-get (plist-get collection :associated) :file))))
-        (when (buffer-local-boundp (cadr container) buf)
-          (buffer-local-value (cadr container) buf)))
+        ;; FIXME: There is `buffer-local-boundp' introduced in Emacs 28.
+        ;; Not using it yet to keep backward compatibility.
+        (condition-case nil
+            (buffer-local-value (cadr container) buf)
+          (void-variable nil)))
     (when (boundp (cadr container))
       (symbol-value (cadr container)))))
 
