@@ -63,6 +63,20 @@ list of various table options (between brackets in LaTeX export),
 since certain tabular environments, such as longtblr of the
 tabularray LaTeX package, provides this structure.
 
+*** New =:compact= attribute when exporting lists to Texinfo
+
+The =:compact= attribute allows exporting multiple description list
+items to one =@item= command and one or more =@itemx= commands.  This
+feature can also be enabled for all description lists in a file using
+the =compact-itemx= export option, or globally using the
+~org-texinfo-compact-itemx~ variable.
+
+*** New shorthands recognized when exporting to Texinfo
+
+Items in a description list that begin with =Function:=, =Variable:=
+or certain related prefixes are converted using Texinfo definition
+commands.
+
 ** New functions and changes in function arguments
 
 *** New function ~org-element-cache-map~ for quick mapping across Org elements
@@ -97,6 +111,11 @@ argument.
 
 ~org-get-tags~ now accepts Org element or buffer position as first
 argument.
+
+*** New function ~org-texinfo-kbd-macro~
+
+This function is intended for us in the definition of a ~kbd~ macro in
+files that are exported to Texinfo.
 
 ** Miscellaneous
 
