@@ -13572,7 +13572,12 @@ include:
 
   The table environments by default are not floats in LaTeX.  To make
   them floating objects use =:float= with one of the following
-  options: =sideways=, =multicolumn=, =t=, and =nil=.
+  options: =t= (for a default =table= environment), =sideways= (for a
+  =sidewaystable= environment), =multicolumn= (to span the table
+  across multiple columns of a page in a =table*= environment) and
+  =nil=.  In addition to these three values, =:float= can pass through
+  any arbitrary value, for example a user-defined float type with the
+  =float= LaTeX package.
 
   LaTeX floats can also have additional layout =:placement=
   attributes.  These are the usual =[h t b p ! H]= permissions
@@ -13686,8 +13691,7 @@ attribute to one of the following:
 
 - =t= ::
 
-  For a standard =figure= environment; used by default whenever an
-  image has a caption.
+  For a default =figure= environment.
 
 - =multicolumn= ::
 
@@ -13707,6 +13711,12 @@ attribute to one of the following:
 - =nil= ::
 
   To avoid a =:float= even if using a caption.
+
+- Any arbitrary value ::
+
+  For example, a user-defined float type with the =float= LaTeX
+  package.
+
 
 Use the =placement= attribute to modify a floating environment's
 placement.
