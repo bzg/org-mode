@@ -340,17 +340,16 @@ This is used for disambiguation."
                         ((= n 27) (throw :complete (cons 0 (cons 0 result))))
                         (t nil))))))))
 
-(defun org-cite-basic--get-author (entry-or-key info)
+(defun org-cite-basic--get-author (entry-or-key &optional info raw)
   "Return author associated to ENTRY-OR-KEY.
 
-ENTRY-OR-KEY is either an association list, as returned by
-`org-cite-basic--get-entry', or a string representing a citation
-key.  INFO is the export state, as a property list.
+ENTRY-OR-KEY, INFO and RAW arguments are the same arguments as
+used in `org-cite-basic--get-field', which see.
 
 Author is obtained from the \"author\" field, if available, or
 from the \"editor\" field otherwise."
-  (or (org-cite-basic--get-field 'author entry-or-key info 'raw)
-      (org-cite-basic--get-field 'editor entry-or-key info 'raw)))
+  (or (org-cite-basic--get-field 'author entry-or-key info raw)
+      (org-cite-basic--get-field 'editor entry-or-key info raw)))
 
 (defun org-cite-basic--get-year (entry-or-key info &optional no-suffix)
   "Return year associated to ENTRY-OR-KEY.
@@ -375,7 +374,7 @@ necessary, unless optional argument NO-SUFFIX is non-nil."
   ;; KEY-SUFFIX-ALIST is an association (KEY . SUFFIX), where KEY is
   ;; the cite key, as a string, and SUFFIX is the generated suffix
   ;; string, or the empty string.
-  (let* ((author (org-cite-basic--get-author entry-or-key info))
+  (let* ((author (org-cite-basic--get-author entry-or-key info 'raw))
          (year
           (or (org-cite-basic--get-field 'year entry-or-key info 'raw)
               (let ((date
@@ -748,7 +747,7 @@ Return nil if there are no bibliography files or no entries."
       (dolist (key (org-cite-basic--all-keys))
         (let ((completion
                (concat
-                (let ((author (org-cite-basic--get-author key nil)))
+                (let ((author (org-cite-basic--get-author key nil 'raw)))
                   (if author
                       (truncate-string-to-width
                        (replace-regexp-in-string " and " "; " author)
