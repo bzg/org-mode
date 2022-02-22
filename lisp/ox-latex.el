@@ -1888,7 +1888,7 @@ INFO is a plist used as a communication channel."
       (?c . ,(plist-get info :creator))
       (?l . ,language)
       (?L . ,(capitalize language))
-      (?D . ,(org-export-get-date info)))))
+      (?D . ,(org-export-data (org-export-get-date info) info)))))
 
 (defun org-latex--insert-compiler (info)
   "Insert LaTeX_compiler info into the document.
