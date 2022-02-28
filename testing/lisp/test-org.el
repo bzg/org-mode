@@ -8231,52 +8231,75 @@ CLOSED: %s
      (org-show-set-visibility 'minimal)
      (org-invisible-p2))))
 
-(defun test-org/copy-visible ()
+(ert-deftest test-org/copy-visible ()
   "Test `org-copy-visible' specifications."
-  (should
-   (equal "Foo"
-	  (org-test-with-temp-text "Foo"
-	    (let ((kill-ring nil))
-	      (org-copy-visible (point-min) (point-max))
-	      (current-kill 0 t)))))
-  ;; Skip invisible characters by text property.
-  (should
-   (equal "Foo"
-	  (org-test-with-temp-text #("F<hidden>oo" 1 7 (invisible t))
-	    (let ((kill-ring nil))
-	      (org-copy-visible (point-min) (point-max))
-	      (current-kill 0 t)))))
-  ;; Skip invisible characters by overlay.
-  (should
-   (equal "Foo"
-	  (org-test-with-temp-text "F<hidden>oo"
-	    (let ((o (make-overlay 2 10)))
-	      (overlay-put o 'invisible t))
-	    (let ((kill-ring nil))
-	      (org-copy-visible (point-min) (point-max))
-	      (current-kill 0 t)))))
-  ;; Handle invisible characters at the beginning and the end of the
-  ;; buffer.
-  (should
-   (equal "Foo"
-	  (org-test-with-temp-text #("<hidden>Foo" 0 8 (invisible t))
-	    (let ((kill-ring nil))
-	      (org-copy-visible (point-min) (point-max))
-	      (current-kill 0 t)))))
-  (should
-   (equal "Foo"
-	  (org-test-with-temp-text #("Foo<hidden>" 3 11 (invisible t))
-	    (let ((kill-ring nil))
-	      (org-copy-visible (point-min) (point-max))
-	      (current-kill 0 t)))))
-  ;; Handle multiple visible parts.
-  (should
-   (equal "abc"
-	  (org-test-with-temp-text
-	      #("aXbXc" 1 2 (invisible t) 3 4 (invisible t))
-	    (let ((kill-ring nil))
-	      (org-copy-visible (point-min) (point-max))
-	      (current-kill 0 t))))))
+  ;;`org-unfontify-region', which is wired up to
+  ;; `font-lock-unfontify-region-function', removes the invisible text
+  ;; property, among other things.
+  (cl-letf (((symbol-function 'org-unfontify-region) #'ignore))
+    (should
+     (equal "Foo"
+	    (org-test-with-temp-text "Foo"
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Skip invisible characters by text property.
+    (should
+     (equal "Foo"
+	    (org-test-with-temp-text #("F<hidden>oo" 1 9 (invisible t))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Skip invisible characters by overlay.
+    (should
+     (equal "Foo"
+	    (org-test-with-temp-text "F<hidden>oo"
+	      (let ((o (make-overlay 2 10)))
+	        (overlay-put o 'invisible t))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Handle invisible characters at the beginning and the end of the
+    ;; buffer.
+    (should
+     (equal "Foo"
+	    (org-test-with-temp-text #("<hidden>Foo" 0 8 (invisible t))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    (should
+     (equal "Foo"
+	    (org-test-with-temp-text #("Foo<hidden>" 3 11 (invisible t))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Handle multiple visible parts.
+    (should
+     (equal "abc"
+	    (org-test-with-temp-text
+	        #("aXbXc" 1 2 (invisible t) 3 4 (invisible t))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Handle adjacent invisible parts.
+    (should
+     (equal "ab"
+	    (org-test-with-temp-text
+	        #("aXXb" 1 2 (invisible t) 2 3 (invisible org-link))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Copies text based on what's actually visible, as defined by
+    ;; `buffer-invisibility-spec'.
+    (should
+     (equal "aYb"
+	    (org-test-with-temp-text
+	        #("aXYb"
+                  1 2 (invisible t)
+                  2 3 (invisible org-test-copy-visible))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))))
 
 (ert-deftest test-org/set-visibility-according-to-property ()
   "Test `org-set-visibility-according-to-property' specifications."
