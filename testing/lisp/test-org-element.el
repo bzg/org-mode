@@ -1161,6 +1161,15 @@ Some other text
    (org-test-with-temp-text "Text[fn::def]"
      (org-element-map
 	 (org-element-parse-buffer) 'footnote-reference 'identity)))
+  ;; Parse inline references with syntax loaded characters.
+  (should
+   (eq 'footnote-reference
+       (org-test-with-temp-text "Text[fn<point>::(def]"
+         (org-element-type (org-element-context)))))
+  (should
+   (eq 'footnote-reference
+       (org-test-with-temp-text "Text[fn<point>::\"def]"
+         (org-element-type (org-element-context)))))
   ;; Parse nested footnotes.
   (should
    (= 2
