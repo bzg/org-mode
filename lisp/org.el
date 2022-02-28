@@ -17522,7 +17522,7 @@ this numeric value."
   (interactive "r")
   (let ((result ""))
     (while (/= beg end)
-      (if (get-char-property beg 'invisible)
+      (if (invisible-p beg)
           (setq beg (next-single-char-property-change beg 'invisible nil end))
         (let ((next (next-single-char-property-change beg 'invisible nil end)))
           (setq result (concat result (buffer-substring beg next)))

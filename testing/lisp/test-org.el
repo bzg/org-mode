@@ -8233,6 +8233,17 @@ CLOSED: %s
 	        #("aXXb" 1 2 (invisible t) 2 3 (invisible org-link))
 	      (let ((kill-ring nil))
 	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Copies text based on what's actually visible, as defined by
+    ;; `buffer-invisibility-spec'.
+    (should
+     (equal "aYb"
+	    (org-test-with-temp-text
+	        #("aXYb"
+                  1 2 (invisible t)
+                  2 3 (invisible org-test-copy-visible))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
 	        (current-kill 0 t)))))))
 
 (ert-deftest test-org/set-visibility-according-to-property ()
