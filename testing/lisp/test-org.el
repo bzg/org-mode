@@ -8225,6 +8225,14 @@ CLOSED: %s
 	        #("aXbXc" 1 2 (invisible t) 3 4 (invisible t))
 	      (let ((kill-ring nil))
 	        (org-copy-visible (point-min) (point-max))
+	        (current-kill 0 t)))))
+    ;; Handle adjacent invisible parts.
+    (should
+     (equal "ab"
+	    (org-test-with-temp-text
+	        #("aXXb" 1 2 (invisible t) 2 3 (invisible org-link))
+	      (let ((kill-ring nil))
+	        (org-copy-visible (point-min) (point-max))
 	        (current-kill 0 t)))))))
 
 (ert-deftest test-org/set-visibility-according-to-property ()
