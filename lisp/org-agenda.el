@@ -4859,7 +4859,7 @@ Press `\\[org-agenda-manipulate-query-add]', \
 
 ;;;###autoload
 (defun org-todo-list (&optional arg)
-  "Show all (not done) TODO entries from all agenda file in a single list.
+  "Show all (not done) TODO entries from all agenda files in a single list.
 The prefix arg can be used to select a specific TODO keyword and limit
 the list to these.  When using `\\[universal-argument]', you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
