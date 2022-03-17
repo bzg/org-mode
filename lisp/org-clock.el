@@ -1233,7 +1233,9 @@ so long."
 	   (org-clock-user-idle-start
 	    (time-since org-clock-user-idle-seconds))
 	   (org-clock-resolving-clocks-due-to-idleness t))
-      (if (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
+      (when (> org-clock-user-idle-seconds (* 60 org-clock-idle-time))
+          (cancel-timer org-clock-idle-timer)
+          (setq org-clock-idle-timer nil)
 	  (org-clock-resolve
 	   (cons org-clock-marker
 		 org-clock-start-time)
@@ -1242,7 +1244,10 @@ so long."
 		     (/ (float-time
 			 (time-since org-clock-user-idle-start))
 			60)))
-	   org-clock-user-idle-start)))))
+	   org-clock-user-idle-start)
+          (when (and (org-clocking-p) (not org-clock-idle-timer))
+            (setq org-clock-idle-timer
+	          (run-with-timer 60 60 #'org-resolve-clocks-if-idle)))))))
 
 (defvar org-clock-current-task nil "Task currently clocked in.")
 (defvar org-clock-out-time nil) ; store the time of the last clock-out
