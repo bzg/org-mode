@@ -233,6 +233,8 @@ Return a hash table with citation references as keys and fields alist as values.
                 entries)))
     entries))
 
+(defvar org-cite-basic--file-id-cache nil
+  "Hash table linking files to their hash.")
 (defun org-cite-basic--parse-bibliography (&optional info)
   "List all entries available in the buffer.
 
@@ -245,14 +247,19 @@ table where keys are references and values are association lists between fields,
 as symbols, and values as strings or nil.
 
 Optional argument INFO is the export state, as a property list."
+  (unless (hash-table-p org-cite-basic--file-id-cache)
+    (setq org-cite-basic--file-id-cache (make-hash-table :test #'equal)))
   (if (plist-member info :cite-basic/bibliography)
       (plist-get info :cite-basic/bibliography)
     (let ((results nil))
       (dolist (file (org-cite-list-bibliography-files))
         (when (file-readable-p file)
           (with-temp-buffer
-            (insert-file-contents file)
-	    (let* ((file-id (cons file (org-buffer-hash)))
+            (when (or (org-file-has-changed-p file)
+                      (not (gethash file org-cite-basic--file-id-cache)))
+              (insert-file-contents file)
+              (puthash file (org-buffer-hash) org-cite-basic--file-id-cache))
+	    (let* ((file-id (cons file (gethash file org-cite-basic--file-id-cache)))
                    (entries
                     (or (cdr (assoc file-id org-cite-basic--bibliography-cache))
                         (let ((table
