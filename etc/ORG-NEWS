@@ -222,6 +222,11 @@ produce results superior to Minted or Listings.
 *** Support for =#+include=-ing URLs
 
 =#+include: FILE= will now accept URLs as the file.
+*** Structure templates now respect case used in ~org-structure-template-alist~ 
+
+The block type in ~org-structure-template-alist~ is not case-sensitive.
+When the block type starts from the upper case, structure template
+will now insert =#+BEGIN_TYPE=.  Previously, lower-case =#+begin_type= was inserted unconditionally.
 
 ** New functions and changes in function arguments
 

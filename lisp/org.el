@@ -8601,9 +8601,11 @@ keywords relative to each registered export back-end."
     ("s" . "src")
     ("v" . "verse"))
   "An alist of keys and block types.
-`org-insert-structure-template' will display a menu with this
-list of templates to choose from.  The block type is inserted,
-with \"#+BEGIN_\" and \"#+END_\" added automatically.
+`org-insert-structure-template' will display a menu with this list of
+templates to choose from.  The block type is inserted, with
+\"#+begin_\" and \"#+end_\" added automatically.  If the block type
+consists of just uppercase letters, \"#+BEGIN_\" and \"#+END_\" are
+added instead.
 
 The menu keys are defined by the car of each entry in this alist.
 If two entries have the keys \"a\" and \"aa\" respectively, the
@@ -8735,18 +8737,23 @@ If an element cannot be made unique, an error is raised."
 Select a block from `org-structure-template-alist' then type
 either RET, TAB or SPC to write the block type.  With an active
 region, wrap the region in the block.  Otherwise, insert an empty
-block."
+block.
+
+When foo is written as FOO, upcase the #+BEGIN/END as well."
   (interactive
    (list (pcase (org--insert-structure-template-mks)
 	   (`("\t" . ,_) (read-string "Structure type: "))
 	   (`(,_ ,choice . ,_) choice))))
-  (let* ((region? (use-region-p))
+  (let* ((case-fold-search t) ; Make sure that matches are case-insensitive.
+         (region? (use-region-p))
 	 (region-start (and region? (region-beginning)))
 	 (region-end (and region? (copy-marker (region-end))))
 	 (extended? (string-match-p "\\`\\(src\\|export\\)\\'" type))
 	 (verbatim? (string-match-p
 		     (concat "\\`" (regexp-opt '("example" "export" "src")))
-		     type)))
+		     type))
+         (upcase? (string= (car (split-string type))
+                           (upcase (car (split-string type))))))
     (when region? (goto-char region-start))
     (let ((column (current-indentation)))
       (if (save-excursion (skip-chars-backward " \t") (bolp))
@@ -8754,7 +8761,7 @@ block."
 	(insert "\n"))
       (save-excursion
 	(indent-to column)
-	(insert (format "#+begin_%s%s\n" type (if extended? " " "")))
+	(insert (format "#+%s_%s%s\n" (if upcase? "BEGIN" "begin") type (if extended? " " "")))
 	(when region?
 	  (when verbatim? (org-escape-code-in-region (point) region-end))
 	  (goto-char region-end)
@@ -8763,7 +8770,7 @@ block."
 	  (end-of-line))
 	(unless (bolp) (insert "\n"))
 	(indent-to column)
-	(insert (format "#+end_%s" (car (split-string type))))
+	(insert (format "#+%s_%s" (if upcase? "END" "end") (car (split-string type))))
 	(if (looking-at "[ \t]*$") (replace-match "")
 	  (insert "\n"))
 	(when (and (eobp) (not (bolp))) (insert "\n")))

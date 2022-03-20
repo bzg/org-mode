@@ -118,11 +118,18 @@ Go through `org-structure-template-alist' and
   "Add block entry from `org-structure-template-alist'."
   (let* ((key (format "<%s" (car entry)))
 	 (name (cdr entry))
-	 (special (member name '("src" "export"))))
+	 (special (member name '("src" "export")))
+         (upcase? (string= (car (split-string name))
+                           (upcase (car (split-string name))))))
     (tempo-define-template (format "org-%s" (replace-regexp-in-string " " "-" name))
-			   `(,(format "#+begin_%s%s" name (if special " " ""))
+			   `(,(format "#+%s_%s%s"
+                                      (if upcase? "BEGIN" "begin")
+                                      name
+                                      (if special " " ""))
 			     ,(when special 'p) '> n ,(unless special 'p) n
-			     ,(format "#+end_%s" (car (split-string name " ")))
+			     ,(format "#+%s_%s"
+                                      (if upcase? "END" "end")
+                                      (car (split-string name " ")))
 			     >)
 			   key
 			   (format "Insert a %s block" name)
