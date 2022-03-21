@@ -1101,9 +1101,9 @@ to be CLOCKED OUT."))))
 						?j ?J ?i ?q ?t ?T)))
 				(or (ding) t)))
 		  (setq char-pressed
-			(read-char (concat (funcall prompt-fn clock)
-					   " [jkKtTgGSscCiq]? ")
-				   nil 45)))
+			(read-char-exclusive (concat (funcall prompt-fn clock)
+					             " [jkKtTgGSscCiq]? ")
+				             nil 45)))
 		(and (not (memq char-pressed '(?i ?q))) char-pressed)))))
 	 (default
 	   (floor (org-time-convert-to-integer (time-since last-valid))
