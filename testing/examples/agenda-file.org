@@ -16,3 +16,7 @@ SCHEDULED: <2022-01-03 Mon>
 #+begin_example
 SCHEDULED: <2022-01-03 Mon>
 #+end_example
+* test timestamp inside properties
+:PROPERTIES:
+:CREATED: <2022-03-22 Tue>
+:END:

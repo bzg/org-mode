@@ -5732,7 +5732,7 @@ displayed in agenda view."
 		    (org-before-first-heading-p)
 		    (and org-agenda-include-inactive-timestamps
 			 (org-at-clock-log-p))
-                    (not (eq 'timestamp (org-element-type (org-element-context)))))
+                    (not (org-at-timestamp-p 'agenda)))
 	    (throw :skip nil))
 	  (org-agenda-skip))
 	(let* ((pos (match-beginning 0))
