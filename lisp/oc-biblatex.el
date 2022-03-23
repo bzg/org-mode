@@ -258,12 +258,7 @@ INFO is the export state, as a property list."
             (mapconcat (lambda (r)
                          (org-cite-biblatex--atomic-arguments (list r) info))
                        (org-cite-get-references citation)
-                       "")
-            ;; According to BibLaTeX manual, left braces or brackets
-            ;; following a multicite command could be parsed as other
-            ;; arguments. So we stop any further parsing by inserting
-            ;; a \relax unconditionally.
-            "\\relax")))
+                       ""))))
 
 (defun org-cite-biblatex--command (citation info name &optional multi no-opt)
   "Return BibLaTeX command NAME for CITATION object.
