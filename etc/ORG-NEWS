@@ -489,6 +489,13 @@ support in LaTeX.  The new =babel= syntax for loading languages via
 =ini= files and the new command =\babelprovide= (see:
 https://mirrors.ctan.org/macros/latex/required/babel/base/babel.pdf)
 are also supported.
+*** Texinfo exports include LaTeX
+
+With the new customization option ~org-texinfo-with-latex~ set to (its
+default value) ~'detect~, if the system runs Texinfo 6.8 (3 July 2021)
+or newer, Org will export all LaTeX fragments and environments using
+Texinfo ~@math~ and ~@displaymath~ commands respectively.
+
 * Version 9.5
 
 ** Important announcements and breaking changes

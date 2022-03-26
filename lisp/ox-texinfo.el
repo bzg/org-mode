@@ -33,7 +33,7 @@
 (require 'ox)
 
 (defvar orgtbl-exp-regexp)
-
+(defvar org-texinfo-supports-math--cache)
 
 
 ;;; Define Back-End
@@ -58,6 +58,8 @@
     (italic . org-texinfo-italic)
     (item . org-texinfo-item)
     (keyword . org-texinfo-keyword)
+    (latex-environment . org-texinfo-latex-environment)
+    (latex-fragment . org-texinfo-latex-fragment)
     (line-break . org-texinfo-line-break)
     (link . org-texinfo-link)
     (node-property . org-texinfo-node-property)
@@ -123,7 +125,9 @@
     (:texinfo-text-markup-alist nil nil org-texinfo-text-markup-alist)
     (:texinfo-format-drawer-function nil nil org-texinfo-format-drawer-function)
     (:texinfo-format-inlinetask-function nil nil org-texinfo-format-inlinetask-function)
-    (:texinfo-compact-itemx nil "compact-itemx" org-texinfo-compact-itemx)))
+    (:texinfo-compact-itemx nil "compact-itemx" org-texinfo-compact-itemx)
+    ;; Redefine regular options.
+    (:with-latex nil "tex" org-texinfo-with-latex)))
 
 
 ;;; User Configurable Variables
@@ -357,6 +361,22 @@ The function must accept six parameters:
 The function should return the string to be exported."
   :group 'org-export-texinfo
   :type 'function)
+
+;;;; LaTeX
+
+(defcustom org-texinfo-with-latex (and org-export-with-latex 'detect)
+  "When non-nil, the Texinfo exporter attempts to process LaTeX math.
+
+When set to t, the exporter will process LaTeX environments and
+fragments as Texinfo \"@displaymath\" and \"@math\" commands
+respectively.  Alternatively, when set to `detect', the exporter
+does so only if the installed version of Texinfo supports the
+necessary commands."
+  :group 'org-export-texinfo
+  :type '(choice
+          (const :tag "Detect" detect)
+          (const :tag "Yes" t)
+          (const :tag "No" nil)))
 
 ;;;; Itemx
 
@@ -1215,6 +1235,52 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (concat "@listoffloats "
 		      (org-export-translate "Listing" :utf-8 info))))))))
 
+;;;; LaTeX Environment
+
+(defun org-texinfo-latex-environment (environment _contents info)
+  "Transcode a LaTeX ENVIRONMENT from Org to Texinfo.
+CONTENTS is ignored.  INFO is a plist holding contextual information."
+  (let ((with-latex (plist-get info :with-latex)))
+    (when (or (eq with-latex t)
+              (and (eq with-latex 'detect)
+                   (org-texinfo-supports-math-p)))
+      (let ((value (org-element-property :value environment)))
+        (string-join (list "@displaymath"
+                           (string-trim (org-remove-indentation value))
+                           "@end displaymath")
+                     "\n")))))
+
+;;;; LaTeX Fragment
+
+(defun org-texinfo-latex-fragment (fragment _contents info)
+  "Transcode a LaTeX FRAGMENT from Org to Texinfo.
+INFO is a plist holding contextual information."
+  (let ((with-latex (plist-get info :with-latex)))
+    (when (or (eq with-latex t)
+              (and (eq with-latex 'detect)
+                   (org-texinfo-supports-math-p)))
+      (let ((value (org-remove-indentation
+                    (org-element-property :value fragment))))
+        (cond
+         ((or (string-match-p "^\\\\\\[" value)
+              (string-match-p "^\\$\\$" value))
+          (concat "\n"
+                  "@displaymath"
+                  "\n"
+                  (string-trim (substring value 2 -2))
+                  "\n"
+                  "@end displaymath"
+                  "\n"))
+         ((string-match-p "^\\$" value)
+          (concat "@math{"
+                  (string-trim (substring value 1 -1))
+                  "}"))
+         ((string-match-p "^\\\\(" value)
+          (concat "@math{"
+                  (string-trim (substring value 2 -2))
+                  "}"))
+         (t value))))))
+
 ;;;; Line Break
 
 (defun org-texinfo-line-break (_line-break _contents _info)
@@ -1951,6 +2017,31 @@ Return INFO file name or an error if it couldn't be produced."
     (message "Process completed.")
     output))
 
+(defun org-texinfo-supports-math-p ()
+  "Return t if the installed version of Texinfo supports \"@math\".
+
+Once computed, the results remain cached."
+  (unless (boundp 'org-texinfo-supports-math--cache)
+    (setq org-texinfo-supports-math--cache
+          (let ((math-example "1 + 1 = 2"))
+            (let* ((input-file
+                    (make-temp-file "test" nil ".info"))
+                   (input-content
+                    (concat (format "@setfilename %s" input-file) "\n"
+                            "@node Top" "\n"
+                            (format "@displaymath{%s}" math-example) "\n")))
+              (with-temp-file input-file
+                (insert input-content))
+              (let* ((output-file (org-texinfo-compile input-file))
+                     (output-content (with-temp-buffer
+                                       (insert-file-contents output-file)
+                                       (buffer-string))))
+                (let ((result (string-match-p (regexp-quote math-example)
+                                              output-content)))
+                  (delete-file input-file)
+                  (delete-file output-file)
+                  (if result t nil)))))))
+  org-texinfo-supports-math--cache)
 
 (provide 'ox-texinfo)
 
