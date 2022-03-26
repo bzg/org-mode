@@ -7924,11 +7924,14 @@ subtree."
 (defun org-agenda-remove-restriction-lock (&optional noupdate)
   "Remove agenda restriction lock."
   (interactive "P")
-  (if (not org-agenda-restrict)
+  (if (not (or org-agenda-restrict org-agenda-overriding-restriction))
       (message "No agenda restriction to remove.")
     (delete-overlay org-agenda-restriction-lock-overlay)
     (delete-overlay org-speedbar-restriction-lock-overlay)
     (setq org-agenda-overriding-restriction nil)
+    (unless org-agenda-keep-restricted-file-list
+      ;; There is a request to keep the file list in place
+      (put 'org-agenda-files 'org-restrict nil))
     (setq org-agenda-restrict nil)
     (put 'org-agenda-files 'org-restrict nil)
     (move-marker org-agenda-restrict-begin nil)
