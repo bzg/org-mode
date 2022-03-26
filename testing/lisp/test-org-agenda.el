@@ -72,6 +72,9 @@
   (let ((org-agenda-span 'day)
 	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
 					       org-test-dir))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
     (org-agenda-list nil  "<2017-03-10 Fri>")
     (set-buffer org-agenda-buffer-name)
     (should (= 3 (count-lines (point-min) (point-max)))))
@@ -85,6 +88,9 @@
   (let ((org-agenda-span 'day)
 	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
 					       org-test-dir))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
     (org-agenda-list nil "<2017-07-19 Wed>")
     (set-buffer org-agenda-buffer-name)
     (should
@@ -101,6 +107,9 @@ See https://list.orgmode.org/20220101200103.GB29829@itccanarias.org/T/#t."
   (let ((org-agenda-span 'day)
 	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
 					       org-test-dir))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
     (org-agenda-list nil "<2022-01-03 Mon>")
     (set-buffer org-agenda-buffer-name)
     (should (= 2 (count-lines (point-min) (point-max)))))
@@ -115,10 +124,18 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
   (let ((org-agenda-span 'day)
 	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
 					       org-test-dir))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
     (org-agenda-list nil "<2022-03-22 Tue>")
     (set-buffer org-agenda-buffer-name)
-    (message "%s" (buffer-string))
-    (should (= 4 (count-lines (point-min) (point-max)))))
+    (should (= 3 (count-lines (point-min) (point-max))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
+    (org-agenda-list nil "<2022-03-25 Fri>")
+    (set-buffer org-agenda-buffer-name)
+    (should (= 3 (count-lines (point-min) (point-max)))))
   (org-test-agenda--kill-all-agendas))
 
 (ert-deftest test-org-agenda/set-priority ()
@@ -129,9 +146,11 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
   (let ((org-agenda-span 'day)
 	(org-agenda-files `(,(expand-file-name "examples/agenda-file.org"
 					       org-test-dir))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
     (org-agenda-list nil "<2017-07-19 Wed>")
     (set-buffer org-agenda-buffer-name)
-
     (should
      (progn (goto-line 3)
 	    (org-agenda-priority ?B)
@@ -224,6 +243,9 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
 			    (dayname "\\W")))
 	(org-agenda-span 'day)
 	(org-agenda-include-diary t))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
     (org-agenda-list nil "<2019-01-08>")
     (should (search-forward "f0bcf0cd8bad93c1451bb6e1b2aaedef5cce7cbb" nil t))
     (org-test-agenda--kill-all-agendas)))

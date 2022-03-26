@@ -20,3 +20,7 @@ SCHEDULED: <2022-01-03 Mon>
 :PROPERTIES:
 :CREATED: <2022-03-22 Tue>
 :END:
+* test sexp timestamp inside properties
+:PROPERTIES:
+:CREATED: <%%(diary-date 03 25 2022)>
+:END:
