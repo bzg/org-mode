@@ -15020,7 +15020,11 @@ When matching, the match groups are the following:
   group 4: day name
   group 5: hours, if any
   group 6: minutes, if any"
-  (let* ((regexp (if extended org-ts-regexp3 org-ts-regexp2))
+  (let* ((regexp (if extended
+                     (if (eq extended 'agenda)
+                         org-element--timestamp-regexp
+		       org-ts-regexp3)
+                   org-ts-regexp2))
 	 (pos (point))
 	 (match?
 	  (let ((boundaries (org-in-regexp regexp)))
@@ -15051,7 +15055,8 @@ When matching, the match groups are the following:
      ((org-pos-in-match-range pos 8)      'minute)
      ((or (org-pos-in-match-range pos 4)
 	  (org-pos-in-match-range pos 5)) 'day)
-     ((and (> pos (or (match-end 8) (match-end 5)))
+     ((and (or (match-end 8) (match-end 5))
+           (> pos (or (match-end 8) (match-end 5)))
 	   (< pos (match-end 0)))
       (- pos (or (match-end 8) (match-end 5))))
      (t                                   'day))))

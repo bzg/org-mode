@@ -130,6 +130,12 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
     (org-agenda-list nil "<2022-03-22 Tue>")
     (set-buffer org-agenda-buffer-name)
     (should (= 3 (count-lines (point-min) (point-max))))
+    ;; NOTE: Be aware that `org-agenda-list' may or may not display
+    ;; past scheduled items depending whether the date is today
+    ;; `org-today' or not.
+    (org-agenda-list nil "<2022-03-25 Fri>")
+    (set-buffer org-agenda-buffer-name)
+    (should (= 3 (count-lines (point-min) (point-max)))))
   (org-test-agenda--kill-all-agendas))
 
 (ert-deftest test-org-agenda/set-priority ()
