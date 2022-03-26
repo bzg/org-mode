@@ -7880,115 +7880,116 @@ the beginning of any other object, return that object.
 Optional argument ELEMENT, when non-nil, is the closest element
 containing point, as returned by `org-element-at-point'.
 Providing it allows for quicker computation."
-  (catch 'objects-forbidden
-    (org-with-wide-buffer
-     (let* ((pos (point))
-	    (element (or element (org-element-at-point)))
-	    (type (org-element-type element))
-	    (post (org-element-property :post-affiliated element)))
-       ;; If point is inside an element containing objects or
-       ;; a secondary string, narrow buffer to the container and
-       ;; proceed with parsing.  Otherwise, return ELEMENT.
-       (cond
-	;; At a parsed affiliated keyword, check if we're inside main
-	;; or dual value.
-	((and post (< pos post))
-	 (beginning-of-line)
-	 (let ((case-fold-search t)) (looking-at org-element--affiliated-re))
-	 (cond
-	  ((not (member-ignore-case (match-string 1)
+  (save-match-data
+    (catch 'objects-forbidden
+      (org-with-wide-buffer
+       (let* ((pos (point))
+	      (element (or element (org-element-at-point)))
+	      (type (org-element-type element))
+	      (post (org-element-property :post-affiliated element)))
+         ;; If point is inside an element containing objects or
+         ;; a secondary string, narrow buffer to the container and
+         ;; proceed with parsing.  Otherwise, return ELEMENT.
+         (cond
+	  ;; At a parsed affiliated keyword, check if we're inside main
+	  ;; or dual value.
+	  ((and post (< pos post))
+	   (beginning-of-line)
+	   (let ((case-fold-search t)) (looking-at org-element--affiliated-re))
+	   (cond
+	    ((not (member-ignore-case (match-string 1)
 				    org-element-parsed-keywords))
-	   (throw 'objects-forbidden element))
-	  ((< (match-end 0) pos)
-	   (narrow-to-region (match-end 0) (line-end-position)))
-	  ((and (match-beginning 2)
-		(>= pos (match-beginning 2))
-		(< pos (match-end 2)))
-	   (narrow-to-region (match-beginning 2) (match-end 2)))
+	     (throw 'objects-forbidden element))
+	    ((< (match-end 0) pos)
+	     (narrow-to-region (match-end 0) (line-end-position)))
+	    ((and (match-beginning 2)
+		  (>= pos (match-beginning 2))
+		  (< pos (match-end 2)))
+	     (narrow-to-region (match-beginning 2) (match-end 2)))
+	    (t (throw 'objects-forbidden element)))
+	   ;; Also change type to retrieve correct restrictions.
+	   (setq type 'keyword))
+	  ;; At an item, objects can only be located within tag, if any.
+	  ((eq type 'item)
+	   (let ((tag (org-element-property :tag element)))
+	     (if (or (not tag) (/= (line-beginning-position) post))
+	         (throw 'objects-forbidden element)
+	       (beginning-of-line)
+	       (search-forward tag (line-end-position))
+	       (goto-char (match-beginning 0))
+	       (if (and (>= pos (point)) (< pos (match-end 0)))
+		   (narrow-to-region (point) (match-end 0))
+	         (throw 'objects-forbidden element)))))
+	  ;; At an headline or inlinetask, objects are in title.
+	  ((memq type '(headline inlinetask))
+	   (let ((case-fold-search nil))
+	     (goto-char (org-element-property :begin element))
+	     (looking-at org-complex-heading-regexp)
+	     (let ((end (match-end 4)))
+	       (if (not end) (throw 'objects-forbidden element)
+	         (goto-char (match-beginning 4))
+	         (when (looking-at org-element-comment-string)
+		   (goto-char (match-end 0)))
+	         (if (>= (point) end) (throw 'objects-forbidden element)
+		   (narrow-to-region (point) end))))))
+	  ;; At a paragraph, a table-row or a verse block, objects are
+	  ;; located within their contents.
+	  ((memq type '(paragraph table-row verse-block))
+	   (let ((cbeg (org-element-property :contents-begin element))
+	         (cend (org-element-property :contents-end element)))
+	     ;; CBEG is nil for table rules.
+	     (if (and cbeg cend (>= pos cbeg)
+		      (or (< pos cend) (and (= pos cend) (eobp))))
+	         (narrow-to-region cbeg cend)
+	       (throw 'objects-forbidden element))))
 	  (t (throw 'objects-forbidden element)))
-	 ;; Also change type to retrieve correct restrictions.
-	 (setq type 'keyword))
-	;; At an item, objects can only be located within tag, if any.
-	((eq type 'item)
-	 (let ((tag (org-element-property :tag element)))
-	   (if (or (not tag) (/= (line-beginning-position) post))
-	       (throw 'objects-forbidden element)
-	     (beginning-of-line)
-	     (search-forward tag (line-end-position))
-	     (goto-char (match-beginning 0))
-	     (if (and (>= pos (point)) (< pos (match-end 0)))
-		 (narrow-to-region (point) (match-end 0))
-	       (throw 'objects-forbidden element)))))
-	;; At an headline or inlinetask, objects are in title.
-	((memq type '(headline inlinetask))
-	 (let ((case-fold-search nil))
-	   (goto-char (org-element-property :begin element))
-	   (looking-at org-complex-heading-regexp)
-	   (let ((end (match-end 4)))
-	     (if (not end) (throw 'objects-forbidden element)
-	       (goto-char (match-beginning 4))
-	       (when (looking-at org-element-comment-string)
-		 (goto-char (match-end 0)))
-	       (if (>= (point) end) (throw 'objects-forbidden element)
-		 (narrow-to-region (point) end))))))
-	;; At a paragraph, a table-row or a verse block, objects are
-	;; located within their contents.
-	((memq type '(paragraph table-row verse-block))
-	 (let ((cbeg (org-element-property :contents-begin element))
-	       (cend (org-element-property :contents-end element)))
-	   ;; CBEG is nil for table rules.
-	   (if (and cbeg cend (>= pos cbeg)
-		    (or (< pos cend) (and (= pos cend) (eobp))))
-	       (narrow-to-region cbeg cend)
-	     (throw 'objects-forbidden element))))
-	(t (throw 'objects-forbidden element)))
-       (goto-char (point-min))
-       (let ((restriction (org-element-restriction type))
-	     (parent element)
-	     last)
-	 (catch 'exit
-	   (while t
-	     (let ((next (org-element--object-lex restriction)))
-	       (when next (org-element-put-property next :parent parent))
-	       ;; Process NEXT, if any, in order to know if we need to
-	       ;; skip it, return it or move into it.
-	       (if (or (not next) (> (org-element-property :begin next) pos))
-		   (throw 'exit (or last parent))
-		 (let ((end (org-element-property :end next))
-		       (cbeg (org-element-property :contents-begin next))
-		       (cend (org-element-property :contents-end next)))
-		   (cond
-		    ;; Skip objects ending before point.  Also skip
-		    ;; objects ending at point unless it is also the
-		    ;; end of buffer, since we want to return the
-		    ;; innermost object.
-		    ((and (<= end pos) (/= (point-max) end))
-		     (goto-char end)
-		     ;; For convenience, when object ends at POS,
-		     ;; without any space, store it in LAST, as we
-		     ;; will return it if no object starts here.
-		     (when (and (= end pos)
-				(not (memq (char-before) '(?\s ?\t))))
-		       (setq last next)))
-		    ;; If POS is within a container object, move into
-		    ;; that object.
-		    ((and cbeg cend
-			  (>= pos cbeg)
-			  (or (< pos cend)
-			      ;; At contents' end, if there is no
-			      ;; space before point, also move into
-			      ;; object, for consistency with
-			      ;; convenience feature above.
-			      (and (= pos cend)
-				   (or (= (point-max) pos)
-				       (not (memq (char-before pos)
-					        '(?\s ?\t)))))))
-		     (goto-char cbeg)
-		     (narrow-to-region (point) cend)
-		     (setq parent next)
-		     (setq restriction (org-element-restriction next)))
-		    ;; Otherwise, return NEXT.
-		    (t (throw 'exit next)))))))))))))
+         (goto-char (point-min))
+         (let ((restriction (org-element-restriction type))
+	       (parent element)
+	       last)
+	   (catch 'exit
+	     (while t
+	       (let ((next (org-element--object-lex restriction)))
+	         (when next (org-element-put-property next :parent parent))
+	         ;; Process NEXT, if any, in order to know if we need to
+	         ;; skip it, return it or move into it.
+	         (if (or (not next) (> (org-element-property :begin next) pos))
+		     (throw 'exit (or last parent))
+		   (let ((end (org-element-property :end next))
+		         (cbeg (org-element-property :contents-begin next))
+		         (cend (org-element-property :contents-end next)))
+		     (cond
+		      ;; Skip objects ending before point.  Also skip
+		      ;; objects ending at point unless it is also the
+		      ;; end of buffer, since we want to return the
+		      ;; innermost object.
+		      ((and (<= end pos) (/= (point-max) end))
+		       (goto-char end)
+		       ;; For convenience, when object ends at POS,
+		       ;; without any space, store it in LAST, as we
+		       ;; will return it if no object starts here.
+		       (when (and (= end pos)
+				  (not (memq (char-before) '(?\s ?\t))))
+		         (setq last next)))
+		      ;; If POS is within a container object, move into
+		      ;; that object.
+		      ((and cbeg cend
+			    (>= pos cbeg)
+			    (or (< pos cend)
+			        ;; At contents' end, if there is no
+			        ;; space before point, also move into
+			        ;; object, for consistency with
+			        ;; convenience feature above.
+			        (and (= pos cend)
+				     (or (= (point-max) pos)
+				         (not (memq (char-before pos)
+					            '(?\s ?\t)))))))
+		       (goto-char cbeg)
+		       (narrow-to-region (point) cend)
+		       (setq parent next)
+		       (setq restriction (org-element-restriction next)))
+		      ;; Otherwise, return NEXT.
+		      (t (throw 'exit next))))))))))))))
 
 (defun org-element-lineage (datum &optional types with-self)
   "List all ancestors of a given element or object.

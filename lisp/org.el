@@ -8200,7 +8200,9 @@ a link at point.  If they don't find anything interesting at point,
 they must return nil.")
 
 (defun org-open-at-point (&optional arg)
-  "Open link, timestamp, footnote or tags at point.
+  "Open thing at point.
+The thing can be a link, citation, timestamp, footnote, src-block or
+tags.
 
 When point is on a link, follow it.  Normally, files will be
 opened by an appropriate application.  If the optional prefix
@@ -8214,6 +8216,10 @@ specified.
 When point is a footnote definition, move to the first reference
 found.  If it is on a reference, move to the associated
 definition.
+
+When point is on a src-block of inline src-block, open its result.
+
+When point is on a citation, follow it.
 
 When point is on a headline, display a list of every link in the
 entry, so it is possible to pick one, or all, of them.  If point
@@ -8333,7 +8339,10 @@ there is one, return it."
 	 (org-back-to-heading t)
 	 (setq end (save-excursion (outline-next-heading) (point)))
 	 (while (re-search-forward org-link-any-re end t)
-	   (push (match-string 0) links))
+           ;; Only consider valid links or links openable via
+           ;; `org-open-at-point'.
+           (when (memq (org-element-type (org-element-context)) '(link comment comment-block node-property keyword))
+	     (push (match-string 0) links)))
 	 (setq links (org-uniquify (reverse links))))
        (cond
 	((null links)
