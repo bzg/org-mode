@@ -3,7 +3,8 @@
 This is a distribution of Org, a plain text notes and project planning
 tool for Emacs.
 
-Check the [[https://orgmode.org][homepage of Org]] and the [[https://orgmode.org/org.html#Installation][installations instructions]].
+Check the Org Mode website at https://orgmode.org and the installation
+instructions at https://orgmode.org/org.html#Installation.
 
 * Contents of this distribution
 
@@ -11,9 +12,10 @@ Check the [[https://orgmode.org][homepage of Org]] and the [[https://orgmode.org
 
 - COPYING :: The GNU General Public License.
 
-- Makefile :: The makefile to compile and install Org.  For
-  installation instructions, see [[https://orgmode.org/org.html#Installation][the manual]] or [[https://orgmode.org/worg/dev/org-build-system.html][this more detailed
-  procedure on Worg]].
+- Makefile :: The makefile to compile and install Org.  See the
+  installation instructions https://orgmode.org/org.html#Installation
+  or this more detailed procedure on Worg:
+  https://orgmode.org/worg/dev/org-build-system.html.
   
 - mk/ :: Files needed for building Org.
 
@@ -44,23 +46,24 @@ this are here http://www.gnu.org/help/evaluation
 Don't have a program to contribute?  Look at all the other ways to
 help: https://www.gnu.org/help/help.html
 
-And to learn more about Free (libre) Software in general, please
-read and share this page: https://gnu.org/philosophy/free-sw.html
+And to learn more about Free (libre) Software in general, please read
+and share this page: https://gnu.org/philosophy/free-sw.html
 
 * License
 
-Org-mode is published under [[https://www.gnu.org/licenses/gpl-3.0.html][the GNU GPLv3 license]] or any later
-version, the same as GNU Emacs.
+Org-mode is published under the GNU GPLv3 license or any later
+version, the same as GNU Emacs:
+https://www.gnu.org/licenses/gpl-3.0.html
 
-Org-mode is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+Org-mode is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
 
-GNU Emacs is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Emacs is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Org mode.  If not, see <https://www.gnu.org/licenses/>.
+along with Org mode.  If not, see https://www.gnu.org/licenses/.
