@@ -18,24 +18,30 @@
 :END:
 #+cindex: summary
 
-Org is a mode for keeping notes, maintaining TODO lists, and project
-planning with a fast and effective plain-text markup language.  It
-also is an authoring system with unique support for literate
-programming and reproducible research.
+Org Mode is an authoring tool and a TODO lists manager for GNU Emacs.
+It relies on a lightweight plain-text markup language used in files
+with the =.org= extension.
 
-Org is implemented on top of Outline mode, which makes it possible to
-keep the content of large files well structured.  Visibility cycling
-and structure editing help to work with the tree.  Tables are easily
-created with a built-in table editor.  Plain text URL-like links
-connect to websites, emails, Usenet messages, BBDB entries, and any
-files related to the projects.
+As an authoring tool, Org helps you write structured documents and
+provides exporting facilities. Org files can also be used for literate
+programming and reproducible research.  As a TODO lists manager, Org
+helps you organize your tasks in a flexible way, from daily needs to
+detailed project-planning, allowing logging, multiple views on your
+tasks, exporting your agendas, etc.
+
+Org mode is implemented on top of Outline mode, which makes it
+possible to keep the content of large files well structured.
+Visibility cycling and structure editing help to work with the tree.
+Tables are easily created with a built-in table editor.  Plain text
+URL-like links connect to websites, emails, Usenet messages, BBDB
+entries, and any files related to the projects.
 
 Org develops organizational tasks around notes files that contain
 lists or information about projects as plain text.  Project planning
 and task management make use of metadata which is part of an outline
 node.  Based on this data, specific entries can be extracted in
-queries and create dynamic /agenda views/ that also integrate the
-Emacs calendar and diary.  Org can be used to implement many different
+queries and create dynamic /agenda views/ that also integrate the Emacs
+calendar and diary.  Org can be used to implement many different
 project planning schemes, such as David Allen's GTD system.
 
 Org files can serve as a single source authoring system with export to
