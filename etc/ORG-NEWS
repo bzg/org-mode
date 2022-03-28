@@ -400,6 +400,13 @@ purpose of the variable.  The replacement variable
 accepts =listings= and =verbatim= in place of =t= and =nil= (which
 still work, but are no longer listed as valid options).
 
+*** ~org-link-parameters~ has a new ~:insert-description~ parameter
+
+The value of ~:insert-description~ is used as the initial input when
+prompting for a link description.  It can be a string (used as-is) or
+a function (called with the same arguments as
+~org-make-link-description-function~ to return a string to use).
+
 * Version 9.5
 
 ** Important announcements and breaking changes
