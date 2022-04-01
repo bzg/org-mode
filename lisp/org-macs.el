@@ -1151,7 +1151,7 @@ fontification."
 	  (folding-only (memq value '(org-hide-block outline)))
 	  (t value))))
 
-(defun org-truely-invisible-p ()
+(defun org-truly-invisible-p ()
   "Check if point is at a character currently not visible.
 This version does not only check the character property, but also
 `visible-mode'."

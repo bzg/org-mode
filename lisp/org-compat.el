@@ -752,6 +752,10 @@ context.  See the individual commands for more information."
 
 (define-obsolete-function-alias 'org-get-last-sibling 'org-get-previous-sibling "9.4")
 
+(define-obsolete-function-alias 'org-truely-invisible-p
+  'org-truly-invisible-p "9.6"
+  "Compatibility alias for legacy misspelling of `org-truly-invisible-p'.")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol
