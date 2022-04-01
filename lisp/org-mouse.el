@@ -580,15 +580,17 @@ This means, between the beginning of line and the point."
   (insert text)
   (beginning-of-line))
 
-(defadvice dnd-insert-text (around org-mouse-dnd-insert-text activate)
+(advice-add 'dnd-insert-text :around #'org--mouse-dnd-insert-text)
+(defun org--mouse-dnd-insert-text (orig-fun window action text &rest args)
   (if (derived-mode-p 'org-mode)
       (org-mouse-insert-item text)
-    ad-do-it))
+    (apply orig-fun window action text args)))
 
-(defadvice dnd-open-file (around org-mouse-dnd-open-file activate)
+(advice-add 'dnd-open-file :around #'org--mouse-dnd-open-file)
+(defun org--mouse-dnd-open-file (orig-fun uri &rest args)
   (if (derived-mode-p 'org-mode)
       (org-mouse-insert-item uri)
-    ad-do-it))
+    (apply orig-fun uri args)))
 
 (defun org-mouse-match-closure (function)
   (let ((match (match-data t)))
@@ -894,15 +896,17 @@ This means, between the beginning of line and the point."
                   (1 `(face nil keymap ,org-mouse-map mouse-face highlight) prepend)))
                t))
 
-            (defadvice org-open-at-point (around org-mouse-open-at-point activate)
-              (let ((context (org-context)))
-                (cond
-                 ((assq :headline-stars context) (org-cycle))
-                 ((assq :checkbox context) (org-toggle-checkbox))
-                 ((assq :item-bullet context)
-                  (let ((org-cycle-include-plain-lists t)) (org-cycle)))
-                 ((org-footnote-at-reference-p) nil)
-                 (t ad-do-it))))))
+            (advice-add 'org-open-at-point :around #'org--mouse-open-at-point)))
+
+(defun org--mouse-open-at-point (orig-fun &rest args)
+  (let ((context (org-context)))
+    (cond
+     ((assq :headline-stars context) (org-cycle))
+     ((assq :checkbox context) (org-toggle-checkbox))
+     ((assq :item-bullet context)
+      (let ((org-cycle-include-plain-lists t)) (org-cycle)))
+     ((org-footnote-at-reference-p) nil)
+     (t (apply orig-fun args)))))
 
 (defun org-mouse-move-tree-start (_event)
   (interactive "e")

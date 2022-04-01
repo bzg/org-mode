@@ -157,7 +157,6 @@ See the ctags documentation for more information.")
 (defcustom org-ctags-path-to-ctags
   (if (executable-find "ctags-exuberant") "ctags-exuberant" "ctags")
   "Name of the ctags executable file."
-  :group 'org-ctags
   :version "24.1"
   :type 'file)
 
@@ -166,7 +165,6 @@ See the ctags documentation for more information.")
     org-ctags-ask-rebuild-tags-file-then-find-tag
     org-ctags-ask-append-topic)
   "List of functions to be prepended to ORG-OPEN-LINK-FUNCTIONS by ORG-CTAGS."
-  :group 'org-ctags
   :version "24.1"
   :type 'hook
   :options '(org-ctags-find-tag
@@ -188,7 +186,6 @@ Created as a local variable in each buffer.")
   "Text to insert when creating a new org file via opening a hyperlink.
 The following patterns are replaced in the string:
     `%t' - replaced with the capitalized title of the hyperlink"
-  :group 'org-ctags
   :version "24.1"
   :type 'string)
 
@@ -207,7 +204,8 @@ The following patterns are replaced in the string:
                   (visit-tags-table tags-filename))))))
 
 
-(defadvice visit-tags-table (after org-ctags-load-tag-list activate compile)
+(advice-add 'visit-tags-table :after #'org--ctags-load-tag-list)
+(defun org--ctags-load-tag-list (&rest _)
   (when (and org-ctags-enabled-p tags-file-name)
     (setq-local org-ctags-tag-list
 		(org-ctags-all-tags-in-current-tags-table))))
@@ -295,8 +293,9 @@ The new topic will be titled NAME (or TITLE if supplied)."
 ;;;; Misc interoperability with etags system =================================
 
 
-(defadvice xref-find-definitions
-    (before org-ctags-set-org-mark-before-finding-tag activate compile)
+(advice-add 'xref-find-definitions :before
+            #'org--ctags-set-org-mark-before-finding-tag)
+(defun org--ctags-set-org-mark-before-finding-tag (&rest _)
   "Before trying to find a tag, save our current position on org mark ring."
   (save-excursion
     (when (and (derived-mode-p 'org-mode) org-ctags-enabled-p)

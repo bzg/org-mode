@@ -67,7 +67,6 @@ just like `org-structure-template-alist'.  The tempo snippet
 
 Do not use \"I\" as a KEY, as it is reserved for expanding
 \"#+include\"."
-  :group 'org-tempo
   :type '(repeat (cons (string :tag "Key")
 		       (string :tag "Keyword")))
   :package-version '(Org . "9.2"))
@@ -102,8 +101,8 @@ Tempo templates will be added."
 
 Go through `org-structure-template-alist' and
 `org-tempo-keywords-alist' and update tempo templates."
-  (mapc 'org--check-org-structure-template-alist '(org-structure-template-alist
-						   org-tempo-keywords-alist))
+  (mapc #'org--check-org-structure-template-alist '(org-structure-template-alist
+						    org-tempo-keywords-alist))
   (let ((keys (org-tempo--keys)))
     ;; Check for duplicated snippet keys and warn if any are found.
     (when (> (length keys) (length (delete-dups keys)))
@@ -176,8 +175,8 @@ didn't succeed."
 ;; Org Tempo is set up with each new Org buffer and potentially in the
 ;; current Org buffer.
 
-(add-hook 'org-mode-hook 'org-tempo-setup)
-(add-hook 'org-tab-before-tab-emulation-hook 'org-tempo-complete-tag)
+(add-hook 'org-mode-hook #'org-tempo-setup)
+(add-hook 'org-tab-before-tab-emulation-hook #'org-tempo-complete-tag)
 
 ;; Enable Org Tempo in all open Org buffers.
 (dolist (b (org-buffer-list 'files))

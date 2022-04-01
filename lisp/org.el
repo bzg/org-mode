@@ -8577,14 +8577,15 @@ This will temporarily bind local variables that are typically bound in
 Org mode to the values they have in Org mode, and then interactively
 call CMD."
   (org-load-modules-maybe)
-  (let (binds)
+  (let (vars vals)
     (dolist (var (org-get-local-variables))
       (when (or (not (boundp (car var)))
 		(eq (symbol-value (car var))
 		    (default-value (car var))))
-	(push (list (car var) `(quote ,(cadr var))) binds)))
-    (eval `(let ,binds
-	     (call-interactively (quote ,cmd))))))
+	(push (car var) vars)
+	(push (cadr var) vals)))
+    (cl-progv vars vals
+      (call-interactively cmd))))
 
 (defun org-get-category (&optional pos force-refresh)
   "Get the category applying to position POS."
@@ -9513,7 +9514,7 @@ block can be inserted by pressing TAB after the string \"<KEY\"."
 In particular, check if the Org 9.2 format is used as opposed to
 previous format."
   (let ((elm (cl-remove-if-not (lambda (x) (listp (cdr x)))
-			       (or (eval checklist)
+			       (or (symbol-value checklist)
 				   org-structure-template-alist))))
     (when elm
       (org-display-warning
@@ -12804,7 +12805,7 @@ a *different* entry, you cannot use these techniques."
 	    ;; Get the right scope
 	    (cond
 	     ((and scope (listp scope) (symbolp (car scope)))
-	      (setq scope (eval scope)))
+	      (setq scope (eval scope t)))
 	     ((eq scope 'agenda)
 	      (setq scope (org-agenda-files t)))
 	     ((eq scope 'agenda-with-archives)
@@ -14625,7 +14626,7 @@ Unless KEEPDATE is non-nil, update `org-ans2' to the cursor date."
   (let ((sf (selected-frame))
 	(sw (selected-window)))
     (select-window (get-buffer-window "*Calendar*" t))
-    (eval form)
+    (eval form t)
     (when (and (not keepdate) (calendar-cursor-to-date))
       (let* ((date (calendar-cursor-to-date))
 	     (time (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
@@ -15039,9 +15040,9 @@ D may be an absolute day number, or a calendar-type list (month day year)."
   (let* ((sexp `(let ((entry ,entry)
 		      (date ',d))
 		  ,(car (read-from-string sexp))))
-	 (result (if calendar-debug-sexp (eval sexp)
+	 (result (if calendar-debug-sexp (eval sexp t)
 		   (condition-case nil
-		       (eval sexp)
+		       (eval sexp t)
 		     (error
 		      (beep)
 		      (message "Bad sexp at line %d in %s: %s"
@@ -15974,25 +15975,29 @@ in Org mode.
     (cdlatex-compute-tables))
   (unless org-cdlatex-texmathp-advice-is-done
     (setq org-cdlatex-texmathp-advice-is-done t)
-    (defadvice texmathp (around org-math-always-on activate)
-      "Always return t in Org buffers.
+    (advice-add 'texmathp :around #'org--math-always-on)))
+
+(defun org--math-always-on (orig-fun &rest args)
+  "Always return t in Org buffers.
 This is because we want to insert math symbols without dollars even outside
 the LaTeX math segments.  If Org mode thinks that point is actually inside
 an embedded LaTeX fragment, let `texmathp' do its job.
 `\\[org-cdlatex-mode-map]'"
-      (interactive)
-      (let (p)
-	(cond
-	 ((not (derived-mode-p 'org-mode)) ad-do-it)
-	 ((eq this-command 'cdlatex-math-symbol)
-	  (setq ad-return-value t
-		texmathp-why '("cdlatex-math-symbol in org-mode" . 0)))
-	 (t
-	  (let ((p (org-inside-LaTeX-fragment-p)))
-	    (if (and p (member (car p) (plist-get org-format-latex-options :matchers)))
-		(setq ad-return-value t
-		      texmathp-why '("Org mode embedded math" . 0))
-	      (when p ad-do-it)))))))))
+  (interactive)
+  (cond
+   ((not (derived-mode-p 'org-mode)) (apply orig-fun args))
+   ((eq this-command 'cdlatex-math-symbol)
+    (setq texmathp-why '("cdlatex-math-symbol in org-mode" . 0))
+    t)
+   (t
+    (let ((p (org-inside-LaTeX-fragment-p)))
+      (when p ;; FIXME: Shouldn't we return t when `p' is nil?
+	(if (member (car p)
+	            (plist-get org-format-latex-options :matchers))
+	    (progn
+	      (setq texmathp-why '("Org mode embedded math" . 0))
+	      t)
+	  (apply orig-fun args)))))))
 
 (defun turn-on-org-cdlatex ()
   "Unconditionally turn on `org-cdlatex-mode'."
@@ -16952,8 +16957,8 @@ overwritten, and the table is not marked as requiring realignment."
       (call-interactively org-speed-command))
      ((functionp org-speed-command)
       (funcall org-speed-command))
-     ((and org-speed-command (listp org-speed-command))
-      (eval org-speed-command))
+     ((consp org-speed-command)
+      (eval org-speed-command t))
      (t (let (org-use-speed-commands)
 	  (call-interactively 'org-self-insert-command)))))
    ((and
@@ -18781,7 +18786,8 @@ such private information before sending the email.")
 			    (string-match "\\(-hook\\|-function\\)\\'" (symbol-name v)))
 		       (and
 			(get v 'custom-type) (get v 'standard-value)
-			(not (equal (symbol-value v) (eval (car (get v 'standard-value)))))))
+			(not (equal (symbol-value v)
+			            (eval (car (get v 'standard-value)) t)))))
 		   (push v list)))))
 	 (kill-buffer (get-buffer "*Warn about privacy*"))
 	 list))

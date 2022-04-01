@@ -179,7 +179,6 @@
                                        cache-dir))
                                    "org-persist/"))
   "Directory where the data is stored."
-  :group 'org-persist
   :type 'directory)
 
 (defcustom org-persist-remote-files 100
@@ -931,8 +930,8 @@ Also, remove containers associated with non-existing files."
       (message "Missing write access rights to org-persist-directory: %S"
                org-persist-directory)
     (add-hook 'kill-emacs-hook #'org-persist-write-all)
-    ;; `org-persist-gc' should run before `org-persist-write-all'.  So we are adding the
-    ;; hook after `org-persist-write-all'.
+    ;; `org-persist-gc' should run before `org-persist-write-all'.
+    ;; So we are adding the hook after `org-persist-write-all'.
     (add-hook 'kill-emacs-hook #'org-persist-gc)))
 
 (add-hook 'after-init-hook #'org-persist-load-all)
