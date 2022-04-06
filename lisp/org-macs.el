@@ -1139,7 +1139,10 @@ as-is if removal failed."
   "Find each %key of ALIST in TEMPLATE and replace it."
   (let ((case-fold-search nil))
     (dolist (entry (sort (copy-sequence alist)
-                         (lambda (a b) (< (length (car a)) (length (car b))))))
+                         ; Sort from longest key to shortest, so that
+                         ; "noweb-ref" and "tangle-mode" get processed
+                         ; before "noweb" and "tangle", respectively.
+                         (lambda (a b) (< (length (car b)) (length (car a))))))
       (setq template
 	    (replace-regexp-in-string
 	     (concat "%" (regexp-quote (car entry)))
