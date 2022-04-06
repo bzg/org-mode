@@ -106,7 +106,16 @@
   (should-not
    (org-test-with-temp-text "xx abc<point> xx"
      (org-in-regexp "abc" nil t))))
+
+;;; Template
 
+(ert-deftest test-org/fill-template ()
+  "Test `org-fill-template'"
+  (should
+   (string= "working"
+            (org-fill-template "%var-long"
+                               '(("var" . "broken")
+                                 ("var-long" . "working"))))))
 
 ;;; Time
 
