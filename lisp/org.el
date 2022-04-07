@@ -15040,9 +15040,11 @@ D may be an absolute day number, or a calendar-type list (month day year)."
   (let* ((sexp `(let ((entry ,entry)
 		      (date ',d))
 		  ,(car (read-from-string sexp))))
-	 (result (if calendar-debug-sexp (eval sexp t)
+         ;; FIXME: Do not use (eval ... t) in the following sexp as
+         ;; diary vars are still using dynamic scope.
+	 (result (if calendar-debug-sexp (eval sexp)
 		   (condition-case nil
-		       (eval sexp t)
+		       (eval sexp)
 		     (error
 		      (beep)
 		      (message "Bad sexp at line %d in %s: %s"
