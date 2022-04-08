@@ -25,6 +25,20 @@
 (eval-and-compile (require 'cl-lib))
 
 
+;;; Helpers
+
+(defmacro org-test-with-timezone (tz &rest body)
+  "Evaluate BODY with TZ environment temporary set to the passed value."
+  (declare (indent 1))
+  (org-with-gensyms (tz-saved)
+    `(let ((,tz-saved (getenv "TZ")))
+       (unwind-protect
+           (progn
+             (setenv "TZ" ,tz)
+             ,@body)
+             (setenv "TZ" ,tz-saved)))))
+
+
 ;;; Comments
 
 (ert-deftest test-org/toggle-comment ()
@@ -178,6 +192,63 @@
 
 
 ;;; Date and time analysis
+
+(ert-deftest test-org/org-encode-time ()
+  "Test various ways to call `org-encode-time'"
+  (org-test-with-timezone "UTC"
+    ;; list as the sole argument
+    (should (string-equal
+             "2022-03-24 23:30:01"
+             (format-time-string
+              "%F %T"
+              (org-encode-time '(1 30 23 24 3 2022 nil -1 nil)))))
+    ;; SECOND...YEAR
+    (should (string-equal
+             "2022-03-24 23:30:02"
+             (format-time-string
+              "%F %T"
+              (org-encode-time 2 30 23 24 3 2022))))
+    ;; SECOND...YEAR IGNORED DST ZONE
+    (should (string-equal
+             "2022-03-24 23:30:03"
+             (format-time-string
+              "%F %T"
+              (org-encode-time 3 30 23 24 3 2022 nil -1 nil))))
+    ;; function call
+    (should (string-equal
+             "2022-03-24 23:30:04"
+             (format-time-string
+              "%F %T"
+              (org-encode-time (apply #'list 4 30 23 '(24 3 2022 nil -1 nil))))))
+    ;; wrong number of arguments
+    (if (not (version< emacs-version "27.1"))
+        (should-error (string-equal
+                       "2022-03-24 23:30:05"
+                       (format-time-string
+                        "%F %T"
+                        (org-encode-time 5 30 23 24 3 2022 nil))))))
+  ;; daylight saving time
+  (if (not (version< emacs-version "27.1"))
+      ;; DST value is not ignored for multiple arguments unlike for `encode-time'
+      (should (string-equal
+               "2022-04-01 00:30:06 +0200 CEST"
+               (format-time-string
+                "%F %T %z %Z"
+                (org-encode-time 6 30 23 31 3 2022 nil nil "Europe/Madrid")
+                "Europe/Madrid")))
+    (should (string-equal
+             "2022-03-31 23:30:07 +0200 CEST"
+             (format-time-string
+              "%F %T %z %Z"
+              (org-encode-time 7 30 23 31 3 2022 nil t "Europe/Madrid")
+              "Europe/Madrid"))))
+  (org-test-with-timezone "Europe/Madrid"
+    ;; Standard time is not forced when DST is not specified
+    (should (string-equal
+             "2022-03-31 23:30:08"
+             (format-time-string
+              "%F %T"
+              (org-encode-time 8 30 23 31 3 2022))))))
 
 (ert-deftest test-org/org-read-date ()
   "Test `org-read-date' specifications."
