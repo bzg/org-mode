@@ -1415,7 +1415,7 @@ This should be a lot faster than the `parse-time-string'."
 	(string-to-number (match-string 4 s))
 	(string-to-number (match-string 3 s))
 	(string-to-number (match-string 2 s))
-	nil nil nil))
+	nil -1 nil))
 
 (defun org-matcher-time (s)
   "Interpret a time comparison value S as a floating point time.

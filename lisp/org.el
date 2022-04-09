@@ -13833,7 +13833,7 @@ user."
 	 (setq year (nth 5 org-defdecode))
 	 (setq org-read-date-analyze-forced-year t))))
     (setq org-read-date-analyze-futurep futurep)
-    (list second minute hour day month year)))
+    (list second minute hour day month year nil -1 nil)))
 
 (defvar parse-time-weekdays)
 (defun org-read-date-get-relative (s today default)
