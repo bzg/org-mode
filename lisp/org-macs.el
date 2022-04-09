@@ -1358,7 +1358,7 @@ nil, just return 0."
    ((numberp s) s)
    ((stringp s)
     (condition-case nil
-	(float-time (apply #'encode-time (org-parse-time-string s)))
+	(org-time-string-to-seconds s)
       (error 0)))
    (t 0)))
 
