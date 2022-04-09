@@ -3579,7 +3579,7 @@ replacement text.  Here is an example:
 (setq org-link-abbrev-alist
       '(("bugzilla"        . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
         ("Nu Html Checker" . "https://validator.w3.org/nu/?doc=%h")
-	("duckduckgo"      . "https://duckduckgo.com/?q=%s")
+        ("duckduckgo"      . "https://duckduckgo.com/?q=%s")
         ("omap"            . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
         ("ads"             . "https://ui.adsabs.harvard.edu/search/q=%20author%3A\"%s\"")))
 #+end_src
@@ -9415,11 +9415,11 @@ the Internet, and outside of business hours, with something like this:
 #+begin_src emacs-lisp
 (defun my-auto-exclude-fn (tag)
   (when (cond ((string= tag "net")
-	       (/= 0 (call-process "/sbin/ping" nil nil nil
-			           "-c1" "-q" "-t1" "mail.gnu.org")))
+               (/= 0 (call-process "/sbin/ping" nil nil nil
+                                   "-c1" "-q" "-t1" "mail.gnu.org")))
               ((member tag '("errand" "call"))
-	       (let ((hr (nth 2 (decode-time))))
-	         (or (< hr 8) (> hr 21)))))
+               (let ((hr (nth 2 (decode-time))))
+                 (or (< hr 8) (> hr 21)))))
     (concat "-" tag)))
 
 (setq org-agenda-auto-exclude-function #'my-auto-exclude-fn)
@@ -16258,7 +16258,7 @@ Settings]]), however, override everything.
 | ~:html-preamble-format~                        | ~org-html-preamble-format~                        |
 | ~:html-preamble~                               | ~org-html-preamble~                               |
 | ~:html-self-link-headlines~                    | ~org-html-self-link-headlines~                    |
-| ~:html-table-align-individual-field~           | ~de{org-html-table-align-individual-fields~       |
+| ~:html-table-align-individual-field~           | ~org-html-table-align-individual-fields~          |
 | ~:html-table-attributes~                       | ~org-html-table-default-attributes~               |
 | ~:html-table-caption-above~                    | ~org-html-table-caption-above~                    |
 | ~:html-table-data-tags~                        | ~org-html-table-data-tags~                        |
