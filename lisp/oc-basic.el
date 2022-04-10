@@ -734,19 +734,24 @@ Return nil if there are no bibliography files or no entries."
      (t
       (clrhash org-cite-basic--completion-cache)
       (dolist (key (org-cite-basic--all-keys))
-        (let ((completion
-               (concat
-                (let ((author (org-cite-basic--get-field 'author key nil t)))
-                  (if author
-                      (truncate-string-to-width
-                       (replace-regexp-in-string " and " "; " author)
-                       org-cite-basic-author-column-end nil ?\s)
-                    (make-string org-cite-basic-author-column-end ?\s)))
-                org-cite-basic-column-separator
-                (let ((date (org-cite-basic--get-year key nil 'no-suffix)))
-                  (format "%4s" (or date "")))
-                org-cite-basic-column-separator
-                (org-cite-basic--get-field 'title key nil t))))
+        (let* ((entry (org-cite-basic--get-entry
+                       key
+                       ;; Supply pre-calculated bibliography to avoid
+                       ;; performance degradation.
+                       (list :cite-basic/bibliography entries)))
+               (completion
+                (concat
+                 (let ((author (org-cite-basic--get-field 'author entry nil 'raw)))
+                   (if author
+                       (truncate-string-to-width
+                        (replace-regexp-in-string " and " "; " author)
+                        org-cite-basic-author-column-end nil ?\s)
+                     (make-string org-cite-basic-author-column-end ?\s)))
+                 org-cite-basic-column-separator
+                 (let ((date (org-cite-basic--get-year entry nil 'no-suffix)))
+                   (format "%4s" (or date "")))
+                 org-cite-basic-column-separator
+                 (org-cite-basic--get-field 'title entry nil t))))
           (puthash completion key org-cite-basic--completion-cache)))
       (unless (map-empty-p org-cite-basic--completion-cache) ;no key
         (puthash entries t org-cite-basic--completion-cache)
