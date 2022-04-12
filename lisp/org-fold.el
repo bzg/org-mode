@@ -833,7 +833,9 @@ DETAIL is either nil, `minimal', `local', `ancestors',
         (let (org-hide-emphasis-markers
               org-link-descriptive
               org-pretty-entities
+              org-hide-macro-markers
               (region (or (org-find-text-property-region (point) 'org-emphasis)
+                          (org-find-text-property-region (point) 'org-macro)
                           (org-find-text-property-region (point) 'invisible)
                           region)))
           (when region
