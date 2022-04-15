@@ -55,8 +55,11 @@ Org maintenance is detailed on Worg: see [[https://orgmode.org/worg/org-maintena
      the [[https://www.gnu.org/philosophy/kind-communication.en.html][GNU Kind Communications Guidelines]].
 
    - Org mode no longer uses ChangeLog entries to document changes.
-     Instead, special commit messages are used, as described in the
-     `CONTRIBUTE' file in the main Emacs repository.
+     Instead, special commit messages are used.  The commit message
+     format generally follows Emacs conventions, as described in the
+     `CONTRIBUTE' file in the main Emacs repository.  Several more
+     Org-specific conventions are described in
+     [[https://orgmode.org/worg/org-contribute.html#commit-messages][worg/org-contribute#commit-messages]].
 
    - Among other things, Org mode is widely appreciated because of its
      simplicity, cleanness and consistency.  We should try to preserve
