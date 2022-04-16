@@ -3200,8 +3200,9 @@ Assume point is at the beginning of the snippet."
       (when (and (looking-at "@@\\([-A-Za-z0-9]+\\):")
 		 (setq contents-end
 		       (save-match-data (goto-char (match-end 0))
-					(re-search-forward "@@" nil t)
-					(match-beginning 0))))
+                                        (when
+					    (re-search-forward "@@" nil t)
+					  (match-beginning 0)))))
 	(let* ((begin (match-beginning 0))
 	       (back-end (match-string-no-properties 1))
 	       (value (buffer-substring-no-properties
