@@ -199,6 +199,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-update-radio-target-regexp "ol" ())
 
 (defvar org-element-paragraph-separate)
+(defvar org-element--timestamp-regexp)
 (defvar org-indent-indentation-per-level)
 (defvar org-radio-target-regexp)
 (defvar org-target-link-regexp)
