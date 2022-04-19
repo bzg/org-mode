@@ -437,6 +437,9 @@ This is the CSS class name to use for the top level content wrapper.
 
 *** New option ~org-babel-plantuml-svg-text-to-path~
 
+** New features
+*** =ob-python= improvements to =:return= header argument
+
 This option, nil by default, allows to add a SVG-specific post-export
 step that runs inkscape text-to-path replacement over the output file.
 
