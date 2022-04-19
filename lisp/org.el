@@ -9,7 +9,7 @@
 ;; Homepage: https://orgmode.org
 ;; Package-Requires: ((emacs "25.1"))
 
-;; Version: 9.5.2
+;; Version: 9.5.3
 
 ;; This file is part of GNU Emacs.
 ;;
