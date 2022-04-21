@@ -15026,8 +15026,9 @@ When matching, the match groups are the following:
   (let* ((regexp
           (if extended
               (if (eq extended 'agenda)
-                  (rx (or (regexp org-ts-regexp3)
-                          (regexp org-element--timestamp-regexp)))
+                  (rx-to-string
+                   `(or (regexp ,org-ts-regexp3)
+                        (regexp ,org-element--timestamp-regexp)))
 		org-ts-regexp3)
             org-ts-regexp2))
 	 (pos (point))
