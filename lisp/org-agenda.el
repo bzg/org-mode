@@ -3925,7 +3925,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 	      (insert "\n"
 		      (if (stringp org-agenda-block-separator)
 			  org-agenda-block-separator
-			(make-string (window-width) org-agenda-block-separator))
+			(make-string (window-max-chars-per-line) org-agenda-block-separator))
 		      "\n"))
 	    (narrow-to-region (point) (point-max)))
 	(setq org-done-keywords-for-agenda nil)
@@ -4944,7 +4944,7 @@ to search again: (0)[ALL]"))
 	    (let ((n 0))
               (dolist (k kwds)
                 (let ((s (format "(%d)%s" (cl-incf n) k)))
-                  (when (> (+ (current-column) (string-width s) 1) (window-width))
+                  (when (> (+ (current-column) (string-width s) 1) (window-max-chars-per-line))
                     (insert "\n                     "))
                   (insert " " s))))
 	    (insert "\n"))
@@ -10032,8 +10032,8 @@ When optional argument LINE is non-nil, align tags only on the
 current line."
   (let ((inhibit-read-only t)
 	(org-agenda-tags-column (if (eq 'auto org-agenda-tags-column)
-				    (- (window-text-width))
-				  org-agenda-tags-column))
+			  (- (window-max-chars-per-line))
+			org-agenda-tags-column))
 	(end (and line (line-end-position)))
 	l c)
     (save-excursion
@@ -10301,10 +10301,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 				  (line-end-position)
 				  '(display nil))
 	  (org-move-to-column
-           (- (if (fboundp 'window-font-width)
-                  (/ (window-width nil t) (window-font-width))
-                ;; Fall back to pre-9.3.3 behavior on Emacs <25.
-                (window-width))
+           (- (window-max-chars-per-line)
               (length stamp))
            t)
           (add-text-properties
