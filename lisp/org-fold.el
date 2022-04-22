@@ -893,7 +893,7 @@ go to the parent and show the entire tree."
 	     (run-hook-with-args 'org-cycle-hook 'subtree))))
 	(t (org-fold-show-set-visibility 'lineage))))
 
-;;; Make isearch search in some text hidden via text propertoes
+;;; Make isearch search in some text hidden via text properties.
 
 (defun org-fold--isearch-reveal (&rest _)
   "Reveal text at POS found by isearch."
