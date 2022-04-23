@@ -55,6 +55,8 @@
 (declare-function geiser-mode "ext:geiser-mode" ())
 (declare-function geiser-eval-region "ext:geiser-mode"
                   (start end &optional and-go raw nomsg))
+(declare-function geiser-eval-region/wait "ext:geiser-mode"
+                  (start end &optional timeout))
 (declare-function geiser-repl-exit "ext:geiser-repl" (&optional arg))
 (declare-function geiser-eval--retort-output "ext:geiser-eval" (ret))
 (declare-function geiser-eval--retort-result-str "ext:geiser-eval" (ret prefix))
@@ -176,7 +178,13 @@ is true; otherwise returns the last value."
 	  (setq geiser-impl--implementation nil)
 	  (let ((geiser-debug-jump-to-debug-p nil)
 		(geiser-debug-show-debug-p nil))
-	    (let ((ret (geiser-eval-region (point-min) (point-max))))
+            ;; `geiser-eval-region/wait' was introduced to await the
+            ;; result of async evaluation in geiser version 0.22.
+	    (let ((ret (funcall (if (fboundp 'geiser-eval-region/wait)
+                                    #'geiser-eval-region/wait
+                                  #'geiser-eval-region)
+                                (point-min)
+                                (point-max))))
 	      (setq result (if output
 			       (or (geiser-eval--retort-output ret)
 				   "Geiser Interpreter produced no output")
