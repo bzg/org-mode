@@ -2915,6 +2915,18 @@ Foo Bar
      (org-open-at-point)
      (eq (org-element-type (org-element-context)) 'radio-target))))
 
+(ert-deftest test-org/open-at-point/radio-target-shadowed ()
+  "Test `org-open-at-point' on shadowed radio targets."
+  (should
+   (org-test-with-temp-text
+       "<<<target shadowed>>> <<<target>>> <point>target shadowed"
+     (org-update-radio-target-regexp)
+     (org-open-at-point)
+     (string=
+      (org-element-property :value
+                            (org-element-radio-target-parser))
+      "target shadowed"))))
+
 (ert-deftest test-org/open-at-point/tag ()
   "Test `org-open-at-point' on tags."
   (should

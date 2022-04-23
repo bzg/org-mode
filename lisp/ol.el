@@ -2040,6 +2040,10 @@ Also refresh fontification if needed."
 		  (cl-pushnew (org-element-property :value obj) rtn
 			      :test #'equal))))
 	    rtn))))
+    (setq targets
+          (sort targets
+                (lambda (a b)
+                  (> (length a) (length b)))))
     (setq org-target-link-regexp
 	  (and targets
 	       (concat before-re
