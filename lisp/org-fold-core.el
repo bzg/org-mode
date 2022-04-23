@@ -1436,7 +1436,7 @@ folded regions.")
 (defun org-fold-core-fontify-region (beg end loudly &optional force)
   "Run `font-lock-default-fontify-region' in visible regions."
   (with-silent-modifications
-    (let* ((pos beg) next
+    (let* ((pos beg) next font-lock-return-value
            (force (or force org-fold-core--force-fontification))
            (org-fold-core--fontifying t)
            (skip-specs
@@ -1467,13 +1467,22 @@ folded regions.")
                       (< next end))
             (setq next (org-fold-core-next-folding-state-change nil next end))))
         (save-excursion
-          (font-lock-default-fontify-region pos next loudly)
+          (setq font-lock-return-value (font-lock-default-fontify-region pos next loudly))
           (save-match-data
-            (unless (<= pos (point) next)
-              (run-hook-with-args 'org-fold-core-first-unfold-functions pos next))))
+            ;; Only run within regions that are not yet touched by
+            ;; fontification.
+            (let ((l pos) (r next) (c pos) nxt)
+              (when (get-text-property c 'org-fold-core-fontified)
+                (setq c (next-single-property-change c 'org-fold-core-fontified)))
+              (setq nxt (next-single-property-change c 'org-fold-core-fontified nil r))
+              (while (< c r)
+                (run-hook-with-args 'org-fold-core-first-unfold-functions c nxt)
+                (setq c (next-single-property-change nxt 'org-fold-core-fontified nil r))
+                (setq nxt (next-single-property-change c 'org-fold-core-fontified nil r))))))
         (put-text-property pos next 'org-fold-core-fontified t)
         (put-text-property pos next 'fontified t)
-        (setq pos next)))))
+        (setq pos next))
+      (or font-lock-return-value `(jit-lock-bounds ,beg . ,end)))))
 
 (defun org-fold-core-update-optimisation (beg end)
   "Update huge buffer optimisation between BEG and END.
