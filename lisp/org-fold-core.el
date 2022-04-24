@@ -1467,7 +1467,16 @@ folded regions.")
                       (< next end))
             (setq next (org-fold-core-next-folding-state-change nil next end))))
         (save-excursion
-          (setq font-lock-return-value (font-lock-default-fontify-region pos next loudly))
+          ;; Keep track of the actually fontified region.
+          (pcase (font-lock-default-fontify-region pos next loudly)
+            (`(jit-lock-bounds ,beg . ,end)
+             (pcase font-lock-return-value
+               (`(jit-lock-bounds ,oldbeg . ,oldend)
+                (setq font-lock-return-value
+                      `(jit-lock-bounds
+                        ,(min oldbeg beg)
+                        ,(max oldend end))))
+               (value (setq font-lock-return-value value)))))
           (save-match-data
             ;; Only run within regions that are not yet touched by
             ;; fontification.
