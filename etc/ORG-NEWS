@@ -512,7 +512,7 @@ heading, except return nil.
 
 In the past, faces of todo keywords, emphasised text, tags, and
 priority cookies inherited =default= face.  The resulting headline
-fontification was not always consistent, as discussed in [[https://lists.gnu.org/archive/html/emacs-orgmode/2020-09/msg00331.html][this bug
+fontification was not always consistent, as discussed in [[msg::87h7sawubl.fsf@protesilaos.com][this bug
 report]].  Now, the relevant faces adapt to face used to fontify the
 current headline level.
 
