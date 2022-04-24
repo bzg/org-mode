@@ -603,10 +603,6 @@ you can now configure them.
 (the default) or use the attachment directory of the current node, if
 it is correctly configured as a Git repository.
 
-*** Some faces now use fixed-pitch
-
-See [[msg:875z8njaol.fsf@protesilaos.com][this thread]].
-
 *** New option ~org-attach-sync-delete-empty-dir~
 
 ~org-attach-sync-delete-empty-dir~ controls the deletion of an empty
