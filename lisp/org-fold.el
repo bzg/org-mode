@@ -897,7 +897,7 @@ go to the parent and show the entire tree."
 
 (defun org-fold--isearch-reveal (&rest _)
   "Reveal text at POS found by isearch."
-  (org-fold-show-set-visibility 'isearch))
+  (org-fold-show-context 'isearch))
 
 ;;; Handling changes in folded elements
 
