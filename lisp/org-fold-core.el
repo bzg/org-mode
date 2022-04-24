@@ -1471,7 +1471,7 @@ folded regions.")
           (save-match-data
             ;; Only run within regions that are not yet touched by
             ;; fontification.
-            (let ((l pos) (r next) (c pos) nxt)
+            (let ((r next) (c pos) nxt)
               (when (get-text-property c 'org-fold-core-fontified)
                 (setq c (next-single-property-change c 'org-fold-core-fontified)))
               (setq nxt (next-single-property-change c 'org-fold-core-fontified nil r))
