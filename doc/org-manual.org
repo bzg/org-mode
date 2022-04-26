@@ -6665,7 +6665,7 @@ into the buffer by ~org-clock-report~:
 #+cindex: @samp{BEGIN clocktable}
 #+begin_example
 ,#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
-,#+END: clocktable
+,#+END:
 #+end_example
 
 #+vindex: org-clocktable-defaults
@@ -6849,7 +6849,7 @@ day, you could write:
 
 #+begin_example
 ,#+BEGIN: clocktable :maxlevel 2 :block today :scope tree1 :link t
-,#+END: clocktable
+,#+END:
 #+end_example
 
 #+texinfo: @noindent
@@ -6858,7 +6858,7 @@ To use a specific time range you could write[fn:80]
 #+begin_example
 ,#+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
                     :tend "<2006-08-10 Thu 12:00>"
-,#+END: clocktable
+,#+END:
 #+end_example
 
 #+texinfo: @noindent
@@ -6866,7 +6866,7 @@ A range starting a week ago and ending right now could be written as
 
 #+begin_example
 ,#+BEGIN: clocktable :tstart "<-1w>" :tend "<now>"
-,#+END: clocktable
+,#+END:
 #+end_example
 
 #+texinfo: @noindent
@@ -6874,7 +6874,7 @@ A summary of the current subtree with % times would be
 
 #+begin_example
 ,#+BEGIN: clocktable :scope subtree :link t :formula %
-,#+END: clocktable
+,#+END:
 #+end_example
 
 #+texinfo: @noindent
@@ -6883,7 +6883,7 @@ last week would be
 
 #+begin_example
 ,#+BEGIN: clocktable :scope agenda :block lastweek :compact t
-,#+END: clocktable
+,#+END:
 #+end_example
 
 *** Resolving idle time and continuous clocking
