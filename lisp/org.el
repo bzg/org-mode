@@ -8976,14 +8976,19 @@ When called through ELisp, arg is also interpreted in the following way:
 		    (throw 'exit nil)))))
 	    (store-match-data match-data)
             (org-fold-core-ignore-modifications
-                (save-excursion
-                  (goto-char (match-beginning 0))
-                  (setf (buffer-substring (match-beginning 0) (match-end 0)) "")
-                  (insert-and-inherit next)
-                  (unless (org-invisible-p (line-beginning-position))
-                    (org-fold-region (line-beginning-position)
-                                  (line-end-position)
-                                  nil))))
+                (goto-char (match-beginning 0))
+              (replace-match "")
+              ;; We need to use `insert-before-markers-and-inherit'
+              ;; because: (1) We want to preserve the folding state
+              ;; text properties; (2) We do not want to make point
+              ;; move before new todo state when inserting a new todo
+              ;; into an empty heading.  In (2), the above
+              ;; `save-excursion' is relying on markers saved before.
+              (insert-before-markers-and-inherit next)
+              (unless (org-invisible-p (line-beginning-position))
+                (org-fold-region (line-beginning-position)
+                              (line-end-position)
+                              nil)))
 	    (cond ((and org-state (equal this org-state))
 		   (message "TODO state was already %s" (org-trim next)))
 		  ((not (pos-visible-in-window-p hl-pos))
