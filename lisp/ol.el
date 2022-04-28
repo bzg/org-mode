@@ -1456,7 +1456,7 @@ is non-nil, move backward."
 	    (`nil nil)
 	    (link
 	     (goto-char (org-element-property :begin link))
-	     (when (org-invisible-p) (org-fold-show-context))
+	     (when (org-invisible-p) (org-fold-show-context 'link-search))
 	     (throw :found t)))))
       (goto-char pos)
       (setq org-link--search-failed t)

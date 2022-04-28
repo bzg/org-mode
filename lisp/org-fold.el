@@ -830,21 +830,28 @@ DETAIL is either nil, `minimal', `local', `ancestors',
       (redisplay)
       (let ((region (org-fold-get-region-at-point)))
         ;; Reveal emphasis markers.
-        (let (org-hide-emphasis-markers
-              org-link-descriptive
-              org-pretty-entities
-              org-hide-macro-markers
-              (region (or (org-find-text-property-region (point) 'org-emphasis)
-                          (org-find-text-property-region (point) 'org-macro)
-                          (org-find-text-property-region (point) 'invisible)
-                          region)))
-          (when region
-            (org-with-point-at (car region)
-              (beginning-of-line)
-              (let (font-lock-extend-region-functions)
-                (font-lock-fontify-region (max (point-min) (1- (car region))) (cdr region))))))
+        (when (eq detail 'local)
+          (let (org-hide-emphasis-markers
+                org-link-descriptive
+                org-pretty-entities
+                org-hide-macro-markers
+                (region (or (org-find-text-property-region (point) 'org-emphasis)
+                            (org-find-text-property-region (point) 'org-macro)
+                            (org-find-text-property-region (point) 'invisible)
+                            region)))
+            (when region
+              (org-with-point-at (car region)
+                (beginning-of-line)
+                (let (font-lock-extend-region-functions)
+                  (font-lock-fontify-region (max (point-min) (1- (car region))) (cdr region))))))
+          ;; Unfold links.
+          (dolist (spec '(org-link org-link-description))
+            (org-fold-region (car region) (cdr region) nil spec)))
         (when region
-          (org-fold-region (car region) (cdr region) nil))))
+          (dolist (spec (org-fold-core-folding-spec-list))
+            ;; Links are taken care by above.
+            (unless (memq spec '(org-link org-link-description))
+              (org-fold-region (car region) (cdr region) nil spec))))))
     (unless (org-before-first-heading-p)
       (org-with-limited-levels
        (cl-case detail
