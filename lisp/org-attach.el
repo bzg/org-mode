@@ -525,7 +525,8 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
        ((eq method 'mv) (rename-file file attach-file))
        ((eq method 'cp) (copy-file file attach-file))
        ((eq method 'ln) (add-name-to-file file attach-file))
-       ((eq method 'lns) (make-symbolic-link file attach-file))
+       ;; We pass integer third argument to auto-expand "~" in FILE.
+       ((eq method 'lns) (make-symbolic-link file attach-file 1))
        ((eq method 'url) (url-copy-file file attach-file)))
       (run-hook-with-args 'org-attach-after-change-hook attach-dir)
       (org-attach-tag)
