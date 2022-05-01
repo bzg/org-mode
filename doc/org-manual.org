@@ -11112,8 +11112,8 @@ more details see the documentation of CDLaTeX mode):
   #+kindex: '
 
   Pressing the single-quote followed by another character modifies the
-  symbol before point with an accent or a font.  If you wait more than
-  1.5 seconds after the single-quote, a help window pops up.
+  LaTeX symbol before point with an accent or a font.  If you wait
+  more than 1.5 seconds after the single-quote, a help window pops up.
   Character modification works only inside LaTeX fragments; outside
   the quote is normal.
 
