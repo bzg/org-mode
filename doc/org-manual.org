@@ -4273,7 +4273,7 @@ specific settings like =TODO(!)=.  For example:
 #+cindex: @samp{STYLE}, property
 
 Org has the ability to track the consistency of a special category of
-TODO, called "habits."  To use habits, you have to enable the ~habits~
+TODO, called "habits."  To use habits, you have to enable the ~habit~
 module by customizing the variable ~org-modules~.
 
 A habit has the following properties:
