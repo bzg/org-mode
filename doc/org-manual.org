@@ -269,6 +269,14 @@ shown below.
 (add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
 #+end_src
 
+If you are using Org mode version from Git repository, you can start
+minimal session using make.
+
+: # Bare Emacs
+: make repro
+: # or pass extra arguments
+: make repro REPRO_ARGS="-l /path/to/minimal/config.el /tmp/bug.org"
+
 If an error occurs, a "backtrace" can be very useful---see below on
 how to create one.  Often a small example file helps, along with clear
 information about:

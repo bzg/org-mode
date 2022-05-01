@@ -59,6 +59,11 @@ BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave perl python
 # extra packages to require for testing
 BTEST_EXTRA =
               # ess-site  # load ESS for R tests
+# Whether to activate extra debugging facilities for make repro.
+REPRO_DEBUG ?= yes
+# Extra arguments passed to Emacs for make repro.
+# e.g. -l config.el /tmp/bug.org
+REPRO_ARGS ?=
 ##->8-------------------------------------------------------------------
 ## YOU MAY NEED TO ADAPT THESE DEFINITIONS
 ##----------------------------------------------------------------------
@@ -92,6 +97,22 @@ BTEST = $(BATCH) $(BTEST_INIT) \
 # Running a plain emacs with no config and this Org mode loaded.  This
 # should be useful for manual testing and verification of problems.
 NOBATCH = $(EMACSQ) $(BTEST_INIT) -l org -f org-version
+
+ifeq ($(REPRO_DEBUG), yes)
+REPRO_INIT = --eval "(setq \
+	debug-on-error t\
+	debug-on-signal nil\
+	debug-on-quit nil\
+	org-element--cache-self-verify 'backtrace\
+	org-element--cache-self-verify-frequency 1.0\
+	org-element--cache-map-statistics t)"
+else
+REPRO_INIT =
+endif
+
+# Running a plain emacs with no config, this Org mode loaded, and
+# debugging facilities activated.
+REPRO = $(NOBATCH) $(REPRO_INIT) $(REPRO_ARGS)
 
 # start Emacs with no user and site configuration
 # EMACSQ = -vanilla # XEmacs

@@ -41,7 +41,7 @@ endif
 	cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol config-version \
-	vanilla
+	vanilla repro
 
 CONF_BASE = EMACS DESTDIR ORGCM ORG_MAKE_DOC
 CONF_DEST = lispdir infodir datadir testdir
@@ -131,6 +131,9 @@ $(INSTSUB):
 
 autoloads: lisp
 	$(MAKE) -C $< $@
+
+repro: cleanall autoloads
+	-@$(REPRO) &
 
 cleandirs:
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) cleanall;)
