@@ -26,10 +26,10 @@ insert hours and minutes.
 Return the timestamp as a string."
   (org-element-interpret-data
    (let ((time (decode-time
-                (apply #'encode-time
-                       (org-fix-decoded-time
-                        (org-read-date-analyze
-                         input nil (decode-time (current-time))))))))
+                (org-encode-time
+                 (org-fix-decoded-time
+                  (org-read-date-analyze
+                   input nil (decode-time (current-time))))))))
      (list 'timestamp
            (list :type (if inactive 'inactive 'active)
                  :minute-start (and with-time (nth 1 time))

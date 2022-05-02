@@ -1052,9 +1052,10 @@ Store them in the capture property list."
                       prompt-time
                     ;; Use 00:00 when no time is given for another
                     ;; date than today?
-                    (apply #'encode-time 0 0
-                           org-extend-today-until
-                           (cl-cdddr (decode-time prompt-time)))))
+                    (org-encode-time
+                     (apply #'list
+                            0 0 org-extend-today-until
+                            (cl-cdddr (decode-time prompt-time))))))
 		 (time-to-days prompt-time)))
 	      (t
 	       ;; Current date, possibly corrected for late night
@@ -1583,7 +1584,7 @@ Expansion occurs in a temporary Org mode buffer."
 	 (time (let* ((c (or (org-capture-get :default-time) (current-time)))
 		      (d (decode-time c)))
 		 (if (< (nth 2 d) org-extend-today-until)
-		     (encode-time 0 59 23 (1- (nth 3 d)) (nth 4 d) (nth 5 d))
+		     (org-encode-time 0 59 23 (1- (nth 3 d)) (nth 4 d) (nth 5 d))
 		   c)))
 	 (v-t (format-time-string (org-time-stamp-format nil) time))
 	 (v-T (format-time-string (org-time-stamp-format t) time))

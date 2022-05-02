@@ -5758,7 +5758,7 @@ displayed in agenda view."
 	    (substring
 	     (format-time-string
 	      (car org-time-stamp-formats)
-	      (encode-time	; DATE bound by calendar
+	      (org-encode-time	; DATE bound by calendar
 	       0 0 0 (nth 1 date) (car date) (nth 2 date)))
 	     1 11))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
@@ -6030,7 +6030,7 @@ then those holidays will be skipped."
 		   (substring
 		    (format-time-string
 		     (car org-time-stamp-formats)
-		     (encode-time  ; DATE bound by calendar
+		     (org-encode-time  ; DATE bound by calendar
 		      0 0 0 (nth 1 date) (car date) (nth 2 date)))
 		    1 11))))
 	 (org-agenda-search-headline-for-time nil)
@@ -11119,8 +11119,8 @@ The prefix arg is passed through to the command if possible."
 		     (ignore-errors
 		       (let* ((date (calendar-gregorian-from-absolute
 				     (+ (org-today) distance)))
-			      (time (encode-time 0 0 0 (nth 1 date) (nth 0 date)
-						 (nth 2 date))))
+			      (time (org-encode-time
+                                     0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
 			 (org-agenda-schedule nil time))))))))
 
 	(?f

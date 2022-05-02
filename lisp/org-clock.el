@@ -1519,7 +1519,7 @@ The time is always returned as UTC."
 	     (day (nth 3 dt)))
 	(if (< hour org-extend-today-until) (setf (nth 3 dt) (1- day)))
 	(setf (nth 2 dt) org-extend-today-until)
-	(apply #'encode-time 0 0 (nthcdr 2 dt))))
+	(org-encode-time (apply #'list 0 0 (nthcdr 2 dt)))))
      ((or (equal cmt "all")
 	  (and (or (not cmt) (equal cmt "auto"))
 	       (not lr)))
@@ -2352,16 +2352,16 @@ have priority."
     (let* ((start (pcase key
 		    (`interactive (org-read-date nil t nil "Range start? "))
 		    (`untilnow nil)
-		    (_ (encode-time 0 m h d month y))))
+		    (_ (org-encode-time 0 m h d month y))))
 	   (end (pcase key
 		  (`interactive (org-read-date nil t nil "Range end? "))
 		  (`untilnow (current-time))
-		  (_ (encode-time 0
-				  m ;; (or m1 m)
-				  (or h1 h)
-				  (or d1 d)
-				  (or month1 month)
-				  (or y1 y)))))
+		  (_ (org-encode-time 0
+                                      m ;; (or m1 m)
+                                      (or h1 h)
+                                      (or d1 d)
+                                      (or month1 month)
+                                      (or y1 y)))))
 	   (text
 	    (pcase key
 	      ((or `day `today) (format-time-string "%A, %B %d, %Y" start))
@@ -2429,14 +2429,14 @@ the currently selected interval size."
 	  (cond
 	   (d (setq ins (format-time-string
 			 "%Y-%m-%d"
-			 (encode-time 0 0 0 (+ d n) nil y)))) ;; m
+			 (org-encode-time 0 0 0 (+ d n) nil y)))) ;; m
 	   ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
 	    (require 'cal-iso)
 	    (setq date (calendar-gregorian-from-absolute
 			(calendar-iso-to-absolute (list (+ mw n) 1 y))))
 	    (setq ins (format-time-string
 		       "%G-W%V"
-		       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
+		       (org-encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
 	   ((and wp (string-match "q\\|Q" wp) mw (> (length wp) 0))
 	    (require 'cal-iso)
 					; if the 4th + 1 quarter is requested we flip to the 1st quarter of the next year
@@ -2453,11 +2453,11 @@ the currently selected interval size."
 			(calendar-iso-to-absolute (org-quarter-to-date (+ mw n) y))))
 	    (setq ins (format-time-string
 		       (concat (number-to-string y) "-Q" (number-to-string (+ mw n)))
-		       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
+		       (org-encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
 	   (mw
 	    (setq ins (format-time-string
 		       "%Y-%m"
-		       (encode-time 0 0 0 1 (+ mw n) y))))
+		       (org-encode-time 0 0 0 1 (+ mw n) y))))
 	   (y
 	    (setq ins (number-to-string (+ y n))))))
 	 (t (user-error "Cannot shift clocktable block")))
@@ -2845,7 +2845,7 @@ a number of clock tables."
           (pcase (if range (car range) (plist-get params :tstart))
             ((and (pred numberp) n)
              (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
-               (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
+               (org-encode-time 0 0 org-extend-today-until d m y)))
             (timestamp
 	     (seconds-to-time
 	      (org-matcher-time (or timestamp
@@ -2855,7 +2855,7 @@ a number of clock tables."
           (pcase (if range (nth 1 range) (plist-get params :tend))
             ((and (pred numberp) n)
              (pcase-let ((`(,m ,d ,y) (calendar-gregorian-from-absolute n)))
-               (apply #'encode-time (list 0 0 org-extend-today-until d m y))))
+               (org-encode-time 0 0 org-extend-today-until d m y)))
             (timestamp (seconds-to-time (org-matcher-time timestamp))))))
     (while (time-less-p start end)
       (unless (bolp) (insert "\n"))
@@ -2867,20 +2867,21 @@ a number of clock tables."
       ;; Compute NEXT, which is the end of the current clock table,
       ;; according to step.
       (let* ((next
-              (apply #'encode-time
-                     (pcase-let
-                         ((`(,_ ,_ ,_ ,d ,m ,y ,dow . ,_) (decode-time start)))
-                       (pcase step
-                         (`day (list 0 0 org-extend-today-until (1+ d) m y))
-                         (`week
-                          (let ((offset (if (= dow week-start) 7
-                                          (mod (- week-start dow) 7))))
-                            (list 0 0 org-extend-today-until (+ d offset) m y)))
-                         (`semimonth (list 0 0 0
-                                           (if (< d 16) 16 1)
-                                           (if (< d 16) m (1+ m)) y))
-                         (`month (list 0 0 0 month-start (1+ m) y))
-                         (`year (list 0 0 org-extend-today-until 1 1 (1+ y)))))))
+              ;; In Emacs-27 and Emacs-28 `encode-time' does not support 6 elements
+              ;; list argument so `org-encode-time' can not be outside of `pcase'.
+              (pcase-let
+                  ((`(,_ ,_ ,_ ,d ,m ,y ,dow . ,_) (decode-time start)))
+                (pcase step
+                  (`day (org-encode-time 0 0 org-extend-today-until (1+ d) m y))
+                  (`week
+                   (let ((offset (if (= dow week-start) 7
+                                   (mod (- week-start dow) 7))))
+                     (org-encode-time 0 0 org-extend-today-until (+ d offset) m y)))
+                  (`semimonth (org-encode-time 0 0 0
+                                               (if (< d 16) 16 1)
+                                               (if (< d 16) m (1+ m)) y))
+                  (`month (org-encode-time 0 0 0 month-start (1+ m) y))
+                  (`year (org-encode-time 0 0 org-extend-today-until 1 1 (1+ y))))))
              (table-begin (line-beginning-position 0))
 	     (step-time
               ;; Write clock table between START and NEXT.

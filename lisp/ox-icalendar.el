@@ -433,7 +433,7 @@ format (e.g. \"Europe/London\").  In either case, the value of
 					 t)))
       ;; Convert timestamp into internal time in order to use
       ;; `format-time-string' and fix any mistake (i.e. MI >= 60).
-      (encode-time 0 mi h d m y)
+      (org-encode-time 0 mi h d m y)
       (and (or (string-equal tz "UTC")
 	       (and (null tz)
 		    with-time-p

@@ -387,7 +387,7 @@ Return value as a string."
 				  (buffer-substring
 				   (point) (line-end-position)))))
 		       (when (cl-some #'identity time)
-			 (setq date (apply #'encode-time time))))))))
+			 (setq date (org-encode-time time))))))))
 	      (let ((proc (get-buffer-process buf)))
 		(while (and proc (accept-process-output proc .5 nil t)))))
 	  (kill-buffer buf))

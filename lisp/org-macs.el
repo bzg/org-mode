@@ -1460,8 +1460,8 @@ following special strings: \"<now>\", \"<today>\",
 \"<tomorrow>\", and \"<yesterday>\".
 
 Return 0. if S is not recognized as a valid value."
-  (let ((today (float-time (apply #'encode-time
-				  (append '(0 0 0) (nthcdr 3 (decode-time)))))))
+  (let ((today (float-time (org-encode-time
+                            (append '(0 0 0) (nthcdr 3 (decode-time)))))))
     (save-match-data
       (cond
        ((string= s "<now>") (float-time))

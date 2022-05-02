@@ -1618,7 +1618,7 @@ non-nil."
 	  (setq link
 		(format-time-string
 		 (car org-time-stamp-formats)
-		 (encode-time 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd))))
+		 (org-encode-time 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd))))
 	  (org-link-store-props :type "calendar" :date cd)))
 
        ((eq major-mode 'w3-mode)

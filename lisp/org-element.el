@@ -4046,12 +4046,12 @@ Assume point is at the beginning of the timestamp."
 				     (/= minute-start minute-end)))))
 	 (funcall
 	  build-ts-string
-	  (encode-time 0
-		       (or minute-start 0)
-		       (or hour-start 0)
-		       (org-element-property :day-start timestamp)
-		       (org-element-property :month-start timestamp)
-		       (org-element-property :year-start timestamp))
+	  (org-encode-time 0
+                           (or minute-start 0)
+                           (or hour-start 0)
+                           (org-element-property :day-start timestamp)
+                           (org-element-property :month-start timestamp)
+                           (org-element-property :year-start timestamp))
 	  (eq type 'active)
 	  (and hour-start minute-start)
 	  (and time-range-p hour-end)
@@ -4063,7 +4063,7 @@ Assume point is at the beginning of the timestamp."
 	     (hour-end (org-element-property :hour-end timestamp)))
 	 (concat
 	  (funcall
-	   build-ts-string (encode-time
+	   build-ts-string (org-encode-time
 			    0
 			    (or minute-start 0)
 			    (or hour-start 0)
@@ -4074,12 +4074,13 @@ Assume point is at the beginning of the timestamp."
 	   (and hour-start minute-start))
 	  "--"
 	  (funcall build-ts-string
-		   (encode-time 0
-				(or minute-end 0)
-				(or hour-end 0)
-				(org-element-property :day-end timestamp)
-				(org-element-property :month-end timestamp)
-				(org-element-property :year-end timestamp))
+		   (org-encode-time
+                    0
+                    (or minute-end 0)
+                    (or hour-end 0)
+                    (org-element-property :day-end timestamp)
+                    (org-element-property :month-end timestamp)
+                    (org-element-property :year-end timestamp))
 		   (eq type 'active-range)
 		   (and hour-end minute-end)))))
       (_ (org-element-property :raw-value timestamp)))))

@@ -137,7 +137,7 @@ will be built under the headline at point."
     (let* ((year (calendar-extract-year d))
 	   (month (calendar-extract-month d))
 	   (day (calendar-extract-day d))
-	   (time (encode-time 0 0 0 day month year))
+	   (time (org-encode-time 0 0 0 day month year))
 	   (iso-date (calendar-iso-from-absolute
 		      (calendar-absolute-from-gregorian d)))
 	   (weekyear (nth 2 iso-date))
@@ -197,14 +197,14 @@ inserted into the buffer."
     (when month
       (insert
        (if day
-	   (format-time-string "-%m-%d %A" (encode-time 0 0 0 day month year))
-	 (format-time-string "-%m %B" (encode-time 0 0 0 1 month year))))))
+	   (format-time-string "-%m-%d %A" (org-encode-time 0 0 0 day month year))
+	 (format-time-string "-%m %B" (org-encode-time 0 0 0 1 month year))))))
   (when (and day org-datetree-add-timestamp)
     (save-excursion
       (insert "\n")
       (org-indent-line)
       (org-insert-time-stamp
-       (encode-time 0 0 0 day month year)
+       (org-encode-time 0 0 0 day month year)
        nil
        (eq org-datetree-add-timestamp 'inactive))))
   (beginning-of-line))
