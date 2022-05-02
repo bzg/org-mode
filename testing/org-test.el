@@ -455,7 +455,7 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
 	(at (cl-gensym)))
     `(let* ((,tm ,time)
 	    (,at (if (stringp ,tm)
-		     (apply #'encode-time (org-parse-time-string ,tm))
+		     (org-time-string-to-time ,tm)
 		   ,tm)))
        (cl-letf
 	   ;; Wrap builtins whose behavior can depend on the current time.
