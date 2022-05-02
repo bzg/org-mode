@@ -309,6 +309,8 @@ be replaced with content and expanded:
               introduced with %[pathname] are expanded this way.
               Since this happens after expanding non-interactive
               %-escapes, those can be used to fill the expression.
+              The evaluation happens with Org mode set as major mode
+              in a temporary buffer.
   %<...>      The result of `format-time-string' on the ... format
               specification.
   %t          Time stamp, date only.  The time stamp is the current
@@ -1572,7 +1574,9 @@ Lisp programs can force the template by setting KEYS to a string."
   "Fill a TEMPLATE and return the filled template as a string.
 The template may still contain \"%?\" for cursor positioning.
 INITIAL content and/or ANNOTATION may be specified, but will be overridden
-by their respective `org-store-link-plist' properties if present."
+by their respective `org-store-link-plist' properties if present.
+
+Expansion occurs in a temporary Org mode buffer."
   (let* ((template (or template (org-capture-get :template)))
 	 (buffer (org-capture-get :buffer))
 	 (file (buffer-file-name (or (buffer-base-buffer buffer) buffer)))
@@ -1645,6 +1649,7 @@ by their respective `org-store-link-plist' properties if present."
       (setq buffer-file-name nil)
       (setq mark-active nil)
       (insert template)
+      (org-mode)
       (goto-char (point-min))
       ;; %[] insert contents of a file.
       (save-excursion
