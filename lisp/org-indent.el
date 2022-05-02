@@ -409,7 +409,13 @@ This function is meant to be called by `after-change-functions'."
 		 (goto-char beg)
 		 (beginning-of-line)
 		 (re-search-forward
-		  (org-with-limited-levels org-outline-regexp-bol) end t)))
+		  (org-with-limited-levels org-outline-regexp-bol)
+                  (save-excursion
+                    (goto-char end)
+                    ;; Extend to headline if END is within its
+                    ;; headline stars.
+                    (line-end-position))
+                  t)))
 	   (let ((end (save-excursion
 			(goto-char end)
 			(org-with-limited-levels (outline-next-heading))
