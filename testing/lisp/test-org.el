@@ -268,15 +268,15 @@
 (ert-deftest test-org/org-parse-time-string ()
   "Test `org-parse-time-string'."
   (should (equal (org-parse-time-string "2012-03-29 16:40")
-		 '(0 40 16 29 3 2012 nil nil nil)))
+		 '(0 40 16 29 3 2012 nil -1 nil)))
   (should (equal (org-parse-time-string "[2012-03-29 16:40]")
-		 '(0 40 16 29 3 2012 nil nil nil)))
+		 '(0 40 16 29 3 2012 nil -1 nil)))
   (should (equal (org-parse-time-string "<2012-03-29 16:40>")
-		 '(0 40 16 29 3 2012 nil nil nil)))
+		 '(0 40 16 29 3 2012 nil -1 nil)))
   (should (equal (org-parse-time-string "<2012-03-29>")
-		 '(0 0 0 29 3 2012 nil nil nil)))
+		 '(0 0 0 29 3 2012 nil -1 nil)))
   (should (equal (org-parse-time-string "<2012-03-29>" t)
-		 '(0 nil nil 29 3 2012 nil nil nil))))
+		 '(0 nil nil 29 3 2012 nil -1 nil))))
 
 (ert-deftest test-org/closest-date ()
   "Test `org-closest-date' specifications."

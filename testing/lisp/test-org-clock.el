@@ -27,9 +27,9 @@ Return the timestamp as a string."
   (org-element-interpret-data
    (let ((time (decode-time
                 (apply #'encode-time
-                       (mapcar (lambda (el) (or el 0))
-                               (org-read-date-analyze
-                                input nil (decode-time (current-time))))))))
+                       (org-fix-decoded-time
+                        (org-read-date-analyze
+                         input nil (decode-time (current-time))))))))
      (list 'timestamp
            (list :type (if inactive 'inactive 'active)
                  :minute-start (and with-time (nth 1 time))
