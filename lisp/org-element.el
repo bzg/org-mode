@@ -4524,12 +4524,13 @@ If STRING is the empty string or nil, return nil."
     (data types fun &optional info first-match no-recursion with-affiliated)
   "Map a function on selected elements or objects.
 
-DATA is a parse tree, an element, an object, a string, or a list
-of such constructs.  TYPES is a symbol or list of symbols of
-elements or objects types (see `org-element-all-elements' and
-`org-element-all-objects' for a complete list of types).  FUN is
-the function called on the matching element or object.  It has to
-accept one argument: the element or object itself.
+DATA is a parse tree (for example, returned by
+`org-element-parse-buffer'), an element, an object, a string, or a
+list of such constructs.  TYPES is a symbol or list of symbols of
+elements or object types (see `org-element-all-elements' and
+`org-element-all-objects' for a complete list of types).  FUN is the
+function called on the matching element or object.  It has to accept
+one argument: the element or object itself.
 
 When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, parts of the parse tree
@@ -4557,6 +4558,7 @@ Assuming TREE is a variable containing an Org buffer parse tree,
 the following example will return a flat list of all `src-block'
 and `example-block' elements in it:
 
+  (setq tree (org-element-parse-buffer))
   (org-element-map tree \\='(example-block src-block) #\\='identity)
 
 The following snippet will find the first headline with a level
