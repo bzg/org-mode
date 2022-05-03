@@ -298,27 +298,28 @@ means that the buffer should stay alive during the operation,
 because otherwise all these markers will point to nowhere."
   (declare (debug (form body)) (indent 1))
   (org-with-gensyms (data specs markers?)
-    `(let* ((,specs ',(org-fold-core-folding-spec-list))
+    `(let* ((,specs (org-fold-core-folding-spec-list))
 	    (,markers? ,use-markers)
 	    (,data
              (org-with-wide-buffer
-              (let ((pos (point-min))
-		    data-val)
-		(while (< pos (point-max))
-                  (dolist (spec (org-fold-get-folding-spec 'all pos))
-                    (let ((region (org-fold-get-region-at-point spec pos)))
-		      (if ,markers?
-			  (push (list (copy-marker (car region))
-				      (copy-marker (cdr region) t)
-                                      spec)
-                                data-val)
-                        (push (list (car region) (cdr region) spec)
-			      data-val))))
-                  (setq pos (org-fold-next-folding-state-change nil pos)))))))
+              (let (data-val)
+                (dolist (spec ,specs)
+                  (let ((pos (point-min)))
+		    (while (< pos (point-max))
+                      (when (org-fold-get-folding-spec spec pos)
+                        (let ((region (org-fold-get-region-at-point spec pos)))
+		          (if ,markers?
+			      (push (list (copy-marker (car region))
+				          (copy-marker (cdr region) t)
+                                          spec)
+                                    data-val)
+                            (push (list (car region) (cdr region) spec)
+			          data-val))))
+                      (setq pos (org-fold-next-folding-state-change spec pos)))))
+                data-val))))
        (unwind-protect (progn ,@body)
 	 (org-with-wide-buffer
-	  (dolist (spec ,specs)
-	    (org-fold-region (point-min) (point-max) nil spec))
+	  (org-fold-region (point-min) (point-max) nil)
 	  (pcase-dolist (`(,beg ,end ,spec) (delq nil ,data))
 	    (org-fold-region beg end t spec)
 	    (when ,markers?
@@ -331,8 +332,8 @@ means that the buffer may change while running BODY, but it also
 means that the buffer should stay alive during the operation,
 because otherwise all these markers will point to nowhere."
   (declare (debug (form body)) (indent 1))
-  `(when (eq org-fold-core-style 'text-properties)
-     (org-fold-save-outline-visibility--text-properties ,use-markers ,@body)
+  `(if (eq org-fold-core-style 'text-properties)
+       (org-fold-save-outline-visibility--text-properties ,use-markers ,@body)
      (org-fold-save-outline-visibility--overlays ,use-markers ,@body)))
 
 ;;;; Changing visibility (regions, blocks, drawers, headlines)
