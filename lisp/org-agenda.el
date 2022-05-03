@@ -7376,6 +7376,7 @@ TODAYP is t when the current agenda view is on today."
 
 (defun org-compile-prefix-format (key)
   "Compile the prefix format into a Lisp form that can be evaluated.
+KEY is the agenda type (see `org-agenda-prefix-format').
 The resulting form and associated variable bindings is returned
 and stored in the variable `org-prefix-format-compiled'."
   (setq org-prefix-has-time nil
