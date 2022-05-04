@@ -2127,36 +2127,38 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an INLINE-SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((code (org-element-property :value inline-src-block))
-	 (separator (org-latex--find-verb-separator code)))
-    (cl-case (plist-get info :latex-listings)
-      ;; Do not use a special package: transcode it verbatim, as code.
-      ((nil) (org-latex--text-markup code 'code info))
-      ;; Use minted package.
-      (minted
-       (let* ((org-lang (org-element-property :language inline-src-block))
-	      (mint-lang (or (cadr (assq (intern org-lang)
-					 (plist-get info :latex-minted-langs)))
-			     (downcase org-lang)))
-	      (options (org-latex--make-option-string
-			(plist-get info :latex-minted-options))))
-	 (format "\\mintinline%s{%s}{%s}"
-		 (if (string= options "") "" (format "[%s]" options))
-		 mint-lang
-		 code)))
-      ;; Use listings package.
-      (otherwise
-       ;; Maybe translate language's name.
-       (let* ((org-lang (org-element-property :language inline-src-block))
-	      (lst-lang (or (cadr (assq (intern org-lang)
-					(plist-get info :latex-listings-langs)))
-			    org-lang))
-	      (options (org-latex--make-option-string
-			(append (plist-get info :latex-listings-options)
-				`(("language" ,lst-lang))))))
-	 (concat (format "\\lstinline[%s]" options)
-		 separator code separator))))))
+  (let ((code (org-element-property :value inline-src-block))
+        (lang (org-element-property :language inline-src-block)))
+    (pcase (plist-get info :latex-listings)
+      ('nil (org-latex--text-markup code 'code info))
+      ('minted (org-latex-inline-src-block--minted info code lang))
+      (_ (org-latex-inline-src-block--listings info code lang)))))
 
+(defun org-latex-inline-src-block--minted (info code lang)
+  "Transcode an inline src block's content from Org to LaTeX, using minted.
+INFO, CODE, and LANG are provided by `org-latex-inline-src-block'."
+  (let ((mint-lang (or (cadr (assq (intern lang)
+                                   (plist-get info :latex-minted-langs)))
+                       (downcase lang)))
+        (options (org-latex--make-option-string
+                  (plist-get info :latex-minted-options))))
+    (format "\\mintinline%s{%s}{%s}"
+            (if (string= options "") "" (format "[%s]" options))
+            mint-lang
+            code)))
+
+(defun org-latex-inline-src-block--listings (info code lang)
+  "Transcode an inline src block's content from Org to LaTeX, using lstlistings.
+INFO, CODE, and LANG are provided by `org-latex-inline-src-block'."
+  (let* ((lst-lang (or (cadr (assq (intern lang)
+                                   (plist-get info :latex-listings-langs)))
+                       lang))
+         (separator (org-latex--find-verb-separator code))
+         (options (org-latex--make-option-string
+                   (append (plist-get info :latex-listings-options)
+                           `(("language" ,lst-lang))))))
+    (concat (format "\\lstinline[%s]" options)
+            separator code separator)))
 
 ;;;; Inlinetask
 
