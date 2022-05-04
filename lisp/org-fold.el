@@ -1125,16 +1125,18 @@ The detailed reaction depends on the user option
 	     (and (not invisible-at-point) invisible-before-point
 		  (memq kind '(insert delete))))))
       (when (or invisible-at-point invisible-before-point)
-	(when (eq org-fold-catch-invisible-edits 'error)
+	(when (and (eq org-fold-catch-invisible-edits 'error)
+                   (not border-and-ok-direction))
 	  (user-error "Editing in invisible areas is prohibited, make them visible first"))
 	(if (and org-custom-properties-overlays
 		 (y-or-n-p "Display invisible properties in this buffer? "))
 	    (org-toggle-custom-properties-visibility)
 	  ;; Make the area visible
-          (save-excursion
-	    (org-fold-show-set-visibility 'local))
-          (when invisible-before-point
-            (org-with-point-at (1- (point)) (org-fold-show-set-visibility 'local)))
+          (unless (eq org-fold-catch-invisible-edits 'error)
+            (save-excursion
+	      (org-fold-show-set-visibility 'local))
+            (when invisible-before-point
+              (org-with-point-at (1- (point)) (org-fold-show-set-visibility 'local))))
 	  (cond
 	   ((eq org-fold-catch-invisible-edits 'show)
 	    ;; That's it, we do the edit after showing
@@ -1144,6 +1146,9 @@ The detailed reaction depends on the user option
 	   ((and (eq org-fold-catch-invisible-edits 'smart)
 		 border-and-ok-direction)
 	    (message "Unfolding invisible region around point before editing"))
+           (border-and-ok-direction
+            ;; Just continue editing.
+            nil)
 	   (t
 	    ;; Don't do the edit, make the user repeat it in full visibility
 	    (user-error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
