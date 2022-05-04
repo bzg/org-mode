@@ -1006,12 +1006,16 @@ in this list - but it does not hurt if it is present."
 
 These options are supplied as a comma-separated list to the
 \\lstset command.  Each element of the association list should be
-a list containing two strings: the name of the option, and the
-value.  For example,
+a list or cons cell containing two strings: the name of the
+option, and the value.  For example,
 
   (setq org-latex-listings-options
     \\='((\"basicstyle\" \"\\\\small\")
       (\"keywordstyle\" \"\\\\color{black}\\\\bfseries\\\\underbar\")))
+  ; or
+  (setq org-latex-listings-options
+    \\='((\"basicstyle\" . \"\\\\small\")
+      (\"keywordstyle\" . \"\\\\color{black}\\\\bfseries\\\\underbar\")))
 
 will typeset the code in a small size font with underlined, bold
 black keywords.
@@ -1059,11 +1063,14 @@ with:
 
 These options are supplied within square brackets in
 \\begin{minted} environments.  Each element of the alist should
-be a list containing two strings: the name of the option, and the
-value.  For example,
+be a list or cons cell containing two strings: the name of the
+option, and the value.  For example,
 
   (setq org-latex-minted-options
     \\='((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
+  ; or
+  (setq org-latex-minted-options
+    \\='((\"bgcolor\" . \"bg\") (\"frame\" . \"lines\")))
 
 will result in source blocks being exported with
 
@@ -1506,21 +1513,24 @@ This is used to choose a separator for constructs like \\verb."
 	     when (not (string-match (regexp-quote (char-to-string c)) s))
 	     return (char-to-string c))))
 
-(defun org-latex--make-option-string (options)
+(defun org-latex--make-option-string (options &optional seperator)
   "Return a comma separated string of keywords and values.
 OPTIONS is an alist where the key is the options keyword as
 a string, and the value a list containing the keyword value, or
 nil."
   (mapconcat (lambda (pair)
-	       (pcase-let ((`(,keyword ,value) pair))
-		 (concat keyword
-			 (and (> (length value) 0)
-			      (concat "="
-                                      (if (string-match-p (rx (any "[]")) value)
-                                          (format "{%s}" value)
-                                        value))))))
-	     options
-	     ","))
+               (let ((keyword (car pair))
+                     (value (pcase (cdr pair)
+                              ((pred stringp) (cdr pair))
+                              ((pred consp) (cadr pair)))))
+                 (concat keyword
+                         (when value
+                           (concat "="
+                                   (if (string-match-p (rx (any "[]")) value)
+                                       (format "{%s}" value)
+                                     value))))))
+             options
+             (or seperator ",")))
 
 (defun org-latex--wrap-label (element output info)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
