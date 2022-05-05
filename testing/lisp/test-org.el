@@ -250,6 +250,26 @@
               "%F %T"
               (org-encode-time 8 30 23 31 3 2022))))))
 
+(ert-deftest test-org/org-time-string-to-time ()
+  "Test `org-time-string-to-time' around DST transition."
+  (org-test-with-timezone "UTC"
+    (should (string-equal
+             "2022-03-31 23:31:00"
+             (format-time-string
+              "%F %T"
+              (org-time-string-to-time "2022-03-31 23:31")))))
+  (org-test-with-timezone "Europe/Madrid"
+    (should (string-equal
+             "2022-03-24 23:32:00 +0100 CET"
+             (format-time-string
+              "%F %T %z %Z"
+              (org-time-string-to-time "2022-03-24 23:32"))))
+    (should (string-equal
+             "2022-03-31 23:33:00 +0200 CEST"
+             (format-time-string
+              "%F %T %z %Z"
+              (org-time-string-to-time "2022-03-31 23:33"))))))
+
 (ert-deftest test-org/org-read-date ()
   "Test `org-read-date' specifications."
   ;; Parse ISO date with abbreviated year and month.
