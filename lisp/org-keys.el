@@ -462,6 +462,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 ;;;; Cursor keys with modifiers
 (org-defkey org-mode-map (kbd "M-<left>") #'org-metaleft)
+(org-defkey org-mode-map (kbd "ESC <left>") #'org-metaleft)
 (org-defkey org-mode-map (kbd "M-<right>") #'org-metaright)
 (org-defkey org-mode-map (kbd "ESC <right>") #'org-metaright)
 (org-defkey org-mode-map (kbd "M-<up>") #'org-metaup)
