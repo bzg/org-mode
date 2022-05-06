@@ -254,22 +254,22 @@ optional prefix argument COMPILE, the tangled Emacs Lisp file is
 byte-compiled before it is loaded."
   (interactive "fFile to load: \nP")
   (let ((tangled-file (concat (file-name-sans-extension file) ".el")))
-    ;; Tangle only if the Org file is newer than the Elisp file.
-    (unless (org-file-newer-than-p
-	     tangled-file
-	     (file-attribute-modification-time
-	      (file-attributes (file-truename file))))
+    ;; Tangle only if the Elisp file is older than the Org file.
+    ;; Catch the case when the .el file exists while the .org file is missing.
+    (unless (file-exists-p file)
+      (error "File to tangle does not exist: %s" file))
+    (when (file-newer-than-file-p file tangled-file)
+      (org-babel-tangle-file file
+                             tangled-file
+                             (rx string-start
+                                 (or "emacs-lisp" "elisp")
+                                 string-end))
       ;; Make sure that tangled file modification time is
       ;; updated even when `org-babel-tangle-file' does not make changes.
       ;; This avoids re-tangling changed FILE where the changes did
       ;; not affect the tangled code.
       (when (file-exists-p tangled-file)
-        (set-file-times tangled-file))
-      (org-babel-tangle-file file
-                             tangled-file
-                             (rx string-start
-                                 (or "emacs-lisp" "elisp")
-                                 string-end)))
+        (set-file-times tangled-file)))
     (if compile
 	(progn
 	  (byte-compile-file tangled-file)
