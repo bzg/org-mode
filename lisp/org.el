@@ -3846,7 +3846,8 @@ expected to be bound to nil when matching against this regexp.")
   "Printf format to make regexp to match an exact headline.
 This regexp will match the headline of any node which has the
 exact headline text that is put into the format, but may have any
-TODO state, priority and tags.")
+TODO state, priority, tags, statistics cookies (at the beginning
+or end of the headline title), or COMMENT keyword.")
 
 (defvar-local org-todo-line-tags-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.
@@ -4213,6 +4214,8 @@ related expressions."
 		      "\\(?: +" org-todo-regexp "\\)?"
 		      "\\(?: +\\(\\[#.\\]\\)\\)?"
 		      "\\(?: +"
+                      ;; Headline might be commented
+                      "\\(?:" org-comment-string " +\\)?"
 		      ;; Stats cookies can be stuck to body.
 		      "\\(?:\\[[0-9%%/]+\\] *\\)*"
 		      "\\(%s\\)"
