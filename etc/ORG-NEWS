@@ -273,6 +273,15 @@ Chmod-style permissions are based on the new variable
 ~org-babel-tangle-default-file-mode~.
 
 *** A new custom setting =org-agenda-clock-report-header= to add a header to org agenda clock report
+
+*** ~org-latex-listings~ has been replaced with ~org-latex-src-block-backend~
+
+~org-latex-listings~ has been renamed to better reflect the current
+purpose of the variable.  The replacement variable
+~org-latex-src-block-backend~ acts in exactly the same way, however it
+accepts =listings= and =verbatim= in place of =t= and =nil= (which
+still work, but are no longer listed as valid options).
+
 * Version 9.5
 
 ** Important announcements and breaking changes

@@ -11159,7 +11159,7 @@ Here is an example
 #+end_example
 
 #+cindex: formatting source code, markup rules
-#+vindex: org-latex-listings
+#+vindex: org-latex-src-block-backend
 If the example is source code from a programming language, or any
 other text that can be marked up by Font Lock in Emacs, you can ask
 for the example to look like the fontified Emacs buffer[fn:114].  This
@@ -16304,12 +16304,12 @@ Settings]]), however, override everything.
 | ~:latex-link-with-unknown-path-format~ | ~org-latex-link-with-unknown-path-format~ |
 | ~:latex-listings-langs~                | ~org-latex-listings-langs~                |
 | ~:latex-listings-options~              | ~org-latex-listings-options~              |
-| ~:latex-listings~                      | ~org-latex-listings~                      |
 | ~:latex-minted-langs~                  | ~org-latex-minted-langs~                  |
 | ~:latex-minted-options~                | ~org-latex-minted-options~                |
 | ~:latex-prefer-user-labels~            | ~org-latex-prefer-user-labels~            |
 | ~:latex-subtitle-format~               | ~org-latex-subtitle-format~               |
 | ~:latex-subtitle-separate~             | ~org-latex-subtitle-separate~             |
+| ~:latex-src-block-backend~             | ~org-latex-src-block-backend~             |
 | ~:latex-table-scientific-notation~     | ~org-latex-table-scientific-notation~     |
 | ~:latex-tables-booktabs~               | ~org-latex-tables-booktabs~               |
 | ~:latex-tables-centered~               | ~org-latex-tables-centered~               |
@@ -22256,7 +22256,7 @@ a fragment, see the documentation of the function
 version 1.34 of the =htmlize.el= package, which you need to install).
 Fontified code chunks in LaTeX can be achieved using either the
 [[https://www.ctan.org/pkg/listings][listings]] package or the [[https://www.ctan.org/pkg/minted][minted]] package.  Refer to
-~org-latex-listings~ for details.
+~org-latex-src-block-backend~ for details.
 
 [fn:115] Source code in code blocks may also be evaluated either
 interactively or on export.  See [[*Working with Source Code]] for more

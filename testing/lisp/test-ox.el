@@ -3978,7 +3978,7 @@ This test does not cover listings and custom environments."
 \\end{verbatim}
 \\caption{Caption is below, 60\\%s}
 \\end{figure*}"
-	     (let ((org-latex-listings 'minted) ; inactive due to missing lang
+	     (let ((org-latex-src-block-backend 'minted) ; inactive due to missing lang
 		   (org-latex-default-figure-position "tp"))
 	       ;; Namely "multicolumn" value to get just figure environment
 	       ;; looks like a bug.

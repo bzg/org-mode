@@ -324,6 +324,8 @@ Counting starts at 1."
   'org-preview-latex-default-process "9.0")
 (define-obsolete-variable-alias 'org-latex-preview-ltxpng-directory
   'org-preview-latex-image-directory "9.0")
+(define-obsolete-variable-alias 'org-latex-listings
+  'org-latex-src-block-backend "9.6")
 (define-obsolete-function-alias 'org-table-p 'org-at-table-p "9.0")
 (define-obsolete-function-alias 'org-on-heading-p 'org-at-heading-p "9.0")
 (define-obsolete-function-alias 'org-at-regexp-p 'org-in-regexp "8.3")

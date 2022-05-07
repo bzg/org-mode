@@ -858,7 +858,7 @@ holding export options."
        (and (stringp template)
 	    (format-spec template (org-latex--format-spec info))))
      ;; engrave-faces-latex preamble
-     (when (and (eq org-latex-listings 'engraved)
+     (when (and (eq org-latex-src-block-backend 'engraved)
                 (org-element-map (plist-get info :parse-tree)
                     '(src-block inline-src-block) #'identity
                     info t))

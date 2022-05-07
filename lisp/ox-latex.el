@@ -143,7 +143,7 @@
     (:latex-inactive-timestamp-format nil nil org-latex-inactive-timestamp-format)
     (:latex-inline-image-rules nil nil org-latex-inline-image-rules)
     (:latex-link-with-unknown-path-format nil nil org-latex-link-with-unknown-path-format)
-    (:latex-listings nil nil org-latex-listings)
+    (:latex-src-block-backend nil nil org-latex-src-block-backend)
     (:latex-listings-langs nil nil org-latex-listings-langs)
     (:latex-listings-options nil nil org-latex-listings-options)
     (:latex-minted-langs nil nil org-latex-minted-langs)
@@ -937,22 +937,22 @@ The function should return the string to be exported."
 
 ;; Src blocks
 
-(defcustom org-latex-listings nil
-  "Non-nil means export source code using the listings package.
+(defcustom org-latex-src-block-backend 'verbatim
+  "Backend used to generate source code listings.
 
-This package will fontify source code, possibly even with color.
-There are four implementations of this functionality you may
+This sets the behaviour for fontifying source code, possibly even with
+color.  There are four implementations of this functionality you may
 choose from (ordered from least to most capable):
-1. Verbatim (nil)
-2. Listings (t)
-3. Minted (minted)
-4. Engraved (engraved)
+1. Verbatim
+2. Listings
+3. Minted
+4. Engraved
 
 The first two options provide basic syntax
 highlighting (listings), or none at all (verbatim).
 
-When using listings, you also need to make use of the LaTeX
-\"listings\" package. The \"color\" package is also needed if you
+When using listings, you also need to make use of LaTeX package
+\"listings\"e. The \"color\" LaTeX package is also needed if you
 would like color too.  These can simply be added to
 `org-latex-packages-alist', using customise or something like:
 
@@ -963,27 +963,12 @@ would like color too.  These can simply be added to
 There are two further options for more comprehensive
 fontification. The first can be set with,
 
-  (setq org-latex-listings \\='engraved)
+  (setq org-latex-src-block-backend \\='minted)
 
-which causes source code to be run through
-`engrave-faces-latex-buffer', which generates colorings using
-Emacs' font-lock information.  This requires the engrave-faces
-package (availible from ELPA), and the fvextra LaTeX package be
-installed.
-
-The styling of the engraved result can customised with
-`org-latex-engraved-preamble' and `org-latex-engraved-options'.
-The default preamble also uses the tcolorbox LaTeX package in
-addition to fvextra.
-
-The second more comprehensive option can be set with,
-
-  (setq org-latex-listings \\='minted)
-
-which causes source code to be exported using the minted package
-as opposed to listings.  If you want to use minted, you need to
-add the minted package to `org-latex-packages-alist', for example
-using customize, or with
+which causes source code to be exported using the LaTeX package
+minted as opposed to listings.  If you want to use minted, you
+need to add the minted package to `org-latex-packages-alist', for
+example using customize, or with
 
   (require \\='ox-latex)
   (add-to-list \\='org-latex-packages-alist \\='(\"newfloat\" \"minted\"))
@@ -996,14 +981,29 @@ passed to pdflatex.
 The minted choice has possible repercussions on the preview of
 latex fragments (see `org-preview-latex-fragment').  If you run
 into previewing problems, please consult
-URL `https://orgmode.org/worg/org-tutorials/org-latex-preview.html'."
+URL `https://orgmode.org/worg/org-tutorials/org-latex-preview.html'.
+
+The most comprehensive option can be set with,
+
+  (setq org-latex-src-block-backend \\='engraved)
+
+which causes source code to be run through
+`engrave-faces-latex-buffer', which generates colorings using
+Emacs' font-lock information.  This requires the Emacs package
+engrave-faces (availible from ELPA), and the LaTeX package
+fvextra be installed.
+
+The styling of the engraved result can customised with
+`org-latex-engraved-preamble' and `org-latex-engraved-options'.
+The default preamble also uses the LaTeX package tcolorbox in
+addition to fvextra."
   :group 'org-export-latex
   :type '(choice
-	  (const :tag "Use listings" t)
+	  (const :tag "Use listings" listings)
 	  (const :tag "Use minted" minted)
 	  (const :tag "Use engrave-faces-latex" engraved)
-	  (const :tag "Export verbatim" nil))
-  :safe (lambda (s) (memq s '(t nil minted engraved))))
+	  (const :tag "Export verbatim" verbatim))
+  :safe (lambda (s) (memq s '(listings minted engraved verbatim))))
 
 (defcustom org-latex-listings-langs
   '((emacs-lisp "Lisp") (lisp "Lisp") (clojure "Lisp")
@@ -1203,7 +1203,7 @@ will produce
 
 [LISTINGS-SETUP]"
   "Preamble content injected when using engrave-faces-latex for source blocks.
-This is relevant when `org-latex-listings' is set to `engraved'.
+This is relevant when `org-latex-src-block-backend' is set to `engraved'.
 
 There is quite a lot of flexibility in what this preamble can be,
 as long as it:
@@ -1526,7 +1526,8 @@ For non-floats, see `org-latex--wrap-label'."
 			    main)
 		       (and (eq type 'src-block)
 			    (not (plist-get attr :float))
-			    (null (plist-get info :latex-listings)))))
+			    (memq (plist-get info :latex-src-block-backend)
+                                  '(verbatim nil)))))
 	 (short (org-export-get-caption element t))
 	 (caption-from-attr-latex (plist-get attr :caption)))
     (cond
@@ -1546,7 +1547,8 @@ For non-floats, see `org-latex--wrap-label'."
 		      (paragraph "figure")
 		      (image "figure")
 		      (special-block "figure")
-		      (src-block (if (plist-get info :latex-listings)
+		      (src-block (if (not (memq (plist-get info :latex-src-block-backend)
+                                                '(verbatim nil)))
 				     "listing"
 				   "figure"))
 		      (t (symbol-name type*)))
@@ -1933,7 +1935,7 @@ holding export options."
        (and (stringp template)
             (format-spec template spec)))
      ;; engrave-faces-latex preamble
-     (when (and (eq org-latex-listings 'engraved)
+     (when (and (eq org-latex-src-block-backend 'engraved)
                 (org-element-map (plist-get info :parse-tree)
                     '(src-block inline-src-block) #'identity
                     info t))
@@ -2321,11 +2323,17 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((code (org-element-property :value inline-src-block))
         (lang (org-element-property :language inline-src-block)))
-    (pcase (plist-get info :latex-listings)
-      ('nil (org-latex--text-markup code 'code info))
-      ('minted (org-latex-inline-src-block--minted info code lang))
-      ('engraved (org-latex-inline-src-block--engraved info code lang))
-      (_ (org-latex-inline-src-block--listings info code lang)))))
+    (pcase (plist-get info :latex-src-block-backend)
+      (`verbatim (org-latex--text-markup code 'code info))
+      (`minted (org-latex-inline-src-block--minted info code lang))
+      (`engraved (org-latex-inline-src-block--engraved info code lang))
+      (`listings (org-latex-inline-src-block--listings info code lang))
+      (oldval
+       (message "Please update the LaTeX src-block-backend to %s"
+                (if oldval "listings" "verbatim"))
+       (if oldval
+           (org-latex-inline-src-block--listings info code lang)
+         (org-latex--text-markup code 'code info))))))
 
 (defun org-latex-inline-src-block--minted (info code lang)
   "Transcode an inline src block's content from Org to LaTeX, using minted.
@@ -2508,7 +2516,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (concat depth (and depth "\n") "\\tableofcontents"))))
 	 ((string-match-p "\\<tables\\>" value) "\\listoftables")
 	 ((string-match-p "\\<listings\\>" value)
-	  (cl-case (plist-get info :latex-listings)
+	  (cl-case (plist-get info :latex-src-block-backend)
 	    ((nil) "\\listoffigures")
 	    (minted "\\listoflistings")
 	    (engraved "\\listoflistings")
@@ -3195,15 +3203,20 @@ contextual information."
            (num-start (org-export-get-loc src-block info))
            (retain-labels (org-element-property :retain-labels src-block))
            (attributes (org-export-read-attribute :attr_latex src-block))
-           (float (plist-get attributes :float))
-           (listings (plist-get info :latex-listings)))
+           (float (plist-get attributes :float)))
       (funcall
-       (pcase listings
-         ((or (pred not) (guard (not lang))) #'org-latex-src-block--verbatim)
+       (pcase (plist-get info :latex-src-block-backend)
+         ((or `verbatim (guard (not lang))) #'org-latex-src-block--verbatim)
+         (`minted #'org-latex-src-block--minted)
+         (`engraved #'org-latex-src-block--engraved)
+         (`listings #'org-latex-src-block--listings)
          ((guard custom-env) #'org-latex-src-block--custom)
-         ('minted #'org-latex-src-block--minted)
-         ('engraved #'org-latex-src-block--engraved)
-         (_ #'org-latex-src-block--listings))
+         (oldval
+          (message "Please update the LaTeX src-block-backend to %s"
+                   (if oldval "listings" "verbatim"))
+          (if oldval
+              #'org-latex-src-block--listings
+            #'org-latex-src-block--verbatim)))
        :src-block src-block
        :info info
        :lang lang
