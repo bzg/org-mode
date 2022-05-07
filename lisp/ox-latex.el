@@ -3306,7 +3306,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
            (let* ((code-info (org-export-unravel-code src-block))
                   (max-width
                    (apply 'max
-                          (mapcar 'length
+                          (mapcar 'string-width
                                   (org-split-string (car code-info)
                                                     "\n")))))
              (org-export-format-code
@@ -3458,7 +3458,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
       (let* ((code-info (org-export-unravel-code src-block))
              (max-width
               (apply 'max
-                     (mapcar 'length
+                     (mapcar 'string-width
                              (org-split-string (car code-info) "\n")))))
         (org-export-format-code
          (car code-info)
