@@ -3186,37 +3186,37 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (when (org-string-nw-p (org-element-property :value src-block))
     (let* ((lang (org-element-property :language src-block))
-	   (caption (org-element-property :caption src-block))
-	   (caption-above-p (org-latex--caption-above-p src-block info))
-	   (label (org-element-property :name src-block))
-	   (custom-env (and lang
-			    (cadr (assq (intern lang)
-					org-latex-custom-lang-environments))))
-	   (num-start (org-export-get-loc src-block info))
-	   (retain-labels (org-element-property :retain-labels src-block))
-	   (attributes (org-export-read-attribute :attr_latex src-block))
-	   (float (plist-get attributes :float))
-	   (listings (plist-get info :latex-listings)))
-      (cond
-       ((or (not lang) (not listings))
-        (org-latex-src-block--verbatim src-block info lang caption caption-above-p label
-                                       num-start retain-labels attributes float))
-       (custom-env
-        (org-latex-src-block--custom src-block info lang caption caption-above-p label
-                                     num-start retain-labels attributes float custom-env))
-       ((eq listings 'minted)
-        (org-latex-src-block--minted src-block info lang caption caption-above-p label
-                                     num-start retain-labels attributes float))
-       ((eq listings 'engraved)
-        (org-latex-src-block--engraved src-block info lang caption caption-above-p label
-                                       num-start retain-labels attributes float))
-       (t
-        (org-latex-src-block--listings src-block info lang caption caption-above-p label
-                                       num-start retain-labels attributes float))))))
+           (caption (org-element-property :caption src-block))
+           (caption-above-p (org-latex--caption-above-p src-block info))
+           (label (org-element-property :name src-block))
+           (custom-env (and lang
+                            (cadr (assq (intern lang)
+                                        org-latex-custom-lang-environments))))
+           (num-start (org-export-get-loc src-block info))
+           (retain-labels (org-element-property :retain-labels src-block))
+           (attributes (org-export-read-attribute :attr_latex src-block))
+           (float (plist-get attributes :float))
+           (listings (plist-get info :latex-listings)))
+      (funcall
+       (pcase listings
+         ((or (pred not) (guard (not lang))) #'org-latex-src-block--verbatim)
+         ((guard custom-env) #'org-latex-src-block--custom)
+         ('minted #'org-latex-src-block--minted)
+         ('engraved #'org-latex-src-block--engraved)
+         (_ #'org-latex-src-block--listings))
+       :src-block src-block
+       :info info
+       :lang lang
+       :caption caption
+       :caption-above-p caption-above-p
+       :label label
+       :num-start num-start
+       :retain-labels retain-labels
+       :attributes attributes
+       :float float))))
 
-(defun org-latex-src-block--verbatim
-    (src-block info _lang caption caption-above-p _label
-               _num-start _retain-labels _attributes float)
+(cl-defun org-latex-src-block--verbatim
+    (&key src-block info caption caption-above-p float &allow-other-keys)
   "Transcode a SRC-BLOCK element from Org to LaTeX, using verbatim.
 LANG, CAPTION, CAPTION-ABOVE-P, LABEL, NUM-START, RETAIN-LABELS, ATTRIBUTES
 and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
@@ -3235,9 +3235,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                     (if caption-above-p "" (concat "\n" caption-str))))
           (t verbatim))))
 
-(defun org-latex-src-block--custom
-    (src-block info _lang caption caption-above-p _label
-               _num-start _retain-labels attributes float custom-env)
+(cl-defun org-latex-src-block--custom
+    (&key src-block info caption caption-above-p attributes float custom-env &allow-other-keys)
   "Transcode a SRC-BLOCK element from Org to LaTeX, using a custom environment.
 LANG, CAPTION, CAPTION-ABOVE-P, LABEL, NUM-START, RETAIN-LABELS, ATTRIBUTES
 and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
@@ -3257,9 +3256,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                      (?l . ,(org-latex--label src-block info))
                      (?o . ,(or (plist-get attributes :options) "")))))))
 
-(defun org-latex-src-block--minted
-    (src-block info lang caption caption-above-p _label
-               num-start retain-labels attributes float)
+(cl-defun org-latex-src-block--minted
+    (&key src-block info lang caption caption-above-p num-start retain-labels attributes float &allow-other-keys)
   "Transcode a SRC-BLOCK element from Org to LaTeX, using minted.
 LANG, CAPTION, CAPTION-ABOVE-P, LABEL, NUM-START, RETAIN-LABELS, ATTRIBUTES
 and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
@@ -3345,9 +3343,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
         engraved-code)
     (user-error "Cannot engrave code as `engrave-faces-latex' is unavailible.")))
 
-(defun org-latex-src-block--engraved
-    (src-block info lang caption caption-above-p _label
-               num-start retain-labels attributes float)
+(cl-defun org-latex-src-block--engraved
+    (&key src-block info lang caption caption-above-p num-start retain-labels attributes float &allow-other-keys)
   "Transcode a SRC-BLOCK element from Org to LaTeX, using engrave-faces-latex.
 LANG, CAPTION, CAPTION-ABOVE-P, LABEL, NUM-START, RETAIN-LABELS, ATTRIBUTES
 and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
@@ -3407,9 +3404,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
            (org-latex-src--engrave-code content lang))))
     (format float-env body)))
 
-(defun org-latex-src-block--listings
-    (src-block info lang caption caption-above-p label
-               num-start retain-labels attributes float)
+(cl-defun org-latex-src-block--listings
+    (&key src-block info lang caption caption-above-p label num-start retain-labels attributes float &allow-other-keys)
   "Transcode a SRC-BLOCK element from Org to LaTeX, using listings.
 LANG, CAPTION, CAPTION-ABOVE-P, LABEL, NUM-START, RETAIN-LABELS, ATTRIBUTES
 and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
