@@ -129,6 +129,7 @@
     (:latex-diary-timestamp-format nil nil org-latex-diary-timestamp-format)
     (:latex-engraved-options nil nil org-latex-engraved-options)
     (:latex-engraved-preamble nil nil org-latex-engraved-preamble)
+    (:latex-engraved-theme "LATEX_ENGRAVED_THEME" nil org-latex-engraved-theme)
     (:latex-footnote-defined-format nil nil org-latex-footnote-defined-format)
     (:latex-footnote-separator nil nil org-latex-footnote-separator)
     (:latex-format-drawer-function nil nil org-latex-format-drawer-function)
@@ -1270,6 +1271,14 @@ block-specific options, you may use the following syntax:
   :type '(alist :key-type (string :tag "option")
                 :value-type (string :tag "value")))
 
+(defcustom org-latex-engraved-theme nil
+  "The theme that should be used for engraved code, when non-nil.
+This can be set to any theme defined in `engrave-faces-themes' or
+loadable by Emacs.  When set to t, the current Emacs theme is
+used.  When nil, no theme is applied."
+  :group 'org-export-latex
+  :type 'symbol)
+
 (defun org-latex-generate-engraved-preamble (info syntax-colours-p)
   "Generate the preamble to setup engraved code.
 The result is constructed from the :latex-engraved-preamble and
@@ -1278,7 +1287,8 @@ which are given by `org-latex-engraved-preamble' and
 `org-latex-engraved-options' respectively."
   (let* ((engraved-options
           (plist-get info :latex-engraved-options))
-         (engraved-preamble (plist-get info :latex-engraved-preamble)))
+         (engraved-preamble (plist-get info :latex-engraved-preamble))
+         (engraved-theme (plist-get info :latex-engraved-theme)))
     (when (string-match "^[ \t]*\\[FVEXTRA-SETUP\\][ \t]*\n?" engraved-preamble)
       (setq engraved-preamble
             (replace-match
@@ -1310,7 +1320,8 @@ which are given by `org-latex-engraved-preamble' and
          engraved-preamble
          "\n\n% Setup for code blocks [2/2]: syntax highlighting colors\n"
          (if (require 'engrave-faces-latex nil t)
-             (engrave-faces-latex-gen-preamble)
+             (engrave-faces-latex-gen-preamble
+              (when engraved-theme (intern engraved-theme)))
            (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
            "% WARNING syntax highlighting unavailible as engrave-faces-latex was missing.\n")
          "\n")
