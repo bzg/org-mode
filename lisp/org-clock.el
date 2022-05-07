@@ -1582,8 +1582,8 @@ line and position cursor in that line."
 	(cond
 	 ((null positions)
           (org-fold-core-ignore-modifications
-	      ;; Skip planning line and property drawer, if any.
-	      (org-end-of-meta-data)
+	    ;; Skip planning line and property drawer, if any.
+	    (org-end-of-meta-data)
 	    (unless (bolp) (insert-and-inherit "\n"))
 	    ;; Create a new drawer if necessary.
 	    (when (and org-clock-into-drawer
@@ -1607,28 +1607,28 @@ line and position cursor in that line."
 	  ;; Skip planning line and property drawer, if any.
 	  (org-end-of-meta-data)
           (org-fold-core-ignore-modifications
-	      (let ((beg (point)))
-	        (insert-and-inherit
-	         (mapconcat
-	          (lambda (p)
-		    (save-excursion
-		      (goto-char p)
-		      (org-trim (delete-and-extract-region
-			         (save-excursion (skip-chars-backward " \r\t\n")
-					         (line-beginning-position 2))
-			         (line-beginning-position 2)))))
-	          positions "\n")
-	         "\n:END:\n")
-	        (let ((end (point-marker)))
-	          (goto-char beg)
-	          (save-excursion (insert-and-inherit ":" drawer ":\n"))
-	          (org-fold-region (line-end-position) (1- end) t 'outline)
-	          (org-indent-region (point) end)
-	          (forward-line)
-	          (unless org-log-states-order-reversed
-		    (goto-char end)
-		    (beginning-of-line -1))
-	          (set-marker end nil)))))
+	    (let ((beg (point)))
+	      (insert-and-inherit
+	       (mapconcat
+	        (lambda (p)
+		  (save-excursion
+		    (goto-char p)
+		    (org-trim (delete-and-extract-region
+			       (save-excursion (skip-chars-backward " \r\t\n")
+					       (line-beginning-position 2))
+			       (line-beginning-position 2)))))
+	        positions "\n")
+	       "\n:END:\n")
+	      (let ((end (point-marker)))
+	        (goto-char beg)
+	        (save-excursion (insert-and-inherit ":" drawer ":\n"))
+	        (org-fold-region (line-end-position) (1- end) t 'outline)
+	        (org-indent-region (point) end)
+	        (forward-line)
+	        (unless org-log-states-order-reversed
+		  (goto-char end)
+		  (beginning-of-line -1))
+	        (set-marker end nil)))))
 	 (org-log-states-order-reversed (goto-char (car (last positions))))
 	 (t (goto-char (car positions))))))))
 
@@ -1678,7 +1678,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (goto-char (match-end 0))
 	  (delete-region (point) (point-at-eol))
           (org-fold-core-ignore-modifications
-              (insert-and-inherit "--")
+            (insert-and-inherit "--")
             (setq te (org-insert-time-stamp (or at-time now) 'with-hm 'inactive))
             (setq s (org-time-convert-to-integer
 	             (time-subtract
@@ -1717,9 +1717,11 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 					   (match-string 2))))
 		    (when newstate (org-todo newstate))))
 		 ((and org-clock-out-switch-to-state
-		       (not (looking-at (concat org-outline-regexp "[ \t]*"
-						org-clock-out-switch-to-state
-						"\\>"))))
+		       (not (looking-at
+                           (concat
+                            org-outline-regexp "[ \t]*"
+			    org-clock-out-switch-to-state
+			    "\\>"))))
 		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
 	  (message (if remove

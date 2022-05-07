@@ -357,7 +357,7 @@ following symbols:
 ;;;; Folding specs
 
 (defvar-local org-fold-core--specs '((org-fold-visible
-		         (:visible . t)
+	                 (:visible . t)
                          (:alias . (visible)))
                         (org-fold-hidden
 			 (:ellipsis . "...")
@@ -504,7 +504,7 @@ than the buffer where the change was actually made.")
 
 Also, make sure that folding properties from killed buffers are not
 hanging around."
-  (declare (debug (form body)) (indent 1))
+  (declare (debug (form body)) (indent 0))
   `(let (buffers dead-properties)
      (if (and (not (buffer-base-buffer))
               (not (eq (current-buffer) (car org-fold-core--indirect-buffers))))
@@ -582,7 +582,7 @@ unless RETURN-ONLY is non-nil."
                     (setq-local org-fold-core--indirect-buffers
                                 (let (bufs)
                                   (org-fold-core-cycle-over-indirect-buffers
-                                      (push (current-buffer) bufs))
+                                    (push (current-buffer) bufs))
                                   (push buf bufs)
                                   (delete-dups bufs)))))
                 ;; Copy all the old folding properties to preserve the folding state
@@ -615,25 +615,25 @@ unless RETURN-ONLY is non-nil."
                   ;; parameters.
                   (let (full-prop-list)
                     (org-fold-core-cycle-over-indirect-buffers
-                        (setq full-prop-list
-                              (append full-prop-list
-                                      (delq nil
-                                            (mapcar (lambda (spec)
-                                                      (cond
-                                                       ((org-fold-core-get-folding-spec-property spec :front-sticky)
-                                                        (cons (org-fold-core--property-symbol-get-create spec nil 'return-only)
-                                                              nil))
-                                                       ((org-fold-core-get-folding-spec-property spec :rear-sticky)
-                                                        nil)
-                                                       (t
-                                                        (cons (org-fold-core--property-symbol-get-create spec nil 'return-only)
-                                                              t))))
-                                                    (org-fold-core-folding-spec-list))))))
+                      (setq full-prop-list
+                            (append full-prop-list
+                                    (delq nil
+                                          (mapcar (lambda (spec)
+                                                    (cond
+                                                     ((org-fold-core-get-folding-spec-property spec :front-sticky)
+                                                      (cons (org-fold-core--property-symbol-get-create spec nil 'return-only)
+                                                            nil))
+                                                     ((org-fold-core-get-folding-spec-property spec :rear-sticky)
+                                                      nil)
+                                                     (t
+                                                      (cons (org-fold-core--property-symbol-get-create spec nil 'return-only)
+                                                            t))))
+                                                  (org-fold-core-folding-spec-list))))))
                     (org-fold-core-cycle-over-indirect-buffers
-                        (setq-local text-property-default-nonsticky
-                                    (delete-dups (append
-                                                  text-property-default-nonsticky
-                                                  full-prop-list))))))))))))))
+                      (setq-local text-property-default-nonsticky
+                                  (delete-dups (append
+                                                text-property-default-nonsticky
+                                                full-prop-list))))))))))))))
 
 (defun org-fold-core-decouple-indirect-buffer-folds ()
   "Copy and decouple folding state in a newly created indirect buffer.
@@ -1173,14 +1173,14 @@ This function is intended to be used as `isearch-filter-predicate'."
 
 (defmacro org-fold-core-ignore-modifications (&rest body)
   "Run BODY ignoring buffer modifications in `org-fold-core--fix-folded-region'."
-  (declare (debug (form body)) (indent 1))
+  (declare (debug (form body)) (indent 0))
   `(let ((org-fold-core--ignore-modifications t))
      (unwind-protect (progn ,@body)
        (setq org-fold-core--last-buffer-chars-modified-tick (buffer-chars-modified-tick)))))
 
 (defmacro org-fold-core-ignore-fragility-checks (&rest body)
   "Run BODY skipping :fragility checks in `org-fold-core--fix-folded-region'."
-  (declare (debug (form body)) (indent 1))
+  (declare (debug (form body)) (indent 0))
   `(let ((org-fold-core--ignore-fragility-checks t))
      (progn ,@body)))
 
@@ -1211,53 +1211,53 @@ property, unfold the region if the :fragile function returns non-nil."
       ;; buffer.  Work around Emacs bug#46982.
       (when (eq org-fold-core-style 'text-properties)
         (org-fold-core-cycle-over-indirect-buffers
-            ;; Re-hide text inserted in the middle/font/back of a folded
-            ;; region.
-            (unless (equal from to) ; Ignore deletions.
-	      (dolist (spec (org-fold-core-folding-spec-list))
-                ;; Reveal fully invisible text inserted in the middle
-                ;; of visible portion of the buffer.  This is needed,
-                ;; for example, when there was a deletion in a folded
-                ;; heading, the heading was unfolded, end `undo' was
-                ;; called.  The `undo' would insert the folded text.
-                (when (and (or (eq from (point-min))
-                               (not (org-fold-core-folded-p (1- from) spec)))
-                           (or (eq to (point-max))
-                               (not (org-fold-core-folded-p to spec)))
-                           (org-fold-core-region-folded-p from to spec))
-                  (org-fold-core-region from to nil spec))
-                ;; Look around and fold the new text if the nearby folds are
-                ;; sticky.
-                (unless (org-fold-core-region-folded-p from to spec)
-	          (let ((spec-to (org-fold-core-get-folding-spec spec (min to (1- (point-max)))))
-		        (spec-from (org-fold-core-get-folding-spec spec (max (point-min) (1- from)))))
-                    ;; Reveal folds around undoed deletion.
-                    (when undo-in-progress
-                      (let ((lregion (org-fold-core-get-region-at-point spec (max (point-min) (1- from))))
-                            (rregion (org-fold-core-get-region-at-point spec (min to (1- (point-max))))))
-                        (if (and lregion rregion)
-                            (org-fold-core-region (car lregion) (cdr rregion) nil spec)
-                          (when lregion
-                            (org-fold-core-region (car lregion) (cdr lregion) nil spec))
-                          (when rregion
-                            (org-fold-core-region (car rregion) (cdr rregion) nil spec)))))
-                    ;; Hide text inserted in the middle of a fold.
-	            (when (and (or spec-from (eq from (point-min)))
-                               (or spec-to (eq to (point-max)))
-                               (or spec-from spec-to)
-                               (eq spec-to spec-from)
-                               (or (org-fold-core-get-folding-spec-property spec :front-sticky)
-                                   (org-fold-core-get-folding-spec-property spec :rear-sticky)))
-                      (unless (and (eq from (point-min)) (eq to (point-max))) ; Buffer content replaced.
-	                (org-fold-core-region from to t (or spec-from spec-to))))
-                    ;; Hide text inserted at the end of a fold.
-                    (when (and spec-from (org-fold-core-get-folding-spec-property spec-from :rear-sticky))
-                      (org-fold-core-region from to t spec-from))
-                    ;; Hide text inserted in front of a fold.
-                    (when (and spec-to
-                               (not (eq to (point-max))) ; Text inserted at the end of buffer is not prepended anywhere.
-                               (org-fold-core-get-folding-spec-property spec-to :front-sticky))
-                      (org-fold-core-region from to t spec-to))))))))
+          ;; Re-hide text inserted in the middle/font/back of a folded
+          ;; region.
+          (unless (equal from to) ; Ignore deletions.
+	    (dolist (spec (org-fold-core-folding-spec-list))
+              ;; Reveal fully invisible text inserted in the middle
+              ;; of visible portion of the buffer.  This is needed,
+              ;; for example, when there was a deletion in a folded
+              ;; heading, the heading was unfolded, end `undo' was
+              ;; called.  The `undo' would insert the folded text.
+              (when (and (or (eq from (point-min))
+                             (not (org-fold-core-folded-p (1- from) spec)))
+                         (or (eq to (point-max))
+                             (not (org-fold-core-folded-p to spec)))
+                         (org-fold-core-region-folded-p from to spec))
+                (org-fold-core-region from to nil spec))
+              ;; Look around and fold the new text if the nearby folds are
+              ;; sticky.
+              (unless (org-fold-core-region-folded-p from to spec)
+	        (let ((spec-to (org-fold-core-get-folding-spec spec (min to (1- (point-max)))))
+		      (spec-from (org-fold-core-get-folding-spec spec (max (point-min) (1- from)))))
+                  ;; Reveal folds around undoed deletion.
+                  (when undo-in-progress
+                    (let ((lregion (org-fold-core-get-region-at-point spec (max (point-min) (1- from))))
+                          (rregion (org-fold-core-get-region-at-point spec (min to (1- (point-max))))))
+                      (if (and lregion rregion)
+                          (org-fold-core-region (car lregion) (cdr rregion) nil spec)
+                        (when lregion
+                          (org-fold-core-region (car lregion) (cdr lregion) nil spec))
+                        (when rregion
+                          (org-fold-core-region (car rregion) (cdr rregion) nil spec)))))
+                  ;; Hide text inserted in the middle of a fold.
+	          (when (and (or spec-from (eq from (point-min)))
+                             (or spec-to (eq to (point-max)))
+                             (or spec-from spec-to)
+                             (eq spec-to spec-from)
+                             (or (org-fold-core-get-folding-spec-property spec :front-sticky)
+                                 (org-fold-core-get-folding-spec-property spec :rear-sticky)))
+                    (unless (and (eq from (point-min)) (eq to (point-max))) ; Buffer content replaced.
+	              (org-fold-core-region from to t (or spec-from spec-to))))
+                  ;; Hide text inserted at the end of a fold.
+                  (when (and spec-from (org-fold-core-get-folding-spec-property spec-from :rear-sticky))
+                    (org-fold-core-region from to t spec-from))
+                  ;; Hide text inserted in front of a fold.
+                  (when (and spec-to
+                             (not (eq to (point-max))) ; Text inserted at the end of buffer is not prepended anywhere.
+                             (org-fold-core-get-folding-spec-property spec-to :front-sticky))
+                    (org-fold-core-region from to t spec-to))))))))
       ;; Process all the folded text between `from' and `to'.  Do it
       ;; only in current buffer to avoid verifying semantic structure
       ;; multiple times in indirect buffers that have exactly same
