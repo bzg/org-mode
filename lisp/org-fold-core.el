@@ -762,8 +762,14 @@ future org buffers."
 (defsubst org-fold-core-folded-p (&optional pos spec-or-alias)
   "Non-nil if the character after POS is folded.
 If POS is nil, use `point' instead.
-If SPEC-OR-ALIAS is a folding spec, only check the given folding spec."
-  (org-fold-core-get-folding-spec spec-or-alias pos))
+If SPEC-OR-ALIAS is a folding spec or a list, only check the given
+folding spec or the listed specs."
+  (if (and spec-or-alias (listp spec-or-alias))
+      (catch :found
+        (dolist (spec spec-or-alias)
+          (let ((val (org-fold-core-get-folding-spec spec pos)))
+            (when val (throw :found val)))))
+    (org-fold-core-get-folding-spec spec-or-alias pos)))
 
 (defun org-fold-core-region-folded-p (beg end &optional spec-or-alias)
   "Non-nil if the region between BEG and END is folded.
