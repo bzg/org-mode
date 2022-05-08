@@ -3330,23 +3330,20 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
   (let* ((caption-str (org-latex--caption/label-string src-block info))
          (placement (or (org-unbracket-string "[" "]" (plist-get attributes :placement))
                         (plist-get info :latex-default-figure-position)))
+         (multicolumn-p (string= "multicolumn" float))
          (float-env
           (cond
-           ((string= "multicolumn" float)
-            (format "\\begin{listing*}[%s]\n%s%%s\n%s\\end{listing*}"
-                    placement
-                    (if caption-above-p caption-str "")
-                    (if caption-above-p "" caption-str)))
-           (caption
-            (format "\\begin{listing}[%s]\n%s%%s\n%s\\end{listing}"
-                    placement
-                    (if caption-above-p caption-str "")
-                    (if caption-above-p "" caption-str)))
+           ((or caption multicolumn-p)
+            (cons
+             (concat "\\begin{listing" (when multicolumn-p "*")
+                     "}[" placement "]\n"
+                     (if caption-above-p caption-str ""))
+             (concat "\n" (if caption-above-p "" caption-str)
+                     "\\end{listing" (when multicolumn-p "*") "}")))
            ((string= "t" float)
-            (concat (format "\\begin{listing}[%s]\n"
-                            placement)
-                    "%s\n\\end{listing}"))
-           (t "%s")))
+            (cons
+             (concat "\\begin{listing}[" placement "]\n")
+             "\n\\end{listing}"))))
          (options (plist-get info :latex-minted-options))
          (body
           (format
@@ -3386,8 +3383,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                                         ?\s)
                            (format "(%s)" ref)))))
               nil (and retain-labels (cdr code-info)))))))
-    ;; Return value.
-    (format float-env body)))
+    (concat (car float-env) body (cdr float-env))))
 
 (defun org-latex-src--engrave-code (content lang &optional theme options inline)
   "Engrave CONTENT to LaTeX in a LANG-mode buffer, and give the result.
@@ -3447,23 +3443,20 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
   (let* ((caption-str (org-latex--caption/label-string src-block info))
          (placement (or (org-unbracket-string "[" "]" (plist-get attributes :placement))
                         (plist-get info :latex-default-figure-position)))
+         (multicolumn-p (string= "multicolumn" float))
          (float-env
           (cond
-           ((string= "multicolumn" float)
-            (format "\\begin{listing*}[%s]\n%s%%s\n%s\\end{listing*}"
-                    placement
-                    (if caption-above-p caption-str "")
-                    (if caption-above-p "" caption-str)))
-           (caption
-            (format "\\begin{listing}[%s]\n%s%%s\n%s\\end{listing}"
-                    placement
-                    (if caption-above-p caption-str "")
-                    (if caption-above-p "" caption-str)))
+           ((or caption multicolumn-p)
+            (cons
+             (concat "\\begin{listing" (when multicolumn-p "*")
+                     "}[" placement "]\n"
+                     (if caption-above-p caption-str ""))
+             (concat "\n" (if caption-above-p "" caption-str)
+                     "\\end{listing" (when multicolumn-p "*") "}")))
            ((string= "t" float)
-            (concat (format "\\begin{listing}[%s]\n"
-                            placement)
-                    "%s\n\\end{listing}"))
-           (t "%s")))
+            (cons
+             (concat "\\begin{listing}[" placement "]\n")
+             "\n\\end{listing}"))))
          (options
           (let ((engraved-options (plist-get info :latex-engraved-options))
                 (local-options (plist-get attributes :options)))
@@ -3498,7 +3491,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
            content lang
            (when engraved-theme (intern engraved-theme))
            options)))
-    (format float-env body)))
+    (concat (car float-env) body (cdr float-env))))
 
 (cl-defun org-latex-src-block--listings
     (&key src-block info lang caption caption-above-p label num-start retain-labels attributes float &allow-other-keys)
