@@ -2319,6 +2319,31 @@
 				     ">>>>>>>>>>")
 	    ">>>>>>>>..")))
 
+(ert-deftest test-org/org-find-olp ()
+  "Test `org-find-olp' specifications."
+  (org-test-with-temp-text
+      "
+* Headline
+** COMMENT headline2
+** TODO headline3
+*** [#A] headline4 :tags:
+** [#A]headline5
+** [0%] headline6
+** headline7 [100%]
+** headline8 [1/5] :some:more:tags:
+* Test
+  "
+    (should (org-find-olp '("Headline") t))
+    (should-error (org-find-olp '("Headline" "Test") t))
+    (should-error (org-find-olp '("Headlinealksjd") t))
+    (should (org-find-olp '("Headline" "headline2") t))
+    (should (org-find-olp '("Headline" "headline3") t))
+    (should (org-find-olp '("Headline" "headline3" "headline4") t))
+    (should-error (org-find-olp '("Headline" "headline5") t))
+    (should (org-find-olp '("Headline" "headline6") t))
+    (should (org-find-olp '("Headline" "headline7") t))
+    (should (org-find-olp '("Headline" "headline8") t))))
+
 (ert-deftest test-org/map-entries ()
   "Test `org-map-entries' specifications."
   ;; Full match.
