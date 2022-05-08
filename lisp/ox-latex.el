@@ -1288,7 +1288,27 @@ which are given by `org-latex-engraved-preamble' and
   (let* ((engraved-options
           (plist-get info :latex-engraved-options))
          (engraved-preamble (plist-get info :latex-engraved-preamble))
-         (engraved-theme (plist-get info :latex-engraved-theme)))
+         (engraved-theme (plist-get info :latex-engraved-theme))
+         (engraved-themes
+          (cl-delete-duplicates
+           (org-element-map
+               (plist-get info :parse-tree)
+               '(src-block inline-src-block)
+             (lambda (src)
+               (plist-get
+                (org-export-read-attribute :attr_latex src)
+                :engraved-theme))
+             info)))
+         (gen-theme-spec
+          (lambda (theme)
+            (if (eq engrave-faces-latex-output-style 'preset)
+                (engrave-faces-latex-gen-preamble (when theme (intern theme)))
+              (engrave-faces-latex-gen-preamble-line
+               'default
+               (alist-get 'default
+                          (if theme
+                              (engrave-faces-get-theme (intern theme))
+                            engrave-faces-current-preset-style)))))))
     (when (string-match "^[ \t]*\\[FVEXTRA-SETUP\\][ \t]*\n?" engraved-preamble)
       (setq engraved-preamble
             (replace-match
@@ -1318,10 +1338,31 @@ which are given by `org-latex-engraved-preamble' and
         (concat
          "\n% Setup for code blocks [1/2]\n\n"
          engraved-preamble
-         "\n\n% Setup for code blocks [2/2]: syntax highlighting colors\n"
+         "\n\n% Setup for code blocks [2/2]: syntax highlighting colors\n\n"
          (if (require 'engrave-faces-latex nil t)
-             (engrave-faces-latex-gen-preamble
-              (when engraved-theme (intern engraved-theme)))
+             (if engraved-themes
+                 (concat
+                  (mapconcat
+                   (lambda (theme)
+                     (format
+                      "\n\\newcommand{\\engravedtheme%s}{%%\n%s\n}"
+                      (replace-regexp-in-string "[^A-Za-z]" "" theme)
+                      (replace-regexp-in-string
+                       "newcommand" "renewcommand"
+                       (replace-regexp-in-string
+                        "#" "##"
+                        (funcall gen-theme-spec theme)))))
+                   engraved-themes
+                   "\n")
+                  "\n\n"
+                  (cond
+                   ((memq engraved-theme engraved-themes)
+                    (concat "\\engravedtheme"
+                            (replace-regexp-in-string
+                             "[^A-Za-z]" "" engraved-theme)
+                            "\n"))
+                   (t (funcall gen-theme-spec engraved-theme))))
+               (funcall gen-theme-spec engraved-theme))
            (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
            "% WARNING syntax highlighting unavailible as engrave-faces-latex was missing.\n")
          "\n")
@@ -2359,10 +2400,11 @@ INFO, CODE, and LANG are provided by `org-latex-inline-src-block'."
             mint-lang
             code)))
 
-(defun org-latex-inline-src-block--engraved (_info code lang)
+(defun org-latex-inline-src-block--engraved (info code lang)
   "Transcode an inline src block's content from Org to LaTeX, using engrave-faces.
 INFO, CODE, and LANG are provided by `org-latex-inline-src-block'."
-  (format "\\Verb{%s}" (org-latex-src--engrave-code code lang)))
+  (org-latex-src--engrave-code
+   code lang nil (plist-get info :latex-engraved-options) t))
 
 (defun org-latex-inline-src-block--listings (info code lang)
   "Transcode an inline src block's content from Org to LaTeX, using lstlistings.
@@ -3347,13 +3389,25 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
     ;; Return value.
     (format float-env body)))
 
-(defun org-latex-src--engrave-code (content lang)
-  "Engrave CONTENT to LaTeX in a LANG-mode buffer, and give the result."
+(defun org-latex-src--engrave-code (content lang &optional theme options inline)
+  "Engrave CONTENT to LaTeX in a LANG-mode buffer, and give the result.
+When the THEME symbol is non-nil, that theme will be used.
+
+When INLINE is nil, a Verbatim environment wrapped in a Code
+environment will be used. When t, a Verb command will be used.
+
+When OPTIONS is provided, as either a string or list of key-value
+pairs accepted by `org-latex--make-option-string', it is passed
+to the Verbatim environment or Verb command."
   (if (require 'engrave-faces-latex nil t)
       (let* ((lang-mode (and lang (org-src-get-lang-mode lang)))
+             (engrave-faces-current-preset-style
+              (if theme
+                  (engrave-faces-get-theme theme)
+                engrave-faces-current-preset-style))
              (engraved-buffer
               (with-temp-buffer
-                (insert content)
+                (insert (string-trim-right content "\n"))
                 (when lang-mode
                   (if (functionp lang-mode)
                       (funcall lang-mode)
@@ -3362,9 +3416,27 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                 (engrave-faces-latex-buffer)))
              (engraved-code
               (with-current-buffer engraved-buffer
-                (buffer-string))))
+                (buffer-string)))
+             (engraved-options
+              (when options
+                (concat "["
+                        (if (listp options)
+                            (org-latex--make-option-string options)
+                          options)
+                        "]")))
+             (engraved-wrapped
+              (if inline
+                  (concat "\\Verb" engraved-options "{" engraved-code "}")
+                (concat "\\begin{Code}\n\\begin{Verbatim}" engraved-options "\n"
+                        engraved-code "\n\\end{Verbatim}\n\\end{Code}"))))
         (kill-buffer engraved-buffer)
-        engraved-code)
+        (if theme
+            (concat "{\\engravedtheme"
+                    (replace-regexp-in-string "[^A-Za-z]" ""
+                                              (symbol-name theme))
+                    engraved-wrapped
+                    "}")
+          engraved-wrapped))
     (user-error "Cannot engrave code as `engrave-faces-latex' is unavailible.")))
 
 (cl-defun org-latex-src-block--engraved
@@ -3392,7 +3464,15 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                             placement)
                     "%s\n\\end{listing}"))
            (t "%s")))
-         (options (plist-get info :latex-engraved-options))
+         (options
+          (let ((engraved-options (plist-get info :latex-engraved-options))
+                (local-options (plist-get attributes :options)))
+            (append
+             (when (and num-start (not (assoc "linenos" engraved-options)))
+               `(("linenos")
+                 ("firstnumber" ,(number-to-string (1+ num-start)))))
+             (and local-options (list local-options)))))
+         (engraved-theme (plist-get attributes :engraved-theme))
          (content
           (let* ((code-info (org-export-unravel-code src-block))
                  (max-width
@@ -3414,18 +3494,10 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                           (format "(%s)" ref)))))
              nil (and retain-labels (cdr code-info)))))
          (body
-          (format
-           "\\begin{Code}\n\\begin{Verbatim}[%s]\n%s\\end{Verbatim}\n\\end{Code}"
-           ;; Options.
-           (concat
-            (org-latex--make-option-string
-             (append
-              (when (and num-start (not (assoc "linenos" options)))
-                `(("linenos")
-                  ("firstnumber" ,(number-to-string (1+ num-start)))))
-              (let ((local-options (plist-get attributes :options)))
-                (and local-options (list local-options))))))
-           (org-latex-src--engrave-code content lang))))
+          (org-latex-src--engrave-code
+           content lang
+           (when engraved-theme (intern engraved-theme))
+           options)))
     (format float-env body)))
 
 (cl-defun org-latex-src-block--listings
