@@ -1231,11 +1231,13 @@ For example, 9:30am would become 09:30 rather than  9:30."
   :type 'boolean)
 
 (defcustom org-agenda-clock-report-header nil
-  "Header for org agenda clock report mode"
+  "Header inserted before the table in Org agenda clock report mode.
+
+See Info node `(org) Agenda Commands' for more details."
   :group 'org-agenda
   :type '(choice
-    (string :tag "Header")
-    (const :tag "No header" nil))
+          (string :tag "Header")
+          (const :tag "No header" nil))
   :safe #'stringp
   :package-version '(Org . "9.6"))
 
