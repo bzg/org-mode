@@ -4502,8 +4502,10 @@ items if they have an hour specification like [h]h:mm."
 	  (setq p (plist-put p :tend clocktable-end))
 	  (setq p (plist-put p :scope 'agenda))
 	  (setq tbl (apply #'org-clock-get-clocktable p))
-    (when org-agenda-clock-report-header
-      (insert (propertize org-agenda-clock-report-header 'face 'org-agenda-structure)))
+          (when org-agenda-clock-report-header
+            (insert (propertize org-agenda-clock-report-header 'face 'org-agenda-structure))
+            (unless (string-suffix-p "\n" org-agenda-clock-report-header)
+              (insert "\n")))
 	  (insert tbl)))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
