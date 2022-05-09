@@ -5543,10 +5543,14 @@ First element has index 0, or I0 if given."
 	 beg end)
     (save-excursion
       (beginning-of-line 1)
-      (while (looking-at re) (beginning-of-line 0))
-      (beginning-of-line 2)
+      (while (and (not (eq (point) (point-min)))
+                  (looking-at re))
+        (beginning-of-line 0))
+      (unless (eq (point) (point-min)) (beginning-of-line 2))
       (setq beg (point))
-      (while (looking-at re) (beginning-of-line 2))
+      (while (and (not (eq (point) (point-max)))
+                  (looking-at re))
+        (beginning-of-line 2))
       (setq end (point)))
     (comment-region beg end (if commented '(4) nil))))
 
