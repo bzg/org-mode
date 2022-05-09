@@ -932,37 +932,38 @@ This function is intended to be used as a member of
 This function is intended to be used as :fragile property of
 `org-fold-outline' spec.  See `org-fold-core--specs' for details."
   (save-match-data
-    (save-excursion
-      (goto-char (car region))
-      ;; The line before beginning of the fold should be either a
-      ;; headline or a list item.
-      (backward-char)
-      (beginning-of-line)
-      ;; Make sure that headline is not partially hidden
-      (unless (org-fold-folded-p nil 'headline)
-        (org-fold-region (max (point-min) (1- (point)))
-                 (let ((endl (line-end-position)))
-                   (save-excursion
-                     (goto-char endl)
-                     (skip-chars-forward "\n\t\r ")
-                     ;; Unfold blank lines.
-                     (if (or (and (looking-at-p "\\*")
-                                  (> (point) (1+ endl)))
-                             (eq (point) (point-max)))
-                         (point)
-                       endl)))
-                 nil 'headline))
-      ;; Never hide level 1 headlines
-      (save-excursion
-        (goto-char (line-end-position))
-        (when (re-search-forward (rx bol "* ") (cdr region) t)
-          (org-fold-region (match-beginning 0) (line-end-position) nil 'headline)))
-      ;; Check the validity of headline
-      (unless (let ((case-fold-search t))
-	        (looking-at (rx-to-string
-                             `(or (regex ,(org-item-re))
-			          (regex ,org-outline-regexp-bol)))))
-	t))))
+    (org-with-wide-buffer
+     (goto-char (car region))
+     ;; The line before beginning of the fold should be either a
+     ;; headline or a list item.
+     (backward-char)
+     (beginning-of-line)
+     ;; Make sure that headline is not partially hidden
+     (unless (org-fold-folded-p nil 'headline)
+       (org-fold-region
+        (max (point-min) (1- (point)))
+        (let ((endl (line-end-position)))
+          (save-excursion
+            (goto-char endl)
+            (skip-chars-forward "\n\t\r ")
+            ;; Unfold blank lines.
+            (if (or (and (looking-at-p "\\*")
+                         (> (point) (1+ endl)))
+                    (eq (point) (point-max)))
+                (point)
+              endl)))
+        nil 'headline))
+     ;; Never hide level 1 headlines
+     (save-excursion
+       (goto-char (line-end-position))
+       (when (re-search-forward (rx bol "* ") (cdr region) t)
+         (org-fold-region (match-beginning 0) (line-end-position) nil 'headline)))
+     ;; Check the validity of headline
+     (unless (let ((case-fold-search t))
+	       (looking-at (rx-to-string
+                            `(or (regex ,(org-item-re))
+			         (regex ,org-outline-regexp-bol)))))
+       t))))
 
 (defun org-fold--reveal-drawer-or-block-maybe (region spec)
   "Reveal folded drawer/block (according to SPEC) in REGION when needed.
