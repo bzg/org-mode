@@ -2850,6 +2850,34 @@ in this variable)."
     (member-ignore-case property org-use-property-inheritance))
    (t (error "Invalid setting of `org-use-property-inheritance'"))))
 
+(defcustom org-property-separators nil
+  "An alist to control how properties are combined.
+
+The car of each item should be either a list of property names or
+a regular expression, while the cdr should be the separator to
+use when combining that property.
+
+If an alist item cannot be found that matches a given property, a
+single space will be used as the separator."
+  :group 'org-properties
+  :type '(alist :key-type (choice (repeat :tag "Properties" string)
+                                  (string :tag "Regular Expression"))
+                :value-type (restricted-sexp :tag "Separator"
+                                             :match-alternatives (stringp)
+                                             :value " ")))
+
+(defun org--property-get-separator (property)
+  "Get the separator to use for combining PROPERTY."
+  (or
+   (catch 'separator
+     (dolist (spec org-property-separators)
+       (if (listp (car spec))
+           (if (member property (car spec))
+               (throw 'separator (cdr spec)))
+         (if (string-match-p (car spec) property)
+             (throw 'separator (cdr spec))))))
+   " "))
+
 (defcustom org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS"
   "The default column format, if no other format has been defined.
 This variable can be set on the per-file basis by inserting a line
@@ -12358,7 +12386,9 @@ value higher up the hierarchy."
       (org-entry-get-with-inheritance property literal-nil))
      (t
       (let* ((local (org--property-local-values property literal-nil))
-	     (value (and local (mapconcat #'identity (delq nil local) " "))))
+	     (value (and local (mapconcat #'identity
+                                          (delq nil local)
+                                          (org--property-get-separator property)))))
 	(if literal-nil value (org-not-nil value)))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
@@ -12467,7 +12497,8 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
      (catch 'exit
        (let ((element (or element
                           (and (org-element--cache-active-p)
-                               (org-element-at-point nil 'cached)))))
+                               (org-element-at-point nil 'cached))))
+             (separator (org--property-get-separator property)))
          (if element
              (let ((element (org-element-lineage element '(headline org-data inlinetask) 'with-self)))
                (while t
@@ -12475,8 +12506,8 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
                         (v (if (listp v) v (list v))))
                    (when v
                      (setq value
-                           (concat (mapconcat #'identity (delq nil v) " ")
-                                   (and value " ")
+                           (concat (mapconcat #'identity (delq nil v) separator)
+                                   (and value separator)
                                    value)))
                    (cond
 	            ((car v)
@@ -12487,15 +12518,15 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 	            (t
 	             (let ((global (org--property-global-or-keyword-value property literal-nil)))
 	               (cond ((not global))
-		             (value (setq value (concat global " " value)))
+		             (value (setq value (concat global separator value)))
 		             (t (setq value global))))
 	             (throw 'exit nil))))))
            (while t
 	     (let ((v (org--property-local-values property literal-nil)))
 	       (when v
 	         (setq value
-		       (concat (mapconcat #'identity (delq nil v) " ")
-			       (and value " ")
+		       (concat (mapconcat #'identity (delq nil v) separator)
+			       (and value separator)
 			       value)))
 	       (cond
 	        ((car v)
@@ -12516,7 +12547,7 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 	        (t
 	         (let ((global (org--property-global-or-keyword-value property literal-nil)))
 	           (cond ((not global))
-		         (value (setq value (concat global " " value)))
+		         (value (setq value (concat global separator value)))
 		         (t (setq value global))))
 	         (throw 'exit nil))))))))
      (if literal-nil value (org-not-nil value)))))

@@ -141,6 +141,37 @@ discouraged when working with Org files.
 
 ** New features
 
+*** New customization option =org-property-separators=
+A new alist variable to control how properties are combined.
+
+If a property is specified multiple times with a =+=, like
+
+#+begin_src org
+:PROPERTIES:
+:EXPORT_FILE_NAME: some/path
+:EXPORT_FILE_NAME+: to/file
+:END:
+#+end_src
+
+the old behavior was to always combine them with a single space
+(=some/path to/file=).  For the new variable, the car of each item in
+the alist should be either a list of property names or a regular
+expression, while the cdr should be the separator to use when
+combining that property.
+
+The default value for the separator is a single space, if none of the
+provided items in the alist match a given property.
+
+For example, in order to combine =EXPORT_FILE_NAME= properties with a
+forward slash =/=, one can use
+
+#+begin_src emacs-lisp
+(setq org-property-separators '((("EXPORT_FILE_NAME") . "/")))
+#+end_src
+
+The example above would then produce the property value
+=some/path/to/file=.
+
 *** New library =org-persist.el= implements variable persistence across Emacs sessions
 
 The library stores variable data in ~org-persist-directory~ (set to XDG
