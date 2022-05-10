@@ -11687,8 +11687,7 @@ Returns the new tags string, or nil to not change the current settings."
 			       (cond
 				((member tag current) c-face)
 				((member tag inherited) i-face)
-				(t (get-text-property (match-beginning 1) '
-						      face))))))))
+				(t 'default)))))))
 		  (goto-char (point-min)))))
 	(delete-overlay org-tags-overlay)
 	(if rtn
