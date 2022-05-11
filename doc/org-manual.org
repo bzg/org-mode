@@ -13811,22 +13811,26 @@ objects through the attributes =:float= and =:options=.  For =:float=:
 
 #+vindex: org-latex-listings-options
 #+vindex: org-latex-minted-options
+#+vindex: org-latex-engraved-options
 The LaTeX export back-end passes string values in =:options= to LaTeX
 packages for customization of that specific source block.  In the
-example below, the =:options= are set for Minted.  Minted is a source
-code highlighting LaTeX package with many configurable options[fn:134].
+example below, the =:options= are set for Engraved or Minted.  Minted
+is a source code highlighting LaTeX package with many configurable
+options[fn:134].  Both Minted and Engraved are built on [[https://www.ctan.org/pkg/fvextra][fvextra]], and
+so support many of the same options.
 
 #+begin_example
-,#+ATTR_LATEX: :options commentstyle=\bfseries
+,#+ATTR_LATEX: :options mathescape
 ,#+BEGIN_SRC emacs-lisp
-  (defun Fib (n)
+  (defun Fib (n) ; $n_i = n_{i-2} + n_{i-1}$
     (if (< n 2) n (+ (Fib (- n 1)) (Fib (- n 2)))))
 ,#+END_SRC
 #+end_example
 
-To apply similar configuration options for all source blocks in
-a file, use the ~org-latex-listings-options~ and
-~org-latex-minted-options~ variables.
+To apply similar configuration options for all source blocks in a
+file, use the ~org-latex-listings-options~,
+~org-latex-engraved-options~, and ~org-latex-minted-options~
+variables.
 
 *** Example blocks in LaTeX export
 :PROPERTIES:
@@ -16289,6 +16293,9 @@ Settings]]), however, override everything.
 | ~:latex-default-table-environment~     | ~org-latex-default-table-environment~     |
 | ~:latex-default-table-mode~            | ~org-latex-default-table-mode~            |
 | ~:latex-diary-timestamp-format~        | ~org-latex-diary-timestamp-format~        |
+| ~:latex-engraved-options~              | ~org-latex-engraved-options~              |
+| ~:latex-engraved-preamble~             | ~org-latex-engraved-preamble~             |
+| ~:latex-engraved-theme~                | ~org-latex-engraved-theme~                |
 | ~:latex-footnote-defined-format~       | ~org-latex-footnote-defined-format~       |
 | ~:latex-footnote-separator~            | ~org-latex-footnote-separator~            |
 | ~:latex-format-drawer-function~        | ~org-latex-format-drawer-function~        |
@@ -22255,8 +22262,8 @@ a fragment, see the documentation of the function
 [fn:114] This works automatically for the HTML backend (it requires
 version 1.34 of the =htmlize.el= package, which you need to install).
 Fontified code chunks in LaTeX can be achieved using either the
-[[https://www.ctan.org/pkg/listings][listings]] package or the [[https://www.ctan.org/pkg/minted][minted]] package.  Refer to
-~org-latex-src-block-backend~ for details.
+[[https://www.ctan.org/pkg/listings][listings]] LaTeX package, [[https://www.ctan.org/pkg/minted][minted]] LaTeX package, or by using
+[[https://elpa.gnu.org/packages/engrave-faces.html][engrave-faces]] .  Refer to ~org-latex-src-block-backend~ for details.
 
 [fn:115] Source code in code blocks may also be evaluated either
 interactively or on export.  See [[*Working with Source Code]] for more

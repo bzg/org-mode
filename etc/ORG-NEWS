@@ -180,6 +180,15 @@ commands.
 =:noweb-prefix= can be set to =no= to prevent the prefix characters
 from being repeated when expanding a multiline noweb reference.
 
+*** New LaTeX source block backend using =engraved-faces-latex=
+
+When ~org-latex-src-block-backend~ is set to ~engraved~,
+=engrave-faces-latex= from [[http://elpa.gnu.org/packages/engrave-faces.html][engrave-faces]] is used to transcode source
+blocks to LaTeX. This requires the =fvextra=, =float=, and (by
+default, but not necessarily) =tcolorbox= LaTeX packages be
+installed. It uses Emacs' font-lock information, and so tends to
+produce results superior to Minted or Listings.
+
 ** New functions and changes in function arguments
 
 *** New function ~org-element-cache-map~ for quick mapping across Org elements
