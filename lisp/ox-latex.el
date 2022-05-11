@@ -3385,6 +3385,40 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
               nil (and retain-labels (cdr code-info)))))))
     (concat (car float-env) body (cdr float-env))))
 
+(defun org-latex-src--engrave-mathescape-p (info options)
+  "From the export INFO plist, and the per-block OPTIONS, determine mathescape."
+  (let ((default-options (plist-get info :latex-engraved-options))
+        (mathescape-status
+         (lambda (opts)
+           (cl-some
+            (lambda (opt)
+              (or (and
+                   (null (cdr opt))
+                   (cond
+                    ((string-match-p
+                      "\\(?:^\\|,\\)mathescape=false\\(?:,\\|$\\)"
+                      (car opt))
+                     'no)
+                    ((or (string-match-p
+                          "\\(?:^\\|,\\)mathescape\\(?:=true\\)?\\(?:,\\|$\\)"
+                          (car opt))
+                         (string= "mathescape" (car opt)))
+                     'yes)))
+                  (and
+                   (string= (car opt) "mathescape")
+                   (cond
+                    ((or (and (stringp (cdr opt)) (string= (cdr opt) "true"))
+                         (equal '("true") (cdr opt)))
+                     'yes)
+                    ((or (and (stringp (cdr opt)) (string= "false" (cdr opt)))
+                         (equal '("false") (cdr opt)))
+                     'no)))))
+            opts))))
+    (if-let ((mathescape (or (funcall mathescape-status default-options)
+                             (funcall mathescape-status options))))
+        (when (eq mathescape 'yes)
+          (or engrave-faces-latex-mathescape t)))))
+
 (defun org-latex-src--engrave-code (content lang &optional theme options inline)
   "Engrave CONTENT to LaTeX in a LANG-mode buffer, and give the result.
 When the THEME symbol is non-nil, that theme will be used.
@@ -3464,7 +3498,7 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
              (when (and num-start (not (assoc "linenos" engraved-options)))
                `(("linenos")
                  ("firstnumber" ,(number-to-string (1+ num-start)))))
-             (and local-options (list local-options)))))
+             (and local-options `((,local-options))))))
          (engraved-theme (plist-get attributes :engraved-theme))
          (content
           (let* ((code-info (org-export-unravel-code src-block))
@@ -3487,10 +3521,12 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                           (format "(%s)" ref)))))
              nil (and retain-labels (cdr code-info)))))
          (body
-          (org-latex-src--engrave-code
-           content lang
-           (when engraved-theme (intern engraved-theme))
-           options)))
+          (let ((engrave-faces-latex-mathescape
+                 (org-latex-src--engrave-mathescape-p info options)))
+            (org-latex-src--engrave-code
+             content lang
+             (when engraved-theme (intern engraved-theme))
+             options))))
     (concat (car float-env) body (cdr float-env))))
 
 (cl-defun org-latex-src-block--listings
