@@ -1554,6 +1554,7 @@ Eventually, if FULL is non-nil, wrap label within \"\\label{}\"."
 			   (`paragraph
 			    (and (org-element-property :caption datum)
 				 "fig:"))
+                           (`src-block "lst:")
 			   (_ nil))
 			 (org-export-get-reference datum info))))))
     (cond ((not full) label)
