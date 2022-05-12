@@ -305,14 +305,6 @@ less error-prone."
           (const :tag "Overlays" 'overlays)
           (const :tag "Text properties" 'text-properties)))
 
-(defcustom org-fold-core-first-unfold-functions nil
-  "Functions executed after first unfolding during fontification.
-Each function is exectured with two arguments: begin and end points of
-the unfolded region."
-  :group 'org
-  :package-version '(Org . "9.6")
-  :type 'hook)
-
 (defvar-local org-fold-core-isearch-open-function #'org-fold-core--isearch-reveal
   "Function used to reveal hidden text found by isearch.
 The function is called with a single argument - point where text is to
@@ -746,8 +738,7 @@ future org buffers."
   (add-hook 'clone-indirect-buffer-hook #'org-fold-core-decouple-indirect-buffer-folds nil 'local)
   ;; Optimise buffer fontification to not fontify folded text.
   (when (eq font-lock-fontify-region-function #'font-lock-default-fontify-region)
-    (setq-local font-lock-fontify-region-function 'org-fold-core-fontify-region)
-    (add-to-list 'font-lock-extra-managed-props 'org-fold-core-fontified))
+    (setq-local font-lock-fontify-region-function 'org-fold-core-fontify-region))
   ;; Setup killing text
   (setq-local filter-buffer-substring-function #'org-fold-core--buffer-substring-filter)
   (if (and (boundp 'isearch-opened-regions)
@@ -1001,8 +992,7 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
            ;; Fontify unfolded text.
            (unless (or (not font-lock-mode)
                        org-fold-core--fontifying
-                       (not (org-fold-core-get-folding-spec-property spec :font-lock-skip))
-                       (not (text-property-not-all from to 'org-fold-core-fontified t)))
+                       (not (org-fold-core-get-folding-spec-property spec :font-lock-skip)))
              (let ((org-fold-core--fontifying t))
                (if jit-lock-mode
                    (jit-lock-refontify from to)
@@ -1482,19 +1472,7 @@ folded regions.")
                       `(jit-lock-bounds
                         ,(min oldbeg beg)
                         ,(max oldend end))))
-               (value (setq font-lock-return-value value)))))
-          (save-match-data
-            ;; Only run within regions that are not yet touched by
-            ;; fontification.
-            (let ((r next) (c pos) nxt)
-              (when (get-text-property c 'org-fold-core-fontified)
-                (setq c (next-single-property-change c 'org-fold-core-fontified)))
-              (setq nxt (next-single-property-change c 'org-fold-core-fontified nil r))
-              (while (< c r)
-                (run-hook-with-args 'org-fold-core-first-unfold-functions c nxt)
-                (setq c (next-single-property-change nxt 'org-fold-core-fontified nil r))
-                (setq nxt (next-single-property-change c 'org-fold-core-fontified nil r))))))
-        (put-text-property pos next 'org-fold-core-fontified t)
+               (value (setq font-lock-return-value value))))))
         (put-text-property pos next 'fontified t)
         (setq pos next))
       (or font-lock-return-value `(jit-lock-bounds ,beg . ,end)))))
