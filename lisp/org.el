@@ -256,6 +256,12 @@ byte-compiled before it is loaded."
 	     tangled-file
 	     (file-attribute-modification-time
 	      (file-attributes (file-truename file))))
+      ;; Make sure that tangled file modification time is
+      ;; updated even when `org-babel-tangle-file' does not make changes.
+      ;; This avoids re-tangling changed FILE where the changes did
+      ;; not affect the tangled code.
+      (when (file-exists-p tangled-file)
+        (set-file-times tangled-file))
       (org-babel-tangle-file file
                              tangled-file
                              (rx string-start
