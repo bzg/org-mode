@@ -252,6 +252,13 @@ instance,
 
 includes all available items in the printed bibliography.
 ** New functions and changes in function arguments
+*** ~org-fold-show-entry~ does not fold drawers by default anymore
+
+~org-fold-show-entry~ now accepts an optional argument HIDE-DRAWERS.
+When the argument is non-nil, the function folds all the drawers
+inside entry.  This was the default previously.
+
+Now, ~org-fold-show-entry~ does not fold drawers by default.
 
 *** New function ~org-element-cache-map~ for quick mapping across Org elements
 

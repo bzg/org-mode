@@ -519,7 +519,7 @@ of the current heading, or to 1 if the current line is not a heading."
       (if (and (bolp) (not (bobp)) (outline-invisible-p (1- (point))))
           (org-fold-region (max (point-min) (1- (point))) (point) nil)))))
 
-(defun org-fold-show-entry ()
+(defun org-fold-show-entry (&optional hide-drawers)
   "Show the body directly following its heading.
 Show the heading too, if it is currently invisible."
   (interactive)
@@ -534,7 +534,7 @@ Show the heading too, if it is currently invisible."
  	 (point-max)))
      nil
      'outline)
-    (org-cycle-hide-drawers 'children)))
+    (when hide-drawers (org-cycle-hide-drawers 'children))))
 
 (defalias 'org-fold-show-hidden-entry #'org-fold-show-entry
   "Show an entry where even the heading is hidden.")

@@ -6911,7 +6911,7 @@ case."
      (move-marker ins-point nil)
      (if folded
 	 (org-fold-subtree t)
-       (org-fold-show-entry)
+       (org-fold-show-entry 'hide-drawers)
        (org-fold-show-children))
      (org-clean-visibility-after-subtree-move)
      ;; move back to the initial column we were at
@@ -17447,7 +17447,7 @@ object (e.g., within a comment).  In these case, you need to use
 	 (org-auto-align-tags (org-align-tags))
 	 (t (org--align-tags-here tags-column))) ;preserve tags column
 	(end-of-line)
-	(org-fold-show-entry)
+	(org-fold-show-entry 'hide-drawers)
 	(org--newline indent arg interactive)
 	(when string (save-excursion (insert (org-trim string))))))
      ;; In a list, make sure indenting keeps trailing text within.

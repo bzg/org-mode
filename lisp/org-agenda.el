@@ -9753,7 +9753,7 @@ if it was hidden in the outline."
   (interactive "P")
   (let ((win (selected-window)))
     (org-agenda-goto t)
-    (when full-entry (org-fold-show-entry))
+    (when full-entry (org-fold-show-entry 'hide-drawers))
     (select-window win)))
 
 (defvar org-agenda-show-window nil)
@@ -9772,7 +9772,7 @@ fold drawers."
 	  (select-window org-agenda-show-window)
 	  (ignore-errors (scroll-up)))
       (org-agenda-goto t)
-      (org-fold-show-entry)
+      (org-fold-show-entry 'hide-drawers)
       (if arg (org-cycle-hide-drawers 'children)
 	(org-with-wide-buffer
 	 (narrow-to-region (org-entry-beginning-position)
@@ -9816,7 +9816,7 @@ if it was hidden in the outline."
      ((and (called-interactively-p 'any) (= more 1))
       (message "Remote: show with default settings"))
      ((= more 2)
-      (org-fold-show-entry)
+      (org-fold-show-entry 'hide-drawers)
       (org-fold-show-children)
       (save-excursion
 	(org-back-to-heading)
