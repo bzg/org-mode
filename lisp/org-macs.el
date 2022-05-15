@@ -1469,6 +1469,13 @@ window."
 	 (message "Beginning of buffer")
 	 (sit-for 1))))))
 
+(cl-defun org-knuth-hash (number &optional (base 32))
+  "Calculate Knuth's multiplicative hash for NUMBER.
+BASE is the maximum bitcount.
+Credit: https://stackoverflow.com/questions/11871245/knuth-multiplicative-hash#41537995"
+  (cl-assert (and (<= 0 base 32)))
+  (ash (* number 2654435769) (- base 32)))
+
 (provide 'org-macs)
 
 ;; Local variables:
