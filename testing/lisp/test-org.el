@@ -5439,6 +5439,23 @@ Paragraph<point>"
 	      (org-deadline nil "<2012-03-29 Tue +2y>"))
 	    (replace-regexp-in-string
 	     "\\( [.A-Za-z]+\\) " "" (buffer-string) nil nil 1))))
+  ;; Preserve warning period.
+  (should
+   (equal "* H\nDEADLINE: <2021-07-20 -1d>"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline nil "<2021-07-20 Tue -1d>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\) " "" (buffer-string) nil nil 1))))
+  (should
+   (equal "* H\nDEADLINE: <2021-07-20 +1m -3d>"
+	  (org-test-with-temp-text "* H"
+	    (let ((org-adapt-indentation nil)
+		  (org-last-inserted-timestamp nil))
+	      (org-deadline nil "<2021-07-20 Tue +1m -3d>"))
+	    (replace-regexp-in-string
+	     "\\( [.A-Za-z]+\\) " "" (buffer-string) nil nil 1))))
   ;; Remove CLOSED keyword, if any.
   (should
    (equal "* H\nDEADLINE: <2012-03-29>"

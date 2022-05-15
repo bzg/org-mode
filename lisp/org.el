@@ -9742,10 +9742,14 @@ TYPE is either `deadline' or `scheduled'.  See `org-deadline' or
 	   ;; time stamp.  We are going to insert it back at the end of
 	   ;; the process.
 	   (repeater (or (and (org-string-nw-p time)
-			      ;; We use `org-repeat-re' because we need
-			      ;; to tell the difference between a real
-			      ;; repeater and a time delta, e.g. "+2d".
-			      (string-match org-repeat-re time)
+			      ;; We use `org-ts-regexp-both' because we
+			      ;; need to tell the difference between a
+			      ;; real repeater and a time delta, e.g.
+			      ;; "+2d".
+                              (string-match-p org-ts-regexp-both time)
+                              (string-match "\\([.+-]+[0-9]+[hdwmy]\
+\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\)"
+					    time)
 			      (match-string 1 time))
 		         (and (org-string-nw-p old-date)
 			      (string-match "\\([.+-]+[0-9]+[hdwmy]\
