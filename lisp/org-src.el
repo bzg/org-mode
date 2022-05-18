@@ -413,6 +413,7 @@ END."
     (overlay-put overlay 'keymap
 		 (let ((map (make-sparse-keymap)))
 		   (define-key map [mouse-1] 'org-edit-src-continue)
+                   (define-key map [return] #'org-edit-src-goto)
 		   map))
     (let ((read-only
 	   (list
@@ -1273,6 +1274,12 @@ Throw an error if there is no such buffer.
 EVENT is passed to `mouse-set-point'."
   (interactive "e")
   (mouse-set-point event)
+  (org-edit-src-goto))
+
+(defun org-edit-src-goto ()
+  "Unconditionally return to buffer editing area under point.
+Throw an error if there is no such buffer."
+  (interactive)
   (let ((buf (get-char-property (point) 'edit-buffer)))
     (if buf (org-src-switch-to-buffer buf 'continue)
       (user-error "No sub-editing buffer for area at point"))))
