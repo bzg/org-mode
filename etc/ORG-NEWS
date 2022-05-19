@@ -291,8 +291,6 @@ purpose of the variable.  The replacement variable
 accepts =listings= and =verbatim= in place of =t= and =nil= (which
 still work, but are no longer listed as valid options).
 
-*** New function ~org-edit-src-goto~ 
-
 * Version 9.5
 
 ** Important announcements and breaking changes
