@@ -7421,9 +7421,9 @@ The following commands help manage the =ARCHIVE= tag:
   child.  If point is /not/ on a headline when this command is
   invoked, check the level 1 trees.
 
-- {{{kbd(C-c C-TAB)}}} (~org-force-cycle-archived~) ::
+- {{{kbd(C-c C-TAB)}}} (~org-cycle-force-archived~) ::
 
-  #+kindex: C-TAB
+  #+kindex: C-c C-TAB
   Cycle a tree even if it is tagged with =ARCHIVE=.
 
 - {{{kbd(C-c C-x A)}}} (~org-archive-to-archive-sibling~) ::
