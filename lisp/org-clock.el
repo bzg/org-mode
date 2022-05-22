@@ -1108,7 +1108,7 @@ to be CLOCKED OUT."))))
 		  60))
 	 (keep
 	  (or (and (memq ch '(?k ?K))
-		   (read-number "Keep how many minutes? " default))
+		   (read-number "Keep how many minutes: " default))
 	      (and (memq ch '(?t ?T))
 		   (floor
 		    (/ (float-time
@@ -1116,7 +1116,7 @@ to be CLOCKED OUT."))))
 		       60)))))
 	 (gotback
 	  (and (memq ch '(?g ?G))
-	       (read-number "Got back how many minutes ago? " default)))
+	       (read-number "Got back how many minutes ago: " default)))
 	 (subtractp (memq ch '(?s ?S)))
 	 (barely-started-p (time-less-p
 			    (time-subtract last-valid (cdr clock))
