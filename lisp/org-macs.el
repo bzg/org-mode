@@ -315,8 +315,13 @@ it for output."
 			       (?F . ,(shell-quote-argument full-name))
 			       (?o . ,(shell-quote-argument out-dir))
 			       (?O . ,(shell-quote-argument output))))))
-	   (dolist (command process)
-	     (shell-command (format-spec command spec) log-buf))
+           ;; Combine output of all commands in PROCESS.
+           (with-current-buffer log-buf
+             (let (buffer-read-only)
+               (erase-buffer)))
+           (let ((shell-command-dont-erase-buffer t))
+	     (dolist (command process)
+	       (shell-command (format-spec command spec) log-buf)))
 	   (when log-buf (with-current-buffer log-buf (compilation-mode)))))
 	(_ (error "No valid command to process %S%s" source err-msg))))
     ;; Check for process failure.  Output file is expected to be

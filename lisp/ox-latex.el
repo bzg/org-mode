@@ -1399,6 +1399,9 @@ A better approach is to use a compiler suit such as `latexmk'."
       "%latex -interaction nonstopmode -output-directory %o %f"))
   "Commands to process a LaTeX file to a PDF file.
 
+The command output will be parsed to extract compilation errors and
+warnings according to `org-latex-known-warnings'.
+
 This is a list of strings, each of them will be given to the
 shell as a command.  %f in the command will be replaced by the
 relative file name, %F by the absolute file name, %b by the file
