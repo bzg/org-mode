@@ -4178,6 +4178,9 @@ produced."
 					    t)
 		     (progn (beginning-of-line) (looking-at-p "%"))
 		     (match-string 0)))
+              ;; Cannot find the compiler inserted by
+              ;; `org-latex-template' -> `org-latex--insert-compiler'.
+              ;; Use a fallback.
 	      "pdflatex"))
 	 (process (if (functionp org-latex-pdf-process) org-latex-pdf-process
 		    ;; Replace "%latex" with "%L" and "%bib" and
