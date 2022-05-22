@@ -8817,7 +8817,7 @@ nil or a string to be used for the todo mark." )
   "Like `org-todo' but the time of change will be 23:59 of yesterday."
   (interactive "P")
   (if (eq major-mode 'org-agenda-mode)
-      (apply 'org-agenda-todo-yesterday arg)
+      (org-agenda-todo-yesterday arg)
     (let* ((org-use-effective-time t)
 	   (hour (nth 2 (decode-time (org-current-time))))
 	   (org-extend-today-until (1+ hour)))
