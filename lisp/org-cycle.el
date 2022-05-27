@@ -114,7 +114,7 @@ than its value."
 This can also be set in on a per-file basis with
 
 #+STARTUP: hideblocks
-#+STARTUP: showblocks"
+#+STARTUP: nohideblocks"
   :group 'org-startup
   :group 'org-cycle
   :type 'boolean)
