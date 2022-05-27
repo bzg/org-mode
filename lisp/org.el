@@ -3990,6 +3990,8 @@ After a match, the following groups carry important information:
     ("noptag" org-tag-persistent-alist nil)
     ("hideblocks" org-hide-block-startup t)
     ("nohideblocks" org-hide-block-startup nil)
+    ("hidedrawers" org-hide-drawer-startup t)
+    ("nohidedrawers" org-hide-drawer-startup nil)
     ("beamer" org-startup-with-beamer-mode t)
     ("entitiespretty" org-pretty-entities t)
     ("entitiesplain" org-pretty-entities nil))

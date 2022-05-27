@@ -291,6 +291,28 @@ The new variable name is =org-plantuml-args=.  It now applies to both
 jar PlantUML file and executable.
 
 ** Miscellaneous
+*** A new custom setting =org-hide-drawer-startup= to control initial folding state of drawers
+
+Previously, all the drawers were always folded when opening an Org
+file.  This only had an effect on the drawers outside folded
+headlines.  The drawers inside folded headlines were re-folded because
+=org-cycle-hide-drawers= was present inside =org-cycle-hook=.
+
+With the new folding backend, running =org-cycle-hide-drawers= is no
+longer needed if all the drawers are truly folded on startup: [[*Folding
+state of the drawers is now preserved when cycling headline
+visibility]].  However, this has an unwanted effect when a user does
+not want the drawers to be folded (see [[https://orgmode.org/list/m2r14f407q.fsf@ntnu.no][this bug report]]).
+
+The new custom setting gives more control over initial folding state
+of the drawers.  When set to =nil= (default is =t=), the drawers are
+not folded on startup.
+
+The folding state can also be controlled on per-file basis using
+=STARTUP= keyword:
+
+: #+startup: hidedrawers
+: #+startup: nohidedrawers
 
 *** Styles are customizable in ~biblatex~ citation processor
 
