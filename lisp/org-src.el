@@ -643,9 +643,10 @@ as `org-src-fontify-natively' is non-nil."
 	      ;; preserve, e.g., composition.
 	      (dolist (prop (cons 'face font-lock-extra-managed-props))
 		(let ((new-prop (get-text-property pos prop)))
-		  (put-text-property
-		   (+ start (1- pos)) (1- (+ start next)) prop new-prop
-		   org-buffer)))
+                  (when new-prop
+		    (put-text-property
+		     (+ start (1- pos)) (1- (+ start next)) prop new-prop
+		     org-buffer))))
 	      (setq pos next)))
           (set-buffer-modified-p nil))
 	;; Add Org faces.
