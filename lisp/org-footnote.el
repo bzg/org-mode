@@ -91,13 +91,13 @@ Match group 1 contains definition's label.")
 (defcustom org-footnote-section "Footnotes"
   "Outline heading containing footnote definitions.
 
-This can be nil, to place footnotes locally at the end of the
-current outline node.  If can also be the name of a special
-outline heading under which footnotes should be put.
+This can be nil, to place footnotes locally at the end of the current
+outline node.  It can also be a string representing the name of a
+special outline heading under which footnotes should be put.
 
 This variable defines the place where Org puts the definition
 automatically, i.e. when creating the footnote, and when sorting
-the notes.  However, by hand you may place definitions
+the notes.  However, by hand, you may place definitions
 *anywhere*.
 
 If this is a string, during export, all subtrees starting with
