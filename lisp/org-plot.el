@@ -667,7 +667,8 @@ line directly before or after the table."
 	   (num-cols (length (if (eq (nth 0 table) 'hline) (nth 1 table)
 			       (nth 0 table))))
 	   (type (assoc (plist-get params :plot-type)
-			org-plot/preset-plot-types)))
+			org-plot/preset-plot-types))
+           gnuplot-script)
 
       (unless type
 	(user-error "Org-plot type `%s' is undefined" (plist-get params :plot-type)))
@@ -701,16 +702,17 @@ line directly before or after the table."
 				  ind-column))
 		 (plist-put params :textind t))))) ; ind holds text
       ;; Write script.
+      (setq gnuplot-script
+            (org-plot/gnuplot-script
+             table data-file num-cols params (plist-get params :script)))
       (with-temp-buffer
 	(if (plist-get params :script)	; user script
-	    (progn (insert
-		    (org-plot/gnuplot-script table data-file num-cols params t))
-		   (insert "\n")
+	    (progn (insert gnuplot-script "\n")
 		   (insert-file-contents (plist-get params :script))
 		   (goto-char (point-min))
 		   (while (re-search-forward "\\$datafile" nil t)
 		     (replace-match data-file nil nil)))
-	  (insert (org-plot/gnuplot-script table data-file num-cols params)))
+	  (insert gnuplot-script))
 	;; Graph table.
 	(gnuplot-mode)
         (condition-case nil
