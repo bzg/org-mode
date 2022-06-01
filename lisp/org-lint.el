@@ -321,7 +321,7 @@ ARG can also be a list of checker names, as symbols, to run."
 		    nil t)))
 	      (cl-remove-if-not
 	       (lambda (c)
-		 (assoc-string (org-lint-checker-categories c) category))
+		 (assoc-string category (org-lint-checker-categories c)))
 	       org-lint--checkers)))
 	   (`(16)
 	    (list
