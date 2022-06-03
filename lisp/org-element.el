@@ -5711,7 +5711,7 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
             (memq #'org-element--cache-after-change after-change-functions))
            (eq org-element--cache-change-tic (buffer-chars-modified-tick)))))
 
-;; FIXME: Remove after we establish that hashing app
+;; FIXME: Remove after we establish that hashing is effective.
 (defun org-element-cache-hash-show-statistics ()
   "Display efficiency of O(1) query cache for `org-element--cache-find'.
 
@@ -5759,7 +5759,7 @@ the cache."
       (when (markerp pos) (setq pos (marker-position pos)))
       (cl-incf (cdr org-element--cache-hash-statistics))
       (when (eq side 'both) (cl-incf org-element--cache-hash-nocache))
-      (if (and hashed (not side)
+      (if (and hashed (not (eq side 'both))
                (or (not limit)
                    ;; Limit can be a list key.
                    (org-element--cache-key-less-p pos limit))
