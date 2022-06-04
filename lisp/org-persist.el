@@ -929,7 +929,7 @@ Also, remove containers associated with non-existing files."
                           ('t t)
                           ('check-existence
                            (file-exists-p file))
-                          ((pred #'numberp)
+                          ((pred numberp)
                            (<= org-persist-remote-files remote-files-num))
                           (_ nil)))
                 (setq expired? t)))
