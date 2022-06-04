@@ -587,7 +587,17 @@ ones and overrule settings in the other lists."
 
 (defconst org-unique-local-variables
   '(org-element--cache
-    org-element--cache-objects
+    org-element--headline-cache
+    org-element--cache-change-tic
+    org-element--cache-change-warning
+    org-element--cache-gapless
+    org-element--cache-hash-left
+    org-element--cache-hash-right
+    org-element--cache-size
+    org-element--headline-cache-size
+    org-element--cache-sync-keys-value
+    org-element--cache-diagnostics-ring
+    org-element--cache-diagnostics-ring-size
     org-element--cache-sync-keys
     org-element--cache-sync-requests
     org-element--cache-sync-timer)
