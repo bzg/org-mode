@@ -649,39 +649,40 @@ in description"
   (org-element-map ast 'keyword
     (lambda (k)
       (when (equal (org-element-property :key k) "INCLUDE")
-	(let* ((value (org-element-property :value k))
-	       (path
-		(and (string-match "^\\(\".+\"\\|\\S-+\\)[ \t]*" value)
-		     (save-match-data
-		       (org-strip-quotes (match-string 1 value))))))
-	  (if (not path)
-	      (list (org-element-property :post-affiliated k)
-		    "Missing location argument in INCLUDE keyword")
-	    (let* ((file (org-string-nw-p
-			  (if (string-match "::\\(.*\\)\\'" path)
-			      (substring path 0 (match-beginning 0))
-			    path)))
-		   (search (and (not (equal file path))
-				(org-string-nw-p (match-string 1 path)))))
-	      (if (and file
-		       (not (file-remote-p file))
-		       (not (file-exists-p file)))
-		  (list (org-element-property :post-affiliated k)
-			"Non-existent file argument in INCLUDE keyword")
-		(let* ((visiting (if file (find-buffer-visiting file)
-				   (current-buffer)))
-		       (buffer (or visiting (find-file-noselect file)))
-		       (org-link-search-must-match-exact-headline t))
-		  (unwind-protect
-		      (with-current-buffer buffer
-			(when (and search
-				   (not (ignore-errors
-					  (org-link-search search nil t))))
-			  (list (org-element-property :post-affiliated k)
-				(format
-				 "Invalid search part \"%s\" in INCLUDE keyword"
-				 search))))
-		    (unless visiting (kill-buffer buffer))))))))))))
+        (let* ((value (org-element-property :value k))
+               (path
+                (and (string-match "^\\(\".+\"\\|\\S-+\\)[ \t]*" value)
+                     (save-match-data
+                       (org-strip-quotes (match-string 1 value))))))
+          (if (not path)
+              (list (org-element-property :post-affiliated k)
+                    "Missing location argument in INCLUDE keyword")
+            (let* ((file (org-string-nw-p
+                          (if (string-match "::\\(.*\\)\\'" path)
+                              (substring path 0 (match-beginning 0))
+                            path)))
+                   (search (and (not (equal file path))
+                                (org-string-nw-p (match-string 1 path)))))
+              (unless (org-url-p file)
+                (if (and file
+                         (not (file-remote-p file))
+                         (not (file-exists-p file)))
+                    (list (org-element-property :post-affiliated k)
+                          "Non-existent file argument in INCLUDE keyword")
+                  (let* ((visiting (if file (find-buffer-visiting file)
+                                     (current-buffer)))
+                         (buffer (or visiting (find-file-noselect file)))
+                         (org-link-search-must-match-exact-headline t))
+                    (unwind-protect
+                        (with-current-buffer buffer
+                          (when (and search
+                                     (not (ignore-errors
+                                            (org-link-search search nil t))))
+                            (list (org-element-property :post-affiliated k)
+                                  (format
+                                   "Invalid search part \"%s\" in INCLUDE keyword"
+                                   search))))
+                      (unless visiting (kill-buffer buffer)))))))))))))
 
 (defun org-lint-obsolete-include-markup (ast)
   (let ((regexp (format "\\`\\(?:\".+\"\\|\\S-+\\)[ \t]+%s"
