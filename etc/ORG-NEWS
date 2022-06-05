@@ -219,6 +219,9 @@ blocks to LaTeX. This requires the =fvextra=, =float=, and (by
 default, but not necessarily) =tcolorbox= LaTeX packages be
 installed. It uses Emacs' font-lock information, and so tends to
 produce results superior to Minted or Listings.
+*** Support for =#+include=-ing URLs
+
+=#+include: FILE= will now accept URLs as the file.
 
 ** New functions and changes in function arguments
 

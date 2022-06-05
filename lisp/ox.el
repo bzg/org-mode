@@ -3229,15 +3229,18 @@ storing and resolving footnotes.  It is created automatically."
 				       value)
 			 (prog1
 			     (save-match-data
-			       (let ((matched (match-string 1 value)))
+			       (let ((matched (match-string 1 value))
+                                     stripped)
 				 (when (string-match "\\(::\\(.*?\\)\\)\"?\\'"
 						     matched)
 				   (setq location (match-string 2 matched))
 				   (setq matched
 					 (replace-match "" nil nil matched 1)))
-				 (expand-file-name (org-strip-quotes matched)
-						   dir)))
-			   (setq value (replace-match "" nil nil value)))))
+                                 (setq stripped (org-strip-quotes matched))
+                                 (if (org-url-p stripped)
+                                     stripped
+                                   (expand-file-name stripped dir))))
+                           (setq value (replace-match "" nil nil value)))))
 		   (only-contents
 		    (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?"
 				       value)
@@ -3273,7 +3276,7 @@ storing and resolving footnotes.  It is created automatically."
 	      (delete-region (point) (line-beginning-position 2))
 	      (cond
 	       ((not file) nil)
-	       ((not (file-readable-p file))
+	       ((and (not (org-url-p file)) (not (file-readable-p file)))
 		(error "Cannot include file %s" file))
 	       ;; Check if files has already been parsed.  Look after
 	       ;; inclusion lines too, as different parts of the same
@@ -3319,8 +3322,9 @@ storing and resolving footnotes.  It is created automatically."
 			 includer-file)))
 		     (org-export-expand-include-keyword
 		      (cons (list file lines) included)
-		      (file-name-directory file)
-		      footnotes)
+                      (unless (org-url-p file)
+                        (file-name-directory file))
+                      footnotes)
 		     (buffer-string)))))
 		;; Expand footnotes after all files have been
 		;; included.  Footnotes are stored at end of buffer.
@@ -3343,7 +3347,7 @@ Org-Element.  If LINES is non-nil only those lines are included.
 Return a string of lines to be included in the format expected by
 `org-export--prepare-file-contents'."
   (with-temp-buffer
-    (insert-file-contents file)
+    (insert (org-file-contents file))
     (unless (eq major-mode 'org-mode)
       (let ((org-inhibit-startup t)) (org-mode)))
     (condition-case err
@@ -3448,7 +3452,7 @@ the included document.
 Optional argument INCLUDER is the file name where the inclusion
 is to happen."
   (with-temp-buffer
-    (insert-file-contents file)
+    (insert (org-file-contents file))
     (when lines
       (let* ((lines (split-string lines "-"))
 	     (lbeg (string-to-number (car lines)))
