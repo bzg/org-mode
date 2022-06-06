@@ -596,10 +596,10 @@ for this property are =folded=, =children=, =content=, and =all=.
 :END:
 #+cindex: edits, catching invisible
 
-#+vindex: org-catch-invisible-edits
+#+vindex: org-fold-catch-invisible-edits
 Sometimes you may inadvertently edit an invisible part of the buffer
 and be confused on what has been edited and how to undo the mistake.
-Setting ~org-catch-invisible-edits~ to non-~nil~ helps preventing
+Setting ~org-fold-catch-invisible-edits~ to non-~nil~ helps preventing
 this.  See the docstring of this option on how Org should catch
 invisible edits and process them.
 
