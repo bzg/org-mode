@@ -3303,7 +3303,6 @@ not have `buffer-file-name' assigned."
                            (buffer-file-name (buffer-base-buffer))))
 	(case-fold-search t)
 	(file-prefix (make-hash-table :test #'equal))
-	(current-prefix 0)
 	(footnotes (or footnotes (make-hash-table :test #'equal)))
 	(include-re "^[ \t]*#\\+INCLUDE:"))
     ;; If :minlevel is not set the text-property
@@ -3319,128 +3318,168 @@ not have `buffer-file-name' assigned."
     (goto-char (point-min))
     (while (re-search-forward include-re nil t)
       (unless (org-in-commented-heading-p)
-	(let ((element (save-match-data (org-element-at-point))))
-	  (when (eq (org-element-type element) 'keyword)
-	    (beginning-of-line)
-	    ;; Extract arguments from keyword's value.
-	    (let* ((value (org-element-property :value element))
-		   (ind (org-current-text-indentation))
-		   location
-		   (coding-system-for-read
-		    (or (and (string-match ":coding +\\(\\S-+\\)>" value)
-			     (prog1 (intern (match-string 1 value))
-			       (setq value (replace-match "" nil nil value))))
-			coding-system-for-read))
-		   (file
-		    (and (string-match "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)"
-				       value)
-			 (prog1
-			     (save-match-data
-			       (let ((matched (match-string 1 value))
-                                     stripped)
-				 (when (string-match "\\(::\\(.*?\\)\\)\"?\\'"
-						     matched)
-				   (setq location (match-string 2 matched))
-				   (setq matched
-					 (replace-match "" nil nil matched 1)))
-                                 (setq stripped (org-strip-quotes matched))
-                                 (if (org-url-p stripped)
-                                     stripped
-                                   (expand-file-name stripped dir))))
-                           (setq value (replace-match "" nil nil value)))))
-		   (only-contents
-		    (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?"
-				       value)
-			 (prog1 (org-not-nil (match-string 1 value))
-			   (setq value (replace-match "" nil nil value)))))
-		   (lines
-		    (and (string-match
-			  ":lines +\"\\([0-9]*-[0-9]*\\)\""
-			  value)
-			 (prog1 (match-string 1 value)
-			   (setq value (replace-match "" nil nil value)))))
-		   (env (cond
-			 ((string-match "\\<example\\>" value) 'literal)
-			 ((string-match "\\<export\\(?: +\\(.*\\)\\)?" value)
-			  'literal)
-			 ((string-match "\\<src\\(?: +\\(.*\\)\\)?" value)
-			  'literal)))
-		   ;; Minimal level of included file defaults to the
-		   ;; child level of the current headline, if any, or
-		   ;; one.  It only applies is the file is meant to be
-		   ;; included as an Org one.
-		   (minlevel
-		    (and (not env)
-			 (if (string-match ":minlevel +\\([0-9]+\\)" value)
-			     (prog1 (string-to-number (match-string 1 value))
-			       (setq value (replace-match "" nil nil value)))
-			   (get-text-property (point)
-					      :org-include-induced-level))))
-		   (args (and (eq env 'literal) (match-string 1 value)))
-		   (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
-			       (match-string 1 value))))
-	      ;; Remove keyword.
-	      (delete-region (point) (line-beginning-position 2))
-	      (cond
-	       ((not file) nil)
-	       ((and (not (org-url-p file)) (not (file-readable-p file)))
-		(error "Cannot include file %s" file))
-	       ;; Check if files has already been parsed.  Look after
-	       ;; inclusion lines too, as different parts of the same
-	       ;; file can be included too.
-	       ((member (list file lines) included)
-		(error "Recursive file inclusion: %s" file))
-	       (t
-		(cond
-		 ((eq env 'literal)
-		  (insert
-		   (let ((ind-str (make-string ind ?\s))
-			 (arg-str (if (stringp args) (format " %s" args) ""))
-			 (contents
-			  (org-escape-code-in-string
-			   (org-export--prepare-file-contents file lines))))
-		     (format "%s#+BEGIN_%s%s\n%s%s#+END_%s\n"
-			     ind-str block arg-str contents ind-str block))))
-		 ((stringp block)
-		  (insert
-		   (let ((ind-str (make-string ind ?\s))
-			 (contents
-			  (org-export--prepare-file-contents file lines)))
-		     (format "%s#+BEGIN_%s\n%s%s#+END_%s\n"
-			     ind-str block contents ind-str block))))
-		 (t
-		  (insert
-		   (with-temp-buffer
-		     (let ((org-inhibit-startup t)
-			   (lines
-			    (if location
-				(org-export--inclusion-absolute-lines
-				 file location only-contents lines)
-			      lines)))
-		       (org-mode)
-		       (insert
-			(org-export--prepare-file-contents
-			 file lines ind minlevel
-			 (or (gethash file file-prefix)
-			     (puthash file
-				      (cl-incf current-prefix)
-				      file-prefix))
-			 footnotes
-			 includer-file)))
-		     (org-export-expand-include-keyword
-		      (cons (list file lines) included)
-                      (unless (org-url-p file)
-                        (file-name-directory file))
-                      footnotes includer-file)
-		     (buffer-string)))))
-		;; Expand footnotes after all files have been
-		;; included.  Footnotes are stored at end of buffer.
-		(unless included
-		  (org-with-wide-buffer
-		   (goto-char (point-max))
-		   (maphash (lambda (k v)
-			      (insert (format "\n[fn:%s] %s\n" k v)))
-			    footnotes))))))))))))
+        (let ((element (save-match-data (org-element-at-point))))
+          (when (eq (org-element-type element) 'keyword)
+            (beginning-of-line)
+            ;; Extract arguments from keyword's value.
+            (let* ((value (org-element-property :value element))
+                   (parameters (org-export-parse-include-value value dir)))
+              ;; Remove keyword.
+              (delete-region (point) (line-beginning-position 2))
+              (pcase (plist-get parameters :file)
+                ((pred not) nil)
+                ((and (pred (not org-url-p)) (pred (not file-readable-p)) f)
+                 (error "Cannot include file %s" f))
+                ;; Check if files has already been parsed.  Look after
+                ;; inclusion lines too, as different parts of the same
+                ;; file can be included too.
+                ((and f (guard (member (list f (plist-get parameters :lines))
+                                       included)))
+                 (error "Recursive file inclusion: %s" f))
+                (_
+                 (org-export--blindly-expand-include
+                  parameters
+                  :includer-file includer-file
+                  :file-prefix file-prefix
+                  :footnotes footnotes
+                  :already-included included)
+                 ;; Expand footnotes after all files have been
+                 ;; included.  Footnotes are stored at end of buffer.
+                 (unless included
+                   (org-with-wide-buffer
+                    (goto-char (point-max))
+                    (maphash (lambda (k v)
+                               (insert (format "\n[fn:%s] %s\n" k v)))
+                             footnotes))))))))))))
+
+(defun org-export-parse-include-value (value &optional dir)
+  "Extract the various parameters from #+include: VALUE."
+  (let* ((ind (org-current-text-indentation))
+         location
+         (coding-system
+          (and (string-match ":coding +\\(\\S-+\\)>" value)
+               (prog1 (intern (match-string 1 value))
+                 (setq value (replace-match "" nil nil value)))))
+         (file
+          (and (string-match "^\\(\".+?\"\\|\\S-+\\)\\(?:\\s-+\\|$\\)" value)
+               (prog1
+                   (save-match-data
+                     (let ((matched (match-string 1 value))
+                           stripped)
+                       (when (string-match "\\(::\\(.*?\\)\\)\"?\\'"
+                                           matched)
+                         (setq location (match-string 2 matched))
+                         (setq matched
+                               (replace-match "" nil nil matched 1)))
+                       (setq stripped (org-strip-quotes matched))
+                       (if (org-url-p stripped)
+                           stripped
+                         (expand-file-name stripped dir))))
+                 (setq value (replace-match "" nil nil value)))))
+         (only-contents
+          (and (string-match ":only-contents *\\([^: \r\t\n]\\S-*\\)?"
+                             value)
+               (prog1 (org-not-nil (match-string 1 value))
+                 (setq value (replace-match "" nil nil value)))))
+         (lines
+          (and (string-match
+                ":lines +\"\\([0-9]*-[0-9]*\\)\""
+                value)
+               (prog1 (match-string 1 value)
+                 (setq value (replace-match "" nil nil value)))))
+         (env (cond
+               ((string-match "\\<example\\>" value) 'literal)
+               ((string-match "\\<export\\(?: +\\(.*\\)\\)?" value)
+                'literal)
+               ((string-match "\\<src\\(?: +\\(.*\\)\\)?" value)
+                'literal)))
+         ;; Minimal level of included file defaults to the
+         ;; child level of the current headline, if any, or
+         ;; one.  It only applies is the file is meant to be
+         ;; included as an Org one.
+         (minlevel
+          (and (not env)
+               (if (string-match ":minlevel +\\([0-9]+\\)" value)
+                   (prog1 (string-to-number (match-string 1 value))
+                     (setq value (replace-match "" nil nil value)))
+                 (get-text-property (point)
+                                    :org-include-induced-level))))
+         (args (and (eq env 'literal) (match-string 1 value)))
+         (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
+                     (match-string 1 value))))
+    (list :file file
+          :coding-system coding-system
+          :location location
+          :only-contents only-contents
+          :lines lines
+          :env env
+          :minlevel minlevel
+          :args args
+          :block block)))
+
+(cl-defun org-export--blindly-expand-include (parameters &key includer-file file-prefix footnotes already-included)
+  "Unconditionally include reference defined by PARAMETERS in the buffer.
+PARAMETERS is a plist of the form returned by `org-export-parse-include-value'.
+
+INCLUDER-FILE is a path to the file where the include keyword is
+being expanded.  FILE-PREFIX is a hash-table of file and
+prefixes, which can be provided to ensure consistent prefixing.
+FOOTNOTES is a hash-table for storing and resolving footnotes,
+which when provided allows footnotes to be handled appropriately.
+ALREADY-INCLUDED is a list of included names along with their
+line restriction which prevents recursion."
+  (let* ((coding-system-for-read
+          (or (plist-get parameters :coding-system)
+              coding-system-for-read))
+         (file (plist-get parameters :file))
+         (lines (plist-get parameters :lines))
+         (args (plist-get parameters :args))
+         (block (plist-get parameters :block))
+         (ind (org-current-text-indentation)))
+    (cond
+     ((eq (plist-get parameters :env) 'literal)
+      (insert
+       (let ((ind-str (make-string ind ?\s))
+             (arg-str (if (stringp args) (format " %s" args) ""))
+             (contents
+              (org-escape-code-in-string
+               (org-export--prepare-file-contents file lines))))
+         (format "%s#+BEGIN_%s%s\n%s%s#+END_%s\n"
+                 ind-str block arg-str contents ind-str block))))
+     ((stringp block)
+      (insert
+       (let ((ind-str (make-string ind ?\s))
+             (contents
+              (org-export--prepare-file-contents file lines)))
+         (format "%s#+BEGIN_%s\n%s%s#+END_%s\n"
+                 ind-str block contents ind-str block))))
+     (t
+      (insert
+       (with-temp-buffer
+         (let ((org-inhibit-startup t)
+               (lines
+                (if-let ((location (plist-get parameters :location)))
+                    (org-export--inclusion-absolute-lines
+                     file location
+                     (plist-get parameters :only-contents)
+                     lines)
+                  lines)))
+           (org-mode)
+           (insert
+            (org-export--prepare-file-contents
+             file lines ind (plist-get parameters :minlevel)
+             (and file-prefix
+                  (or (gethash file file-prefix)
+                      (puthash file
+                               (hash-table-count file-prefix)
+                               file-prefix)))
+             footnotes includer-file)))
+         (org-export-expand-include-keyword
+          (cons (list file lines) already-included)
+          (unless (org-url-p file)
+            (file-name-directory file))
+          footnotes includer-file)
+         (buffer-string)))))))
 
 (defun org-export--inclusion-absolute-lines (file location only-contents lines)
   "Resolve absolute lines for an included file with file-link.
