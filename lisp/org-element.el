@@ -5656,7 +5656,11 @@ lesser than UPPER, per `org-element--cache-key-less-p'."
 (defsubst org-element--cache-key-less-p (a b)
   "Non-nil if key A is less than key B.
 A and B are either integers or lists of integers, as returned by
-`org-element--cache-key'."
+`org-element--cache-key'.
+
+Note that it is not reliable to compare buffer position with the cache
+keys.  They keys may be larger compared to actual element :begin
+position."
   (if (integerp a) (if (integerp b) (< a b) (<= a (car b)))
     (if (integerp b) (< (car a) b)
       (catch 'exit
@@ -5762,7 +5766,9 @@ the cache."
       (if (and hashed (not (eq side 'both))
                (or (not limit)
                    ;; Limit can be a list key.
-                   (org-element--cache-key-less-p pos limit))
+                   (org-element--cache-key-less-p
+                    (org-element--cache-key hashed)
+                    limit))
                (= pos (org-element-property :begin hashed))
                ;; We cannot rely on element :begin for elements with
                ;; children starting at the same pos.
@@ -7829,10 +7835,12 @@ element ending there."
       (if (not org-element--cache) (org-element-cache-reset)
         (unless cached-only (org-element--cache-sync (current-buffer) pom))))
     (setq element (if cached-only
-                      (and (org-element--cache-active-p)
-                           (or (not org-element--cache-sync-requests)
-                               (org-element--cache-key-less-p pom (org-element--request-key (car org-element--cache-sync-requests))))
-                           (org-element--cache-find pom))
+                      (when (and (org-element--cache-active-p)
+                                 (or (not org-element--cache-sync-requests)
+                                     (< pom
+                                        (org-element--request-beg
+                                         (car org-element--cache-sync-requests)))))
+                        (org-element--cache-find pom))
                     (condition-case err
                         (org-element--parse-to pom)
                       (error
