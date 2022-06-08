@@ -10091,30 +10091,31 @@ current line."
 			org-agenda-tags-column))
 	(end (and line (line-end-position)))
 	l c)
-    (save-excursion
-      (goto-char (if line (line-beginning-position) (point-min)))
-      (while (re-search-forward org-tag-group-re end t)
-	(add-text-properties
-	 (match-beginning 1) (match-end 1)
-	 (list 'face (delq nil (let ((prop (get-text-property
+    (org-fold-core-ignore-modifications
+      (save-excursion
+        (goto-char (if line (line-beginning-position) (point-min)))
+        (while (re-search-forward org-tag-group-re end t)
+	  (add-text-properties
+	   (match-beginning 1) (match-end 1)
+	   (list 'face (delq nil (let ((prop (get-text-property
 					    (match-beginning 1) 'face)))
-				 (or (listp prop) (setq prop (list prop)))
-				 (if (memq 'org-tag prop)
+			         (or (listp prop) (setq prop (list prop)))
+			         (if (memq 'org-tag prop)
 				     prop
 				   (cons 'org-tag prop))))))
-	(setq l (string-width (match-string 1))
-	      c (if (< org-agenda-tags-column 0)
-		    (- (abs org-agenda-tags-column) l)
-		  org-agenda-tags-column))
-	(goto-char (match-beginning 1))
-	(delete-region (save-excursion (skip-chars-backward " \t") (point))
-		       (point))
-	(insert (org-add-props
-		    (make-string (max 1 (- c (current-column))) ?\s)
-		    (plist-put (copy-sequence (text-properties-at (point)))
-			       'face nil))))
-      (goto-char (point-min))
-      (org-font-lock-add-tag-faces (point-max)))))
+	  (setq l (string-width (match-string 1))
+	        c (if (< org-agenda-tags-column 0)
+		      (- (abs org-agenda-tags-column) l)
+		    org-agenda-tags-column))
+	  (goto-char (match-beginning 1))
+	  (delete-region (save-excursion (skip-chars-backward " \t") (point))
+		         (point))
+	  (insert (org-add-props
+		      (make-string (max 1 (- c (current-column))) ?\s)
+		      (plist-put (copy-sequence (text-properties-at (point)))
+			         'face nil))))
+        (goto-char (point-min))
+        (org-font-lock-add-tag-faces (point-max))))))
 
 (defun org-agenda-priority-up ()
   "Increase the priority of line at point, also in Org file."
