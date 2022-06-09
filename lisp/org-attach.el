@@ -520,12 +520,17 @@ METHOD may be `cp', `mv', `ln', `lns' or `url' default taken from
     current-prefix-arg
     nil))
   (setq method (or method org-attach-method))
+  (when (file-directory-p file)
+    (setq file (directory-file-name file)))
   (let ((basename (file-name-nondirectory file)))
     (let* ((attach-dir (org-attach-dir 'get-create))
            (attach-file (expand-file-name basename attach-dir)))
       (cond
        ((eq method 'mv) (rename-file file attach-file))
-       ((eq method 'cp) (copy-file file attach-file))
+       ((eq method 'cp)
+        (if (file-directory-p file)
+            (copy-directory file attach-file nil nil t)
+          (copy-file file attach-file)))
        ((eq method 'ln) (add-name-to-file file attach-file))
        ((eq method 'lns) (make-symbolic-link file attach-file 1))
        ((eq method 'url)
