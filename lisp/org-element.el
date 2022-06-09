@@ -5764,6 +5764,10 @@ the cache."
                    ;; Limit can be a list key.
                    (org-element--cache-key-less-p pos limit))
                (= pos (org-element-property :begin hashed))
+               ;; We cannot rely on element :begin for elements with
+               ;; children starting at the same pos.
+               (not (memq (org-element-type hashed)
+                        '(section org-data table)))
                (org-element-property :cached hashed))
           (progn
             (cl-incf (car org-element--cache-hash-statistics))
