@@ -22046,6 +22046,10 @@ format]].  The day name is optional when you type the date yourself.
 However, any date inserted or modified by Org adds that day name, for
 reading convenience.
 
+#+findex: org-date
+#+findex: org-anniversary
+#+findex: org-cyclic
+#+findex: org-block
 [fn:60] When working with the standard diary expression functions, you
 need to be very careful with the order of the arguments.  That order
 depends evilly on the variable ~calendar-date-style~.  For example, to
@@ -22053,10 +22057,11 @@ specify a date December 12, 2005, the call might look like
 =(diary-date 12 1 2005)= or =(diary-date 1 12 2005)= or =(diary-date
 2005 12 1)=, depending on the settings.  This has been the source of
 much confusion.  Org mode users can resort to special versions of
-these functions like ~org-date~ or ~org-anniversary~.  These work just
-like the corresponding ~diary-~ functions, but with stable ISO order
-of arguments (year, month, day) wherever applicable, independent of
-the value of ~calendar-date-style~.
+these functions, namely ~org-date~, ~org-anniversary~, ~org-cyclic, and
+~org-block~.  These work just like the corresponding ~diary-~
+functions, but with stable ISO order of arguments (year, month, day)
+wherever applicable, independent of the value of
+~calendar-date-style~.
 
 [fn:61] See the variable ~org-read-date-prefer-future~.  You may set
 that variable to the symbol ~time~ to even make a time before now
