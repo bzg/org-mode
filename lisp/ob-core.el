@@ -801,7 +801,8 @@ block."
 		    (let ((*this* (if (not file) result
 				    (org-babel-result-to-file
 				     file
-				     (org-babel--file-desc params result)))))
+				     (org-babel--file-desc params result)
+                                     'attachment))))
 		      (setq result (org-babel-ref-resolve post))
 		      (when file
 			(setq result-params (remove "file" result-params))))))
@@ -2298,11 +2299,14 @@ INFO may provide the values of these header arguments (in the
   (cond ((stringp result)
 	 (setq result (org-no-properties result))
 	 (when (member "file" result-params)
-	   (setq result (org-babel-result-to-file
-			 result
-			 (org-babel--file-desc (nth 2 info) result)))))
+	   (setq result
+                 (org-babel-result-to-file
+		  result
+		  (org-babel--file-desc (nth 2 info) result)
+                  'attachment))))
 	((listp result))
 	(t (setq result (format "%S" result))))
+
   (if (and result-params (member "silent" result-params))
       (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
 	     result)
@@ -2605,27 +2609,49 @@ in the buffer."
 		 (line-beginning-position 2))
 	     (point))))))
 
-(defun org-babel-result-to-file (result &optional description)
+(defun org-babel-result-to-file (result &optional description type)
   "Convert RESULT into an Org link with optional DESCRIPTION.
 If the `default-directory' is different from the containing
-file's directory then expand relative links."
+file's directory then expand relative links.
+
+If the optional TYPE is passed as 'attachment` and the path is a
+descendant of the DEFAULT-DIRECTORY, the generated link will be
+specified as an an \"attachment:\" style link."
   (when (stringp result)
-    (let ((same-directory?
-	   (and (buffer-file-name (buffer-base-buffer))
-		(not (string= (expand-file-name default-directory)
-			      (expand-file-name
-			       (file-name-directory
-			        (buffer-file-name (buffer-base-buffer)))))))))
-      (format "[[file:%s]%s]"
-	      (if (and default-directory
-		       (buffer-file-name (buffer-base-buffer)) same-directory?)
-		  (if (eq org-link-file-path-type 'adaptive)
-		      (file-relative-name
-		       (expand-file-name result default-directory)
-		       (file-name-directory
-			(buffer-file-name (buffer-base-buffer))))
-		    (expand-file-name result default-directory))
-		result)
+    (let* ((result-file-name (expand-file-name result))
+           (base-file-name (buffer-file-name (buffer-base-buffer)))
+           (base-directory (and buffer-file-name
+                                (file-name-directory base-file-name)))
+           (same-directory?
+	    (and base-file-name
+	         (not (string= (expand-file-name default-directory)
+			       (expand-file-name
+			        base-directory)))))
+           (request-attachment (eq type 'attachment))
+           (attach-dir (let* ((default-directory base-directory)
+                              (dir (org-attach-dir nil t)))
+                         (when dir
+                           (expand-file-name dir))))
+           (in-attach-dir (and request-attachment
+                               attach-dir
+                               (string-prefix-p
+                                attach-dir
+                                result-file-name))))
+      (format "[[%s:%s]%s]"
+              (pcase type
+                ((and 'attachment (guard in-attach-dir)) "attachment")
+                (_ "file"))
+              (if (and request-attachment in-attach-dir)
+                  (file-relative-name result-file-name)
+	        (if (and default-directory
+		         base-file-name same-directory?)
+		    (if (eq org-link-file-path-type 'adaptive)
+		        (file-relative-name
+		         result-file-name
+                         (file-name-directory
+			  base-file-name))
+		      result-file-name)
+		  result))
 	      (if description (concat "[" description "]") "")))))
 
 (defun org-babel-examplify-region (beg end &optional results-switches inline)
@@ -2756,10 +2782,17 @@ parameters when merging lists."
 	   (setq exports (funcall merge
 				  exports-exclusive-groups
 				  exports
-				  (split-string
+                                  (split-string
                                    (cond ((and value (functionp value)) (funcall value))
                                          (value value)
                                          (t ""))))))
+          ((or '(:dir . attach) '(:dir . "'attach"))
+           (unless (org-attach-dir nil t)
+             (error "No attachment directory for element (add :ID: or :DIR: property)"))
+           (setq params (append
+                         `((:dir . ,(org-attach-dir nil t))
+                           (:mkdirp . "yes"))
+                         (assq-delete-all :dir (assq-delete-all :mkdir params)))))
 	  ;; Regular keywords: any value overwrites the previous one.
 	  (_ (setq params (cons pair (assq-delete-all (car pair) params)))))))
     ;; Handle `:var' and clear out colnames and rownames for replaced

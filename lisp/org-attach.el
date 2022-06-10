@@ -324,6 +324,7 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (command-execute command)
 	  (error "No such attachment command: %c" c))))))
 
+;;;###autoload
 (defun org-attach-dir (&optional create-if-not-exists-p no-fs-check)
   "Return the directory associated with the current outline node.
 First check for DIR property, then ID property.

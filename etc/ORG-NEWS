@@ -798,6 +798,13 @@ Finally, the closures are only evaluated if they're not overridden for
 a source block. This improves efficiency in cases where the result of
 a compute-expensive closure would otherwise be discarded.
 
+*** New special value ~'attach~ for src block =:dir= option
+
+Passing the symbol ~attach~ or string ="'attach"= (with quotes) to the =:dir=
+option of a src block is now equivalent to =:dir (org-attach-dir) :mkdir yes=
+and any file results with a path descended from the attachment directory will
+use =attachment:= style links instead of the standard =file:= link type.
+
 ** Miscellaneous
 *** =org-bibtex= includes =doi= and =url= entries when exporting to BiBTeX
 =doi= and =url= entries have been made optional for some publication

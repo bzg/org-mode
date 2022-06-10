@@ -17542,6 +17542,13 @@ directory with {{{kbd(M-x cd RET DIRECTORY)}}}, and then not setting
 variable ~default-directory~.  Setting =mkdirp= header argument to
 a non-~nil~ value creates the directory, if necessary.
 
+Setting =dir= to the symbol ~attach~ or the string ~"'attach"~ will
+set =dir= to the directory returned by ~(org-attach-dir)~, set =:mkdir
+yes=, and insert any file paths, as when using =:results file=, which
+are under the node's attachment directory using =attachment:= links
+instead of the usual =file:= links.  Any returned path outside of the
+attachment directory will use =file:= links as per usual.
+
 For example, to save the plot file in the =Work/= folder of the home
 directory---notice tilde is expanded:
 
