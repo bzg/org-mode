@@ -4488,7 +4488,7 @@ in the subtree (not just direct children), configure the variable
 include the word =recursive= into the value of the =COOKIE_DATA=
 property.
 
-#+begin_example org
+#+begin_example
 ,* Parent capturing statistics [2/20]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
