@@ -4708,6 +4708,10 @@ The following commands are available:
 
 \\{org-mode-map}"
   (setq-local org-mode-loading t)
+  ;; Apply file-local and directory-local variables, so that Org
+  ;; startup respects them.  See
+  ;; https://list.orgmode.org/587be554-906c-5370-2cf2-f08b14fa58ff@gmail.com/T/#u
+  (hack-local-variables 'ignore-mode-settings)
   (org-load-modules-maybe)
   (org-install-agenda-files-menu)
   (when (and org-link-descriptive
