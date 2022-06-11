@@ -235,7 +235,7 @@ interface or run the following code after updating it:
   :type '(choice (const :tag "dot like in \"2.\"" ?.)
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tag "both" t))
-  :set (lambda (var val) (set var val)
+  :set (lambda (var val) (set-default-toplevel-value var val)
 	 (when (featurep 'org-element) (org-element-update-syntax))))
 
 (defcustom org-list-allow-alphabetical nil
@@ -253,7 +253,7 @@ interface or run the following code after updating it:
   :group 'org-plain-lists
   :version "24.1"
   :type 'boolean
-  :set (lambda (var val) (set var val)
+  :set (lambda (var val) (set-default-toplevel-value var val)
 	 (when (featurep 'org-element) (org-element-update-syntax))))
 
 (defcustom org-list-two-spaces-after-bullet-regexp nil

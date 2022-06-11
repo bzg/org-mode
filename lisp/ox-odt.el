@@ -404,7 +404,7 @@ with GNU ELPA tar or standard Emacs distribution."
     "Set `org-odt-schema-dir'.
 Also add it to `rng-schema-locating-files'."
     (let ((schema-dir value))
-      (set var
+      (set-default-toplevel-value var
 	   (if (and
 		(file-expand-wildcards
 		 (expand-file-name "od-manifest-schema*.rnc" schema-dir))

@@ -107,7 +107,7 @@ you can leave the string empty on this case."
   :package-version '(Org . "8.2.7")
   :set
   (lambda (symbol value)
-    (set symbol value)
+    (set-default-toplevel-value symbol value)
     (setq
      org-babel-lilypond-ly-command   (nth 0 value)
      org-babel-lilypond-pdf-command  (nth 1 value)

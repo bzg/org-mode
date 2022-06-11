@@ -110,7 +110,7 @@ you will need to run the following command after the change:
   :group 'org-footnote
   :initialize 'custom-initialize-default
   :set (lambda (var val)
-	 (set var val)
+	 (set-default-toplevel-value var val)
 	 (when (fboundp 'org-element-cache-reset)
 	   (org-element-cache-reset 'all)))
   :type '(choice

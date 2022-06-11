@@ -231,7 +231,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 ;;;###autoload
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
-  (set-default sym value)
+  (set-default-toplevel-value sym value)
   (dolist (pair org-babel-load-languages)
     (let ((active (cdr pair)) (lang (symbol-name (car pair))))
       (if active
@@ -706,7 +706,7 @@ defined in org-duration.el.")
 
 (defun org-set-modules (var value)
   "Set VAR to VALUE and call `org-load-modules-maybe' with the force flag."
-  (set var value)
+  (set-default-toplevel-value var value)
   (when (featurep 'org)
     (org-load-modules-maybe 'force)
     (org-element-cache-reset 'all)))
@@ -837,7 +837,7 @@ depends on, if any."
   :package-version '(Org . "9.0")
   :initialize 'custom-initialize-set
   :set (lambda (var val)
-	 (if (not (featurep 'ox)) (set-default var val)
+	 (if (not (featurep 'ox)) (set-default-toplevel-value var val)
 	   ;; Any back-end not required anymore (not present in VAL and not
 	   ;; a parent of any back-end in the new value) is removed from the
 	   ;; list of registered back-ends.
@@ -862,7 +862,7 @@ depends on, if any."
 			  backend))
 		((not (memq backend new-list)) (push backend new-list))))
 	     ;; Set VAR to that list with fixed dependencies.
-	     (set-default var new-list))))
+	     (set-default-toplevel-value var new-list))))
   :type '(set :greedy t
 	      (const :tag "   ascii       Export buffer to ASCII format" ascii)
 	      (const :tag "   beamer      Export buffer to Beamer presentation" beamer)
@@ -1815,9 +1815,9 @@ are followed by a letter in parenthesis, like TODO(t)."
   :group 'org-todo
   :set (lambda (var val)
 	 (cond
-	  ((eq var t) (set var 'auto))
-	  ((eq var 'prefix) (set var nil))
-	  (t (set var val))))
+	  ((eq var t) (set-default-toplevel-value var 'auto))
+	  ((eq var 'prefix) (set-default-toplevel-value var nil))
+	  (t (set-default-toplevel-value var val))))
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Automatically, when key letter have been defined" auto)
@@ -1899,7 +1899,7 @@ be blocked if any prior sibling is not yet done.
 Finally, if the parent is blocked because of ordered siblings of its own,
 the child will also be blocked."
   :set (lambda (var val)
-	 (set var val)
+	 (set-default-toplevel-value var val)
 	 (if val
 	     (add-hook 'org-blocker-hook
 		       'org-block-todo-from-children-or-siblings-or-parent)
@@ -1917,7 +1917,7 @@ This variable needs to be set before org.el is loaded, and you need to
 restart Emacs after a change to make the change effective.  The only way
 to change it while Emacs is running is through the customize interface."
   :set (lambda (var val)
-	 (set var val)
+	 (set-default-toplevel-value var val)
 	 (if val
 	     (add-hook 'org-blocker-hook
 		       'org-block-todo-from-checkboxes)
@@ -2368,7 +2368,6 @@ The formats are defined through the variable `org-time-stamp-custom-formats'.
 To turn this on on a per-file basis, insert anywhere in the file:
    #+STARTUP: customtime"
   :group 'org-time
-  :set 'set-default
   :type 'sexp)
 (make-variable-buffer-local 'org-display-custom-times)
 
@@ -3275,7 +3274,7 @@ header, or they will be appended."
 
 (defun org-set-packages-alist (var val)
   "Set the packages alist and make sure it has 3 elements per entry."
-  (set var (mapcar (lambda (x)
+  (set-default-toplevel-value var (mapcar (lambda (x)
 		     (if (and (consp x) (= (length x) 2))
 			 (list (car x) (nth 1 x) t)
 		       x))
@@ -3548,7 +3547,7 @@ After a match, the match groups contain these elements:
 (defvar org-emphasis-alist) ; defined just below
 (defun org-set-emph-re (var val)
   "Set variable and compute the emphasis regular expression."
-  (set var val)
+  (set-default-toplevel-value var val)
   (when (and (boundp 'org-emphasis-alist)
 	     (boundp 'org-emphasis-regexp-components)
 	     org-emphasis-alist org-emphasis-regexp-components)

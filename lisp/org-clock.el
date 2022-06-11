@@ -493,7 +493,7 @@ This variable only has effect if set with \\[customize]."
          (if value
              (add-hook 'kill-emacs-query-functions #'org-clock-kill-emacs-query)
            (remove-hook 'kill-emacs-query-functions #'org-clock-kill-emacs-query))
-         (set symbol value))
+         (set-default-toplevel-value symbol value))
   :type 'boolean
   :package-version '(Org . "9.5"))
 

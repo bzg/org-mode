@@ -98,7 +98,7 @@ sure to call the following command:
   :version "26.1"
   :package-version '(Org . "9.1")
   :set (lambda (var val)
-         (set-default var val)
+         (set-default-toplevel-value var val)
          ;; Avoid recursive load at startup.
 	 (when (featurep 'org-duration)
            (org-duration-set-regexps)))
