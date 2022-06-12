@@ -1353,6 +1353,34 @@ For more examples, see the system specific constants
 			(string :tag "Command")
 			(function :tag "Function")))))
 
+(defcustom org-resource-download-policy 'prompt
+  "The policy applied to requests to obtain remote resources.
+
+This affects keywords like #+setupfile and #+incude on export,
+`org-persist-write:url',and `org-attach-url' in non-interactive
+Emacs sessions.
+
+This recognises four possible values:
+- t, remote resources should always be downloaded.
+- prompt, you will be prompted to download resources nt considered safe.
+- safe, only resources considered safe will be downloaded.
+- nil, never download remote resources.
+
+A resource is considered safe if it matches one of the patterns
+in `org-safe-remote-resources'."
+  :group 'org
+  :type '(choice (const :tag "Always download remote resources" t)
+                 (const :tag "Prompt before downloading an unsafe resource" prompt)
+                 (const :tag "Only download resources considered safe" safe)
+                 (const :tag "Never download any resources" nil)))
+
+(defcustom org-safe-remote-resources nil
+  "A list of regexp patterns matching safe URIs.
+URI regexps are applied to both URLs and Org files requesting
+remote resources."
+  :group 'org
+  :type '(list regexp))
+
 (defcustom org-open-non-existing-files nil
   "Non-nil means `org-open-file' opens non-existing files.
 
@@ -4468,21 +4496,25 @@ is available.  This option applies only if FILE is a URL."
     (cond
      (cache)
      (is-url
-      (with-current-buffer (url-retrieve-synchronously file)
-	(goto-char (point-min))
-	;; Move point to after the url-retrieve header.
-	(search-forward "\n\n" nil :move)
-	;; Search for the success code only in the url-retrieve header.
-	(if (save-excursion
-	      (re-search-backward "HTTP.*\\s-+200\\s-OK" nil :noerror))
-	    ;; Update the cache `org--file-cache' and return contents.
-	    (puthash file
-		     (buffer-substring-no-properties (point) (point-max))
-		     org--file-cache)
-	  (funcall (if noerror #'message #'user-error)
-		   "Unable to fetch file from %S"
-		   file)
-	  nil)))
+      (if (org--should-fetch-remote-resource-p file)
+          (with-current-buffer (url-retrieve-synchronously file)
+            (goto-char (point-min))
+            ;; Move point to after the url-retrieve header.
+            (search-forward "\n\n" nil :move)
+            ;; Search for the success code only in the url-retrieve header.
+            (if (save-excursion
+                  (re-search-backward "HTTP.*\\s-+200\\s-OK" nil :noerror))
+                ;; Update the cache `org--file-cache' and return contents.
+                (puthash file
+                         (buffer-substring-no-properties (point) (point-max))
+                         org--file-cache)
+              (funcall (if noerror #'message #'user-error)
+                       "Unable to fetch file from %S"
+                       file)
+              nil))
+        (funcall (if noerror #'message #'user-error)
+                 "The remote resource %S is considered unsafe, and will not be downloaded."
+                 file)))
      (t
       (with-temp-buffer
         (condition-case nil
@@ -4494,6 +4526,74 @@ is available.  This option applies only if FILE is a URL."
 		    "Unable to read file %S"
 		    file)
 	   nil)))))))
+
+(defun org--should-fetch-remote-resource-p (uri)
+  "Return non-nil if the URI should be fetched."
+  (or (eq org-resource-download-policy t)
+      (org--safe-remote-resource-p uri)
+      (and (eq org-resource-download-policy 'prompt)
+           (org--confirm-resource-safe uri))))
+
+(defun org--safe-remote-resource-p (uri)
+  "Return non-nil if URI is considered safe.
+This checks every pattern in `org-safe-remote-resources', and
+returns non-nil if any of them match."
+  (let ((uri-patterns org-safe-remote-resources)
+        (file-uri (and buffer-file-name
+                       (concat "file://" (file-truename buffer-file-name))))
+        match-p)
+    (while (and (not match-p) uri-patterns)
+      (setq match-p (or (string-match-p (car uri-patterns) uri)
+                        (and file-uri (string-match-p (car uri-patterns) file-uri)))
+            uri-patterns (cdr uri-patterns)))
+    match-p))
+
+(defun org--confirm-resource-safe (uri)
+  "Ask the user if URI should be considered safe, returning non-nil if so."
+  (unless noninteractive
+    (let ((current-file (and buffer-file-name (file-truename buffer-file-name)))
+          (buf (get-buffer-create "*Org Remote Resource*")))
+      ;; Set up the contents of the *Org Remote Resource* buffer.
+      (with-current-buffer buf
+        (erase-buffer)
+        (insert "An org-mode document would like to download "
+                (propertize uri 'face '(:inherit org-link :weight normal))
+                ", which is not considered safe.\n\n"
+                "Do you want to download this?  You can type\n "
+                (propertize "!" 'face 'success)
+                " to download this resource, and permanantly mark it as safe.\n "
+                (propertize "f" 'face 'success)
+                " to download this resource, and permanantly mark all resources in "
+                (propertize current-file 'face 'fixed-pitch-serif)
+                " as safe.\n "
+                (propertize "y" 'face 'warning)
+                " to download this resource, just this once.\n "
+                (propertize "n" 'face 'error)
+                " to skip this resource.\n")
+        (setq-local cursor-type nil)
+        (set-buffer-modified-p nil)
+        (goto-char (point-min)))
+      ;; Display the buffer and read a choice.
+      (save-window-excursion
+        (pop-to-buffer buf)
+        (let* ((exit-chars '(?y ?n ?! ?f ?\s))
+               (prompt (format "Please type y, n, f, or !%s: "
+                               (if (< (line-number-at-pos (point-max))
+                                      (window-body-height))
+                                   ""
+                                 ", or C-v/M-v to scroll")))
+               char)
+          (setq char (read-char-choice prompt exit-chars))
+          (when (memq char '(?! ?f))
+            (customize-push-and-save
+             'org-safe-remote-resources
+             (list (rx string-start
+                       (literal
+                        (if (and (= char ?f) current-file)
+                            (concat "file://" current-file) uri))
+                       string-end))))
+          (prog1 (memq char '(?! ?\s ?y ?f))
+            (quit-window t)))))))
 
 (defun org-extract-log-state-settings (x)
   "Extract the log state setting from a TODO keyword string.

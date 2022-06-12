@@ -657,7 +657,10 @@ COLLECTION is the plist holding data collection."
                          (format "%s-%s.%s" persist-file (md5 path) ext))))
         (unless (file-exists-p (file-name-directory file-copy))
           (make-directory (file-name-directory file-copy) t))
-        (url-copy-file path file-copy 'overwrite)
+        (if (org--should-fetch-remote-resource-p path)
+            (url-copy-file path file-copy 'overwrite)
+          (error "The remote resource %S is considered unsafe, and will not be downloaded."
+                 path))
         (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
 (defun org-persist-write:index (container _)
