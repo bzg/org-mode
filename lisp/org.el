@@ -19822,26 +19822,19 @@ unless optional argument NO-INHERITANCE is non-nil.
 
 Optional argument ELEMENT contains element at point."
   (save-match-data
-    (let ((el (or element (org-element-at-point nil 'cached))))
-      (if el
-          (catch :found
-            (setq el (org-element-lineage el '(headline inlinetask) 'include-self))
-            (if no-inheritance
-                (org-element-property :commentedp el)
-              (while el
-                (when (org-element-property :commentedp el)
-                  (throw :found t))
-                (setq el (org-element-property :parent el)))))
-        (cond
-         ((org-before-first-heading-p) nil)
-         ((let ((headline (nth 4 (org-heading-components))))
-            (and headline
-	         (let ((case-fold-search nil))
-	           (string-match-p (concat "^" org-comment-string "\\(?: \\|$\\)")
-			           headline)))))
-         (no-inheritance nil)
-         (t
-          (save-excursion (and (org-up-heading-safe) (org-in-commented-heading-p)))))))))
+    (let ((el (or element
+                  (org-element-at-point nil 'cached)
+                  (org-with-wide-buffer
+                   (org-back-to-heading-or-point-min t)
+                   (org-element-at-point)))))
+      (catch :found
+        (setq el (org-element-lineage el '(headline inlinetask) 'include-self))
+        (if no-inheritance
+            (org-element-property :commentedp el)
+          (while el
+            (when (org-element-property :commentedp el)
+              (throw :found t))
+            (setq el (org-element-property :parent el))))))))
 
 (defun org-in-archived-heading-p (&optional no-inheritance element)
   "Non-nil if point is under an archived heading.
