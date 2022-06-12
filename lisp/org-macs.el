@@ -166,13 +166,19 @@
 	     (and (re-search-backward "^[ \t]*# +Local Variables:"
 				      (max (- (point) 3000) 1)
 				      t)
-		  (delete-and-extract-region (point) (point-max)))))))
+               (let ((buffer-undo-list t))
+	         (delete-and-extract-region (point) (point-max)))))))
+         (tick-counter-before (buffer-modified-tick)))
      (unwind-protect (progn ,@body)
        (when local-variables
 	 (org-with-wide-buffer
 	  (goto-char (point-max))
 	  (unless (bolp) (insert "\n"))
-	  (insert local-variables))))))
+          (let ((modified (< tick-counter-before (buffer-modified-tick)))
+                (buffer-undo-list t))
+	    (insert local-variables)
+            (unless modified
+              (restore-buffer-modified-p nil))))))))
 
 (defmacro org-no-popups (&rest body)
   "Suppress popup windows and evaluate BODY."
