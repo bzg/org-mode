@@ -19797,14 +19797,15 @@ instead of back to heading."
 (defun org-before-first-heading-p ()
   "Before first heading?
 Respect narrowing."
-  (if (org-element--cache-active-p)
-      (let ((cached-headline (org-element-lineage (org-element-at-point) '(headline) t)))
-        (or (not cached-headline)
-            (< (org-element-property :begin cached-headline) (point-min))))
-    (org-with-limited-levels
-     (save-excursion
-       (end-of-line)
-       (null (re-search-backward org-outline-regexp-bol nil t))))))
+  (let ((cached (org-element-at-point nil 'cached)))
+    (if cached
+        (let ((cached-headline (org-element-lineage cached '(headline) t)))
+          (or (not cached-headline)
+              (< (org-element-property :begin cached-headline) (point-min))))
+      (org-with-limited-levels
+       (save-excursion
+         (end-of-line)
+         (null (re-search-backward org-outline-regexp-bol nil t)))))))
 
 (defun org-at-heading-p (&optional invisible-not-ok)
   "Return t if point is on a (possibly invisible) heading line.
