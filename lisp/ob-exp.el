@@ -157,133 +157,140 @@ this template."
 	      ;; Evaluate from top to bottom every Babel block
 	      ;; encountered.
 	      (goto-char (point-min))
-	      (while (re-search-forward regexp nil t)
-		(unless (save-match-data (or (org-in-commented-heading-p)
-					     (org-in-archived-heading-p)))
-		  (let* ((object? (match-end 1))
-			 (element (save-match-data
-				    (if object? (org-element-context)
-				      ;; No deep inspection if we're
-				      ;; just looking for an element.
-				      (org-element-at-point))))
-			 (type
-			  (pcase (org-element-type element)
-			    ;; Discard block elements if we're looking
-			    ;; for inline objects.  False results
-			    ;; happen when, e.g., "call_" syntax is
-			    ;; located within affiliated keywords:
-			    ;;
-			    ;; #+name: call_src
-			    ;; #+begin_src ...
-			    ((and (or `babel-call `src-block) (guard object?))
-			     nil)
-			    (type type)))
-			 (begin
-			  (copy-marker (org-element-property :begin element)))
-			 (end
-			  (copy-marker
-			   (save-excursion
-			     (goto-char (org-element-property :end element))
-			     (skip-chars-backward " \r\t\n")
-			     (point)))))
-		    (pcase type
-		      (`inline-src-block
-		       (let* ((info
-			       (org-babel-get-src-block-info nil element))
-			      (params (nth 2 info)))
-			 (setf (nth 1 info)
-			       (if (and (cdr (assq :noweb params))
-					(string= "yes"
-						 (cdr (assq :noweb params))))
-				   (org-babel-expand-noweb-references
-				    info org-babel-exp-reference-buffer)
-				 (nth 1 info)))
-			 (goto-char begin)
-			 (let ((replacement
-				(org-babel-exp-do-export info 'inline)))
-			   (if (equal replacement "")
-			       ;; Replacement code is empty: remove
-			       ;; inline source block, including extra
-			       ;; white space that might have been
-			       ;; created when inserting results.
-			       (delete-region begin
-					      (progn (goto-char end)
-						     (skip-chars-forward " \t")
-						     (point)))
-			     ;; Otherwise: remove inline source block
-			     ;; but preserve following white spaces.
-			     ;; Then insert value.
-			     (delete-region begin end)
-			     (insert replacement)))))
-		      ((or `babel-call `inline-babel-call)
-                       (org-babel-exp-do-export
-                        (or (org-babel-lob-get-info element)
-                            (user-error "Unknown Babel reference: %s"
-                                        (org-element-property :call element)))
-                        'lob)
-		       (let ((rep
-			      (org-fill-template
-			       org-babel-exp-call-line-template
-			       `(("line"  .
-				  ,(org-element-property :value element))))))
-			 ;; If replacement is empty, completely remove
-			 ;; the object/element, including any extra
-			 ;; white space that might have been created
-			 ;; when including results.
-			 (if (equal rep "")
-			     (delete-region
-			      begin
-			      (progn (goto-char end)
-				     (if (not (eq type 'babel-call))
-					 (progn (skip-chars-forward " \t")
-						(point))
-				       (skip-chars-forward " \r\t\n")
-				       (line-beginning-position))))
-			   ;; Otherwise, preserve trailing
-			   ;; spaces/newlines and then, insert
-			   ;; replacement string.
-			   (goto-char begin)
-			   (delete-region begin end)
-			   (insert rep))))
-		      (`src-block
-		       (let ((match-start (copy-marker (match-beginning 0)))
-			     (ind (current-indentation)))
-			 ;; Take care of matched block: compute
-			 ;; replacement string.  In particular, a nil
-			 ;; REPLACEMENT means the block is left as-is
-			 ;; while an empty string removes the block.
-			 (let ((replacement
-				(progn (goto-char match-start)
-				       (org-babel-exp-src-block))))
-			   (cond ((not replacement) (goto-char end))
-				 ((equal replacement "")
-				  (goto-char end)
-				  (skip-chars-forward " \r\t\n")
-				  (beginning-of-line)
-				  (delete-region begin (point)))
-				 (t
-				  (goto-char match-start)
-				  (delete-region (point)
-						 (save-excursion
-						   (goto-char end)
-						   (line-end-position)))
-				  (insert replacement)
-				  (if (or org-src-preserve-indentation
-					  (org-element-property
-					   :preserve-indent element))
-				      ;; Indent only code block
-				      ;; markers.
-				      (save-excursion
-					(skip-chars-backward " \r\t\n")
-					(indent-line-to ind)
-					(goto-char match-start)
-					(indent-line-to ind))
-				    ;; Indent everything.
-				    (indent-rigidly
-				     match-start (point) ind)))))
-			 (set-marker match-start nil))))
-		    (set-marker begin nil)
-		    (set-marker end nil)))))
+              ;; We are about to do a large number of changes in
+              ;; buffer.  Do not try to track them in cache and update
+              ;; the folding states.  Reset the cache afterwards.
+              (org-element-with-disabled-cache
+                (org-fold-core-ignore-modifications
+	          (while (re-search-forward regexp nil t)
+		    (unless (save-match-data (or (org-in-commented-heading-p)
+					         (org-in-archived-heading-p)))
+		      (let* ((object? (match-end 1))
+			     (element (save-match-data
+				        (if object? (org-element-context)
+				          ;; No deep inspection if we're
+				          ;; just looking for an element.
+				          (org-element-at-point))))
+			     (type
+			      (pcase (org-element-type element)
+			        ;; Discard block elements if we're looking
+			        ;; for inline objects.  False results
+			        ;; happen when, e.g., "call_" syntax is
+			        ;; located within affiliated keywords:
+			        ;;
+			        ;; #+name: call_src
+			        ;; #+begin_src ...
+			        ((and (or `babel-call `src-block) (guard object?))
+			         nil)
+			        (type type)))
+			     (begin
+			      (copy-marker (org-element-property :begin element)))
+			     (end
+			      (copy-marker
+			       (save-excursion
+			         (goto-char (org-element-property :end element))
+			         (skip-chars-backward " \r\t\n")
+			         (point)))))
+		        (pcase type
+		          (`inline-src-block
+		           (let* ((info
+			           (org-babel-get-src-block-info nil element))
+			          (params (nth 2 info)))
+			     (setf (nth 1 info)
+			           (if (and (cdr (assq :noweb params))
+					    (string= "yes"
+						     (cdr (assq :noweb params))))
+				       (org-babel-expand-noweb-references
+				        info org-babel-exp-reference-buffer)
+				     (nth 1 info)))
+			     (goto-char begin)
+			     (let ((replacement
+				    (org-babel-exp-do-export info 'inline)))
+			       (if (equal replacement "")
+			           ;; Replacement code is empty: remove
+			           ;; inline source block, including extra
+			           ;; white space that might have been
+			           ;; created when inserting results.
+			           (delete-region begin
+					          (progn (goto-char end)
+						         (skip-chars-forward " \t")
+						         (point)))
+			         ;; Otherwise: remove inline source block
+			         ;; but preserve following white spaces.
+			         ;; Then insert value.
+			         (delete-region begin end)
+			         (insert replacement)))))
+		          ((or `babel-call `inline-babel-call)
+                           (org-babel-exp-do-export
+                            (or (org-babel-lob-get-info element)
+                                (user-error "Unknown Babel reference: %s"
+                                            (org-element-property :call element)))
+                            'lob)
+		           (let ((rep
+			          (org-fill-template
+			           org-babel-exp-call-line-template
+			           `(("line"  .
+				      ,(org-element-property :value element))))))
+			     ;; If replacement is empty, completely remove
+			     ;; the object/element, including any extra
+			     ;; white space that might have been created
+			     ;; when including results.
+			     (if (equal rep "")
+			         (delete-region
+			          begin
+			          (progn (goto-char end)
+				         (if (not (eq type 'babel-call))
+					     (progn (skip-chars-forward " \t")
+						    (point))
+				           (skip-chars-forward " \r\t\n")
+				           (line-beginning-position))))
+			       ;; Otherwise, preserve trailing
+			       ;; spaces/newlines and then, insert
+			       ;; replacement string.
+			       (goto-char begin)
+			       (delete-region begin end)
+			       (insert rep))))
+		          (`src-block
+		           (let ((match-start (copy-marker (match-beginning 0)))
+			         (ind (current-indentation)))
+			     ;; Take care of matched block: compute
+			     ;; replacement string.  In particular, a nil
+			     ;; REPLACEMENT means the block is left as-is
+			     ;; while an empty string removes the block.
+			     (let ((replacement
+				    (progn (goto-char match-start)
+				           (org-babel-exp-src-block))))
+			       (cond ((not replacement) (goto-char end))
+				     ((equal replacement "")
+				      (goto-char end)
+				      (skip-chars-forward " \r\t\n")
+				      (beginning-of-line)
+				      (delete-region begin (point)))
+				     (t
+				      (goto-char match-start)
+				      (delete-region (point)
+						     (save-excursion
+						       (goto-char end)
+						       (line-end-position)))
+				      (insert replacement)
+				      (if (or org-src-preserve-indentation
+					      (org-element-property
+					       :preserve-indent element))
+				          ;; Indent only code block
+				          ;; markers.
+				          (save-excursion
+					    (skip-chars-backward " \r\t\n")
+					    (indent-line-to ind)
+					    (goto-char match-start)
+					    (indent-line-to ind))
+				        ;; Indent everything.
+				        (indent-rigidly
+				         match-start (point) ind)))))
+			     (set-marker match-start nil))))
+		        (set-marker begin nil)
+		        (set-marker end nil))))))
+              ;; Reset the outdated cache.
+              (org-element-cache-reset))
 	  (kill-buffer org-babel-exp-reference-buffer)
           (remove-text-properties (point-min) (point-max)
                                   '(org-reference nil)))))))
