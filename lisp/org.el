@@ -3248,8 +3248,8 @@ images at the same place."
 
 (defcustom org-format-latex-header "\\documentclass{article}
 \\usepackage[usenames]{color}
-\[PACKAGES]
 \[DEFAULT-PACKAGES]
+\[PACKAGES]
 \\pagestyle{empty}             % do not remove
 % The settings below are copied from fullpage.sty
 \\setlength{\\textwidth}{\\paperwidth}
