@@ -302,8 +302,8 @@ less error-prone."
   :group 'org
   :package-version '(Org . "9.6")
   :type '(choice
-          (const :tag "Overlays" 'overlays)
-          (const :tag "Text properties" 'text-properties)))
+          (const :tag "Overlays" overlays)
+          (const :tag "Text properties" text-properties)))
 
 (defvar-local org-fold-core-isearch-open-function #'org-fold-core--isearch-reveal
   "Function used to reveal hidden text found by isearch.

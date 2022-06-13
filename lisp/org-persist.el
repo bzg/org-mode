@@ -196,7 +196,7 @@ password prompts to log in."
   :type '(choice (const :tag "Never" nil)
                  (const :tag "Always" t)
                  (number :tag "Keep not more than X files")
-                 (const :tag "Check if exist on remote" 'check-existence)))
+                 (const :tag "Check if exist on remote" check-existence)))
 
 (defcustom org-persist-default-expiry 30
   "Default expiry condition for persistent data.
@@ -207,7 +207,7 @@ data is deleted that number days after last access.  When a function,
 it should be a function returning non-nil when the data is expired.  The
 function will be called with a single argument - collection."
   :group 'org-persist
-  :type '(choice (const :tag "Never" 'never)
+  :type '(choice (const :tag "Never" never)
                  (const :tag "Always" nil)
                  (number :tag "Keep N days")
                  (function :tag "Function")))
