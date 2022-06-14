@@ -329,7 +329,7 @@ non-nil."
   "Return a list of family names from a list of full NAMES.
 
 To better accomomodate corporate names, this will only shorten
-personal names of the form 'family, given'."
+personal names of the form \"family, given\"."
   (when (stringp names)
     (mapconcat
      (lambda (name)

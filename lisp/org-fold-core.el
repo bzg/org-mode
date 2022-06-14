@@ -381,7 +381,7 @@ The following properties are known:
                       using isearch.
 - :isearch-open     :: non-nil means that isearch can reveal text hidden
                       using this spec.  This property does nothing
-                      when 'isearch-ignore property is non-nil.
+                      when \\='isearch-ignore property is non-nil.
 - :front-sticky     :: non-nil means that text prepended to the folded text
                       is automatically folded.
 - :rear-sticky      :: non-nil means that text appended to the folded text
@@ -708,7 +708,7 @@ The folding spec properties will be set to PROPERTIES (see
 SPEC must be a symbol.
 
 BUFFER can be a buffer to remove SPEC in, nil to remove SPEC in current
-buffer, or 'all to remove SPEC in all open `org-mode' buffers and all
+buffer, or \\='all to remove SPEC in all open `org-mode' buffers and all
 future org buffers."
   (org-fold-core--check-spec spec)
   (when (eq buffer 'all)
@@ -777,7 +777,7 @@ If SPEC-OR-ALIAS is a folding spec, only check the given folding spec."
 Return nil if there is no folding at point or POM.
 If SPEC-OR-ALIAS is nil, return a folding spec with highest priority
 among present at `point' or POM.
-If SPEC-OR-ALIAS is 'all, return the list of all present folding
+If SPEC-OR-ALIAS is \\='all, return the list of all present folding
 specs.
 If SPEC-OR-ALIAS is a valid folding spec or a spec alias, return the
 corresponding folding spec (if the text is folded using that spec)."
@@ -1005,7 +1005,7 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
 This is used to allow searching in regions hidden via text properties.
 As for [2020-05-09 Sat], Isearch only has special handling of hidden overlays.
 Any text hidden via text properties is not revealed even if `search-invisible'
-is set to 't.")
+is set to `t'.")
 
 (defvar-local org-fold-core--isearch-local-regions (make-hash-table :test 'equal)
   "Hash table storing temporarily shown folds from isearch matches.")
