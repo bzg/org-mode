@@ -31,12 +31,14 @@ org.texi:	org-manual.org
 	$(BATCH) 				      \
 	  --eval '(add-to-list `load-path "../lisp")' \
 	  --eval '(load "../mk/org-fixup.el")' 	      \
+	  --eval '(setq gc-cons-threshold most-positive-fixnum)' \
 	  --eval '(org-make-manual)'
 
 orgguide.texi:	org-guide.org
 	$(BATCH) 				      \
 	  --eval '(add-to-list `load-path "../lisp")' \
 	  --eval '(load "../mk/org-fixup.el")' 	      \
+	  --eval '(setq gc-cons-threshold most-positive-fixnum)' \
 	  --eval '(org-make-guide)'
 
 org-version.inc:	org.texi
