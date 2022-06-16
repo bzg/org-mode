@@ -398,9 +398,9 @@ be evaluated."
 : 2
 
 #+NAME: src1
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 \(+ 1 1)
-#+END_SRC"
+#+end_src"
       (org-test-with-temp-text
 	  "#+RESULTS: src1
 
@@ -565,7 +565,7 @@ src_emacs-lisp{(+ 1 1)}"
 (ert-deftest ob-export/body-with-coderef ()
   "Test exporting a code block with coderefs."
   (should
-   (equal "#+BEGIN_SRC emacs-lisp\n0 (ref:foo)\n#+END_SRC"
+   (equal "#+begin_src emacs-lisp\n0 (ref:foo)\n#+end_src"
 	  (org-test-with-temp-text
 	      "#+BEGIN_SRC emacs-lisp :exports code\n0 (ref:foo)\n#+END_SRC"
 	    (let ((org-export-use-babel t)
@@ -574,7 +574,7 @@ src_emacs-lisp{(+ 1 1)}"
 	    (buffer-string))))
   (should
    (equal
-    "#+BEGIN_SRC emacs-lisp -l \"r:%s\"\n1 r:foo\n#+END_SRC"
+    "#+begin_src emacs-lisp -l \"r:%s\"\n1 r:foo\n#+end_src"
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -l \"r:%s\" -lisp :exports code\n1 r:foo\n#+END_SRC"
       (let ((org-export-use-babel t))
@@ -586,7 +586,7 @@ src_emacs-lisp{(+ 1 1)}"
   ;; Pathological case: affiliated keyword matches inline source block
   ;; syntax.
   (should
-   (equal "#+name: call_foo\n#+BEGIN_SRC emacs-lisp\n42\n#+END_SRC"
+   (equal "#+name: call_foo\n#+begin_src emacs-lisp\n42\n#+end_src"
 	  (org-test-with-temp-text
 	      "#+name: call_foo\n#+BEGIN_SRC emacs-lisp\n42\n#+END_SRC"
 	    (let ((org-export-use-babel t))
