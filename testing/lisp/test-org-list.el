@@ -216,7 +216,55 @@
 	    (let ((org-plain-list-ordered-item-terminator t)
 		  (org-list-allow-alphabetical t))
 	      (org-cycle-list-bullet)
-	      (buffer-substring (point) (line-end-position)))))))
+	      (buffer-substring (point) (line-end-position))))))
+  ;; Preserve point position while cycling.
+  (org-test-with-temp-text "- this is test
+
+  - asd
+    - asd
+ <point> - this is
+* headline
+"
+    (should (= (point) 36))
+    (dotimes (_ 10)
+      (org-cycle-list-bullet)
+      (should (= 1 (- (point) (line-beginning-position))))))
+  (org-test-with-temp-text "
+- this is test
+  + asd
+    - asd
+  <point>+ this is
+* headline
+"
+    (should (= (point) 37))
+    (dotimes (_ 10)
+      (org-cycle-list-bullet)
+      (should (= 2 (- (point) (line-beginning-position))))))
+  (org-test-with-temp-text "
+- this is test
+  + asd
+    - asd
+  +<point> this is
+* headline
+"
+    (should (= (point) 38))
+    (dotimes (_ 10)
+      (org-cycle-list-bullet)
+      (should (= 3 (- (point) (line-beginning-position))))))
+  (org-test-with-temp-text "
+- this is test
+  - asd
+    - asd
+  - <point>this is
+* headline
+"
+    (should (= (point) 39))
+    (dotimes (i 5)
+      (org-cycle-list-bullet)
+      (should
+       (if (or (< i 2) (= i 4))
+           (should (= 4 (- (point) (line-beginning-position))))
+         (should (= 5 (- (point) (line-beginning-position)))))))))
 
 (ert-deftest test-org-list/indent-item ()
   "Test `org-indent-item' specifications."
