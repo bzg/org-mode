@@ -63,7 +63,7 @@
 (declare-function org-element-type "org-element" (element))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-file-contents "org" (file &optional noerror nocache))
-(declare-function org-in-commented-heading-p "org" (&optional no-inheritance))
+(declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))
 (declare-function org-link-search "ol" (s &optional avoid-pos stealth))
 (declare-function org-mode "org" ())
 (declare-function vc-backend "vc-hooks" (f))
