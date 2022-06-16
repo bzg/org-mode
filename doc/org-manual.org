@@ -15474,7 +15474,7 @@ make that easier the function ~org-texinfo-kbd-macro~ is provided,
 which is intended to be used like this:
 
 #+begin_example
-#+macro: kbd (eval (org-texinfo-kbd-macro $1))
+,#+macro: kbd (eval (org-texinfo-kbd-macro $1))
 
 Type {{{kbd(C-c SPC)}}}.
 #+end_example
