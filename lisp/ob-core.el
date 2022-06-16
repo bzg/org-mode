@@ -42,6 +42,7 @@
 (defvar org-src-preserve-indentation)
 (defvar org-babel-tangle-uncomment-comments)
 
+(declare-function org-attach-dir "org-attach" (&optional create-if-not-exists-p no-fs-check))
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())

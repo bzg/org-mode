@@ -39,6 +39,12 @@
 
 (declare-function engrave-faces-latex-gen-preamble "ext:engrave-faces-latex")
 (declare-function engrave-faces-latex-buffer "ext:engrave-faces-latex")
+(declare-function engrave-faces-latex-gen-preamble-line "ext:engrave-faces-latex")
+(declare-function engrave-faces-get-theme "ext:engrave-faces")
+
+(defvar engrave-faces-latex-output-style)
+(defvar engrave-faces-current-preset-style)
+(defvar engrave-faces-latex-mathescape)
 
 
 ;;; Define Back-End

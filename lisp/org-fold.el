@@ -837,11 +837,13 @@ DETAIL is either nil, `minimal', `local', `ancestors',
           (let (org-hide-emphasis-markers
                 org-link-descriptive
                 org-pretty-entities
-                org-hide-macro-markers
+                (org-hide-macro-markers nil)
                 (region (or (org-find-text-property-region (point) 'org-emphasis)
                             (org-find-text-property-region (point) 'org-macro)
                             (org-find-text-property-region (point) 'invisible)
                             region)))
+            ;; Silence byte-compiler.
+            (ignore org-hide-macro-markers)
             (when region
               (org-with-point-at (car region)
                 (beginning-of-line)
