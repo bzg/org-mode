@@ -27,18 +27,24 @@ guide::		orgguide.texi org-version.inc
 	../mk/guidesplit.pl $@/*
 endif
 
+# We increase GC threshold when generating documentation.  This
+# imrpoves the performance significantly.  See
+# https://yhetil.org/emacs-devel/9778F176-E724-4E61-B0FB-327BCDD316C0@acm.org
+# Too high number may cause memory overflow (for example, it has
+# happened in CI during automated build).  We choose 50Mb threshold,
+# based on the above discussion.
 org.texi:	org-manual.org
 	$(BATCH) 				      \
 	  --eval '(add-to-list `load-path "../lisp")' \
 	  --eval '(load "../mk/org-fixup.el")' 	      \
-	  --eval '(setq gc-cons-threshold most-positive-fixnum)' \
+	  --eval '(setq gc-cons-threshold (* 50 1000 1000))' \
 	  --eval '(org-make-manual)'
 
 orgguide.texi:	org-guide.org
 	$(BATCH) 				      \
 	  --eval '(add-to-list `load-path "../lisp")' \
 	  --eval '(load "../mk/org-fixup.el")' 	      \
-	  --eval '(setq gc-cons-threshold most-positive-fixnum)' \
+	  --eval '(setq gc-cons-threshold (* 50 1000 1000))' \
 	  --eval '(org-make-guide)'
 
 org-version.inc:	org.texi
