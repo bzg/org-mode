@@ -106,6 +106,55 @@ ob-comint.el, which was not previously tested."
 	   "#+BEGIN_SRC sh :results output :var l='(1 2)\necho ${l}\n#+END_SRC"
 	   (org-trim (org-babel-execute-src-block))))))
 
+(ert-deftest ob-shell/remote-with-stdin-or-cmdline ()
+  "Test :stdin and :cmdline with a remote directory."
+  ;; We assume `default-directory' is a local directory.
+  (skip-unless (not (memq system-type '(ms-dos windows-nt))))
+  (org-test-with-tramp-remote-dir remote-dir
+      (dolist (spec `( ()
+                       (:dir ,remote-dir)
+                       (:dir ,remote-dir :cmdline t)
+                       (:dir ,remote-dir :stdin   t)
+                       (:dir ,remote-dir :cmdline t :shebang t)
+                       (:dir ,remote-dir :stdin   t :shebang t)
+                       (:dir ,remote-dir :cmdline t :stdin t :shebang t)
+                       (:cmdline t)
+                       (:stdin   t)
+                       (:cmdline t :shebang t)
+                       (:stdin   t :shebang t)
+                       (:cmdline t :stdin t :shebang t)))
+        (let ((default-directory (or (plist-get spec :dir) default-directory))
+              (org-confirm-babel-evaluate nil)
+              (params-line "")
+              (who-line "  export who=tramp")
+              (args-line "  echo ARGS: --verbose 23 71"))
+          (when-let ((dir (plist-get spec :dir)))
+            (setq params-line (concat params-line " " ":dir " dir)))
+          (when (plist-get spec :stdin)
+            (setq who-line "  read -r who")
+            (setq params-line (concat params-line " :stdin input")))
+          (when (plist-get spec :cmdline)
+            (setq args-line "  echo \"ARGS: $*\"")
+            (setq params-line (concat params-line " :cmdline \"--verbose 23 71\"")))
+          (when (plist-get spec :shebang)
+            (setq params-line (concat params-line " :shebang \"#!/bin/sh\"")))
+          (let* ((result (org-test-with-temp-text
+                             (mapconcat #'identity
+                                        (list "#+name: input"
+                                              "tramp"
+                                              ""
+                                              (concat "<point>"
+                                                      "#+begin_src sh :results output " params-line)
+                                              args-line
+                                              who-line
+                                              "  echo \"hello $who from $(pwd)/\""
+                                              "#+end_src")
+                                        "\n")
+                           (org-trim (org-babel-execute-src-block))))
+                 (expected (concat "ARGS: --verbose 23 71"
+                                   "\nhello tramp from " (file-local-name default-directory))))
+            (should (equal result expected)))))))
+
 (provide 'test-ob-shell)
 
 ;;; test-ob-shell.el ends here

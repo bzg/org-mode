@@ -284,6 +284,35 @@ setting `pp-escape-newlines' to nil manually."
 	;; on multiple lines in the ERT results buffer.
 	(setq pp-escape-newlines back)))))
 
+(defun org-test-with-tramp-remote-dir--worker (body)
+  "Worker for `org-test-with-tramp-remote-dir'."
+  (let ((env-def (getenv "REMOTE_TEMPORARY_FILE_DIRECTORY")))
+    (cond
+     (env-def (funcall body env-def))
+     ((eq system-type 'windows-nt) (funcall body null-device))
+     (t (require 'tramp)
+        (let ((tramp-methods
+               (cons '("mock"
+                       (tramp-login-program        "sh")
+                       (tramp-login-args           (("-i")))
+                       (tramp-remote-shell         "/bin/sh")
+                       (tramp-remote-shell-args    ("-c"))
+                       (tramp-connection-timeout   10))
+                     tramp-methods))
+              (tramp-default-host-alist
+               `(("\\`mock\\'" nil ,(system-name)))))
+          (funcall body (format "/mock::%s" temporary-file-directory)))))))
+
+(defmacro org-test-with-tramp-remote-dir (dir &rest body)
+  "Bind the symbol DIR to a remote directory and execute BODY.
+Return the value of the last form in BODY.  The directory DIR
+will be something like \"/mock::/tmp/\", which allows to test
+Tramp related features.  We mostly follow
+`tramp-test-temporary-file-directory' from GNU Emacs tests."
+  (declare (debug (sexp body)) (indent 2))
+  `(org-test-with-tramp-remote-dir--worker (lambda (,dir) ,@body)))
+
+
 
 ;;; Navigation Functions
 

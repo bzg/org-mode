@@ -224,6 +224,16 @@ extension beyond end of line was not controllable."
 (define-obsolete-function-alias 'org-babel-edit-distance 'org-string-distance
   "9.5")
 
+(unless (fboundp 'with-connection-local-variables)
+  ;; Added in Emacs 27: commit:21f54feee8, 2019-03-09.
+  ;; Redefining it using the old function `with-connection-local-profiles'.
+  (defmacro with-connection-local-variables (&rest body)
+    "Apply connection-local variables according to `default-directory'.
+Execute BODY, and unwind connection-local variables."
+    (declare (debug t))
+    `(with-connection-local-profiles (connection-local-get-profiles)
+       ,@body)))
+
 
 ;;; Emacs < 26.1 compatibility
 

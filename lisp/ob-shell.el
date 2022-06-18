@@ -283,12 +283,16 @@ return the value of the last statement in BODY."
 	      (set-file-modes script-file #o755)
 	      (with-temp-file stdin-file (insert (or stdin "")))
 	      (with-temp-buffer
-		(call-process-shell-command
-		 (concat (if shebang script-file
-			   (format "%s %s" shell-file-name script-file))
-			 (and cmdline (concat " " cmdline)))
-		 stdin-file
-		 (current-buffer))
+                (with-connection-local-variables
+                 (apply #'process-file
+                        (if shebang (file-local-name script-file)
+                          shell-file-name)
+		        stdin-file
+                        (current-buffer)
+                        nil
+                        (if shebang (when cmdline (list cmdline))
+                          (list shell-command-switch
+                                (concat (file-local-name script-file)  " " cmdline)))))
 		(buffer-string))))
 	   (session			; session evaluation
 	    (mapconcat
