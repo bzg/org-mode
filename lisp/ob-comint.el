@@ -124,9 +124,7 @@ statement (not large blocks of code)."
     (while (progn
              (goto-char comint-last-input-end)
              (not (and (re-search-forward comint-prompt-regexp nil t)
-                       (goto-char (match-beginning 0))
-                       (string= (face-name (face-at-point))
-                                "comint-highlight-prompt"))))
+                     (goto-char (match-beginning 0)))))
       (accept-process-output (get-buffer-process buffer)))))
 
 (defun org-babel-comint-eval-invisibly-and-wait-for-file
