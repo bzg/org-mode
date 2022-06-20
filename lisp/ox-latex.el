@@ -3640,7 +3640,8 @@ CONTENTS is the contents of the object."
 ;; `org-latex-table' is the entry point for table transcoding.  It
 ;; takes care of tables with a "verbatim" mode.  Otherwise, it
 ;; delegates the job to either `org-latex--table.el-table',
-;; `org-latex--org-table' or `org-latex--math-table' functions,
+;; `org-latex--org-table', `org-latex--math-table' or
+;; `org-latex--org-tabbing' functions,
 ;; depending of the type of the table and the mode requested.
 ;;
 ;; `org-latex--align-string' is a subroutine used to build alignment
@@ -3664,8 +3665,10 @@ contextual information."
 			   `(table nil ,@(org-element-contents table))))))
        ;; Case 2: Matrix.
        ((or (string= type "math") (string= type "inline-math"))
-	(org-latex--math-table table info))
-       ;; Case 3: Standard table.
+        (org-latex--math-table table info))
+       ;; Case 3: Tabbing
+       ((string= type "tabbing") (org-table--org-tabbing table contents info))
+       ;; Case 4: Standard table.
        (t (concat (org-latex--org-table table contents info)
 		  ;; When there are footnote references within the
 		  ;; table, insert their definition just after it.
@@ -3701,6 +3704,34 @@ centered."
 	      (when (memq 'right borders) (push "|" align))))
 	  info)
 	(apply 'concat (nreverse align)))))
+
+(defun org-latex--align-string-tabbing (table info)
+    "Return an appropriate LaTeX alignment string, for the
+latex tabbing environment.
+TABLE is the considered table.  INFO is a plist used as
+a communication channel."
+    (or (org-export-read-attribute :attr_latex table :align)
+        (let ((align "")
+              (count 0)
+              (separator ""))
+            ;; Count the number of cells in the first row.
+            (setq count (length
+                  (org-element-map
+                      (org-element-map table 'table-row
+                        (lambda (row)
+                          (and (eq (org-element-property :type row) 'standard) row))
+                        info 'first-match)
+                      'table-cell
+                    (lambda (cell) cell))))
+            ;; Calculate the column width, using a proportion of the documets
+            ;; textwidth.
+            (setq separator (format
+                             "\\hspace{%s\\textwidth} \\= "
+                             (- (/  1.0 count) 0.01)))
+            (setq align (concat
+                         (apply 'concat (make-list count separator))
+                         "\\kill")))
+            ))
 
 (defun org-latex--decorate-table (table attributes caption above? info)
   "Decorate TABLE string with caption and float environment.
@@ -3804,6 +3835,23 @@ This function assumes TABLE has `org' as its `:type' property and
 			    table-env)))
 	(org-latex--decorate-table output attr caption above? info))))))
 
+
+(defun org-table--org-tabbing (table contenst info)
+      "Return appropriate LaTeX code for an Org table, using the
+latex tabbing syntax.
+TABLE is the table type element to transcode.  CONTENTS is its
+contents, as a string.  INFO is a plist used as a communication
+channel.
+This function assumes TABLE has `org' as its `:type' property and
+`tabbing' as its `:mode' attribute."
+    (let ((output (format "\\begin{%s}\n%s\n%s\\end{%s}"
+                          "tabbing"
+                          (org-latex--align-string-tabbing table info )
+                          contenst
+                          "tabbing")))
+      output)
+    )
+
 (defun org-latex--table.el-table (table info)
   "Return appropriate LaTeX code for a table.el table.
 
@@ -3887,6 +3935,9 @@ This function assumes TABLE has `org' as its `:type' property and
   "Transcode a TABLE-CELL element from Org to LaTeX.
 CONTENTS is the cell contents.  INFO is a plist used as
 a communication channel."
+  (let (
+        (type (org-export-read-attribute :attr_latex (org-export-get-parent-table table-cell) :mode))
+        )
   (concat
    (let ((scientific-format (plist-get info :latex-table-scientific-notation)))
      (if (and contents
@@ -3898,7 +3949,10 @@ a communication channel."
 		 (match-string 1 contents)
 		 (match-string 2 contents))
        contents))
-   (when (org-export-get-next-element table-cell info) " & ")))
+   (when (org-export-get-next-element table-cell info)
+         (if (string= type "tabbing")
+             " \\> " " & ")
+         ))))
 
 
 ;;;; Table Row

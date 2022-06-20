@@ -227,6 +227,18 @@ produce results superior to Minted or Listings.
 The block type in ~org-structure-template-alist~ is not case-sensitive.
 When the block type starts from the upper case, structure template
 will now insert =#+BEGIN_TYPE=.  Previously, lower-case =#+begin_type= was inserted unconditionally.
+*** New ox-latex tabbing support for tables.
+
+Latex tables can now be exported to the latex tabbing environment
+tabbing environment]].
+This is done by adding =#+ATTR_LATEX: :mode tabbing= at the top
+of the table.
+The default column width is set to 1/n times the latex textwidth,
+where n is the number of columns.
+This behaviour can be changed by supplying a =:align= parameter.
+
+The tabbing environment can be useful when generating simple tables which
+can be span multiple pages and when table cells are allowed to overflow.
 
 ** New functions and changes in function arguments
 

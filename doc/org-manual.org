@@ -13546,10 +13546,12 @@ include:
   #+vindex: org-latex-default-table-mode
   The LaTeX export back-end wraps the table differently depending on
   the mode for accurate rendering of math symbols.  Mode is either
-  =table=, =math=, =inline-math= or =verbatim=.
+  =table=, =math=, =inline-math=, =verbatim= or =tabbing=.
 
   For =math= or =inline-math= mode, LaTeX export back-end wraps the
   table in a math environment, but every cell in it is exported as-is.
+  For =tabbing= the LaTeX tabbing environment is used and the correct
+  tabbing delimiters =\>= are used.
   The LaTeX export back-end determines the default mode from
   ~org-latex-default-table-mode~.  The LaTeX export back-end merges
   contiguous tables in the same mode into a single environment.
