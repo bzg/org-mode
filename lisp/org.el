@@ -5836,6 +5836,8 @@ If TAG is a number, get the corresponding match group."
 			    '(mouse-face t keymap t org-linked-text t
 					 invisible t intangible t
 					 org-emphasis t))
+    (org-fold-region beg end nil 'org-link)
+    (org-fold-region beg end nil 'org-link-description)
     (org-fold-core-update-optimisation beg end)
     (org-remove-font-lock-display-properties beg end)))
 
