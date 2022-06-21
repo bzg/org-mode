@@ -10311,12 +10311,17 @@ narrowing."
 	   (end-of-line -1))))
       (t
        (org-end-of-meta-data org-log-state-notes-insert-after-drawers)
-       (skip-chars-forward " \t\n")
-       (beginning-of-line)
-       (unless org-log-states-order-reversed
-	 (org-skip-over-state-notes)
-	 (skip-chars-backward " \t\n")
-	 (beginning-of-line 2)))))
+       (let ((endpos (point)))
+         (skip-chars-forward " \t\n")
+         (beginning-of-line)
+         (unless org-log-states-order-reversed
+	   (org-skip-over-state-notes)
+	   (skip-chars-backward " \t\n")
+	   (beginning-of-line 2))
+         ;; When current headline is at the end of buffer and does not
+         ;; end with trailing newline the above can move to the
+         ;; beginning of the headline.
+         (when (< (point) endpos)) (goto-char endpos)))))
    (if (bolp) (point) (line-beginning-position 2))))
 
 (defun org-add-log-setup (&optional purpose state prev-state how extra)
