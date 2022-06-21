@@ -345,7 +345,7 @@ FORMAT and ARGS are passed to `message'."
      (`never nil)
      ((pred numberp)
       (when (plist-get ,collection :last-access)
-        (<= (float-time) (+ (plist-get ,collection :last-access) (* ,cnd 24 60 60)))))
+        (> (float-time) (+ (plist-get ,collection :last-access) (* ,cnd 24 60 60)))))
      ((pred functionp)
       (funcall ,cnd ,collection))
      (_ (error "org-persist: Unsupported expiry type %S" ,cnd))))
