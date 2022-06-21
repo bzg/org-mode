@@ -2129,7 +2129,7 @@ argument to `set-category' for each entry it's called against."
 If STRING is non-nil, the text property will be fetched from position 0
 in that string.  If STRING is nil, it will be fetched from the beginning
 of the current line."
-  (declare (debug t))
+  (declare (debug t) (indent 1))
   (org-with-gensyms (marker)
     `(let ((,marker (get-text-property (if ,string 0 (point-at-bol))
 				       'org-hd-marker ,string)))
