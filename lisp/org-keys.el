@@ -244,7 +244,7 @@ become effective."
 
 (defcustom org-use-extra-keys nil
   "Non-nil means use extra key sequence definitions for certain commands.
-This happens automatically if `window-system' is nil.  This
+This happens automatically if `display-graphic-p' returns nil.  This
 variable lets you do the same manually.  You must set it before
 loading Org."
   :group 'org-startup
@@ -495,7 +495,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 ;;  We only set them when really needed because otherwise the
 ;;  menus don't show the simple keys
 
-(when (or org-use-extra-keys (not window-system))
+(when (or org-use-extra-keys (not (display-graphic-p)))
   (org-defkey org-mode-map (kbd "C-c C-x c") #'org-table-copy-down)
   (org-defkey org-mode-map (kbd "C-c C-x m") #'org-meta-return)
   (org-defkey org-mode-map (kbd "C-c C-x M") #'org-insert-todo-heading)
