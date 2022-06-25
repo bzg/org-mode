@@ -6782,6 +6782,16 @@ that range.  See `after-change-functions' for more information."
         ;; Activate a timer to process the request during idle time.
         (org-element--cache-set-timer (current-buffer))))))
 
+(defun org-element--cache-setup-change-functions ()
+  "Setup `before-change-functions' and `after-change-functions'."
+  (when (and (derived-mode-p 'org-mode) org-element-use-cache)
+    (add-hook 'before-change-functions
+	      #'org-element--cache-before-change nil t)
+    ;; Run `org-element--cache-after-change' early to handle cases
+    ;; when other `after-change-functions' require element cache.
+    (add-hook 'after-change-functions
+	      #'org-element--cache-after-change -1 t)))
+
 (defvar org-element--cache-avoid-synchronous-headline-re-parsing nil
   "This variable controls how buffer changes are handled by the cache.
 
@@ -7285,10 +7295,16 @@ buffers."
 	(setq-local org-element--cache-change-warning nil)
 	(setq-local org-element--cache-sync-requests nil)
 	(setq-local org-element--cache-sync-timer nil)
-	(add-hook 'before-change-functions
-		  #'org-element--cache-before-change nil t)
-	(add-hook 'after-change-functions
-		  #'org-element--cache-after-change nil t)))))
+        (org-element--cache-setup-change-functions)
+        ;; Make sure that `org-element--cache-after-change' and
+        ;; `org-element--cache-before-change' are working inside properly created
+        ;; indirect buffers.  Note that `clone-indirect-buffer-hook'
+        ;; will not work inside indirect buffers not created by
+        ;; calling `clone-indirect-buffer'.  We consider that the code
+        ;; not using `clone-indirect-buffer' to be written with
+        ;; awareness about possible consequences.
+        (add-hook 'clone-indirect-buffer-hook
+                  #'org-element--cache-setup-change-functions)))))
 
 ;;;###autoload
 (defun org-element-cache-refresh (pos)
