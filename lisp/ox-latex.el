@@ -3667,7 +3667,8 @@ contextual information."
        ((or (string= type "math") (string= type "inline-math"))
         (org-latex--math-table table info))
        ;; Case 3: Tabbing
-       ((string= type "tabbing") (org-table--org-tabbing table contents info))
+       ((string= type "tabbing")
+        (org-table--org-tabbing table contents info))
        ;; Case 4: Standard table.
        (t (concat (org-latex--org-table table contents info)
 		  ;; When there are footnote references within the
@@ -3706,32 +3707,28 @@ centered."
 	(apply 'concat (nreverse align)))))
 
 (defun org-latex--align-string-tabbing (table info)
-    "Return an appropriate LaTeX alignment string, for the
-latex tabbing environment.
+  "Return LaTeX alignment string using tabbing environment.
 TABLE is the considered table.  INFO is a plist used as
 a communication channel."
-    (or (org-export-read-attribute :attr_latex table :align)
-        (let ((align "")
-              (count 0)
-              (separator ""))
-            ;; Count the number of cells in the first row.
-            (setq count (length
-                  (org-element-map
-                      (org-element-map table 'table-row
-                        (lambda (row)
-                          (and (eq (org-element-property :type row) 'standard) row))
-                        info 'first-match)
-                      'table-cell
-                    (lambda (cell) cell))))
-            ;; Calculate the column width, using a proportion of the documets
-            ;; textwidth.
-            (setq separator (format
-                             "\\hspace{%s\\textwidth} \\= "
-                             (- (/  1.0 count) 0.01)))
-            (setq align (concat
-                         (apply 'concat (make-list count separator))
-                         "\\kill")))
-            ))
+  (or (org-export-read-attribute :attr_latex table :align)
+      (let* ((count
+              ;; Count the number of cells in the first row.
+              (length
+               (org-element-map
+                   (org-element-map table 'table-row
+                     (lambda (row)
+                       (and (eq (org-element-property :type row)
+                                'standard)
+                            row))
+                     info 'first-match)
+                   'table-cell #'identity)))
+             ;; Calculate the column width, using a proportion of
+             ;; the document's textwidth.
+             (separator
+              (format "\\hspace{%s\\textwidth} \\= "
+                      (- (/  1.0 count) 0.01))))
+        (concat (apply 'concat (make-list count separator))
+                "\\kill"))))
 
 (defun org-latex--decorate-table (table attributes caption above? info)
   "Decorate TABLE string with caption and float environment.
@@ -3836,21 +3833,19 @@ This function assumes TABLE has `org' as its `:type' property and
 	(org-latex--decorate-table output attr caption above? info))))))
 
 
-(defun org-table--org-tabbing (table contenst info)
-      "Return appropriate LaTeX code for an Org table, using the
-latex tabbing syntax.
+(defun org-table--org-tabbing (table contents info)
+  "Return tabbing environment LaTeX code for Org table.
 TABLE is the table type element to transcode.  CONTENTS is its
 contents, as a string.  INFO is a plist used as a communication
 channel.
+
 This function assumes TABLE has `org' as its `:type' property and
 `tabbing' as its `:mode' attribute."
-    (let ((output (format "\\begin{%s}\n%s\n%s\\end{%s}"
-                          "tabbing"
-                          (org-latex--align-string-tabbing table info )
-                          contenst
-                          "tabbing")))
-      output)
-    )
+  (format "\\begin{%s}\n%s\n%s\\end{%s}"
+          "tabbing"
+          (org-latex--align-string-tabbing table info)
+          contents
+          "tabbing"))
 
 (defun org-latex--table.el-table (table info)
   "Return appropriate LaTeX code for a table.el table.
