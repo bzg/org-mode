@@ -1185,10 +1185,9 @@ font          The font to use with HTML-CSS and SVG output.  As of MathJax 2.5
 linebreaks    Let MathJax perform automatic linebreaks.  Valid values
               are \"true\" and \"false\".
 indent        If align is not center, how far from the left/right side?
-              Valid values are \"left\" and \"right\"
 multlinewidth The width of the multline environment.
 autonumber    How to number equations.  Valid values are \"None\",
-              \"all\" and \"AMS Math\".
+              \"All\" and \"AMS\".
 tagindent     The amount tags are indented.
 tagside       Which side to show tags/labels on.  Valid values are
               \"left\" and \"right\"
