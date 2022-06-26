@@ -462,10 +462,11 @@ agenda dispatcher `\\[org-agenda]'.  Each entry is a list like this:
 
 key      The key (one or more characters as a string) to be associated
          with the command.
-desc     A description of the command, when omitted or nil, a default
+desc     A description of the command.  When omitted or nil, a default
          description is built using MATCH.
 type     The command type, any of the following symbols:
           agenda      The daily/weekly agenda.
+          agenda*     Appointments for current week/day.
           todo        Entries with a specific TODO keyword, in all agenda files.
           search      Entries containing search words entry or headline.
           tags        Tags/Property/TODO match in all agenda files.
@@ -473,6 +474,8 @@ type     The command type, any of the following symbols:
           todo-tree   Sparse tree of specific TODO keyword in *current* file.
           tags-tree   Sparse tree with all tags matches in *current* file.
           occur-tree  Occur sparse tree for *current* file.
+          alltodo     The global TODO list.
+          stuck       Stuck projects.
           ...         A user-defined function.
 match    What to search for:
           - a single keyword for TODO keyword searches
@@ -486,7 +489,7 @@ settings  A list of option settings, similar to that in a let form, so like
 files     A list of files to write the produced agenda buffer to with
           the command `org-store-agenda-views'.
           If a file name ends in \".html\", an HTML version of the buffer
-          is written out.  If it ends in \".ps\", a postscript version is
+          is written out.  If it ends in \".ps\", a PostScript version is
           produced.  Otherwise, only the plain text is written to the file.
 
 You can also define a set of commands, to create a composite agenda buffer.
@@ -498,9 +501,9 @@ where
 
 desc   A description string to be displayed in the dispatcher menu.
 cmd    An agenda command, similar to the above.  However, tree commands
-       are not allowed, but instead you can get agenda and global todo list.
-       So valid commands for a set are:
+       are not allowed.  Valid commands for a set are:
        (agenda \"\" settings)
+       (agenda* \"\" settings)
        (alltodo \"\" settings)
        (stuck \"\" settings)
        (todo \"match\" settings files)
@@ -520,7 +523,9 @@ should provide a description for the prefix, like
    \\='((\"h\" . \"HOME + Name tag searches\") ; describe prefix \"h\"
      (\"hl\" tags \"+HOME+Lisa\")
      (\"hp\" tags \"+HOME+Peter\")
-     (\"hk\" tags \"+HOME+Kim\")))"
+     (\"hk\" tags \"+HOME+Kim\")))
+
+See also Info node `(org) Custom Agenda Views'."
   :group 'org-agenda-custom-commands
   :type `(repeat
 	  (choice :value ("x" "Describe command here" tags "" nil)
