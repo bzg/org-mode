@@ -21041,6 +21041,17 @@ number.  Here are tips to speed up:
   (setq org-agenda-use-tag-inheritance nil)
   #+end_src
 
+  #+vindex: org-agenda-ignore-drawer-properties
+- Disable parsing of some drawer properties:
+
+  #+begin_src emacs-lisp
+  (setq org-agenda-ignore-drawer-properties '(effort appt stats category))
+  #+end_src
+
+  The drawer properties you can disable in the agenda are effort
+  estimates (~effort~), appointments (~appt~), statistics (~stats~)
+  and subtree-local categories (~category~).
+
 These options can be applied to selected agenda views.  For more
 details about generation of agenda views, see the docstrings for the
 relevant variables, and this [[https://orgmode.org/worg/agenda-optimization.html][dedicated Worg page]] for agenda
