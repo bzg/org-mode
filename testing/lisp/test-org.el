@@ -7753,6 +7753,26 @@ CLOSED: %s
           (org-add-log-note))
         (buffer-string))))))
 
+(ert-deftest test-org/org-todo-prefix ()
+  "Test `org-todo' prefix arg behavior."
+  ;; FIXME: Add tests for all other allowed prefix arguments.
+  ;; -1 prefix arg should cancel repeater and mark DONE.
+  (should
+   (string-match-p
+    "DONE H\\(.*\n\\)*<2012-03-29 Thu \\+0y>"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
+	(org-todo -1)
+	(buffer-string)))))
+  ;; - prefix arg should cancel repeater and mark DONE.
+  (should
+   (string-match-p
+    "DONE H\\(.*\n\\)*<2012-03-29 Thu \\+0y>"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2y>"
+	(org-todo '-)
+	(buffer-string))))))
+
 
 ;;; Timestamps API
 
