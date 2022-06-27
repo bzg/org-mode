@@ -3930,11 +3930,10 @@ This function assumes TABLE has `org' as its `:type' property and
   "Transcode a TABLE-CELL element from Org to LaTeX.
 CONTENTS is the cell contents.  INFO is a plist used as
 a communication channel."
-  (let (
-        (type (org-export-read-attribute :attr_latex (org-export-get-parent-table table-cell) :mode))
-        )
-  (concat
-   (let ((scientific-format (plist-get info :latex-table-scientific-notation)))
+  (let ((type (org-export-read-attribute
+               :attr_latex (org-export-get-parent-table table-cell) :mode))
+        (scientific-format (plist-get info :latex-table-scientific-notation)))
+    (concat
      (if (and contents
 	      scientific-format
 	      (string-match orgtbl-exp-regexp contents))
@@ -3943,11 +3942,9 @@ a communication channel."
 	 (format scientific-format
 		 (match-string 1 contents)
 		 (match-string 2 contents))
-       contents))
-   (when (org-export-get-next-element table-cell info)
-         (if (string= type "tabbing")
-             " \\> " " & ")
-         ))))
+       contents)
+     (when (org-export-get-next-element table-cell info)
+       (if (string= type "tabbing") " \\> " " & ")))))
 
 
 ;;;; Table Row
