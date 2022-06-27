@@ -131,13 +131,18 @@ name and week number or the separator lines."
   :group 'org-agenda
   :type 'boolean)
 
-(defcustom org-agenda-block-separator ?=
+(defcustom org-agenda-block-separator
+  (if (and (display-graphic-p)
+           (char-displayable-p ?─))
+      ?─
+    ?=)
   "The separator between blocks in the agenda.
 If this is a string, it will be used as the separator, with a newline added.
 If it is a character, it will be repeated to fill the window width.
 If nil the separator is disabled.  In `org-agenda-custom-commands' this
 addresses the separator between the current and the previous block."
   :group 'org-agenda
+  :version "29.1"
   :type '(choice
 	  (const :tag "Disabled" nil)
 	  (character)
@@ -1534,11 +1539,12 @@ the variable `org-agenda-time-grid'."
   :type 'boolean)
 
 (defcustom org-agenda-time-grid
-  '((daily today require-timed)
-    (800 1000 1200 1400 1600 1800 2000)
-    "......"
-    "----------------")
-
+  (let ((graphical (and (display-graphic-p)
+                        (char-displayable-p ?┄))))
+    `((daily today require-timed)
+      (800 1000 1200 1400 1600 1800 2000)
+      ,(if graphical " ┄┄┄┄┄ " "......")
+      ,(if graphical "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄" "----------------")))
   "The settings for time grid for agenda display.
 This is a list of four items.  The first item is again a list.  It contains
 symbols specifying conditions when the grid should be displayed:
@@ -1558,6 +1564,7 @@ times that have a grid line.
 The fourth item is a string placed after the grid times.  This
 will align with agenda items."
   :group 'org-agenda-time-grid
+  :version "29.1"
   :type
   '(list
     (set :greedy t :tag "Grid Display Options"
@@ -1579,10 +1586,14 @@ will align with agenda items."
   :type 'boolean)
 
 (defcustom org-agenda-current-time-string
-  "now - - - - - - - - - - - - - - - - - - - - - - - - -"
+  (if (and (display-graphic-p)
+           (char-displayable-p ?⭠)
+           (char-displayable-p ?─))
+      "⭠ now ───────────────────────────────────────────────"
+    "now - - - - - - - - - - - - - - - - - - - - - - - - -")
   "The string for the current time marker in the agenda."
   :group 'org-agenda-time-grid
-  :version "24.1"
+  :version "29.1"
   :type 'string)
 
 (defgroup org-agenda-sorting nil
