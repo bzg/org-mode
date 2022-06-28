@@ -2749,6 +2749,11 @@ parameters when merging lists."
 	(pcase pair
 	  (`(:var . ,value)
 	   (let ((name (cond
+                        ;; Default header arguments can accept lambda
+                        ;; functions.  We uniquely identify the var
+                        ;; according to the full string contents of
+                        ;; the lambda function.
+			((functionp value) value)
 			((listp value) (car value))
 			((string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*=" value)
 			 (intern (match-string 1 value)))
