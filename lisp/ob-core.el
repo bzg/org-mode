@@ -482,12 +482,14 @@ For the format of SAFE-LIST, see `org-babel-safe-header-args'."
 This is a list in which each element is an alist.  Each key
 corresponds to a header argument, and each value to that header's
 value.  The value can either be a string or a closure that
-evaluates to a string.  The closure is evaluated when the source
-block is being evaluated (e.g. during execution or export), with
-point at the source block.  It is not possible to use an
-arbitrary function symbol (e.g. \\='some-func), since org uses
-lexical binding.  To achieve the same functionality, call the
-function within a closure (e.g. (lambda () (some-func))).
+evaluates to a string.
+
+A closure is evaluated when the source block is being
+evaluated (e.g. during execution or export), with point at the
+source block.  It is not possible to use an arbitrary function
+symbol (e.g. 'some-func), since org uses lexical binding.  To
+achieve the same functionality, call the function within a
+closure (e.g. (lambda () (some-func))).
 
 To understand how closures can be used as default header
 arguments, imagine you'd like to set the file name output of a
@@ -504,7 +506,16 @@ this with:
 
 Because the closure is evaluated with point at the source block,
 the call to `org-element-at-point' above will always retrieve
-information about the current source block.")
+information about the current source block.
+
+Some header arguments can be provided multiple times for a source
+block.  An example of such a header argument is :var.  This
+functionality is also supported for default header arguments by
+providing the header argument multiple times in the alist.  For
+example:
+
+'((:var . \"foo=\\\"bar\\\"\")
+  (:var . \"bar=\\\"foo\\\"\"))")
 
 (put 'org-babel-default-header-args 'safe-local-variable
      (org-babel-header-args-safe-fn org-babel-safe-header-args))
