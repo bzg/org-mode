@@ -158,7 +158,7 @@
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
 
-(defconst org-persist--storage-version "2.4"
+(defconst org-persist--storage-version "2.5"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
