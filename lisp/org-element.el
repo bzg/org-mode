@@ -7166,16 +7166,15 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
         (with-current-buffer (get-file-buffer (plist-get associated :file))
           (if (and (derived-mode-p 'org-mode)
                    org-element--cache)
-              (progn
-                ;; Cleanup cache request keys to avoid collisions during next
-                ;; Emacs session.
-                (avl-tree-mapc
-                 (lambda (el)
-                   (org-element-put-property el :org-element--cache-sync-key nil))
-                 org-element--cache)
-                (org-with-wide-buffer
-                 (org-element-at-point (point-max)))
-                nil)
+              (org-with-wide-buffer
+               (org-element--cache-sync (current-buffer) (point-max))
+               ;; Cleanup cache request keys to avoid collisions during next
+               ;; Emacs session.
+               (avl-tree-mapc
+                (lambda (el)
+                  (org-element-put-property el :org-element--cache-sync-key nil))
+                org-element--cache)
+               nil)
             'forbid))
       'forbid)))
 
