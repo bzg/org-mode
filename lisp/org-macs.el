@@ -594,6 +594,7 @@ ones and overrule settings in the other lists."
   '(org-element--cache
     org-element--headline-cache
     org-element--cache-change-tic
+    org-element--cache-last-buffer-size
     org-element--cache-change-warning
     org-element--cache-gapless
     org-element--cache-hash-left

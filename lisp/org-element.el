@@ -5322,29 +5322,6 @@ to be correct.  Setting this to a value less than 0.0001 is useless.")
 (defvar org-element--cache-map-statistics-threshold 0.1
   "Time threshold in seconds to log statistics for `org-element-cache-map'.")
 
-(defvar org-element--cache-diagnostics-modifications t
-  "Non-nil enables cache warnings when for silent modifications.
-
-Silent modifications are the modifications in Org buffers that are not
-registered by `org-element--cache-before-change' and
-`org-element--cache-after-change'.
-
-This variable may cause false-positives because some Emacs versions
-can change `buffer-chars-modified-tick' internally even though no
-visible changes in buffer are being made.  Some of such expected cases
-are covered by heuristics, but not all.")
-
-(defvar org-element--cache-silent-modification-check t
-  "Detect changes in buffer made inside `with-silent-modifications'.
-
-Note that some internal Emacs functions may also trigger a warning and
-cache reset.  The warning can be suppressed by setting
-`org-element--cache-diagnostics-modifications' to nil, but the cache
-will still be refreshed to be safe.
-
-WARNING: Setting this variable to nil may cause cache corruption is some
-third-party packages make undetected changes in buffers.")
-
 (defvar org-element--cache-diagnostics-level 2
   "Detail level of the diagnostics.")
 
@@ -5453,6 +5430,9 @@ See `org-element--cache-key' for more information.")
 
 (defvar-local org-element--cache-change-tic nil
   "Last `buffer-chars-modified-tick' for registered changes.")
+
+(defvar-local org-element--cache-last-buffer-size nil
+  "Last value of `buffer-size' for registered changes.")
 
 (defvar org-element--cache-non-modifying-commands
   '(org-agenda
@@ -5968,46 +5948,17 @@ actually submitted."
     (with-current-buffer (or (buffer-base-buffer buffer) buffer)
       ;; Check if the buffer have been changed outside visibility of
       ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
-      (if (and (/= org-element--cache-change-tic
-                  (buffer-chars-modified-tick))
-               org-element--cache-silent-modification-check
-               ;; FIXME: Below is a heuristics noticed by observation.
-               ;; quail.el with non-latin input does silent
-               ;; modifications in buffer increasing the tick counter
-               ;; but not actually changing the buffer text:
-               ;; https://list.orgmode.org/87sfw2luhj.fsf@localhost/T/#you
-               ;; https://lists.gnu.org/archive/html/bug-gnu-emacs/2021-11/msg00894.html
-               ;; However, the values of `buffer-chars-modified-tick'
-               ;; and `buffer-modified-tick' appear to be same after
-               ;; the quail.el's changes in buffer.  We do not
-               ;; consider these exact changes as a dangerous silent
-               ;; edit.
-               (/= (buffer-chars-modified-tick)
-                  (buffer-modified-tick)))
+      (if (/= org-element--cache-last-buffer-size (buffer-size))
           (progn
-            (when (or (and org-element--cache-diagnostics-modifications
-                           ;; A number of Emacs internal operations in
-                           ;; Emacs 26 and 27 alter
-                           ;; `buffer-chars-modified-tick' (see
-                           ;; https://list.orgmode.org/87ee7jdv70.fsf@localhost/T/#t
-                           ;; https://list.orgmode.org/2022-01-06T12-13-17@devnull.Karl-Voit.at/T/#mb3771758f81b31721ba2f420878a4d16081dc483).
-                           ;; We have no way to distinguish them from
-                           ;; dangerious silent edits.  So, we can
-                           ;; only reset the cache, but do not show
-                           ;; warning to not irritate the users.)
-                           (not (version< emacs-version "28")))
-                      (and (boundp 'org-batch-test) org-batch-test))
-              (org-element--cache-warn
-               "Unregistered buffer modifications detected. Resetting.
+            (org-element--cache-warn
+             "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
-The buffer is: %s\n Current command: %S\n Chars modified: %S\n Buffer modified: %S\n Backtrace:\n%S"
-               (buffer-name (current-buffer))
-               (list this-command (buffer-chars-modified-tick) (buffer-modified-tick))
-               (buffer-chars-modified-tick)
-               (buffer-modified-tick)
-               (when (and (fboundp 'backtrace-get-frames)
-                          (fboundp 'backtrace-to-string))
-                 (backtrace-to-string (backtrace-get-frames 'backtrace)))))
+The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
+             (buffer-name (current-buffer))
+             this-command
+             (when (and (fboundp 'backtrace-get-frames)
+                        (fboundp 'backtrace-to-string))
+               (backtrace-to-string (backtrace-get-frames 'backtrace))))
             (org-element-cache-reset))
         (let ((inhibit-quit t) request next)
           (setq org-element--cache-interrupt-C-g-count 0)
@@ -6688,6 +6639,7 @@ The function returns the new value of `org-element--cache-change-warning'."
     (when (org-element--cache-active-p t)
       (org-with-wide-buffer
        (setq org-element--cache-change-tic (buffer-chars-modified-tick))
+       (setq org-element--cache-last-buffer-size (buffer-size))
        (goto-char beg)
        (beginning-of-line)
        (let ((bottom (save-excursion
@@ -7282,6 +7234,7 @@ buffers."
                                 (current-buffer)
                                 :inherit 'org-element--cache))
         (setq-local org-element--cache-change-tic (buffer-chars-modified-tick))
+        (setq-local org-element--cache-last-buffer-size (buffer-size))
         (setq-local org-element--cache-gapless nil)
 	(setq-local org-element--cache
 		    (avl-tree-create #'org-element--cache-compare))
