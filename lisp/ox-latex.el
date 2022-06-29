@@ -3286,7 +3286,8 @@ contextual information."
        :num-start num-start
        :retain-labels retain-labels
        :attributes attributes
-       :float float))))
+       :float float
+       :custom-env custom-env))))
 
 (cl-defun org-latex-src-block--verbatim
     (&key src-block info caption caption-above-p float &allow-other-keys)
