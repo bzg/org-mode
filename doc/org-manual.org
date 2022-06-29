@@ -21041,11 +21041,11 @@ number.  Here are tips to speed up:
   (setq org-agenda-use-tag-inheritance nil)
   #+end_src
 
-  #+vindex: org-agenda-ignore-drawer-properties
+  #+vindex: org-agenda-ignore-properties
 - Disable parsing of some drawer properties:
 
   #+begin_src emacs-lisp
-  (setq org-agenda-ignore-drawer-properties '(effort appt stats category))
+  (setq org-agenda-ignore-properties '(effort appt stats category))
   #+end_src
 
   The drawer properties you can disable in the agenda are effort
