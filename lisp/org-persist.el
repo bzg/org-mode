@@ -749,10 +749,6 @@ When ASSOCIATED is `all', unregister CONTAINER everywhere."
                      (remove container (plist-get collection :container)))
           (org-persist--add-to-index collection))))))
 
-(defvar org-persist--read-cache (make-hash-table :test #'equal)
-  "Hash table storing as-read data object hashes.
-
-This data is used to avoid overwriting unchanged data.")
 (defvar org-persist--write-cache (make-hash-table :test #'equal)
   "Hash table storing as-written data objects.
 
@@ -793,7 +789,6 @@ When LOAD? is non-nil, load the data instead of reading."
                           (plist-get collection :container))
           (setq data (or (gethash persist-file org-persist--write-cache)
                          (org-persist--read-elisp-file persist-file)))
-          (puthash persist-file (sxhash-equal data) org-persist--read-cache)
           (when data
             (cl-loop for container in (plist-get collection :container)
                      with result = nil
@@ -859,8 +854,7 @@ When IGNORE-RETURN is non-nil, just return t on success without calling
                 (data (mapcar (lambda (c) (cons c (org-persist-write:generic c collection)))
                               (plist-get collection :container))))
             (puthash file data org-persist--write-cache)
-            (unless (equal (sxhash-equal data) (gethash file org-persist--read-cache))
-              (org-persist--write-elisp-file file data))
+            (org-persist--write-elisp-file file data)
             (or ignore-return (org-persist-read container associated))))))))
 
 (defun org-persist-write-all (&optional associated)
