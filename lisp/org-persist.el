@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 ;;
-;; This file implements persistant cache storage across Emacs sessions.
+;; This file implements persistent cache storage across Emacs sessions.
 ;; Both global and buffer-local data can be stored.  This
 ;; implementation is not meant to be used to store important data -
 ;; all the caches should be safe to remove at any time.
@@ -77,7 +77,7 @@
 ;;
 ;; Each data collection can be associated with a local or remote file,
 ;; its inode number, or contents hash.  The persistent data collection
-;; can later be accessed using either file bufer, file, inode, or
+;; can later be accessed using either file buffer, file, inode, or
 ;; contents hash.
 ;;
 ;; The data collections can be versioned and removed upon expiry.
@@ -256,11 +256,11 @@ They keys are conses of (container . associated).")
   "Whether to report read/write time.
 
 When the value is a number, it is a threshold number of seconds.  If
-the read/write time of a single variable exceeds the threashold, a
+the read/write time of a single variable exceeds the threshold, a
 message is displayed.
 
 When the value is a non-nil non-number, always display the message.
-When the value is nil, never diplay the message.")
+When the value is nil, never display the message.")
 
 ;;;; Common functions
 
@@ -506,7 +506,7 @@ MISC, if non-nil will be appended to the collection."
 (defmacro org-persist-read:generic (container reference-data collection)
   "Read and return the data stored in CONTAINER.
 REFERENCE-DATA is associated with CONTAINER in the persist file.
-COLLECTION is the plist holding data collectin."
+COLLECTION is the plist holding data collection."
   `(let* ((c (org-persist--normalize-container ,container))
           (read-func-symbol (intern (format "org-persist-read:%s" (car c)))))
      (setf ,collection (plist-put ,collection :last-access (float-time)))
@@ -554,7 +554,7 @@ COLLECTION is the plist holding data collectin."
 (defmacro org-persist-load:generic (container reference-data collection)
   "Load the data stored in CONTAINER for side effects.
 REFERENCE-DATA is associated with CONTAINER in the persist file.
-COLLECTION is the plist holding data collectin."
+COLLECTION is the plist holding data collection."
   `(let* ((container (org-persist--normalize-container ,container))
           (load-func-symbol (intern (format "org-persist-load:%s" (car container)))))
      (setf ,collection (plist-put ,collection :last-access (float-time)))
@@ -912,7 +912,7 @@ Do nothing in an indirect buffer."
        (delete-directory (file-name-directory ,persist-file)))))
 
 (defun org-persist-gc ()
-  "Remove expired or unregisted containers.
+  "Remove expired or unregistered containers.
 Also, remove containers associated with non-existing files."
   (unless (and org-persist-disable-when-emacs-Q
                ;; FIXME: This is relying on undocumented fact that

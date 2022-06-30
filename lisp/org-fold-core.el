@@ -162,7 +162,7 @@
 ;; functions, it is important to keep in mind that 'invisible text
 ;; property may have multiple possible values (not just nil and
 ;; t). Hence, (next-single-char-property-change pos 'invisible) is not
-;; guarantied to return the boundary of invisible/visible text.
+;; guaranteed to return the boundary of invisible/visible text.
 
 ;;; Interactive searching inside folded text (via isearch)
 
@@ -348,7 +348,7 @@ following symbols:
   used.
 
 - `merge-folds': Do not distinguish between different types of folding
-  specs.  This is the most aggressive optimisation with unforseen and
+  specs.  This is the most aggressive optimisation with unforeseen and
   potentially drastic effects.")
 (put 'org-fold-core--optimise-for-huge-buffers 'safe-local-variable 'listp)
 
@@ -1031,7 +1031,7 @@ TYPE can be either `text-properties' or `overlays'."
     (org-fold-core-region (car region) (cdr region) nil)))
 
 (defun org-fold-core--isearch-filter-predicate-text-properties (beg end)
-  "Make sure that folded text is searchable when user whant so.
+  "Make sure that folded text is searchable when user want so.
 This function is intended to be used as `isearch-filter-predicate'."
   (and
    ;; Check folding specs that cannot be searched
@@ -1096,7 +1096,7 @@ This is a hack, but I do not see a better way around until isearch
 gets support of text properties.")
 (defun org-fold-core--create-isearch-overlays (beg end)
   "Replace text property invisibility spec by overlays between BEG and END.
-All the searcheable folded regions will be changed to use overlays
+All the searchable folded regions will be changed to use overlays
 instead of text properties.  The created overlays will be stored in
 `org-fold-core--isearch-overlays'."
   (let ((pos beg))
@@ -1346,7 +1346,7 @@ negative integer or 0, nil is returned."
 ;; ---- end of indirect buffer ----
 ;; If we copy the text under "Headline" from the indirect buffer and
 ;; insert it under "Another headline" in the base buffer, the inserted
-;; text will be hidden since it's folding text properties are copyed.
+;; text will be hidden since it's folding text properties are copied.
 ;; Basically, the copied text would have two sets of folding text
 ;; properties: (1) Properties for base buffer telling that the text is
 ;; hidden; (2) Properties for the indirect buffer telling that the

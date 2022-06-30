@@ -997,7 +997,7 @@ The most comprehensive option can be set with,
 which causes source code to be run through
 `engrave-faces-latex-buffer', which generates colorings using
 Emacs' font-lock information.  This requires the Emacs package
-engrave-faces (availible from ELPA), and the LaTeX package
+engrave-faces (available from ELPA), and the LaTeX package
 fvextra be installed.
 
 The styling of the engraved result can customised with
@@ -1222,7 +1222,7 @@ as long as it:
 In the default value the colors \"EFD\" and \"EfD\" are provided
 as they are respectively the foreground and background colours,
 just in case they aren't provided by the generated preamble, so
-we can asume they are always set.
+we can assume they are always set.
 
 Within this preamble there are two recognised macro-like placeholders:
 
@@ -1370,7 +1370,7 @@ which are given by `org-latex-engraved-preamble' and
                    (t (funcall gen-theme-spec engraved-theme))))
                (funcall gen-theme-spec engraved-theme))
            (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
-           "% WARNING syntax highlighting unavailible as engrave-faces-latex was missing.\n")
+           "% WARNING syntax highlighting unavailable as engrave-faces-latex was missing.\n")
          "\n")
       (concat
        "\n% Setup for code blocks\n\n"
@@ -1750,7 +1750,7 @@ This is used to choose a separator for constructs like \\verb."
 	     when (not (string-match (regexp-quote (char-to-string c)) s))
 	     return (char-to-string c))))
 
-(defun org-latex--make-option-string (options &optional seperator)
+(defun org-latex--make-option-string (options &optional separator)
   "Return a comma separated string of keywords and values.
 OPTIONS is an alist where the key is the options keyword as
 a string, and the value a list containing the keyword value, or
@@ -1767,7 +1767,7 @@ nil."
                                        (format "{%s}" value)
                                      value))))))
              options
-             (or seperator ",")))
+             (or separator ",")))
 
 (defun org-latex--wrap-label (element output info)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
@@ -3475,7 +3475,7 @@ to the Verbatim environment or Verb command."
                     engraved-wrapped
                     "}")
           engraved-wrapped))
-    (user-error "Cannot engrave code as `engrave-faces-latex' is unavailible.")))
+    (user-error "Cannot engrave code as `engrave-faces-latex' is unavailable.")))
 
 (cl-defun org-latex-src-block--engraved
     (&key src-block info lang caption caption-above-p num-start retain-labels attributes float &allow-other-keys)

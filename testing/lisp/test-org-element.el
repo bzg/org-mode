@@ -3769,7 +3769,7 @@ Text
    (org-test-with-temp-text "* H\n"
      (forward-line)
      (or (org-element-at-point) t)))
-  ;; Return greater element when ouside contents.
+  ;; Return greater element when outside contents.
   (should
    (eq 'drawer
        (org-test-with-temp-text

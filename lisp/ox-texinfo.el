@@ -687,7 +687,7 @@ using the `:findex' and `:kindex' properties.
 If PLAIN-LIST is a description list whose `:compact' attribute is
 non-nil and ITEM has no content but is followed by another item,
 then store the `@findex' and `@kindex' values in the next item.
-If the previous item stored its respecive values in this item,
+If the previous item stored its respective values in this item,
 then move them to the next item.
 
 INFO is a plist used as a communication channel."

@@ -821,7 +821,7 @@ See also `org-src-mode-hook'."
 
 (defun org-src-associate-babel-session (info)
   "Associate edit buffer with comint session.
-INFO should be a list simlar in format to the return value of
+INFO should be a list similar in format to the return value of
 `org-babel-get-src-block-info'."
   (interactive)
   (let ((session (cdr (assq :session (nth 2 info)))))

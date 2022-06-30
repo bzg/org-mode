@@ -700,7 +700,7 @@ is cleared and contents are removed in the process."
            ;; DATUM is i.e. a headline, it's property list (`:title'
            ;; in case of headline) can contain parsed objects.  The
            ;; objects will contain `:parent' property set to the DATUM
-           ;; iteself.  When copied, these inner `:parent' propery
+           ;; itself.  When copied, these inner `:parent' propery
            ;; values will contain incorrect object decoupled from
            ;; DATUM.  Changes to the DATUM copy will not longer be
            ;; reflected in the `:parent' properties.  So, we need to
@@ -1289,7 +1289,7 @@ parser (e.g. `:end' and :END:).  Return value is a plist."
           (category (catch 'buffer-category
                       (unless org-element-org-data-parser--recurse
                         (org-with-point-at end
-                          ;; Avoid recusrive calls from
+                          ;; Avoid recursive calls from
                           ;; `org-element-at-point-no-context'.
                           (let ((org-element-org-data-parser--recurse t))
 	                    (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
@@ -6092,7 +6092,7 @@ completing the request."
                                                             (log org-element--cache-size 2))
                             (org-element-cache-reset)
                             (throw 'org-element--cache-quit t)))
-                      ;; Done deleting everthing starting before END.
+                      ;; Done deleting everything starting before END.
                       ;; DATA-KEY is the first known element after END.
                       ;; Move on to phase 1.
                       (org-element--cache-log-message
@@ -6664,7 +6664,7 @@ The function returns the new value of `org-element--cache-change-warning'."
              ;; `org-element--cache-submit-request').  After the edit, we want to
              ;; look if there was a sensitive removed during edit.
              ;; FIXME: This is not the most efficient way and we now
-             ;; have to delete more elemetns than needed in some
+             ;; have to delete more elements than needed in some
              ;; cases.  A better approach may be storing the warning
              ;; in the modification request itself.
              (let ((org-element--cache-change-warning-before org-element--cache-change-warning)
@@ -6748,7 +6748,7 @@ that range.  See `after-change-functions' for more information."
   "This variable controls how buffer changes are handled by the cache.
 
 By default (when this variable is nil), cache re-parses modified
-headlines immidiately after modification preserving all the unaffected
+headlines immediately after modification preserving all the unaffected
 elements inside the headline.
 
 The default behaviour works best when users types inside Org buffer of
@@ -6870,7 +6870,7 @@ known element in cache (it may start after END)."
                      ;; costly.  Instead, we should better re-parse only the
                      ;; headline itself when possible.  If a headline is still
                      ;; starting from old :begin position, we do not care that
-                     ;; its boundaries could have extended to shrinked - we
+                     ;; its boundaries could have extended to shrunk - we
                      ;; will re-parent and shift them anyway.
                      (and (eq 'headline (org-element-type up))
                           (not org-element--cache-avoid-synchronous-headline-re-parsing)
@@ -7154,7 +7154,7 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
                                    (cdr (org-element--cache-find (org-element-property :begin real-element) 'both)))
           (org-element-cache-reset))))))
 
-;;; Cache persistance
+;;; Cache persistence
 
 (defun org-element--cache-persist-before-write (container &optional associated)
   "Sync cache before saving."

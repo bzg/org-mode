@@ -100,7 +100,7 @@ removed from the final plist."
 		      (cl-remove-if #'file-directory-p
 				    (directory-files dir)))))))
 
-  ;; Check the default trasformation function,
+  ;; Check the default transformation function,
   ;; org-html-publish-to-html. Because org-test-publish uses
   ;; org-publish-attachment by default, we must not just override with
   ;; nil but tell it to remove the :publishing-function from the list.

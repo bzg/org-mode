@@ -5086,7 +5086,7 @@ This includes angle, plain, and bracket links."
 		(progn
                   (add-face-text-property start end face-property)
 		  (add-text-properties start end properties))
-              ;; Initialise folding when used ouside org-mode.
+              ;; Initialise folding when used outside org-mode.
               (unless (or (derived-mode-p 'org-mode)
 			  (and (org-fold-folding-spec-p 'org-link-description)
                                (org-fold-folding-spec-p 'org-link)))
