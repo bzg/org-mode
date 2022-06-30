@@ -1304,25 +1304,7 @@ property, unfold the region if the :fragile function returns non-nil."
                    ;; Move to next fold.
                    (setq pos (org-fold-core-next-folding-state-change spec pos local-to))))))))))))
 
-;;; Hanlding killing/yanking of folded text
-
-;; Backward compatibility with Emacs 24.
-(defun org-fold-core--seq-partition (list n)
-  "Return list of elements of LIST grouped into sub-sequences of length N.
-The last list may contain less than N elements.  If N is a
-negative integer or 0, nil is returned."
-  (if (fboundp 'seq-partition)
-      (seq-partition list n)
-    (unless (< n 1)
-      (let ((result '()))
-        (while list
-          (let (part)
-            (dotimes (_ n)
-              (when list (push (car list) part)))
-            (push part result))
-          (dotimes (_ n)
-            (setq list (cdr list))))
-        (nreverse result)))))
+;;; Handling killing/yanking of folded text
 
 ;; By default, all the text properties of the killed text are
 ;; preserved, including the folding text properties.  This can be
@@ -1386,7 +1368,7 @@ The arguments and return value are as specified for `filter-buffer-substring'."
                  ;; Yes, it is a hack.
                  ;; The below gives us string representation as a list.
                  ;; Note that we need to remove unreadable values, like markers (#<...>).
-                 (org-fold-core--seq-partition
+                 (seq-partition
                   (cdr (let ((data (read (replace-regexp-in-string
                                           "^#(" "("
                                           (replace-regexp-in-string

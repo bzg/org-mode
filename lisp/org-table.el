@@ -4079,7 +4079,7 @@ COLUMNS is a sorted list of column numbers.  BEG and END are,
 respectively, the beginning position and the end position of the
 table."
   (org-with-wide-buffer
-   (org-font-lock-ensure beg end)
+   (font-lock-ensure beg end)
    (dolist (c columns)
      (goto-char beg)
      (let ((align nil)
@@ -4201,7 +4201,7 @@ beginning and end position of the current table."
      (org-table-expand begin end)
      ;; Make sure invisible characters in the table are at the right
      ;; place since column widths take them into account.
-     (org-font-lock-ensure begin end)
+     (font-lock-ensure begin end)
      (org-table--shrink-columns (sort columns #'<) begin end))))
 
 ;;;###autoload
@@ -4333,7 +4333,7 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
     (org-table-save-field
      ;; Make sure invisible characters in the table are at the right
      ;; place since column widths take them into account.
-     (org-font-lock-ensure beg end)
+     (font-lock-ensure beg end)
      (move-marker org-table-aligned-begin-marker beg)
      (move-marker org-table-aligned-end-marker end)
      (goto-char beg)

@@ -70,19 +70,6 @@
 	     ,@body)
 	 (set-buffer-modified-p ,was-modified)))))
 
-;; FIXME: `partial-completion-mode' is obsolete since Emacs 24.1.
-(defmacro org-without-partial-completion (&rest body)
-  (declare (debug (body)))
-  `(if (and (boundp 'partial-completion-mode)
-	    partial-completion-mode
-	    (fboundp 'partial-completion-mode))
-       (unwind-protect
-	   (progn
-	     (partial-completion-mode -1)
-	     ,@body)
-	 (partial-completion-mode 1))
-     ,@body))
-
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
   (declare (debug (form body)) (indent 1))

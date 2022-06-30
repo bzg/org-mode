@@ -904,12 +904,6 @@ context.  See the individual commands for more information."
         ((and (eq window-system 'w32) (fboundp 'w32-get-clipboard-data))
          (w32-get-clipboard-data))))
 
-;; `set-transient-map' is only in Emacs >= 24.4
-(defalias 'org-set-transient-map
-  (if (fboundp 'set-transient-map)
-      'set-transient-map
-    'set-temporary-overlay-map))
-
 
 ;;; Region compatibility
 
@@ -961,13 +955,6 @@ Pass COLUMN and FORCE to `move-to-column'."
                           string)
   (apply 'kill-new string args))
 
-;; `font-lock-ensure' is only available from 24.4.50 on
-(defalias 'org-font-lock-ensure
-  (if (fboundp 'font-lock-ensure)
-      #'font-lock-ensure
-    (lambda (&optional _beg _end)
-      (with-no-warnings (font-lock-fontify-buffer)))))
-
 ;; `file-local-name' was added in Emacs 26.1.
 (defalias 'org-babel-local-file-name
   (if (fboundp 'file-local-name)
@@ -994,29 +981,8 @@ Pass COLUMN and FORCE to `move-to-column'."
            (defun org-release () "N/A")
            (defun org-git-version () "N/A !!check installation!!"))))))
 
-
-
-;;; Functions for Emacs < 24.4 compatibility
-
-(defun org-define-error (name message)
-  "Define NAME as a new error signal.
-MESSAGE is a string that will be output to the echo area if such
-an error is signaled without being caught by a `condition-case'.
-Implements `define-error' for older emacsen."
-  (if (fboundp 'define-error) (define-error name message)
-    (put name 'error-conditions
-         (copy-sequence (cons name (get 'error 'error-conditions))))))
-
-(unless (fboundp 'string-suffix-p)
-  ;; From Emacs subr.el.
-  (defun string-suffix-p (suffix string  &optional ignore-case)
-    "Return non-nil if SUFFIX is a suffix of STRING.
-If IGNORE-CASE is non-nil, the comparison is done without paying
-attention to case differences."
-    (let ((start-pos (- (length string) (length suffix))))
-      (and (>= start-pos 0)
-           (eq t (compare-strings suffix nil nil
-                                  string start-pos nil ignore-case))))))
+(define-obsolete-function-alias 'org-define-error #'define-error "9.6")
+(define-obsolete-function-alias 'org-without-partial-completion 'progn "9.6")
 
 
 ;;; Integration with and fixes for other packages

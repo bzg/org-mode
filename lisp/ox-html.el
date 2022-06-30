@@ -2223,7 +2223,7 @@ is the language used for CODE, as a string, or nil."
 		    (funcall lang-mode)
 		    (insert code)
 		    ;; Fontify buffer.
-		    (org-font-lock-ensure)
+                    (font-lock-ensure)
 		    ;; Remove formatting on newline characters.
 		    (save-excursion
 		      (let ((beg (point-min))

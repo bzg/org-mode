@@ -636,7 +636,7 @@ as `org-src-fontify-natively' is non-nil."
 	    ;; Add string and a final space to ensure property change.
 	    (insert string " "))
 	  (unless (eq major-mode lang-mode) (funcall lang-mode))
-	  (org-font-lock-ensure)
+          (font-lock-ensure)
 	  (let ((pos (point-min)) next)
 	    (while (setq next (next-property-change pos))
 	      ;; Handle additional properties from font-lock, so as to
