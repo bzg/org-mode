@@ -59,9 +59,13 @@
 ;; - author (a), including bare (b), caps (c), bare-caps (bc), full (f),
 ;;   caps-full (cf), and bare-caps-full (bcf) variants,
 ;; - noauthor (na), including bare (b), caps (c) and bare-caps (bc) variants,
+;; - nocite (n),
 ;; - year (y), including a bare (b) variant,
 ;; - text (t). including caps (c), full (f), and caps-full (cf) variants,
 ;; - default style, including bare (b), caps (c) and bare-caps (bc) variants.
+;;
+;; Using "*" as a key in a nocite citation includes all available items in
+;; the printed bibliography.
 
 ;; CSL styles recognize "locator" in citation references' suffix.  For example,
 ;; in the citation
@@ -103,6 +107,7 @@
 (declare-function citeproc-create "ext:citeproc")
 (declare-function citeproc-citation-create "ext:citeproc")
 (declare-function citeproc-append-citations "ext:citeproc")
+(declare-function citeproc-add-uncited "ext:citeproc")
 (declare-function citeproc-render-citations "ext:citeproc")
 (declare-function citeproc-render-bib "ext:citeproc")
 (declare-function citeproc-hash-itemgetter-from-any "ext:citeproc")
@@ -295,6 +300,12 @@ INFO is the export state, as a property list."
   (citeproc-style-cite-note
    (citeproc-proc-style
     (org-cite-csl--processor info))))
+
+(defun org-cite-csl--nocite-p (citation info)
+  "Non-nil when CITATION object's style is nocite.
+INFO is the export state, as a property list."
+  (member (car (org-cite-citation-style citation info))
+          '("nocite" "n")))
 
 (defun org-cite-csl--create-structure-params (citation info)
   "Return citeproc structure creation params for CITATION object.
@@ -535,20 +546,31 @@ INFO is the export state, as a property list.
 Return an alist (CITATION . OUTPUT) where CITATION object has been rendered as
 OUTPUT using Citeproc."
   (or (plist-get info :cite-citeproc-rendered-citations)
-      (let* ((citations (org-cite-list-citations info))
-             (processor (org-cite-csl--processor info))
-             (structures
-              (mapcar (lambda (c) (org-cite-csl--create-structure c info))
-                      citations)))
-        (citeproc-append-citations structures processor)
-        (let* ((rendered
-                (citeproc-render-citations
-                 processor
-                 (org-cite-csl--output-format info)
-                 (org-cite-csl--no-citelinks-p info)))
-               (result (seq-mapn #'cons citations rendered)))
-          (plist-put info :cite-citeproc-rendered-citations result)
-          result))))
+      (let ((citations (org-cite-list-citations info))
+	    (processor (org-cite-csl--processor info))
+	    normal-citations nocite-ids)
+	(dolist (citation citations)
+	  (if (org-cite-csl--nocite-p citation info)
+	      (setq nocite-ids (append (org-cite-get-references citation t) nocite-ids))
+	    (push citation normal-citations)))
+	(let ((structures
+	       (mapcar (lambda (c) (org-cite-csl--create-structure c info))
+		       (nreverse normal-citations))))
+	  (citeproc-append-citations structures processor))
+	(when nocite-ids
+	  (citeproc-add-uncited nocite-ids processor))
+	(let (result
+	      (rendered (citeproc-render-citations
+			 processor
+			 (org-cite-csl--output-format info)
+			 (org-cite-csl--no-citelinks-p info))))
+	  (dolist (citation citations)
+	    (push (cons citation
+			(if (org-cite-csl--nocite-p citation info) "" (pop rendered)))
+		  result))
+	  (setq result (nreverse result))
+	  (plist-put info :cite-citeproc-rendered-citations result)
+	  result))))
 
 
 ;;; Export capability
@@ -638,7 +660,8 @@ property list."
     (("noauthor" "na") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
     (("year" "y") ("bare" "b"))
     (("text" "t") ("caps" "c") ("full" "f") ("caps-full" "cf"))
-    (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))))
+    (("nil") ("bare" "b") ("caps" "c") ("bare-caps" "bc"))
+    (("nocite" "n"))))
 
 (provide 'oc-csl)
 ;;; oc-csl.el ends here

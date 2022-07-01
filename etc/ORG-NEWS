@@ -239,7 +239,18 @@ This behaviour can be changed by supplying a =:align= parameter.
 
 The tabbing environment can be useful when generating simple tables which
 can be span multiple pages and when table cells are allowed to overflow.
+*** Support for =nocite= citations in the "csl" export processor
 
+The "csl" citation export processor now supports =nocite= style
+citations that add items to the printed bibliography without visible
+references in the text. Using the key =*= in a nocite citation, for
+instance,
+
+#+begin_src org
+[cite/n:@*]
+#+end_src
+
+includes all available items in the printed bibliography.
 ** New functions and changes in function arguments
 
 *** New function ~org-element-cache-map~ for quick mapping across Org elements
