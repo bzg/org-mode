@@ -3162,12 +3162,13 @@ Emacs shutdown."))
     (or (and (boundp 'org-babel-temporary-stable-directory)
 	     (file-exists-p org-babel-temporary-stable-directory)
 	     org-babel-temporary-stable-directory)
-        (condition-case nil
-            (make-directory
-	     (expand-file-name
-              "babel-stable"
-              (temporary-file-directory)))
-          (t nil)))
+        (let (dir)
+          (while (or (not dir) (file-exists-p dir))
+            (setq dir (expand-file-name
+                       (format "babel-stable-%d" (random 1000))
+                       (temporary-file-directory))))
+          (make-directory dir)
+          dir))
     "Directory to hold temporary files created to execute code blocks.
 Used by `org-babel-temp-file'.  This directory will be removed on
 Emacs shutdown."))
