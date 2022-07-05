@@ -64,7 +64,6 @@
     (pdfpng       . :any)
     (pdfwidth     . :any)
     (headers      . :any)
-    (packages     . :any)
     (buffer       . ((yes no))))
   "LaTeX-specific header arguments.")
 
