@@ -9666,7 +9666,8 @@ This function is run automatically after each state change to a DONE state."
 		    (while (re-search-forward org-clock-line-re end t)
 		      (when (org-at-clock-log-p) (throw :clock t))))))
 	(org-entry-put nil "LAST_REPEAT" (format-time-string
-					  (org-time-stamp-format t t))))
+					  (org-time-stamp-format t t)
+                                          (org-current-effective-time))))
       (when org-log-repeat
 	(if org-log-setup
 	    ;; We are already setup for some record.
