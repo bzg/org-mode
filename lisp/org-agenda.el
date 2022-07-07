@@ -2975,24 +2975,24 @@ Pressing `<' twice means to restrict to the current subtree or region
 	          (mapcar (lambda (binding) (eval (cadr binding) t)) lprops)
 	        (pcase type
 	          (`agenda
-	           (org-agenda-list current-prefix-arg))
+	           (org-agenda-list arg))
 	          (`agenda*
-	           (org-agenda-list current-prefix-arg nil nil t))
+	           (org-agenda-list arg nil nil t))
 	          (`alltodo
-	           (org-todo-list current-prefix-arg))
+	           (org-todo-list arg))
 	          (`search
-	           (org-search-view current-prefix-arg org-match nil))
+	           (org-search-view arg org-match nil))
 	          (`stuck
-	           (org-agenda-list-stuck-projects current-prefix-arg))
+	           (org-agenda-list-stuck-projects arg))
 	          (`tags
-	           (org-tags-view current-prefix-arg org-match))
+	           (org-tags-view arg org-match))
 	          (`tags-todo
 	           (org-tags-view '(4) org-match))
 	          (`todo
 		   (org-todo-list org-match))
 		  (`tags-tree
 		   (org-check-for-org-mode)
-		   (org-match-sparse-tree current-prefix-arg org-match))
+		   (org-match-sparse-tree arg org-match))
 		  (`todo-tree
 		   (org-check-for-org-mode)
 		   (org-occur (concat "^" org-outline-regexp "[ \t]*"
