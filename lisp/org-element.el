@@ -5946,67 +5946,71 @@ where cache is partially updated before current modification are
 actually submitted."
   (when (buffer-live-p buffer)
     (with-current-buffer (or (buffer-base-buffer buffer) buffer)
-      ;; Check if the buffer have been changed outside visibility of
-      ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
-      (if (/= org-element--cache-last-buffer-size (buffer-size))
-          (progn
-            (org-element--cache-warn
-             "Unregistered buffer modifications detected. Resetting.
+      ;; Do not sync when, for example, in the middle of
+      ;; `combine-change-calls'.  See the commentary inside
+      ;; `org-element--cache-active-p'.
+      (when (org-element--cache-active-p)
+        ;; Check if the buffer have been changed outside visibility of
+        ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
+        (if (/= org-element--cache-last-buffer-size (buffer-size))
+            (progn
+              (org-element--cache-warn
+               "Unregistered buffer modifications detected. Resetting.
 If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
 The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
-             (buffer-name (current-buffer))
-             this-command
-             (when (and (fboundp 'backtrace-get-frames)
-                        (fboundp 'backtrace-to-string))
-               (backtrace-to-string (backtrace-get-frames 'backtrace))))
-            (org-element-cache-reset))
-        (let ((inhibit-quit t) request next)
-          (setq org-element--cache-interrupt-C-g-count 0)
-	  (when org-element--cache-sync-timer
-	    (cancel-timer org-element--cache-sync-timer))
-          (let ((time-limit (time-add nil org-element-cache-sync-duration)))
-	    (catch 'org-element--cache-interrupt
-              (when org-element--cache-sync-requests
-                (org-element--cache-log-message "Syncing down to %S-%S" (or future-change threshold) threshold))
-	      (while org-element--cache-sync-requests
-	        (setq request (car org-element--cache-sync-requests)
-		      next (nth 1 org-element--cache-sync-requests))
-	        (org-element--cache-process-request
-	         request
-	         (when next (org-element--request-key next))
-	         threshold
-	         (unless threshold time-limit)
-	         future-change
-                 offset)
-                ;; Re-assign current and next requests.  It could have
-                ;; been altered during phase 1.
-                (setq request (car org-element--cache-sync-requests)
-		      next (nth 1 org-element--cache-sync-requests))
-	        ;; Request processed.  Merge current and next offsets and
-	        ;; transfer ending position.
-	        (when next
-                  ;; The following requests can only be either phase 1
-                  ;; or phase 2 requests.  We need to let them know
-                  ;; that additional shifting happened ahead of them.
-	          (cl-incf (org-element--request-offset next) (org-element--request-offset request))
-                  (org-element--cache-log-message
-                   "Updating next request offset to %S: %s"
-                   (org-element--request-offset next)
-                   (let ((print-length 10) (print-level 3)) (prin1-to-string next)))
-                  ;; FIXME: END part of the request only matters for
-                  ;; phase 0 requests.  However, the only possible
-                  ;; phase 0 request must be the first request in the
-                  ;; list all the time.  END position should be
-                  ;; unused.
-                  (setf (org-element--request-end next) (org-element--request-end request)))
-	        (setq org-element--cache-sync-requests
-		      (cdr org-element--cache-sync-requests)))))
-	  ;; If more requests are awaiting, set idle timer accordingly.
-	  ;; Otherwise, reset keys.
-	  (if org-element--cache-sync-requests
-	      (org-element--cache-set-timer buffer)
-            (setq org-element--cache-change-warning nil)
-            (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value))))))))
+               (buffer-name (current-buffer))
+               this-command
+               (when (and (fboundp 'backtrace-get-frames)
+                          (fboundp 'backtrace-to-string))
+                 (backtrace-to-string (backtrace-get-frames 'backtrace))))
+              (org-element-cache-reset))
+          (let ((inhibit-quit t) request next)
+            (setq org-element--cache-interrupt-C-g-count 0)
+	    (when org-element--cache-sync-timer
+	      (cancel-timer org-element--cache-sync-timer))
+            (let ((time-limit (time-add nil org-element-cache-sync-duration)))
+	      (catch 'org-element--cache-interrupt
+                (when org-element--cache-sync-requests
+                  (org-element--cache-log-message "Syncing down to %S-%S" (or future-change threshold) threshold))
+	        (while org-element--cache-sync-requests
+	          (setq request (car org-element--cache-sync-requests)
+		        next (nth 1 org-element--cache-sync-requests))
+	          (org-element--cache-process-request
+	           request
+	           (when next (org-element--request-key next))
+	           threshold
+	           (unless threshold time-limit)
+	           future-change
+                   offset)
+                  ;; Re-assign current and next requests.  It could have
+                  ;; been altered during phase 1.
+                  (setq request (car org-element--cache-sync-requests)
+		        next (nth 1 org-element--cache-sync-requests))
+	          ;; Request processed.  Merge current and next offsets and
+	          ;; transfer ending position.
+	          (when next
+                    ;; The following requests can only be either phase 1
+                    ;; or phase 2 requests.  We need to let them know
+                    ;; that additional shifting happened ahead of them.
+	            (cl-incf (org-element--request-offset next) (org-element--request-offset request))
+                    (org-element--cache-log-message
+                     "Updating next request offset to %S: %s"
+                     (org-element--request-offset next)
+                     (let ((print-length 10) (print-level 3)) (prin1-to-string next)))
+                    ;; FIXME: END part of the request only matters for
+                    ;; phase 0 requests.  However, the only possible
+                    ;; phase 0 request must be the first request in the
+                    ;; list all the time.  END position should be
+                    ;; unused.
+                    (setf (org-element--request-end next) (org-element--request-end request)))
+	          (setq org-element--cache-sync-requests
+		        (cdr org-element--cache-sync-requests)))))
+	    ;; If more requests are awaiting, set idle timer accordingly.
+	    ;; Otherwise, reset keys.
+	    (if org-element--cache-sync-requests
+	        (org-element--cache-set-timer buffer)
+              (setq org-element--cache-change-warning nil)
+              (setq org-element--cache-sync-keys-value (1+ org-element--cache-sync-keys-value)))))))))
 
 (defun org-element--cache-process-request
     (request next-request-key threshold time-limit future-change offset)
