@@ -171,6 +171,7 @@ Values that modify the window layout (reorganize-frame, split-window-below,
 split-window-right) will restore the layout after exiting the edit buffer."
   :group 'org-edit-structure
   :type '(choice
+          (const plain)
 	  (const current-window)
 	  (const split-window-below)
 	  (const split-window-right)
