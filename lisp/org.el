@@ -15031,49 +15031,45 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
   "Create buffers for all agenda files, protect archived trees and comments."
   (interactive)
   (let ((inhibit-read-only t)
-	(org-inhibit-startup org-agenda-inhibit-startup)
-	pos)
+	(org-inhibit-startup org-agenda-inhibit-startup))
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)
-    (save-excursion
-      (save-restriction
-	(dolist (file files)
-	  (catch 'nextfile
-	    (if (bufferp file)
-		(set-buffer file)
-	      (org-check-agenda-file file)
-	      (set-buffer (org-get-agenda-file-buffer file)))
-	    (widen)
-	    (org-set-regexps-and-options 'tags-only)
-	    (setq pos (point))
-	    (or (memq 'category org-agenda-ignore-properties)
-		(org-refresh-category-properties))
-	    (or (memq 'stats org-agenda-ignore-properties)
-		(org-refresh-stats-properties))
-	    (or (memq 'effort org-agenda-ignore-properties)
-                (unless org-element-use-cache
-		  (org-refresh-effort-properties)))
-	    (or (memq 'appt org-agenda-ignore-properties)
-		(org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
-	    (setq org-todo-keywords-for-agenda
-		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
-	    (setq org-done-keywords-for-agenda
-		  (append org-done-keywords-for-agenda org-done-keywords))
-	    (setq org-todo-keyword-alist-for-agenda
-		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
-	    (setq org-tag-alist-for-agenda
-		  (org--tag-add-to-alist
-		   org-tag-alist-for-agenda
-		   org-current-tag-alist))
-	    ;; Merge current file's tag groups into global
-	    ;; `org-tag-groups-alist-for-agenda'.
-	    (when org-group-tags
-	      (dolist (alist org-tag-groups-alist)
-		(let ((old (assoc (car alist) org-tag-groups-alist-for-agenda)))
-		  (if old
-		      (setcdr old (org-uniquify (append (cdr old) (cdr alist))))
-		    (push alist org-tag-groups-alist-for-agenda)))))
-	    (goto-char pos)))))
+    (dolist (file files)
+      (catch 'nextfile
+        (with-current-buffer
+            (if (bufferp file)
+                file
+              (org-check-agenda-file file)
+              (org-get-agenda-file-buffer file))
+          (org-with-wide-buffer
+	   (org-set-regexps-and-options 'tags-only)
+	   (or (memq 'category org-agenda-ignore-properties)
+	       (org-refresh-category-properties))
+	   (or (memq 'stats org-agenda-ignore-properties)
+	       (org-refresh-stats-properties))
+	   (or (memq 'effort org-agenda-ignore-properties)
+               (unless org-element-use-cache
+		 (org-refresh-effort-properties)))
+	   (or (memq 'appt org-agenda-ignore-properties)
+	       (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
+	   (setq org-todo-keywords-for-agenda
+		 (append org-todo-keywords-for-agenda org-todo-keywords-1))
+	   (setq org-done-keywords-for-agenda
+		 (append org-done-keywords-for-agenda org-done-keywords))
+	   (setq org-todo-keyword-alist-for-agenda
+		 (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
+	   (setq org-tag-alist-for-agenda
+		 (org--tag-add-to-alist
+		  org-tag-alist-for-agenda
+		  org-current-tag-alist))
+	   ;; Merge current file's tag groups into global
+	   ;; `org-tag-groups-alist-for-agenda'.
+	   (when org-group-tags
+	     (dolist (alist org-tag-groups-alist)
+	       (let ((old (assoc (car alist) org-tag-groups-alist-for-agenda)))
+		 (if old
+		     (setcdr old (org-uniquify (append (cdr old) (cdr alist))))
+		   (push alist org-tag-groups-alist-for-agenda)))))))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
