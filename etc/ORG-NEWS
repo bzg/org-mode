@@ -239,7 +239,7 @@ This behaviour can be changed by supplying a =:align= parameter.
 
 The tabbing environment can be useful when generating simple tables which
 can be span multiple pages and when table cells are allowed to overflow.
-*** Support for =nocite= citations in the "csl" export processor
+*** Support for =nocite= citations and sub-bibliographies in the "csl" export processor
 
 The "csl" citation export processor now supports =nocite= style
 citations that add items to the printed bibliography without visible
@@ -251,6 +251,17 @@ instance,
 #+end_src
 
 includes all available items in the printed bibliography.
+
+The "csl" export processor now also supports sub-bibliographies that
+show only a subset of the references based on some criterion.  For
+example,
+
+#+begin_src org
+#+print_bibliography: :type book :keyword ai
+#+end_src
+
+prints a sub-bibliography containing the book entries with =ai= among
+their keywords.
 ** New functions and changes in function arguments
 *** ~org-fold-show-entry~ does not fold drawers by default anymore
 

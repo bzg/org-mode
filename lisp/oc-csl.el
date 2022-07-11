@@ -90,11 +90,23 @@
 ;; The part of the suffix before the locator is appended to reference's prefix.
 ;; If no locator term is used, but a number is present, then "page" is assumed.
 
+;; Filtered sub-bibliographies can be printed by passing filtering
+;; options to the "print_bibliography" keywords.  E.g.,
+;;
+;;    #+print_bibliography: :type book keyword: emacs
+;;
+;; If you need to use a key multiple times, you can separate its
+;; values with commas, but without any space in-between:
+;;
+;;    #+print_bibliography: :keyword abc,xyz :type article
+
 ;; This library was heavily inspired by and borrows from András Simonyi's
 ;; Citeproc Org (<https://github.com/andras-simonyi/citeproc-org>) library.
 ;; Many thanks to him!
 
 ;;; Code:
+(require 'cl-lib)
+(require 'map)
 (require 'bibtex)
 (require 'json)
 (require 'oc)
@@ -559,6 +571,10 @@ OUTPUT using Citeproc."
 	  (citeproc-append-citations structures processor))
 	(when nocite-ids
 	  (citeproc-add-uncited nocite-ids processor))
+        ;; All bibliographies have to be rendered in order to have
+        ;; correct citation numbers even if there are several
+        ;; sub-bibliograhies.
+        (org-cite-csl--rendered-bibliographies info)
 	(let (result
 	      (rendered (citeproc-render-citations
 			 processor
@@ -571,6 +587,62 @@ OUTPUT using Citeproc."
 	  (setq result (nreverse result))
 	  (plist-put info :cite-citeproc-rendered-citations result)
 	  result))))
+
+(defun org-cite-csl--bibliography-filter (bib-props)
+  "Return the sub-bibliography filter corresponding to bibliography properties.
+
+BIB-PROPS should be a plist representing the properties
+associated with a \"print_bibliography\" keyword, as returned by
+`org-cite-bibliography-properties'."
+  (let (result
+	(remove-keyword-colon (lambda (x) (intern (substring (symbol-name x) 1)))))
+    (map-do
+     (lambda (key value)
+       (pcase key
+         ((or :keyword :notkeyword :nottype :notcsltype :filter)
+          (dolist (v (split-string value ","))
+	    (push (cons  (funcall remove-keyword-colon key) v) result)))
+         ((or :type :csltype)
+          (if (string-match-p "," value)
+              (user-error "The \"%s\" print_bibliography option does not support comma-separated values" key)
+            (push (cons (funcall remove-keyword-colon key) value) result)))))
+     bib-props)
+    result))
+
+(defun org-cite-csl--rendered-bibliographies (info)
+  "Return the rendered bibliographies.
+
+INFO is the export state, as a property list.
+
+Return an (OUTPUTS PARAMETERS) list where OUTPUTS is an alist
+of (BIB-PROPS . OUTPUT) pairs where each key is a property list
+of a \"print_bibliography\" keyword and the corresponding OUTPUT
+value is the bibliography as rendered by Citeproc."
+  (or (plist-get info :cite-citeproc-rendered-bibliographies)
+      (let (bib-plists bib-filters)
+        ;; Collect bibliography property lists and the corresponding
+        ;; Citeproc sub-bib filters.
+	(org-element-map (plist-get info :parse-tree) 'keyword
+          (lambda (keyword)
+            (when (equal "PRINT_BIBLIOGRAPHY" (org-element-property :key keyword))
+              (let ((bib-plist (org-cite-bibliography-properties keyword)))
+                (push bib-plist bib-plists)
+                (push (org-cite-csl--bibliography-filter bib-plist) bib-filters)))))
+        (setq bib-filters (nreverse bib-filters)
+              bib-plists (nreverse bib-plists))
+        ;; Render and return all bibliographies.
+        (let ((processor (org-cite-csl--processor info)))
+          (citeproc-add-subbib-filters bib-filters processor)
+          (pcase-let* ((format (org-cite-csl--output-format info))
+                       (`(,rendered-bibs . ,parameters)
+                        (citeproc-render-bib
+                         (org-cite-csl--processor info)
+                         format
+                         (org-cite-csl--no-citelinks-p info)))
+                       (outputs (cl-mapcar #'cons bib-plists rendered-bibs))
+                       (result (list outputs parameters)))
+            (plist-put info :cite-citeproc-rendered-bibliographies result)
+            result)))))
 
 
 ;;; Export capability
@@ -585,16 +657,13 @@ INFO is the export state, as a property list."
       ;; process.
       (org-cite-parse-objects output))))
 
-(defun org-cite-csl-render-bibliography (_keys _files _style _props _backend info)
+(defun org-cite-csl-render-bibliography (_keys _files _style props _backend info)
   "Export bibliography.
 INFO is the export state, as a property list."
   (org-cite-csl--barf-without-citeproc)
-  (pcase-let* ((format (org-cite-csl--output-format info))
-               (`(,output . ,parameters)
-                (citeproc-render-bib
-                 (org-cite-csl--processor info)
-                 format
-                 (org-cite-csl--no-citelinks-p info))))
+  (pcase-let*  ((format (org-cite-csl--output-format info))
+		(`(,outputs ,parameters) (org-cite-csl--rendered-bibliographies info))
+		(output (cdr (assoc props outputs))))
     (pcase format
       ('html
        (concat
