@@ -1953,6 +1953,9 @@ Initial position of cursor is restored after the changes."
                     (goto-char (match-end 1))
                     (insert-before-markers new-bul)
                     (insert keep-space))))
+              ;; Refresh potentially shifted match markers.
+              (goto-char item)
+              (looking-at org-list-full-item-re)
 	      ;; b.  Replace checkbox.
 	      (cond
 	       ((equal (match-string 3) new-box))

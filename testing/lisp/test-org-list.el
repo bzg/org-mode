@@ -309,6 +309,16 @@
 	    (buffer-string))))
   (should
    (equal "
+- [ ] list item 1
+  + [ ] list item 2"
+          (org-test-with-temp-text "
+- [ ] list item 1
+- [ ] list item 2<point>"
+            (let ((org-list-demote-modify-bullet '(("-" . "+"))))
+              (org-indent-item)
+              (buffer-string)))))
+  (should
+   (equal "
 1. Item 1
    + Item 2"
 	  (org-test-with-temp-text "
