@@ -6141,7 +6141,10 @@ unconditionally."
       (unless invisible-ok
         (if (eq org-fold-core-style 'text-properties)
 	    (cond
-	     ((org-fold-folded-p (line-beginning-position) 'headline)
+	     ((org-fold-folded-p
+               (max (point-min)
+                    (1- (line-beginning-position)))
+               'headline)
 	      (org-fold-region (line-end-position 0) (line-end-position) nil 'headline))
 	     (t nil))
           (pcase (get-char-property-and-overlay (point) 'invisible)
