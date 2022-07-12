@@ -95,7 +95,7 @@ You can set the variable `org-refile-target-verify-function' to a function
 to verify each headline found by the simple criteria above.
 
 When this variable is nil, all top-level headlines in the current buffer
-are used, equivalent to the value `((nil . (:level . 1))'."
+are used, equivalent to the value `((nil . (:level . 1)))'."
   :group 'org-refile
   :type '(repeat
 	  (cons
