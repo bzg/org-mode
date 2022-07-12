@@ -410,7 +410,7 @@ Text here"
       (re-search-forward "Text")
       (should (org-invisible-p))
       (goto-char 1)
-      (delete-char 1)
+      (org-delete-char 1)
       (re-search-forward "Text")
       (should-not (org-invisible-p)))
     (org-test-with-temp-text
