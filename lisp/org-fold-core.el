@@ -298,7 +298,8 @@
   "Internal implementation detail used to hide folded text.
 Can be either `text-properties' or `overlays'.
 The former is faster on large files, while the latter is generally
-less error-prone."
+less error-prone with regard to third-party packages that haven't yet
+adapted to the new folding implementation."
   :group 'org
   :package-version '(Org . "9.6")
   :type '(choice
