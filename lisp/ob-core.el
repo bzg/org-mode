@@ -487,7 +487,7 @@ evaluates to a string.
 A closure is evaluated when the source block is being
 evaluated (e.g. during execution or export), with point at the
 source block.  It is not possible to use an arbitrary function
-symbol (e.g. 'some-func), since org uses lexical binding.  To
+symbol (e.g. \\='some-func), since org uses lexical binding.  To
 achieve the same functionality, call the function within a
 closure (e.g. (lambda () (some-func))).
 
@@ -514,7 +514,7 @@ functionality is also supported for default header arguments by
 providing the header argument multiple times in the alist.  For
 example:
 
-'((:var . \"foo=\\\"bar\\\"\")
+\\='((:var . \"foo=\\\"bar\\\"\")
   (:var . \"bar=\\\"foo\\\"\"))")
 
 (put 'org-babel-default-header-args 'safe-local-variable
@@ -2627,7 +2627,7 @@ in the buffer."
 If the `default-directory' is different from the containing
 file's directory then expand relative links.
 
-If the optional TYPE is passed as 'attachment` and the path is a
+If the optional TYPE is passed as \\='attachment and the path is a
 descendant of the DEFAULT-DIRECTORY, the generated link will be
 specified as an an \"attachment:\" style link."
   (when (stringp result)
