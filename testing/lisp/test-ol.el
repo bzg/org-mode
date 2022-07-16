@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 
 ;;; Decode and Encode Links
 
@@ -624,6 +626,97 @@ See https://github.com/yantar92/org/issues/4."
     '("http" "//foo.com/(something)?after=parens")
     (test-ol-parse-link-in-text
         "The <point>http://foo.com/(something)?after=parens link"))))
+
+;;; Insert Links
+
+(defmacro test-ol-with-link-parameters-as (type parameters &rest body)
+  "Pass TYPE/PARAMETERS to `org-link-parameters' and execute BODY.
+
+Save the original value of `org-link-parameters', execute
+`org-link-set-parameters' with the relevant args, execute BODY
+and restore `org-link-parameters'.
+
+TYPE is as in `org-link-set-parameters'.  PARAMETERS is a plist to
+be passed to `org-link-set-parameters'."
+  (declare (indent 2))
+  (let (orig-parameters)
+    ;; Copy all keys in `parameters' and their original values to
+    ;; `orig-parameters'.
+    (cl-loop for param in parameters by 'cddr
+             do (setq orig-parameters
+                      (plist-put orig-parameters param (org-link-get-parameter type param))))
+    `(unwind-protect
+         ;; Set `parameters' values and execute body.
+         (progn (org-link-set-parameters ,type ,@parameters) ,@body)
+       ;; Restore original values.
+       (apply 'org-link-set-parameters ,type ',orig-parameters))))
+
+(defun test-ol-insert-link-get-desc (&optional link-location description)
+  "Insert link in temp buffer, return description.
+
+LINK-LOCATION and DESCRIPTION are passed to
+`org-insert-link' (COMPLETE-FILE is always nil)."
+  (org-test-with-temp-text ""
+    (org-insert-link nil link-location description)
+    (save-match-data
+      (when (and
+             (org-in-regexp org-link-bracket-re 1)
+             (match-end 2))
+        (match-string-no-properties 2)))))
+
+(defun test-ol/return-foobar (_link-test _desc)
+  "Return string \"foobar\".
+
+Take (and ignore) arguments conforming to `:insert-description'
+API in `org-link-parameters'.  Used in test
+`test-ol/insert-link-insert-description', for the case where
+`:insert-description' is a function symbol."
+  "foobar-from-function")
+
+(ert-deftest test-ol/insert-link-insert-description ()
+  "Test `:insert-description' parameter handling."
+  ;; String case.
+  (should
+   (string=
+    "foobar-string"
+    (test-ol-with-link-parameters-as
+        "id" (:insert-description "foobar-string")
+      (test-ol-insert-link-get-desc "id:foo-bar"))))
+  ;; Lambda case.
+  (should
+   (string=
+    "foobar-lambda"
+    (test-ol-with-link-parameters-as
+        "id" (:insert-description (lambda (_link-test _desc) "foobar-lambda"))
+      (test-ol-insert-link-get-desc "id:foo-bar"))))
+  ;; Function symbol case.
+  (should
+   (string=
+    "foobar-from-function"
+    (test-ol-with-link-parameters-as
+        "id" (:insert-description #'test-ol/return-foobar)
+      (test-ol-insert-link-get-desc "id:foo-bar"))))
+  ;; `:insert-description' parameter is defined, but doesn't return a
+  ;; string.
+  (should
+   (null
+    (test-ol-with-link-parameters-as
+        "id" (:insert-description #'ignore)
+      (test-ol-insert-link-get-desc "id:foo-bar"))))
+  ;; Description argument should override `:insert-description'.
+  (should
+   (string=
+    "foobar-desc-arg"
+    (test-ol-with-link-parameters-as
+        "id" (:insert-description "foobar")
+      (test-ol-insert-link-get-desc "id:foo-bar" "foobar-desc-arg"))))
+  ;; When neither `:insert-description' nor
+  ;; `org-link-make-description-function' is defined, there should be
+  ;; no description
+  (should
+   (null
+    (let ((org-link-make-description-function nil))
+      (test-ol-insert-link-get-desc "fake-link-type:foo-bar")))))
 
 (provide 'test-ol)
 ;;; test-ol.el ends here
