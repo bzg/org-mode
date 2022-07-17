@@ -240,7 +240,11 @@ Return a hash table with citation references as keys and fields alist as values.
                       (cons
                        (intern (downcase field))
                        (replace-regexp-in-string "[ \t\n]+" " " value)))))
-                 (bibtex-parse-entry t))
+                 ;; Parse, substituting the @string replacements.
+                 ;; See Emacs bug#56475 discussion.
+                 (let ((bibtex-string-files `(,(buffer-file-name)))
+                       (bibtex-expand-strings t))
+                   (bibtex-parse-entry t)))
                 entries)))
     entries))
 
