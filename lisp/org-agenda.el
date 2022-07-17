@@ -1587,9 +1587,9 @@ will align with agenda items."
 
 (defcustom org-agenda-current-time-string
   (if (and (display-graphic-p)
-           (char-displayable-p ?⭠)
+           (char-displayable-p ?←)
            (char-displayable-p ?─))
-      "⭠ now ───────────────────────────────────────────────"
+      "← now ───────────────────────────────────────────────"
     "now - - - - - - - - - - - - - - - - - - - - - - - - -")
   "The string for the current time marker in the agenda."
   :group 'org-agenda-time-grid
