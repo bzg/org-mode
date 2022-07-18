@@ -18455,9 +18455,9 @@ ELEMENT."
 	(org-element-property :parent element) t))
       ;; At first line: indent according to previous sibling, if any,
       ;; ignoring footnote definitions and inline tasks, or parent's
-      ;; contents.
-      ((and ( = (line-beginning-position) start)
-	    (eq org-adapt-indentation t))
+      ;; contents.  If `org-adapt-indentation' is `headline-data', ignore
+      ;; previous headline data siblings.
+      ((= (line-beginning-position) start)
        (catch 'exit
 	 (while t
 	   (if (= (point-min) start) (throw 'exit 0)
@@ -18474,6 +18474,21 @@ ELEMENT."
 		((memq (org-element-type previous)
 		       '(footnote-definition inlinetask))
 		 (setq start (org-element-property :begin previous)))
+                ;; Do not indent like previous when the previous
+                ;; element is headline data and `org-adapt-indentation'
+                ;; is set to `headline-data'.
+                ((save-excursion
+                   (goto-char start)
+                   (and
+                    (eq org-adapt-indentation 'headline-data)
+                    (not (or (org-at-clock-log-p)
+                           (org-at-planning-p)))
+                    (progn
+                      (beginning-of-line 1)
+                      (skip-chars-backward "\n")
+                      (or (org-at-heading-p)
+                          (looking-back ":END:.*" (point-at-bol))))))
+                 (throw 'exit 0))
 		(t (goto-char (org-element-property :begin previous))
 		   (throw 'exit
 			  (if (bolp) (current-indentation)
