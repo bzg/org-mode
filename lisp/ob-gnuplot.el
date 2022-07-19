@@ -96,7 +96,7 @@ code."
 		 (if tablep val (mapcar 'list val)))
                ;; Make temporary file name stable with respect to data.
                ;; If we do not do it, :cache argument becomes useless.
-               (org-babel-temp-stable-file params "gnuplot-")
+               (org-babel-temp-stable-file (cons val params) "gnuplot-")
                params)
 	    (if (and (stringp val)
 		     (file-remote-p val)  ;; check if val is a remote file
