@@ -880,12 +880,20 @@ context.  See the individual commands for more information."
   'org-truly-invisible-p "9.6"
   "Compatibility alias for legacy misspelling of `org-truly-invisible-p'.")
 
+(make-obsolete-variable 'org-latex-babel-language-alist
+                        "set `org-latex-language-alist' instead." "9.6")
+
+(make-obsolete-variable 'org-latex-polyglossia-language-alist
+                        "set `org-latex-language-alist' instead." "9.6")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol
   '(progn
      (org-link-set-parameters "file+emacs") ;since Org 9.0
      (org-link-set-parameters "file+sys"))) ;since Org 9.0
+
+
 
 
 
