@@ -17147,7 +17147,30 @@ following values:
 :exports    => "code"
 :cache      => "no"
 :noweb      => "no"
+:hlines     => "no"
+:tangle     => "no"
 #+end_example
+
+#+vindex: org-babel-default-inline-header-args
+Inline source blocks (see [[*Structure of Code Blocks]]) use slightly
+different default header arguments defined in
+~org-babel-default-inline-header-args~:
+
+#+begin_example
+:session    => "none"
+:results    => "replace"
+:exports    => "results"
+:hlines     => "yes"
+#+end_example
+
+The most notable difference between default header arguments for
+inline and normal source blocks is =:exports= argument.  For inline
+source blocks, results of evaluation are exported by default; not the
+code.
+
+Unlike the default values, header arguments set using Org mode
+properties (see [[*Header arguments in Org mode properties]]) do apply to
+both the normal source blocks and inline source blocks.
 
 The example below sets =:noweb= header arguments to =yes=, which makes
 Org expand =:noweb= references by default.
