@@ -3439,17 +3439,18 @@ SCHEDULED: <2017-05-06 Sat>
    (progn (org-file-contents "this-file-must-not-exist" :noerror) t))
   ;; Open URL.
   (should
-   (string= "foo"
-	    (let ((buffer (generate-new-buffer "url-retrieve-output")))
-	      (unwind-protect
-		  ;; Simulate successful retrieval of a URL.
-		  (cl-letf (((symbol-function 'url-retrieve-synchronously)
-			     (lambda (&rest_)
-			       (with-current-buffer buffer
-				 (insert "HTTP/1.1 200 OK\n\nfoo"))
-			       buffer)))
-		    (org-file-contents "http://some-valid-url"))
-		(kill-buffer buffer)))))
+   (let ((org-resource-download-policy t))
+     (string= "foo"
+              (let ((buffer (generate-new-buffer "url-retrieve-output")))
+                (unwind-protect
+                    ;; Simulate successful retrieval of a URL.
+                    (cl-letf (((symbol-function 'url-retrieve-synchronously)
+                               (lambda (&rest_)
+                                 (with-current-buffer buffer
+                                   (insert "HTTP/1.1 200 OK\n\nfoo"))
+                                 buffer)))
+                      (org-file-contents "http://some-valid-url"))
+                  (kill-buffer buffer))))))
   ;; Throw error when trying to access an invalid URL.
   (should-error
    (let ((buffer (generate-new-buffer "url-retrieve-output")))

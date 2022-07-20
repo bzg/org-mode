@@ -238,7 +238,8 @@ num:2 <:active")))
       (org-export--get-inbuffer-options))
     '(:language "fr" :select-tags ("a" "b" "c") :title ("a b c"))))
   ;; Options set through SETUPFILE specified using a URL.
-  (let ((buffer (generate-new-buffer "url-retrieve-output")))
+  (let ((buffer (generate-new-buffer "url-retrieve-output"))
+        (org-resource-download-policy t))
     (unwind-protect
 	;; Simulate successful retrieval of a setupfile from URL.
 	(cl-letf (((symbol-function 'url-retrieve-synchronously)
