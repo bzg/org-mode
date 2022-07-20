@@ -1308,42 +1308,37 @@ which are given by `org-latex-engraved-preamble' and
                   "plaintop" "plain"))
              t t
              engraved-preamble)))
-    (if syntax-colours-p
-        (concat
-         "\n% Setup for code blocks [1/2]\n\n"
-         engraved-preamble
-         "\n\n% Setup for code blocks [2/2]: syntax highlighting colors\n\n"
-         (if (require 'engrave-faces-latex nil t)
-             (if engraved-themes
-                 (concat
-                  (mapconcat
-                   (lambda (theme)
-                     (format
-                      "\n\\newcommand{\\engravedtheme%s}{%%\n%s\n}"
-                      (replace-regexp-in-string "[^A-Za-z]" "" theme)
-                      (replace-regexp-in-string
-                       "newcommand" "renewcommand"
-                       (replace-regexp-in-string
-                        "#" "##"
-                        (funcall gen-theme-spec theme)))))
-                   engraved-themes
-                   "\n")
-                  "\n\n"
-                  (cond
-                   ((memq engraved-theme engraved-themes)
-                    (concat "\\engravedtheme"
-                            (replace-regexp-in-string
-                             "[^A-Za-z]" "" engraved-theme)
-                            "\n"))
-                   (t (funcall gen-theme-spec engraved-theme))))
-               (funcall gen-theme-spec engraved-theme))
-           (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
-           "% WARNING syntax highlighting unavailable as engrave-faces-latex was missing.\n")
-         "\n")
-      (concat
-       "\n% Setup for code blocks\n\n"
-       engraved-preamble
-       "\n"))))
+    (concat
+     "\n% Setup for code blocks [1/2]\n\n"
+     engraved-preamble
+     "\n\n% Setup for code blocks [2/2]: syntax highlighting colors\n\n"
+     (if (require 'engrave-faces-latex nil t)
+         (if engraved-themes
+             (concat
+              (mapconcat
+               (lambda (theme)
+                 (format
+                  "\n\\newcommand{\\engravedtheme%s}{%%\n%s\n}"
+                  (replace-regexp-in-string "[^A-Za-z]" "" theme)
+                  (replace-regexp-in-string
+                   "newcommand" "renewcommand"
+                   (replace-regexp-in-string
+                    "#" "##"
+                    (funcall gen-theme-spec theme)))))
+               engraved-themes
+               "\n")
+              "\n\n"
+              (cond
+               ((memq engraved-theme engraved-themes)
+                (concat "\\engravedtheme"
+                        (replace-regexp-in-string
+                         "[^A-Za-z]" "" engraved-theme)
+                        "\n"))
+               (t (funcall gen-theme-spec engraved-theme))))
+           (funcall gen-theme-spec engraved-theme))
+       (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
+       "% WARNING syntax highlighting unavailable as engrave-faces-latex was missing.\n")
+     "\n")))
 
 ;;;; Compilation
 
@@ -1999,7 +1994,7 @@ holding export options."
                 (org-element-map (plist-get info :parse-tree)
                     '(src-block inline-src-block) #'identity
                     info t))
-       (org-latex-generate-engraved-preamble info t))
+       (org-latex-generate-engraved-preamble info))
      ;; Document start.
      "\\begin{document}\n\n"
      ;; Title command.
