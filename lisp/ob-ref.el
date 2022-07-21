@@ -153,7 +153,7 @@ Emacs Lisp representation of the value of the variable."
 	    (setq ref split-ref))
 	  (org-with-wide-buffer
 	   (goto-char (point-min))
-	   (let* ((params (append args '((:results . "silent"))))
+	   (let* ((params (append args '((:results . "none"))))
 		  (regexp (org-babel-named-data-regexp-for-name ref))
 		  (result
 		   (catch :found
