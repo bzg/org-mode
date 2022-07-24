@@ -471,12 +471,12 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
 		      (or time ,at) args)))
 	    ((symbol-function 'decode-time)
 	     (lambda (&optional time zone form)
-               (condition-case err
+               (condition-case nil
                    (funcall ,(symbol-function 'decode-time)
 			    (or time ,at) zone form)
-                 ;; Fallback for Emacs <27.1.
-                 (error (funcall ,(symbol-function 'decode-time)
-			         (or time ,at) zone)))))
+                 (wrong-number-of-arguments
+                  (funcall ,(symbol-function 'decode-time)
+			   (or time ,at))))))
 	    ((symbol-function 'encode-time)
 	     (lambda (time &rest args)
 	       (apply ,(symbol-function 'encode-time) (or time ,at) args)))
@@ -492,7 +492,7 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
 	       (funcall ,(symbol-function 'set-file-times) file (or time ,at))))
 	    ((symbol-function 'time-add)
 	     (lambda (a b) (funcall ,(symbol-function 'time-add)
-				    (or a ,at) (or b ,at))))
+			       (or a ,at) (or b ,at))))
 	    ((symbol-function 'time-equal-p)
 	     (lambda (a b) (funcall ,(symbol-function 'time-equal-p)
 				    (or a ,at) (or b ,at))))

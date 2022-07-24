@@ -953,9 +953,10 @@ channel."
 			   (org-export-resolve-fuzzy-link link info)
                          ;; Ignore broken links.  On broken link,
                          ;; `org-export-resolve-id-link' will throw an
-                         ;; error and `ignore-error' will return nil.
-			 (ignore-error 'org-link-broken
-                           (org-export-resolve-id-link link info)))))
+                         ;; error and we will return nil.
+			 (condition-case nil
+                             (org-export-resolve-id-link link info)
+                           (org-link-broken nil)))))
              (when dest
 	       (concat
 	        (org-ascii--fill-string
