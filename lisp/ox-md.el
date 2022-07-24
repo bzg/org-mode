@@ -195,8 +195,9 @@ of contents can refer to headlines."
        (lambda (link)
 	 (equal headline
                 ;; Ignore broken links.
-                (ignore-error 'org-link-broken
-                  (org-export-resolve-link link info))))
+                (condition-case nil
+                    (org-export-resolve-id-link link info)
+                  (org-link-broken nil))))
        info t))))
 
 (defun org-md--headline-title (style level title &optional anchor tags)

@@ -470,8 +470,13 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
 	       (apply ,(symbol-function 'current-time-zone)
 		      (or time ,at) args)))
 	    ((symbol-function 'decode-time)
-	     (lambda (&optional time zone form) (funcall ,(symbol-function 'decode-time)
-					            (or time ,at) zone form)))
+	     (lambda (&optional time zone form)
+               (condition-case nil
+                   (funcall ,(symbol-function 'decode-time)
+			    (or time ,at) zone form)
+                 (wrong-number-of-arguments
+                  (funcall ,(symbol-function 'decode-time)
+			   (or time ,at))))))
 	    ((symbol-function 'encode-time)
 	     (lambda (time &rest args)
 	       (apply ,(symbol-function 'encode-time) (or time ,at) args)))
