@@ -4520,6 +4520,7 @@ Return value can be an object or an element:
         (org-persist-register location-type path
                               :write-immediately t))))
 
+(require 'subr-x) ;; FIXME: For `thread-first' in Emacs 26.
 (defun org-export-link-localise (link)
   "Convert remote LINK to local link.
 If LINK refers to a remote resource, modify it to point to a local

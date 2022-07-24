@@ -363,7 +363,7 @@ INFO is the export state, as a property list."
           (_ nil))))
     (apply
      #'org-cite-biblatex--command citation info
-     (pcase (seq-first candidates)
+     (pcase (seq-elt candidates 0) ;; `seq-first' is not available in Emacs 26.
        (`(,_ ,_ . ,command-parameters) command-parameters)
        ('nil
         (user-error

@@ -3420,10 +3420,10 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                          (equal '("false") (cdr opt)))
                      'no)))))
             opts))))
-    (if-let ((mathescape (or (funcall mathescape-status default-options)
-                             (funcall mathescape-status options))))
-        (when (eq mathescape 'yes)
-          (or engrave-faces-latex-mathescape t)))))
+    (let ((mathescape (or (funcall mathescape-status default-options)
+                          (funcall mathescape-status options))))
+      (when (eq mathescape 'yes)
+        (or engrave-faces-latex-mathescape t)))))
 
 (defun org-latex-src--engrave-code (content lang &optional theme options inline)
   "Engrave CONTENT to LaTeX in a LANG-mode buffer, and give the result.
@@ -3443,7 +3443,7 @@ to the Verbatim environment or Verb command."
                 engrave-faces-current-preset-style))
              (engraved-buffer
               (with-temp-buffer
-                (insert (string-trim-right content "\n"))
+                (insert (replace-regexp-in-string "\n\\'" "" content))
                 (when lang-mode
                   (if (functionp lang-mode)
                       (funcall lang-mode)
