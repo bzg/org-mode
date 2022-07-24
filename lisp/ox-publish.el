@@ -382,7 +382,7 @@ still decide about that independently."
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-publish-timestamp-filename filename pub-dir pub-func))
-	(stamp (org-publish-cache-ctime-of-src filename)))
+	(stamp (org-publish-cache-mtime-of-src filename)))
     (org-publish-cache-set key stamp)))
 
 (defun org-publish-remove-all-timestamps ()
@@ -1292,7 +1292,7 @@ the file including them will be republished as well."
   (let* ((key (org-publish-timestamp-filename filename pub-dir pub-func))
 	 (pstamp (org-publish-cache-get key))
 	 (org-inhibit-startup t)
-	 included-files-ctime)
+	 included-files-mtime)
     (when (equal (file-name-extension filename) "org")
       (let ((case-fold-search t))
 	(with-temp-buffer
@@ -1313,14 +1313,14 @@ the file including them will be republished as well."
 				     (substring m 0 (match-beginning 0))
 				   m)))))
 		    (when include-filename
-		      (push (org-publish-cache-ctime-of-src
+		      (push (org-publish-cache-mtime-of-src
 			     (expand-file-name include-filename (file-name-directory filename)))
-			    included-files-ctime))))))))))
+			    included-files-mtime))))))))))
     (or (null pstamp)
-	(let ((ctime (org-publish-cache-ctime-of-src filename)))
-	  (or (time-less-p pstamp ctime)
-	      (cl-some (lambda (ct) (time-less-p ctime ct))
-		       included-files-ctime))))))
+	(let ((mtime (org-publish-cache-mtime-of-src filename)))
+	  (or (time-less-p pstamp mtime)
+	      (cl-some (lambda (ct) (time-less-p mtime ct))
+		       included-files-mtime))))))
 
 (defun org-publish-cache-set-file-property
     (filename property value &optional project-name)
@@ -1365,8 +1365,8 @@ does not exist."
     (error "`org-publish-cache-set' called, but no cache present"))
   (puthash key value org-publish-cache))
 
-(defun org-publish-cache-ctime-of-src (file)
-  "Get the ctime of FILE as an integer."
+(defun org-publish-cache-mtime-of-src (file)
+  "Get the mtime of FILE as an integer."
   (let ((attr (file-attributes
 	       (expand-file-name (or (file-symlink-p file) file)
 				 (file-name-directory file)))))
