@@ -4587,11 +4587,11 @@ returns non-nil if any of them match."
           (when (memq char '(?! ?f))
             (customize-push-and-save
              'org-safe-remote-resources
-             (list (rx string-start
-                       (literal
-                        (if (and (= char ?f) current-file)
-                            (concat "file://" current-file) uri))
-                       string-end))))
+             (list (concat "\\`"
+                           (regexp-opt
+                            (if (and (= char ?f) current-file)
+                                (concat "file://" current-file) uri))
+                           "\\'"))))
           (prog1 (memq char '(?! ?\s ?y ?f))
             (quit-window t)))))))
 
