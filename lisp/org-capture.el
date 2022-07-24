@@ -1180,7 +1180,7 @@ may have been stored before."
         ;; Make sure that last point is not folded.
         (org-fold-core-cycle-over-indirect-buffers
           (org-fold-region (max 1 (1- (point-max))) (point-max) nil))))
-    (let ((origin (point)))
+    (let ((origin (point-marker)))
       (unless (bolp) (insert "\n"))
       (org-capture-empty-lines-before)
       (let ((beg (point)))
@@ -1245,7 +1245,7 @@ may have been stored before."
 				     (point))
 				   beg)))))))
     ;; Insert template.
-    (let ((origin (point)))
+    (let ((origin (point-marker)))
       (unless (bolp) (insert "\n"))
       ;; When a new list is created, always obey to `:empty-lines' and
       ;; friends.
@@ -1346,7 +1346,7 @@ may have been stored before."
       ;; No table found.  Create it with an empty header.
       (goto-char end)
       (unless (bolp) (insert "\n"))
-      (let ((origin (point)))
+      (let ((origin (point-marker)))
 	(insert "|   |\n|---|\n")
 	(narrow-to-region origin (point))))
     ;; In the current table, find the appropriate location for TEXT.
@@ -1375,7 +1375,7 @@ may have been stored before."
      (t
       (goto-char (org-table-end))))
     ;; Insert text and position point according to template.
-    (let ((origin (point)))
+    (let ((origin (point-marker)))
       (unless (bolp) (insert "\n"))
       (let ((beg (point))
 	    (end (save-excursion
@@ -1407,7 +1407,7 @@ Of course, if exact position has been required, just put it there."
    (t
     ;; Beginning or end of file.
     (goto-char (if (org-capture-get :prepend) (point-min) (point-max)))))
-  (let ((origin (point)))
+  (let ((origin (point-marker)))
     (unless (bolp) (insert "\n"))
     (org-capture-empty-lines-before)
     (org-capture-position-for-last-stored (point))
