@@ -487,7 +487,7 @@ evaluates to a string.
 A closure is evaluated when the source block is being
 evaluated (e.g. during execution or export), with point at the
 source block.  It is not possible to use an arbitrary function
-symbol (e.g. \\='some-func), since org uses lexical binding.  To
+symbol (e.g. `some-func'), since org uses lexical binding.  To
 achieve the same functionality, call the function within a
 closure (e.g. (lambda () (some-func))).
 
