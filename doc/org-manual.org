@@ -22082,7 +22082,7 @@ reading convenience.
 [fn:60] When working with the standard diary expression functions, you
 need to be very careful with the order of the arguments.  That order
 depends evilly on the variable ~calendar-date-style~.  For example, to
-specify a date December 12, 2005, the call might look like
+specify a date December 1, 2005, the call might look like
 =(diary-date 12 1 2005)= or =(diary-date 1 12 2005)= or =(diary-date
 2005 12 1)=, depending on the settings.  This has been the source of
 much confusion.  Org mode users can resort to special versions of
