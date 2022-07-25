@@ -370,6 +370,7 @@ Return value as a string."
       value)))
 
 (defun org-macro--vc-modified-time (file)
+  (require 'vc) ; Not everything we need is autoloaded.
   (save-window-excursion
     (when (vc-backend file)
       (let ((buf (get-buffer-create " *org-vc*"))
