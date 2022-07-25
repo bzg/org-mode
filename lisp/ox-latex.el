@@ -2765,7 +2765,12 @@ used as a communication channel."
 			  ((string-prefix-p "," options)
 			   (format "[%s]" (substring options 1)))
 			  (t (format "[%s]" options)))
-		    path))
+                    ;; While \includegraphics is fine with unicode in the path,
+                    ;; \includesvg is prone to producing errors.
+                    (if (and (string-match-p "[^[:ascii:]]" path)
+                             (equal filetype "svg"))
+                        (concat "\\detokenize{" path "}")
+                      path)))
       (when (equal filetype "svg")
 	(setq image-code (replace-regexp-in-string "^\\\\includegraphics"
 						   "\\includesvg"
