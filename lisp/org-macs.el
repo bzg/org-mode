@@ -522,7 +522,7 @@ is selected, only the bare key is returned."
 For example, in this alist:
 
 \(org-uniquify-alist \\='((a 1) (b 2) (a 3)))
-  => \\='((a 1 3) (b 2))
+  => ((a 1 3) (b 2))
 
 merge (a 1) and (a 3) into (a 1 3).
 

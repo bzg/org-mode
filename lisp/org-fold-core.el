@@ -382,7 +382,7 @@ The following properties are known:
                       using isearch.
 - :isearch-open     :: non-nil means that isearch can reveal text hidden
                       using this spec.  This property does nothing
-                      when \\='isearch-ignore property is non-nil.
+                      when `isearch-ignore' property is non-nil.
 - :front-sticky     :: non-nil means that text prepended to the folded text
                       is automatically folded.
 - :rear-sticky      :: non-nil means that text appended to the folded text
@@ -709,7 +709,7 @@ The folding spec properties will be set to PROPERTIES (see
 SPEC must be a symbol.
 
 BUFFER can be a buffer to remove SPEC in, nil to remove SPEC in current
-buffer, or \\='all to remove SPEC in all open `org-mode' buffers and all
+buffer, or `all' to remove SPEC in all open `org-mode' buffers and all
 future org buffers."
   (org-fold-core--check-spec spec)
   (when (eq buffer 'all)
@@ -778,7 +778,7 @@ If SPEC-OR-ALIAS is a folding spec, only check the given folding spec."
 Return nil if there is no folding at point or POM.
 If SPEC-OR-ALIAS is nil, return a folding spec with highest priority
 among present at `point' or POM.
-If SPEC-OR-ALIAS is \\='all, return the list of all present folding
+If SPEC-OR-ALIAS is `all', return the list of all present folding
 specs.
 If SPEC-OR-ALIAS is a valid folding spec or a spec alias, return the
 corresponding folding spec (if the text is folded using that spec)."

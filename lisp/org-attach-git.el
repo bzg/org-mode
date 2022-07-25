@@ -43,7 +43,8 @@
 
 (defcustom org-attach-git-annex-auto-get 'ask
   "Confirmation preference for automatically getting annex files.
-If \\='ask, prompt using `y-or-n-p'.  If t, always get.  If nil, never get."
+If this is the symbol `ask', prompt using `y-or-n-p'.
+If t, always get.  If nil, never get."
   :group 'org-attach
   :package-version '(Org . "9.0")
   :version "26.1"

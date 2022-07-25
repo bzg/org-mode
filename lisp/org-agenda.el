@@ -1645,8 +1645,9 @@ alpha-up           Sort headlines alphabetically.
 alpha-down         Sort headlines alphabetically, reversed.
 
 The different possibilities will be tried in sequence, and testing stops
-if one comparison returns a \"not-equal\".  For example, the default
-    `(time-up category-keep priority-down)'
+if one comparison returns a \"not-equal\".  For example,
+  (setq org-agenda-sorting-strategy
+        \\='(time-up category-keep priority-down))
 means: Pull out all entries having a specified time of day and sort them,
 in order to make a time schedule for the current day the first thing in the
 agenda listing for the day.  Of the entries without a time indication, keep
@@ -2109,10 +2110,11 @@ the lower-case version of all tags."
 
 (defcustom org-agenda-bulk-custom-functions nil
   "Alist of characters and custom functions for bulk actions.
-For example, this value makes those two functions available:
+For example, this makes those two functions available:
 
-  \\='((?R set-category)
-    (?C bulk-cut))
+  (setq org-agenda-bulk-custom-functions
+        \\='((?R set-category)
+          (?C bulk-cut)))
 
 With selected entries in an agenda buffer, `B R' will call
 the custom function `set-category' on the selected entries.
@@ -2123,7 +2125,8 @@ used for each call to your bulk custom function.  The argument
 collecting function will be run once and should return a list of
 arguments to pass to the bulk function.  For example:
 
-  \\='((?R set-category get-category))
+  (setq org-agenda-bulk-custom-functions
+        \\='((?R set-category get-category)))
 
 Now, `B R' will call the custom `get-category' which would prompt
 the user once for a category.  That category is then passed as an
@@ -2732,7 +2735,8 @@ For example, if you have a custom agenda command \"p\" and you
 want this command to be accessible only from plain text files,
 use this:
 
-   \\='((\"p\" ((in-file . \"\\\\.txt\\\\'\"))))
+  (setq org-agenda-custom-commands-contexts
+        \\='((\"p\" ((in-file . \"\\\\.txt\\\\'\")))))
 
 Here are the available contexts definitions:
 
@@ -2750,7 +2754,8 @@ accessible if there is at least one valid check.
 You can also bind a key to another agenda custom command
 depending on contextual rules.
 
-    \\='((\"p\" \"q\" ((in-file . \"\\\\.txt\\\\'\"))))
+  (setq org-agenda-custom-commands-contexts
+        \\='((\"p\" \"q\" ((in-file . \"\\\\.txt\\\\'\")))))
 
 Here it means: in .txt files, use \"p\" as the key for the
 agenda command otherwise associated with \"q\".  (The command
@@ -7877,7 +7882,7 @@ Argument ARG is the prefix argument."
 When in a restricted subtree, remove it.
 
 The restriction will span over the entire file if TYPE is `file',
-or if type is \\='(4), or if the cursor is before the first headline
+or if TYPE is (4), or if the cursor is before the first headline
 in the file.  Otherwise, only apply the restriction to the current
 subtree."
   (interactive "P")
@@ -11304,7 +11309,7 @@ argument: an entry from `org-agenda-get-day-entries'.
 FILTER can also be an alist with the car of each cell being
 either `headline' or `category'.  For example:
 
-  \\='((headline \"IMPORTANT\")
+   ((headline \"IMPORTANT\")
     (category \"Work\"))
 
 will only add headlines containing IMPORTANT or headlines

@@ -230,12 +230,13 @@ Each element is a cell of the format
 
 Where FACE is either a defined face or an anonymous face.
 
-For instance, the following value would color the background of
+For instance, the following would color the background of
 emacs-lisp source blocks and python source blocks in purple and
 green, respectability.
 
-    \\='((\"emacs-lisp\" (:background \"#EEE2FF\"))
-      (\"python\" (:background \"#e5ffb8\")))"
+  (setq org-src-block-faces
+        \\='((\"emacs-lisp\" (:background \"#EEE2FF\"))
+          (\"python\" (:background \"#e5ffb8\"))))"
   :group 'org-edit-structure
   :type '(repeat (list (string :tag "language")
                        (choice
