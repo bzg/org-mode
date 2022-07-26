@@ -4588,7 +4588,7 @@ returns non-nil if any of them match."
             (customize-push-and-save
              'org-safe-remote-resources
              (list (concat "\\`"
-                           (regexp-opt
+                           (regexp-quote
                             (if (and (= char ?f) current-file)
                                 (concat "file://" current-file) uri))
                            "\\'"))))
