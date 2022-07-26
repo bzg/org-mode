@@ -18029,14 +18029,14 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
 	 load-uncore load-misses)
     (setq load-misses
-	  (delq 't
+	  (delq t
 		(mapcar (lambda (f)
 			  (or (org-load-noerror-mustsuffix (concat org-dir f))
 			      (and (string= org-dir contrib-dir)
 				   (org-load-noerror-mustsuffix (concat contrib-dir f)))
 			      (and (org-load-noerror-mustsuffix (concat (org-find-library-dir f) f))
 				   (push f load-uncore)
-				   't)
+				   t)
 			      f))
 			lfeat)))
     (when load-uncore
