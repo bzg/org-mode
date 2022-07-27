@@ -10397,8 +10397,9 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	   (let ((ind (org-list-item-body-column (line-beginning-position))))
 	     (dolist (line lines)
 	       (insert-and-inherit "\n")
-	       (indent-line-to ind)
-	       (insert-and-inherit line)))
+               (unless (string-empty-p line)
+	         (indent-line-to ind)
+	         (insert-and-inherit line))))
 	   (message "Note stored")
 	   (org-back-to-heading t))))))
   ;; Don't add undo information when called from `org-agenda-todo'.
