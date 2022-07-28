@@ -18006,7 +18006,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (require 'loadhist)
   (let* ((org-dir     (org-find-library-dir "org"))
 	 (contrib-dir (or (org-find-library-dir "org-contribdir") org-dir))
-	 (feature-re "^\\(org\\|ob\\|ox\\)\\(-.*\\)?")
+	 (feature-re "^\\(org\\|ob\\|ox\\|ol\\|oc\\)\\(-.*\\)?")
 	 (remove-re (format "\\`%s\\'"
 			    (regexp-opt '("org" "org-loaddefs" "org-version"))))
 	 (feats (delete-dups
