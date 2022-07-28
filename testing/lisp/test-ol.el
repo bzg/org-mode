@@ -22,7 +22,7 @@
 
 ;;; Decode and Encode Links
 
-(ert-deftest test-ol/encode ()
+(ert-deftest test-org-link/encode ()
   "Test `org-link-encode' specifications."
   ;; Regural test.
   (should (string= "Foo%3A%42ar" (org-link-encode "Foo:Bar" '(?\: ?\B))))
@@ -33,7 +33,7 @@
   ;; Encode a Unicode multibyte character.
   (should (string= "%E2%82%AC" (org-link-encode "€" '(?\€)))))
 
-(ert-deftest test-ol/decode ()
+(ert-deftest test-org-link/decode ()
   "Test `org-link-decode' specifications."
   ;; Decode an ASCII character.
   (should (string= "[" (org-link-decode "%5B")))
@@ -42,7 +42,7 @@
   ;; Decode a Unicode multibyte character.
   (should (string= "€" (org-link-decode "%E2%82%AC"))))
 
-(ert-deftest test-ol/encode-url-with-escaped-char ()
+(ert-deftest test-org-link/encode-url-with-escaped-char ()
   "Encode and decode a URL that includes an encoded char."
   (should
    (string= "http://some.host.com/form?&id=blah%2Bblah25"
@@ -50,7 +50,7 @@
 	     (org-link-encode "http://some.host.com/form?&id=blah%2Bblah25"
 			      '(?\s ?\[ ?\] ?%))))))
 
-(ert-deftest test-ol/org-toggle-link-display ()
+(ert-deftest test-org-link/toggle-link-display ()
   "Make sure that `org-toggle-link-display' is working.
 See https://github.com/yantar92/org/issues/4."
   (dolist (org-link-descriptive '(nil t))
@@ -77,7 +77,7 @@ See https://github.com/yantar92/org/issues/4."
 
 ;;; Escape and Unescape Links
 
-(ert-deftest test-ol/escape ()
+(ert-deftest test-org-link/escape ()
   "Test `org-link-escape' specifications."
   ;; No-op when there is no backslash or square bracket.
   (should (string= "foo" (org-link-escape "foo")))
@@ -101,7 +101,7 @@ See https://github.com/yantar92/org/issues/4."
   (should (string= "\\[\\[\\[foo\\]\\]\\]" (org-link-escape "[[[foo]]]")))
   (should (string= "\\[\\[foo\\]\\] bar" (org-link-escape "[[foo]] bar"))))
 
-(ert-deftest test-ol/unescape ()
+(ert-deftest test-org-link/unescape ()
   "Test `org-link-unescape' specifications."
   ;; No-op if there is no backslash.
   (should (string= "foo" (org-link-unescape "foo")))
@@ -122,7 +122,7 @@ See https://github.com/yantar92/org/issues/4."
   (should (string= "[[[foo]]]" (org-link-unescape "\\[\\[\\[foo\\]\\]\\]")))
   (should (string= "[[foo]] bar" (org-link-unescape "\\[\\[foo\\]\\] bar"))))
 
-(ert-deftest test-ol/make-string ()
+(ert-deftest test-org-link/make-string ()
   "Test `org-link-make-string' specifications."
   ;; Throw an error on empty URI.
   (should-error (org-link-make-string ""))
@@ -147,7 +147,7 @@ See https://github.com/yantar92/org/issues/4."
 
 ;;; Store links
 
-(ert-deftest test-ol/store-link ()
+(ert-deftest test-org-link/store-link ()
   "Test `org-store-link' specifications."
   ;; On a headline, link to that headline.  Use heading as the
   ;; description of the link.
@@ -380,7 +380,7 @@ See https://github.com/yantar92/org/issues/4."
 
 ;;; Radio Targets
 
-(ert-deftest test-ol/update-radio-target-regexp ()
+(ert-deftest test-org-link/update-radio-target-regexp ()
   "Test `org-update-radio-target-regexp' specifications."
   ;; Properly update cache with no previous radio target regexp.
   (should
@@ -414,7 +414,7 @@ See https://github.com/yantar92/org/issues/4."
 
 ;;; Navigation
 
-(ert-deftest test-ol/next-link ()
+(ert-deftest test-org-link/next-link ()
   "Test `org-next-link' specifications."
   ;; Move to any type of link.
   (should
@@ -465,7 +465,7 @@ See https://github.com/yantar92/org/issues/4."
 	    (org-next-link)
 	    (buffer-substring (point) (search-forward "]]" nil t))))))
 
-(ert-deftest test-ol/previous-link ()
+(ert-deftest test-org-link/previous-link ()
   "Test `org-previous-link' specifications."
   ;; Move to any type of link.
   (should
@@ -527,7 +527,7 @@ See https://github.com/yantar92/org/issues/4."
      (list (org-element-property :type (org-element-link-parser))
            (org-element-property :path (org-element-link-parser)))))
 
-(ert-deftest test-ol/plain-link-re ()
+(ert-deftest test-org-link/plain-link-re ()
   "Test `org-link-plain-re'."
   (should
    (equal
