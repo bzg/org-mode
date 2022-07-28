@@ -16818,10 +16818,71 @@ conformant to the Harvard style and the specification of the
 Wolkers-Kluwer publisher; since it relies on the ~bibtex~ processor of
 your LaTeX installation, it won't export to anything but PDF.
 
+** Bibliography printing
+
 The =PRINT_BIBLIOGRAPHY= keyword specifies where the bibliography
-should print.
+should be printed (note the colon):
 
 : #+print_bibliography:
+
+The bibliography printed by the LaTeX-based export processors
+"bibtex", "natbib" and "biblatex" has a chapter or section heading by
+default, while the "basic" and "csl" processors print the list of
+bibliography entries without a heading.
+
+A document may contain more than one =PRINT_BIBLIOGRAPHY= keywords.
+Each of the keywords will trigger printing the bibliography.
+
+The keywords can be used with or without additional options.  Options
+can be used, for example, to print only entries that belong to a
+certain category or to control formatting.  The set of supported
+=PRINT_BIBLIOGRAPHY= options and their interpretation varies between
+the different citation export processors.  Some export processors do
+not support passing options.
+
+*** Bibliography options in the "biblatex" and "csl" export processors
+
+The "biblatex" and "csl" export processors support bibliography
+options through a property list attached to the =PRINT_BIBLIOGRAPHY=
+keyword.  For example,
+
+: #print_bibliography: :keyword algebra :type book
+
+Values including spaces must be surrounded with double quotes.  If you
+need to use a key multiple times, you can separate its values with
+commas, but without any space in-between:
+
+: #print_bibliography: :keyword "algebraic logic" :nottype article,book
+
+The "biblatex" export processor accepts all options supported by
+BibLaTeX's ~\printbibliography~ command, while the "csl" processor
+accepts the following ones:
+
+- =:keyword <keyword(,keyword2...)>= :: Print only entries whose
+  keyword field contains all given keywords.
+
+- =:notkeyword <keyword(,keyword2...)>= :: Print only entries whose
+  keyword field does not contain any of the given keywords.
+
+- =:type <entrytype>= :: Print only entries whose type is
+  =<entrytype>=.  Entry type is the BibTeX/BibLaTeX entry type if this
+  information is available (the entry was read from a BibTeX/BibLaTeX
+  bibliography) and the CSL entry type otherwise.
+
+- =:nottype <entrytype(,entrytype2...)>= :: Print only entries whose
+  type is not among the given entry types.  Entry type is determined
+  as in the case of =:type=.
+
+- =:csltype <entrytype>= :: Print only entries whose CSL entry type
+  (possibly based on a conversion from BibTeX/BibLaTeX to CSL) is
+  =<entrytype>=.
+
+- =:notcsltype <entrytype(,entrytype2...)>= :: Print only entries whose
+  CSL entry type (possibly based on a conversion from BibTeX/BibLaTeX
+  to CSL) is not among the listed entry types.
+
+- =:filter <predicate>= :: Print only entries for which the given
+  Emacs Lisp predicate returns a non-~nil~ value.
 
 * Working with Source Code
 :PROPERTIES:
