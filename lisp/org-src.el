@@ -384,7 +384,7 @@ where BEG and END are buffer positions and CONTENTS is a string."
        (let ((beg (org-element-property :contents-begin datum))
 	     (end (org-element-property :contents-end datum)))
 	 (list beg end (buffer-substring-no-properties beg end))))
-      ((memq type '(example-block export-block src-block))
+      ((memq type '(example-block export-block src-block comment-block))
        (list (progn (goto-char (org-element-property :post-affiliated datum))
 		    (line-beginning-position 2))
 	     (progn (goto-char (org-element-property :end datum))
@@ -1159,6 +1159,29 @@ Throw an error when not at an export block."
        (org-src--construct-edit-buffer-name (buffer-name) type)
        mode
        (lambda () (org-escape-code-in-region (point-min) (point-max)))))
+    t))
+
+(defun org-edit-comment-block ()
+  "Edit comment block at point.
+\\<org-src-mode-map>
+A new buffer is created and the block is copied into it, and the
+buffer is switched into Org mode.
+
+When done, exit with `\\[org-edit-src-exit]'.  The edited text \
+will then replace the area in the Org mode buffer.
+
+Throw an error when not at a comment block."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (unless (and (eq (org-element-type element) 'comment-block)
+		 (org-src--on-datum-p element))
+      (user-error "Not in a comment block"))
+    (org-src--edit-element
+     element
+     (org-src--construct-edit-buffer-name (buffer-name) "org")
+     'org-mode
+     (lambda () (org-escape-code-in-region (point-min) (point-max)))
+     (org-unescape-code-in-string (org-element-property :value element)))
     t))
 
 (defun org-edit-src-code (&optional code edit-buffer-name)

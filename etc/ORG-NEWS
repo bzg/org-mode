@@ -141,6 +141,14 @@ discouraged when working with Org files.
 
 ** New features
 
+*** Interactive commands now support escaping text inside comment blocks
+
+~org-edit-special~ and ~org-insert-structure-template~ now handle
+comment blocks.
+
+See [[*New command ~org-edit-comment-block~ to edit comment block at
+point]].
+
 *** New customization option =org-property-separators=
 A new alist variable to control how properties are combined.
 
@@ -301,6 +309,16 @@ inside entry.  This was the default previously.
 
 Now, ~org-fold-show-entry~ does not fold drawers by default.
 
+*** New command ~org-edit-comment-block~ to edit comment block at point
+
+As the contents of comments blocks is not parsed as Org markup, the
+headlines and keywords inside should be escaped, similar to src
+blocks, example blocks, and export blocks.  This in inconvenient to do
+manually and ~org-edit-special~ is usually advised to edit text in
+such kind of blocks.
+
+Now, comment block editing is also supported via this new function.
+
 *** New function ~org-element-cache-map~ for quick mapping across Org elements
 
 When element cache is enabled, the new function provides the best
@@ -314,7 +332,6 @@ to ~org-element--cache-map-statistics~ and
 ~org-element--cache-map-statistics-threshold~.
 
 ~org-scan-tags~ and tag views in agenda utilise the new function.
-
 *** New function ~org-element-at-point-no-context~
 
 This function is like ~org-element-at-point~, but it does not try to

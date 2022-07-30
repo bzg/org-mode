@@ -8873,7 +8873,8 @@ When foo is written as FOO, upcase the #+BEGIN/END as well."
 	 (region-end (and region? (copy-marker (region-end))))
 	 (extended? (string-match-p "\\`\\(src\\|export\\)\\'" type))
 	 (verbatim? (string-match-p
-		     (concat "\\`" (regexp-opt '("example" "export" "src")))
+		     (concat "\\`" (regexp-opt '("example" "export"
+                                                "src" "comment")))
 		     type))
          (upcase? (string= (car (split-string type))
                            (upcase (car (split-string type))))))
@@ -16998,6 +16999,7 @@ When at a table, call the formula editor with `org-table-edit-formulas'.
 When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an export block, call `org-edit-export-block'.
+When in a comment block, call `org-edit-comment-block'.
 When in a LaTeX environment, call `org-edit-latex-environment'.
 When at an INCLUDE, SETUPFILE or BIBLIOGRAPHY keyword, visit the included file.
 When at a footnote reference, call `org-edit-footnote-reference'.
@@ -17044,6 +17046,7 @@ Otherwise, return a user error."
       (`table-row (call-interactively 'org-table-edit-formulas))
       (`example-block (org-edit-src-code))
       (`export-block (org-edit-export-block))
+      (`comment-block (org-edit-comment-block))
       (`fixed-width (org-edit-fixed-width-region))
       (`latex-environment (org-edit-latex-environment))
       (`planning
