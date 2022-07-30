@@ -557,7 +557,7 @@ for the duration of the command.")
 
 (defun org-columns-check-computed ()
   "Throw an error if current column value is computed."
-  (let ((spec (nth (current-column) org-columns-current-fmt-compiled)))
+  (let ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled)))
     (and
      (nth 3 spec)
      (assoc spec (get-text-property (line-beginning-position) 'org-summaries))
@@ -713,7 +713,8 @@ When PREVIOUS is set, go to the previous value.  When NTH is
 an integer, select that value."
   (interactive)
   (org-columns-check-computed)
-  (let* ((column (current-column))
+  (let* ((column (org-current-text-column))
+         (visible-column (current-column))
 	 (key (get-char-property (point) 'org-columns-key))
 	 (value (get-char-property (point) 'org-columns-value))
 	 (pom (or (get-text-property (line-beginning-position) 'org-hd-marker)
@@ -763,7 +764,7 @@ an integer, select that value."
 	;; the right place on the current line.
 	(let ((org-columns-inhibit-recalculation)) (org-columns-redo))
 	(org-columns-update key)
-	(org-move-to-column column))))))
+	(org-move-to-column visible-column))))))
 
 (defun org-colview-construct-allowed-dates (s)
   "Construct a list of three dates around the date in S.
@@ -925,14 +926,14 @@ details."
     (if spec
 	(progn (setcar spec (car new))
 	       (setcdr spec (cdr new)))
-      (push new (nthcdr (current-column) org-columns-current-fmt-compiled)))
+      (push new (nthcdr (org-current-text-column) org-columns-current-fmt-compiled)))
     (org-columns-store-format)
     (org-columns-redo)))
 
 (defun org-columns-delete ()
   "Delete the column at point from columns view."
   (interactive)
-  (let ((spec (nth (current-column) org-columns-current-fmt-compiled)))
+  (let ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled)))
     (when (y-or-n-p (format "Are you sure you want to remove column %S? "
 			    (nth 1 spec)))
       (setq org-columns-current-fmt-compiled
@@ -942,18 +943,18 @@ details."
       ;; updating it may prove counter-intuitive.  See comments in
       ;; `org-columns-move-right' for details.
       (let ((org-columns-inhibit-recalculation t)) (org-columns-redo))
-      (when (>= (current-column) (length org-columns-current-fmt-compiled))
+      (when (>= (org-current-text-column) (length org-columns-current-fmt-compiled))
 	(backward-char)))))
 
 (defun org-columns-edit-attributes ()
   "Edit the attributes of the current column."
   (interactive)
-  (org-columns-new (nth (current-column) org-columns-current-fmt-compiled)))
+  (org-columns-new (nth (org-current-text-column) org-columns-current-fmt-compiled)))
 
 (defun org-columns-widen (arg)
   "Make the column wider by ARG characters."
   (interactive "p")
-  (let* ((n (current-column))
+  (let* ((n (org-current-text-column))
 	 (entry (nth n org-columns-current-fmt-compiled))
 	 (width (aref org-columns-current-maxwidths n)))
     (setq width (max 1 (+ width arg)))
@@ -969,7 +970,7 @@ details."
 (defun org-columns-move-right ()
   "Swap this column with the one to the right."
   (interactive)
-  (let* ((n (current-column))
+  (let* ((n (org-current-text-column))
 	 (cell (nthcdr n org-columns-current-fmt-compiled))
 	 e)
     (when (>= n (1- (length org-columns-current-fmt-compiled)))
@@ -993,7 +994,7 @@ details."
 (defun org-columns-move-left ()
   "Swap this column with the one to the left."
   (interactive)
-  (let* ((n (current-column)))
+  (let* ((n (org-current-text-column)))
     (when (= n 0)
       (error "Cannot shift this column further to the left"))
     (backward-char 1)
@@ -1039,7 +1040,7 @@ the current buffer."
        (let ((key (overlay-get ov 'org-columns-key)))
 	 (when (and key (equal key p) (overlay-start ov))
 	   (goto-char (overlay-start ov))
-	   (let* ((spec (nth (current-column) org-columns-current-fmt-compiled))
+	   (let* ((spec (nth (org-current-text-column) org-columns-current-fmt-compiled))
 		  (value
 		   (or (cdr (assoc spec
 				   (get-text-property (line-beginning-position)
@@ -1049,7 +1050,7 @@ the current buffer."
 	       (let ((displayed (org-columns--displayed-value spec value))
 		     (format (overlay-get ov 'org-columns-format))
 		     (width
-		      (aref org-columns-current-maxwidths (current-column))))
+		      (aref org-columns-current-maxwidths (org-current-text-column))))
 		 (overlay-put ov 'org-columns-value value)
 		 (overlay-put ov 'org-columns-value-modified displayed)
 		 (overlay-put ov

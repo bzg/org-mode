@@ -1042,6 +1042,11 @@ Return width in pixels when PIXELS is non-nil."
               pixel-width
             (/ pixel-width symbol-width)))))))
 
+(defmacro org-current-text-column ()
+  "Like `current-column' but ignore display properties."
+  `(string-width (buffer-substring-no-properties
+                  (line-beginning-position) (point))))
+
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
 Otherwise return nil."
