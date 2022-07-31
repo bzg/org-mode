@@ -1980,8 +1980,7 @@ holding export options."
 	     ((or author email) (format "\\author{%s}\n" (or author email)))))
      ;; Date.
      (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
-       (when date
-             (format "\\date{%s}\n" (org-export-data date info))))
+       (format "\\date{%s}\n" (org-export-data date info)))
      ;; Title and subtitle.
      (let* ((subtitle (plist-get info :subtitle))
 	    (formatted-subtitle
