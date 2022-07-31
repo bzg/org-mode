@@ -286,6 +286,12 @@ The folding state can also be controlled on per-file basis using
 : #+startup: hidedrawers
 : #+startup: nohidedrawers
 
+*** New custom setting ~org-icalendar-force-alarm~
+
+The new setting, when set to non-nil, makes Org create alarm at the
+event time when the alarm time is set to 0.  The default value is 
+nil -- do not create alarms at the event time.
+
 ** New functions and changes in function arguments
 *** ~org-fold-show-entry~ does not fold drawers by default anymore
 
