@@ -7054,7 +7054,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
        ;; is inserted and then promoted.
        (combine-change-calls beg beg
          (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
-         (insert-before-markers txt)
+         (insert txt)
          (unless (string-suffix-p "\n" txt) (insert "\n"))
          (setq newend (point))
          (org-reinstall-markers-in-region beg)

@@ -453,6 +453,8 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 	(setq leader (match-string 0)
 	      level (funcall outline-level))
 	(setq pos (point-marker))
+        ;; Advance POS upon insertion in front of it.
+        (set-marker-insertion-type pos t)
 	(condition-case nil
 	    (outline-up-heading 1 t)
 	  (error (setq e (point-max)) (goto-char (point-min))))
