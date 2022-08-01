@@ -1979,6 +1979,9 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     ((or author email) (format "\\author{%s}\n" (or author email)))))
      ;; Date.
+     ;; LaTeX displays today's date by default. One can override this by
+     ;; inserting \date{} for no date, or \date{string} with any other
+     ;; string to be displayed as the date. 
      (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
        (format "\\date{%s}\n" (org-export-data date info)))
      ;; Title and subtitle.
