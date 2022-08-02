@@ -8810,7 +8810,7 @@ collected into a single place.
   #+findex: org-todo-list
   Show the global TODO list.  This collects the TODO items from all
   agenda files (see [[*Agenda Views]]) into a single buffer.  By default,
-  this lists items with a state the is not a DONE state.  The buffer
+  this lists items with a state that is not a DONE state.  The buffer
   is in Agenda mode, so there are commands to examine and manipulate
   the TODO entries directly from that buffer (see [[*Commands in the
   Agenda Buffer]]).
