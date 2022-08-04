@@ -491,8 +491,8 @@ and TIME is a Lisp time value (HI LO USEC)."
 (defun org-id-update-id-locations (&optional files silent)
   "Scan relevant files for IDs.
 Store the relation between files and corresponding IDs.
-This will scan all agenda files, all associated archives, and all
-files currently mentioned in `org-id-locations'.
+This will scan all agenda files, all associated archives, all open Org
+files, and all files currently mentioned in `org-id-locations'.
 When FILES is given, scan also these files.
 If SILENT is non-nil, messages are suppressed."
   (interactive)
@@ -515,6 +515,8 @@ If SILENT is non-nil, messages are suppressed."
 		       org-id-extra-files)
 		     ;; All files known to have IDs.
 		     org-id-files
+                     ;; All Org files open in Emacs.
+                     (mapcar #'buffer-file-name (org-buffer-list 'files t))
 		     ;; Additional files from function call.
 		     files)))))
          (nfiles (length files))
