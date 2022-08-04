@@ -32,6 +32,10 @@
 ;;          which will be passed to the awk process through STDIN
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-compat)
 

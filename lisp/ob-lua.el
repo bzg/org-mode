@@ -35,6 +35,10 @@
 ;; However, sessions are not yet working.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 (require 'cl-lib)

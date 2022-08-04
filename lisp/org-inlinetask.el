@@ -78,6 +78,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'org)
 
 (defgroup org-inlinetask nil

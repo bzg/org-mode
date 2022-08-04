@@ -30,6 +30,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'org)
 
 (defvar org-datetree-base-level 1

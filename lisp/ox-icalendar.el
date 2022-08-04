@@ -32,6 +32,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cl-lib)
 (require 'org-agenda)
 (require 'ox-ascii)

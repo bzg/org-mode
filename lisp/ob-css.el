@@ -27,6 +27,10 @@
 ;; CSS from Org files.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-default-header-args:css '())

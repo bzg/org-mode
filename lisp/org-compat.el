@@ -29,9 +29,12 @@
 
 ;;; Code:
 
+
 (require 'cl-lib)
 (require 'seq)
 (require 'org-macs)
+
+(org-assert-version)
 
 (declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())

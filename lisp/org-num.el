@@ -61,6 +61,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cl-lib)
 (require 'org-macs)
 (require 'org) ;Otherwise `org-num--comment-re' burps on `org-comment-string'

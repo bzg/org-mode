@@ -36,6 +36,10 @@
 ;; - https://common-lisp.net/project/slime/
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 

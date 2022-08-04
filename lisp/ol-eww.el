@@ -44,6 +44,10 @@
 
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ol)
 (require 'cl-lib)
 (require 'eww)

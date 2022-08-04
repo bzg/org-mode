@@ -61,6 +61,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'org-compat)
 (require 'org-macs)
 (require 'seq)

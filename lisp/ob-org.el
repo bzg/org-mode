@@ -27,6 +27,10 @@
 ;; contents of the code block are returned in a raw result.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (declare-function org-export-string-as "ox"

@@ -32,6 +32,10 @@
 ;; This depends on epstopdf --- See https://www.ctan.org/pkg/epstopdf.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (declare-function org-fold-show-all "org-fold" (&optional types))

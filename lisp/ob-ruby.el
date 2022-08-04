@@ -36,6 +36,10 @@
 ;;   https://github.com/eschulte/rinari/raw/master/util/inf-ruby.el
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 

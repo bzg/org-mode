@@ -29,6 +29,10 @@
 ;; octave-mode.el and octave-inf.el come with GNU emacs
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 

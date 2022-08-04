@@ -36,6 +36,10 @@
 ;; 4) there are no variables (at least for now)
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-compat)
 

@@ -25,6 +25,8 @@
 ;; Org Refile allows you to refile subtrees to various locations.
 
 ;;; Code:
+(require 'org-macs)
+(org-assert-version)
 
 (require 'org)
 

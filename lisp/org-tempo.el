@@ -38,6 +38,9 @@
 ;;
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'tempo)
 (require 'cl-lib)
 (require 'org)

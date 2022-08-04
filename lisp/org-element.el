@@ -58,6 +58,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'avl-tree)
 (require 'ring)
 (require 'cl-lib)

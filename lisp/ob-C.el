@@ -33,6 +33,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cc-mode)
 (require 'ob)
 (require 'org-macs)

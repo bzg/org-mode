@@ -71,6 +71,9 @@
 
 ;;;; Require other packages
 
+(require 'org-compat)
+(org-assert-version)
+
 (require 'cl-lib)
 
 (eval-when-compile (require 'gnus-sum))

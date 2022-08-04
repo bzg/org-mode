@@ -27,6 +27,9 @@
 ;;;; Require other packages
 
 (require 'org-macs)
+(org-assert-version)
+
+(require 'org-macs)
 (require 'org-compat)
 (require 'pcomplete)
 

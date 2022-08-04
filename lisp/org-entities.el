@@ -27,6 +27,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (declare-function org-mode "org" ())
 (declare-function org-toggle-pretty-entities "org"       ())
 (declare-function org-table-align            "org-table" ())

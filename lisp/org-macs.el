@@ -34,6 +34,47 @@
 (require 'cl-lib)
 (require 'format-spec)
 
+;;; Org version verification.
+
+(defmacro org-assert-version ()
+  "Assert compile time and runtime verstion match."
+  `(unless (equal (org-git-version) ,(org-git-version))
+     (warn "Org version mismatch.  Make sure that correct `load-path' is set early in init.el
+This warning usually appears when a built-in Org version is loaded
+prior to the more recent Org version.
+
+Version mismatch is commonly encountered in the following situations:
+1. Emacs is loaded using literate Org config and more recent Org
+   version is loaded inside the file loaded by `org-babel-load-file'.
+   `org-babel-load-file' triggers the built-in Org version clashing
+   the newer Org version attempted to be loaded later.
+
+   It is recommended to move the Org loading code before the
+   `org-babel-load-file' call.
+
+2. New Org version is loaded manually by setting `load-path', but some
+   other package depending on Org is loaded before the `load-path' is
+   configured.
+   This \"other package\" is triggering built-in Org version, again
+   causing the version mismatch.
+
+   It is recommended to set `load-path' as early in the config as
+   possible.
+
+3. New Org version is loaded using straight.el package manager and
+   other package depending on Org is loaded before straight triggers
+   loading of the newer Org version.
+
+   It is recommended to put
+    (straight-use-package 'org)
+   early in the config.  Ideally, right after the straight.el
+   bootstrap.  Moving `use-package' :straight declaration may not be
+   sufficient if the corresponding `use-package' statement is
+   deferring the loading.")
+     (error "Org version mismatch.  Make sure that correct `load-path' is set early in init.el")))
+
+(org-assert-version)
+
 (declare-function org-mode "org" ())
 (declare-function org-agenda-files "org" (&optional unrestricted archives))
 (declare-function org-fold-show-context "org-fold" (&optional key))

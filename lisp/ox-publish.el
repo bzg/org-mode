@@ -38,6 +38,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cl-lib)
 (require 'format-spec)
 (require 'ox)

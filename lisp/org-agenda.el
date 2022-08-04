@@ -45,6 +45,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cl-lib)
 (require 'ol)
 (require 'org-fold-core)

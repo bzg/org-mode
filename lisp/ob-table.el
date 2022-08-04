@@ -53,6 +53,10 @@
 ;; are optional.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob-core)
 (require 'org-macs)
 

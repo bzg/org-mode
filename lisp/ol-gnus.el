@@ -31,6 +31,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'gnus-sum)
 (require 'gnus-util)
 (require 'nnheader)

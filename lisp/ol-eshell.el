@@ -23,6 +23,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'eshell)
 (require 'esh-mode)
 (require 'ol)

@@ -24,6 +24,9 @@
 ;;
 ;;; Commentary:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ol)
 
 (org-link-set-parameters "man"

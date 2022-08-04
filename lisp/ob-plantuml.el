@@ -34,6 +34,10 @@
 ;; plantuml.jar | `org-plantuml-jar-path' should point to the jar file (when exec mode is `jar')
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-default-header-args:plantuml

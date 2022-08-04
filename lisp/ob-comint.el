@@ -30,6 +30,10 @@
 ;; org-babel at large.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob-core)
 (require 'org-compat)
 (require 'comint)

@@ -37,6 +37,9 @@
 ;;; Code:
 
 (require 'org-macs)
+(org-assert-version)
+
+(require 'org-macs)
 (require 'org-compat)
 (require 'org)
 

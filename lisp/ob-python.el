@@ -28,6 +28,10 @@
 ;; Org-Babel support for evaluating python source code.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 (require 'python)

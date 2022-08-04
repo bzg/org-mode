@@ -27,6 +27,10 @@
 ;; Org Babel support for evaluating Eshell source code.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'eshell)
 

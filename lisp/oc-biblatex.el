@@ -62,6 +62,10 @@
 ;;    #+print_bibliography: :keyword abc,xyz :title "Primary Sources"
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'map)
 (require 'org-macs)
 (require 'oc)

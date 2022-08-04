@@ -31,6 +31,9 @@
 ;;; Code:
 
 (require 'org-macs)
+(org-assert-version)
+
+(require 'org-macs)
 (require 'ol)
 
 ;; Customization variables

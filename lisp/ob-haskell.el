@@ -39,6 +39,10 @@
 ;; - (optionally) lhs2tex: https://people.cs.uu.nl/andres/lhs2tex/
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 (require 'comint)

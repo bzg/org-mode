@@ -28,6 +28,10 @@
 ;; Org-Babel support for evaluating perl source code.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-tangle-lang-exts)

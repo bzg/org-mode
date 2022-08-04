@@ -35,6 +35,10 @@
 ;; http://matlab-emacs.sourceforge.net/
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'ob-octave)
 

@@ -39,6 +39,10 @@
 ;; - gnuplot-mode :: you can search the web for the latest active one.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 

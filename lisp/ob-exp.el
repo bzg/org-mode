@@ -23,6 +23,10 @@
 ;; along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob-core)
 
 (declare-function org-babel-lob-get-info "ob-lob" (&optional datum))

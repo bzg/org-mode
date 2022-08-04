@@ -31,6 +31,10 @@
 ;;   https://github.com/russel/Emacs-Groovy-Mode
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-tangle-lang-exts) ;; Autoloaded

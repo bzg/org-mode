@@ -30,6 +30,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ol)
 
 ;; Declare external functions and variables

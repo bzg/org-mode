@@ -30,6 +30,10 @@
 ;; be created directly form the latex source code.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 

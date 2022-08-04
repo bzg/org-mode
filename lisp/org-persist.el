@@ -149,6 +149,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'org-compat)
 (require 'org-id)
 (require 'xdg nil t)

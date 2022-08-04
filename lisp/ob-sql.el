@@ -69,6 +69,10 @@
 ;;
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (declare-function org-table-import "org-table" (file arg))

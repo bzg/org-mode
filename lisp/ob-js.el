@@ -38,6 +38,10 @@
 ;;   configuration instructions
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (declare-function run-mozilla "ext:moz" (arg))

@@ -27,6 +27,10 @@
 ;; Org-Babel support for evaluating calc code
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 (require 'calc)

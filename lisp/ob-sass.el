@@ -38,6 +38,10 @@
 ;; - sass-mode :: https://github.com/nex3/haml/blob/master/extra/sass-mode.el
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-default-header-args:sass '())

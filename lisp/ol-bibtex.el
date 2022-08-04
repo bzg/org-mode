@@ -107,6 +107,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'bibtex)
 (require 'cl-lib)
 (require 'org-compat)

@@ -42,6 +42,8 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
 
 (require 'doc-view)
 (require 'ol)

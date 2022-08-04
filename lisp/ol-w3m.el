@@ -41,6 +41,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ol)
 
 (defvar w3m-current-url)

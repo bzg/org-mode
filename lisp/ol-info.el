@@ -31,6 +31,9 @@
 ;;; Code:
 
 (require 'subr-x) ; `string-trim', `string-remove-prefix'
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ol)
 
 ;; Declare external functions and variables

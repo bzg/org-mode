@@ -31,6 +31,10 @@
 ;; 2) we are adding the "cmdline" header argument
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-tangle-lang-exts)

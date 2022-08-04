@@ -46,6 +46,10 @@
 ;; {{{email}}} and {{{title}}} macros.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cl-lib)
 (require 'org-macs)
 (require 'org-compat)

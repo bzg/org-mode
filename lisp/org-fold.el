@@ -43,6 +43,9 @@
 ;;; Code:
 
 (require 'org-macs)
+(org-assert-version)
+
+(require 'org-macs)
 (require 'org-fold-core)
 
 (defvar org-inlinetask-min-level)

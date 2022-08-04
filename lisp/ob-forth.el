@@ -32,6 +32,10 @@
 ;; `forth-mode' which is distributed with gforth (in gforth.el).
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 

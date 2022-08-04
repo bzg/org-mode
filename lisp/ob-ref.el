@@ -49,6 +49,10 @@
 ;;  #+end_src
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob-core)
 (require 'org-macs)
 (require 'cl-lib)

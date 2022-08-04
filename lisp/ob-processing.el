@@ -51,6 +51,10 @@
 ;; - Processing.js module :: https://processingjs.org/
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'sha1)
 

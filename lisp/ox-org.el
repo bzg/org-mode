@@ -25,6 +25,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ox)
 (declare-function htmlize-buffer "ext:htmlize" (&optional buffer))
 (defvar htmlize-output-type)

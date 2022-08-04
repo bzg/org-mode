@@ -40,6 +40,10 @@
 ;; tell Org Babel which file the sed script to act on.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-sed-command "sed"

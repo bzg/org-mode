@@ -28,6 +28,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (defgroup org-faces nil
   "Faces in Org mode."
   :tag "Org Faces"

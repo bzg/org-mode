@@ -30,6 +30,9 @@
 ;;; Code:
 
 (require 'org-macs)
+(org-assert-version)
+
+(require 'org-macs)
 (require 'org-fold)
 
 (declare-function org-element-type "org-element" (element))

@@ -42,6 +42,10 @@
 ;; web page: https://technomancy.us/126
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (declare-function cider-current-connection "ext:cider-client" (&optional type))

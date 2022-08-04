@@ -27,6 +27,10 @@
 ;; Org-Babel support for evaluating fortran code.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'org-macs)
 (require 'cc-mode)

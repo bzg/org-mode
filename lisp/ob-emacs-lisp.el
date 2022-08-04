@@ -27,6 +27,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob-core)
 
 (declare-function org-babel--get-vars "ob" (params))

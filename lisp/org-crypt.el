@@ -55,6 +55,9 @@
 ;;; Code:
 
 (require 'org-macs)
+(org-assert-version)
+
+(require 'org-macs)
 (require 'org-compat)
 
 (declare-function epg-decrypt-string "epg" (context cipher))

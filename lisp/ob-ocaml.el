@@ -35,6 +35,10 @@
 ;; - tuareg-mode :: https://elpa.nongnu.org/nongnu/tuareg.html
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'comint)
 (require 'org-macs)

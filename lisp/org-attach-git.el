@@ -29,6 +29,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'org-attach)
 (require 'vc-git)
 

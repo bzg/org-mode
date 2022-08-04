@@ -39,6 +39,10 @@
 ;; 4) there are no variables (at least for now)
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-default-header-args:dot

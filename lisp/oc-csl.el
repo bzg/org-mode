@@ -111,6 +111,10 @@
 ;; Many thanks to him!
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'cl-lib)
 (require 'map)
 (require 'bibtex)

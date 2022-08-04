@@ -66,6 +66,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'bibtex)
 (require 'json)
 (require 'map)

@@ -38,6 +38,10 @@
 ;;   ELPA.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 (require 'geiser nil t)
 (require 'geiser-impl nil t)

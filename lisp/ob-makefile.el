@@ -27,6 +27,10 @@
 ;; This file exists solely for tangling a Makefile from Org files.
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-default-header-args:makefile '())

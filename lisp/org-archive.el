@@ -28,6 +28,9 @@
 
 ;;; Code:
 
+(require 'org-macs)
+(org-assert-version)
+
 (require 'org)
 (require 'cl-lib)
 

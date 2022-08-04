@@ -34,6 +34,10 @@
 ;; M-x org-babel-screen-test RET
 
 ;;; Code:
+
+(require 'org-macs)
+(org-assert-version)
+
 (require 'ob)
 
 (defvar org-babel-screen-location "screen"
