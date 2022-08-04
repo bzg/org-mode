@@ -173,110 +173,108 @@
 ;;; Internal Variables
 
 (defconst org-latex-language-alist
-  ;; TODO: replace this list with a property list (the actual
-  ;; implementation is not very robust).
-  '(("am" "amharic" "*")
-    ("ar" "arabic")
-    ("ast" "asturian" "*")
-    ("bg" "bulgarian")
-    ("bn" "bengali" "*")
-    ("bo" "tibetan" "*")
-    ("br" "breton")
-    ("ca" "catalan")
-    ("cop" "coptic" "*")
-    ("cs" "czech")
-    ("cy" "welsh")
-    ("da" "danish")
-    ("de" "ngerman" "german" "german")
-    ("de-at" "naustrian" "german" "austrian")
-    ("dsb" "lsorbian" "*")
-    ("dv" "divehi" "*")
-    ("el" "greek")
-    ("el-polyton" "polutonikogreek" "greek" "polytonic")
-    ("en" "american" "english" "usmax")
-    ("en-au" "australian" "english" "australian")
-    ("en-gb" "british" "english" "uk")
-    ("en-nz" "newzealand" "english" "newzealand")
-    ("en-us" "american" "english" "usmax")
-    ("eo" "esperanto")
-    ("es" "spanish")
-    ("es-mx" "spanishmx" "spanish" "mexican")
-    ("et" "estonian")
-    ("eu" "basque")
-    ("fa" "farsi")
-    ("fi" "finnish")
-    ("fr" "french")
-    ("fr-ca" "canadien" "french" "canadian")
-    ("fur" "friulan")
-    ("ga" "irish")
-    ("gd" "scottish")
-    ("gl" "galician")
-    ("he" "hebrew")
-    ("hi" "hindi")
-    ("hr" "croatian")
-    ("hsb" "uppersorbian" "sorbian" "upper")
-    ("hu" "magyar")
-    ("hy" "armenian" "*")
-    ("ia" "interlingua")
-    ("id" "bahasai" "*")
-    ("is" "icelandic")
-    ("it" "italian")
-    ("kn" "kannada" "*")
-    ("la" "latin")
-    ("la-classic" "classiclatin" "latin" "classic")
-    ("la-medieval" "medievallatin" "latin" "medieval")
-    ("la-ecclesiastic" "ecclesiasticlatin" "latin" "ecclesiastic")
-    ("lo" "lao" "*")
-    ("lt" "lithuanian")
-    ("lv" "latvian")
-    ("ml" "malayalam" "*")
-    ("mr" "maranthi" "*")
-    ("nb" "norsk" "norwegian" "bokmal")
-    ("nl" "dutch")
-    ("nn" "nynorsk" "norwegian" "nynorsk")
-    ("no" "norsk")
-    ("oc" "occitan")
-    ("pl" "polish")
-    ("pms" "piedmontese")
-    ("pt" "portuges")
-    ("pt-br" "brazilian")
-    ("rm" "romansh" "*")
-    ("ro" "romanian")
-    ("ru" "russian")
-    ("sa" "sanskrit" "*")
-    ("sk" "slovak")
-    ("sl" "slovene")
-    ("sq" "albanian")
-    ("sr" "serbian")
-    ("sv" "swedish")
-    ("syr" "syriac" "*")
-    ("ta" "tamil" "*")
-    ("te" "telugu" "*")
-    ("th" "thai")
-    ("tk" "turkmen")
-    ("tr" "turkish")
-    ("uk" "ukrainian")
-    ("ur" "urdu" "*")
-    ("vi" "vietnamese"))
-  "Alist between language code and corresponding Babel/Polyglossia option.
+  '(("am" :babel-ini-only "amharic" :polyglossia "amharic" :lang-name "Amharic")
+    ("ar" :babel "arabic" :polyglossia "arabic" :lang-name "Arabic")
+    ("ast" :babel-ini-only "asturian" :polyglossia "asturian" :lang-name "Asturian")
+    ("bg"  :babel "bulgarian" :polyglossia "bulgarian" :lang-name "Bulgarian")
+    ("bn"  :babel-ini-only "bengali" :polyglossia "bengali" :lang-name "Bengali")
+    ("bo"  :babel-ini-only "tibetan" :polyglossia "tibetan" :lang-name "Tibetan")
+    ("br"  :babel "breton" :polyglossia "breton" :lang-name "Breton")
+    ("ca"  :babel "catalan" :polyglossia "catalan" :lang-name "Catalan")
+    ("cop"  :babel-ini-only "coptic" :polyglossia "coptic" :lang-name "Coptic")
+    ("cs"  :babel "czech" :polyglossia "czech" :lang-name "Czech")
+    ("cy"  :babel "welsh" :polyglossia "welsh" :lang-name "Welsh")
+    ("da"  :babel "danish" :polyglossia "danish" :lang-name "Danish")
+    ("de"  :babel "ngerman" :polyglossia "german" :polyglossia-variant "german" :lang-name "German")
+    ("de-at"  :babel "naustrian" :polyglossia "german" :polyglossia-variant "austrian" :lang-name "German")
+    ("dsb"  :babel "lsorbian" :polyglossia "sorbian" :polyglossia-variant "lower" :lang-name "Lower Sorbian")
+    ("dv"  :babel-ini-only "divehi" :polyglossia "divehi" :lang-name "Divehi")
+    ("el"  :babel "greek" :polyglossia "greek" :lang-name "Greek")
+    ("el-polyton"  :babel "polutonikogreek" :polyglossia "greek" :polyglossia-variant "polytonic" :lang-name "Polytonic Greek")
+    ("en"  :babel "american" :polyglossia "english" :polyglossia-variant "usmax" :lang-name "English")
+    ("en-au"  :babel "australian" :polyglossia "english" :polyglossia-variant "australian" :lang-name "English")
+    ("en-gb"  :babel "british" :polyglossia "english" :polyglossia-variant "uk" :lang-name "English")
+    ("en-nz"  :babel "newzealand" :polyglossia "english" :polyglossia-variant "newzealand" :lang-name "English")
+    ("en-us"  :babel "american" :polyglossia "english" :polyglossia-variant "usmax" :lang-name "English")
+    ("eo"  :babel "esperanto" :polyglossia "esperanto" :lang-name "Esperanto")
+    ("es"  :babel "spanish" :polyglossia "spanish" :lang-name "Spanish")
+    ("es-mx"  :babel "spanishmx" :polyglossia "spanish" :polyglossia-variant "mexican" :lang-name "Spanish")
+    ("et"  :babel "estonian" :polyglossia "estonian" :lang-name "Estonian")
+    ("eu"  :babel "basque" :polyglossia "basque" :lang-name "Basque")
+    ("fa"  :babel "farsi" :polyglossia "farsi" :lang-name "Farsi")
+    ("fi"  :babel "finnish" :polyglossia "finnish" :lang-name "Finnish")
+    ("fr"  :babel "french" :polyglossia "french" :lang-name "French")
+    ("fr-ca"  :babel "canadien" :polyglossia "french" :polyglossia-variant "canadian" :lang-name "French")
+    ("fur"  :babel "friulan" :polyglossia "friulan" :lang-name "Friulian")
+    ("ga"  :babel "irish" :polyglossia "irish" :lang-name "Irish")
+    ("gd"  :babel "scottish" :polyglossia "scottish" :lang-name "Scottish Gaelic")
+    ("gl"  :babel "galician" :polyglossia "galician" :lang-name "Galician")
+    ("he"  :babel "hebrew" :polyglossia "hebrew" :lang-name "Hebrew")
+    ("hi"  :babel "hindi" :polyglossia "hindi" :lang-name "Hindi")
+    ("hr"  :babel "croatian" :polyglossia "croatian" :lang-name "Croatian")
+    ("hsb"  :babel "uppersorbian" :polyglossia "sorbian" :polyglossia-variant "upper" :lang-name "Upper Sorbian")
+    ("hu"  :babel "magyar" :polyglossia "magyar" :lang-name "Magyar")
+    ("hy"  :babel-ini-only "armenian" :polyglossia "armenian" :lang-name "Armenian")
+    ("ia"  :babel "interlingua" :polyglossia "interlingua" :lang-name "Interlingua")
+    ("id"  :babel-ini-only "bahasai" :polyglossia "bahasai" :lang-name "Bahasai")
+    ("is"  :babel "icelandic" :polyglossia "icelandic" :lang-name "Icelandic")
+    ("it"  :babel "italian" :polyglossia "italian" :lang-name "Italian")
+    ("kn"  :babel-ini-only "kannada" :polyglossia "kannada" :lang-name "Kannada")
+    ("la"  :babel "latin" :polyglossia "latin" :lang-name "Latin")
+    ("la-classic"  :babel "classiclatin" :polyglossia "latin" :polyglossia-variant "classic" :lang-name "Classic Latin")
+    ("la-medieval"  :babel "medievallatin" :polyglossia "latin" :polyglossia-variant "medieval" :lang-name "Medieval Latin")
+    ("la-ecclesiastic"  :babel "ecclesiasticlatin" :polyglossia "latin" :polyglossia-variant "ecclesiastic" :lang-name "Ecclesiastic Latin")
+    ("lo"  :babel-ini-only "lao" :polyglossia "lao" :lang-name "Lao")
+    ("lt"  :babel "lithuanian" :polyglossia "lithuanian" :lang-name "Lithuanian")
+    ("lv"  :babel "latvian" :polyglossia "latvian" :lang-name "Latvian")
+    ("ml"  :babel-ini-only "malayalam" :polyglossia "malayalam" :lang-name "Malayalam")
+    ("mr"  :babel-ini-only "maranthi" :polyglossia "maranthi" :lang-name "Maranthi")
+    ("nb"  :babel "norsk" :polyglossia "norwegian" :polyglossia-variant "bokmal" :lang-name "Norwegian Bokmål")
+    ("nl"  :babel "dutch" :polyglossia "dutch" :lang-name "Dutch")
+    ("nn"  :babel "nynorsk" :polyglossia "norwegian" :polyglossia-variant "nynorsk" :lang-name "Norwegian Nynorsk")
+    ("no"  :babel "norsk" :polyglossia "norsk" :lang-name "Norwegian")
+    ("oc"  :babel "occitan" :polyglossia "occitan" :lang-name "Occitan")
+    ("pl"  :babel "polish" :polyglossia "polish" :lang-name "Polish")
+    ("pms"  :babel "piedmontese" :polyglossia "piedmontese" :lang-name "Piedmontese")
+    ("pt"  :babel "portuges" :polyglossia "portuges" :lang-name "Portuges")
+    ("pt-br"  :babel "brazilian" :polyglossia "brazilian" :lang-name "Portuges")
+    ("rm"  :babel-ini-only "romansh" :polyglossia "romansh" :lang-name "Romansh")
+    ("ro"  :babel "romanian" :polyglossia "romanian" :lang-name "Romanian")
+    ("ru"  :babel "russian" :polyglossia "russian" :lang-name "Russian")
+    ("sa"  :babel-ini-only "sanskrit" :polyglossia "sanskrit" :lang-name "Sanskrit")
+    ("sk"  :babel "slovak" :polyglossia "slovak" :lang-name "Slovak")
+    ("sl"  :babel "slovene" :polyglossia "slovene" :lang-name "Slovene")
+    ("sq"  :babel "albanian" :polyglossia "albanian" :lang-name "Albanian")
+    ("sr"  :babel "serbian" :polyglossia "serbian" :lang-name "Serbian")
+    ("sv"  :babel "swedish" :polyglossia "swedish" :lang-name "Swedish")
+    ("syr"  :babel-ini-only "syriac" :polyglossia "syriac" :lang-name "Syriac")
+    ("ta"  :babel-ini-only "tamil" :polyglossia "tamil" :lang-name "Tamil")
+    ("te"  :babel-ini-only "telugu" :polyglossia "telugu" :lang-name "Telugu")
+    ("th"  :babel "thai" :polyglossia "thai" :lang-name "Thai")
+    ("tk"  :babel "turkmen" :polyglossia "turkmen" :lang-name "Turkmen")
+    ("tr"  :babel "turkish" :polyglossia "turkish" :lang-name "Turkish")
+    ("uk"  :babel "ukrainian" :polyglossia "ukrainian" :lang-name "Ukrainian")
+    ("ur"  :babel-ini-only "urdu" :polyglossia "urdu" :lang-name "Urdu")
+    ("vi"  :babel "vietnamese" :polyglossia "vietnamese" :lang-name "Vietnamese"))
+  "Alist between language code and its properties for LaTeX export.
 
-For the names of the languages, the Babel nomenclature is
-preferred to that of Polyglossia, in those cases where both
-coincide.
+In each element of the list car is always the code of the
+language and cdr is a property list.  Valid keywords for this
+list can be:
 
-The alist supports three types of members:
+- `:babel' the name of the language loaded by the Babel LaTeX package
 
-- Members with two elements: CODE BABEL/POLYGLOSSIA OPTION.
+- `:polyglossia' the name of the language loaded by the Polyglossia
+  LaTeX package
 
-- Members with three elements: CODE BABEL/POLYGLOSSIA OPTION
-ASTERISK (the presence of the asterisk indicates that this
-language is not loaded in Babel using the old method of ldf
-files but using ini files.  If Babel is loaded in an Org
-document with these languages, the \"AUTO \" argument is just
-removed, to avoid compilation errors).
+- `:babel-ini-only' the name of the language loaded by Babel
+ exclusively through the new ini files method.  See
+ `http://mirrors.ctan.org/macros/latex/required/babel/base/babel.pdf'
 
-- Members with four elements (for variants of languages): CODE
-BABEL-OPTION POLYGLOSSIA-OPTION POLYGLOSSIA-VARIANT")
+- `:polyglossia-variant' the language variant loaded by Polyglossia
+
+- `:lang-name' the actual name of the language.")
+
 
 (defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
 					  ("qbordermatrix" . "\\cr")
@@ -1622,11 +1620,15 @@ already loaded.
 
 Return the new header."
   (let* ((language-code (plist-get info :language))
-	 (language (nth 1 (assoc language-code
-				 org-latex-language-alist)))
-	 ;; If no language is set or Babel package is not loaded, return
- 	 ;; HEADER as-is.
-	 (header (if (or (not (stringp language-code))
+	 (plist (cdr
+		 (assoc language-code org-latex-language-alist)))
+	 (language (plist-get plist :babel))
+	 (language-ini-only (plist-get plist :babel-ini-only))
+	 ;; If no language is set, or Babel package is not loaded, or
+	 ;; LANGUAGE keyword value is a language served by Babel
+	 ;; exclusively through ini files, return HEADER as-is.
+	 (header (if (or language-ini-only
+			 (not (stringp language-code))
 			 (not (string-match "\\\\usepackage\\[\\(.*\\)\\]{babel}" header)))
 		     header
 		   (let ((options (save-match-data
@@ -1637,22 +1639,13 @@ Return the new header."
 		     ;; served in Babel exclusively through ini files are not added
 		     ;; to the babel argument, and must be loaded using
 		     ;; `\babelprovide'.
-		     (let ((l (assoc language-code org-latex-language-alist)))
-                       ;; Three elements imply that LANGUAGE is served
-                       ;; in Babel only by means of an ini file.
-                       ;; Therefore it will not be added to the Babel
-                       ;; argument.  TODO: this should be improved
-                       ;; when `org-latex-language-alist' is replaced
-                       ;; by a more robust list.
-		       (if (and (consp l) (= (length l) 3))
-                           header
-			 (replace-match
-			  (mapconcat (lambda (option) (if (equal "AUTO" option) language option))
-				     (cond ((member language options) (delete "AUTO" options))
-					   ((member "AUTO" options) options)
-					   (t (append options (list language))))
-				     ", ")
-			  t nil header 1)))))))
+		     (replace-match
+		      (mapconcat (lambda (option) (if (equal "AUTO" option) language option))
+				 (cond ((member language options) (delete "AUTO" options))
+				       ((member "AUTO" options) options)
+				       (t (append options (list language))))
+				 ", ")
+		      t nil header 1)))))
     ;; If `\babelprovide[args]{AUTO}' is present, AUTO is
     ;; replaced by LANGUAGE.
     (if (not (string-match "\\\\babelprovide\\[.*\\]{\\(.+\\)}" header))
@@ -1661,7 +1654,9 @@ Return the new header."
 	(when (equal "AUTO" prov)
 	  (replace-regexp-in-string (format
 				     "\\(\\\\babelprovide\\[.*\\]\\)\\({\\)%s}" prov)
-				    (format "\\1\\2%s}" language) header t))))))
+				    (format "\\1\\2%s}"
+					    (or language language-ini-only))
+				    header t))))))
 
 (defun org-latex-guess-polyglossia-language (header info)
   "Set the Polyglossia language according to the LANGUAGE keyword.
@@ -1678,13 +1673,13 @@ replaced with the language of the document or
 using \setdefaultlanguage and not as an option to the package.
 
 Return the new header."
-  (let ((language (plist-get info :language)))
+  (let* ((language (plist-get info :language)))
     ;; If no language is set or Polyglossia is not loaded, return
     ;; HEADER as-is.
     (if (or (not (stringp language))
 	    (not (string-match
-		"\\\\usepackage\\(?:\\[\\([^]]+?\\)\\]\\){polyglossia}\n"
-		header)))
+		  "\\\\usepackage\\(?:\\[\\([^]]+?\\)\\]\\){polyglossia}\n"
+		  header)))
 	header
       (let* ((options (org-string-nw-p (match-string 1 header)))
 	     (languages (and options
@@ -1703,23 +1698,20 @@ Return the new header."
 	 (concat "\\usepackage{polyglossia}\n"
 		 (mapconcat
 		  (lambda (l)
-		    (let ((l (or (assoc l org-latex-language-alist)
-				 l)))
-		      (format (if main-language-set "\\setotherlanguage%s{%s}\n"
+		    (let* ((plist (cdr
+				   (assoc language org-latex-language-alist)))
+			   (polyglossia-variant (plist-get plist :polyglossia-variant))
+			   (polyglossia-lang (plist-get plist :polyglossia))
+			   (l (if (equal l language)
+				  polyglossia-lang
+				l)))
+		      (format (if main-language-set (format "\\setotherlanguage{%s}\n" l)
 				(setq main-language-set t)
 				"\\setmainlanguage%s{%s}\n")
-                              ;; Four elements implies that there is a
-                              ;; variant (4) for LANGUAGE when
-                              ;; declared by Polyglossia (3).
-                              ;; FIXME: This should be improved when
-                              ;; `org-latex-language-alist' is
-                              ;; replaced by a more robust list.
-                              (if (and (consp l) (= (length l) 4))
-				  (format "[variant=%s]" (nth 3 l))
+			      (if polyglossia-variant
+				  (format "[variant=%s]" polyglossia-variant)
 				"")
-			      (if (and (consp l) (= (length l) 4))
-				  (nth 2 l)
-				(nth 1 l)))))
+			      l)))
 		  languages
 		  ""))
 	 t t header 0)))))
@@ -1863,13 +1855,12 @@ INFO is a plist used as a communication channel."
 (defun org-latex--format-spec (info)
   "Create a format-spec for document meta-data.
 INFO is a plist used as a communication channel."
-  (let ((language (let ((lang (plist-get info :language)))
-                    ;; The second element in
-                    ;; `org-latex-language-alist' is always the
-                    ;; language name, regardless of the type of the
-                    ;; alist entry.
-                    (or (nth 1 (assoc-string lang org-latex-language-alist t))
-			lang))))
+  (let ((language (let* ((lang (plist-get info :language))
+		         (plist (cdr
+			         (assoc lang org-latex-language-alist))))
+                    ;; Here the actual name of the LANGUAGE or LANG is used.
+		    (or (plist-get plist :lang-name)
+		        lang))))
     `((?a . ,(org-export-data (plist-get info :author) info))
       (?t . ,(org-export-data (plist-get info :title) info))
       (?s . ,(org-export-data (plist-get info :subtitle) info))
