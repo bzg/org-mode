@@ -4712,43 +4712,33 @@ The following commands are available:
 
 \\{org-mode-map}"
   (setq-local org-mode-loading t)
-  ;; Disable `font-lock-mode' temporarily to delay fontification in case if
-  ;; `hack-local-variables' shows a popup window.  Such a popup causes
-  ;; redisplay and triggers fontification too early.
-  (let ((org-font-lock-enabled-p font-lock-mode))
-    (font-lock-mode -1)
-    ;; Apply file-local and directory-local variables, so that Org
-    ;; startup respects them.  See
-    ;; https://list.orgmode.org/587be554-906c-5370-2cf2-f08b14fa58ff@gmail.com/T/#u
-    (hack-local-variables 'ignore-mode-settings)
-    (org-load-modules-maybe)
-    (org-install-agenda-files-menu)
-    (when (and org-link-descriptive
-               (eq org-fold-core-style 'overlays))
-      (add-to-invisibility-spec '(org-link)))
-    (org-fold-initialize (or (and (stringp org-ellipsis) (not (equal "" org-ellipsis)) org-ellipsis)
-                          "..."))
-    (make-local-variable 'org-link-descriptive)
-    (when (eq org-fold-core-style 'overlays) (add-to-invisibility-spec '(org-hide-block . t)))
-    (if org-link-descriptive
-        (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible nil)
-      (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible t))
-    (setq-local outline-regexp org-outline-regexp)
-    (setq-local outline-level 'org-outline-level)
-    (when (and (stringp org-ellipsis) (not (equal "" org-ellipsis)))
-      (unless org-display-table
-        (setq org-display-table (make-display-table)))
-      (set-display-table-slot
-       org-display-table 4
-       (vconcat (mapcar (lambda (c) (make-glyph-code c 'org-ellipsis))
-		        org-ellipsis)))
-      (setq buffer-display-table org-display-table))
-    (org-set-regexps-and-options)
-    (org-set-font-lock-defaults)
-    (when (and org-tag-faces (not org-tags-special-faces-re))
-      ;; tag faces set outside customize.... force initialization.
-      (org-set-tag-faces 'org-tag-faces org-tag-faces))
-    (font-lock-mode org-font-lock-enabled-p))
+  (org-load-modules-maybe)
+  (org-install-agenda-files-menu)
+  (when (and org-link-descriptive
+             (eq org-fold-core-style 'overlays))
+    (add-to-invisibility-spec '(org-link)))
+  (org-fold-initialize (or (and (stringp org-ellipsis) (not (equal "" org-ellipsis)) org-ellipsis)
+                        "..."))
+  (make-local-variable 'org-link-descriptive)
+  (when (eq org-fold-core-style 'overlays) (add-to-invisibility-spec '(org-hide-block . t)))
+  (if org-link-descriptive
+      (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible nil)
+    (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible t))
+  (setq-local outline-regexp org-outline-regexp)
+  (setq-local outline-level 'org-outline-level)
+  (when (and (stringp org-ellipsis) (not (equal "" org-ellipsis)))
+    (unless org-display-table
+      (setq org-display-table (make-display-table)))
+    (set-display-table-slot
+     org-display-table 4
+     (vconcat (mapcar (lambda (c) (make-glyph-code c 'org-ellipsis))
+		      org-ellipsis)))
+    (setq buffer-display-table org-display-table))
+  (org-set-regexps-and-options)
+  (org-set-font-lock-defaults)
+  (when (and org-tag-faces (not org-tags-special-faces-re))
+    ;; tag faces set outside customize.... force initialization.
+    (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
   (setq-local calc-embedded-open-mode "# ")
   ;; Modify a few syntax entries
