@@ -109,8 +109,11 @@ If BODY does not contain @startXXX ... @endXXX clauses, @startuml
 (defun org-babel-execute:plantuml (body params)
   "Execute a block of plantuml code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (let* ((out-file (or (cdr (assq :file params))
-		       (error "PlantUML requires a \":file\" header argument")))
+  (let* ((do-export (member "file" (cdr (assq :result-params params))))
+         (out-file (if do-export
+                       (or (cdr (assq :file params))
+                           (error "No :file provided but :results set to file. For plain text output, set :results to verbatim"))
+		     (org-babel-temp-file "plantuml-" ".txt")))
 	 (cmdline (cdr (assq :cmdline params)))
 	 (in-file (org-babel-temp-file "plantuml-"))
 	 (java (or (cdr (assq :java params)) ""))
@@ -155,7 +158,10 @@ This function is called by `org-babel-execute-src-block'."
     (if (and (string= (file-name-extension out-file) "svg")
              org-babel-plantuml-svg-text-to-path)
         (org-babel-eval (format "inkscape %s -T -l %s" out-file out-file) ""))
-    nil)) ;; signal that output has already been written to file
+    (unless do-export (with-temp-buffer
+                        (insert-file-contents out-file)
+                        (buffer-substring-no-properties
+                         (point-min) (point-max))))))
 
 (defun org-babel-prep-session:plantuml (_session _params)
   "Return an error because plantuml does not support sessions."

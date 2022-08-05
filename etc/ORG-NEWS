@@ -343,6 +343,13 @@ files that are exported to Texinfo.
 
 =org-at-heading-p= now returns t by default on headings inside folds.
 Passing optional argument will produce the old behaviour.
+
+*** =org-babel-execute:plantuml= can output ASCII graphs in the buffer
+
+Previously, executing PlantUML src blocks always exported to a file.  Now, if
+:results is set to a value which does not include "file", no file will be
+exported and an ASCII graph will be inserted below the src block.
+
 ** Removed or renamed functions and variables
 *** =org-plantump-executable-args= is renamed and applies to jar as well
 
