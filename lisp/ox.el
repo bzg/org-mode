@@ -4305,7 +4305,7 @@ A search cell follows the pattern (TYPE . SEARCH) where
     - target's or radio-target's name as a list of strings if
       TYPE is `target'.
 
-    - NAME affiliated keyword if TYPE is `other'.
+    - NAME or RESULTS affiliated keyword if TYPE is `other'.
 
 A search cell is the internal representation of a fuzzy link.  It
 ignores white spaces and statistics cookies, if applicable."
@@ -4323,7 +4323,8 @@ ignores white spaces and statistics cookies, if applicable."
 		(and custom-id (cons 'custom-id custom-id)))))))
     (`target
      (list (cons 'target (split-string (org-element-property :value datum)))))
-    ((and (let name (org-element-property :name datum))
+    ((and (let name (or (org-element-property :name datum)
+                        (car (org-element-property :results datum))))
 	  (guard name))
      (list (cons 'other (split-string name))))
     (_ nil)))
@@ -4355,8 +4356,9 @@ Return value can be an object or an element:
 
 - If LINK path matches a target object (i.e. <<path>>) return it.
 
-- If LINK path exactly matches the name affiliated keyword
-  (i.e. #+NAME: path) of an element, return that element.
+- If LINK path exactly matches the name or results affiliated keyword
+  (i.e. #+NAME: path or #+RESULTS: name) of an element, return that
+  element.
 
 - If LINK path exactly matches any headline name, return that
   element.

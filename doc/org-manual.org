@@ -18369,6 +18369,36 @@ file is exported to, say, HTML or LaTeX formats.
   exported file.  Whether the code is evaluated at all depends on
   other options.  Example: =:exports none=.
 
+If a source block is named using =NAME= keyword, the same name will be
+assigned to the results of evaluation.  This way, fuzzy links pointing
+to the named source blocks exported using =:exports results= will
+remain valid and point to the results of evaluation.
+
+Results of evaluation of a named block can also be explicitly named
+using a separate =NAME= keyword.  The name value set via =NAME=
+keyword will be preferred over the parent source block.
+
+: #+NAME: code name
+: #+BEGIN_SRC emacs-lisp :exports both value
+: (+ 1 2)
+: #+END_SRC
+:
+: #+NAME: results name
+: #+RESULTS: code name
+: 3
+:
+: This [[code name][link]] will point to the code block.
+: Another [[results name][link]] will point to the results.
+
+Explicit setting of the result name may be necessary when a named code
+block is exported using =:exports both=.  Links to such block may
+arbitrarily point either to the code block or to its results when
+results do not have a distinct name.
+
+Note that all the links pointing to a source block exported using
+=:exports none= will be broken.  This will make export process fail,
+unless broken links are allowed during export (see [[*Export Settings]]). 
+
 #+vindex: org-export-use-babel
 To stop Org from evaluating code blocks to speed exports, use the
 header argument =:eval never-export= (see [[*Evaluating Code Blocks]]).
