@@ -673,7 +673,7 @@ API in `org-link-parameters'.  Used in test
 `:insert-description' is a function symbol."
   "foobar-from-function")
 
-(ert-deftest test-ol/insert-link-insert-description ()
+(ert-deftest test-org-link/insert-link-insert-description ()
   "Test `:insert-description' parameter handling."
   ;; String case.
   (should
