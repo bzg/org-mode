@@ -1976,7 +1976,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (unless auto-desc
       (let* ((type
               (cond
-               ((string-match (rx-to-string `(: string-start (submatch (or ,@all-prefixes)) ":")) link)
+               ((and all-prefixes
+                     (string-match (rx-to-string `(: string-start (submatch (or ,@all-prefixes)) ":")) link))
                 (match-string 1 link))
                ((file-name-absolute-p link) "file")
                ((string-match "\\`\\.\\.?/" link) "file")))
