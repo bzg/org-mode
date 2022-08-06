@@ -1656,7 +1656,7 @@ non-nil."
 	  (setq file (if file
 			 (abbreviate-file-name
 			  (expand-file-name (dired-get-filename nil t)))
-		       ;; otherwise, no file so use current directory.
+		       ;; Otherwise, no file so use current directory.
 		       default-directory))
 	  (setq cpltxt (concat "file:" file)
 		link cpltxt)))
@@ -1821,7 +1821,7 @@ If the DESCRIPTION parameter is non-nil, this value will be used
 as the default description.  If not, and the chosen link type has
 a non-nil `:insert-description' parameter, that is used to
 generate a description as described in `org-link-parameters'
-docstring. Otherwise, if `org-link-make-description-function' is
+docstring.  Otherwise, if `org-link-make-description-function' is
 non-nil, this function will be called with the link target, and
 the result will be the default link description.  When called
 non-interactively, don't allow to edit the default description."
