@@ -11465,12 +11465,18 @@ in Lisp code use `org-set-tags' instead."
       (save-excursion
 	(org-back-to-heading)
 	(let* ((all-tags (org-get-tags))
+               (local-table (or org-current-tag-alist (org-get-buffer-tags)))
 	       (table (setq org-last-tags-completion-table
-			    (org--tag-add-to-alist
-			     (and org-complete-tags-always-offer-all-agenda-tags
-				  (org-global-tags-completion-table
-				   (org-agenda-files)))
-			     (or org-current-tag-alist (org-get-buffer-tags)))))
+                            (append
+                             ;; Put local tags in front.
+                             local-table
+                             (cl-set-difference
+			      (org--tag-add-to-alist
+			       (and org-complete-tags-always-offer-all-agenda-tags
+				    (org-global-tags-completion-table
+				     (org-agenda-files)))
+			       local-table)
+                              local-table))))
 	       (current-tags
 		(cl-remove-if (lambda (tag) (get-text-property 0 'inherited tag))
 			      all-tags))
