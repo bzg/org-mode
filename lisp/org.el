@@ -4566,6 +4566,13 @@ returns non-nil if any of them match."
   "Ask the user if URI should be considered safe, returning non-nil if so."
   (unless noninteractive
     (let ((current-file (and buffer-file-name (file-truename buffer-file-name)))
+          (domain (and (string-match
+                        (rx (seq "http" (? "s") "://")
+                            (optional (+ (not (any "@/\n"))) "@")
+                            (optional "www.")
+                            (one-or-more (not (any ":/?\n"))))
+                        uri)
+                       (match-string 0 uri)))
           (buf (get-buffer-create "*Org Remote Resource*")))
       ;; Set up the contents of the *Org Remote Resource* buffer.
       (with-current-buffer buf
@@ -4576,6 +4583,11 @@ returns non-nil if any of them match."
                 "Do you want to download this?  You can type\n "
                 (propertize "!" 'face 'success)
                 " to download this resource, and permanantly mark it as safe.\n "
+                (if domain
+                    (concat
+                     (propertize "d" 'face 'success)
+                     " to download this resource, and mark this domain as safe.\n ")
+                  "")
                 (propertize "f" 'face 'success)
                 (if current-file
                     (concat
@@ -4593,8 +4605,8 @@ returns non-nil if any of them match."
       ;; Display the buffer and read a choice.
       (save-window-excursion
         (pop-to-buffer buf)
-        (let* ((exit-chars (append '(?y ?n ?! ?\s) (and current-file '(?f))))
-               (prompt (format "Please type y, n%s, or !%s: "
+        (let* ((exit-chars (append '(?y ?n ?! ?d ?\s) (and current-file '(?f))))
+               (prompt (format "Please type y, n%s, d, or !%s: "
                                (if current-file ", f" "")
                                (if (< (line-number-at-pos (point-max))
                                       (window-body-height))
@@ -4602,15 +4614,17 @@ returns non-nil if any of them match."
                                  ", or C-v/M-v to scroll")))
                char)
           (setq char (read-char-choice prompt exit-chars))
-          (when (memq char '(?! ?f))
+          (when (memq char '(?! ?f ?d))
             (customize-push-and-save
              'org-safe-remote-resources
-             (list (concat "\\`"
-                           (regexp-quote
-                            (if (and (= char ?f) current-file)
-                                (concat "file://" current-file) uri))
-                           "\\'"))))
-          (prog1 (memq char '(?! ?\s ?y ?f))
+             (list (if (eq char ?d)
+                       (concat "\\`" (regexp-quote domain) "\\(?:/\\|\\'\\)")
+                     (concat "\\`"
+                             (regexp-quote
+                              (if (and (= char ?f) current-file)
+                                  (concat "file://" current-file) uri))
+                             "\\'")))))
+          (prog1 (memq char '(?y ?n ?! ?d ?\s ?f))
             (quit-window t)))))))
 
 (defun org-extract-log-state-settings (x)
