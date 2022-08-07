@@ -11762,7 +11762,13 @@ Returns the new tags string, or nil to not change the current settings."
 		  (while (or (rassoc char ntable) (rassoc char table))
 		    (setq char (1+ char)))
 		(setq c2 c1))
-	      (setq c (or c2 char)))
+	      (setq c (or c2
+                          (if (> char ?~)
+                              ?\s
+                            char)))
+              ;; Consider characters A-Z after a-z.
+              (if (equal char ?z)
+                  (setq char ?A)))
 	    (when ingroup (push tg (car groups)))
 	    (setq tg (org-add-props tg nil 'face
 				    (cond
