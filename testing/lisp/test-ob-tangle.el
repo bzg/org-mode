@@ -159,6 +159,62 @@ echo 1
 	     (search-forward (concat "[file:" file) nil t)))
        (delete-file "test-ob-tangle.el")))))
 
+(ert-deftest ob-tangle/comment-noweb-relative ()
+  "Test :comments noweb tangling with relative file paths."
+  (should
+   (org-test-with-temp-text-in-file
+       "* Inner
+#+name: inner
+#+begin_src emacs-lisp
+2
+#+end_src
+
+* Main
+#+header: :tangle \"test-ob-tangle.el\" :comments noweb :noweb yes
+#+begin_src emacs-lisp
+1
+<<inner>>
+#+end_src"
+     (unwind-protect
+	 (let ((org-babel-tangle-use-relative-file-links t))
+           (org-babel-tangle)
+           (with-temp-buffer
+             (insert-file-contents "test-ob-tangle.el")
+             (buffer-string)
+             (goto-char (point-min))
+             (and
+              (search-forward (concat ";; [[file:" (file-name-nondirectory file) "::inner") nil t)
+              (search-forward ";; inner ends here" nil t))))
+       (delete-file "test-ob-tangle.el")))))
+
+(ert-deftest ob-tangle/comment-noweb-absolute ()
+  "Test :comments noweb tangling with absolute file path."
+  (should
+   (org-test-with-temp-text-in-file
+       "* Inner
+#+name: inner
+#+begin_src emacs-lisp
+2
+#+end_src
+
+* Main
+#+header: :tangle \"test-ob-tangle.el\" :comments noweb :noweb yes
+#+begin_src emacs-lisp
+1
+<<inner>>
+#+end_src"
+     (unwind-protect
+	 (let ((org-babel-tangle-use-relative-file-links nil))
+	   (org-babel-tangle)
+	   (with-temp-buffer
+	     (insert-file-contents "test-ob-tangle.el")
+	     (buffer-string)
+	     (goto-char (point-min))
+             (and
+              (search-forward (concat ";; [[file:" file "::inner") nil t)
+              (search-forward ";; inner ends here" nil t))))
+       (delete-file "test-ob-tangle.el")))))
+
 (ert-deftest ob-tangle/jump-to-org ()
   "Test `org-babel-tangle-jump-to-org' specifications."
   ;; Standard test.

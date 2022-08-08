@@ -469,6 +469,33 @@ code blocks by target file."
     (mapcar (lambda (b) (cons (car b) (nreverse (cdr b))))
 	    (nreverse blocks))))
 
+(defun org-babel-tangle--unbracketed-link (params)
+  "Get a raw link to the src block at point, without brackets.
+
+The PARAMS are the 3rd element of the info for the same src block."
+  (unless (string= "no" (cdr (assq :comments params)))
+    (save-match-data
+      (let* (;; The created link is transient.  Using ID is not necessary,
+             ;; but could have side-effects if used.  An ID property may
+             ;; be added to existing entries thus creating unexpected file
+             ;; modifications.
+             (org-id-link-to-org-use-id nil)
+             (l (org-no-properties
+                 (cl-letf (((symbol-function 'org-store-link-functions)
+                            (lambda () nil)))
+                   (org-store-link nil))))
+             (bare (and (string-match org-link-bracket-re l)
+                        (match-string 1 l))))
+        (when bare
+          (if (and org-babel-tangle-use-relative-file-links
+                   (string-match org-link-types-re bare)
+                   (string= (match-string 1 bare) "file"))
+              (concat "file:"
+                      (file-relative-name (substring bare (match-end 0))
+                                          (file-name-directory
+                                           (cdr (assq :tangle params)))))
+            bare))))))
+
 (defun org-babel-tangle-single-block (block-counter &optional only-this-block)
   "Collect the tangled source for current block.
 Return the list of block attributes needed by
@@ -485,20 +512,7 @@ non-nil, return the full association list to be used by
 	 (extra (nth 3 info))
          (coderef (nth 6 info))
 	 (cref-regexp (org-src-coderef-regexp coderef))
-	 (link (if (string= "no" (cdr (assq :comments params))) ""
-                 (let* (
-                        ;; The created link is transient.  Using ID is
-                        ;; not necessary, but could have side-effects if
-                        ;; used.  An ID property may be added to
-                        ;; existing entries thus creating unexpected
-                        ;; file modifications.
-                        (org-id-link-to-org-use-id nil)
-                        (l (org-no-properties
-                            (cl-letf (((symbol-function 'org-store-link-functions)
-                                       (lambda () nil)))
-                              (org-store-link nil)))))
-                   (and (string-match org-link-bracket-re l)
-                        (match-string 1 l)))))
+	 (link (org-babel-tangle--unbracketed-link params))
 	 (source-name
 	  (or (nth 4 info)
 	      (format "%s:%d"
@@ -552,15 +566,7 @@ non-nil, return the full association list to be used by
 		(if org-babel-tangle-use-relative-file-links
 		    (file-relative-name file)
 		  file)
-		(if (and org-babel-tangle-use-relative-file-links
-			 (string-match org-link-types-re link)
-			 (string= (match-string 1 link) "file")
-                         (stringp src-tfile))
-		    (concat "file:"
-			    (file-relative-name (substring link (match-end 0))
-						(file-name-directory
-						 src-tfile)))
-		  link)
+		link
 		source-name
 		params
 		(if org-src-preserve-indentation
@@ -578,18 +584,12 @@ non-nil, return the full association list to be used by
 INFO, when non nil, is the source block information, as returned
 by `org-babel-get-src-block-info'."
   (let ((link-data (pcase (or info (org-babel-get-src-block-info 'light))
-		     (`(,_ ,_ ,_ ,_ ,name ,start ,_)
+		     (`(,_ ,_ ,params ,_ ,name ,start ,_)
 		      `(("start-line" . ,(org-with-point-at start
 					   (number-to-string
 					    (line-number-at-pos))))
 			("file" . ,(buffer-file-name))
-			("link" . ,(let (;; The created link is transient.  Using ID is
-                                         ;; not necessary, but could have side-effects if
-                                         ;; used.  An ID property may be added to
-                                         ;; existing entries thus creatin unexpected file
-                                         ;; modifications.
-                                         (org-id-link-to-org-use-id nil))
-                                     (org-no-properties (org-store-link nil))))
+			("link" . ,(org-babel-tangle--unbracketed-link params))
 			("source-name" . ,name))))))
     (list (org-fill-template org-babel-tangle-comment-format-beg link-data)
 	  (org-fill-template org-babel-tangle-comment-format-end link-data))))
