@@ -11755,7 +11755,9 @@ Returns the new tags string, or nil to not change the current settings."
 	      (while (equal (car tbl) '(:newline))
 		(insert "\n")
 		(setq tbl (cdr tbl)))))
-	   ((equal e '(:grouptags)) (insert " : "))
+	   ((equal e '(:grouptags))
+            (delete-char -3)
+            (insert " : "))
 	   (t
 	    (setq tg (copy-sequence (car e)) c2 nil)
 	    (if (cdr e)
