@@ -128,6 +128,7 @@
 (declare-function citeproc-render-citations "ext:citeproc")
 (declare-function citeproc-render-bib "ext:citeproc")
 (declare-function citeproc-hash-itemgetter-from-any "ext:citeproc")
+(declare-function citeproc-add-subbib-filters "ext:citeproc")
 
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
