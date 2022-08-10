@@ -1567,10 +1567,8 @@ non-nil."
 		  t))))
 	(setq link (plist-get org-store-link-plist :link))
         ;; If store function actually set `:description' property, use
-        ;; it, even if it is nil.  Otherwise, fallback to link value.
-	(setq desc (if (plist-member org-store-link-plist :description)
-                       (plist-get org-store-link-plist :description)
-		     link)))
+        ;; it, even if it is nil.  Otherwise, fallback to nil (ask user).
+	(setq desc (plist-get org-store-link-plist :description)))
 
        ;; Store a link from a remote editing buffer.
        ((org-src-edit-buffer-p)
@@ -1687,9 +1685,7 @@ non-nil."
 	   ;; Store a link using the ID at point
 	   (setq link (condition-case nil
 			  (prog1 (org-id-store-link)
-			    (setq desc (or (plist-get org-store-link-plist
-						      :description)
-					   "")))
+			    (setq desc (plist-get org-store-link-plist :description)))
 			(error
 			 ;; Probably before first headline, link only to file
 			 (concat "file:"
@@ -1751,8 +1747,7 @@ non-nil."
 
       ;; We're done setting link and desc, clean up
       (when (consp link) (setq cpltxt (car link) link (cdr link)))
-      (setq link (or link cpltxt)
-	    desc (or desc cpltxt))
+      (setq link (or link cpltxt))
       (cond ((not desc))
 	    ((equal desc "NONE") (setq desc nil))
 	    (t (setq desc (org-link-display-format desc))))
