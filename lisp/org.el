@@ -11961,7 +11961,9 @@ Inherited tags have the `inherited' text property."
         (org-element-cache-map
          (lambda (el)
            (dolist (tag (org-element-property :tags el))
-             (puthash (list tag) t hashed))))
+             ;; Do not carry over the text properties.  They may look
+             ;; ugly in the completion.
+             (puthash (list (substring-no-properties tag)) t hashed))))
         (dolist (tag org-file-tags) (puthash (list tag) t hashed))
         (hash-table-keys hashed))
     (org-with-point-at 1
