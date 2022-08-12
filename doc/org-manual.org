@@ -6800,6 +6800,10 @@ using the =:formatter= parameter.
 
   Indent each headline field according to its level.
 
+- =:filetitle= ::
+
+  Show title in the file column if the file has a =#+title=.
+ 
 - =:hidefiles= ::
 
   Hide the file column when multiple files are used to produce the

@@ -270,6 +270,19 @@ example,
 
 prints a sub-bibliography containing the book entries with =ai= among
 their keywords.
+*** New =:filetitle= option for clock table
+
+The =:filetitle= option for clock tables can be set to ~t~ to show org
+file title (set by =#+title:=) in the File column instead of the
+file name.  For example:
+
+#+begin_src org
+,#+BEGIN: clocktable :scope agenda :maxlevel 2 :block thisweek :filetitle t
+#+end_src
+
+If a file does not have a title, the table will show the file name
+instead.
+
 ** New options
 *** A new custom setting =org-hide-drawer-startup= to control initial folding state of drawers
 

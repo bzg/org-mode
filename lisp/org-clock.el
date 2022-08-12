@@ -324,6 +324,7 @@ string as argument."
    :link nil
    :narrow '40!
    :indent t
+   :filetitle nil
    :hidefiles nil
    :formula nil
    :timestamp nil
@@ -2469,6 +2470,16 @@ the currently selected interval size."
 	  (org-update-dblock)
 	  t)))))
 
+(defun org-clock-get-file-title (file-name)
+  "Get the file title from FILE-NAME as a string.
+Return short FILE-NAME if #+title keyword is not found."
+  (with-current-buffer (find-file-noselect file-name)
+    (org-macro-initialize-templates)
+    (let ((title (assoc-default "title" org-macro-templates)))
+      (if (null title)
+          (file-name-nondirectory file-name)
+        title))))
+
 ;;;###autoload
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
@@ -2584,6 +2595,7 @@ from the dynamic block definition."
 	 (emph (plist-get params :emphasize))
 	 (compact? (plist-get params :compact))
 	 (narrow (or (plist-get params :narrow) (and compact? '40!)))
+	 (filetitle (plist-get params :filetitle))
 	 (level? (and (not compact?) (plist-get params :level)))
 	 (timestamp (plist-get params :timestamp))
 	 (tags (plist-get params :tags))
@@ -2723,7 +2735,9 @@ from the dynamic block definition."
 			     (if (eq formula '%) " %s |" "")
 			     "\n")
 
-		     (file-name-nondirectory file-name)
+                     (if filetitle
+                         (org-clock-get-file-title file-name)
+                       (file-name-nondirectory file-name))
 		     (if level?    "| " "") ;level column, maybe
 		     (if timestamp "| " "") ;timestamp column, maybe
 		     (if tags      "| " "") ;tags column, maybe
