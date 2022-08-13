@@ -906,8 +906,8 @@ Search backwards when PREVIOUS-P is non-nil."
 	     #'max
 	   #'min)
          (mapcar (if previous-p
-		     (lambda (prop) (max (or limit (point-min)) (previous-single-property-change pos prop nil (or limit (point-min)))))
-		   (lambda (prop) (next-single-property-change pos prop nil (or limit (point-max)))))
+		     (lambda (prop) (max (or limit (point-min)) (previous-single-char-property-change pos prop nil (or limit (point-min)))))
+		   (lambda (prop) (next-single-char-property-change pos prop nil (or limit (point-max)))))
                  (mapcar (lambda (el) (org-fold-core--property-symbol-get-create el nil t))
 		         spec-or-alias))))
 
