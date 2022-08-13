@@ -932,6 +932,55 @@ Move point right after the end of the region, to LIMIT, or
             (set-match-data (list (set-marker (make-marker) (car region) (current-buffer))
 				  (set-marker (make-marker) (cdr region) (current-buffer))))))))))
 
+(cl-defun org-fold-core-get-regions (&key specs from to with-markers relative)
+  "Find all the folded regions in current buffer.
+
+Each element of the returned list represent folded region boundaries
+and the folding spec: (BEG END SPEC).
+
+Search folds intersecting with (FROM TO) buffer region if FROM and TO
+are provided.
+
+If FROM is non-nil and TO is nil, search the folded regions at FROM.
+
+When SPECS is non-nil it should be a list of folding specs or a symbol.
+Only return the matching fold types.
+
+When WITH-MARKERS is non-nil, use markers to represent region
+boundaries.
+
+When RELATIVE is a buffer position, regions boundaries are given
+relative to that position.
+When RELATIVE is t, use FROM as the position.
+WITH-MARKERS must be nil when RELATIVE is non-nil."
+  (when (and relative with-markers)
+    (error "Cannot use markers in non-absolute region boundaries"))
+  (when (eq relative t) (setq relative from))
+  (unless (listp specs) (setq specs (list specs)))
+  (let (regions region mk-region)
+    (org-with-wide-buffer
+     (when (and from (not to)) (setq to (point-max)))
+     (when (and from (< from (point-min))) (setq from (point-min)))
+     (when (and to (> to (point-max))) (setq to (point-max)))
+     (unless from (setq from (point-min)))
+     (dolist (spec (or specs (org-fold-core-folding-spec-list)) regions)
+       (goto-char from)
+       (catch :exit
+         (while (or (not to) (< (point) to))
+           (when (org-fold-core-get-folding-spec spec)
+             (setq region (org-fold-core-get-region-at-point spec))
+             (when relative
+               (cl-decf (car region) relative)
+               (cl-decf (cdr region) relative))
+             (if (not with-markers)
+                 (setq mk-region `(,(car region) ,(cdr region) ,spec))
+               (setq mk-region `(,(make-marker) ,(make-marker) ,spec))
+               (move-marker (nth 0 mk-region) (car region))
+               (move-marker (nth 1 mk-region) (cdr region)))
+             (push mk-region regions))
+           (unless to (throw :exit nil))
+           (goto-char (org-fold-core-next-folding-state-change spec nil to))))))))
+
 ;;;; Changing visibility
 
 ;;;;; Region visibility
@@ -998,6 +1047,43 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                (if jit-lock-mode
                    (jit-lock-refontify from to)
                  (save-match-data (font-lock-fontify-region from to)))))))))))
+
+(cl-defmacro org-fold-core-regions (regions &key override clean-markers relative)
+  "Fold every region in REGIONS list in current buffer.
+
+Each region in the list is a list (BEG END SPEC-OR-ALIAS) describing
+region and folding spec to be applied.
+
+When optional argument OVERRIDE is non-nil, clear folding state in the
+buffer first.
+
+When optional argument CLEAN-MARKERS is non-nil, clear markers used to
+mark region boundaries in REGIONS.
+
+When optional argument RELATIVE is non-nil, it must be a buffer
+position.  REGION boundaries are then treated as relative distances
+from that position."
+  `(org-with-wide-buffer
+    (when ,override (org-fold-core-region (point-min) (point-max) nil))
+    (pcase-dolist (`(,beg ,end ,spec) (delq nil ,regions))
+      (if ,relative
+          (org-fold-core-region (+ ,relative beg) (+ ,relative end) t spec)
+        (org-fold-core-region beg end t spec))
+      (when ,clean-markers
+        (when (markerp beg) (set-marker beg nil))
+        (when (markerp end) (set-marker end nil))))))
+
+(defmacro org-fold-core-save-visibility (use-markers &rest body)
+  "Save and restore folding state around BODY.
+If USE-MARKERS is non-nil, use markers for the positions.  This
+means that the buffer may change while running BODY, but it also
+means that the buffer should stay alive during the operation,
+because otherwise all these markers will point to nowhere."
+  (declare (debug (form body)) (indent 1))
+  (org-with-gensyms (regions)
+    `(let* ((,regions ,(org-fold-core-get-regions :with-markers use-markers)))
+       (unwind-protect (progn ,@body)
+         (org-fold-core-regions ,regions :override t :clean-markers t)))))
 
 ;;; Make isearch search in some text hidden via text propertoes
 
