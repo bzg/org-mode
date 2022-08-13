@@ -217,7 +217,7 @@ smart            Make point visible, and do insertion/deletion if it is
   ;; overlays for isearch.
   (setq-local org-fold-core--isearch-special-specs '(org-link))
   (org-fold-core-initialize
-   `((org-fold-outline
+   `((,(if (eq org-fold-core-style 'text-properties) 'org-fold-outline 'outline)
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-outline-maybe)
       (:isearch-open . t)
@@ -230,7 +230,7 @@ smart            Make point visible, and do insertion/deletion if it is
       (:rear-sticky . nil)
       (:font-lock-skip . t)
       (:alias . (headline heading outline inlinetask plain-list)))
-     (org-fold-block
+     (,(if (eq org-fold-core-style 'text-properties) 'org-fold-block 'org-hide-block)
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-drawer-or-block-maybe)
       (:isearch-open . t)
@@ -239,7 +239,7 @@ smart            Make point visible, and do insertion/deletion if it is
                   dynamic-block example-block export-block
                   quote-block special-block src-block
                   verse-block)))
-     (org-fold-drawer
+     (,(if (eq org-fold-core-style 'text-properties) 'org-fold-drawer 'org-hide-drawer)
       (:ellipsis . ,ellipsis)
       (:fragile . ,#'org-fold--reveal-drawer-or-block-maybe)
       (:isearch-open . t)
