@@ -8024,7 +8024,7 @@ parse tree."
     (or (and (>= beg-A beg-B) (<= end-A end-B))
 	(and (>= beg-B beg-A) (<= end-B end-A)))))
 
-(defun org-element-swap-A-B--overlays (elem-A elem-B)
+(defun org-element-swap-A-B (elem-A elem-B)
   "Swap elements ELEM-A and ELEM-B.
 Assume ELEM-B is after ELEM-A in the buffer.  Leave point at the
 end of ELEM-A."
@@ -8039,79 +8039,13 @@ end of ELEM-A."
     (when (and specialp
 	       (or (not (eq (org-element-type elem-B) 'paragraph))
 		   (/= (org-element-property :begin elem-B)
-		       (org-element-property :contents-begin elem-B))))
+		      (org-element-property :contents-begin elem-B))))
       (error "Cannot swap elements"))
-    ;; In a special situation, ELEM-A will have no indentation.  We'll
-    ;; give it ELEM-B's (which will in, in turn, have no indentation).
-    (let* ((ind-B (when specialp
-		    (goto-char (org-element-property :begin elem-B))
-		    (current-indentation)))
-	   (beg-A (org-element-property :begin elem-A))
-	   (end-A (save-excursion
-		    (goto-char (org-element-property :end elem-A))
-		    (skip-chars-backward " \r\t\n")
-		    (point-at-eol)))
-	   (beg-B (org-element-property :begin elem-B))
-	   (end-B (save-excursion
-		    (goto-char (org-element-property :end elem-B))
-		    (skip-chars-backward " \r\t\n")
-		    (point-at-eol)))
-	   ;; Store inner overlays responsible for visibility status.
-	   ;; We also need to store their boundaries as they will be
-	   ;; removed from buffer.
-	   (overlays
-	    (cons
-	     (delq nil
-		   (mapcar (lambda (o)
-			     (and (>= (overlay-start o) beg-A)
-				  (<= (overlay-end o) end-A)
-				  (list o (overlay-start o) (overlay-end o))))
-			   (overlays-in beg-A end-A)))
-	     (delq nil
-		   (mapcar (lambda (o)
-			     (and (>= (overlay-start o) beg-B)
-				  (<= (overlay-end o) end-B)
-				  (list o (overlay-start o) (overlay-end o))))
-			   (overlays-in beg-B end-B)))))
-	   ;; Get contents.
-	   (body-A (buffer-substring beg-A end-A))
-	   (body-B (delete-and-extract-region beg-B end-B)))
-      (goto-char beg-B)
-      (when specialp
-	(setq body-B (replace-regexp-in-string "\\`[ \t]*" "" body-B))
-	(indent-to-column ind-B))
-      (insert body-A)
-      ;; Restore ex ELEM-A overlays.
-      (let ((offset (- beg-B beg-A)))
-	(dolist (o (car overlays))
-	  (move-overlay (car o) (+ (nth 1 o) offset) (+ (nth 2 o) offset)))
-	(goto-char beg-A)
-	(delete-region beg-A end-A)
-	(insert body-B)
-	;; Restore ex ELEM-B overlays.
-	(dolist (o (cdr overlays))
-	  (move-overlay (car o) (- (nth 1 o) offset) (- (nth 2 o) offset))))
-      (goto-char (org-element-property :end elem-B)))))
-(defun org-element-swap-A-B--text-properties (elem-A elem-B)
-  "Swap elements ELEM-A and ELEM-B.
-Assume ELEM-B is after ELEM-A in the buffer.  Leave point at the
-end of ELEM-A."
-  (goto-char (org-element-property :begin elem-A))
-  ;; There are two special cases when an element doesn't start at bol:
-  ;; the first paragraph in an item or in a footnote definition.
-  (let ((specialp (not (bolp))))
-    ;; Only a paragraph without any affiliated keyword can be moved at
-    ;; ELEM-A position in such a situation.  Note that the case of
-    ;; a footnote definition is impossible: it cannot contain two
-    ;; paragraphs in a row because it cannot contain a blank line.
-    (when (and specialp
-	       (or (not (eq (org-element-type elem-B) 'paragraph))
-		   (/= (org-element-property :begin elem-B)
-	              (org-element-property :contents-begin elem-B))))
-      (error "Cannot swap elements"))
-    ;; In a special situation, ELEM-A will have no indentation.  We'll
-    ;; give it ELEM-B's (which will in, in turn, have no indentation).
-    (org-fold-core-ignore-modifications ;; Preserve folding state
+    ;; Preserve folding state when `org-fold-core-style' is set to
+    ;; `text-properties'.
+    (org-fold-core-ignore-modifications
+      ;; In a special situation, ELEM-A will have no indentation.  We'll
+      ;; give it ELEM-B's (which will in, in turn, have no indentation).
       (let* ((ind-B (when specialp
 		      (goto-char (org-element-property :begin elem-B))
 		      (current-indentation)))
@@ -8125,26 +8059,31 @@ end of ELEM-A."
 		      (goto-char (org-element-property :end elem-B))
 		      (skip-chars-backward " \r\t\n")
 		      (point-at-eol)))
+	     ;; Store inner folds responsible for visibility status.
+	     (folds
+	      (cons
+               (org-fold-core-get-regions :from beg-A :to end-A :relative t)
+               (org-fold-core-get-regions :from beg-B :to end-B :relative t)))
 	     ;; Get contents.
 	     (body-A (buffer-substring beg-A end-A))
-	     (body-B (delete-and-extract-region beg-B end-B)))
+	     (body-B (buffer-substring beg-B end-B)))
+        ;; Clear up the folds.
+        (org-fold-region beg-A end-A nil)
+        (org-fold-region beg-B end-B nil)
+        (delete-region beg-B end-B)
         (goto-char beg-B)
         (when specialp
 	  (setq body-B (replace-regexp-in-string "\\`[ \t]*" "" body-B))
 	  (indent-to-column ind-B))
         (insert body-A)
+        ;; Restore ex ELEM-A folds.
+        (org-fold-core-regions (car folds) :relative beg-B)
 	(goto-char beg-A)
 	(delete-region beg-A end-A)
 	(insert body-B)
+        ;; Restore ex ELEM-A folds.
+        (org-fold-core-regions (cdr folds) :relative beg-A)
         (goto-char (org-element-property :end elem-B))))))
-(defsubst org-element-swap-A-B (elem-A elem-B)
-  "Swap elements ELEM-A and ELEM-B.
-Assume ELEM-B is after ELEM-A in the buffer.  Leave point at the
-end of ELEM-A."
-  (if (eq org-fold-core-style 'text-properties)
-      (org-element-swap-A-B--text-properties elem-A elem-B)
-    (org-element-swap-A-B--overlays elem-A elem-B)))
-
 
 (provide 'org-element)
 

@@ -1491,24 +1491,11 @@ If the link is in hidden text, expose it."
     (org-fold-core-set-folding-spec-property (car org-link--link-folding-spec) :visible t)))
 
 ;;;###autoload
-(defun org-toggle-link-display--overlays ()
-  "Toggle the literal or descriptive display of links."
-  (interactive)
-  (if org-link-descriptive (remove-from-invisibility-spec '(org-link))
-    (add-to-invisibility-spec '(org-link)))
-  (org-restart-font-lock)
-  (setq org-link-descriptive (not org-link-descriptive)))
-(defun org-toggle-link-display--text-properties ()
+(defun org-toggle-link-display ()
   "Toggle the literal or descriptive display of links in current buffer."
   (interactive)
   (setq org-link-descriptive (not org-link-descriptive))
   (org-link-descriptive-ensure))
-(defsubst org-toggle-link-display ()
-  "Toggle the literal or descriptive display of links."
-  (interactive)
-  (if (eq org-fold-core-style 'text-properties)
-      (org-toggle-link-display--text-properties)
-    (org-toggle-link-display--overlays)))
 
 ;;;###autoload
 (defun org-store-link (arg &optional interactive?)

@@ -305,7 +305,7 @@ If the task has an end part, also demote it."
       (add-text-properties (match-beginning 3) (match-end 3)
 			   '(face org-inlinetask font-lock-fontified t)))))
 
-(defun org-inlinetask-toggle-visibility--text-properties ()
+(defun org-inlinetask-toggle-visibility ()
   "Toggle visibility of inline task at point."
   (let ((end (save-excursion
 	       (org-inlinetask-goto-end)
@@ -320,26 +320,6 @@ If the task has an end part, also demote it."
      ((org-fold-get-folding-spec 'headline (1+ start))
       (org-fold-region start end nil 'headline))
      (t (org-fold-region start end t 'headline)))))
-(defun org-inlinetask-toggle-visibility--overlays ()
-  "Toggle visibility of inline task at point."
-  (let ((end (save-excursion
-	       (org-inlinetask-goto-end)
-	       (if (bolp) (1- (point)) (point))))
-	(start (save-excursion
-		 (org-inlinetask-goto-beginning)
-		 (point-at-eol))))
-    (cond
-     ;; Nothing to show/hide.
-     ((= end start))
-     ;; Inlinetask was folded: expand it.
-     ((eq (get-char-property (1+ start) 'invisible) 'outline)
-      (org-fold-region start end nil 'outline))
-     (t (org-fold-region start end t 'outline)))))
-(defsubst org-inlinetask-toggle-visibility ()
-  "Toggle visibility of inline task at point."
-  (if (eq org-fold-core-style 'text-properties)
-      (org-inlinetask-toggle-visibility--text-properties)
-    (org-inlinetask-toggle-visibility--overlays)))
 
 (defun org-inlinetask-hide-tasks (state)
   "Hide inline tasks in buffer when STATE is `contents' or `children'.

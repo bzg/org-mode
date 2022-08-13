@@ -682,10 +682,10 @@ b. Item 2<point>"
        (search-backward "- item 1")
        (org-move-item-down)
        (forward-line)
-       (list (org-invisible-p2)
+       (list (org-fold-get-folding-spec)
 	     (progn
 	       (search-backward " body 2")
-	       (org-invisible-p2)))))))
+	       (org-fold-get-folding-spec)))))))
   ;; Preserve children visibility.
   (org-test-with-temp-text "* Headline
 - item 1

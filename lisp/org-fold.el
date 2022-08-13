@@ -254,6 +254,7 @@ smart            Make point visible, and do insertion/deletion if it is
 (defalias 'org-fold-get-folding-spec #'org-fold-core-get-folding-spec)
 (defalias 'org-fold-get-folding-specs-in-region #'org-fold-core-get-folding-specs-in-region)
 (defalias 'org-fold-get-region-at-point #'org-fold-core-get-region-at-point)
+(defalias 'org-fold-get-regions #'org-fold-core-get-regions)
 (defalias 'org-fold-next-visibility-change #'org-fold-core-next-visibility-change)
 (defalias 'org-fold-previous-visibility-change #'org-fold-core-previous-visibility-change)
 (defalias 'org-fold-next-folding-state-change #'org-fold-core-next-folding-state-change)
@@ -262,110 +263,16 @@ smart            Make point visible, and do insertion/deletion if it is
 
 ;;;;; Macros
 
-(defmacro org-fold-save-outline-visibility--overlays (use-markers &rest body)
-  "Save and restore outline visibility around BODY.
-If USE-MARKERS is non-nil, use markers for the positions.  This
-means that the buffer may change while running BODY, but it also
-means that the buffer should stay alive during the operation,
-because otherwise all these markers will point to nowhere."
-  (declare (debug (form body)) (indent 1))
-  (org-with-gensyms (data invisible-types markers?)
-    `(let* ((,invisible-types '(org-hide-block outline))
-	    (,markers? ,use-markers)
-	    (,data
-	     (mapcar (lambda (o)
-		       (let ((beg (overlay-start o))
-			     (end (overlay-end o))
-			     (type (overlay-get o 'invisible)))
-			 (and beg end
-			      (> end beg)
-			      (memq type ,invisible-types)
-			      (list (if ,markers? (copy-marker beg) beg)
-				    (if ,markers? (copy-marker end t) end)
-				    type))))
-		     (org-with-wide-buffer
-		      (overlays-in (point-min) (point-max))))))
-       (unwind-protect (progn ,@body)
-	 (org-with-wide-buffer
-	  (dolist (type ,invisible-types)
-	    (remove-overlays (point-min) (point-max) 'invisible type))
-	  (pcase-dolist (`(,beg ,end ,type) (delq nil ,data))
-	    (org-fold-region beg end t type)
-	    (when ,markers?
-	      (set-marker beg nil)
-	      (set-marker end nil))))))))
-(defmacro org-fold-save-outline-visibility--text-properties (use-markers &rest body)
-  "Save and restore outline visibility around BODY.
-If USE-MARKERS is non-nil, use markers for the positions.  This
-means that the buffer may change while running BODY, but it also
-means that the buffer should stay alive during the operation,
-because otherwise all these markers will point to nowhere."
-  (declare (debug (form body)) (indent 1))
-  (org-with-gensyms (data specs markers?)
-    `(let* ((,specs (org-fold-core-folding-spec-list))
-	    (,markers? ,use-markers)
-	    (,data
-             (org-with-wide-buffer
-              (let (data-val)
-                (dolist (spec ,specs)
-                  (let ((pos (point-min)))
-		    (while (< pos (point-max))
-                      (when (org-fold-get-folding-spec spec pos)
-                        (let ((region (org-fold-get-region-at-point spec pos)))
-		          (if ,markers?
-			      (push (list (copy-marker (car region))
-				          (copy-marker (cdr region) t)
-                                          spec)
-                                    data-val)
-                            (push (list (car region) (cdr region) spec)
-			          data-val))))
-                      (setq pos (org-fold-next-folding-state-change spec pos)))))
-                data-val))))
-       (unwind-protect (progn ,@body)
-	 (org-with-wide-buffer
-	  (org-fold-region (point-min) (point-max) nil)
-	  (pcase-dolist (`(,beg ,end ,spec) (delq nil ,data))
-	    (org-fold-region beg end t spec)
-	    (when ,markers?
-	      (set-marker beg nil)
-	      (set-marker end nil))))))))
-(defmacro org-fold-save-outline-visibility (use-markers &rest body)
-  "Save and restore outline visibility around BODY.
-If USE-MARKERS is non-nil, use markers for the positions.  This
-means that the buffer may change while running BODY, but it also
-means that the buffer should stay alive during the operation,
-because otherwise all these markers will point to nowhere."
-  (declare (debug (form body)) (indent 1))
-  `(if (eq org-fold-core-style 'text-properties)
-       (org-fold-save-outline-visibility--text-properties ,use-markers ,@body)
-     (org-fold-save-outline-visibility--overlays ,use-markers ,@body)))
+(defalias 'org-fold-save-outline-visibility #'org-fold-core-save-visibility)
 
 ;;;; Changing visibility (regions, blocks, drawers, headlines)
 
 ;;;;; Region visibility
 
-;; (defalias 'org-fold-region #'org-fold-core-region)
-(defun org-fold-region--overlays (from to flag spec)
-  "Hide or show lines from FROM to TO, according to FLAG.
-SPEC is the invisibility spec, as a symbol."
-  (remove-overlays from to 'invisible spec)
-  ;; Use `front-advance' since text right before to the beginning of
-  ;; the overlay belongs to the visible line than to the contents.
-  (when flag
-    (let ((o (make-overlay from to nil 'front-advance)))
-      (overlay-put o 'evaporate t)
-      (overlay-put o 'invisible spec)
-      (overlay-put o
-                   'isearch-open-invisible
-                   (lambda (&rest _) (org-fold-show-context 'isearch))))))
-(defsubst org-fold-region (from to flag &optional spec)
-  "Hide or show lines from FROM to TO, according to FLAG.
-SPEC is the invisibility spec, as a symbol."
-  (if (eq org-fold-core-style 'text-properties)
-      (org-fold-core-region from to flag spec)
-    (org-fold-region--overlays from to flag spec)))
+(defalias 'org-fold-region #'org-fold-core-region)
+(defalias 'org-fold-regions #'org-fold-core-regions)
 
-(defun org-fold-show-all--text-properties (&optional types)
+(defun org-fold-show-all (&optional types)
   "Show all contents in the visible part of the buffer.
 By default, the function expands headings, blocks and drawers.
 When optional argument TYPES is a list of symbols among `blocks',
@@ -373,51 +280,11 @@ When optional argument TYPES is a list of symbols among `blocks',
   (interactive)
   (dolist (type (or types '(blocks drawers headings)))
     (org-fold-region (point-min) (point-max) nil
-	             (pcase type
-	               (`blocks 'block)
-	               (`drawers 'drawer)
-	               (`headings 'headline)
-	               (_ (error "Invalid type: %S" type))))))
-(defun org-fold-show-all--overlays (&optional types)
-  "Show all contents in the visible part of the buffer.
-By default, the function expands headings, blocks and drawers.
-When optional argument TYPE is a list of symbols among `blocks',
-`drawers' and `headings', to only expand one specific type."
-  (interactive)
-  (let ((types (or types '(blocks drawers headings))))
-    (when (memq 'blocks types)
-      (org-fold-region (point-min) (point-max) nil 'org-hide-block))
-    (cond
-     ;; Fast path.  Since headings and drawers share the same
-     ;; invisible spec, clear everything in one go.
-     ((and (memq 'headings types)
-           (memq 'drawers types))
-      (org-fold-region (point-min) (point-max) nil 'outline))
-     ((memq 'headings types)
-      (org-fold-region (point-min) (point-max) nil 'outline)
-      (org-cycle-hide-drawers 'all))
-     ((memq 'drawers types)
-      (save-excursion
-        (goto-char (point-min))
-        (while (re-search-forward org-drawer-regexp nil t)
-          (let* ((pair (get-char-property-and-overlay (line-beginning-position)
-                                                      'invisible))
-                 (o (cdr-safe pair)))
-            (if (overlayp o) (goto-char (overlay-end o))
-              (pcase (get-char-property-and-overlay (point) 'invisible)
-                (`(outline . ,o)
-                 (goto-char (overlay-end o))
-                 (delete-overlay o))
-                (_ nil))))))))))
-(defsubst org-fold-show-all (&optional types)
-  "Show all contents in the visible part of the buffer.
-By default, the function expands headings, blocks and drawers.
-When optional argument TYPES is a list of symbols among `blocks',
-`drawers' and `headings', to only expand one specific type."
-  (interactive)
-  (if (eq org-fold-core-style 'text-properties)
-      (org-fold-show-all--text-properties types)
-    (org-fold-show-all--overlays types)))
+	     (pcase type
+	       (`blocks 'block)
+	       (`drawers 'drawer)
+	       (`headings 'headline)
+	       (_ (error "Invalid type: %S" type))))))
 
 (defun org-fold-flag-above-first-heading (&optional arg)
   "Hide from bob up to the first heading.
@@ -596,7 +463,7 @@ heading to appear."
   (interactive)
   (org-fold-show-children 1000))
 
-(defun org-fold-show-branches-buffer--text-properties ()
+(defun org-fold-show-branches-buffer ()
   "Show all branches in the buffer."
   (org-fold-flag-above-first-heading)
   (org-fold-hide-sublevels 1)
@@ -605,20 +472,6 @@ heading to appear."
     (while (outline-get-next-sibling)
       (org-fold-show-branches)))
   (goto-char (point-min)))
-(defun org-fold-show-branches-buffer--overlays ()
-  "Show all branches in the buffer."
-  (org-fold-flag-above-first-heading)
-  (outline-hide-sublevels 1)
-  (unless (eobp)
-    (outline-show-branches)
-    (while (outline-get-next-sibling)
-      (outline-show-branches)))
-  (goto-char (point-min)))
-(defsubst org-fold-show-branches-buffer ()
-  "Show all branches in the buffer."
-  (if (eq org-fold-core-style 'text-properties)
-      (org-fold-show-branches-buffer--text-properties)
-    (org-fold-show-branches-buffer--overlays)))
 
 ;;;;; Blocks and drawers visibility
 
@@ -652,18 +505,12 @@ Return a non-nil value when toggling is successful."
         ;; at the block closing line.
         (unless (let ((eol (line-end-position)))
                   (and (> eol start) (/= eol end)))
-          (let* ((spec (if (eq org-fold-core-style 'text-properties)
-                           category
-                         (if (eq category 'block) 'org-hide-block 'outline)))
-                 (flag
-                  (cond ((eq force 'off) nil)
-                        (force t)
-                        ((if (eq org-fold-core-style 'text-properties)
-                             (org-fold-folded-p start spec)
-                           (eq spec (get-char-property start 'invisible)))
-                         nil)
-                        (t t))))
-            (org-fold-region start end flag spec))
+          (org-fold-region start end
+                   (cond ((eq force 'off) nil)
+                         (force t)
+                         ((org-fold-folded-p start category) nil)
+                         (t t))
+                   category)
           ;; When the block is hidden away, make sure point is left in
           ;; a visible part of the buffer.
           (when (invisible-p (max (1- (point)) (point-min)))
@@ -716,27 +563,7 @@ Return a non-nil value when toggling is successful."
         (end (point-max)))
     (org-fold--hide-drawers begin end)))
 
-(defun org-fold--hide-drawers--overlays (begin end)
-  "Hide all drawers between BEGIN and END."
-  (save-excursion
-    (goto-char begin)
-    (while (and (< (point) end) (re-search-forward org-drawer-regexp end t))
-      (let* ((pair (get-char-property-and-overlay (line-beginning-position)
-                                                  'invisible))
-             (o (cdr-safe pair)))
-        (if (overlayp o) (goto-char (overlay-end o)) ;invisible drawer
-          (pcase (get-char-property-and-overlay (point) 'invisible)
-            (`(outline . ,o) (goto-char (overlay-end o))) ;already folded
-            (_
-             (let* ((drawer (org-element-at-point))
-                    (type (org-element-type drawer)))
-               (when (memq type '(drawer property-drawer))
-                 (org-fold-hide-drawer-toggle t nil drawer)
-                 ;; Make sure to skip drawer entirely or we might flag it
-                 ;; another time when matching its ending line with
-                 ;; `org-drawer-regexp'.
-                 (goto-char (org-element-property :end drawer)))))))))))
-(defun org-fold--hide-drawers--text-properties (begin end)
+(defun org-fold--hide-drawers (begin end)
   "Hide all drawers between BEGIN and END."
   (save-excursion
     (goto-char begin)
@@ -753,11 +580,6 @@ Return a non-nil value when toggling is successful."
             ;; another time when matching its ending line with
             ;; `org-drawer-regexp'.
             (goto-char (org-element-property :end drawer))))))))
-(defun org-fold--hide-drawers (begin end)
-  "Hide all drawers between BEGIN and END."
-  (if (eq org-fold-core-style 'text-properties)
-      (org-fold--hide-drawers--text-properties begin end)
-    (org-fold--hide-drawers--overlays begin end)))
 
 (defun org-fold-hide-archived-subtrees (beg end)
   "Re-hide all archived subtrees after a visibility state change."
@@ -784,43 +606,10 @@ be shown."
 	 ((cdr (assq key org-fold-show-context-detail)))
 	 (t (cdr (assq 'default org-fold-show-context-detail))))))
 
-(defun org-fold-show-set-visibility--overlays (detail)
-  "Set visibility around point according to DETAIL.
-DETAIL is either nil, `minimal', `local', `ancestors',
-`ancestors-full', `lineage', `tree', `canonical' or t.  See
-`org-show-context-detail' for more information."
-  ;; Show current heading and possibly its entry, following headline
-  ;; or all children.
-  (if (and (org-at-heading-p) (not (eq detail 'local)))
-      (org-fold-heading nil)
-    (org-fold-show-entry)
-    ;; If point is hidden within a drawer or a block, make sure to
-    ;; expose it.
-    (dolist (o (overlays-at (point)))
-      (when (memq (overlay-get o 'invisible) '(org-hide-block outline))
-        (delete-overlay o)))
-    (unless (org-before-first-heading-p)
-      (org-with-limited-levels
-       (cl-case detail
-         ((tree canonical t) (org-fold-show-children))
-         ((nil minimal ancestors ancestors-full))
-         (t (save-excursion
-              (outline-next-heading)
-              (org-fold-heading nil)))))))
-  ;; Show whole subtree.
-  (when (eq detail 'ancestors-full) (org-fold-show-subtree))
-  ;; Show all siblings.
-  (when (eq detail 'lineage) (org-fold-show-siblings))
-  ;; Show ancestors, possibly with their children.
-  (when (memq detail '(ancestors ancestors-full lineage tree canonical t))
-    (save-excursion
-      (while (org-up-heading-safe)
-        (org-fold-heading nil)
-        (when (memq detail '(canonical t)) (org-fold-show-entry))
-        (when (memq detail '(tree canonical t)) (org-fold-show-children))))))
+
 (defvar org-hide-emphasis-markers); Defined in org.el
 (defvar org-pretty-entities); Defined in org.el
-(defun org-fold-show-set-visibility--text-properties (detail)
+(defun org-fold-show-set-visibility (detail)
   "Set visibility around point according to DETAIL.
 DETAIL is either nil, `minimal', `local', `ancestors',
 `ancestors-full', `lineage', `tree', `canonical' or t.  See
@@ -880,14 +669,6 @@ DETAIL is either nil, `minimal', `local', `ancestors',
 	(org-fold-heading nil)
 	(when (memq detail '(canonical t)) (org-fold-show-entry))
 	(when (memq detail '(tree canonical t)) (org-fold-show-children))))))
-(defun org-fold-show-set-visibility (detail)
-  "Set visibility around point according to DETAIL.
-DETAIL is either nil, `minimal', `local', `ancestors', `lineage',
-`tree', `canonical' or t.  See `org-fold-show-context-detail' for more
-information."
-  (if (eq org-fold-core-style 'text-properties)
-      (org-fold-show-set-visibility--text-properties detail)
-    (org-fold-show-set-visibility--overlays detail)))
 
 (defun org-fold-reveal (&optional siblings)
   "Show current entry, hierarchy above it, and the following headline.
@@ -1065,70 +846,7 @@ This function is intended to be used as :fragile property of
           unfold?)))))
 
 ;; Catching user edits inside invisible text
-(defun org-fold-check-before-invisible-edit--overlays (kind)
-  "Check if editing KIND is dangerous with invisible text around.
-The detailed reaction depends on the user option
-`org-fold-catch-invisible-edits'."
-  ;; First, try to get out of here as quickly as possible, to reduce overhead
-  (when (and org-fold-catch-invisible-edits
-             (or (not (boundp 'visible-mode)) (not visible-mode))
-             (or (get-char-property (point) 'invisible)
-                 (get-char-property (max (point-min) (1- (point))) 'invisible)))
-    ;; OK, we need to take a closer look.  Do not consider
-    ;; invisibility obtained through text properties (e.g., link
-    ;; fontification), as it cannot be toggled.
-    (let* ((invisible-at-point
-            (pcase (get-char-property-and-overlay (point) 'invisible)
-              (`(,_ . ,(and (pred overlayp) o)) o)))
-           (invisible-before-point
-            (and (not (bobp))
-                 (pcase (get-char-property-and-overlay (1- (point)) 'invisible)
-                   (`(,_ . ,(and (pred overlayp) o)) o))))
-           (border-and-ok-direction
-            (or
-             ;; Check if we are acting predictably before invisible
-             ;; text.
-             (and invisible-at-point (not invisible-before-point)
-		  (memq kind '(insert delete-backward)))
-             ;; Check if we are acting predictably after invisible text
-             ;; This works not well, and I have turned it off.  It seems
-             ;; better to always show and stop after invisible text.
-             ;; (and (not invisible-at-point) invisible-before-point
-             ;;  (memq kind '(insert delete)))
-             )))
-      (when (or invisible-at-point invisible-before-point)
-        (when (eq org-fold-catch-invisible-edits 'error)
-          (user-error "Editing in invisible areas is prohibited, make them visible first"))
-        (if (and org-custom-properties-overlays
-                 (y-or-n-p "Display invisible properties in this buffer? "))
-            (org-toggle-custom-properties-visibility)
-          ;; Make the area visible
-          (save-excursion
-            (when (and (not invisible-at-point) invisible-before-point)
-              (goto-char
-               (previous-single-char-property-change (point) 'invisible)))
-            ;; Remove whatever overlay is currently making yet-to-be
-            ;; edited text invisible.  Also remove nested invisibility
-            ;; related overlays.
-            (delete-overlay (or invisible-at-point invisible-before-point))
-            (let ((origin (if invisible-at-point (point) (1- (point)))))
-              (while (pcase (get-char-property-and-overlay origin 'invisible)
-                       (`(,_ . ,(and (pred overlayp) o))
-                        (delete-overlay o)
-                        t)))))
-          (cond
-           ((eq org-fold-catch-invisible-edits 'show)
-            ;; That's it, we do the edit after showing
-            (message
-             "Unfolding invisible region around point before editing")
-            (sit-for 1))
-           ((and (eq org-fold-catch-invisible-edits 'smart)
-                 border-and-ok-direction)
-            (message "Unfolding invisible region around point before editing"))
-           (t
-            ;; Don't do the edit, make the user repeat it in full visibility
-            (user-error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
-(defun org-fold-check-before-invisible-edit--text-properties (kind)
+(defun org-fold-check-before-invisible-edit (kind)
   "Check if editing KIND is dangerous with invisible text around.
 The detailed reaction depends on the user option
 `org-fold-catch-invisible-edits'."
@@ -1179,14 +897,6 @@ The detailed reaction depends on the user option
 	   (t
 	    ;; Don't do the edit, make the user repeat it in full visibility
 	    (user-error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
-(defsubst org-fold-check-before-invisible-edit (kind)
-  "Check if editing KIND is dangerous with invisible text around.
-The detailed reaction depends on the user option
-`org-fold-catch-invisible-edits'."
-  ;; First, try to get out of here as quickly as possible, to reduce overhead
-  (if (eq org-fold-core-style 'text-properties)
-      (org-fold-check-before-invisible-edit--text-properties kind)
-    (org-fold-check-before-invisible-edit--overlays kind)))
 
 (provide 'org-fold)
 

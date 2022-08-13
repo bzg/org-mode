@@ -644,23 +644,7 @@ With a numeric prefix, show all headlines up to that level."
 		(_ nil)))
 	    (org-end-of-subtree)))))))
 
-(defun org-cycle-overview--overlays ()
-  "Switch to overview mode, showing only top-level headlines."
-  (interactive)
-  (org-fold-show-all '(headings drawers))
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward org-outline-regexp-bol nil t)
-      (let* ((last (line-end-position))
-             (level (- (match-end 0) (match-beginning 0) 1))
-             (regexp (format "^\\*\\{1,%d\\} " level)))
-        (while (re-search-forward regexp nil :move)
-          (org-fold-region last (line-end-position 0) t 'outline)
-          (setq last (line-end-position))
-          (setq level (- (match-end 0) (match-beginning 0) 1))
-          (setq regexp (format "^\\*\\{1,%d\\} " level)))
-        (org-fold-region last (point) t 'outline)))))
-(defun org-cycle-overview--text-properties ()
+(defun org-cycle-overview ()
   "Switch to overview mode, showing only top-level headlines."
   (interactive)
   (save-excursion
@@ -680,14 +664,8 @@ With a numeric prefix, show all headlines up to that level."
           (setq level (- (match-end 0) (match-beginning 0) 1))
           (setq regexp (format "^\\*\\{1,%d\\} " level)))
         (org-fold-region last (point) t 'outline)))))
-(defun org-cycle-overview ()
-  "Switch to overview mode, showing only top-level headlines."
-  (interactive)
-  (if (eq org-fold-core-style 'text-properties)
-      (org-cycle-overview--text-properties)
-    (org-cycle-overview--overlays)))
 
-(defun org-cycle-content--text-properties (&optional arg)
+(defun org-cycle-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
 With numerical argument N, show content up to level N."
   (interactive "p")
@@ -706,27 +684,6 @@ With numerical argument N, show content up to level N."
       (while (re-search-backward regexp nil t)
         (org-fold-region (line-end-position) last t 'outline)
         (setq last (line-end-position 0))))))
-(defun org-cycle-content--overlays (&optional arg)
-  "Show all headlines in the buffer, like a table of contents.
-With numerical argument N, show content up to level N."
-  (interactive "p")
-  (org-fold-show-all '(headings drawers))
-  (save-excursion
-    (goto-char (point-max))
-    (let ((regexp (if (and (wholenump arg) (> arg 0))
-                      (format "^\\*\\{1,%d\\} " arg)
-                    "^\\*+ "))
-          (last (point)))
-      (while (re-search-backward regexp nil t)
-        (org-fold-region (line-end-position) last t 'outline)
-        (setq last (line-end-position 0))))))
-(defun org-cycle-content (&optional arg)
-  "Show all headlines in the buffer, like a table of contents.
-With numerical argument N, show content up to level N."
-  (interactive "p")
-  (if (eq org-fold-core-style 'text-properties)
-      (org-cycle-content--text-properties arg)
-    (org-cycle-content--overlays arg)))
 
 (defvar org-cycle-scroll-position-to-restore nil
   "Temporarily store scroll position to restore.")

@@ -4655,7 +4655,7 @@ Text.
                      (push region regions))))
                regions)))))
   (should
-   (equal '((63 . 82) (26 . 48))
+   (equal '((26 . 48) (63 . 82))
           (let ((org-fold-core-style 'overlays))
 	    (org-test-with-temp-text
              "
@@ -4747,7 +4747,7 @@ Text.
      (org-drag-element-forward)
      (should
       (equal
-       '((63 . 82) (26 . 48))
+       '((26 . 48) (63 . 82))
        (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
 	       (overlays-in (point-min) (point-max))))))))
 
