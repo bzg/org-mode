@@ -15196,8 +15196,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		 (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
 	   (setq org-tag-alist-for-agenda
 		 (org--tag-add-to-alist
-		  org-tag-alist-for-agenda
-		  org-current-tag-alist))
+		  org-current-tag-alist
+                  org-tag-alist-for-agenda))
 	   ;; Merge current file's tag groups into global
 	   ;; `org-tag-groups-alist-for-agenda'.
 	   (when org-group-tags
