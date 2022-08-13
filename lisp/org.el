@@ -11521,8 +11521,12 @@ visible part of the buffer."
   (let ((get-indent-column
 	 (lambda ()
 	   (let ((offset (if (bound-and-true-p org-indent-mode)
-			     (* (1- org-indent-indentation-per-level)
-				(1- (org-current-level)))
+                             (save-excursion
+                               (org-back-to-heading-or-point-min)
+                               (length
+                                (get-text-property
+                                 (line-end-position)
+                                 'line-prefix)))
 			   0)))
 	     (+ org-tags-column
 		(if (> org-tags-column 0) (- offset) offset))))))
