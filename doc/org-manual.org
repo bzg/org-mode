@@ -17505,9 +17505,10 @@ a colon, for example: =:var table=other-file.org:example-table=.
   : 4
   #+end_example
 
-- literal example ::
+- literal example, or code block contents ::
 
-  A literal example block named with a =NAME= keyword.
+  A code block or literal example block named with a =NAME= keyword,
+  followed by brackets (optional for example blocks).
 
   #+begin_example
   ,#+NAME: literal-example
@@ -17517,7 +17518,7 @@ a colon, for example: =:var table=other-file.org:example-table=.
   ,#+END_EXAMPLE
 
   ,#+NAME: read-literal-example
-  ,#+BEGIN_SRC emacs-lisp :var x=literal-example
+  ,#+BEGIN_SRC emacs-lisp :var x=literal-example[]
     (concatenate #'string x " for you.")
   ,#+END_SRC
 

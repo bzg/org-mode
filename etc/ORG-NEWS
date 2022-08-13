@@ -288,6 +288,11 @@ The =org-md-toplevel-hlevel= customization variable sets the heading
 level used for top level headings, much like how
 =org-html-toplevel-hlevel= sets the heading level used for top level
 headings in HTML export.
+*** Babel: new syntax to pass the contents of a src block as argument
+
+Use the header argument =:var x=code-block[]= or
+: #+CALL: fn(x=code-block[])
+to pass the contents of a named code block as a string argument.
 
 ** New options
 *** A new custom setting =org-hide-drawer-startup= to control initial folding state of drawers

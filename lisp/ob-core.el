@@ -2156,7 +2156,7 @@ Return nil if ELEMENT cannot be read."
 	(or (org-babel--string-to-number v) v)))
      (`table (org-babel-read-table))
      (`plain-list (org-babel-read-list))
-     (`example-block
+     ((or `example-block `src-block)
       (let ((v (org-element-property :value element)))
 	(if (or org-src-preserve-indentation
 		(org-element-property :preserve-indent element))
