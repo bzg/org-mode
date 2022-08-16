@@ -13373,15 +13373,23 @@ general options (see [[*Export Settings]]).
 - =LANGUAGE= ::
   #+cindex: @samp{LANGUAGE}, keyword
   #+vindex: org-latex-packages-alist
+  #+vindex: org-latex-language-alist
+  
+  Language code of the primary document language.
+
+  The list of language codes supported by Org is stored in the
+  variable ~org-latex-language-alist~.
+
   In order to be effective, the =babel= or =polyglossia=
   packages---according to the LaTeX compiler used---must be loaded
   with the appropriate language as argument.  This can be accomplished
   by modifying the ~org-latex-packages-alist~ variable, e.g., with the
-  following snippet:
+  following snippet (note that =polyglossia= does not work with
+  pdfLaTeX):
 
   #+begin_src emacs-lisp
   (add-to-list 'org-latex-packages-alist
-               '("AUTO" "babel" t ("pdflatex")))
+               '("AUTO" "babel" t ("pdflatex" "xelatex" "lualatex")))
   (add-to-list 'org-latex-packages-alist
                '("AUTO" "polyglossia" t ("xelatex" "lualatex")))
   #+end_src
@@ -13509,6 +13517,54 @@ A sample Org file with the above headers:
   some text
 ,* Headline 2
   some more text
+#+end_example
+
+#+cindex: @samp{LANGUAGE}, keyword
+#+vindex: org-export-default-language
+LaTeX packages =babel= or =polyglossia= can also be loaded in a
+document.  The "AUTO" string will be replaced in both cases by the
+appropiate value for the =LANGUAGE= keyword, if present in the
+document, or by the value of ~org-export-default-language~.  Let's see
+some examples in one or another case.
+
+=Babel= accepts the classic syntax and (in addition) the new syntax
+with the =\babelprovide= command to load the languages using the new
+=INI= files procedure.  Keep in mind that there are a number of
+languages that are only served in babel using =INI= files, so they
+cannot be declared using the classic syntax, but only using the
+=\babelprovide= command (see
+https://mirrors.ctan.org/macros/latex/required/babel/base/babel.pdf).
+Valid usage examples could be:
+
+#+begin_example
+,#+LATEX_HEADER: \usepackage[french,italian,AUTO]{babel}
+#+end_example
+
+where "AUTO" is the main language.  But it can also be loaded using
+the =\babelprovide= command:
+
+#+begin_example
+,#+LATEX_HEADER: \usepackage[french,italian]{babel}
+,#+LATEX_HEADER: \babelprovide[import, main]{AUTO}
+#+end_example
+
+=Polyglossia=, for this procedure to be effective, must be loaded
+using the same =babel= classic syntax (but note that /this is not/
+the actual polyglossia syntax).  For example, suppose a document
+declares Polytonic Greek as the primary language, and French as the
+secondary language.  In this case, it would be expressed as:
+
+#+begin_example
+,#+LANGUAGE: el-polyton
+,#+LATEX_HEADER: \usepackage[french,AUTO]{polyglossia}
+#+end_example
+
+This would produce in LaTeX (with the actual =polyglossia= syntax):
+
+#+begin_example
+\usepackage{polyglossia}
+\setmainlanguage[variant=polytonic]{greek}
+\setotherlanguage{french}
 #+end_example
 
 *** Quoting LaTeX code

@@ -431,6 +431,19 @@ prompting for a link description.  It can be a string (used as-is) or
 a function (called with the same arguments as
 ~org-make-link-description-function~ to return a string to use).
 
+*** New list of languages for LaTeX export: ~org-latex-language-alist~ 
+
+~org-latex-language-alist~ unifies into a single list the old language
+lists for the =babel= and =polyglossia= LaTeX packages:
+~org-latex-babel-language-alist~ and
+~org-latex-polyglossia-language-alist~, respectively, which are
+declared obsolete.
+
+This new list captures the current state of art regarding language
+support in LaTeX.  The new =babel= syntax for loading languages via
+=ini= files and the new command =\babelprovide= (see:
+https://mirrors.ctan.org/macros/latex/required/babel/base/babel.pdf)
+are also supported.
 * Version 9.5
 
 ** Important announcements and breaking changes
