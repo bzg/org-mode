@@ -15192,12 +15192,16 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		 (org-refresh-effort-properties)))
 	   (or (memq 'appt org-agenda-ignore-properties)
 	       (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime))
-	   (setq org-todo-keywords-for-agenda
-		 (append org-todo-keywords-for-agenda org-todo-keywords-1))
-	   (setq org-done-keywords-for-agenda
-		 (append org-done-keywords-for-agenda org-done-keywords))
+           (dolist (el org-todo-keywords-1)
+             (unless (member el org-todo-keywords-for-agenda)
+               (push el org-todo-keywords-for-agenda)))
+           (dolist (el org-done-keywords)
+             (unless (member el org-done-keywords-for-agenda)
+               (push el org-done-keywords-for-agenda)))
 	   (setq org-todo-keyword-alist-for-agenda
-		 (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
+                 (org--tag-add-to-alist
+		  org-todo-key-alist
+                  org-todo-keyword-alist-for-agenda))
 	   (setq org-tag-alist-for-agenda
 		 (org--tag-add-to-alist
 		  org-current-tag-alist
@@ -15210,10 +15214,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		 (if old
 		     (setcdr old (org-uniquify (append (cdr old) (cdr alist))))
 		   (push alist org-tag-groups-alist-for-agenda)))))))))
-    (setq org-todo-keywords-for-agenda
-          (org-uniquify org-todo-keywords-for-agenda))
-    (setq org-todo-keyword-alist-for-agenda
-	  (org-uniquify org-todo-keyword-alist-for-agenda))))
     ;; Refresh the menu once after loading all the agenda buffers.
     (when org-agenda-file-menu-enabled
       (org-install-agenda-files-menu))))
