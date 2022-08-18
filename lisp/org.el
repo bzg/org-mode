@@ -4713,7 +4713,8 @@ The following commands are available:
 \\{org-mode-map}"
   (setq-local org-mode-loading t)
   (org-load-modules-maybe)
-  (org-install-agenda-files-menu)
+  (when org-agenda-file-menu-enabled
+    (org-install-agenda-files-menu))
   (when (and org-link-descriptive
              (eq org-fold-core-style 'overlays))
     (add-to-invisibility-spec '(org-link)))
@@ -15167,7 +15168,10 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
   "Create buffers for all agenda files, protect archived trees and comments."
   (interactive)
   (let ((inhibit-read-only t)
-	(org-inhibit-startup org-agenda-inhibit-startup))
+	(org-inhibit-startup org-agenda-inhibit-startup)
+        ;; Do not refresh list of agenda files in the menu when
+        ;; opening every new file.
+        (org-agenda-file-menu-enabled nil))
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)
     (dolist (file files)
@@ -15210,6 +15214,9 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
 	  (org-uniquify org-todo-keyword-alist-for-agenda))))
+    ;; Refresh the menu once after loading all the agenda buffers.
+    (when org-agenda-file-menu-enabled
+      (org-install-agenda-files-menu))))
 
 
 ;;;; CDLaTeX minor mode
@@ -18000,6 +18007,8 @@ Your bug report will be posted to the Org mailing list.
       (when (re-search-backward "^\\(Subject: \\)Org mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
 	(replace-match "\\1[BUG] \\3 [\\2]")))))
 
+(defvar org-agenda-file-menu-enabled t
+  "When non-nil, refresh Agenda files in Org menu when loading Org.")
 
 (defun org-install-agenda-files-menu ()
   "Install agenda file menu."
