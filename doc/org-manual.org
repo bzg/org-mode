@@ -2148,7 +2148,7 @@ Operations]]).  For example
   required to not convert empty fields to 0.  =f-1= is an optional
   Calc format string similar to =%.1f= but leaves empty results empty.
 
-- =if(typeof(vmean($1..$7)) =​= 12, string(""), vmean($1..$7); E= ::
+- =if(typeof(vmean($1..$7)) =​= 12, string(""), vmean($1..$7)); E= ::
 
   Mean value of a range unless there is any empty field.  Every field
   in the range that is empty is replaced by =nan= which lets =vmean=
