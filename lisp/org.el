@@ -6401,10 +6401,11 @@ Set it to HEADING when provided."
   (interactive)
   (org-insert-heading '(4) invisible-ok))
 
-(defun org-insert-todo-heading-respect-content (&optional force-state)
+(defun org-insert-todo-heading-respect-content (&optional _)
   "Insert TODO heading with `org-insert-heading-respect-content' set to t."
   (interactive)
-  (org-insert-todo-heading '(4) force-state))
+  (let ((org-insert-heading-respect-content t))
+    (org-insert-todo-heading '(4) t)))
 
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
