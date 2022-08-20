@@ -2847,7 +2847,8 @@ CONTEXT may be one of :tangle, :export or :eval."
 (defvar org-babel-expand-noweb-references--cache nil
   "Noweb reference cache used during expansion.")
 (defvar org-babel-expand-noweb-references--cache-buffer nil
-  "Cons of (buffer . modified-tick) cached by `org-babel-expand-noweb-references--cache'.")
+  "Cons (buffer . modified-tick) for cached noweb references.
+See `org-babel-expand-noweb-references--cache'.")
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
 

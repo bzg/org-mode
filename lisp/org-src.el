@@ -1201,8 +1201,8 @@ Throw an error when not at an export block."
 A new buffer is created and the block is copied into it, and the
 buffer is switched into Org mode.
 
-When done, exit with `\\[org-edit-src-exit]'.  The edited text \
-will then replace the area in the Org mode buffer.
+When done, exit with `\\[org-edit-src-exit]'.  The edited text will
+then replace the area in the Org mode buffer.
 
 Throw an error when not at a comment block."
   (interactive)
