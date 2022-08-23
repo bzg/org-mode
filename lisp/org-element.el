@@ -7273,7 +7273,6 @@ buffers."
 
 (defvar warning-minimum-log-level) ; Defined in warning.el
 
-(defvar org-element-cache-map--recurse nil)
 (defvar org-element-cache-map-continue-from nil
   "Position from where mapping should continue.
 This variable can be set by called function, especially when the
@@ -7554,28 +7553,6 @@ the cache."
             (goto-char (or start (point-min)))
             (move-start-to-next-match next-element-re)
             (unless (and start (>= start to-pos))
-              ;; Pre-process cache filling all the gaps.
-              (unless (or org-element-cache-map--recurse
-                          (cache-gapless-p)
-                          ;; Pre-processing all the elements in large
-                          ;; buffers when NEXT-RE/FAIL-RE are provided
-                          ;; may be much slower compared to using
-                          ;; regexp.
-                          (and (eq granularity 'element)
-                               (or next-re fail-re)))
-                (let ((org-element-cache-map--recurse t))
-                  (setq before-time (float-time))
-                  (org-element-cache-map
-                   #'ignore
-                   :granularity granularity)  
-                  (cl-incf pre-process-time
-                           (- (float-time)
-                              before-time))
-                  ;; Re-assign the cache root after filling the cache
-                  ;; gaps.
-                  (setq node (cache-root)))
-                (setf (alist-get granularity org-element--cache-gapless)
-                      org-element--cache-change-tic))
               (while node
                 (setq data (avl-tree--node-data node))
                 (if (and leftp (avl-tree--node-left node) ; Left branch.
