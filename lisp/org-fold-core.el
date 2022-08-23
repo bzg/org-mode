@@ -34,7 +34,6 @@
 ;; - Interactive searching in folded text (via isearch)
 ;; - Handling edits in folded text
 ;; - Killing/yanking (copying/pasting) of the folded text
-;; - Fontification of the folded text
 
 ;; To setup folding in an arbitrary buffer, one must call
 ;; `org-fold-core-initialize', optionally providing the list of folding specs to be
@@ -217,22 +216,6 @@
 ;; The fragility checks can be bypassed if the code doing
 ;; modifications is wrapped into `org-fold-core-ignore-fragility-checks' macro.
 
-;;; Fontification of the folded text
-
-;; When working with huge buffers, `font-lock' may take a lot of time
-;; to fontify all the buffer text during startup.  This library
-;; provides a way to delay fontification of initially folded text to
-;; the time when the text is unfolded.  The fontification is
-;; controlled on per-folding-spec basis according to `:font-lock-skip'
-;; folding spec property.
-
-;; This library replaces `font-lock-fontify-region-function' to implement the
-;; delayed fontification.  However, it only does so when
-;; `font-lock-fontify-region-function' is not modified at the initialisation
-;; time.  If one needs to use both delayed fontification and custom
-;; `font-lock-fontify-region-function', it is recommended to consult the
-;; source code of `org-fold-core-fontify-region'.
-
 ;;; Performance considerations
 
 ;; This library is using text properties to hide text.  Text
@@ -393,7 +376,6 @@ The following properties are known:
                        Note that changing this property from nil to t may
                        clear the setting in `buffer-invisibility-spec'.
 - :alias            :: a list of aliases for the SPEC-SYMBOL.
-- :font-lock-skip   :: Suppress font-locking in folded text.
 - :fragile          :: Must be a function accepting two arguments.
                        Non-nil means that changes in region may cause
                        the region to be revealed.  The region is
@@ -695,8 +677,7 @@ The folding spec properties will be set to PROPERTIES (see
     (let* ((full-properties (mapcar (lambda (prop) (cons prop (cdr (assq prop properties))))
                                     '( :visible :ellipsis :isearch-ignore
                                        :global :isearch-open :front-sticky
-                                       :rear-sticky :fragile :alias
-                                       :font-lock-skip)))
+                                       :rear-sticky :fragile :alias)))
            (full-spec (cons spec full-properties)))
       (add-to-list 'org-fold-core--specs full-spec append)
       (mapc (lambda (prop-cons) (org-fold-core-set-folding-spec-property spec (car prop-cons) (cdr prop-cons) 'force)) full-properties)
@@ -737,9 +718,6 @@ future org buffers."
     (org-fold-core-add-folding-spec (car spec) (cdr spec)))
   (add-hook 'after-change-functions 'org-fold-core--fix-folded-region nil 'local)
   (add-hook 'clone-indirect-buffer-hook #'org-fold-core-decouple-indirect-buffer-folds nil 'local)
-  ;; Optimise buffer fontification to not fontify folded text.
-  (when (eq font-lock-fontify-region-function #'font-lock-default-fontify-region)
-    (setq-local font-lock-fontify-region-function 'org-fold-core-fontify-region))
   ;; Setup killing text
   (setq-local filter-buffer-substring-function #'org-fold-core--buffer-substring-filter)
   (if (and (boundp 'isearch-opened-regions)
@@ -985,9 +963,6 @@ WITH-MARKERS must be nil when RELATIVE is non-nil."
 
 ;;;;; Region visibility
 
-(defvar org-fold-core--fontifying nil
-  "Flag used to avoid font-lock recursion.")
-
 ;; This is the core function performing actual folding/unfolding.  The
 ;; folding state is stored in text property (folding property)
 ;; returned by `org-fold-core--property-symbol-get-create'.  The value of the
@@ -1038,15 +1013,7 @@ If SPEC-OR-ALIAS is omitted and FLAG is nil, unfold everything in the region."
                          (setq pos next))
                      (setq pos (next-single-char-property-change pos 'invisible nil to)))))))
            (when (eq org-fold-core-style 'text-properties)
-	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))
-           ;; Fontify unfolded text.
-           (unless (or (not font-lock-mode)
-                       org-fold-core--fontifying
-                       (not (org-fold-core-get-folding-spec-property spec :font-lock-skip)))
-             (let ((org-fold-core--fontifying t))
-               (if jit-lock-mode
-                   (jit-lock-refontify from to)
-                 (save-match-data (font-lock-fontify-region from to)))))))))))
+	     (remove-text-properties from to (list (org-fold-core--property-symbol-get-create spec) nil)))))))))
 
 (cl-defmacro org-fold-core-regions (regions &key override clean-markers relative)
   "Fold every region in REGIONS list in current buffer.
@@ -1291,7 +1258,7 @@ text properties (for the sake of reducing overheads).
 
 If a text was inserted into invisible region, hide the inserted text.
 If a text was inserted in front/back of the region, hide it according
-to :font-sticky/:rear-sticky folding spec property.
+to :front-sticky/:rear-sticky folding spec property.
 
 If the folded region is folded with a spec with non-nil :fragile
 property, unfold the region if the :fragile function returns non-nil."
@@ -1306,7 +1273,7 @@ property, unfold the region if the :fragile function returns non-nil."
       ;; buffer.  Work around Emacs bug#46982.
       (when (eq org-fold-core-style 'text-properties)
         (org-fold-core-cycle-over-indirect-buffers
-          ;; Re-hide text inserted in the middle/font/back of a folded
+          ;; Re-hide text inserted in the middle/front/back of a folded
           ;; region.
           (unless (equal from to) ; Ignore deletions.
 	    (dolist (spec (org-fold-core-folding-spec-list))
@@ -1502,58 +1469,6 @@ The arguments and return value are as specified for `filter-buffer-substring'."
                     (push prop props-list))))))))
       (remove-text-properties 0 (length return-string) props-list return-string))
     return-string))
-
-;;; Do not fontify folded text until needed.
-(defvar org-fold-core--force-fontification nil
-  "Let-bind this variable to t in order to force fontification in
-folded regions.")
-(defun org-fold-core-fontify-region (beg end loudly &optional force)
-  "Run `font-lock-default-fontify-region' in visible regions."
-  (with-silent-modifications
-    (let* ((pos beg) next font-lock-return-value
-           (force (or force org-fold-core--force-fontification))
-           (org-fold-core--fontifying t)
-           (skip-specs
-            (unless force
-              (let (result)
-                (dolist (spec (org-fold-core-folding-spec-list))
-                  (when (and (not (org-fold-core-get-folding-spec-property spec :visible))
-                             (org-fold-core-get-folding-spec-property spec :font-lock-skip))
-                    (push spec result)))
-                result))))
-      ;; Move POS to first visible point within BEG..END.
-      (unless force
-        (while (and (catch :found
-                      (dolist (spec (org-fold-core-get-folding-spec 'all pos))
-                        (when (org-fold-core-get-folding-spec-property spec :font-lock-skip)
-                          (throw :found spec))))
-                    (< pos end))
-          (setq pos (org-fold-core-next-folding-state-change nil pos end))))
-      (when force (setq pos beg next end))
-      (while (< pos end)
-        (unless force
-          (setq next (org-fold-core-next-folding-state-change skip-specs pos end))
-          ;; Move to the end of the region to be fontified.
-          (while (and (not (catch :found
-                           (dolist (spec (org-fold-core-get-folding-spec 'all next))
-                             (when (org-fold-core-get-folding-spec-property spec :font-lock-skip)
-                               (throw :found spec)))))
-                      (< next end))
-            (setq next (org-fold-core-next-folding-state-change nil next end))))
-        (save-excursion
-          ;; Keep track of the actually fontified region.
-          (pcase (font-lock-default-fontify-region pos next loudly)
-            (`(jit-lock-bounds ,beg . ,end)
-             (pcase font-lock-return-value
-               (`(jit-lock-bounds ,oldbeg . ,oldend)
-                (setq font-lock-return-value
-                      `(jit-lock-bounds
-                        ,(min oldbeg beg)
-                        ,(max oldend end))))
-               (value (setq font-lock-return-value value))))))
-        (put-text-property pos next 'fontified t)
-        (setq pos next))
-      (or font-lock-return-value `(jit-lock-bounds ,beg . ,end)))))
 
 (defun org-fold-core-update-optimisation (beg end)
   "Update huge buffer optimisation between BEG and END.

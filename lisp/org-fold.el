@@ -223,12 +223,11 @@ smart            Make point visible, and do insertion/deletion if it is
       (:isearch-open . t)
       ;; This is needed to make sure that inserting a
       ;; new planning line in folded heading is not
-      ;; revealed.  Also, the below combination of :font-sticky and
-      ;; :real-sticky conforms to the overlay properties in outline.el
+      ;; revealed.  Also, the below combination of :front-sticky and
+      ;; :rear-sticky conforms to the overlay properties in outline.el
       ;; and the older Org versions as in `outline-flag-region'.
       (:front-sticky . t)
       (:rear-sticky . nil)
-      (:font-lock-skip . t)
       (:alias . (headline heading outline inlinetask plain-list)))
      (,(if (eq org-fold-core-style 'text-properties) 'org-fold-block 'org-hide-block)
       (:ellipsis . ,ellipsis)

@@ -1197,39 +1197,23 @@ so values can contain further %-escapes if they are define later in TABLE."
 				   org-emphasis t)
   "Properties to remove when a string without properties is wanted.")
 
-(defvar org-fold-core--force-fontification)
-(defmacro org-with-forced-fontification (&rest body)
-  "Run BODY forcing fontification of folded regions."
-  (declare (debug (form body)) (indent 1))
-  `(unwind-protect
-       (progn
-         (setq org-fold-core--force-fontification t)
-         ,@body)
-     (setq org-fold-core--force-fontification nil)))
-
 (defun org-buffer-substring-fontified (beg end)
   "Return fontified region between BEG and END."
   (when (bound-and-true-p jit-lock-mode)
-    (org-with-forced-fontification
-        (when (or (text-property-not-all beg end 'org-fold-core-fontified t)
-                  (text-property-not-all beg end 'fontified t))
-          (save-match-data (font-lock-fontify-region beg end)))))
+    (when (text-property-not-all beg end 'fontified t)
+      (save-match-data (font-lock-fontify-region beg end))))
   (buffer-substring beg end))
 
 (defun org-looking-at-fontified (re)
   "Call `looking-at' RE and make sure that the match is fontified."
   (prog1 (looking-at re)
     (when (bound-and-true-p jit-lock-mode)
-      (org-with-forced-fontification
-          (when (or (text-property-not-all
-                     (match-beginning 0) (match-end 0)
-                     'org-fold-core-fontified t)
-                    (text-property-not-all
-                     (match-beginning 0) (match-end 0)
-                     'fontified t))
-            (save-match-data
-              (font-lock-fontify-region (match-beginning 0)
-                                (match-end 0))))))))
+      (when (text-property-not-all
+             (match-beginning 0) (match-end 0)
+             'fontified t)
+        (save-match-data
+          (font-lock-fontify-region (match-beginning 0)
+                            (match-end 0)))))))
 
 (defsubst org-no-properties (s &optional restricted)
   "Remove all text properties from string S.
