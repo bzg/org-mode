@@ -282,6 +282,12 @@ file name.  For example:
 
 If a file does not have a title, the table will show the file name
 instead.
+*** New =org-md-toplevel-hlevel= variable for Markdown export
+
+The =org-md-toplevel-hlevel= customization variable sets the heading
+level used for top level headings, much like how
+=org-html-toplevel-hlevel= sets the heading level used for top level
+headings in HTML export.
 
 ** New options
 *** A new custom setting =org-hide-drawer-startup= to control initial folding state of drawers
