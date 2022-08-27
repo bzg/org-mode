@@ -18734,7 +18734,7 @@ assumed to be significant there."
 	  (end (copy-marker end)))
       (while (< (point) end)
 	(if (or (looking-at-p " \r\t\n") (org-at-heading-p)) (forward-line)
-	  (let* ((element (org-element-at-point-no-context))
+	  (let* ((element (org-element-at-point))
 		 (type (org-element-type element))
 		 (element-end (copy-marker (org-element-property :end element)))
 		 (ind (org--get-expected-indentation element nil)))
