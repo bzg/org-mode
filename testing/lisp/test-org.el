@@ -8421,6 +8421,166 @@ two
      (call-interactively #'org-paste-subtree)
      (buffer-string)))))
 
+(ert-deftest test-org/org--open-file-format-command ()
+  "Test `org--open-file-format-command' helper for `org-open-file'."
+  (let ((system-type 'gnu/linux)) ; Fix behavior of `shell-quote-argument'.
+    ;; No additional groups in `org-file-apps' key.
+    (let ((file "/file.pdf")
+          (pattern "\\.pdf\\'"))
+      (should
+       (equal "simple /file.pdf"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "simple %s" file file (match-data)))))
+      (should
+       (equal "single-quotes /file.pdf"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "single-quotes '%s'" file file (match-data)))))
+      (should
+       (equal "double-quotes /file.pdf"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "double-quotes \"%s\"" file file (match-data)))))
+      (should
+       (equal "quotes 'mismatch \"/file.pdf'"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "quotes 'mismatch \"%s'" file file (match-data)))))
+      (should
+       (equal "no subst"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "no subst" file file (match-data)))))
+      (should
+       (equal "% literal percent 100% %s"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "\\% literal percent 100\\% \\%s" file file (match-data)))))
+      (should
+       (equal "escape \"/file.pdf\" \\ more"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    ;; Second quote is not escaped.
+                    "escape \\\"%s\" \\\\ more" file file (match-data)))))
+      (should
+       (equal "/file.pdf file at start"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "%s file at start" file file (match-data)))))
+      (should
+       (equal "backslash-newline\n/file.pdf"
+              (and (string-match pattern file)
+                   (org--open-file-format-command
+                    "backslash-newline\\\n%s" file file (match-data))))))
+    ;; Anchors within target file.
+    (let ((file "/page-search.pdf")
+          (link "/page-search.pdf::10::some words")
+          (pattern "\\.pdf::\\([0-9]+\\)::\\(.*\\)\\'"))
+      (should
+       (equal "zathura --page 10 --find some\\ words /page-search.pdf"
+              (and (string-match pattern link)
+                   (org--open-file-format-command
+                    "zathura --page '%1' --find %2 \"%s\"" file link (match-data)))))
+      ;; Unused %2.
+      (should
+       (equal "firefox file:///page-search.pdf\\#page=10"
+              (and (string-match pattern link)
+                   (org--open-file-format-command
+                    "firefox file://%s\\\\#page=%1" file link (match-data)))))
+      (should
+       (equal "adjucent-subst /page-search.pdfsome\\ words10some\\ words"
+              (and (string-match pattern link)
+                   (org--open-file-format-command
+                    "adjucent-subst %s%2'%1'%2" file link (match-data))))))
+    ;; No more than 9 substitutions are supported.
+    (let ((file "/many.pdf")
+          (link "/many.pdf::one:2:3:4:5:6:7:8:9:a:b:c")
+          (pattern (concat "\\.pdf:"
+                           (mapconcat (lambda (_) ":\\([^:]+\\)")
+                                      (number-sequence 1 12)
+                                      "")
+                           "\\'")))
+      (should
+       (equal "overflow /many.pdf::one:2:3:4:5:6:7:8:9:one0:one1:one2"
+              (and (string-match pattern link)
+                   (org--open-file-format-command
+                    "overflow %s::%1:%2:%3:%4:%5:%6:%7:%8:%9:%10:%11:%12"
+                    file link (match-data))))))
+    ;; Percent character in link fields does not cause any problem.
+    (let ((file "/file-%2.pdf")
+          (link "/file-%2.pdf::anchor-%3::search %1")
+          (pattern "\\.pdf::\\([^:]+\\)::\\(.+\\)\\'"))
+      (should
+       (equal "percents --find search\\ \\%1 file:///file-\\%2.pdf\\#anchor-\\%3"
+              (and (string-match pattern link)
+                   (org--open-file-format-command
+                    "percents --find %2 file://%s\\\\#%1"
+                    file link (match-data))))))
+    ;; Errors.
+    (let ((file "/error.pdf")
+          (pattern "\\.pdf\\'"))
+      (let* ((err (should-error
+                   (and (string-match pattern file)
+                        (org--open-file-format-command
+                         "trailing-percent %s %" file file (match-data)))
+                   :type 'error))
+             (err-text (cadr err)))
+        (should-not (unless (and (stringp err-text)
+                                 (string-match-p "\\`Invalid format .*%" err-text))
+                      err)))
+      (let* ((err (should-error
+                   (and (string-match pattern file)
+                        (org--open-file-format-command
+                         "trailing-backslash %s \\" file file (match-data)))
+                   :type 'error))
+             (err-text (cadr err)))
+        (should-not (unless (and (stringp err-text)
+                                 (string-match-p "\\`Invalid format .*\\\\" err-text))
+                      err)))
+      (let* ((err (should-error
+                   (and (string-match pattern file)
+                        (org--open-file-format-command
+                         "percent-newline %\n%s" file file (match-data)))
+                   :type 'error))
+             (err-text (cadr err)))
+        (should-not (unless (and (stringp err-text)
+                                 (string-match-p "\\`Invalid format .*%\n" err-text))
+                      err)))
+      ;; Mailcap escape for "%" is "\%", not "%%".
+      (let* ((err (should-error
+                   (and (string-match pattern file)
+                        (org--open-file-format-command
+                         "percent-percent %s%%" file file (match-data)))
+                   :type 'error))
+             (err-text (cadr err)))
+        (should-not (unless (and (stringp err-text)
+                                 (string-match-p "\\`Invalid format .*%%" err-text))
+                      err)))
+      ;; Mailcap allows "%t" for MIME type, but Org has no such information.
+      (let* ((err (should-error
+                   (and (string-match pattern file)
+                        (org--open-file-format-command
+                         "percent-t-unsupported --type '%t' %s" file file (match-data)))
+                   :type 'error))
+             (err-text (cadr err)))
+        (should-not (unless (and (stringp err-text)
+                                 (string-match-p "\\`Invalid format .*%t" err-text))
+                      err))))
+    ;; Optional regular expression groups have no point in `org-file-apps' patterns.
+    (let* ((file "/error.pdf")
+           (link "/error.pdf::1")
+           (pattern "\\.pdf::\\([^:]+\\)\\(?:::\\(.+\\)\\)?\\'")
+           (err (should-error
+                 (and (string-match pattern link)
+                      (org--open-file-format-command
+                       "no-such-match --search %2 %s" file link (match-data)))
+                 :type 'error))
+           (err-text (cadr err)))
+      (should-not (unless (and (stringp err-text)
+                               (string-match-p "\\`Invalid format.*%2" err-text))
+                    err)))))
+
 (provide 'test-org)
 
 ;;; test-org.el ends here

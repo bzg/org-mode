@@ -1299,6 +1299,16 @@ Possible values for the file identifier are:
 \"evince -p %1 %s\")
                      to open [[file:document.pdf::5]] with evince at page 5.
 
+                 Likely, you will need more entries: without page
+                 number; with search pattern; with cross-reference
+                 anchor; some combination of options.  Consider simple
+                 pattern here and a Lisp function to determine command
+                 line arguments instead.  Passing argument list to
+                 `call-process' or `make-process' directly allows to
+                 avoid treating some character in peculiar file names
+                 as shell specialls causing executing part of file
+                 name as a subcommand.
+
  `directory'   Matches a directory
  `remote'      Matches a remote file, accessible through tramp or efs.
                Remote files most likely should be visited through Emacs
@@ -8015,6 +8025,74 @@ opened in Emacs."
    (when add-auto-mode
      (mapcar (lambda (x) (cons (car x) 'emacs)) auto-mode-alist))))
 
+(defun org--open-file-format-command
+    (mailcap-command file link match-data)
+  "Format MAILCAP-COMMAND to launch viewer for the FILE.
+
+MAILCAP-COMMAND may be an entry from the `org-file-apps' list or viewer
+field from mailcap file loaded to `mailcap-mime-data'.  See \"RFC
+1524.  A User Agent Configuration Mechanism For Multimedia Mail Format
+Information\" (URL `https://www.rfc-editor.org/rfc/rfc1524.html') for
+details, man page `mailcap(5)' for brief summary, and Info node
+`(emacs-mime) mailcap' for specific related to Emacs.  Only a part of
+mailcap specification is supported.
+
+The following substitutions are interpolated in the MAILCAP-COMMAND
+string:
+
+- \"%s\" to FILE name passed through
+  `convert-standard-filename', so it must be absolute path.
+
+- \"%1\" to \"%9\" groups from MATCH-DATA found in the LINK string by
+  the regular expression in the key part of the `org-file-apps' entry.
+  (performed by caller).  Not recommended, consider a lisp function
+  instead of a shell command.  For example, the following link in an
+  Org file
+
+       <file:///usr/share/doc/bash/bashref.pdf::#Redirections::allocate a file>
+
+   may be handled by an `org-file-apps' entry like
+
+       (\"\\\\.pdf\\\\(?:\\\\.[gx]z\\\\|\\\\.bz2\\\\)?::\\\\(#[^:]+\\\\)::\\\\(.+\\\\)\\\\\\='\"
+        . \"okular --find %2 %s%1\")
+
+Use backslash \"\\\" to quote percent \"%\" or any other character
+including backslash itself.
+
+In addition, each argument is passed through `shell-quote-argument',
+so quotes around substitutions should not be used.  For compliance
+with mailcap files shipped e.g. in Debian GNU/Linux, single or double
+quotes around substitutions are stripped.  It deviates from mailcap
+specification that requires file name to be safe for shell and for the
+application."
+  (let ((spec (list (cons ?s  (convert-standard-filename file))))
+        (ngroups (min 9 (- (/ (length match-data) 2) 1))))
+    (when (> ngroups 0)
+      (set-match-data match-data)
+      (dolist (i (number-sequence 1 ngroups))
+        (push (cons (+ ?0 i) (match-string-no-properties i link)) spec)))
+    (replace-regexp-in-string
+     (rx (or (and "\\" (or (group anything) string-end))
+             (and (optional (group (any "'\"")))
+                  "%"
+                  (or (group anything) string-end)
+                  (optional (group (backref 2))))))
+     (lambda (fmt)
+       (let* ((backslash (match-string-no-properties 1 fmt))
+              (key (match-string 3 fmt))
+              (value (and key (alist-get (string-to-char key) spec))))
+         (cond
+          (backslash)
+          (value (let ((quot (match-string 2 fmt))
+                       (subst (shell-quote-argument value)))
+                   ;; Remove quotes around the file name - we use
+                   ;; `shell-quote-argument'.
+                   (if (match-string 4 fmt)
+                       subst
+                     (concat quot subst))))
+          (t (error "Invalid format `%s'" fmt)))))
+     mailcap-command nil 'literal)))
+
 ;;;###autoload
 (defun org-open-file (path &optional in-emacs line search)
   "Open the file at PATH.
@@ -8112,27 +8190,8 @@ If the file does not exist, throw an error."
 	       (not org-open-non-existing-files))
       (user-error "No such file: %s" file))
     (cond
-     ((and (stringp cmd) (not (string-match "^\\s-*$" cmd)))
-      ;; Remove quotes around the file name - we'll use shell-quote-argument.
-      (while (string-match "['\"]%s['\"]" cmd)
-	(setq cmd (replace-match "%s" t t cmd)))
-      (setq cmd (replace-regexp-in-string
-		 "%s"
-		 (shell-quote-argument (convert-standard-filename file))
-		 cmd
-		 nil t))
-
-      ;; Replace "%1", "%2" etc. in command with group matches from regex
-      (save-match-data
-	(let ((match-index 1)
-	      (number-of-groups (- (/ (length link-match-data) 2) 1)))
-	  (set-match-data link-match-data)
-	  (while (<= match-index number-of-groups)
-	    (let ((regex (concat "%" (number-to-string match-index)))
-		  (replace-with (match-string match-index dlink)))
-	      (while (string-match regex cmd)
-		(setq cmd (replace-match replace-with t t cmd))))
-	    (setq match-index (+ match-index 1)))))
+     ((org-string-nw-p cmd)
+      (setq cmd (org--open-file-format-command cmd file dlink link-match-data))
 
       (save-window-excursion
 	(message "Running %s...done" cmd)
