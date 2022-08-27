@@ -197,8 +197,7 @@ then create.  Return the initialized session."
 	  (setq py-buffer (org-babel-python-with-earmuffs session)))
 	(let ((python-shell-buffer-name
 	       (org-babel-python-without-earmuffs py-buffer)))
-	  (run-python cmd)
-	  (sleep-for 0 10)))
+	  (run-python cmd)))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
 	(require 'python-mode)
@@ -217,6 +216,8 @@ then create.  Return the initialized session."
 	  (py-shell nil nil t org-babel-python-command py-buffer nil nil t nil)))
        (t
 	(error "No function available for running an inferior Python")))
+      ;; Wait until Python initializes.
+      (org-babel-comint-wait-for-output py-buffer)
       (setq org-babel-python-buffers
 	    (cons (cons session py-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
