@@ -18610,6 +18610,10 @@ expanded anyway.
   ~org-babel-tangle~, making it suitable for post-processing,
   compilation, and evaluation of code in the tangled files.
 
+- ~org-babel-tangle-finished-hook~ ::
+  #+vindex: org-babel-tangle-finished-hook
+  This hook is run after post-tangle hooks, in the original buffer.
+
 *** Jumping between code and Org
 :PROPERTIES:
 :UNNUMBERED: notoc

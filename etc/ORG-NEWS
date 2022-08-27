@@ -301,6 +301,13 @@ to pass the contents of a named code block as a string argument.
 The new property =ORG-IMAGE-ACTUAL-WIDTH= can override the global
 variable ~org-image-actual-width~ value for inline images display width.
 
+*** New ~org-babel-tangle-finished-hook~ hook run at the very end of ~org-babel-tangle~
+
+This provides a proper counterpart to ~org-babel-pre-tangle-hook~, as
+~org-babel-post-tangle-hook~ is run
+per-tangle-destination. ~org-babel-tangle-finished-hook~ is just run
+once after the post tangle hooks.
+
 ** New options
 *** New custom settings =org-icalendar-scheduled-summary-prefix= and =org-icalendar-deadline-summary-prefix=
 
