@@ -78,7 +78,7 @@ then the name of the language is used."
   :type 'hook)
 
 (defcustom org-babel-pre-tangle-hook '(save-buffer)
-  "Hook run at the beginning of `org-babel-tangle'."
+  "Hook run at the beginning of `org-babel-tangle' in the original buffer."
   :group 'org-babel
   :version "24.1"
   :type 'hook)
@@ -87,6 +87,13 @@ then the name of the language is used."
   "Hook run over the contents of each code block body."
   :group 'org-babel
   :version "24.1"
+  :type 'hook)
+
+(defcustom org-babel-tangle-finished-hook nil
+  "Hook run at the very end of `org-babel-tangle' in the original buffer.
+In this way, it is the counterpart to `org-babel-pre-tangle-hook'."
+  :group 'org-babel
+  :package-version '(Org . "9.6")
   :type 'hook)
 
 (defcustom org-babel-tangle-comment-format-beg "[[%link][%source-name]]"
@@ -322,6 +329,7 @@ matching a regular expression."
 	     (org-babel-with-temp-filebuffer file
 	       (run-hooks 'org-babel-post-tangle-hook)))
 	   path-collector))
+        (run-hooks 'org-babel-tangle-finished-hook)
 	path-collector))))
 
 (defun org-babel-interpret-file-mode (mode)
