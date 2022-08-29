@@ -4586,13 +4586,15 @@ returns non-nil if any of them match."
                 (if domain
                     (concat
                      (propertize "d" 'face 'success)
-                     " to download this resource, and mark this domain as safe.\n ")
+                     " to download this resource, and mark the domain ("
+                     (propertize domain 'face '(:inherit org-link :weight normal))
+                     ") as safe.\n ")
                   "")
                 (propertize "f" 'face 'success)
                 (if current-file
                     (concat
                      " to download this resource, and permanantly mark all resources in "
-                     (propertize current-file 'face 'fixed-pitch-serif)
+                     (propertize current-file 'face 'underline)
                      " as safe.\n ")
                   "")
                 (propertize "y" 'face 'warning)
