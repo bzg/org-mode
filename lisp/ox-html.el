@@ -1184,7 +1184,8 @@ font          The font to use with HTML-CSS and SVG output.  As of MathJax 2.5
               \"Gyre-Termes\", and \"Latin-Modern\".
 linebreaks    Let MathJax perform automatic linebreaks.  Valid values
               are \"true\" and \"false\".
-indent        If align is not center, how far from the left/right side?
+indent        If align is not center, how far from the left/right side?  For
+              example, \"1em\".
 multlinewidth The width of the multline environment.
 autonumber    How to number equations.  Valid values are \"none\",
               \"all\" and \"AMS\".
