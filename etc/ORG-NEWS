@@ -455,6 +455,17 @@ prompting for a link description.  It can be a string (used as-is) or
 a function (called with the same arguments as
 ~org-make-link-description-function~ to return a string to use).
 
+An example of a such function for =info:= links is
+~org-info-description-as-command~.  To access a manual section outside
+of Org, description may be pasted to shell prompt or evaluated withing
+Emacs using =M-:= (wrapped into parenthesis).  For example,
+description of the =info:org#Tags= link is =info "(org) Tags"=.  To
+restore earlier behavior add to your Emacs init file the following:
+#+begin_src elisp :results silent :eval never-export
+  (with-eval-after-load 'ol-info
+    (org-link-set-parameters "info" :insert-description nil))
+#+end_src
+
 *** New list of languages for LaTeX export: ~org-latex-language-alist~ 
 
 ~org-latex-language-alist~ unifies into a single list the old language
