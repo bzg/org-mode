@@ -1101,7 +1101,8 @@ removed.  Return the new string.  If STRING is nil, return nil."
   (and string
        (if (and (string-prefix-p pre string)
 		(string-suffix-p post string))
-	   (substring string (length pre) (- (length post)))
+	   (substring string (length pre)
+                      (and (not (string-equal "" post)) (- (length post))))
 	 string)))
 
 (defun org-strip-quotes (string)

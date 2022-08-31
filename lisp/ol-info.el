@@ -30,7 +30,6 @@
 
 ;;; Code:
 
-(require 'subr-x) ; `string-trim', `string-remove-prefix'
 (require 'org-macs)
 (org-assert-version)
 
@@ -78,11 +77,11 @@ File may be a virtual one, see `Info-virtual-files'."
       '("dir" . "Top")
     (string-match "\\`\\([^#:]*\\)\\(?:[#:]:?\\(.*\\)\\)?\\'" path)
     (let* ((node (match-string 2 path))
-           ;; Do not reorder, `string-trim' modifies match.
-           (file (string-trim (match-string 1 path))))
+           ;; Do not reorder, `org-trim' modifies match.
+           (file (org-trim (match-string 1 path))))
       (cons
        (if (org-string-nw-p file) file "dir")
-       (if (org-string-nw-p node) (string-trim node) "Top")))))
+       (if (org-string-nw-p node) (org-trim node) "Top")))))
 
 (defun org-info-description-as-command (link desc)
   "Info link description that can be pasted as command.
@@ -106,7 +105,7 @@ If LINK is not an info link then DESC is returned."
          (need-file-node (and (not (org-string-nw-p desc))
                               (string-prefix-p prefix link))))
     (pcase (and need-file-node
-                (org-info--link-file-node (string-remove-prefix prefix link)))
+                (org-info--link-file-node (org-unbracket-string prefix "" link)))
       ;; Unlike (info "dir"), "info dir" shell command opens "(coreutils)dir invocation".
       (`("dir" . "Top") "info \"(dir)\"")
       (`(,file . "Top") (format "info %s" file))
