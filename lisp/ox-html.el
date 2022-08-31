@@ -1186,8 +1186,8 @@ linebreaks    Let MathJax perform automatic linebreaks.  Valid values
               are \"true\" and \"false\".
 indent        If align is not center, how far from the left/right side?
 multlinewidth The width of the multline environment.
-autonumber    How to number equations.  Valid values are \"None\",
-              \"All\" and \"AMS\".
+autonumber    How to number equations.  Valid values are \"none\",
+              \"all\" and \"AMS\".
 tagindent     The amount tags are indented.
 tagside       Which side to show tags/labels on.  Valid values are
               \"left\" and \"right\"
