@@ -3,6 +3,7 @@
 ;; Copyright (C) 2021-2022 Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <mail@nicolasgoaziou.fr>
+;; Maintainer: András Simonyi <andras.simonyi@gmail.com>
 
 ;; This file is part of GNU Emacs.
 
