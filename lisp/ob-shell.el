@@ -318,7 +318,7 @@ return the value of the last statement in BODY."
 	      (set-file-modes script-file #o755)
 	      (org-babel-eval script-file "")))
 	   (t (org-babel-eval shell-file-name (org-trim body))))))
-    (when value-is-exit-status
+    (when (and results value-is-exit-status)
       (setq results (car (reverse (split-string results "\n" t)))))
     (when results
       (let ((result-params (cdr (assq :result-params params))))
