@@ -1201,7 +1201,7 @@ so values can contain further %-escapes if they are define later in TABLE."
   "Return fontified region between BEG and END."
   (when (bound-and-true-p jit-lock-mode)
     (when (text-property-not-all beg end 'fontified t)
-      (save-match-data (font-lock-fontify-region beg end))))
+      (save-excursion (save-match-data (font-lock-fontify-region beg end)))))
   (buffer-substring beg end))
 
 (defun org-looking-at-fontified (re)
@@ -1211,9 +1211,10 @@ so values can contain further %-escapes if they are define later in TABLE."
       (when (text-property-not-all
              (match-beginning 0) (match-end 0)
              'fontified t)
-        (save-match-data
-          (font-lock-fontify-region (match-beginning 0)
-                            (match-end 0)))))))
+        (save-excursion
+          (save-match-data
+            (font-lock-fontify-region (match-beginning 0)
+                              (match-end 0))))))))
 
 (defsubst org-no-properties (s &optional restricted)
   "Remove all text properties from string S.
