@@ -2329,8 +2329,8 @@ INFO may provide the values of these header arguments (in the
       (when inline
 	(let ((warning
 	       (or (and (member "table" result-params) "`:results table'")
-		   (and (listp result) "list result")
-		   (and (string-match-p "\n." result) "multiline result")
+		   (and result (listp result) "list result")
+		   (and result (string-match-p "\n." result) "multiline result")
 		   (and (member "list" result-params) "`:results list'"))))
 	  (when warning
 	    (user-error "Inline error: %s cannot be used" warning))))
