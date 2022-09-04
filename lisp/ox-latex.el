@@ -1264,25 +1264,29 @@ which are given by `org-latex-engraved-preamble' and
          (engraved-preamble (plist-get info :latex-engraved-preamble))
          (engraved-theme (plist-get info :latex-engraved-theme))
          (engraved-themes
-          (cl-delete-duplicates
-           (org-element-map
-               (plist-get info :parse-tree)
-               '(src-block inline-src-block)
-             (lambda (src)
-               (plist-get
-                (org-export-read-attribute :attr_latex src)
-                :engraved-theme))
-             info)))
+          (mapcar
+           #'intern
+           (cl-delete-duplicates
+            (org-element-map
+                (plist-get info :parse-tree)
+                '(src-block inline-src-block)
+              (lambda (src)
+                (plist-get
+                 (org-export-read-attribute :attr_latex src)
+                 :engraved-theme))
+              info))))
          (gen-theme-spec
           (lambda (theme)
             (if (eq engrave-faces-latex-output-style 'preset)
-                (engrave-faces-latex-gen-preamble (when theme (intern theme)))
+                (engrave-faces-latex-gen-preamble theme)
               (engrave-faces-latex-gen-preamble-line
                'default
                (alist-get 'default
                           (if theme
                               (engrave-faces-get-theme (intern theme))
                             engrave-faces-current-preset-style)))))))
+    (when (stringp engraved-theme)
+      (setq engraved-theme (intern engraved-theme)))
     (when (string-match "^[ \t]*\\[FVEXTRA-SETUP\\][ \t]*\n?" engraved-preamble)
       (setq engraved-preamble
             (replace-match
@@ -1319,7 +1323,7 @@ which are given by `org-latex-engraved-preamble' and
                (lambda (theme)
                  (format
                   "\n\\newcommand{\\engravedtheme%s}{%%\n%s\n}"
-                  (replace-regexp-in-string "[^A-Za-z]" "" theme)
+                  (replace-regexp-in-string "[^A-Za-z]" "" (symbol-name theme))
                   (replace-regexp-in-string
                    "newcommand" "renewcommand"
                    (replace-regexp-in-string
