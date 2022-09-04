@@ -1463,13 +1463,13 @@ key."
   "Run `org-fold-region' when in org-mode."
   (if (derived-mode-p 'org-mode)
       (org-fold-region (max from (point-min)) (min to (point-max)) flag 'headline)
-    (apply oldfun from to flag)))
+    (funcall oldfun from to flag)))
 
 (define-advice outline-next-visible-heading (:around (oldfun arg) fix-for-org-fold)
   "Run `org-next-visible-heading' when in org-mode."
   (if (derived-mode-p 'org-mode)
       (org-next-visible-heading arg)
-    (apply oldfun arg)))
+    (funcall oldfun arg)))
 
 (define-advice outline-back-to-heading (:around (oldfun &optional invisible-ok) fix-for-org-fold)
   "Run `org-back-to-heading' when in org-mode."
@@ -1487,19 +1487,19 @@ key."
 			           (point)))))
 	      (goto-char found)
 	      found)))
-    (apply oldfun invisible-ok)))
+    (funcall oldfun invisible-ok)))
 
 (define-advice outline-on-heading-p (:around (oldfun &optional invisible-ok) fix-for-org-fold)
   "Run `org-at-heading-p' when in org-mode."
   (if (derived-mode-p 'org-mode)
       (org-at-heading-p (not invisible-ok))
-    (apply oldfun invisible-ok)))
+    (funcall oldfun invisible-ok)))
 
 (define-advice outline-hide-sublevels (:around (oldfun levels) fix-for-org-fold)
   "Run `org-fold-hide-sublevels' when in org-mode."
   (if (derived-mode-p 'org-mode)
       (org-fold-hide-sublevels levels)
-    (apply oldfun levels)))
+    (funcall oldfun levels)))
 
 (define-advice outline-toggle-children (:around (oldfun) fix-for-org-fold)
   "Run `org-fold-hide-sublevels' when in org-mode."
@@ -1510,7 +1510,7 @@ key."
             (org-fold-hide-subtree)
           (org-fold-show-children)
           (org-fold-show-entry 'hide-drawers)))
-    (apply oldfun)))
+    (funcall oldfun)))
 
 ;; TODO: outline-headers-as-kill
 
