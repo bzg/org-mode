@@ -8134,7 +8134,6 @@ If the file does not exist, throw an error."
 	 (link (cond (line (concat file "::" (number-to-string line)))
 		     (search (concat file "::" search))
 		     (t file)))
-	 (dlink (downcase link))
 	 (ext
 	  (and (string-match "\\`.*?\\.\\([a-zA-Z0-9]+\\(\\.gz\\)?\\)\\'" dfile)
 	       (match-string 1 dfile)))
@@ -8159,8 +8158,9 @@ If the file does not exist, throw an error."
 		    ;; First, try matching against apps-dlink if we
 		    ;; get a match here, store the match data for
 		    ;; later.
-		    (let ((match (assoc-default dlink apps-dlink
-						'string-match)))
+		    (let* ((case-fold-search t)
+                           (match (assoc-default link apps-dlink
+                                                 'string-match)))
 		      (if match
 			  (progn (setq link-match-data (match-data))
 				 match)
@@ -8191,7 +8191,7 @@ If the file does not exist, throw an error."
       (user-error "No such file: %s" file))
     (cond
      ((org-string-nw-p cmd)
-      (setq cmd (org--open-file-format-command cmd file dlink link-match-data))
+      (setq cmd (org--open-file-format-command cmd file link link-match-data))
 
       (save-window-excursion
 	(message "Running %s...done" cmd)
