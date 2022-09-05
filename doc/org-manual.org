@@ -16472,13 +16472,16 @@ Settings]]), however, override everything.
 #+cindex: links, publishing
 
 To create a link from one Org file to another, you would use something
-like =[[file:foo.org][The foo]]= or simply =[[file:foo.org]]= (see [[*External Links]]).  When
-published, this link becomes a link to =foo.html=.  You can thus
-interlink the pages of your "Org web" project and the links will work
-as expected when you publish them to HTML.  If you also publish the
-Org source file and want to link to it, use an =http= link instead of
-a =file:= link, because =file= links are converted to link to the
-corresponding =.html= file.
+like =[[file:foo.org][The foo]]= or simply =[[file:foo.org]]= (see
+[[*External Links]]).  When published, this link becomes a link to
+=foo.html=.  You can thus interlink the pages of your "Org web"
+project and the links will work as expected when you publish them to
+HTML.  If you also publish the Org source file and want to link to it,
+use an =http= link instead of a =file:= link, because =file= links are
+converted to link to the corresponding =.html= file.
+
+Links to encrypted Org files, like =[[file:foo.org.gpg]]= are also
+supported.
 
 You may also link to related files, such as images.  Provided you are
 careful with relative file names, and provided you have also
