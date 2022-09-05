@@ -143,6 +143,12 @@ discouraged when working with Org files.
 *** Clock table can now produce quarterly reports
 
 =:step= clock table parameter can now be set to =quarter=.
+*** Publishing now supports links to encrypted Org files
+
+Links to other published Org files are automatically converted to the
+corresponding html links.  Now, this feature is also available when
+links point to encrypted Org files, like
+=[[file:foo.org.gpg::Heading]]=.
 
 *** Interactive commands now support escaping text inside comment blocks
 

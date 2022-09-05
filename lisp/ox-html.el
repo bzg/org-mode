@@ -839,6 +839,8 @@ are directly put into a \"href\" tag in HTML.  However, links to other Org files
 (recognized by the extension \".org\") should become links to the corresponding
 HTML file, assuming that the linked Org file will also be converted to HTML.
 
+Links to \"file.org.gpg\" are also converted.
+
 When nil, the links still point to the plain \".org\" file."
   :group 'org-export-html
   :type 'boolean)
@@ -3066,12 +3068,13 @@ INFO is a plist holding contextual information.  See
 	  (lambda (raw-path info)
 	    ;; Treat links to `file.org' as links to `file.html', if
 	    ;; needed.  See `org-html-link-org-files-as-html'.
-	    (cond
-	     ((and (plist-get info :html-link-org-files-as-html)
-		   (string= ".org"
-			    (downcase (file-name-extension raw-path "."))))
-	      (concat (file-name-sans-extension raw-path) dot html-ext))
-	     (t raw-path))))
+            (save-match-data
+	      (cond
+	       ((and (plist-get info :html-link-org-files-as-html)
+                     (let ((case-fold-search t))
+                       (string-match "\\(.+\\)\\.org\\(?:\\.gpg\\)?$" raw-path)))
+	        (concat (match-string 1 raw-path) dot html-ext))
+	       (t raw-path)))))
 	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
