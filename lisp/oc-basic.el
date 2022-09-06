@@ -277,7 +277,7 @@ Optional argument INFO is the export state, as a property list."
             (when (or (org-file-has-changed-p file)
                       (not (gethash file org-cite-basic--file-id-cache)))
               (insert-file-contents file)
-              (setf (buffer-file-name) file)
+              (set-visited-file-name file t)
               (puthash file (org-buffer-hash) org-cite-basic--file-id-cache))
             (condition-case nil
                 (unwind-protect
@@ -295,7 +295,7 @@ Optional argument INFO is the export state, as a property list."
                                   (push (cons file-id table) org-cite-basic--bibliography-cache)
                                   table))))
                       (push (cons file entries) results))
-                  (setf (buffer-file-name) nil))
+                  (set-visited-file-name nil t))
               (error (setq org-cite-basic--file-id-cache nil))))))
       (when info (plist-put info :cite-basic/bibliography results))
       results)))

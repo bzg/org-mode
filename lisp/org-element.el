@@ -2414,7 +2414,7 @@ CDR is a plist containing `:key', `:value', `:begin', `:end',
 	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-*\\):")
 		      (upcase (match-string-no-properties 1))))
 	  (value (org-trim (buffer-substring-no-properties
-			    (match-end 0) (point-at-eol))))
+			    (match-end 0) (line-end-position))))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (line-beginning-position)))))
@@ -4496,7 +4496,7 @@ This function assumes that current major mode is `org-mode'."
           (gc-cons-threshold #x40000000))
       (org-skip-whitespace)
       (org-element--parse-elements
-       (point-at-bol) (point-max)
+       (line-beginning-position) (point-max)
        ;; Start in `first-section' mode so text before the first
        ;; headline belongs to a section.
        'first-section nil granularity visible-only org-data))))
@@ -8030,12 +8030,12 @@ end of ELEM-A."
 	     (end-A (save-excursion
 		      (goto-char (org-element-property :end elem-A))
 		      (skip-chars-backward " \r\t\n")
-		      (point-at-eol)))
+		      (line-end-position)))
 	     (beg-B (org-element-property :begin elem-B))
 	     (end-B (save-excursion
 		      (goto-char (org-element-property :end elem-B))
 		      (skip-chars-backward " \r\t\n")
-		      (point-at-eol)))
+		      (line-end-position)))
 	     ;; Store inner folds responsible for visibility status.
 	     (folds
 	      (cons

@@ -139,6 +139,7 @@
 (declare-function org-narrow-to-subtree "org" (&optional element))
 (declare-function org-set-property "org" (property value))
 (declare-function org-toggle-tag "org" (tag &optional onoff))
+(declare-function org-indent-region "org" (start end))
 
 (declare-function org-search-view "org-agenda" (&optional todo-only string edit-at))
 
@@ -764,7 +765,7 @@ drawer."
   "Read bibtex entries from FILE and insert as Org headlines after point."
   (interactive "fFile: ")
   (let ((pos (point)))
-    (dotimes (i (org-bibtex-read-file file))
+    (dotimes (_ (org-bibtex-read-file file))
       (save-excursion (org-bibtex-write 'noindent))
       (re-search-forward org-property-end-re)
       (insert "\n"))

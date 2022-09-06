@@ -681,7 +681,7 @@ followed by another \"%[A-F0-9]{2}\" group."
 		  (cons 6 128))))
 	  (when (>= val 192) (setq eat (car shift-xor)))
 	  (setq val (logxor val (cdr shift-xor)))
-	  (setq sum (+ (lsh sum (car shift-xor)) val))
+	  (setq sum (+ (ash sum (car shift-xor)) val))
 	  (when (> eat 0) (setq eat (- eat 1)))
 	  (cond
 	   ((= 0 eat)			;multi byte
@@ -1529,7 +1529,7 @@ non-nil."
 	(let ((end (region-end)))
 	  (goto-char (region-beginning))
 	  (set-mark (point))
-	  (while (< (point-at-eol) end)
+	  (while (< (line-end-position) end)
 	    (move-end-of-line 1) (activate-mark)
 	    (let (current-prefix-arg)
 	      (call-interactively 'org-store-link))

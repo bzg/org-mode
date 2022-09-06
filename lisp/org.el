@@ -5994,7 +5994,7 @@ and subscripts."
 	   (emph-p (get-text-property mpos 'org-emphasis))
 	   (link-p (get-text-property mpos 'mouse-face))
 	   (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
-      (goto-char (point-at-bol))
+      (goto-char (line-beginning-position))
       (setq table-p (looking-at-p org-table-dataline-regexp)
 	    comment-p (looking-at-p "^[ \t]*#[ +]"))
       (goto-char pos)
@@ -6381,7 +6381,7 @@ This is a list with the following elements:
   "Get the entry text, after heading, entire subtree."
   (save-excursion
     (org-back-to-heading t)
-    (filter-buffer-substring (point-at-bol 2) (org-end-of-subtree t))))
+    (filter-buffer-substring (line-beginning-position 2) (org-end-of-subtree t))))
 
 (defun org-edit-headline (&optional heading)
   "Edit the current headline.
@@ -6861,7 +6861,7 @@ case."
 		     (org-get-next-sibling)
 		     (org-get-next-sibling))
 		(if (org-at-heading-p)
-		    (point-at-eol)
+		    (line-end-position)
 		  (point))))
 	 (level (looking-at "\\*+"))
 	 (re (when level (concat "^" (regexp-quote (match-string 0)) " "))))
@@ -7686,7 +7686,7 @@ function is being called interactively."
 		    (org-time-string-to-seconds (match-string 1))
 		  (float-time now))))
 	     ((= dcst ?p)
-	      (if (re-search-forward org-priority-regexp (point-at-eol) t)
+	      (if (re-search-forward org-priority-regexp (line-end-position) t)
 		  (string-to-char (match-string 2))
 		org-priority-default))
 	     ((= dcst ?r)
@@ -8595,7 +8595,7 @@ If not found, stay at current position and return nil."
 (defun org-create-dblock (plist)
   "Create a dynamic block section, with parameters taken from PLIST.
 PLIST must contain a :name entry which is used as the name of the block."
-  (when (string-match "\\S-" (buffer-substring (point-at-bol) (point-at-eol)))
+  (when (string-match "\\S-" (buffer-substring (line-beginning-position) (line-end-position)))
     (end-of-line 1)
     (newline))
   (let ((col (current-column))
@@ -9281,7 +9281,7 @@ When called through ELisp, arg is also interpreted in the following way:
 	    (run-hooks 'org-after-todo-state-change-hook)
 	    (when (and arg (not (member org-state org-done-keywords)))
 	      (setq head (org-get-todo-sequence-head org-state)))
-	    (put-text-property (point-at-bol) (point-at-eol) 'org-todo-head head)
+	    (put-text-property (line-beginning-position) (line-end-position) 'org-todo-head head)
 	    ;; Do we need to trigger a repeat?
 	    (when now-done-p
 	      (when (boundp 'org-agenda-headline-snapshot-before-repeat)
@@ -9494,7 +9494,7 @@ all statistics cookies in the buffer."
 	      (beginning-of-line 1)
 	      (while (re-search-forward
 		      "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)"
-		      (point-at-eol) t)
+		      (line-end-position) t)
 		(replace-match (if (match-end 2) "[100%]" "[0/0]") t t)))))
 	(goto-char pos)
 	(move-marker pos nil)))))
@@ -9537,11 +9537,11 @@ statistics everywhere."
 	  (setq first nil cookie-present nil)
 	  (unless (and level
 		       (not (string-match
-			     "\\<checkbox\\>"
-			     (downcase (or (org-entry-get nil "COOKIE_DATA")
-					   "")))))
+			   "\\<checkbox\\>"
+			   (downcase (or (org-entry-get nil "COOKIE_DATA")
+					 "")))))
 	    (throw 'exit nil))
-	  (while (re-search-forward box-re (point-at-eol) t)
+	  (while (re-search-forward box-re (line-end-position) t)
 	    (setq cnt-all 0 cnt-done 0 cookie-present t)
 	    (setq is-percent (match-end 2) checkbox-beg (match-beginning 0))
 	    (save-match-data
@@ -9650,10 +9650,10 @@ right sequence."
   (let (p)
     (cond
      ((not kwd)
-      (or (get-text-property (point-at-bol) 'org-todo-head)
+      (or (get-text-property (line-beginning-position) 'org-todo-head)
 	  (progn
-	    (setq p (next-single-property-change (point-at-bol) 'org-todo-head
-						 nil (point-at-eol)))
+	    (setq p (next-single-property-change (line-beginning-position) 'org-todo-head
+						 nil (line-end-position)))
 	    (get-text-property p 'org-todo-head))))
      ((not (member kwd org-todo-keywords-1))
       (car org-todo-keywords-1))
@@ -10115,13 +10115,13 @@ nil."
       (outline-next-heading)
       (while (re-search-backward re beg t)
 	(replace-match "")
-	(if (and (string-match "\\S-" (buffer-substring (point-at-bol) (point)))
+	(if (and (string-match "\\S-" (buffer-substring (line-beginning-position) (point)))
 		 (equal (char-before) ?\ ))
 	    (backward-delete-char 1)
 	  (when (string-match "^[ \t]*$" (buffer-substring
-					  (point-at-bol) (point-at-eol)))
-	    (delete-region (point-at-bol)
-			   (min (point-max) (1+ (point-at-eol))))))))))
+					  (line-beginning-position) (line-end-position)))
+	    (delete-region (line-beginning-position)
+			   (min (point-max) (1+ (line-end-position))))))))))
 
 (defvar org-time-was-given) ; dynamically scoped parameter
 (defvar org-end-time-was-given) ; dynamically scoped parameter
@@ -11718,7 +11718,7 @@ Also insert END."
 (defun org-fast-tag-show-exit (flag)
   (save-excursion
     (org-goto-line 3)
-    (when (re-search-forward "[ \t]+Next change exits" (point-at-eol) t)
+    (when (re-search-forward "[ \t]+Next change exits" (line-end-position) t)
       (replace-match ""))
     (when flag
       (end-of-line 1)
@@ -11765,7 +11765,7 @@ Returns the new tags string, or nil to not change the current settings."
 	  (setq ov-start (match-beginning 1)
 		ov-end (match-end 1)
 		ov-prefix "")
-	(setq ov-start (1- (point-at-eol))
+	(setq ov-start (1- (line-end-position))
 	      ov-end (1+ ov-start))
 	(skip-chars-forward "^\n\r")
 	(setq ov-prefix
@@ -11932,7 +11932,7 @@ Returns the new tags string, or nil to not change the current settings."
 		  (when (eq exit-after-next 'now) (throw 'exit t))
 		  (goto-char (point-min))
 		  (beginning-of-line 2)
-		  (delete-region (point) (point-at-eol))
+		  (delete-region (point) (line-end-position))
 		  (org-fast-tag-insert "Current" current c-face)
 		  (org-set-current-tags-overlay current ov-prefix)
 		  (let ((tag-re (concat "\\[.\\] \\(" org-tag-re "\\)")))
@@ -13682,7 +13682,7 @@ user."
 			    (max (point-min) (- (point) 4)) (point))
 			   "    "))
 	  (insert " ")))
-      (let* ((ans (concat (buffer-substring (point-at-bol) (point-max))
+      (let* ((ans (concat (buffer-substring (line-beginning-position) (point-max))
 			  " " (or org-ans1 org-ans2)))
 	     (org-end-time-was-given nil)
 	     (f (org-read-date-analyze ans org-def org-defdecode))
@@ -13704,7 +13704,7 @@ user."
 	(when org-read-date-analyze-futurep
 	  (setq txt (concat txt " (=>F)")))
 	(setq org-read-date-overlay
-	      (make-overlay (1- (point-at-eol)) (point-at-eol)))
+	      (make-overlay (1- (line-end-position)) (line-end-position)))
 	(org-overlay-display org-read-date-overlay txt 'secondary-selection)))))
 
 (defun org-read-date-analyze (ans def defdecode)
@@ -14259,8 +14259,8 @@ days in order to avoid rounding problems."
    (org-clock-update-time-maybe)
    (save-excursion
      (unless (org-at-date-range-p t)
-       (goto-char (point-at-bol))
-       (re-search-forward org-tr-regexp-both (point-at-eol) t))
+       (goto-char (line-beginning-position))
+       (re-search-forward org-tr-regexp-both (line-end-position) t))
      (unless (org-at-date-range-p t)
        (user-error "Not at a time-stamp range, and none found in current line")))
    (let* ((ts1 (match-string 1))
@@ -16053,7 +16053,7 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
     (org-toggle-inline-images)))
 
 ;; For without-x builds.
-(declare-function image-refresh "image" (spec &optional frame))
+(declare-function image-flush "image" (spec &optional frame))
 
 (defcustom org-display-remote-inline-images 'skip
   "How to display remote inline images.
@@ -16194,7 +16194,7 @@ buffer boundaries with possible narrowing."
 				(org-element-property :begin link)
 				'org-image-overlay)))
 		      (if (and (car-safe old) refresh)
-			  (image-refresh (overlay-get (cdr old) 'display))
+			  (image-flush (overlay-get (cdr old) 'display))
 			(let ((image (org--create-inline-image file width)))
 			  (when image
 			    (let ((ov (make-overlay
@@ -16738,14 +16738,14 @@ this function returns t, nil otherwise."
     (save-excursion
       (catch 'exit
 	(unless (org-region-active-p)
-	  (setq beg (point-at-bol))
+	  (setq beg (line-beginning-position))
 	  (beginning-of-line 2)
 	  (while (and (not (eobp)) ;; this is like `next-line'
 		      (org-invisible-p (1- (point))))
 	    (beginning-of-line 2))
 	  (setq end (point))
 	  (goto-char beg)
-	  (goto-char (point-at-eol))
+	  (goto-char (line-end-position))
 	  (setq end (max end (point)))
 	  (while (re-search-forward re end t)
 	    (when (org-invisible-p (match-beginning 0))
@@ -17660,7 +17660,7 @@ number of stars to add."
 	     (goto-char pos)
 	     (while (org-at-comment-p) (forward-line))
 	     (skip-chars-forward " \r\t\n")
-	     (point-at-bol))))
+	     (line-beginning-position))))
 	beg end toggled)
     ;; Determine boundaries of changes.  If a universal prefix has
     ;; been given, put the list in a region.  If region ends at a bol,
@@ -17674,9 +17674,9 @@ number of stars to add."
 	(setq beg (funcall skip-blanks (region-beginning))
 	      end (copy-marker (save-excursion
 				 (goto-char (region-end))
-				 (if (bolp) (point) (point-at-eol)))))
-      (setq beg (funcall skip-blanks (point-at-bol))
-	    end (copy-marker (point-at-eol))))
+				 (if (bolp) (point) (line-end-position)))))
+      (setq beg (funcall skip-blanks (line-beginning-position))
+	    end (copy-marker (line-end-position))))
     ;; Ensure inline tasks don't count as headings.
     (org-with-limited-levels
      (save-excursion
@@ -18249,10 +18249,10 @@ When ELEMENT is provided, it is considered to be element at point."
   (when (eq 'src-block (org-element-type element))
     (or (not inside)
         (not (or (= (line-beginning-position)
-                  (org-element-property :post-affiliated element))
-               (= (1+ (line-end-position))
-                  (- (org-element-property :end element)
-                     (org-element-property :post-blank element))))))))
+                    (org-element-property :post-affiliated element))
+                 (= (1+ (line-end-position))
+                    (- (org-element-property :end element)
+                       (org-element-property :post-blank element))))))))
 
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
@@ -18289,7 +18289,7 @@ and :keyword."
     ;; First the large context
     (cond
      ((org-at-heading-p)
-      (push (list :headline (point-at-bol) (point-at-eol)) clist)
+      (push (list :headline (line-beginning-position) (line-end-position)) clist)
       (when (progn
 	      (beginning-of-line 1)
 	      (looking-at org-todo-line-tags-regexp))
@@ -18303,7 +18303,7 @@ and :keyword."
 
      ((org-at-item-p)
       (push (org-point-in-group p 2 :item-bullet) clist)
-      (push (list :item (point-at-bol)
+      (push (list :item (line-beginning-position)
 		  (save-excursion (org-end-of-item) (point)))
 	    clist)
       (and (org-at-item-checkbox-p)
@@ -18594,12 +18594,12 @@ ELEMENT."
                    (and
                     (eq org-adapt-indentation 'headline-data)
                     (not (or (org-at-clock-log-p)
-                           (org-at-planning-p)))
+                             (org-at-planning-p)))
                     (progn
                       (beginning-of-line 1)
                       (skip-chars-backward "\n")
                       (or (org-at-heading-p)
-                          (looking-back ":END:.*" (point-at-bol))))))
+                          (looking-back ":END:.*" (line-beginning-position))))))
                  (throw 'exit 0))
 		(t (goto-char (org-element-property :begin previous))
 		   (throw 'exit
@@ -18722,7 +18722,7 @@ Also align node properties according to `org-property-format'."
                      (beginning-of-line 1)
                      (skip-chars-backward "\n")
                      (or (org-at-heading-p)
-                         (looking-back ":END:.*" (point-at-bol))))))
+                         (looking-back ":END:.*" (line-beginning-position))))))
     (let* ((element (save-excursion (beginning-of-line) (org-element-at-point-no-context)))
 	   (type (org-element-type element)))
       (cond ((and (memq type '(plain-list item))
@@ -19468,7 +19468,7 @@ major mode."
 		(point))))
       (org-babel-do-in-edit-buffer (call-interactively 'comment-dwim))
     (beginning-of-line)
-    (if (looking-at "\\s-*$") (delete-region (point) (point-at-eol))
+    (if (looking-at "\\s-*$") (delete-region (point) (line-end-position))
       (open-line 1))
     (org-indent-line)
     (insert "# ")))
@@ -19486,10 +19486,10 @@ strictly within a source block, use appropriate comment syntax."
 		  (line-end-position))
 		beg)
 	     (>= (save-excursion
-		   (goto-char (org-element-property :end element))
-		   (skip-chars-backward " \r\t\n")
-		   (line-beginning-position))
-		 end)))
+		  (goto-char (org-element-property :end element))
+		  (skip-chars-backward " \r\t\n")
+		  (line-beginning-position))
+		end)))
       ;; Translate region boundaries for the Org buffer to the source
       ;; buffer.
       (let ((offset (- end beg)))
@@ -19963,7 +19963,7 @@ interactive command with similar behavior."
 		    (and (looking-at "[ \t]*$")
 			 (string-match
 			  "\\`\\*+\\'"
-			  (buffer-substring (point-at-bol) (point)))))))
+			  (buffer-substring (line-beginning-position) (point)))))))
 	  swallowp)
       (cond
        ((and subtreep org-yank-folded-subtrees)
@@ -19996,7 +19996,7 @@ interactive command with similar behavior."
 	  (beginning-of-line 1)
 	  (push-mark beg 'nomsg)))
        ((and subtreep org-yank-adjusted-subtrees)
-	(let ((beg (point-at-bol)))
+	(let ((beg (line-beginning-position)))
 	  (org-paste-subtree nil nil 'for-yank)
 	  (push-mark beg 'nomsg)))
        (t

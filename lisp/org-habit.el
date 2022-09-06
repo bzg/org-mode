@@ -428,7 +428,7 @@ current time."
 	(buffer-invisibility-spec '(org-link))
 	(moment (time-subtract nil (* 3600 org-extend-today-until))))
     (save-excursion
-      (goto-char (if line (point-at-bol) (point-min)))
+      (goto-char (if line (line-beginning-position) (point-min)))
       (while (not (eobp))
 	(let ((habit (get-text-property (point) 'org-habit-p))
               (invisible-prop (get-text-property (point) 'invisible)))
