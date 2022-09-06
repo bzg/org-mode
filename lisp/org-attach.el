@@ -792,7 +792,7 @@ Idea taken from `gnus-dired-attach'."
 
 
 (add-hook 'org-archive-hook 'org-attach-archive-delete-maybe)
-(add-hook 'org-export-before-parsing-hook 'org-attach-expand-links)
+(add-hook 'org-export-before-parsing-functions 'org-attach-expand-links)
 
 (provide 'org-attach)
 

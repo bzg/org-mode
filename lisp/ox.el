@@ -2088,8 +2088,8 @@ keywords before output."
 
 ;;;; Hooks
 
-(defvar org-export-before-processing-hook nil
-  "Hook run at the beginning of the export process.
+(defvar org-export-before-processing-functions nil
+  "Abnormal hook run at the beginning of the export process.
 
 This is run before include keywords and macros are expanded and
 Babel code blocks executed, on a copy of the original buffer
@@ -2099,8 +2099,8 @@ is at the beginning of the buffer.
 Every function in this hook will be called with one argument: the
 back-end currently used, as a symbol.")
 
-(defvar org-export-before-parsing-hook nil
-  "Hook run before parsing an export buffer.
+(defvar org-export-before-parsing-functions nil
+  "Abnormal hook run before parsing an export buffer.
 
 This is run after include keywords and macros have been expanded
 and Babel code blocks executed, on a copy of the original buffer
