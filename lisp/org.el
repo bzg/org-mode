@@ -7423,6 +7423,20 @@ the default is \"/\"."
 	(setf (substring fpath (- width 2)) "..")))
     fpath))
 
+(defun org-get-title (&optional buffer-or-file)
+  "Collect title from the provided `org-mode' BUFFER-OR-FILE.
+
+Returns nil if there are no #+TITLE property."
+  (let ((buffer (cond ((bufferp buffer-or-file) buffer-or-file)
+                      ((stringp buffer-or-file) (find-file-noselect
+                                                 buffer-or-file))
+                      (t (current-buffer)))))
+    (with-current-buffer buffer
+      (org-macro-initialize-templates)
+      (let ((title (assoc-default "title" org-macro-templates)))
+        (unless (string= "" title)
+          title)))))
+
 (defun org-display-outline-path (&optional file current separator just-return-string)
   "Display the current outline path in the echo area.
 

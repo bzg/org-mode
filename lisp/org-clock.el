@@ -2484,16 +2484,6 @@ the currently selected interval size."
 	  (org-update-dblock)
 	  t)))))
 
-(defun org-clock-get-file-title (file-name)
-  "Get the file title from FILE-NAME as a string.
-Return short FILE-NAME if #+title keyword is not found."
-  (with-current-buffer (find-file-noselect file-name)
-    (org-macro-initialize-templates)
-    (let ((title (assoc-default "title" org-macro-templates)))
-      (if (null title)
-          (file-name-nondirectory file-name)
-        title))))
-
 ;;;###autoload
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
@@ -2750,7 +2740,8 @@ from the dynamic block definition."
 			     "\n")
 
                      (if filetitle
-                         (org-clock-get-file-title file-name)
+                         (or (org-get-title file-name)
+                             (file-name-nondirectory file-name))
                        (file-name-nondirectory file-name))
 		     (if level?    "| " "") ;level column, maybe
 		     (if timestamp "| " "") ;timestamp column, maybe
