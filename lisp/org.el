@@ -7988,7 +7988,7 @@ This is saved in case the need arises to restore it.")
     (`windows-nt org-file-apps-windowsnt)
     (_ org-file-apps-gnu)))
 
-(defun org--file-apps-entry-dlink-p (entry)
+(defun org--file-apps-entry-locator-p (entry)
   "Non-nil if ENTRY should be matched against the link by `org-open-file'.
 
 It assumes that is the case when the entry uses a regular
@@ -8119,9 +8119,9 @@ If the file does not exist, throw an error."
   (let* ((file (if (equal path "") buffer-file-name
 		 (substitute-in-file-name (expand-file-name path))))
 	 (file-apps (append org-file-apps (org--file-default-apps)))
-	 (apps (cl-remove-if #'org--file-apps-entry-dlink-p file-apps))
-	 (apps-dlink (cl-remove-if-not #'org--file-apps-entry-dlink-p
-				       file-apps))
+	 (apps (cl-remove-if #'org--file-apps-entry-locator-p file-apps))
+	 (apps-locator (cl-remove-if-not #'org--file-apps-entry-locator-p
+                                         file-apps))
 	 (remp (and (assq 'remote apps) (file-remote-p file)))
 	 (dirp (unless remp (file-directory-p file)))
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
@@ -8155,17 +8155,17 @@ If the file does not exist, throw an error."
      (t
       (setq cmd (or (and remp (cdr (assq 'remote apps)))
 		    (and dirp (cdr (assq 'directory apps)))
-		    ;; First, try matching against apps-dlink if we
+		    ;; First, try matching against apps-locator if we
 		    ;; get a match here, store the match data for
 		    ;; later.
 		    (let* ((case-fold-search t)
-                           (match (assoc-default link apps-dlink
+                           (match (assoc-default link apps-locator
                                                  'string-match)))
 		      (if match
 			  (progn (setq link-match-data (match-data))
 				 match)
 			(progn (setq in-emacs (or in-emacs line search))
-			       nil))) ; if we have no match in apps-dlink,
+			       nil))) ; if we have no match in apps-locator,
 					; always open the file in emacs if line or search
 					; is given (for backwards compatibility)
 		    (assoc-default dfile
