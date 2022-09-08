@@ -8002,7 +8002,7 @@ a parameter."
 	  (> (regexp-opt-depth selector) 0)
 	  (or (and (stringp action)
 		   (string-match "%[0-9]" action))
-	      (consp action))))
+	      (functionp action))))
     (_ nil)))
 
 (defun org--file-apps-regexp-alist (list &optional add-auto-mode)
