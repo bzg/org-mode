@@ -140,6 +140,9 @@ backend.  From now on, using =outline-*= functions is strongly
 discouraged when working with Org files.
 
 ** New features
+*** Clock table can now produce quarterly reports
+
+=:step= clock table parameter can now be set to =quarter=.
 
 *** Interactive commands now support escaping text inside comment blocks
 
