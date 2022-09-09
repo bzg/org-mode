@@ -282,9 +282,10 @@ byte-compiled before it is loaded."
 (defcustom org-babel-load-languages '((emacs-lisp . t))
   "Languages which can be evaluated in Org buffers.
 \\<org-mode-map>
-This list can be used to load support for any of the languages
-below.  Each language will depend on a different set of system
-executables and/or Emacs modes.
+This list can be used to load support for any of the available
+languages with babel support (see info node `(org) Languages').  Each
+language will depend on a different set of system executables and/or
+Emacs modes.
 
 When a language is \"loaded\", code blocks in that language can
 be evaluated with `org-babel-execute-src-block', which is bound
