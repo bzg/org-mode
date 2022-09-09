@@ -1053,6 +1053,40 @@ CLOCK: [2014-04-03 Thu 08:00]--[2014-04-03 Thu 16:00] =>  8:00"
       (let ((system-time-locale "en_US"))
         (test-org-clock-clocktable-contents
 	    ":step month :mstart 4 :block 2014 :stepskip0 t")))))
+  ;; Test ":step quarter".
+  (should
+   (string-match-p
+    "
+Quarterly report starting on:.*?\\[2014-01-01 .*
+.*
+.*
+|.*?| \\*8:00\\* |
+.*
+| Foo +| 8:00 +|
+
+.*?\\[2014-04-01 .*
+.*
+.*
+|.*?| \\*16:00\\* |
+.*
+| Foo +| 16:00 +|
+
+.*?\\[2014-07-01 .*
+.*
+.*
+|.*?| \\*8:00\\* |
+.*
+| Foo +| 8:00 +|
+"
+    (org-test-with-temp-text
+        "* Foo
+CLOCK: [2014-03-04 Tue 08:00]--[2014-03-04 Tue 16:00] =>  8:00
+CLOCK: [2014-04-03 Thu 08:00]--[2014-04-03 Thu 16:00] =>  8:00
+CLOCK: [2014-06-04 Wed 08:00]--[2014-06-04 Wed 16:00] =>  8:00
+CLOCK: [2014-07-03 Thu 08:00]--[2014-07-03 Thu 16:00] =>  8:00"
+      (let ((system-time-locale "en_US"))
+        (test-org-clock-clocktable-contents
+	    ":step quarter :block 2014 :stepskip0 t")))))
   ;; Test ":step semimonth".
   (should
    (string-match-p
