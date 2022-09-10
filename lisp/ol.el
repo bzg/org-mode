@@ -1878,7 +1878,12 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		   "Link: "
 		   (append
 		    (mapcar (lambda (x) (concat x ":")) all-prefixes)
-		    (mapcar #'car org-stored-links))
+		    (mapcar #'car org-stored-links)
+                    ;; Allow description completion.  Avoid "nil" option
+                    ;; in the case of `completing-read-default' and
+                    ;; an error in `ido-completing-read' when some links
+                    ;; have no description.
+                    (delq nil (mapcar 'cadr org-stored-links)))
 		   nil nil nil
 		   'org-link--history
 		   (caar org-stored-links)))
