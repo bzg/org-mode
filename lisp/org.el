@@ -10296,12 +10296,16 @@ narrowing."
 		 (throw 'exit nil))))
 	   ;; No drawer found.  Create one, if permitted.
 	   (when create
+             ;; Unless current heading is the last heading in buffer
+             ;; and does not have a newline, `org-end-of-meta-data'
+             ;; should move us somewhere below the heading.
              ;; Avoid situation when we insert drawer right before
              ;; first "*".  Otherwise, if the previous heading is
              ;; folded, we are inserting after visible newline at
              ;; the end of the fold, thus breaking the fold
              ;; continuity.
-             (when (org-at-heading-p) (backward-char))
+             (unless (eobp)
+               (when (org-at-heading-p) (backward-char)))
              (org-fold-core-ignore-modifications
 	       (unless (bolp) (insert-and-inherit "\n"))
 	       (let ((beg (point)))
