@@ -20022,28 +20022,47 @@ interactive command with similar behavior."
   "Go back to beginning of heading."
   (beginning-of-line)
   (or (org-at-heading-p (not invisible-ok))
-      (let (found)
-	(save-excursion
-          ;; At inlinetask end.  Move to bol, so that the following
-          ;; search goes to the beginning of the inlinetask.
-          (when (and (featurep 'org-inlinetask)
-                     (fboundp 'org-inlinetask-end-p)
-                     (org-inlinetask-end-p))
-            (goto-char (line-beginning-position)))
-	  (while (not found)
-	    (or (re-search-backward (concat "^\\(?:" outline-regexp "\\)")
-				    nil t)
-                (user-error "Before first headline at position %d in buffer %s"
-		            (point) (current-buffer)))
-            ;; Skip inlinetask end.
-            (if (and (featurep 'org-inlinetask)
-                     (fboundp 'org-inlinetask-end-p)
-                     (org-inlinetask-end-p))
-                (org-inlinetask-goto-beginning)
-	      (setq found (and (or invisible-ok (not (org-fold-folded-p)))
-			       (point))))))
-	(goto-char found)
-	found)))
+      (if (org-element--cache-active-p)
+          (let ((heading (org-element-lineage (org-element-at-point)
+                                           '(headline inlinetask)
+                                           'include-self)))
+            (when heading
+              (goto-char (org-element-property :begin heading)))
+            (while (and (not invisible-ok)
+                        heading
+                        (org-fold-folded-p))
+              (goto-char (org-fold-core-previous-visibility-change))
+              (setq heading (org-element-lineage (org-element-at-point)
+                                              '(headline inlinetask)
+                                              'include-self))
+              (when heading
+                (goto-char (org-element-property :begin heading))))
+            (unless heading
+              (user-error "Before first headline at position %d in buffer %s"
+		          (point) (current-buffer)))
+            (point))
+        (let (found)
+	  (save-excursion
+            ;; At inlinetask end.  Move to bol, so that the following
+            ;; search goes to the beginning of the inlinetask.
+            (when (and (featurep 'org-inlinetask)
+                       (fboundp 'org-inlinetask-end-p)
+                       (org-inlinetask-end-p))
+              (goto-char (line-beginning-position)))
+	    (while (not found)
+	      (or (re-search-backward (concat "^\\(?:" outline-regexp "\\)")
+				      nil t)
+                  (user-error "Before first headline at position %d in buffer %s"
+		              (point) (current-buffer)))
+              ;; Skip inlinetask end.
+              (if (and (featurep 'org-inlinetask)
+                       (fboundp 'org-inlinetask-end-p)
+                       (org-inlinetask-end-p))
+                  (org-inlinetask-goto-beginning)
+	        (setq found (and (or invisible-ok (not (org-fold-folded-p)))
+			         (point))))))
+	  (goto-char found)
+	  found))))
 
 (defun org-back-to-heading-or-point-min (&optional invisible-ok)
   "Go back to heading or first point in buffer.
