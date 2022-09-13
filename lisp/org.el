@@ -20176,7 +20176,7 @@ make a significant difference in outlines with very many siblings."
   (let ((element (and (org-element--cache-active-p)
                       (org-element-at-point nil t))))
     (if element
-        (let* ((current-heading (org-element-lineage element '(headline) 'with-self))
+        (let* ((current-heading (org-element-lineage element '(headline inlinetask) 'with-self))
                (parent (org-element-lineage current-heading '(headline))))
           (if (and parent
                    (<= (point-min) (org-element-property :begin parent)))
