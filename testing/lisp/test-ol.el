@@ -231,7 +231,7 @@ See https://github.com/yantar92/org/issues/4."
 	 (org-context-in-file-links nil))
      (org-test-with-temp-text-in-file "* h1"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s][file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file file)
 		(org-store-link nil))))))
   ;; C-u prefix reverses `org-context-in-file-links' in Org buffer.
   (should
@@ -250,7 +250,7 @@ See https://github.com/yantar92/org/issues/4."
 	 (org-context-in-file-links nil))
      (org-test-with-temp-text-in-file "* h1"
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s][file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file file)
 		(org-store-link '(16)))))))
   ;; Store file link to non-Org buffer, with context.
   (should
@@ -268,7 +268,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "one\n<point>two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s][file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file file)
 		(org-store-link nil))))))
   ;; C-u prefix reverses `org-context-in-file-links' in non-Org
   ;; buffer.
@@ -288,7 +288,7 @@ See https://github.com/yantar92/org/issues/4."
      (org-test-with-temp-text-in-file "one\n<point>two"
        (fundamental-mode)
        (let ((file (buffer-file-name)))
-	 (equal (format "[[file:%s][file:%s]]" file file)
+	 (equal (format "[[file:%s]]" file file)
 		(org-store-link '(16)))))))
   ;; Context does not include special search syntax.
   (should
