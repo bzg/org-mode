@@ -779,7 +779,9 @@ block."
 	    (message "executing %s code block%s..."
 		     (capitalize lang)
 		     (let ((name (nth 4 info)))
-		       (if name (format " (%s)" name) "")))
+		       (if name
+                           (format "(%s)" name)
+                         (format "at position %d" (nth 5 info)))))
 	    (setq result
 		  (let ((r (funcall cmd body params)))
 		    (if (and (eq (cdr (assq :result-type params)) 'value)
