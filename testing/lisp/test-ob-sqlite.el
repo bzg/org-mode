@@ -1,4 +1,4 @@
-;;; test-ob-sqlite.el --- tests for ob-sqlite.el
+;;; test-ob-sqlite.el --- tests for ob-sqlite.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017, 2019  Eduardo Bellani
 

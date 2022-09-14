@@ -21,9 +21,8 @@
 ;;; Code:
 
 (require 'cl-lib)
-
-(unless (featurep 'org-protocol)
-  (signal 'missing-test-dependency "Support for org-protocol"))
+(require 'org-protocol)
+(require 'org-capture)
 
 (ert-deftest test-org-protocol/org-protocol-parse-parameters ()
   "Test `org-protocol-parse-parameters' specifications."
@@ -241,4 +240,5 @@
 
 
 ;; TODO: Verify greedy protocol handling
+(provide 'test-org-protocol)
 ;;; test-org-protocol.el ends here

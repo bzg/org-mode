@@ -1,4 +1,4 @@
-;;; test-org-list.el --- Tests for org-list.el
+;;; test-org-list.el --- Tests for org-list.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012, 2013, 2014, 2018, 2019  Nicolas Goaziou
 
@@ -18,6 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
+
+(require 'org-list)
+(require 'org)
 
 (ert-deftest test-org-list/list-ending ()
   "Test if lists end at the right place."
@@ -1369,7 +1372,7 @@ b. Item 2<point>"
   ;; Sort alphabetically.
   (let ((original-string-collate-lessp (symbol-function 'string-collate-lessp)))
     (cl-letf (((symbol-function 'string-collate-lessp)
-	       (lambda (s1 s2 &optional locale ignore-case)
+	       (lambda (s1 s2 &optional _locale ignore-case)
 		 (funcall original-string-collate-lessp
 			  s1 s2 "C" ignore-case))))
       (should

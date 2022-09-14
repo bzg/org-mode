@@ -1,4 +1,4 @@
-;;; test-ob-sql.el --- tests for ob-sql.el
+;;; test-ob-sql.el --- tests for ob-sql.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021 Robin Joy
 

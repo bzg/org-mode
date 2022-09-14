@@ -116,7 +116,7 @@
 	     "* foo   :foo:"
 	   (split-window)
 	   (let ((org-buffer (current-buffer))
-		 (dired-buffer (dired temporary-file-directory)))
+		 (_dired-buffer (dired temporary-file-directory)))
 	     (cl-assert (eq 'dired-mode major-mode))
 	     (revert-buffer)
 	     (dired-goto-file a-filename)
@@ -133,7 +133,8 @@
 		      (mapcar (lambda (x) (string-equal "ATTACH" x))
 			      (plist-get
 			       (plist-get
-				(org-element-at-point) 'headline) :tags))))
+				(org-element-at-point) 'headline)
+			       :tags))))
        (delete-file a-filename)))))
 
 (ert-deftest test-org-attach/dired-attach-to-next-best-subtree/2 ()
@@ -147,7 +148,7 @@
 	  "* foo"
 	  (split-window)
 	  (let ((org-buffer (current-buffer))
-		(dired-buffer (dired temporary-file-directory)))
+		(_dired-buffer (dired temporary-file-directory)))
 	    (cl-assert (eq 'dired-mode major-mode))
 	    (revert-buffer)
 	    (dired-goto-file a-filename)

@@ -1,4 +1,4 @@
-;;; test-ob-ruby.el --- tests for ob-ruby.el
+;;; test-ob-ruby.el --- tests for ob-ruby.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013-2015, 2019 Oleh Krehel
 ;; Authors: Oleh Krehel

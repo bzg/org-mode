@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(require 'org-duration)
+
 (ert-deftest test-org-duration/to-minutes ()
   "Test `org-duration-to-minutes' specifications."
   ;; Raise an error for unknown duration format.

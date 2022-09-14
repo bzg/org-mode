@@ -1,4 +1,4 @@
-;;; test-org-pcomplete.el --- test pcomplete integration
+;;; test-org-pcomplete.el --- test pcomplete integration  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2015-2016, 2019  Alexey Lebedeff
 ;; Authors: Alexey Lebedeff
@@ -23,6 +23,8 @@
 
 
 ;;; Code:
+
+(require 'org)
 
 (ert-deftest test-org-pcomplete/clocktable ()
   "Test completion of clock table parameters."

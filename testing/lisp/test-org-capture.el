@@ -145,7 +145,7 @@
 		    "** H1 %?" :jump-to-captured t))))
 	   (org-capture nil "t")
 	   (cl-letf (((symbol-function 'org-refile-get-location)
-		      (lambda (&rest args)
+		      (lambda (&rest _args)
 			(list (file-name-nondirectory file1) file1 nil nil))))
 	     (org-capture-refile)
 	     (list file1 file2 (buffer-file-name)))))))))

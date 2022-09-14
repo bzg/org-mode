@@ -22,9 +22,8 @@
 ;;; Code:
 
 (require 'cl-lib)
-
-(unless (featurep 'ox)
-  (signal 'missing-test-dependency "org-export"))
+(require 'ox)
+(require 'org-inlinetask)
 
 (defun org-test-default-backend ()
   "Return a default export back-end.
@@ -55,6 +54,7 @@ variable, and communication channel under `info'."
        (org-export--remove-uninterpreted-data tree info)
        (let ((info (org-combine-plists
 		    info (org-export--collect-tree-properties tree info))))
+	 (ignore info) ;; Don't warn if the var is unused.
 	 ,@body))))
 
 
@@ -93,6 +93,7 @@ variable, and communication channel under `info'."
        (format "#+SETUPFILE: \"%s/examples/setupfile.org\"" org-test-dir)
      (let ((org-export-allow-bind-keywords t))
        (org-export-get-environment)
+       ;; FIXME: `variable'?
        (eq variable 'value))))
   ;; Verify that bound variables are seen during export.
   (should
@@ -2002,11 +2003,11 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 		 (org-export-create-backend
 		  :transcoders
 		  (list (cons 'headline
-			      (lambda (headline contents info)
+			      (lambda (headline _contents info)
 				(org-export-data
 				 (org-element-property :title headline)
 				 info)))
-			(cons 'plain-text (lambda (text info) "Success"))))))
+			(cons 'plain-text (lambda (_text _info) "Success"))))))
 	    (org-export-string-as
 	     "* Test"
 	     (org-export-create-backend
@@ -2143,7 +2144,7 @@ Para2"
       (setf (org-export-backend-name backend) 'test)
       (setf (org-export-backend-transcoders backend)
 	    (cons (cons 'export-snippet
-			(lambda (snippet contents info)
+			(lambda (snippet _contents _info)
 			  (when (eq (org-export-snippet-backend snippet) 'test)
 			    (org-element-property :value snippet))))
 		  (org-export-backend-transcoders backend)))
@@ -2190,15 +2191,15 @@ Para2"
   (should
    (equal ""
 	  (org-export-filter-apply-functions
-	   (list (lambda (value &rest _) "")
+	   (list (lambda (_value &rest _) "")
 		 (lambda (value &rest _) (concat "2" value)))
 	   "0" nil)))
   ;; Any function returning the empty string short-circuits the
   ;; process.
   (should
    (org-export-filter-apply-functions
-    (list (lambda (value &rest _) "")
-	  (lambda (value &rest _) (error "This shouldn't happen")))
+    (list (lambda (_value &rest _) "")
+	  (lambda (_value &rest _) (error "This shouldn't happen")))
     "0" nil)))
 
 
@@ -2215,7 +2216,7 @@ Para2"
 	 (org-export-create-backend
 	  :transcoders
 	  `(,(cons 'footnote-reference
-		   (lambda (f c i)
+		   (lambda (f _c i)
 		     (push (org-export-footnote-first-reference-p f i)
 			   result)
 		     ""))
@@ -2260,7 +2261,7 @@ Para2"
 	 (org-export-create-backend
 	  :transcoders
 	  `(,(cons 'footnote-reference
-		   (lambda (f c i)
+		   (lambda (f _c i)
 		     (when (org-element-lineage f '(drawer))
 		       (push (org-export-footnote-first-reference-p f i nil)
 			     result))
@@ -2281,7 +2282,7 @@ Para2"
 	 (org-export-create-backend
 	  :transcoders
 	  `(,(cons 'footnote-reference
-		   (lambda (f c i)
+		   (lambda (f _c i)
 		     (when (org-element-lineage f '(drawer))
 		       (push (org-export-footnote-first-reference-p f i nil t)
 			     result))
@@ -2979,7 +2980,7 @@ Para2"
    (string-match
     "success"
     (progn
-      (org-link-set-parameters "foo" :export (lambda (p d f i) "success"))
+      (org-link-set-parameters "foo" :export (lambda (_p _d _f _i) "success"))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -2995,7 +2996,7 @@ Para2"
     "success"
     (progn
       (org-link-set-parameters
-       "foo" :export (lambda (p d f i) (and (eq f 'test) "success")))
+       "foo" :export (lambda (_p _d f _i) (and (eq f 'test) "success")))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -3012,7 +3013,7 @@ Para2"
     "success"
     (progn
       (org-link-set-parameters
-       "foo" :export (lambda (p d f i) (and (eq f 'test) "success")))
+       "foo" :export (lambda (_p _d f _i) (and (eq f 'test) "success")))
       (org-export-string-as
        "[[foo:path]]"
        (org-export-create-backend
@@ -5043,7 +5044,8 @@ This test does not cover listings and custom environments."
 	 (org-element-type
 	  (org-export-get-next-element
 	   (org-element-map
-	       (plist-get info :title) 'plain-text 'identity info t) info)))))
+	       (plist-get info :title) 'plain-text 'identity info t)
+	   info)))))
   ;; Find next element in parsed affiliated keywords.
   (should
    (eq 'verbatim
@@ -5057,7 +5059,7 @@ This test does not cover listings and custom environments."
    (equal
     '(bold code underline)
     (org-test-with-parsed-data "_a_ /b/ *c* ~d~ _e_"
-      (mapcar 'car
+      (mapcar #'car
 	      (org-export-get-next-element
 	       (org-element-map tree 'italic 'identity info t) info t)))))
   ;; When N is a positive integer, return a list containing up to
@@ -5066,7 +5068,7 @@ This test does not cover listings and custom environments."
    (equal
     '(bold code)
     (org-test-with-parsed-data "_a_ /b/ *c* ~d~ _e_"
-      (mapcar 'car
+      (mapcar #'car
 	      (org-export-get-next-element
 	       (org-element-map tree 'italic 'identity info t) info 2))))))
 
@@ -5109,7 +5111,8 @@ This test does not cover listings and custom environments."
 	 (org-element-type
 	  (org-export-get-previous-element
 	   (org-element-map
-	       (plist-get info :title) 'plain-text 'identity info t) info)))))
+	       (plist-get info :title) 'plain-text 'identity info t)
+	   info)))))
   ;; Find previous element in parsed affiliated keywords.
   (should
    (eq 'verbatim
@@ -5122,7 +5125,7 @@ This test does not cover listings and custom environments."
   (should
    (equal '(underline italic bold)
 	  (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
-	    (mapcar 'car
+	    (mapcar #'car
 		    (org-export-get-previous-element
 		     (org-element-map tree 'code 'identity info t) info t)))))
   ;; When N is a positive integer, return a list containing up to
@@ -5130,7 +5133,7 @@ This test does not cover listings and custom environments."
   (should
    (equal '(italic bold)
 	  (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
-	    (mapcar 'car
+	    (mapcar #'car
 		    (org-export-get-previous-element
 		     (org-element-map tree 'code 'identity info t) info 2))))))
 

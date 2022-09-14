@@ -1,4 +1,4 @@
-;;; test-ob-eshell.el
+;;; test-ob-eshell.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2018 stardiviner
 ;; Authors: stardiviner

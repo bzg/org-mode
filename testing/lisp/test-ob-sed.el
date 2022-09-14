@@ -1,4 +1,4 @@
-;;; test-ob-sed.el --- tests for ob-sed.el
+;;; test-ob-sed.el --- tests for ob-sed.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2015, 2019 Bjarte Johansen
 ;; Authors: Bjarte Johansen

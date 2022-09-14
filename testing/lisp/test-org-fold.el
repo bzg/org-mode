@@ -1,4 +1,4 @@
-;;; test-org.el --- tests for org.el
+;;; test-org.el --- tests for org.el  -*- lexical-binding: t; -*-
 
 ;; Authors: Ihor Radchenko
 

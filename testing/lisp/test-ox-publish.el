@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(require 'org-test "../testing/org-test")
+(require 'ox-publish)
 
 ;;; Helper functions
 
@@ -354,20 +356,20 @@ removed from the final plist."
   (should
    (apply
     #'equal
-    (let* ((ids nil)
+    (let* (;; (ids nil)
 	   (backend
 	    (org-export-create-backend
 	     :transcoders
-	     '((headline . (lambda (h c i)
-			     (concat (org-export-get-reference h i) " " c)))
-	       (paragraph . (lambda (p c i) c))
-	       (section . (lambda (s c i) c))
-	       (link . (lambda (l c i)
-			 (let ((option (org-element-property :search-option l))
-			       (path (org-element-property :path l)))
-			   (and option
-				(org-publish-resolve-external-link
-				 option path))))))))
+	     `((headline . ,(lambda (h c i)
+			      (concat (org-export-get-reference h i) " " c)))
+	       (paragraph . ,(lambda (_p c _i) c))
+	       (section . ,(lambda (_s c _i) c))
+	       (link . ,(lambda (l _c _i)
+			  (let ((option (org-element-property :search-option l))
+			        (path (org-element-property :path l)))
+			    (and option
+				 (org-publish-resolve-external-link
+				  option path))))))))
 	   (publish
 	    (lambda (plist filename pub-dir)
 	      (org-publish-org-to backend filename ".test" plist pub-dir))))
@@ -387,7 +389,7 @@ removed from the final plist."
     '("a1" "b1")
     (let* ((ids nil)
 	   (link-transcoder
-	    (lambda (l c i)
+	    (lambda (l _c _i)
 	      (let ((option (org-element-property :search-option l))
 		    (path (org-element-property :path l)))
 		(push (org-publish-resolve-external-link option path t)
@@ -422,7 +424,7 @@ removed from the final plist."
   ;; Return nil if no appropriate project is found.
   (should-not
    (let* ((base (expand-file-name "examples/pub/" org-test-dir))
-	  (file (expand-file-name "a.org" base))
+	  ;; (file (expand-file-name "a.org" base))
 	  (org-publish-project-alist `(("p" :base-directory ,base))))
      (org-publish-get-project-from-filename "/other/file.org")))
   ;; Return the first project effectively publishing the provided

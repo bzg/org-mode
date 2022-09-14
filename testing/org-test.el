@@ -1,4 +1,4 @@
-;;;; org-test.el --- Tests for Org
+;;;; org-test.el --- Tests for Org  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2015 Sebastian Rose, Eric Schulte
 ;; Authors:
@@ -30,6 +30,9 @@
 
 
 ;;;; Code:
+
+(require 'org)
+(require 'org-id)
 
 ;;; Ob constants
 
@@ -75,7 +78,7 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-dir
   (expand-file-name (file-name-directory (or load-file-name buffer-file-name))))
 
-(defconst org-base-dir
+(defconst org-base-dir ;; FIXME: Use `org-test-' prefix.
   (expand-file-name ".." org-test-dir))
 
 (defconst org-test-example-dir
@@ -93,12 +96,13 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
 
-(defconst org-id-locations-file
+;; FIXME: Merely loading a file shouldn't override a user's settings.
+(setq org-id-locations-file
   (expand-file-name ".test-org-id-locations" org-test-dir))
 
 
 ;;; Functions for writing tests
-(put 'missing-test-dependency
+(put 'missing-test-dependency           ;FIXME: Use `define-error'.
      'error-conditions
      '(error missing-test-dependency))
 
@@ -113,18 +117,18 @@ executable."
 	   exec-path :initial-value nil)
     (signal 'missing-test-dependency (list exe))))
 
-(defun org-test-buffer (&optional file)
+(defun org-test-buffer (&optional _file)
   "TODO:  Setup and return a buffer to work with.
 If file is non-nil insert its contents in there.")
 
-(defun org-test-compare-with-file (&optional file)
+(defun org-test-compare-with-file (&optional _file)
   "TODO:  Compare the contents of the test buffer with FILE.
 If file is not given, search for a file named after the test
 currently executed.")
 
 (defmacro org-test-at-id (id &rest body)
   "Run body after placing the point in the headline identified by ID."
-  (declare (indent 1))
+  (declare (indent 1) (debug t))
   `(let* ((id-location (org-id-find ,id))
 	  (id-file (car id-location))
 	  (visited-p (get-file-buffer id-file))
@@ -142,11 +146,10 @@ currently executed.")
 	     (save-restriction ,@body)))
        (unless (or visited-p (not to-be-removed))
 	 (kill-buffer to-be-removed)))))
-(def-edebug-spec org-test-at-id (form body))
 
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org example file."
-  (declare (indent 1))
+  (declare (indent 1) (debug t))
   `(let* ((my-file (or ,file org-test-file))
 	  (visited-p (get-file-buffer my-file))
 	  to-be-removed
@@ -168,26 +171,24 @@ currently executed.")
      (unless visited-p
        (kill-buffer to-be-removed))
      results))
-(def-edebug-spec org-test-in-example-file (form body))
 
 (defmacro org-test-at-marker (file marker &rest body)
   "Run body after placing the point at MARKER in FILE.
 Note the uuidgen command-line command can be useful for
 generating unique markers for insertion as anchors into org
 files."
-  (declare (indent 2))
+  (declare (indent 2) (debug t))
   `(org-test-in-example-file ,file
      (goto-char (point-min))
      (re-search-forward (regexp-quote ,marker))
      ,@body))
-(def-edebug-spec org-test-at-marker (form form body))
 
 (defmacro org-test-with-temp-text (text &rest body)
   "Run body in a temporary buffer with Org mode as the active
 mode holding TEXT.  If the string \"<point>\" appears in TEXT
 then remove it and place the point there before running BODY,
 otherwise place the point at the beginning of the inserted text."
-  (declare (indent 1))
+  (declare (indent 1) (debug t))
   `(let ((inside-text (if (stringp ,text) ,text (eval ,text)))
 	 (org-mode-hook nil))
      (with-temp-buffer
@@ -201,20 +202,21 @@ otherwise place the point at the beginning of the inserted text."
 	   (goto-char (point-min))))
        (font-lock-ensure (point-min) (point-max))
        ,@body)))
-(def-edebug-spec org-test-with-temp-text (form body))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
   "Run body in a temporary file buffer with Org mode as the active mode.
 If the string \"<point>\" appears in TEXT then remove it and
 place the point there before running BODY, otherwise place the
 point at the beginning of the buffer."
-  (declare (indent 1))
+  (declare (indent 1) (debug t))
   `(let ((file (make-temp-file "org-test"))
 	 (inside-text (if (stringp ,text) ,text (eval ,text)))
 	 buffer)
      (with-temp-file file (insert inside-text))
      (unwind-protect
 	 (progn
+	   ;; FIXME: For the rare cases where we do need to mess with windows,
+           ;; we should let `body' take care of displaying this buffer!
 	   (setq buffer (find-file file))
 	   (when (re-search-forward "<point>" nil t)
 	     (replace-match ""))
@@ -228,15 +230,13 @@ point at the beginning of the buffer."
 	   (set-buffer-modified-p nil)
 	   (kill-buffer))
 	 (delete-file file)))))
-(def-edebug-spec org-test-with-temp-text-in-file (form body))
 
-(defun org-test-table-target-expect (target &optional expect laps
-&rest tblfm)
+(defun org-test-table-target-expect (target &optional expect laps &rest tblfm)
   "For all TBLFM: Apply the formula to TARGET, compare EXPECT with result.
 Either LAPS and TBLFM are nil and the table will only be aligned
 or LAPS is the count of recalculations that should be made on
 each TBLFM.  To save ERT run time keep LAPS as low as possible to
-get the table stable.  Anyhow, if LAPS is 'iterate then iterate,
+get the table stable.  Anyhow, if LAPS is `iterate' then iterate,
 but this will run one recalculation longer.  When EXPECT is nil
 it will be set to TARGET.
 
@@ -291,6 +291,8 @@ setting `pp-escape-newlines' to nil manually."
      (env-def (funcall body env-def))
      ((eq system-type 'windows-nt) (funcall body null-device))
      (t (require 'tramp)
+        (defvar tramp-methods)
+        (defvar tramp-default-host-alist)
         (let ((tramp-methods
                (cons '("mock"
                        (tramp-login-program        "sh")
@@ -321,7 +323,7 @@ Tramp related features.  We mostly follow
   (let ((exp `(progn ,@body)))
     (if (eval test t)
         exp
-      `(when ,test (eval exp t)))))
+      `(when ,test (eval ',exp t)))))
 
 (org--compile-when (featurep 'jump)
   (defjump org-test-jump
@@ -364,7 +366,7 @@ Tramp related features.  We mostly follow
 	full-path))
     (lambda () ((lambda (res) (if (listp res) (car res) res)) (which-function)))))
 
-(define-key emacs-lisp-mode-map "\M-\C-j" 'org-test-jump)
+(define-key emacs-lisp-mode-map "\M-\C-j" #'org-test-jump)
 
 
 ;;; Miscellaneous helper functions
@@ -399,8 +401,8 @@ Tramp related features.  We mostly follow
 	       (lambda (path)
 		 (if (file-directory-p path)
 		     (rld path)
-		   (condition-case err
-		       (when (string-match "^[A-Za-z].*\\.el$"
+		   (condition-case nil
+		       (when (string-match "\\`[A-Za-z].*\\.el\\'"
 					   (file-name-nondirectory path))
                          (let ((feature-name
                                 (intern
@@ -415,7 +417,7 @@ Tramp related features.  We mostly follow
 			(eval `(ert-deftest ,name ()
 				 :expected-result :failed (should nil))))))))
 	       (directory-files base 'full
-				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
+			        "\\`\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el\\'"))))
     (rld (expand-file-name "lisp" org-test-dir))))
 
 (defun org-test-current-defun ()

@@ -1,4 +1,4 @@
-;;; test-ob-emacs-lisp.el
+;;; test-ob-emacs-lisp.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2012-2022 Free Software Foundation, Inc.
 ;; Authors: Eric Schulte, Martyn Jago
@@ -87,22 +87,24 @@
 
     (should (string= "dynamic" (execute "
 #+begin_src emacs-lisp :lexical no :results verbatim
-(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+\(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
 #+end_src")))
 
     (should (string= "lexical" (execute "
 #+begin_src emacs-lisp :lexical yes :results verbatim
-(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+\(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
 #+end_src")))
 
-    (should (string= "dynamic" (let ((x 'dynamic)) (execute "
+    (defvar ob-emacs--x)
+
+    (should (string= "dynamic" (let ((ob-emacs--x 'dynamic)) (execute "
 #+begin_src emacs-lisp :lexical no :results verbatim
-x
+ob-emacs--x
 #+end_src"))))
 
-    (should (string= "lexical" (let ((x 'dynamic)) (execute "
-#+begin_src emacs-lisp :lexical '((x . lexical)) :results verbatim
-x
+    (should (string= "lexical" (let ((ob-emacs--x 'dynamic)) (execute "
+#+begin_src emacs-lisp :lexical '((ob-emacs--x . lexical)) :results verbatim
+ob-emacs--x
 #+end_src"))))
 
     ;; Src block execution uses `eval'. As of 2019-02-26, `eval' does
@@ -132,22 +134,23 @@ x
 
     (should (eq 'dynamic (execute "
 #+begin_src emacs-lisp :lexical no :results verbatim
-(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+\(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
 #+end_src")))
 
     (should (eq 'lexical (execute "
 #+begin_src emacs-lisp :lexical yes :results verbatim
-(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
+\(let ((x 'dynamic)) (funcall (let ((x 'lexical)) (lambda () x))))
 #+end_src")))
 
-    (should (eq 'dynamic (let ((x 'dynamic)) (execute "
+    (defvar ob-emacs--x)
+    (should (eq 'dynamic (let ((ob-emacs--x 'dynamic)) (execute "
 #+begin_src emacs-lisp :lexical no :results verbatim
-x
+ob-emacs--x
 #+end_src"))))
 
-    (should (eq 'lexical (let ((x 'dynamic)) (execute "
-#+begin_src emacs-lisp :lexical '((x . lexical)) :results verbatim
-x
+    (should (eq 'lexical (let ((ob-emacs--x 'dynamic)) (execute "
+#+begin_src emacs-lisp :lexical '((ob-emacs--x . lexical)) :results verbatim
+ob-emacs--x
 #+end_src"))))
 
     (should (equal nil (execute "

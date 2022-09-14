@@ -1,4 +1,4 @@
-;;; test-org-element.el --- Tests for org-element.el
+;;; test-org-element.el --- Tests for org-element.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015, 2019  Nicolas Goaziou
 
@@ -21,8 +21,9 @@
 
 (eval-and-compile (require 'cl-lib))
 
-(unless (featurep 'org-element)
-  (signal 'missing-test-dependency "org-element"))
+(require 'org-element)
+(require 'org)
+(require 'org-inlinetask)
 
 (defun org-test-parse-and-interpret (text)
   "Parse TEXT as Org syntax and interpret it.
@@ -247,7 +248,7 @@ Some other text
     '(italic entity bold)
     (org-test-with-temp-text "/some/ *paragraph*"
       (let* ((tree (org-element-parse-buffer))
-	     (paragraph (org-element-map tree 'paragraph 'identity nil t))
+	     (_paragraph (org-element-map tree 'paragraph #'identity nil t))
 	     (bold (org-element-map tree 'bold 'identity nil t)))
 	(org-element-insert-before '(entity (:name "\\alpha")) bold)
 	(org-element-map tree '(bold entity italic) #'org-element-type nil)))))

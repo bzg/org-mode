@@ -1,4 +1,4 @@
-;;; test-ob-clojure.el
+;;; test-ob-clojure.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2018-2022 Free Software Foundation, Inc.
 ;; Authors: stardiviner

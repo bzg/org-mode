@@ -1,4 +1,4 @@
-;;; test-org-inlinetask.el --- Tests for org-inlinetask.el
+;;; test-org-inlinetask.el --- Tests for org-inlinetask.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c)  Marco Wahl
 ;; Authors: Marco Wahl

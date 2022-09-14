@@ -1,4 +1,4 @@
-;;; test-org-macro.el --- Tests for org-macro.el
+;;; test-org-macro.el --- Tests for org-macro.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013, 2014, 2019  Nicolas Goaziou
 

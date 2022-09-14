@@ -1,4 +1,4 @@
-;;; test-ob-lob.el --- test for ob-lob.el
+;;; test-ob-lob.el --- test for ob-lob.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2015, 2019 Eric Schulte
 ;; Authors: Eric Schulte
@@ -19,6 +19,7 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 (eval-and-compile (require 'cl-lib))
+(require 'ob-lob)
 
 
 ;;; Tests
@@ -134,6 +135,8 @@ for export
 #+call: rubbish()
 #+end_example"
     (should (progn (org-babel-exp-process-buffer) t))))
+
+(defvar temporary-value-for-test)
 
 (ert-deftest test-ob-lob/caching-call-line ()
   (let ((temporary-value-for-test 0))

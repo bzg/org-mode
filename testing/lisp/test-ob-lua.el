@@ -1,4 +1,4 @@
-;;; test-ob-lua.el --- tests for ob-lua.el
+;;; test-ob-lua.el --- tests for ob-lua.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2016, 2019 Thibault Marin
 ;; Authors: Thibault Marin

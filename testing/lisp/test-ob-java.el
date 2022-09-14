@@ -1,4 +1,4 @@
-;;; test-ob-java.el --- tests for ob-java.el
+;;; test-ob-java.el --- tests for ob-java.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2020-2022 Free Software Foundation, Inc.
 ;; Authors: Eric Schulte
@@ -22,12 +22,7 @@
 
 ;;; Code:
 (require 'org-test "../testing/org-test")
-
 (require 'ob-core)
-(defvar org-babel-temporary-directory ; from ob-core
-  (if (boundp 'org-babel-temporary-directory)
-    org-babel-temporary-directory
-  (temporary-file-directory)))
 
 (org-test-for-executable "java")
 (org-test-for-executable "javac")

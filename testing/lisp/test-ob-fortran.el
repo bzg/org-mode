@@ -1,4 +1,4 @@
-;;; test-ob-fortran.el --- tests for ob-fortran.el
+;;; test-ob-fortran.el --- tests for ob-fortran.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2014, 2019 Sergey Litvinov
 ;; Authors: Sergey Litvinov

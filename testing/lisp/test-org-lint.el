@@ -19,6 +19,9 @@
 
 ;;; Code:
 
+(require 'org-footnote)
+(require 'org-lint)
+
 (ert-deftest test-org-lint/add-checker ()
   "Test `org-lint-add-checker'."
   ;; Name should be a non-nil symbol.
@@ -178,7 +181,7 @@ Paragraph 2"
   (should-not
    (org-test-with-temp-text "[[(foo)]]
 #+begin_src emacs-lisp -l \"; ref:%s\"
-(+ 1 1) ; ref:foo
+\(+ 1 1) ; ref:foo
 #+end_src"
      (org-lint '(invalid-coderef-link)))))
 

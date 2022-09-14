@@ -1,4 +1,4 @@
-;;; test-ob-tangle.el --- tests for ob-tangle.el
+;;; test-ob-tangle.el --- tests for ob-tangle.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2016, 2019 Eric Schulte
 ;; Authors: Eric Schulte
@@ -26,6 +26,8 @@
 ;;; Code:
 
 (require 'subr-x)
+(require 'ob-tangle)
+(require 'org)
 
 ;; TODO
 ;; (ert-deftest ob-tangle/noweb-on-tangle ()

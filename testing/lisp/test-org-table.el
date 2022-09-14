@@ -1,4 +1,4 @@
-;;; test-org-table.el --- tests for org-table.el
+;;; test-org-table.el --- tests for org-table.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c)  David Maus
 ;; Authors: David Maus, Michael Brand
@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'org-table)  ; `org-table-make-reference'
+(require 'ox)
 
 (ert-deftest test-org-table/simple-formula/no-grouping/no-title-row ()
   "Simple sum without grouping rows, without title row."
@@ -1613,7 +1614,7 @@ See also `test-org-table/copy-field'."
   (should
    (equal
     "a\nb"
-    (let* ((fun-list (list (lambda (backend) (search-forward "a") (insert "hook"))))
+    (let* ((fun-list (list (lambda (_backend) (search-forward "a") (insert "hook"))))
 	   (org-export-before-parsing-hook fun-list)
 	   (org-export-before-processing-hook fun-list))
       (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
@@ -1622,7 +1623,8 @@ See also `test-org-table/copy-field'."
   (should
    (equal
     "a\nb"
-    (let ((org-export-filter-table-cell-functions (list (lambda (c b i) "filter"))))
+    (let ((org-export-filter-table-cell-functions
+           (list (lambda (_c _b _i) "filter"))))
       (orgtbl-to-generic (org-table-to-lisp "| a |\n|---|\n| b |")
 			 '(:hline nil)))))
   ;; Macros, even if unknown, are returned as-is.
@@ -1891,7 +1893,7 @@ See also `test-org-table/copy-field'."
   ;; Sort alphabetically.  Enforce the C locale for consistent results.
   (let ((original-string-collate-lessp (symbol-function 'string-collate-lessp)))
     (cl-letf (((symbol-function 'string-collate-lessp)
-	       (lambda (s1 s2 &optional locale ignore-case)
+	       (lambda (s1 s2 &optional _locale ignore-case)
 		 (funcall original-string-collate-lessp
 			  s1 s2 "C" ignore-case))))
       (should

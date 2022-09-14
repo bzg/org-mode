@@ -1,4 +1,4 @@
-;;; test-ob-exp.el
+;;; test-ob-exp.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2015, 2019 Eric Schulte
 ;; Authors: Eric Schulte
@@ -23,6 +23,10 @@
 ;; Template test file for Org tests
 
 ;;; Code:
+
+(require 'ob-exp)
+(require 'org-src)
+(require 'org-test "../testing/org-test")
 
 (defmacro org-test-with-expanded-babel-code (&rest body)
   "Execute BODY while in a buffer with all Babel code evaluated.
@@ -136,7 +140,7 @@ a table."
     '(property-drawer plain-list src-block fixed-width src-block plain-list)
     (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
       (org-narrow-to-subtree)
-      (mapcar 'org-element-type
+      (mapcar #'org-element-type
 	      (org-element-map
 		  (org-test-with-expanded-babel-code
 		   (org-element-parse-buffer 'greater-element))
@@ -179,6 +183,7 @@ a table."
 	 nil t))))))
 
 (ert-deftest ob-exp/evaluate-all-executables-in-order ()
+  (defvar *evaluation-collector*)
   (should
    (equal '(5 4 3 2 1)
 	  (let ((org-export-use-babel t) *evaluation-collector*)

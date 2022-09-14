@@ -1,4 +1,4 @@
-;;; test-ob-python.el --- tests for ob-python.el
+;;; test-ob-python.el --- tests for ob-python.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2011-2014, 2019, 2021 Eric Schulte
 ;; Authors: Pedro Bruel, based on test-ob-python.el by Eric Schulte
@@ -21,6 +21,7 @@
 
 ;;; Code:
 (org-test-for-executable "julia")
+(require 'ob-core)
 (unless (featurep 'ob-julia)
   (signal 'missing-test-dependency "Support for julia code blocks"))
 

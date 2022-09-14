@@ -1,4 +1,4 @@
-;;
+;;  -*- lexical-binding: t; -*-
 ;; Remove Org remnants built into Emacs
 ;;
 
@@ -10,11 +10,13 @@
 		     p))
 		 load-path)))
 ;; remove property list to defeat cus-load and remove autoloads
-(mapatoms (function  (lambda (s)
-		       (let ((sn (symbol-name s)))
-			 (when (string-match "^\\(org\\|ob\\|ox\\)\\(-.*\\)?$" sn)
-			   (setplist s nil)
-			   (when (eq 'autoload (car-safe s))
-			     (unintern s)))))))
+(mapatoms (lambda (s)
+	    (let ((sn (symbol-name s)))
+	      (when (string-match "\\`\\(org\\|ob\\|ox\\)\\(-.*\\)?\\'" sn)
+		(setplist s nil)
+		;; FIXME: `s' is a symbol, so (car-safe s) is always nil.
+		;;(when (eq 'autoload (car-safe s))
+		;;  (unintern s obarray))
+		))))
 
 ;; we should now start from a clean slate

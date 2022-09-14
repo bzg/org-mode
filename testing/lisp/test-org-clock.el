@@ -1,4 +1,4 @@
-;;; test-org-clock.el --- Tests for org-clock.el
+;;; test-org-clock.el --- Tests for org-clock.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012, 2014, 2015, 2019  Nicolas Goaziou
 
@@ -12,6 +12,9 @@
 
 
 ;;; Code:
+
+(require 'org-duration)
+(require 'org-clock)
 
 (defun org-test-clock-create-timestamp (input &optional inactive with-time)
   "Create a timestamp out of a date/time prompt string.

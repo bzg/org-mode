@@ -1,4 +1,4 @@
-;;; test-ob-C.el --- tests for ob-C.el
+;;; test-ob-C.el --- tests for ob-C.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2014, 2019 Sergey Litvinov, Thierry Banel
 ;; Authors: Sergey Litvinov, Thierry Banel

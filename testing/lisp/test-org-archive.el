@@ -19,6 +19,8 @@
 
 ;;; Code:
 
+(require 'org-archive)
+
 (ert-deftest test-org-archive/update-status-cookie ()
   "Test archiving properly updating status cookies."
   ;; Test org-archive-subtree with two children.

@@ -21,6 +21,8 @@
 
 ;;; Code:
 
+(require 'org-datetree)
+
 (ert-deftest test-org-datetree/find-date-create ()
   "Test `org-datetree-find-date-create' specifications."
   ;; When date is missing, create it.

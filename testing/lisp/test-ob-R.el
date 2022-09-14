@@ -1,4 +1,4 @@
-;;; test-ob-R.el --- tests for ob-R.el
+;;; test-ob-R.el --- tests for ob-R.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2011-2014, 2019 Eric Schulte
 ;; Authors: Eric Schulte
@@ -20,8 +20,12 @@
 
 ;;; Code:
 (org-test-for-executable "R")
+(require 'ob-core)
 (unless (featurep 'ess)
   (signal 'missing-test-dependency "ESS"))
+(defvar ess-ask-for-ess-directory)
+(defvar ess-history-file)
+
 (unless (featurep 'ob-R)
   (signal 'missing-test-dependency "Support for R code blocks"))
 
@@ -138,7 +142,7 @@ x
 4.0 * 3.5
 log(10)
 log10(10)
-(3 + 1) * 5
+\(3 + 1) * 5
 3^-1
 1/0
 #+end_src"

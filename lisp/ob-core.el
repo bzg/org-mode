@@ -2850,7 +2850,7 @@ CONTEXT may be one of :tangle, :export or :eval."
 (defvar org-babel-expand-noweb-references--cache nil
   "Noweb reference cache used during expansion.")
 (defvar org-babel-expand-noweb-references--cache-buffer nil
-  "Cons (buffer . modified-tick) for cached noweb references.
+  "Cons (BUFFER . MODIFIED-TICK) for cached noweb references.
 See `org-babel-expand-noweb-references--cache'.")
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
@@ -3194,33 +3194,25 @@ additionally processed by `shell-quote-argument'."
   (let ((f (org-babel-local-file-name (expand-file-name name))))
     (if no-quote-p f (shell-quote-argument f))))
 
-(defvar org-babel-temporary-directory)
-(unless (or noninteractive (boundp 'org-babel-temporary-directory))
-  (defvar org-babel-temporary-directory
-    (or (and (boundp 'org-babel-temporary-directory)
-	     (file-exists-p org-babel-temporary-directory)
-	     org-babel-temporary-directory)
-	(make-temp-file "babel-" t))
-    "Directory to hold temporary files created to execute code blocks.
+(defvar org-babel-temporary-directory
+  (unless noninteractive
+    (make-temp-file "babel-" t))
+  "Directory to hold temporary files created to execute code blocks.
 Used by `org-babel-temp-file'.  This directory will be removed on
-Emacs shutdown."))
+Emacs shutdown.")
 
-(defvar org-babel-temporary-stable-directory)
-(unless (or noninteractive (boundp 'org-babel-temporary-stable-directory))
-  (defvar org-babel-temporary-stable-directory
-    (or (and (boundp 'org-babel-temporary-stable-directory)
-	     (file-exists-p org-babel-temporary-stable-directory)
-	     org-babel-temporary-stable-directory)
-        (let (dir)
-          (while (or (not dir) (file-exists-p dir))
-            (setq dir (expand-file-name
-                       (format "babel-stable-%d" (random 1000))
-                       (temporary-file-directory))))
-          (make-directory dir)
-          dir))
-    "Directory to hold temporary files created to execute code blocks.
+(defvar org-babel-temporary-stable-directory
+  (unless noninteractive
+    (let (dir)
+      (while (or (not dir) (file-exists-p dir))
+        (setq dir (expand-file-name
+                   (format "babel-stable-%d" (random 1000))
+                   (temporary-file-directory))))
+      (make-directory dir)
+      dir))
+  "Directory to hold temporary files created to execute code blocks.
 Used by `org-babel-temp-file'.  This directory will be removed on
-Emacs shutdown."))
+Emacs shutdown.")
 
 (defcustom org-babel-remote-temporary-directory "/tmp/"
   "Directory to hold temporary files on remote hosts."
@@ -3258,7 +3250,7 @@ of `org-babel-temporary-directory'."
 		      prefix org-babel-remote-temporary-directory))))
         (make-temp-file prefix nil suffix))
     (let ((temporary-file-directory
-	   (or (and (boundp 'org-babel-temporary-directory)
+	   (or (and org-babel-temporary-directory
 		    (file-exists-p org-babel-temporary-directory)
 		    org-babel-temporary-directory)
 	       temporary-file-directory)))
@@ -3277,7 +3269,7 @@ constructed like the following: PREFIXDATAhashSUFFIX."
         (with-temp-file path)
         path)
     (let* ((temporary-file-directory
-	    (or (and (boundp 'org-babel-temporary-stable-directory)
+	    (or (and org-babel-temporary-stable-directory
 		     (file-exists-p org-babel-temporary-stable-directory)
 		     org-babel-temporary-stable-directory)
 	        temporary-file-directory))
@@ -3290,7 +3282,7 @@ constructed like the following: PREFIXDATAhashSUFFIX."
 
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."
-  (when (and (boundp 'org-babel-temporary-directory)
+  (when (and org-babel-temporary-directory
 	     (file-exists-p org-babel-temporary-directory))
     ;; taken from `delete-directory' in files.el
     (condition-case nil
@@ -3307,13 +3299,12 @@ constructed like the following: PREFIXDATAhashSUFFIX."
 	  (delete-directory org-babel-temporary-directory))
       (error
        (message "Failed to remove temporary Org-babel directory %s"
-		(if (boundp 'org-babel-temporary-directory)
-		    org-babel-temporary-directory
-		  "[directory not defined]"))))))
+		(or org-babel-temporary-directory
+		    "[directory not defined]"))))))
 
 (defun org-babel-remove-temporary-stable-directory ()
   "Remove `org-babel-temporary-stable-directory' and on Emacs shutdown."
-  (when (and (boundp 'org-babel-temporary-stable-directory)
+  (when (and org-babel-temporary-stable-directory
 	     (file-exists-p org-babel-temporary-stable-directory))
     (let ((org-babel-temporary-directory
            org-babel-temporary-stable-directory))

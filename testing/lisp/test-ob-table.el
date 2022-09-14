@@ -1,4 +1,4 @@
-;;; test-ob-table.el
+;;; test-ob-table.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2011-2014, 2019 Eric Schulte
 ;; Authors: Eric Schulte

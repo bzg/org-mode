@@ -1,4 +1,4 @@
-;;; test-org.el --- tests for org.el
+;;; test-org.el --- tests for org.el  -*- lexical-binding: t -*-
 
 ;; Copyright (c)  David Maus
 ;; Authors: David Maus
@@ -23,6 +23,11 @@
 ;;; Code:
 
 (eval-and-compile (require 'cl-lib))
+(eval-when-compile (require 'org-macs)) ;For `org-with-gensyms'.
+(require 'org)
+(require 'org-inlinetask)
+(require 'org-refile)
+(require 'org-agenda)
 
 
 ;;; Helpers
@@ -272,6 +277,7 @@
 
 (ert-deftest test-org/org-read-date ()
   "Test `org-read-date' specifications."
+  (defvar org-time-was-given) ; dynamically scoped parameter
   ;; Parse ISO date with abbreviated year and month.
   (should (equal "2012-03-29 16:40"
 		 (let ((org-time-was-given t))
@@ -1972,7 +1978,7 @@
     "* H <2014-03-05"
     (org-test-with-temp-text "* H <2014-03-04 Tue><point>"
       (cl-letf (((symbol-function 'read-from-minibuffer)
-		 (lambda (&rest args) "+1d")))
+		 (lambda (&rest _args) "+1d")))
 	(org-clone-subtree-with-time-shift 1))
       (buffer-substring-no-properties (line-beginning-position 2)
 				      (line-end-position 2)))))
@@ -2664,7 +2670,7 @@ SCHEDULED: <2014-03-04 tue.>"
 	      org-current-tag-alist))))
   (should
    (equal '(("A" . ?a) ("B") ("C"))
-	  (let ((org-tag-persistant-alist nil))
+	  (let ((org-tag-persistant-alist nil)) ;FIXME: persist*e*nt, maybe?
 	    (org-test-with-temp-text "#+TAGS: A(a) B C"
 	      (org-mode-restart)
 	      org-current-tag-alist))))
@@ -3065,14 +3071,14 @@ Foo Bar
    (org-test-with-temp-text "* H :<point>tag:"
      (catch :result
        (cl-letf (((symbol-function 'org-tags-view)
-		  (lambda (&rest args) (throw :result t))))
+		  (lambda (&rest _args) (throw :result t))))
 	 (org-open-at-point)
 	 nil))))
   (should-not
    (org-test-with-temp-text-in-file "* H<point> :tag:"
      (catch :result
        (cl-letf (((symbol-function 'org-tags-view)
-		  (lambda (&rest args) (throw :result t))))
+		  (lambda (&rest _args) (throw :result t))))
 	 ;; When point isn't on a tag it's going to try other things,
 	 ;; possibly trying to open attachments which will return an
 	 ;; error if there isn't an attachment. Suppress that error.
@@ -3738,7 +3744,7 @@ SCHEDULED: <2017-05-06 Sat>
   (should-not
    (org-test-with-temp-text "A <point>long line of text\nSome other text"
      (visual-line-mode)
-     (dotimes (i 1000) (insert "very "))
+     (dotimes (_ 1000) (insert "very "))
      (org-beginning-of-line)
      (bolp)))
   ;; In a wide headline, with `visual-line-mode', prefer going to the
@@ -3747,14 +3753,14 @@ SCHEDULED: <2017-05-06 Sat>
   (should-not
    (org-test-with-temp-text "* A <point>long headline"
      (visual-line-mode)
-     (dotimes (i 1000) (insert "very "))
+     (dotimes (_ 1000) (insert "very "))
      (goto-char (point-max))
      (org-beginning-of-line)
      (bobp)))
   (should-not
    (org-test-with-temp-text "* A <point>long headline"
      (visual-line-mode)
-     (dotimes (i 1000) (insert "very "))
+     (dotimes (_ 1000) (insert "very "))
      (goto-char (point-max))
      (let ((org-special-ctrl-a/e t)) (org-beginning-of-line))
      (bobp)))
@@ -3854,7 +3860,7 @@ SCHEDULED: <2017-05-06 Sat>
   (should-not
    (org-test-with-temp-text "A <point>long line of text\nSome other text"
      (visual-line-mode)
-     (dotimes (i 1000) (insert "very "))
+     (dotimes (_ 1000) (insert "very "))
      (goto-char (point-min))
      (org-end-of-line)
      (eolp)))
@@ -3869,14 +3875,14 @@ SCHEDULED: <2017-05-06 Sat>
   (should-not
    (org-test-with-temp-text "* A <point>long headline"
      (visual-line-mode)
-     (dotimes (i 1000) (insert "very "))
+     (dotimes (_ 1000) (insert "very "))
      (goto-char (point-min))
      (org-end-of-line)
      (eolp)))
   (should-not
    (org-test-with-temp-text "* A <point>long headline :tag:"
      (visual-line-mode)
-     (dotimes (i 1000) (insert "very "))
+     (dotimes (_ 1000) (insert "very "))
      (goto-char (point-min))
      (org-end-of-line)
      (eolp)))
@@ -5629,7 +5635,7 @@ Paragraph<point>"
   (should
    (equal "* H\nDEADLINE: <2012-03-29 -705d>"
 	  (cl-letf (((symbol-function 'org-read-date)
-		     (lambda (&rest args)
+		     (lambda (&rest _args)
 		       (org-time-string-to-time "2014-03-04"))))
 	    (org-test-with-temp-text "* H\nDEADLINE: <2012-03-29>"
 	      (let ((org-adapt-indentation nil)
@@ -5638,7 +5644,7 @@ Paragraph<point>"
 	      (buffer-string)))))
   (should-error
    (cl-letf (((symbol-function 'org-read-date)
-	      (lambda (&rest args)
+	      (lambda (&rest _args)
 		(org-time-string-to-time "2014-03-04"))))
      (org-test-with-temp-text "* H"
        (let ((org-adapt-indentation nil)
@@ -5741,7 +5747,7 @@ Paragraph<point>"
   (should
    (equal "* H\nSCHEDULED: <2012-03-29 -705d>"
 	  (cl-letf (((symbol-function 'org-read-date)
-		     (lambda (&rest args)
+		     (lambda (&rest _args)
 		       (org-time-string-to-time "2014-03-04"))))
 	    (org-test-with-temp-text "* H\nSCHEDULED: <2012-03-29>"
 	      (let ((org-adapt-indentation nil)
@@ -5750,7 +5756,7 @@ Paragraph<point>"
 	      (buffer-string)))))
   (should-error
    (cl-letf (((symbol-function 'org-read-date)
-	      (lambda (&rest args)
+	      (lambda (&rest _args)
 		(org-time-string-to-time "2014-03-04"))))
      (org-test-with-temp-text "* H"
        (let ((org-adapt-indentation nil)
@@ -7307,7 +7313,7 @@ Paragraph<point>"
    (equal "* H1 :foo:"
 	  (org-test-with-temp-text "* H1"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7317,7 +7323,7 @@ Paragraph<point>"
    (equal "* H1 :foo:\nContents"
 	  (org-test-with-temp-text "* H1\n<point>Contents"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7326,7 +7332,7 @@ Paragraph<point>"
    (equal "* H1 :foo:\nContents2"
 	  (org-test-with-temp-text "* H1\n<point>Contents2"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7338,7 +7344,7 @@ Paragraph<point>"
    (equal "* H1 :foo:\nContents\n* H2 :foo:"
 	  (org-test-with-temp-text "* H1\nContents\n* H2"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-loop-over-headlines-in-active-region t)
 		    (org-tags-column 1))
@@ -7351,7 +7357,7 @@ Paragraph<point>"
    (equal "* H1\nContents\n* H2 :foo:"
 	  (org-test-with-temp-text "* H1\nContents\n* H2"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-loop-over-headlines-in-active-region nil)
 		    (org-tags-column 1))
@@ -7371,7 +7377,7 @@ Paragraph<point>"
    (equal ":foo:"
 	  (org-test-with-temp-text "* <point>"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7381,7 +7387,7 @@ Paragraph<point>"
    (equal "* H1 :foo:"
 	  (org-test-with-temp-text "* H1"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7391,7 +7397,7 @@ Paragraph<point>"
    (equal "* H1 :foo:"
 	  (org-test-with-temp-text "*<point>* H1"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7401,7 +7407,7 @@ Paragraph<point>"
    (equal " b :foo:"
 	  (org-test-with-temp-text "* a<point> b"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (&rest args) '("foo"))))
+		       (lambda (&rest _args) '("foo"))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
 		(org-set-tags-command)))
@@ -7411,7 +7417,7 @@ Paragraph<point>"
    (equal "b :foo:"
 	  (org-test-with-temp-text "* a :foo:\n** <point>b :foo:"
 	    (cl-letf (((symbol-function 'completing-read-multiple)
-		       (lambda (prompt coll &optional pred req initial &rest args)
+		       (lambda (_prompt _coll &optional _pred _req initial &rest _)
 			 (list initial))))
 	      (let ((org-use-fast-tag-selection nil)
 		    (org-tags-column 1))
@@ -7687,7 +7693,7 @@ Paragraph<point>"
     (let ((org-todo-keywords '((sequence "TODO" "DONE")))
 	  (org-log-repeat nil))
       (cl-letf (((symbol-function 'org-add-log-setup)
-		 (lambda (&rest args) nil)))
+		 (lambda (&rest _args) nil)))
 	(org-test-with-temp-text "* TODO H\n<2012-03-29 Thu. +2y>"
 	  (org-todo "DONE")
 	  (buffer-string))))))
@@ -7697,7 +7703,7 @@ Paragraph<point>"
     (let ((org-todo-keywords '((sequence "TODO" "DONE")))
 	  (org-log-repeat t))
       (cl-letf (((symbol-function 'org-add-log-setup)
-		 (lambda (&rest args) nil)))
+		 (lambda (&rest _args) nil)))
 	(org-test-with-temp-text "* TODO H\n<2012-03-29 Thu. +2y>"
 	  (org-todo "DONE")
 	  (buffer-string))))))
@@ -7706,7 +7712,7 @@ Paragraph<point>"
     ":LAST_REPEAT:"
     (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
       (cl-letf (((symbol-function 'org-add-log-setup)
-		 (lambda (&rest args) nil)))
+		 (lambda (&rest _args) nil)))
 	(org-test-with-temp-text
 	    "* TODO H\n<2012-03-29 Thu +2y>\nCLOCK: [2012-03-29 Thu 16:40]"
 	  (org-todo "DONE")
@@ -8016,7 +8022,7 @@ CLOSED: %s
     "Te<2014-03-04 .*?>xt"
     (org-test-with-temp-text "Te<point>xt"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
 	(org-time-stamp nil)
 	(buffer-string)))))
@@ -8026,7 +8032,7 @@ CLOSED: %s
     "Te<2014-03-04 .*? 00:41>xt"
     (org-test-with-temp-text "Te<point>xt"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04 00:41"))))
 	(org-time-stamp '(4))
 	(buffer-string)))))
@@ -8045,7 +8051,7 @@ CLOSED: %s
     "Te\\[2014-03-04 .*?\\]xt"
     (org-test-with-temp-text "Te<point>xt"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
 	(org-time-stamp nil t)
 	(buffer-string)))))
@@ -8055,7 +8061,7 @@ CLOSED: %s
     "<2014-03-04 .*?>"
     (org-test-with-temp-text "<2012-03-29<point> thu.>"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
 	(org-time-stamp nil)
 	(buffer-string)))))
@@ -8064,7 +8070,7 @@ CLOSED: %s
     "<2014-03-04 .*?>--<2014-03-04 .*?>"
     (org-test-with-temp-text "<2012-03-29<point> thu.>--<2014-03-04 tue.>"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
 	(org-time-stamp nil)
 	(buffer-string)))))
@@ -8074,7 +8080,7 @@ CLOSED: %s
     "<2014-03-04 .*? \\+2y>"
     (org-test-with-temp-text "<2012-03-29<point> thu. +2y>"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
 	(org-time-stamp nil)
 	(buffer-string)))))
@@ -8084,7 +8090,7 @@ CLOSED: %s
     "<2012-03-29 .*?>--<2014-03-04 .*?>"
     (org-test-with-temp-text "<2012-03-29 thu.><point>"
       (cl-letf (((symbol-function 'org-read-date)
-		 (lambda (&rest args)
+		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
 	(let ((last-command 'org-time-stamp)
 	      (this-command 'org-time-stamp))

@@ -1,4 +1,4 @@
-;;; test-ob-lilypond.el --- tests for ob-lilypond.el
+;;; test-ob-lilypond.el --- tests for ob-lilypond.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2014, 2019 Martyn Jago
 ;; Authors: Martyn Jago
@@ -19,11 +19,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
-(unless (featurep 'ob-lilypond)
-  (signal 'missing-test-dependency "Support for Lilypond code blocks"))
+(require 'ob-lilypond)
 
-(save-excursion
-  (set-buffer (get-buffer-create "test-ob-lilypond.el"))
+(with-current-buffer (get-buffer-create "test-ob-lilypond.el")
   (setq org-babel-lilypond-here
         (file-name-directory
          (or load-file-name (buffer-file-name)))))

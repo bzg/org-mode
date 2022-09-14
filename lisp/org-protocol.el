@@ -137,7 +137,6 @@
 
 (declare-function org-publish-get-project-from-filename "ox-publish"
 		  (filename &optional up))
-(declare-function server-edit "server" (&optional arg))
 
 (defvar org-capture-link-is-already-stored)
 (defvar org-capture-templates)
@@ -671,7 +670,8 @@ CLIENT is ignored."
 		       (new-style (not (= ?: (aref (match-string 1 fname) 0)))))
                   (when (plist-get (cdr prolist) :kill-client)
 		    (message "Greedy org-protocol handler.  Killing client.")
-		    (server-edit))
+		    ;; If not fboundp, there's no client to kill.
+		    (if (fboundp 'server-edit) (server-edit)))
                   (when (fboundp func)
                     (unless greedy
                       (throw 'fname

@@ -1,4 +1,4 @@
-;;; test-org-footnote.el --- Tests for org-footnote.el
+;;; test-org-footnote.el --- Tests for org-footnote.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2015, 2019  Nicolas Goaziou
 
@@ -18,6 +18,8 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
+
+(require 'org-footnote)
 
 (ert-deftest test-org-footnote/new ()
   "Test `org-footnote-new' specifications."

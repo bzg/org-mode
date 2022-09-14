@@ -1,4 +1,4 @@
-;;; test-ob-octave.el --- tests for ob-octave.el
+;;; test-ob-octave.el --- tests for ob-octave.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2010-2014, 2019 Sergey Litvinov
 ;; Authors: Sergey Litvinov

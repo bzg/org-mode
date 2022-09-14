@@ -260,7 +260,7 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
     (cl-letf (((symbol-function 'read-char-exclusive)
                (lambda () ?t))
               ((symbol-function 'completing-read)
-               (lambda (&rest rest) "DONE")))
+               (lambda (&rest _rest) "DONE")))
       (org-agenda-bulk-action))
     (org-agenda-previous-item 99)
     (should (looking-at ".*DONE a"))
@@ -295,7 +295,7 @@ functions."
             `((?P
                ;; Custom bulk function
                ,(lambda (&rest args)
-                  (message "test" args)
+                  (message "test" args) ;FIXME: `args' unused?
                   (setq f-called-cnt (1+ f-called-cnt)
 
                         f-called-args args))

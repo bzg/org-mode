@@ -1,4 +1,4 @@
-;;; test-ob-plantuml.el --- tests for ob-plantuml.el
+;;; test-ob-plantuml.el --- tests for ob-plantuml.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2016, 2019 Thibault Marin
 ;; Authors: Thibault Marin
@@ -19,8 +19,7 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
-(unless (featurep 'ob-plantuml)
-  (signal 'missing-test-dependency "Support for PlantUML code blocks"))
+(require 'ob-plantuml)
 
 (ert-deftest test-ob-plantuml/single-var ()
   "Test file output with input variable."

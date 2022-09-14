@@ -1,4 +1,4 @@
-;;; test-ob-header-arg-defaults.el --- tests for default header args from properties
+;;; test-ob-header-arg-defaults.el --- tests for default header args from properties  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2013, 2014, 2019 Achim Gratz
 ;; Authors: Achim Gratz

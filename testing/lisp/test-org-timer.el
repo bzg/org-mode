@@ -1,4 +1,4 @@
-;;; test-org-timer.el --- Tests for org-timer.el
+;;; test-org-timer.el --- Tests for org-timer.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014-2015, 2019  Kyle Meyer
 
@@ -22,12 +22,13 @@
 ;;; Code:
 
 (eval-and-compile (require 'cl-lib))
+(require 'org-timer)
 
 (defmacro test-org-timer/with-temp-text (text &rest body)
   "Like `org-test-with-temp-text', but set timer-specific variables.
 Also, mute output from `message'."
   (declare (indent 1))
-  `(cl-letf (((symbol-function 'message) (lambda (&rest args) nil)))
+  `(cl-letf (((symbol-function 'message) (lambda (&rest _args) nil)))
      (org-test-with-temp-text ,text
        (let (org-timer-start-time
 	     org-timer-pause-time

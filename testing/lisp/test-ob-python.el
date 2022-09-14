@@ -1,4 +1,4 @@
-;;; test-ob-python.el --- tests for ob-python.el
+;;; test-ob-python.el --- tests for ob-python.el  -*- lexical-binding: t; -*-
 
 ;; Copyright (c) 2011-2014, 2019 Eric Schulte
 ;; Authors: Eric Schulte
@@ -20,6 +20,7 @@
 
 ;;; Code:
 (org-test-for-executable "python")
+(require 'ob-core)
 (unless (featurep 'ob-python)
   (signal 'missing-test-dependency "Support for Python code blocks"))
 
