@@ -1822,7 +1822,7 @@ non-interactively, don't allow to edit the default description."
 	 (all-prefixes (append (mapcar #'car abbrevs)
 			       (mapcar #'car org-link-abbrev-alist)
 			       (org-link-types)))
-         entry auto-desc)
+         entry)
     (cond
      (link-location)		      ; specified by arg, just use it.
      ((org-in-regexp org-link-bracket-re 1)
@@ -1885,8 +1885,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	    (unless (org-string-nw-p link) (user-error "No link selected"))
 	    (dolist (l org-stored-links)
 	      (when (equal link (cadr l))
-		(setq link (car l))
-		(setq auto-desc t)))
+		(setq link (car l))))
 	    (when (or (member link all-prefixes)
 		      (and (equal ":" (substring link -1))
 			   (member (substring link 0 -1) all-prefixes)
@@ -1963,41 +1962,40 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	  (when (equal desc origpath)
 	    (setq desc path)))))
 
-    (unless auto-desc
-      (let* ((type
-              (cond
-               ((and all-prefixes
-                     (string-match (rx-to-string `(: string-start (submatch (or ,@all-prefixes)) ":")) link))
-                (match-string 1 link))
-               ((file-name-absolute-p link) "file")
-               ((string-match "\\`\\.\\.?/" link) "file")))
-             (initial-input
-	      (cond
-	       (description)
-               (desc)
-               ((org-link-get-parameter type :insert-description)
-                (let ((def (org-link-get-parameter type :insert-description)))
-                  (condition-case nil
-                      (cond
-                       ((stringp def) def)
-                       ((functionp def)
-                        (funcall def link desc)))
-                    (error
-                     (message "Can't get link description from org link parameter `:insert-description': %S"
-			      def)
-		     (sit-for 2)
-                     nil))))
-	       (org-link-make-description-function
+    (let* ((type
+            (cond
+             ((and all-prefixes
+                   (string-match (rx-to-string `(: string-start (submatch (or ,@all-prefixes)) ":")) link))
+              (match-string 1 link))
+             ((file-name-absolute-p link) "file")
+             ((string-match "\\`\\.\\.?/" link) "file")))
+           (initial-input
+            (cond
+             (description)
+             (desc)
+             ((org-link-get-parameter type :insert-description)
+              (let ((def (org-link-get-parameter type :insert-description)))
                 (condition-case nil
-		    (funcall org-link-make-description-function link desc)
-		  (error
-		   (message "Can't get link description from %S"
-		            org-link-make-description-function)
-		   (sit-for 2)
-		   nil))))))
-	(setq desc (if (called-interactively-p 'any)
-		       (read-string "Description: " initial-input)
-		     initial-input))))
+                    (cond
+                     ((stringp def) def)
+                     ((functionp def)
+                      (funcall def link desc)))
+                  (error
+                   (message "Can't get link description from org link parameter `:insert-description': %S"
+                            def)
+                   (sit-for 2)
+                   nil))))
+             (org-link-make-description-function
+              (condition-case nil
+                  (funcall org-link-make-description-function link desc)
+                (error
+                 (message "Can't get link description from %S"
+                          org-link-make-description-function)
+                 (sit-for 2)
+                 nil))))))
+      (setq desc (if (called-interactively-p 'any)
+                     (read-string "Description: " initial-input)
+                   initial-input)))
 
     (unless (org-string-nw-p desc) (setq desc nil))
     (when remove (apply #'delete-region remove))
