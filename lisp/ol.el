@@ -1777,6 +1777,9 @@ The history can be used to select a link previously stored with
 press `RET' at the prompt), the link defaults to the most recently
 stored link.  As `SPC' triggers completion in the minibuffer, you need to
 use `M-SPC' or `C-q SPC' to force the insertion of a space character.
+Completion candidates include link descriptions.
+
+If there is a link under cursor then edit it.
 
 You will also be prompted for a description, and if one is given, it will
 be displayed in the buffer instead of the link.
