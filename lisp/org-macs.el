@@ -73,7 +73,9 @@ Version mismatch is commonly encountered in the following situations:
    deferring the loading.")
      (error "Org version mismatch.  Make sure that correct `load-path' is set early in init.el")))
 
-(org-assert-version)
+;; We rely on org-macs when generating Org version.  Checking Org
+;; version here will interfere with Org build process.
+;; (org-assert-version)
 
 (declare-function org-mode "org" ())
 (declare-function org-agenda-files "org" (&optional unrestricted archives))

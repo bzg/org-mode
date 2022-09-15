@@ -34,7 +34,9 @@
 (require 'seq)
 (require 'org-macs)
 
-(org-assert-version)
+;; We rely on org-compat when generating Org version.  Checking Org
+;; version here will interfere with Org build process.
+;; (org-assert-version)
 
 (declare-function org-agenda-diary-entry "org-agenda")
 (declare-function org-agenda-maybe-redo "org-agenda" ())
