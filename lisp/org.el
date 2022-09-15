@@ -10325,8 +10325,7 @@ narrowing."
          ;; When current headline is at the end of buffer and does not
          ;; end with trailing newline the above can move to the
          ;; beginning of the headline.
-         (when (< (point) endpos)) ;; FIXME: Spurious extra paren?
-         (goto-char endpos)))))
+         (when (< (point) endpos) (goto-char endpos))))))
    (if (bolp) (point) (line-beginning-position 2))))
 
 (defun org-add-log-setup (&optional purpose state prev-state how extra)
