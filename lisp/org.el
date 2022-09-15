@@ -12224,7 +12224,8 @@ but in some other way.")
     "EXPORT_OPTIONS" "EXPORT_TEXT" "EXPORT_FILE_NAME"
     "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE" "UNNUMBERED"
     "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER" "REPEAT_TO_STATE"
-    "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS")
+    "CLOCK_MODELINE_TOTAL" "STYLE" "HTML_CONTAINER_CLASS"
+    "ORG-IMAGE-ACTUAL-WIDTH")
   "Some properties that are used by Org mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 
@@ -16260,48 +16261,51 @@ buffer boundaries with possible narrowing."
   If the value is a float between 0 and 2, it interpreted as that proportion
   of the text width in the buffer."
   ;; Apply `org-image-actual-width' specifications.
-  (cond
-   ((eq org-image-actual-width t) nil)
-   ((listp org-image-actual-width)
-    (let* ((case-fold-search t)
-           (par (org-element-lineage link '(paragraph)))
-           (attr-re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)")
-           (par-end (org-element-property :post-affiliated par))
-           ;; Try to find an attribute providing a :width.
-           (attr-width
-            (when (and par (org-with-point-at
-                               (org-element-property :begin par)
-                             (re-search-forward attr-re par-end t)))
-              (match-string 1)))
-           (width
-            (cond
-             ;; Treat :width t as if `org-image-actual-width' were t.
-             ((string= attr-width "t") nil)
-             ;; Fallback to `org-image-actual-width' if no interprable width is given.
-             ((or (null attr-width)
-                  (string-match-p "\\`[^0-9]" attr-width))
-              (car org-image-actual-width))
-             ;; Convert numeric widths to numbers, converting percentages.
-             ((string-match-p "\\`[0-9.]+%" attr-width)
-              (/ (string-to-number attr-width) 100.0))
-             (t (string-to-number attr-width)))))
-      (if (and (floatp width) (<= 0.0 width 2.0))
-          ;; A float in [0,2] should be interpereted as this portion of
-          ;; the text width in the window.  This works well with cases like
-          ;; #+attr_latex: :width 0.X\{line,page,column,etc.}width,
-          ;; as the "0.X" is pulled out as a float.  We use 2 as the upper
-          ;; bound as cases such as 1.2\linewidth are feasible.
-          (round (* width
-                    (window-pixel-width)
-                    (/ (or (and (bound-and-true-p visual-fill-column-mode)
-                                (or visual-fill-column-width auto-fill-function))
-                           (when auto-fill-function fill-column)
-                           (- (window-text-width) (line-number-display-width)))
-                       (float (window-total-width)))))
-        width)))
-   ((numberp org-image-actual-width)
-    org-image-actual-width)
-   (t nil)))
+  ;; Support subtree-level property "ORG-IMAGE-ACTUAL-WIDTH" specified
+  ;; width.
+  (let ((org-image-actual-width (org-property-or-variable-value 'org-image-actual-width)))
+    (cond
+     ((eq org-image-actual-width t) nil)
+     ((listp org-image-actual-width)
+      (let* ((case-fold-search t)
+             (par (org-element-lineage link '(paragraph)))
+             (attr-re "^[ \t]*#\\+attr_.*?: +.*?:width +\\(\\S-+\\)")
+             (par-end (org-element-property :post-affiliated par))
+             ;; Try to find an attribute providing a :width.
+             (attr-width
+              (when (and par (org-with-point-at
+                                 (org-element-property :begin par)
+                               (re-search-forward attr-re par-end t)))
+                (match-string 1)))
+             (width
+              (cond
+               ;; Treat :width t as if `org-image-actual-width' were t.
+               ((string= attr-width "t") nil)
+               ;; Fallback to `org-image-actual-width' if no interprable width is given.
+               ((or (null attr-width)
+                    (string-match-p "\\`[^0-9]" attr-width))
+                (car org-image-actual-width))
+               ;; Convert numeric widths to numbers, converting percentages.
+               ((string-match-p "\\`[0-9.]+%" attr-width)
+                (/ (string-to-number attr-width) 100.0))
+               (t (string-to-number attr-width)))))
+        (if (and (floatp width) (<= 0.0 width 2.0))
+            ;; A float in [0,2] should be interpereted as this portion of
+            ;; the text width in the window.  This works well with cases like
+            ;; #+attr_latex: :width 0.X\{line,page,column,etc.}width,
+            ;; as the "0.X" is pulled out as a float.  We use 2 as the upper
+            ;; bound as cases such as 1.2\linewidth are feasible.
+            (round (* width
+                      (window-pixel-width)
+                      (/ (or (and (bound-and-true-p visual-fill-column-mode)
+                                  (or visual-fill-column-width auto-fill-function))
+                             (when auto-fill-function fill-column)
+                             (- (window-text-width) (line-number-display-width)))
+                         (float (window-total-width)))))
+          width)))
+     ((numberp org-image-actual-width)
+      org-image-actual-width)
+     (t nil))))
 
 (defun org-display-inline-remove-overlay (ov after _beg _end &optional _len)
   "Remove inline-display overlay if a corresponding region is modified."

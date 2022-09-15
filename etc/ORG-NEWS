@@ -296,6 +296,10 @@ headings in HTML export.
 Use the header argument =:var x=code-block[]= or
 : #+CALL: fn(x=code-block[])
 to pass the contents of a named code block as a string argument.
+*** New property =ORG-IMAGE-ACTUAL-WIDTH= for overriding global ~org-image-actual-width~
+
+The new property =ORG-IMAGE-ACTUAL-WIDTH= can override the global
+variable ~org-image-actual-width~ value for inline images display width.
 
 ** New options
 *** New custom settings =org-icalendar-scheduled-summary-prefix= and =org-icalendar-deadline-summary-prefix=
