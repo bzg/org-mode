@@ -13,10 +13,6 @@
 (mapatoms (lambda (s)
 	    (let ((sn (symbol-name s)))
 	      (when (string-match "\\`\\(org\\|ob\\|ox\\)\\(-.*\\)?\\'" sn)
-		(setplist s nil)
-		;; FIXME: `s' is a symbol, so (car-safe s) is always nil.
-		;;(when (eq 'autoload (car-safe s))
-		;;  (unintern s obarray))
-		))))
+		(setplist s nil)))))
 
 ;; we should now start from a clean slate
