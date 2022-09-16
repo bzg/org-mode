@@ -93,7 +93,7 @@ variable, and communication channel under `info'."
        (format "#+SETUPFILE: \"%s/examples/setupfile.org\"" org-test-dir)
      (let ((org-export-allow-bind-keywords t))
        (org-export-get-environment)
-       ;; FIXME: `variable'?
+       ;; `variable' is bound inside the setupfile.
        (eq variable 'value))))
   ;; Verify that bound variables are seen during export.
   (should

@@ -153,7 +153,6 @@ See https://github.com/yantar92/org/issues/4."
 
 (ert-deftest test-org-link/store-link ()
   "Test `org-store-link' specifications."
-  (defvar org-store-link-props) ;; FIXME: Unknown var!
   ;; On a headline, link to that headline.  Use heading as the
   ;; description of the link.
   (should

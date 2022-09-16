@@ -2670,7 +2670,7 @@ SCHEDULED: <2014-03-04 tue.>"
 	      org-current-tag-alist))))
   (should
    (equal '(("A" . ?a) ("B") ("C"))
-	  (let ((org-tag-persistant-alist nil)) ;FIXME: persist*e*nt, maybe?
+	  (let ((org-tag-persistent-alist nil))
 	    (org-test-with-temp-text "#+TAGS: A(a) B C"
 	      (org-mode-restart)
 	      org-current-tag-alist))))

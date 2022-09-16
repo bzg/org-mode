@@ -1591,7 +1591,7 @@ arguments.  Replace citation with \"@\" character in the output."
     '(p1 p1 p1 p3)
     (org-test-with-temp-text "[cite:@a]"
       (let ((org-export-registered-backends nil)
-            (org-cite--procesors nil)   ;FIXME: `org-cite--processors' maybe?
+            (org-cite--processors nil)
             (org-cite-export-processors
              '((b1 . (p1))
                (t  . (p3)))))
@@ -1612,7 +1612,7 @@ arguments.  Replace citation with \"@\" character in the output."
    (eq 'p2
        (org-test-with-temp-text "#+cite_export: p2\n[cite:@a]"
          (let ((org-export-registered-backends nil)
-               (org-cite--procesors nil)   ;FIXME: `org-cite--processors' maybe?
+               (org-cite--processors nil)
                (org-cite-export-processors '((t  . (p1)))))
            (org-cite-register-processor 'p1
              :export-citation (lambda (&rest _) (throw :exit 'p1)))

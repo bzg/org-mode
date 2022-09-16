@@ -78,7 +78,7 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-dir
   (expand-file-name (file-name-directory (or load-file-name buffer-file-name))))
 
-(defconst org-base-dir ;; FIXME: Use `org-test-' prefix.
+(defconst org-test-base-dir
   (expand-file-name ".." org-test-dir))
 
 (defconst org-test-example-dir
@@ -96,15 +96,9 @@ org-test searches this directory up the directory tree.")
 (defconst org-test-link-in-heading-file
   (expand-file-name "link-in-heading.org" org-test-dir))
 
-;; FIXME: Merely loading a file shouldn't override a user's settings.
-(setq org-id-locations-file
-  (expand-file-name ".test-org-id-locations" org-test-dir))
-
 
 ;;; Functions for writing tests
-(put 'missing-test-dependency           ;FIXME: Use `define-error'.
-     'error-conditions
-     '(error missing-test-dependency))
+(define-error 'missing-test-dependency "org-test: Test dependency missing.")
 
 (defun org-test-for-executable (exe)
   "Throw an error if EXE is not available.
@@ -331,10 +325,10 @@ Tramp related features.  We mostly follow
      ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
      ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
      ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el"))
-    (concat org-base-dir "/")
+    (concat org-test-base-dir "/")
     "Jump between Org files and their tests."
     (lambda (path)
-      (let* ((full-path (expand-file-name path org-base-dir))
+      (let* ((full-path (expand-file-name path org-test-base-dir))
 	     (file-name (file-name-nondirectory path))
 	     (name (file-name-sans-extension file-name)))
 	(find-file full-path)
@@ -392,6 +386,8 @@ Tramp related features.  We mostly follow
 (defun org-test-load ()
   "Load up the Org test suite."
   (interactive)
+  (setq org-id-locations-file
+        (expand-file-name ".test-org-id-locations" org-test-dir))
   (cl-flet ((rld (base)
 	      ;; Recursively load all files, if files throw errors
 	      ;; then silently ignore the error and continue to the

@@ -1389,8 +1389,7 @@ Line 3\"
 	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp
 \(+ 1 2)
 #+END_SRC\n\n\n"
-	    ;; FIXME: Unknown var `org-babel-next-src-block'?
-	    (let ((org-babel-next-src-block "RESULTS"))
+	    (let ((org-babel-results-keyword "RESULTS"))
 	      (org-babel-execute-src-block))
 	    (buffer-string))))
   ;; Do not add spurious blank lines after results.
@@ -1543,8 +1542,7 @@ echo \"$data\"
 	    (should (re-search-forward org-babel-src-block-regexp nil t))
 	    (goto-char (match-beginning 0))
 	    ;; now that we've located the code block, it may be evaluated
-	    ;; FIXME: Unknown var `org-babel-execute-src-block'?
-	    (let ((org-babel-execute-src-block "RESULTS"))
+	    (let ((org-babel-results-keyword "RESULTS"))
 	      (org-babel-execute-src-block))
 	    (buffer-string)))))
 

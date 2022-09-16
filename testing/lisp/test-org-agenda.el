@@ -295,7 +295,7 @@ functions."
             `((?P
                ;; Custom bulk function
                ,(lambda (&rest args)
-                  (message "test" args) ;FIXME: `args' unused?
+                  (message "test")
                   (setq f-called-cnt (1+ f-called-cnt)
 
                         f-called-args args))
