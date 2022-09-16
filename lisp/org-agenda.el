@@ -5908,7 +5908,7 @@ displayed in agenda view."
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
-	(org-agenda-skip)
+	(org-agenda-skip (org-element-lineage (org-element-at-point) '(headline inlinetask) 'with-self))
 	(setq beg (match-beginning 0))
 	(goto-char (1- (match-end 0)))
 	(setq b (point))
