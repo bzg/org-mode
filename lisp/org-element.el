@@ -5953,7 +5953,7 @@ actually submitted."
       ;; Do not sync when, for example, in the middle of
       ;; `combine-change-calls'.  See the commentary inside
       ;; `org-element--cache-active-p'.
-      (when (org-element--cache-active-p)
+      (when (and org-element--cache-sync-requests (org-element--cache-active-p))
         ;; Check if the buffer have been changed outside visibility of
         ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
         (if (/= org-element--cache-last-buffer-size (buffer-size))
