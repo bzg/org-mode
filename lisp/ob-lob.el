@@ -78,9 +78,10 @@ should not be inherited from a source block.")
 Detect if this is context for a Library Of Babel source block and
 if so then run the appropriate source block from the Library."
   (interactive)
-  (let ((info (org-babel-lob-get-info)))
+  (let* ((datum (org-element-context))
+         (info (org-babel-lob-get-info datum)))
     (when info
-      (org-babel-execute-src-block nil info)
+      (org-babel-execute-src-block nil info nil (org-element-type datum))
       t)))
 
 (defun org-babel-lob--src-info (ref)

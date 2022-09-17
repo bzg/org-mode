@@ -715,7 +715,7 @@ a list with the following pattern:
                 ; and `org-babel-read'
 
 ;;;###autoload
-(defun org-babel-execute-src-block (&optional arg info params)
+(defun org-babel-execute-src-block (&optional arg info params executor-type)
   "Execute the current source code block and return the result.
 Insert the results of execution into the buffer.  Source code
 execution and the collection and formatting of results can be
@@ -729,13 +729,29 @@ Optionally supply a value for INFO in the form returned by
 
 Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the front of the source code
-block."
+block.
+
+EXECUTOR-TYPE is the type of the org element responsible for the
+execution of the source block.  If not provided then informed
+guess will be made."
   (interactive)
   (let* ((org-babel-current-src-block-location
-	  (or org-babel-current-src-block-location
-	      (nth 5 info)
-	      (org-babel-where-is-src-block-head)))
-	 (info (if info (copy-tree info) (org-babel-get-src-block-info))))
+          (or org-babel-current-src-block-location
+              (nth 5 info)
+              (org-babel-where-is-src-block-head)))
+         (info (if info (copy-tree info) (org-babel-get-src-block-info)))
+         (executor-type
+          (or executor-type
+              ;; If `executor-type' is unset, then we will make an
+              ;; informed guess.
+              (pcase (char-after org-babel-current-src-block-location)
+                (?s 'inline-src-block)
+                (?c 'inline-babel-call)
+                (?# (pcase (char-after (+ 2 org-babel-current-src-block-location))
+                      (?b 'src-block)
+                      (?c 'call-block)
+                      (_ 'unknown)))
+                (_ 'unknown)))))
     ;; Merge PARAMS with INFO before considering source block
     ;; evaluation since both could disagree.
     (cl-callf org-babel-merge-params (nth 2 info) params)
@@ -776,8 +792,14 @@ block."
 		 result)
 	    (unless (fboundp cmd)
 	      (error "No org-babel-execute function for %s!" lang))
-	    (message "executing %s code block%s..."
+	    (message "executing %s %s %s..."
 		     (capitalize lang)
+                     (pcase executor-type
+                       ('src-block "code block")
+                       ('inline-src-block "inline code block")
+                       ('babel-call "call")
+                       ('inline-babel-call "inline call")
+                       (e (symbol-name e)))
 		     (let ((name (nth 4 info)))
 		       (if name
                            (format "(%s)" name)

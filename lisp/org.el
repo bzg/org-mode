@@ -17297,7 +17297,7 @@ This command does many different things, depending on context:
 	       "`\\[org-ctrl-c-ctrl-c]' can do nothing useful here"))))
 	((or `babel-call `inline-babel-call)
 	 (let ((info (org-babel-lob-get-info context)))
-	   (when info (org-babel-execute-src-block nil info))))
+	   (when info (org-babel-execute-src-block nil info nil type))))
 	(`clock (org-clock-update-time-maybe))
 	(`dynamic-block
 	 (save-excursion
