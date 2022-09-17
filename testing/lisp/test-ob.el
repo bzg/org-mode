@@ -883,7 +883,52 @@ x
 #+begin_src emacs-lisp :noweb yes<point>
 <<AA>>
 #+end_src"
-	    (org-babel-expand-noweb-references)))))
+	    (org-babel-expand-noweb-references))))
+  ;; Test :noweb-ref expansion.
+  (should
+   (equal "(message \"!! %s\" \"Running confpkg-test-setup\")
+
+(message \"- Ran `%s'\" 'confpkg-test-strip-package-statements)
+
+(message \"!! %s\" \"Still running confpkg-test-setup\")
+
+(message \"- Ran elisp blocks in `%s'\" 'confpkg-test-dependency-analysis)
+
+(message \"!! %s\" \"End of confpkg-test-setup\")"
+          (org-test-with-temp-text "
+* Setup
+
+#+name: confpkg-test-setup
+#+begin_src emacs-lisp :results silent :noweb no-export
+(message \"!! %s\" \"Running confpkg-test-setup\")
+
+<<confpkg-test-strip-package-statements>>
+
+(message \"!! %s\" \"Still running confpkg-test-setup\")
+
+<<confpkg-test-dependency-analysis>>
+
+(message \"!! %s\" \"End of confpkg-test-setup\")
+#+end_src
+
+#+call: confpkg-test-setup[:results none]()
+
+* Identify cross-package dependencies
+
+#+begin_src emacs-lisp :noweb-ref confpkg-test-dependency-analysis
+(message \"- Ran elisp blocks in `%s'\" 'confpkg-test-dependency-analysis)
+#+end_src
+
+* Commenting out ~package!~ statements
+
+#+name: confpkg-test-strip-package-statements
+#+begin_src emacs-lisp
+(message \"- Ran `%s'\" 'confpkg-test-strip-package-statements)
+#+end_src
+"
+            (goto-char (point-min))
+            (search-forward "begin_src")
+            (org-babel-expand-noweb-references)))))
 
 (ert-deftest test-ob/splitting-variable-lists-in-references ()
   (org-test-with-temp-text ""
