@@ -18603,6 +18603,8 @@ expanded anyway.
 :UNNUMBERED: notoc
 :END:
 
+# FIXME missing pre-tangle and tangle-body hooks
+
 - ~org-babel-post-tangle-hook~ ::
 
   #+vindex: org-babel-post-tangle-hook
