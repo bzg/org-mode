@@ -789,7 +789,7 @@ guess will be made."
 		       (make-directory d 'parents)
 		       d))))
 		 (cmd (intern (concat "org-babel-execute:" lang)))
-		 result)
+		 result exec-start-time)
 	    (unless (fboundp cmd)
 	      (error "No org-babel-execute function for %s!" lang))
 	    (message "executing %s %s %s..."
@@ -804,7 +804,8 @@ guess will be made."
 		       (if name
                            (format "(%s)" name)
                          (format "at position %d" (nth 5 info)))))
-	    (setq result
+	    (setq exec-start-time (current-time)
+                  result
 		  (let ((r (funcall cmd body params)))
 		    (if (and (eq (cdr (assq :result-type params)) 'value)
 			     (or (member "vector" result-params)
@@ -847,7 +848,8 @@ guess will be made."
 	      (if (member "none" result-params)
 		  (message "result silenced")
 	        (org-babel-insert-result
-	         result result-params info new-hash lang)))
+	         result result-params info new-hash lang
+                 (time-subtract (current-time) exec-start-time))))
 	    (run-hooks 'org-babel-after-execute-hook)
 	    result)))))))
 
@@ -2258,7 +2260,7 @@ If the path of the link is a file path it is expanded using
       ;; scalar result
       (funcall echo-res result))))
 
-(defun org-babel-insert-result (result &optional result-params info hash lang)
+(defun org-babel-insert-result (result &optional result-params info hash lang exec-time)
   "Insert RESULT into the current buffer.
 
 By default RESULT is inserted after the end of the current source
@@ -2266,7 +2268,8 @@ block.  The RESULT of an inline source block usually will be
 wrapped inside a `results' macro and placed on the same line as
 the inline source block.  The macro is stripped upon export.
 Multiline and non-scalar RESULTS from inline source blocks are
-not allowed.  With optional argument RESULT-PARAMS controls
+not allowed.  When EXEC-TIME is provided it may be included in a
+generated message.  With optional argument RESULT-PARAMS controls
 insertion of results in the Org mode file.  RESULT-PARAMS can
 take the following values:
 
@@ -2571,11 +2574,18 @@ INFO may provide the values of these header arguments (in the
 			   (not (and (listp result)
 				     (member "append" result-params))))
 		  (indent-rigidly beg end indent))
-		(if (null result)
-		    (if (member "value" result-params)
-			(message "Code block returned no value.")
-		      (message "Code block produced no output."))
-		  (message "Code block evaluation complete.")))
+                (let ((time-info
+                       ;; Only show the time when something other than
+                       ;; 0s will be shown, i.e. check if the time is at
+                       ;; least half of the displayed precision.
+                       (if (and exec-time (> (float-time exec-time) 0.05))
+                           (format " (took %.1fs)" (float-time exec-time))
+                         "")))
+                  (if (null result)
+                      (if (member "value" result-params)
+                          (message "Code block returned no value%s." time-info)
+                        (message "Code block produced no output%s." time-info))
+                    (message "Code block evaluation complete%s." time-info))))
 	    (set-marker end nil)
 	    (when outside-scope (narrow-to-region visible-beg visible-end))
 	    (set-marker visible-beg nil)
