@@ -1253,7 +1253,7 @@ used.  When nil, no theme is applied."
   :group 'org-export-latex
   :type 'symbol)
 
-(defun org-latex-generate-engraved-preamble (info syntax-colours-p)
+(defun org-latex-generate-engraved-preamble (info)
   "Generate the preamble to setup engraved code.
 The result is constructed from the :latex-engraved-preamble and
 :latex-engraved-optionsn export options, the default values of
