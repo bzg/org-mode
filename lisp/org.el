@@ -18695,7 +18695,7 @@ Alignment is done according to `org-property-format', which see."
 	                      (format org-property-format (match-string 1) (match-string 3))))))
         ;; Do not use `replace-match' here as we want to inherit folding
         ;; properties if inside fold.
-        (setf (buffer-substring (match-beginning 0) (match-end 0)) "")
+        (delete-region (match-beginning 0) (match-end 0))
         (insert-and-inherit newtext)))))
 
 (defun org-indent-line ()
