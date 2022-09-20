@@ -1036,9 +1036,10 @@ from that position."
   `(org-with-wide-buffer
     (when ,override (org-fold-core-region (point-min) (point-max) nil))
     (pcase-dolist (`(,beg ,end ,spec) (delq nil ,regions))
-      (if ,relative
-          (org-fold-core-region (+ ,relative beg) (+ ,relative end) t spec)
-        (org-fold-core-region beg end t spec))
+      (let ((rel ,relative))
+        (if rel
+            (org-fold-core-region (+ rel beg) (+ rel end) t spec)
+          (org-fold-core-region beg end t spec)))
       (when ,clean-markers
         (when (markerp beg) (set-marker beg nil))
         (when (markerp end) (set-marker end nil))))))
