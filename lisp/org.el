@@ -20365,7 +20365,9 @@ If there is no such heading, return nil."
   ;; Furthermore, when used inside Org, finding the end of a large subtree
   ;; with many children and grandchildren etc, this can be much faster
   ;; than the outline version.
-  (org-back-to-heading-or-point-min invisible-ok)
+  (if element
+      (setq element (org-element-lineage element '(headline inlinetask) 'include-self))
+    (org-back-to-heading-or-point-min invisible-ok))
   (unless (and (org-element--cache-active-p)
                (let ((cached (or element (org-element-at-point nil t))))
                  (and cached
