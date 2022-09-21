@@ -20156,9 +20156,13 @@ Optional argument ELEMENT contains element at point."
 	     (cl-some (apply-partially #'string= org-archive-tag) tags)))))
    (no-inheritance nil)
    (t
-    (if (org-element--cache-active-p)
-        (cl-some (lambda (el) (org-element-property :archivedp el))
-                 (org-element-lineage (or element (org-element-at-point)) nil t))
+    (if (or element (org-element--cache-active-p))
+        (catch :archived
+          (unless element (setq element (org-element-at-point)))
+          (while element
+            (when (org-element-property :archivedp element)
+              (throw :archived t))
+            (setq element (org-element-property :parent element))))
       (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p)))))))
 
 (defun org-at-comment-p nil
