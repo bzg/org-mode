@@ -5679,12 +5679,12 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
 
 ;;;; Tools
 
-(defun org-element--cache-active-p (&optional called-from-cache-change-func-p)
+(defsubst org-element--cache-active-p (&optional called-from-cache-change-func-p)
   "Non-nil when cache is active in current buffer."
   (and org-element-use-cache
        org-element--cache
-       (derived-mode-p 'org-mode)
        (or called-from-cache-change-func-p
+           (eq org-element--cache-change-tic (buffer-chars-modified-tick))
            (and
             ;; org-num-mode calls some Org structure analysis functions
             ;; that can trigger cache update in the middle of changes.  See
@@ -5699,8 +5699,7 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
             ;; `combine-change-calls' because the buffer is potentially
             ;; changed without notice (the change will be registered
             ;; after exiting the `combine-change-calls' body though).
-            (memq #'org-element--cache-after-change after-change-functions))
-           (eq org-element--cache-change-tic (buffer-chars-modified-tick)))))
+            (memq #'org-element--cache-after-change after-change-functions)))))
 
 ;; FIXME: Remove after we establish that hashing is effective.
 (defun org-element-cache-hash-show-statistics ()
