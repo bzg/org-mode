@@ -14425,34 +14425,39 @@ D may be an absolute day number, or a calendar-type list (month day year)."
   (let ((hl (calendar-check-holidays org-agenda-current-date)))
     (and hl (mapconcat #'identity hl "; "))))
 
+(defvar org--diary-sexp-entry-cache (make-hash-table :test #'equal)
+  "Hash table holding return values of `org-diary-sexp-entry'.")
 (defun org-diary-sexp-entry (sexp entry d)
   "Process a SEXP diary ENTRY for date D."
   (require 'diary-lib)
   ;; `org-anniversary' and alike expect ENTRY and DATE to be bound
   ;; dynamically.
-  (let* ((sexp `(let ((entry ,entry)
-		      (date ',d))
-		  ,(car (read-from-string sexp))))
-         ;; FIXME: Do not use (eval ... t) in the following sexp as
-         ;; diary vars are still using dynamic scope.
-	 (result (if calendar-debug-sexp (eval sexp)
-		   (condition-case nil
-		       (eval sexp)
-		     (error
-		      (beep)
-		      (message "Bad sexp at line %d in %s: %s"
-			       (org-current-line)
-			       (buffer-file-name) sexp)
-		      (sleep-for 2))))))
-    (cond ((stringp result) (split-string result "; "))
-	  ((and (consp result)
-		(not (consp (cdr result)))
-		(stringp (cdr result)))
-	   (cdr result))
-	  ((and (consp result)
-		(stringp (car result)))
-	   result)
-	  (result entry))))
+  (or (gethash (list sexp entry d) org--diary-sexp-entry-cache)
+      (puthash (list sexp entry d)
+               (let* ((sexp `(let ((entry ,entry)
+		                   (date ',d))
+		               ,(car (read-from-string sexp))))
+                      ;; FIXME: Do not use (eval ... t) in the following sexp as
+                      ;; diary vars are still using dynamic scope.
+	              (result (if calendar-debug-sexp (eval sexp)
+		                (condition-case nil
+		                    (eval sexp)
+		                  (error
+		                   (beep)
+		                   (message "Bad sexp at line %d in %s: %s"
+			                    (org-current-line)
+			                    (buffer-file-name) sexp)
+		                   (sleep-for 2))))))
+                 (cond ((stringp result) (split-string result "; "))
+	               ((and (consp result)
+		             (not (consp (cdr result)))
+		             (stringp (cdr result)))
+	                (cdr result))
+	               ((and (consp result)
+		             (stringp (car result)))
+	                result)
+	               (result entry)))
+               org--diary-sexp-entry-cache)))
 
 (defun org-diary-to-ical-string (frombuf)
   "Get iCalendar entries from diary entries in buffer FROMBUF.
