@@ -12538,7 +12538,7 @@ Insert Beamer-specific code using the following constructs:
 
 ,#+BEGIN_EXPORT beamer
   Only Beamer export back-end exports this.
-,#+END_BEAMER
+,#+END_EXPORT
 
 Text @@beamer:some code@@ within a paragraph.
 #+end_example
