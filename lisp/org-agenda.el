@@ -5919,7 +5919,7 @@ displayed in agenda view."
 	(setq b (point))
 	(forward-sexp 1)
 	(setq sexp (buffer-substring b (point)))
-	(setq sexp-entry (if (org-looking-at "[ \t]*\\(\\S-.*\\)")
+	(setq sexp-entry (if (looking-at "[ \t]*\\(\\S-.*\\)")
                              (buffer-substring
                               (match-beginning 1)
                               (save-excursion
