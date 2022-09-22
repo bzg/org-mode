@@ -570,11 +570,23 @@ This works for both table types.")
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
   "Match a reference that needs translation, for reference display.")
 
-(defconst org-table-separator-space
+(defconst org-table--separator-space-pre
   (propertize " " 'display '(space :relative-width 1))
-  "Space used around fields when aligning the table.
+  "Space used in front of fields when aligning the table.
 This space serves as a segment separator for the purposes of the
-bidirectional reordering.")
+bidirectional reordering.
+Note that `org-table--separator-space-pre' is not `eq' to
+`org-table--separator-space-post'.  This is done to prevent Emacs from
+visually merging spaces in an empty table cell.  See bug#45915.")
+
+(defconst org-table--separator-space-post
+  (propertize " " 'display '(space :relative-width 1.001))
+  "Space used after fields when aligning the table.
+This space serves as a segment separator for the purposes of the
+bidirectional reordering.
+Note that `org-table--separator-space-pre' is not `eq' to
+`org-table--separator-space-post'.  This is done to prevent Emacs from
+visually merging spaces in an empty table cell.  See bug#45915.")
 
 
 ;;; Internal Variables
@@ -3889,7 +3901,7 @@ mouse onto the overlay.
 
 When optional argument PRE is non-nil, assume the overlay is
 located at the beginning of the field, and prepend
-`org-table-separator-space' to it.  Otherwise, concatenate
+`org-table--separator-space-pre' to it.  Otherwise, concatenate
 `org-table-shrunk-column-indicator' at its end.
 
 Return the overlay."
@@ -3908,7 +3920,7 @@ Return the overlay."
     ;; Make sure overlays stays on top of table coordinates overlays.
     ;; See `org-table-overlay-coordinates'.
     (overlay-put o 'priority 1)
-    (let ((d (if pre (concat org-table-separator-space display)
+    (let ((d (if pre (concat org-table--separator-space-pre display)
 	       (concat display org-table-shrunk-column-indicator))))
       (org-overlay-display o d 'org-table t))
     o))
@@ -4321,11 +4333,11 @@ FIELD is a string.  WIDTH is a number.  ALIGN is either \"c\",
 		   ("r" (make-string spaces ?\s))
 		   ("c" (make-string (/ spaces 2) ?\s))))
 	 (suffix (make-string (- spaces (length prefix)) ?\s)))
-    (concat org-table-separator-space
+    (concat org-table--separator-space-pre
 	    prefix
 	    field
 	    suffix
-	    org-table-separator-space)))
+	    org-table--separator-space-post)))
 
 (defun org-table-align ()
   "Align the table at point by aligning all vertical bars."
