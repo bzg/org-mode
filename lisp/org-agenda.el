@@ -5919,8 +5919,13 @@ displayed in agenda view."
 	(setq b (point))
 	(forward-sexp 1)
 	(setq sexp (buffer-substring b (point)))
-	(setq sexp-entry (if (looking-at "[ \t]*\\(\\S-.*\\)")
-			     (org-trim (match-string 1))
+	(setq sexp-entry (if (org-looking-at "[ \t]*\\(\\S-.*\\)")
+                             (buffer-substring
+                              (match-beginning 1)
+                              (save-excursion
+                                (goto-char (match-end 1))
+                                (skip-chars-backward "[:blank:]")
+                                (point)))
 			   ""))
 	(setq result (org-diary-sexp-entry sexp sexp-entry date))
 	(when result
