@@ -5794,7 +5794,7 @@ displayed in agenda view."
 			 (org-at-clock-log-p))
                     (not (org-at-timestamp-p 'agenda)))
 	    (throw :skip nil))
-	  (org-agenda-skip))
+	  (org-agenda-skip (org-element-at-point)))
 	(let* ((pos (match-beginning 0))
 	       (repeat (match-string 1))
 	       (sexp-entry (match-string 3))
