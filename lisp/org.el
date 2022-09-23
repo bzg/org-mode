@@ -14433,7 +14433,8 @@ D may be an absolute day number, or a calendar-type list (month day year)."
   (require 'diary-lib)
   ;; `org-anniversary' and alike expect ENTRY and DATE to be bound
   ;; dynamically.
-  (or (gethash (list sexp entry d) org--diary-sexp-entry-cache)
+  (let ((cached (gethash (list sexp entry d) org--diary-sexp-entry-cache 'none)))
+    (if (not (eq 'none cached)) cached
       (puthash (list sexp entry d)
                (let* ((sexp `(let ((entry ,entry)
 		                   (date ',d))
@@ -14458,7 +14459,7 @@ D may be an absolute day number, or a calendar-type list (month day year)."
 		             (stringp (car result)))
 	                result)
 	               (result entry)))
-               org--diary-sexp-entry-cache)))
+               org--diary-sexp-entry-cache))))
 
 (defun org-diary-to-ical-string (frombuf)
   "Get iCalendar entries from diary entries in buffer FROMBUF.
