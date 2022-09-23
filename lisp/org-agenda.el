@@ -5913,7 +5913,11 @@ displayed in agenda view."
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
-	(org-agenda-skip (org-element-at-point))
+        ;; We do not run `org-agenda-skip' righ away because every single sexp
+        ;; in the buffer is matched here, unlike day-specific search
+        ;; in ordinary timestamps.  Most of the sexps will not match
+        ;; the agenda day and it is quicker to run `org-agenda-skip' only for
+        ;; matching sexps later on.
 	(setq beg (match-beginning 0))
 	(goto-char (1- (match-end 0)))
 	(setq b (point))
@@ -5929,6 +5933,8 @@ displayed in agenda view."
 			   ""))
 	(setq result (org-diary-sexp-entry sexp sexp-entry date))
 	(when result
+          ;; Only check if entry should be skipped on matching sexps.
+ 	  (org-agenda-skip (org-element-at-point))
 	  (setq marker (org-agenda-new-marker beg)
 		level (make-string (org-reduced-level (org-outline-level)) ? )
 		category (org-get-category beg)
