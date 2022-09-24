@@ -1313,6 +1313,73 @@
             (org-test-with-temp-text "* H\n:PROPERTIES:\n:key:\n:END:"
               (org-indent-region (point-min) (point-max))
               (buffer-string)))))
+  ;; Indent planning according to `org-adapt-indentation'.
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* H\n  SCHEDULED: <2022-11-03>"
+            (org-test-with-temp-text "* H\nSCHEDULED: <2022-11-03>"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
+  ;; Indent LOGBOOK according to `org-adapt-indentation'.
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* H\n  :LOGBOOK:
+  CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46
+  :END:"
+            (org-test-with-temp-text "* H\n:LOGBOOK:
+CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46
+:END:"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
+  ;; Indent clock lines according to `org-adapt-indentation'.
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* H
+  CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
+            (org-test-with-temp-text "* H
+CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
+  ;; Do not indent beyond headline data.
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* H\n  SCHEDULED: <2022-11-03>\nParagraph"
+            (org-test-with-temp-text "* H\nSCHEDULED: <2022-11-03>\nParagraph"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
+  (let ((org-adapt-indentation 'headline-data)
+        (org-log-into-drawer t))
+    (should
+     (equal "* TODO A task
+  :PROPERTIES:
+  :CAPTURED: [2022-09-11 dim. 21:25]
+  :END:
+  :LOGBOOK:
+  CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46
+  :END:
+Paragraph"
+            (org-test-with-temp-text "* TODO A task
+:PROPERTIES:
+:CAPTURED: [2022-09-11 dim. 21:25]
+:END:
+:LOGBOOK:
+CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46
+:END:
+Paragraph"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
+  (let ((org-adapt-indentation 'headline-data))
+    (should
+     (equal "* TODO A task
+  CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46
+Paragraph
+CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
+            (org-test-with-temp-text "* TODO A task
+CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46
+Paragraph
+CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
+              (org-indent-region (point-min) (point-max))
+              (buffer-string)))))
   ;; Indent plain lists.
   (let ((org-adapt-indentation t))
     (should

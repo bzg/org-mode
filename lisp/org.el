@@ -18567,6 +18567,36 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 ;;; Indentation
 
+(defun org--at-headline-data-p (&optional beg element)
+  "Return non-nil when `point' or BEG is inside headline metadata.
+
+Metadata is planning line, properties drawer, logbook drawer right
+after property drawer, or clock log line immediately following
+properties drawer/planning line/ heading.
+
+Optional argument ELEMENT contains element at BEG."
+  (org-with-wide-buffer
+   (when beg (goto-char beg))
+   (setq element (or element (org-element-at-point)))
+   (if (not (org-element-lineage element '(headline inlinetask)))
+       nil ; Not inside heading.
+     ;; Skip to top-level parent in section.
+     (while (not (eq 'section (org-element-type (org-element-property :parent element))))
+       (setq element (org-element-property :parent element)))
+     (pcase (org-element-type element)
+       ((or `planning `property-drawer)
+        t)
+       (`drawer
+        ;; LOGBOOK drawer with appropriate name.
+        (equal
+         (org-log-into-drawer)
+         (org-element-property :drawer-name element)))
+       (`clock
+        ;; Previous element must be headline metadata or headline.
+        (goto-char (1- (org-element-property :begin element)))
+        (or (org-at-heading-p)
+            (org--at-headline-data-p)))))))
+
 (defvar org-element-greater-elements)
 (defun org--get-expected-indentation (element contentsp)
   "Expected indentation column for current line, according to ELEMENT.
@@ -18627,17 +18657,10 @@ ELEMENT."
                 ;; Do not indent like previous when the previous
                 ;; element is headline data and `org-adapt-indentation'
                 ;; is set to `headline-data'.
-                ((save-excursion
-                   (goto-char start)
-                   (and
-                    (eq org-adapt-indentation 'headline-data)
-                    (not (or (org-at-clock-log-p)
-                             (org-at-planning-p)))
-                    (progn
-                      (beginning-of-line 1)
-                      (skip-chars-backward "\n")
+                ((and (eq 'headline-data org-adapt-indentation)
+                      (not (org--at-headline-data-p start element))
                       (or (org-at-heading-p)
-                          (looking-back ":END:.*" (line-beginning-position))))))
+                          (org--at-headline-data-p (1- start) previous)))
                  (throw 'exit 0))
 		(t (goto-char (org-element-property :begin previous))
 		   (throw 'exit
@@ -18752,17 +18775,15 @@ list structure.  Instead, use \\<org-mode-map>`\\[org-shiftmetaleft]' or \
 
 Also align node properties according to `org-property-format'."
   (interactive)
-  (unless (or (org-at-heading-p)
-              (and (eq org-adapt-indentation 'headline-data)
-                   (not (or (org-at-clock-log-p)
-                            (org-at-planning-p)))
-                   (save-excursion
-                     (beginning-of-line 1)
-                     (skip-chars-backward "\n")
-                     (or (org-at-heading-p)
-                         (looking-back ":END:.*" (line-beginning-position))))))
-    (let* ((element (save-excursion (beginning-of-line) (org-element-at-point-no-context)))
-	   (type (org-element-type element)))
+  (let* ((element (save-excursion (beginning-of-line) (org-element-at-point-no-context)))
+	 (type (org-element-type element)))
+    (unless (or (org-at-heading-p)
+                (and (eq org-adapt-indentation 'headline-data)
+                     (not (org--at-headline-data-p nil element))
+                     (save-excursion
+                       (goto-char (1- (org-element-property :begin element)))
+                       (or (org-at-heading-p)
+                           (org--at-headline-data-p)))))
       (cond ((and (memq type '(plain-list item))
 		  (= (line-beginning-position)
 		     (org-element-property :post-affiliated element)))
