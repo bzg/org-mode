@@ -5568,6 +5568,18 @@ transcoding it."
      (secondary-opening :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
      (secondary-closing :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
      (apostrophe :utf-8 "’" :html "&rsquo;"))
+    ("fa"
+     (primary-opening
+      :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+      :texinfo "@guillemetleft{}")
+     (primary-closing
+      :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+      :texinfo "@guillemetright{}")
+     (secondary-opening :utf-8 "‹" :html "&lsaquo;" :latex "\\guilsinglleft{}"
+			:texinfo "@guilsinglleft{}")
+     (secondary-closing :utf-8 "›" :html "&rsaquo;" :latex "\\guilsinglright{}"
+			:texinfo "@guilsinglright{}")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
     ("fr"
      (primary-opening
       :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
@@ -5889,6 +5901,7 @@ them."
      ("eo" :html "A&#365;toro")
      ("es" :default "Autor")
      ("et" :default "Autor")
+     ("fa" :default "نویسنده")
      ("fi" :html "Tekij&auml;")
      ("fr" :default "Auteur")
      ("hu" :default "Szerz&otilde;")
@@ -5914,6 +5927,7 @@ them."
      ("cs" :default "Pokračování z předchozí strany")
      ("de" :default "Fortsetzung von vorheriger Seite")
      ("es" :html "Contin&uacute;a de la p&aacute;gina anterior" :ascii "Continua de la pagina anterior" :default "Continúa de la página anterior")
+     ("fa" :default "ادامه از صفحهٔ قبل")
      ("fr" :default "Suite de la page précédente")
      ("it" :default "Continua da pagina precedente")
      ("ja" :default "前ページからの続き")
@@ -5931,6 +5945,7 @@ them."
      ("cs" :default "Pokračuje na další stránce")
      ("de" :default "Fortsetzung nächste Seite")
      ("es" :html "Contin&uacute;a en la siguiente p&aacute;gina" :ascii "Continua en la siguiente pagina" :default "Continúa en la siguiente página")
+     ("fa" :default "ادامه در صفحهٔ بعد")
      ("fr" :default "Suite page suivante")
      ("it" :default "Continua alla pagina successiva")
      ("ja" :default "次ページに続く")
@@ -5945,6 +5960,7 @@ them."
      ("tr" :default "Devamı sonraki sayfada"))
     ("Created"
      ("cs" :default "Vytvořeno")
+     ("fa" :default "ساخته شده")
      ("nl" :default "Gemaakt op")  ;; must be followed by a date or date+time
      ("pt_BR" :default "Criado em")
      ("ro" :default "Creat")
@@ -5959,6 +5975,7 @@ them."
      ("eo" :default "Dato")
      ("es" :default "Fecha")
      ("et" :html "Kuup&#228;ev" :utf-8 "Kuupäev")
+     ("fa" :default "تاریخ")
      ("fi" :html "P&auml;iv&auml;m&auml;&auml;r&auml;")
      ("hu" :html "D&aacute;tum")
      ("is" :default "Dagsetning")
@@ -5985,6 +6002,7 @@ them."
      ("de" :default "Gleichung")
      ("es" :ascii "Ecuacion" :html "Ecuaci&oacute;n" :default "Ecuación")
      ("et" :html "V&#245;rrand" :utf-8 "Võrrand")
+     ("fa" :default "معادله")
      ("fr" :ascii "Equation" :default "Équation")
      ("is" :default "Jafna")
      ("ja" :default "方程式")
@@ -6007,6 +6025,7 @@ them."
      ("de" :default "Abbildung")
      ("es" :default "Figura")
      ("et" :default "Joonis")
+     ("fa" :default "شکل")
      ("is" :default "Mynd")
      ("it" :default "Figura")
      ("ja" :default "図" :html "&#22259;")
@@ -6027,6 +6046,7 @@ them."
      ("de" :default "Abbildung %d:")
      ("es" :default "Figura %d:")
      ("et" :default "Joonis %d:")
+     ("fa" :default "شکل %d:")
      ("fr" :default "Figure %d :" :html "Figure&nbsp;%d&nbsp;:")
      ("is" :default "Mynd %d")
      ("it" :default "Figura %d:")
@@ -6051,6 +6071,7 @@ them."
      ("eo" :default "Piednotoj")
      ("es" :ascii "Notas al pie de pagina" :html "Notas al pie de p&aacute;gina" :default "Notas al pie de página")
      ("et" :html "Allm&#228;rkused" :utf-8 "Allmärkused")
+     ("fa" :default "پانوشت‌ها")
      ("fi" :default "Alaviitteet")
      ("fr" :default "Notes de bas de page")
      ("hu" :html "L&aacute;bjegyzet")
@@ -6079,6 +6100,7 @@ them."
      ("de" :default "Programmauflistungsverzeichnis")
      ("es" :ascii "Indice de Listados de programas" :html "&Iacute;ndice de Listados de programas" :default "Índice de Listados de programas")
      ("et" :default "Loendite nimekiri")
+     ("fa" :default "فهرست برنامه‌ریزی‌ها")
      ("fr" :default "Liste des programmes")
      ("ja" :default "ソースコード目次")
      ("nl" :default "Lijst van programma's")
@@ -6097,6 +6119,7 @@ them."
      ("de" :default "Tabellenverzeichnis")
      ("es" :ascii "Indice de tablas" :html "&Iacute;ndice de tablas" :default "Índice de tablas")
      ("et" :default "Tabelite nimekiri")
+     ("fa" :default "فهرست جدول‌ها")
      ("fr" :default "Liste des tableaux")
      ("is" :default "Töfluskrá" :html "T&ouml;fluskr&aacute;")
      ("it" :default "Indice delle tabelle")
@@ -6120,6 +6143,7 @@ them."
      ("de" :default "Programmlisting")
      ("es" :default "Listado de programa")
      ("et" :default "Loend")
+     ("fa" :default "برنامه‌ریزی")
      ("fr" :default "Programme" :html "Programme")
      ("it" :default "Listato")
      ("ja" :default "ソースコード")
@@ -6140,6 +6164,7 @@ them."
      ("de" :default "Programmlisting %d")
      ("es" :default "Listado de programa %d")
      ("et" :default "Loend %d")
+     ("fa" :default "برنامه‌ریزی %d:")
      ("fr" :default "Programme %d :" :html "Programme&nbsp;%d&nbsp;:")
      ("it" :default "Listato %d :")
      ("ja" :default "ソースコード%d:")
@@ -6158,6 +6183,7 @@ them."
      ("cs" :default "Reference")
      ("de" :default "Quellen")
      ("es" :default "Referencias")
+     ("fa" :default "منابع")
      ("fr" :ascii "References" :default "Références")
      ("it" :default "Riferimenti")
      ("nl" :default "Bronverwijzingen")
@@ -6167,6 +6193,7 @@ them."
      ("tr" :default "Referanslar"))
     ("See figure %s"
      ("cs" :default "Viz obrázek %s")
+     ("fa" :default "نمایش شکل %s")
      ("fr" :default "cf. figure %s"
       :html "cf.&nbsp;figure&nbsp;%s" :latex "cf.~figure~%s")
      ("it" :default "Vedi figura %s")
@@ -6178,6 +6205,7 @@ them."
      ("tr" :default "bkz. şekil %s"))
     ("See listing %s"
      ("cs" :default "Viz program %s")
+     ("fa" :default "نمایش برنامه‌ریزی %s")
      ("fr" :default "cf. programme %s"
       :html "cf.&nbsp;programme&nbsp;%s" :latex "cf.~programme~%s")
      ("nl" :default "Zie programma %s"
@@ -6193,6 +6221,7 @@ them."
      ("de" :default "siehe Abschnitt %s")
      ("es" :ascii "Vea seccion %s" :html "Vea secci&oacute;n %s" :default "Vea sección %s")
      ("et" :html "Vaata peat&#252;kki %s" :utf-8 "Vaata peatükki %s")
+     ("fa" :default "نمایش بخش %s")
      ("fr" :default "cf. section %s")
      ("it" :default "Vedi sezione %s")
      ("ja" :default "セクション %s を参照")
@@ -6208,6 +6237,7 @@ them."
      ("zh-CN" :html "&#21442;&#35265;&#31532;%s&#33410;" :utf-8 "参见第%s节"))
     ("See table %s"
      ("cs" :default "Viz tabulka %s")
+     ("fa" :default "نمایش جدول %s")
      ("fr" :default "cf. tableau %s"
       :html "cf.&nbsp;tableau&nbsp;%s" :latex "cf.~tableau~%s")
      ("it" :default "Vedi tabella %s")
@@ -6223,6 +6253,7 @@ them."
      ("de" :default "Tabelle")
      ("es" :default "Tabla")
      ("et" :default "Tabel")
+     ("fa" :default "جدول")
      ("fr" :default "Tableau")
      ("is" :default "Tafla")
      ("it" :default "Tabella")
@@ -6241,6 +6272,7 @@ them."
      ("de" :default "Tabelle %d")
      ("es" :default "Tabla %d")
      ("et" :default "Tabel %d")
+     ("fa" :default "جدول %d")
      ("fr" :default "Tableau %d :")
      ("is" :default "Tafla %d")
      ("it" :default "Tabella %d:")
@@ -6266,6 +6298,7 @@ them."
      ("eo" :default "Enhavo")
      ("es" :ascii "Indice" :html "&Iacute;ndice" :default "Índice")
      ("et" :default "Sisukord")
+     ("fa" :default "فهرست")
      ("fi" :html "Sis&auml;llysluettelo")
      ("fr" :ascii "Sommaire" :default "Table des matières")
      ("hu" :html "Tartalomjegyz&eacute;k")
@@ -6293,6 +6326,7 @@ them."
      ("de" :default "Unbekannter Verweis")
      ("es" :default "Referencia desconocida")
      ("et" :default "Tundmatu viide")
+     ("fa" :default "منبع ناشناس")
      ("fr" :ascii "Destination inconnue" :default "Référence inconnue")
      ("it" :default "Riferimento sconosciuto")
      ("ja" :default "不明な参照先")
