@@ -37,17 +37,18 @@
 ;;; Org version verification.
 
 (defmacro org-assert-version ()
-  "Assert compile time and runtime verstion match."
+  "Assert compile time and runtime version match."
   `(unless (equal (org-git-version) ,(org-git-version))
      (warn "Org version mismatch.  Make sure that correct `load-path' is set early in init.el
 This warning usually appears when a built-in Org version is loaded
 prior to the more recent Org version.
 
 Version mismatch is commonly encountered in the following situations:
+
 1. Emacs is loaded using literate Org config and more recent Org
    version is loaded inside the file loaded by `org-babel-load-file'.
    `org-babel-load-file' triggers the built-in Org version clashing
-   the newer Org version attempted to be loaded later.
+   the newer Org version attempt to be loaded later.
 
    It is recommended to move the Org loading code before the
    `org-babel-load-file' call.
