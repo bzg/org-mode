@@ -82,16 +82,15 @@
 (require 'find-func)
 (require 'format-spec)
 
-(or (eq this-command 'eval-buffer)
-    (condition-case nil
-	(load (concat (file-name-directory load-file-name)
-		      "org-loaddefs.el")
-	      nil t t t)
-      (error
-       (message "WARNING: No org-loaddefs.el file could be found from where org.el is loaded.")
-       (sit-for 3)
-       (message "You need to run \"make\" or \"make autoloads\" from Org lisp directory")
-       (sit-for 3))))
+(condition-case nil
+    (load (concat (file-name-directory load-file-name)
+		  "org-loaddefs.el")
+	  nil t t t)
+  (error
+   (message "WARNING: No org-loaddefs.el file could be found from where org.el is loaded.")
+   (sit-for 3)
+   (message "You need to run \"make\" or \"make autoloads\" from Org lisp directory")
+   (sit-for 3)))
 
 (eval-and-compile (require 'org-macs))
 (require 'org-compat)
