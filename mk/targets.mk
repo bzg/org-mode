@@ -1,7 +1,7 @@
 .EXPORT_ALL_VARIABLES:
 .NOTPARALLEL: .PHONY
 # Additional distribution files
-DISTFILES_extra=  Makefile request-assign-future.txt etc
+DISTFILES_extra=  Makefile etc
 
 LISPDIRS      = lisp
 OTHERDIRS     = doc etc

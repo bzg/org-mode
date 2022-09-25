@@ -28,11 +28,6 @@ instructions at https://orgmode.org/org.html#Installation.
 
 - testing/ :: Testing suite for Org.
 
-- request-assign-future.txt :: The form that contributors have to sign
-  and get processed with the FSF before contributed changes can be
-  integrated into the Org core.  All files in this distribution have
-  copyright assigned to the FSF.
-
 * Join the GNU Project
 
 Org is part of GNU Emacs and GNU Emacs is part of the GNU Operating
