@@ -10275,6 +10275,10 @@ WHAT entry will also be removed."
   "Remembered current time.
 So that dynamically scoped `org-extend-today-until' affects
 timestamps in state change log.")
+(defvar org-log-note-this-command
+  "`this-command' when `org-add-log-setup' is called.")
+(defvar org-log-note-recursion-depth
+  "`recursion-depth' when `org-add-log-setup' is called.")
 
 (defvar org-log-post-message nil
   "Message to be displayed after a log note has been stored.
@@ -10355,6 +10359,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	org-log-note-how how
 	org-log-note-extra extra
 	org-log-note-effective-time (org-current-effective-time)
+        org-log-note-this-command this-command
+        org-log-note-recursion-depth (recursion-depth)
         org-log-setup t)
   (add-hook 'post-command-hook 'org-add-log-note 'append))
 
@@ -10383,37 +10389,39 @@ EXTRA is additional text that will be inserted into the notes buffer."
 
 (defun org-add-log-note (&optional _purpose)
   "Pop up a window for taking a note, and add this note later."
-  (remove-hook 'post-command-hook 'org-add-log-note)
-  (setq org-log-setup nil)
-  (setq org-log-note-window-configuration (current-window-configuration))
-  (delete-other-windows)
-  (move-marker org-log-note-return-to (point))
-  (pop-to-buffer-same-window (marker-buffer org-log-note-marker))
-  (goto-char org-log-note-marker)
-  (org-switch-to-buffer-other-window "*Org Note*")
-  (erase-buffer)
-  (if (memq org-log-note-how '(time state))
-      (org-store-log-note)
-    (let ((org-inhibit-startup t)) (org-mode))
-    (insert (format "# Insert note for %s.
+  (when (and (equal org-log-note-this-command this-command)
+             (= org-log-note-recursion-depth (recursion-depth)))
+    (remove-hook 'post-command-hook 'org-add-log-note)
+    (setq org-log-setup nil)
+    (setq org-log-note-window-configuration (current-window-configuration))
+    (delete-other-windows)
+    (move-marker org-log-note-return-to (point))
+    (pop-to-buffer-same-window (marker-buffer org-log-note-marker))
+    (goto-char org-log-note-marker)
+    (org-switch-to-buffer-other-window "*Org Note*")
+    (erase-buffer)
+    (if (memq org-log-note-how '(time state))
+        (org-store-log-note)
+      (let ((org-inhibit-startup t)) (org-mode))
+      (insert (format "# Insert note for %s.
 # Finish with C-c C-c, or cancel with C-c C-k.\n\n"
-		    (cl-case org-log-note-purpose
-		      (clock-out "stopped clock")
-		      (done  "closed todo item")
-		      (reschedule "rescheduling")
-		      (delschedule "no longer scheduled")
-		      (redeadline "changing deadline")
-		      (deldeadline "removing deadline")
-		      (refile "refiling")
-		      (note "this entry")
-		      (state
-		       (format "state change from \"%s\" to \"%s\""
-			       (or org-log-note-previous-state "")
-			       (or org-log-note-state "")))
-		      (t (error "This should not happen")))))
-    (when org-log-note-extra (insert org-log-note-extra))
-    (setq-local org-finish-function 'org-store-log-note)
-    (run-hooks 'org-log-buffer-setup-hook)))
+                      (cl-case org-log-note-purpose
+                        (clock-out "stopped clock")
+                        (done  "closed todo item")
+                        (reschedule "rescheduling")
+                        (delschedule "no longer scheduled")
+                        (redeadline "changing deadline")
+                        (deldeadline "removing deadline")
+                        (refile "refiling")
+                        (note "this entry")
+                        (state
+                         (format "state change from \"%s\" to \"%s\""
+                                 (or org-log-note-previous-state "")
+                                 (or org-log-note-state "")))
+                        (t (error "This should not happen")))))
+      (when org-log-note-extra (insert org-log-note-extra))
+      (setq-local org-finish-function 'org-store-log-note)
+      (run-hooks 'org-log-buffer-setup-hook))))
 
 (defvar org-note-abort nil) ; dynamically scoped
 (defun org-store-log-note ()
