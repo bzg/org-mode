@@ -5958,9 +5958,11 @@ actually submitted."
         (if (/= org-element--cache-last-buffer-size (buffer-size))
             (progn
               (org-element--cache-warn
-               "Unregistered buffer modifications detected. Resetting.
+               "Unregistered buffer modifications detected (%S != %S). Resetting.
 If this warning appears regularly, please report the warning text to Org mode mailing list (M-x org-submit-bug-report).
 The buffer is: %s\n Current command: %S\n Backtrace:\n%S"
+               org-element--cache-last-buffer-size
+               (buffer-size)
                (buffer-name (current-buffer))
                this-command
                (when (and (fboundp 'backtrace-get-frames)
