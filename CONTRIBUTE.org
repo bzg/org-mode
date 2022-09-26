@@ -1,5 +1,3 @@
--*- mode: org; fill-column:70 -*-
-
 The text below explains the rules for participating in Org mode
 development.
 
@@ -66,9 +64,3 @@ Org maintenance is detailed on Worg: see [[https://orgmode.org/worg/org-maintena
      them and ask everyone to keep this in mind when posting changes.
 
 See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
-
-* The =contrib/= directory
-
-The git repository used to contain a =contrib/= directory.  Files in
-this directory were moved to a new [[https://git.sr.ht/~bzg/org-contrib][org-contrib]] repository before Org
-9.5.  You can install the new =org-contrib= from [[https://elpa.nongnu.org/nongnu/][NonGNU ELPA]].
