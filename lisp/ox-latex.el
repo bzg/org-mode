@@ -927,7 +927,7 @@ The first two options provide basic syntax
 highlighting (listings), or none at all (verbatim).
 
 When using listings, you also need to make use of LaTeX package
-\"listings\"e. The \"color\" LaTeX package is also needed if you
+\"listings\".  The \"color\" LaTeX package is also needed if you
 would like color too.  These can simply be added to
 `org-latex-packages-alist', using customise or something like:
 
@@ -968,7 +968,7 @@ Emacs' font-lock information.  This requires the Emacs package
 engrave-faces (available from ELPA), and the LaTeX package
 fvextra be installed.
 
-The styling of the engraved result can customised with
+The styling of the engraved result can be customised with
 `org-latex-engraved-preamble' and `org-latex-engraved-options'.
 The default preamble also uses the LaTeX package tcolorbox in
 addition to fvextra."
