@@ -38,7 +38,14 @@
 
 (defmacro org-assert-version ()
   "Assert compile time and runtime version match."
-  `(unless (equal (org-git-version) ,(org-git-version))
+  ;; We intentionally use a more permissive `org-release' instead of
+  ;; `org-git-version' to work around deficiencies in Elisp
+  ;; compilation after pulling latest changes.  Unchanged files will
+  ;; not be re-compiled and thus their macro-expanded
+  ;; `org-assert-version' calls would fail using strict
+  ;; `org-git-version' check because the generated Org version strings
+  ;; will not match.
+  `(unless (equal (org-release) ,(org-release))
      (warn "Org version mismatch.  Make sure that correct `load-path' is set early in init.el
 This warning usually appears when a built-in Org version is loaded
 prior to the more recent Org version.
