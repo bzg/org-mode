@@ -754,5 +754,48 @@
 	      (org-capture nil "t")
 	      (buffer-string))))))
 
+(ert-deftest test-org-capture/template-specific-hooks ()
+  "Test template-specific hook execution."
+  ;; Runs each template hook prior to corresponding global hook
+  (should
+   (equal "hook\nglobal-hook\nprepare\nglobal-prepare
+before\nglobal-before\nafter\nglobal-after"
+          (org-test-with-temp-text-in-file ""
+            (let* ((file (buffer-file-name))
+                   (org-capture-mode-hook
+                    '((lambda () (insert "global-hook\n"))))
+                   (org-capture-prepare-finalize-hook
+                    '((lambda () (insert "global-prepare\n"))))
+                   (org-capture-before-finalize-hook
+                    '((lambda () (insert "global-before\n"))))
+                   (org-capture-after-finalize-hook
+                    '((lambda () (with-current-buffer
+                                     (org-capture-get :buffer)
+                                   (goto-char (point-max))
+                                   (insert "global-after")))))
+                   (org-capture-templates
+                    `(("t" "Test" plain (file ,file) ""
+                       :hook (lambda () (insert "hook\n"))
+                       :prepare-finalize (lambda () (insert "prepare\n"))
+                       :before-finalize (lambda () (insert "before\n"))
+                       :after-finalize (lambda () (with-current-buffer
+                                                      (org-capture-get :buffer)
+                                                    (goto-char (point-max))
+                                                    (insert "after\n")))
+                       :immediate-finish t))))
+              (org-capture nil "t")
+              (buffer-string)))))
+  ;; Accepts a list of nullary functions
+  (should
+   (equal "one\ntwo"
+          (org-test-with-temp-text-in-file ""
+            (let* ((file (buffer-file-name))
+                   (org-capture-templates
+                    `(("t" "Test" plain (file ,file) ""
+                       :hook ((lambda () (insert "one\n"))
+                              (lambda () (insert "two")))))))
+              (org-capture nil "t")
+              (buffer-string))))))
+
 (provide 'test-org-capture)
 ;;; test-org-capture.el ends here

@@ -7929,6 +7929,26 @@ Now lets look at the elements of a template definition.  Each entry in
   - ~:refile-targets~ :: Temporarily set ~org-refile-targets~ to the
     value of this property.
 
+  - ~:hook~ ::
+
+    A nullary function or list of nullary functions run before
+    ~org-capture-mode-hook~ when the template is selected.
+
+ - ~:prepare-finalize~ ::
+
+    A nullary function or list of nullary functions run before
+    ~org-capture-prepare-finalize-hook~ when the template is selected.
+
+ - ~:before-finalize~ ::
+
+    A nullary function or list of nullary functions run before
+    ~org-capture-before-finalize-hook~ when the template is selected.
+
+ - ~:after-finalize~ ::
+
+    A nullary function or list of nullary functions run before
+    ~org-capture-after-finalize-hook~ when the template is selected.
+
 **** Template expansion
 :PROPERTIES:
 :DESCRIPTION: Filling in information about time and context.

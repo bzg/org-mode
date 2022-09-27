@@ -663,6 +663,13 @@ When exiting capture mode via ~org-capture-refile~, the variable
 ~org-refile-targets~ will be temporarily bound to the value of this
 template option.
 
+*** Add Capture template hook properties
+
+Capture templates can now attach template specific hooks via the
+following properties: ~:hook~, ~:prepare-finalize~,
+~:before-finalize~, ~:after-finalize~.  These nullary functions run
+prior to their global counterparts for the selected template.
+
 *** New startup options =#+startup: show<n>levels=
 
 These startup options complement the existing =overview=, =content=,

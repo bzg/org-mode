@@ -297,6 +297,21 @@ properties are:
 
  :no-save            Do not save the target file after finishing the capture.
 
+ :hook               A nullary function or list of nullary functions run before
+                     `org-capture-mode-hook' when the template is selected.
+
+ :prepare-finalize   A nullary function or list of nullary functions run before
+                     `org-capture-prepare-finalize-hook'
+                     when the template is selected.
+
+ :before-finalize    A nullary function or list of nullary functions run before
+                     `org-capture-before-finalize-hook'
+                     when the template is selected.
+
+ :after-finalize     A nullary function or list of nullary functions run before
+                     `org-capture-after-finalize-hook'
+                     when the template is selected.
+
 The template defines the text to be inserted.  Often this is an
 Org mode entry (so the first line should start with a star) that
 will be filed as a child of the target headline.  It can also be
@@ -741,6 +756,17 @@ of the day at point (if any) or the current HH:MM time."
 	(format "* Template function %S not found" f)))
      (_ "* Invalid capture template"))))
 
+(defun org-capture--run-template-functions (keyword &optional local)
+  "Run funcitons associated with KEYWORD on template's plist.
+For valid values of KEYWORD see `org-capture-templates'.
+If LOCAL is non-nil use the buffer-local value of `org-capture-plist'."
+  ;; Used in place of `run-hooks' because these functions have no associated symbol.
+  ;; They are stored directly on `org-capture-plist'.
+  (let ((value (org-capture-get keyword local)))
+    (if (functionp value)
+        (funcall value)
+      (mapc #'funcall value))))
+
 (defun org-capture-finalize (&optional stay-with-capture)
   "Finalize the capture process.
 With prefix argument STAY-WITH-CAPTURE, jump to the location of the
@@ -752,6 +778,7 @@ captured item after finalizing."
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org mode"))
 
+  (org-capture--run-template-functions :prepare-finalize 'local)
   (run-hooks 'org-capture-prepare-finalize-hook)
 
   ;; Update `org-capture-plist' with the buffer-local value.  Since
@@ -821,6 +848,7 @@ captured item after finalizing."
       ;; the indirect buffer has been killed.
       (org-capture-store-last-position)
 
+      (org-capture--run-template-functions :before-finalize 'local)
       ;; Run the hook
       (run-hooks 'org-capture-before-finalize-hook))
 
@@ -869,6 +897,9 @@ captured item after finalizing."
       ;; Restore the window configuration before capture
       (set-window-configuration return-wconf))
 
+    ;; Do not use the local arg to `org-capture--run-template-functions' here.
+    ;; The buffer-local value has been stored on `org-capture-plist'.
+    (org-capture--run-template-functions :after-finalize)
     (run-hooks 'org-capture-after-finalize-hook)
     ;; Special cases
     (cond
@@ -1145,6 +1176,7 @@ may have been stored before."
     (`item (org-capture-place-item))
     (`checkitem (org-capture-place-item)))
   (setq-local org-capture-current-plist org-capture-plist)
+  (org-capture--run-template-functions :hook 'local)
   (org-capture-mode 1))
 
 (defun org-capture-place-entry ()
