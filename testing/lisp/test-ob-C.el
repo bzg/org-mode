@@ -183,5 +183,14 @@
 				 ("Friday" "friday"))
 			       (org-babel-execute-src-block))))))
 
+(ert-deftest ob-C/ouput-doublequotes ()
+  "Double quotes not swallowed in raw output"
+  (if (executable-find org-babel-C++-compiler)
+      (org-test-at-id "9386490b-4063-4400-842c-4a634edbedf5"
+                      (org-babel-next-src-block 1)
+                      (should (equal
+                               "\"line 1\"\n\"line 2\"\n\"line 3\"\n"
+                               (org-babel-execute-src-block))))))
+
 (provide 'test-ob-C)
 ;;; test-ob-C.el ends here

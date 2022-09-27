@@ -162,3 +162,15 @@ void main()
   writefln ("Friday %s", tinomogen_h(4,"day"));
 }
 #+end_src
+
+* Output
+:PROPERTIES:
+:ID:       9386490b-4063-4400-842c-4a634edbedf5
+:END:
+
+#+source: double_quotes
+#+begin_src cpp :includes <iostream> :results output verbatim raw
+std::cout << "\"line 1\"\n";
+std::cout << "\"line 2\"\n";
+std::cout << "\"line 3\"\n";
+#+end_src
