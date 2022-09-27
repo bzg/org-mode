@@ -1,66 +1,26 @@
-The text below explains the rules for participating in Org mode
-development.
+See [[https://orgmode.org/worg/org-contribute.html][the org-contribute page on Worg]] for guidance on how to contribute
+effectively.
 
-* Org maintenance
+We value a nice tone in our discussions: please check and respect the
+[[https://www.gnu.org/philosophy/kind-communication.en.html][GNU Kind Communications Guidelines]].
 
-Org maintenance is detailed on Worg: see [[https://orgmode.org/worg/org-maintenance.html][org-maintenance]].
+* Contribute as a Org user
 
-* Main contribution rules
+You can contribute by helping others in various channels.
 
-1. The master git repository is hosted publicly on [[https://savannah.gnu.org][savannah.gnu.org]].
+See [[https://orgmode.org/worg/org-contribute.html#org99b8f3e][these directions]].
 
-   : git clone https://git.savannah.gnu.org/git/emacs/org-mode.git
+* Contribute as an Emacs Lisp hacker
 
-   This is sufficient to start hacking and to produce patches that can
-   easily and consistently be applied to the main repository.
+You can contribute with bug reports and patches.
 
-2. People who want to participate to the Org mode development can send
-   patches to this address:
+See these [[https://orgmode.org/worg/org-contribute.html#org069b83a][directions]].
 
-   : emacs-orgmode@gnu.org
+* As a Org maintainer
 
-3. If you are a regular contributor, you can request push access to
-   the repository by creating an account on [[https://savannah.gnu.org/account/register.php][savannah.gnu.org]] and by
-   [[https://savannah.gnu.org/git/?group=emacs][joining the Emacs group]].
-   
-   After you have been added as a user with push privileges, you can
-   clone the repository like this:
+We encourage you to volunteer to maintain one of the Org files.
 
-   : git clone USERNAME@git.savannah.gnu.org:/srv/git/emacs/org-mode.git
+Just [[mailto:emacs-orgmode@gnu.org][send an email to the list]] explaining which file and your
+motivations.
 
-   Replace =USERNAME= with your Savannah username.
-
-4. By requesting push access, you acknowledge that you have read and
-   agreed with the following rules:
-
-   - Org mode is part of GNU Emacs.  Therefore, we need to be very
-     conscious about changes moving into the Org mode core.  These can
-     originate only from people who have signed the appropriate papers
-     with the Free Software Foundation.  The files to which this
-     applies are:
-
-     - all *.el files in the lisp directory of the repository
-     - orgcard.tex and all *.org files in the doc/ directory
-
-   - Before making any significant changes, please explain and discuss
-     them on the mailing list [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]].
-
-     This does obviously not apply to people who are maintaining their
-     own contributions to Org mode.  Please just use the new mechanism
-     to make sure all changes end up in the right place.
-
-     We value a nice tone in our discussions: please check and respect
-     the [[https://www.gnu.org/philosophy/kind-communication.en.html][GNU Kind Communications Guidelines]].
-
-   - Org mode no longer uses ChangeLog entries to document changes.
-     Instead, special commit messages are used.  The commit message
-     format generally follows Emacs conventions, as described in the
-     `CONTRIBUTE' file in the main Emacs repository.  Several more
-     Org-specific conventions are described in
-     [[https://orgmode.org/worg/org-contribute.html#commit-messages][worg/org-contribute#commit-messages]].
-
-   - Among other things, Org mode is widely appreciated because of its
-     simplicity, cleanness and consistency.  We should try to preserve
-     them and ask everyone to keep this in mind when posting changes.
-
-See [[https://orgmode.org/worg/org-contribute.html][worg/org-contribute]] for guidance on how to contribute effectively.
+See what is [[https://orgmode.org/worg/org-maintenance.html][the role of a maintainer]].
