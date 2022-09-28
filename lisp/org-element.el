@@ -5679,7 +5679,12 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
 
 ;;;; Tools
 
-(defsubst org-element--cache-active-p (&optional called-from-cache-change-func-p)
+;; FIXME: Ideally, this should be inlined to avoid overheads, but
+;; inlined functions should be declared before the code that uses them
+;; and some code above does use `org-element--cache-active-p'.  Moving this
+;; declaration on top would require restructuring the whole cache
+;; section.
+(defun org-element--cache-active-p (&optional called-from-cache-change-func-p)
   "Non-nil when cache is active in current buffer."
   (and org-element-use-cache
        org-element--cache
