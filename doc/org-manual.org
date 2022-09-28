@@ -7835,7 +7835,7 @@ Now lets look at the elements of a template definition.  Each entry in
 
     Do not save the target file after finishing the capture.
 
-  - ~:refile-targets :: Temporarily set ~org-refile-targets~ to the
+  - ~:refile-targets~ :: Temporarily set ~org-refile-targets~ to the
     value of this property.
 
 **** Template expansion
