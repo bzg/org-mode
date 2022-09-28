@@ -6586,8 +6586,7 @@ or FILE."
   (declare (indent 2))
   (if (not (file-writable-p file)) (error "Output file not writable")
     (let ((ext-plist (org-combine-plists `(:output-file ,file) ext-plist))
-	  (encoding (or org-export-coding-system buffer-file-coding-system))
-          auto-mode-alist)
+	  (encoding (or org-export-coding-system buffer-file-coding-system)))
       (if async
           (org-export-async-start
 	      (lambda (file)
@@ -6599,14 +6598,14 @@ or FILE."
 	       (with-temp-buffer
 		 (insert output)
 		 (let ((coding-system-for-write ',encoding))
-		   (write-file ,file)))
+		   (write-region (point-min) (point-max) ,file)))
 	       (or (ignore-errors (funcall ',post-process ,file)) ,file)))
         (let ((output (org-export-as
                        backend subtreep visible-only body-only ext-plist)))
           (with-temp-buffer
             (insert output)
             (let ((coding-system-for-write encoding))
-	      (write-file file)))
+	      (write-region (point-min) (point-max) file)))
           (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p output))
             (org-kill-new output))
           ;; Get proper return value.
