@@ -552,7 +552,8 @@ unless RETURN-ONLY is non-nil."
                                      org-fold-core--property-symbol-cache))))
         (prog1
             local-prop
-          (unless return-only
+          (unless (or return-only
+                      (memql 'ignore-indirect org-fold-core--optimise-for-huge-buffers))
 	    (with-current-buffer buf
               ;; Update folding properties carried over from other
               ;; buffer (implying that current buffer is indirect
@@ -623,9 +624,11 @@ unless RETURN-ONLY is non-nil."
 
 (defun org-fold-core-decouple-indirect-buffer-folds ()
   "Copy and decouple folding state in a newly created indirect buffer.
-This function is mostly indented to be used in `clone-indirect-buffer-hook'."
+This function is mostly intended to be used in
+`clone-indirect-buffer-hook'."
   (when (and (buffer-base-buffer)
-             (eq org-fold-core-style 'text-properties))
+             (eq org-fold-core-style 'text-properties)
+             (not (memql 'ignore-indirect org-fold-core--optimise-for-huge-buffers)))
     (org-fold-core--property-symbol-get-create (car (org-fold-core-folding-spec-list)))))
 
 ;;; API
