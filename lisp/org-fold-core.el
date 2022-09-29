@@ -461,7 +461,9 @@ If GLOBAL is non-nil, do not make the property unique in the BUFFER."
                     ;; Using buffer-name is safe, since the only place where
                     ;; buffer-local text property actually matters is an indirect
                     ;; buffer, where the name cannot be same anyway.
-                    (if global 'global
+                    (if (or global
+                            (memql 'ignore-indirect org-fold-core--optimise-for-huge-buffers))
+                        'global
                       (sxhash (buffer-name (or buffer (current-buffer)))))))))
 
 (defsubst org-fold-core-get-folding-spec-from-folding-prop (folding-prop)
@@ -552,8 +554,7 @@ unless RETURN-ONLY is non-nil."
                                      org-fold-core--property-symbol-cache))))
         (prog1
             local-prop
-          (unless (or return-only
-                      (memql 'ignore-indirect org-fold-core--optimise-for-huge-buffers))
+          (unless return-only
 	    (with-current-buffer buf
               ;; Update folding properties carried over from other
               ;; buffer (implying that current buffer is indirect
