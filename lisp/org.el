@@ -19296,12 +19296,18 @@ filling the current element."
   "Break line at point and indent, continuing comment if within one.
 The inserted newline is marked hard if variable
 `use-hard-newlines' is true, unless optional argument SOFT is
-non-nil."
-  (if soft (insert-and-inherit ?\n) (newline 1))
-  (save-excursion (forward-char -1) (delete-horizontal-space))
-  (delete-horizontal-space)
-  (indent-to-left-margin)
-  (insert-before-markers-and-inherit fill-prefix))
+non-nil.
+
+This function is a simplified version of `comment-indent-new-line'
+that bypasses the complex Emacs machinery dealing with comments.
+We instead rely on Org parser, utilizing `org-adaptive-fill-function'"
+  (let ((fill-prefix (org-adaptive-fill-function)))
+    (if soft (insert-and-inherit ?\n) (newline 1))
+    (save-excursion (forward-char -1) (delete-horizontal-space))
+    (delete-horizontal-space)
+    (indent-to-left-margin)
+    (when fill-prefix
+      (insert-before-markers-and-inherit fill-prefix))))
 
 
 ;;; Fixed Width Areas

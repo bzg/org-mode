@@ -1405,6 +1405,26 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
 	    (org-indent-region (point-min) (point-max))
 	    (buffer-string)))))
 
+(ert-deftest test-org/default-indent-new-line ()
+  "Test behavior of default binding `M-j'."
+  ;; Calling `M-j' when point is not in an Org comment:
+  (should
+   (equal "* Some heading\n"
+  (org-test-with-temp-text "* Some heading<point>"
+                           (call-interactively #'default-indent-new-line)
+                           (buffer-string))))
+  ;; Calling `M-j' when point is in an Org comment:
+  (should
+   (equal "# Some Org comment\n# "
+  (org-test-with-temp-text "# Some Org comment<point>"
+                           (call-interactively #'default-indent-new-line)
+                           (buffer-string))))
+  (should
+   (equal "# Some Org\n# comment"
+  (org-test-with-temp-text "# Some Org <point>comment"
+                           (call-interactively #'default-indent-new-line)
+                           (buffer-string)))))
+
 
 
 ;;; Editing
