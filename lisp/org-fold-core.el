@@ -285,7 +285,9 @@
 Can be either `text-properties' or `overlays'.
 The former is faster on large files, while the latter is generally
 less error-prone with regard to third-party packages that haven't yet
-adapted to the new folding implementation."
+adapted to the new folding implementation.
+
+Important: This variable must be set before loading Org."
   :group 'org
   :package-version '(Org . "9.6")
   :type '(choice
