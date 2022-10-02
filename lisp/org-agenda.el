@@ -4200,12 +4200,19 @@ to t."
 If this function returns nil, the current match should not be skipped.
 Otherwise, the function must return a position from where the search
 should be continued.
-This may also be a Lisp form, it will be evaluated.
-Never set this variable using `setq' or so, because then it will apply
-to all future agenda commands.  If you do want a global skipping condition,
-use the option `org-agenda-skip-function-global' instead.
-The correct usage for `org-agenda-skip-function' is to bind it with
-`let' to scope it dynamically into the agenda-constructing command.
+
+This may also be a Lisp form that will be evaluated.  Useful
+forms include `org-agenda-skip-entry-if' and
+`org-agenda-skip-subtree-if'.  See the Info node `(org) Special
+Agenda Views' for more details and examples.
+
+Never set this variable using `setq' or similar, because then it
+will apply to all future agenda commands.  If you want a global
+skipping condition, use the option `org-agenda-skip-function-global'
+instead.
+
+The correct way to use `org-agenda-skip-function' is to bind it with `let'
+to scope it dynamically into the agenda-constructing command.
 A good way to set it is through options in `org-agenda-custom-commands'.")
 
 (defun org-agenda-skip (&optional element)
@@ -5118,12 +5125,18 @@ bind it in the options section.")
 
 (defun org-agenda-skip-entry-if (&rest conditions)
   "Skip entry if any of CONDITIONS is true.
-See `org-agenda-skip-if' for details."
+See `org-agenda-skip-if' for details about CONDITIONS.
+
+This function can be put into `org-agenda-skip-function' for the
+duration of a command."
   (org-agenda-skip-if nil conditions))
 
 (defun org-agenda-skip-subtree-if (&rest conditions)
   "Skip subtree if any of CONDITIONS is true.
-See `org-agenda-skip-if' for details."
+See `org-agenda-skip-if' for details about CONDITIONS.
+
+This function can be put into `org-agenda-skip-function' for the
+duration of a command."
   (org-agenda-skip-if t conditions))
 
 (defun org-agenda-skip-if (subtree conditions)
@@ -5145,8 +5158,8 @@ notregexp     Check if regexp does not match.
 todo          Check if TODO keyword matches
 nottodo       Check if TODO keyword does not match
 
-The regexp is taken from the conditions list, it must come right after
-the `regexp' or `notregexp' element.
+The regexp is taken from the conditions list, and must come right
+after the `regexp' or `notregexp' element.
 
 `todo' and `nottodo' accept as an argument a list of todo
 keywords, which may include \"*\" to match any todo keyword.

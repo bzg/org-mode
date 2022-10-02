@@ -21345,6 +21345,8 @@ meaningful string suitable for the agenda view.
 
 #+vindex: org-odd-levels-only
 #+vindex: org-agenda-skip-function
+#+findex: org-agenda-skip-entry-if
+#+findex: org-agenda-skip-subtree-if
 Search for entries with a limit set on levels for the custom search.
 This is a general approach to creating custom searches in Org.  To
 include all levels, use =LEVEL>0=[fn:: Note that, for
