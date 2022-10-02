@@ -1527,13 +1527,15 @@ This may also be a cons cell where the behavior for `C-a' and
 			(const :tag "reversed: after tags first" reversed)))))
 
 (defcustom org-special-ctrl-k nil
-  "Non-nil means `C-k' will behave specially in headlines.
-When nil, `C-k' will call the default `kill-line' command.
-When t, the following will happen while the cursor is in the headline:
+  "Non-nil means that \\<org-mode-map>\\[org-kill-line] \
+will behave specially in headlines.
 
-- When at the beginning of a headline, kill the entire subtree.
-- When in the middle of the headline text, kill the text up to the tags.
-- When after the headline text and before the tags, kill all the tags."
+When nil, \\[org-kill-line] will call the default `kill-line' command.
+Otherwise, the following will happen when point is in a headline:
+
+- At the beginning of a headline, kill the entire line.
+- In the middle of the headline text, kill the text up to the tags.
+- After the headline text and before the tags, kill all the tags."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -19970,7 +19972,11 @@ depending on context."
 	    (call-interactively #'forward-sentence)))))))
 
 (defun org-kill-line (&optional _arg)
-  "Kill line, to tags or end of line."
+  "Kill line, to tags or end of line.
+
+The behavior of this command depends on the user options
+`org-special-ctrl-k' and `org-ctrl-k-protect-subtree' (which
+see)."
   (interactive)
   (cond
    ((or (not org-special-ctrl-k)
