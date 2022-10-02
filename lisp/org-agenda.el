@@ -614,13 +614,17 @@ you can then use it to define a custom command."
   '("+LEVEL=2/-DONE" ("TODO" "NEXT" "NEXTACTION") nil "")
   "How to identify stuck projects.
 This is a list of four items:
+
 1. A tags/todo/property matcher string that is used to identify a project.
-   See the manual for a description of tag and property searches.
-   The entire tree below a headline matched by this is considered one project.
+   See Info node `(org) Matching tags and properties' for a
+   description of tag and property searches.  The entire tree
+   below a headline matched by this is considered one project.
+
 2. A list of TODO keywords identifying non-stuck projects.
    If the project subtree contains any headline with one of these todo
    keywords, the project is considered to be not stuck.  If you specify
    \"*\" as a keyword, any TODO keyword will mark the project unstuck.
+
 3. A list of tags identifying non-stuck projects.
    If the project subtree contains any headline with one of these tags,
    the project is considered to be not stuck.  If you specify \"*\" as
@@ -628,6 +632,7 @@ This is a list of four items:
    the explicit presence of a tag somewhere in the subtree, inherited
    tags do not count here.  If inherited tags make a project not stuck,
    use \"-TAG\" in the tags part of the matcher under (1.) above.
+
 4. An arbitrary regular expression matching non-stuck projects.
 
 If the project turns out to be not stuck, search continues also in the
