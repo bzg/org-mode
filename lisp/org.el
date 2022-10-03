@@ -4721,6 +4721,10 @@ This is for getting out of special buffers like capture.")
 (defvar org-element-use-cache); Defined in org-element.el
 (defvar org-mode-loading nil
   "Non-nil during Org mode initialisation.")
+
+(defvar org-agenda-file-menu-enabled t
+  "When non-nil, refresh Agenda files in Org menu when loading Org.")
+
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
   "Outline-based notes management and organizer, alias
@@ -18120,9 +18124,6 @@ Your bug report will be posted to the Org mailing list.
     (save-excursion
       (when (re-search-backward "^\\(Subject: \\)Org mode version \\(.*?\\);[ \t]*\\(.*\\)" nil t)
 	(replace-match "\\1[BUG] \\3 [\\2]")))))
-
-(defvar org-agenda-file-menu-enabled t
-  "When non-nil, refresh Agenda files in Org menu when loading Org.")
 
 (defun org-install-agenda-files-menu ()
   "Install agenda file menu."
