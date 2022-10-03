@@ -19138,11 +19138,18 @@ a footnote definition, try to fill the first paragraph within."
       ;; the buffer.  In that case, ignore filling.
       (cl-case (org-element-type element)
 	;; Use major mode filling function is source blocks.
-	(src-block (org-babel-do-in-edit-buffer
-                    (push-mark (point-min))
-                    (goto-char (point-max))
-                    (setq mark-active t)
-                    (funcall-interactively #'fill-paragraph justify 'region)))
+        (src-block
+         (let ((regionp (region-active-p)))
+           (org-babel-do-in-edit-buffer
+            ;; `org-babel-do-in-edit-buffer' will preserve region if it
+            ;; is within src block contents.  Otherwise, the region
+            ;; crosses src block boundaries.  We re-fill the whole src
+            ;; block in such scenario.
+            (when (and regionp (not (region-active-p)))
+              (push-mark (point-min))
+              (goto-char (point-max))
+              (setq mark-active t))
+            (funcall-interactively #'fill-paragraph justify 'region))))
 	;; Align Org tables, leave table.el tables as-is.
 	(table-row (org-table-align) t)
 	(table
