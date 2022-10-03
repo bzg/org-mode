@@ -7215,12 +7215,12 @@ The relative and countdown are started with separate commands.
   #+findex: org-timer-start
   Start or reset the relative timer.  By default, the timer is set
   to 0.  When called with a {{{kbd(C-u)}}} prefix, prompt the user for
-  a starting offset.  If there is a timer string at point, this is
-  taken as the default, providing a convenient way to restart taking
-  notes after a break in the process.  When called with a double
-  prefix argument {{{kbd(C-u C-u)}}}, change all timer strings in the
-  active region by a certain amount.  This can be used to fix timer
-  strings if the timer was not started at exactly the right moment.
+  a starting offset.  The prompt will default to a timer string at
+  point (if any), providing a convenient way to restart taking notes
+  after a break in the process.  When called with a double prefix
+  argument {{{kbd(C-u C-u)}}}, change all timer strings in the active
+  region by a certain amount.  This can be used to fix timer strings
+  if the timer was not started at exactly the right moment.
 
 - {{{kbd(C-c C-x ;)}}} (~org-timer-set-timer~) ::
 
