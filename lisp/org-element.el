@@ -2952,8 +2952,8 @@ CONTENTS is verse block contents."
   "Parse emphasis object at point, if any.
 
 MARK is the delimiter string used.  TYPE is a symbol among
-‘bold’, ‘code’, ‘italic’, ‘strike-through’, ‘underline’, and
-‘verbatim’.
+`bold', `code', `italic', `strike-through', `underline', and
+`verbatim'.
 
 Assume point is at first MARK."
   (save-excursion
