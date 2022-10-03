@@ -6803,7 +6803,7 @@ using the =:formatter= parameter.
 - =:filetitle= ::
 
   Show title in the file column if the file has a =#+title=.
- 
+
 - =:hidefiles= ::
 
   Hide the file column when multiple files are used to produce the
@@ -13396,7 +13396,7 @@ general options (see [[*Export Settings]]).
   #+cindex: @samp{LANGUAGE}, keyword
   #+vindex: org-latex-packages-alist
   #+vindex: org-latex-language-alist
-  
+
   Language code of the primary document language.
 
   The list of language codes supported by Org is stored in the
@@ -18420,7 +18420,7 @@ results do not have a distinct name.
 
 Note that all the links pointing to a source block exported using
 =:exports none= will be broken.  This will make export process fail,
-unless broken links are allowed during export (see [[*Export Settings]]). 
+unless broken links are allowed during export (see [[*Export Settings]]).
 
 #+vindex: org-export-use-babel
 To stop Org from evaluating code blocks to speed exports, use the
@@ -22525,7 +22525,7 @@ within a buffer with the =STARTUP= options =inlineimages= and
 =noinlineimages=.
 
 [fn:120] The width can be customized in Emacs >= 24.1, built with
-imagemagick support. 
+imagemagick support.
 
 [fn:121] The corresponding in-buffer setting is: =#+STARTUP: fninline=
 or =#+STARTUP: nofninline=.

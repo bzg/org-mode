@@ -64,14 +64,14 @@
 ;; Consider the following Org mode link:
 ;; [[file:/path/to/file/file.ext][description]]
 ;; Only the word "description" is normally visible in this link.
-;; 
+;;
 ;; The way this partial visibility is achieved is combining the two
 ;; folding specs.  The whole link is folded using 'org-fold-hidden
 ;; folding spec, but the visible part is additionally folded using
 ;; 'org-fold-visible:
 ;;
 ;; <begin org-fold-hidden>[[file:/path/to/file/file.ext][<begin org-fold-visible>description<end org-fold-visible>]]<end org-fold-hidden>
-;; 
+;;
 ;; Because 'org-fold-visible has higher priority than
 ;; 'org-fold-hidden, it suppresses the 'org-fold-hidden effect and
 ;; thus reveals the description part of the link.
@@ -330,7 +330,7 @@ following symbols:
   of the folded regions may become visible for some external packages
   inserting text using `insert' instead of `insert-and-inherit' (the
   latter is rarely used in practice).
-  
+
 - `ignore-indirect': Do not decouple folding state in the indirect
   buffers.  This can speed up Emacs display engine (and thus motion of
   point), especially when large number of indirect buffers is being

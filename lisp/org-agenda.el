@@ -5934,7 +5934,7 @@ displayed in agenda view."
 	(setq result (org-diary-sexp-entry sexp sexp-entry date))
 	(when result
           ;; Only check if entry should be skipped on matching sexps.
- 	  (org-agenda-skip (org-element-at-point))
+          (org-agenda-skip (org-element-at-point))
 	  (setq marker (org-agenda-new-marker beg)
 		level (make-string (org-reduced-level (org-outline-level)) ? )
 		category (org-get-category beg)

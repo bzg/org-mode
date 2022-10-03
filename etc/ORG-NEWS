@@ -239,7 +239,7 @@ produce results superior to Minted or Listings.
 *** Support for =#+include=-ing URLs
 
 =#+include: FILE= will now accept URLs as the file.
-*** Structure templates now respect case used in ~org-structure-template-alist~ 
+*** Structure templates now respect case used in ~org-structure-template-alist~
 
 The block type in ~org-structure-template-alist~ is not case-sensitive.
 When the block type starts from the upper case, structure template
@@ -348,7 +348,7 @@ The folding state can also be controlled on per-file basis using
 *** New custom setting ~org-icalendar-force-alarm~
 
 The new setting, when set to non-nil, makes Org create alarm at the
-event time when the alarm time is set to 0.  The default value is 
+event time when the alarm time is set to 0.  The default value is
 nil -- do not create alarms at the event time.
 
 ** New functions and changes in function arguments
@@ -493,7 +493,7 @@ restore earlier behavior add to your Emacs init file the following:
     (org-link-set-parameters "info" :insert-description nil))
 #+end_src
 
-*** New list of languages for LaTeX export: ~org-latex-language-alist~ 
+*** New list of languages for LaTeX export: ~org-latex-language-alist~
 
 ~org-latex-language-alist~ unifies into a single list the old language
 lists for the =babel= and =polyglossia= LaTeX packages:

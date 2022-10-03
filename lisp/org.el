@@ -7950,8 +7950,8 @@ the whole buffer."
                    (put-text-property
                     (save-excursion (org-back-to-heading-or-point-min t))
                     (save-excursion (if (org-before-first-heading-p)
-        			        (point-max)
-        			      (org-end-of-subtree t t)))
+                                        (point-max)
+                                      (org-end-of-subtree t t)))
                     'org-category
                     value)))))))))))
 
