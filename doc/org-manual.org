@@ -11489,6 +11489,12 @@ command:
   - When set to nil, try to get the width from an =#+ATTR.*= keyword
     and fall back on the original width if none is found.
 
+
+#+vindex: org-cycle-inline-images-display
+Inline images can also be displayed when cycling the folding state.
+When custom option ~org-cycle-inline-images-display~ is set, the
+visible inline images under subtree will be displayed automatically.
+
 ** Captions
 :PROPERTIES:
 :DESCRIPTION: Describe tables, images...

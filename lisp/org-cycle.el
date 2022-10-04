@@ -208,8 +208,9 @@ the values `folded', `children', or `subtree'."
   :type 'hook)
 
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
-		   org-cycle-show-empty-lines
-		   org-cycle-optimize-window-after-visibility-change)
+                            org-cycle-show-empty-lines
+                            org-cycle-optimize-window-after-visibility-change
+                            org-cycle-display-inline-images)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
 The function(s) in this hook must accept a single argument which indicates
 the new state that was set by the most recent `org-cycle' command.  The
@@ -227,6 +228,13 @@ When nil, archived trees will stay folded.  You can still open them with
 normal outline commands like `show-all', but not with the cycling commands."
   :group 'org-archive
   :group 'org-cycle
+  :type 'boolean)
+
+(defcustom org-cycle-inline-images-display nil
+  "Non-nil means auto display inline images under subtree when cycling."
+  :group 'org-startup
+  :group 'org-cycle
+  :package-version '(Org . "9.6")
   :type 'boolean)
 
 (defvar org-cycle-tab-first-hook nil
@@ -774,6 +782,32 @@ STATE should be one of the symbols listed in the docstring of
 	(message "%s" (substitute-command-keys
 		       "Subtree is archived and stays closed.  Use \
 `\\[org-cycle-force-archived]' to cycle it anyway."))))))
+
+(defun org-cycle-display-inline-images (state)
+  "Auto display inline images under subtree when cycling.
+It works when `org-cycle-inline-images-display' is non-nil."
+  (when org-cycle-inline-images-display
+    (pcase state
+      ('children
+       (org-with-wide-buffer
+        (org-narrow-to-subtree)
+        ;; If has nested headlines, beg,end only from parent headline
+        ;; to first child headline which reference to upper
+        ;; let-binding `org-next-visible-heading'.
+        (org-display-inline-images
+         nil nil
+         (point-min) (progn (org-next-visible-heading 1) (point)))))
+      ('subtree
+       (org-with-wide-buffer
+        (org-narrow-to-subtree)
+        ;; If has nested headlines, also inline display images under all sub-headlines.
+        (org-display-inline-images nil nil (point-min) (point-max))))
+      ('folded
+       (org-with-wide-buffer
+        (org-narrow-to-subtree)
+        (if (numberp (point-max))
+            (org-remove-inline-images (point-min) (point-max))
+          (ignore)))))))
 
 (provide 'org-cycle)
 

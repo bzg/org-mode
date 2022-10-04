@@ -204,7 +204,7 @@
 (declare-function org-toggle-radio-button "org" (&optional arg))
 (declare-function org-toggle-comment "org" ())
 (declare-function org-toggle-fixed-width "org" ())
-(declare-function org-toggle-inline-images "org" (&optional include-linked))
+(declare-function org-toggle-inline-images "org" (&optional include-linked beg end))
 (declare-function org-latex-preview "org" (&optional arg))
 (declare-function org-toggle-narrow-to-subtree "org" ())
 (declare-function org-toggle-ordered-property "org" ())

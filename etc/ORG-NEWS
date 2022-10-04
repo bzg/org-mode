@@ -307,6 +307,13 @@ to pass the contents of a named code block as a string argument.
 The new property =ORG-IMAGE-ACTUAL-WIDTH= can override the global
 variable ~org-image-actual-width~ value for inline images display width.
 
+*** Outline cycling can now include inline image visibility
+
+New ~org-cycle-hook~ function ~org-cycle-display-inline-images~ for
+auto-displaying inline images in the visible parts of the subtree.
+This behavior is controlled by new custom option
+~org-cycle-inline-images-display~.
+
 *** New ~org-babel-tangle-finished-hook~ hook run at the very end of ~org-babel-tangle~
 
 This provides a proper counterpart to ~org-babel-pre-tangle-hook~, as
