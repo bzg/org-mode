@@ -1033,7 +1033,7 @@ FILES is a list of files to build the calendar from."
 	      user-full-name
 	      ;; Timezone.
 	      (or (org-string-nw-p org-icalendar-timezone)
-		  (format-time-string "Z"))
+		  (format-time-string "%Z"))
 	      ;; Description.
 	      org-icalendar-combined-description
 	      ;; Contents.
