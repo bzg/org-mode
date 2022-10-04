@@ -112,6 +112,9 @@ version of the manual.
 
 - Use example blocks for Org syntax instead of "begin_src org".
 
+- Prefer inline footnote definition when a footnote consists of a
+  single sentence.
+
 - Internal links to headlines always start with a star.
 
 - Tags, node properties, are not shown with the surrounding colons.
