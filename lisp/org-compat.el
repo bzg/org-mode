@@ -116,6 +116,13 @@ the symbol of the calling function, for example."
       (when (not (equal attr cachedattr))
         (puthash sym attr org-file-has-changed-p--hash-table)))))
 
+(unless (fboundp 'string-equal-ignore-case)
+  ;; From Emacs subr.el.
+  (defun string-equal-ignore-case (string1 string2)
+    "Like `string-equal', but case-insensitive.
+Upper-case and lower-case letters are treated as equal.
+Unibyte strings are converted to multibyte for comparison."
+    (eq t (compare-strings string1 0 nil string2 0 nil t))))
 
 
 ;;; Emacs < 28.1 compatibility
@@ -1171,14 +1178,6 @@ Pass COLUMN and FORCE to `move-to-column'."
 
 (define-obsolete-function-alias 'org-define-error #'define-error "9.6")
 (define-obsolete-function-alias 'org-without-partial-completion 'progn "9.6")
-
-(unless (fboundp 'string-equal-ignore-case)
-  ;; From Emacs subr.el.
-  (defun string-equal-ignore-case (string1 string2)
-    "Like `string-equal', but case-insensitive.
-Upper-case and lower-case letters are treated as equal.
-Unibyte strings are converted to multibyte for comparison."
-    (eq t (compare-strings string1 0 nil string2 0 nil t))))
 
 
 ;;; Integration with and fixes for other packages
