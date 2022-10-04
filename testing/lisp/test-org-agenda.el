@@ -196,6 +196,53 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
   (org-toggle-sticky-agenda)
   (org-test-agenda--kill-all-agendas))
 
+(ert-deftest test-org-agenda/sticky-agenda-filter-preset ()
+  "Update sticky agenda buffers properly with preset of filters."
+  (unless org-agenda-sticky
+    (org-toggle-sticky-agenda))
+  (org-test-agenda-with-agenda "* TODO Foo"
+    (org-set-property "CATEGORY" "foo")
+    (let ((org-agenda-custom-commands
+           '(("f" "foo: multi-command"
+	      ((tags-todo "+CATEGORY=\"foo\"")
+               (alltodo ""))
+              ((org-agenda-category-filter-preset '("+foo"))))
+             ("b" "bar: multi-command"
+	      ((tags-todo "+CATEGORY=\"bar\"")
+               (alltodo ""))
+              ((org-agenda-category-filter-preset '("+bar"))))
+             ("f1" "foo: single-command"
+	      tags-todo "+CATEGORY=\"foo\""
+              ((org-agenda-category-filter-preset '("+foo"))))
+             ("b1" "bar: single-command"
+	      tags-todo "+CATEGORY=\"bar\""
+              ((org-agenda-category-filter-preset '("+bar"))))
+             ("f2" "foo: single-command"
+	      alltodo "" ((org-agenda-category-filter-preset '("+foo"))))
+             ("b2" "bar: single-command"
+	      alltodo "" ((org-agenda-category-filter-preset '("+bar")))))))
+      (org-agenda nil "f")
+      (org-agenda nil "b")
+      (set-buffer "*Org Agenda(f)*")
+      (org-agenda-redo)
+      (goto-char (point-min))
+      (should (not (invisible-p (1- (search-forward "TODO Foo")))))
+      (org-test-agenda--kill-all-agendas)
+      (org-agenda nil "f1")
+      (org-agenda nil "b1")
+      (set-buffer "*Org Agenda(f1:+CATEGORY=\"foo\")*")
+      (org-agenda-redo)
+      (goto-char (point-min))
+      (should (not (invisible-p (1- (search-forward "TODO Foo")))))
+      (org-test-agenda--kill-all-agendas)
+      (org-agenda nil "f2")
+      (org-agenda nil "b2")
+      (set-buffer "*Org Agenda(f2)*")
+      (org-agenda-redo)
+      (goto-char (point-min))
+      (should (not (invisible-p (1- (search-forward "TODO Foo")))))))
+  (org-toggle-sticky-agenda))
+
 (ert-deftest test-org-agenda/goto-date ()
   "Test `org-agenda-goto-date'."
   (unwind-protect
@@ -228,6 +275,19 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
      (should text-scale-mode)
      (should (= 11 text-scale-mode-amount)))
    (org-test-agenda--kill-all-agendas)))
+
+(ert-deftest test-org-agenda/redo-setting ()
+  "Command settings survives `org-agenda-redo'."
+  (org-test-agenda--kill-all-agendas)
+  (let ((org-agenda-custom-commands
+         '(("t" "TODOs" alltodo ""
+            ((org-agenda-overriding-header "Test"))))))
+    (org-agenda nil "t")
+    (org-agenda-redo)
+    (org-agenda-redo)
+    (goto-char (point-min))
+    (should (looking-at-p "Test")))
+  (org-test-agenda--kill-all-agendas))
 
 
 (ert-deftest test-org-agenda/diary-inclusion ()

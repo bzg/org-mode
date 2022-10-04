@@ -2276,6 +2276,7 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-top-headline-filter
     org-agenda-regexp-filter
     org-agenda-effort-filter
+    org-agenda-filters-preset
     org-agenda-markers
     org-agenda-last-search-view-search-was-boolean
     org-agenda-last-indirect-buffer
@@ -2929,10 +2930,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq org-agenda-restrict nil)
 	(move-marker org-agenda-restrict-begin nil)
 	(move-marker org-agenda-restrict-end nil))
-      ;; Delete old local properties
-      (put 'org-agenda-redo-command 'org-lprops nil)
-      ;; Delete previously set last-arguments
-      (put 'org-agenda-redo-command 'last-args nil)
       ;; Remember where this call originated
       (setq org-agenda-last-dispatch-buffer (current-buffer))
       (unless org-keys
@@ -2981,7 +2978,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 		(setq org-agenda-buffer-name
 		      (or (and (stringp org-match) (format "*Org Agenda(%s:%s)*" org-keys org-match))
 			  (format "*Org Agenda(%s)*" org-keys))))
-	      (put 'org-agenda-redo-command 'org-lprops lprops)
 	      (cl-progv
 	          (mapcar #'car lprops)
 	          (mapcar (lambda (binding) (eval (cadr binding) t)) lprops)
@@ -3016,7 +3012,10 @@ Pressing `<' twice means to restrict to the current subtree or region
 		   (funcall type org-match))
 		  ;; FIXME: Will signal an error since it's not `functionp'!
 		  ((pred fboundp) (funcall type org-match))
-		  (_ (user-error "Invalid custom agenda command type %s" type)))))
+		  (_ (user-error "Invalid custom agenda command type %s" type))))
+              (let ((inhibit-read-only t))
+	        (add-text-properties (point-min) (point-max)
+			             `(org-lprops ,lprops))))
 	  (org-agenda-run-series (nth 1 entry) (cddr entry))))
        ((equal org-keys "C")
 	(setq org-agenda-custom-commands org-agenda-custom-commands-orig)
@@ -3808,6 +3807,10 @@ the entire agenda view.  In a block agenda, it will not work reliably to
 define a filter for one of the individual blocks.  You need to set it in
 the global options and expect it to be applied to the entire view.")
 
+(defvar org-agenda-filters-preset nil
+  "Alist of filter types and associated preset of filters.
+This variable is local in `org-agenda' buffers.  See `org-agenda-local-vars'.")
+
 (defconst org-agenda-filter-variables
   '((category . org-agenda-category-filter)
     (tag . org-agenda-tag-filter)
@@ -3818,7 +3821,7 @@ the global options and expect it to be applied to the entire view.")
   "Is any filter active?"
   (cl-some (lambda (x)
 	     (or (symbol-value (cdr x))
-		 (get :preset-filter x)))
+                 (assoc-default (car x) org-agenda-filters-preset)))
 	   org-agenda-filter-variables))
 
 (defvar org-agenda-category-filter-preset nil
@@ -3927,10 +3930,6 @@ FILTER-ALIST is an alist of filters we need to apply when
 			    (cat . ,org-agenda-category-filter))))))
     (if (org-agenda-use-sticky-p)
 	(progn
-	  (put 'org-agenda-tag-filter :preset-filter nil)
-	  (put 'org-agenda-category-filter :preset-filter nil)
-	  (put 'org-agenda-regexp-filter :preset-filter nil)
-	  (put 'org-agenda-effort-filter :preset-filter nil)
 	  ;; Popup existing buffer
 	  (org-agenda-prepare-window (get-buffer org-agenda-buffer-name)
 				     filter-alist)
@@ -3938,14 +3937,6 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (or org-agenda-multi (org-agenda-fit-window-to-buffer))
 	  (throw 'exit "Sticky Agenda buffer, use `r' to refresh"))
       (setq org-todo-keywords-for-agenda nil)
-      (put 'org-agenda-tag-filter :preset-filter
-	   org-agenda-tag-filter-preset)
-      (put 'org-agenda-category-filter :preset-filter
-	   org-agenda-category-filter-preset)
-      (put 'org-agenda-regexp-filter :preset-filter
-	   org-agenda-regexp-filter-preset)
-      (put 'org-agenda-effort-filter :preset-filter
-	   org-agenda-effort-filter-preset)
       (if org-agenda-multi
 	  (progn
 	    (setq buffer-read-only nil)
@@ -3970,7 +3961,12 @@ FILTER-ALIST is an alist of filters we need to apply when
 	(setq org-agenda-buffer (current-buffer))
 	(setq org-agenda-contributing-files nil)
 	(setq org-agenda-columns-active nil)
-	(org-agenda-prepare-buffers (org-agenda-files nil 'ifmode))
+        (setq org-agenda-filters-preset
+              `((tag . ,org-agenda-tag-filter-preset)
+                (category . ,org-agenda-category-filter-preset)
+                (regexp . ,org-agenda-regexp-filter-preset)
+                (effort . ,org-agenda-effort-filter-preset)))
+        (org-agenda-prepare-buffers (org-agenda-files nil 'ifmode))
 	(setq org-todo-keywords-for-agenda
 	      (org-uniquify org-todo-keywords-for-agenda))
 	(setq org-done-keywords-for-agenda
@@ -4040,24 +4036,24 @@ agenda display, configure `org-agenda-finalize-hook'."
 	   org-agenda-top-headline-filter))
 	(when org-agenda-tag-filter
 	  (org-agenda-filter-apply org-agenda-tag-filter 'tag t))
-	(when (get 'org-agenda-tag-filter :preset-filter)
+	(when (assoc-default 'tag org-agenda-filters-preset)
 	  (org-agenda-filter-apply
-	   (get 'org-agenda-tag-filter :preset-filter) 'tag t))
+	   (assoc-default 'tag org-agenda-filters-preset) 'tag t))
 	(when org-agenda-category-filter
 	  (org-agenda-filter-apply org-agenda-category-filter 'category))
-	(when (get 'org-agenda-category-filter :preset-filter)
+	(when (assoc-default 'category org-agenda-filters-preset)
 	  (org-agenda-filter-apply
-	   (get 'org-agenda-category-filter :preset-filter) 'category))
+	   (assoc-default 'category org-agenda-filters-preset) 'category))
 	(when org-agenda-regexp-filter
 	  (org-agenda-filter-apply org-agenda-regexp-filter 'regexp))
-	(when (get 'org-agenda-regexp-filter :preset-filter)
+	(when (assoc-default 'regexp org-agenda-filters-preset)
 	  (org-agenda-filter-apply
-	   (get 'org-agenda-regexp-filter :preset-filter) 'regexp))
+	   (assoc-default 'regexp org-agenda-filters-preset) 'regexp))
 	(when org-agenda-effort-filter
 	  (org-agenda-filter-apply org-agenda-effort-filter 'effort))
-	(when (get 'org-agenda-effort-filter :preset-filter)
+	(when (assoc-default 'effort org-agenda-filters-preset)
 	  (org-agenda-filter-apply
-	   (get 'org-agenda-effort-filter :preset-filter) 'effort))
+	   (assoc-default 'effort org-agenda-filters-preset) 'effort))
 	(add-hook 'kill-buffer-hook #'org-agenda-reset-markers 'append 'local))
       (run-hooks 'org-agenda-finalize-hook))))
 
@@ -8098,19 +8094,19 @@ in the agenda."
 				     org-agenda-buffer-name))
 	 (org-agenda-keep-modes t)
 	 (tag-filter org-agenda-tag-filter)
-	 (tag-preset (get 'org-agenda-tag-filter :preset-filter))
+	 (tag-preset (assoc-default 'tag org-agenda-filters-preset))
 	 (top-hl-filter org-agenda-top-headline-filter)
 	 (cat-filter org-agenda-category-filter)
-	 (cat-preset (get 'org-agenda-category-filter :preset-filter))
+	 (cat-preset (assoc-default 'category org-agenda-filters-preset))
 	 (re-filter org-agenda-regexp-filter)
-	 (re-preset (get 'org-agenda-regexp-filter :preset-filter))
+	 (re-preset (assoc-default 'regexp org-agenda-filters-preset))
 	 (effort-filter org-agenda-effort-filter)
-	 (effort-preset (get 'org-agenda-effort-filter :preset-filter))
+	 (effort-preset (assoc-default 'effort org-agenda-filters-preset))
 	 (org-agenda-tag-filter-while-redo (or tag-filter tag-preset))
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
-	 (lprops (get 'org-agenda-redo-command 'org-lprops))
+	 (lprops (get-text-property p 'org-lprops))
 	 (redo-cmd (get-text-property p 'org-redo-cmd))
 	 (last-args (get-text-property p 'org-last-args))
 	 (org-agenda-overriding-cmd (get-text-property p 'org-series-cmd))
@@ -8121,10 +8117,6 @@ in the agenda."
 		  ((stringp last-args)
 		   last-args))))
 	 (series-redo-cmd (get-text-property p 'org-series-redo-cmd)))
-    (put 'org-agenda-tag-filter :preset-filter nil)
-    (put 'org-agenda-category-filter :preset-filter nil)
-    (put 'org-agenda-regexp-filter :preset-filter nil)
-    (put 'org-agenda-effort-filter :preset-filter nil)
     (and cols (org-columns-quit))
     (message "Rebuilding agenda buffer...")
     (if series-redo-cmd
@@ -8132,7 +8124,9 @@ in the agenda."
       (cl-progv
 	  (mapcar #'car lprops)
 	  (mapcar (lambda (binding) (eval (cadr binding) t)) lprops)
-	(eval redo-cmd t)))
+	(eval redo-cmd t))
+      (let ((inhibit-read-only t))
+	(add-text-properties (point-min) (point-max) `(org-lprops ,lprops))))
     (setq org-agenda-undo-list nil
 	  org-agenda-pending-undo-list nil
 	  org-agenda-tag-filter tag-filter
@@ -8141,10 +8135,6 @@ in the agenda."
 	  org-agenda-effort-filter effort-filter
 	  org-agenda-top-headline-filter top-hl-filter)
     (message "Rebuilding agenda buffer...done")
-    (put 'org-agenda-tag-filter :preset-filter tag-preset)
-    (put 'org-agenda-category-filter :preset-filter cat-preset)
-    (put 'org-agenda-regexp-filter :preset-filter re-preset)
-    (put 'org-agenda-effort-filter :preset-filter effort-preset)
     (let ((tag (or tag-filter tag-preset))
 	  (cat (or cat-filter cat-preset))
 	  (effort (or effort-filter effort-preset))
@@ -8540,7 +8530,7 @@ also press `-' or `+' to switch between filtering and excluding."
 	  (org-agenda-filter-apply org-agenda-tag-filter 'tag expand))))
      ((eq char ?\\)
       (org-agenda-filter-show-all-tag)
-      (when (get 'org-agenda-tag-filter :preset-filter)
+      (when (assoc-default 'tag org-agenda-filters-preset)
 	(org-agenda-filter-apply org-agenda-tag-filter 'tag expand)))
      ((eq char ?.)
       (setq org-agenda-tag-filter
@@ -8613,7 +8603,7 @@ grouptags."
      ((eq type 'tag)
       (setq filter
 	    (delete-dups
-	     (append (get 'org-agenda-tag-filter :preset-filter)
+	     (append (assoc-default 'tag org-agenda-filters-preset)
 		     filter)))
       (dolist (x filter)
 	(let ((op (string-to-char x)))
@@ -8625,7 +8615,7 @@ grouptags."
      ((eq type 'category)
       (setq filter
 	    (delete-dups
-	     (append (get 'org-agenda-category-filter :preset-filter)
+	     (append (assoc-default 'category org-agenda-filters-preset)
 		     filter)))
       (dolist (x filter)
 	(if (equal "-" (substring x 0 1))
@@ -8636,7 +8626,7 @@ grouptags."
      ((eq type 'regexp)
       (setq filter
 	    (delete-dups
-	     (append (get 'org-agenda-regexp-filter :preset-filter)
+	     (append (assoc-default 'regexp org-agenda-filters-preset)
 		     filter)))
       (dolist (x filter)
 	(if (equal "-" (substring x 0 1))
@@ -8647,7 +8637,7 @@ grouptags."
      ((eq type 'effort)
       (setq filter
 	    (delete-dups
-	     (append (get 'org-agenda-effort-filter :preset-filter)
+	     (append (assoc-default 'effort org-agenda-filters-preset)
 		     filter)))
       (dolist (x filter)
 	(push (org-agenda-filter-effort-form x) f))))
@@ -9340,13 +9330,13 @@ When called with a prefix argument, include all archive files as well."
 	       (t ""))
 	      (if (org-agenda-filter-any) " " "")
 	      (if (or org-agenda-category-filter
-		      (get 'org-agenda-category-filter :preset-filter))
+		      (assoc-default 'category org-agenda-filters-preset))
 		  '(:eval (propertize
 			   (concat "["
 	      			   (mapconcat
                                     #'identity
 	      			    (append
-	      			     (get 'org-agenda-category-filter :preset-filter)
+	      			     (assoc-default 'category org-agenda-filters-preset)
 	      			     org-agenda-category-filter)
 	      			    "")
 				   "]")
@@ -9354,36 +9344,36 @@ When called with a prefix argument, include all archive files as well."
                            'help-echo "Category used in filtering"))
                 "")
 	      (if (or org-agenda-tag-filter
-		      (get 'org-agenda-tag-filter :preset-filter))
+		      (assoc-default 'tag org-agenda-filters-preset))
 		  '(:eval (propertize
 			   (concat (mapconcat
 				    #'identity
 				    (append
-				     (get 'org-agenda-tag-filter :preset-filter)
+				     (assoc-default 'tag org-agenda-filters-preset)
 				     org-agenda-tag-filter)
 				    ""))
 			   'face 'org-agenda-filter-tags
 			   'help-echo "Tags used in filtering"))
 		"")
 	      (if (or org-agenda-effort-filter
-		      (get 'org-agenda-effort-filter :preset-filter))
+		      (assoc-default 'effort org-agenda-filters-preset))
 		  '(:eval (propertize
 			   (concat (mapconcat
 				    #'identity
 				    (append
-				     (get 'org-agenda-effort-filter :preset-filter)
+				     (assoc-default 'effort org-agenda-filters-preset)
 				     org-agenda-effort-filter)
 				    ""))
 			   'face 'org-agenda-filter-effort
 			   'help-echo "Effort conditions used in filtering"))
 		"")
 	      (if (or org-agenda-regexp-filter
-		      (get 'org-agenda-regexp-filter :preset-filter))
+		      (assoc-default 'regexp org-agenda-filters-preset))
 		  '(:eval (propertize
 			   (concat (mapconcat
 				    (lambda (x) (concat (substring x 0 1) "/" (substring x 1) "/"))
 				    (append
-				     (get 'org-agenda-regexp-filter :preset-filter)
+				     (assoc-default 'regexp org-agenda-filters-preset)
 				     org-agenda-regexp-filter)
 				    ""))
 			   'face 'org-agenda-filter-regexp
@@ -11235,10 +11225,10 @@ current HH:MM time."
      (,org-agenda-category-filter category)
      (,org-agenda-regexp-filter regexp)
      (,org-agenda-effort-filter effort)
-     (,(get 'org-agenda-tag-filter :preset-filter) tag)
-     (,(get 'org-agenda-category-filter :preset-filter) category)
-     (,(get 'org-agenda-effort-filter :preset-filter) effort)
-     (,(get 'org-agenda-regexp-filter :preset-filter) regexp))))
+     (,(assoc-default 'tag org-agenda-filters-preset) tag)
+     (,(assoc-default 'category org-agenda-filters-preset) category)
+     (,(assoc-default 'effort org-agenda-filters-preset) effort)
+     (,(assoc-default 'regexp org-agenda-filters-preset) regexp))))
 
 (defun org-agenda-drag-line-forward (arg &optional backward)
   "Drag an agenda line forward by ARG lines.
