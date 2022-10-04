@@ -10674,9 +10674,10 @@ See the docstring of the variable for more information.
 If you are away from your computer, it can be very useful to have a
 printed version of some agenda views to carry around.  Org mode can
 export custom agenda views as plain text, HTML[fn:: For HTML you need
-to install Hrvoje Nikšić's =htmlize.el= as an Emacs package from MELPA
-or from [[https://github.com/hniksic/emacs-htmlize][Hrvoje Nikšić's
-repository]].], Postscript, PDF[fn:35], and iCalendar files.  If you
+to install Hrvoje Nikšić's =htmlize.el= as an Emacs package from
+[[https://elpa.nongnu.org/][NonGNU ELPA]] or from
+[[https://github.com/hniksic/emacs-htmlize][Hrvoje Nikšić's repository]].],
+Postscript, PDF[fn:35], and iCalendar files.  If you
 want to do this only occasionally, use the following command:
 
 - {{{kbd(C-x C-w)}}} (~org-agenda-write~) ::
@@ -11195,7 +11196,7 @@ a major LaTeX mode like AUCTeX in order to speed-up insertion of
 environments and math templates.  Inside Org mode, you can make use of
 some of the features of CDLaTeX mode.  You need to install
 =cdlatex.el= and =texmathp.el= (the latter comes also with AUCTeX)
-using [[https://melpa.org/][MELPA]] with the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Package-Installation.html][Emacs packaging system]] or alternatively from
+from [[https://elpa.nongnu.org/][NonGNU ELPA]] with the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Package-Installation.html][Emacs packaging system]] or alternatively from
 [[https://staff.fnwi.uva.nl/c.dominik/Tools/cdlatex/]].  Do not use
 CDLaTeX mode itself under Org mode, but use the special version Org
 CDLaTeX minor mode that comes as part of Org.  Turn it on for the
