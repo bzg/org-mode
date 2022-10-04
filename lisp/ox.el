@@ -3236,7 +3236,7 @@ storing and resolving footnotes.  It is created automatically."
 	    (beginning-of-line)
 	    ;; Extract arguments from keyword's value.
 	    (let* ((value (org-element-property :value element))
-		   (ind (current-indentation))
+		   (ind (org-current-text-indentation))
 		   location
 		   (coding-system-for-read
 		    (or (and (string-match ":coding +\\(\\S-+\\)>" value)

@@ -1275,7 +1275,7 @@ may have been stored before."
 	(when item
 	  (let ((i (save-excursion
 		     (goto-char (org-element-property :post-affiliated item))
-		     (current-indentation))))
+		     (org-current-text-indentation))))
 	    (save-excursion
 	      (goto-char beg)
 	      (save-excursion

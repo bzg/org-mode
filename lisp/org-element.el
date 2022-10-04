@@ -1616,7 +1616,7 @@ CONTENTS is the contents of the element."
 	   ;; At a new item: end previous sibling.
 	   ((looking-at item-re)
 	    (let ((ind (save-excursion (skip-chars-forward " \t")
-				       (current-column))))
+				       (org-current-text-column))))
 	      (setq top-ind (min top-ind ind))
 	      (while (and items (<= ind (nth 1 (car items))))
 		(let ((item (pop items)))
@@ -1650,7 +1650,7 @@ CONTENTS is the contents of the element."
 	   (t
 	    (let ((ind (save-excursion
 			 (skip-chars-forward " \t")
-			 (current-column)))
+			 (org-current-text-column)))
 		  (end (save-excursion
 			 (skip-chars-backward " \r\t\n")
 			 (line-beginning-position 2))))

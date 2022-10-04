@@ -18818,13 +18818,13 @@ Also align node properties according to `org-property-format'."
                (let ((element (org-element-at-point))
                      block-content-ind some-ind)
                  (org-with-point-at (org-element-property :begin element)
-                   (setq block-content-ind (+ (current-indentation)
+                   (setq block-content-ind (+ (org-current-text-indentation)
                                               org-edit-src-content-indentation))
                    (forward-line)
 		   (save-match-data (re-search-forward "^[ \t]*\\S-" nil t))
                    (backward-char)
                    (setq some-ind (if (looking-at-p "#\\+end_src")
-                                      block-content-ind (current-indentation))))
+                                      block-content-ind (org-current-text-indentation))))
                  (indent-line-to (min block-content-ind some-ind))))
 	     (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
 	    (t
@@ -18933,7 +18933,7 @@ assumed to be significant there."
 		;; might break the list as a whole.  On the other
 		;; hand, when at a plain list, indent it as a whole.
 		(cond ((eq type 'plain-list)
-		       (let ((offset (- ind (current-indentation))))
+		       (let ((offset (- ind (org-current-text-indentation))))
 			 (unless (zerop offset)
 			   (indent-rigidly (org-element-property :begin element)
 					   (org-element-property :end element)
@@ -19393,7 +19393,7 @@ region only contains such lines."
               (catch 'zerop
                 (while (< (point) end)
                   (unless (looking-at-p "[ \t]*$")
-                    (let ((ind (current-indentation)))
+                    (let ((ind (org-current-text-indentation)))
                       (setq min-ind (min min-ind ind))
                       (when (zerop ind) (throw 'zerop t))))
                   (forward-line)))))
@@ -19599,7 +19599,7 @@ strictly within a source block, use appropriate comment syntax."
 	      (goto-char (point-min))
 	      (while (and (not (eobp)) (not (zerop min-indent)))
 		(unless (looking-at "[ \t]*$")
-		  (setq min-indent (min min-indent (current-indentation))))
+		  (setq min-indent (min min-indent (org-current-text-indentation))))
 		(forward-line)))
 	    ;; Then loop over all lines.
 	    (save-excursion

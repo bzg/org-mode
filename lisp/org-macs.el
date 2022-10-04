@@ -400,7 +400,7 @@ line.  Return nil if it fails."
 		   (save-excursion
                      (when skip-fl (forward-line))
 		     (while (re-search-forward "^[ \t]*\\S-" nil t)
-		       (let ((ind (current-indentation)))
+		       (let ((ind (org-current-text-indentation)))
 			 (if (zerop ind) (throw :exit nil)
 			   (setq min-ind (min min-ind ind))))))
 		   min-ind))))
@@ -1100,6 +1100,11 @@ Return width in pixels when PIXELS is non-nil."
   "Like `current-column' but ignore display properties."
   `(string-width (buffer-substring-no-properties
                   (line-beginning-position) (point))))
+
+(defmacro org-current-text-indentation ()
+  "Like `current-indentation', but ignore display/invisible properties."
+  `(let ((buffer-invisibility-spec nil))
+     (current-indentation)))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.

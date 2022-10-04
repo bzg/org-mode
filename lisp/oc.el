@@ -1525,7 +1525,7 @@ CONTEXT is the element or object at point, as returned by `org-element-context'.
      ;; unaffected.
      ((eq type 'item)
       (> (point) (+ (org-element-property :begin context)
-                    (current-indentation)
+                    (org-current-text-indentation)
                     (if (org-element-property :checkbox context)
                         5 1))))
      ;; Other elements are invalid.

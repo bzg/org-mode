@@ -263,7 +263,7 @@ this template."
 			     (insert rep))))
 		        (`src-block
 		         (let ((match-start (copy-marker (match-beginning 0)))
-			       (ind (current-indentation)))
+			       (ind (org-current-text-indentation)))
 			   ;; Take care of matched block: compute
 			   ;; replacement string.  In particular, a nil
 			   ;; REPLACEMENT means the block is left as-is
