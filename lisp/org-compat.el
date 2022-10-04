@@ -148,6 +148,18 @@ inserted before contatenating."
     (and (file-directory-p dir)
          (null (directory-files dir nil directory-files-no-dot-files-regexp t)))))
 
+(if (fboundp 'string-clean-whitespace)
+    (defalias 'org-string-clean-whitespace #'string-clean-whitespace)
+  ;; From Emacs subr-x.el.
+  (defun org-string-clean-whitespace (string)
+    "Clean up whitespace in STRING.
+All sequences of whitespaces in STRING are collapsed into a
+single space character, and leading/trailing whitespace is
+removed."
+    (let ((blank "[[:blank:]\r\n]+"))
+      (string-trim (replace-regexp-in-string blank " " string t t)
+                   blank blank))))
+
 
 ;;; Emacs < 27.1 compatibility
 

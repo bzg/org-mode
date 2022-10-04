@@ -4454,11 +4454,11 @@ INFO is a plist used as a communication channel.
 
 Return value can be a radio-target object or nil.  Assume LINK
 has type \"radio\"."
-  (let ((path (string-clean-whitespace (org-element-property :path link))))
+  (let ((path (org-string-clean-whitespace (org-element-property :path link))))
     (org-element-map (plist-get info :parse-tree) 'radio-target
       (lambda (radio)
 	(and (string-equal-ignore-case
-	      (string-clean-whitespace (org-element-property :value radio))
+	      (org-string-clean-whitespace (org-element-property :value radio))
               path)
 	     radio))
       info 'first-match)))
