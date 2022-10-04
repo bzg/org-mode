@@ -171,6 +171,26 @@ removed."
       (string-trim (replace-regexp-in-string blank " " string t t)
                    blank blank))))
 
+(if (fboundp 'format-prompt)
+    (defalias 'org-format-prompt #'format-prompt)
+  ;; From Emacs minibuffer.el, inlining
+  ;; `minibuffer-default-prompt-format' value and replacing `length<'
+  ;; (both new in Emacs 28.1).
+  (defun org-format-prompt (prompt default &rest format-args)
+    "Compatibility substitute for `format-prompt'."
+    (concat
+     (if (null format-args)
+         prompt
+       (apply #'format prompt format-args))
+     (and default
+          (or (not (stringp default))
+              (> (length default) 0))
+          (format " (default %s)"
+                  (if (consp default)
+                      (car default)
+                    default)))
+     ": ")))
+
 
 ;;; Emacs < 27.1 compatibility
 

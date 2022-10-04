@@ -645,10 +645,7 @@ this function appends the default value from
          (prompt (let ((default (or (car org-refile-history)
                                     (and (assoc cbnex tbl) (setq cdef cbnex)
                                          cbnex))))
-                   ;; `format-prompt' is new in Emacs 28.1.
-                   (if (fboundp 'format-prompt)
-                       (format-prompt prompt default)
-                     (concat prompt " (default " default ": "))))
+                   (org-format-prompt prompt default)))
 	 pa answ parent-target child parent old-hist)
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)

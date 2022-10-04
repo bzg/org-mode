@@ -1831,12 +1831,7 @@ Expansion occurs in a temporary Org mode buffer."
 		     (setq org-capture--prompt-history
 			   (gethash prompt org-capture--prompt-history-table))
                      (push (org-completing-read
-                            ;; `format-prompt' is new in Emacs 28.1.
-                            (if (fboundp 'format-prompt)
-                                (format-prompt (or prompt "Enter string") default)
-                              (concat (or prompt "Enter string")
-                                      (and default (format " [%s]" default))
-                                      ": "))
+                            (org-format-prompt (or prompt "Enter string") default)
 			    completions
 			    nil nil nil 'org-capture--prompt-history default)
 			   strings)
