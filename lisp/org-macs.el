@@ -386,6 +386,11 @@ it for output."
 
 ;;; Indentation
 
+(defmacro org-current-text-indentation ()
+  "Like `current-indentation', but ignore display/invisible properties."
+  `(let ((buffer-invisibility-spec nil))
+     (current-indentation)))
+
 (defun org-do-remove-indentation (&optional n skip-fl)
   "Remove the maximum common indentation from the buffer.
 When optional argument N is a positive integer, remove exactly
@@ -1100,11 +1105,6 @@ Return width in pixels when PIXELS is non-nil."
   "Like `current-column' but ignore display properties."
   `(string-width (buffer-substring-no-properties
                   (line-beginning-position) (point))))
-
-(defmacro org-current-text-indentation ()
-  "Like `current-indentation', but ignore display/invisible properties."
-  `(let ((buffer-invisibility-spec nil))
-     (current-indentation)))
 
 (defun org-not-nil (v)
   "If V not nil, and also not the string \"nil\", then return V.
