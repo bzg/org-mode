@@ -49,7 +49,11 @@ followed by a colon."
          (eshell-buffer-name (car buffer-and-command))
          (command (cadr buffer-and-command)))
     (if (get-buffer eshell-buffer-name)
-	(pop-to-buffer eshell-buffer-name display-comint-buffer-action)
+        (pop-to-buffer
+         eshell-buffer-name
+         (if (boundp 'display-comint-buffer-action) ; Emacs >= 29
+             display-comint-buffer-action
+           '(display-buffer-same-window (inhibit-same-window))))
       (eshell))
     (goto-char (point-max))
     (eshell-kill-input)
