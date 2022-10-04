@@ -863,8 +863,7 @@ as a communication channel."
    (if (not (plist-get info :with-author)) ""
      (org-export-data (plist-get info :author) info))
    ;; Timezone.
-   (if (org-string-nw-p org-icalendar-timezone) org-icalendar-timezone
-     (cadr (current-time-zone)))
+   (or (org-string-nw-p org-icalendar-timezone) (format-time-string "%Z"))
    ;; Description.
    (org-export-data (plist-get info :title) info)
    contents))
@@ -1011,7 +1010,7 @@ This function assumes major mode for current buffer is
        (org-icalendar--vcalendar
 	org-icalendar-combined-name
 	user-full-name
-	(or (org-string-nw-p org-icalendar-timezone) (cadr (current-time-zone)))
+	(or (org-string-nw-p org-icalendar-timezone) (format-time-string "%Z"))
 	org-icalendar-combined-description
 	contents)))
     (run-hook-with-args 'org-icalendar-after-save-hook file)))
@@ -1034,7 +1033,7 @@ FILES is a list of files to build the calendar from."
 	      user-full-name
 	      ;; Timezone.
 	      (or (org-string-nw-p org-icalendar-timezone)
-		  (cadr (current-time-zone)))
+		  (format-time-string "Z"))
 	      ;; Description.
 	      org-icalendar-combined-description
 	      ;; Contents.

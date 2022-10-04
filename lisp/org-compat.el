@@ -45,7 +45,7 @@
 (declare-function org-calendar-goto-agenda "org-agenda" ())
 (declare-function org-align-tags "org" (&optional all))
 (declare-function org-at-heading-p "org" (&optional ignored))
-(declare-function org-at-table.el-p "org" ())
+(declare-function org-at-table.el-p "org-table" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-at-point-no-context "org-element" (&optional pom))
@@ -258,8 +258,7 @@ Execute BODY, and unwind connection-local variables."
   (defsubst file-attribute-modification-time (attributes)
     "The modification time in ATTRIBUTES returned by `file-attributes'.
 This is the time of the last change to the file's contents, and
-is a list of integers (HIGH LOW USEC PSEC) in the same style
-as (current-time)."
+is a Lisp timestamp in the same style as `current-time'."
     (nth 5 attributes)))
 
 (unless (fboundp 'file-attribute-size)
@@ -1161,6 +1160,14 @@ Pass COLUMN and FORCE to `move-to-column'."
 (define-obsolete-function-alias 'org-define-error #'define-error "9.6")
 (define-obsolete-function-alias 'org-without-partial-completion 'progn "9.6")
 
+(unless (fboundp 'string-equal-ignore-case)
+  ;; From Emacs subr.el.
+  (defun string-equal-ignore-case (string1 string2)
+    "Like `string-equal', but case-insensitive.
+Upper-case and lower-case letters are treated as equal.
+Unibyte strings are converted to multibyte for comparison."
+    (eq t (compare-strings string1 0 nil string2 0 nil t))))
+
 
 ;;; Integration with and fixes for other packages
 
@@ -1262,7 +1269,7 @@ To get rid of the restriction, use `\\[org-agenda-remove-restriction-lock]'."
 	(org-agenda-set-restriction-lock 'file)))
      (t (user-error "Don't know how to restrict Org mode agenda")))
     (move-overlay org-speedbar-restriction-lock-overlay
-		  (line-beginning-position) (line-end-position))
+                  (line-beginning-position) (line-end-position))
     (setq current-prefix-arg nil)
     (org-agenda-maybe-redo)))
 
@@ -1340,10 +1347,8 @@ ELEMENT is the element at point."
 	  (and log
 	       (let ((drawer (org-element-lineage element '(drawer))))
 		 (and drawer
-		      (eq (compare-strings
-			   log nil nil
-			   (org-element-property :drawer-name drawer) nil nil t)
-			  t)))))
+		      (string-equal-ignore-case
+		       log (org-element-property :drawer-name drawer))))))
 	nil)
        (t
 	(cl-case (org-element-type element)

@@ -1529,7 +1529,7 @@ non-nil."
 	(let ((end (region-end)))
 	  (goto-char (region-beginning))
 	  (set-mark (point))
-	  (while (< (line-end-position) end)
+          (while (< (line-end-position) end)
 	    (move-end-of-line 1) (activate-mark)
 	    (let (current-prefix-arg)
 	      (call-interactively 'org-store-link))
@@ -1623,14 +1623,6 @@ non-nil."
 		 (car org-time-stamp-formats)
 		 (org-encode-time 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd))))
 	  (org-link-store-props :type "calendar" :date cd)))
-
-       ((eq major-mode 'w3-mode)
-	(setq cpltxt (if (and (buffer-name)
-			      (not (string-match "Untitled" (buffer-name))))
-			 (buffer-name)
-		       (url-view-url t))
-	      link (url-view-url t))
-	(org-link-store-props :type "w3" :url (url-view-url t)))
 
        ((eq major-mode 'image-mode)
 	(setq cpltxt (concat "file:"

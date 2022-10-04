@@ -467,9 +467,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 	(unless (or (org-kill-is-subtree-p
 		     (buffer-substring region-start region-end))
 		    (prog1 org-refile-active-region-within-subtree
-		      (let ((s (line-end-position)))
+                      (let ((s (line-end-position)))
 			(org-toggle-heading)
-			(setq region-end (+ (- (line-end-position) s) region-end)))))
+                        (setq region-end (+ (- (line-end-position) s) region-end)))))
 	  (user-error "The region is not a (sequence of) subtree(s)")))
       (if (equal arg '(16))
 	  (org-refile-goto-last-stored)
@@ -642,11 +642,13 @@ this function appends the default value from
 	       org-refile-target-table))
 	 (completion-ignore-case t)
 	 cdef
-	 (prompt (concat prompt
-			 (or (and (car org-refile-history)
-				  (concat " (default " (car org-refile-history) ")"))
-			     (and (assoc cbnex tbl) (setq cdef cbnex)
-				  (concat " (default " cbnex ")"))) ": "))
+         (prompt (let ((default (or (car org-refile-history)
+                                    (and (assoc cbnex tbl) (setq cdef cbnex)
+                                         cbnex))))
+                   ;; `format-prompt' is new in Emacs 28.1.
+                   (if (fboundp 'format-prompt)
+                       (format-prompt prompt default)
+                     (concat prompt " (default " default ": "))))
 	 pa answ parent-target child parent old-hist)
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)

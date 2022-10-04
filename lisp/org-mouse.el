@@ -211,7 +211,7 @@ this function is called.  Otherwise, the current major mode menu is used."
   (interactive "@e \nP")
   (if (and (= (event-click-count event) 1)
 	   (or (not mark-active)
-	       (sit-for (/ double-click-time 1000.0))))
+               (sit-for (/ (mouse-double-click-time) 1000.0))))
       (progn
 	(select-window (posn-window (event-start event)))
 	(when (not (org-mouse-mark-active))
@@ -1013,7 +1013,7 @@ This means, between the beginning of line and the point."
 		     (org-fold-heading nil)))   ; show the next heading
 	      (org-back-to-heading)
 	      (setq marker (point-marker))
-	      (goto-char (max (line-beginning-position) (- (line-end-position) anticol)))
+              (goto-char (max (line-beginning-position) (- (line-end-position) anticol)))
 	      (funcall command)
 	      (message "_cmd: %S" org-mouse-cmd)
 	      (message "this-command: %S" this-command)

@@ -224,8 +224,7 @@ Emacs initialization file."
 	  (const :tag "Clock and history" t)
 	  (const :tag "No persistence" nil)))
 
-(defcustom org-clock-persist-file (convert-standard-filename
-				   (concat user-emacs-directory "org-clock-save.el"))
+(defcustom org-clock-persist-file (locate-user-emacs-file "org-clock-save.el")
   "File to save clock data to."
   :group 'org-clock
   :type 'string)
@@ -1820,7 +1819,7 @@ Optional argument N tells to change by that many units."
     (goto-char org-clock-marker)
     (if (looking-back (concat "^[ \t]*" org-clock-string ".*")
 		      (line-beginning-position))
-	(progn (delete-region (1- (line-beginning-position)) (line-end-position))
+        (progn (delete-region (1- (line-beginning-position)) (line-end-position))
 	       (org-remove-empty-drawer-at (point)))
       (message "Clock gone, cancel the timer anyway")
       (sit-for 2)))
@@ -1959,7 +1958,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 			       (aset ltimes l (+ (aref ltimes l) t1))))
 		  (setq time (aref ltimes level))
 		  (goto-char (match-beginning 0))
-		  (put-text-property (point) (line-end-position)
+                  (put-text-property (point) (line-end-position)
 				     (or propname :org-clock-minutes) time)
 		  (when headline-filter
 		    (save-excursion
@@ -2127,7 +2126,7 @@ fontified, and then returned."
     (forward-line 2)
     (buffer-substring (point) (progn
 				(re-search-forward "^[ \t]*#\\+END" nil t)
-				(line-beginning-position)))))
+                                (line-beginning-position)))))
 
 ;;;###autoload
 (defun org-clock-report (&optional arg)
@@ -3059,7 +3058,7 @@ Otherwise, return nil."
 	 ((not (match-end 2))
 	  (when (and (equal (marker-buffer org-clock-marker) (current-buffer))
 		     (> org-clock-marker (point))
-		     (<= org-clock-marker (line-end-position)))
+                     (<= org-clock-marker (line-end-position)))
 	    ;; The clock is running here
 	    (setq org-clock-start-time
 		  (org-time-string-to-time (match-string 1)))

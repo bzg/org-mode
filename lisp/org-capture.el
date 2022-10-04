@@ -1458,7 +1458,7 @@ Of course, if exact position has been required, just put it there."
 		(if (org-at-table-p)
 		    (save-excursion
 		      (org-table-goto-line (nth 1 where))
-		      (line-beginning-position))
+                      (line-beginning-position))
 		  (point))))))
     (with-current-buffer (buffer-base-buffer (current-buffer))
       (org-with-point-at pos
@@ -1830,10 +1830,13 @@ Expansion occurs in a temporary Org mode buffer."
 		     ;; Load history list for current prompt.
 		     (setq org-capture--prompt-history
 			   (gethash prompt org-capture--prompt-history-table))
-		     (push (org-completing-read
-			    (concat (or prompt "Enter string")
-				    (and default (format " [%s]" default))
-				    ": ")
+                     (push (org-completing-read
+                            ;; `format-prompt' is new in Emacs 28.1.
+                            (if (fboundp 'format-prompt)
+                                (format-prompt (or prompt "Enter string") default)
+                              (concat (or prompt "Enter string")
+                                      (and default (format " [%s]" default))
+                                      ": "))
 			    completions
 			    nil nil nil 'org-capture--prompt-history default)
 			   strings)

@@ -40,6 +40,7 @@
 
 (declare-function org-fold-show-all "org-fold" (&optional types))
 
+;; FIXME: Doesn't this rather belong in lilypond-mode.el?
 (defalias 'lilypond-mode 'LilyPond-mode)
 
 (add-to-list 'org-babel-tangle-lang-exts '("LilyPond" . "ly"))
@@ -315,7 +316,7 @@ LINENO is the number of the erroneous line."
 	(progn
 	  (goto-char (point-min))
 	  (forward-line (- lineNo 1))
-	  (buffer-substring (point) (line-end-position)))
+          (buffer-substring (point) (line-end-position)))
       nil)))
 
 (defun org-babel-lilypond-attempt-to-open-pdf (file-name &optional test)

@@ -241,7 +241,7 @@ going below `org-inlinetask-min-level'."
 	  (setq beg (point))
 	  (replace-match down-task nil t nil 1)
 	  (org-inlinetask-goto-end)
-	  (if (and (eobp) (looking-back "END\\s-*" (line-beginning-position)))
+          (if (and (eobp) (looking-back "END\\s-*" (line-beginning-position)))
               (beginning-of-line)
             (forward-line -1))
 	  (unless (= (point) beg)
@@ -317,7 +317,7 @@ When STATE is `unfold', unfold unconditionally."
 	       (if (bolp) (1- (point)) (point))))
 	(start (save-excursion
 		 (org-inlinetask-goto-beginning)
-		 (line-end-position))))
+                 (line-end-position))))
     (cond
      ;; Nothing to show/hide.
      ((= end start))

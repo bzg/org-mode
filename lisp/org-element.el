@@ -2414,7 +2414,7 @@ CDR is a plist containing `:key', `:value', `:begin', `:end',
 	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-*\\):")
 		      (upcase (match-string-no-properties 1))))
 	  (value (org-trim (buffer-substring-no-properties
-			    (match-end 0) (line-end-position))))
+                            (match-end 0) (line-end-position))))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (line-beginning-position)))))
