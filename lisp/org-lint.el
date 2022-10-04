@@ -383,7 +383,7 @@ called with one argument, the key used for comparison."
    ast
    'node-property
    (lambda (property)
-     (and (string-equal-ignore-case
+     (and (org-string-equal-ignore-case
            "CUSTOM_ID" (org-element-property :key property))
 	  (org-element-property :value property)))
    (lambda (property _) (org-element-property :begin property))

@@ -82,7 +82,6 @@
 (require 'org-element)
 (require 'org-macro)
 (require 'tabulated-list)
-(require 'subr-x)
 
 (declare-function org-src-coderef-format "org-src" (&optional element))
 (declare-function org-src-coderef-regexp "org-src" (fmt &optional label))
@@ -4457,7 +4456,7 @@ has type \"radio\"."
   (let ((path (org-string-clean-whitespace (org-element-property :path link))))
     (org-element-map (plist-get info :parse-tree) 'radio-target
       (lambda (radio)
-	(and (string-equal-ignore-case
+	(and (org-string-equal-ignore-case
 	      (org-string-clean-whitespace (org-element-property :value radio))
               path)
 	     radio))

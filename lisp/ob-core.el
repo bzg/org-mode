@@ -144,7 +144,7 @@ used."
   :type 'string
   :safe (lambda (v)
 	  (and (stringp v)
-	       (string-equal-ignore-case "RESULTS" v))))
+	       (org-string-equal-ignore-case "RESULTS" v))))
 
 (defcustom org-babel-noweb-wrap-start "<<"
   "String used to begin a noweb reference in a code block.
@@ -2491,7 +2491,7 @@ INFO may provide the values of these header arguments (in the
 		       ;; Escape contents from "export" wrap.  Wrap
 		       ;; inline results within an export snippet with
 		       ;; appropriate value.
-		       ((string-equal-ignore-case type "export")
+		       ((org-string-equal-ignore-case type "export")
 			(let ((backend (pcase split
 					 (`(,_) "none")
 					 (`(,_ ,b . ,_) b))))
@@ -2502,14 +2502,14 @@ INFO may provide the values of these header arguments (in the
 					   backend) "@@)}}}")))
 		       ;; Escape contents from "example" wrap.  Mark
 		       ;; inline results as verbatim.
-		       ((string-equal-ignore-case type "example")
+		       ((org-string-equal-ignore-case type "example")
 			(funcall wrap
 				 opening-line closing-line
 				 nil nil
 				 "{{{results(=" "=)}}}"))
 		       ;; Escape contents from "src" wrap.  Mark
 		       ;; inline results as inline source code.
-		       ((string-equal-ignore-case type "src")
+		       ((org-string-equal-ignore-case type "src")
 			(let ((inline-open
 			       (pcase split
 				 (`(,_)

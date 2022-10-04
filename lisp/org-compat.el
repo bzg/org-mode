@@ -76,6 +76,9 @@
 (declare-function org-fold-show-all "org-fold" (&optional types))
 (declare-function org-fold-show-children "org-fold" (&optional level))
 (declare-function org-fold-show-entry "org-fold" (&optional hide-drawers))
+;; `org-string-equal-ignore-case' is in _this_ file but isn't at the
+;; top-level.
+(declare-function org-string-equal-ignore-case "org-compat" (string1 string2))
 
 (defvar calendar-mode-map)
 (defvar org-complex-heading-regexp)
@@ -116,9 +119,10 @@ the symbol of the calling function, for example."
       (when (not (equal attr cachedattr))
         (puthash sym attr org-file-has-changed-p--hash-table)))))
 
-(unless (fboundp 'string-equal-ignore-case)
+(if (fboundp 'string-equal-ignore-case)
+    (defalias 'org-string-equal-ignore-case #'string-equal-ignore-case)
   ;; From Emacs subr.el.
-  (defun string-equal-ignore-case (string1 string2)
+  (defun org-string-equal-ignore-case (string1 string2)
     "Like `string-equal', but case-insensitive.
 Upper-case and lower-case letters are treated as equal.
 Unibyte strings are converted to multibyte for comparison."
@@ -1358,7 +1362,7 @@ ELEMENT is the element at point."
 	  (and log
 	       (let ((drawer (org-element-lineage element '(drawer))))
 		 (and drawer
-		      (string-equal-ignore-case
+		      (org-string-equal-ignore-case
 		       log (org-element-property :drawer-name drawer))))))
 	nil)
        (t
