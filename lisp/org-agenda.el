@@ -147,7 +147,7 @@ If it is a character, it will be repeated to fill the window width.
 If nil the separator is disabled.  In `org-agenda-custom-commands' this
 addresses the separator between the current and the previous block."
   :group 'org-agenda
-  :version "29.1"
+  :package-version '(Org . "9.6")
   :type '(choice
 	  (const :tag "Disabled" nil)
 	  (character)
@@ -1571,7 +1571,7 @@ times that have a grid line.
 The fourth item is a string placed after the grid times.  This
 will align with agenda items."
   :group 'org-agenda-time-grid
-  :version "29.1"
+  :package-version '(Org . "9.6")
   :type
   '(list
     (set :greedy t :tag "Grid Display Options"
@@ -1600,7 +1600,7 @@ will align with agenda items."
     "now - - - - - - - - - - - - - - - - - - - - - - - - -")
   "The string for the current time marker in the agenda."
   :group 'org-agenda-time-grid
-  :version "29.1"
+  :package-version '(Org . "9.6")
   :type 'string)
 
 (defgroup org-agenda-sorting nil
