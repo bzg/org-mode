@@ -2270,13 +2270,14 @@ For all numbers larger than LIMIT, shift them by DELTA."
 		 (format "@%d\\$[0-9]+=.*?\\(::\\|$\\)" remove))))
 	    s n a)
 	(when remove
-          (while (re-search-forward re2 (line-end-position) t)
-	    (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
-	      (if (equal (char-before (match-beginning 0)) ?.)
-		  (user-error
-		   "Change makes TBLFM term %s invalid, use undo to recover"
-		   (match-string 0))
-		(replace-match "")))))
+          (save-excursion
+            (while (re-search-forward re2 (line-end-position) t)
+	      (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
+	        (if (equal (char-before (match-beginning 0)) ?.)
+		    (user-error
+		     "Change makes TBLFM term %s invalid, use undo to recover"
+		     (match-string 0))
+		  (replace-match ""))))))
         (while (re-search-forward re (line-end-position) t)
 	  (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
 	    (setq s (match-string 1) n (string-to-number s))
