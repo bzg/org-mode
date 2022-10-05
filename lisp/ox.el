@@ -2622,9 +2622,10 @@ The function assumes BUFFER's major mode is `org-mode'."
 	     ov-set)))
       (lambda ()
 	(let ((inhibit-modification-hooks t))
-	  ;; Set major mode. Ignore `org-mode-hook' as it has been run
-	  ;; already in BUFFER.
-	  (let ((org-mode-hook nil) (org-inhibit-startup t)) (org-mode))
+	  ;; Set major mode. Ignore `org-mode-hook' and other hooks as
+	  ;; they have been run already in BUFFER.
+          (delay-mode-hooks
+            (let ((org-inhibit-startup t)) (org-mode)))
 	  ;; Copy specific buffer local variables and variables set
 	  ;; through BIND keywords.
 	  (pcase-dolist (`(,var . ,val) varvals)
