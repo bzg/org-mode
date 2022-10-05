@@ -7246,15 +7246,17 @@ buffers."
   (dolist (buffer (if all (buffer-list) (list (current-buffer))))
     (with-current-buffer (or (buffer-base-buffer buffer) buffer)
       (when (and org-element-use-cache (derived-mode-p 'org-mode))
-        (when (not org-element-cache-persistent)
-          (org-persist-unregister 'org-element--headline-cache (current-buffer))
-          (org-persist-unregister 'org-element--cache (current-buffer)))
-        (when (and org-element-cache-persistent
-                   (buffer-file-name (current-buffer)))
-          (org-persist-register 'org-element--cache (current-buffer))
-          (org-persist-register 'org-element--headline-cache
-                                (current-buffer)
-                                :inherit 'org-element--cache))
+        ;; Only persist cache in file buffers.
+        (when (buffer-file-name)
+          (when (not org-element-cache-persistent)
+            (org-persist-unregister 'org-element--headline-cache (current-buffer))
+            (org-persist-unregister 'org-element--cache (current-buffer)))
+          (when (and org-element-cache-persistent
+                     (buffer-file-name (current-buffer)))
+            (org-persist-register 'org-element--cache (current-buffer))
+            (org-persist-register 'org-element--headline-cache
+                                  (current-buffer)
+                                  :inherit 'org-element--cache)))
         (setq-local org-element--cache-change-tic (buffer-chars-modified-tick))
         (setq-local org-element--cache-last-buffer-size (buffer-size))
         (setq-local org-element--cache-gapless nil)
