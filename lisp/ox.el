@@ -4679,10 +4679,22 @@ objects of the same type."
        (org-element-map (plist-get info :parse-tree)
 	   (or types (org-element-type element))
 	 (lambda (el)
-	   (cond
-	    ((eq element el) (1+ counter))
-	    ((not predicate) (cl-incf counter) nil)
-	    ((funcall predicate el info) (cl-incf counter) nil)))
+           (let ((cached (org-element-property :org-export--counter el)))
+	     (cond
+	      ((eq element el) (1+ counter))
+              ;; Use cached result.
+              ((and cached (equal predicate (car cached)))
+               (cdr cached))
+	      ((not predicate)
+               (cl-incf counter)
+               (org-element-put-property
+                el :org-export--counter (cons predicate counter))
+               nil)
+	      ((funcall predicate el info)
+               (cl-incf counter)
+               (org-element-put-property
+                el :org-export--counter (cons predicate counter))
+               nil))))
 	 info 'first-match)))))
 
 ;;;; For Raw objects
