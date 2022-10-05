@@ -3376,9 +3376,7 @@ current buffer:
 
   For Org files, if there is a =<<target>>= at point, the link points
   to the target.  Otherwise it points to the current headline, which
-  is also the description[fn:: If the headline contains a timestamp,
-  it is removed from the link, which results in a wrong link---you
-  should avoid putting a timestamp in the headline.].
+  is also the description.
 
   #+vindex: org-id-link-to-org-use-id
   #+cindex: @samp{CUSTOM_ID}, property
