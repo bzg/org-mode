@@ -2879,12 +2879,15 @@ INFO is a plist containing export properties."
 	;; temporary buffer so that dvipng/imagemagick can properly
 	;; turn the fragment into an image.
 	(setq latex-frag (concat latex-header latex-frag))))
-    (org-export-with-buffer-copy
-     (erase-buffer)
-     (insert latex-frag)
-     (org-format-latex cache-relpath nil nil cache-dir nil
-		       "Creating LaTeX Image..." nil processing-type)
-     (buffer-string))))
+    (with-current-buffer
+        (org-export-copy-buffer
+         (get-buffer-create " *Org HTML Export LaTeX*")
+         'drop-visible 'drop-narrowing 'drop-contents)
+      (erase-buffer)
+      (insert latex-frag)
+      (org-format-latex cache-relpath nil nil cache-dir nil
+		        "Creating LaTeX Image..." nil processing-type)
+      (buffer-string))))
 
 (defun org-html--wrap-latex-environment (contents _ &optional caption label)
   "Wrap CONTENTS string within appropriate environment for equations.

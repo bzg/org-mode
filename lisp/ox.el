@@ -2544,12 +2544,25 @@ Return the updated communication channel."
 ;; a default template (or a back-end specific template) at point or in
 ;; current subtree.
 
-(defun org-export-copy-buffer ()
+(defun org-export-copy-buffer (&optional buffer drop-visibility
+                                         drop-narrowing drop-contents
+                                         drop-locals)
   "Return a copy of the current buffer.
 The copy preserves Org buffer-local variables, visibility and
-narrowing."
-  (let ((copy-buffer-fun (org-export--generate-copy-script (current-buffer)))
-	(new-buf (generate-new-buffer (buffer-name))))
+narrowing.
+
+When optional argument BUFFER is non-nil, copy into BUFFER.
+
+Optional arguments DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, and
+DROP-LOCALS are passed to `org-export--generate-copy-script'."
+  (let ((copy-buffer-fun (org-export--generate-copy-script
+                          (current-buffer)
+                          'do-not-check-unreadable
+                          drop-visibility
+                          drop-narrowing
+                          drop-contents
+                          drop-locals))
+	(new-buf (or buffer (generate-new-buffer (buffer-name)))))
     (with-current-buffer new-buf
       (funcall copy-buffer-fun)
       (set-buffer-modified-p nil))
@@ -2573,55 +2586,73 @@ when BODY is applied."
 		       (restore-buffer-modified-p nil))
 		     (kill-buffer ,buf-copy)))))))
 
-(defun org-export--generate-copy-script (buffer)
+(defun org-export--generate-copy-script (buffer
+                                         &optional
+                                         copy-unreadable
+                                         drop-visibility
+                                         drop-narrowing
+                                         drop-contents
+                                         drop-locals)
   "Generate a function duplicating BUFFER.
 
 The copy will preserve local variables, visibility, contents and
 narrowing of the original buffer.  If a region was active in
 BUFFER, contents will be narrowed to that region instead.
 
+When optional argument COPY-UNREADABLE is non-nil, do not ensure that
+all the copied local variables will be readable in another Emacs
+session.
+
+When optional arguments DROP-VISIBILITY, DROP-NARROWING,
+DROP-CONTENTS, or DROP-LOCALS are non-nil, do not preserve visibility,
+narrowing, contents, or local variables correspondingly.
+
 The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
 
 The function assumes BUFFER's major mode is `org-mode'."
   (with-current-buffer buffer
-    (let ((str (org-with-wide-buffer (buffer-string)))
+    (let ((str (unless drop-contents (org-with-wide-buffer (buffer-string))))
           (narrowing
-           (if (org-region-active-p)
-	       (list (region-beginning) (region-end))
-	     (list (point-min) (point-max))))
+           (unless drop-narrowing
+             (if (org-region-active-p)
+	         (list (region-beginning) (region-end))
+	       (list (point-min) (point-max)))))
 	  (pos (point))
 	  (varvals
-	   (let ((bound-variables (org-export--list-bound-variables))
-		 (varvals nil))
-	     (dolist (entry (buffer-local-variables (buffer-base-buffer)))
-	       (when (consp entry)
-		 (let ((var (car entry))
-		       (val (cdr entry)))
-		   (and (not (memq var org-export-ignored-local-variables))
-			(or (memq var
-				  '(default-directory
-				     buffer-file-name
-				     buffer-file-coding-system
-                                     ;; Needed to preserve folding state
-                                     char-property-alias-alist))
-			    (assq var bound-variables)
-			    (string-match "^\\(org-\\|orgtbl-\\)"
-					  (symbol-name var)))
-			;; Skip unreadable values, as they cannot be
-			;; sent to external process.
-			(or (not val) (ignore-errors (read (format "%S" val))))
-			(push (cons var val) varvals)))))
-             varvals))
+           (unless drop-locals
+	     (let ((bound-variables (org-export--list-bound-variables))
+		   (varvals nil))
+	       (dolist (entry (buffer-local-variables (buffer-base-buffer)))
+	         (when (consp entry)
+		   (let ((var (car entry))
+		         (val (cdr entry)))
+		     (and (not (memq var org-export-ignored-local-variables))
+			  (or (memq var
+				    '(default-directory
+				       buffer-file-name
+				       buffer-file-coding-system
+                                       ;; Needed to preserve folding state
+                                       char-property-alias-alist))
+			      (assq var bound-variables)
+			      (string-match "^\\(org-\\|orgtbl-\\)"
+					    (symbol-name var)))
+			  ;; Skip unreadable values, as they cannot be
+			  ;; sent to external process.
+			  (or copy-unreadable (not val)
+                              (ignore-errors (read (format "%S" val))))
+			  (push (cons var val) varvals)))))
+               varvals)))
 	  (ols
-	   (let (ov-set)
-	     (dolist (ov (overlays-in (point-min) (point-max)))
-	       (let ((invis-prop (overlay-get ov 'invisible)))
-		 (when invis-prop
-		   (push (list (overlay-start ov) (overlay-end ov)
-			       invis-prop)
-			 ov-set))))
-	     ov-set)))
+           (unless drop-visibility
+	     (let (ov-set)
+	       (dolist (ov (overlays-in (point-min) (point-max)))
+	         (let ((invis-prop (overlay-get ov 'invisible)))
+		   (when invis-prop
+		     (push (list (overlay-start ov) (overlay-end ov)
+			         invis-prop)
+			   ov-set))))
+	       ov-set))))
       (lambda ()
 	(let ((inhibit-modification-hooks t))
           ;; Never write the buffer copy to disk, despite
@@ -2629,19 +2660,21 @@ The function assumes BUFFER's major mode is `org-mode'."
           (set 'write-contents-functions (list #'always))
 	  ;; Set major mode. Ignore `org-mode-hook' and other hooks as
 	  ;; they have been run already in BUFFER.
-          (delay-mode-hooks
-            (let ((org-inhibit-startup t)) (org-mode)))
+          (unless (eq major-mode 'org-mode)
+            (delay-mode-hooks
+              (let ((org-inhibit-startup t)) (org-mode))))
 	  ;; Copy specific buffer local variables and variables set
 	  ;; through BIND keywords.
 	  (pcase-dolist (`(,var . ,val) varvals)
 	    (set (make-local-variable var) val))
-	  ;; Whole buffer contents.
-	  (insert str)
+	  ;; Whole buffer contents when requested.
+          (when str (erase-buffer) (insert str))
           ;; Make org-element-cache not complain about changed buffer
           ;; state.
           (org-element-cache-reset)
 	  ;; Narrowing.
-	  (apply #'narrow-to-region narrowing)
+          (when narrowing
+	    (apply #'narrow-to-region narrowing))
 	  ;; Current position of point.
 	  (goto-char pos)
 	  ;; Overlays with invisible property.
