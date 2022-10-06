@@ -425,6 +425,12 @@ The new variable name is =org-plantuml-args=.  It now applies to both
 jar PlantUML file and executable.
 
 ** Miscellaneous
+*** Post-processing code blocks can return an empty list
+
+When the result of a regular code block is nil, then that was already
+treated as an empty list.  Now that is also the case for code blocks
+that post-process the result of another block.
+
 *** Styles are customizable in ~biblatex~ citation processor
 
 It is now possible to add new styles or modify old ones in ~biblatex~

@@ -136,6 +136,30 @@ should still return the link."
     (let ((info (org-babel-get-src-block-info)))
       (should (string= "no" (cdr (assq :tangle (nth 2 info))))))))
 
+(ert-deftest test-ob/post-header-arguments ()
+  "When the result of a post-processing source block is an empty
+list, then it should be treated as such; not as the symbol nil."
+  (should
+   (let ((default-directory temporary-file-directory))
+     (org-test-with-temp-text
+         "
+#+name: addheader
+#+header: :var rows=\"\"
+#+begin_src elisp :hlines yes
+  '()
+#+end_src
+#+header: :post addheader(*this*)
+#+<point>begin_src emacs-lisp :results table
+#+end_src
+#+RESULTS:
+: nil"
+       (org-babel-execute-src-block)
+       (goto-char (1- (point-max)))
+       (equal (buffer-substring-no-properties
+               (line-beginning-position)
+               (line-end-position))
+              "#+RESULTS:")))))
+
 (ert-deftest test-ob/elisp-in-header-arguments ()
   "Test execution of elisp forms in header arguments."
   (org-test-with-temp-text-in-file "

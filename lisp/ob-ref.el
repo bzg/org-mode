@@ -199,7 +199,7 @@ Emacs Lisp representation of the value of the variable."
 				(org-babel-execute-src-block nil info params))))
 		     (error "Reference `%s' not found in this buffer" ref))))
 	     (cond
-	      ((symbolp result) (format "%S" result))
+	      ((and result (symbolp result)) (format "%S" result))
 	      ((and index (listp result))
 	       (org-babel-ref-index-list index result))
 	      (t result)))))))))
