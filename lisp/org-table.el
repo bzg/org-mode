@@ -1355,6 +1355,9 @@ However, when FORCE is non-nil, create new columns if necessary."
   "Insert a new column into the table."
   (interactive)
   (unless (org-at-table-p) (user-error "Not at a table"))
+  (when (eobp) (save-excursion (insert "\n")))
+  (unless (string-match-p "|[ \t]*$" (org-current-line-string))
+    (org-table-align))
   (org-table-find-dataline)
   (let ((col (max 1 (org-table-current-column)))
 	(beg (org-table-begin))
@@ -1649,6 +1652,9 @@ Swap with anything in target cell."
 With prefix ARG, insert below the current line."
   (interactive "P")
   (unless (org-at-table-p) (user-error "Not at a table"))
+  (when (eobp) (save-excursion (insert "\n")))
+  (unless (string-match-p "|[ \t]*$" (org-current-line-string))
+    (org-table-align))
   (org-table-with-shrunk-columns
    (let* ((line (buffer-substring (line-beginning-position) (line-end-position)))
 	  (new (org-table-clean-line line)))
