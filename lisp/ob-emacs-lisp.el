@@ -58,7 +58,7 @@ by `org-edit-src-code'.")
       (format "(let (%s)\n%s\n)"
 	      (mapconcat
 	       (lambda (var)
-		 (format "%S" (print `(,(car var) ',(cdr var)))))
+		 (format "%S" `(,(car var) ',(cdr var))))
 	       vars "\n      ")
 	      body))))
 
