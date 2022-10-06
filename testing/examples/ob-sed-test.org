@@ -30,6 +30,9 @@
   :ID:       E3C6A8BA-39FF-4840-BA8E-90D5C4365AB1
   :END:
 
-  #+BEGIN_SRC sed :in-file test2.txt :cmd-line "-i"
+  /Note:/ Use =-i.backup= instead of just =-i= because the BSD =sed=,
+  unlike the GNU =sed=, requires =-i <extension>=.
+
+  #+BEGIN_SRC sed :in-file test2.txt :cmd-line "-i.backup"
     s/test/tested again/
   #+END_SRC
