@@ -86,7 +86,7 @@
 (defvar org-table-hlines)
 
 (defvar org-capture-clock-was-started nil
-  "Internal flag, noting if the clock was started.")
+  "Internal flag, keeping marker to the started clock.")
 
 (defvar org-capture-last-stored-marker (make-marker)
   "Marker pointing to the entry most recently stored with `org-capture'.")
@@ -719,7 +719,8 @@ of the day at point (if any) or the current HH:MM time."
 		  (org-capture-put :interrupted-clock
 				   (copy-marker org-clock-marker)))
 		(org-clock-in)
-		(setq-local org-capture-clock-was-started t))
+		(setq-local org-capture-clock-was-started
+                            (copy-marker org-clock-marker)))
 	    (error "Could not start the clock in this capture buffer")))
 	(when (org-capture-get :immediate-finish)
 	  (org-capture-finalize))))))))
@@ -760,10 +761,7 @@ captured item after finalizing."
 
   ;; Did we start the clock in this capture buffer?
   (when (and org-capture-clock-was-started
-	     org-clock-marker
-	     (eq (marker-buffer org-clock-marker) (buffer-base-buffer))
-	     (>= org-clock-marker (point-min))
-	     (< org-clock-marker (point-max)))
+	     (equal org-clock-marker org-capture-clock-was-started))
     ;; Looks like the clock we started is still running.
     (if org-capture-clock-keep
 	;; User may have completed clocked heading from the template.
