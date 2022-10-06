@@ -21688,7 +21688,7 @@ Call {{{var(FUNC)}}} at each headline selected by {{{var(MATCH)}}} in
 
 {{{var(FUNC)}}} is a function or a Lisp form.  With point positioned
 at the beginning of the headline, call the function without arguments.
-Org returns an alist of return values of calls to the function.
+Org returns a list of return values of calls to the function.
 
 To avoid preserving point, Org wraps the call to {{{var(FUNC)}}} in
 ~save-excursion~ form.  After evaluation, Org moves point to the end
