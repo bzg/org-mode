@@ -2624,6 +2624,9 @@ The function assumes BUFFER's major mode is `org-mode'."
 	     ov-set)))
       (lambda ()
 	(let ((inhibit-modification-hooks t))
+          ;; Never write the buffer copy to disk, despite
+          ;; `buffer-file-name' not being nil.
+          (set 'write-contents-functions (list #'always))
 	  ;; Set major mode. Ignore `org-mode-hook' and other hooks as
 	  ;; they have been run already in BUFFER.
           (delay-mode-hooks
