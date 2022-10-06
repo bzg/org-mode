@@ -55,7 +55,7 @@
 (defun org-babel-execute:awk (body params)
   "Execute a block of Awk code with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (message "executing Awk source code block")
+  (message "Executing Awk source code block")
   (let* ((result-params (cdr (assq :result-params params)))
          (cmd-line (cdr (assq :cmd-line params)))
          (in-file (cdr (assq :in-file params)))

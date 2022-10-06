@@ -791,7 +791,7 @@ guess will be made."
 		 result exec-start-time)
 	    (unless (fboundp cmd)
 	      (error "No org-babel-execute function for %s!" lang))
-	    (message "executing %s %s %s..."
+	    (message "Executing %s %s %s..."
 		     (capitalize lang)
                      (pcase executor-type
                        ('src-block "code block")

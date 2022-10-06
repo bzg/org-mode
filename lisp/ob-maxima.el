@@ -76,7 +76,7 @@
 (defun org-babel-execute:maxima (body params)
   "Execute a block of Maxima entries with org-babel.
 This function is called by `org-babel-execute-src-block'."
-  (message "executing Maxima source code block")
+  (message "Executing Maxima source code block")
   (let ((result-params (split-string (or (cdr (assq :results params)) "")))
 	(result
 	 (let* ((cmdline (or (cdr (assq :cmdline params)) ""))
