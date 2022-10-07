@@ -278,10 +278,23 @@ list can be:
 
 - `:lang-name' the actual name of the language.")
 
+(defconst org-latex-line-break-safe "\\\\\\relax"
+  "Linebreak protecting the following [...].
 
-(defconst org-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
+Without \"\\relax\" it would be interpreted as an optional argument to
+the \\\\.
+
+This constant, for example, makes the below code not err:
+
+\\begin{tabular}{c|c}
+    [t] & s\\\\\\relax
+    [I] & A\\\\\\relax
+    [m] & kg
+\\end{tabular}")
+
+(defconst org-latex-table-matrix-macros `(("bordermatrix" . "\\cr")
 					  ("qbordermatrix" . "\\cr")
-					  ("kbordermatrix" . "\\\\"))
+					  ("kbordermatrix" . ,org-latex-line-break-safe))
   "Alist between matrix macros and their row ending.")
 
 (defconst org-latex-math-environments-re
@@ -2062,7 +2075,7 @@ information."
 	   (concat (org-timestamp-translate (org-element-property :value clock))
 		   (let ((time (org-element-property :duration clock)))
 		     (and time (format " (%s)" time)))))
-   "\\\\"))
+   org-latex-line-break-safe))
 
 
 ;;;; Code
@@ -2659,7 +2672,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-latex-line-break (_line-break _contents _info)
   "Transcode a LINE-BREAK object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  "\\\\\n")
+  (concat org-latex-line-break-safe "\n"))
 
 
 ;;;; Link
@@ -3005,7 +3018,9 @@ contextual information."
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
       (setq output (replace-regexp-in-string
-		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n" output nil t)))
+		    "\\(?:[ \t]*\\\\\\\\\\)?[ \t]*\n"
+                    (concat org-latex-line-break-safe "\n")
+                    output nil t)))
     ;; Return value.
     output))
 
@@ -3041,7 +3056,7 @@ information."
 		(format (plist-get info :latex-active-timestamp-format)
 			(org-timestamp-translate scheduled)))))))
     " ")
-   "\\\\"))
+   org-latex-line-break-safe))
 
 
 ;;;; Property Drawer
@@ -3821,11 +3836,11 @@ This function assumes TABLE has `org' as its `:type' property and
 		(format "\\begin{%s}%s{%s}\n" table-env width alignment)
 		(and above?
 		     (org-string-nw-p caption)
-		     (concat caption "\\\\\n"))
+		     (concat caption org-latex-line-break-safe "\n"))
 		contents
 		(and (not above?)
 		     (org-string-nw-p caption)
-		     (concat caption "\\\\\n"))
+		     (concat caption org-latex-line-break-safe "\n"))
 		(format "\\end{%s}" table-env)
 		(and fontsize "}"))))
      (t
@@ -3910,7 +3925,7 @@ This function assumes TABLE has `org' as its `:type' property and
 		 (lambda (cell)
 		   (substring (org-element-interpret-data cell) 0 -1))
 		 (org-element-map row 'table-cell #'identity info) "&")
-		(or (cdr (assoc env org-latex-table-matrix-macros)) "\\\\")
+		(or (cdr (assoc env org-latex-table-matrix-macros)) org-latex-line-break-safe)
 		"\n")))
 	   (org-element-map table 'table-row #'identity info) "")))
     (concat
@@ -3982,7 +3997,7 @@ a communication channel."
        ;; hline was specifically marked.
        (and booktabsp (not (org-export-get-previous-element table-row info))
 	    "\\toprule\n")
-       contents "\\\\\n"
+       contents org-latex-line-break-safe "\n"
        (cond
 	;; Special case for long tables.  Define header and footers.
 	((and longtablep (org-export-table-row-ends-header-p table-row info))
@@ -3990,9 +4005,9 @@ a communication channel."
 			      (org-export-get-parent-table table-row) info))))
 	   (format "%s
 \\endfirsthead
-\\multicolumn{%d}{l}{%s} \\\\
+\\multicolumn{%d}{l}{%s} \\\\\\relax
 %s
-%s \\\\\n
+%s \\\\\\relax\n
 %s
 \\endhead
 %s\\multicolumn{%d}{r}{%s} \\\\
@@ -4092,8 +4107,12 @@ contextual information."
 	       (replace-regexp-in-string
 	        "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
 	        (replace-regexp-in-string
-	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n" "\\\\\n"
-	         contents nil t) nil t) nil t) linreset)
+	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n"
+                 (concat org-latex-line-break-safe "\n")
+	         contents nil t)
+                nil t)
+               nil t)
+              linreset)
       info)
      ;; Insert footnote definitions, if any, after the environment, so
      ;; the special formatting above is not applied to them.
