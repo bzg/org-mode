@@ -2671,7 +2671,7 @@ The function assumes BUFFER's major mode is `org-mode'."
           (when str (erase-buffer) (insert str))
           ;; Make org-element-cache not complain about changed buffer
           ;; state.
-          (org-element-cache-reset)
+          (org-element-cache-reset nil 'no-persistence)
 	  ;; Narrowing.
           (when narrowing
 	    (apply #'narrow-to-region narrowing))

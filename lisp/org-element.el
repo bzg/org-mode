@@ -7238,16 +7238,18 @@ Each element indicates the latest `org-element--cache-change-tic' when
 change did not contain gaps.")
 
 ;;;###autoload
-(defun org-element-cache-reset (&optional all)
+(defun org-element-cache-reset (&optional all no-persistance)
   "Reset cache in current buffer.
 When optional argument ALL is non-nil, reset cache in all Org
-buffers."
+buffers.
+When optional argument NO-PERSISTANCE is non-nil, do not try to update
+the cache persistence in the buffer."
   (interactive "P")
   (dolist (buffer (if all (buffer-list) (list (current-buffer))))
     (with-current-buffer (or (buffer-base-buffer buffer) buffer)
       (when (and org-element-use-cache (derived-mode-p 'org-mode))
         ;; Only persist cache in file buffers.
-        (when (buffer-file-name)
+        (when (and (buffer-file-name) (not no-persistance))
           (when (not org-element-cache-persistent)
             (org-persist-unregister 'org-element--headline-cache (current-buffer))
             (org-persist-unregister 'org-element--cache (current-buffer)))

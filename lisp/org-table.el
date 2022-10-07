@@ -59,7 +59,7 @@
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-(declare-function org-element-cache-reset "org-element" (&optional all))
+(declare-function org-element-cache-reset "org-element" (&optional all no-persistence))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
 (declare-function org-export-create-backend "ox" (&rest rest) t)
 (declare-function org-export-data-with-backend "ox" (data backend info))
