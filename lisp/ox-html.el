@@ -2887,6 +2887,14 @@ INFO is a plist containing export properties."
       (insert latex-frag)
       (org-format-latex cache-relpath nil nil cache-dir nil
 		        "Creating LaTeX Image..." nil processing-type)
+      ;; Present save dialogue to be shown for this buffer.  We need
+      ;; to explicitly disable the dialogue because
+      ;; `org-export-copy-buffer' copies `buffer-file-name' local
+      ;; variable thus making Emacs think that the buffer copy is
+      ;; associated with file.  Note that despite `buffer-file-name',
+      ;; `org-export-copy-buffer' arranges saving to not perform
+      ;; actual writing onto the disk.
+      (restore-buffer-modified-p nil)
       (buffer-string))))
 
 (defun org-html--wrap-latex-environment (contents _ &optional caption label)
