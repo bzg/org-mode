@@ -22406,7 +22406,16 @@ properties.  Please rewrite your date/week-tree targets using
 
 [fn:30] A date tree is an outline structure with years on the highest
 level, months or ISO weeks as sublevels and then dates on the lowest
-level.  Tags are allowed in the tree structure.
+level.
+
+#+begin_example
+,* 2022
+,** 2022-10 October
+,*** 2022-10-07 Friday
+,*** 2022-10-08 Saturday
+#+end_example
+
+Tags are allowed in the tree structure.
 
 [fn:31] This is always the other, not the user.  See the variable
 ~org-link-from-user-regexp~.
