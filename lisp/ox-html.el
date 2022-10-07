@@ -1185,8 +1185,8 @@ path          The path to MathJax version 3 or later.
 scale         Scaling with HTML-CSS, MathML and SVG output engines.
 align         How to align display math: left, center, or right.
 font          The font to use with HTML-CSS and SVG output.  Needs
-              MathJax version 3+.  MathJax 3 provides 11 fonts:
-              \"mathjax-modern\"   Latin-Modern font, default in MathJax 3+
+              MathJax version 4+.  MathJax 4 provides 11 fonts:
+              \"mathjax-modern\"   Latin-Modern font, default in MathJax 4+
               \"mathjax-asana\"    Asana-Math font
               \"mathjax-bonum\"    Gyre Bonum font
               \"mathjax-dejavu\"   Gyre DejaVu font
@@ -1198,7 +1198,7 @@ font          The font to use with HTML-CSS and SVG output.  Needs
               \"mathjax-euler\"    Neo Euler font that extends Latin-Modern
               \"mathjax-tex\"      The original MathJax TeX font
 overflow      How to break displayed equations when too large. Needs
-              MathJax 3 or newer.  Supported options include
+              MathJax 4 or newer.  Supported options include
               \"overflow\", \"scale\", \"scroll\", \"truncate\",
               \"linebreak\", and \"elide\".
 linebreaks    Let MathJax perform automatic linebreaks.  Valid values
@@ -1238,7 +1238,7 @@ The legacy \"linebreaks\" option, with the value \"true\" or
 The legacy values of the \"font\" option, namely \"TeX\",
 \"STIX-Web\", \"Asana-Math\", \"Neo-Euler\", \"Gyre-Pagella\",
 \"Gyre-Termes\", \"Latin-Modern\", become converted to the
-corresponding MathJax 3+ font names.
+corresponding MathJax 4+ font names.
 
 Legacy options and values always take precedence.
 "

@@ -148,7 +148,7 @@ which now /must/ point to a file containing MathJax version 3 or
 later.  The new Org does /not/ work with the legacy MathJax 2.
 
 Further, if you need to use a non-default ~font~ or ~linebreaks~ (now
-~overflow~), then the ~path~ must point to MathJax 3 or later.
+~overflow~), then the ~path~ must point to MathJax 4 or later.
 
 See the updated ~org-html-mathjax-options~ for more details.
 
