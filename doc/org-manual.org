@@ -7592,7 +7592,6 @@ You may also define a global key for capturing new material (see
 - {{{kbd(M-x org-capture)}}} (~org-capture~) ::
 
   #+findex: org-capture
-  #+cindex: date tree
   Display the capture templates menu.  If you have templates defined
   (see [[*Capture templates]]), it offers these templates for selection or
   use a new Org outline node as the default template.  It inserts the
@@ -7771,6 +7770,7 @@ Now lets look at the elements of a template definition.  Each entry in
 
   #+vindex: org-default-notes-file
   #+vindex: org-directory
+  #+cindex: date tree
   Specification of where the captured item should be placed.  In Org
   files, targets usually define a node.  Entries will become children
   of this node.  Other types will be added to the table or list in the
