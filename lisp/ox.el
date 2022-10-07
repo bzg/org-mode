@@ -2551,6 +2551,16 @@ Return the updated communication channel."
 The copy preserves Org buffer-local variables, visibility and
 narrowing.
 
+IMPORTANT: The buffer copy may also have `buffer-file-name' copied.
+To prevent Emacs overwriting the original buffer file,
+`write-contents-functions' is set to (always).  Do not alter this
+variable and do not do anything that might alter it (like calling a
+major mode) to prevent data corruption.  Also, do note that Emacs may
+jump into the created buffer if the original file buffer is closed and
+then re-opened.  Making edits in the buffer copy may also trigger
+Emacs save dialogue.  Prefer using `org-export-with-buffer-copy' macro
+when possible.
+
 When optional argument BUFFER is non-nil, copy into BUFFER.
 
 Optional arguments DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, and
@@ -2630,6 +2640,10 @@ The function assumes BUFFER's major mode is `org-mode'."
 		     (and (not (memq var org-export-ignored-local-variables))
 			  (or (memq var
 				    '(default-directory
+                                       ;; Required to convert file
+                                       ;; links in the #+INCLUDEd
+                                       ;; files.  See
+                                       ;; `org-export--prepare-file-contents'.
 				       buffer-file-name
 				       buffer-file-coding-system
                                        ;; Needed to preserve folding state
