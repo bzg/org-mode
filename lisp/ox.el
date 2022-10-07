@@ -2655,9 +2655,6 @@ The function assumes BUFFER's major mode is `org-mode'."
 	       ov-set))))
       (lambda ()
 	(let ((inhibit-modification-hooks t))
-          ;; Never write the buffer copy to disk, despite
-          ;; `buffer-file-name' not being nil.
-          (set 'write-contents-functions (list #'always))
 	  ;; Set major mode. Ignore `org-mode-hook' and other hooks as
 	  ;; they have been run already in BUFFER.
           (unless (eq major-mode 'org-mode)
@@ -2679,7 +2676,10 @@ The function assumes BUFFER's major mode is `org-mode'."
 	  (goto-char pos)
 	  ;; Overlays with invisible property.
 	  (pcase-dolist (`(,start ,end ,invis) ols)
-	    (overlay-put (make-overlay start end) 'invisible invis)))))))
+	    (overlay-put (make-overlay start end) 'invisible invis))
+          ;; Never write the buffer copy to disk, despite
+          ;; `buffer-file-name' not being nil.
+          (setq write-contents-functions (list #'always)))))))
 
 (defun org-export--delete-comment-trees ()
   "Delete commented trees and commented inlinetasks in the buffer.
