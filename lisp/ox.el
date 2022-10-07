@@ -7123,8 +7123,20 @@ back to standard interface."
 	(delete-other-windows)
 	(org-switch-to-buffer-other-window
 	 (get-buffer-create "*Org Export Dispatcher*"))
-	(setq cursor-type nil
-	      header-line-format "Use SPC, DEL, C-n or C-p to navigate.")
+        (setq cursor-type nil)
+        (setq header-line-format
+              (let ((propertize-help-key
+                     (lambda (key)
+                       ;; Add `face' *and* `font-lock-face' to "work
+                       ;; reliably in any buffer", per a comment in
+                       ;; `help--key-description-fontified'.
+                       (propertize key
+                                   'font-lock-face 'help-key-binding
+                                   'face 'help-key-binding))))
+                (apply 'format
+                       (cons "Use %s, %s, %s, or %s to navigate."
+                             (mapcar propertize-help-key
+                                     (list "SPC" "DEL" "C-n" "C-p"))))))
 	;; Make sure that invisible cursor will not highlight square
 	;; brackets.
 	(set-syntax-table (copy-syntax-table))
