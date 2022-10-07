@@ -35,7 +35,10 @@
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-escape-code-in-string "org-src" (s))
-(declare-function org-export-copy-buffer "ox" ())
+(declare-function org-export-copy-buffer "ox"
+                  (&optional buffer drop-visibility
+                             drop-narrowing drop-contents
+                             drop-locals))
 (declare-function org-in-commented-heading-p "org" (&optional no-inheritance element))
 (declare-function org-in-archived-heading-p "org" (&optional no-inheritance element))
 
