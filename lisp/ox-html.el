@@ -1167,72 +1167,116 @@ See `format-time-string' for more information on its components."
 ;;;; Template :: Mathjax
 
 (defcustom org-html-mathjax-options
-  '((path "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML" )
-    (scale "100")
+  '((path "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js")
+    (scale 1.0)
     (align "center")
-    (font "TeX")
-    (linebreaks "false")
-    (autonumber "AMS")
+    (font "mathjax-modern")
+    (overflow "overflow")
+    (tags "ams")
     (indent "0em")
     (multlinewidth "85%")
     (tagindent ".8em")
     (tagside "right"))
   "Options for MathJax setup.
 
-Alist of the following elements.  All values are strings.
+Alist of the following elements.
 
-path          The path to MathJax.
+path          The path to MathJax version 3 or later.
 scale         Scaling with HTML-CSS, MathML and SVG output engines.
 align         How to align display math: left, center, or right.
-font          The font to use with HTML-CSS and SVG output.  As of MathJax 2.5
-              the following values are understood: \"TeX\", \"STIX-Web\",
-              \"Asana-Math\", \"Neo-Euler\", \"Gyre-Pagella\",
-              \"Gyre-Termes\", and \"Latin-Modern\".
+font          The font to use with HTML-CSS and SVG output.  Needs
+              MathJax version 3+.  MathJax 3 provides 11 fonts:
+              \"mathjax-modern\"   Latin-Modern font, default in MathJax 3+
+              \"mathjax-asana\"    Asana-Math font
+              \"mathjax-bonum\"    Gyre Bonum font
+              \"mathjax-dejavu\"   Gyre DejaVu font
+              \"mathjax-pagella\"  Gyre Pagella font
+              \"mathjax-schola\"   Gyre Schola font
+              \"mathjax-termes\"   Gyre Termes font
+              \"mathjax-stix2\"    STIX2 font
+              \"mathjax-fira\"     Fira and Fira-Math fonts
+              \"mathjax-euler\"    Neo Euler font that extends Latin-Modern
+              \"mathjax-tex\"      The original MathJax TeX font
+overflow      How to break displayed equations when too large. Needs
+              MathJax 3 or newer.  Supported options include
+              \"overflow\", \"scale\", \"scroll\", \"truncate\",
+              \"linebreak\", and \"elide\".
 linebreaks    Let MathJax perform automatic linebreaks.  Valid values
               are \"true\" and \"false\".
 indent        If align is not center, how far from the left/right side?  For
               example, \"1em\".
 multlinewidth The width of the multline environment.
-autonumber    How to number equations.  Valid values are \"none\",
-              \"all\" and \"AMS\".
+tags          How to number equations.  Valid values are \"none\",
+              \"all\" and \"ams\".
 tagindent     The amount tags are indented.
 tagside       Which side to show tags/labels on.  Valid values are
               \"left\" and \"right\"
 
-You can also customize this for each buffer, using something like
+You can also customize this for some buffer, using something like
 
-#+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
+#+HTML_MATHJAX: align: left indent: 5em tagside: left
 
 For further information about MathJax options, see the MathJax documentation:
 
-  https://docs.mathjax.org/"
+  https://docs.mathjax.org/
+
+To maintain compatibility with pre-9.6 Org that used MathJax 2,
+the following conversions take place.
+
+The legacy \"autonumber\" option, with the value \"AMS\",
+\"None\", or \"All\", becomes the \"tags\" option set to the
+value \"ams\", \"none\", or \"all\", respectively.
+
+Any legacy values of the \"scale\" option, specified as
+percentage strings, become converted to unit-interval numbers.
+For example, a legacy scale of \"150\" becomes a scale of 1.5.
+
+The legacy \"linebreaks\" option, with the value \"true\" or
+\"false\", becomes the \"overflow\" option set to the value
+\"linebreak\" or \"overflow\", respectively.
+
+The legacy values of the \"font\" option, namely \"TeX\",
+\"STIX-Web\", \"Asana-Math\", \"Neo-Euler\", \"Gyre-Pagella\",
+\"Gyre-Termes\", \"Latin-Modern\", become converted to the
+corresponding MathJax 3+ font names.
+
+Legacy options and values always take precedence.
+"
   :group 'org-export-html
-  :package-version '(Org . "8.3")
+  :package-version '(Org . "9.6")
   :type '(list :greedy t
 	       (list :tag "path   (the path from where to load MathJax.js)"
 		     (const :format "       " path) (string))
 	       (list :tag "scale  (scaling for the displayed math)"
-		     (const :format "       " scale) (string))
+		     (const :format "   " scale) (float))
 	       (list :tag "align  (alignment of displayed equations)"
 		     (const :format "       " align) (string))
-	       (list :tag "font (used to display math)"
-		     (const :format "            " font)
-		     (choice (const "TeX")
-			     (const "STIX-Web")
-			     (const "Asana-Math")
-			     (const "Neo-Euler")
-			     (const "Gyre-Pagella")
-			     (const "Gyre-Termes")
-			     (const "Latin-Modern")))
-	       (list :tag "linebreaks (automatic line-breaking)"
-		     (const :format "      " linebreaks)
-		     (choice (const "true")
-			     (const "false")))
-	       (list :tag "autonumber (when should equations be numbered)"
-		     (const :format "      " autonumber)
-		     (choice (const "AMS")
-			     (const "None")
-			     (const "All")))
+               (list :tag "font (used to typeset math)"
+		     (const :format "               " font)
+                     (choice (const "mathjax-modern")
+                             (const "mathjax-asana")
+                             (const "mathjax-bonum")
+                             (const "mathjax-dejavu")
+                             (const "mathjax-pagella")
+                             (const "mathjax-schola")
+                             (const "mathjax-termes")
+                             (const "mathjax-stix2")
+                             (const "mathjax-fira")
+                             (const "mathjax-euler")
+                             (const "mathjax-tex")))
+               (list :tag "overflow (how to break displayed math)"
+		     (const :format "         " overflow)
+                     (choice (const "overflow")
+                             (const "scale")
+                             (const "scroll")
+                             (const "truncate")
+                             (const "linebreak")
+                             (const "elide")))
+	       (list :tag "tags (whether equations are numbered and how)"
+		     (const :format "    " tags)
+		     (choice (const "ams")
+			     (const "none")
+			     (const "all")))
 	       (list :tag "indent (indentation with left or right alignment)"
 		     (const :format "       " indent) (string))
 	       (list :tag "multlinewidth (width to use for the multline environment)"
@@ -1245,27 +1289,38 @@ For further information about MathJax options, see the MathJax documentation:
 			     (const "right")))))
 
 (defcustom org-html-mathjax-template
-  "<script type=\"text/x-mathjax-config\">
-    MathJax.Hub.Config({
-        displayAlign: \"%ALIGN\",
-        displayIndent: \"%INDENT\",
-
-        \"HTML-CSS\": { scale: %SCALE,
-                        linebreaks: { automatic: \"%LINEBREAKS\" },
-                        webFont: \"%FONT\"
-                       },
-        SVG: {scale: %SCALE,
-              linebreaks: { automatic: \"%LINEBREAKS\" },
-              font: \"%FONT\"},
-        NativeMML: {scale: %SCALE},
-        TeX: { equationNumbers: {autoNumber: \"%AUTONUMBER\"},
-               MultLineWidth: \"%MULTLINEWIDTH\",
-               TagSide: \"%TAGSIDE\",
-               TagIndent: \"%TAGINDENT\"
-             }
-});
+  "<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '%MULTLINEWIDTH'
+      },
+      tags: '%TAGS',
+      tagSide: '%TAGSIDE',
+      tagIndent: '%TAGINDENT'
+    },
+    chtml: {
+      scale: %SCALE,
+      displayAlign: '%ALIGN',
+      displayIndent: '%INDENT'
+    },
+    svg: {
+      scale: %SCALE,
+      displayAlign: '%ALIGN',
+      displayIndent: '%INDENT'
+    },
+    output: {
+      font: '%FONT',
+      displayOverflow: '%OVERFLOW'
+    }
+  };
 </script>
-<script src=\"%PATH\"></script>"
+
+<script
+  id=\"MathJax-script\"
+  async
+  src=\"%PATH\">
+</script>"
   "The MathJax template.  See also `org-html-mathjax-options'."
   :group 'org-export-html
   :type 'string)
@@ -1948,21 +2003,85 @@ INFO is a plist used as a communication channel."
   "Insert the user setup into the mathjax template.
 INFO is a plist used as a communication channel."
   (when (and (memq (plist-get info :with-latex) '(mathjax t))
-	     (org-element-map (plist-get info :parse-tree)
-		 '(latex-fragment latex-environment) #'identity info t nil t))
+             (org-element-map (plist-get info :parse-tree)
+                 '(latex-fragment latex-environment) #'identity info t nil t))
     (let ((template (plist-get info :html-mathjax-template))
-	  (options (plist-get info :html-mathjax-options))
-	  (in-buffer (or (plist-get info :html-mathjax) "")))
+          (options (let ((options (plist-get info :html-mathjax-options)))
+                     ;; If the user customized some legacy option, set
+                     ;; the corresponding new option to nil, so that
+                     ;; the legacy user choice overrides the default.
+                     ;; Otherwise, the user did not set the legacy
+                     ;; option, in which case still set the legacy
+                     ;; option but to no value, so that the code can
+                     ;; find its in-buffer value, if set.
+                     `((,(if (plist-member options 'autonumber)
+                             'tags 'autonumber)
+                        nil)
+                       (,(if (plist-member options 'linebreaks)
+                             'overflow 'linebreaks)
+                        nil)
+                       ,@options)))
+          (in-buffer (or (plist-get info :html-mathjax) "")))
       (dolist (e options (org-element-normalize-string template))
-	(let ((name (car e))
-	      (val (nth 1 e)))
-	  (when (string-match (concat "\\<" (symbol-name name) ":") in-buffer)
-	    (setq val
-		  (car (read-from-string (substring in-buffer (match-end 0))))))
-	  (unless (stringp val) (setq val (format "%s" val)))
-	  (while (string-match (concat "%" (upcase (symbol-name name)))
-			       template)
-	    (setq template (replace-match val t t template))))))))
+        (let ((symbol (car e))
+              (value (nth 1 e)))
+          (when (string-match (concat "\\<" (symbol-name symbol) ":")
+                              in-buffer)
+            (setq value
+                  (car (split-string (substring in-buffer
+                                                (match-end 0))))))
+          (when value
+            (pcase symbol
+              (`font
+               (when-let
+                   ((value-new
+                     (pcase value
+                       ("TeX" "mathjax-tex")
+                       ("STIX-Web" "mathjax-stix2")
+                       ("Asana-Math" "mathjax-asana")
+                       ("Neo-Euler" "mathjax-euler")
+                       ("Gyre-Pagella" "mathjax-pagella")
+                       ("Gyre-Termes" "mathjax-termes")
+                       ("Latin-Modern" "mathjax-modern"))))
+                 (setq value value-new)))
+              (`linebreaks
+               (org-display-warning
+                "Converting legacy MathJax option: linebreaks")
+               (setq symbol 'overflow
+                     value (if (string= value "true")
+                               "linebreak"
+                             "overflow")))
+              (`scale
+               (when (stringp value)
+                 (let ((value-maybe (string-to-number value)))
+                   (setq value
+                         (if (= value-maybe 0)
+                             (progn
+                               (org-display-warning
+                                (format "Non-numerical MathJax scale: %s"
+                                        value))
+                               1.0)
+                           value-maybe))))
+               (when (>= value 10)
+                 (setq value
+                       (let ((value-new (/ (float value) 100)))
+                         (org-display-warning
+                          (format "Converting legacy MathJax scale: %s to %s"
+                                  value
+                                  value-new))
+                         value-new))))
+              (`autonumber
+               (org-display-warning
+                "Converting legacy MathJax option: autonumber")
+               (setq symbol 'tags
+                     value (downcase value))))
+            (while (string-match (format "\\(%%%s\\)[^A-Z]"
+                                         (upcase (symbol-name symbol)))
+                                 template)
+              (setq template
+                    (replace-match (format "%s" value)
+                                   t
+                                   t template 1)))))))))
 
 (defun org-html-format-spec (info)
   "Return format specification for preamble and postamble.

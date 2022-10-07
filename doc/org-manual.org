@@ -13231,24 +13231,20 @@ as-is.
 LaTeX math snippets (see [[*LaTeX fragments]]) can be displayed in two
 different ways on HTML pages.  The default is to use the
 [[https://www.mathjax.org][MathJax]], which should work out of the box
-with Org[fn:: By default Org loads MathJax from
-[[https://cdnjs.com][cdnjs.com]] as recommended by
-[[https://www.mathjax.org][MathJax]].][fn:46].  Some MathJax display
-options can be configured via ~org-html-mathjax-options~, or in the
-buffer.  For example, with the following settings,
+with Org[fn:: By default, Org loads MathJax from
+[[https://www.jsdelivr.com/][jsDelivr]], as recommended in
+[[https://docs.mathjax.org/en/latest/web/start.html][Getting Started
+with MathJax Components]].][fn:46].  Some MathJax display options can
+be configured via ~org-html-mathjax-options~, or in the buffer.  For
+example, with the following settings,
 
 #+begin_example
-,#+HTML_MATHJAX: align: left indent: 5em tagside: left font: Neo-Euler
-,#+HTML_MATHJAX: cancel.js noErrors.js
+,#+HTML_MATHJAX: align: left indent: 5em tagside: left
 #+end_example
 
 #+texinfo: @noindent
 equation labels are displayed on the left margin and equations are
-five em from the left margin.  In addition, it loads the two MathJax
-extensions =cancel.js= and =noErrors.js=[fn:: See
-[[https://docs.mathjax.org/en/latest/input/tex/extensions.html#tex-and-latex-extensions][TeX
-and LaTeX extensions]] in the [[https://docs.mathjax.org][MathJax
-manual]] to learn about extensions.].
+five em from the left margin.
 
 #+vindex: org-html-mathjax-template
 See the docstring of ~org-html-mathjax-options~ for all supported

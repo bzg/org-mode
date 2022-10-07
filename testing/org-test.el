@@ -33,6 +33,7 @@
 
 (require 'org)
 (require 'org-id)
+(require 'org-macs)
 
 ;;; Ob constants
 
@@ -535,6 +536,16 @@ TIME can be a non-nil Lisp time value, or a string specifying a date and time."
 	     (lambda (a b) (funcall ,(symbol-function 'time-subtract)
 				    (or a ,at) (or b ,at)))))
 	 ,@body))))
+
+(defmacro org-test-capture-warnings (&rest body)
+  "Capture all warnings passed to `org-display-warning' within BODY."
+  (declare (indent 0) (debug t))
+  `(let ((messages (list)))
+     (cl-letf (((symbol-function 'org-display-warning)
+                (lambda (message)
+                  (setq messages (cons message messages)))))
+       ,@body)
+     (nreverse messages)))
 
 (provide 'org-test)
 
