@@ -4409,6 +4409,9 @@ items if they have an hour specification like [h]h:mm."
 		      (- sd (+ (if (< d 0) 7 0) d)))))
 	   (day-numbers (list start))
 	   (day-cnt 0)
+           ;; FIXME: This may cause confusion when users are trying to
+           ;; debug agenda.  The debugger will not trigger without
+           ;; redisplay.
 	   (inhibit-redisplay (not debug-on-error))
 	   (org-agenda-show-log-scoped org-agenda-show-log)
 	   s rtn rtnall file date d start-pos end-pos todayp ;; e
