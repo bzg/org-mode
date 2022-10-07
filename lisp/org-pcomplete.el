@@ -364,7 +364,11 @@ This needs more work, to handle headings with lots of spaces in them."
 	      (pcomplete-uniquify-list tbl)))
 	  ;; When completing a bracketed link, i.e., "[[*", argument
 	  ;; starts at the star, so remove this character.
-	  (substring pcomplete-stub 1))))
+          ;; Also, if the completion is done inside [[*head<point>]],
+          ;; drop the closing parentheses.
+          (replace-regexp-in-string
+           "\\]+$" ""
+	   (substring pcomplete-stub 1)))))
 
 (defun pcomplete/org-mode/tag ()
   "Complete a tag name.  Omit tags already set."
