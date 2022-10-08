@@ -18084,6 +18084,10 @@ The =eval= header argument can limit evaluation of specific code
 blocks and =CALL= keyword.  It is useful for protection against
 evaluating untrusted code blocks by prompting for a confirmation.
 
+- =yes= ::
+
+  Org always evaluates the source code without asking permission.
+
 - =never= or =no= ::
 
   Org never evaluates the source code.
