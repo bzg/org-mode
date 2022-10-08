@@ -2693,7 +2693,7 @@ The function assumes BUFFER's major mode is `org-mode'."
 	    (overlay-put (make-overlay start end) 'invisible invis))
           ;; Never write the buffer copy to disk, despite
           ;; `buffer-file-name' not being nil.
-          (setq write-contents-functions (list #'always)))))))
+          (setq write-contents-functions (list (lambda (&rest _) t))))))))
 
 (defun org-export--delete-comment-trees ()
   "Delete commented trees and commented inlinetasks in the buffer.
