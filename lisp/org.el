@@ -17755,7 +17755,15 @@ number of stars to add."
 			  (org-list-to-lisp t)
 			  (pcase (org-current-level)
 			    (`nil 1)
-			    (l (1+ (org-reduced-level l)))))
+			    (l (1+ (org-reduced-level l))))
+                          ;; Keywords to replace checkboxes.
+                          (list
+                           ;; [X]
+                           :cbon (concat (or (car org-done-keywords) "DONE") " ")
+                           ;; [ ]
+                           :cboff (concat (or (car org-not-done-keywords) "TODO") " ")
+                           ;; [-]
+                           :cbtrans (concat (or (car org-not-done-keywords) "TODO") " ")))
 			 "\n")))
 	     (setq toggled t))
 	   (forward-line)))
