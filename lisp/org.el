@@ -17697,6 +17697,9 @@ In a region:
   universal prefix argument.
 
 - If it is a plain list item, turn all plain list items into headings.
+  The checkboxes are converted to appropriate TODO or DONE keywords
+  (using `car' or `org-done-keywords' and `org-not-done-keywords' when
+  available).
 
 When converting a line into a heading, the number of stars is chosen
 such that the lines become children of the current entry.  However,
