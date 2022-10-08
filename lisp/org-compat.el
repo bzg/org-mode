@@ -34,6 +34,8 @@
 (require 'seq)
 (require 'org-macs)
 
+(eval-when-compile (require 'subr-x))  ; Emacs < 28
+
 ;; We rely on org-compat when generating Org version.  Checking Org
 ;; version here will interfere with Org build process.
 ;; (org-assert-version)
