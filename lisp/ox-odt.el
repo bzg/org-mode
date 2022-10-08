@@ -2909,9 +2909,20 @@ contextual information."
 	(setq output
 	      (replace-regexp-in-string (car pair) (cdr pair) output t nil))))
     ;; Handle break preservation if required.
-    (when (plist-get info :preserve-breaks)
-      (setq output (replace-regexp-in-string
-		    "\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>" output t)))
+    (if (plist-get info :preserve-breaks)
+        (setq output (replace-regexp-in-string
+		      "\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>" output t))
+      ;; OpenDocument schema recognizes newlines as spaces, which may
+      ;; not be desired in scripts that do not separate words with
+      ;; spaces (for example, Han script).  `fill-region' is able to
+      ;; handle such situations.
+      (setq output
+            (with-temp-buffer
+              (insert output)
+              ;; Unfill.
+              (let ((fill-column (point-max)))
+                (fill-region (point-min) (point-max)))
+              (buffer-string))))
     ;; Return value.
     output))
 
