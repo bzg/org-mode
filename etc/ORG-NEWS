@@ -314,6 +314,15 @@ This provides a proper counterpart to ~org-babel-pre-tangle-hook~, as
 per-tangle-destination. ~org-babel-tangle-finished-hook~ is just run
 once after the post tangle hooks.
 
+*** New =:backend= header argument for clojure code blocks
+
+The =:backend= header argument on clojure code blocks can override the
+value of ~org-babel-clojure-backend~. For example:
+
+#+begin_src clojure :backend babashka
+(range 2)
+#+end_src
+
 ** New options
 *** New custom settings =org-icalendar-scheduled-summary-prefix= and =org-icalendar-deadline-summary-prefix=
 

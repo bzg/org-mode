@@ -68,7 +68,10 @@
 (add-to-list 'org-babel-tangle-lang-exts '("clojurescript" . "cljs"))
 
 (defvar org-babel-default-header-args:clojure '())
-(defvar org-babel-header-args:clojure '((ns . :any) (package . :any)))
+(defvar org-babel-header-args:clojure
+  '((ns . :any)
+    (package . :any)
+    (backend . ((inf-clojure cider slime babashka nbb)))))
 (defvar org-babel-default-header-args:clojurescript '())
 (defvar org-babel-header-args:clojurescript '((package . :any)))
 
@@ -253,28 +256,33 @@
      "")))
 
 (defun org-babel-execute:clojure (body params)
-  "Execute a block of Clojure code with Babel."
-  (unless org-babel-clojure-backend
-    (user-error "You need to customize org-babel-clojure-backend"))
-  (let* ((expanded (org-babel-expand-body:clojure body params))
-	 (result-params (cdr (assq :result-params params)))
-	 result)
-    (setq result
-	  (cond
-	   ((eq org-babel-clojure-backend 'inf-clojure)
-	    (ob-clojure-eval-with-inf-clojure expanded params))
-           ((eq org-babel-clojure-backend 'babashka)
-	    (ob-clojure-eval-with-babashka ob-clojure-babashka-command expanded))
-           ((eq org-babel-clojure-backend 'nbb)
-	    (ob-clojure-eval-with-babashka ob-clojure-nbb-command expanded))
-	   ((eq org-babel-clojure-backend 'cider)
-	    (ob-clojure-eval-with-cider expanded params))
-	   ((eq org-babel-clojure-backend 'slime)
-	    (ob-clojure-eval-with-slime expanded params))))
-    (org-babel-result-cond result-params
-      result
-      (condition-case nil (org-babel-script-escape result)
-	(error result)))))
+  "Execute the BODY block of Clojure code with PARAMS using Babel."
+  (let* ((backend-override (cdr (assq :backend params)))
+         (org-babel-clojure-backend
+          (cond
+           (backend-override (intern backend-override))
+           (org-babel-clojure-backend org-babel-clojure-backend)
+           (t (user-error "You need to customize `org-babel-clojure-backend'
+or set the `:backend' header argument")))))
+    (let* ((expanded (org-babel-expand-body:clojure body params))
+	   (result-params (cdr (assq :result-params params)))
+	   result)
+      (setq result
+	    (cond
+	     ((eq org-babel-clojure-backend 'inf-clojure)
+	      (ob-clojure-eval-with-inf-clojure expanded params))
+             ((eq org-babel-clojure-backend 'babashka)
+	      (ob-clojure-eval-with-babashka ob-clojure-babashka-command expanded))
+             ((eq org-babel-clojure-backend 'nbb)
+	      (ob-clojure-eval-with-babashka ob-clojure-nbb-command expanded))
+	     ((eq org-babel-clojure-backend 'cider)
+	      (ob-clojure-eval-with-cider expanded params))
+	     ((eq org-babel-clojure-backend 'slime)
+	      (ob-clojure-eval-with-slime expanded params))))
+      (org-babel-result-cond result-params
+        result
+        (condition-case nil (org-babel-script-escape result)
+	  (error result))))))
 
 (defun org-babel-execute:clojurescript (body params)
   "Evaluate BODY with PARAMS as ClojureScript code."
