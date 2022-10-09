@@ -193,7 +193,7 @@ replaced in this string.")
                                                   (concat
                                                    (file-remote-p default-directory)
                                                    org-babel-remote-temporary-directory)
-                                                org-babel-temporary-directory)
+                                                (org-babel-temp-directory))
                                             default-directory)))
          ;; the dir to write the source file
          (packagedir (if (and (not run-from-temp) packagename)

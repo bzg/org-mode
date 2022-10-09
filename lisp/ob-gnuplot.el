@@ -106,7 +106,7 @@ code."
 		     (file-remote-p val)  ;; check if val is a remote file
 		     (file-exists-p val)) ;; call to file-exists-p is slow, maybe remove it
 		(let* ((local-name (concat ;; create a unique filename to avoid multiple downloads
-				    org-babel-temporary-directory
+				    (org-babel-temp-directory)
 				    "/gnuplot/"
 				    (file-remote-p val 'host)
 				    (org-babel-local-file-name val))))

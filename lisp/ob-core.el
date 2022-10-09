@@ -3273,6 +3273,15 @@ Emacs shutdown.")
 	   ,scalar-form
 	 ,@table-forms))))
 
+(defmacro org-babel-temp-directory ()
+  "Return temporary directory suitable for `default-directory'."
+  `(if (file-remote-p default-directory)
+       org-babel-remote-temporary-directory
+     (or (and org-babel-temporary-directory
+	      (file-exists-p org-babel-temporary-directory)
+	      org-babel-temporary-directory)
+	 temporary-file-directory)))
+
 (defun org-babel-temp-file (prefix &optional suffix)
   "Create a temporary file in the `org-babel-temporary-directory'.
 Passes PREFIX and SUFFIX directly to `make-temp-file' with the

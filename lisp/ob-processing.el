@@ -93,7 +93,7 @@
 	  ;; make-temp-file is repeated until no hyphen is in the
 	  ;; name; also sketch dir name must be the same as the
 	  ;; basename of the sketch file.
-	  (let* ((temporary-file-directory org-babel-temporary-directory)
+	  (let* ((temporary-file-directory (org-babel-temp-directory))
 		 (sketch-dir
 		  (let (sketch-dir-candidate)
 		    (while
