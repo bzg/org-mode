@@ -43,6 +43,7 @@
 (declare-function org--get-expected-indentation "org" (element contentsp))
 (declare-function org-mode "org" ())
 (declare-function org--get-expected-indentation "org" (element contentsp))
+(declare-function org-fold-region "org-fold" (from to flag &optional spec-or-alias))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-class "org-element" (datum &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
@@ -698,6 +699,8 @@ as `org-src-fontify-natively' is non-nil."
           (when (or (facep src-face) (listp src-face))
             (font-lock-append-text-property start end 'face src-face))
 	  (font-lock-append-text-property start end 'face 'org-block))
+        ;; Clear abbreviated link folding.
+        (org-fold-region start end nil 'org-link)
 	(add-text-properties
 	 start end
 	 '(font-lock-fontified t fontified t font-lock-multiline t))
