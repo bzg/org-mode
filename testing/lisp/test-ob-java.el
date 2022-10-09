@@ -607,5 +607,5 @@ public class Main {
                (delete-directory (concat (file-name-as-directory org-babel-temporary-directory)
                                          "pkg")))))))
 
-
+(provide 'test-ob-java)
 ;;; test-ob-java.el ends here
