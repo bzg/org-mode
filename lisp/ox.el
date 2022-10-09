@@ -2544,9 +2544,9 @@ Return the updated communication channel."
 ;; a default template (or a back-end specific template) at point or in
 ;; current subtree.
 
-(defun org-export-copy-buffer (&optional buffer drop-visibility
-                                         drop-narrowing drop-contents
-                                         drop-locals)
+(cl-defun org-export-copy-buffer (&key to-buffer drop-visibility
+                                       drop-narrowing drop-contents
+                                       drop-locals)
   "Return a copy of the current buffer.
 The copy preserves Org buffer-local variables, visibility and
 narrowing.
@@ -2561,61 +2561,81 @@ then re-opened.  Making edits in the buffer copy may also trigger
 Emacs save dialogue.  Prefer using `org-export-with-buffer-copy' macro
 when possible.
 
-When optional argument BUFFER is non-nil, copy into BUFFER.
+When optional key `:to-buffer' is non-nil, copy into BUFFER.
 
-Optional arguments DROP-VISIBILITY, DROP-NARROWING, DROP-CONTENTS, and
-DROP-LOCALS are passed to `org-export--generate-copy-script'."
+Optional keys `:drop-visibility', `:drop-narrowing', `:drop-contents',
+and `:drop-locals' are passed to `org-export--generate-copy-script'."
   (let ((copy-buffer-fun (org-export--generate-copy-script
                           (current-buffer)
-                          'do-not-check-unreadable
-                          drop-visibility
-                          drop-narrowing
-                          drop-contents
-                          drop-locals))
-	(new-buf (or buffer (generate-new-buffer (buffer-name)))))
+                          :copy-unreadable 'do-not-check
+                          :drop-visibility drop-visibility
+                          :drop-narrowing drop-narrowing
+                          :drop-contents drop-contents
+                          :drop-locals drop-locals))
+	(new-buf (or to-buffer (generate-new-buffer (buffer-name)))))
     (with-current-buffer new-buf
       (funcall copy-buffer-fun)
       (set-buffer-modified-p nil))
     new-buf))
 
-(defmacro org-export-with-buffer-copy (&rest body)
+(cl-defmacro org-export-with-buffer-copy ( &rest body
+                                           &key to-buffer drop-visibility
+                                           drop-narrowing drop-contents
+                                           drop-locals
+                                           &allow-other-keys)
   "Apply BODY in a copy of the current buffer.
 The copy preserves local variables, visibility and contents of
 the original buffer.  Point is at the beginning of the buffer
-when BODY is applied."
+when BODY is applied.
+
+Optional keys can modify what is being copied and the generated buffer
+copy.  `:to-buffer', `:drop-visibility', `:drop-narrowing',
+`:drop-contents', and `:drop-locals' are passed as arguments to
+`org-export-copy-buffer'."
   (declare (debug t))
   (org-with-gensyms (buf-copy)
-    `(let ((,buf-copy (org-export-copy-buffer)))
+    `(let ((,buf-copy (org-export-copy-buffer
+                       :to-buffer ,to-buffer
+                       :drop-visibility ,drop-visibility
+                       :drop-narrowing ,drop-narrowing
+                       :drop-contents ,drop-contents
+                       :drop-locals ,drop-locals)))
        (unwind-protect
 	   (with-current-buffer ,buf-copy
 	     (goto-char (point-min))
-	     (progn ,@body))
+             (prog1
+	         (progn ,@body)
+               ;; `org-export-copy-buffer' carried the value of
+               ;; `buffer-file-name' from the original buffer.  When not
+               ;; killed, the new buffer copy may become a target of
+               ;; `find-file'.  Prevent this.
+               (setq buffer-file-name nil)))
 	 (and (buffer-live-p ,buf-copy)
 	      ;; Kill copy without confirmation.
 	      (progn (with-current-buffer ,buf-copy
 		       (restore-buffer-modified-p nil))
-		     (kill-buffer ,buf-copy)))))))
+                     (unless ,to-buffer
+		       (kill-buffer ,buf-copy))))))))
 
-(defun org-export--generate-copy-script (buffer
-                                         &optional
-                                         copy-unreadable
-                                         drop-visibility
-                                         drop-narrowing
-                                         drop-contents
-                                         drop-locals)
+(cl-defun org-export--generate-copy-script (buffer
+                                            &key
+                                            copy-unreadable
+                                            drop-visibility
+                                            drop-narrowing
+                                            drop-contents
+                                            drop-locals)
   "Generate a function duplicating BUFFER.
 
 The copy will preserve local variables, visibility, contents and
 narrowing of the original buffer.  If a region was active in
 BUFFER, contents will be narrowed to that region instead.
 
-When optional argument COPY-UNREADABLE is non-nil, do not ensure that
-all the copied local variables will be readable in another Emacs
-session.
+When optional key `:copy-unreadable' is non-nil, do not ensure that all
+the copied local variables will be readable in another Emacs session.
 
-When optional arguments DROP-VISIBILITY, DROP-NARROWING,
-DROP-CONTENTS, or DROP-LOCALS are non-nil, do not preserve visibility,
-narrowing, contents, or local variables correspondingly.
+When optional keys `:drop-visibility', `:drop-narrowing',
+`:drop-contents', or `:drop-locals' are non-nil, do not preserve
+visibility, narrowing, contents, or local variables correspondingly.
 
 The resulting function can be evaluated at a later time, from
 another buffer, effectively cloning the original buffer there.
