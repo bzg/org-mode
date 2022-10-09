@@ -574,14 +574,14 @@ public class Tangle {
   (org-test-with-temp-text
       (format  "#+begin_src java :dir %s :results output silent
 System.out.print(42);
-#+end_src" org-babel-temporary-directory)
+#+end_src" temporary-file-directory)
     (should (string=
              "42"
              (unwind-protect
                  (org-babel-execute-src-block)
-               (delete-file (concat (file-name-as-directory org-babel-temporary-directory)
+               (delete-file (concat (file-name-as-directory temporary-file-directory)
                                     "Main.java"))
-               (delete-file (concat (file-name-as-directory org-babel-temporary-directory)
+               (delete-file (concat (file-name-as-directory temporary-file-directory)
                                     "Main.class")))))))
 
 (ert-deftest ob-java/simple-dir-with-package ()
@@ -595,16 +595,16 @@ public class Main {
       System.out.print(42);
     }
 }
-#+end_src" org-babel-temporary-directory)
+#+end_src" temporary-file-directory)
     (should (string=
              "42"
              (unwind-protect
                  (org-babel-execute-src-block)
-               (delete-file (concat (file-name-as-directory org-babel-temporary-directory)
+               (delete-file (concat (file-name-as-directory temporary-file-directory)
                                     "pkg/Main.java"))
-               (delete-file (concat (file-name-as-directory org-babel-temporary-directory)
+               (delete-file (concat (file-name-as-directory temporary-file-directory)
                                     "pkg/Main.class"))
-               (delete-directory (concat (file-name-as-directory org-babel-temporary-directory)
+               (delete-directory (concat (file-name-as-directory temporary-file-directory)
                                          "pkg")))))))
 
 (provide 'test-ob-java)
