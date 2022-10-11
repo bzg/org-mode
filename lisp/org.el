@@ -12187,8 +12187,11 @@ a *different* entry, you cannot use these techniques."
 
 	  (if (not scope)
 	      (progn
-		(org-agenda-prepare-buffers
-		 (and buffer-file-name (list buffer-file-name)))
+                ;; Agenda expects a file buffer.  Skip over refreshing
+                ;; agenda cache for non-file buffers.
+                (when buffer-file-name
+		  (org-agenda-prepare-buffers
+		   (and buffer-file-name (list buffer-file-name))))
 		(setq res
 		      (org-scan-tags
 		       func matcher org--matcher-tags-todo-only start-level)))
