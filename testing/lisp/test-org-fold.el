@@ -285,6 +285,36 @@
 ** <point>b"
      (org-set-visibility-according-to-property)
      (invisible-p (point))))
+  (org-test-with-temp-text
+      "<point>
+#+STARTUP: overview
+* A
+** AA
+** AB
+*** ABA
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+**** ABAA
+**** ABAB
+**** ABAC
+** AC
+* B
+"
+    (org-set-regexps-and-options)
+    (org-cycle-set-startup-visibility)
+    (search-forward "A")
+    (should-not (invisible-p (point)))
+    (search-forward "AB")
+    (should (invisible-p (point)))
+    (search-forward "ABA")
+    (should (invisible-p (point)))
+    (search-forward "ABAB")
+    (should (invisible-p (point)))
+    (search-forward "AC")
+    (should (invisible-p (point)))
+    (search-forward "B")
+    (should-not (invisible-p (point))))
   ;; "children" state.
   (should
    (org-test-with-temp-text
