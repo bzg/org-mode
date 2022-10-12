@@ -1962,6 +1962,11 @@ default-directory
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/script-escape ()
+  ;; Empty list.
+  (should (equal nil (org-babel-script-escape "[]")))
+  (should (equal nil (org-babel-script-escape "()")))
+  (should (equal nil (org-babel-script-escape "'()")))
+  (should (equal nil (org-babel-script-escape "{}")))
   ;; Delimited lists of numbers
   (should (equal '(1 2 3)
 		 (org-babel-script-escape "[1 2 3]")))

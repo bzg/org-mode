@@ -3124,7 +3124,7 @@ block but are passed literally to the \"example-block\"."
     (error "`org-babel-script-escape' expects a string"))
   (let ((escaped
 	 (cond
-	  ((and (> (length str) 2)
+	  ((and (>= (length str) 2)
 		(or (and (string-equal "[" (substring str 0 1))
 			 (string-equal "]" (substring str -1)))
 		    (and (string-equal "{" (substring str 0 1))
