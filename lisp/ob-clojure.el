@@ -104,6 +104,13 @@
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (org-babel--get-vars params))
+         (backend-override (cdr (assq :backend params)))
+         (org-babel-clojure-backend
+          (cond
+           (backend-override (intern backend-override))
+           (org-babel-clojure-backend org-babel-clojure-backend)
+           (t (user-error "You need to customize `org-babel-clojure-backend'
+or set the `:backend' header argument"))))
 	 (ns (or (cdr (assq :ns params))
 		 (if (eq org-babel-clojure-backend 'cider)
 		     (or cider-buffer-ns
