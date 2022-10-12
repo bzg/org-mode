@@ -2202,7 +2202,17 @@ string that it returns."
 (org-remap org-agenda-mode-map 'move-end-of-line 'org-agenda-end-of-line)
 
 (defvar org-agenda-menu) ; defined later in this file.
-(defvar org-agenda-restrict nil)
+(defvar org-agenda-restrict nil
+  "Non-nil means agenda restriction is active.
+This is an internal flag indicating either temporary or extended
+agenda restriction.  Specifically, it is set to t if the agenda
+is restricted to an entire file, and is set to the corresponding
+buffer if the agenda is restricted to a part of a file, e.g. a
+region or a substree.  In the latter case,
+`org-agenda-restrict-begin' and `org-agenda-restrict-end' are set
+to the beginning and the end of the part.
+
+See also `org-agenda-set-restriction-lock'.")
 (defvar org-agenda-follow-mode nil)
 (defvar org-agenda-entry-text-mode nil)
 (defvar org-agenda-clockreport-mode nil)
@@ -2734,10 +2744,16 @@ that have been changed along."
 
 ;;; Agenda dispatch
 
-(defvar org-agenda-restrict-begin (make-marker))
-(defvar org-agenda-restrict-end (make-marker))
+(defvar org-agenda-restrict-begin (make-marker)
+  "Internal variable used to mark the restriction beginning.
+It is only relevant when `org-agenda-restrict' is a buffer.")
+(defvar org-agenda-restrict-end (make-marker)
+  "Internal variable used to mark the restriction end.
+It is only relevant when `org-agenda-restrict' is a buffer.")
 (defvar org-agenda-last-dispatch-buffer nil)
-(defvar org-agenda-overriding-restriction nil)
+(defvar org-agenda-overriding-restriction nil
+  "Non-nil means extended agenda restriction is active.
+This is an internal flag set by `org-agenda-set-restriction-lock'.")
 
 (defcustom org-agenda-custom-commands-contexts nil
   "Alist of custom agenda keys and contextual rules.
@@ -2962,12 +2978,12 @@ Pressing `<' twice means to restrict to the current subtree or region
 	    (move-marker org-agenda-restrict-begin (point))
 	    (move-marker org-agenda-restrict-end
 			 (progn (org-end-of-subtree t)))))
-	 ((and (eq restriction 'buffer)
-	       (or (< 1 (point-min))
-		   (< (point-max) (1+ (buffer-size)))))
-	  (setq org-agenda-restrict (current-buffer))
-	  (move-marker org-agenda-restrict-begin (point-min))
-	  (move-marker org-agenda-restrict-end (point-max)))))
+	 ((eq restriction 'buffer)
+          (if (not (buffer-narrowed-p))
+              (setq org-agenda-restrict t)
+            (setq org-agenda-restrict (current-buffer))
+	    (move-marker org-agenda-restrict-begin (point-min))
+	    (move-marker org-agenda-restrict-end (point-max))))))
 
       ;; For example the todo list should not need it (but does...)
       (cond
@@ -7958,7 +7974,7 @@ subtree."
 	  (message "Locking agenda restriction to subtree"))
       (put 'org-agenda-files 'org-restrict
 	   (list (buffer-file-name (buffer-base-buffer))))
-      (setq org-agenda-restrict nil)
+      (setq org-agenda-restrict t)
       (setq org-agenda-overriding-restriction 'file)
       (move-marker org-agenda-restrict-begin nil)
       (move-marker org-agenda-restrict-end nil)
@@ -7969,14 +7985,11 @@ subtree."
 (defun org-agenda-remove-restriction-lock (&optional noupdate)
   "Remove agenda restriction lock."
   (interactive "P")
-  (if (not (or org-agenda-restrict org-agenda-overriding-restriction))
+  (if (not org-agenda-restrict)
       (message "No agenda restriction to remove.")
     (delete-overlay org-agenda-restriction-lock-overlay)
     (delete-overlay org-speedbar-restriction-lock-overlay)
     (setq org-agenda-overriding-restriction nil)
-    (unless org-agenda-keep-restricted-file-list
-      ;; There is a request to keep the file list in place
-      (put 'org-agenda-files 'org-restrict nil))
     (setq org-agenda-restrict nil)
     (put 'org-agenda-files 'org-restrict nil)
     (move-marker org-agenda-restrict-begin nil)

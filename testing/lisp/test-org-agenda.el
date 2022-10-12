@@ -255,6 +255,34 @@ See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
           (get-text-property (point) 'day))))
     (org-test-agenda--kill-all-agendas)))
 
+(ert-deftest test-org-agenda/file-restriction ()
+  "Test file restriction for org agenda."
+  (org-test-with-temp-text-in-file "* TODO Foo"
+    (org-agenda-set-restriction-lock t)
+    (org-agenda nil "t")
+    (should (search-forward "Foo"))
+    (should (org-agenda-files))
+    (should-not (org-agenda-files t))
+    (org-agenda-remove-restriction-lock)
+    (goto-char (point-min))
+    (should-not (search-forward "Foo" nil t))
+    (should-not (org-agenda-files)))
+  (org-test-with-temp-text-in-file "* TODO Bar"
+    (org-agenda nil "t" 'buffer)
+    (should (search-forward "Bar"))
+    (should (org-agenda-files))
+    (should-not (org-agenda-files t))
+    (org-agenda-remove-restriction-lock)
+    (goto-char (point-min))
+    (should-not (search-forward "Bar" nil t))
+    (should-not (org-agenda-files)))
+  (org-test-with-temp-text-in-file "* TODO Bar"
+    (org-agenda nil "t" 'buffer)
+    (org-agenda nil "t")
+    (should-not (search-forward "Bar" nil t))
+    (should-not (org-agenda-files)))
+  (org-test-agenda--kill-all-agendas))
+
 
 ;; agenda redo
 
