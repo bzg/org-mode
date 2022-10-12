@@ -2750,7 +2750,6 @@ It is only relevant when `org-agenda-restrict' is a buffer.")
 (defvar org-agenda-restrict-end (make-marker)
   "Internal variable used to mark the restriction end.
 It is only relevant when `org-agenda-restrict' is a buffer.")
-(defvar org-agenda-last-dispatch-buffer nil)
 (defvar org-agenda-overriding-restriction nil
   "Non-nil means extended agenda restriction is active.
 This is an internal flag set by `org-agenda-set-restriction-lock'.")
@@ -2951,8 +2950,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq org-agenda-restrict nil)
 	(move-marker org-agenda-restrict-begin nil)
 	(move-marker org-agenda-restrict-end nil))
-      ;; Remember where this call originated
-      (setq org-agenda-last-dispatch-buffer (current-buffer))
       (unless org-keys
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      org-keys (car ans)
