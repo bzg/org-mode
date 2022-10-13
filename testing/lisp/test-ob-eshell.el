@@ -34,7 +34,10 @@
 	"#+begin_src eshell
 echo 2
 #+end_src"
-      (org-babel-execute-src-block))
+      (org-babel-execute-src-block)
+      (goto-char (org-babel-where-is-src-block-result))
+      (forward-line)
+      (buffer-substring-no-properties (point) (line-end-position)))
     ": 2")))
 
 (ert-deftest ob-eshell/variables-assignment ()
@@ -45,7 +48,10 @@ echo 2
 	"#+begin_src eshell :var hi=\"hello, world\"
 echo $hi
 #+end_src"
-      (org-babel-execute-src-block))
+      (org-babel-execute-src-block)
+      (goto-char (org-babel-where-is-src-block-result))
+      (forward-line)
+      (buffer-substring-no-properties (point) (line-end-position)))
     ": hello, world")))
 
 (ert-deftest ob-eshell/session ()
