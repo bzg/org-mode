@@ -42,4 +42,5 @@
 	    (org-babel-next-src-block)
 	    (org-babel-execute-src-block)))))
 
+(provide 'test-ob-sqlite)
 ;;; test-ob-sqlite.el ends here

@@ -377,4 +377,5 @@
   select * from dummy;
 #+end_src"))
 
-;;; test-ob-sqlite.el ends here
+(provide 'test-ob-sql)
+;;; test-ob-sql.el ends here
