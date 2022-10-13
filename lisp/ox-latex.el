@@ -278,17 +278,17 @@ list can be:
 
 - `:lang-name' the actual name of the language.")
 
-(defconst org-latex-line-break-safe "\\\\\\relax"
+(defconst org-latex-line-break-safe "\\\\\\empty"
   "Linebreak protecting the following [...].
 
-Without \"\\relax\" it would be interpreted as an optional argument to
+Without \"\\empty\" it would be interpreted as an optional argument to
 the \\\\.
 
 This constant, for example, makes the below code not err:
 
 \\begin{tabular}{c|c}
-    [t] & s\\\\\\relax
-    [I] & A\\\\\\relax
+    [t] & s\\\\\\empty
+    [I] & A\\\\\\empty
     [m] & kg
 \\end{tabular}")
 
@@ -4005,9 +4005,9 @@ a communication channel."
 			      (org-export-get-parent-table table-row) info))))
 	   (format "%s
 \\endfirsthead
-\\multicolumn{%d}{l}{%s} \\\\\\relax
+\\multicolumn{%d}{l}{%s} \\\\\\empty
 %s
-%s \\\\\\relax\n
+%s \\\\\\empty\n
 %s
 \\endhead
 %s\\multicolumn{%d}{r}{%s} \\\\

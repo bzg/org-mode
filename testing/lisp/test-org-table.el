@@ -1635,11 +1635,11 @@ See also `test-org-table/copy-field'."
 (ert-deftest test-org-table/to-latex ()
   "Test `orgtbl-to-latex' specifications."
   (should
-   (equal "\\begin{tabular}{l}\na\\\\\\relax\n\\end{tabular}"
+   (equal "\\begin{tabular}{l}\na\\\\\\empty\n\\end{tabular}"
 	  (orgtbl-to-latex (org-table-to-lisp "| a |") nil)))
   ;; Test :environment parameter.
   (should
-   (equal "\\begin{tabularx}{l}\na\\\\\\relax\n\\end{tabularx}"
+   (equal "\\begin{tabularx}{l}\na\\\\\\empty\n\\end{tabularx}"
 	  (orgtbl-to-latex (org-table-to-lisp "| a |")
 			   '(:environment "tabularx"))))
   ;; Test :booktabs parameter.
@@ -1648,7 +1648,7 @@ See also `test-org-table/copy-field'."
     "\\toprule" (orgtbl-to-latex (org-table-to-lisp "| a |") '(:booktabs t))))
   ;; Handle LaTeX snippets.
   (should
-   (equal "\\begin{tabular}{l}\n\\(x\\)\\\\\\relax\n\\end{tabular}"
+   (equal "\\begin{tabular}{l}\n\\(x\\)\\\\\\empty\n\\end{tabular}"
 	  (orgtbl-to-latex (org-table-to-lisp "| $x$ |") nil)))
   ;; Test pseudo objects and :raw parameter.
   (should
