@@ -25,6 +25,8 @@
 
 (unless (featurep 'ob-scheme)
   (signal 'missing-test-dependency "Support for Scheme code blocks"))
+(unless (featurep 'geiser)
+  (signal 'missing-test-dependency "geiser"))
 
 (ert-deftest test-ob-scheme/tables ()
   "Test table output."
