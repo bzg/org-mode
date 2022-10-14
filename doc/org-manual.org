@@ -20668,8 +20668,9 @@ Here is a suggestion for Org Crypt settings in Emacs init file:
 (setq org-tags-exclude-from-inheritance '("crypt"))
 
 (setq org-crypt-key nil)
-;; GPG key to use for encryption
-;; Either the Key ID or set to nil to use symmetric encryption.
+;; GPG key to use for encryption.
+;; nil means  use symmetric encryption unconditionally.
+;; "" means use symmetric encryption unless heading sets CRYPTKEY property.
 
 (setq auto-save-default nil)
 ;; Auto-saving does not cooperate with org-crypt.el: so you need to
@@ -20690,6 +20691,10 @@ specifying the respective key as property =CRYPTKEY=, e.g.:
   :CRYPTKEY: 0x0123456789012345678901234567890123456789
   :END:
 #+end_example
+
+Note that =CRYPTKEY= property is only effective when ~org-crypt-key~
+is set to non-nil.  ~nil~ value of ~org-crypt-key~ makes Org use
+symmetric encryption unconditionally.
 
 Excluding the =crypt= tag from inheritance prevents already encrypted
 text from being encrypted again.
