@@ -199,8 +199,9 @@ See `org-crypt-disable-auto-save'."
 Assume `epg-context' is set."
   (and org-crypt-key
        (or (epg-list-keys epg-context
-			  (or (org-entry-get nil "CRYPTKEY" 'selective)
-			      org-crypt-key))
+			  (pcase (org-entry-get nil "CRYPTKEY" 'selective 'literal-nil)
+                            ("nil" "")
+                            (key (or key org-crypt-key ""))))
 	   (bound-and-true-p epa-file-encrypt-to)
 	   (progn
 	     (message "No crypt key set, using symmetric encryption.")
