@@ -15936,7 +15936,7 @@ a HTML file."
 				'(1.0 . 1.0)))
 	 (scale (* (if buffer (car image-size-adjust) (cdr image-size-adjust))
 		   (or (plist-get options (if buffer :scale :html-scale)) 1.0)))
-	 (dpi (* scale (if buffer (org--get-display-dpi) 140.0)))
+	 (dpi (* scale (if (and buffer (display-graphic-p)) (org--get-display-dpi) 140.0)))
 	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
 		 "Black"))
 	 (bg (or (plist-get options (if buffer :background :html-background))
