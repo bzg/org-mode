@@ -4280,8 +4280,8 @@ Marker is at point, or at POS if non-nil.  Org mode keeps a list
 of these markers and resets them when they are no longer in use."
   (let ((m (copy-marker (or pos (point)) t)))
     (setq org-agenda-last-marker-time (float-time))
-    (if org-agenda-buffer
-	(with-current-buffer org-agenda-buffer
+    (if (and org-agenda-buffer (buffer-live-p org-agenda-buffer))
+        (with-current-buffer org-agenda-buffer
 	  (push m org-agenda-markers))
       (push m org-agenda-markers))
     m))
