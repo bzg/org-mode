@@ -1609,7 +1609,7 @@ non-nil."
 	   (t (setq link nil)))))
 
        ;; We are in the agenda, link to referenced location
-       ((equal (bound-and-true-p org-agenda-buffer-name) (buffer-name))
+       ((eq major-mode 'org-agenda-mode)
 	(let ((m (or (get-text-property (point) 'org-hd-marker)
 		     (get-text-property (point) 'org-marker))))
 	  (when m
