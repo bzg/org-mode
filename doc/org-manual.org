@@ -2664,11 +2664,11 @@ keyword.
 #+cindex: debugging, of table formulas
 
 When the evaluation of a formula leads to an error, the field content
-becomes the string =#ERROR=.  If you would like to see what is going
-on during variable substitution and calculation in order to find
-a bug, turn on formula debugging in the Tbl menu and repeat the
-calculation, for example by pressing {{{kbd(C-u C-u C-c = RET)}}} in
-a field.  Detailed information are displayed.
+becomes the string =#ERROR=.  If you want to see what is going on
+during variable substitution and calculation in order to find a bug,
+turn on formula debugging in the Tbl menu and repeat the calculation,
+for example by pressing {{{kbd(C-u C-u C-c = RET)}}} in a field.
+Detailed information are displayed.
 
 *** Updating the table
 :PROPERTIES:
@@ -14522,7 +14522,7 @@ The example here shows creating a style using LibreOffice.
 
 The ODT export back-end relies on many templates and style names.
 Using third-party styles and templates can lead to mismatches.
-Templates derived from built in ODT templates and styles seem to have
+Templates derived from built-in ODT templates and styles seem to have
 fewer problems.
 
 *** Links in ODT export
@@ -16678,11 +16678,11 @@ configured Org to upload the related files, these links will work too.
 See [[*Example: complex publishing configuration]], for an example of this
 usage.
 
-Eventually, links between published documents can contain some search
-options (see [[*Search Options in File Links]]), which will be resolved to
-the appropriate location in the linked file.  For example, once
-published to HTML, the following links all point to a dedicated anchor
-in =foo.html=.
+Links between published documents can contain some search options (see
+[[*Search Options in File Links]]), which will be resolved to the
+appropriate location in the linked file.  For example, once published
+to HTML, the following links all point to a dedicated anchor in
+=foo.html=.
 
 #+begin_example
 [[file:foo.org::*heading]]
