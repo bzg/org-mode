@@ -72,7 +72,7 @@ REPRO_ARGS ?=
 req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
 lst-ob-lang = ($(ob-lang) . t)
 req-extra   = --eval '(require '"'"'$(req))'
-BTEST_RE   ?= \\(org\\|ob\\)
+BTEST_RE   ?= \\(org\\|ob\\|ox\\)
 BTEST_LOAD  = \
 	--eval '(add-to-list '"'"'load-path (concat default-directory "lisp"))' \
 	--eval '(add-to-list '"'"'load-path (concat default-directory "testing"))'

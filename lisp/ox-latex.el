@@ -4105,7 +4105,8 @@ contextual information."
 	      (replace-regexp-in-string
 	       "^[ \t]+" (lambda (m) (format "\\hspace*{%dem}" (length m)))
 	       (replace-regexp-in-string
-	        "^[ \t]*\\\\\\\\$" "\\vspace*{1em}"
+                (concat "^[ \t]*" (regexp-quote org-latex-line-break-safe) "$")
+	        "\\vspace*{1em}"
 	        (replace-regexp-in-string
 	         "\\([ \t]*\\\\\\\\\\)?[ \t]*\n"
                  (concat org-latex-line-break-safe "\n")
