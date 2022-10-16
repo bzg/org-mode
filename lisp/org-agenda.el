@@ -9367,7 +9367,7 @@ When called with a prefix argument, include all archive files as well."
 	      			   (mapconcat
                                     #'identity
 	      			    (append
-	      			     (assoc-default 'category org-agenda-filters-preset)
+                                     (assoc-default 'category org-agenda-filters-preset)
 	      			     org-agenda-category-filter)
 	      			    "")
 				   "]")
