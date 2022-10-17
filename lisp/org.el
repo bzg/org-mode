@@ -13988,12 +13988,14 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
            the DEFAULT date rather than TODAY."
   (require 'parse-time)
   (when (and
-	 (string-match
-	  (concat
-	   "\\`[ \t]*\\([-+]\\{0,2\\}\\)"
-	   "\\([0-9]+\\)?"
-	   "\\([hdwmy]\\|\\(" (mapconcat 'car parse-time-weekdays "\\|") "\\)\\)?"
-	   "\\([ \t]\\|$\\)") s)
+         ;; Force case-insensitive.
+         (let ((case-fold-search t))
+	   (string-match
+	    (concat
+	     "\\`[ \t]*\\([-+]\\{0,2\\}\\)"
+	     "\\([0-9]+\\)?"
+	     "\\([hdwmy]\\|\\(" (mapconcat 'car parse-time-weekdays "\\|") "\\)\\)?"
+	     "\\([ \t]\\|$\\)") s))
 	 (or (> (match-end 1) (match-beginning 1)) (match-end 4)))
     (let* ((dir (if (> (match-end 1) (match-beginning 1))
 		    (string-to-char (substring (match-string 1 s) -1))
