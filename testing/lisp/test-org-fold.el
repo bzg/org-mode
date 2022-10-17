@@ -124,6 +124,34 @@
   (should-error
    (org-test-with-temp-text "Paragraph" (org-hide-block-toggle))))
 
+(ert-deftest test-org-fold/org-fold-hide-entry ()
+  "Test `org-fold-hide-entry' specifications."
+  ;; Do nothing on empty heading with children.
+  (should-not
+   (org-test-with-temp-text
+       "* H<point>EADING
+** subheading1
+** subheading2
+"
+     (org-fold-hide-entry)
+     (org-invisible-p (line-end-position))))
+  ;; Text inside entry.  Hide it.
+  (should
+   (org-test-with-temp-text
+       "* H<point>EADING
+Some text here
+** subheading1
+** subheading2
+"
+     (org-fold-hide-entry)
+     (org-invisible-p (line-end-position))))
+  ;; Heading at EOB.  Do nothing.
+  (should-not
+   (org-test-with-temp-text
+       "* H<point>EADING"
+     (org-fold-hide-entry)
+     (org-invisible-p (line-end-position)))))
+
 (ert-deftest test-org-fold/show-set-visibility ()
   "Test `org-fold-show-set-visibility' specifications."
   ;; Do not throw an error before first heading.

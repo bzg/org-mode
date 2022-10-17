@@ -320,7 +320,7 @@ When ENTRY is non-nil, show the entire entry."
   (save-excursion
     (org-back-to-heading-or-point-min t)
     (when (org-at-heading-p) (forward-line))
-    (unless (eobp) ; Current headline is empty and ends at the end of buffer.
+    (unless (or (eobp) (org-at-heading-p)) ; Current headline is empty.
       (org-fold-region
        (line-end-position 0)
        (save-excursion
