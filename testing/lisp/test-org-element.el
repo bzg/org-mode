@@ -2429,7 +2429,19 @@ Outside list"
   ;; When contents is empty, the parsed contents is nil.
   (should
    (org-test-with-temp-text "#+BEGIN_SPECIAL\n#+END_SPECIAL"
-     (eq nil (org-element-contents (org-element-at-point))))))
+     (eq nil (org-element-contents (org-element-at-point)))))
+  ;; Parse parameters if any, trimming blanks.
+  (should
+   (org-test-with-temp-text "#+BEGIN_SPECIAL* s  p   :w 3   \nContent.\n#+END_SPECIAL*"
+     (equal "s  p   :w 3"
+	    (org-element-property :parameters (org-element-at-point)))))
+  ;; When parameters is blank, `:parameters' is nil.
+  (should
+   (org-test-with-temp-text "#+BEGIN_SPECIAL*     \t   \nContent.\n#+END_SPECIAL*"
+     (eq nil (org-element-property :parameters (org-element-at-point))))
+   ))
+
+
 
 
 ;;;; Src Block
@@ -2945,13 +2957,30 @@ Outside list"
 
 (ert-deftest test-org-element/special-block-interpreter ()
   "Test special block interpreter."
+  ;; No parameters
   (should (equal (org-test-parse-and-interpret
 		  "#+BEGIN_SPECIAL\nTest\n#+END_SPECIAL")
 		 "#+begin_SPECIAL\nTest\n#+end_SPECIAL\n"))
   ;; No content
   (should (equal (org-test-parse-and-interpret
 		  "#+BEGIN_SPECIAL\n#+END_SPECIAL")
-		 "#+begin_SPECIAL\n#+end_SPECIAL\n")))
+		 "#+begin_SPECIAL\n#+end_SPECIAL\n"))
+  ;; Some parameters
+  (should
+   (equal (org-test-parse-and-interpret
+           "#+BEGIN_special some parameters until EOL\nA very special content\n#+END_special")
+          "#+begin_special some parameters until EOL\nA very special content\n#+end_special\n"))
+  ;; No parameters (blanks only)
+  (should
+   (equal (org-test-parse-and-interpret
+           "#+BEGIN_special   \t \nA very special content\n#+END_special")
+          "#+begin_special\nA very special content\n#+end_special\n"))
+  ;; Some parameters with leading and trailing blanks, no content, and
+  ;; a /special/ name.
+  (should
+   (equal (org-test-parse-and-interpret
+           "#+BEGIN_spe<c>ial  :a  :b \t  :c  \t \n#+END_spe<c>ial")
+          "#+begin_spe<c>ial :a  :b \t  :c\n#+end_spe<c>ial\n")))
 
 (ert-deftest test-org-element/babel-call-interpreter ()
   "Test Babel call interpreter."

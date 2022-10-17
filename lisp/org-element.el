@@ -1868,13 +1868,15 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.
 
 Return a list whose CAR is `special-block' and CDR is a plist
-containing `:type', `:begin', `:end', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+containing `:type', `:parameters', `:begin', `:end',
+`:contents-begin', `:contents-end', `:post-blank' and
+`:post-affiliated' keywords.
 
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
-	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
-		      (match-string-no-properties 1))))
+	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)[ \t]*\\(.*\\)[ \t]*$")
+		      (match-string-no-properties 1)))
+	 (parameters (match-string-no-properties 2)))
     (if (not (save-excursion
 	       (re-search-forward
 		(format "^[ \t]*#\\+END_%s[ \t]*$" (regexp-quote type))
@@ -1898,6 +1900,8 @@ Assume point is at the beginning of the block."
 	    (list 'special-block
 		  (nconc
 		   (list :type type
+			 :parameters (and (org-string-nw-p parameters)
+					  (org-trim parameters))
 			 :begin begin
 			 :end end
 			 :contents-begin contents-begin
@@ -1909,8 +1913,11 @@ Assume point is at the beginning of the block."
 (defun org-element-special-block-interpreter (special-block contents)
   "Interpret SPECIAL-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
-  (let ((block-type (org-element-property :type special-block)))
-    (format "#+begin_%s\n%s#+end_%s" block-type (or contents "") block-type)))
+  (let ((block-type (org-element-property :type special-block))
+        (parameters (org-element-property :parameters special-block)))
+    (format "#+begin_%s%s\n%s#+end_%s" block-type
+            (if parameters (concat " " parameters) "")
+            (or contents "") block-type)))
 
 
 
