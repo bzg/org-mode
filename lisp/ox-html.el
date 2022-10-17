@@ -897,7 +897,8 @@ all the faces you are interested in are defined, for example by loading files
 in all modes you want.  Then, use the command
 `\\[org-html-htmlize-generate-css]' to extract class definitions."
   :group 'org-export-html
-  :type '(choice (const css) (const inline-css) (const nil)))
+  :type '(choice (const css) (const inline-css) (const nil))
+  :safe #'symbolp)
 
 (defcustom org-html-htmlize-font-prefix "org-"
   "The prefix for CSS class names for htmlize font specifications."
