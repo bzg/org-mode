@@ -3577,9 +3577,9 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                        (org-export-data main info))))))
         (lst-opt (plist-get info :latex-listings-options)))
     (concat
-     ;; Options.
      (format
-      "\\lstset{%s}\n"
+      "\\begin{lstlisting}[%s]\n%s\\end{lstlisting}"
+      ;; Options.
       (concat
        (org-latex--make-option-string
         (append
@@ -3600,10 +3600,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
                (t `(("firstnumber" ,(number-to-string (1+ num-start)))
                     ("numbers" "left"))))))
        (let ((local-options (plist-get attributes :options)))
-         (and local-options (concat "," local-options)))))
-     ;; Source code.
-     (format
-      "\\begin{lstlisting}\n%s\\end{lstlisting}"
+         (and local-options (concat "," local-options))))
+      ;; Source code.
       (let* ((code-info (org-export-unravel-code src-block))
              (max-width
               (apply 'max
