@@ -119,10 +119,15 @@ after REF in the Library of Babel."
 	    (cdr (assoc-string ref org-babel-library-of-babel))))))))
 
 ;;;###autoload
-(defun org-babel-lob-get-info (&optional datum)
+(defun org-babel-lob-get-info (&optional datum no-eval)
   "Return internal representation for Library of Babel function call.
 
 Consider DATUM, when provided, or element at point otherwise.
+ 
+When optional argument NO-EVAL is non-nil, Babel does not resolve
+remote variable references; a process which could likely result
+in the execution of other code blocks, and do not evaluate Lisp
+values in parameters.
 
 Return nil when not on an appropriate location.  Otherwise return
 a list compatible with `org-babel-get-src-block-info', which
@@ -144,16 +149,16 @@ see."
 			org-babel-default-lob-header-args
 			(append
 			 (org-with-point-at begin
-			   (org-babel-params-from-properties language))
+			   (org-babel-params-from-properties language no-eval))
 			 (list
 			  (org-babel-parse-header-arguments
-			   (org-element-property :inside-header context))
+			   (org-element-property :inside-header context) no-eval)
 			  (let ((args (org-element-property :arguments context)))
 			    (and args
 				 (mapcar (lambda (ref) (cons :var ref))
 					 (org-babel-ref-split-args args))))
 			  (org-babel-parse-header-arguments
-			   (org-element-property :end-header context)))))
+			   (org-element-property :end-header context) no-eval))))
 		 nil
 		 (org-element-property :name context)
 		 begin

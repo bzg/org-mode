@@ -29,7 +29,7 @@
 
 (require 'ob-core)
 
-(declare-function org-babel-lob-get-info "ob-lob" (&optional datum))
+(declare-function org-babel-lob-get-info "ob-lob" (&optional datum no-eval))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
