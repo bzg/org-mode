@@ -1910,7 +1910,7 @@ Assume point is at the beginning of the block."
   "Interpret SPECIAL-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
   (let ((block-type (org-element-property :type special-block)))
-    (format "#+begin_%s\n%s#+end_%s" block-type contents block-type)))
+    (format "#+begin_%s\n%s#+end_%s" block-type (or contents "") block-type)))
 
 
 

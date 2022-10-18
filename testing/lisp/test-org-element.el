@@ -2425,7 +2425,11 @@ Outside list"
   ;; Handle non-empty blank line at the end of buffer.
   (should
    (org-test-with-temp-text "#+BEGIN_SPECIAL\nC\n#+END_SPECIAL\n "
-     (= (org-element-property :end (org-element-at-point)) (point-max)))))
+     (= (org-element-property :end (org-element-at-point)) (point-max))))
+  ;; When contents is empty, the parsed contents is nil.
+  (should
+   (org-test-with-temp-text "#+BEGIN_SPECIAL\n#+END_SPECIAL"
+     (eq nil (org-element-contents (org-element-at-point))))))
 
 
 ;;;; Src Block
@@ -2943,7 +2947,11 @@ Outside list"
   "Test special block interpreter."
   (should (equal (org-test-parse-and-interpret
 		  "#+BEGIN_SPECIAL\nTest\n#+END_SPECIAL")
-		 "#+begin_SPECIAL\nTest\n#+end_SPECIAL\n")))
+		 "#+begin_SPECIAL\nTest\n#+end_SPECIAL\n"))
+  ;; No content
+  (should (equal (org-test-parse-and-interpret
+		  "#+BEGIN_SPECIAL\n#+END_SPECIAL")
+		 "#+begin_SPECIAL\n#+end_SPECIAL\n")))
 
 (ert-deftest test-org-element/babel-call-interpreter ()
   "Test Babel call interpreter."
