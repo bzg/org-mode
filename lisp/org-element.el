@@ -412,10 +412,14 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
 			     subscript superscript underline verbatim))
 	 (standard-set
 	  (remq 'citation-reference (remq 'table-cell org-element-all-objects)))
-	 (standard-set-no-line-break (remq 'line-break standard-set)))
+	 (standard-set-no-line-break (remq 'line-break standard-set))
+         (standard-set-for-citations (seq-difference
+                                      standard-set-no-line-break
+                                      '( citation citation-reference
+                                         footnote-reference link))))
     `((bold ,@standard-set)
       (citation citation-reference)
-      (citation-reference ,@minimal-set)
+      (citation-reference ,@standard-set-for-citations)
       (footnote-reference ,@standard-set)
       (headline ,@standard-set-no-line-break)
       (inlinetask ,@standard-set-no-line-break)
