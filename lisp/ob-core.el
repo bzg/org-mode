@@ -339,7 +339,7 @@ then run `org-babel-execute-src-block'."
 This includes header arguments, language and name, and is largely
 a window into the `org-babel-get-src-block-info' function."
   (interactive)
-  (let ((info (org-babel-get-src-block-info 'light))
+  (let ((info (org-babel-get-src-block-info 'no-eval))
 	(full (lambda (it) (> (length it) 0)))
 	(printf (lambda (fmt &rest args) (princ (apply #'format fmt args)))))
     (when info
@@ -640,10 +640,10 @@ the list of header arguments."
         (push elem lst)))
     (reverse lst)))
 
-(defun org-babel-get-src-block-info (&optional light datum)
+(defun org-babel-get-src-block-info (&optional no-eval datum)
   "Extract information from a source block or inline source block.
 
-When optional argument LIGHT is non-nil, Babel does not resolve
+When optional argument NO-EVAL is non-nil, Babel does not resolve
 remote variable references; a process which could likely result
 in the execution of other code blocks, and do not evaluate Lisp
 values in parameters.
@@ -677,9 +677,9 @@ a list with the following pattern:
 		       ;; properties applicable to its location within
 		       ;; the document.
 		       (org-with-point-at (org-element-property :begin datum)
-			 (org-babel-params-from-properties lang light))
+			 (org-babel-params-from-properties lang no-eval))
 		       (mapcar (lambda (h)
-				 (org-babel-parse-header-arguments h light))
+				 (org-babel-parse-header-arguments h no-eval))
 			       (cons (org-element-property :parameters datum)
 				     (org-element-property :header datum)))))
 	       (or (org-element-property :switches datum) "")
@@ -687,7 +687,7 @@ a list with the following pattern:
 	       (org-element-property (if inline :begin :post-affiliated)
 				     datum)
 	       (and (not inline) (org-src-coderef-format datum)))))
-	(unless light
+	(unless no-eval
 	  (setf (nth 2 info) (org-babel-process-params (nth 2 info))))
 	(setf (nth 2 info) (org-babel-generate-file-param name (nth 2 info)))
 	info))))
@@ -933,7 +933,7 @@ arguments and pop open the results in a preview buffer."
 (defun org-babel-insert-header-arg (&optional header-arg value)
   "Insert a header argument selecting from lists of common args and values."
   (interactive)
-  (let* ((info (org-babel-get-src-block-info 'light))
+  (let* ((info (org-babel-get-src-block-info 'no-eval))
 	 (lang (car info))
 	 (begin (nth 5 info))
 	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
@@ -1130,7 +1130,7 @@ code block, otherwise return nil.  With optional prefix argument
 RE-RUN the source-code block is evaluated even if results already
 exist."
   (interactive "P")
-  (pcase (org-babel-get-src-block-info 'light)
+  (pcase (org-babel-get-src-block-info 'no-eval)
     (`(,_ ,_ ,arguments ,_ ,_ ,start ,_)
      (save-excursion
        ;; Go to the results, if there aren't any then run the block.
@@ -1967,7 +1967,7 @@ split.  When called from outside of a code block a new code block
 is created.  In both cases if the region is demarcated and if the
 region is not active then the point is demarcated."
   (interactive "P")
-  (let* ((info (org-babel-get-src-block-info 'light))
+  (let* ((info (org-babel-get-src-block-info 'no-eval))
 	 (start (org-babel-where-is-src-block-head))
 	 (block (and start (match-string 0)))
 	 (headers (and start (match-string 4)))
@@ -2916,7 +2916,7 @@ would set the value of argument \"a\" equal to \"9\".  Note that
 these arguments are not evaluated in the current source-code
 block but are passed literally to the \"example-block\"."
   (let* ((parent-buffer (or parent-buffer (current-buffer)))
-	 (info (or info (org-babel-get-src-block-info 'light)))
+	 (info (or info (org-babel-get-src-block-info 'no-eval)))
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (comment (string= "noweb" (cdr (assq :comments (nth 2 info)))))

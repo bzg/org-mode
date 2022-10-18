@@ -35,7 +35,7 @@
 
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-babel-combine-header-arg-lists "ob-core" (original &rest others))
-(declare-function org-babel-get-src-block-info "ob-core" (&optional light datum))
+(declare-function org-babel-get-src-block-info "ob-core" (&optional no-eval datum))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-buffer-property-keys "org" (&optional specials defaults columns))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
@@ -428,7 +428,7 @@ switches."
 				    (symbol-plist
 				     'org-babel-load-languages)
 				    'custom-type)))))))
-  (let* ((info (org-babel-get-src-block-info 'light))
+  (let* ((info (org-babel-get-src-block-info 'no-eval))
 	 (lang (car info))
 	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
 	 (headers (org-babel-combine-header-arg-lists

@@ -54,7 +54,7 @@ should not be inherited from a source block.")
   (interactive "fFile: ")
   (let ((lob-ingest-count 0))
     (org-babel-map-src-blocks file
-      (let* ((info (org-babel-get-src-block-info 'light))
+      (let* ((info (org-babel-get-src-block-info 'no-eval))
 	     (source-name (nth 4 info)))
 	(when source-name
 	  (setf (nth 1 info)
