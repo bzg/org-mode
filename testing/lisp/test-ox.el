@@ -391,7 +391,7 @@ Paragraph"
 	    (plist-get (org-export-get-environment nil t) :date))))
   ;; Still grab correct options when section above is empty.
   (should
-   (equal '("H1")
+   (equal '("H12")
 	  (org-test-with-temp-text "* H1\n** H11\n** H12<point>"
 	    (plist-get (org-export-get-environment nil t) :title))))
   ;; More than one property can refer to the same node property.

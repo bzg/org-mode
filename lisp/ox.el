@@ -1435,7 +1435,7 @@ for export.  Return options as a plist."
   ;; property is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
    ;; Make sure point is at a heading.
-   (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
+   (org-back-to-heading t)
    (let ((plist
 	  ;; EXPORT_OPTIONS are parsed in a non-standard way.  Take
 	  ;; care of them right from the start.
