@@ -2737,6 +2737,12 @@ INFO is a plist holding contextual information.  See
 	   (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 		   (org-export-get-reference destination info)
 		   (or desc (org-export-get-ordinal destination info))))
+          ;; Link to a file, corresponding to string return value of
+          ;; `org-export-resolve-id-link'.
+          (plain-text
+           (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
+		   destination
+		   (or desc (org-export-get-ordinal destination info))))
 	  ;; Fuzzy link points to some element (e.g., an inline image,
 	  ;; a math formula or a table).
 	  (otherwise
