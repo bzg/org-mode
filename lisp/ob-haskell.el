@@ -136,7 +136,7 @@ a parameter, such as \"ghc -v\"."
 	 (comint-preoutput-filter-functions
 	  (cons 'ansi-color-filter-apply comint-preoutput-filter-functions))
          (raw (org-babel-comint-with-output
-		  (session org-babel-haskell-eoe t full-body)
+		  (session org-babel-haskell-eoe nil full-body)
                 (insert (org-trim full-body))
                 (comint-send-input nil t)
                 (insert org-babel-haskell-eoe)
