@@ -60,14 +60,14 @@ lorem ipsum dolor
     (should
      (search-forward
       "\\begin{verse}
-lorem ipsum dolor\\\\\\empty
-lorem ipsum dolor\\\\\\empty
+lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor\\\\[0pt]
 \\vspace*{1em}
-lorem ipsum dolor\\\\\\empty
-lorem ipsum dolor\\\\\\empty
+lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor\\\\[0pt]
 \\vspace*{1em}
-lorem ipsum dolor\\\\\\empty
-lorem ipsum dolor\\\\\\empty
+lorem ipsum dolor\\\\[0pt]
+lorem ipsum dolor\\\\[0pt]
 \\end{verse}"))))
 
 (provide 'test-ox-latex)
