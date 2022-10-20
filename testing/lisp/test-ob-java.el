@@ -21,8 +21,25 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Code:
+
 (require 'org-test "../testing/org-test")
 (require 'ob-core)
+
+;;; No Java required
+
+(ert-deftest ob-java/lint-header-arguments ()
+  (org-test-with-temp-text "
+#+header: :dir /tmp
+#+header: :classname com.example.Example
+#+header: :imports com.example.OtherExample
+#+header: :cmpflag -classpath .:/tmp/example/
+#+header: :cmdline -classpath .:/tmp/example/
+#+header: :cmdarg -verbose
+#+begin_src java
+#+end_src"
+    (should-not (org-lint '(wrong-header-argument)))))
+
+;;; Java required
 
 (org-test-for-executable "java")
 (org-test-for-executable "javac")

@@ -53,7 +53,13 @@ directory, so we keep that as the default behavior.
 
 [1] https://orgmode.org/manual/Results-of-Evaluation.html")
 
-(defconst org-babel-header-args:java '((imports . :any))
+(defconst org-babel-header-args:java
+  '((dir       . :any)
+    (classname . :any)
+    (imports   . :any)
+    (cmpflag   . :any)
+    (cmdline   . :any)
+    (cmdarg    . :any))
   "Java-specific header arguments.")
 
 (defcustom org-babel-java-command "java"
