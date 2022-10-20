@@ -1507,8 +1507,15 @@ CONTEXT is the element or object at point, as returned by `org-element-context'.
 			(not (looking-at-p "\\*+ END[ \t]*$")))
 		      (let ((case-fold-search nil))
 			(looking-at org-complex-heading-regexp))))
-	       (match-beginning 4)
-	       (>= (point) (match-beginning 4))
+	       (>= (point) (or
+                           ;; Real heading.
+                           (match-beginning 4)
+                           ;; If no heading, end of priority.
+                           (match-end 3)
+                           ;; ... end of todo keyword.
+                           (match-end 2)
+                           ;; ... after stars.
+                           (1+ (match-end 1))))
 	       (or (not (match-beginning 5))
 		   (< (point) (match-beginning 5))))))
      ;; White spaces after an object or blank lines after an element
