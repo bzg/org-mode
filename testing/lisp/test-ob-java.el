@@ -27,7 +27,36 @@
 
 ;;; No Java required
 
-(ert-deftest ob-java/lint-header-arguments ()
+(ert-deftest ob-java/lint-header-args-buffer ()
+  ;; Test that the Org linter accepts every supported Java source
+  ;; block header argument at the buffer level.
+  (org-test-with-temp-text "
+#+property: header-args:java+ :dir /tmp
+#+property: header-args:java+ :classname com.example.Example
+#+property: header-args:java+ :imports com.example.OtherExample
+#+property: header-args:java+ :cmpflag -classpath .:/tmp/example/
+#+property: header-args:java+ :cmdline -classpath .:/tmp/example/
+#+property: header-args:java+ :cmdarg -verbose"
+    (should-not (org-lint '(wrong-header-argument)))))
+
+(ert-deftest ob-java/lint-header-args-heading ()
+  ;; Test that the Org linter accepts every supported Java source
+  ;; block header argument at the heading level.
+  (org-test-with-temp-text "
+* Test
+:PROPERTIES:
+:header-args:java+: :dir /tmp
+:header-args:java+: :classname com.example.Example
+:header-args:java+: :imports com.example.OtherExample
+:header-args:java+: :cmpflag -classpath .:/tmp/example/
+:header-args:java+: :cmdline -classpath .:/tmp/example/
+:header-args:java+: :cmdarg -verbose
+:END:"
+    (should-not (org-lint '(wrong-header-argument)))))
+
+(ert-deftest ob-java/lint-header-args-block ()
+  ;; Test that the Org linter accepts every supported Java source
+  ;; block header argument at the block level.
   (org-test-with-temp-text "
 #+header: :dir /tmp
 #+header: :classname com.example.Example
