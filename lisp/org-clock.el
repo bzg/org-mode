@@ -701,7 +701,10 @@ pointing to it."
 			org-odd-levels-only)
 		       (length prefix))))))
       (when (and cat task)
-	(insert (format "[%c] %-12s  %s\n" i cat task))
+        (if (string-match-p "[[:print:]]" (make-string 1 i))
+	    (insert (format "[%c] %-12s  %s\n" i cat task))
+          ;; Avoid non-printable characters.
+          (insert (format "[N/A] %-12s  %s\n" cat task)))
 	(cons i marker)))))
 
 (defvar org-clock-task-overrun nil
