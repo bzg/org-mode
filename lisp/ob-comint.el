@@ -109,7 +109,7 @@ or user `keyboard-quit' during execution of body."
 		      "\n" "[\r\n]+" (regexp-quote (or ,full-body "")))
 		     string-buffer))
 	   (setq string-buffer (substring string-buffer (match-end 0))))
-	 (split-string string-buffer comint-prompt-regexp)))))
+         (delete "" (split-string string-buffer comint-prompt-regexp))))))
 
 (defun org-babel-comint-input-command (buffer cmd)
   "Pass CMD to BUFFER.

@@ -47,10 +47,15 @@
 (defvar org-babel-shell-names)
 
 (defconst org-babel-shell-set-prompt-commands
-  '(("fish" . "function fish_prompt\n\techo \"%s\"\nend")
-    ("csh" . "set prompt=\"%s\"")
+  '(;; Fish has no PS2 equivalent.
+    ("fish" . "function fish_prompt\n\techo \"%s\"\nend")
+    ;; prompt2 is like PS2 in POSIX shells.
+    ("csh" . "set prompt=\"%s\"\nset prompt2=\"\"")
+    ;; PowerShell, similar to fish, does not have PS2 equivalent.
     ("posh" . "function prompt { \"%s\" }")
-    (t . "PS1=\"%s\""))
+    ;; PROMPT_COMMAND can override PS1 settings.  Disable it.
+    ;; Disable PS2 to avoid garbage in multi-line inputs.
+    (t . "PROMPT_COMMAND=;PS1=\"%s\";PS2="))
   "Alist assigning shells with their prompt setting command.
 
 Each element of the alist associates a shell type from
@@ -299,20 +304,14 @@ return the value of the last statement in BODY."
 	     #'org-babel-sh-strip-weird-long-prompt
 	     (mapcar
 	      #'org-trim
-	      (butlast
+	      (butlast ; Remove eoe indicator
 	       (org-babel-comint-with-output
 		   (session org-babel-sh-eoe-output t body)
-		 (dolist (line (append (split-string (org-trim body) "\n")
-				       (list org-babel-sh-eoe-indicator)))
-		   (insert line)
-		   (comint-send-input nil t)
-		   (while (save-excursion
-			    (goto-char comint-last-input-end)
-			    (not (re-search-forward
-				  comint-prompt-regexp nil t)))
-		     (accept-process-output
-		      (get-buffer-process (current-buffer))))))
-	       2))
+                 (insert (org-trim body) "\n"
+                         org-babel-sh-eoe-indicator)
+		 (comint-send-input nil t))
+               ;; Remove `org-babel-sh-eoe-indicator' output line.
+	       1))
 	     "\n"))
 	   ;; External shell script, with or without a predefined
 	   ;; shebang.
