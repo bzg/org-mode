@@ -1175,6 +1175,29 @@ trying to find the :END: marker."
     (org-babel-execute-src-block)
     (org-babel-execute-src-block)))
 
+(ert-deftest test-ob/org-babel-results-indented-list ()
+  "Test that :results value list indents multi-line items correctly."
+  (should
+   (string= "- Foo1
+  Bar1
+- Foo2
+
+  Bar2
+"
+            (org-test-with-temp-text
+                "#+begin_src emacs-lisp :results value list
+'(\"Foo1
+Bar1\"
+  \"Foo2
+
+Bar2\")
+#+end_src"
+              (org-babel-execute-src-block)
+              (org-forward-element)
+              (org-narrow-to-element)
+              (delete-trailing-whitespace)
+              (buffer-string)))))
+
 (ert-deftest test-ob/file-desc-header-argument ()
   "Test that the :file-desc header argument is used."
   (org-test-with-temp-text "#+begin_src emacs-lisp :results file :file-desc bar
