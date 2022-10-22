@@ -239,6 +239,10 @@ property on the headline itself.")
     ("\\.\\.\\." . "&#x2026;"))		; hellip
   "Regular expressions for special string conversion.")
 
+(defvar org-html--id-attr-prefix "ID-"
+  "Prefix to use in ID attributes.
+This affects IDs that are determined from the ID property.")
+
 (defcustom org-html-scripts
   "<script>
 // @license magnet:?xt=urn:btih:1f739d935676111cfff4b4693e3816e664797050&amp;dn=gpl-3.0.txt GPL-v3-or-Later
@@ -1719,18 +1723,22 @@ When NAMED-ONLY is non-nil and DATUM has no NAME keyword, return
 nil.  This doesn't apply to headlines, inline tasks, radio
 targets and targets."
   (let* ((type (org-element-type datum))
+	 (custom-id (and (memq type '(headline inlinetask))
+			 (org-element-property :CUSTOM_ID datum)))
 	 (user-label
-	  (org-element-property
-	   (pcase type
-	     ((or `headline `inlinetask) :CUSTOM_ID)
-	     ((or `radio-target `target) :value)
-	     (_ :name))
-	   datum)))
+	  (or
+	   custom-id
+	   (and (memq type '(radio-target target))
+		(org-element-property :value datum))
+	   (org-element-property :name datum)
+	   (when-let ((id (org-element-property :ID datum)))
+	     (concat org-html--id-attr-prefix id)))))
+
     (cond
      ((and user-label
 	   (or (plist-get info :html-prefer-user-labels)
 	       ;; Used CUSTOM_ID property unconditionally.
-	       (memq type '(headline inlinetask))))
+	       custom-id))
       user-label)
      ((and named-only
 	   (not (memq type '(headline inlinetask radio-target target)))
@@ -3281,7 +3289,7 @@ INFO is a plist holding contextual information.  See
 	(pcase (org-element-type destination)
 	  ;; ID link points to an external file.
 	  (`plain-text
-	   (let ((fragment (concat "ID-" path))
+	   (let ((fragment (concat org-html--id-attr-prefix path))
 		 ;; Treat links to ".org" files as ".html", if needed.
 		 (path (funcall link-org-files-as-html-maybe
 				destination info)))

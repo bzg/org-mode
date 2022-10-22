@@ -148,6 +148,10 @@
 
 ;;; Internal Variables
 
+(defvar org-odt--id-attr-prefix "ID-"
+  "Prefix to use in ID attributes.
+This affects IDs that are determined from the ID property.")
+
 (defconst org-odt-lib-dir
   (file-name-directory (or load-file-name (buffer-file-name)))
   "Location of ODT exporter.
@@ -1775,7 +1779,7 @@ holding contextual information."
 	   ;; Extra targets.
 	   (extra-targets
 	    (let ((id (org-element-property :ID headline)))
-	      (if id (org-odt--target "" (concat "ID-" id)) "")))
+	      (if id (org-odt--target "" (concat org-odt--id-attr-prefix id)) "")))
 	   ;; Title.
 	   (anchored-title (org-odt--target full-text id)))
       (cond
