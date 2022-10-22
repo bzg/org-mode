@@ -2738,11 +2738,15 @@ INFO is a plist holding contextual information.  See
 		   (org-export-get-reference destination info)
 		   (or desc (org-export-get-ordinal destination info))))
           ;; Link to a file, corresponding to string return value of
-          ;; `org-export-resolve-id-link'.
+          ;; `org-export-resolve-id-link'.  Export it is file link.
           (plain-text
-           (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
-		   destination
-		   (or desc (org-export-get-ordinal destination info))))
+           (let ((file-link (org-element-copy link)))
+             (org-element-put-property file-link :type "file")
+             (org-element-put-property file-link :path destination)
+             (org-element-put-property
+              file-link
+              :raw-link (format "file:%s" destination))
+             (org-odt-link file-link desc info)))
 	  ;; Fuzzy link points to some element (e.g., an inline image,
 	  ;; a math formula or a table).
 	  (otherwise
