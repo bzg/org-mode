@@ -713,15 +713,17 @@ KEYS is the list of cited keys, as strings.  STYLE is the expected bibliography
 style, as a string.  BACKEND is the export back-end, as a symbol.  INFO is the
 export state, as a property list."
   (mapconcat
-   (lambda (k)
-     (let ((entry (org-cite-basic--get-entry k info)))
-       (org-export-data
-        (org-cite-make-paragraph
-         (and (org-export-derived-backend-p backend 'latex)
-              (org-export-raw-string "\\noindent\n"))
-         (org-cite-basic--print-entry entry style info))
-        info)))
-   (org-cite-basic--sort-keys keys info)
+   (lambda (entry)
+     (org-export-data
+      (org-cite-make-paragraph
+       (and (org-export-derived-backend-p backend 'latex)
+            (org-export-raw-string "\\noindent\n"))
+       (org-cite-basic--print-entry entry style info))
+      info))
+   (delq nil
+         (mapcar
+          (lambda (k) (org-cite-basic--get-entry k info))
+          (org-cite-basic--sort-keys keys info)))
    "\n"))
 
 
