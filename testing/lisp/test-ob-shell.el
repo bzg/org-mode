@@ -48,9 +48,11 @@ ob-comint.el, which was not previously tested."
     (should res)
     (should (listp res)))
   ;; Test multi-line input.
-  (let ((res (org-babel-execute:sh "if true; then\necho \"yes\"\nfi" '((:session . "yes")))))
-    (should res)
-    (should (string= "yes" res))))
+  (let ((result (org-babel-execute:sh
+		 "if true \n then \n echo yes \n fi"
+		 '((:session . "yes")))))
+    (should result)
+    (should (string= "yes" result))))
 
 ; A list of tests using the samples in ob-shell-test.org
 (ert-deftest ob-shell/generic-uses-no-arrays ()
