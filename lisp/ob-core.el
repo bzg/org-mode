@@ -3161,7 +3161,7 @@ situations in which is it not appropriate."
 		  (string= cell "*this*")))
 	 (eval (read cell) t))
 	((save-match-data
-           (and (string-match "^[[:space:]]*\"\\(.+\\)\"[[:space:]]*$" cell)
+           (and (string-match "^[[:space:]]*\"\\(.*\\)\"[[:space:]]*$" cell)
                 (not (string-match "[^\\]\"" (match-string 1 cell)))))
          (read cell))
 	(t (org-no-properties cell))))
