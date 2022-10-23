@@ -39,7 +39,11 @@
   (let ((buf (get-buffer-create org-babel-error-buffer-name)))
     (with-current-buffer buf
       (goto-char (point-max))
-      (save-excursion (insert stderr)))
+      (save-excursion
+        (insert
+         (if (string-empty-p stderr)
+             (format "[ Babel evaluation exited with code %S ]" exit-code)
+           stderr))))
     (display-buffer buf))
   (message "Babel evaluation exited with code %S" exit-code))
 
