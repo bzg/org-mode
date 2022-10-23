@@ -3160,7 +3160,10 @@ situations in which is it not appropriate."
 	      (or (memq (string-to-char cell) '(?\( ?' ?` ?\[))
 		  (string= cell "*this*")))
 	 (eval (read cell) t))
-	((eq (string-to-char cell) ?\") (read cell))
+	((save-match-data
+           (and (string-match "^[[:space:]]*\"\\(.+\\)\"[[:space:]]*$" cell)
+                (not (string-match "[^\\]\"" (match-string 1 cell)))))
+         (read cell))
 	(t (org-no-properties cell))))
 
 (defun org-babel--string-to-number (string)
