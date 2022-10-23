@@ -662,6 +662,35 @@ Unfolded Paragraph.
             (org-fold-check-before-invisible-edit kind)
             (should (org-invisible-p (1- (point))))))))))
 
+(ert-deftest test-org-fold/org-fold-display-inline-images ()
+  "Test inline images displaying when cycling."
+  (let* ((org-cycle-inline-images-display t)
+         (images-dir (expand-file-name "examples/images/" org-test-dir))
+         (org-logo-image (expand-file-name "Org mode logo mono-color.png" images-dir)))
+    ;; `org-cycle' -(state)-> `'children' display child inline images.
+    ;; TODO:
+    
+    ;; `org-cycle' -(state)-> `'subtree' display subtrees inline images.
+    ;; TODO:
+    
+    ;; `org-cycle' -(state)-> `'folded' remove inline image overlays.
+    (org-test-with-temp-text
+        (format "<point>* Heading 1
+[[file:%s]]
+** Subheading 1
+[[file:%s]]
+** Subheading 2
+[[file:%s]]" org-logo-image org-logo-image org-logo-image)
+      (org-overview)
+      (org-show-subtree)
+      (org-fold-subtree t)
+      (run-hook-with-args 'org-cycle-hook 'folded)
+      (should (null org-inline-image-overlays))
+      (should (null (overlays-in (point-min) (point-max))))
+      (org-show-subtree)
+      (should-not org-inline-image-overlays)
+      (should-not (overlays-in (point-min) (point-max))))))
+
 (provide 'test-org-fold)
 
 ;;; test-org-fold.el ends here
