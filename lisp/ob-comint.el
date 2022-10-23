@@ -74,11 +74,26 @@ or user `keyboard-quit' during execution of body."
   (let ((buffer (nth 0 meta))
 	(eoe-indicator (nth 1 meta))
 	(remove-echo (nth 2 meta))
-	(full-body (nth 3 meta)))
+	(full-body (nth 3 meta))
+        (org-babel-comint-prompt-separator
+         "org-babel-comint-prompt-separator"))
     `(org-babel-comint-in-buffer ,buffer
        (let* ((string-buffer "")
 	      (comint-output-filter-functions
-	       (cons (lambda (text) (setq string-buffer (concat string-buffer text)))
+	       (cons (lambda (text)
+                       (setq string-buffer
+                             (concat
+                              string-buffer
+                              ;; Upon concatenation, the prompt may no
+                              ;; longer match `comint-prompt-regexp'.
+                              ;; In particular, when the regexp has ^
+                              ;; and the output does not contain
+                              ;; trailing newline.  Use more reliable
+                              ;; match to split the output later.
+                              (replace-regexp-in-string
+                               comint-prompt-regexp
+                               ,org-babel-comint-prompt-separator
+                               text))))
 		     comint-output-filter-functions))
 	      dangling-text)
 	 ;; got located, and save dangling text
@@ -109,7 +124,9 @@ or user `keyboard-quit' during execution of body."
 		      "\n" "[\r\n]+" (regexp-quote (or ,full-body "")))
 		     string-buffer))
 	   (setq string-buffer (substring string-buffer (match-end 0))))
-         (delete "" (split-string string-buffer comint-prompt-regexp))))))
+         (delete "" (split-string
+                     string-buffer
+                     ,org-babel-comint-prompt-separator))))))
 
 (defun org-babel-comint-input-command (buffer cmd)
   "Pass CMD to BUFFER.
