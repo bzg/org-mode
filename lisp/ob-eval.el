@@ -71,7 +71,8 @@ its results, otherwise display STDERR with
 		    (compilation-mode))
 		  ;; Compilation-mode enforces read-only, but Babel expects the buffer modifiable.
 		  (setq buffer-read-only nil))))
-	    nil)
+            ;; Return output, if any.
+	    (buffer-string))
 	(buffer-string)))))
 
 (defun org-babel-eval-read-file (file)
