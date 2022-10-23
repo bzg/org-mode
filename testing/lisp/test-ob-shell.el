@@ -162,6 +162,15 @@ ob-comint.el, which was not previously tested."
                                    "\nhello tramp from " (file-local-name default-directory))))
             (should (equal result expected)))))))
 
+(ert-deftest ob-shell/results-table ()
+  "Test :results table."
+  (should
+   (equal '(("I \"want\" it all"))
+	  (org-test-with-temp-text
+	      "#+BEGIN_SRC sh :results table\necho 'I \"want\" it all'\n#+END_SRC"
+	    (org-babel-execute-src-block)))))
+
+
 (provide 'test-ob-shell)
 
 ;;; test-ob-shell.el ends here
