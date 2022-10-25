@@ -1633,7 +1633,7 @@ More specifically,
            (if (>= style-end (point))
                ;; On style part, edit the style.
                (let ((style-start (+ 5 begin))
-                     (style (funcall select-style)))
+                     (style (funcall select-style context)))
                  (unless style (user-error "Aborted"))
                  (org-with-point-at style-start
                    (delete-region style-start style-end)
