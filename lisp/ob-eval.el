@@ -40,39 +40,44 @@
     (with-current-buffer buf
       (goto-char (point-max))
       (save-excursion
-        (insert stderr)
         (unless (bolp) (insert "\n"))
-        (insert (format "[ Babel evaluation exited with code %S ]\n" exit-code))))
+        (insert stderr)
+        (insert (format "[ Babel evaluation exited with code %S ]" exit-code))))
     (display-buffer buf))
   (message "Babel evaluation exited with code %S" exit-code))
 
 (defun org-babel-eval (command query)
   "Run COMMAND on QUERY.
+Return standard output produced by COMMAND.  If COMMAND exits
+with a non-zero code or produces error output, show it with
+`org-babel-eval-error-notify'.
+
 Writes QUERY into a temp-buffer that is processed with
-`org-babel--shell-command-on-region'.  If COMMAND succeeds then return
-its results, otherwise display STDERR with
-`org-babel-eval-error-notify'."
+`org-babel--shell-command-on-region'."
   (let ((error-buffer (get-buffer-create " *Org-Babel Error*")) exit-code)
     (with-current-buffer error-buffer (erase-buffer))
     (with-temp-buffer
       (insert query)
       (setq exit-code
-	    (org-babel--shell-command-on-region
-	     command error-buffer))
-      (if (or (not (numberp exit-code)) (> exit-code 0))
-	  (progn
-	    (with-current-buffer error-buffer
-	      (org-babel-eval-error-notify exit-code (buffer-string)))
-	    (save-excursion
-	      (when (get-buffer org-babel-error-buffer-name)
-		(with-current-buffer org-babel-error-buffer-name
-		  (unless (derived-mode-p 'compilation-mode)
-		    (compilation-mode))
-		  ;; Compilation-mode enforces read-only, but Babel expects the buffer modifiable.
-		  (setq buffer-read-only nil))))
-            ;; Return output, if any.
-	    (buffer-string))
-	(buffer-string)))))
+            (org-babel--shell-command-on-region
+             command error-buffer))
+      (let ((stderr (with-current-buffer error-buffer (buffer-string))))
+        (if (or (not (numberp exit-code))
+                (> exit-code 0)
+                (not (string-empty-p stderr)))
+            (progn
+              (org-babel-eval-error-notify exit-code stderr)
+              (save-excursion
+                (when (get-buffer org-babel-error-buffer-name)
+                  (with-current-buffer org-babel-error-buffer-name
+                    (unless (derived-mode-p 'compilation-mode)
+                      (compilation-mode))
+                    ;; Compilation-mode enforces read-only, but
+                    ;; Babel expects the buffer modifiable.
+                    (setq buffer-read-only nil))))
+              ;; Return output, if any.
+              (buffer-string))
+          (buffer-string))))))
 
 (defun org-babel-eval-read-file (file)
   "Return the contents of FILE as a string."

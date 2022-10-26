@@ -170,6 +170,88 @@ ob-comint.el, which was not previously tested."
 	      "#+BEGIN_SRC sh :results table\necho 'I \"want\" it all'\n#+END_SRC"
 	    (org-babel-execute-src-block)))))
 
+;;; Standard output
+
+(ert-deftest ob-shell/standard-output-after-success ()
+  "Test standard output after exiting with a zero code."
+  (should (= 1
+             (org-babel-execute:sh
+              "echo 1" nil))))
+
+(ert-deftest ob-shell/standard-output-after-failure ()
+  "Test standard output after exiting with a non-zero code."
+  (should (= 1
+             (org-babel-execute:sh
+              "echo 1; exit 2" nil))))
+
+;;; Standard error
+
+(ert-deftest ob-shell/error-output-after-success ()
+  "Test that standard error shows in the error buffer, alongside the
+exit code, after exiting with a zero code."
+  (should
+   (string= "1
+[ Babel evaluation exited with code 0 ]"
+            (progn (org-babel-eval-wipe-error-buffer)
+                   (org-babel-execute:sh
+                    "echo 1 >&2" nil)
+                   (with-current-buffer org-babel-error-buffer-name
+                     (buffer-string))))))
+
+(ert-deftest ob-shell/error-output-after-failure ()
+  "Test that standard error shows in the error buffer, alongside the
+exit code, after exiting with a non-zero code."
+  (should
+   (string= "1
+[ Babel evaluation exited with code 2 ]"
+            (progn (org-babel-eval-wipe-error-buffer)
+                   (org-babel-execute:sh
+                    "echo 1 >&2; exit 2" nil)
+                   (with-current-buffer org-babel-error-buffer-name
+                     (buffer-string))))))
+
+(ert-deftest ob-shell/error-output-after-failure-multiple ()
+  "Test that multiple standard error strings show in the error
+buffer, alongside multiple exit codes."
+  (should
+   (string= "1
+[ Babel evaluation exited with code 2 ]
+3
+[ Babel evaluation exited with code 4 ]"
+            (progn (org-babel-eval-wipe-error-buffer)
+                   (org-babel-execute:sh
+                    "echo 1 >&2; exit 2" nil)
+                   (org-babel-execute:sh
+                    "echo 3 >&2; exit 4" nil)
+                   (with-current-buffer org-babel-error-buffer-name
+                     (buffer-string))))))
+
+;;; Exit codes
+
+(ert-deftest ob-shell/exit-code ()
+  "Test that the exit code shows in the error buffer after exiting
+with a non-zero return code."
+  (should
+   (string= "[ Babel evaluation exited with code 1 ]"
+            (progn (org-babel-eval-wipe-error-buffer)
+                   (org-babel-execute:sh
+                    "exit 1" nil)
+                   (with-current-buffer org-babel-error-buffer-name
+                     (buffer-string))))))
+
+(ert-deftest ob-shell/exit-code-multiple ()
+  "Test that multiple exit codes show in the error buffer after
+exiting with a non-zero return code multiple times."
+  (should
+   (string= "[ Babel evaluation exited with code 1 ]
+[ Babel evaluation exited with code 2 ]"
+            (progn (org-babel-eval-wipe-error-buffer)
+                   (org-babel-execute:sh
+                    "exit 1" nil)
+                   (org-babel-execute:sh
+                    "exit 2" nil)
+                   (with-current-buffer org-babel-error-buffer-name
+                     (buffer-string))))))
 
 (provide 'test-ob-shell)
 
