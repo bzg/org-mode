@@ -2920,13 +2920,21 @@ contextual information."
       ;; not be desired in scripts that do not separate words with
       ;; spaces (for example, Han script).  `fill-region' is able to
       ;; handle such situations.
+      ;; FIXME: The unnecessary spaced may still remain when a newline
+      ;; is at a boundary between Org objects (e.g. italics markup
+      ;; followed by newline).
       (setq output
             (with-temp-buffer
               (insert output)
-              ;; Unfill.
-              (let ((fill-column (point-max)))
-                (fill-region (point-min) (point-max)))
-              (buffer-string))))
+              (save-match-data
+                (let ((leading (and (string-match (rx bos (1+ blank)) output)
+                                    (match-string 0 output)))
+                      (trailing (and (string-match (rx (1+ blank) eos) output)
+                                     (match-string 0 output))))
+                  ;; Unfill, retaining leading/trailing space.
+                  (let ((fill-column (point-max)))
+                    (fill-region (point-min) (point-max)))
+                  (concat leading (buffer-string) trailing))))))
     ;; Return value.
     output))
 
