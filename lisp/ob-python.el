@@ -37,7 +37,7 @@
 (require 'python)
 
 (declare-function py-shell "ext:python-mode" (&rest args))
-(declare-function py-toggle-shells "ext:python-mode" (arg))
+(declare-function py-choose-shell "ext:python-mode" (&optional shell))
 (declare-function py-shell-send-string "ext:python-mode" (strg &optional process))
 
 (defvar org-babel-tangle-lang-exts)
@@ -182,7 +182,6 @@ Emacs-lisp table, otherwise return the results as a string."
 	(substring name 1 (- (length name) 1))
       name)))
 
-(defvar py-default-interpreter)
 (defvar py-which-bufname)
 (defvar python-shell-buffer-name)
 (defun org-babel-python-initiate-session-by-key (&optional session)
@@ -208,7 +207,7 @@ then create.  Return the initialized session."
 	;; Make sure that py-which-bufname is initialized, as otherwise
 	;; it will be overwritten the first time a Python buffer is
 	;; created.
-	(py-toggle-shells py-default-interpreter)
+	(py-choose-shell)
 	;; `py-shell' creates a buffer whose name is the value of
 	;; `py-which-bufname' with '*'s at the beginning and end
 	(let* ((bufname (if (and py-buffer (buffer-live-p py-buffer))
