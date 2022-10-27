@@ -40,10 +40,9 @@
     (with-current-buffer buf
       (goto-char (point-max))
       (save-excursion
-        (insert
-         (if (string-empty-p stderr)
-             (format "[ Babel evaluation exited with code %S ]" exit-code)
-           stderr))))
+        (insert stderr)
+        (unless (bolp) (insert "\n"))
+        (insert (format "[ Babel evaluation exited with code %S ]\n" exit-code))))
     (display-buffer buf))
   (message "Babel evaluation exited with code %S" exit-code))
 
