@@ -133,7 +133,7 @@ or set the `:backend' header argument"))))
 		   (format "(let [%s]\n%s)"
 			   (mapconcat
 			    (lambda (var)
-			      (format "%S %S" (car var) (cdr var)))
+			      (format "%S '%S" (car var) (cdr var)))
 			    vars
 			    "\n      ")
 			   body))))))
