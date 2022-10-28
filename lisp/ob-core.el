@@ -3170,7 +3170,16 @@ situations in which is it not appropriate."
 	((and (not inhibit-lisp-eval)
 	      (or (memq (string-to-char cell) '(?\( ?' ?` ?\[))
 		  (string= cell "*this*")))
-	 (eval (read cell) t))
+         ;; Prevent arbitrary function calls.
+         (if (and (memq (string-to-char cell) '(?\( ?`))
+                  (not (org-babel-confirm-evaluate
+                      ;; See `org-babel-get-src-block-info'.
+                      (list "emacs-lisp" (format "%S" cell)
+                            '((:eval . yes)) nil (format "%S" cell)
+                            nil nil))))
+             ;; Not allowed.
+             (user-error "Evaluation of elisp code %S aborted." cell)
+	   (eval (read cell) t)))
 	((save-match-data
            (and (string-match "^[[:space:]]*\"\\(.*\\)\"[[:space:]]*$" cell)
                 (not (string-match "[^\\]\"" (match-string 1 cell)))))
