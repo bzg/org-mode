@@ -25,21 +25,22 @@
 
 ;;; Commentary:
 
-;; Support for evaluating clojure code
+;; Support for evaluating Clojure code
 
 ;; Requirements:
 
-;; - clojure (at least 1.2.0)
+;; - Clojure (at least 1.2.0)
 ;; - clojure-mode
-;; - inf-clojure, cider or SLIME
+;; - inf-clojure, Cider, SLIME, babashka or nbb
 
 ;; For clojure-mode, see https://github.com/clojure-emacs/clojure-mode
-;; For cider, see https://github.com/clojure-emacs/cider
-;; For inf-clojure, see https://github.com/clojure-emacs/cider
+;; For inf-clojure, see https://github.com/clojure-emacs/inf-clojure
+;; For Cider, see https://github.com/clojure-emacs/cider
+;; For SLIME, see https://slime.common-lisp.dev
 ;; For babashka, see https://github.com/babashka/babashka
 ;; For nbb, see https://github.com/babashka/nbb
 
-;; For SLIME, the best way to install these components is by following
+;; For SLIME, the best way to install its components is by following
 ;; the directions as set out by Phil Hagelberg (Technomancy) on the
 ;; web page: https://technomancy.us/126
 
