@@ -1201,8 +1201,7 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 
 (defvar org-x11idle-exists-p
   ;; Check that x11idle exists
-  (and (eq window-system 'x)
-       (eq 0 (call-process-shell-command
+  (and (eq 0 (call-process-shell-command
               (format "command -v %s" org-clock-x11idle-program-name)))
        ;; Check that x11idle can retrieve the idle time
        ;; FIXME: Why "..-shell-command" rather than just `call-process'?
