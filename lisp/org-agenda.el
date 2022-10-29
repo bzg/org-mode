@@ -1070,7 +1070,7 @@ current item's tree, in an indirect buffer."
 (defcustom org-agenda-show-outline-path t
   "Non-nil means show outline path in echo area after line motion.
 
-If set to 'title, show outline path with prepended document
+If set to `title', show outline path with prepended document
 title.  Fallback to file name is no title is present."
   :group 'org-agenda-startup
   :type '(choice

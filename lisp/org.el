@@ -7440,7 +7440,7 @@ Returns nil if there are no #+TITLE property."
 (defun org-display-outline-path (&optional file-or-title current separator just-return-string)
   "Display the current outline path in the echo area.
 
-If FILE-OR-TITLE is 'title, prepend outline with file title.  If
+If FILE-OR-TITLE is `title', prepend outline with file title.  If
 it is non-nil or title is not present in document, prepend
 outline path with the file name.
 If CURRENT is non-nil, append the current heading to the output.
