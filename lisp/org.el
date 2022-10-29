@@ -11573,13 +11573,12 @@ in Lisp code use `org-set-tags' instead."
     (cond
      ((equal '(4) arg) (org-align-tags t))
      ((and (org-region-active-p) org-loop-over-headlines-in-active-region)
-      (let (org-loop-over-headlines-in-active-region) ;  hint: infinite recursion.
+      (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
+		    'region-start-level 'region))
+            org-loop-over-headlines-in-active-region) ;  hint: infinite recursion.
 	(org-map-entries
 	 #'org-set-tags-command
-	 nil
-	 (if (eq org-loop-over-headlines-in-active-region 'start-level)
-	     'region-start-level
-	   'region)
+	 nil cl
 	 (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
      (t
       (save-excursion
