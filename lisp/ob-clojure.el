@@ -76,9 +76,16 @@
 (defvar org-babel-default-header-args:clojurescript '())
 (defvar org-babel-header-args:clojurescript '((package . :any)))
 
-(defcustom org-babel-clojure-backend nil
+(defcustom org-babel-clojure-backend (cond
+                                      ((executable-find "bb") 'babashka)
+                                      ((executable-find "nbb") 'nbb)
+                                      ((featurep 'cider) 'cider)
+                                      ((featurep 'inf-clojure) 'inf-clojure)
+                                      ((featurep 'slime) 'slime)
+				      (t nil))
   "Backend used to evaluate Clojure code blocks."
   :group 'org-babel
+  :package-version '(Org . "9.6")
   :type '(choice
 	  (const :tag "inf-clojure" inf-clojure)
 	  (const :tag "cider" cider)
