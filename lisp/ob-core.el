@@ -76,6 +76,7 @@
 (declare-function org-list-struct "org-list" ())
 (declare-function org-list-to-generic "org-list" (LIST PARAMS))
 (declare-function org-list-to-lisp "org-list" (&optional delete))
+(declare-function org-list-to-org "org-list" (list &optional params))
 (declare-function org-macro-escape-arguments "org-macro" (&rest args))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function org-narrow-to-subtree "org" (&optional element))
