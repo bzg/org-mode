@@ -123,7 +123,7 @@ after REF in the Library of Babel."
   "Return internal representation for Library of Babel function call.
 
 Consider DATUM, when provided, or element at point otherwise.
- 
+
 When optional argument NO-EVAL is non-nil, Babel does not resolve
 remote variable references; a process which could likely result
 in the execution of other code blocks, and do not evaluate Lisp
