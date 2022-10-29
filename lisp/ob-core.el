@@ -805,7 +805,7 @@ guess will be made."
                          (format "at position %d" (nth 5 info)))))
 	    (setq exec-start-time (current-time)
                   result
-		  (let ((r (funcall cmd body params)))
+		  (let ((r (save-current-buffer (funcall cmd body params))))
 		    (if (and (eq (cdr (assq :result-type params)) 'value)
 			     (or (member "vector" result-params)
 				 (member "table" result-params))
