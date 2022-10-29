@@ -61,7 +61,7 @@ delete('%s')
 ")
 (defvar org-babel-octave-wrapper-method
   "%s
-if ischar(ans), fid = fopen('%s', 'w'); fprintf(fid, '%%s\\n', ans); fclose(fid);
+if ischar(ans), fid = fopen('%s', 'w'); fdisp(fid, ans); fclose(fid);
 else, dlmwrite('%s', ans, '\\t')
 end")
 
