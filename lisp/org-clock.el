@@ -446,8 +446,8 @@ specifications than `frame-title-format', which see."
 you can do \"~$ sudo apt-get install xprintidle\" if you are using
 a Debian-based distribution.
 
-Alternatively, can find x11idle.c in the org-contrib repository at
-https://git.sr.ht/~bzg/org-contrib"
+Alternatively, can find x11idle.c in
+https://orgmode.org/worg/code/scripts/x11idle.c"
   :group 'org-clock
   :version "24.4"
   :package-version '(Org . "8.0")
