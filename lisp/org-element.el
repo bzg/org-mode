@@ -1287,15 +1287,11 @@ parser (e.g. `:end' and :END:).  Return value is a plist."
                               (min robust-end (point))))
                            (+ 2 contents-begin))))
           (category (cond ((null org-category)
-		           (when (with-current-buffer
-                                     (or (buffer-base-buffer)
-                                         (current-buffer))
+		           (when (org-with-base-buffer nil
                                    buffer-file-name)
 		             (file-name-sans-extension
 		              (file-name-nondirectory
-                               (with-current-buffer
-                                   (or (buffer-base-buffer)
-                                       (current-buffer))
+                               (org-with-base-buffer nil
                                  buffer-file-name)))))
 		          ((symbolp org-category) (symbol-name org-category))
 		          (t org-category)))
@@ -5755,7 +5751,7 @@ after POS.
 
 The function can only find elements in the synchronized part of
 the cache."
-  (with-current-buffer (or (buffer-base-buffer) (current-buffer))
+  (org-with-base-buffer nil
     (let* ((limit (and org-element--cache-sync-requests
                        (org-element--request-key (car org-element--cache-sync-requests))))
 	   (node (org-element--cache-root))
@@ -5970,7 +5966,7 @@ change offset.  It is used in `org-element--cache-submit-request',
 where cache is partially updated before current modification are
 actually submitted."
   (when (buffer-live-p buffer)
-    (with-current-buffer (or (buffer-base-buffer buffer) buffer)
+    (org-with-base-buffer buffer
       ;; Do not sync when, for example, in the middle of
       ;; `combine-change-calls'.  See the commentary inside
       ;; `org-element--cache-active-p'.
@@ -6665,8 +6661,7 @@ BEG and END are the beginning and end of the range of changed
 text.  See `before-change-functions' for more information.
 
 The function returns the new value of `org-element--cache-change-warning'."
-  (with-current-buffer (or (buffer-base-buffer (current-buffer))
-                           (current-buffer))
+  (org-with-base-buffer nil
     (when (org-element--cache-active-p t)
       (org-with-wide-buffer
        (setq org-element--cache-change-tic (buffer-chars-modified-tick))
@@ -6745,8 +6740,7 @@ The function returns the new value of `org-element--cache-change-warning'."
 BEG and END are the beginning and end of the range of changed
 text, and the length in bytes of the pre-change text replaced by
 that range.  See `after-change-functions' for more information."
-  (with-current-buffer (or (buffer-base-buffer (current-buffer))
-                           (current-buffer))
+  (org-with-base-buffer nil
     (when (org-element--cache-active-p t)
       (when (not (eq org-element--cache-change-tic (buffer-chars-modified-tick)))
         (org-element--cache-log-message "After change")
@@ -6960,8 +6954,7 @@ change, as an integer."
   (org-element--cache-log-message
    "Submitting new synchronization request for [%S..%S]𝝙%S"
    beg end offset)
-  (with-current-buffer (or (buffer-base-buffer (current-buffer))
-                           (current-buffer))
+  (org-with-base-buffer nil
     (let ((next (car org-element--cache-sync-requests))
 	  delete-to delete-from)
       (if (and next
@@ -7253,7 +7246,7 @@ When optional argument NO-PERSISTANCE is non-nil, do not try to update
 the cache persistence in the buffer."
   (interactive "P")
   (dolist (buffer (if all (buffer-list) (list (current-buffer))))
-    (with-current-buffer (or (buffer-base-buffer buffer) buffer)
+    (org-with-base-buffer buffer
       (when (and org-element-use-cache (derived-mode-p 'org-mode))
         ;; Only persist cache in file buffers.
         (when (and (buffer-file-name) (not no-persistance))

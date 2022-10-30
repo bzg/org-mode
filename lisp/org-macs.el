@@ -123,6 +123,14 @@ Version mismatch is commonly encountered in the following situations:
 	     ,@body)
 	 (set-buffer-modified-p ,was-modified)))))
 
+(defmacro org-with-base-buffer (buffer &rest body)
+  "Run BODY in base buffer for BUFFER.
+If BUFFER is nil, use base buffer for `current-buffer'."
+  (declare (debug (body)) (indent 1))
+  `(with-current-buffer (or (buffer-base-buffer ,buffer)
+                            (or ,buffer (current-buffer)))
+     ,@body))
+
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
   (declare (debug (form body)) (indent 1))
