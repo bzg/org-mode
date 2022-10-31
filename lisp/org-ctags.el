@@ -230,7 +230,7 @@ If the tag is found, return a list containing the filename, line number, and
 buffer position where the tag is found."
   (interactive "sTag: ")
   (unless tags-file-name
-    (call-interactively (visit-tags-table)))
+    (call-interactively #'visit-tags-table))
   (save-excursion
     (visit-tags-table-buffer 'same)
     (when tags-file-name
@@ -257,7 +257,7 @@ Return the list."
   (interactive)
   (let ((taglist nil))
     (unless tags-file-name
-      (call-interactively (visit-tags-table)))
+      (call-interactively #'visit-tags-table))
     (save-excursion
       (visit-tags-table-buffer 'same)
       (with-current-buffer (get-file-buffer tags-file-name)
@@ -439,7 +439,7 @@ to append a new topic."
 Like ORG-CTAGS-FIND-TAG, but calls the external ctags program first,
 to rebuild (update) the TAGS file."
   (unless tags-file-name
-    (call-interactively (visit-tags-table)))
+    (call-interactively #'visit-tags-table))
   (when (buffer-file-name)
     (org-ctags-create-tags))
   (org-ctags-find-tag name))
