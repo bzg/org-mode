@@ -457,6 +457,20 @@ The new variable name is =org-plantuml-args=.  It now applies to both
 jar PlantUML file and executable.
 
 ** Miscellaneous
+*** SQL Babel ~:dbconnection~ parameter can be mixed with other SQL Babel parameters
+
+Before you could either specify SQL parameters like ~:dbhost~,
+~:dbuser~, ~:database~, etc or a ~:dbconnection~ parameter which looks
+up all other parameters from the ~sql-connection-alist~ variable.  Now
+it's possible to specify a ~:dbconnection~ and additionally other
+parameters that will add or overwrite the parameters coming from
+~sql-connection-alist~.
+
+E.g. if you have a connection in your ~sql-connection-alist~ to a
+server that has many databases, you don't need an entry for every
+database but instead can just specify ~:database~ next to your
+~:dbconnection~ parameter.
+
 *** Post-processing code blocks can return an empty list
 
 When the result of a regular code block is nil, then that was already
