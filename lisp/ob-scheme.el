@@ -56,6 +56,7 @@
 (defvar geiser-repl-window-allow-split)	; Defined in geiser-repl.el
 
 (declare-function run-geiser "ext:geiser-repl" (impl))
+(declare-function geiser "ext:geiser-repl" (impl))
 (declare-function geiser-mode "ext:geiser-mode" ())
 (declare-function geiser-eval-region "ext:geiser-mode"
                   (start end &optional and-go raw nomsg))
@@ -120,7 +121,10 @@
   (let ((buffer (org-babel-scheme-get-session-buffer name)))
     (or buffer
 	(progn
-	  (run-geiser impl)
+          (if (fboundp 'geiser)
+              (geiser impl)
+            ;; Obsolete since Geiser 0.26.
+	    (run-geiser impl))
 	  (when name
 	    (rename-buffer name t)
 	    (org-babel-scheme-set-session-buffer name (current-buffer)))
