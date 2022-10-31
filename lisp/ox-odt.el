@@ -2688,7 +2688,14 @@ INFO is a plist holding contextual information.  See
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
 		((string= type "file")
-		 (org-export-file-uri raw-path))
+                 (let ((path-uri (org-export-file-uri raw-path)))
+                   (if (string-prefix-p "file://" path-uri)
+                       path-uri
+                     ;; Otherwise, it is a relative path.
+                     ;; OpenOffice treats base directory inside the odt
+                     ;; archive.  The directory containing the odt file
+                     ;; is "../".
+                     (concat "../" path-uri))))
 		(t raw-path)))
 	 ;; Convert & to &amp; for correct XML representation
 	 (path (replace-regexp-in-string "&" "&amp;" path)))
