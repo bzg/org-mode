@@ -3066,18 +3066,31 @@ Otherwise, return nil."
 		  (org-time-string-to-time (match-string 1)))
 	    (org-clock-update-mode-line)))
 	 (t
-	  (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))
-	  (end-of-line 1)
-	  (setq ts (match-string 1)
-		te (match-string 3))
-	  (setq s (- (org-time-string-to-seconds te)
+          ;; Prevent recursive call from `org-timestamp-change'.
+          (cl-letf (((symbol-function 'org-clock-update-time-maybe) #'ignore))
+            ;; Update timestamps.
+            (save-excursion
+              (goto-char (match-beginning 1)) ; opening timestamp
+              (save-match-data (org-timestamp-change 0 'day)))
+            ;; Refresh match data.
+            (looking-at re)
+            (save-excursion
+              (goto-char (match-beginning 3)) ; closing timestamp
+              (save-match-data (org-timestamp-change 0 'day))))
+          ;; Refresh match data.
+          (looking-at re)
+          (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))
+          (end-of-line 1)
+          (setq ts (match-string 1)
+                te (match-string 3))
+          (setq s (- (org-time-string-to-seconds te)
 		     (org-time-string-to-seconds ts))
-		neg (< s 0)
-		s (abs s)
-		h (floor (/ s 3600))
-		s (- s (* 3600 h))
-		m (floor (/ s 60))
-		s (- s (* 60 s)))
+                neg (< s 0)
+                s (abs s)
+                h (floor (/ s 3600))
+                s (- s (* 3600 h))
+                m (floor (/ s 60))
+                s (- s (* 60 s)))
 	  (insert " => " (format (if neg "-%d:%02d" "%2d:%02d") h m))
 	  t))))))
 
