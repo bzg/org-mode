@@ -7109,8 +7109,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
        (when (or for-yank (called-interactively-p 'interactive))
          (message "Clipboard pasted as level %d subtree" new-level))
        (when (and (not for-yank) ; in this case, org-yank will decide about folding
-		  kill-ring
-		  (equal org-subtree-clip (current-kill 0))
+		  (equal org-subtree-clip tree)
 		  org-subtree-clip-folded)
          ;; The tree was folded before it was killed/copied
          (org-fold-subtree t))
