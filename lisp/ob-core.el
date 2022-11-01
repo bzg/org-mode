@@ -744,7 +744,11 @@ guess will be made."
           (or executor-type
               ;; If `executor-type' is unset, then we will make an
               ;; informed guess.
-              (pcase (char-after org-babel-current-src-block-location)
+              (pcase (and
+                      ;; When executing virtual src block, no location
+                      ;; is known.
+                      org-babel-current-src-block-location
+                      (char-after org-babel-current-src-block-location))
                 (?s 'inline-src-block)
                 (?c 'inline-babel-call)
                 (?# (pcase (char-after (+ 2 org-babel-current-src-block-location))
@@ -803,7 +807,7 @@ guess will be made."
 		     (let ((name (nth 4 info)))
 		       (if name
                            (format "(%s)" name)
-                         (format "at position %d" (nth 5 info)))))
+                         (format "at position %S" (nth 5 info)))))
 	    (setq exec-start-time (current-time)
                   result
 		  (let ((r (save-current-buffer (funcall cmd body params))))
