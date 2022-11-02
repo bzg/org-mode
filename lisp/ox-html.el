@@ -1994,7 +1994,7 @@ communication channel."
 	     (if (functionp section) (funcall section info)
 	       (cond
 		((stringp section) (format-spec section spec))
-		((eq section 'auto)
+		((and (eq section 'auto) (eq type 'postamble))
 		 (let ((date (cdr (assq ?d spec)))
 		       (author (cdr (assq ?a spec)))
 		       (email (cdr (assq ?e spec)))
