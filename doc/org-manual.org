@@ -13027,17 +13027,17 @@ exporter insert the preamble.  See the variable
 ~org-html-preamble-format~ for the format string.
 
 Set ~org-html-preamble~ to a string to override the default format
-string.  If the string is a function, the HTML exporter expects the
-function to return a string upon execution.  The HTML exporter inserts
-this string in the preamble.  The HTML exporter does not insert
-a preamble if ~org-html-preamble~ is set ~nil~.
+string.  If set to a function, the HTML exporter expects the function
+to return a string upon execution.  The HTML exporter inserts this
+string in the preamble.  The HTML exporter does not insert a preamble
+if ~org-html-preamble~ is set ~nil~.
 
-The default value for ~org-html-postamble~ is ~auto~, which makes the
-HTML exporter build a postamble from looking up author's name, email
-address, creator's name, and date.  Set ~org-html-postamble~ to ~t~ to
-insert the postamble in the format specified in the
-~org-html-postamble-format~ variable.  The HTML exporter does not
-insert a postamble if ~org-html-postamble~ is set to ~nil~.
+The above also applies to ~org-html-postamble~ and
+~org-html-postamble-format~.  In addition, ~org-html-postamble~ can be
+set to ~auto~ (its default value), which makes the HTML exporter build
+a postamble from looking up author's name, email address, creator's
+name, and date.
+
 
 *** Quoting HTML tags
 :PROPERTIES:
