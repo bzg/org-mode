@@ -1277,9 +1277,11 @@ For further information about MathJax options, see the MathJax documentation:
 
 When set to `auto', check against the
 `org-export-with-author/email/creator/date' variables to set the
-content of the postamble.  When set to a string, use this string
-as the postamble.  When t, insert a string as defined by the
-formatting string in `org-html-postamble-format'.
+content of the postamble.  When t, insert a string as defined by the
+formatting string in `org-html-postamble-format'.  When set to a
+string, use this formatting string instead (see
+`org-html-postamble-format' for an example of such a formatting
+string).
 
 When set to a function, apply this function and insert the
 returned string.  The function takes the property list of export
