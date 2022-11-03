@@ -273,6 +273,22 @@ the buffer."
                   (org-log-into-drawer nil))
               (org-clock-drawer-name))))))
 
+(ert-deftest test-org-clock/clock-drawer-dwim ()
+  "Test DWIM update of days for clocks in logbook drawers."
+  (should (equal "* Foo
+:LOGBOOK:
+CLOCK: [2022-11-03 Thu 06:00]--[2022-11-03 Thu 06:01] =>  0:01
+:END:
+"
+         (org-test-with-temp-text
+             "* Foo
+:LOGBOOK:
+<point>CLOCK: [2022-11-03 ??? 06:00]--[2022-11-03 ??? 06:01] =>  0:01
+:END:
+"
+           (org-ctrl-c-ctrl-c)
+           (buffer-string)))))
+
 
 ;;; Clocktable
 
