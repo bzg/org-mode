@@ -110,7 +110,13 @@ exporting the literal LaTeX source."
   :type 'function)
 
 (defcustom org-babel-latex-pdf-svg-process
-  "inkscape --pdf-poppler %f -D -T -l -o %O"
+  "inkscape \
+--pdf-poppler \
+--export-area-drawing \
+--export-text-to-path \
+--export-plain-svg \
+--export-filename=%O \
+%f"
   "Command to convert a PDF file to an SVG file."
   :group 'org-babel
   :type 'string)
