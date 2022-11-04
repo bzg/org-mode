@@ -2007,6 +2007,15 @@ e^{i\\pi}+1=0
 	    (progn (org-mode-restart)
 		   (goto-char (1- (point-max)))
 		   (org-element-property :type (org-element-context))))))
+  ;; Link abbreviation with spaces.
+  (should
+   (equal "https"
+          (org-test-with-temp-text
+              "#+LINK: \"Nu Html Checker\" https://validator.w3.org/nu/?doc=%h
+              [[Nu Html Checker:test]]"
+	    (progn (org-mode-restart)
+		   (goto-char (1- (point-max)))
+		   (org-element-property :type (org-element-context))))))
   ;; Link abbreviation in a secondary string.
   (should
    (equal "https"

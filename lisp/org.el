@@ -4227,7 +4227,11 @@ related expressions."
 	       (delq nil
 		     (mapcar
 		      (lambda (value)
-			(and (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value)
+			(and (or
+                              ;; "abbrev with spaces" spec
+                              (string-match "\\`\"\\(.+[^\\]\\)\"[ \t]+\\(.+\\)" value)
+                              ;; abbrev spec
+                              (string-match "\\`\\(\\S-+\\)[ \t]+\\(.+\\)" value))
 			     (cons (match-string-no-properties 1 value)
 				   (match-string-no-properties 2 value))))
 		      (cdr (assoc "LINK" alist))))))
