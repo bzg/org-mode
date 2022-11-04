@@ -285,7 +285,7 @@ extension beyond end of line was not controllable."
     "Apply connection-local variables according to `default-directory'.
 Execute BODY, and unwind connection-local variables."
     (declare (debug t))
-    `(with-connection-local-profiles (connection-local-get-profiles)
+    `(with-connection-local-profiles (connection-local-get-profiles nil)
        ,@body)))
 
 
