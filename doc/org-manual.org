@@ -18408,13 +18408,17 @@ follows from the type specified above.
 
   When used along with =file= type, the result is a link to the file
   specified in =:file= header argument.  However, unlike plain =file=
-  type, nothing is written to the disk.  The block is used for its
-  side-effects only, as in the following example:
+  type, code block output is not written to the disk.  The block is
+  expected to generate the file by its side-effects only, as in the
+  following example:
 
   #+begin_example
-  ,#+begin_src shell :results file link :file "download.tar.gz"
-  wget -c "https://example.com/download.tar.gz"
+  ,#+begin_src shell :results file link :file "org-mode-unicorn.svg"
+    wget -c "https://orgmode.org/resources/img/org-mode-unicorn.svg"
   ,#+end_src
+
+  ,#+RESULTS:
+  [[file:org-mode-unicorn.svg]]
   #+end_example
 
 - =org= ::
