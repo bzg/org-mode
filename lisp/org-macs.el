@@ -1100,9 +1100,17 @@ Return width in pixels when PIXELS is non-nil."
                   (if (get-buffer-window (current-buffer))
                       (car (window-text-pixel-size
                             nil (line-beginning-position) (point-max)))
-                    (set-window-buffer nil (current-buffer))
-                    (car (window-text-pixel-size
-                          nil (line-beginning-position) (point-max)))))
+                    (let ((dedicatedp (window-dedicated-p))
+                          (oldbuffer (window-buffer)))
+                      (unwind-protect
+                          (progn
+                            ;; Do not throw error in dedicated windows.
+                            (set-window-dedicated-p nil nil)
+                            (set-window-buffer nil (current-buffer))
+                            (car (window-text-pixel-size
+                                  nil (line-beginning-position) (point-max))))
+                        (set-window-buffer nil oldbuffer)
+                        (set-window-dedicated-p nil dedicatedp)))))
             (unless pixels
               (erase-buffer)
               (insert "a")
@@ -1110,9 +1118,17 @@ Return width in pixels when PIXELS is non-nil."
                     (if (get-buffer-window (current-buffer))
                         (car (window-text-pixel-size
                               nil (line-beginning-position) (point-max)))
-                      (set-window-buffer nil (current-buffer))
-                      (car (window-text-pixel-size
-                            nil (line-beginning-position) (point-max)))))))
+                      (let ((dedicatedp (window-dedicated-p))
+                            (oldbuffer (window-buffer)))
+                        (unwind-protect
+                            (progn
+                              ;; Do not throw error in dedicated windows.
+                              (set-window-dedicated-p nil nil)
+                              (set-window-buffer nil (current-buffer))
+                              (car (window-text-pixel-size
+                                    nil (line-beginning-position) (point-max))))
+                          (set-window-buffer nil oldbuffer)
+                          (set-window-dedicated-p nil dedicatedp)))))))
           (if pixels
               pixel-width
             (/ pixel-width symbol-width)))))))
