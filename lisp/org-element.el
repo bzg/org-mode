@@ -603,7 +603,8 @@ Return parent element."
     ;; Link every child to PARENT. If PARENT is nil, it is a secondary
     ;; string: parent is the list itself.
     (dolist (child children)
-      (org-element-put-property child :parent (or parent children)))
+      (when child
+        (org-element-put-property child :parent (or parent children))))
     ;; Add CHILDREN at the end of PARENT contents.
     (when parent
       (apply #'org-element-set-contents
