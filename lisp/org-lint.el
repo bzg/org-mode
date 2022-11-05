@@ -652,7 +652,7 @@ in description"
       (when (equal (org-element-property :key k) "INCLUDE")
         (let* ((value (org-element-property :value k))
                (path
-                (and (string-match "^\\(\".+\"\\|\\S-+\\)[ \t]*" value)
+                (and (string-match "^\\(\".+?\"\\|\\S-+\\)[ \t]*" value)
                      (save-match-data
                        (org-strip-quotes (match-string 1 value))))))
           (if (not path)
