@@ -415,7 +415,7 @@ then run `org-babel-switch-to-session'."
     (mkdirp	. ((yes no)))
     (no-expand)
     (noeval)
-    (noweb	. ((yes no tangle no-export strip-export)))
+    (noweb	. ((yes no tangle strip-tangle no-export strip-export)))
     (noweb-ref	. :any)
     (noweb-sep  . :any)
     (noweb-prefix . ((no yes)))
@@ -2885,9 +2885,9 @@ parameters when merging lists."
   "Check if PARAMS require expansion in CONTEXT.
 CONTEXT may be one of :tangle, :export or :eval."
   (let ((allowed-values (cl-case context
-			  (:tangle '("yes" "tangle" "no-export" "strip-export"))
-			  (:eval   '("yes" "no-export" "strip-export" "eval"))
-			  (:export '("yes")))))
+			  (:tangle '("yes" "tangle" "no-export" "strip-export" "strip-tangle"))
+			  (:eval   '("yes" "no-export" "strip-export" "eval" "strip-tangle"))
+			  (:export '("yes" "strip-tangle")))))
     (cl-some (lambda (v) (member v allowed-values))
 	     (split-string (or (cdr (assq :noweb params)) "")))))
 

@@ -228,6 +228,11 @@ commands.
 =:noweb-prefix= can be set to =no= to prevent the prefix characters
 from being repeated when expanding a multiline noweb reference.
 
+*** New =:noweb= babel header argument value =strip-tangle=
+
+=:noweb= can be set to =strip-tangle= to strip the noweb syntax references
+before tangling.
+
 *** New LaTeX source block backend using =engraved-faces-latex=
 
 When ~org-latex-src-block-backend~ is set to ~engraved~,

@@ -18998,6 +18998,12 @@ tangled, or exported.
   Expansion of noweb syntax references in the body of the code block
   when tangling.  No expansion when evaluating or exporting.
 
+- =strip-tangle= ::
+
+  Expansion of noweb syntax references in the body of the code block
+  when evaluating or exporting.  Removes noweb syntax references
+  when exporting.
+
 - =no-export= ::
 
   Expansion of noweb syntax references in the body of the code block

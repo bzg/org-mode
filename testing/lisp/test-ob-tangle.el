@@ -510,6 +510,32 @@ another block
 		    (org-split-string (buffer-string))))
 	      (delete-file file))))))
 
+(ert-deftest ob-tangle/strip-tangle ()
+  "Test if strip-tangle works correctly when tangling noweb code blocks."
+  (should
+   (equal '("1")
+          (let ((file (make-temp-file "org-tangle-")))
+            (unwind-protect
+                (progn
+                  (org-test-with-temp-text-in-file
+                   (format "
+#+name: block1
+#+begin_src elisp
+2
+#+end_src
+
+#+begin_src elisp :noweb strip-tangle :tangle %s
+1<<block1>>
+#+end_src
+" file)
+                   (let ((org-babel-noweb-error-all-langs nil)
+                         (org-babel-noweb-error-langs nil))
+                     (org-babel-tangle)))
+                  (with-temp-buffer
+                    (insert-file-contents file)
+                    (org-split-string (buffer-string))))
+              (delete-file file))))))
+
 (ert-deftest ob-tangle/detangle-false-positive ()
   "Test handling of false positive link during detangle."
   (let (buffer)

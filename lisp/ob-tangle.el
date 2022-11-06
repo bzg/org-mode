@@ -536,7 +536,9 @@ non-nil, return the full association list to be used by
 	 (body
 	  ;; Run the tangle-body-hook.
           (let ((body (if (org-babel-noweb-p params :tangle)
-			  (org-babel-expand-noweb-references info)
+                          (if (string= "strip-tangle" (cdr (assq :noweb (nth 2 info))))
+                            (replace-regexp-in-string (org-babel-noweb-wrap) "" (nth 1 info))
+			    (org-babel-expand-noweb-references info))
 			(nth 1 info))))
 	    (with-temp-buffer
 	      (insert
