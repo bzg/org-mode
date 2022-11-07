@@ -4196,7 +4196,7 @@ meant to be translated with `org-export-data' or alike."
 	  ((and fmt
 		(not (cdr date))
 		(eq (org-element-type (car date)) 'timestamp))
-	   (org-timestamp-format (car date) fmt))
+	   (org-format-timestamp (car date) fmt))
 	  (t date))))
 
 

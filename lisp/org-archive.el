@@ -239,7 +239,7 @@ direct children of this heading."
 	     (tr-org-odd-levels-only org-odd-levels-only)
 	     (this-buffer (current-buffer))
 	     (time (format-time-string
-		    (substring (cdr org-time-stamp-formats) 1 -1)))
+                    (org-time-stamp-format 'with-time 'no-brackets)))
 	     (file (abbreviate-file-name
 		    (or (buffer-file-name (buffer-base-buffer))
 			(error "No file associated to buffer"))))
@@ -490,7 +490,7 @@ Archiving time is retained in the ARCHIVE_TIME node property."
 	(org-set-property
 	 "ARCHIVE_TIME"
 	 (format-time-string
-	  (substring (cdr org-time-stamp-formats) 1 -1)))
+          (org-time-stamp-format 'with-time 'no-brackets)))
 	(outline-up-heading 1 t)
 	(org-fold-subtree t)
 	(org-cycle-show-empty-lines 'folded)

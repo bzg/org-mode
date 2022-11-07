@@ -95,7 +95,6 @@
 (defvar org-property-re)
 (defvar org-src-preserve-indentation)
 (defvar org-tags-column)
-(defvar org-time-stamp-formats)
 (defvar org-todo-regexp)
 (defvar org-ts-regexp-both)
 
@@ -4033,8 +4032,7 @@ Assume point is at the beginning of the timestamp."
 	  ;; the repeater string, if any.
 	  (lambda (time activep &optional with-time-p hour-end minute-end)
 	    (let ((ts (format-time-string
-		       (funcall (if with-time-p #'cdr #'car)
-				org-time-stamp-formats)
+                       (org-time-stamp-format with-time-p)
 		       time)))
 	      (when (and hour-end minute-end)
 		(string-match "[012]?[0-9]:[0-5][0-9]" ts)

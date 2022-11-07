@@ -920,7 +920,7 @@ See `org-odt--build-date-styles' for implementation details."
   (let* ((format-timestamp
 	  (lambda (timestamp format &optional end utc)
 	    (if timestamp
-		(org-timestamp-format timestamp format end utc)
+		(org-format-timestamp timestamp format end utc)
 	      (format-time-string format nil utc))))
 	 (has-time-p (or (not timestamp)
 			 (org-timestamp-has-time-p timestamp)))
@@ -936,14 +936,8 @@ See `org-odt--build-date-styles' for implementation details."
 	     ;; don't bother about formatting the date contents to be
 	     ;; compatible with "OrgDate1" and "OrgDateTime" styles.  A
 	     ;; simple Org-style date should suffice.
-	     (date (let* ((formats
-			   (if org-display-custom-times
-			       (cons (substring
-				      (car org-time-stamp-custom-formats) 1 -1)
-				     (substring
-				      (cdr org-time-stamp-custom-formats) 1 -1))
-			     '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M")))
-			  (format (if has-time-p (cdr formats) (car formats))))
+	     (date (let ((format (org-time-stamp-format
+                                  has-time-p 'no-brackets 'custom)))
 		     (funcall format-timestamp timestamp format end)))
 	     (repeater (let ((repeater-type (org-element-property
 					     :repeater-type timestamp))
@@ -1422,8 +1416,10 @@ original parsed data.  INFO is a plist holding export options."
 	 ;; value before moving on to temp-buffer context down below.
 	 (custom-time-fmts
 	  (if org-display-custom-times
-	      (cons (substring (car org-time-stamp-custom-formats) 1 -1)
-		    (substring (cdr org-time-stamp-custom-formats) 1 -1))
+              (cons (org-time-stamp-format
+                     nil 'no-brackets 'custom)
+                    (org-time-stamp-format
+                     'with-time 'no-brackets 'custom))
 	    '("%Y-%M-%d %a" . "%Y-%M-%d %a %H:%M"))))
     (with-temp-buffer
       (insert-file-contents

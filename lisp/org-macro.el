@@ -368,7 +368,7 @@ Return value as a string."
 	     (not (cdr date))
 	     (eq 'timestamp (org-element-type (car date))))
 	(format "(eval (if (org-string-nw-p $1) %s %S))"
-		(format "(org-timestamp-format '%S $1)"
+		(format "(org-format-timestamp '%S $1)"
 			(org-element-copy (car date)))
 		value)
       value)))

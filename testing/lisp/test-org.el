@@ -8279,19 +8279,19 @@ CLOSED: %s
   (should-not (org-get-repeat "<2012-03-29 Thu 16:40>")))
 
 (ert-deftest test-org/timestamp-format ()
-  "Test `org-timestamp-format' specifications."
+  "Test `org-format-timestamp' specifications."
   ;; Regular test.
   (should
    (equal
     "2012-03-29 16:40"
     (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
-      (org-timestamp-format (org-element-context) "%Y-%m-%d %R"))))
+      (org-format-timestamp (org-element-context) "%Y-%m-%d %R"))))
   ;; Range end.
   (should
    (equal
     "2012-03-29"
     (org-test-with-temp-text "[2011-07-14 Thu]--[2012-03-29 Thu]"
-      (org-timestamp-format (org-element-context) "%Y-%m-%d" t)))))
+      (org-format-timestamp (org-element-context) "%Y-%m-%d" t)))))
 
 (ert-deftest test-org/timestamp-split-range ()
   "Test `org-timestamp-split-range' specifications."

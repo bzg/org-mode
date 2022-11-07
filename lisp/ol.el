@@ -42,7 +42,6 @@
 (defvar org-inhibit-startup)
 (defvar org-outline-regexp-bol)
 (defvar org-src-source-file-name)
-(defvar org-time-stamp-formats)
 (defvar org-ts-regexp)
 
 (declare-function calendar-cursor-to-date "calendar" (&optional error event))
@@ -1620,7 +1619,7 @@ non-nil."
 	(let ((cd (calendar-cursor-to-date)))
 	  (setq link
 		(format-time-string
-		 (car org-time-stamp-formats)
+                 (org-time-stamp-format)
 		 (org-encode-time 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd))))
 	  (org-link-store-props :type "calendar" :date cd)))
 

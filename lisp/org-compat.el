@@ -384,6 +384,8 @@ Counting starts at 1."
 (define-obsolete-function-alias 'org-string-match-p 'string-match-p "9.0")
 
 ;;;; Functions and variables from previous releases now obsolete.
+(define-obsolete-function-alias 'org-timestamp-format
+  'org-format-timestamp "Org 9.6")
 (define-obsolete-variable-alias 'org-export-before-processing-hook
   'org-export-before-processing-functions "Org 9.6")
 (define-obsolete-variable-alias 'org-export-before-parsing-hook

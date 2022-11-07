@@ -55,7 +55,6 @@
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
 (defvar org-link-bracket-re)
-(defvar org-time-stamp-formats)
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org mode."
@@ -2388,7 +2387,7 @@ have priority."
 	      (`interactive "(Range interactively set)")
 	      (`untilnow "now"))))
       (if (not as-strings) (list start end text)
-	(let ((f (cdr org-time-stamp-formats)))
+	(let ((f (org-time-stamp-format 'with-time)))
 	  (list (and start (format-time-string f start))
 		(format-time-string f end)
 		text))))))

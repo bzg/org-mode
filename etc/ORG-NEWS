@@ -460,6 +460,36 @@ exported and an ASCII graph will be inserted below the src block.
 
 The new variable name is =org-plantuml-args=.  It now applies to both
 jar PlantUML file and executable.
+*** Default values and interpretations of ~org-time-stamp-formats~ and ~org-time-stamp-custom-formats~ are changed
+
+Leading =<= and trailing =>= in the default values of
+~org-time-stamp-formats~ and ~org-time-stamp-custom-formats~ are
+stripped.
+
+The Org functions that are using these variables also ignore leading
+and trailing brackets (=<...>= and =[...]=, if present).
+
+This change makes the Org code more consistent and also makes the
+docstring for ~org-time-stamp-custom-formats~ accurate.
+
+No changes on the user side are needed if
+~org-time-stamp-custom-formats~ was customized.
+*** ~org-timestamp-format~ is renamed to ~org-format-timestamp~
+
+The old function name is similar to other ~org-time-stamp-format~
+function.  The new name emphasizes that ~org-format-timestamp~ works
+on =timestamp= objects.
+
+*** Updated argument list in ~org-time-stamp-format~
+
+New =custom= argument in ~org-time-stamp-format~ makes the function
+use ~org-time-stamp-custom-formats~ instead of
+~org-time-stamp-formats~ to determine the format.
+
+Optional argument =long= is renamed to =with-time=, emphasizing that it refers to time stamp format with time specification.
+
+Optional argument =inactive= can now have a value =no-brackets= to
+return format string with brackets stripped.
 
 ** Miscellaneous
 *** SQL Babel ~:dbconnection~ parameter can be mixed with other SQL Babel parameters
