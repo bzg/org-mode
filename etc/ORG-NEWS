@@ -355,6 +355,11 @@ lines in ICS exports.  The customization can be used to disable
 the prefixes completely or make them a little bit more verbose
 (e.g. "Deadline: " instead of the default "DL: ").
 
+The same settings can also be applied via corresponding exporter
+options:
+=:icalendar-scheduled-summary-prefix=,
+=:icalendar-deadline-summary-prefix=
+
 *** A new custom setting =org-hide-drawer-startup= to control initial folding state of drawers
 
 Previously, all the drawers were always folded when opening an Org

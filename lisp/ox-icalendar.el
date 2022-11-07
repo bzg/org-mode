@@ -332,7 +332,9 @@ re-read the iCalendar file.")
     (:icalendar-store-UID nil nil org-icalendar-store-UID)
     (:icalendar-timezone nil nil org-icalendar-timezone)
     (:icalendar-use-deadline nil nil org-icalendar-use-deadline)
-    (:icalendar-use-scheduled nil nil org-icalendar-use-scheduled))
+    (:icalendar-use-scheduled nil nil org-icalendar-use-scheduled)
+    (:icalendar-scheduled-summary-prefix nil nil org-icalendar-scheduled-summary-prefix)
+    (:icalendar-deadline-summary-prefix nil nil org-icalendar-deadline-summary-prefix))
   :filters-alist
   '((:filter-headline . org-icalendar-clear-blank-lines))
   :menu-entry
@@ -630,7 +632,9 @@ inlinetask within the section."
 	  ;; "VEVENT" component from scheduled, deadline, or any
 	  ;; timestamp in the entry.
 	  (let ((deadline (org-element-property :deadline entry))
-		(use-deadline (plist-get info :icalendar-use-deadline)))
+		(use-deadline (plist-get info :icalendar-use-deadline))
+                (deadline-summary-prefix (org-icalendar-cleanup-string
+                                          (plist-get info :icalendar-deadline-summary-prefix))))
 	    (and deadline
 		 (pcase todo-type
 		   (`todo (or (memq 'event-if-todo-not-done use-deadline)
@@ -639,10 +643,12 @@ inlinetask within the section."
 		   (_ (memq 'event-if-not-todo use-deadline)))
 		 (org-icalendar--vevent
 		  entry deadline (concat "DL-" uid)
-		  (concat org-icalendar-deadline-summary-prefix summary)
+		  (concat deadline-summary-prefix summary)
                   loc desc cat tz class)))
 	  (let ((scheduled (org-element-property :scheduled entry))
-		(use-scheduled (plist-get info :icalendar-use-scheduled)))
+		(use-scheduled (plist-get info :icalendar-use-scheduled))
+                (scheduled-summary-prefix (org-icalendar-cleanup-string
+                                           (plist-get info :icalendar-scheduled-summary-prefix))))
 	    (and scheduled
 		 (pcase todo-type
 		   (`todo (or (memq 'event-if-todo-not-done use-scheduled)
@@ -651,7 +657,7 @@ inlinetask within the section."
 		   (_ (memq 'event-if-not-todo use-scheduled)))
 		 (org-icalendar--vevent
 		  entry scheduled (concat "SC-" uid)
-		  (concat org-icalendar-scheduled-summary-prefix summary)
+		  (concat scheduled-summary-prefix summary)
                   loc desc cat tz class)))
 	  ;; When collecting plain timestamps from a headline and its
 	  ;; title, skip inlinetasks since collection will happen once
