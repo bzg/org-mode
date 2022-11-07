@@ -166,28 +166,57 @@ When set to `query', ask the user instead."
   "Translate an UUID ID into a folder-path.
 Default format for how Org translates ID properties to a path for
 attachments.  Useful if ID is generated with UUID."
-  (format "%s/%s"
-	  (substring id 0 2)
-	  (substring id 2)))
+  (and (< 2 (length id))
+       (format "%s/%s"
+               (substring id 0 2)
+               (substring id 2))))
 
 (defun org-attach-id-ts-folder-format (id)
   "Translate an ID based on a timestamp to a folder-path.
 Useful way of translation if ID is generated based on ISO8601
 timestamp.  Splits the attachment folder hierarchy into
 year-month, the rest."
-  (format "%s/%s"
-	  (substring id 0 6)
-	  (substring id 6)))
+  (and (< 6 (length id))
+       (format "%s/%s"
+               (substring id 0 6)
+               (substring id 6))))
 
-(defcustom org-attach-id-to-path-function-list '(org-attach-id-uuid-folder-format
-						 org-attach-id-ts-folder-format)
-  "List of functions parsing an ID string into a folder-path.
-The first function in this list defines the preferred function
-which will be used when creating new attachment folders.  All
-functions of this list will be tried when looking for existing
-attachment folders based on ID."
+(defun org-attach-id-fallback-folder-format (id)
+  "Return \"__/X/ID\" folder path as a dumb fallback.
+X is the first character in the ID string.
+
+This function may be appended to `org-attach-id-path-function-list' to
+provide a fallback for non-standard ID values that other functions in
+`org-attach-id-path-function-list' are unable to handle.  For example,
+when the ID is too short for `org-attach-id-ts-folder-format'.
+
+However, we recommend to define a more specific function spreading
+entries over multiple folders.  This function may create a large
+number of entries in a single folder, which may cause issues on some
+systems."
+  (format "__/%s/%s" (substring id 0 1) id))
+
+(defcustom org-attach-id-to-path-function-list
+  '(org-attach-id-uuid-folder-format
+    org-attach-id-ts-folder-format
+    org-attach-id-fallback-folder-format)
+  "List of functions used to derive attachment path from an ID string.
+The functions are called with a single ID argument until the return
+value is an existing folder.  If no folder has been created yet for
+the given ID, then the first non-nil value defines the attachment
+dir to be created.
+
+Usually, the ID format passed to the functions is defined by
+`org-id-method'.  It is advised that the first function in the list do
+not generate all the attachment dirs inside the same parent dir.  Some
+file systems may have performance issues in such scenario.
+
+Care should be taken when customizing this variable.  Previously
+created attachment folders might not be correctly mapped upon removing
+functions from the list.  Then, Org will not be able to detect the
+existing attachments."
   :group 'org-attach
-  :package-version '(Org . "9.3")
+  :package-version '(Org . "9.6")
   :type '(repeat (function :tag "Function with ID as input")))
 
 (defvar org-attach-after-change-hook nil
@@ -360,7 +389,7 @@ If no attachment directory can be derived, return nil."
       (org-attach-check-absolute-path attach-dir))
      ((setq id (org-entry-get nil "ID" org-attach-use-inheritance))
       (org-attach-check-absolute-path nil)
-      (setq attach-dir (org-attach-dir-from-id id 'try-all))))
+      (setq attach-dir (org-attach-dir-from-id id 'existing))))
     (if no-fs-check
 	attach-dir
       (when (and attach-dir (file-directory-p attach-dir))
@@ -381,7 +410,11 @@ If the attachment by some reason cannot be created an error will be raised."
 	  (setq answer (read-char-exclusive)))
 	(cond
 	 ((or (eq org-attach-preferred-new-method 'id) (eq answer ?1))
-	  (setq attach-dir (org-attach-dir-from-id (org-id-get nil t))))
+	  (let ((id (org-id-get nil t)))
+	    (or (setq attach-dir (org-attach-dir-from-id id))
+		(error "Failed to get folder for id %s, \
+adjust `org-attach-id-to-path-function-list'"
+		        id))))
 	 ((or (eq org-attach-preferred-new-method 'dir) (eq answer ?2))
 	  (setq attach-dir (org-attach-set-directory)))
 	 ((eq org-attach-preferred-new-method 'nil)
@@ -392,27 +425,25 @@ If the attachment by some reason cannot be created an error will be raised."
       (make-directory attach-dir t))
     attach-dir))
 
-(defun org-attach-dir-from-id (id  &optional try-all)
+(defun org-attach-dir-from-id (id  &optional existing)
   "Return a folder path based on `org-attach-id-dir' and ID.
-If TRY-ALL is non-nil, try all id-to-path functions in
-`org-attach-id-to-path-function-list' and return the first path
-that exist in the filesystem, or the first one if none exist.
-Otherwise only use the first function in that list."
-  (let ((attach-dir-preferred (expand-file-name
-			       (funcall (car org-attach-id-to-path-function-list) id)
-			       (expand-file-name org-attach-id-dir))))
-    (if try-all
-	(let ((attach-dir attach-dir-preferred)
-	      (fun-list (cdr org-attach-id-to-path-function-list)))
-	  (while (and fun-list (not (file-directory-p attach-dir)))
-	    (setq attach-dir (expand-file-name
-			      (funcall (car fun-list) id)
-			      (expand-file-name org-attach-id-dir)))
-	    (setq fun-list (cdr fun-list)))
-	  (if (file-directory-p attach-dir)
-	      attach-dir
-	    attach-dir-preferred))
-      attach-dir-preferred)))
+Try id-to-path functions in `org-attach-id-to-path-function-list'
+ignoring nils.  If EXISTING is non-nil, then return the first path
+found in the filesystem.  Otherwise return the first non-nil value."
+  (let ((fun-list org-attach-id-to-path-function-list)
+        (base-dir (expand-file-name org-attach-id-dir))
+        preferred first)
+    (while (and fun-list
+                (not preferred))
+      (let* ((name (funcall (car fun-list) id))
+             (candidate (and name (expand-file-name name base-dir))))
+        (setq fun-list (cdr fun-list))
+        (when candidate
+          (if (or (not existing) (file-directory-p candidate))
+              (setq preferred candidate)
+            (unless first
+              (setq first candidate))))))
+    (or preferred first)))
 
 (defun org-attach-check-absolute-path (dir)
   "Check if we have enough information to root the attachment directory.

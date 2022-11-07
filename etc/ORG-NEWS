@@ -604,6 +604,45 @@ With the new customization option ~org-texinfo-with-latex~ set to (its
 default value) ~'detect~, if the system runs Texinfo 6.8 (3 July 2021)
 or newer, Org will export all LaTeX fragments and environments using
 Texinfo ~@math~ and ~@displaymath~ commands respectively.
+*** More flexible ~org-attach-id-to-path-function-list~
+
+List entries may return nil if they are unable to handle the passed
+ID.  So, responsibility is passed to the next item in the list.
+Default entries ~org-attach-id-uuid-folder-format~ and
+~org-attach-id-ts-folder-format~ now return nil for too short IDs.
+Earlier an obscure error has been thrown.
+
+After the change, error text suggests adjusting
+~org-attach-id-to-path-function-list~ value.  The
+~org-attach-dir-from-id~ function is adapted to ignore nil values and
+to take first non-nil value instead of the value returned by first
+~org-attach-id-to-path-function-list~ item.
+
+New policy allows mixing different ID styles while keeping subfolder
+layout suited best for each one.  For example, one can use the
+following snippet to allow multiple different ID formats in Org files.
+
+#+begin_src emacs-lisp
+(setq org-attach-id-to-path-function-list
+      '(;; When ID looks like an UUIDs or Org internal ID, use
+        ;; `org-attach-id-uuid-folder-format'.
+        (lambda (id)
+          (and (or (org-uuidgen-p id)
+	           (string-match-p "[0-9a-z]\\{12\\}" id))
+	       (org-attach-id-uuid-folder-format id)))
+        ;; When ID looks like a timestap-based ID. Group by year-month
+        ;; folders.
+        (lambda (id)
+          (and (string-match-p "[0-9]\\{8\\}T[0-9]\\{6\\}\.[0-9]\\{6\\}" id)
+               (org-attach-id-ts-folder-format id)))
+        ;; Any other ID goes into "important" folder.
+        (lambda (id) (format "important/%s/%s" (substring id 0 1) id))
+        ;; Fallback to detect existing attachments for old defaults.
+        ;; All the above functions, even when return non-nil, would
+        ;; point to non-existing folders.
+        org-attach-id-uuid-folder-format
+        org-attach-id-ts-folder-format))
+#+end_src
 
 * Version 9.5
 
