@@ -150,7 +150,7 @@ a parameter, such as \"ghc -v\"."
               (`output (mapconcat #'identity (reverse results) "\n"))
               (`value (car results)))))
        (org-babel-result-cond (cdr (assq :result-params params))
-	 result (org-babel-script-escape result)))
+	 result (when result (org-babel-script-escape result))))
      (org-babel-pick-name (cdr (assq :colname-names params))
 			  (cdr (assq :colname-names params)))
      (org-babel-pick-name (cdr (assq :rowname-names params))
