@@ -18657,7 +18657,8 @@ Optional argument ELEMENT contains element at BEG."
   (org-with-wide-buffer
    (when beg (goto-char beg))
    (setq element (or element (org-element-at-point)))
-   (if (not (org-element-lineage element '(headline inlinetask)))
+   (if (or (eq (org-element-type element) 'headline)
+           (not (org-element-lineage element '(headline inlinetask))))
        nil ; Not inside heading.
      ;; Skip to top-level parent in section.
      (while (not (eq 'section (org-element-type (org-element-property :parent element))))
