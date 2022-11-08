@@ -46,10 +46,18 @@ ans = s
 
 
 * Graphical tests
-#+begin_src octave :results graphics :file chart.png
+
+Graphics file.  This test is performed by =ob-octave/graphics-file= in =testing/lisp/test-ob-octave.el=.
+#+begin_src octave :results file graphics :file sombrero.png
 sombrero;
 #+end_src
 
-#+begin_src octave :session
+Graphics file in a session.  This test is performed by =ob-octave/graphics-file-session= in =testing/lisp/test-ob-octave.el=.
+#+begin_src octave :session :results graphics file :file sombrero.png
+sombrero;
+#+end_src
+
+Graphics file with a space in name.  This test is performed by =ob-octave/graphics-file-space= in =testing/lisp/test-ob-octave.el=.
+#+begin_src octave :results graphics file :file sombrero hat.png
 sombrero;
 #+end_src
