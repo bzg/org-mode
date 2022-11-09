@@ -68,113 +68,143 @@
 (ert-deftest test-org-num/max-level ()
   "Test `org-num-max-level' option."
   (should
-   (equal '("1.1 " "1 ")
+   (equal (sort '("1.1 " "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n** H2\n*** H3"
             (let ((org-num-max-level 2)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max)))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp)))))
 
 (ert-deftest test-org-num/skip-numbering ()
   "Test various skip numbering parameters."
   ;; Skip commented headlines.
   (should
-   (equal '(nil "1 ")
+   (equal (sort '(nil "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* COMMENT H2"
             (let ((org-num-skip-commented t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("2 " "1 ")
+   (equal (sort '("2 " "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* COMMENT H2"
             (let ((org-num-skip-commented nil)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Skip commented sub-trees.
   (should
-   (equal '(nil nil)
+   (equal (sort '(nil nil) #'string-lessp)
           (org-test-with-temp-text "* COMMENT H1\n** H2"
             (let ((org-num-skip-commented t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Skip footnotes sections.
   (should
-   (equal '(nil "1 ")
+   (equal (sort '(nil "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* FN"
             (let ((org-num-skip-footnotes t)
                   (org-footnote-section "FN"))
               (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("2 " "1 ")
+   (equal (sort '("2 " "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* FN"
             (let ((org-num-skip-footnotes nil)
                   (org-footnote-section "FN"))
               (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Skip tags, recursively.
   (should
-   (equal '(nil "1 ")
+   (equal (sort '(nil "1 ") #'string-lessp)
           (org-test-with-temp-text "* H1\n* H2 :foo:"
             (let ((org-num-skip-tags '("foo"))) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '(nil nil)
+   (equal (sort '(nil nil) #'string-lessp)
           (org-test-with-temp-text "* H1 :foo:\n** H2"
             (let ((org-num-skip-tags '("foo"))) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Skip unnumbered sections.
   (should
-   (equal '(nil "1 ")
+   (equal (sort '(nil "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("2 " "1 ")
+   (equal (sort '("2 " "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: t\n:END:"
             (let ((org-num-skip-unnumbered nil)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("2 " "1 ")
+   (equal (sort '("2 " "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H1\n* H2\n:PROPERTIES:\n:UNNUMBERED: nil\n:END:"
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Skip unnumbered sub-trees.
   (should
-   (equal '(nil nil)
+   (equal (sort '(nil nil) #'string-lessp)
           (org-test-with-temp-text
               "* H1\n:PROPERTIES:\n:UNNUMBERED: t\n:END:\n** H2"
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Do not choke on empty headlines.
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "* "
             (let ((org-num-skip-commented t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "* "
             (let ((org-num-skip-unnumbered t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "* "
             (let ((org-num-skip-footnotes t)) (org-num-mode 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max)))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp)))))
 
 (ert-deftest test-org-num/update ()
   "Test numbering update after a buffer modification."
@@ -202,79 +232,97 @@
                          'after-string))))
   ;; Headlines created at END.
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "X<point> H"
             (org-num-mode 1)
             (insert "\n*")
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "X<point>* H"
             (org-num-mode 1)
             (insert "\n")
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Headlines created between BEG and END.
   (should
-   (equal '("1.1 " "1 ")
+   (equal (sort '("1.1 " "1 ") #'string-lessp)
           (org-test-with-temp-text ""
             (org-num-mode 1)
             (insert "\n* H\n** H2")
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Change level of a headline.
   (should
-   (equal '("0.1 ")
+   (equal (sort '("0.1 ") #'string-lessp)
           (org-test-with-temp-text "* H"
             (org-num-mode 1)
             (insert "*")
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "*<point>* H"
             (org-num-mode 1)
             (delete-char 1)
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Alter skip state.
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text "* H :fo<point>o:"
             (let ((org-num-skip-tags '("foo")))
               (org-num-mode 1)
               (delete-char 1))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   (should
-   (equal '(nil)
+   (equal (sort '(nil) #'string-lessp)
           (org-test-with-temp-text "* H :fo<point>:"
             (let ((org-num-skip-tags '("foo")))
               (org-num-mode 1)
               (insert "o"))
-            (mapcar (lambda (o) (overlay-get o 'after-string))
-                    (overlays-in (point-min) (point-max))))))
+            (sort
+             (mapcar (lambda (o) (overlay-get o 'after-string))
+                     (overlays-in (point-min) (point-max)))
+             #'string-lessp))))
   ;; Invalidate an overlay and insert new headlines.
   (should
-   (equal '("1.2 " "1.1 " "1 ")
+   (equal (sort '("1.2 " "1.1 " "1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H\n:PROPERTIES:\n:UNNUMBE<point>RED: t\n:END:"
             (let ((org-num-skip-unnumbered t))
               (org-num-mode 1)
               (insert "\n** H2\n** H3\n")
-              (mapcar (lambda (o) (overlay-get o 'after-string))
-                      (overlays-in (point-min) (point-max)))))))
+              (sort
+               (mapcar (lambda (o) (overlay-get o 'after-string))
+                       (overlays-in (point-min) (point-max)))
+               #'string-lessp)))))
   ;; Invalidate two overlays: current headline and next one.
   (should
-   (equal '("1 ")
+   (equal (sort '("1 ") #'string-lessp)
           (org-test-with-temp-text
               "* H\n:PROPERTIES:\n:UNNUMBE<point>RED: t\n:END:\n** H2"
             (let ((org-num-skip-unnumbered t))
               (org-num-mode 1)
               (delete-region (point) (line-beginning-position 3))
-              (mapcar (lambda (o) (overlay-get o 'after-string))
-                      (overlays-in (point-min) (point-max))))))))
+              (sort
+               (mapcar (lambda (o) (overlay-get o 'after-string))
+                       (overlays-in (point-min) (point-max)))
+               #'string-lessp))))))
 
 (provide 'test-org-num)
 ;;; org-test-num.el ends here

@@ -3049,23 +3049,36 @@ See also `test-org-table/copy-field'."
 	    (org-table-toggle-column-width)
 	    (buffer-substring (line-beginning-position)
 			      (overlay-start
-			       (car (overlays-in (line-beginning-position)
-						 (line-end-position))))))))
+			       (nth
+                                1
+                                (sort
+                                 (overlays-in (line-beginning-position)
+					      (line-end-position))
+                                 (lambda (ov1 ov2) (< (overlay-start ov1)
+                                                 (overlay-start ov2))))))))))
   (should
    (equal "| a  "
 	  (org-test-with-temp-text "| <3>  |\n| <point>a   |"
 	    (org-table-toggle-column-width)
 	    (buffer-substring (line-beginning-position)
 			      (overlay-start
-			       (car (overlays-in (line-beginning-position)
-						 (line-end-position))))))))
+			       (car
+                                (sort
+                                 (overlays-in (line-beginning-position)
+					      (line-end-position))
+                                 (lambda (ov1 ov2) (< (overlay-start ov1)
+                                                 (overlay-start ov2))))))))))
   (should
    (equal (concat "----" org-table-shrunk-column-indicator)
 	  (org-test-with-temp-text "| <3>  |\n|--<point>----|"
 	    (org-table-toggle-column-width)
 	    (overlay-get
-	     (car (overlays-in (line-beginning-position)
-			       (line-end-position)))
+	     (car
+              (sort
+               (overlays-in (line-beginning-position)
+			    (line-end-position))
+               (lambda (ov1 ov2) (< (overlay-start ov1)
+                               (overlay-start ov2)))))
 	     'display))))
   ;; Width only takes into account visible characters.
   (should
@@ -3074,8 +3087,13 @@ See also `test-org-table/copy-field'."
 	    (org-table-toggle-column-width)
 	    (buffer-substring (line-beginning-position)
 			      (overlay-start
-			       (car (overlays-in (line-beginning-position)
-						 (line-end-position))))))))
+			       (nth
+                                1
+                                (sort
+                                 (overlays-in (line-beginning-position)
+					      (line-end-position))
+                                 (lambda (ov1 ov2) (< (overlay-start ov1)
+                                                 (overlay-start ov2))))))))))
   ;; Before the first column or after the last one, ask for columns
   ;; ranges.
   (should
