@@ -24,6 +24,8 @@
 
 (require 'org-test "../testing/org-test")
 (require 'ob-core)
+(unless (featurep 'ob-java)
+  (signal 'missing-test-dependency "Support for java code blocks"))
 
 ;;; No Java required
 
