@@ -24,6 +24,8 @@
 
 (require 'org-test "../testing/org-test")
 (require 'ob-core)
+;; ob-java is needed for linter tests as well.  org-lint relies on
+;; default header arg value.
 (unless (featurep 'ob-java)
   (signal 'missing-test-dependency "Support for java code blocks"))
 
@@ -74,8 +76,6 @@
 
 (org-test-for-executable "java")
 (org-test-for-executable "javac")
-(unless (featurep 'ob-java)
-  (signal 'missing-test-dependency "Support for java code blocks"))
 
 ; simple tests
 
