@@ -198,7 +198,7 @@ export file for all source blocks.
 Optional argument LANG-RE can be used to limit the exported
 source code blocks by languages matching a regular expression.
 
-Return a list whose CAR is the tangled file name."
+Return list of the tangled file names."
   (interactive "fFile to tangle: \nP")
   (let* ((visited (find-buffer-visiting file))
          (buffer (or visited (find-file-noselect file))))
@@ -220,7 +220,7 @@ Return a list whose CAR is the tangled file name."
 (defun org-babel-tangle (&optional arg target-file lang-re)
   "Write code blocks to source-specific files.
 Extract the bodies of all source code blocks from the current
-file into their own source-specific files.
+file into their own source-specific files.  Return the list of files.
 With one universal prefix argument, only tangle the block at point.
 When two universal prefix arguments, only tangle blocks for the
 tangle file of the block at point.
