@@ -5183,7 +5183,7 @@ value after it.  Keys are case-insensitive.  Here is an example:
 
 Depending on the value of ~org-use-property-inheritance~, a property
 set this way is associated either with a single entry, or with the
-sub-tree defined by the entry, see [[*Property Inheritance]].
+subtree defined by the entry, see [[*Property Inheritance]].
 
 You may define the allowed values for a particular property =Xyz= by
 setting a property =Xyz_ALL=.  This special property is /inherited/,
@@ -11692,7 +11692,7 @@ the hierarchical menu, press {{{kbd(?)}}}.
 
   Invokes the export dispatcher interface.  The options show default
   settings.  The {{{kbd(C-u)}}} prefix argument preserves options from
-  the previous export, including any sub-tree selections.
+  the previous export, including any subtree selections.
 
 Org exports the entire buffer by default.  If the Org buffer has an
 active region, then Org exports just that region.
@@ -11731,15 +11731,15 @@ further alter what is exported, and how.
 - {{{kbd(C-s)}}} ::
   #+kindex: C-c C-e C-s
 
-  Toggle sub-tree export.  When turned on, Org exports only the
-  sub-tree starting from point position at the time the export
-  dispatcher was invoked.  Org uses the top heading of this sub-tree
+  Toggle subtree export.  When turned on, Org exports only the
+  subtree starting from point position at the time the export
+  dispatcher was invoked.  Org uses the top heading of this subtree
   as the document's title.  If point is not on a heading, Org uses the
   nearest enclosing header.  If point is in the document preamble, Org
   signals an error and aborts export.
 
   #+vindex: org-export-initial-scope
-  To make sub-tree export the default, customize the variable
+  To make subtree export the default, customize the variable
   ~org-export-initial-scope~.
 
 - {{{kbd(C-v)}}} ::
@@ -11819,7 +11819,7 @@ global variables, include:
   #+vindex: org-export-select-tags
   The default value is =("export")=.  When a tree is tagged with
   =export= (~org-export-select-tags~), Org selects that tree and its
-  sub-trees for export.  Org excludes trees with =noexport= tags, see
+  subtrees for export.  Org excludes trees with =noexport= tags, see
   below.  When selectively exporting files with =export= tags set, Org
   does not export any text that appears before the first headline.
 
@@ -11829,9 +11829,9 @@ global variables, include:
   #+vindex: org-export-exclude-tags
   The default value is =("noexport")=.  When a tree is tagged with
   =noexport= (~org-export-exclude-tags~), Org excludes that tree and
-  its sub-trees from export.  Entries tagged with =noexport= are
+  its subtrees from export.  Entries tagged with =noexport= are
   unconditionally excluded from the export, even if they have an
-  =export= tag.  Even if a sub-tree is not exported, Org executes any
+  =export= tag.  Even if a subtree is not exported, Org executes any
   code blocks contained there.
 
 - =TITLE= ::
@@ -12050,10 +12050,10 @@ following arguments.
   #+vindex: org-export-with-tables
   Toggle inclusion of tables (~org-export-with-tables~).
 
-When exporting sub-trees, special node properties can override the
+When exporting subtrees, special node properties can override the
 above keywords.  These properties have an =EXPORT_= prefix.  For
 example, =DATE= becomes, =EXPORT_DATE= when used for a specific
-sub-tree.  Except for =SETUPFILE=, all other keywords listed above
+subtree.  Except for =SETUPFILE=, all other keywords listed above
 have an =EXPORT_= equivalent.
 
 #+cindex: @samp{BIND}, keyword
@@ -13378,7 +13378,7 @@ external file.
 
 #+cindex: @samp{HTML_CONTAINER_CLASS}, property
 #+cindex: @samp{HTML_HEADLINE_CLASS}, property
-In order to add styles to a sub-tree, use the =HTML_CONTAINER_CLASS=
+In order to add styles to a subtree, use the =HTML_CONTAINER_CLASS=
 property to assign a class to the tree.  In order to specify CSS
 styles for a particular headline, you can use the ID specified in
 a =CUSTOM_ID= property.  You can also assign a specific class to
@@ -13679,7 +13679,7 @@ By default, the LaTeX export back-end uses the /article/ class.
 To change the default class globally, edit ~org-latex-default-class~.
 To change the default class locally in an Org file, add option lines
 =#+LATEX_CLASS: myclass=.  To change the default class for just a part
-of the Org file, set a sub-tree property, =EXPORT_LATEX_CLASS=.  The
+of the Org file, set a subtree property, =EXPORT_LATEX_CLASS=.  The
 class name entered here must be valid member of ~org-latex-classes~.
 This variable defines a header template for each class into which the
 exporter splices the values of ~org-latex-default-packages-alist~ and
@@ -14379,7 +14379,7 @@ executable.  Without it, export cannot finish.
 
   If the selected region is a single tree, the ODT export back-end
   makes the tree head the document title.  Incidentally, {{{kbd(C-c
-  @)}}} selects the current sub-tree.  If the tree head entry has, or
+  @)}}} selects the current subtree.  If the tree head entry has, or
   inherits, an =EXPORT_FILE_NAME= property, the ODT export back-end
   uses that for file name.
 
@@ -17325,7 +17325,7 @@ or
   Optional.  Heading arguments control many aspects of evaluation,
   export and tangling of code blocks (see [[*Using Header Arguments]]).
   Using Org's properties feature, header arguments can be selectively
-  applied to the entire buffer or specific sub-trees of the Org
+  applied to the entire buffer or specific subtrees of the Org
   document.
 
 - =<body>= ::
@@ -17427,13 +17427,13 @@ for any block.
 
 #+vindex: org-use-property-inheritance
 Header arguments set through Org's property drawers (see [[*Property
-Syntax]]) apply at the sub-tree level on down.  Since these property
+Syntax]]) apply at the subtree level on down.  Since these property
 drawers can appear anywhere in the file hierarchy, Org uses outermost
 call or source block to resolve the values.  Org ignores
 ~org-use-property-inheritance~ setting.
 
 In this example, =:cache= defaults to =yes= for all code blocks in the
-sub-tree.
+subtree.
 
 #+begin_example
 ,* sample header
@@ -18570,7 +18570,7 @@ evaluation, or /none/.  Org defaults to exporting /code/ for most
 languages and /results/ for inline code blocks.  For some languages,
 such as ditaa, Org defaults to /results/ both in ordinary source
 blocks and in inline source blocks.  To export just the body of code
-blocks, see [[*Literal Examples]].  To selectively export sub-trees of an
+blocks, see [[*Literal Examples]].  To selectively export subtrees of an
 Org document, see [[*Exporting]].
 
 #+cindex: @samp{exports}, header argument
@@ -18643,9 +18643,9 @@ in some circumstances.  So during export, to allow evaluation of just
 the header arguments but not any code evaluation in the source block,
 set =:eval never-export= (see [[*Evaluating Code Blocks]]).
 
-Org never evaluates code blocks in commented sub-trees when exporting
+Org never evaluates code blocks in commented subtrees when exporting
 (see [[*Comment Lines]]).  On the other hand, Org does evaluate code
-blocks in sub-trees excluded from export (see [[*Export Settings]]).
+blocks in subtrees excluded from export (see [[*Export Settings]]).
 
 ** Extracting Source Code
 :PROPERTIES:
@@ -19046,7 +19046,7 @@ the second code block is expanded as
 #+end_example
 
 You may also include the contents of multiple blocks sharing a common
-=noweb-ref= header argument, which can be set at the file, sub-tree,
+=noweb-ref= header argument, which can be set at the file, subtree,
 or code block level.  In the example Org file shown next, the body of
 the source code in each block is extracted for concatenation to a pure
 code file when tangled.
@@ -21742,7 +21742,7 @@ To avoid preserving point, Org wraps the call to {{{var(FUNC)}}} in
 ~save-excursion~ form.  After evaluation, Org moves point to the end
 of the line that was just processed.  Search continues from that point
 forward.  This may not always work as expected under some conditions,
-such as if the current sub-tree was removed by a previous archiving
+such as if the current subtree was removed by a previous archiving
 operation.  In such rare circumstances, Org skips the next entry
 entirely when it should not.  To stop Org from such skips, make
 {{{var(FUNC)}}} set the variable ~org-map-continue-from~ to a specific
