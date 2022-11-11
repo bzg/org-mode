@@ -1356,6 +1356,69 @@ b. Item 2<point>"
 	    (goto-char (point-max))
 	    (org-toggle-item nil)
 	    (buffer-string))))
+  ;; When headings contain footnote definitions, move the definition
+  ;; out of the list.  Footnote definitions cannot be indented.
+  (should
+   (equal "- Main headline
+  - Headline 1
+    bbbbbbbb [fn:1]
+
+- Headline 2
+[fn:1] cccccccccccccccc
+
+
+"
+          (org-test-with-temp-text "* Main headline
+** Headline 1
+bbbbbbbb [fn:1]
+
+[fn:1] cccccccccccccccc
+* Headline 2"
+            (transient-mark-mode 1)
+            (push-mark (point) t t)
+            (goto-char (point-max))
+            (org-toggle-item t)
+            (buffer-string))))
+  ;; Footnote definitions that did not have trailing double blank line
+  ;; must not slurp the following element.
+  (should
+   (equal "- Head 1
+- Head 2
+[fn:1] cccccccccccccccc
+
+
+Paragraph outside footnote definitions."
+          (org-test-with-temp-text "* Head 1
+[fn:1] cccccccccccccccc
+* Head 2
+
+
+Paragraph outside footnote definitions."
+            (transient-mark-mode 1)
+            (push-mark (point) t t)
+            (search-forward "Head 2")
+            (org-toggle-item t)
+            (buffer-string))))
+  ;; Move footnote definitions past pre-existing items after.
+  (should
+   (equal "- Line 1
+  Line 2
+- next item
+[fn:1] definition
+
+
+"
+          (org-test-with-temp-text "Line 1
+Line 2
+[fn:1] definition
+
+
+- next item"
+            (transient-mark-mode 1)
+            (push-mark (point) t t)
+            (search-forward "definition")
+            (org-toggle-item t)
+            (buffer-string))))
   ;; When argument ARG is non-nil, change the whole region into
   ;; a single item.
   (should

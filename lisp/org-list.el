@@ -3021,7 +3021,38 @@ If it is an item, convert all items to normal lines.
 If it is normal text, change region into a list of items.
 With a prefix argument ARG, change the region in a single item."
   (interactive "P")
-  (let ((shift-text
+  (let ((extract-footnote-definitions
+         (lambda (end)
+           ;; Remove footnote definitions from point to END.
+           ;; Return the list of the extracted definitions.
+           (let (definitions element)
+             (save-excursion
+               (while (re-search-forward org-footnote-definition-re end t)
+                 (setq element (org-element-at-point))
+                 (when (eq 'footnote-definition
+                           (org-element-type element))
+                   (push (buffer-substring-no-properties
+                          (org-element-property :begin element)
+                          (org-element-property :end element))
+                         definitions)
+                   ;; Ensure at least 2 blank lines after the last
+                   ;; footnote definition, thus not slurping the
+                   ;; following element.
+                   (unless (<= 2 (org-element-property
+                                 :post-blank
+                                 (org-element-at-point)))
+                     (setf (car definitions)
+                           (concat (car definitions)
+                                   (make-string
+                                    (- 2 (org-element-property
+                                          :post-blank
+                                          (org-element-at-point)))
+                                    ?\n))))
+                   (delete-region
+                    (org-element-property :begin element)
+                    (org-element-property :end element))))
+               definitions))))
+        (shift-text
 	 (lambda (ind end)
 	   ;; Shift text in current section to IND, from point to END.
 	   ;; The function leaves point to END line.
@@ -3079,7 +3110,7 @@ With a prefix argument ARG, change the region in a single item."
 	     (skip-chars-forward " \t")
 	     (delete-region (point) (match-end 0)))
 	   (forward-line)))
-	;; Case 2. Start at an heading: convert to items.
+	;; Case 2. Start at a heading: convert to items.
 	((org-at-heading-p)
 	 ;; Remove metadata
 	 (let (org-loop-over-headlines-in-active-region)
@@ -3095,7 +3126,9 @@ With a prefix argument ARG, change the region in a single item."
 			      (t (length (match-string 0))))))
 		;; Level of first heading.  Further headings will be
 		;; compared to it to determine hierarchy in the list.
-		(ref-level (org-reduced-level (org-outline-level))))
+		(ref-level (org-reduced-level (org-outline-level)))
+                (footnote-definitions
+                 (funcall extract-footnote-definitions end)))
 	   (while (< (point) end)
 	     (let* ((level (org-reduced-level (org-outline-level)))
 		    (delta (max 0 (- level ref-level)))
@@ -3124,8 +3157,8 @@ With a prefix argument ARG, change the region in a single item."
 			"[X]"
 		      "[ ]"))
 		   (org-list-write-struct struct
-					  (org-list-parents-alist struct)
-					  old)))
+				  (org-list-parents-alist struct)
+				  old)))
 	       ;; Ensure all text down to END (or SECTION-END) belongs
 	       ;; to the newly created item.
 	       (let ((section-end (save-excursion
@@ -3133,13 +3166,23 @@ With a prefix argument ARG, change the region in a single item."
 		 (forward-line)
 		 (funcall shift-text
 			  (+ start-ind (* (1+ delta) bul-len))
-			  (min end section-end)))))))
+			  (min end section-end)))))
+           (when footnote-definitions
+             (goto-char end)
+             ;; Insert footnote definitions after the list.
+             (unless (bolp) (beginning-of-line 2))
+             ;; At (point-max).
+             (unless (bolp) (insert "\n"))
+             (dolist (def footnote-definitions)
+               (insert def)))))
 	;; Case 3. Normal line with ARG: make the first line of region
 	;;         an item, and shift indentation of others lines to
 	;;         set them as item's body.
 	(arg (let* ((bul (org-list-bullet-string "-"))
 		    (bul-len (length bul))
-		    (ref-ind (org-current-text-indentation)))
+		    (ref-ind (org-current-text-indentation))
+                    (footnote-definitions
+                     (funcall extract-footnote-definitions end)))
 	       (skip-chars-forward " \t")
 	       (insert bul)
 	       (forward-line)
@@ -3150,7 +3193,21 @@ With a prefix argument ARG, change the region in a single item."
 			  (+ ref-ind bul-len)
 			  (min end (save-excursion (or (outline-next-heading)
 						       (point)))))
-		 (forward-line))))
+		 (forward-line))
+               (when footnote-definitions
+                 ;; If the new list is followed by same-level items,
+                 ;; move past them as well.
+                 (goto-char (org-element-property
+                             :end
+                             (org-element-lineage
+                              (org-element-at-point (1- end))
+                              '(plain-list) t)))
+                 ;; Insert footnote definitions after the list.
+                 (unless (bolp) (beginning-of-line 2))
+                 ;; At (point-max).
+                 (unless (bolp) (insert "\n"))
+                 (dolist (def footnote-definitions)
+                   (insert def)))))
 	;; Case 4. Normal line without ARG: turn each non-item line
 	;;         into an item.
 	(t
