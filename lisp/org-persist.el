@@ -170,18 +170,20 @@
   :group 'org)
 
 (defcustom org-persist-directory (expand-file-name
-                                  (org-file-name-concat
-                                   (let ((cache-dir (when (fboundp 'xdg-cache-home)
-                                                      (xdg-cache-home))))
-                                     (if (or (seq-empty-p cache-dir)
-                                             (not (file-exists-p cache-dir))
-                                             (file-exists-p (org-file-name-concat
-                                                             user-emacs-directory
-                                                             "org-persist")))
-                                         user-emacs-directory
-                                       cache-dir))
-                                   "org-persist/"))
+                       (org-file-name-concat
+                        (let ((cache-dir (when (fboundp 'xdg-cache-home)
+                                           (xdg-cache-home))))
+                          (if (or (seq-empty-p cache-dir)
+                                  (not (file-exists-p cache-dir))
+                                  (file-exists-p (org-file-name-concat
+                                                  user-emacs-directory
+                                                  "org-persist")))
+                              user-emacs-directory
+                            cache-dir))
+                        "org-persist/"))
   "Directory where the data is stored."
+  :group 'org-persist
+  :package-version '(Org . "9.6")
   :type 'directory)
 
 (defcustom org-persist-remote-files 100
@@ -196,6 +198,7 @@ up to that number persistent values for remote files.
 Note that the last option `check-existence' may cause Emacs to show
 password prompts to log in."
   :group 'org-persist
+  :package-version '(Org . "9.6")
   :type '(choice (const :tag "Never" nil)
                  (const :tag "Always" t)
                  (number :tag "Keep not more than X files")
@@ -210,6 +213,7 @@ data is deleted that number days after last access.  When a function,
 it should be a function returning non-nil when the data is expired.  The
 function will be called with a single argument - collection."
   :group 'org-persist
+  :package-version '(Org . "9.6")
   :type '(choice (const :tag "Never" never)
                  (const :tag "Always" nil)
                  (number :tag "Keep N days")

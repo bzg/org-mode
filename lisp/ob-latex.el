@@ -119,7 +119,8 @@ exporting the literal LaTeX source."
 %f"
   "Command to convert a PDF file to an SVG file."
   :group 'org-babel
-  :type 'string)
+  :type 'string
+  :package-version '(Org . "9.6"))
 
 (defcustom org-babel-latex-htlatex-packages
   '("[usenames]{color}" "{tikz}" "{color}" "{listings}" "{amsmath}")

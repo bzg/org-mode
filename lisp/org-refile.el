@@ -155,6 +155,7 @@ When `full-file-path', include the full file path.
 
 When `buffer-name', use the buffer name."
   :group 'org-refile
+  :package-version '(Org . "9.6")
   :type '(choice
 	  (const :tag "Not" nil)
 	  (const :tag "Yes" t)

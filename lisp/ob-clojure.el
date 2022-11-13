@@ -102,12 +102,14 @@
 (defcustom ob-clojure-babashka-command (executable-find "bb")
   "Path to the babashka executable."
   :type 'file
-  :group 'org-babel)
+  :group 'org-babel
+  :package-version '(Org . "9.6"))
 
 (defcustom ob-clojure-nbb-command (executable-find "nbb")
   "Path to the nbb executable."
   :type 'file
-  :group 'org-babel)
+  :group 'org-babel
+  :package-version '(Org . "9.6"))
 
 (defun org-babel-expand-body:clojure (body params)
   "Expand BODY according to PARAMS, return the expanded body."

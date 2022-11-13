@@ -367,7 +367,8 @@ In addition to the keys mentioned above, every header argument
 defined for the code block may be used as a key and will be
 replaced with its value."
   :group 'org-babel
-  :type 'string)
+  :type 'string
+  :package-version '(Org . "9.6"))
 
 (defcustom org-babel-exp-inline-code-template
   "src_%lang[%switches%flags]{%body}"

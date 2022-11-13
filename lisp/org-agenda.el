@@ -1076,7 +1076,8 @@ title.  Fallback to file name is no title is present."
   :type '(choice
 	  (const :tag "Don't show outline path in agenda view." nil)
 	  (const :tag "Show outline path with prepended file name." t)
-	  (const :tag "Show outline path with prepended document title." title)))
+	  (const :tag "Show outline path with prepended document title." title))
+  :package-version '(Org . "9.6"))
 
 (defcustom org-agenda-start-with-entry-text-mode nil
   "The initial value of entry-text-mode in a newly created agenda window."

@@ -373,6 +373,7 @@ respectively.  Alternatively, when set to `detect', the exporter
 does so only if the installed version of Texinfo supports the
 necessary commands."
   :group 'org-export-texinfo
+  :package-version '(Org . "9.6")
   :type '(choice
           (const :tag "Detect" detect)
           (const :tag "Yes" t)

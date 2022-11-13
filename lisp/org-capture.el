@@ -393,7 +393,7 @@ calendar                |  %:type %:date
 When you need to insert a literal percent sign in the template,
 you can escape ambiguous cases with a backward slash, e.g., \\%i."
   :group 'org-capture
-  :package-version '(Org . "9.5")
+  :package-version '(Org . "9.6")
   :set (lambda (s v) (set-default-toplevel-value s (org-capture-upgrade-templates v)))
   :type
   (let ((file-variants '(choice :tag "Filename       "

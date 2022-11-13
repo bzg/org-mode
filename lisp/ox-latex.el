@@ -765,7 +765,7 @@ pdflatex, pdf, jpg and png images are OK.  When processing
 through dvi to Postscript, only ps and eps are allowed.  The
 default we use here encompasses both."
   :group 'org-export-latex
-  :package-version '(Org . "9.4")
+  :package-version '(Org . "9.6")
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
@@ -986,6 +986,7 @@ The styling of the engraved result can be customised with
 The default preamble also uses the LaTeX package tcolorbox in
 addition to fvextra."
   :group 'org-export-latex
+  :package-version '(Org . "9.6")
   :type '(choice
 	  (const :tag "Use listings" listings)
 	  (const :tag "Use minted" minted)
@@ -1255,6 +1256,7 @@ block-specific options, you may use the following syntax:
   ...
   #+END_SRC"
   :group 'org-export-latex
+  :package-version '(Org . "9.6")
   :type '(alist :key-type (string :tag "option")
                 :value-type (string :tag "value")))
 
@@ -1264,6 +1266,7 @@ This can be set to any theme defined in `engrave-faces-themes' or
 loadable by Emacs.  When set to t, the current Emacs theme is
 used.  When nil, no theme is applied."
   :group 'org-export-latex
+  :package-version '(Org . "9.6")
   :type 'symbol)
 
 (defun org-latex-generate-engraved-preamble (info)

@@ -1391,6 +1391,7 @@ This recognises four possible values:
 A resource is considered safe if it matches one of the patterns
 in `org-safe-remote-resources'."
   :group 'org
+  :package-version '(Org . "9.6")
   :type '(choice (const :tag "Always download remote resources" t)
                  (const :tag "Prompt before downloading an unsafe resource" prompt)
                  (const :tag "Only download resources considered safe" safe)
@@ -1401,6 +1402,7 @@ in `org-safe-remote-resources'."
 URI regexps are applied to both URLs and Org files requesting
 remote resources."
   :group 'org
+  :package-version '(Org . "9.6")
   :type '(list regexp))
 
 (defcustom org-open-non-existing-files nil
@@ -2438,6 +2440,7 @@ commands, if custom time display is turned on at the time of export.
 Leading \"<\" and trailing \">\" pair will be stripped from the format
 strings."
   :group 'org-time
+  :package-version '(Org . "9.6")
   :type '(cons string string))
 
 (defun org-time-stamp-format (&optional with-time inactive custom)
@@ -2944,6 +2947,7 @@ use when combining that property.
 If an alist item cannot be found that matches a given property, a
 single space will be used as the separator."
   :group 'org-properties
+  :package-version '(Org . "9.6")
   :type '(alist :key-type (choice (repeat :tag "Properties" string)
                                   (string :tag "Regular Expression"))
                 :value-type (restricted-sexp :tag "Separator"
@@ -3296,8 +3300,7 @@ Place-holders only used by `:image-converter':
   %S    the image size scale ratio, which is used to adjust image size by some
         processing commands."
   :group 'org-latex
-  :version "26.1"
-  :package-version '(Org . "9.0")
+  :package-version '(Org . "9.6")
   :type '(alist :tag "LaTeX to image backends"
 		:value-type (plist)))
 
@@ -8873,7 +8876,7 @@ block can be inserted by pressing TAB after the string \"<KEY\"."
   :type '(repeat
 	  (cons (string :tag "Key")
 		(string :tag "Template")))
-  :package-version '(Org . "9.2"))
+  :package-version '(Org . "9.6"))
 
 (defun org--check-org-structure-template-alist (&optional checklist)
   "Check whether `org-structure-template-alist' is set up correctly.

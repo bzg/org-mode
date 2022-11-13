@@ -334,7 +334,7 @@ string as argument."
    :formatter nil)
   "Default properties for clock tables."
   :group 'org-clock
-  :version "24.1"
+  :package-version '(Org . "9.6")
   :type 'plist)
 
 (defcustom org-clock-clocktable-formatter 'org-clocktable-write-default
