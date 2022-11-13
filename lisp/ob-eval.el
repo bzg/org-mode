@@ -31,6 +31,8 @@
 (require 'org-macs)
 (org-assert-version)
 
+(eval-when-compile (require 'subr-x))  ; For `string-empty-p', Emacs < 29
+
 (defvar org-babel-error-buffer-name "*Org-Babel Error Output*")
 (declare-function org-babel-temp-file "ob-core" (prefix &optional suffix))
 

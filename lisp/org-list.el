@@ -83,6 +83,7 @@
 (require 'org-macs)
 (require 'org-compat)
 (require 'org-fold-core)
+(require 'org-footnote)
 
 (defvar org-M-RET-may-split-line)
 (defvar org-adapt-indentation)
