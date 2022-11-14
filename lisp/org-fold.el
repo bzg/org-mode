@@ -332,11 +332,12 @@ When ENTRY is non-nil, show the entire entry."
        'outline))))
 
 (defun org-fold-subtree (flag)
+"Hide (when FLAG) or reveal subtree at point."
   (save-excursion
     (org-back-to-heading t)
     (org-fold-region
      (line-end-position)
-     (progn (org-end-of-subtree t) (point))
+     (progn (org-end-of-subtree t t) (if (eobp) (point) (1- (point))))
      flag
      'outline)))
 
