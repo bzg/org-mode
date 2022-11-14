@@ -18461,7 +18461,8 @@ value listed above.  E.g.,
 :UNNUMBERED: notoc
 :END:
 
-Handling options after collecting the results.
+Handling options after collecting the results.  Choose one of the
+options; they are mutually exclusive.
 
 - =replace= ::
 
