@@ -1669,12 +1669,13 @@ Return the new header."
     (if (not (string-match "\\\\babelprovide\\[.*\\]{\\(.+\\)}" header))
 	header
       (let ((prov (match-string 1 header)))
-	(when (equal "AUTO" prov)
-	  (replace-regexp-in-string (format
-				     "\\(\\\\babelprovide\\[.*\\]\\)\\({\\)%s}" prov)
-				    (format "\\1\\2%s}"
-					    (or language language-ini-only))
-				    header t))))))
+	(if (equal "AUTO" prov)
+	    (replace-regexp-in-string (format
+				       "\\(\\\\babelprovide\\[.*\\]\\)\\({\\)%s}" prov)
+				      (format "\\1\\2%s}"
+					      (or language language-ini-only))
+				      header t)
+	  header)))))
 
 (defun org-latex-guess-polyglossia-language (header info)
   "Set the Polyglossia language according to the LANGUAGE keyword.
