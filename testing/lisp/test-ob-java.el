@@ -379,8 +379,8 @@ return a;
       "#+begin_src java :dir 'nil :var a=java_list :results value silent
 import java.util.List;
 import java.util.Arrays;
-List<String> b = Arrays.asList(a.get(0).get(0),
-                               a.get(1).get(0));
+List<String> b = Arrays.asList(a.get(0),
+                               a.get(1));
 return b;
 #+end_src
 
@@ -394,7 +394,7 @@ return b;
   "Read a list and return an array."
   (org-test-with-temp-text
       "#+begin_src java :dir 'nil :var a=java_list :results value silent
-String[] b = {a.get(0).get(0), a.get(1).get(0)};
+String[] b = {a.get(0), a.get(1)};
 return b;
 #+end_src
 
@@ -411,8 +411,8 @@ return b;
 package pkg;
 import java.util.List;
 import java.util.Arrays;
-List<String> b = Arrays.asList(a.get(0).get(0),
-                               a.get(1).get(0));
+List<String> b = Arrays.asList(a.get(0),
+                               a.get(1));
 return b;
 #+end_src
 

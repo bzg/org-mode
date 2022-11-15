@@ -204,7 +204,27 @@ list, then it should be treated as such; not as the symbol nil."
     (forward-line 5)
     (should (string= ": 4" (buffer-substring
 			    (point-at-bol)
-			    (point-at-eol))))))
+			    (point-at-eol)))))
+  ;; Test reading lists.
+  (org-test-with-temp-text-in-file "
+
+#+NAME: example-list
+- simple
+  - not
+  - nested
+- list
+
+<point>#+BEGIN_SRC emacs-lisp :var x=example-list
+(print x)
+#+END_SRC"
+
+    (should (equal '("simple" "list") (org-babel-execute-src-block)))
+    (forward-line 5)
+    (should (string=
+             "| simple | list |"
+             (buffer-substring
+	      (point-at-bol)
+	      (point-at-eol))))))
 
 (ert-deftest test-ob/block-content-resolution ()
   "Test block content resolution."
@@ -218,8 +238,8 @@ list, then it should be treated as such; not as the symbol nil."
 #+begin_src emacs-lisp :var four=four[]
   (length (eval (car (read-from-string four))))
 #+end_src"
-                                   (org-babel-next-src-block 2)
-                                   (should (= 4 (org-babel-execute-src-block)))))
+    (org-babel-next-src-block 2)
+    (should (= 4 (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob/cons-cell-as-variable ()
   "Test that cons cell can be assigned as variable."

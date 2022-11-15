@@ -778,6 +778,40 @@ If you prefer to keep the keybinding, you can add it back to
 (define-key org-mode-map (kbd "C-c SPC") #'org-table-blank-field)
 #+end_src
 
+*** List references in source block variable assignments are now proper lists
+
+List representation of named lists is now converted to a simple list
+as promised by the manual section [[info:org#Environment of a Code Block][org#Environment of a Code Block]].
+Previously, it was converted to a list of lists.
+
+Before:
+
+#+begin_src org
+,#+NAME: example-list
+- simple
+  - not
+  - nested
+- list
+
+,#+BEGIN_SRC emacs-lisp :var x=example-list :results value
+(format "%S" x)
+,#+END_SRC
+
+,#+RESULTS:
+: (("simple" (unordered ("not") ("nested"))) ("list"))
+#+end_src
+
+After:
+
+#+begin_src org
+,#+BEGIN_SRC emacs-lisp :var x=example-list :results value
+(format "%S" x)
+,#+END_SRC
+
+,#+RESULTS:
+: ("simple" "list")
+#+end_src
+
 ** New features
 
 *** New citation engine

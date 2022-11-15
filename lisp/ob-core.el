@@ -2239,8 +2239,15 @@ Return nil if ELEMENT cannot be read."
           (org-table-to-lisp)))
 
 (defun org-babel-read-list ()
-  "Read the list at point into emacs-lisp."
-  (mapcar (lambda (el) (org-babel-read el 'inhibit-lisp-eval))
+  "Read the list at point into emacs-lisp.
+
+Return the list of strings representing top level items:
+
+   (item1 item2 ...)
+
+Only consider top level items.  See Info node `(org)Environment of \
+a Code Block'."
+  (mapcar (lambda (el) (org-babel-read (car el) 'inhibit-lisp-eval))
 	  (cdr (org-list-to-lisp))))
 
 (defvar org-link-types-re)
