@@ -163,13 +163,13 @@ value
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/assign-underscore ()
-  (should
-   (equal "success"
-	  (org-test-with-temp-text "#+begin_src python :session :results value
+  (let ((result
+         (org-test-with-temp-text "#+begin_src python :session :results value
 _ = 'failure'
 'success'
 #+end_src"
-	    (org-babel-execute-src-block)))))
+	   (org-babel-execute-src-block))))
+    (should (equal "success" result))))
 
 (ert-deftest test-ob-python/multiline-var ()
   (should
