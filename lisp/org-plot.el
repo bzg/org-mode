@@ -294,6 +294,11 @@ When NORMALIZE is non-nil, the count is divided by the number of values."
 	))
     (cl-subseq factors 0 -1)))
 
+(defgroup org-plot nil
+  "Options for plotting in Org mode."
+  :tag "Org Plot"
+  :group 'org)
+
 (defcustom org-plot/gnuplot-script-preamble ""
   "String of function to be inserted before the gnuplot plot command is run.
 

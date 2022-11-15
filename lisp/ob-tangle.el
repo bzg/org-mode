@@ -51,6 +51,11 @@
 (declare-function outline-previous-heading "outline" ())
 (defvar org-id-link-to-org-use-id) ; Dynamically scoped
 
+(defgroup org-babel-tangle nil
+  "Options for extracting source code from code blocks."
+  :tag "Org Babel Tangle"
+  :group 'org-babel)
+
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el")
     ("elisp" . "el"))
@@ -73,26 +78,26 @@ then the name of the language is used."
 
 (defcustom org-babel-post-tangle-hook nil
   "Hook run in code files tangled by `org-babel-tangle'."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :version "24.1"
   :type 'hook)
 
 (defcustom org-babel-pre-tangle-hook '(save-buffer)
   "Hook run at the beginning of `org-babel-tangle' in the original buffer."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :version "24.1"
   :type 'hook)
 
 (defcustom org-babel-tangle-body-hook nil
   "Hook run over the contents of each code block body."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :version "24.1"
   :type 'hook)
 
 (defcustom org-babel-tangle-finished-hook nil
   "Hook run at the very end of `org-babel-tangle' in the original buffer.
 In this way, it is the counterpart to `org-babel-pre-tangle-hook'."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :package-version '(Org . "9.6")
   :type 'hook)
 
@@ -112,7 +117,7 @@ non-nil value.
 
 Whether or not comments are inserted during tangling is
 controlled by the :comments header argument."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :version "24.1"
   :type 'string)
 
@@ -132,7 +137,7 @@ non-nil value.
 
 Whether or not comments are inserted during tangling is
 controlled by the :comments header argument."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :version "24.1"
   :type 'string)
 
@@ -141,7 +146,7 @@ controlled by the :comments header argument."
 of tangle comments.  Use `org-babel-tangle-comment-format-beg'
 and `org-babel-tangle-comment-format-end' to customize the format
 of tangled comments."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :type 'boolean)
 
 (defcustom org-babel-process-comment-text 'org-remove-indentation
@@ -149,7 +154,7 @@ of tangled comments."
 inserted as comments in tangled source-code files.  The function
 should take a single string argument and return a string
 result.  The default value is `org-remove-indentation'."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :version "24.1"
   :type 'function)
 
@@ -157,7 +162,7 @@ result.  The default value is `org-remove-indentation'."
   "The default mode used for tangled files, as an integer.
 The default value 356 correspands to the octal #o544, which is
 read-write permissions for the user, read-only for everyone else."
-  :group 'org-babel
+  :group 'org-babel-tangle
   :package-version '(Org . "9.6")
   :type 'integer)
 

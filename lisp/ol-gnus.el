@@ -74,7 +74,7 @@ negates this setting for the duration of the command."
 
 (defcustom org-gnus-no-server nil
   "Should Gnus be started using `gnus-no-server'?"
-  :group 'org-gnus
+  :group 'org-link-follow
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'boolean)

@@ -977,6 +977,11 @@ equivalent option for agenda views."
   :group 'org-todo
   :group 'org-archive)
 
+(defgroup org-startup nil
+  "Startup options Org uses when first visiting a file."
+  :tag "Org Startup"
+  :group 'org)
+
 (defcustom org-startup-folded 'showeverything
   "Non-nil means entering Org mode will switch to OVERVIEW.
 

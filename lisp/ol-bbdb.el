@@ -135,7 +135,7 @@
 
 (defgroup org-bbdb-anniversaries nil
   "Customizations for including anniversaries from BBDB into Agenda."
-  :group 'org-bbdb)
+  :group 'org-agenda)
 
 (defcustom org-bbdb-default-anniversary-format "birthday"
   "Default anniversary class."

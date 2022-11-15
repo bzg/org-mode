@@ -226,7 +226,6 @@ By default, Org uses 3 runs of to do the processing.
 Alternatively, this may be a Lisp function that does the
 processing.  This function should accept the file name as
 its single argument."
-  :group 'org-export-pdf
   :group 'org-export-man
   :version "24.4"
   :package-version '(Org . "8.0")

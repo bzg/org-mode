@@ -236,6 +236,11 @@
 (defvar org-bibtex-entries nil
   "List to hold parsed bibtex entries.")
 
+(defgroup org-bibtex nil
+  "Options for translating between Org headlines and BibTeX entries."
+  :tag "Org BibTeX"
+  :group 'org)
+
 (defcustom org-bibtex-autogen-keys nil
   "Set to a truth value to use `bibtex-generate-autokey' to generate keys."
   :group 'org-bibtex
