@@ -184,6 +184,8 @@ Emacs-lisp table, otherwise return the results as a string."
 
 (defvar py-which-bufname)
 (defvar python-shell-buffer-name)
+(defvar-local org-babel-python--initialized nil
+  "Flag used to mark that python session has been initialized.")
 (defun org-babel-python-initiate-session-by-key (&optional session)
   "Initiate a python session.
 If there is not a current inferior-process-buffer in SESSION
@@ -200,7 +202,14 @@ then create.  Return the initialized session."
 	  (setq py-buffer (org-babel-python-with-earmuffs session)))
 	(let ((python-shell-buffer-name
 	       (org-babel-python-without-earmuffs py-buffer)))
-	  (run-python cmd)))
+	  (run-python cmd)
+          (with-current-buffer py-buffer
+            (add-hook
+             'python-shell-first-prompt-hook
+             (lambda ()
+               (setq-local org-babel-python--initialized t)
+               (message "I am running!!!"))
+             nil 'local))))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
 	(require 'python-mode)
@@ -220,7 +229,14 @@ then create.  Return the initialized session."
        (t
 	(error "No function available for running an inferior Python")))
       ;; Wait until Python initializes.
-      (org-babel-comint-wait-for-output py-buffer)
+      (if (eq 'python org-babel-python-mode) ; python.el
+          ;; This is more reliable compared to
+          ;; `org-babel-comint-wait-for-output' as python may emit
+          ;; multiple prompts during initialization.
+          (with-current-buffer py-buffer
+            (while (not org-babel-python--initialized)
+              (org-babel-comint-wait-for-output py-buffer)))
+        (org-babel-comint-wait-for-output py-buffer))
       (setq org-babel-python-buffers
 	    (cons (cons session py-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
