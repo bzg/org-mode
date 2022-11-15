@@ -2146,10 +2146,12 @@ If point is inside an existing clocktable block, update it.
 Otherwise, insert a new one.
 
 The new table inherits its properties from the variable
-`org-clock-clocktable-default-properties'.  The scope of the
-clocktable, when not specified in the previous variable, is
-`subtree' when the function is called from within a subtree, and
-`file' elsewhere.
+`org-clock-clocktable-default-properties'.
+
+The scope of the clocktable, when not specified in the previous
+variable, is `subtree' of the current heading when the function is
+called from inside heading, and `file' elsewhere (before the first
+heading).
 
 When called with a prefix argument, move to the first clock table
 in the buffer and update it."
