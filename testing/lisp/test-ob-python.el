@@ -163,6 +163,9 @@ value
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/assign-underscore ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail.
+  (skip-unless (version<= "28" emacs-version))
   (let ((result
          (org-test-with-temp-text "#+begin_src python :session :results value
 _ = 'failure'
