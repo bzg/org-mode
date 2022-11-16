@@ -389,31 +389,32 @@ Tramp related features.  We mostly follow
   (setq org-id-locations-file
         (expand-file-name ".test-org-id-locations" org-test-dir))
   (cl-flet ((rld (base)
-	      ;; Recursively load all files, if files throw errors
-	      ;; then silently ignore the error and continue to the
-	      ;; next file.  This allows files to error out if
-	      ;; required executables aren't available.
-	      (mapc
-	       (lambda (path)
-		 (if (file-directory-p path)
-		     (rld path)
-		   (condition-case nil
-		       (when (string-match "\\`[A-Za-z].*\\.el\\'"
-					   (file-name-nondirectory path))
-                         (let ((feature-name
-                                (intern
-                                 (file-name-base
-                                  (file-name-nondirectory path)))))
-			   (require feature-name path)))
-		     (missing-test-dependency
-		      (let ((name (intern
-				   (concat "org-missing-dependency/"
-					   (file-name-nondirectory
-					    (file-name-sans-extension path))))))
-			(eval `(ert-deftest ,name ()
-				 :expected-result :failed (should nil))))))))
-	       (directory-files base 'full
-			        "\\`\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el\\'"))))
+	         ;; Recursively load all files, if files throw errors
+	         ;; then silently ignore the error and continue to the
+	         ;; next file.  This allows files to error out if
+	         ;; required executables aren't available.
+	         (mapc
+	          (lambda (path)
+		    (if (file-directory-p path)
+		        (rld path)
+		      (condition-case nil
+		          (when (string-match "\\`[A-Za-z].*\\.el\\'"
+					      (file-name-nondirectory path))
+                            (let ((feature-name
+                                   (intern
+                                    (file-name-base
+                                     (file-name-nondirectory path)))))
+			      (require feature-name path)))
+		        (missing-test-dependency
+		         (let ((name (intern
+				      (concat "org-missing-dependency/"
+					      (file-name-nondirectory
+					       (file-name-sans-extension path))))))
+			   (eval `(ert-deftest ,name ()
+                                    (skip-unless nil) ;; Make it prominent.
+				    :expected-result :failed (should nil))))))))
+	          (directory-files base 'full
+			           "\\`\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el\\'"))))
     (rld (expand-file-name "lisp" org-test-dir))))
 
 (defun org-test-current-defun ()
