@@ -580,8 +580,8 @@ INFO is the export state, as a property list."
                      (suffix (org-element-property :suffix ref)))
                  (funcall format-ref
                           prefix
-                          (org-cite-basic--get-author k info)
-                          (org-cite-basic--get-year k info)
+                          (or (org-cite-basic--get-author k info) "??")
+                          (or (org-cite-basic--get-year k info) "????")
                           suffix)))
              (org-cite-get-references citation)
              org-cite-basic-author-year-separator)
@@ -652,15 +652,17 @@ export communication channel, as a property list."
          (org-export-data
           (mapconcat
            (lambda (key)
-             (let ((author (org-cite-basic--get-author key info)))
-               (if caps (capitalize author) author)))
+             (or
+              (let ((author (org-cite-basic--get-author key info)))
+                (if caps (capitalize author) author))
+              "??"))
            (org-cite-get-references citation t)
            org-cite-basic-author-year-separator)
           info)))
       ;; "noauthor" style.
       (`(,(or "noauthor" "na") . ,variant)
        (format (if (funcall has-variant-p variant 'bare) "%s" "(%s)")
-               (mapconcat (lambda (key) (org-cite-basic--get-year key info))
+               (mapconcat (lambda (key) (or (org-cite-basic--get-year key info) "????"))
                           (org-cite-get-references citation t)
                           org-cite-basic-author-year-separator)))
       ;; "nocite" style.
