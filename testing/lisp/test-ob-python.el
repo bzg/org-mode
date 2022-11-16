@@ -164,7 +164,7 @@ value
 
 (ert-deftest test-ob-python/assign-underscore ()
   ;; Disable the test on older Emacs as built-in python.el sometimes
-  ;; fail.
+  ;; fail to initialize session.
   (skip-unless (version<= "28" emacs-version))
   (let ((result
          (org-test-with-temp-text "#+begin_src python :session :results value
@@ -202,6 +202,9 @@ return text
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/session-value-sleep ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (should
    (equal "success"
 	  (org-test-with-temp-text "#+begin_src python :session :results value
@@ -212,23 +215,29 @@ time.sleep(.1)
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/async-simple-session-output ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (let ((org-babel-temporary-directory temporary-file-directory)
         (org-confirm-babel-evaluate nil))
     (org-test-with-temp-text
-     "#+begin_src python :session :async yes :results output
+        "#+begin_src python :session :async yes :results output
 import time
 time.sleep(.1)
 print('Yep!')
 #+end_src\n"
-     (should (let ((expected "Yep!"))
-	       (and (not (string= expected (org-babel-execute-src-block)))
-		    (string= expected
-			     (progn
-			       (sleep-for 0 200)
-			       (goto-char (org-babel-where-is-src-block-result))
-			       (org-babel-read-result)))))))))
+      (should (let ((expected "Yep!"))
+	        (and (not (string= expected (org-babel-execute-src-block)))
+		     (string= expected
+			      (progn
+			        (sleep-for 0 200)
+			        (goto-char (org-babel-where-is-src-block-result))
+			        (org-babel-read-result)))))))))
 
 (ert-deftest test-ob-python/async-named-output ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (let (org-confirm-babel-evaluate
         (org-babel-temporary-directory temporary-file-directory)
         (src-block "#+begin_src python :async :session :results output
@@ -246,13 +255,16 @@ print(\"Yep!\")
 : Yep!
 "))
     (org-test-with-temp-text
-     (concat src-block results-before)
-     (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
-                    (string= (concat src-block results-after)
-                             (buffer-string)))))))
+        (concat src-block results-before)
+      (should (progn (org-babel-execute-src-block)
+                     (sleep-for 0 200)
+                     (string= (concat src-block results-after)
+                              (buffer-string)))))))
 
 (ert-deftest test-ob-python/async-output-drawer ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (let (org-confirm-babel-evaluate
         (org-babel-temporary-directory temporary-file-directory)
         (src-block "#+begin_src python :async :session :results output drawer
@@ -266,11 +278,11 @@ print(list(range(3)))
 :end:
 "))
     (org-test-with-temp-text
-     src-block
-     (should (progn (org-babel-execute-src-block)
-                    (sleep-for 0 200)
-                    (string= (concat src-block result)
-                             (buffer-string)))))))
+        src-block
+      (should (progn (org-babel-execute-src-block)
+                     (sleep-for 0 200)
+                     (string= (concat src-block result)
+                              (buffer-string)))))))
 
 (provide 'test-ob-python)
 
