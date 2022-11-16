@@ -103,6 +103,9 @@ return x
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/session-multiline ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (should
    (equal "20"
 	  (org-test-with-temp-text "#+begin_src python :session :results output
@@ -117,6 +120,9 @@ return x
 	    (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/insert-necessary-blank-line-when-sending-code-to-interpreter ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (should
    (equal 2 (org-test-with-temp-text "#+begin_src python :session :results value
 if True:
@@ -137,6 +143,9 @@ if True:
 	      (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/if-else-block ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (should
    (equal "success" (org-test-with-temp-text "#+begin_src python :session :results value
 value = 'failure'
@@ -146,9 +155,12 @@ else:
     value = 'success'
 value
 #+end_src"
-	      (org-babel-execute-src-block)))))
+	              (org-babel-execute-src-block)))))
 
 (ert-deftest test-ob-python/indent-block-with-blank-lines ()
+  ;; Disable the test on older Emacs as built-in python.el sometimes
+  ;; fail to initialize session.
+  (skip-unless (version<= "28" emacs-version))
   (should
    (equal 20
 	  (org-test-with-temp-text "#+begin_src python :session :results value
