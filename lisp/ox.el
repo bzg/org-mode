@@ -1404,7 +1404,7 @@ Optional argument BACKEND is an export back-end, as returned by,
 e.g., `org-export-create-backend'.  It specifies which back-end
 specific items to read, if any."
   (let ((line
-	 (let (value alist)
+	 (let (alist)
            (with-temp-buffer
              (insert options)
              (goto-char (point-min))
