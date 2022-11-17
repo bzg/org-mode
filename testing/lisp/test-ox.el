@@ -198,7 +198,10 @@ num:2 <:active")))
   (should
    (let ((options (org-export--parse-option-keyword "H: num:t")))
      (and (not (plist-get options :headline-levels))
-          (plist-get options :section-numbers)))))
+          (plist-get options :section-numbers))))
+  ;; Parse spaces inside brackets.
+  (let ((options (org-export--parse-option-keyword "html-postamble:\"test space\"" 'html)))
+    (should (equal "test space" (plist-get options :html-postamble)))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
