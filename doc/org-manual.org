@@ -18167,10 +18167,12 @@ The =cache= header argument can have one of two values: =yes= or =no=.
 In this example, both functions are cached.  But =caller= runs only if
 the result from =random= has changed since the last run.
 
+# +1 here is to work around Emacs bug#59293.
+# Otherwise, (1) is recognized as footnote reference by info.el.
 #+begin_example
 ,#+NAME: random
 ,#+BEGIN_SRC R :cache yes
-  runif(1)
+  runif(+1)
 ,#+END_SRC
 
 ,#+RESULTS[a2a72cd647ad44515fab62e144796432793d68e1]: random
