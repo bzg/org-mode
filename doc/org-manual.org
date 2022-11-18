@@ -18478,8 +18478,10 @@ options; they are mutually exclusive.
 
 - =none= ::
 
-  Do not process results at all.  No inserting in the Org mode buffer
-  nor echo them in the minibuffer.  Usage example: =:results none=.
+  Compute results, but do not do anything with them.  No inserting in
+  the Org mode buffer nor echo them in the minibuffer.  The results
+  can still be used when referenced from another code block.
+  Usage example: =:results none=.
 
 - =append= ::
 
