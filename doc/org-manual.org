@@ -19777,9 +19777,10 @@ manual, but here is a consolidated list for easy reference.
 #+cindex: special keywords
 
 In-buffer settings start with =#+=, followed by a keyword, a colon,
-and then a word for each setting.  Org accepts multiple settings on
-the same line.  Org also accepts multiple lines for a keyword.  This
-manual describes these settings throughout.  A summary follows here.
+one or more spaces, and then a word for each setting.  Org accepts
+multiple settings on the same line.  Org also accepts multiple lines
+for a keyword.  This manual describes these settings throughout.  A
+summary follows here.
 
 #+cindex: refresh set-up
 {{{kbd(C-c C-c)}}} activates any changes to the in-buffer settings.
