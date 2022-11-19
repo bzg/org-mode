@@ -24,13 +24,13 @@ use warnings;
 
 sub rep_esc{
   my $s = shift @_;
-  $s =~ s/\\kbd{([^}]+)}/$1/g;
+  $s =~ s/\\kbd\{([^}]+)\}/$1/g;
   $s =~ s/\$\^([0-9])\$/[$1]/g;
   $s =~ s/\\rm //g;
   $s =~ s/\\\///g;
-  $s =~ s/\\\^{}/^/g;
+  $s =~ s/\\\^\{\}/^/g;
   $s =~ s/\\}/}/g;
-  $s =~ s/\\{/{/g;
+  $s =~ s/\\\{/{/g;
   $s =~ s/\\\#/#/g;
   $s =~ s/\\\^/^/g;
   $s =~ s/\\\%/%/g;
@@ -39,7 +39,7 @@ sub rep_esc{
   $s =~ s/\\\$/\$/g;
   $s =~ s/\$\\leftrightarrow\$/<->/g;
   $s =~ s/\$\\pm 1\$/±1/g;
-  $s =~ s/``{\\tt ([^}]+)}''/`$1'/g;
+  $s =~ s/``\{\\tt ([^}]+)}''/`$1'/g;
   return $s;
 }
 my $page=0;
@@ -48,7 +48,7 @@ my $orgversionnumber;
 open(IN,"org-version.tex");
 while(<IN>){
   last if(/\f/);
-  $orgversionnumber = $1 if /\\def\\orgversionnumber{([^}]+)}/;
+  $orgversionnumber = $1 if /\\def\\orgversionnumber\{([^}]+)}/;
 }
 close(IN);
 
@@ -75,17 +75,17 @@ while(<IN>){
   next if($page != 1);
   next if(/^%/);
   next if /Org Mode Reference Card \([12]\/2\)/;
-  next if /\\centerline{\(for version \\orgversionnumber\)}/;
+  next if /\\centerline\{\(for version \\orgversionnumber\)}/;
   next if /\(for version  \)/;
   next if /\\newcolumn/;
   next if /\\copyrightnotice/;
   next if /\\bye/;
-  next if /\\title{([^}]+)}/;
+  next if /\\title\{([^}]+)}/;
   chomp;
 #  print "b:$_\n";
   s/([^\\])\%.+$/$1/;
 #  print "a:$_\n";
-  if (/\\section{(.+)}/){
+  if (/\\section\{(.+)}/){
     my $sec = rep_esc($1);
     print "================================================================================\n";
     print "$sec\n";
@@ -106,8 +106,8 @@ while(<IN>){
     print "--------------------------------------------------------------------------------\n";
     next;
   }
-  if(/^\\key{(.+)}\s*$/||/^\\metax{(.+)}\s*$/){
-    my ($k,$v) = split(/}{/,$1);
+  if(/^\\key\{(.+)}\s*$/||/^\\metax\{(.+)}\s*$/){
+    my ($k,$v) = split(/}\{/,$1);
     my $k2 = &rep_esc($k);
     my $v2 = &rep_esc($v);
 #    print "$k2\t$v2\n";
