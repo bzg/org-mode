@@ -45,7 +45,7 @@ sub rep_esc{
 my $page=0;
 my $orgversionnumber;
 
-open(IN,$ARGV[0]);
+open(IN,"org-version.tex");
 while(<IN>){
   last if(/\f/);
   $orgversionnumber = $1 if /\\def\\orgversionnumber{([^}]+)}/;
