@@ -3208,7 +3208,9 @@ If the table is trivial, then return it as a scalar."
 		   ;; If the file was empty, don't bother trying to
 		   ;; convert the table.
 		   (when (> pmax 1)
-		     (org-table-convert-region (point-min) pmax separator)
+                     ;; Convert tables of arbitrary size.
+                     (let ((org-table-convert-region-max-lines most-positive-fixnum))
+		       (org-table-convert-region (point-min) pmax separator))
 		     (delq nil
 			   (mapcar (lambda (row)
 				     (and (not (eq row 'hline))
