@@ -7482,7 +7482,7 @@ its location in the outline tree, but behaves in the following way:
   #+vindex: org-cycle-open-archived-trees
   It does not open when you attempt to do so with a visibility cycling
   command (see [[*Visibility Cycling]]).  You can force cycling archived
-  subtrees with {{{kbd(C-TAB)}}}, or by setting the option
+  subtrees with {{{kbd(C-c C-TAB)}}}, or by setting the option
   ~org-cycle-open-archived-trees~.  Also normal outline commands, like
   ~org-show-all~, open archived subtrees.
 
