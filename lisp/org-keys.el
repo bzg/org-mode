@@ -808,10 +808,6 @@ command."
   (interactive)
   (unless org-use-speed-commands
     (user-error "Speed commands are not activated, customize `org-use-speed-commands'"))
-  ;; FIXME: remove this warning for 9.6
-  (when (boundp 'org-speed-commands-user)
-    (message "`org-speed-command-user' is obsolete, please use `org-speed-commands'")
-    (sit-for 3))
   (with-output-to-temp-buffer "*Help*"
     (princ "Speed commands\n==============\n")
     (mapc #'org-print-speed-command
