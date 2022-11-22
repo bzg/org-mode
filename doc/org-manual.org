@@ -18487,6 +18487,14 @@ options; they are mutually exclusive.
   can still be used when referenced from another code block.
   Usage example: =:results none=.
 
+- =discard= ::
+
+  Ignore the results completely.  This option is similar to =none=,
+  but no processing is performed on the return value.  Calling the
+  code block programatically (see [[*How to evaluate source code]]) or by
+  reference (see [[*Passing arguments]] and [[*Noweb Reference Syntax]]) will
+  always yield nil.
+
 - =append= ::
 
   Append results to the Org buffer.  Latest results are at the bottom.

@@ -382,6 +382,14 @@ value of ~org-babel-clojure-backend~. For example:
 (range 2)
 #+end_src
 
+*** New =:results discard= header argument
+
+Unlike =:results none=, the return value of code blocks called with
+=:results discard= header argument is always ~nil~.  Org does not
+attempt to analyze the results and simply returns nil.  This can be
+useful when the code block is used for side effects only but generates
+large outputs that may be slow to analyze for Org.
+
 ** New options
 *** A new option for custom setting ~org-refile-use-outline-path~ to show document title in refile targets
 
