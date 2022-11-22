@@ -859,7 +859,11 @@ SIZE is a string Columns x Rows like for example \"3x2\"."
   "Convert region to a table.
 
 The region goes from BEG0 to END0, but these borders will be moved
-slightly, to make sure a beginning of line in the first line is included.
+slightly, to make sure a beginning of line in the first line is
+included.
+
+Throw an error when the region has more than
+`org-table-convert-region-max-lines' lines.
 
 SEPARATOR specifies the field separator in the lines.  It can have the
 following values:
