@@ -18816,7 +18816,19 @@ expanded anyway.
 :UNNUMBERED: notoc
 :END:
 
-# FIXME missing pre-tangle and tangle-body hooks
+- ~org-babel-pre-tangle-hook~ ::
+
+  #+vindex: org-babel-pre-tangle-hook
+  This hook is run before the tangle process begins.  The active
+  buffer is buffer to be tangled.
+
+- ~org-babel-tangle-body-hook~ ::
+  
+  #+vindex: org-babel-tangle-body-hook
+  This hook is run from a temporary buffer containing expanded code of
+  every tangled code block.  The hook can modify the expanded code as
+  needed.  The contents of the current buffer will be used as actual
+  code block expansion.
 
 - ~org-babel-post-tangle-hook~ ::
 
