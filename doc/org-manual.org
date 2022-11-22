@@ -18002,7 +18002,8 @@ see [[*Code Evaluation and Security Issues]].
 Org captures the results of the code block evaluation and inserts them
 in the Org file, right after the code block.  The insertion point is
 after a newline and the =RESULTS= keyword.  Org creates the =RESULTS=
-keyword if one is not already there.
+keyword if one is not already there.  More details in [[*Results of
+Evaluation]].
 
 By default, Org enables only Emacs Lisp code blocks for execution.
 See [[*Languages]] to enable other languages.
@@ -18257,8 +18258,12 @@ they are mutually exclusive.
 :END:
 
 Type tells what result types to expect from the execution of the code
-block.  Choose one of the options; they are mutually exclusive.  The
-default behavior is to automatically determine the result type.
+block.  Choose one of the options; they are mutually exclusive.
+
+The default behavior is to automatically determine the result type.
+The result type detection depends on the code block language, as
+described in the documentation for individual languages.  See
+[[*Languages]].
 
 #+attr_texinfo: :sep ,
 - =table=, =vector= ::
@@ -18865,8 +18870,8 @@ code block header arguments:
 #+cindex: source code, languages
 #+cindex: code block, languages
 
-Code blocks in dozens of languages are supported.  See Worg for
-[[https://orgmode.org/worg/org-contrib/babel/languages/index.html][language specific documentation]].
+Code blocks in dozens of languages are supported.  See Worg website
+for [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][language specific documentation]].
 
 #+vindex: org-babel-load-languages
 By default, only Emacs Lisp is enabled for evaluation.  To enable or
