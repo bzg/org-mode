@@ -112,44 +112,43 @@ as shown in the example below.
 	       ;; ensure that all cells prefixed with $'s are strings
 	       (cons (car var)
 		     (delq nil (mapcar
-				(lambda (el)
-				  (if (eq '$ el)
-				      (prog1 nil (setq quote t))
-				    (prog1
-					(cond
-					 (quote (format "\"%s\"" el))
-					 ((stringp el) (org-no-properties el))
-					 (t el))
-				      (setq quote nil))))
-				(cdr var)))))
+			      (lambda (el)
+				(if (eq '$ el)
+				    (prog1 nil (setq quote t))
+				  (prog1
+				      (cond
+				       (quote (format "\"%s\"" el))
+				       ((stringp el) (org-no-properties el))
+				       (t el))
+				    (setq quote nil))))
+			      (cdr var)))))
 	     variables)))
       (unless (stringp source-block)
 	(setq source-block (symbol-name source-block)))
-      (let ((result
-             (if (and source-block (> (length source-block) 0))
-                 (let ((params
-                        ;; FIXME: Why `eval'?!?!?
-                        (eval `(org-babel-parse-header-arguments
-                                (concat
-                                 ":var results="
-                                 ,source-block
-                                 "[" ,header-args "]"
-                                 "("
-                                 (mapconcat
-                                  (lambda (var-spec)
-                                    (if (> (length (cdr var-spec)) 1)
-                                        (format "%S='%S"
-                                                (car var-spec)
-                                                (mapcar #'read (cdr var-spec)))
-                                      (format "%S=%s"
-                                              (car var-spec) (cadr var-spec))))
-                                  ',variables ", ")
-                                 ")")))))
-                   (org-babel-execute-src-block
-                    nil (list "emacs-lisp" "results" params)
-                    '((:results . "silent"))))
-               "")))
-        (org-trim (if (stringp result) result (format "%S" result)))))))
+      `(let ((result
+              (if ,(and source-block (> (length source-block) 0))
+                  (let ((params
+                         ',(org-babel-parse-header-arguments
+                            (concat
+                             ":var results="
+                             source-block
+                             "[" header-args "]"
+                             "("
+                             (mapconcat
+                              (lambda (var-spec)
+                                (if (> (length (cdr var-spec)) 1)
+                                    (format "%S='%S"
+                                            (car var-spec)
+                                            (mapcar #'read (cdr var-spec)))
+                                  (format "%S=%s"
+                                          (car var-spec) (cadr var-spec))))
+                              variables ", ")
+                             ")"))))
+                    (org-babel-execute-src-block
+                     nil (list "emacs-lisp" "results" params)
+                     '((:results . "silent"))))
+                "")))
+         (org-trim (if (stringp result) result (format "%S" result)))))))
 
 (provide 'ob-table)
 
