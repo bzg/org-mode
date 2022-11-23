@@ -4172,16 +4172,13 @@ This test does not cover listings and custom environments."
 	      (org-element-map tree 'plain-text
 		(lambda (s) (org-export-activate-smart-quotes s :html info))
 		info nil nil t)))))
-  ;; FIXME: Test failing non-interactively.
-  ;;
-  ;; (should
-  ;;  (equal '("&ldquo;foo&rdquo;")
-  ;; 	  (let ((org-export-default-language "en"))
-  ;; 	    (org-test-with-parsed-data "*\"foo\"*"
-  ;; 	      (org-element-map tree 'plain-text
-  ;; 		(lambda (s) (org-export-activate-smart-quotes s :html info))
-  ;; 		info nil nil t)))))
-)
+  (should
+   (equal '("&ldquo;foo&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "*\"foo\"*"
+	      (org-element-map tree 'plain-text
+		(lambda (s) (org-export-activate-smart-quotes s :html info))
+		info nil nil t))))))
 
 
 
