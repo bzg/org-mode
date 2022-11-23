@@ -688,7 +688,7 @@ to deal with new-style links.")
 
 (advice-add 'server-visit-files :around #'org--protocol-detect-protocol-server)
 (defun org--protocol-detect-protocol-server (orig-fun files client &rest args)
-  "Advice server-visit-flist to call `org-protocol-modify-filename-for-protocol'."
+  "Advice server-visit-flist to call `org-protocol-check-filename-for-protocol'."
   (let ((flist (if org-protocol-reverse-list-of-files
                    (reverse files)
                  files)))
