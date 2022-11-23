@@ -18823,7 +18823,7 @@ expanded anyway.
   buffer is buffer to be tangled.
 
 - ~org-babel-tangle-body-hook~ ::
-  
+
   #+vindex: org-babel-tangle-body-hook
   This hook is run from a temporary buffer containing expanded code of
   every tangled code block.  The hook can modify the expanded code as
