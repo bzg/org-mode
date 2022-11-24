@@ -1014,11 +1014,10 @@ See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
   (should
    (string= "@1$1 = $0" (org-table-convert-refs-to-rc "A1 = $0"))))
 
-;; TODO: Test Broken
-;; (ert-deftest test-org-table/org-table-convert-refs-to-rc/3 ()
-;;   "Remote reference."
-;;   (should
-;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
+(ert-deftest test-org-table/org-table-convert-refs-to-rc/3 ()
+  "Remote reference."
+  (should
+   (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
 
 (ert-deftest test-org-table/remote-reference-access ()
   "Access to remote reference.
