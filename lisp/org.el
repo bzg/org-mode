@@ -16136,21 +16136,32 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 
 (defvar-local org-inline-image-overlays nil)
 
+(defun org--inline-image-overlays (&optional beg end)
+  "Return image overlays between BEG and END."
+  (let* ((beg (or beg (point-min)))
+         (end (or end (point-max)))
+         (overlays (overlays-in beg end))
+         result)
+    (dolist (ov overlays result)
+      (when (memq ov org-inline-image-overlays)
+        (push ov result)))))
+
 (defun org-toggle-inline-images (&optional include-linked beg end)
   "Toggle the display of inline images.
 INCLUDE-LINKED is passed to `org-display-inline-images'."
   (interactive "P")
-  (if org-inline-image-overlays
+  (if (org--inline-image-overlays beg end)
       (progn
-	(org-remove-inline-images beg end)
-	(when (called-interactively-p 'interactive)
+        (org-remove-inline-images beg end)
+        (when (called-interactively-p 'interactive)
 	  (message "Inline image display turned off")))
     (org-display-inline-images include-linked nil beg end)
     (when (called-interactively-p 'interactive)
-      (message (if org-inline-image-overlays
-		   (format "%d images displayed inline"
-			   (length org-inline-image-overlays))
-		 "No images to display inline")))))
+      (let ((new (org--inline-image-overlays beg end)))
+        (message (if new
+		     (format "%d images displayed inline"
+			     (length new))
+		   "No images to display inline"))))))
 
 (defun org-redisplay-inline-images ()
   "Assure display of inline images and refresh them."
@@ -16395,7 +16406,11 @@ buffer boundaries with possible narrowing."
     (dolist (ov overlays)
       (when (memq ov org-inline-image-overlays)
         (setq org-inline-image-overlays (delq ov org-inline-image-overlays))
-        (delete-overlay ov)))))
+        (delete-overlay ov)))
+    ;; Clear removed overlays.
+    (dolist (ov org-inline-image-overlays)
+      (unless (overlay-buffer ov)
+        (setq org-inline-image-overlays (delq ov org-inline-image-overlays))))))
 
 (defvar org-self-insert-command-undo-counter 0)
 (defvar org-speed-command nil)
