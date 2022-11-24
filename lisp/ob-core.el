@@ -849,8 +849,7 @@ guess will be made."
 		    (setq result (org-babel-ref-resolve post))
 		    (when file
 		      (setq result-params (remove "file" result-params))))))
-	      (if (member "none" result-params)
-		  (message "result silenced")
+	      (unless (member "none" result-params)
 	        (org-babel-insert-result
 	         result result-params info new-hash lang
                  (time-subtract (current-time) exec-start-time))))
