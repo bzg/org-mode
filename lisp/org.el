@@ -3243,7 +3243,7 @@ All available processes and theirs documents can be found in
      :image-output-type "svg"
      :image-size-adjust (1.7 . 1.5)
      :latex-compiler ("latex -interaction nonstopmode -output-directory %o %f")
-     :image-converter ("dvisvgm %f -n -e -c %S -o %O"))
+     :image-converter ("dvisvgm %f --no-fonts --exact-bbox --scale=%S --output=%O"))
     (imagemagick
      :programs ("latex" "convert")
      :description "pdf > png"
