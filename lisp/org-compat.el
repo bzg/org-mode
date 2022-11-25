@@ -555,6 +555,19 @@ Counting starts at 1."
                "use `org-element' library"
                "9.0")
 
+;; FIXME: Unused; obsoleted; to be removed.
+(defun org-let (list &rest body) ;FIXME: So many kittens are suffering here.
+  (declare (indent 1) (obsolete cl-progv "2021"))
+  (eval (cons 'let (cons list body))))
+
+;; FIXME: Unused; obsoleted; to be removed.
+(defun org-let2 (list1 list2 &rest body) ;FIXME: Where did our karma go?
+  (declare (indent 2) (obsolete cl-progv "2021"))
+  (eval (cons 'let (cons list1 (list (cons 'let (cons list2 body)))))))
+
+(make-obsolete 'org-let "to be removed" "9.6")
+(make-obsolete 'org-let2 "to be removed" "9.6")
+
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports
