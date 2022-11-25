@@ -3441,7 +3441,9 @@ full TBLFM line."
 (defun org-table-convert-refs-to-an (s)
   "Convert spreadsheet references from to @7$28 to AB7.
 Works for single references, but also for entire formulas and even the
-full TBLFM line."
+full TBLFM line.
+
+Leave the relative references unchanged."
   (while (string-match "@\\([0-9]+\\)\\$\\([0-9]+\\)" s)
     (setq s (replace-match
 	     (format "%s%d"
@@ -3449,7 +3451,7 @@ full TBLFM line."
 		      (string-to-number (match-string 2 s)))
 		     (string-to-number (match-string 1 s)))
 	     t t s)))
-  (while (string-match "\\(^\\|[^0-9a-zA-Z]\\)\\$\\([0-9]+\\)" s)
+  (while (string-match "\\(^\\|[^0-9a-zA-Z]\\)\\$\\([1-9][0-9]*\\)" s)
     (setq s (replace-match (concat "\\1"
 				   (org-number-to-letters
 				    (string-to-number (match-string 2 s))) "&")

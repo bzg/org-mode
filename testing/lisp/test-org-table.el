@@ -993,11 +993,10 @@ See also URL `https://orgmode.org/worg/org-tutorials/org-lookups.html'."
   (should
    (string= "A2" (org-table-convert-refs-to-an "@2$1"))))
 
-;; TODO: Test broken
-;; (ert-deftest test-org-table/org-table-convert-refs-to-an/2 ()
-;;   "Self reference @1$1."
-;;   (should
-;;    (string= "A1 = $0" (org-table-convert-refs-to-an "@1$1 = $0"))))
+(ert-deftest test-org-table/org-table-convert-refs-to-an/2 ()
+  "Self reference @1$1."
+  (should
+   (string= "A1 = $0" (org-table-convert-refs-to-an "@1$1 = $0"))))
 
 (ert-deftest test-org-table/org-table-convert-refs-to-an/3 ()
   "Remote reference."
