@@ -14,6 +14,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 * Version 9.6 (not yet released)
 
 ** Important announcements and breaking changes
+*** =python-mode.el (MELPA)= support in =ob-python.el= is deprecated
+
+We no longer aim to support third-party =python-mode.el= implementation of Python REPL.
+Only the built-in =python.el= will be supported from now on.
+
+We still keep the old, partially broken, code in =ob-python.el= for
+the time being.  It will be removed in the next release.
+
+See https://orgmode.org/list/87r0yk7bx8.fsf@localhost for more details.
 
 *** Element cache is enabled by default and work for headings
 
