@@ -143,32 +143,29 @@ Some other text
        (lambda (object) (org-element-type (org-element-secondary-p object)))
        nil t))))
 
-;; FIXME: `org-element-class' is a defsubst and cannot be tested
-;; properly (i.e., "make test" fails).
-;;
-;; (ert-deftest test-org-element/class ()
-;;   "Test `org-element-class' specifications."
-;;   ;; Regular tests.
-;;   (should (eq 'element (org-element-class '(paragraph nil) nil)))
-;;   (should (eq 'object (org-element-class '(target nil) nil)))
-;;   ;; Special types.
-;;   (should (eq 'element (org-element-class '(org-data nil) nil)))
-;;   (should (eq 'object (org-element-class "text" nil)))
-;;   (should (eq 'object (org-element-class '("secondary " "string") nil)))
-;;   ;; Pseudo elements.
-;;   (should (eq 'element (org-element-class '(foo nil) nil)))
-;;   (should (eq 'element (org-element-class '(foo nil) '(center-block nil))))
-;;   (should (eq 'element (org-element-class '(foo nil) '(org-data nil))))
-;;   ;; Pseudo objects.
-;;   (should (eq 'object (org-element-class '(foo nil) '(bold nil))))
-;;   (should (eq 'object (org-element-class '(foo nil) '(paragraph nil))))
-;;   (should (eq 'object (org-element-class '(foo nil) '("secondary"))))
-;;   (should
-;;    (eq 'object
-;;        (let* ((datum '(foo nil))
-;; 	      (headline `(headline (:title (,datum)))))
-;; 	 (org-element-put-property datum :parent headline)
-;; 	 (org-element-class datum)))))
+(ert-deftest test-org-element/class ()
+  "Test `org-element-class' specifications."
+  ;; Regular tests.
+  (should (eq 'element (org-element-class '(paragraph nil) nil)))
+  (should (eq 'object (org-element-class '(target nil) nil)))
+  ;; Special types.
+  (should (eq 'element (org-element-class '(org-data nil) nil)))
+  (should (eq 'object (org-element-class "text" nil)))
+  (should (eq 'object (org-element-class '("secondary " "string") nil)))
+  ;; Pseudo elements.
+  (should (eq 'element (org-element-class '(foo nil) nil)))
+  (should (eq 'element (org-element-class '(foo nil) '(center-block nil))))
+  (should (eq 'element (org-element-class '(foo nil) '(org-data nil))))
+  ;; Pseudo objects.
+  (should (eq 'object (org-element-class '(foo nil) '(bold nil))))
+  (should (eq 'object (org-element-class '(foo nil) '(paragraph nil))))
+  (should (eq 'object (org-element-class '(foo nil) '("secondary"))))
+  (should
+   (eq 'object
+       (let* ((datum '(foo nil))
+	      (headline `(headline (:title (,datum)))))
+	 (org-element-put-property datum :parent headline)
+	 (org-element-class datum)))))
 
 (ert-deftest test-org-element/adopt-elements ()
   "Test `org-element-adopt-elements' specifications."
@@ -178,7 +175,7 @@ Some other text
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
 	      (org-element-adopt-elements
-	       (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
+	          (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
 	      (mapcar (lambda (blob) (org-element-type blob))
 		      (org-element-contents
 		       (org-element-map tree 'bold 'identity nil t)))))))
@@ -188,7 +185,7 @@ Some other text
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
 	      (org-element-adopt-elements
-	       (org-element-map tree 'bold 'identity nil t) "b")
+	          (org-element-map tree 'bold 'identity nil t) "b")
 	      (org-element-contents
 	       (org-element-map tree 'bold 'identity nil t)))))))
 
