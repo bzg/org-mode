@@ -349,7 +349,7 @@ For more information, see `org-clocktable-write-default'."
   '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"   "Total time"   "File time" "Clock summary at")
     ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Tiempo" "TODO" "Tiempo total" "Tiempo archivo" "Clock summary at")
     ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier" "Horodatage sommaire à")
-    ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd" "Clock summary at")
+    ("nl" "Bestand"  "N"  "Tijdstip"   "Rubriek" "Duur"  "ALLES" "Totale duur"  "Bestandstijd" "Klok overzicht op")
     ("de" "Datei"    "E"  "Zeitstempel" "Kopfzeile" "Dauer" "GESAMT"
      "Gesamtdauer"  "Dateizeit" "Erstellt am"))
   "Terms used in clocktable, translated to different languages."
