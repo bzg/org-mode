@@ -2245,8 +2245,8 @@ Return the list of strings representing top level items:
 
    (item1 item2 ...)
 
-Only consider top level items.  See Info node `(org)Environment of \
-a Code Block'."
+Only consider top level items.  See Info node
+`(org)Environment of a Code Block'."
   (mapcar (lambda (el) (org-babel-read (car el) 'inhibit-lisp-eval))
 	  (cdr (org-list-to-lisp))))
 
