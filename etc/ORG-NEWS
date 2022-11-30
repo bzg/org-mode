@@ -187,6 +187,40 @@ network (CDN) provider from CloudFlare to jsDelivr.  You can find the
 new terms of service, including the privacy policy, at
 https://www.jsdelivr.com/terms.
 
+*** List references in source block variable assignments are now proper lists
+
+List representation of named lists is now converted to a simple list
+as promised by the manual section [[info:org#Environment of a Code Block][org#Environment of a Code Block]].
+Previously, it was converted to a list of lists.
+
+Before:
+
+#+begin_src org
+,#+NAME: example-list
+- simple
+  - not
+  - nested
+- list
+
+,#+BEGIN_SRC emacs-lisp :var x=example-list :results value
+(format "%S" x)
+,#+END_SRC
+
+,#+RESULTS:
+: (("simple" (unordered ("not") ("nested"))) ("list"))
+#+end_src
+
+After:
+
+#+begin_src org
+,#+BEGIN_SRC emacs-lisp :var x=example-list :results value
+(format "%S" x)
+,#+END_SRC
+
+,#+RESULTS:
+: ("simple" "list")
+#+end_src
+
 ** New features
 *** Clock table can now produce quarterly reports
 
@@ -391,6 +425,13 @@ attempt to analyze the results and simply returns nil.  This can be
 useful when the code block is used for side effects only but generates
 large outputs that may be slow to analyze for Org.
 
+*** Add Capture template hook properties
+
+Capture templates can now attach template specific hooks via the
+following properties: ~:hook~, ~:prepare-finalize~,
+~:before-finalize~, ~:after-finalize~.  These nullary functions run
+prior to their global counterparts for the selected template.
+
 ** New options
 *** A new option for custom setting ~org-refile-use-outline-path~ to show document title in refile targets
 
@@ -444,6 +485,13 @@ The folding state can also be controlled on per-file basis using
 The new setting, when set to non-nil, makes Org create alarm at the
 event time when the alarm time is set to 0.  The default value is
 nil -- do not create alarms at the event time.
+
+*** New special value ~'attach~ for src block =:dir= option
+
+Passing the symbol ~attach~ or string ="'attach"= (with quotes) to the =:dir=
+option of a src block is now equivalent to =:dir (org-attach-dir) :mkdir yes=
+and any file results with a path descended from the attachment directory will
+use =attachment:= style links instead of the standard =file:= link type.
 
 ** New functions and changes in function arguments
 *** New function ~org-get-title~ to get =#+TITLE:= property from buffers
@@ -796,40 +844,6 @@ If you prefer to keep the keybinding, you can add it back to
 (define-key org-mode-map (kbd "C-c SPC") #'org-table-blank-field)
 #+end_src
 
-*** List references in source block variable assignments are now proper lists
-
-List representation of named lists is now converted to a simple list
-as promised by the manual section [[info:org#Environment of a Code Block][org#Environment of a Code Block]].
-Previously, it was converted to a list of lists.
-
-Before:
-
-#+begin_src org
-,#+NAME: example-list
-- simple
-  - not
-  - nested
-- list
-
-,#+BEGIN_SRC emacs-lisp :var x=example-list :results value
-(format "%S" x)
-,#+END_SRC
-
-,#+RESULTS:
-: (("simple" (unordered ("not") ("nested"))) ("list"))
-#+end_src
-
-After:
-
-#+begin_src org
-,#+BEGIN_SRC emacs-lisp :var x=example-list :results value
-(format "%S" x)
-,#+END_SRC
-
-,#+RESULTS:
-: ("simple" "list")
-#+end_src
-
 ** New features
 
 *** New citation engine
@@ -877,13 +891,6 @@ library.  For backward compatibility, it is loaded by default.
 When exiting capture mode via ~org-capture-refile~, the variable
 ~org-refile-targets~ will be temporarily bound to the value of this
 template option.
-
-*** Add Capture template hook properties
-
-Capture templates can now attach template specific hooks via the
-following properties: ~:hook~, ~:prepare-finalize~,
-~:before-finalize~, ~:after-finalize~.  These nullary functions run
-prior to their global counterparts for the selected template.
 
 *** New startup options =#+startup: show<n>levels=
 
@@ -1213,13 +1220,6 @@ contents of the current latex source block.
 Finally, the closures are only evaluated if they're not overridden for
 a source block. This improves efficiency in cases where the result of
 a compute-expensive closure would otherwise be discarded.
-
-*** New special value ~'attach~ for src block =:dir= option
-
-Passing the symbol ~attach~ or string ="'attach"= (with quotes) to the =:dir=
-option of a src block is now equivalent to =:dir (org-attach-dir) :mkdir yes=
-and any file results with a path descended from the attachment directory will
-use =attachment:= style links instead of the standard =file:= link type.
 
 ** Miscellaneous
 *** =org-bibtex= includes =doi= and =url= entries when exporting to BiBTeX
