@@ -2131,13 +2131,13 @@ information."
     (let ((environment (or (org-export-read-attribute
 			    :attr_latex example-block :environment)
 			   "verbatim")))
-      (org-latex--wrap-label
-       example-block
-       (format "\\begin{%s}\n%s\\end{%s}"
-	       environment
-	       (org-export-format-code-default example-block info)
-	       environment)
-       info))))
+      (format "\\begin{%s}%s\n%s\\end{%s}"
+	      environment
+              (if (org-element-property :name example-block)
+                  (org-latex--label example-block info nil 'full)
+                "")
+	      (org-export-format-code-default example-block info)
+	      environment))))
 
 
 ;;;; Export Block
