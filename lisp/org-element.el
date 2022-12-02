@@ -7167,7 +7167,7 @@ The element is: %S\n The parent is: %S\n The real parent is: %S"
                (not (memq (org-element-type element) '(section org-data)))
                ;; Avoid too much slowdown
                (< (random 1000) (* 1000 org-element--cache-self-verify-frequency)))
-      (let ((real-element (let (org-element-use-cache)
+      (let ((real-element (org-element-with-disabled-cache
                             (org-element--parse-to
                              (if (memq (org-element-type element) '(table-row item))
                                  (1+ (org-element-property :begin element))
@@ -7872,7 +7872,7 @@ It is a faster version of `org-element-at-point' that is not
 guaranteed to return correct `:parent' properties even when cache is
 enabled."
   (or (org-element-at-point pom 'cached-only)
-      (let (org-element-use-cache) (org-element-at-point pom))))
+      (org-element-with-disabled-cache (org-element-at-point pom))))
 
 ;;;###autoload
 (defun org-element-context (&optional element)
