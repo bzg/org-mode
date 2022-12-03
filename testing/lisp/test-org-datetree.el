@@ -129,7 +129,7 @@
         (org-trim (buffer-string)))))))
 
 (ert-deftest test-org-datetree/find-iso-week-create ()
-  "Test `org-datetree-find-iso-date-create' specificaiton."
+  "Test `org-datetree-find-iso-date-create' specification."
   (let ((org-blank-before-new-entry '((heading . t))))
     ;; When date is missing, create it.
     (should

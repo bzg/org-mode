@@ -5918,7 +5918,7 @@ Paragraph<point>"
 :B: 1
 :END:"
 	    (org-buffer-property-keys))))
-  ;; Retrieve muliple properties in the same drawer.
+  ;; Retrieve multiple properties in the same drawer.
   (should
    (equal '("A" "B")
 	  (org-test-with-temp-text "* H\n:PROPERTIES:\n:A: 1\n:B: 2\n:END:"
