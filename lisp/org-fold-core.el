@@ -497,7 +497,7 @@ hanging around."
   (declare (debug (form body)) (indent 0))
   `(let (buffers dead-properties)
      (if (and (not (buffer-base-buffer))
-              (not (eq (current-buffer) (car org-fold-core--indirect-buffers))))
+              (not (memq (current-buffer) org-fold-core--indirect-buffers)))
          ;; We are in base buffer with `org-fold-core--indirect-buffers' value from
          ;; different buffer.  This can happen, for example, when
          ;; org-capture copies local variables into *Capture* buffer.
