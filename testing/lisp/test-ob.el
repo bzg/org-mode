@@ -1954,6 +1954,23 @@ nil
      (file-exists-p (format "%s/test.txt" (org-attach-dir nil t)))
      (string= (buffer-substring-no-properties (point) (line-end-position))
               "[[attachment:test.txt]]"))))
+  ;; Strip attach dir from the file path.
+  (should
+   (org-test-with-temp-text-in-file
+    "* heading
+:PROPERTIES:
+:DIR:      custom-attach-dir
+:END:
+
+<point>#+begin_src elisp :results value file
+\"custom-attach-dir/test.txt\"
+#+end_src"
+    (message "DIR: %s" (org-attach-dir t))
+    (org-babel-execute-src-block)
+    (goto-char (org-babel-where-is-src-block-result))
+    (forward-line)
+     (string= (buffer-substring-no-properties (point) (line-end-position))
+              "[[attachment:test.txt]]")))
   (should-error
    (org-test-with-temp-text-in-file
     "* 'attach with no ID or DIR
