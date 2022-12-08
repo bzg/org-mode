@@ -930,6 +930,8 @@ are provided.
 
 If FROM is non-nil and TO is nil, search the folded regions at FROM.
 
+When both FROM and TO are nil, search folded regions in the whole buffer.
+
 When SPECS is non-nil it should be a list of folding specs or a symbol.
 Only return the matching fold types.
 
@@ -946,6 +948,9 @@ WITH-MARKERS must be nil when RELATIVE is non-nil."
   (unless (listp specs) (setq specs (list specs)))
   (let (regions region mk-region)
     (org-with-wide-buffer
+     (when (and (not from) (not to))
+       (setq from (point-min)
+             to (point-max)))
      (when (and from (not to)) (setq to (point-max)))
      (when (and from (< from (point-min))) (setq from (point-min)))
      (when (and to (> to (point-max))) (setq to (point-max)))
