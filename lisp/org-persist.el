@@ -601,7 +601,7 @@ COLLECTION is the plist holding data collection."
       (plist-put (org-persist--get-collection container) :expiry 'never))))
 
 (defun org-persist--load-index ()
-  "Load `org-persist--index."
+  "Load `org-persist--index'."
   (org-persist-load:index
    `(index ,org-persist--storage-version)
    (org-file-name-concat org-persist-directory org-persist-index-file)
@@ -694,7 +694,7 @@ COLLECTION is the plist holding data collection."
     (org-file-name-concat org-persist-directory org-persist-index-file)))
 
 (defun org-persist--save-index ()
-  "Save `org-persist--index."
+  "Save `org-persist--index'."
   (org-persist-write:index
    `(index ,org-persist--storage-version) nil))
 
