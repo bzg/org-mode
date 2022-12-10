@@ -5728,31 +5728,32 @@ This may be either a string or a function of two arguments:
     ;; Initialize communication channel in INFO.
     (with-temp-buffer
       (let ((org-inhibit-startup t)) (org-mode))
-      (let ((standard-output (current-buffer))
-	    (org-element-use-cache nil))
-	(dolist (e table)
-	  (cond ((eq e 'hline) (princ "|--\n"))
-		((consp e)
-		 (princ "| ") (dolist (c e) (princ c) (princ " |"))
-		 (princ "\n")))))
-      (org-element-cache-reset)
-      ;; Add back-end specific filters, but not user-defined ones.  In
-      ;; particular, make sure to call parse-tree filters on the
-      ;; table.
-      (setq info
-	    (let ((org-export-filters-alist nil))
-	      (org-export-install-filters
-	       (org-combine-plists
-		(org-export-get-environment backend nil params)
-		`(:back-end ,(org-export-get-backend backend))))))
-      (setq data
-	    (org-export-filter-apply-functions
-	     (plist-get info :filter-parse-tree)
-	     (org-element-map (org-element-parse-buffer) 'table
-	       #'identity nil t)
-	     info)))
-    (when (and backend (symbolp backend) (not (org-export-get-backend backend)))
-      (user-error "Unknown :backend value"))
+      (org-fold-core-ignore-modifications
+        (let ((standard-output (current-buffer))
+	      (org-element-use-cache nil))
+	  (dolist (e table)
+	    (cond ((eq e 'hline) (princ "|--\n"))
+		  ((consp e)
+		   (princ "| ") (dolist (c e) (princ c) (princ " |"))
+		   (princ "\n")))))
+        (org-element-cache-reset)
+        ;; Add back-end specific filters, but not user-defined ones.  In
+        ;; particular, make sure to call parse-tree filters on the
+        ;; table.
+        (setq info
+	      (let ((org-export-filters-alist nil))
+	        (org-export-install-filters
+	         (org-combine-plists
+		  (org-export-get-environment backend nil params)
+		  `(:back-end ,(org-export-get-backend backend))))))
+        (setq data
+	      (org-export-filter-apply-functions
+	       (plist-get info :filter-parse-tree)
+	       (org-element-map (org-element-parse-buffer) 'table
+	         #'identity nil t)
+	       info))
+        (when (and backend (symbolp backend) (not (org-export-get-backend backend)))
+          (user-error "Unknown :backend value"))))
     (when (or (not backend) (plist-get info :raw)) (require 'ox-org))
     ;; Handle :skip parameter.
     (let ((skip (plist-get info :skip)))
