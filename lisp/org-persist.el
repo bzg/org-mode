@@ -963,7 +963,7 @@ Also, remove containers associated with non-existing files."
                           ('check-existence
                            (file-exists-p file))
                           ((pred numberp)
-                           (<= org-persist-remote-files remote-files-num))
+                           (< org-persist-remote-files remote-files-num))
                           (_ nil)))
                 (setq expired? t)))
             (if expired?
