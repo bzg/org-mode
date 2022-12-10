@@ -944,6 +944,7 @@ Also, remove containers associated with non-existing files."
                    (directory-files-recursively org-persist-directory ".+"))))
       (dolist (collection org-persist--index)
         (let* ((file (plist-get (plist-get collection :associated) :file))
+               (web-file (and file (string-match-p "\\`https?://" file)))
                (file-remote (when file (file-remote-p file)))
                (persist-file (when (plist-get collection :persist-file)
                                (org-file-name-concat
@@ -953,7 +954,7 @@ Also, remove containers associated with non-existing files."
                           (plist-get collection :expiry) collection)))
           (when persist-file
             (setq orphan-files (delete persist-file orphan-files))
-            (when file
+            (when (and file (not web-file))
               (when file-remote (cl-incf remote-files-num))
               (unless (if (not file-remote)
                           (file-exists-p file)
