@@ -771,6 +771,7 @@ ASSOCIATED can be a plist, a buffer, or a string.
 A buffer is treated as (:buffer ASSOCIATED).
 A string is treated as (:file ASSOCIATED).
 When LOAD? is non-nil, load the data instead of reading."
+  (unless org-persist--index (org-persist--load-index))
   (setq associated (org-persist--normalize-associated associated))
   (setq container (org-persist--normalize-container container))
   (unless (and org-persist-disable-when-emacs-Q
