@@ -1063,7 +1063,7 @@ means that the buffer should stay alive during the operation,
 because otherwise all these markers will point to nowhere."
   (declare (debug (form body)) (indent 1))
   (org-with-gensyms (regions)
-    `(let* ((,regions ,(org-fold-core-get-regions :with-markers use-markers)))
+    `(let* ((,regions (org-fold-core-get-regions :with-markers ,use-markers)))
        (unwind-protect (progn ,@body)
          (org-fold-core-regions ,regions :override t :clean-markers t)))))
 

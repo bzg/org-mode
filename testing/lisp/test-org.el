@@ -3581,6 +3581,21 @@ SCHEDULED: <2017-05-06 Sat>
        (kill-buffer buffer))
      t)))
 
+(ert-deftest test-org/org-ctrl-c-ctrl-c ()
+  "Test `org-ctrl-c-ctrl-c' specifications."
+  ;; FIXME: Improve coverage.
+  ;; Preserve visibility after refreshing Org setup.
+  (org-test-with-temp-text
+      "#+TITLE: Test
+* Heading<point>
+text"
+    (org-overview)
+    (should (org-fold-folded-p (point) 'outline))
+    (save-excursion
+      (goto-char (point-min))
+      (org-ctrl-c-ctrl-c))
+    (should (org-fold-folded-p (point) 'outline))))
+
 
 ;;; Navigation
 
