@@ -929,14 +929,18 @@ Do nothing in an indirect buffer."
        (delete-directory (file-name-directory ,persist-file)))))
 
 (defun org-persist-gc ()
-  "Remove expired or unregistered containers.
+  "Remove expired or unregistered containers and orphaned files.
 Also, remove containers associated with non-existing files."
   (unless (and org-persist-disable-when-emacs-Q
                ;; FIXME: This is relying on undocumented fact that
                ;; Emacs sets `user-init-file' to nil when loaded with
                ;; "-Q" argument.
                (not user-init-file))
-    (let (new-index (remote-files-num 0))
+    (let (new-index
+          (remote-files-num 0)
+          (orphan-files
+           (delete (org-file-name-concat org-persist-directory org-persist-index-file)
+                   (directory-files-recursively org-persist-directory ".+"))))
       (dolist (collection org-persist--index)
         (let* ((file (plist-get (plist-get collection :associated) :file))
                (file-remote (when file (file-remote-p file)))
@@ -947,6 +951,7 @@ Also, remove containers associated with non-existing files."
                (expired? (org-persist--gc-expired-p
                           (plist-get collection :expiry) collection)))
           (when persist-file
+            (setq orphan-files (delete persist-file orphan-files))
             (when file
               (when file-remote (cl-incf remote-files-num))
               (unless (if (not file-remote)
@@ -962,6 +967,7 @@ Also, remove containers associated with non-existing files."
             (if expired?
                 (org-persist--gc-persist-file persist-file)
               (push collection new-index)))))
+      (mapc #'org-persist--gc-persist-file orphan-files)
       (setq org-persist--index (nreverse new-index)))))
 
 ;; Automatically write the data, but only when we have write access.
