@@ -41,6 +41,7 @@
 (require 'org-macs)
 (require 'org-compat)
 (require 'org-keys)
+(require 'org-fold-core)
 
 (declare-function calc-eval "calc" (str &optional separator &rest args))
 (declare-function face-remap-remove-relative "face-remap" (cookie))
