@@ -929,6 +929,23 @@ Do nothing in an indirect buffer."
     (when (org-directory-empty-p (file-name-directory persist-file))
       (delete-directory (file-name-directory persist-file)))))
 
+(defmacro org-persist--associated-files:generic (container collection)
+  "List associated files in `org-persist-directory' for CONTAINER in COLLECTION."
+  `(let* ((c (org-persist--normalize-container ,container))
+          (gc-func-symbol (intern (format "org-persist--associated-files:%s" (car c)))))
+     (and (fboundp gc-func-symbol)
+          (funcall gc-func-symbol c ,collection))))
+
+(defun org-persist--associated-files:url (_ collection)
+  "List url-associated files in `org-persist-directory' for COLLECTION."
+  (let* ((persist-file (org-file-name-concat
+                        org-persist-directory
+                        (plist-get collection :persist-file)))
+         (data (or (gethash persist-file org-persist--write-cache)
+                   (org-persist--read-elisp-file persist-file)))
+         (url-file (alist-get '(url nil) data nil nil #'equal)))
+    (and url-file (list url-file))))
+
 (defun org-persist-gc ()
   "Remove expired or unregistered containers and orphaned files.
 Also, remove containers associated with non-existing files."
@@ -968,7 +985,16 @@ Also, remove containers associated with non-existing files."
                 (setq expired? t)))
             (if expired?
                 (org-persist--gc-persist-file persist-file)
-              (push collection new-index)))))
+              (push collection new-index)
+              (dolist (container (plist-get collection :container))
+                (dolist (associated-file
+                         (org-persist--associated-files:generic
+                          container collection))
+                  (setq orphan-files
+                        (delete (org-file-name-concat
+                                 org-persist-directory
+                                 associated-file)
+                                orphan-files))))))))
       (mapc #'org-persist--gc-persist-file orphan-files)
       (setq org-persist--index (nreverse new-index)))))
 
