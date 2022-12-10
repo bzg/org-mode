@@ -2692,8 +2692,8 @@ specified as an an \"attachment:\" style link."
            (same-directory?
 	    (and base-file-name
 	         (not (string= (expand-file-name default-directory)
-			     (expand-file-name
-			      base-directory)))))
+			       (expand-file-name
+			        base-directory)))))
            (request-attachment (eq type 'attachment))
            (attach-dir (let* ((default-directory base-directory)
                               (dir (org-attach-dir nil t)))
