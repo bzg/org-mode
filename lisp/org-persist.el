@@ -259,6 +259,9 @@ properties:
   "Hash table storing `org-persist--index'.  Used for quick access.
 They keys are conses of (container . associated).")
 
+(defvar org-persist--index-age nil
+  "The modification time of the index file, when it was loaded.")
+
 (defvar org-persist--report-time 0.5
   "Whether to report read/write time.
 
@@ -589,8 +592,10 @@ COLLECTION is the plist holding data collection."
 (defun org-persist-load:index (container index-file _)
   "Load `org-persist--index' from INDEX-FILE according to CONTAINER."
   (unless org-persist--index
-    (setq org-persist--index (org-persist-read:index container index-file nil))
-    (setq org-persist--index-hash nil)
+    (setq org-persist--index (org-persist-read:index container index-file nil)
+          org-persist--index-hash nil
+          org-persist--index-age (file-attribute-modification-time
+                                  (file-attributes index-file)))
     (if org-persist--index
         (mapc (lambda (collection) (org-persist--add-to-index collection 'hash)) org-persist--index)
       (setq org-persist--index nil)
@@ -690,16 +695,50 @@ COLLECTION is the plist holding data collection."
         (message "Missing write access rights to org-persist-directory: %S"
                  org-persist-directory))))
   (when (file-exists-p org-persist-directory)
-    (org-persist--write-elisp-file
-     (org-file-name-concat org-persist-directory org-persist-index-file)
-     org-persist--index
-     t t)
-    (org-file-name-concat org-persist-directory org-persist-index-file)))
+    (let ((index-file
+           (org-file-name-concat org-persist-directory org-persist-index-file)))
+      (org-persist--merge-index-with-disk)
+      (org-persist--write-elisp-file index-file org-persist--index t t)
+      (setq org-persist--index-age
+            (file-attribute-modification-time (file-attributes index-file)))
+      index-file)))
 
 (defun org-persist--save-index ()
   "Save `org-persist--index'."
   (org-persist-write:index
    `(index ,org-persist--storage-version) nil))
+
+(defun org-persist--merge-index-with-disk ()
+  "Merge `org-persist--index' with the current index file on disk."
+  (let* ((index-file
+          (org-file-name-concat org-persist-directory org-persist-index-file))
+         (disk-index
+          (and (file-exists-p index-file)
+               (org-file-newer-than-p index-file org-persist--index-age)
+               (org-persist-read:index `(index ,org-persist--storage-version) index-file nil)))
+         (combined-index
+          (org-persist--merge-index org-persist--index disk-index)))
+    (when disk-index
+      (setq org-persist--index combined-index
+            org-persist--index-age
+            (file-attribute-modification-time (file-attributes index-file))))))
+
+(defun org-persist--merge-index (base other)
+  "Attempt to merge new index items in OTHER into BASE.
+Items with different details are considered too difficult, and skipped."
+  (if other
+      (let ((new (cl-set-difference other base :test #'equal))
+            (base-files (mapcar (lambda (s) (plist-get s :persist-file)) base))
+            (combined (reverse base)))
+        (dolist (item (nreverse new))
+          (unless (or (memq 'index (mapcar #'car (plist-get item :container)))
+                      (not (file-exists-p
+                            (org-file-name-concat org-persist-directory
+                                                  (plist-get item :persist-file))))
+                      (member (plist-get item :persist-file) base-files))
+            (push item combined)))
+        (nreverse combined))
+    base))
 
 ;;;; Public API
 
@@ -951,6 +990,9 @@ Do nothing in an indirect buffer."
 (defun org-persist-gc ()
   "Remove expired or unregistered containers and orphaned files.
 Also, remove containers associated with non-existing files."
+  (if org-persist--index
+      (org-persist--merge-index-with-disk)
+    (org-persist--load-index))
   (unless (and org-persist-disable-when-emacs-Q
                ;; FIXME: This is relying on undocumented fact that
                ;; Emacs sets `user-init-file' to nil when loaded with
