@@ -15439,14 +15439,12 @@ an embedded LaTeX fragment, let `texmathp' do its job.
     (setq texmathp-why '("cdlatex-math-symbol in org-mode" . 0))
     t)
    (t
-    (let ((p (org-inside-LaTeX-fragment-p)))
-      (when p ;; FIXME: Shouldn't we return t when `p' is nil?
-	(if (member (car p)
-	            (plist-get org-format-latex-options :matchers))
-	    (progn
-	      (setq texmathp-why '("Org mode embedded math" . 0))
-	      t)
-	  (apply orig-fun args)))))))
+    (let ((element (org-element-context)))
+      (or (not (org-inside-LaTeX-fragment-p element))
+          (if (not (eq (org-element-type element) 'latex-fragment))
+              (apply orig-fun args)
+            (setq texmathp-why '("Org mode embedded math" . 0))
+	    t))))))
 
 (defun turn-on-org-cdlatex ()
   "Unconditionally turn on `org-cdlatex-mode'."
@@ -15549,50 +15547,13 @@ environment remains unintended."
 
 ;;;; LaTeX fragments
 
-(defun org-inside-LaTeX-fragment-p ()
-  "Test if point is inside a LaTeX fragment.
-I.e. after a \\begin, \\(, \\[, $, or $$, without the corresponding closing
-sequence appearing also before point.
-Even though the matchers for math are configurable, this function assumes
-that \\begin, \\(, \\[, and $$ are always used.  Only the single dollar
-delimiters are skipped when they have been removed by customization.
-The return value is nil, or a cons cell with the delimiter and the
-position of this delimiter.
+(defun org-inside-LaTeX-fragment-p (&optional element)
+  "Test if point is inside a LaTeX fragment or environment.
 
-This function does a reasonably good job, but can locally be fooled by
-for example currency specifications.  For example it will assume being in
-inline math after \"$22.34\".  The LaTeX fragment formatter will only format
-fragments that are properly closed, but during editing, we have to live
-with the uncertainty caused by missing closing delimiters.  This function
-looks only before point, not after."
-  (catch 'exit
-    (let ((pos (point))
-	  (dodollar (member "$" (plist-get org-format-latex-options :matchers)))
-	  (lim (progn
-		 (re-search-backward (concat "^\\(" paragraph-start "\\)") nil
-				     'move)
-		 (point)))
-	  dd-on str (start 0) m re)
-      (goto-char pos)
-      (when dodollar
-	(setq str (concat (buffer-substring lim (point)) "\000 X$.")
-	      re (nth 1 (assoc "$" org-latex-regexps)))
-	(while (string-match re str start)
-	  (cond
-	   ((= (match-end 0) (length str))
-	    (throw 'exit (cons "$" (+ lim (match-beginning 0) 1))))
-	   ((= (match-end 0) (- (length str) 5))
-	    (throw 'exit nil))
-	   (t (setq start (match-end 0))))))
-      (when (setq m (re-search-backward "\\(\\\\begin{[^}]*}\\|\\\\(\\|\\\\\\[\\)\\|\\(\\\\end{[^}]*}\\|\\\\)\\|\\\\\\]\\)\\|\\(\\$\\$\\)" lim t))
-	(goto-char pos)
-	(and (match-beginning 1) (throw 'exit (cons (match-string 1) m)))
-	(and (match-beginning 2) (throw 'exit nil))
-	;; count $$
-	(while (re-search-backward "\\$\\$" lim t)
-	  (setq dd-on (not dd-on)))
-	(goto-char pos)
-	(when dd-on (cons "$$" m))))))
+When optional argument ELEMENT is non-nil, it should be element/object
+at point."
+  (memq (org-element-type (or element (org-element-context)))
+        '(latex-fragment latex-environment)))
 
 (defun org-inside-latex-macro-p ()
   "Is point inside a LaTeX macro or its arguments?"
