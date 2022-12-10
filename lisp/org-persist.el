@@ -922,12 +922,12 @@ Do nothing in an indirect buffer."
     (when (file-exists-p file)
       (delete-file file))))
 
-(defmacro org-persist--gc-persist-file (persist-file)
+(defun org-persist--gc-persist-file (persist-file)
   "Garbage collect PERSIST-FILE."
-  `(when (file-exists-p ,persist-file)
-     (delete-file ,persist-file)
-     (when (org-directory-empty-p (file-name-directory ,persist-file))
-       (delete-directory (file-name-directory ,persist-file)))))
+  (when (file-exists-p persist-file)
+    (delete-file persist-file)
+    (when (org-directory-empty-p (file-name-directory persist-file))
+      (delete-directory (file-name-directory persist-file)))))
 
 (defun org-persist-gc ()
   "Remove expired or unregistered containers and orphaned files.
