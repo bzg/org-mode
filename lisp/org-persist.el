@@ -420,7 +420,9 @@ Return PLIST."
       (org-persist-collection-let collection
         (dolist (cont (cons container container))
           (unless (listp (car container))
-            (org-persist-gc:generic cont collection))
+            (org-persist-gc:generic cont collection)
+            (dolist (afile (org-persist-associated-files:generic cont collection))
+              (delete-file afile)))
           (remhash (cons cont associated) org-persist--index-hash)
           (when path (remhash (cons cont (list :file path)) org-persist--index-hash))
           (when inode (remhash (cons cont (list :inode inode)) org-persist--index-hash))
@@ -909,18 +911,9 @@ Do nothing in an indirect buffer."
 
 (defalias 'org-persist-gc:elisp #'ignore)
 (defalias 'org-persist-gc:index #'ignore)
-
-(defun org-persist-gc:file (container collection)
-  "Garbage collect file CONTAINER in COLLECTION."
-  (let ((file (org-persist-read container (plist-get collection :associated))))
-    (when (file-exists-p file)
-      (delete-file file))))
-
-(defun org-persist-gc:url (container collection)
-  "Garbage collect url CONTAINER in COLLECTION."
-  (let ((file (org-persist-read container (plist-get collection :associated))))
-    (when (file-exists-p file)
-      (delete-file file))))
+(defalias 'org-persist-gc:version #'ignore)
+(defalias 'org-persist-gc:file #'ignore)
+(defalias 'org-persist-gc:url #'ignore)
 
 (defun org-persist--gc-persist-file (persist-file)
   "Garbage collect PERSIST-FILE."
@@ -929,22 +922,30 @@ Do nothing in an indirect buffer."
     (when (org-directory-empty-p (file-name-directory persist-file))
       (delete-directory (file-name-directory persist-file)))))
 
-(defmacro org-persist--associated-files:generic (container collection)
-  "List associated files in `org-persist-directory' for CONTAINER in COLLECTION."
+(defmacro org-persist-associated-files:generic (container collection)
+  "List associated files in `org-persist-directory' of CONTAINER in COLLECTION."
   `(let* ((c (org-persist--normalize-container ,container))
-          (gc-func-symbol (intern (format "org-persist--associated-files:%s" (car c)))))
-     (and (fboundp gc-func-symbol)
-          (funcall gc-func-symbol c ,collection))))
+          (assocf-func-symbol (intern (format "org-persist-associated-files:%s" (car c)))))
+     (if (fboundp assocf-func-symbol)
+         (funcall assocf-func-symbol c ,collection)
+       (error "org-persist: Read function %s not defined"
+              assocf-func-symbol))))
 
-(defun org-persist--associated-files:url (_ collection)
-  "List url-associated files in `org-persist-directory' for COLLECTION."
-  (let* ((persist-file (org-file-name-concat
-                        org-persist-directory
-                        (plist-get collection :persist-file)))
-         (data (or (gethash persist-file org-persist--write-cache)
-                   (org-persist--read-elisp-file persist-file)))
-         (url-file (alist-get '(url nil) data nil nil #'equal)))
-    (and url-file (list url-file))))
+(defalias 'org-persist-associated-files:elisp #'ignore)
+(defalias 'org-persist-associated-files:index #'ignore)
+(defalias 'org-persist-associated-files:version #'ignore)
+
+(defun org-persist-associated-files:file (_ collection)
+  "List file CONTAINER associated files of COLLECTION in `org-persist-directory'."
+  (let ((file (org-persist-read container (plist-get collection :associated))))
+    (when (file-exists-p file)
+      (list file))))
+
+(defun org-persist-associated-files:url (container collection)
+  "List url CONTAINER associated files of COLLECTION in `org-persist-directory'."
+  (let ((file (org-persist-read container (plist-get collection :associated))))
+    (when (file-exists-p file)
+      (list file))))
 
 (defun org-persist-gc ()
   "Remove expired or unregistered containers and orphaned files.
@@ -988,13 +989,9 @@ Also, remove containers associated with non-existing files."
               (push collection new-index)
               (dolist (container (plist-get collection :container))
                 (dolist (associated-file
-                         (org-persist--associated-files:generic
+                         (org-persist-associated-files:generic
                           container collection))
-                  (setq orphan-files
-                        (delete (org-file-name-concat
-                                 org-persist-directory
-                                 associated-file)
-                                orphan-files))))))))
+                  (setq orphan-files (delete associated-file orphan-files))))))))
       (mapc #'org-persist--gc-persist-file orphan-files)
       (setq org-persist--index (nreverse new-index)))))
 
