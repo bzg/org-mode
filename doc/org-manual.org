@@ -96,6 +96,10 @@ When installing Org on top of the pre-packaged version, please note
 that Org stable versions are meant to be fully compatible with the
 last three stable versions of Emacs but not with older Emacsen.
 
+Some Org components also depend on third-party packages available
+through package archives.  Org is only guaranteed to be compatible
+with the latest stable versions of these third-party packages.
+
 *** Using Emacs packaging system
 :PROPERTIES:
 :UNNUMBERED: notoc
