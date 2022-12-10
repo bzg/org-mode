@@ -4612,12 +4612,17 @@ If LINK refers to a remote resource, modify it to point to a local
 downloaded copy.  Otherwise, return unchanged LINK."
   (when (org-export-link-remote-p link)
     (let* ((local-path (org-export-link--remote-local-copy link)))
-      (setcdr link
-              (thread-first (cadr link)
-                            (plist-put :type "file")
-                            (plist-put :path local-path)
-                            (plist-put :raw-link (concat "file:" local-path))
-                            list))))
+      (if local-path
+          (setcdr link
+                  (thread-first (cadr link)
+                                (plist-put :type "file")
+                                (plist-put :path local-path)
+                                (plist-put :raw-link (concat "file:" local-path))
+                                list))
+        (display-warning
+         '(org export)
+         (format "unable to obtain local copy of %s"
+                 (org-element-property :raw-link link))))))
   link)
 
 ;;;; For References
