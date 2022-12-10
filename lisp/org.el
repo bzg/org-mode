@@ -16286,6 +16286,10 @@ buffer boundaries with possible narrowing."
 					  (org-element-property :end link))
 					 (skip-chars-backward " \t")
 					 (point)))))
+                              ;; FIXME: See bug#59902.  We cannot rely
+                              ;; on Emacs to update image if the file
+                              ;; has changed.
+                              (image-flush image)
 			      (overlay-put ov 'display image)
 			      (overlay-put ov 'face 'default)
 			      (overlay-put ov 'org-image-overlay t)
