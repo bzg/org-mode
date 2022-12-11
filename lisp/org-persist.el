@@ -936,7 +936,7 @@ Do nothing in an indirect buffer."
 (defalias 'org-persist-associated-files:index #'ignore)
 (defalias 'org-persist-associated-files:version #'ignore)
 
-(defun org-persist-associated-files:file (_ collection)
+(defun org-persist-associated-files:file (container collection)
   "List file CONTAINER associated files of COLLECTION in `org-persist-directory'."
   (let ((file (org-persist-read container (plist-get collection :associated))))
     (when (file-exists-p file)
