@@ -16364,6 +16364,10 @@ buffer boundaries with possible narrowing."
   "Remove inline-display overlay if a corresponding region is modified."
   (when (and ov after)
     (delete ov org-inline-image-overlays)
+    ;; Clear image from cache to avoid image not updating upon
+    ;; changing on disk.  See Emacs bug#59902.
+    (when (overlay-get ov 'org-image-overlay)
+      (image-flush (overlay-get ov 'display)))
     (delete-overlay ov)))
 
 (defun org-remove-inline-images (&optional beg end)
