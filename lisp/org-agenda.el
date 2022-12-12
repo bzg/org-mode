@@ -4166,7 +4166,9 @@ dimming them."                   ;FIXME: The arg isn't used, actually!
 				   (line-beginning-position))
 				 (line-end-position))))
 	  (when todo-blocked
-	    (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
+	    (overlay-put ov 'face 'org-agenda-dimmed-todo-face)
+            ;; Override other overlays.
+            (overlay-put ov 'priority 50))
 	  (when invisible
 	    (org-agenda-filter-hide-line 'todo-blocked)))
         (if (= (point-max) (line-end-position))
