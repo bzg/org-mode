@@ -1025,7 +1025,7 @@ in this list - but it does not hurt if it is present."
   "Association list of options for the latex listings package.
 
 These options are supplied as a comma-separated list to the
-\\lstset command.  Each element of the association list should be
+\\lstlisting command.  Each element of the association list should be
 a list or cons cell containing two strings: the name of the
 option, and the value.  For example,
 
