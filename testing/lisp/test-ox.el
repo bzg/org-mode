@@ -405,6 +405,64 @@ Paragraph"
 		   (options (org-export-get-environment backend t)))
 	      (list (plist-get options :k1) (plist-get options :k2)))))))
 
+(ert-deftest test-org-export/get-ordinal ()
+  "Test specifications for `org-export-get-ordinal'."
+  ;; Table numbering with, without predicates, and with other types.
+  (org-test-with-temp-text
+      "#+title: Table numbering test
+#+options: author:nil toc:nil
+
+#+caption: Should be Table 1
+| h1       | h2       | h3       |
+|----------+----------+----------|
+| abcdefgh | ijklmnop | qrstuvwx |
+
+#+caption: Should be Table 2
+| h1       | h2       | h3       |
+|----------+----------+----------|
+| abcdefgh | ijklmnop | qrstuvwx |
+
+#+caption: Should be Table 3
+| h1       | h2       | h3       |
+|----------+----------+----------|
+| abcdefgh | ijklmnop | qrstuvwx |
+
+#+caption: Should be Table 4
+| h1       | h2       | h3       |
+|----------+----------+----------|
+| abcdefgh | ijklmnop | qrstuvwx |"
+    (org-export-as
+     (org-export-create-backend
+      :parent 'org
+      :transcoders
+      '((table
+         .
+         (lambda (table contents info)
+           (let ((from-third (lambda (table info)
+                               (<= 3 (org-export-get-ordinal table info)))))
+             (pcase (org-element-interpret-data (org-export-get-caption table))
+               ("Should be Table 1"
+                (should (= 1 (org-export-get-ordinal table info)))
+                (should (= 2 (org-export-get-ordinal table info '(section))))
+                (should (= 1 (org-export-get-ordinal table info nil #'org-ascii--has-caption-p)))
+                (should (= 1 (org-export-get-ordinal table info nil from-third))))
+               ("Should be Table 2"
+                (should (= 2 (org-export-get-ordinal table info)))
+                (should (= 3 (org-export-get-ordinal table info '(section))))
+                (should (= 2 (org-export-get-ordinal table info nil #'org-ascii--has-caption-p)))
+                (should (= 1 (org-export-get-ordinal table info nil from-third))))
+               ("Should be Table 3"
+                (should (= 3 (org-export-get-ordinal table info)))
+                (should (= 4 (org-export-get-ordinal table info '(section))))
+                (should (= 3 (org-export-get-ordinal table info nil #'org-ascii--has-caption-p)))
+                (should (= 1 (org-export-get-ordinal table info nil from-third))))
+               ("Should be Table 4"
+                (should (= 4 (org-export-get-ordinal table info)))
+                (should (= 5 (org-export-get-ordinal table info '(section))))
+                (should (= 4 (org-export-get-ordinal table info nil #'org-ascii--has-caption-p)))
+                (should (= 2 (org-export-get-ordinal table info nil from-third))))))
+           "")))))))
+
 (ert-deftest test-org-export/set-title ()
   "Test title setting."
   ;; Without TITLE keyword.
