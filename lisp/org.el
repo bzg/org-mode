@@ -102,6 +102,7 @@
 
 (require 'org-cycle)
 (defvaralias 'org-hide-block-startup 'org-cycle-hide-block-startup)
+(defvaralias 'org-hide-drawer-startup 'org-cycle-hide-drawer-startup)
 (defvaralias 'org-pre-cycle-hook 'org-cycle-pre-hook)
 (defvaralias 'org-tab-first-hook 'org-cycle-tab-first-hook)
 (defalias 'org-global-cycle #'org-cycle-global)
