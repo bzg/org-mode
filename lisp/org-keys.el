@@ -503,6 +503,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
   (org-defkey org-mode-map (kbd "C-c C-x c") #'org-table-copy-down)
   (org-defkey org-mode-map (kbd "C-c C-x m") #'org-meta-return)
   (org-defkey org-mode-map (kbd "C-c C-x M") #'org-insert-todo-heading)
+  (org-defkey org-mode-map (kbd "C-c C-x s") #'org-insert-structure-template)
   (org-defkey org-mode-map (kbd "C-c C-x RET") #'org-meta-return)
   (org-defkey org-mode-map (kbd "ESC RET") #'org-meta-return)
   (org-defkey org-mode-map (kbd "ESC <left>") #'org-metaleft)

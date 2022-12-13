@@ -20496,6 +20496,7 @@ further based on their usage needs.  For example, the normal
 | {{{kbd(S-DOWN)}}}    | {{{kbd(C-c DOWN)}}}      |              |                      |
 | {{{kbd(C-S-LEFT)}}}  | {{{kbd(C-c C-x LEFT)}}}  |              |                      |
 | {{{kbd(C-S-RIGHT)}}} | {{{kbd(C-c C-x RIGHT)}}} |              |                      |
+| {{{kbd(C-c C-\,)}}}  | {{{kbd(C-c C-x s)}}}     |              |                      |
 
 ** Protocols for External Access
 :PROPERTIES:
