@@ -4759,17 +4759,20 @@ objects of the same type."
 	     (cond
 	      ((eq element el) (1+ counter))
               ;; Use cached result.
-              ((and cached (equal predicate (car cached)))
-               (cdr cached))
+              ((and cached
+                    (equal predicate (car cached))
+                    (equal types (cadr cached)))
+               (setq counter (nth 2 cached))
+               nil)
 	      ((not predicate)
                (cl-incf counter)
                (org-element-put-property
-                el :org-export--counter (cons predicate counter))
+                el :org-export--counter (list predicate types counter))
                nil)
 	      ((funcall predicate el info)
                (cl-incf counter)
                (org-element-put-property
-                el :org-export--counter (cons predicate counter))
+                el :org-export--counter (list predicate types counter))
                nil))))
 	 info 'first-match)))))
 
