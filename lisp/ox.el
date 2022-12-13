@@ -4758,23 +4758,27 @@ objects of the same type."
      (let ((counter 0))
        ;; Increment counter until ELEMENT is found again.
        (org-element-map (plist-get info :parse-tree)
-	   (or types (org-element-type element))
+	   (or (and types (cons (org-element-type element) types))
+               (org-element-type element))
 	 (lambda (el)
            (let ((cached (org-element-property :org-export--counter el)))
 	     (cond
 	      ((eq element el) (1+ counter))
               ;; Use cached result.
-              ((and cached (equal predicate (car cached)))
-               (cdr cached))
+              ((and cached
+                    (equal predicate (car cached))
+                    (equal types (cadr cached)))
+               (setq counter (nth 2 cached))
+               nil)
 	      ((not predicate)
                (cl-incf counter)
                (org-element-put-property
-                el :org-export--counter (cons predicate counter))
+                el :org-export--counter (list predicate types counter))
                nil)
 	      ((funcall predicate el info)
                (cl-incf counter)
                (org-element-put-property
-                el :org-export--counter (cons predicate counter))
+                el :org-export--counter (list predicate types counter))
                nil))))
 	 info 'first-match)))))
 
