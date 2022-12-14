@@ -12,6 +12,21 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
+** New options
+*** New ~org-latex-listings-src-omit-language~ customization for LaTeX export
+
+The ~org-latex-listings-src-omit-language~ customization variable
+allows you to omit the =language= parameter in the exported
+=lstlisting= environment. This is necessary when the =listings=
+backend delegates listing generation to another package like
+=fancyvrb= using the following setup in the document header:
+
+#+BEGIN_src org
+,#+LATEX_HEADER: \RequirePackage{fancyvrb}
+,#+LATEX_HEADER: \DefineVerbatimEnvironment{verbatim}{Verbatim}{...whatever...}
+,#+LATEX_HEADER: \DefineVerbatimEnvironment{lstlisting}{Verbatim}{...whatever...}
+#+END_src
+
 * Version 9.6
 
 ** Important announcements and breaking changes
@@ -432,6 +447,7 @@ following properties: ~:hook~, ~:prepare-finalize~,
 ~:before-finalize~, ~:after-finalize~.  These nullary functions run
 prior to their global counterparts for the selected template.
 
+
 ** New options
 *** A new option for custom setting ~org-refile-use-outline-path~ to show document title in refile targets
 
@@ -747,7 +763,6 @@ following snippet to allow multiple different ID formats in Org files.
         org-attach-id-uuid-folder-format
         org-attach-id-ts-folder-format))
 #+end_src
-
 * Version 9.5
 
 ** Important announcements and breaking changes

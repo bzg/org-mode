@@ -1021,6 +1021,23 @@ in this list - but it does not hurt if it is present."
 	   (symbol :tag "Major mode       ")
 	   (string :tag "Listings language"))))
 
+(defcustom org-latex-listings-src-omit-language nil
+  "Discard src block language parameter in listings.
+
+Set this option to t to omit the \"language=\" in the parameters to
+\"lstlisting\" environments when exporting an src block.
+
+This is necessary, for example, when the \"fancyvrb\" package is used
+instead of \"listings\":
+
+#+LATEX_HEADER: \\RequirePackage{fancyvrb}
+#+LATEX_HEADER: \\DefineVerbatimEnvironment{verbatim}{Verbatim}{...}
+#+LATEX_HEADER: \\DefineVerbatimEnvironment{lstlisting}{Verbatim}{...}"
+  :group 'org-export-latex
+  :package-version '(Org . "9.7")
+  :type 'boolean
+  :safe #'booleanp)
+
 (defcustom org-latex-listings-options nil
   "Association list of options for the latex listings package.
 
@@ -3593,7 +3610,8 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
           ((string= "multicolumn" float) '(("float" "*")))
           ((and float (not (assoc "float" lst-opt)))
            `(("float" ,(plist-get info :latex-default-figure-position)))))
-         `(("language" ,lst-lang))
+         (unless org-latex-listings-src-omit-language
+           `(("language" ,lst-lang)))
          (when label
              `(("label" ,(org-latex--label src-block info))))
          (when caption-str
