@@ -2443,6 +2443,8 @@ These are overlaid over the default ISO format if the variable
 end of the second format.  The custom formats are also honored by export
 commands, if custom time display is turned on at the time of export.
 
+This variable also affects how timestamps are exported.
+
 Leading \"<\" and trailing \">\" pair will be stripped from the format
 strings."
   :group 'org-time
