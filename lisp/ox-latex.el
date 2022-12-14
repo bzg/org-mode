@@ -3594,11 +3594,14 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
           ((and float (not (assoc "float" lst-opt)))
            `(("float" ,(plist-get info :latex-default-figure-position)))))
          `(("language" ,lst-lang))
-         (if label
-             `(("label" ,(org-latex--label src-block info)))
-           '(("label" " ")))
-         (if caption-str `(("caption" ,caption-str)) '(("caption" " ")))
-         `(("captionpos" ,(if caption-above-p "t" "b")))
+         (when label
+             `(("label" ,(org-latex--label src-block info))))
+         (when caption-str
+           `(("caption" ,caption-str)))
+         (when caption-str
+           ;; caption-above-p means captionpos is t(op)
+           ;; else b(ottom)
+           `(("captionpos" ,(if caption-above-p "t" "b"))))
          (cond ((assoc "numbers" lst-opt) nil)
                ((not num-start) '(("numbers" "none")))
                (t `(("firstnumber" ,(number-to-string (1+ num-start)))
