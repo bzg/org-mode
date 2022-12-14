@@ -60,6 +60,12 @@ The face ~org-agenda-calendar-daterange~ is used to show entries with
 a date range in the agenda.  It inherits from the default face in
 order to remain backward-compatible.
 
+** New features
+*** Datetree structure headlines can now be complex
+
+TODO state, priority, tags, statistics cookies, and COMMENT keywords
+are allowed in the tree structure.
+
 * Version 9.6
 
 ** Important announcements and breaking changes

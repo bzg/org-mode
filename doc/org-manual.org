@@ -22510,7 +22510,8 @@ level.
 ,*** 2022-10-08 Saturday
 #+end_example
 
-Tags are allowed in the tree structure.
+TODO state, priority, tags, statistics cookies, and COMMENT keywords
+are allowed in the tree structure.
 
 [fn:31] This is always the other, not the user.  See the variable
 ~org-link-from-user-regexp~.

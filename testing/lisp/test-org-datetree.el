@@ -58,6 +58,14 @@
         (let ((org-datetree-add-timestamp nil))
 	  (org-datetree-find-date-create '(3 29 2012)))
         (org-trim (buffer-string)))))
+    ;; Do not create new day node when one exists.
+    (should
+     (string-match
+      "\\`\\* DONE 2012 :tag1:tag2:\n\n\\*\\* TODO 2012-03 .*\n\n\\*\\*\\* \\[#A\\] 2012-03-29 .*\\'"
+      (org-test-with-temp-text "* DONE 2012 :tag1:tag2:\n\n** TODO 2012-03 month\n\n*** [#A] 2012-03-29 day :tag3:"
+        (let ((org-datetree-add-timestamp nil))
+	  (org-datetree-find-date-create '(3 29 2012)))
+        (org-trim (buffer-string)))))
     ;; Sort new entry in right place.
     (should
      (string-match
@@ -160,6 +168,14 @@
      (string-match
       "\\`\\* 2015\n\n\\*\\* 2015-W01\n\n\\*\\*\\* 2014-12-31 .*\\'"
       (org-test-with-temp-text "* 2015\n\n** 2015-W01\n\n*** 2014-12-31 day"
+        (let ((org-datetree-add-timestamp nil))
+	  (org-datetree-find-iso-week-create '(12 31 2014)))
+        (org-trim (buffer-string)))))
+    ;; Do not create new day node when one exists.
+    (should
+     (string-match
+      "\\`\\* TODO \\[#B\\] 2015\n\n\\*\\* 2015-W01 :tag1:\n\n\\*\\*\\* 2014-12-31 .*\\'"
+      (org-test-with-temp-text "* TODO [#B] 2015\n\n** 2015-W01 :tag1:\n\n*** 2014-12-31 day"
         (let ((org-datetree-add-timestamp nil))
 	  (org-datetree-find-iso-week-create '(12 31 2014)))
         (org-trim (buffer-string)))))
