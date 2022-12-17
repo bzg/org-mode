@@ -999,7 +999,8 @@ Also, remove containers associated with non-existing files."
         (remote-files-num 0)
         (orphan-files
          (delete (org-file-name-concat org-persist-directory org-persist-index-file)
-                 (directory-files-recursively org-persist-directory ".+"))))
+                 (when (file-exists-p org-persist-directory)
+                   (directory-files-recursively org-persist-directory ".+")))))
     (dolist (collection org-persist--index)
       (let* ((file (plist-get (plist-get collection :associated) :file))
              (web-file (and file (string-match-p "\\`https?://" file)))
