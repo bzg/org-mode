@@ -881,26 +881,35 @@ When IGNORE-RETURN is non-nil, just return t on success without calling
 When ASSOCIATED is non-nil, only save the matching data."
   (unless org-persist--index (org-persist--load-index))
   (setq associated (org-persist--normalize-associated associated))
-  (let (all-containers)
-    (dolist (collection org-persist--index)
-      (if associated
-          (when collection
-            (cl-pushnew (plist-get collection :container) all-containers :test #'equal))
-        (condition-case err
-            (org-persist-write (plist-get collection :container) (plist-get collection :associated) t)
-          (error
-           (message "%s. Deleting bad index entry." err)
-           (org-persist--remove-from-index collection)
-           nil))))
-    (dolist (container all-containers)
-      (let ((collection (org-persist--find-index `(:container ,container :associated ,associated))))
-        (when collection
+  (unless
+      (and (equal 1 (length org-persist--index))
+           ;; The single collection only contains a single container
+           ;; in the container list.
+           (equal 1 (length (plist-get (car org-persist--index) :container)))
+           ;; The container is an `index' container.
+           (eq 'index (caar (plist-get (car org-persist--index) :container)))
+           ;; No `org-persist-directory' exists yet.
+           (not (file-exists-p org-persist-directory)))
+    (let (all-containers)
+      (dolist (collection org-persist--index)
+        (if associated
+            (when collection
+              (cl-pushnew (plist-get collection :container) all-containers :test #'equal))
           (condition-case err
-              (org-persist-write container associated t)
+              (org-persist-write (plist-get collection :container) (plist-get collection :associated) t)
             (error
              (message "%s. Deleting bad index entry." err)
              (org-persist--remove-from-index collection)
-             nil)))))))
+             nil))))
+      (dolist (container all-containers)
+        (let ((collection (org-persist--find-index `(:container ,container :associated ,associated))))
+          (when collection
+            (condition-case err
+                (org-persist-write container associated t)
+              (error
+               (message "%s. Deleting bad index entry." err)
+               (org-persist--remove-from-index collection)
+               nil))))))))
 
 (defun org-persist-write-all-buffer ()
   "Call `org-persist-write-all' in current buffer.
