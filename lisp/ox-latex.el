@@ -156,6 +156,7 @@
     (:latex-src-block-backend nil nil org-latex-src-block-backend)
     (:latex-listings-langs nil nil org-latex-listings-langs)
     (:latex-listings-options nil nil org-latex-listings-options)
+    (:latex-listings-src-omit-language nil nil org-latex-listings-src-omit-language)
     (:latex-minted-langs nil nil org-latex-minted-langs)
     (:latex-minted-options nil nil org-latex-minted-options)
     (:latex-prefer-user-labels nil nil org-latex-prefer-user-labels)
@@ -3610,10 +3611,10 @@ and FLOAT are extracted from SRC-BLOCK and INFO in `org-latex-src-block'."
           ((string= "multicolumn" float) '(("float" "*")))
           ((and float (not (assoc "float" lst-opt)))
            `(("float" ,(plist-get info :latex-default-figure-position)))))
-         (unless org-latex-listings-src-omit-language
+         (unless (plist-get info :latex-listings-src-omit-language)
            `(("language" ,lst-lang)))
          (when label
-             `(("label" ,(org-latex--label src-block info))))
+           `(("label" ,(org-latex--label src-block info))))
          (when caption-str
            `(("caption" ,caption-str)))
          (when caption-str
