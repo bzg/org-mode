@@ -2464,7 +2464,11 @@ INFO may provide the values of these header arguments (in the
 		       (cons 'unordered
 			     (mapcar
 			      (lambda (e)
-				(list (if (stringp e) e (format "%S" e))))
+                                (cond
+                                 ((stringp e) (list e))
+                                 ((listp e)
+                                  (mapcar (lambda (x) (format "%S" x)) e))
+                                 (t (list (format "%S" e)))))
 			      (if (listp result) result
 				(split-string result "\n" t))))
 		       '(:splicep nil :istart "- " :iend "\n")))
