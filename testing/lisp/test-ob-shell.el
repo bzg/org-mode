@@ -170,6 +170,20 @@ ob-comint.el, which was not previously tested."
 	      "#+BEGIN_SRC sh :results table\necho 'I \"want\" it all'\n#+END_SRC"
 	    (org-babel-execute-src-block)))))
 
+(ert-deftest ob-shell/results-list ()
+  "Test :results list."
+  (org-test-with-temp-text
+      "#+BEGIN_SRC sh :results list\necho 1\necho 2\necho 3\n#+END_SRC"
+    (should
+     (equal '((1) (2) (3))
+            (org-babel-execute-src-block)))
+    (search-forward "#+results")
+    (beginning-of-line 2)
+    (should
+     (equal
+      "- 1\n- 2\n- 3\n"
+      (buffer-substring-no-properties (point) (point-max))))))
+
 ;;; Standard output
 
 (ert-deftest ob-shell/standard-output-after-success ()
