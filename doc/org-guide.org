@@ -141,7 +141,7 @@ See [[*Miscellaneous]] for a setup to realize this.
 
 Outlines make it possible to hide parts of the text in the buffer.
 Org uses just two commands, bound to {{{kbd(TAB)}}} and
-{{{kbd{S-TAB)}}} to change the visibility in the buffer.
+{{{kbd(S-TAB)}}} to change the visibility in the buffer.
 
 #+attr_texinfo: :sep ,
 - {{{kbd(TAB)}}} ::
@@ -667,7 +667,7 @@ of the option ~org-todo-state-tags-triggers~ for details.
 :DESCRIPTION: More than just on/off.
 :END:
 
-You can use TODO keywords to indicate @emph{sequential} working progress
+You can use TODO keywords to indicate /sequential/ working progress
 states:
 
 #+begin_src emacs-lisp
@@ -1093,7 +1093,7 @@ a range of times---in a special format, either =<2003-09-16 Tue>= or
 =<2003-09-16 Tue 09:39>= or =<2003-09-16 Tue 12:00-12:30>=.
 A timestamp can appear anywhere in the headline or body of an Org tree
 entry.  Its presence causes entries to be shown on specific dates in
-the agenda (see [[*The Weekly/daily Agenda]]).  We distinguish:
+the agenda (see [[*The Weekly/Daily Agenda]]).  We distinguish:
 
 - Plain timestamp; Event; Appointment ::
 
@@ -1294,7 +1294,7 @@ a project.
   a {{{kbd(C-u)}}} prefix argument, select the target task from a list
   of recently clocked tasks.
 
-The {{{kbd(l)}}} key may be used in the agenda (see [[*The Weekly/daily
+The {{{kbd(l)}}} key may be used in the agenda (see [[*The Weekly/Daily
 Agenda]]) to show which tasks have been worked on or closed during
 a day.
 
@@ -1527,7 +1527,7 @@ commands:
 #+attr_texinfo: :sep ,
 - {{{kbd(a)}}} ::
 
-  Create the calendar-like agenda (see [[*The Weekly/daily Agenda]]).
+  Create the calendar-like agenda (see [[*The Weekly/Daily Agenda]]).
 
 - {{{kbd(t)}}}, {{{kbd(T)}}} ::
 
