@@ -978,13 +978,17 @@ Also, remove containers associated with non-existing files."
     (add-hook 'kill-emacs-hook #'org-persist-gc)))
 
 ;; Point to temp directory when `org-persist--disable-when-emacs-Q' is set.
-(if (and org-persist--disable-when-emacs-Q
-         ;; FIXME: This is relying on undocumented fact that
-         ;; Emacs sets `user-init-file' to nil when loaded with
-         ;; "-Q" argument.
-         (not user-init-file))
-    (setq org-persist-directory
-          (make-temp-file "org-persist-" 'dir)))
+(when (and org-persist--disable-when-emacs-Q
+           ;; FIXME: This is relying on undocumented fact that
+           ;; Emacs sets `user-init-file' to nil when loaded with
+           ;; "-Q" argument.
+           (not user-init-file))
+  (setq org-persist-directory
+        (make-temp-file "org-persist-" 'dir))
+  ;; We don't need the temp directory to exist.
+  ;; `org-persist-write-all' will refrain from creating and writing to the dir if
+  ;; none exists yet.
+  (delete-directory org-persist-directory))
 
 (add-hook 'after-init-hook #'org-persist-load-all)
 
