@@ -4283,7 +4283,7 @@ produced."
               ;; Cannot find the compiler inserted by
               ;; `org-latex-template' -> `org-latex--insert-compiler'.
               ;; Use a fallback.
-	      "pdflatex"))
+              org-latex-compiler))
 	 (process (if (functionp org-latex-pdf-process) org-latex-pdf-process
 		    ;; Replace "%latex" with "%L" and "%bib" and
 		    ;; "%bibtex" with "%B" to adhere to `format-spec'
