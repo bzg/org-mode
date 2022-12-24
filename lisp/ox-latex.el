@@ -4301,6 +4301,8 @@ produced."
          (outfile (org-compile-file texfile process "pdf"
 				    (format "See %S for details" log-buf-name)
 				    log-buf spec)))
+    (with-current-buffer log-buf
+      (erase-buffer))
     (org-latex-compile--postprocess outfile log-buf snippet)
     ;; Return output file name.
     outfile))
