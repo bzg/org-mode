@@ -4301,24 +4301,31 @@ produced."
          (outfile (org-compile-file texfile process "pdf"
 				    (format "See %S for details" log-buf-name)
 				    log-buf spec)))
-    (unless snippet
-      (when org-latex-remove-logfiles
-	(mapc #'delete-file
-	      (directory-files
-	       (file-name-directory outfile)
-	       t
-	       (concat (regexp-quote (file-name-base outfile))
-		       "\\(?:\\.[0-9]+\\)?\\."
-		       (regexp-opt org-latex-logfiles-extensions))
-	       t)))
-      (let ((warnings (org-latex--collect-warnings log-buf)))
-	(message (concat "PDF file produced"
-			 (cond
-			  ((eq warnings 'error) " with errors.")
-			  (warnings (concat " with warnings: " warnings))
-			  (t "."))))))
+    (org-latex-compile--postprocess outfile log-buf snippet)
     ;; Return output file name.
     outfile))
+
+(defun org-latex-compile--postprocess (outfile log-buf &optional snippet)
+  "Process the results of creating OUTFILE via LaTeX compilation.
+Warnings and errors are collected from LOG-BUF.
+When SNIPPET is nil and `org-latex-remove-logfiles' non-nil,
+log files (as specified by `org-latex-logfiles-extensions') are deleted."
+  (unless snippet
+    (when org-latex-remove-logfiles
+      (mapc #'delete-file
+            (directory-files
+             (file-name-directory outfile)
+             t
+             (concat (regexp-quote (file-name-base outfile))
+                     "\\(?:\\.[0-9]+\\)?\\."
+                     (regexp-opt org-latex-logfiles-extensions))
+             t)))
+    (let ((warnings (org-latex--collect-warnings log-buf)))
+      (message (concat "PDF file produced"
+                       (cond
+                        ((eq warnings 'error) " with errors.")
+                        (warnings (concat " with warnings: " warnings))
+                        (t ".")))))))
 
 (defun org-latex--collect-warnings (buffer)
   "Collect some warnings from \"pdflatex\" command output.
