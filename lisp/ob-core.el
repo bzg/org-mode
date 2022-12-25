@@ -3187,8 +3187,8 @@ situations in which is it not appropriate."
          (if (and (memq (string-to-char cell) '(?\( ?`))
                   (not (org-babel-confirm-evaluate
                       ;; See `org-babel-get-src-block-info'.
-                      (list "emacs-lisp" (format "%S" cell)
-                            '((:eval . yes)) nil (format "%S" cell)
+                      (list "emacs-lisp" cell
+                            '((:eval . yes)) nil (format "%s" cell)
                             nil nil))))
              ;; Not allowed.
              (user-error "Evaluation of elisp code %S aborted." cell)
