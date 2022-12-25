@@ -175,6 +175,26 @@
 	  (org-test-with-temp-text "* Test"
 	    (call-interactively #'org-comment-dwim)
 	    (buffer-string))))
+  ;; Uncomment a heading
+  (should
+   (equal "* Test"
+	  (org-test-with-temp-text "* COMMENT Test"
+	    (call-interactively #'org-comment-dwim)
+	    (buffer-string))))
+  ;; Comment an inlinetask
+  (should
+   (equal "*** COMMENT Test"
+          (let ((org-inlinetask-min-level 3))
+	    (org-test-with-temp-text "*** Test"
+	      (call-interactively #'org-comment-dwim)
+	      (buffer-string)))))
+  ;; Uncomment an inlinetask
+  (should
+   (equal "*** Test"
+	  (let ((org-inlinetask-min-level 3))
+	    (org-test-with-temp-text "*** COMMENT Test"
+	      (call-interactively #'org-comment-dwim)
+	      (buffer-string)))))
   ;; In a source block, use appropriate syntax.
   (should
    (equal "  ;; "
