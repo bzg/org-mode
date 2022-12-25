@@ -2281,6 +2281,48 @@ CLOCK: [2022-09-17 sam. 11:00]--[2022-09-17 sam. 11:46] =>  0:46"
 
 ;;; Headline
 
+(ert-deftest test-org/org-back-to-heading ()
+  "Test `org-back-to-heading' specifications."
+  ;; On heading already
+  (org-test-with-temp-text "* Head<point>ing"
+    (org-back-to-heading)
+    (should (bobp)))
+  ;; Below heading
+  (org-test-with-temp-text "* Heading
+Text<point>"
+    (org-back-to-heading)
+    (should (bobp)))
+  ;; At inlinetask
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text "* Heading
+*** Inlinetask <point>"
+      (org-back-to-heading)
+      (should (= 11 (point)))))
+  ;; Below inlinetask
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text "* Heading
+*** Inlinetask
+Test <point>"
+      (org-back-to-heading)
+      ;; Not at or inside inlinetask.  Move to parent heading.
+      (should (bobp))))
+  ;; Inside inlinetask
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text "* Heading
+*** Inlinetask
+Test <point>
+*** END"
+      (org-back-to-heading)
+      (should (= 11 (point)))))
+  ;; At END
+  (let ((org-inlinetask-min-level 3))
+    (org-test-with-temp-text "* Heading
+*** Inlinetask
+Test
+*** END<point>"
+      (org-back-to-heading)
+      (should (= 11 (point))))))
+
 (ert-deftest test-org/get-heading ()
   "Test `org-get-heading' specifications."
   ;; Return current heading, even if point is not on it.
