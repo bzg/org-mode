@@ -1071,7 +1071,7 @@ such scenario."
             (file-name-as-directory org-persist-directory))))
   (while (and (not (file-exists-p dir))
               (not (equal dir (setq dir (directory-file-name
-                                       (file-name-directory dir)))))))
+                                         (file-name-directory dir)))))))
   (if (not (file-writable-p dir))
       (message "Missing write access rights to org-persist-directory: %S"
                org-persist-directory)

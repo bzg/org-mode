@@ -3477,14 +3477,14 @@ This ensures the export commands can easily use it."
       (setq props (plist-put props 'tags (mapconcat #'identity tmp ":"))))
     (when (setq tmp (plist-get props 'date))
       (when (integerp tmp) (setq tmp (calendar-gregorian-from-absolute tmp)))
-      (let ((calendar-date-display-form '(year "-" month "-" day)))
-	'((format "%4d, %9s %2s, %4s" dayname monthname day year))
-
+      (let ((calendar-date-display-form
+             '(year "-" (string-pad month 2 ?0 'left) "-" (string-pad day 2 ?0 'left))))
 	(setq tmp (calendar-date-string tmp)))
       (setq props (plist-put props 'date tmp)))
     (when (setq tmp (plist-get props 'day))
       (when (integerp tmp) (setq tmp (calendar-gregorian-from-absolute tmp)))
-      (let ((calendar-date-display-form '(year "-" month "-" day)))
+      (let ((calendar-date-display-form
+             '(year "-" (string-pad month 2 ?0 'left) "-" (string-pad day 2 ?0 'left))))
 	(setq tmp (calendar-date-string tmp)))
       (setq props (plist-put props 'day tmp))
       (setq props (plist-put props 'agenda-day tmp)))
