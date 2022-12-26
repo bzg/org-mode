@@ -657,9 +657,10 @@ COLLECTION is the plist holding data collection."
              (file-copy (org-file-name-concat
                          org-persist-directory
                          (format "%s-%s.%s" persist-file (md5 path) ext))))
-        (unless (file-exists-p (file-name-directory file-copy))
-          (make-directory (file-name-directory file-copy) t))
-        (copy-file path file-copy 'overwrite)
+        (unless (file-exists-p file-copy)
+          (unless (file-exists-p (file-name-directory file-copy))
+            (make-directory (file-name-directory file-copy) t))
+          (copy-file path file-copy 'overwrite))
         (format "%s-%s.%s" persist-file (md5 path) ext)))))
 
 (defun org-persist-write:url (c collection)
