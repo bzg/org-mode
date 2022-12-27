@@ -4678,7 +4678,7 @@ is active."
 	 (org-agenda-text-search-extra-files org-agenda-text-search-extra-files)
 	 regexp rtn rtnall files file pos inherited-tags
 	 marker category level tags c neg re boolean
-	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
+	 ee txt beg end last-search-end words regexps+ regexps- hdl-only buffer beg1 str)
     (unless (and (not edit-at)
 		 (stringp string)
 		 (string-match "\\S-" string))
@@ -4817,6 +4817,7 @@ is active."
 		      (throw 'nextfile t))
 		    (goto-char (max (point-min) (1- (point))))
 		    (while (re-search-forward regexp nil t)
+                      (setq last-search-end (point))
 		      (org-back-to-heading t)
 		      (while (and (not (zerop org-agenda-search-view-max-outline-level))
 				  (> (org-reduced-level (org-outline-level))
@@ -4878,7 +4879,7 @@ is active."
 			  'priority 1000
 			  'type "search")
 			(push txt ee)
-			(goto-char (1- end))))))))))
+			(goto-char (max (1- end) last-search-end))))))))))
 	(setq rtn (nreverse ee))
 	(setq rtnall (append rtnall rtn)))
       (org-agenda--insert-overriding-header

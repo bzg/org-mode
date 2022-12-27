@@ -115,6 +115,31 @@ See https://list.orgmode.org/20220101200103.GB29829@itccanarias.org/T/#t."
     (should (= 2 (count-lines (point-min) (point-max)))))
   (org-test-agenda--kill-all-agendas))
 
+(ert-deftest test-org-agenda/org-search-view ()
+  "Test `org-search-view' specifications."
+  (cl-assert (not org-agenda-sticky) nil "precondition violation")
+  (cl-assert (not (org-test-agenda--agenda-buffers))
+	     nil "precondition violation")
+  ;; Search a string.
+  (let ((org-agenda-files `(,(expand-file-name "examples/agenda-search.org"
+					       org-test-dir))))
+    (org-search-view nil "foo")
+    (set-buffer org-agenda-buffer-name)
+    (should (= 4 (count-lines (point-min) (point-max)))))
+  ;; Search past inlinetask.
+  (let ((org-agenda-files `(,(expand-file-name "examples/agenda-search.org"
+					       org-test-dir))))
+    (org-search-view nil "bar")
+    (set-buffer org-agenda-buffer-name)
+    (should (= 3 (count-lines (point-min) (point-max)))))
+  ;; Search inside inlinetask.
+  (let ((org-agenda-files `(,(expand-file-name "examples/agenda-search.org"
+					       org-test-dir))))
+    (org-search-view nil "text inside inlinetask")
+    (set-buffer org-agenda-buffer-name)
+    (should (= 3 (count-lines (point-min) (point-max)))))
+  (org-test-agenda--kill-all-agendas))
+
 (ert-deftest test-org-agenda/property-timestamp ()
   "Match timestamps inside property drawer.
 See https://list.orgmode.org/06d301d83d9e$f8b44340$ea1cc9c0$@tomdavey.com"
