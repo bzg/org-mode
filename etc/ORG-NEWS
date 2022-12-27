@@ -13,6 +13,33 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** New options
+*** New custom settings for the "csl" citation export processor's LaTeX output
+
+The settings ~org-cite-csl-latex-label-separator~ and
+~org-cite-csl-latex-label-width-per-char~ allow the user to control
+the indentation of entries for labeled bibliography styles when the
+"csl" citation processor is used for LaTeX export.  The indentation
+length is computed as the sum of ~org-cite-csl-latex-label-separator~
+and the maximal label width, for example:
+
+#+begin_example
+    indentation length
+<------------------------->
+max. label width  separator
+<---------------><-------->
+[Doe22]                    John Doe. A title...
+[DoeSmithJones19]          John Doe, Jane Smith and...
+[SmithDoe02]               Jane Smith and John Doe...
+#+end_example
+
+The maximal label width, in turn, is calculated as the product of
+~org-cite-csl-latex-label-width-per-char~ and the maximal label length
+measured in characters.
+
+The setting ~org-cite-csl-latex-preamble~ makes it possible to
+customize the entire LaTeX fragment that the "csl" citation processor injects
+into the preamble.
+
 *** New ~org-latex-listings-src-omit-language~ customization for LaTeX export
 
 The ~org-latex-listings-src-omit-language~ customization variable
