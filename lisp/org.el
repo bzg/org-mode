@@ -18551,24 +18551,40 @@ block from point."
   (interactive "sOrg-files matching: ")
   (let* ((files (org-agenda-files))
 	 (tnames (mapcar #'file-truename files))
-	 (extra org-agenda-text-search-extra-files))
-    (when (eq (car extra) 'agenda-archives)
+	 (extra org-agenda-text-search-extra-files)
+         (narrows nil))
+    (when (and (eq (car extra) 'agenda-archives)
+               (not org-agenda-restrict))
       (setq extra (cdr extra))
       (setq files (org-add-archive-files files)))
-    (dolist (f extra)
-      (unless (member (file-truename f) tnames)
-	(unless (member f files) (setq files (append files (list f))))
-	(setq tnames (append tnames (list (file-truename f))))))
+    (unless org-agenda-restrict
+      (dolist (f extra)
+        (unless (member (file-truename f) tnames)
+	  (unless (member f files) (setq files (append files (list f))))
+	  (setq tnames (append tnames (list (file-truename f)))))))
     (multi-occur
      (mapcar (lambda (x)
 	       (with-current-buffer
 		   ;; FIXME: Why not just (find-file-noselect x)?
 		   ;; Is it to avoid the "revert buffer" prompt?
 		   (or (get-file-buffer x) (find-file-noselect x))
-		 (widen)
+                 (if (eq (current-buffer) org-agenda-restrict)
+		     (progn
+                       ;; Save the narrowing state.
+                       (push (list (current-buffer) (point-min) (point-max))
+                             narrows)
+                       (widen)
+                       (narrow-to-region org-agenda-restrict-begin
+				         org-agenda-restrict-end))
+		   (widen))
 		 (current-buffer)))
 	     files)
-     regexp)))
+     regexp)
+    ;; Restore the narrowing.
+    (dolist (narrow narrows)
+      (with-current-buffer (car narrow)
+        (widen)
+        (narrow-to-region (nth 1 narrow) (nth 2 narrow))))))
 
 (add-hook 'occur-mode-find-occurrence-hook
 	  (lambda () (when (derived-mode-p 'org-mode) (org-fold-reveal))))
