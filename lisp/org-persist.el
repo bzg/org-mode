@@ -822,14 +822,27 @@ When ASSOCIATED is `all', unregister CONTAINER everywhere."
   "Hash table storing as-written data objects.
 
 This data is used to avoid reading the data multiple times.")
-(defun org-persist-read (container &optional associated hash-must-match load?)
+(cl-defun org-persist-read (container &optional associated hash-must-match load &key read-related)
   "Restore CONTAINER data for ASSOCIATED.
 When HASH-MUST-MATCH is non-nil, do not restore data if hash for
 ASSOCIATED file or buffer does not match.
+
 ASSOCIATED can be a plist, a buffer, or a string.
 A buffer is treated as (:buffer ASSOCIATED).
 A string is treated as (:file ASSOCIATED).
-When LOAD? is non-nil, load the data instead of reading."
+
+When LOAD is non-nil, load the data instead of reading.
+
+When READ-RELATED is non-nil, return the data stored alongside with
+CONTAINER as well.  For example:
+
+    (let ((info \"test\"))
+      (org-persist-register
+        \\='((version \"My data\") (elisp info local))
+        nil :write-immediately t))
+    (org-persist-read \\='(version \"My data\")) ; => \"My data\"
+    (org-persist-read \\='(version \"My data\")
+                      :read-related t) ; => (\"My data\" \"test\")"
   (unless org-persist--index (org-persist--load-index))
   (setq associated (org-persist--normalize-associated associated))
   (setq container (org-persist--normalize-container container))
@@ -859,19 +872,22 @@ When LOAD? is non-nil, load the data instead of reading."
         (setq data (or (gethash persist-file org-persist--write-cache)
                        (org-persist--read-elisp-file persist-file)))
         (when data
-          (cl-loop for container in (plist-get collection :container)
+          (cl-loop for c in (plist-get collection :container)
                    with result = nil
                    do
-                   (if load?
-                       (push (org-persist-load:generic container (alist-get container data nil nil #'equal) collection) result)
-                     (push (org-persist-read:generic container (alist-get container data nil nil #'equal) collection) result))
-                   (run-hook-with-args 'org-persist-after-read-hook container associated)
-                   finally return (if (= 1 (length result)) (car result) result)))))))
+                   (when (or read-related
+                             (equal c container)
+                             (member c container))
+                     (if load
+                         (push (org-persist-load:generic c (alist-get c data nil nil #'equal) collection) result)
+                       (push (org-persist-read:generic c (alist-get c data nil nil #'equal) collection) result)))
+                   (run-hook-with-args 'org-persist-after-read-hook c associated)
+                   finally return (if (= 1 (length result)) (car result) (nreverse result))))))))
 
-(defun org-persist-load (container &optional associated hash-must-match)
+(cl-defun org-persist-load (container &optional associated hash-must-match &key read-related)
   "Load CONTAINER data for ASSOCIATED.
 The arguments have the same meaning as in `org-persist-read'."
-  (org-persist-read container associated hash-must-match t))
+  (org-persist-read container associated hash-must-match t :read-related read-related))
 
 (defun org-persist-load-all (&optional associated)
   "Restore all the persistent data associated with ASSOCIATED."

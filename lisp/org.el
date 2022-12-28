@@ -206,7 +206,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-latex-make-preamble "ox-latex" (info &optional template snippet?))
 (declare-function org-num-mode "org-num" (&optional arg))
 (declare-function org-plot/gnuplot "org-plot" (&optional params))
-(declare-function org-persist-load "org-persist" (container &optional associated hash-must-match))
+(declare-function org-persist-load "org-persist")
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function org-timer "org-timer" (&optional restart no-insert))
 (declare-function org-timer-item "org-timer" (&optional arg))
@@ -4839,7 +4839,7 @@ The following commands are available:
   (org-element-cache-reset)
   (when (and org-element-cache-persistent
              org-element-use-cache)
-    (org-persist-load 'org-element--cache (current-buffer) t))
+    (org-persist-load 'org-element--cache (current-buffer) 'match-hash :read-related t))
   ;; Initialize macros templates.
   (org-macro-initialize-templates)
   ;; Initialize radio targets.
