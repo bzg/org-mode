@@ -632,16 +632,29 @@ COLLECTION is the plist holding data collection."
 
 (defun org-persist-write:elisp (container collection)
   "Write elisp CONTAINER according to COLLECTION."
-  (if (and (plist-get (plist-get collection :associated) :file)
-           (get-file-buffer (plist-get (plist-get collection :associated) :file)))
-      (let ((buf (get-file-buffer (plist-get (plist-get collection :associated) :file))))
-        ;; FIXME: There is `buffer-local-boundp' introduced in Emacs 28.
-        ;; Not using it yet to keep backward compatibility.
-        (condition-case nil
-            (buffer-local-value (cadr container) buf)
-          (void-variable nil)))
-    (when (boundp (cadr container))
-      (symbol-value (cadr container)))))
+  (let ((scope (nth 2 container)))
+    (pcase scope
+      ((pred stringp)
+       (when-let ((buf (or (get-buffer scope)
+                           (get-file-buffer scope))))
+         ;; FIXME: There is `buffer-local-boundp' introduced in Emacs 28.
+         ;; Not using it yet to keep backward compatibility.
+         (condition-case nil
+             (buffer-local-value (cadr container) buf)
+           (void-variable nil))))
+      (`local
+       (when (boundp (cadr container))
+         (symbol-value (cadr container))))
+      (`nil
+       (if-let ((buf (and (plist-get (plist-get collection :associated) :file)
+                          (get-file-buffer (plist-get (plist-get collection :associated) :file)))))
+           ;; FIXME: There is `buffer-local-boundp' introduced in Emacs 28.
+           ;; Not using it yet to keep backward compatibility.
+           (condition-case nil
+               (buffer-local-value (cadr container) buf)
+             (void-variable nil))
+         (when (boundp (cadr container))
+           (symbol-value (cadr container))))))))
 
 (defalias 'org-persist-write:version #'ignore)
 
