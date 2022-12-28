@@ -1137,10 +1137,10 @@ REGION can also be an overlay in current buffer."
   (when (overlayp region)
     (setq region (cons (overlay-start region)
                        (overlay-end region))))
-  (org-with-point-at (car region)
-    (while (< (point) (cdr region))
+  (let ((pos (car region)))
+    (while (< pos (cdr region))
       (funcall org-fold-core-isearch-open-function (car region))
-      (goto-char (org-fold-core-next-visibility-change (point) (cdr region) 'ignore-hidden)))))
+      (setq pos (org-fold-core-next-visibility-change pos (cdr region) 'ignore-hidden)))))
 
 (defun org-fold-core--isearch-show-temporary (region hide-p)
   "Temporarily reveal text in REGION.
