@@ -828,14 +828,18 @@ When LOAD? is non-nil, load the data instead of reading."
              (plist-get collection :persist-file))))
          (data nil))
     (when (and collection
-               (file-exists-p persist-file)
                (or (not (plist-get collection :expiry)) ; current session
                    (not (org-persist--gc-expired-p
                        (plist-get collection :expiry) collection)))
                (or (not hash-must-match)
                    (and (plist-get associated :hash)
                         (equal (plist-get associated :hash)
-                               (plist-get (plist-get collection :associated) :hash)))))
+                               (plist-get (plist-get collection :associated) :hash))))
+               (or (file-exists-p persist-file)
+                   ;; Attempt to write data if it is not yet written.
+                   (progn
+                     (org-persist-write container associated 'no-read)
+                     (file-exists-p persist-file))))
       (unless (seq-find (lambda (v)
                           (run-hook-with-args-until-success 'org-persist-before-read-hook v associated))
                         (plist-get collection :container))
