@@ -161,7 +161,7 @@
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
 
-(defconst org-persist--storage-version "2.7"
+(defconst org-persist--storage-version "3.0"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
@@ -219,7 +219,7 @@ function will be called with a single argument - collection."
                  (number :tag "Keep N days")
                  (function :tag "Function")))
 
-(defconst org-persist-index-file "index"
+(defconst org-persist-index-file "index.eld"
   "File name used to store the data index.")
 
 (defvar org-persist--disable-when-emacs-Q t
@@ -337,6 +337,7 @@ FORMAT and ARGS are passed to `message'."
     (unless (file-exists-p (file-name-directory file))
       (make-directory (file-name-directory file) t))
     (with-temp-file file
+      (insert ";;   -*- mode: lisp-data; -*-\n")
       (if pp
           (pp data (current-buffer))
         (prin1 data (current-buffer))))
