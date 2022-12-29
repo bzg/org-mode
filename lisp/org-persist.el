@@ -90,10 +90,10 @@
 ;;    (let ((info1 "test")
 ;;          (info2 "test 2"))
 ;;      (org-persist-register
-;;         `((version "Named data") (elisp info1 local) (elisp info2 local))
+;;         `("Named data" (elisp info1 local) (elisp info2 local))
 ;;         nil :write-immediately t))
 ;;    (org-persist-read
-;;       '(version "Named data")
+;;       "Named data"
 ;;       nil nil nil :read-related t) ; => ("Named data" "test" "test2")
 ;;
 ;; 9. Cancel variable persistence:
@@ -138,6 +138,16 @@
 ;;
 ;;    (org-persist-register '((version "My data") (file "/path/to/file")) '(:key "key") :write-immediately t)
 ;;    (org-persist-read '(version "My data") '(:key "key")) ;; => '("My data" "/path/to/file/copy")
+;;
+;;    Containers can also take a short form:
+;;
+;;    '("String" file '(quoted elisp "value") :keyword)
+;;    is the same as
+;;    '((elisp-data "String") (file nil)
+;;      (elisp-data '(quoted elisp "value")) (elisp-data :keyword))
+;;
+;;    Note that '(file "String" (elisp value)) would be interpreted as
+;;    `file' container with "String" path and extra options.
 ;;
 ;; 2. Associated :: an object the container is associated with.  The
 ;;    object can be a buffer, file, inode number, file contents hash,
@@ -544,18 +554,22 @@ MISC, if non-nil will be appended to the collection."
 
 ;;;; Reading container data.
 
-(defun org-persist--normalize-container (container)
-  "Normalize CONTAINER representation into (type . settings)."
-  (if (and (listp container) (listp (car container)))
-      (mapcar #'org-persist--normalize-container container)
-    (pcase container
-      ((or `elisp `version `file `index `url)
-       (list container nil))
-      ((pred symbolp)
-       (list `elisp container))
-      (`(,(or `elisp `version `file `index `url) . ,_)
-       container)
-      (_ (error "org-persist: Unknown container type: %S" container)))))
+(defun org-persist--normalize-container (container &optional inner)
+  "Normalize CONTAINER representation into (type . settings).
+
+When INNER is non-nil, do not try to match as list of containers."
+  (pcase container
+    ((or `elisp `elisp-data `version `file `index `url)
+     `(,container nil))
+    ((or (pred keywordp) (pred stringp) `(quote . ,_))
+     `(elisp-data ,container))
+    ((pred symbolp)
+     `(elisp ,container))
+    (`(,(or `elisp `elisp-data `version `file `index `url) . ,_)
+     container)
+    ((and (pred listp) (guard (not inner)))
+     (mapcar (lambda (c) (org-persist--normalize-container c 'inner)) container))
+    (_ (error "org-persist: Unknown container type: %S" container))))
 
 (defvar org-persist--associated-buffer-cache (make-hash-table :weakness 'key)
   "Buffer hash cache.")
@@ -620,9 +634,11 @@ COLLECTION is the plist holding data collection."
   "Read elisp container and return LISP-VALUE."
   lisp-value)
 
-(defun org-persist-read:version (container _ __)
-  "Read version CONTAINER."
+(defun org-persist-read:elisp-data (container _ __)
+  "Read elisp-data CONTAINER."
   (cadr container))
+
+(defalias 'org-persist-read:version #'org-persist-read:elisp-data)
 
 (defun org-persist-read:file (_ path __)
   "Read file container from PATH."
@@ -675,6 +691,7 @@ COLLECTION is the plist holding data collection."
           (set lisp-symbol lisp-value))
       (set lisp-symbol lisp-value))))
 
+(defalias 'org-persist-load:elisp-data #'org-persist-read:elisp-data)
 (defalias 'org-persist-load:version #'org-persist-read:version)
 (defalias 'org-persist-load:file #'org-persist-read:file)
 
@@ -742,6 +759,7 @@ COLLECTION is the plist holding data collection."
          (when (boundp (cadr container))
            (symbol-value (cadr container))))))))
 
+(defalias 'org-persist-write:elisp-data #'ignore)
 (defalias 'org-persist-write:version #'ignore)
 
 (defun org-persist-write:file (c collection)
@@ -924,10 +942,10 @@ CONTAINER as well.  For example:
 
     (let ((info \"test\"))
       (org-persist-register
-        \\='((version \"My data\") (elisp info local))
+        \\=`(\"My data\" (elisp-data ,info))
         nil :write-immediately t))
-    (org-persist-read \\='(version \"My data\")) ; => \"My data\"
-    (org-persist-read \\='(version \"My data\")
+    (org-persist-read \"My data\") ; => \"My data\"
+    (org-persist-read \"My data\" nil nil nil
                       :read-related t) ; => (\"My data\" \"test\")"
   (unless org-persist--index (org-persist--load-index))
   (setq associated (org-persist--normalize-associated associated))
@@ -1079,6 +1097,7 @@ Do nothing in an indirect buffer."
 
 (defalias 'org-persist-gc:elisp #'ignore)
 (defalias 'org-persist-gc:index #'ignore)
+(defalias 'org-persist-gc:elisp-data #'ignore)
 (defalias 'org-persist-gc:version #'ignore)
 (defalias 'org-persist-gc:file #'ignore)
 (defalias 'org-persist-gc:url #'ignore)
@@ -1101,6 +1120,7 @@ Do nothing in an indirect buffer."
 
 (defalias 'org-persist-associated-files:elisp #'ignore)
 (defalias 'org-persist-associated-files:index #'ignore)
+(defalias 'org-persist-associated-files:elisp-data #'ignore)
 (defalias 'org-persist-associated-files:version #'ignore)
 
 (defun org-persist-associated-files:file (container collection)
