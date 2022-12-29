@@ -332,7 +332,9 @@ Optional argument INFO is the export state, as a property list.
 
 Return value may be nil or a string.  If current export back-end is derived
 from `latex', return a raw string instead, unless optional argument RAW is
-non-nil."
+non-nil.
+
+Throw an error if the field value is non-string and non-nil."
   (let ((value
          (cdr
           (assq field
@@ -343,6 +345,8 @@ non-nil."
                    entry-or-key)
                   (_
                    (error "Wrong value for ENTRY-OR-KEY: %S" entry-or-key)))))))
+    (when (and value (not (stringp value)))
+      (error "Non-string bibliography field value: %S" value))
     (if (and value
              (not raw)
              (org-export-derived-backend-p (plist-get info :back-end) 'latex))
