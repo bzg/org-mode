@@ -67,7 +67,6 @@
 (ert-deftest ob-octave/graphics-file ()
   "Graphics file.  Test that link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
   ;; In case a prior test left the Error Output buffer hanging around.
-  (skip-unless nil) ; FIXME: Failing on CI only
   (when (get-buffer "*Org-Babel Error Output*")
     (kill-buffer "*Org-Babel Error Output*"))
   (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
@@ -80,7 +79,12 @@ sombrero;
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should (> (file-attribute-size (file-attributes file)) 0))
+          (should (or (> (file-attribute-size (file-attributes file)) 0)
+                      ;; Avoid race condition on slow machines.
+                      ;; https://orgmode.org/list/87r0wk29dz.fsf@localhost
+                      (progn
+                        (sleep-for 1)
+                        (> (file-attribute-size (file-attributes file)) 0))))
           (should-not (get-buffer "*Org-Babel Error Output*")))
       ;; clean-up
       (delete-file file)
@@ -89,7 +93,6 @@ sombrero;
 
 (ert-deftest ob-octave/graphics-file-session ()
   "Graphics file in a session.  Test that session is started in *Inferior Octave* buffer, link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
-  (skip-unless nil) ; FIXME: Failing on CI only
   (let ((file (make-temp-file "test-ob-octave-" nil ".png")))
     (unwind-protect
         (org-test-with-temp-text
@@ -102,7 +105,12 @@ sombrero;
           (should (get-buffer "*Inferior Octave*"))
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should (> (file-attribute-size (file-attributes file)) 0))
+          (or (> (file-attribute-size (file-attributes file)) 0)
+              ;; Avoid race condition on slow machines.
+              ;; https://orgmode.org/list/87r0wk29dz.fsf@localhost
+              (progn
+                (sleep-for 1)
+                (> (file-attribute-size (file-attributes file)) 0)))
           (should-not (get-buffer "*Org-Babel Error Output*")))
       ;; clean-up
       (delete-file file)
@@ -113,7 +121,6 @@ sombrero;
 
 (ert-deftest ob-octave/graphics-file-space ()
   "Graphics file with a space in filename.  Test that session is started in *Inferior Octave* buffer, link is correctly inserted and graphics file is created (and not empty).  Clean-up side-effects."
-  (skip-unless nil) ; FIXME: Failing on CI only
   (let ((file (make-temp-file "test ob octave-" nil ".png")))
     (unwind-protect
         (org-test-with-temp-text
@@ -124,7 +131,12 @@ sombrero;
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should (> (file-attribute-size (file-attributes file)) 0))
+          (or (> (file-attribute-size (file-attributes file)) 0)
+              ;; Avoid race condition on slow machines.
+              ;; https://orgmode.org/list/87r0wk29dz.fsf@localhost
+              (progn
+                (sleep-for 1)
+                (> (file-attribute-size (file-attributes file)) 0)))
           (should-not (get-buffer "*Org-Babel Error Output*")))
       ;; clean-up
       (delete-file file)
