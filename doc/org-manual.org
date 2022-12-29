@@ -18351,6 +18351,9 @@ described in the documentation for individual languages.  See
   from the =file-ext= header argument.  In that case, both the name
   and the extension are mandatory.
 
+  Result can also be interpreted as path to file.  See =:results
+  link=.
+
   #+begin_example
   ,#+name: circle
   ,#+BEGIN_SRC asymptote :results value file :file-ext pdf
@@ -18430,6 +18433,9 @@ follows from the type specified above.
   ,#+RESULTS:
   [[file:org-mode-unicorn.svg]]
   #+end_example
+
+  If =:file= header argument is omitted, interpret source block result
+  as the file path.
 
 - =org= ::
 
