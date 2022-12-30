@@ -18,21 +18,23 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 ;;; Comment:
 
-;; Template test file for Org tests
-
-;;; Code:
+;;; Requirements:
 (org-test-for-executable "sh")
+
 (require 'ob-core)
+
 (unless (featurep 'ob-shell)
   (signal 'missing-test-dependency "Support for Shell code blocks"))
 
+;;; Code:
 (ert-deftest test-ob-shell/dont-insert-spaces-on-expanded-bodies ()
-  "Expanded shell bodies should not start with a blank line
-unless the body of the tangled block does."
+  "Expanded shell bodies should not start with a blank line unless
+the body of the tangled block does."
   (should-not (string-match "^[\n\r][\t ]*[\n\r]"
-			    (org-babel-expand-body:generic "echo 2" '())))
+                            (org-babel-expand-body:generic "echo 2" '())))
   (should (string-match "^[\n\r][\t ]*[\n\r]"
                         (org-babel-expand-body:generic "\n\necho 2" '()))))
 
@@ -68,16 +70,36 @@ unless the body of the tangled block does."
     (if (should (equal '((1) (2)) result))
         (kill-buffer session-name))))
 
-(ert-deftest ob-shell/generic-uses-no-arrays ()
-  "No arrays for generic"
-  (org-test-at-id "0ba56632-8dc1-405c-a083-c204bae477cf"
-    (org-babel-next-src-block)
+(ert-deftest test-ob-shell/generic-uses-no-arrays ()
+  "Test generic serialization of array into a single string."
+  (org-test-with-temp-text
+      " #+NAME: sample_array
+| one   |
+| two   |
+| three |
+
+#+begin_src sh :exports results :results output :var array=sample_array
+echo ${array}
+<point>
+#+end_src"
     (should (equal "one two three" (org-trim (org-babel-execute-src-block))))))
 
-(ert-deftest ob-shell/bash-uses-arrays ()
-  "Bash arrays"
-  (org-test-at-id "0ba56632-8dc1-405c-a083-c204bae477cf"
-    (org-babel-next-src-block 2)
+(ert-deftest test-ob-shell/bash-uses-arrays ()
+  "Bash sees named array as a simple indexed array.
+
+In this test, we check that the returned value is indeed only the
+first item of the array, as opposed to the generic serialiation
+that will return all elements of the array as a single string."
+  (org-test-with-temp-text
+      "#+NAME: sample_array
+| one   |
+| two   |
+| three |
+
+#+begin_src bash :exports results :results output :var array=sample_array
+echo ${array}
+<point>
+#+end_src"
     (should (equal "one" (org-trim (org-babel-execute-src-block))))))
 
 (ert-deftest test-ob-shell/generic-uses-no-assoc-arrays-simple-map ()
@@ -157,22 +179,27 @@ echo ${table[spaghetti]}
      (equal "20 cm"
             (org-trim (org-babel-execute-src-block))))))
 
-(ert-deftest ob-shell/simple-list ()
-  "Test list variables in shell."
-  ;; With bash, a list is turned into an array.
+(ert-deftest test-ob-shell/simple-list ()
+  "Test list variables."
+  ;; bash: a list is turned into an array
   (should
    (equal "2"
-	  (org-test-with-temp-text
-	   "#+BEGIN_SRC bash :results output :var l='(1 2)\necho ${l[1]}\n#+END_SRC"
-	   (org-trim (org-babel-execute-src-block)))))
-  ;; On sh, it is a string containing all values.
+          (org-test-with-temp-text
+              "#+BEGIN_SRC bash :results output :var l='(1 2)
+               echo ${l[1]}
+               #+END_SRC"
+            (org-trim (org-babel-execute-src-block)))))
+
+  ;; sh: a list is a string containing all values
   (should
    (equal "1 2"
-	  (org-test-with-temp-text
-	   "#+BEGIN_SRC sh :results output :var l='(1 2)\necho ${l}\n#+END_SRC"
-	   (org-trim (org-babel-execute-src-block))))))
+          (org-test-with-temp-text
+              "#+BEGIN_SRC sh :results output :var l='(1 2)
+               echo ${l}
+               #+END_SRC"
+            (org-trim (org-babel-execute-src-block))))))
 
-(ert-deftest ob-shell/remote-with-stdin-or-cmdline ()
+(ert-deftest test-ob-shell/remote-with-stdin-or-cmdline ()
   "Test :stdin and :cmdline with a remote directory."
   ;; We assume `default-directory' is a local directory.
   (skip-unless (not (memq system-type '(ms-dos windows-nt))))
@@ -219,20 +246,27 @@ echo ${table[spaghetti]}
                            (org-trim (org-babel-execute-src-block))))
                  (expected (concat "ARGS: --verbose 23 71"
                                    "\nhello tramp from " (file-local-name default-directory))))
-            (should (equal result expected)))))))
+            (if (should (equal result expected))
+                (kill-matching-buffers (format "\\*tramp/mock\\s-%s\\*" system-name) t t)))))))
 
-(ert-deftest ob-shell/results-table ()
+(ert-deftest test-ob-shell/results-table ()
   "Test :results table."
   (should
    (equal '(("I \"want\" it all"))
-	  (org-test-with-temp-text
-	      "#+BEGIN_SRC sh :results table\necho 'I \"want\" it all'\n#+END_SRC"
-	    (org-babel-execute-src-block)))))
+          (org-test-with-temp-text
+              "#+BEGIN_SRC sh :results table
+               echo 'I \"want\" it all'
+               #+END_SRC"
+            (org-babel-execute-src-block)))))
 
-(ert-deftest ob-shell/results-list ()
+(ert-deftest test-ob-shell/results-list ()
   "Test :results list."
   (org-test-with-temp-text
-      "#+BEGIN_SRC sh :results list\necho 1\necho 2\necho 3\n#+END_SRC"
+      "#+BEGIN_SRC sh :results list
+echo 1
+echo 2
+echo 3
+#+END_SRC"
     (should
      (equal '((1) (2) (3))
             (org-babel-execute-src-block)))
@@ -245,86 +279,98 @@ echo ${table[spaghetti]}
 
 ;;; Standard output
 
-(ert-deftest ob-shell/standard-output-after-success ()
+(ert-deftest test-ob-shell/standard-output-after-success ()
   "Test standard output after exiting with a zero code."
   (should (= 1
              (org-babel-execute:sh
               "echo 1" nil))))
 
-(ert-deftest ob-shell/standard-output-after-failure ()
+(ert-deftest test-ob-shell/standard-output-after-failure ()
   "Test standard output after exiting with a non-zero code."
-  (should (= 1
-             (org-babel-execute:sh
-              "echo 1; exit 2" nil))))
+  (if
+      (should (= 1
+                 (org-babel-execute:sh
+                  "echo 1; exit 2" nil)))
+      (kill-buffer "*Org-Babel Error Output*")))
 
 ;;; Standard error
 
-(ert-deftest ob-shell/error-output-after-success ()
-  "Test that standard error shows in the error buffer, alongside the
-exit code, after exiting with a zero code."
-  (should
-   (string= "1
+(ert-deftest test-ob-shell/error-output-after-success ()
+  "Test that standard error shows in the error buffer, alongside
+the exit code, after exiting with a zero code."
+  (if
+      (should
+       (string= "1
 [ Babel evaluation exited with code 0 ]"
-            (progn (org-babel-eval-wipe-error-buffer)
-                   (org-babel-execute:sh
-                    "echo 1 >&2" nil)
-                   (with-current-buffer org-babel-error-buffer-name
-                     (buffer-string))))))
+                (progn (org-babel-eval-wipe-error-buffer)
+                       (org-babel-execute:sh
+                        "echo 1 >&2" nil)
+                       (with-current-buffer org-babel-error-buffer-name
+                         (buffer-string)))))
+      (kill-buffer "*Org-Babel Error Output*")))
 
-(ert-deftest ob-shell/error-output-after-failure ()
-  "Test that standard error shows in the error buffer, alongside the
-exit code, after exiting with a non-zero code."
-  (should
-   (string= "1
+(ert-deftest test-ob-shell/error-output-after-failure ()
+  "Test that standard error shows in the error buffer, alongside
+the exit code, after exiting with a non-zero code."
+  (if
+      (should
+       (string= "1
 [ Babel evaluation exited with code 2 ]"
-            (progn (org-babel-eval-wipe-error-buffer)
-                   (org-babel-execute:sh
-                    "echo 1 >&2; exit 2" nil)
-                   (with-current-buffer org-babel-error-buffer-name
-                     (buffer-string))))))
+                (progn (org-babel-eval-wipe-error-buffer)
+                       (org-babel-execute:sh
+                        "echo 1 >&2; exit 2" nil)
+                       (with-current-buffer org-babel-error-buffer-name
+                         (buffer-string)))))
+      (kill-buffer "*Org-Babel Error Output*")))
 
-(ert-deftest ob-shell/error-output-after-failure-multiple ()
+(ert-deftest test-ob-shell/error-output-after-failure-multiple ()
   "Test that multiple standard error strings show in the error
 buffer, alongside multiple exit codes."
-  (should
-   (string= "1
+  (if
+      (should
+       (string= "1
 [ Babel evaluation exited with code 2 ]
 3
 [ Babel evaluation exited with code 4 ]"
-            (progn (org-babel-eval-wipe-error-buffer)
-                   (org-babel-execute:sh
-                    "echo 1 >&2; exit 2" nil)
-                   (org-babel-execute:sh
-                    "echo 3 >&2; exit 4" nil)
-                   (with-current-buffer org-babel-error-buffer-name
-                     (buffer-string))))))
+                (progn (org-babel-eval-wipe-error-buffer)
+                       (org-babel-execute:sh
+                        "echo 1 >&2; exit 2" nil)
+                       (org-babel-execute:sh
+                        "echo 3 >&2; exit 4" nil)
+                       (with-current-buffer org-babel-error-buffer-name
+                         (buffer-string)))))
+      (kill-buffer "*Org-Babel Error Output*")))
 
 ;;; Exit codes
 
-(ert-deftest ob-shell/exit-code ()
+(ert-deftest test-ob-shell/exit-code ()
   "Test that the exit code shows in the error buffer after exiting
 with a non-zero return code."
-  (should
-   (string= "[ Babel evaluation exited with code 1 ]"
-            (progn (org-babel-eval-wipe-error-buffer)
-                   (org-babel-execute:sh
-                    "exit 1" nil)
-                   (with-current-buffer org-babel-error-buffer-name
-                     (buffer-string))))))
+  (if
+      (should
+       (string= "[ Babel evaluation exited with code 1 ]"
+                (progn (org-babel-eval-wipe-error-buffer)
+                       (org-babel-execute:sh
+                        "exit 1" nil)
+                       (with-current-buffer org-babel-error-buffer-name
+                         (buffer-string)))))
+      (kill-buffer "*Org-Babel Error Output*")))
 
-(ert-deftest ob-shell/exit-code-multiple ()
+(ert-deftest test-ob-shell/exit-code-multiple ()
   "Test that multiple exit codes show in the error buffer after
 exiting with a non-zero return code multiple times."
-  (should
-   (string= "[ Babel evaluation exited with code 1 ]
+  (if
+      (should
+       (string= "[ Babel evaluation exited with code 1 ]
 [ Babel evaluation exited with code 2 ]"
-            (progn (org-babel-eval-wipe-error-buffer)
-                   (org-babel-execute:sh
-                    "exit 1" nil)
-                   (org-babel-execute:sh
-                    "exit 2" nil)
-                   (with-current-buffer org-babel-error-buffer-name
-                     (buffer-string))))))
+                (progn (org-babel-eval-wipe-error-buffer)
+                       (org-babel-execute:sh
+                        "exit 1" nil)
+                       (org-babel-execute:sh
+                        "exit 2" nil)
+                       (with-current-buffer org-babel-error-buffer-name
+                         (buffer-string)))))
+      (kill-buffer "*Org-Babel Error Output*")))
 
 (provide 'test-ob-shell)
 
