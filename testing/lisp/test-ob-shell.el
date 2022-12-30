@@ -45,18 +45,28 @@ unless the body of the tangled block does."
   (if (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil)))
       (kill-buffer "*Org-Babel Error Output*")))
 
-(ert-deftest test-ob-shell/session ()
-  "This also tests `org-babel-comint-with-output' in
-ob-comint.el, which was not previously tested."
-  (let ((res (org-babel-execute:sh "echo 1; echo 2" '((:session . "yes")))))
-    (should res)
-    (should (listp res)))
-  ;; Test multi-line input.
-  (let ((result (org-babel-execute:sh
-		 "if true \n then \n echo yes \n fi"
-		 '((:session . "yes")))))
+(ert-deftest test-ob-shell/session-single-return-returns-string ()
+  "Sessions with a single result should return a string."
+  (let* ((session-name "test-ob-shell/session-evaluation-single-return-returns-string")
+         (kill-buffer-query-functions nil)
+         (result (org-babel-execute:sh
+                  (format "echo %s" session-name)
+                  `((:session . ,session-name)))))
     (should result)
-    (should (string= "yes" result))))
+    (if (should (string= session-name result))
+        (kill-buffer session-name))))
+
+(ert-deftest test-ob-shell/session-multiple-returns-returns-list ()
+  "Sessions with multiple results should return a list."
+  (let* ((session-name "test-ob-shell/session-multiple-returns-returns-list")
+         (kill-buffer-query-functions nil)
+         (result (org-babel-execute:sh
+                  "echo 1; echo 2"
+                  `((:session . ,session-name)))))
+    (should result)
+    (should (listp result))
+    (if (should (equal '((1) (2)) result))
+        (kill-buffer session-name))))
 
 ; A list of tests using the samples in ob-shell-test.org
 (ert-deftest ob-shell/generic-uses-no-arrays ()
