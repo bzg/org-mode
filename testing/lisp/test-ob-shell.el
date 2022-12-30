@@ -68,7 +68,6 @@ unless the body of the tangled block does."
     (if (should (equal '((1) (2)) result))
         (kill-buffer session-name))))
 
-; A list of tests using the samples in ob-shell-test.org
 (ert-deftest ob-shell/generic-uses-no-arrays ()
   "No arrays for generic"
   (org-test-at-id "0ba56632-8dc1-405c-a083-c204bae477cf"
@@ -81,20 +80,43 @@ unless the body of the tangled block does."
     (org-babel-next-src-block 2)
     (should (equal "one" (org-trim (org-babel-execute-src-block))))))
 
-(ert-deftest ob-shell/generic-uses-no-assoc-arrays ()
-  "No associative arrays for generic"
-  (should
-   (equal "first one second two third three"
-	  (org-test-at-id
-	   "bec1a5b0-4619-4450-a8c0-2a746b44bf8d"
-	   (org-babel-next-src-block)
-	   (org-trim (org-babel-execute-src-block)))))
-  (should
-   (equal "bread 2 kg spaghetti 20 cm milk 50 dl"
-	  (org-test-at-id
-	   "82320a48-3409-49d7-85c9-5de1c6d3ff87"
-	   (org-babel-next-src-block)
-	   (org-trim (org-babel-execute-src-block))))))
+(ert-deftest test-ob-shell/generic-uses-no-assoc-arrays-simple-map ()
+  "Generic shell: no special handing for key-value mapping table
+
+No associative arrays for generic.  The shell will see all values
+as a single string."
+  (org-test-with-temp-text
+      "#+NAME: sample_mapping_table
+| first  | one   |
+| second | two   |
+| third  | three |
+
+#+begin_src sh :exports results :results output :var table=sample_mapping_table
+echo ${table}
+<point>
+#+end_src"
+    (should
+     (equal "first one second two third three"
+            (org-trim (org-babel-execute-src-block))))))
+
+(ert-deftest test-ob-shell/generic-uses-no-assoc-arrays-3-columns ()
+  "Associative array tests (more than 2 columns)
+
+No associative arrays for generic.  The shell will see all values
+as a single string."
+  (org-test-with-temp-text
+      "#+NAME: sample_big_table
+| bread     |  2 | kg |
+| spaghetti | 20 | cm |
+| milk      | 50 | dl |
+
+#+begin_src sh :exports results :results output :var table=sample_big_table
+echo ${table}
+<point>
+#+end_src"
+    (should
+     (equal "bread 2 kg spaghetti 20 cm milk 50 dl"
+            (org-trim (org-babel-execute-src-block))))))
 
 (ert-deftest ob-shell/bash-uses-assoc-arrays ()
   "Bash associative arrays"
