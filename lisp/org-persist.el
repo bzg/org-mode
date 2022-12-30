@@ -161,7 +161,7 @@
 (declare-function org-at-heading-p "org" (&optional invisible-not-ok))
 
 
-(defconst org-persist--storage-version "2.7"
+(defconst org-persist--storage-version "3.1"
   "Persistent storage layout version.")
 
 (defgroup org-persist nil
@@ -431,25 +431,27 @@ Return PLIST."
           (when key (remhash (cons cont (list :key key)) org-persist--index-hash))))
       (setq org-persist--index (delq existing org-persist--index)))))
 
-(defun org-persist--get-collection (container &optional associated &rest misc)
+(defun org-persist--get-collection (container &optional associated misc)
   "Return or create collection used to store CONTAINER for ASSOCIATED.
 When ASSOCIATED is nil, it is a global CONTAINER.
 ASSOCIATED can also be a (:buffer buffer) or buffer, (:file file-path)
 or file-path, (:inode inode), (:hash hash), or or (:key key).
-MISC, if non-nil will be appended to the collection."
+MISC, if non-nil will be appended to the collection.  It must be a plist."
   (unless (and (listp container) (listp (car container)))
     (setq container (list container)))
   (setq associated (org-persist--normalize-associated associated))
-  (unless (equal misc '(nil))
-    (setq associated (append associated misc)))
+  (when (and misc (or (not (listp misc)) (= 1 (% (length misc) 2))))
+    (error "org-persist: Not a plist: %S" misc))
   (or (org-persist--find-index
        `( :container ,(org-persist--normalize-container container)
           :associated ,associated))
       (org-persist--add-to-index
-       (list :container (org-persist--normalize-container container)
-             :persist-file
-             (replace-regexp-in-string "^.." "\\&/" (org-id-uuid))
-             :associated associated))))
+       (nconc
+        (list :container (org-persist--normalize-container container)
+              :persist-file
+              (replace-regexp-in-string "^.." "\\&/" (org-id-uuid))
+              :associated associated)
+        misc))))
 
 ;;;; Reading container data.
 
@@ -720,7 +722,8 @@ last access, or a function accepting a single argument - collection.
 EXPIRY key has no effect when INHERIT is non-nil.
 Optional key WRITE-IMMEDIATELY controls whether to save the container
 data immediately.
-MISC will be appended to CONTAINER.
+MISC will be appended to the collection.  It must be alternating :KEY
+VALUE pairs.
 When WRITE-IMMEDIATELY is non-nil, the return value will be the same
 with `org-persist-write'."
   (unless org-persist--index (org-persist--load-index))
