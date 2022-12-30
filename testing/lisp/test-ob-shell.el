@@ -18,17 +18,22 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
+
 ;;; Comment:
 
+;; See testing/README for how to run tests.
+
+
 ;;; Requirements:
-(org-test-for-executable "sh")
 
 (require 'ob-core)
 
 (unless (featurep 'ob-shell)
   (signal 'missing-test-dependency "Support for Shell code blocks"))
 
+(org-test-for-executable "sh")
+
+
 ;;; Code:
 (ert-deftest test-ob-shell/dont-insert-spaces-on-expanded-bodies ()
   "Expanded shell bodies should not start with a blank line unless
@@ -277,6 +282,7 @@ echo 3
       "- 1\n- 2\n- 3\n"
       (buffer-substring-no-properties (point) (point-max))))))
 
+
 ;;; Standard output
 
 (ert-deftest test-ob-shell/standard-output-after-success ()
@@ -293,6 +299,7 @@ echo 3
                   "echo 1; exit 2" nil)))
       (kill-buffer "*Org-Babel Error Output*")))
 
+
 ;;; Standard error
 
 (ert-deftest test-ob-shell/error-output-after-success ()
@@ -341,6 +348,7 @@ buffer, alongside multiple exit codes."
                          (buffer-string)))))
       (kill-buffer "*Org-Babel Error Output*")))
 
+
 ;;; Exit codes
 
 (ert-deftest test-ob-shell/exit-code ()
