@@ -34,12 +34,16 @@ unless the body of the tangled block does."
   (should-not (string-match "^[\n\r][\t ]*[\n\r]"
 			    (org-babel-expand-body:generic "echo 2" '())))
   (should (string-match "^[\n\r][\t ]*[\n\r]"
-			(org-babel-expand-body:generic "\n\necho 2" '()))))
+                        (org-babel-expand-body:generic "\n\necho 2" '()))))
 
 (ert-deftest test-ob-shell/dont-error-on-empty-results ()
-  "Was throwing an elisp error when shell blocks threw errors and
-returned empty results."
-  (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil))))
+  "Empty results should not cause a Lisp error."
+  (should (null (org-babel-execute:sh "" nil))))
+
+(ert-deftest test-ob-shell/dont-error-on-babel-error ()
+  "Errors within Babel execution should not cause Lisp errors."
+  (if (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil)))
+      (kill-buffer "*Org-Babel Error Output*")))
 
 (ert-deftest test-ob-shell/session ()
   "This also tests `org-babel-comint-with-output' in
