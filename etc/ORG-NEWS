@@ -13,14 +13,15 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** New options
-*** New custom settings for the "csl" citation export processor's LaTeX output
+*** New options for the "csl" citation export processor's LaTeX output
 
-The settings ~org-cite-csl-latex-label-separator~ and
-~org-cite-csl-latex-label-width-per-char~ allow the user to control
-the indentation of entries for labeled bibliography styles when the
-"csl" citation processor is used for LaTeX export.  The indentation
-length is computed as the sum of ~org-cite-csl-latex-label-separator~
-and the maximal label width, for example:
+The ~org-cite-csl-latex-label-separator~ and
+~org-cite-csl-latex-label-width-per-char~ options allow the user to
+control the indentation of entries for labeled bibliography styles
+when the "csl" citation processor is used for LaTeX export.  The
+indentation length is computed as the sum of
+~org-cite-csl-latex-label-separator~ and the maximal label width, for
+example:
 
 #+begin_example
     indentation length
@@ -36,17 +37,17 @@ The maximal label width, in turn, is calculated as the product of
 ~org-cite-csl-latex-label-width-per-char~ and the maximal label length
 measured in characters.
 
-The setting ~org-cite-csl-latex-preamble~ makes it possible to
-customize the entire LaTeX fragment that the "csl" citation processor injects
-into the preamble.
+The ~org-cite-csl-latex-preamble~ option makes it possible to
+customize the entire LaTeX fragment that the "csl" citation processor
+injects into the preamble.
 
-*** New ~org-latex-listings-src-omit-language~ customization for LaTeX export
+*** New ~org-latex-listings-src-omit-language~ option for LaTeX export
 
-The ~org-latex-listings-src-omit-language~ customization variable
-allows you to omit the =language= parameter in the exported
-=lstlisting= environment. This is necessary when the =listings=
-backend delegates listing generation to another package like
-=fancyvrb= using the following setup in the document header:
+The ~org-latex-listings-src-omit-language~ option allows omitting the
+=language= parameter in the exported =lstlisting= environment.  This
+is necessary when the =listings= backend delegates listing generation
+to another package like =fancyvrb= using the following setup in the
+document header:
 
 #+BEGIN_src org
 ,#+LATEX_HEADER: \RequirePackage{fancyvrb}
@@ -473,7 +474,6 @@ Capture templates can now attach template specific hooks via the
 following properties: ~:hook~, ~:prepare-finalize~,
 ~:before-finalize~, ~:after-finalize~.  These nullary functions run
 prior to their global counterparts for the selected template.
-
 
 ** New options
 *** A new option for custom setting ~org-refile-use-outline-path~ to show document title in refile targets
