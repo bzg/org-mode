@@ -37,16 +37,21 @@
 (declare-function org-babel-temp-file "ob-core" (prefix &optional suffix))
 
 (defun org-babel-eval-error-notify (exit-code stderr)
-  "Open a buffer to display STDERR and a message with the value of EXIT-CODE."
+  "Open a buffer to display STDERR and a message with the value of EXIT-CODE.
+If EXIT-CODE is nil, display the message without a code."
   (let ((buf (get-buffer-create org-babel-error-buffer-name)))
     (with-current-buffer buf
       (goto-char (point-max))
       (save-excursion
         (unless (bolp) (insert "\n"))
         (insert stderr)
-        (insert (format "[ Babel evaluation exited with code %S ]" exit-code))))
+        (if exit-code
+            (insert (format "[ Babel evaluation exited with code %S ]" exit-code))
+          (insert "[ Babel evaluation exited abnormally ]"))))
     (display-buffer buf))
-  (message "Babel evaluation exited with code %S" exit-code))
+  (if exit-code
+      (message "Babel evaluation exited with code %S" exit-code)
+    (message "Babel evaluation exited abnormally")))
 
 (defun org-babel-eval (command query)
   "Run COMMAND on QUERY.

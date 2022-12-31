@@ -65,6 +65,8 @@
 (declare-function geiser-repl-exit "ext:geiser-repl" (&optional arg))
 (declare-function geiser-eval--retort-output "ext:geiser-eval" (ret))
 (declare-function geiser-eval--retort-result-str "ext:geiser-eval" (ret prefix))
+(declare-function geiser-eval--retort-error "ext:geiser-eval" (ret))
+(declare-function geiser-eval--retort-error-msg "ext:geiser-eval" (err))
 
 (defcustom org-babel-scheme-null-to 'hline
   "Replace `null' and empty lists in scheme tables with this before returning."
@@ -193,22 +195,30 @@ is true; otherwise returns the last value."
                                   #'geiser-eval-region)
                                 (point-min)
                                 (point-max))))
-	      (setq result (if output
+	      (let ((err (geiser-eval--retort-error ret)))
+		(setq result (cond
+			      (output
 			       (or (geiser-eval--retort-output ret)
-				   "Geiser Interpreter produced no output")
-			     (geiser-eval--retort-result-str ret "")))))
+				   "Geiser Interpreter produced no output"))
+			      (err nil)
+			      (t (geiser-eval--retort-result-str ret ""))))
 	  (when (not repl)
 	    (save-current-buffer (set-buffer repl-buffer)
 				 (geiser-repl-exit))
 	    (set-process-query-on-exit-flag (get-buffer-process repl-buffer) nil)
-	    (kill-buffer repl-buffer)))))
+		  (kill-buffer repl-buffer))
+		(when err
+		  (let ((msg (geiser-eval--error-msg err)))
+		    (org-babel-eval-error-notify
+		     nil
+		     (concat (if (listp msg) (car msg) msg) "\n"))))))))))
     result))
 
 (defun org-babel-scheme--table-or-string (results)
   "Convert RESULTS into an appropriate elisp value.
 If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (let ((res (org-babel-script-escape results)))
+  (let ((res (and results (org-babel-script-escape results))))
     (cond ((listp res)
            (mapcar (lambda (el)
 		     (if (or (null el) (eq el 'null))
