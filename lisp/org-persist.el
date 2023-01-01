@@ -420,7 +420,19 @@ FORMAT and ARGS are passed to `message'."
 
 (defun org-persist--write-elisp-file (file data &optional no-circular pp)
   "Write elisp DATA to FILE."
-  (let ((print-circle (not no-circular))
+  ;; Fsync slightly reduces the chance of an incomplete filesystem
+  ;; write, however on modern hardware its effectiveness is
+  ;; questionable and it is insufficient to garantee complete writes.
+  ;; Coupled with the significant performance hit if writing many
+  ;; small files, it simply does not make sense to use fsync here,
+  ;; particularly as cache corruption is only a minor inconvenience.
+  ;; With all this in mind, we ensure `write-region-inhibit-fsync' is
+  ;; set.
+  ;;
+  ;; To read more about this, see the comments in Emacs' fileio.c, in
+  ;; particular the large comment block in init_fileio.
+  (let ((write-region-inhibit-fsync t)
+        (print-circle (not no-circular))
         print-level
         print-length
         print-quoted
