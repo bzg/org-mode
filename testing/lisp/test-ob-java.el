@@ -1,6 +1,6 @@
 ;;; test-ob-java.el --- tests for ob-java.el  -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2020-2022 Free Software Foundation, Inc.
+;; Copyright (c) 2020-2023 Free Software Foundation, Inc.
 ;; Authors: Eric Schulte
 ;;          Dan Davison
 ;; Maintainer: Ian Martins <ianxm@jhu.edu>
