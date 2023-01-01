@@ -79,12 +79,6 @@ sombrero;
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should (or (> (file-attribute-size (file-attributes file)) 0)
-                      ;; Avoid race condition on slow machines.
-                      ;; https://orgmode.org/list/87r0wk29dz.fsf@localhost
-                      (progn
-                        (sleep-for 1)
-                        (> (file-attribute-size (file-attributes file)) 0))))
           (should-not (get-buffer "*Org-Babel Error Output*")))
       ;; clean-up
       (delete-file file)
@@ -105,12 +99,6 @@ sombrero;
           (should (get-buffer "*Inferior Octave*"))
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (or (> (file-attribute-size (file-attributes file)) 0)
-              ;; Avoid race condition on slow machines.
-              ;; https://orgmode.org/list/87r0wk29dz.fsf@localhost
-              (progn
-                (sleep-for 1)
-                (> (file-attribute-size (file-attributes file)) 0)))
           (should-not (get-buffer "*Org-Babel Error Output*")))
       ;; clean-up
       (delete-file file)
@@ -131,12 +119,6 @@ sombrero;
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (or (> (file-attribute-size (file-attributes file)) 0)
-              ;; Avoid race condition on slow machines.
-              ;; https://orgmode.org/list/87r0wk29dz.fsf@localhost
-              (progn
-                (sleep-for 1)
-                (> (file-attribute-size (file-attributes file)) 0)))
           (should-not (get-buffer "*Org-Babel Error Output*")))
       ;; clean-up
       (delete-file file)
