@@ -74,9 +74,9 @@ Version mismatch is commonly encountered in the following situations:
    loading of the newer Org version.
 
    It is recommended to put
-   
+
     %s
-    
+
    early in the config.  Ideally, right after the straight.el
    bootstrap.  Moving `use-package' :straight declaration may not be
    sufficient if the corresponding `use-package' statement is
