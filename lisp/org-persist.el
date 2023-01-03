@@ -386,37 +386,38 @@ FORMAT and ARGS are passed to `message'."
 
 (defun org-persist--read-elisp-file (&optional buffer-or-file)
   "Read elisp data from BUFFER-OR-FILE or current buffer."
-  (unless buffer-or-file (setq buffer-or-file (current-buffer)))
-  (with-temp-buffer
-    (if (bufferp buffer-or-file)
-        (set-buffer buffer-or-file)
-      (insert-file-contents buffer-or-file))
-    (condition-case err
-        (let ((coding-system-for-read 'utf-8)
-              (read-circle t)
-              (start-time (float-time)))
-          ;; FIXME: Reading sometimes fails to read circular objects.
-          ;; I suspect that it happens when we have object reference
-          ;; #N# read before object definition #N=.  If it is really
-          ;; so, it should be Emacs bug - either in `read' or in
-          ;; `prin1'.  Meanwhile, just fail silently when `read'
-          ;; fails to parse the saved cache object.
-          (prog1
-              (read (current-buffer))
-            (org-persist--display-time
-             (- (float-time) start-time)
-             "Reading from %S" buffer-or-file)))
-      ;; Recover gracefully if index file is corrupted.
-      (error
-       ;; Remove problematic file.
-       (unless (bufferp buffer-or-file) (delete-file buffer-or-file))
-       ;; Do not report the known error to user.
-       (if (string-match-p "Invalid read syntax" (error-message-string err))
-           (message "Emacs reader failed to read data in %S. The error was: %S"
-                    buffer-or-file (error-message-string err))
-         (warn "Emacs reader failed to read data in %S. The error was: %S"
-               buffer-or-file (error-message-string err)))
-       nil))))
+  (let (;; UTF-8 is explicitly used in `org-persist--write-elisp-file'.
+        (coding-system-for-read 'utf-8)
+        (buffer-or-file (or buffer-or-file (current-buffer))))
+    (with-temp-buffer
+      (if (bufferp buffer-or-file)
+          (set-buffer buffer-or-file)
+        (insert-file-contents buffer-or-file))
+      (condition-case err
+          (let ((read-circle t)
+                (start-time (float-time)))
+            ;; FIXME: Reading sometimes fails to read circular objects.
+            ;; I suspect that it happens when we have object reference
+            ;; #N# read before object definition #N=.  If it is really
+            ;; so, it should be Emacs bug - either in `read' or in
+            ;; `prin1'.  Meanwhile, just fail silently when `read'
+            ;; fails to parse the saved cache object.
+            (prog1
+                (read (current-buffer))
+              (org-persist--display-time
+               (- (float-time) start-time)
+               "Reading from %S" buffer-or-file)))
+        ;; Recover gracefully if index file is corrupted.
+        (error
+         ;; Remove problematic file.
+         (unless (bufferp buffer-or-file) (delete-file buffer-or-file))
+         ;; Do not report the known error to user.
+         (if (string-match-p "Invalid read syntax" (error-message-string err))
+             (message "Emacs reader failed to read data in %S. The error was: %S"
+                      buffer-or-file (error-message-string err))
+           (warn "Emacs reader failed to read data in %S. The error was: %S"
+                 buffer-or-file (error-message-string err)))
+         nil)))))
 
 (defun org-persist--write-elisp-file (file data &optional no-circular pp)
   "Write elisp DATA to FILE."
@@ -432,6 +433,9 @@ FORMAT and ARGS are passed to `message'."
   ;; To read more about this, see the comments in Emacs' fileio.c, in
   ;; particular the large comment block in init_fileio.
   (let ((write-region-inhibit-fsync t)
+        ;; We set UTF-8 here and in `org-persist--read-elisp-file'
+        ;; to avoid the overhead from `find-auto-coding'.
+        (coding-system-for-write 'utf-8)
         (print-circle (not no-circular))
         print-level
         print-length
