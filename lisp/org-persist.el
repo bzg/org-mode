@@ -913,12 +913,12 @@ When REMOVE-RELATED is non-nil, remove all the containers stored with
 the CONTAINER as well."
   (unless org-persist--index (org-persist--load-index))
   (setq container (org-persist--normalize-container container))
-  (setq associated (org-persist--normalize-associated associated))
   (if (eq associated 'all)
       (mapc (lambda (collection)
               (when (member container (plist-get collection :container))
                 (org-persist-unregister container (plist-get collection :associated) :remove-related remove-related)))
             org-persist--index)
+    (setq associated (org-persist--normalize-associated associated))
     (let ((collection (org-persist--find-index `(:container ,container :associated ,associated))))
       (when collection
         (if (or remove-related (= (length (plist-get collection :container)) 1))
