@@ -906,20 +906,22 @@ with `org-persist-write'."
       (add-hook 'kill-buffer-hook #'org-persist-write-all-buffer nil 'local)))
   (when write-immediately (org-persist-write container associated)))
 
-(defun org-persist-unregister (container &optional associated)
+(cl-defun org-persist-unregister (container &optional associated &key remove-related)
   "Unregister CONTAINER in ASSOCIATED to be persistent.
-When ASSOCIATED is `all', unregister CONTAINER everywhere."
+When ASSOCIATED is `all', unregister CONTAINER everywhere.
+When REMOVE-RELATED is non-nil, remove all the containers stored with
+the CONTAINER as well."
   (unless org-persist--index (org-persist--load-index))
   (setq container (org-persist--normalize-container container))
   (setq associated (org-persist--normalize-associated associated))
   (if (eq associated 'all)
       (mapc (lambda (collection)
               (when (member container (plist-get collection :container))
-                (org-persist-unregister container (plist-get collection :associated))))
+                (org-persist-unregister container (plist-get collection :associated) :remove-related remove-related)))
             org-persist--index)
     (let ((collection (org-persist--find-index `(:container ,container :associated ,associated))))
       (when collection
-        (if (= (length (plist-get collection :container)) 1)
+        (if (or remove-related (= (length (plist-get collection :container)) 1))
             (org-persist--remove-from-index collection)
           (plist-put collection :container
                      (remove container (plist-get collection :container)))
