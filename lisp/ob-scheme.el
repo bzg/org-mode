@@ -4,7 +4,6 @@
 
 ;; Authors: Eric Schulte
 ;;	    Michael Gauland
-;; Maintainer: Rudolf Adamkovič <salutis@me.com>
 ;; Keywords: literate programming, reproducible research, scheme
 ;; URL: https://orgmode.org
 
