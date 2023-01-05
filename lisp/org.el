@@ -6690,7 +6690,9 @@ This goes first to child, then to parent, level, then up the hierarchy.
 After top level, it switches back to sibling level."
   (interactive)
   (let ((org-adapt-indentation nil))
-    (when (org-point-at-end-of-empty-headline)
+    (when (and (org-point-at-end-of-empty-headline)
+               (not (and (featurep 'org-inlinetask)
+                       (org-inlinetask-in-task-p))))
       (setq this-command 'org-cycle-level) ; Only needed for caching
       (let ((cur-level (org-current-level))
             (prev-level (org-get-previous-line-level)))
