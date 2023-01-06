@@ -79,7 +79,7 @@ sombrero;
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should-not (get-buffer "*Org-Babel Error Output*")))
+          (should-not (buffer-live-p (get-buffer "*Org-Babel Error Output*"))))
       ;; clean-up
       (delete-file file)
       (when (get-buffer "*Org-Babel Error Output*")
@@ -99,7 +99,7 @@ sombrero;
           (should (get-buffer "*Inferior Octave*"))
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should-not (get-buffer "*Org-Babel Error Output*")))
+          (should-not (buffer-live-p (get-buffer "*Org-Babel Error Output*"))))
       ;; clean-up
       (delete-file file)
       (let (kill-buffer-query-functions kill-buffer-hook)
@@ -119,7 +119,7 @@ sombrero;
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
           (should (file-readable-p file))
-          (should-not (get-buffer "*Org-Babel Error Output*")))
+          (should-not (buffer-live-p (get-buffer "*Org-Babel Error Output*"))))
       ;; clean-up
       (delete-file file)
       (when (get-buffer "*Org-Babel Error Output*")
