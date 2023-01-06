@@ -75,20 +75,25 @@ This function has to be called whenever `org-babel-shell-names'
 is modified outside the Customize interface."
   (interactive)
   (dolist (name org-babel-shell-names)
-    (eval `(defun ,(intern (concat "org-babel-execute:" name))
-	       (body params)
-	     ,(format "Execute a block of %s commands with Babel." name)
-	     (let ((shell-file-name ,name)
-                   (org-babel-prompt-command
-                    (or (cdr (assoc ,name org-babel-shell-set-prompt-commands))
-                        (alist-get t org-babel-shell-set-prompt-commands))))
-	       (org-babel-execute:shell body params))))
-    (eval `(defalias ',(intern (concat "org-babel-variable-assignments:" name))
-	     'org-babel-variable-assignments:shell
-	     ,(format "Return list of %s statements assigning to the block's \
+    (let ((fname (intern (concat "org-babel-execute:" name))))
+      (defalias fname
+        (lambda (body params)
+	  (:documentation
+           (format "Execute a block of %s commands with Babel." name))
+	  (let ((shell-file-name name)
+                (org-babel-prompt-command
+                 (or (cdr (assoc name org-babel-shell-set-prompt-commands))
+                     (alist-get t org-babel-shell-set-prompt-commands))))
+	    (org-babel-execute:shell body params))))
+      (put fname 'definition-name 'org-babel-shell-initialize))
+    (defalias (intern (concat "org-babel-variable-assignments:" name))
+      #'org-babel-variable-assignments:shell
+      (format "Return list of %s statements assigning to the block's \
 variables."
-		      name)))
-    (eval `(defvar ,(intern (concat "org-babel-default-header-args:" name)) '()))))
+	      name))
+    (funcall (if (fboundp 'defvar-1) #'defvar-1 #'set) ;Emacs-29
+             (intern (concat "org-babel-default-header-args:" name))
+             nil)))
 
 (defcustom org-babel-shell-names
   '("sh" "bash" "zsh" "fish" "csh" "ash" "dash" "ksh" "mksh" "posh")
