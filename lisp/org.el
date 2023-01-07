@@ -15434,13 +15434,15 @@ in Org mode.
     (cdlatex-compute-tables))
   (unless org-cdlatex-texmathp-advice-is-done
     (setq org-cdlatex-texmathp-advice-is-done t)
-    (advice-add 'texmathp :around #'org--math-always-on)))
+    (advice-add 'texmathp :around #'org--math-p)))
 
-(defun org--math-always-on (orig-fun &rest args)
-  "Always return t in Org buffers.
-This is because we want to insert math symbols without dollars even outside
-the LaTeX math segments.  If Org mode thinks that point is actually inside
-an embedded LaTeX fragment, let `texmathp' do its job.
+(defun org--math-p (orig-fun &rest args)
+  "Return t inside math fragments or running `cdlatex-math-symbol'.
+This function is intended to be an :around advice for `texmathp'.
+
+If Org mode thinks that point is actually inside
+an embedded LaTeX environment, return t when the environment is math
+or let `texmathp' do its job otherwise.
 `\\[org-cdlatex-mode-map]'"
   (interactive)
   (cond
@@ -15450,11 +15452,14 @@ an embedded LaTeX fragment, let `texmathp' do its job.
     t)
    (t
     (let ((element (org-element-context)))
-      (or (not (org-inside-LaTeX-fragment-p element))
-          (if (not (eq (org-element-type element) 'latex-fragment))
-              (apply orig-fun args)
-            (setq texmathp-why '("Org mode embedded math" . 0))
-	    t))))))
+      (when (org-inside-LaTeX-fragment-p element)
+        (pcase (substring-no-properties
+                (org-element-property :value element)
+                0 2)
+          ((or "\\(" "\\[" (pred (string-match-p (rx string-start "$"))))
+           (setq texmathp-why '("Org mode embedded math" . 0))
+           t)
+          (_ (apply orig-fun args))))))))
 
 (defun turn-on-org-cdlatex ()
   "Unconditionally turn on `org-cdlatex-mode'."

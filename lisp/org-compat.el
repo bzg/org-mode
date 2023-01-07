@@ -568,6 +568,9 @@ Counting starts at 1."
 (make-obsolete 'org-let "to be removed" "9.6")
 (make-obsolete 'org-let2 "to be removed" "9.6")
 
+(define-obsolete-function-alias 'org--math-always-on
+  'org--math-p "9.7")
+
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports
