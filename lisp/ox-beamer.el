@@ -116,6 +116,7 @@ open    The opening template for the environment, with the following escapes
         %r   the raw headline text (i.e. without any processing)
         %H   if there is headline text, that raw text in {} braces
         %U   if there is headline text, that raw text in [] brackets
+        %l   the label, obtained from `org-beamer--get-label'
 close   The closing string of the environment."
   :group 'org-export-beamer
   :version "24.4"
@@ -178,10 +179,10 @@ through `org-beamer-environments-extra' variable.")
     ("quotation"      "q" "\\begin{quotation}%a %% %h"    "\\end{quotation}")
     ("quote"          "Q" "\\begin{quote}%a %% %h"        "\\end{quote}")
     ("structureenv"   "s" "\\begin{structureenv}%a %% %h" "\\end{structureenv}")
-    ("theorem"        "t" "\\begin{theorem}%a[%h]"        "\\end{theorem}")
-    ("definition"     "d" "\\begin{definition}%a[%h]"     "\\end{definition}")
-    ("example"        "e" "\\begin{example}%a[%h]"        "\\end{example}")
-    ("exampleblock"   "E" "\\begin{exampleblock}%a{%h}"   "\\end{exampleblock}")
+    ("theorem"        "t" "\\begin{theorem}%a[%h]%l"        "\\end{theorem}")
+    ("definition"     "d" "\\begin{definition}%a[%h]%l"     "\\end{definition}")
+    ("example"        "e" "\\begin{example}%a[%h]%l"        "\\end{example}")
+    ("exampleblock"   "E" "\\begin{exampleblock}%a{%h}%l"   "\\end{exampleblock}")
     ("proof"          "p" "\\begin{proof}%a[%h]"          "\\end{proof}")
     ("beamercolorbox" "o" "\\begin{beamercolorbox}%o{%h}" "\\end{beamercolorbox}"))
   "Environments triggered by properties in Beamer export.
@@ -578,6 +579,7 @@ used as a communication channel."
 		(cons "O" (or raw-options ""))
 		(cons "h" title)
 		(cons "r" raw-title)
+                (cons "l" (format "\\label{%s}" (org-beamer--get-label headline info)))
 		(cons "H" (if (equal raw-title "") ""
 			    (format "{%s}" raw-title)))
 		(cons "U" (if (equal raw-title "") ""

@@ -24,6 +24,12 @@ consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]
 has been ported to.
 
 ** New and changed options
+*** New escape in ~org-beamer-environments-extra~ for labels in Beamer export
+The escape =%l= in ~org-beamer-environments-extra~ inserts the label
+obtained from ~org-beamer--get-label~.  This is added to the default
+environments =theorem=, =definition=, =example=, and =exampleblock= in
+~org-beamer-environments-default~.
+
 *** ~org-clock-x11idle-program-name~ now defaults to =xprintidle=, when available
 
 When =xprintidle= executable is available at =org-clock= load time, it
