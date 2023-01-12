@@ -3099,7 +3099,7 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))))
   (should
    (equal (org-element-fixed-width-interpreter
 	   '(fixed-width (:value "")) nil)
-	  ""))
+	  ":\n"))
   ;; Handle nil value.
   (should-not
    (org-element-fixed-width-interpreter
