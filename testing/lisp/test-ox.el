@@ -1113,6 +1113,16 @@ Text"
 	    (org-export-as (org-test-default-backend)
 			   'subtree nil nil
 			   '(:with-planning t :with-properties t)))))
+  (should
+   (equal ""
+	  (org-test-with-temp-text "
+* H
+:PROPERTIES:
+:A: 1
+:END:<point>
+* H2"
+	    (org-export-as (org-test-default-backend)
+			   'subtree))))
   ;; Visible.
   (should
    (equal "* H1\n"

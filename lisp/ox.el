@@ -3040,7 +3040,7 @@ Return code as a string."
                ;; This way, we will be able to retrieve its export
                ;; options when calling
                ;; `org-export--get-subtree-options'.
-               (backward-char)
+               (when (bolp) (backward-char))
 	       (narrow-to-region (point) (point-max))))
         ;; Initialize communication channel with original buffer
         ;; attributes, unavailable in its copy.
