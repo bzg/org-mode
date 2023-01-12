@@ -541,58 +541,67 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (org-kill-new (buffer-substring region-start region-end))
 		  (org-save-markers-in-region region-start region-end))
 	      (org-copy-subtree 1 nil t))
-	    (with-current-buffer (setq nbuf (or (find-buffer-visiting file)
-						(find-file-noselect file)))
-	      (setq reversed (org-notes-order-reversed-p))
-	      (org-with-wide-buffer
-	       (if pos
-		   (progn
-		     (goto-char pos)
-		     (setq level (org-get-valid-level (funcall outline-level) 1))
-		     (goto-char
-		      (if reversed
-			  (or (outline-next-heading) (point-max))
-			(or (save-excursion (org-get-next-sibling))
-			    (org-end-of-subtree t t)
-			    (point-max)))))
-		 (setq level 1)
-		 (if (not reversed)
-		     (goto-char (point-max))
-		   (goto-char (point-min))
-		   (or (outline-next-heading) (goto-char (point-max)))))
-	       (unless (bolp) (newline))
-	       (org-paste-subtree level nil nil t)
-	       ;; Record information, according to `org-log-refile'.
-	       ;; Do not prompt for a note when refiling multiple
-	       ;; headlines, however.  Simply add a time stamp.
-	       (cond
-		((not org-log-refile))
-		(regionp
-		 (org-map-region
-		  (lambda () (org-add-log-setup 'refile nil nil 'time))
-		  (point)
-		  (+ (point) (- region-end region-start))))
-		(t
-		 (org-add-log-setup 'refile nil nil org-log-refile)))
-	       (and org-auto-align-tags
-		    (let ((org-loop-over-headlines-in-active-region nil))
-		      (org-align-tags)))
-	       (let ((bookmark-name (plist-get org-bookmark-names-plist
-					       :last-refile)))
-		 (when bookmark-name
-		   (with-demoted-errors "Bookmark set error: %S"
-		     (bookmark-set bookmark-name))))
-	       ;; If we are refiling for capture, make sure that the
-	       ;; last-capture pointers point here
-	       (when (bound-and-true-p org-capture-is-refiling)
-		 (let ((bookmark-name (plist-get org-bookmark-names-plist
-						 :last-capture-marker)))
+            (let ((origin (point-marker)))
+              ;; Handle special case when we refile to exactly same
+              ;; location with tree promotion/demotion.  Point marker
+              ;; saved by `org-width-wide-buffer' (`save-excursion')
+              ;; will then remain before the inserted subtree in
+              ;; unexpected location.
+              (set-marker-insertion-type origin t)
+	      (with-current-buffer (setq nbuf (or (find-buffer-visiting file)
+						  (find-file-noselect file)))
+	        (setq reversed (org-notes-order-reversed-p))
+	        (org-with-wide-buffer
+	         (if pos
+		     (progn
+		       (goto-char pos)
+		       (setq level (org-get-valid-level (funcall outline-level) 1))
+		       (goto-char
+		        (if reversed
+			    (or (outline-next-heading) (point-max))
+			  (or (save-excursion (org-get-next-sibling))
+			      (org-end-of-subtree t t)
+			      (point-max)))))
+		   (setq level 1)
+		   (if (not reversed)
+		       (goto-char (point-max))
+		     (goto-char (point-min))
+		     (or (outline-next-heading) (goto-char (point-max)))))
+	         (unless (bolp) (newline))
+	         (org-paste-subtree level nil nil t)
+	         ;; Record information, according to `org-log-refile'.
+	         ;; Do not prompt for a note when refiling multiple
+	         ;; headlines, however.  Simply add a time stamp.
+	         (cond
+		  ((not org-log-refile))
+		  (regionp
+		   (org-map-region
+		    (lambda () (org-add-log-setup 'refile nil nil 'time))
+		    (point)
+		    (+ (point) (- region-end region-start))))
+		  (t
+		   (org-add-log-setup 'refile nil nil org-log-refile)))
+	         (and org-auto-align-tags
+		      (let ((org-loop-over-headlines-in-active-region nil))
+		        (org-align-tags)))
+	         (let ((bookmark-name (plist-get org-bookmark-names-plist
+					         :last-refile)))
 		   (when bookmark-name
 		     (with-demoted-errors "Bookmark set error: %S"
 		       (bookmark-set bookmark-name))))
-		 (move-marker org-capture-last-stored-marker (point)))
-               (deactivate-mark)
-	       (run-hooks 'org-after-refile-insert-hook)))
+	         ;; If we are refiling for capture, make sure that the
+	         ;; last-capture pointers point here
+	         (when (bound-and-true-p org-capture-is-refiling)
+		   (let ((bookmark-name (plist-get org-bookmark-names-plist
+						   :last-capture-marker)))
+		     (when bookmark-name
+		       (with-demoted-errors "Bookmark set error: %S"
+		         (bookmark-set bookmark-name))))
+		   (move-marker org-capture-last-stored-marker (point)))
+                 (deactivate-mark)
+	         (run-hooks 'org-after-refile-insert-hook)))
+              ;; Go back to ORIGIN.
+              (goto-char origin))
 	    (unless org-refile-keep
 	      (if regionp
 		  (delete-region (point) (+ (point) (- region-end region-start)))

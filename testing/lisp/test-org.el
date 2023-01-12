@@ -6953,6 +6953,17 @@ Paragraph<point>"
               (org-refile-targets `((nil :level . 1))))
        (mapcar #'car (org-refile-get-targets)))))))
 
+(ert-deftest test-org/refile ()
+  "Test `org-refile' specifications."
+  ;; Test edge case when we refile heading into the same location.
+  (should
+   (equal
+    "* H1
+** H2\n"
+    (org-test-with-temp-text-in-file "* H1
+* H2<point>"
+     (org-refile nil nil `("H1" ,(buffer-file-name) nil 1))
+     (buffer-string)))))
 
 
 ;;; Sparse trees
