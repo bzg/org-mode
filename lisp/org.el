@@ -14845,6 +14845,12 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like
       (setq timestamp? (or what timestamp?)
 	    inactive (= (char-after (match-beginning 0)) ?\[)
 	    ts (match-string 0))
+      ;; FIXME: Instead of deleting everything and then inserting
+      ;; later, we should make use of `replace-match', which preserves
+      ;; markers.  The current implementation suffers from
+      ;; `save-excursion' not preserving point inside the timestamp
+      ;; once we delete the timestamp here.  The point moves to the
+      ;; updated timestamp end.
       (replace-match "")
       (when (string-match
 	     "\\(\\(-[012][0-9]:[0-5][0-9]\\)?\\( +[.+]?-?[-+][0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)*\\)[]>]"
