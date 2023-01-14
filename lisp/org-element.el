@@ -7208,9 +7208,9 @@ The element is: %S\n The real element is: %S\n Cache around :begin:\n%S\n%S\n%S"
                                        "no" "yes")
                                    (org-element--format-element element)
                                    (org-element--format-element real-element)
-                                   (org-element--cache-find (1- (org-element-property :begin real-element)))
-                                   (car (org-element--cache-find (org-element-property :begin real-element) 'both))
-                                   (cdr (org-element--cache-find (org-element-property :begin real-element) 'both)))
+                                   (org-element--format-element (org-element--cache-find (1- (org-element-property :begin real-element))))
+                                   (org-element--format-element (car (org-element--cache-find (org-element-property :begin real-element) 'both)))
+                                   (org-element--format-element (cdr (org-element--cache-find (org-element-property :begin real-element) 'both))))
           (org-element-cache-reset))))))
 
 ;;; Cache persistence
