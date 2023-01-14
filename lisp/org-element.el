@@ -5985,7 +5985,7 @@ It is a symbol among nil, t, or a number representing smallest level of
 modified headline.  The level considers headline levels both before
 and after the modification.")
 
-(defun org-element--cache-sync (buffer &optional threshold future-change offset)
+(defun org-element--cache-sync (buffer &optional threshold future-change offset force)
   "Synchronize cache with recent modification in BUFFER.
 
 When optional argument THRESHOLD is non-nil, do the
@@ -5998,13 +5998,18 @@ FUTURE-CHANGE, when non-nil, is a buffer position where changes
 not registered yet in the cache are going to happen.  OFFSET is the
 change offset.  It is used in `org-element--cache-submit-request',
 where cache is partially updated before current modification are
-actually submitted."
+actually submitted.
+
+FORCE, when non-nil will force the synchronization even when
+`org-element--cache-active-p' returns nil."
   (when (buffer-live-p buffer)
     (org-with-base-buffer buffer
       ;; Do not sync when, for example, in the middle of
       ;; `combine-change-calls'.  See the commentary inside
-      ;; `org-element--cache-active-p'.
-      (when (and org-element--cache-sync-requests (org-element--cache-active-p))
+      ;; `org-element--cache-active-p'.  Such situation may occur when
+      ;; sync timer triggers in the middle of `combine-change-calls'.
+      (when (and org-element--cache-sync-requests
+                 (or force (org-element--cache-active-p)))
         ;; Check if the buffer have been changed outside visibility of
         ;; `org-element--cache-before-change' and `org-element--cache-after-change'.
         (if (/= org-element--cache-last-buffer-size (buffer-size))
@@ -7072,7 +7077,7 @@ change, as an integer."
         ;; yet to the otherwise correct part of the cache (i.e, before
         ;; the first request).
         (org-element--cache-log-message "Adding new phase 0 request")
-        (when next (org-element--cache-sync (current-buffer) end beg offset))
+        (when next (org-element--cache-sync (current-buffer) end beg offset 'force))
         (let ((first (org-element--cache-for-removal beg end offset)))
 	  (if first
 	      (push (let ((first-beg (org-element-property :begin first))
