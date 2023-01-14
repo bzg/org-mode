@@ -6407,7 +6407,7 @@ them."
      ("nb" :default "Innhold")
      ("nn" :default "Innhald")
      ("pl" :html "Spis tre&#x015b;ci")
-     ("pt_BR" :html "&Iacute;ndice" :utf8 "Índice" :ascii "Indice")
+     ("pt_BR" :html "&Iacute;ndice" :utf-8 "Índice" :ascii "Indice")
      ("ro" :default "Cuprins")
      ("ru" :html "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;"
       :utf-8 "Содержание")
