@@ -6583,7 +6583,8 @@ headings in the region."
   (interactive)
   (save-excursion
     (if (org-region-active-p)
-	(org-map-region 'org-promote (region-beginning) (region-end))
+        (let ((deactivate-mark nil))
+          (org-map-region 'org-promote (region-beginning) (region-end)))
       (org-promote)))
   (org-fix-position-after-promote))
 
@@ -6594,7 +6595,8 @@ headings in the region."
   (interactive)
   (save-excursion
     (if (org-region-active-p)
-	(org-map-region 'org-demote (region-beginning) (region-end))
+        (let ((deactivate-mark nil))
+          (org-map-region 'org-demote (region-beginning) (region-end)))
       (org-demote)))
   (org-fix-position-after-promote))
 
@@ -16925,21 +16927,25 @@ for more information."
               (call-interactively 'org-move-subtree-down)))))))
    ((org-region-active-p)
     (let* ((a (save-excursion
-		(goto-char (region-beginning))
-		(line-beginning-position)))
-	   (b (save-excursion
-		(goto-char (region-end))
-		(if (bolp) (1- (point)) (line-end-position))))
-	   (c (save-excursion
-		(goto-char a)
-		(move-beginning-of-line 0)
-		(point)))
-	   (d (save-excursion
-		(goto-char a)
-		(move-end-of-line 0)
-		(point))))
+                (goto-char (region-beginning))
+                (line-beginning-position)))
+           (b (save-excursion
+                (goto-char (region-end))
+                (if (bolp) (1- (point)) (line-end-position))))
+           (c (save-excursion
+                (goto-char a)
+                (move-beginning-of-line 0)
+                (point)))
+           (d (save-excursion
+                (goto-char a)
+                (move-end-of-line 0)
+                (point)))
+           (deactivate-mark nil)
+           (swap? (< (point) (mark))))
       (transpose-regions a b c d)
-      (goto-char c)))
+      (set-mark c)
+      (goto-char (+ c (- b a)))
+      (when swap? (exchange-point-and-mark))))
    ((org-at-table-p) (org-call-with-arg 'org-table-move-row 'up))
    ((and (featurep 'org-inlinetask)
          (org-inlinetask-in-task-p))
@@ -16980,21 +16986,25 @@ commands for more information."
               (call-interactively 'org-move-subtree-up)))))))
    ((org-region-active-p)
     (let* ((a (save-excursion
-		(goto-char (region-beginning))
-		(line-beginning-position)))
+                (goto-char (region-beginning))
+                (line-beginning-position)))
 	   (b (save-excursion
-		(goto-char (region-end))
-		(if (bolp) (1- (point)) (line-end-position))))
+                (goto-char (region-end))
+                (if (bolp) (1- (point)) (line-end-position))))
 	   (c (save-excursion
-		(goto-char b)
-		(move-beginning-of-line (if (bolp) 1 2))
-		(point)))
+                (goto-char b)
+                (move-beginning-of-line (if (bolp) 1 2))
+                (point)))
 	   (d (save-excursion
-		(goto-char b)
-		(move-end-of-line (if (bolp) 1 2))
-		(point))))
+                (goto-char b)
+                (move-end-of-line (if (bolp) 1 2))
+                (point)))
+           (deactivate-mark nil)
+           (swap? (< (point) (mark))))
       (transpose-regions a b c d)
-      (goto-char d)))
+      (set-mark (+ 1 a (- d c)))
+      (goto-char (+ 1 a (- d c) (- b a)))
+      (when swap? (exchange-point-and-mark))))
    ((org-at-table-p) (call-interactively 'org-table-move-row))
    ((and (featurep 'org-inlinetask)
          (org-inlinetask-in-task-p))

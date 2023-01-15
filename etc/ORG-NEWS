@@ -86,6 +86,15 @@ order to remain backward-compatible.
 When region is active and starts at a heading, ~org-metaup~ and
 ~org-metadown~ will move all the selected subtrees.
 
+*** Many structure editing commands now do not deactivate region
+
+Moving, promoting, and demoting of headings and items in region now do
+not deactivate Transient mark mode.
+
+Users can thus conveniently select multiple headings/items and use,
+for example, =M-<down>=/=M-<up>= repeatedly without losing the
+selection.
+
 *** Datetree structure headlines can now be complex
 
 TODO state, priority, tags, statistics cookies, and COMMENT keywords

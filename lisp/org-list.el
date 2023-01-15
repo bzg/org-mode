@@ -2688,7 +2688,8 @@ Return t if successful."
                        (no-subtree (1+ (line-beginning-position)))
                        (t (org-list-get-item-end (line-beginning-position) struct))))))
       (let* ((beg (marker-position org-last-indent-begin-marker))
-	     (end (marker-position org-last-indent-end-marker)))
+	     (end (marker-position org-last-indent-end-marker))
+             (deactivate-mark nil))
 	(cond
 	 ;; Special case: moving top-item with indent rule.
 	 (specialp
