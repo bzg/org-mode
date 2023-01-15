@@ -81,6 +81,11 @@ a date range in the agenda.  It inherits from the default face in
 order to remain backward-compatible.
 
 ** New features
+*** ~org-metaup~ and ~org-metadown~ now act on headings in region
+
+When region is active and starts at a heading, ~org-metaup~ and
+~org-metadown~ will move all the selected subtrees.
+
 *** Datetree structure headlines can now be complex
 
 TODO state, priority, tags, statistics cookies, and COMMENT keywords
