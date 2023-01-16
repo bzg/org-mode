@@ -1184,7 +1184,9 @@ Custom commands can set this variable in the options section."
   "Non-nil means start the overview always on the specified weekday.
 0 denotes Sunday, 1 denotes Monday, etc.
 When nil, always start on the current day.
-Custom commands can set this variable in the options section."
+Custom commands can set this variable in the options section.
+
+This variable only applies when agenda spans either 7 or 14 days."
   :group 'org-agenda-daily/weekly
   :type '(choice (const :tag "Today" nil)
 		 (integer :tag "Weekday No.")))
@@ -4359,7 +4361,10 @@ This check for agenda markers in all agenda buffers currently active."
 Custom commands can set this variable in the options section.
 This is usually a string like \"2007-11-01\", \"+2d\" or any other
 input allowed when reading a date through the Org calendar.
-See the docstring of `org-read-date' for details.")
+See the docstring of `org-read-date' for details.
+
+This variable has no effect when `org-agenda-start-on-weekday' is set
+and agenda spans 7 or 14 days.")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-arg-loc nil) ; local variable
 
