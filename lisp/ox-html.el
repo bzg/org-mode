@@ -3616,32 +3616,32 @@ contextual information."
 	   (klipsify  (and  (plist-get info :html-klipsify-src)
                             (member lang '("javascript" "js"
 					   "ruby" "scheme" "clojure" "php" "html")))))
-      (if (not lang) (format "<pre class=\"example\"%s>\n%s</pre>" label code)
-	(format "<div class=\"org-src-container\">\n%s%s\n</div>"
-		;; Build caption.
-		(let ((caption (org-export-get-caption src-block)))
-		  (if (not caption) ""
-		    (let ((listing-number
-			   (format
-			    "<span class=\"listing-number\">%s </span>"
-			    (format
-			     (org-html--translate "Listing %d:" info)
-			     (org-export-get-ordinal
-			      src-block info nil #'org-html--has-caption-p)))))
-		      (format "<label class=\"org-src-name\">%s%s</label>"
-			      listing-number
-			      (org-trim (org-export-data caption info))))))
-		;; Contents.
-		(if klipsify
-		    (format "<pre><code class=\"src src-%s\"%s%s>%s</code></pre>"
-			    lang
-			    label
-			    (if (string= lang "html")
-				" data-editor-type=\"html\""
-			      "")
-			    code)
-		  (format "<pre class=\"src src-%s\"%s>%s</pre>"
-                          lang label code)))))))
+      (format "<div class=\"org-src-container\">\n%s%s\n</div>"
+	      ;; Build caption.
+	      (let ((caption (org-export-get-caption src-block)))
+		(if (not caption) ""
+		  (let ((listing-number
+			 (format
+			  "<span class=\"listing-number\">%s </span>"
+			  (format
+			   (org-html--translate "Listing %d:" info)
+			   (org-export-get-ordinal
+			    src-block info nil #'org-html--has-caption-p)))))
+		    (format "<label class=\"org-src-name\">%s%s</label>"
+			    listing-number
+			    (org-trim (org-export-data caption info))))))
+	      ;; Contents.
+	      (if klipsify
+		  (format "<pre><code class=\"src src-%s\"%s%s>%s</code></pre>"
+			  lang ; lang being nil is OK.
+			  label
+			  (if (string= lang "html")
+			      " data-editor-type=\"html\""
+			    "")
+			  code)
+		(format "<pre class=\"src src-%s\"%s>%s</pre>"
+                        ;; Lang being nil is OK.
+                        lang label code))))))
 
 ;;;; Statistics Cookie
 
