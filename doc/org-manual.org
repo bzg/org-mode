@@ -17314,8 +17314,15 @@ or
 - =<language>= ::
 
   #+cindex: language, in code blocks
-  Mandatory.  It is the identifier of the source code language in the
+  Optional.  It is the identifier of the source code language in the
   block.  See [[*Languages]], for identifiers of supported languages.
+
+  When =<language>= identifier is omitted, the block also cannot
+  have =<switches>= and =<header arguments>=.
+
+  Language identifier is also used to fontify code blocks in Org
+  buffers, when ~org-src-fontify-natively~ is set to non-~nil~.  See
+  [[*Editing Source Code]].
 
 - =<switches>= ::
 
@@ -18952,6 +18959,9 @@ group ~org-edit-structure~.
   header line, then the edit buffer uses that major mode.  Use this
   variable to arbitrarily map language identifiers to major modes.
 
+  When language identifier is omitted in the src block, Org mode's
+  behavior is undefined.
+
 - ~org-src-window-setup~ ::
 
   #+vindex: org-src-window-setup
@@ -18977,10 +18987,13 @@ group ~org-edit-structure~.
 
 #+vindex: org-src-fontify-natively
 #+vindex: org-src-block-faces
-Set ~org-src-fontify-natively~ to non-~nil~ to turn on native code
-fontification in the /Org/ buffer.  Fontification of code blocks can
-give visual separation of text and code on the display page.  To
-further customize the appearance of ~org-block~ for specific
+Fontification of code blocks can give visual separation of text and
+code on the display page.  Set ~org-src-fontify-natively~ to non-~nil~
+to turn on native code fontification in the /Org/ buffer.  The
+fontification follows the major mode used to edit the code block (see
+~org-src-lang-modes~ above).
+
+To further customize the appearance of ~org-block~ for specific
 languages, customize ~org-src-block-faces~.  The following example
 shades the background of regular blocks, and colors source blocks only
 for Python and Emacs Lisp languages.
