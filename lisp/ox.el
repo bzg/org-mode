@@ -3283,15 +3283,24 @@ locally for the subtree through node properties."
 		   (downcase (car key))
 		   (if (org-string-nw-p val) (format " %s" val) ""))))))))
 
-(defun org-export-expand-include-keyword (&optional included dir footnotes)
+(defun org-export-expand-include-keyword (&optional included dir footnotes includer-file)
   "Expand every include keyword in buffer.
+
 Optional argument INCLUDED is a list of included file names along
 with their line restriction, when appropriate.  It is used to
-avoid infinite recursion.  Optional argument DIR is the current
-working directory.  It is used to properly resolve relative
-paths.  Optional argument FOOTNOTES is a hash-table used for
-storing and resolving footnotes.  It is created automatically."
-  (let ((includer-file (buffer-file-name (buffer-base-buffer)))
+avoid infinite recursion.
+
+Optional argument DIR is the current working directory.  It is used to
+properly resolve relative paths.
+
+Optional argument FOOTNOTES is a hash-table used for
+storing and resolving footnotes.  It is created automatically.
+
+Optional argument INCLUDER-FILE is the file path corresponding to the
+buffer contents being included.  It is used when current buffer does
+not have `buffer-file-name' assigned."
+  (let ((includer-file (or includer-file
+                           (buffer-file-name (buffer-base-buffer))))
 	(case-fold-search t)
 	(file-prefix (make-hash-table :test #'equal))
 	(current-prefix 0)
@@ -3422,7 +3431,7 @@ storing and resolving footnotes.  It is created automatically."
 		      (cons (list file lines) included)
                       (unless (org-url-p file)
                         (file-name-directory file))
-                      footnotes)
+                      footnotes includer-file)
 		     (buffer-string)))))
 		;; Expand footnotes after all files have been
 		;; included.  Footnotes are stored at end of buffer.
