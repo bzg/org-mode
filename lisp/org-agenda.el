@@ -54,6 +54,7 @@
 (require 'org)
 (require 'org-macs)
 (require 'org-refile)
+(require 'org-element)
 
 (declare-function diary-add-to-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
@@ -80,11 +81,6 @@
 (declare-function org-columns-quit              "org-colview" ())
 (declare-function diary-date-display-form       "diary-lib"  (&optional type))
 (declare-function org-mobile-write-agenda-for-mobile "org-mobile" (file))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element--cache-active-p "org-element"
-                  (&optional called-from-cache-change-func-p))
-(declare-function org-element-lineage "org-element"
-                  (datum &optional types with-self))
 (declare-function org-habit-insert-consistency-graphs
 		  "org-habit" (&optional line))
 (declare-function org-is-habit-p "org-habit" (&optional pom))
@@ -94,8 +90,6 @@
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-capture "org-capture" (&optional goto keys))
 (declare-function org-clock-modify-effort-estimate "org-clock" (&optional value))
-
-(declare-function org-element-type "org-element" (&optional element))
 
 (defvar calendar-mode-map)
 (defvar org-clock-current-task)
