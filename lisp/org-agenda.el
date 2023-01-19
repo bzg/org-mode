@@ -7110,7 +7110,7 @@ scheduled items with an hour specification like [h]h:mm."
 		(throw :skip t))
               (setq face (if (= d1 d2)
                              'org-agenda-calendar-event
-                           nil))
+                           'org-agenda-calendar-daterange))
 	      (setq marker (org-agenda-new-marker (point))
 		    category (org-get-category))
               (setq effort (save-match-data (or (get-text-property (point) 'effort)

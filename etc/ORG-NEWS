@@ -55,6 +55,11 @@ document header:
 ,#+LATEX_HEADER: \DefineVerbatimEnvironment{lstlisting}{Verbatim}{...whatever...}
 #+END_src
 
+*** New face: ~org-agenda-calendar-daterange~
+The face ~org-agenda-calendar-daterange~ is used to show entries with
+a date range in the agenda.  It inherits from the default face in
+order to remain backward-compatible.
+
 * Version 9.6
 
 ** Important announcements and breaking changes
