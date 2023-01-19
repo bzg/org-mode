@@ -7059,8 +7059,7 @@ scheduled items with an hour specification like [h]h:mm."
 (defun org-agenda-get-blocks ()
   "Return the date-range information for agenda display."
   (with-no-warnings (defvar date))
-  (let* ((props (list 'face nil
-		      'org-not-done-regexp org-not-done-regexp
+  (let* ((props (list 'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
@@ -7069,9 +7068,9 @@ scheduled items with an hour specification like [h]h:mm."
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-tr-regexp)
 	 (d0 (calendar-absolute-from-gregorian date))
-	 marker hdmarker ee txt d1 d2 s1 s2 category
-	 level todo-state tags pos head donep inherited-tags
-         effort effort-minutes)
+         face marker hdmarker ee txt d1 d2 s1 s2 category level
+	 todo-state tags pos head donep inherited-tags effort
+	 effort-minutes)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -7109,6 +7108,9 @@ scheduled items with an hour specification like [h]h:mm."
 	      (setq donep (member todo-state org-done-keywords))
 	      (when (and donep org-agenda-skip-timestamp-if-done)
 		(throw :skip t))
+              (setq face (if (= d1 d2)
+                             'org-agenda-calendar-event
+                           nil))
 	      (setq marker (org-agenda-new-marker (point))
 		    category (org-get-category))
               (setq effort (save-match-data (or (get-text-property (point) 'effort)
@@ -7160,6 +7162,7 @@ scheduled items with an hour specification like [h]h:mm."
 					(concat "<" end-time ">")))))
 			     remove-re))))
 	      (org-add-props txt props
+                'face face
 		'org-marker marker 'org-hd-marker hdmarker
 		'type "block" 'date date
 		'level level
