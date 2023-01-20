@@ -434,7 +434,8 @@ FORMAT and ARGS are passed to `message'."
     (with-temp-file file
       (insert ";;   -*- mode: lisp-data; -*-\n")
       (if pp
-          (pp data (current-buffer))
+          (let ((pp-use-max-width nil)) ; Emacs bug#58687
+            (pp data (current-buffer)))
         (prin1 data (current-buffer))))
     (org-persist--display-time
      (- (float-time) start-time)
