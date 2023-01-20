@@ -8658,12 +8658,12 @@ or to another Org file, automatically push the old position onto the ring."
   "Check if the current file should receive notes in reversed order."
   (cond
    ((not org-reverse-note-order) nil)
-   ((eq t org-reverse-note-order) t)
-   ((not (listp org-reverse-note-order)) nil)
-   (t (catch 'exit
+   ((listp org-reverse-note-order)
+    (catch 'exit
         (dolist (entry org-reverse-note-order)
           (when (string-match (car entry) buffer-file-name)
-	    (throw 'exit (cdr entry))))))))
+	    (throw 'exit (cdr entry))))))
+   (t org-reverse-note-order)))
 
 (defvar org-agenda-new-buffers nil
   "Buffers created to visit agenda files.")
