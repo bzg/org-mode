@@ -8617,6 +8617,19 @@ CLOSED: %s
 	  (org-test-with-temp-text "*** <point>"
 	    (org-paste-subtree nil "* Text")
 	    (buffer-string))))
+  ;; Remove the indicator line completely.
+  (should
+   (equal "* Top
+text
+more text
+*** Text
+"
+	  (org-test-with-temp-text "* Top
+text
+*** <point>
+more text"
+	    (org-paste-subtree nil "* Text")
+	    (buffer-string))))
   ;; Optional argument LEVEL forces a level for the subtree.
   (should
    (equal "* H\n*** Text\n"
