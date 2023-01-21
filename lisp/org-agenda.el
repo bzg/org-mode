@@ -7147,19 +7147,13 @@ scheduled items with an hour specification like [h]h:mm."
                                'effort effort
                                'effort-minutes effort-minutes)
                              level category tags
-			     (save-match-data
-			       (let ((hhmm1 (and (string-match org-ts-regexp1 s1)
-						 (match-string 6 s1)))
-				     (hhmm2 (and (string-match org-ts-regexp1 s2)
-						 (match-string 6 s2))))
-				 (cond ((string= hhmm1 hhmm2)
-					(concat "<" start-time ">--<" end-time ">"))
-				       ((and (= d1 d0) (= d2 d0))
-					(concat "<" start-time ">--<" end-time ">"))
-                                       ((= d1 d0)
-					(concat "<" start-time ">"))
-				       ((= d2 d0)
-					(concat "<" end-time ">")))))
+			     (cond
+                              ((and (= d1 d0) (= d2 d0))
+			       (concat "<" start-time ">--<" end-time ">"))
+                              ((= d1 d0)
+			       (concat "<" start-time ">"))
+			      ((= d2 d0)
+			       (concat "<" end-time ">")))
 			     remove-re))))
 	      (org-add-props txt props
                 'face face
