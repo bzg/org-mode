@@ -12180,16 +12180,15 @@ example, to include your =.emacs= file, you could use:
 : #+INCLUDE: "~/.emacs" src emacs-lisp
 
 #+texinfo: @noindent
-The first parameter is the file name to include.  The optional second
-parameter specifies the block type: =example=, =export= or =src=.  The
-optional third parameter specifies the source code language to use for
-formatting the contents.  This is relevant to both =export= and =src=
-block types.
-
-If an included file is specified as having a markup language, Org
-neither checks for valid syntax nor changes the contents in any way.
-For example and source blocks, Org code-escapes the contents before
-inclusion.
+There are three positional arguments after the include keyword, they are:
+1. The file name, this is the sole mandatory argument.  Org neither
+   checks for correctness or validates the content in any way.
+2. The block name to wrap the file content in.  When this is
+   =example=, =export=, or =src= the content is escaped by
+   ~org-escape-code-in-string~.  Arbitrary block names may be given,
+   however block names starting with =:= must be quoted, i.e. =":name"=.
+3. The source code language to use for formatting the contents.  This is relevant
+   to both =export= and =src= block types.
 
 #+cindex: @samp{minlevel}, include
 If an included file is not specified as having any markup language,
