@@ -3353,7 +3353,21 @@ not have `buffer-file-name' assigned."
                              footnotes))))))))))))
 
 (defun org-export-parse-include-value (value &optional dir)
-  "Extract the various parameters from #+include: VALUE."
+  "Extract the various parameters from #+include: VALUE.
+
+More specifically, this extracts the following parameters to a
+plist: :file, :coding-system, :location, :only-contents, :lines,
+:env, :minlevel, :args, and :block.
+
+The :file parameter is expanded relative to DIR.
+
+The :file, :block, and :args parameters are extracted
+positionally, while the remaining parameters are extracted as
+plist-style keywords.
+
+Any remaining unmatched content is passed through
+`org-babel-parse-header-arguments' (without evaluation) and
+provided as the :unmatched parameter."
   (let* ((ind (org-current-text-indentation))
          location
          (coding-system
