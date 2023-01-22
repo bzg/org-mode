@@ -152,6 +152,18 @@
 
 (ert-deftest test-org-capture/abort ()
   "Test aborting a capture process."
+  ;; Newly create capture buffer should not be saved.
+  (let ((capture-file (make-temp-name
+                       (org-file-name-concat
+                        temporary-file-directory
+                        "org-test"))))
+    (unwind-protect
+        (let ((org-capture-templates `(("t" "Todo" entry (file ,capture-file) nil :no-save t))))
+          (org-capture nil "t")
+          (org-capture-kill)
+          (should-not (file-exists-p capture-file)))
+      (when (file-exists-p capture-file)
+        (delete-file capture-file))))
   ;; Test that capture can be aborted after inserting at end of
   ;; capture buffer.
   (should

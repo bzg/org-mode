@@ -889,10 +889,16 @@ captured item after finalizing."
 		(goto-char (+ size pos))
 	      (goto-char (if (< ipt pos) (+ size pos) pos))))))
 
-      ;; Kill the target buffer if that is desired
-      (when (and base-buffer new-buffer kill-buffer)
-	(with-current-buffer base-buffer (save-buffer))
-	(kill-buffer base-buffer))
+      (if (and base-buffer org-note-abort new-buffer)
+          ;; Unconditionally kill the new buffer when capture is
+          ;; aborted.
+          (with-current-buffer base-buffer
+            (set-buffer-modified-p nil)
+            (kill-buffer))
+        ;; Kill the target buffer if that is desired
+        (when (and base-buffer new-buffer kill-buffer)
+	  (with-current-buffer base-buffer (save-buffer))
+	  (kill-buffer base-buffer)))
 
       ;; Restore the window configuration before capture
       (set-window-configuration return-wconf))
