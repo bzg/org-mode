@@ -17133,13 +17133,13 @@ The "biblatex" and "csl" export processors support bibliography
 options through a property list attached to the =PRINT_BIBLIOGRAPHY=
 keyword.  For example,
 
-: #print_bibliography: :keyword algebra :type book
+: #+print_bibliography: :keyword algebra :type book
 
 Values including spaces must be surrounded with double quotes.  If you
 need to use a key multiple times, you can separate its values with
 commas, but without any space in-between:
 
-: #print_bibliography: :keyword "algebraic logic" :nottype article,book
+: #+print_bibliography: :keyword "algebraic logic" :nottype article,book
 
 The "biblatex" export processor accepts all options supported by
 BibLaTeX's ~\printbibliography~ command, while the "csl" processor
