@@ -3404,9 +3404,15 @@ not have `buffer-file-name' assigned."
                      (setq value (replace-match "" nil nil value)))
                  (get-text-property (point)
                                     :org-include-induced-level))))
-         (args (and (eq env 'literal) (match-string 1 value)))
-         (block (and (string-match "\\<\\(\\S-+\\)\\>" value)
-                     (match-string 1 value))))
+         (args (and (eq env 'literal)
+                    (prog1 (match-string 1 value)
+                      (setq value (replace-match "" nil nil value 1)))))
+         (block (and (or (string-match "\"\\(\\S-+\\)\"" value)
+                         (string-match "\\<\\(\\S-+\\)\\>" value))
+                     (or (= (match-beginning 0) 0)
+                         (not (= ?: (aref value (1- (match-beginning 0))))))
+                     (prog1 (match-string 1 value)
+                       (setq value (replace-match "" nil nil value))))))
     (list :file file
           :coding-system coding-system
           :location location
@@ -3415,7 +3421,8 @@ not have `buffer-file-name' assigned."
           :env env
           :minlevel minlevel
           :args args
-          :block block)))
+          :block block
+          :unmatched (org-babel-parse-header-arguments value t))))
 
 (cl-defun org-export--blindly-expand-include (parameters &key includer-file file-prefix footnotes already-included)
   "Unconditionally include reference defined by PARAMETERS in the buffer.
