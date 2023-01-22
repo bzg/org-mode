@@ -13714,7 +13714,11 @@ user."
 	 (calendar-view-holidays-initially-flag nil)
 	 ans (org-ans0 "") org-ans1 org-ans2 final cal-frame)
     ;; Rationalize `org-def' and `org-defdecode', if required.
-    (when (< (nth 2 org-defdecode) org-extend-today-until)
+    ;; Only consider `org-extend-today-until' when explicit reference
+    ;; time is not given.
+    (when (and (not default-time)
+               (not org-overriding-default-time)
+               (< (nth 2 org-defdecode) org-extend-today-until))
       (setf (nth 2 org-defdecode) -1)
       (setf (nth 1 org-defdecode) 59)
       (setq org-def (org-encode-time org-defdecode))
