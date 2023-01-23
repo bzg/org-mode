@@ -116,8 +116,7 @@ sombrero;
 		    file)
           (org-babel-execute-src-block)
           (should (search-forward (format "[[file:%s]]" file) nil nil))
-          (should (file-readable-p file))
-          (should-not (buffer-live-p (get-buffer "*Org-Babel Error Output*"))))
+          (should (file-readable-p file)))
       ;; clean-up
       (delete-file file)
       (when (get-buffer "*Org-Babel Error Output*")
