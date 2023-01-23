@@ -3323,34 +3323,35 @@ not have `buffer-file-name' assigned."
             (beginning-of-line)
             ;; Extract arguments from keyword's value.
             (let* ((value (org-element-property :value element))
-                   (parameters (org-export-parse-include-value value dir)))
+                   (parameters (org-export-parse-include-value value dir))
+                   (file (plist-get parameters :file)))
               ;; Remove keyword.
               (delete-region (point) (line-beginning-position 2))
-              (pcase (plist-get parameters :file)
-                ((pred not) nil)
-                ((and (pred (not org-url-p)) (pred (not file-readable-p)) f)
-                 (error "Cannot include file %s" f))
-                ;; Check if files has already been parsed.  Look after
-                ;; inclusion lines too, as different parts of the same
-                ;; file can be included too.
-                ((and f (guard (member (list f (plist-get parameters :lines))
-                                       included)))
-                 (error "Recursive file inclusion: %s" f))
-                (_
-                 (org-export--blindly-expand-include
-                  parameters
-                  :includer-file includer-file
-                  :file-prefix file-prefix
-                  :footnotes footnotes
-                  :already-included included)
-                 ;; Expand footnotes after all files have been
-                 ;; included.  Footnotes are stored at end of buffer.
-                 (unless included
-                   (org-with-wide-buffer
-                    (goto-char (point-max))
-                    (maphash (lambda (k v)
-                               (insert (format "\n[fn:%s] %s\n" k v)))
-                             footnotes))))))))))))
+              (cond
+               ((not file)) ; Do nothing.
+               ((and (not (org-url-p file))
+                     (not (file-readable-p file)))
+                (error "Cannot include file %s" file))
+               ;; Check if files has already been parsed.  Look after
+               ;; inclusion lines too, as different parts of the same
+               ;; file can be included too.
+               ((member (list file (plist-get parameters :lines)) included)
+                (error "Recursive file inclusion: %s" f))
+               (t
+                (org-export--blindly-expand-include
+                 parameters
+                 :includer-file includer-file
+                 :file-prefix file-prefix
+                 :footnotes footnotes
+                 :already-included included)
+                ;; Expand footnotes after all files have been
+                ;; included.  Footnotes are stored at end of buffer.
+                (unless included
+                  (org-with-wide-buffer
+                   (goto-char (point-max))
+                   (maphash (lambda (k v)
+                              (insert (format "\n[fn:%s] %s\n" k v)))
+                            footnotes))))))))))))
 
 (defun org-export-parse-include-value (value &optional dir)
   "Extract the various parameters from #+include: VALUE.
