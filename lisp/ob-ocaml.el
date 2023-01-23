@@ -109,7 +109,7 @@
 (defvar tuareg-interactive-buffer-name)
 (defun org-babel-prep-session:ocaml (session _params)
   "Prepare SESSION according to the header arguments in PARAMS."
-  (require 'tuareg)
+  (org-require-package 'tuareg)
   (let ((tuareg-interactive-buffer-name (if (and (not (string= session "none"))
                                                  (not (string= session "default"))
                                                  (stringp session))

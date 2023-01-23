@@ -90,9 +90,9 @@ current directory string."
   "Execute a block of Common Lisp code with Babel.
 BODY is the contents of the block, as a string.  PARAMS is
 a property list containing the parameters of the block."
-  (require (pcase org-babel-lisp-eval-fn
-	     (`slime-eval 'slime)
-	     (`sly-eval 'sly)))
+  (pcase org-babel-lisp-eval-fn
+    (`slime-eval (org-require-package 'slime "SLIME"))
+    (`sly-eval (org-require-package 'sly "SLY")))
   (org-babel-reassemble-table
    (let ((result
           (funcall (if (member "output" (cdr (assq :result-params params)))

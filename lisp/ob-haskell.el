@@ -122,7 +122,7 @@ a parameter, such as \"ghc -v\"."
 	  (cdr (assq :rowname-names params)) (cdr (assq :rownames params))))))))
 
 (defun org-babel-interpret-haskell (body params)
-  (require 'inf-haskell)
+  (org-require-package 'inf-haskell "haskell-mode")
   (add-hook 'inferior-haskell-hook
             (lambda ()
               (setq-local comint-prompt-regexp
@@ -167,7 +167,7 @@ a parameter, such as \"ghc -v\"."
   "Initiate a haskell session.
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
-  (require 'inf-haskell)
+  (org-require-package 'inf-haskell "haskell-mode")
   (or (get-buffer "*haskell*")
       (save-window-excursion (run-haskell) (sleep-for 0.25) (current-buffer))))
 

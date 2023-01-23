@@ -198,7 +198,7 @@ code."
 (defun org-babel-execute:gnuplot (body params)
   "Execute a block of Gnuplot code.
 This function is called by `org-babel-execute-src-block'."
-  (require 'gnuplot)
+  (org-require-package 'gnuplot)
   (let ((session (cdr (assq :session params)))
         (result-type (cdr (assq :results params)))
         (body (org-babel-expand-body:gnuplot body params))
@@ -262,7 +262,7 @@ This function is called by `org-babel-execute-src-block'."
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session.  The current
 `gnuplot-mode' doesn't provide support for multiple sessions."
-  (require 'gnuplot)
+  (org-require-package 'gnuplot)
   (unless (string= session "none")
     (save-window-excursion
       (gnuplot-send-string-to-gnuplot "" "line")

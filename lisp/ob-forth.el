@@ -55,7 +55,7 @@ This function is called by `org-babel-execute-src-block'."
 	(car (last all-results))))))
 
 (defun org-babel-forth-session-execute (body params)
-  (require 'forth-mode)
+  (org-require-package 'forth-mode)
   (let ((proc (forth-proc))
 	(rx " \\(\n:\\|compiled\n\\|ok\n\\)")
 	(result-start))

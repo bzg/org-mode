@@ -96,7 +96,7 @@ This function is called by `org-babel-execute-src-block'."
 		  ;; Indium Node REPL.  Separate case because Indium
 		  ;; REPL is not inherited from Comint mode.
 		  ((string= session "*JS REPL*")
-		   (require 'indium-repl)
+                   (org-require-package 'indium-repl "indium")
 		   (unless (get-buffer session)
 		     (indium-run-node org-babel-js-cmd))
 		   (indium-eval full-body))
@@ -168,7 +168,7 @@ Return the initialized session."
    ((string= session "none")
     (warn "Session evaluation of ob-js is not supported"))
    ((string= "*skewer-repl*" session)
-    (require 'skewer-repl)
+    (org-require-package 'skewer-repl "skewer-mode")
     (let ((session-buffer (get-buffer "*skewer-repl*")))
       (if (and session-buffer
 	       (org-babel-comint-buffer-livep (get-buffer session-buffer))
@@ -180,7 +180,7 @@ Return the initialized session."
 	(skewer-repl)
 	session-buffer)))
    ((string= "*Javascript REPL*" session)
-    (require 'js-comint)
+    (org-require-package 'js-comint)
     (let ((session-buffer "*Javascript REPL*"))
       (if (and (org-babel-comint-buffer-livep (get-buffer session-buffer))
 	       (comint-check-proc session-buffer))
@@ -189,7 +189,9 @@ Return the initialized session."
 	(sit-for .5)
 	session-buffer)))
    ((string= "mozrepl" org-babel-js-cmd)
-    (require 'moz)
+    ;; FIXME: According to https://github.com/bard/mozrepl, this REPL
+    ;; is outdated and does not work for Firefox >54.
+    (org-require-package 'moz "mozrepl")
     (let ((session-buffer (save-window-excursion
 			    (run-mozilla nil)
 			    (rename-buffer session)

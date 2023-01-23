@@ -107,6 +107,15 @@ Version mismatch is commonly encountered in the following situations:
 
 ;;; Macros
 
+(defmacro org-require-package (symbol &optional name noerror)
+  "Try to load library SYMBOL and display error otherwise.
+With optional parameter NAME, use NAME as package name instead of
+SYMBOL.  Show warning instead of error when NOERROR is non-nil."
+  `(unless (require ,symbol nil t)
+     (,(if noerror 'warn 'user-error)
+      "`%s' failed to load required package \"%s\""
+      this-command ,(or name symbol))))
+
 (defmacro org-with-gensyms (symbols &rest body)
   (declare (debug (sexp body)) (indent 1))
   `(let ,(mapcar (lambda (s)

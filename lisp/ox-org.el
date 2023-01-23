@@ -320,8 +320,7 @@ publishing directory.
 Return output file name."
   (org-publish-org-to 'org filename ".org" plist pub-dir)
   (when (plist-get plist :htmlized-source)
-    (or (require 'htmlize nil t)
-	(error "Please install htmlize from https://github.com/hniksic/emacs-htmlize"))
+    (org-require-package 'htmlize)
     (require 'ox-html)
     (let* ((org-inhibit-startup t)
 	   (htmlize-output-type 'css)

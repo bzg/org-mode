@@ -417,6 +417,7 @@ Label is in match group 1.")
 
 
 ;;; Internal functions
+;; FIXME: We use `org-require-package' in other places.
 (defun org-cite-csl--barf-without-citeproc ()
   "Raise an error if Citeproc library is not loaded."
   (unless (featurep 'citeproc)

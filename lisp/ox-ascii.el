@@ -1856,7 +1856,7 @@ contextual information."
       (cond ((eq (org-element-property :type table) 'org) contents)
 	    ((and (plist-get info :ascii-table-use-ascii-art)
 		  (eq (plist-get info :ascii-charset) 'utf-8)
-		  (require 'ascii-art-to-unicode nil t))
+		  (org-require-package 'ascii-art-to-unicode nil 'noerror))
 	     (with-temp-buffer
 	       (insert (org-remove-indentation
 			(org-element-property :value table)))

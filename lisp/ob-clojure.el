@@ -186,8 +186,7 @@ or set the `:backend' header argument"))))
 (defvar inf-clojure-comint-prompt-regexp)
 (defun ob-clojure-eval-with-inf-clojure (expanded params)
   "Evaluate EXPANDED code block with PARAMS using inf-clojure."
-  (condition-case nil (require 'inf-clojure)
-    (user-error "inf-clojure not available"))
+  (org-require-package 'inf-clojure)
   ;; Maybe initiate the inf-clojure session
   (unless (and inf-clojure-buffer
 	       (buffer-live-p (get-buffer inf-clojure-buffer)))
@@ -228,8 +227,7 @@ or set the `:backend' header argument"))))
 
 (defun ob-clojure-eval-with-cider (expanded params)
   "Evaluate EXPANDED code block with PARAMS using cider."
-  (condition-case nil (require 'cider)
-    (user-error "cider not available"))
+  (org-require-package 'cider "Cider")
   (let ((connection (cider-current-connection (cdr (assq :target params))))
 	(result-params (cdr (assq :result-params params)))
 	result0)
@@ -256,8 +254,7 @@ or set the `:backend' header argument"))))
 
 (defun ob-clojure-eval-with-slime (expanded params)
   "Evaluate EXPANDED code block with PARAMS using slime."
-  (condition-case nil (require 'slime)
-    (user-error "slime not available"))
+  (org-require-package 'slime "SLIME")
   (with-temp-buffer
     (insert expanded)
     (slime-eval

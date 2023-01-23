@@ -3635,8 +3635,7 @@ the agenda to write."
 		(kill-buffer (current-buffer))
 		(message "Org file written to %s" file)))
 	     ((member extension '("html" "htm"))
-	      (or (require 'htmlize nil t)
-		  (error "Please install htmlize from https://github.com/hniksic/emacs-htmlize"))
+              (org-require-package 'htmlize)
 	      (declare-function htmlize-buffer "htmlize" (&optional buffer))
 	      (set-buffer (htmlize-buffer (current-buffer)))
 	      (when org-agenda-export-html-style

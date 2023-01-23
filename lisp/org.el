@@ -15449,7 +15449,7 @@ in Org mode.
 \\{org-cdlatex-mode-map}"
   :lighter " OCDL"
   (when org-cdlatex-mode
-    (require 'cdlatex)
+    (org-require-package 'cdlatex)
     (run-hooks 'cdlatex-mode-hook)
     (cdlatex-compute-tables))
   (unless org-cdlatex-texmathp-advice-is-done

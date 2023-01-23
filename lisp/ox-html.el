@@ -1823,8 +1823,7 @@ If you then set `org-html-htmlize-output-type' to `css', calls
 to the function `org-html-htmlize-region-for-paste' will
 produce code that uses these same face definitions."
   (interactive)
-  (unless (require 'htmlize nil t)
-    (error "htmlize library missing.  Aborting"))
+  (org-require-package 'htmlize)
   (and (get-buffer "*html*") (kill-buffer "*html*"))
   (with-temp-buffer
     (let ((fl (face-list))

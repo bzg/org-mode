@@ -641,7 +641,7 @@ manner suitable for prepending to a user-specified script."
 If not given options will be taken from the +PLOT
 line directly before or after the table."
   (interactive)
-  (require 'gnuplot)
+  (org-require-package 'gnuplot)
   (save-window-excursion
     (delete-other-windows)
     (when (get-buffer "*gnuplot*") ; reset *gnuplot* if it already running

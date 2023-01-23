@@ -86,7 +86,7 @@ This function is called by `org-babel-execute-src-block'."
 		     body params (org-babel-variable-assignments:ruby params)))
          (result (if (member "xmp" result-params)
 		     (with-temp-buffer
-		       (require 'rcodetools)
+		       (org-require-package 'rcodetools "rcodetools (gem package)")
 		       (insert full-body)
 		       (xmp (cdr (assq :xmp-option params)))
 		       (buffer-string))
@@ -161,7 +161,7 @@ Emacs-lisp table, otherwise return the results as a string."
 If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
   (unless (string= session "none")
-    (require 'inf-ruby)
+    (org-require-package 'inf-ruby)
     (let* ((command (cdr (or (assq :ruby params)
 			     (assoc inf-ruby-default-implementation
 				    inf-ruby-implementations))))

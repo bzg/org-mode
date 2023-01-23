@@ -276,7 +276,7 @@ This function is called by `org-babel-execute-src-block'."
 	  (when (get-buffer session)
 	    ;; Session buffer exists, but with dead process
 	    (set-buffer session))
-	  (require 'ess) (R)
+          (org-require-package 'ess "ESS") (R)
 	  (let ((R-proc (get-process (or ess-local-process-name
 					 ess-current-process-name))))
 	    (while (process-get R-proc 'callbacks)

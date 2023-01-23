@@ -196,7 +196,8 @@ end"
 	  (when (get-buffer session)
 	    ;; Session buffer exists, but with dead process
 	    (set-buffer session))
-          (require 'ess) (set-buffer (julia))
+          (org-require-package 'ess "ESS")
+          (set-buffer (julia))
 	  (rename-buffer
 	   (if (bufferp session)
 	       (buffer-name session)
