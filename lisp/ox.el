@@ -3369,8 +3369,7 @@ plist-style keywords.
 Any remaining unmatched content is passed through
 `org-babel-parse-header-arguments' (without evaluation) and
 provided as the :unmatched parameter."
-  (let* ((ind (org-current-text-indentation))
-         location
+  (let* (location
          (coding-system
           (and (string-match ":coding +\\(\\S-+\\)>" value)
                (prog1 (intern (match-string 1 value))
