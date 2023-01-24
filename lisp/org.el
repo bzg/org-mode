@@ -8800,7 +8800,9 @@ the correct writing function."
     (let* ((win (selected-window))
 	   (pos (point))
 	   (line (org-current-line))
-	   (params (org-prepare-dblock))
+	   (params
+            ;; Called for side effect.
+            (org-prepare-dblock))
 	   (name (plist-get params :name))
 	   (indent (plist-get params :indentation-column))
 	   (cmd (intern (concat "org-dblock-write:" name))))
