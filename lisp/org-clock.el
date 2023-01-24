@@ -439,7 +439,9 @@ This uses the same format as `frame-title-format', which see."
   :group 'org-clock
   :type 'sexp)
 
-(defcustom org-clock-x11idle-program-name "x11idle"
+(defcustom org-clock-x11idle-program-name
+  (if (executable-find "xprintidle")
+      "xprintidle" "x11idle")
   "Name of the program which prints X11 idle time in milliseconds.
 
 you can do \"~$ sudo apt-get install xprintidle\" if you are using
@@ -448,8 +450,7 @@ a Debian-based distribution.
 Alternatively, can find x11idle.c in
 https://orgmode.org/worg/code/scripts/x11idle.c"
   :group 'org-clock
-  :version "24.4"
-  :package-version '(Org . "8.0")
+  :package-version '(Org . "9.7")
   :type 'string)
 
 (defcustom org-clock-goto-before-context 2

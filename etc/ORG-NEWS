@@ -12,7 +12,16 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
-** New options
+** New and changed options
+*** ~org-clock-x11idle-program-name~ now defaults to =xprintidle=, when available
+
+When =xprintidle= executable is available at =org-clock= load time, it
+is used as the default value for ~org-clock-x11idle-program-name~.
+The old =x11idle= default is used as the fallback.
+
+=xprintidle= is available as system package in most Linux
+distributions, unlike ancient =x11idle= that is distributed via WORG.
+
 *** New options for the "csl" citation export processor's LaTeX output
 
 The ~org-cite-csl-latex-label-separator~ and
