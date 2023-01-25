@@ -77,6 +77,15 @@ If \"natbib\" package is already required in the document, e.g., through
     (const :tag "redefine \\thebibliography to issue \\section* instead of \\chapter*" sectionbib)
     (const :tag "keep all the authors' names in a citation on one line" nonamebreak)))
 
+(defcustom org-cite-natbib-bibliography-style 'unsrtnat
+  "Default bibliography style."
+  :group 'org-cite
+  :package-version '(Org . "9.7")
+  :type
+  '(choice
+    (const unsrtnat)
+    (symbol :tag "Other")))
+
 
 ;;; Internal functions
 (defun org-cite-natbib--style-to-command (style)
@@ -143,11 +152,13 @@ CITATION is the citation object.  INFO is the export state, as a property list."
   "Print references from bibliography FILES.
 FILES is a list of absolute file names.  STYLE is the bibliography style, as
 a string or nil."
-  (concat (and style (format "\\bibliographystyle{%s}\n" style))
-          (format "\\bibliography{%s}"
-                  (mapconcat #'file-name-sans-extension
-                             files
-                             ","))))
+  (concat
+   (format "\\bibliographystyle{%s}\n"
+           (or style org-cite-natbib-bibliography-style))
+   (format "\\bibliography{%s}"
+           (mapconcat #'file-name-sans-extension
+                      files
+                      ","))))
 
 (defun org-cite-natbib-export-citation (citation style _ info)
   "Export CITATION object.

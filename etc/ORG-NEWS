@@ -24,6 +24,16 @@ consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]
 has been ported to.
 
 ** New and changed options
+*** New ~org-cite-natbib-export-bibliography~ option defining fallback bibliography style
+
+~natbib~ citation export processor now uses
+~org-cite-natbib-export-bibliography~ (defaults to ~unsrtnat~) as a
+fallback bibliography style if none is specified by user in
+=#+cite_export:= keyword.
+
+Previously, export would fail without explicitly selected bibliography
+style.
+
 *** New escape in ~org-beamer-environments-extra~ for labels in Beamer export
 The escape =%l= in ~org-beamer-environments-extra~ inserts the label
 obtained from ~org-beamer--get-label~.  This is added to the default
