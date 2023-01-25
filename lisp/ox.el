@@ -3336,7 +3336,7 @@ not have `buffer-file-name' assigned."
                ;; inclusion lines too, as different parts of the same
                ;; file can be included too.
                ((member (list file (plist-get parameters :lines)) included)
-                (error "Recursive file inclusion: %s" f))
+                (error "Recursive file inclusion: %s" file))
                (t
                 (org-export--blindly-expand-include
                  parameters
