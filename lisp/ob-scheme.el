@@ -67,6 +67,7 @@
 (declare-function geiser-eval--retort-result-str "ext:geiser-eval" (ret prefix))
 (declare-function geiser-eval--retort-error "ext:geiser-eval" (ret))
 (declare-function geiser-eval--retort-error-msg "ext:geiser-eval" (err))
+(declare-function geiser-eval--error-msg "ext:geiser-eval" (err))
 
 (defcustom org-babel-scheme-null-to 'hline
   "Replace `null' and empty lists in scheme tables with this before returning."
