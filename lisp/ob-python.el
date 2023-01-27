@@ -36,10 +36,6 @@
 (require 'org-macs)
 (require 'python)
 
-(declare-function py-shell "ext:python-mode" (&rest args))
-(declare-function py-choose-shell "ext:python-mode" (&optional shell))
-(declare-function py-shell-send-string "ext:python-mode" (strg &optional process))
-
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("python" . "py"))
 
@@ -51,16 +47,6 @@
   :package-version '(Org . "8.0")
   :group 'org-babel
   :type 'string)
-
-;; FIXME: Remove third-party `python-mode' package support in the next release.
-(defcustom org-babel-python-mode
-  (if (featurep 'python-mode) 'python-mode 'python)
-  "Preferred python mode for use in running python interactively.
-This will typically be either `python' or `python-mode'."
-  :group 'org-babel
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type 'symbol)
 
 (defcustom org-babel-python-hline-to "None"
   "Replace hlines in incoming tables with this when translating to python."
@@ -183,7 +169,6 @@ Emacs-lisp table, otherwise return the results as a string."
 	(substring name 1 (- (length name) 1))
       name)))
 
-(defvar py-which-bufname)
 (defvar python-shell-buffer-name)
 (defvar-local org-babel-python--initialized nil
   "Flag used to mark that python session has been initialized.")
@@ -197,47 +182,25 @@ then create.  Return the initialized session."
 	   (cmd (if (member system-type '(cygwin windows-nt ms-dos))
 		    (concat org-babel-python-command " -i")
 		  org-babel-python-command)))
-      (cond
-       ((eq 'python org-babel-python-mode) ; python.el
-	(unless py-buffer
-	  (setq py-buffer (org-babel-python-with-earmuffs session)))
-	(let ((python-shell-buffer-name
-	       (org-babel-python-without-earmuffs py-buffer)))
-	  (run-python cmd)
-          (with-current-buffer py-buffer
-            (add-hook
-             'python-shell-first-prompt-hook
-             (lambda ()
-               (setq-local org-babel-python--initialized t)
-               (message "I am running!!!"))
-             nil 'local))))
-       ((and (eq 'python-mode org-babel-python-mode)
-	     (fboundp 'py-shell)) ; python-mode.el
-	(require 'python-mode)
-	;; Make sure that py-which-bufname is initialized, as otherwise
-	;; it will be overwritten the first time a Python buffer is
-	;; created.
-	(py-choose-shell)
-	;; `py-shell' creates a buffer whose name is the value of
-	;; `py-which-bufname' with '*'s at the beginning and end
-	(let* ((bufname (if (and py-buffer (buffer-live-p py-buffer))
-			    (replace-regexp-in-string ;; zap surrounding *
-			     "^\\*\\([^*]+\\)\\*$" "\\1" py-buffer)
-			  (concat "Python-" (symbol-name session))))
-	       (py-which-bufname bufname))
-	  (setq py-buffer (org-babel-python-with-earmuffs bufname))
-	  (py-shell nil nil t org-babel-python-command py-buffer nil nil t nil)))
-       (t
-	(error "No function available for running an inferior Python")))
+      (unless py-buffer
+	(setq py-buffer (org-babel-python-with-earmuffs session)))
+      (let ((python-shell-buffer-name
+	     (org-babel-python-without-earmuffs py-buffer)))
+	(run-python cmd)
+        (with-current-buffer py-buffer
+          (add-hook
+           'python-shell-first-prompt-hook
+           (lambda ()
+             (setq-local org-babel-python--initialized t)
+             (message "I am running!!!"))
+           nil 'local)))
       ;; Wait until Python initializes.
-      (if (eq 'python org-babel-python-mode) ; python.el
-          ;; This is more reliable compared to
-          ;; `org-babel-comint-wait-for-output' as python may emit
-          ;; multiple prompts during initialization.
-          (with-current-buffer py-buffer
-            (while (not org-babel-python--initialized)
-              (org-babel-comint-wait-for-output py-buffer)))
-        (org-babel-comint-wait-for-output py-buffer))
+      ;; This is more reliable compared to
+      ;; `org-babel-comint-wait-for-output' as python may emit
+      ;; multiple prompts during initialization.
+      (with-current-buffer py-buffer
+        (while (not org-babel-python--initialized)
+          (org-babel-comint-wait-for-output py-buffer)))
       (setq org-babel-python-buffers
 	    (cons (cons session py-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
@@ -352,7 +315,7 @@ last statement in BODY, as elisp."
       raw
       (org-babel-python-table-or-string (org-trim raw)))))
 
-(defun org-babel-python--send-string (session body)
+(defun org-babel-python-send-string (session body)
   "Pass BODY to the Python process in SESSION.
 Return output."
   (with-current-buffer session
@@ -370,12 +333,9 @@ finally:
     print('%s')"
 			 (org-babel-python--shift-right body 4)
 			 org-babel-python-eoe-indicator)))
-      (if (not (eq 'python-mode org-babel-python-mode))
-	  (let ((python-shell-buffer-name
-		 (org-babel-python-without-earmuffs session)))
-	    (python-shell-send-string body))
-	(require 'python-mode)
-	(py-shell-send-string body (get-buffer-process session)))
+      (let ((python-shell-buffer-name
+	     (org-babel-python-without-earmuffs session)))
+	(python-shell-send-string body))
       ;; same as `python-shell-comint-end-of-output-p' in emacs-25.1+
       (while (not (string-match
 		   org-babel-python-eoe-indicator
@@ -398,12 +358,12 @@ last statement in BODY, as elisp."
 	       (let ((body (format org-babel-python--exec-tmpfile
 				   (org-babel-process-file-name
 				    tmp-src-file 'noquote))))
-		 (org-babel-python--send-string session body)))
+		 (org-babel-python-send-string session body)))
               (`value
                (let* ((tmp-results-file (org-babel-temp-file "python-"))
 		      (body (org-babel-python-format-session-value
 			     tmp-src-file tmp-results-file result-params)))
-		 (org-babel-python--send-string session body)
+		 (org-babel-python-send-string session body)
 		 (sleep-for 0 10)
 		 (org-babel-eval-read-file tmp-results-file)))))))
     (org-babel-result-cond result-params

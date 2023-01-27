@@ -1117,6 +1117,14 @@ context.  See the individual commands for more information."
 (make-obsolete-variable 'org-latex-polyglossia-language-alist
                         "set `org-latex-language-alist' instead." "9.6")
 
+(defconst org-babel-python-mode 'python
+  "Python mode for use in running python interactively.")
+
+(make-obsolete-variable
+ 'org-babel-python-mode
+ "Only the built-in Python mode is supported in ob-python now."
+ "9.7")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol

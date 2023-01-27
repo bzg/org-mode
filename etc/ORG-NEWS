@@ -12,6 +12,17 @@ See the end of the file for license conditions.
 Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
+** Important announcements and breaking changes
+*** =python-mode.el (MELPA)= support in =ob-python.el= is removed
+
+=python-mode.el= support has been removed from =ob-python.el=.  The
+related customization =org-babel-python-mode= has been changed to a
+constant.
+
+If you still want to use python-mode with ob-python, you might
+consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]], where the code to support python-mode
+has been ported to.
+
 ** New and changed options
 *** ~org-clock-x11idle-program-name~ now defaults to =xprintidle=, when available
 
