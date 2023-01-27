@@ -8616,6 +8616,7 @@ or to another Org file, automatically push the old position onto the ring."
 (defvar org-agenda-buffer-name)
 (defun org-follow-timestamp-link ()
   "Open an agenda view for the time-stamp date/range at point."
+  (require 'org-agenda)
   ;; Avoid changing the global value.
   (let ((org-agenda-buffer-name org-agenda-buffer-name))
     (cond
