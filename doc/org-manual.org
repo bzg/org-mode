@@ -17013,6 +17013,9 @@ more "bibliography" keywords.
 #+bibliography: "/some/file/with spaces/in its name.bib"
 #+end_example
 
+Org mode uses all the local and global bibliographies combined to
+search for citation keys.
+
 #+kindex: C-c C-x @@
 #+findex: org-cite-insert
 One can then insert and edit citations using ~org-cite-insert~, called
