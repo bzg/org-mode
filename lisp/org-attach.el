@@ -343,7 +343,8 @@ Shows a list of commands and prompts for another key to execute a command."
 			            "Invalid `org-attach-commands' item: %S"
 			            entry))))
 		              org-attach-commands
-		              "\n")))))
+		              "\n"))))
+            (goto-char (point-min)))
 	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
 	  (let ((msg (format "Select command: [%s]"
 			     (concat (mapcar #'caar org-attach-commands)))))
