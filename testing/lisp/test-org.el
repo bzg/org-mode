@@ -2740,7 +2740,27 @@ SCHEDULED: <2014-03-04 tue.>"
                    (setq org-map-continue-from
                          (org-element-property
                           :begin (org-element-at-point))))))
-              (buffer-string)))))
+              (buffer-string))))
+  (should
+   (= 1
+      (org-test-with-temp-text "* H1\n** H1.1\n** H1.2\n"
+        (let (acc)
+          (org-map-entries
+           (lambda ()
+             (push (org-element-property :title (org-element-at-point)) acc)
+             (setq org-map-continue-from
+                   (org-element-property :end (org-element-at-point)))))
+          (length acc)))))
+  (should
+   (= 2
+      (org-test-with-temp-text "* H1\n** H1.1\n** H1.2\n"
+        (let (acc)
+          (org-map-entries
+           (lambda ()
+             (push (org-element-property :title (org-element-at-point)) acc)
+             (setq org-map-continue-from
+                   (line-end-position 2))))
+          (length acc))))))
 
 (ert-deftest test-org/edit-headline ()
   "Test `org-edit-headline' specifications."

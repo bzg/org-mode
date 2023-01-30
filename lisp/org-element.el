@@ -7702,7 +7702,15 @@ the cache."
                               (when org-element-cache-map-continue-from
                                 (goto-char org-element-cache-map-continue-from))
                               (when (> (point) start)
-                                (move-start-to-next-match nil))
+                                (move-start-to-next-match nil)
+                                ;; (point) inside matching element.
+                                ;; Go further.
+                                (when (> (point) start)
+                                  (setq data (element-match-at-point))
+                                  (if (not data)
+                                      (cache-walk-abort)
+                                    (goto-char (next-element-start))
+                                    (move-start-to-next-match next-element-re))))
                               ;; Drop nil.
                               (unless (car result) (pop result)))
                             ;; If FUNC did not move the point and we
