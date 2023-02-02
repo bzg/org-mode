@@ -75,7 +75,8 @@
 ;;    ;; Save buffer-local variable (buffer-local will not be
 ;;    ;; autoloaded!)
 ;;    (org-persist-register 'org-element--cache (current-buffer))
-;;    ;; Save buffer-local variable preserving circular links:
+;;    ;; Save several buffer-local variables preserving circular links
+;;    ;; between:
 ;;    (org-persist-register 'org-element--headline-cache (current-buffer)
 ;;               :inherit 'org-element--cache)
 ;;
@@ -110,7 +111,7 @@
 ;; data-cells and we want to preserve their circular structure.
 ;;
 ;; Each data collection can be associated with a local or remote file,
-;; its inode number, or contents hash.  The persistent data collection
+;; its inode number, contents hash.  The persistent data collection
 ;; can later be accessed using either file buffer, file, inode, or
 ;; contents hash.
 ;;
@@ -126,28 +127,30 @@
 ;;    Lisp variable value.  Similarly, (version "2.0") container
 ;;    will store version number.
 ;;
-;;    Container can also refer to a list of simple containers:
+;;    Container can also refer to a group of containers:
 ;;
 ;;    ;; Three containers stored together.
 ;;    '((elisp variable) (file "/path") (version "x.x"))
 ;;
 ;;    Providing a single container from the list to `org-persist-read'
-;;    is sufficient to retrieve all the containers.
+;;    is sufficient to retrieve all the containers (with appropriate
+;;    optional parameter).
 ;;
 ;;    Example:
 ;;
 ;;    (org-persist-register '((version "My data") (file "/path/to/file")) '(:key "key") :write-immediately t)
-;;    (org-persist-read '(version "My data") '(:key "key")) ;; => '("My data" "/path/to/file/copy")
+;;    (org-persist-read '(version "My data") '(:key "key") :read-related t) ;; => '("My data" "/path/to/file/copy")
 ;;
-;;    Containers can also take a short form:
+;;    Individual containers can also take a short form (not a list):
 ;;
 ;;    '("String" file '(quoted elisp "value") :keyword)
-;;    is the same as
+;;    is the same with
 ;;    '((elisp-data "String") (file nil)
 ;;      (elisp-data '(quoted elisp "value")) (elisp-data :keyword))
 ;;
 ;;    Note that '(file "String" (elisp value)) would be interpreted as
-;;    `file' container with "String" path and extra options.
+;;    `file' container with "String" path and extra options.  See
+;;    `org-persist--normalize-container'.
 ;;
 ;; 2. Associated :: an object the container is associated with.  The
 ;;    object can be a buffer, file, inode number, file contents hash,
@@ -159,12 +162,15 @@
 ;;
 ;;    When several objects are associated with a single container, it
 ;;    is not necessary to provide them all to access the container.
-;;    Just using a single :file/:inode/:hash/:key is sufficient.
+;;    Just using a single :file/:inode/:hash/:key is sufficient.  This
+;;    way, one can retrieve cached data even when the file has moved -
+;;    by contents hash.
 ;;
-;; 3. Data collection :: a list of containers linked to an associated
-;;    object/objects.  Each data collection can also have auxiliary
-;;    records.  Their only purpose is readability of the collection
-;;    index.
+;; 3. Data collection :: a list of containers, the associated
+;;    object/objects, expiry, access time, and information about where
+;;    the cache is stored.  Each data collection can also have
+;;    auxiliary records.  Their only purpose is readability of the
+;;    collection index.
 ;;
 ;;    Example:
 ;;
@@ -180,6 +186,11 @@
 ;;    actual data values for a single data collection.  This file
 ;;    contains an alist associating each data container in data
 ;;    collection with its value or a reference to the actual value.
+;;
+;;    Example (persist file storing two elisp container values):
+;;
+;;    (((elisp org-element--headline-cache) . #s(avl-tree- ...))
+;;     ((elisp org-element--cache)  . #s(avl-tree- ...)))
 ;;
 ;; All the persistent data is stored in `org-persist-directory'.  The data
 ;; collections are listed in `org-persist-index-file' and the actual data is
@@ -266,18 +277,19 @@
   :tag "Org persist"
   :group 'org)
 
-(defcustom org-persist-directory (expand-file-name
-                       (org-file-name-concat
-                        (let ((cache-dir (when (fboundp 'xdg-cache-home)
-                                           (xdg-cache-home))))
-                          (if (or (seq-empty-p cache-dir)
-                                  (not (file-exists-p cache-dir))
-                                  (file-exists-p (org-file-name-concat
-                                                  user-emacs-directory
-                                                  "org-persist")))
+(defcustom org-persist-directory
+  (expand-file-name
+   (org-file-name-concat
+    (let ((cache-dir (when (fboundp 'xdg-cache-home)
+                       (xdg-cache-home))))
+      (if (or (seq-empty-p cache-dir)
+              (not (file-exists-p cache-dir))
+              (file-exists-p (org-file-name-concat
                               user-emacs-directory
-                            cache-dir))
-                        "org-persist/"))
+                              "org-persist")))
+          user-emacs-directory
+        cache-dir))
+    "org-persist/"))
   "Directory where the data is stored."
   :group 'org-persist
   :package-version '(Org . "9.6")
@@ -357,7 +369,7 @@ properties:
 
 (defvar org-persist--index-hash nil
   "Hash table storing `org-persist--index'.  Used for quick access.
-They keys are conses of (container . associated).")
+The keys are conses of (container . associated).")
 
 (defvar org-persist--index-age nil
   "The modification time of the index file, when it was loaded.")
@@ -366,7 +378,7 @@ They keys are conses of (container . associated).")
   "Whether to report read/write time.
 
 When the value is a number, it is a threshold number of seconds.  If
-the read/write time of a single variable exceeds the threshold, a
+the read/write time of a single persist file exceeds the threshold, a
 message is displayed.
 
 When the value is a non-nil non-number, always display the message.
