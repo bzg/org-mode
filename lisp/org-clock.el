@@ -347,7 +347,7 @@ For more information, see `org-clocktable-write-default'."
 ;; FIXME: translate es and nl last string "Clock summary at"
 (defcustom org-clock-clocktable-language-setup
   '(("en" "File"     "L"  "Timestamp"  "Headline" "Time"  "ALL"   "Total time"   "File time" "Clock summary at")
-    ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Tiempo" "TODO" "Tiempo total" "Tiempo archivo" "Clock summary at")
+    ("es" "Archivo"  "N"  "Fecha y hora" "Tarea" "Duración" "TODO" "Duración total" "Tiempo archivo" "Generado el")
     ("fr" "Fichier"  "N"  "Horodatage" "En-tête"  "Durée" "TOUT"  "Durée totale" "Durée fichier" "Horodatage sommaire à")
     ("nl" "Bestand"  "N"  "Tijdstip"   "Rubriek" "Duur"  "ALLES" "Totale duur"  "Bestandstijd" "Klok overzicht op")
     ("de" "Datei"    "E"  "Zeitstempel" "Kopfzeile" "Dauer" "GESAMT" "Gesamtdauer"  "Dateizeit" "Erstellt am")
