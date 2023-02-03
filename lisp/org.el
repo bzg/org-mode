@@ -723,6 +723,10 @@ defined in org-duration.el.")
   (set-default-toplevel-value var value)
   (when (featurep 'org)
     (org-load-modules-maybe 'force)
+    ;; FIXME: We can't have all the requires at top-level due to
+    ;; circular dependencies.  Yet, this function might sometimes be
+    ;; called when 'org-element is not loaded.
+    (require 'org-element)
     (org-element-cache-reset 'all)))
 
 (defcustom org-modules '(ol-doi ol-w3m ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-eww)
