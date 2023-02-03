@@ -1932,17 +1932,30 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
       (save-excursion
 	(goto-char (point-max))
 	(while (re-search-backward re nil t)
-          (let ((element-type
-                 (org-element-type
-                  (save-match-data
-                    (org-element-at-point)))))
+          (let* ((element (save-match-data (org-element-at-point)))
+                 (element-type (org-element-type element)))
 	    (cond
 	     ((and (eq element-type 'clock) (match-end 2))
 	      ;; Two time stamps.
-	      (let* ((ss (match-string 2))
-		     (se (match-string 3))
-		     (ts (org-time-string-to-seconds ss))
-		     (te (org-time-string-to-seconds se))
+	      (let* ((timestamp (org-element-property :value element))
+		     (ts (float-time
+                          (encode-time
+                           (list 0
+                                 (org-element-property :minute-start timestamp)
+                                 (org-element-property :hour-start timestamp)
+                                 (org-element-property :day-start timestamp)
+                                 (org-element-property :month-start timestamp)
+                                 (org-element-property :year-start timestamp)
+                                 nil -1 nil))))
+		     (te (float-time
+                          (encode-time
+                           (list 0
+                                 (org-element-property :minute-end timestamp)
+                                 (org-element-property :hour-end timestamp)
+                                 (org-element-property :day-end timestamp)
+                                 (org-element-property :month-end timestamp)
+                                 (org-element-property :year-end timestamp)
+                                 nil -1 nil))))
 		     (dt (- (if tend (min te tend) te)
 			    (if tstart (max ts tstart) ts))))
 	        (when (> dt 0) (cl-incf t1 (floor dt 60)))))
