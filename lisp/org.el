@@ -13183,7 +13183,11 @@ Optional argument DEFAULT provides a default value for PROPERTY."
 			 (if (org-string-nw-p current)
 			     (format " [%s]" current)
 			   "")))
-	 (set-function (org-set-property-function property)))
+	 (set-function (org-set-property-function property))
+         (default (cond
+                   ((not allowed) default)
+                   ((member default allowed) default)
+                   (t nil))))
     (org-trim
      (if allowed
 	 (funcall set-function
@@ -13195,7 +13199,7 @@ Optional argument DEFAULT provides a default value for PROPERTY."
 				  (and pom
 				       (org-with-point-at pom
 					 (org-property-values property)))))))
-	 (funcall set-function prompt all nil nil "" nil current))))))
+	 (funcall set-function prompt all nil nil default nil current))))))
 
 (defvar org-last-set-property nil)
 (defvar org-last-set-property-value nil)
