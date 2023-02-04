@@ -1939,7 +1939,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 	      ;; Two time stamps.
 	      (let* ((timestamp (org-element-property :value element))
 		     (ts (float-time
-                          (encode-time
+                          (org-encode-time
                            (list 0
                                  (org-element-property :minute-start timestamp)
                                  (org-element-property :hour-start timestamp)
@@ -1948,7 +1948,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
                                  (org-element-property :year-start timestamp)
                                  nil -1 nil))))
 		     (te (float-time
-                          (encode-time
+                          (org-encode-time
                            (list 0
                                  (org-element-property :minute-end timestamp)
                                  (org-element-property :hour-end timestamp)
