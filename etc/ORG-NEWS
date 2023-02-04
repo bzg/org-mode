@@ -435,6 +435,23 @@ The change is breaking when ~org-use-property-inheritance~ is set to ~t~.
 
 The =TEST= parameter is better served by Emacs debugging tools.
 ** New and changed options
+*** New custom setting ~org-icalendar-ttl~ for the ~ox-icalendar~ backend
+
+The option ~org-icalendar-ttl~ allows to advise a subscriber to the
+exported =.ics= file to reload after the given time interval.
+
+This is useful i.e. if a calendar server subscribes to your exported
+file and that file is updated regularly.
+
+See IETF RFC 5545, Section 3.3.6 Duration and
+https://en.wikipedia.org/wiki/ICalendar#Other_component_types for
+details.
+
+Default for ~org-icalendar-ttl~ is ~nil~.  In that case the setting
+will not be used in the exported ICS file.
+
+The option may also be set using the =ICAL-TTL= keyword.
+
 *** The default value of ~org-attach-store-link-p~ is now ~attached~
 
 Now, after attaching a file, =[[attach:...]]= link to the attached file

@@ -16369,6 +16369,15 @@ information.  The iCalendar standard defines three visibility classes:
 The server should treat unknown class properties the same as
 =PRIVATE=.
 
+#+cindex: @samp{ICAL-TTL}, keyword
+#+vindex: org-icalendar-ttl
+The exported iCalendar file can advise clients how often to check for
+updates.  This duration can be set globally with the
+~org-icalendar-ttl~ variable, or on a per-document basis with the
+=ICAL-TTL= keyword.  This option should be set using the iCalendar
+notation for time durations; consult the docstring of
+~org-icalendar-ttl~ for more details.
+
 Exporting to iCalendar format depends in large part on the
 capabilities of the destination application.  Some are more lenient
 than others.  Consult the Org mode FAQ for advice on specific

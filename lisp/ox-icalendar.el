@@ -331,6 +331,32 @@ Interesting value are:
 	  (const :tag "Universal time" ":%Y%m%dT%H%M%SZ")
 	  (string :tag "Explicit format")))
 
+(defcustom org-icalendar-ttl nil
+  "Time to live for the exported calendar.
+
+Subscribing clients to the exported ics file can derive the time
+interval to read the file again from the server.  One example of such
+client is Nextcloud calendar, which respects the setting of
+X-PUBLISHED-TTL in ICS files.  Setting `org-icalendar-ttl' to \"PT1H\"
+would advise a server to reload the file every hour.
+
+See https://icalendar.org/iCalendar-RFC-5545/3-8-2-5-duration.html
+for a complete description of possible specifications of this
+option.  For example, \"PT1H\" stands for 1 hour and
+\"PT0H27M34S\" stands for 0 hours, 27 minutes and 34 seconds.
+
+The default value is nil, which means no such option is set in
+the ICS file. This option can also be set on a per-document basis
+with the ICAL-TTL export keyword."
+  :group 'org-export-icalendar
+  :type '(choice
+          (const :tag "No refresh period" nil)
+          (const :tag "One hour" "PT1H")
+          (const :tag "One day" "PT1D")
+          (const :tag "One week" "PT7D")
+          (string :tag "Other"))
+  :package-version '(Org . "9.7"))
+
 (defvar org-icalendar-after-save-hook nil
   "Hook run after an iCalendar file has been saved.
 This hook is run with the name of the file as argument.  A good
@@ -368,7 +394,8 @@ re-read the iCalendar file.")
     (:icalendar-use-deadline nil nil org-icalendar-use-deadline)
     (:icalendar-use-scheduled nil nil org-icalendar-use-scheduled)
     (:icalendar-scheduled-summary-prefix nil nil org-icalendar-scheduled-summary-prefix)
-    (:icalendar-deadline-summary-prefix nil nil org-icalendar-deadline-summary-prefix))
+    (:icalendar-deadline-summary-prefix nil nil org-icalendar-deadline-summary-prefix)
+    (:icalendar-ttl "ICAL-TTL" nil org-icalendar-ttl))
   :filters-alist
   '((:filter-headline . org-icalendar-clear-blank-lines))
   :menu-entry
@@ -1021,25 +1048,30 @@ as a communication channel."
    (or (org-string-nw-p org-icalendar-timezone) (format-time-string "%Z"))
    ;; Description.
    (org-export-data (plist-get info :title) info)
+   ;; TTL
+   (plist-get info :icalendar-ttl)
    contents))
 
-(defun org-icalendar--vcalendar (name owner tz description contents)
+(defun org-icalendar--vcalendar (name owner tz description ttl contents)
   "Create a VCALENDAR component.
-NAME, OWNER, TZ, DESCRIPTION and CONTENTS are all strings giving,
+NAME, OWNER, TZ, DESCRIPTION, TTL and CONTENTS are all strings giving,
 respectively, the name of the calendar, its owner, the timezone
-used, a short description and the other components included."
+used, a short description, time to live (refresh period) and
+the other components included."
   (org-icalendar-fold-string
    (concat (format "BEGIN:VCALENDAR
 VERSION:2.0
 X-WR-CALNAME:%s
 PRODID:-//%s//Emacs with Org mode//EN
 X-WR-TIMEZONE:%s
-X-WR-CALDESC:%s
-CALSCALE:GREGORIAN\n"
+X-WR-CALDESC:%s\n"
 		   (org-icalendar-cleanup-string name)
 		   (org-icalendar-cleanup-string owner)
 		   (org-icalendar-cleanup-string tz)
 		   (org-icalendar-cleanup-string description))
+           (when ttl (format "X-PUBLISHED-TTL:%s\n"
+                             (org-icalendar-cleanup-string ttl)))
+           "CALSCALE:GREGORIAN\n"
 	   contents
 	   "END:VCALENDAR\n")))
 
@@ -1167,6 +1199,7 @@ This function assumes major mode for current buffer is
 	user-full-name
 	(or (org-string-nw-p org-icalendar-timezone) (format-time-string "%Z"))
 	org-icalendar-combined-description
+	org-icalendar-ttl
 	contents)))
     (org-icalendar--post-process-file file)))
 
@@ -1191,6 +1224,8 @@ FILES is a list of files to build the calendar from."
 		  (format-time-string "%Z"))
 	      ;; Description.
 	      org-icalendar-combined-description
+	      ;; TTL (Refresh period)
+	      org-icalendar-ttl
 	      ;; Contents.
 	      (concat
 	       ;; Agenda contents.
