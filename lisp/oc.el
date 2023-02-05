@@ -838,6 +838,11 @@ tokens.  Spurious spaces are ignored."
                s))
       (nreverse result))))
 
+(defun org-cite-processor (info)
+  "Return expected citation/bibliography processor.
+INFO is a plist used as a communication channel."
+  (car (plist-get info :cite-export)))
+
 (defun org-cite-bibliography-style (info)
   "Return expected bibliography style.
 INFO is a plist used as a communication channel."
