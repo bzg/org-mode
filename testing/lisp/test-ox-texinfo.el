@@ -24,6 +24,8 @@
 (require 'cl-lib)
 (require 'ox-texinfo)
 
+(eval-when-compile (require 'subr-x))
+
 (unless (featurep 'ox-texinfo)
   (signal 'missing-test-dependency "org-export-texinfo"))
 
@@ -291,6 +293,36 @@
                                         "\n")))
              nil
              '(:with-latex t))))))
+
+
+;;; End-to-end
+
+(ert-deftest test-ox-texinfo/end-to-end-inline ()
+  "Test end-to-end with inline TeX fragment."
+  (should
+   (org-test-with-temp-text
+    "$a^2 = b$"
+    (let ((export-buffer "*Test Texinfo Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'texinfo export-buffer
+        nil nil nil nil nil
+        #'texinfo-mode)))))
+
+(ert-deftest test-ox-texinfo/end-to-end-sanity-check-displayed ()
+  "Test end-to-end with LaTeX environment."
+  (should
+   (org-test-with-temp-text
+    (string-join
+     (list "\\begin{equation}"
+           "a ^ 2 = b"
+           "b ^ 2 = c"
+           "\\end{equation}")
+     "\n")
+    (let ((export-buffer "*Test Texinfo Export*")
+          (org-export-show-temporary-export-buffer nil))
+      (org-export-to-buffer 'texinfo export-buffer
+        nil nil nil nil nil
+        #'texinfo-mode)))))
 
 (provide 'test-ox-texinfo)
 ;;; test-ox-texinfo.el end here
