@@ -3525,7 +3525,8 @@ This ensures the export commands can easily use it."
   (let ((cmds (org-agenda-normalize-custom-commands org-agenda-custom-commands))
         (pop-up-frames nil)
         (dir default-directory)
-        cmd thiscmdkey thiscmdcmd match files opts cmd-or-set bufname)
+        cmd thiscmdkey thiscmdcmd match files opts cmd-or-set
+        seriesp bufname)
     (save-window-excursion
       (while cmds
 	(setq cmd (pop cmds)
@@ -3537,9 +3538,12 @@ This ensures the export commands can easily use it."
 				   (format "*Org Agenda(%s:%s)*" thiscmdkey match))
 			      (format "*Org Agenda(%s)*" thiscmdkey))
 			org-agenda-buffer-name)
+              ;; series:     (0:key 1:desc 2:(cmd1 cmd2 ...) 3:general-settings 4:files)
+              ;; non-series: (0:key 1:desc 2:type 3:match    4:settings         5:files)
 	      cmd-or-set (nth 2 cmd)
-	      opts (nth (if (listp cmd-or-set) 3 4) cmd)
-	      files (nth (if (listp cmd-or-set) 4 5) cmd))
+	      seriesp (not (or (symbolp cmd-or-set) (functionp cmd-or-set)))
+	      opts (nth (if seriesp 3 4) cmd)
+	      files (nth (if seriesp 4 5) cmd))
 	(if (stringp files) (setq files (list files)))
 	(when files
 	  (let* ((opts (append org-agenda-exporter-settings opts))
