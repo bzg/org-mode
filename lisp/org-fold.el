@@ -419,20 +419,21 @@ Show the heading too, if it is currently invisible."
 
 (defun org-fold-show-children (&optional level)
   "Show all direct subheadings of this heading.
-Prefix arg LEVEL is how many levels below the current level
-should be shown.  Default is enough to cause the following
-heading to appear."
+Prefix arg LEVEL is how many levels below the current level should be
+shown.  If direct subheadings are deeper than LEVEL, they are still
+displayed."
   (interactive "p")
   (unless (org-before-first-heading-p)
     (save-excursion
       (org-with-limited-levels (org-back-to-heading t))
       (let* ((current-level (funcall outline-level))
+             (parent-level current-level)
              (max-level (org-get-valid-level
-                         current-level
+                         parent-level
                          (if level (prefix-numeric-value level) 1)))
+             (min-level-direct-child most-positive-fixnum)
              (end (save-excursion (org-end-of-subtree t t)))
              (regexp-fmt "^\\*\\{%d,%s\\}\\(?: \\|$\\)")
-             (past-first-child nil)
              ;; Make sure to skip inlinetasks.
              (re (format regexp-fmt
                          current-level
@@ -448,11 +449,12 @@ heading to appear."
         ;; MAX-LEVEL.  Since we want to display it anyway, adjust
         ;; MAX-LEVEL accordingly.
         (while (re-search-forward re end t)
-          (unless past-first-child
-            (setq re (format regexp-fmt
-                             current-level
-                             (max (funcall outline-level) max-level)))
-            (setq past-first-child t))
+          (setq current-level (funcall outline-level))
+          (when (< current-level min-level-direct-child)
+            (setq min-level-direct-child current-level
+                  re (format regexp-fmt
+                             parent-level
+                             (max min-level-direct-child max-level))))
           (org-fold-heading nil))))))
 
 (defun org-fold-show-subtree ()
