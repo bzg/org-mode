@@ -274,10 +274,14 @@ See the manual for examples."
 		(choice
 		 (string :tag "Format")
 		 (function))))
-  :safe (lambda (val)
-	  (pcase val
-	    (`(,(pred stringp) . ,(pred stringp)) t)
-	    (_ nil))))
+  :safe (lambda (alist)
+          (when (listp alist)
+            (catch :unsafe
+              (dolist (val alist)
+	        (pcase val
+	          (`(,(pred stringp) . ,(pred stringp)) t)
+	          (_ (throw :unsafe nil))))
+              t))))
 
 (defgroup org-link-follow nil
   "Options concerning following links in Org mode."
