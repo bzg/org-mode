@@ -6657,22 +6657,29 @@ about what to do with it.
 
   #+kindex: C-S-UP
   #+findex: org-clock-timestamps-up
+  #+findex: org-shiftcontrolup
   #+kindex: C-S-DOWN
   #+findex: org-clock-timestamps-down
+  #+findex: org-shiftcontroldown
   On CLOCK log lines, increase/decrease both timestamps so that the
   clock duration keeps the same value.
 
 - {{{kbd(S-M-UP)}}} (~org-timestamp-up~), {{{kbd(S-M-DOWN)}}} (~org-timestamp-down~) ::
 
   #+kindex: S-M-UP
-  #+findex: org-clock-timestamp-up
+  #+findex: org-timestamp-up
+  #+findex: org-shiftmetaup
   #+kindex: S-M-DOWN
-  #+findex: org-clock-timestamp-down
+  #+findex: org-timestamp-down
+  #+findex: org-shiftmetadown
   On =CLOCK= log lines, increase/decrease the timestamp at point and
   the one of the previous, or the next, clock timestamp by the same
   duration.  For example, if you hit {{{kbd(S-M-UP)}}} to increase
   a clocked-out timestamp by five minutes, then the clocked-in
   timestamp of the next clock is increased by five minutes.
+
+  Only =CLOCK= logs created during current Emacs session are
+  considered when adjusting next/previous timestamp.
 
 - {{{kbd(C-c C-t)}}} (~org-todo~) ::
 
