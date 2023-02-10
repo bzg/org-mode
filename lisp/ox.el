@@ -1638,6 +1638,7 @@ is a list holding export options.
 
 Following tree properties are set or updated:
 
+`:parse-tree' Is simply set to DATA.
 `:headline-offset' Offset between true level of headlines and
 		   local level.  An offset of -1 means a headline
 		   of level 2 should be considered as a level
@@ -3177,7 +3178,8 @@ still inferior to file-local settings."
           (org-export-filter-apply-functions
            (plist-get info :filter-parse-tree) tree info))
     ;; Now tree is complete, compute its properties and add them
-    ;; to communication channel.
+    ;; to communication channel.  This is responsible for setting
+    ;; :parse-tree to TREE.
     (setq info (org-export--collect-tree-properties tree info))
     ;; Process citations and bibliography.  Replace each citation
     ;; and "print_bibliography" keyword in the parse tree with
