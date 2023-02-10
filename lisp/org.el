@@ -6560,7 +6560,7 @@ See also `org-promote'."
   (interactive)
   (save-excursion
     (org-back-to-heading t)
-    (combine-change-calls (point) (save-excursion (org-end-of-subtree t))
+    (org-combine-change-calls (point) (save-excursion (org-end-of-subtree t))
       (org-with-limited-levels (org-map-tree 'org-promote))))
   (org-fix-position-after-promote))
 
@@ -6570,7 +6570,7 @@ See `org-demote' and `org-promote'."
   (interactive)
   (save-excursion
     (org-back-to-heading t)
-    (combine-change-calls (point) (save-excursion (org-end-of-subtree t))
+    (org-combine-change-calls (point) (save-excursion (org-end-of-subtree t))
       (org-with-limited-levels (org-map-tree 'org-demote))))
   (org-fix-position-after-promote))
 
@@ -7139,7 +7139,7 @@ When REMOVE is non-nil, remove the subtree from the clipboard."
        (setq beg (point))
        ;; Avoid re-parsing cache elements when i.e. level 1 heading
        ;; is inserted and then promoted.
-       (combine-change-calls beg beg
+       (org-combine-change-calls beg beg
          (when (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
          (insert txt)
          (unless (string-suffix-p "\n" txt) (insert "\n"))
@@ -18848,7 +18848,7 @@ Alignment is done according to `org-property-format', which see."
   (when (save-excursion
 	  (beginning-of-line)
 	  (looking-at org-property-re))
-    (combine-change-calls (match-beginning 0) (match-end 0)
+    (org-combine-change-calls (match-beginning 0) (match-end 0)
       (let ((newtext (concat (match-string 4)
 	                     (org-trim
 	                      (format org-property-format (match-string 1) (match-string 3))))))
