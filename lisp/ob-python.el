@@ -190,9 +190,7 @@ then create.  Return the initialized session."
         (with-current-buffer py-buffer
           (add-hook
            'python-shell-first-prompt-hook
-           (lambda ()
-             (setq-local org-babel-python--initialized t)
-             (message "I am running!!!"))
+           (lambda () (setq-local org-babel-python--initialized t))
            nil 'local)))
       ;; Wait until Python initializes.
       ;; This is more reliable compared to
