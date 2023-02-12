@@ -189,7 +189,10 @@ smart            Make point visible, and do insertion/deletion if it is
                  Never delete a previously invisible character or add in the
                  middle or right after an invisible region.  Basically, this
                  allows insertion and backward-delete right before ellipses.
-                 FIXME: maybe in this case we should not even show?"
+                 FIXME: maybe in this case we should not even show?
+
+This variable only affects commands listed in
+`org-fold-catch-invisible-edits-commands'."
   :group 'org-edit-structure
   :version "24.1"
   :type '(choice
@@ -198,6 +201,33 @@ smart            Make point visible, and do insertion/deletion if it is
 	  (const :tag "Unhide, but do not do the edit" show-and-error)
 	  (const :tag "Show invisible part and do the edit" show)
 	  (const :tag "Be smart and do the right thing" smart)))
+
+(defcustom org-fold-catch-invisible-edits-commands
+  ;; We do not add non-Org commands here by default to avoid advising
+  ;; globally.  See `org-fold--advice-edit-commands'.
+  '((org-self-insert-command . insert)
+    (org-delete-backward-char . delete-backward)
+    (org-delete-char . delete)
+    (org-meta-return . insert)
+    (org-return . insert))
+  "Alist of commands where Org checks for invisible edits.
+Each element is (COMMAND . KIND), where COMMAND is symbol representing
+command as stored in `this-command' and KIND is symbol `insert',
+symbol `delete', or symbol `delete-backward'.
+
+The checks are performed around `point'.
+
+This variable must be set before loading Org in order to take effect.
+
+Also, see `org-fold-catch-invisible-edits'."
+  :group 'org-edit-structure
+  :package-version '("Org" . "9.7")
+  :type '(alist
+          :key-type symbol
+          :value-type (choice
+                       (const insert)
+                       (const delete)
+                       (const delete-backward))))
 
 ;;; Core functionality
 
@@ -902,6 +932,19 @@ The detailed reaction depends on the user option
 	   (t
 	    ;; Don't do the edit, make the user repeat it in full visibility
 	    (user-error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
+
+(defun org-fold-check-before-invisible-edit-maybe (&rest _)
+  "Check before invisible command by `this-command'."
+  (when (derived-mode-p 'org-mode)
+    (pcase (alist-get this-command org-fold-catch-invisible-edits-commands)
+      ((pred null) nil)
+      (kind (org-fold-check-before-invisible-edit kind)))))
+
+(defun org-fold--advice-edit-commands ()
+  "Advice editing commands according to `org-fold-catch-invisible-edits-commands'.
+The advices are installed in current buffer."
+  (dolist (command (mapcar #'car org-fold-catch-invisible-edits-commands))
+    (advice-add command :before #'org-fold-check-before-invisible-edit-maybe)))
 
 (provide 'org-fold)
 

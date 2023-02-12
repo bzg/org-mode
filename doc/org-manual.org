@@ -622,11 +622,17 @@ for this property are =folded=, =children=, =content=, and =all=.
 #+cindex: edits, catching invisible
 
 #+vindex: org-fold-catch-invisible-edits
+#+vindex: org-fold-catch-invisible-edits-commands
 Sometimes you may inadvertently edit an invisible part of the buffer
 and be confused on what has been edited and how to undo the mistake.
-Setting ~org-fold-catch-invisible-edits~ to non-~nil~ helps preventing
-this.  See the docstring of this option on how Org should catch
-invisible edits and process them.
+By default, Org prevents such edits for a limited set of user
+commands.  Users can control which commands are affected by
+customizing ~org-fold-catch-invisible-edits-commands~.
+
+The strategy used to decide if a given edit is dangerous is controlled
+by ~org-fold-catch-invisible-edits~.  See the docstring of this option
+on the available strategies.  Set the option to ~nil~ to disable
+catching invisible edits completely.
 
 ** Motion
 :PROPERTIES:
