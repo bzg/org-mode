@@ -1162,7 +1162,7 @@ Do nothing in an indirect buffer."
 (defun org-persist-associated-files:file (container collection)
   "List file CONTAINER associated files of COLLECTION in `org-persist-directory'."
   (let ((file (org-persist-read container (plist-get collection :associated))))
-    (when (file-exists-p file)
+    (when (and file (file-exists-p file))
       (list file))))
 
 (defun org-persist-associated-files:url (container collection)
