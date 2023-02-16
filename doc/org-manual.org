@@ -5915,12 +5915,12 @@ is used in a much wider sense.
 #+cindex: deadlines
 #+cindex: scheduling
 
-A timestamp is a specification of a date (possibly with a time or
-a range of times) in a special format, either =<2003-09-16 Tue>= or
-=<2003-09-16 Tue 09:39>= or =<2003-09-16 Tue 12:00-12:30>=[fn:19].
-A timestamp can appear anywhere in the headline or body of an Org tree
-entry.  Its presence causes entries to be shown on specific dates in
-the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
+A timestamp is a specification of a date (possibly with a time) in a
+special format, either =<2003-09-16 Tue>= or
+=<2003-09-16 Tue 09:39>=[fn:19].  A timestamp can appear anywhere in
+the headline or body of an Org tree entry.  Its presence causes
+entries to be shown on specific dates in the agenda (see [[*Weekly/daily
+agenda]]).  We distinguish:
 
 - Plain timestamp; Event; Appointment ::
 
@@ -5935,7 +5935,7 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
   ,* Meet Peter at the movies
     <2006-11-01 Wed 19:15>
   ,* Discussion on climate change
-    <2006-11-02 Thu 20:00-22:00>
+    <2006-11-02 Thu>
   #+end_example
 
 - Timestamp with repeater interval ::
@@ -5974,13 +5974,20 @@ the agenda (see [[*Weekly/daily agenda]]).  We distinguish:
 
   #+cindex: timerange
   #+cindex: date range
-  Two timestamps connected by =--= denote a range.  The headline is
-  shown on the first and last day of the range, and on any dates that
-  are displayed and fall in the range.  Here is an example:
+  Two timestamps connected by =--= denote a range.  In the agenda, the
+  headline is shown on the first and last day of the range, and on any
+  dates that are displayed and fall in the range.  Here is an example:
 
   #+begin_example
   ,** Meeting in Amsterdam
      <2004-08-23 Mon>--<2004-08-26 Thu>
+  #+end_example
+
+  Timerange is a timestamp consisting of two time units connected by =-=
+
+  #+begin_example
+  ,* Discussion on climate change
+     <2006-11-02 Thu 10:00-12:00>
   #+end_example
 
 - Inactive timestamp ::
