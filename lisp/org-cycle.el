@@ -658,7 +658,7 @@ With a numeric prefix, show all headlines up to that level."
 		((or "all" "showall")
 		 (org-fold-show-subtree))
 		(_ nil)))
-	    (org-end-of-subtree)))))))
+	    (org-end-of-subtree t)))))))
 
 (defun org-cycle-overview ()
   "Switch to overview mode, showing only top-level headlines."

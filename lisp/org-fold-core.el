@@ -835,13 +835,20 @@ If PREVIOUS-P is non-nil, search backwards."
 	 (next-change (if previous-p
 			  (if ignore-hidden-p
                               (lambda (p) (org-fold-core-previous-folding-state-change (org-fold-core-get-folding-spec nil p) p limit))
-			    (lambda (p) (max limit (1- (previous-single-char-property-change p 'invisible nil limit)))))
+			    (lambda (p) (max limit (previous-single-char-property-change p 'invisible nil limit))))
                         (if ignore-hidden-p
                             (lambda (p) (org-fold-core-next-folding-state-change (org-fold-core-get-folding-spec nil p) p limit))
 			  (lambda (p) (next-single-char-property-change p 'invisible nil limit)))))
 	 (next pos))
     (while (and (funcall cmp next limit)
-		(not (org-xor invisible-initially? (funcall invisible-p next))))
+		(not (org-xor
+                    invisible-initially?
+                    (funcall invisible-p
+                             (if previous-p
+                                 ;; NEXT-1 -> NEXT is the change.
+                                 (max limit (1- next))
+                               ;; NEXT -> NEXT+1 is the change.
+                               next)))))
       (setq next (funcall next-change next)))
     next))
 
