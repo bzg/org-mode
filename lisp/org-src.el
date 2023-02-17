@@ -233,7 +233,8 @@ Each element is a cell of the format
 
      (\"language\" FACE)
 
-Where FACE is either a defined face or an anonymous face.
+Where FACE is either a defined face or an anonymous face.  Empty
+language string refers to source blocks without specified language.
 
 For instance, the following would color the background of
 emacs-lisp source blocks and python source blocks in purple and
@@ -247,7 +248,6 @@ green, respectability.
                        (choice
                         (face :tag "Face")
                         (sexp :tag "Anonymous face"))))
-  :version "26.1"
   :package-version '(Org . "9.0"))
 
 (defcustom org-src-tab-acts-natively t

@@ -24,6 +24,21 @@ consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]
 has been ported to.
 
 ** New and changed options
+*** ~org-src-block-faces~ now accepts empty string ~""~ as language name
+
+It is now possible to customize face of source blocks without language specifier.
+
+: #+begin_src
+: Source block with no language
+: #+end_src
+
+For example, to set ~highlight~ face, use
+
+#+begin_src emacs-lisp
+(setq org-src-fontify-natively t)
+(add-to-list 'org-src-block-faces '("" highlight))
+#+end_src
+
 *** New ~org-cite-natbib-export-bibliography~ option defining fallback bibliography style
 
 ~natbib~ citation export processor now uses
