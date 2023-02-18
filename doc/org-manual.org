@@ -19927,15 +19927,18 @@ changes.
   #+cindex: @samp{SETUPFILE}, keyword
   The setup file or a URL pointing to such file is for additional
   in-buffer settings.  Org loads this file and parses it for any
-  settings in it only when Org opens the main file.  If URL is
+  settings in it when Org opens the main file.  If URL is
   specified, the contents are downloaded and stored in a temporary
-  file cache.  {{{kbd(C-c C-c)}}} on the settings line parses and
-  loads the file, and also resets the temporary file cache.  Org also
-  parses and loads the document during normal exporting process.  Org
-  parses the contents of this document as if it was included in the
-  buffer.  It can be another Org file.  To visit the file---not
-  a URL---use {{{kbd(C-c ')}}} while point is on the line with the
-  file name.
+  file cache.  {{{kbd(C-c C-c)}}} on the settings line re-parses and
+  re-loads the file, and also resets the temporary file cache.
+
+  Org also parses and loads /in-buffer settings/ from the setup file
+  during normal exporting process.  Org parses the /in-buffer
+  settings/ as if it was included in the containing Org buffer.  The
+  rest of the contents of setup file is ignored.
+
+  To visit the setup file---not a URL---use {{{kbd(C-c ')}}} while point
+  is on the line with the setup file name.
 
 - =#+STARTUP:= ::
 
