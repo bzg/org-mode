@@ -3138,8 +3138,73 @@ Outside list"
 	  (org-test-with-temp-text "<2012-03-29 Thu +1y -1y>"
 	    (let ((ts (org-element-context)))
 	      (list (org-element-property :repeater-type ts)
-		    (org-element-property :warning-type ts)))))))
-
+		    (org-element-property :warning-type ts))))))
+  ;; :range-type property
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    nil))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    nil))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00-13:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'timerange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00-12:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'timerange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun>--<2023-07-02 Sun>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun>--<2023-07-03 Mon>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-02 Sun 12:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-03 Mon 13:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-02 Sun>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-03 Mon>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-02 Sun 13:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00>--<2023-07-02 Sun>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange))
+  (should
+   (eq
+    (org-test-with-temp-text "<2023-07-02 Sun 12:00 +5d>--<2023-07-02 Sun 13:00>"
+      (org-element-property :range-type (org-element-timestamp-parser)))
+    'daterange)))
 
 ;;;; Underline
 
@@ -3685,6 +3750,14 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 		  '(timestamp
 		    (:type active :year-start 2012 :month-start 3 :day-start 29
 			   :hour-start 16 :minute-start 40)) nil)))
+  (should
+   (string-match
+    "<2012-03-29 .* 16:40>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active :year-start 2012 :month-start 3 :day-start 29
+	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
+	      :day-end 29 :hour-end 16 :minute-end 40)) nil)))
   ;; Inactive.
   (should
    (string-match "\\[2012-03-29 .* 16:40\\]"
@@ -3696,11 +3769,45 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
      '(timestamp
        (:type inactive :year-start 2012 :month-start 3 :day-start 29
 	      :hour-start 16 :minute-start 40)) nil)))
-  ;; Active range.
+  ;; Active daterange.
   (should
    (string-match "<2012-03-29 .* 16:40>--<2012-03-29 .* 16:41>"
 		 (org-test-parse-and-interpret
 		  "<2012-03-29 thu. 16:40>--<2012-03-29 thu. 16:41>")))
+  ;;; No end time, dates are not equal
+  (should
+   ;; Expected result: "<2012-03-29 Thu 16:40>--<2012-03-30 Fri>"
+   (string=
+    (format
+     "<%s>--<%s>"
+     (format-time-string (cdr org-time-stamp-formats) (org-encode-time 0 40 16 29 03 2012))
+     (format-time-string (car org-time-stamp-formats) (org-encode-time 0 0 0 30 03 2012)))
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active-range :year-start 2012 :month-start 3 :day-start 29
+	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
+	      :day-end 30)) nil)))
+  ;;; No start time, dates are not equal
+  (should
+   ;; Expected result: "<2012-03-29 Thu>--<2012-03-30 Fri 16:40>"
+   (string=
+    (format
+     "<%s>--<%s>"
+     (format-time-string (car org-time-stamp-formats) (org-encode-time 0 0 0 29 03 2012))
+     (format-time-string (cdr org-time-stamp-formats) (org-encode-time 0 40 16 30 03 2012)))
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active-range :year-start 2012 :month-start 3 :day-start 29
+	      :hour-end 16 :minute-end 40 :year-end 2012 :month-end 3
+	      :day-end 30)) nil)))
+  (should
+   (string-match
+    "<2012-03-29 .* 16:40>--<2012-03-29 .* 16:40>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active-range :year-start 2012 :month-start 3 :day-start 29
+	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
+	      :day-end 29 :hour-end 16 :minute-end 40)) nil)))
   (should
    (string-match
     "<2012-03-29 .* 16:40>--<2012-03-29 .* 16:41>"
@@ -3709,7 +3816,7 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
        (:type active-range :year-start 2012 :month-start 3 :day-start 29
 	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
 	      :day-end 29 :hour-end 16 :minute-end 41)) nil)))
-  ;; Inactive range.
+  ;; Inactive daterange.
   (should
    (string-match "\\[2012-03-29 .* 16:40\\]--\\[2012-03-29 .* 16:41\\]"
 		 (org-test-parse-and-interpret
@@ -3722,6 +3829,11 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
        (:type inactive-range :year-start 2012 :month-start 3 :day-start 29
 	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
 	      :day-end 29 :hour-end 16 :minute-end 41)) nil)))
+  ;; Active timerange
+  (should
+   (string-match "<2012-03-29 .* 16:40-16:41>"
+		 (org-test-parse-and-interpret
+		  "<2012-03-29 thu. 16:40-16:41>")))
   ;; Diary.
   (should (equal (org-test-parse-and-interpret "<%%diary-float t 4 2>")
 		 "<%%diary-float t 4 2>\n"))
@@ -3767,7 +3879,116 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
        (:type active-range :year-start 2012 :month-start 3 :day-start 29
 	      :year-end 2012 :month-end 3 :day-end 30 :repeater-type cumulate
 	      :repeater-value 1 :repeater-unit year))
-     nil))))
+     nil)))
+  ;; Tests for :range-type property
+  ;;; Errors
+  (should-error
+   (org-element-timestamp-interpreter
+    '(timestamp
+      (:range-type timerange
+                   :type active
+                   :year-start 2023 :month-start 7 :day-start 10
+                   :year-end 2023 :month-end 7 :day-end 10
+                   :hour-start 17 :minute-start 30
+                   :hour-end 17 :minute-end 30))
+    nil))
+  (should-error
+   (org-element-timestamp-interpreter
+    '(timestamp
+      (:range-type daterange
+                   :type active :year-start 2023 :month-start 7 :day-start 10
+                   :hour-start 17 :minute-start 30)) nil))
+  (should-error
+   (org-element-timestamp-interpreter
+    '(timestamp
+      (:range-type timerange
+                   :type inactive
+                   :year-start 2023 :month-start 7 :day-start 10
+                   :year-end 2023 :month-end 7 :day-end 10
+                   :hour-start 17 :minute-start 30
+                   :hour-end 17 :minute-end 30))
+    nil))
+  (should-error
+   (org-element-timestamp-interpreter
+    '(timestamp
+      (:range-type daterange
+                   :type inactive :year-start 2023 :month-start 7 :day-start 10
+                   :hour-start 17 :minute-start 30)) nil))
+  
+  ;;; End part is nil
+  (should
+   ;; Expected result: "<2023-07-10 Mon>--<2023-07-10 Mon>"
+   (string=
+    (format
+     "<%s>--<%s>"
+     (format-time-string (car org-time-stamp-formats) (org-encode-time 0 0 0 10 7 2023))
+     (format-time-string (car org-time-stamp-formats) (org-encode-time 0 0 0 10 7 2023)))
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:range-type daterange
+                    :type active-range :year-start 2023 :month-start 7 :day-start 10)) nil)))
+  (should
+   (string-match "<2023-07-10 .* 17:30-17:30>"
+		 (org-element-timestamp-interpreter
+		  '(timestamp
+		    (:range-type timerange
+                                 :type active-range :year-start 2023 :month-start 7 :day-start 10
+		                 :hour-start 17 :minute-start 30)) nil)))
+  (should
+   ;; Expected result: "<2023-07-10 Mon 17:30>--<2023-07-10 Mon>"
+   (string=
+    (format
+     "<%s>--<%s>"
+     (format-time-string (cdr org-time-stamp-formats) (org-encode-time 0 30 17 10 7 2023))
+     (format-time-string (car org-time-stamp-formats) (org-encode-time 0 0 0 10 7 2023)))
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:range-type daterange
+                    :type active-range :year-start 2023 :month-start 7 :day-start 10
+		    :hour-start 17 :minute-start 30)) nil)))
+  ;;; End is equal to start
+  (should
+   (string-match "<2023-07-10 .* 17:30-17:30>"
+		 (org-element-timestamp-interpreter
+		  '(timestamp
+		    (:range-type timerange
+                                 :type active-range
+                                 :year-start 2023 :month-start 7 :day-start 10
+                                 :year-end 2023 :month-end 7 :day-end 10
+		                 :hour-start 17 :minute-start 30
+                                 :hour-end 17 :minute-end 30)) nil)))
+  (should
+   (string-match "<2023-07-10 .* 17:30>--<2023-07-10 .* 17:30>"
+		 (org-element-timestamp-interpreter
+		  '(timestamp
+		    (:range-type daterange
+                                 :type active-range
+                                 :year-start 2023 :month-start 7 :day-start 10
+                                 :year-end 2023 :month-end 7 :day-end 10
+		                 :hour-start 17 :minute-start 30
+                                 :hour-end 17 :minute-end 30)) nil)))
+  ;;;; End date is not equal to start date, but interpret the object as a timerange (:range-type 'timerange)
+  (should
+   (string-match "<2023-07-10 .* 17:30-18:30>"
+		 (org-element-timestamp-interpreter
+		  '(timestamp
+		    (:range-type timerange
+                                 :type active-range
+                                 :year-start 2023 :month-start 7 :day-start 10
+                                 :year-end 2023 :month-end 8 :day-end 10
+                                 :hour-start 17 :minute-start 30
+                                 :hour-end 18 :minute-end 30)) nil)))
+  ;;;; End date is not equal to start date, interpret the object as a daterange (:range-type 'daterange)
+  (should
+   (string-match "<2023-07-10 .* 17:30>--<2023-08-10 .* 18:30>"
+		 (org-element-timestamp-interpreter
+		  '(timestamp
+		    (:range-type daterange
+                                 :type active-range
+                                 :year-start 2023 :month-start 7 :day-start 10
+		                 :year-end 2023 :month-end 8 :day-end 10
+                                 :hour-start 17 :minute-start 30
+                                 :hour-end 18 :minute-end 30)) nil))))
 
 (ert-deftest test-org-element/verse-block-interpreter ()
   "Test verse block interpretation."

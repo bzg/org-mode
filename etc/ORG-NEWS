@@ -200,6 +200,13 @@ a newly created one.
 Previously, one had to use
 
 : (apply #'org-element-create 'section nil (org-element-contents node))
+**** New property ~:range-type~ for org-element timestamp object
+
+~org-element-timestamp-parser~ now adds =:range-type= property to each
+timestamp object.  Possible values: ~timerange~, ~daterange~, ~nil~.
+
+~org-element-timestamp-interpreter~ takes into account this property
+and returns an appropriate timestamp string.
 
 *** ~org-priority=show~ command no longer adjusts for scheduled/deadline
 

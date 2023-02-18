@@ -4043,7 +4043,7 @@ Assume point is at the target."
   "Parse time stamp at point, if any.
 
 When at a time stamp, return a new syntax node of `timestamp' type
-containing `:type', `:raw-value', `:year-start', `:month-start',
+containing `:type', `:range-type', `:raw-value', `:year-start', `:month-start',
 `:day-start', `:hour-start', `:minute-start', `:year-end',
 `:month-end', `:day-end', `:hour-end', `:minute-end',
 `:repeater-type', `:repeater-value', `:repeater-unit',
@@ -4077,6 +4077,10 @@ Assume point is at the beginning of the timestamp."
 			 (activep 'active)
 			 ((or date-end time-range) 'inactive-range)
 			 (t 'inactive)))
+             (range-type (cond
+                          (date-end 'daterange)
+                          (time-range 'timerange)
+                          (t nil)))
 	     (repeater-props
 	      (and (not diaryp)
 		   (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)"
@@ -4123,6 +4127,7 @@ Assume point is at the beginning of the timestamp."
 	(org-element-create
          'timestamp
 	 (nconc (list :type type
+                      :range-type range-type
 		      :raw-value raw-value
 		      :year-start year-start
 		      :month-start month-start
@@ -4142,99 +4147,123 @@ Assume point is at the beginning of the timestamp."
 
 (defun org-element-timestamp-interpreter (timestamp _)
   "Interpret TIMESTAMP object as Org syntax."
-  (let* ((repeat-string
-	  (concat
-	   (pcase (org-element-property :repeater-type timestamp)
-	     (`cumulate "+") (`catch-up "++") (`restart ".+"))
-	   (let ((val (org-element-property :repeater-value timestamp)))
-	     (and val (number-to-string val)))
-	   (pcase (org-element-property :repeater-unit timestamp)
-	     (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
-	 (warning-string
-	  (concat
-	   (pcase (org-element-property :warning-type timestamp)
-	     (`first "--") (`all "-"))
-	   (let ((val (org-element-property :warning-value timestamp)))
-	     (and val (number-to-string val)))
-	   (pcase (org-element-property :warning-unit timestamp)
-	     (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
-	 (build-ts-string
-	  ;; Build an Org timestamp string from TIME.  ACTIVEP is
-	  ;; non-nil when time stamp is active.  If WITH-TIME-P is
-	  ;; non-nil, add a time part.  HOUR-END and MINUTE-END
-	  ;; specify a time range in the timestamp.  REPEAT-STRING is
-	  ;; the repeater string, if any.
-	  (lambda (time activep &optional with-time-p hour-end minute-end)
-	    (let ((ts (format-time-string
-                       (org-time-stamp-format with-time-p)
-		       time)))
-	      (when (and hour-end minute-end)
-		(string-match "[012]?[0-9]:[0-5][0-9]" ts)
-		(setq ts
-		      (replace-match
-		       (format "\\&-%02d:%02d" hour-end minute-end)
-		       nil nil ts)))
-	      (unless activep (setq ts (format "[%s]" (substring ts 1 -1))))
-	      (dolist (s (list repeat-string warning-string))
-		(when (org-string-nw-p s)
-		  (setq ts (concat (substring ts 0 -1)
-				   " "
-				   s
-				   (substring ts -1)))))
-	      ;; Return value.
-	      ts)))
-	 (type (org-element-property :type timestamp)))
-    (pcase type
-      ((or `active `inactive)
-       (let* ((minute-start (org-element-property :minute-start timestamp))
-	      (minute-end (org-element-property :minute-end timestamp))
-	      (hour-start (org-element-property :hour-start timestamp))
-	      (hour-end (org-element-property :hour-end timestamp))
-	      (time-range-p (and hour-start hour-end minute-start minute-end
-				 (or (/= hour-start hour-end)
-				     (/= minute-start minute-end)))))
-	 (funcall
-	  build-ts-string
-	  (org-encode-time 0
-                           (or minute-start 0)
-                           (or hour-start 0)
-                           (org-element-property :day-start timestamp)
-                           (org-element-property :month-start timestamp)
-                           (org-element-property :year-start timestamp))
-	  (eq type 'active)
-	  (and hour-start minute-start)
-	  (and time-range-p hour-end)
-	  (and time-range-p minute-end))))
-      ((or `active-range `inactive-range)
-       (let ((minute-start (org-element-property :minute-start timestamp))
-	     (minute-end (org-element-property :minute-end timestamp))
-	     (hour-start (org-element-property :hour-start timestamp))
-	     (hour-end (org-element-property :hour-end timestamp)))
-	 (concat
-	  (funcall
-	   build-ts-string (org-encode-time
-			    0
-			    (or minute-start 0)
-			    (or hour-start 0)
-			    (org-element-property :day-start timestamp)
-			    (org-element-property :month-start timestamp)
-			    (org-element-property :year-start timestamp))
-	   (eq type 'active-range)
-	   (and hour-start minute-start))
-	  "--"
-	  (funcall build-ts-string
-		   (org-encode-time
-                    0
-                    (or minute-end 0)
-                    (or hour-end 0)
-                    (org-element-property :day-end timestamp)
-                    (org-element-property :month-end timestamp)
-                    (org-element-property :year-end timestamp))
-		   (eq type 'active-range)
-		   (and hour-end minute-end)))))
-      (_ (org-element-property :raw-value timestamp)))))
-
-
+  (let((type (org-element-property :type timestamp)))
+    (if (member type '(active inactive inactive-range active-range))
+        (let ((day-start (org-element-property :day-start timestamp))
+              (month-start (org-element-property :month-start timestamp))
+              (year-start (org-element-property :year-start timestamp)))
+          ;; Return nil when start date is not available.  Could also
+          ;; throw an error, but the current behavior is historical.
+          (when (and day-start month-start year-start)
+            (let* ((repeat-string
+	            (concat
+	             (pcase (org-element-property :repeater-type timestamp)
+	               (`cumulate "+") (`catch-up "++") (`restart ".+"))
+	             (let ((val (org-element-property :repeater-value timestamp)))
+	               (and val (number-to-string val)))
+	             (pcase (org-element-property :repeater-unit timestamp)
+	               (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
+                   (range-type (org-element-property :range-type timestamp))
+                   (warning-string
+	            (concat
+	             (pcase (org-element-property :warning-type timestamp)
+	               (`first "--") (`all "-"))
+	             (let ((val (org-element-property :warning-value timestamp)))
+	               (and val (number-to-string val)))
+	             (pcase (org-element-property :warning-unit timestamp)
+	               (`hour "h") (`day "d") (`week "w") (`month "m") (`year "y"))))
+                   (hour-start (org-element-property :hour-start timestamp))
+                   (minute-start (org-element-property :minute-start timestamp))
+                   (brackets
+                    (if (member
+                         type
+                         '(inactive inactive-range))
+                        (cons "[" "]")
+                      (cons "<" ">")))
+                   (timestamp-end
+                    (concat
+                     (and (org-string-nw-p repeat-string) (concat " " repeat-string))
+                     (and (org-string-nw-p warning-string) (concat " " warning-string))
+                     (cdr brackets))))
+              (concat
+               ;; Opening backet: [ or <
+               (car brackets)
+               ;; Starting date/time: YYYY-MM-DD DAY[ HH:MM]
+               (format-time-string
+                ;; `org-time-stamp-formats'.
+	        (org-time-stamp-format
+                 ;; Ignore time unless both HH:MM are available.
+                 ;; Ignore means (car org-timestamp-formats).
+                 (and minute-start hour-start)
+                 'no-brackets)
+	        (org-encode-time
+	         0 (or minute-start 0) (or hour-start 0)
+	         day-start month-start year-start))
+               ;; Range: -HH:MM or TIMESTAMP-END--[YYYY-MM-DD DAY HH:MM]
+               (let ((hour-end (org-element-property :hour-end timestamp))
+                     (minute-end (org-element-property :minute-end timestamp)))
+                 (pcase type
+                   ((or `active `inactive)
+                    ;; `org-element-timestamp-parser' uses this type
+                    ;; when no time/date range is provided.  So,
+                    ;; should normally return nil in this clause.
+                    (pcase range-type
+                      (`nil
+                       ;; `org-element-timestamp-parser' assigns end
+                       ;; times for `active'/`inactive' TYPE if start
+                       ;; time is not nil.  But manually built
+                       ;; timestamps may not contain end times, so
+                       ;; check for end times anyway.
+                       (when (and hour-start hour-end minute-start minute-end
+				  (or (/= hour-start hour-end)
+				      (/= minute-start minute-end)))
+                         ;; Could also throw an error.  Return range
+                         ;; timestamp nevertheless to preserve
+                         ;; historical behavior.
+                         (format "-%02d:%02d" hour-end minute-end)))
+                      ((or `timerange `daterange)
+                       (error "`:range-type' must be `nil' for `active'/`inactive' type"))))
+                   ;; Range must be present.
+                   ((or `active-range `inactive-range)
+                    (pcase range-type
+                      ;; End time: -HH:MM.
+                      ;; Fall back to start time if end time is not defined (arbitrary historical choice).
+                      ;; Error will be thrown if both end and begin time is not defined.
+                      (`timerange (format "-%02d:%02d" (or hour-end hour-start) (or minute-end minute-start)))
+                      ;; End date: TIMESTAMP-END--[YYYY-MM-DD DAY HH:MM
+                      ((or `daterange
+                           ;; Should never happen in the output of `org-element-timestamp-parser'.
+                           ;; Treat as an equivalent of `daterange' arbitrarily.
+                           `nil)
+                       (concat
+                        ;; repeater + warning + closing > or ]
+                        ;; This info is duplicated in date ranges.
+                        timestamp-end
+                        "--" (car brackets)
+                        (format-time-string
+                         ;; `org-time-stamp-formats'.
+	                 (org-time-stamp-format
+                          ;; Ignore time unless both HH:MM are available.
+                          ;; Ignore means (car org-timestamp-formats).
+                          (and minute-end hour-end)
+                          'no-brackets)
+	                 (org-encode-time
+                          ;; Closing HH:MM missing is a valid scenario.
+	                  0 (or minute-end 0) (or hour-end 0)
+                          ;; YEAR/MONTH/DAY-END will always be present
+                          ;; for `daterange' range-type, as parsed by
+                          ;; `org-element-timestamp-parser'.
+                          ;; For manually constructed timestamp
+                          ;; object, arbitrarily fall back to starting
+                          ;; date.
+	                  (or (org-element-property :day-end timestamp) day-start)
+	                  (or (org-element-property :month-end timestamp) month-start)
+	                  (or (org-element-property :year-end timestamp) year-start)))))))))
+               ;; repeater + warning + closing > or ]
+               ;; This info is duplicated in date ranges.
+               timestamp-end))))
+      ;; diary type.
+      (org-element-property :raw-value timestamp))))
 ;;;; Underline
 
 (defun org-element-underline-parser ()

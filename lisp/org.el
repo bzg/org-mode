@@ -20043,6 +20043,7 @@ Return a new timestamp object."
 	;; Set new type.
 	(org-element-put-property
 	 split-ts :type (if (eq type 'active-range) 'active 'inactive))
+        (org-element-put-property split-ts :range-type nil)
 	;; Copy start properties over end properties if END is
 	;; non-nil.  Otherwise, copy end properties over `start' ones.
 	(let ((p-alist '((:minute-start . :minute-end)
