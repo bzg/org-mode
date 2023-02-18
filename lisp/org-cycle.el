@@ -608,7 +608,9 @@ With a numeric prefix, show all headlines up to that level."
 (defun org-cycle-set-startup-visibility ()
   "Set the visibility required by startup options and properties."
   (cond
-   ((eq org-startup-folded t)
+   ;; `fold' is technically not allowed value, but it is often
+   ;; intuitively tried by users by analogy with #+STARTUP: fold.
+   ((memq org-startup-folded '(t fold))
     (org-cycle-overview))
    ((eq org-startup-folded 'content)
     (org-cycle-content))
@@ -620,8 +622,10 @@ With a numeric prefix, show all headlines up to that level."
     (org-cycle-content 4))
    ((eq org-startup-folded 'show5levels)
     (org-cycle-content 5))
-   ((or (eq org-startup-folded 'showeverything)
-	(eq org-startup-folded nil))
+   ;; `nofold' and `showall' are technically not allowed values, but
+   ;; they are often intuitively tried by users by analogy with
+   ;; #+STARTUP: nofold or #STARUP: showall.
+   ((memq org-startup-folded '(showeverything nil nofold showall))
     (org-fold-show-all)))
   (unless (eq org-startup-folded 'showeverything)
     (when org-cycle-hide-block-startup (org-fold-hide-block-all))
