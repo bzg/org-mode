@@ -251,7 +251,7 @@ echo ${table[spaghetti]}
                            (org-trim (org-babel-execute-src-block))))
                  (expected (concat "ARGS: --verbose 23 71"
                                    "\nhello tramp from " (file-local-name default-directory))))
-            (if (should (equal result expected)) nil
+            (if (should (equal result expected))
               ;; FIXME: Fails with non-local exit on Emacs 26.
               (when (version<= "27" emacs-version)
                 (kill-matching-buffers (format "\\*tramp/mock\\s-%s\\*" system-name) t t))))))))
