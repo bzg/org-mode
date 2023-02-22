@@ -89,6 +89,30 @@ the buffer."
     ;; Remove clocktable.
     (delete-region (point) (search-forward "#+END:\n"))))
 
+(ert-deftest test-org-clok/org-clock-timestamps-change ()
+  "Test `org-clock-timestamps-change' specifications."
+  (should
+   (equal
+    "CLOCK: [2023-02-19 Sun 21:30]--[2023-02-19 Sun 23:35] =>  2:05"
+    (org-test-with-temp-text
+        "CLOCK: [2023-02-19 Sun 2<point>2:30]--[2023-02-20 Mon 00:35] =>  2:05"
+      (org-clock-timestamps-change 'down 1)
+      (buffer-string))))
+  (should
+   (equal
+    "CLOCK: [2023-02-20 Mon 00:00]--[2023-02-20 Mon 00:40] =>  0:40"
+    (org-test-with-temp-text
+        "CLOCK: [2023-02-19 Sun 23:<point>55]--[2023-02-20 Mon 00:35] =>  0:40"
+      (org-clock-timestamps-change 'up 1)
+      (buffer-string))))
+  (should
+   (equal
+    "CLOCK: [2023-02-20 Mon 00:30]--[2023-02-20 Mon 01:35] =>  1:05"
+    (org-test-with-temp-text
+        "CLOCK: [2023-02-19 Sun 2<point>3:30]--[2023-02-20 Mon 00:35] =>  1:05"
+      (org-clock-timestamps-change 'up 1)
+      (buffer-string)))))
+
 
 ;;; Clock drawer
 
