@@ -20327,6 +20327,10 @@ packages are documented here.
   By default the index is two levels deep---you can modify the
   depth using the option ~org-imenu-depth~.
 
+  Org activates Imenu support only in the buffers opened after loading
+  Imenu library.  To enable Imenu support in an already opened Org
+  buffer, reload Org.
+
 - =speedbar.el= by Eric\nbsp{}M.\nbsp{}Ludlam ::
   #+cindex: @file{speedbar.el}
 
