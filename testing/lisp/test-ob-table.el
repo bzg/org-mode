@@ -26,8 +26,24 @@
 
 (ert-deftest test-ob-table/sbe ()
   "Test that `sbe' can be used to call code blocks from inside tables."
-  (org-test-at-id "6d2ff4ce-4489-4e2a-9c65-e3f71f77d975"
-    (should (equal "2.0" (org-sbe take-sqrt (n "4"))))))
+  (org-test-with-temp-text
+      "#+name: take-sqrt
+#+begin_src emacs-lisp :var n=9
+  (sqrt n)
+#+end_src"
+    ;; Symbol src block name.
+    (should (equal "2.0" (org-sbe take-sqrt (n "4"))))
+    ;; String src block name.
+    (should (equal "2.0" (org-sbe "take-sqrt" (n "4")))))
+  (org-test-with-temp-text
+      "#+name: identity
+#+begin_src emacs-lisp :var x=1
+  x
+#+end_src"
+    ;; Escape quotes.
+    (should
+     (equal "123°34'23.34\"otherthing"
+            (org-sbe identity (x $"123°34'23.34\"otherthing"))))))
 
 (provide 'test-ob-table)
 
