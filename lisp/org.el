@@ -4561,21 +4561,25 @@ is available.  This option applies only if FILE is a URL."
      (cache)
      (is-url
       (if (org--should-fetch-remote-resource-p file)
-          (with-current-buffer (url-retrieve-synchronously file)
-            (goto-char (point-min))
-            ;; Move point to after the url-retrieve header.
-            (search-forward "\n\n" nil :move)
-            ;; Search for the success code only in the url-retrieve header.
-            (if (save-excursion
-                  (re-search-backward "HTTP.*\\s-+200\\s-OK" nil :noerror))
-                ;; Update the cache `org--file-cache' and return contents.
-                (puthash file
-                         (buffer-substring-no-properties (point) (point-max))
-                         org--file-cache)
-              (funcall (if noerror #'message #'user-error)
-                       "Unable to fetch file from %S"
-                       file)
-              nil))
+          (condition-case error
+              (with-current-buffer (url-retrieve-synchronously file)
+                (goto-char (point-min))
+                ;; Move point to after the url-retrieve header.
+                (search-forward "\n\n" nil :move)
+                ;; Search for the success code only in the url-retrieve header.
+                (if (save-excursion
+                      (re-search-backward "HTTP.*\\s-+200\\s-OK" nil :noerror))
+                    ;; Update the cache `org--file-cache' and return contents.
+                    (puthash file
+                             (buffer-substring-no-properties (point) (point-max))
+                             org--file-cache)
+                  (funcall (if noerror #'message #'user-error)
+                           "Unable to fetch file from %S"
+                           file)
+                  nil))
+            (error (if noerror
+                       (message "Org could't download \"%s\": %s %S" file (car error) (cdr error))
+                     (signal (car error) (cdr error)))))
         (funcall (if noerror #'message #'user-error)
                  "The remote resource %S is considered unsafe, and will not be downloaded."
                  file)))
