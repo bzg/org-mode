@@ -3227,7 +3227,7 @@ INFO is a plist holding contextual information.  See
 			     (org-trim (plist-get info :html-link-home)))))
 	      (when (and home
 			 (plist-get info :html-link-use-abs-url)
-			 (file-name-absolute-p raw-path))
+			 (not (file-name-absolute-p raw-path)))
 		(setq raw-path (concat (file-name-as-directory home) raw-path))))
 	    ;; Maybe turn ".org" into ".html".
 	    (setq raw-path (funcall link-org-files-as-html-maybe raw-path info))
