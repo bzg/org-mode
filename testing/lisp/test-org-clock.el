@@ -1276,5 +1276,40 @@ CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
           (test-org-clock-clocktable-contents
            (format ":hidefiles t :scope (lambda () (list %S))" the-file))))))))
 
+;;; Mode line
+
+(ert-deftest test-org-clock/mode-line ()
+  "Test mode line string ends in a space.
+
+\"Elements that are added to [the mode line] should normally end
+in a space (to ensure that consecutive 'global-mode-string'
+elements display properly)\" per Emacs manual, Section 24.4.4
+Variables Used in the Mode Line."
+  ;; Test the variant without effort.
+  (should
+   (equal
+    "<before> [0:00] (Heading) <after> "
+    (org-test-with-temp-text
+        "* Heading"
+      (org-clock-in)
+      (prog1 (concat "<before> "
+                     (org-clock-get-clock-string)
+                     "<after> ")
+        (org-clock-out)))))
+  ;; Test the variant with effort.
+  (should
+   (equal
+    "<before> [0:00/1:00] (Heading) <after> "
+    (org-test-with-temp-text
+        "* Heading
+:PROPERTIES:
+:EFFORT: 1h
+:END:"
+      (org-clock-in)
+      (prog1 (concat "<before> "
+                     (org-clock-get-clock-string)
+                     "<after> ")
+        (org-clock-out))))))
+
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here
