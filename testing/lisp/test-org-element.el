@@ -125,7 +125,13 @@ Some other text
    (org-test-with-temp-text "* Headline\n *a*"
      (let ((tree (org-element-parse-buffer)))
        (org-element-set-contents (org-element-map tree 'bold 'identity nil t))
-       (org-element-contents (org-element-map tree 'bold 'identity nil t))))))
+       (org-element-contents (org-element-map tree 'bold 'identity nil t)))))
+  ;; Set contents of anonymous elements.
+  (should
+   (equal '#1=((b (:parent #1#)))
+          (let ((element '#1=((a (:parent #1#)) (b (:parent #1#)))))
+            (org-element-set-contents element `(b (:parent ,element)))
+            element))))
 
 (ert-deftest test-org-element/secondary-p ()
   "Test `org-element-secondary-p' specifications."

@@ -548,7 +548,14 @@ Return modified element."
   "Set ELEMENT's contents to CONTENTS.
 Return ELEMENT."
   (cond ((null element) contents)
-	((not (symbolp (car element))) contents)
+	((not (symbolp (car element)))
+         (if (not (listp element))
+             ;; Non-element.
+             contents
+           ;; Anonymous element (el1 el2 ...)
+           (setcar element (car contents))
+           (setcdr element (cdr contents))
+           element))
 	((cdr element) (setcdr (cdr element) contents) element)
 	(t (nconc element contents))))
 
