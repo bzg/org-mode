@@ -2600,7 +2600,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (otherwise "\\lstlistoflistings")))))))))
 
 
-;;;; Latex Environment
+;;;; LaTeX Environment
 
 (defun org-latex--environment-type (latex-environment)
   "Return the TYPE of LATEX-ENVIRONMENT.
@@ -2658,7 +2658,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (insert caption)
 	  (buffer-string))))))
 
-;;;; Latex Fragment
+;;;; LaTeX Fragment
 
 (defun org-latex-latex-fragment (latex-fragment _contents _info)
   "Transcode a LATEX-FRAGMENT object from Org to LaTeX.

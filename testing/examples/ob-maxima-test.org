@@ -79,7 +79,7 @@ m: genmatrix (lambda([i,j], i+j-1), 3, 3)$
 write_data(m, "/dev/stdout")$
 #+end_src
 
-* Latex output
+* LaTeX output
 #+begin_src maxima  :exports both :results latex :results verbatim
 assume(x>0);
 tex(ratsimp(diff(%e^(a*x), x)));

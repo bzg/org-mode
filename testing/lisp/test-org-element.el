@@ -1680,7 +1680,7 @@ Paragraph"
      (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
-;;;; Latex Environment
+;;;; LaTeX Environment
 
 (ert-deftest test-org-element/latex-environment-parser ()
   "Test `latex-environment' parser."
@@ -1745,7 +1745,7 @@ e^{i\\pi}+1=0
      (= (org-element-property :end (org-element-at-point)) (point-max)))))
 
 
-;;;; Latex Fragment
+;;;; LaTeX Fragment
 
 (ert-deftest test-org-element/latex-fragment-parser ()
   "Test `latex-fragment' parser."
@@ -4156,7 +4156,7 @@ Text
                       (org-element-type (org-element-at-point))))))
   (should-not (eq 'headline
                   (org-test-with-temp-text "* H1\nP1\n<point>*H2\n"
-                    (let ((org-element-use-cache t))  
+                    (let ((org-element-use-cache t))
                       (org-element-cache-map #'ignore :granularity 'element)
                       (backward-delete-char 1)
                       (org-element-type (org-element-at-point))))))
