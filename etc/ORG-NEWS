@@ -6540,7 +6540,7 @@ that Calc formulas can operate on them.
 
 *** Hyperlinks
 
-**** Org-Bibtex -- major improvements
+**** Org-BibTeX -- major improvements
 
      Provides support for managing bibtex bibliographical references
      data in headline properties.  Each headline corresponds to a
