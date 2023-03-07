@@ -1283,8 +1283,8 @@ CLOCK: [2012-03-29 Thu 16:00]--[2012-03-29 Thu 17:00] =>  1:00"
 
 \"Elements that are added to [the mode line] should normally end
 in a space (to ensure that consecutive 'global-mode-string'
-elements display properly)\" per Emacs manual, Section 24.4.4
-Variables Used in the Mode Line."
+elements display properly)\" per the Info node `(elisp)Mode Line
+Variables'."
   ;; Test the variant without effort.
   (should
    (equal
