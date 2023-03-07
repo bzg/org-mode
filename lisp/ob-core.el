@@ -3208,7 +3208,8 @@ Otherwise return nil."
 
 (defun org-babel-import-elisp-from-file (file-name &optional separator)
   "Read the results located at FILE-NAME into an elisp table.
-If the table is trivial, then return it as a scalar."
+If the table is trivial, then return it as a scalar.
+SEPARATOR is passed to `org-table-convert-region', which see."
   (let ((result
 	 (with-temp-buffer
 	   (condition-case err
