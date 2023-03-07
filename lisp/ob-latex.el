@@ -141,7 +141,7 @@ exporting the literal LaTeX source."
   (org-trim body))
 
 (defun org-babel-execute:latex (body params)
-  "Execute a block of Latex code with Babel.
+  "Execute a block of LaTeX code with Babel.
 This function is called by `org-babel-execute-src-block'."
   (setq body (org-babel-expand-body:latex body params))
   (if (cdr (assq :file params))
