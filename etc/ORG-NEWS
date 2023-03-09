@@ -96,6 +96,21 @@ The face ~org-agenda-calendar-daterange~ is used to show entries with
 a date range in the agenda.  It inherits from the default face in
 order to remain backward-compatible.
 
+*** New ~org-babel-clojurescript-backend~ option to choose ClojureScript backend
+
+Before, a ClojureScript source block used the same backend as Clojure,
+configured in ~org-babel-clojure-backend~ and relied on an undocumented
+~:target~ paramter.
+
+Now, there's ~org-babel-clojurescript-backend~ to determine the
+backend used for evaluation of ClojureScript.
+
+*** Support for Clojure CLI in ~ob-clojure~
+
+~ob-clojure~ now supports executing babel source blocks with the
+official [[https://clojure.org/guides/deps_and_cli][Clojure CLI tools]].
+The command can be customized with ~ob-clojure-cli-command~.
+
 ** New features
 *** ~org-metaup~ and ~org-metadown~ now act on headings in region
 
@@ -115,6 +130,14 @@ selection.
 
 TODO state, priority, tags, statistics cookies, and COMMENT keywords
 are allowed in the tree structure.
+
+** Miscellaneous
+*** Remove undocumented ~:target~ header parameter in ~ob-clojure~
+
+The ~:target~ header was only used internally to distinguish
+from Clojure and ClojureScript.
+This is now handled with an optional function parameter in
+the respective functions that need this information.
 
 * Version 9.6
 
