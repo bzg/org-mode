@@ -3956,7 +3956,6 @@ FILTER-ALIST is an alist of filters we need to apply when
 	  (message "Sticky Agenda buffer, use `r' to refresh")
 	  (or org-agenda-multi (org-agenda-fit-window-to-buffer))
 	  (throw 'exit "Sticky Agenda buffer, use `r' to refresh"))
-      (setq org-todo-keywords-for-agenda nil)
       (if org-agenda-multi
 	  (progn
 	    (setq buffer-read-only nil)
@@ -3969,6 +3968,7 @@ FILTER-ALIST is an alist of filters we need to apply when
 			(make-string (window-max-chars-per-line) org-agenda-block-separator))
 		      "\n"))
 	    (narrow-to-region (point) (point-max)))
+	(setq org-todo-keywords-for-agenda nil)
 	(setq org-done-keywords-for-agenda nil)
 	;; Setting any org variables that are in org-agenda-local-vars
 	;; list need to be done after the prepare call
