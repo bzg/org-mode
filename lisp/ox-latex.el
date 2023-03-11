@@ -2980,7 +2980,14 @@ information."
   "Transcode a PARAGRAPH element from Org to LaTeX.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  contents)
+  ;; Ensure that we do not create multiple paragraphs, when a single
+  ;; paragraph is expected.
+  ;; Multiple newlines may appear in CONTENTS, for example, when
+  ;; certain objects are stripped from export, leaving single newlines
+  ;; before and after.
+  (replace-regexp-in-string
+   (rx "\n" (1+ (0+ space) "\n")) "\n"
+   contents))
 
 
 ;;;; Plain List
