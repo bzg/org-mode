@@ -218,17 +218,14 @@ This function is called by `org-babel-execute-src-block'."
 	    (if (string-suffix-p ".svg" out-file)
 		(progn
 		  (shell-command "pwd")
-		  (shell-command (format "mv %s %s"
-					 (concat (file-name-sans-extension tex-file) "-1.svg")
-					 out-file)))
+                  (rename-file (concat (file-name-sans-extension tex-file) "-1.svg")
+                               out-file t))
 	      (error "SVG file produced but HTML file requested")))
 	   ((file-exists-p (concat (file-name-sans-extension tex-file) ".html"))
 	    (if (string-suffix-p ".html" out-file)
-		(shell-command "mv %s %s"
-			       (concat (file-name-sans-extension tex-file)
-				       ".html")
-			       out-file)
-	      (error "HTML file produced but SVG file requested")))))
+                (rename-file (concat (file-name-sans-extension tex-file) ".html")
+                             out-file t)
+              (error "HTML file produced but SVG file requested")))))
 	 ((or (string= "pdf" extension) imagemagick)
 	  (with-temp-file tex-file
 	    (require 'ox-latex)
