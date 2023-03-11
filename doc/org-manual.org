@@ -11675,7 +11675,7 @@ text.  Markers always start with =fn:=.  For example:
 #+begin_example
 The Org website[fn:1] now looks a lot better than it used to.
 ...
-[fn:55] The link is: https://orgmode.org
+[fn:49] The link is: https://orgmode.org
 #+end_example
 
 Org mode extends the number-based syntax to /named/ footnotes and
@@ -19253,6 +19253,9 @@ the second code block is expanded as
 ,#+END_SRC
 #+end_example
 
+Note that noweb expansion does not automatically carry over =:var=
+header arguments[fn:49].
+
 You may also include the contents of multiple blocks sharing a common
 =noweb-ref= header argument, which can be set at the file, subtree,
 or code block level.  In the example Org file shown next, the body of
@@ -19788,7 +19791,7 @@ in the desired amount with hard spaces and hiding leading stars.
 To display the buffer in the indented view, activate Org Indent minor
 mode, using {{{kbd(M-x org-indent-mode)}}}.  Text lines that are not
 headlines are prefixed with virtual spaces to vertically align with
-the headline text[fn:49].
+the headline text[fn:50].
 
 #+vindex: org-indent-indentation-per-level
 To make more horizontal space, the headlines are shifted by two
@@ -19816,7 +19819,7 @@ use =STARTUP= keyword as follows:
 
 It is possible to use hard spaces to achieve the indentation instead,
 if the bare ASCII file should have the indented look also outside
-Emacs[fn:50].  With Org's support, you have to indent all lines to
+Emacs[fn:51].  With Org's support, you have to indent all lines to
 line up with the outline headers.  You would use these settings[fn::
 ~org-adapt-indentation~ can also be set to ='headline-data=, in which
 case only data lines below the headline will be indented.]:
@@ -20971,7 +20974,7 @@ Tags]]) only for those set in these variables.
 
 #+vindex: org-mobile-directory
 The mobile application needs access to a file directory on
-a server[fn:51] to interact with Emacs.  Pass its location through
+a server[fn:52] to interact with Emacs.  Pass its location through
 the ~org-mobile-directory~ variable.  If you can mount that directory
 locally just set the variable to point to that directory:
 
@@ -21015,7 +21018,7 @@ Symbolic links in ~org-directory~ need to have the same name as their
 targets.].
 
 Push creates a special Org file =agendas.org= with custom agenda views
-defined by the user[fn:52].
+defined by the user[fn:53].
 
 Finally, Org writes the file =index.org=, containing links to other
 files.  The mobile application reads this file first from the server
@@ -21335,7 +21338,7 @@ of these strategies:
 To wrap a source table in LaTeX, use the =comment= environment
 provided by =comment.sty=[fn:: https://www.ctan.org/pkg/comment].  To
 activate it, put ~\usepackage{comment}~ in the document header.
-Orgtbl mode inserts a radio table skeleton[fn:53] with the command
+Orgtbl mode inserts a radio table skeleton[fn:54] with the command
 {{{kbd(M-x orgtbl-insert-radio-table)}}}, which prompts for a table
 name.  For example, if =salesfigures= is the name, the template
 inserts:
@@ -21355,7 +21358,7 @@ The line =#+ORGTBL: SEND= tells Orgtbl mode to use the function
 ~orgtbl-to-latex~ to convert the table to LaTeX format, then insert
 the table at the target (receive) location named =salesfigures=.  Now
 the table is ready for data entry.  It can even use spreadsheet
-features[fn:54]:
+features[fn:55]:
 
 #+begin_example
 % BEGIN RECEIVE ORGTBL salesfigures
@@ -22770,29 +22773,58 @@ as latexmk, can select the correct bibliography compiler.
 are not evaluated when they appear in a keyword (see [[*Summary of
 In-Buffer Settings]]).
 
-[fn:49] Org Indent mode also sets ~wrap-prefix~ correctly for
+[fn:49] In the following example, attempting to evaluate
+the second code block will give an error, because the variables
+defined in the first code block will not be defined in the second
+block.
+
+#+begin_example
+,#+NAME: get-prompt
+,#+BEGIN_SRC emacs-lisp :var prompt="root> " :var command="ls"
+  (concat prompt command)
+,#+END_SRC
+
+,#+RESULTS: get-prompt
+: root> ls
+
+,#+BEGIN_SRC emacs-lisp :noweb yes
+  <<get-prompt>>
+,#+END_SRC
+#+end_example
+
+The previous block is expanded without setting ~prompt~ and ~command~
+values.
+
+#+begin_example
+,#+BEGIN_SRC emacs-lisp
+  (concat prompt command)
+,#+END_SRC
+#+end_example
+
+
+[fn:50] Org Indent mode also sets ~wrap-prefix~ correctly for
 indenting and wrapping long lines of headlines or text.  This minor
 mode also handles Visual Line mode and directly applied settings
 through ~word-wrap~.
 
-[fn:50] This works, but requires extra effort.  Org Indent mode is
+[fn:51] This works, but requires extra effort.  Org Indent mode is
 more convenient for most applications.
 
-[fn:51] For a server to host files, consider using a WebDAV server,
+[fn:52] For a server to host files, consider using a WebDAV server,
 such as [[https://nextcloud.com][Nextcloud]].  Additional help is at this [[https://orgmode.org/worg/org-faq.html#mobileorg_webdav][FAQ entry]].
 
-[fn:52] While creating the agendas, Org mode forces =ID= properties
+[fn:53] While creating the agendas, Org mode forces =ID= properties
 on all referenced entries, so that these entries can be uniquely
 identified if Org Mobile flags them for further action.  To avoid
 setting properties configure the variable
 ~org-mobile-force-id-on-agenda-items~ to ~nil~.  Org mode then relies
 on outline paths, assuming they are unique.
 
-[fn:53] By default this works only for LaTeX, HTML, and Texinfo.
+[fn:54] By default this works only for LaTeX, HTML, and Texinfo.
 Configure the variable ~orgtbl-radio-table-templates~ to install
 templates for other modes.
 
-[fn:54] If the =TBLFM= keyword contains an odd number of dollar
+[fn:55] If the =TBLFM= keyword contains an odd number of dollar
 characters, this may cause problems with Font Lock in LaTeX mode.  As
 shown in the example you can fix this by adding an extra line inside
 the =comment= environment that is used to balance the dollar
