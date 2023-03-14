@@ -1272,7 +1272,7 @@ used.  When nil, no theme is applied."
 (defun org-latex-generate-engraved-preamble (info)
   "Generate the preamble to setup engraved code.
 The result is constructed from the :latex-engraved-preamble and
-:latex-engraved-optionsn export options, the default values of
+:latex-engraved-options export options, the default values of
 which are given by `org-latex-engraved-preamble' and
 `org-latex-engraved-options' respectively."
   (let* ((engraved-options
