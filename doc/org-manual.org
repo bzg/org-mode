@@ -11152,14 +11152,14 @@ snippets are identified as LaTeX source code:
   =\begin= statement appears on a new line, preceded by only
   whitespace.
 
-- Text within the usual LaTeX math delimiters.  To avoid conflicts
-  with currency specifications, single =$= characters are only
-  recognized as math delimiters if the enclosed text contains at most
-  two line breaks, is directly attached to the =$= characters with no
-  whitespace in between, and if the closing =$= is followed by
-  whitespace, punctuation or a dash.  For the other delimiters, there
-  is no such restriction, so when in doubt, use =\(...\)= as inline
-  math delimiters.
+- Text within the usual LaTeX math delimiters.  Prefer =\(...\)= for
+  inline fragments.  The =$...$= alternative has some restrictions and
+  may be a source of confusion.  To avoid conflicts with currency
+  specifications, single =$= characters are only recognized as math
+  delimiters if the enclosed text contains at most two line breaks, is
+  directly attached to the =$= characters with no whitespace in
+  between, and if the closing =$= is followed by whitespace or
+  punctuation (but not a dash).
 
 #+texinfo: @noindent
 For example:
