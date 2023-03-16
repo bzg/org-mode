@@ -4,28 +4,18 @@ ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
 
-ifneq ($(ORG_ADD_CONTRIB),)
-  _ORG_ADD_EL_ := \
-	$(notdir \
-	$(wildcard \
-	$(addsuffix .el, \
-	$(addprefix ../contrib/lisp/, \
-	$(basename \
-	$(notdir $(ORG_ADD_CONTRIB)))))))
-endif
-
 LISPV 	:= org-version.el
 LISPI 	:= org-loaddefs.el
 LISPA 	:= $(LISPV) $(LISPI)
 LISPB 	:= $(LISPA:%el=%elc) org-install.elc
-LISPF 	:= $(filter-out $(LISPA),$(sort $(wildcard *.el) $(_ORG_ADD_EL_)))
+LISPF 	:= $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC 	:= $(filter-out $(LISPB) $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 _ORGCM_ := dirall single source slint1 slint2
 -include local.mk
 
 .PHONY:	all compile compile-dirty \
 	$(_ORGCM_) $(_ORGCM_:%=compile-%) \
-	autoloads addcontrib \
+	autoloads \
 	install clean cleanauto cleanall cleanelc clean-install
 
 # do not clean here, done in toplevel make
@@ -59,12 +49,7 @@ slint1:
 	@$(info Compiling single $(abspath $<)...)
 	-@$(ELC) $<
 
-addcontrib:
-ifneq ($(ORG_ADD_CONTRIB),)
-	$(CP) $(addprefix ../contrib/lisp/,$(_ORG_ADD_EL_)) .
-endif
-
-autoloads:	cleanauto addcontrib $(LISPI) $(LISPV)
+autoloads:	cleanauto $(LISPI) $(LISPV)
 
 $(LISPV):	$(LISPF)
 	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
