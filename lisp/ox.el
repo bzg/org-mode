@@ -6813,14 +6813,14 @@ or FILE."
 	       (with-temp-buffer
 		 (insert output)
 		 (let ((coding-system-for-write ',encoding))
-		   (write-region (point-min) (point-max) ,file)))
+		   (write-region nil nil ,file)))
 	       (or (ignore-errors (funcall ',post-process ,file)) ,file)))
         (let ((output (org-export-as
                        backend subtreep visible-only body-only ext-plist)))
           (with-temp-buffer
             (insert output)
             (let ((coding-system-for-write encoding))
-	      (write-region (point-min) (point-max) file)))
+	      (write-region nil nil file)))
           (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p output))
             (org-kill-new output))
           ;; Get proper return value.
