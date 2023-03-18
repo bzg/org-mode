@@ -3667,13 +3667,8 @@ the agenda to write."
 	                        "ox-icalendar" (file))
 	      (org-icalendar-export-current-agenda (expand-file-name file)))
 	     (t
-	      (let ((bs (buffer-string)))
-		(find-file file)
-		(erase-buffer)
-		(insert bs)
-		(save-buffer 0)
-		(kill-buffer (current-buffer))
-		(message "Plain text written to %s" file))))))))
+              (write-region nil nil file)
+              (message "Plain text written to %s" file)))))))
     (set-buffer (or agenda-bufname
 		    ;; FIXME: I'm pretty sure called-interactively-p
                     ;; doesn't do what we want here!

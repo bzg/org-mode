@@ -4332,14 +4332,8 @@ extension of the given file name, and finally on the variable
 		(table (org-table-to-lisp)))
 	    (unless (fboundp transform)
 	      (user-error "No such transformation function %s" transform))
-	    (let (buf)
-	      (with-current-buffer (find-file-noselect file)
-		(setq buf (current-buffer))
-		(erase-buffer)
-		(fundamental-mode)
-		(insert (funcall transform table params) "\n")
-		(save-buffer))
-	      (kill-buffer buf))
+            (with-temp-file file
+              (insert (funcall transform table params) "\n"))
 	    (message "Export done."))
 	(user-error "TABLE_EXPORT_FORMAT invalid")))))
 

@@ -255,26 +255,27 @@ constructs (header arguments, no-web syntax etc...) are ignored."
                        t t)
         (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
     (save-excursion
-      ;; export to latex w/org and save as .lhs
-      (require 'ox-latex)
-      (find-file tmp-org-file)
-      ;; Ensure we do not clutter kill ring with incomplete results.
-      (let (org-export-copy-to-kill-ring)
-	(org-export-to-file 'latex tmp-tex-file))
-      (kill-buffer nil)
-      (delete-file tmp-org-file)
-      (find-file tmp-tex-file)
-      (goto-char (point-min)) (forward-line 2)
-      (insert "%include polycode.fmt\n")
-      ;; ensure all \begin/end{code} statements start at the first column
-      (while (re-search-forward "^[ \t]+\\\\begin{code}[^\000]+\\\\end{code}" nil t)
-        (replace-match (save-match-data (org-remove-indentation (match-string 0)))
-                       t t))
-      (setq contents (buffer-string))
-      (save-buffer) (kill-buffer nil))
-    (delete-file tmp-tex-file)
-    ;; save org exported latex to a .lhs file
-    (with-temp-file lhs-file (insert contents))
+      (unwind-protect
+          (with-temp-buffer
+            ;; Export to latex w/org and save as .lhs
+            (require 'ox-latex)
+            (insert-file-contents tmp-org-file)
+            ;; Ensure we do not clutter kill ring with incomplete results.
+            (let (org-export-copy-to-kill-ring)
+	      (org-export-to-file 'latex tmp-tex-file)))
+        (delete-file tmp-org-file))
+      (unwind-protect
+          (with-temp-buffer
+            (insert-file-contents tmp-tex-file)
+            (goto-char (point-min)) (forward-line 2)
+            (insert "%include polycode.fmt\n")
+            ;; ensure all \begin/end{code} statements start at the first column
+            (while (re-search-forward "^[ \t]+\\\\begin{code}[^\000]+\\\\end{code}" nil t)
+              (replace-match (save-match-data (org-remove-indentation (match-string 0)))
+                             t t))
+            ;; save org exported latex to a .lhs file
+            (write-region nil nil lhs-file))
+        (delete-file tmp-tex-file)))
     (if (not arg)
         (find-file lhs-file)
       ;; process .lhs file with lhs2tex

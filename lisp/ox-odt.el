@@ -1365,50 +1365,40 @@ original parsed data.  INFO is a plist holding export options."
     ;; Ensure we have write permissions to this file.
     (set-file-modes (concat org-odt-zip-dir "styles.xml") #o600)
 
-    ;; FIXME: Who is opening an empty styles.xml before this point?
-    (with-current-buffer
-	(find-file-noselect (concat org-odt-zip-dir "styles.xml") t)
-      (revert-buffer t t)
+    (let ((styles-xml (concat org-odt-zip-dir "styles.xml")))
+      (with-temp-buffer
+        (when (file-exists-p styles-xml)
+          (insert-file-contents styles-xml))
+        
+        ;; Write custom styles for source blocks
+        ;; Save STYLES used for colorizing of source blocks.
+        ;; Update styles.xml with styles that were collected as part of
+        ;; `org-odt-hfy-face-to-css' callbacks.
+        (let ((styles (mapconcat (lambda (style) (format " %s\n" (cddr style)))
+			         hfy-user-sheet-assoc "")))
+          (when styles
+	    (goto-char (point-min))
+	    (when (re-search-forward "</office:styles>" nil t)
+	      (goto-char (match-beginning 0))
+	      (insert "\n<!-- Org Htmlfontify Styles -->\n" styles "\n"))))
 
-      ;; Write custom styles for source blocks
-      ;; Save STYLES used for colorizing of source blocks.
-      ;; Update styles.xml with styles that were collected as part of
-      ;; `org-odt-hfy-face-to-css' callbacks.
-      (let ((styles (mapconcat (lambda (style) (format " %s\n" (cddr style)))
-			       hfy-user-sheet-assoc "")))
-	(when styles
-	  (goto-char (point-min))
-	  (when (re-search-forward "</office:styles>" nil t)
-	    (goto-char (match-beginning 0))
-	    (insert "\n<!-- Org Htmlfontify Styles -->\n" styles "\n"))))
+        ;; Update styles.xml - take care of outline numbering
+        ;; Outline numbering is retained only up to LEVEL.
+        ;; To disable outline numbering pass a LEVEL of 0.
 
-      ;; Update styles.xml - take care of outline numbering
-
-      ;; Don't make automatic backup of styles.xml file. This setting
-      ;; prevents the backed-up styles.xml file from being zipped in to
-      ;; odt file. This is more of a hackish fix. Better alternative
-      ;; would be to fix the zip command so that the output odt file
-      ;; includes only the needed files and excludes any auto-generated
-      ;; extra files like backups and auto-saves etc etc. Note that
-      ;; currently the zip command zips up the entire temp directory so
-      ;; that any auto-generated files created under the hood ends up in
-      ;; the resulting odt file.
-      (setq-local backup-inhibited t)
-
-      ;; Outline numbering is retained only up to LEVEL.
-      ;; To disable outline numbering pass a LEVEL of 0.
-
-      (goto-char (point-min))
-      (let ((regex
-	     "<text:outline-level-style\\([^>]*\\)text:level=\"\\([^\"]*\\)\"\\([^>]*\\)>")
-	    (replacement
-	     "<text:outline-level-style\\1text:level=\"\\2\" style:num-format=\"\">"))
-	(while (re-search-forward regex nil t)
-	  (unless (let ((sec-num (plist-get info :section-numbers))
-			(level (string-to-number (match-string 2))))
-		    (if (wholenump sec-num) (<= level sec-num) sec-num))
-	    (replace-match replacement t nil))))
-      (save-buffer 0)))
+        (let ((regex
+	       "<text:outline-level-style\\([^>]*\\)text:level=\"\\([^\"]*\\)\"\\([^>]*\\)>")
+	      (replacement
+	       "<text:outline-level-style\\1text:level=\"\\2\" style:num-format=\"\">"))
+          (goto-char (point-min))
+          (while (re-search-forward regex nil t)
+	    (unless (let ((sec-num (plist-get info :section-numbers))
+		          (level (string-to-number (match-string 2))))
+		      (if (wholenump sec-num) (<= level sec-num) sec-num))
+	      (replace-match replacement t nil))))
+        
+        ;; Write back the new contents.
+        (write-region nil nil styles-xml))))
   ;; Update content.xml.
 
   (let* ( ;; `org-display-custom-times' should be accessed right
