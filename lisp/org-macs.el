@@ -380,6 +380,11 @@ it for output."
     ;; Check for process failure.  Output file is expected to be
     ;; located in the same directory as SOURCE.
     (unless (org-file-newer-than-p output time)
+      (ignore (defvar org-batch-test))
+      ;; Display logs when running tests.
+      (when org-batch-test
+        (message "org-compile-file log ::\n-----\n%s\n-----\n"
+                 (with-current-buffer log-buf (buffer-string))))
       (error (format "File %S wasn't produced%s" output err-msg)))
     output))
 
