@@ -27,6 +27,7 @@
 ;;; Requirements:
 
 (require 'ob-core)
+(require 'org-macs)
 
 (unless (featurep 'ob-shell)
   (signal 'missing-test-dependency "Support for Shell code blocks"))
@@ -74,6 +75,59 @@ the body of the tangled block does."
     (should (listp result))
     (if (should (equal '((1) (2)) result))
         (kill-buffer session-name))))
+
+(ert-deftest test-ob-shell/session-async-valid-header-arg-values ()
+  "Test that session runs asynchronously for certain :async values."
+  (let ((session-name "test-ob-shell/session-async-valid-header-arg-values")
+        (kill-buffer-query-functions nil))
+    (dolist (arg-val '("t" ""))
+     (org-test-with-temp-text
+         (concat "#+begin_src sh :session " session-name " :async " arg-val "
+echo 1<point>
+#+end_src")
+       (if (should
+            (string-match
+             org-uuid-regexp
+             (org-trim (org-babel-execute-src-block))))
+           (kill-buffer session-name))))))
+
+(ert-deftest test-ob-shell/session-async-inserts-uuid-before-results-are-returned ()
+  "Test that a uuid placeholder is inserted before results are inserted."
+  (let ((session-name "test-ob-shell/session-async-inserts-uuid-before-results-are-returned")
+        (kill-buffer-query-functions nil))
+    (org-test-with-temp-text
+        (concat "#+begin_src sh :session " session-name " :async t
+echo 1<point>
+#+end_src")
+      (if (should
+           (string-match
+            org-uuid-regexp
+            (org-trim (org-babel-execute-src-block))))
+          (kill-buffer session-name)))))
+
+(ert-deftest test-ob-shell/session-async-evaluation ()
+  "Test the async evaluation process."
+  (let* ((session-name "test-ob-shell/session-async-evaluation")
+         (kill-buffer-query-functions nil)
+         (start-time (current-time))
+         (wait-time (time-add start-time 3))
+         uuid-placeholder)
+    (org-test-with-temp-text
+        (concat "#+begin_src sh :session " session-name " :async t
+echo 1
+echo 2<point>
+#+end_src")
+      (setq uuid-placeholder (org-trim (org-babel-execute-src-block)))
+      (catch 'too-long
+        (while (string-match uuid-placeholder (buffer-string))
+          (progn
+            (sleep-for 0.01)
+            (when (time-less-p wait-time (current-time))
+              (throw 'too-long (ert-fail "Took too long to get result from callback"))))))
+    (search-forward "#+results")
+    (beginning-of-line 2)
+    (if (should (string= ": 1\n: 2\n" (buffer-substring-no-properties (point) (point-max))))
+          (kill-buffer session-name)))))
 
 (ert-deftest test-ob-shell/generic-uses-no-arrays ()
   "Test generic serialization of array into a single string."

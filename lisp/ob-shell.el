@@ -269,12 +269,22 @@ var of the same value."
 	    (set-marker comint-last-output-start (point))
 	    (get-buffer (current-buffer)))))))
 
+(defconst ob-shell-async-indicator "echo 'ob_comint_async_shell_%s_%s'"
+  "Session output delimiter template.
+See `org-babel-comint-async-indicator'.")
+
+(defun ob-shell-async-chunk-callback (string)
+  "Filter applied to results before insertion.
+See `org-babel-comint-async-chunk-callback'."
+  (replace-regexp-in-string comint-prompt-regexp "" string))
+
 (defun org-babel-sh-evaluate (session body &optional params stdin cmdline)
   "Pass BODY to the Shell process in BUFFER.
 If RESULT-TYPE equals `output' then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals `value' then
 return the value of the last statement in BODY."
   (let* ((shebang (cdr (assq :shebang params)))
+         (async (org-babel-comint-use-async params))
 	 (results-params (cdr (assq :result-params params)))
 	 (value-is-exit-status
 	  (or (and
@@ -306,19 +316,37 @@ return the value of the last statement in BODY."
                                 (concat (file-local-name script-file)  " " cmdline)))))
 		(buffer-string))))
 	   (session			; session evaluation
-	    (mapconcat
-	     #'org-babel-sh-strip-weird-long-prompt
-	     (mapcar
-	      #'org-trim
-	      (butlast ; Remove eoe indicator
-	       (org-babel-comint-with-output
-		   (session org-babel-sh-eoe-output t body)
-                 (insert (org-trim body) "\n"
-                         org-babel-sh-eoe-indicator)
-		 (comint-send-input nil t))
-               ;; Remove `org-babel-sh-eoe-indicator' output line.
-	       1))
-	     "\n"))
+            (if async
+                (progn
+                  (let ((uuid (org-id-uuid)))
+                    (org-babel-comint-async-register
+                     session
+                     (current-buffer)
+                     "ob_comint_async_shell_\\(.+\\)_\\(.+\\)"
+                     'ob-shell-async-chunk-callback
+                     nil)
+                    (org-babel-comint-async-delete-dangling-and-eval
+                        session
+                      (insert (format ob-shell-async-indicator "start" uuid))
+                      (comint-send-input nil t)
+                      (insert (org-trim body))
+                      (comint-send-input nil t)
+                      (insert (format ob-shell-async-indicator "end" uuid))
+                      (comint-send-input nil t))
+                    uuid))
+	      (mapconcat
+	       #'org-babel-sh-strip-weird-long-prompt
+	       (mapcar
+	        #'org-trim
+	        (butlast ; Remove eoe indicator
+	         (org-babel-comint-with-output
+		     (session org-babel-sh-eoe-output t body)
+                   (insert (org-trim body) "\n"
+                           org-babel-sh-eoe-indicator)
+		   (comint-send-input nil t))
+                 ;; Remove `org-babel-sh-eoe-indicator' output line.
+	         1))
+	       "\n")))
 	   ;; External shell script, with or without a predefined
 	   ;; shebang.
 	   ((org-string-nw-p shebang)
