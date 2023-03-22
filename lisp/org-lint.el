@@ -1251,6 +1251,14 @@ Use \"export %s\" instead"
              (format "Bullet counter \"%s\" is not the same with item position %d.  Consider adding manual [@%d] counter."
                      bullet (car (last true-number)) bullet-number))))))))
 
+(defun org-lint-LaTeX-$ (ast)
+  "Report semi-obsolete $...$ LaTeX fragments."
+  (org-element-map ast 'latex-fragment
+    (lambda (fragment)
+      (and (string-match-p "^[$][^$]" (org-element-property :value fragment))
+           (list (org-element-property :begin fragment)
+                 "Potentially confusing LaTeX fragment format.  Prefer using more reliable \\(...\\)")))))
+
 
 ;;; Checkers declaration
 
@@ -1478,6 +1486,11 @@ Use \"export %s\" instead"
   "Report inconsistent item numbers in lists"
   #'org-lint-item-number
   :categories '(plain-list))
+
+(org-lint-add-checker 'LaTeX-$
+  "Report potentially confusing $...$ LaTeX markup."
+  #'org-lint-LaTeX-$
+  :categories '(markup))
 
 (provide 'org-lint)
 
