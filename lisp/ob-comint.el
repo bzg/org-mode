@@ -91,7 +91,16 @@ or user `keyboard-quit' during execution of body."
                               ;; trailing newline.  Use more reliable
                               ;; match to split the output later.
                               (replace-regexp-in-string
-                               comint-prompt-regexp
+                               ;; Sometimes, we get multiple agglomerated
+                               ;; prompts together in a single output:
+                               ;; "prompt prompt prompt output"
+                               ;; Remove them progressively, so that
+                               ;; possible "^" in the prompt regexp gets to
+                               ;; work as we remove the heading prompt
+                               ;; instance.
+                               (if (string-prefix-p "^" comint-prompt-regexp)
+                                   (format "^\\(%s\\)+" (substring comint-prompt-regexp 1))
+                                 comint-prompt-regexp)
                                ,org-babel-comint-prompt-separator
                                text))))
 		     comint-output-filter-functions))
