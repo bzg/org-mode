@@ -274,6 +274,8 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("brvbar" "\\textbrokenbar{}" nil "&brvbar;" "|" "¦" "¦")
      ("S" "\\S" nil "&sect;" "section" "§" "§")
      ("sect" "\\S" nil "&sect;" "section" "§" "§")
+     ("P" "\\P{}" nil "&para;" "paragraph" "¶" "¶")
+     ("para" "\\P{}" nil "&para;" "paragraph" "¶" "¶")
      ("amp" "\\&" nil "&amp;" "&" "&" "&")
      ("lt" "\\textless{}" nil "&lt;" "<" "<" "<")
      ("gt" "\\textgreater{}" nil "&gt;" ">" ">" ">")
@@ -489,7 +491,6 @@ packages to be loaded, add these packages to `org-latex-packages-alist'."
      ("checkmark" "\\checkmark" t "&check;" "[checkmark]" "[checkmark]" "✓")
 
      "** Miscellaneous (seldom used)"
-     ("para" "\\P{}" nil "&para;" "[pilcrow]" "¶" "¶")
      ("ordf" "\\textordfeminine{}" nil "&ordf;" "_a_" "ª" "ª")
      ("ordm" "\\textordmasculine{}" nil "&ordm;" "_o_" "º" "º")
      ("cedil" "\\c{}" nil "&cedil;" "[cedilla]" "¸" "¸")
