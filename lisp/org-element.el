@@ -1103,7 +1103,7 @@ Assume point is at beginning of the headline."
                          (skip-chars-forward " \t")))
 	   (level (org-reduced-level true-level))
 	   (todo (and org-todo-regexp
-		      (let (case-fold-search) (looking-at (concat org-todo-regexp " ")))
+		      (let (case-fold-search) (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
 		      (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")
 			     (match-string 1))))

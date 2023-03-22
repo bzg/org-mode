@@ -1206,7 +1206,10 @@ Some other text
   ;; Todo keyword is prefix of headlines first word.
   (org-test-with-temp-text "* TODOHeadline"
     (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (should-not (org-element-property :todo-keyword (org-element-at-point))))))
+      (should-not (org-element-property :todo-keyword (org-element-at-point)))))
+  (org-test-with-temp-text "* TODO"
+    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should (org-element-property :todo-keyword (org-element-at-point))))))
 
 (ert-deftest test-org-element/headline-comment-keyword ()
   "Test COMMENT keyword recognition."
