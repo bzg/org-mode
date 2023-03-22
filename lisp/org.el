@@ -18457,10 +18457,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
     (setq s (replace-match "\\vert" t t s)))
   s)
 
-(defun org-uuidgen-p (s)
-  "Is S an ID created by UUIDGEN?"
-  (string-match "\\`[0-9a-f]\\{8\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{12\\}\\'" (downcase s)))
-
 (defun org-in-src-block-p (&optional inside element)
   "Whether point is in a code source block.
 When INSIDE is non-nil, don't consider we are within a source
