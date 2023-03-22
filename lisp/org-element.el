@@ -1114,16 +1114,13 @@ Assume point is at beginning of the headline."
 				 (aref (match-string 0) 2))))
 	   (commentedp
 	    (and (let ((case-fold-search nil))
-                   (looking-at org-element-comment-string))
-		 (goto-char (match-end 0))
-                 (when (looking-at-p "\\(?:[ \t]\\|$\\)")
-                   (point))))
-	   (title-start (prog1 (point)
-                          (unless (or todo priority commentedp)
-                            ;; Headline like "* :tag:"
-                            (skip-chars-backward " \t"))))
+                   (looking-at (concat org-element-comment-string "\\(?: \\|$\\)")))
+                 (prog1 t
+		   (goto-char (match-end 0))
+                   (skip-chars-forward " \t"))))
+	   (title-start (point))
 	   (tags (when (re-search-forward
-			"[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
+			"\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
 			(line-end-position)
 			'move)
 		   (goto-char (match-beginning 0))

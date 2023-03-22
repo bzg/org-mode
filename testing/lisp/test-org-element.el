@@ -1209,7 +1209,15 @@ Some other text
       (should-not (org-element-property :todo-keyword (org-element-at-point)))))
   (org-test-with-temp-text "* TODO"
     (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-      (should (org-element-property :todo-keyword (org-element-at-point))))))
+      (should (org-element-property :todo-keyword (org-element-at-point)))))
+  (org-test-with-temp-text "* :tag:"
+    (should (member "tag" (org-element-property :tags (org-element-at-point)))))
+  (org-test-with-temp-text "* COMMENT"
+    (should (org-element-property :commentedp (org-element-at-point))))
+  (org-test-with-temp-text "* COMMENT title"
+    (should (equal "title" (org-element-property :raw-value (org-element-at-point)))))
+  (org-test-with-temp-text "* COMMENT:tag:"
+    (should-not (org-element-property :commentedp (org-element-at-point)))))
 
 (ert-deftest test-org-element/headline-comment-keyword ()
   "Test COMMENT keyword recognition."
