@@ -51,6 +51,9 @@
 (declare-function org-dynamic-block-define "org" (type func))
 (declare-function w32-notification-notify "w32fns.c" (&rest params))
 (declare-function w32-notification-close "w32fns.c" (&rest params))
+(declare-function dbus-list-activatable-names "dbus" (&optional bus))
+(declare-function dbus-call-method "dbus" (bus service path interface method &rest args))
+(declare-function dbus-get-property "dbus" (bus service path interface property))
 
 (defvar org-frame-title-format-backup nil)
 (defvar org-state)
@@ -1214,6 +1217,26 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
   "Return the current X11 idle time in seconds."
   (/ (string-to-number (shell-command-to-string org-clock-x11idle-program-name)) 1000))
 
+(defvar org-logind-dbus-session-path
+  (when (and (boundp 'dbus-runtime-version)
+             (require 'dbus nil t)
+             (member "org.freedesktop.login1" (dbus-list-activatable-names)))
+    (dbus-call-method
+     :system "org.freedesktop.login1"
+     "/org/freedesktop/login1"
+     "org.freedesktop.login1.Manager"
+     "GetSessionByPID" (emacs-pid)))
+  "D-Bus session path for the elogind interface.")
+
+(defun org-logind-user-idle-seconds ()
+  "Return the number of idle seconds for the user according to logind."
+  (- (float-time)
+     (/ (dbus-get-property
+         :system "org.freedesktop.login1"
+         org-logind-dbus-session-path
+         "org.freedesktop.login1.Session" "IdleSinceHint")
+        1e6)))
+
 (defun org-user-idle-seconds ()
   "Return the number of seconds the user has been idle for.
 This routine returns a floating point number."
@@ -1222,6 +1245,13 @@ This routine returns a floating point number."
     (org-mac-idle-seconds))
    ((and (eq window-system 'x) org-x11idle-exists-p)
     (org-x11-idle-seconds))
+   ((and
+     org-logind-dbus-session-path
+     (dbus-get-property
+      :system "org.freedesktop.login1"
+      org-logind-dbus-session-path
+      "org.freedesktop.login1.Session" "IdleHint"))
+    (org-logind-user-idle-seconds))
    (t
     (org-emacs-idle-seconds))))
 

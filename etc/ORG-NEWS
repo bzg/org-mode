@@ -112,6 +112,13 @@ official [[https://clojure.org/guides/deps_and_cli][Clojure CLI tools]].
 The command can be customized with ~ob-clojure-cli-command~.
 
 ** New features
+*** Add support for ~logind~ idle time in ~org-user-idle-seconds~
+
+When Emacs is built with =dbus= support and
+the =org.freedesktop.login1= interface is available, fallback to
+checking the =IdleSinceHint= property when
+determining =org-user-idle-seconds= as the penultimate step.
+
 *** ~org-metaup~ and ~org-metadown~ now act on headings in region
 
 When region is active and starts at a heading, ~org-metaup~ and
