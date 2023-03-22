@@ -273,7 +273,7 @@ STRING contains the output originally inserted into the comint buffer."
 		   (res-str-raw
 		    (buffer-substring
 		     ;; move point to beginning of indicator
-                     (- (match-beginning 0) 1)
+                     (match-beginning 0)
 		     ;; find the matching start indicator
 		     (cl-loop
                       do (re-search-backward indicator)
