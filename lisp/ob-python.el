@@ -398,7 +398,7 @@ by `org-babel-comint-async-filter'."
   (let ((python-shell-buffer-name (org-babel-python-without-earmuffs session)))
     (pcase result-type
       (`output
-       (let ((uuid (md5 (number-to-string (random 100000000)))))
+       (let ((uuid (org-id-uuid)))
          (with-temp-buffer
            (insert (format org-babel-python-async-indicator "start" uuid))
            (insert "\n")

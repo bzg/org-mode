@@ -519,7 +519,7 @@ by `org-babel-comint-async-filter'."
 	   (ess-eval-buffer nil)))
        tmp-file))
     (output
-     (let ((uuid (md5 (number-to-string (random 100000000))))
+     (let ((uuid (org-id-uuid))
            (ess-local-process-name
             (process-name (get-buffer-process session)))
            (ess-eval-visibly-p nil))
