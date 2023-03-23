@@ -266,8 +266,9 @@ or set the `:backend' header argument"))))
 	    (reverse ob-clojure-inf-clojure-tmp-output)))))
 
 (defun ob-clojure-eval-with-cider (expanded _params &optional cljs-p)
-  "Evaluate EXPANDED code block with PARAMS using cider.
-When CLJS-P is non-nil, use a cljs connection instead of clj."
+  "Evaluate EXPANDED code block using cider.
+When CLJS-P is non-nil, use a cljs connection instead of clj.
+The PARAMS from Babel are not used in this function."
   (org-require-package 'cider "Cider")
   (let ((connection (cider-current-connection (if cljs-p "cljs" "clj"))))
     (unless connection (sesman-start-session 'CIDER))
