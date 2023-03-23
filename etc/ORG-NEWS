@@ -51,6 +51,21 @@ encounter issues, and users are advised to update to the most recent
 version of org-caldav.  See [[https://github.com/dengste/org-caldav/commit/618bf4cdc9be140ca1993901d017b7f18297f1b8][this org-caldav commit]] for more information.
 
 ** New and changed options
+*** New customization ~org-image-max-width~ limiting the displayed inline image width
+
+New custom variable ~org-image-max-width~ limits the maximum inline
+image width, but only when the inline image width is not explicitly
+set via ~org-image-actual-width~, =ORG-IMAGE-ACTUAL-WIDTH= property,
+or =#+ATTR*= keyword.
+
+By default, when ~org-image-actual-width~ is set to t,
+~org-image-max-width~ takes effect.  Its default value is set to
+~fill-column~, limiting the image previews to ~fill-column~ number of
+characters.
+
+To fall back to previous defaults, where the inline image width is not
+constrained, set ~org-image-max-width~ to nil.
+
 *** ~org-src-block-faces~ now accepts empty string ~""~ as language name
 
 It is now possible to customize face of source blocks without language specifier.

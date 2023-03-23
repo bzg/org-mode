@@ -11499,14 +11499,19 @@ command:
 
 
   #+vindex: org-image-actual-width
+  #+vindex: org-image-max-width
   #+cindex: @samp{ORG-IMAGE-ACTUAL-WIDTH}, property
   By default, Org mode displays inline images according to their
-  actual width.  You can customize the displayed image width using
+  actual width, but no wider than ~fill-column~ characters.
+
+  You can customize the displayed image width using
   ~org-image-actual-width~ variable (globally) or
   =ORG-IMAGE-ACTUAL-WIDTH= property (subtree-level)[fn:: The width can
   be customized in Emacs >= 24.1, built with imagemagick support.].
   Their value can be the following:
   - (default) Non-nil, use the actual width of images when inlining them.
+    If the actual width is too wide, limit it according to
+    ~org-image-max-width~.
   - When set to a number, use imagemagick (when available) to set the
     image's width to this value.
   - When set to a number in a list, try to get the width from any
@@ -11516,8 +11521,17 @@ command:
     #+end_example
     and fall back on that number if none is found.
   - When set to nil, try to get the width from an =#+ATTR.*= keyword
-    and fall back on the original width if none is found.
+    and fall back on the original width or ~org-image-max-width~ if
+    none is found.
 
+  ~org-image-max-width~ limits the maximum displayed image width, but
+  only when the image width is not set explicitly.  Possible maximum
+  width can be set to:
+  - (default) ~fill-column~, limit width to ~fill-column~ number of
+    characters.
+  - ~window~, limit width to current window width.
+  - integer number, limit width that specified number of pixels.
+  - nil, do not limit the width.
 
 #+vindex: org-cycle-inline-images-display
 Inline images can also be displayed when cycling the folding state.
