@@ -138,6 +138,12 @@ selection.
 TODO state, priority, tags, statistics cookies, and COMMENT keywords
 are allowed in the tree structure.
 
+*** Asynchronous code evaluatation in ~ob-shell~
+
+Running shell blocks with the ~:session~ header freezes Emacs until
+execution completes.  The new ~:async~ header allows users to continue
+editing with Emacs while a ~:session~ block executes.
+
 ** Miscellaneous
 *** Remove undocumented ~:target~ header parameter in ~ob-clojure~
 
@@ -866,8 +872,8 @@ following snippet to allow multiple different ID formats in Org files.
         ;; `org-attach-id-uuid-folder-format'.
         (lambda (id)
           (and (or (org-uuidgen-p id)
-	           (string-match-p "[0-9a-z]\\{12\\}" id))
-	       (org-attach-id-uuid-folder-format id)))
+                   (string-match-p "[0-9a-z]\\{12\\}" id))
+               (org-attach-id-uuid-folder-format id)))
         ;; When ID looks like a timestamp-based ID. Group by year-month
         ;; folders.
         (lambda (id)
@@ -1480,7 +1486,7 @@ Go through the buffer and ask for the replacement."
                      (goto-char (match-beginning 0))
                      (looking-at-p org-link-bracket-re))
                    (y-or-n-p "Fix link (remove TODO keyword)? "))
-	  (replace-match "[[*")))))
+          (replace-match "[[*")))))
   (visible-mode -1))
 #+end_src
 
@@ -2172,12 +2178,12 @@ removed.
       "Change properties for Org-Attach."
       (interactive)
       (org-with-point-at 1
-	(while (outline-next-heading)
-	  (let ((DIR (org--property-local-values "ATTACH_DIR" nil)))
-	    (when DIR
-	      (org-set-property "DIR" (car DIR))
-	      (org-delete-property "ATTACH_DIR"))))
-	(org-delete-property-globally "ATTACH_DIR_INHERIT")))
+        (while (outline-next-heading)
+          (let ((DIR (org--property-local-values "ATTACH_DIR" nil)))
+            (when DIR
+              (org-set-property "DIR" (car DIR))
+              (org-delete-property "ATTACH_DIR"))))
+        (org-delete-property-globally "ATTACH_DIR_INHERIT")))
 #+end_src
 
 For those who hate breaking changes, even though the changes are made
@@ -2702,14 +2708,14 @@ conditional on another entry. E.g. given this configuration:
   (defun custom/org-collect-confirmed (property)
     "Return `PROPERTY' for `CONFIRMED' entries"
     (let ((prop (org-entry-get nil property))
-	  (confirmed (org-entry-get nil "CONFIRMED")))
+          (confirmed (org-entry-get nil "CONFIRMED")))
       (if (and prop (string= "[X]" confirmed))
-	  prop
-	"0")))
+          prop
+        "0")))
 
   (setq org-columns-summary-types
-	'(("X+" org-columns--summary-sum
-	   custom/org-collect-confirmed)))
+        '(("X+" org-columns--summary-sum
+           custom/org-collect-confirmed)))
 #+END_SRC
 
 You can have a file =bananas.org= containing:
@@ -2944,11 +2950,11 @@ to the following
 #+BEGIN_SRC elisp
 (lambda (entry style project)
   (cond ((not (directory-name-p entry))
-	 (format "[[file:%s][%s]]"
-		 (file-name-sans-extension entry)
-		 (org-publish-find-title entry project)))
-	((eq style 'tree) (file-name-nondirectory (directory-file-name entry)))
-	(t entry)))
+         (format "[[file:%s][%s]]"
+                 (file-name-sans-extension entry)
+                 (org-publish-find-title entry project)))
+        ((eq style 'tree) (file-name-nondirectory (directory-file-name entry)))
+        (t entry)))
 #+END_SRC
 
 *** Change signature for ~:sitemap-function~
