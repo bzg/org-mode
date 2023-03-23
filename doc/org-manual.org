@@ -9419,16 +9419,16 @@ done depends on the type of view.
   time-of-day specification.  These entries are shown at the beginning
   of the list, as a /schedule/ for the day.  After that, items remain
   grouped in categories, in the sequence given by ~org-agenda-files~.
-  Within each category, items are sorted by priority (see
-  [[*Priorities]]), which is composed of the base priority (2000 for
-  priority =A=, 1000 for =B=, and 0 for =C=), plus additional
-  increments for overdue scheduled or deadline items.
+  Within each category, items are sorted by urgency, which is composed
+  of the base priority (see [[*Priorities]]; 2000 for priority =A=, 1000
+  for =B=, and 0 for =C=), plus additional increments for overdue
+  scheduled or deadline items.
 
 - For the TODO list, items remain in the order of categories, but
-  within each category, sorting takes place according to priority (see
-  [[*Priorities]]).  The priority used for sorting derives from the
-  priority cookie, with additions depending on how close an item is to
-  its due or scheduled date.
+  within each category, sorting takes place according to urgency.  The
+  urgency used for sorting derives from the priority cookie, with
+  additions depending on how close an item is to its due or scheduled
+  date.
 
 - For tags matches, items are not sorted at all, but just appear in
   the sequence in which they are found in the agenda files.

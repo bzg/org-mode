@@ -85,7 +85,7 @@
 		  "org-habit" (&optional line))
 (declare-function org-is-habit-p "org-habit" (&optional pom))
 (declare-function org-habit-parse-todo "org-habit" (&optional pom))
-(declare-function org-habit-get-priority "org-habit" (habit &optional moment))
+(declare-function org-habit-get-urgency "org-habit" (habit &optional moment))
 (declare-function org-agenda-columns "org-colview" ())
 (declare-function org-add-archive-files "org-archive" (files))
 (declare-function org-capture "org-capture" (&optional goto keys))
@@ -267,6 +267,7 @@ you can \"misuse\" it to also add other text to the header."
     (const category-keep) (const category-up) (const category-down)
     (const tag-down) (const tag-up)
     (const priority-up) (const priority-down)
+    (const urgency-up) (const urgency-down)
     (const todo-state-up) (const todo-state-down)
     (const effort-up) (const effort-down)
     (const habit-up) (const habit-down)
@@ -1617,9 +1618,9 @@ will align with agenda items."
   :group 'org-agenda)
 
 (defcustom org-agenda-sorting-strategy
-  '((agenda habit-down time-up priority-down category-keep)
-    (todo   priority-down category-keep)
-    (tags   priority-down category-keep)
+  '((agenda habit-down time-up urgency-down category-keep)
+    (todo   urgency-down category-keep)
+    (tags   urgency-down category-keep)
     (search category-keep))
   "Sorting structure for the agenda items of a single day.
 This is a list of symbols which will be used in sequence to determine
@@ -1646,6 +1647,12 @@ tag-up             Sort alphabetically by last tag, A-Z.
 tag-down           Sort alphabetically by last tag, Z-A.
 priority-up        Sort numerically by priority, high priority last.
 priority-down      Sort numerically by priority, high priority first.
+urgency-up         Sort numerically by urgency, high urgency last.
+                   Urgency is calculated based on item's priority,
+                   and proximity to scheduled time and deadline.  See
+                   info node `(org)Sorting of agenda items' for
+                   details.
+urgency-down       Sort numerically by urgency, high urgency first.
 todo-state-up      Sort by todo state, tasks that are done last.
 todo-state-down    Sort by todo state, tasks that are done first.
 effort-up          Sort numerically by estimated effort, high effort last.
@@ -4879,6 +4886,7 @@ is active."
 			  'org-todo-regexp org-todo-regexp
 			  'level level
 			  'org-complex-heading-regexp org-complex-heading-regexp
+                          'urgency 1000
 			  'priority 1000
 			  'type "search")
 			(push txt ee)
@@ -5635,7 +5643,7 @@ and the timestamp type relevant for the sorting strategy in
 					      "\\|")
 				   "\\)"))
 			  (t org-not-done-regexp))))
-	 marker priority category level tags todo-state
+	 marker priority urgency category level tags todo-state
 	 ts-date ts-date-type ts-date-pair
 	 ee txt beg end inherited-tags todo-state-end-pos
          effort effort-minutes)
@@ -5673,15 +5681,18 @@ and the timestamp type relevant for the sorting strategy in
 			   (memq 'todo org-agenda-use-tag-inheritance))))
 	      tags (org-get-tags nil (not inherited-tags))
 	      level (make-string (org-reduced-level (org-outline-level)) ? )
-	      txt (org-agenda-format-item ""
-                                (org-add-props txt nil
-                                  'effort effort
-                                  'effort-minutes effort-minutes)
-                                level category tags t)
-	      priority (1+ (org-get-priority txt)))
+	      txt (org-agenda-format-item
+                   ""
+                   (org-add-props txt nil
+                     'effort effort
+                     'effort-minutes effort-minutes)
+                   level category tags t)
+              urgency (1+ (org-get-priority txt))
+	      priority (org-get-priority txt))
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
 	  'priority priority
+          'urgency urgency
           'effort effort 'effort-minutes effort-minutes
 	  'level level
 	  'ts-date ts-date
@@ -5911,9 +5922,10 @@ displayed in agenda view."
                        'effort-minutes effort-minutes)
                      level category tags time-stamp org-ts-regexp habit?)))
 	      (org-add-props item props
-		'priority (if habit?
-			      (org-habit-get-priority (org-habit-parse-todo))
-			    (org-get-priority item))
+		'urgency (if habit?
+ 			     (org-habit-get-urgency (org-habit-parse-todo))
+			   (org-get-priority item))
+                'priority (org-get-priority item)
 		'org-marker (org-agenda-new-marker pos)
 		'org-hd-marker (org-agenda-new-marker)
 		'date date
@@ -6167,7 +6179,7 @@ then those holidays will be skipped."
 	  (setq priority 100000)
 	  (org-add-props txt props
 	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-agenda-done
-	    'priority priority 'level level
+	    'urgency priority 'priority priority 'level level
             'effort effort 'effort-minutes effort-minutes
 	    'type type 'date date
 	    'undone-face 'org-warning 'done-face 'org-agenda-done)
@@ -6468,13 +6480,14 @@ specification like [h]h:mm."
 		       'level level
                        'effort effort 'effort-minutes effort-minutes
 		       'ts-date deadline
-		       'priority
-		       ;; Adjust priority to today reminders about deadlines.
-		       ;; Overdue deadlines get the highest priority
+		       'urgency
+		       ;; Adjust urgency to today reminders about deadlines.
+		       ;; Overdue deadlines get the highest urgency
 		       ;; increase, then imminent deadlines and eventually
 		       ;; more distant deadlines.
 		       (let ((adjust (if today? (- diff) 0)))
 		         (+ adjust (org-get-priority item)))
+                       'priority (org-get-priority item)
 		       'todo-state todo-state
 		       'type (if upcoming? "upcoming-deadline" "deadline")
 		       'date (if upcoming? date deadline)
@@ -6610,13 +6623,14 @@ specification like [h]h:mm."
 		  'level level
                   'effort effort 'effort-minutes effort-minutes
 		  'ts-date deadline
-		  'priority
-		  ;; Adjust priority to today reminders about deadlines.
-		  ;; Overdue deadlines get the highest priority
+		  'urgency
+		  ;; Adjust urgency to today reminders about deadlines.
+		  ;; Overdue deadlines get the highest urgency
 		  ;; increase, then imminent deadlines and eventually
 		  ;; more distant deadlines.
 		  (let ((adjust (if today? (- diff) 0)))
 		    (+ adjust (org-get-priority item)))
+                  'priority (org-get-priority item)
 		  'todo-state todo-state
 		  'type (if upcoming? "upcoming-deadline" "deadline")
 		  'date (if upcoming? date deadline)
@@ -6866,8 +6880,9 @@ scheduled items with an hour specification like [h]h:mm."
 		       'warntime warntime
 		       'level level
                        'effort effort 'effort-minutes effort-minutes
-		       'priority (if habitp (org-habit-get-priority habitp)
-			           (+ 99 diff (org-get-priority item)))
+		       'urgency (if habitp (org-habit-get-urgency habitp)
+			          (+ 99 diff (org-get-priority item)))
+                       'priority (org-get-priority item)
 		       'org-habit-p habitp
 		       'todo-state todo-state)
 	             (push item scheduled-items)))))))
@@ -7051,8 +7066,9 @@ scheduled items with an hour specification like [h]h:mm."
 		  'warntime warntime
 		  'level level
                   'effort effort 'effort-minutes effort-minutes
-		  'priority (if habitp (org-habit-get-priority habitp)
-			      (+ 99 diff (org-get-priority item)))
+		  'urgency (if habitp (org-habit-get-urgency habitp)
+			     (+ 99 diff (org-get-priority item)))
+                  'priority (org-get-priority item)
 		  'org-habit-p habitp
 		  'todo-state todo-state)
 	        (push item scheduled-items)))))))
@@ -7164,6 +7180,7 @@ scheduled items with an hour specification like [h]h:mm."
 		'level level
                 'effort effort 'effort-minutes effort-minutes
 		'todo-state todo-state
+                'urgency (org-get-priority txt)
 		'priority (org-get-priority txt))
 	      (push txt ee))))
 	(goto-char pos)))
@@ -7525,7 +7542,7 @@ and stored in the variable `org-prefix-format-compiled'."
             org-agenda-sorting-strategy
 	  (or (cdr (assq key org-agenda-sorting-strategy))
 	      (cdr (assq 'agenda org-agenda-sorting-strategy))
-	      '(time-up category-keep priority-down)))))
+	      '(time-up category-keep urgency-down)))))
 
 (defun org-get-time-of-day (s &optional string)
   "Check string S for a time of day.
@@ -7872,6 +7889,9 @@ their type."
 	 (priority-up     (and (org-em 'priority-up 'priority-down ss)
 			       (org-cmp-values a b 'priority)))
 	 (priority-down   (if priority-up (- priority-up) nil))
+	 (urgency-up     (and (org-em 'urgency-up 'urgency-down ss)
+			      (org-cmp-values a b 'urgency)))
+	 (urgency-down   (if urgency-up (- urgency-up) nil))
 	 (effort-up       (and (org-em 'effort-up 'effort-down ss)
 			       (org-cmp-effort a b)))
 	 (effort-down     (if effort-up (- effort-up) nil))

@@ -13,6 +13,21 @@ Please send Org bug reports to mailto:emacs-orgmode@gnu.org.
 
 * Version 9.7 (not released yet)
 ** Important announcements and breaking changes
+*** "Priority" used to sort items in agenda is renamed to "urgency"
+
+Previously, ~priority-up~ and ~priority-down~ in
+~org-agenda-sorting-strategy~ used a composite rank depending on
+item's priority (=[#A]=, =[#B]=, =[#C]=, etc) and overdue time to
+order agenda items (see "11.4.3 Sorting of agenda items" section of
+Org manual).
+
+Now, this composite rank is renamed to =urgency= and the relevant
+sorting strategies are renamed to ~urgency-up~ and ~urgency-down~.
+~priority-up~ and ~priority-down~ sort by item's priority only.
+
+Users relying on the previous composite ranking should adjust their
+agenda sorting settings.
+
 *** =python-mode.el (MELPA)= support in =ob-python.el= is removed
 
 =python-mode.el= support has been removed from =ob-python.el=.  The
