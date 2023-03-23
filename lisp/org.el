@@ -9876,7 +9876,6 @@ inactive time ranges.
 When this function returns a non-nil value, match data is set
 according to `org-tr-regexp-both' or `org-tr-regexp', depending
 on INACTIVE-OK."
-  (interactive)
   (save-excursion
     (catch 'exit
       (let ((pos (point)))
@@ -15475,7 +15474,6 @@ If Org mode thinks that point is actually inside
 an embedded LaTeX environment, return t when the environment is math
 or let `texmathp' do its job otherwise.
 `\\[org-cdlatex-mode-map]'"
-  (interactive)
   (cond
    ((not (derived-mode-p 'org-mode)) (apply orig-fun args))
    ((eq this-command 'cdlatex-math-symbol)
@@ -20525,7 +20523,6 @@ point before the first headline or at point-min."
 
 (defun org-first-sibling-p ()
   "Is this heading the first child of its parents?"
-  (interactive)
   (let ((re org-outline-regexp-bol)
 	level l)
     (unless (org-at-heading-p t)
