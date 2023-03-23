@@ -1221,11 +1221,12 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
   (when (and (boundp 'dbus-runtime-version)
              (require 'dbus nil t)
              (member "org.freedesktop.login1" (dbus-list-activatable-names)))
-    (dbus-call-method
-     :system "org.freedesktop.login1"
-     "/org/freedesktop/login1"
-     "org.freedesktop.login1.Manager"
-     "GetSessionByPID" (emacs-pid)))
+    (ignore-errors
+      (dbus-call-method
+       :system "org.freedesktop.login1"
+       "/org/freedesktop/login1"
+       "org.freedesktop.login1.Manager"
+       "GetSessionByPID" (emacs-pid))))
   "D-Bus session path for the elogind interface.")
 
 (defun org-logind-user-idle-seconds ()
