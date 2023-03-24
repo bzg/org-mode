@@ -237,8 +237,7 @@ take 10 primes
 
 (ert-deftest ob-haskell/2D-lists-multilines ()
   "Evaluation of nested lists into a table, as multilines."
-  :expected-result :failed
-  (should (equal '((1 2 3) (4 5 6))
+  (should (equal '((1 2 3) (4 5 6) (7 8 9))
                  (test-ob-haskell-ghci "" "
 :{
 [ [1..3]
@@ -421,8 +420,9 @@ return ()
 
 (ert-deftest ob-haskell/ghci-info ()
   "The ghci meta command ':info' ."
-  (should (equal "repeat :: a -> [a]    -- Defined in ‘GHC.List’"
-                 (test-ob-haskell-ghci ":results output" ":info repeat"))))
+  (should (string-match-p
+           "repeat :: a -> \\[a\\][ \t]+-- Defined in ‘GHC.List’"
+           (test-ob-haskell-ghci ":results output" ":info repeat"))))
 
 
 (provide 'test-ob-haskell-ghci)
