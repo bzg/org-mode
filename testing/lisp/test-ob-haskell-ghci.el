@@ -93,7 +93,6 @@ before the code block.  When UNPROTECTED is non-nil, check pre/post conditions."
                  (test-ob-haskell-ghci ":results output" "return \"Hello World!\""))))
 
 (ert-deftest ob-haskell/hello-world-output-multilines ()
-  :expected-result :failed
   (should (equal "Hello World!"
                  (test-ob-haskell-ghci ":results output" "
 :{
@@ -163,7 +162,6 @@ return \"useless\"
 
 (ert-deftest ob-haskell/let-multilines-1 ()
   "Local definitions on multiple lines."
-  :expected-result :failed
   (should (equal 6 (test-ob-haskell-ghci "" "
 :{
  let { x=2
@@ -175,7 +173,6 @@ return \"useless\"
 
 (ert-deftest ob-haskell/let-multilines-2 ()
   "Local definitions on multiple lines, relying on indentation."
-  :expected-result :failed
   (should (equal 6 (test-ob-haskell-ghci "" "
 :{
   let x=2
@@ -210,7 +207,6 @@ length' [1..5]
 
 (ert-deftest ob-haskell/primes ()
   "From haskell.org."""
-  :expected-result :failed
   (should (equal '(2 3 5 7 11 13 17 19 23 29)
                  (test-ob-haskell-ghci "" "
 :{
@@ -336,7 +332,6 @@ v = 4
 
 (ert-deftest ob-haskell/not-defined-then-defined-1-fixed ()
   "Like not-defined-then-defined-1, but using the mutiline marks."
-  :expected-result :failed
   (let ((r (test-ob-haskell-ghci "" "
 :{
   v :: Int
