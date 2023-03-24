@@ -169,7 +169,16 @@ If there is not a current inferior-process-buffer in SESSION
 then create one.  Return the initialized session."
   (org-require-package 'inf-haskell "haskell-mode")
   (or (get-buffer "*haskell*")
-      (save-window-excursion (run-haskell) (sleep-for 0.25) (current-buffer))))
+      (save-window-excursion
+        (run-haskell)
+        (sleep-for 0.25)
+        ;; Disable secondary prompt: If we do not do this,
+        ;; org-comint may treat secondary prompts as a part of
+        ;; output.
+        (org-babel-comint-input-command
+         (current-buffer)
+         ":set prompt-cont \"\"")
+        (current-buffer))))
 
 (defun org-babel-load-session:haskell (session body params)
   "Load BODY into SESSION."
