@@ -79,6 +79,14 @@
 (defvar org-babel-default-header-args:scheme '()
   "Default header arguments for scheme code blocks.")
 
+(defun org-babel-scheme-expand-header-arg-vars (vars)
+  "Expand :var header arguments given as VARS."
+  (mapconcat
+   (lambda (var)
+     (format "(define %S %S)" (car var) (cdr var)))
+   vars
+   "\n"))
+
 (defun org-babel-expand-body:scheme (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (org-babel--get-vars params))
@@ -86,13 +94,7 @@
 	(postpends (cdr (assq :epilogue params))))
     (concat (and prepends (concat prepends "\n"))
 	    (if (null vars) body
-	      (format "(let (%s)\n%s\n)"
-		      (mapconcat
-		       (lambda (var)
-			 (format "%S" (print `(,(car var) ',(cdr var)))))
-		       vars
-		       "\n      ")
-		      body))
+	      (concat (org-babel-scheme-expand-header-arg-vars vars) "\n" body))
 	    (and postpends (concat "\n" postpends)))))
 
 
