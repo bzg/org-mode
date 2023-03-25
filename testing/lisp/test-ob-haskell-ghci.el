@@ -108,20 +108,39 @@ main
 
 (ert-deftest ob-haskell/sessions-must-not-share-variables ()
   "Sessions must not share variables."
-  :expected-result :failed
-  (test-ob-haskell-ghci-with-global-session
-   (test-ob-haskell-ghci ":session s1" "x=2" nil :unprotected)
-   (should (equal 2 (test-ob-haskell-ghci ":session s1" "x" nil :unprotected)))
-   (test-ob-haskell-ghci ":session s2" "x=3" nil :unprotected)
-   (should-not (equal 3 (test-ob-haskell-ghci ":session s1" "x" nil :unprotected)))
-   ))
+  (test-ob-haskell-ghci ":session s1" "x=2" nil)
+  (should (equal 2 (test-ob-haskell-ghci ":session s1" "x" nil)))
+  (test-ob-haskell-ghci ":session s2" "x=3" nil)
+  (should-not (equal 3 (test-ob-haskell-ghci ":session s1" "x" nil)))
+  )
 
-(ert-deftest ob-haskell/no-session-means-one-shot-sessions ()
-  "When no session, use a new session."
-  :expected-result :failed
-  (test-ob-haskell-ghci-with-global-session
-   (test-ob-haskell-ghci "" "x=2" nil :unprotected)
-   (should-not (equal 2 (test-ob-haskell-ghci "" "x" nil :unprotected)))))
+(ert-deftest ob-haskell/session-named-none-means-one-shot-sessions ()
+  "When no session, use a new session.
+\"none\" is a special name that means `no session'."
+  (test-ob-haskell-ghci ":session none" "x=2" nil)
+  (should-not (equal 2 (test-ob-haskell-ghci ":session \"none\"" "x" nil)))
+  (test-ob-haskell-ghci ":session none" "x=2" nil)
+  (should-not (equal 2 (test-ob-haskell-ghci ":session \"none\"" "x" nil))))
+
+(ert-deftest ob-haskell/reuse-variables-in-same-session ()
+  "Reuse variables between blocks using the same session."
+  (test-ob-haskell-ghci ":session s1" "x=2" nil)
+  (should (equal 2 (test-ob-haskell-ghci ":session s1" "x"))))
+
+(ert-deftest ob-haskell/may-use-the-*haskell*-session ()
+  "The user may use the special *haskell* buffer."
+  (when (get-buffer "*haskell*")
+    (error "A buffer named '*haskell*' exists.  Can't run this test"))
+  (unwind-protect
+      (progn
+        (test-ob-haskell-ghci ":session *haskell*" "x=2" nil :unprotected)
+        (should (equal 2 (test-ob-haskell-ghci ":session *haskell*" "x" nil :unprotected))))
+    (with-current-buffer "*haskell*"
+      (let ((kill-buffer-query-functions nil)
+            (kill-buffer-hook nil))
+        (kill-buffer "*haskell*")))))
+
+
 
 
 ;;;; Values
