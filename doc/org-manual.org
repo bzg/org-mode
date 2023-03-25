@@ -11005,6 +11005,10 @@ To turn off fontification for marked up text, you can set
 ~org-fontify-emphasized-text~ to ~nil~.  To narrow down the list of
 available markup syntax, you can customize ~org-emphasis-alist~.
 
+#+vindex: org-hide-emphasis-markers
+To hide the emphasis markup characters in your buffers, set
+~org-hide-emphasis-markers~ to ~t~.
+
 Sometimes, when marked text also contains the marker character itself,
 the result may be unsettling.  For example,
 
