@@ -88,8 +88,8 @@ before the code block.  When UNPROTECTED is non-nil, check pre/post conditions."
                  (test-ob-haskell-ghci ":results output" "putStrLn \"Hello World!\""))))
 
 (ert-deftest ob-haskell/hello-world-output-nothing ()
-  :expected-result :failed
-  (should (equal ""
+  ;; GHCi prints the value on standard output.  So, the last value is part of the output.
+  (should (equal "Hello World!"
                  (test-ob-haskell-ghci ":results output" "return \"Hello World!\""))))
 
 (ert-deftest ob-haskell/hello-world-output-multilines ()
@@ -393,12 +393,10 @@ readIORef r
 
 (ert-deftest ob-haskell/results-value-3 ()
   "Don't confuse output and values: nothing."
-  :expected-result :failed
   (should (equal nil (test-ob-haskell-ghci ":results value" "putStrLn \"3\""))))
 
 (ert-deftest ob-haskell/results-value-4 ()
   "Don't confuse output and values: nothing."
-  :expected-result :failed
   (should (equal nil (test-ob-haskell-ghci ":results value" "
 putStrLn \"3\"
 return ()

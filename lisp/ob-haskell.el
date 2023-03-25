@@ -61,7 +61,7 @@
 
 (defvar org-babel-haskell-lhs2tex-command "lhs2tex")
 
-(defvar org-babel-haskell-eoe "\"org-babel-haskell-eoe\"")
+(defvar org-babel-haskell-eoe "org-babel-haskell-eoe")
 
 (defvar haskell-prompt-regexp)
 
@@ -127,34 +127,56 @@ a parameter, such as \"ghc -v\"."
             (lambda ()
               (setq-local comint-prompt-regexp
                           (concat haskell-prompt-regexp "\\|^λ?> "))))
-  (let* ((session (cdr (assq :session params)))
-         (result-type (cdr (assq :result-type params)))
-         (full-body (org-babel-expand-body:generic
-		     body params
-		     (org-babel-variable-assignments:haskell params)))
-         (session (org-babel-haskell-initiate-session session params))
-	 (comint-preoutput-filter-functions
-	  (cons 'ansi-color-filter-apply comint-preoutput-filter-functions))
-         (raw (org-babel-comint-with-output
-		  (session org-babel-haskell-eoe nil full-body)
-                (insert (org-trim full-body))
-                (comint-send-input nil t)
-                (insert org-babel-haskell-eoe)
-                (comint-send-input nil t)))
-         (results (mapcar #'org-strip-quotes
-			  (cdr (member org-babel-haskell-eoe
-                                       (reverse (mapcar #'org-trim raw)))))))
-    (org-babel-reassemble-table
-     (let ((result
-            (pcase result-type
-              (`output (mapconcat #'identity (reverse results) "\n"))
-              (`value (car results)))))
-       (org-babel-result-cond (cdr (assq :result-params params))
-	 result (when result (org-babel-script-escape result))))
-     (org-babel-pick-name (cdr (assq :colname-names params))
-			  (cdr (assq :colname-names params)))
-     (org-babel-pick-name (cdr (assq :rowname-names params))
-			  (cdr (assq :rowname-names params))))))
+  (org-babel-haskell-with-session session params
+    (cl-labels
+        ((send-txt-to-ghci (txt)
+           (insert txt) (comint-send-input nil t))
+         (send-eoe ()
+           (send-txt-to-ghci (concat "putStrLn \"" org-babel-haskell-eoe "\"\n")))
+         (comint-with-output (todo)
+           (let ((comint-preoutput-filter-functions
+                  (cons 'ansi-color-filter-apply
+                        comint-preoutput-filter-functions)))
+             (org-babel-comint-with-output
+                 (session org-babel-haskell-eoe nil nil)
+               (funcall todo)))))
+      (let* ((result-type (cdr (assq :result-type params)))
+             (full-body (org-babel-expand-body:generic
+                         body params
+                         (org-babel-variable-assignments:haskell params)))
+             (raw (pcase result-type
+                    (`output
+                     (comint-with-output
+                      (lambda () (send-txt-to-ghci (org-trim full-body)) (send-eoe))))
+                    (`value
+                      ;; We first compute the value and store it,
+                      ;; ignoring any output.
+                     (comint-with-output
+                      (lambda ()
+                        (send-txt-to-ghci "__LAST_VALUE_IMPROBABLE_NAME__=()::()\n")
+                        (send-txt-to-ghci (org-trim full-body))
+                        (send-txt-to-ghci "__LAST_VALUE_IMPROBABLE_NAME__=it\n")
+                        (send-eoe)))
+                      ;; We now display and capture the value.
+                     (comint-with-output
+                      (lambda()
+                        (send-txt-to-ghci "__LAST_VALUE_IMPROBABLE_NAME__\n")
+                        (send-eoe))))))
+             (results (mapcar #'org-strip-quotes
+                              (cdr (member org-babel-haskell-eoe
+                                           (reverse (mapcar #'org-trim raw)))))))
+        (org-babel-reassemble-table
+         (let ((result
+                (pcase result-type
+                  (`output (mapconcat #'identity (reverse results) "\n"))
+                  (`value (car results)))))
+           (org-babel-result-cond (cdr (assq :result-params params))
+	     result (when result (org-babel-script-escape result))))
+         (org-babel-pick-name (cdr (assq :colname-names params))
+			      (cdr (assq :colname-names params)))
+         (org-babel-pick-name (cdr (assq :rowname-names params))
+			      (cdr (assq :rowname-names params))))))))
+
 
 (defun org-babel-execute:haskell (body params)
   "Execute a block of Haskell code."
