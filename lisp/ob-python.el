@@ -169,7 +169,6 @@ Emacs-lisp table, otherwise return the results as a string."
 	(substring name 1 (- (length name) 1))
       name)))
 
-(defvar python-shell-buffer-name)
 (defvar-local org-babel-python--initialized nil
   "Flag used to mark that python session has been initialized.")
 (defun org-babel-python-initiate-session-by-key (&optional session)
@@ -178,27 +177,33 @@ If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
-           (py-buffer (org-babel-python-session-buffer session))
+           (py-buffer (or (org-babel-python-session-buffer session)
+                          (org-babel-python-with-earmuffs session)))
 	   (cmd (if (member system-type '(cygwin windows-nt ms-dos))
 		    (concat org-babel-python-command " -i")
-		  org-babel-python-command)))
-      (unless py-buffer
-	(setq py-buffer (org-babel-python-with-earmuffs session)))
-      (let ((python-shell-buffer-name
-	     (org-babel-python-without-earmuffs py-buffer)))
-	(run-python cmd)
-        (with-current-buffer py-buffer
-          (add-hook
-           'python-shell-first-prompt-hook
-           (lambda () (setq-local org-babel-python--initialized t))
-           nil 'local)))
-      ;; Wait until Python initializes.
-      ;; This is more reliable compared to
-      ;; `org-babel-comint-wait-for-output' as python may emit
-      ;; multiple prompts during initialization.
+		  org-babel-python-command))
+           (python-shell-buffer-name
+	    (org-babel-python-without-earmuffs py-buffer))
+           (existing-session-p (comint-check-proc py-buffer)))
+      (run-python cmd)
       (with-current-buffer py-buffer
-        (while (not org-babel-python--initialized)
-          (org-babel-comint-wait-for-output py-buffer)))
+        ;; Adding to `python-shell-first-prompt-hook' immediately
+        ;; after `run-python' should be safe from race conditions,
+        ;; because subprocess output only arrives when Emacs is
+        ;; waiting (see elisp manual, "Output from Processes")
+        (add-hook
+         'python-shell-first-prompt-hook
+         (lambda () (setq-local org-babel-python--initialized t))
+         nil 'local))
+      ;; Don't hang if session was started externally
+      (unless existing-session-p
+        ;; Wait until Python initializes
+        ;; This is more reliable compared to
+        ;; `org-babel-comint-wait-for-output' as python may emit
+        ;; multiple prompts during initialization.
+        (with-current-buffer py-buffer
+          (while (not org-babel-python--initialized)
+            (org-babel-comint-wait-for-output py-buffer))))
       (setq org-babel-python-buffers
 	    (cons (cons session py-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
