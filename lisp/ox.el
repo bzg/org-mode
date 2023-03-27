@@ -2754,7 +2754,24 @@ from tree."
 		(let ((type (org-element-type data)))
 		  (if (org-export--skip-p data info selected excluded)
 		      (if (memq type '(table-cell table-row)) (push data ignore)
-			(org-element-extract-element data))
+			(let ((post-blank (org-element-property :post-blank data)))
+			  (if (or (not post-blank) (zerop post-blank)
+				  (eq 'element (org-element-class data)))
+			      (org-element-extract-element data)
+			    ;; Keep spaces in place of removed
+			    ;; element, if necessary.
+			    ;; Example: "Foo.[10%] Bar" would become
+			    ;; "Foo.Bar" if we do not keep spaces.
+			    (let ((previous (org-export-get-previous-element data info)))
+			      (if (or (not previous)
+				      (pcase (org-element-type previous)
+					(`plain-text
+					 (string-match-p
+					  (rx  whitespace eos) previous))
+					(_ (org-element-property :post-blank previous))))
+				  ;; Previous object ends with whitespace already.
+				  (org-element-extract-element data)
+				(org-element-set-element data (make-string post-blank ?\s)))))))
 		    (if (and (eq type 'headline)
 			     (eq (plist-get info :with-archived-trees)
 				 'headline)

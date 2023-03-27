@@ -202,6 +202,27 @@ execution completes.  The new ~:async~ header allows users to continue
 editing with Emacs while a ~:session~ block executes.
 
 ** Miscellaneous
+*** Blank lines after removed objects are not retained during export
+
+When certain objects in Org document are to be excluded from export,
+spaces after these objects were previously removed as well.
+
+For example, if ~org-export-with-footnotes~ is set to nil, the footnote in
+
+: Pellentesque dapibus suscipit ligula.[fn:1]  Donec posuere augue in quam.
+
+would be removed, leading to the following exported ASCII document
+
+: Pellentesque dapibus suscipit ligula.Donec posuere augue in quam.
+
+This is because spaces after footnote (and other markup) are
+considered a part of the preceding AST object in Org.
+
+Now, unless there is a whitespace before an object to be removed,
+spaces are preserved during export:
+
+: Pellentesque dapibus suscipit ligula.  Donec posuere augue in quam.
+
 *** Remove undocumented ~:target~ header parameter in ~ob-clojure~
 
 The ~:target~ header was only used internally to distinguish
