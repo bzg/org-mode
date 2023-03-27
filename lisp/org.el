@@ -3602,13 +3602,13 @@ following symbols:
 	       (const :tag "Entities" entities))))
 
 (defcustom org-hide-emphasis-markers nil
-  "Non-nil mean font-lock should hide the emphasis marker characters."
+  "Non-nil means font-lock should hide the emphasis marker characters."
   :group 'org-appearance
   :type 'boolean
   :safe #'booleanp)
 
 (defcustom org-hide-macro-markers nil
-  "Non-nil mean font-lock should hide the brackets marking macro calls."
+  "Non-nil means font-lock should hide the brackets marking macro calls."
   :group 'org-appearance
   :type 'boolean)
 
@@ -3620,7 +3620,7 @@ When nil, the \\name form remains in the buffer."
   :type 'boolean)
 
 (defcustom org-pretty-entities-include-sub-superscripts t
-  "Non-nil means, pretty entity display includes formatting sub/superscripts."
+  "Non-nil means pretty entity display includes formatting sub/superscripts."
   :group 'org-appearance
   :version "24.1"
   :type 'boolean)
