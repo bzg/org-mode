@@ -1624,6 +1624,24 @@ Credit: https://stackoverflow.com/questions/11871245/knuth-multiplicative-hash#4
   (cl-assert (and (<= 0 base 32)))
   (ash (* number 2654435769) (- base 32)))
 
+(defvar org-sxhash-hashes (make-hash-table :weakness 'key :test 'equal))
+(defvar org-sxhash-objects (make-hash-table :weakness 'value))
+(defun org-sxhash-safe (obj &optional counter)
+  "Like `sxhash' for OBJ, but collision-free for in-memory objects.
+When COUNTER is non-nil, return safe hash for (COUNTER . OBJ)."
+  ;; Note: third-party code may modify OBJ by side effect.
+  ;; Should not affect anything as long as `org-sxhash-safe'
+  ;; is used to calculate hash.
+  (or (and (not counter) (gethash obj org-sxhash-hashes))
+      (let* ((hash (sxhash (if counter (cons counter obj) obj)))
+	     (obj-old (gethash hash org-sxhash-objects)))
+	(if obj-old ; collision
+	    (org-sxhash-safe obj (if counter (1+ counter) 1))
+	  ;; No collision.  Remember and return normal hash.
+	  (puthash hash obj org-sxhash-objects)
+	  (puthash obj hash org-sxhash-hashes)))))
+
+
 (provide 'org-macs)
 
 ;; Local variables:

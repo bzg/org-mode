@@ -3343,7 +3343,7 @@ constructed like the following: PREFIXDATAhashSUFFIX."
           "%s%s%s%s"
           (file-name-as-directory (org-babel-temp-stable-directory))
           prefix
-          (sxhash data)
+          (org-sxhash-safe data)
           (or suffix ""))))
     ;; Create file.
     (with-temp-file path)
