@@ -602,7 +602,18 @@ to (adaptive outside after)."
    (append (mapcar (lambda (value)
 		     (pcase value
 		       (`(,f . ,d)
-                        (expand-file-name (org-strip-quotes f) d))))
+                        (setq f (org-strip-quotes f))
+                        (if (or (file-name-absolute-p f)
+                                (file-remote-p f)
+                                (equal d default-directory))
+                            ;; Keep absolute paths, remote paths, and
+                            ;; local relative paths.
+                            f
+                          ;; Adjust relative bibliography path for
+                          ;; #+SETUP files located in other directory.
+                          ;; Also, see `org-export--update-included-link'.
+                          (file-relative-name
+                           (expand-file-name f d) default-directory)))))
 		   (pcase (org-collect-keywords
                            '("BIBLIOGRAPHY") nil '("BIBLIOGRAPHY"))
 		     (`(("BIBLIOGRAPHY" . ,pairs)) pairs)))

@@ -482,8 +482,20 @@
             (let ((org-cite-global-bibliography '("/other-bibliography")))
               (org-cite-list-bibliography-files)))))
   (should
-   (equal '(t)
+   (equal '("./bibliography")
           (org-test-with-temp-text "#+bibliography: ./bibliography"
+            (let ((org-cite-global-bibliography nil))
+              (org-cite-list-bibliography-files)))))
+  (should
+   (equal '("/foo.bib")
+          (org-test-with-temp-text
+              (format "#+SETUPFILE: \"%s/examples/sub-bib/include-global-bib.org\"" org-test-dir)
+            (let ((org-cite-global-bibliography nil))
+              (org-cite-list-bibliography-files)))))
+  (should
+   (equal '(nil)
+          (org-test-with-temp-text
+              (format "#+SETUPFILE: \"%s/examples/sub-bib/include-relative-bib.org\"" org-test-dir)
             (let ((org-cite-global-bibliography nil))
               (mapcar #'file-name-absolute-p (org-cite-list-bibliography-files))))))
   (should
