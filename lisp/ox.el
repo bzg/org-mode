@@ -1881,6 +1881,8 @@ INFO is a plist containing export directives."
 DATA is a parse tree, an element or an object or a secondary
 string.  INFO is a plist holding export options.
 
+The `:filter-parse-tree' filters are not applied.
+
 Return a string."
   (or (gethash data (plist-get info :exported-data))
       ;; Handle broken links according to
