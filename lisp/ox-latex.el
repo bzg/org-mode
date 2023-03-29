@@ -1374,7 +1374,7 @@ which are given by `org-latex-engraved-preamble' and
                         "\n"))
                (t (funcall gen-theme-spec engraved-theme))))
            (funcall gen-theme-spec engraved-theme))
-       (message "Cannot engrave source blocks. Consider installing `engrave-faces'.")
+       (warn "Cannot engrave source blocks. Consider installing `engrave-faces'.")
        "% WARNING syntax highlighting unavailable as engrave-faces-latex was missing.\n")
      "\n")))
 
@@ -2423,8 +2423,8 @@ contextual information."
       (`engraved (org-latex-inline-src-block--engraved info code lang))
       (`listings (org-latex-inline-src-block--listings info code lang))
       (oldval
-       (message "Please update the LaTeX src-block-backend to %s"
-                (if oldval "listings" "verbatim"))
+       (warn "Please update the LaTeX src-block-backend to %s"
+             (if oldval "listings" "verbatim"))
        (if oldval
            (org-latex-inline-src-block--listings info code lang)
          (org-latex--text-markup code 'code info))))))
@@ -3321,8 +3321,8 @@ contextual information."
          (`listings #'org-latex-src-block--listings)
          ((guard custom-env) #'org-latex-src-block--custom)
          (oldval
-          (message "Please update the LaTeX src-block-backend to %s"
-                   (if oldval "listings" "verbatim"))
+          (warn "Please update the LaTeX src-block-backend to %s"
+                (if oldval "listings" "verbatim"))
           (if oldval
               #'org-latex-src-block--listings
             #'org-latex-src-block--verbatim)))
@@ -3498,8 +3498,8 @@ to the Verbatim environment or Verb command."
                 (when lang-mode
                   (if (functionp lang-mode)
                       (funcall lang-mode)
-                    (message "Cannot engrave code as %s. %s is undefined."
-                             lang lang-mode)))
+                    (warn "Cannot engrave code as %s. %s is undefined."
+                          lang lang-mode)))
                 (engrave-faces-latex-buffer)))
              (engraved-code
               (with-current-buffer engraved-buffer

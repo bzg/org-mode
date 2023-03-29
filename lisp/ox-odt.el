@@ -1009,7 +1009,7 @@ See `org-odt--build-date-styles' for implementation details."
 	      (setq exit-code (archive-zip-extract archive member))
 	      (buffer-string)))
       (unless (zerop exit-code)
-	(message command-output)
+	(warn command-output)
 	(error "Extraction failed")))))
 
 ;;;; Target
@@ -3413,7 +3413,7 @@ contextual information."
     ;; such tables from export.
     (table.el
      (prog1 nil
-       (message
+       (warn
 	(concat
 	 "(ox-odt): Found table.el-type table in the source Org file."
 	 "  table.el doesn't support export to ODT format."
@@ -3720,16 +3720,16 @@ contextual information."
        (if (and (fboundp 'org-format-latex-mathml-available-p)
 		(org-format-latex-mathml-available-p))
 	   (setq processing-type 'mathml)
-	 (message "LaTeX to MathML converter not available.")
+	 (warn "LaTeX to MathML converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
       ((dvipng imagemagick)
        (unless (and (org-check-external-command "latex" "" t)
 		    (org-check-external-command
 		     (if (eq processing-type 'dvipng) "dvipng" "convert") "" t))
-	 (message "LaTeX to PNG converter not available.")
+	 (warn "LaTeX to PNG converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
       (otherwise
-       (message "Unknown LaTeX option.  Forcing verbatim.")
+       (warn "Unknown LaTeX option.  Forcing verbatim.")
        (setq processing-type 'verbatim)))
 
     ;; Store normalized value for later use.
@@ -4089,8 +4089,8 @@ contextual information."
        (error
 	;; Cleanup work directory and work files.
 	(funcall --cleanup-xml-buffers)
-	(message "OpenDocument export failed: %s"
-		 (error-message-string err))))))
+	(warn "OpenDocument export failed: %s"
+	      (error-message-string err))))))
 
 
 ;;;; Export to OpenDocument formula
