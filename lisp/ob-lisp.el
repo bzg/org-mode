@@ -90,35 +90,38 @@ current directory string."
   "Execute a block of Common Lisp code with Babel.
 BODY is the contents of the block, as a string.  PARAMS is
 a property list containing the parameters of the block."
-  (pcase org-babel-lisp-eval-fn
-    (`slime-eval (org-require-package 'slime "SLIME"))
-    (`sly-eval (org-require-package 'sly "SLY")))
-  (org-babel-reassemble-table
-   (let ((result
-          (funcall (if (member "output" (cdr (assq :result-params params)))
-                       #'car #'cadr)
-                   (with-temp-buffer
-                     (insert (org-babel-expand-body:lisp body params))
-                     (funcall org-babel-lisp-eval-fn
-                              `(swank:eval-and-grab-output
-                                ,(let ((dir (if (assq :dir params)
-                                                (cdr (assq :dir params))
-                                              default-directory)))
-                                   (format
-                                    (if dir (format org-babel-lisp-dir-fmt dir)
-                                      "(progn %s\n)")
-                                    (buffer-substring-no-properties
-                                     (point-min) (point-max)))))
-                              (cdr (assq :package params)))))))
-     (org-babel-result-cond (cdr (assq :result-params params))
-       (org-strip-quotes result)
-       (condition-case nil
-           (read (org-babel-lisp-vector-to-list result))
-         (error result))))
-   (org-babel-pick-name (cdr (assq :colname-names params))
-			(cdr (assq :colnames params)))
-   (org-babel-pick-name (cdr (assq :rowname-names params))
-			(cdr (assq :rownames params)))))
+  (let (eval-and-grab-output)
+    (pcase org-babel-lisp-eval-fn
+      (`slime-eval (org-require-package 'slime "SLIME")
+                   (setq eval-and-grab-output 'swank:eval-and-grab-output))
+      (`sly-eval (org-require-package 'sly "SLY")
+                 (setq eval-and-grab-output 'slynk:eval-and-grab-output)))
+    (org-babel-reassemble-table
+     (let ((result
+            (funcall (if (member "output" (cdr (assq :result-params params)))
+                         #'car #'cadr)
+                     (with-temp-buffer
+                       (insert (org-babel-expand-body:lisp body params))
+                       (funcall org-babel-lisp-eval-fn
+                                `(,eval-and-grab-output
+                                  ,(let ((dir (if (assq :dir params)
+                                                  (cdr (assq :dir params))
+                                                default-directory)))
+                                     (format
+                                      (if dir (format org-babel-lisp-dir-fmt dir)
+                                        "(progn %s\n)")
+                                      (buffer-substring-no-properties
+                                       (point-min) (point-max)))))
+                                (cdr (assq :package params)))))))
+       (org-babel-result-cond (cdr (assq :result-params params))
+         (org-strip-quotes result)
+         (condition-case nil
+             (read (org-babel-lisp-vector-to-list result))
+           (error result))))
+     (org-babel-pick-name (cdr (assq :colname-names params))
+			  (cdr (assq :colnames params)))
+     (org-babel-pick-name (cdr (assq :rowname-names params))
+			  (cdr (assq :rownames params))))))
 
 (defun org-babel-lisp-vector-to-list (results)
   ;; TODO: better would be to replace #(...) with [...]
