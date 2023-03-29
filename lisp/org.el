@@ -10215,7 +10215,7 @@ nil."
 	(replace-match "")
         (if (and (string-match "\\S-" (buffer-substring (line-beginning-position) (point)))
 		 (equal (char-before) ?\ ))
-	    (backward-delete-char 1)
+	    (delete-char -1)
 	  (when (string-match "^[ \t]*$" (buffer-substring
                                           (line-beginning-position) (line-end-position)))
             (delete-region (line-beginning-position)
@@ -12006,18 +12006,17 @@ Returns the new tags string, or nil to not change the current settings."
 		    (setq current nil)
 		    (when exit-after-next (setq exit-after-next 'now)))
 		   ((= c ?\t)
-                    (condition-case nil
-                        (unless tab-tags
-                          (setq tab-tags
-                                (delq nil
-                                      (mapcar (lambda (x)
-                                                (let ((item (car-safe x)))
-                                                  (and (stringp item)
-                                                       (list item))))
-                                              (org--tag-add-to-alist
-                                               (with-current-buffer buf
-                                                 (org-get-buffer-tags))
-                                               table))))))
+                    (unless tab-tags
+                      (setq tab-tags
+                            (delq nil
+                                  (mapcar (lambda (x)
+                                            (let ((item (car-safe x)))
+                                              (and (stringp item)
+                                                   (list item))))
+                                          (org--tag-add-to-alist
+                                           (with-current-buffer buf
+                                             (org-get-buffer-tags))
+                                           table)))))
                     (setq tg (completing-read "Tag: " tab-tags))
 		    (when (string-match "\\S-" tg)
 		      (cl-pushnew (list tg) tab-tags :test #'equal)
@@ -16532,7 +16531,7 @@ because, in this case the deletion might narrow the column."
 	     (looking-at-p ".*?|")
 	     (org-at-table-p))
 	(progn (forward-char -1) (org-delete-char 1))
-      (backward-delete-char N)
+      (funcall-interactively #'backward-delete-char N)
       (org-fix-tags-on-the-fly))))
 
 (defun org-delete-char (N)
