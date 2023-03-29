@@ -168,7 +168,7 @@ This string must include a \"%s\" which will be replaced by the results."
      'safe-local-variable
      (lambda (value)
        (and (stringp value)
-	    (string-match-p "%s" value))))
+	    (string-search "%s" value))))
 
 (defcustom org-babel-hash-show-time nil
   "Non-nil means show the time the code block was evaluated in the result hash."
@@ -1984,7 +1984,7 @@ block of the same language with the previous."
 	 (stars (concat (make-string (or (org-current-level) 1) ?*) " "))
 	 (upper-case-p (and block
 			    (let (case-fold-search)
-			      (string-match-p "#\\+BEGIN_SRC" block)))))
+			      (string-search "#+BEGIN_SRC" block)))))
     (if (and info start) ;; At src block, but not within blank lines after it.
         (mapc
          (lambda (place)

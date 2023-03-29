@@ -8597,7 +8597,7 @@ also press `-' or `+' to switch between filtering and excluding."
 	  (setq org-agenda-represented-categories
 		;; Enclose category names with a hyphen in double
 		;; quotes to process them specially in `org-agenda-filter'.
-		(mapcar (lambda (s) (if (string-match-p "-" s) (format "\"%s\"" s) s))
+		(mapcar (lambda (s) (if (string-search "-" s) (format "\"%s\"" s) s))
 			(nreverse (org-uniquify (delq nil categories)))))))))
 
 (defvar org-tag-groups-alist-for-agenda)

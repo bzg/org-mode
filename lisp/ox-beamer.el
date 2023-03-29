@@ -452,12 +452,12 @@ used as a communication channel."
 		    ;; allowed by Beamer.
 		    (and (not (member "allowframebreaks" options))
 			 (not (cl-some (lambda (s) (string-match-p "^label=" s))
-				       options))
+				     options))
 			 (list
 			  (let ((label (org-beamer--get-label headline info)))
 			    ;; Labels containing colons need to be
 			    ;; wrapped within braces.
-			    (format (if (string-match-p ":" label)
+			    (format (if (string-search ":" label)
 					"label={%s}"
 				      "label=%s")
 				    label))))))
