@@ -158,6 +158,10 @@ Make sure you set the load path correctly in your Emacs init file:
 (add-to-list 'load-path "~/src/org-mode/lisp")
 #+end_src
 
+You must also manually install =compat= library required by Org mode.
+Using built-in =package.el=, you can run =M-x package-install <RET>
+compat <RET>=.
+
 You can also compile with =make=, generate the documentation with
 =make doc=, create a local configuration with =make config=, and
 install Org with =make install=.  Please run =make help= to get the

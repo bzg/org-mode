@@ -43,6 +43,13 @@ header for =beamer= that includes theme configuration. For example:
 will make the Beamer exporter ignore the ~#+BEAMER_...~ keywords
 in the document that are related to theme configuration.
 
+*** Org mode now uses =compat.el= third-party package to support older Emacs versions
+
+This change is mostly technical and should not affect most users.
+However, people who install Org from git source might be affected.
+It is now necessary to manually install =compat.el= using Emacs'
+package manager.
+
 *** ~org-mouse~ tag and priority menus are now separate
 
 The "Tags and Priorities" section of the global context menu is split
