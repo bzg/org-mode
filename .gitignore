@@ -48,6 +48,7 @@ local*.mk
 .gitattributes
 mk/x11idle
 ChangeLog
+deps/compiled
 
 # Files generated during `make packages/org` in a clone of `elpa.git`.
 
