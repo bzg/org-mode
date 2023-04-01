@@ -23,6 +23,18 @@ If you still want to use python-mode with ob-python, you might
 consider [[https://gitlab.com/jackkamm/ob-python-mode-mode][ob-python-mode-mode]], where the code to support python-mode
 has been ported to.
 
+*** =ox-icalendar.el= line ending fix may affect downstream packages
+
+iCalendar export now uses dos-style CRLF ("\r\n") line endings
+throughout, as required by the iCalendar specification (RFC 5545).
+Previously, the export used an inconsistent mix of dos and unix line
+endings.
+
+This might cause errors in external packages that parse output from
+ox-icalendar.  In particular, older versions of org-caldav may
+encounter issues, and users are advised to update to the most recent
+version of org-caldav.  See [[https://github.com/dengste/org-caldav/commit/618bf4cdc9be140ca1993901d017b7f18297f1b8][this org-caldav commit]] for more information.
+
 ** New and changed options
 *** ~org-src-block-faces~ now accepts empty string ~""~ as language name
 

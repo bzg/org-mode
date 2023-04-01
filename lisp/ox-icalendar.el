@@ -540,12 +540,23 @@ or subject for the event."
 	    ;; line, real contents must be split at 74 chars.
 	    (while (< (setq chunk-end (+ chunk-start 74)) len)
 	      (setq folded-line
-		    (concat folded-line "\r\n "
+		    (concat folded-line "\n "
 			    (substring line chunk-start chunk-end))
 		    chunk-start chunk-end))
-	    (concat folded-line "\r\n " (substring line chunk-start))))))
-    (org-split-string s "\n") "\r\n")))
+	    (concat folded-line "\n " (substring line chunk-start))))))
+    (org-split-string s "\n") "\n")))
 
+(defun org-icalendar--post-process-file (file)
+  "Post-process the exported iCalendar FILE.
+Converts line endings to dos-style CRLF as per RFC 5545, then
+runs `org-icalendar-after-save-hook'."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (let ((coding-system-for-write (coding-system-change-eol-conversion
+                                    last-coding-system-used 'dos)))
+      (write-region nil nil file)))
+  (run-hook-with-args 'org-icalendar-after-save-hook file)
+  nil)
 
 
 ;;; Filters
@@ -932,8 +943,7 @@ Return ICS file name."
     (org-export-to-file 'icalendar outfile
       async subtreep visible-only body-only
       '(:ascii-charset utf-8 :ascii-links-to-notes nil)
-      '(lambda (file)
-	 (run-hook-with-args 'org-icalendar-after-save-hook file) nil))))
+      #'org-icalendar--post-process-file)))
 
 ;;;###autoload
 (defun org-icalendar-export-agenda-files (&optional async)
@@ -1019,7 +1029,7 @@ This function assumes major mode for current buffer is
 	(or (org-string-nw-p org-icalendar-timezone) (format-time-string "%Z"))
 	org-icalendar-combined-description
 	contents)))
-    (run-hook-with-args 'org-icalendar-after-save-hook file)))
+    (org-icalendar--post-process-file file)))
 
 (defun org-icalendar--combine-files (&rest files)
   "Combine entries from multiple files into an iCalendar file.
@@ -1061,8 +1071,7 @@ FILES is a list of files to build the calendar from."
 	       (when (and org-icalendar-include-bbdb-anniversaries
 			  (require 'ol-bbdb nil t))
 		 (with-output-to-string (org-bbdb-anniv-export-ical)))))))
-	  (run-hook-with-args 'org-icalendar-after-save-hook
-			      org-icalendar-combined-agenda-file))
+	  (org-icalendar--post-process-file org-icalendar-combined-agenda-file))
       (org-release-buffers org-agenda-new-buffers))))
 
 
