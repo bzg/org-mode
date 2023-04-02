@@ -435,7 +435,8 @@ inhibit insertion of results into the buffer."
 	  (info (copy-sequence info))
 	  (org-babel-current-src-block-location (point-marker)))
       ;; Skip code blocks which we can't evaluate.
-      (when (fboundp (intern (concat "org-babel-execute:" lang)))
+      (if (not (fboundp (intern (concat "org-babel-execute:" lang))))
+          (warn "org-export: No org-babel-execute function for %s.  Not updating exported results." lang)
 	(org-babel-eval-wipe-error-buffer)
 	(setf (nth 1 info) body)
 	(setf (nth 2 info)
