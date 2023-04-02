@@ -7067,22 +7067,21 @@ asynchronous export stack."
   (let* ((input
 	  (cond ((equal arg '(16)) '(stack))
 		((and arg org-export-dispatch-last-action))
-		(t (save-window-excursion
-		     (unwind-protect
-			 (progn
-			   ;; Remember where we are
-			   (move-marker org-export-dispatch-last-position
-					(point)
-					(org-base-buffer (current-buffer)))
-			   ;; Get and store an export command
-			   (setq org-export-dispatch-last-action
-				 (org-export--dispatch-ui
-				  (list org-export-initial-scope
-					(and org-export-in-background 'async))
-				  nil
-				  org-export-dispatch-use-expert-ui)))
-		       (and (get-buffer "*Org Export Dispatcher*")
-			    (kill-buffer "*Org Export Dispatcher*")))))))
+		(t (unwind-protect
+		       (progn
+		         ;; Remember where we are
+		         (move-marker org-export-dispatch-last-position
+				      (point)
+				      (org-base-buffer (current-buffer)))
+		         ;; Get and store an export command
+		         (setq org-export-dispatch-last-action
+			       (org-export--dispatch-ui
+			        (list org-export-initial-scope
+				      (and org-export-in-background 'async))
+			        nil
+			        org-export-dispatch-use-expert-ui)))
+		     (and (get-buffer "*Org Export Dispatcher*")
+			  (kill-buffer "*Org Export Dispatcher*"))))))
 	 (action (car input))
 	 (optns (cdr input)))
     (unless (memq 'subtree optns)
@@ -7272,43 +7271,44 @@ back to standard interface."
     (if expertp
 	(org-export--dispatch-action
 	 expert-prompt allowed-keys entries options first-key expertp)
-      ;; At first call, create frame layout in order to display menu.
-      (unless (get-buffer "*Org Export Dispatcher*")
-	(delete-other-windows)
-	(org-switch-to-buffer-other-window
-	 (get-buffer-create "*Org Export Dispatcher*"))
-        (setq cursor-type nil)
-        (setq header-line-format
-              (let ((propertize-help-key
-                     (lambda (key)
-                       ;; Add `face' *and* `font-lock-face' to "work
-                       ;; reliably in any buffer", per a comment in
-                       ;; `help--key-description-fontified'.
-                       (propertize key
-                                   'font-lock-face 'help-key-binding
-                                   'face 'help-key-binding))))
-                (apply 'format
-                       (cons "Use %s, %s, %s, or %s to navigate."
-                             (mapcar propertize-help-key
-                                     (list "SPC" "DEL" "C-n" "C-p"))))))
-	;; Make sure that invisible cursor will not highlight square
-	;; brackets.
-	(set-syntax-table (copy-syntax-table))
-	(modify-syntax-entry ?\[ "w"))
-      ;; At this point, the buffer containing the menu exists and is
-      ;; visible in the current window.  So, refresh it.
-      (with-current-buffer "*Org Export Dispatcher*"
-	;; Refresh help.  Maintain display continuity by re-visiting
-	;; previous window position.
-	(let ((pt (point))
-	      (wstart (window-start)))
-	  (erase-buffer)
-	  (insert help)
-	  (goto-char pt)
-	  (set-window-start nil wstart)))
-      (org-fit-window-to-buffer)
-      (org-export--dispatch-action
-       standard-prompt allowed-keys entries options first-key expertp))))
+      (save-window-excursion
+        ;; At first call, create frame layout in order to display menu.
+        (unless (get-buffer "*Org Export Dispatcher*")
+	  (delete-other-windows)
+	  (org-switch-to-buffer-other-window
+	   (get-buffer-create "*Org Export Dispatcher*"))
+          (setq cursor-type nil)
+          (setq header-line-format
+                (let ((propertize-help-key
+                       (lambda (key)
+                         ;; Add `face' *and* `font-lock-face' to "work
+                         ;; reliably in any buffer", per a comment in
+                         ;; `help--key-description-fontified'.
+                         (propertize key
+                                     'font-lock-face 'help-key-binding
+                                     'face 'help-key-binding))))
+                  (apply 'format
+                         (cons "Use %s, %s, %s, or %s to navigate."
+                               (mapcar propertize-help-key
+                                       (list "SPC" "DEL" "C-n" "C-p"))))))
+	  ;; Make sure that invisible cursor will not highlight square
+	  ;; brackets.
+	  (set-syntax-table (copy-syntax-table))
+	  (modify-syntax-entry ?\[ "w"))
+        ;; At this point, the buffer containing the menu exists and is
+        ;; visible in the current window.  So, refresh it.
+        (with-current-buffer "*Org Export Dispatcher*"
+	  ;; Refresh help.  Maintain display continuity by re-visiting
+	  ;; previous window position.
+	  (let ((pt (point))
+                (wstart (window-start)))
+	    (erase-buffer)
+	    (insert help)
+	    (goto-char pt)
+	    (set-window-start nil wstart)))
+        (org-fit-window-to-buffer)
+        (org-export--dispatch-action
+         standard-prompt allowed-keys entries options first-key expertp)))))
 
 (defun org-export--dispatch-action
     (prompt allowed-keys entries options first-key expertp)
