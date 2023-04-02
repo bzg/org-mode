@@ -14,15 +14,15 @@ ifneq ($(wildcard .git),)
   # Use the org.el header.
   ORGVERSION := $(patsubst %-dev,%,$(shell $(BATCH) --eval "(require 'lisp-mnt)" \
     --visit lisp/org.el --eval '(princ (lm-header "version"))'))
-  GITVERSION ?= $(shell git describe --match release\* --abbrev=6 HEAD 2>/dev/null || echo  "release_N/A-N/A-$(shell git describe --match release\* --abbrev=6 --always HEAD)")
-  GITSTATUS  ?= $(shell git status -uno --porcelain)
+  GITVERSION := $(shell git describe --match release\* --abbrev=6 HEAD 2>/dev/null || echo  "release_N/A-N/A-$(shell git describe --match release\* --abbrev=6 --always HEAD)")
+  GITSTATUS  := $(shell git status -uno --porcelain)
 else
  -include mk/version.mk
   GITVERSION ?= N/A
   ORGVERSION ?= N/A
 endif
-DATE          = $(shell date +%Y-%m-%d)
-YEAR          = $(shell date +%Y)
+DATE          := $(shell date +%Y-%m-%d)
+YEAR          := $(shell date +%Y)
 ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION:.dirty=).dirty
 endif
