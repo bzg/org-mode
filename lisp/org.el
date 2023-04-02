@@ -16920,7 +16920,9 @@ for more information."
     (let ((beg (region-beginning))
           (end (region-end)))
       (save-excursion
-        (goto-char end)
+        ;; Go a little earlier because `org-move-subtree-down' will
+        ;; insert before markers and we may overshoot in some cases.
+        (goto-char (max beg (1- end)))
         (setq end (point-marker))
         (goto-char beg)
         (let ((level (org-current-level)))
