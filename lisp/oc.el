@@ -1049,7 +1049,7 @@ the same object, call `org-cite-adjust-note' first."
                              (match-string 3 previous)))))
       ;; Bail you when there is no quote and either no punctuation, or
       ;; punctuation on both sides.
-      (when (or quote (org-xor punct final-punct))
+      (when (or quote (xor punct final-punct))
         ;; Phase 1: handle punctuation rule.
         (pcase rule
           ((guard (not quote)) nil)

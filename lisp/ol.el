@@ -2685,8 +2685,8 @@ NAME."
 	    (set-mark (point)))))
     (setq org-store-link-plist nil)
     ;; Negate `org-link-context-for-files' when given a single universal arg.
-    (let ((org-link-context-for-files (org-xor org-link-context-for-files
-                                               (equal arg '(4))))
+    (let ((org-link-context-for-files (xor org-link-context-for-files
+                                           (equal arg '(4))))
           link desc search agenda-link) ;; description
       (cond
        ;; Store a link using an external link type, if any function is
@@ -2975,7 +2975,7 @@ non-interactively, don't allow editing the default description."
 			 org-link--insert-history)))
 	    (setq link
 		  (org-completing-read
-                   (org-format-prompt "Insert link" (caar org-stored-links))
+                   (format-prompt "Insert link" (caar org-stored-links))
 		   (append
 		    (mapcar (lambda (x) (concat x ":")) all-prefixes)
 		    (mapcar #'car org-stored-links)

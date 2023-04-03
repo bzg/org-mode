@@ -692,7 +692,7 @@ this function appends the default value from
          (prompt (let ((default (or (car org-refile-history)
                                     (and (assoc cbnex tbl) (setq cdef cbnex)
                                          cbnex))))
-                   (org-format-prompt prompt default)))
+                   (format-prompt prompt default)))
 	 pa answ parent-target child parent old-hist)
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)

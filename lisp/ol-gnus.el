@@ -97,8 +97,8 @@ If `org-store-link' was called with a prefix arg the meaning of
 `org-gnus-prefer-web-links' is reversed."
   (let ((unprefixed-group (replace-regexp-in-string "^[^:]+:" "" group)))
     (if (and (string-prefix-p "nntp" group) ;; Only for nntp groups
-	     (org-xor current-prefix-arg
-		      org-gnus-prefer-web-links))
+	     (xor current-prefix-arg
+		  org-gnus-prefer-web-links))
 	(concat "https://groups.google.com/group/" unprefixed-group)
       (concat "gnus:" group))))
 
@@ -115,7 +115,7 @@ Otherwise create a link to the article inside Gnus.
 
 If `org-store-link' was called with a prefix arg the meaning of
 `org-gnus-prefer-web-links' is reversed."
-  (if (and (org-xor current-prefix-arg org-gnus-prefer-web-links)
+  (if (and (xor current-prefix-arg org-gnus-prefer-web-links)
 	   newsgroups		  ;make web links only for nntp groups
 	   (not x-no-archive))	  ;and if X-No-Archive isn't set
       (format "https://groups.google.com/groups/search?as_umsgid=%s"
@@ -164,7 +164,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 	    newsgroups x-no-archive)
        ;; Fetching an article is an expensive operation; newsgroup and
        ;; x-no-archive are only needed for web links.
-       (when (org-xor current-prefix-arg org-gnus-prefer-web-links)
+       (when (xor current-prefix-arg org-gnus-prefer-web-links)
 	 ;; Make sure the original article buffer is up-to-date.
 	 (save-window-excursion (gnus-summary-select-article))
 	 (setq to (or to (gnus-fetch-original-field "To")))

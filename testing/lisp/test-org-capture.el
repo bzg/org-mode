@@ -156,7 +156,7 @@
   "Test aborting a capture process."
   ;; Newly create capture buffer should not be saved.
   (let ((capture-file (make-temp-name
-                       (org-file-name-concat
+                       (file-name-concat
                         temporary-file-directory
                         "org-test"))))
     (unwind-protect

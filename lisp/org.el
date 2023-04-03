@@ -20482,7 +20482,7 @@ filling the current element."
 		 (list (when current-prefix-arg 'full) t))
                org-mode)
   (let ((hash (and (not (buffer-modified-p))
-		   (org-buffer-hash))))
+		   (buffer-hash))))
     (cond
      ((and region transient-mark-mode mark-active
 	   (not (eq (region-beginning) (region-end))))
@@ -20507,7 +20507,7 @@ filling the current element."
     ;; If we didn't change anything in the buffer (and the buffer was
     ;; previously unmodified), then flip the modification status back
     ;; to "unchanged".
-    (when (and hash (equal hash (org-buffer-hash)))
+    (when (and hash (equal hash (buffer-hash)))
       (set-buffer-modified-p nil))
     ;; Return non-nil.
     t))

@@ -427,7 +427,7 @@ Example:
    ast
    'node-property
    (lambda (property)
-     (and (org-string-equal-ignore-case
+     (and (string-equal-ignore-case
            "CUSTOM_ID" (org-element-property :key property))
 	  (org-element-property :value property)))
    (lambda (property _) (org-element-begin property))

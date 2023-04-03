@@ -344,7 +344,7 @@ Note, that this function will always behave as if
 `org-protocol-reverse-list-of-files' was set to t and the returned list will
 reflect that.  emacsclient's first parameter will be the first one in the
 returned list."
-  (let* ((l (org--flatten-tree (if org-protocol-reverse-list-of-files
+  (let* ((l (flatten-tree (if org-protocol-reverse-list-of-files
                               param-list
                             (reverse param-list))))
 	 (trigger (car l))
@@ -370,7 +370,7 @@ returned list."
       l)))
 
 (define-obsolete-function-alias 'org-protocol-flatten
-  (if (fboundp 'flatten-tree) 'flatten-tree 'org--flatten-tree)
+  'flatten-tree
   "9.7"
   "Transform LIST into a flat list.
 

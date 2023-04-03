@@ -312,11 +312,11 @@ Optional argument INFO is the export state, as a property list."
         (setq file (file-truename file))
         (when (file-readable-p file)
           (with-temp-buffer
-            (when (or (org-file-has-changed-p file)
+            (when (or (file-has-changed-p file)
                       (not (gethash file org-cite-basic--file-id-cache)))
               (insert-file-contents file)
               (set-visited-file-name file t)
-              (puthash file (org-buffer-hash) org-cite-basic--file-id-cache))
+              (puthash file (buffer-hash) org-cite-basic--file-id-cache))
             (condition-case nil
                 (unwind-protect
 	            (let* ((file-id (cons file (gethash file org-cite-basic--file-id-cache)))
@@ -570,7 +570,7 @@ Optional argument INFO is the export state, as a property list."
   "List cite keys close to KEY in terms of string distance."
   (seq-filter (lambda (k)
                 (>= org-cite-basic-max-key-distance
-                    (org-string-distance k key)))
+                   (string-distance k key)))
               keys))
 
 (defun org-cite-basic--set-keymap (beg end suggestions)

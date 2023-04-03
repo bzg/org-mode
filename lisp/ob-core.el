@@ -144,7 +144,7 @@ used."
   :type 'string
   :safe (lambda (v)
 	  (and (stringp v)
-	       (org-string-equal-ignore-case "RESULTS" v))))
+	       (string-equal-ignore-case "RESULTS" v))))
 
 (defcustom org-babel-noweb-wrap-start "<<"
   "String used to begin a noweb reference in a code block.
@@ -1059,7 +1059,7 @@ arguments and pop open the results in a preview buffer."
 				   (match-string 4))))))
       (dolist (name names)
 	(when (and (not (string= header name))
-		   (<= (org-string-distance header name) too-close)
+		   (<= (string-distance header name) too-close)
 		   (not (member header names)))
 	  (error "Supplied header \"%S\" is suspiciously close to \"%S\""
 		 header name))))
@@ -2749,13 +2749,13 @@ result:
 			   (closing-line (concat "#+end_" type)))
 		      (cond
                        ;; Do nothing if type is "no" or "nil"
-                       ((or (org-string-equal-ignore-case type "nil")
-                            (org-string-equal-ignore-case type "no"))
+                       ((or (string-equal-ignore-case type "nil")
+                            (string-equal-ignore-case type "no"))
                         nil)
 		       ;; Escape contents from "export" wrap.  Wrap
 		       ;; inline results within an export snippet with
 		       ;; appropriate value.
-		       ((org-string-equal-ignore-case type "export")
+		       ((string-equal-ignore-case type "export")
 			(let ((backend (pcase split
 					 (`(,_) "none")
 					 (`(,_ ,b . ,_) b))))
@@ -2766,14 +2766,14 @@ result:
 					   backend) "@@)}}}")))
 		       ;; Escape contents from "example" wrap.  Mark
 		       ;; inline results as verbatim.
-		       ((org-string-equal-ignore-case type "example")
+		       ((string-equal-ignore-case type "example")
 			(funcall wrap
 				 opening-line closing-line
 				 nil nil
 				 "{{{results(=" "=)}}}"))
 		       ;; Escape contents from "src" wrap.  Mark
 		       ;; inline results as inline source code.
-		       ((org-string-equal-ignore-case type "src")
+		       ((string-equal-ignore-case type "src")
 			(let ((inline-open
 			       (pcase split
 				 (`(,_)
@@ -3563,7 +3563,7 @@ name is removed, since in that case the process will be executing
 remotely.  The file name is then processed by `expand-file-name'.
 Unless second argument NO-QUOTE-P is non-nil, the file name is
 additionally processed by `shell-quote-argument'."
-  (let ((f (org-babel-local-file-name (expand-file-name name))))
+  (let ((f (file-local-name (expand-file-name name))))
     (if no-quote-p f (shell-quote-argument f))))
 
 (defvar org-babel-temporary-directory

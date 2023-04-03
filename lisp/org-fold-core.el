@@ -868,7 +868,7 @@ If PREVIOUS-P is non-nil, search backwards."
 			  (lambda (p) (next-single-char-property-change p 'invisible nil limit)))))
 	 (next pos))
     (while (and (funcall cmp next limit)
-		(not (org-xor
+		(not (xor
                     invisible-initially?
                     (funcall invisible-p
                              (if previous-p
