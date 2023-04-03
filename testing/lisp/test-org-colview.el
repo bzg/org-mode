@@ -1093,6 +1093,71 @@
 	    (list (get-char-property 1 'org-columns-value-modified)
 		  (get-char-property 2 'org-columns-value-modified))))))
 
+(ert-deftest test-org-colview/columns-move-row-down ()
+  "Test `org-columns-move-row-down' specifications."
+  (should
+   (equal "* H
+** B
+** A
+"
+          (org-test-with-temp-text "* H
+** A
+** B
+"
+            (let ((org-columns-default-format "%ITEM")) (org-columns)
+                 (next-line 1)
+                 (org-columns-move-row-down)
+                 (buffer-substring-no-properties (point-min) (point-max)))))))
+
+(ert-deftest test-org-colview/columns-move-row-up ()
+  "Test `org-columns-move-row-up' specifications."
+  (should
+   (equal "* H
+** B
+** A
+"
+          (org-test-with-temp-text "* H
+** A
+** B
+"
+            (let ((org-columns-default-format "%ITEM")) (org-columns)
+                 (next-line 2)
+                 (org-columns-move-row-up)
+                 (buffer-substring-no-properties (point-min) (point-max)))))))
+
+(ert-deftest test-org-colview/columns--move-row-stay-at-the-same-column ()
+  "After function call 'org-columns--move-row' point should stay at the same column."
+  (should
+   (equal 35
+                    (org-test-with-temp-text "* H
+** A
+** B
+"
+          (org-columns)
+          (next-line 1)
+          (forward-char 2)
+          (org-columns--move-row)
+          (current-column)))))
+
+(ert-deftest test-org-colview/columns-move-row-down-with-subheading ()
+  "Test `org-columns-move-row-up' specifications with subheading."
+  (should
+   (equal "* H
+** B
+** A
+*** A1
+"
+
+                    (org-test-with-temp-text "* H
+** A
+*** A1
+** B
+"
+          (let ((org-columns-default-format "%ITEM")) (org-columns)
+               (next-line 1)
+               (org-columns-move-row-down)
+               (buffer-substring-no-properties (point-min) (point-max)))))))
+
 (ert-deftest test-org-colview/columns-move-left ()
   "Test `org-columns-move-left' specifications."
   ;; Error when trying to move the left-most column.

@@ -895,6 +895,11 @@ After:
 
 
 ** New features
+*** Column view: new commands to move rows up & down
+You can move rows up & down in column view with
+~org-columns-move-row-up~ and ~org-columns-move-row-down~.
+Keybindings are the same as ~org-move-subtree-up~ and ~org-move-subtree-down~
+=M-<up>= and =M-<down>=.
 *** Clock table can now produce quarterly reports
 
 =:step= clock table parameter can now be set to =quarter=.

@@ -210,6 +210,8 @@ See `org-columns-summary-types' for details.")
 (org-defkey org-columns-map ">" #'org-columns-widen)
 (org-defkey org-columns-map [(meta right)] #'org-columns-move-right)
 (org-defkey org-columns-map [(meta left)]  #'org-columns-move-left)
+(org-defkey org-columns-map [(meta down)]  #'org-columns-move-row-down)
+(org-defkey org-columns-map [(meta up)]  #'org-columns-move-row-up)
 (org-defkey org-columns-map [(shift meta right)] #'org-columns-new)
 (org-defkey org-columns-map [(shift meta left)]  #'org-columns-delete)
 (dotimes (i 10)
@@ -231,6 +233,8 @@ See `org-columns-summary-types' for details.")
     "--"
     ["Move column right" org-columns-move-right t]
     ["Move column left" org-columns-move-left t]
+    ["Move row up" org-columns-move-row-up t]
+    ["Move row down" org-columns-move-row-down t]
     ["Add column" org-columns-new t]
     ["Delete column" org-columns-delete t]
     "--"
@@ -1020,6 +1024,27 @@ details."
     (backward-char 1)
     (org-columns-move-right)
     (backward-char 1)))
+
+(defun org-columns--move-row (&optional up)
+  "Move the current table row down.
+With non-nil optional argument UP, move it up."
+  (let ((inhibit-read-only t)
+        (col (current-column)))
+    (if up (org-move-subtree-up)
+      (org-move-subtree-down))
+    (let ((org-columns-inhibit-recalculation t))
+      (org-columns-redo)
+      (move-to-column col))))
+
+(defun org-columns-move-row-down ()
+  "Move the current table row down."
+  (interactive)
+  (org-columns--move-row))
+
+(defun org-columns-move-row-up ()
+  "Move the current table row up."
+  (interactive)
+  (org-columns--move-row 'up))
 
 (defun org-columns-store-format ()
   "Store the text version of the current columns format.

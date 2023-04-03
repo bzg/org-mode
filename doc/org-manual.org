@@ -5843,6 +5843,30 @@ either for all clocks or just for today.
   #+findex: org-columns-delete
   Delete the current column.
 
+- {{{kbd(M-LEFT)}}} (~org-columns-move-left~) ::
+
+  #+kindex: M-LEFT
+  #+findex: org-columns-move-left
+  Move the current column left.
+
+- {{{kbd(M-RIGHT)}}} (~org-columns-move-right~) ::
+
+  #+kindex: M-RIGHT
+  #+findex: org-columns-move-right
+  Move the current column right.
+
+- {{{kbd(M-UP)}}} (~org-columns-move-row-up~) ::
+
+  #+kindex: M-UP
+  #+findex: org-columns-move-row-up
+  Move the current row up.
+
+- {{{kbd(M-DOWN)}}} (~org-columns-move-row-down~) ::
+
+  #+kindex: M-DOWN
+  #+findex: org-columns-move-row-down
+  Move the current row down.
+
 *** Capturing column view
 :PROPERTIES:
 :DESCRIPTION: A dynamic block for column view.
