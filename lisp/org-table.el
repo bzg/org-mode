@@ -5416,8 +5416,8 @@ overwritten, and the table is not marked as requiring realignment."
     (let* (orgtbl-mode
 	   (cmd (or (key-binding
 		     (or (and (listp function-key-map)
-			      (cdr (assoc last-input-event function-key-map)))
-			 (vector last-input-event)))
+			      (cdr (assoc last-command-event function-key-map)))
+			 (vector last-command-event)))
 		    'self-insert-command)))
       (call-interactively cmd)
       (if (and org-self-insert-cluster-for-undo
