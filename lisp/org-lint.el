@@ -1227,6 +1227,30 @@ Use \"export %s\" instead"
                                        (org-element-property :parent text))
                  "Possibly incomplete citation markup")))))
 
+(defun org-lint-item-number (ast)
+  (org-element-map ast 'item
+    (lambda (item)
+      (unless (org-element-property :counter item)
+        (when-let* ((bullet (org-element-property :bullet item))
+                    (bullet-number
+                     (cond
+                      ((string-match "[A-Za-z]" bullet)
+		       (- (string-to-char (upcase (match-string 0 bullet)))
+			  64))
+                      ((string-match "[0-9]+" bullet)
+		       (string-to-number (match-string 0 bullet)))))
+                    (true-number
+                     (org-list-get-item-number
+                      (org-element-property :begin item)
+                      (org-element-property :structure item)
+                      (org-list-prevs-alist (org-element-property :structure item))
+                      (org-list-parents-alist (org-element-property :structure item)))))
+          (unless (equal bullet-number (car (last true-number)))
+            (list
+             (org-element-property :begin item)
+             (format "Bullet counter \"%s\" is not the same with item position %d.  Consider adding manual [@%d] counter."
+                     bullet (car (last true-number)) bullet-number))))))))
+
 
 ;;; Checkers declaration
 
@@ -1449,6 +1473,11 @@ Use \"export %s\" instead"
   "Report incomplete citation object"
   #'org-lint-incomplete-citation
   :categories '(cite) :trust 'low)
+
+(org-lint-add-checker 'item-number
+  "Report inconsistent item numbers in lists"
+  #'org-lint-item-number
+  :categories '(plain-list))
 
 (provide 'org-lint)
 
