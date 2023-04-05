@@ -14330,10 +14330,16 @@ some text in German...
 
 The Markdown export back-end, "md", converts an Org file to Markdown
 format, as defined at https://daringfireball.net/projects/markdown/.
+This is the original Markdown specification, developed by John Gruber
+and Aaron Swartz.
 
-Since it is built on top of the HTML back-end (see [[*HTML Export]]), it
-converts every Org construct not defined in Markdown syntax, such as
-tables, to HTML.
+Since "md" back-end is built on top of the HTML back-end (see [[*HTML
+Export]]), it converts every Org construct not defined in Markdown
+syntax, such as tables, to HTML.
+
+Do note that the original markdown syntax has differences with other
+commonly used Markdown flavors.  See
+https://en.wikipedia.org/wiki/Markdown for more details.
 
 *** Markdown export commands
 :PROPERTIES:
