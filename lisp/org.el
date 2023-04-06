@@ -5414,8 +5414,9 @@ by a #."
 	     beg end-of-endline '(font-lock-fontified t font-lock-multiline t))
 	    (org-remove-flyspell-overlays-in beg bol-after-beginline)
 	    (org-remove-flyspell-overlays-in nl-before-endline end-of-endline)
-	    (cond
-	     (org-src-fontify-natively
+            (cond
+	     ((and org-src-fontify-natively
+                   (string= block-type "src"))
 	      (save-match-data
                 (org-src-font-lock-fontify-block (or lang "") block-start block-end))
 	      (add-text-properties bol-after-beginline block-end '(src-block t)))
