@@ -87,19 +87,23 @@
     (should-error (org-babel-execute-src-block))
     :type 'error))
 
-;; (ert-deftest ob-fortran/wrong-list ()
-;;   "Test wrong input list"
-;;   (org-test-at-id "891ead4a-f87a-473c-9ae0-1cf348bcd04f"
-;;     (org-babel-next-src-block 2)
-;;     (should-error (org-babel-execute-src-block))
-;;     :type 'error))
+(ert-deftest ob-fortran/wrong-list ()
+  "Test wrong input list"
+  (org-test-at-id "891ead4a-f87a-473c-9ae0-1cf348bcd04f"
+    (org-babel-next-src-block 2)
+    (org-babel-execute-src-block)
+    (when (should (buffer-live-p (get-buffer org-babel-error-buffer-name)))
+      (kill-buffer org-babel-error-buffer-name))
+    :type 'error))
 
-;; (ert-deftest ob-fortran/compiler-flags ()
-;;   "Test compiler's flags"
-;;   (org-test-at-id "891ead4a-f87a-473c-9ae0-1cf348bcd04f"
-;;     (org-babel-next-src-block 3)
-;;     (should-error (org-babel-execute-src-block))
-;;     :type 'error))
+(ert-deftest ob-fortran/compiler-flags ()
+  "Test compiler's flags"
+  (org-test-at-id "891ead4a-f87a-473c-9ae0-1cf348bcd04f"
+    (org-babel-next-src-block 3)
+    (org-babel-execute-src-block)
+    (when (should (buffer-live-p (get-buffer org-babel-error-buffer-name)))
+      (kill-buffer org-babel-error-buffer-name))
+    :type 'error))
 
 (ert-deftest ob-fortran/command-arguments ()
   "Test real array from a table"
