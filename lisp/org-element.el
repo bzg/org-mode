@@ -5333,7 +5333,7 @@ seconds.")
   "Duration, as a time value, of the pause between synchronizations.
 See `org-element-cache-sync-duration' for more information.")
 
-(defvar org-element--cache-self-verify t
+(defvar org-element--cache-self-verify nil
   "Activate extra consistency checks for the cache.
 
 This may cause serious performance degradation depending on the value
