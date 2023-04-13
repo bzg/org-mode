@@ -361,9 +361,9 @@ Did you give the decimal value %1$d by mistake?" mode)))
     ;; Match regexp taken from `file-modes-symbolic-to-number'.
     (file-modes-symbolic-to-number mode org-babel-tangle-default-file-mode))
    ((string-match-p "^[r-][w-][xs-][r-][w-][xs-][r-][w-][x-]$" mode)
-    (file-modes-symbolic-to-number (concat  "u=" (substring mode 0 3)
-                                            ",g=" (substring mode 3 6)
-                                            ",o=" (substring mode 6 9))
+    (file-modes-symbolic-to-number (concat "u="  (delete ?- (substring mode 0 3))
+                                           ",g=" (delete ?- (substring mode 3 6))
+                                           ",o=" (delete ?- (substring mode 6 9)))
                                    0))
    (t (error "File mode %S not recognized as a valid format. See `org-babel-interpret-file-mode'." mode))))
 
