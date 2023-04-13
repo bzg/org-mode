@@ -209,6 +209,12 @@ from Clojure and ClojureScript.
 This is now handled with an optional function parameter in
 the respective functions that need this information.
 
+*** New org-entity alias: =\P= for =\para=
+
+For symmetry with =\S= and =\sect= for the section symbol, =\P= has
+been added as an another form for the pilcrow symbol currently
+available as =\para=.
+
 * Version 9.6
 
 ** Important announcements and breaking changes
