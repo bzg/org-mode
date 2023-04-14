@@ -11859,6 +11859,24 @@ further alter what is exported, and how.
   in the export.  Affects only those backend formats that have
   sections like =<head>...</head>= in HTML.
 
+  #+vindex: org-export-body-only
+  To make body-only export the default, customize the variable
+  ~org-export-body-only~.
+
+- {{{kbd(C-f)}}} ::
+  #+kindex: C-c C-e C-f
+
+  Toggle force-publishing export.  Publish functions normally only
+  publish changed files (see [[**Triggering Publication]]).  Forced
+  publishing causes files to be published even if their timestamps do
+  not indicate the file has been changed.
+
+  #+vindex: org-export-force-publishing
+  To make forced publishing the default, customize the variable
+  ~org-export-force-publishing~.  (This is similar to
+  ~org-publish-use-timestamps-flag~, but only affects the export
+  dispatcher.)
+
 - {{{kbd(C-s)}}} ::
   #+kindex: C-c C-e C-s
 
@@ -11879,6 +11897,10 @@ further alter what is exported, and how.
   Toggle visible-only export.  This is useful for exporting only
   certain parts of an Org document by adjusting the visibility of
   particular headings.  See also [[*Sparse Trees]].
+
+  #+vindex: org-export-visible-only
+  To make visible-only export the default, customize the variable
+  ~org-export-visible-only~.
 
 ** Export Settings
 :PROPERTIES:

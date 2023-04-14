@@ -956,6 +956,31 @@ these cases."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-body-only nil
+  "The initial \"Body only\" setting when exporting with `org-export-dispatch'.
+Non-nil means only export body code, without the surrounding
+template."
+  :group 'org-export-general
+  :package-version '(Org . "9.7")
+  :type 'boolean
+  :safe #'booleanp)
+
+(defcustom org-export-visible-only nil
+  "The initial \"Visible only\" setting when exporting with `org-export-dispatch'.
+Non-nil means don't export the contents of hidden elements."
+  :group 'org-export-general
+  :package-version '(Org . "9.7")
+  :type 'boolean
+  :safe #'booleanp)
+
+(defcustom org-export-force-publishing nil
+  "The initial \"Force publishing\" setting for `org-export-dispatch'.
+Non-nil means force all files in the project to be published."
+  :group 'org-export-general
+  :package-version '(Org . "9.7")
+  :type 'boolean
+  :safe #'booleanp)
+
 (defcustom org-export-in-background nil
   "Non-nil means export and publishing commands will run in background.
 Results from an asynchronous export are never displayed
@@ -7095,6 +7120,9 @@ asynchronous export stack."
 		         (setq org-export-dispatch-last-action
 			       (org-export--dispatch-ui
 			        (list org-export-initial-scope
+				      (and org-export-body-only 'body)
+				      (and org-export-visible-only 'visible)
+				      (and org-export-force-publishing 'force)
 				      (and org-export-in-background 'async))
 			        nil
 			        org-export-dispatch-use-expert-ui)))

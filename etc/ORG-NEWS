@@ -180,6 +180,14 @@ backend used for evaluation of ClojureScript.
 official [[https://clojure.org/guides/deps_and_cli][Clojure CLI tools]].
 The command can be customized with ~ob-clojure-cli-command~.
 
+*** New customization options for ~org-export-dispatch~
+
+New custom variables ~org-export-body-only~,
+~org-export-visible-only~, and ~org-export-force-publishing~ allow the
+default settings of "Body only", "Visible only", and "Force
+publishing" in the ~org-export-dispatch~ UI to be customized,
+respectively.
+
 ** New features
 *** Add support for ~logind~ idle time in ~org-user-idle-seconds~
 
