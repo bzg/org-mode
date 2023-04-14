@@ -4348,8 +4348,10 @@ A habit has the following properties:
 
 3. The TODO has a scheduled date, usually with a =.+= style repeat
    interval.  A =++= style may be appropriate for habits with time
-   constraints, e.g., must be done on weekends, or a =+= style for an
-   unusual habit that can have a backlog, e.g., weekly reports.
+   constraints, e.g., must be done on specific days of week (=++w=),
+   or a =+= style for an unusual habit that can have a backlog, e.g.,
+   weekly reports.  See [[*Repeated tasks]] for more details about
+   repeat intervals.
 
 4. The TODO may also have minimum and maximum ranges specified by
    using the syntax =.+2d/3d=, which says that you want to do the task
