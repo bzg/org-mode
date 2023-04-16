@@ -17693,41 +17693,50 @@ Use `\\[org-edit-special]' to edit table.el tables")))
 	   (org-fold-show-branches)
 	   (org-fold-hide-archived-subtrees beg end)))))
 
-(defun org-delete-indentation (&optional arg)
+(defun org-delete-indentation (&optional arg beg end)
   "Join current line to previous and fix whitespace at join.
 
 If previous line is a headline add to headline title.  Otherwise
 the function calls `delete-indentation'.
 
-I.e. with a non-nil optional argument, join the line with the
-following one.  If there is a region then join the lines in that
-region."
-  (interactive "*P")
+If there is a region (BEG END), then join the lines in that region.
+
+With a non-nil prefix ARG, join the line with the following one,
+ignoring region."
+  (interactive
+   (cons current-prefix-arg
+         (when (and (not current-prefix-arg) (use-region-p))
+           (list (region-beginning) (region-end)))))
+  (unless (and beg end)
+    ;; No region selected or BEG/END arguments not passed.
+    (setq beg (line-beginning-position (if arg 1 0))
+          end (line-end-position (if arg 2 1))))
   (if (save-excursion
-	(beginning-of-line (if arg 1 0))
-	(let ((case-fold-search nil))
-	  (looking-at org-complex-heading-regexp)))
+        (goto-char beg)
+        (beginning-of-line)
+        (and (< (line-end-position) end)
+             (let ((case-fold-search nil))
+	       (looking-at org-complex-heading-regexp))))
       ;; At headline.
       (let ((tags-column (when (match-beginning 5)
 			   (save-excursion (goto-char (match-beginning 5))
 					   (current-column))))
-	    (string (concat " " (progn (when arg (forward-line 1))
-				       (org-trim (delete-and-extract-region
-						  (line-beginning-position)
-						  (line-end-position)))))))
-	(unless (bobp) (delete-region (point) (1- (point))))
+	    string)
+        (goto-char beg)
+        ;; Join all but headline.
+        (save-excursion (save-match-data (delete-indentation nil (line-beginning-position 2) end)))
+        (setq string (org-trim (delete-and-extract-region (line-end-position) (line-end-position 2))))
 	(goto-char (or (match-end 4)
 		       (match-beginning 5)
 		       (match-end 0)))
 	(skip-chars-backward " \t")
-	(save-excursion (insert string))
+	(save-excursion (insert " " string))
 	;; Adjust alignment of tags.
 	(cond
 	 ((not tags-column))		;no tags
 	 (org-auto-align-tags (org-align-tags))
 	 (t (org--align-tags-here tags-column)))) ;preserve tags column
-    (let ((current-prefix-arg arg))
-      (call-interactively #'delete-indentation))))
+    (funcall-interactively #'delete-indentation arg beg end)))
 
 (defun org-open-line (n)
   "Insert a new row in tables, call `open-line' elsewhere.
