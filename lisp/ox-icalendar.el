@@ -747,31 +747,30 @@ only.  CLASS contains the visibility attribute.  Three of them
 should be treated as \"PRIVATE\" if they are unknown to the iCalendar server.
 
 Return VEVENT component as a string."
-  (org-icalendar-fold-string
-   (if (eq (org-element-property :type timestamp) 'diary)
-       (org-icalendar-transcode-diary-sexp
-	(org-element-property :raw-value timestamp) uid summary)
-     (concat "BEGIN:VEVENT\n"
-	     (org-icalendar-dtstamp) "\n"
-	     "UID:" uid "\n"
-	     (org-icalendar-convert-timestamp timestamp "DTSTART" nil timezone) "\n"
-	     (org-icalendar-convert-timestamp timestamp "DTEND" t timezone) "\n"
-	     ;; RRULE.
-	     (when (org-element-property :repeater-type timestamp)
-	       (format "RRULE:FREQ=%s;INTERVAL=%d\n"
-		       (cl-case (org-element-property :repeater-unit timestamp)
-			 (hour "HOURLY") (day "DAILY") (week "WEEKLY")
-			 (month "MONTHLY") (year "YEARLY"))
-		       (org-element-property :repeater-value timestamp)))
-	     "SUMMARY:" summary "\n"
-	     (and (org-string-nw-p location) (format "LOCATION:%s\n" location))
-	     (and (org-string-nw-p class) (format "CLASS:%s\n" class))
-	     (and (org-string-nw-p description)
-		  (format "DESCRIPTION:%s\n" description))
-	     "CATEGORIES:" categories "\n"
-	     ;; VALARM.
-	     (org-icalendar--valarm entry timestamp summary)
-	     "END:VEVENT"))))
+  (if (eq (org-element-property :type timestamp) 'diary)
+      (org-icalendar-transcode-diary-sexp
+       (org-element-property :raw-value timestamp) uid summary)
+    (concat "BEGIN:VEVENT\n"
+	    (org-icalendar-dtstamp) "\n"
+	    "UID:" uid "\n"
+	    (org-icalendar-convert-timestamp timestamp "DTSTART" nil timezone) "\n"
+	    (org-icalendar-convert-timestamp timestamp "DTEND" t timezone) "\n"
+	    ;; RRULE.
+	    (when (org-element-property :repeater-type timestamp)
+	      (format "RRULE:FREQ=%s;INTERVAL=%d\n"
+		      (cl-case (org-element-property :repeater-unit timestamp)
+			(hour "HOURLY") (day "DAILY") (week "WEEKLY")
+			(month "MONTHLY") (year "YEARLY"))
+		      (org-element-property :repeater-value timestamp)))
+	    "SUMMARY:" summary "\n"
+	    (and (org-string-nw-p location) (format "LOCATION:%s\n" location))
+	    (and (org-string-nw-p class) (format "CLASS:%s\n" class))
+	    (and (org-string-nw-p description)
+		 (format "DESCRIPTION:%s\n" description))
+	    "CATEGORIES:" categories "\n"
+	    ;; VALARM.
+	    (org-icalendar--valarm entry timestamp summary)
+	    "END:VEVENT")))
 
 (defun org-icalendar--vtodo
     (entry uid summary location description categories timezone class)
@@ -797,34 +796,33 @@ Return VTODO component as a string."
 				 :day-start (nth 3 now)
 				 :month-start (nth 4 now)
 				 :year-start (nth 5 now)))))))
-    (org-icalendar-fold-string
-     (concat "BEGIN:VTODO\n"
-	     "UID:TODO-" uid "\n"
-	     (org-icalendar-dtstamp) "\n"
-	     (org-icalendar-convert-timestamp start "DTSTART" nil timezone) "\n"
-	     (and (memq 'todo-due org-icalendar-use-deadline)
-		  (org-element-property :deadline entry)
-		  (concat (org-icalendar-convert-timestamp
-			   (org-element-property :deadline entry) "DUE" nil timezone)
-			  "\n"))
-	     "SUMMARY:" summary "\n"
-	     (and (org-string-nw-p location) (format "LOCATION:%s\n" location))
-	     (and (org-string-nw-p class) (format "CLASS:%s\n" class))
-	     (and (org-string-nw-p description)
-		  (format "DESCRIPTION:%s\n" description))
-	     "CATEGORIES:" categories "\n"
-	     "SEQUENCE:1\n"
-	     (format "PRIORITY:%d\n"
-		     (let ((pri (or (org-element-property :priority entry)
-				    org-priority-default)))
-		       (floor (- 9 (* 8. (/ (float (- org-priority-lowest pri))
-					    (- org-priority-lowest
-					       org-priority-highest)))))))
-	     (format "STATUS:%s\n"
-		     (if (eq (org-element-property :todo-type entry) 'todo)
-			 "NEEDS-ACTION"
-		       "COMPLETED"))
-	     "END:VTODO"))))
+    (concat "BEGIN:VTODO\n"
+	    "UID:TODO-" uid "\n"
+	    (org-icalendar-dtstamp) "\n"
+	    (org-icalendar-convert-timestamp start "DTSTART" nil timezone) "\n"
+	    (and (memq 'todo-due org-icalendar-use-deadline)
+		 (org-element-property :deadline entry)
+		 (concat (org-icalendar-convert-timestamp
+			  (org-element-property :deadline entry) "DUE" nil timezone)
+			 "\n"))
+	    "SUMMARY:" summary "\n"
+	    (and (org-string-nw-p location) (format "LOCATION:%s\n" location))
+	    (and (org-string-nw-p class) (format "CLASS:%s\n" class))
+	    (and (org-string-nw-p description)
+		 (format "DESCRIPTION:%s\n" description))
+	    "CATEGORIES:" categories "\n"
+	    "SEQUENCE:1\n"
+	    (format "PRIORITY:%d\n"
+		    (let ((pri (or (org-element-property :priority entry)
+				   org-priority-default)))
+		      (floor (- 9 (* 8. (/ (float (- org-priority-lowest pri))
+					   (- org-priority-lowest
+					      org-priority-highest)))))))
+	    (format "STATUS:%s\n"
+		    (if (eq (org-element-property :todo-type entry) 'todo)
+			"NEEDS-ACTION"
+		      "COMPLETED"))
+	    "END:VTODO")))
 
 (defun org-icalendar--valarm (entry timestamp summary)
   "Create a VALARM component.
@@ -890,19 +888,20 @@ as a communication channel."
 NAME, OWNER, TZ, DESCRIPTION and CONTENTS are all strings giving,
 respectively, the name of the calendar, its owner, the timezone
 used, a short description and the other components included."
-  (concat (format "BEGIN:VCALENDAR
+  (org-icalendar-fold-string
+   (concat (format "BEGIN:VCALENDAR
 VERSION:2.0
 X-WR-CALNAME:%s
 PRODID:-//%s//Emacs with Org mode//EN
 X-WR-TIMEZONE:%s
 X-WR-CALDESC:%s
 CALSCALE:GREGORIAN\n"
-		  (org-icalendar-cleanup-string name)
-		  (org-icalendar-cleanup-string owner)
-		  (org-icalendar-cleanup-string tz)
-		  (org-icalendar-cleanup-string description))
-	  contents
-	  "END:VCALENDAR\n"))
+		   (org-icalendar-cleanup-string name)
+		   (org-icalendar-cleanup-string owner)
+		   (org-icalendar-cleanup-string tz)
+		   (org-icalendar-cleanup-string description))
+	   contents
+	   "END:VCALENDAR\n")))
 
 
 
