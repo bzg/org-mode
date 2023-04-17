@@ -39,6 +39,7 @@
 (require 'org-macs)
 (require 'org-compat)
 (require 'org-keys)
+(require 'sh-script)
 
 (declare-function org--get-expected-indentation "org" (element contentsp))
 (declare-function org-mode "org" ())
@@ -194,11 +195,17 @@ You may want to use this hook for example to turn off `outline-minor-mode'
 or similar things which you want to have when editing a source code file,
 but which mess up the display of a snippet in Org exported files.")
 
+(defun org-src--get-known-shells ()
+  "List all the shells in `sh-ancestor-alist' for `org-src-lang-modes'.
+The shells are associated with `sh-mode'."
+  (mapcar
+   (lambda (shell) (cons (symbol-name shell) 'sh))
+   (delete-dups (flatten-tree sh-ancestor-alist))))
+
 (defcustom org-src-lang-modes
-  '(("C" . c)
+  `(("C" . c)
     ("C++" . c++)
     ("asymptote" . asy)
-    ("bash" . sh)
     ("beamer" . latex)
     ("calc" . fundamental)
     ("cpp" . c++)
@@ -208,9 +215,10 @@ but which mess up the display of a snippet in Org exported files.")
     ("elisp" . emacs-lisp)
     ("ocaml" . tuareg)
     ("screen" . shell-script)
-    ("shell" . sh)
     ("sqlite" . sql)
-    ("toml" . conf-toml))
+    ("toml" . conf-toml)
+    ("shell" . sh)
+    ,@(org-src--get-known-shells))
   "Alist mapping languages to their major mode.
 
 The key is the language name.  The value is the mode name, as
@@ -221,7 +229,7 @@ not the case, this variable provides a way to simplify things on
 the user side.  For example, there is no `ocaml-mode' in Emacs,
 but the mode to use is `tuareg-mode'."
   :group 'org-edit-structure
-  :package-version '(Org . "9.6")
+  :package-version '(Org . "9.7")
   :type '(repeat
 	  (cons
 	   (string "Language name")
