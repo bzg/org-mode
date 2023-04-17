@@ -26,6 +26,72 @@
 (require 'org-duration)
 (require 'org-inlinetask)
 
+(ert-deftest test-org-colview/uncompile-format ()
+  "Test `org-columns-uncompile-format' specifications."
+  ;; With minimum data, one element
+  (should
+   (equal "%ITEM"
+          (org-columns-uncompile-format '(("ITEM" "ITEM" nil nil nil)))))
+  ;; With minimum data, two element
+  (should
+   (equal "%ITEM %TODO"
+          (org-columns-uncompile-format
+           `(("ITEM" "ITEM" nil nil nil) ("TODO" "TODO" nil nil nil)))))
+  ;; Read width
+  (should
+   (equal "%10ITEM"
+          (org-columns-uncompile-format `(("ITEM" "ITEM" 10 nil nil)))))
+  ;; Read title
+  (should
+   (equal "%ITEM(some title)"
+          (org-columns-uncompile-format `(("ITEM" "some title" nil nil nil)))))
+  ;; Read operator
+  (should
+   (equal "%ITEM{+}"
+          (org-columns-uncompile-format `(("ITEM" "ITEM" nil "+" nil)))))
+  ;; Read operator printf
+  (should
+   (equal "%ITEM{+;%.1f}"
+          (org-columns-uncompile-format  `(("ITEM" "ITEM" nil "+" "%.1f"))))))
+
+(ert-deftest test-org-colview/compile-format ()
+  "Test `org-columns-compile-format' specifications."
+  ;; With minimum data, one element
+  (should
+   (equal `(("ITEM" "ITEM" nil nil nil))
+          (org-columns-compile-format
+           "%ITEM")))
+  ;; With minimum data, two element
+  (should
+   (equal `(("ITEM" "ITEM" nil nil nil) ("TODO" "TODO" nil nil nil))
+          (org-columns-compile-format
+           "%ITEM %TODO")))
+  ;; Read width
+  (should
+   (equal `(("ITEM" "ITEM" 10 nil nil))
+          (org-columns-compile-format
+           "%10ITEM")))
+  ;; Upcase property name
+  (should
+   (equal `(("ITEM" "item" nil nil nil))
+          (org-columns-compile-format
+           "%item")))
+  ;; Read title
+  (should
+   (equal `(("ITEM" "some title" nil nil nil))
+          (org-columns-compile-format
+           "%ITEM(some title)")))
+  ;; Read operator
+  (should
+   (equal `(("ITEM" "ITEM" nil "+" nil))
+          (org-columns-compile-format
+           "%ITEM{+}")))
+  ;; Read operator printf
+  (should
+   (equal `(("ITEM" "ITEM" nil "+" "%.1f"))
+          (org-columns-compile-format
+           "%ITEM{+;%.1f}"))))
+
 (ert-deftest test-org-colview/get-format ()
   "Test `org-columns-get-format' specifications."
   ;; Without any clue, use `org-columns-default-format'.
