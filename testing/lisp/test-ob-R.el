@@ -272,6 +272,16 @@ log10(10)
                     (string= (concat src-block result)
                              (buffer-string)))))))
 
+(ert-deftest ob-session-R-result-value ()
+  (let (ess-ask-for-ess-directory
+        ess-history-file
+        org-confirm-babel-evaluate
+        (org-babel-temporary-directory "/tmp"))
+    (org-test-with-temp-text
+     "#+begin_src R :session R :results value \n  1:50\n#+end_src"
+     (should
+      (equal (number-sequence 1 50)
+             (mapcar #'car (org-babel-execute-src-block)))))))
 
 ;; test for printing of (nested) list
 (ert-deftest ob-R-nested-list ()
