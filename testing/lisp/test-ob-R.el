@@ -25,6 +25,11 @@
   (signal 'missing-test-dependency "ESS"))
 (defvar ess-ask-for-ess-directory)
 (defvar ess-history-file)
+(defvar ess-r-post-run-hook)
+(declare-function
+ ess-command "ext:ess-inf"
+ (cmd &optional out-buffer sleep no-prompt-check wait proc proc force-redisplay timeout))
+(declare-function ess-calculate-width "ext:ess-inf" (opt))
 
 (unless (featurep 'ob-R)
   (signal 'missing-test-dependency "Support for R code blocks"))
@@ -177,7 +182,9 @@ log10(10)
   (let (ess-ask-for-ess-directory
         ess-history-file
         (org-babel-temporary-directory "/tmp")
-        (org-confirm-babel-evaluate nil))
+        (org-confirm-babel-evaluate nil)
+        ;; Workaround for Emacs 27.  See https://orgmode.org/list/87ilduqrem.fsf@localhost
+        (ess-r-post-run-hook (lambda () (ess-command (ess-calculate-width 9999)))))
     (org-test-with-temp-text
      "#+begin_src R :session R :results output :async yes\n  Sys.sleep(.1)\n  1:5\n#+end_src\n"
      (should (let ((expected "[1] 1 2 3 4 5"))
@@ -195,7 +202,9 @@ log10(10)
         org-confirm-babel-evaluate
         (src-block "#+begin_src R :async :session R :results output\n  1:5\n#+end_src")
         (results-before "\n\n#+NAME: foobar\n#+RESULTS:\n: [1] 1")
-        (results-after "\n\n#+NAME: foobar\n#+RESULTS:\n: [1] 1 2 3 4 5\n"))
+        (results-after "\n\n#+NAME: foobar\n#+RESULTS:\n: [1] 1 2 3 4 5\n")
+        ;; Workaround for Emacs 27.  See https://orgmode.org/list/87ilduqrem.fsf@localhost
+        (ess-r-post-run-hook (lambda () (ess-command (ess-calculate-width 9999)))))
     (org-test-with-temp-text
      (concat src-block results-before)
      (should (progn (org-babel-execute-src-block)
@@ -224,7 +233,9 @@ log10(10)
         org-confirm-babel-evaluate
         (org-babel-temporary-directory "/tmp")
         (src-block "#+begin_src R :async :session R :results output drawer\n  1:5\n#+end_src")
-        (result "\n\n#+RESULTS:\n:results:\n[1] 1 2 3 4 5\n:end:\n"))
+        (result "\n\n#+RESULTS:\n:results:\n[1] 1 2 3 4 5\n:end:\n")
+        ;; Workaround for Emacs 27.  See https://orgmode.org/list/87ilduqrem.fsf@localhost
+        (ess-r-post-run-hook (lambda () (ess-command (ess-calculate-width 9999)))))
     (org-test-with-temp-text
      src-block
      (should (progn (org-babel-execute-src-block)
