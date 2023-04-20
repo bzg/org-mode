@@ -345,9 +345,7 @@ Return output file name."
                 t t)))
 	(write-file (concat pub-dir (file-name-nondirectory filename) html-ext)))
       (kill-buffer newbuf)
-      (unless visitingp (kill-buffer work-buffer)))
-    ;; FIXME: Why?  Which buffer is this supposed to apply to?
-    (set-buffer-modified-p nil)))
+      (unless visitingp (kill-buffer work-buffer)))))
 
 
 (provide 'ox-org)
