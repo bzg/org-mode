@@ -1,4 +1,4 @@
-;;; ox-latex.el --- LaTeX Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-latex.el --- LaTeX Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2023 Free Software Foundation, Inc.
 
@@ -50,7 +50,7 @@
 (defvar engrave-faces-latex-mathescape)
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-backend 'latex
   '((bold . org-latex-bold)
@@ -2274,9 +2274,9 @@ holding contextual information."
 	       ((= (length sec) 4)
 		(if numberedp (concat (car sec) "\n%s" (nth 1 sec))
 		  (concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
-	   ;; Create a temporary export back-end that hard-codes
+	   ;; Create a temporary export backend that hard-codes
 	   ;; "\underline" within "\section" and alike.
-	   (section-back-end
+	   (section-backend
             (org-export-create-backend
              :parent 'latex
              :transcoders
@@ -2289,7 +2289,7 @@ holding contextual information."
                (verbatim . (lambda (o _ _) (org-latex--protect-texttt (org-element-property :value o)))))))
 	   (text
 	    (org-export-data-with-backend
-	     (org-element-property :title headline) section-back-end info))
+	     (org-element-property :title headline) section-backend info))
 	   (todo
 	    (and (plist-get info :with-todo-keywords)
 		 (let ((todo (org-element-property :todo-keyword headline)))
@@ -2341,7 +2341,7 @@ holding contextual information."
 			todo todo-type priority
 			(org-export-data-with-backend
 			 (org-export-get-alt-title headline info)
-			 section-back-end info)
+			 section-backend info)
 			(and (eq (plist-get info :with-tags) t) tags)
 			info))
 	      ;; Maybe end local TOC (see `org-latex-keyword').

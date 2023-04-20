@@ -1,4 +1,4 @@
-;;; ox-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine  -*- lexical-binding: t; -*-
+;;; ox-koma-letter.el --- KOMA Scrlttr2 Backend for Org Export Engine  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2023 Free Software Foundation, Inc.
 
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 ;;
-;; This library implements a KOMA Scrlttr2 back-end, derived from the
+;; This library implements a KOMA Scrlttr2 backend, derived from the
 ;; LaTeX one.
 ;;
 ;; Depending on the desired output format, three commands are provided
@@ -34,8 +34,8 @@
 ;; `org-koma-letter-export-to-latex' ("tex" file) and
 ;; `org-koma-letter-export-to-pdf' ("pdf" file).
 ;;
-;; On top of buffer keywords supported by `latex' back-end (see
-;; `org-latex-packages-alist'), this back-end introduces the following
+;; On top of buffer keywords supported by `latex' backend (see
+;; `org-latex-packages-alist'), this backend introduces the following
 ;; keywords:
 ;;   - CLOSING: see `org-koma-letter-closing',
 ;;   - FROM_ADDRESS: see `org-koma-letter-from-address',
@@ -466,7 +466,7 @@ e.g. \"title-subject:t\"."
   "Holds special content temporarily.")
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
@@ -623,7 +623,7 @@ channel."
   (let ((key (org-element-property :key keyword))
         (value (org-element-property :value keyword)))
     ;; Handle specifically KOMA-LETTER keywords.  Otherwise, fallback
-    ;; to `latex' back-end.
+    ;; to `latex' backend.
     (if (equal key "KOMA-LETTER") value
       (org-export-with-backend 'latex keyword contents info))))
 

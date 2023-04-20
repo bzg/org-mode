@@ -3334,7 +3334,7 @@ Valid parameters are:
 
 :backend, :raw
 
-  Export back-end used as a basis to transcode elements of the
+  Export backend used as a basis to transcode elements of the
   list, when no specific parameter applies to it.  It is also
   used to translate its contents.  You can prevent this by
   setting :raw property to a non-nil value.

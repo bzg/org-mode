@@ -306,7 +306,7 @@ When completing for #+STARTUP, for example, this function returns
 	      "creator:" "date:" "d:" "email:" "*:" "e:" "::" "f:"
 	      "inline:" "tex:" "p:" "pri:" "':" "-:" "stat:" "^:" "toc:"
 	      "|:" "tags:" "tasks:" "<:" "todo:")
-	    ;; OPTION items from registered back-ends.
+	    ;; OPTION items from registered backends.
 	    (let (items)
 	      (dolist (backend (bound-and-true-p
 				org-export-registered-backends))

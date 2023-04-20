@@ -1,4 +1,4 @@
-;;; ox-ascii.el --- ASCII Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-ascii.el --- ASCII Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 ;;
-;; This library implements an ASCII back-end for Org generic exporter.
+;; This library implements an ASCII backend for Org generic exporter.
 ;; See Org manual for more information.
 
 ;;; Code:
@@ -42,7 +42,7 @@
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-next-visible-heading "org" (arg))
 
-;;; Define Back-End
+;;; Define Backend
 ;;
 ;; The following setting won't allow modifying preferred charset
 ;; through a buffer keyword or an option item, but, since the property
@@ -2048,10 +2048,10 @@ contextual information."
   "Filter controlling number of blank lines after a headline.
 
 HEADLINE is a string representing a transcoded headline.  BACKEND
-is symbol specifying back-end used for export.  INFO is plist
+is symbol specifying backend used for export.  INFO is plist
 containing the communication channel.
 
-This function only applies to `ascii' back-end.  See
+This function only applies to `ascii' backend.  See
 `org-ascii-headline-spacing' for information."
   (let ((headline-spacing (plist-get info :ascii-headline-spacing)))
     (if (not headline-spacing) headline
@@ -2062,7 +2062,7 @@ This function only applies to `ascii' back-end.  See
   "Filter controlling number of blank lines between paragraphs.
 
 TREE is the parse tree.  BACKEND is the symbol specifying
-back-end used for export.  INFO is a plist used as
+backend used for export.  INFO is a plist used as
 a communication channel.
 
 See `org-ascii-paragraph-spacing' for information."
@@ -2078,7 +2078,7 @@ See `org-ascii-paragraph-spacing' for information."
 (defun org-ascii-filter-comment-spacing (tree _backend info)
   "Filter removing blank lines between comments.
 TREE is the parse tree.  BACKEND is the symbol specifying
-back-end used for export.  INFO is a plist used as
+backend used for export.  INFO is a plist used as
 a communication channel."
   (org-element-map tree '(comment comment-block)
     (lambda (c)

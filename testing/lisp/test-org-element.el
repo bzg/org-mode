@@ -1041,8 +1041,8 @@ Some other text
   "Test `export-snippet' parser."
   (should
    (equal
-    '("back-end" . "contents")
-    (org-test-with-temp-text "@@back-end:contents@@"
+    '("backend" . "contents")
+    (org-test-with-temp-text "@@backend:contents@@"
       (org-element-map
        (org-element-parse-buffer) 'export-snippet
        (lambda (snippet) (cons (org-element-property :back-end snippet)
@@ -3378,8 +3378,8 @@ DEADLINE: <2012-03-29 thu.> SCHEDULED: <2012-03-29 thu.> CLOSED: [2012-03-29 thu
 
 (ert-deftest test-org-element/export-snippet-interpreter ()
   "Test export snippet interpreter."
-  (should (equal (org-test-parse-and-interpret "@@back-end:contents@@")
-		 "@@back-end:contents@@\n")))
+  (should (equal (org-test-parse-and-interpret "@@backend:contents@@")
+		 "@@backend:contents@@\n")))
 
 (ert-deftest test-org-element/footnote-reference-interpreter ()
   "Test footnote reference interpreter."

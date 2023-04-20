@@ -1,4 +1,4 @@
-;;; ox-org.el --- Org Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-org.el --- Org Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2023 Free Software Foundation, Inc.
 

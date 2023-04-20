@@ -26,8 +26,8 @@
 (require 'org-inlinetask)
 
 (defun org-test-default-backend ()
-  "Return a default export back-end.
-This back-end simply returns parsed data as Org syntax."
+  "Return a default export backend.
+This backend simply returns parsed data as Org syntax."
   (org-export-create-backend
    :transcoders
    (mapcar (lambda (type)
@@ -181,7 +181,7 @@ num:2 <:active")))
 	  (eq (plist-get options :section-numbers) 2)
 	  (eq (plist-get options :with-timestamps) 'active)
 	  (equal (plist-get options :with-drawers) '("TEST")))))
-  ;; Test back-end specific values.
+  ;; Test backend specific values.
   (should
    (equal
     (org-export--parse-option-keyword
@@ -214,18 +214,18 @@ num:2 <:active")))
   ;; Test `space' behaviour.
   (should
    (equal
-    (let ((back-end (org-export-create-backend
+    (let ((backend (org-export-create-backend
 		     :options '((:keyword "KEYWORD" nil nil space)))))
       (org-test-with-temp-text "#+KEYWORD: With\n#+KEYWORD: spaces"
-	(org-export--get-inbuffer-options back-end)))
+	(org-export--get-inbuffer-options backend)))
     '(:keyword "With spaces")))
   ;; Test `newline' behaviour.
   (should
    (equal
-    (let ((back-end (org-export-create-backend
+    (let ((backend (org-export-create-backend
 		     :options '((:keyword "KEYWORD" nil nil newline)))))
       (org-test-with-temp-text "#+KEYWORD: With\n#+KEYWORD: two lines"
-	(org-export--get-inbuffer-options back-end)))
+	(org-export--get-inbuffer-options backend)))
     '(:keyword "With\ntwo lines")))
   ;; Test `split' behaviour.
   (should
@@ -1853,10 +1853,10 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 
 
-;;; Back-End Tools
+;;; Backend Tools
 
 (ert-deftest test-org-export/define-backend ()
-  "Test back-end definition and accessors."
+  "Test backend definition and accessors."
   ;; Translate table.
   (should
    (equal '((headline . my-headline-test))
@@ -1890,7 +1890,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 (ert-deftest test-org-export/define-derived-backend ()
   "Test `org-export-define-derived-backend' specifications."
-  ;; Error when parent back-end is not defined.
+  ;; Error when parent backend is not defined.
   (should-error
    (let (org-export-registered-backends)
      (org-export-define-derived-backend 'test 'parent)))
@@ -1956,7 +1956,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 (ert-deftest test-org-export/get-all-transcoders ()
   "Test `org-export-get-all-transcoders' specifications."
-  ;; Return nil when back-end cannot be found.
+  ;; Return nil when backend cannot be found.
   (should-not (org-export-get-all-transcoders nil))
   ;; Same as `org-export-transcoders' if no parent.
   (should
@@ -1981,7 +1981,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (org-export-get-all-transcoders
 	     (org-export-create-backend
 	      :parent 'b2 :transcoders '((paragraph . ignore)))))))
-  ;; Back-end transcoders overrule inherited ones.
+  ;; Backend transcoders overrule inherited ones.
   (should
    (eq 'b
        (let (org-export-registered-backends)
@@ -1993,7 +1993,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 (ert-deftest test-org-export/get-all-options ()
   "Test `org-export-get-all-options' specifications."
-  ;; Return nil when back-end cannot be found.
+  ;; Return nil when backend cannot be found.
   (should-not (org-export-get-all-options nil))
   ;; Same as `org-export-options' if no parent.
   (should
@@ -2018,7 +2018,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (org-export-get-all-options
 	     (org-export-create-backend
 	      :parent 'b2 :options '((:key3 value3)))))))
-  ;; Back-end options overrule inherited ones.
+  ;; Backend options overrule inherited ones.
   (should
    (eq 'b
        (let (org-export-registered-backends)
@@ -2030,7 +2030,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 (ert-deftest test-org-export/get-all-filters ()
   "Test `org-export-get-all-filters' specifications."
-  ;; Return nil when back-end cannot be found.
+  ;; Return nil when backend cannot be found.
   (should-not (org-export-get-all-filters nil))
   ;; Same as `org-export-filters' if no parent.
   (should
@@ -2059,7 +2059,7 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	    (org-export-get-all-filters
 	     (org-export-create-backend
 	      :parent 'b2 :filters '((:filter-paragraph . ignore)))))))
-  ;; Back-end filters overrule inherited ones.
+  ;; Backend filters overrule inherited ones.
   (should
    (eq 'b
        (let (org-export-registered-backends)
@@ -2071,9 +2071,9 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 
 (ert-deftest test-org-export/with-backend ()
   "Test `org-export-with-backend' definition."
-  ;; Error when calling an undefined back-end
+  ;; Error when calling an undefined backend
   (should-error (org-export-with-backend nil "Test"))
-  ;; Error when called back-end doesn't have an appropriate
+  ;; Error when called backend doesn't have an appropriate
   ;; transcoder.
   (should-error
    (org-export-with-backend
@@ -2095,11 +2095,11 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	   (org-export-create-backend
 	    :transcoders '((plain-text . (lambda (text info) "Success"))))
 	   "Test")))
-  ;; Provide correct back-end if transcoder needs to use recursive
+  ;; Provide correct backend if transcoder needs to use recursive
   ;; calls.
   (should
    (equal "Success\n"
-	  (let ((test-back-end
+	  (let ((test-backend
 		 (org-export-create-backend
 		  :transcoders
 		  (list (cons 'headline
@@ -2115,13 +2115,13 @@ Footnotes[fn:2], foot[fn:test] and [fn:inline:inline footnote]
 	      (list (cons 'headline
 			  (lambda (headline contents info)
 			    (org-export-with-backend
-			     test-back-end headline contents info))))))))))
+			     test-backend headline contents info))))))))))
 
 (ert-deftest test-org-export/data-with-backend ()
   "Test `org-export-data-with-backend' specifications."
-  ;; Error when calling an undefined back-end.
+  ;; Error when calling an undefined backend.
   (should-error (org-export-data-with-backend nil "nil" nil))
-  ;; Otherwise, export data recursively, using correct back-end.
+  ;; Otherwise, export data recursively, using correct backend.
   (should
    (equal
     "Success!"
@@ -3107,7 +3107,7 @@ Para2"
 	  (link . (lambda (l c i)
 		    (or (org-export-custom-protocol-maybe l c 'no-test i)
 			"failure")))))))))
-  ;; Ignore anonymous back-ends.
+  ;; Ignore anonymous backends.
   (should-not
    (string-match
     "success"
@@ -3835,7 +3835,7 @@ Another text. (ref:text)
      (let ((headline (org-element-map tree 'headline #'identity nil t)))
        (equal (org-export-get-reference headline info)
 	      (org-export-get-reference headline info)))))
-  ;; References get through local export back-ends.
+  ;; References get through local export backends.
   (should
    (org-test-with-parsed-data "* Headline"
      (let ((headline (org-element-map tree 'headline #'identity nil t))

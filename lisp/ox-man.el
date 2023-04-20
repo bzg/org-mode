@@ -1,4 +1,4 @@
-;;; ox-man.el --- Man Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-man.el --- Man Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2023 Free Software Foundation, Inc.
 
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 ;;
-;; This library implements a Man back-end for Org generic exporter.
+;; This library implements a Man backend for Org generic exporter.
 ;;
 ;; To test it, run
 ;;
@@ -51,7 +51,7 @@
 
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-backend 'man
   '((babel-call . org-man-babel-call)

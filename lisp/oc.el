@@ -46,8 +46,8 @@
 ;; The "export" capability is slightly more involved as one need to
 ;; select the processor providing it, but may also provide a default
 ;; style for citations and bibliography.  Also, the choice of an
-;; export processor may depend of the current export back-end.  The
-;; association between export back-ends and triplets of parameters can
+;; export processor may depend of the current export backend.  The
+;; association between export backends and triplets of parameters can
 ;; be set in `org-cite-export-processors' variable, or in a document,
 ;; through the "cite_export" keyword.
 
@@ -143,12 +143,12 @@ File names must be absolute."
 
 When nil, citations and bibliography are not exported.
 
-When non-nil, the value is an association list between export back-ends and
+When non-nil, the value is an association list between export backends and
 citation export processors:
 
-  (BACK-END . PROCESSOR)
+  (BACKEND . PROCESSOR)
 
-where BACK-END is the name of an export back-end or t, and PROCESSOR is a
+where BACKEND is the name of an export backend or t, and PROCESSOR is a
 triplet following the pattern
 
   (NAME BIBLIOGRAPHY-STYLE CITATION-STYLE)
@@ -160,7 +160,7 @@ exporting a citation), as a string or nil.  Both BIBLIOGRAPHY-STYLE and
 CITATION-STYLE are optional.  NAME is mandatory.
 
 The export process selects the citation processor associated to the current
-export back-end, or the most specific back-end the current one is derived from,
+export backend, or the most specific backend the current one is derived from,
 or, if all are inadequate, to the processor associated to t.  For example, with
 the following value
 
@@ -168,9 +168,9 @@ the following value
    (latex biblatex)
    (t csl))
 
-exporting with `beamer' or any back-end derived from it will use `natbib',
-whereas exporting with `latex' or any back-end derived from it but different
-from `beamer' will use `biblatex' processor.  Any other back-end, such as
+exporting with `beamer' or any backend derived from it will use `natbib',
+whereas exporting with `latex' or any backend derived from it but different
+from `beamer' will use `biblatex' processor.  Any other backend, such as
 `html', will use `csl' processor.
 
 CITATION-STYLE is overridden by adding a style to any citation object.  A nil
@@ -187,7 +187,7 @@ or
   #+CITE_EXPORT: basic
 
 In that case, `basic' processor is used on every export, independently on the
-back-end."
+backend."
   :group 'org-cite
   :package-version '(Org . "9.5")
   :type '(choice (const :tag "No export" nil)
@@ -345,7 +345,7 @@ optional keys can be set:
     arguments: the list of citation keys used in the document, as
     strings, a list of bibliography files, the style, as a string
     or nil, the local properties, as a property list, the export
-    back-end, as a symbol, and the communication channel, as a
+    backend, as a symbol, and the communication channel, as a
     property list.
 
     It is called at each \"print_bibliography\" keyword in the
@@ -358,7 +358,7 @@ optional keys can be set:
 
     Function rendering citations.  It is called with four
     arguments: a citation object, the style, as a pair, the
-    export back-end, as a symbol, and the communication channel,
+    export backend, as a symbol, and the communication channel,
     as a property list.
 
     It is called on each citation object in the parse tree.  It
@@ -373,7 +373,7 @@ optional keys can be set:
     six arguments: the output, as a string, a list of citation
     keys used in the document, a list of bibliography files, the
     expected bibliography style, as a string or nil, the export
-    back-end, as a symbol, and the communication channel, as a
+    backend, as a symbol, and the communication channel, as a
     property list.
 
     It must return a string, which will become the final output
@@ -654,7 +654,7 @@ in the current buffer.  Positions include leading \"@\" character."
 (defun org-cite-main-affixes (citation)
   "Return main affixes for CITATION object.
 
-Some export back-ends only support a single pair of affixes per
+Some export backends only support a single pair of affixes per
 citation, even if it contains multiple keys.  This function
 decides what affixes are the most appropriate.
 
@@ -1279,12 +1279,12 @@ side-effect."
             ;; Value is an alist.  It must come from
             ;; `org-cite-export-processors' variable.  Find the most
             ;; appropriate processor according to current export
-            ;; back-end.
+            ;; backend.
             ((and (pred consp) alist)
              (let* ((backend (plist-get info :back-end))
                     (candidates
                      ;; Limit candidates to processors associated to
-                     ;; back-ends derived from or equal to the current
+                     ;; backends derived from or equal to the current
                      ;; one.
                      (sort (seq-filter
                             (pcase-lambda (`(,key . ,_))
@@ -1336,7 +1336,7 @@ selected citation processor."
 
 (defun org-cite-export-bibliography (keyword _ info)
   "Return bibliography associated to \"print_bibliography\" KEYWORD.
-BACKEND is the export back-end, as a symbol.  INFO is a plist
+BACKEND is the export backend, as a symbol.  INFO is a plist
 used as a communication channel."
   (pcase (plist-get info :cite-export)
     ('nil nil)

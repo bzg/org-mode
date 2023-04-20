@@ -1,4 +1,4 @@
-;;; ox-beamer.el --- Beamer Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-beamer.el --- Beamer Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007-2023 Free Software Foundation, Inc.
 
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 ;;
-;; This library implements both a Beamer back-end, derived from the
+;; This library implements both a Beamer backend, derived from the
 ;; LaTeX one and a minor mode easing structure edition of the
 ;; document.  See Org manual for more information.
 
@@ -166,7 +166,7 @@ which is replaced with the subtitle."
     ("ignoreheading"  "i")
     ("note"           "n")
     ("noteNH"         "N"))
-  "Alist of environments treated in a special way by the back-end.
+  "Alist of environments treated in a special way by the backend.
 Keys are environment names, as strings, values are bindings used
 in `org-beamer-select-environment'.  Environments listed here,
 along with their binding, are hard coded and cannot be modified
@@ -229,7 +229,7 @@ Return overlay specification, as a string, or nil."
 
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-derived-backend 'beamer 'latex
   :menu-entry
@@ -377,7 +377,7 @@ CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
   (let ((latex-headline
 	 (org-export-with-backend
-	  ;; We create a temporary export back-end which behaves the
+	  ;; We create a temporary export backend which behaves the
 	  ;; same as current one, but adds "\protect" in front of the
 	  ;; output of some objects.
 	  (org-export-create-backend
@@ -715,7 +715,7 @@ channel."
   (let ((key (org-element-property :key keyword))
 	(value (org-element-property :value keyword)))
     ;; Handle specifically BEAMER and TOC (headlines only) keywords.
-    ;; Otherwise, fallback to `latex' back-end.
+    ;; Otherwise, fallback to `latex' backend.
     (cond
      ((equal key "BEAMER") value)
      ((and (equal key "TOC") (string-match "\\<headlines\\>" value))
@@ -808,7 +808,7 @@ contextual information."
 
 ;;;; Template
 ;;
-;; Template used is similar to the one used in `latex' back-end,
+;; Template used is similar to the one used in `latex' backend,
 ;; excepted for the table of contents and Beamer themes.
 
 (defun org-beamer-template (contents info)

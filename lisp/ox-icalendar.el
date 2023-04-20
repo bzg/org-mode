@@ -1,4 +1,4 @@
-;;; ox-icalendar.el --- iCalendar Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-icalendar.el --- iCalendar Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2023 Free Software Foundation, Inc.
 
@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 ;;
-;; This library implements an iCalendar back-end for Org generic
+;; This library implements an iCalendar backend for Org generic
 ;; exporter.  See Org manual for more information.
 ;;
 ;; It is expected to conform to RFC 5545.
@@ -48,7 +48,7 @@
 ;;; User-Configurable Variables
 
 (defgroup org-export-icalendar nil
-  "Options specific for iCalendar export back-end."
+  "Options specific for iCalendar export backend."
   :tag "Org Export iCalendar"
   :group 'org-export)
 
@@ -96,7 +96,7 @@ and will fire at the event start."
 (defcustom org-icalendar-exclude-tags nil
   "Tags that exclude a tree from export.
 This variable allows specifying different exclude tags from other
-back-ends.  It can also be set with the ICALENDAR_EXCLUDE_TAGS
+backends.  It can also be set with the ICALENDAR_EXCLUDE_TAGS
 keyword."
   :group 'org-export-icalendar
   :type '(repeat (string :tag "Tag")))
@@ -305,7 +305,7 @@ re-read the iCalendar file.")
 
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-derived-backend 'icalendar 'ascii
   :translate-alist '((clock . nil)
@@ -561,10 +561,10 @@ runs `org-icalendar-after-save-hook'."
 
 ;;; Filters
 
-(defun org-icalendar-clear-blank-lines (headline _back-end _info)
+(defun org-icalendar-clear-blank-lines (headline _backend _info)
   "Remove blank lines in HEADLINE export.
 HEADLINE is a string representing a transcoded headline.
-BACK-END and INFO are ignored."
+BACKEND and INFO are ignored."
   (replace-regexp-in-string "^\\(?:[ \t]*\n\\)+" "" headline))
 
 
@@ -936,7 +936,7 @@ Return ICS file name."
   (let ((file (buffer-file-name (buffer-base-buffer))))
     (when (and file org-icalendar-store-UID)
       (org-icalendar-create-uid file 'warn-user)))
-  ;; Export part.  Since this back-end is backed up by `ascii', ensure
+  ;; Export part.  Since this backend is backed up by `ascii', ensure
   ;; links will not be collected at the end of sections.
   (let ((outfile (org-export-output-file-name ".ics" subtreep)))
     (org-export-to-file 'icalendar outfile

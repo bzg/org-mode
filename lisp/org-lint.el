@@ -46,7 +46,7 @@
 ;; - deprecated export block syntax,
 ;; - deprecated Babel header syntax,
 ;; - missing language in source blocks,
-;; - missing back-end in export blocks,
+;; - missing backend in export blocks,
 ;; - invalid Babel call blocks,
 ;; - NAME values with a colon,
 ;; - wrong babel headers,
@@ -509,7 +509,7 @@ Use :header-args: instead"
     (lambda (b)
       (unless (org-element-property :type b)
 	(list (org-element-property :post-affiliated b)
-	      "Missing back-end in export block")))))
+	      "Missing backend in export block")))))
 
 (defun org-lint-invalid-babel-call-block (ast)
   (org-element-map ast 'babel-call
@@ -1308,7 +1308,7 @@ Use \"export %s\" instead"
   :categories '(babel))
 
 (org-lint-add-checker 'missing-backend-in-export-block
-  "Report missing back-end in export blocks"
+  "Report missing backend in export blocks"
   #'org-lint-missing-backend-in-export-block
   :categories '(export))
 

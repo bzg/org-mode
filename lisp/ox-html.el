@@ -1,4 +1,4 @@
-;;; ox-html.el --- HTML Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-html.el --- HTML Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2011-2023 Free Software Foundation, Inc.
 
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; This library implements a HTML back-end for Org generic exporter.
+;; This library implements a HTML backend for Org generic exporter.
 ;; See Org manual for more information.
 
 ;;; Code:
@@ -55,7 +55,7 @@
 (defvar htmlize-output-type)
 (defvar htmlize-css-name-prefix)
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-backend 'html
   '((bold . org-html-bold)
@@ -544,7 +544,7 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
 (defun org-html-infojs-install-script (exp-plist _backend)
   "Install script in export options when appropriate.
 EXP-PLIST is a plist containing export options.  BACKEND is the
-export back-end currently used."
+export backend currently used."
   (unless (or (memq 'body-only (plist-get exp-plist :export-options))
 	      (not (plist-get exp-plist :html-use-infojs))
 	      (and (eq (plist-get exp-plist :html-use-infojs) 'when-configured)

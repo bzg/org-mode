@@ -1,4 +1,4 @@
-;;; ox-texinfo.el --- Texinfo Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-texinfo.el --- Texinfo Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2023 Free Software Foundation, Inc.
 ;; Author: Jonathan Leech-Pepin <jonathan.leechpepin at gmail dot com>
@@ -38,7 +38,7 @@
 (defvar org-texinfo-supports-math--cache)
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-backend 'texinfo
   '((bold . org-texinfo-bold)
@@ -486,7 +486,7 @@ If two strings share the same prefix (e.g. \"ISO-8859-1\" and
 (defun org-texinfo--normalize-headlines (tree _backend info)
   "Normalize headlines in TREE.
 
-BACK-END is the symbol specifying back-end used for export.
+BACKEND is the symbol specifying backend used for export.
 INFO is a plist used as a communication channel.
 
 Make sure every headline in TREE contains a section, since those

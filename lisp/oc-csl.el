@@ -184,8 +184,8 @@ looks for style files in this directory, too."
   :safe #'booleanp)
 
 (defcustom org-cite-csl-no-citelinks-backends '(ascii)
-  "List of export back-ends for which cite linking is disabled.
-Cite linking for export back-ends derived from any of the back-ends listed here,
+  "List of export backends for which cite linking is disabled.
+Cite linking for export backends derived from any of the backends listed here,
 is also disabled."
   :group 'org-cite
   :package-version '(Org . "9.5")

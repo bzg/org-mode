@@ -27,7 +27,7 @@
 ;;
 ;; ox-publish.el can do the following:
 ;;
-;; + Publish all one's Org files to a given export back-end
+;; + Publish all one's Org files to a given export backend
 ;; + Upload HTML, images, attachments and other files to a web server
 ;; + Exclude selected private pages from publishing
 ;; + Publish a clickable sitemap of pages
@@ -129,14 +129,14 @@ considered relative to the base directory.
 When both `:include' and `:exclude' properties are given values,
 the exclusion step happens first.
 
-One special property controls which back-end function to use for
+One special property controls which backend function to use for
 publishing files in the project.  This can be used to extend the
 set of file types publishable by `org-publish', as well as the
 set of output formats.
 
   `:publishing-function'
 
-    Function to publish file.  Each back-end may define its
+    Function to publish file.  Each backend may define its
     own (i.e. `org-latex-publish-to-pdf',
     `org-html-publish-to-html').  May be a list of functions, in
     which case each function in the list is invoked in turn.
@@ -162,8 +162,8 @@ date.
 
 Some properties control details of the Org publishing process,
 and are equivalent to the corresponding user variables listed in
-the right column.  Back-end specific properties may also be
-included.  See the back-end documentation for more information.
+the right column.  Backend specific properties may also be
+included.  See the backend documentation for more information.
 
   :author                   `user-full-name'
   :creator                  `org-export-creator-string'
@@ -547,12 +547,12 @@ publishing FILENAME."
 
 
 
-;;; Tools for publishing functions in back-ends
+;;; Tools for publishing functions in backends
 
 (defun org-publish-org-to (backend filename extension plist &optional pub-dir)
-  "Publish an Org file to a specified back-end.
+  "Publish an Org file to a specified backend.
 
-BACKEND is a symbol representing the back-end used for
+BACKEND is a symbol representing the backend used for
 transcoding.  FILENAME is the filename of the Org file to be
 published.  EXTENSION is the extension used for the output
 string, with the leading dot.  PLIST is the property list for the
@@ -841,9 +841,9 @@ Default for SITEMAP-FILENAME is `sitemap.org'."
   "Find the PROPERTY of FILE in project.
 
 PROPERTY is a keyword referring to an export option, as defined
-in `org-export-options-alist' or in export back-ends.  In the
+in `org-export-options-alist' or in export backends.  In the
 latter case, optional argument BACKEND has to be set to the
-back-end where the option is defined, e.g.,
+backend where the option is defined, e.g.,
 
   (org-publish-find-property file :subtitle \\='latex)
 
@@ -1024,7 +1024,7 @@ the project."
   "Update index for a file in cache.
 
 OUTPUT is the output from transcoding current file.  BACKEND is
-the back-end that was used for transcoding.  INFO is a plist
+the backend that was used for transcoding.  INFO is a plist
 containing publishing and export options.
 
 The index relative to current file is stored as an alist.  An
@@ -1138,7 +1138,7 @@ publishing directory."
   "Store cross-references for current published file.
 
 OUTPUT is the produced output, as a string.  BACKEND is the export
-back-end used, as a symbol.  INFO is the final export state, as
+backend used, as a symbol.  INFO is the final export state, as
 a plist.
 
 This function is meant to be used as a final output filter.  See
@@ -1170,7 +1170,7 @@ option, e.g.,
 When PREFER-CUSTOM is non-nil, and SEARCH targets a headline in
 FILE, return its custom ID, if any.
 
-It only makes sense to use this if export back-end builds
+It only makes sense to use this if export backend builds
 references with `org-export-get-reference'."
   (cond
    ((and prefer-custom

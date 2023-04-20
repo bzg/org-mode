@@ -812,7 +812,7 @@ For export specific modules, see also `org-export-backends'."
 (declare-function org-export-derived-backend-p "ox" (backend &rest backends))
 (declare-function org-export-backend-name "ox" (backend) t)
 (defcustom org-export-backends '(ascii html icalendar latex odt)
-  "List of export back-ends that should be always available.
+  "List of export backends that should be always available.
 
 If a description starts with <C>, the file is not part of Emacs and Org mode,
 so loading it will require that you have properly installed org-contrib
@@ -844,12 +844,12 @@ value of the variable, after updating it:
       (dolist (backend val)
         (cond
          ((not (load (format \"ox-%s\" backend) t t))
-          (message \"Problems while trying to load export back-end \\=`%s\\='\"
+          (message \"Problems while trying to load export backend \\=`%s\\='\"
                    backend))
          ((not (memq backend new-list)) (push backend new-list))))
       (set-default \\='org-export-backends new-list)))
 
-Adding a back-end to this list will also pull the back-end it
+Adding a backend to this list will also pull the backend it
 depends on, if any."
   :group 'org
   :group 'org-export
@@ -858,9 +858,9 @@ depends on, if any."
   :initialize 'custom-initialize-set
   :set (lambda (var val)
 	 (if (not (featurep 'ox)) (set-default-toplevel-value var val)
-	   ;; Any back-end not required anymore (not present in VAL and not
-	   ;; a parent of any back-end in the new value) is removed from the
-	   ;; list of registered back-ends.
+	   ;; Any backend not required anymore (not present in VAL and not
+	   ;; a parent of any backend in the new value) is removed from the
+	   ;; list of registered backends.
 	   (setq org-export-registered-backends
 		 (cl-remove-if-not
 		  (lambda (backend)
@@ -871,14 +871,14 @@ depends on, if any."
 			      (and (org-export-derived-backend-p b name)
 				   (throw 'parentp t)))))))
 		  org-export-registered-backends))
-	   ;; Now build NEW-LIST of both new back-ends and required
+	   ;; Now build NEW-LIST of both new backends and required
 	   ;; parents.
 	   (let ((new-list (mapcar #'org-export-backend-name
 				   org-export-registered-backends)))
 	     (dolist (backend val)
 	       (cond
 		((not (load (format "ox-%s" backend) t t))
-		 (message "Problems while trying to load export back-end `%s'"
+		 (message "Problems while trying to load export backend `%s'"
 			  backend))
 		((not (memq backend new-list)) (push backend new-list))))
 	     ;; Set VAR to that list with fixed dependencies.
@@ -906,7 +906,7 @@ depends on, if any."
 (eval-after-load 'ox
   '(dolist (backend org-export-backends)
      (condition-case nil (require (intern (format "ox-%s" backend)))
-       (error (message "Problems while trying to load export back-end `%s'"
+       (error (message "Problems while trying to load export backend `%s'"
 		       backend)))))
 
 (defcustom org-support-shift-select nil
@@ -8868,15 +8868,15 @@ This function can be used in a hook."
 (defun org-get-export-keywords ()
   "Return a list of all currently understood export keywords.
 Export keywords include options, block names, attributes and
-keywords relative to each registered export back-end."
+keywords relative to each registered export backend."
   (let (keywords)
     (dolist (backend
 	     (bound-and-true-p org-export-registered-backends)
 	     (delq nil keywords))
-      ;; Back-end name (for keywords, like #+LATEX:)
+      ;; Backend name (for keywords, like #+LATEX:)
       (push (upcase (symbol-name (org-export-backend-name backend))) keywords)
       (dolist (option-entry (org-export-backend-options backend))
-	;; Back-end options.
+	;; Backend options.
 	(push (nth 1 option-entry) keywords)))))
 
 (defconst org-options-keywords

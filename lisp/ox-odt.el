@@ -39,7 +39,7 @@
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-next-visible-heading "org" (arg))
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-backend 'odt
   '((bold . org-odt-bold)

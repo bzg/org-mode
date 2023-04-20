@@ -114,11 +114,11 @@ below.
   Function that accepts four arguments:
   - the path, as a string,
   - the description as a string, or nil,
-  - the export back-end,
+  - the export backend,
   - the export communication channel, as a plist.
 
   When nil, export for that type of link is delegated to the
-  back-end.
+  backend.
 
 `:store'
 

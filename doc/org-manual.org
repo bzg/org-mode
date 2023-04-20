@@ -11103,7 +11103,7 @@ possible to provide your own special symbols in the variable
 ~org-entities-user~.
 
 During export, these symbols are transformed into the native format of
-the exporter back-end.  Strings like =\alpha= are exported as =&alpha;= in
+the exporter backend.  Strings like =\alpha= are exported as =&alpha;= in
 the HTML output, and as =\(\alpha\)= in the LaTeX output.  Similarly, =\nbsp=
 becomes =&nbsp;= in HTML and =~= in LaTeX.
 
@@ -11143,7 +11143,7 @@ symbols and the occasional formula.  LaTeX[fn:36] is widely used to
 typeset scientific documents.  Org mode supports embedding LaTeX code
 into its files, because many academics are used to writing and reading
 LaTeX source code, and because it can be readily processed to produce
-pretty output for a number of export back-ends.
+pretty output for a number of export backends.
 
 *** LaTeX fragments
 :PROPERTIES:
@@ -11153,7 +11153,7 @@ pretty output for a number of export back-ends.
 
 #+vindex: org-format-latex-header
 Org mode can contain LaTeX math fragments, and it supports ways to
-process these for several export back-ends.  When exporting to LaTeX,
+process these for several export backends.  When exporting to LaTeX,
 the code is left as it is.  When exporting to HTML, Org can use either
 [[https://www.mathjax.org][MathJax]] (see [[*Math formatting in HTML export]]) or transcode the math
 into images (see [[*Previewing LaTeX fragments]]).
@@ -11189,7 +11189,7 @@ either $$ a=+\sqrt{2} $$ or \[ a=-\sqrt{2} \].
 #+vindex: org-export-with-latex
 LaTeX processing can be configured with the variable
 ~org-export-with-latex~.  The default setting is ~t~ which means
-MathJax for HTML, and no processing for ASCII and LaTeX back-ends.
+MathJax for HTML, and no processing for ASCII and LaTeX backends.
 You can also set this variable on a per-file basis using one of these
 lines:
 
@@ -11570,7 +11570,7 @@ Optionally, the caption can take the form:
 Even though images and tables are prominent examples of captioned
 structures, the same caption mechanism can apply to many
 others---e.g., LaTeX equations, source code blocks.  Depending on the
-export back-end, those may or may not be handled.
+export backend, those may or may not be handled.
 
 ** Horizontal Rules
 :PROPERTIES:
@@ -11687,10 +11687,11 @@ export documents to a variety of other formats while retaining as much
 structure (see [[*Document Structure]]) and markup (see [[*Markup for Rich
 Contents]]) as possible.
 
+#+cindex: export backend
 #+cindex: export back-end
 The libraries responsible for translating Org files to other formats
-are called /back-ends/.  Org ships with support for the following
-back-ends:
+are called /backends/.  Org ships with support for the following
+backends:
 
 - /ascii/ (ASCII format)
 - /beamer/ (LaTeX Beamer format)
@@ -11706,15 +11707,15 @@ back-ends:
 Users can install libraries for additional formats from the Emacs
 packaging system.  For easy discovery, these packages have a common
 naming scheme: ~ox-NAME~, where {{{var(NAME)}}} is a format.  For
-example, ~ox-koma-letter~ for /koma-letter/ back-end.  More libraries
+example, ~ox-koma-letter~ for /koma-letter/ backend.  More libraries
 can be found in the =org-contrib= repository (see [[*Installation]]).
 
 #+vindex: org-export-backends
-Org only loads back-ends for the following formats by default: ASCII,
-HTML, iCalendar, LaTeX, and ODT.  Additional back-ends can be loaded
+Org only loads backends for the following formats by default: ASCII,
+HTML, iCalendar, LaTeX, and ODT.  Additional backends can be loaded
 in either of two ways: by configuring the ~org-export-backends~
 variable, or by requiring libraries in the Emacs init file.  For
-example, to load the Markdown back-end, add this to your Emacs config:
+example, to load the Markdown backend, add this to your Emacs config:
 
 #+begin_src emacs-lisp
 (require 'ox-md)
@@ -11776,7 +11777,7 @@ further alter what is exported, and how.
   #+kindex: C-c C-e C-b
 
   Toggle body-only export.  Useful for excluding headers and footers
-  in the export.  Affects only those back-end formats that have
+  in the export.  Affects only those backend formats that have
   sections like =<head>...</head>= in HTML.
 
 - {{{kbd(C-s)}}} ::
@@ -11818,14 +11819,14 @@ set at a specific level override options set at a more general level.
 #+cindex: @samp{SETUPFILE}, keyword
 In-buffer settings may appear anywhere in the file, either directly or
 indirectly through a file included using =#+SETUPFILE: filename or
-URL= syntax.  Option keyword sets tailored to a particular back-end
+URL= syntax.  Option keyword sets tailored to a particular backend
 can be inserted from the export dispatcher (see [[*The Export
 Dispatcher]]) using the =Insert template= command by pressing
 {{{kbd(#)}}}.  To insert keywords individually, a good way to make
 sure the keyword is correct is to type =#+= and then to use
 {{{kbd(M-TAB)}}}[fn:6] for completion.
 
-The export keywords available for every back-end, and their equivalent
+The export keywords available for every backend, and their equivalent
 global variables, include:
 
 - =AUTHOR= ::
@@ -11897,7 +11898,7 @@ global variables, include:
   #+cindex: @samp{EXPORT_FILE_NAME}, keyword
   The name of the output file to be generated.  Otherwise, Org
   generates the file name based on the buffer name and the extension
-  based on the back-end format.
+  based on the backend format.
 
 The =OPTIONS= keyword is a compact form.  To configure multiple
 options, use several =OPTIONS= lines.  =OPTIONS= recognizes the
@@ -12010,7 +12011,7 @@ following arguments.
   #+vindex: org-export-headline-levels
   Set the number of headline levels for export
   (~org-export-headline-levels~).  Below that level, headlines are
-  treated differently.  In most back-ends, they become list items.
+  treated differently.  In most backends, they become list items.
 
 - ~inline~ ::
 
@@ -12323,7 +12324,7 @@ turns ={{{gnustamp(linux)}}}= into =GNU/Linux= during export.
 Org recognizes macro references in following Org markup areas:
 paragraphs, headlines, verse blocks, tables cells and lists.  Org also
 recognizes macro references in keywords, such as =CAPTION=, =TITLE=,
-=AUTHOR=, =DATE=, and for some back-end specific export options.
+=AUTHOR=, =DATE=, and for some backend specific export options.
 
 Org comes with following pre-defined macros:
 
@@ -12480,7 +12481,7 @@ See the variable ~org-ascii-links-to-notes~ for details.
 :UNNUMBERED: notoc
 :END:
 
-The ASCII export back-end has one extra keyword for customizing ASCII
+The ASCII export backend has one extra keyword for customizing ASCII
 output.  Setting this keyword works similar to the general options
 (see [[*Export Settings]]).
 
@@ -12505,7 +12506,7 @@ cut-off point where levels become lists, see [[*Export Settings]].
 :UNNUMBERED: notoc
 :END:
 
-To insert text within the Org file by the ASCII back-end, use one the
+To insert text within the Org file by the ASCII backend, use one the
 following constructs, inline, keyword, or export block:
 
 #+cindex: @samp{ASCII}, keyword
@@ -12516,7 +12517,7 @@ Inline text @@ascii:and additional text@@ within a paragraph.
 ,#+ASCII: Some text
 
 ,#+BEGIN_EXPORT ascii
-Org exports text in this block only when using ASCII back-end.
+Org exports text in this block only when using ASCII backend.
 ,#+END_EXPORT
 #+end_example
 
@@ -12527,7 +12528,7 @@ Org exports text in this block only when using ASCII back-end.
 #+cindex: @samp{ATTR_ASCII}, keyword
 #+cindex: horizontal rules, in ASCII export
 
-ASCII back-end recognizes only one attribute, =:width=, which
+ASCII backend recognizes only one attribute, =:width=, which
 specifies the width of a horizontal rule in number of characters.  The
 keyword and syntax for specifying widths is:
 
@@ -12544,7 +12545,7 @@ keyword and syntax for specifying widths is:
 #+cindex: @samp{BEGIN_JUSTIFYLEFT}
 #+cindex: @samp{BEGIN_JUSTIFYRIGHT}
 
-Besides =#+BEGIN_CENTER= blocks (see [[*Paragraphs]]), ASCII back-end has
+Besides =#+BEGIN_CENTER= blocks (see [[*Paragraphs]]), ASCII backend has
 these two left and right justification blocks:
 
 #+begin_example
@@ -12603,7 +12604,7 @@ popular display formats.
 :DESCRIPTION: For customizing Beamer export.
 :END:
 
-Beamer export back-end has several additional keywords for customizing
+Beamer export backend has several additional keywords for customizing
 Beamer output.  These keywords work similar to the general options
 settings (see [[*Export Settings]]).
 
@@ -12716,7 +12717,7 @@ should in principle be exportable as a Beamer presentation.
   headline as an overlay or action specification.  When enclosed in
   square brackets, Org export makes the overlay specification
   a default.  Use =BEAMER_OPT= to set any options applicable to the
-  current Beamer frame or block.  The Beamer export back-end wraps
+  current Beamer frame or block.  The Beamer export backend wraps
   with appropriate angular or square brackets.  It also adds the
   =fragile= option for any code that may require a verbatim block.
 
@@ -12738,8 +12739,8 @@ should in principle be exportable as a Beamer presentation.
 :DESCRIPTION: For using in Org documents.
 :END:
 
-Since Org's Beamer export back-end is an extension of the LaTeX
-back-end, it recognizes other LaTeX specific syntax---for example,
+Since Org's Beamer export backend is an extension of the LaTeX
+backend, it recognizes other LaTeX specific syntax---for example,
 =#+LATEX:= or =#+ATTR_LATEX:=.  See [[*LaTeX Export]], for details.
 
 Beamer export wraps the table of contents generated with =toc:t=
@@ -12757,7 +12758,7 @@ Insert Beamer-specific code using the following constructs:
 ,#+BEAMER: \pause
 
 ,#+BEGIN_EXPORT beamer
-  Only Beamer export back-end exports this.
+  Only Beamer export backend exports this.
 ,#+END_EXPORT
 
 Text @@beamer:some code@@ within a paragraph.
@@ -13094,8 +13095,8 @@ name, and date.
 :DESCRIPTION: Using direct HTML in Org files.
 :END:
 
-The HTML export back-end transforms =<= and =>= to =&lt;= and =&gt;=.
-To include raw HTML code in the Org file so the HTML export back-end
+The HTML export backend transforms =<= and =>= to =&lt;= and =&gt;=.
+To include raw HTML code in the Org file so the HTML export backend
 can insert that HTML code in the output, use this inline syntax:
 =@@html:...@@=.  For example:
 
@@ -13136,25 +13137,25 @@ a =href= attribute making the headlines link to themselves.
 #+cindex: internal links, in HTML export
 #+cindex: external links, in HTML export
 
-The HTML export back-end transforms Org's internal links (see
-[[*Internal Links]]) to equivalent HTML links in the output.  The back-end
+The HTML export backend transforms Org's internal links (see
+[[*Internal Links]]) to equivalent HTML links in the output.  The backend
 similarly handles Org's automatic links created by radio targets (see
 [[*Radio Targets]]) similarly.  For Org links to external files, the
-back-end transforms the links to /relative/ paths.
+backend transforms the links to /relative/ paths.
 
 #+vindex: org-html-link-org-files-as-html
-For Org links to other =.org= files, the back-end automatically
+For Org links to other =.org= files, the backend automatically
 changes the file extension to =.html= and makes file paths relative.
 If the =.org= files have an equivalent =.html= version at the same
 location, then the converted links should work without any further
 manual intervention.  However, to disable this automatic path
 translation, set ~org-html-link-org-files-as-html~ to ~nil~.  When
-disabled, the HTML export back-end substitutes the ID-based links in
+disabled, the HTML export backend substitutes the ID-based links in
 the HTML output.  For more about linking files when publishing to
 a directory, see [[*Publishing links]].
 
 Org files can also have special directives to the HTML export
-back-end.  For example, by using =#+ATTR_HTML= lines to specify new
+backend.  For example, by using =#+ATTR_HTML= lines to specify new
 format attributes to ~<a>~ or ~<img>~ tags.  This example shows
 changing the link's title and style:
 
@@ -13171,7 +13172,7 @@ changing the link's title and style:
 #+cindex: tables, in HTML
 #+vindex: org-export-html-table-tag
 
-The HTML export back-end uses ~org-html-table-default-attributes~ when
+The HTML export backend uses ~org-html-table-default-attributes~ when
 exporting Org tables to HTML.  By default, the exporter does not draw
 frames and cell borders.  To change for this for a table, use the
 following lines before the table in the Org file:
@@ -13183,7 +13184,7 @@ following lines before the table in the Org file:
 ,#+ATTR_HTML: :border 2 :rules all :frame border
 #+end_example
 
-The HTML export back-end preserves column groupings in Org tables (see
+The HTML export backend preserves column groupings in Org tables (see
 [[*Column Groups]]) when exporting to HTML.
 
 Additional options for customizing tables for HTML export.
@@ -13231,20 +13232,20 @@ Additional options for customizing tables for HTML export.
 #+cindex: images, inline in HTML
 #+cindex: inlining images in HTML
 
-The HTML export back-end has features to convert Org image links to
+The HTML export backend has features to convert Org image links to
 HTML inline images and HTML clickable image links.
 
 #+vindex: org-html-inline-images
 When the link in the Org file has no description, the HTML export
-back-end by default in-lines that image.  For example:
+backend by default in-lines that image.  For example:
 =[[file:myimg.jpg]]= is in-lined, while =[[file:myimg.jpg][the image]]= links to the text,
 =the image=.  For more details, see the variable
 ~org-html-inline-images~.
 
 On the other hand, if the description part of the Org link is itself
 another link, such as =file:= or =http:= URL pointing to an image, the
-HTML export back-end in-lines this image and links to the main image.
-This Org syntax enables the back-end to link low-resolution thumbnail
+HTML export backend in-lines this image and links to the main image.
+This Org syntax enables the backend to link low-resolution thumbnail
 to the high-resolution version of the image, as shown in this example:
 
 : [[file:highres.jpg][file:thumb.jpg]]
@@ -13262,7 +13263,7 @@ accessibility standards.
 [[./img/a.jpg]]
 #+end_example
 
-The HTML export back-end copies the =http= links from the Org file
+The HTML export backend copies the =http= links from the Org file
 as-is.
 
 *** Math formatting in HTML export
@@ -13325,12 +13326,12 @@ HTML was by using =:textarea=.  The advantage of this approach was
 that copying and pasting was built into browsers with simple
 JavaScript commands.  Even editing before pasting was made simple.
 
-The HTML export back-end can create such text areas.  It requires an
+The HTML export backend can create such text areas.  It requires an
 =#+ATTR_HTML= line as shown in the example below with the =:textarea=
 option.  This must be followed by either an example or a source code
 block.  Other Org block types do not honor the =:textarea= option.
 
-By default, the HTML export back-end creates a text area 80 characters
+By default, the HTML export backend creates a text area 80 characters
 wide and height just enough to fit the content.  Override these
 defaults with =:width= and =:height= options on the =#+ATTR_HTML=
 line.
@@ -13397,7 +13398,7 @@ classes like for headlines, tables, etc.
 #+vindex: org-html-head
 #+vindex: org-html-head-extra
 #+cindex: @samp{HTML_INCLUDE_STYLE}, keyword
-The HTML export back-end includes a compact default style in each
+The HTML export backend includes a compact default style in each
 exported HTML file.  To override the default style with another style,
 use these keywords in the Org file.  They will replace the global
 defaults the HTML exporter uses.
@@ -13526,7 +13527,7 @@ to your pages, configure the variable ~org-export-html-use-infojs~.
 #+cindex: @LaTeX{} export
 #+cindex: PDF export
 
-The LaTeX export back-end can handle complex documents, incorporate
+The LaTeX export backend can handle complex documents, incorporate
 standard or custom LaTeX document classes, generate documents using
 alternate LaTeX engines, and produce fully linked PDF files with
 indexes, bibliographies, and tables of contents, destined for
@@ -13538,7 +13539,7 @@ quick references to variables for the impatient: for engines, see
 ~org-latex-pdf-process~; for packages, see
 ~org-latex-default-packages-alist~ and ~org-latex-packages-alist~.
 
-An important note about the LaTeX export back-end: it is sensitive to
+An important note about the LaTeX export backend: it is sensitive to
 blank lines in the Org document.  That's because LaTeX itself depends
 on blank lines to tell apart syntactical elements, such as paragraphs.
 
@@ -13585,10 +13586,10 @@ on blank lines to tell apart syntactical elements, such as paragraphs.
 #+cindex: xelatex
 #+cindex: lualatex
 #+cindex: @samp{LATEX_COMPILER}, keyword
-The LaTeX export back-end can use any of these LaTeX engines:
+The LaTeX export backend can use any of these LaTeX engines:
 =pdflatex=, =xelatex=, and =lualatex=.  These engines compile LaTeX
 files with different compilers, packages, and output options.  The
-LaTeX export back-end finds the compiler version to use from
+LaTeX export backend finds the compiler version to use from
 ~org-latex-compiler~ variable or the =#+LATEX_COMPILER= keyword in the
 Org file.  See the docstring for the
 ~org-latex-default-packages-alist~ for loading packages with certain
@@ -13597,10 +13598,10 @@ bibliography compiler[fn:47].
 
 *** LaTeX specific export settings
 :PROPERTIES:
-:DESCRIPTION: Unique to this @LaTeX{} back-end.
+:DESCRIPTION: Unique to this @LaTeX{} backend.
 :END:
 
-The LaTeX export back-end has several additional keywords for
+The LaTeX export backend has several additional keywords for
 customizing LaTeX output.  Setting these keywords works similar to the
 general options (see [[*Export Settings]]).
 
@@ -13647,7 +13648,7 @@ general options (see [[*Export Settings]]).
   #+vindex: org-latex-classes
   This is LaTeX document class, such as /article/, /report/, /book/,
   and so on, which contain predefined preamble and headline level
-  mapping that the LaTeX export back-end needs.  The back-end reads
+  mapping that the LaTeX export backend needs.  The backend reads
   the default class name from the ~org-latex-default-class~ variable.
   Org has /article/ as the default class.  A valid default class must
   be an element of ~org-latex-classes~.
@@ -13655,7 +13656,7 @@ general options (see [[*Export Settings]]).
 - =LATEX_CLASS_OPTIONS= ::
 
   #+cindex: @samp{LATEX_CLASS_OPTIONS}, keyword
-  Options the LaTeX export back-end uses when calling the LaTeX
+  Options the LaTeX export backend uses when calling the LaTeX
   document class.
 
 - =LATEX_COMPILER= ::
@@ -13711,12 +13712,12 @@ The following sections have further details.
 #+cindex: header, for @LaTeX{} files
 #+cindex: sectioning structure, for @LaTeX{} export
 
-The LaTeX export back-end converts the first three of Org's outline
+The LaTeX export backend converts the first three of Org's outline
 levels into LaTeX headlines.  The remaining Org levels are exported as
 lists.  To change this globally for the cut-off point between levels
 and lists, (see [[*Export Settings]]).
 
-By default, the LaTeX export back-end uses the /article/ class.
+By default, the LaTeX export backend uses the /article/ class.
 
 #+vindex: org-latex-default-class
 #+vindex: org-latex-classes
@@ -13736,7 +13737,7 @@ custom sectioning or custom classes.
 #+cindex: @samp{LATEX_CLASS_OPTIONS}, keyword
 #+cindex: @samp{EXPORT_LATEX_CLASS}, property
 #+cindex: @samp{EXPORT_LATEX_CLASS_OPTIONS}, property
-The LaTeX export back-end sends the =LATEX_CLASS_OPTIONS= keyword and
+The LaTeX export backend sends the =LATEX_CLASS_OPTIONS= keyword and
 =EXPORT_LATEX_CLASS_OPTIONS= property as options to the LaTeX
 ~\documentclass~ macro.  The options and the syntax for specifying
 them, including enclosing them in square brackets, follow LaTeX
@@ -13746,10 +13747,10 @@ conventions.
 
 #+cindex: @samp{LATEX_HEADER}, keyword
 #+cindex: @samp{LATEX_HEADER_EXTRA}, keyword
-The LaTeX export back-end appends values from =LATEX_HEADER= and
+The LaTeX export backend appends values from =LATEX_HEADER= and
 =LATEX_HEADER_EXTRA= keywords to the LaTeX header.  The docstring for
 ~org-latex-classes~ explains in more detail.  Also note that LaTeX
-export back-end does not append =LATEX_HEADER_EXTRA= to the header
+export backend does not append =LATEX_HEADER_EXTRA= to the header
 when previewing LaTeX snippets (see [[*Previewing LaTeX fragments]]).
 
 A sample Org file with the above headers:
@@ -13818,7 +13819,7 @@ This would produce in LaTeX (with the actual =polyglossia= syntax):
 :DESCRIPTION: Incorporating literal @LaTeX{} code.
 :END:
 
-The LaTeX export back-end can insert any arbitrary LaTeX code, see
+The LaTeX export backend can insert any arbitrary LaTeX code, see
 [[*Embedded LaTeX]].  There are three ways to embed such code in the Org
 file and they all use different quoting syntax.
 
@@ -13833,7 +13834,7 @@ Inserting as one or more keyword lines in the Org file:
 : #+LATEX: any arbitrary LaTeX code
 
 #+cindex: @samp{BEGIN_EXPORT latex}
-Inserting as an export block in the Org file, where the back-end
+Inserting as an export block in the Org file, where the backend
 exports any code between begin and end markers:
 
 #+begin_example
@@ -13848,7 +13849,7 @@ exports any code between begin and end markers:
 :END:
 #+cindex: tables, in @LaTeX{} export
 
-The LaTeX export back-end can pass several LaTeX attributes for table
+The LaTeX export backend can pass several LaTeX attributes for table
 contents and layout.  Besides specifying a label (see [[*Internal Links]])
 and a caption (see [[*Captions]]), the other valid LaTeX attributes
 include:
@@ -13857,27 +13858,27 @@ include:
 - =:mode= ::
 
   #+vindex: org-latex-default-table-mode
-  The LaTeX export back-end wraps the table differently depending on
+  The LaTeX export backend wraps the table differently depending on
   the mode for accurate rendering of math symbols.  Mode is either
   =table=, =math=, =inline-math=, =verbatim= or =tabbing=.
 
-  For =math= or =inline-math= mode, LaTeX export back-end wraps the
+  For =math= or =inline-math= mode, LaTeX export backend wraps the
   table in a math environment, but every cell in it is exported as-is.
   For =tabbing= the LaTeX tabbing environment is used and the correct
   tabbing delimiters =\>= are used.
-  The LaTeX export back-end determines the default mode from
-  ~org-latex-default-table-mode~.  The LaTeX export back-end merges
+  The LaTeX export backend determines the default mode from
+  ~org-latex-default-table-mode~.  The LaTeX export backend merges
   contiguous tables in the same mode into a single environment.
 
 - =:environment= ::
 
   #+vindex: org-latex-default-table-environment
   Set the default LaTeX table environment for the LaTeX export
-  back-end to use when exporting Org tables.  Common LaTeX table
+  backend to use when exporting Org tables.  Common LaTeX table
   environments are provided by these packages: tabularx, longtable,
   array, tabu, and bmatrix.  For packages, such as tabularx and tabu,
   or any newer replacements, include them in the
-  ~org-latex-packages-alist~ variable so the LaTeX export back-end can
+  ~org-latex-packages-alist~ variable so the LaTeX export backend can
   insert the appropriate load package headers in the converted LaTeX
   file.  Look in the docstring for the ~org-latex-packages-alist~
   variable for configuring these packages for LaTeX snippet previews,
@@ -13903,11 +13904,11 @@ include:
   LaTeX floats can also have additional layout =:placement=
   attributes.  These are the usual =[h t b p ! H]= permissions
   specified in square brackets.  Note that for =:float sideways=
-  tables, the LaTeX export back-end ignores =:placement= attributes.
+  tables, the LaTeX export backend ignores =:placement= attributes.
 
 - =:align=, =:font=, =:width= ::
 
-  The LaTeX export back-end uses these attributes for regular tables
+  The LaTeX export backend uses these attributes for regular tables
   to set their alignments, fonts, and widths.
 
 - =:options= ::
@@ -13920,7 +13921,7 @@ include:
 
 - =:spread= ::
 
-  When =:spread= is non-~nil~, the LaTeX export back-end spreads or
+  When =:spread= is non-~nil~, the LaTeX export backend spreads or
   shrinks the table by the =:width= for tabu and longtabu
   environments.  =:spread= has no effect if =:width= is not set.
 
@@ -13937,10 +13938,10 @@ include:
 
 - =:math-prefix=, =:math-suffix=, =:math-arguments= ::
 
-  The LaTeX export back-end inserts =:math-prefix= string value in
-  a math environment before the table.  The LaTeX export back-end
+  The LaTeX export backend inserts =:math-prefix= string value in
+  a math environment before the table.  The LaTeX export backend
   inserts =:math-suffix= string value in a math environment after the
-  table.  The LaTeX export back-end inserts =:math-arguments= string
+  table.  The LaTeX export backend inserts =:math-arguments= string
   value between the macro name and the table's contents.
   =:math-arguments= comes in use for matrix macros that require more
   than one argument, such as =qbordermatrix=.
@@ -13978,13 +13979,13 @@ Set the caption with the LaTeX command
 #+cindex: inlining images in LaTeX
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-The LaTeX export back-end processes image links in Org files that do
+The LaTeX export backend processes image links in Org files that do
 not have descriptions, such as these links =[[file:img.jpg]]= or
 =[[./img.jpg]]=, as direct image insertions in the final PDF output.  In
 the PDF, they are no longer links but actual images embedded on the
-page.  The LaTeX export back-end uses =\includegraphics= macro to
+page.  The LaTeX export backend uses =\includegraphics= macro to
 insert the image.  But for TikZ (https://sourceforge.net/projects/pgf/)
-images, the back-end uses an ~\input~ macro wrapped within
+images, the backend uses an ~\input~ macro wrapped within
 a ~tikzpicture~ environment.
 
 For specifying image =:width=, =:height=, =:scale= and other =:options=,
@@ -14006,7 +14007,7 @@ overrides the default =#+CAPTION= value:
 #+end_example
 
 When captions follow the method as described in [[*Captions]], the LaTeX
-export back-end wraps the picture in a floating =figure= environment.
+export backend wraps the picture in a floating =figure= environment.
 To float an image without specifying a caption, set the =:float=
 attribute to one of the following:
 
@@ -14016,7 +14017,7 @@ attribute to one of the following:
 
 - =multicolumn= ::
 
-  To span the image across multiple columns of a page; the back-end
+  To span the image across multiple columns of a page; the backend
   wraps the image in a =figure*= environment.
 
 - =wrap= ::
@@ -14050,12 +14051,12 @@ placement.
 #+vindex: org-latex-images-centered
 #+cindex: center image in LaTeX export
 #+cindex: image, centering in LaTeX export
-The LaTeX export back-end centers all images by default.  Setting
+The LaTeX export backend centers all images by default.  Setting
 =:center= to =nil= disables centering.  To disable centering globally,
 set ~org-latex-images-centered~ to =nil=.
 
 Set the =:comment-include= attribute to non-~nil~ value for the LaTeX
-export back-end to comment out the =\includegraphics= macro.
+export backend to comment out the =\includegraphics= macro.
 
 *** Plain lists in LaTeX export
 :PROPERTIES:
@@ -14064,7 +14065,7 @@ export back-end to comment out the =\includegraphics= macro.
 
 #+cindex: plain lists, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
-The LaTeX export back-end accepts the =environment= and =options=
+The LaTeX export backend accepts the =environment= and =options=
 attributes for plain lists.  Both attributes work together for
 customizing lists, as shown in the examples:
 
@@ -14100,7 +14101,7 @@ four:
 #+cindex: source blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-The LaTeX export back-end can make source code blocks into floating
+The LaTeX export backend can make source code blocks into floating
 objects through the attributes =:float= and =:options=.  For =:float=:
 
 - =t= ::
@@ -14127,7 +14128,7 @@ objects through the attributes =:float= and =:options=.  For =:float=:
 #+vindex: org-latex-listings-options
 #+vindex: org-latex-minted-options
 #+vindex: org-latex-engraved-options
-The LaTeX export back-end passes string values in =:options= to LaTeX
+The LaTeX export backend passes string values in =:options= to LaTeX
 packages for customization of that specific source block.  In the
 example below, the =:options= are set for Engraved or Minted.  Minted
 is a source code highlighting LaTeX package with many configurable
@@ -14158,7 +14159,7 @@ variables.
 #+cindex: verbatim blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-The LaTeX export back-end wraps the contents of example blocks in
+The LaTeX export backend wraps the contents of example blocks in
 a =verbatim= environment.  To change this behavior to use another
 environment globally, specify an appropriate export filter (see
 [[*Advanced Export Configuration]]).  To change this behavior to use
@@ -14182,8 +14183,8 @@ to specify a custom environment.
 #+cindex: proof, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-For other special blocks in the Org file, the LaTeX export back-end
-makes a special environment of the same name.  The back-end also takes
+For other special blocks in the Org file, the LaTeX export backend
+makes a special environment of the same name.  The backend also takes
 =:options=, if any, and appends as-is to that environment's opening
 string.  For example:
 
@@ -14231,7 +14232,7 @@ example:
 #+cindex: horizontal rules, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-The LaTeX export back-end converts horizontal rules by the specified
+The LaTeX export backend converts horizontal rules by the specified
 =:width= and =:thickness= attributes.  For example:
 
 #+begin_example
@@ -14247,7 +14248,7 @@ The LaTeX export back-end converts horizontal rules by the specified
 #+cindex: verse blocks, in @LaTeX{} export
 #+cindex: @samp{ATTR_LATEX}, keyword
 
-The LaTeX export back-end accepts four attributes for verse blocks:
+The LaTeX export backend accepts four attributes for verse blocks:
 =:lines=, =:center=, =:versewidth= and =:latexcode=.  The three first
 require the external LaTeX package =verse.sty=, which is an extension
 of the standard LaTeX environment.
@@ -14295,7 +14296,7 @@ To eat the world’s due, by the grave and thee.
 #+cindex: @samp{ATTR_LATEX}, keyword
 #+cindex: org-latex-default-quote-environment
 
-The LaTeX export back-end accepts two attributes for quote blocks:
+The LaTeX export backend accepts two attributes for quote blocks:
 =:environment=, for an arbitrary quoting environment (the default
 value is that of ~org-latex-default-quote-environment~: ~"quote"~) and
 =:options=.  For example, to choose the environment =quotation=,
@@ -14334,12 +14335,12 @@ some text in German...
 :END:
 #+cindex: Markdown export
 
-The Markdown export back-end, "md", converts an Org file to Markdown
+The Markdown export backend, "md", converts an Org file to Markdown
 format, as defined at https://daringfireball.net/projects/markdown/.
 This is the original Markdown specification, developed by John Gruber
 and Aaron Swartz.
 
-Since "md" back-end is built on top of the HTML back-end (see [[*HTML
+Since "md" backend is built on top of the HTML backend (see [[*HTML
 Export]]), it converts every Org construct not defined in Markdown
 syntax, such as tables, to HTML.
 
@@ -14379,7 +14380,7 @@ https://en.wikipedia.org/wiki/Markdown for more details.
 Based on ~org-md-headline-style~, Markdown export can generate
 headlines of both /atx/ and /setext/ types.  /atx/ limits headline
 levels to two whereas /setext/ limits headline levels to six.  Beyond
-these limits, the export back-end converts headlines to lists.  To set
+these limits, the export backend converts headlines to lists.  To set
 a limit to a level before the absolute limit (see [[*Export Settings]]).
 
 ** OpenDocument Text Export
@@ -14391,7 +14392,7 @@ a limit to a level before the absolute limit (see [[*Export Settings]]).
 #+cindex: export, OpenDocument
 #+cindex: LibreOffice
 
-The ODT export back-end handles creating of OpenDocument Text (ODT)
+The ODT export backend handles creating of OpenDocument Text (ODT)
 format.  Documents created by this exporter use the
 {{{cite(OpenDocument-v1.2 specification)}}}[fn:: See
 [[https://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html][Open
@@ -14404,7 +14405,7 @@ and are compatible with LibreOffice 3.4.
 :END:
 #+cindex: zip
 
-The ODT export back-end relies on the zip program to create the final
+The ODT export backend relies on the zip program to create the final
 compressed ODT output.  Check if =zip= is locally available and
 executable.  Without it, export cannot finish.
 
@@ -14423,16 +14424,16 @@ executable.  Without it, export cannot finish.
   #+vindex: org-odt-preferred-output-format
 
   If ~org-odt-preferred-output-format~ is specified, the ODT export
-  back-end automatically converts the exported file to that format.
+  backend automatically converts the exported file to that format.
 
   For =myfile.org=, Org exports to =myfile.odt=, overwriting without
-  warning.  The ODT export back-end exports a region only if a region
+  warning.  The ODT export backend exports a region only if a region
   was active.
 
-  If the selected region is a single tree, the ODT export back-end
+  If the selected region is a single tree, the ODT export backend
   makes the tree head the document title.  Incidentally, {{{kbd(C-c
   @)}}} selects the current subtree.  If the tree head entry has, or
-  inherits, an =EXPORT_FILE_NAME= property, the ODT export back-end
+  inherits, an =EXPORT_FILE_NAME= property, the ODT export backend
   uses that for file name.
 
 - {{{kbd(C-c C-e o O)}}} ::
@@ -14450,21 +14451,21 @@ executable.  Without it, export cannot finish.
 :DESCRIPTION: Configuration options.
 :END:
 
-The ODT export back-end has several additional keywords for
+The ODT export backend has several additional keywords for
 customizing ODT output.  Setting these keywords works similar to the
 general options (see [[*Export Settings]]).
 
 - =DESCRIPTION= ::
 
   #+cindex: @samp{DESCRIPTION}, keyword
-  This is the document's description, which the ODT export back-end
+  This is the document's description, which the ODT export backend
   inserts as document metadata.  For long descriptions, use multiple
   lines, prefixed with =DESCRIPTION=.
 
 - =KEYWORDS= ::
 
   #+cindex: @samp{KEYWORDS}, keyword
-  The keywords for the document.  The ODT export back-end inserts the
+  The keywords for the document.  The ODT export backend inserts the
   description along with author name, keywords, and related file
   metadata as metadata in the output file.  Use multiple =KEYWORDS= if
   necessary.
@@ -14473,7 +14474,7 @@ general options (see [[*Export Settings]]).
 
   #+cindex: @samp{ODT_STYLES_FILE}, keyword
   #+vindex: org-odt-styles-file
-  The ODT export back-end uses the ~org-odt-styles-file~ by default.
+  The ODT export backend uses the ~org-odt-styles-file~ by default.
   See [[*Applying custom styles]] for details.
 
 - =SUBTITLE= ::
@@ -14486,7 +14487,7 @@ general options (see [[*Export Settings]]).
 :DESCRIPTION: Producing DOC, PDF files.
 :END:
 
-The ODT export back-end can produce documents in other formats besides
+The ODT export backend can produce documents in other formats besides
 ODT using a specialized ODT converter process.  Its common interface
 works with popular converters to produce formats such as =doc=, or
 convert a document from one format, say =csv=, to another format, say
@@ -14508,7 +14509,7 @@ a document converter]].
 #+vindex: org-odt-preferred-output-format
 If ODT format is just an intermediate step to get to other formats,
 such as =doc=, =docx=, =rtf=, or =pdf=, etc., then extend the ODT
-export back-end to directly produce that format.  Specify the final
+export backend to directly produce that format.  Specify the final
 format in the ~org-odt-preferred-output-format~ variable.  This is one
 way to extend (see [[*ODT export commands]]).
 
@@ -14517,7 +14518,7 @@ way to extend (see [[*ODT export commands]]).
 :UNNUMBERED: notoc
 :END:
 
-The Org export back-end is made to be inter-operable with a wide range
+The Org export backend is made to be inter-operable with a wide range
 of text document format converters.  Newer generation converters, such
 as LibreOffice and Pandoc, can handle hundreds of formats at once.
 Org provides a consistent interaction with whatever converter is
@@ -14536,7 +14537,7 @@ installed.  Here are some generic commands:
 #+cindex: styles, custom
 #+cindex: template, custom
 
-The ODT export back-end comes with many OpenDocument styles (see
+The ODT export backend comes with many OpenDocument styles (see
 [[*Working with OpenDocument style files]]).  To expand or further
 customize these built-in style sheets, either edit the style sheets
 directly or generate them using an application such as LibreOffice.
@@ -14579,7 +14580,7 @@ The example here shows creating a style using LibreOffice.
 :UNNUMBERED: notoc
 :END:
 
-The ODT export back-end relies on many templates and style names.
+The ODT export backend relies on many templates and style names.
 Using third-party styles and templates can lead to mismatches.
 Templates derived from built-in ODT templates and styles seem to have
 fewer problems.
@@ -14608,18 +14609,18 @@ with a cross-reference and sequence number of the labeled entity.  See
 
 #+cindex: tables, in ODT export
 
-The ODT export back-end handles native Org mode tables (see [[*Tables]])
+The ODT export backend handles native Org mode tables (see [[*Tables]])
 and simple =table.el= tables.  Complex =table.el= tables having column
 or row spans are not supported.  Such tables are stripped from the
 exported document.
 
-By default, the ODT export back-end exports a table with top and
+By default, the ODT export backend exports a table with top and
 bottom frames and with ruled lines separating row and column groups
 (see [[*Column Groups]]).  All tables are typeset to occupy the same
-width.  The ODT export back-end honors any table alignments and
+width.  The ODT export backend honors any table alignments and
 relative widths for columns (see [[*Column Width and Alignment]]).
 
-Note that the ODT export back-end interprets column widths as weighted
+Note that the ODT export backend interprets column widths as weighted
 ratios, the default weight being 1.
 
 #+cindex: @samp{ATTR_ODT}, keyword
@@ -14661,7 +14662,7 @@ tables in ODT export]].
 :UNNUMBERED: notoc
 :END:
 
-The ODT export back-end processes image links in Org files that do not
+The ODT export backend processes image links in Org files that do not
 have descriptions, such as these links =[[file:img.jpg]]= or =[[./img.jpg]]=,
 as direct image insertions in the final output.  Either of these
 examples works:
@@ -14694,13 +14695,13 @@ attribute.
 
 #+cindex: identify, ImageMagick
 #+vindex: org-odt-pixels-per-inch
-The ODT export back-end starts with establishing the size of the image
+The ODT export backend starts with establishing the size of the image
 in the final document.  The dimensions of this size are measured in
-centimeters.  The back-end then queries the image file for its
-dimensions measured in pixels.  For this measurement, the back-end
+centimeters.  The backend then queries the image file for its
+dimensions measured in pixels.  For this measurement, the backend
 relies on ImageMagick's identify program or Emacs ~create-image~ and
 ~image-size~ API.  ImageMagick is the preferred choice for large file
-sizes or frequent batch operations.  The back-end then converts the
+sizes or frequent batch operations.  The backend then converts the
 pixel dimensions using ~org-odt-pixels-per-inch~ into the familiar 72
 dpi or 96 dpi.  The default value for this is in
 ~display-pixels-per-inch~, which can be tweaked for better results
@@ -14751,7 +14752,7 @@ image scaling operations:
 :END:
 
 #+cindex: @samp{ATTR_ODT}, keyword
-The ODT export back-end can anchor images to =as-char=, =paragraph=,
+The ODT export backend can anchor images to =as-char=, =paragraph=,
 or =page=.  Set the preferred anchor using the =:anchor= property of
 the =ATTR_ODT= line.
 
@@ -14912,9 +14913,9 @@ With the above modification, the previous example changes to:
 :DESCRIPTION: For source code and example blocks.
 :END:
 
-The ODT export back-end supports literal examples (see [[*Literal
+The ODT export backend supports literal examples (see [[*Literal
 Examples]]) with full fontification.  Internally, the ODT export
-back-end relies on =htmlfontify.el= to generate the style definitions
+backend relies on =htmlfontify.el= to generate the style definitions
 needed for fancy listings.  The auto-generated styles get =OrgSrc=
 prefix and inherit colors from the faces used by Emacs Font Lock
 library for that source language.
@@ -14932,7 +14933,7 @@ To turn off fontification of literal examples, customize the
 :DESCRIPTION: For power users.
 :END:
 
-The ODT export back-end has extensive features useful for power users
+The ODT export backend has extensive features useful for power users
 and frequent uses of ODT formats.
 
 **** Configuring a document converter
@@ -14944,7 +14945,7 @@ and frequent uses of ODT formats.
 #+cindex: doc, docx, rtf
 #+cindex: converter
 
-The ODT export back-end works with popular converters with little or
+The ODT export backend works with popular converters with little or
 no extra configuration.  See [[*Extending ODT export]].  The following is
 for unsupported converters or tweaking existing defaults.
 
@@ -15018,7 +15019,7 @@ factory styles used by the exporter.
 
 - ~org-odt-styles-file~ ::
 
-  The ODT export back-end uses the file pointed to by this variable,
+  The ODT export backend uses the file pointed to by this variable,
   such as =styles.xml=, for the final output.  It can take one of the
   following values:
 
@@ -15055,7 +15056,7 @@ factory styles used by the exporter.
 :UNNUMBERED: notoc
 :END:
 
-The ODT export back-end can read embedded raw OpenDocument XML from
+The ODT export backend can read embedded raw OpenDocument XML from
 the Org file.  Such direct formatting is useful for one-off instances.
 
 - Embedding ODT tags as part of regular text ::
@@ -15081,7 +15082,7 @@ the Org file.  Such direct formatting is useful for one-off instances.
 - Embedding a one-line OpenDocument XML ::
 
   #+cindex: @samp{ODT}, keyword
-  The ODT export back-end can read one-liner options with =#+ODT:= in
+  The ODT export backend can read one-liner options with =#+ODT:= in
   the Org file.  For example, to force a page break:
 
   #+begin_example
@@ -15101,7 +15102,7 @@ the Org file.  Such direct formatting is useful for one-off instances.
 
 - Embedding a block of OpenDocument XML ::
 
-  The ODT export back-end can also read ODT export blocks for
+  The ODT export backend can also read ODT export blocks for
   OpenDocument XML.  Such blocks use the =#+BEGIN_EXPORT odt=
   ... =#+END_EXPORT= constructs.
 
@@ -15265,7 +15266,7 @@ schema-sensitive editing---of XML files: [[info:nxml-mode::Introduction]].
 #+vindex: org-export-odt-schema-dir
 Customize ~org-odt-schema-dir~ to point to a directory with
 OpenDocument RNC files and the needed schema-locating rules.  The ODT
-export back-end takes care of updating the
+export backend takes care of updating the
 ~rng-schema-locating-files~.
 
 ** Org Export
@@ -15274,9 +15275,9 @@ export back-end takes care of updating the
 :END:
 
 #+cindex: Org export
-/org/ export back-end creates a normalized version of the Org document
+/org/ export backend creates a normalized version of the Org document
 in current buffer.  The exporter evaluates Babel code (see [[*Evaluating
-Code Blocks]]) and removes content specific to other back-ends.
+Code Blocks]]) and removes content specific to other backends.
 
 *** Org export commands
 :PROPERTIES:
@@ -15326,7 +15327,7 @@ Code Blocks]]) and removes content specific to other back-ends.
 :DESCRIPTION: Setting the environment.
 :END:
 
-The Texinfo export back-end has several additional keywords for
+The Texinfo export backend has several additional keywords for
 customizing Texinfo output.  Setting these keywords works similar to
 the general options (see [[*Export Settings]]).
 
@@ -15388,7 +15389,7 @@ the general options (see [[*Export Settings]]).
 :END:
 
 #+cindex: @samp{TEXINFO_FILENAME}, keyword
-After creating the header for a Texinfo file, the Texinfo back-end
+After creating the header for a Texinfo file, the Texinfo backend
 automatically generates a name and destination path for the Info file.
 To override this default with a more sensible path and name, specify
 the =TEXINFO_FILENAME= keyword.
@@ -15432,7 +15433,7 @@ keywords.  They have to be set in raw Texinfo code.
 
 #+cindex: @samp{COPYING}, property
 Copying material is defined in a dedicated headline with a non-~nil~
-=COPYING= property.  The back-end inserts the contents within
+=COPYING= property.  The backend inserts the contents within
 a =@copying= command at the beginning of the document.  The heading
 itself does not appear in the structure of the document.
 
@@ -15483,7 +15484,7 @@ Here is an example that writes to the Info directory file:
 #+vindex: org-texinfo-classes
 #+vindex: org-texinfo-default-class
 #+cindex: @samp{TEXINFO_CLASS}, keyword
-The Texinfo export back-end uses a pre-defined scheme to convert Org
+The Texinfo export backend uses a pre-defined scheme to convert Org
 headlines to equivalent Texinfo structuring commands.  A scheme like
 this maps top-level headlines to numbered chapters tagged as
 ~@chapter~ and lower-level headlines to unnumbered chapters tagged as
@@ -15491,21 +15492,21 @@ this maps top-level headlines to numbered chapters tagged as
 other Texinfo structuring commands, define a new class in
 ~org-texinfo-classes~.  Activate the new class with the
 =TEXINFO_CLASS= keyword.  When no new class is defined and activated,
-the Texinfo export back-end defaults to the
+the Texinfo export backend defaults to the
 ~org-texinfo-default-class~.
 
 If an Org headline's level has no associated Texinfo structuring
 command, or is below a certain threshold (see [[*Export Settings]]), then
-the Texinfo export back-end makes it into a list item.
+the Texinfo export backend makes it into a list item.
 
 #+cindex: @samp{APPENDIX}, property
-The Texinfo export back-end makes any headline with a non-~nil~
+The Texinfo export backend makes any headline with a non-~nil~
 =APPENDIX= property into an appendix.  This happens independent of the
 Org headline level or the =TEXINFO_CLASS= keyword.
 
 #+cindex: @samp{ALT_TITLE}, property
 #+cindex: @samp{DESCRIPTION}, property
-The Texinfo export back-end creates a menu entry after the Org
+The Texinfo export backend creates a menu entry after the Org
 headline for each regular sectioning structure.  To override this with
 a shorter menu entry, use the =ALT_TITLE= property (see [[*Table of
 Contents]]).  Texinfo menu entries also have an option for a longer
@@ -15543,7 +15544,7 @@ file.  See [[info:texinfo::The Top Node]], for more information.
 #+cindex: data type index, in Texinfo export
 #+cindex: @samp{VINDEX}, keyword
 #+cindex: variable index, in Texinfo export
-The Texinfo export back-end recognizes these indexing keywords if used
+The Texinfo export backend recognizes these indexing keywords if used
 in the Org file: =CINDEX=, =FINDEX=, =KINDEX=, =PINDEX=, =TINDEX= and
 =VINDEX=.  Write their value as verbatim Texinfo code; in particular,
 ={=, =}= and =@= characters need to be escaped with =@= if they do not
@@ -15552,10 +15553,10 @@ belong to a Texinfo command.
 : #+CINDEX: Defining indexing entries
 
 #+cindex: @samp{INDEX}, property
-For the back-end to generate an index entry for a headline, set the
+For the backend to generate an index entry for a headline, set the
 =INDEX= property to =cp= or =vr=.  These abbreviations come from
 Texinfo that stand for concept index and variable index.  The Texinfo
-manual has abbreviations for all other kinds of indexes.  The back-end
+manual has abbreviations for all other kinds of indexes.  The backend
 exports the headline as an unnumbered chapter or section command, and
 then inserts the index after its contents.
 
@@ -15595,7 +15596,7 @@ This paragraph is preceded by...
 
 #+cindex: lettered lists, in Texinfo export
 #+cindex: enum, Texinfo attribute
-The Texinfo export back-end converts unordered and ordered lists in
+The Texinfo export backend converts unordered and ordered lists in
 the Org file using the default command =@itemize=.
 
 Ordered lists are numbered when exported to Texinfo format.  Such
@@ -15613,7 +15614,7 @@ specific number, or switch to a lettered list, as illustrated here:
 #+cindex: @samp{ATTR_TEXINFO}, keyword
 #+cindex: two-column tables, in Texinfo export
 #+cindex: table-type, Texinfo attribute
-The Texinfo export back-end by default converts description lists in
+The Texinfo export backend by default converts description lists in
 the Org file using the default command =@table=, which results in
 a table with two columns.  To change this behavior, set =:table-type=
 attribute to either =ftable= or =vtable= value.  For more information,
@@ -15621,7 +15622,7 @@ see [[info:texinfo::Two-column Tables]].
 
 #+vindex: org-texinfo-table-default-markup
 #+cindex: indic, Texinfo attribute
-The Texinfo export back-end by default also applies a text highlight
+The Texinfo export backend by default also applies a text highlight
 based on the defaults stored in ~org-texinfo-table-default-markup~.
 To override the default highlight command, specify another one with
 the =:indic= attribute.
@@ -15629,7 +15630,7 @@ the =:indic= attribute.
 #+cindex: multiple items in Texinfo lists
 #+cindex: sep, Texinfo attribute
 Org syntax is limited to one entry per list item.  Nevertheless, the
-Texinfo export back-end can split that entry according to any text
+Texinfo export backend can split that entry according to any text
 provided through the =:sep= attribute.  Each part then becomes a new
 entry in the first column of the table.
 
@@ -15668,7 +15669,7 @@ Support for this compact syntax can also be enabled for all lists in
 a file using the =compact-itemx= export option, or globally using the
 variable ~org-texinfo-compact-itemx~.
 
-The Texinfo export back-end also supports two approaches to writing
+The Texinfo export backend also supports two approaches to writing
 Texinfo definition commands (see [[info:texinfo::Definition Commands]]).
 One of them uses description lists and is described below, the other
 relies on special blocks (see [[*Special blocks in Texinfo export]]).
@@ -15740,7 +15741,7 @@ Command in parenthesis, as done above, is optional.
 :END:
 
 #+cindex: @samp{ATTR_TEXINFO}, keyword
-When exporting tables, the Texinfo export back-end uses the widest
+When exporting tables, the Texinfo export backend uses the widest
 cell width in each column.  To override this and instead specify as
 fractions of line length, use the =:columns= attribute.  See example
 below.
@@ -15757,7 +15758,7 @@ below.
 
 #+cindex: @samp{ATTR_TEXINFO}, keyword
 Insert a file link to the image in the Org file, and the Texinfo
-export back-end inserts the image.  These links must have the usual
+export backend inserts the image.  These links must have the usual
 supported image extensions and no descriptions.  To scale the image,
 use =:width= and =:height= attributes.  For alternate text, use =:alt=
 and specify the text using Texinfo code, as shown in the example:
@@ -15828,13 +15829,13 @@ Type @kbd{C-c @key{SPC}}.
 :DESCRIPTION: Special block attributes.
 :END:
 
-The Texinfo export back-end supports two approaches to writing Texinfo
+The Texinfo export backend supports two approaches to writing Texinfo
 definition commands.  One of them is described here, the other in
 [[*Plain lists in Texinfo export]].
 
 #+cindex: @samp{ATTR_TEXINFO}, keyword
 
-The Texinfo export back-end converts special blocks to commands with
+The Texinfo export backend converts special blocks to commands with
 the same name.  It also adds any =:options= attributes to the end of
 the command, as shown in this example:
 
@@ -15936,24 +15937,24 @@ This manual is for GNU Sample (version {{{version}}},
 
 A large part of Org mode's interoperability success is its ability to
 easily export to or import from external applications.  The iCalendar
-export back-end takes calendar data from Org files and exports to the
+export backend takes calendar data from Org files and exports to the
 standard iCalendar format.
 
 #+vindex: org-icalendar-include-todo
 #+vindex: org-icalendar-use-deadline
 #+vindex: org-icalendar-use-scheduled
-The iCalendar export back-end can also incorporate TODO entries based
+The iCalendar export backend can also incorporate TODO entries based
 on the configuration of the ~org-icalendar-include-todo~ variable.
-The back-end exports plain timestamps as =VEVENT=, TODO items as
+The backend exports plain timestamps as =VEVENT=, TODO items as
 =VTODO=, and also create events from deadlines that are in non-TODO
-items.  The back-end uses the deadlines and scheduling dates in Org
+items.  The backend uses the deadlines and scheduling dates in Org
 TODO items for setting the start and due dates for the iCalendar TODO
 entry.  Consult the ~org-icalendar-use-deadline~ and
 ~org-icalendar-use-scheduled~ variables for more details.
 
 #+vindex: org-icalendar-categories
 #+vindex: org-icalendar-alarm-time
-For tags on the headline, the iCalendar export back-end makes them
+For tags on the headline, the iCalendar export backend makes them
 into iCalendar categories.  To tweak the inheritance of tags and TODO
 states, configure the variable ~org-icalendar-categories~.  To assign
 clock alarms based on time, configure the ~org-icalendar-alarm-time~
@@ -15962,9 +15963,9 @@ variable.
 #+vindex: org-icalendar-store-UID
 #+cindex: @samp{ID}, property
 The iCalendar format standard requires globally unique identifier---or
-UID---for each entry.  The iCalendar export back-end creates UIDs
+UID---for each entry.  The iCalendar export backend creates UIDs
 during export.  To save a copy of the UID in the Org file set the
-variable ~org-icalendar-store-UID~.  The back-end looks for the =ID=
+variable ~org-icalendar-store-UID~.  The backend looks for the =ID=
 property of the entry for re-using the same UID for subsequent
 exports.
 
@@ -16003,15 +16004,15 @@ connections.
 #+cindex: @samp{LOCATION}, property
 #+cindex: @samp{TIMEZONE}, property
 #+cindex: @samp{CLASS}, property
-The iCalendar export back-end includes =SUMMARY=, =DESCRIPTION=,
+The iCalendar export backend includes =SUMMARY=, =DESCRIPTION=,
 =LOCATION=, =TIMEZONE= and =CLASS= properties from the Org entries
-when exporting.  To force the back-end to inherit the =LOCATION=,
+when exporting.  To force the backend to inherit the =LOCATION=,
 =TIMEZONE= and =CLASS= properties, configure the
 ~org-use-property-inheritance~ variable.
 
 #+vindex: org-icalendar-include-body
 When Org entries do not have =SUMMARY=, =DESCRIPTION=, =LOCATION= and
-=CLASS= properties, the iCalendar export back-end derives the summary
+=CLASS= properties, the iCalendar export backend derives the summary
 from the headline, and derives the description from the body of the
 Org item.  The ~org-icalendar-include-body~ variable limits the
 maximum number of characters of the content are turned into its
@@ -16038,18 +16039,18 @@ capabilities of the destination application.  Some are more lenient
 than others.  Consult the Org mode FAQ for advice on specific
 applications.
 
-** Other Built-in Back-ends
+** Other Built-in Backends
 :PROPERTIES:
 :DESCRIPTION: Exporting to a man page.
 :END:
 
-Other export back-ends included with Org are:
+Other export backends included with Org are:
 
 - =ox-man.el=: Export to a man page.
 
-To activate such back-ends, either customize ~org-export-backends~ or
+To activate such backends, either customize ~org-export-backends~ or
 load directly with =(require 'ox-man)=.  On successful load, the
-back-end adds new keys in the export dispatcher (see [[*The Export
+backend adds new keys in the export dispatcher (see [[*The Export
 Dispatcher]]).
 
 Follow the comment section of such files, for example, =ox-man.el=,
@@ -16074,14 +16075,14 @@ the buffer.  The second hook, ~org-export-before-parsing-hook~, runs
 before the buffer is parsed.
 
 Functions added to these hooks are called with a single argument: the
-export back-end actually used, as a symbol.  You may use them for
+export backend actually used, as a symbol.  You may use them for
 heavy duty structural modifications of the document.  For example, you
 can remove every headline in the buffer during export like this:
 
 #+begin_src emacs-lisp
 (defun my-headline-removal (backend)
   "Remove all headlines in the current buffer.
-BACKEND is the export back-end being used, as a symbol."
+BACKEND is the export backend being used, as a symbol."
   (org-map-entries
    (lambda () (delete-region (point) (line-beginning-position 2)))))
 
@@ -16095,7 +16096,7 @@ BACKEND is the export back-end being used, as a symbol."
 
 #+cindex: Filters, exporting
 Filters are lists of functions to be applied to certain parts for
-a given back-end.  The output from the first function in the filter is
+a given backend.  The output from the first function in the filter is
 passed on to the next function in the filter.  The final output is the
 output from the final function in the filter.
 
@@ -16126,7 +16127,7 @@ is the type targeted by the filter.  Valid types are:
 | underline           | verbatim           | verse-block      |
 
 Here is an example filter that replaces non-breaking spaces ~ ~ in the
-Org buffer with =~= for the LaTeX back-end.
+Org buffer with =~= for the LaTeX backend.
 
 #+begin_src emacs-lisp
 (defun my-latex-filter-nobreaks (text backend info)
@@ -16139,10 +16140,10 @@ Org buffer with =~= for the LaTeX back-end.
 #+end_src
 
 A filter requires three arguments: the code to be transformed, the
-name of the back-end, and some optional information about the export
+name of the backend, and some optional information about the export
 process.  The third argument can be safely ignored.  Note the use of
 ~org-export-derived-backend-p~ predicate that tests for /latex/
-back-end or any other back-end, such as /beamer/, derived from
+backend or any other backend, such as /beamer/, derived from
 /latex/.
 
 *** Defining filters for individual files
@@ -16150,7 +16151,7 @@ back-end or any other back-end, such as /beamer/, derived from
 :UNNUMBERED: notoc
 :END:
 
-The Org export can filter not just for back-ends, but also for
+The Org export can filter not just for backends, but also for
 specific files through the =BIND= keyword.  Here is an example with
 two filters; one removes brackets from time stamps, and the other
 removes strike-through text.  The filter functions are defined in
@@ -16167,26 +16168,26 @@ debugging.
 ,#+END_SRC
 #+end_example
 
-*** Extending an existing back-end
+*** Extending an existing backend
 :PROPERTIES:
 :UNNUMBERED: notoc
 :END:
 
 Some parts of the conversion process can be extended for certain
 elements so as to introduce a new or revised translation.  That is how
-the HTML export back-end was extended to handle Markdown format.  The
+the HTML export backend was extended to handle Markdown format.  The
 extensions work seamlessly so any aspect of filtering not done by the
-extended back-end is handled by the original back-end.  Of all the
+extended backend is handled by the original backend.  Of all the
 export customization in Org, extending is very powerful as it operates
 at the parser level.
 
-For this example, make the /ascii/ back-end display the language used
+For this example, make the /ascii/ backend display the language used
 in a source code block.  Also make it display only when some attribute
 is non-~nil~, like the following:
 
 : #+ATTR_ASCII: :language t
 
-Then extend ASCII back-end with a custom "my-ascii" back-end.
+Then extend ASCII backend with a custom "my-ascii" backend.
 
 #+begin_src emacs-lisp
 (defun my-ascii-src-block (src-block contents info)
@@ -16208,13 +16209,13 @@ channel."
 #+end_src
 
 The ~my-ascii-src-block~ function looks at the attribute above the
-current element.  If not true, hands over to /ascii/ back-end.  If
+current element.  If not true, hands over to /ascii/ backend.  If
 true, which it is in this example, it creates a box around the code
 and leaves room for the inserting a string for language.  The last
-form creates the new back-end that springs to action only when
+form creates the new backend that springs to action only when
 translating ~src-block~ type elements.
 
-To use the newly defined back-end, evaluate the following from an Org
+To use the newly defined backend, evaluate the following from an Org
 buffer:
 
 #+begin_src emacs-lisp
@@ -16230,7 +16231,7 @@ user-friendly improvements.
 :DESCRIPTION: Author tables and lists in Org syntax.
 :END:
 
-The export back-ends in Org often include commands to convert selected
+The export backends in Org often include commands to convert selected
 regions.  A convenient feature of this in-place conversion is that the
 exported output replaces the original source.  Here are such
 functions:
@@ -17278,7 +17279,7 @@ Org can extract one or more source code blocks and write them to one
 or more source files---a process known as /tangling/ in literate
 programming terminology.
 
-For exporting and publishing, Org's back-ends can format a source code
+For exporting and publishing, Org's backends can format a source code
 block appropriately, often with native syntax highlighting.
 
 For executing and compiling a source code block, the user can
@@ -21107,33 +21108,33 @@ A review of =ol-man.el=:
    description.  The function ~org-insert-link~ can insert it back
    into an Org buffer later on.
 
-** Adding Export Back-ends
+** Adding Export Backends
 :PROPERTIES:
-:DESCRIPTION: How to write new export back-ends.
+:DESCRIPTION: How to write new export backends.
 :END:
-#+cindex: Export, writing back-ends
+#+cindex: Export, writing backends
 
-Org's export engine makes it easy for writing new back-ends.  The
+Org's export engine makes it easy for writing new backends.  The
 framework on which the engine was built makes it easy to derive new
-back-ends from existing ones.
+backends from existing ones.
 
 #+findex: org-export-define-backend
 #+findex: org-export-define-derived-backend
 The two main entry points to the export engine are:
 ~org-export-define-backend~ and ~org-export-define-derived-backend~.
 To grok these functions, see =ox-latex.el= for an example of defining
-a new back-end from scratch, and =ox-beamer.el= for an example of
+a new backend from scratch, and =ox-beamer.el= for an example of
 deriving from an existing engine.
 
-For creating a new back-end from scratch, first set its name as
+For creating a new backend from scratch, first set its name as
 a symbol in an alist consisting of elements and export functions.  To
-make the back-end visible to the export dispatcher, set ~:menu-entry~
-keyword.  For export options specific to this back-end, set the
+make the backend visible to the export dispatcher, set ~:menu-entry~
+keyword.  For export options specific to this backend, set the
 ~:options-alist~.
 
-For creating a new back-end from an existing one, set
+For creating a new backend from an existing one, set
 ~:translate-alist~ to an alist of export functions.  This alist
-replaces the parent back-end functions.
+replaces the parent backend functions.
 
 For complete documentation, see [[https://orgmode.org/worg/dev/org-export-reference.html][the Org Export Reference on Worg]].
 
@@ -21343,7 +21344,7 @@ Orgtbl mode has built-in translator functions: ~orgtbl-to-csv~
 ~orgtbl-to-latex~, ~orgtbl-to-html~, ~orgtbl-to-texinfo~,
 ~orgtbl-to-unicode~ and ~orgtbl-to-orgtbl~.  They use the generic
 translator, ~orgtbl-to-generic~, which delegates translations to
-various export back-ends.
+various export backends.
 
 Properties passed to the function through the =ORGTBL SEND= line take
 precedence over properties defined inside the function.  For example,
@@ -22637,7 +22638,7 @@ information on evaluating code blocks.
 Beamer---, the =org-latex-package-alist= variable needs further
 configuration.  See [[LaTeX specific export settings]].
 
-[fn:42] At the moment, some export back-ends do not obey this
+[fn:42] At the moment, some export backends do not obey this
 specification.  For example, LaTeX export excludes every unnumbered
 headline from the table of contents.
 

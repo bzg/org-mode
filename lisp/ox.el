@@ -36,32 +36,32 @@
 ;;
 ;; - The transcoder walks the parse tree, ignores or treat as plain
 ;;   text elements and objects according to export options, and
-;;   eventually calls back-end specific functions to do the real
+;;   eventually calls backend specific functions to do the real
 ;;   transcoding, concatenating their return value along the way.
 ;;
 ;; - The filter system is activated at the very beginning and the very
 ;;   end of the export process, and each time an element or an object
 ;;   has been converted.  It is the entry point to fine-tune standard
-;;   output from back-end transcoders.  See "The Filter System"
+;;   output from backend transcoders.  See "The Filter System"
 ;;   section for more information.
 ;;
 ;; The core functions is `org-export-as'.  It returns the transcoded
 ;; buffer as a string.  Its derivatives are `org-export-to-buffer' and
 ;; `org-export-to-file'.
 ;;
-;; An export back-end is defined with `org-export-define-backend'.
+;; An export backend is defined with `org-export-define-backend'.
 ;; This function can also support specific buffer keywords, OPTION
 ;; keyword's items and filters.  Refer to function's documentation for
 ;; more information.
 ;;
-;; If the new back-end shares most properties with another one,
+;; If the new backend shares most properties with another one,
 ;; `org-export-define-derived-backend' can be used to simplify the
 ;; process.
 ;;
-;; Any back-end can define its own variables.  Among them, those
+;; Any backend can define its own variables.  Among them, those
 ;; customizable should belong to the `org-export-BACKEND' group.
 ;;
-;; Tools for common tasks across back-ends are implemented in the
+;; Tools for common tasks across backends are implemented in the
 ;; following part of the file.
 ;;
 ;; Eventually, a dispatcher (`org-export-dispatch') is provided in the
@@ -178,7 +178,7 @@ BEHAVIOR determines how Org should handle multiple keywords for
 Values set through KEYWORD and OPTION have precedence over
 DEFAULT.
 
-All these properties should be back-end agnostic.  Back-end
+All these properties should be backend agnostic.  Backend
 specific properties are set through `org-export-define-backend'.
 Properties redefined there have precedence over these.")
 
@@ -243,7 +243,7 @@ The key of each association is a property name accessible through
 the communication channel.  Its value is a configurable global
 variable defining initial filters.
 
-This list is meant to install user specified filters.  Back-end
+This list is meant to install user specified filters.  Backend
 developers may install their own filters using
 `org-export-define-backend'.  Filters defined there will always
 be prepended to the current list, so they always get applied
@@ -292,7 +292,7 @@ value in the external process.")
 This is an alist: its CAR is the source of the
 result (destination file or buffer for a finished process,
 original buffer for a running one) and its CDR is a list
-containing the back-end used, as a symbol, and either a process
+containing the backend used, as a symbol, and either a process
 or the time at which it finished.  It is used to build the menu
 from `org-export-stack'.")
 
@@ -313,14 +313,14 @@ uses the same subtree if the previous command was restricted to a subtree.")
 
 ;; For compatibility with Org < 8
 (defvar org-export-current-backend nil
-  "Name, if any, of the back-end used during an export process.
+  "Name, if any, of the backend used during an export process.
 
 Its value is a symbol such as `html', `latex', `ascii', or nil if
-the back-end is anonymous (see `org-export-create-backend') or if
+the backend is anonymous (see `org-export-create-backend') or if
 there is no export process in progress.
 
 It can be used to teach Babel blocks how to act differently
-according to the back-end used.")
+according to the backend used.")
 
 
 
@@ -330,7 +330,7 @@ according to the back-end used.")
 ;;
 ;; They should never be accessed directly, as their value is to be
 ;; stored in a property list (cf. `org-export-options-alist').
-;; Back-ends will read their value from there instead.
+;; Backends will read their value from there instead.
 
 (defgroup org-export nil
   "Options for exporting Org mode files."
@@ -521,7 +521,7 @@ t           Allow export of math snippets."
   "The last level which is still exported as a headline.
 
 Inferior levels will usually produce itemize or enumerate lists
-when exported, but back-end behavior may differ.
+when exported, but backend behavior may differ.
 
 This option can also be set with the OPTIONS keyword,
 e.g. \"H:2\"."
@@ -873,7 +873,7 @@ This option can also be set with the OPTIONS keyword, e.g.,
 	  (const :tag "Raise an error" nil)))
 
 (defcustom org-export-snippet-translation-alist nil
-  "Alist between export snippets back-ends and exporter back-ends.
+  "Alist between export snippets backends and exporter backends.
 
 This variable allows providing shortcuts for export snippets.
 
@@ -882,14 +882,14 @@ For example, with:
   (setq org-export-snippet-translation-alist
         \\='((\"h\" . \"html\")))
 
-the HTML back-end will recognize the contents of \"@@h:<b>@@\" as
-HTML code while every other back-end will ignore it."
+the HTML backend will recognize the contents of \"@@h:<b>@@\" as
+HTML code while every other backend will ignore it."
   :group 'org-export-general
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(repeat
 	  (cons (string :tag "Shortcut")
-		(string :tag "Back-end")))
+		(string :tag "Backend")))
   :safe (lambda (x)
 	  (and (listp x)
 	       (cl-every #'consp x)
@@ -999,34 +999,34 @@ mode."
 
 
 
-;;; Defining Back-ends
+;;; Defining Backends
 ;;
-;; An export back-end is a structure with `org-export-backend' type
+;; An export backend is a structure with `org-export-backend' type
 ;; and `name', `parent', `transcoders', `options', `filters', `blocks'
 ;; and `menu' slots.
 ;;
-;; At the lowest level, a back-end is created with
+;; At the lowest level, a backend is created with
 ;; `org-export-create-backend' function.
 ;;
-;; A named back-end can be registered with
-;; `org-export-register-backend' function.  A registered back-end can
+;; A named backend can be registered with
+;; `org-export-register-backend' function.  A registered backend can
 ;; later be referred to by its name, with `org-export-get-backend'
-;; function.  Also, such a back-end can become the parent of a derived
-;; back-end from which slot values will be inherited by default.
-;; `org-export-derived-backend-p' can check if a given back-end is
-;; derived from a list of back-end names.
+;; function.  Also, such a backend can become the parent of a derived
+;; backend from which slot values will be inherited by default.
+;; `org-export-derived-backend-p' can check if a given backend is
+;; derived from a list of backend names.
 ;;
 ;; `org-export-get-all-transcoders', `org-export-get-all-options' and
 ;; `org-export-get-all-filters' return the full alist of transcoders,
 ;; options and filters, including those inherited from ancestors.
 ;;
 ;; At a higher level, `org-export-define-backend' is the standard way
-;; to define an export back-end.  If the new back-end is similar to
-;; a registered back-end, `org-export-define-derived-backend' may be
+;; to define an export backend.  If the new backend is similar to
+;; a registered backend, `org-export-define-derived-backend' may be
 ;; used instead.
 ;;
 ;; Eventually `org-export-barf-if-invalid-backend' returns an error
-;; when a given back-end hasn't been registered yet.
+;; when a given backend hasn't been registered yet.
 
 (cl-defstruct (org-export-backend (:constructor org-export-create-backend)
 				  (:copier nil))
@@ -1034,24 +1034,24 @@ mode."
 
 ;;;###autoload
 (defun org-export-get-backend (name)
-  "Return export back-end named after NAME.
-NAME is a symbol.  Return nil if no such back-end is found."
+  "Return export backend named after NAME.
+NAME is a symbol.  Return nil if no such backend is found."
   (cl-find-if (lambda (b) (and (eq name (org-export-backend-name b))))
 	      org-export-registered-backends))
 
 (defun org-export-register-backend (backend)
-  "Register BACKEND as a known export back-end.
+  "Register BACKEND as a known export backend.
 BACKEND is a structure with `org-export-backend' type."
-  ;; Refuse to register an unnamed back-end.
+  ;; Refuse to register an unnamed backend.
   (unless (org-export-backend-name backend)
-    (error "Cannot register a unnamed export back-end"))
-  ;; Refuse to register a back-end with an unknown parent.
+    (error "Cannot register a unnamed export backend"))
+  ;; Refuse to register a backend with an unknown parent.
   (let ((parent (org-export-backend-parent backend)))
     (when (and parent (not (org-export-get-backend parent)))
-      (error "Cannot use unknown \"%s\" back-end as a parent" parent)))
-  ;; If a back-end with the same name as BACKEND is already
+      (error "Cannot use unknown \"%s\" backend as a parent" parent)))
+  ;; If a backend with the same name as BACKEND is already
   ;; registered, replace it with BACKEND.  Otherwise, simply add
-  ;; BACKEND to the list of registered back-ends.
+  ;; BACKEND to the list of registered backends.
   (let ((old (org-export-get-backend (org-export-backend-name backend))))
     (if old (setcar (memq old org-export-registered-backends) backend)
       (push backend org-export-registered-backends))))
@@ -1059,14 +1059,14 @@ BACKEND is a structure with `org-export-backend' type."
 (defun org-export-barf-if-invalid-backend (backend)
   "Signal an error if BACKEND isn't defined."
   (unless (org-export-backend-p backend)
-    (error "Unknown \"%s\" back-end: Aborting export" backend)))
+    (error "Unknown \"%s\" backend: Aborting export" backend)))
 
 ;;;###autoload
 (defun org-export-derived-backend-p (backend &rest backends)
   "Non-nil if BACKEND is derived from one of BACKENDS.
-BACKEND is an export back-end, as returned by, e.g.,
+BACKEND is an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end.  BACKENDS is constituted of symbols."
+a registered backend.  BACKENDS is constituted of symbols."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (when backend
     (catch 'exit
@@ -1080,13 +1080,13 @@ a registered back-end.  BACKENDS is constituted of symbols."
 (defun org-export-get-all-transcoders (backend)
   "Return full translation table for BACKEND.
 
-BACKEND is an export back-end, as return by, e.g,,
+BACKEND is an export backend, as return by, e.g,,
 `org-export-create-backend'.  Return value is an alist where
 keys are element or object types, as symbols, and values are
 transcoders.
 
 Unlike to `org-export-backend-transcoders', this function
-also returns transcoders inherited from parent back-ends,
+also returns transcoders inherited from parent backends,
 if any."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (when backend
@@ -1101,12 +1101,12 @@ if any."
 (defun org-export-get-all-options (backend)
   "Return export options for BACKEND.
 
-BACKEND is an export back-end, as return by, e.g,,
+BACKEND is an export backend, as return by, e.g,,
 `org-export-create-backend'.  See `org-export-options-alist'
 for the shape of the return value.
 
 Unlike to `org-export-backend-options', this function also
-returns options inherited from parent back-ends, if any.
+returns options inherited from parent backends, if any.
 
 Return nil if BACKEND is unknown."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
@@ -1121,12 +1121,12 @@ Return nil if BACKEND is unknown."
 (defun org-export-get-all-filters (backend)
   "Return complete list of filters for BACKEND.
 
-BACKEND is an export back-end, as return by, e.g,,
+BACKEND is an export backend, as return by, e.g,,
 `org-export-create-backend'.  Return value is an alist where
 keys are symbols and values lists of functions.
 
 Unlike to `org-export-backend-filters', this function also
-returns filters inherited from parent back-ends, if any."
+returns filters inherited from parent backends, if any."
   (when (symbolp backend) (setq backend (org-export-get-backend backend)))
   (when backend
     (let ((filters (org-export-backend-filters backend))
@@ -1137,7 +1137,7 @@ returns filters inherited from parent back-ends, if any."
       filters)))
 
 (defun org-export-define-backend (backend transcoders &rest body)
-  "Define a new back-end BACKEND.
+  "Define a new backend BACKEND.
 
 TRANSCODERS is an alist between object or element types and
 functions handling them.
@@ -1173,7 +1173,7 @@ The latter, when defined, is to be called on every text not
 recognized as an element or an object.  It must accept two
 arguments: the text string and the information channel.  It is an
 appropriate place to protect special chars relative to the
-back-end.
+backend.
 
 BODY can start with pre-defined keyword arguments.  The following
 keywords are understood:
@@ -1181,9 +1181,9 @@ keywords are understood:
   :filters-alist
 
     Alist between filters and function, or list of functions,
-    specific to the back-end.  See `org-export-filters-alist' for
+    specific to the backend.  See `org-export-filters-alist' for
     a list of all allowed filters.  Filters defined here
-    shouldn't make a back-end test, as it may prevent back-ends
+    shouldn't make a backend test, as it may prevent backends
     derived from this one to behave properly.
 
   :menu-entry
@@ -1195,13 +1195,13 @@ keywords are understood:
 
     where :
 
-      KEY is a free character selecting the back-end.
+      KEY is a free character selecting the backend.
 
       DESCRIPTION-OR-ORDINAL is either a string or a number.
 
-      If it is a string, is will be used to name the back-end in
+      If it is a string, is will be used to name the backend in
       its menu entry.  If it is a number, the following menu will
-      be displayed as a sub-menu of the back-end with the same
+      be displayed as a sub-menu of the backend with the same
       KEY.  Also, the number will be used to determine in which
       order such sub-menus will appear (lowest first).
 
@@ -1221,7 +1221,7 @@ keywords are understood:
 
     Valid values include:
 
-      (?m \"My Special Back-end\" my-special-export-function)
+      (?m \"My Special Backend\" my-special-export-function)
 
       or
 
@@ -1242,7 +1242,7 @@ keywords are understood:
 
   :options-alist
 
-    Alist between back-end specific properties introduced in
+    Alist between backend specific properties introduced in
     communication channel and how their value are acquired.  See
     `org-export-options-alist' for more information about
     structure of the values."
@@ -1263,10 +1263,10 @@ keywords are understood:
 				:menu menu-entry))))
 
 (defun org-export-define-derived-backend (child parent &rest body)
-  "Create a new back-end as a variant of an existing one.
+  "Create a new backend as a variant of an existing one.
 
-CHILD is the name of the derived back-end.  PARENT is the name of
-the parent back-end.
+CHILD is the name of the derived backend.  PARENT is the name of
+the parent backend.
 
 BODY can start with pre-defined keyword arguments.  The following
 keywords are understood:
@@ -1274,7 +1274,7 @@ keywords are understood:
   :filters-alist
 
     Alist of filters that will overwrite or complete filters
-    defined in PARENT back-end.  See `org-export-filters-alist'
+    defined in PARENT backend.  See `org-export-filters-alist'
     for a list of allowed filters.
 
   :menu-entry
@@ -1285,25 +1285,25 @@ keywords are understood:
 
   :options-alist
 
-    Alist of back-end specific properties that will overwrite or
-    complete those defined in PARENT back-end.  Refer to
+    Alist of backend specific properties that will overwrite or
+    complete those defined in PARENT backend.  Refer to
     `org-export-options-alist' for more information about
     structure of the values.
 
   :translate-alist
 
     Alist of element and object types and transcoders that will
-    overwrite or complete transcode table from PARENT back-end.
+    overwrite or complete transcode table from PARENT backend.
     Refer to `org-export-define-backend' for detailed information
     about transcoders.
 
-As an example, here is how one could define \"my-latex\" back-end
-as a variant of `latex' back-end with a custom template function:
+As an example, here is how one could define \"my-latex\" backend
+as a variant of `latex' backend with a custom template function:
 
   (org-export-define-derived-backend \\='my-latex \\='latex
      :translate-alist \\='((template . my-latex-template-fun)))
 
-The back-end could then be called with, for example:
+The backend could then be called with, for example:
 
   (org-export-to-buffer \\='my-latex \"*Test my-latex*\")"
   (declare (indent 2))
@@ -1374,7 +1374,7 @@ The back-end could then be called with, for example:
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
 
-Optional argument BACKEND is an export back-end, as returned by
+Optional argument BACKEND is an export backend, as returned by
 `org-export-create-backend'.
 
 When optional argument SUBTREEP is non-nil, assume the export is
@@ -1400,8 +1400,8 @@ inferior to file-local settings."
 
 (defun org-export--parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
-Optional argument BACKEND is an export back-end, as returned by,
-e.g., `org-export-create-backend'.  It specifies which back-end
+Optional argument BACKEND is an export backend, as returned by,
+e.g., `org-export-create-backend'.  It specifies which backend
 specific items to read, if any."
   (let ((line
 	 (let (alist)
@@ -1414,7 +1414,7 @@ specific items to read, if any."
                              (read (current-buffer))) ; moves point
                        alist))))
 	   alist))
-	;; Priority is given to back-end specific options.
+	;; Priority is given to backend specific options.
 	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist))
 	(plist))
@@ -1427,8 +1427,8 @@ specific items to read, if any."
 
 (defun org-export--get-subtree-options (&optional backend)
   "Get export options in subtree at point.
-Optional argument BACKEND is an export back-end, as returned by,
-e.g., `org-export-create-backend'.  It specifies back-end used
+Optional argument BACKEND is an export backend, as returned by,
+e.g., `org-export-create-backend'.  It specifies backend used
 for export.  Return options as a plist."
   ;; For each buffer keyword, create a headline property setting the
   ;; same property in communication channel.  The name for the
@@ -1450,7 +1450,7 @@ for export.  Return options as a plist."
 			   (let ((case-fold-search nil))
 			     (looking-at org-complex-heading-regexp)
 			     (match-string-no-properties 4))))))
-	 ;; Look for both general keywords and back-end specific
+	 ;; Look for both general keywords and backend specific
 	 ;; options, with priority given to the latter.
 	 (options (append (org-export-get-all-options backend)
 			  org-export-options-alist)))
@@ -1479,15 +1479,15 @@ for export.  Return options as a plist."
 (defun org-export--get-inbuffer-options (&optional backend)
   "Return current buffer export options, as a plist.
 
-Optional argument BACKEND, when non-nil, is an export back-end,
+Optional argument BACKEND, when non-nil, is an export backend,
 as returned by, e.g., `org-export-create-backend'.  It specifies
-which back-end specific options should also be read in the
+which backend specific options should also be read in the
 process.
 
 Assume buffer is in Org mode.  Narrowing, if any, is ignored."
   (let* ((case-fold-search t)
 	 (options (append
-		   ;; Priority is given to back-end specific options.
+		   ;; Priority is given to backend specific options.
 		   (org-export-get-all-options backend)
 		   org-export-options-alist))
 	 plist to-parse)
@@ -1575,12 +1575,12 @@ are like the arguments with the same names of function
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
-Optional argument BACKEND, if non-nil, is an export back-end, as
+Optional argument BACKEND, if non-nil, is an export backend, as
 returned by, e.g., `org-export-create-backend'.  It specifies
-which back-end specific export options should also be read in the
+which backend specific export options should also be read in the
 process."
   (let (plist
-	;; Priority is given to back-end specific options.
+	;; Priority is given to backend specific options.
 	(all (append (org-export-get-all-options backend)
 		     org-export-options-alist)))
     (dolist (cell all plist)
@@ -1853,13 +1853,13 @@ not exported."
 ;;
 ;; `org-export-data' reads a parse tree (obtained with, i.e.
 ;; `org-element-parse-buffer') and transcodes it into a specified
-;; back-end output.  It takes care of filtering out elements or
+;; backend output.  It takes care of filtering out elements or
 ;; objects according to export options and organizing the output blank
 ;; lines and white space are preserved.  The function memoizes its
 ;; results, so it is cheap to call it within transcoders.
 ;;
-;; It is possible to modify locally the back-end used by
-;; `org-export-data' or even use a temporary back-end by using
+;; It is possible to modify locally the backend used by
+;; `org-export-data' or even use a temporary backend by using
 ;; `org-export-data-with-backend'.
 ;;
 ;; `org-export-transcoder' is an accessor returning appropriate
@@ -1876,7 +1876,7 @@ INFO is a plist containing export directives."
 
 ;;;###autoload
 (defun org-export-data (data info)
-  "Convert DATA into current back-end format.
+  "Convert DATA into current backend format.
 
 DATA is a parse tree, an element or an object or a secondary
 string.  INFO is a plist holding export options.
@@ -2011,8 +2011,8 @@ recursively convert DATA using BACKEND translation table."
 		:exported-data (make-hash-table :test 'eq :size 401)))))
     (prog1 (org-export-data data new-info)
       ;; Preserve `:internal-references', as those do not depend on
-      ;; the back-end used; we need to make sure that any new
-      ;; reference when the temporary back-end was active gets through
+      ;; the backend used; we need to make sure that any new
+      ;; reference when the temporary backend was active gets through
       ;; the default one.
       (plist-put info :internal-references
 		 (plist-get new-info :internal-references)))))
@@ -2040,9 +2040,9 @@ keywords before output."
 ;; They are the functional counterpart of hooks, as every filter in
 ;; a set is applied to the return value of the previous one.
 ;;
-;; Every set is back-end agnostic.  Although, a filter is always
-;; called, in addition to the string it applies to, with the back-end
-;; used as argument, so it's easy for the end-user to add back-end
+;; Every set is backend agnostic.  Although, a filter is always
+;; called, in addition to the string it applies to, with the backend
+;; used as argument, so it's easy for the end-user to add backend
 ;; specific filters in the set.  The communication channel, as
 ;; a plist, is required as the third argument.
 ;;
@@ -2055,7 +2055,7 @@ keywords before output."
 ;; - `:filter-options' applies to the property list containing export
 ;;   options.  Unlike to other filters, functions in this list accept
 ;;   two arguments instead of three: the property list containing
-;;   export options and the back-end.  Users can set its value through
+;;   export options and the backend.  Users can set its value through
 ;;   `org-export-filter-options-functions' variable.
 ;;
 ;; - `:filter-parse-tree' applies directly to the complete parsed
@@ -2103,7 +2103,7 @@ being exported.  Visibility and narrowing are preserved.  Point
 is at the beginning of the buffer.
 
 Every function in this hook will be called with one argument: the
-back-end currently used, as a symbol.")
+backend currently used, as a symbol.")
 
 (defvar org-export-before-parsing-functions nil
   "Abnormal hook run before parsing an export buffer.
@@ -2114,7 +2114,7 @@ being exported.  Visibility and narrowing are preserved.  Point
 is at the beginning of the buffer.
 
 Every function in this hook will be called with one argument: the
-back-end currently used, as a symbol.")
+backend currently used, as a symbol.")
 
 
 ;;;; Special Filters
@@ -2122,34 +2122,34 @@ back-end currently used, as a symbol.")
 (defvar org-export-filter-options-functions nil
   "List of functions applied to the export options.
 Each filter is called with two arguments: the export options, as
-a plist, and the back-end, as a symbol.  It must return
+a plist, and the backend, as a symbol.  It must return
 a property list containing export options.")
 
 (defvar org-export-filter-parse-tree-functions nil
   "List of functions applied to the parsed tree.
 Each filter is called with three arguments: the parse tree, as
-returned by `org-element-parse-buffer', the back-end, as
+returned by `org-element-parse-buffer', the backend, as
 a symbol, and the communication channel, as a plist.  It must
 return the modified parse tree to transcode.")
 
 (defvar org-export-filter-plain-text-functions nil
   "List of functions applied to plain text.
 Each filter is called with three arguments: a string which
-contains no Org syntax, the back-end, as a symbol, and the
+contains no Org syntax, the backend, as a symbol, and the
 communication channel, as a plist.  It must return a string or
 nil.")
 
 (defvar org-export-filter-body-functions nil
   "List of functions applied to transcoded body.
 Each filter is called with three arguments: a string which
-contains no Org syntax, the back-end, as a symbol, and the
+contains no Org syntax, the backend, as a symbol, and the
 communication channel, as a plist.  It must return a string or
 nil.")
 
 (defvar org-export-filter-final-output-functions nil
   "List of functions applied to the transcoded string.
 Each filter is called with three arguments: the full transcoded
-string, the back-end, as a symbol, and the communication channel,
+string, the backend, as a symbol, and the communication channel,
 as a plist.  It must return a string that will be used as the
 final export output.")
 
@@ -2159,176 +2159,176 @@ final export output.")
 (defvar org-export-filter-babel-call-functions nil
   "List of functions applied to a transcoded babel-call.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-center-block-functions nil
   "List of functions applied to a transcoded center block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-clock-functions nil
   "List of functions applied to a transcoded clock.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-diary-sexp-functions nil
   "List of functions applied to a transcoded diary-sexp.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-drawer-functions nil
   "List of functions applied to a transcoded drawer.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-dynamic-block-functions nil
   "List of functions applied to a transcoded dynamic-block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-example-block-functions nil
   "List of functions applied to a transcoded example-block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-export-block-functions nil
   "List of functions applied to a transcoded export-block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-fixed-width-functions nil
   "List of functions applied to a transcoded fixed-width.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-footnote-definition-functions nil
   "List of functions applied to a transcoded footnote-definition.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-headline-functions nil
   "List of functions applied to a transcoded headline.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-horizontal-rule-functions nil
   "List of functions applied to a transcoded horizontal-rule.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-inlinetask-functions nil
   "List of functions applied to a transcoded inlinetask.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-item-functions nil
   "List of functions applied to a transcoded item.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-keyword-functions nil
   "List of functions applied to a transcoded keyword.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-latex-environment-functions nil
   "List of functions applied to a transcoded latex-environment.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-node-property-functions nil
   "List of functions applied to a transcoded node-property.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-paragraph-functions nil
   "List of functions applied to a transcoded paragraph.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-plain-list-functions nil
   "List of functions applied to a transcoded plain-list.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-planning-functions nil
   "List of functions applied to a transcoded planning.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-property-drawer-functions nil
   "List of functions applied to a transcoded property-drawer.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-quote-block-functions nil
   "List of functions applied to a transcoded quote block.
 Each filter is called with three arguments: the transcoded quote
-data, as a string, the back-end, as a symbol, and the
+data, as a string, the backend, as a symbol, and the
 communication channel, as a plist.  It must return a string or
 nil.")
 
 (defvar org-export-filter-section-functions nil
   "List of functions applied to a transcoded section.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-special-block-functions nil
   "List of functions applied to a transcoded special block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-src-block-functions nil
   "List of functions applied to a transcoded src-block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-table-functions nil
   "List of functions applied to a transcoded table.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-table-cell-functions nil
   "List of functions applied to a transcoded table-cell.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-table-row-functions nil
   "List of functions applied to a transcoded table-row.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-verse-block-functions nil
   "List of functions applied to a transcoded verse block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 
@@ -2337,128 +2337,128 @@ channel, as a plist.  It must return a string or nil.")
 (defvar org-export-filter-bold-functions nil
   "List of functions applied to transcoded bold text.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-code-functions nil
   "List of functions applied to transcoded code text.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-entity-functions nil
   "List of functions applied to a transcoded entity.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-export-snippet-functions nil
   "List of functions applied to a transcoded export-snippet.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-footnote-reference-functions nil
   "List of functions applied to a transcoded footnote-reference.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-inline-babel-call-functions nil
   "List of functions applied to a transcoded inline-babel-call.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-inline-src-block-functions nil
   "List of functions applied to a transcoded inline-src-block.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-italic-functions nil
   "List of functions applied to transcoded italic text.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-latex-fragment-functions nil
   "List of functions applied to a transcoded latex-fragment.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-line-break-functions nil
   "List of functions applied to a transcoded line-break.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-link-functions nil
   "List of functions applied to a transcoded link.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-radio-target-functions nil
   "List of functions applied to a transcoded radio-target.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-statistics-cookie-functions nil
   "List of functions applied to a transcoded statistics-cookie.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-strike-through-functions nil
   "List of functions applied to transcoded strike-through text.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-subscript-functions nil
   "List of functions applied to a transcoded subscript.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-superscript-functions nil
   "List of functions applied to a transcoded superscript.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-target-functions nil
   "List of functions applied to a transcoded target.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-timestamp-functions nil
   "List of functions applied to a transcoded timestamp.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-underline-functions nil
   "List of functions applied to transcoded underline text.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-verbatim-functions nil
   "List of functions applied to transcoded verbatim text.
 Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
+as a string, the backend, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 
 ;;;; Filters Tools
 ;;
 ;; Internal function `org-export-install-filters' installs filters
-;; hard-coded in back-ends (developer filters) and filters from global
+;; hard-coded in backends (developer filters) and filters from global
 ;; variables (user filters) in the communication channel.
 ;;
 ;; Internal function `org-export-filter-apply-functions' takes care
@@ -2470,7 +2470,7 @@ channel, as a plist.  It must return a string or nil.")
   "Call every function in FILTERS.
 
 Functions are called with three arguments: a value, the export
-back-end name and the communication channel.  First function in
+backend name and the communication channel.  First function in
 FILTERS is called with VALUE as its first argument.  Second
 function in FILTERS is called with the previous result as its
 value, etc.
@@ -2507,7 +2507,7 @@ Return the updated communication channel."
 			 (append (if (listp info-value) info-value
 				   (list info-value))
 				 default-value)))))
-    ;; Prepend back-end specific filters to that list.
+    ;; Prepend backend specific filters to that list.
     (dolist (p (org-export-get-all-filters (plist-get info :back-end)))
       ;; Single values get consed, lists are appended.
       (let ((key (car p)) (value (cdr p)))
@@ -2545,7 +2545,7 @@ Return the updated communication channel."
 ;; associated to the file, that is before parsing.
 ;;
 ;; `org-export-insert-default-template' is a command to insert
-;; a default template (or a back-end specific template) at point or in
+;; a default template (or a backend specific template) at point or in
 ;; current subtree.
 
 (cl-defun org-export-copy-buffer (&key to-buffer drop-visibility
@@ -2805,7 +2805,7 @@ from tree."
     ;; Prune tree and communication channel.
     (funcall walk-data data)
     (dolist (entry (append
-		    ;; Priority is given to back-end specific options.
+		    ;; Priority is given to backend specific options.
 		    (org-export-get-all-options (plist-get info :back-end))
 		    org-export-options-alist))
       (when (eq (nth 4 entry) 'parse)
@@ -3018,9 +3018,9 @@ returned by the function."
     (backend &optional subtreep visible-only body-only ext-plist)
   "Transcode current Org buffer into BACKEND code.
 
-BACKEND is either an export back-end, as returned by, e.g.,
+BACKEND is either an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end.
+a registered backend.
 
 If narrowing is active in the current buffer, only transcode its
 narrowed part.
@@ -3124,7 +3124,7 @@ still inferior to file-local settings."
                        (append (org-export-get-all-options backend)
                                org-export-options-alist))))
         tree modified-tick)
-    ;; Run first hook with current back-end's name as argument.
+    ;; Run first hook with current backend's name as argument.
     (run-hook-with-args 'org-export-before-processing-hook
                         (org-export-backend-name backend))
     (org-export-expand-include-keyword)
@@ -3147,7 +3147,7 @@ still inferior to file-local settings."
         (org-set-regexps-and-options)
         (org-update-radio-target-regexp))
       (setq modified-tick (buffer-chars-modified-tick)))
-    ;; Run last hook with current back-end's name as argument.
+    ;; Run last hook with current backend's name as argument.
     ;; Update buffer properties and radio targets one last time
     ;; before parsing.
     (goto-char (point-min))
@@ -3211,9 +3211,9 @@ still inferior to file-local settings."
 (defun org-export-string-as (string backend &optional body-only ext-plist)
   "Transcode STRING into BACKEND code.
 
-BACKEND is either an export back-end, as returned by, e.g.,
+BACKEND is either an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end.
+a registered backend.
 
 When optional argument BODY-ONLY is non-nil, only return body
 code, without preamble nor postamble.
@@ -3231,9 +3231,9 @@ Return code as a string."
 ;;;###autoload
 (defun org-export-replace-region-by (backend)
   "Replace the active region by its export to BACKEND.
-BACKEND is either an export back-end, as returned by, e.g.,
+BACKEND is either an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end."
+a registered backend."
   (unless (org-region-active-p) (user-error "No active region to replace"))
   (insert
    (org-export-string-as
@@ -3244,7 +3244,7 @@ a registered back-end."
   "Insert all export keywords with default values at beginning of line.
 
 BACKEND is a symbol referring to the name of a registered export
-back-end, for which specific export options should be added to
+backend, for which specific export options should be added to
 the template, or `default' for default template.  When it is nil,
 the user will be prompted for a category.
 
@@ -3304,7 +3304,7 @@ locally for the subtree through node properties."
 		  (cl-incf width (1+ (length item))))))
 	    (insert "\n")))))
     ;; Then the rest of keywords, in the order specified in either
-    ;; `org-export-options-alist' or respective export back-ends.
+    ;; `org-export-options-alist' or respective export backends.
     (dolist (key (nreverse keywords))
       (let ((val (cond ((equal (car key) "DATE")
 			(or (cdr key)
@@ -3816,10 +3816,10 @@ See also `org-export-copy-to-kill-ring'."
 
 
 
-;;; Tools For Back-Ends
+;;; Tools For Backends
 ;;
 ;; A whole set of tools is available to help build new exporters.  Any
-;; function general enough to have its use across many back-ends
+;; function general enough to have its use across many backends
 ;; should be added here.
 
 ;;;; For Affiliated Keywords
@@ -3889,18 +3889,18 @@ Caption lines are separated by a white space."
     (cdr caption)))
 
 
-;;;; For Derived Back-ends
+;;;; For Derived Backends
 ;;
 ;; `org-export-with-backend' is a function allowing to locally use
-;; another back-end to transcode some object or element.  In a derived
-;; back-end, it may be used as a fall-back function once all specific
+;; another backend to transcode some object or element.  In a derived
+;; backend, it may be used as a fall-back function once all specific
 ;; cases have been treated.
 
 (defun org-export-with-backend (backend data &optional contents info)
   "Call a transcoder from BACKEND on DATA.
-BACKEND is an export back-end, as returned by, e.g.,
+BACKEND is an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end.  DATA is an Org element, object, secondary
+a registered backend.  DATA is an Org element, object, secondary
 string or string.  CONTENTS, when non-nil, is the transcoded
 contents of DATA element, as a string.  INFO, when non-nil, is
 the communication channel used for export, as a plist."
@@ -3918,7 +3918,7 @@ the communication channel used for export, as a plist."
 		    :back-end backend
 		    :translate-alist all-transcoders
 		    :exported-data (make-hash-table :test #'eq :size 401)))))
-	;; `:internal-references' are shared across back-ends.
+	;; `:internal-references' are shared across backends.
 	(prog1 (if (eq type 'plain-text)
 		   (funcall transcoder data new-info)
 		 (funcall transcoder data contents new-info))
@@ -3928,20 +3928,20 @@ the communication channel used for export, as a plist."
 
 ;;;; For Export Snippets
 ;;
-;; Every export snippet is transmitted to the back-end.  Though, the
+;; Every export snippet is transmitted to the backend.  Though, the
 ;; latter will only retain one type of export-snippet, ignoring
-;; others, based on the former's target back-end.  The function
-;; `org-export-snippet-backend' returns that back-end for a given
+;; others, based on the former's target backend.  The function
+;; `org-export-snippet-backend' returns that backend for a given
 ;; export-snippet.
 
 (defun org-export-snippet-backend (export-snippet)
-  "Return EXPORT-SNIPPET targeted back-end as a symbol.
+  "Return EXPORT-SNIPPET targeted backend as a symbol.
 Translation, with `org-export-snippet-translation-alist', is
 applied."
-  (let ((back-end (org-element-property :back-end export-snippet)))
+  (let ((backend (org-element-property :back-end export-snippet)))
     (intern
-     (or (cdr (assoc back-end org-export-snippet-translation-alist))
-	 back-end))))
+     (or (cdr (assoc backend org-export-snippet-translation-alist))
+	 backend))))
 
 
 ;;;; For Footnotes
@@ -3952,7 +3952,7 @@ applied."
 ;; transcoded data.
 ;;
 ;; `org-export-footnote-first-reference-p' is a predicate used by some
-;; back-ends, when they need to attach the footnote definition only to
+;; backends, when they need to attach the footnote definition only to
 ;; the first occurrence of the corresponding label.
 ;;
 ;; `org-export-get-footnote-definition' and
@@ -4356,11 +4356,11 @@ meant to be translated with `org-export-data' or alike."
   "Try exporting LINK object with a dedicated function.
 
 DESC is its description, as a string, or nil.  BACKEND is the
-back-end used for export, as a symbol.
+backend used for export, as a symbol.
 
 Return output as a string, or nil if no protocol handles LINK.
 
-A custom protocol has precedence over regular back-end export.
+A custom protocol has precedence over regular backend export.
 The function ignores links with an implicit type (e.g.,
 \"custom-id\")."
   (let ((type (org-element-property :type link)))
@@ -4414,13 +4414,13 @@ This only applies to links without a description."
   "Insert image links in DATA.
 
 Org syntax does not support nested links.  Nevertheless, some
-export back-ends support images as descriptions of links.  Since
+export backends support images as descriptions of links.  Since
 images are really links to image files, we need to make an
 exception about links nesting.
 
 This function recognizes links whose contents are really images
 and turn them into proper nested links.  It is meant to be used
-as a parse tree filter in back-ends supporting such constructs.
+as a parse tree filter in backends supporting such constructs.
 
 DATA is a parse tree.  INFO is the current state of the export
 process, as a plist.
@@ -4559,7 +4559,7 @@ Return value can be an object or an element:
 - Otherwise, throw an error.
 
 PSEUDO-TYPES are pseudo-elements types, i.e., elements defined
-specifically in an export back-end, that could have a name
+specifically in an export backend, that could have a name
 affiliated keyword.
 
 Assume LINK type is \"fuzzy\".  White spaces are not
@@ -4896,13 +4896,13 @@ objects of the same type."
 ;;;; For Raw objects
 ;;
 ;; `org-export-raw-string' builds a pseudo-object out of a string
-;; that any export back-end returns as-is.
+;; that any export backend returns as-is.
 
 ;;;###autoload
 (defun org-export-raw-string (s)
   "Return a raw object containing string S.
 A raw string is exported as-is, with no additional processing
-from the export back-end."
+from the export backend."
   (unless (stringp s) (error "Wrong raw contents type: %S" s))
   (org-element-create 'raw nil s))
 
@@ -5575,7 +5575,7 @@ return nil."
 ;; `org-export-collect-tables', `org-export-collect-figures' and
 ;; `org-export-collect-listings' can be derived from it.
 ;;
-;; `org-export-toc-entry-backend' builds a special anonymous back-end
+;; `org-export-toc-entry-backend' builds a special anonymous backend
 ;; useful to export table of contents' entries.
 
 (defun org-export-collect-headlines (info &optional n scope)
@@ -5651,7 +5651,7 @@ collected.
 
 A figure is a paragraph type element, with a caption, verifying
 PREDICATE.  The latter has to be provided since a \"figure\" is
-a vague concept that may depend on back-end.
+a vague concept that may depend on backend.
 
 Return a list of elements recognized as figures."
   (org-export-collect-elements 'paragraph info predicate))
@@ -5679,12 +5679,12 @@ required on headlines excluded from table of contents."
       (equal "notoc" (org-export-get-node-property :UNNUMBERED headline t))))
 
 (defun org-export-toc-entry-backend (parent &rest transcoders)
-  "Return an export back-end appropriate for table of contents entries.
+  "Return an export backend appropriate for table of contents entries.
 
-PARENT is an export back-end the returned back-end should inherit
+PARENT is an export backend the returned backend should inherit
 from.
 
-By default, the back-end removes footnote references and targets.
+By default, the backend removes footnote references and targets.
 It also changes links and radio targets into regular text.
 TRANSCODERS optional argument, when non-nil, specifies additional
 transcoders.  A transcoder follows the pattern (TYPE . FUNCTION)
@@ -6625,7 +6625,7 @@ to `:default' encoding.  If it fails, return S."
 ;;`org-export-stack-remove', `org-export-stack-view' and
 ;;`org-export-stack-clear'.
 ;;
-;; For back-ends, `org-export-add-to-stack' add a new source to stack.
+;; For backends, `org-export-add-to-stack' add a new source to stack.
 ;; It should be used whenever `org-export-async-start' is called.
 
 (defun org-export-async-start  (fun body)
@@ -6717,9 +6717,9 @@ and `org-export-to-file' for more specialized functions."
 	     post-process)
   "Call `org-export-as' with output to a specified buffer.
 
-BACKEND is either an export back-end, as returned by, e.g.,
+BACKEND is either an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end.
+a registered backend.
 
 BUFFER is the name of the output buffer.  If it already exists,
 it will be erased first, otherwise, it will be created.
@@ -6736,7 +6736,7 @@ see.
 
 Optional argument POST-PROCESS is a function which should accept
 no argument.  It is always called within the current process,
-from BUFFER, with point at its beginning.  Export back-ends can
+from BUFFER, with point at its beginning.  Export backends can
 use it to set a major mode there, e.g.,
 
   (defun org-latex-export-as-latex
@@ -6786,9 +6786,9 @@ This function returns BUFFER."
 	     post-process)
   "Call `org-export-as' with output to a specified file.
 
-BACKEND is either an export back-end, as returned by, e.g.,
+BACKEND is either an export backend, as returned by, e.g.,
 `org-export-create-backend', or a symbol referring to
-a registered back-end.  FILE is the name of the output file, as
+a registered backend.  FILE is the name of the output file, as
 a string.
 
 A non-nil optional argument ASYNC means the process should happen
@@ -6801,7 +6801,7 @@ see.
 
 Optional argument POST-PROCESS is called with FILE as its
 argument and happens asynchronously when ASYNC is non-nil.  It
-has to return a file name, or nil.  Export back-ends can use this
+has to return a file name, or nil.  Export backends can use this
 to send the output file through additional processing, e.g,
 
   (defun org-latex-export-to-latex
@@ -6905,7 +6905,7 @@ Return file name as a string."
   "Add a new result to export stack if not present already.
 
 SOURCE is a buffer or a file name containing export results.
-BACKEND is a symbol representing export back-end used to generate
+BACKEND is a symbol representing export backend used to generate
 it.
 
 Entries already pointing to SOURCE and unavailable entries are
@@ -6988,7 +6988,7 @@ or buffers, only display.
 \\{org-export-stack-mode-map}"
   (setq tabulated-list-format
 	(vector (list "#" 4 #'org-export--stack-num-predicate)
-		(list "Back-End" 12 t)
+		(list "Backend" 12 t)
 		(list "Age" 6 nil)
 		(list "Source" 0 nil)))
   (setq tabulated-list-sort-key (cons "#" nil))
@@ -7021,7 +7021,7 @@ appropriate for `tabulated-list-print'."
 	       (vector
 		;; Counter.
 		(number-to-string (cl-incf counter))
-		;; Back-End.
+		;; Backend.
 		(if (nth 1 entry) (symbol-name (nth 1 entry)) "")
 		;; Age.
 		(let ((info (nth 2 entry)))
@@ -7170,7 +7170,7 @@ back to standard interface."
 	    ;; Fontify VALUE string.
 	    (propertize value 'face 'font-lock-variable-name-face)))
 	 ;; Prepare menu entries by extracting them from registered
-	 ;; back-ends and sorting them by access key and by ordinal,
+	 ;; backends and sorting them by access key and by ordinal,
 	 ;; if any.
 	 (entries
 	  (sort (sort (delq nil
@@ -7222,7 +7222,7 @@ back to standard interface."
 		     (funcall fontify-key "C-a" t)
 		     (funcall fontify-value
 			      (if (memq 'async options) "On " "Off")))
-	     ;; Display registered back-end entries.  When a key
+	     ;; Display registered backend entries.  When a key
 	     ;; appears for the second time, do not create another
 	     ;; entry, but append its sub-menu to existing menu.
 	     (let (last-key)

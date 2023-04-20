@@ -1,4 +1,4 @@
-;;; ox-md.el --- Markdown Back-End for Org Export Engine -*- lexical-binding: t; -*-
+;;; ox-md.el --- Markdown Backend for Org Export Engine -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2023 Free Software Foundation, Inc.
 
@@ -23,8 +23,8 @@
 
 ;;; Commentary:
 
-;; This library implements a Markdown back-end (vanilla flavor) for
-;; Org exporter, based on `html' back-end.  See Org manual for more
+;; This library implements a Markdown backend (vanilla flavor) for
+;; Org exporter, based on `html' backend.  See Org manual for more
 ;; information.
 
 ;;; Code:
@@ -40,7 +40,7 @@
 ;;; User-Configurable Variables
 
 (defgroup org-export-md nil
-  "Options specific to Markdown export back-end."
+  "Options specific to Markdown export backend."
   :tag "Org Markdown"
   :group 'org-export
   :version "24.4"
@@ -92,7 +92,7 @@ headings for its own use."
 
 
 
-;;; Define Back-End
+;;; Define Backend
 
 (org-export-define-derived-backend 'md 'html
   :filters-alist '((:filter-parse-tree . org-md-separate-elements))
@@ -150,7 +150,7 @@ headings for its own use."
   "Fix blank lines between elements.
 
 TREE is the parse tree being exported.  BACKEND is the export
-back-end used.  INFO is a plist used as a communication channel.
+backend used.  INFO is a plist used as a communication channel.
 
 Enforce a blank line between elements.  There are two exceptions
 to this rule:

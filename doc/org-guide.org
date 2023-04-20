@@ -2223,8 +2223,8 @@ compatible with XHTML 1.0 strict standard.
   exports to =myfile.html=, overwriting without warning.  {{{kbd(C-c
   C-e h o)}}} exports to HTML and opens it in a web browser.
 
-The HTML export back-end transforms =<= and =>= to =&lt;= and =&gt;=.
-To include raw HTML code in the Org file so the HTML export back-end
+The HTML export backend transforms =<= and =>= to =&lt;= and =&gt;=.
+To include raw HTML code in the Org file so the HTML export backend
 can insert that HTML code in the output, use this inline syntax:
 =@@html:...@@=.  For example:
 
@@ -2245,7 +2245,7 @@ For larger raw HTML code blocks, use these HTML export code blocks:
 :DESCRIPTION: Exporting to @LaTeX{} and processing to PDF.
 :END:
 
-The LaTeX export back-end can handle complex documents, incorporate
+The LaTeX export backend can handle complex documents, incorporate
 standard or custom LaTeX document classes, generate documents using
 alternate LaTeX engines, and produce fully linked PDF files with
 indexes, bibliographies, and tables of contents, destined for
@@ -2269,7 +2269,7 @@ The class must be listed in ~org-latex-classes~.
   Export as LaTeX file and convert it to PDF, then open the PDF using
   the default viewer.
 
-The LaTeX export back-end can insert any arbitrary LaTeX code, see
+The LaTeX export backend can insert any arbitrary LaTeX code, see
 [[*Embedded LaTeX]].  There are three ways to embed such code in the Org
 file and they all use different quoting syntax.
 
@@ -2281,7 +2281,7 @@ Inserting as one or more keyword lines in the Org file:
 
 : #+LATEX: any arbitrary LaTeX code
 
-Inserting as an export block in the Org file, where the back-end
+Inserting as an export block in the Org file, where the backend
 exports any code between begin and end markers:
 
 #+begin_example
@@ -2297,7 +2297,7 @@ exports any code between begin and end markers:
 
 A large part of Org mode's interoperability success is its ability to
 easily export to or import from external applications.  The iCalendar
-export back-end takes calendar data from Org files and exports to the
+export backend takes calendar data from Org files and exports to the
 standard iCalendar format.
 
 - {{{kbd(C-c C-e c f)}}} ::

@@ -3242,13 +3242,13 @@ Assume point is at the beginning of the snippet."
 					    (re-search-forward "@@" nil t)
 					  (match-beginning 0)))))
 	(let* ((begin (match-beginning 0))
-	       (back-end (match-string-no-properties 1))
+	       (backend (match-string-no-properties 1))
 	       (value (buffer-substring-no-properties
 		       (match-end 0) contents-end))
 	       (post-blank (skip-chars-forward " \t"))
 	       (end (point)))
 	  (list 'export-snippet
-		(list :back-end back-end
+		(list :back-end backend
 		      :value value
 		      :begin begin
 		      :end end

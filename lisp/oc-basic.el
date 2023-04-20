@@ -1,4 +1,4 @@
-;;; oc-basic.el --- basic back-end for citations  -*- lexical-binding: t; -*-
+;;; oc-basic.el --- basic backend for citations  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
@@ -330,7 +330,7 @@ FIELD is a symbol.  ENTRY-OR-KEY is either an association list, as returned by
 
 Optional argument INFO is the export state, as a property list.
 
-Return value may be nil or a string.  If current export back-end is derived
+Return value may be nil or a string.  If current export backend is derived
 from `latex', return a raw string instead, unless optional argument RAW is
 non-nil.
 
@@ -716,7 +716,7 @@ export communication channel, as a property list."
 (defun org-cite-basic-export-bibliography (keys _files style _props backend info)
   "Generate bibliography.
 KEYS is the list of cited keys, as strings.  STYLE is the expected bibliography
-style, as a string.  BACKEND is the export back-end, as a symbol.  INFO is the
+style, as a string.  BACKEND is the export backend, as a symbol.  INFO is the
 export state, as a property list."
   (mapconcat
    (lambda (entry)

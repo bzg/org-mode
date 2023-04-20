@@ -5615,7 +5615,7 @@ Valid parameters are:
 
 :backend, :raw
 
-  Export back-end used as a basis to transcode elements of the
+  Export backend used as a basis to transcode elements of the
   table, when no specific parameter applies to it.  It is also
   used to translate cells contents.  You can prevent this by
   setting :raw property to a non-nil value.
@@ -5707,7 +5707,7 @@ This may be either a string or a function of two arguments:
   (require 'ox)
   (let* ((backend (plist-get params :backend))
 	 (custom-backend
-	  ;; Build a custom back-end according to PARAMS.  Before
+	  ;; Build a custom backend according to PARAMS.  Before
 	  ;; defining a translator, check if there is anything to do.
 	  ;; When there isn't, let BACKEND handle the element.
 	  (org-export-create-backend
@@ -5717,7 +5717,7 @@ This may be either a string or a function of two arguments:
 	     (table-row . ,(org-table--to-generic-row params))
 	     (table-cell . ,(org-table--to-generic-cell params))
 	     ;; Macros are not going to be expanded.  However, no
-	     ;; regular back-end has a transcoder for them.  We
+	     ;; regular backend has a transcoder for them.  We
 	     ;; provide one so they are not ignored, but displayed
 	     ;; as-is instead.
 	     (macro . (lambda (m c i) (org-element-macro-interpreter m nil))))))
@@ -5735,7 +5735,7 @@ This may be either a string or a function of two arguments:
 		   (princ "| ") (dolist (c e) (princ c) (princ " |"))
 		   (princ "\n")))))
         (org-element-cache-reset)
-        ;; Add back-end specific filters, but not user-defined ones.  In
+        ;; Add backend specific filters, but not user-defined ones.  In
         ;; particular, make sure to call parse-tree filters on the
         ;; table.
         (setq info
@@ -5794,7 +5794,7 @@ This may be either a string or a function of two arguments:
     ;; We use a low-level mechanism to export DATA so as to skip all
     ;; usual pre-processing and post-processing, i.e., hooks, Babel
     ;; code evaluation, include keywords and macro expansion.  Only
-    ;; back-end specific filters are retained.
+    ;; backend specific filters are retained.
     (let ((output (org-export-data-with-backend data custom-backend info)))
       ;; Remove final newline.
       (if (org-string-nw-p output) (substring-no-properties output 0 -1) ""))))
