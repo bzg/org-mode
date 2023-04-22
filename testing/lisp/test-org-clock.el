@@ -89,29 +89,34 @@ the buffer."
     ;; Remove clocktable.
     (delete-region (point) (search-forward "#+END:\n"))))
 
-(ert-deftest test-org-clok/org-clock-timestamps-change ()
+(ert-deftest test-org-clock/org-clock-timestamps-change ()
   "Test `org-clock-timestamps-change' specifications."
-  (should
-   (equal
-    "CLOCK: [2023-02-19 Sun 21:30]--[2023-02-19 Sun 23:35] =>  2:05"
-    (org-test-with-temp-text
-        "CLOCK: [2023-02-19 Sun 2<point>2:30]--[2023-02-20 Mon 00:35] =>  2:05"
-      (org-clock-timestamps-change 'down 1)
-      (buffer-string))))
-  (should
-   (equal
-    "CLOCK: [2023-02-20 Mon 00:00]--[2023-02-20 Mon 00:40] =>  0:40"
-    (org-test-with-temp-text
-        "CLOCK: [2023-02-19 Sun 23:<point>55]--[2023-02-20 Mon 00:35] =>  0:40"
-      (org-clock-timestamps-change 'up 1)
-      (buffer-string))))
-  (should
-   (equal
-    "CLOCK: [2023-02-20 Mon 00:30]--[2023-02-20 Mon 01:35] =>  1:05"
-    (org-test-with-temp-text
-        "CLOCK: [2023-02-19 Sun 2<point>3:30]--[2023-02-20 Mon 00:35] =>  1:05"
-      (org-clock-timestamps-change 'up 1)
-      (buffer-string)))))
+  (let ((sun (aref org-test-day-of-weeks-abbrev 0))
+        (mon (aref org-test-day-of-weeks-abbrev 1)))
+    (should
+     (equal
+      (format "CLOCK: [2023-02-19 %s 21:30]--[2023-02-19 %s 23:35] =>  2:05"
+              sun sun)
+      (org-test-with-temp-text
+          "CLOCK: [2023-02-19 Sun 2<point>2:30]--[2023-02-20 Mon 00:35] =>  2:05"
+        (org-clock-timestamps-change 'down 1)
+        (buffer-string))))
+    (should
+     (equal
+      (format "CLOCK: [2023-02-20 %s 00:00]--[2023-02-20 %s 00:40] =>  0:40"
+              mon mon)
+      (org-test-with-temp-text
+          "CLOCK: [2023-02-19 Sun 23:<point>55]--[2023-02-20 Mon 00:35] =>  0:40"
+        (org-clock-timestamps-change 'up 1)
+        (buffer-string))))
+    (should
+     (equal
+      (format "CLOCK: [2023-02-20 %s 00:30]--[2023-02-20 %s 01:35] =>  1:05"
+              mon mon)
+      (org-test-with-temp-text
+          "CLOCK: [2023-02-19 Sun 2<point>3:30]--[2023-02-20 Mon 00:35] =>  1:05"
+        (org-clock-timestamps-change 'up 1)
+        (buffer-string))))))
 
 (ert-deftest test-org-clok/org-clock-update-time-maybe ()
   "Test `org-clock-update-time-maybe' specifications."
@@ -313,19 +318,20 @@ the buffer."
 
 (ert-deftest test-org-clock/clock-drawer-dwim ()
   "Test DWIM update of days for clocks in logbook drawers."
-  (should (equal "* Foo
+  (let ((thu (aref org-test-day-of-weeks-abbrev 4)))
+    (should (equal (format "* Foo
 :LOGBOOK:
-CLOCK: [2022-11-03 Thu 06:00]--[2022-11-03 Thu 06:01] =>  0:01
+CLOCK: [2022-11-03 %s 06:00]--[2022-11-03 %s 06:01] =>  0:01
 :END:
-"
-         (org-test-with-temp-text
-             "* Foo
+" thu thu)
+                   (org-test-with-temp-text
+                       "* Foo
 :LOGBOOK:
 <point>CLOCK: [2022-11-03 ??? 06:00]--[2022-11-03 ??? 06:01] =>  0:01
 :END:
 "
-           (org-ctrl-c-ctrl-c)
-           (buffer-string)))))
+                     (org-ctrl-c-ctrl-c)
+                     (buffer-string))))))
 
 
 ;;; Clocktable
