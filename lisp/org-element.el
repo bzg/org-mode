@@ -5832,15 +5832,29 @@ Properties are modified by side-effect."
   (when (and (or (not props) (memq :structure props))
              (eq (org-element-type element) 'plain-list)
              (not (eq (org-element-type (org-element-property :parent element)) 'item)))
-    (let ((structure (org-element-property-1 :structure element)))
+    (let ((structure (org-element-property :structure element)))
       (dolist (item structure)
         (cl-incf (car item) offset)
         (cl-incf (nth 6 item) offset))))
-  (dolist (key '( :begin :contents-begin :contents-end :end
-                  :post-affiliated :robust-begin :robust-end))
-    (when (and (or (not props) (memq key props))
-               (org-element-property key element))
-      (cl-incf (org-element-property-1 key element) offset))))
+  ;; Do not use loop for inline expansion to work during compile time.
+  (when (or (not props) (memq :begin props))
+    (cl-incf (org-element-property :begin element) offset))
+  (when (or (not props) (memq :end props))
+    (cl-incf (org-element-property :end element) offset))
+  (when (or (not props) (memq :post-affiliated props))
+    (cl-incf (org-element-property :post-affiliated element) offset))
+  (when (and (or (not props) (memq :contents-begin props))
+             (org-element-property :contents-begin element))
+    (cl-incf (org-element-property :contents-begin element) offset))
+  (when (and (or (not props) (memq :contents-end props))
+             (org-element-property :contents-end element))
+    (cl-incf (org-element-property :contents-end element) offset))
+  (when (and (or (not props) (memq :robust-begin props))
+             (org-element-property :robust-begin element))
+    (cl-incf (org-element-property :robust-begin element) offset))
+  (when (and (or (not props) (memq :robust-end props))
+             (org-element-property :robust-end element))
+    (cl-incf (org-element-property :robust-end element) offset)))
 
 (defvar org-element--cache-interrupt-C-g t
   "When non-nil, allow the user to abort `org-element--cache-sync'.
@@ -7541,8 +7555,8 @@ the cache."
                   ;; and need to fill it.
                   (unless (or (and start (< (org-element-property :begin data) start))
 		              (and prev (not (org-element--cache-key-less-p
-				              (org-element--cache-key prev)
-				              (org-element--cache-key data)))))
+				            (org-element--cache-key prev)
+				            (org-element--cache-key data)))))
                     ;; DATA is at of after START and PREV.
 	            (if (or (not start) (= (org-element-property :begin data) start))
                         ;; DATA is at START.  Match it.
