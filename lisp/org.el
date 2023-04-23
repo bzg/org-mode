@@ -8444,7 +8444,10 @@ a link."
 	       (dolist (link (if (stringp links) (list links) links))
 		 (search-forward link nil links-end)
 		 (goto-char (match-beginning 0))
-		 (org-open-at-point arg)))))))
+                 ;; When opening file link, current buffer may be
+                 ;; altered.
+                 (save-current-buffer
+		   (org-open-at-point arg))))))))
        ;; On a footnote reference or at definition's label.
        ((or (eq type 'footnote-reference)
 	    (and (eq type 'footnote-definition)
