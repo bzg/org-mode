@@ -1096,6 +1096,37 @@ Use \"export %s\" instead"
 				     (org-element-property :header datum))))))))
     reports))
 
+(defun org-lint-empty-header-argument (ast)
+  (let* (reports)
+    (org-element-map ast '(babel-call inline-babel-call inline-src-block src-block)
+      (lambda (datum)
+        (let ((headers
+	       (pcase (org-element-type datum)
+	         ((or `babel-call `inline-babel-call)
+		  (cl-mapcan
+                   (lambda (header) (org-babel-parse-header-arguments header 'no-eval))
+		   (list
+		    (org-element-property :inside-header datum)
+		    (org-element-property :end-header datum))))
+	         (`inline-src-block
+		  (org-babel-parse-header-arguments
+		   (org-element-property :parameters datum)
+                   'no-eval))
+	         (`src-block
+		  (cl-mapcan
+                   (lambda (header) (org-babel-parse-header-arguments header 'no-eval))
+		   (cons (org-element-property :parameters datum)
+			 (org-element-property :header datum)))))))
+          (dolist (header headers)
+            (when (not (cdr header))
+              (push
+	       (list
+                (or (org-element-property :post-affiliated datum)
+		    (org-element-property :begin datum))
+		(format "Empty value in header argument \"%s\"" (symbol-name (car header))))
+	       reports))))))
+    reports))
+
 (defun org-lint-wrong-header-value (ast)
   (let (reports)
     (org-element-map ast
@@ -1330,6 +1361,11 @@ Use \"export %s\" instead"
 (org-lint-add-checker 'wrong-header-value
   "Report invalid value in babel headers"
   #'org-lint-wrong-header-value
+  :categories '(babel) :trust 'low)
+
+(org-lint-add-checker 'empty-header-argument
+  "Report empty values in babel headers"
+  #'org-lint-empty-header-argument
   :categories '(babel) :trust 'low)
 
 (org-lint-add-checker 'deprecated-category-setup
