@@ -374,7 +374,7 @@ Some other text
   ;; Parse multiple keywords.
   (should
    (equal
-    '("line2" "line1")
+    '("line1" "line2")
     (org-element-property
      :attr_ascii
      (org-test-with-temp-text
@@ -409,12 +409,12 @@ Some other text
   ;; Allow multiple caption keywords.
   (should
    (equal
-    '((("l2") "s2") (("l1") "s1"))
+    '((("l1") "s1") (("l2") "s2"))
     (org-test-with-temp-text "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph"
       (org-element-property :caption (org-element-at-point)))))
   (should
    (equal
-    '((("l1")) (nil "s1"))
+    '((nil "s1") (("l1")))
     (org-test-with-temp-text "#+CAPTION[s1]:\n#+CAPTION: l1\nParagraph"
       (org-element-property :caption (org-element-at-point)))))
   ;; Corner case: orphaned keyword at the end of an element.
@@ -2772,7 +2772,7 @@ Outside list"
   (should
    (equal
     (org-element-interpret-data
-     '(org-data nil (paragraph (:attr_ascii ("line2" "line1")) "Paragraph")))
+     '(org-data nil (paragraph (:attr_ascii ("line1" "line2")) "Paragraph")))
     "#+attr_ascii: line1\n#+attr_ascii: line2\nParagraph\n"))
   ;; Interpret parsed affiliated keywords.
   (should
@@ -2791,7 +2791,7 @@ Outside list"
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph
-		     (:caption ((("l2") "s2") (("l1") "s1"))) "Paragraph")))
+		     (:caption ((("l1") "s1") (("l2") "s2"))) "Paragraph")))
     "#+caption[s1]: l1\n#+caption[s2]: l2\nParagraph\n"))
   ;; Pseudo objects and elements are transparent.
   (should
