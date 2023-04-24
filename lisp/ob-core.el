@@ -1662,9 +1662,11 @@ shown below.
   (let (results)
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
-		(mapcar (lambda (v) (push (cons :var (org-trim v)) results))
-			(org-babel-join-splits-near-ch
-			 61 (org-babel-balanced-split (cdr pair) 32)))
+                (or
+	         (mapcar (lambda (v) (push (cons :var (org-trim v)) results))
+		         (org-babel-join-splits-near-ch
+		          61 (org-babel-balanced-split (or (cdr pair) "") 32)))
+                 (push `(:var) results))
 	      (push pair results)))
 	  header-arguments)
     (nreverse results)))
