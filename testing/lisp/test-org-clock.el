@@ -1325,5 +1325,57 @@ Variables'."
                      "<after> ")
         (org-clock-out))))))
 
+;;; Helpers
+
+(ert-deftest test-org-clock/special-range ()
+  "Test `org-clock-special-range'."
+  (let* ((cases
+          '((("2023-04-23 Sun" "2023-04-24 Mon" "2023-04-25 Tue" "2023-04-26 Wed"
+              "2023-04-27 Thu" "2023-04-28 Fri" "2023-04-29 Sat")
+             thisweek 0
+             "2023-04-23 Sun" "2023-04-30 Sun")
+            (("2023-04-24 Mon" "2023-04-25 Tue" "2023-04-26 Wed"
+              "2023-04-27 Thu" "2023-04-28 Fri" "2023-04-29 Sat" "2023-04-30 Sun")
+             thisweek 1
+             "2023-04-24 Mon" "2023-05-01 Mon")
+            (("2023-04-24 Mon" "2023-04-25 Tue" "2023-04-26 Wed"
+              "2023-04-27 Thu" "2023-04-28 Fri" "2023-04-29 Sat" "2023-04-30 Sun")
+             thisweek nil ; Copy of 1.
+             "2023-04-24 Mon" "2023-05-01 Mon")
+            (("2023-04-22 Sat"
+              "2023-04-23 Sun" "2023-04-24 Mon" "2023-04-25 Tue" "2023-04-26 Wed"
+              "2023-04-27 Thu" "2023-04-28 Fri")
+             thisweek 6
+             "2023-04-22 Sat" "2023-04-29 Sat")
+            (("2023-04-23 Sun" "2023-04-24 Mon" "2023-04-25 Tue" "2023-04-26 Wed"
+              "2023-04-27 Thu" "2023-04-28 Fri" "2023-04-29 Sat")
+             thisweek 7 ; Copy of 0.
+             "2023-04-23 Sun" "2023-04-30 Sun")))
+         (failed
+          (delq
+           nil
+           (mapcar (lambda (params)
+                     (pcase-let ((`(,days ,key ,wstart ,begin ,end) params))
+                       (delq
+                        nil
+                        (mapcar (lambda (today)
+                                  (let* ((ts-today (org-time-string-to-time today))
+                                         (range (org-clock-special-range
+                                                 key ts-today nil wstart nil))
+                                         (ts-begin (nth 0 range))
+                                         (ts-end (nth 1 range))
+                                         (expected-begin (org-time-string-to-time begin))
+                                         (expected-end (org-time-string-to-time end)))
+                                    (unless (and (equal ts-begin expected-begin)
+                                                 (equal ts-end expected-end))
+                                      (format "%s..%s != %s..%s %s %s :wstart %s"
+                                              begin end
+                                              (format-time-string "%F" ts-begin)
+                                              (format-time-string "%F" ts-end)
+                                              today key wstart))))
+                                days))))
+                   cases))))
+    (should-not failed)))
+
 (provide 'test-org-clock)
 ;;; test-org-clock.el end here

@@ -2389,7 +2389,7 @@ have priority."
                               d (+ d shift)))
       ((or `week `thisweek)
        (let* ((ws (or wstart 1))
-	      (diff (+ (* -7 shift) (if (= dow 0) (- 7 ws) (- dow ws)))))
+	      (diff (+ (* -7 shift) (mod (+ dow 7 (- ws)) 7))))
 	 (setq m 0 h org-extend-today-until d (- d diff) d1 (+ 7 d))))
       ((or `month `thismonth)
        (setq h org-extend-today-until m 0 d (or mstart 1)
