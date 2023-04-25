@@ -452,14 +452,30 @@ DATELINE is non-nil when the face used should be
 	    "Type \\<org-columns-map>`\\[org-columns-edit-value]' \
 to edit property")))))))
 
+(defun org-columns--truncate-below-width (string width)
+  "Return a substring of STRING no wider than WIDTH.
+This substring must start at 0, and must be the longest possible
+substring whose `string-width' does not exceed WIDTH."
+  (declare (side-effect-free t))
+  (let ((end (min width (length string))) res)
+    (while (and end (>= end 0))
+      (let* ((curr (string-width string 0 end))
+             (excess (- curr width)))
+        (if (> excess 0)
+            (cl-decf end (max 1 (/ excess 2)))
+          (setq res (substring string 0 end) end nil))))
+    res))
+
 (defun org-columns-add-ellipses (string width)
   "Truncate STRING with WIDTH characters, with ellipses."
   (cond
-   ((<= (length string) width) string)
-   ((<= width (length org-columns-ellipses))
-    (substring org-columns-ellipses 0 width))
-   (t (concat (substring string 0 (- width (length org-columns-ellipses)))
-	      org-columns-ellipses))))
+   ((<= (string-width string) width) string)
+   ((<= width (string-width org-columns-ellipses))
+    (org-columns--truncate-below-width org-columns-ellipses width))
+   (t (concat
+       (org-columns--truncate-below-width
+        string (- width (string-width org-columns-ellipses)))
+       org-columns-ellipses))))
 
 (defvar org-columns-full-header-line-format nil
   "The full header line format, will be shifted by horizontal scrolling." )
