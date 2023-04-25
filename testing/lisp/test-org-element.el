@@ -70,7 +70,7 @@ Some other text
   ;; Use WITH-AFFILIATED argument.
   (should
    (equal
-    '("a" "1" "b" "2")
+    '("1" "a" "2" "b")
     (org-test-with-temp-text "#+CAPTION[a]: 1\n#+CAPTION[b]: 2\nParagraph"
       (org-element-map
        (org-element-at-point) 'plain-text 'identity nil nil nil t)))))

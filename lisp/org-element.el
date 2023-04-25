@@ -4472,8 +4472,9 @@ function called on the matching element or object.  It has to accept
 one argument: the element or object itself.
 
 When optional argument INFO is non-nil, it should be a plist
-holding export options.  In that case, parts of the parse tree
-not exportable according to that property list will be skipped.
+holding export options.  In that case, elements of the parse tree
+\\(compared with `eq') not exportable according to `:ignore-list'
+property in that property list will be skipped.
 
 When optional argument FIRST-MATCH is non-nil, stop at the first
 match for which FUN doesn't return nil, and return that value.
@@ -4487,8 +4488,15 @@ When optional argument WITH-AFFILIATED is non-nil, FUN will also
 apply to matching objects within parsed affiliated keywords (see
 `org-element-parsed-keywords').
 
+FUN may throw `:org-element-skip' signal.  Then, `org-element-map'
+will not recurse into the current element.
+
 Nil values returned from FUN do not appear in the results.
 
+When buffer parse tree is used, elements and objects are generally
+traversed in the same order they appear in text with a single
+exception of dual keywords where secondary value is traversed after
+the mail value.
 
 Examples:
 ---------
@@ -4526,98 +4534,31 @@ looking into captions:
   (declare (indent 2))
   ;; Ensure TYPES and NO-RECURSION are a list, even of one element.
   (let* ((types (if (listp types) types (list types)))
-	 (no-recursion (if (listp no-recursion) no-recursion
-			 (list no-recursion)))
-	 ;; Recursion depth is determined by --CATEGORY.
-	 (--category
-	  (catch :--found
-	    (let ((category 'greater-elements)
-		  (all-objects (cons 'plain-text org-element-all-objects)))
-	      (dolist (type types category)
-		(cond ((memq type all-objects)
-		       ;; If one object is found, the function has
-		       ;; to recurse into every object.
-		       (throw :--found 'objects))
-		      ((not (memq type org-element-greater-elements))
-		       ;; If one regular element is found, the
-		       ;; function has to recurse, at least, into
-		       ;; every element it encounters.
-		       (and (not (eq category 'elements))
-			    (setq category 'elements))))))))
-         (--ignore-list (plist-get info :ignore-list))
-	 --acc)
-    (letrec ((--walk-tree
-	      (lambda (--data)
-		;; Recursively walk DATA.  INFO, if non-nil, is a plist
-		;; holding contextual information.
-		(let ((--type (org-element-type --data)))
-		  (cond
-		   ((not --data))
-		   ;; Ignored element in an export context.
-		   ((and info (memq --data --ignore-list)))
-		   ;; List of elements or objects.
-		   ((not --type) (mapc --walk-tree --data))
-		   ;; Unconditionally enter parse trees.
-		   ((eq --type 'org-data)
-		    (mapc --walk-tree (org-element-contents --data)))
-		   (t
-		    ;; Check if TYPE is matching among TYPES.  If so,
-		    ;; apply FUN to --DATA and accumulate return value
-		    ;; into --ACC (or exit if FIRST-MATCH is non-nil).
-		    (when (memq --type types)
-		      (let ((result (funcall fun --data)))
-			(cond ((not result))
-			      (first-match (throw :--map-first-match result))
-			      (t (push result --acc)))))
-		    ;; If --DATA has a secondary string that can contain
-		    ;; objects with their type among TYPES, look inside.
-		    (when (and (eq --category 'objects) (not (stringp --data)))
-		      (dolist (p (cdr (assq --type
-					    org-element-secondary-value-alist)))
-			(funcall --walk-tree (org-element-property p --data))))
-		    ;; If --DATA has any parsed affiliated keywords and
-		    ;; WITH-AFFILIATED is non-nil, look for objects in
-		    ;; them.
-		    (when (and with-affiliated
-			       (eq --category 'objects)
-			       (eq (org-element-class --data) 'element))
-		      (dolist (kwd-pair org-element--parsed-properties-alist)
-			(let ((kwd (car kwd-pair))
-			      (value (org-element-property (cdr kwd-pair) --data)))
-			  ;; Pay attention to the type of parsed
-			  ;; keyword.  In particular, preserve order for
-			  ;; multiple keywords.
-			  (cond
-			   ((not value))
-			   ((member kwd org-element-dual-keywords)
-			    (if (member kwd org-element-multiple-keywords)
-				(dolist (line value)
-				  (funcall --walk-tree (cdr line))
-				  (funcall --walk-tree (car line)))
-			      (funcall --walk-tree (cdr value))
-			      (funcall --walk-tree (car value))))
-			   ((member kwd org-element-multiple-keywords)
-			    (mapc --walk-tree value))
-			   (t (funcall --walk-tree value))))))
-		    ;; Determine if a recursion into --DATA is possible.
-		    (cond
-		     ;; --TYPE is explicitly removed from recursion.
-		     ((memq --type no-recursion))
-		     ;; --DATA has no contents.
-		     ((not (org-element-contents --data)))
-		     ;; Looking for greater elements but --DATA is
-		     ;; simply an element or an object.
-		     ((and (eq --category 'greater-elements)
-			   (not (memq --type org-element-greater-elements))))
-		     ;; Looking for elements but --DATA is an object.
-		     ((and (eq --category 'elements)
-			   (eq (org-element-class --data) 'object)))
-		     ;; In any other case, map contents.
-		     (t (mapc --walk-tree (org-element-contents --data))))))))))
-      (catch :--map-first-match
-	(funcall --walk-tree data)
-	;; Return value in a proper order.
-	(nreverse --acc)))))
+         (ignore-list (plist-get info :ignore-list))
+	 (objects?
+          (cl-intersection
+           (cons 'plain-text org-element-all-objects) types))
+         (no-recursion
+          (append
+           (if (listp no-recursion) no-recursion
+	     (list no-recursion))
+           (unless objects?
+             org-element-all-objects)
+           (unless objects?
+             ;; Do not recurse into elements that can only contain
+             ;; objects.
+             (cl-set-difference
+              org-element-all-elements
+              org-element-greater-elements)))))
+    (org-element-ast-map
+        data types fun
+        ignore-list first-match
+        no-recursion
+        ;; Affiliated keywords may only contain objects.
+        (when (and with-affiliated objects?)
+          (mapcar #'cdr org-element--parsed-properties-alist))
+        ;; Secondary strings may only contain objects.
+        (not objects?))))
 
 ;; The following functions are internal parts of the parser.
 ;;
