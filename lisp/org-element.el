@@ -3671,7 +3671,7 @@ a plist with `:key', `:args', `:begin', `:end', `:value' and
 
 Assume point is at the macro."
   (save-excursion
-    (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\([^\000]*?\\))\\)?}}}")
+    (when (looking-at "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\(\\(?:.\\|\n\\)*?\\))\\)?}}}")
       (let ((begin (point))
 	    (key (downcase (match-string-no-properties 1)))
 	    (value (match-string-no-properties 0))

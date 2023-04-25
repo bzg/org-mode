@@ -226,7 +226,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
   (let* ((contents (buffer-string))
          (haskell-regexp
           (concat "^\\([ \t]*\\)#\\+begin_src[ \t]haskell*\\(.*\\)[\r\n]"
-                  "\\([^\000]*?\\)[\r\n][ \t]*#\\+end_src.*"))
+                  "\\(\\(?:.\\|\n\\)*?\\)[\r\n][ \t]*#\\+end_src.*"))
          (base-name (file-name-sans-extension (buffer-file-name)))
          (tmp-file (org-babel-temp-file "haskell-"))
          (tmp-org-file (concat tmp-file ".org"))
@@ -270,7 +270,7 @@ constructs (header arguments, no-web syntax etc...) are ignored."
             (goto-char (point-min)) (forward-line 2)
             (insert "%include polycode.fmt\n")
             ;; ensure all \begin/end{code} statements start at the first column
-            (while (re-search-forward "^[ \t]+\\\\begin{code}[^\000]+\\\\end{code}" nil t)
+            (while (re-search-forward "^[ \t]+\\\\begin{code}\\(?:.\\|\n\\)+\\\\end{code}" nil t)
               (replace-match (save-match-data (org-remove-indentation (match-string 0)))
                              t t))
             ;; save org exported latex to a .lhs file

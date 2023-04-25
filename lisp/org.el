@@ -405,7 +405,7 @@ FULL is given."
 ;;;; Block
 
 (defconst org-block-regexp
-  "^[ \t]*#\\+begin_?\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_?\\1[ \t]*$"
+  "^[ \t]*#\\+begin_?\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\(\\(?:.\\|\n\\)+?\\)#\\+end_?\\1[ \t]*$"
   "Regular expression for hiding blocks.")
 
 (defconst org-dblock-start-re
@@ -611,7 +611,7 @@ Group 1 contains drawer's name or \"END\".")
   "Matches an entire property drawer.")
 
 (defconst org-clock-drawer-re
-  (concat "\\(" org-clock-drawer-start-re "\\)[^\000]*?\\("
+  (concat "\\(" org-clock-drawer-start-re "\\)\\(?:.\\|\n\\)*?\\("
 	  org-clock-drawer-end-re "\\)\n?")
   "Matches an entire clock drawer.")
 
@@ -661,14 +661,13 @@ An entry can be toggled between COMMENT and normal with
 ;;;; LaTeX Environments and Fragments
 
 (defconst org-latex-regexps
-  '(("begin" "^[ \t]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)[^\000]+?\\\\end{\\2}\\)" 1 t)
+  '(("begin" "^[ \t]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)\\(?:.\\|\n\\)+?\\\\end{\\2}\\)" 1 t)
     ;; ("$" "\\([ \t(]\\|^\\)\\(\\(\\([$]\\)\\([^ \t\n,.$].*?\\(\n.*?\\)\\{0,5\\}[^ \t\n,.$]\\)\\4\\)\\)\\([ \t.,?;:'\")]\\|$\\)" 2 nil)
-    ;; \000 in the following regex is needed for org-inside-LaTeX-fragment-p
-    ("$1" "\\([^$]\\|^\\)\\(\\$[^ \t\r\n,;.$]\\$\\)\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|\000\\|'\\|$\\)" 2 nil)
-    ("$"  "\\([^$]\\|^\\)\\(\\(\\$\\([^ \t\n,;.$][^$\n\r]*?\\(\n[^$\n\r]*?\\)\\{0,2\\}[^ \t\n,.$]\\)\\$\\)\\)\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|\000\\|'\\|$\\)" 2 nil)
-    ("\\(" "\\\\([^\000]*?\\\\)" 0 nil)
-    ("\\[" "\\\\\\[[^\000]*?\\\\\\]" 0 nil)
-    ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
+    ("$1" "\\([^$]\\|^\\)\\(\\$[^ \t\r\n,;.$]\\$\\)\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|'\\|$\\)" 2 nil)
+    ("$"  "\\([^$]\\|^\\)\\(\\(\\$\\([^ \t\n,;.$][^$\n\r]*?\\(\n[^$\n\r]*?\\)\\{0,2\\}[^ \t\n,.$]\\)\\$\\)\\)\\(\\s.\\|\\s-\\|\\s(\\|\\s)\\|\\s\"\\|'\\|$\\)" 2 nil)
+    ("\\(" "\\\\(\\(?:.\\|\n\\)*?\\\\)" 0 nil)
+    ("\\[" "\\\\\\[\\(?:.\\|\n\\)*?\\\\\\]" 0 nil)
+    ("$$" "\\$\\$\\(?:.\\|\n\\)*?\\$\\$" 0 nil))
   "Regular expressions for matching embedded LaTeX.")
 
 ;;;; Node Property

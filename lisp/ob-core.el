@@ -212,7 +212,7 @@ When matching, reference is stored in match group 1."
    ;; (4) header arguments
    "\\([^\n]*\\)\n"
    ;; (5) body
-   "\\([^\000]*?\n\\)??[ \t]*#\\+end_src")
+   "\\(\\(?:.\\|\n\\)*?\n\\)??[ \t]*#\\+end_src")
   "Regexp used to identify code blocks.")
 
 (defun org-babel--get-vars (params)

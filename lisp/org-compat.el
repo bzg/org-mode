@@ -925,7 +925,7 @@ an error.  Return a non-nil value when toggling is successful."
       (goto-char start)
       (while (and (< (point) end)
 		  (re-search-forward "^[ \t]*#\\+begin_?\
-\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_?\\1[ \t]*$" end t))
+\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\(\\(?:.\\|\n\\)+?\\)#\\+end_?\\1[ \t]*$" end t))
 	(save-excursion
 	  (save-match-data
             (goto-char (match-beginning 0))

@@ -337,7 +337,7 @@ Return output file name."
 	(when org-org-htmlized-css-url
 	  (goto-char (point-min))
 	  (and (re-search-forward
-		"<style type=\"text/css\">[^\000]*?\n[ \t]*</style>.*" nil t)
+		"<style type=\"text/css\">\\(?:.\\|\n\\)*?\n[ \t]*</style>.*" nil t)
 	       (replace-match
 		(format
 		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
