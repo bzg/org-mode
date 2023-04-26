@@ -3796,7 +3796,7 @@ Assume point is at the underscore."
   (save-excursion
     (unless (bolp) (backward-char))
     (when (looking-at org-match-substring-regexp)
-      (let ((bracketsp (match-beginning 4))
+      (let ((bracketsp (if (match-beginning 4) t nil))
 	    (begin (match-beginning 2))
 	    (contents-begin (or (match-beginning 4)
 				(match-beginning 3)))
@@ -3834,7 +3834,7 @@ Assume point is at the caret."
   (save-excursion
     (unless (bolp) (backward-char))
     (when (looking-at org-match-substring-regexp)
-      (let ((bracketsp (match-beginning 4))
+      (let ((bracketsp (if (match-beginning 4) t nil))
 	    (begin (match-beginning 2))
 	    (contents-begin (or (match-beginning 4)
 				(match-beginning 3)))
