@@ -5556,23 +5556,24 @@ cache during the synchronization get a new key generated with
 Such keys are stored inside the element property
 `:org-element--cache-sync-key'.  The property is a cons containing
 current `org-element--cache-sync-keys-value' and the element key."
-  (or (when (eq org-element--cache-sync-keys-value (car (org-element-property :org-element--cache-sync-key element)))
-        (cdr (org-element-property :org-element--cache-sync-key element)))
+  (or (when-let ((key-cons (org-element-property :org-element--cache-sync-key element)))
+        (when (eq org-element--cache-sync-keys-value (car key-cons))
+          (cdr key-cons)))
       (let* ((begin (org-element-property :begin element))
+             (type (org-element-type element))
 	     ;; Increase beginning position of items (respectively
 	     ;; table rows) by one, so the first item can get
 	     ;; a different key from its parent list (respectively
 	     ;; table).
-	     (key (if (memq (org-element-type element) '(item table-row))
-		      (1+ begin)
-                    ;; Decrease beginning position of sections by one,
-                    ;; so that the first element of the section get
-                    ;; different key from the parent section.
-                    (if (eq (org-element-type element) 'section)
-                        (1- begin)
-                      (if (eq (org-element-type element) 'org-data)
-                          (- begin 2)
-		        begin)))))
+	     (key
+              (cond
+               ((memq type '(item table-row)) (1+ begin))
+               ;; Decrease beginning position of sections by one,
+               ;; so that the first element of the section get
+               ;; different key from the parent section.
+               ((eq type 'section) (1- begin))
+               ((eq type 'org-data) (- begin 2))
+               (t begin))))
         (when org-element--cache-sync-requests
 	  (org-element-put-property
            element
@@ -5673,7 +5674,7 @@ position."
 	;; than B (A is longer).  Therefore, return nil.
 	(and (null a) b)))))
 
-(defun org-element--cache-compare (a b)
+(defsubst org-element--cache-compare (a b)
   "Non-nil when element A is located before element B."
   (org-element--cache-key-less-p (org-element--cache-key a) (org-element--cache-key b)))
 
