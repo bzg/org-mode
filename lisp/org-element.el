@@ -1374,7 +1374,7 @@ Assume point is at beginning of the inline task."
                    (looking-at org-element-comment-string))
 		 (goto-char (match-end 0))
                  (when (looking-at-p "\\(?:[ \t]\\|$\\)")
-                   (point))))
+                   t)))
 	   (title-start (prog1 (point)
                           (unless (or todo priority commentedp)
                             ;; Headline like "* :tag:"
