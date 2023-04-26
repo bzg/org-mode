@@ -1106,7 +1106,7 @@ Assume point is at beginning of the headline."
 		      (let (case-fold-search) (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
 		      (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")
-			     (match-string 1))))
+			     (match-string-no-properties 1))))
 	   (todo-type
 	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
 	   (priority (and (looking-at "\\[#.\\][ \t]*")
@@ -1124,7 +1124,7 @@ Assume point is at beginning of the headline."
 			(line-end-position)
 			'move)
 		   (goto-char (match-beginning 0))
-		   (org-split-string (match-string 1) ":")))
+		   (org-split-string (match-string-no-properties 1) ":")))
 	   (title-end (point))
 	   (raw-value (org-trim
 		       (buffer-substring-no-properties title-start title-end)))
@@ -1363,12 +1363,12 @@ Assume point is at beginning of the inline task."
 		      (let (case-fold-search) (looking-at org-todo-regexp))
 		      (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")
-			     (match-string 0))))
+			     (match-string-no-properties 0))))
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
 	   (priority (and (looking-at "\\[#.\\][ \t]*")
 			  (progn (goto-char (match-end 0))
-				 (aref (match-string 0) 2))))
+				 (aref (match-string-no-properties 0) 2))))
            (commentedp
 	    (and (let ((case-fold-search nil))
                    (looking-at org-element-comment-string))
@@ -1384,7 +1384,7 @@ Assume point is at beginning of the inline task."
 			(line-end-position)
 			'move)
 		   (goto-char (match-beginning 0))
-		   (org-split-string (match-string 1) ":")))
+		   (org-split-string (match-string-no-properties 1) ":")))
 	   (title-end (point))
 	   (raw-value (org-trim
 		       (buffer-substring-no-properties title-start title-end)))
@@ -1512,10 +1512,10 @@ Assume point is at the beginning of the item."
 			(cond
 			 ((not c) nil)
 			 ((string-match "[A-Za-z]" c)
-			  (- (string-to-char (upcase (match-string 0 c)))
+			  (- (string-to-char (upcase (match-string-no-properties 0 c)))
 			     64))
 			 ((string-match "[0-9]+" c)
-			  (string-to-number (match-string 0 c)))))))
+			  (string-to-number (match-string-no-properties 0 c)))))))
 	   (end (progn (goto-char (nth 6 (assq (point) struct)))
 		       (if (bolp) (point) (line-beginning-position 2))))
 	   (pre-blank 0)
@@ -2241,7 +2241,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		 (label-fmt
 		  (and switches
 		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-		       (match-string 1 switches)))
+		       (match-string-no-properties 1 switches)))
 		 ;; Standard block parsing.
 		 (begin (car affiliated))
 		 (post-affiliated (point))
@@ -2746,7 +2746,7 @@ Assume point is at the beginning of the block."
 		 (label-fmt
 		  (and switches
 		       (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-		       (match-string 1 switches)))
+		       (match-string-no-properties 1 switches)))
 		 ;; Should labels be retained in (or stripped from)
 		 ;; source blocks?
 		 (retain-labels
@@ -3549,7 +3549,7 @@ Assume point is at the beginning of the link."
 	  (setq path raw-link))
 	 ;; Explicit type (http, irc, bbdb...).
 	 ((string-match org-link-types-re raw-link)
-	  (setq type (match-string 1 raw-link))
+	  (setq type (match-string-no-properties 1 raw-link))
 	  (setq path (substring raw-link (match-end 0))))
 	 ;; Code-ref type: PATH is the name of the reference.
 	 ((and (string-match-p "\\`(" raw-link)
@@ -3595,10 +3595,10 @@ Assume point is at the beginning of the link."
       ;; Special "file"-type link processing.  Extract opening
       ;; application and search option, if any.  Also normalize URI.
       (when (string-match "\\`file\\(?:\\+\\(.+\\)\\)?\\'" type)
-	(setq application (match-string 1 type))
+	(setq application (match-string-no-properties 1 type))
 	(setq type "file")
 	(when (string-match "::\\(.*\\)\\'" path)
-	  (setq search-option (match-string 1 path))
+	  (setq search-option (match-string-no-properties 1 path))
 	  (setq path (replace-match "" nil nil path)))
 	(setq path (replace-regexp-in-string "\\`///*\\(.:\\)?/" "\\1/" path)))
       ;; Translate link, if `org-link-translation-function' is set.
@@ -3945,7 +3945,7 @@ Assume point is at the beginning of the timestamp."
                                     "\\)\\)?"))
 		(match-string-no-properties 0)))
 	     (date-start (match-string-no-properties 1))
-	     (date-end (match-string 3))
+	     (date-end (match-string-no-properties 3))
 	     (diaryp (match-beginning 2))
 	     (post-blank (progn (goto-char (match-end 0))
 				(skip-chars-forward " \t")))
