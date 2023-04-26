@@ -759,8 +759,9 @@ COLLECTION is the plist holding data collection."
   "Write CONTAINER in COLLECTION."
   `(let* ((c (org-persist--normalize-container ,container))
           (write-func-symbol (intern (format "org-persist-write:%s" (car c)))))
-     (setf ,collection (plist-put ,collection :last-access (float-time)))
-     (setf ,collection (plist-put ,collection :last-access-hr (format-time-string "%FT%T%z" (float-time))))
+     (unless (plist-get ,collection :last-access)
+       (setf ,collection (plist-put ,collection :last-access (float-time)))
+       (setf ,collection (plist-put ,collection :last-access-hr (format-time-string "%FT%T%z" (float-time)))))
      (unless (fboundp write-func-symbol)
        (error "org-persist: Write function %s not defined"
               write-func-symbol))
