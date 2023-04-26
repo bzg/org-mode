@@ -1858,14 +1858,15 @@ containing `:begin', `:end', `:contents-begin', `contents-end',
     ;; Beginning of section is the beginning of the first non-blank
     ;; line after previous headline.
     (let* ((begin (point))
-	   (end (progn (org-with-limited-levels (outline-next-heading))
-		       (point)))
+	   (end
+            (if (re-search-forward (org-get-limited-outline-regexp t) nil 'move)
+                (goto-char (match-beginning 0))
+	      (point)))
 	   (pos-before-blank (progn (skip-chars-backward " \r\t\n")
 				    (line-beginning-position 2)))
            (robust-end (when (> (- pos-before-blank 2) begin)
                          (- pos-before-blank 2)))
-           (robust-begin (when robust-end begin))
-           )
+           (robust-begin (when robust-end begin)))
       (list 'section
 	    (list :begin begin
 		  :end end
