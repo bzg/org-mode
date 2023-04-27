@@ -18602,6 +18602,10 @@ block from point."
 	      (throw 'exit n)))))
       nil)))
 
+;; Defined in org-agenda.el
+(defvar org-agenda-restrict)
+(defvar org-agenda-restrict-begin)
+(defvar org-agenda-restrict-end)
 (defun org-occur-in-agenda-files (regexp &optional _nlines)
   "Call `multi-occur' with buffers for all agenda files."
   (interactive "sOrg-files matching: ")
