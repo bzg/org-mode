@@ -4526,7 +4526,7 @@ pattern (TYPE PROPERTIES CONTENTS), where :
   exhaustive list of such symbols.  One can retrieve it with
   `org-element-type' function.
 
-  PROPERTIES is the list of attributes attached to the element or
+  PROPERTIES is the list of properties attached to the element or
   object, as a plist.  Although most of them are specific to the
   element or object type, all types share `:begin', `:end',
   `:post-blank' and `:parent' properties, which respectively
