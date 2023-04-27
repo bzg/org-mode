@@ -4411,8 +4411,7 @@ directory."
             (let ((value (org-element-property :value element)))
               (pcase (org-element-property :key element)
 		("SETUPFILE"
-		 (when (and (org-string-nw-p value)
-			    (not buffer-read-only)) ;FIXME: bug in Gnus?
+		 (when (org-string-nw-p value)
 		   (let* ((uri (org-strip-quotes value))
 			  (uri-is-url (org-url-p uri))
 			  (uri (if uri-is-url
