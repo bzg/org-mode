@@ -4568,6 +4568,9 @@ one argument: the element or object itself.
 
 When TYPES is t, call FUN for all the elements and objects.
 
+FUN can also be a lisp form.  The form will be evaluated as function
+with symbol `node' bound to the current node.
+
 When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, elements of the parse tree
 \\(compared with `eq') not exportable according to `:ignore-list'

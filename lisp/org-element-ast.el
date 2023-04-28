@@ -829,6 +829,9 @@ It has to accept one argument: the node itself.
 
 When TYPES is t, call FUN for all the node types.
 
+FUN can also be a Lisp form.  The form will be evaluated as function
+with symbol `node' bound to the current node.
+
 When optional argument IGNORE is non-nil, it should be a list holding
 nodes to be skipped.  In that case, the listed nodes and their
 contents will be skipped.
@@ -864,6 +867,7 @@ Nil values returned from FUN do not appear in the results."
                     (_ (list types))))
 	   (no-recursion (if (listp no-recursion) no-recursion
 			   (list no-recursion)))
+           (fun (if (functionp fun) fun `(lambda (node) ,fun)))
 	   --acc)
       (letrec ((--walk-tree
 	        (lambda (--data)
