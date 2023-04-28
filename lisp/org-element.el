@@ -497,15 +497,16 @@ past the brackets."
 ;; There is `org-element-put-property', `org-element-set-contents'.
 ;; These low-level functions are useful to build a parse tree.
 ;;
-;; `org-element-adopt-elements', `org-element-set',
-;; `org-element-extract' and `org-element-insert-before' are
-;; high-level functions useful to modify a parse tree.
+;; `org-element-adopt', `org-element-set', `org-element-extract' and
+;; `org-element-insert-before' are high-level functions useful to
+;; modify a parse tree.
 ;;
 ;; `org-element-secondary-p' is a predicate used to know if a given
 ;; object belongs to a secondary string.  `org-element-class' tells if
 ;; some parsed data is an element or an object, handling pseudo
 ;; elements and objects.  `org-element-copy' returns an element or
-;; object, stripping its parent property in the process.
+;; object, stripping its parent property and resolving deferred values
+;; in the process.
 
 (require 'org-element-ast)
 
@@ -619,9 +620,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `center-block' and CDR is a plist
-containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `center-block' type containing `:begin',
+`:end', `:contents-begin', `:contents-end', `:post-blank' and
+`:post-affiliated' properties.
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
@@ -670,9 +671,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `drawer' and CDR is a plist containing
-`:drawer-name', `:begin', `:end', `:contents-begin',
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `drawer' type containing `:drawer-name',
+`:begin', `:end', `:contents-begin', `:contents-end', `:post-blank'
+and `:post-affiliated' properties.
 
 Assume point is at beginning of drawer."
   (let ((case-fold-search t))
@@ -729,10 +730,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `dynamic-block' and CDR is a plist
-containing `:block-name', `:begin', `:end', `:contents-begin',
-`:contents-end', `:arguments', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `dynamic-block' type containing
+`:block-name', `:begin', `:end', `:contents-begin', `:contents-end',
+`:arguments', `:post-blank' and `:post-affiliated' properties.
 
 Assume point is at beginning of dynamic block."
   (let ((case-fold-search t))
@@ -797,10 +797,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `footnote-definition' and CDR is
-a plist containing `:label', `:begin' `:end', `:contents-begin',
-`:contents-end', `:pre-blank',`:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `footnote-definition' type containing
+`:label', `:begin' `:end', `:contents-begin', `:contents-end',
+`:pre-blank',`:post-blank' and `:post-affiliated' properties.
 
 Assume point is at the beginning of the footnote definition."
   (save-excursion
@@ -995,13 +994,12 @@ Return value is a plist."
 (defun org-element-headline-parser (&optional _ raw-secondary-p)
   "Parse a headline.
 
-Return a list whose CAR is `headline' and CDR is a plist
-containing `:raw-value', `:title', `:begin', `:end',
-`:pre-blank', `:contents-begin' and `:contents-end', `:level',
-`:priority', `:tags', `:todo-keyword', `:todo-type', `:scheduled',
-`:deadline', `:closed', `:archivedp', `:commentedp'
-`:footnote-section-p', `:post-blank' and `:post-affiliated'
-keywords.
+Return a new syntax node of `headline' type containing `:raw-value',
+`:title', `:begin', `:end', `:pre-blank', `:contents-begin' and
+`:contents-end', `:level', `:priority', `:tags', `:todo-keyword',
+`:todo-type', `:scheduled', `:deadline', `:closed', `:archivedp',
+`:commentedp' `:footnote-section-p', `:post-blank' and
+`:post-affiliated' properties.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -1179,7 +1177,11 @@ parser (e.g. `:end' and :END:).  Return value is a plist."
 
 (defvar org-element-org-data-parser--recurse nil)
 (defun org-element-org-data-parser (&optional _)
-  "Parse org-data."
+  "Parse org-data.
+
+Return a new syntax node of `org-data' type containing `:begin',
+`:contents-begin', `:contents-end', `:end', `:post-blank',
+`:post-affiliated', and `:path' properties."
   (org-with-wide-buffer
    (let* ((begin 1)
           (contents-begin (progn
@@ -1255,12 +1257,11 @@ CONTENTS is the contents of the element."
 (defun org-element-inlinetask-parser (limit &optional raw-secondary-p)
   "Parse an inline task.
 
-Return a list whose CAR is `inlinetask' and CDR is a plist
-containing `:title', `:begin', `:end', `:pre-blank',
-`:contents-begin' and `:contents-end', `:level', `:priority',
-`:raw-value', `:tags', `:todo-keyword', `:todo-type',
-`:scheduled', `:deadline', `:closed', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `inlinetask' type containing `:title',
+`:begin', `:end', `:pre-blank', `:contents-begin' and `:contents-end',
+`:level', `:priority', `:raw-value', `:tags', `:todo-keyword',
+`:todo-type', `:scheduled', `:deadline', `:closed', `:post-blank' and
+`:post-affiliated' properties.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -1414,10 +1415,10 @@ CONTENTS is the contents of inlinetask."
 
 STRUCT is the structure of the plain list.
 
-Return a list whose CAR is `item' and CDR is a plist containing
-`:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag', `:structure', `:pre-blank',
-`:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `item' type containing `:bullet',
+`:begin', `:end', `:contents-begin', `:contents-end', `:checkbox',
+`:counter', `:tag', `:structure', `:pre-blank', `:post-blank' and
+`:post-affiliated' properties.
 
 When optional argument RAW-SECONDARY-P is non-nil, item's tag, if
 any, will not be parsed as a secondary string, but as a plain
@@ -1631,10 +1632,9 @@ keyword and CDR is a plist of affiliated keywords along with
 their value.  STRUCTURE is the structure of the plain list being
 parsed.
 
-Return a list whose CAR is `plain-list' and CDR is a plist
-containing `:type', `:begin', `:end', `:contents-begin' and
-`:contents-end', `:structure', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `plain-list' type containing `:type',
+`:begin', `:end', `:contents-begin' and `:contents-end', `:structure',
+`:post-blank' and `:post-affiliated' properties.
 
 Assume point is at the beginning of the list."
   (save-excursion
@@ -1685,9 +1685,9 @@ CONTENTS is the contents of the element."
 
 LIMIT bounds the search.
 
-Return a list whose car is `property-drawer' and cdr is a plist
-containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `property-drawer' type containing
+`:begin', `:end', `:contents-begin', `:contents-end', `:post-blank'
+and `:post-affiliated' properties.
 
 Assume point is at the beginning of the property drawer."
   (save-excursion
@@ -1725,9 +1725,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `quote-block' and CDR is a plist
-containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `quote-block' type containing `:begin',
+`:end', `:contents-begin', `:contents-end', `:post-blank' and
+`:post-affiliated' properties.
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
@@ -1771,9 +1771,9 @@ CONTENTS is the contents of the element."
 (defun org-element-section-parser (_)
   "Parse a section.
 
-Return a list whose CAR is `section' and CDR is a plist
-containing `:begin', `:end', `:contents-begin', `contents-end',
-`:post-blank' and `:post-affiliated' keywords."
+Return a new syntax node of `section' type containing `:begin',
+`:end', `:contents-begin', `contents-end', `:post-blank' and
+`:post-affiliated' properties."
   (save-excursion
     ;; Beginning of section is the beginning of the first non-blank
     ;; line after previous headline.
@@ -1814,10 +1814,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `special-block' and CDR is a plist
-containing `:type', `:parameters', `:begin', `:end',
-`:contents-begin', `:contents-end', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `special-block' type containing `:type',
+`:parameters', `:begin', `:end', `:contents-begin', `:contents-end',
+`:post-blank' and `:post-affiliated' properties.
 
 Assume point is at the beginning of the block."
   (let* ((case-fold-search t)
@@ -1891,10 +1890,9 @@ the buffer position at the beginning of the first affiliated
 keyword and cdr is a plist of affiliated keywords along with
 their value.
 
-Return a list whose car is `babel-call' and cdr is a plist
-containing `:call', `:inside-header', `:arguments',
-`:end-header', `:begin', `:end', `:value', `:post-blank' and
-`:post-affiliated' as keywords."
+Return a new syntax node of `babel-call' type containing `:call',
+`:inside-header', `:arguments', `:end-header', `:begin', `:end',
+`:value', `:post-blank' and `:post-affiliated' as properties."
   (save-excursion
     (let* ((begin (car affiliated))
 	   (post-affiliated (point))
@@ -1951,9 +1949,9 @@ containing `:call', `:inside-header', `:arguments',
 
 LIMIT bounds the search.
 
-Return a list whose CAR is `clock' and CDR is a plist containing
-`:status', `:value', `:time', `:begin', `:end', `:post-blank' and
-`:post-affiliated' as keywords."
+Return a new syntax node of `clock' type containing `:status',
+`:value', `:time', `:begin', `:end', `:post-blank' and
+`:post-affiliated' as properties."
   (save-excursion
     (let* ((case-fold-search nil)
 	   (begin (point))
@@ -2001,9 +1999,8 @@ Return a list whose CAR is `clock' and CDR is a plist containing
 
 LIMIT bounds the search.
 
-Return a list whose CAR is `comment' and CDR is a plist
-containing `:begin', `:end', `:value', `:post-blank',
-`:post-affiliated' keywords.
+Return a new syntax node of `comment' type containing `:begin',
+`:end', `:value', `:post-blank', `:post-affiliated' properties.
 
 Assume point is at comment beginning."
   (save-excursion
@@ -2052,9 +2049,8 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `comment-block' and CDR is a plist
-containing `:begin', `:end', `:value', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `comment-block' type containing `:begin',
+`:end', `:value', `:post-blank' and `:post-affiliated' properties.
 
 Assume point is at comment block beginning."
   (let ((case-fold-search t))
@@ -2105,9 +2101,8 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `diary-sexp' and CDR is a plist
-containing `:begin', `:end', `:value', `:post-blank' and
-`:post-affiliated' keywords."
+Return a new syntax node of `diary-sexp' type containing `:begin',
+`:end', `:value', `:post-blank' and `:post-affiliated' properties."
   (save-excursion
     (let ((begin (car affiliated))
 	  (post-affiliated (point))
@@ -2141,10 +2136,10 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `example-block' and CDR is a plist
-containing `:begin', `:end', `:number-lines', `:preserve-indent',
-`:retain-labels', `:use-labels', `:label-fmt', `:switches',
-`:value', `:post-blank' and `:post-affiliated' keywords."
+Return a new syntax node of `example-block' type containing `:begin',
+`:end', `:number-lines', `:preserve-indent', `:retain-labels',
+`:use-labels', `:label-fmt', `:switches', `:value', `:post-blank' and
+`:post-affiliated' properties."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE[ \t]*$" limit t)))
@@ -2248,9 +2243,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `export-block' and CDR is a plist
-containing `:begin', `:end', `:type', `:value', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `export-block' type containing `:begin',
+`:end', `:type', `:value', `:post-blank' and `:post-affiliated'
+properties.
 
 Assume point is at export-block beginning."
   (let* ((case-fold-search t))
@@ -2306,9 +2301,8 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `fixed-width' and CDR is a plist
-containing `:begin', `:end', `:value', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `fixed-width' type containing `:begin',
+`:end', `:value', `:post-blank' and `:post-affiliated' properties.
 
 Assume point is at the beginning of the fixed-width area."
   (save-excursion
@@ -2353,9 +2347,8 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `horizontal-rule' and CDR is a plist
-containing `:begin', `:end', `:post-blank' and `:post-affiliated'
-keywords."
+Return a new syntax node of `horizontal-rule' type containing
+`:begin', `:end', `:post-blank' and `:post-affiliated' properties."
   (save-excursion
     (let ((begin (car affiliated))
 	  (post-affiliated (point))
@@ -2386,9 +2379,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is a normalized `keyword' (uppercase) and
-CDR is a plist containing `:key', `:value', `:begin', `:end',
-`:post-blank' and `:post-affiliated' keywords."
+Return a new syntax node of `keyword' type containing `:key',
+`:value', `:begin', `:end', `:post-blank' and `:post-affiliated'
+properties."
   (save-excursion
     ;; An orphaned affiliated keyword is considered as a regular
     ;; keyword.  In this case AFFILIATED is nil, so we take care of
@@ -2443,9 +2436,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `latex-environment' and CDR is a plist
-containing `:begin', `:end', `:value', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `latex-environment' type containing
+`:begin', `:end', `:value', `:post-blank' and `:post-affiliated'
+properties.
 
 Assume point is at the beginning of the latex environment."
   (save-excursion
@@ -2488,9 +2481,9 @@ Assume point is at the beginning of the latex environment."
 
 LIMIT bounds the search.
 
-Return a list whose CAR is `node-property' and CDR is a plist
-containing `:key', `:value', `:begin', `:end', `:post-blank' and
-`:post-affiliated' keywords."
+Return a new syntax node of `node-property' type containing `:key',
+`:value', `:begin', `:end', `:post-blank' and `:post-affiliated'
+properties."
   (looking-at org-property-re)
   (let ((case-fold-search t)
 	(begin (point))
@@ -2528,9 +2521,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `paragraph' and CDR is a plist
-containing `:begin', `:end', `:contents-begin' and
-`:contents-end', `:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `paragraph' type containing `:begin',
+`:end', `:contents-begin' and `:contents-end', `:post-blank' and
+`:post-affiliated' properties.
 
 Assume point is at the beginning of the paragraph."
   (save-excursion
@@ -2601,9 +2594,9 @@ CONTENTS is the contents of the element."
 
 LIMIT bounds the search.
 
-Return a list whose CAR is `planning' and CDR is a plist
-containing `:closed', `:deadline', `:scheduled', `:begin',
-`:end', `:post-blank' and `:post-affiliated' keywords."
+Return a new syntax node of `planning' type containing `:closed',
+`:deadline', `:scheduled', `:begin', `:end', `:post-blank' and
+`:post-affiliated' properties."
   (save-excursion
     (let* ((case-fold-search nil)
 	   (begin (point))
@@ -2663,11 +2656,10 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `src-block' and CDR is a plist
-containing `:language', `:switches', `:parameters', `:begin',
-`:end', `:number-lines', `:retain-labels', `:use-labels',
-`:label-fmt', `:preserve-indent', `:value', `:post-blank' and
-`:post-affiliated' keywords.
+Return a new syntax node of `src-block' type containing `:language',
+`:switches', `:parameters', `:begin', `:end', `:number-lines',
+`:retain-labels', `:use-labels', `:label-fmt', `:preserve-indent',
+`:value', `:post-blank' and `:post-affiliated' properties.
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
@@ -2791,10 +2783,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `table' and CDR is a plist containing
-`:begin', `:end', `:tblfm', `:type', `:contents-begin',
-`:contents-end', `:value', `:post-blank' and `:post-affiliated'
-keywords.
+Return a new syntax node of `table' type containing `:begin', `:end',
+`:tblfm', `:type', `:contents-begin', `:contents-end', `:value',
+`:post-blank' and `:post-affiliated' properties.
 
 Assume point is at the beginning of the table."
   (save-excursion
@@ -2855,9 +2846,9 @@ CONTENTS is a string, if table's type is `org', or nil."
 (defun org-element-table-row-parser (_)
   "Parse table row at point.
 
-Return a list whose CAR is `table-row' and CDR is a plist
-containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:type', `:post-blank' and `:post-affiliated' keywords."
+Return a new syntax node of `table-row' type containing `:begin',
+`:end', `:contents-begin', `:contents-end', `:type', `:post-blank' and
+`:post-affiliated' properties."
   (save-excursion
     (let* ((type (if (looking-at "^[ \t]*|-") 'rule 'standard))
 	   (begin (point))
@@ -2897,9 +2888,9 @@ the buffer position at the beginning of the first affiliated
 keyword and CDR is a plist of affiliated keywords along with
 their value.
 
-Return a list whose CAR is `verse-block' and CDR is a plist
-containing `:begin', `:end', `:contents-begin', `:contents-end',
-`:post-blank' and `:post-affiliated' keywords.
+Return a new syntax node of `verse-block' type containing `:begin',
+`:end', `:contents-begin', `:contents-end', `:post-blank' and
+`:post-affiliated' properties.
 
 Assume point is at beginning of the block."
   (let ((case-fold-search t))
@@ -3002,10 +2993,9 @@ Assume point is at first MARK."
 (defun org-element-bold-parser ()
   "Parse bold object at point, if any.
 
-When at a bold object, return a list whose car is `bold' and cdr
-is a plist with `:begin', `:end', `:contents-begin' and
-`:contents-end' and `:post-blank' keywords.  Otherwise, return
-nil.
+When at a bold object, return a new syntax node `bold' type containing
+`:begin', `:end', `:contents-begin', `:contents-end', and
+`:post-blank' properties.  Otherwise, return nil.
 
 Assume point is at the first star marker."
   (org-element--parse-generic-emphasis "*" 'bold))
@@ -3021,10 +3011,10 @@ CONTENTS is the contents of the object."
 (defun org-element-citation-parser ()
   "Parse citation object at point, if any.
 
-When at a citation object, return a list whose car is `citation'
-and cdr is a plist with `:style', `:prefix', `:suffix', `:begin',
-`:end', `:contents-begin', `:contents-end', and `:post-blank'
-keywords.  Otherwise, return nil.
+When at a citation object, return a new syntax node of `citation' type
+containing `:style', `:prefix', `:suffix', `:begin', `:end',
+`:contents-begin', `:contents-end', and `:post-blank' properties.
+Otherwise, return nil.
 
 Assume point is at the beginning of the citation."
   (when (looking-at org-element-citation-prefix-re)
@@ -3103,9 +3093,9 @@ CONTENTS is the contents of the object, as a string."
 (defun org-element-citation-reference-parser ()
   "Parse citation reference object at point, if any.
 
-When at a reference, return a list whose car is
-`citation-reference', and cdr is a plist with `:key',
-`:prefix', `:suffix', `:begin', `:end', and `:post-blank' keywords.
+When at a reference, return a new syntax node of `citation-reference'
+type containing `:key', `:prefix', `:suffix', `:begin', `:end', and
+`:post-blank' properties.
 
 Assume point is at the beginning of the reference."
   (save-excursion
@@ -3154,9 +3144,9 @@ Assume point is at the beginning of the reference."
 (defun org-element-code-parser ()
   "Parse code object at point, if any.
 
-When at a code object, return a list whose car is `code' and cdr
-is a plist with `:value', `:begin', `:end' and `:post-blank'
-keywords.  Otherwise, return nil.
+When at a code object, return a new syntax node of `code' type
+containing `:value', `:begin', `:end' and `:post-blank' properties.
+Otherwise, return nil.
 
 Assume point is at the first tilde marker."
   (org-element--parse-generic-emphasis "~" 'code))
@@ -3171,10 +3161,10 @@ Assume point is at the first tilde marker."
 (defun org-element-entity-parser ()
   "Parse entity at point, if any.
 
-When at an entity, return a list whose car is `entity' and cdr
-a plist with `:begin', `:end', `:latex', `:latex-math-p',
-`:html', `:latin1', `:utf-8', `:ascii', `:use-brackets-p' and
-`:post-blank' as keywords.  Otherwise, return nil.
+When at an entity, return a new syntax node of `entity' type
+containing `:begin', `:end', `:latex', `:latex-math-p', `:html',
+`:latin1', `:utf-8', `:ascii', `:use-brackets-p' and `:post-blank' as
+properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the entity."
   (catch 'no-object
@@ -3214,10 +3204,9 @@ Assume point is at the beginning of the entity."
 (defun org-element-export-snippet-parser ()
   "Parse export snippet at point.
 
-When at an export snippet, return a list whose car is
-`export-snippet' and cdr a plist with `:begin', `:end',
-`:back-end', `:value' and `:post-blank' as keywords.  Otherwise,
-return nil.
+When at an export snippet, return a new syntax node of
+`export-snippet' type containing `:begin', `:end', `:back-end',
+`:value' and `:post-blank' as properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the snippet."
   (save-excursion
@@ -3258,10 +3247,10 @@ Assume point is at the beginning of the snippet."
 (defun org-element-footnote-reference-parser ()
   "Parse footnote reference at point, if any.
 
-When at a footnote reference, return a list whose car is
-`footnote-reference' and cdr a plist with `:label', `:type',
-`:begin', `:end', `:contents-begin', `:contents-end' and
-`:post-blank' as keywords.  Otherwise, return nil."
+When at a footnote reference, return a new syntax node of
+`footnote-reference' type containing `:label', `:type', `:begin',
+`:end', `:contents-begin', `:contents-end' and `:post-blank' as
+properties.  Otherwise, return nil."
   (when (looking-at org-footnote-re)
     (let ((closing (with-syntax-table org-element--pair-square-table
 		     (ignore-errors (scan-lists (point) 1 0)))))
@@ -3299,10 +3288,10 @@ CONTENTS is its definition, when inline, or nil."
 (defun org-element-inline-babel-call-parser ()
   "Parse inline babel call at point, if any.
 
-When at an inline babel call, return a list whose car is
-`inline-babel-call' and cdr a plist with `:call',
-`:inside-header', `:arguments', `:end-header', `:begin', `:end',
-`:value' and `:post-blank' as keywords.  Otherwise, return nil.
+When at an inline babel call, return a new syntax node of
+`inline-babel-call' type containing `:call', `:inside-header',
+`:arguments', `:end-header', `:begin', `:end', `:value' and
+`:post-blank' as properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the babel call."
   (save-excursion
@@ -3358,10 +3347,10 @@ Assume point is at the beginning of the babel call."
 (defun org-element-inline-src-block-parser ()
   "Parse inline source block at point, if any.
 
-When at an inline source block, return a list whose car is
-`inline-src-block' and cdr a plist with `:begin', `:end',
-`:language', `:value', `:parameters' and `:post-blank' as
-keywords.  Otherwise, return nil.
+When at an inline source block, return a new syntax node of
+`inline-src-block' type containing `:begin', `:end', `:language',
+`:value', `:parameters' and `:post-blank' as properties.  Otherwise,
+return nil.
 
 Assume point is at the beginning of the inline source block."
   (save-excursion
@@ -3403,10 +3392,9 @@ Assume point is at the beginning of the inline source block."
 (defun org-element-italic-parser ()
   "Parse italic object at point, if any.
 
-When at an italic object, return a list whose car is `italic' and
-cdr is a plist with `:begin', `:end', `:contents-begin' and
-`:contents-end' and `:post-blank' keywords.  Otherwise, return
-nil.
+When at an italic object, return a new syntax node of `italic' type
+containing `:begin', `:end', `:contents-begin' and `:contents-end' and
+`:post-blank' properties.  Otherwise, return nil.
 
 Assume point is at the first slash marker."
   (org-element--parse-generic-emphasis "/" 'italic))
@@ -3422,9 +3410,9 @@ CONTENTS is the contents of the object."
 (defun org-element-latex-fragment-parser ()
   "Parse LaTeX fragment at point, if any.
 
-When at a LaTeX fragment, return a list whose car is
-`latex-fragment' and cdr a plist with `:value', `:begin', `:end',
-and `:post-blank' as keywords.  Otherwise, return nil.
+When at a LaTeX fragment, return a new syntax node of `latex-fragment'
+type containing `:value', `:begin', `:end', and `:post-blank' as
+properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the LaTeX fragment."
   (catch 'no-object
@@ -3477,9 +3465,9 @@ Assume point is at the beginning of the LaTeX fragment."
 (defun org-element-line-break-parser ()
   "Parse line break at point, if any.
 
-When at a line break, return a list whose car is `line-break',
-and cdr a plist with `:begin', `:end' and `:post-blank' keywords.
-Otherwise, return nil.
+When at a line break, return a new syntax node of `line-break' type
+containing `:begin', `:end' and `:post-blank' properties.  Otherwise,
+return nil.
 
 Assume point is at the beginning of the line break."
   (when (and (looking-at-p "\\\\\\\\[ \t]*$")
@@ -3500,11 +3488,10 @@ Assume point is at the beginning of the line break."
 (defun org-element-link-parser ()
   "Parse link at point, if any.
 
-When at a link, return a list whose car is `link' and cdr a plist
-with `:type', `:path', `:format', `:raw-link', `:application',
-`:search-option', `:begin', `:end', `:contents-begin',
-`:contents-end' and `:post-blank' as keywords.  Otherwise, return
-nil.
+When at a link, return a new syntax node of `link' type containing
+`:type', `:path', `:format', `:raw-link', `:application',
+`:search-option', `:begin', `:end', `:contents-begin', `:contents-end'
+and `:post-blank' as properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the link."
   (catch 'no-object
@@ -3672,9 +3659,9 @@ CONTENTS is the contents of the object, or nil."
 (defun org-element-macro-parser ()
   "Parse macro at point, if any.
 
-When at a macro, return a list whose car is `macro' and cdr
-a plist with `:key', `:args', `:begin', `:end', `:value' and
-`:post-blank' as keywords.  Otherwise, return nil.
+When at a macro, return a new syntax node of `macro' type containing
+`:key', `:args', `:begin', `:end', `:value' and `:post-blank' as
+properties.  Otherwise, return nil.
 
 Assume point is at the macro."
   (save-excursion
@@ -3714,10 +3701,9 @@ Assume point is at the macro."
 (defun org-element-radio-target-parser ()
   "Parse radio target at point, if any.
 
-When at a radio target, return a list whose car is `radio-target'
-and cdr a plist with `:begin', `:end', `:contents-begin',
-`:contents-end', `:value' and `:post-blank' as keywords.
-Otherwise, return nil.
+When at a radio target, return a new syntax node of `radio-target'
+type containing `:begin', `:end', `:contents-begin', `:contents-end',
+`:value' and `:post-blank' as properties.  Otherwise, return nil.
 
 Assume point is at the radio target."
   (save-excursion
@@ -3749,9 +3735,9 @@ CONTENTS is the contents of the object."
 (defun org-element-statistics-cookie-parser ()
   "Parse statistics cookie at point, if any.
 
-When at a statistics cookie, return a list whose car is
-`statistics-cookie', and cdr a plist with `:begin', `:end',
-`:value' and `:post-blank' keywords.  Otherwise, return nil.
+When at a statistics cookie, return a new syntax node of
+`statistics-cookie' type containing `:begin', `:end', `:value' and
+`:post-blank' properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the statistics-cookie."
   (save-excursion
@@ -3779,10 +3765,10 @@ Assume point is at the beginning of the statistics-cookie."
 (defun org-element-strike-through-parser ()
   "Parse strike-through object at point, if any.
 
-When at a strike-through object, return a list whose car is
-`strike-through' and cdr is a plist with `:begin', `:end',
-`:contents-begin' and `:contents-end' and `:post-blank' keywords.
-Otherwise, return nil.
+When at a strike-through object, return a new syntax node of
+`strike-through' type containing `:begin', `:end', `:contents-begin'
+and `:contents-end' and `:post-blank' properties.  Otherwise, return
+nil.
 
 Assume point is at the first plus sign marker."
   (org-element--parse-generic-emphasis "+" 'strike-through))
@@ -3798,10 +3784,10 @@ CONTENTS is the contents of the object."
 (defun org-element-subscript-parser ()
   "Parse subscript at point, if any.
 
-When at a subscript object, return a list whose car is
-`subscript' and cdr a plist with `:begin', `:end',
-`:contents-begin', `:contents-end', `:use-brackets-p' and
-`:post-blank' as keywords.  Otherwise, return nil.
+When at a subscript object, return a new syntax node of `subscript'
+type containing `:begin', `:end', `:contents-begin', `:contents-end',
+`:use-brackets-p' and `:post-blank' as properties.  Otherwise, return
+nil.
 
 Assume point is at the underscore."
   (save-excursion
@@ -3837,10 +3823,10 @@ CONTENTS is the contents of the object."
 (defun org-element-superscript-parser ()
   "Parse superscript at point, if any.
 
-When at a superscript object, return a list whose car is
-`superscript' and cdr a plist with `:begin', `:end',
-`:contents-begin', `:contents-end', `:use-brackets-p' and
-`:post-blank' as keywords.  Otherwise, return nil.
+When at a superscript object, return a new syntax node of
+`superscript' type containing `:begin', `:end', `:contents-begin',
+`:contents-end', `:use-brackets-p' and `:post-blank' as properties.
+Otherwise, return nil.
 
 Assume point is at the caret."
   (save-excursion
@@ -3875,9 +3861,9 @@ CONTENTS is the contents of the object."
 
 (defun org-element-table-cell-parser ()
   "Parse table cell at point.
-Return a list whose car is `table-cell' and cdr is a plist
-containing `:begin', `:end', `:contents-begin', `:contents-end'
-and `:post-blank' keywords."
+Return a new syntax node of `table-cell' type containing `:begin',
+`:end', `:contents-begin', `:contents-end' and `:post-blank'
+properties."
   (looking-at "[ \t]*\\(.*?\\)[ \t]*\\(?:|\\|$\\)")
   (let* ((begin (match-beginning 0))
 	 (end (match-end 0))
@@ -3902,9 +3888,9 @@ CONTENTS is the contents of the cell, or nil."
 (defun org-element-target-parser ()
   "Parse target at point, if any.
 
-When at a target, return a list whose car is `target' and cdr
-a plist with `:begin', `:end', `:value' and `:post-blank' as
-keywords.  Otherwise, return nil.
+When at a target, return a new syntax node of `target' type containing
+`:begin', `:end', `:value' and `:post-blank' as properties.
+Otherwise, return nil.
 
 Assume point is at the target."
   (save-excursion
@@ -3939,14 +3925,13 @@ Assume point is at the target."
 (defun org-element-timestamp-parser ()
   "Parse time stamp at point, if any.
 
-When at a time stamp, return a list whose car is `timestamp', and
-cdr a plist with `:type', `:raw-value', `:year-start',
-`:month-start', `:day-start', `:hour-start', `:minute-start',
-`:year-end', `:month-end', `:day-end', `:hour-end',
-`:minute-end', `:repeater-type', `:repeater-value',
-`:repeater-unit', `:warning-type', `:warning-value',
-`:warning-unit', `:begin', `:end' and `:post-blank' keywords.
-Otherwise, return nil.
+When at a time stamp, return a new syntax node of `timestamp' type
+containing `:type', `:raw-value', `:year-start', `:month-start',
+`:day-start', `:hour-start', `:minute-start', `:year-end',
+`:month-end', `:day-end', `:hour-end', `:minute-end',
+`:repeater-type', `:repeater-value', `:repeater-unit',
+`:warning-type', `:warning-value', `:warning-unit', `:begin', `:end'
+and `:post-blank' properties.  Otherwise, return nil.
 
 Assume point is at the beginning of the timestamp."
   (when (looking-at-p org-element--timestamp-regexp)
@@ -4140,10 +4125,9 @@ Assume point is at the beginning of the timestamp."
 (defun org-element-underline-parser ()
   "Parse underline object at point, if any.
 
-When at an underline object, return a list whose car is
-`underline' and cdr is a plist with `:begin', `:end',
-`:contents-begin' and `:contents-end' and `:post-blank' keywords.
-Otherwise, return nil.
+When at an underline object, return a new syntax node of `underline'
+type containing `:begin', `:end', `:contents-begin' and
+`:contents-end' and `:post-blank' properties.  Otherwise, return nil.
 
 Assume point is at the first underscore marker."
   (org-element--parse-generic-emphasis "_" 'underline))
@@ -4159,9 +4143,9 @@ CONTENTS is the contents of the object."
 (defun org-element-verbatim-parser ()
   "Parse verbatim object at point, if any.
 
-When at a verbatim object, return a list whose car is `verbatim'
-and cdr is a plist with `:value', `:begin', `:end' and
-`:post-blank' keywords.  Otherwise, return nil.
+When at a verbatim object, return a new syntax node of `verbatim' type
+containing `:value', `:begin', `:end' and `:post-blank' properties.
+Otherwise, return nil.
 
 Assume point is at the first equal sign marker."
   (org-element--parse-generic-emphasis "=" 'verbatim))
