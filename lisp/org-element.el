@@ -4568,7 +4568,10 @@ If STRING is the empty string or nil, return nil."
           rtn)))))
 
 (defun org-element-map
-    (data types fun &optional info first-match no-recursion with-affiliated)
+    ( data types fun
+      &optional
+      info first-match no-recursion
+      with-affiliated no-undefer)
   "Map a function on selected elements or objects.
 
 DATA is a parse tree (for example, returned by
@@ -4578,6 +4581,8 @@ elements or object types (see `org-element-all-elements' and
 `org-element-all-objects' for a complete list of types).  FUN is the
 function called on the matching element or object.  It has to accept
 one argument: the element or object itself.
+
+When TYPES is t, call FUN for all the elements and objects.
 
 When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, elements of the parse tree
@@ -4595,6 +4600,9 @@ list.  Though, FUN can still be applied on them.
 When optional argument WITH-AFFILIATED is non-nil, FUN will also
 apply to matching objects within parsed affiliated keywords (see
 `org-element-parsed-keywords').
+
+When optional argument NO-UNDEFER is non-nil, do not resolve deferred
+values.
 
 FUN may throw `:org-element-skip' signal.  Then, `org-element-map'
 will not recurse into the current element.
@@ -4641,32 +4649,35 @@ looking into captions:
    nil nil nil t)"
   (declare (indent 2))
   ;; Ensure TYPES and NO-RECURSION are a list, even of one element.
-  (let* ((types (if (listp types) types (list types)))
-         (ignore-list (plist-get info :ignore-list))
-	 (objects?
-          (cl-intersection
-           (cons 'plain-text org-element-all-objects) types))
-         (no-recursion
-          (append
-           (if (listp no-recursion) no-recursion
-	     (list no-recursion))
-           (unless objects?
-             org-element-all-objects)
-           (unless objects?
-             ;; Do not recurse into elements that can only contain
-             ;; objects.
-             (cl-set-difference
-              org-element-all-elements
-              org-element-greater-elements)))))
-    (org-element-ast-map
-        data types fun
-        ignore-list first-match
-        no-recursion
-        ;; Affiliated keywords may only contain objects.
-        (when (and with-affiliated objects?)
-          (mapcar #'cdr org-element--parsed-properties-alist))
-        ;; Secondary strings may only contain objects.
-        (not objects?))))
+  (when (and types data)
+    (let* ((ignore-list (plist-get info :ignore-list))
+	   (objects?
+            (or (eq types t)
+                (cl-intersection
+                 (cons 'plain-text org-element-all-objects)
+                 (if (listp types) types (list types)))))
+           (no-recursion
+            (append
+             (if (listp no-recursion) no-recursion
+	       (list no-recursion))
+             (unless objects?
+               org-element-all-objects)
+             (unless objects?
+               ;; Do not recurse into elements that can only contain
+               ;; objects.
+               (cl-set-difference
+                org-element-all-elements
+                org-element-greater-elements)))))
+      (org-element-ast-map
+          data types fun
+          ignore-list first-match
+          no-recursion
+          ;; Affiliated keywords may only contain objects.
+          (when (and with-affiliated objects?)
+            (mapcar #'cdr org-element--parsed-properties-alist))
+          ;; Secondary strings may only contain objects.
+          (not objects?)
+          no-undefer))))
 
 ;; The following functions are internal parts of the parser.
 ;;
