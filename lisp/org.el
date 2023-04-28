@@ -11662,6 +11662,9 @@ in Lisp code use `org-set-tags' instead."
 	 (lambda () (when (org-invisible-p) (org-end-of-subtree nil t))))))
      (t
       (save-excursion
+        ;; FIXME: We need to add support setting #+FILETAGS.
+        (when (org-before-first-heading-p)
+          (user-error "Setting file tags is not supported yet"))
 	(org-back-to-heading)
 	(let* ((all-tags (org-get-tags))
                (local-table (or org-current-tag-alist (org-get-buffer-tags)))
