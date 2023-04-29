@@ -130,11 +130,9 @@
 	   (search-forward "* foo")
 					; expectation.  tag ATTACH has been appended.
 	   (cl-reduce (lambda (x y) (or x y))
-		      (mapcar (lambda (x) (string-equal "ATTACH" x))
-			      (plist-get
-			       (plist-get
-				(org-element-at-point) 'headline)
-			       :tags))))
+		      (mapcar
+                       (lambda (x) (string-equal "ATTACH" x))
+                       (org-element-property :tags (org-element-at-point)))))
        (delete-file a-filename)))))
 
 (ert-deftest test-org-attach/dired-attach-to-next-best-subtree/2 ()

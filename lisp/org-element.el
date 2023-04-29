@@ -940,7 +940,7 @@ Return value is a plist."
 		  (t (setq plist (plist-put plist :closed time))))))
 	plist))))
 
-(defun org-element-headline-parser--deferred (element)
+(defun org-element--headline-deferred (element)
   "Parse and set extra properties for ELEMENT headline in BUFFER."
   (with-current-buffer (org-element-property :buffer element)
     (org-with-wide-buffer
@@ -991,6 +991,92 @@ Return value is a plist."
   "Retrieve :raw-value in HEADLINE according to BEG-OFFSET and END-OFFSET."
   (org-trim (org-element--substring headline beg-offset end-offset)))
 
+(defun org-element--headline-archivedp (headline)
+  "Return t when HEADLINE is archived and nil otherwise."
+  (if (member org-element-archive-tag
+              (org-element-property :tags headline))
+      t nil))
+
+(defun org-element--headline-footnote-section-p (headline)
+  "Return t when HEADLINE is a footnote section and nil otherwise."
+  (and org-footnote-section
+       (string= org-footnote-section
+                (org-element-property :raw-value headline))))
+
+(defun org-element--headline-parse-title (headline raw-secondary-p)
+  "Resolve title properties of HEADLINE for side effect.
+When RAW-SECONDARY-P is non-nil, headline's title will not be
+parsed as a secondary string, but as a plain string instead.
+
+Throw `:org-element-deferred-retry' signal at the end."
+  (with-current-buffer (org-element-property :buffer headline)
+    (org-with-point-at (org-element-property :begin headline)
+      (let* ((begin (point))
+             (true-level (prog1 (skip-chars-forward "*")
+                           (skip-chars-forward " \t")))
+	     (level (org-reduced-level true-level))
+	     (todo (and org-todo-regexp
+		        (let (case-fold-search) (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
+		        (progn (goto-char (match-end 0))
+			       (skip-chars-forward " \t")
+                               (org-element--get-cached-string (match-string-no-properties 1)))))
+	     (todo-type
+	      (and todo (if (member todo org-done-keywords) 'done 'todo)))
+	     (priority (and (looking-at "\\[#.\\][ \t]*")
+			    (progn (goto-char (match-end 0))
+				   (aref (match-string 0) 2))))
+	     (commentedp
+	      (and (let ((case-fold-search nil))
+                     (looking-at (concat org-element-comment-string "\\(?: \\|$\\)")))
+                   (prog1 t
+		     (goto-char (match-end 0))
+                     (skip-chars-forward " \t"))))
+	     (title-start (point))
+	     (tags (when (re-search-forward
+			  "\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
+			  (line-end-position)
+			  'move)
+		     (goto-char (match-beginning 0))
+                     (mapcar #'org-element--get-cached-string
+		             (org-split-string (match-string-no-properties 1) ":"))))
+	     (title-end (point))
+	     (raw-value
+              (org-element-deferred-create
+               nil #'org-element--headline-raw-value
+               (- title-start begin) (- title-end begin)))
+	     (archivedp
+              (org-element-deferred-create
+               nil #'org-element--headline-archivedp))
+	     (footnote-section-p
+              (org-element-deferred-create
+               nil #'org-element--headline-footnote-section-p)))
+        (org-element-put-property headline :raw-value raw-value)
+        (org-element-put-property headline :level level)
+        (org-element-put-property headline :priority priority)
+        (org-element-put-property headline :tags tags)
+        (org-element-put-property headline :todo-keyword todo)
+        (org-element-put-property headline :todo-type todo-type)
+        (org-element-put-property
+         headline :footnote-section-p footnote-section-p)
+        (org-element-put-property headline :archivedp archivedp)
+        (org-element-put-property headline :commentedp commentedp)
+	(org-element-put-property
+	 headline :title
+	 (if raw-secondary-p
+             (org-element-deferred-create-alias :raw-value)
+	   (org-element--parse-objects
+	    (progn (goto-char title-start)
+		   (skip-chars-forward " \t")
+		   (point))
+	    (progn (goto-char title-end)
+		   (skip-chars-backward " \t")
+		   (point))
+	    nil
+	    (org-element-restriction
+             (org-element-type headline))
+	    headline))))))
+  (throw :org-element-deferred-retry nil))
+
 (defun org-element-headline-parser (&optional _ raw-secondary-p)
   "Parse a headline.
 
@@ -1010,44 +1096,11 @@ parsed as a secondary string, but as a plain string instead.
 
 Assume point is at beginning of the headline."
   (save-excursion
-    (let* ((begin (point))
-           (true-level (prog1 (skip-chars-forward "*")
-                         (skip-chars-forward " \t")))
-	   (level (org-reduced-level true-level))
-	   (todo (and org-todo-regexp
-		      (let (case-fold-search) (looking-at (concat org-todo-regexp "\\(?: \\|$\\)")))
-		      (progn (goto-char (match-end 0))
-			     (skip-chars-forward " \t")
-                             (org-element--get-cached-string (match-string-no-properties 1)))))
-	   (todo-type
-	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
-	   (priority (and (looking-at "\\[#.\\][ \t]*")
-			  (progn (goto-char (match-end 0))
-				 (aref (match-string 0) 2))))
-	   (commentedp
-	    (and (let ((case-fold-search nil))
-                   (looking-at (concat org-element-comment-string "\\(?: \\|$\\)")))
-                 (prog1 t
-		   (goto-char (match-end 0))
-                   (skip-chars-forward " \t"))))
-	   (title-start (point))
-	   (tags (when (re-search-forward
-			"\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
-			(line-end-position)
-			'move)
-		   (goto-char (match-beginning 0))
-                   (mapcar #'org-element--get-cached-string
-		           (org-split-string (match-string-no-properties 1) ":"))))
-	   (title-end (point))
-           (raw-value (org-trim
-		       (buffer-substring-no-properties title-start title-end)))
-	   (raw-value-deferred
+    (let* ((deferred-title-prop
             (org-element-deferred-create
-             nil #'org-element--headline-raw-value
-             (- title-start begin) (- title-end begin)))
-	   (archivedp (if (member org-element-archive-tag tags) t nil))
-	   (footnote-section-p (and org-footnote-section
-				    (string= org-footnote-section raw-value)))
+             nil #'org-element--headline-parse-title raw-secondary-p))
+           (begin (point))
+           (true-level (skip-chars-forward "*"))
            (end
             (save-excursion
               (if (re-search-forward (org-headline-re true-level) nil t)
@@ -1072,52 +1125,41 @@ Assume point is at beginning of the headline."
                             (when (> (- contents-end 2) robust-begin)
                               (- contents-end 2)))))
       (unless robust-end (setq robust-begin nil))
-      (let ((headline
-	     (org-element-create
-              'headline
-	      (list :raw-value raw-value-deferred
-		    :begin begin
-		    :end end
-		    :pre-blank
-		    (if (not contents-begin) 0
-		      (1- (count-lines begin contents-begin)))
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-                    :robust-begin robust-begin
-                    :robust-end robust-end
-		    :true-level true-level
-		    :level level
-		    :priority priority
-		    :tags tags
-		    :todo-keyword todo
-		    :todo-type todo-type
-		    :post-blank
-		    (if contents-end
-			(count-lines contents-end end)
-		      (1- (count-lines begin end)))
-		    :footnote-section-p footnote-section-p
-		    :archivedp archivedp
-		    :commentedp commentedp
-		    :post-affiliated begin
-                    :secondary (alist-get
-                                'headline
-                                org-element-secondary-value-alist)
-                    :deferred
-                    (org-element-deferred-create
-                     t #'org-element-headline-parser--deferred)))))
-	(org-element-put-property
-	 headline :title
-	 (if raw-secondary-p (org-element-deferred-alias :raw-value)
-	   (org-element--parse-objects
-	    (progn (goto-char title-start)
-		   (skip-chars-forward " \t")
-		   (point))
-	    (progn (goto-char title-end)
-		   (skip-chars-backward " \t")
-		   (point))
-	    nil
-	    (org-element-restriction 'headline)
-	    headline)))))))
+      (org-element-create
+       'headline
+       (list
+	:begin begin
+	:end end
+	:pre-blank
+	(if (not contents-begin) 0
+	  (1- (count-lines begin contents-begin)))
+	:contents-begin contents-begin
+	:contents-end contents-end
+        :robust-begin robust-begin
+        :robust-end robust-end
+	:true-level true-level
+        :buffer (current-buffer)
+        :raw-value deferred-title-prop
+        :title deferred-title-prop
+        :level deferred-title-prop
+	:priority deferred-title-prop
+	:tags deferred-title-prop
+	:todo-keyword deferred-title-prop
+	:todo-type deferred-title-prop
+	:post-blank
+	(if contents-end
+	    (count-lines contents-end end)
+	  (1- (count-lines begin end)))
+	:footnote-section-p deferred-title-prop
+	:archivedp deferred-title-prop
+	:commentedp deferred-title-prop
+	:post-affiliated begin
+        :secondary (alist-get
+                    'headline
+                    org-element-secondary-value-alist)
+        :deferred
+        (org-element-deferred-create
+         t #'org-element--headline-deferred))))))
 
 (defun org-element-headline-interpreter (headline contents)
   "Interpret HEADLINE element as Org syntax.
@@ -1273,48 +1315,15 @@ string instead.
 
 Assume point is at beginning of the inline task."
   (save-excursion
-    (let* ((begin (point))
-	   (level (prog1 (org-reduced-level (skip-chars-forward "*"))
-		    (skip-chars-forward " \t")))
-	   (todo (and org-todo-regexp
-		      (let (case-fold-search) (looking-at org-todo-regexp))
-		      (progn (goto-char (match-end 0))
-			     (skip-chars-forward " \t")
-                             (org-element--get-cached-string (match-string-no-properties 0)))))
-	   (todo-type (and todo
-			   (if (member todo org-done-keywords) 'done 'todo)))
-	   (priority (and (looking-at "\\[#.\\][ \t]*")
-			  (progn (goto-char (match-end 0))
-				 (aref (match-string-no-properties 0) 2))))
-           (commentedp
-	    (and (let ((case-fold-search nil))
-                   (looking-at org-element-comment-string))
-		 (goto-char (match-end 0))
-                 (when (looking-at-p "\\(?:[ \t]\\|$\\)")
-                   t)))
-	   (title-start (prog1 (point)
-                          (unless (or todo priority commentedp)
-                            ;; Headline like "* :tag:"
-                            (skip-chars-backward " \t"))))
-	   (tags (when (re-search-forward
-			"[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$"
-			(line-end-position)
-			'move)
-		   (goto-char (match-beginning 0))
-                   (mapcar #'org-element--get-cached-string
-		           (org-split-string (match-string-no-properties 1) ":"))))
-	   (title-end (point))
-	   (raw-value-deferred
-            (org-element-deferred
-             nil #'org-element--headline-raw-value
-             (- title-start begin) (- title-end begin)))
-           (archivedp (if (member org-element-archive-tag tags) t nil))
+    (let* ((deferred-title-prop
+            (org-element-deferred-create
+             nil #'org-element--headline-parse-title raw-secondary-p))
+           (begin (point))
 	   (task-end (save-excursion
 		       (end-of-line)
 		       (and (re-search-forward org-element-headline-re limit t)
 			    (looking-at-p "[ \t]*END[ \t]*$")
 			    (line-beginning-position))))
-	   (time-props (and task-end (org-element--get-time-properties)))
 	   (contents-begin (and task-end
 				(< (point) task-end)
 				(progn
@@ -1325,50 +1334,36 @@ Assume point is at beginning of the inline task."
 	   (end (progn (when task-end (goto-char task-end))
 		       (forward-line)
 		       (skip-chars-forward " \r\t\n" limit)
-		       (if (eobp) (point) (line-beginning-position))))
-	   (inlinetask
-	    (org-element-create
-             'inlinetask
-	     (nconc
-	      (list :raw-value raw-value-deferred
-		    :begin begin
-		    :end end
-		    :pre-blank
-		    (if (not contents-begin) 0
-		      (1- (count-lines begin contents-begin)))
-		    :contents-begin contents-begin
-		    :contents-end contents-end
-		    :level level
-		    :priority priority
-		    :tags tags
-		    :todo-keyword todo
-		    :todo-type todo-type
-		    :post-blank (1- (count-lines (or task-end begin) end))
-		    :post-affiliated begin
-                    :archivedp archivedp
-		    :commentedp commentedp
-                    :secondary (alist-get
-                                'inlinetask
-                                org-element-secondary-value-alist)
-                    :deferred
-                    (and task-end
-                         (org-element-deferred
-                          t #'org-element-headline-parser--deferred))
-                    :buffer (current-buffer))
-	      time-props))))
-      (org-element-put-property
-       inlinetask :title
-       (if raw-secondary-p (org-element-deferred-alias :raw-value)
-	 (org-element--parse-objects
-	  (progn (goto-char title-start)
-		 (skip-chars-forward " \t")
-		 (point))
-	  (progn (goto-char title-end)
-		 (skip-chars-backward " \t")
-		 (point))
-	  nil
-	  (org-element-restriction 'inlinetask)
-	  inlinetask))))))
+		       (if (eobp) (point) (line-beginning-position)))))
+      (org-element-create
+       'inlinetask
+       (list
+	:begin begin
+	:end end
+	:pre-blank
+	(if (not contents-begin) 0
+	  (1- (count-lines begin contents-begin)))
+	:contents-begin contents-begin
+	:contents-end contents-end
+        :buffer (current-buffer)
+        :raw-value deferred-title-prop
+        :title deferred-title-prop
+        :level deferred-title-prop
+	:priority deferred-title-prop
+	:tags deferred-title-prop
+	:todo-keyword deferred-title-prop
+	:todo-type deferred-title-prop
+	:archivedp deferred-title-prop
+	:commentedp deferred-title-prop
+	:post-blank (1- (count-lines (or task-end begin) end))
+	:post-affiliated begin
+        :secondary (alist-get
+                    'inlinetask
+                    org-element-secondary-value-alist)
+        :deferred
+        (and task-end
+             (org-element-deferred-create
+              t #'org-element--headline-deferred)))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
   "Interpret INLINETASK element as Org syntax.
