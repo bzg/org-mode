@@ -173,6 +173,38 @@ return \"useless\"
   "Evaluation of strings."
   (should (equal "a string" (test-ob-haskell-ghci "" "\"a string\""))))
 
+;;;; Output without EOL
+;;
+
+(ert-deftest ob-haskell/output-without-eol-1 ()
+  "Cannot get output from incomplete lines, when entered line by line."
+  :expected-result :failed
+  (should (equal "123"
+                 (test-ob-haskell-ghci ":results output" "
+  putStr(\"1\")
+  putStr(\"2\")
+  putStr(\"3\")
+  putStr(\"\\n\")
+"))))
+
+(ert-deftest ob-haskell/output-without-eol-2 ()
+  "Incomplete output lines are OK when using a multiline block."
+  (should (equal "123"
+                 (test-ob-haskell-ghci ":results output" "
+:{
+  do putStr(\"1\")
+     putStr(\"2\")
+     putStr(\"3\")
+     putStr(\"\\n\")
+:}
+"))))
+
+(ert-deftest ob-haskell/output-without-eol-3 ()
+  "Incomplete output lines are OK on one line."
+  (should (equal "123"
+                 (test-ob-haskell-ghci ":results output" "
+do { putStr(\"1\"); putStr(\"2\"); putStr(\"3\"); putStr(\"\\n\") }
+"))))
 
 ;;;; Local variables
 (ert-deftest ob-haskell/let-one-line ()
