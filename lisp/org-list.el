@@ -364,16 +364,32 @@ group 2: counter
 group 3: checkbox
 group 4: description tag")
 
+(defvar org--item-re-cache nil
+  "Results cache for `org-item-re'.")
 (defun org-item-re ()
   "Return the correct regular expression for plain lists."
-  (let ((term (cond
-	       ((eq org-plain-list-ordered-item-terminator t) "[.)]")
-	       ((= org-plain-list-ordered-item-terminator ?\)) ")")
-	       ((= org-plain-list-ordered-item-terminator ?.) "\\.")
-	       (t "[.)]")))
-	(alpha (if org-list-allow-alphabetical "\\|[A-Za-z]" "")))
-    (concat "\\([ \t]*\\([-+]\\|\\(\\([0-9]+" alpha "\\)" term
-	    "\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")))
+  (or (plist-get
+       (plist-get org--item-re-cache
+                  org-list-allow-alphabetical)
+       org-plain-list-ordered-item-terminator)
+      (let* ((term (cond
+	            ((eq org-plain-list-ordered-item-terminator t) "[.)]")
+	            ((= org-plain-list-ordered-item-terminator ?\)) ")")
+	            ((= org-plain-list-ordered-item-terminator ?.) "\\.")
+	            (t "[.)]")))
+	     (alpha (if org-list-allow-alphabetical "\\|[A-Za-z]" ""))
+             (re (concat "\\([ \t]*\\([-+]\\|\\(\\([0-9]+" alpha "\\)" term
+	                 "\\)\\)\\|[ \t]+\\*\\)\\([ \t]+\\|$\\)")))
+        (setq org--item-re-cache
+              (plist-put
+               org--item-re-cache
+               org-list-allow-alphabetical
+               (plist-put
+                (plist-get org--item-re-cache
+                           org-list-allow-alphabetical)
+                org-plain-list-ordered-item-terminator
+                re)))
+        re)))
 
 (defsubst org-item-beginning-re ()
   "Regexp matching the beginning of a plain list item."

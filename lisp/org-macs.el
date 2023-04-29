@@ -807,20 +807,33 @@ get an unnecessary O(N²) space complexity, so you're usually better off using
       (eval form t)
     (error (format "%%![Error: %s]" error))))
 
-(defvar org--headline-re-cache (make-hash-table :test #'equal)
-  "Hash table holding association between headline level regexp.")
+(defvar org--headline-re-cache-no-bol nil
+  "Plist holding association between headline level regexp.")
+(defvar org--headline-re-cache-bol nil
+  "Plist holding association between headline level regexp.")
 (defun org-headline-re (true-level &optional no-bol)
   "Generate headline regexp for TRUE-LEVEL.
 When NO-BOL is non-nil, regexp will not demand the regexp to start at
 beginning of line."
-  (or (gethash (cons true-level no-bol) org--headline-re-cache)
-      (puthash
-       (cons true-level no-bol)
-       (rx-to-string
+  (or (plist-get
+       (if no-bol
+           org--headline-re-cache-no-bol
+         org--headline-re-cache-bol)
+       true-level)
+      (let ((re (rx-to-string
+                 (if no-bol
+                     `(seq (** 1 ,true-level "*") " ")
+                   `(seq line-start (** 1 ,true-level "*") " ")))))
         (if no-bol
-            `(seq (** 1 ,true-level "*") " ")
-          `(seq line-start (** 1 ,true-level "*") " ")))
-       org--headline-re-cache)))
+            (setq org--headline-re-cache-no-bol
+                  (plist-put
+                   org--headline-re-cache-no-bol
+                   true-level re))
+          (setq org--headline-re-cache-bol
+                (plist-put
+                 org--headline-re-cache-bol
+                 true-level re)))
+        re)))
 
 (defvar org-outline-regexp) ; defined in org.el
 (defvar org-outline-regexp-bol) ; defined in org.el
