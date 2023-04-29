@@ -466,6 +466,11 @@ Return modified NODE."
                 (setcar (cdr ,node) (plist-put (nth 1 ,node) ,property ,value)))))
            ,node))))))
 
+(define-inline org-element-put-property-2 (property value node)
+  "Like `org-element-put-property', but NODE is the last argument.
+See `org-element-put-property' for the meaning of PROPERTY and VALUE."
+  (inline-quote (org-element-put-property ,node ,property ,value)))
+
 (defun org-element--property (property node &optional dflt force-undefer)
   "Extract the value from the PROPERTY of a NODE.
 Return DFLT when PROPERTY is not present.
