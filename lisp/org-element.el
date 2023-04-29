@@ -1206,16 +1206,51 @@ CONTENTS is the contents of the element."
 
 ;;;; org-data
 
-(defun org-element--get-global-node-properties ()
-  "Return node properties associated with the whole Org buffer.
+(defun org-element--get-category ()
+  "Return category in current buffer."
+  (let ((default-category
+         (cond ((null org-category)
+	        (when (org-with-base-buffer nil
+                        buffer-file-name)
+	          (file-name-sans-extension
+	           (file-name-nondirectory
+                    (org-with-base-buffer nil
+                      buffer-file-name)))))
+	       ((symbolp org-category) (symbol-name org-category))
+	       (t org-category)))
+        category)
+    ;; Search for #+CATEGORY keywords.
+    (org-with-point-at (point-max)
+      (while (and (not category)
+                  (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t))
+	(let ((element (org-element-at-point-no-context)))
+	  (when (org-element-type-p element 'keyword)
+            (setq category (org-element-property :value element))))))
+    ;; Return.
+    (or category default-category)))
+
+(defun org-element--get-global-node-properties (data)
+  "Set node properties associated with the whole Org buffer.
 Upcase property names.  It avoids confusion between properties
 obtained through property drawer and default properties from the
-parser (e.g. `:end' and :END:).  Return value is a plist."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (while (and (org-at-comment-p) (bolp)) (forward-line))
-   (org-element--get-node-properties t)))
+parser (e.g. `:end' and :END:).
 
+Alter DATA by side effect."
+  (with-current-buffer (org-element-property :buffer data)
+    (org-with-wide-buffer
+     (goto-char (point-min))
+     (while (and (org-at-comment-p) (bolp)) (forward-line))
+     (let ((props (org-element--get-node-properties t))
+           (has-category? nil))
+       (while props
+         (org-element-put-property data (car props) (cadr props))
+         (when (eq (car props) :CATEGORY) (setq has-category? t))
+         (setq props (cddr props)))
+       ;; CATEGORY not set in top-level property drawer.  Go the long way.
+       (unless has-category?
+         (org-element-put-property data :CATEGORY (org-element--get-category)))))
+    ;; Return nil.
+    nil))
 
 (defvar org-element-org-data-parser--recurse nil)
 (defun org-element-org-data-parser (&optional _)
@@ -1247,47 +1282,23 @@ Return a new syntax node of `org-data' type containing `:begin',
                               (goto-char (match-end 0))
                               (skip-chars-backward " \t")
                               (min robust-end (point))))
-                           (+ 2 contents-begin))))
-          (category (cond ((null org-category)
-		           (when (org-with-base-buffer nil
-                                   buffer-file-name)
-		             (file-name-sans-extension
-		              (file-name-nondirectory
-                               (org-with-base-buffer nil
-                                 buffer-file-name)))))
-		          ((symbolp org-category) (symbol-name org-category))
-		          (t org-category)))
-          (category (catch 'buffer-category
-                      (unless org-element-org-data-parser--recurse
-                        (org-with-point-at end
-                          ;; Avoid recursive calls from
-                          ;; `org-element-at-point-no-context'.
-                          (let ((org-element-org-data-parser--recurse t))
-	                    (while (re-search-backward "^[ \t]*#\\+CATEGORY:" (point-min) t)
-                              (org-element-with-disabled-cache
-	                        (let ((element (org-element-at-point-no-context)))
-	                          (when (org-element-type-p element 'keyword)
-		                    (throw 'buffer-category
-		                           (org-element-property :value element)))))))))
-	              category))
-          (properties (org-element--get-global-node-properties)))
-     (unless (plist-get properties :CATEGORY)
-       (setq properties (plist-put properties :CATEGORY category)))
+                           (+ 2 contents-begin)))))
      (org-element-create
       'org-data
-      (nconc
-       (list :begin begin
-             :contents-begin contents-begin
-             :contents-end pos-before-blank
-             :end end
-             :robust-begin robust-begin
-             :robust-end robust-end
-             :post-blank (count-lines pos-before-blank end)
-             :post-affiliated begin
-             :path (buffer-file-name)
-             :mode 'org-data
-             :buffer (current-buffer))
-       properties)))))
+      (list :begin begin
+            :contents-begin contents-begin
+            :contents-end pos-before-blank
+            :end end
+            :robust-begin robust-begin
+            :robust-end robust-end
+            :post-blank (count-lines pos-before-blank end)
+            :post-affiliated begin
+            :path (buffer-file-name)
+            :mode 'org-data
+            :buffer (current-buffer)
+            :deferred
+            (org-element-deferred-create
+             t #'org-element--get-global-node-properties))))))
 
 (defun org-element-org-data-interpreter (_ contents)
   "Interpret ORG-DATA element as Org syntax.
