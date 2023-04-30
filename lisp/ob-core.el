@@ -2427,13 +2427,13 @@ INFO may provide the values of these header arguments (in the
 		  (delete-region (point) (org-babel-result-end)))
 		 ((member "append" result-params)
 		  (goto-char (org-babel-result-end)) (setq beg (point-marker)))
-		 ;; ((member "prepend" result-params)) ; Do nothing.  Already there.
+		 ;; ((member "prepend" result-params)) ; already there
                  )
 		(setq results-switches
 		      (if results-switches (concat " " results-switches) ""))
 		(let ((wrap
-		       (lambda ( start finish &optional no-escape no-newlines
-			    inline-start inline-finish)
+		       (lambda (start finish &optional no-escape no-newlines
+				      inline-start inline-finish)
 			 (when inline
 			   (setq start inline-start)
 			   (setq finish inline-finish)
