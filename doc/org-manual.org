@@ -20075,11 +20075,12 @@ changes.
   | =odd=       | Allow only odd outline levels (1, 3, ...).                   |
   | =oddeven=   | Allow all outline levels.                                    |
 
-  #+vindex: org-put-time-stamp-overlays
-  #+vindex: org-time-stamp-overlay-formats
+  #+vindex: org-display-custom-times
+  #+vindex: org-timestamp-custom-formats
+  #+vindex: org-time-stamp-custom-formats
   To turn on custom format overlays over timestamps (variables
-  ~org-put-time-stamp-overlays~ and
-  ~org-timestamp-overlay-formats~), use:
+  ~org-display-custom-times~ and
+  ~org-timestamp-custom-formats~), use:
 
   | =customtime= | Overlay custom time format. |
 
