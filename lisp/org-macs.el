@@ -393,7 +393,7 @@ it for output."
     output))
 
 (defun org-compile-file-commands (source process ext &optional spec err-msg)
-  "Create commands to compile SOURCE.
+  "Return list of commands used to compile SOURCE file.
 
 The commands are formed from PROCESS, which is either a function or
 a list of shell commands, as strings.  EXT is a file extension, without
@@ -412,7 +412,10 @@ name, directory and absolute output file name.  It is possible,
 however, to use more place-holders by specifying them in optional
 argument SPEC, as an alist following the pattern
 
-  (CHARACTER . REPLACEMENT-STRING)."
+  (CHARACTER . REPLACEMENT-STRING).
+
+Throw an error if PROCESS does not satisfy the described patterns.
+The error string will be appended with ERR-MSG, when it is a string."
   (let* ((base-name (file-name-base source))
 	 (full-name (file-truename source))
          (relative-name (file-relative-name source))
@@ -423,17 +426,17 @@ argument SPEC, as an alist following the pattern
                     "./"))
 	 (output (expand-file-name (concat (file-name-base source) "." ext) out-dir))
 	 (err-msg (if (stringp err-msg) (concat ".  " err-msg) "")))
-      (pcase process
-	((pred functionp) process)
-	((pred consp)
-	 (let ((spec (append spec
-			     `((?b . ,(shell-quote-argument base-name))
-			       (?f . ,(shell-quote-argument relative-name))
-			       (?F . ,(shell-quote-argument full-name))
-			       (?o . ,(shell-quote-argument out-dir))
-			       (?O . ,(shell-quote-argument output))))))
-           (mapcar (lambda (command) (format-spec command spec)) process)))
-	(_ (error "No valid command to process %S%s" source err-msg)))))
+    (pcase process
+      ((pred functionp) (list process))
+      ((pred consp)
+       (let ((spec (append spec
+			   `((?b . ,(shell-quote-argument base-name))
+			     (?f . ,(shell-quote-argument relative-name))
+			     (?F . ,(shell-quote-argument full-name))
+			     (?o . ,(shell-quote-argument out-dir))
+			     (?O . ,(shell-quote-argument output))))))
+         (mapcar (lambda (command) (format-spec command spec)) process)))
+      (_ (error "No valid command to process %S%s" source err-msg)))))
 
 
 
