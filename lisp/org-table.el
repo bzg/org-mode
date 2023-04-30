@@ -2627,10 +2627,10 @@ location of point."
 				   duration-output-format)
 		       ev))
 
-	  ;; Use <...> time-stamps so that Calc can handle them.
+	  ;; Use <...> timestamps so that Calc can handle them.
 	  (setq form
 		(replace-regexp-in-string org-ts-regexp-inactive "<\\1>" form))
-	  ;; Internationalize local time-stamps by setting locale to
+	  ;; Internationalize local timestamps by setting locale to
 	  ;; "C".
 	  (setq form
 		(replace-regexp-in-string

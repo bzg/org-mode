@@ -889,7 +889,7 @@ style from the list."
 
 When nil, export timestamps as plain text.
 
-When non-nil, map `org-time-stamp-custom-formats' to a pair of
+When non-nil, map `org-timestamp-custom-formats' to a pair of
 OpenDocument date-styles with names \"OrgDate1\" and \"OrgDate2\"
 respectively.  A timestamp with no time component is formatted
 with style \"OrgDate1\" while one with explicit hour and minutes

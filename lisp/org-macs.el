@@ -488,7 +488,7 @@ error when the user input is empty."
 	  (allow-empty? nil)
 	  (t (user-error "Empty input is not valid")))))
 
-(declare-function org-time-stamp-inactive "org" (&optional arg))
+(declare-function org-timestamp-inactive "org" (&optional arg))
 
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."
@@ -498,7 +498,7 @@ error when the user input is empty."
     (define-key minibuffer-local-completion-map " " #'self-insert-command)
     (define-key minibuffer-local-completion-map "?" #'self-insert-command)
     (define-key minibuffer-local-completion-map (kbd "C-c !")
-      #'org-time-stamp-inactive)
+                #'org-timestamp-inactive)
     (apply #'completing-read args)))
 
 (defun org--mks-read-key (allowed-keys prompt navigation-keys)

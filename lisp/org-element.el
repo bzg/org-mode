@@ -3995,7 +3995,7 @@ Assume point is at the beginning of the timestamp."
 		  day-start (nth 3 date)
 		  hour-start (nth 2 date)
 		  minute-start (nth 1 date))))
-	;; Compute date-end.  It can be provided directly in time-stamp,
+	;; Compute date-end.  It can be provided directly in timestamp,
 	;; or extracted from time range.  Otherwise, it defaults to the
 	;; same values as date-start.
 	(unless diaryp

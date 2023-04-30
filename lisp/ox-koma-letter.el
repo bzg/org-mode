@@ -682,7 +682,7 @@ PLIST-KEY."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (concat
-   ;; Time-stamp.
+   ;; Timestamp.
    (and (plist-get info :time-stamp-file)
         (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
    ;; LaTeX compiler

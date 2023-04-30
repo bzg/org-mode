@@ -524,12 +524,12 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
      (let (ts)
        (and (re-search-forward org-ts-regexp end t)
 	    (setq ts (match-string 0))
-	    (< (org-time-stamp-to-now ts) 0)
+	    (< (org-timestamp-to-now ts) 0)
 	    (if (not (looking-at
-		      (concat "--\\(" org-ts-regexp "\\)")))
+		    (concat "--\\(" org-ts-regexp "\\)")))
 		(concat "old timestamp " ts)
 	      (setq ts (concat "old timestamp " ts (match-string 0)))
-	      (and (< (org-time-stamp-to-now (match-string 1)) 0)
+	      (and (< (org-timestamp-to-now (match-string 1)) 0)
 		   ts)))))
    tag))
 

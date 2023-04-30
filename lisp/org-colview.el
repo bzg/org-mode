@@ -1130,7 +1130,7 @@ This function updates `org-columns-current-fmt-compiled'."
 
 (defun org-columns--age-to-minutes (s)
   "Turn age string S into a number of minutes.
-An age is either computed from a given time-stamp, or indicated
+An age is either computed from a given timestamp, or indicated
 as a canonical duration, i.e., using units defined in
 `org-duration-canonical-units'."
   (cond

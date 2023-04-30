@@ -7943,7 +7943,7 @@ Paragraph<point>"
 	(org-todo "DONE")
 	(buffer-string)))))
   ;; Throw an error if repeater unit is the hour and no time is
-  ;; provided in the time-stamp.
+  ;; provided in the timestamp.
   (should-error
    (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
      (org-test-with-temp-text "* TODO H\n<2012-03-29 Thu +2h>"
@@ -8098,7 +8098,7 @@ SCHEDULED: <2021-06-15 Tue +1d>"
     "* DONE task
 CLOSED: %s"
     (org-test-with-temp-text ""
-      (org-insert-time-stamp (current-time) t t)
+      (org-insert-timestamp (current-time) t t)
       (buffer-string)))
     (let ((org-log-done 'time)
           (org-log-done-with-time t)
@@ -8115,7 +8115,7 @@ CLOSED: %s"
     "* DONE task
 CLOSED: %s"
     (org-test-with-temp-text ""
-      (org-insert-time-stamp (current-time) nil t)
+      (org-insert-timestamp (current-time) nil t)
       (buffer-string)))
     (let ((org-log-done 'time)
           (org-log-done-with-time nil)
@@ -8149,7 +8149,7 @@ CLOSED: %s"
 * DONE task
 CLOSED: %s"
     (org-test-with-temp-text ""
-      (org-insert-time-stamp (current-time) t t)
+      (org-insert-timestamp (current-time) t t)
       (buffer-string)))
     (let ((org-log-done nil)
           (org-log-done-with-time t)
@@ -8189,7 +8189,7 @@ CLOSED: %s
 :LOGGING: logdone
 :END:"
     (org-test-with-temp-text ""
-      (org-insert-time-stamp (current-time) t t)
+      (org-insert-timestamp (current-time) t t)
       (buffer-string)))
     (let ((org-log-done nil)
           (org-log-done-with-time t)
@@ -8275,7 +8275,7 @@ CLOSED: %s
   (should-not
    (org-test-with-temp-text "[2012-03-29 Thu]"
      (org-at-timestamp-p)))
-  ;; When optional argument is `agenda', recognize time-stamps in
+  ;; When optional argument is `agenda', recognize timestamps in
   ;; planning info line, property drawers and clocks.
   (should
    (org-test-with-temp-text "* H\nSCHEDULED: <point><2012-03-29 Thu>"
@@ -8330,8 +8330,8 @@ CLOSED: %s
    (org-test-with-temp-text "# [2012-03-29 Thu]<point>"
      (org-at-timestamp-p 'lax))))
 
-(ert-deftest test-org/time-stamp ()
-  "Test `org-time-stamp' specifications."
+(ert-deftest test-org/timestamp ()
+  "Test `org-timestamp' specifications."
   ;; Insert chosen time stamp at point.
   (should
    (string-match
@@ -8340,7 +8340,7 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
-	(org-time-stamp nil)
+	(org-timestamp nil)
 	(buffer-string)))))
   ;; With a prefix argument, also insert time.
   (should
@@ -8350,7 +8350,7 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04 00:41"))))
-	(org-time-stamp '(4))
+	(org-timestamp '(4))
 	(buffer-string)))))
   ;; With two universal prefix arguments, insert an active timestamp
   ;; with the current time without prompting the user.
@@ -8359,7 +8359,7 @@ CLOSED: %s
     "Te<2014-03-04 .*? 00:41>xt"
     (org-test-with-temp-text "Te<point>xt"
       (org-test-at-time "2014-03-04 00:41"
-	(org-time-stamp '(16))
+	(org-timestamp '(16))
 	(buffer-string)))))
   ;; When optional argument is non-nil, insert an inactive timestamp.
   (should
@@ -8369,7 +8369,7 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
-	(org-time-stamp nil t)
+	(org-timestamp nil t)
 	(buffer-string)))))
   ;; When called from a timestamp, replace existing one.
   (should
@@ -8379,7 +8379,7 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
-	(org-time-stamp nil)
+	(org-timestamp nil)
 	(buffer-string)))))
   (should
    (string-match
@@ -8388,7 +8388,7 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
-	(org-time-stamp nil)
+	(org-timestamp nil)
 	(buffer-string)))))
   ;; When replacing a timestamp, preserve repeater, if any.
   (should
@@ -8398,7 +8398,7 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
-	(org-time-stamp nil)
+	(org-timestamp nil)
 	(buffer-string)))))
   ;; When called twice in a raw, build a date range.
   (should
@@ -8408,9 +8408,9 @@ CLOSED: %s
       (cl-letf (((symbol-function 'org-read-date)
 		 (lambda (&rest _args)
 		   (org-time-string-to-time "2014-03-04"))))
-	(let ((last-command 'org-time-stamp)
-	      (this-command 'org-time-stamp))
-	  (org-time-stamp nil))
+	(let ((last-command 'org-timestamp)
+	      (this-command 'org-timestamp))
+	  (org-timestamp nil))
 	(buffer-string))))))
 
 (ert-deftest test-org/timestamp-has-time-p ()
@@ -8520,42 +8520,42 @@ CLOSED: %s
    (equal "<29>--<30>"
 	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
 	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+		  (org-timestamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context))))))
   ;; Translate date range start.
   (should
    (equal "<29>"
 	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
 	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+		  (org-timestamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context) 'start)))))
   ;; Translate date range end.
   (should
    (equal "<30>"
 	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
 	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+		  (org-timestamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context) 'end)))))
   ;; Translate time range.
   (should
    (equal "<08>--<16>"
 	  (org-test-with-temp-text "<2012-03-29 Thu 8:30-16:40>"
 	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%H>")))
+		  (org-timestamp-custom-formats '("<%d>" . "<%H>")))
 	      (org-timestamp-translate (org-element-context))))))
   ;; Translate non-range timestamp.
   (should
    (equal "<29>"
 	  (org-test-with-temp-text "<2012-03-29 Thu>"
 	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+		  (org-timestamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context))))))
   ;; Do not change `diary' timestamps.
   (should
    (equal "<%%(org-float t 4 2)>"
 	  (org-test-with-temp-text "<%%(org-float t 4 2)>"
 	    (let ((org-display-custom-times t)
-		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+		  (org-timestamp-custom-formats '("<%d>" . "<%d>")))
 	      (org-timestamp-translate (org-element-context)))))))
 
 (ert-deftest test-org/timestamp-from-string ()

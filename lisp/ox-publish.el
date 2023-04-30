@@ -174,7 +174,7 @@ included.  See the backend documentation for more information.
   :preserve-breaks          `org-export-preserve-breaks'
   :section-numbers          `org-export-with-section-numbers'
   :select-tags              `org-export-select-tags'
-  :time-stamp-file          `org-export-time-stamp-file'
+  :time-stamp-file          `org-export-timestamp-file'
   :with-archived-trees      `org-export-with-archived-trees'
   :with-author              `org-export-with-author'
   :with-creator             `org-export-with-creator'
@@ -891,7 +891,7 @@ time in `current-time' format."
 	     (file-attribute-modification-time (file-attributes file))
 	   (let ((date (org-publish-find-property file :date project)))
 	     ;; DATE is a secondary string.  If it contains
-	     ;; a time-stamp, convert it to internal format.
+	     ;; a timestamp, convert it to internal format.
 	     ;; Otherwise, use FILE modification time.
 	     (cond ((let ((ts (and (consp date) (assq 'timestamp date))))
 		      (and ts

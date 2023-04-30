@@ -222,7 +222,7 @@ inserted into the buffer."
     (save-excursion
       (insert "\n")
       (org-indent-line)
-      (org-insert-time-stamp
+      (org-insert-timestamp
        (org-encode-time 0 0 0 day month year)
        nil
        (eq org-datetree-add-timestamp 'inactive))))

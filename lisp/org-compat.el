@@ -414,7 +414,7 @@ Counting starts at 1."
   'completing-read "9.0")
 (define-obsolete-function-alias 'org-iread-file-name 'read-file-name "9.0")
 (define-obsolete-function-alias 'org-days-to-time
-  'org-time-stamp-to-now "8.2")
+  'org-timestamp-to-now "8.2")
 (define-obsolete-variable-alias 'org-agenda-ignore-drawer-properties
   'org-agenda-ignore-properties "9.0")
 (define-obsolete-function-alias 'org-preview-latex-fragment

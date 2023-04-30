@@ -1858,7 +1858,7 @@ Expansion occurs in a temporary Org mode buffer."
 		     (let* ((upcase? (equal (upcase key) key))
 			    (org-end-time-was-given nil)
 			    (time (org-read-date upcase? t nil prompt)))
-		       (org-insert-time-stamp
+		       (org-insert-timestamp
 			time (or org-time-was-given upcase?)
 			(member key '("u" "U"))
 			nil nil (list org-end-time-was-given))))

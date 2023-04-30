@@ -128,7 +128,7 @@ clocking out."
   "Rounding minutes when clocking in or out.
 The default value is 0 so that no rounding is done.
 When set to a non-integer value, use the car of
-`org-time-stamp-rounding-minutes', like for setting a time-stamp.
+`org-timestamp-rounding-minutes', like for setting a timestamp.
 
 E.g. if `org-clock-rounding-minutes' is set to 5, time is 14:47
 and you clock in: then the clock starts at 14:45.  If you clock
@@ -1441,8 +1441,8 @@ the default behavior."
 			  leftover)
 		     start-time
 		     (org-current-time org-clock-rounding-minutes t)))
-	   (setq ts (org-insert-time-stamp org-clock-start-time
-					   'with-hm 'inactive))
+	   (setq ts (org-insert-timestamp org-clock-start-time
+					  'with-hm 'inactive))
 	   (org-indent-line)))
 	 (move-marker org-clock-marker (point) (buffer-base-buffer))
 	 (move-marker org-clock-hd-marker
@@ -1722,7 +1722,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (delete-region (point) (line-end-position))
           (org-fold-core-ignore-modifications
             (insert-and-inherit "--")
-            (setq te (org-insert-time-stamp (or at-time now) 'with-hm 'inactive))
+            (setq te (org-insert-timestamp (or at-time now) 'with-hm 'inactive))
             (setq s (org-time-convert-to-integer
 	             (time-subtract
 	              (org-time-string-to-time te)

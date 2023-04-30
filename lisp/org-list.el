@@ -2408,7 +2408,7 @@ subtree, ignoring planning line and any drawer following it."
 		  (setq lim-down (copy-marker limit))))
 	       ((org-at-heading-p)
 		;; On a heading, start at first item after drawers and
-		;; time-stamps (scheduled, etc.).
+		;; timestamps (scheduled, etc.).
 		(let ((limit (save-excursion (outline-next-heading) (point))))
 		  (org-end-of-meta-data t)
 		  (if (org-list-search-forward (org-item-beginning-re) limit t)

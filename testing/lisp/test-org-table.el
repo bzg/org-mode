@@ -2233,8 +2233,8 @@ See also `test-org-table/copy-field'."
       (org-table-calc-current-TBLFM)
       (buffer-string)))))
 
-(ert-deftest test-org-table/time-stamps ()
-  "Test time-stamps handling."
+(ert-deftest test-org-table/timestamps ()
+  "Test timestamps handling."
   ;; Standard test.
   (should
    (string-match-p
@@ -2243,7 +2243,7 @@ See also `test-org-table/copy-field'."
 	"| <2016-07-07 Sun> | <2016-07-08 Fri> |   |\n<point>#+TBLFM: $3=$2-$1"
       (org-table-calc-current-TBLFM)
       (buffer-string))))
-  ;; Handle locale specific time-stamps.
+  ;; Handle locale specific timestamps.
   (should
    (string-match-p
     "| 1 |"

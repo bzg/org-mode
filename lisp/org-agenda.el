@@ -1342,7 +1342,7 @@ When set to the symbol `next' only the first future repeat is shown."
 
 When nil, display SCHEDULED and DEADLINE dates at their base
 date, and in today's agenda, as a reminder.  Display plain
-time-stamps, on the other hand, at every repeat date in the past
+timestamps, on the other hand, at every repeat date in the past
 in addition to the base date.
 
 When non-nil, show a repeated entry at its latest repeat date,
@@ -5708,7 +5708,7 @@ and the timestamp type relevant for the sorting strategy in
 This function is invoked if `org-agenda-todo-ignore-deadlines',
 `org-agenda-todo-ignore-scheduled' or
 `org-agenda-todo-ignore-timestamp' is set to an integer."
-  (let ((days (org-time-stamp-to-now
+  (let ((days (org-timestamp-to-now
 	       time org-agenda-todo-ignore-time-comparison-use-seconds)))
     (if (>= n 0)
 	(>= days n)
@@ -5730,13 +5730,13 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	       (re-search-forward org-scheduled-time-regexp end t)
 	       (cond
 		((eq org-agenda-todo-ignore-scheduled 'future)
-		 (> (org-time-stamp-to-now
+		 (> (org-timestamp-to-now
 		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
 		    0))
 		((eq org-agenda-todo-ignore-scheduled 'past)
-		 (<= (org-time-stamp-to-now
-		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
-		     0))
+		 (<= (org-timestamp-to-now
+		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+		    0))
 		((numberp org-agenda-todo-ignore-scheduled)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-scheduled))
@@ -5748,13 +5748,13 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		((eq org-agenda-todo-ignore-deadlines 'far)
 		 (not (org-deadline-close-p (match-string 1))))
 		((eq org-agenda-todo-ignore-deadlines 'future)
-		 (> (org-time-stamp-to-now
+		 (> (org-timestamp-to-now
 		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
 		    0))
 		((eq org-agenda-todo-ignore-deadlines 'past)
-		 (<= (org-time-stamp-to-now
-		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
-		     0))
+		 (<= (org-timestamp-to-now
+		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+		    0))
 		((numberp org-agenda-todo-ignore-deadlines)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-deadlines))
@@ -5777,13 +5777,13 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		   (when (re-search-forward org-ts-regexp nil t)
 		     (cond
 		      ((eq org-agenda-todo-ignore-timestamp 'future)
-		       (> (org-time-stamp-to-now
+		       (> (org-timestamp-to-now
 			   (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
 			  0))
 		      ((eq org-agenda-todo-ignore-timestamp 'past)
-		       (<= (org-time-stamp-to-now
-			    (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
-			   0))
+		       (<= (org-timestamp-to-now
+			   (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds)
+			  0))
 		      ((numberp org-agenda-todo-ignore-timestamp)
 		       (org-agenda-todo-custom-ignore-p
 			(match-string 1) org-agenda-todo-ignore-timestamp))
@@ -5809,8 +5809,8 @@ displayed in agenda view."
 		    (let ((m (get-text-property 0 'org-hd-marker d)))
 		      (and m (marker-position m))))
 		  deadlines))
-	 ;; Match time-stamps set to current date, time-stamps with
-	 ;; a repeater, and S-exp time-stamps.
+	 ;; Match timestamps set to current date, timestamps with
+	 ;; a repeater, and S-exp timestamps.
 	 (regexp
 	  (concat
 	   (if org-agenda-include-inactive-timestamps "[[<]" "<")
@@ -5827,7 +5827,7 @@ displayed in agenda view."
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       ;; Skip date ranges, scheduled and deadlines, which are handled
-      ;; specially.  Also skip time-stamps before first headline as
+      ;; specially.  Also skip timestamps before first headline as
       ;; there would be no entry to add to the agenda.  Eventually,
       ;; ignore clock entries.
       (catch :skip
@@ -5843,11 +5843,11 @@ displayed in agenda view."
 	(let* ((pos (match-beginning 0))
 	       (repeat (match-string 1))
 	       (sexp-entry (match-string 3))
-	       (time-stamp (if (or repeat sexp-entry) (match-string 0)
-			     (save-excursion
-			       (goto-char pos)
-			       (looking-at org-ts-regexp-both)
-			       (match-string 0))))
+	       (timestamp (if (or repeat sexp-entry) (match-string 0)
+			    (save-excursion
+			      (goto-char pos)
+			      (looking-at org-ts-regexp-both)
+			      (match-string 0))))
 	       (todo-state (org-get-todo-state))
 	       (warntime (get-text-property (point) 'org-appt-warntime))
 	       (done? (member todo-state org-done-keywords)))
@@ -5892,7 +5892,7 @@ displayed in agenda view."
 		(throw :skip nil))))
 	  (save-excursion
 	    (re-search-backward org-outline-regexp-bol nil t)
-	    ;; Possibly skip time-stamp when a deadline is set.
+	    ;; Possibly skip timestamp when a deadline is set.
 	    (when (and org-agenda-skip-timestamp-if-deadline-is-shown
 		       (assq (point) deadline-position-alist))
 	      (throw :skip nil))
@@ -5920,7 +5920,7 @@ displayed in agenda view."
                      (org-add-props head nil
                        'effort effort
                        'effort-minutes effort-minutes)
-                     level category tags time-stamp org-ts-regexp habit?)))
+                     level category tags timestamp org-ts-regexp habit?)))
 	      (org-add-props item props
 		'urgency (if habit?
  			     (org-habit-get-urgency (org-habit-parse-todo))
@@ -10392,15 +10392,15 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
   (org-agenda-date-later (- arg) what))
 
 (defun org-agenda-date-later-minutes (arg)
-  "Change the time of this item, in units of `org-time-stamp-rounding-minutes'."
+  "Change the time of this item, in units of `org-timestamp-rounding-minutes'."
   (interactive "p")
-  (setq arg (* arg (cadr org-time-stamp-rounding-minutes)))
+  (setq arg (* arg (cadr org-timestamp-rounding-minutes)))
   (org-agenda-date-later arg 'minute))
 
 (defun org-agenda-date-earlier-minutes (arg)
-  "Change the time of this item, in units of `org-time-stamp-rounding-minutes'."
+  "Change the time of this item, in units of `org-timestamp-rounding-minutes'."
   (interactive "p")
-  (setq arg (* arg (cadr org-time-stamp-rounding-minutes)))
+  (setq arg (* arg (cadr org-timestamp-rounding-minutes)))
   (org-agenda-date-earlier arg 'minute))
 
 (defun org-agenda-date-later-hours (arg)
@@ -10438,7 +10438,7 @@ When called programmatically, FORCE-DIRECTION can be `set', `up',
 
 (defun org-agenda-date-prompt (arg)
   "Change the date of this item.  Date is prompted for, with default today.
-The prefix ARG is passed to the `org-time-stamp' command and can therefore
+The prefix ARG is passed to the `org-timestamp' command and can therefore
 be used to request time specification in the time stamp."
   (interactive "P")
   (org-agenda-check-type t 'agenda)
@@ -10454,7 +10454,7 @@ be used to request time specification in the time stamp."
 	 (widen)
 	 (goto-char pos)
 	 (unless (org-at-timestamp-p 'lax) (error "Cannot find time stamp"))
-	 (org-time-stamp arg (equal (char-after (match-beginning 0)) ?\[)))
+	 (org-timestamp arg (equal (char-after (match-beginning 0)) ?\[)))
        (org-agenda-show-new-time marker org-last-changed-timestamp))
      (message "Time stamp changed to %s" org-last-changed-timestamp))))
 
@@ -10682,9 +10682,9 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	   (require 'org-datetree)
 	   (org-datetree-find-date-create d1)
 	   (org-agenda-insert-diary-make-new-entry text))
-	 (org-insert-time-stamp (org-time-from-absolute
-				 (calendar-absolute-from-gregorian d1))
-				nil nil nil nil time2))
+	 (org-insert-timestamp (org-time-from-absolute
+				(calendar-absolute-from-gregorian d1))
+			       nil nil nil nil time2))
        (end-of-line 0))
       ((block) ;; Wrap this in (strictly unnecessary) parens because
        ;; otherwise the indentation gets confused by the
@@ -10697,11 +10697,11 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	 (require 'org-datetree)
 	 (org-datetree-find-date-create d1)
 	 (org-agenda-insert-diary-make-new-entry text))
-       (org-insert-time-stamp (org-time-from-absolute
-			       (calendar-absolute-from-gregorian d1)))
+       (org-insert-timestamp (org-time-from-absolute
+			      (calendar-absolute-from-gregorian d1)))
        (insert "--")
-       (org-insert-time-stamp (org-time-from-absolute
-			       (calendar-absolute-from-gregorian d2)))
+       (org-insert-timestamp (org-time-from-absolute
+			      (calendar-absolute-from-gregorian d2)))
        (end-of-line 0)))
     (if (string-match "\\S-" text)
 	(progn

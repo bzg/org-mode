@@ -271,7 +271,7 @@ after the current heading."
 
 For the acceptable UNITS, see `org-timestamp-change'."
   (interactive)
-  (org-time-stamp nil)
+  (org-timestamp nil)
   (when shift (org-timestamp-change shift units)))
 
 (defun org-mouse-keyword-menu (keywords function &optional selected itemformat)
@@ -713,7 +713,7 @@ This means, between the beginning of line and the point."
       (popup-menu
        '(nil
 	 ["Show Day" org-open-at-point t]
-	 ["Change Timestamp" org-time-stamp t]
+	 ["Change Timestamp" org-timestamp t]
 	 ["Delete Timestamp" (org-mouse-delete-timestamp) t]
 	 ["Compute Time Range" org-evaluate-time-range (org-at-date-range-p)]
 	 "--"
@@ -817,14 +817,14 @@ This means, between the beginning of line and the point."
 	   ["Set Deadline"
 	    (progn (org-mouse-end-headline) (insert " ") (org-deadline))
 	    :active (not (save-excursion
-			   (org-mouse-re-search-line org-deadline-regexp)))]
+			 (org-mouse-re-search-line org-deadline-regexp)))]
 	   ["Schedule Task"
 	    (progn (org-mouse-end-headline) (insert " ") (org-schedule))
 	    :active (not (save-excursion
-			   (org-mouse-re-search-line org-scheduled-regexp)))]
+			 (org-mouse-re-search-line org-scheduled-regexp)))]
 	   ["Insert Timestamp"
-	    (progn (org-mouse-end-headline) (insert " ") (org-time-stamp nil)) t]
-					;	 ["Timestamp (inactive)" org-time-stamp-inactive t]
+	    (progn (org-mouse-end-headline) (insert " ") (org-timestamp nil)) t]
+					;	 ["Timestamp (inactive)" org-timestamp-inactive t]
 	   "--"
 	   ["Archive Subtree" org-archive-subtree]
 	   ["Cut Subtree"  org-cut-special]

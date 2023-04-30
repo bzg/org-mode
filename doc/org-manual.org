@@ -6022,10 +6022,11 @@ format.  All commands listed below produce timestamps in the correct
 format.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c .)}}} (~org-time-stamp~) ::
+- {{{kbd(C-c .)}}} (~org-timestamp~) ::
 
   #+kindex: C-c .
   #+findex: org-time-stamp
+  #+findex: org-timestamp
   Prompt for a date and insert a corresponding timestamp.  When point
   is at an existing timestamp in the buffer, the command is used to
   modify this timestamp instead of inserting a new one.  When this
@@ -6033,21 +6034,23 @@ format.
 
   #+kindex: C-u C-c .
   #+vindex: org-time-stamp-rounding-minutes
+  #+vindex: org-timestamp-rounding-minutes
   When called with a prefix argument, use the alternative format which
   contains date and time.  The default time can be rounded to
   multiples of 5 minutes.  See the option
-  ~org-time-stamp-rounding-minutes~.
+  ~org-timestamp-rounding-minutes~.
 
   #+kindex: C-u C-u C-c .
   With two prefix arguments, insert an active timestamp with the
   current time without prompting.
 
-- {{{kbd(C-c !)}}} (~org-time-stamp-inactive~) ::
+- {{{kbd(C-c !)}}} (~org-timestamp-inactive~) ::
 
   #+kindex: C-c !
   #+kindex: C-u C-c !
   #+kindex: C-u C-u C-c !
   #+findex: org-time-stamp-inactive
+  #+findex: org-timestamp-inactive
   Like {{{kbd(C-c .)}}}, but insert an inactive timestamp that does
   not cause an agenda entry.
 
@@ -6251,16 +6254,18 @@ turn off the display with ~org-read-date-display-live~.].
 
 #+vindex: org-display-custom-times
 #+vindex: org-time-stamp-custom-formats
+#+vindex: org-timestamp-custom-formats
 Org mode uses the standard ISO notation for dates and times as it is
 defined in ISO 8601.  If you cannot get used to this and require
 another representation of date and time to keep you happy, you can get
 it by customizing the variables ~org-display-custom-times~ and
-~org-time-stamp-custom-formats~.
+~org-timestamp-custom-formats~.
 
-- {{{kbd(C-c C-x C-t)}}} (~org-toggle-time-stamp-overlays~) ::
+- {{{kbd(C-c C-x C-t)}}} (~org-toggle-timestamp-overlays~) ::
 
   #+kindex: C-c C-x C-t
   #+findex: org-toggle-time-stamp-overlays
+  #+findex: org-toggle-timestamp-overlays
   Toggle the display of custom formats for dates and times.
 
 Org mode needs the default format for scanning, so the custom
@@ -11846,7 +11851,7 @@ global variables, include:
 
   #+cindex: @samp{DATE}, keyword
   #+vindex: org-export-date-timestamp-format
-  A date or a time-stamp[fn:: The variable
+  A date or a timestamp[fn:: The variable
   ~org-export-date-timestamp-format~ defines how this timestamp are
   exported.].
 
@@ -12077,8 +12082,9 @@ following arguments.
 - ~timestamp~ ::
 
   #+vindex: org-export-time-stamp-file
+  #+vindex: org-export-timestamp-file
   Toggle inclusion of the creation time in the exported file
-  (~org-export-time-stamp-file~).
+  (~org-export-timestamp-file~).
 
 - ~title~ ::
 
@@ -20073,7 +20079,7 @@ changes.
   #+vindex: org-time-stamp-overlay-formats
   To turn on custom format overlays over timestamps (variables
   ~org-put-time-stamp-overlays~ and
-  ~org-time-stamp-overlay-formats~), use:
+  ~org-timestamp-overlay-formats~), use:
 
   | =customtime= | Overlay custom time format. |
 
@@ -21471,7 +21477,7 @@ Org provides a special hook to further limit items in agenda views:
 ~agenda~, ~agenda*~[fn:: The ~agenda*~ view is the same as ~agenda~
 except that it only considers /appointments/, i.e., scheduled and
 deadline items that have a time specification =[h]h:mm= in their
-time-stamps.], ~todo~, ~alltodo~, ~tags~, ~tags-todo~, ~tags-tree~.
+timestamps.], ~todo~, ~alltodo~, ~tags~, ~tags-todo~, ~tags-tree~.
 Specify a custom function that tests inclusion of every matched item
 in the view.  This function can also skip as much as is needed.
 
@@ -22603,7 +22609,7 @@ only set this in the global options section, not in the section of an
 individual block.
 
 [fn:34] /Planned/ means here that these entries have some planning
-information attached to them, like a time-stamp, a scheduled or
+information attached to them, like a timestamp, a scheduled or
 a deadline string.  See ~org-agenda-entry-types~ on how to set what
 planning information is taken into account.
 

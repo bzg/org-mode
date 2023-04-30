@@ -119,7 +119,7 @@
     (:headline-levels nil "H" org-export-headline-levels)
     (:preserve-breaks nil "\\n" org-export-preserve-breaks)
     (:section-numbers nil "num" org-export-with-section-numbers)
-    (:time-stamp-file nil "timestamp" org-export-time-stamp-file)
+    (:time-stamp-file nil "timestamp" org-export-timestamp-file)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-broken-links nil "broken-links" org-export-with-broken-links)
@@ -398,16 +398,16 @@ e.g. \"date:nil\"."
   :safe #'booleanp)
 
 (defcustom org-export-date-timestamp-format nil
-  "Time-stamp format string to use for DATE keyword.
+  "Timestamp format string to use for DATE keyword.
 
 The format string, when specified, only applies if date consists
-in a single time-stamp.  Otherwise its value will be ignored.
+in a single timestamp.  Otherwise its value will be ignored.
 
 See `format-time-string' for details on how to build this
 string."
   :group 'org-export-general
   :type '(choice
-	  (string :tag "Time-stamp format string")
+	  (string :tag "Timestamp format string")
 	  (const :tag "No format string" nil))
   :safe (lambda (x) (or (null x) (stringp x))))
 
@@ -576,7 +576,7 @@ e.g. \"inline:nil\"."
   "Non-nil means include planning info in export.
 
 Planning info is the line containing either SCHEDULED:,
-DEADLINE:, CLOSED: time-stamps, or a combination of them.
+DEADLINE:, CLOSED: timestamps, or a combination of them.
 
 This option can also be set with the OPTIONS keyword,
 e.g. \"p:t\"."
@@ -804,7 +804,8 @@ e.g. \"title:nil\"."
   :type 'boolean
   :safe #'booleanp)
 
-(defcustom org-export-time-stamp-file t
+(defvaralias 'org-export-time-stamp-file 'org-export-timestamp-file)
+(defcustom org-export-timestamp-file t
   "Non-nil means insert a time stamp into the exported file.
 The time stamp shows when the file was created.  This option can
 also be set with the OPTIONS keyword, e.g. \"timestamp:nil\"."
@@ -3309,7 +3310,7 @@ locally for the subtree through node properties."
       (let ((val (cond ((equal (car key) "DATE")
 			(or (cdr key)
 			    (with-temp-buffer
-			      (org-insert-time-stamp nil))))
+			      (org-insert-timestamp nil))))
 		       ((equal (car key) "TITLE")
 			(or (let ((visited-file
 				   (buffer-file-name (buffer-base-buffer))))

@@ -190,8 +190,8 @@
 (declare-function org-table-sum "org" (&optional beg end nlast))
 (declare-function org-table-toggle-coordinate-overlays "org" ())
 (declare-function org-table-toggle-formula-debugger "org" ())
-(declare-function org-time-stamp "org" (arg &optional inactive))
-(declare-function org-time-stamp-inactive "org" (&optional arg))
+(declare-function org-timestamp "org" (arg &optional inactive))
+(declare-function org-timestamp-inactive "org" (&optional arg))
 (declare-function org-timer "org" (&optional restart no-insert))
 (declare-function org-timer-item "org" (&optional arg))
 (declare-function org-timer-pause-or-continue "org" (&optional stop))
@@ -210,7 +210,7 @@
 (declare-function org-toggle-ordered-property "org" ())
 (declare-function org-toggle-pretty-entities "org" ())
 (declare-function org-toggle-tags-groups "org" ())
-(declare-function org-toggle-time-stamp-overlays "org" ())
+(declare-function org-toggle-timestamp-overlays "org" ())
 (declare-function org-transpose-element "org" ())
 (declare-function org-transpose-words "org" ())
 (declare-function org-tree-to-indirect-buffer "org" (&optional arg))
@@ -594,8 +594,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c %") #'org-mark-ring-push)
 (org-defkey org-mode-map (kbd "C-c &") #'org-mark-ring-goto)
 (org-defkey org-mode-map (kbd "C-c C-z") #'org-add-note) ;alternative binding
-(org-defkey org-mode-map (kbd "C-c .") #'org-time-stamp) ;minor-mode reserved
-(org-defkey org-mode-map (kbd "C-c !") #'org-time-stamp-inactive) ;minor-mode r.
+(org-defkey org-mode-map (kbd "C-c .") #'org-timestamp) ;minor-mode reserved
+(org-defkey org-mode-map (kbd "C-c !") #'org-timestamp-inactive) ;minor-mode r.
 (org-defkey org-mode-map (kbd "C-c ,") #'org-priority) ;minor-mode reserved
 (org-defkey org-mode-map (kbd "C-c C-y") #'org-evaluate-time-range)
 (org-defkey org-mode-map (kbd "C-c >") #'org-goto-calendar)
@@ -639,7 +639,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 (org-defkey org-mode-map (kbd "C-c C-x C-w") #'org-cut-special)
 (org-defkey org-mode-map (kbd "C-c C-x M-w") #'org-copy-special)
 (org-defkey org-mode-map (kbd "C-c C-x C-y") #'org-paste-special)
-(org-defkey org-mode-map (kbd "C-c C-x C-t") #'org-toggle-time-stamp-overlays)
+(org-defkey org-mode-map (kbd "C-c C-x C-t") #'org-toggle-timestamp-overlays)
 (org-defkey org-mode-map (kbd "C-c C-x C-i") #'org-clock-in)
 (org-defkey org-mode-map (kbd "C-c C-x C-x") #'org-clock-in-last)
 (org-defkey org-mode-map (kbd "C-c C-x C-z") #'org-resolve-clocks)
