@@ -3711,7 +3711,8 @@ contextual information."
 
 (defun org-odt--translate-latex-fragments (tree _backend info)
   (let ((processing-type (plist-get info :with-latex))
-	(count 0))
+	(count 0)
+        (warning nil))
     ;; Normalize processing-type to one of dvipng, mathml or verbatim.
     ;; If the desired converter is not available, force verbatim
     ;; processing.
@@ -3720,17 +3721,24 @@ contextual information."
        (if (and (fboundp 'org-format-latex-mathml-available-p)
 		(org-format-latex-mathml-available-p))
 	   (setq processing-type 'mathml)
-	 (warn "LaTeX to MathML converter not available.  Falling back to verbatim.")
+         (setq warning "`org-odt-with-latex': LaTeX to MathML converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
       ((dvipng imagemagick)
        (unless (and (org-check-external-command "latex" "" t)
 		    (org-check-external-command
 		     (if (eq processing-type 'dvipng) "dvipng" "convert") "" t))
-	 (warn "LaTeX to PNG converter not available.  Falling back to verbatim.")
+	 (setq warning "`org-odt-with-latex': LaTeX to PNG converter not available.  Falling back to verbatim.")
 	 (setq processing-type 'verbatim)))
       (otherwise
-       (warn "Unknown LaTeX option.  Forcing verbatim.")
+       (setq warning "`org-odt-with-latex': Unknown LaTeX option.  Forcing verbatim.")
        (setq processing-type 'verbatim)))
+
+    ;; Display warning if the selected PROCESSING-TYPE is not
+    ;; available, but there are fragments to be converted.
+    (when warning
+      (org-element-map tree '(latex-fragment latex-environment)
+        (lambda (_) (warn warning))
+        info 'first-match nil t))
 
     ;; Store normalized value for later use.
     (when (plist-get info :with-latex)
