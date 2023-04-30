@@ -4097,8 +4097,8 @@ contextual information."
        (error
 	;; Cleanup work directory and work files.
 	(funcall --cleanup-xml-buffers)
-	(warn "OpenDocument export failed: %s"
-	      (error-message-string err))))))
+	(error "OpenDocument export failed: %s"
+	       (error-message-string err))))))
 
 
 ;;;; Export to OpenDocument formula
