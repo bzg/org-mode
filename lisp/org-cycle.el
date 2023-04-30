@@ -638,20 +638,21 @@ With a numeric prefix, show all headlines up to that level."
   "Switch subtree visibility according to VISIBILITY property."
   (interactive)
   (let ((regexp (org-re-property "VISIBILITY")))
-    (org-with-point-at 1
+    (save-excursion
+      (goto-char (point-min))
       (while (re-search-forward regexp nil t)
-	(let ((state (match-string 3)))
+        (let ((state (match-string 3)))
 	  (if (not (org-at-property-p)) (outline-next-heading)
 	    (save-excursion
 	      (org-back-to-heading t)
 	      (org-fold-subtree t)
 	      (pcase state
-		("folded"
+	        ("folded"
 		 (org-fold-subtree t))
-		("children"
+	        ("children"
 		 (org-fold-show-hidden-entry)
 		 (org-fold-show-children))
-		("content"
+	        ("content"
                  ;; Newline before heading will be outside the
                  ;; narrowing.  Make sure that it is revealed.
                  (org-fold-heading nil)
@@ -659,9 +660,9 @@ With a numeric prefix, show all headlines up to that level."
 		   (save-restriction
 		     (org-narrow-to-subtree)
 		     (org-cycle-content))))
-		((or "all" "showall")
+	        ((or "all" "showall")
 		 (org-fold-show-subtree))
-		(_ nil)))
+	        (_ nil)))
 	    (org-end-of-subtree t)))))))
 
 (defun org-cycle-overview ()

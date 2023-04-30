@@ -222,6 +222,10 @@ execution completes.  The new ~:async~ header allows users to continue
 editing with Emacs while a ~:session~ block executes.
 
 ** Miscellaneous
+*** =org-crypt.el= now applies initial visibility settings to decrypted entries
+
+Previously, all the text was unfolded unconditionally, including property drawers.
+
 *** Blank lines after removed objects are not retained during export
 
 When certain objects in Org document are to be excluded from export,

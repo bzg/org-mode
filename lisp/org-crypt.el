@@ -81,6 +81,7 @@
 (declare-function org-previous-visible-heading "org" (arg))
 (declare-function org-scan-tags "org" (action matcher todo-only &optional start-level))
 (declare-function org-set-property "org" (property value))
+(declare-function org-cycle-set-startup-visibility "org-cycle" ())
 
 (defgroup org-crypt nil
   "Org Crypt."
@@ -269,10 +270,12 @@ Assume `epg-context' is set."
 	      (decrypted-text
 	       (decode-coding-string
 		(epg-decrypt-string epg-context encrypted-text)
-		'utf-8)))
+		'utf-8))
+              origin-marker)
 	 ;; Delete region starting just before point, because the
 	 ;; outline property starts at the \n of the heading.
 	 (delete-region (1- (point)) end)
+         (setq origin-marker (point-marker))
 	 ;; Store a checksum of the decrypted and the encrypted text
 	 ;; value.  This allows reusing the same encrypted text if the
 	 ;; text does not change, and therefore avoid a re-encryption
@@ -282,6 +285,12 @@ Assume `epg-context' is set."
 			     'org-crypt-checksum (sha1 decrypted-text)
 			     'org-crypt-key (org-crypt-key-for-heading)
 			     'org-crypt-text encrypted-text))
+         ;; Apply initial visibility.
+         (save-restriction
+           (narrow-to-region origin-marker (point))
+           (set-marker origin-marker nil)
+           (org-cycle-set-startup-visibility))
+         ;; ... but keep the previous folded state.
 	 (when folded-heading
 	   (goto-char folded-heading)
 	   (org-fold-subtree t))
