@@ -113,6 +113,20 @@ the buffer."
       (org-clock-timestamps-change 'up 1)
       (buffer-string)))))
 
+(ert-deftest test-org-clok/org-clock-update-time-maybe ()
+  "Test `org-clock-update-time-maybe' specifications."
+  (should
+   (equal
+    "CLOCK: [2023-04-29 Sat 00:00]--[2023-05-04 Thu 01:00] => 121:00"
+    (org-test-with-temp-text
+        "CLOCK: [2023-04-29 Sat 00:00]--[2023-05-04 Thu 01:00]"
+      (should (org-clock-update-time-maybe))
+      (buffer-string))))
+  (should-not
+   (org-test-with-temp-text
+       "[2023-04-29 Sat 00:00]--[2023-05-04 Thu 01:00]"
+     (org-clock-update-time-maybe))))
+
 
 ;;; Clock drawer
 
