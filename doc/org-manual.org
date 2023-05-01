@@ -219,8 +219,12 @@ region by using the mouse to select a region, or pressing
 :DESCRIPTION: Bug reports, ideas, patches, etc.
 :END:
 #+cindex: feedback
+#+cindex: contact
 #+cindex: bug reports
 #+cindex: reporting a bug
+#+cindex: request a feature
+#+cindex: feature requests
+#+cindex: ideas
 #+cindex: maintainer
 #+cindex: author
 
@@ -299,8 +303,17 @@ information about:
 2. What did you expect to happen?
 3. What happened instead?
 
-Thank you for helping to improve this program.
+#+cindex: performance
+#+cindex: profile
+#+cindex: slow
+#+cindex: slowdown
+#+cindex: laggy
+#+cindex: not responsive
+If you experience degraded performance, you can record a "profile" and
+share it on the Org mailing list.  See below for the instructions how
+to record a useful profile.
 
+Thank you for helping to improve this program.
 *** How to create a useful backtrace
 :PROPERTIES:
 :UNNUMBERED: notoc
@@ -335,6 +348,67 @@ error occurred.  Here is how to produce a useful backtrace:
 4. When you hit the error, a =*Backtrace*= buffer appears on the
    screen.  Save this buffer to a file---for example using {{{kbd(C-x
    C-w)}}}---and attach it to your bug report.
+
+*** How to profile Org performance
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+#+cindex: profiler
+Sometimes, Org is becoming slow for no apparent reason.  Such slowdown
+is often caused by interaction between third-party packages and Org
+mode.  However, identifying the root cause is not always straightforward.
+
+Emacs is able to record performance statistics, which can then be used
+to find out which functions are taking most of the time to execute.
+To record the statistics, one can use so-called profiler.  To use the
+Emacs profiler, we recommend the following steps:
+
+1. Make sure that no profiler is currently active:
+
+   : M-x profiler-stop <RET>
+
+2. Start a new CPU profiler session:
+
+   : M-x profiler-start <RET> cpu <RET>
+
+3. Use Emacs as usual, performing the actions that are deemed slow.
+
+4. Display and examine the recorded performance statistics:
+
+   : M-x profiler-report <RET>
+
+   This command will display a summary of the commands and functions
+   that have been executed between ~profiler-start~ and
+   ~profiler-report~ invocations, with command taking most of the time
+   displayed on top.
+
+   =<TAB>= key can be used to fold and unfold lines in the profiler
+   buffer.  The child items revealed upon unfolding are the functions
+   and commands called by the unfolded parent.
+
+   The root causes are often buried deep inside sub-children items in
+   the profiler.  You can press =B= (~profiler-report-render-reversed-calltree~)
+   to quickly reveal the actual function/command that takes most of
+   the time to run.
+
+   Pressing =C= ~profiler-report-render-calltree~ will recover the
+   original view.
+
+5. If you need further help, you can share the statistics data.
+
+   Just save the data by issuing
+
+   : M-x profiler-report-write-profile <RET>
+   : /path/to/profile-file-to-be-saved <RET>
+
+   Then, you can attached the saved file to your email to the Org
+   mailing list, alongside with details about what you did to trigger
+   the slowdown.
+
+   Note that the saved statistics will only contain the function names
+   and how long their execution takes.  No private data will be
+   recorded.
 
 ** Typesetting Conventions Used in this Manual
 :PROPERTIES:
