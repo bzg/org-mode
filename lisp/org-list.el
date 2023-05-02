@@ -115,7 +115,7 @@
 (declare-function org-element-macro-interpreter "org-element" (macro ##))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-normalize-string "org-element" (s))
-(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
+(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only keep-deferred))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-put-property "org-element-ast" (node property value))
 (declare-function org-element-set "org-element-ast" (old new))

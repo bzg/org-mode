@@ -4460,7 +4460,7 @@ When PARSE is non-nil, values from keywords belonging to
 ;; resulting values.  In an export situation, it also skips unneeded
 ;; parts of the parse tree.
 
-(defun org-element-parse-buffer (&optional granularity visible-only)
+(defun org-element-parse-buffer (&optional granularity visible-only keep-deferred)
   "Recursively parse the buffer and return structure.
 If narrowing is in effect, only parse the visible part of the
 buffer.
@@ -4477,6 +4477,8 @@ recursion.  It can be set to the following symbols:
 
 When VISIBLE-ONLY is non-nil, don't parse contents of hidden
 elements.
+
+When KEEP-DEFERRED is non-nil, do not resolve deferred properties.
 
 An element or object is represented as a list with the
 pattern (TYPE PROPERTIES CONTENTS), where :
@@ -4515,10 +4517,11 @@ This function assumes that current major mode is `org-mode'."
              ;; Start in `first-section' mode so text before the first
              ;; headline belongs to a section.
              'first-section nil granularity visible-only org-data))
-      (org-element-map ; undefer
-          org-data t
-        (lambda (el) (org-element-properties-resolve el t))
-        nil nil nil t)
+      (unless keep-deferred
+        (org-element-map ; undefer
+            org-data t
+          (lambda (el) (org-element-properties-resolve el t))
+          nil nil nil t))
       org-data)))
 
 (defun org-element-parse-secondary-string (string restriction &optional parent)

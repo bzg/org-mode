@@ -2893,7 +2893,7 @@ a list of footnote definitions or in the widened buffer."
 			  (narrow-to-region
 			   (org-element-property :begin datum)
 			   (org-element-property :end datum))
-			  (org-element-map (org-element-parse-buffer)
+			  (org-element-map (org-element-parse-buffer nil nil 'defer)
 			      'footnote-definition #'identity nil t))))))
 		  (_ nil)))
 	       (t (user-error "Definition not found for footnote %s" label)))))
@@ -3212,7 +3212,7 @@ still inferior to file-local settings."
         (let ((result (funcall filter info backend-name)))
           (when result (setq info result)))))
     ;; Parse buffer.
-    (setq tree (org-element-parse-buffer nil visible-only))
+    (setq tree (org-element-parse-buffer nil visible-only 'defer))
     ;; Prune tree from non-exported elements and transform
     ;; uninterpreted elements or objects in both parse tree and
     ;; communication channel.

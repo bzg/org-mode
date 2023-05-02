@@ -57,7 +57,7 @@
 (declare-function org-element-interpret-data "org-element" (data))
 (declare-function org-element-lineage "org-element-ast" (blob &optional types with-self))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
-(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
+(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only keep-deferred))
 (declare-function org-element-property "org-element-ast" (property node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-cache-reset "org-element" (&optional all no-persistence))

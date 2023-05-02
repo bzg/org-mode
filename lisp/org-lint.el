@@ -195,7 +195,7 @@ for `tabulated-list-printer'."
   (with-current-buffer buffer
     (save-excursion
       (goto-char (point-min))
-      (let ((ast (org-element-parse-buffer))
+      (let ((ast (org-element-parse-buffer nil nil 'defer))
 	    (id 0)
 	    (last-line 1)
 	    (last-pos 1))
