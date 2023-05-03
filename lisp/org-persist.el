@@ -1210,7 +1210,8 @@ Also, remove containers associated with non-existing files."
               (setq expired? t)))
           (if expired?
               (org-persist--gc-persist-file persist-file)
-            (push collection new-index)
+            (when (file-exists-p persist-file)
+              (push collection new-index))
             (dolist (container (plist-get collection :container))
               (dolist (associated-file
                        (org-persist-associated-files:generic
