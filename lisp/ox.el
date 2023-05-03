@@ -1785,8 +1785,8 @@ not exported."
      ;; local structure of the document upon interpreting it back into
      ;; Org syntax.
      (let* ((previous (org-export-get-previous-element datum options))
-	    (before (or (org-element-property :post-blank previous) 0))
-	    (after (or (org-element-property :post-blank datum) 0)))
+	    (before (or (org-element-post-blank previous) 0))
+	    (after (or (org-element-post-blank datum) 0)))
        (when previous
 	 (org-element-put-property previous :post-blank (max before after 1))))
      t)
@@ -1998,7 +1998,7 @@ Return a string."
 	    (t
 	     (org-export-filter-apply-functions
 	      (plist-get info (intern (format ":filter-%s" type)))
-	      (let ((blank (or (org-element-property :post-blank data) 0)))
+	      (let ((blank (or (org-element-post-blank data) 0)))
 		(if (eq (org-element-class data parent) 'object)
 		    (concat results (make-string blank ?\s))
 		  (concat (org-element-normalize-string results)
@@ -2747,8 +2747,8 @@ Narrowing, if any, is ignored."
      (while (re-search-forward regexp nil t)
        (let ((element (org-element-at-point)))
 	 (when (org-element-property :commentedp element)
-	   (delete-region (org-element-property :begin element)
-			  (org-element-property :end element))))))))
+	   (delete-region (org-element-begin element)
+			  (org-element-end element))))))))
 
 (defun org-export--prune-tree (data info)
   "Prune non exportable elements from DATA.
@@ -2772,7 +2772,7 @@ from tree."
 		(let ((type (org-element-type data)))
 		  (if (org-export--skip-p data info selected excluded)
 		      (if (memq type '(table-cell table-row)) (push data ignore)
-			(let ((post-blank (org-element-property :post-blank data)))
+			(let ((post-blank (org-element-post-blank data)))
 			  (if (or (not post-blank) (zerop post-blank)
 				  (eq 'element (org-element-class data)))
 			      (org-element-extract data)
@@ -2786,7 +2786,7 @@ from tree."
 					(`plain-text
 					 (string-match-p
 					  (rx  whitespace eos) previous))
-					(_ (org-element-property :post-blank previous))))
+					(_ (org-element-post-blank previous))))
 				  ;; Previous object ends with whitespace already.
 				  (org-element-extract data)
 				(org-element-set data (make-string post-blank ?\s)))))))
@@ -2883,8 +2883,8 @@ a list of footnote definitions or in the widened buffer."
 			;; Parse definition with contents.
 			(save-restriction
 			  (narrow-to-region
-			   (org-element-property :begin datum)
-			   (org-element-property :end datum))
+			   (org-element-begin datum)
+			   (org-element-end datum))
 			  (org-element-map (org-element-parse-buffer nil nil 'defer)
 			      'footnote-definition #'identity nil t))))))
 		  (_ nil)))
@@ -2984,7 +2984,7 @@ returned by the function."
     (lambda (datum)
       (let* ((type (org-element-type datum))
 	     (post-blank
-	      (pcase (org-element-property :post-blank datum)
+	      (pcase (org-element-post-blank datum)
 		(`nil nil)
 		(n (make-string n (if (eq type 'latex-environment) ?\n ?\s)))))
 	     (new
@@ -3585,9 +3585,9 @@ Return a string of lines to be included in the format expected by
        (error "%s for %s::%s" (error-message-string err) file location)))
     (let* ((element (org-element-at-point))
 	   (contents-begin
-	    (and only-contents (org-element-property :contents-begin element))))
+	    (and only-contents (org-element-contents-begin element))))
       (narrow-to-region
-       (or contents-begin (org-element-property :begin element))
+       (or contents-begin (org-element-begin element))
        (org-element-property (if contents-begin :contents-end :end) element))
       (when (and only-contents
 		 (org-element-type-p element '(headline inlinetask)))
@@ -3637,18 +3637,18 @@ Move point after the link."
     (if (or (not (string= "file" (org-element-property :type link)))
 	    (file-remote-p path)
 	    (file-name-absolute-p path))
-	(goto-char (org-element-property :end link))
+	(goto-char (org-element-end link))
       (let ((new-path (file-relative-name (expand-file-name path file-dir)
 					  includer-dir))
 	    (new-link (org-element-copy link)))
 	(org-element-put-property new-link :path new-path)
-	(when (org-element-property :contents-begin link)
+	(when (org-element-contents-begin link)
 	  (org-element-adopt new-link
 	    (buffer-substring
-	     (org-element-property :contents-begin link)
-	     (org-element-property :contents-end link))))
-	(delete-region (org-element-property :begin link)
-		       (org-element-property :end link))
+	     (org-element-contents-begin link)
+	     (org-element-contents-end link))))
+	(delete-region (org-element-begin link)
+		       (org-element-end link))
 	(insert (org-element-interpret-data new-link))))))
 
 (defun org-export--prepare-file-contents
@@ -3714,11 +3714,11 @@ is to happen."
 		  ;; `org-export-insert-image-links' may activate
 		  ;; them.
 		  (let ((contents-begin
-			 (org-element-property :contents-begin link))
-			(begin (org-element-property :begin link)))
+			 (org-element-contents-begin link))
+			(begin (org-element-begin link)))
 		    (when contents-begin
 		      (save-excursion
-			(goto-char (org-element-property :contents-end link))
+			(goto-char (org-element-contents-end link))
 			(while (re-search-backward regexp contents-begin t)
 			  (save-match-data
 			    (org-export--update-included-link
@@ -3789,7 +3789,7 @@ is to happen."
 	     (lambda (f old new)
 	       ;; Replace OLD label with NEW in footnote F.
 	       (save-excursion
-		 (goto-char (+ (org-element-property :begin f) 4))
+		 (goto-char (+ (org-element-begin f) 4))
 		 (looking-at (regexp-quote old))
 		 (replace-match new))))
 	    (seen-alist))
@@ -4874,7 +4874,7 @@ objects of the same type."
     ;; Special case 2: An item returns its number as a list.
     (item (let ((struct (org-element-property :structure element)))
 	    (org-list-get-item-number
-	     (org-element-property :begin element)
+	     (org-element-begin element)
 	     struct
 	     (org-list-prevs-alist struct)
 	     (org-list-parents-alist struct))))
@@ -5960,7 +5960,7 @@ INFO is the current export state, as a plist."
 				       text info)))
 			       (cond ((not p) nil)
 				     ((stringp p) (substring p -1))
-				     ((memq (org-element-property :post-blank p)
+				     ((memq (org-element-post-blank p)
 					    '(0 nil))
 				      'no-blank)
 				     (t 'blank)))))

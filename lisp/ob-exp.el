@@ -33,6 +33,8 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-escape-code-in-string "org-src" (s))
 (declare-function org-export-copy-buffer "ox"
@@ -195,11 +197,11 @@ this template."
 			     nil)
 			    (type type)))
 			 (begin
-			  (copy-marker (org-element-property :begin element)))
+			  (copy-marker (org-element-begin element)))
 			 (end
 			  (copy-marker
 			   (save-excursion
-			     (goto-char (org-element-property :end element))
+			     (goto-char (org-element-end element))
 			     (skip-chars-backward " \r\t\n")
 			     (point)))))
 		    (pcase type

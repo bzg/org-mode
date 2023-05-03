@@ -52,6 +52,13 @@
 		  (blob &optional types with-self))
 (declare-function org-element--parse-paired-brackets "org-element" (char))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
+(declare-function org-element-contents-begin "org-element" (node))
+(declare-function org-element-contents-end "org-element" (node))
+(declare-function org-element-post-affiliated "org-element" (node))
+(declare-function org-element-post-blank "org-element" (node))
+(declare-function org-element-parent "org-element-ast" (node))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-footnote-goto-definition "org-footnote"
@@ -378,36 +385,36 @@ where BEG and END are buffer positions and CONTENTS is a string."
      (cond
       ((eq type 'footnote-definition)
        (let* ((beg (progn
-		     (goto-char (org-element-property :post-affiliated datum))
+		     (goto-char (org-element-post-affiliated datum))
 		     (search-forward "]")))
-	      (end (or (org-element-property :contents-end datum) beg)))
+	      (end (or (org-element-contents-end datum) beg)))
 	 (list beg end (buffer-substring-no-properties beg end))))
       ((eq type 'inline-src-block)
-       (let ((beg (progn (goto-char (org-element-property :begin datum))
+       (let ((beg (progn (goto-char (org-element-begin datum))
 			 (search-forward "{" (line-end-position) t)))
-	     (end (progn (goto-char (org-element-property :end datum))
+	     (end (progn (goto-char (org-element-end datum))
 			 (search-backward "}" (line-beginning-position) t))))
 	 (list beg end (buffer-substring-no-properties beg end))))
       ((eq type 'latex-fragment)
-       (let ((beg (org-element-property :begin datum))
-	     (end (org-with-point-at (org-element-property :end datum)
+       (let ((beg (org-element-begin datum))
+	     (end (org-with-point-at (org-element-end datum)
 		    (skip-chars-backward " \t")
 		    (point))))
 	 (list beg end (buffer-substring-no-properties beg end))))
-      ((org-element-property :contents-begin datum)
-       (let ((beg (org-element-property :contents-begin datum))
-	     (end (org-element-property :contents-end datum)))
+      ((org-element-contents-begin datum)
+       (let ((beg (org-element-contents-begin datum))
+	     (end (org-element-contents-end datum)))
 	 (list beg end (buffer-substring-no-properties beg end))))
       ((memq type '(example-block export-block src-block comment-block))
-       (list (progn (goto-char (org-element-property :post-affiliated datum))
+       (list (progn (goto-char (org-element-post-affiliated datum))
 		    (line-beginning-position 2))
-	     (progn (goto-char (org-element-property :end datum))
+	     (progn (goto-char (org-element-end datum))
 		    (skip-chars-backward " \r\t\n")
 		    (line-beginning-position 1))
 	     (org-element-property :value datum)))
       ((memq type '(fixed-width latex-environment table))
-       (let ((beg (org-element-property :post-affiliated datum))
-	     (end (progn (goto-char (org-element-property :end datum))
+       (let ((beg (org-element-post-affiliated datum))
+	     (end (progn (goto-char (org-element-end datum))
 			 (skip-chars-backward " \r\t\n")
 			 (line-beginning-position 2))))
 	 (list beg
@@ -448,10 +455,10 @@ END."
   "Non-nil when point is on DATUM.
 DATUM is an element or an object.  Consider blank lines or white
 spaces after it as being outside."
-  (and (>= (point) (org-element-property :begin datum))
+  (and (>= (point) (org-element-begin datum))
        (<= (point)
 	   (org-with-wide-buffer
-	    (goto-char (org-element-property :end datum))
+	    (goto-char (org-element-end datum))
 	    (skip-chars-backward " \r\t\n")
 	    (if (eq (org-element-class datum) 'element)
 		(line-end-position)
@@ -541,7 +548,7 @@ Leave point in edit buffer."
 	     (source-file-name (buffer-file-name (buffer-base-buffer)))
 	     (source-tab-width (if indent-tabs-mode tab-width 0))
 	     (type (org-element-type datum))
-	     (block-ind (org-with-point-at (org-element-property :begin datum)
+	     (block-ind (org-with-point-at (org-element-begin datum)
                           (cond
                            ((save-excursion (skip-chars-backward " \t") (bolp))
 			    (org-current-text-indentation))
@@ -1052,12 +1059,12 @@ A coderef format regexp can only match at the end of a line."
 	   (contents
 	    (org-with-wide-buffer
 	     (buffer-substring-no-properties
-	      (or (org-element-property :post-affiliated definition)
-		  (org-element-property :begin definition))
+	      (or (org-element-post-affiliated definition)
+		  (org-element-begin definition))
 	      (cond
-	       (inline? (1+ (org-element-property :contents-end definition)))
-	       ((org-element-property :contents-end definition))
-	       (t (goto-char (org-element-property :post-affiliated definition))
+	       (inline? (1+ (org-element-contents-end definition)))
+	       ((org-element-contents-end definition))
+	       (t (goto-char (org-element-post-affiliated definition))
 		  (line-end-position)))))))
       (add-text-properties
        0
@@ -1128,9 +1135,9 @@ Throw an error when not at such a table."
       (user-error "Not on a LaTeX fragment"))
     (let* ((contents
 	    (buffer-substring-no-properties
-	     (org-element-property :begin context)
-	     (- (org-element-property :end context)
-		(org-element-property :post-blank context))))
+	     (org-element-begin context)
+	     (- (org-element-end context)
+		(org-element-post-blank context))))
 	   (delim-length (if (string-match "\\`\\$[^$]" contents) 1 2)))
       ;; Make the LaTeX deliminators read-only.
       (add-text-properties 0 delim-length

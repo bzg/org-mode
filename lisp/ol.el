@@ -56,6 +56,7 @@
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-link-parser "org-element" ())
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-update-syntax "org-element" ())
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
@@ -755,7 +756,7 @@ White spaces are not significant."
 	(forward-char -1)
 	(let ((object (org-element-context)))
 	  (when (org-element-type-p object 'radio-target)
-	    (goto-char (org-element-property :begin object))
+	    (goto-char (org-element-begin object))
 	    (org-fold-show-context 'link-search)
 	    (throw :radio-match nil))))
       (goto-char origin)
@@ -1118,7 +1119,7 @@ for internal and \"file\" links, or stored as a parameter in
 		      (_ path))
 		    ;; Prevent fuzzy links from matching themselves.
 		    (and (equal type "fuzzy")
-			 (+ 2 (org-element-property :begin link)))))
+			 (+ 2 (org-element-begin link)))))
 		 (point))))
 	   (unless (and (<= (point-min) destination)
 			(>= (point-max) destination))
@@ -1224,7 +1225,7 @@ of matched result, which is either `dedicated' or `fuzzy'."
 		 (let ((context (org-element-context)))
 		   (when (org-element-type-p context 'target)
 		     (setq type 'dedicated)
-		     (goto-char (org-element-property :begin context))
+		     (goto-char (org-element-begin context))
 		     (throw :target-match t))))
 	       nil))))
      ;; Look for elements named after S, only if not in a headline
@@ -1475,7 +1476,7 @@ is non-nil, move backward."
 	  (pcase (org-element-lineage context 'link t)
 	    (`nil nil)
 	    (link
-	     (goto-char (org-element-property :begin link))
+	     (goto-char (org-element-begin link))
 	     (when (org-invisible-p) (org-fold-show-context 'link-search))
 	     (throw :found t)))))
       (goto-char pos)

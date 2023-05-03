@@ -40,6 +40,7 @@
 (declare-function org-buffer-property-keys "org" (&optional specials defaults columns))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-property "org-element-ast" property node)
+(declare-function org-element-end "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-end-of-meta-data "org" (&optional full))
 (declare-function org-entry-properties "org" (&optional pom which))
@@ -399,7 +400,7 @@ This needs more work, to handle headings with lots of spaces in them."
 		  (let ((drawer (org-element-at-point)))
 		    (when (org-element-type-p drawer '(drawer property-drawer))
 		      (push (org-element-property :drawer-name drawer) names)
-		      (goto-char (org-element-property :end drawer))))))
+		      (goto-char (org-element-end drawer))))))
 	      (pcomplete-uniquify-list names))))
    (substring pcomplete-stub 1)))	;remove initial colon
 

@@ -59,6 +59,8 @@
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion with-affiliated))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only keep-deferred))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-end "org-element" (node))
+(declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-cache-reset "org-element" (&optional all no-persistence))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
@@ -1015,7 +1017,7 @@ With a non-nil optional argument TABLE-TYPE, return the beginning
 of a table.el-type table.  This function assumes point is on
 a table."
   (cond (table-type
-	 (org-element-property :post-affiliated (org-element-at-point)))
+	 (org-element-post-affiliated (org-element-at-point)))
 	((save-excursion
 	   (and (re-search-backward org-table-border-regexp nil t)
 		(line-beginning-position 2))))
@@ -1029,7 +1031,7 @@ a table.el-type table.  This function assumes point is on
 a table."
   (save-excursion
     (cond (table-type
-	   (goto-char (org-element-property :end (org-element-at-point)))
+	   (goto-char (org-element-end (org-element-at-point)))
 	   (skip-chars-backward " \t\n")
 	   (line-beginning-position 2))
 	  ((re-search-forward org-table-border-regexp nil t)
@@ -4264,8 +4266,8 @@ beginning and end position of the current table."
 	  (unless quietly
 	    (message "Mapping tables: %d%%"
 		     (floor (* 100.0 (point)) (buffer-size))))
-	  (goto-char (org-element-property :post-affiliated table))
-	  (let ((end (copy-marker (org-element-property :end table))))
+	  (goto-char (org-element-post-affiliated table))
+	  (let ((end (copy-marker (org-element-end table))))
 	    (unwind-protect
 		(progn (funcall f) (goto-char end))
 	      (set-marker end nil)))))))

@@ -745,7 +745,7 @@ INFO is a plist used as a communication channel."
 	         (org-not-nil
 	          (org-export-read-attribute :attr_texinfo plain-list :compact)))
 	     (not (org-element-contents item))
-	     (eq 1 (org-element-property :post-blank item)))
+	     (eq 1 (org-element-post-blank item)))
 	(org-element-put-property next-item :findex findex)
 	(org-element-put-property next-item :kindex kindex)
 	(org-element-put-property item :findex nil)
@@ -1186,12 +1186,12 @@ contextual information."
     (when (and compact
                (org-export-get-next-element item info)
                (not (org-element-contents item))
-               (eq 1 (org-element-property :post-blank item)))
+               (eq 1 (org-element-post-blank item)))
       (org-element-put-property item :post-blank 0))
     (if (and compact
              (setq previous-item (org-export-get-previous-element item info))
              (not (org-element-contents previous-item))
-	     (eq 0 (org-element-property :post-blank previous-item)))
+	     (eq 0 (org-element-post-blank previous-item)))
         (format "@itemx%s\n%s"
                 (if tag (concat " " (org-export-data tag info)) "")
                 (or contents ""))
@@ -1769,8 +1769,8 @@ a communication channel."
 	      ;; approximation of the length of the cell in the
 	      ;; output.  It can sometimes fail (e.g. it considers
 	      ;; "/a/" being larger than "ab").
-	      (let ((w (- (org-element-property :contents-end cell)
-			  (org-element-property :contents-begin cell))))
+	      (let ((w (- (org-element-contents-end cell)
+			  (org-element-contents-begin cell))))
 		(aset widths idx (max w (aref widths idx))))
 	      (cl-incf idx))
 	    info)))

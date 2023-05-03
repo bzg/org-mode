@@ -43,6 +43,7 @@
 (declare-function org-element--cache-active-p "org-element" ())
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-heading-components "org" ())
@@ -458,10 +459,10 @@ code blocks by target file."
     (org-babel-map-src-blocks (buffer-file-name)
       (let ((current-heading-pos
              (if (org-element--cache-active-p)
-                 (or (org-element-property
-                      :begin (org-element-lineage
-                              (org-element-at-point)
-                              'headline t))
+                 (or (org-element-begin
+                      (org-element-lineage
+                       (org-element-at-point)
+                       'headline t))
                      1)
 	       (org-with-wide-buffer
 	        (org-with-limited-levels (outline-previous-heading))))))

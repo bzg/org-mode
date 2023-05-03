@@ -117,6 +117,13 @@
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only keep-deferred))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
+(declare-function org-element-contents-begin "org-element" (node))
+(declare-function org-element-contents-end "org-element" (node))
+(declare-function org-element-post-affiliated "org-element" (node))
+(declare-function org-element-post-blank "org-element" (node))
+(declare-function org-element-parent "org-element-ast" (node))
 (declare-function org-element-put-property "org-element-ast" (node property value))
 (declare-function org-element-set "org-element-ast" (old new))
 (declare-function org-element-type-p "org-element-ast" (node types))
@@ -2383,10 +2390,10 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
       (when (org-element-type-p e '(item plain-list))
 	;; Look for ATTR_ORG attribute in the current plain list.
 	(let ((plain-list (org-element-lineage e 'plain-list t)))
-	  (org-with-point-at (org-element-property :post-affiliated plain-list)
+	  (org-with-point-at (org-element-post-affiliated plain-list)
 	    (let ((case-fold-search t)
 		  (regexp "^[ \t]*#\\+attr_org:.* :radio \\(\\S-+\\)")
-		  (begin (org-element-property :begin plain-list)))
+		  (begin (org-element-begin plain-list)))
 	      (and (re-search-backward regexp begin t)
 		   (not (string-equal "nil" (match-string 1)))))))))))
 
@@ -2583,7 +2590,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 		      '(drawer center-block dynamic-block inlinetask item
 			       quote-block special-block verse-block)))
 		    (beg (if container
-			     (org-element-property :contents-begin container)
+			     (org-element-contents-begin container)
 			   (save-excursion
 			     (org-with-limited-levels
 			      (outline-previous-heading))
@@ -2593,7 +2600,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 		     (goto-char beg)
 		     (let ((end
 			    (if container
-				(org-element-property :contents-end container)
+				(org-element-contents-end container)
 			      (save-excursion
 				(org-with-limited-levels (outline-next-heading))
 				(point))))
@@ -2608,7 +2615,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 			     (while (setq element (org-element-lineage
 						   element 'plain-list))
 			       (goto-char
-				(min (org-element-property :end element)
+				(min (org-element-end element)
 				     end))))))
 		       ;; Cache count for cookies applying to the same
 		       ;; area.  Then return it.
@@ -3050,25 +3057,23 @@ With a prefix argument ARG, change the region in a single item."
                  (setq element (org-element-at-point))
                  (when (org-element-type-p element 'footnote-definition)
                    (push (buffer-substring-no-properties
-                          (org-element-property :begin element)
-                          (org-element-property :end element))
+                          (org-element-begin element)
+                          (org-element-end element))
                          definitions)
                    ;; Ensure at least 2 blank lines after the last
                    ;; footnote definition, thus not slurping the
                    ;; following element.
-                   (unless (<= 2 (org-element-property
-                                 :post-blank
+                   (unless (<= 2 (org-element-post-blank
                                  (org-element-at-point)))
                      (setf (car definitions)
                            (concat (car definitions)
                                    (make-string
-                                    (- 2 (org-element-property
-                                          :post-blank
+                                    (- 2 (org-element-post-blank
                                           (org-element-at-point)))
                                     ?\n))))
                    (delete-region
-                    (org-element-property :begin element)
-                    (org-element-property :end element))))
+                    (org-element-begin element)
+                    (org-element-end element))))
                definitions))))
         (shift-text
 	 (lambda (ind end)
@@ -3215,8 +3220,7 @@ With a prefix argument ARG, change the region in a single item."
                (when footnote-definitions
                  ;; If the new list is followed by same-level items,
                  ;; move past them as well.
-                 (goto-char (org-element-property
-                             :end
+                 (goto-char (org-element-end
                              (org-element-lineage
                               (org-element-at-point (1- end))
                               'plain-list t)))

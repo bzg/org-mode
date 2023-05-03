@@ -6340,7 +6340,7 @@ specification like [h]h:mm."
                           (org-element-property
                            :hour-end
                            (org-element-property :deadline el))))
-             (goto-char (org-element-property :contents-begin el))
+             (goto-char (org-element-contents-begin el))
              (catch :skip
 	       (org-agenda-skip el)
 	       (let* ((s (substring (org-element-property
@@ -6348,7 +6348,7 @@ specification like [h]h:mm."
                                      (org-element-property :deadline el))
                                     1 -1))
 	              (pos (save-excursion
-                             (goto-char (org-element-property :contents-begin el))
+                             (goto-char (org-element-contents-begin el))
                              ;; We intentionally leave NOERROR
                              ;; argument in `re-search-forward' nil.  If
                              ;; the search fails here, something went
@@ -6427,7 +6427,7 @@ specification like [h]h:mm."
 			        (/= deadline current)))
 	           (throw :skip nil))
 	         (save-excursion
-                   (goto-char (org-element-property :begin el))
+                   (goto-char (org-element-begin el))
 	           (let* ((category (org-get-category))
                           (effort (save-match-data (or (get-text-property (point) 'effort)
                                                        (org-element-property (intern (concat ":" (upcase org-effort-property))) el))))
@@ -6435,7 +6435,7 @@ specification like [h]h:mm."
 		          (level (make-string (org-element-property :level el)
 				              ?\s))
 		          (head (save-excursion
-                                  (goto-char (org-element-property :begin el))
+                                  (goto-char (org-element-begin el))
                                   (re-search-forward org-outline-regexp-bol)
                                   (buffer-substring-no-properties (point) (line-end-position))))
 		          (inherited-tags
@@ -6683,7 +6683,7 @@ scheduled items with an hour specification like [h]h:mm."
                           (org-element-property
                            :hour-end
                            (org-element-property :scheduled el))))
-             (goto-char (org-element-property :contents-begin el))
+             (goto-char (org-element-contents-begin el))
              (catch :skip
                (org-agenda-skip el)
                (let* ((s (substring (org-element-property
@@ -6691,7 +6691,7 @@ scheduled items with an hour specification like [h]h:mm."
                                      (org-element-property :scheduled el))
                                     1 -1))
                       (pos (save-excursion
-                             (goto-char (org-element-property :contents-begin el))
+                             (goto-char (org-element-contents-begin el))
                              ;; We intentionally leave NOERROR
                              ;; argument in `re-search-forward' nil.  If
                              ;; the search fails here, something went
@@ -6814,7 +6814,7 @@ scheduled items with an hour specification like [h]h:mm."
 			              org-habit-show-habits-only-for-today))))
 	           (throw :skip nil))
 	         (save-excursion
-                   (goto-char (org-element-property :begin el))
+                   (goto-char (org-element-begin el))
 	           (let* ((category (org-get-category))
                           (effort (save-match-data
                                     (or (get-text-property (point) 'effort)
@@ -6832,7 +6832,7 @@ scheduled items with an hour specification like [h]h:mm."
 		          (level (make-string (org-element-property :level el)
 				              ?\s))
 		          (head (save-excursion
-                                  (goto-char (org-element-property :begin el))
+                                  (goto-char (org-element-begin el))
                                   (re-search-forward org-outline-regexp-bol)
                                   (buffer-substring (point) (line-end-position))))
 		          (time
@@ -6868,7 +6868,7 @@ scheduled items with an hour specification like [h]h:mm."
 				       'org-agenda-done)
 			              (todayp 'org-scheduled-today)
 			              (t 'org-scheduled)))
-		          (habitp (and habitp (org-habit-parse-todo (org-element-property :begin el)))))
+		          (habitp (and habitp (org-habit-parse-todo (org-element-begin el)))))
 	             (org-add-props item props
 		       'undone-face face
 		       'face (if donep 'org-agenda-done face)

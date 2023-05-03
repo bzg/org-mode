@@ -45,6 +45,10 @@
 (declare-function dired-dwim-target-directory "dired-aux")
 (declare-function dired-get-marked-files "dired" (&optional localp arg filter distinguish-one-marked error))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
+(declare-function org-element-contents-begin "org-element" (node))
+(declare-function org-element-contents-end "org-element" (node))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
@@ -744,17 +748,17 @@ It is meant to be added to `org-export-before-parsing-hook'."
 	(when (and (org-element-type-p link 'link)
 		   (string-equal "attachment"
 				 (org-element-property :type link)))
-	  (let* ((description (and (org-element-property :contents-begin link)
+	  (let* ((description (and (org-element-contents-begin link)
 				   (buffer-substring-no-properties
-				    (org-element-property :contents-begin link)
-				    (org-element-property :contents-end link))))
+				    (org-element-contents-begin link)
+				    (org-element-contents-end link))))
 		 (file (org-element-property :path link))
 		 (new-link (org-link-make-string
 			    (concat "file:" (org-attach-expand file))
 			    description)))
-	    (goto-char (org-element-property :end link))
+	    (goto-char (org-element-end link))
 	    (skip-chars-backward " \t")
-	    (delete-region (org-element-property :begin link) (point))
+	    (delete-region (org-element-begin link) (point))
 	    (insert new-link)))))))
 
 (defun org-attach-follow (file arg)

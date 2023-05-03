@@ -56,6 +56,11 @@
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
+(declare-function org-element-contents-begin "org-element" (node))
+(declare-function org-element-contents-end "org-element" (node))
+(declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-end-of-subtree "org" (&optional invisible-ok to-heading))
 (declare-function org-get-heading "org" (&optional no-tags no-todo no-priority no-comment))
 (declare-function org-get-tags "org" (&optional pos local))
@@ -896,10 +901,10 @@ region as a drawer without further ado."
 		      (looking-at-p "^[ \t]*:\\(\\(?:\\w\\|[-_]\\)+\\):[ \t]*$"))
 		    (org-element-at-point)))))
       (when (org-element-type-p drawer '(drawer property-drawer))
-	(let ((post (org-element-property :post-affiliated drawer)))
+	(let ((post (org-element-post-affiliated drawer)))
 	  (org-fold-region
 	   (save-excursion (goto-char post) (line-end-position))
-	   (save-excursion (goto-char (org-element-property :end drawer))
+	   (save-excursion (goto-char (org-element-end drawer))
 			   (skip-chars-backward " \t\n")
 			   (line-end-position))
 	   flag (if (eq org-fold-core-style 'text-properties) 'drawer 'outline))
@@ -1389,7 +1394,7 @@ ELEMENT is the element at point."
        ;; Only in inline footnotes, within the definition.
        (and (eq (org-element-property :type object) 'inline)
 	    (< (save-excursion
-		 (goto-char (org-element-property :begin object))
+		 (goto-char (org-element-begin object))
 		 (search-forward ":" nil t 2))
 	       (point))))
       (otherwise t))))
@@ -1410,7 +1415,7 @@ ELEMENT is the element at point."
            ;; Ignore checks in code, verbatim and others.
            (org--flyspell-object-check-p (org-element-at-point-no-context)))
     (let* ((element (org-element-at-point-no-context))
-	   (post-affiliated (org-element-property :post-affiliated element)))
+	   (post-affiliated (org-element-post-affiliated element)))
       (cond
        ;; Ignore checks in all affiliated keywords but captions.
        ((< (point) post-affiliated)
@@ -1436,7 +1441,7 @@ ELEMENT is the element at point."
 		(save-excursion
 		  (end-of-line)
 		  (skip-chars-forward " \r\t\n")
-		  (< (point) (org-element-property :end element)))))
+		  (< (point) (org-element-end element)))))
 	  ;; Arbitrary list of keywords where checks are meaningful.
 	  ;; Make sure point is on the value part of the element.
 	  (keyword
@@ -1448,8 +1453,8 @@ ELEMENT is the element at point."
 	  ;; table rows (after affiliated keywords) but some objects
 	  ;; must not be affected.
 	  ((paragraph table-row verse-block)
-	   (let ((cbeg (org-element-property :contents-begin element))
-		 (cend (org-element-property :contents-end element)))
+	   (let ((cbeg (org-element-contents-begin element))
+		 (cend (org-element-contents-end element)))
 	     (and cbeg (>= (point) cbeg) (< (point) cend)
 		  (org--flyspell-object-check-p element))))))))))
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)

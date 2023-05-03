@@ -63,6 +63,8 @@
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-contents-end "org-element" (node))
+(declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-encrypt-entry "org-crypt" ())
 (declare-function org-insert-link "ol" (&optional complete-file link-location default-description))
 (declare-function org-link-make-string "ol" (link &optional description))
@@ -1314,7 +1316,7 @@ may have been stored before."
 		   (point-marker))))
 	(when item
 	  (let ((i (save-excursion
-		     (goto-char (org-element-property :post-affiliated item))
+		     (goto-char (org-element-post-affiliated item))
 		     (org-current-text-indentation))))
 	    (save-excursion
 	      (goto-char beg)
@@ -1382,8 +1384,8 @@ may have been stored before."
 	  ((pred (lambda (e) (eq 'table.el (org-element-property :type e))))
 	   nil)
 	  (table
-	   (goto-char (org-element-property :contents-end table))
-	   (narrow-to-region (org-element-property :post-affiliated table)
+	   (goto-char (org-element-contents-end table))
+	   (narrow-to-region (org-element-post-affiliated table)
 			     (point))
 	   (throw :found t))))
       ;; No table found.  Create it with an empty header.

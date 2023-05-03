@@ -63,6 +63,8 @@
 (declare-function org-element-put-property "org-element-ast" (node property value))
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-begin "org-element" (node))
+(declare-function org-element-end "org-element" (node))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node types))
@@ -255,7 +257,7 @@ a definition in TEMPLATES."
              (org-element-put-property macro :parent nil)
 	     (let* ((key (org-element-property :key macro))
 		    (value (org-macro-expand macro templates))
-		    (begin (org-element-property :begin macro))
+		    (begin (org-element-begin macro))
 		    (signature (list begin
 				     macro
 				     (org-element-property :args macro))))
@@ -269,7 +271,7 @@ a definition in TEMPLATES."
 		      (delete-region
 		       begin
 		       ;; Preserve white spaces after the macro.
-		       (progn (goto-char (org-element-property :end macro))
+		       (progn (goto-char (org-element-end macro))
 			      (skip-chars-backward " \t")
 			      (point)))
 		      ;; Leave point before replacement in case of

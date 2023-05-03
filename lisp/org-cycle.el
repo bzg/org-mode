@@ -37,6 +37,7 @@
 
 (declare-function org-element-type-p "org-element-ast" (node types))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-element-lineage "org-element-ast" (datum &optional types with-self))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-display-inline-images "org" (&optional include-linked refresh beg end))
@@ -404,8 +405,8 @@ Use `\\[org-edit-special]' to edit table.el tables"))
 							   t)))
 			    (and item
 				 (= (line-beginning-position)
-				    (org-element-property :post-affiliated
-							  item)))))
+				    (org-element-post-affiliated
+				     item)))))
 		     (org-match-line org-outline-regexp))
 		 (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	    (org-cycle-internal-local))

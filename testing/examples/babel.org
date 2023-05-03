@@ -489,5 +489,4 @@ The =[[= causes a false positive which ~org-babel-detangle~ should handle proper
 :ID:       73115FB0-6565-442B-BB95-50195A499EF4
 :END:
 #+begin_src emacs-lisp :tangle yes :comments link
-  ;; detangle
 #+end_src

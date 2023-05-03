@@ -1482,7 +1482,7 @@ contextual information."
 			  (org-element-property :bullet item)))
 		    (num (number-to-string
 			  (car (last (org-list-get-item-number
-				      (org-element-property :begin item)
+				      (org-element-begin item)
 				      struct
 				      (org-list-prevs-alist struct)
 				      (org-list-parents-alist struct)))))))

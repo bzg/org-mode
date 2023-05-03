@@ -64,6 +64,8 @@
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-at-point "org-element" (&optional pom cached-only))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-end "org-element" (node))
+(declare-function org-element-post-affiliated "org-element" (node))
 (declare-function org-element--current-element "org-element" (limit &optional granularity mode structure))
 (declare-function org-element--cache-active-p "org-element" ())
 (declare-function org-toggle-custom-properties-visibility "org" ())
@@ -528,12 +530,12 @@ Return a non-nil value when toggling is successful."
                         comment-block dynamic-block example-block export-block
                         quote-block special-block src-block verse-block))
               (_ (error "Unknown category: %S" category))))
-      (let* ((post (org-element-property :post-affiliated element))
+      (let* ((post (org-element-post-affiliated element))
              (start (save-excursion
                       (goto-char post)
                       (line-end-position)))
              (end (save-excursion
-                    (goto-char (org-element-property :end element))
+                    (goto-char (org-element-end element))
                     (skip-chars-backward " \t\n")
                     (line-end-position))))
         ;; Do nothing when not before or at the block opening line or
@@ -614,7 +616,7 @@ Return a non-nil value when toggling is successful."
             ;; Make sure to skip drawer entirely or we might flag it
             ;; another time when matching its ending line with
             ;; `org-drawer-regexp'.
-            (goto-char (org-element-property :end drawer))))))))
+            (goto-char (org-element-end drawer))))))))
 
 (defun org-fold-hide-archived-subtrees (beg end)
   "Re-hide all archived subtrees after a visibility state change."
