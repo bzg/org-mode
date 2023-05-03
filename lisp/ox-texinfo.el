@@ -1177,11 +1177,11 @@ contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((tag (org-element-property :tag item))
-         (plain-list (org-element-property :parent item))
+         (plain-list (org-element-parent item))
          (compact (and (eq (org-element-property :type plain-list) 'descriptive)
                        (or (plist-get info :texinfo-compact-itemx)
                            (org-not-nil (org-export-read-attribute
-                                         :attr_texinfo plain-list :compact)))))
+                                       :attr_texinfo plain-list :compact)))))
          (previous-item nil))
     (when (and compact
                (org-export-get-next-element item info)
@@ -1350,7 +1350,7 @@ INFO is a plist holding contextual information.  See
 	       (and `target
 		    (guard
 		     (org-element-type-p
-		      (org-element-property :parent destination)
+		      (org-element-parent destination)
                       'headline))))
 	   (let ((headline (org-element-lineage destination '(headline) t)))
 	     (org-texinfo--@ref headline desc info)))

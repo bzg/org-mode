@@ -1937,7 +1937,7 @@ contextual information."
   "Transcode an ITEM element from Org to ODT.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((plain-list (org-export-get-parent item))
+  (let* ((plain-list (org-element-parent item))
 	 (count (org-element-property :counter item))
 	 (type (org-element-property :type plain-list)))
     (unless (memq type '(ordered unordered descriptive-1 descriptive-2))
@@ -2555,7 +2555,7 @@ Return nil, otherwise."
 	     (paragraph element)
 	     (link (and (or (not link-predicate)
 			    (funcall link-predicate element))
-			(org-export-get-parent element)))
+			(org-element-parent element)))
 	     (t nil))))
     (when (and p (org-element-type-p p 'paragraph))
       (when (or (not paragraph-predicate)
@@ -2838,7 +2838,7 @@ no special environment, a center block, or a quote block."
 	  ;; If PARAGRAPH is a leading paragraph in an item that has
 	  ;; a checkbox, splice checkbox and paragraph contents
 	  ;; together.
-	  (concat (let ((parent (org-element-property :parent paragraph)))
+	  (concat (let ((parent (org-element-parent paragraph)))
 		    (and (org-element-type-p parent 'item)
 			 (not (org-export-get-previous-element paragraph info))
 			 (org-odt--checkbox parent)))
@@ -2871,7 +2871,7 @@ contextual information."
 	  ;; If top-level list, re-start numbering.  Otherwise,
 	  ;; continue numbering.
 	  (format "text:continue-numbering=\"%s\""
-		  (let* ((parent (org-export-get-parent plain-list)))
+		  (let* ((parent (org-element-parent plain-list)))
 		    (if (and parent (org-element-type-p parent 'item))
 			"true" "false")))
 	  contents))
@@ -3303,7 +3303,7 @@ channel."
 	 (r (car table-cell-address))
 	 (c (cdr table-cell-address))
 	 (horiz-span (or (org-export-table-cell-width table-cell info) 0))
-	 (table-row (org-export-get-parent table-cell))
+	 (table-row (org-element-parent table-cell))
 	 (custom-style-prefix (org-odt-get-table-cell-styles
 			       table-cell info))
 	 (paragraph-style
@@ -3487,7 +3487,7 @@ pertaining to indentation here."
 			    (list el
 				  (assq 'headline
 					(org-element-contents
-					 (org-export-get-parent el)))))))
+					 (org-element-parent el)))))))
 		   parent-list)
 	      (nconc
 	       ;; Handle list genealogy.

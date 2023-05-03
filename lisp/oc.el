@@ -86,6 +86,7 @@
 (declare-function org-element-parse-secondary-string "org-element" (string restriction &optional parent))
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-parent "org-element-ast" (node))
 (declare-function org-element-put-property "org-element-ast" (node property value))
 (declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-set "org-element-ast" (old new))
@@ -765,7 +766,7 @@ When removing the last reference, also remove the whole citation."
          (when (= pos-after-blank end)
            (org-with-point-at pos-before-blank (insert " ")))))))
     ('citation-reference
-     (let* ((citation (org-element-property :parent datum))
+     (let* ((citation (org-element-parent datum))
             (references (org-cite-get-references citation))
             (begin (org-element-property :begin datum))
             (end (org-element-property :end datum)))
@@ -958,7 +959,7 @@ When non-nil, the return value if the footnote container."
                               '(footnote-definition footnote-reference))))
     (and footnote
          (or (not strict)
-             (equal (org-element-contents (org-element-property :parent citation))
+             (equal (org-element-contents (org-element-parent citation))
                     (list citation)))
          ;; Return value.
          footnote)))
@@ -1091,7 +1092,7 @@ the same object, call `org-cite-adjust-note' first."
                  (org-element-insert-before new-next next))
                 (t
                  (org-element-adopt
-                     (org-element-property :parent citation)
+                     (org-element-parent citation)
                    new-next)))
                (setq previous new-prev)
                (setq next new-next)

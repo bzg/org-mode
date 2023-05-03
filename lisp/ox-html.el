@@ -2942,7 +2942,7 @@ INFO is a plist holding contextual information.  See
   "Transcode an ITEM element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((plain-list (org-export-get-parent item))
+  (let* ((plain-list (org-element-parent item))
 	 (type (org-element-property :type plain-list))
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
@@ -3169,7 +3169,7 @@ images, set it to:
   (lambda (paragraph) (org-element-property :caption paragraph))"
   (let ((paragraph (pcase (org-element-type element)
 		     (`paragraph element)
-		     (`link (org-export-get-parent element)))))
+		     (`link (org-element-parent element)))))
     (and (org-element-type-p paragraph 'paragraph)
 	 (or (not (and (boundp 'org-html-standalone-image-predicate)
                      (fboundp org-html-standalone-image-predicate)))
@@ -3248,7 +3248,7 @@ INFO is a plist holding contextual information.  See
 	   ;; for inline images).  This is needed as long as
 	   ;; attributes cannot be set on a per link basis.
 	   (let* ((parent (org-export-get-parent-element link))
-		  (link (let ((container (org-export-get-parent link)))
+		  (link (let ((container (org-element-parent link)))
 			  (if (and (org-element-type-p container 'link)
 				   (org-html-inline-image-p link info))
 			      container
@@ -3396,7 +3396,7 @@ information."
   "Transcode a PARAGRAPH element from Org to HTML.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (let* ((parent (org-export-get-parent paragraph))
+  (let* ((parent (org-element-parent paragraph))
 	 (parent-type (org-element-type parent))
 	 (style '((footnote-definition " class=\"footpara\"")
 		  (org-data " class=\"footpara\"")))
@@ -3691,7 +3691,7 @@ contextual information."
   "Transcode a TABLE-CELL element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let* ((table-row (org-export-get-parent table-cell))
+  (let* ((table-row (org-element-parent table-cell))
 	 (table (org-export-get-parent-table table-cell))
 	 (cell-attrs
 	  (if (not (plist-get info :html-table-align-individual-fields)) ""

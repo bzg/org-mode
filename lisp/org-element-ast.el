@@ -538,6 +538,13 @@ except `:deferred', may not be resolved."
   "Like `org-element-property', but reverse the order of NODE and PROPERTY."
   (inline-quote (org-element-property ,property ,node ,dflt ,force-undefer)))
 
+(defsubst org-element-parent (node)
+  "Return `:parent' property of NODE."
+  (org-element-property :parent node))
+
+(gv-define-setter org-element-parent (value node)
+  `(org-element-put-property ,node :parent ,value))
+
 (gv-define-setter org-element-property (value property node &optional _)
   `(org-element-put-property ,node ,property ,value))
 
@@ -741,7 +748,7 @@ Return the modified PARENT."
   "Extract NODE from parse tree.
 Remove NODE from the parse tree by side-effect, and return it
 with its `:parent' property stripped out."
-  (let ((parent (org-element-property :parent node))
+  (let ((parent (org-element-parent node))
 	(secondary (org-element-secondary-p node)))
     (if secondary
         (org-element-put-property
@@ -757,7 +764,7 @@ with its `:parent' property stripped out."
   "Insert NODE before LOCATION in parse tree.
 LOCATION is an element, object or string within the parse tree.
 Parse tree is modified by side effect."
-  (let* ((parent (org-element-property :parent location))
+  (let* ((parent (org-element-parent location))
 	 (property (org-element-secondary-p location))
 	 (siblings (if property (org-element-property property parent)
 		     (org-element-contents parent)))
@@ -794,7 +801,7 @@ Return the modified element.
 
 The function takes care of setting `:parent' property for NEW."
   ;; Ensure OLD and NEW have the same parent.
-  (org-element-put-property new :parent (org-element-property :parent old))
+  (org-element-put-property new :parent (org-element-parent old))
   ;; Handle KEEP-PROPS.
   (dolist (p keep-props)
     (org-element-put-property new p (org-element-property p old)))
@@ -933,7 +940,7 @@ strings.
 
 When CHILDREN is a single anonymous node, use its contents as children
 nodes.  This way,
-   (org-element-create 'section nil (org-element-contents node))
+   (org-element-create \\='section nil (org-element-contents node))
 will yield expected results with contents of another node adopted into
 a newly created one.
 
@@ -1047,11 +1054,11 @@ When DATUM is obtained through `org-element-context' or
 `org-element-at-point', and org-element-cache is disabled, only
 ancestors from its section can be found.  There is no such limitation
 when DATUM belongs to a full parse tree."
-  (let ((up (if with-self datum (org-element-property :parent datum)))
+  (let ((up (if with-self datum (org-element-parent datum)))
 	ancestors)
     (while (and up (not (org-element-type-p up types)))
       (unless types (push up ancestors))
-      (setq up (org-element-property :parent up)))
+      (setq up (org-element-parent up)))
     (if types up (nreverse ancestors))))
 
 (defun org-element-lineage-map (datum fun &optional types with-self first-match)
@@ -1076,7 +1083,7 @@ When optional argument FIRST-MATCH is non-nil, stop at the first
 match for which FUN doesn't return nil, and return that value."
   (declare (indent 2))
   (setq fun (if (functionp fun) fun `(lambda (node) ,fun)))
-  (let ((up (if with-self datum (org-element-property :parent datum)))
+  (let ((up (if with-self datum (org-element-parent datum)))
 	acc rtn)
     (catch :--first-match
       (while up
@@ -1085,7 +1092,7 @@ match for which FUN doesn't return nil, and return that value."
           (if (and first-match rtn)
               (throw :--first-match rtn)
             (when rtn (push rtn acc))))
-        (setq up (org-element-property :parent up)))
+        (setq up (org-element-parent up)))
       (nreverse acc))))
 
 (defun org-element-property-inherited (property node &optional with-self accumulate literal-nil include-nil)
@@ -1110,7 +1117,7 @@ skipped."
   (setq property (ensure-list property))
   (let (acc local val)
     (catch :found
-      (unless with-self (setq node (org-element-property :parent node)))
+      (unless with-self (setq node (org-element-parent node)))
       (while node
         (setq local nil)
         (dolist (prop property)
@@ -1125,7 +1132,7 @@ skipped."
               (setq local (append local (ensure-list val))))))
         ;; Append parent to front.
         (setq acc (append local acc))
-        (setq node (org-element-property :parent node)))
+        (setq node (org-element-parent node)))
       acc)))
 
 (provide 'org-element-ast)

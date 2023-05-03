@@ -2521,14 +2521,14 @@ contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((orderedp (eq (org-element-property
-			:type (org-export-get-parent item))
+			:type (org-element-parent item))
 		       'ordered))
 	 (level
 	  ;; Determine level of current item to determine the
 	  ;; correct LaTeX counter to use (enumi, enumii...).
 	  (let ((parent item) (level 0))
 	    (while (org-element-type-p
-		    (setq parent (org-export-get-parent parent))
+		    (setq parent (org-element-parent parent))
 		    '(plain-list item))
 	      (when (and (org-element-type-p parent 'plain-list)
 			 (eq (org-element-property :type parent)
@@ -2739,7 +2739,7 @@ used as a communication channel."
 	 (center
 	  (cond
 	   ;; If link is an image link, do not center.
-	   ((org-element-type-p (org-export-get-parent link) 'link) nil)
+	   ((org-element-type-p (org-element-parent link) 'link) nil)
 	   ((plist-member attr :center) (plist-get attr :center))
 	   (t (plist-get info :latex-images-centered))))
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
@@ -3119,7 +3119,7 @@ it."
 	  (when (and (member mode '("inline-math" "math"))
 		     ;; Do not wrap twice the same table.
 		     (not (org-element-type-p
-			   (org-element-property :parent table) 'latex-matrices)))
+			 (org-element-parent table) 'latex-matrices)))
 	    (let* ((caption (and (not (string= mode "inline-math"))
 				 (org-element-property :caption table)))
 		   (name (and (not (string= mode "inline-math"))
@@ -3206,8 +3206,7 @@ containing export options.  Modify DATA by side-effect and return it."
       (lambda (object)
 	;; Skip objects already wrapped.
 	(when (and (not (org-element-type-p
-		       (org-element-property :parent object)
-                       'latex-math-block))
+		       (org-element-parent object) 'latex-math-block))
 		   (funcall valid-object-p object))
 	  (let ((math-block (list 'latex-math-block nil))
 		(next-elements (org-export-get-next-element object info t))
@@ -4007,7 +4006,7 @@ a communication channel."
 CONTENTS is the contents of the row.  INFO is a plist used as
 a communication channel."
   (let* ((attr (org-export-read-attribute :attr_latex
-					  (org-export-get-parent table-row)))
+					  (org-element-parent table-row)))
 	 (booktabsp (if (plist-member attr :booktabs) (plist-get attr :booktabs)
 		      (plist-get info :latex-tables-booktabs)))
 	 (longtablep

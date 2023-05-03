@@ -71,6 +71,7 @@
 (require 'oc)
 
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-parent "org-element-ast" (node))
 (declare-function org-export-data "org-export" (data info))
 
 
@@ -231,7 +232,7 @@ When NO-OPT argument is non-nil, only provide mandatory arguments."
       (let* ((origin (pcase references
                        (`(,reference) reference)
                        (`(,reference . ,_)
-                        (org-element-property :parent reference))))
+                        (org-element-parent reference))))
              (suffix (org-element-property :suffix origin))
              (prefix (org-element-property :prefix origin)))
         (concat (and prefix

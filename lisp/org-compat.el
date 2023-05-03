@@ -1134,6 +1134,8 @@ context.  See the individual commands for more information."
 (define-obsolete-function-alias 'ob-clojure-eval-with-babashka
   #'ob-clojure-eval-with-cmd "9.7")
 
+(define-obsolete-function-alias 'org-export-get-parent 'org-element-parent "9.7")
+
 ;;;; Obsolete link types
 
 (eval-after-load 'ol

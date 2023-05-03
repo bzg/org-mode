@@ -554,7 +554,7 @@ contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((bullet (org-element-property :bullet item))
-         (type (org-element-property :type (org-element-property :parent item)))
+         (type (org-element-property :type (org-element-parent item)))
          (checkbox (pcase (org-element-property :checkbox item)
                      (`on "\\o'\\(sq\\(mu'")
                      (`off "\\(sq ")
@@ -645,7 +645,7 @@ information."
   "Transcode a PARAGRAPH element from Org to Man.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (let ((parent (org-element-property :parent paragraph)))
+  (let ((parent (org-element-parent paragraph)))
     (when parent
       (let ((parent-type (org-element-type parent))
             (fixed-paragraph ""))

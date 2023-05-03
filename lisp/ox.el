@@ -1633,14 +1633,6 @@ an alist where associations are (VARIABLE-NAME VALUE)."
        (mapcar (lambda (v) (read (format "(%s)" v)))
 	       values)))))
 
-;; defsubst org-export-get-parent must be defined before first use,
-;; was originally defined in the topology section
-
-(defsubst org-export-get-parent (blob)
-  "Return BLOB parent or nil.
-BLOB is the element or object considered."
-  (org-element-property :parent blob))
-
 ;;;; Tree Properties
 ;;
 ;; Tree properties are information extracted from parse tree.  They
@@ -1925,7 +1917,7 @@ Return a string."
 			  (format "[BROKEN LINK: %s]" (nth 1 err)) info))
 		  (_ nil))))))
 	(let* ((type (org-element-type data))
-	       (parent (org-export-get-parent data))
+	       (parent (org-element-parent data))
 	       (results
 		(cond
 		 ;; Ignored element/object.
@@ -5181,7 +5173,7 @@ All special rows will be ignored during export."
        ;; ... the table contains a special column and the row start
        ;; with a marking character among, "^", "_", "$" or "!",
        (and (org-export-table-has-special-column-p
-	     (org-export-get-parent table-row))
+	     (org-element-parent table-row))
 	    (member first-cell '(("^") ("_") ("$") ("!"))))
        ;; ... it contains only alignment cookies and empty cells.
        (let ((special-row-p 'empty))
@@ -5217,7 +5209,7 @@ header."
 	;; First time a row is queried, populate cache with all the
 	;; rows from the table.
 	(let ((group 0) row-flag)
-	  (org-element-map (org-export-get-parent table-row) 'table-row
+	  (org-element-map (org-element-parent table-row) 'table-row
 	    (lambda (row)
 	      (if (eq (org-element-property :type row) 'rule)
 		  (setq row-flag nil)
@@ -5233,8 +5225,8 @@ INFO is a plist used as the communication channel.
 
 Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
-  (let* ((row (org-export-get-parent table-cell))
-	 (table (org-export-get-parent row))
+  (let* ((row (org-element-parent table-cell))
+	 (table (org-element-parent row))
 	 (cells (org-element-contents row))
 	 (columns (length cells))
 	 (column (- columns (length (memq table-cell cells))))
@@ -5282,8 +5274,8 @@ column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
   ;; Load `org-table-number-fraction' and `org-table-number-regexp'.
   (require 'org-table)
-  (let* ((row (org-export-get-parent table-cell))
-	 (table (org-export-get-parent row))
+  (let* ((row (org-element-parent table-cell))
+	 (table (org-element-parent row))
 	 (cells (org-element-contents row))
 	 (columns (length cells))
 	 (column (- columns (length (memq table-cell cells))))
@@ -5307,7 +5299,7 @@ Possible values are `left', `right' and `center'."
 	      (total-cells 0)
 	      cookie-align
 	      previous-cell-number-p)
-	  (dolist (row (org-element-contents (org-export-get-parent row)))
+	  (dolist (row (org-element-contents (org-element-parent row)))
 	    (cond
 	     ;; In a special row, try to find an alignment cookie at
 	     ;; COLUMN.
@@ -5366,7 +5358,7 @@ Return value is a list of symbols, or nil.  Possible values are:
 row (resp. last row) of the table, ignoring table rules, if any.
 
 Returned borders ignore special rows."
-  (let* ((row (org-export-get-parent table-cell))
+  (let* ((row (org-element-parent table-cell))
 	 (table (org-export-get-parent-table table-cell))
 	 borders)
     ;; Top/above border?  TABLE-CELL has a border above when a rule
@@ -5446,7 +5438,7 @@ INFO is a plist used as a communication channel."
   ;; A cell starts a column group either when it is at the beginning
   ;; of a row (or after the special column, if any) or when it has
   ;; a left border.
-  (or (eq (org-element-map (org-export-get-parent table-cell) 'table-cell
+  (or (eq (org-element-map (org-element-parent table-cell) 'table-cell
 	    'identity info 'first-match)
 	  table-cell)
       (memq 'left (org-export-table-cell-borders table-cell info))))
@@ -5457,7 +5449,7 @@ INFO is a plist used as a communication channel."
   ;; A cell ends a column group either when it is at the end of a row
   ;; or when it has a right border.
   (or (eq (car (last (org-element-contents
-		      (org-export-get-parent table-cell))))
+		      (org-element-parent table-cell))))
 	  table-cell)
       (memq 'right (org-export-table-cell-borders table-cell info))))
 
@@ -5551,7 +5543,7 @@ a communication channel.
 Address is a CONS cell (ROW . COLUMN), where ROW and COLUMN are
 zero-based index.  Only exportable cells are considered.  The
 function returns nil for other cells."
-  (let* ((table-row (org-export-get-parent table-cell))
+  (let* ((table-row (org-element-parent table-cell))
 	 (row-number (org-export-table-row-number table-row info)))
     (when row-number
       (cons row-number
@@ -5932,7 +5924,7 @@ If no translation is found, the quote character is left as-is.")
 (defun org-export--smart-quote-status (s info)
   "Return smart quote status at the beginning of string S.
 INFO is the current export state, as a plist."
-  (let* ((parent (org-element-property :parent s))
+  (let* ((parent (org-element-parent s))
 	 (cache (or (plist-get info :smart-quote-cache)
 		    (let ((table (make-hash-table :test #'eq)))
 		      (plist-put info :smart-quote-cache table)
@@ -6038,14 +6030,11 @@ Return the new string."
 ;;
 ;; Here are various functions to retrieve information about the
 ;; neighborhood of a given element or object.  Neighbors of interest
-;; are direct parent (`org-export-get-parent'), parent headline
-;; (`org-export-get-parent-headline'), first element containing an
-;; object, (`org-export-get-parent-element'), parent table
-;; (`org-export-get-parent-table'), previous element or object
-;; (`org-export-get-previous-element') and next element or object
-;; (`org-export-get-next-element').
-
-;; defsubst org-export-get-parent must be defined before first use
+;; are parent headline (`org-export-get-parent-headline'), first
+;; element containing an object, (`org-export-get-parent-element'),
+;; parent table (`org-export-get-parent-table'), previous element or
+;; object (`org-export-get-previous-element') and next element or
+;; object (`org-export-get-next-element').
 
 (defun org-export-get-parent-headline (blob)
   "Return BLOB parent headline or nil.
@@ -6074,7 +6063,7 @@ containing up to N siblings before BLOB, from farthest to
 closest.  With any other non-nil value, return a list containing
 all of them."
   (let* ((secondary (org-element-secondary-p blob))
-	 (parent (org-export-get-parent blob))
+	 (parent (org-element-parent blob))
 	 (siblings
 	  (if secondary (org-element-property secondary parent)
 	    (org-element-contents parent)))
@@ -6099,7 +6088,7 @@ containing up to N siblings after BLOB, from closest to farthest.
 With any other non-nil value, return a list containing all of
 them."
   (let* ((secondary (org-element-secondary-p blob))
-	 (parent (org-export-get-parent blob))
+	 (parent (org-element-parent blob))
 	 (siblings
 	  (cdr (memq blob
 		     (if secondary (org-element-property secondary parent)

@@ -604,7 +604,7 @@ Use :header-args: instead"
 	      (before
 	       (mapcar #'org-element-type
 		       (assq d (reverse (org-element-contents
-					 (org-element-property :parent d)))))))
+					 (org-element-parent d)))))))
 	  (list (org-element-property :post-affiliated d)
 		(if (or (and headline? (member before '(nil (planning))))
 			(and (null headline?) (member before '(nil (comment)))))
@@ -1318,7 +1318,7 @@ Use \"export %s\" instead"
            ;; of the paragraph containing the faulty object.  It is
            ;; not very accurate but may be enough for now.
            (list (org-element-property :contents-begin
-                                       (org-element-property :parent text))
+                                       (org-element-parent text))
                  "Possibly incomplete citation markup")))))
 
 (defun org-lint-item-number (ast)

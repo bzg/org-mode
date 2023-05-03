@@ -65,6 +65,7 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-property "org-element-ast" (property node))
+(declare-function org-element-parent "org-element-ast" (node))
 (declare-function org-element-type "org-element-ast" (node &optional anonymous))
 (declare-function org-element-type-p "org-element-ast" (node &optional types))
 (declare-function org-entry-get "org" (pom property &optional inherit literal-nil))
@@ -2153,11 +2154,11 @@ to HASH."
 	 ((or `inline-babel-call `inline-src-block)
 	  ;; Results for inline objects are located right after them.
 	  ;; There is no RESULTS line to insert either.
-	  (let ((limit (pcase (org-element-type (org-element-property :parent context))
+	  (let ((limit (pcase (org-element-type (org-element-parent context))
                          (`section (org-element-property
-		                    :end (org-element-property :parent context)))
+		                    :end (org-element-parent context)))
                          (_ (org-element-property
-		             :contents-end (org-element-property :parent context))))))
+		             :contents-end (org-element-parent context))))))
 	    (goto-char (org-element-property :end context))
 	    (skip-chars-forward " \t\n" limit)
 	    (throw :found
@@ -2190,11 +2191,11 @@ to HASH."
 	     ;; No possible anonymous results at the very end of
 	     ;; buffer or outside CONTEXT parent.
 	     ((eq (point)
-		  (or (pcase (org-element-type (org-element-property :parent context))
+		  (or (pcase (org-element-type (org-element-parent context))
                         ((or `section `org-data) (org-element-property
-		                                  :end (org-element-property :parent context)))
+		                                  :end (org-element-parent context)))
                         (_ (org-element-property
-		            :contents-end (org-element-property :parent context))))
+		            :contents-end (org-element-parent context))))
 		      (point-max))))
 	     ;; Check if next element is an anonymous result below
 	     ;; the current block.
@@ -2689,7 +2690,7 @@ Leading white space is trimmed."
 		       (skip-chars-forward
 			" \t\n"
 			(org-element-property
-			 :contents-end (org-element-property :parent el)))
+			 :contents-end (org-element-parent el)))
 		       (org-element-context))))
 	 (when (and (org-element-type-p result 'macro)
 		    (string= (org-element-property :key result) "results"))

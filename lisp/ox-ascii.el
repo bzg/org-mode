@@ -607,7 +607,7 @@ INFO is a plist used as a communication channel."
                  (lambda (e)
                    (and (org-element-type-p e 'plain-list)
                         (not (org-element-type-p
-                            (org-export-get-parent e) 'item))))
+                            (org-element-parent e) 'item))))
                  genealogy)
                 (plist-get info :ascii-list-margin))
              ;; Compute indentation offset due to current list.  It is
@@ -617,7 +617,7 @@ INFO is a plist used as a communication channel."
                (dolist (e genealogy)
                  (cond
                   ((not (org-element-type-p e 'item)))
-                  ((eq (org-element-property :type (org-export-get-parent e))
+                  ((eq (org-element-property :type (org-element-parent e))
                        'descriptive)
                    (cl-incf indentation org-ascii-quote-margin))
                   (t
@@ -1465,7 +1465,7 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8))
 	 (checkbox (org-ascii--checkbox item info))
-	 (list-type (org-element-property :type (org-export-get-parent item)))
+	 (list-type (org-element-property :type (org-element-parent item)))
 	 (bullet
 	  ;; First parent of ITEM is always the plain-list.  Get
 	  ;; `:type' property from it.
@@ -1659,7 +1659,7 @@ the plist used as a communication channel."
 	;; Do not indent first paragraph in a section.
 	(unless (and (not (org-export-get-previous-element paragraph info))
 		     (org-element-type-p
-                      (org-export-get-parent paragraph) 'section))
+                      (org-element-parent paragraph) 'section))
 	  (make-string indented-line-width ?\s))
 	(replace-regexp-in-string "\\`[ \t]+" "" contents))))
    paragraph info))
@@ -1673,7 +1673,7 @@ CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let ((margin (plist-get info :ascii-list-margin)))
     (if (or (< margin 1)
-	    (org-element-type-p (org-export-get-parent plain-list) 'item))
+	    (org-element-type-p (org-element-parent plain-list) 'item))
 	contents
       (org-ascii--indent-string contents margin))))
 
@@ -1887,8 +1887,8 @@ column.
 
 When `org-ascii-table-widen-columns' is non-nil, width cookies
 are ignored."
-  (let* ((row (org-export-get-parent table-cell))
-	 (table (org-export-get-parent row))
+  (let* ((row (org-element-parent table-cell))
+	 (table (org-element-parent row))
 	 (col (let ((cells (org-element-contents row)))
 		(- (length cells) (length (memq table-cell cells)))))
 	 (cache

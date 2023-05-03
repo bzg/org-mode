@@ -3548,7 +3548,7 @@ PARAMS is a plist used to tweak the behavior of the transcoder."
 	(ddend (plist-get params :ddend)))
     (lambda (item contents info)
       (let* ((type
-	      (org-element-property :type (org-element-property :parent item)))
+	      (org-element-property :type (org-element-parent item)))
 	     (tag (org-element-property :tag item))
 	     (depth (org-list--depth item))
 	     (separator (and (org-export-get-next-element item info)

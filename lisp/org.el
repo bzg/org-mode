@@ -12267,7 +12267,7 @@ Inherited tags have the `inherited' text property."
              (not local))
         org-scanner-tags
       (org-with-point-at (unless (org-element-type pos-or-element)
-                        (or pos-or-element (point)))
+                           (or pos-or-element (point)))
         (unless (or (org-element-type pos-or-element)
                     (org-before-first-heading-p))
           (org-back-to-heading t))
@@ -12281,7 +12281,7 @@ Inherited tags have the `inherited' text property."
                                    (org-element-lineage pos-or-element '(headline org-data inlinetask) t)
                                  (org-element-at-point nil 'cached)))))
               (if cached
-                  (while (setq cached (org-element-property :parent cached))
+                  (while (setq cached (org-element-parent cached))
                     (setq itags (nconc (mapcar #'org-add-prop-inherited
                                                ;; If we do explicitly copy the result, reference would
                                                ;; be returned and cache element might be modified directly.
@@ -13019,8 +13019,8 @@ However, if LITERAL-NIL is set, return the string value \"nil\" instead."
 	            ((car v)
 	             (move-marker org-entry-property-inherited-from (org-element-property :begin element))
 	             (throw 'exit nil))
-	            ((org-element-property :parent element)
-                     (setq element (org-element-property :parent element)))
+	            ((org-element-parent element)
+                     (setq element (org-element-parent element)))
 	            (t
 	             (let ((global (org--property-global-or-keyword-value property literal-nil)))
 	               (cond ((not global))
@@ -17641,7 +17641,7 @@ This command does many different things, depending on context:
       ;; For convenience: at the first line of a paragraph on the same
       ;; line as an item, apply function on that item instead.
       (when (eq type 'paragraph)
-	(let ((parent (org-element-property :parent context)))
+	(let ((parent (org-element-parent context)))
 	  (when (and (org-element-type-p parent 'item)
 		     (= (line-beginning-position)
 			(org-element-property :begin parent)))
@@ -18990,8 +18990,8 @@ Optional argument ELEMENT contains element at BEG."
            (not (org-element-lineage element '(headline inlinetask))))
        nil ; Not inside heading.
      ;; Skip to top-level parent in section.
-     (while (not (org-element-type-p (org-element-property :parent element) 'section))
-       (setq element (org-element-property :parent element)))
+     (while (not (org-element-type-p (org-element-parent element) 'section))
+       (setq element (org-element-parent element)))
      (pcase (org-element-type element)
        ((or `planning `property-drawer)
         t)
@@ -19022,7 +19022,7 @@ ELEMENT."
 	 ((diary-sexp footnote-definition) 0)
          (section
           (org--get-expected-indentation
-           (org-element-property :parent element)
+           (org-element-parent element)
            t))
 	 ((headline inlinetask nil)
 	  (if (not org-adapt-indentation) 0
@@ -19041,7 +19041,7 @@ ELEMENT."
       ;; Indent like parent.
       ((< (line-beginning-position) start)
        (org--get-expected-indentation
-	(org-element-property :parent element) t))
+	(org-element-parent element) t))
       ;; At first line: indent according to previous sibling, if any,
       ;; ignoring footnote definitions and inline tasks, or parent's
       ;; contents.  If `org-adapt-indentation' is `headline-data', ignore
@@ -19055,7 +19055,7 @@ ELEMENT."
 		    (parent previous))
 	       (while (and parent (<= (org-element-property :end parent) start))
 		 (setq previous parent
-		       parent (org-element-property :parent parent)))
+		       parent (org-element-parent parent)))
 	       (cond
 		((not previous) (throw 'exit 0))
 		((> (org-element-property :end previous) start)
@@ -19077,7 +19077,7 @@ ELEMENT."
 			    ;; At first paragraph in an item or
 			    ;; a footnote definition.
 			    (org--get-expected-indentation
-			     (org-element-property :parent previous) t))))))))))
+			     (org-element-parent previous) t))))))))))
       ;; Otherwise, move to the first non-blank line above.
       (t
        (beginning-of-line)
@@ -19098,7 +19098,7 @@ ELEMENT."
 	  ;; like parent.
 	  ((< (line-beginning-position) start)
 	   (org--get-expected-indentation
-	    (org-element-property :parent element) t))
+	    (org-element-parent element) t))
 	  ;; Line above is the beginning of an element, i.e., point
 	  ;; was originally on the blank lines between element's start
 	  ;; and contents.
@@ -19485,7 +19485,7 @@ matches in paragraphs or comments, use it."
 	   (paragraph
 	    ;; Fill prefix is usually the same as the current line,
 	    ;; unless the paragraph is at the beginning of an item.
-	    (let ((parent (org-element-property :parent element)))
+	    (let ((parent (org-element-parent element)))
 	      (save-excursion
 		(beginning-of-line)
 		(cond ((org-element-type-p parent 'item)
@@ -20604,7 +20604,7 @@ Optional argument ELEMENT contains element at point."
           (while el
             (when (org-element-property :commentedp el)
               (throw :found t))
-            (setq el (org-element-property :parent el))))))))
+            (setq el (org-element-parent el))))))))
 
 (defun org-in-archived-heading-p (&optional no-inheritance element)
   "Non-nil if point is under an archived heading.
@@ -20627,7 +20627,7 @@ Optional argument ELEMENT contains element at point."
           (while element
             (when (org-element-property :archivedp element)
               (throw :archived t))
-            (setq element (org-element-property :parent element))))
+            (setq element (org-element-parent element))))
       (save-excursion (and (org-up-heading-safe) (org-in-archived-heading-p)))))))
 
 (defun org-at-comment-p nil
@@ -21064,12 +21064,12 @@ Function may return a real element, or a pseudo-element with type
 	   ((memq type '(table property-drawer))
 	    (list (org-element-property :begin e)
 		  (org-element-property :end e)
-		  (org-element-property :parent e)))
+		  (org-element-parent e)))
 	   ((memq type '(node-property table-row))
-	    (let ((e (org-element-property :parent e)))
+	    (let ((e (org-element-parent e)))
 	      (list (org-element-property :begin e)
 		    (org-element-property :end e)
-		    (org-element-property :parent e))))
+		    (org-element-parent e))))
 	   ((memq type '(clock diary-sexp keyword))
 	    (let* ((regexp (pcase type
 			     (`clock org-clock-line-re)
@@ -21089,14 +21089,14 @@ Function may return a real element, or a pseudo-element with type
 			    (if (looking-at regexp)
 				(point)
 			      (line-beginning-position 2)))))
-	      (list begin end (org-element-property :parent e))))
+	      (list begin end (org-element-parent e))))
 	   ;; Find the full plain list containing point, the check it
 	   ;; contains exactly one line per item.
 	   ((let ((l (org-element-lineage e '(plain-list) t)))
 	      (while (org-element-type-p
-                      (org-element-property :parent l)
+                      (org-element-parent l)
                       '(item plain-list))
-		(setq l (org-element-property :parent l)))
+		(setq l (org-element-parent l)))
 	      (and l org--single-lines-list-is-paragraph
 		   (org-with-point-at (org-element-property :post-affiliated l)
 		     (forward-line (length (org-element-property :structure l)))
@@ -21104,7 +21104,7 @@ Function may return a real element, or a pseudo-element with type
 		   ;; Return value.
 		   (list (org-element-property :begin l)
 			 (org-element-property :end l)
-			 (org-element-property :parent l)))))
+			 (org-element-parent l)))))
 	   (t nil))))			;no triplet: return element
     (pcase triplet
       (`(,b ,e ,p)
@@ -21207,7 +21207,7 @@ See `org-backward-paragraph'."
 	     (post-affiliated (org-element-property :post-affiliated element))
 	     (contents-end (org-element-property :contents-end element))
 	     (end (org-element-property :end element))
-	     (parent (org-element-property :parent element))
+	     (parent (org-element-parent element))
 	     (reach
 	      ;; Move to the visible empty line above position P, or
 	      ;; to position P.  Return t.
@@ -21293,7 +21293,7 @@ Move to the next element at the same level, when possible."
 	(t
 	 (let* ((elem (org-element-at-point))
 		(end (org-element-property :end elem))
-		(parent (org-element-property :parent elem)))
+		(parent (org-element-parent elem)))
 	   (cond ((and parent (= (org-element-property :contents-end parent) end))
 		  (goto-char (org-element-property :end parent)))
 		 ((integer-or-marker-p end) (goto-char end))
@@ -21328,7 +21328,7 @@ Move to the previous element at the same level, when possible."
 	       (unless (bobp)
 		 (let ((prev (org-element-at-point)))
 		   (goto-char (org-element-property :begin prev))
-		   (while (and (setq prev (org-element-property :parent prev))
+		   (while (and (setq prev (org-element-parent prev))
 			       (<= (org-element-property :end prev) beg))
 		     (goto-char (org-element-property :begin prev)))))))))))
 
@@ -21338,10 +21338,10 @@ Move to the previous element at the same level, when possible."
   (if (org-with-limited-levels (org-at-heading-p))
       (unless (org-up-heading-safe) (user-error "No surrounding element"))
     (let* ((elem (org-element-at-point))
-	   (parent (org-element-property :parent elem)))
+	   (parent (org-element-parent elem)))
       ;; Skip sections
       (when (org-element-type-p parent 'section)
-        (setq parent (org-element-property :parent parent)))
+        (setq parent (org-element-parent parent)))
       (if (and parent
                (not (org-element-type-p parent 'org-data)))
           (goto-char (org-element-property :begin parent))
@@ -21383,7 +21383,7 @@ Move to the previous element at the same level, when possible."
 		 (let* ((beg (org-element-property :begin elem))
 			(prev (org-element-at-point))
 			(up prev))
-		   (while (and (setq up (org-element-property :parent up))
+		   (while (and (setq up (org-element-parent up))
 			       (<= (org-element-property :end up) beg))
 		     (setq prev up))
 		   prev)))))

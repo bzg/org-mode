@@ -545,9 +545,9 @@ Leave point in edit buffer."
                           (cond
                            ((save-excursion (skip-chars-backward " \t") (bolp))
 			    (org-current-text-indentation))
-                           ((org-element-property :parent datum)
+                           ((org-element-parent datum)
                             (org--get-expected-indentation
-                             (org-element-property :parent datum) nil))
+                             (org-element-parent datum) nil))
                            (t (org-current-text-indentation)))))
 	     (content-ind org-edit-src-content-indentation)
              (blank-line (save-excursion (beginning-of-line)

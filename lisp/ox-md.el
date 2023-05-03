@@ -167,7 +167,7 @@ Assume BACKEND is `md'."
       (org-element-put-property
        e :post-blank
        (if (and (org-element-type-p e 'paragraph)
-		(org-element-type-p (org-element-property :parent e) 'item)
+		(org-element-type-p (org-element-parent e) 'item)
 		(org-export-first-sibling-p e info)
 		(let ((next (org-export-get-next-element e info)))
 		  (and (org-element-type-p next 'plain-list)
@@ -437,7 +437,7 @@ as a communication channel."
   "Transcode ITEM element into Markdown format.
 CONTENTS is the item contents.  INFO is a plist used as
 a communication channel."
-  (let* ((type (org-element-property :type (org-export-get-parent item)))
+  (let* ((type (org-element-property :type (org-element-parent item)))
 	 (struct (org-element-property :structure item))
 	 (bullet (if (not (eq type 'ordered)) "-"
 		   (concat (number-to-string
