@@ -492,6 +492,14 @@ Final hooks are added to the following commands:
 
 The prefix arguments are passed to ~org-insert-todo-heading~.
 
+*** Make ~ob-sqlite~ use in-memory databases by default
+
+~sqlite~ source blocks with no ~:db~ header argument now make SQLite
+use a temporary in-memory database instead of throwing an error,
+matching the behavior of the official ~sqlite3~ shell.  As a result,
+~sqlite~ source blocks are now usable out of the box, that is with no
+header arguments.
+
 *** Add support for ~logind~ idle time in ~org-user-idle-seconds~
 
 When Emacs is built with =dbus= support and

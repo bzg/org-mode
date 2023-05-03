@@ -39,8 +39,40 @@
   .import $tb TestTable
   select * from TestTable;
 #+end_src"
-	    (org-babel-next-src-block)
-	    (org-babel-execute-src-block)))))
+	   (org-babel-next-src-block)
+	   (org-babel-execute-src-block)))))
+
+(ert-deftest ob-sqlite/in-memory ()
+  "Test in-memory temporariness."
+  (should
+   (equal 0
+          (progn
+            (org-test-with-temp-text
+	     "#+BEGIN_SRC sqlite
+PRAGMA user_version = 1;
+#+END_SRC"
+	     (org-babel-execute-src-block))
+            (org-test-with-temp-text
+	     "#+BEGIN_SRC sqlite
+PRAGMA user_version;
+#+END_SRC"
+	     (org-babel-execute-src-block))))))
+
+(ert-deftest ob-sqlite/in-file ()
+  "Test in-file permanency."
+  (should
+   (equal 1
+          (let ((file (org-babel-temp-file "test" ".sqlite")))
+            (org-test-with-temp-text
+	     (format "#+BEGIN_SRC sqlite :db %s
+PRAGMA user_version = 1;
+#+END_SRC" file)
+	     (org-babel-execute-src-block))
+            (org-test-with-temp-text
+	     (format "#+BEGIN_SRC sqlite :db %s
+PRAGMA user_version;
+#+END_SRC" file)
+	     (org-babel-execute-src-block))))))
 
 (provide 'test-ob-sqlite)
 ;;; test-ob-sqlite.el ends here

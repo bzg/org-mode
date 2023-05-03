@@ -74,7 +74,6 @@ This function is called by `org-babel-execute-src-block'."
 			   (lambda (arg) (car (assq arg params)))
 			   (list :header :echo :bail :column
 				 :csv :html :line :list)))))
-    (unless db (error "ob-sqlite: can't evaluate without a database"))
     (with-temp-buffer
       (insert
        (org-babel-eval
@@ -97,7 +96,7 @@ This function is called by `org-babel-execute-src-block'."
 			      (member :html others) separator)
 			  ""
 			"-csv"))
-	  (cons "db " db)))
+          (cons "db" (or db ""))))
 	;; body of the code block
 	(org-babel-expand-body:sqlite body params)))
       (org-babel-result-cond result-params
