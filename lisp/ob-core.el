@@ -434,7 +434,18 @@ then run `org-babel-switch-to-session'."
     (tangle	. ((tangle yes no :any)))
     (tangle-mode . ((#o755 #o555 #o444 :any)))
     (var	. :any)
-    (wrap       . :any)))
+    (wrap       . :any))
+  "Alist defining common header args and their allowed values.
+Keys of the alist are header arg symbols.  Values of the alist are
+either a symbol `:any' or a list of allowed values.  Each element of
+the value list is either symbol `:any', other symbol representing the
+allowed value, or a list of exclusive values.  `:any' implies that any
+value of the header arg is allowed.  Exclusive values override each
+other when multiple values are used in a given header argument.
+
+A good example of exclusive values is in \"results\" header arg where,
+for example, \"file\" and \"table\" values cannot co-exist.  See info
+node `(org)Results of evaluation' for more details.")
 
 (defconst org-babel-header-arg-names
   (mapcar #'car org-babel-common-header-args-w-values)
