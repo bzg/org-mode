@@ -905,6 +905,12 @@ Optional argument PROPS, when non-nil, is a plist defining the
 properties of the node.  CHILDREN can be elements, objects or
 strings.
 
+When CHILDREN is a single anonymous node, use its contents as children
+nodes.  This way,
+   (org-element-create 'section nil (org-element-contents node))
+will yield expected results with contents of another node adopted into
+a newly created one.
+
 When TYPE is `plain-text', CHILDREN must contain a single node -
 string.  Alternatively, TYPE can be a string.  When TYPE is nil or
 `anonymous', PROPS must be nil."
@@ -934,7 +940,11 @@ string.  Alternatively, TYPE can be a string.  When TYPE is nil or
      (org-add-props (car children) props))
     ((pred stringp)
      (if props (org-add-props type props) type))
-    (_ (apply #'org-element-adopt (list type props) children))))
+    (_
+     (if (and (= 1 (length children))
+              (org-element-type-p (car children) 'anonymous))
+         (apply #'org-element-adopt (list type props) (car children))
+       (apply #'org-element-adopt (list type props) children)))))
 
 (defun org-element-copy (datum &optional keep-contents)
   "Return a copy of DATUM.
