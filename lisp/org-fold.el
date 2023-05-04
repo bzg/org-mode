@@ -767,7 +767,7 @@ Assume that point is located at the header line."
         (if (equal (point)
                    (save-excursion
                      (goto-char endl)
-                     (org-end-of-subtree)
+                     (org-end-of-subtree t)
                      (skip-chars-forward "\n\t\r ")))
             (point)
           endl)))
