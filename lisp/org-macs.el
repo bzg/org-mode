@@ -156,12 +156,18 @@ If BUFFER is nil, use base buffer for `current-buffer'."
      ,@body))
 
 (defmacro org-with-point-at (pom &rest body)
-  "Move to buffer and point of point-or-marker POM for the duration of BODY."
+  "Move to buffer and point of POM for the duration of BODY.
+POM is a point or marker or Org syntax node."
   (declare (debug (form body)) (indent 1))
+  (require 'org-element-ast)
   (org-with-gensyms (mpom)
     `(let ((,mpom ,pom))
        (save-excursion
 	 (when (markerp ,mpom) (set-buffer (marker-buffer ,mpom)))
+         (when (org-element-property :buffer ,mpom)
+           (set-buffer (org-element-property :buffer ,mpom)))
+         (when (org-element-property :begin ,mpom)
+           (setq ,mpom (org-element-property :begin ,mpom)))
 	 (org-with-wide-buffer
 	  (goto-char (or ,mpom (point)))
 	  ,@body)))))
