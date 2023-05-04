@@ -11588,8 +11588,7 @@ the list of tags in this group."
 (delete-overlay org-tags-overlay)
 
 (defun org-add-prop-inherited (s)
-  (add-text-properties 0 (length s) '(inherited t) s)
-  s)
+  (propertize s 'inherited t))
 
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
