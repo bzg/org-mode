@@ -20429,7 +20429,7 @@ Respect narrowing."
 If INVISIBLE-NOT-OK is non-nil, an invisible heading line is not ok."
   (save-excursion
     (beginning-of-line)
-    (and (bolp) (or (not invisible-not-ok) (not (org-fold-folded-p)))
+    (and (or (not invisible-not-ok) (not (org-fold-folded-p)))
 	 (looking-at outline-regexp))))
 
 (defun org-in-commented-heading-p (&optional no-inheritance element)
