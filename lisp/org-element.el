@@ -5735,7 +5735,10 @@ This function assumes `org-element--headline-cache' is a valid AVL tree."
   "Non-nil when cache is active in current buffer."
   (org-with-base-buffer nil
     (and org-element-use-cache
-         org-element--cache
+         (or org-element--cache
+             (when (derived-mode-p 'org-mode)
+               (org-element-cache-reset)
+               t))
          (or called-from-cache-change-func-p
              (eq org-element--cache-change-tic (buffer-chars-modified-tick))
              (and
