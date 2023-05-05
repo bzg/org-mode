@@ -141,10 +141,11 @@ See [[*Miscellaneous]] for a setup to realize this.
 
 Outlines make it possible to hide parts of the text in the buffer.
 Org uses just two commands, bound to {{{kbd(TAB)}}} and
-{{{kbd(S-TAB)}}} to change the visibility in the buffer.
+{{{kbd(S-TAB)}}} (~org-cycle~ and ~org-shifttab~) to change the
+visibility in the buffer.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(TAB)}}} ::
+- {{{kbd(TAB)}}} (~org-cycle~) ::
 
   /Subtree cycling/: Rotate current subtree among the states
 
@@ -154,14 +155,14 @@ Org uses just two commands, bound to {{{kbd(TAB)}}} and
   When called with a prefix argument ({{{kbd(C-u TAB)}}}), or with the
   Shift key, global cycling is invoked.
 
-- {{{kbd(S-TAB)}}}, {{{kbd(C-u TAB)}}} ::
+- {{{kbd(S-TAB)}}} (~org-global-cycle~), {{{kbd(C-u TAB)}}} (~org-cycle~) ::
 
   /Global cycling/: Rotate the entire buffer among the states
 
   : ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
   : '--------------------------------------'
 
-- {{{kbd(C-u C-u C-u TAB)}}} ::
+- {{{kbd(C-u C-u C-u TAB)}}} (~org-show-all~) ::
 
   Show all, including drawers.
 
@@ -180,15 +181,18 @@ basis by adding a =STARTUP= keyword to =overview=, =content=,
 
 The following commands jump to other headlines in the buffer.
 
-- {{{kbd(C-c C-n)}}} :: Next heading.
+- {{{kbd(C-c C-n)}}} (~org-next-visible-heading~) :: Next heading.
+- {{{kbd(C-c C-p)}}} (~org-previous-visible-heading~) :: Previous
+  heading.
 
-- {{{kbd(C-c C-p)}}} :: Previous heading.
+- {{{kbd(C-c C-f)}}} (~org-backward-heading-same-level~) :: Next
+  heading same level.
 
-- {{{kbd(C-c C-f)}}} :: Next heading same level.
+- {{{kbd(C-c C-b)}}} (~outline-backward-same-level~) :: Previous
+  heading same level.
 
-- {{{kbd(C-c C-b)}}} :: Previous heading same level.
-
-- {{{kbd(C-c C-u)}}} :: Backward to higher level heading.
+- {{{kbd(C-c C-u)}}} (~outline-up-heading~) :: Backward to higher
+  level heading.
 
 ** Structure Editing
 :PROPERTIES:
@@ -196,37 +200,37 @@ The following commands jump to other headlines in the buffer.
 :END:
 
 #+attr_texinfo: :sep ,
-- {{{kbd(M-RET)}}} ::
+- {{{kbd(M-RET)}}} (~org-meta-return~) ::
 
   Insert new heading with same level as current.  If point is in
   a plain list item, a new item is created (see [[Plain Lists]]).  When
   this command is used in the middle of a line, the line is split and
   the rest of the line becomes the new headline[fn:2].
 
-- {{{kbd(M-S-RET)}}} ::
+- {{{kbd(M-S-RET)}}} (~org-insert-todo-heading~) ::
 
   Insert new TODO entry with same level as current heading.
 
-- {{{kbd(TAB)}}} in new, empty entry ::
+- {{{kbd(TAB)}}} (~org-cycle~) in new, empty entry ::
 
   In a new entry with no text yet, {{{kbd(TAB)}}} cycles through
   reasonable levels.
 
-- {{{kbd(M-LEFT)}}}, {{{kbd(M-RIGHT)}}} ::
+- {{{kbd(M-LEFT)}}} (~org-metaleft~), {{{kbd(M-RIGHT)}}} (~org-metaright~) ::
 
   Promote or demote current heading by one level.
 
-- {{{kbd(M-UP)}}}, {{{kbd(M-DOWN)}}} ::
+- {{{kbd(M-UP)}}} (~org-move-subtree-up~), {{{kbd(M-DOWN)}}} (~org-move-subtree-down~) ::
 
   Move subtree up or down, i.e., swap with previous or next subtree of
   same level.
 
-- {{{kbd(C-c C-w)}}} ::
+- {{{kbd(C-c C-w)}}} (~org-refile~) ::
 
   Refile entry or region to a different location.  See [[*Refile and
   Copy]].
 
-- {{{kbd(C-x n s)}}}, {{{kbd(C-x n w)}}} ::
+- {{{kbd(C-x n s)}}} (~org-narrow-to-subtree~), {{{kbd(C-x n w)}}} (~widen~) ::
 
   Narrow buffer to current subtree and widen it again.
 
@@ -247,12 +251,12 @@ Just try it out and you will see immediately how it works.
 Org mode contains several commands creating such trees, all these
 commands can be accessed through a dispatcher:
 
-- {{{kbd(C-c /)}}} ::
+- {{{kbd(C-c /)}}} (~org-sparse-tree~) ::
 
   This prompts for an extra key to select a sparse-tree creating
   command.
 
-- {{{kbd(C-c / r)}}} ::
+- {{{kbd(C-c / r)}}} (~org-occur~) ::
 
   Occur.  Prompts for a regexp and shows a sparse tree with all
   matches.  Each match is also highlighted; the highlights disappear
@@ -303,41 +307,41 @@ The following commands act on items when point is in the first line of
 an item (the line with the bullet or number).
 
 #+attr_texinfo: :sep ,
-- {{{kbd(TAB)}}} ::
+- {{{kbd(TAB)}}} (~org-cycle~) ::
 
   Items can be folded just like headline levels.
 
-- {{{kbd(M-RET)}}} ::
+- {{{kbd(M-RET)}}} (~org-insert-heading~) ::
 
   Insert new item at current level.  With a prefix argument, force
   a new heading (see [[*Structure Editing]]).
 
-- {{{kbd(M-S-RET)}}} ::
+- {{{kbd(M-S-RET)}}} (~org-insert-todo-heading~) ::
 
   Insert a new item with a checkbox (see [[*Checkboxes]]).
 
-- {{{kbd(M-S-UP)}}}, {{{kbd(M-S-DOWN)}}} ::
+- {{{kbd(M-UP)}}} (~org-move-item-up~), {{{kbd(M-DOWN)}}} (~org-move-item-down~) ::
 
   Move the item including subitems up/down (swap with previous/next
   item of same indentation).  If the list is ordered, renumbering is
   automatic.
 
-- {{{kbd(M-LEFT)}}}, {{{kbd(M-RIGHT)}}} ::
+- {{{kbd(M-LEFT)}}} (~org-do-promote~), {{{kbd(M-RIGHT)}}} (~org-do-demote~) ::
 
   Decrease/increase the indentation of an item, leaving children
   alone.
 
-- {{{kbd(M-S-LEFT)}}}, {{{kbd(M-S-RIGHT)}}} ::
+- {{{kbd(M-S-LEFT)}}} (~org-promote-subtree~), {{{kbd(M-S-RIGHT)}}} (~org-demote-subtree~) ::
 
   Decrease/increase the indentation of the item, including subitems.
 
-- {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}} (~org-toggle-checkbox~) ::
 
   If there is a checkbox (see [[*Checkboxes]]) in the item line, toggle
   the state of the checkbox.  Also verify bullets and indentation
   consistency in the whole list.
 
-- {{{kbd(C-c -)}}} ::
+- {{{kbd(C-c -)}}} (~org-cycle-list-bullet~) ::
 
   Cycle the entire list level through the different itemize/enumerate
   bullets (=-=, =+=, =*=, =1.=, =1)=).
@@ -391,7 +395,7 @@ automatically made blank.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(C-c |)}}} ::
+- {{{kbd(C-c |)}}} (~org-table-create-or-convert-from-region~) ::
 
   Convert the active region to table.  If every line contains at least
   one {{{kbd(TAB)}}} character, the function assumes that the material
@@ -409,25 +413,25 @@ automatically made blank.
 :END:
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}} (~org-table-align~) ::
 
   Re-align the table without moving point.
 
-- {{{kbd(TAB)}}} ::
+- {{{kbd(TAB)}}} (~org-table-next-field~) ::
 
   Re-align the table, move to the next field.  Creates a new row if
   necessary.
 
-- {{{kbd(S-TAB)}}} ::
+- {{{kbd(S-TAB)}}} (~org-table-previous-field~) ::
 
   Re-align, move to previous field.
 
-- {{{kbd(RET)}}} ::
+- {{{kbd(RET)}}} (~org-table-next-row~) ::
 
   Re-align the table and move down to next row.  Creates a new row if
   necessary.
 
-- {{{kbd(S-UP)}}}, {{{kbd(S-DOWN)}}}, {{{kbd(S-LEFT)}}}, {{{kbd(S-RIGHT)}}} ::
+- {{{kbd(S-UP)}}} (~org-table-move-cell-up~), {{{kbd(S-DOWN)}}} (~org-table-move-cell-down~), {{{kbd(S-LEFT)}}} (~org-table-move-cell-left~), {{{kbd(S-RIGHT)}}} (~org-table-move-cell-right~) ::
 
   Move a cell up, down, left, and right by swapping with adjacent
   cell.
@@ -437,42 +441,42 @@ automatically made blank.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(M-LEFT)}}}, {{{kbd(M-RIGHT)}}} ::
+- {{{kbd(M-LEFT)}}} (~org-table-move-column-left~), {{{kbd(M-RIGHT)}}} (~org-table-move-column-right~) ::
 
   Move the current column left/right.
 
-- {{{kbd(M-S-LEFT)}}} ::
+- {{{kbd(M-S-LEFT)}}} (~org-table-delete-column~) ::
 
   Kill the current column.
 
-- {{{kbd(M-S-RIGHT)}}} ::
+- {{{kbd(M-S-RIGHT)}}} (~org-table-insert-column~) ::
 
   Insert a new column to the left of point position.
 
-- {{{kbd(M-UP)}}}, {{{kbd(M-DOWN)}}} ::
+- {{{kbd(M-UP)}}} (~org-table-move-row-up~), {{{kbd(M-DOWN)}}} (~org-table-move-row-down~) ::
 
   Move the current row up/down.
 
-- {{{kbd(M-S-UP)}}} ::
+- {{{kbd(M-S-UP)}}} (~org-table-kill-row~) ::
 
   Kill the current row or horizontal line.
 
-- {{{kbd(M-S-DOWN)}}} ::
+- {{{kbd(M-S-DOWN)}}} (~org-table-insert-row~) ::
 
   Insert a new row above the current row.  With a prefix argument, the
   line is created below the current one.
 
-- {{{kbd(C-c -)}}} ::
+- {{{kbd(C-c -)}}} (~org-table-insert-hline~) ::
 
   Insert a horizontal line below current row.  With a prefix argument,
   the line is created above the current line.
 
-- {{{kbd(C-c RET)}}} ::
+- {{{kbd(C-c RET)}}} (~org-table-hline-and-move~) ::
 
   Insert a horizontal line below current row, and move the point into
   the row below that line.
 
-- {{{kbd(C-c ^)}}} ::
+- {{{kbd(C-c ^)}}} (~org-table-sort-lines~) ::
 
   Sort the table lines in the region.  The position of point indicates
   the column to be used for sorting, and the range of lines is the
@@ -573,7 +577,7 @@ From an Org buffer, the following commands create, navigate or, more
 generally, act on links.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c C-l)}}} ::
+- {{{kbd(C-c C-l)}}} (~org-insert-link~) ::
 
   Insert a link.  This prompts for a link to be inserted into the
   buffer.  You can just type a link, or use history keys {{{kbd(UP)}}}
@@ -583,16 +587,16 @@ generally, act on links.
   When called with a {{{kbd(C-u)}}} prefix argument, file name
   completion is used to link to a file.
 
-- {{{kbd(C-c C-l)}}} (with point on existing link) ::
+- {{{kbd(C-c C-l)}}} (with point on existing link) (~org-insert-link~) ::
 
   When point is on an existing link, {{{kbd(C-c C-l)}}} allows you to
   edit the link and description parts of the link.
 
-- {{{kbd(C-c C-o)}}} ::
+- {{{kbd(C-c C-o)}}} (~open-link-at-point~) ::
 
   Open link at point.
 
-- {{{kbd(C-c &)}}} ::
+- {{{kbd(C-c &)}}} (~org-mark-ring-goto~) ::
 
   Jump back to a recorded position.  A position is recorded by the
   commands following internal links, and by {{{kbd(C-c %)}}}.  Using
@@ -628,7 +632,7 @@ for example:
 The most important commands to work with TODO entries are:
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c C-t)}}} ::
+- {{{kbd(C-c C-t)}}} (~org-todo~) ::
 
   Rotate the TODO state of the current item among
 
@@ -639,23 +643,23 @@ The most important commands to work with TODO entries are:
   with the {{{kbd(t)}}} command key (see [[*Commands in the Agenda
   Buffer]]).
 
-- {{{kbd(S-RIGHT)}}}, {{{kbd(S-LEFT)}}} ::
+- {{{kbd(S-RIGHT)}}} (~org-shiftright~), {{{kbd(S-LEFT)}}} (~org-shiftleft~) ::
 
   Select the following/preceding TODO state, similar to cycling.
 
-- {{{kbd(C-c / t)}}} ::
+- {{{kbd(C-c / t)}}} (~org-show-todo-tree~) ::
 
   View TODO items in a /sparse tree/ (see [[*Sparse Trees]]).  Folds the
   entire buffer, but shows all TODO items---with not-DONE state---and
   the headings hierarchy above them.
 
-- {{{kbd(M-x org-agenda t)}}} ::
+- {{{kbd(M-x org-agenda t)}}} (~org-todo-list~) ::
 
   Show the global TODO list.  Collects the TODO items (with not-DONE
   states) from all agenda files (see [[*Agenda Views]]) into a single
   buffer.  See [[*The Global TODO List]], for more information.
 
-- {{{kbd(S-M-RET)}}} ::
+- {{{kbd(S-M-RET)}}} (~org-insert-todo-heading~) ::
 
   Insert a new TODO entry below the current one.
 
@@ -722,7 +726,7 @@ To record a timestamp and a note when changing a TODO state, call the
 command ~org-todo~ with a prefix argument.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-u C-c C-t)}}} ::
+- {{{kbd(C-u C-c C-t)}}} (~org-todo~) ::
   Prompt for a note and record a the time of the TODO state change.
 
 Org mode can also automatically record a timestamp and optionally a
@@ -801,7 +805,7 @@ highest, =B= the default if none is given.  Priorities make
 a difference only in the agenda.
 
 #+attr_texinfo: :sep ;
-- {{{kbd(C-c \,)}}} ::
+- {{{kbd(C-c \,)}}} (~org-priority~) ::
 
   Set the priority of the current headline.  Press {{{kbd(A)}}},
   {{{kbd(B)}}} or {{{kbd(C)}}} to select a priority, or {{{kbd(SPC)}}}
@@ -861,12 +865,12 @@ checked.
 
 The following commands work with checkboxes:
 
-- {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}}, {{{kbd(C-u C-c C-c)}}} (~org-toggle-checkbox~) ::
 
   Toggle checkbox status or---with prefix argument---checkbox presence
   at point.
 
-- {{{kbd(M-S-RET)}}} ::
+- {{{kbd(M-S-RET)}}} (~org-insert-todo-heading~) ::
 
   Insert a new item with a checkbox.  This works only if point is
   already in a plain list item (see [[*Plain Lists]]).
@@ -921,13 +925,13 @@ Tags can simply be typed into the buffer at the end of a headline.
 After a colon, {{{kbd(M-TAB)}}} offers completion on tags.  There is
 also a special command for inserting tags:
 
-- {{{kbd(C-c C-q)}}} ::
+- {{{kbd(C-c C-q)}}} (~org-set-tags-command~) ::
 
   Enter new tags for the current headline.  Org mode either offers
   completion or a special single-key interface for setting tags, see
   below.
 
-- {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}} (~org-set-tags-command~) ::
 
   When point is in a headline, this does the same as {{{kbd(C-c
   C-q)}}}.
@@ -991,18 +995,18 @@ support with ~org-toggle-tags-groups~, bound to {{{kbd(C-c C-x q)}}}.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(C-c / m)}}} or {{{kbd(C-c \)}}} ::
+- {{{kbd(C-c / m)}}} or {{{kbd(C-c \)}}} (~org-match-sparse-tree~) ::
 
   Create a sparse tree with all headlines matching a tags search.
   With a {{{kbd(C-u)}}} prefix argument, ignore headlines that are not
   a TODO line.
 
-- {{{kbd(M-x org-agenda m)}}} ::
+- {{{kbd(M-x org-agenda m)}}} (~org-tags-view~) ::
 
   Create a global list of tag matches from all agenda files.  See
   [[*Matching Tags and Properties]].
 
-- {{{kbd(M-x org-agenda M)}}} ::
+- {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
   Create a global list of tag matches from all agenda files, but check
   only TODO items and force checking subitems (see the option
@@ -1061,11 +1065,11 @@ a file, use a line like:
 
 The following commands help to work with properties:
 
-- {{{kbd(C-c C-x p)}}} ::
+- {{{kbd(C-c C-x p)}}} (~org-set-property~) ::
 
   Set a property.  This prompts for a property name and a value.
 
-- {{{kbd(C-c C-c d)}}} ::
+- {{{kbd(C-c C-c d)}}} (~org-delete-property~) ::
 
   Remove a property from the current entry.
 
@@ -1187,7 +1191,7 @@ format.  All commands listed below produce timestamps in the correct
 format.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c .)}}} ::
+- {{{kbd(C-c .)}}} (~org-timestamp~) ::
 
   Prompt for a date and insert a corresponding timestamp.  When point
   is at an existing timestamp in the buffer, the command is used to
@@ -1195,16 +1199,16 @@ format.
   command is used twice in succession, a time range is inserted.  With
   a prefix argument, it also adds the current time.
 
-- {{{kbd(C-c !)}}} ::
+- {{{kbd(C-c !)}}} (~org-timestamp-inactive~) ::
 
   Like {{{kbd(C-c .)}}}, but insert an inactive timestamp that does
   not cause an agenda entry.
 
-- {{{kbd(S-LEFT)}}}, {{{kbd(S-RIGHT)}}} ::
+- {{{kbd(S-LEFT)}}} (~org-timestamp-down-day~), {{{kbd(S-RIGHT)}}} (~org-timestamp-up-day~) ::
 
   Change date at point by one day.
 
-- {{{kbd(S-UP)}}}, {{{kbd(S-DOWN)}}} ::
+- {{{kbd(S-UP)}}} (~org-timestamp-up~), {{{kbd(S-DOWN)}}} (~org-timestamp-down~) ::
 
   On the beginning or enclosing bracket of a timestamp, change its
   type.  Within a timestamp, change the item under point.  Point can
@@ -1229,7 +1233,7 @@ the date/time prompt works.
 A timestamp may be preceded by special keywords to facilitate
 planning:
 
-- {{{kbd(C-c C-d)}}} ::
+- {{{kbd(C-c C-d)}}} (~org-deadline~) ::
 
   Insert =DEADLINE= keyword along with a time stamp, in the line
   following the headline.
@@ -1249,7 +1253,7 @@ planning:
       The editor in charge is [[bbdb:Ford Prefect]]
   #+end_example
 
-- {{{kbd(C-c C-s)}}} ::
+- {{{kbd(C-c C-s)}}} (~org-schedule~) ::
 
   Insert =SCHEDULED= keyword along with a stamp, in the line following
   the headline.
@@ -1290,30 +1294,30 @@ Org mode allows you to clock the time you spend on specific tasks in
 a project.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c C-x C-i)}}} ::
+- {{{kbd(C-c C-x C-i)}}} (~org-clock-in~) ::
 
   Start the clock on the current item (clock-in).  This inserts the
   =CLOCK= keyword together with a timestamp.  When called with
   a {{{kbd(C-u)}}} prefix argument, select the task from a list of
   recently clocked tasks.
 
-- {{{kbd(C-c C-x C-o)}}} ::
+- {{{kbd(C-c C-x C-o)}}} (~org-clock-out~) ::
 
   Stop the clock (clock-out).  This inserts another timestamp at the
   same location where the clock was last started.  It also directly
   computes the resulting time in inserts it after the time range as
   ==>HH:MM=.
 
-- {{{kbd(C-c C-x C-e)}}} ::
+- {{{kbd(C-c C-x C-e)}}} (~org-clock-modify-effort-estimate~) ::
 
   Update the effort estimate for the current clock task.
 
-- {{{kbd(C-c C-x C-q)}}} ::
+- {{{kbd(C-c C-x C-q)}}} (~org-clock-cancel~) ::
 
   Cancel the current clock.  This is useful if a clock was started by
   mistake, or if you ended up working on something else.
 
-- {{{kbd(C-c C-x C-j)}}} ::
+- {{{kbd(C-c C-x C-j)}}} (~org-clock-goto~) ::
 
   Jump to the headline of the currently clocked in task.  With
   a {{{kbd(C-u)}}} prefix argument, select the target task from a list
@@ -1364,24 +1368,24 @@ You may also define a global key for capturing new material (see
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(M-x org-capture)}}} ::
+- {{{kbd(M-x org-capture)}}} (~org-capture~) ::
 
   Start a capture process, placing you into a narrowed indirect buffer
   to edit.
 
-- {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}} (~org-capture-finalize~) ::
 
   Once you have finished entering information into the capture buffer,
   {{{kbd(C-c C-c)}}} returns you to the window configuration before
   the capture process, so that you can resume your work without
   further distraction.
 
-- {{{kbd(C-c C-w)}}} ::
+- {{{kbd(C-c C-w)}}} (~org-capture-refile~) ::
 
   Finalize the capture process by refiling the note to a different
   place (see [[*Refile and Copy]]).
 
-- {{{kbd(C-c C-k)}}} ::
+- {{{kbd(C-c C-k)}}} (~org-capture-kill~) ::
 
   Abort the capture process and return to the previous state.
 
@@ -1433,7 +1437,7 @@ Cutting, finding the right location, and then pasting the note is
 cumbersome.  To simplify this process, you can use the following
 special command:
 
-- {{{kbd(C-c C-w)}}} ::
+- {{{kbd(C-c C-w)}}} (~org-agenda-refile~) ::
 
   Refile the entry or region at point.  This command offers possible
   locations for refiling the entry and lets you select one with
@@ -1445,15 +1449,15 @@ special command:
   across a number of files.  See the variable ~org-refile-targets~ for
   details.
 
-- {{{kbd(C-u C-c C-w)}}} ::
+- {{{kbd(C-u C-c C-w)}}} (~org-agenda-refile~) ::
 
   Use the refile interface to jump to a heading.
 
-- {{{kbd(C-u C-u C-c C-w)}}} ::
+- {{{kbd(C-u C-u C-c C-w)}}} (~org-refile-goto-last-stored~) ::
 
   Jump to the location where ~org-refile~ last moved a tree to.
 
-- {{{kbd(C-c M-w)}}} ::
+- {{{kbd(C-c M-w)}}} (~org-refile-copy~) ::
 
   Copying works like refiling, except that the original note is not
   deleted.
@@ -1471,12 +1475,12 @@ global searches like the construction of agenda views fast.
 The most common archiving action is to move a project tree to another
 file, the archive file.
 
-- {{{kbd(C-c C-x C-a)}}} ::
+- {{{kbd(C-c C-x C-a)}}} (~org-archive-subtree-default~) ::
 
   Archive the current entry using the command specified in the
   variable ~org-archive-default-command~.
 
-- {{{kbd(C-c C-x C-s)}}} or short {{{kbd(C-c $)}}} ::
+- {{{kbd(C-c C-x C-s)}}} or short {{{kbd(C-c $)}}} (~org-archive-subtree~) ::
 
   Archive the subtree starting at point position to the location given
   by ~org-archive-location~.
@@ -1521,19 +1525,20 @@ Agenda buffer, see [[*Commands in the Agenda Buffer]].
 The information to be shown is normally collected from all /agenda
 files/, the files listed in the variable ~org-agenda-files~.
 
-#+attr_texinfo: :sep or
-- {{{kbd(C-c [)}}} ::
+# Use "/" separator because "," is in one of the bindings.
+#+attr_texinfo: :sep /
+- {{{kbd(C-c [)}}} (~org-agenda-file-to-front~) ::
 
   Add current file to the list of agenda files.  The file is added to
   the front of the list.  If it was already in the list, it is moved
   to the front.  With a prefix argument, file is added/moved to the
   end.
 
-- {{{kbd(C-c ])}}} ::
+- {{{kbd(C-c ])}}} (~org-remove-file~) ::
 
   Remove current file from the list of agenda files.
 
-- {{{kbd(C-')}}} or {{{kbd(C-\,)}}} ::
+- {{{kbd(C-')}}} / {{{kbd(C-\,)}}} (~org-cycle-agenda-files~) ::
 
   Cycle through agenda file list, visiting one file after the other.
 
@@ -1579,7 +1584,7 @@ commands:
 The purpose of the weekly/daily /agenda/ is to act like a page of
 a paper agenda, showing all the tasks for the current week or day.
 
-- {{{kbd(M-x org-agenda a)}}} ::
+- {{{kbd(M-x org-agenda a)}}} (~org-agenda-list~) ::
 
   Compile an agenda for the current week from a list of Org files.
   The agenda shows the entries for each day.
@@ -1618,12 +1623,12 @@ can change the state of a TODO entry with a single key press.  For
 commands available in the TODO list, see [[*Commands in the Agenda
 Buffer]].
 
-- {{{kbd(M-x org-agenda t)}}} ::
+- {{{kbd(M-x org-agenda t)}}} (~org-todo-list~) ::
 
   Show the global TODO list.  This collects the TODO items from all
   agenda files (see [[*Agenda Views]]) into a single buffer.
 
-- {{{kbd(M-x org-agenda T)}}} ::
+- {{{kbd(M-x org-agenda T)}}} (~org-todo-list~) ::
 
   Like the above, but allows selection of a specific TODO keyword.
 
@@ -1638,7 +1643,7 @@ on this metadata and collect them into an agenda buffer.  The match
 syntax described here also applies when creating sparse trees with
 {{{kbd(C-c / m)}}}.
 
-- {{{kbd(M-x org-agenda m)}}} ::
+- {{{kbd(M-x org-agenda m)}}} (~org-tags-view~) ::
 
   Produce a list of all headlines that match a given set of tags.  The
   command prompts for a selection criterion, which is a boolean logic
@@ -1646,7 +1651,7 @@ syntax described here also applies when creating sparse trees with
   (see [[*Tags]]).  If you often need a specific search, define a custom
   command for it (see [[*The Agenda Dispatcher]]).
 
-- {{{kbd(M-x org-agenda M)}}} ::
+- {{{kbd(M-x org-agenda M)}}} (~org-tags-view~) ::
 
   Like {{{kbd(m)}}}, but only select headlines that are also TODO
   items.
@@ -1724,11 +1729,11 @@ the agenda menu and the manual for a complete list.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(n)}}} ::
+- {{{kbd(n)}}} (~org-agenda-next-line~) ::
 
   Next line (same as {{{kbd(DOWN)}}} and {{{kbd(C-n)}}}).
 
-- {{{kbd(p)}}} ::
+- {{{kbd(p)}}} (~org-agenda-previous-line~) ::
 
   Previous line (same as {{{kbd(UP)}}} and {{{kbd(C-p)}}}).
 
@@ -1737,16 +1742,16 @@ the agenda menu and the manual for a complete list.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(SPC)}}} ::
+- {{{kbd(SPC)}}} (~org-agenda-show-and-scroll-up~) ::
 
   Display the original location of the item in another window.
   With a prefix argument, make sure that drawers stay folded.
 
-- {{{kbd(TAB)}}} ::
+- {{{kbd(TAB)}}} (~org-agenda-goto~) ::
 
   Go to the original location of the item in another window.
 
-- {{{kbd(RET)}}} ::
+- {{{kbd(RET)}}} (~org-agenda-switch-to~) ::
 
   Go to the original location of the item and delete other windows.
 
@@ -1755,37 +1760,37 @@ the agenda menu and the manual for a complete list.
 :UNNUMBERED: notoc
 :END:
 #+attr_texinfo: :sep ,
-- {{{kbd(o)}}} ::
+- {{{kbd(o)}}} (~delete-other-windows~) ::
 
   Delete other windows.
 
-- {{{kbd(v d)}}} or short {{{kbd(d)}}} ::
+- {{{kbd(v d)}}} or short {{{kbd(d)}}} (~org-agenda-day-view~) ::
 
   Switch to day view.
 
-- {{{kbd(v w)}}} or short {{{kbd(w)}}} ::
+- {{{kbd(v w)}}} or short {{{kbd(w)}}} (~org-agenda-week-view~) ::
 
   Switch to week view.
 
-- {{{kbd(f)}}} ::
+- {{{kbd(f)}}} (~org-agenda-later~) ::
 
   Go forward in time to display the span following the current one.
   For example, if the display covers a week, switch to the following
   week.
 
-- {{{kbd(b)}}} ::
+- {{{kbd(b)}}} (~org-agenda-earlier~) ::
 
   Go backward in time to display earlier dates.
 
-- {{{kbd(.)}}} ::
+- {{{kbd(.)}}} (~org-agenda-goto-today~) ::
 
   Go to today.
 
-- {{{kbd(j)}}} ::
+- {{{kbd(j)}}} (~org-agenda-goto-date~) ::
 
   Prompt for a date and go there.
 
-- {{{kbd(v l)}}} or {{{kbd(v L)}}} or short {{{kbd(l)}}} ::
+- {{{kbd(v l)}}} or {{{kbd(v L)}}} or short {{{kbd(l)}}} (~org-agenda-log-mode~) ::
 
   Toggle Logbook mode.  In Logbook mode, entries that were marked as
   done while logging was on (see the variable ~org-log-done~) are
@@ -1793,12 +1798,12 @@ the agenda menu and the manual for a complete list.
   day.  When called with a {{{kbd(C-u)}}} prefix argument, show all
   possible logbook entries, including state changes.
 
-- {{{kbd(r)}}}, {{{kbd(g)}}} ::
+- {{{kbd(r)}}}, {{{kbd(g)}}} (~org-agenda-redo~) ::
 
   Recreate the agenda buffer, for example to reflect the changes after
   modification of the timestamps of items.
 
-- {{{kbd(s)}}} ::
+- {{{kbd(s)}}} (~org-save-all-org-buffers~) ::
 
   #+kindex: C-x C-s
   #+findex: org-save-all-org-buffers
@@ -1815,62 +1820,62 @@ the agenda menu and the manual for a complete list.
 
   Digit argument.
 
-- {{{kbd(t)}}} ::
+- {{{kbd(t)}}} (~org-agenda-todo~) ::
 
   Change the TODO state of the item, both in the agenda and in the
   original Org file.
 
-- {{{kbd(C-k)}}} ::
+- {{{kbd(C-k)}}} (~org-agenda-kill~) ::
 
   Delete the current agenda item along with the entire subtree
   belonging to it in the original Org file.
 
-- {{{kbd(C-c C-w)}}} ::
+- {{{kbd(C-c C-w)}}} (~org-agenda-refile~) ::
 
   Refile the entry at point.
 
-- {{{kbd(a)}}} ::
+- {{{kbd(a)}}} (~org-agenda-archive-default-with-confirmation~) ::
 
   Archive the subtree corresponding to the entry at point using the
   default archiving command set in ~org-archive-default-command~.
 
-- {{{kbd($)}}} ::
+- {{{kbd($)}}} (~org-agenda-archive~) ::
 
   Archive the subtree corresponding to the current headline.
 
-- {{{kbd(C-c C-s)}}} ::
+- {{{kbd(C-c C-s)}}} (~org-agenda-schedule~) ::
 
   Schedule this item.  With a prefix argument, remove the
   scheduling timestamp
 
-- {{{kbd(C-c C-d)}}} ::
+- {{{kbd(C-c C-d)}}} (~org-agenda-deadline~) ::
 
   Set a deadline for this item.  With a prefix argument, remove the
   deadline.
 
-- {{{kbd(S-RIGHT)}}} ::
+- {{{kbd(S-RIGHT)}}} (~org-agenda-do-date-later~) ::
 
   Change the timestamp associated with the current line by one day
   into the future.
 
-- {{{kbd(S-LEFT)}}} ::
+- {{{kbd(S-LEFT)}}} (~org-agenda-do-date-earlier~) ::
 
   Change the timestamp associated with the current line by one day
   into the past.
 
-- {{{kbd(I)}}} ::
+- {{{kbd(I)}}} (~org-agenda-clock-in~) ::
 
   Start the clock on the current item.
 
-- {{{kbd(O)}}} ::
+- {{{kbd(O)}}} (~org-agenda-clock-out~) ::
 
   Stop the previously started clock.
 
-- {{{kbd(X)}}} ::
+- {{{kbd(X)}}} (~org-agenda-clock-cancel~) ::
 
   Cancel the currently running clock.
 
-- {{{kbd(J)}}} ::
+- {{{kbd(J)}}} (~org-agenda-clock-goto~) ::
 
   Jump to the running clock in another window.
 
@@ -1879,11 +1884,11 @@ the agenda menu and the manual for a complete list.
 :UNNUMBERED: notoc
 :END:
 
-- {{{kbd(q)}}} ::
+- {{{kbd(q)}}} (~org-agenda-quit~) ::
 
   Quit agenda, remove the agenda buffer.
 
-- {{{kbd(x)}}} ::
+- {{{kbd(x)}}} (~org-agenda-exit~) ::
 
   Exit agenda, remove the agenda buffer and all buffers loaded by
   Emacs for the compilation of the agenda.
@@ -2098,7 +2103,7 @@ The Org website[fn:1] now looks a lot better than it used to.
 
 The following commands handle footnotes:
 
-- {{{kbd(C-c C-x f)}}} ::
+- {{{kbd(C-c C-x f)}}} (~org-footnote-action~) ::
 
   The footnote action command.  When point is on a footnote reference,
   jump to the definition.  When it is at a definition, jump to the
@@ -2106,7 +2111,7 @@ The following commands handle footnotes:
   command is called with a prefix argument, a menu of additional
   options including renumbering is offered.
 
-- {{{kbd(C-c C-c)}}} ::
+- {{{kbd(C-c C-c)}}} (~org-ctrl-c-ctrl-c~) ::
 
   Jump between definition and reference.
 
@@ -2128,7 +2133,7 @@ The export dispatcher is the main interface for Org's exports.
 A hierarchical menu presents the currently configured export formats.
 Options are shown as easy toggle switches on the same screen.
 
-- {{{kbd(C-c C-e)}}} ::
+- {{{kbd(C-c C-e)}}} (~org-export-dispatch~) ::
 
   Invokes the export dispatcher interface.
 
@@ -2212,7 +2217,7 @@ Finally, a =COMMENT= keyword at the beginning of an entry, but after
 any other keyword or priority cookie, comments out the entire subtree.
 The command below helps changing the comment status of a headline.
 
-- {{{kbd(C-c ;)}}} ::
+- {{{kbd(C-c ;)}}} (~org-toggle-comment~) ::
 
   Toggle the =COMMENT= keyword at the beginning of an entry.
 
@@ -2227,7 +2232,7 @@ does not contain any Org markup.  UTF-8 export uses additional
 characters and symbols available in this encoding standards.
 
 #+attr_texinfo: :sep ,
-- {{{kbd(C-c C-e t a)}}}, {{{kbd(C-c C-e t u)}}} ::
+- {{{kbd(C-c C-e t a)}}}, {{{kbd(C-c C-e t u)}}} (~org-ascii-export-to-ascii~) ::
 
   Export as an ASCII file with a =.txt= extension.  For =myfile.org=,
   Org exports to =myfile.txt=, overwriting without warning.  For
@@ -2242,7 +2247,7 @@ characters and symbols available in this encoding standards.
 Org mode contains an HTML exporter with extensive HTML formatting
 compatible with XHTML 1.0 strict standard.
 
-- {{{kbd(C-c C-e h h)}}} ::
+- {{{kbd(C-c C-e h h)}}} (~org-html-export-to-html~) ::
 
   Export as HTML file with a =.html= extension.  For =myfile.org=, Org
   exports to =myfile.html=, overwriting without warning.  {{{kbd(C-c
@@ -2280,16 +2285,16 @@ By default, the LaTeX output uses the /article/ class.  You can change
 this by adding an option like =#+LATEX_CLASS: myclass= in your file.
 The class must be listed in ~org-latex-classes~.
 
-- {{{kbd(C-c C-e l l)}}} ::
+- {{{kbd(C-c C-e l l)}}} (~org-latex-export-to-latex~) ::
 
   Export to a LaTeX file with a =.tex= extension.  For =myfile.org=,
   Org exports to =myfile.tex=, overwriting without warning.
 
-- {{{kbd(C-c C-e l p)}}} ::
+- {{{kbd(C-c C-e l p)}}} (~org-latex-export-to-pdf~) ::
 
   Export as LaTeX file and convert it to PDF file.
 
-- {{{kbd(C-c C-e l o)}}} ::
+- {{{kbd(C-c C-e l o)}}} (~<no corresponding named command>~) ::
 
   Export as LaTeX file and convert it to PDF, then open the PDF using
   the default viewer.
@@ -2325,12 +2330,12 @@ easily export to or import from external applications.  The iCalendar
 export backend takes calendar data from Org files and exports to the
 standard iCalendar format.
 
-- {{{kbd(C-c C-e c f)}}} ::
+- {{{kbd(C-c C-e c f)}}} (~org-icalendar-export-to-ics~) ::
 
   Create iCalendar entries from the current Org buffer and store them
   in the same directory, using a file extension =.ics=.
 
-- {{{kbd(C-c C-e c c)}}} ::
+- {{{kbd(C-c C-e c c)}}} (~org-icalendar-combine-agenda-files~) ::
 
   Create a combined iCalendar file from Org files in
   ~org-agenda-files~ and write it to
@@ -2367,20 +2372,20 @@ example:
                     type=\"text/css\"/>")))
 #+end_src
 
-- {{{kbd(C-c C-e P x)}}} ::
+- {{{kbd(C-c C-e P x)}}} (~org-publish~) ::
 
   Prompt for a specific project and publish all files that belong to
   it.
 
-- {{{kbd(C-c C-e P p)}}} ::
+- {{{kbd(C-c C-e P p)}}} (~org-publish-current-project~) ::
 
   Publish the project containing the current file.
 
-- {{{kbd(C-c C-e P f)}}} ::
+- {{{kbd(C-c C-e P f)}}} (~org-publish-current-file~) ::
 
   Publish only the current file.
 
-- {{{kbd(C-c C-e P a)}}} ::
+- {{{kbd(C-c C-e P a)}}} (~org-publish-all~) ::
 
   Publish every project.
 
@@ -2592,7 +2597,7 @@ a headline.
 To quickly insert empty structural blocks, such as =#+BEGIN_SRC=
 ... =#+END_SRC=, or to wrap existing text in such a block, use
 
-- {{{kbd(C-c C-\,)}}} ::
+- {{{kbd(C-c C-\,)}}} (~org-insert-structure-template~) ::
 
   Prompt for a type of block structure, and insert the block at point.
   If the region is active, it is wrapped in the block.
