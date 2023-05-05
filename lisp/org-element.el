@@ -4217,7 +4217,7 @@ Assume point is at the first equal sign marker."
 
 (defvar org-inlinetask-min-level); Declared in org-inlinetask.el
 (defvar org-element--cache-sync-requests); Declared later
-(defun org-element--current-element (limit &optional granularity mode structure)
+(defsubst org-element--current-element (limit &optional granularity mode structure)
   "Parse the element starting at point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
