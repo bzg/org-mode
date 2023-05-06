@@ -373,7 +373,7 @@ group 4: description tag")
 
 (defvar org--item-re-cache nil
   "Results cache for `org-item-re'.")
-(defun org-item-re ()
+(defsubst org-item-re ()
   "Return the correct regular expression for plain lists."
   (or (plist-get
        (plist-get org--item-re-cache
